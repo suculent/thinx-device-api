@@ -1,0 +1,10 @@
+{ 
+    "_id": "_design/devicelib", 
+    "language": "javascript", 
+    "views": { 
+        "devices_by_mac": { 
+            "map": "function (doc) { if(doc.mac) { emit (doc.mac, doc); } }"
+        } 
+    } 
+}
+

@@ -1,28 +1,30 @@
 {
-  "name" : "thinx",
-  "description" : "THiNX Device API",
-  "version" : "0.0.1",
-  "author" : {
-    "name" : "Matej Sychra"
+  "name": "thinx",
+  "description": "THiNX Device API",
+  "version": "0.0.1",
+  "author": {
+    "name": "Matej Sychra"
   },
-  "repository" : {
-    "type" : "git",
-    "url" : "git://github.com/suculent/thinx-device-api.git"
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/suculent/thinx-device-api.git"
   },
-  "bugs" : {
-    "url" : "https://github.com/suculent/thinx-device-api/issues"
+  "bugs": {
+    "url": "https://github.com/suculent/thinx-device-api/issues"
   },
-  "license" : "ISC",
-  "bin" : {
-    "homebridge" : "bin/thinx-api"
+  "license": "ISC",
+  "bin": {
+    "homebridge": "bin/thinx-api"
   },
-  "engines" : {
-    "node" : ">=4.3.2"
+  "engines": {
+    "node": ">=4.3.2"
   },
-  "preferGlobal" : true,
-  "dependencies" : {
-    "body-parser" : "^1.17.1",
-    "httpdispatcher" : "^2.1.0",
-    "querystring" : "^0.2.0"
+  "preferGlobal": true,
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "httpdispatcher": "^2.1.0",
+    "nano": "^6.2.0",
+    "node-couchdb": "^1.1.1",
+    "querystring": "^0.2.0"
   }
 }
