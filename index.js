@@ -6,7 +6,7 @@ var http = require('http');
 var parser = require('body-parser');
 var nano = require("nano")(db);
 
-var rdict = [];
+var rdict = {};
 
 // Initially creates DB, otherwise fails silently.
 nano.db.create("managed_devices", function (err, body, header) {
@@ -56,7 +56,7 @@ dispatcher.onPost("/api/login", function(req, res)
 
 		if (dict["registration"]) {
 
-			rdict["registration"] = [];
+			rdict["registration"] = {};
 
 			var mac = reg['mac'];
 			var fw = reg['firmware'];
@@ -92,10 +92,10 @@ dispatcher.onPost("/api/login", function(req, res)
 				var success = false;
 				var status = "OK";
 
-				var device_id = undefined
-				var firmware_url = undefined;
-				var known_alias = undefined;
-				var known_owner = undefined;
+				var device_id = "";
+				var firmware_url = "";
+				var known_alias = "";
+				var known_owner = "";
 
 				status = "FIRMWARE_UPDATE";
 				firmware_url = "/bin/eav/3b19d050daa5924a2370eb8ef5ac51a484d81d6e.bin";			
@@ -140,20 +140,31 @@ dispatcher.onPost("/api/login", function(req, res)
 					// - store all parameters if valid and then reply OK
 
 					devicelib.insert(device, device.mac, function(err, body, header) {
+
+						if (err == "Error: error happened in your connection") {
+
+							//return;
+						}
+
 						if(err) {
 							console.log("Inserting device failed. " + err + "\n");
-							rdict["registration"]["success"] = fail;
+							rdict["registration"]["success"] = false;
 							rdict["registration"]["status"] = "Insertion failed";
+
+							console.log("CHECK6:");
+									console.log(rdict['registration']);
+
 						} else {
 							console.log("Device inserted. Response: " + JSON.stringify(body) + "\n");
 							rdict["registration"]["success"] = true;
 							rdict["registration"]["status"] = "OK";
-						}
 
-						res.setEncoding('utf8');
-						res.writeHead(200, {'Content-Type': 'application/json'});
-						res.end(JSON.stringify(rdict));
-						console.log(rdict);
+							console.log("CHECK7:");
+									console.log(rdict['registration']);
+
+						}
+						
+						sendRegistrationOKResponse(res, rdict);
 					});
 
 				} else {
@@ -204,11 +215,9 @@ dispatcher.onPost("/api/login", function(req, res)
 									console.log("CHECK4:");
 									console.log(rdict['registration']);
 
-									res.setEncoding('utf8');
-									res.writeHead(200, {'Content-Type': 'application/json'});
-									//res.end(JSON.stringify(rdict['registration']));
-									res.json(rdict['registration']);
-									console.log(rdict['registration']);
+									sendRegistrationOKResponse(res, rdict);
+
+									return;
 
 								}  else {
 
@@ -217,10 +226,10 @@ dispatcher.onPost("/api/login", function(req, res)
 									rdict["registration"]["success"] = false;
 									rdict["registration"]["status"] = "Insert failed";
 
-									res.setEncoding('utf8');
-									res.writeHead(200, {'Content-Type': 'application/json'});
-									res.end(JSON.stringify(rdict['registration']));
+									console.log("CHECK5:");
 									console.log(rdict['registration']);
+
+									sendRegistrationOKResponse(res, rdict);
 								}
 							}) 
 
@@ -230,11 +239,7 @@ dispatcher.onPost("/api/login", function(req, res)
 							rdict["registration"]["success"] = false;
 							rdict["registration"]["status"] = "Get for update failed";
 
-							res.setEncoding('utf8');
-							res.writeHead(200, {'Content-Type': 'application/json'});
-							res.setEncoding('utf8');
-							res.end(JSON.stringify(rdict['registration']));
-							console.log(rdict['registration']);
+							sendRegistrationOKResponse(res, rdict);
 						}
 					});
 				}
@@ -244,6 +249,13 @@ dispatcher.onPost("/api/login", function(req, res)
 }
 }
 });
+
+function sendRegistrationOKResponse(res, dict)
+{
+	res.writeHead(200, {'Content-Type': 'application/json'});
+	var json = JSON.stringify(dict);
+	res.end(json);
+}
 
 /* Should return true for known devices */
 function identifyDeviceByMac(mac) {	
