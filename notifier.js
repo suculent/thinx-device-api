@@ -76,11 +76,11 @@ var devicelib = require("nano")(db).use("managed_devices");
 var message = {  
     data: {
     	type: "update",
-        url: "/bin/test/firmware.elf",
-        mac: "5C:CF:7F:EE:90:E0;ANY",
-        commit: "18ee75e3a56c07a9eff08f75df69ef96f919653f",
-        version: "0.1",
-        checksum: "6bf6bd7fc983af6c900d8fe162acc3ba585c446ae0188e52802004631d854c60"
+        url: repo_url || "/bin/test/firmware.elf",
+        mac: mac || "5C:CF:7F:EE:90:E0;ANY",
+        commit: commit_id || "18ee75e3a56c07a9eff08f75df69ef96f919653a",
+        version: version || "0.1",
+        checksum: sha || "6bf6bd7fc983af6c900d8fe162acc3ba585c446ae0188e52802004631d854c60"
     },
     notification : {
         title : 'Update',
