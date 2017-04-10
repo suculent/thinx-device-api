@@ -235,7 +235,7 @@ dispatcher.onPost("/api/login", function(req, res)
 				var success = false;
 				var status = "OK";
 
-				var device_id = "";
+				var device_id = mac;
 				var firmware_url = "";
 				var known_alias = "";
 				var known_owner = "";
@@ -247,7 +247,7 @@ dispatcher.onPost("/api/login", function(req, res)
 				// this is only a fake
 				 // TODO: fetch from commit notification descriptor
 				var firmwareUpdateDescriptor = {
-					url: firmware_url,
+					url: "/bin/test/3b19d050daa5924a2370eb8ef5ac51a484d81d6e.bin",
 					mac: "ANY",
 					commit: "3b19d050daa5924a2370eb8ef5ac51a484d81d6e",
 					version: "1",
