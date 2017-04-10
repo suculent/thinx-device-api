@@ -10,8 +10,8 @@ DEVICE='ANY'	# builds for any device by default
 OPEN=false		# show build result in Finder
 
 # tested:
-# ./build.sh --tenant=test --mac=ANY --git=https://github.com/suculent/thinx-firmware-esp8266 --dry-run
-# ./build.sh --tenant=test --mac=ANY --git=git@github.com:suculent/thinx-firmware-esp8266.git --dry-run
+# ./builder --tenant=test --mac=ANY --git=https://github.com/suculent/thinx-firmware-esp8266 --dry-run
+# ./builder --tenant=test --mac=ANY --git=git@github.com:suculent/thinx-firmware-esp8266.git --dry-run
 
 for i in "$@"
 do
@@ -137,7 +137,7 @@ platformio run
 
 echo
 
-if [ $DRY ]; then
+if [[ $RUN==false ]]; then
 
 	echo "Dry run completed - skipping actual deployment."
 
