@@ -9,7 +9,9 @@ Server application running on node.js. Serves as an IoT device registration endp
 
 ## Endpoints
 
-### `SERVER_URL`/register
+### /api/login
+
+Main registration endpoint.
 
 Usage example:
 
@@ -19,8 +21,8 @@ Push token, alias and owner parameters are optional. Has is optional for backwar
 
     curl -H "User-Agent: THiNX-Client" \
     -H "Content-Type: application/json" \
-    -X POST -d '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "push- registration-token-optional", "alias" : "test", "owner": "admin" } }' \
-    http://localhost:7442/api/login
+    -X POST -d '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "push-registration-token-optional", "alias" : "test", "owner": "admin" } }' \
+    http://thinx.cloud:7442/api/login
 
 • HTTP POST JSON body:
 
@@ -52,7 +54,11 @@ Registration succeeded, firmware update available:
         "registration" : {
             "success" : true,
             "status" : "FIRMWARE_UPDATE",            
-            "url": "/bin/eav/3b19d050daa5924a2370eb8ef5ac51a484d81d6e.bin"
+            "url" : "/bin/test/firmware.elf",
+            "mac" : "5C:CF:7F:EE:90:E0;ANY",
+            "commit" : "18ee75e3a56c07a9eff08f75df69ef96f919653f",
+            "version" : "0.1",
+            "sha256" : "6bf6bd7fc983af6c900d8fe162acc3ba585c446ae0188e52802004631d854c60"
         }
     }
 
