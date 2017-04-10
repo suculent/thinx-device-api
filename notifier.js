@@ -8,6 +8,10 @@ var http = require('http');
 var parser = require('body-parser');
 var nano = require("nano")(db);
 
+var FCM = require('fcm-push');
+var serverkey = 'AAAARM9VDGs:APA91bHS49MhXxLk6-as4IRJy59WbOZEMBN9qE_foptk_IiGVwOfgGKyd_r78Eet-OxoyHahm8f1CgI6rylFt8h3koyRmOa6ccLCpNMWIBs1flcNn7LZadyxcXOxU4bd8GBE6VXWMQcg'; // public development key only!
+var fcm = FCM(serverkey);
+
 var rdict = {};
 
 console.log("-=[ ☢ THiNX IoT RTM NOTIFIER ☢ ]=-" + '\n');
@@ -71,6 +75,29 @@ var devicelib = require("nano")(db).use("managed_devices");
 
 // Notify users (FCM)
 
+var message {  
+    to : "d877126b0b76fe086d63679c8d747423e7b4a1bdb4e1679e59216732b7060f03",
+    collapse_key : '<insert-collapse-key>',
+    data : {
+        <random-data-key1> : '<random-data-value1>',
+        <random-data-key2> : '<random-data-value2>'
+    },
+    notification : {
+        title : 'Title of the notification',
+        body : 'Body of the notification'
+    }
+};
+
+fcm.send(message, function(err,response){  
+    if(err) {
+        console.log("Something has gone wrong !");
+    } else {
+        console.log("Successfully sent with resposne :",response);
+    }
+});
+
+/*
+
 function execCommand(parameter)
 {
 	const exec = require('child_process').exec;
@@ -85,7 +112,6 @@ function execCommand(parameter)
 	});
 }
 
-/*
 dispatcher.onPost("/api/repo/add", function(req, res)
 {
 	// Repo should have 'firmware-name', URL and last commit ID, maybe array of devices (but that can be done by searching devices by commit id)

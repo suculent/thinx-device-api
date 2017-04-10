@@ -240,8 +240,9 @@ dispatcher.onPost("/api/login", function(req, res)
 				var known_alias = "";
 				var known_owner = "";
 
+				// test only
 				status = "FIRMWARE_UPDATE";
-				firmware_url = "/bin/eav/3b19d050daa5924a2370eb8ef5ac51a484d81d6e.bin";			
+				firmware_url = "/bin/eav/3b19d050daa5924a2370eb8ef5ac51a484d81d6e.bin";				
 
 				//
 				// Construct response			 
@@ -351,12 +352,7 @@ dispatcher.onPost("/api/login", function(req, res)
 									console.log("Device updated. Response: " + JSON.stringify(body) + "\n"); 
 
 									rdict["registration"]["success"] = true;
-									rdict["registration"]["status"] = "OK";
-
-									console.log("INSERT:OK");
-
-									console.log("CHECK4:");
-									console.log(rdict['registration']);
+									//rdict["registration"]["status"] = "OK"; // test only, uncomment for production
 
 									sendRegistrationOKResponse(res, rdict);
 
@@ -392,8 +388,7 @@ dispatcher.onPost("/api/login", function(req, res)
 });
 
 function sendRegistrationOKResponse(res, dict)
-{
-	res.writeHead(200, {'Content-Type': 'application/json'});
+{	
 	var json = JSON.stringify(dict);
 	res.end(json);
 }
