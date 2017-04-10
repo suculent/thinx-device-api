@@ -241,8 +241,18 @@ dispatcher.onPost("/api/login", function(req, res)
 				var known_owner = "";
 
 				// test only
-				status = "FIRMWARE_UPDATE";
-				firmware_url = "/bin/eav/3b19d050daa5924a2370eb8ef5ac51a484d81d6e.bin";				
+				status = "OK";
+				update_available = true; // function isUpdateAvailable(device)
+
+				// this is only a fake
+				 // TODO: fetch from commit notification descriptor
+				var firmwareUpdateDescriptor = {
+					url: firmware_url,
+					mac: "ANY",
+					commit: "3b19d050daa5924a2370eb8ef5ac51a484d81d6e",
+					version: "1",
+					checksum: "4044decaad0627adb7946e297e5564aaf0c53f958175b388e02f455d3e6bc3d4"
+				}
 
 				//
 				// Construct response			 
@@ -251,8 +261,13 @@ dispatcher.onPost("/api/login", function(req, res)
 				rdict["registration"]["success"] = success;
 				rdict["registration"]["status"] = status;
 
-				if (firmware_url) {
-					rdict["registration"]["url"] = firmware_url;
+				if (update_available) {
+					rdict["registration"]["status"] = FIRMWARE_UPDATE;
+					rdict["registration"]["url"] = firmwareUpdateDescriptor.url;
+					rdict["registration"]["mac"] = firmwareUpdateDescriptor.mac;
+					rdict["registration"]["commit"] = firmwareUpdateDescriptor.commit;
+					rdict["registration"]["version"] = firmwareUpdateDescriptor.version;
+					rdict["registration"]["checksum"] = firmwareUpdateDescriptor.checksum;
 				}
 
 				if (alias != known_alias) {
@@ -352,6 +367,8 @@ dispatcher.onPost("/api/login", function(req, res)
 									console.log("Device updated. Response: " + JSON.stringify(body) + "\n"); 
 
 									rdict["registration"]["success"] = true;
+
+									// TESTING FIRMWARE_UPDATE
 									//rdict["registration"]["status"] = "OK"; // test only, uncomment for production
 
 									sendRegistrationOKResponse(res, rdict);
