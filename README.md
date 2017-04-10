@@ -9,6 +9,28 @@ Server application running on node.js. Serves as an IoT device registration endp
 
 ## Endpoints
 
+### /api/build
+
+-=[ ☢ THiNX IoT RTM BUILDER ☢ ]=- endpoint.
+
+Usage example:
+
+    curl -H "User-Agent: THiNX-Client" \
+    -H "Content-Type: application/json" \
+    -X POST -d '{ "build" : { "mac" : "ANY", "owner" : "test", "git" : "https://github.com/suculent/thinx-firmware-esp8266", "dryrun" : true } }' \
+    http://localhost:7442/api/build
+
+• HTTP POST JSON body:
+
+    {
+        "build" : {
+            "mac" : "ANY",
+            "owner" : "test",
+            "git" : "https://github.com/suculent/thinx-firmware-esp8266",
+            "dryrun" : true
+        }
+    }
+
 ### /api/login
 
 Main registration endpoint.

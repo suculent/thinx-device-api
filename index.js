@@ -6,47 +6,190 @@ var http = require('http');
 var parser = require('body-parser');
 var nano = require("nano")(db);
 
+const uuidV1 = require('uuid/v1');
+
 var rdict = {};
+
+console.log("-=[ ☢ THiNX IoT RTM API ☢ ]=-");
 
 // Initially creates DB, otherwise fails silently.
 nano.db.create("managed_devices", function (err, body, header) {
 	if (err) {
-		// console.log("» Database creation completed. " + err + "\n");
+		if (err == "Error: The database could not be created, the file already exists.") {
+			// silently fail, this is ok
+		} else {
+			console.log("» Device database creation completed. " + err + "\n");
+		}
 	} else {
-		console.log("» Database creation completed. Response: " + JSON.stringify(body) + "\n");
+		console.log("» Device database creation completed. Response: " + JSON.stringify(body) + "\n");
+	}
+});
+
+nano.db.create("managed_repos", function (err, body, header) {
+	if (err) {
+		if (err == "Error: The database could not be created, the file already exists.") {
+			// silently fail, this is ok
+		} else {
+			console.log("» Repository database creation completed. " + err + "\n");
+		}
+	} else {
+		console.log("» Repository database creation completed. Response: " + JSON.stringify(body) + "\n");
 	}
 });
 
 var devicelib = require("nano")(db).use("managed_devices");
+var gitlib = require("nano")(db).use("managed_repos");
 
 const dispatcher = new (require('httpdispatcher'))();
 
-function execCommand(parameter)
-{
-	const exec = require('child_process').exec;
-	CMD='wemo switch "'+wemo_device_name+'" '+parameter;
-	console.log(CMD);
-	exec(CMD, function (err, stdout, stderr) {
-		if (err) {
-			console.error(err);
-			return;
-		}
-		console.log(stdout);
-	});
-}
-
-dispatcher.onPost("/api/login", function(req, res)
-{
+function validateRequest(req, res) {
 	var ua = req.headers['user-agent'];
 	var validity = ua.indexOf(client_user_agent)
 
-	console.log("UA: '"+ ua + "' : " + validity);
+	if (validity == 0) {
+		//
+	} else {
+		console.log("☢ UA: '"+ ua + "' invalid! " + validity);
+	}
 
-	if (validity == -1)  {
+	if (validity == -1) {
 		res.writeHead(400, {'Content-Type': 'text/plain'});
 		res.end('Bad request.');
 		console.log("Invalid UA: '"+ua+"'"); // TODO: Report to security analytics!
+		return false
 	}
+	return true;
+}
+
+function buildCommand(build_id, tenant, mac, git, dryrun)
+{	
+	// ./builder --tenant=test --mac=ANY --git=https://github.com/suculent/thinx-firmware-esp8266 --dry-run
+	// ./builder --tenant=test --mac=ANY --git=git@github.com:suculent/thinx-firmware-esp8266.git --dry-run
+
+	console.log("Executing build chain...");
+
+	const exec = require('child_process').exec;
+	CMD='./builder --tenant=' + tenant + ' --mac=' + mac + ' --git=' + git + ' --id=' + build_id;
+	if (dryrun == true) {
+		CMD=CMD+' --dry-run'
+	}
+	console.log(CMD);
+	exec(CMD, function (err, stdout, stderr) {
+		if (err) {
+			console.error(build_id + " : " + stdout);
+			return;
+		}
+		console.log(build_id + " : " + stdout);
+	});
+}
+
+// Build respective firmware and notify target device(s)
+dispatcher.onPost("/api/build", function(req, res) {
+
+	res.writeHead(200, {'Content-Type': 'application/json'});
+
+	if (validateRequest(req, res) == true) {
+
+		if (req.method == 'POST') {
+
+			var rdict = {}
+
+			var dict = JSON.parse(req.body.toString());
+
+			var build = dict['build'];
+			var mac = build.mac;
+			var tenant = build.owner;
+			var git = build.git;
+			var dryrun = false;
+
+			if (typeof(build.dryrun) != undefined) {
+				dryrun = build.dryrun;
+			}
+
+			if ((typeof(build) == undefined || build == null) ||
+				(typeof(mac) == undefined || mac == null) ||
+				(typeof(tenant) == undefined || tenant == null) ||
+				(typeof(git) == undefined || git == null)) {
+
+				rdict = { 
+					build: {
+						success: false,
+						status: "Submission failed. Invalid params."
+					}
+				};
+
+				res.end(JSON.stringify(rdict));
+				return;
+			}
+
+			var build_id = uuidV1();
+
+			if (dryrun == false) {
+				rdict = { 
+					build: {
+						success: true,
+						status: "Build started.",
+						id: build_id
+					}
+				};
+			} else {
+				rdict = { 
+					build: {
+						success: true,
+						status: "Dry-run started. Build will not be deployed.",
+						id: build_id
+					}
+				};
+			}
+			
+			res.end(JSON.stringify(rdict));
+
+			buildCommand(build_id, tenant, mac, git, dryrun);
+		}
+	}
+})
+
+// CRUD on GIT repository database
+dispatcher.onPost("/api/repo/add", function(req, res)
+{
+	// Repo should have 'firmware-name', URL and last commit ID, maybe array of devices (but that can be done by searching devices by commit id)
+
+	// TODO: Fetch current user session by bearer token and use for 'owner'
+
+
+	// TODO: Fetch parameters for following obj from req:
+	var repo = {
+		url: "https://github.com/suculent/thinx-firmware-esp8266.git",
+		firmware_name: "thinx-firmware-esp8266",
+		hash: "18ee75e3a56c07a9eff08f75df69ef96f919653f",
+		owner: "admin",
+		lastupdate: new Date()
+	};
+
+	gitlib.insert(repo, repo.firmware_name, function(err, body, header) {
+
+		if (err == "Error: error happened in your connection") {
+			//return;
+		}
+
+		if(err) {
+			console.log("Inserting repo failed. " + err + "\n");
+			// TODO
+
+		} else {
+			console.log("Repo inserted. Response: " + JSON.stringify(body) + "\n");
+			// TODO
+
+		}
+		
+		sendAddRepoResponse(res, rdict);
+	});
+})
+
+// Device login/registration
+dispatcher.onPost("/api/login", function(req, res)
+{
+	validateRequest(req, res);
 
 	if (req.method == 'POST') {
 
@@ -73,7 +216,7 @@ dispatcher.onPost("/api/login", function(req, res)
 			// See if we know this MAC which is a primary key in db
 			devicelib.get(mac, function (err, existing) {
 
-				if (err) { 				  
+				if (err) { 				 
 					console.log("Querying devices failed. " + err + "\n"); 
 				} else {
 					isNew = false;
@@ -101,7 +244,7 @@ dispatcher.onPost("/api/login", function(req, res)
 				firmware_url = "/bin/eav/3b19d050daa5924a2370eb8ef5ac51a484d81d6e.bin";			
 
 				//
-				// Construct response			   
+				// Construct response			 
 				//
 
 				rdict["registration"]["success"] = success;
@@ -160,7 +303,7 @@ dispatcher.onPost("/api/login", function(req, res)
 							rdict["registration"]["status"] = "OK";
 
 							console.log("CHECK7:");
-									console.log(rdict['registration']);
+							console.log(rdict['registration']);
 
 						}
 						
@@ -219,7 +362,7 @@ dispatcher.onPost("/api/login", function(req, res)
 
 									return;
 
-								}  else {
+								} else {
 
 									console.log("INSERT:FAILED");
 
@@ -243,11 +386,9 @@ dispatcher.onPost("/api/login", function(req, res)
 						}
 					});
 				}
-
 			});
-
-}
-}
+		}
+	}
 });
 
 function sendRegistrationOKResponse(res, dict)

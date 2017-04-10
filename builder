@@ -8,6 +8,7 @@ TENANT='test' 	# name of folder where workspaces reside
 RUN=true		# dry-run switch
 DEVICE='ANY'	# builds for any device by default
 OPEN=false		# show build result in Finder
+BUILD_ID=0
 
 # tested:
 # ./builder --tenant=test --mac=ANY --git=https://github.com/suculent/thinx-firmware-esp8266 --dry-run
@@ -16,6 +17,9 @@ OPEN=false		# show build result in Finder
 for i in "$@"
 do
 case $i in
+	-i=*|--id=*)
+      BUILD_ID="${i#*=}"
+    ;;
     -t=*|--tenant=*)
       TENANT="${i#*=}"
     ;;
@@ -109,6 +113,9 @@ fi
 COMMIT=$(git rev-parse HEAD)
 echo "Fetched commit ID: ${COMMIT}"
 
+VERSION=$(git rev-list HEAD --count)
+echo "Version: ${VERSION}"
+
 #cd $REPO_NAME #
 
 # TODO:
@@ -135,13 +142,25 @@ fi
 
 platformio run
 
+SHA=0
+
+if [[ $?==0 ]] ; then
+	STATUS='"OK"'
+	SHAX=$(shasum -a 256 .pioenvs/d1_mini/firmware.elf)
+	SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
+else
+	STATUS='"FAILED"'
+fi
+
 echo
 
 if [[ $RUN==false ]]; then
 
-	echo "Dry run completed - skipping actual deployment."
+	echo "☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment."	
 
-else
+	STATUS='"DRY_RUN_OK"'	
+
+else	
 		
 	# Create user-referenced folder in public www space
 	mkdir -p $DEPLOYMENT_PATH
@@ -153,15 +172,23 @@ else
 
 	mv $COMMIT.bin $DEPLOYMENT_PATH	
 
+	STATUS='"DEPLOYED"'
+
 	if [ $(uname) == "Darwin" ]; then
 		if $OPEN; then
 			open $DEPLOYMENT_PATH
 		fi
 	fi
-
-	# TODO: send notification or create notification job
-
 fi
 
+echo $STATUS
+
 popd > /dev/null
 popd > /dev/null
+
+DEPLOYMENT_PATH=$(echo ${DEPLOYMENT_PATH} | tr -d '/var/www/html')
+
+CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${COMMIT}.bin ${DEVICE} ${SHA} ${STATUS}"
+echo $CMD
+RESULT=$(node notifier.js $CMD)
+echo $RESULT
