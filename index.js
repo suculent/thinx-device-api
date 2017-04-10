@@ -262,7 +262,7 @@ dispatcher.onPost("/api/login", function(req, res)
 				rdict["registration"]["status"] = status;
 
 				if (update_available) {
-					rdict["registration"]["status"] = FIRMWARE_UPDATE;
+					rdict["registration"]["status"] = 'FIRMWARE_UPDATE';
 					rdict["registration"]["url"] = firmwareUpdateDescriptor.url;
 					rdict["registration"]["mac"] = firmwareUpdateDescriptor.mac;
 					rdict["registration"]["commit"] = firmwareUpdateDescriptor.commit;

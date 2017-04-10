@@ -42,11 +42,11 @@ console.log("status : " + status + '\n');
 
 var pushNotificationPayload = {
   firmware_update: {
-    url : build_path,
-    mac : mac,
-    commit : commit_id,
-    version : version,
-    sha256: sha
+    url: build_path,
+    mac: mac,
+    commit: commit_id,
+    version: version,
+    checksum: sha
   }
 }
 
