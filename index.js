@@ -239,10 +239,12 @@ dispatcher.onPost("/api/login", function(req, res)
 				var firmware_url = "";
 				var known_alias = "";
 				var known_owner = "";
-
-				// test only
+				
 				status = "OK";
-				update_available = true; // function isUpdateAvailable(device)
+				update_available = false; // test only
+
+				// function isUpdateAvailable(device) should search for new files since 
+				// last installed firmware (version ideally)
 
 				// this is only a fake
 				 // TODO: fetch from commit notification descriptor

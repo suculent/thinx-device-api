@@ -2,15 +2,13 @@
  * This THiNX-RTM module is responsible for saving build results to database and notifying users/devices 
  */
 
+ "use strict";
+
 const db = "http://rtmapi:frohikey@localhost:5984";
 
 var http = require('http');
 var parser = require('body-parser');
 var nano = require("nano")(db);
-
-var FCM = require('fcm-push');
-var serverkey = 'AAAARM9VDGs:APA91bHS49MhXxLk6-as4IRJy59WbOZEMBN9qE_foptk_IiGVwOfgGKyd_r78Eet-OxoyHahm8f1CgI6rylFt8h3koyRmOa6ccLCpNMWIBs1flcNn7LZadyxcXOxU4bd8GBE6VXWMQcg'; // public development key only!
-var fcm = FCM(serverkey);
 
 var rdict = {};
 
@@ -29,13 +27,13 @@ var status = process.argv[9];
 
 // Validate params
 
-console.log("build_id : " + build_id +);
-console.log("commit_id : " + commit_id);
-console.log("version : " + version);
-console.log("repo_url : " + repo_url);
-console.log("build_path : " + build_path);
-console.log("mac : " + mac);
-console.log("sha : " + sha);
+console.log("build_id : " + build_id + '\n');
+console.log("commit_id : " + commit_id + '\n');
+console.log("version : " + version + '\n');
+console.log("repo_url : " + repo_url + '\n');
+console.log("build_path : " + build_path + '\n');
+console.log("mac : " + mac + '\n');
+console.log("sha : " + sha + '\n');
 console.log("status : " + status + '\n');
 
 // Prepare payload
@@ -75,26 +73,45 @@ var devicelib = require("nano")(db).use("managed_devices");
 
 // Notify users (FCM)
 
-var message {  
-    to : "d877126b0b76fe086d63679c8d747423e7b4a1bdb4e1679e59216732b7060f03",
-    collapse_key : '<insert-collapse-key>',
-    data : {
-        <random-data-key1> : '<random-data-value1>',
-        <random-data-key2> : '<random-data-value2>'
+var message = {  
+    data: {
+    	type: "update",
+        url: "/bin/test/firmware.elf",
+        mac: "5C:CF:7F:EE:90:E0;ANY",
+        commit: "18ee75e3a56c07a9eff08f75df69ef96f919653f",
+        version: "0.1",
+        checksum: "6bf6bd7fc983af6c900d8fe162acc3ba585c446ae0188e52802004631d854c60"
     },
     notification : {
-        title : 'Title of the notification',
-        body : 'Body of the notification'
+        title : 'Update',
+        body : 'New firmware update is available.'
     }
 };
 
-fcm.send(message, function(err,response){  
-    if(err) {
-        console.log("Something has gone wrong !");
-    } else {
-        console.log("Successfully sent with resposne :",response);
-    }
+// This registration token comes from the client FCM SDKs.
+var registrationToken = "dhho4djVGeQ:APA91bFuuZWXDQ8vSR0YKyjWIiwIoTB1ePqcyqZFU3PIxvyZMy9htu9LGPmimfzdrliRfAdci-AtzgLCIV72xmoykk-kHcYRhAFWFOChULOGxrDi00x8GgenORhx_JVxUN_fjtsN5B7T";
+
+// See the "Defining the message payload" section below for details
+
+
+var admin = require("firebase-admin");
+//firebase-adminsdk-wjhzo@thinx-cloud.iam.gserviceaccount.com
+var serviceAccount = require("./thinx-cloud-firebase-adminsdk-wjhzo-9fd8c42211.json");
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://thinx-cloud.firebaseio.com"
 });
+
+admin.messaging().sendToDevice(registrationToken, message)
+  .then(function(response) {
+    // See the MessagingDevicesResponse reference documentation for
+    // the contents of response.
+    console.log("Successfully sent message:", response);
+  })
+  .catch(function(error) {
+    console.log("Error sending message:", error);
+  });
+
 
 /*
 
