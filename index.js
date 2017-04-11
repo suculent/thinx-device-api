@@ -51,7 +51,7 @@ var sess;
 
 app.all('/*', function(req, res, next) {
 	// CORS headers
-	res.header("Access-Control-Allow-Origin", "*"); // restrict it to the required domain
+	res.header("Access-Control-Allow-Origin", "*"); // rtm.thinx.cloud
 	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
 	// Set custom headers for CORS
 	res.header('Access-Control-Allow-Headers',
@@ -63,14 +63,18 @@ app.all('/*', function(req, res, next) {
 	}
 });
 
-/* http://thejackalofjavascript.com/architecting-a-restful-node-js-app/
+// http://thejackalofjavascript.com/architecting-a-restful-node-js-app/
+
+// TEMPLATE CODE HERE -->
 app.get('/', function(req, res) {
 	sess = req.session;
 	console.log("owner: " + sess.owner);
 	if (sess.owner) {
-		res.redirect('/admin');
+		res.end("Hello " + sess.owner + ".");
+		// res.redirect('/admin');
 	} else {
-		res.redirect('/api/login'); // crashes
+		res.end("Nothing here.");
+		// res.redirect('/api/login'); // crashes
 	}
 });
 
@@ -102,52 +106,13 @@ app.get('/logout', function(req, res) {
 		}
 	});
 });
-*/
+
+// <- TEMPLATE CODE HERE
 
 app.listen(serverPort, function() {
 	console.log("-=[ ☢ THiNX IoT RTM API ☢ ]=-");
 	console.log("» Started on port " + serverPort);
 });
-
-
-
-// CRUD on GIT repository database
-/*
-dispatcher.onPost("/api/repo/add", function(req, res) {
-	// Repo should have 'firmware-name', URL and last commit ID, maybe array of devices (but that can be done by searching devices by commit id)
-
-	// TODO: Fetch current user session by bearer token and use for 'owner'
-
-
-	// TODO: Fetch parameters for following obj from req:
-	var repo = {
-		url: "https://github.com/suculent/thinx-firmware-esp8266.git",
-		firmware_name: "thinx-firmware-esp8266",
-		hash: "18ee75e3a56c07a9eff08f75df69ef96f919653f",
-		owner: "admin",
-		lastupdate: new Date()
-	};
-
-	gitlib.insert(repo, repo.firmware_name, function(err, body, header) {
-
-		if (err == "Error: error happened in your connection") {
-			//return;
-		}
-
-		if (err) {
-			console.log("Inserting repo failed. " + err + "\n");
-			// TODO
-
-		} else {
-			console.log("Repo inserted. Response: " + JSON.stringify(body) + "\n");
-			// TODO
-
-		}
-
-		sendAddRepoResponse(res, rdict);
-	});
-})
-*/
 
 // Front-end authentication, returns 5-minute session on valid authentication
 app.post("/api/login", function(req, res) {
@@ -301,7 +266,7 @@ app.post("/device/register", function(req, res) {
 
 	if (req.method == 'POST') {
 
-		var dict = JSON.parse(req.body.toString());
+		var dict = req.body;
 		var reg = dict['registration'];
 
 		if (dict["registration"]) {
@@ -648,8 +613,7 @@ app.post("/api/build", function(req, res) {
 		if (req.method == 'POST') {
 
 			var rdict = {}
-
-			var dict = JSON.parse(req.body.toString());
+			var dict = req.body;
 
 			var build = dict['build'];
 			var mac = build.mac;
