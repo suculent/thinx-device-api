@@ -1,5 +1,5 @@
 node_modules/
-tenants/**
+tenants/
 
 conf/config.json
 conf/thinx-cloud-firebase-adminsdk-wjhzo-9fd8c42211.json
