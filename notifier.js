@@ -4,12 +4,6 @@
 
 "use strict";
 
-//require('./core.js');
-
-const client_user_agent = "THiNX-Client";
-
-var that = this;
-
 //
 // Shared Configuration
 //
@@ -17,70 +11,29 @@ var that = this;
 var config = require("./config.json");
 var sha256 = require("sha256");
 const db = config['database_uri'];
+//require('./core.js');
+var that = this;
 
-//
-// Version Management
-//
-
-/* Returns currently available version for respective owner and mac address */
-function availableVersionForDevice(owner, mac) {
-
-  // if MAC=any, provide version of recent thinx-esp8266-firmware
-
-  // else check the owner folder
-
-  // searches in deployment directory
-
-  var deployment_path = deploymentPathForDevice(owner, mac);
-  console.log("deployment_path = " + deployment_path);
-
-  // list all files
-
-  // Find latest binary, fetch version
-
-}
-
-function deploymentPathForDevice(owner, mac) {
-  // MMAC is file-system agnostic and easy to search
-  var mmac = mac.toString().replace(':', '-');
-
-  // Get path for owner (and optinaly a device)
-  var user_path = config.deploy_root + '/' + owner;
-  var device_path = user_path;
-  if (mac.indexOf("ANY") != -1) {
-    device_path = device_path + '/' + mac
-  }
-  return device_path;
-}
-
-function hasUpdateAvailable(device) {
-
-  var deviceVersion = device.version;
-  var deployedVersion = availableVersionForDevice(device.owner, device.mac);
-
-  if (semver.valid(deviceVersion) == true) {
-
-
-
-  } else {
-
-  }
-
-  semver.satisfies('1.2.3', '1.x || >=2.5.0 || 5.0.0 - 7.2.3') // true
-  semver.gt('1.2.3', '9.8.7') // false
-  semver.lt('1.2.3', '9.8.7') // true
-}
-
+// Network
+const client_user_agent = "THiNX-Client";
 var http = require('http');
-var parser = require('body-parser');
-var nano = require("nano")(db);
+
+// CouchDB
+var nano = require('nano')(db);
+
+// CHECKSUM
 var fs = require('fs');
 var checksum = require('checksum'); // deprecated
 
-var rdict = {};
-
+// SLACK
 var SLACK_WEBHOOK_URL = config.slack_webhook;
 var slack = require('slack-notify')(SLACK_WEBHOOK_URL);
+
+// MQTT
+var mqtt = require('mqtt')
+
+// Main
+var rdict = {};
 
 console.log("-=[ ☢ THiNX IoT RTM NOTIFIER ☢ ]=-" + '\n');
 
@@ -155,8 +108,6 @@ if (sha == undefined || sha == '') {
   }
 }
 
-
-
 console.log("build_id : " + build_id + '\n');
 console.log("commit_id : " + commit_id + '\n');
 console.log("version : " + version + '\n');
@@ -206,6 +157,7 @@ var buildEnvelope = {
   version: version,
   checksum: sha,
   //  build_id: build_id,
+  owner: owner,
   status: status
 };
 
@@ -217,9 +169,11 @@ console.log("envelopePath: " + envelopePath);
 
 fs.writeFile(envelopePath, JSON.stringify(buildEnvelope), function(err) {
   if (err) {
-    return console.log("Save error: " + err);
+    return console.log("Commit descriptor save error: " + err);
+  } else {
+    console.log("Commit descriptor saved successfully.");
   }
-  console.log("Commit descriptor was saved.");
+  console.log('\n');
 });
 
 // TODO: Update current build version in managed_repos
@@ -249,8 +203,6 @@ if (status == true) {
   });
 }
 
-// Notify devices (MQTT)
-
 // Notify users (FCM)
 
 var message = {
@@ -268,6 +220,10 @@ var message = {
     body: 'Je k dispozici aktualizace software pro Akustim. Přejete si ji nainstalovat?'
   }
 };
+
+console.log('\n');
+
+// TODO: Get registration token from device database instead
 
 // This registration token comes from the client FCM SDKs.
 var registrationToken =
@@ -289,5 +245,91 @@ admin.messaging().sendToDevice(registrationToken, message)
     console.log("Error sending message:", error);
   });
 
-// Delimit
-console.log(" ");
+console.log('\n');
+
+//
+// Notify devices (MQTT)
+//
+
+// Device channel
+notify_device_channel(owner, mac, message);
+
+//
+// Version Management
+//
+
+/* Returns currently available version for respective owner and mac address */
+function availableVersionForDevice(owner, mac) {
+
+  // if MAC=any, provide version of recent thinx-esp8266-firmware
+
+  // else check the owner folder
+
+  // searches in deployment directory
+
+  var deployment_path = deploymentPathForDevice(owner, mac);
+  console.log("deployment_path = " + deployment_path);
+
+  // list all files
+
+  // Find latest binary, fetch version
+
+}
+
+function deploymentPathForDevice(owner, mac) {
+  // MMAC is file-system agnostic and easy to search
+  var mmac = mac.toString().replace(':', '-');
+
+  // Get path for owner (and optinaly a device)
+  var user_path = config.deploy_root + '/' + owner;
+  var device_path = user_path;
+  if (mac.indexOf("ANY") != -1) {
+    device_path = device_path + '/' + mac
+  }
+  return device_path;
+}
+
+function hasUpdateAvailable(device) {
+
+  var deviceVersion = device.version;
+  var deployedVersion = availableVersionForDevice(device.owner, device.mac);
+
+  if (semver.valid(deviceVersion) == true) {
+
+  } else {
+
+  }
+
+  semver.satisfies('1.2.3', '1.x || >=2.5.0 || 5.0.0 - 7.2.3') // true
+  semver.gt('1.2.3', '9.8.7') // false
+  semver.lt('1.2.3', '9.8.7') // true
+}
+
+//
+// MQTT Notifications (for Devices)
+//
+
+function notify_device_channel(owner, mac, message) {
+
+  var channel = '/devices/' + owner + '/' + mac;
+  console.log("Posting to MQTT queue " + channel);
+  var client = mqtt.connect('mqtt://guest:guest@thinx.cloud:1883');
+
+  client.on('connect', function() {
+    console.log("Connected to MQTT, will post to " + channel)
+    client.subscribe(channel)
+    var msg = message
+    delete msg.notification
+    client.publish(channel, JSON.stringify(message))
+
+    var homeMessage = {
+      text: "Released update for device " + mac + " owned by tenant '" +
+        owner + "'"
+    }
+    client.subscribe("/home")
+    client.publish("/home", JSON.stringify(homeMessage))
+    client.end();
+  })
+
+  console.log('\n');
+}
