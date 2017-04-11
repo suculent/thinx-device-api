@@ -1,0 +1,9 @@
+{
+  "_id": "_design/builds",
+  "language": "javascript",
+  "views": {
+    "builds_by_build_id": {
+      "map": "function (doc) { if(doc.build_id) { emit (doc.build_id, doc); } }"
+    }
+  }
+}

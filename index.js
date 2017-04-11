@@ -4,68 +4,65 @@
 
 require('./core.js');
 
-const client_user_agent = "THiNX-Client";
-
 //
 // Shared Configuration
 //
 
+const client_user_agent = "THiNX-Client";
+const webapp_user_agent = "THiNX-Web";
+
 var config = require("./conf/config.json");
 const db = config.database_uri;
-
 const serverPort = config.port;
 
+const uuidV1 = require('uuid/v1');
 var http = require('http');
 var parser = require('body-parser');
 var nano = require("nano")(db);
+
 var NodeSession = require('node-session');
 var sessionConfig = require('./conf/node-session.json');
-
 session = new NodeSession(sessionConfig);
 
-const uuidV1 = require('uuid/v1');
-
+// Response dictionary
 var rdict = {};
 
+// Welcome message for logfile
 console.log("-=[ ☢ THiNX IoT RTM API ☢ ]=-");
 
-// Initially creates DB, otherwise fails silently.
-nano.db.create("managed_devices", function(err, body, header) {
-	if (err) {
-		if (err ==
-			"Error: The database could not be created, the file already exists.") {
-			// silently fail, this is ok
-		} else {
-			console.log("» Device database creation completed. " + err + "\n");
-		}
-	} else {
-		console.log("» Device database creation completed. Response: " + JSON.stringify(
-			body) + "\n");
-	}
-});
-
-nano.db.create("managed_repos", function(err, body, header) {
-	if (err) {
-		if (err ==
-			"Error: The database could not be created, the file already exists.") {
-			// silently fail, this is ok
-		} else {
-			console.log("» Repository database creation completed. " + err + "\n");
-		}
-	} else {
-		console.log("» Repository database creation completed. Response: " + JSON.stringify(
-			body) + "\n");
-	}
-});
+initDatabases();
 
 var devicelib = require("nano")(db).use("managed_devices");
 var gitlib = require("nano")(db).use("managed_repos");
+var buildlib = require("nano")(db).use("managed_builds");
+var userlib = require("nano")(db).use("managed_users");
 
 const dispatcher = new(require('httpdispatcher'))();
 
 function validateRequest(req, res) {
+
+	// Check device user-agent
 	var ua = req.headers['user-agent'];
 	var validity = ua.indexOf(client_user_agent)
+
+	if (validity == 0) {
+		return true;
+
+	} else {
+		console.log("☢ UA: '" + ua + "' invalid! " + validity);
+		res.writeHead(401, {
+			'Content-Type': 'text/plain'
+		});
+		res.end('Request not authorized.');
+		return false;
+	}
+}
+
+function validateSecureRequest(req, res) {
+
+	// Check webapp user-agent
+	var ua = req.headers['user-agent'];
+	var validity = ua.indexOf(webapp_user_agent)
 
 	if (validity == 0) {
 		//
@@ -74,110 +71,20 @@ function validateRequest(req, res) {
 	}
 
 	if (validity == -1) {
-		res.writeHead(400, {
+		res.writeHead(401, {
 			'Content-Type': 'text/plain'
 		});
-		res.end('Bad request.');
+		res.end('Request not authorized.');
 		console.log("Invalid UA: '" + ua + "'"); // TODO: Report to security analytics!
 		return false
 	}
 	return true;
 }
 
-function buildCommand(build_id, tenant, mac, git, dryrun) {
-	// ./builder --tenant=test --mac=ANY --git=https://github.com/suculent/thinx-firmware-esp8266 --dry-run
-	// ./builder --tenant=test --mac=ANY --git=git@github.com:suculent/thinx-firmware-esp8266.git --dry-run
 
-	console.log("Executing build chain...");
-
-	const exec = require('child_process').exec;
-	CMD = './builder --tenant=' + tenant + ' --mac=' + mac + ' --git=' + git +
-		' --id=' + build_id;
-	if (dryrun == true) {
-		CMD = CMD + ' --dry-run'
-	}
-	console.log(CMD);
-	exec(CMD, function(err, stdout, stderr) {
-		if (err) {
-			console.error(build_id + " : " + stdout);
-			return;
-		}
-		console.log(build_id + " : " + stdout);
-	});
-}
-
-// Build respective firmware and notify target device(s)
-dispatcher.onPost("/api/build", function(req, res) {
-
-	var callback = function(){};
-	session.startSession(req, res, callback);
-
-	res.writeHead(200, {
-		'Content-Type': 'application/json'
-	});
-
-	if (validateRequest(req, res) == true) {
-
-		if (req.method == 'POST') {
-
-			var rdict = {}
-
-			var dict = JSON.parse(req.body.toString());
-
-			var build = dict['build'];
-			var mac = build.mac;
-			var tenant = build.owner;
-			var git = build.git;
-			var dryrun = false;
-
-			if (typeof(build.dryrun) != undefined) {
-				dryrun = build.dryrun;
-			}
-
-			if ((typeof(build) == undefined || build == null) ||
-				(typeof(mac) == undefined || mac == null) ||
-				(typeof(tenant) == undefined || tenant == null) ||
-				(typeof(git) == undefined || git == null)) {
-
-				rdict = {
-					build: {
-						success: false,
-						status: "Submission failed. Invalid params."
-					}
-				};
-
-				res.end(JSON.stringify(rdict));
-				return;
-			}
-
-			var build_id = uuidV1();
-
-			if (dryrun == false) {
-				rdict = {
-					build: {
-						success: true,
-						status: "Build started.",
-						id: build_id
-					}
-				};
-			} else {
-				rdict = {
-					build: {
-						success: true,
-						status: "Dry-run started. Build will not be deployed.",
-						id: build_id
-					}
-				};
-			}
-
-			res.end(JSON.stringify(rdict));
-
-			buildCommand(build_id, tenant, mac, git, dryrun);
-		}
-	}
-})
 
 // CRUD on GIT repository database
+/*
 dispatcher.onPost("/api/repo/add", function(req, res) {
 	// Repo should have 'firmware-name', URL and last commit ID, maybe array of devices (but that can be done by searching devices by commit id)
 
@@ -212,57 +119,85 @@ dispatcher.onPost("/api/repo/add", function(req, res) {
 		sendAddRepoResponse(res, rdict);
 	});
 })
+*/
 
 // Front-end authentication
-dispatcher.onPost("/api/auth", function(req, res) {
+dispatcher.onPost("/api/login", function(req, res) {
 
-	// TODO: Should happen only if the user is valid
-	var callback = function(){};
-	session.startSession(req, res, callback);
-
-	res.writeHead(200, {
-		'Content-Type': 'application/json'
-	});
-
-	if (req.method == 'POST') {
-
-		// login params must be inside a POST
-		var request = JSON.parse(req.body.toString());
-
-		var user = request['username'];
-		var pass = request['password'];
-
-		// TODO: Validate password
-
-		req.session.put('username', user);
-		req.session.put('password', pass);
-
-		var data = req.session.all();
-
-		console.log("Session data: " + data);
-
-		res.end(JSON.stringify({
-			status: "OK"
-		}));
-	} else {
+	// Request must be post
+	if (req.method != 'POST') {
 		req.session.flush();
 		res.end(JSON.stringify({
-			status: "FAILED"
+			status: "ERROR"
 		}));
 	}
+
+	// Start session first...
+	session.startSession(req, res, function() {
+
+		var body = JSON.parse(req.body.toString());
+		var username = body['username'];
+		var password = body['password'];
+		var userValid = false;
+
+		console.log("u: " + username);
+		console.log("p: " + password);
+
+		userlib.get(username, function(err, existing) {
+
+			var data = req.session.all();
+			console.log("Session data: " + data.toString());
+
+			if (err) {
+
+				console.log("Querying users failed. " + err);
+				req.session.flush();
+
+				res.writeHead(401, {
+					'Content-Type': 'application/json'
+				});
+				res.end(JSON.stringify({
+					authentication: false
+				}));
+
+			} else {
+
+				console.log("User valid." + existing.toString());
+				var pwd = existing.password;
+				if (password != pwd) {
+					console.log("Bad password.");
+				} else {
+					userValid = true;
+					req.session.put('owner', user);
+
+					// TODO: write last_seen timestamp to DB here
+
+					res.writeHead(200, {
+						'Content-Type': 'application/json'
+					});
+					res.end(JSON.stringify({
+						status: "WELCOME"
+					}));
+				}
+
+				if (req.session.get('owner')) {
+					console.log('Session owner:')
+				}
+			}
+		});
+	})
 })
 
-// Device login/registration
-dispatcher.onPost("/api/login", function(req, res) {
+// Device login/registration (no authentication, no validation, allows flooding so far)
+dispatcher.onPost("/device/register", function(req, res) {
 	validateRequest(req, res);
 
-	var callback = function(){};
+	var callback = function() {};
 	session.startSession(req, res, callback);
 
 	if (req.method == 'POST') {
 
 		var dict = JSON.parse(req.body.toString());
-
 		var reg = dict['registration'];
 
 		if (dict["registration"]) {
@@ -274,7 +209,7 @@ dispatcher.onPost("/api/login", function(req, res) {
 			var hash = reg['hash'];
 			var push = reg['push'];
 			var alias = reg['alias'];
-			var owner = reg['owner'];
+			var owner = reg['owner']; // cannot be changed, must match if set
 
 			var success = false;
 			var status = "ERROR";
@@ -486,6 +421,167 @@ function identifyDeviceByMac(mac) {
 	return false;
 }
 
+//
+// Databases
+//
+
+function initDatabases() {
+
+	nano.db.create("managed_devices", function(err, body, header) {
+		if (err) {
+			handleDatabaseErrors(err, "managed_devices")
+		} else {
+			console.log("» Device database creation completed. Response: " + JSON.stringify(
+				body) + "\n");
+		}
+	});
+
+	nano.db.create("managed_repos", function(err, body, header) {
+		if (err) {
+			handleDatabaseErrors(err, "managed_repos")
+		} else {
+			console.log("» Repository database creation completed. Response: " +
+				JSON.stringify(
+					body) + "\n");
+		}
+	});
+
+	nano.db.create("managed_builds", function(err, body, header) {
+		if (err) {
+			handleDatabaseErrors(err, "managed_builds")
+		} else {
+			console.log("» Build database creation completed. Response: " + JSON.stringify(
+				body) + "\n");
+		}
+	});
+
+	nano.db.create("managed_users", function(err, body, header) {
+		if (err) {
+			handleDatabaseErrors(err, "managed_users")
+		} else {
+			console.log("» User database creation completed. Response: " + JSON.stringify(
+				body) + "\n");
+		}
+	});
+}
+
+function handleDatabaseErrors(err, name) {
+
+	if (err.toString().indexOf("the file already exists") != -1) {
+		// silently fail, this is ok
+
+	} else if (err.toString().indexOf("error happened in your connection") != -1) {
+		console.log("🚫 Database connectivity issue. " + err)
+		process.exit(1);
+
+	} else {
+		console.log("🚫 Database " + name + " creation failed. " + err);
+		process.exit(2);
+	}
+}
+
+//
+// Builder
+//
+
+// Build respective firmware and notify target device(s)
+dispatcher.onPost("/api/build", function(req, res) {
+
+	var callback = function() {};
+	session.startSession(req, res, callback);
+
+	res.writeHead(200, {
+		'Content-Type': 'application/json'
+	});
+
+	if (validateRequest(req, res) == true) {
+
+		if (req.method == 'POST') {
+
+			var rdict = {}
+
+			var dict = JSON.parse(req.body.toString());
+
+			var build = dict['build'];
+			var mac = build.mac;
+			var tenant = build.owner;
+			var git = build.git;
+			var dryrun = false;
+
+			if (typeof(build.dryrun) != undefined) {
+				dryrun = build.dryrun;
+			}
+
+			if ((typeof(build) == undefined || build == null) ||
+				(typeof(mac) == undefined || mac == null) ||
+				(typeof(tenant) == undefined || tenant == null) ||
+				(typeof(git) == undefined || git == null)) {
+
+				rdict = {
+					build: {
+						success: false,
+						status: "Submission failed. Invalid params."
+					}
+				};
+
+				res.end(JSON.stringify(rdict));
+				return;
+			}
+
+			var build_id = uuidV1();
+
+			if (dryrun == false) {
+				rdict = {
+					build: {
+						success: true,
+						status: "Build started.",
+						id: build_id
+					}
+				};
+			} else {
+				rdict = {
+					build: {
+						success: true,
+						status: "Dry-run started. Build will not be deployed.",
+						id: build_id
+					}
+				};
+			}
+
+			res.end(JSON.stringify(rdict));
+
+			buildCommand(build_id, tenant, mac, git, dryrun);
+		}
+	}
+})
+
+function buildCommand(build_id, tenant, mac, git, dryrun) {
+
+	// ./builder --tenant=test --mac=ANY --git=https://github.com/suculent/thinx-firmware-esp8266 --dry-run
+	// ./builder --tenant=test --mac=ANY --git=git@github.com:suculent/thinx-firmware-esp8266.git --dry-run
+
+	console.log("Executing build chain...");
+
+	const exec = require('child_process').exec;
+	CMD = './builder --tenant=' + tenant + ' --mac=' + mac + ' --git=' + git +
+		' --id=' + build_id;
+	if (dryrun == true) {
+		CMD = CMD + ' --dry-run'
+	}
+	console.log(CMD);
+	exec(CMD, function(err, stdout, stderr) {
+		if (err) {
+			console.error(build_id + " : " + stdout);
+			return;
+		}
+		console.log(build_id + " : " + stdout);
+	});
+}
+
+//
+// Server core and main loop
+//
+
 //We need a function which handles requests and send response
 function handleRequest(request, response) {
 	try {
@@ -503,4 +599,9 @@ var server = http.createServer(handleRequest);
 server.listen(serverPort, function() {
 	//Callback triggered when server is successfully listening. Hurray!
 	console.log("Server listening on: http://localhost:%s", serverPort);
+});
+
+// Prevent crashes on uncaught exceptions
+process.on('uncaughtException', function(err) {
+	console.log('Caught exception: ' + err);
 });

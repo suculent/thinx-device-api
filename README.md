@@ -9,18 +9,31 @@ Server application running on node.js. Serves as an IoT device registration endp
 
 ## Endpoints
 
+### /api/login
+
+```
+curl -H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+-X POST -d '{ "username" : "test", "password" : "test" }' \
+http://localhost:7442/api/login
+```
+
 ### /api/build
 
 -=[ ☢ THiNX IoT RTM BUILDER ☢ ]=- endpoint.
 
 Fetches GIT repository for given owner, builds his project, deploys binary and posts an FCM notification in case of successful update for respective devices.
 
+> Will require valid session with authorized user in future.
+
 Usage example:
 
-    curl -H "User-Agent: THiNX-Client" \
-    -H "Content-Type: application/json" \
-    -X POST -d '{ "build" : { "mac" : "ANY", "owner" : "test", "git" : "https://github.com/suculent/thinx-firmware-esp8266", "dryrun" : true } }' \
-    http://localhost:7442/api/build
+```
+curl -H "User-Agent: THiNX-Client" \
+-H "Content-Type: application/json" \
+-X POST -d '{ "build" : { "mac" : "ANY", "owner" : "test", "git" : "https://github.com/suculent/thinx-firmware-esp8266", "dryrun" : true } }' \
+http://localhost:7442/api/build
+```
 
 • HTTP POST JSON body:
 
@@ -33,7 +46,7 @@ Usage example:
         }
     }
 
-### /api/login
+### /device/register
 
 Main registration endpoint. Serves for monitoring device firmware versions.
 
@@ -46,7 +59,7 @@ Push token, alias and owner parameters are optional. Has is optional for backwar
     curl -H "User-Agent: THiNX-Client" \
     -H "Content-Type: application/json" \
     -X POST -d '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "push-registration-token-optional", "alias" : "test", "owner": "admin" } }' \
-    http://thinx.cloud:7442/api/login
+    http://thinx.cloud:7442/device/register
 
 • HTTP POST JSON body:
 
