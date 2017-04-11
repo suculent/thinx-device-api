@@ -10,7 +10,7 @@ const client_user_agent = "THiNX-Client";
 // Shared Configuration
 //
 
-var config = require("./config.json");
+var config = require("./conf/config.json");
 const db = config.database_uri; 
 
 const serverPort = config.port; 

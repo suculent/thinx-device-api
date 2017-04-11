@@ -1,5 +1,5 @@
 node_modules/
 tenants/**
 
-./config.json
-./thinx-cloud-firebase-adminsdk-wjhzo-9fd8c42211.json
+./conf/config.json
+./conf/thinx-cloud-firebase-adminsdk-wjhzo-9fd8c42211.json

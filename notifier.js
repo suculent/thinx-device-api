@@ -8,7 +8,7 @@
 // Shared Configuration
 //
 
-var config = require("./config.json");
+var config = require("./conf/config.json");
 var sha256 = require("sha256");
 const db = config['database_uri'];
 //require('./core.js');
