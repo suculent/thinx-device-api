@@ -117,16 +117,3 @@ TODO Registration succeeded, new device registration with one-time token:
         }
     }
 
-## TODOs
-
-### RTM API (for node.js)
-
-* notifier.js: add device fetch
-* notifier.js: add mqtt support
-* notifier.js: add slack monitoring
-* builder: override commit-id in Thinx.h file
-* index.js: add proper update availability check per device and generic firmware version
-
-### THiNX Client (for Arduino)
-
-### EAV Manager (for Arduino)
