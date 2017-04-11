@@ -1,7 +1,7 @@
 {
   "name" : "thinx",
-  "description" : "THiNX Device API",
-  "version" : "0.0.3",
+  "description" : "THiNX API",
+  "version" : "0.0.4",
   "author" : {
     "name" : "Matej Sychra"
   },
