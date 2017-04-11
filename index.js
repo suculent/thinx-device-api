@@ -64,19 +64,17 @@ function validateSecureRequest(req, res) {
 	var ua = req.headers['user-agent'];
 	var validity = ua.indexOf(webapp_user_agent)
 
-	if (validity == 0) {
-		//
-	} else {
+	if (validity == -1) {
 		console.log("☢ UA: '" + ua + "' invalid! " + validity);
 	}
 
-	if (validity == -1) {
-		res.writeHead(401, {
-			'Content-Type': 'text/plain'
-		});
-		res.end('Request not authorized.');
-		console.log("Invalid UA: '" + ua + "'"); // TODO: Report to security analytics!
-		return false
+	// Reasons to reject
+	if ((req.method != 'POST') ||
+		(validity == -1)) {
+		// ? req.session.flush();
+		failureResponse(res, 500, "protocol");
+		console.log("Not a post request.");
+		return false;
 	}
 	return true;
 }
@@ -127,12 +125,8 @@ dispatcher.onPost("/api/login", function(req, res) {
 	// Request must be post
 	if (req.method != 'POST') {
 		req.session.flush();
-		res.writeHead(401, {
-			'Content-Type': 'application/json'
-		});
-		res.end(JSON.stringify({
-			status: "ERROR"
-		}));
+
+		failureResponse(res, 500, "protocol");
 		console.log("Not a post request.");
 		return;
 	}
@@ -195,12 +189,12 @@ dispatcher.onPost("/api/login", function(req, res) {
 			}
 
 			// Did not fall through, goodbye...
-			res.writeHead(401, {
-				'Content-Type': 'application/json'
-			});
-			res.end(JSON.stringify({
-				authentication: false
-			}));
+
+			// EXTRACT: failureResponse("authentication")-->
+			failureResponse(res, 401, "authentication");
+			// <--
+
+
 			if (req.session) {
 				console.log("Flusing session: " + JSON.stringify(req.session.data));
 				req.session.flush();
@@ -209,25 +203,23 @@ dispatcher.onPost("/api/login", function(req, res) {
 	}); // startSession
 }); // onPost
 
-// Front-end authentication, returns 5-minute session on valid authentication
-dispatcher.onPost("/api/login", function(req, res) {
+function failureResponse(res, code, reason) {
+	res.writeHead(code, {
+		'Content-Type': 'application/json'
+	});
+	res.end(JSON.stringify({
+		success: false,
+		"reason": reason
+	}));
+}
 
-	// Request must be post
-	if (req.method != 'POST') {
-		req.session.flush();
-		res.writeHead(401, {
-			'Content-Type': 'application/json'
-		});
-		res.end(JSON.stringify({
-			status: "ERROR"
-		}));
-		console.log("Not a post request.");
-		return;
-	}
+/* Authenticated view draft
+dispatcher.onPost("/api/view/devices", function(req, res) {
+
+	if !validateSecureRequest(req) return;
 
 	var body = JSON.parse(req.body.toString());
-	var username = body['username'];
-	var password = body['password'];
+	//var query = body['query']; we might want to filter or page
 
 	userlib.view('users', 'owners_by_username', {
 		'key': username,
@@ -260,6 +252,7 @@ dispatcher.onPost("/api/login", function(req, res) {
 				// console.log("Username known.");
 				if (password == rowData.value) {
 					// console.log("Username password known, user valid.");
+					userV
 
 					res.writeHead(200, {
 						'Content-Type': 'application/json',
@@ -296,6 +289,7 @@ dispatcher.onPost("/api/login", function(req, res) {
 		};
 	}); // startSession
 }); // onPost
+*/
 
 // Device login/registration (no authentication, no validation, allows flooding so far)
 dispatcher.onPost("/device/register", function(req, res) {
