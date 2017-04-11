@@ -1,5 +1,5 @@
-/* 
- * This THiNX-RTM API module is responsible for responding to devices and build requests. 
+/*
+ * This THiNX-RTM API module is responsible for responding to devices and build requests.
  */
 
 require('./core.js');
@@ -11,13 +11,17 @@ const client_user_agent = "THiNX-Client";
 //
 
 var config = require("./conf/config.json");
-const db = config.database_uri; 
+const db = config.database_uri;
 
-const serverPort = config.port; 
+const serverPort = config.port;
 
 var http = require('http');
 var parser = require('body-parser');
 var nano = require("nano")(db);
+var NodeSession = require('node-session');
+var sessionConfig = require('./conf/node-session.json');
+
+session = new NodeSession(sessionConfig);
 
 const uuidV1 = require('uuid/v1');
 
@@ -26,34 +30,38 @@ var rdict = {};
 console.log("-=[ ☢ THiNX IoT RTM API ☢ ]=-");
 
 // Initially creates DB, otherwise fails silently.
-nano.db.create("managed_devices", function (err, body, header) {
+nano.db.create("managed_devices", function(err, body, header) {
 	if (err) {
-		if (err == "Error: The database could not be created, the file already exists.") {
+		if (err ==
+			"Error: The database could not be created, the file already exists.") {
 			// silently fail, this is ok
 		} else {
 			console.log("» Device database creation completed. " + err + "\n");
 		}
 	} else {
-		console.log("» Device database creation completed. Response: " + JSON.stringify(body) + "\n");
+		console.log("» Device database creation completed. Response: " + JSON.stringify(
+			body) + "\n");
 	}
 });
 
-nano.db.create("managed_repos", function (err, body, header) {
+nano.db.create("managed_repos", function(err, body, header) {
 	if (err) {
-		if (err == "Error: The database could not be created, the file already exists.") {
+		if (err ==
+			"Error: The database could not be created, the file already exists.") {
 			// silently fail, this is ok
 		} else {
 			console.log("» Repository database creation completed. " + err + "\n");
 		}
 	} else {
-		console.log("» Repository database creation completed. Response: " + JSON.stringify(body) + "\n");
+		console.log("» Repository database creation completed. Response: " + JSON.stringify(
+			body) + "\n");
 	}
 });
 
 var devicelib = require("nano")(db).use("managed_devices");
 var gitlib = require("nano")(db).use("managed_repos");
 
-const dispatcher = new (require('httpdispatcher'))();
+const dispatcher = new(require('httpdispatcher'))();
 
 function validateRequest(req, res) {
 	var ua = req.headers['user-agent'];
@@ -62,32 +70,34 @@ function validateRequest(req, res) {
 	if (validity == 0) {
 		//
 	} else {
-		console.log("☢ UA: '"+ ua + "' invalid! " + validity);
+		console.log("☢ UA: '" + ua + "' invalid! " + validity);
 	}
 
 	if (validity == -1) {
-		res.writeHead(400, {'Content-Type': 'text/plain'});
+		res.writeHead(400, {
+			'Content-Type': 'text/plain'
+		});
 		res.end('Bad request.');
-		console.log("Invalid UA: '"+ua+"'"); // TODO: Report to security analytics!
+		console.log("Invalid UA: '" + ua + "'"); // TODO: Report to security analytics!
 		return false
 	}
 	return true;
 }
 
-function buildCommand(build_id, tenant, mac, git, dryrun)
-{	
+function buildCommand(build_id, tenant, mac, git, dryrun) {
 	// ./builder --tenant=test --mac=ANY --git=https://github.com/suculent/thinx-firmware-esp8266 --dry-run
 	// ./builder --tenant=test --mac=ANY --git=git@github.com:suculent/thinx-firmware-esp8266.git --dry-run
 
 	console.log("Executing build chain...");
 
 	const exec = require('child_process').exec;
-	CMD='./builder --tenant=' + tenant + ' --mac=' + mac + ' --git=' + git + ' --id=' + build_id;
+	CMD = './builder --tenant=' + tenant + ' --mac=' + mac + ' --git=' + git +
+		' --id=' + build_id;
 	if (dryrun == true) {
-		CMD=CMD+' --dry-run'
+		CMD = CMD + ' --dry-run'
 	}
 	console.log(CMD);
-	exec(CMD, function (err, stdout, stderr) {
+	exec(CMD, function(err, stdout, stderr) {
 		if (err) {
 			console.error(build_id + " : " + stdout);
 			return;
@@ -99,7 +109,11 @@ function buildCommand(build_id, tenant, mac, git, dryrun)
 // Build respective firmware and notify target device(s)
 dispatcher.onPost("/api/build", function(req, res) {
 
-	res.writeHead(200, {'Content-Type': 'application/json'});
+	session.startSession(req, res, callback)
+
+	res.writeHead(200, {
+		'Content-Type': 'application/json'
+	});
 
 	if (validateRequest(req, res) == true) {
 
@@ -124,7 +138,7 @@ dispatcher.onPost("/api/build", function(req, res) {
 				(typeof(tenant) == undefined || tenant == null) ||
 				(typeof(git) == undefined || git == null)) {
 
-				rdict = { 
+				rdict = {
 					build: {
 						success: false,
 						status: "Submission failed. Invalid params."
@@ -138,7 +152,7 @@ dispatcher.onPost("/api/build", function(req, res) {
 			var build_id = uuidV1();
 
 			if (dryrun == false) {
-				rdict = { 
+				rdict = {
 					build: {
 						success: true,
 						status: "Build started.",
@@ -146,7 +160,7 @@ dispatcher.onPost("/api/build", function(req, res) {
 					}
 				};
 			} else {
-				rdict = { 
+				rdict = {
 					build: {
 						success: true,
 						status: "Dry-run started. Build will not be deployed.",
@@ -154,7 +168,7 @@ dispatcher.onPost("/api/build", function(req, res) {
 					}
 				};
 			}
-			
+
 			res.end(JSON.stringify(rdict));
 
 			buildCommand(build_id, tenant, mac, git, dryrun);
@@ -163,8 +177,7 @@ dispatcher.onPost("/api/build", function(req, res) {
 })
 
 // CRUD on GIT repository database
-dispatcher.onPost("/api/repo/add", function(req, res)
-{
+dispatcher.onPost("/api/repo/add", function(req, res) {
 	// Repo should have 'firmware-name', URL and last commit ID, maybe array of devices (but that can be done by searching devices by commit id)
 
 	// TODO: Fetch current user session by bearer token and use for 'owner'
@@ -185,7 +198,7 @@ dispatcher.onPost("/api/repo/add", function(req, res)
 			//return;
 		}
 
-		if(err) {
+		if (err) {
 			console.log("Inserting repo failed. " + err + "\n");
 			// TODO
 
@@ -194,19 +207,54 @@ dispatcher.onPost("/api/repo/add", function(req, res)
 			// TODO
 
 		}
-		
+
 		sendAddRepoResponse(res, rdict);
 	});
 })
 
+// Front-end authentication
+dispatcher.onPost("/api/auth", function(req, res) {
 
+	res.writeHead(200, {
+		'Content-Type': 'application/json'
+	});
 
+	// TODO: Should happen only if the user is valid
+	session.startSession(req, res, callback)
 
+	if (req.method == 'POST') {
+
+		// login params must be inside a POST
+		var request = JSON.parse(req.body.toString());
+
+		var user = request['username'];
+		var pass = request['password'];
+
+		// TODO: Validate password
+
+		req.session.put('username', user);
+		req.session.put('password', pass);
+
+		var data = req.session.all();
+
+		console.log("Session data: " + data);
+
+		res.end(JSON.stringify({
+			status: "OK"
+		}));
+	} else {
+		req.session.flush();
+		res.end(JSON.stringify({
+			status: "FAILED"
+		}));
+	}
+})
 
 // Device login/registration
-dispatcher.onPost("/api/login", function(req, res)
-{
+dispatcher.onPost("/api/login", function(req, res) {
 	validateRequest(req, res);
+
+	session.startSession(req, res, callback)
 
 	if (req.method == 'POST') {
 
@@ -231,13 +279,13 @@ dispatcher.onPost("/api/login", function(req, res)
 			var isNew = true;
 
 			// See if we know this MAC which is a primary key in db
-			devicelib.get(mac, function (err, existing) {
+			devicelib.get(mac, function(err, existing) {
 
-				if (err) { 				 
-					console.log("Querying devices failed. " + err + "\n"); 
+				if (err) {
+					console.log("Querying devices failed. " + err + "\n");
 				} else {
 					isNew = false;
-				} 
+				}
 
 				/*
 				console.log("== Incoming attributes ==");
@@ -256,15 +304,15 @@ dispatcher.onPost("/api/login", function(req, res)
 				var firmware_url = "";
 				var known_alias = "";
 				var known_owner = "";
-				
+
 				status = "OK";
 				update_available = false; // test only
 
-				// function isUpdateAvailable(device) should search for new files since 
+				// function isUpdateAvailable(device) should search for new files since
 				// last installed firmware (version ideally)
 
 				// this is only a fake
-				 // TODO: fetch from commit notification descriptor
+				// TODO: fetch from commit notification descriptor
 				var firmwareUpdateDescriptor = {
 					url: "/bin/test/3b19d050daa5924a2370eb8ef5ac51a484d81d6e.bin",
 					mac: "ANY",
@@ -274,7 +322,7 @@ dispatcher.onPost("/api/login", function(req, res)
 				}
 
 				//
-				// Construct response			 
+				// Construct response
 				//
 
 				rdict["registration"]["success"] = success;
@@ -324,16 +372,17 @@ dispatcher.onPost("/api/login", function(req, res)
 							//return;
 						}
 
-						if(err) {
+						if (err) {
 							console.log("Inserting device failed. " + err + "\n");
 							rdict["registration"]["success"] = false;
 							rdict["registration"]["status"] = "Insertion failed";
 
 							console.log("CHECK6:");
-									console.log(rdict['registration']);
+							console.log(rdict['registration']);
 
 						} else {
-							console.log("Device inserted. Response: " + JSON.stringify(body) + "\n");
+							console.log("Device inserted. Response: " + JSON.stringify(body) +
+								"\n");
 							rdict["registration"]["success"] = true;
 							rdict["registration"]["status"] = "OK";
 
@@ -341,7 +390,7 @@ dispatcher.onPost("/api/login", function(req, res)
 							console.log(rdict['registration']);
 
 						}
-						
+
 						sendRegistrationOKResponse(res, rdict);
 					});
 
@@ -355,11 +404,11 @@ dispatcher.onPost("/api/login", function(req, res)
 					// - see if alias or owner changed
 					// - otherwise reply just OK
 
-					devicelib.get(mac, function (error, existing) { 
+					devicelib.get(mac, function(error, existing) {
 
-						if (!error) { 
+						if (!error) {
 
-							existing.firmware = fw; 
+							existing.firmware = fw;
 
 							if (typeof(hash) != undefined && hash != null) {
 								existing.hash = hash;
@@ -379,11 +428,12 @@ dispatcher.onPost("/api/login", function(req, res)
 
 							existing.lastupdate = new Date();
 
-							devicelib.insert(existing, mac, function (err, body, header) { 
+							devicelib.insert(existing, mac, function(err, body, header) {
 
-								if (!err) { 
+								if (!err) {
 
-									console.log("Device updated. Response: " + JSON.stringify(body) + "\n"); 
+									console.log("Device updated. Response: " + JSON.stringify(
+										body) + "\n");
 
 									rdict["registration"]["success"] = true;
 
@@ -406,7 +456,7 @@ dispatcher.onPost("/api/login", function(req, res)
 
 									sendRegistrationOKResponse(res, rdict);
 								}
-							}) 
+							})
 
 						} else {
 
@@ -423,23 +473,22 @@ dispatcher.onPost("/api/login", function(req, res)
 	}
 });
 
-function sendRegistrationOKResponse(res, dict)
-{	
+function sendRegistrationOKResponse(res, dict) {
 	var json = JSON.stringify(dict);
 	res.end(json);
 }
 
 /* Should return true for known devices */
-function identifyDeviceByMac(mac) {	
+function identifyDeviceByMac(mac) {
 	return false;
 }
 
 //We need a function which handles requests and send response
-function handleRequest(request, response){
+function handleRequest(request, response) {
 	try {
 		//console.log(request.url);
 		dispatcher.dispatch(request, response);
-	} catch(err) {
+	} catch (err) {
 		console.log(err);
 	}
 }
@@ -448,7 +497,7 @@ function handleRequest(request, response){
 var server = http.createServer(handleRequest);
 
 //Lets start our server
-server.listen(serverPort, function(){
+server.listen(serverPort, function() {
 	//Callback triggered when server is successfully listening. Hurray!
 	console.log("Server listening on: http://localhost:%s", serverPort);
 });

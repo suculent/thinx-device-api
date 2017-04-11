@@ -8,8 +8,8 @@ const client_user_agent = "THiNX-Client";
 // Shared Configuration
 //
 
-var config = require("./config.json");
-const db = config.database_uri; 
+var config = require("./conf/config.json");
+const db = config.database_uri;
 
 //
 // Version Management
@@ -23,8 +23,8 @@ function availableVersionForDevice(owner, mac) {
 	// else check the owner folder
 
 	// searches in deployment directory
-	
-	// Get path for owner (and optinaly a device)	
+
+	// Get path for owner (and optinaly a device)
 	var user_path = config.deploy_root + '/' + owner;
 	var device_path = user_path;
 	if (mac.indexOf("ANY") != -1) {
@@ -48,7 +48,7 @@ function hasUpdateAvailable(device) {
 
 	}
 
-	  semver.satisfies('1.2.3', '1.x || >=2.5.0 || 5.0.0 - 7.2.3') // true
-    	semver.gt('1.2.3', '9.8.7') // false
-    semver.lt('1.2.3', '9.8.7') // true
+	semver.satisfies('1.2.3', '1.x || >=2.5.0 || 5.0.0 - 7.2.3') // true
+	semver.gt('1.2.3', '9.8.7') // false
+	semver.lt('1.2.3', '9.8.7') // true
 }

@@ -1,0 +1,9 @@
+{
+  "secret": "Q3UBzdH9GEfiRCTKbi5MTPyChpzXLsTD",
+  "driver": "file",
+  "lifetime": 300000,
+  "expireOnClose": false,
+  "files": "./sessions",
+  "cookie": "node_session",
+  "path": "/"
+}
