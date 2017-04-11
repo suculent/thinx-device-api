@@ -13,6 +13,8 @@ Server application running on node.js. Serves as an IoT device registration endp
 
 -=[ ☢ THiNX IoT RTM BUILDER ☢ ]=- endpoint.
 
+Fetches GIT repository for given owner, builds his project, deploys binary and posts an FCM notification in case of successful update for respective devices.
+
 Usage example:
 
     curl -H "User-Agent: THiNX-Client" \
@@ -33,7 +35,7 @@ Usage example:
 
 ### /api/login
 
-Main registration endpoint.
+Main registration endpoint. Serves for monitoring device firmware versions.
 
 Usage example:
 
@@ -114,3 +116,17 @@ TODO Registration succeeded, new device registration with one-time token:
             "device_id" : "xyz"
         }
     }
+
+## TODOs
+
+### RTM API (for node.js)
+
+* notifier.js: add device fetch
+* notifier.js: add mqtt support
+* notifier.js: add slack monitoring
+* builder: override commit-id in Thinx.h file
+* index.js: add proper update availability check per device and generic firmware version
+
+### THiNX Client (for Arduino)
+
+### EAV Manager (for Arduino)

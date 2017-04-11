@@ -73,7 +73,7 @@ if [[ "$user" == "git" ]]; then
 	GIT_USER=$(echo $OLDHOST | grep : | cut -d: -f2-)
 	#echo "GIT_USER: ${GIT_USER}"
 	GIT_PATH=$REPO_PATH
-	REPO_PATH="${GIT_USER}/$(sed 's/.git//g' <<< $GIT_PATH)"	
+	REPO_PATH="${GIT_USER}/$(sed 's/.git//g' <<< $GIT_PATH)"
 	REPO_NAME="$(echo $REPO_PATH | grep / | cut -d/ -f2-)"
 fi
 
@@ -156,21 +156,21 @@ echo
 
 if [[ $RUN==false ]]; then
 
-	echo "☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment."	
+	echo "☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment."
 
-	STATUS='"DRY_RUN_OK"'	
+	STATUS='"DRY_RUN_OK"'
 
-else	
-		
+else
+
 	# Create user-referenced folder in public www space
 	mkdir -p $DEPLOYMENT_PATH
 
 	# Deploy binary (may require rotating previous file or timestamping/renaming previous version of the file)
 	mv .pioenvs/d1_mini/firmware.elf $COMMIT.bin
 
-	echo "Deploying $COMMIT.bin to $DEPLOYMENT_PATH..."	
+	echo "Deploying $COMMIT.bin to $DEPLOYMENT_PATH..."
 
-	mv $COMMIT.bin $DEPLOYMENT_PATH	
+	mv $COMMIT.bin $DEPLOYMENT_PATH
 
 	STATUS='"DEPLOYED"'
 
@@ -188,7 +188,7 @@ popd > /dev/null
 
 DEPLOYMENT_PATH=$(echo ${DEPLOYMENT_PATH} | tr -d '/var/www/html')
 
-CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${COMMIT}.bin ${DEVICE} ${SHA} ${STATUS}"
+CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${COMMIT}.bin ${DEVICE} ${SHA} ${TENANT} ${STATUS}"
 echo $CMD
 RESULT=$(node notifier.js $CMD)
 echo $RESULT

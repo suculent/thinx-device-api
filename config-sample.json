@@ -1,0 +1,8 @@
+{
+  "type": "thinx_server_config",
+  "database_uri": "http://localhost:5984",
+  "port": 7442,
+  "deploy_root": "/var/www/html/bin",
+  "slack_webhook": "https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/fFIhDLTO37QX2y8ljBExSqC8",
+  "fcm_auth": "./thinx-cloud-firebase-adminsdk-wjhzo-9fd8c42211.json"
+}

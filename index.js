@@ -1,6 +1,19 @@
+/* 
+ * This THiNX-RTM API module is responsible for responding to devices and build requests. 
+ */
+
+require('./core.js');
+
 const client_user_agent = "THiNX-Client";
-const serverPort = 7442;
-const db = "http://rtmapi:frohikey@localhost:5984";
+
+//
+// Shared Configuration
+//
+
+var config = require("./config.json");
+const db = config.database_uri; 
+
+const serverPort = config.port; 
 
 var http = require('http');
 var parser = require('body-parser');
@@ -185,6 +198,10 @@ dispatcher.onPost("/api/repo/add", function(req, res)
 		sendAddRepoResponse(res, rdict);
 	});
 })
+
+
+
+
 
 // Device login/registration
 dispatcher.onPost("/api/login", function(req, res)
