@@ -1,4 +1,4 @@
-# thinx-device-api
+# ☢ thinx-device-api
 
 Server application running on node.js. Serves as an IoT device registration endpoint. Should store device data using Couch or MongoDB.
 
@@ -22,25 +22,32 @@ curl -H "User-Agent: THiNX-Web" \
 -X POST -d '{ "username" : "test", "password" : "tset" }' \
 http://localhost:7442/api/login
 ```
+---
 
 ### /api/view/devices
 
-Provides **intial draft** device list for authorized owner. Requires no parameters, just valid session.
+Provides **intial draft** device list for authorized owner. Requires no parameters, just valid session. 
 
 ```
-curl -v -H "User-Agent: THiNX-Web" \
+curl -v -c cookies.jar \
+-H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--H "Cookies: x-thx-session=s%3A1xayOXcGexJ2AwHA3WJjA2Jt9ZCIaf8LviXPJYft.C4KsfFlTZmummhbYsR3p5%2BqgkzVyAPIAmbnflNhjz6I" \
+-X POST -d '{ "username" : "test", "password" : "test" }' \
+http://localhost:7442/api/login
+
+curl -v -b cookies.jar \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
 -X POST -d '{ "query" : false }' http://localhost:7442/api/view/devices
 ```
 
 > TODO: Show all devices for superadmin user.
 
+---
+
 ### /api/build
 
--=[ *☢* THiNX IoT RTM BUILDER *☢* ]=- endpoint.
-
-Fetches GIT repository for given owner, builds his project, deploys binary and posts an FCM notification in case of successful update for respective devices.
+Builder endpoint. Fetches GIT repository for given owner, builds his project, deploys binary and posts an FCM notification in case of successful update for respective devices.
 
 > Will require valid session with authorized user in future.
 
@@ -63,6 +70,8 @@ http://localhost:7442/api/build
             "dryrun" : true
         }
     }
+
+---
 
 ### /device/register
 
@@ -147,3 +156,11 @@ TODO Registration succeeded, new device registration with one-time token:
             "device_id" : "xyz"
         }
     }
+
+
+## Changelog
+
+12/4/2017 - Rewritten API router, working authentication
+11/4/2017 - MQTT/Slack Notifications, Sessions
+10/4/2017 - Builder and notifier
+09/4/2017 - Device registration
