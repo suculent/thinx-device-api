@@ -109,7 +109,8 @@ function buildCommand(build_id, tenant, mac, git, dryrun) {
 // Build respective firmware and notify target device(s)
 dispatcher.onPost("/api/build", function(req, res) {
 
-	session.startSession(req, res, callback)
+	var callback = function(){};
+	session.startSession(req, res, callback);
 
 	res.writeHead(200, {
 		'Content-Type': 'application/json'
@@ -215,12 +216,13 @@ dispatcher.onPost("/api/repo/add", function(req, res) {
 // Front-end authentication
 dispatcher.onPost("/api/auth", function(req, res) {
 
+	// TODO: Should happen only if the user is valid
+	var callback = function(){};
+	session.startSession(req, res, callback);
+
 	res.writeHead(200, {
 		'Content-Type': 'application/json'
 	});
-
-	// TODO: Should happen only if the user is valid
-	session.startSession(req, res, callback)
 
 	if (req.method == 'POST') {
 
@@ -254,7 +256,8 @@ dispatcher.onPost("/api/auth", function(req, res) {
 dispatcher.onPost("/api/login", function(req, res) {
 	validateRequest(req, res);
 
-	session.startSession(req, res, callback)
+	var callback = function(){};
+	session.startSession(req, res, callback);
 
 	if (req.method == 'POST') {
 
