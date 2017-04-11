@@ -121,72 +121,181 @@ dispatcher.onPost("/api/repo/add", function(req, res) {
 })
 */
 
-// Front-end authentication
+// Front-end authentication, returns 5-minute session on valid authentication
 dispatcher.onPost("/api/login", function(req, res) {
 
 	// Request must be post
 	if (req.method != 'POST') {
 		req.session.flush();
+		res.writeHead(401, {
+			'Content-Type': 'application/json'
+		});
 		res.end(JSON.stringify({
 			status: "ERROR"
 		}));
+		console.log("Not a post request.");
+		return;
 	}
 
-	// Start session first...
-	session.startSession(req, res, function() {
+	var body = JSON.parse(req.body.toString());
+	var username = body['username'];
+	var password = body['password'];
 
-		var body = JSON.parse(req.body.toString());
-		var username = body['username'];
-		var password = body['password'];
-		var userValid = false;
+	userlib.view('users', 'owners_by_username', {
+		'key': username,
+		'include_docs': true
+	}, function(err, body) {
 
-		console.log("u: " + username);
-		console.log("p: " + password);
-
-		userlib.get(username, function(err, existing) {
-
+		if (req.session) {
 			var data = req.session.all();
-			console.log("Session data: " + data.toString());
+			console.log("Session data: " + JSON.stringify(data));
+		}
 
-			if (err) {
+		if (err) {
+			console.log("Error: " + err.toString());
 
-				console.log("Querying users failed. " + err);
-				req.session.flush();
+			// Did not fall through, goodbye...
+			res.writeHead(401, {
+				'Content-Type': 'application/json'
+			});
+			res.end(JSON.stringify({
+				authentication: false
+			}));
+			req.session.flush();
+			return;
+		};
 
-				res.writeHead(401, {
-					'Content-Type': 'application/json'
-				});
-				res.end(JSON.stringify({
-					authentication: false
-				}));
-
-			} else {
-
-				console.log("User valid." + existing.toString());
-				var pwd = existing.password;
-				if (password != pwd) {
-					console.log("Bad password.");
-				} else {
-					userValid = true;
-					req.session.put('owner', user);
-
-					// TODO: write last_seen timestamp to DB here
+		var rows = body.rows; //the rows returned
+		for (var row in rows) {
+			var rowData = rows[row];
+			if (username == rowData.key) {
+				// console.log("Username known.");
+				if (password == rowData.value) {
+					// console.log("Username password known, user valid.");
 
 					res.writeHead(200, {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Headers': 'Content-Type',
+						'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+						'Access-Control-Allow-Origin': 'rtm.thinx.cloud'
 					});
-					res.end(JSON.stringify({
-						status: "WELCOME"
-					}));
-				}
 
-				if (req.session.get('owner')) {
-					console.log('Session owner:')
+					session.startSession(req, res, function() {
+						req.session.put('owner', rowData.key);
+
+						// TODO: write last_seen timestamp to DB here
+						res.end(JSON.stringify({
+							status: "WELCOME"
+						}));
+						var data = req.session.all();
+						console.log("Created new session: " + JSON.stringify(data));
+					});
+					return; // early exit
 				}
 			}
+
+			// Did not fall through, goodbye...
+			res.writeHead(401, {
+				'Content-Type': 'application/json'
+			});
+			res.end(JSON.stringify({
+				authentication: false
+			}));
+			if (req.session) {
+				console.log("Flusing session: " + JSON.stringify(req.session.data));
+				req.session.flush();
+			}
+		};
+	}); // startSession
+}); // onPost
+
+// Front-end authentication, returns 5-minute session on valid authentication
+dispatcher.onPost("/api/login", function(req, res) {
+
+	// Request must be post
+	if (req.method != 'POST') {
+		req.session.flush();
+		res.writeHead(401, {
+			'Content-Type': 'application/json'
 		});
-	})
-})
+		res.end(JSON.stringify({
+			status: "ERROR"
+		}));
+		console.log("Not a post request.");
+		return;
+	}
+
+	var body = JSON.parse(req.body.toString());
+	var username = body['username'];
+	var password = body['password'];
+
+	userlib.view('users', 'owners_by_username', {
+		'key': username,
+		'include_docs': true
+	}, function(err, body) {
+
+		if (req.session) {
+			var data = req.session.all();
+			console.log("Session data: " + JSON.stringify(data));
+		}
+
+		if (err) {
+			console.log("Error: " + err.toString());
+
+			// Did not fall through, goodbye...
+			res.writeHead(401, {
+				'Content-Type': 'application/json'
+			});
+			res.end(JSON.stringify({
+				authentication: false
+			}));
+			req.session.flush();
+			return;
+		};
+
+		var rows = body.rows; //the rows returned
+		for (var row in rows) {
+			var rowData = rows[row];
+			if (username == rowData.key) {
+				// console.log("Username known.");
+				if (password == rowData.value) {
+					// console.log("Username password known, user valid.");
+
+					res.writeHead(200, {
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Headers': 'Content-Type',
+						'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+						'Access-Control-Allow-Origin': 'rtm.thinx.cloud'
+					});
+
+					session.startSession(req, res, function() {
+						req.session.put('owner', rowData.key);
+
+						// TODO: write last_seen timestamp to DB here
+						res.end(JSON.stringify({
+							status: "WELCOME"
+						}));
+						var data = req.session.all();
+						console.log("Created new session: " + JSON.stringify(data));
+					});
+					return; // early exit
+				}
+			}
+
+			// Did not fall through, goodbye...
+			res.writeHead(401, {
+				'Content-Type': 'application/json'
+			});
+			res.end(JSON.stringify({
+				authentication: false
+			}));
+			if (req.session) {
+				console.log("Flusing session: " + JSON.stringify(req.session.data));
+				req.session.flush();
+			}
+		};
+	}); // startSession
+}); // onPost
 
 // Device login/registration (no authentication, no validation, allows flooding so far)
 dispatcher.onPost("/device/register", function(req, res) {
@@ -319,7 +428,8 @@ dispatcher.onPost("/device/register", function(req, res) {
 							console.log(rdict['registration']);
 
 						} else {
-							console.log("Device inserted. Response: " + JSON.stringify(body) +
+							console.log("Device inserted. Response: " + JSON.stringify(
+									body) +
 								"\n");
 							rdict["registration"]["success"] = true;
 							rdict["registration"]["status"] = "OK";
@@ -431,8 +541,9 @@ function initDatabases() {
 		if (err) {
 			handleDatabaseErrors(err, "managed_devices")
 		} else {
-			console.log("» Device database creation completed. Response: " + JSON.stringify(
-				body) + "\n");
+			console.log("» Device database creation completed. Response: " +
+				JSON.stringify(
+					body) + "\n");
 		}
 	});
 
@@ -450,8 +561,9 @@ function initDatabases() {
 		if (err) {
 			handleDatabaseErrors(err, "managed_builds")
 		} else {
-			console.log("» Build database creation completed. Response: " + JSON.stringify(
-				body) + "\n");
+			console.log("» Build database creation completed. Response: " + JSON
+				.stringify(
+					body) + "\n");
 		}
 	});
 
@@ -470,7 +582,9 @@ function handleDatabaseErrors(err, name) {
 	if (err.toString().indexOf("the file already exists") != -1) {
 		// silently fail, this is ok
 
-	} else if (err.toString().indexOf("error happened in your connection") != -1) {
+	} else if (err.toString().indexOf("error happened in your connection") !=
+		-
+		1) {
 		console.log("🚫 Database connectivity issue. " + err)
 		process.exit(1);
 

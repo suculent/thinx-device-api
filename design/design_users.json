@@ -1,9 +1,9 @@
 {
-  "_id": "_design/users",
-  "language": "javascript",
-  "views": {
-    "owners_by_account": {
-      "map": "function (doc) { if(doc.account) { emit (doc.account, doc); } }"
-    }
-  }
+	"_id": "_design/users",
+	"language": "javascript",
+	"views": {
+		"owners_by_username": {
+			"map": "function (doc) { if(doc.username) { emit (doc.username, doc.password); } }"
+		}
+	}
 }
