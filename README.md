@@ -9,18 +9,36 @@ Server application running on node.js. Serves as an IoT device registration endp
 
 ## Endpoints
 
+
 ### /api/login
+
+Authentication point, that client application must pass before performing authorized operations (view owner data, start builds, initiate OTA updates).
+Expects username and password as an input (POST body), returns `x-thx-session` cookie in case of valid authentication.
+Session cookie can be used to access owner data or start owner/admin builds and its expiration is configurable in conf/node-session.json.
 
 ```
 curl -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--X POST -d '{ "username" : "test", "password" : "test" }' \
+-X POST -d '{ "username" : "test", "password" : "tset" }' \
 http://localhost:7442/api/login
 ```
 
+### /api/view/devices
+
+Provides **intial draft** device list for authorized owner. Requires no parameters, just valid session.
+
+```
+curl -v -H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+-H "Cookies: x-thx-session=s%3A1xayOXcGexJ2AwHA3WJjA2Jt9ZCIaf8LviXPJYft.C4KsfFlTZmummhbYsR3p5%2BqgkzVyAPIAmbnflNhjz6I" \
+-X POST -d '{ "query" : false }' http://localhost:7442/api/view/devices
+```
+
+> TODO: Show all devices for superadmin user.
+
 ### /api/build
 
--=[ ☢ THiNX IoT RTM BUILDER ☢ ]=- endpoint.
+-=[ *☢* THiNX IoT RTM BUILDER *☢* ]=- endpoint.
 
 Fetches GIT repository for given owner, builds his project, deploys binary and posts an FCM notification in case of successful update for respective devices.
 
@@ -84,9 +102,9 @@ Registration failed:
             "status" : "reason: generic fail"
         }
     }
-    
+
 Registration succeeded, firmware update available:
-    
+
     {
         "registration" : {
             "success" : true,
@@ -99,18 +117,18 @@ Registration succeeded, firmware update available:
         }
     }
 
-    
+
 Registration succeeded, no new firmware:
-    
+
     {
         "registration" : {
             "success" : true,
             "status" : "OK"
         }
     }
-    
+
 Registration succeeded, new device alias:
-    
+
     {
         "registration" : {
             "mac" : "00:00:00:00:00:00",
@@ -118,10 +136,10 @@ Registration succeeded, new device alias:
             "alias" : "test"
         }
     }
-    
-    
+
+
 TODO Registration succeeded, new device registration with one-time token:
-    
+
     {
         "registration" : {
             "success" : true,
@@ -129,4 +147,3 @@ TODO Registration succeeded, new device registration with one-time token:
             "device_id" : "xyz"
         }
     }
-

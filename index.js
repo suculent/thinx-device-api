@@ -27,9 +27,6 @@ session = new NodeSession(sessionConfig);
 // Response dictionary
 var rdict = {};
 
-// Welcome message for logfile
-console.log("-=[ ☢ THiNX IoT RTM API ☢ ]=-");
-
 initDatabases();
 
 var devicelib = require("nano")(db).use("managed_devices");
@@ -37,47 +34,80 @@ var gitlib = require("nano")(db).use("managed_repos");
 var buildlib = require("nano")(db).use("managed_builds");
 var userlib = require("nano")(db).use("managed_users");
 
-const dispatcher = new(require('httpdispatcher'))();
+var express = require('express');
+var session = require('express-session');
+var app = express();
 
-function validateRequest(req, res) {
+app.use(session({
+	secret: sessionConfig.secret
+}));
 
-	// Check device user-agent
-	var ua = req.headers['user-agent'];
-	var validity = ua.indexOf(client_user_agent)
+app.use(parser.json());
+app.use(parser.urlencoded({
+	extended: true
+}));
 
-	if (validity == 0) {
-		return true;
+var sess;
 
+app.all('/*', function(req, res, next) {
+	// CORS headers
+	res.header("Access-Control-Allow-Origin", "*"); // restrict it to the required domain
+	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+	// Set custom headers for CORS
+	res.header('Access-Control-Allow-Headers',
+		'Content-type,Accept,X-Access-Token,X-Key');
+	if (req.method == 'OPTIONS') {
+		res.status(200).end();
 	} else {
-		console.log("☢ UA: '" + ua + "' invalid! " + validity);
-		res.writeHead(401, {
-			'Content-Type': 'text/plain'
-		});
-		res.end('Request not authorized.');
-		return false;
+		next();
 	}
-}
+});
 
-function validateSecureRequest(req, res) {
-
-	// Check webapp user-agent
-	var ua = req.headers['user-agent'];
-	var validity = ua.indexOf(webapp_user_agent)
-
-	if (validity == -1) {
-		console.log("☢ UA: '" + ua + "' invalid! " + validity);
+/* http://thejackalofjavascript.com/architecting-a-restful-node-js-app/
+app.get('/', function(req, res) {
+	sess = req.session;
+	console.log("owner: " + sess.owner);
+	if (sess.owner) {
+		res.redirect('/admin');
+	} else {
+		res.redirect('/api/login'); // crashes
 	}
+});
 
-	// Reasons to reject
-	if ((req.method != 'POST') ||
-		(validity == -1)) {
-		// ? req.session.flush();
-		failureResponse(res, 500, "protocol");
-		console.log("Not a post request.");
-		return false;
+app.post('/login', function(req, res) {
+	sess = req.session;
+	//In this we are assigning email to sess.email variable.
+	//username comes from HTML page. Owner must be fetched from db.
+	sess.owner = req.body.username;
+	res.end('done');
+});
+
+app.get('/admin', function(req, res) {
+	sess = req.session;
+	if (sess.email) {
+		res.write('<h1>Hello ' + sess.email + '</h1>');
+		res.end('<a href="+">Logout</a>');
+	} else {
+		res.write('<h1>Please login first.</h1>');
+		res.end('<a href="+">Login</a>');
 	}
-	return true;
-}
+});
+
+app.get('/logout', function(req, res) {
+	req.session.destroy(function(err) {
+		if (err) {
+			console.log(err);
+		} else {
+			res.redirect('/');
+		}
+	});
+});
+*/
+
+app.listen(serverPort, function() {
+	console.log("-=[ ☢ THiNX IoT RTM API ☢ ]=-");
+	console.log("» Started on port " + serverPort);
+});
 
 
 
@@ -120,179 +150,150 @@ dispatcher.onPost("/api/repo/add", function(req, res) {
 */
 
 // Front-end authentication, returns 5-minute session on valid authentication
-dispatcher.onPost("/api/login", function(req, res) {
+app.post("/api/login", function(req, res) {
 
 	// Request must be post
 	if (req.method != 'POST') {
-		req.session.flush();
+		req.session.destroy(function(err) {
+			if (err) {
+				console.log(err);
+			} else {
+				failureResponse(res, 500, "protocol");
+				console.log("Not a post request.");
+				return;
+			}
+		});
+	}
 
-		failureResponse(res, 500, "protocol");
-		console.log("Not a post request.");
+	var username = req.body.username;
+	var password = req.body.password;
+
+	userlib.view('users', 'owners_by_username', {
+		'key': username,
+		'include_docs': true // might be useless
+	}, function(err, body) {
+
+		if (err) {
+			console.log("Error: " + err.toString());
+
+			// Did not fall through, goodbye...
+			req.session.destroy(function(err) {
+				if (err) {
+					console.log(err);
+				} else {
+					failureResponse(res, 501, "protocol");
+					console.log("Not a post request.");
+					return;
+				}
+			});
+			return;
+		};
+
+		var rows = body.rows; //the rows returned
+		for (var row in rows) {
+			var rowData = rows[row];
+			if (username == rowData.key) {
+				// console.log("Username known.");
+				if (password == rowData.value) {
+					// console.log("Username password known, user valid.");
+
+					req.session.owner = rowData.key;
+
+					// TODO: write last_seen timestamp to DB here
+					res.end(JSON.stringify({
+						status: "WELCOME"
+					}));
+
+					return; // early exit
+				}
+			}
+
+			if (req.session) {
+				console.log("Flusing session: " + JSON.stringify(req.session.data));
+				req.session.destroy(function(err) {
+					if (err) {
+						console.log(err);
+					} else {
+						failureResponse(res, 401, "protocol");
+						console.log("Not a post request.");
+						return;
+					}
+				});
+			} else {
+				failureResponse(res, 401, "authentication");
+			}
+		};
+	});
+});
+
+/* Authenticated view draft */
+app.post("/api/view/devices", function(req, res) {
+
+	// reject on invalid headers
+	if (!validateSecureRequest(req)) return;
+
+	// reject on invalid session
+	if (!req.session) {
+		failureResponse(res, 405, "not allowed");
+		console.log("No session!");
 		return;
 	}
 
-	var body = JSON.parse(req.body.toString());
-	var username = body['username'];
-	var password = body['password'];
+	// reject on invalid owner
+	var owner = null;
+	if (req.session.owner) {
+		owner = req.session.owner;
+	} else {
+		failureResponse(res, 405, "not allowed");
+		console.log("No valid owner!");
+		return;
+	}
 
-	userlib.view('users', 'owners_by_username', {
-		'key': username,
-		'include_docs': true
+	devicelib.view('devicelib', 'devices_by_owner', {
+		'key': owner,
+		'include_docs': false
 	}, function(err, body) {
 
-		if (req.session) {
-			var data = req.session.all();
-			console.log("Session data: " + JSON.stringify(data));
+		if (err) {
+			if (err.toString() == "Error: missing") {
+				res.end({
+					result: "none"
+				});
+			}
+			console.log("Error: " + err.toString());
+			return;
 		}
 
-		if (err) {
-			console.log("Error: " + err.toString());
+		var rows = body.rows; // devices returned
+		var devices = [];
 
-			// Did not fall through, goodbye...
-			res.writeHead(401, {
-				'Content-Type': 'application/json'
+		// Show all devices for admin (if not limited by query)
+		if (req.session.admin == true && req.body.query == undefined) {
+			res.end({
+				devices
 			});
-			res.end(JSON.stringify({
-				authentication: false
-			}));
-			req.session.flush();
 			return;
-		};
+		}
 
-		var rows = body.rows; //the rows returned
 		for (var row in rows) {
 			var rowData = rows[row];
-			if (username == rowData.key) {
-				// console.log("Username known.");
-				if (password == rowData.value) {
-					// console.log("Username password known, user valid.");
-
-					res.writeHead(200, {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Headers': 'Content-Type',
-						'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-						'Access-Control-Allow-Origin': 'rtm.thinx.cloud'
-					});
-
-					session.startSession(req, res, function() {
-						req.session.put('owner', rowData.key);
-
-						// TODO: write last_seen timestamp to DB here
-						res.end(JSON.stringify({
-							status: "WELCOME"
-						}));
-						var data = req.session.all();
-						console.log("Created new session: " + JSON.stringify(data));
-					});
-					return; // early exit
-				}
+			if (owner == rowData.key) {
+				console.log("OWNER: " + JSON.stringify(rowData) + '\n');
+				devices.push(rowData);
+			} else {
+				console.log("ROW: " + JSON.stringify(rowData) + '\n');
 			}
-
-			// Did not fall through, goodbye...
-
-			// EXTRACT: failureResponse("authentication")-->
-			failureResponse(res, 401, "authentication");
-			// <--
-
-
-			if (req.session) {
-				console.log("Flusing session: " + JSON.stringify(req.session.data));
-				req.session.flush();
-			}
-		};
-	}); // startSession
-}); // onPost
-
-function failureResponse(res, code, reason) {
-	res.writeHead(code, {
-		'Content-Type': 'application/json'
+		}
+		var response = JSON.stringify({
+			devices
+		});
+		console.log("Response: " + response);
+		res.end(response);
 	});
-	res.end(JSON.stringify({
-		success: false,
-		"reason": reason
-	}));
-}
-
-/* Authenticated view draft
-dispatcher.onPost("/api/view/devices", function(req, res) {
-
-	if !validateSecureRequest(req) return;
-
-	var body = JSON.parse(req.body.toString());
-	//var query = body['query']; we might want to filter or page
-
-	userlib.view('users', 'owners_by_username', {
-		'key': username,
-		'include_docs': true
-	}, function(err, body) {
-
-		if (req.session) {
-			var data = req.session.all();
-			console.log("Session data: " + JSON.stringify(data));
-		}
-
-		if (err) {
-			console.log("Error: " + err.toString());
-
-			// Did not fall through, goodbye...
-			res.writeHead(401, {
-				'Content-Type': 'application/json'
-			});
-			res.end(JSON.stringify({
-				authentication: false
-			}));
-			req.session.flush();
-			return;
-		};
-
-		var rows = body.rows; //the rows returned
-		for (var row in rows) {
-			var rowData = rows[row];
-			if (username == rowData.key) {
-				// console.log("Username known.");
-				if (password == rowData.value) {
-					// console.log("Username password known, user valid.");
-					userV
-
-					res.writeHead(200, {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Headers': 'Content-Type',
-						'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-						'Access-Control-Allow-Origin': 'rtm.thinx.cloud'
-					});
-
-					session.startSession(req, res, function() {
-						req.session.put('owner', rowData.key);
-
-						// TODO: write last_seen timestamp to DB here
-						res.end(JSON.stringify({
-							status: "WELCOME"
-						}));
-						var data = req.session.all();
-						console.log("Created new session: " + JSON.stringify(data));
-					});
-					return; // early exit
-				}
-			}
-
-			// Did not fall through, goodbye...
-			res.writeHead(401, {
-				'Content-Type': 'application/json'
-			});
-			res.end(JSON.stringify({
-				authentication: false
-			}));
-			if (req.session) {
-				console.log("Flusing session: " + JSON.stringify(req.session.data));
-				req.session.flush();
-			}
-		};
-	}); // startSession
-}); // onPost
-*/
+});
 
 // Device login/registration (no authentication, no validation, allows flooding so far)
-dispatcher.onPost("/device/register", function(req, res) {
+app.post("/device/register", function(req, res) {
 	validateRequest(req, res);
 
 	var callback = function() {};
@@ -327,16 +328,6 @@ dispatcher.onPost("/device/register", function(req, res) {
 				} else {
 					isNew = false;
 				}
-
-				/*
-				console.log("== Incoming attributes ==");
-				console.log("MAC: " + mac);
-				console.log("FW: " + fw);
-				console.log("HASH: " + hash);
-				console.log("PUSH: " + push);
-				console.log("ALIAS: " + alias);
-				console.log("OWNER: " + owner);
-				*/
 
 				var success = false;
 				var status = "OK";
@@ -525,6 +516,56 @@ function identifyDeviceByMac(mac) {
 	return false;
 }
 
+function failureResponse(res, code, reason) {
+	res.writeHead(code, {
+		'Content-Type': 'application/json'
+	});
+	res.end(JSON.stringify({
+		success: false,
+		"reason": reason
+	}));
+}
+
+function validateRequest(req, res) {
+
+	// Check device user-agent
+	var ua = req.headers['user-agent'];
+	var validity = ua.indexOf(client_user_agent)
+
+	if (validity == 0) {
+		return true;
+
+	} else {
+		console.log("☢ UA: '" + ua + "' invalid! " + validity);
+		res.writeHead(401, {
+			'Content-Type': 'text/plain'
+		});
+		res.end('Request not authorized.');
+		return false;
+	}
+}
+
+function validateSecureRequest(req, res) {
+
+	// Check webapp user-agent
+	var ua = req.headers['user-agent'];
+	var validity = ua.indexOf(webapp_user_agent)
+
+	if (validity == -1) {
+		console.log("☢ UA: '" + ua + "' invalid! " + validity);
+	}
+
+	// Reasons to reject
+	if ((req.method != 'POST') ||
+		(validity == -1)) {
+		// ? req.session.flush();
+		failureResponse(res, 500, "protocol");
+		console.log("Not a post request.");
+		return false;
+	}
+	return true;
+}
+
 //
 // Databases
 //
@@ -593,7 +634,7 @@ function handleDatabaseErrors(err, name) {
 //
 
 // Build respective firmware and notify target device(s)
-dispatcher.onPost("/api/build", function(req, res) {
+app.post("/api/build", function(req, res) {
 
 	var callback = function() {};
 	session.startSession(req, res, callback);
@@ -685,29 +726,6 @@ function buildCommand(build_id, tenant, mac, git, dryrun) {
 		console.log(build_id + " : " + stdout);
 	});
 }
-
-//
-// Server core and main loop
-//
-
-//We need a function which handles requests and send response
-function handleRequest(request, response) {
-	try {
-		//console.log(request.url);
-		dispatcher.dispatch(request, response);
-	} catch (err) {
-		console.log(err);
-	}
-}
-
-//Create a server
-var server = http.createServer(handleRequest);
-
-//Lets start our server
-server.listen(serverPort, function() {
-	//Callback triggered when server is successfully listening. Hurray!
-	console.log("Server listening on: http://localhost:%s", serverPort);
-});
 
 // Prevent crashes on uncaught exceptions
 process.on('uncaughtException', function(err) {

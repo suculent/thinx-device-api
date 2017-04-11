@@ -1,10 +1,12 @@
-{ 
-    "_id": "_design/devicelib", 
-    "language": "javascript", 
-    "views": { 
-        "devices_by_mac": { 
-            "map": "function (doc) { if(doc.mac) { emit (doc.mac, doc); } }"
-        } 
-    } 
+{
+  "_id": "_design/devicelib",
+  "language": "javascript",
+  "views": {
+    "devices_by_mac": {
+      "map": "function (doc) { if(doc.mac) { emit (doc.mac, doc); } }"
+    },
+    "devices_by_owner": {
+      "map": "function (doc) { if(doc.owner) { emit (doc.owner, doc); } }"
+    }
+  }
 }
-

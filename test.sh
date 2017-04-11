@@ -9,3 +9,7 @@ http://localhost:7442/api/login
 echo "☢ Testing builder..."
 
 curl -H "User-Agent: THiNX-Client" -H "Content-Type: application/json" -X POST -d '{ "build" : { "mac" : "ANY", "owner" : "test", "git" : "https://github.com/suculent/thinx-firmware-esp8266", "dryrun" : true } }' http://localhost:7442/api/build
+
+echo "» Testing user login..."
+
+curl -v -H "User-Agent: THiNX-Web" -H "Content-Type: application/json" -X POST -d '{ "username" : "test", "password" : "tset" }' http://localhost:7442/api/login
