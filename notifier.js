@@ -320,7 +320,7 @@ function notify_device_channel(owner, mac, message) {
     client.subscribe(channel)
     var msg = message
     delete msg.notification
-    client.publish(channel, JSON.stringify(message))
+    client.publish(channel, JSON.stringify(message), { retain: true } )
 
     var homeMessage = {
       text: "Released update for device " + mac + " owned by tenant '" +
