@@ -292,7 +292,7 @@ app.post("/api/view/devices", function(req, res) {
 		}
 
 		var rows = body.rows; // devices returned
-		var devices = [];
+		var devices = {};
 
 		// Show all devices for admin (if not limited by query)
 		if (req.session.admin == true && req.body.query == undefined) {
@@ -314,10 +314,11 @@ app.post("/api/view/devices", function(req, res) {
 			}
 		}
 		var response = JSON.stringify({
-			devices // should be "devices" : devices according to eslint
+			devices
 		});
 		console.log("/api/view/devices: Response: " + response);
-		res.end(response);
+		res.end(
+			response);
 	});
 });
 
