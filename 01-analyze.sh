@@ -19,3 +19,25 @@ echo "» slintám..."
 
 eslint **/*.js
 eslint *.js
+
+echo
+
+if [[ ! -f $(which srcclr) ]]; then
+  echo "» [:] SourceClear not found, installing..."
+  curl -sSL https://srcclr.com/install | bash
+fi
+
+#
+# [:] SourceClear
+#
+
+# should be handled by circle ci like this:
+#test:
+#  post:
+#    - curl -sSL https://download.sourceclear.com/ci.sh | sh
+# + requires added SRCCLR_API_TOKEN to Circle CI
+
+if [[ $(which srcclr) ]]; then
+  echo "Would 'srcclr scan .' but circle should do that"
+  srcclr .
+fi
