@@ -1,14 +1,14 @@
 machine:
-  timezone:
-    Europe/Prague
+#  timezone:
+#    Europe/Prague
 
-  ruby:
-    version:
-      2.4.0
-#
-#  node:
+#  ruby:
 #    version:
-#      5.9.0
+#      2.4.0
+
+  node:
+    version:
+      5.9.0
 #
 #  hosts:
 #    circlehost: 127.0.0.1
