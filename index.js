@@ -84,11 +84,9 @@ app.get('/', function(req, res) {
 	sess = req.session;
 	console.log("owner: " + sess.owner);
 	if (sess.owner) {
-		res.end("Hello " + sess.owner + ".");
-		// res.redirect('/admin');
+		res.redirect("http://rtm.thinx.cloud:80/app");
 	} else {
-		res.end("Nothing here.");
-		// res.redirect('/api/login'); // crashes
+		res.end("This is API ROOT."); // insecure
 	}
 });
 
@@ -101,25 +99,6 @@ app.get('/app', function(req, res) {
 	} else {
 		res.end("Welcome to the /app endpoint.");
 		// res.redirect('/api/login'); // crashes
-	}
-});
-
-app.post('/login', function(req, res) {
-	sess = req.session;
-	//In this we are assigning email to sess.email variable.
-	//username comes from HTML page. Owner must be fetched from db.
-	sess.owner = req.body.username;
-	res.end('done');
-});
-
-app.get('/admin', function(req, res) {
-	sess = req.session;
-	if (sess.email) {
-		res.write('<h1>Hello ' + sess.email + '</h1>');
-		res.end('<a href="+">Logout</a>');
-	} else {
-		res.write('<h1>Please login first.</h1>');
-		res.end('<a href="+">Login</a>');
 	}
 });
 
