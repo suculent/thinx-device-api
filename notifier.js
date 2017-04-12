@@ -194,6 +194,13 @@ if (status == true) {
     username: "notifier.js",
     fields: buildEnvelope
   });
+} else if (status == "DRY_RUN_OK") {
+  slack.alert({
+    text: "Dry run successful. Firmware left undeployed.", // todo: reference git_url + commit_id here
+    username: "notifier.js",
+    icon_emoji: ":ghost:",
+    fields: buildEnvelope
+  });
 } else {
   slack.alert({
     text: "Build failed.",
