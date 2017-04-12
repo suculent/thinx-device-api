@@ -254,11 +254,13 @@ app.post("/api/login", function(req, res) {
 /* Authenticated view draft */
 app.post("/api/view/devices", function(req, res) {
 
+	console.log(req.toString());
+
 	// reject on invalid headers
 	if (!validateSecureRequest(req)) return;
 
 	// reject on invalid session
-	if (!req.session) {
+	if (!sess) {
 		failureResponse(res, 405, "not allowed");
 		console.log("/api/view/devices: No session!");
 		return;
@@ -266,10 +268,10 @@ app.post("/api/view/devices", function(req, res) {
 
 	// reject on invalid owner
 	var owner = null;
-	if (req.session.owner) {
+	if (req.session.owner || sess.owner) {
 		owner = req.session.owner;
 	} else {
-		failureResponse(res, 405, "not allowed");
+		failureResponse(res, 403, "session has no owner");
 		console.log("/api/view/devices: No valid owner!");
 		return;
 	}
