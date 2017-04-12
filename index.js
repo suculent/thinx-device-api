@@ -214,19 +214,12 @@ app.post("/api/login", function(req, res) {
 					// TODO: write last_seen timestamp to DB here __for devices__
 					console.log("client_type: " + client_type);
 					if (client_type == "device") {
-						// TODO: send session cookie here as well
+						// TODO: Send cookie here
 						res.end(JSON.stringify({
 							status: "WELCOME"
 						}));
 					} else if (client_type == "webapp") {
-						if (req.session.owner != undefined) {
-							// Hand over control to AngularJS app running on Apache (!)
-							//res.writeHead(302);
-							res.end(JSON.stringify({ redirectURL: "https://rtm.thinx.cloud:80/app" }));
-							//res.redirect("http://rtm.thinx.cloud:80/app");
-						} else {
-							res.redirect("/login");
-						}
+						res.end(JSON.stringify({ "redirectURL": "https://rtm.thinx.cloud:80/app" }));
 					}
 
 					// TODO: If user-agent contains app/device... (what?)
@@ -239,18 +232,28 @@ app.post("/api/login", function(req, res) {
 		};
 
 		if (req.session.owner == undefined) {
+
+			if (client_type == "device") {
+				res.end(JSON.stringify({
+					status: "ERROR"
+				}));
+			} else if (client_type == "webapp") {
+				res.redirect("http://rtm.thinx.cloud:80/"); // redirects browser, not in XHR?
+				// or res.end(JSON.stringify({ redirectURL: "https://rtm.thinx.cloud:80/app" }));
+			}
+			
 			console.log("login: Flushing session: " + JSON.stringify(req.session));
 			req.session.destroy(function(err) {
 				if (err) {
 					console.log(err);
 				} else {
-					failureResponse(res, 401, "protocol");
+					failureResponse(res, 501, "protocol");
 					console.log("Not a post request.");
 					return;
 				}
 			});
 		} else {
-			failureResponse(res, 401, "authentication");
+			failureResponse(res, 541, "authentication exception");
 		}
 	});
 });
