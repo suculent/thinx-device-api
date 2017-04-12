@@ -37,8 +37,9 @@ var app = express();
 
 app.use(session({
 	secret: session_config.secret,
+	name: 'x-thx-session',
 	resave: false,
-    saveUninitialized: false
+	saveUninitialized: false
 }));
 
 app.use(parser.json());
@@ -68,6 +69,18 @@ app.all('/*', function(req, res, next) {
 app.get('/', function(req, res) {
 	sess = req.session;
 	console.log("owner: " + sess.owner);
+	if (sess.owner) {
+		res.end("Hello " + sess.owner + ".");
+		// res.redirect('/admin');
+	} else {
+		res.end("Nothing here.");
+		// res.redirect('/api/login'); // crashes
+	}
+});
+
+app.get('/app', function(req, res) {
+	sess = req.session;
+	console.log("redirected to /app with owner: " + sess.owner);
 	if (sess.owner) {
 		res.end("Hello " + sess.owner + ".");
 		// res.redirect('/admin');
@@ -121,6 +134,15 @@ app.post("/api/login", function(req, res) {
 
 	sess = req.session;
 
+	var client_type = "webapp";
+
+	var ua = req.headers['user-agent'];
+	var validity = ua.indexOf(client_user_agent)
+
+	if (validity == 0) {
+		client_type = "device";
+	}
+
 	// Request must be post
 	if (req.method != 'POST') {
 		req.session.destroy(function(err) {
@@ -133,9 +155,20 @@ app.post("/api/login", function(req, res) {
 			}
 		});
 	}
-
 	var username = req.body.username;
 	var password = req.body.password;
+
+	if (username == undefined || password == undefined) {
+		req.session.destroy(function(err) {
+			if (err) {
+				console.log(err);
+			} else {
+				failureResponse(res, 403, "unauthorized");
+				console.log("User unknown.");
+				return;
+			}
+		});
+	}
 
 	userlib.view('users', 'owners_by_username', {
 		'key': username,
@@ -151,29 +184,40 @@ app.post("/api/login", function(req, res) {
 					console.log(err);
 				} else {
 					failureResponse(res, 501, "protocol");
-					console.log("Not a post request.");					
+					console.log("Not a post request.");
 				}
 			});
 			return;
 		}
-		
+
 		// Find user and match password
 		var all_users = body.rows;
 		for (var index in all_users) {
 			var user_data = all_users[index];
 			if (username == user_data.key) {
-				console.log("User valid.");
 				if (password == user_data.value) {
 					req.session.owner = user_data.key;
-					// TODO: write last_seen timestamp to DB here
-					res.end(JSON.stringify({
-						status: "WELCOME"
-					}));
+					// TODO: write last_seen timestamp to DB here __for devices__
+					console.log("client_type: " + client_type);
+
+					if (client_type = "device") {
+						// TODO: send session cookie here as well
+						res.end(JSON.stringify({
+							status: "WELCOME"
+						}));
+					} else {
+						res.redirect("/app");
+					}
+
+
+
+					// TODO: If user-agent contains app/device
+
 					return; // early exit
 				} else {
 					console.log("Password mismatch for " + username);
 				}
-			}			
+			}
 		};
 
 		if (req.session.owner == undefined) {
@@ -261,12 +305,12 @@ app.post("/api/view/devices", function(req, res) {
 
 // Device login/registration (no authentication, no validation, allows flooding so far)
 app.post("/device/register", function(req, res) {
-	
+
 	validateRequest(req, res);
 
 	sess = req.session;
 
-		// Request must be post
+	// Request must be post
 	if (req.method != 'POST') {
 		req.session.destroy(function(err) {
 			if (err) {
@@ -372,9 +416,6 @@ app.post("/device/register", function(req, res) {
 
 		if (isNew) {
 
-			// UNKNOWN:
-			// - store all parameters if valid and then reply OK
-
 			devicelib.insert(device, device.mac, function(err, body, header) {
 
 				if (err == "Error: error happened in your connection") {
@@ -385,8 +426,6 @@ app.post("/device/register", function(req, res) {
 					console.log("Inserting device failed. " + err + "\n");
 					rdict["registration"]["success"] = false;
 					rdict["registration"]["status"] = "Insertion failed";
-
-					console.log("CHECK6:");
 					console.log(rdict['registration']);
 
 				} else {
@@ -395,10 +434,7 @@ app.post("/device/register", function(req, res) {
 						"\n");
 					rdict["registration"]["success"] = true;
 					rdict["registration"]["status"] = "OK";
-
-					console.log("CHECK7:");
 					console.log(rdict['registration']);
-
 				}
 
 				sendRegistrationOKResponse(res, rdict);
@@ -417,7 +453,9 @@ app.post("/device/register", function(req, res) {
 
 				if (!error) {
 
-					existing.firmware = fw;
+					if (typeof(firmware) != undefined && firmware != null) {
+						existing.firmware = fw;
+					}
 
 					if (typeof(hash) != undefined && hash != null) {
 						existing.hash = hash;
@@ -477,7 +515,7 @@ app.post("/device/register", function(req, res) {
 				}
 			});
 		}
-	});	
+	});
 });
 
 function sendRegistrationOKResponse(res, dict) {
@@ -535,7 +573,7 @@ function validateSecureRequest(req, res) {
 			} else {
 				failureResponse(res, 500, "protocol");
 			}
-		});							
+		});
 		return false;
 	}
 	return true;
@@ -611,7 +649,7 @@ function handleDatabaseErrors(err, name) {
 // Build respective firmware and notify target device(s)
 app.post("/api/build", function(req, res) {
 
-	sess = req.session;	
+	sess = req.session;
 
 	res.writeHead(200, {
 		'Content-Type': 'application/json'
