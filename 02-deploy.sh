@@ -18,11 +18,17 @@ echo "» Checking if node.js is running..."
 
 NODEZ=$(ps -ax | grep "$DAEMON")
 
-echo "${NODEZ}" | while IFS="pts" read A B ; do 
-	NODE=$($A | tr -d ' ')
-	echo "Killing: " $NODE $B
-	kill "$NODE"
-done
+if [[ $(echo $NODEZ | wc -l) > 1 ]]; then
+
+	echo "${NODEZ}" | while IFS="pts" read A B ; do 
+		NODE=$($A | tr -d ' ')
+		echo "Killing: " $NODE $B
+		kill "$NODE"
+	done
+
+else
+	echo "${NODEZ}"
+fi
 
 echo
 echo "» Fetching current app version from GIT..."
