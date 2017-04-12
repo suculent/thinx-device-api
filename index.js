@@ -222,7 +222,7 @@ app.post("/api/login", function(req, res) {
 						if (req.session.owner != undefined) {
 							// Hand over control to AngularJS app running on Apache (!)
 							res.writeHead(302);
-							res.body({ redirectURL: "https://rtm.thinx.cloud:80/app" } );
+							res.end({ redirectURL: "https://rtm.thinx.cloud:80/app" } );
 							res.redirect("http://rtm.thinx.cloud:80/app");
 						} else {
 							res.redirect("/login");

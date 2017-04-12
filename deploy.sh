@@ -21,13 +21,10 @@ echo "NODEZ:"
 echo "$NODEZ"
 
 echo "${NODEZ}" | while IFS="pts" read A B ; do 
-	echo "NODE: $A"
+	NODE=$($A | tr -d ' ')
+	echo $NODE $B
+	kill $NODE
 done
-
-if [[ $NODEZ && $A ]]; then
-	echo "No node server found to be killed."
-	#exit 2
-fi
 
 echo "» Fetching current app version from GIT..."
 
