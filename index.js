@@ -2,7 +2,7 @@
  * This THiNX-RTM API module is responsible for responding to devices and build requests.
  */
 
-require('./core.js');
+require("./core.js");
 
 //
 // Shared Configuration
@@ -20,12 +20,12 @@ var config = require("./conf/config.json");
 var db = config.database_uri;
 var serverPort = config.port;
 
-var uuidV1 = require('uuid/v1');
-var http = require('http');
-var parser = require('body-parser');
+var uuidV1 = require("uuid/v1");
+var http = require("http");
+var parser = require("body-parser");
 var nano = require("nano")(db);
 
-var session_config = require('./conf/node-session.json');
+var session_config = require("./conf/node-session.json");
 
 // Response dictionary
 var rdict = {};
@@ -37,13 +37,13 @@ var gitlib = require("nano")(db).use("managed_repos");
 var buildlib = require("nano")(db).use("managed_builds");
 var userlib = require("nano")(db).use("managed_users");
 
-var express = require('express');
-var session = require('express-session');
+var express = require("express");
+var session = require("express-session");
 var app = express();
 
 app.use(session({
 	secret: session_config.secret,
-	name: 'x-thx-session',
+	name: "x-thx-session",
 	resave: false,
 	saveUninitialized: false
 }));
@@ -55,27 +55,27 @@ app.use(parser.urlencoded({
 
 var sess;
 
-app.all('/*', function(req, res, next) {
+app.all("/*", function(req, res, next) {
 	// CORS headers
 
-	var origin = req.get('origin');
+	var origin = req.get("origin");
 	var allowedOrigin = origin;
 
-	if ((origin == 'http://rtm.thinx.loc') ||
-		(origin == 'https://rtm.thinx.cloud') ||
-		(origin == '127.0.0.1')) {
+	if ((origin == "http://rtm.thinx.loc") ||
+		(origin == "https://rtm.thinx.cloud") ||
+		(origin == "127.0.0.1")) {
 
 	} else {
 		console.log("Origin: " + origin);
 	}
 
-	res.header('Access-Control-Allow-Origin', allowedOrigin); // rtm.thinx.cloud
-	res.header('Access-Control-Allow-Credentials', 'true');
-	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+	res.header("Access-Control-Allow-Origin", allowedOrigin); // rtm.thinx.cloud
+	res.header("Access-Control-Allow-Credentials", "true");
+	res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
 	// Set custom headers for CORS
-	res.header('Access-Control-Allow-Headers',
-		'Content-type,Accept,X-Access-Token,X-Key');
-	if (req.method == 'OPTIONS') {
+	res.header("Access-Control-Allow-Headers",
+		"Content-type,Accept,X-Access-Token,X-Key");
+	if (req.method == "OPTIONS") {
 		res.status(200).end();
 	} else {
 		next();
@@ -86,7 +86,7 @@ app.all('/*', function(req, res, next) {
 
 // TEMPLATE CODE HERE -->
 
-app.get('/', function(req, res) {
+app.get("/", function(req, res) {
 	sess = req.session;
 	console.log("owner: " + sess.owner);
 	if (sess.owner) {
@@ -96,20 +96,20 @@ app.get('/', function(req, res) {
 	}
 });
 
-app.get('/app', function(req, res) {
+app.get("/app", function(req, res) {
 	sess = req.session;
 	console.log("redirected to /app with owner: " + sess.owner);
 	if (sess.owner) {
 		res.end("Hello " + sess.owner + ".");
-		// res.redirect('/admin');
+		// res.redirect("/admin");
 	} else {
 		res.end("Welcome to the /app endpoint.");
-		// res.redirect('/api/login'); // crashes
+		// res.redirect("/api/login"); // crashes
 	}
 });
 
 // Used by web app
-app.get('/logout', function(req, res) {
+app.get("/logout", function(req, res) {
 	req.session.destroy(function(err) {
 		if (err) {
 			console.log(err);
@@ -136,15 +136,15 @@ app.post("/api/login", function(req, res) {
 
 	var client_type = "webapp";
 
-	var ua = req.headers['user-agent'];
-	var validity = ua.indexOf(client_user_agent)
+	var ua = req.headers["user-agent"];
+	var validity = ua.indexOf(client_user_agent);
 
 	if (validity == 0) {
 		client_type = "device";
 	}
 
 	// Request must be post
-	if (req.method != 'POST') {
+	if (req.method != "POST") {
 		req.session.destroy(function(err) {
 			if (err) {
 				console.log(err);
@@ -170,9 +170,9 @@ app.post("/api/login", function(req, res) {
 		});
 	}
 
-	userlib.view('users', 'owners_by_username', {
-		'key': username,
-		'include_docs': true // might be useless
+	userlib.view("users", "owners_by_username", {
+		"key": username,
+		"include_docs": true // might be useless
 	}, function(err, body) {
 
 		if (err) {
@@ -269,9 +269,9 @@ app.post("/api/view/devices", function(req, res) {
 		return;
 	}
 
-	devicelib.view('devicelib', 'devices_by_owner', {
-		'key': owner,
-		'include_docs': false
+	devicelib.view("devicelib", "devices_by_owner", {
+		"key": owner,
+		"include_docs": false
 	}, function(err, body) {
 
 		if (err) {
@@ -299,10 +299,10 @@ app.post("/api/view/devices", function(req, res) {
 		for (var row in rows) {
 			var rowData = rows[row];
 			if (owner == rowData.key) {
-				console.log("OWNER: " + JSON.stringify(rowData) + '\n');
+				console.log("OWNER: " + JSON.stringify(rowData) + "\n");
 				devices.push(rowData);
 			} else {
-				console.log("ROW: " + JSON.stringify(rowData) + '\n');
+				console.log("ROW: " + JSON.stringify(rowData) + "\n");
 			}
 		}
 		var response = JSON.stringify({
@@ -321,7 +321,7 @@ app.post("/device/register", function(req, res) {
 	sess = req.session;
 
 	// Request must be post
-	if (req.method != 'POST') {
+	if (req.method != "POST") {
 		req.session.destroy(function(err) {
 			if (err) {
 				console.log(err);
@@ -334,18 +334,18 @@ app.post("/device/register", function(req, res) {
 	}
 
 	var dict = req.body;
-	var reg = dict['registration'];
+	var reg = dict["registration"];
 
 	if (dict["registration"] == undefined) return;
 
 	rdict["registration"] = {};
 
-	var mac = reg['mac'];
-	var fw = reg['firmware'];
-	var hash = reg['hash'];
-	var push = reg['push'];
-	var alias = reg['alias'];
-	var owner = reg['owner']; // cannot be changed, must match if set
+	var mac = reg["mac"];
+	var fw = reg["firmware"];
+	var hash = reg["hash"];
+	var push = reg["push"];
+	var alias = reg["alias"];
+	var owner = reg["owner"]; // cannot be changed, must match if set
 
 	var success = false;
 	var status = "ERROR";
@@ -383,7 +383,7 @@ app.post("/device/register", function(req, res) {
 			commit: "3b19d050daa5924a2370eb8ef5ac51a484d81d6e",
 			version: "1",
 			checksum: "4044decaad0627adb7946e297e5564aaf0c53f958175b388e02f455d3e6bc3d4"
-		}
+		};
 
 		//
 		// Construct response
@@ -393,7 +393,7 @@ app.post("/device/register", function(req, res) {
 		rdict["registration"]["status"] = status;
 
 		if (update_available) {
-			rdict["registration"]["status"] = 'FIRMWARE_UPDATE';
+			rdict["registration"]["status"] = "FIRMWARE_UPDATE";
 			rdict["registration"]["url"] = firmwareUpdateDescriptor.url;
 			rdict["registration"]["mac"] = firmwareUpdateDescriptor.mac;
 			rdict["registration"]["commit"] = firmwareUpdateDescriptor.commit;
@@ -436,7 +436,7 @@ app.post("/device/register", function(req, res) {
 					console.log("Inserting device failed. " + err + "\n");
 					rdict["registration"]["success"] = false;
 					rdict["registration"]["status"] = "Insertion failed";
-					console.log(rdict['registration']);
+					console.log(rdict["registration"]);
 
 				} else {
 					console.log("Device inserted. Response: " + JSON.stringify(
@@ -444,7 +444,7 @@ app.post("/device/register", function(req, res) {
 						"\n");
 					rdict["registration"]["success"] = true;
 					rdict["registration"]["status"] = "OK";
-					console.log(rdict['registration']);
+					console.log(rdict["registration"]);
 				}
 
 				sendRegistrationOKResponse(res, rdict);
@@ -452,7 +452,7 @@ app.post("/device/register", function(req, res) {
 
 		} else {
 
-			console.log(rdict['registration']);
+			console.log(rdict["registration"]);
 
 			// KNOWN:
 			// - see if new firmware is available and reply FIRMWARE_UPDATE with url
@@ -509,11 +509,11 @@ app.post("/device/register", function(req, res) {
 							rdict["registration"]["status"] = "Insert failed";
 
 							console.log("CHECK5:");
-							console.log(rdict['registration']);
+							console.log(rdict["registration"]);
 
 							sendRegistrationOKResponse(res, rdict);
 						}
-					})
+					});
 
 				} else {
 
@@ -540,7 +540,7 @@ function identifyDeviceByMac(mac) {
 
 function failureResponse(res, code, reason) {
 	res.writeHead(code, {
-		'Content-Type': 'application/json'
+		"Content-Type": "application/json"
 	});
 	res.end(JSON.stringify({
 		success: false,
@@ -551,31 +551,26 @@ function failureResponse(res, code, reason) {
 function validateRequest(req, res) {
 
 	// Check device user-agent
-	var ua = req.headers['user-agent'];
-	var validity = ua.indexOf(client_user_agent)
+	var ua = req.headers["user-agent"];
+	var validity = ua.indexOf(client_user_agent);
 
 	if (validity == 0) {
-
-
 		return true;
-
 	} else {
-		console.log("☢ UA: '" + ua + "' invalid! " + validity);
+		console.log("☢ UA: " + ua + " invalid!");
 		res.writeHead(401, {
-			'Content-Type': 'text/plain'
+			"Content-Type": "text/plain"
 		});
-		res.end('validate: Client request has invalid User-Agent.');
+		res.end("validate: Client request has invalid User-Agent.");
 		return false;
 	}
 }
 
 function validateSecureRequest(req, res) {
-
 	// Only log webapp user-agent
-	var ua = req.headers['user-agent'];
-	console.log("☢ UA: '" + ua);
-
-	if (req.method != 'POST') {
+	var ua = req.headers["user-agent"];
+	console.log("☢ UA: " + ua);
+	if (req.method != "POST") {
 		console.log("validateSecure: Not a post request.");
 		req.session.destroy(function(err) {
 			if (err) {
@@ -597,7 +592,7 @@ function initDatabases() {
 
 	nano.db.create("managed_devices", function(err, body, header) {
 		if (err) {
-			handleDatabaseErrors(err, "managed_devices")
+			handleDatabaseErrors(err, "managed_devices");
 		} else {
 			console.log("» Device database creation completed. Response: " +
 				JSON.stringify(
@@ -607,7 +602,7 @@ function initDatabases() {
 
 	nano.db.create("managed_repos", function(err, body, header) {
 		if (err) {
-			handleDatabaseErrors(err, "managed_repos")
+			handleDatabaseErrors(err, "managed_repos");
 		} else {
 			console.log("» Repository database creation completed. Response: " +
 				JSON.stringify(
@@ -617,7 +612,7 @@ function initDatabases() {
 
 	nano.db.create("managed_builds", function(err, body, header) {
 		if (err) {
-			handleDatabaseErrors(err, "managed_builds")
+			handleDatabaseErrors(err, "managed_builds");
 		} else {
 			console.log("» Build database creation completed. Response: " + JSON
 				.stringify(
@@ -627,7 +622,7 @@ function initDatabases() {
 
 	nano.db.create("managed_users", function(err, body, header) {
 		if (err) {
-			handleDatabaseErrors(err, "managed_users")
+			handleDatabaseErrors(err, "managed_users");
 		} else {
 			console.log("» User database creation completed. Response: " + JSON.stringify(
 				body) + "\n");
@@ -643,7 +638,7 @@ function handleDatabaseErrors(err, name) {
 	} else if (err.toString().indexOf("error happened in your connection") !=
 		-
 		1) {
-		console.log("🚫 Database connectivity issue. " + err)
+		console.log("🚫 Database connectivity issue. " + err);
 		process.exit(1);
 
 	} else {
@@ -662,15 +657,15 @@ app.post("/api/build", function(req, res) {
 	sess = req.session;
 
 	res.writeHead(200, {
-		'Content-Type': 'application/json'
+		"Content-Type": "application/json"
 	});
 
 	if (validateRequest(req, res) == true) {
 
-		var rdict = {}
+		var rdict = {};
 		var dict = req.body;
 
-		var build = dict['build'];
+		var build = dict["build"];
 		var mac = build.mac;
 		var tenant = build.owner;
 		var git = build.git;
@@ -720,7 +715,7 @@ app.post("/api/build", function(req, res) {
 
 		buildCommand(build_id, tenant, mac, git, dryrun);
 	}
-})
+});
 
 function buildCommand(build_id, tenant, mac, git, dryrun) {
 
@@ -729,11 +724,11 @@ function buildCommand(build_id, tenant, mac, git, dryrun) {
 
 	console.log("Executing build chain...");
 
-	var exec = require('child_process').exec;
-	CMD = './builder --tenant=' + tenant + ' --mac=' + mac + ' --git=' + git +
-		' --id=' + build_id;
+	var exec = require("child_process").exec;
+	CMD = "./builder --tenant=" + tenant + " --mac=" + mac + " --git=" + git +
+		" --id=" + build_id;
 	if (dryrun == true) {
-		CMD = CMD + ' --dry-run'
+		CMD = CMD + " --dry-run";
 	}
 	console.log(CMD);
 	exec(CMD, function(err, stdout, stderr) {
@@ -746,6 +741,6 @@ function buildCommand(build_id, tenant, mac, git, dryrun) {
 }
 
 // Prevent crashes on uncaught exceptions
-process.on('uncaughtException', function(err) {
-	console.log('Caught exception: ' + err);
+process.on("uncaughtException", function(err) {
+	console.log("Caught exception: " + err);
 });

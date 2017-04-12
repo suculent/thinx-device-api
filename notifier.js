@@ -10,32 +10,32 @@
 
 var config = require("./conf/config.json");
 var sha256 = require("sha256");
-const db = config['database_uri'];
-//require('./core.js');
+var db = config["database_uri"];
+//require("./core.js");
 var that = this;
 
 // Network
-const client_user_agent = "THiNX-Client";
-var http = require('http');
+var client_user_agent = "THiNX-Client";
+var http = require("http");
 
 // CouchDB
-var nano = require('nano')(db);
+var nano = require("nano")(db);
 
 // CHECKSUM
-var fs = require('fs');
-var checksum = require('checksum'); // deprecated
+var fs = require("fs");
+var checksum = require("checksum"); // deprecated
 
 // SLACK
 var SLACK_WEBHOOK_URL = config.slack_webhook;
-var slack = require('slack-notify')(SLACK_WEBHOOK_URL);
+var slack = require("slack-notify")(SLACK_WEBHOOK_URL);
 
 // MQTT
-var mqtt = require('mqtt')
+var mqtt = require("mqtt");
 
 // Main
 var rdict = {};
 
-console.log("-=[ ☢ THiNX IoT RTM NOTIFIER ☢ ]=-" + '\n');
+console.log("-=[ ☢ THiNX IoT RTM NOTIFIER ☢ ]=-" + "\n");
 
 // Parse input params
 
@@ -46,52 +46,52 @@ var repo_url = process.argv[5]; // reference to git repo
 var build_path = process.argv[6]; // path to build artifact
 var mac = process.argv[7]; // mac address of target device or ANY
 var sha = process.argv[8]; // sha hash of the binary
-var owner = process.argv[9] || 'test'; // owner/tenant
+var owner = process.argv[9] || "test"; // owner/tenant
 var status = process.argv[10] || true; // build result status
 
 // Validate params
 
 // Default build identifier
-if (build_id == undefined || build_id == '') {
-  build_id = '0xBUILD_ID';
+if (build_id == undefined || build_id == "") {
+  build_id = "0xBUILD_ID";
 }
 
 // Existing commit identifier for initial OTA firmware
-if (commit_id == undefined || commit_id == '') {
-  commit_id = '18ee75e3a56c07a9eff08f75df69ef96f919653f'; // test only!
+if (commit_id == undefined || commit_id == "") {
+  commit_id = "18ee75e3a56c07a9eff08f75df69ef96f919653f"; // test only!
 }
 
-// We'll build for ZERO-MAC by default instead of 'ANY' to prevent accidents
-if (mac == undefined || mac == '') {
-  mac = '00:00:00:00:00:00';
+// We"ll build for ZERO-MAC by default instead of "ANY" to prevent accidents
+if (mac == undefined || mac == "") {
+  mac = "00:00:00:00:00:00";
 }
 
 // Attribute all builds to test user by default
-if (owner == undefined || owner == '') {
-  owner = 'test';
+if (owner == undefined || owner == "") {
+  owner = "test";
 }
 
 // Default version
-if (version == undefined || version == '') {
-  version = '0.0.1';
+if (version == undefined || version == "") {
+  version = "0.0.1";
 }
 
 // Default path for vanilla OTA firmware
-if (repo_url == undefined || repo_url == '') {
-  repo_url = 'git@github.com:suculent/thinx-firmware-esp8266.git';
+if (repo_url == undefined || repo_url == "") {
+  repo_url = "git@github.com:suculent/thinx-firmware-esp8266.git";
 }
 
 // Default path
-if (build_path == undefined || build_path == '') {
-  build_path = config.deploy_root + '/' + owner + '/' + commit_id;
+if (build_path == undefined || build_path == "") {
+  build_path = config.deploy_root + "/" + owner + "/" + commit_id;
 }
 
-if (sha == undefined || sha == '') {
-  var binary = build_path + '.bin';
+if (sha == undefined || sha == "") {
+  var binary = build_path + ".bin";
   console.log("Calculating sha256 checksum for " + binary);
 
-  fs = require('fs');
-  var data = fs.readFileSync(binary, 'binary', function(err, data) {
+  fs = require("fs");
+  var data = fs.readFileSync(binary, "binary", function(err, data) {
     if (err) {
       return console.log(err);
     }
@@ -108,14 +108,14 @@ if (sha == undefined || sha == '') {
   }
 }
 
-console.log("build_id : " + build_id + '\n');
-console.log("commit_id : " + commit_id + '\n');
-console.log("version : " + version + '\n');
-console.log("repo_url : " + repo_url + '\n');
-console.log("build_path : " + build_path + '\n');
-console.log("mac : " + mac + '\n');
-console.log("sha : " + sha + '\n');
-console.log("status : " + status + '\n');
+console.log("build_id : " + build_id + "\n");
+console.log("commit_id : " + commit_id + "\n");
+console.log("version : " + version + "\n");
+console.log("repo_url : " + repo_url + "\n");
+console.log("build_path : " + build_path + "\n");
+console.log("mac : " + mac + "\n");
+console.log("sha : " + sha + "\n");
+console.log("status : " + status + "\n");
 
 // Prepare payload
 
@@ -127,7 +127,7 @@ var pushNotificationPayload = {
     version: version,
     checksum: sha
   }
-}
+};
 
 // Initially creates DB, otherwise fails silently.
 nano.db.create("managed_repos", function(err, body, header) {
@@ -150,7 +150,7 @@ var devicelib = require("nano")(db).use("managed_devices");
 // TODO: Create build envelope
 
 var buildEnvelope = {
-  url: '<' + repo_url + '|' + repo_url + '>',
+  url: "<" + repo_url + "|" + repo_url + ">",
   //  path: build_path,
   //  mac: mac,
   commit: commit_id,
@@ -163,8 +163,8 @@ var buildEnvelope = {
 
 // save to build_path
 
-var envelopePath = deploymentPathForDevice(owner, mac) + '/' + commit_id +
-  '.json'
+var envelopePath = deploymentPathForDevice(owner, mac) + "/" + commit_id +
+  ".json";
 console.log("envelopePath: " + envelopePath);
 
 fs.writeFile(envelopePath, JSON.stringify(buildEnvelope), function(err) {
@@ -173,7 +173,7 @@ fs.writeFile(envelopePath, JSON.stringify(buildEnvelope), function(err) {
   } else {
     console.log("Commit descriptor saved successfully.");
   }
-  console.log('\n');
+  console.log("\n");
 });
 
 // TODO: Update current build version in managed_repos
@@ -190,15 +190,15 @@ fs.writeFile(envelopePath, JSON.stringify(buildEnvelope), function(err) {
 
 if (status == true) {
   slack.alert({
-    text: 'Build successfully completed.',
+    text: "Build successfully completed.",
     username: "notifier.js",
     fields: buildEnvelope
   });
 } else {
   slack.alert({
-    text: 'Build failed.',
+    text: "Build failed.",
     username: "notifier.js",
-    icon_emoji: ':computerage:',
+    icon_emoji: ":computerage:",
     fields: buildEnvelope
   });
 }
@@ -216,12 +216,12 @@ var message = {
       "6bf6bd7fc983af6c900d8fe162acc3ba585c446ae0188e52802004631d854c60"
   },
   notification: {
-    title: 'Aktualizace EAV',
-    body: 'Je k dispozici aktualizace software pro Akustim. Přejete si ji nainstalovat?'
+    title: "Aktualizace EAV",
+    body: "Je k dispozici aktualizace software pro Akustim. Přejete si ji nainstalovat?"
   }
 };
 
-console.log('\n');
+console.log("\n");
 
 // TODO: Get registration token from device database instead
 
@@ -245,7 +245,7 @@ admin.messaging().sendToDevice(registrationToken, message)
     console.log("Error sending message:", error);
   });
 
-console.log('\n');
+console.log("\n");
 
 //
 // Notify devices (MQTT)
@@ -278,13 +278,13 @@ function availableVersionForDevice(owner, mac) {
 
 function deploymentPathForDevice(owner, mac) {
   // MMAC is file-system agnostic and easy to search
-  var mmac = mac.toString().replace(':', '-');
+  var mmac = mac.toString().replace(":", "-");
 
   // Get path for owner (and optinaly a device)
-  var user_path = config.deploy_root + '/' + owner;
+  var user_path = config.deploy_root + "/" + owner;
   var device_path = user_path;
   if (mac.indexOf("ANY") != -1) {
-    device_path = device_path + '/' + mac
+    device_path = device_path + "/" + mac;
   }
   return device_path;
 }
@@ -300,9 +300,9 @@ function hasUpdateAvailable(device) {
 
   }
 
-  semver.satisfies('1.2.3', '1.x || >=2.5.0 || 5.0.0 - 7.2.3') // true
-  semver.gt('1.2.3', '9.8.7') // false
-  semver.lt('1.2.3', '9.8.7') // true
+  semver.satisfies("1.2.3", "1.x || >=2.5.0 || 5.0.0 - 7.2.3"); // true
+  semver.gt("1.2.3", "9.8.7"); // false
+  semver.lt("1.2.3", "9.8.7"); // true
 }
 
 //
@@ -311,25 +311,27 @@ function hasUpdateAvailable(device) {
 
 function notify_device_channel(owner, mac, message) {
 
-  var channel = '/devices/' + owner + '/' + mac;
+  var channel = "/devices/" + owner + "/" + mac;
   console.log("Posting to MQTT queue " + channel);
-  var client = mqtt.connect('mqtt://guest:guest@thinx.cloud:1883');
+  var client = mqtt.connect("mqtt://guest:guest@thinx.cloud:1883");
 
-  client.on('connect', function() {
-    console.log("Connected to MQTT, will post to " + channel)
-    client.subscribe(channel)
-    var msg = message
-    delete msg.notification
-    client.publish(channel, JSON.stringify(message), { retain: true } )
+  client.on("connect", function() {
+    console.log("Connected to MQTT, will post to " + channel);
+    client.subscribe(channel);
+    var msg = message;
+    delete msg.notification;
+    client.publish(channel, JSON.stringify(message), {
+      retain: true
+    });
 
     var homeMessage = {
-      text: "Released update for device " + mac + " owned by tenant '" +
+      text: "Released update for device '" + mac + "' owned by '" +
         owner + "'"
-    }
-    client.subscribe("/home")
-    client.publish("/home", JSON.stringify(homeMessage))
+    };
+    client.subscribe("/home");
+    client.publish("/home", JSON.stringify(homeMessage));
     client.end();
-  })
+  });
 
-  console.log('\n');
+  console.log("\n");
 }

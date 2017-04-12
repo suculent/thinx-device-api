@@ -20,10 +20,10 @@ function availableVersionForDevice(owner, mac) {
 	// searches in deployment directory
 
 	// Get path for owner (and optinaly a device)
-	var user_path = config.deploy_root + '/' + owner;
+	var user_path = config.deploy_root + "/" + owner;
 	var device_path = user_path;
 	if (mac.indexOf("ANY") != -1) {
-		device_path = device_path + '/' + mac
+		device_path = device_path + "/" + mac;
 	}
 
 	// Find latest binary, fetch version
@@ -35,15 +35,9 @@ function hasUpdateAvailable(device) {
 	var deviceVersion = device.version;
 	var deployedVersion = availableVersionForDevice(device.owner, device.mac);
 
-	if (semver.valid(deviceVersion) == true) {
+	if (semver.valid(deviceVersion) == true) {} else {};
 
-
-
-	} else {
-
-	}
-
-	semver.satisfies('1.2.3', '1.x || >=2.5.0 || 5.0.0 - 7.2.3') // true
-	semver.gt('1.2.3', '9.8.7') // false
-	semver.lt('1.2.3', '9.8.7') // true
+	semver.satisfies("1.2.3", "1.x || >=2.5.0 || 5.0.0 - 7.2.3"); // true
+	semver.gt("1.2.3", "9.8.7"); // false
+	semver.lt("1.2.3", "9.8.7"); // true
 }
