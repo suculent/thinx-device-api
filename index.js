@@ -219,7 +219,7 @@ app.post("/api/login", function(req, res) {
 							status: "WELCOME"
 						}));
 					} else if (client_type == "webapp") {
-						res.end(JSON.stringify({ "redirectURL": "https://rtm.thinx.cloud:80/app" }));
+						res.end(JSON.stringify({ "redirectURL": "http://rtm.thinx.cloud:80/app" }));
 					}
 
 					// TODO: If user-agent contains app/device... (what?)
