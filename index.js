@@ -301,7 +301,7 @@ app.post("/api/view/devices", function(req, res) {
 		}
 
 		var rows = body.rows; // devices returned
-		var devices = {};
+		var devices = []; // an array by design (needs push), to be encapsulated later
 
 		// Show all devices for admin (if not limited by query)
 		if (req.session.admin == true && req.body.query == undefined) {
