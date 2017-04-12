@@ -1,0 +1,34 @@
+/*
+BASED ON:
+curl -H "Origin: rtm.thinx.cloud" \
+-H "Content-Type: application/json" \
+-H "User-Agent: THiNX-Client" \
+-X POST -d '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "registration-token-optional", "alias" : "test", "owner": "admin" } }' \
+http://thinx.cloud:7442/device/register
+*/
+
+console.log(
+  "Running localhost / test. Should respond `This is API ROOT.` or so...");
+
+var request = require("request");
+
+var base_url = "http://localhost:7442/";
+
+describe("Hello World API", function() {
+  describe("GET /", function() {
+    it("returns status code 200", function(done) {
+      request.get(base_url, function(error, response, body) {
+        expect(response.statusCode).toBe(200);
+        done();
+      });
+    });
+
+    it("returns `This is API ROOT.`", function(done) {
+      request.get(base_url, function(error, response, body) {
+        expect(body).toBe("This is API ROOT.");
+        console.log("Body is `This is API ROOT.`");
+        done();
+      });
+    });
+  });
+});

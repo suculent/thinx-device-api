@@ -84,8 +84,7 @@ app.all("/*", function(req, res, next) {
 
 // http://thejackalofjavascript.com/architecting-a-restful-node-js-app/
 
-// TEMPLATE CODE HERE -->
-
+/** Tested with: !device_register.spec.js` */
 app.get("/", function(req, res) {
 	sess = req.session;
 	console.log("owner: " + sess.owner);
