@@ -51,7 +51,19 @@ var sess;
 
 app.all('/*', function(req, res, next) {
 	// CORS headers
-	res.header('Access-Control-Allow-Origin', 'http://rtm.thinx.loc'); // rtm.thinx.cloud
+
+	var origin = req.get('origin');
+	var allowedOrigin = origin;
+
+	if ((origin == 'http://rtm.thinx.loc') ||
+	   (origin == 'https://rtm.thinx.cloud') ||
+	   (origin == '127.0.0.1')) {
+
+	} else {
+		console.log("Origin: " + origin);
+	}
+
+	res.header('Access-Control-Allow-Origin', allowedOrigin); // rtm.thinx.cloud
 	res.header('Access-Control-Allow-Credentials', 'true');
 	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
 	// Set custom headers for CORS
