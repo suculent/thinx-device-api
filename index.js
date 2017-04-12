@@ -220,7 +220,8 @@ app.post("/api/login", function(req, res) {
 						}));
 					} else if (client_type == "webapp") {
 						if (req.session.owner != undefined) {
-							res.redirect("/app");
+							// Hand over control to AngularJS app running on Apache (!)
+							res.redirect("http://rtm.thinx.cloud:80/app");
 						} else {
 							res.redirect("/login");
 						}
