@@ -112,7 +112,7 @@ app.listen(serverPort, function() {
 	var package_info = require("./package.json");
 	var product = package_info.description;
 	var version = package_info.version;
-	console.log("-=[ ☢ " + product + " v" +  + " ☢ ]=-");
+	console.log("-=[ ☢ " + product + " v" + version + " ☢ ]=-");
 	console.log("» Started on port " + serverPort);
 });
 
