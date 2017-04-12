@@ -297,7 +297,7 @@ app.post("/api/view/devices", function(req, res) {
 		// Show all devices for admin (if not limited by query)
 		if (req.session.admin == true && req.body.query == undefined) {
 			var response = JSON.stringify({
-				devices: devices
+				devices // should be "devices" : devices according to eslint
 			});
 			res.end(response);
 			return;
@@ -314,7 +314,7 @@ app.post("/api/view/devices", function(req, res) {
 			}
 		}
 		var response = JSON.stringify({
-			devices: devices
+			devices // should be "devices" : devices according to eslint
 		});
 		console.log("/api/view/devices: Response: " + response);
 		res.end(response);
