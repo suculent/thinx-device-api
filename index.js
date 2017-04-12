@@ -123,12 +123,13 @@ app.get('/admin', function(req, res) {
 	}
 });
 
+// Used by web app
 app.get('/logout', function(req, res) {
 	req.session.destroy(function(err) {
 		if (err) {
 			console.log(err);
 		} else {
-			res.redirect('/');
+			res.redirect("http://rtm.thinx.cloud:80/"); // HOME_URL (Apache)
 		}
 	});
 });
