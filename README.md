@@ -1,20 +1,41 @@
 # ☢ thinx-device-api
 
-Server application running on node.js. Serves as an IoT device registration endpoint. Should store device data using Couch or MongoDB.
+API Server running on node.js.
+
+• Serves as an IoT device registration endpoint while soring device data using remote CouchDB server.
+
+• Application is a back-end data provider (security agent) for RTM admin console running on the same server (currently on Apache, but should converge to node.js).
+
+• Provides control to a build server that pushes new firmware versions to client applications (FCM push) and devices (MQTT).
+
+## Supported IoT Platforms
+
+* ESP8266 (thinx-firmware-esp8266)
+* Expected: Arduino
 
 ## Prerequisites
 
+* Linux Server (possibly RasPi but not tested)
 * Application runs on HTTP port 7442 (possibly HTTPS 7441)
-* EAV Device with firmware version higher than 0.4.0
+* Admin runs on HTTPS port (443)
 
 ## Endpoints
+
+### /
+
+Redirects to web-app for authenticated user, otherwise returns `This is API ROOT.`
+
+
+### /logout
+
+Terminates current session. Redirects to web root.
 
 
 ### /api/login
 
 Authentication point, that client application must pass before performing authorized operations (view owner data, start builds, initiate OTA updates).
-Expects username and password as an input (POST body), returns `x-thx-session` cookie in case of valid authentication.
-Session cookie can be used to access owner data or start owner/admin builds and its expiration is configurable in conf/node-session.json.
+Expects username and password as an input (POST body), returns session cookie in case of valid authentication.
+Session cookie can be used to access owner data or start owner/admin builds and it is configurable in code using express.js
 
 ```
 curl -H "User-Agent: THiNX-Web" \
@@ -26,7 +47,7 @@ http://localhost:7442/api/login
 
 ### /api/view/devices
 
-Provides **intial draft** device list for authorized owner. Requires no parameters, just valid session. 
+Provides **intial draft** device list for authorized owner. Requires no parameters, just valid session.
 
 ```
 curl -v -c cookies.jar \
@@ -41,7 +62,7 @@ curl -v -b cookies.jar \
 -X POST -d '{ "query" : false }' http://localhost:7442/api/view/devices
 ```
 
-> TODO: Show all devices for superadmin user.
+> All devices are returned in case user has an `admin` tag set to true in session. Must be inferred from database where it can be set manually through SSL tunnelling to CouchDB administration, which is otherwise only locally accessible on the server (security purposes).
 
 ---
 

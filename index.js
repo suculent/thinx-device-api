@@ -63,7 +63,11 @@ app.all("/*", function(req, res, next) {
 
 	if ((origin == "http://rtm.thinx.loc") ||
 		(origin == "https://rtm.thinx.cloud") ||
-		(origin == "127.0.0.1")) {
+		(origin == "127.0.0.1") ||
+		(origin == "undefined") ||
+		(origin == undefined)
+
+	) {
 
 	} else {
 		console.log("Origin: " + origin);
@@ -95,6 +99,7 @@ app.get("/", function(req, res) {
 	}
 });
 
+/* useless
 app.get("/app", function(req, res) {
 	sess = req.session;
 	console.log("redirected to /app with owner: " + sess.owner);
@@ -106,6 +111,7 @@ app.get("/app", function(req, res) {
 		// res.redirect("/api/login"); // crashes
 	}
 });
+*/
 
 // Used by web app
 app.get("/logout", function(req, res) {
@@ -254,7 +260,7 @@ app.post("/api/view/devices", function(req, res) {
 	// reject on invalid session
 	if (!req.session) {
 		failureResponse(res, 405, "not allowed");
-		console.log("No session!");
+		console.log("/api/view/devices: No session!");
 		return;
 	}
 
@@ -264,7 +270,7 @@ app.post("/api/view/devices", function(req, res) {
 		owner = req.session.owner;
 	} else {
 		failureResponse(res, 405, "not allowed");
-		console.log("No valid owner!");
+		console.log("/api/view/devices: No valid owner!");
 		return;
 	}
 
@@ -279,7 +285,7 @@ app.post("/api/view/devices", function(req, res) {
 					result: "none"
 				});
 			}
-			console.log("Error: " + err.toString());
+			console.log("/api/view/devices: Error: " + err.toString());
 			return;
 		}
 
@@ -298,16 +304,17 @@ app.post("/api/view/devices", function(req, res) {
 		for (var row in rows) {
 			var rowData = rows[row];
 			if (owner == rowData.key) {
-				console.log("OWNER: " + JSON.stringify(rowData) + "\n");
+				console.log("/api/view/devices: OWNER: " + JSON.stringify(rowData) +
+					"\n");
 				devices.push(rowData);
 			} else {
-				console.log("ROW: " + JSON.stringify(rowData) + "\n");
+				console.log("/api/view/devices: ROW: " + JSON.stringify(rowData) + "\n");
 			}
 		}
 		var response = JSON.stringify({
 			devices: devices
 		});
-		console.log("Response: " + response);
+		console.log("/api/view/devices: Response: " + response);
 		res.end(response);
 	});
 });
