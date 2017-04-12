@@ -29,6 +29,7 @@ checkout:
 dependencies:
   pre:
     - gem install jasmine
+    - npm install -g eslint
     - npm install .
     commands:
       - bash ./01-init_db_design.sh
@@ -58,6 +59,8 @@ test:
   override:
     - phpunit test/unit-tests # use PHPunit for testing
   commands:
+    - eslint **/*.js
+    - eslint *.js
     - bash ./02-analyze.sh
     - bash ./03-deploy.sh
     - bash ./04-test.sh
