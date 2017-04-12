@@ -1,5 +1,7 @@
 # ☢ thinx-device-api
 
+[![Coverage Status](https://coveralls.io/repos/github/suculent/thinx-firmware-esp8266/badge.svg?branch=master)](https://coveralls.io/github/suculent/thinx-firmware-esp8266?branch=master)
+
 API Server running on node.js.
 
 • Serves as an IoT device registration endpoint while soring device data using remote CouchDB server.
