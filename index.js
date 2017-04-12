@@ -19,9 +19,7 @@ var http = require('http');
 var parser = require('body-parser');
 var nano = require("nano")(db);
 
-var NodeSession = require('node-session');
-var sessionConfig = require('./conf/node-session.json');
-session = new NodeSession(sessionConfig);
+var session_config = require('./conf/node-session.json');
 
 // Response dictionary
 var rdict = {};
@@ -38,7 +36,9 @@ var session = require('express-session');
 var app = express();
 
 app.use(session({
-	secret: sessionConfig.secret
+	secret: session_config.secret,
+	resave: false,
+    saveUninitialized: false
 }));
 
 app.use(parser.json());
@@ -109,7 +109,10 @@ app.get('/logout', function(req, res) {
 // <- TEMPLATE CODE HERE
 
 app.listen(serverPort, function() {
-	console.log("-=[ ☢ THiNX IoT RTM API ☢ ]=-");
+	var package_info = require("./package.json");
+	var product = package_info.description;
+	var version = package_info.version;
+	console.log("-=[ ☢ " + product + " v" +  + " ☢ ]=-");
 	console.log("» Started on port " + serverPort);
 });
 
@@ -504,8 +507,8 @@ function validateRequest(req, res) {
 	var validity = ua.indexOf(client_user_agent)
 
 	if (validity == 0) {
-		
-		
+
+
 		return true;
 
 	} else {

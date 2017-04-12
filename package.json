@@ -1,42 +1,37 @@
 {
-  "name": "thinx",
-  "description": "THiNX API",
-  "version": "0.0.6",
-  "author": {
-    "name": "Matej Sychra"
+  "name" : "thinx",
+  "description" : "THiNX IoT RTM API",
+  "version" : "0.0.7",
+  "author" : {
+    "name" : "Matej Sychra"
   },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/suculent/thinx-device-api.git"
+  "repository" : {
+    "type" : "git",
+    "url" : "git://github.com/suculent/thinx-device-api.git"
   },
-  "bugs": {
-    "url": "https://github.com/suculent/thinx-device-api/issues"
+  "bugs" : {
+    "url" : "https://github.com/suculent/thinx-device-api/issues"
   },
-  "license": "ISC",
-  "bin": {
-    "homebridge": "bin/thinx-api"
+  "license" : "ISC",
+  "engines" : {
+    "node" : ">=4.3.2"
   },
-  "engines": {
-    "node": ">=4.3.2"
-  },
-  "preferGlobal": true,
-  "dependencies": {
-    "body-parser": "^1.7.0",
-    "checksum": "^0.1.1",
-    "ejs": "^1.0.0",
-    "express": "^4.8.7",
-    "express-session": "^1.7.6",
-    "firebase-admin": "^4.2.0",
-    "html": "^1.0.0",
-    "httpdispatcher": "^2.1.0",
-    "mdns": "^2.3.3",
-    "nano": "^6.2.0",
-    "node-couchdb": "^1.1.1",
-    "node-session": "^1.2.1",
-    "querystring": "^0.2.0",
-    "semver": "^1.0.14",
-    "sha256": "^0.2.0",
-    "slack-notify": "^0.1.6",
-    "uuid": "^3.0.1"
+  "preferGlobal" : true,
+  "dependencies" : {
+    "body-parser" : "^1.7.0",
+    "checksum" : "^0.1.1",
+    "ejs" : "^1.0.0",
+    "express" : "^4.8.7",
+    "express-session" : "^1.7.6",
+    "firebase-admin" : "^4.2.0",
+    "html" : "^1.0.0",
+    "mdns" : "^2.3.3",
+    "nano" : "^6.2.0",
+    "node-couchdb" : "^1.1.1",
+    "querystring" : "^0.2.0",
+    "semver" : "^1.0.14",
+    "sha256" : "^0.2.0",
+    "slack-notify" : "^0.1.6",
+    "uuid" : "^3.0.1"
   }
 }
