@@ -213,7 +213,7 @@ app.post("/api/login", function(req, res) {
 					// TODO: write last_seen timestamp to DB here __for devices__
 					console.log("client_type: " + client_type);
 
-					if (client_type = "device") {
+					if (client_type == "device") {
 						// TODO: send session cookie here as well
 						res.end(JSON.stringify({
 							status: "WELCOME"
