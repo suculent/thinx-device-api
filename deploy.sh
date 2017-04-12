@@ -21,7 +21,7 @@ NODEZ=$(ps -ax | grep "$DAEMON")
 echo "${NODEZ}" | while IFS="pts" read A B ; do 
 	NODE=$($A | tr -d ' ')
 	echo "Killing: " $NODE $B
-	kill $NODE
+	kill "$NODE"
 done
 
 echo
