@@ -56,8 +56,8 @@ dependencies:
 
 ## Customize test commands
 test:
-  override:
-    - phpunit test/unit-tests # use PHPunit for testing
+#  override:
+#    - phpunit test/unit-tests # use PHPunit for testing
   commands:
     - eslint **/*.js
     - eslint *.js

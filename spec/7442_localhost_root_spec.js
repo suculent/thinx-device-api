@@ -7,26 +7,31 @@ curl -H "Origin: rtm.thinx.cloud" \
 http://thinx.cloud:7442/device/register
 */
 
+// ran by `npm test` while included in package.json
+
 console.log(
-  "Running localhost / test. Should respond `This is API ROOT.` or so...");
+  "/ test expects 200 OK");
 
 var request = require("request");
 
 var base_url = "http://localhost:7442/";
 
-describe("Hello World API", function() {
+describe("7442_localhost_root_spec", function() {
   describe("GET /", function() {
     it("returns status code 200", function(done) {
+      console.log("Checking status code...");
       request.get(base_url, function(error, response, body) {
+        console.log("200 OK");
         expect(response.statusCode).toBe(200);
         done();
       });
     });
 
-    it("returns `This is API ROOT.`", function(done) {
+    it("returns This is API ROOT.", function(done) {
+      console.log("Checking response...");
       request.get(base_url, function(error, response, body) {
+        console.log(body.toString());
         expect(body).toBe("This is API ROOT.");
-        console.log("Body is `This is API ROOT.`");
         done();
       });
     });
