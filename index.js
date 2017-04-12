@@ -305,6 +305,8 @@ app.post("/api/view/devices", function(req, res) {
 
 		for (var row in rows) {
 			var rowData = rows[row];
+			console.log("Matching device of owner " + rowData.key +
+				" with alien user " + owner);
 			if (owner == rowData.key) {
 				console.log("/api/view/devices: OWNER: " + JSON.stringify(rowData) +
 					"\n");

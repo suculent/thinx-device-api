@@ -64,6 +64,15 @@ curl -v -b cookies.jar \
 
 > All devices are returned in case user has an `admin` tag set to true in session. Must be inferred from database where it can be set manually through SSL tunnelling to CouchDB administration, which is otherwise only locally accessible on the server (security purposes).
 
+Sample response:
+
+```
+{ "devices" :
+{"id":"11:11:11:11:11:11","key":"test","value":{"_id":"11:11:11:11:11:11","_rev":"46-1c5e7beee91056cf3e185664b397d116","mac":"11:11:11:11:11:11","firmware":"EAV-App-0.4.0-beta:2017/04/08","hash":"e58fa9bf7f478442c9d34593f0defc78718c8732","alias":"rabbit","lastupdate":"2017-04-10T23:40:31.548Z","push":"d877126b0b76fe086d63679c8d747423e7b4a1bdb4e1679e59216732b7060f03","owner":"test"}}
+}
+
+```
+
 ---
 
 ### /api/build
