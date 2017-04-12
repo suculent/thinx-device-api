@@ -25,10 +25,12 @@
     "express-session": "^1.7.6",
     "firebase-admin": "^4.2.0",
     "html": "^1.0.0",
+    "jasmine-node": "^1.14.5",
     "nano": "^6.2.0",
     "node-couchdb": "^1.1.1",
     "nodelint": "^0.6.2",
     "querystring": "^0.2.0",
+    "request": "^2.81.0",
     "semver": "^1.0.14",
     "sha256": "^0.2.0",
     "slack-notify": "^0.1.6",
@@ -36,5 +38,8 @@
   },
   "devDependencies": {
     "eslint": "^3.19.0"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/jasmine-node spec"
   }
 }
