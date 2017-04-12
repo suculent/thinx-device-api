@@ -50,7 +50,8 @@ var sess;
 
 app.all('/*', function(req, res, next) {
 	// CORS headers
-	res.header("Access-Control-Allow-Origin", "*"); // rtm.thinx.cloud
+	res.header('Access-Control-Allow-Origin', 'http://rtm.thinx.loc'); // rtm.thinx.cloud
+	res.header('Access-Control-Allow-Credentials', 'true');
 	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
 	// Set custom headers for CORS
 	res.header('Access-Control-Allow-Headers',
