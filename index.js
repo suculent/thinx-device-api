@@ -8,13 +8,19 @@ require('./core.js');
 // Shared Configuration
 //
 
-const client_user_agent = "THiNX-Client";
+var client_user_agent = client_user_agent;
+
+// Test whether core.js works
+if (client_user_agent == undefined) {
+	console.log("client_user_agent not defined in core.js, fixing...");
+	client_user_agent = "THiNX-Client";
+}
 
 var config = require("./conf/config.json");
-const db = config.database_uri;
-const serverPort = config.port;
+var db = config.database_uri;
+var serverPort = config.port;
 
-const uuidV1 = require('uuid/v1');
+var uuidV1 = require('uuid/v1');
 var http = require('http');
 var parser = require('body-parser');
 var nano = require("nano")(db);
@@ -56,8 +62,8 @@ app.all('/*', function(req, res, next) {
 	var allowedOrigin = origin;
 
 	if ((origin == 'http://rtm.thinx.loc') ||
-	   (origin == 'https://rtm.thinx.cloud') ||
-	   (origin == '127.0.0.1')) {
+		(origin == 'https://rtm.thinx.cloud') ||
+		(origin == '127.0.0.1')) {
 
 	} else {
 		console.log("Origin: " + origin);
@@ -199,7 +205,9 @@ app.post("/api/login", function(req, res) {
 							status: "WELCOME"
 						}));
 					} else if (client_type == "webapp") {
-						res.end(JSON.stringify({ "redirectURL": "http://rtm.thinx.cloud:80/app" }));
+						res.end(JSON.stringify({
+							"redirectURL": "http://rtm.thinx.cloud:80/app"
+						}));
 					}
 
 					// TODO: If user-agent contains app/device... (what?)
@@ -221,7 +229,7 @@ app.post("/api/login", function(req, res) {
 				res.redirect("http://rtm.thinx.cloud:80/"); // redirects browser, not in XHR?
 				// or res.end(JSON.stringify({ redirectURL: "https://rtm.thinx.cloud:80/app" }));
 			}
-			
+
 			console.log("login: Flushing session: " + JSON.stringify(req.session));
 			req.session.destroy(function(err) {
 				if (err) {
@@ -281,9 +289,10 @@ app.post("/api/view/devices", function(req, res) {
 
 		// Show all devices for admin (if not limited by query)
 		if (req.session.admin == true && req.body.query == undefined) {
-			res.end({
-				devices
+			var response = JSON.stringify({
+				devices: devices
 			});
+			res.end(response);
 			return;
 		}
 
@@ -297,7 +306,7 @@ app.post("/api/view/devices", function(req, res) {
 			}
 		}
 		var response = JSON.stringify({
-			devices
+			devices: devices
 		});
 		console.log("Response: " + response);
 		res.end(response);
@@ -720,7 +729,7 @@ function buildCommand(build_id, tenant, mac, git, dryrun) {
 
 	console.log("Executing build chain...");
 
-	const exec = require('child_process').exec;
+	var exec = require('child_process').exec;
 	CMD = './builder --tenant=' + tenant + ' --mac=' + mac + ' --git=' + git +
 		' --id=' + build_id;
 	if (dryrun == true) {
