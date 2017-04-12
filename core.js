@@ -1,15 +1,10 @@
 //
-// Constants
+// Global Constants / Shared Configuration
 //
 
-const client_user_agent = "THiNX-Client";
-
-//
-// Shared Configuration
-//
-
+var client_user_agent = "THiNX-Client";
 var config = require("./conf/config.json");
-const db = config.database_uri;
+var db = config.database_uri;
 
 //
 // Version Management
