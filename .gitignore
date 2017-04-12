@@ -5,6 +5,7 @@ node_modules/
 # Runtime data that are not to be stored from server back to repository
 tenants/
 sessions/
+cookie.jar
 
 # User secrets
 conf/config.json
