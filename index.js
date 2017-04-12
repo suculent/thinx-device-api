@@ -212,21 +212,18 @@ app.post("/api/login", function(req, res) {
 					req.session.owner = user_data.key;
 					// TODO: write last_seen timestamp to DB here __for devices__
 					console.log("client_type: " + client_type);
-
 					if (client_type == "device") {
 						// TODO: send session cookie here as well
 						res.end(JSON.stringify({
 							status: "WELCOME"
 						}));
-					} else {
+					} else if (client_type == "webapp") {
 						res.redirect("/app");
 					}
 
+					// TODO: If user-agent contains app/device... (what?)
 
-
-					// TODO: If user-agent contains app/device
-
-					return; // early exit
+					return;
 				} else {
 					console.log("Password mismatch for " + username);
 				}
