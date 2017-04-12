@@ -269,7 +269,16 @@ app.post("/api/view/devices", function(req, res) {
 	// reject on invalid owner
 	var owner = null;
 	if (req.session.owner || sess.owner) {
-		owner = req.session.owner;
+		if (req.session.owner) {
+			console.log("assigning owner = req.session.owner;");
+			owner = req.session.owner;
+		}
+		if (sess.owner) {
+			console.log(
+				"assigning owner = sess.owner; (client lost or session terminated?)");
+			owner = sess.owner;
+		}
+
 	} else {
 		failureResponse(res, 403, "session has no owner");
 		console.log("/api/view/devices: No valid owner!");
@@ -305,8 +314,8 @@ app.post("/api/view/devices", function(req, res) {
 
 		for (var row in rows) {
 			var rowData = rows[row];
-			console.log("Matching device of owner " + rowData.key +
-				" with alien user " + owner);
+			console.log("Matching device of device owner " + rowData.key +
+				" with alien user " + owner + " in " + rowData.toString());
 			if (owner == rowData.key) {
 				console.log("/api/view/devices: OWNER: " + JSON.stringify(rowData) +
 					"\n");
