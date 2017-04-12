@@ -15,15 +15,15 @@ machine:
 #    dev.mycompany.com: 127.0.0.1
 
   # Add some environment variables
-  environment:
-    CIRCLE_ENV: test
-    DATABASE_URL: postgresql://ubuntu:@127.0.0.1:5432/circle_test
+#  environment:
+#    CIRCLE_ENV: test
+#    DATABASE_URL: postgresql://ubuntu:@127.0.0.1:5432/circle_test
 
 ## Customize checkout
-checkout:
-  post:
-    - git submodule sync
-    - git submodule update --init # use submodules
+#checkout:
+#  post:
+#    - git submodule sync
+#    - git submodule update --init # use submodules
 
 ## Customize dependencies
 dependencies:
@@ -31,8 +31,6 @@ dependencies:
     - gem install jasmine
     - npm install -g eslint
     - npm install .
-    commands:
-      - bash ./01-init_db_design.sh
 
   override:
     - bundle install: # note ':' here
@@ -48,8 +46,9 @@ dependencies:
     #- "node_modules"
 
 ## Customize database setup
-#database:
-#  override:
+database:
+  override:
+    - bash ./01-init_db_design.sh
 #    # replace CircleCI's generated database.yml
 #    - cp config/database.yml.ci config/database.yml
 #    - bundle exec rake db:create db:schema:load
