@@ -122,8 +122,8 @@ echo "Version: ${VERSION}"
 # Overwrite Thinx.h file (should be required)
 
 THINX_FILE=$(find . | grep "/Thinx.h")
-THINX_CLOUD_URL="http://thinx.cloud"
-THINX_MQTT_URL="mqtt://thinx.cloud"
+THINX_CLOUD_URL="thinx.cloud"
+THINX_MQTT_URL="mqtt://${THINX_CLOUD_URL}"
 THINX_OWNER=$TENANT
 
 if [[ ! -z $DEVICE_ALIAS ]]; then
