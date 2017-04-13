@@ -70,6 +70,7 @@ test:
       environment:
         RAILS_ENV: test
         RACK_ENV: test
+    - cp -v ./coverage $CIRCLE_ARTIFACTS
 
 ## Customize deployment commands
 deployment:
