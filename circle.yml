@@ -80,5 +80,3 @@ deployment:
 ## Custom notifications
 notify:
   - curl -X POST --data-urlencode 'payload={"text":"THiNX integration completed."}' https://hooks.slack.com/services/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
-#  webhooks:
-#    A list of hashes representing hooks. Only the url field is supported.
