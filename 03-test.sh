@@ -1,6 +1,16 @@
 #!/bin/bash
 
 echo
+echo "☢ Running NYC code coverage..."
+
+nyc --reporter=lcov --reporter=text-lcov npm test
+
+echo
+echo "☢ Karma..."
+
+karma start
+
+echo
 echo "☢ Testing device registration..."
 
 curl -H "Origin: rtm.thinx.cloud" -H "Content-Type: application/json" -H "User-Agent: THiNX-Client" \

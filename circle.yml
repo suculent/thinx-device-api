@@ -48,7 +48,7 @@ dependencies:
 ## Customize database setup
 database:
   override:
-    - bash ./01-init_db_design.sh
+    - bash ./00-init_db_design.sh
 #    # replace CircleCI's generated database.yml
 #    - cp config/database.yml.ci config/database.yml
 #    - bundle exec rake db:create db:schema:load
@@ -60,9 +60,9 @@ test:
   commands:
     - eslint **/*.js
     - eslint *.js
-    - bash ./02-analyze.sh
-    - bash ./03-deploy.sh
-    - bash ./04-test.sh
+    - bash ./01-analyze.sh
+    - bash ./02-deploy.sh
+    - bash ./03-test.sh
   post:
     - curl -sSL https://download.sourceclear.com/ci.sh | sh
     - bundle exec rake jasmine:ci: # add an extra test type

@@ -7,6 +7,9 @@ tenants/
 sessions/
 cookie.jar
 
+coverage/
+.nyc_output/
+
 # User secrets
 conf/config.json
 conf/thinx-cloud-firebase-adminsdk-wjhzo-9fd8c42211.json
