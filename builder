@@ -124,7 +124,7 @@ echo "Version: ${VERSION}"
 THINX_FILE=$(find . | grep "/Thinx.h")
 THINX_CLOUD_URL="http://thinx.cloud"
 THINX_MQTT_URL="mqtt://thinx.cloud"
-THINX_OWNER=$TENANT 
+THINX_OWNER=$TENANT
 
 if [[ ! -z $DEVICE_ALIAS ]]; then
 	THINX_ALIAS=$DEVICE_ALIAS
@@ -132,17 +132,24 @@ else
 	THINX_ALIAS="vanilla"
 fi
 
+REPO_NAME=basename(pwd)
+REPO_VERSION="1.0.${VERSION}" # todo: is not semantic at all
+BUILD_DATE=`date +%Y-%m-%d`
+
+# TODO: Change this to a sed template, this is tedious
+
 echo "//" > $THINX_FILE
 echo "// This is an auto-generated file, it will be re-written by THiNX on cloud build." >> $THINX_FILE
 echo "//" >> $THINX_FILE
 
 echo "" >> $THINX_FILE
 
-echo "String thinx_commit_id = \"${COMMIT}\";" >> $THINX_FILE
-echo "String thinx_owner = \"${THINX_OWNER}\";" >> $THINX_FILE
-echo "String thinx_alias = \"${THINX_ALIAS}\";" >> $THINX_FILE
-echo "String thinx_cloud_url = \"${THINX_CLOUD_URL}\";" >> $THINX_FILE
-echo "String thinx_mqtt_url = \"${THINX_MQTT_URL}\";" >> $THINX_FILE
+echo "static const String thinx_commit_id = \"${COMMIT}\";" >> $THINX_FILE
+echo "static const String thinx_owner = \"${THINX_OWNER}\";" >> $THINX_FILE
+echo "static const String thinx_alias = \"${THINX_ALIAS}\";" >> $THINX_FILE
+echo "static const String thinx_cloud_url = \"${THINX_CLOUD_URL}\";" >> $THINX_FILE
+echo "static const String thinx_mqtt_url = \"${THINX_MQTT_URL}\";" >> $THINX_FILE
+echo "static const String app_version = "\"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\";" >> $THINX_FILE
 
 echo "" >> $THINX_FILE
 
