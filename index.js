@@ -15,7 +15,7 @@ var v = new Version();
 var client_user_agent = client_user_agent;
 
 // Test whether core.js works
-if (typeof(client_user_agent) == 'undefined') {
+if (typeof(client_user_agent) == "undefined") {
 	console.log("client_user_agent not defined in core.js, fixing...");
 	client_user_agent = "THiNX-Client";
 }
@@ -70,10 +70,10 @@ app.all("/*", function(req, res, next) {
 		(origin == "127.0.0.1") ||
 		(origin == "undefined")
 	) {
-
+		//
 	} else {
 		console.log("Origin: " + origin);
-	}
+	};
 
 	res.header("Access-Control-Allow-Origin", allowedOrigin); // rtm.thinx.cloud
 	res.header("Access-Control-Allow-Credentials", "true");
@@ -165,7 +165,7 @@ app.post("/api/login", function(req, res) {
 	var username = req.body.username;
 	var password = req.body.password;
 
-	if (typeof(username) == 'undefined' || typeof(password) == 'undefined') {
+	if (typeof(username) == "undefined" || typeof(password) == "undefined") {
 		req.session.destroy(function(err) {
 			if (err) {
 				console.log(err);
@@ -226,7 +226,7 @@ app.post("/api/login", function(req, res) {
 			}
 		}
 
-		if (typeof(req.session.owner) == 'undefined') {
+		if (typeof(req.session.owner) == "undefined") {
 
 			if (client_type == "device") {
 				res.end(JSON.stringify({
@@ -306,7 +306,7 @@ app.post("/api/view/devices", function(req, res) {
 		var devices = []; // an array by design (needs push), to be encapsulated later
 
 		// Show all devices for admin (if not limited by query)
-		if (req.session.admin === true && typeof(req.body.query) == 'undefined') {
+		if (req.session.admin === true && typeof(req.body.query) == "undefined") {
 			var response = JSON.stringify({
 				devices: devices
 			});
@@ -357,7 +357,7 @@ app.post("/device/register", function(req, res) {
 	var dict = req.body;
 	var reg = dict.registration;
 
-	if (typeof(dict.registration) == 'undefined') return;
+	if (typeof(dict.registration) == "undefined") return;
 
 	rdict.registration = {};
 
@@ -695,14 +695,14 @@ app.post("/api/build", function(req, res) {
 		var git = build.git;
 		var dryrun = false;
 
-		if (typeof(build.dryrun) != 'undefined') {
+		if (typeof(build.dryrun) != "undefined") {
 			dryrun = build.dryrun;
 		}
 
-		if ((typeof(build) === 'undefined' || build === null) ||
-			(typeof(mac) === 'undefined' || mac === null) ||
-			(typeof(tenant) === 'undefined' || tenant === null) ||
-			(typeof(git) === 'undefined' || git === null)) {
+		if ((typeof(build) === "undefined" || build === null) ||
+			(typeof(mac) === "undefined" || mac === null) ||
+			(typeof(tenant) === "undefined" || tenant === null) ||
+			(typeof(git) === "undefined" || git === null)) {
 
 			rdict = {
 				build: {
