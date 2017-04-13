@@ -35,6 +35,13 @@ echo "» Fetching current app version from GIT..."
 
 git pull origin master
 
+if [[ CIRCLECI == true ]]; then
+	echo
+	echo "☢  Running node.js without console for CI..."
+	nohup node index.js > ./logs/things.log
+	exit 0
+fi
+
 echo
 echo "☢  Running node.js as a background process..."
 
