@@ -1,6 +1,6 @@
 {
   "type" : "thinx_server_config",
-  "database_uri" : "http://rtmapi:frohikey@iot.teacloud.net:5984",
+  "database_uri" : "http://test:test@iot.teacloud.net:5984",
   "port" : 7442,
   "deploy_root" : "/var/www/html/bin",
   "slack_webhook" : "https://hooks.slack.com/services/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",

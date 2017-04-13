@@ -453,6 +453,7 @@ app.post("/device/register", function(req, res) {
 
 				if (err == "Error: error happened in your connection") {
 					return;
+					process.exit(3);
 				}
 
 				if (err) {
