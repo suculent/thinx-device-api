@@ -30,10 +30,6 @@ dependencies:
   pre:
     - npm install .
     - echo "Creating cached directories (installer should do it)..."
-    - mkdir sessions
-    - mkdir tenants
-    - mkdir logs
-    - mkdir build
 
   override:
     - bundle install: # note ':' here
@@ -43,10 +39,7 @@ dependencies:
 
   # cache and restore between builds
   cache_directories:
-    - "sessions"
-    - "build"
-    - "tenants"
-    #- "node_modules"
+    - "node_modules"
 
 ## Customize database setup
 database:
