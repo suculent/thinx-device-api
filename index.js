@@ -3,36 +3,28 @@
  */
 
 require("./core.js");
-var Version = require("./lib/thinx/version.js");
-
-var v = new Version();
-
 
 //
 // Shared Configuration
 //
 
-var client_user_agent = client_user_agent;
+var session_config = require("./conf/node-session.json");
+var app_config = require("./conf/config.json");
 
-// Test whether core.js works
-if (typeof(client_user_agent) == "undefined") {
-	console.log("client_user_agent not defined in core.js, fixing...");
-	client_user_agent = "THiNX-Client";
-}
-
-var config = require("./conf/config.json");
-var db = config.database_uri;
-var serverPort = config.port;
+var client_user_agent = app_config.client_user_agent;
+var db = app_config.database_uri;
+var serverPort = app_config.port;
 
 var uuidV1 = require("uuid/v1");
 var http = require("http");
 var parser = require("body-parser");
 var nano = require("nano")(db);
 
-var session_config = require("./conf/node-session.json");
+var v = require("./lib/thinx/version");
 
-// Response dictionary
 var rdict = {};
+
+// Database access
 
 initDatabases();
 
@@ -40,6 +32,8 @@ var devicelib = require("nano")(db).use("managed_devices");
 var gitlib = require("nano")(db).use("managed_repos");
 var buildlib = require("nano")(db).use("managed_builds");
 var userlib = require("nano")(db).use("managed_users");
+
+// Express App
 
 var express = require("express");
 var session = require("express-session");
@@ -70,10 +64,10 @@ app.all("/*", function(req, res, next) {
 		(origin == "127.0.0.1") ||
 		(origin == "undefined")
 	) {
-		
+
 	} else {
 		console.log("Origin: " + origin);
-	};
+	}
 
 	res.header("Access-Control-Allow-Origin", allowedOrigin); // rtm.thinx.cloud
 	res.header("Access-Control-Allow-Credentials", "true");
@@ -126,13 +120,19 @@ app.get("/logout", function(req, res) {
 	});
 });
 
-// <- TEMPLATE CODE HERE
+app.version = function() {
+	return v.revision();
+};
 
 app.listen(serverPort, function() {
 	var package_info = require("./package.json");
 	var product = package_info.description;
 	var version = package_info.version;
-	console.log("-=[ ☢ " + product + " v" + version + " rev. " + v + " ☢ ]=-");
+
+	console.log("");
+	console.log("-=[ ☢ " + product + " v" + version + " rev. " + app.version() +
+		" ☢ ]=-");
+	console.log("");
 	console.log("» Started on port " + serverPort);
 });
 
