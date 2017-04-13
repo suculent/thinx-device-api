@@ -11,28 +11,24 @@
 var config = require("./conf/config.json");
 var sha256 = require("sha256");
 var db = config["database_uri"];
-//require("./core.js");
+
 var that = this;
 
 // Network
-var client_user_agent = "THiNX-Client";
+var client_user_agent = config.client_user_agent;
+
+
 var http = require("http");
-
-// CouchDB
-var nano = require("nano")(db);
-
-// CHECKSUM
 var fs = require("fs");
+
+var nano = require("nano")(db);
 var checksum = require("checksum"); // deprecated
 
-// SLACK
 var SLACK_WEBHOOK_URL = config.slack_webhook;
 var slack = require("slack-notify")(SLACK_WEBHOOK_URL);
 
-// MQTT
 var mqtt = require("mqtt");
 
-// Main
 var rdict = {};
 
 console.log("-=[ ☢ THiNX IoT RTM NOTIFIER ☢ ]=-" + "\n");
@@ -275,7 +271,7 @@ function availableVersionForDevice(owner, mac) {
   // searches in deployment directory
 
   var deployment_path = deploymentPathForDevice(owner, mac);
-  console.log("deployment_path = " + deployment_path);
+  console.log("availableVersionForDevice deployment_path = " + deployment_path);
 
   // list all files
 
@@ -302,9 +298,9 @@ function hasUpdateAvailable(device) {
   var deployedVersion = availableVersionForDevice(device.owner, device.mac);
 
   if (semver.valid(deviceVersion) == true) {
-
+    console.log("semver.valid:" + deviceVersion);
   } else {
-
+    console.log("semver.invalid:" + deviceVersion);
   }
 
   semver.satisfies("1.2.3", "1.x || >=2.5.0 || 5.0.0 - 7.2.3"); // true
