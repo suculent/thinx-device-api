@@ -28,8 +28,6 @@ machine:
 ## Customize dependencies
 dependencies:
   pre:
-    - gem install jasmine
-    - npm install -g eslint nyc karma
     - npm install .
 
   override:

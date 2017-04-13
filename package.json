@@ -42,7 +42,11 @@
     "eslint": "^3.19.0",
     "grunt-karma-coveralls": "^2.5.4",
     "jshint": "^2.9.4",
-    "nyc": "^10.2.0"
+    "nyc": "^10.2.0",
+    "karma-coverage": "*",
+    "eslint": "*",
+    "nyc": "*",
+    "karma": "*"
   },
   "scripts": {
     "test": "nyc mocha"

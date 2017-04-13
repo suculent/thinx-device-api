@@ -38,6 +38,7 @@ git pull origin master
 echo
 echo "☢  Running node.js as a background process..."
 
+mkdir logs
 nohup node index.js > ./logs/thinx.log
 
 echo
