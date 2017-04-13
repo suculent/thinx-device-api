@@ -46,7 +46,7 @@ echo "» Monitoring log. You can exit any time by pressing ^C and logout. Node.j
 echo
 
 if [[ -f ./logs/thinx.log ]]; then
-	tail -f ./logs/thinx.log
+	tail -f -n200 ./logs/thinx.log
 else
 	echo "./logs/thinx.log not found, exiting silently..."
 fi
