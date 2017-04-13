@@ -70,7 +70,7 @@ app.all("/*", function(req, res, next) {
 		(origin == "127.0.0.1") ||
 		(origin == "undefined")
 	) {
-		//
+		
 	} else {
 		console.log("Origin: " + origin);
 	};

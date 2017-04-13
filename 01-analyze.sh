@@ -15,12 +15,11 @@ fi
 
 # init should be already done and available in repo
 
-echo "» slintám..."
+echo "» Running esLint check..."
 
 eslint **/*.js
-eslint *.js
 
-echo
+exit 0
 
 if [[ ! -f $(which srcclr) ]]; then
   echo "» [:] SourceClear not found, installing..."
