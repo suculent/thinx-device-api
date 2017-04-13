@@ -26,6 +26,9 @@ case $i in
     -m=*|--mac=*)
       DEVICE="${i#*=}"
     ;;
+    -a=*|--alias=*)
+      DEVICE_ALIAS="${i#*=}"
+    ;;
     -g=*|--git=*)
       GIT_REPO="${i#*=}"
     ;;
@@ -116,11 +119,34 @@ echo "Fetched commit ID: ${COMMIT}"
 VERSION=$(git rev-list HEAD --count)
 echo "Version: ${VERSION}"
 
-#cd $REPO_NAME #
+# Overwrite Thinx.h file (should be required)
 
-# TODO:
-# process platformio.ini in order to set correct arduino library path
-# search and adjust Thinx.h with current $COMMIT
+THINX_FILE=$(find . | grep "/Thinx.h")
+THINX_CLOUD_URL="http://thinx.cloud"
+THINX_MQTT_URL="mqtt://thinx.cloud"
+THINX_OWNER=$TENANT 
+
+if [[ ! -z $DEVICE_ALIAS ]]; then
+	THINX_ALIAS=$DEVICE_ALIAS
+else
+	THINX_ALIAS="vanilla"
+fi
+
+echo "//" > $THINX_FILE
+echo "// This is an auto-generated file, it will be re-written by THiNX on cloud build." >> $THINX_FILE
+echo "//" >> $THINX_FILE
+
+echo "" >> $THINX_FILE
+
+echo "String thinx_commit_id = \"${COMMIT}\";" >> $THINX_FILE
+echo "String thinx_owner = \"${THINX_OWNER}\";" >> $THINX_FILE
+echo "String thinx_alias = \"${THINX_ALIAS}\";" >> $THINX_FILE
+echo "String thinx_cloud_url = \"${THINX_CLOUD_URL}\";" >> $THINX_FILE
+echo "String thinx_mqtt_url = \"${THINX_MQTT_URL}\";" >> $THINX_FILE
+
+echo "" >> $THINX_FILE
+
+echo "int thinx_mqtt_port = 1883;" >> $THINX_FILE
 
 # Build
 echo
