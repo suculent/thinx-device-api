@@ -30,7 +30,7 @@ dependencies:
   pre:
     - gem install jasmine
     - npm install -g eslint
-    - npm install .
+    - npm install .    
 
   override:
     - bundle install: # note ':' here
@@ -57,15 +57,17 @@ database:
 test:
 #  override:
 #    - phpunit test/unit-tests # use PHPunit for testing
-  commands:
-    - eslint **/*.js
-    - eslint *.js
+  commands:    
+    - nohup node index.js > thinx.log &
     - bash ./01-analyze.sh
     - bash ./02-deploy.sh
     - bash ./03-test.sh
   post:
     - curl -sSL https://download.sourceclear.com/ci.sh | sh
-    - bundle exec rake jasmine:ci: # add an extra test type
+    - eslint **/*.js
+    - eslint *.js
+    - karma start
+    - bundle exec rake jasmine:ci:
       environment:
         RAILS_ENV: test
         RACK_ENV: test
