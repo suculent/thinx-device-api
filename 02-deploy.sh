@@ -38,7 +38,7 @@ git pull origin master
 if [[ CIRCLECI == true ]]; then
 	echo
 	echo "☢  Running node.js without console for CI..."
-	nohup node index.js > ./logs/things.log
+	nohup node index.js > ./logs/things.log &
 	exit 0
 fi
 
@@ -46,7 +46,7 @@ echo
 echo "☢  Running node.js as a background process..."
 
 mkdir logs
-nohup node index.js > ./logs/thinx.log
+nohup node index.js > ./logs/thinx.log &
 
 echo
 echo "» Monitoring log. You can exit any time by pressing ^C and logout. Node.js will be still running."
