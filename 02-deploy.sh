@@ -38,10 +38,14 @@ git pull origin master
 echo
 echo "☢  Running node.js as a background process..."
 
-nohup node index.js > ./logs/thinx.log &
+nohup node index.js > ./logs/thinx.log
 
 echo
 echo "» Monitoring log. You can exit any time by pressing ^C and logout. Node.js will be still running."
 echo
 
-tail -f ./logs/thinx.log
+if [[ -f ./logs/thinx.log ]]; then
+	tail -f ./logs/thinx.log
+else
+	echo "./logs/thinx.log not found, exiting silently..."
+fi
