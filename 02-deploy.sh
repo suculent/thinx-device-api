@@ -20,7 +20,7 @@ NODEZ=$(ps -ax | grep "$DAEMON")
 
 if [[ $(echo $NODEZ | wc -l) > 1 ]]; then
 
-	echo "${NODEZ}" | while IFS="pts" read A B ; do 
+	echo "${NODEZ}" | while IFS="pts" read A B ; do
 		NODE=$($A | tr -d ' ')
 		echo "Killing: " $NODE $B
 		kill "$NODE"
@@ -38,11 +38,10 @@ git pull origin master
 echo
 echo "☢  Running node.js as a background process..."
 
-nohup node index.js > thinx.log &
+nohup node index.js > ./logs/thinx.log &
 
 echo
 echo "» Monitoring log. You can exit any time by pressing ^C and logout. Node.js will be still running."
 echo
 
-tail -f thinx.log
-
+tail -f ./logs/thinx.log

@@ -12,7 +12,7 @@ if [[ ! -f $(which node) ]]; then
 fi
 
 DAEMON=node
-DAEMONOPTS="index.js > /var/log/thinx.log"
+DAEMONOPTS="index.js > ./logs/thinx.log &"
 
 NAME=thinx
 DESC="THiNX API description"
