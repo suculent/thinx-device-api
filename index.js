@@ -3,6 +3,10 @@
  */
 
 require("./core.js");
+var Version = require("./lib/thinx/version.js");
+
+var v = new Version();
+
 
 //
 // Shared Configuration
@@ -11,7 +15,7 @@ require("./core.js");
 var client_user_agent = client_user_agent;
 
 // Test whether core.js works
-if (client_user_agent == undefined) {
+if (typeof(client_user_agent) == 'undefined') {
 	console.log("client_user_agent not defined in core.js, fixing...");
 	client_user_agent = "THiNX-Client";
 }
@@ -64,9 +68,7 @@ app.all("/*", function(req, res, next) {
 	if ((origin == "http://rtm.thinx.loc") ||
 		(origin == "https://rtm.thinx.cloud") ||
 		(origin == "127.0.0.1") ||
-		(origin == "undefined") ||
-		(origin == undefined)
-
+		(origin == "undefined")
 	) {
 
 	} else {
@@ -130,7 +132,7 @@ app.listen(serverPort, function() {
 	var package_info = require("./package.json");
 	var product = package_info.description;
 	var version = package_info.version;
-	console.log("-=[ ☢ " + product + " v" + version + " ☢ ]=-");
+	console.log("-=[ ☢ " + product + " v" + version + " rev. " + v + " ☢ ]=-");
 	console.log("» Started on port " + serverPort);
 });
 
@@ -144,7 +146,7 @@ app.post("/api/login", function(req, res) {
 	var ua = req.headers["user-agent"];
 	var validity = ua.indexOf(client_user_agent);
 
-	if (validity == 0) {
+	if (validity === 0) {
 		client_type = "device";
 	}
 
@@ -163,7 +165,7 @@ app.post("/api/login", function(req, res) {
 	var username = req.body.username;
 	var password = req.body.password;
 
-	if (username == undefined || password == undefined) {
+	if (typeof(username) == 'undefined' || typeof(password) == 'undefined') {
 		req.session.destroy(function(err) {
 			if (err) {
 				console.log(err);
@@ -222,9 +224,9 @@ app.post("/api/login", function(req, res) {
 					console.log("Password mismatch for " + username);
 				}
 			}
-		};
+		}
 
-		if (req.session.owner == undefined) {
+		if (typeof(req.session.owner) == 'undefined') {
 
 			if (client_type == "device") {
 				res.end(JSON.stringify({
@@ -304,9 +306,9 @@ app.post("/api/view/devices", function(req, res) {
 		var devices = []; // an array by design (needs push), to be encapsulated later
 
 		// Show all devices for admin (if not limited by query)
-		if (req.session.admin == true && req.body.query == undefined) {
+		if (req.session.admin === true && typeof(req.body.query) == 'undefined') {
 			var response = JSON.stringify({
-				devices // should be "devices" : devices according to eslint
+				devices: devices
 			});
 			res.end(response);
 			return;
@@ -324,12 +326,11 @@ app.post("/api/view/devices", function(req, res) {
 				console.log("/api/view/devices: ROW: " + JSON.stringify(rowData) + "\n");
 			}
 		}
-		var response = JSON.stringify({
-			devices
+		var reply = JSON.stringify({
+			devices: devices
 		});
-		console.log("/api/view/devices: Response: " + response);
-		res.end(
-			response);
+		console.log("/api/view/devices: Response: " + reply);
+		res.end(reply);
 	});
 });
 
@@ -354,18 +355,18 @@ app.post("/device/register", function(req, res) {
 	}
 
 	var dict = req.body;
-	var reg = dict["registration"];
+	var reg = dict.registration;
 
-	if (dict["registration"] == undefined) return;
+	if (typeof(dict.registration) == 'undefined') return;
 
-	rdict["registration"] = {};
+	rdict.registration = {};
 
-	var mac = reg["mac"];
-	var fw = reg["firmware"];
-	var hash = reg["hash"];
-	var push = reg["push"];
-	var alias = reg["alias"];
-	var owner = reg["owner"]; // cannot be changed, must match if set
+	var mac = reg.mac;
+	var fw = reg.firmware;
+	var hash = reg.hash;
+	var push = reg.push;
+	var alias = reg.alias;
+	var owner = reg.owner; // cannot be changed, must match if set
 
 	var success = false;
 	var status = "ERROR";
@@ -409,29 +410,31 @@ app.post("/device/register", function(req, res) {
 		// Construct response
 		//
 
-		rdict["registration"]["success"] = success;
-		rdict["registration"]["status"] = status;
+		reg = rdict.registration;
+
+		reg.success = success;
+		reg.status = status;
 
 		if (update_available) {
-			rdict["registration"]["status"] = "FIRMWARE_UPDATE";
-			rdict["registration"]["url"] = firmwareUpdateDescriptor.url;
-			rdict["registration"]["mac"] = firmwareUpdateDescriptor.mac;
-			rdict["registration"]["commit"] = firmwareUpdateDescriptor.commit;
-			rdict["registration"]["version"] = firmwareUpdateDescriptor.version;
-			rdict["registration"]["checksum"] = firmwareUpdateDescriptor.checksum;
+			reg.status = "FIRMWARE_UPDATE";
+			reg.url = firmwareUpdateDescriptor.url;
+			reg.mac = firmwareUpdateDescriptor.mac;
+			reg.commit = firmwareUpdateDescriptor.commit;
+			reg.version = firmwareUpdateDescriptor.version;
+			reg.checksum = firmwareUpdateDescriptor.checksum;
 		}
 
 		if (alias != known_alias) {
-			rdict["registration"]["alias"] = known_alias;
+			reg.alias = known_alias;
 		}
 
 		if (owner != known_owner) {
 			// TODO: Fail from device side, notify admin.
-			rdict["registration"]["owner"] = known_owner;
+			reg.owner = known_owner;
 		}
 
-		if (device_id != null) {
-			rdict["registration"]["device_id"] = device_id;
+		if (device_id !== null) {
+			reg.device_id = device_id;
 		}
 
 		var device = {
@@ -454,17 +457,17 @@ app.post("/device/register", function(req, res) {
 
 				if (err) {
 					console.log("Inserting device failed. " + err + "\n");
-					rdict["registration"]["success"] = false;
-					rdict["registration"]["status"] = "Insertion failed";
-					console.log(rdict["registration"]);
+					reg.success = false;
+					reg.status = "Insertion failed";
+					console.log(reg);
 
 				} else {
 					console.log("Device inserted. Response: " + JSON.stringify(
 							body) +
 						"\n");
-					rdict["registration"]["success"] = true;
-					rdict["registration"]["status"] = "OK";
-					console.log(rdict["registration"]);
+					reg.success = true;
+					reg.status = "OK";
+					console.log(reg);
 				}
 
 				sendRegistrationOKResponse(res, rdict);
@@ -472,7 +475,7 @@ app.post("/device/register", function(req, res) {
 
 		} else {
 
-			console.log(rdict["registration"]);
+			console.log(reg);
 
 			// KNOWN:
 			// - see if new firmware is available and reply FIRMWARE_UPDATE with url
@@ -483,23 +486,23 @@ app.post("/device/register", function(req, res) {
 
 				if (!error) {
 
-					if (typeof(firmware) != undefined && firmware != null) {
+					if (typeof(firmware) !== undefined && firmware !== null) {
 						existing.firmware = fw;
 					}
 
-					if (typeof(hash) != undefined && hash != null) {
+					if (typeof(hash) !== undefined && hash !== null) {
 						existing.hash = hash;
 					}
 
-					if (typeof(push) != undefined && push != null) {
+					if (typeof(push) !== undefined && push !== null) {
 						existing.push = push;
 					}
 
-					if (typeof(alias) != undefined && alias != null) {
+					if (typeof(alias) !== undefined && alias !== null) {
 						existing.alias = alias;
 					}
 
-					if (typeof(owner) != undefined && owner != null) {
+					if (typeof(owner) !== undefined && owner !== null) {
 						existing.owner = owner;
 					}
 
@@ -512,7 +515,7 @@ app.post("/device/register", function(req, res) {
 							console.log("Device updated. Response: " + JSON.stringify(
 								body) + "\n");
 
-							rdict["registration"]["success"] = true;
+							reg.success = true;
 
 							// TESTING FIRMWARE_UPDATE
 							//rdict["registration"]["status"] = "OK"; // test only, uncomment for production
@@ -525,11 +528,13 @@ app.post("/device/register", function(req, res) {
 
 							console.log("INSERT:FAILED");
 
-							rdict["registration"]["success"] = false;
-							rdict["registration"]["status"] = "Insert failed";
+							reg.success = false;
+							reg.this.status = "Insert failed";
 
 							console.log("CHECK5:");
-							console.log(rdict["registration"]);
+							console.log(reg);
+							console.log("CHECK5.1:");
+							console.log(rdict);
 
 							sendRegistrationOKResponse(res, rdict);
 						}
@@ -538,8 +543,8 @@ app.post("/device/register", function(req, res) {
 				} else {
 
 					console.log("GET:FAILED");
-					rdict["registration"]["success"] = false;
-					rdict["registration"]["status"] = "Get for update failed";
+					reg.success = false;
+					reg.status = "Get for update failed";
 
 					sendRegistrationOKResponse(res, rdict);
 				}
@@ -574,7 +579,7 @@ function validateRequest(req, res) {
 	var ua = req.headers["user-agent"];
 	var validity = ua.indexOf(client_user_agent);
 
-	if (validity == 0) {
+	if (validity === 0) {
 		return true;
 	} else {
 		console.log("☢ UA: " + ua + " invalid!");
@@ -680,25 +685,24 @@ app.post("/api/build", function(req, res) {
 		"Content-Type": "application/json"
 	});
 
-	if (validateRequest(req, res) == true) {
+	if (validateRequest(req, res) === true) {
 
 		var rdict = {};
-		var dict = req.body;
 
-		var build = dict["build"];
+		var build = req.body.build;
 		var mac = build.mac;
 		var tenant = build.owner;
 		var git = build.git;
 		var dryrun = false;
 
-		if (typeof(build.dryrun) != undefined) {
+		if (typeof(build.dryrun) != 'undefined') {
 			dryrun = build.dryrun;
 		}
 
-		if ((typeof(build) == undefined || build == null) ||
-			(typeof(mac) == undefined || mac == null) ||
-			(typeof(tenant) == undefined || tenant == null) ||
-			(typeof(git) == undefined || git == null)) {
+		if ((typeof(build) === 'undefined' || build === null) ||
+			(typeof(mac) === 'undefined' || mac === null) ||
+			(typeof(tenant) === 'undefined' || tenant === null) ||
+			(typeof(git) === 'undefined' || git === null)) {
 
 			rdict = {
 				build: {
@@ -713,7 +717,7 @@ app.post("/api/build", function(req, res) {
 
 		var build_id = uuidV1();
 
-		if (dryrun == false) {
+		if (dryrun === false) {
 			rdict = {
 				build: {
 					success: true,
@@ -747,7 +751,7 @@ function buildCommand(build_id, tenant, mac, git, dryrun) {
 	var exec = require("child_process").exec;
 	CMD = "./builder --tenant=" + tenant + " --mac=" + mac + " --git=" + git +
 		" --id=" + build_id;
-	if (dryrun == true) {
+	if (dryrun === true) {
 		CMD = CMD + " --dry-run";
 	}
 	console.log(CMD);

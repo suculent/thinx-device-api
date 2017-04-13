@@ -24,7 +24,11 @@ echo
 
 if [[ ! -f $(which srcclr) ]]; then
   echo "» [:] SourceClear not found, installing..."
-  curl -sSL https://srcclr.com/install | bash
+  # curl -sSL https://srcclr.com/install | bash
+  sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys DF7DD7A50B746DD4
+  sudo add-apt-repository "deb https://download.srcclr.com/ubuntu stable/"
+  sudo apt-get update -y
+  sudo apt-get install -y srcclr
 fi
 
 #

@@ -64,8 +64,7 @@ test:
     - bash ./03-test.sh
   post:
     - curl -sSL https://download.sourceclear.com/ci.sh | sh
-    - eslint **/*.js
-    - eslint *.js
+#    - eslint *.js
     - karma start
     - bundle exec rake jasmine:ci:
       environment:

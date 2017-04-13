@@ -1,5 +1,6 @@
 require 'coveralls'
 Coveralls.wear!
 
-# Your code here.
-
+config.expect_with :rspec do |c|
+    c.syntax = [:should, :expect]
+end
