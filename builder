@@ -145,15 +145,19 @@ echo "//" >> $THINX_FILE
 echo "" >> $THINX_FILE
 
 echo "static const String thinx_commit_id = \"${COMMIT}\";" >> $THINX_FILE
-echo "static const String thinx_owner = \"${THINX_OWNER}\";" >> $THINX_FILE
-echo "static const String thinx_alias = \"${THINX_ALIAS}\";" >> $THINX_FILE
 echo "static const String thinx_cloud_url = \"${THINX_CLOUD_URL}\";" >> $THINX_FILE
 echo "static const String thinx_mqtt_url = \"${THINX_MQTT_URL}\";" >> $THINX_FILE
+echo "static const String thinx_firmware_version = \"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\";" >> $THINX_FILE
 echo "static const String app_version = "\"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\";" >> $THINX_FILE
+echo "String thinx_owner = \"${THINX_OWNER}\";" >> $THINX_FILE
+echo "String thinx_alias = \"${THINX_ALIAS}\";" >> $THINX_FILE
 
 echo "" >> $THINX_FILE
 
+echo "WARNING: MQTT port is not parametrized.";
 echo "int thinx_mqtt_port = 1883;" >> $THINX_FILE
+echo "WARNING: API port is not parametrized here.";
+echo "int thinx_api_port = 7442;" >> $THINX_FILE
 
 # Build
 echo
