@@ -377,7 +377,12 @@ app.post("/device/register", function(req, res) {
 	rdict.registration = {};
 
 	var mac = reg.mac;
-	var fw = reg.firmware || "unknown";
+	var fw;
+	if (reg["firmware"] === "undefined") {
+		fw = "unknown";
+	} else {
+		fw = reg.firmware;
+	}
 	var hash = reg.hash;
 	var push = reg.push;
 	var alias = reg.alias;
