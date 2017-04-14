@@ -55,6 +55,11 @@ var sess;
 
 app.all("/*", function(req, res, next) {
 
+	// Skip security for devices so far
+	var client = req.get("User-Agent");
+	if (client == client_user_agent) {
+		next();
+	}
 	// CORS headers
 
 	var origin = req.get("origin");
@@ -71,13 +76,6 @@ app.all("/*", function(req, res, next) {
 	}
 
 	console.log("Origin: " + origin);
-
-	// Skip security for devices so far
-	var client = req.get("User-Agent");
-	if (client == client_user_agent) {
-		next();
-		return;
-	}
 
 	res.header("Access-Control-Allow-Origin", allowedOrigin); // rtm.thinx.cloud
 	res.header("Access-Control-Allow-Credentials", "true");
