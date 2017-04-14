@@ -69,6 +69,8 @@ app.all("/*", function(req, res, next) {
 		console.log("Origin: " + origin);
 	}
 
+	console.log("Origin: " + origin);
+
 	res.header("Access-Control-Allow-Origin", allowedOrigin); // rtm.thinx.cloud
 	res.header("Access-Control-Allow-Credentials", "true");
 	res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
