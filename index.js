@@ -376,6 +376,8 @@ app.post("/device/register", function(req, res) {
 
 	rdict.registration = {};
 
+	console.log(reg.toString());
+
 	var mac = reg.mac;
 	var fw;
 	if (reg["firmware"] === "undefined") {
