@@ -381,10 +381,11 @@ app.post("/device/register", function(req, res) {
 	var mac = reg.mac;
 	var fw = "unknown";
 	if (!reg.hasOwnProperty("firmware")) {
-		fw
+		fw = "undefined";
 	} else {
 		fw = reg.firmware;
 	}
+
 	var hash = reg.hash;
 	var push = reg.push;
 	var alias = reg.alias;
@@ -396,7 +397,7 @@ app.post("/device/register", function(req, res) {
 	var isNew = true;
 
 	// See if we know this MAC which is a primary key in db
-	devicelib.get(mac, function(err, existing) {
+	devicelib.get(mac, function(err, existing, fw) {
 
 		if (err) {
 			console.log("Querying devices failed. " + err + "\n");
