@@ -75,9 +75,12 @@ app.all("/*", function(req, res, next) {
 	// Custom user agent is required for devices
 	var client = req.get("User-Agent");
 	if (client == client_user_agent) {
+		onsole.log("Device Agent: " + client);
 		if (origin == "device") {
 			next();
 			return;
+		} else {
+			onsole.log("Non-device Origin: " + origin);
 		}
 	}
 
@@ -374,7 +377,7 @@ app.post("/device/register", function(req, res) {
 	rdict.registration = {};
 
 	var mac = reg.mac;
-	var fw = reg.firmware;
+	var fw = reg.firmware || "unknown";
 	var hash = reg.hash;
 	var push = reg.push;
 	var alias = reg.alias;

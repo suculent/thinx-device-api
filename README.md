@@ -109,16 +109,20 @@ http://localhost:7442/api/build
 
 Main registration endpoint. Serves for monitoring device firmware versions.
 
+Devices must use `Origin: device` header to circumvent Access-Control.
+
 Usage example:
 
 User agent must be set properly or the request will be rejected.
 
 Push token, alias and owner parameters are optional. Has is optional for backwards compatibility only, otherwise it's required since EAV firmware 0.4.1.
 
-    curl -H "User-Agent: THiNX-Client" \
-    -H "Content-Type: application/json" \
-    -X POST -d '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "push-registration-token-optional", "alias" : "test", "owner": "admin" } }' \
-    http://thinx.cloud:7442/device/register
+```
+curl -H 'Origin: device' -H "User-Agent: THiNX-Client" \
+-H "Content-Type: application/json" \
+-X POST -d '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "push-registration-token-optional", "alias" : "test", "owner": "admin" } }' \
+http://thinx.cloud:7442/device/register
+```
 
 • HTTP POST JSON body:
 
