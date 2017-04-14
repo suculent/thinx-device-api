@@ -75,7 +75,7 @@ app.all("/*", function(req, res, next) {
 	// Custom user agent is required for devices
 	var client = req.get("User-Agent");
 	if (client == client_user_agent) {
-		if (origin === "undefined") {
+		if (origin == "device") {
 			next();
 			return;
 		}
