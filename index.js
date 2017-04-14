@@ -379,9 +379,9 @@ app.post("/device/register", function(req, res) {
 	console.log(reg.toString());
 
 	var mac = reg.mac;
-	var fw;
-	if (reg["firmware"] === "undefined") {
-		fw = "unknown";
+	var fw = "unknown";
+	if (!reg.hasOwnProperty("firmware")) {
+		fw
 	} else {
 		fw = reg.firmware;
 	}
@@ -509,7 +509,7 @@ app.post("/device/register", function(req, res) {
 
 				if (!error) {
 
-					if (typeof(firmware) !== undefined && firmware !== null) {
+					if (typeof(fw) !== undefined && fw !== null) {
 						existing.firmware = fw;
 					}
 
