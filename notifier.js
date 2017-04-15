@@ -2,8 +2,6 @@
  * This THiNX-RTM module is responsible for saving build results to database and notifying users/devices
  */
 
-//"use strict";
-
 //
 // Shared Configuration
 //
@@ -140,11 +138,11 @@ var devicelib = require("nano")(db).use("managed_devices");
 var buildEnvelope = {
   url: repo_url,
   //  path: build_path,
-  //  mac: mac,
+  mac: mac,
   commit: commit_id,
   version: version,
   checksum: sha,
-  //  build_id: build_id,
+  build_id: build_id,
   owner: owner,
   status: status,
   timestamp: new Date()
@@ -155,6 +153,19 @@ var buildEnvelope = {
 var envelopePath = deploymentPathForDevice(owner, mac) + "/" + commit_id +
   ".json";
 console.log("Saving build envelope: " + envelopePath);
+
+function deploymentPathForDevice(owner, mac) {
+  // MMAC is file-system agnostic and easy to search
+  var mmac = mac.toString().replace(":", "-");
+
+  // Get path for owner (and optinaly a device)
+  var user_path = config.deploy_root + "/" + owner;
+  var device_path = user_path;
+  if (mac.indexOf("ANY") != -1) {
+    device_path = device_path + "/" + mac;
+  }
+  return device_path;
+}
 
 fs.open(envelopePath, 'w', function(err, fd) {
   if (err) {
@@ -177,8 +188,8 @@ fs.open(envelopePath, 'w', function(err, fd) {
 
 // Select targets
 
-// -- fetch devices with matching MAC or any
-// -- collect push tokens (each only once)
+// TODO: -- fetch devices with matching MAC or any
+// TODO: -- collect push tokens (each only once)
 
 // Notify admin (Slack)
 
@@ -256,39 +267,6 @@ console.log("\n");
 
 // Device channel
 notify_device_channel(owner, mac, message);
-
-//
-// Version Management
-//
-
-
-
-function getFiles(dir, files_) {
-  files_ = files_ || [];
-  var files = fs.readdirSync(dir);
-  for (var i in files) {
-    var name = dir + '/' + files[i];
-    if (fs.statSync(name).isDirectory()) {
-      getFiles(name, files_);
-    } else {
-      files_.push(name);
-    }
-  }
-  return files_;
-}
-
-function deploymentPathForDevice(owner, mac) {
-  // MMAC is file-system agnostic and easy to search
-  var mmac = mac.toString().replace(":", "-");
-
-  // Get path for owner (and optinaly a device)
-  var user_path = config.deploy_root + "/" + owner;
-  var device_path = user_path;
-  if (mac.indexOf("ANY") != -1) {
-    device_path = device_path + "/" + mac;
-  }
-  return device_path;
-}
 
 //
 // MQTT Notifications (for Devices)

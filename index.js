@@ -496,8 +496,7 @@ app.post("/device/register", function(req, res) {
 		reg.status = status;
 
 		if (alias != known_alias) {
-			reg.alias = known_alias;
-			alias = known_alias; // should force update in device library
+			known_alias = alias; // should force update in device library
 		}
 
 		if (known_owner === "") {
@@ -535,10 +534,10 @@ app.post("/device/register", function(req, res) {
 
 		var update = deploy.hasUpdateAvailable(device);
 		if (update) {
-			console.log("Firmware update found!");
+			console.log("Firmware update available.");
 			var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(device);
-			console.log(firmwareUpdateDescriptor);
 			reg.status = "FIRMWARE_UPDATE";
+			reg.success = true;
 			reg.url = firmwareUpdateDescriptor.url;
 			reg.mac = firmwareUpdateDescriptor.mac;
 			reg.commit = firmwareUpdateDescriptor.commit;

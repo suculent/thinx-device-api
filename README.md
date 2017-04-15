@@ -123,7 +123,7 @@ curl -v \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--X POST -d '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "version" : "1.0.0", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "push-registration-token-optional", "alias" : "test", "owner": "admin" } }' \
+-X POST -d '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "version" : "1.0.0", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "dhho4djVGeQ:APA91bFuuZWXDQ8vSR0YKyjWIiwIoTB1ePqcyqZFU3PIxvyZMy9htu9LGPmimfzdrliRfAdci-AtzgLCIV72xmoykk-kHcYRhAFWFOChULOGxrDi00x8GgenORhx_JVxUN_fjtsN5B7T", "alias" : "rabbit", "owner": "test" } }' \
 http://thinx.cloud:7442/device/register
 ```
 
@@ -135,9 +135,9 @@ http://thinx.cloud:7442/device/register
             "firmware" : "EAV-App-0.4.0-beta:2017/04/08",
             "version" : "1.0.0",
             "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732",
-            "push" : "push-registration-token-optional",
-            "alias" : "test",
-            "owner": "admin"
+            "push" : "dhho4djVGeQ:APA91bFuuZWXDQ8vSR0YKyjWIiwIoTB1ePqcyqZFU3PIxvyZMy9htu9LGPmimfzdrliRfAdci-AtzgLCIV72xmoykk-kHcYRhAFWFOChULOGxrDi00x8GgenORhx_JVxUN_fjtsN5B7T",
+            "alias" : "rabbit",
+            "owner": "test"
         }
     }
 
