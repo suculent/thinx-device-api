@@ -640,7 +640,7 @@ app.post("/device/register", function(req, res) {
 
 function sendRegistrationOKResponse(res, dict) {
 	var json = JSON.stringify(dict);
-	res.set('Connection', 'close');
+	res.set("Connection", "close");
 	res.end(json);
 }
 

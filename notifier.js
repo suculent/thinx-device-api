@@ -167,9 +167,9 @@ function deploymentPathForDevice(owner, mac) {
   return device_path;
 }
 
-fs.open(envelopePath, 'w', function(err, fd) {
+fs.open(envelopePath, "w", function(err, fd) {
   if (err) {
-    throw 'error opening file: ' + err;
+    throw "error opening file: " + err;
   } else {
     fs.writeFile(envelopePath, JSON.stringify(buildEnvelope), function(err) {
       if (err) {
