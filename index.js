@@ -452,7 +452,10 @@ app.post("/device/register", function(req, res) {
 
 			if (api_key_valid === false) {
 				console.log("Invalid API key.");
-				res.end();
+				res.end({
+					success: false,
+					status: "authentication"
+				});
 				return;
 			}
 		}
