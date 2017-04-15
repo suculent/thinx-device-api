@@ -2,7 +2,7 @@
  * This THiNX-RTM module is responsible for saving build results to database and notifying users/devices
  */
 
-"use strict";
+//"use strict";
 
 //
 // Shared Configuration
@@ -10,23 +10,17 @@
 
 var config = require("./conf/config.json");
 var sha256 = require("sha256");
-var db = config["database_uri"];
+
+var db = config.database_uri;
+var client_user_agent = config.client_user_agent;
+var slack_webhook = config.slack_webhook;
+var slack = require("slack-notify")(slack_webhook);
 
 var that = this;
 
-// Network
-var client_user_agent = config.client_user_agent;
-
-
 var http = require("http");
 var fs = require("fs");
-
 var nano = require("nano")(db);
-var checksum = require("checksum"); // deprecated
-
-var SLACK_WEBHOOK_URL = config.slack_webhook;
-var slack = require("slack-notify")(SLACK_WEBHOOK_URL);
-
 var mqtt = require("mqtt");
 
 var rdict = {};
@@ -48,51 +42,49 @@ var status = process.argv[10] || true; // build result status
 // Validate params
 
 // Default build identifier
-if (build_id == undefined || build_id == "") {
+if (typeof(build_id) === "undefined" || build_id === "") {
   build_id = "0xBUILD_ID";
 }
 
 // Existing commit identifier for initial OTA firmware
-if (commit_id == undefined || commit_id == "") {
+if (typeof(commit_id) === "undefined" || commit_id === "") {
   commit_id = "18ee75e3a56c07a9eff08f75df69ef96f919653f"; // test only!
 }
 
 // We"ll build for ZERO-MAC by default instead of "ANY" to prevent accidents
-if (mac == undefined || mac == "") {
+if (typeof(mac) === "undefined" || mac === "") {
   mac = "00:00:00:00:00:00";
 }
 
 // Attribute all builds to test user by default
-if (owner == undefined || owner == "") {
+if (typeof(owner) === "undefined" || owner === "") {
   owner = "test";
 }
 
 // Default version
-if (version == undefined || version == "") {
+if (typeof(version) === "undefined" || version === "") {
   version = "0.0.1";
 }
 
 // Default path for vanilla OTA firmware
-if (repo_url == undefined || repo_url == "") {
+if (typeof(repo_url) === "undefined" || repo_url === "") {
   repo_url = "git@github.com:suculent/thinx-firmware-esp8266.git";
 }
 
 // Default path
-if (build_path == undefined || build_path == "") {
+if (typeof(build_path) === "undefined" || build_path === "") {
   build_path = config.deploy_root + "/" + owner + "/" + commit_id;
 }
 
-if (sha == undefined || sha == "") {
+if (typeof(sha) === "undefined" || sha === "") {
   var binary = build_path + ".bin";
   console.log("Calculating sha256 checksum for " + binary);
 
-  fs = require("fs");
   var data = fs.readFileSync(binary, "binary", function(err, data) {
     if (err) {
-      return console.log(err);
+      console.log(err);
     }
   });
-
   if (data) {
     sha = sha256(data.toString());
     that.sha = sha;
@@ -161,15 +153,22 @@ var buildEnvelope = {
 
 var envelopePath = deploymentPathForDevice(owner, mac) + "/" + commit_id +
   ".json";
-console.log("envelopePath: " + envelopePath);
+console.log("Saving build envelope: " + envelopePath);
 
-fs.writeFile(envelopePath, JSON.stringify(buildEnvelope), function(err) {
+fs.open(envelopePath, 'w', function(err, fd) {
   if (err) {
-    return console.log("Commit descriptor save error: " + err);
+    throw 'error opening file: ' + err;
   } else {
-    console.log("Commit descriptor saved successfully.");
+    fs.writeFile(envelopePath, JSON.stringify(buildEnvelope), function(err) {
+      if (err) {
+        console.log("Build envelope save error: " + err);
+      } else {
+        console.log("Build envelope saved successfully:");
+        console.log(JSON.stringify(buildEnvelope));
+      }
+      console.log("\n");
+    });
   }
-  console.log("\n");
 });
 
 // TODO: Update current build version in managed_repos
@@ -184,7 +183,7 @@ fs.writeFile(envelopePath, JSON.stringify(buildEnvelope), function(err) {
 
 // Bundled notification types:
 
-if (status == true) {
+if (status === true) {
   slack.alert({
     text: "Build successfully completed.",
     username: "notifier.js",
@@ -273,10 +272,34 @@ function availableVersionForDevice(owner, mac) {
   var deployment_path = deploymentPathForDevice(owner, mac);
   console.log("availableVersionForDevice deployment_path = " + deployment_path);
 
+  var files = getFiles(deployment_path);
+  console.log("Files: " + files);
+
+  // TODO: Track only .bin files with their timestamps.
+
+  var stats = fs.statSync(files[0]);
+  var mtime = new Date(util.inspect(stats.mtime));
+  console.log(mtime);
+
+
   // list all files
 
   // Find latest binary, fetch version
 
+}
+
+function getFiles(dir, files_) {
+  files_ = files_ || [];
+  var files = fs.readdirSync(dir);
+  for (var i in files) {
+    var name = dir + '/' + files[i];
+    if (fs.statSync(name).isDirectory()) {
+      getFiles(name, files_);
+    } else {
+      files_.push(name);
+    }
+  }
+  return files_;
 }
 
 function deploymentPathForDevice(owner, mac) {
