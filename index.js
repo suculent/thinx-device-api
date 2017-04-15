@@ -395,12 +395,14 @@ app.post("/device/register", function(req, res) {
 	var success = false;
 	var status = "ERROR";
 
-	if (req.headers.authentication) {
+	console.log(req.headers);
+
+	if (typeof(req.headers.authentication) !== "undefined") {
 		api_key = req.headers.authentication;
-		console.log("API KEY: Found in request: " + api_key);
+		console.log("API KEY  in request: '" + api_key + "'");
 	} else {
 		console.log("ERROR: Registration requests now require API key!");
-		req.end();
+		res.end();
 	}
 
 	console.log("Serching for owner: " + owner);
@@ -452,7 +454,7 @@ app.post("/device/register", function(req, res) {
 			}
 
 			if (api_key_valid === false) {
-				console.log("Invlaid API key.");
+				console.log("Invalid API key.");
 				req.end();
 				return;
 			}
