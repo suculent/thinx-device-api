@@ -192,10 +192,7 @@ app.post("/api/login", function(req, res) {
 		});
 	}
 
-	userlib.view("users", "owners_by_username", {
-		"key": username,
-		"include_docs": true // might be useless
-	}, function(err, body) {
+	userlib.get(owner, function(err, existing, req, res) {
 
 		if (err) {
 			console.log("Error: " + err.toString());
@@ -205,8 +202,8 @@ app.post("/api/login", function(req, res) {
 				if (err) {
 					console.log(err);
 				} else {
-					failureResponse(res, 501, "protocol");
-					console.log("Not a post request.");
+					failureResponse(res, 403, "unauthorized");
+					console.log("Owner not found: " + owner);
 				}
 			});
 			return;
@@ -444,7 +441,7 @@ app.post("/device/register", function(req, res) {
 		var all_users = body.rows;
 		for (var index in all_users) {
 			var user_data = all_users[index];
-			console.log("User-data (we sarch for api_keys array)");
+			console.log("User-data (we sarch for api_keys array)" + user_data);
 
 			for (var kindex in user_data.api_keys) {
 				if (api_key == user_data.api_keys[kindex]) {
@@ -455,7 +452,7 @@ app.post("/device/register", function(req, res) {
 
 			if (api_key_valid === false) {
 				console.log("Invalid API key.");
-				req.end();
+				res.end();
 				return;
 			}
 		}
