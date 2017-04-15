@@ -133,7 +133,7 @@ else
 fi
 
 REPO_NAME=basename(pwd)
-REPO_VERSION="1.0.${VERSION}" # todo: is not semantic at all
+REPO_VERSION="0.3.${VERSION}" # todo: is not semantic at all, 0.3 should be recent git tag
 BUILD_DATE=`date +%Y-%m-%d`
 
 # TODO: Change this to a sed template, this is tedious
@@ -151,6 +151,7 @@ echo "static const String thinx_firmware_version = \"${REPO_NAME}-${REPO_VERSION
 echo "static const String app_version = "\"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\";" >> $THINX_FILE
 echo "String thinx_owner = \"${THINX_OWNER}\";" >> $THINX_FILE
 echo "String thinx_alias = \"${THINX_ALIAS}\";" >> $THINX_FILE
+echo "String thinx_api_key = \"VANILLA_API_KEY\";;" >> $THINX_FILE # this just adds placeholder, key must not leak in binary...
 
 echo "" >> $THINX_FILE
 
