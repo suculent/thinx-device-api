@@ -60,10 +60,10 @@ test:
   post:
     - curl -sSL https://download.sourceclear.com/ci.sh | sh
     - karma start
-    - bundle exec rake jasmine:ci:
-      environment:
-        RAILS_ENV: test
-        RACK_ENV: test
+#    - bundle exec rake jasmine:ci: # no rakefile
+#      environment:
+#        RAILS_ENV: test
+#        RACK_ENV: test
     - cp -v ./coverage $CIRCLE_ARTIFACTS
 
 ## Customize deployment commands
