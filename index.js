@@ -52,6 +52,7 @@ app.use(parser.urlencoded({
 }));
 
 var sess;
+var api_key = null;
 
 app.all("/*", function(req, res, next) {
 
@@ -392,22 +393,24 @@ app.post("/device/register", function(req, res) {
 	var push = reg.push;
 	var alias = reg.alias;
 	var owner = reg.owner; // cannot be changed, must match if set
-	var api_key = null;
 
 	var success = false;
 	var status = "ERROR";
+
+
 
 	console.log(req.headers);
 
 	if (typeof(req.headers.authentication) !== "undefined") {
 		api_key = req.headers.authentication;
-		console.log("API KEY  in request: '" + api_key + "'");
+		console.log("API KEY in request: '" + api_key + "'");
 	} else {
 		console.log("ERROR: Registration requests now require API key!");
 		res.end();
 	}
 
 	console.log("Serching for owner: " + owner);
+	console.log("api_key: " + api_key);
 
 	//Error: Error: missing
 	// Caught exception: TypeError: Cannot read property 'session' of undefined
@@ -416,6 +419,8 @@ app.post("/device/register", function(req, res) {
 		"key": owner,
 		"include_docs": true // might be useless
 	}, function(err, body, req, res, api_key) {
+
+		console.log("api_key: " + api_key);
 
 		if (err) {
 			console.log("Error: " + err.toString());
@@ -453,8 +458,8 @@ app.post("/device/register", function(req, res) {
 			var user_data = all_users[index].doc;
 			for (var kindex in user_data.api_keys) {
 				var userkey = user_data.api_keys[kindex];
-				console.log("Matching key " + userkey);
-				if (api_key.indexOf(userkey) !== -1) {
+				console.log("Matching key " + userkey + " to " + api_key);
+				if (userkey.indexOf(api_key) !== -1) {
 					console.log("Valid key " + userkey);
 					api_key_valid = true;
 					break;
