@@ -138,7 +138,7 @@ var devicelib = require("nano")(db).use("managed_devices");
 // TODO: Create build envelope
 
 var buildEnvelope = {
-  url: "<" + repo_url + "|" + repo_url + ">",
+  url: repo_url,
   //  path: build_path,
   //  mac: mac,
   commit: commit_id,
@@ -146,7 +146,8 @@ var buildEnvelope = {
   checksum: sha,
   //  build_id: build_id,
   owner: owner,
-  status: status
+  status: status,
+  timestamp: new Date()
 };
 
 // save to build_path

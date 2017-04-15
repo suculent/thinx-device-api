@@ -123,7 +123,7 @@ curl -v \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--X POST -d '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "push-registration-token-optional", "alias" : "test", "owner": "admin" } }' \
+-X POST -d '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "version" : "1.0.0", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "push-registration-token-optional", "alias" : "test", "owner": "admin" } }' \
 http://thinx.cloud:7442/device/register
 ```
 
@@ -133,6 +133,7 @@ http://thinx.cloud:7442/device/register
         "registration" : {
             "mac" : "00:00:00:00:00:00",
             "firmware" : "EAV-App-0.4.0-beta:2017/04/08",
+            "version" : "1.0.0",
             "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732",
             "push" : "push-registration-token-optional",
             "alias" : "test",

@@ -472,21 +472,19 @@ app.post("/device/register", function(req, res) {
 		var status = "OK";
 
 		var device_id = mac;
+		var device_version = "1.0.0"; // default
+
+		if (typeof(req.version) !== "undefined" && req.version !== null) {
+			device_version = req.version;
+		}
+
+		// TODO: Find existing version by firmware hash (from envelope)
+		//deploy.initWithDevice(...)
+		//deploy.versionWithHash(hash)
 
 		var firmware_url = "";
 		var known_alias = "";
 		var known_owner = "";
-
-		update_available = false; // test only
-
-		console.log("Seaching for possible firmware update...");
-
-
-
-		// function isUpdateAvailable(device) should search for new files since
-		// last installed firmware (version ideally)
-
-
 
 		//
 		// Construct response
@@ -496,8 +494,6 @@ app.post("/device/register", function(req, res) {
 
 		reg.success = success;
 		reg.status = status;
-
-
 
 		if (alias != known_alias) {
 			reg.alias = known_alias;
@@ -528,48 +524,31 @@ app.post("/device/register", function(req, res) {
 			push: push,
 			alias: alias,
 			owner: owner,
+			version: device_version,
 			device_id: device_id,
 			lastupdate: new Date()
 		};
 
+		console.log("Seaching for possible firmware update...");
 		var deploy = require("./lib/thinx/deployment");
-		//var dpath = deploy.pathForDevice(owner, mac);
 		deploy.initWithDevice(device);
-
-		var latestFirmware = deploy.latestFirmwarePath(device.owner, device.mac);
-		console.log("Latest firmware: " + latestFirmware);
 
 		var update = deploy.hasUpdateAvailable(device);
 		if (update) {
-			console.log("Firmware update available.");
-
-			var firmwareUpdateDescriptor = deloy.latestFirmwareEnvelope(device);
-
-			/*
-			// this is only a fake
-			// TODO: fetch from commit notification descriptor
-			var firmwareUpdateDescriptor = {
-				url: "/bin/test/3b19d050daa5924a2370eb8ef5ac51a484d81d6e.bin",
-				mac: "ANY",
-				commit: "3b19d050daa5924a2370eb8ef5ac51a484d81d6e",
-				version: "1",
-				checksum: "4044decaad0627adb7946e297e5564aaf0c53f958175b388e02f455d3e6bc3d4"
-			};
-			*/
-
+			console.log("Firmware update found!");
+			var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(device);
+			console.log(firmwareUpdateDescriptor);
 			reg.status = "FIRMWARE_UPDATE";
 			reg.url = firmwareUpdateDescriptor.url;
 			reg.mac = firmwareUpdateDescriptor.mac;
 			reg.commit = firmwareUpdateDescriptor.commit;
 			reg.version = firmwareUpdateDescriptor.version;
 			reg.checksum = firmwareUpdateDescriptor.checksum;
-
 		} else {
-			console.log("Firmware is current");
+			console.log("No firmware update available.");
 		}
 
 		if (isNew) {
-
 			// Create UDID for new device
 			device.device_id = uuidV1();
 
