@@ -52,7 +52,6 @@ app.use(parser.urlencoded({
 }));
 
 var sess;
-var api_key = null;
 
 app.all("/*", function(req, res, next) {
 
@@ -355,6 +354,8 @@ app.post("/api/view/devices", function(req, res) {
 // Device login/registration (no authentication, no validation, allows flooding so far)
 app.post("/device/register", function(req, res) {
 
+	var api_key = null;
+
 	validateRequest(req, res);
 
 	sess = req.session;
@@ -410,7 +411,6 @@ app.post("/device/register", function(req, res) {
 	}
 
 	console.log("Serching for owner: " + owner);
-	console.log("api_key 1: " + api_key);
 
 	//Error: Error: missing
 	// Caught exception: TypeError: Cannot read property 'session' of undefined
@@ -419,8 +419,6 @@ app.post("/device/register", function(req, res) {
 		"key": owner,
 		"include_docs": true // might be useless
 	}, function(err, body) {
-
-		console.log("api_key 2: " + api_key);
 
 		if (err) {
 			console.log("Error: " + err.toString());
@@ -451,16 +449,14 @@ app.post("/device/register", function(req, res) {
 			api_key_valid = false;
 		}
 
-		var all_users = body.rows;
-		console.log(body);
+		var user_record = body.rows;
 
-		for (var index in all_users) {
-			var user_data = all_users[index].doc;
+		// Should be only one record actually
+		for (var index in user_record) {
+			var user_data = user_record[index].doc;
 			for (var kindex in user_data.api_keys) {
 				var userkey = user_data.api_keys[kindex];
-				console.log("Matching key " + userkey + " to " + api_key);
 				if (userkey.indexOf(api_key) !== -1) {
-					console.log("Valid key " + userkey);
 					api_key_valid = true;
 					break;
 				}
