@@ -52,8 +52,10 @@ echo
 echo "» Monitoring log. You can exit any time by pressing ^C and logout. Node.js will be still running."
 echo
 
-if [[ -f ./logs/thinx.log ]]; then
-	tail -f -n200 ./logs/thinx.log
-else
-	echo "./logs/thinx.log not found, exiting silently..."
+if [[ CIRCLECI == false ]]; then
+	if [[ -f ./logs/thinx.log ]]; then
+		tail -f -n200 ./logs/thinx.log
+	else
+		echo "./logs/thinx.log not found, exiting silently..."
+	fi
 fi
