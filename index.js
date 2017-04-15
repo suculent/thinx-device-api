@@ -451,25 +451,25 @@ app.post("/device/register", function(req, res) {
 
 		for (var index in all_users) {
 			var user_data = all_users[index].doc;
-			console.log("User-data (we sarch for api_keys array)" + user_data.toString());
-
 			for (var kindex in user_data.api_keys) {
 				var userkey = user_data.api_keys[kindex];
 				console.log("Matching key " + userkey);
-				if (api_key == userkey) {
+				if (api_key.indexOf(userkey) !== -1) {
+					console.log("Valid key " + userkey);
 					api_key_valid = true;
 					break;
 				}
 			}
+			if (api_key_valid === true) break;
+		}
 
-			if (api_key_valid === false) {
-				console.log("Invalid API key.");
-				res.end(JSON.stringify({
-					success: false,
-					status: "authentication"
-				}));
-				return;
-			}
+		if (api_key_valid === false) {
+			console.log("Invalid API key.");
+			res.end(JSON.stringify({
+				success: false,
+				status: "authentication"
+			}));
+			return;
 		}
 
 		var isNew = true;
