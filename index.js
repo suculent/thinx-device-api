@@ -544,6 +544,7 @@ app.post("/device/register", function(req, res) {
 			reg.version = firmwareUpdateDescriptor.version;
 			reg.checksum = firmwareUpdateDescriptor.checksum;
 		} else {
+			reg.success = true;
 			console.log("No firmware update available.");
 		}
 
@@ -571,7 +572,6 @@ app.post("/device/register", function(req, res) {
 					reg.status = "OK";
 					console.log(reg);
 				}
-
 				sendRegistrationOKResponse(res, rdict);
 			});
 
@@ -604,7 +604,6 @@ app.post("/device/register", function(req, res) {
 					}
 
 					devicelib.insert(existing, mac, function(err, body, header) {
-
 						if (!err) {
 							reg.success = true;
 							console.log("Device updated. Response: " + JSON.stringify(
