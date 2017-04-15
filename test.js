@@ -15,6 +15,7 @@ console.log(
 var request = require("request");
 
 var base_url = "http://localhost:7442/";
+var expect = require('expect');
 
 describe("7442_localhost_root_spec", function() {
   describe("GET /", function() {

@@ -46,7 +46,8 @@
     "karma-coverage" : "*",
     "karma" : "*",
     "karma-coverage" : "*",
-    "mocha" : "*"
+    "mocha" : "*",
+    "expect.js" : "*"
   },
   "scripts" : {
     "test" : "nyc mocha"
