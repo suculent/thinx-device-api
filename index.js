@@ -192,7 +192,12 @@ app.post("/api/login", function(req, res) {
 		});
 	}
 
-	userlib.get(owner, function(err, existing, req, res) {
+	userlib.view("users", "owners_by_username", {
+		"key": username,
+		"include_docs": true // might be useless
+	}, function(err, body) {
+
+
 
 		if (err) {
 			console.log("Error: " + err.toString());
@@ -404,10 +409,7 @@ app.post("/device/register", function(req, res) {
 
 	console.log("Serching for owner: " + owner);
 
-	userlib.view("users", "owners_by_username", {
-		"key": owner,
-		"include_docs": true
-	}, function(err, body, api_key) {
+	userlib.get(owner, function(err, existing, req, res, api_key) {
 
 		if (err) {
 			console.log("Error: " + err.toString());
@@ -441,10 +443,12 @@ app.post("/device/register", function(req, res) {
 		var all_users = body.rows;
 		for (var index in all_users) {
 			var user_data = all_users[index];
-			console.log("User-data (we sarch for api_keys array)" + user_data);
+			console.log("User-data (we sarch for api_keys array)" + user_data.toString());
 
 			for (var kindex in user_data.api_keys) {
-				if (api_key == user_data.api_keys[kindex]) {
+				var userkey = user_data.api_keys[kindex];
+				console.log("Matching key " + userkey);
+				if (api_key == userkey) {
 					api_key_valid = true;
 					break;
 				}
@@ -452,10 +456,10 @@ app.post("/device/register", function(req, res) {
 
 			if (api_key_valid === false) {
 				console.log("Invalid API key.");
-				res.end({
+				res.end(JSON.stringify({
 					success: false,
 					status: "authentication"
-				});
+				}));
 				return;
 			}
 		}
