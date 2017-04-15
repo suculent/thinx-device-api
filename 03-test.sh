@@ -13,8 +13,12 @@ karma start
 echo
 echo "☢ Testing device registration..."
 
-curl -H "Origin: rtm.thinx.cloud" -H "Content-Type: application/json" -H "User-Agent: THiNX-Client" \
--X POST -d '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "registration-token-optional", "alias" : "test", "owner": "admin" } }' \
+curl -v \
+-H 'Authentication: 4ae7fa8276e4cd6e61e8a3ba133f2c237176e8d5' \
+-H 'Origin: device' \
+-H "User-Agent: THiNX-Client" \
+-H "Content-Type: application/json" \
+-X POST -d '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "version" : "1.0.0", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "dhho4djVGeQ:APA91bFuuZWXDQ8vSR0YKyjWIiwIoTB1ePqcyqZFU3PIxvyZMy9htu9LGPmimfzdrliRfAdci-AtzgLCIV72xmoykk-kHcYRhAFWFOChULOGxrDi00x8GgenORhx_JVxUN_fjtsN5B7T", "alias" : "rabbit", "owner": "test" } }' \
 http://thinx.cloud:7442/device/register
 
 echo
