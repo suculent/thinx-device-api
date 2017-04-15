@@ -450,7 +450,7 @@ app.post("/device/register", function(req, res) {
 		console.log(body);
 
 		for (var index in all_users) {
-			var user_data = all_users[index];
+			var user_data = all_users[index].doc;
 			console.log("User-data (we sarch for api_keys array)" + user_data.toString());
 
 			for (var kindex in user_data.api_keys) {
