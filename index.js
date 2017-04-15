@@ -373,10 +373,10 @@ app.post("/device/register", function(req, res) {
 		});
 	}
 
-	var dict = req.body;
-	var reg = dict.registration;
-
-	if (typeof(dict.registration) == "undefined") return;
+	var reg = req.body.registration;
+	if (typeof(req.body.registration) == "undefined") {
+		return;
+	}
 
 	rdict.registration = {};
 
@@ -398,10 +398,9 @@ app.post("/device/register", function(req, res) {
 	var success = false;
 	var status = "ERROR";
 
-
-
 	console.log(req.headers);
 
+	// Headers must contain Authentication header
 	if (typeof(req.headers.authentication) !== "undefined") {
 		api_key = req.headers.authentication;
 		console.log("API KEY in request: '" + api_key + "'");
@@ -412,9 +411,6 @@ app.post("/device/register", function(req, res) {
 
 	console.log("Serching for owner: " + owner);
 
-	//Error: Error: missing
-	// Caught exception: TypeError: Cannot read property 'session' of undefined
-
 	userlib.view("users", "owners_by_username", {
 		"key": owner,
 		"include_docs": true // might be useless
@@ -422,33 +418,19 @@ app.post("/device/register", function(req, res) {
 
 		if (err) {
 			console.log("Error: " + err.toString());
-
-			// Did not fall through, goodbye...
 			req.session.destroy(function(err) {
 				if (err) {
 					console.log(err);
 				} else {
 					failureResponse(res, 501, "protocol");
-					console.log("Not a post request.");
+					console.log("Not a valid request.");
 				}
 			});
 			return;
 		}
 
 		// Find user and match api_key
-
 		var api_key_valid = false;
-
-		// Testing only!
-		if (api_key == "VANILLA_API_KEY") {
-			api_key_valid = true;
-			console.log(
-				"Device is valid but has no owner. TODO: Owner must default to `unclaimed`."
-			);
-		} else {
-			api_key_valid = false;
-		}
-
 		var user_record = body.rows;
 
 		// Should be only one record actually
@@ -457,13 +439,16 @@ app.post("/device/register", function(req, res) {
 			for (var kindex in user_data.api_keys) {
 				var userkey = user_data.api_keys[kindex];
 				if (userkey.indexOf(api_key) !== -1) {
+					console.log("Found valid key.");
 					api_key_valid = true;
 					break;
 				}
+				if (api_key_valid === true) break;
 			}
 			if (api_key_valid === true) break;
 		}
 
+		// Bail out on invalid API key
 		if (api_key_valid === false) {
 			console.log("Invalid API key.");
 			res.end(JSON.stringify({
@@ -476,28 +461,91 @@ app.post("/device/register", function(req, res) {
 		var isNew = true;
 
 		// See if we know this MAC which is a primary key in db
-		devicelib.get(mac, function(err, existing, fw) {
 
-			if (err) {
-				console.log("Querying devices failed. " + err + "\n");
-			} else {
-				isNew = false;
-			}
+		if (err) {
+			console.log("Querying devices failed. " + err + "\n");
+		} else {
+			isNew = false;
+		}
 
-			var success = false;
-			var status = "OK";
+		var success = false;
+		var status = "OK";
 
-			var device_id = mac;
-			var firmware_url = "";
-			var known_alias = "";
-			var known_owner = "";
+		var device_id = mac;
 
-			status = "OK";
-			update_available = false; // test only
+		var firmware_url = "";
+		var known_alias = "";
+		var known_owner = "";
 
-			// function isUpdateAvailable(device) should search for new files since
-			// last installed firmware (version ideally)
+		update_available = false; // test only
 
+		console.log("Seaching for possible firmware update...");
+
+
+
+		// function isUpdateAvailable(device) should search for new files since
+		// last installed firmware (version ideally)
+
+
+
+		//
+		// Construct response
+		//
+
+		reg = rdict.registration;
+
+		reg.success = success;
+		reg.status = status;
+
+
+
+		if (alias != known_alias) {
+			reg.alias = known_alias;
+			alias = known_alias; // should force update in device library
+		}
+
+		if (known_owner === "") {
+			known_owner = owner;
+		}
+
+		if (owner != known_owner) {
+			// TODO: Fail from device side, notify admin.
+			console.log("owner is not known_owner (" + owner + ", " + known_owner +
+				")");
+			reg.owner = known_owner;
+			owner = known_owner; // should force update in device library
+		}
+
+		// Re-use existing UDID or create new one
+		if (device_id !== null) {
+			reg.device_id = device_id;
+		}
+
+		var device = {
+			mac: mac,
+			firmware: fw,
+			hash: hash,
+			push: push,
+			alias: alias,
+			owner: owner,
+			device_id: device_id,
+			lastupdate: new Date()
+		};
+
+		var deploy = require("./lib/thinx/deployment");
+		//var dpath = deploy.pathForDevice(owner, mac);
+		deploy.initWithDevice(device);
+
+		var latestFirmware = deploy.latestFirmwarePath(device.owner, device.mac);
+		console.log("Latest firmware: " + latestFirmware);
+
+		var update = deploy.hasUpdateAvailable(device);
+		if (update) {
+			console.log("Firmware update available.");
+
+			var firmwareUpdateDescriptor = deloy.latestFirmwareEnvelope(device);
+
+			/*
 			// this is only a fake
 			// TODO: fetch from commit notification descriptor
 			var firmwareUpdateDescriptor = {
@@ -507,142 +555,109 @@ app.post("/device/register", function(req, res) {
 				version: "1",
 				checksum: "4044decaad0627adb7946e297e5564aaf0c53f958175b388e02f455d3e6bc3d4"
 			};
+			*/
 
-			//
-			// Construct response
-			//
+			reg.status = "FIRMWARE_UPDATE";
+			reg.url = firmwareUpdateDescriptor.url;
+			reg.mac = firmwareUpdateDescriptor.mac;
+			reg.commit = firmwareUpdateDescriptor.commit;
+			reg.version = firmwareUpdateDescriptor.version;
+			reg.checksum = firmwareUpdateDescriptor.checksum;
 
-			reg = rdict.registration;
+		} else {
+			console.log("Firmware is current");
+		}
 
-			reg.success = success;
-			reg.status = status;
+		if (isNew) {
 
-			if (update_available) {
-				reg.status = "FIRMWARE_UPDATE";
-				reg.url = firmwareUpdateDescriptor.url;
-				reg.mac = firmwareUpdateDescriptor.mac;
-				reg.commit = firmwareUpdateDescriptor.commit;
-				reg.version = firmwareUpdateDescriptor.version;
-				reg.checksum = firmwareUpdateDescriptor.checksum;
-			}
+			// Create UDID for new device
+			device.device_id = uuidV1();
 
-			if (alias != known_alias) {
-				reg.alias = known_alias;
-				alias = known_alias; // should force update in device library
-			}
+			devicelib.insert(device, device.mac, function(err, body, header) {
 
-			if (owner != known_owner) {
-				// TODO: Fail from device side, notify admin.
-				console.log("owner is not known_owner (" + owner + ", " + known_owner +
-					")");
-				reg.owner = known_owner;
-				owner = known_owner; // should force update in device library
-			}
+				if (err == "Error: error happened in DB connection") {
+					process.exit(3);
+				}
 
-			if (device_id !== null) {
-				reg.device_id = device_id;
-			}
+				if (err) {
+					console.log("Inserting device failed. " + err + "\n");
+					reg.success = false;
+					reg.status = "Insertion failed";
+					console.log(reg);
 
-			var device = {
-				mac: mac,
-				firmware: fw,
-				hash: hash,
-				push: push,
-				alias: alias,
-				owner: owner,
-				device_id: device_id,
-				lastupdate: new Date()
-			};
+				} else {
+					console.log("Device inserted. Response: " + JSON.stringify(
+							body) +
+						"\n");
+					reg.success = true;
+					reg.status = "OK";
+					console.log(reg);
+				}
 
-			if (isNew) {
+				sendRegistrationOKResponse(res, rdict);
+			});
 
-				devicelib.insert(device, device.mac, function(err, body, header) {
+		} else {
 
-					if (err == "Error: error happened in DB connection") {
-						process.exit(3);
+			console.log(reg);
+
+			// KNOWN DEVICES:
+			// - see if new firmware is available and reply FIRMWARE_UPDATE with url
+			// - see if alias or owner changed
+			// - otherwise reply just OK
+
+			devicelib.get(mac, function(error, existing, fw) {
+				if (!error) {
+					existing.lastupdate = new Date();
+					if (typeof(fw) !== undefined && fw !== null) {
+						existing.firmware = fw;
+					}
+					if (typeof(hash) !== undefined && hash !== null) {
+						existing.hash = hash;
+					}
+					if (typeof(push) !== undefined && push !== null) {
+						existing.push = push;
+					}
+					if (typeof(alias) !== undefined && alias !== null) {
+						existing.alias = alias;
+					}
+					if (typeof(owner) !== undefined && owner !== null) {
+						existing.owner = owner;
 					}
 
-					if (err) {
-						console.log("Inserting device failed. " + err + "\n");
-						reg.success = false;
-						reg.status = "Insertion failed";
-						console.log(reg);
+					devicelib.insert(existing, mac, function(err, body, header) {
 
-					} else {
-						console.log("Device inserted. Response: " + JSON.stringify(
-								body) +
-							"\n");
-						reg.success = true;
-						reg.status = "OK";
-						console.log(reg);
-					}
+						if (!err) {
+							reg.success = true;
+							console.log("Device updated. Response: " + JSON.stringify(
+								body) + "\n");
+							sendRegistrationOKResponse(res, rdict);
+							return;
 
+						} else {
+							reg.success = false;
+							reg.this.status = "Insert failed";
+							console.log("Device record update failed.");
+
+							console.log("CHECK5:");
+							console.log(reg);
+							console.log("CHECK5.1:");
+							console.log(rdict);
+
+							// todo: sendRegistrationFailureResponse(res, rdict);
+							sendRegistrationOKResponse(res, rdict);
+						}
+					});
+
+				} else {
+					console.log("GET:FAILED");
+					reg.success = false;
+					reg.status = "Get for update failed";
+					// todo: sendRegistrationFailureResponse(res, rdict);
 					sendRegistrationOKResponse(res, rdict);
-				});
-
-			} else {
-
-				console.log(reg);
-
-				// KNOWN:
-				// - see if new firmware is available and reply FIRMWARE_UPDATE with url
-				// - see if alias or owner changed
-				// - otherwise reply just OK
-
-				devicelib.get(mac, function(error, existing) {
-
-					if (!error) {
-						existing.lastupdate = new Date();
-						if (typeof(fw) !== undefined && fw !== null) {
-							existing.firmware = fw;
-						}
-						if (typeof(hash) !== undefined && hash !== null) {
-							existing.hash = hash;
-						}
-						if (typeof(push) !== undefined && push !== null) {
-							existing.push = push;
-						}
-						if (typeof(alias) !== undefined && alias !== null) {
-							existing.alias = alias;
-						}
-						if (typeof(owner) !== undefined && owner !== null) {
-							existing.owner = owner;
-						}
-
-						devicelib.insert(existing, mac, function(err, body, header) {
-
-							if (!err) {
-								reg.success = true;
-								console.log("Device updated. Response: " + JSON.stringify(
-									body) + "\n");
-								sendRegistrationOKResponse(res, rdict);
-								return;
-
-							} else {
-								reg.success = false;
-								reg.this.status = "Insert failed";
-								console.log("Device record update failed.");
-
-								console.log("CHECK5:");
-								console.log(reg);
-								console.log("CHECK5.1:");
-								console.log(rdict);
-
-								// todo: sendRegistrationFailureResponse(res, rdict);
-								sendRegistrationOKResponse(res, rdict);
-							}
-						});
-
-					} else {
-						console.log("GET:FAILED");
-						reg.success = false;
-						reg.status = "Get for update failed";
-						// todo: sendRegistrationFailureResponse(res, rdict);
-						sendRegistrationOKResponse(res, rdict);
-					}
-				});
-			}
-		});
+				}
+			});
+		}
 	});
 });
 

@@ -260,33 +260,7 @@ notify_device_channel(owner, mac, message);
 // Version Management
 //
 
-/* Returns currently available version for respective owner and mac address */
-function availableVersionForDevice(owner, mac) {
 
-  // if MAC=any, provide version of recent thinx-esp8266-firmware
-
-  // else check the owner folder
-
-  // searches in deployment directory
-
-  var deployment_path = deploymentPathForDevice(owner, mac);
-  console.log("availableVersionForDevice deployment_path = " + deployment_path);
-
-  var files = getFiles(deployment_path);
-  console.log("Files: " + files);
-
-  // TODO: Track only .bin files with their timestamps.
-
-  var stats = fs.statSync(files[0]);
-  var mtime = new Date(util.inspect(stats.mtime));
-  console.log(mtime);
-
-
-  // list all files
-
-  // Find latest binary, fetch version
-
-}
 
 function getFiles(dir, files_) {
   files_ = files_ || [];
@@ -313,22 +287,6 @@ function deploymentPathForDevice(owner, mac) {
     device_path = device_path + "/" + mac;
   }
   return device_path;
-}
-
-function hasUpdateAvailable(device) {
-
-  var deviceVersion = device.version;
-  var deployedVersion = availableVersionForDevice(device.owner, device.mac);
-
-  if (semver.valid(deviceVersion) == true) {
-    console.log("semver.valid:" + deviceVersion);
-  } else {
-    console.log("semver.invalid:" + deviceVersion);
-  }
-
-  semver.satisfies("1.2.3", "1.x || >=2.5.0 || 5.0.0 - 7.2.3"); // true
-  semver.gt("1.2.3", "9.8.7"); // false
-  semver.lt("1.2.3", "9.8.7"); // true
 }
 
 //

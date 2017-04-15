@@ -6,7 +6,7 @@ echo
 
 TENANT='test' 	# name of folder where workspaces reside
 RUN=true		# dry-run switch
-DEVICE='ANY'	# builds for any device by default
+DEVICE='00:00:00:00:00'	# builds for no device by default, not even ANY
 OPEN=false		# show build result in Finder
 BUILD_ID=0
 
@@ -25,6 +25,7 @@ case $i in
     ;;
     -m=*|--mac=*)
       DEVICE="${i#*=}"
+			UDID=$DEVICE
     ;;
     -a=*|--alias=*)
       DEVICE_ALIAS="${i#*=}"
@@ -38,6 +39,8 @@ case $i in
     -o|--open)
       OPEN=true
     ;;
+		-u|--udid)
+		  UDID="${i#*=}"
     *)
       # unknown option
     ;;
@@ -49,6 +52,8 @@ DEPLOYMENT_PATH=/var/www/html/bin/$TENANT
 # deploy to device folder if assigned
 if [ "${DEVICE}" != "ANY" ];  then
 	DEPLOYMENT_PATH=${DEPLOYMENT_PATH}/${DEVICE}
+else
+	echo "Build for any device..."
 fi
 
 # extract the protocol
@@ -132,8 +137,9 @@ else
 	THINX_ALIAS="vanilla"
 fi
 
+THX_VERSION=$(git describe --abbrev=0 --tags)
 REPO_NAME=basename(pwd)
-REPO_VERSION="0.3.${VERSION}" # todo: is not semantic at all, 0.3 should be recent git tag
+REPO_VERSION="${THX_VERSION}.${VERSION}" # todo: is not semantic at all, 0.3 should be recent git tag
 BUILD_DATE=`date +%Y-%m-%d`
 
 # TODO: Change this to a sed template, this is tedious
@@ -152,6 +158,7 @@ echo "static const String app_version = "\"${REPO_NAME}-${REPO_VERSION}:${BUILD_
 echo "String thinx_owner = \"${THINX_OWNER}\";" >> $THINX_FILE
 echo "String thinx_alias = \"${THINX_ALIAS}\";" >> $THINX_FILE
 echo "String thinx_api_key = \"VANILLA_API_KEY\";;" >> $THINX_FILE # this just adds placeholder, key must not leak in binary...
+echo "String thinx_udid = \"${UDID}\";;" >> $THINX_FILE # this just adds placeholder, key should not leak
 
 echo "" >> $THINX_FILE
 
