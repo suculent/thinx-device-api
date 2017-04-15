@@ -410,7 +410,7 @@ app.post("/device/register", function(req, res) {
 	}
 
 	console.log("Serching for owner: " + owner);
-	console.log("api_key: " + api_key);
+	console.log("api_key 1: " + api_key);
 
 	//Error: Error: missing
 	// Caught exception: TypeError: Cannot read property 'session' of undefined
@@ -418,9 +418,9 @@ app.post("/device/register", function(req, res) {
 	userlib.view("users", "owners_by_username", {
 		"key": owner,
 		"include_docs": true // might be useless
-	}, function(err, body, req, res, api_key) {
+	}, function(err, body) {
 
-		console.log("api_key: " + api_key);
+		console.log("api_key 2: " + api_key);
 
 		if (err) {
 			console.log("Error: " + err.toString());
