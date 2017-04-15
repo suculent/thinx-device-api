@@ -80,7 +80,7 @@ app.all("/*", function(req, res, next) {
 			next();
 			return;
 		} else {
-			onsole.log("Non-device Origin: " + origin);
+			console.log("Non-device Origin: " + origin);
 		}
 	}
 
@@ -447,6 +447,8 @@ app.post("/device/register", function(req, res) {
 		}
 
 		var all_users = body.rows;
+		console.log(body);
+
 		for (var index in all_users) {
 			var user_data = all_users[index];
 			console.log("User-data (we sarch for api_keys array)" + user_data.toString());
