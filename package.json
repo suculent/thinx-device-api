@@ -45,6 +45,7 @@
     "nyc" : "*",
     "karma-coverage" : "*",
     "karma" : "*",
+    "karma-coverage" : "*",
     "mocha" : "*"
   },
   "scripts" : {
