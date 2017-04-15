@@ -41,3 +41,21 @@ curl -v -b cookies.jar \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -X POST -d '{ "query" : false }' http://thinx.cloud:7442/api/view/devices
+
+echo
+echo "» Terminating node.js..."
+
+NODEZ=$(ps -ax | grep "$DAEMON")
+
+if [[ $(echo $NODEZ | wc -l) > 1 ]]; then
+
+	echo "${NODEZ}" | while IFS="pts" read A B ; do
+		NODE=$($A | tr -d ' ')
+		echo "Killing: " $NODE $B
+		kill "$NODE"
+	done
+
+else
+	echo "${NODEZ}"
+fi
+

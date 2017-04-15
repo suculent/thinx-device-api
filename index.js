@@ -606,15 +606,15 @@ app.post("/device/register", function(req, res) {
 					devicelib.insert(existing, mac, function(err, body, header) {
 						if (!err) {
 							reg.success = true;
-							console.log("Device updated. Response: " + JSON.stringify(
-								body) + "\n");
+							console.log("Device updated.");
 							sendRegistrationOKResponse(res, rdict);
 							return;
 
 						} else {
+
 							reg.success = false;
 							reg.this.status = "Insert failed";
-							console.log("Device record update failed.");
+							console.log("Device record update failed." + err);
 
 							console.log("CHECK5:");
 							console.log(reg);
