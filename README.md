@@ -196,11 +196,3 @@ TODO Registration succeeded, new device registration with one-time token:
             "device_id" : "xyz"
         }
     }
-
-
-## Changelog
-
-12/4/2017 - Rewritten API router, working authentication
-11/4/2017 - MQTT/Slack Notifications, Sessions
-10/4/2017 - Builder and notifier
-09/4/2017 - Device registration
