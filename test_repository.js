@@ -3,7 +3,7 @@ var repoWatch = require('gulp-repository-watch');
 
 gulp.task("repo-watch", function() {
 	repoWatch({
-			repository: "git@github.com/suculent/thinx-device-api.git"
+			repository: "git@github.com:suculent/thinx-device-api.git"
 		})
 		.on("check", function() {
 			console.log("No changes in " + repo_url);
