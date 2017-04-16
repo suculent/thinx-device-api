@@ -1,22 +1,17 @@
-var gulp = require('gulp');
-var repoWatch = require('gulp-repository-watch');
+var repo = require("./lib/thinx/repository");
 
-gulp.task("repo-watch", function() {
-	repoWatch({
-			repository: "git@github.com/suculent/thinx-device-api.git"
-		})
-		.on("check", function() {
-			console.log("No changes in " + repo_url);
-		})
-		.on("change", function(newHash, oldHash) {
-			console.log(repo_url + "changed from ", oldHash, " to ", newHash);
-		});
+// One-time check
+
+console.log("One-time check:");
+var result1 = repo.checkRepository(".", false);
+console.log(result1);
+
+console.log("Async watch:");
+var result2 = repo.watchRepository(".");
+console.log(result2);
+
+setTimeout(30000, function() {
+  console.log("Async watch end:");
+  var result = repo.unwatchRepository(".");
+  console.log(result);
 });
-
-//var repo = require("./lib/thinx/repository");
-
-//repo.watchRepository("git@github.com/suculent/thinx-device-api.git");
-
-while (true) {
-
-}
