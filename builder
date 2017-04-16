@@ -12,7 +12,9 @@ BUILD_ID=0
 ORIGIN=$(pwd)
 
 # tested:
-# ./builder --tenant=test --udid=47fc9ab2-2227-11e7-8584-4c327591230d --mac=ANY --git=git@github.com:suculent/thinx-firmware-esp8266.git
+# ./builder --build-id="cli-manual" --tenant=test --udid=47fc9ab2-2227-11e7-8584-4c327591230d --mac=ANY --git=git@github.com:suculent/thinx-firmware-esp8266.git
+# ./builder --build-id="cli-manual" --tenant=test --udid=47fc9ab2-2227-11e7-8584-4c327591230d --mac="000000000000" --git=git@github.com:suculent/thinx-firmware-esp8266.git
+
 
 for i in "$@"
 do
@@ -202,7 +204,7 @@ fi
 
 echo
 
-if [[ $RUN==false ]]; then
+if [[ ! ${RUN} ]]; then
 
 	echo "☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment."
 
