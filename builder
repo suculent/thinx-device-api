@@ -39,8 +39,9 @@ case $i in
     -o|--open)
       OPEN=true
     ;;
-		-u|--udid)
-		  UDID="${i#*=}"
+	-u|--udid)
+	  UDID="${i#*=}"
+	;;
     *)
       # unknown option
     ;;
@@ -192,7 +193,7 @@ SHA=0
 
 if [[ $?==0 ]] ; then
 	STATUS='"OK"'
-	SHAX=$(shasum -a 256 .pioenvs/d1_mini/firmware.elf)
+	SHAX=$(shasum -a 256 .pioenvs/d1_mini/firmware.bin)
 	SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
 else
 	STATUS='"FAILED"'
@@ -212,7 +213,7 @@ else
 	mkdir -p $DEPLOYMENT_PATH
 
 	# Deploy binary (may require rotating previous file or timestamping/renaming previous version of the file)
-	mv .pioenvs/d1_mini/firmware.elf $COMMIT.bin
+	mv .pioenvs/d1_mini/firmware.bin $COMMIT.bin # WARNING: bin was elf here but it seems kind of wrong. needs testing
 
 	echo "Deploying $COMMIT.bin to $DEPLOYMENT_PATH..."
 
@@ -234,6 +235,7 @@ popd > /dev/null
 
 DEPLOYMENT_PATH=$(echo ${DEPLOYMENT_PATH} | tr -d '/var/www/html')
 
+# Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
 CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${COMMIT}.bin ${DEVICE} ${SHA} ${TENANT} ${STATUS}"
 echo $CMD
 RESULT=$(node notifier.js $CMD)

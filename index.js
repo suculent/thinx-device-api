@@ -778,7 +778,8 @@ app.post("/api/build", function(req, res) {
 		var rdict = {};
 
 		var build = req.body.build;
-		var mac = build.mac;
+		var mac = build.mac; // should be optional only, used for paths now
+		var udid = build.udid; // target device UDID
 		var tenant = build.owner;
 		var git = build.git;
 		var dryrun = false;
@@ -837,12 +838,18 @@ function buildCommand(build_id, tenant, mac, git, dryrun) {
 	console.log("Executing build chain...");
 
 	var exec = require("child_process").exec;
-	CMD = "./builder --tenant=" + tenant + " --mac=" + mac + " --git=" +
+	CMD = "./builder --tenant=" + tenant + " --udid=" + udid + " --git=" +
 		git +
-		" --id=" + build_id;
+		" --id=" + build_id;	
+
+	if (typeof(mac) !== "undefined" && mac !== null) {
+		CMD = CMD + " --mac=" + mac;
+	}
+
 	if (dryrun === true) {
 		CMD = CMD + " --dry-run";
 	}
+
 	console.log(CMD);
 	exec(CMD, function(err, stdout, stderr) {
 		if (err) {
