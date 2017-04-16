@@ -7,10 +7,11 @@ var result1 = repo.repositoryChanged(".", false);
 console.log(result1);
 
 console.log("Async watch:");
-var terminate = function(result) {
+var update_callback = function(result) {
   console.log("Watch complete:");
   console.log(result);
-}
+};
+
 var result2 = repo.watchRepository(".", update_callback);
 console.log(result2);
 
@@ -18,6 +19,6 @@ var terminate = function() {
   console.log("Async watch end:");
   var result = repo.unwatchRepository(".");
   console.log(result);
-}
+};
 
 setTimeout(30000, terminate);
