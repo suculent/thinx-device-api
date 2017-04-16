@@ -525,7 +525,8 @@ app.post("/device/register", function(req, res) {
 			owner: owner,
 			version: device_version,
 			device_id: device_id,
-			lastupdate: new Date()
+			lastupdate: new Date(),
+			lastkey: api_key
 		};
 
 		console.log("Seaching for possible firmware update...");
