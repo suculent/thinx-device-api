@@ -63,14 +63,13 @@ app.all("/*", function(req, res, next) {
 	if ((origin == "http://rtm.thinx.loc") ||
 		(origin == "https://rtm.thinx.cloud") ||
 		(origin == "127.0.0.1") ||
-		(origin == "undefined")
+		(origin == "undefined") ||
+		(origin == "rtm.thinx.cloud")
 	) {
 
 	} else {
 		console.log("Origin: " + origin);
 	}
-
-	console.log("Origin: " + origin);
 
 	// Custom user agent is required for devices
 	var client = req.get("User-Agent");
@@ -86,7 +85,8 @@ app.all("/*", function(req, res, next) {
 
 	res.header("Access-Control-Allow-Origin", allowedOrigin); // rtm.thinx.cloud
 	res.header("Access-Control-Allow-Credentials", "true");
-	res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+	res.header(
+		"Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
 	// Set custom headers for CORS
 	res.header("Access-Control-Allow-Headers",
 		"Content-type,Accept,X-Access-Token,X-Key");
@@ -826,11 +826,11 @@ app.post("/api/build", function(req, res) {
 
 		res.end(JSON.stringify(rdict));
 
-		buildCommand(build_id, tenant, mac, git, dryrun);
+		buildCommand(build_id, tenant, mac, git, udid, dryrun);
 	}
 });
 
-function buildCommand(build_id, tenant, mac, git, dryrun) {
+function buildCommand(build_id, tenant, mac, git, udid, dryrun) {
 
 	// ./builder --tenant=test --mac=ANY --git=https://github.com/suculent/thinx-firmware-esp8266 --dry-run
 	// ./builder --tenant=test --mac=ANY --git=git@github.com:suculent/thinx-firmware-esp8266.git --dry-run
@@ -840,7 +840,7 @@ function buildCommand(build_id, tenant, mac, git, dryrun) {
 	var exec = require("child_process").exec;
 	CMD = "./builder --tenant=" + tenant + " --udid=" + udid + " --git=" +
 		git +
-		" --id=" + build_id;	
+		" --id=" + build_id;
 
 	if (typeof(mac) !== "undefined" && mac !== null) {
 		CMD = CMD + " --mac=" + mac;
