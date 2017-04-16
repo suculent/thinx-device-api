@@ -1,58 +1,58 @@
 {
-  "name" : "thinx",
-  "description" : "THiNX IoT RTM API",
-  "version" : "1.1.186",
-  "author" : {
-    "name" : "Matej Sychra"
+  "name": "thinx",
+  "description": "THiNX IoT RTM API",
+  "version": "1.1.186",
+  "author": {
+    "name": "Matej Sychra"
   },
-  "repository" : {
-    "type" : "git",
-    "url" : "git://github.com/suculent/thinx-device-api.git"
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/suculent/thinx-device-api.git"
   },
-  "bugs" : {
-    "url" : "https://github.com/suculent/thinx-device-api/issues"
+  "bugs": {
+    "url": "https://github.com/suculent/thinx-device-api/issues"
   },
-  "license" : "ISC",
-  "engines" : {
-    "node" : ">=4.3.2"
+  "license": "ISC",
+  "engines": {
+    "node": ">=4.3.2"
   },
-  "preferGlobal" : true,
-  "dependencies" : {
-    "body-parser" : "^1.7.0",
-    "checksum" : "^0.1.1",
-    "ejs" : "^1.0.0",
-    "express" : "^4.8.7",
-    "express-session" : "^1.7.6",
-    "firebase-admin" : "^4.2.0",
-    "gulp" : "^3.9.1",
-    "gulp-repository-watch" : "0.0.4",
-    "html" : "^1.0.0",
-    "jasmine-node" : "^1.14.5",
-    "nano" : "^6.2.0",
-    "node-couchdb" : "^1.1.1",
-    "nodelint" : "^0.6.2",
-    "querystring" : "^0.2.0",
-    "request" : "^2.81.0",
-    "semver" : "^1.0.14",
-    "sha256" : "^0.2.0",
-    "should" : "^11.2.1",
-    "slack-notify" : "^0.1.6",
-    "sync-exec" : "^0.6.2",
-    "uuid" : "^3.0.1"
+  "preferGlobal": true,
+  "dependencies": {
+    "body-parser": "^1.7.0",
+    "checksum": "^0.1.1",
+    "ejs": "^1.0.0",
+    "express": "^4.8.7",
+    "express-session": "^1.7.6",
+    "firebase-admin": "^4.2.0",
+    "gulp": "^3.9.1",
+    "gulp-repository-watch": "0.0.4",
+    "html": "^1.0.0",
+    "jasmine-node": "^1.14.5",
+    "nano": "^6.2.0",
+    "node-couchdb": "^1.1.1",
+    "nodelint": "^0.6.2",
+    "querystring": "^0.2.0",
+    "request": "^2.81.0",
+    "semver": "^4.3.2",
+    "sha256": "^0.2.0",
+    "should": "^11.2.1",
+    "slack-notify": "^0.1.6",
+    "sync-exec": "^0.6.2",
+    "uuid": "^3.0.1"
   },
-  "devDependencies" : {
-    "coveralls" : "^2.13.0",
-    "eslint" : "*",
-    "grunt-karma-coveralls" : "^2.5.4",
-    "jshint" : "^2.9.4",
-    "nyc" : "*",
-    "karma-coverage" : "*",
-    "karma" : "*",
-    "mocha" : "*",
-    "expect" : "*",
-    "grunt" : "*"
+  "devDependencies": {
+    "coveralls": "^2.13.0",
+    "eslint": "*",
+    "grunt-karma-coveralls": "^2.5.4",
+    "jshint": "^2.9.4",
+    "nyc": "*",
+    "karma-coverage": "*",
+    "karma": "*",
+    "mocha": "*",
+    "expect": "*",
+    "grunt": "*"
   },
-  "scripts" : {
-    "test" : "nyc mocha"
+  "scripts": {
+    "test": "nyc mocha"
   }
 }
