@@ -10,8 +10,10 @@ console.log("Async watch:");
 var result2 = repo.watchRepository(".");
 console.log(result2);
 
-setTimeout(30000, function() {
+var terminate = function() {
   console.log("Async watch end:");
   var result = repo.unwatchRepository(".");
   console.log(result);
-});
+}
+
+setTimeout(30000, terminate);
