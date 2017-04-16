@@ -8,7 +8,7 @@ console.log(result1);
 
 console.log("Async watch:");
 var update_callback = function(result) {
-  console.log("Watch complete:");
+  console.log("Watch complete callback with result:");
   console.log(result);
 };
 
