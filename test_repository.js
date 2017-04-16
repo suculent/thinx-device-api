@@ -13,4 +13,4 @@ var update_callback = function(changed) {
   console.log(changed);
 };
 
-repo.watchRepository(".", update_callback);
+repo.watchRepository(".", update_callback());
