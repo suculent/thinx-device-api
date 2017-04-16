@@ -133,7 +133,7 @@ nano.db.create("managed_repos", function(err, body, header) {
 var gitlib = require("nano")(db).use("managed_repos");
 var devicelib = require("nano")(db).use("managed_devices");
 
-// TODO: Create build envelope
+// Create build envelope
 
 var buildEnvelope = {
   url: repo_url,
