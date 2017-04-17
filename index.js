@@ -351,6 +351,64 @@ app.get("/api/user/devices", function(req, res) {
 	});
 });
 
+/* Authenticated view draft */
+app.get("/api/user/profile", function(req, res) {
+
+	console.log(req.toString());
+
+	// reject on invalid headers
+	//if (!validateSecureRequest(req)) return; but this is GET!
+
+	// reject on invalid session
+	if (!sess) {
+		failureResponse(res, 405, "not allowed");
+		console.log("/api/user/profile: No session!");
+		return;
+	}
+
+	// reject on invalid owner
+	var owner = null;
+	if (req.session.owner || sess.owner) {
+		if (req.session.owner) {
+			console.log("assigning owner = req.session.owner;");
+			owner = req.session.owner;
+		}
+		if (sess.owner) {
+			console.log(
+				"assigning owner = sess.owner; (client lost or session terminated?)");
+			owner = sess.owner;
+		}
+
+	} else {
+		failureResponse(res, 403, "session has no owner");
+		console.log("/api/user/profile: No valid owner!");
+		return;
+	}
+
+	userlib.view("users", "owners_by_username", {
+		"key": owner,
+		"include_docs": true // might be useless
+	}, function(err, body) {
+
+		if (err) {
+			console.log("Error: " + err.toString());
+
+			// Did not fall through, goodbye...
+			req.session.destroy(function(err) {
+				if (err) {
+					console.log(err);
+				} else {
+					failureResponse(res, 403, "unauthorized");
+					console.log("Owner not found: " + owner);
+				}
+			});
+			return;
+		}
+		// TODO: Filter for security, API_KEYS must be hashed
+		res.end(JSON.stringify(body));
+	});
+});
+
 //
 // WORK ON ROAD! ->
 //
