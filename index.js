@@ -276,7 +276,7 @@ app.get("/api/user/devices", function(req, res) {
 	console.log(req.toString());
 
 	// reject on invalid headers
-	if (!validateSecureRequest(req)) return;
+	//if (!validateSecureRequest(req)) return; but this is GET!
 
 	// reject on invalid session
 	if (!sess) {
