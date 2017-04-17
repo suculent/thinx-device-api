@@ -365,7 +365,63 @@ app.get("/api/user/devices", function(req, res) {
 // /user/apikey/list GET
 // /user/apikey/revoke POST
 
-/* Authenticated view draft */
+app.get("/api/user/profile", function(req, res) {
+
+	console.log(req.toString());
+
+	// reject on invalid headers
+	if (!validateSecureRequest(req)) return;
+
+	// reject on invalid session
+	if (!sess) {
+		failureResponse(res, 405, "not allowed");
+		console.log("/api/user/devices: No session!");
+		return;
+	}
+
+	// reject on invalid owner
+	var owner = null;
+	if (req.session.owner || sess.owner) {
+		if (req.session.owner) {
+			console.log("assigning owner = req.session.owner;");
+			owner = req.session.owner;
+		}
+		if (sess.owner) {
+			console.log(
+				"assigning owner = sess.owner; (client lost or session terminated?)");
+			owner = sess.owner;
+		}
+
+	} else {
+		failureResponse(res, 403, "session has no owner");
+		console.log("/api/user/devices: No valid owner!");
+		return;
+	}
+
+	userlib.view("users", "owners_by_username", {
+		"key": owner,
+		"include_docs": true // might be useless
+	}, function(err, body, fw) {
+
+		if (err) {
+			console.log("Error: " + err.toString());
+			req.session.destroy(function(err) {
+				if (err) {
+					console.log(err);
+				} else {
+					failureResponse(res, 501, "protocol");
+					console.log("Not a valid request.");
+				}
+			});
+			return;
+		}
+		// TODO: Limit results for security
+		var json = JSON.stringify(body);
+		res.set("Connection", "close");
+		res.end(json);
+	});
+});
+
 app.get("/api/user/devices", function(req, res) {
 
 	console.log(req.toString());
@@ -418,7 +474,8 @@ app.get("/api/user/devices", function(req, res) {
 		var devices = []; // an array by design (needs push), to be encapsulated later
 
 		// Show all devices for admin (if not limited by query)
-		if (req.session.admin === true && typeof(req.body.query) == "undefined") {
+		if (req.session.admin === true && typeof(req.body.query) ==
+			"undefined") {
 			var response = JSON.stringify({
 				devices: devices
 			});
@@ -435,7 +492,8 @@ app.get("/api/user/devices", function(req, res) {
 					"\n");
 				devices.push(rowData);
 			} else {
-				console.log("/api/user/devices: ROW: " + JSON.stringify(rowData) + "\n");
+				console.log("/api/user/devices: ROW: " + JSON.stringify(rowData) +
+					"\n");
 			}
 		}
 		var reply = JSON.stringify({
