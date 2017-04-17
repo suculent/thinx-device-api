@@ -21,6 +21,59 @@ API Server running on node.js.
 * Application runs on HTTP port 7442 (possibly HTTPS 7441)
 * Admin runs on HTTPS port (443)
 
+## Database Schema
+
+* deviceslib: all devices
+* users: each user owns several api_keys and repositories that may be linked to one or more devices
+* builds: unused
+* repos: unused
+
+Device:
+
+```
+{
+   "_id": "00:00:00:00:00:00",
+   "_rev": "81-19ff005179c1e7a6429185639e044065",
+   "mac": "00:00:00:00:00:00",
+   "firmware": "EAV-App-0.4.0-beta:2017/04/08",
+   "hash": "e58fa9bf7f478442c9d34593f0defc78718c8732",
+   "push": "dhho4djVGeQ:APA91bFuuZWXDQ8vSR0YKyjWIiwIoTB1ePqcyqZFU3PIxvyZMy9htu9LGPmimfzdrliRfAdci-AtzgLCIV72xmoykk-kHcYRhAFWFOChULOGxrDi00x8GgenORhx_JVxUN_fjtsN5B7T",
+   "alias": "test",
+   "owner": "test",
+   "lastupdate": "2017-04-15T22:01:48.347Z",
+   "device_id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX"
+}
+```
+
+User:
+
+```
+{
+   "_id": "e2b5ea22a4bf40ec608e4d9c400007ad",
+   "_rev": "7-487903ee48a34f8d102771339af6db44",
+   "username": "test",
+   "owner": "test",
+   "password": "****",
+   "last_seen": null,
+   "e-mail": "syxra@syxra.cz",
+   "first_name": "Sàmō",
+   "last_name": "Sëtō",
+   "api_keys": [
+       "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+   ],
+   "repos": [
+       {
+           "url": "git@github.com:suculent/thinx-device-api.git",
+           "devices": [
+               "ANY",
+               "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX",
+               "00:00:00:00:00:00"
+           ]
+       }
+   ]
+}
+```
+
 ## Endpoints
 
 ### /

@@ -517,7 +517,7 @@ app.post("/device/register", function(req, res) {
 	userlib.view("users", "owners_by_username", {
 		"key": owner,
 		"include_docs": true // might be useless
-	}, function(err, body) {
+	}, function(err, body, fw) {
 
 		if (err) {
 			console.log("Error: " + err.toString());
