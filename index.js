@@ -125,7 +125,7 @@ app.get("/app", function(req, res) {
 */
 
 // Used by web app
-app.get("/logout", function(req, res) {
+app.get("/api/logout", function(req, res) {
 	req.session.destroy(function(err) {
 		if (err) {
 			console.log(err);
@@ -271,7 +271,7 @@ app.post("/api/login", function(req, res) {
 });
 
 /* Authenticated view draft */
-app.post("/api/view/devices", function(req, res) {
+app.get("/api/user/devices", function(req, res) {
 
 	console.log(req.toString());
 
@@ -281,7 +281,7 @@ app.post("/api/view/devices", function(req, res) {
 	// reject on invalid session
 	if (!sess) {
 		failureResponse(res, 405, "not allowed");
-		console.log("/api/view/devices: No session!");
+		console.log("/api/user/devices: No session!");
 		return;
 	}
 
@@ -300,7 +300,7 @@ app.post("/api/view/devices", function(req, res) {
 
 	} else {
 		failureResponse(res, 403, "session has no owner");
-		console.log("/api/view/devices: No valid owner!");
+		console.log("/api/user/devices: No valid owner!");
 		return;
 	}
 
@@ -315,7 +315,7 @@ app.post("/api/view/devices", function(req, res) {
 					result: "none"
 				});
 			}
-			console.log("/api/view/devices: Error: " + err.toString());
+			console.log("/api/user/devices: Error: " + err.toString());
 			return;
 		}
 
@@ -336,20 +336,123 @@ app.post("/api/view/devices", function(req, res) {
 			console.log("Matching device of device owner " + rowData.key +
 				" with alien user " + owner + " in " + rowData.toString());
 			if (owner == rowData.key) {
-				console.log("/api/view/devices: OWNER: " + JSON.stringify(rowData) +
+				console.log("/api/user/devices: OWNER: " + JSON.stringify(rowData) +
 					"\n");
 				devices.push(rowData);
 			} else {
-				console.log("/api/view/devices: ROW: " + JSON.stringify(rowData) + "\n");
+				console.log("/api/user/devices: ROW: " + JSON.stringify(rowData) + "\n");
 			}
 		}
 		var reply = JSON.stringify({
 			devices: devices
 		});
-		console.log("/api/view/devices: Response: " + reply);
+		console.log("/api/user/devices: Response: " + reply);
 		res.end(reply);
 	});
 });
+
+//
+// WORK ON ROAD! ->
+//
+
+// /user/profile GET
+// /user/profile POST
+
+// /user/password/set POST
+// /user/password/reset POST
+
+// /user/apikey/new GET
+// /user/apikey/list GET
+// /user/apikey/revoke POST
+
+/* Authenticated view draft */
+app.get("/api/user/devices", function(req, res) {
+
+	console.log(req.toString());
+
+	// reject on invalid headers
+	if (!validateSecureRequest(req)) return;
+
+	// reject on invalid session
+	if (!sess) {
+		failureResponse(res, 405, "not allowed");
+		console.log("/api/user/devices: No session!");
+		return;
+	}
+
+	// reject on invalid owner
+	var owner = null;
+	if (req.session.owner || sess.owner) {
+		if (req.session.owner) {
+			console.log("assigning owner = req.session.owner;");
+			owner = req.session.owner;
+		}
+		if (sess.owner) {
+			console.log(
+				"assigning owner = sess.owner; (client lost or session terminated?)");
+			owner = sess.owner;
+		}
+
+	} else {
+		failureResponse(res, 403, "session has no owner");
+		console.log("/api/user/devices: No valid owner!");
+		return;
+	}
+
+	devicelib.view("devicelib", "devices_by_owner", {
+		"key": owner,
+		"include_docs": false
+	}, function(err, body) {
+
+		if (err) {
+			if (err.toString() == "Error: missing") {
+				res.end({
+					result: "none"
+				});
+			}
+			console.log("/api/user/devices: Error: " + err.toString());
+			return;
+		}
+
+		var rows = body.rows; // devices returned
+		var devices = []; // an array by design (needs push), to be encapsulated later
+
+		// Show all devices for admin (if not limited by query)
+		if (req.session.admin === true && typeof(req.body.query) == "undefined") {
+			var response = JSON.stringify({
+				devices: devices
+			});
+			res.end(response);
+			return;
+		}
+
+		for (var row in rows) {
+			var rowData = rows[row];
+			console.log("Matching device of device owner " + rowData.key +
+				" with alien user " + owner + " in " + rowData.toString());
+			if (owner == rowData.key) {
+				console.log("/api/user/devices: OWNER: " + JSON.stringify(rowData) +
+					"\n");
+				devices.push(rowData);
+			} else {
+				console.log("/api/user/devices: ROW: " + JSON.stringify(rowData) + "\n");
+			}
+		}
+		var reply = JSON.stringify({
+			devices: devices
+		});
+		console.log("/api/user/devices: Response: " + reply);
+		res.end(reply);
+	});
+});
+
+//
+// WORK ON ROAD. <-
+//
+
+//
+// Main Device API
+//
 
 // Device login/registration (no authentication, no validation, allows flooding so far)
 app.post("/device/register", function(req, res) {
