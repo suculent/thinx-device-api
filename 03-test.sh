@@ -66,4 +66,3 @@ if [[ $(echo $NODEZ | wc -l) > 1 ]]; then
 else
 	echo "${NODEZ}"
 fi
-

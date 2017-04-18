@@ -19,6 +19,7 @@ var uuidV1 = require("uuid/v1");
 var http = require("http");
 var parser = require("body-parser");
 var nano = require("nano")(db);
+var sha256 = require("sha256");
 
 var v = require("./lib/thinx/version");
 
@@ -197,8 +198,6 @@ app.post("/api/login", function(req, res) {
 		"include_docs": true // might be useless
 	}, function(err, body) {
 
-
-
 		if (err) {
 			console.log("Error: " + err.toString());
 
@@ -233,9 +232,7 @@ app.post("/api/login", function(req, res) {
 							"redirectURL": "http://rtm.thinx.cloud:80/app"
 						}));
 					}
-
 					// TODO: If user-agent contains app/device... (what?)
-
 					return;
 				} else {
 					console.log("Password mismatch for " + username);
@@ -351,13 +348,89 @@ app.get("/api/user/devices", function(req, res) {
 	});
 });
 
+/* TODO: Authenticated view draft */
+app.get("/api/user/apikey", function(req, res) {
+
+	// So far must Authenticated using owner session.
+	// This means, new API KEY can requested only
+	// from authenticated web UI.
+
+	console.log(JSON.stringify(sess));
+
+	if (!validateSecureGETRequest(req)) return;
+
+	var owner = sess.owner;
+
+	if (typeof(owner) === "undefined") {
+		failureResponse(res, 403, "session has no owner");
+		console.log("/api/user/profile: No valid owner!");
+		return;
+	}
+
+	var new_api_key = sha256(new Date().toString()).substring(0, 40);
+
+	// Get all users
+	userlib.view("users", "owners_by_username", function(err, doc) {
+
+		if (err) {
+			console.log(err);
+			return;
+		}
+
+		var users = doc.rows;
+		var user_data;
+		var doc_id;
+		for (var index in users) {
+			if (users[index].key === owner) {
+				doc_id = users[index]._id;
+				break;
+			}
+		}
+
+		// Fetch complete user
+		userlib.get(users[index].id, function(error, doc) {
+
+			if (!doc) {
+				console.log("User " + users[index].id + " not found.");
+				return;
+			}
+
+			// Add new API Key
+			doc.api_keys.push(new_api_key);
+
+			console.log("Updating user: " + users[index].id);
+
+			// Add new API Key
+			userlib.insert(doc, function(err) {
+				if (err) {
+					console.log(err);
+				}
+				res.end(JSON.stringify({
+					api_key: new_api_key
+				}));
+			});
+		});
+	});
+});
+
+/* Authenticated view draft */
+app.post("/api/user/profile", function(req, res) {
+
+	console.log(req.toString());
+
+	if (!validateSecureRequest(req)) return;
+
+	res.end(JSON.stringify({
+		status: "not-implemented-yet"
+	}));
+});
+
 /* Authenticated view draft */
 app.get("/api/user/profile", function(req, res) {
 
 	console.log(req.toString());
 
-	// reject on invalid headers
-	//if (!validateSecureRequest(req)) return; but this is GET!
+	if (!validateSecureGETRequest(req)) return;
 
 	// reject on invalid session
 	if (!sess) {
@@ -895,6 +968,24 @@ function validateRequest(req, res) {
 		res.end("validate: Client request has invalid User-Agent.");
 		return false;
 	}
+}
+
+function validateSecureGETRequest(req, res) {
+	// Only log webapp user-agent
+	var ua = req.headers["user-agent"];
+	console.log("☢ UA: " + ua);
+	if (req.method != "GET") {
+		console.log("validateSecure: Not a get request.");
+		req.session.destroy(function(err) {
+			if (err) {
+				console.log(err);
+			} else {
+				failureResponse(res, 500, "protocol");
+			}
+		});
+		return false;
+	}
+	return true;
 }
 
 function validateSecureRequest(req, res) {
