@@ -111,31 +111,6 @@ app.get("/", function(req, res) {
 	}
 });
 
-/* useless
-app.get("/app", function(req, res) {
-	sess = req.session;
-	console.log("redirected to /app with owner: " + sess.owner);
-	if (sess.owner) {
-		res.end("Hello " + sess.owner + ".");
-		// res.redirect("/admin");
-	} else {
-		res.end("Welcome to the /app endpoint.");
-		// res.redirect("/api/login"); // crashes
-	}
-});
-*/
-
-// Used by web app
-app.get("/api/logout", function(req, res) {
-	req.session.destroy(function(err) {
-		if (err) {
-			console.log(err);
-		} else {
-			res.redirect("http://rtm.thinx.cloud:80/"); // HOME_URL (Apache)
-		}
-	});
-});
-
 app.version = function() {
 	return v.revision();
 };
@@ -150,6 +125,21 @@ app.listen(serverPort, function() {
 		" ☢ ]=-");
 	console.log("");
 	console.log("» Started on port " + serverPort);
+});
+
+/*
+ * Authentication
+ */
+
+// Used by web app
+app.get("/api/logout", function(req, res) {
+	req.session.destroy(function(err) {
+		if (err) {
+			console.log(err);
+		} else {
+			res.redirect("http://rtm.thinx.cloud:80/"); // HOME_URL (Apache)
+		}
+	});
 });
 
 // Front-end authentication, returns 5-minute session on valid authentication
@@ -267,6 +257,10 @@ app.post("/api/login", function(req, res) {
 	});
 });
 
+/*
+ * Devices
+ */
+
 /* Authenticated view draft */
 app.get("/api/user/devices", function(req, res) {
 
@@ -348,7 +342,10 @@ app.get("/api/user/devices", function(req, res) {
 	});
 });
 
-/* TODO: Authenticated view draft */
+/*
+ * API Keys
+ */
+
 app.get("/api/user/apikey", function(req, res) {
 
 	// So far must Authenticated using owner session.
@@ -413,95 +410,150 @@ app.get("/api/user/apikey", function(req, res) {
 	});
 });
 
-/* Authenticated view draft */
-app.post("/api/user/profile", function(req, res) {
-
+// TODO: /user/apikey/revoke POST
+app.post("/api/user/apikey/revoke", function(req, res) {
 	console.log(req.toString());
-
 	if (!validateSecureRequest(req)) return;
+
+	var key = req.body.api_key;
 
 	res.end(JSON.stringify({
 		status: "not-implemented-yet"
 	}));
 });
 
-/* Authenticated view draft */
-app.get("/api/user/profile", function(req, res) {
+// TODO: // /user/apikey/list GET
+app.get("/api/user/apikey/list", function(req, res) {
 
-	console.log(req.toString());
+	// So far must Authenticated using owner session.
+	// This means, new API KEY can requested only
+	// from authenticated web UI.
+
+	console.log(JSON.stringify(sess));
 
 	if (!validateSecureGETRequest(req)) return;
 
-	// reject on invalid session
-	if (!sess) {
-		failureResponse(res, 405, "not allowed");
-		console.log("/api/user/profile: No session!");
-		return;
-	}
+	var owner = sess.owner;
 
-	// reject on invalid owner
-	var owner = null;
-	if (req.session.owner || sess.owner) {
-		if (req.session.owner) {
-			console.log("assigning owner = req.session.owner;");
-			owner = req.session.owner;
-		}
-		if (sess.owner) {
-			console.log(
-				"assigning owner = sess.owner; (client lost or session terminated?)");
-			owner = sess.owner;
-		}
-
-	} else {
+	if (typeof(owner) === "undefined") {
 		failureResponse(res, 403, "session has no owner");
 		console.log("/api/user/profile: No valid owner!");
 		return;
 	}
 
-	userlib.view("users", "owners_by_username", {
-		"key": owner,
-		"include_docs": true // might be useless
-	}, function(err, body) {
+	var new_api_key = sha256(new Date().toString()).substring(0, 40);
+
+	// Get all users
+	userlib.view("users", "owners_by_username", function(err, doc) {
 
 		if (err) {
-			console.log("Error: " + err.toString());
-
-			// Did not fall through, goodbye...
-			req.session.destroy(function(err) {
-				if (err) {
-					console.log(err);
-				} else {
-					failureResponse(res, 403, "unauthorized");
-					console.log("Owner not found: " + owner);
-				}
-			});
+			console.log(err);
 			return;
 		}
-		// TODO: Filter for security, API_KEYS must be hashed
-		res.end(JSON.stringify(body));
+
+		var users = doc.rows;
+		var user_data;
+		var doc_id;
+		for (var index in users) {
+			if (users[index].key === owner) {
+				doc_id = users[index]._id;
+				break;
+			}
+		}
+
+		// Fetch complete user
+		userlib.get(users[index].id, function(error, doc) {
+
+			if (!doc) {
+				console.log("User " + users[index].id + " not found.");
+				return;
+			}
+
+			// Return all api-keys
+			console.log("Listing api keys: " +
+				JSON.stringify(doc.api_keys));
+			res.end(JSON.stringify({
+				api_keys: doc.api_keys
+			}));
+
+		});
 	});
 });
 
-//
-// WORK ON ROAD! ->
-//
+/*
+ * Password Reset
+ */
+
+// TODO: /user/password/set POST
+/* Used by the password-reset page to perform the change in database. Should revoke reset_key when done. */
+app.post("/api/user/password/set", function(req, res) {
+
+	console.log(req.toString());
+
+	if (!validateSecureRequest(req)) return;
+
+	// TODO: Must have authenticated session
+
+	// TODO: Update user document
+
+	res.end(JSON.stringify({
+		status: "not-implemented-yet"
+	}));
+});
+
+
+// TODO: /user/password/reset POST
+/* Used to initiate password-reset session, creates reset key with expiraation and sends password-reset e-mail. */
+app.post("/api/user/password/reset", function(req, res) {
+
+	console.log(req.toString());
+
+	if (!validateSecureRequest(req)) return;
+
+	// TODO: Must not have authenticated session
+	// TODO: Generate activation e-mail, save reset_key (with expiration) for user
+
+	res.end(JSON.stringify({
+		status: "not-implemented-yet"
+	}));
+});
+
+// TODO: /user/password/set POST
+/* Used to receive link from activation e-mail, authenticate user session with owner and reset_key parameters and redirect to password-reset form. */
+app.post("/api/user/password/reset", function(req, res) {
+
+	console.log(req.toString());
+
+	if (!validateSecureRequest(req)) return;
+
+	// TODO: Must not have authenticated session
+	// TODO: Redirect to password reset (store reset_key in cookie for later revocation)
+
+	res.end(JSON.stringify({
+		status: "not-implemented-yet"
+	}));
+});
+
+/*
+ *  User Profile
+ */
+
+// /user/profile POST
+app.post("/api/user/profile", function(req, res) {
+	console.log(req.toString());
+	if (!validateSecureRequest(req)) return;
+	res.end(JSON.stringify({
+		status: "not-implemented-yet"
+	}));
+});
 
 // /user/profile GET
-// /user/profile POST
-
-// /user/password/set POST
-// /user/password/reset POST
-
-// /user/apikey/new GET
-// /user/apikey/list GET
-// /user/apikey/revoke POST
-
 app.get("/api/user/profile", function(req, res) {
 
 	console.log(req.toString());
 
 	// reject on invalid headers
-	if (!validateSecureRequest(req)) return;
+	if (!validateSecureGETRequest(req)) return;
 
 	// reject on invalid session
 	if (!sess) {
