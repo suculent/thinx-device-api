@@ -4,7 +4,7 @@
 
 ### Last week
 
-18/4/2017 - Secure endpoints for listing and generating new API keys
+18/4/2017 - 1.1.203: Secure endpoints for listing and generating new API keys
 
 ### First week
 
