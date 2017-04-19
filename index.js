@@ -447,8 +447,6 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 
 	console.log("/api/user/apikey/revoke");
 
-	console.log("REVOKE" + JSON.stringify(req.body));
-
 	var vtest = vault.read('secret/password');
 	console.log("vtest: " + JSON.stringify(vtest));
 
@@ -463,8 +461,6 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 	}
 
 	var api_key = req.body.api_key;
-
-	console.log("REVOKE api_key" + api_key);
 
 	// Get all users
 	userlib.view("users", "owners_by_username", function(err, doc) {
@@ -492,16 +488,24 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 				return;
 			}
 
-			delete doc.api_keys[api_key];
+			var keys = doc.api_keys;
+			delete keys[api_key];
+			doc.api_keys = keys;
 
 			// Save new document
 			userlib.insert(doc, function(err) {
 				if (err) {
 					console.log(err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "Revocation failed."
+					}));
+				} else {
+					res.end(JSON.stringify({
+						revoked: api_key,
+						success: true
+					}));
 				}
-				res.end(JSON.stringify({
-					revoked: api_key
-				}));
 			});
 		});
 	});
