@@ -27,6 +27,8 @@ var rdict = {};
 
 // Database access
 
+// ./vault write secret/password value=13fd9bae19f4daffa17b34f05dbd9eb8281dce90 owner=test revoked=false
+
 initDatabases();
 
 var devicelib = require("nano")(db).use("managed_devices");
@@ -412,17 +414,64 @@ app.get("/api/user/apikey", function(req, res) {
 
 // TODO: /user/apikey/revoke POST
 app.post("/api/user/apikey/revoke", function(req, res) {
+
 	console.log(req.toString());
+
 	if (!validateSecureRequest(req)) return;
 
-	var key = req.body.api_key;
+	var owner = sess.owner;
 
-	res.end(JSON.stringify({
-		status: "not-implemented-yet"
-	}));
+	if (typeof(owner) === "undefined") {
+		failureResponse(res, 403, "session has no owner");
+		console.log("/api/user/profile: No valid owner!");
+		return;
+	}
+
+	var apikey = req.body.api_key;
+
+	// Get all users
+	userlib.view("users", "owners_by_username", function(err, doc) {
+
+		if (err) {
+			console.log(err);
+			return;
+		}
+
+		var users = doc.rows;
+		var user_data;
+		var doc_id;
+		for (var index in users) {
+			if (users[index].key === owner) {
+				doc_id = users[index]._id;
+				break;
+			}
+		}
+
+		// Fetch complete user
+		userlib.get(users[index].id, function(error, doc) {
+
+			if (!doc) {
+				console.log("User " + users[index].id + " not found.");
+				return;
+			}
+
+			delete doc.api_keys[apikey];
+
+			// Save new document
+			userlib.insert(doc, function(err) {
+				if (err) {
+					console.log(err);
+				}
+				res.end(JSON.stringify({
+					revoked: api_key
+				}));
+			});
+		});
+	});
 });
 
-// TODO: // /user/apikey/list GET
+/* Lists all API keys for user. */
+// TODO: Mangle keys as display placeholders only.
 app.get("/api/user/apikey/list", function(req, res) {
 
 	// So far must Authenticated using owner session.
@@ -483,6 +532,52 @@ app.get("/api/user/apikey/list", function(req, res) {
 /*
  * Password Reset
  */
+
+// TODO: /user/create GET
+/* Create username based on e-mail. Owner should be unique (docid?). */
+app.post("/api/user/create", function(req, res) {
+
+	console.log(req.toString());
+
+	if (!validateSecureRequest(req)) return;
+
+	// TODO: Creates registration e-mail with activation link, should save reset_key? (activation key) somewhere.
+	// TODO: Update user document
+
+	res.end(JSON.stringify({
+		status: "not-implemented-yet"
+	}));
+});
+
+/* Endpoint for the user activation e-mail. */
+app.get("/api/user/activate", function(req, res) {
+
+	console.log(req.toString());
+
+	if (!validateSecureRequest(req)) return;
+
+	// TODO: Redirect to activation page. Save activation key into cookie.
+	// TODO: Create user document with activation e-mail and key
+
+	res.end(JSON.stringify({
+		status: "not-implemented-yet"
+	}));
+});
+
+/* Endpoint for the user activation for (password set). */
+app.post("/api/user/activate", function(req, res) {
+
+	console.log(req.toString());
+
+	if (!validateSecureRequest(req)) return;
+
+	// TODO: Creates registration e-mail with activation link, should save reset_key? (activation key) somewhere.
+	// TODO: Update user document with password, redirect to login.
+
+	res.end(JSON.stringify({
+		status: "not-implemented-yet"
+	}));
+});
 
 // TODO: /user/password/set POST
 /* Used by the password-reset page to perform the change in database. Should revoke reset_key when done. */
@@ -605,6 +700,7 @@ app.get("/api/user/profile", function(req, res) {
 	});
 });
 
+/* Provides list of users’ devices. Should mangle certain secure data. */
 app.get("/api/user/devices", function(req, res) {
 
 	console.log(req.toString());
@@ -683,6 +779,7 @@ app.get("/api/user/devices", function(req, res) {
 			devices: devices
 		});
 		console.log("/api/user/devices: Response: " + reply);
+		res.set("Connection", "keep-alive"); // allow XHR request
 		res.end(reply);
 	});
 });
@@ -758,7 +855,7 @@ app.post("/device/register", function(req, res) {
 	userlib.view("users", "owners_by_username", {
 		"key": owner,
 		"include_docs": true // might be useless
-	}, function(err, body, fw) {
+	}, function(err, body) {
 
 		if (err) {
 			console.log("Error: " + err.toString());
@@ -859,6 +956,8 @@ app.post("/device/register", function(req, res) {
 		if (device_id !== null) {
 			reg.device_id = device_id;
 		}
+
+		console.log("Device firmware: " + fw);
 
 		var device = {
 			mac: mac,
@@ -1155,7 +1254,6 @@ app.post("/api/build", function(req, res) {
 			(typeof(mac) === "undefined" || mac === null) ||
 			(typeof(tenant) === "undefined" || tenant === null) ||
 			(typeof(git) === "undefined" || git === null)) {
-
 			rdict = {
 				build: {
 					success: false,
@@ -1194,9 +1292,6 @@ app.post("/api/build", function(req, res) {
 });
 
 function buildCommand(build_id, tenant, mac, git, udid, dryrun) {
-
-	// ./builder --tenant=test --mac=ANY --git=https://github.com/suculent/thinx-firmware-esp8266 --dry-run
-	// ./builder --tenant=test --mac=ANY --git=git@github.com:suculent/thinx-firmware-esp8266.git --dry-run
 
 	console.log("Executing build chain...");
 

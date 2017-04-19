@@ -55,9 +55,9 @@ test:
     - bash ./02-deploy.sh
     - bash ./03-test.sh
   post:
-    - curl -sSL https://download.sourceclear.com/ci.sh | sh
-    - npm install -g karma
-    - karma start
+#    - npm install -g karma karma-coverage jasmine-core karma-jasmine
+#    - bash karma start
+    - bash curl -sSL https://download.sourceclear.com/ci.sh | sh
     - bash cp -v ./coverage $CIRCLE_ARTIFACTS
 
 ## Customize deployment commands
