@@ -587,7 +587,13 @@ app.post("/api/user/create", function(req, res) {
 
 	// if (!validateSecureRequest(req)) return;
 
-	var new_owner = uuidV1();
+	var owner = req.body.owner;
+	var first_name = req.body.first_name;
+	var last_name = req.body.last_name;
+	var email = req.body.email;
+	var password = req.body.password;
+
+	var new_owner = owner;
 
 	userlib.view("users", "owners_by_username", {
 		"key": new_owner,
@@ -650,6 +656,8 @@ app.post("/api/user/create", function(req, res) {
 				}
 			});
 
+			// TODO: Redirect to page that says "Wait for activation e-mail..."
+
 			res.end(JSON.stringify(body));
 
 		}); // insert
@@ -675,6 +683,8 @@ app.get("/api/user/activate", function(req, res) {
 	res.header.activation = ac_key;
 	res.redirect("http://rtm.thinx.cloud:80/api/user/password/set");
 
+	// TODO: Revoke activation token for this user (sooner).
+
 	/*
 	res.end(JSON.stringify({
 		status: "not-implemented-yet"
@@ -692,6 +702,8 @@ app.post("/api/user/activate", function(req, res) {
 
 	// TODO: Creates registration e-mail with activation link, should save reset_key? (activation key) somewhere.
 	// TODO: Update user document with password, redirect to login.
+
+	// TODO: Revoke activation token for this user (later).
 
 	res.end(JSON.stringify({
 		status: "not-implemented-yet"
