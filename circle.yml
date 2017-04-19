@@ -28,7 +28,7 @@ machine:
 ## Customize dependencies
 dependencies:
   pre:
-    - npm install .    
+    - npm install .
     - echo "Creating cached directories (installer should do it)..."
 
   override:
@@ -44,10 +44,7 @@ dependencies:
 ## Customize database setup
 database:
   override:
-    - bash ./00-init_db_design.sh # requires access to localhost:5984?
-#    # replace CircleCI's generated database.yml
-#    - cp config/database.yml.ci config/database.yml
-#    - bundle exec rake db:create db:schema:load
+    - bash ./00-init_db_design.sh
 
 ## Customize test commands
 test:
@@ -61,7 +58,7 @@ test:
     - curl -sSL https://download.sourceclear.com/ci.sh | sh
     - npm install -g karma
     - karma start
-    - cp -v ./coverage $CIRCLE_ARTIFACTS
+    - bash cp -v ./coverage $CIRCLE_ARTIFACTS
 
 ## Customize deployment commands
 deployment:
