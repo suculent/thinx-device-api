@@ -430,7 +430,7 @@ app.get("/api/user/apikey", function(req, res) {
 			console.log("Updating user: " + users[index].id);
 
 			// Add new API Key
-			userlib.insert(doc, function(err) {
+			userlib.insert(doc, owner, function(err, body, header) {
 				if (err) {
 					console.log(err);
 				}
