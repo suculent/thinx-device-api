@@ -445,7 +445,7 @@ app.get("/api/user/apikey", function(req, res) {
 // /user/apikey/revoke POST
 app.post("/api/user/apikey/revoke", function(req, res) {
 
-	console.log("REVOKE" + req.toString());
+	console.log("REVOKE" + JSON.stringify(req.body));
 
 	var vtest = vault.read('secret/password');
 	console.log("vtest: " + JSON.stringify(vtest));
@@ -459,8 +459,6 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 		console.log("/api/user/profile: No valid owner!");
 		return;
 	}
-
-
 
 	var api_key = req.body.api_key;
 
