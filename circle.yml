@@ -28,7 +28,7 @@ machine:
 ## Customize dependencies
 dependencies:
   pre:
-    - npm install .
+    - npm install .    
     - echo "Creating cached directories (installer should do it)..."
 
   override:
@@ -59,6 +59,7 @@ test:
     - bash ./03-test.sh
   post:
     - curl -sSL https://download.sourceclear.com/ci.sh | sh
+    - npm install -g karma
     - karma start
     - cp -v ./coverage $CIRCLE_ARTIFACTS
 
