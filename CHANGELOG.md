@@ -4,13 +4,14 @@
 
 ### Last week
 
+19/4/2017 - 1.1.219: API Key revocation (from UI)
 18/4/2017 - 1.1.203: Secure endpoints for listing and generating new API keys
 
 ### First week
 
 16/4/2017 - Created asynchronous polling git-watcher (Repository class), improved tests
 
-15/4/2017 - Semantic versioning, firmware update-on-checkin, Deployment, Envelopes, UDID, 
+15/4/2017 - Semantic versioning, firmware update-on-checkin, Deployment, Envelopes, UDID,
 Device registration with API key
 
 14/4/2017 - Espress Router, Security (api_key, origin, fixes, device router)

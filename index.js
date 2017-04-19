@@ -245,7 +245,6 @@ app.post("/api/login", function(req, res) {
 					// TODO: write last_seen timestamp to DB here __for devices__
 					console.log("client_type: " + client_type);
 					if (client_type == "device") {
-						// TODO: Send cookie here
 						res.end(JSON.stringify({
 							status: "WELCOME"
 						}));
@@ -516,7 +515,7 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 });
 
 /* Lists all API keys for user. */
-// TODO: Mangle keys as display placeholders only.
+// TODO L8TR: Mangle keys as display placeholders only, but support this in revocation!
 app.get("/api/user/apikey/list", function(req, res) {
 
 	console.log("/api/user/apikey/list");
@@ -584,20 +583,14 @@ app.get("/api/user/apikey/list", function(req, res) {
 /* Create username based on e-mail. Owner should be unique (docid?). */
 app.post("/api/user/create", function(req, res) {
 
-	console.log(req.toString());
+	console.log(JSON.stringify(req.body));
 
-	if (!validateSecureRequest(req)) return;
+	// if (!validateSecureRequest(req)) return;
 
-	var owner = sess.owner;
-
-	if (typeof(owner) === "undefined") {
-		failureResponse(res, 403, "session has no owner");
-		console.log("/api/user/profile: No valid owner!");
-		return;
-	}
+	var new_owner = uuidV1();
 
 	userlib.view("users", "owners_by_username", {
-		"key": owner,
+		"key": new_owner,
 		"include_docs": true // might be useless
 	}, function(err, body) {
 
@@ -611,7 +604,7 @@ app.post("/api/user/create", function(req, res) {
 					failureResponse(res, 501, err);
 				} else {
 					failureResponse(res, 501, "already_exists");
-					console.log("User " + owner + " already exists.");
+					console.log("User " + new_owner + " already exists.");
 				}
 			});
 		}
@@ -624,13 +617,13 @@ app.post("/api/user/create", function(req, res) {
 
 		// Create user document
 		var new_user = {
-			owner: owner,
+			owner: new_owner,
 			email: email,
 			api_keys: new_api_keys,
 			activation: new_activation_token
 		};
 
-		userlib.insert(new_user, owner, function(err, body, header) {
+		userlib.insert(new_user, new_owner, function(err, body, header) {
 
 			if (err) {
 				console.log(err);
@@ -640,6 +633,22 @@ app.post("/api/user/create", function(req, res) {
 
 			// TODO: Creates registration e-mail with activation link, should save reset_key? (activation key) somewhere.
 
+			var Email = require('email').Email;
+			var activationEmail = new Email({
+				from: "api@thinx.cloud",
+				to: email,
+				subject: "Account activation",
+				body: "Hello first_name last_name. Please <a href=/api/user/activate?activation=\"/  " +
+					new_activation_token + "\">activate</a> your THiNX account."
+			});
+
+			// if callback is provided, errors will be passed into it
+			// else errors will be thrown
+			activationEmail.send(function(err) {
+				if (err) {
+					console.log(err);
+				}
+			});
 
 			res.end(JSON.stringify(body));
 
@@ -651,22 +660,33 @@ app.post("/api/user/create", function(req, res) {
 /* Endpoint for the user activation e-mail. */
 app.get("/api/user/activate", function(req, res) {
 
-	console.log(req.toString());
+	console.log("GET /api/user/activate");
+	console.log(JSON.stringify(req.body));
 
-	if (!validateSecureRequest(req)) return;
+	var ac_key = req.body.activation;
 
-	// TODO: Redirect to activation page. Save activation key into cookie.
-	// TODO: Create user document with activation e-mail and key
+	console.log("Attempt to activate with key: " + ac_key);
 
+	// TODO: Search allusers in DB with this ac_key (better save ac_key elsewhere with user _id)
+
+	// if (!validateSecureRequest(req)) return;
+
+	// Redirect to password-set page. Save activation key into cookie.
+	res.header.activation = ac_key;
+	res.redirect("http://rtm.thinx.cloud:80/api/user/password/set");
+
+	/*
 	res.end(JSON.stringify({
 		status: "not-implemented-yet"
 	}));
+	*/
 });
 
 /* Endpoint for the user activation for (password set). */
 app.post("/api/user/activate", function(req, res) {
 
-	console.log(req.toString());
+	console.log("POST /api/user/activate");
+	console.log(JSON.stringify(req.body));
 
 	if (!validateSecureRequest(req)) return;
 
@@ -682,7 +702,8 @@ app.post("/api/user/activate", function(req, res) {
 /* Used by the password-reset page to perform the change in database. Should revoke reset_key when done. */
 app.post("/api/user/password/set", function(req, res) {
 
-	console.log(req.toString());
+	console.log("POST /api/user/password/set");
+	console.log(JSON.stringify(req.body));
 
 	if (!validateSecureRequest(req)) return;
 
@@ -700,28 +721,13 @@ app.post("/api/user/password/set", function(req, res) {
 /* Used to initiate password-reset session, creates reset key with expiraation and sends password-reset e-mail. */
 app.post("/api/user/password/reset", function(req, res) {
 
-	console.log(req.toString());
+	console.log("POST /api/user/password/reset");
+	console.log(JSON.stringify(req.body));
 
 	if (!validateSecureRequest(req)) return;
 
 	// TODO: Must not have authenticated session
 	// TODO: Generate activation e-mail, save reset_key (with expiration) for user
-
-	res.end(JSON.stringify({
-		status: "not-implemented-yet"
-	}));
-});
-
-// TODO: /user/password/set POST
-/* Used to receive link from activation e-mail, authenticate user session with owner and reset_key parameters and redirect to password-reset form. */
-app.post("/api/user/password/reset", function(req, res) {
-
-	console.log(req.toString());
-
-	if (!validateSecureRequest(req)) return;
-
-	// TODO: Must not have authenticated session
-	// TODO: Redirect to password reset (store reset_key in cookie for later revocation)
 
 	res.end(JSON.stringify({
 		status: "not-implemented-yet"
@@ -734,7 +740,10 @@ app.post("/api/user/password/reset", function(req, res) {
 
 // /user/profile POST
 app.post("/api/user/profile", function(req, res) {
-	console.log(req.toString());
+
+	console.log("POST /api/user/profile");
+	console.log(JSON.stringify(req.body));
+
 	if (!validateSecureRequest(req)) return;
 	res.end(JSON.stringify({
 		status: "not-implemented-yet"
@@ -744,7 +753,8 @@ app.post("/api/user/profile", function(req, res) {
 // /user/profile GET
 app.get("/api/user/profile", function(req, res) {
 
-	console.log(req.toString());
+	console.log("GET /api/user/profile");
+	console.log(JSON.stringify(req.body));
 
 	// reject on invalid headers
 	if (!validateSecureGETRequest(req)) return;
