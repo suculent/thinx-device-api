@@ -445,6 +445,8 @@ app.get("/api/user/apikey", function(req, res) {
 // /user/apikey/revoke POST
 app.post("/api/user/apikey/revoke", function(req, res) {
 
+	console.log("/api/user/apikey/revoke");
+
 	console.log("REVOKE" + JSON.stringify(req.body));
 
 	var vtest = vault.read('secret/password');
@@ -509,11 +511,13 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 // TODO: Mangle keys as display placeholders only.
 app.get("/api/user/apikey/list", function(req, res) {
 
+	console.log("/api/user/apikey/list");
+
 	// So far must Authenticated using owner session.
 	// This means, new API KEY can requested only
 	// from authenticated web UI.
 
-	console.log(JSON.stringify(sess));
+	console.log("APIKEY LIST: " + JSON.stringify(sess));
 
 	if (!validateSecureGETRequest(req)) return;
 
@@ -521,7 +525,7 @@ app.get("/api/user/apikey/list", function(req, res) {
 
 	if (typeof(owner) === "undefined") {
 		failureResponse(res, 403, "session has no owner");
-		console.log("/api/user/profile: No valid owner!");
+		console.log("/api/user/apikey/list: No valid owner!");
 		return;
 	}
 
