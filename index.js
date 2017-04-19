@@ -460,7 +460,11 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 		return;
 	}
 
+
+
 	var api_key = req.body.api_key;
+
+	console.log("REVOKE api_key" + api_key);
 
 	// Get all users
 	userlib.view("users", "owners_by_username", function(err, doc) {
