@@ -445,7 +445,7 @@ app.get("/api/user/apikey", function(req, res) {
 // /user/apikey/revoke POST
 app.post("/api/user/apikey/revoke", function(req, res) {
 
-	console.log(req.toString());
+	console.log("REVOKE" + req.toString());
 
 	var vtest = vault.read('secret/password');
 	console.log("vtest: " + JSON.stringify(vtest));
@@ -460,7 +460,7 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 		return;
 	}
 
-	var apikey = req.body.api_key;
+	var api_key = req.body.api_key;
 
 	// Get all users
 	userlib.view("users", "owners_by_username", function(err, doc) {
@@ -488,7 +488,7 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 				return;
 			}
 
-			delete doc.api_keys[apikey];
+			delete doc.api_keys[api_key];
 
 			// Save new document
 			userlib.insert(doc, function(err) {
