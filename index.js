@@ -490,11 +490,9 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 			}
 
 			var keys = doc.api_keys;
-			var removeIndex = keys.findIndex(function(o) {
-				console.log("Revoking " + api_key);
-				return o.id === api_key;
-			});
-			doc.api_keys = array.splice(removeIndex, 1);
+			var removeIndex = keys[api_key];
+			keys.splice(removeIndex, 1);
+			doc.api_keys = keys;
 
 			console.log("Saving: " + JSON.stringify(doc.api_keys));
 
