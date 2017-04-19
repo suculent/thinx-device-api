@@ -296,10 +296,8 @@ app.post("/api/login", function(req, res) {
 /* Authenticated view draft */
 app.get("/api/user/devices", function(req, res) {
 
-	console.log(req.toString());
-
 	// reject on invalid headers
-	//if (!validateSecureRequest(req)) return; but this is GET!
+	if (!validateSecureGETRequest(req)) return;
 
 	// reject on invalid session
 	if (!sess) {
@@ -429,14 +427,17 @@ app.get("/api/user/apikey", function(req, res) {
 
 			console.log("Updating user: " + users[index].id);
 
-			// Add new API Key
-			userlib.insert(doc, owner, function(err, body, header) {
-				if (err) {
-					console.log(err);
-				}
-				res.end(JSON.stringify({
-					api_key: new_api_key
-				}));
+			userlib.destroy(doc.id, function() {
+
+				// Add new API Key
+				userlib.insert(doc, owner, function(err, body, header) {
+					if (err) {
+						console.log(err);
+					}
+					res.end(JSON.stringify({
+						api_key: new_api_key
+					}));
+				});
 			});
 		});
 	});
