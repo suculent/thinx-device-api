@@ -490,7 +490,7 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 			}
 
 			var keys = doc.api_keys;
-			var removeIndex = arr.findIndex(function(o) {
+			var removeIndex = keys.findIndex(function(o) {
 				console.log("Revoking " + api_key);
 				return o.id === api_key;
 			});
@@ -527,7 +527,7 @@ app.get("/api/user/apikey/list", function(req, res) {
 	// This means, new API KEY can requested only
 	// from authenticated web UI.
 
-	console.log("APIKEY LIST: " + JSON.stringify(sess));
+	console.log("APIKEY LIST: " + JSON.stringify(req.body));
 
 	if (!validateSecureGETRequest(req)) return;
 
