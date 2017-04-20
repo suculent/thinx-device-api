@@ -615,7 +615,7 @@ app.post("/api/user/password/reset", function(req, res) {
 			console.log("Error: " + err.toString());
 			failureResponse(res, 404, "user_not_found");
 		} else {
-			console.log("password reset users: " + JSON.stringify(body));
+			console.log("password reset users: " + body.rows.length);
 		}
 
 		var user = body.rows[0];
@@ -641,7 +641,7 @@ app.post("/api/user/password/reset", function(req, res) {
 				from: "api@thinx.cloud",
 				to: user.email,
 				subject: "Password reset",
-				body: "Hello " + owner.first_name + " " + owner.last_name +
+				body: "Hello " + user.first_name + " " + user.last_name +
 					". Please <a href=\"/api/user/password/reset?reset=\"/  " +
 					user.activation + "\">reset</a> your THiNX password."
 			});
