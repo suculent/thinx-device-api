@@ -26,9 +26,7 @@ var v = require("./lib/thinx/version");
 var rdict = {};
 
 // Database access
-
 // ./vault write secret/password value=13fd9bae19f4daffa17b34f05dbd9eb8281dce90 owner=test revoked=false
-
 // Vault init & unseal:
 
 var options = {
@@ -71,6 +69,7 @@ var userlib = require("nano")(db).use("managed_users");
 var express = require("express");
 var session = require("express-session");
 var app = express();
+var sess;
 
 app.use(session({
 	secret: session_config.secret,
@@ -83,8 +82,6 @@ app.use(parser.json());
 app.use(parser.urlencoded({
 	extended: true
 }));
-
-var sess;
 
 app.all("/*", function(req, res, next) {
 
@@ -132,170 +129,12 @@ app.all("/*", function(req, res, next) {
 
 // http://thejackalofjavascript.com/architecting-a-restful-node-js-app/
 
-/** Tested with: !device_register.spec.js` */
-app.get("/", function(req, res) {
-	sess = req.session;
-	console.log("owner: " + sess.owner);
-	if (sess.owner) {
-		res.redirect("http://rtm.thinx.cloud:80/app");
-	} else {
-		res.end("This is API ROOT."); // insecure
-	}
-});
-
-app.version = function() {
-	return v.revision();
-};
-
-app.listen(serverPort, function() {
-	var package_info = require("./package.json");
-	var product = package_info.description;
-	var version = package_info.version;
-
-	console.log("");
-	console.log("-=[ ☢ " + product + " v" + version + " rev. " + app.version() +
-		" ☢ ]=-");
-	console.log("");
-	console.log("» Started on port " + serverPort);
-});
-
-/*
- * Authentication
- */
-
-// Used by web app
-app.get("/api/logout", function(req, res) {
-	req.session.destroy(function(err) {
-		if (err) {
-			console.log(err);
-		} else {
-			res.redirect("http://rtm.thinx.cloud:80/"); // HOME_URL (Apache)
-		}
-	});
-});
-
-// Front-end authentication, returns 5-minute session on valid authentication
-app.post("/api/login", function(req, res) {
-
-	sess = req.session;
-
-	var client_type = "webapp";
-
-	var ua = req.headers["user-agent"];
-	var validity = ua.indexOf(client_user_agent);
-
-	if (validity === 0) {
-		client_type = "device";
-	}
-
-	// Request must be post
-	if (req.method != "POST") {
-		req.session.destroy(function(err) {
-			if (err) {
-				console.log(err);
-			} else {
-				failureResponse(res, 500, "protocol");
-				console.log("Not a post request.");
-				return;
-			}
-		});
-	}
-	var username = req.body.username;
-	var password = req.body.password;
-
-	if (typeof(username) == "undefined" || typeof(password) == "undefined") {
-		req.session.destroy(function(err) {
-			if (err) {
-				console.log(err);
-			} else {
-				failureResponse(res, 403, "unauthorized");
-				console.log("User unknown.");
-				return;
-			}
-		});
-	}
-
-	userlib.view("users", "owners_by_username", {
-		"key": username,
-		"include_docs": true // might be useless
-	}, function(err, body) {
-
-		if (err) {
-			console.log("Error: " + err.toString());
-
-			// Did not fall through, goodbye...
-			req.session.destroy(function(err) {
-				if (err) {
-					console.log(err);
-				} else {
-					failureResponse(res, 403, "unauthorized");
-					console.log("Owner not found: " + owner);
-				}
-			});
-			return;
-		}
-
-		// Find user and match password
-		var all_users = body.rows;
-		for (var index in all_users) {
-			var user_data = all_users[index];
-			if (username == user_data.key) {
-				if (password == user_data.value) {
-					req.session.owner = user_data.key;
-					// TODO: write last_seen timestamp to DB here __for devices__
-					console.log("client_type: " + client_type);
-					if (client_type == "device") {
-						res.end(JSON.stringify({
-							status: "WELCOME"
-						}));
-					} else if (client_type == "webapp") {
-						res.end(JSON.stringify({
-							"redirectURL": "http://rtm.thinx.cloud:80/app"
-						}));
-					}
-					// TODO: If user-agent contains app/device... (what?)
-					return;
-				} else {
-					console.log("Password mismatch for " + username);
-				}
-			}
-		}
-
-		if (typeof(req.session.owner) == "undefined") {
-
-			if (client_type == "device") {
-				res.end(JSON.stringify({
-					status: "ERROR"
-				}));
-			} else if (client_type == "webapp") {
-				res.redirect("http://rtm.thinx.cloud:80/"); // redirects browser, not in XHR?
-				// or res.end(JSON.stringify({ redirectURL: "https://rtm.thinx.cloud:80/app" }));
-			}
-
-			console.log("login: Flushing session: " + JSON.stringify(req.session));
-			req.session.destroy(function(err) {
-				if (err) {
-					console.log(err);
-				} else {
-					failureResponse(res, 501, "protocol");
-					console.log("Not a post request.");
-					return;
-				}
-			});
-		} else {
-			failureResponse(res, 541, "authentication exception");
-		}
-	});
-});
-
 /*
  * Devices
  */
 
 /* Authenticated view draft */
 app.get("/api/user/devices", function(req, res) {
-
-	// reject on invalid headers
 	if (!validateSecureGETRequest(req)) return;
 
 	// reject on invalid session
@@ -317,7 +156,6 @@ app.get("/api/user/devices", function(req, res) {
 				"assigning owner = sess.owner; (client lost or session terminated?)");
 			owner = sess.owner;
 		}
-
 	} else {
 		failureResponse(res, 403, "session has no owner");
 		console.log("/api/user/devices: No valid owner!");
@@ -375,6 +213,7 @@ app.get("/api/user/devices", function(req, res) {
  * API Keys
  */
 
+/* Creates new api key. */
 app.get("/api/user/apikey", function(req, res) {
 
 	// So far must Authenticated using owner session.
@@ -389,7 +228,7 @@ app.get("/api/user/apikey", function(req, res) {
 
 	if (typeof(owner) === "undefined") {
 		failureResponse(res, 403, "session has no owner");
-		console.log("/api/user/profile: No valid owner!");
+		console.log("/api/user/apikey: No valid owner!");
 		return;
 	}
 
@@ -421,22 +260,19 @@ app.get("/api/user/apikey", function(req, res) {
 				return;
 			}
 
-			// Add new API Key
 			doc.api_keys.push(new_api_key);
 
 			console.log("Updating user: " + users[index].id);
 
-			userlib.destroy(doc.id, function() {
-
-				// Add new API Key
-				userlib.insert(doc, owner, function(err, body, header) {
-					if (err) {
-						console.log(err);
-					}
-					res.end(JSON.stringify({
-						api_key: new_api_key
-					}));
-				});
+			// Add new API Key
+			userlib.insert(doc, owner, function(err, body, header) {
+				if (err) {
+					console.log(err);
+				}
+				console.log("Userlib " + owner + "document inserted");
+				res.end(JSON.stringify({
+					api_key: new_api_key
+				}));
 			});
 		});
 	});
@@ -456,7 +292,7 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 
 	if (typeof(owner) === "undefined") {
 		failureResponse(res, 403, "session has no owner");
-		console.log("/api/user/profile: No valid owner!");
+		console.log("/api/user/apikey/revoke: No valid owner!");
 		return;
 	}
 
@@ -583,6 +419,7 @@ app.get("/api/user/apikey/list", function(req, res) {
 /* Create username based on e-mail. Owner should be unique (docid?). */
 app.post("/api/user/create", function(req, res) {
 
+	console.log("/api/user/create");
 	console.log(JSON.stringify(req.body));
 
 	// if (!validateSecureRequest(req)) return;
@@ -604,16 +441,13 @@ app.post("/api/user/create", function(req, res) {
 			console.log("User should NOT exist! Skipping ALL errors...");
 			console.log("Error: " + err.toString());
 		} else {
+			console.log("User already exists: " + new_owner);
+			failureResponse(res, 404, "already_exists");
 			req.session.destroy(function(err) {
-				if (err) {
-					console.log(err);
-					failureResponse(res, 501, err);
-				} else {
-					failureResponse(res, 501, "already_exists");
-					console.log("User " + new_owner + " already exists.");
-				}
+				console.log("User " + new_owner + " already exists.");
 			});
 		}
+
 
 		var new_api_keys = [];
 		var new_api_key = sha256(new Date().toString()).substring(0, 40);
@@ -644,7 +478,8 @@ app.post("/api/user/create", function(req, res) {
 				from: "api@thinx.cloud",
 				to: email,
 				subject: "Account activation",
-				body: "Hello first_name last_name. Please <a href=/api/user/activate?activation=\"/  " +
+				body: "Hello " + owner.first_name + " " + owner.last_name +
+					". Please <a href=\"http://rtm.thinx.cloud:7442/api/user/activate?activation=\"/  " +
 					new_activation_token + "\">activate</a> your THiNX account."
 			});
 
@@ -664,6 +499,33 @@ app.post("/api/user/create", function(req, res) {
 	}); // view
 }); // post
 
+
+/* Endpoint for the password reset e-mail. */
+app.get("/api/user/password/reset", function(req, res) {
+
+	console.log("GET /api/user/password/reset");
+	console.log(JSON.stringify(req.body));
+
+	var reset_key = req.body.reset;
+
+	console.log("Attempt to reset password with key: " + reset_key);
+
+	// TODO: Search allusers in DB with this ac_key (better save ac_key elsewhere with user _id)
+
+	// if (!validateSecureRequest(req)) return;
+
+	// Redirect to password-set page. Save activation key into cookie.
+	res.header.activation = reset_key;
+	res.redirect("http://rtm.thinx.cloud:80/api/user/password/set");
+
+	// TODO: Revoke activation token for this user (sooner).
+
+	/*
+	res.end(JSON.stringify({
+		status: "not-implemented-yet"
+	}));
+	*/
+});
 
 /* Endpoint for the user activation e-mail. */
 app.get("/api/user/activate", function(req, res) {
@@ -736,15 +598,60 @@ app.post("/api/user/password/reset", function(req, res) {
 	console.log("POST /api/user/password/reset");
 	console.log(JSON.stringify(req.body));
 
-	if (!validateSecureRequest(req)) return;
-
+	// TODO: Receive e-mail as an parameter, will require captcha
 	// TODO: Must not have authenticated session
 	// TODO: Generate activation e-mail, save reset_key (with expiration) for user
 
-	res.end(JSON.stringify({
-		status: "not-implemented-yet"
-	}));
-});
+	var email = req.body.email;
+
+	userlib.view("users", "owners_by_email", {
+		"key": email,
+		"include_docs": true // might be useless
+	}, function(err, body) {
+
+		if (err) {
+			console.log("Error: " + err.toString());
+			failureResponse(res, 404, "user_not_found");
+		}
+
+		var user = body[0];
+		user.activation = sha256(new Date().toString());
+
+		userlib.insert(user, user.owner, function(err, body, header) {
+
+			if (err) {
+				console.log(err);
+				res.end(err);
+				return;
+			}
+
+			// TODO: Creates reset e-mail with re-activation link
+
+			var Email = require('email').Email;
+			var activationEmail = new Email({
+				from: "api@thinx.cloud",
+				to: user.email,
+				subject: "Password reset",
+				body: "Hello " + owner.first_name + " " + owner.last_name +
+					". Please <a href=\"/api/user/password/reset?reset=\"/  " +
+					user.activation + "\">reset</a> your THiNX password."
+			});
+
+			// if callback is provided, errors will be passed into it
+			// else errors will be thrown
+			activationEmail.send(function(err) {
+				if (err) {
+					console.log(err);
+				}
+			});
+
+			// Calling page already displays "Relax. You reset link is on its way."
+
+			res.end(JSON.stringify(body));
+
+		}); // insert
+	}); // view
+}); // post
 
 /*
  *  User Profile
@@ -1209,11 +1116,6 @@ function sendRegistrationOKResponse(res, dict) {
 	res.end(json);
 }
 
-/* Should return true for known devices */
-function identifyDeviceByMac(mac) {
-	return false;
-}
-
 function failureResponse(res, code, reason) {
 	res.writeHead(code, {
 		"Content-Type": "application/json"
@@ -1438,6 +1340,162 @@ function buildCommand(build_id, tenant, mac, git, udid, dryrun) {
 		console.log(build_id + " : " + stdout);
 	});
 }
+
+/** Tested with: !device_register.spec.js` */
+app.get("/", function(req, res) {
+	sess = req.session;
+	console.log("owner: " + sess.owner);
+	if (sess.owner) {
+		res.redirect("http://rtm.thinx.cloud:80/app");
+	} else {
+		res.end("This is API ROOT."); // insecure
+	}
+});
+
+app.version = function() {
+	return v.revision();
+};
+
+app.listen(serverPort, function() {
+	var package_info = require("./package.json");
+	var product = package_info.description;
+	var version = package_info.version;
+
+	console.log("");
+	console.log("-=[ ☢ " + product + " v" + version + " rev. " + app.version() +
+		" ☢ ]=-");
+	console.log("");
+	console.log("» Started on port " + serverPort);
+});
+
+/*
+ * Authentication
+ */
+
+// Used by web app
+app.get("/api/logout", function(req, res) {
+	console.log("/api/logout");
+	req.session.destroy(function(err) {
+		if (err) {
+			console.log(err);
+		} else {
+			res.redirect("http://rtm.thinx.cloud/"); // HOME_URL (Apache)
+		}
+	});
+});
+
+// Front-end authentication, returns 5-minute session on valid authentication
+app.post("/api/login", function(req, res) {
+	console.log("/api/login");
+	sess = req.session;
+
+	var client_type = "webapp";
+	var ua = req.headers["user-agent"];
+	var validity = ua.indexOf(client_user_agent);
+
+	if (validity === 0) {
+		client_type = "device";
+	}
+
+	// Request must be post
+	if (req.method != "POST") {
+		req.session.destroy(function(err) {
+			if (err) {
+				console.log(err);
+			} else {
+				failureResponse(res, 500, "protocol");
+				console.log("Not a post request.");
+				return;
+			}
+		});
+	}
+	var username = req.body.username;
+	var password = req.body.password;
+
+	if (typeof(username) == "undefined" || typeof(password) == "undefined") {
+		req.session.destroy(function(err) {
+			if (err) {
+				console.log(err);
+			} else {
+				failureResponse(res, 403, "unauthorized");
+				console.log("User unknown.");
+				return;
+			}
+		});
+	}
+
+	userlib.view("users", "owners_by_username", {
+		"key": username,
+		"include_docs": true // might be useless
+	}, function(err, body) {
+
+		if (err) {
+			console.log("Error: " + err.toString());
+
+			// Did not fall through, goodbye...
+			req.session.destroy(function(err) {
+				if (err) {
+					console.log(err);
+				} else {
+					failureResponse(res, 403, "unauthorized");
+					console.log("Owner not found: " + username);
+				}
+			});
+			return;
+		}
+
+		// Find user and match password
+		var all_users = body.rows;
+		for (var index in all_users) {
+			var user_data = all_users[index];
+			if (username == user_data.key) {
+				if (password == user_data.value) {
+					req.session.owner = user_data.key;
+					// TODO: write last_seen timestamp to DB here __for devices__
+					console.log("client_type: " + client_type);
+					if (client_type == "device") {
+						res.end(JSON.stringify({
+							status: "WELCOME"
+						}));
+					} else if (client_type == "webapp") {
+						res.end(JSON.stringify({
+							"redirectURL": "http://rtm.thinx.cloud:80/app"
+						}));
+					}
+					// TODO: If user-agent contains app/device... (what?)
+					return;
+				} else {
+					console.log("Password mismatch for " + username);
+				}
+			}
+		}
+
+		if (typeof(req.session.owner) == "undefined") {
+
+			if (client_type == "device") {
+				res.end(JSON.stringify({
+					status: "ERROR"
+				}));
+			} else if (client_type == "webapp") {
+				res.redirect("http://rtm.thinx.cloud:80/"); // redirects browser, not in XHR?
+				// or res.end(JSON.stringify({ redirectURL: "https://rtm.thinx.cloud:80/app" }));
+			}
+
+			console.log("login: Flushing session: " + JSON.stringify(req.session));
+			req.session.destroy(function(err) {
+				if (err) {
+					console.log(err);
+				} else {
+					failureResponse(res, 501, "protocol");
+					console.log("Not a post request.");
+					return;
+				}
+			});
+		} else {
+			failureResponse(res, 541, "authentication exception");
+		}
+	});
+});
 
 // Prevent crashes on uncaught exceptions
 process.on("uncaughtException", function(err) {
