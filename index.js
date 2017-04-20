@@ -515,8 +515,8 @@ app.get("/api/user/password/reset", function(req, res) {
 	// if (!validateSecureRequest(req)) return;
 
 	// Redirect to password-set page. Save activation key into cookie.
-	res.header.activation = reset_key;
-	res.redirect("http://rtm.thinx.cloud:80/api/user/password/set");
+	//res.header("Activation", reset_key);
+	//res.redirect("http://rtm.thinx.cloud:80/api/user/password/set");
 
 	// TODO: Revoke activation token for this user (sooner).
 
@@ -615,7 +615,7 @@ app.post("/api/user/password/reset", function(req, res) {
 		}
 
 		var user = body[0];
-		user.activation = sha256(new Date().toString());
+		user.doc.activation = sha256(new Date().toString());
 
 		userlib.insert(user, user.owner, function(err, body, header) {
 
@@ -625,7 +625,7 @@ app.post("/api/user/password/reset", function(req, res) {
 				return;
 			}
 
-			// TODO: Creates reset e-mail with re-activation link
+			// Creates reset e-mail with re-activation link
 
 			var Email = require('email').Email;
 			var activationEmail = new Email({
