@@ -424,8 +424,6 @@ app.post("/api/user/create", function(req, res) {
 	console.log("/api/user/create");
 	console.log(JSON.stringify(req.body));
 
-	// if (!validateSecureRequest(req)) return;
-
 	var owner = req.body.owner;
 	var first_name = req.body.first_name;
 	var last_name = req.body.last_name;
@@ -450,7 +448,6 @@ app.post("/api/user/create", function(req, res) {
 			});
 		}
 
-
 		var new_api_keys = [];
 		var new_api_key = sha256(new Date().toString()).substring(0, 40);
 		new_api_keys.push(new_api_key);
@@ -473,31 +470,32 @@ app.post("/api/user/create", function(req, res) {
 				return;
 			}
 
-			// TODO: Creates registration e-mail with activation link, should save reset_key? (activation key) somewhere.
-
-
+			// Creates registration e-mail with activation link
 			var activationEmail = new Emailer({
 				bodyType: "html",
 				from: "api@thinx.cloud",
 				to: email,
 				subject: "Account activation",
-				body: "Hello " + owner.first_name + " " + owner.last_name +
-					". Please <a href='http://rtm.thinx.cloud:7442/api/user/activate?activation=" +
-					new_activation_token + "'>activate</a> your THiNX account."
+				body: "<!DOCTYPE html>Hello " + user.doc.first_name + " " + user.doc
+					.last_name +
+					". Please <a href='http://rtm.thinx.cloud:7442/api/user/activate?owner=" +
+					owner + "&activation=" +
+					new_activation_token + "'>activate</a> your THiNX account.</html>"
 			});
 
-			// if callback is provided, errors will be passed into it
-			// else errors will be thrown
 			activationEmail.send(function(err) {
 				if (err) {
 					console.log(err);
+					res.end({
+						success: false,
+						status: "Password reset failed."
+					});
+				} else {
+					res.end({
+						success: true
+					});
 				}
 			});
-
-			// TODO: Redirect to page that says "Wait for activation e-mail..."
-
-			res.end(JSON.stringify(body));
-
 		}); // insert
 	}); // view
 }); // post
@@ -506,28 +504,50 @@ app.post("/api/user/create", function(req, res) {
 /* Endpoint for the password reset e-mail. */
 app.get("/api/user/password/reset", function(req, res) {
 
-	console.log("GET /api/user/password/reset");
+	console.log("UNEXPECTED GET /api/user/password/reset");
 	console.log(JSON.stringify(req.body));
 
-	var reset_key = req.body.reset;
+	var reset_key = req.params.reset;
+	var owner = req.params.owner; // for faster search
 
 	console.log("Attempt to reset password with key: " + reset_key);
 
-	// TODO: Search allusers in DB with this ac_key (better save ac_key elsewhere with user _id)
+	userlib.view("users", "owners_by_username", {
+		"key": owner,
+		"include_docs": true
+	}, function(err, body) {
 
-	// if (!validateSecureRequest(req)) return;
+		if (err) {
+			console.log("Error: " + err.toString());
+			req.session.destroy(function(err) {
+				if (err) {
+					console.log(err);
+				} else {
+					failureResponse(res, 501, "protocol");
+					console.log("Not a valid request.");
+				}
+			});
+		}
 
-	// Redirect to password-set page. Save activation key into cookie.
-	//res.header("Activation", reset_key);
-	//res.redirect("http://rtm.thinx.cloud:80/api/user/password/set");
+		var user = body[0].doc;
+		var activation = user.activation;
 
-	// TODO: Revoke activation token for this user (sooner).
+		// TODO 3: Password reset must not work without reset key
+		if (typeof(activation) === "undefined") {
+			activation = null;
+		}
 
-	/*
-	res.end(JSON.stringify({
-		status: "not-implemented-yet"
-	}));
-	*/
+		// TODO 1: Validate reset key
+		if (reset_key != user.activation) {
+			failureResponse(res, 501, "reset_key_does_not_match");
+			console.log("reset_key does not match");
+			return;
+		} else {
+			// TODO 2: Redirect to password reset if valid (with reset key)
+			res.header("Activation", reset_key);
+			res.redirect("http://rtm.thinx.cloud:80/password-reset");
+		}
+	});
 });
 
 /* Endpoint for the user activation e-mail. */
@@ -585,6 +605,8 @@ app.post("/api/user/password/set", function(req, res) {
 	if (!validateSecureRequest(req)) return;
 
 	// TODO: Must have authenticated session
+
+	// TODO 4: Reset key will be revoked on password change
 
 	// TODO: Update user document
 
@@ -645,9 +667,11 @@ app.post("/api/user/password/reset", function(req, res) {
 				from: "api@thinx.cloud",
 				to: email,
 				subject: "Password reset",
-				body: "<!DOCTYPE html>Hello " + user.doc.first_name + " " + user.doc
+				body: "<!DOCTYPE html>Hello " + user.doc.first_name + " " + user
+					.doc
 					.last_name +
-					". Please <a href='/api/user/password/reset?reset=/  " +
+					". Please <a href='http://rtm.thinx.cloud:7442/api/user/password/reset?owner=" +
+					user.doc.owner + "&reset=/  " +
 					user.doc.activation + "'>reset</a> your THiNX password.</html>"
 			});
 
