@@ -480,6 +480,8 @@ app.post("/api/user/create", function(req, res) {
 				return;
 			}
 
+			console.log("Sending activation email...");
+
 			// Creates registration e-mail with activation link
 			var activationEmail = new Emailer({
 				bodyType: "html",
@@ -493,6 +495,7 @@ app.post("/api/user/create", function(req, res) {
 			});
 
 			activationEmail.send(function(err) {
+				console.log("Activation email sent.");
 				if (err) {
 					console.log(err);
 					res.end({
@@ -625,7 +628,7 @@ app.post("/api/user/password/set", function(req, res) {
 });
 
 
-// TODO: /user/password/reset POST
+// /user/password/reset POST
 /* Used to initiate password-reset session, creates reset key with expiraation and sends password-reset e-mail. */
 app.post("/api/user/password/reset", function(req, res) {
 
@@ -657,9 +660,11 @@ app.post("/api/user/password/reset", function(req, res) {
 			return;
 		}
 
+		console.log("Creating new reset-key");
+
 		user.doc.activation = sha256(new Date().toString());
 
-		userlib.insert(user, user.owner, function(err, body, header) {
+		userlib.insert(user, user.doc.owner, function(err, body, header) {
 
 			if (err) {
 				console.log(err);
@@ -689,6 +694,7 @@ app.post("/api/user/password/reset", function(req, res) {
 					console.log(err);
 					res.end(err);
 				} else {
+					console.log("Reset e-mail sent.");
 					res.end(JSON.stringify({}));
 				}
 			});
