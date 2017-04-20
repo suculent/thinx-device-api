@@ -226,11 +226,21 @@ app.get("/api/user/apikey", function(req, res) {
 
 	if (!validateSecureGETRequest(req)) return;
 
-	var owner = sess.owner;
-
-	if (typeof(owner) === "undefined") {
+	// reject on invalid owner
+	var owner = null;
+	if (req.session.owner || sess.owner) {
+		if (req.session.owner) {
+			console.log("assigning owner = req.session.owner;");
+			owner = req.session.owner;
+		}
+		if (sess.owner) {
+			console.log(
+				"assigning owner = sess.owner; (client lost or session terminated?)");
+			owner = sess.owner;
+		}
+	} else {
 		failureResponse(res, 403, "session has no owner");
-		console.log("/api/user/apikey: No valid owner!");
+		console.log("/api/user/devices: No valid owner!");
 		return;
 	}
 
@@ -366,7 +376,7 @@ app.get("/api/user/apikey/list", function(req, res) {
 
 	if (!validateSecureGETRequest(req)) return;
 
-	var owner = sess.owner;
+	var owner = req.session.owner;
 
 	if (typeof(owner) === "undefined") {
 		failureResponse(res, 403, "session has no owner");
