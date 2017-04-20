@@ -477,12 +477,13 @@ app.post("/api/user/create", function(req, res) {
 
 
 			var activationEmail = new Emailer({
+				bodyType: "html",
 				from: "api@thinx.cloud",
 				to: email,
 				subject: "Account activation",
 				body: "Hello " + owner.first_name + " " + owner.last_name +
-					". Please <a href=\"http://rtm.thinx.cloud:7442/api/user/activate?activation=\"/  " +
-					new_activation_token + "\">activate</a> your THiNX account."
+					". Please <a href='http://rtm.thinx.cloud:7442/api/user/activate?activation=" +
+					new_activation_token + "'>activate</a> your THiNX account."
 			});
 
 			// if callback is provided, errors will be passed into it
@@ -640,6 +641,7 @@ app.post("/api/user/password/reset", function(req, res) {
 			console.log(JSON.stringify(user));
 
 			var activationEmail = new Emailer({
+				bodyType: "html",
 				from: "api@thinx.cloud",
 				to: email,
 				subject: "Password reset",
