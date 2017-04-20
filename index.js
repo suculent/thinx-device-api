@@ -612,10 +612,17 @@ app.post("/api/user/password/reset", function(req, res) {
 		if (err) {
 			console.log("Error: " + err.toString());
 			failureResponse(res, 404, "user_not_found");
+		} else {
+			console.log("password reset users: " + JSON.stringify(body));
 		}
 
 		var user = body[0];
-		user.doc.activation = sha256(new Date().toString());
+		if (user === null) {
+			console.log("User not found.");
+			failureResponse(res, 404, "user_not_found");
+			return;
+		}
+		user.activation = sha256(new Date().toString());
 
 		userlib.insert(user, user.owner, function(err, body, header) {
 

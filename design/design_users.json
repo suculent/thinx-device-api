@@ -6,7 +6,7 @@
 			"map": "function (doc) { if(doc.username) { emit (doc.username, doc.password); } }"
 		},
 		"owners_by_email": {
-			"map": "function (doc) { if(doc.email) { emit (doc.username, doc); } }"
+			"map": "function (doc) { if(doc.email) { emit (doc.email, doc.owner, doc.username, doc.activation, doc); } }"
 		}
 	}
 }
