@@ -366,7 +366,7 @@ app.get("/api/user/apikey/list", function(req, res) {
 
 	if (!validateSecureGETRequest(req)) return;
 
-	var owner = req.session.owner;
+	var owner = sess.owner;
 
 	if (typeof(owner) === "undefined") {
 		failureResponse(res, 403, "session has no owner");
