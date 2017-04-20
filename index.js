@@ -637,9 +637,11 @@ app.post("/api/user/password/reset", function(req, res) {
 
 			// Creates reset e-mail with re-activation link
 
+			console.log(JSON.stringify(user));
+
 			var activationEmail = new Emailer({
 				from: "api@thinx.cloud",
-				to: user.email,
+				to: email,
 				subject: "Password reset",
 				body: "Hello " + user.first_name + " " + user.last_name +
 					". Please <a href=\"/api/user/password/reset?reset=\"/  " +
