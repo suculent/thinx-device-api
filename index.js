@@ -625,7 +625,7 @@ app.post("/api/user/password/reset", function(req, res) {
 			return;
 		}
 
-		user.activation = sha256(new Date().toString());
+		user.doc.activation = sha256(new Date().toString());
 
 		userlib.insert(user, user.owner, function(err, body, header) {
 
@@ -643,9 +643,10 @@ app.post("/api/user/password/reset", function(req, res) {
 				from: "api@thinx.cloud",
 				to: email,
 				subject: "Password reset",
-				body: "Hello " + user.first_name + " " + user.last_name +
-					". Please <a href=\"/api/user/password/reset?reset=\"/  " +
-					user.activation + "\">reset</a> your THiNX password."
+				body: "<!DOCTYPE html>Hello " + user.doc.first_name + " " + user.doc
+					.last_name +
+					". Please <a href='/api/user/password/reset?reset=/  " +
+					user.doc.activation + "'>reset</a> your THiNX password.</html>"
 			});
 
 			// if callback is provided, errors will be passed into it
