@@ -486,7 +486,8 @@ app.post("/api/user/create", function(req, res) {
 				from: "api@thinx.cloud",
 				to: email,
 				subject: "Account activation",
-				body: "<!DOCTYPE html>Please <a href='http://rtm.thinx.cloud:7442/api/user/activate?owner=" +
+				body: "<!DOCTYPE html>Hello " + first_name + " " + last_name +
+					". Please <a href='http://rtm.thinx.cloud:7442/api/user/activate?owner=" +
 					owner + "&activation=" +
 					new_activation_token + "'>activate</a> your THiNX account.</html>"
 			});
