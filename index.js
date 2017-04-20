@@ -20,6 +20,7 @@ var http = require("http");
 var parser = require("body-parser");
 var nano = require("nano")(db);
 var sha256 = require("sha256");
+var Emailer = require('email').Email;
 
 var v = require("./lib/thinx/version");
 
@@ -474,8 +475,8 @@ app.post("/api/user/create", function(req, res) {
 
 			// TODO: Creates registration e-mail with activation link, should save reset_key? (activation key) somewhere.
 
-			var Email = require('email').Email;
-			var activationEmail = new Email({
+
+			var activationEmail = new Emailer({
 				from: "api@thinx.cloud",
 				to: email,
 				subject: "Account activation",
@@ -636,8 +637,7 @@ app.post("/api/user/password/reset", function(req, res) {
 
 			// Creates reset e-mail with re-activation link
 
-			var Email = require('email').Email;
-			var activationEmail = new Email({
+			var activationEmail = new Emailer({
 				from: "api@thinx.cloud",
 				to: user.email,
 				subject: "Password reset",
