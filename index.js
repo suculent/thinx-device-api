@@ -300,9 +300,18 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 
 	if (!validateSecureRequest(req)) return;
 
-	var owner = sess.owner;
-
-	if (typeof(owner) === "undefined") {
+	var owner = null;
+	if (req.session.owner || sess.owner) {
+		if (req.session.owner) {
+			console.log("assigning owner = req.session.owner;");
+			owner = req.session.owner;
+		}
+		if (sess.owner) {
+			console.log(
+				"assigning owner = sess.owner; (client lost or session terminated?)");
+			owner = sess.owner;
+		}
+	} else {
 		failureResponse(res, 403, "session has no owner");
 		console.log("/api/user/apikey/revoke: No valid owner!");
 		return;
@@ -344,7 +353,7 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 			console.log("Saving: " + JSON.stringify(doc.api_keys));
 
 			// Save new document
-			userlib.insert(doc, function(err) {
+			userlib.insert(doc, users[index].owner, function(err) {
 				if (err) {
 					console.log(err);
 					res.end(JSON.stringify({
@@ -376,9 +385,18 @@ app.get("/api/user/apikey/list", function(req, res) {
 
 	if (!validateSecureGETRequest(req)) return;
 
-	var owner = req.session.owner;
-
-	if (typeof(owner) === "undefined") {
+	var owner = null;
+	if (req.session.owner || sess.owner) {
+		if (req.session.owner) {
+			console.log("assigning owner = req.session.owner;");
+			owner = req.session.owner;
+		}
+		if (sess.owner) {
+			console.log(
+				"assigning owner = sess.owner; (client lost or session terminated?)");
+			owner = sess.owner;
+		}
+	} else {
 		failureResponse(res, 403, "session has no owner");
 		console.log("/api/user/apikey/list: No valid owner!");
 		return;
@@ -663,6 +681,9 @@ app.post("/api/user/password/reset", function(req, res) {
 		console.log("Creating new reset-key");
 
 		user.doc.activation = sha256(new Date().toString());
+
+		// Really destroy?
+		//userlib.destroy(user, user._rev);
 
 		userlib.insert(user, user.doc.owner, function(err, body, header) {
 
