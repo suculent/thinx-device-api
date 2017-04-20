@@ -486,9 +486,7 @@ app.post("/api/user/create", function(req, res) {
 				from: "api@thinx.cloud",
 				to: email,
 				subject: "Account activation",
-				body: "<!DOCTYPE html>Hello " + user.doc.first_name + " " + user.doc
-					.last_name +
-					". Please <a href='http://rtm.thinx.cloud:7442/api/user/activate?owner=" +
+				body: "<!DOCTYPE html>Please <a href='http://rtm.thinx.cloud:7442/api/user/activate?owner=" +
 					owner + "&activation=" +
 					new_activation_token + "'>activate</a> your THiNX account.</html>"
 			});
@@ -670,9 +668,9 @@ app.post("/api/user/password/reset", function(req, res) {
 
 			// Creates reset e-mail with re-activation link
 
-			console.log(JSON.stringify(user));
+			console.log("Resetting password for user: " + JSON.stringify(user));
 
-			var activationEmail = new Emailer({
+			var resetEmail = new Emailer({
 				bodyType: "html",
 				from: "api@thinx.cloud",
 				to: email,
@@ -685,17 +683,16 @@ app.post("/api/user/password/reset", function(req, res) {
 					user.doc.activation + "'>reset</a> your THiNX password.</html>"
 			});
 
-			// if callback is provided, errors will be passed into it
-			// else errors will be thrown
-			activationEmail.send(function(err) {
+			resetEmail.send(function(err) {
 				if (err) {
 					console.log(err);
+					res.end(err);
+				} else {
+					res.end(JSON.stringify({}));
 				}
 			});
 
 			// Calling page already displays "Relax. You reset link is on its way."
-
-			res.end(JSON.stringify(body));
 
 		}); // insert
 	}); // view
