@@ -35,6 +35,7 @@ var options = {
 	token: 'b7fbc90b-6ae2-bbb8-ff0b-1a7e353b8641' // optional client token; can be fetched after valid initialization of the server
 };
 
+/*
 // get new instance of the client
 var vault = require("node-vault")(options);
 
@@ -55,7 +56,7 @@ vault.init({
 	})
 	.catch(console.error);
 
-//
+*/
 
 initDatabases();
 
@@ -364,7 +365,7 @@ app.get("/api/user/apikey/list", function(req, res) {
 
 	if (!validateSecureGETRequest(req)) return;
 
-	var owner = sess.owner;
+	var owner = req.session.owner;
 
 	if (typeof(owner) === "undefined") {
 		failureResponse(res, 403, "session has no owner");
@@ -616,12 +617,13 @@ app.post("/api/user/password/reset", function(req, res) {
 			console.log("password reset users: " + JSON.stringify(body));
 		}
 
-		var user = body[0];
-		if (user === null) {
+		var user = body.rows[0];
+		if (typeof(user) === "undefined" || user === null) {
 			console.log("User not found.");
 			failureResponse(res, 404, "user_not_found");
 			return;
 		}
+
 		user.activation = sha256(new Date().toString());
 
 		userlib.insert(user, user.owner, function(err, body, header) {
