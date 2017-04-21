@@ -386,12 +386,12 @@ app.get("/api/user/apikey/list", function(req, res) {
 	if (!validateSecureGETRequest(req)) return;
 
 	var owner = null;
-	if (req.session.owner || sess.owner) {
-		if (req.session.owner) {
+	if ((typeof(req.session) !== "undefined") || sess.owner) {
+		if (typeof(req.session.owner) !== "undefined") {
 			console.log("assigning owner = req.session.owner;");
 			owner = req.session.owner;
 		}
-		if (sess.owner) {
+		if (typeof(sess.owner) !== "undefined") {
 			console.log(
 				"assigning owner = sess.owner; (client lost or session terminated?)");
 			owner = sess.owner;
