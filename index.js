@@ -386,7 +386,8 @@ app.get("/api/user/apikey/list", function(req, res) {
 	if (!validateSecureGETRequest(req)) return;
 
 	var owner = null;
-	if ((typeof(req.session) !== "undefined") || sess.owner) {
+	if (typeof(session) !== "undefined" && ((typeof(req.session) !== "undefined") ||
+			sess.owner)) {
 		if (typeof(req.session.owner) !== "undefined") {
 			console.log("assigning owner = req.session.owner;");
 			owner = req.session.owner;
