@@ -478,11 +478,7 @@ app.post("/api/user/create", function(req, res) {
 			console.log("User should NOT exist! Skipping ALL errors...");
 			console.log("Error: " + err.toString());
 		} else {
-			console.log("User already exists: " + new_owner);
-			failureResponse(res, 404, "already_exists");
-			req.session.destroy(function(err) {
-				console.log("User " + new_owner + " already exists.");
-			});
+			// TODO: Assets, there should be length(body.rows) == 0
 		}
 
 		var new_api_keys = [];
