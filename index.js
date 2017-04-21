@@ -589,9 +589,9 @@ app.get("/api/user/password/reset", function(req, res) {
 app.get("/api/user/activate", function(req, res) {
 
 	console.log("GET /api/user/activate");
-	console.log(JSON.stringify(req.body));
+	console.log(JSON.stringify(req.query));
 
-	var ac_key = req.params.activation;
+	var ac_key = req.query.activation;
 
 	console.log("Attempt to activate with key: " + ac_key);
 
