@@ -383,8 +383,6 @@ app.get("/api/user/apikey/list", function(req, res) {
 	// This means, new API KEY can requested only
 	// from authenticated web UI.
 
-	console.log("APIKEY LIST: " + JSON.stringify(req.body));
-
 	if (!validateSecureGETRequest(req)) return;
 
 	// reject on invalid session
@@ -593,7 +591,7 @@ app.get("/api/user/activate", function(req, res) {
 	console.log("GET /api/user/activate");
 	console.log(JSON.stringify(req.body));
 
-	var ac_key = req.body.activation;
+	var ac_key = req.params.activation;
 
 	console.log("Attempt to activate with key: " + ac_key);
 
