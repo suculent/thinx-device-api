@@ -276,15 +276,17 @@ app.get("/api/user/apikey", function(req, res) {
 
 			console.log("Updating user: " + users[index].id);
 
-			// Add new API Key
-			userlib.insert(doc, owner, function(err, body, header) {
-				if (err) {
-					console.log(err);
-				}
-				console.log("Userlib " + owner + "document inserted");
-				res.end(JSON.stringify({
-					api_key: new_api_key
-				}));
+			userlib.destroy(doc, doc._rev, function(err) {
+				// Add new API Key
+				userlib.insert(doc, owner, function(err, body, header) {
+					if (err) {
+						console.log(err);
+					}
+					console.log("Userlib " + owner + "document inserted");
+					res.end(JSON.stringify({
+						api_key: new_api_key
+					}));
+				});
 			});
 		});
 	});
