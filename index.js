@@ -385,8 +385,16 @@ app.get("/api/user/apikey/list", function(req, res) {
 
 	if (!validateSecureGETRequest(req)) return;
 
+	// reject on invalid session
+	if (!sess) {
+		failureResponse(res, 405, "not allowed");
+		console.log("/api/user/devices: No session!");
+		return;
+	}
+
 	var owner = null;
-	if (typeof(session) !== "undefined" && ((typeof(req.session) !== "undefined") ||
+	if (typeof(sess) !== "undefined" && ((typeof(req.session) !==
+				"undefined") ||
 			sess.owner)) {
 		if (typeof(req.session.owner) !== "undefined") {
 			console.log("assigning owner = req.session.owner;");
