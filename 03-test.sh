@@ -1,19 +1,6 @@
 #!/bin/bash
 
 echo
-echo "☢ Running NYC code coverage..."
-
-HOST="thinx.cloud"
-HOST="localhost"
-
-nyc --reporter=lcov --reporter=text-lcov npm test
-
-echo
-echo "☢ Karma..."
-
-karma start
-
-echo
 echo "☢ Testing device registration..."
 
 curl -v \
@@ -48,6 +35,28 @@ curl -v -b cookies.jar \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -X POST -d '{ "query" : false }' http://$HOST:7442/api/view/devices
+
+echo
+echo "» Fetching user apikeys..."
+
+curl -v -b cookies.jar \
+-H "Origin: rtm.thinx.cloud" \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+-X POST -d '{ "query" : false }' http://$HOST:7442/api/apikey/list
+
+echo
+echo "☢ Running NYC code coverage..."
+
+HOST="thinx.cloud"
+HOST="localhost"
+
+nyc --reporter=lcov --reporter=text-lcov npm test
+
+echo
+echo "☢ Skipping Karma..."
+
+# karma start
 
 echo
 echo "» Terminating node.js..."

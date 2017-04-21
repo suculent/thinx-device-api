@@ -683,46 +683,52 @@ app.post("/api/user/password/reset", function(req, res) {
 		user.doc.activation = sha256(new Date().toString());
 
 		// Really destroy?
-		//userlib.destroy(user, user._rev);
-
-		userlib.insert(user, user.doc.owner, function(err, body, header) {
-
+		userlib.destroy(user, user._rev, function(err) {
 			if (err) {
 				console.log(err);
-				res.end(err);
 				return;
 			}
+			userlib.insert(user, user.doc.owner, function(err, body, header) {
 
-			// Creates reset e-mail with re-activation link
-
-			console.log("Resetting password for user: " + JSON.stringify(user));
-
-			var resetEmail = new Emailer({
-				bodyType: "html",
-				from: "api@thinx.cloud",
-				to: email,
-				subject: "Password reset",
-				body: "<!DOCTYPE html>Hello " + user.doc.first_name + " " + user
-					.doc
-					.last_name +
-					". Please <a href='http://rtm.thinx.cloud:7442/api/user/password/reset?owner=" +
-					user.doc.owner + "&reset=/  " +
-					user.doc.activation + "'>reset</a> your THiNX password.</html>"
-			});
-
-			resetEmail.send(function(err) {
 				if (err) {
 					console.log(err);
 					res.end(err);
-				} else {
-					console.log("Reset e-mail sent.");
-					res.end(JSON.stringify({}));
+					return;
 				}
-			});
 
-			// Calling page already displays "Relax. You reset link is on its way."
+				// Creates reset e-mail with re-activation link
 
-		}); // insert
+				console.log("Resetting password for user: " + JSON.stringify(user));
+
+				var resetEmail = new Emailer({
+					bodyType: "html",
+					from: "api@thinx.cloud",
+					to: email,
+					subject: "Password reset",
+					body: "<!DOCTYPE html>Hello " + user.doc.first_name + " " +
+						user
+						.doc
+						.last_name +
+						". Please <a href='http://rtm.thinx.cloud:7442/api/user/password/reset?owner=" +
+						user.doc.owner + "&reset=/  " +
+						user.doc.activation +
+						"'>reset</a> your THiNX password.</html>"
+				});
+
+				resetEmail.send(function(err) {
+					if (err) {
+						console.log(err);
+						res.end(err);
+					} else {
+						console.log("Reset e-mail sent.");
+						res.end(JSON.stringify({}));
+					}
+				});
+
+
+				// Calling page already displays "Relax. You reset link is on its way."
+			}); // insert
+		}); // destroy
 	}); // view
 }); // post
 
@@ -767,7 +773,8 @@ app.get("/api/user/profile", function(req, res) {
 		}
 		if (sess.owner) {
 			console.log(
-				"assigning owner = sess.owner; (client lost or session terminated?)");
+				"assigning owner = sess.owner; (client lost or session terminated?)"
+			);
 			owner = sess.owner;
 		}
 
@@ -825,7 +832,8 @@ app.get("/api/user/devices", function(req, res) {
 		}
 		if (sess.owner) {
 			console.log(
-				"assigning owner = sess.owner; (client lost or session terminated?)");
+				"assigning owner = sess.owner; (client lost or session terminated?)"
+			);
 			owner = sess.owner;
 		}
 
@@ -1047,7 +1055,8 @@ app.post("/device/register", function(req, res) {
 
 		if (owner != known_owner) {
 			// TODO: Fail from device side, notify admin.
-			console.log("owner is not known_owner (" + owner + ", " + known_owner +
+			console.log("owner is not known_owner (" + owner + ", " +
+				known_owner +
 				")");
 			reg.owner = known_owner;
 			owner = known_owner; // should force update in device library
@@ -1078,7 +1087,7 @@ app.post("/device/register", function(req, res) {
 		deploy.initWithDevice(device);
 
 		var update = deploy.hasUpdateAvailable(device);
-		if (update) {
+		if (update === true) {
 			console.log("Firmware update available.");
 			var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(device);
 			reg.status = "FIRMWARE_UPDATE";
@@ -1088,9 +1097,11 @@ app.post("/device/register", function(req, res) {
 			reg.commit = firmwareUpdateDescriptor.commit;
 			reg.version = firmwareUpdateDescriptor.version;
 			reg.checksum = firmwareUpdateDescriptor.checksum;
-		} else {
+		} else if (update === false) {
 			reg.success = true;
 			console.log("No firmware update available.");
+		} else {
+			console.log("Update semver response: " + update);
 		}
 
 		if (isNew) {
@@ -1570,7 +1581,9 @@ app.post("/api/login", function(req, res) {
 	});
 });
 
+/*
 // Prevent crashes on uncaught exceptions
 process.on("uncaughtException", function(err) {
 	console.log("Caught exception: " + err);
 });
+*/
