@@ -619,9 +619,9 @@ app.get("/api/user/password/reset", function(req, res) {
 					reset_key: reset_key
 				});
 				var options2 = {
-					host: 'rtm.thinx.cloud',
-					port: 80,
-					path: '/password.html?reset_key=' + reset_key + '&owner=' + user.owner
+					uri: 'http://rtm.thinx.cloud' + '/password.html?reset_key=' +
+						reset_key + '&owner=' + user.owner,
+					port: 80
 				};
 				request.get(options2,
 					function(err, res, body) {
@@ -650,10 +650,10 @@ app.get("/api/user/password/reset", function(req, res) {
 					activation: activation
 				});
 				var options1 = {
-					host: 'rtm.thinx.cloud',
-					port: 80,
-					path: '/password.html?activation=' + user_activation + '&owner=' +
-						user.owner
+					uri: 'http://rtm.thinx.cloud' + '/password.html?activation=' +
+						user_activation + '&owner=' +
+						user.owner,
+					port: 80
 				};
 				request.get(options1,
 					function(err, res, body) {
@@ -708,9 +708,9 @@ app.get("/api/user/activate", function(req, res) {
 				activation: ac_key
 			});
 			var options3 = {
-				host: 'rtm.thinx.cloud',
-				port: 80,
-				path: '/password.html?activation=' + ac_key + '&owner=' + ac_owner
+				uri: 'http://rtm.thinx.cloud' + '/password.html?activation=' + ac_key +
+					'&owner=' + ac_owner,
+				port: 80
 			};
 			request.get(options3,
 				function(err, res, body) {
