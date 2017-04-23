@@ -690,6 +690,8 @@ app.post("/api/user/password/set", function(req, res) {
 	var password1 = req.body.password;
 	var password2 = req.body.rpassword;
 
+	console.log(JSON.stringify(req.body));
+
 	if (password1 !== password2) {
 		res.end(JSON.stringify({
 			status: "passwords-mismatch",
