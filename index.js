@@ -485,7 +485,7 @@ app.post("/api/user/create", function(req, res) {
 			console.log("Error: " + err.toString());
 		} else {
 			// TODO: Assets, there should be length(body.rows) == 0
-			var user_should_not_exist = length(body.rows);
+			var user_should_not_exist = body.rows.length;
 			if (user_should_not_exist > 0) {
 				res.end(JSON.stringify({
 					success: false,
