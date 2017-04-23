@@ -697,13 +697,13 @@ app.post("/api/user/password/set", function(req, res) {
 		}));
 	}
 
-	if (typeof(req.headers.reset_key) !== "undefined") {
+	if (typeof(req.body.reset_key) !== "undefined") {
 
 		console.log("Performing password reset...");
 
 		// Validate password reset_key
 		userlib.view("users", "owners_by_resetkey", {
-			"key": req.headers.reset_key,
+			"key": req.body.reset_key,
 			"include_docs": true
 		}, function(err, body) {
 
@@ -770,13 +770,13 @@ app.post("/api/user/password/set", function(req, res) {
 
 	}
 
-	if (typeof(req.headers.activation) !== "undefined") {
+	if (typeof(req.body.activation) !== "undefined") {
 
 		console.log("Performing new activation...");
 
 		// Validate new activation
 		userlib.view("users", "owners_by_activation", {
-			"key": req.headers.activation,
+			"key": req.body.activation,
 			"include_docs": true
 		}, function(err, body) {
 
