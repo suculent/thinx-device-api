@@ -744,14 +744,15 @@ app.post("/api/user/password/set", function(req, res) {
 					}));
 				}
 
+				console.log(body);
+
 				var userdoc = body.rows[0];
 
 				console.log("userdoc: " + JSON.stringify(userdoc));
 
-				userdoc['password'] = sha256(password1);
-				userdoc['last_reset'] = new Date();
-				userdoc[
-					'reset_key'] = null;
+				userdoc.password = sha256(password1);
+				userdoc.last_reset = new Date();
+				userdoc.reset_key = null;
 
 				userlib.destroy(userdoc.owner, userdoc._rev, function(err) {
 
@@ -816,16 +817,17 @@ app.post("/api/user/password/set", function(req, res) {
 						status: "user_not_found",
 						success: false
 					}));
-					return;
 				}
+
+				console.log(body);
 
 				var userdoc = body.rows[0];
 
-				console.log("Activating user: " + JSON.stringify(userdoc));
+				console.log("userdoc: " + JSON.stringify(userdoc));
 
 				userdoc.password = sha256(password1);
 				userdoc.last_reset = new Date();
-				userdoc.activation = null;
+				userdoc.reset_key = null;
 
 				userlib.destroy(userdoc.owner, userdoc._rev, function(err) {
 
