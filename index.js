@@ -113,7 +113,10 @@ app.all("/*", function(req, res, next) {
 			next();
 			return;
 		} else {
-			console.log("Non-device Origin: " + origin);
+			// skip for local tests and calls so far [chec4sec]
+			if (origin != "rtm.thinx.cloud") {
+				console.log("Non-device Origin: " + origin);
+			}
 		}
 	}
 
@@ -743,9 +746,12 @@ app.post("/api/user/password/set", function(req, res) {
 
 				var userdoc = body.rows[0];
 
-				userdoc.password = sha256(password1);
-				userdoc.last_reset = new Date();
-				userdoc.reset_key = null;
+				console.log("userdoc: " + JSON.stringify(userdoc));
+
+				userdoc['password'] = sha256(password1);
+				userdoc['last_reset'] = new Date();
+				userdoc[
+					'reset_key'] = null;
 
 				userlib.destroy(userdoc.owner, userdoc._rev, function(err) {
 
