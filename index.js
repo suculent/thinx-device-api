@@ -656,8 +656,8 @@ app.post("/api/user/password/set", function(req, res) {
 	console.log("POST /api/user/password/set");
 	console.log(JSON.stringify(req.body));
 
-	var password1 = req.query.password;
-	var password2 = req.query.rpassword;
+	var password1 = req.body.password;
+	var password2 = req.body.rpassword;
 
 	if (password1 !== password2) {
 		res.end(JSON.stringify({
