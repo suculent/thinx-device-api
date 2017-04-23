@@ -564,10 +564,8 @@ app.post("/api/user/create", function(req, res) {
 /* Endpoint for the password reset e-mail. */
 app.get("/api/user/password/reset", function(req, res) {
 
-	console.log("UNEXPECTED GET /api/user/password/reset");
 	console.log(JSON.stringify(req.body));
 
-	var reset_key = req.params.reset;
 	var owner = req.params.owner; // for faster search
 
 	console.log("Attempt to reset password with key: " + reset_key);
@@ -590,22 +588,43 @@ app.get("/api/user/password/reset", function(req, res) {
 		}
 
 		var user = body[0].doc;
-		var activation = user.reset_key;
 
-		// TODO 3: Password reset must not work without reset key
-		if (typeof(activation) === "undefined") {
-			activation = null;
+		if (typeof(req.params.reset_key) !== "undefined") {
+
+			var user_reset_key = user.reset_key;
+
+			if (typeof(user_reset_key) === "undefined") {
+				user_reset_key = null;
+			}
+
+			if (req.params.reset_key != user_reset_key) {
+				failureResponse(res, 501, "reset_key_does_not_match");
+				console.log("reset_key does not match");
+				return;
+			} else {
+				res.header("Reset", reset_key);
+				res.header("Owner", user.owner);
+				res.redirect("http://rtm.thinx.cloud:80/password.html");
+			}
 		}
 
-		// TODO 1: Validate reset key
-		if (reset_key != user.reset_key) {
-			failureResponse(res, 501, "reset_key_does_not_match");
-			console.log("reset_key does not match");
-			return;
-		} else {
-			// TODO 2: Redirect to password reset if valid (with reset key)
-			res.header("Activation", reset_key);
-			res.redirect("http://rtm.thinx.cloud:80/password-reset");
+		if (typeof(req.params.activation) !== "undefined") {
+
+			var user_activation = user.activation;
+
+			if (typeof(user_activation) === "undefined") {
+				user_activation = null;
+			}
+
+			if (req.params.activation != user_activation) {
+				failureResponse(res, 501, "reset_key_does_not_match");
+				console.log("reset_key does not match");
+				return;
+			} else {
+				res.header("Activation", reset_key);
+				res.header("Owner", user.owner);
+				res.redirect("http://rtm.thinx.cloud:80/password.html");
+			}
 		}
 	});
 });
@@ -649,8 +668,7 @@ app.get("/api/user/activate", function(req, res) {
 	});
 });
 
-// TODO: /user/password/set POST
-/* Used by the password-reset page to perform the change in database. Should revoke reset_key when done. */
+/* Used by the password.html page to perform the change in database. Should revoke reset_key when done. */
 app.post("/api/user/password/set", function(req, res) {
 
 	console.log("POST /api/user/password/set");
@@ -728,6 +746,7 @@ app.post("/api/user/password/set", function(req, res) {
 						} else {
 							// TODO: Password-reset success page, should redirect to login.
 							res.redirect("http://rtm.thinx.cloud:80/");
+							return;
 						}
 					});
 				});
@@ -798,6 +817,7 @@ app.post("/api/user/password/set", function(req, res) {
 						} else {
 							// TODO: Password-reset success page, should redirect to login.
 							res.redirect("http://rtm.thinx.cloud:80/");
+							return;
 						}
 					});
 				});
@@ -805,9 +825,7 @@ app.post("/api/user/password/set", function(req, res) {
 		});
 	}
 
-	res.end(JSON.stringify({
-		status: "not-implemented-yet"
-	}));
+	failureResponse(res, 403, "Password change not authorized.");
 });
 
 
