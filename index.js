@@ -216,6 +216,8 @@ app.get("/api/user/devices", function(req, res) {
  */
 
 /* Creates new api key. */
+
+// FIXME: does not save to DB
 app.get("/api/user/apikey", function(req, res) {
 
 	// So far must Authenticated using owner session.
@@ -272,20 +274,24 @@ app.get("/api/user/apikey", function(req, res) {
 				return;
 			}
 
-			doc.api_keys.push(new_api_key);
-
-			console.log("Updating user: " + users[index].id);
+			console.log("Updating user: " + JSON.stringify(doc));;
 
 			userlib.destroy(doc, doc._rev, function(err) {
+
+				console.log("Destroyed, inserting " + JSON.stringify(dic));
+
 				// Add new API Key
+				doc.api_keys.push(new_api_key);
+
 				userlib.insert(doc, owner, function(err, body, header) {
 					if (err) {
-						console.log(err);
+						console.log("/api/user/apikey ERROR:" + err);
+					} else {
+						console.log("Userlib " + owner + "document inserted");
+						res.end(JSON.stringify({
+							api_key: new_api_key
+						}));
 					}
-					console.log("Userlib " + owner + "document inserted");
-					res.end(JSON.stringify({
-						api_key: new_api_key
-					}));
 				});
 			});
 		});
@@ -465,7 +471,7 @@ app.post("/api/user/create", function(req, res) {
 	var first_name = req.body.first_name;
 	var last_name = req.body.last_name;
 	var email = req.body.email;
-	var password = req.body.password;
+	var password = sha256(req.body.password);
 
 	var new_owner = owner;
 
@@ -565,7 +571,7 @@ app.get("/api/user/password/reset", function(req, res) {
 		}
 
 		var user = body[0].doc;
-		var activation = user.activation;
+		var activation = user.reset_key;
 
 		// TODO 3: Password reset must not work without reset key
 		if (typeof(activation) === "undefined") {
@@ -573,7 +579,7 @@ app.get("/api/user/password/reset", function(req, res) {
 		}
 
 		// TODO 1: Validate reset key
-		if (reset_key != user.activation) {
+		if (reset_key != user.reset_key) {
 			failureResponse(res, 501, "reset_key_does_not_match");
 			console.log("reset_key does not match");
 			return;
@@ -585,49 +591,43 @@ app.get("/api/user/password/reset", function(req, res) {
 	});
 });
 
-/* Endpoint for the user activation e-mail. */
+/* Endpoint for the user activation e-mail, should proceed to password set. */
 app.get("/api/user/activate", function(req, res) {
 
 	console.log("GET /api/user/activate");
 	console.log(JSON.stringify(req.query));
 
 	var ac_key = req.query.activation;
+	var ac_owner = req.query.owner;
 
 	console.log("Attempt to activate with key: " + ac_key);
 
-	// TODO: Search allusers in DB with this ac_key (better save ac_key elsewhere with user _id)
+	userlib.view("users", "owners_by_activation", {
+		"key": ac_key,
+		"include_docs": false
+	}, function(err, body) {
 
-	// if (!validateSecureRequest(req)) return;
-
-	// Redirect to password-set page. Save activation key into cookie.
-	res.header.activation = ac_key;
-	res.redirect("http://rtm.thinx.cloud:80/api/user/password/set");
-
-	// TODO: Revoke activation token for this user (sooner).
-
-	/*
-	res.end(JSON.stringify({
-		status: "not-implemented-yet"
-	}));
-	*/
-});
-
-/* Endpoint for the user activation for (password set). */
-app.post("/api/user/activate", function(req, res) {
-
-	console.log("POST /api/user/activate");
-	console.log(JSON.stringify(req.body));
-
-	if (!validateSecureRequest(req)) return;
-
-	// TODO: Creates registration e-mail with activation link, should save reset_key? (activation key) somewhere.
-	// TODO: Update user document with password, redirect to login.
-
-	// TODO: Revoke activation token for this user (later).
-
-	res.end(JSON.stringify({
-		status: "not-implemented-yet"
-	}));
+		if (err) {
+			console.log("Error: " + err.toString());
+			req.session.destroy(function(err) {
+				if (err) {
+					console.log(err);
+				} else {
+					failureResponse(res, 501, "protocol");
+					console.log("Not a valid request.");
+				}
+			});
+			res.end(JSON.stringify({
+				status: "activation",
+				success: false
+			}));
+		} else {
+			console.log("Body to extract owner: " + JSON.stringify(body));
+			res.header("Activation", ac_key);
+			res.header("Owner", body.owner);
+			res.redirect("http://rtm.thinx.cloud:80/password-reset");
+		}
+	});
 });
 
 // TODO: /user/password/set POST
@@ -637,9 +637,95 @@ app.post("/api/user/password/set", function(req, res) {
 	console.log("POST /api/user/password/set");
 	console.log(JSON.stringify(req.body));
 
-	if (!validateSecureRequest(req)) return;
+	var password1 = req.query.password;
+	var password2 = req.query.rpassword;
 
-	// TODO: Must have authenticated session
+	if (password1 !== password2) {
+		res.end(JSON.stringify({
+			status: "passwords-mismatch",
+			success: false
+		}));
+	}
+
+	// TODO: Validate reset key... if (!validateSecureRequest(req)) return;
+
+
+	if (typeof(req.headers.reset_key) !== "undefined") {
+
+		userlib.view("users", "owners_by_resetkey", {
+			"key": req.headers.reset_key,
+			"include_docs": true
+		}, function(err, body) {
+
+			if (err) {
+				console.log("Error: " + err.toString());
+				req.session.destroy(function(err) {
+					if (err) {
+						console.log(err);
+					} else {
+						failureResponse(res, 501, "protocol");
+						console.log("Not a valid request.");
+					}
+				});
+				res.end(JSON.stringify({
+					status: "reset",
+					success: false
+				}));
+				return;
+
+			} else {
+
+				if (body.rows.length === 0) {
+					res.end(JSON.stringify({
+						status: "user_not_found",
+						success: false
+					}));
+				}
+
+				var userdoc = body.rows[0];
+
+				userdoc.password = sha256(password1);
+				userdoc.last_reset = new Date();
+
+				userlib.destroy(userdoc.owner, userdoc._rev, function(err) {
+
+					if (err) {
+						console.log("Cannot destroy user on password-reset");
+						res.end(JSON.stringify({
+							status: "user_not_reset",
+							success: false
+						}));
+						return;
+					}
+
+					userlib.insert(userdoc.owner, doc, function(err) {
+
+						if (err) {
+							console.log("Cannot insert user on password-reset");
+							res.end(JSON.stringify({
+								status: "user_not_saved",
+								success: false
+							}));
+							return;
+						}
+
+
+
+					});
+
+				});
+
+				res.redirect("http://rtm.thinx.cloud:80/password-reset");
+			}
+		});
+
+	}
+
+	if (typeof(req.headers.activation) !== "undefined") {
+
+	}
+
+
 
 	// TODO 4: Reset key will be revoked on password change
 
@@ -685,7 +771,7 @@ app.post("/api/user/password/reset", function(req, res) {
 
 		console.log("Creating new reset-key");
 
-		user.doc.activation = sha256(new Date().toString());
+		user.doc.reset_key = sha256(new Date().toString());
 
 		// Really destroy?
 		userlib.destroy(user, user._rev, function(err) {
@@ -716,7 +802,7 @@ app.post("/api/user/password/reset", function(req, res) {
 						.last_name +
 						". Please <a href='http://rtm.thinx.cloud:7442/api/user/password/reset?owner=" +
 						user.doc.owner + "&reset=/  " +
-						user.doc.activation +
+						user.doc.reset_key +
 						"'>reset</a> your THiNX password.</html>"
 				});
 
@@ -729,8 +815,6 @@ app.post("/api/user/password/reset", function(req, res) {
 						res.end(JSON.stringify({}));
 					}
 				});
-
-
 				// Calling page already displays "Relax. You reset link is on its way."
 			}); // insert
 		}); // destroy
@@ -741,6 +825,7 @@ app.post("/api/user/password/reset", function(req, res) {
  *  User Profile
  */
 
+// TODO: Implement user profile changes (what changes?)
 // /user/profile POST
 app.post("/api/user/profile", function(req, res) {
 
@@ -1499,7 +1584,7 @@ app.post("/api/login", function(req, res) {
 		});
 	}
 	var username = req.body.username;
-	var password = req.body.password;
+	var password = sha256(req.body.password);
 
 	if (typeof(username) == "undefined" || typeof(password) == "undefined") {
 		req.session.destroy(function(err) {
@@ -1538,6 +1623,25 @@ app.post("/api/login", function(req, res) {
 		for (var index in all_users) {
 			var user_data = all_users[index];
 			if (username == user_data.key) {
+
+				// TODO: Second option (direct compare) will deprecate soon.
+				if (password == sha256(user_data.value)) {
+					req.session.owner = user_data.key;
+					// TODO: write last_seen timestamp to DB here __for devices__
+					console.log("client_type: " + client_type);
+					if (client_type == "device") {
+						res.end(JSON.stringify({
+							status: "WELCOME"
+						}));
+					} else if (client_type == "webapp") {
+						res.end(JSON.stringify({
+							"redirectURL": "http://rtm.thinx.cloud:80/app"
+						}));
+					}
+					// TODO: If user-agent contains app/device... (what?)
+					return;
+				} else
+
 				if (password == user_data.value) {
 					req.session.owner = user_data.key;
 					// TODO: write last_seen timestamp to DB here __for devices__
@@ -1553,6 +1657,8 @@ app.post("/api/login", function(req, res) {
 					}
 					// TODO: If user-agent contains app/device... (what?)
 					return;
+
+
 				} else {
 					console.log("Password mismatch for " + username);
 				}
