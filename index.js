@@ -22,6 +22,8 @@ var nano = require("nano")(db);
 var sha256 = require("sha256");
 var Emailer = require('email').Email;
 
+var request = require("request");
+
 var v = require("./lib/thinx/version");
 
 var rdict = {};
@@ -612,13 +614,25 @@ app.get("/api/user/password/reset", function(req, res) {
 				console.log("reset_key does not match");
 				return;
 			} else {
-				res.header("Reset", reset_key);
-				res.header("Owner", user.owner);
-				res.redirect("http://rtm.thinx.cloud:80/password.html");
+				var rbody = JSON.stringify({
+					owner: user.owner,
+					reset_key: reset_key
+				});
+				var options2 = {
+					uri: 'http://rtm.thinx.cloud' + '/password.html?reset_key=' +
+						reset_key + '&owner=' + user.owner,
+					port: 80
+				};
+				request.get(options2,
+					function(err, res, body) {
+						if (err) {
+							console.log(err);
+							return;
+						}
+					});
+				return;
 			}
-		}
-
-		if (typeof(req.params.activation) !== "undefined") {
+		} else if (typeof(req.params.activation) !== "undefined") {
 
 			var user_activation = user.activation;
 
@@ -631,9 +645,24 @@ app.get("/api/user/password/reset", function(req, res) {
 				console.log("reset_key does not match");
 				return;
 			} else {
-				res.header("Activation", reset_key);
-				res.header("Owner", user.owner);
-				res.redirect("http://rtm.thinx.cloud:80/password.html");
+				var rbody2 = JSON.stringify({
+					owner: user.owner,
+					activation: activation
+				});
+				var options1 = {
+					uri: 'http://rtm.thinx.cloud' + '/password.html?activation=' +
+						user_activation + '&owner=' +
+						user.owner,
+					port: 80
+				};
+				request.get(options1,
+					function(err, res, body) {
+						if (err) {
+							console.log(err);
+							return;
+						}
+					});
+				return;
 			}
 		}
 	});
@@ -671,12 +700,26 @@ app.get("/api/user/activate", function(req, res) {
 		} else {
 			console.log("Body to extract owner: " + JSON.stringify(body));
 
-			// contains only activation, id and username
-			req.session.activation = ac_key;
-			req.session.owner = ac_owner;
-			console.log("Reset request with session owner: " + ac_owner);
-			res.redirect("http://rtm.thinx.cloud:80/password.html?activation=" +
-				ac_key + "&owner=" + ac_owner);
+			console.log("Activation request with query owner (requestor): " +
+				ac_owner);
+
+			var rbody3 = JSON.stringify({
+				owner: ac_owner,
+				activation: ac_key
+			});
+			var options3 = {
+				uri: 'http://rtm.thinx.cloud' + '/password.html?activation=' + ac_key +
+					'&owner=' + ac_owner,
+				port: 80
+			};
+			request.get(options3,
+				function(err, res, body) {
+					if (err) {
+						console.log(err);
+						return;
+					}
+				});
+			return;
 		}
 	});
 });
@@ -689,6 +732,8 @@ app.post("/api/user/password/set", function(req, res) {
 
 	var password1 = req.body.password;
 	var password2 = req.body.rpassword;
+
+	console.log(JSON.stringify(req.body));
 
 	if (password1 !== password2) {
 		res.end(JSON.stringify({
