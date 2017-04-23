@@ -486,8 +486,12 @@ app.post("/api/user/create", function(req, res) {
 	}, function(err, body) {
 
 		if (err) {
-			console.log("User should NOT exist! Skipping ALL errors...");
-			console.log("Error: " + err.toString());
+			if (err == "Error: missing") {
+				// this is OK
+				// console.log("User should NOT exist! Skipping ALL errors...");
+			} else {
+				console.log("Error: " + err.toString());
+			}
 		} else {
 			// TODO: Assets, there should be length(body.rows) == 0
 			var user_should_not_exist = body.rows.length;
@@ -558,7 +562,6 @@ app.post("/api/user/create", function(req, res) {
 			});
 
 			activationEmail.send(function(err) {
-				console.log("Activation email sent.");
 				if (err) {
 					console.log(err);
 					res.end(JSON.stringify({
@@ -566,6 +569,7 @@ app.post("/api/user/create", function(req, res) {
 						status: "Password reset failed."
 					}));
 				} else {
+					console.log("Activation email sent.");
 					res.end(JSON.stringify({
 						success: true
 					}));
@@ -796,14 +800,6 @@ app.post("/api/user/password/set", function(req, res) {
 
 			if (err) {
 				console.log("Error: " + err.toString());
-				req.session.destroy(function(err) {
-					if (err) {
-						console.log(err);
-					} else {
-						failureResponse(res, 501, "protocol");
-						console.log("Not a valid request.");
-					}
-				});
 				res.end(JSON.stringify({
 					status: "reset",
 					success: false
@@ -821,7 +817,7 @@ app.post("/api/user/password/set", function(req, res) {
 
 				console.log(body);
 
-				var userdoc = body.rows[0];
+				var userdoc = body.rows[0].doc;
 
 				console.log("userdoc: " + JSON.stringify(userdoc));
 
