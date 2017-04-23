@@ -274,7 +274,7 @@ app.get("/api/user/apikey", function(req, res) {
 				return;
 			}
 
-			console.log("Updating user: " + JSON.stringify(doc));;
+			console.log("Updating user: " + JSON.stringify(doc));
 
 			userlib.destroy(doc, doc._rev, function(err) {
 
@@ -636,7 +636,7 @@ app.get("/api/user/activate", function(req, res) {
 			console.log("Body to extract owner: " + JSON.stringify(body));
 			res.header("Activation", ac_key);
 			res.header("Owner", body.owner);
-			res.redirect("http://rtm.thinx.cloud:80/password-reset");
+			res.redirect("http://rtm.thinx.cloud:80/password.html");
 		}
 	});
 });
@@ -658,11 +658,9 @@ app.post("/api/user/password/set", function(req, res) {
 		}));
 	}
 
-	// TODO: Validate reset key... if (!validateSecureRequest(req)) return;
-
-
 	if (typeof(req.headers.reset_key) !== "undefined") {
 
+		// Validate password reset_key
 		userlib.view("users", "owners_by_resetkey", {
 			"key": req.headers.reset_key,
 			"include_docs": true
@@ -697,6 +695,7 @@ app.post("/api/user/password/set", function(req, res) {
 
 				userdoc.password = sha256(password1);
 				userdoc.last_reset = new Date();
+				userdoc.reset_key = null;
 
 				userlib.destroy(userdoc.owner, userdoc._rev, function(err) {
 
@@ -718,15 +717,12 @@ app.post("/api/user/password/set", function(req, res) {
 								success: false
 							}));
 							return;
+						} else {
+							// TODO: Password-reset success page, should redirect to login.
+							res.redirect("http://rtm.thinx.cloud:80/");
 						}
-
-
-
 					});
-
 				});
-
-				res.redirect("http://rtm.thinx.cloud:80/password-reset");
 			}
 		});
 
@@ -734,13 +730,72 @@ app.post("/api/user/password/set", function(req, res) {
 
 	if (typeof(req.headers.activation) !== "undefined") {
 
+		// Validate new activation
+		userlib.view("users", "owners_by_activation", {
+			"key": req.headers.activation,
+			"include_docs": true
+		}, function(err, body) {
+
+			if (err) {
+				console.log("Error: " + err.toString());
+				req.session.destroy(function(err) {
+					if (err) {
+						console.log(err);
+					} else {
+						failureResponse(res, 501, "protocol");
+						console.log("Not a valid request.");
+					}
+				});
+				res.end(JSON.stringify({
+					status: "reset",
+					success: false
+				}));
+				return;
+
+			} else {
+
+				if (body.rows.length === 0) {
+					res.end(JSON.stringify({
+						status: "user_not_found",
+						success: false
+					}));
+				}
+
+				var userdoc = body.rows[0];
+
+				userdoc.password = sha256(password1);
+				userdoc.last_reset = new Date();
+				userdoc.activation = null;
+
+				userlib.destroy(userdoc.owner, userdoc._rev, function(err) {
+
+					if (err) {
+						console.log("Cannot destroy user on password-reset");
+						res.end(JSON.stringify({
+							status: "user_not_reset",
+							success: false
+						}));
+						return;
+					}
+
+					userlib.insert(userdoc.owner, doc, function(err) {
+
+						if (err) {
+							console.log("Cannot insert user on password-reset");
+							res.end(JSON.stringify({
+								status: "user_not_saved",
+								success: false
+							}));
+							return;
+						} else {
+							// TODO: Password-reset success page, should redirect to login.
+							res.redirect("http://rtm.thinx.cloud:80/");
+						}
+					});
+				});
+			}
+		});
 	}
-
-
-
-	// TODO 4: Reset key will be revoked on password change
-
-	// TODO: Update user document
 
 	res.end(JSON.stringify({
 		status: "not-implemented-yet"

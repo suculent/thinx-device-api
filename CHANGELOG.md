@@ -4,6 +4,8 @@
 
 ### Last week
 
+23/4/2017 - SecFix: never store passwords
+
 19/4/2017 - 1.1.219: API Key revocation (from UI)
 18/4/2017 - 1.1.203: Secure endpoints for listing and generating new API keys
 

@@ -15,6 +15,10 @@ API Server running on node.js.
 * ESP8266 (thinx-firmware-esp8266)
 * Expected: Arduino
 
+## Roadmap
+
+* `owner` must be stored as hash (could be salted but not with e-mail)
+
 ## Prerequisites
 
 * Linux Server (possibly RasPi but not tested)
