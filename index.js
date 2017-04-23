@@ -612,13 +612,24 @@ app.get("/api/user/password/reset", function(req, res) {
 				console.log("reset_key does not match");
 				return;
 			} else {
-				res.header("Reset", reset_key);
-				res.header("Owner", user.owner);
-				res.redirect("http://rtm.thinx.cloud:80/password.html");
+				var rbody = JSON.stringify({
+					owner: user.owner,
+					reset_key: reset_key
+				});
+				var options = {
+					host: 'rtm.thinx.cloud',
+					port: 80,
+					path: '/password.html'
+				};
+				request.post(options, rbody, function(err, res, body) {
+					if (err) {
+						console.log(err);
+					}
+					return;
+				});
+				return;
 			}
-		}
-
-		if (typeof(req.params.activation) !== "undefined") {
+		} else if (typeof(req.params.activation) !== "undefined") {
 
 			var user_activation = user.activation;
 
@@ -631,9 +642,22 @@ app.get("/api/user/password/reset", function(req, res) {
 				console.log("reset_key does not match");
 				return;
 			} else {
-				res.header("Activation", reset_key);
-				res.header("Owner", user.owner);
-				res.redirect("http://rtm.thinx.cloud:80/password.html");
+				var rbody2 = JSON.stringify({
+					owner: user.owner,
+					activation: activation
+				});
+				var options2 = {
+					host: 'rtm.thinx.cloud',
+					port: 80,
+					path: '/password.html'
+				};
+				request.post(options2, rbody2, function(err, res, body) {
+					if (err) {
+						console.log(err);
+						return;
+					}
+				});
+				return;
 			}
 		}
 	});
