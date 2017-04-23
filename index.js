@@ -695,12 +695,25 @@ app.get("/api/user/activate", function(req, res) {
 		} else {
 			console.log("Body to extract owner: " + JSON.stringify(body));
 
-			// contains only activation, id and username
-			req.session.activation = ac_key;
-			req.session.owner = ac_owner;
-			console.log("Reset request with session owner: " + ac_owner);
-			res.redirect("http://rtm.thinx.cloud:80/password.html?activation=" +
-				ac_key + "&owner=" + ac_owner);
+			console.log("Activation request with query owner (requestor): " +
+				ac_owner);
+
+			var rbody3 = JSON.stringify({
+				owner: ac_owner,
+				activation: ac_key
+			});
+			var options2 = {
+				host: 'rtm.thinx.cloud',
+				port: 80,
+				path: '/password.html'
+			};
+			request.post(options3, rbody3, function(err, res, body) {
+				if (err) {
+					console.log(err);
+					return;
+				}
+			});
+			return;
 		}
 	});
 });
