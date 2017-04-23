@@ -22,6 +22,8 @@ var nano = require("nano")(db);
 var sha256 = require("sha256");
 var Emailer = require('email').Email;
 
+var request = require("request");
+
 var v = require("./lib/thinx/version");
 
 var rdict = {};
