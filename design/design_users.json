@@ -7,6 +7,12 @@
 		},
 		"owners_by_email": {
 			"map": "function (doc) { if(doc.email) { emit (doc.email, doc.owner, doc.username, doc.activation, doc); } }"
+		},
+		"owners_by_activation": {
+			"map": "function (doc) { if(doc.activation) { emit (doc.activation, doc.owner, doc.username); } }"
+		},
+		"owners_by_resetkey": {
+			"map": "function (doc) { if(doc.reset_key) { emit (doc.reset_key, doc.owner, doc.username); } }"
 		}
 	}
 }
