@@ -471,7 +471,7 @@ app.post("/api/user/create", function(req, res) {
 	var first_name = req.body.first_name;
 	var last_name = req.body.last_name;
 	var email = req.body.email;
-	var password = sha256(req.body.password);
+	// password will be set on successful e-mail activation
 
 	var new_owner = owner;
 
@@ -494,8 +494,6 @@ app.post("/api/user/create", function(req, res) {
 			}
 		}
 
-
-
 		var new_api_keys = [];
 		var new_api_key = sha256(new Date().toString()).substring(0, 40);
 		new_api_keys.push(new_api_key);
@@ -508,6 +506,8 @@ app.post("/api/user/create", function(req, res) {
 			owner: new_owner,
 			email: email,
 			api_keys: new_api_keys,
+			first_name: first_name,
+			last_name: last_name,
 			activation: new_activation_token,
 			activation_date: new_activation_date
 		};
