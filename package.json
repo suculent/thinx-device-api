@@ -61,8 +61,5 @@
     "eslint": "*",
     "jshint": "^2.9.4",
     "grunt": "*"
-  },
-  "scripts": {
-    "test": "nyc mocha"
   }
 }
