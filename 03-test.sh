@@ -45,13 +45,13 @@ curl -v -b cookies.jar \
 -H "Content-Type: application/json" \
 -X POST -d '{ "query" : false }' http://$HOST:7442/api/apikey/list
 
-echo
-echo "☢ Running NYC code coverage..."
-
-HOST="thinx.cloud"
-HOST="localhost"
-
-nyc --reporter=lcov --reporter=text-lcov npm test
+#echo
+#echo "☢ Running NYC code coverage..."
+#
+#HOST="thinx.cloud"
+#HOST="localhost"
+#
+#nyc --reporter=lcov --reporter=text-lcov npm test
 
 echo
 echo "☢ Skipping Karma..."
