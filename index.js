@@ -647,6 +647,7 @@ app.get("/api/user/activate", function(req, res) {
 
 	var ac_key = req.query.activation;
 	var ac_owner = req.query.owner;
+	console.log("owner: " + ac_owner);
 
 	userlib.view("users", "owners_by_activation", {
 		"key": ac_key,
@@ -672,9 +673,10 @@ app.get("/api/user/activate", function(req, res) {
 
 			// contains only activation, id and username
 			req.session.activation = ac_key;
-			req.session.owner = body.rows[0].value;
-			console.log("Reset request with session owner: " + req.session.owner);
-			res.redirect("http://rtm.thinx.cloud:80/password.html");
+			req.session.owner = ac_owner;
+			console.log("Reset request with session owner: " + ac_owner);
+			res.redirect("http://rtm.thinx.cloud:80/password.html?activation=" +
+				ac_key + "&owner=" + ac_owner);
 		}
 	});
 });
