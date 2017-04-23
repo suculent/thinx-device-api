@@ -1708,6 +1708,7 @@ app.post("/api/login", function(req, res) {
 				} else {
 					failureResponse(res, 403, "unauthorized");
 					console.log("Owner not found: " + username);
+					return;
 				}
 			});
 			return;
@@ -1728,10 +1729,12 @@ app.post("/api/login", function(req, res) {
 						res.end(JSON.stringify({
 							status: "WELCOME"
 						}));
+						return;
 					} else if (client_type == "webapp") {
 						res.end(JSON.stringify({
 							"redirectURL": "http://rtm.thinx.cloud:80/app"
 						}));
+						return;
 					}
 					// TODO: If user-agent contains app/device... (what?)
 					return;
@@ -1745,10 +1748,12 @@ app.post("/api/login", function(req, res) {
 						res.end(JSON.stringify({
 							status: "WELCOME"
 						}));
+						return;
 					} else if (client_type == "webapp") {
 						res.end(JSON.stringify({
 							"redirectURL": "http://rtm.thinx.cloud:80/app"
 						}));
+						return;
 					}
 					// TODO: If user-agent contains app/device... (what?)
 					return;
@@ -1766,8 +1771,10 @@ app.post("/api/login", function(req, res) {
 				res.end(JSON.stringify({
 					status: "ERROR"
 				}));
+				return;
 			} else if (client_type == "webapp") {
 				res.redirect("http://rtm.thinx.cloud:80/"); // redirects browser, not in XHR?
+				return;
 				// or res.end(JSON.stringify({ redirectURL: "https://rtm.thinx.cloud:80/app" }));
 			}
 
@@ -1776,7 +1783,10 @@ app.post("/api/login", function(req, res) {
 				if (err) {
 					console.log(err);
 				} else {
-					failureResponse(res, 501, "protocol");
+					res.end(JSON.stringify({
+						success: false,
+						status: "no session (owner)"
+					}));
 					console.log("Not a post request.");
 					return;
 				}
