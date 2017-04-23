@@ -171,9 +171,9 @@ app.get("/api/user/devices", function(req, res) {
 
 		if (err) {
 			if (err.toString() == "Error: missing") {
-				res.end({
+				res.end(JSON.stringify({
 					result: "none"
-				});
+				}));
 			}
 			console.log("/api/user/devices: Error: " + err.toString());
 			return;
@@ -485,20 +485,31 @@ app.post("/api/user/create", function(req, res) {
 			console.log("Error: " + err.toString());
 		} else {
 			// TODO: Assets, there should be length(body.rows) == 0
+			var user_should_not_exist = length(body.rows);
+			if (user_should_not_exist > 0) {
+				res.end(JSON.stringify({
+					success: false,
+					status: "Owner already exists."
+				}));
+			}
 		}
+
+
 
 		var new_api_keys = [];
 		var new_api_key = sha256(new Date().toString()).substring(0, 40);
 		new_api_keys.push(new_api_key);
 
-		var new_activation_token = sha256(new Date().toString());
+		var new_activation_date = new Date().toString();
+		var new_activation_token = sha256(new_activation_date);
 
 		// Create user document
 		var new_user = {
 			owner: new_owner,
 			email: email,
 			api_keys: new_api_keys,
-			activation: new_activation_token
+			activation: new_activation_token,
+			activation_date: new_activation_date
 		};
 
 		userlib.insert(new_user, new_owner, function(err, body, header) {
@@ -527,14 +538,14 @@ app.post("/api/user/create", function(req, res) {
 				console.log("Activation email sent.");
 				if (err) {
 					console.log(err);
-					res.end({
+					res.end(JSON.stringify({
 						success: false,
 						status: "Password reset failed."
-					});
+					}));
 				} else {
-					res.end({
+					res.end(JSON.stringify({
 						success: true
-					});
+					}));
 				}
 			});
 		}); // insert
@@ -940,9 +951,9 @@ app.get("/api/user/devices", function(req, res) {
 
 		if (err) {
 			if (err.toString() == "Error: missing") {
-				res.end({
+				res.end(JSON.stringify({
 					result: "none"
-				});
+				}));
 			}
 			console.log("/api/user/devices: Error: " + err.toString());
 			return;
@@ -1046,7 +1057,10 @@ app.post("/device/register", function(req, res) {
 		console.log("API KEY in request: '" + api_key + "'");
 	} else {
 		console.log("ERROR: Registration requests now require API key!");
-		res.end();
+		res.end(JSON.stringify({
+			success: false,
+			status: "authentication"
+		}));
 	}
 
 	console.log("Serching for owner: " + owner);
