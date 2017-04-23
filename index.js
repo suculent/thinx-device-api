@@ -688,6 +688,13 @@ app.post("/api/user/password/set", function(req, res) {
 	var password1 = req.body.password;
 	var password2 = req.body.rpassword;
 
+	var request_owner = null;
+	if (typeof(req.body.owner) !== undefined) {
+		request_owner = req.body.owner;
+	} else {
+		console.log("Request has no owner for fast-search.");
+	}
+
 	console.log(JSON.stringify(req.body));
 
 	if (password1 !== password2) {
@@ -695,6 +702,8 @@ app.post("/api/user/password/set", function(req, res) {
 			status: "passwords-mismatch",
 			success: false
 		}));
+	} else {
+		console.log("Passwords match....");
 	}
 
 	if (typeof(req.body.reset_key) !== "undefined") {
@@ -768,9 +777,7 @@ app.post("/api/user/password/set", function(req, res) {
 			}
 		});
 
-	}
-
-	if (typeof(req.body.activation) !== "undefined") {
+	} else if (typeof(req.body.activation) !== "undefined") {
 
 		console.log("Performing new activation...");
 
@@ -842,11 +849,10 @@ app.post("/api/user/password/set", function(req, res) {
 				});
 			}
 		});
+	} else {
+		console.log("No reset or activation? Edge assert!");
+		failureResponse(res, 403, "Password change not authorized.");
 	}
-
-	console.log("No reset or activation? Edge assert!");
-
-	failureResponse(res, 403, "Password change not authorized.");
 });
 
 
