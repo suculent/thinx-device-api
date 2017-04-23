@@ -671,9 +671,9 @@ app.get("/api/user/activate", function(req, res) {
 			console.log("Body to extract owner: " + JSON.stringify(body));
 
 			// contains only activation, id and username
-			res.session.activation = ac_key;
-			res.session.owner = body.rows[0].value;
-			console.log("Reset with session owner: " + res.session.owner);
+			req.session.activation = ac_key;
+			req.session.owner = body.rows[0].value;
+			console.log("Reset request with session owner: " + req.session.owner);
 			res.redirect("http://rtm.thinx.cloud:80/password.html");
 		}
 	});
