@@ -467,11 +467,10 @@ app.post("/api/user/create", function(req, res) {
 	console.log("/api/user/create");
 	console.log(JSON.stringify(req.body));
 
-	var owner = req.body.owner;
 	var first_name = req.body.first_name;
 	var last_name = req.body.last_name;
 	var email = req.body.email;
-	var username = req.body.username;
+	var username = req.body.owner;
 	// password will be set on successful e-mail activation
 
 	var new_owner_hash = sha256(email);
@@ -801,6 +800,8 @@ app.post("/api/user/password/set", function(req, res) {
 
 				var userdoc = body.rows[0];
 
+				console.log("Activating user: " + JSON.stringify(userdoc));
+
 				userdoc.password = sha256(password1);
 				userdoc.last_reset = new Date();
 				userdoc.activation = null;
@@ -863,6 +864,10 @@ app.post("/api/user/password/reset", function(req, res) {
 			failureResponse(res, 404, "user_not_found");
 		} else {
 			console.log("password reset users: " + body.rows.length);
+
+			if (body.rows.length > 2) {
+				failureResponse(res, 403, "more_users_with_same_email!");
+			}
 		}
 
 		var user = body.rows[0];
