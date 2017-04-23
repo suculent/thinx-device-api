@@ -471,12 +471,13 @@ app.post("/api/user/create", function(req, res) {
 	var first_name = req.body.first_name;
 	var last_name = req.body.last_name;
 	var email = req.body.email;
+	var username = req.body.username;
 	// password will be set on successful e-mail activation
 
-	var new_owner = owner;
+	var new_owner_hash = sha256(email);
 
 	userlib.view("users", "owners_by_username", {
-		"key": new_owner,
+		"key": new_owner_hash,
 		"include_docs": true // might be useless
 	}, function(err, body) {
 
@@ -501,18 +502,28 @@ app.post("/api/user/create", function(req, res) {
 		var new_activation_date = new Date().toString();
 		var new_activation_token = sha256(new_activation_date);
 
+		var default_repo = {
+			alias: "THiNX Vanilla Device Firmware",
+			url: "git@github.com:suculent/thinx-firmware-esp8266.git",
+			devices: [
+				"ANY"
+			]
+		};
+
 		// Create user document
 		var new_user = {
-			owner: new_owner,
+			owner: new_owner_hash,
+			username: username,
 			email: email,
 			api_keys: new_api_keys,
 			first_name: first_name,
 			last_name: last_name,
 			activation: new_activation_token,
-			activation_date: new_activation_date
+			activation_date: new_activation_date,
+			repos: [default_repo]
 		};
 
-		userlib.insert(new_user, email, function(err, body, header) {
+		userlib.insert(new_user, new_owner_hash, function(err, body, header) {
 
 			if (err) {
 				if (err.statusCode == 409) {
