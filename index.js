@@ -512,11 +512,19 @@ app.post("/api/user/create", function(req, res) {
 			activation_date: new_activation_date
 		};
 
-		userlib.insert(new_user, new_owner, function(err, body, header) {
+		userlib.insert(new_user, email, function(err, body, header) {
 
 			if (err) {
+				if (err.statusCode == 409) {
+					res.writeHead(409, {
+						"Content-Type": "application/json"
+					});
+					res.end(JSON.stringify({
+						success: false,
+						status: "User already exists"
+					}));
+				}
 				console.log(err);
-				res.end(err);
 				return;
 			}
 
