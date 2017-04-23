@@ -548,7 +548,7 @@ app.post("/api/user/create", function(req, res) {
 				subject: "Account activation",
 				body: "<!DOCTYPE html>Hello " + first_name + " " + last_name +
 					". Please <a href='http://rtm.thinx.cloud:7442/api/user/activate?owner=" +
-					owner + "&activation=" +
+					username + "&activation=" +
 					new_activation_token + "'>activate</a> your THiNX account.</html>"
 			});
 
@@ -648,8 +648,6 @@ app.get("/api/user/activate", function(req, res) {
 	var ac_key = req.query.activation;
 	var ac_owner = req.query.owner;
 
-	console.log("Attempt to activate with key: " + ac_key);
-
 	userlib.view("users", "owners_by_activation", {
 		"key": ac_key,
 		"include_docs": false
@@ -695,6 +693,8 @@ app.post("/api/user/password/set", function(req, res) {
 	}
 
 	if (typeof(req.headers.reset_key) !== "undefined") {
+
+		console.log("Performing password reset...");
 
 		// Validate password reset_key
 		userlib.view("users", "owners_by_resetkey", {
@@ -767,6 +767,8 @@ app.post("/api/user/password/set", function(req, res) {
 
 	if (typeof(req.headers.activation) !== "undefined") {
 
+		console.log("Performing new activation...");
+
 		// Validate new activation
 		userlib.view("users", "owners_by_activation", {
 			"key": req.headers.activation,
@@ -836,6 +838,8 @@ app.post("/api/user/password/set", function(req, res) {
 			}
 		});
 	}
+
+	console.log("No reset or activation? Edge assert!");
 
 	failureResponse(res, 403, "Password change not authorized.");
 });
