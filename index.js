@@ -816,6 +816,7 @@ app.post("/api/user/password/set", function(req, res) {
 						status: "user_not_found",
 						success: false
 					}));
+					return;
 				}
 
 				var userdoc = body.rows[0];
