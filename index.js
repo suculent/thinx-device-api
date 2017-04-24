@@ -630,7 +630,7 @@ app.get("/api/user/password/reset", function(req, res) {
 
 		console.log(body);
 
-		var user = body[0].doc;
+		var user = body.rows[0].doc;
 
 		if (typeof(req.params.reset_key) !== "undefined") {
 
