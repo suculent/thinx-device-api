@@ -603,7 +603,7 @@ app.get("/api/user/password/reset", function(req, res) {
 
 	console.log(JSON.stringify(req.body));
 
-	var owner = req.params.owner; // for faster search
+	var owner = req.query.owner; // for faster search
 
 	console.log("Searching for owner " + owner);
 
@@ -617,6 +617,7 @@ app.get("/api/user/password/reset", function(req, res) {
 			req.session.destroy(function(err) {
 				if (err) {
 					console.log(err);
+					res.end(err);
 				} else {
 					res.end(JSON.stringify({
 						success: false,
@@ -673,6 +674,7 @@ app.get("/api/user/password/reset", function(req, res) {
 				console.log("reset_key does not match");
 				return;
 			} else {
+				console.log("Should redirect now...");
 				res.redirect('http://rtm.thinx.cloud:80' + '/password.html?activation=' +
 					activation +
 					'&owner=' + user.owner);
