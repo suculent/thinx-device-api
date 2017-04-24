@@ -501,27 +501,17 @@ app.post("/api/user/create", function(req, res) {
 	}, function(err, body) {
 
 		if (err) {
-			if (err.status == 409) {
+			if (err != "Error: missing") {
+				console.log("Error: " + err.toString());
+			}
+		} else {
+			var user_should_not_exist = body.rows.length;
+			if (user_should_not_exist > 0) {
 				res.end(JSON.stringify({
 					success: false,
 					status: "email_already_exists"
 				}));
 				return;
-			}
-			if (err == "Error: missing") {
-				// this is OK
-				// console.log("User should NOT exist! Skipping ALL errors...");
-			} else {
-				console.log("Error: " + err.toString());
-			}
-		} else {
-			// TODO: Assets, there should be length(body.rows) == 0
-			var user_should_not_exist = body.rows.length;
-			if (user_should_not_exist > 0) {
-				res.end(JSON.stringify({
-					success: false,
-					status: "Owner already exists."
-				}));
 			}
 		}
 
