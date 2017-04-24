@@ -531,7 +531,7 @@ app.post("/api/user/create", function(req, res) {
 			repos: [default_repo]
 		};
 
-		userlib.insert(JSON.stringify(new_user), new_owner_hash, function(err,
+		userlib.insert(new_user, new_owner_hash, function(err,
 			body, header) {
 
 			if (err) {
@@ -773,7 +773,7 @@ app.post("/api/user/password/set", function(req, res) {
 
 					console.log("Creating document :" + JSON.stringify(userdoc));
 
-					userlib.insert(userdoc.owner, JSON.stringify(userdoc), function(err) {
+					userlib.insert(userdoc, userdoc.owner, function(err) {
 
 						if (err) {
 							console.log("Cannot insert user on password-reset");
@@ -840,7 +840,7 @@ app.post("/api/user/password/set", function(req, res) {
 						return;
 					}
 
-					userlib.insert(userdoc.owner, JSON.stringify(userdoc), function(err) {
+					userlib.insert(userdoc, userdoc.owner, function(err) {
 
 						if (err) {
 							console.log(err);
