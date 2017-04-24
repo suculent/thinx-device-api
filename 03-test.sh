@@ -53,8 +53,8 @@ curl -v -b cookies.jar \
 #
 #nyc --reporter=lcov --reporter=text-lcov npm test
 
-echo
-echo "☢ Skipping Karma..."
+#echo
+#echo "☢ Skipping Karma..."
 
 # karma start
 

@@ -23,7 +23,7 @@ dependencies:
 
   # cache and restore between builds
   cache_directories:
-    - "node_modules"
+#    - "node_modules"
 
 ## Customize database setup
 database:

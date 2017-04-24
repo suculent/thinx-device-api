@@ -33,9 +33,9 @@ fi
 echo
 echo "» Fetching current app version from GIT..."
 
-git pull origin master
+git pull # origin master is the default tracking branch
 
-if [[ CIRCLECI == true ]]; then
+if [[ $CIRCLECI == true ]]; then
 	echo
 	echo "☢  Running node.js without console for CI..."
 	nohup node index.js > ./logs/things.log &
@@ -52,7 +52,7 @@ echo
 echo "» Monitoring log. You can exit any time by pressing ^C and logout. Node.js will be still running."
 echo
 
-if [[ CIRCLECI == false ]]; then
+if [[ $CIRCLECI == false ]]; then
 	if [[ -f ./logs/thinx.log ]]; then
 		tail -f -n200 ./logs/thinx.log
 	else
