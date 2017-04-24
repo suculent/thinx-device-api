@@ -605,6 +605,8 @@ app.get("/api/user/password/reset", function(req, res) {
 
 	var owner = req.params.owner; // for faster search
 
+	console.log("Searching for owner " + owner);
+
 	userlib.view("users", "owners_by_username", {
 		"key": owner,
 		"include_docs": true
@@ -623,7 +625,10 @@ app.get("/api/user/password/reset", function(req, res) {
 					console.log("Not a valid request.");
 				}
 			});
+			return;
 		}
+
+		console.log(body);
 
 		var user = body[0].doc;
 
