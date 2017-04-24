@@ -827,7 +827,7 @@ app.post("/api/user/password/set", function(req, res) {
 					}));
 				}
 
-				//console.log("Activating user: " + JSON.stringify(body));
+				console.log("Activating user: " + JSON.stringify(body));
 
 				var userdoc = body.rows[0];
 
