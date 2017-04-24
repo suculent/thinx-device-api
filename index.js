@@ -97,7 +97,11 @@ app.all("/*", function(req, res, next) {
 	// why the login page rejects CORS on browser-side (redirect from successful
 	// Password-change operation).
 
-	if (origin === "undefined") {
+	if (typeof(origin) === "undefined") {
+		origin = "rtm.thinx.cloud";
+	}
+
+	if (origin === null) {
 		origin = "rtm.thinx.cloud";
 	}
 
@@ -109,7 +113,7 @@ app.all("/*", function(req, res, next) {
 		(origin == "undefined") ||
 		(origin == "rtm.thinx.cloud")
 	) {
-
+		console.log("X-Origin: " + origin);
 	} else {
 		console.log("Origin: " + origin);
 	}
@@ -296,6 +300,7 @@ app.get("/api/user/apikey", function(req, res) {
 
 				// Add new API Key
 				doc.api_keys.push(new_api_key);
+				delete doc._rev;
 
 				userlib.insert(doc, owner, function(err, body, header) {
 					if (err) {
@@ -371,6 +376,7 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 			var removeIndex = keys[api_key];
 			keys.splice(removeIndex, 1);
 			doc.api_keys = keys;
+			delete doc._rev;
 
 			console.log("Saving: " + JSON.stringify(doc.api_keys));
 
@@ -784,6 +790,8 @@ app.post("/api/user/password/set", function(req, res) {
 
 					console.log("Creating document :" + JSON.stringify(userdoc));
 
+					delete userdoc.doc._rev;
+
 					userlib.insert(userdoc.doc, userdoc.owner, function(err) {
 
 						if (err) {
@@ -867,6 +875,8 @@ app.post("/api/user/password/set", function(req, res) {
 							return;
 						} else {
 							// TODO: Password-reset success page, should redirect to login.
+							console.log(
+								"Password reset success page, should redirect to login...");
 							res.redirect("http://rtm.thinx.cloud:80/");
 							return;
 						}
