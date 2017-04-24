@@ -812,8 +812,11 @@ app.post("/api/user/password/set", function(req, res) {
 							}));
 							return;
 						} else {
-							// TODO: Password-reset success page, should redirect to login.
-							res.redirect("http://rtm.thinx.cloud:80/");
+							//res.redirect("http://rtm.thinx.cloud:80/");
+							res.end(JSON.stringify({
+								status: "password_reset_successful",
+								success: true
+							}));
 							return;
 						}
 					});
@@ -922,6 +925,7 @@ app.post("/api/user/password/reset", function(req, res) {
 		if (err) {
 			console.log("Error: " + err.toString());
 			failureResponse(res, 404, "user_not_found");
+			return;
 		} else {
 			console.log("password reset users: " + body.rows.length);
 
