@@ -829,13 +829,13 @@ app.post("/api/user/password/set", function(req, res) {
 
 				console.log("Activating user: " + JSON.stringify(body));
 
-				var userdoc = body.rows[0];
+				var userdoc = body.rows[0].doc;
 
 				console.log("Updating user document: " + JSON.stringify(userdoc));
 
-				userdoc.doc.password = sha256(password1);
-				userdoc.doc.activation_date = new Date();
-				userdoc.doc.activation = null;
+				userdoc.password = sha256(password1);
+				userdoc.activation_date = new Date();
+				// TODO: reset activation on success userdoc.activation = null;
 
 				userlib.destroy(userdoc.id, userdoc.doc._rev, function(err) {
 
@@ -898,7 +898,7 @@ app.post("/api/user/password/reset", function(req, res) {
 			}
 		}
 
-		var user = body.rows[0];
+		var user = body.rows[0].doc;
 		if (typeof(user) === "undefined" || user === null) {
 			console.log("User not found.");
 			failureResponse(res, 404, "user_not_found");
@@ -907,7 +907,7 @@ app.post("/api/user/password/reset", function(req, res) {
 
 		console.log("Creating new reset-key");
 
-		user.doc.reset_key = sha256(new Date().toString());
+		user.reset_key = sha256(new Date().toString());
 
 		// Really destroy?
 		userlib.destroy(user._id, user._rev, function(err) {
@@ -915,7 +915,7 @@ app.post("/api/user/password/reset", function(req, res) {
 				console.log(err);
 				return;
 			}
-			userlib.insert(user, user.doc.owner, function(err, body, header) {
+			userlib.insert(user, user.owner, function(err, body, header) {
 
 				if (err) {
 					console.log(err);
@@ -1034,7 +1034,7 @@ app.get("/api/user/profile", function(req, res) {
 	});
 });
 
-/* Provides list of users’ devices. Should mangle certain secure data. */
+/* Provides list of users’ devices. Should mangle certain secure data.
 app.get("/api/user/devices", function(req, res) {
 
 	console.log(req.toString());
@@ -1122,6 +1122,7 @@ app.get("/api/user/devices", function(req, res) {
 //
 // WORK ON ROAD. <-
 //
+*/
 
 //
 // Main Device API
