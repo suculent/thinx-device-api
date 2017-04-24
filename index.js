@@ -781,7 +781,7 @@ app.post("/api/user/password/set", function(req, res) {
 
 					console.log("Creating document :" + JSON.stringify(userdoc));
 
-					userlib.insert(userdoc, userdoc.owner, function(err) {
+					userlib.insert(userdoc.doc, userdoc.owner, function(err) {
 
 						if (err) {
 							console.log("Cannot insert user on password-reset");
@@ -827,7 +827,7 @@ app.post("/api/user/password/set", function(req, res) {
 					}));
 				}
 
-				console.log("Activating user: " + JSON.stringify(body));
+				//console.log("Activating user: " + JSON.stringify(body));
 
 				var userdoc = body.rows[0];
 
@@ -848,7 +848,7 @@ app.post("/api/user/password/set", function(req, res) {
 						return;
 					}
 
-					userlib.insert(userdoc, userdoc.owner, function(err) {
+					userlib.insert(userdoc.doc, userdoc.owner, function(err) {
 
 						if (err) {
 							console.log(err);
