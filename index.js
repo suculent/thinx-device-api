@@ -667,7 +667,8 @@ app.get("/api/user/activate", function(req, res) {
 
 	var ac_key = req.query.activation;
 	var ac_owner = req.query.owner;
-	console.log("owner: " + ac_owner);
+
+	console.log("Searching ac_key " + ac_key + " for owner: " + ac_owner);
 
 	userlib.view("users", "owners_by_activation", {
 		"key": ac_key,
@@ -676,18 +677,20 @@ app.get("/api/user/activate", function(req, res) {
 
 		if (err) {
 			console.log("Error: " + err.toString());
+
 			req.session.destroy(function(err) {
-				if (err) {
-					console.log(err);
-				} else {
-					failureResponse(res, 501, "protocol");
-					console.log("Not a valid request.");
-				}
+				console.log(err);
+				res.end(JSON.stringify({
+					status: "user_not_found",
+					success: false
+				}));
 			});
+
 			res.end(JSON.stringify({
 				status: "activation",
 				success: false
 			}));
+
 		} else {
 			res.redirect('http://rtm.thinx.cloud:80' + '/password.html?activation=' +
 				ac_key +
@@ -837,7 +840,7 @@ app.post("/api/user/password/set", function(req, res) {
 				userdoc.activation_date = new Date();
 				// TODO: reset activation on success userdoc.activation = null;
 
-				userlib.destroy(userdoc.id, userdoc.doc._rev, function(err) {
+				userlib.destroy(userdoc._id, userdoc._rev, function(err) {
 
 					if (err) {
 						console.log("Cannot destroy user on new activation.");
@@ -848,7 +851,7 @@ app.post("/api/user/password/set", function(req, res) {
 						return;
 					}
 
-					userlib.insert(userdoc.doc, userdoc.owner, function(err) {
+					userlib.insert(userdoc, userdoc.owner, function(err) {
 
 						if (err) {
 							console.log(err);

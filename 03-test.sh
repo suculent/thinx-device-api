@@ -8,13 +8,17 @@ curl -v \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--X POST -d '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "version" : "1.0.0", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "dhho4djVGeQ:APA91bFuuZWXDQ8vSR0YKyjWIiwIoTB1ePqcyqZFU3PIxvyZMy9htu9LGPmimfzdrliRfAdci-AtzgLCIV72xmoykk-kHcYRhAFWFOChULOGxrDi00x8GgenORhx_JVxUN_fjtsN5B7T", "alias" : "rabbit", "owner": "test" } }' \
+-d '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "version" : "1.0.0", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "dhho4djVGeQ:APA91bFuuZWXDQ8vSR0YKyjWIiwIoTB1ePqcyqZFU3PIxvyZMy9htu9LGPmimfzdrliRfAdci-AtzgLCIV72xmoykk-kHcYRhAFWFOChULOGxrDi00x8GgenORhx_JVxUN_fjtsN5B7T", "alias" : "rabbit", "owner": "test" } }' \
 http://$HOST:7442/device/register
 
 echo
 echo "☢ Testing builder..."
 
-curl -H "Origin: rtm.thinx.cloud" -H "User-Agent: THiNX-Client" -H "Content-Type: application/json" -X POST -d '{ "build" : { "udid" : "47fc9ab2-2227-11e7-8584-4c327591230d", "mac" : "ANY", "owner" : "test", "git" : "git@github.com:suculent/thinx-firmware-esp8266.git", "dryrun" : true } }' http://thinx.cloud:7442/api/build
+curl -H "Origin: rtm.thinx.cloud" \
+-H "User-Agent: THiNX-Client" \
+-H "Content-Type: application/json" \
+-d '{ "build" : { "udid" : "47fc9ab2-2227-11e7-8584-4c327591230d", "mac" : "ANY", "owner" : "test", "git" : "git@github.com:suculent/thinx-firmware-esp8266.git", "dryrun" : true } }' \
+http://$HOST:7442/api/build
 
 echo
 echo "» Testing authentication..."
@@ -24,7 +28,7 @@ curl -v -c cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--X POST -d '{ "username" : "test", "password" : "tset" }' \
+-d '{ "username" : "test", "password" : "tset" }' \
 http://$HOST:7442/api/login
 
 echo
@@ -34,7 +38,7 @@ curl -v -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--X POST -d '{ "query" : false }' http://$HOST:7442/api/view/devices
+-d '{ "query" : false }' http://$HOST:7442/api/view/devices
 
 echo
 echo "» Fetching user apikeys..."
@@ -43,7 +47,7 @@ curl -v -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--X POST -d '{ "query" : false }' http://$HOST:7442/api/apikey/list
+-d '{ "query" : false }' http://$HOST:7442/api/apikey/list
 
 #echo
 #echo "☢ Running NYC code coverage..."
