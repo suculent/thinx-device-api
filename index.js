@@ -605,8 +605,6 @@ app.get("/api/user/password/reset", function(req, res) {
 
 	var owner = req.params.owner; // for faster search
 
-	console.log("Attempt to reset password with key: " + reset_key);
-
 	userlib.view("users", "owners_by_username", {
 		"key": owner,
 		"include_docs": true
@@ -618,7 +616,10 @@ app.get("/api/user/password/reset", function(req, res) {
 				if (err) {
 					console.log(err);
 				} else {
-					failureResponse(res, 501, "protocol");
+					res.end(JSON.stringify({
+						success: false,
+						status: "invalid-protocol"
+					}));
 					console.log("Not a valid request.");
 				}
 			});
@@ -628,15 +629,21 @@ app.get("/api/user/password/reset", function(req, res) {
 
 		if (typeof(req.params.reset_key) !== "undefined") {
 
+			var reset_key = req.params.reset_key;
 			var user_reset_key = user.reset_key;
 
 			if (typeof(user_reset_key) === "undefined") {
 				user_reset_key = null;
 			}
 
+			console.log("Attempt to reset password with key: " + reset_key);
+
 			if (req.params.reset_key != user_reset_key) {
-				failureResponse(res, 501, "reset_key_does_not_match");
 				console.log("reset_key does not match");
+				res.end(JSON.stringify({
+					success: false,
+					status: "invalid-reset-key"
+				}));
 				return;
 			} else {
 				res.redirect('http://rtm.thinx.cloud:80' + '/password.html?reset_key=' +
@@ -644,6 +651,7 @@ app.get("/api/user/password/reset", function(req, res) {
 					'&owner=' + user.owner);
 				return;
 			}
+
 		} else if (typeof(req.params.activation) !== "undefined") {
 
 			var user_activation = user.activation;
@@ -653,7 +661,10 @@ app.get("/api/user/password/reset", function(req, res) {
 			}
 
 			if (req.params.activation != user_activation) {
-				failureResponse(res, 501, "reset_key_does_not_match");
+				res.end(JSON.stringify({
+					success: false,
+					status: "invalid-reset-key"
+				}));
 				console.log("reset_key does not match");
 				return;
 			} else {
@@ -956,7 +967,7 @@ app.post("/api/user/password/reset", function(req, res) {
 					subject: "Password reset",
 					body: "<!DOCTYPE html>Hello " + user.first_name + " " + user.last_name +
 						". Please <a href='http://rtm.thinx.cloud:7442/api/user/password/reset?owner=" +
-						user.owner + "&reset=/  " +
+						user.owner + "&reset_key=/  " +
 						user.reset_key +
 						"'>reset</a> your THiNX password.</html>"
 				});
