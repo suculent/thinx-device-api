@@ -500,6 +500,8 @@ app.post("/api/user/create", function(req, res) {
 		"include_docs": true // might be useless
 	}, function(err, body) {
 
+		console.log(JSON.stingify(body));
+
 		if (err) {
 			if (err != "Error: missing") {
 				console.log("Error: " + err.toString());
@@ -511,6 +513,7 @@ app.post("/api/user/create", function(req, res) {
 					success: false,
 					status: "email_already_exists"
 				}));
+				console.log("Already exists.");
 				return;
 			}
 		}
