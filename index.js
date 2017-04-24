@@ -551,12 +551,9 @@ app.post("/api/user/create", function(req, res) {
 
 			if (err) {
 				if (err.statusCode == 409) {
-					res.writeHead(409, {
-						"Content-Type": "application/json"
-					});
 					res.end(JSON.stringify({
 						success: false,
-						status: "User already exists"
+						status: "email_already_exists"
 					}));
 				} else {
 					console.log(err);
