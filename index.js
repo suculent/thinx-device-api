@@ -964,9 +964,8 @@ app.post("/api/user/password/reset", function(req, res) {
 					to: email,
 					subject: "Password reset",
 					body: "<!DOCTYPE html>Hello " + user.first_name + " " + user.last_name +
-						". Please <a href='http://rtm.thinx.cloud:7442/api/user/password/reset?owner=" +
-						user.owner + "&reset_key=/  " +
-						user.reset_key +
+						". Someone has requested to <a href='http://rtm.thinx.cloud:7442/api/user/password/reset?owner=" +
+						user.owner + "&reset_key=" + user.reset_key +
 						"'>reset</a> your THiNX password.</html>"
 				});
 
