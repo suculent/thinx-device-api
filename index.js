@@ -815,20 +815,18 @@ app.post("/api/user/password/set", function(req, res) {
 					}));
 				}
 
-				console.log(body);
-
 				var userdoc = body.rows[0].doc;
 
-				console.log("userdoc: " + JSON.stringify(userdoc));
+				console.log("Updating user document: " + JSON.stringify(userdoc));
 
 				userdoc.password = sha256(password1);
-				userdoc.last_reset = new Date();
-				userdoc.reset_key = null;
+				userdoc.activation_date = new Date();
+				userdoc.activation = null;
 
 				userlib.destroy(userdoc.owner, userdoc._rev, function(err) {
 
 					if (err) {
-						console.log("Cannot destroy user on password-reset");
+						console.log("Cannot destroy user on new activation.");
 						res.end(JSON.stringify({
 							status: "user_not_reset",
 							success: false
@@ -839,7 +837,8 @@ app.post("/api/user/password/set", function(req, res) {
 					userlib.insert(userdoc.owner, userdoc, function(err) {
 
 						if (err) {
-							console.log("Could not re-insert user on password-reset");
+							console.log(err);
+							console.log("Could not re-insert user on new activation.");
 							res.end(JSON.stringify({
 								status: "user_not_saved",
 								success: false
