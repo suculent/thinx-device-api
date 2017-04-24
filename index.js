@@ -583,12 +583,13 @@ app.post("/api/user/create", function(req, res) {
 					console.log(err);
 					res.end(JSON.stringify({
 						success: false,
-						status: "Password reset failed."
+						status: "activation-failed"
 					}));
 				} else {
 					console.log("Activation email sent.");
 					res.end(JSON.stringify({
-						success: true
+						success: true,
+						status: "email-sent"
 					}));
 				}
 			});
@@ -877,7 +878,11 @@ app.post("/api/user/password/set", function(req, res) {
 							// TODO: Password-reset success page, should redirect to login.
 							console.log(
 								"Password reset success page, should redirect to login...");
-							res.redirect("http://rtm.thinx.cloud:80/");
+							//res.redirect("http://rtm.thinx.cloud:80/");
+							res.end(JSON.stringify({
+								redirect: "http://rtm.thinx.cloud:80/",
+								success: true
+							}));
 							return;
 						}
 					});
@@ -941,8 +946,6 @@ app.post("/api/user/password/reset", function(req, res) {
 					return;
 				}
 
-				// Creates reset e-mail with re-activation link
-
 				console.log("Resetting password for user: " + JSON.stringify(user));
 
 				var resetEmail = new Emailer({
@@ -950,13 +953,10 @@ app.post("/api/user/password/reset", function(req, res) {
 					from: "api@thinx.cloud",
 					to: email,
 					subject: "Password reset",
-					body: "<!DOCTYPE html>Hello " + user.doc.first_name + " " +
-						user
-						.doc
-						.last_name +
+					body: "<!DOCTYPE html>Hello " + user.first_name + " " + user.last_name +
 						". Please <a href='http://rtm.thinx.cloud:7442/api/user/password/reset?owner=" +
-						user.doc.owner + "&reset=/  " +
-						user.doc.reset_key +
+						user.owner + "&reset=/  " +
+						user.reset_key +
 						"'>reset</a> your THiNX password.</html>"
 				});
 
@@ -966,7 +966,10 @@ app.post("/api/user/password/reset", function(req, res) {
 						res.end(err);
 					} else {
 						console.log("Reset e-mail sent.");
-						res.end(JSON.stringify({}));
+						res.end(JSON.stringify({
+							success: true,
+							status: "email-sent"
+						}));
 					}
 				});
 				// Calling page already displays "Relax. You reset link is on its way."
