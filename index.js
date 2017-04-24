@@ -604,11 +604,12 @@ app.get("/api/user/password/reset", function(req, res) {
 	console.log(JSON.stringify(req.body));
 
 	var owner = req.query.owner; // for faster search
+	var reset_key = req.query.reset_key; // for faster search
 
 	console.log("Searching for owner " + owner);
 
-	userlib.view("users", "owners_by_username", {
-		"key": owner,
+	userlib.view("users", "owners_by_resetkey", {
+		"key": reset_key,
 		"include_docs": true
 	}, function(err, body) {
 
@@ -629,13 +630,21 @@ app.get("/api/user/password/reset", function(req, res) {
 			return;
 		}
 
+		if (body.rows.length === 0) {
+			res.end(JSON.stringify({
+				success: false,
+				status: "user-not-found"
+			}));
+			return;
+		}
+
 		console.log(body);
 
 		var user = body.rows[0].doc;
 
-		if (typeof(req.params.reset_key) !== "undefined") {
+		if (typeof(req.query.reset_key) !== "undefined") {
 
-			var reset_key = req.params.reset_key;
+			var reset_key = req.query.reset_key;
 			var user_reset_key = user.reset_key;
 
 			if (typeof(user_reset_key) === "undefined") {
@@ -644,7 +653,7 @@ app.get("/api/user/password/reset", function(req, res) {
 
 			console.log("Attempt to reset password with key: " + reset_key);
 
-			if (req.params.reset_key != user_reset_key) {
+			if (req.query.reset_key != user_reset_key) {
 				console.log("reset_key does not match");
 				res.end(JSON.stringify({
 					success: false,
@@ -658,28 +667,10 @@ app.get("/api/user/password/reset", function(req, res) {
 				return;
 			}
 
-		} else if (typeof(req.params.activation) !== "undefined") {
+		} else {
 
-			var user_activation = user.activation;
+			console.log("Missing reset key.");
 
-			if (typeof(user_activation) === "undefined") {
-				user_activation = null;
-			}
-
-			if (req.params.activation != user_activation) {
-				res.end(JSON.stringify({
-					success: false,
-					status: "invalid-reset-key"
-				}));
-				console.log("reset_key does not match");
-				return;
-			} else {
-				console.log("Should redirect now...");
-				res.redirect('http://rtm.thinx.cloud:80' + '/password.html?activation=' +
-					activation +
-					'&owner=' + user.owner);
-				return;
-			}
 		}
 	});
 });
