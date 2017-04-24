@@ -281,7 +281,7 @@ app.get("/api/user/apikey", function(req, res) {
 
 			console.log("Updating user: " + JSON.stringify(doc));
 
-			userlib.destroy(doc, doc._rev, function(err) {
+			userlib.destroy(users[index]._id, doc._rev, function(err) {
 
 				console.log("Destroyed, inserting " + JSON.stringify(dic));
 
@@ -758,7 +758,7 @@ app.post("/api/user/password/set", function(req, res) {
 				userdoc.last_reset = new Date();
 				userdoc.reset_key = null;
 
-				userlib.destroy(userdoc.owner, userdoc._rev, function(err) {
+				userlib.destroy(userdoc._id, userdoc._rev, function(err) {
 
 					if (err) {
 						console.log("Cannot destroy user on password-reset");
@@ -768,6 +768,8 @@ app.post("/api/user/password/set", function(req, res) {
 						}));
 						return;
 					}
+
+					console.log("Creating document " + userdoc.owner);
 
 					userlib.insert(userdoc.owner, userdoc, function(err) {
 
@@ -815,6 +817,8 @@ app.post("/api/user/password/set", function(req, res) {
 					}));
 				}
 
+				console.log("Activating user: " + body);
+
 				var userdoc = body.rows[0].doc;
 
 				console.log("Updating user document: " + JSON.stringify(userdoc));
@@ -823,7 +827,7 @@ app.post("/api/user/password/set", function(req, res) {
 				userdoc.activation_date = new Date();
 				userdoc.activation = null;
 
-				userlib.destroy(userdoc.owner, userdoc._rev, function(err) {
+				userlib.destroy(userdoc._id, userdoc._rev, function(err) {
 
 					if (err) {
 						console.log("Cannot destroy user on new activation.");
@@ -901,7 +905,7 @@ app.post("/api/user/password/reset", function(req, res) {
 		user.doc.reset_key = sha256(new Date().toString());
 
 		// Really destroy?
-		userlib.destroy(user, user._rev, function(err) {
+		userlib.destroy(user._id, user._rev, function(err) {
 			if (err) {
 				console.log(err);
 				return;
