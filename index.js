@@ -922,21 +922,22 @@ app.post("/api/user/password/reset", function(req, res) {
 			return;
 		}
 
-		console.log("Creating new reset-key");
-
-		user.reset_key = sha256(new Date().toString());
-
-		// Really destroy?
 		userlib.destroy(user._id, user._rev, function(err) {
 			if (err) {
 				console.log(err);
 				return;
 			}
+
+			console.log("Creating new reset-key...");
+			user.reset_key = sha256(new Date().toString());
+
+			delete user._rev;
+
 			userlib.insert(user, user.owner, function(err, body, header) {
 
 				if (err) {
 					console.log(err);
-					res.end(err);
+					res.end(JSON.stringify(err));
 					return;
 				}
 
