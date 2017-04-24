@@ -519,8 +519,6 @@ app.post("/api/user/create", function(req, res) {
 		}
 
 		var new_api_keys = [];
-		var new_api_key = sha256(new Date().toString()).substring(0, 40);
-		new_api_keys.push(new_api_key);
 
 		var new_activation_date = new Date().toString();
 		var new_activation_token = sha256(new_activation_date);
@@ -929,6 +927,15 @@ app.post("/api/user/password/reset", function(req, res) {
 					success: false,
 					status: "too_many_users"
 				}));
+				return;
+			}
+
+			if (body.rows.length === 0) {
+				res.end(JSON.stringify({
+					success: false,
+					status: "email_not_found"
+				}));
+				return;
 			}
 		}
 
