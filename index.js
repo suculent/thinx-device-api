@@ -756,11 +756,11 @@ app.post("/api/user/password/set", function(req, res) {
 
 				console.log("userdoc: " + JSON.stringify(userdoc));
 
-				userdoc.password = sha256(password1);
-				userdoc.last_reset = new Date();
-				userdoc.reset_key = null;
+				userdoc.doc.password = sha256(password1);
+				userdoc.doc.last_reset = new Date();
+				userdoc.doc.reset_key = null;
 
-				userlib.destroy(userdoc._id, userdoc._rev, function(err) {
+				userlib.destroy(userdoc.id, userdoc.doc._rev, function(err) {
 
 					if (err) {
 						console.log("Cannot destroy user on password-reset");
@@ -821,15 +821,15 @@ app.post("/api/user/password/set", function(req, res) {
 
 				console.log("Activating user: " + JSON.stringify(body));
 
-				var userdoc = body.rows[0].doc;
+				var userdoc = body.rows[0];
 
 				console.log("Updating user document: " + JSON.stringify(userdoc));
 
-				userdoc.password = sha256(password1);
-				userdoc.activation_date = new Date();
-				userdoc.activation = null;
+				userdoc.doc.password = sha256(password1);
+				userdoc.doc.activation_date = new Date();
+				userdoc.doc.activation = null;
 
-				userlib.destroy(userdoc._id, userdoc._rev, function(err) {
+				userlib.destroy(userdoc.id, userdoc.doc._rev, function(err) {
 
 					if (err) {
 						console.log("Cannot destroy user on new activation.");
