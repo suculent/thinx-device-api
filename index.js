@@ -769,7 +769,7 @@ app.post("/api/user/password/set", function(req, res) {
 						return;
 					}
 
-					userlib.insert(userdoc.owner, doc, function(err) {
+					userlib.insert(userdoc.owner, userdoc, function(err) {
 
 						if (err) {
 							console.log("Cannot insert user on password-reset");
@@ -836,10 +836,10 @@ app.post("/api/user/password/set", function(req, res) {
 						return;
 					}
 
-					userlib.insert(userdoc.owner, doc, function(err) {
+					userlib.insert(userdoc.owner, userdoc, function(err) {
 
 						if (err) {
-							console.log("Cannot insert user on password-reset");
+							console.log("Could not re-insert user on password-reset");
 							res.end(JSON.stringify({
 								status: "user_not_saved",
 								success: false
