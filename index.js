@@ -501,6 +501,13 @@ app.post("/api/user/create", function(req, res) {
 	}, function(err, body) {
 
 		if (err) {
+			if (err.status == 409) {
+				res.end(JSON.stringify({
+					success: false,
+					status: "email_already_exists"
+				}));
+				return;
+			}
 			if (err == "Error: missing") {
 				// this is OK
 				// console.log("User should NOT exist! Skipping ALL errors...");
