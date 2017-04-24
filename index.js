@@ -583,13 +583,13 @@ app.post("/api/user/create", function(req, res) {
 					console.log(err);
 					res.end(JSON.stringify({
 						success: false,
-						status: "activation-failed"
+						status: "activation_failed"
 					}));
 				} else {
 					console.log("Activation email sent.");
 					res.end(JSON.stringify({
 						success: true,
-						status: "email-sent"
+						status: "email_sent"
 					}));
 				}
 			});
@@ -622,7 +622,7 @@ app.get("/api/user/password/reset", function(req, res) {
 				} else {
 					res.end(JSON.stringify({
 						success: false,
-						status: "invalid-protocol"
+						status: "invalid_protocol"
 					}));
 					console.log("Not a valid request.");
 				}
@@ -633,7 +633,7 @@ app.get("/api/user/password/reset", function(req, res) {
 		if (body.rows.length === 0) {
 			res.end(JSON.stringify({
 				success: false,
-				status: "user-not-found"
+				status: "user_not_found"
 			}));
 			return;
 		}
@@ -657,7 +657,7 @@ app.get("/api/user/password/reset", function(req, res) {
 				console.log("reset_key does not match");
 				res.end(JSON.stringify({
 					success: false,
-					status: "invalid-reset-key"
+					status: "invalid_reset_key"
 				}));
 				return;
 			} else {
@@ -735,7 +735,7 @@ app.post("/api/user/password/set", function(req, res) {
 
 	if (password1 !== password2) {
 		res.end(JSON.stringify({
-			status: "passwords-mismatch",
+			status: "password_mismatch",
 			success: false
 		}));
 	} else {
@@ -758,16 +758,14 @@ app.post("/api/user/password/set", function(req, res) {
 					if (err) {
 						console.log(err);
 					} else {
-						failureResponse(res, 501, "protocol");
+						res.end(JSON.stringify({
+							status: "reset",
+							success: false
+						}));
 						console.log("Not a valid request.");
 					}
 				});
-				res.end(JSON.stringify({
-					status: "reset",
-					success: false
-				}));
 				return;
-
 			} else {
 
 				if (body.rows.length === 0) {
@@ -777,11 +775,11 @@ app.post("/api/user/password/set", function(req, res) {
 					}));
 				}
 
-				console.log(body);
+				// console.log(body);
 
 				var userdoc = body.rows[0];
 
-				console.log("userdoc: " + JSON.stringify(userdoc));
+				// console.log("userdoc: " + JSON.stringify(userdoc));
 
 				userdoc.doc.password = sha256(password1);
 				userdoc.doc.last_reset = new Date();
@@ -798,12 +796,10 @@ app.post("/api/user/password/set", function(req, res) {
 						return;
 					}
 
-					console.log("Creating document :" + JSON.stringify(userdoc));
-
+					console.log("Creating document...");
 					delete userdoc.doc._rev;
 
 					userlib.insert(userdoc.doc, userdoc.owner, function(err) {
-
 						if (err) {
 							console.log("Cannot insert user on password-reset");
 							res.end(JSON.stringify({
@@ -924,26 +920,38 @@ app.post("/api/user/password/reset", function(req, res) {
 
 		if (err) {
 			console.log("Error: " + err.toString());
-			failureResponse(res, 404, "user_not_found");
+			res.end(JSON.stringify({
+				success: false,
+				status: "user_not_found"
+			}));
 			return;
 		} else {
 			console.log("password reset users: " + body.rows.length);
-
 			if (body.rows.length > 2) {
-				failureResponse(res, 403, "more_users_with_same_email!");
+				res.end(JSON.stringify({
+					success: false,
+					status: "too_many_users"
+				}));
 			}
 		}
 
 		var user = body.rows[0].doc;
 		if (typeof(user) === "undefined" || user === null) {
 			console.log("User not found.");
-			failureResponse(res, 404, "user_not_found");
+			res.end(JSON.stringify({
+				success: false,
+				status: "user_not_found"
+			}));
 			return;
 		}
 
 		userlib.destroy(user._id, user._rev, function(err) {
 			if (err) {
 				console.log(err);
+				res.end(JSON.stringify({
+					success: false,
+					status: "destroy_failed"
+				}));
 				return;
 			}
 
@@ -956,7 +964,10 @@ app.post("/api/user/password/reset", function(req, res) {
 
 				if (err) {
 					console.log(err);
-					res.end(JSON.stringify(err));
+					res.end(JSON.stringify({
+						success: false,
+						status: "insert_failed"
+					}));
 					return;
 				}
 
@@ -976,12 +987,15 @@ app.post("/api/user/password/reset", function(req, res) {
 				resetEmail.send(function(err) {
 					if (err) {
 						console.log(err);
-						res.end(err);
+						res.end(JSON.stringify({
+							success: false,
+							status: err
+						}));
 					} else {
 						console.log("Reset e-mail sent.");
 						res.end(JSON.stringify({
 							success: true,
-							status: "email-sent"
+							status: "email_sent"
 						}));
 					}
 				});
