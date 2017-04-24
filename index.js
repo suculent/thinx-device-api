@@ -837,6 +837,7 @@ app.post("/api/user/password/set", function(req, res) {
 						status: "user_not_found",
 						success: false
 					}));
+					return;
 				}
 
 				console.log("Activating user: " + JSON.stringify(body));
