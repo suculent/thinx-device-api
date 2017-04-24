@@ -849,7 +849,11 @@ app.post("/api/user/password/set", function(req, res) {
 							success: false
 						}));
 						return;
+					} else {
+						console.log("Deleted " + userdoc._id + " revision " + userdoc._rev);
 					}
+
+					delete userdoc._rev; // should force new revision...
 
 					userlib.insert(userdoc, userdoc.owner, function(err) {
 
