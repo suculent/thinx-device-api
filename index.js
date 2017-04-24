@@ -500,7 +500,7 @@ app.post("/api/user/create", function(req, res) {
 		"include_docs": true // might be useless
 	}, function(err, body) {
 
-		console.log(JSON.stingify(body));
+		console.log(JSON.stringify(body));
 
 		if (err) {
 			if (err != "Error: missing") {
