@@ -92,6 +92,15 @@ app.all("/*", function(req, res, next) {
 	// CORS headers
 
 	var origin = req.get("origin");
+
+	// FIXME: This is a hack. It should not work like this. We just need to find out,
+	// why the login page rejects CORS on browser-side (redirect from successful
+	// Password-change operation).
+
+	if (origin === "undefined") {
+		origin = "rtm.thinx.cloud";
+	}
+
 	var allowedOrigin = origin;
 
 	if ((origin == "http://rtm.thinx.loc") ||
@@ -692,7 +701,6 @@ app.get("/api/user/activate", function(req, res) {
 app.post("/api/user/password/set", function(req, res) {
 
 	console.log("POST /api/user/password/set");
-	console.log(JSON.stringify(req.body));
 
 	var password1 = req.body.password;
 	var password2 = req.body.rpassword;
@@ -871,11 +879,6 @@ app.post("/api/user/password/set", function(req, res) {
 app.post("/api/user/password/reset", function(req, res) {
 
 	console.log("POST /api/user/password/reset");
-	console.log(JSON.stringify(req.body));
-
-	// TODO: Receive e-mail as an parameter, will require captcha
-	// TODO: Must not have authenticated session
-	// TODO: Generate activation e-mail, save reset_key (with expiration) for user
 
 	var email = req.body.email;
 
@@ -1698,6 +1701,8 @@ app.get("/api/logout", function(req, res) {
 app.post("/api/login", function(req, res) {
 	console.log("/api/login");
 	sess = req.session;
+
+	console.log("Origin: " + req.headers.origin);
 
 	var client_type = "webapp";
 	var ua = req.headers["user-agent"];
