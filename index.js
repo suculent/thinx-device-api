@@ -493,15 +493,15 @@ validateSessionOwner = function(req, res) {
 
 	if (typeof(sess) !== "undefined" && ((typeof(req.session) !==
 				"undefined") ||
-			sess.owner)) {
+			this.sess.owner)) {
 		if (typeof(req.session.owner) !== "undefined") {
 			console.log("assigning owner = req.session.owner;");
 			owner = req.session.owner;
 		}
-		if (typeof(sess.owner) !== "undefined") {
+		if (typeof(this.sess.owner) !== "undefined") {
 			console.log(
 				"assigning owner = sess.owner; (client lost or session terminated?)");
-			owner = sess.owner;
+			owner = this.sess.owner;
 		}
 	} else {
 		failureResponse(res, 403, "session has no owner");
