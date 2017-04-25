@@ -480,12 +480,13 @@ app.get("/api/user/apikey/list", function(req, res) {
  * Sources
  */
 
-validateSessionOwner = function(req, res, sess) {
+validateSessionOwner = function(req, res) {
 
 	var owner = null;
+	var sess = req.session;
 
 	// reject on invalid session
-	if (!sess) {
+	if (!req.session) {
 		failureResponse(res, 405, "not allowed");
 		console.log("/api/user/sources/list: No session!");
 	}
@@ -518,7 +519,7 @@ app.get("/api/user/sources/list", function(req, res) {
 
 	// --> EXTRACTED
 
-	var owner = this.validateSessionOwner(req, res, sess);
+	var owner = this.validateSessionOwner(req, res);
 	if (owner === null) return;
 
 	// <-- EXTRACTED
