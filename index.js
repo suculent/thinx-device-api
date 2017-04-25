@@ -575,7 +575,7 @@ app.get("/api/user/sources/list", function(req, res) {
 
 			var doc = body.rows[0];
 
-			console.log("Found doc: " + doc);
+			console.log("Found doc: " + JSON.stringify(doc));
 
 			// Return all sources
 			console.log("Listing Sources (Repositories): " +
