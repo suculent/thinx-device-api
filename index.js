@@ -562,9 +562,9 @@ app.get("/api/user/sources/list", function(req, res) {
 			return;
 		}
 
-		console.log("Found user: " + body);
+		console.log("Found user: " + JSON.stringify(body));
 
-		var doc = body.rows[0];
+		var doc = body;
 
 		console.log("Found doc: " + doc);
 
