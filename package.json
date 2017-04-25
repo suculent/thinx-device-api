@@ -1,65 +1,65 @@
 {
-  "name" : "thinx",
-  "description" : "THiNX IoT RTM API",
-  "version" : "1.1.317",
-  "author" : {
-    "name" : "Matej Sychra"
+  "name": "thinx",
+  "description": "THiNX IoT RTM API",
+  "version": "1.1.339",
+  "author": {
+    "name": "Matej Sychra"
   },
-  "repository" : {
-    "type" : "git",
-    "url" : "git://github.com/suculent/thinx-device-api.git"
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/suculent/thinx-device-api.git"
   },
-  "bugs" : {
-    "url" : "https://github.com/suculent/thinx-device-api/issues"
+  "bugs": {
+    "url": "https://github.com/suculent/thinx-device-api/issues"
   },
-  "license" : "ISC",
-  "engines" : {
-    "node" : ">=4.3.2"
+  "license": "ISC",
+  "engines": {
+    "node": ">=4.3.2"
   },
-  "preferGlobal" : true,
-  "dependencies" : {
-    "body-parser" : "^1.7.0",
-    "brace-expansion" : "^1.1.7",
-    "checksum" : "^0.1.1",
-    "ejs" : "^1.0.0",
-    "email" : "^0.2.6",
-    "expect" : "*",
-    "express" : "^4.8.7",
-    "express-session" : "^1.7.6",
-    "firebase-admin" : "^4.2.0",
-    "gawk" : "4.2.0",
-    "grunt-karma-coveralls" : "^2.5.4",
-    "gulp" : "^3.9.1",
-    "gulp-repository-watch" : "0.0.4",
-    "html" : "^1.0.0",
-    "http-signature" : "1.0.0",
-    "jasmine" : "^2.5.3",
-    "jasmine-node" : "^1.14.5",
-    "karma" : "*",
-    "karma-jasmine" : "*",
-    "karma-coverage" : "*",
-    "minimatch" : "3.0.2",
-    "mocha" : "*",
-    "nano" : "^6.2.0",
-    "node-couchdb" : "^1.1.1",
-    "node-vault" : "^0.5.6",
-    "nodelint" : "^0.6.2",
-    "nyc" : "*",
-    "qs" : "6.4.0",
-    "querystring" : "^0.2.0",
-    "request" : "^2.81.0",
-    "semver" : "^4.3.2",
-    "sha256" : "^0.2.0",
-    "shelljs" : "^0.7.5",
-    "should" : "^11.2.1",
-    "slack-notify" : "^0.1.6",
-    "sync-exec" : "^0.6.2",
-    "uuid" : "^3.0.1"
+  "preferGlobal": true,
+  "dependencies": {
+    "body-parser": "^1.7.0",
+    "brace-expansion": "^1.1.7",
+    "checksum": "^0.1.1",
+    "ejs": "^1.0.0",
+    "email": "^0.2.6",
+    "expect": "*",
+    "express": "^4.8.7",
+    "express-session": "^1.7.6",
+    "firebase-admin": "^4.2.0",
+    "gawk": "4.2.0",
+    "grunt-karma-coveralls": "^2.5.4",
+    "gulp": "^3.9.1",
+    "gulp-repository-watch": "0.0.4",
+    "html": "^1.0.0",
+    "http-signature": "1.0.0",
+    "jasmine": "^2.5.3",
+    "jasmine-node": "^1.14.5",
+    "karma": "*",
+    "karma-jasmine": "*",
+    "karma-coverage": "*",
+    "minimatch": "3.0.2",
+    "mocha": "*",
+    "nano": "^6.2.0",
+    "node-couchdb": "^1.1.1",
+    "node-vault": "^0.5.6",
+    "nodelint": "^0.6.2",
+    "nyc": "*",
+    "qs": "6.4.0",
+    "querystring": "^0.2.0",
+    "request": "^2.81.0",
+    "semver": "^4.3.2",
+    "sha256": "^0.2.0",
+    "shelljs": "^0.7.5",
+    "should": "^11.2.1",
+    "slack-notify": "^0.1.6",
+    "sync-exec": "^0.6.2",
+    "uuid": "^3.0.1"
   },
-  "devDependencies" : {
-    "coveralls" : "^2.13.0",
-    "eslint" : "*",
-    "jshint" : "^2.9.4",
-    "grunt" : "*"
+  "devDependencies": {
+    "coveralls": "^2.13.0",
+    "eslint": "*",
+    "jshint": "^2.9.4",
+    "grunt": "*"
   }
 }

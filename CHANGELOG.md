@@ -4,6 +4,8 @@
 
 ### Last week
 
+25/4/2017 - Working repository list
+
 24/4/2017 - Working account creation and password reset
 
 ### Second week

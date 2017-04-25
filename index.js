@@ -296,7 +296,7 @@ app.get("/api/user/apikey", function(req, res) {
 
 			userlib.destroy(users[index]._id, doc._rev, function(err) {
 
-				console.log("Destroyed, inserting " + JSON.stringify(dic));
+				console.log("Destroyed, inserting " + JSON.stringify(doc));
 
 				// Add new API Key
 				doc.api_keys.push(new_api_key);

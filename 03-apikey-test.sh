@@ -2,6 +2,8 @@
 
 # Get access cookie by authentication
 
+echo "--- LOGIN & APIKEY ---"
+
 curl -v -c cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
@@ -20,8 +22,6 @@ curl -v -b cookies.jar \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 http://$HOST:7442/api/user/apikey/list
-
-echo "------"
 
 curl -v -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
