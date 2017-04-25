@@ -518,7 +518,7 @@ app.get("/api/user/sources/list", function(req, res) {
 
 	// --> EXTRACTED
 
-	var owner = this.validateSessionOwner();
+	var owner = this.validateSessionOwner(req, res);
 	if (owner === null) return;
 
 	// <-- EXTRACTED
