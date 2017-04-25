@@ -567,7 +567,15 @@ app.get("/api/user/sources/list", function(req, res) {
 
 			console.log("Found user: " + JSON.stringify(body));
 
-			var doc = body;
+			if (body.rows.length === 0) {
+				res.end(JSON.stringify({
+					success: false,
+					status: "no_such_owner"
+				}));
+				return;
+			}
+
+			var doc = body.rows[0];
 
 			console.log("Found doc: " + doc);
 
