@@ -13,11 +13,18 @@ curl -v -b cookies.jar \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -X GET \
-http://localhost:7442/api/user/apikey
+http://$HOST:7442/api/user/sources/list
 
 curl -v -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -X GET \
-http://localhost:7442/api/user/apikey/list
+http://$HOST:7442/api/user/apikey
+
+curl -v -b cookies.jar \
+-H 'Origin: rtm.thinx.cloud' \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+-X GET \
+http://$HOST:7442/api/user/apikey/list

@@ -480,7 +480,7 @@ app.get("/api/user/apikey/list", function(req, res) {
  * Sources
  */
 
-validateSessionOwner = function(req, res) {
+validateSessionOwner = function(req, res, sess) {
 
 	var owner = null;
 
@@ -518,7 +518,7 @@ app.get("/api/user/sources/list", function(req, res) {
 
 	// --> EXTRACTED
 
-	var owner = this.validateSessionOwner(req, res);
+	var owner = this.validateSessionOwner(req, res, sess);
 	if (owner === null) return;
 
 	// <-- EXTRACTED
