@@ -508,7 +508,7 @@ validateSessionOwner = function(req, res) {
 		console.log("validateSessionOwner: No valid owner!");
 	}
 
-	return owner;
+	return (typeof(req.session.owner) !== "undefined") ? req.session.owner : null;
 };
 
 app.get("/api/user/sources/list", function(req, res) {
