@@ -322,8 +322,8 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 
 	console.log("/api/user/apikey/revoke");
 
-	var vtest = vault.read('secret/password');
-	console.log("vtest: " + JSON.stringify(vtest));
+	//var vtest = vault.read('secret/password');
+	// console.log("vtest: " + JSON.stringify(vtest));
 
 	if (!validateSecureRequest(req)) return;
 
