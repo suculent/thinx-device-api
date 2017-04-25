@@ -488,7 +488,7 @@ validateSessionOwner = function(req, res) {
 	// reject on invalid session
 	if (!req.session) {
 		failureResponse(res, 405, "not allowed");
-		console.log("/api/user/sources/list: No session!");
+		console.log("validateSessionOwner: No session!");
 	}
 
 	if (typeof(sess) !== "undefined" && ((typeof(req.session) !==
@@ -505,7 +505,7 @@ validateSessionOwner = function(req, res) {
 		}
 	} else {
 		failureResponse(res, 403, "session has no owner");
-		console.log("/api/user/apikey/list: No valid owner!");
+		console.log("validateSessionOwner: No valid owner!");
 	}
 
 	return owner;
@@ -520,6 +520,9 @@ app.get("/api/user/sources/list", function(req, res) {
 	// --> EXTRACTED
 
 	var owner = this.validateSessionOwner(req, res);
+
+	console.log("owner: " + owner);
+
 	if (owner === null) return;
 
 	// <-- EXTRACTED
