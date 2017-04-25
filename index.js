@@ -480,10 +480,10 @@ app.get("/api/user/apikey/list", function(req, res) {
  * Sources
  */
 
-validateSessionOwner = function(req, res) {
+validateSessionOwner = function(req, res, sess) {
 
 	var owner = null;
-	var sess = req.session;
+	//sess = req.session;
 
 	// reject on invalid session
 	if (!req.session) {
@@ -493,22 +493,22 @@ validateSessionOwner = function(req, res) {
 
 	if (typeof(sess) !== "undefined" && ((typeof(req.session) !==
 				"undefined") ||
-			this.sess.owner)) {
+			sess.owner)) {
 		if (typeof(req.session.owner) !== "undefined") {
 			console.log("assigning owner = req.session.owner;");
 			owner = req.session.owner;
 		}
-		if (typeof(this.sess.owner) !== "undefined") {
+		if (typeof(sess.owner) !== "undefined") {
 			console.log(
 				"assigning owner = sess.owner; (client lost or session terminated?)");
-			owner = this.sess.owner;
+			owner = sess.owner;
 		}
 	} else {
 		failureResponse(res, 403, "session has no owner");
 		console.log("validateSessionOwner: No valid owner!");
 	}
 
-	return (typeof(req.session.owner) !== "undefined") ? req.session.owner : null;
+	return owner;
 };
 
 app.get("/api/user/sources/list", function(req, res) {
@@ -519,7 +519,9 @@ app.get("/api/user/sources/list", function(req, res) {
 
 	// --> EXTRACTED
 
-	var owner = this.validateSessionOwner(req, res);
+	sess = req.session;
+
+	var owner = this.validateSessionOwner(req, res, sess);
 
 	console.log("owner: " + owner);
 
