@@ -578,11 +578,11 @@ app.get("/api/user/sources/list", function(req, res) {
 			console.log("Found doc: " + JSON.stringify(user));
 
 			// Return all sources
-			console.log("Listing Sources (Repositories): " +
-				JSON.stringify(user.doc.sources));
+			console.log("Listing Repositories: " +
+				JSON.stringify(user.doc.repos));
 			res.end(JSON.stringify({
 				success: true,
-				sources: user.doc.sources
+				sources: user.doc.repos
 			}));
 		});
 });
