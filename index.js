@@ -515,16 +515,18 @@ app.get("/api/user/sources/list", function(req, res) {
 
 	console.log("/api/user/sources/list");
 
+	sess = req.session;
+
+	console.log("sess.owner: " + sess.owner);
+
 	if (!validateSecureGETRequest(req)) return;
 
 	// --> EXTRACTED
 
-	sess = req.session;
-
 	//     var owner = this.validateSessionOwner(req, res, sess);
 	var owner = req.session.owner;
 
-	console.log("owner: " + owner);
+	console.log("req.session.owner: " + owner);
 
 	if (owner === null) return;
 
