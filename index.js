@@ -547,8 +547,8 @@ app.get("/api/user/sources/list", function(req, res) {
 
 	console.log("Listing sources for owner: " + owner);
 
-	userlib.view("users", "owners_by_id", {
-			"key": sha256(owner),
+	userlib.view("users", "owners_by_username", {
+			"key": owner,
 			"include_docs": true
 		},
 
