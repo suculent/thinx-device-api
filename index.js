@@ -520,25 +520,26 @@ app.get("/api/user/sources/list", function(req, res) {
 	// reject on invalid session
 	if (!sess) {
 		failureResponse(res, 405, "not allowed");
-		console.log("/api/user/devices: No session!");
+		console.log("/api/user/sources/list: No session!");
 		return;
 	}
 
-	// reject on invalid owner
 	var owner = null;
-	if (req.session.owner || sess.owner) {
-		if (req.session.owner) {
+	if (typeof(sess) !== "undefined" && ((typeof(req.session) !==
+				"undefined") ||
+			sess.owner)) {
+		if (typeof(req.session.owner) !== "undefined") {
 			console.log("assigning owner = req.session.owner;");
 			owner = req.session.owner;
 		}
-		if (sess.owner) {
+		if (typeof(sess.owner) !== "undefined") {
 			console.log(
 				"assigning owner = sess.owner; (client lost or session terminated?)");
 			owner = sess.owner;
 		}
 	} else {
 		failureResponse(res, 403, "session has no owner");
-		console.log("/api/user/devices: No valid owner!");
+		console.log("/api/user/sources/list: No valid owner!");
 		return;
 	}
 
