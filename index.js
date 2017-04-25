@@ -515,20 +515,32 @@ app.get("/api/user/sources/list", function(req, res) {
 
 	console.log("/api/user/sources/list");
 
-	sess = req.session;
-
-	console.log("sess.owner: " + sess.owner);
-
 	if (!validateSecureGETRequest(req)) return;
 
-	// --> EXTRACTED
+	// reject on invalid session
+	if (!sess) {
+		failureResponse(res, 405, "not allowed");
+		console.log("/api/user/devices: No session!");
+		return;
+	}
 
-	//     var owner = this.validateSessionOwner(req, res, sess);
-	var owner = req.session.owner;
-
-	console.log("req.session.owner: " + owner);
-
-	if (owner === null) return;
+	// reject on invalid owner
+	var owner = null;
+	if (req.session.owner || sess.owner) {
+		if (req.session.owner) {
+			console.log("assigning owner = req.session.owner;");
+			owner = req.session.owner;
+		}
+		if (sess.owner) {
+			console.log(
+				"assigning owner = sess.owner; (client lost or session terminated?)");
+			owner = sess.owner;
+		}
+	} else {
+		failureResponse(res, 403, "session has no owner");
+		console.log("/api/user/devices: No valid owner!");
+		return;
+	}
 
 	// <-- EXTRACTED
 
