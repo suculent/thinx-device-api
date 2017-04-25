@@ -302,11 +302,11 @@ app.get("/api/user/apikey", function(req, res) {
 				doc.api_keys.push(new_api_key);
 				delete doc._rev;
 
-				userlib.insert(doc, owner, function(err, body, header) {
+				userlib.insert(doc, doc.owner, function(err, body, header) {
 					if (err) {
 						console.log("/api/user/apikey ERROR:" + err);
 					} else {
-						console.log("Userlib " + owner + "document inserted");
+						console.log("Userlib " + doc.owner + "document inserted");
 						res.end(JSON.stringify({
 							api_key: new_api_key
 						}));
@@ -477,6 +477,173 @@ app.get("/api/user/apikey/list", function(req, res) {
 });
 
 /*
+ * Sources
+ */
+
+validateSessionOwner = function(req, res) {
+
+	var owner = null;
+
+	// reject on invalid session
+	if (!sess) {
+		failureResponse(res, 405, "not allowed");
+		console.log("/api/user/sources/list: No session!");
+	}
+
+	if (typeof(sess) !== "undefined" && ((typeof(req.session) !==
+				"undefined") ||
+			sess.owner)) {
+		if (typeof(req.session.owner) !== "undefined") {
+			console.log("assigning owner = req.session.owner;");
+			owner = req.session.owner;
+		}
+		if (typeof(sess.owner) !== "undefined") {
+			console.log(
+				"assigning owner = sess.owner; (client lost or session terminated?)");
+			owner = sess.owner;
+		}
+	} else {
+		failureResponse(res, 403, "session has no owner");
+		console.log("/api/user/apikey/list: No valid owner!");
+	}
+
+	return owner;
+};
+
+app.get("/api/user/sources/list", function(req, res) {
+
+	console.log("/api/user/sources/list");
+
+	if (!validateSecureGETRequest(req)) return;
+
+	// --> EXTRACTED
+
+	var owner = this.validateSessionOwner();
+	if (owner === null) return;
+
+	// <-- EXTRACTED
+
+	console.log("Listing sources for owner: " + owner);
+
+	userlib.view("users", "owners_by_username", {
+		"key": owner,
+		"include_docs": true
+
+	}, function(err, body) {
+
+		if (err) {
+			console.log(err);
+			res.end(JSON.stringify({
+				success: false,
+				status: "api-user-apikey-list_error"
+			}));
+			return;
+		}
+
+		console.log("Found user: " + body);
+
+		var doc = body.rows[0];
+
+		console.log("Found doc: " + doc);
+
+		// Return all sources
+		console.log("Listing Sources (Repositories): " +
+			JSON.stringify(doc.sources));
+		res.end(JSON.stringify({
+			success: true,
+			sources: doc.sources
+		}));
+	});
+});
+
+/*
+ * SSH Keys
+ */
+
+app.get("/api/user/sshkey/list", function(req, res) {
+	// TODO: List SSH key fingerprints
+});
+
+/*
+ app.post("/api/user/sshkey/add", function(req, res) {
+
+ 	console.log(JSON.stringify(sess));
+
+ 	if (!validateSecureGETRequest(req)) return;
+
+ 	// reject on invalid owner
+ 	var owner = null;
+ 	if (req.session.owner || sess.owner) {
+ 		if (req.session.owner) {
+ 			console.log("assigning owner = req.session.owner;");
+ 			owner = req.session.owner;
+ 		}
+ 		if (sess.owner) {
+ 			console.log(
+ 				"assigning owner = sess.owner; (client lost or session terminated?)");
+ 			owner = sess.owner;
+ 		}
+ 	} else {
+ 		failureResponse(res, 403, "session has no owner");
+ 		console.log("/api/user/devices: No valid owner!");
+ 		return;
+ 	}
+
+ 	var new_api_key = sha256(new Date().toString()).substring(0, 40);
+
+ 	// Get all users
+ 	userlib.view("users", "owners_by_username", function(err, doc) {
+
+ 		if (err) {
+ 			console.log(err);
+ 			return;
+ 		}
+
+ 		var users = doc.rows;
+ 		var user_data;
+ 		var doc_id;
+ 		for (var index in users) {
+ 			if (users[index].key === owner) {
+ 				doc_id = users[index]._id;
+ 				break;
+ 			}
+ 		}
+
+ 		// Fetch complete user
+ 		userlib.get(users[index].id, function(error, doc) {
+
+ 			if (!doc) {
+ 				console.log("User " + users[index].id + " not found.");
+ 				return;
+ 			}
+
+ 			console.log("Updating user: " + JSON.stringify(doc));
+
+ 			userlib.destroy(users[index]._id, doc._rev, function(err) {
+
+ 				console.log("Destroyed, inserting " + JSON.stringify(dic));
+
+ 				// Add new API Key
+ 				doc.api_keys.push(new_api_key);
+ 				delete doc._rev;
+
+ 				userlib.insert(doc, doc.owner, function(err, body, header) {
+ 					if (err) {
+ 						console.log("/api/user/apikey ERROR:" + err);
+ 					} else {
+ 						console.log("Userlib " + doc.owner + "document inserted");
+ 						res.end(JSON.stringify({
+ 							api_key: new_api_key
+ 						}));
+ 					}
+ 				});
+ 			});
+ 		});
+ 	});
+ });
+ */
+
+/*
  * Password Reset
  */
 
@@ -570,7 +737,8 @@ app.post("/api/user/create", function(req, res) {
 				body: "<!DOCTYPE html>Hello " + first_name + " " + last_name +
 					". Please <a href='http://rtm.thinx.cloud:7442/api/user/activate?owner=" +
 					username + "&activation=" +
-					new_activation_token + "'>activate</a> your THiNX account.</html>"
+					new_activation_token +
+					"'>activate</a> your THiNX account.</html>"
 			});
 
 			activationEmail.send(function(err) {
