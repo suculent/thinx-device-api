@@ -547,35 +547,38 @@ app.get("/api/user/sources/list", function(req, res) {
 
 	console.log("Listing sources for owner: " + owner);
 
-	userlib.view("users", "owners_by_username", {
+	userlib.view("users", "owners_by_username",
+		/*{
 		"key": owner,
 		"include_docs": true
 
-	}, function(err, body) {
+	},*/
 
-		if (err) {
-			console.log(err);
+		function(err, body) {
+
+			if (err) {
+				console.log(err);
+				res.end(JSON.stringify({
+					success: false,
+					status: "api-user-apikey-list_error"
+				}));
+				return;
+			}
+
+			console.log("Found user: " + JSON.stringify(body));
+
+			var doc = body;
+
+			console.log("Found doc: " + doc);
+
+			// Return all sources
+			console.log("Listing Sources (Repositories): " +
+				JSON.stringify(doc.sources));
 			res.end(JSON.stringify({
-				success: false,
-				status: "api-user-apikey-list_error"
+				success: true,
+				sources: doc.sources
 			}));
-			return;
-		}
-
-		console.log("Found user: " + JSON.stringify(body));
-
-		var doc = body;
-
-		console.log("Found doc: " + doc);
-
-		// Return all sources
-		console.log("Listing Sources (Repositories): " +
-			JSON.stringify(doc.sources));
-		res.end(JSON.stringify({
-			success: true,
-			sources: doc.sources
-		}));
-	});
+		});
 });
 
 /*
@@ -958,6 +961,7 @@ app.post("/api/user/password/set", function(req, res) {
 						status: "user_not_found",
 						success: false
 					}));
+					return;
 				}
 
 				// console.log(body);
