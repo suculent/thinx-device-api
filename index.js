@@ -573,16 +573,16 @@ app.get("/api/user/sources/list", function(req, res) {
 				return;
 			}
 
-			var doc = body.rows[0];
+			var user = body.rows[0];
 
-			console.log("Found doc: " + JSON.stringify(doc));
+			console.log("Found doc: " + JSON.stringify(user));
 
 			// Return all sources
 			console.log("Listing Sources (Repositories): " +
-				JSON.stringify(doc.sources));
+				JSON.stringify(user.doc.sources));
 			res.end(JSON.stringify({
 				success: true,
-				sources: doc.sources
+				sources: user.doc.sources
 			}));
 		});
 });
