@@ -521,7 +521,8 @@ app.get("/api/user/sources/list", function(req, res) {
 
 	sess = req.session;
 
-	var owner = this.validateSessionOwner(req, res, sess);
+	//     var owner = this.validateSessionOwner(req, res, sess);
+	var owner = req.session.owner;
 
 	console.log("owner: " + owner);
 
