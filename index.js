@@ -175,7 +175,7 @@ app.get("/api/user/devices", function(req, res) {
 	}
 
 	devicelib.view("devicelib", "devices_by_owner", {
-		"key": owner,
+		"key": username,
 		"include_docs": false
 	}, function(err, body) {
 
