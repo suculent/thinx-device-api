@@ -1,10 +1,13 @@
 #!/bin/bash
 
+rm -rf cookies.jar
+
 echo
+echo "--------------------------------------------------------------------------------"
 echo "☢ Testing device registration..."
 
 curl -v \
--H 'Authentication: 4ae7fa8276e4cd6e61e8a3ba133f2c237176e8d5' \
+-H 'Authentication: 3d7c1c8d5c0bbe1da084ca634ce07fd617fa468c' \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
@@ -12,6 +15,7 @@ curl -v \
 http://$HOST:7442/device/register
 
 echo
+echo "--------------------------------------------------------------------------------"
 echo "☢ Testing builder..."
 
 curl -H "Origin: rtm.thinx.cloud" \
@@ -21,6 +25,7 @@ curl -H "Origin: rtm.thinx.cloud" \
 http://$HOST:7442/api/build
 
 echo
+echo "--------------------------------------------------------------------------------"
 echo "» Testing authentication..."
 
 # Get access cookie by authentication
@@ -32,22 +37,24 @@ curl -v -c cookies.jar \
 http://$HOST:7442/api/login
 
 echo
+echo "--------------------------------------------------------------------------------"
 echo "» Fetching device catalog..."
 
 curl -v -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--d '{ "query" : false }' http://$HOST:7442/api/view/devices
+http://$HOST:7442/api/user/devices
 
 echo
+echo "--------------------------------------------------------------------------------"
 echo "» Fetching user apikeys..."
 
 curl -v -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--d '{ "query" : false }' http://$HOST:7442/api/apikey/list
+http://$HOST:7442/api/user/apikey/list
 
 #echo
 #echo "☢ Running NYC code coverage..."
@@ -61,6 +68,8 @@ curl -v -b cookies.jar \
 #echo "☢ Skipping Karma..."
 
 # karma start
+
+exit 0
 
 echo
 echo "» Terminating node.js..."
