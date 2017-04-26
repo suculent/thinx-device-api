@@ -192,6 +192,8 @@ app.get("/api/user/devices", function(req, res) {
 		var rows = body.rows; // devices returned
 		var devices = []; // an array by design (needs push), to be encapsulated later
 
+		console.log(JSON.stringify(rows));
+
 		// Show all devices for admin (if not limited by query)
 		if (req.session.admin === true && typeof(req.body.query) == "undefined") {
 			var response = JSON.stringify({
@@ -204,8 +206,8 @@ app.get("/api/user/devices", function(req, res) {
 		for (var row in rows) {
 			var rowData = rows[row];
 			console.log("Matching device of device owner " + rowData.key +
-				" with alien user " + owner + " in " + rowData.toString());
-			if (owner == rowData.key) {
+				" with username " + username + " in " + rowData.toString());
+			if (username == rowData.key) {
 				console.log("/api/user/devices: OWNER: " + JSON.stringify(rowData) +
 					"\n");
 				devices.push(rowData);
