@@ -26,6 +26,8 @@ var request = require("request");
 
 var v = require("./lib/thinx/version");
 
+var sess;
+
 var rdict = {};
 
 // Database access
@@ -163,10 +165,9 @@ app.get("/api/user/devices", function(req, res) {
 
 	var owner = null;
 	var username = null;
-	if (typeof(req.session.owner) !== "undefined") {
-		console.log("assigning owner = req.session.owner;");
-		owner = req.session.owner;
-		username = req.session.username;
+	if (typeof(sess) !== "undefined") {
+		owner = sess.owner;
+		username = sess.username;
 	} else {
 		failureResponse(res, 403, "session has no owner");
 		console.log("No valid owner!");
@@ -399,13 +400,11 @@ app.get("/api/user/apikey/list", function(req, res) {
 
 	console.log(JSON.stringify(req.session));
 
-	var sess = req.session;	
 	var owner = null;
 	var username = null;
-	if (typeof(req.session.owner) !== "undefined") {
-		console.log("assigning owner = req.session.owner;");
-		owner = req.session.owner;
-		username = req.session.username;
+	if (typeof(sess) !== "undefined") {
+		owner = sess.owner;
+		username = sess.username;
 	} else {
 		failureResponse(res, 403, "session has no owner");
 		console.log("No valid owner!");
@@ -620,7 +619,7 @@ app.get("/api/user/sshkey/list", function(req, res) {
 
  			userlib.destroy(users[index]._id, doc._rev, function(err) {
 
- 				console.log("Destroyed, inserting " + JSON.stringify(dic));
+ 				console.log("Destroyed, inserting " + JSON.stringify(doc));
 
  				// Add new API Key
  				doc.api_keys.push(new_api_key);
@@ -1903,6 +1902,8 @@ app.post("/api/login", function(req, res) {
 	console.log("/api/login");
 
 	console.log("Origin: " + req.headers.origin);
+
+	sess = req.session;
 
 	var client_type = "webapp";
 	var ua = req.headers["user-agent"];
