@@ -74,21 +74,37 @@ var userlib = require("nano")(db).use("managed_users");
 
 var express = require("express");
 var session = require("express-session");
-var cookieParser = require('cookie-parser');
 var app = express();
+
+var redis = require("redis");
+var redisStore = require('connect-redis')(session);
+var client = redis.createClient();
 
 app.use(session({
 	secret: session_config.secret,
+	store: new redisStore({
+		host: 'localhost',
+		port: 6379,
+		client: client
+	}),
 	name: "x-thx-session",
-	resave: true,
+	resave: false,
 	saveUninitialized: false
 }));
+
+/* file-based session store
+app.use(session({
+	secret: session_config.secret,
+	name: "x-thx-session",
+	resave: false,
+	saveUninitialized: false
+}));
+*/
 
 app.use(parser.json());
 app.use(parser.urlencoded({
 	extended: true
 }));
-app.use(cookieParser("x-thx-session"));
 
 app.all("/*", function(req, res, next) {
 
@@ -143,6 +159,7 @@ app.all("/*", function(req, res, next) {
 	// Set custom headers for CORS
 	res.header("Access-Control-Allow-Headers",
 		"Content-type,Accept,X-Access-Token,X-Key");
+
 	if (req.method == "OPTIONS") {
 		res.status(200).end();
 	} else {
@@ -561,15 +578,21 @@ app.get("/api/user/sources/list", function(req, res) {
  */
 
 app.get("/api/user/sshkey/list", function(req, res) {
-	// TODO: List SSH key fingerprints
+	// TODO: List SSH key fingerprints saved to DB on adding
+
+	// requires valid session...
+
+	// returns ssh_keys_by_owner
 });
 
 /*
  app.post("/api/user/sshkey/add", function(req, res) {
 
+ 	// fetches and updates owner by adding ssh_key, fingerprint and name, might add path where the key is stored
+
  	console.log(JSON.stringify(sess));
 
- 	if (!validateSecureGETRequest(req)) return;
+ 	if (!validateSecurePOSTRequest(req)) return;
 
  	// reject on invalid owner
  	var owner = null;
@@ -647,8 +670,8 @@ app.get("/api/user/sshkey/list", function(req, res) {
  * Password Reset
  */
 
-// TODO: /user/create GET
-/* Create username based on e-mail. Owner should be unique (docid?). */
+// /user/create GET
+/* Create username based on e-mail. Owner is  be unique (email hash). */
 app.post("/api/user/create", function(req, res) {
 
 	console.log("/api/user/create");
@@ -1366,6 +1389,7 @@ app.post("/device/register", function(req, res) {
 		fw = "undefined";
 	} else {
 		fw = reg.firmware;
+		console.log("Setting firmware " + fw);
 	}
 
 	var hash = reg.hash;
@@ -1388,6 +1412,7 @@ app.post("/device/register", function(req, res) {
 			success: false,
 			status: "authentication"
 		}));
+		return;
 	}
 
 	console.log("Serching for owner: " + owner);

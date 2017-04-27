@@ -16,6 +16,9 @@
 		},
 		"owners_by_resetkey": {
 			"map": "function (doc) { if(doc.reset_key) { emit (doc.reset_key, doc.owner, doc.username); } }"
+		},
+		"ssh_keys_by_owner": {
+			"map": "function (doc) { if(doc.id) { emit (doc.ssh_keys); } }"
 		}
 	}
 }
