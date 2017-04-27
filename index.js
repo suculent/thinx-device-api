@@ -107,7 +107,7 @@ app.all("/*", function(req, res, next) {
 
 	var origin = req.get("origin");
 
-	console.log("Headers: " + JSON.stringify(req.headers));
+	//console.log("Headers: " + JSON.stringify(req.headers));
 
 	if (typeof(req.session) === "undefined") {
 		console.log("---session-less-request---");
@@ -251,8 +251,6 @@ app.post("/api/user/apikey", function(req, res) {
 		if (err) {
 			console.log(err);
 			return;
-		} else {
-			console.log("API Key set user: " + JSON.stringify(body));
 		}
 
 		var user = body;
@@ -266,8 +264,6 @@ app.post("/api/user/apikey", function(req, res) {
 			}));
 			return;
 		}
-
-		console.log("Updating user: " + JSON.stringify(doc));
 
 		userlib.destroy(doc._id, doc._rev, function(err) {
 
@@ -349,9 +345,7 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 			for (var index in keys) {
 				var internal_key = keys[index];
 				var internal_hash = sha256(internal_key);
-				console.log("Compare " + internal_hash + " to " + api_key_hash);
 				if (internal_hash.indexOf(api_key_hash) !== -1) {
-					console.log("FOUND!!!");
 					api_key_index = index;
 					break;
 				}
@@ -509,7 +503,7 @@ app.get("/api/user/sources/list", function(req, res) {
 				return;
 			}
 
-			console.log("Found user: " + JSON.stringify(body));
+			//console.log("Found user: " + JSON.stringify(body));
 
 			if (body.rows.length === 0) {
 				res.end(JSON.stringify({
@@ -521,7 +515,7 @@ app.get("/api/user/sources/list", function(req, res) {
 
 			var user = body.rows[0];
 
-			console.log("Found doc: " + JSON.stringify(user));
+			//console.log("Found doc: " + JSON.stringify(user));
 
 			// Return all sources
 			console.log("Listing Repositories: " +
@@ -684,7 +678,7 @@ app.get("/api/user/rsakey/list", function(req, res) {
 
 		var user = body.rows[0];
 
-		console.log("User:" + JSON.stringify(user));
+		//console.log("User:" + JSON.stringify(user));
 
 		// Fetch complete user
 		userlib.get(user.id, function(error, doc) {
@@ -748,8 +742,6 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 		if (err) {
 			console.log(err);
 			return;
-		} else {
-			console.log("Found body:" + JSON.stringify(body));
 		}
 
 		var user = body.rows[0];
