@@ -346,7 +346,7 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 
 		if (api_key_index === null) {
 			console.log("Searching for " + api_key_hash + " in " + JSON.stringify(
-				body) + " failed.");
+				keys) + " failed.");
 			res.end(JSON.stringify({
 				success: false,
 				status: "hash_not_found"
