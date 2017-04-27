@@ -333,18 +333,19 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 		}
 
 		// Search API key by hash
-		var user = body;
-		var keys = user.doc.api_keys;
+		var user = body.rows[0];
+		var keys = body.rows[0].doc.api_keys; // array
 		var api_key_index = null;
 		var api_key = null;
 		for (var index in keys) {
 			var internal_hash = sha256(keys[index]);
+			console.log("inthash_ " + internal_hash);
 			if (internal_hash.indexOf(api_key_hash) !== -1) {
 				api_key_index = index;
 				api_key = keys[index];
 				console.log("Found and splicing index " + api_key_index + " key " +
 					api_key);
-				user.doc.api_keys.splice(api_key_index, 1);
+				body.rows[0].doc.api_keys.splice(api_key_index, 1);
 				delete user._rev;
 				break;
 			}
