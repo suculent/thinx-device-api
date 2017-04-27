@@ -412,7 +412,7 @@ app.get("/api/user/apikey/list", function(req, res) {
 			console.log(err);
 			return;
 		} else {
-			console.log(doc);
+			console.log(JSON.stringify(doc));
 		}
 
 		var users = doc.rows;
@@ -481,7 +481,7 @@ app.get("/api/user/sources/list", function(req, res) {
 	console.log("Listing sources for owner: " + owner);
 
 	userlib.view("users", "owners_by_username", {
-			"key": owner,
+			"key": username,
 			"include_docs": true
 		},
 
@@ -668,13 +668,15 @@ app.get("/api/user/rsakey/list", function(req, res) {
 
 	// Get all users
 	userlib.view("users", "owners_by_username", {
-		"key": owner,
+		"key": username,
 		"include_docs": true
-	}, function() {
+	}, function(err, doc) {
 
 		if (err) {
 			console.log(err);
 			return;
+		} else {
+			console.log(JSON.stringify(doc));
 		}
 
 		var users = doc.rows;
@@ -688,9 +690,9 @@ app.get("/api/user/rsakey/list", function(req, res) {
 		}
 
 		// Fetch complete user
-		userlib.get(users[index].id, function(error, doc) {
+		userlib.get(users[index]._id, function(error, doc) {
 			if (!doc) {
-				console.log("User " + users[index].id + " not found.");
+				console.log("User " + users[index]._id + " not found.");
 				return;
 			}
 			console.log("Listing API keys: " +
