@@ -466,6 +466,8 @@ app.get("/api/user/apikey/list", function(req, res) {
 
 validateSession = function(req, res) {
 
+	console.log(JSON.stringify(req.session));
+
 	var sessionValid = false;
 	if (typeof(req.session.owner) !== "undefined") {
 		if (typeof(req.session.username) !== "undefined") {
