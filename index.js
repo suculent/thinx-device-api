@@ -359,7 +359,7 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 				}
 			}
 
-			if (api_key === null) {
+			if (api_key_index === null) {
 				res.end(JSON.stringify({
 					success: false,
 					status: "hash_not_found"
@@ -697,7 +697,7 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			}
 
 			var exportedKeys = [];
-			var keys = Object.keys(doc.rsa_keys)
+			var keys = Object.keys(doc.rsa_keys);
 			for (var i = 0; i < keys.length; i++) {
 				console.log("Parsing key: " + index + " from " + JSON.stringify(doc.rsa_keys[
 					keys[i]]));
