@@ -530,6 +530,8 @@ app.post("/api/user/rsakey", function(req, res) {
 	var owner = req.session.owner;
 	var username = req.session.username;
 
+	console.log(JSON.stringify(req.body));
+
 	// Validate those inputs from body... so far must be set
 	if (typeof(req.body.alias) !== "undefined") {
 		res.end(JSON.stringify({
