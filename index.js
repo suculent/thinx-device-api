@@ -314,12 +314,18 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 	var api_key_hash = req.body.api_key; // this is hash only!
 
 	// Get all users
-	userlib.view("users", "owners_by_username", function(err, doc) {
+	userlib.view("users", "owners_by_username", {
+		"key": username,
+		"include_docs": true
+	}, function(err, body) {
+
 
 		if (err) {
 			console.log(err);
 			return;
 		}
+
+		var doc = body.rows[0];
 
 		var users = doc.rows;
 		var user_data;
