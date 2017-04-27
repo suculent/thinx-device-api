@@ -22,6 +22,7 @@ var nano = require("nano")(db);
 var sha256 = require("sha256");
 var fingerprint = require('ssh-fingerprint');
 var Emailer = require('email').Email;
+var fs = require("fs");
 
 var request = require("request");
 
@@ -229,13 +230,13 @@ app.get("/api/user/devices", function(req, res) {
 /* Creates new api key. */
 
 // FIXME: may not save to DB
-app.get("/api/user/apikey", function(req, res) {
+app.post("/api/user/apikey", function(req, res) {
 
 	console.log("/api/user/apikey");
 
 	console.log(JSON.stringify(sess));
 
-	if (!validateSecureGETRequest(req)) return;
+	if (!validateSecureRequest(req)) return;
 
 	if (!validateSession(req, res)) return;
 
