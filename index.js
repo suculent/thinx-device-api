@@ -855,6 +855,7 @@ app.post("/api/user/create", function(req, res) {
 		}
 
 		var new_api_keys = [];
+		var new_rsa_keys = {};
 
 		var new_activation_date = new Date().toString();
 		var new_activation_token = sha256(new_activation_date);
@@ -873,6 +874,7 @@ app.post("/api/user/create", function(req, res) {
 			username: username,
 			email: email,
 			api_keys: new_api_keys,
+			rsa_keys: new_rsa_keys,
 			first_name: first_name,
 			last_name: last_name,
 			activation: new_activation_token,
@@ -1563,7 +1565,7 @@ app.post("/device/register", function(req, res) {
 	console.log("Serching for owner: " + owner);
 
 	userlib.view("users", "owners_by_username", {
-		"key": username,
+		"key": owner,
 		"include_docs": true // might be useless
 	}, function(err, body) {
 
