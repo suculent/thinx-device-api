@@ -799,7 +799,7 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 
 		console.log("Saving " + JSON.stringify(doc) + " document...");
 
-		userlib.destroy(userdoc.id, userdoc.doc._rev, function(err) {
+		userlib.destroy(user.id, user.doc._rev, function(err) {
 
 			if (err) {
 				console.log("Cannot destroy user on password-reset");
