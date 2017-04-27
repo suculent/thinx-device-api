@@ -798,19 +798,31 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 
 		console.log("Saving " + JSON.stringify(doc) + " document...");
 
-		// Save new document
-		userlib.insert(doc, doc._id, function(err) {
+		userlib.destroy(userdoc.id, userdoc.doc._rev, function(err) {
+
 			if (err) {
-				console.log("rsa_revocation_failed:" + err);
+				console.log("Cannot destroy user on password-reset");
 				res.end(JSON.stringify({
-					success: false,
-					status: "rsa_revocation_failed"
+					status: "user_not_reset",
+					success: false
 				}));
+				return;
 			} else {
-				res.end(JSON.stringify({
-					revoked: rsa_key_fingerprint,
-					success: true
-				}));
+				// Save new document
+				userlib.insert(userdoc, userdoc.id, function(err) {
+					if (err) {
+						console.log("rsa_revocation_failed:" + err);
+						res.end(JSON.stringify({
+							success: false,
+							status: "rsa_revocation_failed"
+						}));
+					} else {
+						res.end(JSON.stringify({
+							revoked: rsa_key_fingerprint,
+							success: true
+						}));
+					}
+				});
 			}
 		});
 	});
