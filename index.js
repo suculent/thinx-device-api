@@ -205,8 +205,6 @@ app.get("/api/user/devices", function(req, res) {
 
 		for (var row in rows) {
 			var rowData = rows[row];
-			console.log("Matching device of device owner " + rowData.key +
-				" with username " + username + " in " + JSON.stringify(rowData));
 			if (username == rowData.key) {
 				console.log("/api/user/devices: OWNER: " + JSON.stringify(rowData) +
 					"\n");
@@ -370,6 +368,7 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 			var removeIndex = keys[api_key_index];
 			keys.splice(removeIndex, 1);
 			doc.api_keys = keys;
+			doc.last_update = new Date();
 			delete doc._rev;
 
 			console.log("Saving: " + JSON.stringify(doc.api_keys));
@@ -602,16 +601,14 @@ app.post("/api/user/rsakey", function(req, res) {
 			console.log("Updating user: " + JSON.stringify(doc));
 
 			// FIXME: Change username to owner_id
-			var file_name = Math.floor(new Date() / 1000) + ".pub";
-			var path = "./tenants/" + username + "/rsakey-" + file_name;
+			var file_name = username + "-" + Math.floor(new Date() /
+				1000) + ".pub";
+			var ssh_path = "../.ssh/" + file_name;
 
 			var new_ssh_key = {
 				alias: new_key_alias,
-				key: file_name
+				key: ssh_path
 			};
-
-			var ssh_path = "../.ssh/" + username + "-" + Math.floor(new Date() /
-				1000) + ".pub";
 
 			fs.open(path, 'w+', function(err, fd) {
 				if (err) {
