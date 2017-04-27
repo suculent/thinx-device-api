@@ -4,6 +4,10 @@
 
 ### Last week
 
+27/4/2017 - REDIS, working on session-store security tail
+
+26/4/2017 - Bugfixing and analyzing Session issue
+
 25/4/2017 - Working repository list
 
 24/4/2017 - Working account creation and password reset

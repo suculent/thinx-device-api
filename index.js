@@ -112,6 +112,12 @@ app.all("/*", function(req, res, next) {
 
 	var origin = req.get("origin");
 
+	if (typeof(req.session) === "undefined") {
+		console.log("---session-less-request---");
+	} else {
+		console.log("S: " + JSON.stringify(req.session));
+	}
+
 	// FIXME: This is a hack. It should not work like this. We just need to find out,
 	// why the login page rejects CORS on browser-side (redirect from successful
 	// Password-change operation).
@@ -156,9 +162,8 @@ app.all("/*", function(req, res, next) {
 	res.header("Access-Control-Allow-Credentials", "true");
 	res.header(
 		"Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
-	// Set custom headers for CORS
 	res.header("Access-Control-Allow-Headers",
-		"Content-type,Accept,X-Access-Token,X-Key");
+		"Content-type,Accept,X-Access-Token,X-Key,x-thx-session");
 
 	if (req.method == "OPTIONS") {
 		res.status(200).end();
