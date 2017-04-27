@@ -740,7 +740,7 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 			console.log("User " + user.id + " not found.");
 			return;
 		} else {
-			console.log("Loaded " + user.rsa_keys.length + " keys.");
+			console.log("Loaded " + JSON.stringify(user.rsa_keys) + " keys.");
 			console.log("Parsing doc for RSA key: " + JSON.stringify(user.rsa_keys));
 		}
 
@@ -776,7 +776,8 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 		console.log("Saving " + JSON.stringify(user.rsa_keys) + " keys...");
 
 		// Save new document
-		userlib.insert(doc, user.owner, function(err) {
+		userlib.insert(doc, console.log("Loaded " + user.rsa_keys.length +
+			" keys."); user.owner, function(err) {
 			if (err) {
 				console.log(err);
 				res.end(JSON.stringify({
