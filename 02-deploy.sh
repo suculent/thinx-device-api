@@ -16,6 +16,9 @@ fi
 echo
 echo "» Checking if node.js is running..."
 
+service thinx-app status
+service thinx-app stop
+
 NODEZ=$(ps -ax | grep "$DAEMON")
 
 if [[ $(echo $NODEZ | wc -l) > 0 ]]; then
@@ -35,10 +38,16 @@ echo "» Fetching current app version from GIT..."
 
 git pull # origin master is the default tracking branch
 
+echo
+echo "» Re-installing npm packages..."
+
+npm install .
+
 if [[ $CIRCLECI == true ]]; then
 	echo
 	echo "☢  Running node.js without console for CI..."
-	nohup node index.js > ./logs/things.log &
+	nohup node index.js > /var/log/things.log &
+	service thinx-app start
 	exit 0
 else
 
@@ -46,16 +55,17 @@ else
 	echo "☢  Running node.js as a background process..."
 
 	mkdir logs
-	nohup node index.js > ./logs/thinx.log &
+#	nohup node index.js > /var/log/thinx.log &
+	service thinx-app start
 
 	echo
 	echo "» Monitoring log. You can exit any time by pressing ^C and logout. Node.js will be still running."
 	echo
 
 
-	if [[ -f ./logs/thinx.log ]]; then
-		tail -f -n200 ./logs/thinx.log
+	if [[ -f /var/log/thinx.log ]]; then
+		tail -f -n200 /var/log/thinx.log
 	else
-		echo "./logs/thinx.log not found, exiting silently..."
+		echo "/var/log/thinx.log not found, exiting silently..."
 	fi
 fi

@@ -253,6 +253,7 @@ app.get("/api/user/devices", function(req, res) {
 /* Creates new api key. */
 
 // FIXME: may not save to DB
+// FIXME: returns some ssh error
 app.get("/api/user/apikey", function(req, res) {
 
 	console.log("/api/user/apikey");
