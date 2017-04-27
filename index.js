@@ -740,31 +740,31 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 			console.log("User " + user.id + " not found.");
 			return;
 		} else {
-			console.log("Loaded " + body.rsa_keys.length + " keys.");
-			console.log("Parsing doc for RSA key: " + JSON.stringify(doc.rsa_keys));
+			console.log("Loaded " + user.rsa_keys.length + " keys.");
+			console.log("Parsing doc for RSA key: " + JSON.stringify(user.rsa_keys));
 		}
 
 		// Search RSA key by hash
-		var keys = doc.rsa_keys;
+		var keys = user.rsa_keys;
 		var delete_key = null;
 
-		var fingerprints = Object.keys(doc.rsa_keys);
+		var fingerprints = Object.keys(user.rsa_keys);
 		for (var i = 0; i < fingerprints.length; i++) {
 			console.log("Parsing finerprint " + fingerprints[i]);
-			var key = doc.rsa_keys[fingerprints[i]];
+			var key = user.rsa_keys[fingerprints[i]];
 			console.log("key: " + fingerprints[i] + " compared to " +
 				rsa_key_fingerprint);
 			if (fingerprints[i].indexOf(rsa_key_fingerprint) !== -1) {
 				console.log("Setting keys for " + rsa_key_fingerprint);
 				delete_key = true;
 				delete keys[fingerprints[i]];
-				doc.rsa_keys = keys;
+				user.rsa_keys = keys;
 				break;
 			}
 		}
 
 		if (delete_key !== null) {
-			delete doc._rev;
+			delete user._rev;
 		} else {
 			res.end(JSON.stringify({
 				success: false,
@@ -773,10 +773,10 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 			return;
 		}
 
-		console.log("Saving " + JSON.stringify(doc.rsa_keys) + " keys...");
+		console.log("Saving " + JSON.stringify(user.rsa_keys) + " keys...");
 
 		// Save new document
-		userlib.insert(doc, doc.owner, function(err) {
+		userlib.insert(doc, user.owner, function(err) {
 			if (err) {
 				console.log(err);
 				res.end(JSON.stringify({
