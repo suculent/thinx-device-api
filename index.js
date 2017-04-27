@@ -333,7 +333,8 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 		}
 
 		// Search API key by hash
-		var keys = body.rows[0].api_keys;
+		var user = body.rows[0];
+		var keys = doc.api_keys;
 		var api_key_index = null;
 		for (var index in keys) {
 			console.log("Searching by index " + index);
@@ -356,14 +357,14 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 
 		var removeIndex = keys[api_key_index];
 		keys.splice(removeIndex, 1);
-		body.api_keys = keys;
-		body.last_update = new Date();
+		doc.api_keys = keys;
+		doc.last_update = new Date();
 		delete body._rev;
 
 		console.log("Saving: " + JSON.stringify(body));
 
 		// Save new document
-		userlib.insert(body, body.owner, function(err) {
+		userlib.insert(body, doc.owner, function(err) {
 			if (err) {
 				console.log(err);
 				res.end(JSON.stringify({
