@@ -683,10 +683,10 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			} else {
 				console.log("userdoc: " + JSON.stringify(doc));
 			}
-			console.log("Listing API keys: " +
+			console.log("Listing RSA keys: " +
 				JSON.stringify(doc.ssh_keys));
 			res.end(JSON.stringify({
-				api_keys: doc.ssh_keys
+				rsa_keys: doc.ssh_keys
 			}));
 		});
 	});
