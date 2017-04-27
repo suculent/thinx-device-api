@@ -406,7 +406,7 @@ app.get("/api/user/apikey/list", function(req, res) {
 	userlib.view("users", "owners_by_username", {
 		"key": username,
 		"include_docs": true
-	}, function(err, doc) {
+	}, function(err, body) {
 
 		if (err) {
 			console.log(err);
@@ -415,20 +415,12 @@ app.get("/api/user/apikey/list", function(req, res) {
 			console.log(JSON.stringify(doc));
 		}
 
-		var users = doc.rows;
-		var user_data;
-		var doc_id;
-		for (var index in users) {
-			if (users[index].key === owner) {
-				doc_id = users[index]._id;
-				break;
-			}
-		}
+		var user = body.rows[0];
 
 		// Fetch complete user
-		userlib.get(users[index]._id, function(error, doc) {
+		userlib.get(user.id, function(error, doc) {
 			if (!doc) {
-				console.log("User " + users[index].id + " not found.");
+				console.log("User " + user.id + " not found.");
 				return;
 			}
 			console.log("Listing API keys: " +
