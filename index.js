@@ -325,23 +325,13 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 			return;
 		}
 
-		var doc = body.rows[0];
-
-		var users = doc.rows;
-		var user_data;
-		var doc_id;
-		for (var index in users) {
-			if (users[index].key === owner) {
-				doc_id = users[index]._id;
-				break;
-			}
-		}
+		var userdoc = body.rows[0];
 
 		// Fetch complete user
-		userlib.get(users[index].id, function(error, doc) {
+		userlib.get(userdoc.id, function(error, doc) {
 
 			if (!doc) {
-				console.log("User " + users[index].id + " not found.");
+				console.log("User " + userdoc.id + " not found.");
 				return;
 			}
 
