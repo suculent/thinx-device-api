@@ -29,7 +29,7 @@ echo "--------------------------------------------------------------------------
 echo "» Testing authentication..."
 
 # Get access cookie by authentication
-curl -v -c cookies.jar \
+curl -c cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -40,7 +40,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Fetching device catalog..."
 
-curl -v -b cookies.jar \
+curl -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -50,7 +50,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Requesting new API Key..."
 
-curl -v -b cookies.jar \
+curl -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -63,7 +63,7 @@ echo "» Revoking API Key..."
 
 echo "  TODO: Parse previous response in order to revoke newly created API Key, prevents polluting database..."
 
-curl -v -b cookies.jar \
+curl -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -84,7 +84,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Fetching user sources..."
 
-curl -v -b cookies.jar \
+curl -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -94,18 +94,18 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Revoking RSA key..."
 
-curl -v -b cookies.jar \
+curl -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--d '{ "fingerprint" : "TO:DO" }' \
+-d '{ "fingerprint" : "d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93" }' \
 -X DELETE http://$HOST:7442/api/user/rsakey/revoke
 
 echo
 echo "--------------------------------------------------------------------------------"
 echo "» Pushing RSA key..."
 
-curl -v -b cookies.jar \
+curl -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -116,7 +116,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Fetching RSA keys..."
 
-curl -v -b cookies.jar \
+curl -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \

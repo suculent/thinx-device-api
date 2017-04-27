@@ -347,14 +347,14 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 
 			// Search API key by hash
 			var keys = doc.api_keys;
-			var api_key = null;
+			var api_key_index = null;
 			for (var index in keys) {
 				var internal_key = keys[index];
 				var internal_hash = sha256(internal_key);
 				console.log("Compare " + internal_hash + " to " + api_key_hash);
 				if (internal_hash.indexOf(api_key_hash) !== -1) {
 					console.log("FOUND!!!");
-					api_key = internal_key;
+					api_key_index = index;
 					break;
 				}
 			}
@@ -367,7 +367,7 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 				return;
 			}
 
-			var removeIndex = keys[api_key];
+			var removeIndex = keys[api_key_index];
 			keys.splice(removeIndex, 1);
 			doc.api_keys = keys;
 			delete doc._rev;
@@ -697,8 +697,10 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			}
 
 			var exportedKeys = [];
-			for (var index in Object.keys(doc.rsa_keys)) {
-				console.log("Parsing key: " + index + " from " + JSON.stringify(doc.rsa_keys));
+			var keys = Object.keys(doc.rsa_keys)
+			for (var i = 0; i < keys.length; i++) {
+				console.log("Parsing key: " + index + " from " + JSON.stringify(doc.rsa_keys[
+					keys[i]]));
 				var info = {
 					name: doc.rsa_keys[index].alias,
 					fingerprint: doc.rsa_keys[index].fingerprint
