@@ -617,7 +617,7 @@ app.post("/api/user/rsakey", function(req, res) {
 				key: file_name
 			};
 
-			var ssh_path = "~/.ssh/" + username + "-" + Math.floor(new Date() /
+			var ssh_path = "../.ssh/" + username + "-" + Math.floor(new Date() /
 				1000) + ".pub";
 
 			fs.open(path, 'w+', function(err, fd) {
@@ -1097,9 +1097,11 @@ app.post("/api/user/password/set", function(req, res) {
 				return;
 			} else {
 
+				console.log("resetting user: " + JSON.stringify(body));
+
 				if (body.rows.length === 0) {
 					res.end(JSON.stringify({
-						status: "user_not_found",
+						status: "reset_user_not_found",
 						success: false
 					}));
 					return;
@@ -1170,9 +1172,11 @@ app.post("/api/user/password/set", function(req, res) {
 
 			} else {
 
+				console.log("activating user: " + JSON.stringify(body));
+
 				if (body.rows.length === 0) {
 					res.end(JSON.stringify({
-						status: "user_not_found",
+						status: "activated_user_not_found",
 						success: false
 					}));
 					return;
@@ -2166,6 +2170,7 @@ app.post("/api/login", function(req, res) {
 						}));
 						return;
 					} else if (client_type == "webapp") {
+						console.log("Redirecting through JSON body...");
 						res.end(JSON.stringify({
 							"redirectURL": "http://rtm.thinx.cloud:80/app"
 						}));
