@@ -146,7 +146,7 @@ app.all("/*", function(req, res, next) {
 	res.header(
 		"Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
 	res.header("Access-Control-Allow-Headers",
-		"Content-type,Accept,X-Access-Token,X-Key,x-thx-session");
+		"Content-type,Accept,x-thx-session");
 	res.header("Access-Control-Expose-Headers", "x-thx-session");
 
 	if (req.method == "OPTIONS") {
