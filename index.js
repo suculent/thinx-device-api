@@ -604,7 +604,7 @@ app.post("/api/user/rsakey", function(req, res) {
 				key: ssh_path
 			};
 
-			fs.open(path, 'w+', function(err, fd) {
+			fs.open(ssh_path, 'w+', function(err, fd) {
 				if (err) {
 					return console.log(err);
 				} else {
