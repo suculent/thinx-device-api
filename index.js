@@ -337,9 +337,7 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 		var keys = user.doc.api_keys;
 		var api_key_index = null;
 		for (var index in keys) {
-
 			var internal_hash = sha256(keys[index]);
-			console.log("Searching by index " + index + " and hash " + internal_hash);
 			if (internal_hash.indexOf(api_key_hash) !== -1) {
 				api_key_index = index;
 				break;
@@ -358,7 +356,13 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 
 		userlib.destroy(user.id, user._rev, function(err) {
 
-			var removeIndex = keys[api_key_index];
+			if (err) {
+				console.log(err);
+				return;
+			}
+
+			var removeKey = keys[api_key_index];
+			var removeIndex = api_key_index;
 			keys.splice(removeIndex, 1);
 			user.doc.api_keys = keys;
 			user.doc.last_update = new Date();
@@ -786,10 +790,10 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 
 		delete user._rev;
 
-		console.log("Saving " + JSON.stringify(user) + " document...");
+		console.log("Saving " + JSON.stringify(doc) + " document...");
 
 		// Save new document
-		userlib.insert(user, user.id, function(err) {
+		userlib.insert(doc, doc._id, function(err) {
 			if (err) {
 				console.log("rsa_revocation_failed:" + err);
 				res.end(JSON.stringify({
