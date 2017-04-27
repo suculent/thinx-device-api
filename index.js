@@ -226,8 +226,6 @@ app.get("/api/user/devices", function(req, res) {
  */
 
 /* Creates new api key. */
-
-// FIXME: may not save to DB
 app.post("/api/user/apikey", function(req, res) {
 
 	console.log("/api/user/apikey");
@@ -251,13 +249,15 @@ app.post("/api/user/apikey", function(req, res) {
 		if (err) {
 			console.log(err);
 			return;
+		} else {
+			console.log("DELETE: " + body);
 		}
 
-		var user = body;
-		var doc = body.doc;
+		var user = body.rows[0];
+		var doc = user.doc;
 
 		if (!doc) {
-			console.log("User " + user.id + " not found.");
+			console.log("User " + username + " not found.");
 			res.end(JSON.stringify({
 				success: false,
 				status: "user_not_found"
