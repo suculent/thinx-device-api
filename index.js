@@ -412,7 +412,7 @@ app.get("/api/user/apikey/list", function(req, res) {
 			console.log(err);
 			return;
 		} else {
-			console.log(JSON.stringify(body));
+
 		}
 
 		var user = body.rows[0];
@@ -422,11 +422,13 @@ app.get("/api/user/apikey/list", function(req, res) {
 			if (!doc) {
 				console.log("User " + user.id + " not found.");
 				return;
+			} else {
+				console.log(JSON.stringify(doc));
 			}
 			console.log("Listing API keys: " +
-				JSON.stringify(doc.api_keys));
+				JSON.stringify(user.doc.api_keys));
 			res.end(JSON.stringify({
-				api_keys: doc.api_keys
+				api_keys: user.doc.api_keys
 			}));
 		});
 	});
