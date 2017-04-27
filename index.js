@@ -605,8 +605,7 @@ app.post("/api/user/rsakey", function(req, res) {
 			var file_name = Math.floor(new Date() / 1000) + ".pub";
 			var path = "./tenants/" + username + "/rsakey-" + file_name;
 
-			var new_ssh_key = {};
-			new_ssh_key[new_key_fingerprint] = {
+			var new_ssh_key = {
 				alias: new_key_alias,
 				key: file_name
 			};
@@ -634,7 +633,7 @@ app.post("/api/user/rsakey", function(req, res) {
 
 			userlib.destroy(doc._id, doc._rev, function(err) {
 
-				doc.rsa_keys.push(new_ssh_key);
+				doc.rsa_keys[new_key_fingerprint] = new_ssh_key;
 				delete doc._rev;
 
 				userlib.insert(doc, doc._id, function(err, body, header) {
@@ -697,6 +696,7 @@ app.get("/api/user/rsakey/list", function(req, res) {
 
 			var exportedKeys = [];
 			for (var index in doc.rsa_keys) {
+				console.log("Parsing key: " + index + " from " + JSON.stringify(doc.rsa_keys));
 				var info = {
 					name: doc.rsa_keys[index].alias,
 					fingerprint: doc.rsa_keys[index].fingerprint
