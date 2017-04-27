@@ -1934,7 +1934,7 @@ app.get("/api/logout", function(req, res) {
 app.post("/api/login", function(req, res) {
 	console.log("/api/login");
 
-	console.log("Headers: " + JSON.stringify(req.headers));
+	console.log("Headers: " + JSON.stringify(req.headers) + "\n");
 	//console.log("Origin: " + req.headers.origin);
 
 	sess = req.session;
@@ -2005,7 +2005,7 @@ app.post("/api/login", function(req, res) {
 				// TODO: Second option (direct compare) will deprecate soon.
 				if (password.indexOf(user_data.value) !== -1) {
 
-					console.log("user_data: " + user_data);
+					console.log("user_data:\n" + JSON.stringify(user_data) + "\n");
 
 					req.session.owner = user_data.doc.owner;
 					req.session.username = username;
