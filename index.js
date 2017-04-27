@@ -93,15 +93,6 @@ app.use(session({
 	saveUninitialized: false
 }));
 
-/* file-based session store
-app.use(session({
-	secret: session_config.secret,
-	name: "x-thx-session",
-	resave: false,
-	saveUninitialized: false
-}));*/
-
-
 app.use(parser.json());
 app.use(parser.urlencoded({
 	extended: true
@@ -137,16 +128,7 @@ app.all("/*", function(req, res, next) {
 
 	var allowedOrigin = origin;
 
-	if ((origin == "http://rtm.thinx.loc") ||
-		(origin == "https://rtm.thinx.cloud") ||
-		(origin == "127.0.0.1") ||
-		(origin == "undefined") ||
-		(origin == "rtm.thinx.cloud")
-	) {
-		console.log("Known-Origin: " + origin);
-	} else {
-		console.log("Unknown-Origin: " + origin);
-	}
+	console.log("Origin: " + origin);
 
 	// Custom user agent is required for devices
 	var client = req.get("User-Agent");
@@ -186,16 +168,10 @@ app.get("/api/user/devices", function(req, res) {
 
 	if (!validateSecureGETRequest(req)) return;
 
-	var owner = null;
-	var username = null;
-	if (typeof(sess) !== "undefined") {
-		owner = sess.owner;
-		username = sess.username;
-	} else {
-		failureResponse(res, 403, "session has no owner");
-		console.log("No valid owner!");
-		return;
-	}
+	if (!validateSession(req, res)) return;
+
+	var owner = req.session.owner;
+	var username = req.session.username;
 
 	devicelib.view("devicelib", "devices_by_owner", {
 		"key": username,
@@ -253,33 +229,18 @@ app.get("/api/user/devices", function(req, res) {
 /* Creates new api key. */
 
 // FIXME: may not save to DB
-// FIXME: returns some ssh error
 app.get("/api/user/apikey", function(req, res) {
 
 	console.log("/api/user/apikey");
-
-	// So far must Authenticated using owner session.
-	// This means, new API KEY can requested only
-	// from authenticated web UI.
 
 	console.log(JSON.stringify(sess));
 
 	if (!validateSecureGETRequest(req)) return;
 
-	// reject on invalid owner
+	if (!validateSession(req, res)) return;
 
-	// if (req.session.owner || sess.owner) {
-	var owner = null;
-	var username = null;
-	if (typeof(req.session.owner) !== "undefined") {
-		console.log("assigning owner = req.session.owner;");
-		owner = req.session.owner;
-		username = req.session.username;
-	} else {
-		failureResponse(res, 403, "session has no owner");
-		console.log("No valid owner!");
-		return;
-	}
+	var owner = req.session.owner;
+	var username = req.session.username;
 
 	var new_api_key = sha256(new Date().toString()).substring(0, 40);
 
@@ -308,6 +269,10 @@ app.get("/api/user/apikey", function(req, res) {
 
 			if (!doc) {
 				console.log("User " + users[index].id + " not found.");
+				res.end(JSON.stringify({
+					success: false,
+					status: "user_not_found"
+				}));
 				return;
 			}
 
@@ -315,22 +280,35 @@ app.get("/api/user/apikey", function(req, res) {
 
 			userlib.destroy(doc._id, doc._rev, function(err) {
 
-				console.log("Destroyed, inserting " + JSON.stringify(doc));
+				if (err) {
+					console.log("Could not destroy " + doc._id);
+					res.end(JSON.stringify({
+						success: false,
+						status: "apikey_update_error"
+					}));
 
-				// Add new API Key
-				doc.api_keys.push(new_api_key);
-				delete doc._rev;
+				} else {
 
-				userlib.insert(doc, doc._id, function(err, body, header) {
-					if (err) {
-						console.log("/api/user/apikey ERROR:" + err);
-					} else {
-						console.log("Userlib " + doc.owner + "document inserted");
-						res.end(JSON.stringify({
-							api_key: new_api_key
-						}));
-					}
-				});
+					console.log("Destroyed, inserting " + JSON.stringify(doc));
+
+					// Add new API Key
+					doc.api_keys.push(new_api_key);
+					delete doc._rev;
+
+					userlib.insert(doc, doc._id, function(err, body, header) {
+						if (err) {
+							console.log("/api/user/apikey ERROR:" + err);
+						} else {
+							console.log("Userlib " + doc.owner + "document inserted");
+							res.end(JSON.stringify({
+								success: true,
+								api_key: new_api_key
+							}));
+						}
+					});
+
+				}
+
 			});
 		});
 	});
@@ -346,17 +324,10 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 
 	if (!validateSecureRequest(req)) return;
 
-	var owner = null;
-	var username = null;
-	if (typeof(req.session.owner) !== "undefined") {
-		console.log("assigning owner = req.session.owner;");
-		owner = req.session.owner;
-		username = req.session.username;
-	} else {
-		failureResponse(res, 403, "session has no owner");
-		console.log("No valid owner!");
-		return;
-	}
+	if (!validateSession(req, res)) return;
+
+	var owner = req.session.owner;
+	var username = req.session.username;
 
 	var api_key = req.body.api_key;
 
@@ -424,16 +395,10 @@ app.get("/api/user/apikey/list", function(req, res) {
 
 	if (!validateSecureGETRequest(req)) return;
 
-	var owner = null;
-	var username = null;
-	if (typeof(sess) !== "undefined") {
-		owner = sess.owner;
-		username = sess.username;
-	} else {
-		failureResponse(res, 403, "session has no owner");
-		console.log("No valid owner!");
-		return;
-	}
+	if (!validateSession(req, res)) return;
+
+	var owner = req.session.owner;
+	var username = req.session.username;
 
 	console.log("Serching for user " + owner);
 
@@ -477,35 +442,27 @@ app.get("/api/user/apikey/list", function(req, res) {
  * Sources
  */
 
-validateSessionOwner = function(req, res, sess) {
+validateSession = function(req, res) {
 
-	var owner = null;
-	//
-
-	// reject on invalid session
-	if (!req.session) {
-		failureResponse(res, 405, "not allowed");
-		console.log("validateSessionOwner: No session!");
-	}
-
-	if (typeof(sess) !== "undefined" && ((typeof(req.session) !==
-				"undefined") ||
-			sess.owner)) {
-		if (typeof(req.session.owner) !== "undefined") {
-			console.log("assigning owner = req.session.owner;");
-			owner = req.session.owner;
-		}
-		if (typeof(sess.owner) !== "undefined") {
-			console.log(
-				"assigning owner = sess.owner; (client lost or session terminated?)");
-			owner = sess.owner;
+	var sessionValid = false;
+	if (typeof(req.session.owner) !== "undefined") {
+		if (typeof(req.session.username) !== "undefined") {
+			sessionValid = true;
+		} else {
+			console.log("validateSession: No username!");
 		}
 	} else {
-		failureResponse(res, 403, "session has no owner");
-		console.log("validateSessionOwner: No valid owner!");
+		console.log("validateSession: No owner!");
 	}
 
-	return owner;
+	if (sessionValid === false) {
+		res.end(JSON.stringify({
+			success: false,
+			status: "invalid_session_owner"
+		}));
+	}
+
+	return sessionValid;
 };
 
 app.get("/api/user/sources/list", function(req, res) {
@@ -514,26 +471,10 @@ app.get("/api/user/sources/list", function(req, res) {
 
 	if (!validateSecureGETRequest(req)) return;
 
-	var owner = null;
-	if (typeof(sess) !== "undefined" && ((typeof(req.session) !==
-				"undefined") ||
-			sess.owner)) {
-		if (typeof(req.session.owner) !== "undefined") {
-			console.log("assigning owner = req.session.owner;");
-			owner = req.session.owner;
-		}
-		if (typeof(sess.owner) !== "undefined") {
-			console.log(
-				"assigning owner = sess.owner; (client lost or session terminated?)");
-			owner = sess.owner;
-		}
-	} else {
-		failureResponse(res, 403, "session has no owner");
-		console.log("/api/user/sources/list: No valid owner!");
-		return;
-	}
+	if (!validateSession(req, res)) return;
 
-	// <-- EXTRACTED
+	var owner = req.session.owner;
+	var username = req.session.username;
 
 	console.log("Listing sources for owner: " + owner);
 
@@ -590,20 +531,10 @@ app.post("/api/user/rsakey", function(req, res) {
 
 	if (!validateSecureGETRequest(req)) return;
 
-	// reject on invalid owner
+	if (!validateSession(req, res)) return;
 
-	// if (req.session.owner || sess.owner) {
-	var owner = null;
-	var username = null;
-	if (typeof(req.session.owner) !== "undefined") {
-		console.log("assigning owner = req.session.owner;");
-		owner = req.session.owner;
-		username = req.session.username;
-	} else {
-		failureResponse(res, 403, "session has no owner");
-		console.log("No valid owner!");
-		return;
-	}
+	var owner = req.session.owner;
+	var username = req.session.username;
 
 	// Validate those inputs from body... so far must be set
 	if (typeof(req.body.alias) !== "undefined") {
@@ -726,16 +657,10 @@ app.get("/api/user/rsakey/list", function(req, res) {
 
 	if (!validateSecureGETRequest(req)) return;
 
-	var owner = null;
-	var username = null;
-	if (typeof(sess) !== "undefined") {
-		owner = sess.owner;
-		username = sess.username;
-	} else {
-		failureResponse(res, 403, "session has no owner");
-		console.log("No valid owner!");
-		return;
-	}
+	if (!validateSession(req, res)) return;
+
+	var owner = req.session.owner;
+	var username = req.session.username;
 
 	console.log("Serching for user " + owner);
 
@@ -774,87 +699,6 @@ app.get("/api/user/rsakey/list", function(req, res) {
 		});
 	});
 });
-
-/*
- app.post("/api/user/rsakey/add", function(req, res) {
-
- 	// fetches and updates owner by adding ssh_key, fingerprint and name, might add path where the key is stored
-
- 	console.log(JSON.stringify(sess));
-
- 	if (!validateSecurePOSTRequest(req)) return;
-
- 	// reject on invalid owner
- 	var owner = null;
- 	if (req.session.owner || sess.owner) {
- 		if (req.session.owner) {
- 			console.log("assigning owner = req.session.owner;");
- 			owner = req.session.owner;
- 		}
- 		if (sess.owner) {
- 			console.log(
- 				"assigning owner = sess.owner; (client lost or session terminated?)");
- 			owner = sess.owner;
- 		}
- 	} else {
- 		failureResponse(res, 403, "session has no owner");
- 		console.log("/api/user/devices: No valid owner!");
- 		return;
- 	}
-
- 	var new_api_key = sha256(new Date().toString()).substring(0, 40);
-
- 	// Get all users
- 	userlib.view("users", "owners_by_username", function(err, doc) {
-
- 		if (err) {
- 			console.log(err);
- 			return;
- 		}
-
- 		var users = doc.rows;
- 		var user_data;
- 		var doc_id;
- 		for (var index in users) {
- 			if (users[index].key === owner) {
- 				doc_id = users[index]._id;
- 				break;
- 			}
- 		}
-
- 		// Fetch complete user
- 		userlib.get(users[index].id, function(error, doc) {
-
- 			if (!doc) {
- 				console.log("User " + users[index].id + " not found.");
- 				return;
- 			}
-
- 			console.log("Updating user: " + JSON.stringify(doc));
-
- 			userlib.destroy(users[index]._id, doc._rev, function(err) {
-
- 				console.log("Destroyed, inserting " + JSON.stringify(doc));
-
- 				// Add new API Key
- 				doc.api_keys.push(new_api_key);
- 				delete doc._rev;
-
- 				userlib.insert(doc, doc.owner, function(err, body, header) {
- 					if (err) {
- 						console.log("/api/user/apikey ERROR:" + err);
- 					} else {
- 						console.log("Userlib " + doc.owner + "document inserted");
- 						res.end(JSON.stringify({
- 							api_key: new_api_key
- 						}));
- 					}
- 				});
- 			});
- 		});
- 	});
- });
- */
 
 /*
  * Password Reset
@@ -1403,6 +1247,12 @@ app.post("/api/user/profile", function(req, res) {
 	console.log(JSON.stringify(req.body));
 
 	if (!validateSecureRequest(req)) return;
+
+	if (!validateSession(req, res)) return;
+
+	var owner = req.session.owner;
+	var username = req.session.username;
+
 	res.end(JSON.stringify({
 		status: "not-implemented-yet"
 	}));
@@ -1417,18 +1267,10 @@ app.get("/api/user/profile", function(req, res) {
 	// reject on invalid headers
 	if (!validateSecureGETRequest(req)) return;
 
-	// reject on invalid owner
-	var owner = null;
-	var username = null;
-	if (typeof(req.session.owner) !== "undefined") {
-		console.log("assigning owner = req.session.owner;");
-		owner = req.session.owner;
-		username = req.session.username;
-	} else {
-		failureResponse(res, 403, "session has no owner");
-		console.log("No valid owner!");
-		return;
-	}
+	if (!validateSession(req, res)) return;
+
+	var owner = req.session.owner;
+	var username = req.session.username;
 
 	userlib.view("users", "owners_by_username", {
 		"key": owner,
@@ -2110,11 +1952,6 @@ app.get("/api/logout", function(req, res) {
 app.post("/api/login", function(req, res) {
 	console.log("/api/login");
 
-
-	//console.log("Origin: " + req.headers.origin);
-
-	sess = req.session;
-
 	var client_type = "webapp";
 	var ua = req.headers["user-agent"];
 	var validity = ua.indexOf(client_user_agent);
@@ -2182,8 +2019,6 @@ app.post("/api/login", function(req, res) {
 				if (password.indexOf(user_data.value) !== -1) {
 
 					// console.log("user_data:\n" + JSON.stringify(user_data) + "\n");
-
-					sess = req.session;
 
 					req.session.owner = user_data.doc.owner;
 					req.session.username = user_data.doc.username;
