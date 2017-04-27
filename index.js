@@ -328,14 +328,16 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 		if (!body) {
 			console.log("User " + userdoc.id + " not found.");
 			return;
+		} else {
+			console.log("body: " + body);
 		}
 
 		// Search API key by hash
-		var keys = Object.keys(body.api_keys);
+		var keys = body.api_keys;
 		var api_key_index = null;
 		for (var index in keys) {
 			console.log("Searching by index " + index);
-			var internal_hash = body.api_keys[keys[index]].hash;
+			var internal_hash = keys[index].hash;
 			if (internal_hash.indexOf(api_key_hash) !== -1) {
 				api_key_index = index;
 				break;
