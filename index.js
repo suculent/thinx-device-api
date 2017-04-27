@@ -598,12 +598,13 @@ app.post("/api/user/rsakey", function(req, res) {
 							fs.close(fd, function() {
 								console.log('file written');
 							});
+							fs.chmodSync(path, '644');
 						}
 					});
 				}
 			});
 
-			var ssh_path = "../.ssh/" + username + "-" + Math.floor(new Date() /
+			var ssh_path = "~/.ssh/" + username + "-" + Math.floor(new Date() /
 				1000) + ".pub";
 
 			fs.open(path, 'w+', function(err, fd) {
@@ -617,7 +618,7 @@ app.post("/api/user/rsakey", function(req, res) {
 							fs.close(fd, function() {
 								console.log('file written');
 							});
-							fs.chmodSync(ssh_path, '600');
+							fs.chmodSync(ssh_path, '644');
 							console.log("Saved RSA key to " + ssh_path);
 						}
 					});
