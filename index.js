@@ -791,7 +791,7 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 			console.log("Saving " + doc.rsa_keys.length + " keys...");
 
 			// Save new document
-			userlib.insert(doc, users[index].owner, function(err) {
+			userlib.insert(doc, doc.owner, function(err) {
 				if (err) {
 					console.log(err);
 					res.end(JSON.stringify({
@@ -2035,9 +2035,9 @@ function buildCommand(build_id, tenant, mac, git, udid, dryrun) {
 
 /** Tested with: !device_register.spec.js` */
 app.get("/", function(req, res) {
-
-	console.log("owner: " + sess.owner);
-	if (sess.owner) {
+	if (typeof(req.session) !== "undefined") {
+		console.log("owner: " + req.session.owner);
+		console.log("username: " + req.session.username);
 		res.redirect("http://rtm.thinx.cloud:80/app");
 	} else {
 		res.end("This is API ROOT."); // insecure
