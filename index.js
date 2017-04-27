@@ -26,10 +26,10 @@ var request = require("request");
 
 var v = require("./lib/thinx/version");
 
-var sess;
-
 var rdict = {};
 
+
+/*
 // Database access
 // ./vault write secret/password value=13fd9bae19f4daffa17b34f05dbd9eb8281dce90 owner=test revoked=false
 // Vault init & unseal:
@@ -40,7 +40,7 @@ var options = {
 	token: 'b7fbc90b-6ae2-bbb8-ff0b-1a7e353b8641' // optional client token; can be fetched after valid initialization of the server
 };
 
-/*
+
 // get new instance of the client
 var vault = require("node-vault")(options);
 
@@ -80,6 +80,7 @@ var redis = require("redis");
 var redisStore = require('connect-redis')(session);
 var client = redis.createClient();
 
+/*
 app.use(session({
 	secret: session_config.secret,
 	store: new redisStore({
@@ -87,19 +88,19 @@ app.use(session({
 		port: 6379,
 		client: client
 	}),
-	name: "x-thx-session",
+name: "x-thx-session",
 	resave: false,
 	saveUninitialized: false
-}));
+})); * /
 
-/* file-based session store
+/* file-based session store */
 app.use(session({
 	secret: session_config.secret,
 	name: "x-thx-session",
 	resave: false,
 	saveUninitialized: false
 }));
-*/
+
 
 app.use(parser.json());
 app.use(parser.urlencoded({
@@ -111,6 +112,8 @@ app.all("/*", function(req, res, next) {
 	// CORS headers
 
 	var origin = req.get("origin");
+
+	console.log("Headers: " + JSON.stringify(req.headers) + "\n");
 
 	if (typeof(req.session) === "undefined") {
 		console.log("---session-less-request---");
@@ -1934,7 +1937,7 @@ app.get("/api/logout", function(req, res) {
 app.post("/api/login", function(req, res) {
 	console.log("/api/login");
 
-	console.log("Headers: " + JSON.stringify(req.headers) + "\n");
+
 	//console.log("Origin: " + req.headers.origin);
 
 	sess = req.session;
@@ -2007,8 +2010,10 @@ app.post("/api/login", function(req, res) {
 
 					console.log("user_data:\n" + JSON.stringify(user_data) + "\n");
 
+					sess = req.session;
+
 					req.session.owner = user_data.doc.owner;
-					req.session.username = username;
+					req.session.username = user_data.doc.username;
 
 					console.log("FIXME: Began session " + JSON.stringify(req.session));
 
