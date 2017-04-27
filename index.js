@@ -1861,7 +1861,7 @@ function validateRequest(req, res) {
 	if (validity === 0) {
 		return true;
 	} else {
-		console.log("☢ UA: " + ua + " invalid!");
+		console.log("User-Agent: " + ua + " invalid!");
 		res.writeHead(401, {
 			"Content-Type": "text/plain"
 		});
@@ -1873,7 +1873,7 @@ function validateRequest(req, res) {
 function validateSecureGETRequest(req, res) {
 	// Only log webapp user-agent
 	var ua = req.headers["user-agent"];
-	console.log("☢ UA: " + ua);
+	console.log("☢ User-Agent: " + ua);
 	if (req.method != "GET") {
 		console.log("validateSecure: Not a get request.");
 		req.session.destroy(function(err) {
