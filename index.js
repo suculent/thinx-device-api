@@ -2015,6 +2015,11 @@ app.post("/api/login", function(req, res) {
 					req.session.owner = user_data.doc.owner;
 					req.session.username = user_data.doc.username;
 
+					var hour = 3600000;
+					req.session.cookie.expires = new Date(Date.now() + hour);
+					req.session.cookie.maxAge = hour;
+					req.session.cookie.httpOnly = false;
+
 					console.log("FIXME: Began session " + JSON.stringify(req.session));
 
 					// TODO: write last_seen timestamp to DB here __for devices__
