@@ -776,8 +776,8 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 			for (var i = 0; i < fingerprints.length; i++) {
 				console.log("Parsing finerprint " + fingerprints[i]);
 				var key = doc.rsa_keys[fingerprints[i]];
-				console.log("key: " + key + " compared to " + rsa_key_hash);
-				if (key.indexOf(rsa_key_hash) !== -1) {
+				console.log("key: " + key + " compared to " + rsa_key_fingerprint);
+				if (key.indexOf(rsa_key_fingerprint) !== -1) {
 					delete doc.rsa_keys[fingerprints[i]];
 					delete_key = true;
 					break;
