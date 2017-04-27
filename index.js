@@ -205,7 +205,7 @@ app.get("/api/user/devices", function(req, res) {
 		for (var row in rows) {
 			var rowData = rows[row];
 			console.log("Matching device of device owner " + rowData.key +
-				" with username " + username + " in " + rowData.toString());
+				" with username " + username + " in " + JSON.stringify(rowData));
 			if (username == rowData.key) {
 				console.log("/api/user/devices: OWNER: " + JSON.stringify(rowData) +
 					"\n");
@@ -404,7 +404,7 @@ app.get("/api/user/apikey/list", function(req, res) {
 
 	// Get all users
 	userlib.view("users", "owners_by_username", {
-		"key": username,
+		"key": owner,
 		"include_docs": true
 	}, function(err, doc) {
 
