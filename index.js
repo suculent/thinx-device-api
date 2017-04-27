@@ -342,6 +342,7 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 			if (internal_hash.indexOf(api_key_hash) !== -1) {
 				api_key_index = index;
 				api_key = keys[index];
+				console.log("Found index " + api_key_index + " key " + api_key);
 				break;
 			}
 		}
