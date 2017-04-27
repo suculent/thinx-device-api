@@ -769,6 +769,7 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 
 		if (delete_key !== null) {
 			delete doc._rev;
+			doc.last_update = new Date();
 		} else {
 			res.end(JSON.stringify({
 				success: false,
@@ -780,7 +781,7 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 		console.log("Saving " + JSON.stringify(user) + " keys...");
 
 		// Save new document
-		userlib.insert(doc, doc.owner, function(err) {
+		userlib.insert(doc, doc._id, function(err) {
 			if (err) {
 				console.log(err);
 				res.end(JSON.stringify({
