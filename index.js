@@ -686,7 +686,7 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			var exportedKeys = [];
 			var fingerprints = Object.keys(doc.rsa_keys);
 			for (var i = 0; i < fingerprints.length; i++) {
-				console.log("Parsing finerprint " + fingerprints[i]);
+				console.log("Parsing RSA fingerprint " + fingerprints[i]);
 				var key = doc.rsa_keys[fingerprints[i]];
 				console.log("Parsing key " + JSON.stringify(key));
 				var info = {
@@ -741,62 +741,60 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 		}
 
 		var user = body.rows[0];
+		var doc = user.doc;
 
-		// Fetch complete user
-		userlib.get(user.id, function(error, doc) {
 
-			if (!doc) {
-				console.log("User " + user.id + " not found.");
-				return;
-			} else {
-				console.log("Loaded " + doc.rsa_keys.length + " keys.");
-				console.log("Parsing doc for RSA key: " + JSON.stringify(doc.rsa_keys));
+		if (!doc) {
+			console.log("User " + user.id + " not found.");
+			return;
+		} else {
+			console.log("Loaded " + doc.rsa_keys.length + " keys.");
+			console.log("Parsing doc for RSA key: " + JSON.stringify(doc.rsa_keys));
+		}
+
+		// Search RSA key by hash
+		var keys = doc.rsa_keys;
+		var delete_key = null;
+
+		var fingerprints = Object.keys(doc.rsa_keys);
+		for (var i = 0; i < fingerprints.length; i++) {
+			console.log("Parsing finerprint " + fingerprints[i]);
+			var key = doc.rsa_keys[fingerprints[i]];
+			console.log("key: " + fingerprints[i] + " compared to " +
+				rsa_key_fingerprint);
+			if (fingerprints[i].indexOf(rsa_key_fingerprint) !== -1) {
+				delete doc.rsa_keys[fingerprints[i]];
+				delete_key = true;
+				break;
 			}
+		}
 
-			// Search RSA key by hash
-			var keys = doc.rsa_keys;
-			var delete_key = null;
+		if (delete_key !== null) {
+			delete doc._rev;
+		} else {
+			res.end(JSON.stringify({
+				success: false,
+				status: "fingerprint_not_found"
+			}));
+			return;
+		}
 
-			var fingerprints = Object.keys(doc.rsa_keys);
-			for (var i = 0; i < fingerprints.length; i++) {
-				console.log("Parsing finerprint " + fingerprints[i]);
-				var key = doc.rsa_keys[fingerprints[i]];
-				console.log("key: " + fingerprints[i] + " compared to " +
-					rsa_key_fingerprint);
-				if (fingerprints[i].indexOf(rsa_key_fingerprint) !== -1) {
-					delete doc.rsa_keys[fingerprints[i]];
-					delete_key = true;
-					break;
-				}
-			}
+		console.log("Saving " + JSON.stringify(doc.rsa_keys) + " keys...");
 
-			if (delete_key !== null) {
-				delete doc._rev;
-			} else {
+		// Save new document
+		userlib.insert(doc, doc.owner, function(err) {
+			if (err) {
+				console.log(err);
 				res.end(JSON.stringify({
 					success: false,
-					status: "fingerprint_not_found"
+					status: "rsa_revocation_failed"
 				}));
-				return;
+			} else {
+				res.end(JSON.stringify({
+					revoked: rsa_key_hash,
+					success: true
+				}));
 			}
-
-			console.log("Saving " + JSON.stringify(doc.rsa_keys) + " keys...");
-
-			// Save new document
-			userlib.insert(doc, doc.owner, function(err) {
-				if (err) {
-					console.log(err);
-					res.end(JSON.stringify({
-						success: false,
-						status: "rsa_revocation_failed"
-					}));
-				} else {
-					res.end(JSON.stringify({
-						revoked: rsa_key_hash,
-						success: true
-					}));
-				}
-			});
 		});
 	});
 });
