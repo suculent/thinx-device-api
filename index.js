@@ -1920,20 +1920,22 @@ app.listen(serverPort, function() {
 // Used by web app
 app.get("/api/logout", function(req, res) {
 	console.log("/api/logout");
-	req.session.destroy(function(err) {
-		if (err) {
-			console.log(err);
-		} else {
-			res.redirect("http://rtm.thinx.cloud/"); // HOME_URL (Apache)
-		}
-	});
+	if (typeof(req.session) !== "undefined") {
+		req.session.destroy(function(err) {
+			if (err) {
+				console.log(err);
+			}
+		});
+	}
+	res.redirect("http://rtm.thinx.cloud/"); // HOME_URL (Apache)
 });
 
 // Front-end authentication, returns 5-minute session on valid authentication
 app.post("/api/login", function(req, res) {
 	console.log("/api/login");
 
-	console.log("Origin: " + req.headers.origin);
+	console.log("Headers: " + JSON.stringify(req.headers));
+	//console.log("Origin: " + req.headers.origin);
 
 	sess = req.session;
 
@@ -2002,6 +2004,9 @@ app.post("/api/login", function(req, res) {
 
 				// TODO: Second option (direct compare) will deprecate soon.
 				if (password.indexOf(user_data.value) !== -1) {
+
+					console.log("user_data: " + user_data);
+
 					req.session.owner = user_data.doc.owner;
 					req.session.username = username;
 
