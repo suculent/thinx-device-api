@@ -109,11 +109,13 @@ app.use(parser.urlencoded({
 
 app.all("/*", function(req, res, next) {
 
+	console.log("---");
+
 	// CORS headers
 
 	var origin = req.get("origin");
 
-	console.log("Headers: " + JSON.stringify(req.headers) + "\n");
+	console.log("Headers: " + JSON.stringify(req.headers));
 
 	if (typeof(req.session) === "undefined") {
 		console.log("---session-less-request---");
@@ -141,9 +143,9 @@ app.all("/*", function(req, res, next) {
 		(origin == "undefined") ||
 		(origin == "rtm.thinx.cloud")
 	) {
-		console.log("X-Origin: " + origin);
+		console.log("Known-Origin: " + origin);
 	} else {
-		console.log("Origin: " + origin);
+		console.log("Unknown-Origin: " + origin);
 	}
 
 	// Custom user agent is required for devices
@@ -153,11 +155,6 @@ app.all("/*", function(req, res, next) {
 		if (origin == "device") {
 			next();
 			return;
-		} else {
-			// skip for local tests and calls so far [chec4sec]
-			if (origin != "rtm.thinx.cloud") {
-				console.log("Non-device Origin: " + origin);
-			}
 		}
 	}
 
@@ -2183,7 +2180,7 @@ app.post("/api/login", function(req, res) {
 				// TODO: Second option (direct compare) will deprecate soon.
 				if (password.indexOf(user_data.value) !== -1) {
 
-					console.log("user_data:\n" + JSON.stringify(user_data) + "\n");
+					// console.log("user_data:\n" + JSON.stringify(user_data) + "\n");
 
 					sess = req.session;
 
