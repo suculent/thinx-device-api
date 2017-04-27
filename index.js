@@ -345,6 +345,8 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 		}
 
 		if (api_key_index === null) {
+			console.log("Searching for " + api_key_hash + " in " + JSON.stringify(
+				body) + " failed.");
 			res.end(JSON.stringify({
 				success: false,
 				status: "hash_not_found"
@@ -783,7 +785,7 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 		// Save new document
 		userlib.insert(doc, doc._id, function(err) {
 			if (err) {
-				console.log(err);
+				console.log("rsa_revocation_failed:" + err);
 				res.end(JSON.stringify({
 					success: false,
 					status: "rsa_revocation_failed"
