@@ -740,25 +740,25 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 			console.log("User " + user.id + " not found.");
 			return;
 		} else {
-			console.log("Loaded " + JSON.stringify(doc.rsa_keys) + " keys.");
-			console.log("Parsing doc for RSA key: " + JSON.stringify(user.rsa_keys));
+			console.log("Loaded " + JSON.stringify(doc) + " doc.");
+			console.log("Parsing doc for RSA key in: " + JSON.stringify(doc.rsa_keys));
 		}
 
 		// Search RSA key by hash
-		var keys = user.rsa_keys;
+		var keys = doc.rsa_keys;
 		var delete_key = null;
 
-		var fingerprints = Object.keys(user.rsa_keys);
+		var fingerprints = Object.keys(doc.rsa_keys);
 		for (var i = 0; i < fingerprints.length; i++) {
 			console.log("Parsing finerprint " + fingerprints[i]);
-			var key = user.rsa_keys[fingerprints[i]];
+			var key = doc.rsa_keys[fingerprints[i]];
 			console.log("key: " + fingerprints[i] + " compared to " +
 				rsa_key_fingerprint);
 			if (fingerprints[i].indexOf(rsa_key_fingerprint) !== -1) {
 				console.log("Setting keys for " + rsa_key_fingerprint);
 				delete_key = true;
 				delete keys[fingerprints[i]];
-				user.rsa_keys = keys;
+				doc.rsa_keys = keys;
 				break;
 			}
 		}
