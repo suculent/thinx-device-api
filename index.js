@@ -663,7 +663,7 @@ app.get("/api/user/rsakey/list", function(req, res) {
 	var owner = req.session.owner;
 	var username = req.session.username;
 
-	console.log("Serching for user " + owner);
+	// console.log("Serching for user " + owner);
 
 	// Get all users
 	userlib.view("users", "owners_by_username", {
