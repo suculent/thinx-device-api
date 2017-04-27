@@ -234,8 +234,6 @@ app.post("/api/user/apikey", function(req, res) {
 
 	console.log("/api/user/apikey");
 
-	console.log(JSON.stringify(sess));
-
 	if (!validateSecureRequest(req)) return;
 
 	if (!validateSession(req, res)) return;
