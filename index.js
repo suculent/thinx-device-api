@@ -346,6 +346,7 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 				console.log("Found and splicing index " + api_key_index + " key " +
 					api_key);
 				body.rows[0].doc.api_keys.splice(api_key_index, 1);
+				user.doc.api_keys.splice(api_key_index, 1); // important
 				delete user._rev;
 				break;
 			}
@@ -376,7 +377,7 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 			console.log("Saving: " + JSON.stringify(user));
 
 			// Save new document
-			userlib.insert(user, user.doc.owner, function(err) {
+			userlib.insert(user.doc, user.doc.owner, function(err) {
 				if (err) {
 					console.log(err);
 					res.end(JSON.stringify({
