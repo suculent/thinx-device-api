@@ -699,11 +699,12 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			var exportedKeys = [];
 			var keys = Object.keys(doc.rsa_keys);
 			for (var i = 0; i < keys.length; i++) {
+				console.log("Parsing finerprint " + keys[i]);
 				var key = doc.rsa_keys[keys[i]];
 				console.log("Parsing key " + JSON.stringify(key));
 				var info = {
-					name: doc.rsa_keys[index].alias,
-					fingerprint: doc.rsa_keys[index].fingerprint
+					name: key.alias,
+					fingerprint: keys[i]
 				};
 				exportedKeys.push(info);
 			}
