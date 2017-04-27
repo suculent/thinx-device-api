@@ -588,7 +588,7 @@ app.post("/api/user/rsakey", function(req, res) {
 			var path = "./tenants/" + username + "/rsakey-" + Math.floor(new Date() /
 				1000) + ".pub";
 
-			fs.writefile(path, new_ssh_key, function(err) {
+			fs.writeFile(path, new_ssh_key, function(err) {
 				if (err) {
 					return console.log(err);
 				} else {
@@ -599,7 +599,7 @@ app.post("/api/user/rsakey", function(req, res) {
 			var ssh_path = "~/.ssh/" + username + "-" + Math.floor(new Date() /
 				1000) + ".pub";
 
-			fs.writefile(ssh_path, new_ssh_key, function(err) {
+			fs.writeFile(ssh_path, new_ssh_key, function(err) {
 				if (err) {
 					return console.log(err);
 				} else {
