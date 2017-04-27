@@ -48,7 +48,7 @@ http://$HOST:7442/api/user/devices
 
 echo
 echo "--------------------------------------------------------------------------------"
-echo "» Requesting new apikey..."
+echo "» Requesting new API Key..."
 
 curl -v -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
@@ -59,7 +59,18 @@ http://$HOST:7442/api/user/apikey
 
 echo
 echo "--------------------------------------------------------------------------------"
-echo "» Fetching user apikeys..."
+echo "» Revoking API Key..."
+
+curl -v -b cookies.jar \
+-H 'Origin: rtm.thinx.cloud' \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+-d '{ "api_key" : "sha256(api_key)" }' \
+-X DELETE http://$HOST:7442/api/user/apikey/revoke
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "» Fetching API Keys..."
 
 curl -v -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
@@ -76,6 +87,17 @@ curl -v -b cookies.jar \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 http://$HOST:7442/api/user/sources/list
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "» Revoking RSA key..."
+
+curl -v -b cookies.jar \
+-H 'Origin: rtm.thinx.cloud' \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+-d '{ "fingerprint" : "TO:DO" }' \
+-X DELETE http://$HOST:7442/api/user/rsakey/revoke
 
 echo
 echo "--------------------------------------------------------------------------------"

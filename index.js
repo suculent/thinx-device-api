@@ -313,22 +313,19 @@ app.post("/api/user/apikey", function(req, res) {
 	});
 });
 
-// /user/apikey/revoke POST
-app.post("/api/user/apikey/revoke", function(req, res) {
+/* Deletes API Key by its hash value */
+app.delete("/api/user/apikey/revoke", function(req, res) {
 
 	console.log("/api/user/apikey/revoke");
 
-	//var vtest = vault.read('secret/password');
-	// console.log("vtest: " + JSON.stringify(vtest));
-
-	if (!validateSecureRequest(req)) return;
+	if (!validateSecureDELETERequest(req)) return;
 
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
 	var username = req.session.username;
 
-	var api_key = req.body.api_key;
+	var api_key_hash = req.body.api_key; // this is hash only!
 
 	// Get all users
 	userlib.view("users", "owners_by_username", function(err, doc) {
@@ -356,7 +353,26 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 				return;
 			}
 
+			// Search API key by hash
 			var keys = doc.api_keys;
+			var api_key = null;
+			for (var index in keys) {
+				var internal_key = keys[index];
+				var internal_hash = sha256(internal_key);
+				if (internal_hash.indexOf(api_key_hash) !== -1) {
+					api_key = internal_key;
+					break;
+				}
+			}
+
+			if (api_key === null) {
+				res.end(JSON.stringify({
+					success: false,
+					status: "hash_not_found"
+				}));
+				return;
+			}
+
 			var removeIndex = keys[api_key];
 			keys.splice(removeIndex, 1);
 			doc.api_keys = keys;
@@ -370,7 +386,7 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 					console.log(err);
 					res.end(JSON.stringify({
 						success: false,
-						status: "Revocation failed."
+						status: "revocation_failed"
 					}));
 				} else {
 					res.end(JSON.stringify({
@@ -384,7 +400,7 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 });
 
 /* Lists all API keys for user. */
-// TODO L8TR: Mangle keys as display placeholders only, but support this in revocation!
+// Crop apikeys for display...
 app.get("/api/user/apikey/list", function(req, res) {
 
 	console.log("/api/user/apikey/list");
@@ -424,10 +440,21 @@ app.get("/api/user/apikey/list", function(req, res) {
 			} else {
 				console.log(JSON.stringify(doc));
 			}
+
+			var exportedKeys = [];
+			for (var index in doc.api_keys) {
+				var info = {
+					name: "******************************" + doc.api_keys[index].substring(
+						30),
+					hash: sha256(doc.api_keys[index])
+				};
+				exportedKeys.push(info);
+			}
+
 			console.log("Listing API keys: " +
-				JSON.stringify(doc.api_keys));
+				JSON.stringify(exportedKeys));
 			res.end(JSON.stringify({
-				api_keys: doc.api_keys
+				api_keys: exportedKeys
 			}));
 		});
 	});
@@ -613,7 +640,6 @@ app.post("/api/user/rsakey", function(req, res) {
 
 			userlib.destroy(doc._id, doc._rev, function(err) {
 
-				// Add/update new API Key
 				doc.ssh_keys.push(new_ssh_key);
 				delete doc._rev;
 
@@ -689,6 +715,96 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			res.end(JSON.stringify({
 				rsa_keys: exportedKeys
 			}));
+		});
+	});
+});
+
+/* Deletes RSA Key by its fingerprint */
+app.delete("/api/user/rsakey/revoke", function(req, res) {
+
+	console.log("/api/user/rsakey/revoke");
+
+	if (!validateSecureDELETERequest(req)) return;
+
+	if (!validateSession(req, res)) return;
+
+	var owner = req.session.owner;
+	var username = req.session.username;
+
+	if (typeof(req.body.fingerprint) === "undefined") {
+		res.end(JSON.stringify({
+			success: false,
+			status: "missing_attribute:fingerprint"
+		}));
+		return;
+	}
+
+	var rsa_key_hash = req.body.fingerprint; // this is hash only!
+
+	// Get all users
+	userlib.view("users", "owners_by_username", {
+		"key": username,
+		"include_docs": true
+	}, function(err, body) {
+
+		if (err) {
+			console.log(err);
+			return;
+		}
+
+		var user = body.rows[0];
+
+		// Fetch complete user
+		userlib.get(user.id, function(error, doc) {
+
+			if (!doc) {
+				console.log("User " + user.id + " not found.");
+				return;
+			} else {
+				console.log("Loaded " + doc.rsa_keys.length + " keys.");
+				console.log("Parsing doc for RSA key: " + JSON.stringify(doc.rsa_keys));
+			}
+
+			// Search RSA key by hash
+			var keys = doc.rsa_keys;
+			var delete_key = null;
+
+			for (var index in keys) {
+				console.log("index: " + index);
+				if (index == rsa_key_hash) {
+					delete_key = index;
+					break;
+				}
+			}
+
+			if (delete_key !== null) {
+				delete doc.rsa_keys[rsa_key_hash];
+				delete doc._rev;
+			} else {
+				res.end(JSON.stringify({
+					success: false,
+					status: "fingerprint_not_found"
+				}));
+				return;
+			}
+
+			console.log("Saving " + doc.rsa_keys.length + " keys...");
+
+			// Save new document
+			userlib.insert(doc, users[index].owner, function(err) {
+				if (err) {
+					console.log(err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "rsa_revocation_failed"
+					}));
+				} else {
+					res.end(JSON.stringify({
+						revoked: rsa_key_hash,
+						success: true
+					}));
+				}
+			});
 		});
 	});
 });
@@ -1712,6 +1828,24 @@ function validateSecureGETRequest(req, res) {
 	console.log("☢ User-Agent: " + ua);
 	if (req.method != "GET") {
 		console.log("validateSecure: Not a get request.");
+		req.session.destroy(function(err) {
+			if (err) {
+				console.log(err);
+			} else {
+				failureResponse(res, 500, "protocol");
+			}
+		});
+		return false;
+	}
+	return true;
+}
+
+function validateSecureDELETERequest(req, res) {
+	// Only log webapp user-agent
+	var ua = req.headers["user-agent"];
+	console.log("☢ UA: " + ua);
+	if (req.method != "DELETE") {
+		console.log("validateSecure: Not a delete request.");
 		req.session.destroy(function(err) {
 			if (err) {
 				console.log(err);

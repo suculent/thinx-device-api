@@ -4,7 +4,7 @@
 
 ### Last week
 
-27/4/2017 - 1.1.373: REDIS Session Management, Startup Service, API for listing/adding RSA-keys; working on session-store security tail...
+27/4/2017 - 1.1.373: REDIS Session Management, Startup Service, API for listing/adding RSA-keys; session-store is safe now; key revocation requires DELETE request and is based on key-hash now as the apikey is not shown more than once anymore.
 
 26/4/2017 - Bugfixing and analyzing Session issue
 
