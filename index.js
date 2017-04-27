@@ -375,7 +375,7 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 			console.log("Saving: " + JSON.stringify(doc.api_keys));
 
 			// Save new document
-			userlib.insert(doc, users[index].owner, function(err) {
+			userlib.insert(doc, doc.owner, function(err) {
 				if (err) {
 					console.log(err);
 					res.end(JSON.stringify({
