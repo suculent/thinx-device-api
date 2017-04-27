@@ -38,7 +38,6 @@ test:
     - bash ./01-analyze.sh
     - bash ./02-deploy.sh
     - bash ./03-test.sh
-    - bash ./03-apikey-test.sh
   post:
 #    - npm install -g karma karma-coverage jasmine-core karma-jasmine
 #    - bash karma start
