@@ -754,7 +754,7 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 
 		var fingerprints = Object.keys(doc.rsa_keys);
 		for (var i = 0; i < fingerprints.length; i++) {
-			console.log("Parsing finerprint " + fingerprints[i]);
+			console.log("Parsing fingerprint " + fingerprints[i]);
 			var key = doc.rsa_keys[fingerprints[i]];
 			console.log("key: " + fingerprints[i] + " compared to " +
 				rsa_key_fingerprint);
@@ -768,7 +768,7 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 		}
 
 		if (delete_key !== null) {
-			delete user._rev;
+			delete doc._rev;
 		} else {
 			res.end(JSON.stringify({
 				success: false,
@@ -780,7 +780,7 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 		console.log("Saving " + JSON.stringify(user) + " keys...");
 
 		// Save new document
-		userlib.insert(user, user.owner, function(err) {
+		userlib.insert(doc, doc.owner, function(err) {
 			if (err) {
 				console.log(err);
 				res.end(JSON.stringify({
