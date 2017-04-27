@@ -431,32 +431,29 @@ app.get("/api/user/apikey/list", function(req, res) {
 		}
 
 		var user = body.rows[0];
+		var doc = user.doc;
+		if (!doc) {
+			console.log("User " + user.id + " not found.");
+			return;
+		} else {
+			console.log(JSON.stringify(doc));
+		}
 
-		// Fetch complete user
-		userlib.get(user.id, function(error, doc) {
-			if (!doc) {
-				console.log("User " + user.id + " not found.");
-				return;
-			} else {
-				console.log(JSON.stringify(doc));
-			}
+		var exportedKeys = [];
+		for (var index in doc.api_keys) {
+			var info = {
+				name: "******************************" + doc.api_keys[index].substring(
+					30),
+				hash: sha256(doc.api_keys[index])
+			};
+			exportedKeys.push(info);
+		}
 
-			var exportedKeys = [];
-			for (var index in doc.api_keys) {
-				var info = {
-					name: "******************************" + doc.api_keys[index].substring(
-						30),
-					hash: sha256(doc.api_keys[index])
-				};
-				exportedKeys.push(info);
-			}
-
-			console.log("Listing API keys: " +
-				JSON.stringify(exportedKeys));
-			res.end(JSON.stringify({
-				api_keys: exportedKeys
-			}));
-		});
+		console.log("Listing API keys: " +
+			JSON.stringify(exportedKeys));
+		res.end(JSON.stringify({
+			api_keys: exportedKeys
+		}));
 	});
 });
 
