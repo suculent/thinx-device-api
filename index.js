@@ -523,8 +523,6 @@ app.post("/api/user/rsakey", function(req, res) {
 
 	console.log("/api/user/rsakey");
 
-	console.log(JSON.stringify(sess));
-
 	if (!validateSecureGETRequest(req)) return;
 
 	if (!validateSession(req, res)) return;
@@ -561,26 +559,20 @@ app.post("/api/user/rsakey", function(req, res) {
 
 	// Get all users
 	// FIXME: Refactor to get by owner
-	userlib.view("users", "owners_by_username", function(err, doc) {
+	userlib.view("users", "owners_by_username", {
+		"key": username,
+		"include_docs": true
+	}, function(err, body) {
 
 		if (err) {
 			console.log(err);
 			return;
 		}
 
-		var users = doc.rows;
-		var user_data;
-		var doc_id;
-		for (var index in users) {
-			console.log("SSHKEY: Parsing user: " + JSON.stringify(users[index]));
-			if (users[index].key === owner) {
-				doc_id = users[index]._id;
-				break;
-			}
-		}
+		var user = body.rows[0];
 
 		// Fetch complete user
-		userlib.get(users[index].id, function(error, doc) {
+		userlib.get(user.id, function(error, doc) {
 
 			if (!doc) {
 				console.log("User " + users[index].id + " not found.");
