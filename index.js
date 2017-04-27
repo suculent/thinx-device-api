@@ -629,8 +629,8 @@ app.post("/api/user/rsakey", function(req, res) {
 
 				console.log("Destroyed, inserting " + JSON.stringify(doc));
 
-				// Add new API Key
-				doc.ssh_keys.push(new_ssh_key);
+				// Add/update new API Key
+				doc.ssh_keys[fingerprint] = new_ssh_key;
 				delete doc._rev;
 
 				userlib.insert(doc, doc._id, function(err, body, header) {
@@ -642,10 +642,9 @@ app.post("/api/user/rsakey", function(req, res) {
 						}));
 						return;
 					} else {
-						console.log("Userlib " + doc.owner + "document inserted");
 						res.end(JSON.stringify({
 							success: true,
-							ssh_key: new_key_fingerprint
+							fingerprint: new_key_fingerprint
 						}));
 					}
 				});
