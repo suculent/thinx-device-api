@@ -426,9 +426,9 @@ app.get("/api/user/apikey/list", function(req, res) {
 				console.log(JSON.stringify(doc));
 			}
 			console.log("Listing API keys: " +
-				JSON.stringify(user.doc.api_keys));
+				JSON.stringify(doc.api_keys));
 			res.end(JSON.stringify({
-				api_keys: user.doc.api_keys
+				api_keys: doc.api_keys
 			}));
 		});
 	});
