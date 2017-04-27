@@ -687,6 +687,8 @@ app.get("/api/user/rsakey/list", function(req, res) {
 
 		var user = body.rows[0];
 
+		console.log("User:" + JSON.stringify(user));
+
 		// Fetch complete user
 		userlib.get(user.id, function(error, doc) {
 			if (!doc) {
@@ -695,7 +697,7 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			}
 
 			var exportedKeys = [];
-			for (var index in doc.rsa_keys) {
+			for (var index in doc.rsa_keys.keys()) {
 				console.log("Parsing key: " + index + " from " + JSON.stringify(doc.rsa_keys));
 				var info = {
 					name: doc.rsa_keys[index].alias,
