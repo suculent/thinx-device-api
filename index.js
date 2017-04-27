@@ -356,28 +356,31 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 			return;
 		}
 
-		var removeIndex = keys[api_key_index];
-		keys.splice(removeIndex, 1);
-		user.doc.api_keys = keys;
-		user.doc.last_update = new Date();
-		delete user._rev;
+		userlib.destroy(user.id, user._rev, function(err) {
 
-		console.log("Saving: " + JSON.stringify(body));
+			var removeIndex = keys[api_key_index];
+			keys.splice(removeIndex, 1);
+			user.doc.api_keys = keys;
+			user.doc.last_update = new Date();
+			delete user._rev;
 
-		// Save new document
-		userlib.insert(user, user.doc.owner, function(err) {
-			if (err) {
-				console.log(err);
-				res.end(JSON.stringify({
-					success: false,
-					status: "revocation_failed"
-				}));
-			} else {
-				res.end(JSON.stringify({
-					revoked: api_key,
-					success: true
-				}));
-			}
+			console.log("Saving: " + JSON.stringify(user));
+
+			// Save new document
+			userlib.insert(user, user.doc.owner, function(err) {
+				if (err) {
+					console.log(err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "revocation_failed"
+					}));
+				} else {
+					res.end(JSON.stringify({
+						revoked: api_key,
+						success: true
+					}));
+				}
+			});
 		});
 	});
 });
