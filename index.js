@@ -737,6 +737,8 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 
 	var rsa_key_hash = req.body.fingerprint; // this is hash only!
 
+	console.log("Searching by username " + username);
+
 	// Get all users
 	userlib.view("users", "owners_by_username", {
 		"key": username,
@@ -746,9 +748,11 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 		if (err) {
 			console.log(err);
 			return;
+		} else {
+			console.log("Found body:" + JSON.stringify(body));
 		}
 
-		var user = body.rows[0];
+		var user = body;
 
 		// Fetch complete user
 		userlib.get(user.id, function(error, doc) {
