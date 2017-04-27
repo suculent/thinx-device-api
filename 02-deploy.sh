@@ -18,7 +18,7 @@ echo "» Checking if node.js is running..."
 
 NODEZ=$(ps -ax | grep "$DAEMON")
 
-if [[ $(echo $NODEZ | wc -l) > 1 ]]; then
+if [[ $(echo $NODEZ | wc -l) > 0 ]]; then
 
 	echo "${NODEZ}" | while IFS="pts" read A B ; do
 		NODE=$($A | tr -d ' ')
@@ -40,19 +40,19 @@ if [[ $CIRCLECI == true ]]; then
 	echo "☢  Running node.js without console for CI..."
 	nohup node index.js > ./logs/things.log &
 	exit 0
-fi
+else
 
-echo
-echo "☢  Running node.js as a background process..."
+	echo
+	echo "☢  Running node.js as a background process..."
 
-mkdir logs
-nohup node index.js > ./logs/thinx.log &
+	mkdir logs
+	nohup node index.js > ./logs/thinx.log &
 
-echo
-echo "» Monitoring log. You can exit any time by pressing ^C and logout. Node.js will be still running."
-echo
+	echo
+	echo "» Monitoring log. You can exit any time by pressing ^C and logout. Node.js will be still running."
+	echo
 
-if [[ $CIRCLECI == false ]]; then
+
 	if [[ -f ./logs/thinx.log ]]; then
 		tail -f -n200 ./logs/thinx.log
 	else
