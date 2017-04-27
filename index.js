@@ -311,6 +311,8 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 	var username = req.session.username;
 	var api_key_hash = req.body.api_key; // this is hash only!
 
+	console.log("Revoking API Key by hash " + api_key_hash);
+
 	// Get all users
 	userlib.view("users", "owners_by_username", {
 		"key": username,
