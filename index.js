@@ -77,8 +77,8 @@ var session = require("express-session");
 var app = express();
 
 var redis = require("redis");
-// var redisStore = require('connect-redis')(session);
-// var client = redis.createClient();
+var redisStore = require('connect-redis')(session);
+var client = redis.createClient();
 
 /*
 app.use(session({
