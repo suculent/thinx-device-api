@@ -533,7 +533,7 @@ app.post("/api/user/rsakey", function(req, res) {
 	console.log(JSON.stringify(req.body));
 
 	// Validate those inputs from body... so far must be set
-	if (typeof(req.body.alias) !== "undefined") {
+	if (typeof(req.body.alias) === "undefined") {
 		res.end(JSON.stringify({
 			success: false,
 			status: "missing_ssh_alias"
@@ -541,7 +541,7 @@ app.post("/api/user/rsakey", function(req, res) {
 		return;
 	}
 
-	if (typeof(req.body.key) !== "undefined") {
+	if (typeof(req.body.key) === "undefined") {
 		res.end(JSON.stringify({
 			success: false,
 			status: "missing_ssh_key"
