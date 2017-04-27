@@ -362,12 +362,16 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 			return;
 		}
 
+		console.log("Desronying old document...");
+
 		userlib.destroy(user.doc._id, user._rev, function(err) {
 
 			if (err) {
 				console.log(err);
 				return;
 			}
+
+			console.log("Creating new document...");
 
 			//keys.splice(api_key_index, 1);
 			//user.doc.api_keys = keys;
@@ -377,7 +381,7 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 			console.log("Saving: " + JSON.stringify(user));
 
 			// Save new document
-			userlib.insert(user.doc, user.doc.owner, function(err) {
+			userlib.insert(user.doc, user.doc._id, function(err) {
 				if (err) {
 					console.log(err);
 					res.end(JSON.stringify({
