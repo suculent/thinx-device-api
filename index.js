@@ -640,7 +640,7 @@ app.post("/api/user/rsakey", function(req, res) {
 
 			userlib.destroy(doc._id, doc._rev, function(err) {
 
-				doc.ssh_keys.push(new_ssh_key);
+				doc.rsa_keys.push(new_ssh_key);
 				delete doc._rev;
 
 				userlib.insert(doc, doc._id, function(err, body, header) {
@@ -852,6 +852,7 @@ app.post("/api/user/create", function(req, res) {
 		}
 
 		var new_api_keys = [];
+		var rsa_keys = [];
 
 		var new_activation_date = new Date().toString();
 		var new_activation_token = sha256(new_activation_date);
@@ -870,6 +871,7 @@ app.post("/api/user/create", function(req, res) {
 			username: username,
 			email: email,
 			api_keys: new_api_keys,
+			rsa_keys: rsa_keys,
 			first_name: first_name,
 			last_name: last_name,
 			activation: new_activation_token,

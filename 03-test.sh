@@ -61,6 +61,8 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Revoking API Key..."
 
+echo "  TODO: Parse previous response in order to revoke newly created API Key, prevents polluting database..."
+
 curl -v -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
