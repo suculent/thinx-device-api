@@ -662,8 +662,6 @@ app.get("/api/user/rsakey/list", function(req, res) {
 		if (err) {
 			console.log(err);
 			return;
-		} else {
-			console.log(JSON.stringify(body));
 		}
 
 		var user = body.rows[0];
@@ -673,13 +671,21 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			if (!doc) {
 				console.log("User " + user.id + " not found.");
 				return;
-			} else {
-				console.log("userdoc: " + JSON.stringify(doc));
 			}
+
+			var exportedKeys = [];
+			for (var index in doc.ssh_keys) {
+				var info = {
+					name: doc.ssh_keys[index].alias,
+					fingerprint: doc.ssh_keys[index].fingerprint
+				};
+				exportedKeys.push(info);
+			}
+
 			console.log("Listing RSA keys: " +
-				JSON.stringify(doc.ssh_keys));
+				JSON.stringify(exportedKeys));
 			res.end(JSON.stringify({
-				rsa_keys: doc.ssh_keys
+				rsa_keys: exportedKeys
 			}));
 		});
 	});
