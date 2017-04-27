@@ -20,6 +20,7 @@ var http = require("http");
 var parser = require("body-parser");
 var nano = require("nano")(db);
 var sha256 = require("sha256");
+var fingerprint = require('ssh-fingerprint');
 var Emailer = require('email').Email;
 
 var request = require("request");
@@ -166,7 +167,7 @@ app.all("/*", function(req, res, next) {
 		"Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
 	res.header("Access-Control-Allow-Headers",
 		"Content-type,Accept,X-Access-Token,X-Key,x-thx-session");
-	res.header("Access-Control-Expose-Headers", "x-thx-session")
+	res.header("Access-Control-Expose-Headers", "x-thx-session");
 
 	if (req.method == "OPTIONS") {
 		res.status(200).end();
@@ -254,7 +255,7 @@ app.get("/api/user/devices", function(req, res) {
 
 /* Creates new api key. */
 
-// FIXME: does not save to DB
+// FIXME: may not save to DB
 app.get("/api/user/apikey", function(req, res) {
 
 	console.log("/api/user/apikey");
@@ -285,6 +286,7 @@ app.get("/api/user/apikey", function(req, res) {
 	var new_api_key = sha256(new Date().toString()).substring(0, 40);
 
 	// Get all users
+	// FIXME: Refactor to oqners_by_apikey
 	userlib.view("users", "owners_by_username", function(err, doc) {
 
 		if (err) {
@@ -419,13 +421,10 @@ app.get("/api/user/apikey/list", function(req, res) {
 
 	console.log("/api/user/apikey/list");
 
-	// So far must Authenticated using owner session.
-	// This means, new API KEY can requested only
-	// from authenticated web UI.
+	// Must be Authenticated using owner session.
+	console.log(JSON.stringify(req.session));
 
 	if (!validateSecureGETRequest(req)) return;
-
-	console.log(JSON.stringify(req.session));
 
 	var owner = null;
 	var username = null;
@@ -438,10 +437,13 @@ app.get("/api/user/apikey/list", function(req, res) {
 		return;
 	}
 
-	var new_api_key = sha256(new Date().toString()).substring(0, 40);
+	console.log("Serching for user " + owner);
 
 	// Get all users
-	userlib.view("users", "owners_by_username", function(err, doc) {
+	userlib.view("users", "owners_by_username", {
+		"key": owner,
+		"include_docs": true
+	}, function() {
 
 		if (err) {
 			console.log(err);
@@ -460,19 +462,15 @@ app.get("/api/user/apikey/list", function(req, res) {
 
 		// Fetch complete user
 		userlib.get(users[index].id, function(error, doc) {
-
 			if (!doc) {
 				console.log("User " + users[index].id + " not found.");
 				return;
 			}
-
-			// Return all api-keys
-			console.log("Listing api keys: " +
+			console.log("Listing API keys: " +
 				JSON.stringify(doc.api_keys));
 			res.end(JSON.stringify({
 				api_keys: doc.api_keys
 			}));
-
 		});
 	});
 });
@@ -585,16 +583,202 @@ app.get("/api/user/sources/list", function(req, res) {
  * SSH Keys
  */
 
-app.get("/api/user/sshkey/list", function(req, res) {
-	// TODO: List SSH key fingerprints saved to DB on adding
+// FIXME: may not save to DB
+app.post("/api/user/rsakey", function(req, res) {
 
-	// requires valid session...
+	console.log("/api/user/rsakey");
 
-	// returns ssh_keys_by_owner
+	console.log(JSON.stringify(sess));
+
+	if (!validateSecureGETRequest(req)) return;
+
+	// reject on invalid owner
+
+	// if (req.session.owner || sess.owner) {
+	var owner = null;
+	var username = null;
+	if (typeof(req.session.owner) !== "undefined") {
+		console.log("assigning owner = req.session.owner;");
+		owner = req.session.owner;
+		username = req.session.username;
+	} else {
+		failureResponse(res, 403, "session has no owner");
+		console.log("No valid owner!");
+		return;
+	}
+
+	// Validate those inputs from body... so far must be set
+	if (typeof(req.body.alias) !== "undefined") {
+		res.end(JSON.stringify({
+			success: false,
+			status: "missing_ssh_alias"
+		}));
+		return;
+	}
+
+	if (typeof(req.body.key) !== "undefined") {
+		res.end(JSON.stringify({
+			success: false,
+			status: "missing_ssh_key"
+		}));
+		return;
+	}
+
+	var new_key_alias = req.body.alias;
+	var new_key_body = req.body.key;
+	var new_key_fingerprint = fingerprint(new_key_body);
+
+	var new_ssh_key = {
+		alias: new_key_alias,
+		fingerprint: new_key_fingerprint,
+		key: new_key_body
+	};
+
+	// Get all users
+	// FIXME: Refactor to get by owner
+	userlib.view("users", "owners_by_username", function(err, doc) {
+
+		if (err) {
+			console.log(err);
+			return;
+		}
+
+		var users = doc.rows;
+		var user_data;
+		var doc_id;
+		for (var index in users) {
+			console.log("SSHKEY: Parsing user: " + JSON.stringify(users[index]));
+			if (users[index].key === owner) {
+				doc_id = users[index]._id;
+				break;
+			}
+		}
+
+		// Fetch complete user
+		userlib.get(users[index].id, function(error, doc) {
+
+			if (!doc) {
+				console.log("User " + users[index].id + " not found.");
+				return;
+			}
+
+			console.log("Updating user: " + JSON.stringify(doc));
+
+			// FIXME: Change username to owner_id
+			var path = "./tenants/" + username + "/rsakey-" + Math.floor(new Date() /
+				1000) + ".pub";
+
+			fs.writefile(path, new_ssh_key, function(err) {
+				if (err) {
+					return console.log(err);
+				} else {
+					console.log("The RSA key was saved to " + path);
+				}
+			});
+
+			var ssh_path = "~/.ssh/" + username + "-" + Math.floor(new Date() /
+				1000) + ".pub";
+
+			fs.writefile(ssh_path, new_ssh_key, function(err) {
+				if (err) {
+					return console.log(err);
+				} else {
+					fs.chmodSync(ssh_path, '600');
+					console.log("Saved RSA key to " + ssh_path);
+				}
+			});
+
+			userlib.destroy(doc._id, doc._rev, function(err) {
+
+				console.log("Destroyed, inserting " + JSON.stringify(doc));
+
+				// Add new API Key
+				doc.ssh_keys.push(new_ssh_key);
+				delete doc._rev;
+
+				userlib.insert(doc, doc._id, function(err, body, header) {
+					if (err) {
+						console.log("/api/user/rsakey ERROR:" + err);
+						res.end(JSON.stringify({
+							success: false,
+							status: "key-not-added"
+						}));
+						return;
+					} else {
+						console.log("Userlib " + doc.owner + "document inserted");
+						res.end(JSON.stringify({
+							success: true,
+							ssh_key: new_key_fingerprint
+						}));
+					}
+				});
+			});
+		});
+	});
+});
+
+/* Lists all SSH keys for user. */
+// TODO L8TR: Mangle keys as display placeholders only, but support this in revocation!
+app.get("/api/user/rsakey/list", function(req, res) {
+
+	console.log("/api/user/rsakey/list");
+
+	// Must be Authenticated using owner session.
+	console.log(JSON.stringify(req.session));
+
+	if (!validateSecureGETRequest(req)) return;
+
+	var owner = null;
+	var username = null;
+	if (typeof(sess) !== "undefined") {
+		owner = sess.owner;
+		username = sess.username;
+	} else {
+		failureResponse(res, 403, "session has no owner");
+		console.log("No valid owner!");
+		return;
+	}
+
+	console.log("Serching for user " + owner);
+
+	// Get all users
+	userlib.view("users", "owners_by_username", {
+		"key": owner,
+		"include_docs": true
+	}, function() {
+
+		if (err) {
+			console.log(err);
+			return;
+		}
+
+		var users = doc.rows;
+		var user_data;
+		var doc_id;
+		for (var index in users) {
+			if (users[index].key === owner) {
+				doc_id = users[index]._id;
+				break;
+			}
+		}
+
+		// Fetch complete user
+		userlib.get(users[index].id, function(error, doc) {
+			if (!doc) {
+				console.log("User " + users[index].id + " not found.");
+				return;
+			}
+			console.log("Listing API keys: " +
+				JSON.stringify(doc.ssh_keys));
+			res.end(JSON.stringify({
+				api_keys: doc.ssh_keys
+			}));
+		});
+	});
 });
 
 /*
- app.post("/api/user/sshkey/add", function(req, res) {
+ app.post("/api/user/rsakey/add", function(req, res) {
 
  	// fetches and updates owner by adding ssh_key, fingerprint and name, might add path where the key is stored
 
@@ -1365,8 +1549,6 @@ app.post("/device/register", function(req, res) {
 	var api_key = null;
 
 	validateRequest(req, res);
-
-
 
 	// Request must be post
 	if (req.method != "POST") {
