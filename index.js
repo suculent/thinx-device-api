@@ -766,10 +766,9 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 			console.log("key: " + fingerprints[i] + " compared to " +
 				rsa_key_fingerprint);
 			if (fingerprints[i].indexOf(rsa_key_fingerprint) !== -1) {
-				console.log("Setting keys for " + rsa_key_fingerprint);
+				console.log("Revoking " + rsa_key_fingerprint);
+				delete doc.rsa_keys[fingerprint];
 				delete_key = true;
-				delete keys[fingerprints[i]];
-				doc.rsa_keys = keys;
 				break;
 			}
 		}
@@ -785,7 +784,9 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 			return;
 		}
 
-		console.log("Saving " + JSON.stringify(user) + " keys...");
+		delete user._rev;
+
+		console.log("Saving " + JSON.stringify(user) + " document...");
 
 		// Save new document
 		userlib.insert(user, user.id, function(err) {
