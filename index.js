@@ -552,12 +552,6 @@ app.post("/api/user/rsakey", function(req, res) {
 	var new_key_body = req.body.key;
 	var new_key_fingerprint = fingerprint(new_key_body);
 
-	var new_ssh_key = {
-		alias: new_key_alias,
-		fingerprint: new_key_fingerprint,
-		key: new_key_body
-	};
-
 	// Get all users
 	// FIXME: Refactor to get by owner
 	userlib.view("users", "owners_by_username", {
@@ -577,32 +571,24 @@ app.post("/api/user/rsakey", function(req, res) {
 
 			if (!doc) {
 				console.log("User " + users[index].id + " not found.");
+				res.end(JSON.stringify({
+					success: false,
+					status: "user_not_found"
+				}));
 				return;
 			}
 
 			console.log("Updating user: " + JSON.stringify(doc));
 
 			// FIXME: Change username to owner_id
-			var path = "./tenants/" + username + "/rsakey-" + Math.floor(new Date() /
-				1000) + ".pub";
+			var file_name = Math.floor(new Date() / 1000) + ".pub";
+			var path = "./tenants/" + username + "/rsakey-" + file_name;
 
-			fs.open(path, 'w+', function(err, fd) {
-				if (err) {
-					return console.log(err);
-				} else {
-					fs.writeFile(path, new_ssh_key, function(err) {
-						if (err) {
-							return console.log(err);
-						} else {
-							console.log("The RSA key was saved to " + path);
-							fs.close(fd, function() {
-								console.log('file written');
-							});
-							fs.chmodSync(path, '644');
-						}
-					});
-				}
-			});
+			var new_ssh_key = {};
+			new_ssh_key[new_key_fingerprint] = {
+				alias: new_key_alias,
+				key: file_name
+			};
 
 			var ssh_path = "~/.ssh/" + username + "-" + Math.floor(new Date() /
 				1000) + ".pub";
@@ -616,10 +602,10 @@ app.post("/api/user/rsakey", function(req, res) {
 							return console.log(err);
 						} else {
 							fs.close(fd, function() {
-								console.log('file written');
+								console.log('RSA key installed...');
 							});
+							console.log("Updating permissions for " + ssh_path);
 							fs.chmodSync(ssh_path, '644');
-							console.log("Saved RSA key to " + ssh_path);
 						}
 					});
 				}
@@ -627,10 +613,8 @@ app.post("/api/user/rsakey", function(req, res) {
 
 			userlib.destroy(doc._id, doc._rev, function(err) {
 
-				console.log("Destroyed, inserting " + JSON.stringify(doc));
-
 				// Add/update new API Key
-				doc.ssh_keys[fingerprint] = new_ssh_key;
+				doc.ssh_keys.push(new_ssh_key);
 				delete doc._rev;
 
 				userlib.insert(doc, doc._id, function(err, body, header) {
