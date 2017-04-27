@@ -244,7 +244,7 @@ app.post("/api/user/apikey", function(req, res) {
 	// Get all users
 	// FIXME: Refactor to oqners_by_apikey
 	userlib.view("users", "owners_by_username", {
-		"key": owner,
+		"key": username,
 		"include_docs": true
 	}, function(err, body) {
 
@@ -323,15 +323,13 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 			return;
 		}
 
-		var doc = body.rows[0];
-
-		if (!doc) {
+		if (!body) {
 			console.log("User " + userdoc.id + " not found.");
 			return;
 		}
 
 		// Search API key by hash
-		var keys = doc.api_keys;
+		var keys = body.api_keys;
 		var api_key_index = null;
 		for (var index in keys) {
 			var internal_key = keys[index];
@@ -352,14 +350,14 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 
 		var removeIndex = keys[api_key_index];
 		keys.splice(removeIndex, 1);
-		doc.api_keys = keys;
-		doc.last_update = new Date();
-		delete doc._rev;
+		body.api_keys = keys;
+		body.last_update = new Date();
+		delete body._rev;
 
-		console.log("Saving: " + JSON.stringify(doc));
+		console.log("Saving: " + JSON.stringify(body));
 
 		// Save new document
-		userlib.insert(doc, doc.owner, function(err) {
+		userlib.insert(body, body.owner, function(err) {
 			if (err) {
 				console.log(err);
 				res.end(JSON.stringify({
