@@ -697,7 +697,7 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			}
 
 			var exportedKeys = [];
-			for (var index in doc.rsa_keys.keys()) {
+			for (var index in Object.keys(doc.rsa_keys)) {
 				console.log("Parsing key: " + index + " from " + JSON.stringify(doc.rsa_keys));
 				var info = {
 					name: doc.rsa_keys[index].alias,
@@ -770,7 +770,7 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 			var delete_key = null;
 
 			for (var index in keys) {
-				console.log("index: " + index);
+				console.log("index: " + index + " compared to " + rsa_key_hash);
 				if (index == rsa_key_hash) {
 					delete_key = index;
 					break;
