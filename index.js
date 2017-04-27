@@ -697,14 +697,14 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			}
 
 			var exportedKeys = [];
-			var keys = Object.keys(doc.rsa_keys);
+			var fingerprints = Object.keys(doc.rsa_keys);
 			for (var i = 0; i < keys.length; i++) {
-				console.log("Parsing finerprint " + keys[i]);
-				var key = doc.rsa_keys[keys[i]];
+				console.log("Parsing finerprint " + fingerprints[i]);
+				var key = doc.rsa_keys[fingerprints[i]];
 				console.log("Parsing key " + JSON.stringify(key));
 				var info = {
 					name: key.alias,
-					fingerprint: keys[i]
+					fingerprint: fingerprints[i]
 				};
 				exportedKeys.push(info);
 			}
@@ -738,7 +738,7 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 		return;
 	}
 
-	var rsa_key_hash = req.body.fingerprint; // this is hash only!
+	var rsa_key_fingerprint = req.body.fingerprint; // this is hash only!
 
 	console.log("Searching by username " + username);
 
@@ -772,19 +772,19 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 			var keys = doc.rsa_keys;
 			var delete_key = null;
 
-			for (var index in keys) {
-				console.log("index: " + index + " compared to " + rsa_key_hash);
-				if (index == rsa_key_hash) {
-					delete_key = index;
+			var fingerprints = Object.keys(doc.rsa_keys);
+			for (var i = 0; i < keys.length; i++) {
+				console.log("Parsing finerprint " + fingerprints[i]);
+				var key = doc.rsa_keys[fingerprints[i]];
+				console.log("key: " + key + " compared to " + rsa_key_hash);
+				if (key.indexOf(rsa_key_hash) !== -1) {
+					delete doc.rsa_keys[fingerprints[i]];
+					delete_key = true;
 					break;
 				}
 			}
 
 			if (delete_key !== null) {
-
-				// TODO: Should delete file on path as well!
-
-				delete doc.rsa_keys[rsa_key_hash];
 				delete doc._rev;
 			} else {
 				res.end(JSON.stringify({
@@ -794,7 +794,7 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 				return;
 			}
 
-			console.log("Saving " + doc.rsa_keys.length + " keys...");
+			console.log("Saving " + JSON.stringify(doc.rsa_keys) + " keys...");
 
 			// Save new document
 			userlib.insert(doc, doc.owner, function(err) {
