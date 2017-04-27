@@ -412,7 +412,7 @@ app.get("/api/user/apikey/list", function(req, res) {
 			console.log(err);
 			return;
 		} else {
-			console.log(JSON.stringify(doc));
+			console.log(JSON.stringify(body));
 		}
 
 		var user = body.rows[0];
