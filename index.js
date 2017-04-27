@@ -342,7 +342,9 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 			if (internal_hash.indexOf(api_key_hash) !== -1) {
 				api_key_index = index;
 				api_key = keys[index];
-				console.log("Found index " + api_key_index + " key " + api_key);
+				console.log("Found and splicing index " + api_key_index + " key " +
+					api_key);
+				user.doc.api_keys.splice(api_key_index, 1);
 				break;
 			}
 		}
@@ -364,8 +366,8 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 				return;
 			}
 
-			keys.splice(api_key_index, 1);
-			user.doc.api_keys = keys;
+			//keys.splice(api_key_index, 1);
+			//user.doc.api_keys = keys;
 			user.doc.last_update = new Date();
 			delete user._rev;
 
