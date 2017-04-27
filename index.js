@@ -80,7 +80,6 @@ var redis = require("redis");
 var redisStore = require('connect-redis')(session);
 var client = redis.createClient();
 
-/*
 app.use(session({
 	secret: session_config.secret,
 	store: new redisStore({
@@ -88,18 +87,18 @@ app.use(session({
 		port: 6379,
 		client: client
 	}),
-name: "x-thx-session",
+	name: "x-thx-session",
 	resave: false,
 	saveUninitialized: false
-})); * /
+}));
 
-/* file-based session store */
+/* file-based session store
 app.use(session({
 	secret: session_config.secret,
 	name: "x-thx-session",
 	resave: false,
 	saveUninitialized: false
-}));
+}));*/
 
 
 app.use(parser.json());
@@ -167,6 +166,7 @@ app.all("/*", function(req, res, next) {
 		"Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
 	res.header("Access-Control-Allow-Headers",
 		"Content-type,Accept,X-Access-Token,X-Key,x-thx-session");
+	res.header("Access-Control-Expose-Headers", "x-thx-session")
 
 	if (req.method == "OPTIONS") {
 		res.status(200).end();
@@ -1248,7 +1248,6 @@ app.get("/api/user/profile", function(req, res) {
 		return;
 	}
 
-
 	userlib.view("users", "owners_by_username", {
 		"key": owner,
 		"include_docs": true // might be useless
@@ -1799,12 +1798,6 @@ function handleDatabaseErrors(err, name) {
 
 // Build respective firmware and notify target device(s)
 app.post("/api/build", function(req, res) {
-
-
-
-	res.writeHead(200, {
-		"Content-Type": "application/json"
-	});
 
 	if (validateRequest(req, res) === true) {
 
