@@ -305,12 +305,10 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 	console.log("/api/user/apikey/revoke");
 
 	if (!validateSecureDELETERequest(req)) return;
-
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
 	var username = req.session.username;
-
 	var api_key_hash = req.body.api_key; // this is hash only!
 
 	// Get all users
@@ -325,59 +323,55 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 			return;
 		}
 
-		var userdoc = body.rows[0];
+		var doc = body.rows[0];
 
-		// Fetch complete user
-		userlib.get(userdoc.id, function(error, doc) {
+		if (!doc) {
+			console.log("User " + userdoc.id + " not found.");
+			return;
+		}
 
-			if (!doc) {
-				console.log("User " + userdoc.id + " not found.");
-				return;
+		// Search API key by hash
+		var keys = doc.api_keys;
+		var api_key_index = null;
+		for (var index in keys) {
+			var internal_key = keys[index];
+			var internal_hash = sha256(internal_key);
+			if (internal_hash.indexOf(api_key_hash) !== -1) {
+				api_key_index = index;
+				break;
 			}
+		}
 
-			// Search API key by hash
-			var keys = doc.api_keys;
-			var api_key_index = null;
-			for (var index in keys) {
-				var internal_key = keys[index];
-				var internal_hash = sha256(internal_key);
-				if (internal_hash.indexOf(api_key_hash) !== -1) {
-					api_key_index = index;
-					break;
-				}
-			}
+		if (api_key_index === null) {
+			res.end(JSON.stringify({
+				success: false,
+				status: "hash_not_found"
+			}));
+			return;
+		}
 
-			if (api_key_index === null) {
+		var removeIndex = keys[api_key_index];
+		keys.splice(removeIndex, 1);
+		doc.api_keys = keys;
+		doc.last_update = new Date();
+		delete doc._rev;
+
+		console.log("Saving: " + JSON.stringify(doc));
+
+		// Save new document
+		userlib.insert(doc, doc.owner, function(err) {
+			if (err) {
+				console.log(err);
 				res.end(JSON.stringify({
 					success: false,
-					status: "hash_not_found"
+					status: "revocation_failed"
 				}));
-				return;
+			} else {
+				res.end(JSON.stringify({
+					revoked: api_key,
+					success: true
+				}));
 			}
-
-			var removeIndex = keys[api_key_index];
-			keys.splice(removeIndex, 1);
-			doc.api_keys = keys;
-			doc.last_update = new Date();
-			delete doc._rev;
-
-			console.log("Saving: " + JSON.stringify(doc.api_keys));
-
-			// Save new document
-			userlib.insert(doc, doc.owner, function(err) {
-				if (err) {
-					console.log(err);
-					res.end(JSON.stringify({
-						success: false,
-						status: "revocation_failed"
-					}));
-				} else {
-					res.end(JSON.stringify({
-						revoked: api_key,
-						success: true
-					}));
-				}
-			});
 		});
 	});
 });
