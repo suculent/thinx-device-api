@@ -752,7 +752,7 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 			console.log("Found body:" + JSON.stringify(body));
 		}
 
-		var user = body;
+		var user = body.rows[0];
 
 		// Fetch complete user
 		userlib.get(user.id, function(error, doc) {
@@ -778,6 +778,9 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 			}
 
 			if (delete_key !== null) {
+
+				// TODO: Should delete file on path as well!
+
 				delete doc.rsa_keys[rsa_key_hash];
 				delete doc._rev;
 			} else {
