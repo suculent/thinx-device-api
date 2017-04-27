@@ -245,70 +245,62 @@ app.post("/api/user/apikey", function(req, res) {
 
 	// Get all users
 	// FIXME: Refactor to oqners_by_apikey
-	userlib.view("users", "owners_by_username", function(err, doc) {
+	userlib.view("users", "owners_by_username", {
+		"key": username,
+		"include_docs": true
+	}, function(err, body) {
 
 		if (err) {
 			console.log(err);
 			return;
+		} else {
+			console.log("API Key set user: " + JSON.stringify(body));
 		}
 
-		var users = doc.rows;
-		var user_data;
-		var doc_id;
-		for (var index in users) {
-			console.log("APIKEY: Parsing user: " + JSON.stringify(users[index]));
-			if (users[index].key === owner) {
-				doc_id = users[index]._id;
-				break;
-			}
+		var user = body;
+		var doc = body.doc;
+
+		if (!doc) {
+			console.log("User " + user.id + " not found.");
+			res.end(JSON.stringify({
+				success: false,
+				status: "user_not_found"
+			}));
+			return;
 		}
 
-		// Fetch complete user
-		userlib.get(users[index].id, function(error, doc) {
+		console.log("Updating user: " + JSON.stringify(doc));
 
-			if (!doc) {
-				console.log("User " + users[index].id + " not found.");
+		userlib.destroy(doc._id, doc._rev, function(err) {
+
+			if (err) {
+				console.log("Could not destroy " + doc._id);
 				res.end(JSON.stringify({
 					success: false,
-					status: "user_not_found"
+					status: "apikey_update_error"
 				}));
-				return;
+
+			} else {
+
+				console.log("Destroyed, inserting " + JSON.stringify(doc));
+
+				// Add new API Key
+				doc.api_keys.push(new_api_key);
+				delete doc._rev;
+
+				userlib.insert(doc, doc._id, function(err, body, header) {
+					if (err) {
+						console.log("/api/user/apikey ERROR:" + err);
+					} else {
+						console.log("Userlib " + doc.owner + "document inserted");
+						res.end(JSON.stringify({
+							success: true,
+							api_key: new_api_key
+						}));
+					}
+				});
 			}
 
-			console.log("Updating user: " + JSON.stringify(doc));
-
-			userlib.destroy(doc._id, doc._rev, function(err) {
-
-				if (err) {
-					console.log("Could not destroy " + doc._id);
-					res.end(JSON.stringify({
-						success: false,
-						status: "apikey_update_error"
-					}));
-
-				} else {
-
-					console.log("Destroyed, inserting " + JSON.stringify(doc));
-
-					// Add new API Key
-					doc.api_keys.push(new_api_key);
-					delete doc._rev;
-
-					userlib.insert(doc, doc._id, function(err, body, header) {
-						if (err) {
-							console.log("/api/user/apikey ERROR:" + err);
-						} else {
-							console.log("Userlib " + doc.owner + "document inserted");
-							res.end(JSON.stringify({
-								success: true,
-								api_key: new_api_key
-							}));
-						}
-					});
-
-				}
-
-			});
 		});
 	});
 });
@@ -359,7 +351,9 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 			for (var index in keys) {
 				var internal_key = keys[index];
 				var internal_hash = sha256(internal_key);
+				console.log("Compare " + internal_hash + " to " + api_key_hash);
 				if (internal_hash.indexOf(api_key_hash) !== -1) {
+					console.log("FOUND!!!");
 					api_key = internal_key;
 					break;
 				}

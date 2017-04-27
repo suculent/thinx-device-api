@@ -7,7 +7,7 @@ echo "--------------------------------------------------------------------------
 echo "☢ Testing device registration..."
 
 curl -v \
--H 'Authentication: 3d7c1c8d5c0bbe1da084ca634ce07fd617fa468c' \
+-H 'Authentication: 5d9d2ddfe126b7ba31ef94a7acee0cf109fa847c' \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
