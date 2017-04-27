@@ -1382,7 +1382,7 @@ app.get("/api/user/profile", function(req, res) {
 	var username = req.session.username;
 
 	userlib.view("users", "owners_by_username", {
-		"key": owner,
+		"key": username,
 		"include_docs": true // might be useless
 	}, function(err, body, fw) {
 
@@ -1556,7 +1556,7 @@ app.post("/device/register", function(req, res) {
 	console.log("Serching for owner: " + owner);
 
 	userlib.view("users", "owners_by_username", {
-		"key": owner,
+		"key": username,
 		"include_docs": true // might be useless
 	}, function(err, body) {
 
