@@ -67,7 +67,7 @@ curl -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--d '{ "api_key" : "3493bdc4353e424972b5f0204b02f2e486b53aa2a61204ad625f1022875c31a2" }' \
+-d '{ "api_key" : "b7c2d19da39deba81e360c1d61b386dbd5a8bc5d93f8bd40e3f74510a24e8cb0" }' \
 -X DELETE http://$HOST:7442/api/user/apikey/revoke
 
 echo
