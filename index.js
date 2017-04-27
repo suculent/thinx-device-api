@@ -331,11 +331,11 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 		}
 
 		// Search API key by hash
-		var keys = body.api_keys;
+		var keys = Object.keys(body.api_keys);
 		var api_key_index = null;
 		for (var index in keys) {
 			console.log("Searching by index " + index);
-			var internal_hash = keys[index].hash;
+			var internal_hash = body.api_keys[keys[index]].hash;
 			if (internal_hash.indexOf(api_key_hash) !== -1) {
 				api_key_index = index;
 				break;
