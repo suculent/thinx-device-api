@@ -698,7 +698,7 @@ app.get("/api/user/rsakey/list", function(req, res) {
 
 			var exportedKeys = [];
 			var fingerprints = Object.keys(doc.rsa_keys);
-			for (var i = 0; i < keys.length; i++) {
+			for (var i = 0; i < fingerprints.length; i++) {
 				console.log("Parsing finerprint " + fingerprints[i]);
 				var key = doc.rsa_keys[fingerprints[i]];
 				console.log("Parsing key " + JSON.stringify(key));
@@ -773,7 +773,7 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 			var delete_key = null;
 
 			var fingerprints = Object.keys(doc.rsa_keys);
-			for (var i = 0; i < keys.length; i++) {
+			for (var i = 0; i < fingerprints.length; i++) {
 				console.log("Parsing finerprint " + fingerprints[i]);
 				var key = doc.rsa_keys[fingerprints[i]];
 				console.log("key: " + key + " compared to " + rsa_key_hash);
