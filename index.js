@@ -244,7 +244,7 @@ app.post("/api/user/apikey", function(req, res) {
 	// Get all users
 	// FIXME: Refactor to oqners_by_apikey
 	userlib.view("users", "owners_by_username", {
-		"key": username,
+		"key": owner,
 		"include_docs": true
 	}, function(err, body) {
 
