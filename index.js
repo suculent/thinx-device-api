@@ -406,7 +406,7 @@ app.get("/api/user/apikey/list", function(req, res) {
 	userlib.view("users", "owners_by_username", {
 		"key": owner,
 		"include_docs": true
-	}, function(err) {
+	}, function(err, doc) {
 
 		if (err) {
 			console.log(err);
