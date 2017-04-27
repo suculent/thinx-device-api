@@ -362,12 +362,12 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 			return;
 		}
 
-		console.log("Desronying old document...");
+		console.log("Destroying old document...");
 
-		userlib.destroy(user.doc._id, user._rev, function(err) {
+		userlib.destroy(user.doc._id, user.doc._rev, function(err) {
 
 			if (err) {
-				console.log(err);
+				console.log("destroy eerror: " + err);
 				return;
 			}
 
