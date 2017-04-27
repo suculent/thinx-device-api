@@ -586,7 +586,7 @@ app.post("/api/user/rsakey", function(req, res) {
 			var path = "./tenants/" + username + "/rsakey-" + Math.floor(new Date() /
 				1000) + ".pub";
 
-			fs.open(path, 'w', function(err, fd) {
+			fs.open(path, 'w+', function(err, fd) {
 				if (err) {
 					return console.log(err);
 				} else {
@@ -603,10 +603,10 @@ app.post("/api/user/rsakey", function(req, res) {
 				}
 			});
 
-			var ssh_path = "~/.ssh/" + username + "-" + Math.floor(new Date() /
+			var ssh_path = "../.ssh/" + username + "-" + Math.floor(new Date() /
 				1000) + ".pub";
 
-			fs.open(path, 'w', function(err, fd) {
+			fs.open(path, 'w+', function(err, fd) {
 				if (err) {
 					return console.log(err);
 				} else {
