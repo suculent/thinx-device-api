@@ -523,7 +523,7 @@ app.post("/api/user/rsakey", function(req, res) {
 
 	console.log("/api/user/rsakey");
 
-	if (!validateSecureGETRequest(req)) return;
+	if (!validateSecurePOSTRequest(req)) return;
 
 	if (!validateSession(req, res)) return;
 
