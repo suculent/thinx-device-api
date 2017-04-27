@@ -146,7 +146,7 @@ app.all("/*", function(req, res, next) {
 	res.header(
 		"Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
 	res.header("Access-Control-Allow-Headers",
-		"Content-type,Accept,x-thx-session");
+		"Content-type,Accept,X-Access-Token,X-Key,x-thx-session");
 	res.header("Access-Control-Expose-Headers", "x-thx-session");
 
 	if (req.method == "OPTIONS") {
@@ -460,8 +460,6 @@ app.get("/api/user/apikey/list", function(req, res) {
 
 validateSession = function(req, res) {
 
-	console.log(JSON.stringify(req.session));
-
 	var sessionValid = false;
 	if (typeof(req.session.owner) !== "undefined") {
 		if (typeof(req.session.username) !== "undefined") {
@@ -698,10 +696,10 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			}
 
 			var exportedKeys = [];
-			for (var index in doc.ssh_keys) {
+			for (var index in doc.rsa_keys) {
 				var info = {
-					name: doc.ssh_keys[index].alias,
-					fingerprint: doc.ssh_keys[index].fingerprint
+					name: doc.rsa_keys[index].alias,
+					fingerprint: doc.rsa_keys[index].fingerprint
 				};
 				exportedKeys.push(info);
 			}
@@ -848,7 +846,6 @@ app.post("/api/user/create", function(req, res) {
 		}
 
 		var new_api_keys = [];
-		var rsa_keys = [];
 
 		var new_activation_date = new Date().toString();
 		var new_activation_token = sha256(new_activation_date);
@@ -867,7 +864,6 @@ app.post("/api/user/create", function(req, res) {
 			username: username,
 			email: email,
 			api_keys: new_api_keys,
-			rsa_keys: rsa_keys,
 			first_name: first_name,
 			last_name: last_name,
 			activation: new_activation_token,
@@ -2035,9 +2031,9 @@ function buildCommand(build_id, tenant, mac, git, udid, dryrun) {
 
 /** Tested with: !device_register.spec.js` */
 app.get("/", function(req, res) {
-	if (typeof(req.session) !== "undefined") {
-		console.log("owner: " + req.session.owner);
-		console.log("username: " + req.session.username);
+
+	console.log("owner: " + sess.owner);
+	if (sess.owner) {
 		res.redirect("http://rtm.thinx.cloud:80/app");
 	} else {
 		res.end("This is API ROOT."); // insecure
