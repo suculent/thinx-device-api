@@ -358,14 +358,14 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 
 		var removeIndex = keys[api_key_index];
 		keys.splice(removeIndex, 1);
-		doc.api_keys = keys;
-		doc.last_update = new Date();
-		delete body._rev;
+		user.doc.api_keys = keys;
+		user.doc.last_update = new Date();
+		delete user._rev;
 
 		console.log("Saving: " + JSON.stringify(body));
 
 		// Save new document
-		userlib.insert(body, doc.owner, function(err) {
+		userlib.insert(user, user.doc.owner, function(err) {
 			if (err) {
 				console.log(err);
 				res.end(JSON.stringify({
