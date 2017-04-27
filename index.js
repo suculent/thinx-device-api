@@ -785,7 +785,7 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 				}));
 			} else {
 				res.end(JSON.stringify({
-					revoked: rsa_key_hash,
+					revoked: rsa_key_fingerprint,
 					success: true
 				}));
 			}
