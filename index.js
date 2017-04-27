@@ -586,23 +586,41 @@ app.post("/api/user/rsakey", function(req, res) {
 			var path = "./tenants/" + username + "/rsakey-" + Math.floor(new Date() /
 				1000) + ".pub";
 
-			fs.writeFile(path, new_ssh_key, function(err) {
+			fs.open(path, 'w', function(err, fd) {
 				if (err) {
 					return console.log(err);
 				} else {
-					console.log("The RSA key was saved to " + path);
+					fs.writeFile(path, new_ssh_key, function(err) {
+						if (err) {
+							return console.log(err);
+						} else {
+							console.log("The RSA key was saved to " + path);
+							fs.close(fd, function() {
+								console.log('file written');
+							});
+						}
+					});
 				}
 			});
 
 			var ssh_path = "~/.ssh/" + username + "-" + Math.floor(new Date() /
 				1000) + ".pub";
 
-			fs.writeFile(ssh_path, new_ssh_key, function(err) {
+			fs.open(path, 'w', function(err, fd) {
 				if (err) {
 					return console.log(err);
 				} else {
-					fs.chmodSync(ssh_path, '600');
-					console.log("Saved RSA key to " + ssh_path);
+					fs.writeFile(ssh_path, new_ssh_key, function(err) {
+						if (err) {
+							return console.log(err);
+						} else {
+							fs.close(fd, function() {
+								console.log('file written');
+							});
+							fs.chmodSync(ssh_path, '600');
+							console.log("Saved RSA key to " + ssh_path);
+						}
+					});
 				}
 			});
 
