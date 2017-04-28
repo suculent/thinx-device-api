@@ -133,7 +133,7 @@ nano.db.create("managed_repos", function(err, body, header) {
 var gitlib = require("nano")(db).use("managed_repos");
 var devicelib = require("nano")(db).use("managed_devices");
 
-// TODO: Create build envelope
+// Create build envelope
 
 var buildEnvelope = {
   url: repo_url,
@@ -201,6 +201,13 @@ if (status === true) {
     username: "notifier.js",
     fields: buildEnvelope
   });
+} else if (status == "DEPLOYED") {
+  slack.alert({
+    text: "Deployment successful.", // todo: reference git_url + commit_id here
+    username: "notifier.js",
+    icon_emoji: ":ghost:",
+    fields: buildEnvelope
+  });
 } else if (status == "DRY_RUN_OK") {
   slack.alert({
     text: "Dry run successful. Firmware left undeployed.", // todo: reference git_url + commit_id here
@@ -266,7 +273,9 @@ console.log("\n");
 //
 
 // Device channel
-notify_device_channel(owner, mac, message);
+if (status == "DEPLOYED") {
+  notify_device_channel(owner, mac, message);
+}
 
 //
 // MQTT Notifications (for Devices)

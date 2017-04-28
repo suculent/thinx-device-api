@@ -9,10 +9,12 @@ RUN=true		# dry-run switch
 DEVICE='00:00:00:00:00'	# builds for no device by default, not even ANY
 OPEN=false		# show build result in Finder
 BUILD_ID=0
+ORIGIN=$(pwd)
 
 # tested:
-# ./builder --tenant=test --mac=ANY --git=https://github.com/suculent/thinx-firmware-esp8266 --dry-run
-# ./builder --tenant=test --mac=ANY --git=git@github.com:suculent/thinx-firmware-esp8266.git --dry-run
+# ./builder --build-id="cli-manual" --tenant=test --udid=47fc9ab2-2227-11e7-8584-4c327591230d --mac=ANY --git=git@github.com:suculent/thinx-firmware-esp8266.git
+# ./builder --build-id="cli-manual" --tenant=test --udid=47fc9ab2-2227-11e7-8584-4c327591230d --mac="000000000000" --git=git@github.com:suculent/thinx-firmware-esp8266.git
+
 
 for i in "$@"
 do
@@ -48,14 +50,8 @@ case $i in
 esac
 done
 
-DEPLOYMENT_PATH=/var/www/html/bin/$TENANT
-
-# deploy to device folder if assigned
-if [ "${DEVICE}" != "ANY" ];  then
-	DEPLOYMENT_PATH=${DEPLOYMENT_PATH}/${DEVICE}
-else
-	echo "Build for any device..."
-fi
+TENANT_HOME=/var/www/html/bin/$TENANT
+DEPLOYMENT_PATH=${TENANT_HOME}/${DEVICE}
 
 # extract the protocol
 proto="$(echo $GIT_REPO | grep :// | sed -e's,^\(.*://\).*,\1,g')"
@@ -86,18 +82,20 @@ if [[ "$user" == "git" ]]; then
 	REPO_NAME="$(echo $REPO_PATH | grep / | cut -d/ -f2-)"
 fi
 
-#echo "url: $url"
-#echo "  proto: $proto"
-#echo "  user: $user"
-#echo "  host: $host"
-#echo "  port: $port"
-#echo "  REPO_PATH: $REPO_PATH"
-#echo "  REPO_NAME: ${REPO_NAME}"
+echo "  url: $url"
+echo "  proto: $proto"
+echo "  user: $user"
+echo "  host: $host"
+echo "  port: $port"
+echo "  REPO_PATH: $REPO_PATH"
+echo "  REPO_NAME: ${REPO_NAME}"
 
 echo "Cleaning workspace..."
 
 # Clean
 rm -rf ./tenants/$TENANT/$REPO_PATH
+
+echo "Creating workspace..."
 
 # Create new working directory
 mkdir -p ./tenants/$TENANT/$REPO_PATH
@@ -127,7 +125,7 @@ echo "Version: ${VERSION}"
 
 # Overwrite Thinx.h file (should be required)
 
-THINX_FILE=$(find . | grep "/Thinx.h")
+THINX_FILE="$(find . | grep '/Thinx.h')"
 THINX_CLOUD_URL="thinx.cloud"
 THINX_MQTT_URL="mqtt://${THINX_CLOUD_URL}"
 THINX_OWNER=$TENANT
@@ -138,12 +136,14 @@ else
 	THINX_ALIAS="vanilla"
 fi
 
-THX_VERSION=$(git describe --abbrev=0 --tags)
-REPO_NAME=basename(pwd)
-REPO_VERSION="${THX_VERSION}.${VERSION}" # todo: is not semantic at all, 0.3 should be recent git tag
+THX_VERSION="$(git describe --abbrev=0 --tags)"
+REPO_NAME="$(basename $(pwd))"
+REPO_VERSION="${THX_VERSION}.${VERSION}" # todo: is not semantic at all
 BUILD_DATE=`date +%Y-%m-%d`
 
 # TODO: Change this to a sed template, this is tedious
+
+echo "Building Thinx.h..."
 
 echo "//" > $THINX_FILE
 echo "// This is an auto-generated file, it will be re-written by THiNX on cloud build." >> $THINX_FILE
@@ -156,21 +156,24 @@ echo "static const String thinx_cloud_url = \"${THINX_CLOUD_URL}\";" >> $THINX_F
 echo "static const String thinx_mqtt_url = \"${THINX_MQTT_URL}\";" >> $THINX_FILE
 echo "static const String thinx_firmware_version = \"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\";" >> $THINX_FILE
 echo "static const String thinx_firmware_version_short = \"${REPO_VERSION}\";" >> $THINX_FILE
-echo "static const String app_version = "\"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\";" >> $THINX_FILE
+echo "static const String app_version = \"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\";" >> $THINX_FILE
 echo "String thinx_owner = \"${THINX_OWNER}\";" >> $THINX_FILE
 echo "String thinx_alias = \"${THINX_ALIAS}\";" >> $THINX_FILE
-echo "String thinx_api_key = \"VANILLA_API_KEY\";;" >> $THINX_FILE # this just adds placeholder, key must not leak in binary...
-echo "String thinx_udid = \"${UDID}\";;" >> $THINX_FILE # this just adds placeholder, key should not leak
+echo "String thinx_api_key = \"VANILLA_API_KEY\";" >> $THINX_FILE # this just adds placeholder, key must not leak in binary...
+echo "String thinx_udid = \"${UDID}\";" >> $THINX_FILE # this just adds placeholder, key should not leak
 
+echo
+echo $THINX_FILE
 echo "" >> $THINX_FILE
+echo
 
-echo "WARNING: MQTT port is not parametrized.";
+echo "WARNING: MQTT port is fixed to 1883 in builder shell-script.";
 echo "int thinx_mqtt_port = 1883;" >> $THINX_FILE
-echo "WARNING: API port is not parametrized here.";
+echo "WARNING: API port is fixed to 7442 in builder shell-script.";
 echo "int thinx_api_port = 7442;" >> $THINX_FILE
 
 # Build
-echo
+cat $THINX_FILE
 
 echo "Build step..."
 
@@ -201,7 +204,7 @@ fi
 
 echo
 
-if [[ $RUN==false ]]; then
+if [[ ! ${RUN} ]]; then
 
 	echo "☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment."
 
@@ -210,10 +213,14 @@ if [[ $RUN==false ]]; then
 else
 
 	# Create user-referenced folder in public www space
+	echo "Creating deployment path..."
+	set +e
 	mkdir -p $DEPLOYMENT_PATH
+	set -e
 
 	# Deploy binary (may require rotating previous file or timestamping/renaming previous version of the file)
-	mv .pioenvs/d1_mini/firmware.bin $COMMIT.bin # WARNING: bin was elf here but it seems kind of wrong. needs testing
+	 # WARNING: bin was elf here but it seems kind of wrong. needs testing
+	mv ".pioenvs/d1_mini/firmware.bin" "${COMMIT}.bin"
 
 	echo "Deploying $COMMIT.bin to $DEPLOYMENT_PATH..."
 
@@ -221,8 +228,8 @@ else
 
 	STATUS='"DEPLOYED"'
 
-	if [ $(uname) == "Darwin" ]; then
-		if $OPEN; then
+	if [[ $(uname) == "Darwin" ]]; then
+		if [[ $OPEN ]]; then
 			open $DEPLOYMENT_PATH
 		fi
 	fi
@@ -234,6 +241,20 @@ popd > /dev/null
 popd > /dev/null
 
 DEPLOYMENT_PATH=$(echo ${DEPLOYMENT_PATH} | tr -d '/var/www/html')
+
+echo "DP" $DEPLOYMENT_PATH
+
+echo "BID" "${BUILD_ID}"
+echo "CID" "${COMMIT}"
+echo "VER" "${VERSION}"
+echo "GIT" "${GIT_REPO}"
+echo "DEP" "${DEPLOYMENT_PATH}"
+echo "MAC" "${DEVICE}"
+echo "SHA" "${SHA}"
+echo "TNT" "${TENANT}"
+echo "STA" "${STATUS}"
+
+cd $ORIGIN
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
 CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${COMMIT}.bin ${DEVICE} ${SHA} ${TENANT} ${STATUS}"

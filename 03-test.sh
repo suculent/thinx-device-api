@@ -27,7 +27,7 @@ http://$HOST:7442/device/register
 echo
 echo "☢ Testing builder..."
 
-curl -H "Origin: rtm.thinx.cloud" -H "User-Agent: THiNX-Client" -H "Content-Type: application/json" -X POST -d '{ "build" : { "udid" : "47fc9ab2-2227-11e7-8584-4c327591230d", "mac" : "ANY", "owner" : "test", "git" : "https://github.com/suculent/thinx-firmware-esp8266", "dryrun" : true } }' http://thinx.cloud:7442/api/build
+curl -H "Origin: rtm.thinx.cloud" -H "User-Agent: THiNX-Client" -H "Content-Type: application/json" -X POST -d '{ "build" : { "udid" : "47fc9ab2-2227-11e7-8584-4c327591230d", "mac" : "ANY", "owner" : "test", "git" : "git@github.com:suculent/thinx-firmware-esp8266.git", "dryrun" : true } }' http://thinx.cloud:7442/api/build
 
 echo
 echo "» Testing authentication..."
