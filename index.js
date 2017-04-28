@@ -1601,21 +1601,17 @@ app.post("/device/register", function(req, res) {
 
 		// Find user and match api_key
 		var api_key_valid = false;
-		var user_record = body;
+		var user_data = body.rows[0].doc;
 
-		console.log("searching api key in user :" + JSON.stringify(user_record));
+		console.log("searching API key in user :" + JSON.stringify(user_data));
 
-		// Should be only one record actually
-		for (var index in user_record) {
-			var user_data = user_record[index].doc;
-			for (var kindex in user_data.api_keys) {
-				var userkey = user_data.api_keys[kindex];
-				if (userkey.indexOf(api_key) !== -1) {
-					console.log("Found valid key.");
-					api_key_valid = true;
-					break;
-				}
-				if (api_key_valid === true) break;
+
+		for (var kindex in user_data.api_keys) {
+			var userkey = user_data.api_keys[kindex];
+			if (userkey.indexOf(api_key) !== -1) {
+				console.log("Found valid key.");
+				api_key_valid = true;
+				break;
 			}
 			if (api_key_valid === true) break;
 		}
@@ -1706,7 +1702,8 @@ app.post("/device/register", function(req, res) {
 
 		console.log("Seaching for possible firmware update...");
 		var deploy = require("./lib/thinx/deployment");
-		deploy.initWithDevice(device);
+		deploy.initWithDevice(
+			device);
 
 		var update = deploy.hasUpdateAvailable(device);
 		if (update === true) {
