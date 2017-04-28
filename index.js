@@ -254,6 +254,7 @@ app.post("/api/user/apikey", function(req, res) {
 		}
 
 		var user = body.rows[0];
+
 		var doc = user.doc;
 
 		if (!doc) {
@@ -347,7 +348,7 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 					api_key);
 				body.rows[0].doc.api_keys.splice(api_key_index, 1);
 				user.doc.api_keys.splice(api_key_index, 1); // important
-				delete user._rev;
+				delete user.doc._rev;
 				break;
 			}
 		}
