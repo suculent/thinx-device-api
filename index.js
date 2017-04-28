@@ -2540,7 +2540,6 @@ app.post("/api/login", function(req, res) {
 			} else if (client_type == "webapp") {
 				res.redirect("http://rtm.thinx.cloud:80/"); // redirects browser, not in XHR?
 				return;
-				// or res.end(JSON.stringify({ redirectURL: "https://rtm.thinx.cloud:80/app" }));
 			}
 
 			console.log("login: Flushing session: " + JSON.stringify(req.session));
