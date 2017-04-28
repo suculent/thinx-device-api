@@ -16,6 +16,18 @@ http://$HOST:7442/device/register
 
 echo
 echo "--------------------------------------------------------------------------------"
+echo "☢ Testing firmware update (owner test)..."
+
+curl -v \
+-H 'Authentication: 5d9d2ddfe126b7ba31ef94a7acee0cf109fa847c' \
+-H 'Origin: device' \
+-H "User-Agent: THiNX-Client" \
+-H "Content-Type: application/json" \
+-d '{ "mac" : "00:00:00:00:00:00", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "commit" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "checksum" : "02e2436d60c629e2ab6357d0d314dd6fe28bd0331b18ca6b19a25cd6f969d0a8", "owner" : "c527e62f1373b6ddc5ba6f10c3434f39aadeecafd918fb886b02b395cd6afba7"  }' \
+http://$HOST:7442/device/firmware
+
+echo
+echo "--------------------------------------------------------------------------------"
 echo "☢ Testing builder..."
 
 curl -H "Origin: rtm.thinx.cloud" \

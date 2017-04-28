@@ -222,7 +222,7 @@ app.all("/*", function(req, res, next) {
  * Devices
  */
 
-/* Authenticated view draft */
+/* List all devices for user. */
 app.get("/api/user/devices", function(req, res) {
 
 	console.log("/api/user/devices");
@@ -1720,34 +1720,211 @@ app.get("/api/user/profile", function(req, res) {
 	});
 });
 
+// --> WORK
+
 //
 // Main Device API
 //
 
-// Device login/registration (no authentication, no validation, allows flooding so far)
-app.post("/device/register", function(req, res) {
-
-	var api_key = null;
+// Firmware update retrieval. Serves binary by owner and device MAC.
+// FIXME: Read user and validate api_key
+app.get("/device/firmware", function(req, res) {
 
 	validateRequest(req, res);
 
-	// Request must be post
-	if (req.method != "POST") {
-		req.session.destroy(function(err) {
-			if (err) {
-				console.log(err);
-			} else {
-				failureResponse(res, 500, "protocol");
-				console.log("Not a post request.");
-				return;
-			}
-		});
+	var api_key = null;
+
+	if (typeof(req.body.mac) === "undefined") {
+		res.end(JSON.stringify({
+			success: false,
+			status: "missing_mac"
+		}));
+		return;
 	}
 
-	var reg = req.body.registration;
+	if (typeof(req.body.checksum) === "undefined") {
+		res.end(JSON.stringify({
+			success: false,
+			status: "missing_checksum"
+		}));
+		return;
+	}
+
+	if (typeof(req.body.commit) === "undefined") {
+		res.end(JSON.stringify({
+			success: false,
+			status: "missing_commit"
+		}));
+		return;
+	}
+
+	var mac = req.body.mac;
+	var device_id = req.body.hash;
+	var checksum = req.body.checksum;
+	var commit = req.body.commit;
+	var owner = req.body.owner; // inferred from API key...
+
+	console.log("TODO: Validate if SHOULD update device " + mac +
+		" using commit " + commit + " with checksum " + checksum + " and owner: " +
+		owner);
+
+	var success = false;
+	var status = "ERROR";
+
+	console.log(req.headers);
+
+	// Headers must contain Authentication header
+	if (typeof(req.headers.authentication) !== "undefined") {
+		api_key = req.headers.authentication;
+	} else {
+		console.log("ERROR: Update requests must contain API key!");
+		res.end(JSON.stringify({
+			success: false,
+			status: "authentication"
+		}));
+		return;
+	}
+
+	userlib.view("users", "owners_by_username", {
+		"key": owner,
+		"include_docs": true // might be useless
+	}, function(err, body) {
+
+		if (err) {
+			console.log("Error: " + err.toString());
+			req.session.destroy(function(err) {
+				if (err) {
+					console.log(err);
+				} else {
+					failureResponse(res, 501, "protocol");
+					console.log("Not a valid request.");
+				}
+			});
+			return;
+		}
+
+		if (body.rows.length === 0) {
+			res.end(JSON.stringify({
+				success: false,
+				status: "owner_not_found"
+			}));
+			return;
+		}
+
+		// Find user and match api_key
+		var api_key_valid = false;
+		var user_data = body.rows[0].doc;
+
+		for (var kindex in user_data.api_keys) {
+			var userkey = user_data.api_keys[kindex];
+			if (userkey.indexOf(api_key) !== -1) {
+				console.log("Found valid key.");
+				api_key_valid = true;
+				break;
+			}
+			if (api_key_valid === true) break;
+		}
+
+		// Bail out on invalid API key
+		if (api_key_valid === false) {
+			console.log("Invalid API key.");
+			res.end(JSON.stringify({
+				success: false,
+				status: "authentication"
+			}));
+			return;
+		}
+
+		// See if we know this MAC which is a primary key in db
+
+		if (err) {
+			console.log("Querying devices failed. " + err + "\n");
+		} else {
+			isNew = false;
+		}
+
+		var success = false;
+		var status = "OK";
+
+		// FIXME: Validate checksum, commit and mac that should be part of request
+		var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(device);
+		var url = firmwareUpdateDescriptor.url;
+		var mac = firmwareUpdateDescriptor.mac;
+		var commit = firmwareUpdateDescriptor.commit;
+		var version = firmwareUpdateDescriptor.version;
+		var checksum = firmwareUpdateDescriptor.checksum;
+
+		devicelib.get(mac, function(error, existing, fw) {
+
+			if (!error) {
+				existing.version = fw.version;
+
+				// TODO: Fetch real device version here...
+				var device = {
+					mac: mac,
+					owner: owner,
+					version: version
+				};
+
+				console.log("Seaching for possible firmware update...");
+				var deploy = require("./lib/thinx/deployment");
+				deploy.initWithDevice(device);
+
+				var update = deploy.hasUpdateAvailable(device);
+				if (update === true) {
+					var path = deploy.pathForDevice(owner, mac);
+					fs.open(ssh_path, 'r', function(err, fd) {
+						if (err) {
+							res.end(JSON.stringify({
+								success: false,
+								status: "not_found"
+							}));
+							return console.log(err);
+						} else {
+							var buffer = fs.readFileSync(path);
+							res.end(buffer);
+							fs.close(fd, function() {
+								console.log('Sending firmware update...');
+							});
+
+							devicelib.insert(existing, mac, function(err, body, header) {
+								if (!err) {
+									console.log("Device updated.");
+									return;
+								} else {
+									console.log("Device record update failed." + err);
+								}
+							}); // insert
+
+						}
+					}); // fs.open
+
+				} else {
+					res.end(JSON.stringify({
+						success: false,
+						status: "update"
+					}));
+					console.log("No firmware update available for " + JSON.stringify(
+						device));
+				}
+			}
+		}); // device get
+	}); // user view
+}); // app.get
+
+// <-- WORK
+
+// Device login/registration (no authentication, no validation, allows flooding so far)
+app.post("/device/register", function(req, res) {
+
+	validateRequest(req, res);
+
 	if (typeof(req.body.registration) == "undefined") {
 		return;
 	}
+
+	var reg = req.body.registration;
+	var api_key = null;
 
 	rdict.registration = {};
 
@@ -1813,7 +1990,6 @@ app.post("/device/register", function(req, res) {
 		// Find user and match api_key
 		var api_key_valid = false;
 		var user_data = body.rows[0].doc;
-
 
 		for (var kindex in user_data.api_keys) {
 			var userkey = user_data.api_keys[kindex];
