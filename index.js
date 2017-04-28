@@ -156,8 +156,9 @@ app.use(session({
 		client: client
 	}),
 	name: "x-thx-session",
-	resave: false,
-	saveUninitialized: false
+	resave: true,
+	rolling: true,
+	saveUninitialized: true
 }));
 
 app.use(parser.json());
@@ -1681,6 +1682,9 @@ app.post("/api/user/profile", function(req, res) {
 	var owner = req.session.owner;
 	var username = req.session.username;
 
+	// TODO: Optional 'avatar' parameter
+	// TODO: Optional 'settings' parameter
+
 	res.end(JSON.stringify({
 		status: "not-implemented-yet"
 	}));
@@ -2496,8 +2500,9 @@ app.post("/api/login", function(req, res) {
 					req.session.username = user_data.doc.username;
 
 					var hour = 3600000;
-					req.session.cookie.expires = new Date(Date.now() + hour);
-					req.session.cookie.maxAge = hour;
+					var expiration = new Date(Date.now() + 3 * hour);
+					req.session.cookie.expires = expiration;
+					req.session.cookie.maxAge = expiration;
 					req.session.cookie.httpOnly = false;
 
 					// TODO: write last_seen timestamp to DB here __for devices__
