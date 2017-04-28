@@ -20,6 +20,7 @@
   "dependencies": {
     "body-parser": "^1.7.0",
     "connect-redis": "^3.2.0",
+    "console-stamp": "^0.2.5",
     "email": "^0.2.6",
     "expect": "*",
     "express": "^4.8.7",

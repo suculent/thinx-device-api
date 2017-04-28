@@ -8,6 +8,8 @@ require("./core.js");
 // Shared Configuration
 //
 
+require('console-stamp')(console, 'yyyy-mm-dd HH:MM:ss.l');
+
 var session_config = require("./conf/node-session.json");
 var app_config = require("./conf/config.json");
 
