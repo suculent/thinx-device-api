@@ -2089,8 +2089,7 @@ app.post("/device/register", function(req, res) {
 
 		console.log("Seaching for possible firmware update...");
 		var deploy = require("./lib/thinx/deployment");
-		deploy.initWithDevice(
-			device);
+		deploy.initWithDevice(device);
 
 		var update = deploy.hasUpdateAvailable(device);
 		if (update === true) {
@@ -2166,8 +2165,13 @@ app.post("/device/register", function(req, res) {
 					devicelib.insert(existing, mac, function(err, body, header) {
 						if (!err) {
 							reg.success = true;
-							console.log("Device updated.");
-							sendRegistrationOKResponse(res, rdict);
+							console.log("Device info updated.");
+
+							res.end(JSON.stringify({
+								success: true,
+								status: "checkin"
+							}));
+
 							return;
 
 						} else {
