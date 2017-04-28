@@ -1601,7 +1601,7 @@ app.post("/device/register", function(req, res) {
 
 		// Find user and match api_key
 		var api_key_valid = false;
-		var user_record = body.rows;
+		var user_record = body;
 
 		console.log("searching api key in user :" + user_record);
 
