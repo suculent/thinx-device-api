@@ -2509,10 +2509,14 @@ app.post("/api/login", function(req, res) {
 					req.session.username = user_data.doc.username;
 
 					//var hour = 3600000;
-					//var expiration = new Date(Date.now() + 3 * hour);
+					var minute = 5*60*1000;
+					//var expiration = new Date(Date.now() + 24 * hour);
 					//req.session.cookie.expires = expiration;
-					//req.session.cookie.maxAge = expiration;
-					req.session.cookie.httpOnly = false;
+					//req.session.cookie.expires = false;
+					//req.session.cookie.domain = '.thinx.cloud';
+					req.session.cookie.httpOnly = true;
+					req.session.cookie.maxAge = 5 * minute;
+					req.session.cookie.secure = false;
 
 					// TODO: write last_seen timestamp to DB here __for devices__
 					console.log("client_type: " + client_type);
