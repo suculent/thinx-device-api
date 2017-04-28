@@ -122,6 +122,28 @@ curl -b cookies.jar \
 -H "Content-Type: application/json" \
 http://$HOST:7442/api/user/rsakey/list
 
+echo
+echo "--------------------------------------------------------------------------------"
+echo "» Testing source detach..."
+
+curl -b cookies.jar \
+-H 'Origin: rtm.thinx.cloud' \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+-d '{ "mac" : "00:00:00:00:00:00" }' \
+http://$HOST:7442/api/device/detach
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "» Testing source attach..."
+
+curl -b cookies.jar \
+-H 'Origin: rtm.thinx.cloud' \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+-d '{ "mac" : "00:00:00:00:00:00", "alias" : "thinx-test-repo" }' \
+http://$HOST:7442/api/device/attach
+
 
 #echo
 #echo "☢ Running NYC code coverage..."

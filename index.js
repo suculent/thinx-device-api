@@ -30,6 +30,70 @@ var v = require("./lib/thinx/version");
 
 var rdict = {};
 
+/*
+ * Databases
+ */
+
+function initDatabases() {
+
+	nano.db.create("managed_devices", function(err, body, header) {
+		if (err) {
+			handleDatabaseErrors(err, "managed_devices");
+		} else {
+			console.log("» Device database creation completed. Response: " +
+				JSON.stringify(
+					body) + "\n");
+		}
+	});
+
+	nano.db.create("managed_repos", function(err, body, header) {
+		if (err) {
+			handleDatabaseErrors(err, "managed_repos");
+		} else {
+			console.log("» Repository database creation completed. Response: " +
+				JSON.stringify(
+					body) + "\n");
+		}
+	});
+
+	nano.db.create("managed_builds", function(err, body, header) {
+		if (err) {
+			handleDatabaseErrors(err, "managed_builds");
+		} else {
+			console.log("» Build database creation completed. Response: " +
+				JSON
+				.stringify(
+					body) + "\n");
+		}
+	});
+
+	nano.db.create("managed_users", function(err, body, header) {
+		if (err) {
+			handleDatabaseErrors(err, "managed_users");
+		} else {
+			console.log("» User database creation completed. Response: " + JSON
+				.stringify(
+					body) + "\n");
+		}
+	});
+}
+
+function handleDatabaseErrors(err, name) {
+
+	if (err.toString().indexOf("the file already exists") != -1) {
+		// silently fail, this is ok
+
+	} else if (err.toString().indexOf("error happened in your connection") !=
+		-
+		1) {
+		console.log("🚫 Database connectivity issue. " + err);
+		process.exit(1);
+
+	} else {
+		console.log("🚫 Database " + name + " creation failed. " + err);
+		process.exit(2);
+	}
+}
 
 /*
 // Database access
@@ -210,6 +274,134 @@ app.get("/api/user/devices", function(req, res) {
 	});
 });
 
+/* Attach code source to a device. Expects unique device identifier and source alias. */
+app.post("/api/device/attach", function(req, res) {
+
+	console.log("/api/device/attach");
+	console.log("WARNING: NOT TESTED.");
+
+	if (!validateSecurePOSTRequest(req)) return;
+	if (!validateSession(req, res)) return;
+
+	if (typeof(req.body.alias) === "undefined") {
+		res.end(JSON.stringify({
+			success: false,
+			status: "missing_alias"
+		}));
+		return;
+	}
+
+	if (typeof(req.body.mac) === "undefined") {
+		res.end(JSON.stringify({
+			success: false,
+			status: "missing_mac"
+		}));
+		return;
+	}
+
+	var mac = req.body.mac;
+	var alias = req.body.alias;
+	var owner = req.session.owner;
+	var username = req.session.username;
+
+	devicelib.view("devicelib", "devices_by_mac", {
+		"key": mac,
+		"include_docs": true
+	}, function(err, body) {
+
+		if (err) {
+			console.log(err);
+			return;
+		}
+
+		var doc = body.rows[0].doc;
+
+		console.log("Attaching repository to device: " + JSON.stringify(doc));
+
+		devicelib.destroy(doc._id, doc._rev, function(err) {
+
+			doc.source = alias;
+			delete doc._rev;
+
+			devicelib.insert(doc, doc._id, function(err, body, header) {
+				if (err) {
+					console.log("/api/device/attach ERROR:" + err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "attach_failed"
+					}));
+					return;
+				} else {
+					res.end(JSON.stringify({
+						success: true,
+						attached: alias
+					}));
+				}
+			});
+		});
+	});
+});
+
+/* Detach code source from a device. Expects unique device identifier. */
+// FIXME: Should be based on device_id instead of MAC
+app.post("/api/device/detach", function(req, res) {
+
+	console.log("/api/device/detach");
+	console.log("WARNING: NOT TESTED.");
+
+	if (!validateSecurePOSTRequest(req)) return;
+	if (!validateSession(req, res)) return;
+
+	if (typeof(req.body.mac) === "undefined") {
+		res.end(JSON.stringify({
+			success: false,
+			status: "missing_mac"
+		}));
+		return;
+	}
+
+	var mac = req.body.mac;
+	var owner = req.session.owner;
+	var username = req.session.username;
+
+	devicelib.view("devicelib", "devices_by_mac", {
+		"key": mac,
+		"include_docs": true
+	}, function(err, body) {
+
+		if (err) {
+			console.log(err);
+			return;
+		}
+
+		var doc = body.rows[0].doc;
+
+		console.log("Detaching repository from device: " + JSON.stringify(doc));
+
+		devicelib.destroy(doc._id, doc._rev, function(err) {
+
+			doc.source = null;
+			delete doc._rev;
+
+			devicelib.insert(doc, doc._id, function(err, body, header) {
+				if (err) {
+					console.log("/api/device/detach ERROR:" + err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "detach_failed"
+					}));
+					return;
+				} else {
+					res.end(JSON.stringify({
+						success: true,
+						attached: doc.source
+					}));
+				}
+			});
+		});
+	});
+});
+
 /*
  * API Keys
  */
@@ -377,7 +569,6 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 });
 
 /* Lists all API keys for user. */
-// Crop apikeys for display...
 app.get("/api/user/apikey/list", function(req, res) {
 
 	console.log("/api/user/apikey/list");
@@ -425,32 +616,10 @@ app.get("/api/user/apikey/list", function(req, res) {
 });
 
 /*
- * Sources
+ * Sources (GIT Repositories)
  */
 
-validateSession = function(req, res) {
-
-	var sessionValid = false;
-	if (typeof(req.session.owner) !== "undefined") {
-		if (typeof(req.session.username) !== "undefined") {
-			sessionValid = true;
-		} else {
-			console.log("validateSession: No username!");
-		}
-	} else {
-		console.log("validateSession: No owner!");
-	}
-
-	if (sessionValid === false) {
-		res.end(JSON.stringify({
-			success: false,
-			status: "invalid_session_owner"
-		}));
-	}
-
-	return sessionValid;
-};
-
+/* List available sources */
 app.get("/api/user/sources/list", function(req, res) {
 
 	console.log("/api/user/sources/list");
@@ -504,9 +673,7 @@ app.get("/api/user/sources/list", function(req, res) {
 		});
 });
 
-/*
- *  Adds a GIT repository. Expects URL, alias and a optional branch (origin/master is default).
- */
+/* Adds a GIT repository. Expects URL, alias and a optional branch (origin/master is default). */
 app.post("/api/user/source", function(req, res) {
 
 	console.log("/api/user/source");
@@ -596,9 +763,7 @@ app.post("/api/user/source", function(req, res) {
 	});
 });
 
-/*
- *  Removes a GIT repository. Expects alias.
- */
+/* Removes a GIT repository. Expects alias. */
 app.delete("/api/user/source", function(req, res) {
 
 	console.log("/api/delete/source");
@@ -1939,74 +2104,32 @@ function validateSecurePOSTRequest(req, res) {
 	return true;
 }
 
-//
-// Databases
-//
+validateSession = function(req, res) {
 
-function initDatabases() {
-
-	nano.db.create("managed_devices", function(err, body, header) {
-		if (err) {
-			handleDatabaseErrors(err, "managed_devices");
+	var sessionValid = false;
+	if (typeof(req.session.owner) !== "undefined") {
+		if (typeof(req.session.username) !== "undefined") {
+			sessionValid = true;
 		} else {
-			console.log("» Device database creation completed. Response: " +
-				JSON.stringify(
-					body) + "\n");
+			console.log("validateSession: No username!");
 		}
-	});
-
-	nano.db.create("managed_repos", function(err, body, header) {
-		if (err) {
-			handleDatabaseErrors(err, "managed_repos");
-		} else {
-			console.log("» Repository database creation completed. Response: " +
-				JSON.stringify(
-					body) + "\n");
-		}
-	});
-
-	nano.db.create("managed_builds", function(err, body, header) {
-		if (err) {
-			handleDatabaseErrors(err, "managed_builds");
-		} else {
-			console.log("» Build database creation completed. Response: " +
-				JSON
-				.stringify(
-					body) + "\n");
-		}
-	});
-
-	nano.db.create("managed_users", function(err, body, header) {
-		if (err) {
-			handleDatabaseErrors(err, "managed_users");
-		} else {
-			console.log("» User database creation completed. Response: " + JSON
-				.stringify(
-					body) + "\n");
-		}
-	});
-}
-
-function handleDatabaseErrors(err, name) {
-
-	if (err.toString().indexOf("the file already exists") != -1) {
-		// silently fail, this is ok
-
-	} else if (err.toString().indexOf("error happened in your connection") !=
-		-
-		1) {
-		console.log("🚫 Database connectivity issue. " + err);
-		process.exit(1);
-
 	} else {
-		console.log("🚫 Database " + name + " creation failed. " + err);
-		process.exit(2);
+		console.log("validateSession: No owner!");
 	}
-}
 
-//
-// Builder
-//
+	if (sessionValid === false) {
+		res.end(JSON.stringify({
+			success: false,
+			status: "invalid_session_owner"
+		}));
+	}
+
+	return sessionValid;
+};
+
+/*
+ * Builder
+ */
 
 // Build respective firmware and notify target device(s)
 app.post("/api/build", function(req, res) {
@@ -2093,33 +2216,6 @@ function buildCommand(build_id, tenant, mac, git, udid, dryrun) {
 		console.log(build_id + " : " + stdout);
 	});
 }
-
-/** Tested with: !device_register.spec.js` */
-app.get("/", function(req, res) {
-
-	console.log("owner: " + sess.owner);
-	if (sess.owner) {
-		res.redirect("http://rtm.thinx.cloud:80/app");
-	} else {
-		res.end("This is API ROOT."); // insecure
-	}
-});
-
-app.version = function() {
-	return v.revision();
-};
-
-app.listen(serverPort, function() {
-	var package_info = require("./package.json");
-	var product = package_info.description;
-	var version = package_info.version;
-
-	console.log("");
-	console.log("-=[ ☢ " + product + " v" + version + " rev. " + app.version() +
-		" ☢ ]=-");
-	console.log("");
-	console.log("» Started on port " + serverPort);
-});
 
 /*
  * Authentication
@@ -2284,6 +2380,33 @@ app.post("/api/login", function(req, res) {
 			failureResponse(res, 541, "authentication exception");
 		}
 	});
+});
+
+/** Tested with: !device_register.spec.js` */
+app.get("/", function(req, res) {
+
+	console.log("owner: " + sess.owner);
+	if (sess.owner) {
+		res.redirect("http://rtm.thinx.cloud:80/app");
+	} else {
+		res.end("This is API ROOT."); // insecure
+	}
+});
+
+app.version = function() {
+	return v.revision();
+};
+
+app.listen(serverPort, function() {
+	var package_info = require("./package.json");
+	var product = package_info.description;
+	var version = package_info.version;
+
+	console.log("");
+	console.log("-=[ ☢ " + product + " v" + version + " rev. " + app.version() +
+		" ☢ ]=-");
+	console.log("");
+	console.log("» Started on port " + serverPort);
 });
 
 /*
