@@ -2295,8 +2295,11 @@ function validateSecurePOSTRequest(req, res) {
 validateSession = function(req, res) {
 
 	var sessionValid = false;
+
 	if (typeof(req.session.owner) !== "undefined") {
+		console.log("so: " + req.session.owner);
 		if (typeof(req.session.username) !== "undefined") {
+			console.log("un: " + req.session.username);
 			sessionValid = true;
 		} else {
 			console.log("validateSession: No username!");
@@ -2306,10 +2309,16 @@ validateSession = function(req, res) {
 	}
 
 	if (sessionValid === false) {
-		res.end(JSON.stringify({
-			success: false,
-			status: "invalid_session_owner"
-		}));
+		req.session.destroy(function(err) {
+			if (err) {
+				console.log(err);
+			} else {
+				res.end(JSON.stringify({
+					success: false,
+					status: "invalid_session_owner"
+				}));
+			}
+		});
 	}
 
 	return sessionValid;
