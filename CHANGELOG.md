@@ -4,7 +4,7 @@
 
 ### Last week
 
-27/4/2017 - 1.2.473: stabilizing nightly build
+27/4/2017 - 1.2.482: stabilized nightly build
 
 27/4/2017 - 1.2.413: REDIS Session Management, Startup Service, API for listing/adding RSA-keys; session-store is safe now; key revocation requires DELETE request and is based on key-hash now as the API Key is not shown more than once anymore.
 

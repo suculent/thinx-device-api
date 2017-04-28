@@ -727,15 +727,15 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 		for (var i = 0; i < fingerprints.length; i++) {
 			var key = doc.rsa_keys[fingerprints[i]];
 			if (fingerprints[i].indexOf(rsa_key_fingerprint) !== -1) {
-				console.log("Revoking " + rsa_key_fingerprint);
-				delete doc.rsa_keys[fingerprint];
+				console.log("Revoking " + rsa_key_fingerprint +
+					"from DB only... TODO: delete file if any.");
+				delete user.doc.rsa_keys[fingerprint];
 				delete_key = true;
 				break;
 			}
 		}
 
 		if (delete_key !== null) {
-			//delete doc._rev;
 			doc.last_update = new Date();
 		} else {
 			res.end(JSON.stringify({
@@ -744,7 +744,6 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 			}));
 			return;
 		}
-
 
 		userlib.destroy(user.doc.id, user.doc._rev, function(err) {
 
@@ -756,7 +755,6 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 				}));
 				return;
 			} else {
-				// Save new document
 
 				delete user.doc._rev;
 
