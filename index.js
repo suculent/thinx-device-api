@@ -1730,7 +1730,7 @@ app.get("/api/user/profile", function(req, res) {
 
 // Firmware update retrieval. Serves binary by owner and device MAC.
 // FIXME: Read user and validate api_key
-app.get("/device/firmware", function(req, res) {
+app.post("/device/firmware", function(req, res) {
 
 	validateRequest(req, res);
 
