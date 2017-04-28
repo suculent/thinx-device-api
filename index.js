@@ -402,9 +402,6 @@ app.get("/api/user/apikey/list", function(req, res) {
 
 	console.log("/api/user/apikey/list");
 
-	// Must be Authenticated using owner session.
-	console.log(JSON.stringify(req.session));
-
 	if (!validateSecureGETRequest(req)) return;
 
 	if (!validateSession(req, res)) return;
@@ -421,8 +418,6 @@ app.get("/api/user/apikey/list", function(req, res) {
 		if (err) {
 			console.log(err);
 			return;
-		} else {
-			console.log(JSON.stringify(body));
 		}
 
 		var user = body.rows[0];
@@ -430,8 +425,6 @@ app.get("/api/user/apikey/list", function(req, res) {
 		if (!doc) {
 			console.log("User " + user.id + " not found.");
 			return;
-		} else {
-			console.log(JSON.stringify(doc));
 		}
 
 		var exportedKeys = [];
@@ -547,8 +540,6 @@ app.post("/api/user/rsakey", function(req, res) {
 	var owner = req.session.owner;
 	var username = req.session.username;
 
-	console.log(JSON.stringify(req.body));
-
 	// Validate those inputs from body... so far must be set
 	if (typeof(req.body.alias) === "undefined") {
 		res.end(JSON.stringify({
@@ -571,7 +562,6 @@ app.post("/api/user/rsakey", function(req, res) {
 	var new_key_fingerprint = fingerprint(new_key_body);
 
 	// Get all users
-	// FIXME: Refactor to get by owner
 	userlib.view("users", "owners_by_username", {
 		"key": username,
 		"include_docs": true
@@ -595,8 +585,6 @@ app.post("/api/user/rsakey", function(req, res) {
 				}));
 				return;
 			}
-
-			console.log("Updating user: " + JSON.stringify(doc));
 
 			// FIXME: Change username to owner_id
 			var file_name = username + "-" + Math.floor(new Date() /
