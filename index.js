@@ -156,9 +156,9 @@ app.use(session({
 		client: client
 	}),
 	name: "x-thx-session",
-	resave: false,
+	resave: true,
 	rolling: true,
-	saveUninitialized: false
+	saveUninitialized: true
 }));
 
 app.use(parser.json());
@@ -2508,10 +2508,10 @@ app.post("/api/login", function(req, res) {
 					req.session.owner = user_data.doc.owner;
 					req.session.username = user_data.doc.username;
 
-					var hour = 3600000;
-					var expiration = new Date(Date.now() + 3 * hour);
-					req.session.cookie.expires = expiration;
-					req.session.cookie.maxAge = expiration;
+					//var hour = 3600000;
+					//var expiration = new Date(Date.now() + 3 * hour);
+					//req.session.cookie.expires = expiration;
+					//req.session.cookie.maxAge = expiration;
 					req.session.cookie.httpOnly = false;
 
 					// TODO: write last_seen timestamp to DB here __for devices__
