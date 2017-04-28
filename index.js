@@ -758,9 +758,9 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 			} else {
 				// Save new document
 
-				delete userdoc._rev;
+				delete user.doc._rev;
 
-				userlib.insert(userdoc, userdoc.id, function(err) {
+				userlib.insert(user.doc, user.doc.id, function(err) {
 					if (err) {
 						console.log("rsa_revocation_failed:" + err);
 						res.end(JSON.stringify({
