@@ -334,8 +334,8 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 		}
 
 		// Search API key by hash
-		var user = body.rows[0];
-		var keys = body.rows[0].doc.api_keys; // array
+		var user = body.rows[0].doc;
+		var keys = user.api_keys; // array
 		var api_key_index = null;
 		var api_key = null;
 		for (var index in keys) {
@@ -346,9 +346,8 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 				api_key = keys[index];
 				console.log("Found and splicing index " + api_key_index + " key " +
 					api_key);
-				body.rows[0].doc.api_keys.splice(api_key_index, 1);
-				user.doc.api_keys.splice(api_key_index, 1); // important
-				delete user.doc._rev;
+				user.api_keys.splice(api_key_index, 1); // important
+				delete user._rev;
 				break;
 			}
 		}
@@ -365,7 +364,7 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 
 		console.log("Destroying old document...");
 
-		userlib.destroy(user.doc._id, user.doc._rev, function(err) {
+		userlib.destroy(user._id, user._rev, function(err) {
 
 			if (err) {
 				console.log("destroy eerror: " + err);
@@ -376,13 +375,13 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 
 			//keys.splice(api_key_index, 1);
 			//user.doc.api_keys = keys;
-			user.doc.last_update = new Date();
+			user.last_update = new Date();
 
 
 			console.log("Saving: " + JSON.stringify(user));
 
 			// Save new document
-			userlib.insert(user.doc, user.doc._id, function(err) {
+			userlib.insert(user, user._id, function(err) {
 				if (err) {
 					console.log(err);
 					res.end(JSON.stringify({
@@ -2148,6 +2147,8 @@ app.post("/api/login", function(req, res) {
 			}
 		});
 	}
+
+	console.log("Serching user " + username);
 
 	userlib.view("users", "owners_by_username", {
 		"key": username,
