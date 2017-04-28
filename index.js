@@ -190,8 +190,6 @@ app.get("/api/user/devices", function(req, res) {
 		var rows = body.rows; // devices returned
 		var devices = []; // an array by design (needs push), to be encapsulated later
 
-		console.log(JSON.stringify(rows));
-
 		// Show all devices for admin (if not limited by query)
 		if (req.session.admin === true && typeof(req.body.query) == "undefined") {
 			var response = JSON.stringify({
@@ -716,7 +714,6 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 		var user = body.rows[0];
 		var doc = user.doc;
 
-
 		if (!doc) {
 			console.log("User " + user.id + " not found.");
 			return;
@@ -738,7 +735,7 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 		}
 
 		if (delete_key !== null) {
-			delete doc._rev;
+			//delete doc._rev;
 			doc.last_update = new Date();
 		} else {
 			res.end(JSON.stringify({
@@ -748,9 +745,8 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 			return;
 		}
 
-		delete user._rev;
 
-		userlib.destroy(user.id, user.doc._rev, function(err) {
+		userlib.destroy(user.doc.id, user.doc._rev, function(err) {
 
 			if (err) {
 				console.log("Cannot destroy user on password-reset");
@@ -761,6 +757,9 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 				return;
 			} else {
 				// Save new document
+
+				delete userdoc._rev;
+
 				userlib.insert(userdoc, userdoc.id, function(err) {
 					if (err) {
 						console.log("rsa_revocation_failed:" + err);
@@ -1093,7 +1092,7 @@ app.post("/api/user/password/set", function(req, res) {
 				userlib.destroy(userdoc.id, userdoc.doc._rev, function(err) {
 
 					if (err) {
-						console.log("Cannot destroy user on password-reset");
+						console.log("Cannot destroy user on password-set");
 						res.end(JSON.stringify({
 							status: "user_not_reset",
 							success: false
@@ -1106,7 +1105,7 @@ app.post("/api/user/password/set", function(req, res) {
 
 					userlib.insert(userdoc.doc, userdoc.owner, function(err) {
 						if (err) {
-							console.log("Cannot insert user on password-reset");
+							console.log("Cannot insert user on password-set");
 							res.end(JSON.stringify({
 								status: "user_not_saved",
 								success: false
@@ -1437,7 +1436,6 @@ app.post("/device/register", function(req, res) {
 	// Headers must contain Authentication header
 	if (typeof(req.headers.authentication) !== "undefined") {
 		api_key = req.headers.authentication;
-		console.log("API KEY in request: '" + api_key + "'");
 	} else {
 		console.log("ERROR: Registration requests now require API key!");
 		res.end(JSON.stringify({
@@ -1476,8 +1474,6 @@ app.post("/device/register", function(req, res) {
 		// Find user and match api_key
 		var api_key_valid = false;
 		var user_data = body.rows[0].doc;
-
-		console.log("searching API key in user :" + JSON.stringify(user_data));
 
 
 		for (var kindex in user_data.api_keys) {
@@ -1619,14 +1615,12 @@ app.post("/device/register", function(req, res) {
 						"\n");
 					reg.success = true;
 					reg.status = "OK";
-					console.log(reg);
 				}
 				sendRegistrationOKResponse(res, rdict);
 			});
 
 		} else {
 
-			console.log(reg);
 
 			// KNOWN DEVICES:
 			// - see if new firmware is available and reply FIRMWARE_UPDATE with url
@@ -1724,7 +1718,7 @@ function validateRequest(req, res) {
 function validateSecureGETRequest(req, res) {
 	// Only log webapp user-agent
 	var ua = req.headers["user-agent"];
-	console.log("☢ User-Agent: " + ua);
+	//console.log("☢ User-Agent: " + ua);
 	if (req.method != "GET") {
 		console.log("validateSecure: Not a get request.");
 		req.session.destroy(function(err) {
