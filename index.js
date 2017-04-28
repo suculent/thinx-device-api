@@ -204,11 +204,7 @@ app.get("/api/user/devices", function(req, res) {
 		for (var row in rows) {
 			var rowData = rows[row];
 			if (username == rowData.key) {
-				console.log("/api/user/devices: OWNER: " + JSON.stringify(rowData) +
-					"\n");
 				devices.push(rowData);
-			} else {
-				console.log("/api/user/devices: ROW: " + JSON.stringify(rowData) + "\n");
 			}
 		}
 		var reply = JSON.stringify({
@@ -322,8 +318,6 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 		if (!body) {
 			console.log("User " + userdoc.id + " not found.");
 			return;
-		} else {
-			console.log("body: " + JSON.stringify(body));
 		}
 
 		// Search API key by hash
