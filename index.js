@@ -1603,6 +1603,8 @@ app.post("/device/register", function(req, res) {
 		var api_key_valid = false;
 		var user_record = body.rows;
 
+		console.log("searching api key in user :" + user_record);
+
 		// Should be only one record actually
 		for (var index in user_record) {
 			var user_data = user_record[index].doc;
