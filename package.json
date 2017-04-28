@@ -28,7 +28,6 @@
     "grunt-karma-coveralls": "^2.5.4",
     "gulp-repository-watch": "0.0.4",
     "karma-coverage": "*",
-    "karma-jasmine": "^1.1.0",
     "mocha": "^3.3.0",
     "mqtt": "^2.6.2",
     "nano": "^6.2.0",
