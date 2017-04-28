@@ -214,7 +214,6 @@ app.get("/api/user/devices", function(req, res) {
 		var reply = JSON.stringify({
 			devices: devices
 		});
-		console.log("/api/user/devices: Response: " + reply);
 		res.end(reply);
 	});
 });
@@ -247,8 +246,6 @@ app.post("/api/user/apikey", function(req, res) {
 		if (err) {
 			console.log(err);
 			return;
-		} else {
-			console.log("DELETE: " + body);
 		}
 
 		var user = body.rows[0];
@@ -274,8 +271,6 @@ app.post("/api/user/apikey", function(req, res) {
 				}));
 
 			} else {
-
-				console.log("Destroyed, inserting " + JSON.stringify(doc));
 
 				// Add new API Key
 				doc.api_keys.push(new_api_key);
@@ -338,7 +333,6 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 		var api_key = null;
 		for (var index in keys) {
 			var internal_hash = sha256(keys[index]);
-			console.log("inthash_ " + internal_hash);
 			if (internal_hash.indexOf(api_key_hash) !== -1) {
 				api_key_index = index;
 				api_key = keys[index];
@@ -350,8 +344,6 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 		}
 
 		if (api_key_index === null) {
-			console.log("Searching for " + api_key_hash + " in " + JSON.stringify(
-				keys) + " failed.");
 			res.end(JSON.stringify({
 				success: false,
 				status: "hash_not_found"
@@ -374,8 +366,6 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 			//user.doc.api_keys = keys;
 			user.last_update = new Date();
 			delete user._rev;
-
-			console.log("Saving: " + JSON.stringify(user));
 
 			// Save new document
 			userlib.insert(user, user._id, function(err) {
@@ -2051,8 +2041,6 @@ app.post("/api/login", function(req, res) {
 				}
 			});
 			return;
-		} else {
-			console.log("login body: " + JSON.stringify(body));
 		}
 
 		// Find user and match password
