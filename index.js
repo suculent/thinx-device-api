@@ -111,8 +111,6 @@ app.all("/*", function(req, res, next) {
 
 	if (typeof(req.session) === "undefined") {
 		console.log("---session-less-request---");
-	} else {
-		console.log("S: " + JSON.stringify(req.session));
 	}
 
 	// FIXME: This is a hack. It should not work like this. We just need to find out,
@@ -414,8 +412,6 @@ app.get("/api/user/apikey/list", function(req, res) {
 	var owner = req.session.owner;
 	var username = req.session.username;
 
-	console.log("Serching for user " + owner);
-
 	// Get all users
 	userlib.view("users", "owners_by_username", {
 		"key": username,
@@ -448,8 +444,7 @@ app.get("/api/user/apikey/list", function(req, res) {
 			exportedKeys.push(info);
 		}
 
-		console.log("Listing API keys: " +
-			JSON.stringify(exportedKeys));
+		console.log("Listing API keys. ");
 		res.end(JSON.stringify({
 			api_keys: exportedKeys
 		}));
@@ -662,17 +657,12 @@ app.get("/api/user/rsakey/list", function(req, res) {
 
 	console.log("/api/user/rsakey/list");
 
-	// Must be Authenticated using owner session.
-	console.log(JSON.stringify(req.session));
-
 	if (!validateSecureGETRequest(req)) return;
 
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
 	var username = req.session.username;
-
-	// console.log("Serching for user " + owner);
 
 	// Get all users
 	userlib.view("users", "owners_by_username", {
@@ -686,8 +676,6 @@ app.get("/api/user/rsakey/list", function(req, res) {
 		}
 
 		var user = body.rows[0];
-
-		//console.log("User:" + JSON.stringify(user));
 
 		// Fetch complete user
 		userlib.get(user.id, function(error, doc) {
@@ -760,9 +748,6 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 		if (!doc) {
 			console.log("User " + user.id + " not found.");
 			return;
-		} else {
-			console.log("Loaded " + JSON.stringify(doc) + " doc.");
-			console.log("Parsing doc for RSA key in: " + JSON.stringify(doc.rsa_keys));
 		}
 
 		// Search RSA key by hash
@@ -771,10 +756,7 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 
 		var fingerprints = Object.keys(doc.rsa_keys);
 		for (var i = 0; i < fingerprints.length; i++) {
-			console.log("Parsing fingerprint " + fingerprints[i]);
 			var key = doc.rsa_keys[fingerprints[i]];
-			console.log("key: " + fingerprints[i] + " compared to " +
-				rsa_key_fingerprint);
 			if (fingerprints[i].indexOf(rsa_key_fingerprint) !== -1) {
 				console.log("Revoking " + rsa_key_fingerprint);
 				delete doc.rsa_keys[fingerprint];
@@ -795,8 +777,6 @@ app.delete("/api/user/rsakey/revoke", function(req, res) {
 		}
 
 		delete user._rev;
-
-		console.log("Saving " + JSON.stringify(doc) + " document...");
 
 		userlib.destroy(user.id, user.doc._rev, function(err) {
 
@@ -1430,89 +1410,6 @@ app.get("/api/user/profile", function(req, res) {
 	});
 });
 
-/* Provides list of users’ devices. Should mangle certain secure data.
-app.get("/api/user/devices", function(req, res) {
-
-	console.log(req.toString());
-
-	// reject on invalid headers
-	if (!validateSecureRequest(req)) return;
-
-	// reject on invalid owner
-	var owner = null;
-	if (req.session.owner || sess.owner) {
-		if (req.session.owner) {
-			console.log("assigning owner = req.session.owner;");
-			owner = req.session.owner;
-		}
-		if (sess.owner) {
-			console.log(
-				"assigning owner = sess.owner; (client lost or session terminated?)"
-			);
-			owner = sess.owner;
-		}
-
-	} else {
-		failureResponse(res, 403, "session has no owner");
-		console.log("/api/user/devices: No valid owner!");
-		return;
-	}
-
-	devicelib.view("devicelib", "devices_by_owner", {
-		"key": owner,
-		"include_docs": false
-	}, function(err, body) {
-
-		if (err) {
-			if (err.toString() == "Error: missing") {
-				res.end(JSON.stringify({
-					result: "none"
-				}));
-			}
-			console.log("/api/user/devices: Error: " + err.toString());
-			return;
-		}
-
-		var rows = body.rows; // devices returned
-		var devices = []; // an array by design (needs push), to be encapsulated later
-
-		// Show all devices for admin (if not limited by query)
-		if (req.session.admin === true && typeof(req.body.query) ==
-			"undefined") {
-			var response = JSON.stringify({
-				devices: devices
-			});
-			res.end(response);
-			return;
-		}
-
-		for (var row in rows) {
-			var rowData = rows[row];
-			console.log("Matching device of device owner " + rowData.key +
-				" with alien user " + owner + " in " + rowData.toString());
-			if (owner == rowData.key) {
-				console.log("/api/user/devices: OWNER: " + JSON.stringify(rowData) +
-					"\n");
-				devices.push(rowData);
-			} else {
-				console.log("/api/user/devices: ROW: " + JSON.stringify(rowData) +
-					"\n");
-			}
-		}
-		var reply = JSON.stringify({
-			devices: devices
-		});
-		console.log("/api/user/devices: Response: " + reply);
-		res.set("Connection", "keep-alive"); // allow XHR request
-		res.end(reply);
-	});
-});
-
-//
-// WORK ON ROAD. <-
-//
-*/
-
 //
 // Main Device API
 //
@@ -1577,8 +1474,6 @@ app.post("/device/register", function(req, res) {
 		}));
 		return;
 	}
-
-	console.log("Serching for owner: " + owner);
 
 	userlib.view("users", "owners_by_username", {
 		"key": owner,
