@@ -505,10 +505,101 @@ app.get("/api/user/sources/list", function(req, res) {
 });
 
 /*
- * SSH Keys
+ *  Adds a GIT repository. Expects URL, alias and a optional branch (origin/master is default).
+ */
+app.post("/api/user/source", function(req, res) {
+
+	console.log("/api/user/source");
+
+	console.log("WARNING: NOT TESTED.");
+
+	if (!validateSecurePOSTRequest(req)) return;
+
+	if (!validateSession(req, res)) return;
+
+	var owner = req.session.owner;
+	var username = req.session.username;
+
+	if (typeof(req.body.alias) === "undefined") {
+		res.end(JSON.stringify({
+			success: false,
+			status: "missing_ssh_alias"
+		}));
+		return;
+	}
+
+	if (typeof(req.body.url) === "undefined") {
+		res.end(JSON.stringify({
+			success: false,
+			status: "missing_git_url"
+		}));
+		return;
+	}
+
+	var branch = "origin/master";
+	var url = req.body.url;
+	var alias = req.body.url;
+
+	// Get all users
+	userlib.view("users", "owners_by_username", {
+		"key": username,
+		"include_docs": true
+	}, function(err, body) {
+
+		if (err) {
+			console.log(err);
+			return;
+		}
+
+		var user = body.rows[0];
+
+		// Fetch complete user
+		userlib.get(user.id, function(error, doc) {
+
+			if (!doc) {
+				console.log("User " + users[index].id + " not found.");
+				res.end(JSON.stringify({
+					success: false,
+					status: "user_not_found"
+				}));
+				return;
+			}
+
+			var new_source = {
+				alias: new_key_alias,
+				url: ssh_path,
+				branch: branch
+			};
+
+			userlib.destroy(doc._id, doc._rev, function(err) {
+
+				doc.sources.push(new_source);
+				delete doc._rev;
+
+				userlib.insert(doc, doc._id, function(err, body, header) {
+					if (err) {
+						console.log("/api/user/source ERROR:" + err);
+						res.end(JSON.stringify({
+							success: false,
+							status: "key-not-added"
+						}));
+						return;
+					} else {
+						res.end(JSON.stringify({
+							success: true,
+							source: new_source
+						}));
+					}
+				});
+			});
+		});
+	});
+});
+
+/*
+ * RSA Keys
  */
 
-// FIXME: may not save to DB
 app.post("/api/user/rsakey", function(req, res) {
 
 	console.log("/api/user/rsakey");
