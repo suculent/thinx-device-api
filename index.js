@@ -280,7 +280,6 @@ app.get("/api/user/devices", function(req, res) {
 app.post("/api/device/attach", function(req, res) {
 
 	console.log("/api/device/attach");
-	console.log("WARNING: NOT TESTED.");
 
 	if (!validateSecurePOSTRequest(req)) return;
 	if (!validateSession(req, res)) return;
@@ -349,7 +348,6 @@ app.post("/api/device/attach", function(req, res) {
 app.post("/api/device/detach", function(req, res) {
 
 	console.log("/api/device/detach");
-	console.log("WARNING: NOT TESTED.");
 
 	if (!validateSecurePOSTRequest(req)) return;
 	if (!validateSession(req, res)) return;
@@ -735,8 +733,8 @@ app.post("/api/user/source", function(req, res) {
 			}
 
 			var new_source = {
-				alias: new_key_alias,
-				url: ssh_path,
+				alias: alias,
+				url: url,
 				branch: branch
 			};
 

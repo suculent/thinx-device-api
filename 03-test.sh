@@ -136,6 +136,17 @@ http://$HOST:7442/api/user/rsakey/list
 
 echo
 echo "--------------------------------------------------------------------------------"
+echo "» Testing source add..."
+
+curl -b cookies.jar \
+-H 'Origin: rtm.thinx.cloud' \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+-d '{ "url" : "https://github.com/suculent/thinx-firmware-esp8266.git", "alias" : "thinx-firmware-esp8266" }' \
+http://$HOST:7442/api/user/source
+
+echo
+echo "--------------------------------------------------------------------------------"
 echo "» Testing source detach..."
 
 curl -b cookies.jar \
