@@ -740,6 +740,10 @@ app.post("/api/user/source", function(req, res) {
 
 			userlib.destroy(doc._id, doc._rev, function(err) {
 
+				if (typeof(doc.sources) === "undefined") {
+					doc.sources = [];
+				}
+
 				doc.sources.push(new_source);
 				delete doc._rev;
 
