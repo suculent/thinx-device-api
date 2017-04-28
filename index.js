@@ -1600,9 +1600,17 @@ app.post("/device/register", function(req, res) {
 			return;
 		}
 
+		if (body.rows.length === 0) {
+			res.end(JSON.stringify({
+				success: false,
+				status: "owner_not_found"
+			}));
+			return;
+		}
+
 		// Find user and match api_key
 		var api_key_valid = false;
-		var user_data = body.rows[0].doc;
+		var user_data = body.rows[0]; // .doc!
 
 		console.log("searching API key in user :" + JSON.stringify(user_data));
 
