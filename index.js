@@ -127,8 +127,6 @@ app.all("/*", function(req, res, next) {
 
 	var allowedOrigin = origin;
 
-	console.log("Origin: " + origin);
-
 	// Custom user agent is required for devices
 	var client = req.get("User-Agent");
 	if (client == client_user_agent) {
@@ -221,7 +219,7 @@ app.post("/api/user/apikey", function(req, res) {
 
 	console.log("/api/user/apikey");
 
-	if (!validateSecureRequest(req)) return;
+	if (!validateSecurePOSTRequest(req)) return;
 
 	if (!validateSession(req, res)) return;
 
@@ -515,7 +513,7 @@ app.post("/api/user/rsakey", function(req, res) {
 
 	console.log("/api/user/rsakey");
 
-	if (!validateSecureRequest(req)) return;
+	if (!validateSecurePOSTRequest(req)) return;
 
 	if (!validateSession(req, res)) return;
 
@@ -1329,7 +1327,7 @@ app.post("/api/user/profile", function(req, res) {
 	console.log("POST /api/user/profile");
 	console.log(JSON.stringify(req.body));
 
-	if (!validateSecureRequest(req)) return;
+	if (!validateSecurePOSTRequest(req)) return;
 
 	if (!validateSession(req, res)) return;
 
@@ -1732,9 +1730,7 @@ function validateSecureGETRequest(req, res) {
 }
 
 function validateSecureDELETERequest(req, res) {
-	// Only log webapp user-agent
 	var ua = req.headers["user-agent"];
-	console.log("☢ UA: " + ua);
 	if (req.method != "DELETE") {
 		console.log("validateSecure: Not a delete request.");
 		req.session.destroy(function(err) {
@@ -1749,10 +1745,8 @@ function validateSecureDELETERequest(req, res) {
 	return true;
 }
 
-function validateSecureRequest(req, res) {
-	// Only log webapp user-agent
+function validateSecurePOSTRequest(req, res) {
 	var ua = req.headers["user-agent"];
-	console.log("☢ UA: " + ua);
 	if (req.method != "POST") {
 		console.log("validateSecure: Not a post request.");
 		req.session.destroy(function(err) {
@@ -2047,8 +2041,6 @@ app.post("/api/login", function(req, res) {
 					req.session.cookie.expires = new Date(Date.now() + hour);
 					req.session.cookie.maxAge = hour;
 					req.session.cookie.httpOnly = false;
-
-					console.log("FIXME: Began session " + JSON.stringify(req.session));
 
 					// TODO: write last_seen timestamp to DB here __for devices__
 					console.log("client_type: " + client_type);
