@@ -156,9 +156,9 @@ app.use(session({
 		client: client
 	}),
 	name: "x-thx-session",
-	resave: true,
+	resave: false,
 	rolling: true,
-	saveUninitialized: true
+	saveUninitialized: false
 }));
 
 app.use(parser.json());
@@ -678,8 +678,6 @@ app.get("/api/user/sources/list", function(req, res) {
 app.post("/api/user/source", function(req, res) {
 
 	console.log("/api/user/source");
-
-	console.log("WARNING: NOT TESTED.");
 
 	if (!validateSecurePOSTRequest(req)) return;
 
@@ -2296,6 +2294,8 @@ validateSession = function(req, res) {
 
 	var sessionValid = false;
 
+	var sess = req.session;
+
 	if (typeof(req.session.owner) !== "undefined") {
 		console.log("so: " + req.session.owner);
 		if (typeof(req.session.username) !== "undefined") {
@@ -2315,7 +2315,7 @@ validateSession = function(req, res) {
 			} else {
 				res.end(JSON.stringify({
 					success: false,
-					status: "invalid_session_owner"
+					status: "invalid_session"
 				}));
 			}
 		});
@@ -2503,7 +2503,7 @@ app.post("/api/login", function(req, res) {
 				// TODO: Second option (direct compare) will deprecate soon.
 				if (password.indexOf(user_data.value) !== -1) {
 
-					// console.log("user_data:\n" + JSON.stringify(user_data) + "\n");
+					console.log("user_data:\n" + JSON.stringify(user_data) + "\n");
 
 					req.session.owner = user_data.doc.owner;
 					req.session.username = user_data.doc.username;
