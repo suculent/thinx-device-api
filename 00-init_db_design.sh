@@ -1,8 +1,25 @@
 #!/bin/bash
 
-echo "This should be run against the CouchDB server."
+USE_VAULT=false
 
-exit 0
+#
+# Vault
+#
+
+# Unseal Key: Khij92R4gz0ptt/emQd/SUIRlSMg2D2u20jhqNlTOOM=
+# Root Token: b7fbc90b-6ae2-bbb8-ff0b-1a7e353b8641
+
+if [[ $USE_VAULT == true ]]; then
+  wget https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_linux_amd64.zip
+  unzip vault_0.7.0*.zip
+  cat "export VAULT_ADDR='http://127.0.0.1:8200'" > ~/.profile
+  ./vault policy-write "thinx" ./vault-policy.json
+fi
+
+if [[ $CIRCLECI ]]; then
+  echo "This should be run against the CouchDB server."
+  exit 0
+fi
 
 # or use ENV_VAR COUCH_USER and COUCH_PASS
 
