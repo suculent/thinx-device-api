@@ -168,7 +168,7 @@ app.use(parser.urlencoded({
 
 app.all("/*", function(req, res, next) {
 
-	console.log("---");
+	console.log("--- " + req.url);
 
 	// CORS headers
 
@@ -658,8 +658,6 @@ app.get("/api/user/sources/list", function(req, res) {
 				return;
 			}
 
-			//console.log("Found user: " + JSON.stringify(body));
-
 			if (body.rows.length === 0) {
 				res.end(JSON.stringify({
 					success: false,
@@ -669,8 +667,6 @@ app.get("/api/user/sources/list", function(req, res) {
 			}
 
 			var user = body.rows[0];
-
-			//console.log("Found doc: " + JSON.stringify(user));
 
 			// Return all sources
 			console.log("Listing Repositories: " +
@@ -868,7 +864,6 @@ app.post("/api/user/rsakey", function(req, res) {
 	console.log("/api/user/rsakey");
 
 	if (!validateSecurePOSTRequest(req)) return;
-
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
@@ -895,7 +890,6 @@ app.post("/api/user/rsakey", function(req, res) {
 	var new_key_body = req.body.key;
 	var new_key_fingerprint = fingerprint(new_key_body);
 
-	// Get all users
 	userlib.view("users", "owners_by_username", {
 		"key": username,
 		"include_docs": true
@@ -903,6 +897,10 @@ app.post("/api/user/rsakey", function(req, res) {
 
 		if (err) {
 			console.log(err);
+			res.end(JSON.stringify({
+				success: false,
+				status: "user_not_found"
+			}));
 			return;
 		}
 
@@ -915,7 +913,7 @@ app.post("/api/user/rsakey", function(req, res) {
 				console.log("User " + users[index].id + " not found.");
 				res.end(JSON.stringify({
 					success: false,
-					status: "user_not_found"
+					status: "userid_not_found"
 				}));
 				return;
 			}
@@ -932,11 +930,11 @@ app.post("/api/user/rsakey", function(req, res) {
 
 			fs.open(ssh_path, 'w+', function(err, fd) {
 				if (err) {
-					return console.log(err);
+					console.log(err);
 				} else {
 					fs.writeFile(ssh_path, new_ssh_key, function(err) {
 						if (err) {
-							return console.log(err);
+							console.log(err);
 						} else {
 							fs.close(fd, function() {
 								console.log('RSA key installed...');
@@ -960,8 +958,8 @@ app.post("/api/user/rsakey", function(req, res) {
 							success: false,
 							status: "key-not-added"
 						}));
-						return;
 					} else {
+						console.log("RSA Key successfully added.");
 						res.end(JSON.stringify({
 							success: true,
 							fingerprint: new_key_fingerprint
@@ -980,7 +978,6 @@ app.get("/api/user/rsakey/list", function(req, res) {
 	console.log("/api/user/rsakey/list");
 
 	if (!validateSecureGETRequest(req)) return;
-
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
@@ -994,6 +991,10 @@ app.get("/api/user/rsakey/list", function(req, res) {
 
 		if (err) {
 			console.log(err);
+			res.end(JSON.stringify({
+				success: false,
+				status: "user_not_found"
+			}));
 			return;
 		}
 
@@ -1003,6 +1004,10 @@ app.get("/api/user/rsakey/list", function(req, res) {
 		userlib.get(user.id, function(error, doc) {
 			if (!doc) {
 				console.log("User " + user.id + " not found.");
+				res.end(JSON.stringify({
+					success: false,
+					status: "userid_not_found"
+				}));
 				return;
 			}
 
@@ -1019,11 +1024,11 @@ app.get("/api/user/rsakey/list", function(req, res) {
 				exportedKeys.push(info);
 			}
 
-			console.log("Listing RSA keys: " +
-				JSON.stringify(exportedKeys));
-			res.end(JSON.stringify({
+			var reply = JSON.stringify({
 				rsa_keys: exportedKeys
-			}));
+			});
+			console.log("Listing RSA keys: " + reply);
+			res.end(reply);
 		});
 	});
 });
@@ -1034,7 +1039,6 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 	console.log("/api/user/rsakey/revoke");
 
 	if (!validateSecurePOSTRequest(req)) return;
-
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
@@ -1048,11 +1052,10 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 		return;
 	}
 
-	var rsa_key_fingerprint = req.body.fingerprint; // this is hash only!
+	var rsa_key_fingerprint = req.body.fingerprint;
 
 	console.log("Searching by username " + username);
 
-	// Get all users
 	userlib.view("users", "owners_by_username", {
 		"key": username,
 		"include_docs": true
@@ -2298,15 +2301,9 @@ function validateSecurePOSTRequest(req, res) {
 }
 
 validateSession = function(req, res) {
-
 	var sessionValid = false;
-
-	var sess = req.session;
-
 	if (typeof(req.session.owner) !== "undefined") {
-		console.log("so: " + req.session.owner);
 		if (typeof(req.session.username) !== "undefined") {
-			console.log("un: " + req.session.username);
 			sessionValid = true;
 		} else {
 			console.log("validateSession: No username!");
