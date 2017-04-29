@@ -466,6 +466,7 @@ app.post("/api/user/apikey", function(req, res) {
 						console.log("/api/user/apikey ERROR:" + err);
 					} else {
 						console.log("Userlib " + doc.owner + "document inserted");
+						res.set("Connection", "close");
 						res.end(JSON.stringify({
 							success: true,
 							api_key: new_api_key
@@ -589,6 +590,10 @@ app.get("/api/user/apikey/list", function(req, res) {
 
 		if (err) {
 			console.log(err);
+			res.end(JSON.stringify({
+				success: false,
+				status: "invalid_user"
+			}));
 			return;
 		}
 
@@ -596,6 +601,10 @@ app.get("/api/user/apikey/list", function(req, res) {
 		var doc = user.doc;
 		if (!doc) {
 			console.log("User " + user.id + " not found.");
+			res.end(JSON.stringify({
+				success: false,
+				status: "user_not_fond"
+			}));
 			return;
 		}
 
