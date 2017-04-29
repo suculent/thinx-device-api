@@ -26,7 +26,6 @@ var fingerprint = require('ssh-fingerprint');
 var Emailer = require('email').Email;
 var fs = require("fs");
 var gutil = require('gulp-util');
-
 var request = require("request");
 
 var v = require("./lib/thinx/version");
@@ -169,13 +168,9 @@ app.use(parser.urlencoded({
 
 app.all("/*", function(req, res, next) {
 
-	console.log("> " + req.method + ": " + req.query.toString());
-
-	// CORS headers
+	console.log("> " + req.method + ": " + req.query.url);
 
 	var origin = req.get("origin");
-
-	//console.log("Headers: " + JSON.stringify(req.headers));
 
 	if (typeof(req.session) === "undefined") {
 		console.log("---session-less-request---");
@@ -211,7 +206,6 @@ app.all("/*", function(req, res, next) {
 		"Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
 	res.header("Access-Control-Allow-Headers",
 		"Content-type,Accept,X-Access-Token,X-Key");
-	// res.header("Access-Control-Expose-Headers", "x-thx-session");
 
 	if (req.method == "OPTIONS") {
 		res.status(200).end();
@@ -219,8 +213,6 @@ app.all("/*", function(req, res, next) {
 		next();
 	}
 });
-
-// http://thejackalofjavascript.com/architecting-a-restful-node-js-app/
 
 /*
  * Devices
@@ -1662,7 +1654,7 @@ app.get("/api/user/profile", function(req, res) {
 	userlib.view("users", "owners_by_username", {
 		"key": username,
 		"include_docs": true // might be useless
-	}, function(err, body, fw) {
+	}, function(err, body) {
 
 		if (err) {
 			console.log("Error: " + err.toString());
@@ -1813,7 +1805,7 @@ app.post("/device/firmware", function(req, res) {
 		var version = firmwareUpdateDescriptor.version;
 		var checksum = firmwareUpdateDescriptor.checksum;
 
-		devicelib.get(mac, function(error, existing, fw) {
+		devicelib.get(mac, function(error, existing) {
 
 			if (!error) {
 				existing.version = fw.version;
@@ -2100,7 +2092,7 @@ app.post("/device/register", function(req, res) {
 			// - see if alias or owner changed
 			// - otherwise reply just OK
 
-			devicelib.get(mac, function(error, existing, fw) {
+			devicelib.get(mac, function(error, existing) {
 				if (!error) {
 					existing.lastupdate = new Date();
 					if (typeof(fw) !== undefined && fw !== null) {

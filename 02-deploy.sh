@@ -46,7 +46,7 @@ npm install .
 if [[ $CIRCLECI == true ]]; then
 	echo
 	echo "☢  Running node.js without console for CI..."
-	nohup node index.js > /var/log/things.log &
+#forever start index.js -lo /var/log/thinx.log
 	service thinx-app start
 	exit 0
 else
