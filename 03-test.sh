@@ -11,7 +11,7 @@ echo "--------------------------------------------------------------------------
 echo "☢ Testing device registration..."
 
 curl -v \
--H 'Authentication: 3d7c1c8d5c0bbe1da084ca634ce07fd617fa468c' \
+-H 'Authentication: 19e0e3f2b16c013af092f1e0584a3fda11fd18e2' \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
@@ -23,11 +23,11 @@ echo "--------------------------------------------------------------------------
 echo "☢ Testing firmware update (owner test)..."
 
 curl -v \
--H 'Authentication: 3d7c1c8d5c0bbe1da084ca634ce07fd617fa468c' \
+-H 'Authentication: 19e0e3f2b16c013af092f1e0584a3fda11fd18e2' \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "mac" : "00:00:00:00:00:00", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "commit" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "checksum" : "02e2436d60c629e2ab6357d0d314dd6fe28bd0331b18ca6b19a25cd6f969d0a8", "owner" : "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f"  }' \
+-d '{ "mac" : "00:00:00:00:00:00", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "commit" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "checksum" : "02e2436d60c629e2ab6357d0d314dd6fe28bd0331b18ca6b19a25cd6f969d0a8", "owner" : "test"  }' \
 http://$HOST:7442/device/firmware
 
 echo
