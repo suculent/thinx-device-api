@@ -1044,8 +1044,13 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 
 				console.log("Removing RSA key from database: " + rsa_key_fingerprint);
 
-				delete user.doc.rsa_keys[fingerprint];
-				delete_key = true;
+				var count = keys.count;
+				delete keys[fingerprint];
+				if (keys.count != count - 1) {
+					console.log("ASSERT: Object delete failed.");
+				} else {
+					delete_key = true;
+				}
 				break;
 			}
 		}
@@ -1073,6 +1078,7 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 			} else {
 
 				delete user.doc._rev;
+				user.doc.rsa_keys = keys;
 
 				userlib.insert(user.doc, user.doc.id, function(err) {
 					if (err) {
