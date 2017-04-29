@@ -169,7 +169,7 @@ app.use(parser.urlencoded({
 
 app.all("/*", function(req, res, next) {
 
-	console.log("> " + req.method + ": " + JSON.stringify(req.query));
+	console.log("> " + req.method + ": " + JSON.stringify(req));
 
 	var origin = req.get("origin");
 
@@ -640,10 +640,10 @@ app.get("/api/user/sources/list", function(req, res) {
 			var user = body.rows[0];
 
 			console.log("Listing Repositories: " +
-				JSON.stringify(user.doc.repos));
+				JSON.stringify(user.doc.sources));
 			res.end(JSON.stringify({
 				success: true,
-				sources: user.doc.repos
+				sources: user.doc.sources
 			}));
 		});
 });
