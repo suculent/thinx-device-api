@@ -169,7 +169,7 @@ app.use(parser.urlencoded({
 
 app.all("/*", function(req, res, next) {
 
-	console.log("> " + req.method + ": " + JSON.stringify(req));
+	//console.log("> " + req.method + ": " + JSON.stringify(req));
 
 	var origin = req.get("origin");
 
