@@ -28,6 +28,7 @@ var fs = require("fs");
 var gutil = require('gulp-util');
 var request = require("request");
 
+var deploy = require("./lib/thinx/deployment");
 var v = require("./lib/thinx/version");
 
 var rdict = {};
@@ -168,7 +169,7 @@ app.use(parser.urlencoded({
 
 app.all("/*", function(req, res, next) {
 
-	console.log("> " + req.method + ": " + req.query.URL);
+	console.log("> " + req.method + ": " + req.query.toString());
 
 	var origin = req.get("origin");
 
@@ -1812,7 +1813,6 @@ app.post("/device/firmware", function(req, res) {
 				};
 
 				console.log("Seaching for possible firmware update...");
-				var deploy = require("./lib/thinx/deployment");
 				deploy.initWithDevice(device);
 
 				var update = deploy.hasUpdateAvailable(device);
@@ -1938,6 +1938,8 @@ app.post("/device/register", function(req, res) {
 		// Find user and match api_key
 		var api_key_valid = false;
 		var user_data = body.rows[0].doc;
+
+		console.log(JSON.stringify(user_data));
 
 		for (var kindex in user_data.api_keys) {
 			var userkey = user_data.api_keys[kindex];
