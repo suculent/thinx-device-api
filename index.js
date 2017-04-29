@@ -1796,9 +1796,7 @@ app.post("/device/firmware", function(req, res) {
 		devicelib.get(mac, function(error, existing) {
 
 			if (!error) {
-				existing.version = fw.version;
 
-				// TODO: Fetch real device version here...
 				var device = {
 					mac: existing.mac,
 					owner: existing.owner,
