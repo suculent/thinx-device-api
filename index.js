@@ -169,7 +169,7 @@ app.use(parser.urlencoded({
 
 app.all("/*", function(req, res, next) {
 
-	console.log("> " + req.query);
+	console.log("> " + req.method + ": " + req.query);
 
 	// CORS headers
 
@@ -972,9 +972,7 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			var exportedKeys = [];
 			var fingerprints = Object.keys(doc.rsa_keys);
 			for (var i = 0; i < fingerprints.length; i++) {
-				console.log("Parsing RSA fingerprint " + fingerprints[i]);
 				var key = doc.rsa_keys[fingerprints[i]];
-				console.log("Parsing key " + JSON.stringify(key));
 				var info = {
 					name: key.alias,
 					fingerprint: fingerprints[i]
