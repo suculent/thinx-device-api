@@ -2,6 +2,10 @@
 
 rm -rf cookies.jar
 
+if [[ -z $HOST ]]; then
+	HOST='localhost'
+fi
+
 echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing device registration..."
@@ -62,18 +66,18 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Requesting new API Key..."
 
-R=curl -b cookies.jar \
+R=$(curl -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -d '{}' \
-http://$HOST:7442/api/user/apikey
+http://$HOST:7442/api/user/apikey)
 
 # {"success":true,"api_key":"ece10e3effb17650420c280a7d5dce79110dc084"}
 
 SUCCESS=$(echo '$R' | jq .success)
 APIKEY="b7c2d19da39deba81e360c1d61b386dbd5a8bc5d93f8bd40e3f74510a24e8cb0"
-if [[ $SUCCESS == true ]];
+if [[ $SUCCESS == true ]]; then
 	APIKEY=$(echo '$R' | jq .api_key)
 	echo "New key to revoke: $APIKEY"
 fi
