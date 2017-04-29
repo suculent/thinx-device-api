@@ -169,7 +169,7 @@ app.use(parser.urlencoded({
 
 app.all("/*", function(req, res, next) {
 
-	console.log("--- " + req.query);
+	console.log("> " + req.query);
 
 	// CORS headers
 
@@ -229,10 +229,7 @@ app.all("/*", function(req, res, next) {
 /* List all devices for user. */
 app.get("/api/user/devices", function(req, res) {
 
-	console.log("/api/user/devices");
-
 	if (!validateSecureGETRequest(req)) return;
-
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
@@ -280,8 +277,6 @@ app.get("/api/user/devices", function(req, res) {
 
 /* Attach code source to a device. Expects unique device identifier and source alias. */
 app.post("/api/device/attach", function(req, res) {
-
-	console.log("/api/device/attach");
 
 	if (!validateSecurePOSTRequest(req)) return;
 	if (!validateSession(req, res)) return;
@@ -349,8 +344,6 @@ app.post("/api/device/attach", function(req, res) {
 // FIXME: Should be based on device_id instead of MAC
 app.post("/api/device/detach", function(req, res) {
 
-	console.log("/api/device/detach");
-
 	if (!validateSecurePOSTRequest(req)) return;
 	if (!validateSession(req, res)) return;
 
@@ -411,10 +404,7 @@ app.post("/api/device/detach", function(req, res) {
 /* Creates new api key. */
 app.post("/api/user/apikey", function(req, res) {
 
-	console.log("/api/user/apikey");
-
 	if (!validateSecurePOSTRequest(req)) return;
-
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
@@ -482,8 +472,6 @@ app.post("/api/user/apikey", function(req, res) {
 /* Deletes API Key by its hash value */
 app.post("/api/user/apikey/revoke", function(req, res) {
 
-	console.log("/api/user/apikey/revoke");
-
 	if (!validateSecurePOSTRequest(req)) return;
 	if (!validateSession(req, res)) return;
 
@@ -493,7 +481,6 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 
 	console.log("Revoking API Key by hash " + api_key_hash);
 
-	// Get all users
 	userlib.view("users", "owners_by_username", {
 		"key": username,
 		"include_docs": true
@@ -546,12 +533,9 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 
 			console.log("Creating new document...");
 
-			//keys.splice(api_key_index, 1);
-			//user.doc.api_keys = keys;
 			user.last_update = new Date();
 			delete user._rev;
 
-			// Save new document
 			userlib.insert(user, user._id, function(err) {
 				if (err) {
 					console.log(err);
@@ -573,16 +557,12 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 /* Lists all API keys for user. */
 app.get("/api/user/apikey/list", function(req, res) {
 
-	console.log("/api/user/apikey/list");
-
 	if (!validateSecureGETRequest(req)) return;
-
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
 	var username = req.session.username;
 
-	// Get all users
 	userlib.view("users", "owners_by_username", {
 		"key": username,
 		"include_docs": true
@@ -632,10 +612,7 @@ app.get("/api/user/apikey/list", function(req, res) {
 /* List available sources */
 app.get("/api/user/sources/list", function(req, res) {
 
-	console.log("/api/user/sources/list");
-
 	if (!validateSecureGETRequest(req)) return;
-
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
@@ -669,7 +646,6 @@ app.get("/api/user/sources/list", function(req, res) {
 
 			var user = body.rows[0];
 
-			// Return all sources
 			console.log("Listing Repositories: " +
 				JSON.stringify(user.doc.repos));
 			res.end(JSON.stringify({
@@ -682,10 +658,7 @@ app.get("/api/user/sources/list", function(req, res) {
 /* Adds a GIT repository. Expects URL, alias and a optional branch (origin/master is default). */
 app.post("/api/user/source", function(req, res) {
 
-	console.log("/api/user/source");
-
 	if (!validateSecurePOSTRequest(req)) return;
-
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
@@ -711,7 +684,6 @@ app.post("/api/user/source", function(req, res) {
 	var url = req.body.url;
 	var alias = req.body.alias;
 
-	// Get all users
 	userlib.view("users", "owners_by_username", {
 		"key": username,
 		"include_docs": true
@@ -723,63 +695,55 @@ app.post("/api/user/source", function(req, res) {
 		}
 
 		var user = body.rows[0];
+		var doc = user.doc;
 
-		// Fetch complete user
-		userlib.get(user.id, function(error, doc) {
+		if (!doc) {
+			console.log("User " + users[index].id + " not found.");
+			res.end(JSON.stringify({
+				success: false,
+				status: "user_not_found"
+			}));
+			return;
+		}
 
-			if (!doc) {
-				console.log("User " + users[index].id + " not found.");
-				res.end(JSON.stringify({
-					success: false,
-					status: "user_not_found"
-				}));
-				return;
+		var new_source = {
+			alias: alias,
+			url: url,
+			branch: branch
+		};
+
+		userlib.destroy(doc._id, doc._rev, function(err) {
+
+			if (typeof(doc.sources) === "undefined") {
+				doc.sources = [];
 			}
 
-			var new_source = {
-				alias: alias,
-				url: url,
-				branch: branch
-			};
+			doc.sources.push(new_source);
+			delete doc._rev;
 
-			userlib.destroy(doc._id, doc._rev, function(err) {
-
-				if (typeof(doc.sources) === "undefined") {
-					doc.sources = [];
+			userlib.insert(doc, doc._id, function(err, body, header) {
+				if (err) {
+					console.log("/api/user/source ERROR:" + err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "key-not-added"
+					}));
+					return;
+				} else {
+					res.end(JSON.stringify({
+						success: true,
+						source: new_source
+					}));
 				}
-
-				doc.sources.push(new_source);
-				delete doc._rev;
-
-				userlib.insert(doc, doc._id, function(err, body, header) {
-					if (err) {
-						console.log("/api/user/source ERROR:" + err);
-						res.end(JSON.stringify({
-							success: false,
-							status: "key-not-added"
-						}));
-						return;
-					} else {
-						res.end(JSON.stringify({
-							success: true,
-							source: new_source
-						}));
-					}
-				});
 			});
 		});
 	});
 });
 
 /* Removes a GIT repository. Expects alias. */
-app.delete("/api/user/source", function(req, res) {
-
-	console.log("/api/delete/source");
-
-	console.log("WARNING: NOT TESTED.");
+app.post("/api/user/source/revoke", function(req, res) {
 
 	if (!validateSecureDELETERequest(req)) return;
-
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
@@ -795,7 +759,6 @@ app.delete("/api/user/source", function(req, res) {
 
 	var alias = req.body.alias;
 
-	// Get all users
 	userlib.view("users", "owners_by_username", {
 		"key": username,
 		"include_docs": true
@@ -807,50 +770,48 @@ app.delete("/api/user/source", function(req, res) {
 		}
 
 		var user = body.rows[0];
+		var doc = user.doc;
 
-		// Fetch complete user
-		userlib.get(user.id, function(error, doc) {
 
-			if (!doc) {
-				console.log("User " + users[index].id + " not found.");
-				res.end(JSON.stringify({
-					success: false,
-					status: "user_not_found"
-				}));
-				return;
+		if (!doc) {
+			console.log("User " + users[index].id + " not found.");
+			res.end(JSON.stringify({
+				success: false,
+				status: "user_not_found"
+			}));
+			return;
+		}
+
+		var sources = [];
+		for (var index in doc.sources) {
+			var source = doc.sources[index];
+			// TODO: Sources should have UUID as well
+			if (source.alias.indexOf(alias) !== -1) {
+				// skip this one to delete
+			} else {
+				sources.push(source);
 			}
+		}
 
-			var sources = [];
-			for (var index in doc.sources) {
-				var source = doc.sources[index];
-				// TODO: Sources should have UUID as well
-				if (source.alias.indexOf(alias) !== -1) {
-					// skip this one to delete
+		userlib.destroy(doc._id, doc._rev, function(err) {
+
+			doc.sources = sources;
+			delete doc._rev;
+
+			userlib.insert(doc, doc._id, function(err, body, header) {
+				if (err) {
+					console.log("/api/user/source ERROR:" + err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "source_not_removed"
+					}));
+					return;
 				} else {
-					sources.push(source);
+					res.end(JSON.stringify({
+						success: true,
+						alias: alias
+					}));
 				}
-			}
-
-			userlib.destroy(doc._id, doc._rev, function(err) {
-
-				doc.sources = sources;
-				delete doc._rev;
-
-				userlib.insert(doc, doc._id, function(err, body, header) {
-					if (err) {
-						console.log("/api/user/source ERROR:" + err);
-						res.end(JSON.stringify({
-							success: false,
-							status: "source_not_removed"
-						}));
-						return;
-					} else {
-						res.end(JSON.stringify({
-							success: true,
-							alias: alias
-						}));
-					}
-				});
 			});
 		});
 	});
@@ -861,8 +822,6 @@ app.delete("/api/user/source", function(req, res) {
  */
 
 app.post("/api/user/rsakey", function(req, res) {
-
-	console.log("/api/user/rsakey");
 
 	if (!validateSecurePOSTRequest(req)) return;
 	if (!validateSession(req, res)) return;
@@ -976,8 +935,6 @@ app.post("/api/user/rsakey", function(req, res) {
 // TODO L8TR: Mangle keys as display placeholders only, but support this in revocation!
 app.get("/api/user/rsakey/list", function(req, res) {
 
-	console.log("/api/user/rsakey/list");
-
 	if (!validateSecureGETRequest(req)) return;
 	if (!validateSession(req, res)) return;
 
@@ -1036,8 +993,6 @@ app.get("/api/user/rsakey/list", function(req, res) {
 
 /* Deletes RSA Key by its fingerprint */
 app.post("/api/user/rsakey/revoke", function(req, res) {
-
-	console.log("/api/user/rsakey/revoke");
 
 	if (!validateSecurePOSTRequest(req)) return;
 	if (!validateSession(req, res)) return;
@@ -1148,9 +1103,6 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 /* Create username based on e-mail. Owner is  be unique (email hash). */
 app.post("/api/user/create", function(req, res) {
 
-	console.log("/api/user/create");
-	console.log(JSON.stringify(req.body));
-
 	var first_name = req.body.first_name;
 	var last_name = req.body.last_name;
 	var email = req.body.email;
@@ -1163,8 +1115,6 @@ app.post("/api/user/create", function(req, res) {
 		"key": new_owner_hash,
 		"include_docs": true // might be useless
 	}, function(err, body) {
-
-		console.log(JSON.stringify(body));
 
 		if (err) {
 			if (err != "Error: missing") {
@@ -1300,8 +1250,6 @@ app.get("/api/user/password/reset", function(req, res) {
 			return;
 		}
 
-		console.log(body);
-
 		var user = body.rows[0].doc;
 
 		if (typeof(req.query.reset_key) !== "undefined") {
@@ -1340,7 +1288,6 @@ app.get("/api/user/password/reset", function(req, res) {
 /* Endpoint for the user activation e-mail, should proceed to password set. */
 app.get("/api/user/activate", function(req, res) {
 
-	console.log("GET /api/user/activate");
 	console.log(JSON.stringify(req.query));
 
 	var ac_key = req.query.activation;
@@ -1380,8 +1327,6 @@ app.get("/api/user/activate", function(req, res) {
 
 /* Used by the password.html page to perform the change in database. Should revoke reset_key when done. */
 app.post("/api/user/password/set", function(req, res) {
-
-	console.log("POST /api/user/password/set");
 
 	var password1 = req.body.password;
 	var password2 = req.body.rpassword;
@@ -1440,11 +1385,7 @@ app.post("/api/user/password/set", function(req, res) {
 					return;
 				}
 
-				// console.log(body);
-
 				var userdoc = body.rows[0];
-
-				// console.log("userdoc: " + JSON.stringify(userdoc));
 
 				userdoc.doc.password = sha256(password1);
 				userdoc.doc.last_reset = new Date();
@@ -1473,7 +1414,6 @@ app.post("/api/user/password/set", function(req, res) {
 							}));
 							return;
 						} else {
-							//res.redirect("http://rtm.thinx.cloud:80/");
 							res.end(JSON.stringify({
 								status: "password_reset_successful",
 								success: true
@@ -1489,7 +1429,6 @@ app.post("/api/user/password/set", function(req, res) {
 
 		console.log("Performing new activation...");
 
-		// Validate new activation
 		userlib.view("users", "owners_by_activation", {
 			"key": req.body.activation,
 			"include_docs": true
@@ -1575,8 +1514,6 @@ app.post("/api/user/password/set", function(req, res) {
 // /user/password/reset POST
 /* Used to initiate password-reset session, creates reset key with expiraation and sends password-reset e-mail. */
 app.post("/api/user/password/reset", function(req, res) {
-
-	console.log("POST /api/user/password/reset");
 
 	var email = req.body.email;
 
@@ -1689,7 +1626,6 @@ app.post("/api/user/password/reset", function(req, res) {
 // /user/profile POST
 app.post("/api/user/profile", function(req, res) {
 
-	console.log("POST /api/user/profile");
 	console.log(JSON.stringify(req.body));
 
 	if (!validateSecurePOSTRequest(req)) return;
@@ -1710,12 +1646,10 @@ app.post("/api/user/profile", function(req, res) {
 // /user/profile GET
 app.get("/api/user/profile", function(req, res) {
 
-	console.log("GET /api/user/profile");
 	console.log(JSON.stringify(req.body));
 
 	// reject on invalid headers
 	if (!validateSecureGETRequest(req)) return;
-
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
@@ -1744,14 +1678,11 @@ app.get("/api/user/profile", function(req, res) {
 	});
 });
 
-// --> WORK
-
 //
 // Main Device API
 //
 
 // Firmware update retrieval. Serves binary by owner and device MAC.
-// FIXME: Read user and validate api_key
 app.post("/device/firmware", function(req, res) {
 
 	validateRequest(req, res);
@@ -2432,7 +2363,7 @@ function buildCommand(build_id, tenant, mac, git, udid, dryrun) {
 
 // Used by web app
 app.get("/api/logout", function(req, res) {
-	console.log("/api/logout");
+
 	if (typeof(req.session) !== "undefined") {
 		req.session.destroy(function(err) {
 			if (err) {
@@ -2445,7 +2376,6 @@ app.get("/api/logout", function(req, res) {
 
 // Front-end authentication, returns 5-minute session on valid authentication
 app.post("/api/login", function(req, res) {
-	console.log("/api/login");
 
 	var client_type = "webapp";
 	var ua = req.headers["user-agent"];
@@ -2597,8 +2527,7 @@ app.post("/api/login", function(req, res) {
 
 /** Tested with: !device_register.spec.js` */
 app.get("/", function(req, res) {
-
-	console.log("owner: " + sess.owner);
+	console.log("/ called with owner: " + sess.owner);
 	if (sess.owner) {
 		res.redirect("http://rtm.thinx.cloud:80/app");
 	} else {
