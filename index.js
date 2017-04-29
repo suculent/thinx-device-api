@@ -1746,6 +1746,8 @@ app.post("/device/firmware", function(req, res) {
 				}
 			});
 			return;
+		} else {
+			isNew = false;
 		}
 
 		if (body.rows.length === 0) {
@@ -1762,12 +1764,12 @@ app.post("/device/firmware", function(req, res) {
 
 		for (var kindex in user_data.api_keys) {
 			var userkey = user_data.api_keys[kindex];
+			console.log("Matching " + userkey + " to " + api_key);
 			if (userkey.indexOf(api_key) !== -1) {
 				console.log("Found valid key.");
 				api_key_valid = true;
 				break;
 			}
-			if (api_key_valid === true) break;
 		}
 
 		// Bail out on invalid API key
@@ -1775,7 +1777,7 @@ app.post("/device/firmware", function(req, res) {
 			console.log("Invalid API key.");
 			res.end(JSON.stringify({
 				success: false,
-				status: "authentication"
+				status: "api_key_invalid"
 			}));
 			return;
 		}
@@ -1784,8 +1786,6 @@ app.post("/device/firmware", function(req, res) {
 
 		if (err) {
 			console.log("Querying devices failed. " + err + "\n");
-		} else {
-			isNew = false;
 		}
 
 		var success = false;
@@ -1911,6 +1911,7 @@ app.post("/device/register", function(req, res) {
 		"include_docs": true // might be useless
 	}, function(err, body) {
 
+		var isNew = true;
 		if (err) {
 			console.log("Error: " + err.toString());
 			req.session.destroy(function(err) {
@@ -1922,6 +1923,8 @@ app.post("/device/register", function(req, res) {
 				}
 			});
 			return;
+		} else {
+			isNew = false;
 		}
 
 		if (body.rows.length === 0) {
@@ -1938,6 +1941,7 @@ app.post("/device/register", function(req, res) {
 
 		for (var kindex in user_data.api_keys) {
 			var userkey = user_data.api_keys[kindex];
+			console.log("Comparing " + userkey + " to " + api_key);
 			if (userkey.indexOf(api_key) !== -1) {
 				console.log("Found valid key.");
 				api_key_valid = true;
@@ -1946,7 +1950,6 @@ app.post("/device/register", function(req, res) {
 			if (api_key_valid === true) break;
 		}
 
-		// Bail out on invalid API key
 		if (api_key_valid === false) {
 			console.log("Invalid API key.");
 			res.end(JSON.stringify({
@@ -1956,15 +1959,6 @@ app.post("/device/register", function(req, res) {
 			return;
 		}
 
-		var isNew = true;
-
-		// See if we know this MAC which is a primary key in db
-
-		if (err) {
-			console.log("Querying devices failed. " + err + "\n");
-		} else {
-			isNew = false;
-		}
 
 		var success = false;
 		var status = "OK";
@@ -2440,12 +2434,7 @@ app.post("/api/login", function(req, res) {
 					req.session.owner = user_data.doc.owner;
 					req.session.username = user_data.doc.username;
 
-					// var hour = 3600000;
 					var minute = 5 * 60 * 1000;
-					// var expiration = new Date(Date.now() + 24 * hour);
-					// req.session.cookie.expires = expiration;
-					// req.session.cookie.expires = false;
-					// req.session.cookie.domain = '.thinx.cloud';
 					req.session.cookie.httpOnly = true;
 					req.session.cookie.maxAge = 20 * minute;
 					req.session.cookie.secure = false;
@@ -2517,8 +2506,8 @@ app.post("/api/login", function(req, res) {
 
 /** Tested with: !device_register.spec.js` */
 app.get("/", function(req, res) {
-	console.log("/ called with owner: " + sess.owner);
-	if (sess.owner) {
+	console.log("/ called with owner: " + req.session.owner);
+	if (req.session.owner) {
 		res.redirect("http://rtm.thinx.cloud:80/app");
 	} else {
 		res.end("This is API ROOT."); // insecure
