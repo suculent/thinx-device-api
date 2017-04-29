@@ -1792,13 +1792,6 @@ app.post("/device/firmware", function(req, res) {
 		var success = false;
 		var status = "OK";
 
-		// FIXME: Validate checksum, commit and mac that should be part of request
-		var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(device);
-		var url = firmwareUpdateDescriptor.url;
-		var mac = firmwareUpdateDescriptor.mac;
-		var commit = firmwareUpdateDescriptor.commit;
-		var version = firmwareUpdateDescriptor.version;
-		var checksum = firmwareUpdateDescriptor.checksum;
 
 		devicelib.get(mac, function(error, existing) {
 
@@ -1807,10 +1800,18 @@ app.post("/device/firmware", function(req, res) {
 
 				// TODO: Fetch real device version here...
 				var device = {
-					mac: mac,
-					owner: owner,
-					version: version
+					mac: existing.mac,
+					owner: existing.owner,
+					version: existing.version
 				};
+
+				// FIXME: Validate checksum, commit and mac that should be part of request
+				var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(device);
+				var url = firmwareUpdateDescriptor.url;
+				var mac = firmwareUpdateDescriptor.mac;
+				var commit = firmwareUpdateDescriptor.commit;
+				var version = firmwareUpdateDescriptor.version;
+				var checksum = firmwareUpdateDescriptor.checksum;
 
 				console.log("Seaching for possible firmware update...");
 				deploy.initWithDevice(device);
