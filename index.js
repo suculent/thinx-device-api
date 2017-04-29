@@ -168,7 +168,7 @@ app.use(parser.urlencoded({
 
 app.all("/*", function(req, res, next) {
 
-	console.log("> " + req.method + ": " + req.query.url);
+	console.log("> " + req.method + ": " + req.query.URL);
 
 	var origin = req.get("origin");
 
@@ -1025,6 +1025,7 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 		var delete_key = null;
 
 		var fingerprints = Object.keys(doc.rsa_keys);
+		var new_keys = {};
 		for (var i = 0; i < fingerprints.length; i++) {
 			var key = doc.rsa_keys[fingerprints[i]];
 			if (fingerprints[i].indexOf(rsa_key_fingerprint) !== -1) {
@@ -1033,22 +1034,16 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 					console.log("Deleting RSA key file:" + key.key);
 					fs.unlink(key.key);
 				}
-
 				console.log("Removing RSA key from database: " + rsa_key_fingerprint);
-
-				var count = keys.count;
-				delete keys[fingerprint];
-				if (keys.count != count - 1) {
-					console.log("ASSERT: Object delete failed.");
-				} else {
-					delete_key = true;
-				}
-				break;
+				delete_key = true;
+			} else {
+				new_keys[fingerprint] = fingerprints[fingerprint];
 			}
 		}
 
 		if (delete_key !== null) {
 			doc.last_update = new Date();
+			user.doc.rsa_keys = new_keys;
 		} else {
 			res.end(JSON.stringify({
 				success: false,
@@ -1070,7 +1065,6 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 			} else {
 
 				delete user.doc._rev;
-				user.doc.rsa_keys = keys;
 
 				userlib.insert(user.doc, user.doc.id, function(err) {
 					if (err) {
