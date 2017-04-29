@@ -62,24 +62,31 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Requesting new API Key..."
 
-curl -b cookies.jar \
+R=curl -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -d '{}' \
 http://$HOST:7442/api/user/apikey
 
+# {"success":true,"api_key":"ece10e3effb17650420c280a7d5dce79110dc084"}
+
+SUCCESS=$(echo '$R' | jq .success)
+APIKEY="b7c2d19da39deba81e360c1d61b386dbd5a8bc5d93f8bd40e3f74510a24e8cb0"
+if [[ $SUCCESS == true ]];
+	APIKEY=$(echo '$R' | jq .api_key)
+	echo "New key to revoke: $APIKEY"
+fi
+
 echo
 echo "--------------------------------------------------------------------------------"
 echo "» Revoking API Key..."
 
-echo "  TODO: Parse previous response in order to revoke newly created API Key, prevents polluting database..."
-
-curl -b cookies.jar \
+curl -v -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--d '{ "api_key" : "b7c2d19da39deba81e360c1d61b386dbd5a8bc5d93f8bd40e3f74510a24e8cb0" }' \
+-d '{ "api_key" : "${APIKEY}" }' \
 -X DELETE http://$HOST:7442/api/user/apikey/revoke
 
 echo
