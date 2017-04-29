@@ -169,7 +169,7 @@ app.use(parser.urlencoded({
 
 app.all("/*", function(req, res, next) {
 
-	console.log("> " + req.method + ": " + req.query);
+	console.log("> " + req.method + ": " + req.query.toString());
 
 	// CORS headers
 
