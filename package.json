@@ -28,6 +28,7 @@
     "firebase-admin": "^4.2.0",
     "grunt-karma-coveralls": "^2.5.4",
     "gulp-repository-watch": "0.0.4",
+    "gulp-util": "^3.0.8",
     "karma-coverage": "*",
     "mocha": "^3.3.0",
     "mqtt": "^2.6.2",

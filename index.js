@@ -25,6 +25,7 @@ var sha256 = require("sha256");
 var fingerprint = require('ssh-fingerprint');
 var Emailer = require('email').Email;
 var fs = require("fs");
+var gutil = require('gulp-util');
 
 var request = require("request");
 
@@ -168,7 +169,7 @@ app.use(parser.urlencoded({
 
 app.all("/*", function(req, res, next) {
 
-	console.log("--- " + req.url);
+	console.log("--- " + req.query);
 
 	// CORS headers
 
@@ -1082,8 +1083,14 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 		for (var i = 0; i < fingerprints.length; i++) {
 			var key = doc.rsa_keys[fingerprints[i]];
 			if (fingerprints[i].indexOf(rsa_key_fingerprint) !== -1) {
-				console.log("Revoking " + rsa_key_fingerprint +
-					"from DB only... TODO: delete file if any.");
+
+				if (fs.existsSync(key.key)) {
+					console.log("Deleting RSA key file:" + key.key);
+					fs.unlink(key.key);
+				}
+
+				console.log("Removing RSA key from database: " + rsa_key_fingerprint);
+
 				delete user.doc.rsa_keys[fingerprint];
 				delete_key = true;
 				break;
