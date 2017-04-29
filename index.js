@@ -169,7 +169,7 @@ app.use(parser.urlencoded({
 
 app.all("/*", function(req, res, next) {
 
-	console.log("> " + req.method + ": " + req.query.toString());
+	console.log("> " + req.method + ": " + JSON.stringify(req.query));
 
 	var origin = req.get("origin");
 
@@ -736,7 +736,7 @@ app.post("/api/user/source", function(req, res) {
 /* Removes a GIT repository. Expects alias. */
 app.post("/api/user/source/revoke", function(req, res) {
 
-	if (!validateSecureDELETERequest(req)) return;
+	if (!validateSecurePOSTRequest(req)) return;
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
@@ -1846,7 +1846,7 @@ app.post("/device/firmware", function(req, res) {
 				} else {
 					res.end(JSON.stringify({
 						success: false,
-						status: "update"
+						status: "no_update_available"
 					}));
 					console.log("No firmware update available for " + JSON.stringify(
 						device));
