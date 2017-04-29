@@ -466,6 +466,7 @@ app.post("/api/user/apikey", function(req, res) {
 						console.log("/api/user/apikey ERROR:" + err);
 					} else {
 						console.log("Userlib " + doc.owner + "document inserted");
+						res.set("Connection", "close");
 						res.end(JSON.stringify({
 							success: true,
 							api_key: new_api_key
@@ -1136,7 +1137,6 @@ app.post("/api/user/create", function(req, res) {
 	var last_name = req.body.last_name;
 	var email = req.body.email;
 	var username = req.body.owner;
-	var avatar = "/assets/thinx/img/default_avatar.png";
 	// password will be set on successful e-mail activation
 
 	var new_owner_hash = sha256(email);
@@ -1187,7 +1187,6 @@ app.post("/api/user/create", function(req, res) {
 			rsa_keys: new_rsa_keys,
 			first_name: first_name,
 			last_name: last_name,
-			avatar: avatar,
 			activation: new_activation_token,
 			activation_date: new_activation_date,
 			repos: [default_repo]
@@ -2517,7 +2516,7 @@ app.post("/api/login", function(req, res) {
 					// req.session.cookie.expires = false;
 					// req.session.cookie.domain = '.thinx.cloud';
 					req.session.cookie.httpOnly = true;
-					req.session.cookie.maxAge = 5 * minute;
+					req.session.cookie.maxAge = 20 * minute;
 					req.session.cookie.secure = false;
 
 					// TODO: write last_seen timestamp to DB here __for devices__
