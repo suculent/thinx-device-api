@@ -1100,10 +1100,11 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 			return;
 		}
 
-		userlib.destroy(user.doc.id, user.doc._rev, function(err) {
+		userlib.destroy(user.doc._id, user.doc._rev, function(err) {
 
 			if (err) {
 				console.log("Cannot destroy user on password-reset");
+				console.log(err);
 				res.end(JSON.stringify({
 					status: "user_not_reset",
 					success: false
