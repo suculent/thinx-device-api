@@ -466,7 +466,6 @@ app.post("/api/user/apikey", function(req, res) {
 						console.log("/api/user/apikey ERROR:" + err);
 					} else {
 						console.log("Userlib " + doc.owner + "document inserted");
-						res.set("Connection", "close");
 						res.end(JSON.stringify({
 							success: true,
 							api_key: new_api_key
@@ -489,7 +488,7 @@ app.delete("/api/user/apikey/revoke", function(req, res) {
 
 	var owner = req.session.owner;
 	var username = req.session.username;
-	var api_key_hash = req.body.api_key; // this is hash only!
+	var api_key_hash = req.body.fingerprint;
 
 	console.log("Revoking API Key by hash " + api_key_hash);
 
@@ -1730,7 +1729,6 @@ app.get("/api/user/profile", function(req, res) {
 		}
 		// TODO: Limit results for security
 		var json = JSON.stringify(body);
-		res.set("Connection", "close");
 		res.end(json);
 	});
 });
@@ -2518,7 +2516,7 @@ app.post("/api/login", function(req, res) {
 					req.session.username = user_data.doc.username;
 
 					// var hour = 3600000;
-					var minute = 5*60*1000;
+					var minute = 5 * 60 * 1000;
 					// var expiration = new Date(Date.now() + 24 * hour);
 					// req.session.cookie.expires = expiration;
 					// req.session.cookie.expires = false;
