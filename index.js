@@ -209,8 +209,8 @@ app.all("/*", function(req, res, next) {
 	res.header(
 		"Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
 	res.header("Access-Control-Allow-Headers",
-		"Content-type,Accept,X-Access-Token,X-Key,x-thx-session");
-	res.header("Access-Control-Expose-Headers", "x-thx-session");
+		"Content-type,Accept,X-Access-Token,X-Key");
+	// res.header("Access-Control-Expose-Headers", "x-thx-session");
 
 	if (req.method == "OPTIONS") {
 		res.status(200).end();
@@ -1136,6 +1136,7 @@ app.post("/api/user/create", function(req, res) {
 	var last_name = req.body.last_name;
 	var email = req.body.email;
 	var username = req.body.owner;
+	var avatar = "/assets/thinx/img/default_avatar.png";
 	// password will be set on successful e-mail activation
 
 	var new_owner_hash = sha256(email);
@@ -1186,6 +1187,7 @@ app.post("/api/user/create", function(req, res) {
 			rsa_keys: new_rsa_keys,
 			first_name: first_name,
 			last_name: last_name,
+			avatar: avatar,
 			activation: new_activation_token,
 			activation_date: new_activation_date,
 			repos: [default_repo]
@@ -2508,12 +2510,12 @@ app.post("/api/login", function(req, res) {
 					req.session.owner = user_data.doc.owner;
 					req.session.username = user_data.doc.username;
 
-					//var hour = 3600000;
+					// var hour = 3600000;
 					var minute = 5*60*1000;
-					//var expiration = new Date(Date.now() + 24 * hour);
-					//req.session.cookie.expires = expiration;
-					//req.session.cookie.expires = false;
-					//req.session.cookie.domain = '.thinx.cloud';
+					// var expiration = new Date(Date.now() + 24 * hour);
+					// req.session.cookie.expires = expiration;
+					// req.session.cookie.expires = false;
+					// req.session.cookie.domain = '.thinx.cloud';
 					req.session.cookie.httpOnly = true;
 					req.session.cookie.maxAge = 5 * minute;
 					req.session.cookie.secure = false;
