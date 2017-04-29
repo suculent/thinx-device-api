@@ -90,8 +90,8 @@ curl -v -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--d '{ "api_key" : "${APIKEY}" }' \
--X DELETE http://$HOST:7442/api/user/apikey/revoke
+-d '{ "fingerprint" : "${APIKEY}" }' \
+http://$HOST:7442/api/user/apikey/revoke
 
 echo
 echo "--------------------------------------------------------------------------------"
@@ -122,7 +122,7 @@ curl -b cookies.jar \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -d '{ "fingerprint" : "d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93" }' \
--X DELETE http://$HOST:7442/api/user/rsakey/revoke
+http://$HOST:7442/api/user/rsakey/revoke
 
 echo
 echo "--------------------------------------------------------------------------------"
@@ -133,7 +133,7 @@ curl -b cookies.jar \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -d '{ "alias" : "name", "key" : "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0PF7uThKgcEwtBga4gRdt7tiPmxzRhJgxUdUrNKj0z4rDhs09gmXyN1EBH3oATJOMwdZ7J19eP/qRFK+bbkOacP6Hh0+eCr54bySpqyNPAeQFFXWzLXJ6t/di/vH0deutYBNH6S5yVz+Df/04IjoVIf+AMDYA8ppJ3WtBm0Qp/1UjYDM3Hc93JtDwr6AUoq/k0oAroP4ikL2gyXnmVjMX0DIkBwEScXhFDi1X6u6PWvFPLeZeB5MWQUo+VnBwFctExOmEt3RWJdwv7s8uRnoaFDA2OxlQ8cMWjCx0Z/aftl8AaV/TwpFTc1Fz/LhZ54Ud3s4usHji9720aAkSXGfD test@thinx.cloud" }' \
--X POST http://$HOST:7442/api/user/rsakey
+http://$HOST:7442/api/user/rsakey
 
 echo
 echo "--------------------------------------------------------------------------------"

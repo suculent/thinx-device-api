@@ -479,11 +479,11 @@ app.post("/api/user/apikey", function(req, res) {
 });
 
 /* Deletes API Key by its hash value */
-app.delete("/api/user/apikey/revoke", function(req, res) {
+app.post("/api/user/apikey/revoke", function(req, res) {
 
 	console.log("/api/user/apikey/revoke");
 
-	if (!validateSecureDELETERequest(req)) return;
+	if (!validateSecurePOSTRequest(req)) return;
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
@@ -1029,11 +1029,11 @@ app.get("/api/user/rsakey/list", function(req, res) {
 });
 
 /* Deletes RSA Key by its fingerprint */
-app.delete("/api/user/rsakey/revoke", function(req, res) {
+app.post("/api/user/rsakey/revoke", function(req, res) {
 
 	console.log("/api/user/rsakey/revoke");
 
-	if (!validateSecureDELETERequest(req)) return;
+	if (!validateSecurePOSTRequest(req)) return;
 
 	if (!validateSession(req, res)) return;
 
