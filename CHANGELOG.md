@@ -6,11 +6,19 @@
 
 » Notifier (finish prototype)
 » Builder (finish prototype)
-» Attach/detach repository to device and commence build
 » Refactor to UDIDs instead of MACs and owner_id
+
+### Last week
+
+PLANS: 
+
+» Optimizace server use by moving couch to iot server
+» Attach/detach repository to device and commence build
 » [...] Device firmware (to support direct update)
-» Statistic data for graphs
+» Aggregate statistic data from logs for graphs
 » Testing, testing, testing...
+
+
 
 ### Third week
 
