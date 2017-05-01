@@ -1863,6 +1863,8 @@ app.post("/device/register", function(req, res) {
 
 	validateRequest(req, res);
 
+	console.log(JSON.stringify(req.body));
+
 	if (typeof(req.body.registration) == "undefined") {
 		return;
 	}
@@ -1942,7 +1944,7 @@ app.post("/device/register", function(req, res) {
 
 		for (var kindex in user_data.api_keys) {
 			var userkey = user_data.api_keys[kindex];
-			console.log("Comparing " + userkey + " to " + api_key);
+			//console.log("Comparing " + userkey + " to " + api_key);
 			if (userkey.indexOf(api_key) !== -1) {
 				console.log("Found valid key.");
 				api_key_valid = true;
@@ -2022,7 +2024,7 @@ app.post("/device/register", function(req, res) {
 			version: device_version,
 			device_id: device_id,
 			lastupdate: new Date(),
-			lastkey: api_key
+			lastkey: sha256(api_key)
 		};
 
 		console.log("Seaching for possible firmware update...");
@@ -2131,7 +2133,12 @@ app.post("/device/register", function(req, res) {
 					});
 
 				} else {
+
+					// IS NEW!
+
 					console.log(error);
+
+					device.device_id = uuidV1();
 
 					device.lastupdate = new Date();
 					if (typeof(fw) !== undefined && fw !== null) {
