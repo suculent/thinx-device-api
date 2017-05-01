@@ -8,11 +8,13 @@
 » Builder (finish prototype)
 » Attach/detach repository to device and commence build
 » Refactor to UDIDs instead of MACs and owner_id
-» Device firmware (to support direct update)
+» [...] Device firmware (to support direct update)
 » Statistic data for graphs
 » Testing, testing, testing...
 
 ### Third week
+
+1/5/2017 - 1.2.533: re-tested and improved device registration, new UI
 
 29/4/2017 - 1.2.516: working login, API and RSA key creation and revocation, session,
 

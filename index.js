@@ -1969,13 +1969,10 @@ app.post("/device/register", function(req, res) {
 		var device_id = mac;
 		var device_version = "1.0.0"; // default
 
-		if (typeof(req.version) !== "undefined" && req.version !== null) {
-			device_version = req.version;
+		if (typeof(reg.version) !== "undefined" && reg.version !== null) {
+			console.log("Updating device version to " + reg.version)
+			device_version = reg.version;
 		}
-
-		// TODO: Find existing version by firmware hash (from envelope)
-		//deploy.initWithDevice(...)
-		//deploy.versionWithHash(hash)
 
 		var firmware_url = "";
 		var known_alias = "";
