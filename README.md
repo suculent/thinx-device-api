@@ -17,7 +17,8 @@ API Server running on node.js.
 
 ## Roadmap
 
-* `owner` must be stored as hash (could be salted but not with e-mail)
+* `owner` is stored as hash (but should be salted)
+* `api_key` usage should be tracked
 
 ## Prerequisites
 

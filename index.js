@@ -2082,7 +2082,9 @@ app.post("/device/register", function(req, res) {
 			// - otherwise reply just OK
 
 			devicelib.get(mac, function(error, existing) {
+
 				if (!error) {
+
 					existing.lastupdate = new Date();
 					if (typeof(fw) !== undefined && fw !== null) {
 						existing.firmware = fw;
@@ -2129,11 +2131,51 @@ app.post("/device/register", function(req, res) {
 					});
 
 				} else {
-					console.log("GET:FAILED");
-					reg.success = false;
-					reg.status = "Get for update failed";
-					// todo: sendRegistrationFailureResponse(res, rdict);
-					sendRegistrationOKResponse(res, rdict);
+					console.log(error);
+
+					device.lastupdate = new Date();
+					if (typeof(fw) !== undefined && fw !== null) {
+						device.firmware = fw;
+					}
+					if (typeof(hash) !== undefined && hash !== null) {
+						device.hash = hash;
+					}
+					if (typeof(push) !== undefined && push !== null) {
+						device.push = push;
+					}
+					if (typeof(alias) !== undefined && alias !== null) {
+						device.alias = alias;
+					}
+					if (typeof(owner) !== undefined && owner !== null) {
+						device.owner = owner;
+					}
+
+					devicelib.insert(device, mac, function(err, body, header) {
+						if (!err) {
+							reg.success = true;
+							console.log("Device info created.");
+
+							res.end(JSON.stringify({
+								success: true,
+								status: "register"
+							}));
+
+							return;
+
+						} else {
+
+							reg.success = false;
+							reg.this.status = "Insert failed";
+							console.log("Device record update failed." + err);
+
+							console.log("CHECK6:");
+							console.log(reg);
+							console.log("CHECK6.1:");
+							console.log(rdict);
+
+							sendRegistrationOKResponse(res, rdict);
+						}
+					});
 				}
 			});
 		}
