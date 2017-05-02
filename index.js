@@ -2362,7 +2362,7 @@ app.post("/api/build", function(req, res) {
 			var rowData = rows[row];
 			console.log("Parsing user:" + JSON.stringify(rowData));
 			if (tenant.indexOf(rowData.key) !== -1) {
-				var db_udid_hash = rowData.doc;
+				var db_udid_hash = rowData.doc.hash;
 				console.log("Matching device:" + db_udid_hash);
 				if (device_udid_hash.indexOf(db_udid_hash) != -1) {
 					device = rowData.doc;
