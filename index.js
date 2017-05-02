@@ -2319,7 +2319,7 @@ app.post("/api/build", function(req, res) {
 		dryrun = build.dryrun;
 	}
 
-	if (typeof(build.device_udid_hash) === "undefined") {
+	if (typeof(build.hash) === "undefined") {
 		return res.end(JSON.stringify({
 			success: false,
 			status: "missing_device_hash"
