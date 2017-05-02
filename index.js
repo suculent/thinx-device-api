@@ -2124,7 +2124,6 @@ app.post("/device/register", function(req, res) {
 							console.log("CHECK5.1:");
 							console.log(rdict);
 
-							// todo: sendRegistrationFailureResponse(res, rdict);
 							sendRegistrationOKResponse(res, rdict);
 						}
 					});
@@ -2305,60 +2304,151 @@ validateSession = function(req, res) {
 // Build respective firmware and notify target device(s)
 app.post("/api/build", function(req, res) {
 
-	if (validateRequest(req, res) === true) {
+	if (!validateSecurePOSTRequest(req)) return;
+	if (!validateSession(req, res)) return;
 
-		var rdict = {};
+	var rdict = {};
 
-		var build = req.body.build;
-		var mac = build.mac; // should be optional only, used for paths now
-		var udid = build.udid; // target device UDID
-		var tenant = build.owner;
-		var git = build.git;
-		var dryrun = false;
+	// '{ "build" : { "hash" : "2d5b0e45f791cb3efd828d2a451e0dc64e4aefa3", "source" : "thinx-firmware-esp8266", "dryrun" : true } }'
 
-		if (typeof(build.dryrun) != "undefined") {
-			dryrun = build.dryrun;
-		}
+	var tenant = req.session.username;
+	var build = req.body.build; // build descriptor wrapper
 
-		if ((typeof(build) === "undefined" || build === null) ||
-			(typeof(mac) === "undefined" || mac === null) ||
-			(typeof(tenant) === "undefined" || tenant === null) ||
-			(typeof(git) === "undefined" || git === null)) {
-			rdict = {
-				build: {
-					success: false,
-					status: "Submission failed. Invalid params."
-				}
-			};
+	var dryrun = false;
+	if (typeof(build.dryrun) != "undefined") {
+		dryrun = build.dryrun;
+	}
 
-			res.end(JSON.stringify(rdict));
+	if (typeof(build.device_udid_hash) === "undefined") {
+		return res.end(JSON.stringify({
+			success: false,
+			status: "missing_device_hash"
+		}));
+	}
+	var device_udid_hash = build.hash;
+
+	if (typeof(build.source) === "undefined") {
+		return res.end(JSON.stringify({
+			success: false,
+			status: "missing_source_alias"
+		}));
+	}
+	var source_alias = build.source;
+
+	// FIXME: seek devices by owner and find the one that has same has as device_udid_hash; fetch device UDID and MAC
+
+	devicelib.view("devicelib", "devices_by_owner", {
+		"key": username,
+		"include_docs": true
+	}, function(err, body) {
+
+		if (err) {
+			if (err.toString() == "Error: missing") {
+				res.end(JSON.stringify({
+					result: "no_devices"
+				}));
+			}
+			console.log("/api/build: Error: " + err.toString());
 			return;
 		}
 
-		var build_id = uuidV1();
+		var rows = body.rows; // devices returned
+		var udid = null; // an array by design (needs push), to be encapsulated later
+		var device = null;
+		var mac = null;
 
-		if (dryrun === false) {
-			rdict = {
-				build: {
-					success: true,
-					status: "Build started.",
-					id: build_id
+		for (var row in rows) {
+			var rowData = rows[row];
+			if (username == rowData.key) {
+				var db_udid_hash = rowData.doc;
+				if (device_udid_hash.indexOf(db_udid_hash) != -1) {
+					device = rowData.doc;
+					console.log("Device found: " + rowData);
+					udid = device.udid; // target device UDID
+					mac = device.mac;
+					break;
 				}
-			};
-		} else {
-			rdict = {
-				build: {
-					success: true,
-					status: "Dry-run started. Build will not be deployed.",
-					id: build_id
-				}
-			};
+			}
 		}
 
-		res.end(JSON.stringify(rdict));
+		// TODO: convert build.git to git url by seeking in users' sources
+		userlib.view("users", "owners_by_username", {
+				"key": username,
+				"include_docs": true
+			},
 
-		buildCommand(build_id, tenant, mac, git, udid, dryrun);
-	}
+			function(err, body) {
+
+				if (err) {
+					console.log(err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "api_build-device_fetch_error"
+					}));
+					return;
+				}
+
+				if (body.rows.length === 0) {
+					res.end(JSON.stringify({
+						success: false,
+						status: "no_such_owner"
+					}));
+					return;
+				}
+
+				var git = null;
+
+				// Finds first source with given source_alias
+				var sources = body.rows[0].doc.sources;
+				for (var index in sources) {
+					var source = sources[index];
+					if (source.alias.indexOf(source_alias) !== -1) {
+						git = source.url;
+						break;
+					}
+				}
+
+				if ((typeof(build) === "undefined" || build === null) ||
+					(typeof(mac) === "undefined" || mac === null) ||
+					(typeof(tenant) === "undefined" || tenant === null) ||
+					(typeof(git) === "undefined" || git === null)) {
+					rdict = {
+						build: {
+							success: false,
+							status: "Submission failed. Invalid params."
+						}
+					};
+
+					res.end(JSON.stringify(rdict));
+					return;
+				}
+
+				var build_id = uuidV1();
+
+				if (dryrun === false) {
+					rdict = {
+						build: {
+							success: true,
+							status: "Build started.",
+							id: build_id
+						}
+					};
+				} else {
+					rdict = {
+						build: {
+							success: true,
+							status: "Dry-run started. Build will not be deployed.",
+							id: build_id
+						}
+					};
+				}
+
+				res.end(JSON.stringify(rdict));
+
+				buildCommand(build_id, tenant, mac, git, udid, dryrun);
+
+			});
+	});
 });
 
 function buildCommand(build_id, tenant, mac, git, udid, dryrun) {

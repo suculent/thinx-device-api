@@ -32,16 +32,6 @@ http://$HOST:7442/device/firmware
 
 echo
 echo "--------------------------------------------------------------------------------"
-echo "☢ Testing builder..."
-
-curl -H "Origin: rtm.thinx.cloud" \
--H "User-Agent: THiNX-Client" \
--H "Content-Type: application/json" \
--d '{ "build" : { "udid" : "47fc9ab2-2227-11e7-8584-4c327591230d", "mac" : "ANY", "owner" : "test", "git" : "git@github.com:suculent/thinx-firmware-esp8266.git", "dryrun" : true } }' \
-http://$HOST:7442/api/build
-
-echo
-echo "--------------------------------------------------------------------------------"
 echo "» Testing authentication..."
 
 # Get access cookie by authentication
@@ -178,6 +168,16 @@ curl -b cookies.jar \
 -d '{ "mac" : "00:00:00:00:00:00", "alias" : "thinx-test-repo" }' \
 http://$HOST:7442/api/device/attach
 
+echo
+echo "--------------------------------------------------------------------------------"
+echo "☢ Testing builder..."
+
+curl -b cookies.jar \
+-H "Origin: rtm.thinx.cloud" \
+-H "User-Agent: THiNX-Client" \
+-H "Content-Type: application/json" \
+-d '{ "build" : { "hash" : "2d5b0e45f791cb3efd828d2a451e0dc64e4aefa3", "source" : "thinx-firmware-esp8266", "dryrun" : true } }' \
+http://$HOST:7442/api/build
 
 #echo
 #echo "☢ Running NYC code coverage..."
