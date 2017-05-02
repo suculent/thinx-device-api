@@ -2335,9 +2335,6 @@ app.post("/api/build", function(req, res) {
 	}
 	var source_alias = build.source;
 
-	// Seeks devices by owner and find the one that has same has as device_udid_hash; fetch device UDID and MAC
-	console.log("Builder is fetching tenant...");
-
 	devicelib.view("devicelib", "devices_by_owner", {
 		"key": tenant,
 		"include_docs": true
@@ -2360,10 +2357,8 @@ app.post("/api/build", function(req, res) {
 
 		for (var row in rows) {
 			var rowData = rows[row].value;
-			//console.log("Parsing device:" + JSON.stringify(rowData));
 			if (tenant.indexOf(rowData.owner) !== -1) {
 				var db_udid_hash = rowData.hash;
-				console.log("Matching device:" + JSON.stringify(db_udid_hash));
 				if (device_udid_hash.indexOf(db_udid_hash) != -1) {
 					udid = rowData.hash; // target device ID hash
 					mac = rowData.mac; // target device ID mac, will deprecate
@@ -2410,15 +2405,6 @@ app.post("/api/build", function(req, res) {
 						break;
 					}
 				}
-
-				/*
-								console.log("BOM-check:");
-								console.log("udid:" + udid);
-								console.log("mac:" + mac);
-								console.log("tenant:" + tenant);
-								console.log("git:" + git);
-								console.log("dryrun:" + dryrun);
-								*/
 
 				if ((typeof(udid) === "undefined" || build === null) ||
 					(typeof(mac) === "undefined" || mac === null) ||
@@ -2494,20 +2480,7 @@ function buildCommand(build_id, tenant, mac, git, udid, dryrun) {
  * Authentication
  */
 
-// Used by web app
-app.get("/api/logout", function(req, res) {
-
-	if (typeof(req.session) !== "undefined") {
-		req.session.destroy(function(err) {
-			if (err) {
-				console.log(err);
-			}
-		});
-	}
-	res.redirect("http://rtm.thinx.cloud/"); // HOME_URL (Apache)
-});
-
-// Front-end authentication, returns 5-minute session on valid authentication
+// Front-end authentication, returns session on valid authentication
 app.post("/api/login", function(req, res) {
 
 	var client_type = "webapp";
@@ -2653,6 +2626,19 @@ app.post("/api/login", function(req, res) {
 	});
 });
 
+// Front-end authentication, destroys session on valid authentication
+app.get("/api/logout", function(req, res) {
+
+	if (typeof(req.session) !== "undefined") {
+		req.session.destroy(function(err) {
+			if (err) {
+				console.log(err);
+			}
+		});
+	}
+	res.redirect("http://rtm.thinx.cloud/"); // HOME_URL (Apache)
+});
+
 /** Tested with: !device_register.spec.js` */
 app.get("/", function(req, res) {
 	console.log("/ called with owner: " + req.session.owner);
@@ -2679,9 +2665,8 @@ app.listen(serverPort, function() {
 	console.log("» Started on port " + serverPort);
 });
 
-/*
+
 // Prevent crashes on uncaught exceptions
 process.on("uncaughtException", function(err) {
 	console.log("Caught exception: " + err);
 });
-*/
