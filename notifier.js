@@ -116,21 +116,23 @@ var pushNotificationPayload = {
 };
 
 // Initially creates DB, otherwise fails silently.
-nano.db.create("managed_repos", function(err, body, header) {
+nano.db.create("managed_builds", function(err, body, header) {
   if (err) {
     if (err ==
-      "Error: The database could not be created, the file already exists.") {
+      "Error: The build database could not be created, the file already exists."
+    ) {
       // silently fail, this is ok
     } else {
-      console.log("» Repository database creation completed. " + err + "\n");
+      console.log("» RepositBuildory database creation completed. " + err +
+        "\n");
     }
   } else {
-    console.log("» Repository database creation completed. Response: " +
+    console.log("» Build database creation completed. Response: " +
       JSON.stringify(body) + "\n");
   }
 });
 
-var gitlib = require("nano")(db).use("managed_repos");
+var loglib = require("nano")(db).use("managed_logs");
 var devicelib = require("nano")(db).use("managed_devices");
 
 // Create build envelope
@@ -183,7 +185,7 @@ fs.open(envelopePath, "w", function(err, fd) {
   }
 });
 
-// TODO: Update current build version in managed_repos
+// TODO: Update current build version in managed_users.sources
 
 
 // Select targets

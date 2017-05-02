@@ -1,8 +1,8 @@
 {
-  "_id": "_design/repos",
+  "_id": "_design/logs",
   "language": "javascript",
   "views": {
-    "repos_by_id": {
+    "logs_by_id": {
       "map": "function (doc) { if(doc.id) { emit (doc.id, doc); } }"
     }
   }

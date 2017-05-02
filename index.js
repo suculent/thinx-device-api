@@ -49,11 +49,11 @@ function initDatabases() {
 		}
 	});
 
-	nano.db.create("managed_repos", function(err, body, header) {
+	nano.db.create("managed_logs", function(err, body, header) {
 		if (err) {
-			handleDatabaseErrors(err, "managed_repos");
+			handleDatabaseErrors(err, "managed_logs");
 		} else {
-			console.log("» Repository database creation completed. Response: " +
+			console.log("» Log database creation completed. Response: " +
 				JSON.stringify(
 					body) + "\n");
 		}
@@ -169,7 +169,9 @@ app.use(parser.urlencoded({
 
 app.all("/*", function(req, res, next) {
 
-	//console.log("> " + req.method + ": " + JSON.stringify(req));
+	console.log("> " + req.method + " originalUrl: " + req.originalUrl);
+	console.log("> " + req.method + " path: " + req.path);
+	console.log("> " + req.method + " url: " + req.url);
 
 	var origin = req.get("origin");
 

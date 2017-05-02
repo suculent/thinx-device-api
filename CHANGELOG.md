@@ -2,23 +2,32 @@
 
 ## Change log
 
-### TODO:
+### TODOs Now
 
-» Notifier (finish prototype)
-» Builder (finish prototype)
-» Refactor to UDIDs instead of MACs and owner_id
+* THX-50: Builder (finish prototype)
+* THX-49: Notifier (finish prototype)
+* THX-55: Test build->update provisioning
+* THX-54: Aggregate statistic data from logs for graphs
+* THX-58: invalid logins and `api_key` usage should be tracked: log invalid api key hashes
+
+
+### Future Roadmap
+
+*Security hardening*
+
+* THX-56: `owner` is stored as hash (but should be salted)
+* THX-53: Add VAULT to support storing usernames/passwords for git and direct links
+* THX-51: Refactor to UDIDs instead of MACs and owner_id
+
+*User features*
+
+* THX-52: Allow linking direct sources (maybe just use #direct switch and allow to store username/password using vault)
+* THX-57: Security: create audit log
+
 
 ### Last week
 
-PLANS:
-
-x Optimizace server use by moving couch to iot server
-» Attach/detach repository to device and commence build
-» [...] Device firmware (to support direct update)
-» Aggregate statistic data from logs for graphs
-» Testing, testing, testing...
-
-2/5/2017 - 1.3.550: secured build API, updated tests; UI improvements (attach/detach/build)
+2/5/2017 - 1.3.550: changed build API to secure, updated tests; UI advancements (attach/detach/build)
 
 ### Third week
 

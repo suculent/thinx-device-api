@@ -4,7 +4,7 @@
 
 API Server running on node.js.
 
-• Serves as an IoT device registration endpoint while soring device data using remote CouchDB server.
+• Serves as an IoT device registration endpoint while storing device data using CouchDB server and Redis session-store.
 
 • Application is a back-end data provider (security agent) for RTM admin console running on the same server (currently on Apache, but should converge to node.js).
 
@@ -15,23 +15,18 @@ API Server running on node.js.
 * ESP8266 (thinx-firmware-esp8266)
 * Expected: Arduino
 
-## Roadmap
-
-* `owner` is stored as hash (but should be salted)
-* `api_key` usage should be tracked
-
 ## Prerequisites
 
-* Linux Server (possibly RasPi but not tested)
-* Application runs on HTTP port 7442 (possibly HTTPS 7441)
-* Admin runs on HTTPS port (443)
+* Linux Server (possibly Raspberry Pi but not tested)
+* API runs on HTTP port 7442 (possibly HTTPS 7441)
+* Admin runs on HTTP/HTTPS port (80/443)
 
 ## Database Schema
 
-* deviceslib: all devices
-* users: each user owns several api_keys and repositories that may be linked to one or more devices
+* managed_devices: all devices
+* managed_users: each user owns several api_keys and repositories that may be linked to one or more devices
 * builds: unused
-* repos: unused
+* managed_logs: audit logs by owner
 
 Device:
 
