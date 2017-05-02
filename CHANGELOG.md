@@ -9,7 +9,7 @@
 * THX-55: Test build->update provisioning
 * THX-54: Aggregate statistic data from logs for graphs
 * THX-58: invalid logins and `api_key` usage should be tracked: log invalid api key hashes
-
+* THX-62: Enable repository watcher for attached repos on start, add/remove on the at attach/detach
 
 ### Future Roadmap
 

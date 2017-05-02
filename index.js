@@ -169,9 +169,7 @@ app.use(parser.urlencoded({
 
 app.all("/*", function(req, res, next) {
 
-	console.log("> " + req.method + " originalUrl: " + req.originalUrl);
-	console.log("> " + req.method + " path: " + req.path);
-	console.log("> " + req.method + " url: " + req.url);
+	console.log("[" + req.method + "]:" + req.url);
 
 	var origin = req.get("origin");
 
@@ -309,7 +307,7 @@ app.post("/api/device/attach", function(req, res) {
 
 		var doc = body.rows[0].doc;
 
-		console.log("Attaching repository to device: " + JSON.stringify(doc));
+		console.log("Attaching repository to device: " + JSON.stringify(doc.hash));
 
 		devicelib.destroy(doc._id, doc._rev, function(err) {
 
@@ -366,7 +364,7 @@ app.post("/api/device/detach", function(req, res) {
 
 		var doc = body.rows[0].doc;
 
-		console.log("Detaching repository from device: " + JSON.stringify(doc));
+		console.log("Detaching repository from device: " + JSON.stringify(doc.hash));
 
 		devicelib.destroy(doc._id, doc._rev, function(err) {
 
@@ -474,7 +472,7 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 	var username = req.session.username;
 	var api_key_hash = req.body.fingerprint;
 
-	console.log("Revoking API Key by hash " + api_key_hash);
+	console.log("Revoke API Key by hash: " + api_key_hash);
 
 	userlib.view("users", "owners_by_username", {
 		"key": username,
@@ -613,7 +611,7 @@ app.get("/api/user/sources/list", function(req, res) {
 	var owner = req.session.owner;
 	var username = req.session.username;
 
-	console.log("Listing sources for owner: " + owner);
+	console.log("List sources for owner: " + owner);
 
 	userlib.view("users", "owners_by_username", {
 			"key": username,
@@ -1865,7 +1863,7 @@ app.post("/device/register", function(req, res) {
 
 	validateRequest(req, res);
 
-	console.log(JSON.stringify(req.body));
+	// console.log(JSON.stringify(req.body));
 
 	if (typeof(req.body.registration) == "undefined") {
 		return;
@@ -1895,7 +1893,7 @@ app.post("/device/register", function(req, res) {
 	var success = false;
 	var status = "ERROR";
 
-	console.log(req.headers);
+	// console.log(req.headers);
 
 	// Headers must contain Authentication header
 	if (typeof(req.headers.authentication) !== "undefined") {
@@ -1942,7 +1940,7 @@ app.post("/device/register", function(req, res) {
 		var api_key_valid = false;
 		var user_data = body.rows[0].doc;
 
-		console.log(JSON.stringify(user_data));
+		// console.log(JSON.stringify(user_data));
 
 		for (var kindex in user_data.api_keys) {
 			var userkey = user_data.api_keys[kindex];
@@ -1972,7 +1970,7 @@ app.post("/device/register", function(req, res) {
 		var device_version = "1.0.0"; // default
 
 		if (typeof(reg.version) !== "undefined" && reg.version !== null) {
-			console.log("Updating device version to " + reg.version)
+			console.log("Updating device version to " + reg.version);
 			device_version = reg.version;
 		}
 
@@ -2362,7 +2360,7 @@ app.post("/api/build", function(req, res) {
 
 		for (var row in rows) {
 			var rowData = rows[row].value;
-			console.log("Parsing device:" + JSON.stringify(rowData));
+			//console.log("Parsing device:" + JSON.stringify(rowData));
 			if (tenant.indexOf(rowData.owner) !== -1) {
 				var db_udid_hash = rowData.hash;
 				console.log("Matching device:" + JSON.stringify(db_udid_hash));
@@ -2413,12 +2411,14 @@ app.post("/api/build", function(req, res) {
 					}
 				}
 
-				console.log("BOM-check:");
-				console.log("udid:" + udid);
-				console.log("mac:" + mac);
-				console.log("tenant:" + tenant);
-				console.log("git:" + git);
-				console.log("dryrun:" + dryrun);
+				/*
+								console.log("BOM-check:");
+								console.log("udid:" + udid);
+								console.log("mac:" + mac);
+								console.log("tenant:" + tenant);
+								console.log("git:" + git);
+								console.log("dryrun:" + dryrun);
+								*/
 
 				if ((typeof(udid) === "undefined" || build === null) ||
 					(typeof(mac) === "undefined" || mac === null) ||
@@ -2578,7 +2578,7 @@ app.post("/api/login", function(req, res) {
 				// TODO: Second option (direct compare) will deprecate soon.
 				if (password.indexOf(user_data.value) !== -1) {
 
-					console.log("user_data:\n" + JSON.stringify(user_data) + "\n");
+					console.log("Found user:" + JSON.stringify(user_data.doc.owner));
 
 					req.session.owner = user_data.doc.owner;
 					req.session.username = user_data.doc.username;
@@ -2597,7 +2597,7 @@ app.post("/api/login", function(req, res) {
 						}));
 						return;
 					} else if (client_type == "webapp") {
-						console.log("Redirecting through JSON body...");
+						//console.log("Redirecting through JSON body...");
 						res.end(JSON.stringify({
 							"redirectURL": "http://rtm.thinx.cloud:80/app"
 						}));
