@@ -2354,7 +2354,7 @@ app.post("/api/build", function(req, res) {
 		}
 
 		var rows = body.rows; // devices returned
-		var udid = null; // an array by design (needs push), to be encapsulated later
+		var udid = null;
 		var device = null;
 		var mac = null;
 
@@ -2366,9 +2366,9 @@ app.post("/api/build", function(req, res) {
 				console.log("Matching device:" + db_udid_hash);
 				if (device_udid_hash.indexOf(db_udid_hash) != -1) {
 					device = rowData.doc;
-					console.log("Device found: " + JSON.stringify(rowData));
-					udid = device.doc.device_id; // target device UDID
-					mac = device.doc.mac;
+					console.log("Device doc found: " + JSON.stringify(device));
+					udid = device.udid; // target device UDID
+					mac = device.mac;
 					break;
 				}
 			}
