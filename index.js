@@ -2365,8 +2365,8 @@ app.post("/api/build", function(req, res) {
 				var db_udid_hash = rowData.hash;
 				console.log("Matching device:" + JSON.stringify(db_udid_hash));
 				if (device_udid_hash.indexOf(db_udid_hash) != -1) {
-					udid = device.device_id; // target device UDID
-					mac = device.mac;
+					udid = rowData.device_id; // target device UDID
+					mac = rowData.mac;
 					break;
 				}
 			}
