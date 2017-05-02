@@ -2412,6 +2412,13 @@ app.post("/api/build", function(req, res) {
 					}
 				}
 
+				console.log("BOM-check:");
+				console.log("udid:" + udid);
+				console.log("mac:" + mac);
+				console.log("tenant:" + tenant);
+				console.log("git:" + git);
+				console.log("dryrun:" + dryrun);
+				/*
 				if ((typeof(udid) === "undefined" || build === null) ||
 					(typeof(mac) === "undefined" || mac === null) ||
 					(typeof(tenant) === "undefined" || tenant === null) ||
@@ -2426,6 +2433,7 @@ app.post("/api/build", function(req, res) {
 					res.end(JSON.stringify(rdict));
 					return;
 				}
+				*/
 
 				var build_id = uuidV1();
 
