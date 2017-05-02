@@ -135,7 +135,7 @@ vault.init({
 initDatabases();
 
 var devicelib = require("nano")(db).use("managed_devices");
-var gitlib = require("nano")(db).use("managed_repos");
+var loglib = require("nano")(db).use("managed_logs");
 var buildlib = require("nano")(db).use("managed_builds");
 var userlib = require("nano")(db).use("managed_users");
 
