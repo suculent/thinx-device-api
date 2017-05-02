@@ -2338,7 +2338,7 @@ app.post("/api/build", function(req, res) {
 	// FIXME: seek devices by owner and find the one that has same has as device_udid_hash; fetch device UDID and MAC
 
 	devicelib.view("devicelib", "devices_by_owner", {
-		"key": username,
+		"key": tenant,
 		"include_docs": true
 	}, function(err, body) {
 
@@ -2373,7 +2373,7 @@ app.post("/api/build", function(req, res) {
 
 		// TODO: convert build.git to git url by seeking in users' sources
 		userlib.view("users", "owners_by_username", {
-				"key": username,
+				"key": tenant,
 				"include_docs": true
 			},
 
