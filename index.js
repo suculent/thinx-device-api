@@ -2336,6 +2336,7 @@ app.post("/api/build", function(req, res) {
 	var source_alias = build.source;
 
 	// FIXME: seek devices by owner and find the one that has same has as device_udid_hash; fetch device UDID and MAC
+	console.log("Builder is fetching tenant...");
 
 	devicelib.view("devicelib", "devices_by_owner", {
 		"key": tenant,
@@ -2401,15 +2402,17 @@ app.post("/api/build", function(req, res) {
 
 				// Finds first source with given source_alias
 				var sources = body.rows[0].doc.sources;
+				console.log("Parsing sources:" + JSON.stringify(sources));
 				for (var index in sources) {
 					var source = sources[index];
 					if (source.alias.indexOf(source_alias) !== -1) {
 						git = source.url;
+						console.log("Found source: " + git);
 						break;
 					}
 				}
 
-				if ((typeof(build) === "undefined" || build === null) ||
+				if ((typeof(udid) === "undefined" || build === null) ||
 					(typeof(mac) === "undefined" || mac === null) ||
 					(typeof(tenant) === "undefined" || tenant === null) ||
 					(typeof(git) === "undefined" || git === null)) {
