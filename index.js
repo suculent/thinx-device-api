@@ -2360,9 +2360,10 @@ app.post("/api/build", function(req, res) {
 
 		for (var row in rows) {
 			var rowData = rows[row];
-			console.log(JSON.stringify(rowData));
-			if (tenant == rowData.key) {
+			console.log("Parsing user:" + JSON.stringify(rowData));
+			if (tenant.indexOf(rowData.key) !== -1) {
 				var db_udid_hash = rowData.doc;
+				console.log("Matching device:" + db_udid_hash);
 				if (device_udid_hash.indexOf(db_udid_hash) != -1) {
 					device = rowData.doc;
 					console.log("Device found: " + rowData);
