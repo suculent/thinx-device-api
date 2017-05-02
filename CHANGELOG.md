@@ -10,15 +10,15 @@
 
 ### Last week
 
-PLANS: 
+PLANS:
 
-» Optimizace server use by moving couch to iot server
+x Optimizace server use by moving couch to iot server
 » Attach/detach repository to device and commence build
 » [...] Device firmware (to support direct update)
 » Aggregate statistic data from logs for graphs
 » Testing, testing, testing...
 
-
+2/5/2017 - 1.3.550: secured build API, updated tests; UI improvements (attach/detach/build)
 
 ### Third week
 

@@ -2335,7 +2335,7 @@ app.post("/api/build", function(req, res) {
 	}
 	var source_alias = build.source;
 
-	// FIXME: seek devices by owner and find the one that has same has as device_udid_hash; fetch device UDID and MAC
+	// Seeks devices by owner and find the one that has same has as device_udid_hash; fetch device UDID and MAC
 	console.log("Builder is fetching tenant...");
 
 	devicelib.view("devicelib", "devices_by_owner", {
@@ -2365,14 +2365,14 @@ app.post("/api/build", function(req, res) {
 				var db_udid_hash = rowData.hash;
 				console.log("Matching device:" + JSON.stringify(db_udid_hash));
 				if (device_udid_hash.indexOf(db_udid_hash) != -1) {
-					udid = rowData.device_id; // target device UDID
-					mac = rowData.mac;
+					udid = rowData.hash; // target device ID hash
+					mac = rowData.mac; // target device ID mac, will deprecate
 					break;
 				}
 			}
 		}
 
-		// TODO: convert build.git to git url by seeking in users' sources
+		// Converts build.git to git url by seeking in users' sources
 		userlib.view("users", "owners_by_username", {
 				"key": tenant,
 				"include_docs": true
@@ -2417,7 +2417,7 @@ app.post("/api/build", function(req, res) {
 				console.log("tenant:" + tenant);
 				console.log("git:" + git);
 				console.log("dryrun:" + dryrun);
-				/*
+
 				if ((typeof(udid) === "undefined" || build === null) ||
 					(typeof(mac) === "undefined" || mac === null) ||
 					(typeof(tenant) === "undefined" || tenant === null) ||
@@ -2425,14 +2425,13 @@ app.post("/api/build", function(req, res) {
 					rdict = {
 						build: {
 							success: false,
-							status: "Submission failed. Invalid params."
+							status: "invalid_params"
 						}
 					};
 
 					res.end(JSON.stringify(rdict));
 					return;
 				}
-				*/
 
 				var build_id = uuidV1();
 
