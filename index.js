@@ -2359,11 +2359,11 @@ app.post("/api/build", function(req, res) {
 		var mac = null;
 
 		for (var row in rows) {
-			var rowData = rows[row];
+			var rowData = rows[row].value;
 			console.log("Parsing user:" + JSON.stringify(rowData));
 			if (tenant.indexOf(rowData.key) !== -1) {
-				var db_udid_hash = rowData.doc.hash;
-				console.log("Matching device:" + db_udid_hash);
+				var db_udid_hash = rowData.hash;
+				console.log("Matching device:" + JSON.stringify(db_udid_hash));
 				if (device_udid_hash.indexOf(db_udid_hash) != -1) {
 					device = rowData.doc;
 					console.log("Device doc found: " + JSON.stringify(device));
