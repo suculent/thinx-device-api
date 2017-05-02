@@ -2359,7 +2359,8 @@ app.post("/api/build", function(req, res) {
 
 		for (var row in rows) {
 			var rowData = rows[row];
-			if (username == rowData.key) {
+			console.log(JSON.stringify(rowData));
+			if (tenant == rowData.key) {
 				var db_udid_hash = rowData.doc;
 				if (device_udid_hash.indexOf(db_udid_hash) != -1) {
 					device = rowData.doc;
