@@ -1792,6 +1792,8 @@ app.post("/device/firmware", function(req, res) {
 				status: "api_key_invalid"
 			}));
 			return;
+		} else {
+			alog.console.log(owner, "Firmware request with API Key: " + api_key);
 		}
 
 		// See if we know this MAC which is a primary key in db
@@ -1909,6 +1911,7 @@ app.post("/device/register", function(req, res) {
 		api_key = req.headers.authentication;
 	} else {
 		console.log("ERROR: Registration requests now require API key!");
+		alog.console.log(owner, "Attempt to register witout API Key!");
 		res.end(JSON.stringify({
 			success: false,
 			status: "authentication"
@@ -1949,8 +1952,6 @@ app.post("/device/register", function(req, res) {
 		var api_key_valid = false;
 		var user_data = body.rows[0].doc;
 
-		// console.log(JSON.stringify(user_data));
-
 		for (var kindex in user_data.api_keys) {
 			var userkey = user_data.api_keys[kindex].key;
 			console.log("Comparing user_data.api_keys[kindex].key " + userkey +
@@ -1965,11 +1966,14 @@ app.post("/device/register", function(req, res) {
 
 		if (api_key_valid === false) {
 			console.log("Invalid API key.");
+			alog.console.log(owner, "Attempt to use invalid API Key: " + api_key);
 			res.end(JSON.stringify({
 				success: false,
 				status: "authentication"
 			}));
 			return;
+		} else {
+			alog.console.log(owner, "Using API Key: " + api_key);
 		}
 
 
