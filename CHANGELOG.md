@@ -27,6 +27,7 @@
 
 ### Last week
 
+3/5/2017 - 1.3.559: API key now requires alias
 2/5/2017 - 1.3.550: changed build API to secure, updated tests; UI advancements (attach/detach/build)
 
 ### Third week

@@ -63,7 +63,7 @@ R=$(curl -b cookies.jar \
 -d '{}' \
 http://$HOST:7442/api/user/apikey)
 
-# {"success":true,"api_key":"ece10e3effb17650420c280a7d5dce79110dc084"}
+# {"success":true,"api_key":"ece10e3effb17650420c280a7d5dce79110dc084","alias":"api-key-name"}
 
 SUCCESS=$(echo '$R' | jq .success)
 APIKEY="b7c2d19da39deba81e360c1d61b386dbd5a8bc5d93f8bd40e3f74510a24e8cb0"

@@ -403,10 +403,19 @@ app.post("/api/user/apikey", function(req, res) {
 	var owner = req.session.owner;
 	var username = req.session.username;
 
+	if (typeof(req.body.alias) === "undefined") {
+		res.end(JSON.stringify({
+			success: false,
+			status: "missing_alias"
+		}));
+		return;
+	}
+	var new_api_key_alias = req.body.alias;
+
 	var new_api_key = sha256(new Date().toString()).substring(0, 40);
 
 	// Get all users
-	// FIXME: Refactor to oqners_by_apikey
+	// FIXME: Refactor to owners_by_apikey
 	userlib.view("users", "owners_by_username", {
 		"key": username,
 		"include_docs": true
@@ -442,7 +451,10 @@ app.post("/api/user/apikey", function(req, res) {
 			} else {
 
 				// Add new API Key
-				doc.api_keys.push(new_api_key);
+				doc.api_keys.push({
+					"key": new_api_key,
+					"alias": new_api_key_alias
+				});
 				delete doc._rev;
 
 				userlib.insert(doc, doc._id, function(err, body, header) {
@@ -496,10 +508,10 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 		var api_key_index = null;
 		var api_key = null;
 		for (var index in keys) {
-			var internal_hash = sha256(keys[index]);
+			var internal_hash = sha256(keys[index].key);
 			if (internal_hash.indexOf(api_key_hash) !== -1) {
 				api_key_index = index;
-				api_key = keys[index];
+				api_key = keys[index].key;
 				console.log("Found and splicing index " + api_key_index + " key " +
 					api_key);
 				user.api_keys.splice(api_key_index, 1); // important
@@ -584,9 +596,10 @@ app.get("/api/user/apikey/list", function(req, res) {
 		var exportedKeys = [];
 		for (var index in doc.api_keys) {
 			var info = {
-				name: "******************************" + doc.api_keys[index].substring(
+				name: "******************************" + doc.api_keys[index].key.substring(
 					30),
-				hash: sha256(doc.api_keys[index])
+				hash: sha256(doc.api_keys[index].key),
+				alias: doc.api_keys[index].alias
 			};
 			exportedKeys.push(info);
 		}
@@ -1764,7 +1777,7 @@ app.post("/device/firmware", function(req, res) {
 		var user_data = body.rows[0].doc;
 
 		for (var kindex in user_data.api_keys) {
-			var userkey = user_data.api_keys[kindex];
+			var userkey = user_data.api_keys[kindex].key;
 			console.log("Matching " + userkey + " to " + api_key);
 			if (userkey.indexOf(api_key) !== -1) {
 				console.log("Found valid key.");
@@ -1943,8 +1956,9 @@ app.post("/device/register", function(req, res) {
 		// console.log(JSON.stringify(user_data));
 
 		for (var kindex in user_data.api_keys) {
-			var userkey = user_data.api_keys[kindex];
-			//console.log("Comparing " + userkey + " to " + api_key);
+			var userkey = user_data.api_keys[kindex].key;
+			console.log("Comparing user_data.api_keys[kindex].key " + userkey +
+				" with requested api_key " + api_key);
 			if (userkey.indexOf(api_key) !== -1) {
 				console.log("Found valid key.");
 				api_key_valid = true;
