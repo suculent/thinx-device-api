@@ -2575,7 +2575,7 @@ app.post("/api/login", function(req, res) {
 					req.session.cookie.maxAge = 20 * minute;
 					req.session.cookie.secure = false;
 
-					alog.log(owner, "User logged in: " + username);
+					alog.log(req.session.owner, "User logged in: " + username);
 
 					// TODO: write last_seen timestamp to DB here __for devices__
 					console.log("client_type: " + client_type);
@@ -2684,8 +2684,8 @@ app.listen(serverPort, function() {
 
 
 // Prevent crashes on uncaught exceptions
+/*
 process.on("uncaughtException", function(err) {
 	console.log("Caught exception: " + err);
 });
-
-//
+*/
