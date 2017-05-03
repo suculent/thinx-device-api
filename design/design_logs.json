@@ -4,6 +4,9 @@
   "views": {
     "logs_by_id": {
       "map": "function (doc) { if(doc.id) { emit (doc.id, doc); } }"
+    },
+    "logs_by_owner": {
+      "map": "function (doc) { if(doc.owner) { emit (doc); } }"
     }
   }
 }

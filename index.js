@@ -30,6 +30,7 @@ var request = require("request");
 
 var deploy = require("./lib/thinx/deployment");
 var v = require("./lib/thinx/version");
+var alog = require("./lib/thinx/audit");
 
 var rdict = {};
 
@@ -44,16 +45,6 @@ function initDatabases() {
 			handleDatabaseErrors(err, "managed_devices");
 		} else {
 			console.log("» Device database creation completed. Response: " +
-				JSON.stringify(
-					body) + "\n");
-		}
-	});
-
-	nano.db.create("managed_logs", function(err, body, header) {
-		if (err) {
-			handleDatabaseErrors(err, "managed_logs");
-		} else {
-			console.log("» Log database creation completed. Response: " +
 				JSON.stringify(
 					body) + "\n");
 		}
@@ -135,7 +126,6 @@ vault.init({
 initDatabases();
 
 var devicelib = require("nano")(db).use("managed_devices");
-var loglib = require("nano")(db).use("managed_logs");
 var buildlib = require("nano")(db).use("managed_builds");
 var userlib = require("nano")(db).use("managed_users");
 
@@ -295,6 +285,9 @@ app.post("/api/device/attach", function(req, res) {
 	var owner = req.session.owner;
 	var username = req.session.username;
 
+	alog.console.log(owner, "Attempt to attach repository: " + alias +
+		" to device: " + mac);
+
 	devicelib.view("devicelib", "devices_by_mac", {
 		"key": mac,
 		"include_docs": true
@@ -351,6 +344,8 @@ app.post("/api/device/detach", function(req, res) {
 	var mac = req.body.mac;
 	var owner = req.session.owner;
 	var username = req.session.username;
+
+	alog.console.log(owner, "Attempt to detach repository from device: " + mac);
 
 	devicelib.view("devicelib", "devices_by_mac", {
 		"key": mac,
@@ -595,6 +590,7 @@ app.get("/api/user/apikey/list", function(req, res) {
 
 		var exportedKeys = [];
 		for (var index in doc.api_keys) {
+			console.log(doc.api_keys);
 			var info = {
 				name: "******************************" + doc.api_keys[index].key.substring(
 					30),
@@ -1730,8 +1726,6 @@ app.post("/device/firmware", function(req, res) {
 	var success = false;
 	var status = "ERROR";
 
-	console.log(req.headers);
-
 	// Headers must contain Authentication header
 	if (typeof(req.headers.authentication) !== "undefined") {
 		api_key = req.headers.authentication;
@@ -1789,6 +1783,7 @@ app.post("/device/firmware", function(req, res) {
 		// Bail out on invalid API key
 		if (api_key_valid === false) {
 			console.log("Invalid API key.");
+			alog.console.log(owner, "Attempt to use invalid API Key: " + api_key);
 			res.end(JSON.stringify({
 				success: false,
 				status: "api_key_invalid"
@@ -1905,8 +1900,6 @@ app.post("/device/register", function(req, res) {
 
 	var success = false;
 	var status = "ERROR";
-
-	// console.log(req.headers);
 
 	// Headers must contain Authentication header
 	if (typeof(req.headers.authentication) !== "undefined") {
@@ -2684,3 +2677,5 @@ app.listen(serverPort, function() {
 process.on("uncaughtException", function(err) {
 	console.log("Caught exception: " + err);
 });
+
+//
