@@ -2575,6 +2575,8 @@ app.post("/api/login", function(req, res) {
 					req.session.cookie.maxAge = 20 * minute;
 					req.session.cookie.secure = false;
 
+					alog.console.log(owner, "User logged in: " + username);
+
 					// TODO: write last_seen timestamp to DB here __for devices__
 					console.log("client_type: " + client_type);
 					if (client_type == "device") {
@@ -2600,6 +2602,7 @@ app.post("/api/login", function(req, res) {
 
 				} else {
 					console.log("Password mismatch for " + username);
+					alog.console.log(owner, "Password mismatch for: " + username);
 					res.end(JSON.stringify({
 						status: "password_mismatch",
 						success: false
