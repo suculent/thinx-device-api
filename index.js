@@ -301,6 +301,18 @@ app.post("/api/device/attach", function(req, res) {
 			return;
 		}
 
+		if (body.rows.length === 0) {
+			res.end(JSON.stringify({
+				success: false,
+				status: "udid_not_found"
+			}));
+			alog.log(owner, "Attempt to attach repository to non-existent device: " +
+				mac);
+			return;
+		}
+
+		console.log(JSON.stringify(body.rows));
+
 		var doc = body.rows[0].doc;
 
 		console.log("Attaching repository to device: " + JSON.stringify(doc.hash));
@@ -2684,8 +2696,7 @@ app.listen(serverPort, function() {
 
 
 // Prevent crashes on uncaught exceptions
-/*
+
 process.on("uncaughtException", function(err) {
 	console.log("Caught exception: " + err);
 });
-*/

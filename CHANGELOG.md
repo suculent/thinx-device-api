@@ -8,7 +8,6 @@
 * THX-49: Notifier (finish prototype)
 * THX-55: Test build->update provisioning
 * THX-54: Aggregate statistic data from logs for graphs
-* THX-58: invalid logins and `api_key` usage should be tracked: log invalid api key hashes
 * THX-62: Enable repository watcher for attached repos on start, add/remove on the at attach/detach
 
 ### Future Roadmap
@@ -27,7 +26,7 @@
 
 ### Last week
 
-3/5/2017 - 1.3.559: API key now requires alias
+3/5/2017 - 1.3.559: API key now requires alias, audit logging, 
 2/5/2017 - 1.3.550: changed build API to secure, updated tests; UI advancements (attach/detach/build)
 
 ### Third week

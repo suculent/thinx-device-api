@@ -46,8 +46,9 @@ npm install .
 if [[ $CIRCLECI == true ]]; then
 	echo
 	echo "☢  Running node.js without console for CI..."
-#forever start index.js -lo /var/log/thinx.log
-	service thinx-app start
+	nohup node index.js >> /var/log/thinx.log &
+	#forever start index.js -lo /var/log/thinx.log
+	#service thinx-app start
 	exit 0
 else
 
@@ -55,8 +56,8 @@ else
 	echo "☢  Running node.js as a background process..."
 
 	mkdir logs
-#	nohup node index.js > /var/log/thinx.log &
-	service thinx-app start
+	nohup node index.js >> /var/log/thinx.log &
+	#service thinx-app start
 
 	echo
 	echo "» Monitoring log. You can exit any time by pressing ^C and logout. Node.js will be still running."
