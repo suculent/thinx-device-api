@@ -204,7 +204,7 @@ app.all("/*", function(req, res, next) {
 		next();
 	}
 
-	alog.console.log("API", req.method + " : " + req.url);
+	alog.log("API", req.method + " : " + req.url);
 
 });
 
@@ -288,7 +288,7 @@ app.post("/api/device/attach", function(req, res) {
 	var owner = req.session.owner;
 	var username = req.session.username;
 
-	alog.console.log(owner, "Attempt to attach repository: " + alias +
+	alog.log(owner, "Attempt to attach repository: " + alias +
 		" to device: " + mac);
 
 	devicelib.view("devicelib", "devices_by_mac", {
@@ -348,7 +348,7 @@ app.post("/api/device/detach", function(req, res) {
 	var owner = req.session.owner;
 	var username = req.session.username;
 
-	alog.console.log(owner, "Attempt to detach repository from device: " + mac);
+	alog.log(owner, "Attempt to detach repository from device: " + mac);
 
 	devicelib.view("devicelib", "devices_by_mac", {
 		"key": mac,
@@ -1786,14 +1786,14 @@ app.post("/device/firmware", function(req, res) {
 		// Bail out on invalid API key
 		if (api_key_valid === false) {
 			console.log("Invalid API key.");
-			alog.console.log(owner, "Attempt to use invalid API Key: " + api_key);
+			alog.log(owner, "Attempt to use invalid API Key: " + api_key);
 			res.end(JSON.stringify({
 				success: false,
 				status: "api_key_invalid"
 			}));
 			return;
 		} else {
-			alog.console.log(owner, "Firmware request with API Key: " + api_key);
+			alog.log(owner, "Firmware request with API Key: " + api_key);
 		}
 
 		// See if we know this MAC which is a primary key in db
@@ -1911,7 +1911,7 @@ app.post("/device/register", function(req, res) {
 		api_key = req.headers.authentication;
 	} else {
 		console.log("ERROR: Registration requests now require API key!");
-		alog.console.log(owner, "Attempt to register witout API Key!");
+		alog.log(owner, "Attempt to register witout API Key!");
 		res.end(JSON.stringify({
 			success: false,
 			status: "authentication"
@@ -1966,14 +1966,14 @@ app.post("/device/register", function(req, res) {
 
 		if (api_key_valid === false) {
 			console.log("Invalid API key.");
-			alog.console.log(owner, "Attempt to use invalid API Key: " + api_key);
+			alog.log(owner, "Attempt to use invalid API Key: " + api_key);
 			res.end(JSON.stringify({
 				success: false,
 				status: "authentication"
 			}));
 			return;
 		} else {
-			alog.console.log(owner, "Using API Key: " + api_key);
+			alog.log(owner, "Using API Key: " + api_key);
 		}
 
 
@@ -2575,7 +2575,7 @@ app.post("/api/login", function(req, res) {
 					req.session.cookie.maxAge = 20 * minute;
 					req.session.cookie.secure = false;
 
-					alog.console.log(owner, "User logged in: " + username);
+					alog.log(owner, "User logged in: " + username);
 
 					// TODO: write last_seen timestamp to DB here __for devices__
 					console.log("client_type: " + client_type);
@@ -2602,7 +2602,7 @@ app.post("/api/login", function(req, res) {
 
 				} else {
 					console.log("Password mismatch for " + username);
-					alog.console.log(owner, "Password mismatch for: " + username);
+					alog.log(owner, "Password mismatch for: " + username);
 					res.end(JSON.stringify({
 						status: "password_mismatch",
 						success: false
