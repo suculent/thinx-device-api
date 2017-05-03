@@ -203,6 +203,9 @@ app.all("/*", function(req, res, next) {
 	} else {
 		next();
 	}
+
+	alog.console.log("API", req.method + " : " + req.url);
+
 });
 
 /*
