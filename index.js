@@ -1228,10 +1228,10 @@ app.post("/api/user/create", function(req, res) {
 /* Endpoint for the password reset e-mail. */
 app.get("/api/user/password/reset", function(req, res) {
 
-	console.log(JSON.stringify(req.body));
-
 	var owner = req.query.owner; // for faster search
 	var reset_key = req.query.reset_key; // for faster search
+
+	alog.log(owner, "Attempt to reset password with: " + reset_key);
 
 	console.log("Searching for owner " + owner);
 
@@ -1353,8 +1353,6 @@ app.post("/api/user/password/set", function(req, res) {
 		console.log("Request has no owner for fast-search.");
 	}
 
-	console.log(JSON.stringify(req.body));
-
 	if (password1 !== password2) {
 		res.end(JSON.stringify({
 			status: "password_mismatch",
@@ -1365,6 +1363,8 @@ app.post("/api/user/password/set", function(req, res) {
 	}
 
 	if (typeof(req.body.reset_key) !== "undefined") {
+
+		alog.log(request_owner, "Attempt to set password with: " + req.body.reset_key);
 
 		console.log("Performing password reset...");
 
@@ -1443,6 +1443,8 @@ app.post("/api/user/password/set", function(req, res) {
 	} else if (typeof(req.body.activation) !== "undefined") {
 
 		console.log("Performing new activation...");
+
+		alog.log(request_owner, "Attempt to activate account with: " + req.body.activation);
 
 		userlib.view("users", "owners_by_activation", {
 			"key": req.body.activation,
@@ -1641,8 +1643,6 @@ app.post("/api/user/password/reset", function(req, res) {
 // /user/profile POST
 app.post("/api/user/profile", function(req, res) {
 
-	console.log(JSON.stringify(req.body));
-
 	if (!validateSecurePOSTRequest(req)) return;
 
 	if (!validateSession(req, res)) return;
@@ -1660,8 +1660,6 @@ app.post("/api/user/profile", function(req, res) {
 
 // /user/profile GET
 app.get("/api/user/profile", function(req, res) {
-
-	console.log(JSON.stringify(req.body));
 
 	// reject on invalid headers
 	if (!validateSecureGETRequest(req)) return;
@@ -1888,8 +1886,6 @@ app.post("/device/register", function(req, res) {
 
 	validateRequest(req, res);
 
-	// console.log(JSON.stringify(req.body));
-
 	if (typeof(req.body.registration) == "undefined") {
 		return;
 	}
@@ -1914,6 +1910,8 @@ app.post("/device/register", function(req, res) {
 	var push = reg.push;
 	var alias = reg.alias;
 	var owner = reg.owner; // cannot be changed, must match if set
+
+	alog.log(owner, "Attempt to register device: " + hash + " alias: " + alias);
 
 	var success = false;
 	var status = "ERROR";
