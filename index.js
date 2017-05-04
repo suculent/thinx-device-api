@@ -2133,11 +2133,7 @@ app.post("/device/register", function(req, res) {
 						if (!err) {
 							reg.success = true;
 							console.log("Device info updated.");
-
-							res.end(JSON.stringify({
-								success: true,
-								status: "checkin"
-							}));
+							sendRegistrationOKResponse(res, rdict);
 
 							return;
 
