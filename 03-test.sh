@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Using API Key 'static-test-key' : e172704e2c4e978782a5aecec4ebca9c88017a2a
+
 rm -rf cookies.jar
 
 if [[ -z $HOST ]]; then
@@ -11,7 +13,7 @@ echo "--------------------------------------------------------------------------
 echo "☢ Testing device registration..."
 
 curl -v \
--H 'Authentication: 19e0e3f2b16c013af092f1e0584a3fda11fd18e2' \
+-H 'Authentication: e172704e2c4e978782a5aecec4ebca9c88017a2a' \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
@@ -23,7 +25,7 @@ echo "--------------------------------------------------------------------------
 echo "☢ Testing firmware update (owner test)..."
 
 curl -v \
--H 'Authentication: 19e0e3f2b16c013af092f1e0584a3fda11fd18e2' \
+-H 'Authentication: e172704e2c4e978782a5aecec4ebca9c88017a2a' \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
@@ -66,7 +68,7 @@ http://$HOST:7442/api/user/apikey)
 # {"success":true,"api_key":"ece10e3effb17650420c280a7d5dce79110dc084","alias":"api-key-name"}
 
 SUCCESS=$(echo '$R' | jq .success)
-APIKEY="b7c2d19da39deba81e360c1d61b386dbd5a8bc5d93f8bd40e3f74510a24e8cb0"
+APIKEY="e172704e2c4e978782a5aecec4ebca9c88017a2a"
 if [[ $SUCCESS == true ]]; then
 	APIKEY=$(echo '$R' | jq .api_key)
 	echo "New key to revoke: $APIKEY"
