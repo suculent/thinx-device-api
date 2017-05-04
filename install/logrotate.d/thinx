@@ -1,5 +1,6 @@
 /var/log/thinx.log
 {
+	su root adm
 	rotate 4
 	daily
 	missingok
@@ -11,4 +12,3 @@
 		invoke-rc.d rsyslog rotate >/dev/null 2>&1 || true
 	endscript
 }
-r

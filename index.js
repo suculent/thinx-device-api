@@ -2580,11 +2580,7 @@ app.post("/api/login", function(req, res) {
 				if (password.indexOf(user_data.value) !== -1) {
 
 					if (typeof(req.session === "undefined")) {
-						res.end(JSON.stringify({
-							status: "try_again",
-							success: false
-						}));
-						return;
+						console.log("Warning, no session!");
 					}
 
 					console.log("Found user:" + JSON.stringify(user_data.doc.owner));
@@ -2597,6 +2593,7 @@ app.post("/api/login", function(req, res) {
 					req.session.cookie.maxAge = 20 * minute;
 					req.session.cookie.secure = false;
 
+					console.log("Performing audit logging...");
 					alog.log(req.session.owner, "User logged in: " + username);
 
 					// TODO: write last_seen timestamp to DB here __for devices__

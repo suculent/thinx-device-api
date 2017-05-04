@@ -19,19 +19,7 @@ echo "» Checking if node.js is running..."
 service thinx-app status
 service thinx-app stop
 
-NODEZ=$(ps -ax | grep "$DAEMON")
-
-if [[ $(echo $NODEZ | wc -l) > 0 ]]; then
-
-	echo "${NODEZ}" | while IFS="pts" read A B ; do
-		NODE=$($A | tr -d ' ')
-		echo "Killing: " $NODE $B
-		kill "$NODE"
-	done
-
-else
-	echo "${NODEZ}"
-fi
+killall node
 
 echo
 echo "» Fetching current app version from GIT..."
