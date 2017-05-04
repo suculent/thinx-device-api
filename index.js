@@ -2579,6 +2579,14 @@ app.post("/api/login", function(req, res) {
 				// TODO: Second option (direct compare) will deprecate soon.
 				if (password.indexOf(user_data.value) !== -1) {
 
+					if (typeof(req.session === "undefined")) {
+						res.end(JSON.stringify({
+							status: "try_again",
+							success: false
+						}));
+						return;
+					}
+
 					console.log("Found user:" + JSON.stringify(user_data.doc.owner));
 
 					req.session.owner = user_data.doc.owner;
