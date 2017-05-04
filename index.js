@@ -1473,6 +1473,8 @@ app.post("/api/user/password/set", function(req, res) {
 
 				console.log("Activating user: " + JSON.stringify(body));
 
+				deploy.initWithOwner(userdoc.owner);
+
 				var userdoc = body.rows[0].doc;
 
 				console.log("Updating user document: " + JSON.stringify(userdoc));
@@ -1895,7 +1897,7 @@ app.post("/device/register", function(req, res) {
 
 	rdict.registration = {};
 
-	console.log(reg.toString());
+	console.log("[!!!SEC!!!] Registration request: " + JSON.stringify(req.body));
 
 	var mac = reg.mac;
 	var fw = "unknown";
@@ -1912,6 +1914,8 @@ app.post("/device/register", function(req, res) {
 	var owner = reg.owner; // cannot be changed, must match if set
 
 	alog.log(owner, "Attempt to register device: " + hash + " alias: " + alias);
+
+	deploy.initWithOwner(owner); // creates user path if does not exist
 
 	var success = false;
 	var status = "ERROR";
