@@ -29,7 +29,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing device registration..."
 
-R=$(curl -s -v \
+R=$(curl -s \
 -H "Authentication: ${API_KEY}" \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
