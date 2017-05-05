@@ -21,12 +21,13 @@
 *User features*
 
 * THX-52: Allow linking direct sources (maybe just use #direct switch and allow to store username/password using vault)
-* THX-57: Security: create audit log
 
 
 ### Last week
 
-3/5/2017 - 1.3.559: API key now requires alias, audit logging, 
+5/5/2017 - 1.3.576: improved tests, enabled editing device alias through API, working logrotate
+
+3/5/2017 - 1.3.559: API key now requires alias, audit logging,
 2/5/2017 - 1.3.550: changed build API to secure, updated tests; UI advancements (attach/detach/build)
 
 ### Third week

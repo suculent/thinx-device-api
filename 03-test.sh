@@ -48,6 +48,27 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
+echo "☢ Assigning device alias..."
+
+R=$(curl -s \
+-H "Authentication: ${API_KEY}" \
+-H 'Origin: device' \
+-H "User-Agent: THiNX-Client" \
+-H "Content-Type: application/json" \
+-d '{ "changes" : [ { "device_id" : "00:00:00:00:00:00", "alias" : "new-test-alias" } ] }' \
+http://$HOST:7442/api/device/edit)
+
+# {"success":true,"status":"updated"}
+
+SUCCESS=$(echo $R | tr -d "\n" | jq .success)
+if [[ $SUCCESS == true ]]; then
+	echo_ok "Alias assignment result: $R"
+else
+	echo_fail $R
+fi
+
+echo
+echo "--------------------------------------------------------------------------------"
 echo "☢ Testing device registration for revocation..."
 
 R=$(curl -s \

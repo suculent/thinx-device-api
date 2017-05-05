@@ -311,11 +311,9 @@ app.post("/api/device/attach", function(req, res) {
 			return;
 		}
 
-		console.log(JSON.stringify(body.rows));
-
 		var doc = body.rows[0].doc;
-
-		console.log("Attaching repository to device: " + JSON.stringify(doc.hash));
+		alog.log(doc.owner, "Attaching repository to device: " + JSON.stringify(
+			doc.hash));
 
 		devicelib.destroy(doc._id, doc._rev, function(err) {
 
@@ -1950,14 +1948,16 @@ app.post("/device/firmware", function(req, res) {
 	}); // user view
 }); // app.get
 
-// <-- WORK
-
-// Device login/registration (no authentication, no validation, allows flooding so far)
+// Device login/registration
 app.post("/device/register", function(req, res) {
 
-	validateRequest(req, res);
+	validatesRequest(req, res);
 
 	if (typeof(req.body.registration) == "undefined") {
+		res.end(JSON.stringify({
+			success: false,
+			status: "no_registration"
+		}));
 		return;
 	}
 
@@ -2275,6 +2275,95 @@ app.post("/device/register", function(req, res) {
 				}
 			});
 		}
+	});
+});
+
+// Device editing (alias only so far)
+app.post("/api/device/edit", function(req, res) {
+
+	if (!validateSecurePOSTRequest(req)) return;
+	if (!validateSession(req, res)) return;
+
+	if (typeof(req.body.changes) === "undefined") {
+		res.end(JSON.stringify({
+			success: false,
+			status: "missing_changes"
+		}));
+		return;
+	}
+
+	var owner = req.session.owner;
+	var username = req.session.username;
+
+	var changes = req.body.changes;
+	var change = changes[0]; // TODO: support bulk operations
+
+	var udid = change.device_id;
+
+	devicelib.view("devicelib", "devices_by_id", {
+		"key": udid,
+		"include_docs": true
+	}, function(err, body) {
+
+		if (err) {
+			console.log(err);
+			res.end(JSON.stringify({
+				success: false,
+				status: "device_not_found"
+			}));
+			return;
+		}
+
+		if (body.rows.length === 0) {
+			res.end(JSON.stringify({
+				success: false,
+				status: "no_such_device"
+			}));
+			return;
+		}
+
+		var device = body.rows[0];
+		var doc = device.doc;
+
+		console.log("Editing device: " +
+			JSON.stringify(doc.alias));
+
+		// Delete device document with old alias
+		devicelib.destroy(doc._id, doc._rev, function(err) {
+
+			if (err) {
+				console.log("/api/device/edit ERROR:" + err);
+				res.end(JSON.stringify({
+					success: false,
+					status: "destroy_failed"
+				}));
+				return;
+			}
+
+			if (typeof(change.alias) !== "undefined") {
+				doc.alias = change.alias;
+				console.log("Changing alias: " +
+					JSON.stringify(doc.alias) + " to " + change.alias);
+				delete doc._rev;
+			}
+
+			// Create device document with new alias
+			devicelib.insert(doc, doc._id, function(err, body, header) {
+				if (err) {
+					console.log("/api/device/edit ERROR:" + err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "device_not_changed"
+					}));
+					return;
+				} else {
+					res.end(JSON.stringify({
+						success: true,
+						change: change
+					}));
+				}
+			});
+		});
 	});
 });
 
@@ -2729,7 +2818,6 @@ app.post("/api/login", function(req, res) {
 
 // Front-end authentication, destroys session on valid authentication
 app.get("/api/logout", function(req, res) {
-
 	if (typeof(req.session) !== "undefined") {
 		req.session.destroy(function(err) {
 			if (err) {
