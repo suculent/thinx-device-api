@@ -400,6 +400,75 @@ app.post("/api/device/detach", function(req, res) {
 	});
 });
 
+/* Revokes a device. Expects unique device identifier. */
+app.post("/api/device/revoke", function(req, res) {
+
+	if (!validateSecurePOSTRequest(req)) return;
+	if (!validateSession(req, res)) return;
+
+	if (typeof(req.body.device_id) === "undefined") {
+		res.end(JSON.stringify({
+			success: false,
+			status: "missing_udid"
+		}));
+		return;
+	}
+
+	var udid = req.body.device_id;
+	var owner = req.session.owner;
+	var username = req.session.username;
+
+	alog.log(owner, "Attempt to revoke device: " + mac);
+
+	devicelib.view("devicelib", "devices_by_id", {
+		"key": udid,
+		"include_docs": true
+	}, function(err, body) {
+
+		if (err) {
+			console.log(err);
+			return;
+		}
+
+		if (body.rows.count === 0) {
+			alog.log(owner, "No such device: " + doc.alias +
+				" (${doc.hash})");
+			res.end(JSON.stringify({
+				success: false,
+				status: "no_such_device"
+			}));
+			return;
+		}
+
+		var doc = body.rows[0].doc;
+
+		console.log("Revoking device: " + doc.hash);
+
+		alog.log(owner, logmessage);
+
+		devicelib.destroy(doc._id, doc._rev, function(err) {
+			doc.source = null;
+			delete doc._rev;
+			if (err) {
+				console.log("/api/device/revoke ERROR:" + err);
+				res.end(JSON.stringify({
+					success: false,
+					status: "revocation_failed"
+				}));
+				return;
+			} else {
+				var logmessage = "Revocation succeed: " + doc.alias +
+					" (${doc.hash})";
+				alog.log(owner, logmessage);
+				res.end(JSON.stringify({
+					success: true,
+					revoked: doc.hash
+				}));
+			}
+		});
+	});
+});
+
 /*
  * API Keys
  */
@@ -460,9 +529,9 @@ app.post("/api/user/apikey", function(req, res) {
 
 			} else {
 
-				// Add new API Key
 				doc.api_keys.push({
 					"key": new_api_key,
+					"hash": sha256(new_api_key),
 					"alias": new_api_key_alias
 				});
 				delete doc._rev;
@@ -1870,7 +1939,7 @@ app.post("/device/firmware", function(req, res) {
 
 				} else {
 					res.end(JSON.stringify({
-						success: false,
+						success: true,
 						status: "no_update_available"
 					}));
 					console.log("No firmware update available for " + JSON.stringify(
