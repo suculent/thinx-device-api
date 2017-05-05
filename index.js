@@ -1951,7 +1951,7 @@ app.post("/device/firmware", function(req, res) {
 // Device login/registration
 app.post("/device/register", function(req, res) {
 
-	validatesRequest(req, res);
+	validateRequest(req, res);
 
 	if (typeof(req.body.registration) == "undefined") {
 		res.end(JSON.stringify({
