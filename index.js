@@ -2037,8 +2037,6 @@ app.post("/device/register", function(req, res) {
 
 		for (var kindex in user_data.api_keys) {
 			var userkey = user_data.api_keys[kindex].key;
-			console.log("Comparing user_data.api_keys[kindex].key " + userkey +
-				" with requested api_key " + api_key);
 			if (userkey.indexOf(api_key) !== -1) {
 				console.log("Found valid key.");
 				api_key_valid = true;
