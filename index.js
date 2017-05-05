@@ -2251,10 +2251,7 @@ app.post("/device/register", function(req, res) {
 							reg.success = true;
 							console.log("Device info created.");
 
-							res.end(JSON.stringify({
-								success: true,
-								status: "register"
-							}));
+							sendRegistrationOKResponse(res, rdict);
 
 							return;
 
