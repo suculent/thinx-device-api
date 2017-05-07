@@ -2,30 +2,15 @@
 
 ## Change log
 
-### TODOs Now
-
-* THX-50: Builder (finish prototype)
-* THX-49: Notifier (finish prototype)
-* THX-55: Test build->update provisioning
-* THX-54: Aggregate statistic data from logs for graphs
-* THX-62: Enable repository watcher for attached repos on start, add/remove on the at attach/detach
-
-### Future Roadmap
-
-*Security hardening*
-
-* THX-56: `owner` is stored as hash (but should be salted)
-* THX-53: Add VAULT to support storing usernames/passwords for git and direct links
-* THX-51: Refactor to UDIDs instead of MACs and owner_id
-
-*User features*
-
-* THX-52: Allow linking direct sources (maybe just use #direct switch and allow to store username/password using vault)
-
-
 ### Last week
 
-5/5/2017 - 1.3.576: improved tests, enabled editing device alias through API, working logrotate
+
+
+### Fourth week
+
+6/5/2017 - 1.3.581: Core client implementation templates for ESP8266/NodeMCU LUA and Micropython-based firmwares (registration and SPIFFS only, no OTA, not tested)
+
+5/5/2017 - 1.3.576: improved tests, enabled editing device alias through API, working logrotate; working device registration step (with issues only on device side)
 
 3/5/2017 - 1.3.559: API key now requires alias, audit logging,
 2/5/2017 - 1.3.550: changed build API to secure, updated tests; UI advancements (attach/detach/build)

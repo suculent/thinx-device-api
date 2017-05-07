@@ -4,10 +4,10 @@ echo
 echo "-=[ ☢ THiNX IoT RTM BUILDER ☢ ]=-"
 echo
 
-TENANT='test' 	# name of folder where workspaces reside
-RUN=true		# dry-run switch
-DEVICE='00:00:00:00:00'	# builds for no device by default, not even ANY
-OPEN=false		# show build result in Finder
+USERNAME='test' 		# name of folder where workspaces reside
+RUN=true			# dry-run switch
+DEVICE='UNKNOWN'	# builds for no device by default, not even ANY
+OPEN=false			# show build result in Finder
 BUILD_ID=0
 ORIGIN=$(pwd)
 
@@ -23,7 +23,7 @@ case $i in
       BUILD_ID="${i#*=}"
     ;;
     -t=*|--tenant=*)
-      TENANT="${i#*=}"
+      USERNAME="${i#*=}"
     ;;
     -m=*|--mac=*)
       DEVICE="${i#*=}"
@@ -50,8 +50,8 @@ case $i in
 esac
 done
 
-TENANT_HOME=/var/www/html/bin/$TENANT
-DEPLOYMENT_PATH=${TENANT_HOME}/${DEVICE}
+USERNAME_HOME=/var/www/html/bin/$USERNAME
+DEPLOYMENT_PATH=${USERNAME_HOME}/${DEVICE}
 
 # extract the protocol
 proto="$(echo $GIT_REPO | grep :// | sed -e's,^\(.*://\).*,\1,g')"
@@ -93,15 +93,15 @@ echo "  REPO_NAME: ${REPO_NAME}"
 echo "Cleaning workspace..."
 
 # Clean
-rm -rf ./tenants/$TENANT/$REPO_PATH
+rm -rf ./tenants/$USERNAME/$REPO_PATH
 
 echo "Creating workspace..."
 
 # Create new working directory
-mkdir -p ./tenants/$TENANT/$REPO_PATH
+mkdir -p ./tenants/$USERNAME/$REPO_PATH
 
 # TODO: only if $REPO_NAME contains slash(es)
-pushd ./tenants/$TENANT > /dev/null
+pushd ./tenants/$USERNAME > /dev/null
 
 # enter git user folder if any
 if [[ -d ${GIT_USER} ]]; then
@@ -128,7 +128,7 @@ echo "Version: ${VERSION}"
 THINX_FILE="$(find . | grep '/Thinx.h')"
 THINX_CLOUD_URL="thinx.cloud"
 THINX_MQTT_URL="mqtt://${THINX_CLOUD_URL}"
-THINX_OWNER=$TENANT
+THINX_OWNER=$USERNAME
 
 if [[ ! -z $DEVICE_ALIAS ]]; then
 	THINX_ALIAS=$DEVICE_ALIAS
@@ -251,13 +251,13 @@ echo "GIT" "${GIT_REPO}"
 echo "DEP" "${DEPLOYMENT_PATH}"
 echo "MAC" "${DEVICE}"
 echo "SHA" "${SHA}"
-echo "TNT" "${TENANT}"
+echo "TNT" "${USERNAME}"
 echo "STA" "${STATUS}"
 
 cd $ORIGIN
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
-CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${COMMIT}.bin ${DEVICE} ${SHA} ${TENANT} ${STATUS}"
+CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${COMMIT}.bin ${DEVICE} ${SHA} ${USERNAME} ${STATUS}"
 echo $CMD
 RESULT=$(node notifier.js $CMD)
 echo $RESULT

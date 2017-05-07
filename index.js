@@ -1764,7 +1764,7 @@ app.get("/api/user/profile", function(req, res) {
 // Main Device API
 //
 
-// Firmware update retrieval. Serves binary by owner and device MAC.
+// Firmware update retrieval. Serves binary [by owner (?) - should not be required] and device MAC.
 app.post("/device/firmware", function(req, res) {
 
 	validateRequest(req, res);
@@ -1779,27 +1779,41 @@ app.post("/device/firmware", function(req, res) {
 		return;
 	}
 
+	if (typeof(req.body.hash) === "undefined") {
+		/* optional, we'll find latest checksum if not available
+		res.end(JSON.stringify({
+			success: false,
+			status: "missing_udid"
+		}));
+		return;
+		*/
+	}
+
 	if (typeof(req.body.checksum) === "undefined") {
+		/* optional, we'll find latest checksum if not available
 		res.end(JSON.stringify({
 			success: false,
 			status: "missing_checksum"
 		}));
 		return;
+		*/
 	}
 
 	if (typeof(req.body.commit) === "undefined") {
+		/* optional, we'll find latest commit_id if not available
 		res.end(JSON.stringify({
 			success: false,
 			status: "missing_commit"
 		}));
 		return;
+		*/
 	}
 
 	var mac = req.body.mac;
 	var device_id = req.body.hash;
 	var checksum = req.body.checksum;
 	var commit = req.body.commit;
-	var owner = req.body.owner; // inferred from API key...
+	var owner = req.body.owner; // TODO: should be inferred from API Key, not required in request! But API Key is inside user which is a fail and should be stored in redis instead just with owner's secret ID reference.
 
 	console.log("TODO: Validate if SHOULD update device " + mac +
 		" using commit " + commit + " with checksum " + checksum + " and owner: " +
@@ -1864,8 +1878,9 @@ app.post("/device/firmware", function(req, res) {
 
 		// Bail out on invalid API key
 		if (api_key_valid === false) {
-			console.log("Invalid API key.");
-			alog.log(owner, "Attempt to use invalid API Key: " + api_key);
+			console.log("Invalid API key on firmware update.");
+			alog.log(owner, "Attempt to use invalid API Key: " + api_key +
+				"  on firmware update.");
 			res.end(JSON.stringify({
 				success: false,
 				status: "api_key_invalid"
@@ -2035,8 +2050,13 @@ app.post("/device/register", function(req, res) {
 		var api_key_valid = false;
 		var user_data = body.rows[0].doc;
 
+		console.log("Seeking API key: " + api_key); // FIXME
+
 		for (var kindex in user_data.api_keys) {
 			var userkey = user_data.api_keys[kindex].key;
+
+			console.log("in: " + userkey); // FIXME
+
 			if (userkey.indexOf(api_key) !== -1) {
 				console.log("Found valid key.");
 				api_key_valid = true;
@@ -2046,8 +2066,9 @@ app.post("/device/register", function(req, res) {
 		}
 
 		if (api_key_valid === false) {
-			console.log("Invalid API key.");
-			alog.log(owner, "Attempt to use invalid API Key: " + api_key);
+			console.log("Invalid API key on registration.");
+			alog.log(owner, "Attempt to use invalid API Key: " + api_key +
+				" on device registration.");
 			res.end(JSON.stringify({
 				success: false,
 				status: "authentication"
@@ -2109,7 +2130,7 @@ app.post("/device/register", function(req, res) {
 		var device = {
 			mac: mac,
 			firmware: fw,
-			hash: hash,
+			hash: hash, // will deprecate; is commit_id or binary checksum!
 			push: push,
 			alias: alias,
 			owner: owner,
