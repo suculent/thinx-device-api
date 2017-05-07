@@ -454,13 +454,38 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ TODO: Audit log fetch..."
 
+R=$(curl -s -b cookies.jar \
+-H "Origin: rtm.thinx.cloud" \
+-H "User-Agent: THiNX-Client" \
+-H "Content-Type: application/json" \
+http://$HOST:7442/api/user/logs/audit)
+
+echo $R
+
 echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ TODO: Build log list..."
 
+R=$(curl -s -b cookies.jar \
+-H "Origin: rtm.thinx.cloud" \
+-H "User-Agent: THiNX-Client" \
+-H "Content-Type: application/json" \
+http://$HOST:7442/api/user/logs/build/list)
+
+echo $R
+
 echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ TODO: Build log fetch..."
+
+R=$(curl -s -b cookies.jar \
+-H "Origin: rtm.thinx.cloud" \
+-H "User-Agent: THiNX-Client" \
+-H "Content-Type: application/json" \
+-d '{ "build_id" : "*"' \
+http://$HOST:7442/api/user/logs/build)
+
+echo $R
 
 #echo
 #echo "☢ Running nyc code coverage..."
