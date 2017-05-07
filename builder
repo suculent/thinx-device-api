@@ -15,7 +15,6 @@ ORIGIN=$(pwd)
 # ./builder --build-id="cli-manual" --tenant=test --udid=47fc9ab2-2227-11e7-8584-4c327591230d --mac=ANY --git=git@github.com:suculent/thinx-firmware-esp8266.git
 # ./builder --build-id="cli-manual" --tenant=test --udid=47fc9ab2-2227-11e7-8584-4c327591230d --mac="000000000000" --git=git@github.com:suculent/thinx-firmware-esp8266.git
 
-
 for i in "$@"
 do
 case $i in
@@ -52,6 +51,7 @@ done
 
 USERNAME_HOME=/var/www/html/bin/$USERNAME
 DEPLOYMENT_PATH=${USERNAME_HOME}/${DEVICE}
+LOG_PATH="${DEPLOYMENT_PATH}/${BUILD_ID}.log"
 
 # extract the protocol
 proto="$(echo $GIT_REPO | grep :// | sed -e's,^\(.*://\).*,\1,g')"
@@ -68,8 +68,6 @@ REPO_PATH="$(echo $url | grep / | cut -d/ -f2-)"
 # extract the end of path (if any)
 REPO_NAME="$(echo $url | grep / | cut -d/ -f3-)"
 
-#echo "REPO_PATH: ${REPO_PATH}"
-
 if [[ "$user" == "git" ]]; then
 	proto="git-ssl"
 	len=${#REPO_NAME}
@@ -82,20 +80,20 @@ if [[ "$user" == "git" ]]; then
 	REPO_NAME="$(echo $REPO_PATH | grep / | cut -d/ -f2-)"
 fi
 
-echo "  url: $url"
-echo "  proto: $proto"
-echo "  user: $user"
-echo "  host: $host"
-echo "  port: $port"
-echo "  REPO_PATH: $REPO_PATH"
-echo "  REPO_NAME: ${REPO_NAME}"
+echo "  url: $url" >> $LOG_PATH
+echo "  proto: $proto" >> $LOG_PATH
+echo "  user: $user" >> $LOG_PATH
+echo "  host: $host" >> $LOG_PATH
+echo "  port: $port" >> $LOG_PATH
+echo "  REPO_PATH: $REPO_PATH" >> $LOG_PATH
+echo "  REPO_NAME: ${REPO_NAME}" >> $LOG_PATH
 
-echo "Cleaning workspace..."
+echo "Cleaning workspace..." >> $LOG_PATH
 
 # Clean
 rm -rf ./tenants/$USERNAME/$REPO_PATH
 
-echo "Creating workspace..."
+echo "Creating workspace..." >> $LOG_PATH
 
 # Create new working directory
 mkdir -p ./tenants/$USERNAME/$REPO_PATH
@@ -109,7 +107,7 @@ if [[ -d ${GIT_USER} ]]; then
 fi
 
 # Fetch project
-git clone $GIT_REPO
+git clone $GIT_REPO >> $LOG_PATH
 
 if [[ -d $REPO_NAME ]]; then
 	pushd ./$REPO_NAME > /dev/null
@@ -118,10 +116,10 @@ else
 fi
 
 COMMIT=$(git rev-parse HEAD)
-echo "Fetched commit ID: ${COMMIT}"
+echo "Fetched commit ID: ${COMMIT}" >> $LOG_PATH
 
 VERSION=$(git rev-list HEAD --count)
-echo "Version: ${VERSION}"
+echo "Version: ${VERSION}" >> $LOG_PATH
 
 # Overwrite Thinx.h file (should be required)
 
@@ -143,7 +141,7 @@ BUILD_DATE=`date +%Y-%m-%d`
 
 # TODO: Change this to a sed template, this is tedious
 
-echo "Building Thinx.h..."
+echo "Building Thinx.h..." >> $LOG_PATH
 
 echo "//" > $THINX_FILE
 echo "// This is an auto-generated file, it will be re-written by THiNX on cloud build." >> $THINX_FILE
@@ -173,24 +171,24 @@ echo "WARNING: API port is fixed to 7442 in builder shell-script.";
 echo "int thinx_api_port = 7442;" >> $THINX_FILE
 
 # Build
-cat $THINX_FILE
+cat $THINX_FILE >> $LOG_PATH
 
-echo "Build step..."
+echo "Build step..." >> $LOG_PATH
 
 if [[ -f package.json ]]; then
-	echo
-	echo "THiNX does not support npm builds."
-	echo "If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues"
+	echo >> $LOG_PATH
+	echo "THiNX does not support npm builds." >> $LOG_PATH
+	echo "If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues" >> $LOG_PATH
 	exit 0
 
 elif [[ ! -f platformio.ini ]]; then
-	echo
-	echo "This not a compatible project so far."
-	echo "If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues"
+	echo >> $LOG_PATH
+	echo "This not a compatible project so far." >> $LOG_PATH
+	echo "If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues" >> $LOG_PATH
 	exit 1
 fi
 
-platformio run
+platformio run >> $LOG_PATH
 
 SHA=0
 
@@ -206,14 +204,14 @@ echo
 
 if [[ ! ${RUN} ]]; then
 
-	echo "☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment."
+	echo "☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> $LOG_PATH
 
 	STATUS='"DRY_RUN_OK"'
 
 else
 
 	# Create user-referenced folder in public www space
-	echo "Creating deployment path..."
+	echo "Creating deployment path..." >> $LOG_PATH
 	set +e
 	mkdir -p $DEPLOYMENT_PATH
 	set -e
@@ -222,7 +220,7 @@ else
 	 # WARNING: bin was elf here but it seems kind of wrong. needs testing
 	mv ".pioenvs/d1_mini/firmware.bin" "${COMMIT}.bin"
 
-	echo "Deploying $COMMIT.bin to $DEPLOYMENT_PATH..."
+	echo "Deploying $COMMIT.bin to $DEPLOYMENT_PATH..." >> $LOG_PATH
 
 	mv $COMMIT.bin $DEPLOYMENT_PATH
 
@@ -235,29 +233,31 @@ else
 	fi
 fi
 
-echo $STATUS
+echo $STATUS >> $LOG_PATH
 
 popd > /dev/null
 popd > /dev/null
 
 DEPLOYMENT_PATH=$(echo ${DEPLOYMENT_PATH} | tr -d '/var/www/html')
 
-echo "DP" $DEPLOYMENT_PATH
+echo "DP" $DEPLOYMENT_PATH >> $LOG_PATH
 
-echo "BID" "${BUILD_ID}"
-echo "CID" "${COMMIT}"
-echo "VER" "${VERSION}"
-echo "GIT" "${GIT_REPO}"
-echo "DEP" "${DEPLOYMENT_PATH}"
-echo "MAC" "${DEVICE}"
-echo "SHA" "${SHA}"
-echo "TNT" "${USERNAME}"
-echo "STA" "${STATUS}"
+echo "BID" "${BUILD_ID}" >> $LOG_PATH
+echo "CID" "${COMMIT}" >> $LOG_PATH
+echo "VER" "${VERSION}" >> $LOG_PATH
+echo "GIT" "${GIT_REPO}" >> $LOG_PATH
+echo "DEP" "${DEPLOYMENT_PATH}" >> $LOG_PATH
+echo "MAC" "${DEVICE}" >> $LOG_PATH
+echo "SHA" "${SHA}" >> $LOG_PATH
+echo "TNT" "${USERNAME}" >> $LOG_PATH
+echo "STA" "${STATUS}" >> $LOG_PATH
 
 cd $ORIGIN
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
 CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${COMMIT}.bin ${DEVICE} ${SHA} ${USERNAME} ${STATUS}"
-echo $CMD
+echo $CMD >> $LOG_PATH
 RESULT=$(node notifier.js $CMD)
-echo $RESULT
+echo $RESULT >> $LOG_PATH
+
+cat $LOG_PATH

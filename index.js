@@ -1997,6 +1997,14 @@ app.post("/device/register", function(req, res) {
 	var alias = reg.alias;
 	var owner = reg.owner; // cannot be changed, must match if set
 
+	if (typeof(owner) === "undefined") {
+		res.end(JSON.stringify({
+			success: false,
+			status: "owner_not_given"
+		}));
+		return;
+	}
+
 	alog.log(owner, "Attempt to register device: " + hash + " alias: " + alias);
 
 	deploy.initWithOwner(owner); // creates user path if does not exist
