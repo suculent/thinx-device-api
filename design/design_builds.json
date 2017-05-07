@@ -3,7 +3,11 @@
   "language": "javascript",
   "views": {
     "builds_by_build_id": {
-      "map": "function (doc) { if(doc.build_id) { emit (doc.build_id, doc); } }"
+      "map": "function (doc) { if(doc.build_id) { emit (doc); } }"
+    },
+    "builds_by_owner": {
+      "map": "function (doc) { if(doc.owner) { emit (doc.build_id); } }"
     }
   }
+}
 }

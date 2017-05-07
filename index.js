@@ -31,6 +31,7 @@ var request = require("request");
 var deploy = require("./lib/thinx/deployment");
 var v = require("./lib/thinx/version");
 var alog = require("./lib/thinx/audit");
+var blog = require("./lib/thinx/build");
 
 var rdict = {};
 
@@ -2681,6 +2682,155 @@ function buildCommand(build_id, tenant, mac, git, udid, dryrun) {
 		console.log(build_id + " : " + stdout);
 	});
 }
+
+/*
+ * Build and Audit Logs
+ */
+
+/* Returns all audit logs per owner */
+app.get("/api/user/logs/audit", function(req, res) {
+
+	if (!validateSecureGETRequest(req)) return;
+	if (!validateSession(req, res)) return;
+
+	var owner = req.session.owner;
+	var username = req.session.username;
+
+	alog.fetch(owner, function(err, body) {
+
+		if (err) {
+			console.log(err);
+			res.end(JSON.stringify({
+				success: false,
+				status: "log_fetch_failed",
+				error: err
+			}));
+			return;
+		}
+
+		if (!body) {
+			console.log("Log for owner " + owner + " not found.");
+			res.end(JSON.stringify({
+				success: false,
+				status: "log_fetch_failed",
+				error: err
+			}));
+			return;
+		}
+
+		res.end(JSON.stringify({
+			success: true,
+			logs: body
+		}));
+	});
+});
+
+/* Returns list of build logs for owner */
+app.get("/api/user/logs/build/list", function(req, res) {
+
+	if (!validateSecureGETRequest(req)) return;
+	if (!validateSession(req, res)) return;
+
+	var owner = req.session.owner;
+	var username = req.session.username;
+
+	if (err) {
+		console.log(err);
+		res.end(JSON.stringify({
+			success: false,
+			status: "build_fetch_failed",
+			error: err
+		}));
+		return;
+	}
+
+	if (!body) {
+		console.log("Builds for owner " + owner + " not found.");
+		res.end(JSON.stringify({
+			success: false,
+			status: "build_fetch_empty",
+			error: err
+		}));
+		return;
+	}
+
+	blog.list(owner, function(err, body) {
+
+		if (err) {
+			console.log(err);
+			res.end(JSON.stringify({
+				success: false,
+				status: "build_list_failed",
+				error: err
+			}));
+			return;
+		}
+
+		if (!body) {
+			console.log("Log for owner " + owner + " not found.");
+			res.end(JSON.stringify({
+				success: false,
+				status: "build_list_empty",
+				error: err
+			}));
+			return;
+		}
+
+		res.end(JSON.stringify({
+			success: true,
+			builds: body
+		}));
+
+	});
+});
+
+/* Returns specific build log for owner */
+app.post("/api/user/logs/build", function(req, res) {
+
+	if (!validateSecurePOSTRequest(req)) return;
+	if (!validateSession(req, res)) return;
+
+	var owner = req.session.owner;
+	var username = req.session.username;
+
+	if (typeof(req.body.build_id) == "undefined") {
+		res.end(JSON.stringify({
+			success: false,
+			status: "missing_build_id"
+		}));
+		return;
+	}
+
+	blog.fetch(req.body.build_id, function(err, body) {
+
+		if (err) {
+			console.log(err);
+			res.end(JSON.stringify({
+				success: false,
+				status: "build_fetch_failed",
+				error: err
+			}));
+			return;
+		}
+
+		if (!body) {
+			console.log("Log for owner " + owner + " not found.");
+			res.end(JSON.stringify({
+				success: false,
+				status: "build_fetch_empty",
+				error: err
+			}));
+			return;
+		}
+
+		res.end(JSON.stringify({
+			success: true,
+			log: body
+		}));
+	});
+});
+
+
 
 /*
  * Authentication
