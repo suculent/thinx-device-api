@@ -2160,12 +2160,8 @@ app.post("/device/register", function(req, res) {
 		console.log("Setting firmware " + fw);
 	}
 
-	var hash = reg.hash;
 	var push = reg.push;
 	var alias = reg.alias;
-	//var owner = reg.owner; // cannot be changed, must match if set
-
-
 
 	var success = false;
 	var status = "ERROR";
@@ -2264,6 +2260,21 @@ app.post("/device/register", function(req, res) {
 		var known_alias = "";
 		var known_owner = "";
 
+		var hash = null;
+		if (typeof(reg.hash) !== "undefined") {
+			hash = reg.hash;
+		}
+
+		var checksum = hash;
+		if (typeof(reg.checksum) !== "undefined") {
+			checksum = reg.checksum;
+		}
+
+		var udid = mac;
+		if (typeof(reg.udid) !== "undefined") {
+			udid = reg.udid;
+		}
+
 		//
 		// Construct response
 		//
@@ -2301,11 +2312,13 @@ app.post("/device/register", function(req, res) {
 			mac: mac,
 			firmware: fw,
 			hash: hash, // will deprecate; is commit_id or binary checksum!
+			checksum: checksum,
 			push: push,
 			alias: alias,
 			owner: req.session.owner,
 			version: device_version,
-			device_id: device_id,
+			device_id: device_id, // will deprecate in favour or udid
+			udid: udid,
 			lastupdate: new Date(),
 			lastkey: sha256(api_key)
 		};
@@ -2334,7 +2347,9 @@ app.post("/device/register", function(req, res) {
 
 		if (isNew) {
 			// Create UDID for new device
-			device.device_id = uuidV1();
+
+			device.udid = uuidV1();
+			device.device_id = device.udid;
 
 			devicelib.insert(device, device.mac, function(err, body, header) {
 
