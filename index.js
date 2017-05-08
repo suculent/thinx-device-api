@@ -2163,19 +2163,9 @@ app.post("/device/register", function(req, res) {
 	var hash = reg.hash;
 	var push = reg.push;
 	var alias = reg.alias;
-	var owner = reg.owner; // cannot be changed, must match if set
+	//var owner = reg.owner; // cannot be changed, must match if set
 
-	if (typeof(owner) === "undefined") {
-		res.end(JSON.stringify({
-			success: false,
-			status: "owner_not_given"
-		}));
-		return;
-	}
 
-	alog.log(owner, "Attempt to register device: " + hash + " alias: " + alias);
-
-	deploy.initWithOwner(owner); // creates user path if does not exist
 
 	var success = false;
 	var status = "ERROR";
@@ -2194,7 +2184,6 @@ app.post("/device/register", function(req, res) {
 	}
 
 	userlib.view("users", "owners_by_username", {
-		"key": owner,
 		"include_docs": true // might be useless
 	}, function(err, body) {
 
@@ -2221,6 +2210,11 @@ app.post("/device/register", function(req, res) {
 			}));
 			return;
 		}
+
+		var owner = body.rows[0].doc.owner;
+		alog.log(owner, "Attempt to register device: " + hash + " alias: " +
+			alias);
+		deploy.initWithOwner(owner); // creates user path if does not exist
 
 		// Find user and match api_key
 		var api_key_valid = false;
