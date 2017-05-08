@@ -3245,9 +3245,6 @@ var initWatcher = function(watcher) {
 			return;
 		}
 
-		console.log(JSON.stringify(body));
-
-		// Collect paths
 		for (var index in body.rows) {
 			var owner = body.rows[index].doc.owner;
 			console.log("owner: " + owner);
@@ -3256,9 +3253,10 @@ var initWatcher = function(watcher) {
 			var path = deploy.pathForDevice(owner, device_id);
 
 			if (!fs.existsSync(path)) {
-				console.log("path does not exist to be watched: " + path);
+				//console.log("path does not exist to be watched: " + path);
+				continue;
 			} else {
-				console.log("watched path: " + path);
+				console.log("Trying to watch path: " + path);
 				if (fs.lstatSync(path).isDirectory()) {
 					watcher.watchRepository(path, watcher_callback());
 					watched_repos.push(path);
