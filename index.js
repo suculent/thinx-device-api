@@ -3249,9 +3249,9 @@ var initWatcher = function(watcher) {
 
 		// Collect paths
 		for (var index in body.rows) {
-			var owner = body.rows[index].owner;
+			var owner = body.rows[index].doc.owner;
 			console.log("owner: " + owner);
-			var device_id = body.rows[index].device_id;
+			var device_id = body.rows[index].doc.device_id;
 			console.log("device_id: " + owner);
 			var path = deploy.pathForDevice(owner, device_id);
 			console.log("path: " + path);
