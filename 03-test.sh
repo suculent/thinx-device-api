@@ -6,6 +6,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 API_KEY='e172704e2c4e978782a5aecec4ebca9c88017a2a'
+OWNER_ID='886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445'
 
 function echo_fail() { # $1 = string
     COLOR=$RED
@@ -34,7 +35,7 @@ R=$(curl -s \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "version" : "1.0.0", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "dhho4djVGeQ:APA91bFuuZWXDQ8vSR0YKyjWIiwIoTB1ePqcyqZFU3PIxvyZMy9htu9LGPmimfzdrliRfAdci-AtzgLCIV72xmoykk-kHcYRhAFWFOChULOGxrDi00x8GgenORhx_JVxUN_fjtsN5B7T", "alias" : "rabbit", "owner": "test" } }' \
+-d '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "version" : "1.0.0", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "dhho4djVGeQ:APA91bFuuZWXDQ8vSR0YKyjWIiwIoTB1ePqcyqZFU3PIxvyZMy9htu9LGPmimfzdrliRfAdci-AtzgLCIV72xmoykk-kHcYRhAFWFOChULOGxrDi00x8GgenORhx_JVxUN_fjtsN5B7T", "alias" : "rabbit", "owner": "886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445" } }' \
 http://$HOST:7442/device/register)
 
 # {"success":false,"status":"authentication"}
@@ -76,7 +77,7 @@ R=$(curl -s \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "registration" : { "mac" : "FFFFFFFFFFFF", "firmware" : "none", "version" : "0.0.0", "hash" : "hash", "push" : "none", "alias" : "to-be-deleted", "owner": "test" } }' \
+-d '{ "registration" : { "mac" : "FFFFFFFFFFFF", "firmware" : "none", "version" : "0.0.0", "hash" : "hash", "push" : "none", "alias" : "to-be-deleted", "owner": "886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445" } }' \
 http://$HOST:7442/device/register)
 
 # {"success":false,"status":"authentication"}
@@ -121,7 +122,7 @@ R=$(curl -s \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "mac" : "00:00:00:00:00:00", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "commit" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "checksum" : "02e2436d60c629e2ab6357d0d314dd6fe28bd0331b18ca6b19a25cd6f969d0a8", "owner" : "test"  }' \
+-d '{ "mac" : "00:00:00:00:00:00", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "commit" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "checksum" : "02e2436d60c629e2ab6357d0d314dd6fe28bd0331b18ca6b19a25cd6f969d0a8", "owner" : "886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445"  }' \
 http://$HOST:7442/device/firmware)
 
 # {"success":false,"status":"api_key_invalid"}
