@@ -2685,6 +2685,8 @@ function buildCommand(build_id, tenant, mac, git, udid, dryrun) {
 
 	console.log("Executing build chain...");
 
+	blog.log(build_id, owner, udid, "Starting build...");
+
 	var exec = require("child_process").exec;
 	CMD = "./builder --tenant=" + tenant + " --udid=" + udid + " --git=" +
 		git +
@@ -2701,9 +2703,11 @@ function buildCommand(build_id, tenant, mac, git, udid, dryrun) {
 	console.log(CMD);
 	exec(CMD, function(err, stdout, stderr) {
 		if (err) {
+			blog.log(build_id, owner, udid, "Build start failed...");
 			console.error(build_id + " : " + stdout);
 			return;
 		}
+		blog.log(build_id, owner, udid, "Running build...");
 		console.log(build_id + " : " + stdout);
 	});
 }
