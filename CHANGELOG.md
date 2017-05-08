@@ -2,13 +2,21 @@
 
 ## Change log
 
-### Last week
+### Hopefully The Last Week
 
-
+**ROADMAP**
+* WEEK: UI follows API
+* 1: Working Arduino C implementation (lib?)
+* 2: Build progres tracking
+* 3: Bare data support (LUA/uPy)
+* 4: Statistics
+* 5: Tests
+* 6: Tests
+* 7: Tests
 
 ### Fourth week
 
-8/5/2017 - 1.4.601: Watching sources repositories attached to devices for changes, enabled build logger, updated build directory/repository structure, simplified registration request (should not require 'owner' parameter anymore); advanced update-notifier implementation
+8/5/2017 - 1.4.603: Watching sources repositories attached to devices for changes, enabled build logger, updated build directory/repository structure, simplified registration request (should not require 'owner' parameter anymore); advanced update-notifier implementation; database compact job
 
 7/5/2017 - 1.3.585: Added API endpoints for fetching audit log, build log list and build log (incomplete), builder now saves build logs next to build/envelope file with same filename (build-id)
 
