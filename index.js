@@ -2348,10 +2348,10 @@ app.post("/device/register", function(req, res) {
 		if (isNew) {
 			// Create UDID for new device
 
-			device.udid = uuidV1();
+			device.udid = uuidV1(); // is returned to device which should immediately take over this value instead of mac for new registration
 			device.device_id = device.udid;
 
-			devicelib.insert(device, device.mac, function(err, body, header) {
+			devicelib.insert(device, device.udid, function(err, body, header) {
 
 				if (err == "Error: error happened in DB connection") {
 					process.exit(3);
