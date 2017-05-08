@@ -2309,7 +2309,7 @@ app.post("/device/register", function(req, res) {
 			hash: hash, // will deprecate; is commit_id or binary checksum!
 			push: push,
 			alias: alias,
-			owner: owner,
+			owner: req.session.owner,
 			version: device_version,
 			device_id: device_id,
 			lastupdate: new Date(),
@@ -2685,7 +2685,8 @@ app.post("/api/build", function(req, res) {
 
 	// '{ "build" : { "hash" : "2d5b0e45f791cb3efd828d2a451e0dc64e4aefa3", "source" : "thinx-firmware-esp8266", "dryrun" : true } }'
 
-	var tenant = req.session.username;
+	var owner = req.session.owner;
+	var username = req.session.username;
 	var build = req.body.build; // build descriptor wrapper
 
 	var dryrun = false;
@@ -2710,7 +2711,7 @@ app.post("/api/build", function(req, res) {
 	var source_alias = build.source;
 
 	devicelib.view("devicelib", "devices_by_owner", {
-		"key": tenant,
+		"key": username,
 		"include_docs": true
 	}, function(err, body) {
 
@@ -2731,8 +2732,16 @@ app.post("/api/build", function(req, res) {
 
 		for (var row in rows) {
 			var rowData = rows[row].value;
-			if (tenant.indexOf(rowData.owner) !== -1) {
-				var db_udid_hash = rowData.hash;
+			var db_udid_hash = rowData.hash;
+			if (owner.indexOf(rowData.owner) !== -1) {
+				if (device_udid_hash.indexOf(db_udid_hash) != -1) {
+					udid = rowData.hash; // target device ID hash
+					mac = rowData.mac; // target device ID mac, will deprecate
+					break;
+				}
+			}
+			// will deprecate when all devices will be re-registered using owner and not username
+			if (username.indexOf(rowData.owner) !== -1) {
 				if (device_udid_hash.indexOf(db_udid_hash) != -1) {
 					udid = rowData.hash; // target device ID hash
 					mac = rowData.mac; // target device ID mac, will deprecate
@@ -2743,7 +2752,7 @@ app.post("/api/build", function(req, res) {
 
 		// Converts build.git to git url by seeking in users' sources
 		userlib.view("users", "owners_by_username", {
-				"key": tenant,
+				"key": username,
 				"include_docs": true
 			},
 
@@ -2782,7 +2791,7 @@ app.post("/api/build", function(req, res) {
 
 				if ((typeof(udid) === "undefined" || build === null) ||
 					(typeof(mac) === "undefined" || mac === null) ||
-					(typeof(tenant) === "undefined" || tenant === null) ||
+					(typeof(owner) === "undefined" || owner === null) ||
 					(typeof(git) === "undefined" || git === null)) {
 					rdict = {
 						build: {
@@ -2817,20 +2826,20 @@ app.post("/api/build", function(req, res) {
 
 				res.end(JSON.stringify(rdict));
 
-				buildCommand(build_id, tenant, mac, git, udid, dryrun);
+				buildCommand(build_id, owner, mac, git, udid, dryrun);
 
 			});
 	});
 });
 
-function buildCommand(build_id, tenant, mac, git, udid, dryrun) {
+function buildCommand(build_id, owner, mac, git, udid, dryrun) {
 
 	console.log("Executing build chain...");
 
 	blog.log(build_id, owner, udid, "Starting build...");
 
 	var exec = require("child_process").exec;
-	CMD = "./builder --tenant=" + tenant + " --udid=" + udid + " --git=" +
+	CMD = "./builder --owner=" + owner + " --udid=" + udid + " --git=" +
 		git +
 		" --id=" + build_id;
 

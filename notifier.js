@@ -34,7 +34,7 @@ var repo_url = process.argv[5]; // reference to git repo
 var build_path = process.argv[6]; // path to build artifact
 var mac = process.argv[7]; // mac address of target device or ANY
 var sha = process.argv[8]; // sha hash of the binary
-var owner = process.argv[9] || "test"; // owner/tenant
+var owner = process.argv[9] || "test"; // owner_id
 var status = process.argv[10] || true; // build result status
 
 // Validate params

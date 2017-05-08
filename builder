@@ -4,7 +4,7 @@ echo
 echo "-=[ ☢ THiNX IoT RTM BUILDER ☢ ]=-"
 echo
 
-USERNAME='test' 		# name of folder where workspaces reside
+OWNER_ID='886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445' 		# name of folder where workspaces reside
 RUN=true			# dry-run switch
 DEVICE='UNKNOWN'	# builds for no device by default, not even ANY
 OPEN=false			# show build result in Finder
@@ -12,8 +12,8 @@ BUILD_ID=0
 ORIGIN=$(pwd)
 
 # tested:
-# ./builder --build-id="cli-manual" --tenant=test --udid=47fc9ab2-2227-11e7-8584-4c327591230d --mac=ANY --git=git@github.com:suculent/thinx-firmware-esp8266.git
-# ./builder --build-id="cli-manual" --tenant=test --udid=47fc9ab2-2227-11e7-8584-4c327591230d --mac="000000000000" --git=git@github.com:suculent/thinx-firmware-esp8266.git
+# ./builder --build-id="cli-manual" --owner=886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445 --udid=47fc9ab2-2227-11e7-8584-4c327591230d --mac=ANY --git=git@github.com:suculent/thinx-firmware-esp8266.git
+# ./builder --build-id="cli-manual" --owner=886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445 --udid=47fc9ab2-2227-11e7-8584-4c327591230d --mac="000000000000" --git=git@github.com:suculent/thinx-firmware-esp8266.git
 
 for i in "$@"
 do
@@ -21,8 +21,8 @@ case $i in
 	-i=*|--id=*)
       BUILD_ID="${i#*=}"
     ;;
-    -t=*|--tenant=*)
-      USERNAME="${i#*=}"
+    -o=*|--owner=*)
+      OWNER_ID="${i#*=}"
     ;;
     -m=*|--mac=*)
       DEVICE="${i#*=}"
@@ -37,7 +37,7 @@ case $i in
     -d|--dry-run)
       RUN=false
     ;;
-    -o|--open)
+    --open)
       OPEN=true
     ;;
 	-u|--udid)
@@ -49,8 +49,8 @@ case $i in
 esac
 done
 
-USERNAME_HOME=/var/www/html/bin/$USERNAME
-DEPLOYMENT_PATH=${USERNAME_HOME}/${DEVICE}
+OWNER_ID_HOME=/var/www/html/bin/$OWNER_ID
+DEPLOYMENT_PATH=${OWNER_ID_HOME}/${DEVICE}
 LOG_PATH="${DEPLOYMENT_PATH}/${BUILD_ID}.log"
 
 # extract the protocol
@@ -91,15 +91,15 @@ echo "  REPO_NAME: ${REPO_NAME}" >> $LOG_PATH
 echo "Cleaning workspace..." >> $LOG_PATH
 
 # Clean
-rm -rf ./tenants/$USERNAME/$REPO_PATH
+rm -rf ./tenants/$OWNER_ID/$REPO_PATH
 
 echo "Creating workspace..." >> $LOG_PATH
 
 # Create new working directory
-mkdir -p ./tenants/$USERNAME/$REPO_PATH
+mkdir -p ./tenants/$OWNER_ID/$REPO_PATH
 
 # TODO: only if $REPO_NAME contains slash(es)
-pushd ./tenants/$USERNAME > /dev/null
+pushd ./tenants/$OWNER_ID > /dev/null
 
 # enter git user folder if any
 if [[ -d ${GIT_USER} ]]; then
@@ -126,7 +126,7 @@ echo "Version: ${VERSION}" >> $LOG_PATH
 THINX_FILE="$(find . | grep '/Thinx.h')"
 THINX_CLOUD_URL="thinx.cloud"
 THINX_MQTT_URL="mqtt://${THINX_CLOUD_URL}"
-THINX_OWNER=$USERNAME
+THINX_OWNER=$OWNER_ID
 
 if [[ ! -z $DEVICE_ALIAS ]]; then
 	THINX_ALIAS=$DEVICE_ALIAS
@@ -188,6 +188,8 @@ elif [[ ! -f platformio.ini ]]; then
 	exit 1
 fi
 
+echo "TODO: Support no-compile deployment of Micropython/LUA here..."
+
 platformio run >> $LOG_PATH
 
 SHA=0
@@ -215,6 +217,8 @@ else
 	set +e
 	mkdir -p $DEPLOYMENT_PATH
 	set -e
+
+	echo "TODO: Support post-build deployment of different platforms here..."
 
 	# Deploy binary (may require rotating previous file or timestamping/renaming previous version of the file)
 	 # WARNING: bin was elf here but it seems kind of wrong. needs testing
@@ -249,13 +253,13 @@ echo "GIT" "${GIT_REPO}" >> $LOG_PATH
 echo "DEP" "${DEPLOYMENT_PATH}" >> $LOG_PATH
 echo "MAC" "${DEVICE}" >> $LOG_PATH
 echo "SHA" "${SHA}" >> $LOG_PATH
-echo "TNT" "${USERNAME}" >> $LOG_PATH
+echo "TNT" "${OWNER_ID}" >> $LOG_PATH
 echo "STA" "${STATUS}" >> $LOG_PATH
 
 cd $ORIGIN
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
-CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${COMMIT}.bin ${DEVICE} ${SHA} ${USERNAME} ${STATUS}"
+CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${COMMIT}.bin ${DEVICE} ${SHA} ${OWNER_ID} ${STATUS}"
 echo $CMD >> $LOG_PATH
 RESULT=$(node notifier.js $CMD)
 echo $RESULT >> $LOG_PATH
