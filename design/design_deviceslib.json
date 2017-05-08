@@ -10,6 +10,9 @@
     },
     "devices_by_id": {
       "map": "function (doc) { if(doc.id) { emit (doc); } }"
+    },
+    "watcher_view": {
+      "map": "function (doc) { if(doc.source != null) { emit (doc.owner, doc.device_id, doc.source); } }"
     }
   }
 }

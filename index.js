@@ -27,13 +27,16 @@ var Emailer = require('email').Email;
 var fs = require("fs");
 var gutil = require('gulp-util');
 var request = require("request");
+var mkdirp = require('mkdirp');
 
 var deploy = require("./lib/thinx/deployment");
 var v = require("./lib/thinx/version");
 var alog = require("./lib/thinx/audit");
 var blog = require("./lib/thinx/build");
+var watcher = require("./lib/thinx/repository");
 
 var rdict = {};
+var watched_repos = {};
 
 /*
  * Databases
@@ -316,6 +319,21 @@ app.post("/api/device/attach", function(req, res) {
 		alog.log(doc.owner, "Attaching repository to device: " + JSON.stringify(
 			doc.hash));
 
+		var repo_path = deploy.pathForDevice(doc.owner, doc.device_id);
+		console.log("repo_path: " + repo_path);
+
+		mkdirp(user_path, function(err) {
+			if (err) console.error(err);
+			else console.log(repo_path + 'created.');
+		});
+
+		if (fs.lstatSync(path).isDirectory()) {
+			watcher.watchRepository(path, watcher_callback());
+			watched_repos.push(path);
+		} else {
+			console.log(path + " is not a directory.");
+		}
+
 		devicelib.destroy(doc._id, doc._rev, function(err) {
 
 			doc.source = alias;
@@ -374,6 +392,13 @@ app.post("/api/device/detach", function(req, res) {
 		var doc = body.rows[0].doc;
 
 		console.log("Detaching repository from device: " + JSON.stringify(doc.hash));
+
+		var repo_path = deploy.pathForDevice(doc.owner, doc.device_id);
+		console.log("repo_path: " + owner);
+		if (fs.lstatSync(path).isDirectory()) {
+			watcher.unwatchRepository(path);
+			watched_repos.splice(watched_repos.indexOf(path));
+		}
 
 		devicelib.destroy(doc._id, doc._rev, function(err) {
 
@@ -3034,3 +3059,50 @@ app.listen(serverPort, function() {
 process.on("uncaughtException", function(err) {
 	console.log("Caught exception: " + err);
 });
+
+/* Should load all devices with attached repositories and watch those repositories.
+ * Maintains list of watched repositories for runtime handling purposes.
+ * TODO: Re-build on change.
+ */
+
+initWatcher(watcher);
+
+var watcher_callback = function(result) {
+	console.log("Watch repository result: " + JSON.stringify(result));
+	//watched_repos.splice(watched_repos.indexOf(path));
+	// TODO: Commence re-build (will notify user but needs to get all required user data first (owner/device is in path))
+};
+
+var initWatcher = function(watcher) {
+
+	console.log("Starting repository watcher...");
+
+	devicelib.view("devicelib", "watcher_view", {
+		"include_docs": true
+	}, function(err, body) {
+
+		if (err) {
+			console.log(err);
+			return;
+		}
+
+		console.log(JSON.stringify(body));
+
+		// Collect paths
+		for (var index in body.rows) {
+			var owner = body.rows[index].owner;
+			console.log("owner: " + owner);
+			var device_id = body.rows[index].device_id;
+			console.log("device_id: " + owner);
+			var path = deploy.pathForDevice(owner, device_id);
+			console.log("path: " + path);
+
+			if (fs.lstatSync(path).isDirectory()) {
+				watcher.watchRepository(path, watcher_callback());
+				watched_repos.push(path);
+			} else {
+				console.log(path + " is not a directory.");
+			}
+		}
+	});
+};
