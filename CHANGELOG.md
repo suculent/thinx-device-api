@@ -8,7 +8,7 @@
 
 ### Fourth week
 
-8/5/2017 - 1.3.xxx: Watching sources repositories attached to devices for changes, enabled build logger
+8/5/2017 - 1.3.xxx: Watching sources repositories attached to devices for changes, enabled build logger, updated build directory/repository structure, simplified registration request (should not require 'owner' parameter anymore)
 
 8/5/2017 - 1.3.585: Added API endpoints for fetching audit log, build log list and build log (incomplete), builder now saves build logs next to build/envelope file with same filename (build-id)
 
