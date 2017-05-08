@@ -12,8 +12,8 @@ BUILD_ID=0
 ORIGIN=$(pwd)
 
 # tested:
-# ./builder --build-id="cli-manual" --owner=886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445 --udid=47fc9ab2-2227-11e7-8584-4c327591230d --mac=ANY --git=git@github.com:suculent/thinx-firmware-esp8266.git
-# ./builder --build-id="cli-manual" --owner=886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445 --udid=47fc9ab2-2227-11e7-8584-4c327591230d --mac="000000000000" --git=git@github.com:suculent/thinx-firmware-esp8266.git
+# ./builder --build-id="cli-manual" --owner=886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445 --udid=47fc9ab2-2227-11e7-8584-4c327591230d --git=git@github.com:suculent/thinx-firmware-esp8266.git
+# ./builder --build-id="cli-manual" --owner=886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445 --udid=47fc9ab2-2227-11e7-8584-4c327591230d --git=git@github.com:suculent/thinx-firmware-esp8266.git
 
 for i in "$@"
 do
@@ -23,10 +23,6 @@ case $i in
     ;;
     -o=*|--owner=*)
       OWNER_ID="${i#*=}"
-    ;;
-    -m=*|--mac=*)
-      DEVICE="${i#*=}"
-			UDID=$DEVICE
     ;;
     -a=*|--alias=*)
       DEVICE_ALIAS="${i#*=}"
@@ -50,7 +46,7 @@ esac
 done
 
 OWNER_ID_HOME=/var/www/html/bin/$OWNER_ID
-DEPLOYMENT_PATH=${OWNER_ID_HOME}/${DEVICE}
+DEPLOYMENT_PATH=${OWNER_ID_HOME}/${UDID}
 LOG_PATH="${DEPLOYMENT_PATH}/${BUILD_ID}.log"
 
 # extract the protocol
@@ -251,7 +247,7 @@ echo "CID" "${COMMIT}" >> $LOG_PATH
 echo "VER" "${VERSION}" >> $LOG_PATH
 echo "GIT" "${GIT_REPO}" >> $LOG_PATH
 echo "DEP" "${DEPLOYMENT_PATH}" >> $LOG_PATH
-echo "MAC" "${DEVICE}" >> $LOG_PATH
+echo "UDID" "${UDID}" >> $LOG_PATH
 echo "SHA" "${SHA}" >> $LOG_PATH
 echo "TNT" "${OWNER_ID}" >> $LOG_PATH
 echo "STA" "${STATUS}" >> $LOG_PATH
@@ -259,7 +255,7 @@ echo "STA" "${STATUS}" >> $LOG_PATH
 cd $ORIGIN
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
-CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${COMMIT}.bin ${DEVICE} ${SHA} ${OWNER_ID} ${STATUS}"
+CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${COMMIT}.bin ${UDID} ${SHA} ${OWNER_ID} ${STATUS}"
 echo $CMD >> $LOG_PATH
 RESULT=$(node notifier.js $CMD)
 echo $RESULT >> $LOG_PATH

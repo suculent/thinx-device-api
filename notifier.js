@@ -10,6 +10,12 @@ var config = require("./conf/config.json");
 var sha256 = require("sha256");
 
 var db = config.database_uri;
+
+var userlib = require("nano")(db).use("managed_users");
+var buildlib = require("nano")(db).use("managed_builds");
+var loglib = require("nano")(db).use("managed_logs");
+var devicelib = require("nano")(db).use("managed_devices");
+
 var client_user_agent = config.client_user_agent;
 var slack_webhook = config.slack_webhook;
 var slack = require("slack-notify")(slack_webhook);
@@ -32,9 +38,9 @@ var commit_id = process.argv[3]; // build artifact commit_id
 var version = process.argv[4]; // build artifact version
 var repo_url = process.argv[5]; // reference to git repo
 var build_path = process.argv[6]; // path to build artifact
-var mac = process.argv[7]; // mac address of target device or ANY
+var udid = process.argv[7]; // udid address of target device or ANY
 var sha = process.argv[8]; // sha hash of the binary
-var owner = process.argv[9] || "test"; // owner_id
+var owner = process.argv[9]; // owner_id
 var status = process.argv[10] || true; // build result status
 
 // Validate params
@@ -94,27 +100,6 @@ if (typeof(sha) === "undefined" || sha === "") {
   }
 }
 
-console.log("build_id : " + build_id + "\n");
-console.log("commit_id : " + commit_id + "\n");
-console.log("version : " + version + "\n");
-console.log("repo_url : " + repo_url + "\n");
-console.log("build_path : " + build_path + "\n");
-console.log("mac : " + mac + "\n");
-console.log("sha : " + sha + "\n");
-console.log("status : " + status + "\n");
-
-// Prepare payload
-
-var pushNotificationPayload = {
-  firmware_update: {
-    url: build_path,
-    mac: mac,
-    commit: commit_id,
-    version: version,
-    checksum: sha
-  }
-};
-
 // Initially creates DB, otherwise fails silently.
 nano.db.create("managed_builds", function(err, body, header) {
   if (err) {
@@ -132,152 +117,221 @@ nano.db.create("managed_builds", function(err, body, header) {
   }
 });
 
-var loglib = require("nano")(db).use("managed_logs");
-var devicelib = require("nano")(db).use("managed_devices");
+console.log("build_id : " + build_id + "\n");
+console.log("commit_id : " + commit_id + "\n");
+console.log("version : " + version + "\n");
+console.log("repo_url : " + repo_url + "\n");
+console.log("build_path : " + build_path + "\n");
+console.log("mac : " + mac + "\n"); // should change to udid!
+console.log("sha : " + sha + "\n");
+console.log("status : " + status + "\n");
 
-// Create build envelope
+var blog = require("./lib/thinx/build");
 
-var buildEnvelope = {
-  url: repo_url,
-  //  path: build_path,
-  mac: mac,
-  commit: commit_id,
-  version: version,
-  checksum: sha,
-  build_id: build_id,
-  owner: owner,
-  status: status,
-  timestamp: new Date()
-};
+blog.log(build_id, owner, udid, "Starting build notifier...");
 
-// save to build_path
+//
+// Device -> Souce Alias -> User -> Sources ...
+//
 
-var envelopePath = deploymentPathForDevice(owner, mac) + "/" + commit_id +
-  ".json";
-console.log("Saving build envelope: " + envelopePath);
+devicelib.get(mac, function(err, doc) {
 
-function deploymentPathForDevice(owner, mac) {
-  // MMAC is file-system agnostic and easy to search
-  var mmac = mac.toString().replace(":", "-");
-
-  // Get path for owner (and optinaly a device)
-  var user_path = config.deploy_root + "/" + owner;
-  var device_path = user_path;
-  if (mac.indexOf("ANY") != -1) {
-    device_path = device_path + "/" + mac;
-  }
-  return device_path;
-}
-
-fs.open(envelopePath, "w", function(err, fd) {
   if (err) {
-    throw "error opening file: " + err;
-  } else {
-    fs.writeFile(envelopePath, JSON.stringify(buildEnvelope), function(err) {
-      if (err) {
-        console.log("Build envelope save error: " + err);
-      } else {
-        console.log("Build envelope saved successfully:");
-        console.log(JSON.stringify(buildEnvelope));
-      }
-      console.log("\n");
-    });
+    console.log(err);
+    res.end(JSON.stringify({
+      success: false,
+      status: "device_not_found"
+    }));
+    return;
   }
+
+  var source = doc.source;
+
+  // Collect push tokens
+  var push_tokens = [];
+  devicelib.view("devicelib", "devices_by_source", {
+    "key": source,
+    "include_docs": true
+  }, function(err, body) {
+
+    if (err) {
+      console.log(err);
+      return false;
+    }
+
+    if (body.rows.length === 0) {
+      console.log("No results.");
+      return false;
+    }
+
+
+    for (var index in body.rows) {
+      if (typeof(body.rows[index].push !== "undefined")) {
+        push_tokens.push(body.rows[index].push);
+      }
+    }
+
+    console.log(JSON.stringify(body));
+
+    // Create build envelope
+
+    var buildEnvelope = {
+      url: repo_url,
+      //  path: build_path,
+      mac: mac,
+      commit: commit_id,
+      version: version,
+      checksum: sha,
+      build_id: build_id,
+      owner: owner,
+      status: status,
+      timestamp: new Date()
+    };
+
+    // save to build_path
+
+    var envelopePath = deploymentPathForDevice(owner, mac) + "/" +
+      commit_id +
+      ".json";
+    console.log("Saving build envelope: " + envelopePath);
+
+
+
+    fs.open(envelopePath, "w", function(err, fd) {
+      if (err) {
+        throw "error opening file: " + err;
+      } else {
+        fs.writeFile(envelopePath, JSON.stringify(buildEnvelope),
+          function(err) {
+            if (err) {
+              console.log("Build envelope save error: " + err);
+            } else {
+              console.log("Build envelope saved successfully:");
+              console.log(JSON.stringify(buildEnvelope));
+            }
+            console.log("\n");
+          });
+      }
+    });
+
+    // TODO: Update current build version in managed_users.sources
+
+
+    // Select targets
+
+    // TODO: -- fetch devices with matching MAC or any
+    // TODO: -- collect push tokens (each only once)
+
+    // Notify admin (Slack)
+
+    // Bundled notification types:
+
+    if (status === true) {
+      slack.alert({
+        text: "Build successfully completed.",
+        username: "notifier.js",
+        fields: buildEnvelope
+      });
+    } else if (status == "DEPLOYED") {
+      slack.alert({
+        text: "Deployment successful.", // todo: reference git_url + commit_id here
+        username: "notifier.js",
+        icon_emoji: ":ghost:",
+        fields: buildEnvelope
+      });
+    } else if (status == "DRY_RUN_OK") {
+      slack.alert({
+        text: "Dry run successful. Firmware left undeployed.", // todo: reference git_url + commit_id here
+        username: "notifier.js",
+        icon_emoji: ":ghost:",
+        fields: buildEnvelope
+      });
+    } else {
+      slack.alert({
+        text: "Build failed.",
+        username: "notifier.js",
+        icon_emoji: ":computerage:",
+        fields: buildEnvelope
+      });
+    }
+
+    // Notify users (FCM)
+
+    var message = {
+      data: {
+        type: "update",
+        url: repo_url || "/bin/test/firmware.elf",
+        mac: mac || "5C:CF:7F:EE:90:E0;ANY",
+        commit: commit_id ||
+          "18ee75e3a56c07a9eff08f75df69ef96f919653a",
+        version: version || "0.0.1",
+        checksum: sha ||
+          "6bf6bd7fc983af6c900d8fe162acc3ba585c446ae0188e52802004631d854c60"
+      },
+      notification: {
+        title: "Aktualizace EAV",
+        body: "Je k dispozici aktualizace software pro Akustim. Přejete si ji nainstalovat?"
+      }
+    };
+
+    console.log("\n");
+
+    // TODO: Get registration token from device database instead
+
+    var admin = require("firebase-admin");
+    var serviceAccount = require(
+      config.fcm_auth);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      databaseURL: "https://thinx-cloud.firebaseio.com"
+    });
+
+    var successFunction = function(response) {
+      console.log("Successfully sent message:", response);
+    };
+
+    var failureFunction = function(error) {
+      console.log("Error sending message:", error);
+    };
+
+    for (var pindex in push_tokens) {
+      var registrationToken = push_tokens[pindex];
+      admin.messaging().sendToDevice(registrationToken, message)
+        .then(successFunction)
+        .catch(failureFunction);
+
+      console.log("\n");
+    }
+
+
+    //
+    // Notify devices (MQTT)
+    //
+
+    // Device channel
+    if (status == "DEPLOYED") {
+      notify_device_channel(owner, mac, message);
+    }
+
+
+  });
 });
 
-// TODO: Update current build version in managed_users.sources
 
 
-// Select targets
+// Prepare payload
 
-// TODO: -- fetch devices with matching MAC or any
-// TODO: -- collect push tokens (each only once)
-
-// Notify admin (Slack)
-
-// Bundled notification types:
-
-if (status === true) {
-  slack.alert({
-    text: "Build successfully completed.",
-    username: "notifier.js",
-    fields: buildEnvelope
-  });
-} else if (status == "DEPLOYED") {
-  slack.alert({
-    text: "Deployment successful.", // todo: reference git_url + commit_id here
-    username: "notifier.js",
-    icon_emoji: ":ghost:",
-    fields: buildEnvelope
-  });
-} else if (status == "DRY_RUN_OK") {
-  slack.alert({
-    text: "Dry run successful. Firmware left undeployed.", // todo: reference git_url + commit_id here
-    username: "notifier.js",
-    icon_emoji: ":ghost:",
-    fields: buildEnvelope
-  });
-} else {
-  slack.alert({
-    text: "Build failed.",
-    username: "notifier.js",
-    icon_emoji: ":computerage:",
-    fields: buildEnvelope
-  });
-}
-
-// Notify users (FCM)
-
-var message = {
-  data: {
-    type: "update",
-    url: repo_url || "/bin/test/firmware.elf",
-    mac: mac || "5C:CF:7F:EE:90:E0;ANY",
-    commit: commit_id || "18ee75e3a56c07a9eff08f75df69ef96f919653a",
-    version: version || "0.0.1",
-    checksum: sha ||
-      "6bf6bd7fc983af6c900d8fe162acc3ba585c446ae0188e52802004631d854c60"
-  },
-  notification: {
-    title: "Aktualizace EAV",
-    body: "Je k dispozici aktualizace software pro Akustim. Přejete si ji nainstalovat?"
+var pushNotificationPayload = {
+  firmware_update: {
+    url: build_path,
+    mac: mac,
+    commit: commit_id,
+    version: version,
+    checksum: sha
   }
 };
 
-console.log("\n");
 
-// TODO: Get registration token from device database instead
-
-// This registration token comes from the client FCM SDKs.
-var registrationToken =
-  "dhho4djVGeQ:APA91bFuuZWXDQ8vSR0YKyjWIiwIoTB1ePqcyqZFU3PIxvyZMy9htu9LGPmimfzdrliRfAdci-AtzgLCIV72xmoykk-kHcYRhAFWFOChULOGxrDi00x8GgenORhx_JVxUN_fjtsN5B7T";
-
-var admin = require("firebase-admin");
-var serviceAccount = require(
-  config.fcm_auth);
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://thinx-cloud.firebaseio.com"
-});
-
-admin.messaging().sendToDevice(registrationToken, message)
-  .then(function(response) {
-    console.log("Successfully sent message:", response);
-  })
-  .catch(function(error) {
-    console.log("Error sending message:", error);
-  });
-
-console.log("\n");
-
-//
-// Notify devices (MQTT)
-//
-
-// Device channel
-if (status == "DEPLOYED") {
-  notify_device_channel(owner, mac, message);
-}
 
 //
 // MQTT Notifications (for Devices)
@@ -308,4 +362,18 @@ function notify_device_channel(owner, mac, message) {
   });
 
   console.log("\n");
+}
+
+
+function deploymentPathForDevice(owner, mac) {
+  // MMAC is file-system agnostic and easy to search
+  var mmac = mac.toString().replace(":", "-");
+
+  // Get path for owner (and optinaly a device)
+  var user_path = config.deploy_root + "/" + owner;
+  var device_path = user_path;
+  if (mac.indexOf("ANY") != -1) {
+    device_path = device_path + "/" + mac;
+  }
+  return device_path;
 }

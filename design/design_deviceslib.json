@@ -8,6 +8,9 @@
     "devices_by_owner": {
       "map": "function (doc) { if(doc.owner) { emit (doc.owner, doc); } }"
     },
+    "devices_by_source": {
+      "map": "function (doc) { if(doc.source) { emit (doc); } }"
+    },
     "devices_by_id": {
       "map": "function (doc) { if(doc.id) { emit (doc); } }"
     },

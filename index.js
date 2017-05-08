@@ -753,7 +753,7 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 
 	console.log("Revoke API Key by hash: " + api_key_hash);
 
-	userlib.view("users", "owners_by_username", {
+	userlib.get("users", "owners_by_username", {
 		"key": username,
 		"include_docs": true
 	}, function(err, body) {
@@ -2132,6 +2132,7 @@ app.post("/device/firmware", function(req, res) {
 }); // app.get
 
 // Device login/registration
+// FIXME: MAC will be allowed for initial regitra
 app.post("/device/register", function(req, res) {
 
 	validateRequest(req, res);
@@ -2835,13 +2836,13 @@ app.post("/api/build", function(req, res) {
 
 				res.end(JSON.stringify(rdict));
 
-				buildCommand(build_id, owner, mac, git, udid, dryrun);
+				buildCommand(build_id, owner, git, udid, dryrun);
 
 			});
 	});
 });
 
-function buildCommand(build_id, owner, mac, git, udid, dryrun) {
+function buildCommand(build_id, owner, git, udid, dryrun) {
 
 	console.log("Executing build chain...");
 
@@ -2851,10 +2852,6 @@ function buildCommand(build_id, owner, mac, git, udid, dryrun) {
 	CMD = "./builder --owner=" + owner + " --udid=" + udid + " --git=" +
 		git +
 		" --id=" + build_id;
-
-	if (typeof(mac) !== "undefined" && mac !== null) {
-		CMD = CMD + " --mac=" + mac;
-	}
 
 	if (dryrun === true) {
 		CMD = CMD + " --dry-run";
