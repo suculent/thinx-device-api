@@ -3254,13 +3254,17 @@ var initWatcher = function(watcher) {
 			var device_id = body.rows[index].doc.device_id;
 			console.log("device_id: " + owner);
 			var path = deploy.pathForDevice(owner, device_id);
-			console.log("path: " + path);
 
-			if (fs.lstatSync(path).isDirectory()) {
-				watcher.watchRepository(path, watcher_callback());
-				watched_repos.push(path);
+			if (!fs.existsSync(path)) {
+				console.log("path does not exist to be watched: " + path);
 			} else {
-				console.log(path + " is not a directory.");
+				console.log("watched path: " + path);
+				if (fs.lstatSync(path).isDirectory()) {
+					watcher.watchRepository(path, watcher_callback());
+					watched_repos.push(path);
+				} else {
+					console.log(path + " is not a directory.");
+				}
 			}
 		}
 	});
