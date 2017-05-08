@@ -3226,8 +3226,6 @@ process.on("uncaughtException", function(err) {
  * TODO: Re-build on change.
  */
 
-initWatcher(watcher);
-
 var watcher_callback = function(result) {
 	console.log("Watch repository result: " + JSON.stringify(result));
 	//watched_repos.splice(watched_repos.indexOf(path));
@@ -3267,3 +3265,5 @@ var initWatcher = function(watcher) {
 		}
 	});
 };
+
+initWatcher(watcher);
