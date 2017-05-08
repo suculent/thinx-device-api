@@ -303,8 +303,8 @@ app.post("/api/user/profile", function(req, res) {
 
 	});
 
-	userlib.view("users", "owners_by_username", {
-		"key": username,
+	userlib.view("users", "owners_by_owner_id", {
+		"key": owner,
 		"include_docs": true
 	}, function(err, body) {
 
@@ -683,8 +683,8 @@ app.post("/api/user/apikey", function(req, res) {
 
 	// Get all users
 	// FIXME: Refactor to owners_by_apikey
-	userlib.view("users", "owners_by_username", {
-		"key": username,
+	userlib.view("users", "owners_by_owner_id", {
+		"key": owner,
 		"include_docs": true
 	}, function(err, body) {
 
@@ -753,8 +753,8 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 
 	console.log("Revoke API Key by hash: " + api_key_hash);
 
-	userlib.get("users", "owners_by_username", {
-		"key": username,
+	userlib.get("users", "owners_by_owner_id", {
+		"key": owner,
 		"include_docs": true
 	}, function(err, body) {
 
@@ -835,8 +835,8 @@ app.get("/api/user/apikey/list", function(req, res) {
 	var owner = req.session.owner;
 	var username = req.session.username;
 
-	userlib.view("users", "owners_by_username", {
-		"key": username,
+	userlib.view("users", "owners_by_owner_id", {
+		"key": owner,
 		"include_docs": true
 	}, function(err, body) {
 
@@ -894,8 +894,8 @@ app.get("/api/user/sources/list", function(req, res) {
 
 	console.log("List sources for owner: " + owner);
 
-	userlib.view("users", "owners_by_username", {
-			"key": username,
+	userlib.view("users", "owners_by_owner_id", {
+			"key": owner,
 			"include_docs": true
 		},
 
@@ -958,8 +958,8 @@ app.post("/api/user/source", function(req, res) {
 	var url = req.body.url;
 	var alias = req.body.alias;
 
-	userlib.view("users", "owners_by_username", {
-		"key": username,
+	userlib.view("users", "owners_by_owner_id", {
+		"key": owner,
 		"include_docs": true
 	}, function(err, body) {
 
@@ -1033,8 +1033,8 @@ app.post("/api/user/source/revoke", function(req, res) {
 
 	var alias = req.body.alias;
 
-	userlib.view("users", "owners_by_username", {
-		"key": username,
+	userlib.view("users", "owners_by_owner_id", {
+		"key": owner,
 		"include_docs": true
 	}, function(err, body) {
 
@@ -1124,8 +1124,8 @@ app.post("/api/user/rsakey", function(req, res) {
 	var new_key_body = req.body.key;
 	var new_key_fingerprint = fingerprint(new_key_body);
 
-	userlib.view("users", "owners_by_username", {
-		"key": username,
+	userlib.view("users", "owners_by_owner_id", {
+		"key": owner,
 		"include_docs": true
 	}, function(err, body) {
 
@@ -1216,8 +1216,8 @@ app.get("/api/user/rsakey/list", function(req, res) {
 	var username = req.session.username;
 
 	// Get all users
-	userlib.view("users", "owners_by_username", {
-		"key": username,
+	userlib.view("users", "owners_by_owner_id", {
+		"key": owner,
 		"include_docs": true
 	}, function(err, body) {
 
@@ -1284,8 +1284,8 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 
 	console.log("Searching by username " + username);
 
-	userlib.view("users", "owners_by_username", {
-		"key": username,
+	userlib.view("users", "owners_by_owner_id", {
+		"key": owner,
 		"include_docs": true
 	}, function(err, body) {
 
@@ -1905,8 +1905,8 @@ app.get("/api/user/profile", function(req, res) {
 	var owner = req.session.owner;
 	var username = req.session.username;
 
-	userlib.view("users", "owners_by_username", {
-		"key": username,
+	userlib.view("users", "owners_by_owner_id", {
+		"key": owner,
 		"include_docs": true // might be useless
 	}, function(err, body) {
 
@@ -2761,8 +2761,8 @@ app.post("/api/build", function(req, res) {
 		}
 
 		// Converts build.git to git url by seeking in users' sources
-		userlib.view("users", "owners_by_username", {
-				"key": username,
+		userlib.view("users", "owners_by_owner_id", {
+				"key": owner,
 				"include_docs": true
 			},
 
