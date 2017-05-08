@@ -3269,3 +3269,18 @@ var initWatcher = function(watcher) {
 };
 
 initWatcher(watcher);
+
+//
+// Database compactor
+//
+
+var database_compactor = function() {
+	console.log("Running database compact jobs...");
+	nano.db.compact("builds");
+	nano.db.compact("deviceslib");
+	nano.db.compact("logs");
+	nano.db.compact("users");
+	console.log("Database compact jobs completed.");
+};
+
+var database_compact_timer = setTimeout(86400 * 100, database_compactor);

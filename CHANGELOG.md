@@ -8,9 +8,9 @@
 
 ### Fourth week
 
-8/5/2017 - 1.3.600: Watching sources repositories attached to devices for changes, enabled build logger, updated build directory/repository structure, simplified registration request (should not require 'owner' parameter anymore); advenced update-notifier implementation
+8/5/2017 - 1.4.601: Watching sources repositories attached to devices for changes, enabled build logger, updated build directory/repository structure, simplified registration request (should not require 'owner' parameter anymore); advanced update-notifier implementation
 
-8/5/2017 - 1.3.585: Added API endpoints for fetching audit log, build log list and build log (incomplete), builder now saves build logs next to build/envelope file with same filename (build-id)
+7/5/2017 - 1.3.585: Added API endpoints for fetching audit log, build log list and build log (incomplete), builder now saves build logs next to build/envelope file with same filename (build-id)
 
 6/5/2017 - 1.3.581: Core client implementation templates for ESP8266/NodeMCU LUA and Micropython-based firmwares (registration and SPIFFS only, no OTA, not tested)
 
