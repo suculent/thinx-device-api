@@ -483,6 +483,7 @@ app.post("/api/device/attach", function(req, res) {
 		alog.log(doc.owner, "Attaching repository to device: " + JSON.stringify(
 			doc.hash));
 
+		deploy.initWithOwner(doc.owner);
 		var repo_path = deploy.pathForDevice(doc.owner, doc.device_id);
 		console.log("repo_path: " + repo_path);
 
