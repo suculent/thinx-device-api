@@ -213,6 +213,170 @@ app.all("/*", function(req, res, next) {
 });
 
 /*
+ * User Profile
+ */
+
+/* Updates user profile allowing following types of bulked changes:
+ * { avatar: "base64hexdata..." }
+ * { info: { "arbitrary" : "user info data "} } }
+ */
+app.post("/api/user/profile", function(req, res) {
+
+	if (!validateSecurePOSTRequest(req)) return;
+	if (!validateSession(req, res)) return;
+
+	var owner = req.session.owner;
+	var username = req.session.username;
+
+	var update_key = null;
+	var update_value = null;
+
+	if (typeof(req.body.avatar) !== "undefined") {
+
+		update_key = "avatar";
+		update_value = req.body.avatar;
+
+	} else if (typeof(req.body.info) !== "undefined") {
+
+		update_key = "info";
+		update_value = req.body.info;
+
+	} else {
+		res.end(JSON.stringify({
+			success: false,
+			status: "invalid_protocol"
+		}));
+	}
+
+	console.log("Updating owner: " + owner + "(" + username + ")");
+	alog.log(owner, "Attempt to update owner: " + owner +
+		" with: " + update_key + "and: " + JSON.stringify(update_value));
+
+	// Fetch complete user
+	userlib.get(owner, function(err, doc) {
+
+		if (err) {
+			console.log(err);
+			alog.log(owner, "Profile update failed.");
+			res.end(JSON.stringify({
+				success: false,
+				status: "owner_not_found"
+			}));
+			return;
+		}
+
+		if (!doc) {
+			console.log("Document for " + owner + " not found.");
+			alog.log(owner, "Profile update failed.");
+			res.end(JSON.stringify({
+				success: false,
+				status: "document_not_found"
+			}));
+			return;
+		}
+
+
+
+		doc[update_key] = update_value;
+
+		delete doc._rev;
+
+		userlib.insert(doc._id, function(err) {
+
+			if (err) {
+				console.log(err);
+				alog.log(owner, "Profile updated.");
+				res.end(JSON.stringify({
+					success: false,
+					status: "profile_update_failed"
+				}));
+				return;
+			} else {
+				alog.log(owner, "Profile update failed.");
+				res.end(JSON.stringify({
+					"success": true,
+					update_key: update_value
+				}));
+			}
+
+		});
+
+	});
+
+	userlib.view("users", "owners_by_username", {
+		"key": username,
+		"include_docs": true
+	}, function(err, body) {
+
+
+		if (err) {
+			console.log(err);
+			return;
+		}
+
+		if (!body) {
+			console.log("User " + userdoc.id + " not found.");
+			return;
+		}
+
+		// Search API key by hash
+		var user = body.rows[0].doc;
+		var keys = user.api_keys; // array
+		var api_key_index = null;
+		var api_key = null;
+		for (var index in keys) {
+			var internal_hash = sha256(keys[index].key);
+			if (internal_hash.indexOf(api_key_hash) !== -1) {
+				api_key_index = index;
+				api_key = keys[index].key;
+				console.log("Found and splicing index " + api_key_index + " key " +
+					api_key);
+				user.api_keys.splice(api_key_index, 1); // important
+				break;
+			}
+		}
+
+		if (api_key_index === null) {
+			res.end(JSON.stringify({
+				success: false,
+				status: "hash_not_found"
+			}));
+			return;
+		}
+
+		console.log("Destroying old document...");
+
+		userlib.destroy(user._id, user._rev, function(err) {
+
+			if (err) {
+				console.log("destroy eerror: " + err);
+				return;
+			}
+
+			console.log("Creating new document...");
+
+			user.last_update = new Date();
+			delete user._rev;
+
+			userlib.insert(user, user._id, function(err) {
+				if (err) {
+					console.log(err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "revocation_failed"
+					}));
+				} else {
+					res.end(JSON.stringify({
+						revoked: api_key,
+						success: true
+					}));
+				}
+			});
+		});
+	});
+});
+
+/*
  * Devices
  */
 
@@ -1730,28 +1894,6 @@ app.post("/api/user/password/reset", function(req, res) {
 	}); // view
 }); // post
 
-/*
- *  User Profile
- */
-
-// TODO: Implement user profile changes (what changes?)
-// /user/profile POST
-app.post("/api/user/profile", function(req, res) {
-
-	if (!validateSecurePOSTRequest(req)) return;
-
-	if (!validateSession(req, res)) return;
-
-	var owner = req.session.owner;
-	var username = req.session.username;
-
-	// TODO: Optional 'avatar' parameter
-	// TODO: Optional 'settings' parameter
-
-	res.end(JSON.stringify({
-		status: "not-implemented-yet"
-	}));
-});
 
 // /user/profile GET
 app.get("/api/user/profile", function(req, res) {
@@ -2434,7 +2576,6 @@ function failureResponse(res, code, reason) {
 }
 
 function validateRequest(req, res) {
-
 	// Check device user-agent
 	var ua = req.headers["user-agent"];
 	var validity = ua.indexOf(client_user_agent);
@@ -2518,6 +2659,7 @@ validateSession = function(req, res) {
 			if (err) {
 				console.log(err);
 			} else {
+				console.log("validateSession: Invalid session!");
 				res.end(JSON.stringify({
 					success: false,
 					status: "invalid_session"
