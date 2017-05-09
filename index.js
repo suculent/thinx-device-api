@@ -3278,7 +3278,7 @@ var initWatcher = function(watcher) {
 	});
 };
 
-initWatcher(watcher);
+// initWatcher(watcher);
 
 //
 // Database compactor
