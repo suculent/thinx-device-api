@@ -687,14 +687,14 @@ app.post("/api/user/apikey", function(req, res) {
 	userlib.view("users", "owners_by_id", {
 		"key": owner,
 		"include_docs": true
-	}, function(err, body) {
+	}, function(err, user) {
 
 		if (err) {
 			console.log(err);
 			return;
 		}
 
-		var user = body.rows[0];
+		console.log("user: " + JSON.stringify(user));
 
 		var doc = user.doc;
 
@@ -757,21 +757,19 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 	userlib.view("users", "owners_by_id", {
 		"key": owner,
 		"include_docs": true
-	}, function(err, body) {
-
+	}, function(err, user) {
 
 		if (err) {
 			console.log(err);
 			return;
 		}
 
-		if (!body) {
+		if (!user) {
 			console.log("User " + userdoc.id + " not found.");
 			return;
 		}
 
 		// Search API key by hash
-		var user = body.rows[0].doc;
 		var keys = user.api_keys; // array
 		var api_key_index = null;
 		var api_key = null;
@@ -839,7 +837,7 @@ app.get("/api/user/apikey/list", function(req, res) {
 	userlib.view("users", "owners_by_id", {
 		"key": owner,
 		"include_docs": true
-	}, function(err, body) {
+	}, function(err, user) {
 
 		if (err) {
 			console.log(err);
@@ -850,7 +848,6 @@ app.get("/api/user/apikey/list", function(req, res) {
 			return;
 		}
 
-		var user = body.rows[0];
 		var doc = user.doc;
 		if (!doc) {
 			console.log("User " + user.id + " not found.");
@@ -1288,14 +1285,13 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 	userlib.view("users", "owners_by_id", {
 		"key": owner,
 		"include_docs": true
-	}, function(err, body) {
+	}, function(err, user) {
 
 		if (err) {
 			console.log(err);
 			return;
 		}
 
-		var user = body.rows[0];
 		var doc = user.doc;
 
 		if (!doc) {
@@ -2170,7 +2166,7 @@ app.post("/device/register", function(req, res) {
 
 	var push = reg.push;
 	var alias = reg.alias;
-
+	var username = reg.owner;
 	var success = false;
 	var status = "ERROR";
 
@@ -2187,14 +2183,12 @@ app.post("/device/register", function(req, res) {
 		return;
 	}
 
-	userlib.view("users", "owners_by_apikey", {
-		"key": api_key,
+	userlib.view("users", "owners_by_username", { // because owners_by_apikey does not work anymore... apikeys should have to be in separate table
 		"include_docs": true // might be useless
 	}, function(err, body) {
 
-		console.log("owners_by_apikey: " + JSON.stringify(body));
-
 		var isNew = true;
+
 		if (err) {
 			console.log("Error: " + err.toString());
 			req.session.destroy(function(err) {
@@ -2218,33 +2212,37 @@ app.post("/device/register", function(req, res) {
 			return;
 		}
 
-		console.log("owners:" + JSON.stringify(body.rows));
+		//console.log("owners:" + JSON.stringify(body.rows));
+		console.log("Searching for api-key: " + api_key);
 
-		var owner = body.rows[0].doc.owner;
+		//console.log("in: " + JSON.stringify(body.rows));
+
+		var user_data = null;
+		var owner = null;
+
+		var api_key_valid = false;
+
+		// search API Key in owners, this will take a while...
+		for (var oindex in body.rows) {
+			var anowner = body.rows[oindex];
+			for (var kindex in anowner.doc.api_keys) {
+				var k = anowner.doc.api_keys[kindex].key;
+				console.log("Comparing: " + k);
+				if (k.indexOf(api_key) != -1) {
+					user_data = anowner.doc;
+					owner = anowner.doc.owner;
+					console.log("Valid key found.");
+					api_key_valid = true;
+					break;
+				}
+			}
+		}
+
 		alog.log(owner, "Attempt to register device: " + hash + " alias: " +
 			alias);
 
 		var deploy = require("./lib/thinx/deployment");
 		deploy.initWithOwner(owner); // creates user path if does not exist
-
-		// Find user and match api_key
-		var api_key_valid = false;
-		var user_data = body.rows[0].doc;
-
-		console.log("Seeking API key: " + api_key); // FIXME
-
-		for (var kindex in user_data.api_keys) {
-			var userkey = user_data.api_keys[kindex].key;
-
-			console.log("in: " + userkey); // FIXME
-
-			if (userkey.indexOf(api_key) !== -1) {
-				console.log("Found valid key.");
-				api_key_valid = true;
-				break;
-			}
-			if (api_key_valid === true) break;
-		}
 
 		if (api_key_valid === false) {
 			console.log("Invalid API key on registration.");
@@ -2323,16 +2321,18 @@ app.post("/device/register", function(req, res) {
 
 		console.log("Device firmware: " + fw);
 
+		var deploy = require("./lib/thinx/deployment");
+
 		var device = {
 			mac: mac,
 			firmware: fw,
-			hash: hash, // will deprecate; is commit_id or binary checksum!
+			hash: hash,
 			checksum: checksum,
 			push: push,
 			alias: alias,
 			owner: owner,
 			version: device_version,
-			device_id: device_id, // will deprecate in favour or udid
+			device_id: device_id,
 			udid: udid,
 			lastupdate: new Date(),
 			lastkey: sha256(api_key)
@@ -2340,7 +2340,10 @@ app.post("/device/register", function(req, res) {
 
 		console.log("Seaching for possible firmware update...");
 
-		var deploy = require("./lib/thinx/deployment");
+		console.log("Checking update for device descriptor:\n" + JSON.stringify(
+			device));
+
+		//var deploy = require("./lib/thinx/deployment");
 		var update = deploy.hasUpdateAvailable(device);
 		if (update === true) {
 			console.log("Firmware update available.");
@@ -2361,6 +2364,8 @@ app.post("/device/register", function(req, res) {
 
 		if (isNew) {
 			// Create UDID for new device
+
+			console.log("Considering a new device...");
 
 			device.udid = uuidV1(); // is returned to device which should immediately take over this value instead of mac for new registration
 			device.device_id = device.udid;
@@ -2389,6 +2394,7 @@ app.post("/device/register", function(req, res) {
 
 		} else {
 
+			console.log("Considering a device update...");
 
 			// KNOWN DEVICES:
 			// - see if new firmware is available and reply FIRMWARE_UPDATE with url
