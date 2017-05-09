@@ -253,7 +253,7 @@ app.post("/api/user/profile", function(req, res) {
 		" with: " + update_key + "and: " + JSON.stringify(update_value));
 
 	// Fetch complete user
-	userlib.get(owner, function(err, doc) {
+	userlib.view(owner, function(err, doc) {
 
 		if (err) {
 			console.log(err);
@@ -483,7 +483,6 @@ app.post("/api/device/attach", function(req, res) {
 		alog.log(doc.owner, "Attaching repository to device: " + JSON.stringify(
 			doc.hash));
 
-		var deploy = require("./lib/thinx/deployment");
 		deploy.initWithOwner(doc.owner);
 		var repo_path = deploy.pathForDevice(doc.owner, doc.device_id);
 		console.log("repo_path: " + repo_path);
@@ -559,7 +558,6 @@ app.post("/api/device/detach", function(req, res) {
 
 		console.log("Detaching repository from device: " + JSON.stringify(doc.hash));
 
-		var deploy = require("./lib/thinx/deployment");
 		var repo_path = deploy.pathForDevice(doc.owner, doc.device_id);
 		console.log("repo_path: " + owner);
 		if (fs.lstatSync(path).isDirectory()) {
@@ -756,7 +754,7 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 
 	console.log("Revoke API Key by hash: " + api_key_hash);
 
-	userlib.get("users", "owners_by_id", {
+	userlib.view("users", "owners_by_id", {
 		"key": owner,
 		"include_docs": true
 	}, function(err, body) {
@@ -1733,8 +1731,7 @@ app.post("/api/user/password/set", function(req, res) {
 
 				console.log("Activating user: " + JSON.stringify(body));
 
-				var deploy = require("./lib/thinx/deployment");
-				deploy = deploy.initWithOwner(userdoc.owner);
+				deploy.initWithOwner(userdoc.owner);
 
 				var userdoc = body.rows[0].doc;
 
@@ -2094,9 +2091,10 @@ app.post("/device/firmware", function(req, res) {
 				var version = firmwareUpdateDescriptor.version;
 				var checksum = firmwareUpdateDescriptor.checksum;
 
-				console.log("Seaching for possible firmware update...");
-				var deploy = require("./lib/thinx/deployment");
-				deploy = deploy.initWithDevice(device);
+				console.log("Seaching for possible firmware update... (owneer:" +
+					device.owner + ")");
+
+				deploy.initWithDevice(device);
 
 				var update = deploy.hasUpdateAvailable(device);
 				if (update === true) {
@@ -2189,9 +2187,12 @@ app.post("/device/register", function(req, res) {
 		return;
 	}
 
-	userlib.view("users", "owners_by_username", {
+	userlib.view("users", "owners_by_apikey", {
+		"key": api_key,
 		"include_docs": true // might be useless
 	}, function(err, body) {
+
+		console.log("owners_by_apikey: " + JSON.stringify(body));
 
 		var isNew = true;
 		if (err) {
@@ -2217,12 +2218,14 @@ app.post("/device/register", function(req, res) {
 			return;
 		}
 
+		console.log("owners:" + JSON.stringify(body.rows));
+
 		var owner = body.rows[0].doc.owner;
 		alog.log(owner, "Attempt to register device: " + hash + " alias: " +
 			alias);
 
 		var deploy = require("./lib/thinx/deployment");
-		deploy = deploy.initWithOwner(owner); // creates user path if does not exist
+		deploy.initWithOwner(owner); // creates user path if does not exist
 
 		// Find user and match api_key
 		var api_key_valid = false;
@@ -2327,7 +2330,7 @@ app.post("/device/register", function(req, res) {
 			checksum: checksum,
 			push: push,
 			alias: alias,
-			owner: req.session.owner,
+			owner: owner,
 			version: device_version,
 			device_id: device_id, // will deprecate in favour or udid
 			udid: udid,
@@ -2337,6 +2340,7 @@ app.post("/device/register", function(req, res) {
 
 		console.log("Seaching for possible firmware update...");
 
+		var deploy = require("./lib/thinx/deployment");
 		var update = deploy.hasUpdateAvailable(device);
 		if (update === true) {
 			console.log("Firmware update available.");
@@ -3079,8 +3083,6 @@ app.post("/api/login", function(req, res) {
 
 		if (err) {
 			console.log("Error: " + err.toString());
-
-			// Did not fall through, goodbye...
 			req.session.destroy(function(err) {
 				if (err) {
 					console.log(err);
@@ -3103,12 +3105,12 @@ app.post("/api/login", function(req, res) {
 				if (password.indexOf(user_data.value) !== -1) {
 
 					if (typeof(req.session === "undefined")) {
-						console.log("Warning, no session!");
+						console.log("ERROR, no session!");
 					}
 
-					console.log("Found user:" + JSON.stringify(user_data.doc.owner));
+					console.log("Found user:" + JSON.stringify(user_data));
 
-					req.session.owner = user_data.doc.owner;
+					req.session.owner = user_data.doc.owner; // what if there's no session?
 					req.session.username = user_data.doc.username;
 
 					var minute = 5 * 60 * 1000;

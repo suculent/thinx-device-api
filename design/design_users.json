@@ -18,7 +18,7 @@
 			"map": "function (doc) { if(doc.reset_key) { emit (doc.reset_key, doc.owner, doc.username); } }"
 		},
 		"owners_by_apikey": {
-			"map": "function (doc) { if(doc.api_keys.api_key) { emit (doc.owner, doc); } }"
+			"map": "function (doc) { if(doc.api_keys.includes(api_key)) { emit (doc.owner, doc); } }"
 		},
 		"ssh_keys_by_owner": {
 			"map": "function (doc) { if(doc.id) { emit (doc.ssh_keys); } }"

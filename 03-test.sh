@@ -5,7 +5,7 @@
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
-API_KEY='a98dc4e8db30f07642ffa7898b42c18245f7b6c1'
+API_KEY='e172704e2c4e978782a5aecec4ebca9c88017a2a'
 OWNER_ID='886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445'
 
 function echo_fail() { # $1 = string
