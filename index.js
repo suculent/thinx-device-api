@@ -3278,7 +3278,9 @@ var initWatcher = function(watcher) {
 	});
 };
 
-// initWatcher(watcher);
+console.log("Starting Repository Watcher...");
+
+initWatcher(watcher);
 
 //
 // Database compactor
@@ -3293,4 +3295,6 @@ var database_compactor = function() {
 	console.log("Database compact jobs completed.");
 };
 
-var database_compact_timer = setTimeout(86400 * 100, database_compactor);
+console.log("Starting Database Compact Timer...");
+
+var database_compact_timer = setTimeout(86400 * 100, database_compactor());
