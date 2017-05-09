@@ -21,14 +21,10 @@ API Server running on node.js.
 * API runs on HTTP port 7442 (possibly HTTPS 7441)
 * Admin runs on HTTP/HTTPS port (80/443)
 
-## Database Schema
+## Installation
 
-* managed_devices: all devices
-* managed_users: each user owns several api_keys and repositories that may be linked to one or more devices
-* managed_logs: audit logs by owner
-* managed_builds: unused, will store build logs, states and results. possibly pre & post-build tasks as builds will be organized by owner id/hash
-
+Ree RTM.md for all details.
 
 ## Endpoints (deprecated)
 
-See code and tests. There is no point of maintaining documentation for this at current stage of development and user base zero.
+See 03-test.sh. There is no point of maintaining documentation for this at current stage of development and user base zero.
