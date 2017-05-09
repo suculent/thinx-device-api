@@ -1916,15 +1916,10 @@ app.get("/api/user/profile", function(req, res) {
 	}, function(err, body) {
 
 		if (err) {
-			console.log("Error: " + err.toString());
-			req.session.destroy(function(err) {
-				if (err) {
-					console.log(err);
-				} else {
-					failureResponse(res, 501, "protocol");
-					console.log("Not a valid request.");
-				}
-			});
+			res.end(JSON.stringify({
+				success: false,
+				status: err
+			}));
 			return;
 		}
 
@@ -1933,6 +1928,10 @@ app.get("/api/user/profile", function(req, res) {
 		// TODO: Limit results for security
 		var json = JSON.stringify(body);
 		res.end(json);
+		res.end(JSON.stringify({
+			success: true,
+			profile: body
+		}));
 	});
 });
 
