@@ -1927,8 +1927,11 @@ app.get("/api/user/profile", function(req, res) {
 			});
 			return;
 		}
+
+		console.log(body);
+
 		// TODO: Limit results for security
-		var json = JSON.stringify(body.rows[0]);
+		var json = JSON.stringify(body);
 		res.end(json);
 	});
 });
