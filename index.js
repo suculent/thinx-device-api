@@ -3257,13 +3257,12 @@ var initWatcher = function(watcher) {
 
 		for (var index in body.rows) {
 			var owner = body.rows[index].doc.owner;
-			console.log("owner: " + owner);
 			var device_id = body.rows[index].doc.device_id;
-			console.log("device_id: " + owner);
 			var path = deploy.pathForDevice(owner, device_id);
 
+			console.log("Watcher checks path " + path);
+
 			if (!fs.existsSync(path)) {
-				//console.log("path does not exist to be watched: " + path);
 				continue;
 			} else {
 				console.log("Trying to watch path: " + path);
@@ -3297,4 +3296,6 @@ var database_compactor = function() {
 
 console.log("Starting Database Compact Timer...");
 
-var database_compact_timer = setTimeout(86400 * 100, database_compactor());
+var COMPACT_TIMEOUT = 30000;
+
+var database_compact_timer = setTimeout(database_compactor(), this.COMPACT_TIMEOUT);
