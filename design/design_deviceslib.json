@@ -16,6 +16,12 @@
     },
     "watcher_view": {
       "map": "function (doc) { if(doc.source != null) { emit (doc.owner, doc.device_id, doc.source); } }"
+    },
+    "devices_by_device_id": {
+      "map": "function (doc) { if(doc.device_id) { emit (doc); } }"
+    },
+    "devices_by_uuid": {
+      "map": "function (doc) { if(doc.device_id) { emit (doc); } }"
     }
   }
 }

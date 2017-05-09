@@ -5,7 +5,7 @@
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
-API_KEY='e172704e2c4e978782a5aecec4ebca9c88017a2a'
+API_KEY='a98dc4e8db30f07642ffa7898b42c18245f7b6c1'
 OWNER_ID='886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445'
 
 function echo_fail() { # $1 = string
@@ -40,6 +40,8 @@ http://$HOST:7442/device/register)
 
 # {"success":false,"status":"authentication"}
 
+echo "TODO: we need to parse UDID here for update test..."
+
 SUCCESS=$(echo $R | tr -d "\n" | jq .registration.success)
 if [[ $SUCCESS == true ]]; then
 	echo_ok "Device registration result: $R"
@@ -71,29 +73,6 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
-echo "☢ Testing device revocation..."
-
-R=$(curl -s \
--H "Authentication: ${API_KEY}" \
--H 'Origin: device' \
--H "User-Agent: THiNX-Client" \
--H "Content-Type: application/json" \
--d '{ "device_id" : "FFFFFFFFFFFF" }' \
-http://$HOST:7442/device/revoke)
-
-# {"success":false,"status":"authentication"}
-
-SUCCESS=$(echo $R | tr -d "\n" | jq .success)
-echo $SUCCESS
-if [[ $SUCCESS == true ]]; then
-	STATUS=$(echo $R | jq .status)
-	echo_ok "Device revocation result: $R"
-else
-	echo_fail $R
-fi
-
-echo
-echo "--------------------------------------------------------------------------------"
 echo "☢ Testing firmware update (owner test)..."
 
 R=$(curl -s \
@@ -101,10 +80,12 @@ R=$(curl -s \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "mac" : "00:00:00:00:00:00", "hash" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "commit" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "checksum" : "02e2436d60c629e2ab6357d0d314dd6fe28bd0331b18ca6b19a25cd6f969d0a8", "owner" : "886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445"  }' \
+-d '{ "mac" : "00:00:00:00:00:00", "udid" : "47fc9ab2-2227-11e7-8584-4c327591230d", "hash" : "hash", "commit" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "checksum" : "02e2436d60c629e2ab6357d0d314dd6fe28bd0331b18ca6b19a25cd6f969d0a8", "owner" : "886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445"  }' \
 http://$HOST:7442/device/firmware)
 
 # {"success":false,"status":"api_key_invalid"}
+
+
 
 SUCCESS=$(echo $R | jq .success)
 echo $SUCCESS
@@ -139,6 +120,31 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
+echo "☢ Testing device revocation..."
+
+R=$(curl -v -b cookies.jar \
+-H "Authentication: ${API_KEY}" \
+-H 'Origin: device' \
+-H "User-Agent: THiNX-Client" \
+-H "Content-Type: application/json" \
+-d '{ "device_id" : "FFFFFFFFFFFF" }' \
+http://$HOST:7442/api/device/revoke)
+
+# {"success":false,"status":"authentication"}
+
+echo $R
+
+SUCCESS=$(echo $R | tr -d "\n" | jq .success)
+echo $SUCCESS
+if [[ $SUCCESS == true ]]; then
+	STATUS=$(echo $R | jq .status)
+	echo_ok "Device revocation result: $R"
+else
+	echo_fail $R
+fi
+
+echo
+echo "--------------------------------------------------------------------------------"
 echo "» Fetching device catalog..."
 
 R=$(curl -s -b cookies.jar \
@@ -162,7 +168,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Assigning device alias..."
 
-R=$(curl -s \
+R=$(curl -s -b cookies.jar \
 -H "Authentication: ${API_KEY}" \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \

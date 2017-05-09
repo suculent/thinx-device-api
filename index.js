@@ -607,7 +607,7 @@ app.post("/api/device/revoke", function(req, res) {
 	var owner = req.session.owner;
 	var username = req.session.username;
 
-	alog.log(owner, "Attempt to revoke device: " + mac);
+	alog.log(owner, "Attempt to revoke device: " + udid);
 
 	devicelib.view("devicelib", "devices_by_id", {
 		"key": udid,
@@ -629,7 +629,7 @@ app.post("/api/device/revoke", function(req, res) {
 			return;
 		}
 
-		var doc = body.rows[0].doc;
+		var doc = body.doc;
 
 		console.log("Revoking device: " + doc.hash);
 
@@ -1978,10 +1978,11 @@ app.post("/device/firmware", function(req, res) {
 		*/
 	}
 
-	var mac = req.body.mac;
-	var device_id = req.body.hash;
+	var mac = req.body.mac; // will deprecate
+	var udid = req.body.udid;
 	var checksum = req.body.checksum;
 	var commit = req.body.commit;
+	var alias = req.body.alias;
 	var owner = req.body.owner; // TODO: should be inferred from API Key, not required in request! But API Key is inside user which is a fail and should be stored in redis instead just with owner's secret ID reference.
 
 	console.log("TODO: Validate if SHOULD update device " + mac +
@@ -2004,9 +2005,8 @@ app.post("/device/firmware", function(req, res) {
 	}
 
 	userlib.view("users", "owners_by_username", {
-		"key": owner,
 		"include_docs": true // might be useless
-	}, function(err, body) {
+	}, function(err, all_users) {
 
 		if (err) {
 			console.log("Error: " + err.toString());
@@ -2023,27 +2023,28 @@ app.post("/device/firmware", function(req, res) {
 			isNew = false;
 		}
 
-		if (body.rows.length === 0) {
-			res.end(JSON.stringify({
-				success: false,
-				status: "owner_not_found"
-			}));
-			return;
-		}
-
 		// Find user and match api_key
 		var api_key_valid = false;
-		var user_data = body.rows[0].doc;
+		var user_data = null;
 
-		for (var kindex in user_data.api_keys) {
-			var userkey = user_data.api_keys[kindex].key;
-			console.log("Matching " + userkey + " to " + api_key);
-			if (userkey.indexOf(api_key) !== -1) {
-				console.log("Found valid key.");
-				api_key_valid = true;
-				break;
+		// search API Key in owners, this will take a while...
+		for (var oindex in all_users.rows) {
+			var anowner = all_users.rows[oindex];
+			for (var kindex in anowner.doc.api_keys) {
+				var k = anowner.doc.api_keys[kindex].key;
+				console.log("Comparing: " + k);
+				if (k.indexOf(api_key) != -1) {
+					user_data = anowner.doc;
+					owner = anowner.doc.owner;
+					console.log("Valid key found.");
+					api_key_valid = true;
+					break;
+				}
 			}
 		}
+
+		alog.log(owner, "Attempt to register device: " + udid + " alias: " +
+			alias);
 
 		// Bail out on invalid API key
 		if (api_key_valid === false) {
@@ -2068,10 +2069,27 @@ app.post("/device/firmware", function(req, res) {
 		var success = false;
 		var status = "OK";
 
+		devicelib.view("devicelib", "devices_by_id", {
+			"key": udid,
+			"include_docs": true
+		}, function(err, existing) {
 
-		devicelib.get(mac, function(error, existing) {
+			if (err) {
+				console.log(err);
+				return;
+			}
 
-			if (!error) {
+			if (body.rows.count === 0) {
+				alog.log(owner, "No such device: " + doc.alias +
+					" (${doc.hash})");
+				res.end(JSON.stringify({
+					success: false,
+					status: "no_such_device"
+				}));
+				return;
+			}
+
+			if (!err) {
 
 				var device = {
 					mac: existing.mac,
@@ -2283,7 +2301,7 @@ app.post("/device/register", function(req, res) {
 			checksum = reg.checksum;
 		}
 
-		var udid = mac;
+		var udid = uuidV1(); // is returned to device which should immediately take over this value instead of mac for new registration
 		if (typeof(reg.udid) !== "undefined") {
 			udid = reg.udid;
 		}
@@ -2367,8 +2385,8 @@ app.post("/device/register", function(req, res) {
 
 			console.log("Considering a new device...");
 
-			device.udid = uuidV1(); // is returned to device which should immediately take over this value instead of mac for new registration
-			device.device_id = device.udid;
+			//device.udid = uuidV1(); // is returned to device which should immediately take over this value instead of mac for new registration
+			device.device_id = device.udid; // backwards compatibility
 
 			devicelib.insert(device, device.udid, function(err, body, header) {
 
@@ -2764,7 +2782,7 @@ app.post("/api/build", function(req, res) {
 			var db_udid_hash = rowData.hash;
 			if (owner.indexOf(rowData.owner) !== -1) {
 				if (device_udid_hash.indexOf(db_udid_hash) != -1) {
-					udid = rowData.hash; // target device ID hash
+					udid = rowData.hash; // target device ID hash (FIXME: should be just udid)
 					mac = rowData.mac; // target device ID mac, will deprecate
 					break;
 				}
