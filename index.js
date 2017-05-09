@@ -3222,9 +3222,11 @@ app.listen(serverPort, function() {
 
 // Prevent crashes on uncaught exceptions
 
+/*
 process.on("uncaughtException", function(err) {
 	console.log("Caught exception: " + err);
 });
+*/
 
 /* Should load all devices with attached repositories and watch those repositories.
  * Maintains list of watched repositories for runtime handling purposes.
