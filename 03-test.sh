@@ -6,7 +6,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 API_KEY='a98dc4e8db30f07642ffa7898b42c18245f7b6c1'
-OWNER_ID='886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445'
+OWNER_ID='eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f'
 
 function echo_fail() { # $1 = string
     COLOR=$RED
@@ -62,6 +62,8 @@ R=$(curl -s \
 http://$HOST:7442/device/register)
 
 # {"success":false,"status":"authentication"}
+
+echo $R
 
 SUCCESS=$(echo $R | tr -d "\n" | jq .registration.success)
 if [[ $SUCCESS == true ]]; then
@@ -122,12 +124,12 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing device revocation..."
 
-R=$(curl -v -b cookies.jar \
+R=$(curl -b cookies.jar \
 -H "Authentication: ${API_KEY}" \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "device_id" : "FFFFFFFFFFFF" }' \
+-d '{ "udid" : "FFFFFFFFFFFF" }' \
 http://$HOST:7442/api/device/revoke)
 
 # {"success":false,"status":"authentication"}
@@ -173,7 +175,7 @@ R=$(curl -s -b cookies.jar \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "changes" : [ { "device_id" : "00:00:00:00:00:00", "alias" : "new-test-alias" } ] }' \
+-d '{ "changes" : [ { "device_id" : "FFFFFFFFFFFF", "alias" : "new-test-alias" } ] }' \
 http://$HOST:7442/api/device/edit)
 
 # {"success":true,"status":"updated"}

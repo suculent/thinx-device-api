@@ -405,6 +405,7 @@ app.get("/api/user/devices", function(req, res) {
 		}
 
 		var rows = body.rows; // devices returned
+		console.log("rows:" + JSON.stringify(rows));
 		var devices = []; // an array by design (needs push), to be encapsulated later
 
 		// Show all devices for admin (if not limited by query)
@@ -595,7 +596,7 @@ app.post("/api/device/revoke", function(req, res) {
 	if (!validateSecurePOSTRequest(req)) return;
 	if (!validateSession(req, res)) return;
 
-	if (typeof(req.body.device_id) === "undefined") {
+	if (typeof(req.body.udid) === "undefined") {
 		res.end(JSON.stringify({
 			success: false,
 			status: "missing_udid"
@@ -603,7 +604,7 @@ app.post("/api/device/revoke", function(req, res) {
 		return;
 	}
 
-	var udid = req.body.device_id;
+	var udid = req.body.udid;
 	var owner = req.session.owner;
 	var username = req.session.username;
 
@@ -621,7 +622,7 @@ app.post("/api/device/revoke", function(req, res) {
 
 		if (body.rows.count === 0) {
 			alog.log(owner, "No such device: " + doc.alias +
-				" (${doc.hash})");
+				" (${doc.udid})");
 			res.end(JSON.stringify({
 				success: false,
 				status: "no_such_device"
@@ -629,9 +630,21 @@ app.post("/api/device/revoke", function(req, res) {
 			return;
 		}
 
-		var doc = body.doc;
+		console.log("revoked device: " + JSON.stringify(body));
 
-		console.log("Revoking device: " + doc.hash);
+		var doc = body.rows[0];
+		if (typeof(doc) === "undefined") {
+			res.end(JSON.stringify({
+				success: true,
+				status: "already_revoked"
+			}));
+			return; // prevent breaking db
+		}
+		doc.udid = udid;
+
+		var logmessage = "Revoking device: " + doc.udid;
+
+		console.log(logmessage);
 
 		alog.log(owner, logmessage);
 
@@ -647,11 +660,11 @@ app.post("/api/device/revoke", function(req, res) {
 				return;
 			} else {
 				var logmessage = "Revocation succeed: " + doc.alias +
-					" (${doc.hash})";
+					" (${doc.udid})";
 				alog.log(owner, logmessage);
 				res.end(JSON.stringify({
 					success: true,
-					revoked: doc.hash
+					revoked: doc.udid
 				}));
 			}
 		});
@@ -2079,74 +2092,64 @@ app.post("/device/firmware", function(req, res) {
 				return;
 			}
 
-			if (body.rows.count === 0) {
-				alog.log(owner, "No such device: " + doc.alias +
-					" (${doc.hash})");
+
+
+			var device = {
+				mac: existing.mac,
+				owner: existing.owner,
+				version: existing.version
+			};
+
+			// FIXME: Validate checksum, commit and mac that should be part of request
+			var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(device);
+			var url = firmwareUpdateDescriptor.url;
+			var mac = firmwareUpdateDescriptor.mac;
+			var commit = firmwareUpdateDescriptor.commit;
+			var version = firmwareUpdateDescriptor.version;
+			var checksum = firmwareUpdateDescriptor.checksum;
+
+			console.log("Seaching for possible firmware update... (owneer:" +
+				device.owner + ")");
+
+			deploy.initWithDevice(device);
+
+			var update = deploy.hasUpdateAvailable(device);
+			if (update === true) {
+				var path = deploy.pathForDevice(owner, mac);
+				fs.open(ssh_path, 'r', function(err, fd) {
+					if (err) {
+						res.end(JSON.stringify({
+							success: false,
+							status: "not_found"
+						}));
+						return console.log(err);
+					} else {
+						var buffer = fs.readFileSync(path);
+						res.end(buffer);
+						fs.close(fd, function() {
+							console.log('Sending firmware update...');
+						});
+
+						devicelib.insert(existing, mac, function(err, body, header) {
+							if (!err) {
+								console.log("Device updated.");
+								return;
+							} else {
+								console.log("Device record update failed." + err);
+							}
+						}); // insert
+
+					}
+				}); // fs.open
+
+			} else {
 				res.end(JSON.stringify({
-					success: false,
-					status: "no_such_device"
+					success: true,
+					status: "no_update_available"
 				}));
-				return;
-			}
+				console.log("No firmware update available for " + JSON.stringify(
+					device));
 
-			if (!err) {
-
-				var device = {
-					mac: existing.mac,
-					owner: existing.owner,
-					version: existing.version
-				};
-
-				// FIXME: Validate checksum, commit and mac that should be part of request
-				var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(device);
-				var url = firmwareUpdateDescriptor.url;
-				var mac = firmwareUpdateDescriptor.mac;
-				var commit = firmwareUpdateDescriptor.commit;
-				var version = firmwareUpdateDescriptor.version;
-				var checksum = firmwareUpdateDescriptor.checksum;
-
-				console.log("Seaching for possible firmware update... (owneer:" +
-					device.owner + ")");
-
-				deploy.initWithDevice(device);
-
-				var update = deploy.hasUpdateAvailable(device);
-				if (update === true) {
-					var path = deploy.pathForDevice(owner, mac);
-					fs.open(ssh_path, 'r', function(err, fd) {
-						if (err) {
-							res.end(JSON.stringify({
-								success: false,
-								status: "not_found"
-							}));
-							return console.log(err);
-						} else {
-							var buffer = fs.readFileSync(path);
-							res.end(buffer);
-							fs.close(fd, function() {
-								console.log('Sending firmware update...');
-							});
-
-							devicelib.insert(existing, mac, function(err, body, header) {
-								if (!err) {
-									console.log("Device updated.");
-									return;
-								} else {
-									console.log("Device record update failed." + err);
-								}
-							}); // insert
-
-						}
-					}); // fs.open
-
-				} else {
-					res.end(JSON.stringify({
-						success: true,
-						status: "no_update_available"
-					}));
-					console.log("No firmware update available for " + JSON.stringify(
-						device));
-				}
 			}
 		}); // device get
 	}); // user view
@@ -2535,11 +2538,15 @@ app.post("/api/device/edit", function(req, res) {
 	var username = req.session.username;
 
 	var changes = req.body.changes;
+
+	console.log(JSON.stringify(changes));
 	var change = changes[0]; // TODO: support bulk operations
 
 	var udid = change.device_id;
 
-	devicelib.view("devicelib", "devices_by_id", {
+	console.log("Change wit udid:" + udid);
+
+	devicelib.view("devicelib", "devices_by_udid", {
 		"key": udid,
 		"include_docs": true
 	}, function(err, body) {
@@ -3131,8 +3138,6 @@ app.post("/api/login", function(req, res) {
 					if (typeof(req.session === "undefined")) {
 						console.log("ERROR, no session!");
 					}
-
-					console.log("Found user:" + JSON.stringify(user_data));
 
 					req.session.owner = user_data.doc.owner; // what if there's no session?
 					req.session.username = user_data.doc.username;
