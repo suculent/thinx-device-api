@@ -2339,7 +2339,7 @@ app.post("/device/register", function(req, res) {
 		var deploy = require("./lib/thinx/deployment");
 		deploy = deploy.initWithDevice(device);
 
-		var update = deploy.hasUpdateAvailable(device);
+		var update = Deployment.hasUpdateAvailable(device);
 		if (update === true) {
 			console.log("Firmware update available.");
 			var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(device);
