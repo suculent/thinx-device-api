@@ -483,7 +483,8 @@ app.post("/api/device/attach", function(req, res) {
 		alog.log(doc.owner, "Attaching repository to device: " + JSON.stringify(
 			doc.hash));
 
-		deploy = deploy.initWithOwner(doc.owner);
+		var deploy = require("./lib/thinx/deployment");
+		deploy.initWithOwner(doc.owner);
 		var repo_path = deploy.pathForDevice(doc.owner, doc.device_id);
 		console.log("repo_path: " + repo_path);
 
@@ -558,6 +559,7 @@ app.post("/api/device/detach", function(req, res) {
 
 		console.log("Detaching repository from device: " + JSON.stringify(doc.hash));
 
+		var deploy = require("./lib/thinx/deployment");
 		var repo_path = deploy.pathForDevice(doc.owner, doc.device_id);
 		console.log("repo_path: " + owner);
 		if (fs.lstatSync(path).isDirectory()) {
@@ -1731,6 +1733,7 @@ app.post("/api/user/password/set", function(req, res) {
 
 				console.log("Activating user: " + JSON.stringify(body));
 
+				var deploy = require("./lib/thinx/deployment");
 				deploy = deploy.initWithOwner(userdoc.owner);
 
 				var userdoc = body.rows[0].doc;
@@ -2092,7 +2095,7 @@ app.post("/device/firmware", function(req, res) {
 				var checksum = firmwareUpdateDescriptor.checksum;
 
 				console.log("Seaching for possible firmware update...");
-				deploy.initWithDevice(device);
+				deploy = deploy.initWithDevice(device);
 
 				var update = deploy.hasUpdateAvailable(device);
 				if (update === true) {
