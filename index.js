@@ -483,6 +483,7 @@ app.post("/api/device/attach", function(req, res) {
 		alog.log(doc.owner, "Attaching repository to device: " + JSON.stringify(
 			doc.hash));
 
+		var deploy = require("./lib/thinx/deployment");
 		deploy.initWithOwner(doc.owner);
 		var repo_path = deploy.pathForDevice(doc.owner, doc.device_id);
 		console.log("repo_path: " + repo_path);
@@ -1731,6 +1732,7 @@ app.post("/api/user/password/set", function(req, res) {
 
 				console.log("Activating user: " + JSON.stringify(body));
 
+				var deploy = require("./lib/thinx/deployment");
 				deploy.initWithOwner(userdoc.owner);
 
 				var userdoc = body.rows[0].doc;
@@ -2212,6 +2214,7 @@ app.post("/device/register", function(req, res) {
 		var owner = body.rows[0].doc.owner;
 		alog.log(owner, "Attempt to register device: " + hash + " alias: " +
 			alias);
+		var deploy = require("./lib/thinx/deployment");
 		deploy.initWithOwner(owner); // creates user path if does not exist
 
 		// Find user and match api_key
