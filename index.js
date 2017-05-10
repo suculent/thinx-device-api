@@ -875,39 +875,34 @@ app.get("/api/user/sources/list", function(req, res) {
 
 	console.log("List sources for owner: " + owner);
 
-	userlib.view("users", "owners_by_id", {
-			"key": owner,
-			"include_docs": true
-		},
+	userlib.get(owner, function(err, body) {
 
-		function(err, body) {
-
-			if (err) {
-				console.log(err);
-				res.end(JSON.stringify({
-					success: false,
-					status: "api-user-apikey-list_error"
-				}));
-				return;
-			}
-
-			if (body.rows.length === 0) {
-				res.end(JSON.stringify({
-					success: false,
-					status: "no_such_owner"
-				}));
-				return;
-			}
-
-			var user = body.rows[0];
-
-			console.log("Listing Repositories: " +
-				JSON.stringify(user.doc.sources));
+		if (err) {
+			console.log(err);
 			res.end(JSON.stringify({
-				success: true,
-				sources: user.doc.sources
+				success: false,
+				status: "api-user-apikey-list_error"
 			}));
-		});
+			return;
+		}
+
+		if (body.rows.length === 0) {
+			res.end(JSON.stringify({
+				success: false,
+				status: "no_such_owner"
+			}));
+			return;
+		}
+
+		var user = body.rows[0];
+
+		console.log("Listing Repositories: " +
+			JSON.stringify(user.sources));
+		res.end(JSON.stringify({
+			success: true,
+			sources: user.sources
+		}));
+	});
 });
 
 /* Adds a GIT repository. Expects URL, alias and a optional branch (origin/master is default). */
@@ -1853,14 +1848,10 @@ app.get("/api/user/profile", function(req, res) {
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
-	var username = req.session.username;
 
 	console.log("profile for owner: " + owner);
 
-	userlib.view("users", "owners_by_id", {
-		"key": owner,
-		"include_docs": true // might be useless
-	}, function(err, body) {
+	userlib.get(owner, function(err, body) {
 
 		if (err) {
 			res.end(JSON.stringify({
@@ -2885,6 +2876,8 @@ app.get("/api/user/logs/audit", function(req, res) {
 			}));
 			return;
 		}
+
+		console.log(JSON.stringify(body));
 
 		res.end(JSON.stringify({
 			success: true,
