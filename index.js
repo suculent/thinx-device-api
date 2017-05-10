@@ -830,8 +830,9 @@ app.get("/api/user/apikey/list", function(req, res) {
 			return;
 		}
 
-		var doc = user;
-		if (!doc) {
+		console.log(user);
+
+		if (!user) {
 			console.log("User " + owner + " not found.");
 			console.log(user);
 			res.end(JSON.stringify({
@@ -842,13 +843,13 @@ app.get("/api/user/apikey/list", function(req, res) {
 		}
 
 		var exportedKeys = [];
-		for (var index in doc.api_keys) {
-			console.log(doc.api_keys);
+		for (var index in user.api_keys) {
+			console.log(user.api_keys);
 			var info = {
-				name: "******************************" + doc.api_keys[index].key.substring(
+				name: "******************************" + user.api_keys[index].key.substring(
 					30),
-				hash: sha256(doc.api_keys[index].key),
-				alias: doc.api_keys[index].alias
+				hash: sha256(user.api_keys[index].key),
+				alias: user.api_keys[index].alias
 			};
 			exportedKeys.push(info);
 		}
@@ -871,7 +872,6 @@ app.get("/api/user/sources/list", function(req, res) {
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
-
 	console.log("List sources for owner: " + owner);
 
 	userlib.get(owner, function(err, user) {
