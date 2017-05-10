@@ -818,7 +818,6 @@ app.get("/api/user/apikey/list", function(req, res) {
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
-	var username = req.session.username;
 
 	userlib.get(owner, function(err, user) {
 
@@ -831,7 +830,7 @@ app.get("/api/user/apikey/list", function(req, res) {
 			return;
 		}
 
-		var doc = user.doc;
+		var doc = user;
 		if (!doc) {
 			console.log("User " + owner + " not found.");
 			console.log(user);
