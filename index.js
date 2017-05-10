@@ -281,7 +281,7 @@ app.post("/api/user/profile", function(req, res) {
 
 		delete doc._rev;
 
-		userlib.insert(doc._id, function(err) {
+		userlib.insert(owner, doc._id, function(err) {
 
 			if (err) {
 				console.log(err);
@@ -1715,15 +1715,15 @@ app.post("/api/user/password/set", function(req, res) {
 
 				deploy.initWithOwner(userdoc.owner);
 
-				console.log("Updating user document: " + JSON.stringify(userdoc));
-
 				userdoc.password = sha256(password1);
 				userdoc.activation_date = new Date();
 				userdoc.activation = null;
 
 				delete userdoc._rev; // should force new revision...
 
-				userlib.insert(userdoc, userdoc.owner, function(err) {
+				console.log("Updating user document: " + JSON.stringify(userdoc));
+
+				userlib.insert(userdoc, userdoc._id, function(err) {
 
 					if (err) {
 						console.log(err);
