@@ -2772,7 +2772,7 @@ app.post("/api/build", function(req, res) {
 	var source_alias = build.source;
 
 	devicelib.view("devicelib", "devices_by_owner", {
-		"key": username,
+		"key": owner,
 		"include_docs": true
 	}, function(err, body) {
 
