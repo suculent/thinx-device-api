@@ -888,10 +888,10 @@ app.get("/api/user/sources/list", function(req, res) {
 		console.log("nody_:" + JSON.stringify(user));
 
 		console.log("Listing Repositories: " +
-			JSON.stringify(user.sources));
+			JSON.stringify(user.repos));
 		res.end(JSON.stringify({
 			success: true,
-			sources: user.sources
+			sources: user.repos
 		}));
 	});
 });
