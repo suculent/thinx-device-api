@@ -1719,31 +1719,37 @@ app.post("/api/user/password/set", function(req, res) {
 				userdoc.activation_date = new Date();
 				userdoc.activation = null;
 
-				delete userdoc._rev; // should force new revision...
+
 
 				console.log("Updating user document: " + JSON.stringify(userdoc));
 
-				userlib.insert(userdoc, userdoc._id, function(err) {
+				userlib.destroy(userdoc._id, userdoc._rev, function(err) {
 
-					if (err) {
-						console.log(err);
-						console.log("Could not re-insert user on new activation.");
-						res.end(JSON.stringify({
-							status: "user_not_saved",
-							success: false
-						}));
-						return;
-					} else {
-						// TODO: Password-reset success page, should redirect to login.
-						console.log(
-							"Password reset success page, should redirect to login...");
-						//res.redirect("http://rtm.thinx.cloud:80/");
-						res.end(JSON.stringify({
-							redirect: "http://rtm.thinx.cloud:80/",
-							success: true
-						}));
-						return;
-					}
+					delete userdoc._rev; // should force new revision...
+
+					userlib.insert(userdoc, userdoc._id, function(err) {
+
+						if (err) {
+							console.log(err);
+							console.log("Could not re-insert user on new activation.");
+							res.end(JSON.stringify({
+								status: "user_not_saved",
+								success: false
+							}));
+							return;
+						} else {
+							// TODO: Password-reset success page, should redirect to login.
+							console.log(
+								"Password reset success page, should redirect to login...");
+							//res.redirect("http://rtm.thinx.cloud:80/");
+							res.end(JSON.stringify({
+								redirect: "http://rtm.thinx.cloud:80/",
+								success: true
+							}));
+							return;
+						}
+					});
+
 				});
 			}
 		});
