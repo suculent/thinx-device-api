@@ -253,7 +253,7 @@ app.post("/api/user/profile", function(req, res) {
 		" with: " + update_key + "and: " + JSON.stringify(update_value));
 
 	// Fetch complete user
-	userlib.view(owner, function(err, doc) {
+	userlib.get(owner, function(err, doc) {
 
 		if (err) {
 			console.log(err);
@@ -274,8 +274,6 @@ app.post("/api/user/profile", function(req, res) {
 			}));
 			return;
 		}
-
-
 
 		doc[update_key] = update_value;
 
@@ -303,11 +301,7 @@ app.post("/api/user/profile", function(req, res) {
 
 	});
 
-	userlib.view("users", "owners_by_id", {
-		"key": owner,
-		"include_docs": true
-	}, function(err, body) {
-
+	userlib.get(owner, function(err, body) {
 
 		if (err) {
 			console.log(err);
@@ -315,7 +309,7 @@ app.post("/api/user/profile", function(req, res) {
 		}
 
 		if (!body) {
-			console.log("User " + userdoc.id + " not found.");
+			console.log("User " + userdoc.id + "(Profile) not found.");
 			return;
 		}
 
