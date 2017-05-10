@@ -390,7 +390,7 @@ app.get("/api/user/devices", function(req, res) {
 	var username = req.session.username;
 
 	devicelib.view("devicelib", "devices_by_owner", {
-		"key": username,
+		"key": owner,
 		"include_docs": false
 	}, function(err, body) {
 
