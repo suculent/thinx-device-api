@@ -1189,10 +1189,7 @@ app.get("/api/user/rsakey/list", function(req, res) {
 	var username = req.session.username;
 
 	// Get all users
-	userlib.view("users", "owners_by_id", {
-		"key": owner,
-		"include_docs": true
-	}, function(err, body) {
+	userlib.get(owner, function(err, user) {
 
 		if (err) {
 			console.log(err);
@@ -1203,36 +1200,33 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			return;
 		}
 
-		var user = body.rows[0];
+		console.log("user: " + user);
 
-		// Fetch complete user
-		userlib.get(user.id, function(error, doc) {
-			if (!doc) {
-				console.log("User " + user.id + " not found.");
-				res.end(JSON.stringify({
-					success: false,
-					status: "userid_not_found"
-				}));
-				return;
-			}
+		if (!doc) {
+			console.log("User " + user.id + " not found.");
+			res.end(JSON.stringify({
+				success: false,
+				status: "userid_not_found"
+			}));
+			return;
+		}
 
-			var exportedKeys = [];
-			var fingerprints = Object.keys(doc.rsa_keys);
-			for (var i = 0; i < fingerprints.length; i++) {
-				var key = doc.rsa_keys[fingerprints[i]];
-				var info = {
-					name: key.alias,
-					fingerprint: fingerprints[i]
-				};
-				exportedKeys.push(info);
-			}
+		var exportedKeys = [];
+		var fingerprints = Object.keys(doc.rsa_keys);
+		for (var i = 0; i < fingerprints.length; i++) {
+			var key = doc.rsa_keys[fingerprints[i]];
+			var info = {
+				name: key.alias,
+				fingerprint: fingerprints[i]
+			};
+			exportedKeys.push(info);
+		}
 
-			var reply = JSON.stringify({
-				rsa_keys: exportedKeys
-			});
-			console.log("Listing RSA keys: " + reply);
-			res.end(reply);
+		var reply = JSON.stringify({
+			rsa_keys: exportedKeys
 		});
+		console.log("Listing RSA keys: " + reply);
+		res.end(reply);
 	});
 });
 
