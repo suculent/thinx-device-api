@@ -1550,7 +1550,7 @@ app.get("/api/user/activate", function(req, res) {
 
 	userlib.view("users", "owners_by_activation", {
 		"key": ac_key,
-		"include_docs": false
+		"include_docs": true
 	}, function(err, body) {
 
 		if (err) {
@@ -1711,17 +1711,15 @@ app.post("/api/user/password/set", function(req, res) {
 
 				console.log("Activating user: " + JSON.stringify(body));
 
-				deploy.initWithOwner(userdoc.owner);
-
 				var userdoc = body.rows[0].doc;
+
+				deploy.initWithOwner(userdoc.owner);
 
 				console.log("Updating user document: " + JSON.stringify(userdoc));
 
 				userdoc.password = sha256(password1);
 				userdoc.activation_date = new Date();
-				// TODO: reset activation on success userdoc.activation = null;
-
-
+				userdoc.activation = null;
 
 				delete userdoc._rev; // should force new revision...
 
