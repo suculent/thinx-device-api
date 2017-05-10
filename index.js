@@ -3178,7 +3178,7 @@ app.post("/api/login", function(req, res) {
 
 				} else {
 					console.log("Password mismatch for " + username);
-					alog.log(owner, "Password mismatch for: " + username);
+					alog.log(req.session.owner, "Password mismatch for: " + username);
 					res.end(JSON.stringify({
 						status: "password_mismatch",
 						success: false
