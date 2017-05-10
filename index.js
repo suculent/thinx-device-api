@@ -710,9 +710,9 @@ app.post("/api/user/apikey", function(req, res) {
 			return;
 		}
 
-		console.log("user: " + JSON.stringify(user));
-
 		var doc = users.rows[0];
+
+		console.log("doc: " + JSON.stringify(user));
 
 		if (!doc) {
 			console.log("User " + username + " not found.");
