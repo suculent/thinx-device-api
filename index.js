@@ -1687,6 +1687,7 @@ app.post("/api/user/password/set", function(req, res) {
 					}
 
 					console.log("Creating document...");
+
 					delete userdoc.doc._rev;
 
 					userlib.insert(userdoc.doc, userdoc.owner, function(err) {
@@ -1698,9 +1699,11 @@ app.post("/api/user/password/set", function(req, res) {
 							}));
 							return;
 						} else {
+							console.log("Password reset completed saving new user document.");
 							res.end(JSON.stringify({
 								status: "password_reset_successful",
-								success: true
+								success: true,
+								redirect: "http://thinx.cloud/"
 							}));
 							return;
 						}
