@@ -709,7 +709,7 @@ app.post("/api/user/apikey", function(req, res) {
 
 		console.log("user: " + JSON.stringify(user));
 
-		var doc = user.doc;
+		var doc = user;
 
 		if (!doc) {
 			console.log("User " + username + " not found.");
@@ -3139,7 +3139,10 @@ app.post("/api/login", function(req, res) {
 						console.log("ERROR, no session!");
 					}
 
+					console.log("User data doc:" + JSON.stringify(user_data.doc));
+
 					req.session.owner = user_data.doc.owner; // what if there's no session?
+					console.log("ASsigning session owner: " + req.session.owner)
 					req.session.username = user_data.doc.username;
 
 					var minute = 5 * 60 * 1000;

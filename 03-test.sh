@@ -6,7 +6,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 API_KEY='a98dc4e8db30f07642ffa7898b42c18245f7b6c1'
-OWNER_ID='eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f'
+OWNER_ID='886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445'
 
 function echo_fail() { # $1 = string
     COLOR=$RED
@@ -471,6 +471,16 @@ http://$HOST:7442/api/user/logs/audit)
 
 echo $R
 
+SUCCESS=$(echo $R | jq .success)
+echo $SUCCESS
+ASOURCE=null
+if [[ $SUCCESS == true ]]; then
+	ALOG=$(echo $R | jq .)
+	echo_ok "Fetched audit log: $ALOG"
+else
+	echo_fail $R
+fi
+
 echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ TODO: Build log list..."
@@ -483,6 +493,16 @@ http://$HOST:7442/api/user/logs/build/list)
 
 echo $R
 
+SUCCESS=$(echo $R | jq .success)
+echo $SUCCESS
+BLIST=null
+if [[ $SUCCESS == true ]]; then
+	BLIST=$(echo $R | jq .)
+	echo_ok "Fetched build log: $BLIST"
+else
+	echo_fail $R
+fi
+
 echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ TODO: Build log fetch..."
@@ -491,10 +511,20 @@ R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "build_id" : "*"' \
+-d '{ "build_id" : "0xBUILD"' \
 http://$HOST:7442/api/user/logs/build)
 
 echo $R
+
+SUCCESS=$(echo $R | jq .success)
+echo $SUCCESS
+BLOG=null
+if [[ $SUCCESS == true ]]; then
+	BLOG=$(echo $R | jq .)
+	echo_ok "Fetched build log: $BLOG"
+else
+	echo_fail $R
+fi
 
 echo
 echo "--------------------------------------------------------------------------------"
