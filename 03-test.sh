@@ -357,7 +357,7 @@ R=$(curl -s -b cookies.jar \
 -d '{ "url" : "https://github.com/suculent/thinx-firmware-esp8266.git", "alias" : "thinx-firmware-esp8266" }' \
 http://$HOST:7442/api/user/source)
 
-SUCCESS=$(echo $R | jq .success)
+SUCCESS=$(echo $R | jq .)
 echo $SUCCESS
 SOURCEA=null
 if [[ $SUCCESS == true ]]; then

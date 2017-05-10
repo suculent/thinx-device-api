@@ -1472,6 +1472,8 @@ app.post("/api/user/create", function(req, res) {
 					"'>activate</a> your THiNX account.</html>"
 			});
 
+			console.log("Sending reset e-mail: " + JSON.stringify(activationEmail));
+
 			activationEmail.send(function(err) {
 				if (err) {
 					console.log(err);
@@ -1882,6 +1884,8 @@ app.post("/api/user/password/reset", function(req, res) {
 						user.owner + "&reset_key=" + user.reset_key +
 						"'>reset</a> your THiNX password.</html>"
 				});
+
+				console.log("Sending reset e-mail: " + JSON.stringify(resetEmail));
 
 				resetEmail.send(function(err) {
 					if (err) {
