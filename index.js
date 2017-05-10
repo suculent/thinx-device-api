@@ -1202,7 +1202,7 @@ app.get("/api/user/rsakey/list", function(req, res) {
 
 		console.log("user: " + user);
 
-		if (!doc) {
+		if (typeof(user) === "undefined") {
 			console.log("User " + user.id + " not found.");
 			res.end(JSON.stringify({
 				success: false,
@@ -1212,7 +1212,7 @@ app.get("/api/user/rsakey/list", function(req, res) {
 		}
 
 		var exportedKeys = [];
-		var fingerprints = Object.keys(doc.rsa_keys);
+		var fingerprints = Object.keys(user.rsa_keys);
 		for (var i = 0; i < fingerprints.length; i++) {
 			var key = doc.rsa_keys[fingerprints[i]];
 			var info = {
