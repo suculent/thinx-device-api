@@ -874,7 +874,7 @@ app.get("/api/user/sources/list", function(req, res) {
 
 	console.log("List sources for owner: " + owner);
 
-	userlib.get(owner, function(err, body) {
+	userlib.get(owner, function(err, user) {
 
 		if (err) {
 			console.log(err);
@@ -885,17 +885,7 @@ app.get("/api/user/sources/list", function(req, res) {
 			return;
 		}
 
-		console.log("nody_:" + JSON.stringify(body));
-
-		if (body.rows.length === 0) {
-			res.end(JSON.stringify({
-				success: false,
-				status: "no_such_owner"
-			}));
-			return;
-		}
-
-		var user = body.rows[0];
+		console.log("nody_:" + JSON.stringify(user));
 
 		console.log("Listing Repositories: " +
 			JSON.stringify(user.sources));
