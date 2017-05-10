@@ -346,32 +346,26 @@ app.post("/api/user/profile", function(req, res) {
 
 		console.log("Destroying old document...");
 
-		userlib.destroy(user._id, user._rev, function(err) {
 
+
+		console.log("Creating new document...");
+
+		user.last_update = new Date();
+		delete user._rev;
+
+		userlib.insert(user, user._id, function(err) {
 			if (err) {
-				console.log("destroy eerror: " + err);
-				return;
+				console.log(err);
+				res.end(JSON.stringify({
+					success: false,
+					status: "revocation_failed"
+				}));
+			} else {
+				res.end(JSON.stringify({
+					revoked: api_key,
+					success: true
+				}));
 			}
-
-			console.log("Creating new document...");
-
-			user.last_update = new Date();
-			delete user._rev;
-
-			userlib.insert(user, user._id, function(err) {
-				if (err) {
-					console.log(err);
-					res.end(JSON.stringify({
-						success: false,
-						status: "revocation_failed"
-					}));
-				} else {
-					res.end(JSON.stringify({
-						revoked: api_key,
-						success: true
-					}));
-				}
-			});
 		});
 	});
 });
@@ -502,26 +496,23 @@ app.post("/api/device/attach", function(req, res) {
 			console.log(path + " is not a directory.");
 		}
 
-		devicelib.destroy(doc._id, doc._rev, function(err) {
+		doc.source = alias;
+		delete doc._rev;
 
-			doc.source = alias;
-			delete doc._rev;
-
-			devicelib.insert(doc, doc._id, function(err, body, header) {
-				if (err) {
-					console.log("/api/device/attach ERROR:" + err);
-					res.end(JSON.stringify({
-						success: false,
-						status: "attach_failed"
-					}));
-					return;
-				} else {
-					res.end(JSON.stringify({
-						success: true,
-						attached: alias
-					}));
-				}
-			});
+		devicelib.insert(doc, doc._id, function(err, body, header) {
+			if (err) {
+				console.log("/api/device/attach ERROR:" + err);
+				res.end(JSON.stringify({
+					success: false,
+					status: "attach_failed"
+				}));
+				return;
+			} else {
+				res.end(JSON.stringify({
+					success: true,
+					attached: alias
+				}));
+			}
 		});
 	});
 });
@@ -568,26 +559,24 @@ app.post("/api/device/detach", function(req, res) {
 			watched_repos.splice(watched_repos.indexOf(path));
 		}
 
-		devicelib.destroy(doc._id, doc._rev, function(err) {
 
-			doc.source = null;
-			delete doc._rev;
+		doc.source = null;
+		delete doc._rev;
 
-			devicelib.insert(doc, doc._id, function(err, body, header) {
-				if (err) {
-					console.log("/api/device/detach ERROR:" + err);
-					res.end(JSON.stringify({
-						success: false,
-						status: "detach_failed"
-					}));
-					return;
-				} else {
-					res.end(JSON.stringify({
-						success: true,
-						attached: doc.source
-					}));
-				}
-			});
+		devicelib.insert(doc, doc._id, function(err, body, header) {
+			if (err) {
+				console.log("/api/device/detach ERROR:" + err);
+				res.end(JSON.stringify({
+					success: false,
+					status: "detach_failed"
+				}));
+				return;
+			} else {
+				res.end(JSON.stringify({
+					success: true,
+					attached: doc.source
+				}));
+			}
 		});
 	});
 });
@@ -650,26 +639,24 @@ app.post("/api/device/revoke", function(req, res) {
 
 		alog.log(owner, logmessage);
 
-		devicelib.destroy(doc._id, doc._rev, function(err) {
-			doc.source = null;
-			delete doc._rev;
-			if (err) {
-				console.log("/api/device/revoke ERROR:" + err);
-				res.end(JSON.stringify({
-					success: false,
-					status: "revocation_failed"
-				}));
-				return;
-			} else {
-				var logmessage = "Revocation succeed: " + doc.alias +
-					" (${doc.udid})";
-				alog.log(owner, logmessage);
-				res.end(JSON.stringify({
-					success: true,
-					revoked: doc.udid
-				}));
-			}
-		});
+		doc.source = null;
+		delete doc._rev;
+		if (err) {
+			console.log("/api/device/revoke ERROR:" + err);
+			res.end(JSON.stringify({
+				success: false,
+				status: "revocation_failed"
+			}));
+			return;
+		} else {
+			var logmessage = "Revocation succeed: " + doc.alias +
+				" (${doc.udid})";
+			alog.log(owner, logmessage);
+			res.end(JSON.stringify({
+				success: true,
+				revoked: doc.udid
+			}));
+		}
 	});
 });
 
@@ -696,6 +683,8 @@ app.post("/api/user/apikey", function(req, res) {
 	var new_api_key_alias = req.body.alias;
 
 	var new_api_key = sha256(new Date().toString()).substring(0, 40);
+
+	console.log("Searching for owner " + owner);
 
 	// Get all users
 	// FIXME: Refactor to owners_by_apikey
@@ -733,12 +722,6 @@ app.post("/api/user/apikey", function(req, res) {
 			}));
 			return;
 		}
-
-
-
-		// fix: doc(.api_keys) undefined!
-
-		//if (typeof(doc.api_keys)) {
 
 		doc.api_keys.push({
 			"key": new_api_key,
@@ -812,34 +795,24 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 			return;
 		}
 
-		console.log("Destroying old document...");
+		console.log("Creating new document...");
 
-		userlib.destroy(user._id, user._rev, function(err) {
+		user.last_update = new Date();
+		delete user._rev;
 
+		userlib.insert(user, user._id, function(err) {
 			if (err) {
-				console.log("destroy eerror: " + err);
-				return;
+				console.log(err);
+				res.end(JSON.stringify({
+					success: false,
+					status: "revocation_failed"
+				}));
+			} else {
+				res.end(JSON.stringify({
+					revoked: api_key,
+					success: true
+				}));
 			}
-
-			console.log("Creating new document...");
-
-			user.last_update = new Date();
-			delete user._rev;
-
-			userlib.insert(user, user._id, function(err) {
-				if (err) {
-					console.log(err);
-					res.end(JSON.stringify({
-						success: false,
-						status: "revocation_failed"
-					}));
-				} else {
-					res.end(JSON.stringify({
-						revoked: api_key,
-						success: true
-					}));
-				}
-			});
 		});
 	});
 });
@@ -1003,30 +976,27 @@ app.post("/api/user/source", function(req, res) {
 			branch: branch
 		};
 
-		userlib.destroy(doc._id, doc._rev, function(err) {
+		if (typeof(doc.sources) === "undefined") {
+			doc.sources = [];
+		}
 
-			if (typeof(doc.sources) === "undefined") {
-				doc.sources = [];
+		doc.sources.push(new_source);
+		delete doc._rev;
+
+		userlib.insert(doc, doc._id, function(err, body, header) {
+			if (err) {
+				console.log("/api/user/source ERROR:" + err);
+				res.end(JSON.stringify({
+					success: false,
+					status: "key-not-added"
+				}));
+				return;
+			} else {
+				res.end(JSON.stringify({
+					success: true,
+					source: new_source
+				}));
 			}
-
-			doc.sources.push(new_source);
-			delete doc._rev;
-
-			userlib.insert(doc, doc._id, function(err, body, header) {
-				if (err) {
-					console.log("/api/user/source ERROR:" + err);
-					res.end(JSON.stringify({
-						success: false,
-						status: "key-not-added"
-					}));
-					return;
-				} else {
-					res.end(JSON.stringify({
-						success: true,
-						source: new_source
-					}));
-				}
-			});
 		});
 	});
 });
@@ -1084,26 +1054,23 @@ app.post("/api/user/source/revoke", function(req, res) {
 			}
 		}
 
-		userlib.destroy(doc._id, doc._rev, function(err) {
+		doc.sources = sources;
+		delete doc._rev;
 
-			doc.sources = sources;
-			delete doc._rev;
-
-			userlib.insert(doc, doc._id, function(err, body, header) {
-				if (err) {
-					console.log("/api/user/source ERROR:" + err);
-					res.end(JSON.stringify({
-						success: false,
-						status: "source_not_removed"
-					}));
-					return;
-				} else {
-					res.end(JSON.stringify({
-						success: true,
-						alias: alias
-					}));
-				}
-			});
+		userlib.insert(doc, doc._id, function(err, body, header) {
+			if (err) {
+				console.log("/api/user/source ERROR:" + err);
+				res.end(JSON.stringify({
+					success: false,
+					status: "source_not_removed"
+				}));
+				return;
+			} else {
+				res.end(JSON.stringify({
+					success: true,
+					alias: alias
+				}));
+			}
 		});
 	});
 });
@@ -1197,26 +1164,24 @@ app.post("/api/user/rsakey", function(req, res) {
 				}
 			});
 
-			userlib.destroy(doc._id, doc._rev, function(err) {
 
-				doc.rsa_keys[new_key_fingerprint] = new_ssh_key;
-				delete doc._rev;
+			doc.rsa_keys[new_key_fingerprint] = new_ssh_key;
+			delete doc._rev;
 
-				userlib.insert(doc, doc._id, function(err, body, header) {
-					if (err) {
-						console.log("/api/user/rsakey ERROR:" + err);
-						res.end(JSON.stringify({
-							success: false,
-							status: "key-not-added"
-						}));
-					} else {
-						console.log("RSA Key successfully added.");
-						res.end(JSON.stringify({
-							success: true,
-							fingerprint: new_key_fingerprint
-						}));
-					}
-				});
+			userlib.insert(doc, doc._id, function(err, body, header) {
+				if (err) {
+					console.log("/api/user/rsakey ERROR:" + err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "key-not-added"
+					}));
+				} else {
+					console.log("RSA Key successfully added.");
+					res.end(JSON.stringify({
+						success: true,
+						fingerprint: new_key_fingerprint
+					}));
+				}
 			});
 		});
 	});
@@ -1350,36 +1315,34 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 			return;
 		}
 
-		userlib.destroy(user.doc._id, user.doc._rev, function(err) {
 
-			if (err) {
-				console.log("Cannot destroy user on password-reset");
-				console.log(err);
-				res.end(JSON.stringify({
-					status: "user_not_reset",
-					success: false
-				}));
-				return;
-			} else {
+		if (err) {
+			console.log("Cannot destroy user on password-reset");
+			console.log(err);
+			res.end(JSON.stringify({
+				status: "user_not_reset",
+				success: false
+			}));
+			return;
+		} else {
 
-				delete user.doc._rev;
+			delete user.doc._rev;
 
-				userlib.insert(user.doc, user.doc.id, function(err) {
-					if (err) {
-						console.log("rsa_revocation_failed:" + err);
-						res.end(JSON.stringify({
-							success: false,
-							status: "rsa_revocation_failed"
-						}));
-					} else {
-						res.end(JSON.stringify({
-							revoked: rsa_key_fingerprint,
-							success: true
-						}));
-					}
-				});
-			}
-		});
+			userlib.insert(user.doc, user.doc.id, function(err) {
+				if (err) {
+					console.log("rsa_revocation_failed:" + err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "rsa_revocation_failed"
+					}));
+				} else {
+					res.end(JSON.stringify({
+						revoked: rsa_key_fingerprint,
+						success: true
+					}));
+				}
+			});
+		}
 	});
 });
 
@@ -1681,39 +1644,36 @@ app.post("/api/user/password/set", function(req, res) {
 				userdoc.doc.last_reset = new Date();
 				userdoc.doc.reset_key = null;
 
-				userlib.destroy(userdoc.id, userdoc.doc._rev, function(err) {
+				if (err) {
+					console.log("Cannot destroy user on password-set");
+					res.end(JSON.stringify({
+						status: "user_not_reset",
+						success: false
+					}));
+					return;
+				}
 
+				console.log("Creating document...");
+
+				delete userdoc.doc._rev;
+
+				userlib.insert(userdoc.doc, userdoc.owner, function(err) {
 					if (err) {
-						console.log("Cannot destroy user on password-set");
+						console.log("Cannot insert user on password-set");
 						res.end(JSON.stringify({
-							status: "user_not_reset",
+							status: "user_not_saved",
 							success: false
 						}));
 						return;
+					} else {
+						console.log("Password reset completed saving new user document.");
+						res.end(JSON.stringify({
+							status: "password_reset_successful",
+							success: true,
+							redirect: "http://thinx.cloud/"
+						}));
+						return;
 					}
-
-					console.log("Creating document...");
-
-					delete userdoc.doc._rev;
-
-					userlib.insert(userdoc.doc, userdoc.owner, function(err) {
-						if (err) {
-							console.log("Cannot insert user on password-set");
-							res.end(JSON.stringify({
-								status: "user_not_saved",
-								success: false
-							}));
-							return;
-						} else {
-							console.log("Password reset completed saving new user document.");
-							res.end(JSON.stringify({
-								status: "password_reset_successful",
-								success: true,
-								redirect: "http://thinx.cloud/"
-							}));
-							return;
-						}
-					});
 				});
 			}
 		});
@@ -1761,43 +1721,31 @@ app.post("/api/user/password/set", function(req, res) {
 				userdoc.activation_date = new Date();
 				// TODO: reset activation on success userdoc.activation = null;
 
-				userlib.destroy(userdoc._id, userdoc._rev, function(err) {
+
+
+				delete userdoc._rev; // should force new revision...
+
+				userlib.insert(userdoc, userdoc.owner, function(err) {
 
 					if (err) {
-						console.log("Cannot destroy user on new activation.");
+						console.log(err);
+						console.log("Could not re-insert user on new activation.");
 						res.end(JSON.stringify({
-							status: "user_not_reset",
+							status: "user_not_saved",
 							success: false
 						}));
 						return;
 					} else {
-						console.log("Deleted " + userdoc._id + " revision " + userdoc._rev);
+						// TODO: Password-reset success page, should redirect to login.
+						console.log(
+							"Password reset success page, should redirect to login...");
+						//res.redirect("http://rtm.thinx.cloud:80/");
+						res.end(JSON.stringify({
+							redirect: "http://rtm.thinx.cloud:80/",
+							success: true
+						}));
+						return;
 					}
-
-					delete userdoc._rev; // should force new revision...
-
-					userlib.insert(userdoc, userdoc.owner, function(err) {
-
-						if (err) {
-							console.log(err);
-							console.log("Could not re-insert user on new activation.");
-							res.end(JSON.stringify({
-								status: "user_not_saved",
-								success: false
-							}));
-							return;
-						} else {
-							// TODO: Password-reset success page, should redirect to login.
-							console.log(
-								"Password reset success page, should redirect to login...");
-							//res.redirect("http://rtm.thinx.cloud:80/");
-							res.end(JSON.stringify({
-								redirect: "http://rtm.thinx.cloud:80/",
-								success: true
-							}));
-							return;
-						}
-					});
 				});
 			}
 		});
@@ -1855,65 +1803,55 @@ app.post("/api/user/password/reset", function(req, res) {
 			return;
 		}
 
-		userlib.destroy(user._id, user._rev, function(err) {
+
+		console.log("Creating new reset-key...");
+		user.reset_key = sha256(new Date().toString());
+
+		delete user._rev;
+
+		userlib.insert(user, user.owner, function(err, body, header) {
+
 			if (err) {
 				console.log(err);
 				res.end(JSON.stringify({
 					success: false,
-					status: "destroy_failed"
+					status: "insert_failed"
 				}));
 				return;
 			}
 
-			console.log("Creating new reset-key...");
-			user.reset_key = sha256(new Date().toString());
+			console.log("Resetting password for user: " + JSON.stringify(user));
 
-			delete user._rev;
+			var resetEmail = new Emailer({
+				bodyType: "html",
+				from: "api@thinx.cloud",
+				to: email,
+				subject: "Password reset",
+				body: "<!DOCTYPE html>Hello " + user.first_name + " " + user.last_name +
+					". Someone has requested to <a href='http://rtm.thinx.cloud:7442/api/user/password/reset?owner=" +
+					user.owner + "&reset_key=" + user.reset_key +
+					"'>reset</a> your THiNX password.</html>"
+			});
 
-			userlib.insert(user, user.owner, function(err, body, header) {
+			console.log("Sending reset e-mail: " + JSON.stringify(resetEmail));
 
+			resetEmail.send(function(err) {
 				if (err) {
 					console.log(err);
 					res.end(JSON.stringify({
 						success: false,
-						status: "insert_failed"
+						status: err
 					}));
-					return;
+				} else {
+					console.log("Reset e-mail sent.");
+					res.end(JSON.stringify({
+						success: true,
+						status: "email_sent"
+					}));
 				}
-
-				console.log("Resetting password for user: " + JSON.stringify(user));
-
-				var resetEmail = new Emailer({
-					bodyType: "html",
-					from: "api@thinx.cloud",
-					to: email,
-					subject: "Password reset",
-					body: "<!DOCTYPE html>Hello " + user.first_name + " " + user.last_name +
-						". Someone has requested to <a href='http://rtm.thinx.cloud:7442/api/user/password/reset?owner=" +
-						user.owner + "&reset_key=" + user.reset_key +
-						"'>reset</a> your THiNX password.</html>"
-				});
-
-				console.log("Sending reset e-mail: " + JSON.stringify(resetEmail));
-
-				resetEmail.send(function(err) {
-					if (err) {
-						console.log(err);
-						res.end(JSON.stringify({
-							success: false,
-							status: err
-						}));
-					} else {
-						console.log("Reset e-mail sent.");
-						res.end(JSON.stringify({
-							success: true,
-							status: "email_sent"
-						}));
-					}
-				});
-				// Calling page already displays "Relax. You reset link is on its way."
-			}); // insert
-		}); // destroy
+			});
+			// Calling page already displays "Relax. You reset link is on its way."
+		}); // insert
 	}); // view
 }); // post
 
