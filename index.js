@@ -871,7 +871,6 @@ app.get("/api/user/sources/list", function(req, res) {
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
-	var username = req.session.username;
 
 	console.log("List sources for owner: " + owner);
 
@@ -885,6 +884,8 @@ app.get("/api/user/sources/list", function(req, res) {
 			}));
 			return;
 		}
+
+		console.log("nody_:" + body);
 
 		if (body.rows.length === 0) {
 			res.end(JSON.stringify({
@@ -3189,13 +3190,6 @@ app.listen(serverPort, function() {
 });
 
 
-// Prevent crashes on uncaught exceptions
-
-/*
-process.on("uncaughtException", function(err) {
-	console.log("Caught exception: " + err);
-});
-*/
 
 /* Should load all devices with attached repositories and watch those repositories.
  * Maintains list of watched repositories for runtime handling purposes.
@@ -3265,3 +3259,10 @@ console.log("Starting Database Compact Timer...");
 var COMPACT_TIMEOUT = 30000;
 
 var database_compact_timer = setTimeout(database_compactor(), this.COMPACT_TIMEOUT);
+
+
+// Prevent crashes on uncaught exceptions
+
+process.on("uncaughtException", function(err) {
+	console.log("Caught exception: " + err);
+});
