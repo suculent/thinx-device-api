@@ -389,9 +389,11 @@ app.get("/api/user/devices", function(req, res) {
 	var owner = req.session.owner;
 	var username = req.session.username;
 
+	console.log("Listing devices by owner:" + owner);
+
 	devicelib.view("devicelib", "devices_by_owner", {
 		"key": owner,
-		"include_docs": false
+		"include_docs": true
 	}, function(err, body) {
 
 		if (err) {
@@ -698,60 +700,66 @@ app.post("/api/user/apikey", function(req, res) {
 	// Get all users
 	// FIXME: Refactor to owners_by_apikey
 	userlib.view("users", "owners_by_id", {
-		"key": owner,
-		"include_docs": true
-	}, function(err, user) {
-
-		if (err) {
-			console.log(err);
-			return;
-		}
-
-		console.log("user: " + JSON.stringify(user));
-
-		var doc = user;
-
-		if (!doc) {
-			console.log("User " + username + " not found.");
-			res.end(JSON.stringify({
-				success: false,
-				status: "user_not_found"
-			}));
-			return;
-		}
-
-		userlib.destroy(doc._id, doc._rev, function(err) {
+			"key": owner,
+			"include_docs": true
+		}, function(err, users) {
 
 			if (err) {
-				console.log("Could not destroy " + doc._id);
+				console.log(err);
 				res.end(JSON.stringify({
 					success: false,
-					status: "apikey_update_error"
+					status: err
 				}));
-
-			} else {
-
-				doc.api_keys.push({
-					"key": new_api_key,
-					"hash": sha256(new_api_key),
-					"alias": new_api_key_alias
-				});
-				delete doc._rev;
-
-				userlib.insert(doc, doc._id, function(err, body, header) {
-					if (err) {
-						console.log("/api/user/apikey ERROR:" + err);
-					} else {
-						console.log("Userlib " + doc.owner + "document inserted");
-						res.end(JSON.stringify({
-							success: true,
-							api_key: new_api_key
-						}));
-					}
-				});
+				return;
 			}
 
-		});
+			if (users.rows.count === 0) {
+				res.end(JSON.stringify({
+					success: false,
+					status: "session_owner_not_found"
+				}));
+				return;
+			}
+
+			console.log("user: " + JSON.stringify(user));
+
+			var doc = users.rows[0];
+
+			if (!doc) {
+				console.log("User " + username + " not found.");
+				res.end(JSON.stringify({
+					success: false,
+					status: "user_not_found"
+				}));
+				return;
+			}
+
+
+
+			// fix: doc(.api_keys) undefined!
+
+			if (typeof(doc.api_keys))
+
+				doc.api_keys.push({
+				"key": new_api_key,
+				"hash": sha256(new_api_key),
+				"alias": new_api_key_alias
+			});
+			delete doc._rev;
+
+			userlib.insert(doc, doc._id, function(err, body, header) {
+				if (err) {
+					console.log("/api/user/apikey ERROR:" + err);
+				} else {
+					console.log("Userlib " + doc.owner + "document inserted");
+					res.end(JSON.stringify({
+						success: true,
+						api_key: new_api_key
+					}));
+				}
+			});
+		}
+
 	});
 });
 
