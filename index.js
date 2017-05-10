@@ -826,10 +826,7 @@ app.get("/api/user/apikey/list", function(req, res) {
 	var owner = req.session.owner;
 	var username = req.session.username;
 
-	userlib.view("users", "owners_by_id", {
-		"key": owner,
-		"include_docs": true
-	}, function(err, user) {
+	userlib.get(owner, function(err, user) {
 
 		if (err) {
 			console.log(err);
@@ -842,7 +839,8 @@ app.get("/api/user/apikey/list", function(req, res) {
 
 		var doc = user.doc;
 		if (!doc) {
-			console.log("User " + user.id + " not found.");
+			console.log("User " + owner + " not found.");
+			console.log(user);
 			res.end(JSON.stringify({
 				success: false,
 				status: "user_not_fond"
