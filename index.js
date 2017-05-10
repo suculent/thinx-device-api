@@ -700,66 +700,64 @@ app.post("/api/user/apikey", function(req, res) {
 	// Get all users
 	// FIXME: Refactor to owners_by_apikey
 	userlib.view("users", "owners_by_id", {
-			"key": owner,
-			"include_docs": true
-		}, function(err, users) {
+		"key": owner,
+		"include_docs": true
+	}, function(err, users) {
 
-			if (err) {
-				console.log(err);
-				res.end(JSON.stringify({
-					success: false,
-					status: err
-				}));
-				return;
-			}
-
-			if (users.rows.count === 0) {
-				res.end(JSON.stringify({
-					success: false,
-					status: "session_owner_not_found"
-				}));
-				return;
-			}
-
-			console.log("user: " + JSON.stringify(user));
-
-			var doc = users.rows[0];
-
-			if (!doc) {
-				console.log("User " + username + " not found.");
-				res.end(JSON.stringify({
-					success: false,
-					status: "user_not_found"
-				}));
-				return;
-			}
-
-
-
-			// fix: doc(.api_keys) undefined!
-
-			if (typeof(doc.api_keys))
-
-				doc.api_keys.push({
-				"key": new_api_key,
-				"hash": sha256(new_api_key),
-				"alias": new_api_key_alias
-			});
-			delete doc._rev;
-
-			userlib.insert(doc, doc._id, function(err, body, header) {
-				if (err) {
-					console.log("/api/user/apikey ERROR:" + err);
-				} else {
-					console.log("Userlib " + doc.owner + "document inserted");
-					res.end(JSON.stringify({
-						success: true,
-						api_key: new_api_key
-					}));
-				}
-			});
+		if (err) {
+			console.log(err);
+			res.end(JSON.stringify({
+				success: false,
+				status: err
+			}));
+			return;
 		}
 
+		if (users.rows.count === 0) {
+			res.end(JSON.stringify({
+				success: false,
+				status: "session_owner_not_found"
+			}));
+			return;
+		}
+
+		console.log("user: " + JSON.stringify(user));
+
+		var doc = users.rows[0];
+
+		if (!doc) {
+			console.log("User " + username + " not found.");
+			res.end(JSON.stringify({
+				success: false,
+				status: "user_not_found"
+			}));
+			return;
+		}
+
+
+
+		// fix: doc(.api_keys) undefined!
+
+		//if (typeof(doc.api_keys)) {
+
+		doc.api_keys.push({
+			"key": new_api_key,
+			"hash": sha256(new_api_key),
+			"alias": new_api_key_alias
+		});
+		delete doc._rev;
+
+		userlib.insert(doc, doc._id, function(err, body, header) {
+			if (err) {
+				console.log("/api/user/apikey ERROR:" + err);
+			} else {
+				console.log("Userlib " + doc.owner + "document inserted");
+				res.end(JSON.stringify({
+					success: true,
+					api_key: new_api_key
+				}));
+			}
+		});
 	});
 });
 
@@ -2357,8 +2355,6 @@ app.post("/device/register", function(req, res) {
 
 		console.log("Device firmware: " + fw);
 
-		var deploy = require("./lib/thinx/deployment");
-
 		var device = {
 			mac: mac,
 			firmware: fw,
@@ -3157,7 +3153,7 @@ app.post("/api/login", function(req, res) {
 					console.log("User data doc:" + JSON.stringify(user_data.doc));
 
 					req.session.owner = user_data.doc.owner; // what if there's no session?
-					console.log("ASsigning session owner: " + req.session.owner)
+					console.log("ASsigning session owner: " + req.session.owner);
 					req.session.username = user_data.doc.username;
 
 					var minute = 5 * 60 * 1000;
