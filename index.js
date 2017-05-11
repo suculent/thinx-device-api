@@ -2727,20 +2727,20 @@ app.post("/api/build", function(req, res) {
 			var rowData = rows[row].value;
 			var db_udid_hash = rowData.hash;
 			console.log("Searching owner in " + JSON.stringify(rows[row]));
-			var device = rows[row];
-			if (rowData.owner.indexOf(owner) !== -1) {
+			var device = rows[row].value.doc;
+			if (device.owner.indexOf(owner) !== -1) {
 				if (device_udid_hash.indexOf(db_udid_hash) != -1) {
-					udid = rowData.hash; // target device ID hash (FIXME: should be just udid)
-					mac = rowData.mac; // target device ID mac, will deprecate
+					udid = device.hash; // target device ID hash (FIXME: should be just udid)
+					mac = device.mac; // target device ID mac, will deprecate
 					break;
 				}
 			}
 			// will deprecate when all devices will be re-registered using owner and not username
 			if (typeof(username) !== "undefined") {
-				if (username.indexOf(rowData.owner) !== -1) {
+				if (username.indexOf(device.owner) !== -1) {
 					if (device_udid_hash.indexOf(db_udid_hash) != -1) {
-						udid = rowData.hash; // target device ID hash
-						mac = rowData.mac; // target device ID mac, will deprecate
+						udid = device.hash; // target device ID hash
+						mac = device.mac; // target device ID mac, will deprecate
 						break;
 					}
 				}
