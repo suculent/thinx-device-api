@@ -683,10 +683,8 @@ app.post("/api/user/apikey", function(req, res) {
 
 	console.log("Searching for owner " + owner);
 
-	// Get all users (TODO: put apikeys elsewhere)
-	userlib.view("users", "owners_by_id", {
-		"include_docs": true
-	}, function(err, users) {
+
+	userlib.get(owner, function(err, doc) {
 
 		if (err) {
 			console.log(err);
@@ -697,19 +695,9 @@ app.post("/api/user/apikey", function(req, res) {
 			return;
 		}
 
-		if (users.rows.count === 0) {
-			res.end(JSON.stringify({
-				success: false,
-				status: "session_owner_not_found"
-			}));
-			return;
-		}
-
-		var doc = users.rows[0];
-
 		console.log("doc: " + JSON.stringify(doc));
 
-		if (!doc) {
+		if (doc === null) {
 			console.log("User " + username + " not found.");
 			res.end(JSON.stringify({
 				success: false,
