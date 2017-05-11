@@ -1128,7 +1128,7 @@ app.post("/api/user/rsakey", function(req, res) {
 		console.log(JSON.stringify(user));
 
 		// Fetch complete user
-		userlib.get(user._id, function(error, doc) {
+		userlib.get(owner, function(error, doc) {
 
 			if (!doc) {
 				console.log("User " + users[index].id + " not found.");
