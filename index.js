@@ -1129,7 +1129,7 @@ app.post("/api/user/rsakey", function(req, res) {
 
 		var doc = body.rows[0];
 
-		//console.log(JSON.stringify(user));
+		console.log(JSON.stringify(doc));
 
 		// Fetch complete user
 		//userlib.get(owner, function(error, doc) {
@@ -1140,7 +1140,7 @@ app.post("/api/user/rsakey", function(req, res) {
 		}
 
 		if (!doc) {
-			console.log("User " + users[index].id + " not found.");
+			console.log("User " + owner + " not found.");
 			res.end(JSON.stringify({
 				success: false,
 				status: "userid_not_found"
