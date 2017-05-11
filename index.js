@@ -718,15 +718,25 @@ app.post("/api/user/apikey", function(req, res) {
 			return;
 		}
 
+		var keys;
 		if (typeof(doc.api_keys) === "undefined") {
-			doc.api_keys = {};
+			keys = [];
+		} else {
+			keys = doc.api_keys;
 		}
 
-		doc.api_keys.push({
+		keys.push({
 			"key": new_api_key,
 			"hash": sha256(new_api_key),
 			"alias": new_api_key_alias
 		});
+
+		console.log("old keys: " + doc.api_keys);
+
+		doc.api_keys = keys;
+
+		console.log("new keys: " + keys);
+
 		delete doc._rev;
 
 		userlib.insert(doc, doc._id, function(err, body, header) {
@@ -889,8 +899,6 @@ app.get("/api/user/sources/list", function(req, res) {
 			}));
 			return;
 		}
-
-		console.log("nody_:" + JSON.stringify(user));
 
 		console.log("Listing Repositories: " +
 			JSON.stringify(user.repos));
@@ -1191,7 +1199,7 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			return;
 		}
 
-		console.log("user: " + user);
+		console.log("user: " + JSON.stingify(user));
 
 		if (typeof(user) === "undefined") {
 			console.log("User " + user.id + " not found.");
