@@ -838,7 +838,7 @@ app.get("/api/user/apikey/list", function(req, res) {
 			return;
 		}
 
-		console.log(user);
+		console.log("user: " + JSON.stringify(user));
 
 		if (!user) {
 			console.log("User " + owner + " not found.");
@@ -852,11 +852,11 @@ app.get("/api/user/apikey/list", function(req, res) {
 
 		var exportedKeys = [];
 		for (var index in user.api_keys) {
-			console.log(user.api_keys);
+			console.log(JSON.stringify(user.api_keys[index]));
 			var info = {
 				name: "******************************" + user.api_keys[index].key.substring(
 					30),
-				hash: sha256(user.api_keys[index].key),
+				hash: sha256(user.api_keys[index].hash),
 				alias: user.api_keys[index].alias
 			};
 			exportedKeys.push(info);
