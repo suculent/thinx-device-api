@@ -1,7 +1,7 @@
 {
   "name" : "thinx",
   "description" : "THiNX IoT RTM API",
-  "version" : "1.4.601",
+  "version" : "1.4.676",
   "author" : {
     "name" : "Matej Sychra"
   },
@@ -38,6 +38,7 @@
     "mqtt" : "^2.6.2",
     "nano" : "^6.2.0",
     "node-vault" : "^0.5.6",
+    "path" : "^0.12.7",
     "qs" : "6.0.4",
     "redis" : "^2.7.1",
     "request" : "^2.81.0",
