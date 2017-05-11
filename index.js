@@ -1123,72 +1123,76 @@ app.post("/api/user/rsakey", function(req, res) {
 			return;
 		}
 
-		var user = body.rows[0];
+		var doc = body.rows[0];
 
-		console.log(JSON.stringify(user));
+		//console.log(JSON.stringify(user));
 
 		// Fetch complete user
-		userlib.get(owner, function(error, doc) {
+		//userlib.get(owner, function(error, doc) {
 
-			if (!doc) {
-				console.log("User " + users[index].id + " not found.");
-				res.end(JSON.stringify({
-					success: false,
-					status: "userid_not_found"
-				}));
-				return;
-			}
+		if (err) {
+			console.log("userlib.get: " + err);
+			return;
+		}
 
-			// FIXME: Change username to owner_id
-			var file_name = username + "-" + Math.floor(new Date() /
-				1000) + ".pub";
-			var ssh_path = "../.ssh/" + file_name;
+		if (!doc) {
+			console.log("User " + users[index].id + " not found.");
+			res.end(JSON.stringify({
+				success: false,
+				status: "userid_not_found"
+			}));
+			return;
+		}
 
-			var new_ssh_key = {
-				alias: new_key_alias,
-				key: ssh_path
-			};
+		// FIXME: Change username to owner_id
+		var file_name = username + "-" + Math.floor(new Date() /
+			1000) + ".pub";
+		var ssh_path = "../.ssh/" + file_name;
 
-			fs.open(ssh_path, 'w+', function(err, fd) {
-				if (err) {
-					console.log(err);
-				} else {
-					fs.writeFile(ssh_path, new_ssh_key, function(err) {
-						if (err) {
-							console.log(err);
-						} else {
-							fs.close(fd, function() {
-								console.log('RSA key installed...');
-							});
-							console.log("Updating permissions for " + ssh_path);
-							fs.chmodSync(ssh_path, '644');
-						}
-					});
-				}
-			});
+		var new_ssh_key = {
+			alias: new_key_alias,
+			key: ssh_path
+		};
 
-
-			doc.rsa_keys[new_key_fingerprint] = new_ssh_key;
-
-			userlib.destroy(doc._id, doc._rev, function(err) {
-				delete doc._rev;
-
-
-				userlib.insert(doc, doc._id, function(err, body, header) {
+		fs.open(ssh_path, 'w+', function(err, fd) {
+			if (err) {
+				console.log(err);
+			} else {
+				fs.writeFile(ssh_path, new_ssh_key, function(err) {
 					if (err) {
-						console.log("/api/user/rsakey ERROR:" + err);
-						res.end(JSON.stringify({
-							success: false,
-							status: "key-not-added"
-						}));
+						console.log(err);
 					} else {
-						console.log("RSA Key successfully added.");
-						res.end(JSON.stringify({
-							success: true,
-							fingerprint: new_key_fingerprint
-						}));
+						fs.close(fd, function() {
+							console.log('RSA key installed...');
+						});
+						console.log("Updating permissions for " + ssh_path);
+						fs.chmodSync(ssh_path, '644');
 					}
 				});
+			}
+		});
+
+
+		doc.rsa_keys[new_key_fingerprint] = new_ssh_key;
+
+		userlib.destroy(doc._id, doc._rev, function(err) {
+			delete doc._rev;
+
+
+			userlib.insert(doc, doc._id, function(err, body, header) {
+				if (err) {
+					console.log("/api/user/rsakey ERROR:" + err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "key-not-added"
+					}));
+				} else {
+					console.log("RSA Key successfully added.");
+					res.end(JSON.stringify({
+						success: true,
+						fingerprint: new_key_fingerprint
+					}));
+				}
 			});
 		});
 	});
