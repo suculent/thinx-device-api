@@ -495,7 +495,7 @@ app.post("/api/device/attach", function(req, res) {
 		}
 
 		if (fs.existsSync(repo_path)) {
-			watcher.watchRepository(repo_path, watcher_callback());
+			watcher.watchRepository(repo_path, watcher_callback);
 			watched_repos.push(repo_path);
 		} else {
 			console.log(repo_path + " is not a directory.");
@@ -3202,7 +3202,7 @@ var watcher_callback = function(result) {
 			"TODO: Commence re-build (will notify user but needs to get all required user data first (owner/device is in path)"
 		);
 	} else {
-		console.log("watcher_callback.");
+		console.log("watcher_callback: no result");
 	}
 };
 
@@ -3231,7 +3231,7 @@ var initWatcher = function(watcher) {
 			} else {
 				console.log("Trying to watch path: " + path);
 				if (fs.lstatSync(path).isDirectory()) {
-					watcher.watchRepository(path, watcher_callback());
+					watcher.watchRepository(path, watcher_callback);
 					watched_repos.push(path);
 				} else {
 					console.log(path + " is not a directory.");
