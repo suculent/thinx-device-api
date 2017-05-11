@@ -6,26 +6,26 @@
 
 **ROADMAP**
 
-* WEEK: UI follows API
-* 1: Working Arduino C implementation (lib?)
-* 2: Build progres tracking
-* 3: Bare data support (LUA/uPy)
-* 4: Statistics
-* 5: Tests
-* 6: Tests
-* 7: Tests
+* 1: Profile Editing
+* 2: Device Editing
+* 3: Use API Keys from Redis
+* 4: Working Arduino C implementation (lib?)
+* 5: Bare data support (LUA/uPy)
+* 6: Statistics
+* 7: Fix postfix
+* 8: Builder, build tests
 
 ### Last week
 
-11/5/2017 - 1.4.722: big laundry done; added HTTPS-proxy; prototyping Redis API Key storage
+11/5/2017 - 1.4.722: big laundry done; added HTTPS-proxy; build progress tracking, prototyping Redis API Key storage
 
-10/5/2017 -
+10/5/2017 - fixing regressions and bugs
 
-9/5/2017 -
-
-### Fourth week
+9/5/2017 - major refactoring
 
 8/5/2017 - 1.4.603: Watching sources repositories attached to devices for changes, enabled build logger, updated build directory/repository structure, simplified registration request (should not require 'owner' parameter anymore); advanced update-notifier implementation; database compact job
+
+### Fourth week
 
 7/5/2017 - 1.3.585: Added API endpoints for fetching audit log, build log list and build log (incomplete), builder now saves build logs next to build/envelope file with same filename (build-id)
 
@@ -33,7 +33,8 @@
 
 5/5/2017 - 1.3.576: improved tests, enabled editing device alias through API, working logrotate; working device registration step (with issues only on device side)
 
-3/5/2017 - 1.3.559: API key now requires alias, audit logging,
+3/5/2017 - 1.3.559: API key now requires alias, audit logging
+
 2/5/2017 - 1.3.550: changed build API to secure, updated tests; UI advancements (attach/detach/build)
 
 ### Third week
