@@ -781,10 +781,7 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 
 	console.log("Revoke API Key by hash: " + api_key_hash);
 
-	userlib.view("users", "owners_by_id", {
-		"key": owner,
-		"include_docs": true
-	}, function(err, user) {
+	userlib.get(owner, function(err, user) {
 
 		if (err) {
 			console.log(err);
@@ -792,7 +789,7 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 		}
 
 		if (!user) {
-			console.log("User " + userdoc.id + " not found.");
+			console.log("User " + owner + " not found.");
 			return;
 		}
 
@@ -800,8 +797,10 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 		var keys = user.api_keys; // array
 		var api_key_index = null;
 		var api_key = null;
+		console.log("keys: " + api_keys);
 		for (var index in keys) {
-			var internal_hash = sha256(keys[index].key);
+			var internal_hash = keys[index].hash;
+			console.log("ihash: " + internal_hash + " ahash: " + api_key_hash);
 			if (internal_hash.indexOf(api_key_hash) !== -1) {
 				api_key_index = index;
 				api_key = keys[index].key;
