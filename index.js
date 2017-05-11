@@ -287,92 +287,29 @@ app.post("/api/user/profile", function(req, res) {
 
 		doc[update_key] = update_value;
 
-		delete doc._rev;
+		userlib.destroy(doc._id, doc._rev, function(err) {
 
-		userlib.insert(owner, doc._id, function(err) {
+			delete doc._rev;
 
-			if (err) {
-				console.log(err);
-				alog.log(owner, "Profile updated.");
-				res.end(JSON.stringify({
-					success: false,
-					status: "profile_update_failed"
-				}));
-				return;
-			} else {
-				alog.log(owner, "Profile update failed.");
-				res.end(JSON.stringify({
-					"success": true,
-					update_key: update_value
-				}));
-			}
+			userlib.insert(owner, doc._id, function(err) {
 
-		});
+				if (err) {
+					console.log(err);
+					alog.log(owner, "Profile updated.");
+					res.end(JSON.stringify({
+						success: false,
+						status: "profile_update_failed"
+					}));
+					return;
+				} else {
+					alog.log(owner, "Profile update failed.");
+					res.end(JSON.stringify({
+						"success": true,
+						update_key: update_value
+					}));
+				}
 
-	});
-
-	userlib.get(owner, function(err, body) {
-
-		if (err) {
-			console.log(err);
-			return;
-		}
-
-		if (!body) {
-			console.log("User " + userdoc.id + "(Profile) not found.");
-			return;
-		}
-
-		client.get("ak:" + user._id, function(err, redis_keys) {
-			if ((typeof(redis_keys) !== "undefined") || (redis_keys !== null)) {
-				console.log("[WARNING-NEW]: fetched redis_keys" + JSON.parse(
-					redis_keys));
-			} else {
-				console.log("[WARNING-NEW]: fetched no redis_keys");
-			}
-		});
-
-		// Search API key by hash
-		var user = body.rows[0].doc;
-		var keys = user.api_keys; // array
-		var api_key_index = null;
-		var api_key = null;
-		for (var index in keys) {
-			var internal_hash = sha256(keys[index].key);
-			if (internal_hash.indexOf(api_key_hash) !== -1) {
-				api_key_index = index;
-				api_key = keys[index].key;
-				console.log("Found and splicing index " + api_key_index + " key " +
-					api_key);
-				user.api_keys.splice(api_key_index, 1); // important
-				break;
-			}
-		}
-
-		if (api_key_index === null) {
-			res.end(JSON.stringify({
-				success: false,
-				status: "hash_not_found"
-			}));
-			return;
-		}
-
-		user.last_update = new Date();
-		delete user._rev;
-
-		userlib.insert(user, user._id, function(err) {
-			if (err) {
-				console.log(err);
-				res.end(JSON.stringify({
-					success: false,
-					status: "revocation_failed"
-				}));
-			} else {
-				res.end(JSON.stringify({
-					revoked: api_key,
-					success: true
-				}));
-			}
+			});
 		});
 	});
 });
@@ -513,9 +450,7 @@ app.post("/api/device/attach", function(req, res) {
 		doc.source = alias;
 
 		devicelib.destroy(doc._id, doc._rev, function(err) {
-
 			delete doc._rev;
-
 			devicelib.insert(doc, doc._id, function(err, body, header) {
 				if (err) {
 					console.log("/api/device/attach ERROR:" + err);
