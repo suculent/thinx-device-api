@@ -387,45 +387,47 @@ app.get("/api/user/devices", function(req, res) {
 
 	console.log("Listing devices by owner:" + owner);
 
-	devicelib.view("devicelib", "devices_by_owner", {
-		"key": owner,
-		"include_docs": true
-	}, function(err, body) {
+	devicelib.view("devicelib", "devices_by_owner",
+		/*{
+			"key": owner,
+			"include_docs": true
+		},*/
+		function(err, body) {
 
-		if (err) {
-			if (err.toString() == "Error: missing") {
-				res.end(JSON.stringify({
-					result: "none"
-				}));
+			if (err) {
+				if (err.toString() == "Error: missing") {
+					res.end(JSON.stringify({
+						result: "none"
+					}));
+				}
+				console.log("/api/user/devices: Error: " + err.toString());
+				return;
 			}
-			console.log("/api/user/devices: Error: " + err.toString());
-			return;
-		}
 
-		var rows = body.rows; // devices returned
-		console.log("rows:" + JSON.stringify(rows));
-		var devices = []; // an array by design (needs push), to be encapsulated later
+			var rows = body.rows; // devices returned
+			console.log("rows:" + JSON.stringify(rows));
+			var devices = []; // an array by design (needs push), to be encapsulated later
 
-		// Show all devices for admin (if not limited by query)
-		if (req.session.admin === true && typeof(req.body.query) == "undefined") {
-			var response = JSON.stringify({
+			// Show all devices for admin (if not limited by query)
+			if (req.session.admin === true && typeof(req.body.query) == "undefined") {
+				var response = JSON.stringify({
+					devices: devices
+				});
+				res.end(response);
+				return;
+			}
+
+			for (var row in rows) {
+				var rowData = rows[row];
+				if (username == rowData.key) {
+					devices.push(rowData);
+				}
+			}
+			var reply = JSON.stringify({
 				devices: devices
 			});
-			res.end(response);
-			return;
-		}
-
-		for (var row in rows) {
-			var rowData = rows[row];
-			if (username == rowData.key) {
-				devices.push(rowData);
-			}
-		}
-		var reply = JSON.stringify({
-			devices: devices
+			res.end(reply);
 		});
-		res.end(reply);
-	});
 });
 
 /* Attach code source to a device. Expects unique device identifier and source alias. */
