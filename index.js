@@ -2676,11 +2676,12 @@ app.post("/api/build", function(req, res) {
 
 	var rdict = {};
 
+	// FIXME: Change 'hash' to 'udid' in /build request
 	// '{ "build" : { "hash" : "2d5b0e45f791cb3efd828d2a451e0dc64e4aefa3", "source" : "thinx-firmware-esp8266", "dryrun" : true } }'
 
 	var owner = req.session.owner;
 	var username = req.session.username;
-	var build = req.body.build; // build descriptor wrapper
+	var build = req.body.build; // build descriptor wrapper	;
 
 	var dryrun = false;
 	if (typeof(build.dryrun) != "undefined") {
@@ -2694,6 +2695,7 @@ app.post("/api/build", function(req, res) {
 		}));
 	}
 	var device_udid_hash = build.hash;
+	console.log("Build for hash: " + build.hash);
 
 	if (typeof(build.source) === "undefined") {
 		return res.end(JSON.stringify({
@@ -2725,13 +2727,15 @@ app.post("/api/build", function(req, res) {
 
 		for (var row in rows) {
 			var device = rows[row].doc;
-			var db_udid_hash = rows[row].hash;
+			var db_udid_hash = rows[row].device_id;
 
 			console.log("Searching owner in " + JSON.stringify(device));
 
-			if (device.owner.indexOf(owner) !== -1) {
+			var device_owner = device.owner;
+
+			if (device_owner.indexOf(owner) !== -1) {
 				if (device_udid_hash.indexOf(db_udid_hash) != -1) {
-					udid = device.hash; // target device ID hash (FIXME: should be just udid)
+					udid = device.device_id; // target device ID
 					mac = device.mac; // target device ID mac, will deprecate
 					break;
 				}
@@ -2740,7 +2744,7 @@ app.post("/api/build", function(req, res) {
 			if (typeof(username) !== "undefined") {
 				if (username.indexOf(device.owner) !== -1) {
 					if (device_udid_hash.indexOf(db_udid_hash) != -1) {
-						udid = device.hash; // target device ID hash
+						udid = device.device_id; // target device ID hash
 						mac = device.mac; // target device ID mac, will deprecate
 						break;
 					}
