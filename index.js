@@ -1238,7 +1238,7 @@ app.get("/api/user/rsakey/list", function(req, res) {
 		var exportedKeys = [];
 		var fingerprints = Object.keys(user.rsa_keys);
 		for (var i = 0; i < fingerprints.length; i++) {
-			var key = doc.rsa_keys[fingerprints[i]];
+			var key = user.rsa_keys[fingerprints[i]];
 			var info = {
 				name: key.alias,
 				fingerprint: fingerprints[i]
