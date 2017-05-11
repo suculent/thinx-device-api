@@ -791,6 +791,8 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 		if (!user) {
 			console.log("User " + owner + " not found.");
 			return;
+		} else {
+			console.log("ud: " + JSON.stringify(user));
 		}
 
 		// Search API key by hash
