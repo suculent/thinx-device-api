@@ -22,6 +22,7 @@ var serverPort = app_config.port;
 
 var uuidV1 = require("uuid/v1");
 var http = require("http");
+var https = require("https");
 var parser = require("body-parser");
 var nano = require("nano")(db);
 var sha256 = require("sha256");
@@ -3156,19 +3157,28 @@ app.version = function() {
 	return v.revision();
 };
 
-app.listen(serverPort, function() {
-	var package_info = require("./package.json");
-	var product = package_info.description;
-	var version = package_info.version;
+var options = {
+	key: fs.readFileSync(app_config.ssl_key),
+	cert: fs.readFileSync(app_config.ssl_cert)
+};
 
-	console.log("");
-	console.log("-=[ ☢ " + product + " v" + version + " rev. " + app.version() +
-		" ☢ ]=-");
-	console.log("");
-	console.log("» Started on port " + serverPort);
-});
+// FIXME: Link to letsencrypt SSL keys using configuration
+https.createServer(options, app).listen(serverPort + 1);
+http.createServer(app).listen(serverPort);
 
+// Will probably deprecate...
+//app.listen(serverPort, function() {
+var package_info = require("./package.json");
+var product = package_info.description;
+var version = package_info.version;
 
+console.log("");
+console.log("-=[ ☢ " + product + " v" + version + " rev. " + app.version() +
+	" ☢ ]=-");
+console.log("");
+console.log("» Started on port " + serverPort " (HTTP) and " + (serverPort + 1) +
+	" (HTTPS)");
+//});
 
 /* Should load all devices with attached repositories and watch those repositories.
  * Maintains list of watched repositories for runtime handling purposes.
