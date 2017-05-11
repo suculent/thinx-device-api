@@ -2679,6 +2679,8 @@ app.post("/api/build", function(req, res) {
 	// FIXME: Change 'hash' to 'udid' in /build request
 	// '{ "build" : { "hash" : "2d5b0e45f791cb3efd828d2a451e0dc64e4aefa3", "source" : "thinx-firmware-esp8266", "dryrun" : true } }'
 
+	console.log(JSON.stringify(req.body));
+
 	var owner = req.session.owner;
 	var username = req.session.username;
 	var build = req.body.build; // build descriptor wrapper	;
