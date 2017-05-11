@@ -2897,26 +2897,6 @@ app.get("/api/user/logs/build/list", function(req, res) {
 	var owner = req.session.owner;
 	var username = req.session.username;
 
-	if (err) {
-		console.log(err);
-		res.end(JSON.stringify({
-			success: false,
-			status: "build_fetch_failed",
-			error: err
-		}));
-		return;
-	}
-
-	if (!body) {
-		console.log("Builds for owner " + owner + " not found.");
-		res.end(JSON.stringify({
-			success: false,
-			status: "build_fetch_empty",
-			error: err
-		}));
-		return;
-	}
-
 	blog.list(owner, function(err, body) {
 
 		if (err) {
