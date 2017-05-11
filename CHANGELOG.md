@@ -5,6 +5,7 @@
 ### Hopefully The Last Week
 
 **ROADMAP**
+
 * WEEK: UI follows API
 * 1: Working Arduino C implementation (lib?)
 * 2: Build progres tracking
@@ -13,6 +14,14 @@
 * 5: Tests
 * 6: Tests
 * 7: Tests
+
+### Last week
+
+11/5/2017 - 1.4.603: big laundry done; 
+
+10/5/2017 -
+
+9/5/2017 -
 
 ### Fourth week
 

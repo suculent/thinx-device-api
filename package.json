@@ -1,7 +1,7 @@
 {
   "name" : "thinx",
   "description" : "THiNX IoT RTM API",
-  "version" : "1.4.676",
+  "version" : "1.4.695",
   "author" : {
     "name" : "Matej Sychra"
   },
