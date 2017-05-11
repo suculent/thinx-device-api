@@ -718,6 +718,8 @@ app.post("/api/user/apikey", function(req, res) {
 			return;
 		}
 
+		console.log("/api/use/apikey doc:" + JSON.stringify(doc));
+
 		var keys;
 		if (typeof(doc.api_keys) === "undefined") {
 			keys = [];
@@ -733,9 +735,9 @@ app.post("/api/user/apikey", function(req, res) {
 
 		console.log("old keys: " + doc.api_keys);
 
-		doc.api_keys = keys;
+		doc.api_keys = JSON.stringify(keys);
 
-		console.log("new keys: " + keys);
+		console.log("new keys: " + JSON.stringify(keys));
 
 		delete doc._rev;
 
