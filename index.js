@@ -256,7 +256,7 @@ app.post("/api/user/profile", function(req, res) {
 		}));
 	}
 
-	console.log("Updating owner: " + owner + "(" + username + ")");
+	//console.log("Updating owner: " + owner + "(" + username + ")");
 	alog.log(owner, "Attempt to update owner: " + owner +
 		" with: " + update_key + "and: " + JSON.stringify(update_value));
 
@@ -404,7 +404,6 @@ app.get("/api/user/devices", function(req, res) {
 			}
 
 			var rows = body.rows; // devices returned
-			console.log("rows:" + JSON.stringify(rows));
 			var devices = []; // an array by design (needs push), to be encapsulated later
 
 			// Show all devices for admin (if not limited by query)
@@ -1861,8 +1860,6 @@ app.get("/api/user/profile", function(req, res) {
 			}));
 			return;
 		}
-
-		console.log(body);
 
 		var avatar = dummy_avatar;
 		if (typeof(body.avatar) !== "undefined") {
