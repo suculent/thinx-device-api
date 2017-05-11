@@ -708,7 +708,7 @@ app.post("/api/user/apikey", function(req, res) {
 
 		console.log("/api/use/apikey doc:" + JSON.stringify(doc));
 
-		var keys;
+		var keys = [];
 		if (typeof(doc.api_keys) === "undefined") {
 			keys = [];
 		} else {
