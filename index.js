@@ -1113,10 +1113,7 @@ app.post("/api/user/rsakey", function(req, res) {
 	var new_key_body = req.body.key;
 	var new_key_fingerprint = fingerprint(new_key_body);
 
-	userlib.view("users", "owners_by_id", {
-		"key": owner,
-		"include_docs": true
-	}, function(err, body) {
+	userlib.get(owner, function(err, body) {
 
 		if (err) {
 			console.log(err);
