@@ -212,12 +212,11 @@ app.all("/*", function(req, res, next) {
 		next();
 	}
 
-
 	if ((typeof(req.session) !== "undefined") && (typeof(req.session
 			.owner) !== "undefined")) {
-		alog.log(req.session.owner, req.method + " : " + req.url);
+		console.log(req.session.owner, req.method + " : " + req.url);
 	} else {
-		alog.log("API", req.method + " : " + req.url);
+		console.log("API", req.method + " : " + req.url);
 	}
 
 
@@ -348,12 +347,6 @@ app.post("/api/user/profile", function(req, res) {
 			}));
 			return;
 		}
-
-		console.log("Destroying old document...");
-
-
-
-		console.log("Creating new document...");
 
 		user.last_update = new Date();
 		delete user._rev;
@@ -2663,11 +2656,8 @@ function validateSession(req, res) {
 			if (err) {
 				console.log(err);
 			} else {
-				console.log("validateSession: Invalid session!");
-				res.end(JSON.stringify({
-					success: false,
-					status: "invalid_session"
-				}));
+				console.log("validateSession: Invalid session, redirecting to login!");
+				res.redirect("http://rtm.thinx.cloud:80/"); // redirects browser, not in XHR?
 			}
 		});
 	}
