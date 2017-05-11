@@ -2756,7 +2756,7 @@ app.post("/api/build", function(req, res) {
 		}
 
 		// Converts build.git to git url by seeking in users' repos
-		userlib.get(owner, function(err, body) {
+		userlib.get(owner, function(err, doc) {
 
 			if (err) {
 				console.log(err);
@@ -2767,7 +2767,7 @@ app.post("/api/build", function(req, res) {
 				return;
 			}
 
-			if (typeof(body) === "undefined") {
+			if (typeof(doc) === "undefined") {
 				res.end(JSON.stringify({
 					success: false,
 					status: "no_such_owner"
@@ -2775,18 +2775,16 @@ app.post("/api/build", function(req, res) {
 				return;
 			}
 
-			var doc = body.doc;
-
 			var git = null;
 
 			// Finds first source with given source_alias
 			var sources = doc.repos;
-			console.log("Parsing sources:" + JSON.stringify(sources));
+			console.log("Parsing repos:" + JSON.stringify(sources));
 			for (var index in sources) {
 				var source = sources[index];
 				if (source.alias.indexOf(source_alias) !== -1) {
 					git = source.url;
-					console.log("Found source: " + git);
+					console.log("Found repo: " + git);
 					break;
 				}
 			}
