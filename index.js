@@ -824,6 +824,7 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 		user.last_update = new Date();
 
 		userlib.destroy(user._id, user._rev, function(err) {
+
 			delete user._rev;
 
 			userlib.insert(user, user._id, function(err) {
@@ -955,10 +956,7 @@ app.post("/api/user/source", function(req, res) {
 	var url = req.body.url;
 	var alias = req.body.alias;
 
-	userlib.view("users", "owners_by_id", {
-		"key": owner,
-		"include_docs": true
-	}, function(err, body) {
+	userlib.get(owner, function(err, body) {
 
 		if (err) {
 			console.log(err);
@@ -968,7 +966,7 @@ app.post("/api/user/source", function(req, res) {
 		console.log("body:" + JSON.stringify(body));
 
 		var user = body;
-		var doc = user;
+		var doc = user.doc;
 
 		if (!doc) {
 			console.log("User " + users[index].id + " not found.");
@@ -1029,19 +1027,15 @@ app.post("/api/user/source/revoke", function(req, res) {
 
 	var alias = req.body.alias;
 
-	userlib.view("users", "owners_by_id", {
-		"key": owner,
-		"include_docs": true
-	}, function(err, body) {
+	userlib.get(owner, function(err, body) {
 
 		if (err) {
 			console.log(err);
 			return;
 		}
 
-		var user = body.rows[0];
+		var user = body;
 		var doc = user.doc;
-
 
 		if (!doc) {
 			console.log("User " + users[index].id + " not found.");
@@ -1169,12 +1163,11 @@ app.post("/api/user/rsakey", function(req, res) {
 			}
 		});
 
-
 		doc.rsa_keys[new_key_fingerprint] = new_ssh_key;
 
 		userlib.destroy(doc._id, doc._rev, function(err) {
-			delete doc._rev;
 
+			delete doc._rev;
 
 			userlib.insert(doc, doc._id, function(err, body, header) {
 				if (err) {
@@ -1268,10 +1261,7 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 
 	console.log("Searching by username " + username);
 
-	userlib.view("users", "owners_by_id", {
-		"key": owner,
-		"include_docs": true
-	}, function(err, user) {
+	userlib.view(owner, function(err, user) {
 
 		if (err) {
 			console.log(err);
@@ -1724,8 +1714,6 @@ app.post("/api/user/password/set", function(req, res) {
 				userdoc.activation_date = new Date();
 				userdoc.activation = null;
 
-
-
 				console.log("Updating user document: " + JSON.stringify(userdoc));
 
 				userlib.destroy(userdoc._id, userdoc._rev, function(err) {
@@ -1763,7 +1751,6 @@ app.post("/api/user/password/set", function(req, res) {
 		failureResponse(res, 403, "Password change not authorized.");
 	}
 });
-
 
 // /user/password/reset POST
 /* Used to initiate password-reset session, creates reset key with expiraation and sends password-reset e-mail. */
@@ -2055,8 +2042,6 @@ app.post("/device/firmware", function(req, res) {
 				return;
 			}
 
-
-
 			var device = {
 				mac: existing.mac,
 				owner: existing.owner,
@@ -2112,7 +2097,6 @@ app.post("/device/firmware", function(req, res) {
 				}));
 				console.log("No firmware update available for " + JSON.stringify(
 					device));
-
 			}
 		}); // device get
 	}); // user view
@@ -2241,7 +2225,6 @@ app.post("/device/register", function(req, res) {
 			alog.log(owner, "Using API Key: " + api_key);
 		}
 
-
 		var success = false;
 		var status = "OK";
 
@@ -2345,8 +2328,8 @@ app.post("/device/register", function(req, res) {
 		}
 
 		if (isNew) {
-			// Create UDID for new device
 
+			// Create UDID for new device
 			console.log("Considering a new device...");
 
 			//device.udid = uuidV1(); // is returned to device which should immediately take over this value instead of mac for new registration
@@ -2538,6 +2521,8 @@ app.post("/api/device/edit", function(req, res) {
 		// Delete device document with old alias
 		devicelib.destroy(doc._id, doc._rev, function(err) {
 
+			delete doc._rev;
+
 			if (err) {
 				console.log("/api/device/edit ERROR:" + err);
 				res.end(JSON.stringify({
@@ -2551,7 +2536,12 @@ app.post("/api/device/edit", function(req, res) {
 				doc.alias = change.alias;
 				console.log("Changing alias: " +
 					JSON.stringify(doc.alias) + " to " + change.alias);
-				delete doc._rev;
+			}
+
+			if (typeof(change.avatar) !== "undefined") {
+				doc.avatar = change.avatar;
+				console.log("Changing avatar: " +
+					JSON.stringify(doc.avatar) + " to " + change.avatar);
 			}
 
 			// Create device document with new alias
@@ -2657,7 +2647,7 @@ function validateSecurePOSTRequest(req, res) {
 	return true;
 }
 
-validateSession = function(req, res) {
+function validateSession(req, res) {
 	var sessionValid = false;
 	if (typeof(req.session.owner) !== "undefined") {
 		if (typeof(req.session.username) !== "undefined") {
@@ -2668,7 +2658,6 @@ validateSession = function(req, res) {
 	} else {
 		console.log("validateSession: No owner!");
 	}
-
 	if (sessionValid === false) {
 		req.session.destroy(function(err) {
 			if (err) {
@@ -2682,9 +2671,8 @@ validateSession = function(req, res) {
 			}
 		});
 	}
-
 	return sessionValid;
-};
+}
 
 /*
  * Builder
@@ -2766,84 +2754,81 @@ app.post("/api/build", function(req, res) {
 		}
 
 		// Converts build.git to git url by seeking in users' sources
-		userlib.view("users", "owners_by_id", {
-				"key": owner,
-				"include_docs": true
-			},
+		userlib.get(owner, function(err, body) {
 
-			function(err, body) {
+			if (err) {
+				console.log(err);
+				res.end(JSON.stringify({
+					success: false,
+					status: "api_build-device_fetch_error"
+				}));
+				return;
+			}
 
-				if (err) {
-					console.log(err);
-					res.end(JSON.stringify({
-						success: false,
-						status: "api_build-device_fetch_error"
-					}));
-					return;
+			if (typeof(body) === "undefined") {
+				res.end(JSON.stringify({
+					success: false,
+					status: "no_such_owner"
+				}));
+				return;
+			}
+
+			var doc = body.doc;
+
+			var git = null;
+
+			// Finds first source with given source_alias
+			var sources = doc.sources;
+			console.log("Parsing sources:" + JSON.stringify(sources));
+			for (var index in sources) {
+				var source = sources[index];
+				if (source.alias.indexOf(source_alias) !== -1) {
+					git = source.url;
+					console.log("Found source: " + git);
+					break;
 				}
+			}
 
-				if (body.rows.length === 0) {
-					res.end(JSON.stringify({
+			if ((typeof(udid) === "undefined" || build === null) ||
+				(typeof(mac) === "undefined" || mac === null) ||
+				(typeof(owner) === "undefined" || owner === null) ||
+				(typeof(git) === "undefined" || git === null)) {
+				rdict = {
+					build: {
 						success: false,
-						status: "no_such_owner"
-					}));
-					return;
-				}
-
-				var git = null;
-
-				// Finds first source with given source_alias
-				var sources = body.rows[0].doc.sources;
-				console.log("Parsing sources:" + JSON.stringify(sources));
-				for (var index in sources) {
-					var source = sources[index];
-					if (source.alias.indexOf(source_alias) !== -1) {
-						git = source.url;
-						console.log("Found source: " + git);
-						break;
+						status: "invalid_params"
 					}
-				}
-
-				if ((typeof(udid) === "undefined" || build === null) ||
-					(typeof(mac) === "undefined" || mac === null) ||
-					(typeof(owner) === "undefined" || owner === null) ||
-					(typeof(git) === "undefined" || git === null)) {
-					rdict = {
-						build: {
-							success: false,
-							status: "invalid_params"
-						}
-					};
-
-					res.end(JSON.stringify(rdict));
-					return;
-				}
-
-				var build_id = uuidV1();
-
-				if (dryrun === false) {
-					rdict = {
-						build: {
-							success: true,
-							status: "Build started.",
-							id: build_id
-						}
-					};
-				} else {
-					rdict = {
-						build: {
-							success: true,
-							status: "Dry-run started. Build will not be deployed.",
-							id: build_id
-						}
-					};
-				}
+				};
 
 				res.end(JSON.stringify(rdict));
+				return;
+			}
 
-				buildCommand(build_id, owner, git, udid, dryrun);
+			var build_id = uuidV1();
 
-			});
+			if (dryrun === false) {
+				rdict = {
+					build: {
+						success: true,
+						status: "Build started.",
+						id: build_id
+					}
+				};
+			} else {
+				rdict = {
+					build: {
+						success: true,
+						status: "Dry-run started. Build will not be deployed.",
+						id: build_id
+					}
+				};
+			}
+
+			res.end(JSON.stringify(rdict));
+
+			buildCommand(build_id, owner, git, udid, dryrun);
+
+		});
 	});
 });
 
