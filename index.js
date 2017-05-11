@@ -383,7 +383,6 @@ app.get("/api/user/devices", function(req, res) {
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
-	var username = req.session.username;
 
 	console.log("Listing devices by owner:" + owner);
 
@@ -419,7 +418,8 @@ app.get("/api/user/devices", function(req, res) {
 
 			for (var row in rows) {
 				var rowData = rows[row];
-				if (username == rowData.key) {
+				// Compare owner to device owner
+				if (owner.indexof(rowData.key) != -1) {
 					devices.push(rowData);
 				}
 			}
