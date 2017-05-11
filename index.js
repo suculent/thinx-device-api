@@ -2726,7 +2726,8 @@ app.post("/api/build", function(req, res) {
 		for (var row in rows) {
 			var rowData = rows[row].value;
 			var db_udid_hash = rowData.hash;
-			console.log("Searching owner in " + rows[row]);
+			console.log("Searching owner in " + JSON.stringify(rows[row]));
+			var device = rows[row];
 			if (rowData.owner.indexOf(owner) !== -1) {
 				if (device_udid_hash.indexOf(db_udid_hash) != -1) {
 					udid = rowData.hash; // target device ID hash (FIXME: should be just udid)
