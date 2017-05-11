@@ -17,7 +17,7 @@
 
 ### Last week
 
-11/5/2017 - 1.4.703: big laundry done; 
+11/5/2017 - 1.4.722: big laundry done; added HTTPS-proxy; prototyping Redis API Key storage
 
 10/5/2017 -
 
