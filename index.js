@@ -964,8 +964,10 @@ app.post("/api/user/source", function(req, res) {
 			return;
 		}
 
-		var user = body.rows[0];
-		var doc = user.doc;
+		console.log("body:" + JSON.stringify(body));
+
+		var user = body;
+		var doc = user;
 
 		if (!doc) {
 			console.log("User " + users[index].id + " not found.");
