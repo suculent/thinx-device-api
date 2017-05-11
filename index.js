@@ -3209,9 +3209,15 @@ app.listen(serverPort, function() {
  */
 
 var watcher_callback = function(result) {
-	console.log("Watch repository result: " + JSON.stringify(result));
-	//watched_repos.splice(watched_repos.indexOf(path));
-	// TODO: Commence re-build (will notify user but needs to get all required user data first (owner/device is in path))
+	if (typeof(result) !== "undefined") {
+		console.log("watcher_callback result: " + JSON.stringify(result));
+		//watched_repos.splice(watched_repos.indexOf(path));
+		console.log(
+			"TODO: Commence re-build (will notify user but needs to get all required user data first (owner/device is in path)"
+		);
+	} else {
+		console.log("watcher_callback.");
+	}
 };
 
 var initWatcher = function(watcher) {
