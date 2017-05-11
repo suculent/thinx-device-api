@@ -1856,15 +1856,15 @@ app.get("/api/user/profile", function(req, res) {
 		console.log(body);
 
 		var avatar = dummy_avatar;
-		if (typeof(owner.avatar) !== "undefined") {
-			avatar = owner.avatar;
+		if (typeof(body.avatar) !== "undefined") {
+			avatar = body.avatar;
 		}
 
 		var profile = {
-			first_name: owner.first_name,
-			last_name: owner.last_name,
-			username: owner.username,
-			owner: owner.owner,
+			first_name: body.first_name,
+			last_name: body.last_name,
+			username: body.username,
+			owner: body.owner,
 			avatar: avatar
 		};
 
