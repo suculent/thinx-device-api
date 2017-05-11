@@ -211,7 +211,12 @@ app.all("/*", function(req, res, next) {
 		next();
 	}
 
-	alog.log("API", req.method + " : " + req.url);
+	if (typeof(req.session.owner) !== "undefined") {
+		alog.log(owner, req.method + " : " + req.url);
+	} else {
+		alog.log("API", req.method + " : " + req.url);
+	}
+
 
 });
 
@@ -721,7 +726,7 @@ app.post("/api/user/apikey", function(req, res) {
 			"alias": new_api_key_alias
 		};
 
-		console.log("old keys: " + doc.api_keys);
+		console.log("old keys: " + JSON.stringify(doc.api_keys));
 
 		doc.api_keys = keys;
 
@@ -735,7 +740,7 @@ app.post("/api/user/apikey", function(req, res) {
 				if (err) {
 					console.log("/api/user/apikey ERROR:" + err);
 				} else {
-					console.log("Userlib " + doc.owner + "document inserted");
+					console.log(doc.owner + " API Keys updated.");
 					res.end(JSON.stringify({
 						success: true,
 						api_key: new_api_key
