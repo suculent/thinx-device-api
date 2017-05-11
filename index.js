@@ -212,7 +212,9 @@ app.all("/*", function(req, res, next) {
 		next();
 	}
 
-	if (typeof(req.session.owner) !== "undefined") {
+
+	if ((typeof(req.session) !== "undefined") && (typeof(req.session
+			.owner) !== "undefined")) {
 		alog.log(req.session.owner, req.method + " : " + req.url);
 	} else {
 		alog.log("API", req.method + " : " + req.url);
@@ -408,7 +410,8 @@ app.get("/api/user/devices", function(req, res) {
 			var devices = []; // an array by design (needs push), to be encapsulated later
 
 			// Show all devices for admin (if not limited by query)
-			if (req.session.admin === true && typeof(req.body.query) == "undefined") {
+			if (req.session.admin === true && typeof(req.body.query) ==
+				"undefined") {
 				var response = JSON.stringify({
 					devices: devices
 				});
@@ -475,7 +478,8 @@ app.post("/api/device/attach", function(req, res) {
 				success: false,
 				status: "udid_not_found"
 			}));
-			alog.log(owner, "Attempt to attach repository to non-existent device: " +
+			alog.log(owner,
+				"Attempt to attach repository to non-existent device: " +
 				mac);
 			return;
 		}
@@ -1446,7 +1450,8 @@ app.post("/api/user/create", function(req, res) {
 					"'>activate</a> your THiNX account.</html>"
 			});
 
-			console.log("Sending reset e-mail: " + JSON.stringify(activationEmail));
+			console.log("Sending reset e-mail: " + JSON.stringify(
+				activationEmail));
 
 			activationEmail.send(function(err) {
 				if (err) {
@@ -1529,7 +1534,8 @@ app.get("/api/user/password/reset", function(req, res) {
 				}));
 				return;
 			} else {
-				res.redirect('http://rtm.thinx.cloud:80' + '/password.html?reset_key=' +
+				res.redirect('http://rtm.thinx.cloud:80' +
+					'/password.html?reset_key=' +
 					reset_key +
 					'&owner=' + user.owner);
 				return;
@@ -1575,7 +1581,8 @@ app.get("/api/user/activate", function(req, res) {
 			}));
 
 		} else {
-			res.redirect('http://rtm.thinx.cloud:80' + '/password.html?activation=' +
+			res.redirect('http://rtm.thinx.cloud:80' +
+				'/password.html?activation=' +
 				ac_key +
 				'&owner=' + ac_owner);
 			return;
@@ -1961,7 +1968,8 @@ app.post("/device/firmware", function(req, res) {
 	var owner = req.body.owner; // TODO: should be inferred from API Key, not required in request! But API Key is inside user which is a fail and should be stored in redis instead just with owner's secret ID reference.
 
 	console.log("TODO: Validate if SHOULD update device " + mac +
-		" using commit " + commit + " with checksum " + checksum + " and owner: " +
+		" using commit " + commit + " with checksum " + checksum +
+		" and owner: " +
 		owner);
 
 	var success = false;
