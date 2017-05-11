@@ -718,6 +718,10 @@ app.post("/api/user/apikey", function(req, res) {
 			return;
 		}
 
+		if (typeof(doc.api_keys) === "undefined") {
+			doc.api_keys = {};
+		}
+
 		doc.api_keys.push({
 			"key": new_api_key,
 			"hash": sha256(new_api_key),
