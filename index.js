@@ -887,7 +887,6 @@ app.get("/api/user/sources/list", function(req, res) {
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
-	console.log("List sources for owner: " + owner);
 
 	userlib.get(owner, function(err, user) {
 
@@ -1852,8 +1851,6 @@ app.get("/api/user/profile", function(req, res) {
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
-
-	console.log("profile for owner: " + owner);
 
 	userlib.get(owner, function(err, body) {
 
