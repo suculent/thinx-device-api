@@ -40,7 +40,7 @@ var blog = require("./lib/thinx/build");
 var watcher = require("./lib/thinx/repository");
 
 var rdict = {};
-var watched_repos = {};
+var watched_repos = [];
 
 /*
  * Databases
@@ -494,7 +494,7 @@ app.post("/api/device/attach", function(req, res) {
 		});
 
 		if (typeof(watched_repos) === "undefined") {
-			watched_repos = {};
+			watched_repos = [];
 		}
 
 		if (fs.existsSync(repo_path)) {
