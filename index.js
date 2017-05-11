@@ -1210,7 +1210,7 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			return;
 		}
 
-		console.log("user: " + JSON.stingify(user));
+		console.log("user: " + JSON.stringify(user));
 
 		if (typeof(user) === "undefined") {
 			console.log("User " + user.id + " not found.");
