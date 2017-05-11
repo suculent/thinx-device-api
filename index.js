@@ -1126,7 +1126,7 @@ app.post("/api/user/rsakey", function(req, res) {
 		var user = body.rows[0];
 
 		// Fetch complete user
-		userlib.get(user.id, function(error, doc) {
+		userlib.get(user._id, function(error, doc) {
 
 			if (!doc) {
 				console.log("User " + users[index].id + " not found.");
@@ -1167,22 +1167,26 @@ app.post("/api/user/rsakey", function(req, res) {
 
 
 			doc.rsa_keys[new_key_fingerprint] = new_ssh_key;
-			delete doc._rev;
 
-			userlib.insert(doc, doc._id, function(err, body, header) {
-				if (err) {
-					console.log("/api/user/rsakey ERROR:" + err);
-					res.end(JSON.stringify({
-						success: false,
-						status: "key-not-added"
-					}));
-				} else {
-					console.log("RSA Key successfully added.");
-					res.end(JSON.stringify({
-						success: true,
-						fingerprint: new_key_fingerprint
-					}));
-				}
+			userlib.destroy(doc._id, doc._rev, function(err) {
+				delete doc._rev;
+
+
+				userlib.insert(doc, doc._id, function(err, body, header) {
+					if (err) {
+						console.log("/api/user/rsakey ERROR:" + err);
+						res.end(JSON.stringify({
+							success: false,
+							status: "key-not-added"
+						}));
+					} else {
+						console.log("RSA Key successfully added.");
+						res.end(JSON.stringify({
+							success: true,
+							fingerprint: new_key_fingerprint
+						}));
+					}
+				});
 			});
 		});
 	});
