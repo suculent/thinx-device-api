@@ -2891,7 +2891,7 @@ app.get("/api/user/logs/audit", function(req, res) {
 			return;
 		}
 
-		console.log(JSON.stringify(body));
+		console.log("alog.fetch: " + JSON.stringify(body));
 
 		res.end(JSON.stringify({
 			success: true,
