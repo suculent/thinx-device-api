@@ -14,6 +14,9 @@
 		"owners_by_id": {
 			"map": "function (doc) { if(doc.owner) { emit (doc); } }"
 		},
+		"owners_by_docid": {
+			"map": "function (doc) { if(doc.id) { emit (doc); } }"
+		},
 		"owners_by_resetkey": {
 			"map": "function (doc) { if(doc.reset_key) { emit (doc.reset_key, doc.owner, doc.username); } }"
 		},

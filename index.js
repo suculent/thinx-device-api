@@ -1109,7 +1109,7 @@ app.post("/api/user/rsakey", function(req, res) {
 	var new_key_body = req.body.key;
 	var new_key_fingerprint = fingerprint(new_key_body);
 
-	userlib.view("users", "owners_by_id", {
+	userlib.view("users", "owners_by_docid", {
 		"key": owner,
 		"include_docs": true
 	}, function(err, body) {
@@ -1124,6 +1124,8 @@ app.post("/api/user/rsakey", function(req, res) {
 		}
 
 		var user = body.rows[0];
+
+		console.log(JSON.stringify(user));
 
 		// Fetch complete user
 		userlib.get(user._id, function(error, doc) {
