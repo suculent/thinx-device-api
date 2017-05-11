@@ -419,7 +419,7 @@ app.get("/api/user/devices", function(req, res) {
 			for (var row in rows) {
 				var rowData = rows[row];
 				// Compare owner to device owner
-				if (owner.indexof(rowData.key) != -1) {
+				if (owner.indexOf(rowData.key) != -1) {
 					devices.push(rowData);
 				}
 			}
