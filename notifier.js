@@ -214,7 +214,7 @@ devicelib.get(mac, function(err, doc) {
       }
     });
 
-    // TODO: Update current build version in managed_users.sources
+    // TODO: Update current build version in managed_users.repos
 
 
     // Select targets
