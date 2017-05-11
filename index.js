@@ -572,20 +572,22 @@ app.post("/api/device/detach", function(req, res) {
 		doc.source = null;
 		delete doc._rev;
 
-		devicelib.insert(doc, doc._id, function(err, body, header) {
-			if (err) {
-				console.log("/api/device/detach ERROR:" + err);
-				res.end(JSON.stringify({
-					success: false,
-					status: "detach_failed"
-				}));
-				return;
-			} else {
-				res.end(JSON.stringify({
-					success: true,
-					attached: doc.source
-				}));
-			}
+		devicelib.destroy(doc._id, doc._rev, function(err) {
+			devicelib.insert(doc, doc._id, function(err, body, header) {
+				if (err) {
+					console.log("/api/device/detach ERROR:" + err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "detach_failed"
+					}));
+					return;
+				} else {
+					res.end(JSON.stringify({
+						success: true,
+						attached: doc.source
+					}));
+				}
+			});
 		});
 	});
 });
@@ -650,22 +652,25 @@ app.post("/api/device/revoke", function(req, res) {
 
 		doc.source = null;
 		delete doc._rev;
-		if (err) {
-			console.log("/api/device/revoke ERROR:" + err);
-			res.end(JSON.stringify({
-				success: false,
-				status: "revocation_failed"
-			}));
-			return;
-		} else {
-			var logmessage = "Revocation succeed: " + doc.alias +
-				" (${doc.udid})";
-			alog.log(owner, logmessage);
-			res.end(JSON.stringify({
-				success: true,
-				revoked: doc.udid
-			}));
-		}
+
+		devicelib.destroy(doc._id, doc._rev, function(err) {
+			if (err) {
+				console.log("/api/device/revoke ERROR:" + err);
+				res.end(JSON.stringify({
+					success: false,
+					status: "revocation_failed"
+				}));
+				return;
+			} else {
+				var logmessage = "Revocation succeed: " + doc.alias +
+					" (${doc.udid})";
+				alog.log(owner, logmessage);
+				res.end(JSON.stringify({
+					success: true,
+					revoked: doc.udid
+				}));
+			}
+		});
 	});
 });
 
