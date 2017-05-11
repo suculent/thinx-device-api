@@ -323,6 +323,15 @@ app.post("/api/user/profile", function(req, res) {
 			return;
 		}
 
+		client.get("ak:" + user._id, function(err, redis_keys) {
+			if ((typeof(redis_keys) !== "undefined") || (redis_keys !== null)) {
+				console.log("[WARNING-NEW]: fetched redis_keys" + JSON.parse(
+					redis_keys));
+			} else {
+				console.log("[WARNING-NEW]: fetched no redis_keys");
+			}
+		});
+
 		// Search API key by hash
 		var user = body.rows[0].doc;
 		var keys = user.api_keys; // array
@@ -557,6 +566,8 @@ app.post("/api/device/detach", function(req, res) {
 			return;
 		}
 
+		console.log(JSON.stringify(body.rows));
+
 		var doc = body.rows[0].doc;
 
 		console.log("Detaching repository from device: " + JSON.stringify(doc.hash));
@@ -737,11 +748,10 @@ app.post("/api/user/apikey", function(req, res) {
 			"alias": new_api_key_alias
 		};
 
-		console.log("old keys: " + JSON.stringify(doc.api_keys));
+		console.log("[WARNING-NEW]: Storing key to redis: ");
+		client.set("ak:" + doc._id, JSON.stringify(keys));
 
 		doc.api_keys = keys;
-
-		console.log("new keys: " + JSON.stringify(keys));
 
 		userlib.destroy(doc._id, doc._rev, function(err) {
 
@@ -869,6 +879,15 @@ app.get("/api/user/apikey/list", function(req, res) {
 			return;
 		}
 
+		client.get("ak:" + user._id, function(err, redis_keys) {
+			if ((typeof(redis_keys) !== "undefined") || (redis_keys !== null)) {
+				console.log("[WARNING-NEW]: fetched redis_keys" + JSON.parse(
+					redis_keys));
+			} else {
+				console.log("[WARNING-NEW]: fetched no redis_keys");
+			}
+		});
+
 		var exportedKeys = [];
 		for (var index in user.api_keys) {
 			console.log("K: " + JSON.stringify(user.api_keys[index]));
@@ -959,10 +978,10 @@ app.post("/api/user/source", function(req, res) {
 		console.log("body:" + JSON.stringify(body));
 
 		var user = body;
-		var doc = user.doc;
+		var doc = body;
 
 		if (!doc) {
-			console.log("User " + users[index].id + " not found.");
+			console.log("User " + owner + " not found.");
 			res.end(JSON.stringify({
 				success: false,
 				status: "user_not_found"
@@ -981,22 +1000,26 @@ app.post("/api/user/source", function(req, res) {
 		}
 
 		doc.repos.push(new_source);
-		delete doc._rev;
 
-		userlib.insert(doc, doc._id, function(err, body, header) {
-			if (err) {
-				console.log("/api/user/source ERROR:" + err);
-				res.end(JSON.stringify({
-					success: false,
-					status: "key-not-added"
-				}));
-				return;
-			} else {
-				res.end(JSON.stringify({
-					success: true,
-					source: new_source
-				}));
-			}
+		userlib.destroy(doc._id, doc._rev, function(err) {
+
+			delete doc._rev;
+
+			userlib.insert(doc, doc._id, function(err, body, header) {
+				if (err) {
+					console.log("/api/user/source ERROR:" + err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "key-not-added"
+					}));
+					return;
+				} else {
+					res.end(JSON.stringify({
+						success: true,
+						source: new_source
+					}));
+				}
+			});
 		});
 	});
 });
