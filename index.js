@@ -31,6 +31,7 @@ var fs = require("fs");
 var gutil = require('gulp-util');
 var request = require("request");
 var mkdirp = require('mkdirp');
+var path = require('path');
 
 var deploy = require("./lib/thinx/deployment");
 var v = require("./lib/thinx/version");
@@ -489,10 +490,10 @@ app.post("/api/device/attach", function(req, res) {
 
 		mkdirp(repo_path, function(err) {
 			if (err) console.error(err);
-			else console.log(repo_path + 'created.');
+			else console.log(repo_path + ' created.');
 		});
 
-		if (fs.lstatSync(repo_path).isDirectory()) {
+		if (path.existsSync(repo_path)) {
 			watcher.watchRepository(repo_path, watcher_callback());
 			watched_repos.push(repo_path);
 		} else {
@@ -556,12 +557,11 @@ app.post("/api/device/detach", function(req, res) {
 		console.log("Detaching repository from device: " + JSON.stringify(doc.hash));
 
 		var repo_path = deploy.pathForDevice(doc.owner, doc.device_id);
-		console.log("repo_path: " + owner);
-		if (fs.lstatSync(path).isDirectory()) {
-			watcher.unwatchRepository(path);
-			watched_repos.splice(watched_repos.indexOf(path));
+		console.log("repo_path: " + repo_path);
+		if (path.existsSync(repo_path)) {
+			watcher.unwatchRepository(repo_path);
+			watched_repos.splice(watched_repos.indexOf(repo_path));
 		}
-
 
 		doc.source = null;
 		delete doc._rev;
