@@ -799,7 +799,7 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 		var keys = user.api_keys; // array
 		var api_key_index = null;
 		var api_key = null;
-		console.log("keys: " + api_keys);
+		console.log("keys: " + keys);
 		for (var index in keys) {
 			var internal_hash = keys[index].hash;
 			console.log("ihash: " + internal_hash + " ahash: " + api_key_hash);
