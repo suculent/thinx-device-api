@@ -2728,15 +2728,16 @@ app.post("/api/build", function(req, res) {
 		var mac = null;
 
 		for (var row in rows) {
-			var device = rows[row].doc;
-			var db_udid_hash = rows[row].device_id;
+			device = rows[row].doc;
+			var db_udid = device.device_id;
 
-			console.log("Searching owner in " + JSON.stringify(device));
+			console.log(JSON.stringify(device));
 
 			var device_owner = device.owner;
-
+			console.log("Searching " + owner + " in " + device_owner);
 			if (device_owner.indexOf(owner) !== -1) {
-				if (device_udid_hash.indexOf(db_udid_hash) != -1) {
+				console.log("Searching " + device_udid_hash + " in " + db_udid);
+				if (device_udid_hash.indexOf(db_udid) != -1) {
 					udid = device.device_id; // target device ID
 					mac = device.mac; // target device ID mac, will deprecate
 					break;
@@ -2745,7 +2746,7 @@ app.post("/api/build", function(req, res) {
 			// will deprecate when all devices will be re-registered using owner and not username
 			if (typeof(username) !== "undefined") {
 				if (username.indexOf(device.owner) !== -1) {
-					if (device_udid_hash.indexOf(db_udid_hash) != -1) {
+					if (device_udid_hash.indexOf(db_udid) != -1) {
 						udid = device.device_id; // target device ID hash
 						mac = device.mac; // target device ID mac, will deprecate
 						break;
