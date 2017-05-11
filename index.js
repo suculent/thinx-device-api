@@ -1113,7 +1113,7 @@ app.post("/api/user/rsakey", function(req, res) {
 	var new_key_body = req.body.key;
 	var new_key_fingerprint = fingerprint(new_key_body);
 
-	userlib.get(owner, function(err, body) {
+	userlib.get(owner, function(err, doc) {
 
 		if (err) {
 			console.log(err);
@@ -1124,17 +1124,9 @@ app.post("/api/user/rsakey", function(req, res) {
 			return;
 		}
 
-		var doc = body.rows[0];
+		console.log("body: " + JSON.stringify(doc));
 
 		console.log(JSON.stringify(doc));
-
-		// Fetch complete user
-		//userlib.get(owner, function(error, doc) {
-
-		if (err) {
-			console.log("userlib.get: " + err);
-			return;
-		}
 
 		if (!doc) {
 			console.log("User " + owner + " not found.");
