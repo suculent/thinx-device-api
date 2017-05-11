@@ -2726,7 +2726,8 @@ app.post("/api/build", function(req, res) {
 		for (var row in rows) {
 			var rowData = rows[row].value;
 			var db_udid_hash = rowData.hash;
-			if (owner.indexOf(rowData.owner) !== -1) {
+			console.log("Searching owner in " + rows[row]);
+			if (rowData.owner.indexOf(owner) !== -1) {
 				if (device_udid_hash.indexOf(db_udid_hash) != -1) {
 					udid = rowData.hash; // target device ID hash (FIXME: should be just udid)
 					mac = rowData.mac; // target device ID mac, will deprecate
@@ -2734,11 +2735,13 @@ app.post("/api/build", function(req, res) {
 				}
 			}
 			// will deprecate when all devices will be re-registered using owner and not username
-			if (username.indexOf(rowData.owner) !== -1) {
-				if (device_udid_hash.indexOf(db_udid_hash) != -1) {
-					udid = rowData.hash; // target device ID hash
-					mac = rowData.mac; // target device ID mac, will deprecate
-					break;
+			if (typeof(username) !== "undefined") {
+				if (username.indexOf(rowData.owner) !== -1) {
+					if (device_udid_hash.indexOf(db_udid_hash) != -1) {
+						udid = rowData.hash; // target device ID hash
+						mac = rowData.mac; // target device ID mac, will deprecate
+						break;
+					}
 				}
 			}
 		}
