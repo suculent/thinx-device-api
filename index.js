@@ -493,7 +493,7 @@ app.post("/api/device/attach", function(req, res) {
 			else console.log(repo_path + ' created.');
 		});
 
-		if (path.existsSync(repo_path)) {
+		if (fs.existsSync(repo_path)) {
 			watcher.watchRepository(repo_path, watcher_callback());
 			watched_repos.push(repo_path);
 		} else {
@@ -558,7 +558,7 @@ app.post("/api/device/detach", function(req, res) {
 
 		var repo_path = deploy.pathForDevice(doc.owner, doc.device_id);
 		console.log("repo_path: " + repo_path);
-		if (path.existsSync(repo_path)) {
+		if (fs.existsSync(repo_path)) {
 			watcher.unwatchRepository(repo_path);
 			watched_repos.splice(watched_repos.indexOf(repo_path));
 		}
