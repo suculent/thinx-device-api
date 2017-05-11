@@ -212,7 +212,7 @@ app.all("/*", function(req, res, next) {
 	}
 
 	if (typeof(req.session.owner) !== "undefined") {
-		alog.log(owner, req.method + " : " + req.url);
+		alog.log(req.session.owner, req.method + " : " + req.url);
 	} else {
 		alog.log("API", req.method + " : " + req.url);
 	}
