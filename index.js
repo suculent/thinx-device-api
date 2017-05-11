@@ -507,20 +507,22 @@ app.post("/api/device/attach", function(req, res) {
 		doc.source = alias;
 		delete doc._rev;
 
-		devicelib.insert(doc, doc._id, function(err, body, header) {
-			if (err) {
-				console.log("/api/device/attach ERROR:" + err);
-				res.end(JSON.stringify({
-					success: false,
-					status: "attach_failed"
-				}));
-				return;
-			} else {
-				res.end(JSON.stringify({
-					success: true,
-					attached: alias
-				}));
-			}
+		devicelib.destroy(doc._id, doc._rev, function(err) {
+			devicelib.insert(doc, doc._id, function(err, body, header) {
+				if (err) {
+					console.log("/api/device/attach ERROR:" + err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "attach_failed"
+					}));
+					return;
+				} else {
+					res.end(JSON.stringify({
+						success: true,
+						attached: alias
+					}));
+				}
+			});
 		});
 	});
 });
