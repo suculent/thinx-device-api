@@ -2905,7 +2905,18 @@ app.get("/api/user/logs/build/list", function(req, res) {
 	if (!validateSession(req, res)) return;
 
 	var owner = req.session.owner;
-	var username = req.session.username;
+
+	if (typeof(owner) === "undefined") {
+		if (err) {
+			console.log(err);
+			res.end(JSON.stringify({
+				success: false,
+				status: "session_failed",
+				error: err
+			}));
+			return;
+		}
+	}
 
 	blog.list(owner, function(err, body) {
 
