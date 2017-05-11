@@ -727,18 +727,21 @@ app.post("/api/user/apikey", function(req, res) {
 
 		console.log("new keys: " + JSON.stringify(keys));
 
-		delete doc._rev;
+		userlib.destroy(doc._id, doc._rev, function(err) {
 
-		userlib.insert(doc, doc._id, function(err, body, header) {
-			if (err) {
-				console.log("/api/user/apikey ERROR:" + err);
-			} else {
-				console.log("Userlib " + doc.owner + "document inserted");
-				res.end(JSON.stringify({
-					success: true,
-					api_key: new_api_key
-				}));
-			}
+			delete doc._rev;
+
+			userlib.insert(doc, doc._id, function(err, body, header) {
+				if (err) {
+					console.log("/api/user/apikey ERROR:" + err);
+				} else {
+					console.log("Userlib " + doc.owner + "document inserted");
+					res.end(JSON.stringify({
+						success: true,
+						api_key: new_api_key
+					}));
+				}
+			});
 		});
 	});
 });
