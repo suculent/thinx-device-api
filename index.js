@@ -3208,7 +3208,7 @@ var watcher_callback = function(result) {
 
 var initWatcher = function(watcher) {
 
-	console.log("Starting repository watcher...");
+	console.log("» Starting GIT watcher...");
 
 	devicelib.view("devicelib", "watcher_view", {
 		"include_docs": true
@@ -3223,9 +3223,7 @@ var initWatcher = function(watcher) {
 			var owner = body.rows[index].doc.owner;
 			var device_id = body.rows[index].doc.device_id;
 			var path = deploy.pathForDevice(owner, device_id);
-
-			console.log("Watcher checks path " + path);
-
+			//console.log("Watcher checks path " + path);
 			if (!fs.existsSync(path)) {
 				continue;
 			} else {
@@ -3241,8 +3239,6 @@ var initWatcher = function(watcher) {
 	});
 };
 
-console.log("Starting Repository Watcher...");
-
 initWatcher(watcher);
 
 //
@@ -3250,20 +3246,16 @@ initWatcher(watcher);
 //
 
 var database_compactor = function() {
-	console.log("Running database compact jobs...");
+	console.log("» Running database compact jobs...");
 	nano.db.compact("builds");
 	nano.db.compact("deviceslib");
 	nano.db.compact("logs");
 	nano.db.compact("users");
-	console.log("Database compact jobs completed.");
+	console.log("» Database compact jobs completed.");
 };
 
-console.log("Starting Database Compact Timer...");
-
 var COMPACT_TIMEOUT = 30000;
-
-var database_compact_timer = setTimeout(database_compactor(), this.COMPACT_TIMEOUT);
-
+var database_compact_timer = setTimeout(database_compactor(), COMPACT_TIMEOUT);
 
 // Prevent crashes on uncaught exceptions
 
