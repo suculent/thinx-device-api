@@ -706,7 +706,7 @@ app.post("/api/user/apikey", function(req, res) {
 			return;
 		}
 
-		console.log("/api/use/apikey doc:" + JSON.stringify(doc));
+		//console.log("/api/use/apikey doc:" + JSON.stringify(doc));
 
 		var keys = [];
 		if (typeof(doc.api_keys) === "undefined") {
@@ -715,11 +715,11 @@ app.post("/api/user/apikey", function(req, res) {
 			keys = doc.api_keys;
 		}
 
-		keys.push({
+		keys[keys.length] = {
 			"key": new_api_key,
 			"hash": sha256(new_api_key),
 			"alias": new_api_key_alias
-		});
+		};
 
 		console.log("old keys: " + doc.api_keys);
 
