@@ -487,16 +487,16 @@ app.post("/api/device/attach", function(req, res) {
 		var repo_path = deploy.pathForDevice(doc.owner, doc.device_id);
 		console.log("repo_path: " + repo_path);
 
-		mkdirp(user_path, function(err) {
+		mkdirp(repo_path, function(err) {
 			if (err) console.error(err);
 			else console.log(repo_path + 'created.');
 		});
 
-		if (fs.lstatSync(path).isDirectory()) {
-			watcher.watchRepository(path, watcher_callback());
-			watched_repos.push(path);
+		if (fs.lstatSync(repo_path).isDirectory()) {
+			watcher.watchRepository(repo_path, watcher_callback());
+			watched_repos.push(repo_path);
 		} else {
-			console.log(path + " is not a directory.");
+			console.log(repo_path + " is not a directory.");
 		}
 
 		doc.source = alias;
