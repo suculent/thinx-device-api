@@ -2836,7 +2836,7 @@ function buildCommand(build_id, owner, git, udid, dryrun) {
 
 	console.log("Executing build chain...");
 
-	blog.log(build_id, owner, udid, "Starting build...");
+
 
 	var exec = require("child_process").exec;
 	CMD = "./builder --owner=" + owner + " --udid=" + udid + " --git=" +
@@ -2854,9 +2854,19 @@ function buildCommand(build_id, owner, git, udid, dryrun) {
 			console.error(build_id + " : " + stdout);
 			return;
 		}
+		if (stderr) {
+			blog.log(build_id, owner, udid, stderr);
+			console.error(stderr);
+		}
 		blog.log(build_id, owner, udid, "Running build...");
 		console.log(build_id + " : " + stdout);
 	});
+
+	console.log("WARNING: sexec-test only...");
+
+	var sexec = require("sync-exec");
+	var temp = sexec(CMD).stdout; // .replace("\n", "");
+	console.log("sexec-stdout: " + temp);
 }
 
 /*
