@@ -821,24 +821,25 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 			return;
 		}
 
-		console.log("Creating new document...");
-
 		user.last_update = new Date();
-		delete user._rev;
 
-		userlib.insert(user, user._id, function(err) {
-			if (err) {
-				console.log(err);
-				res.end(JSON.stringify({
-					success: false,
-					status: "revocation_failed"
-				}));
-			} else {
-				res.end(JSON.stringify({
-					revoked: api_key,
-					success: true
-				}));
-			}
+		userlib.destroy(user._id, user._rev, function(err) {
+			delete user._rev;
+
+			userlib.insert(user, user._id, function(err) {
+				if (err) {
+					console.log(err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "revocation_failed"
+					}));
+				} else {
+					res.end(JSON.stringify({
+						revoked: api_key,
+						success: true
+					}));
+				}
+			});
 		});
 	});
 });
