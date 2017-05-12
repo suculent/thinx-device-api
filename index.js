@@ -504,9 +504,7 @@ app.post("/api/device/detach", function(req, res) {
 
 		var doc = body.rows[0].value;
 
-		console.log(JSON.stringify(doc));
-
-		console.log("Detaching repository from device: " + JSON.stringify(doc.hash));
+		console.log("Detaching repository from device: " + JSON.stringify(doc.device_id));
 
 		var repo_path = deploy.pathForDevice(doc.owner, doc.device_id);
 		console.log("repo_path: " + repo_path);
@@ -3222,9 +3220,15 @@ var watcher_callback = function(result) {
 	if (typeof(result) !== "undefined") {
 		console.log("watcher_callback result: " + JSON.stringify(result));
 		//watched_repos.splice(watched_repos.indexOf(path));
-		console.log(
-			"TODO: Commence re-build (will notify user but needs to get all required user data first (owner/device is in path)"
-		);
+		if (result === false) {
+			console.log(
+				"No change detected on repository so far."
+			);
+		} else {
+			console.log(
+				"CHANGE DETECTED! - TODO: Commence re-build (will notify user but needs to get all required user data first (owner/device is in path)"
+			);
+		}
 	} else {
 		console.log("watcher_callback: no result");
 	}
