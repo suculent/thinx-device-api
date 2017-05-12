@@ -2466,7 +2466,7 @@ app.post("/api/device/edit", function(req, res) {
 			return;
 		}
 
-		//console.log("body: " + JSON.stringify(body));
+		console.log("searching: " + udid);
 
 		var device = null;
 
@@ -2474,6 +2474,7 @@ app.post("/api/device/edit", function(req, res) {
 			var dev = body.rows[dindex];
 			console.log("Comparing dev" + JSON.stringify(dev));
 			if (udid.indexOf(dev.device_id) != -1) {
+				console.log("Found dev" + JSON.stringify(dev));
 				device = dev;
 				break;
 			}
@@ -2487,7 +2488,7 @@ app.post("/api/device/edit", function(req, res) {
 			return;
 		}
 
-		var doc = device.doc;
+		var doc = device;
 
 		console.log("doc: " + JSON.stringify(doc));
 
