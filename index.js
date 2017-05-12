@@ -2446,7 +2446,7 @@ app.post("/api/device/edit", function(req, res) {
 
 	console.log("Change with udid:" + udid);
 
-	devicelib.view("devicelib", "devices_by_udid", {
+	devicelib.view("devicelib", "devices_by_device_id", {
 		"key": udid,
 		"include_docs": true
 	}, function(err, body) {
@@ -2461,6 +2461,7 @@ app.post("/api/device/edit", function(req, res) {
 		}
 
 		if (body.rows.length === 0) {
+			console.log(JSON.stringify(body));
 			res.end(JSON.stringify({
 				success: false,
 				status: "no_such_device"
