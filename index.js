@@ -2446,10 +2446,7 @@ app.post("/api/device/edit", function(req, res) {
 
 	console.log("Change with udid:" + udid);
 
-	devicelib.view("devicelib", "devices_by_device_id", {
-		"key": udid,
-		"include_docs": true
-	}, function(err, body) {
+	devicelib.view("devicelib", "devices_by_device_id", function(err, body) {
 
 		if (err) {
 			console.log(err);
@@ -2471,8 +2468,27 @@ app.post("/api/device/edit", function(req, res) {
 
 		console.log("body: " + JSON.stringify(body));
 
-		var device = body.rows[0];
+		var device = null;
+
+		for (var dindex in body.rows) {
+			var dev = body.rows[dindex];
+			if (udid.indexOf(dev.device_id) != -1) {
+				device = dev;
+				break;
+			}
+		}
+
+		if (device === null) {
+			res.end(JSON.stringify({
+				success: false,
+				status: "no_such_device"
+			}));
+			return;
+		}
+
 		var doc = device.doc;
+
+		console.log("doc: " + JSON.stringify(body));
 
 		console.log("Editing device: " +
 			JSON.stringify(doc.alias));
