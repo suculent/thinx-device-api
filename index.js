@@ -2466,12 +2466,13 @@ app.post("/api/device/edit", function(req, res) {
 			return;
 		}
 
-		console.log("body: " + JSON.stringify(body));
+		//console.log("body: " + JSON.stringify(body));
 
 		var device = null;
 
 		for (var dindex in body.rows) {
 			var dev = body.rows[dindex];
+			console.log("Comparing dev" + JSON.stringify(dev));
 			if (udid.indexOf(dev.device_id) != -1) {
 				device = dev;
 				break;
@@ -2488,7 +2489,7 @@ app.post("/api/device/edit", function(req, res) {
 
 		var doc = device.doc;
 
-		console.log("doc: " + JSON.stringify(body));
+		console.log("doc: " + JSON.stringify(doc));
 
 		console.log("Editing device: " +
 			JSON.stringify(doc.alias));
