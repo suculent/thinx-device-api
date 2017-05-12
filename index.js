@@ -2439,7 +2439,8 @@ app.post("/api/device/edit", function(req, res) {
 	var changes = req.body.changes;
 
 	console.log(JSON.stringify(changes));
-	var change = changes[0]; // TODO: support bulk operations
+
+	var change = changes; // TODO: support bulk operations
 
 	var udid = change.device_id;
 
