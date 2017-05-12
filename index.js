@@ -1009,23 +1009,26 @@ app.post("/api/user/source/revoke", function(req, res) {
 			}
 		}
 
-		doc.repos = sources;
-		delete doc._rev;
+		userlib.destroy(doc._id, doc._rev, function(err) {
 
-		userlib.insert(doc, doc._id, function(err, body, header) {
-			if (err) {
-				console.log("/api/user/source ERROR:" + err);
-				res.end(JSON.stringify({
-					success: false,
-					status: "source_not_removed"
-				}));
-				return;
-			} else {
-				res.end(JSON.stringify({
-					success: true,
-					alias: alias
-				}));
-			}
+			doc.repos = sources;
+			delete doc._rev;
+
+			userlib.insert(doc, doc._id, function(err, body, header) {
+				if (err) {
+					console.log("/api/user/source ERROR:" + err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "source_not_removed"
+					}));
+					return;
+				} else {
+					res.end(JSON.stringify({
+						success: true,
+						alias: alias
+					}));
+				}
+			});
 		});
 	});
 });
@@ -2440,7 +2443,7 @@ app.post("/api/device/edit", function(req, res) {
 
 	var udid = change.device_id;
 
-	console.log("Change wit udid:" + udid);
+	console.log("Change with udid:" + udid);
 
 	devicelib.view("devicelib", "devices_by_udid", {
 		"key": udid,
@@ -2463,6 +2466,8 @@ app.post("/api/device/edit", function(req, res) {
 			}));
 			return;
 		}
+
+		console.log("body: " + JSON.stringify(body));
 
 		var device = body.rows[0];
 		var doc = device.doc;
