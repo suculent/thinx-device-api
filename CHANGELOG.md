@@ -17,6 +17,8 @@
 
 ### Last week
 
+12/5/2017 - 1.4.726: added HTTPS-endpoint for proxy
+
 11/5/2017 - 1.4.722: big laundry done; added HTTPS-proxy; build progress tracking, prototyping Redis API Key storage
 
 10/5/2017 - fixing regressions and bugs
