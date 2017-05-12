@@ -3176,7 +3176,8 @@ console.log("");
 console.log("-=[ ☢ " + product + " v" + version + " rev. " + app.version() +
 	" ☢ ]=-");
 console.log("");
-console.log("» Started on port " + serverPort " (HTTP) and " + (serverPort + 1) +
+console.log("» Started on port " + serverPort + " (HTTP) and " + (serverPort +
+		1) +
 	" (HTTPS)");
 //});
 
@@ -3246,7 +3247,7 @@ var database_compactor = function() {
 };
 
 var COMPACT_TIMEOUT = 30000;
-var database_compact_timer = setTimeout(database_compactor(), COMPACT_TIMEOUT);
+var database_compact_timer = setTimeout(database_compactor, COMPACT_TIMEOUT);
 
 // Prevent crashes on uncaught exceptions
 
