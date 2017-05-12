@@ -502,9 +502,9 @@ app.post("/api/device/detach", function(req, res) {
 			return;
 		}
 
-		console.log(JSON.stringify(body.rows));
+		var doc = body.rows[0].value.doc;
 
-		var doc = body.rows[0].doc;
+		console.log(JSON.stringify(doc));
 
 		console.log("Detaching repository from device: " + JSON.stringify(doc.hash));
 
