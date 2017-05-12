@@ -290,6 +290,15 @@ app.post("/api/user/profile", function(req, res) {
 
 		userlib.destroy(doc._id, doc._rev, function(err) {
 
+			if (err) {
+				console.log(err);
+				res.end(JSON.stringify({
+					success: false,
+					status: "destroy_error"
+				}));
+				return;
+			}
+
 			delete doc._rev;
 
 			userlib.insert(doc, doc._id, function(err, body, header) {
