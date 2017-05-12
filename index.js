@@ -36,6 +36,7 @@ var v = require("./lib/thinx/version");
 var alog = require("./lib/thinx/audit");
 var blog = require("./lib/thinx/build");
 var watcher = require("./lib/thinx/repository");
+var apikey = require("./lib/thinx/apikey");
 
 var rdict = {};
 var watched_repos = [];
