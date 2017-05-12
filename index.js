@@ -219,8 +219,6 @@ app.all("/*", function(req, res, next) {
 	} else {
 		console.log("API", req.method + " : " + req.url);
 	}
-
-
 });
 
 /*
@@ -288,11 +286,13 @@ app.post("/api/user/profile", function(req, res) {
 
 		doc[update_key] = update_value;
 
+		console.log("destriydoc: " + JSON.stringify(doc));
+
 		userlib.destroy(doc._id, doc._rev, function(err) {
 
 			delete doc._rev;
 
-			userlib.insert(owner, doc._id, function(err) {
+			userlib.insert(doc, doc._id, function(err, body, header) {
 
 				if (err) {
 					console.log(err);
@@ -309,7 +309,6 @@ app.post("/api/user/profile", function(req, res) {
 						update_key: update_value
 					}));
 				}
-
 			});
 		});
 	});
@@ -1758,48 +1757,51 @@ app.post("/api/user/password/reset", function(req, res) {
 		console.log("Creating new reset-key...");
 		user.reset_key = sha256(new Date().toString());
 
-		delete user._rev;
+		userlib.destroy(user._id, user._rev, function(err) {
 
-		userlib.insert(user, user.owner, function(err, body, header) {
+			delete user._rev;
 
-			if (err) {
-				console.log(err);
-				res.end(JSON.stringify({
-					success: false,
-					status: "insert_failed"
-				}));
-				return;
-			}
+			userlib.insert(user, user.owner, function(err, body, header) {
 
-			console.log("Resetting password for user: " + JSON.stringify(user));
-
-			var resetEmail = new Emailer({
-				bodyType: "html",
-				from: "api@thinx.cloud",
-				to: email,
-				subject: "Password reset",
-				body: "<!DOCTYPE html>Hello " + user.first_name + " " + user.last_name +
-					". Someone has requested to <a href='http://rtm.thinx.cloud:7442/api/user/password/reset?owner=" +
-					user.owner + "&reset_key=" + user.reset_key +
-					"'>reset</a> your THiNX password.</html>"
-			});
-
-			console.log("Sending reset e-mail: " + JSON.stringify(resetEmail));
-
-			resetEmail.send(function(err) {
 				if (err) {
 					console.log(err);
 					res.end(JSON.stringify({
 						success: false,
-						status: err
+						status: "insert_failed"
 					}));
-				} else {
-					console.log("Reset e-mail sent.");
-					res.end(JSON.stringify({
-						success: true,
-						status: "email_sent"
-					}));
+					return;
 				}
+
+				console.log("Resetting password for user: " + JSON.stringify(user));
+
+				var resetEmail = new Emailer({
+					bodyType: "html",
+					from: "api@thinx.cloud",
+					to: email,
+					subject: "Password reset",
+					body: "<!DOCTYPE html>Hello " + user.first_name + " " + user.last_name +
+						". Someone has requested to <a href='http://rtm.thinx.cloud:7442/api/user/password/reset?owner=" +
+						user.owner + "&reset_key=" + user.reset_key +
+						"'>reset</a> your THiNX password.</html>"
+				});
+
+				console.log("Sending reset e-mail: " + JSON.stringify(resetEmail));
+
+				resetEmail.send(function(err) {
+					if (err) {
+						console.log(err);
+						res.end(JSON.stringify({
+							success: false,
+							status: err
+						}));
+					} else {
+						console.log("Reset e-mail sent.");
+						res.end(JSON.stringify({
+							success: true,
+							status: "email_sent"
+						}));
+					}
+				});
 			});
 			// Calling page already displays "Relax. You reset link is on its way."
 		}); // insert
