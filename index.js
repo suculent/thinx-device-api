@@ -2521,21 +2521,26 @@ app.post("/api/device/edit", function(req, res) {
 					JSON.stringify(doc.avatar) + " to " + change.avatar);
 			}
 
-			// Create device document with new alias
-			devicelib.insert(doc, doc._id, function(err, body, header) {
-				if (err) {
-					console.log("/api/device/edit ERROR:" + err);
-					res.end(JSON.stringify({
-						success: false,
-						status: "device_not_changed"
-					}));
-					return;
-				} else {
-					res.end(JSON.stringify({
-						success: true,
-						change: change
-					}));
-				}
+			devicelib.destroy(doc._id, doc._rev, function(err) {
+
+				delete doc._rev;
+
+				// Create device document with new alias
+				devicelib.insert(doc, doc._id, function(err, body, header) {
+					if (err) {
+						console.log("/api/device/edit ERROR:" + err);
+						res.end(JSON.stringify({
+							success: false,
+							status: "device_not_changed"
+						}));
+						return;
+					} else {
+						res.end(JSON.stringify({
+							success: true,
+							change: change
+						}));
+					}
+				});
 			});
 		});
 	});
