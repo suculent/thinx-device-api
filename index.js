@@ -502,7 +502,7 @@ app.post("/api/device/detach", function(req, res) {
 			return;
 		}
 
-		var doc = body.rows[0].value.doc;
+		var doc = body.rows[0].value;
 
 		console.log(JSON.stringify(doc));
 
