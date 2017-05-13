@@ -2177,8 +2177,6 @@ app.post("/device/register", function(req, res) {
 		"include_docs": true // might be useless
 	}, function(err, body) {
 
-		var isNew = true;
-
 		if (err) {
 			console.log("Error: " + err.toString());
 			req.session.destroy(function(err) {
@@ -2270,7 +2268,7 @@ app.post("/device/register", function(req, res) {
 			checksum = reg.checksum;
 		}
 
-		var udid = uuidV1(); // is returned to device which should immediately take over this value instead of mac for new registration
+		var udid; // is returned to device which should immediately take over this value instead of mac for new registration
 
 		if (typeof(reg.device_id) !== "undefined") {
 			udid = reg.device_id; // overridden
@@ -2304,11 +2302,6 @@ app.post("/device/register", function(req, res) {
 				")");
 			reg.owner = known_owner;
 			owner = known_owner; // should force update in device library
-		}
-
-		// Will deprecate.
-		if (udid !== null) {
-			reg.device_id = udid;
 		}
 
 		console.log("Device firmware: " + fw);
@@ -2383,11 +2376,10 @@ app.post("/device/register", function(req, res) {
 					existing.owner = owner;
 				}
 
-
 				devicelib.insert(existing, mac, function(err, body, header) {
 					if (!err) {
 						reg.success = true;
-						console.log("Device info updated.");
+						console.log("Device info updated for " + existing.udid);
 						sendRegistrationOKResponse(res, rdict);
 
 						return;
