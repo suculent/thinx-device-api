@@ -1207,7 +1207,8 @@ app.get("/api/user/rsakey/list", function(req, res) {
 
 		var exportedKeys = [];
 		var fingerprints = Object.keys(user.rsa_keys);
-		for (var i = 0; i < fingerprints.count; i++) {
+		console.log("fingerprints: " + JSON.stringify[fingerprints]);
+		for (var i = 0; i < fingerprints.length; i++) {
 			var key = user.rsa_keys[fingerprints[i]];
 			var info = {
 				name: key.alias,
