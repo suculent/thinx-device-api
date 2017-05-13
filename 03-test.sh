@@ -354,7 +354,7 @@ R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--d '{ "url" : "https://github.com/suculent/thinx-firmware-esp8266.git", "alias" : "thinx-firmware-esp8266" }' \
+-d '{ "url" : "https://github.com/suculent/thinx-firmware-esp8266.git", "alias" : "thinx-test-repo" }' \
 http://$HOST:7442/api/user/source)
 
 SUCCESS=$(echo $R | jq .success)
@@ -364,28 +364,6 @@ if [[ $SUCCESS == true ]]; then
 	echo_ok "Added source alias: $SOURCEA"
 else
 	echo_fail $R
-fi
-
-echo
-echo "--------------------------------------------------------------------------------"
-echo "» Testing source removal..."
-
-# {"success":true,"removed":"thinx-test-repo"}
-
-R=$(curl -s -b cookies.jar \
--H 'Origin: rtm.thinx.cloud' \
--H "User-Agent: THiNX-Web" \
--H "Content-Type: application/json" \
--d '{ "alias" : "thinx-firmware-esp8266" }' \
-http://$HOST:7442/api/user/source/revoke)
-
-SUCCESS=$(echo $R | jq .success)
-RSOURCE=null
-if [[ $SUCCESS == true ]]; then
-	RSOURCE=$(echo $R | jq .removed)
-	echo_ok "Removed source alias: $RSOURCE"
-else
-	echo_fail "$R"
 fi
 
 echo
@@ -420,6 +398,8 @@ R=$(curl -s -b cookies.jar \
 -H "Content-Type: application/json" \
 -d '{ "mac" : "00:00:00:00:00:00", "alias" : "thinx-test-repo" }' \
 http://$HOST:7442/api/device/attach)
+
+echo "$R"
 
 SUCCESS=$(echo $R | jq .success)
 ASOURCE=null
@@ -510,7 +490,7 @@ R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "build_id" : "2adf9af0-3817-11e7-b36a-b5bff48e5684"' \
+-d '{ "build_id" : "2adf9af0-3817-11e7-b36a-b5bff48e5684" }' \
 http://$HOST:7442/api/user/logs/build)
 
 SUCCESS=$(echo $R | jq .success)
@@ -581,6 +561,30 @@ if [[ $SUCCESS == true ]]; then
 	echo_ok "Device revocation result: $R"
 else
 	echo_fail $R
+fi
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "» Testing source removal..."
+
+# {"success":true,"removed":"thinx-test-repo"}
+
+R=$(curl -s -b cookies.jar \
+-H 'Origin: rtm.thinx.cloud' \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+-d '{ "alias" : "thinx-test-repo" }' \
+http://$HOST:7442/api/user/source/revoke)
+
+echo "$R"
+
+SUCCESS=$(echo $R | jq .success)
+RSOURCE=null
+if [[ $SUCCESS == true ]]; then
+	RSOURCE=$(echo $R | jq .removed)
+	echo_ok "Removed source alias: $RSOURCE"
+else
+	echo_fail "$R"
 fi
 
 #echo
