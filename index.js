@@ -257,7 +257,7 @@ app.post("/api/user/profile", function(req, res) {
 
 	//console.log("Updating owner: " + owner + "(" + username + ")");
 	alog.log(owner, "Attempt to update owner: " + owner +
-		" with: " + update_key + "and: " + JSON.stringify(update_value));
+		" with: " + update_key);
 
 	// Fetch complete user
 	userlib.get(owner, function(err, doc) {
@@ -283,8 +283,6 @@ app.post("/api/user/profile", function(req, res) {
 		}
 
 		doc[update_key] = update_value;
-
-		console.log("destriydoc: " + JSON.stringify(doc));
 
 		userlib.destroy(doc._id, doc._rev, function(err) {
 
@@ -601,8 +599,9 @@ app.post("/api/device/revoke", function(req, res) {
 		var doc = body.rows[0];
 		if (typeof(doc) === "undefined") {
 			res.end(JSON.stringify({
-				success: true,
-				status: "already_revoked"
+				success: false,
+				status: "device_not_found",
+				err_udid: udid
 			}));
 			return; // prevent breaking db
 		}
@@ -846,7 +845,6 @@ app.get("/api/user/apikey/list", function(req, res) {
 
 		var exportedKeys = [];
 		for (var index in user.api_keys) {
-			console.log("K: " + JSON.stringify(user.api_keys[index]));
 			var info = {
 				name: "******************************" + user.api_keys[index].key.substring(
 					30),
@@ -999,15 +997,16 @@ app.post("/api/user/source/revoke", function(req, res) {
 
 	var alias = req.body.alias;
 
-	userlib.get(owner, function(err, body) {
+	userlib.get(owner, function(err, user) {
 
 		if (err) {
 			console.log(err);
 			return;
 		}
 
-		var user = body;
 		var doc = user.doc;
+
+		console.log("doc:" + doc);
 
 		if (!doc) {
 			console.log("User " + users[index].id + " not found.");
@@ -1097,9 +1096,7 @@ app.post("/api/user/rsakey", function(req, res) {
 			return;
 		}
 
-		console.log("body: " + JSON.stringify(doc));
-
-		console.log(JSON.stringify(doc));
+		//console.log("body: " + JSON.stringify(doc));
 
 		if (!doc) {
 			console.log("User " + owner + " not found.");
@@ -1185,7 +1182,7 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			return;
 		}
 
-		console.log("user: " + JSON.stringify(user));
+		// OK console.log("user: " + JSON.stringify(user));
 
 		if (typeof(user) === "undefined") {
 			console.log("User " + user.id + " not found.");
@@ -1198,7 +1195,7 @@ app.get("/api/user/rsakey/list", function(req, res) {
 
 		var exportedKeys = [];
 		var fingerprints = Object.keys(user.rsa_keys);
-		for (var i = 0; i < fingerprints.length; i++) {
+		for (var i = 0; i < fingerprints.count; i++) {
 			var key = user.rsa_keys[fingerprints[i]];
 			var info = {
 				name: key.alias,
@@ -1236,12 +1233,18 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 
 	console.log("Searching by username " + username);
 
-	userlib.view(owner, function(err, user) {
+	userlib.get(owner, function(err, user) {
 
 		if (err) {
-			console.log(err);
+			console.log("ERRX:" + err);
+			res.end(JSON.stringify({
+				success: false,
+				status: "owner_not_found"
+			}));
 			return;
 		}
+
+		console.log("apikey/revoke/user:" + JSON.stringify(user));
 
 		var doc = user.doc;
 
@@ -1254,10 +1257,30 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 		var keys = doc.rsa_keys;
 		var delete_key = null;
 
+		if (typeof(keys !== "undefined")) {
+
+		} else {
+			console.log("Searching rsa_keys in " + JSON.stringify(doc));
+			res.end(JSON.stringify({
+				success: false,
+				status: "rsa_keys_not_found"
+			}));
+			return;
+		}
+
 		var fingerprints = Object.keys(doc.rsa_keys);
 
-		console.log(fingerprints);
+		console.log("fingerprints:" + fingerprints);
 		console.log(JSON.stringify(fingerprints));
+
+		if (typeof(fingerprints) === "undefined") {
+			console.log("ERROR: No fingerprints in keys: " + JSON.stringify(keys));
+			res.end(JSON.stringify({
+				success: false,
+				status: "fingerprint_not_found"
+			}));
+			return;
+		}
 
 		var new_keys = {};
 		for (var i = 0; i < fingerprints.length; i++) {
@@ -2469,7 +2492,7 @@ app.post("/api/device/edit", function(req, res) {
 
 	var changes = req.body.changes;
 
-	console.log(JSON.stringify(changes));
+	console.log("CHANGES: " + JSON.stringify(changes));
 
 	var change = changes; // TODO: support bulk operations
 
@@ -2494,6 +2517,8 @@ app.post("/api/device/edit", function(req, res) {
 			return;
 		}
 
+		//console.log("searching: " + body);
+
 		if (body.rows.length === 0) {
 			console.log(JSON.stringify(body));
 			res.end(JSON.stringify({
@@ -2509,7 +2534,7 @@ app.post("/api/device/edit", function(req, res) {
 
 		for (var dindex in body.rows) {
 			var dev = body.rows[dindex].key;
-			console.log("Comparing dev" + JSON.stringify(dev));
+			console.log("Comparing " + udid + " to " + dev.device_id);
 			if (udid.indexOf(dev.device_id) != -1) {
 				console.log("Found dev" + JSON.stringify(dev));
 				device = dev;
