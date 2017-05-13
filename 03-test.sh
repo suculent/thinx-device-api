@@ -336,7 +336,6 @@ http://$HOST:7442/api/user/rsakey/revoke)
 echo "${R}"
 
 SUCCESS=$(echo $R | jq .success)
-echo $SUCCESS
 RPRINT=null
 if [[ $SUCCESS == true ]]; then
 	RPRINT=$(echo $R | jq .revoked)
@@ -359,7 +358,6 @@ R=$(curl -s -b cookies.jar \
 http://$HOST:7442/api/user/source)
 
 SUCCESS=$(echo $R | jq .success)
-echo $SUCCESS
 SOURCEA=null
 if [[ $SUCCESS == true ]]; then
 	SOURCEA=$(echo $R | jq .source.alias)
@@ -382,7 +380,6 @@ R=$(curl -s -b cookies.jar \
 http://$HOST:7442/api/user/source/revoke)
 
 SUCCESS=$(echo $R | jq .success)
-echo $SUCCESS
 RSOURCE=null
 if [[ $SUCCESS == true ]]; then
 	RSOURCE=$(echo $R | jq .removed)
@@ -405,7 +402,6 @@ R=$(curl -s -b cookies.jar \
 http://$HOST:7442/api/device/detach)
 
 SUCCESS=$(echo $R | jq .success)
-echo $SUCCESS
 if [[ $SUCCESS == true ]]; then
 	echo_ok "Detached source from device: ${DEVICE_ID}"
 else
@@ -426,7 +422,6 @@ R=$(curl -s -b cookies.jar \
 http://$HOST:7442/api/device/attach)
 
 SUCCESS=$(echo $R | jq .success)
-echo $SUCCESS
 ASOURCE=null
 if [[ $SUCCESS == true ]]; then
 	ASOURCE=$(echo $R | jq .alias)
@@ -441,9 +436,7 @@ echo "☢ Testing builder..."
 
 # Q: {"build":{"hash":"5a2bbb50-350a-11e7-872e-5b8d369649c8","source":"thinx-test-repo"}}
 
-# {"build":{"success":true,"status":"Dry-run started. Build will not be deployed.","id":"85695a10-3015-11e7-9101-a5cf1f2b8f3f"}}r
-
-
+# {"build":{"success":true,"status":"Dry-run started. Build will not be deployed.","id":"85695a10-3015-11e7-9101-a5cf1f2b8f3f"}}
 
 R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
@@ -475,7 +468,6 @@ R=$(curl -s -b cookies.jar \
 http://$HOST:7442/api/user/logs/audit)
 
 SUCCESS=$(echo $R | jq .success)
-echo $SUCCESS
 ASOURCE=null
 if [[ $SUCCESS == true ]]; then
 	ALOG=$(echo $R | jq .logs.rows)
@@ -490,7 +482,7 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
-echo "☢ TODO: Build log list..."
+echo "☢ FIXME: Build log list..."
 
 R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
@@ -512,13 +504,13 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
-echo "☢ TODO: Build log fetch..."
+echo "☢ FIXME: Build log fetch..."
 
 R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "build_id" : "ff16cba945cff2ca578b29c7024eb653"' \
+-d '{ "build_id" : "2adf9af0-3817-11e7-b36a-b5bff48e5684"' \
 http://$HOST:7442/api/user/logs/build)
 
 SUCCESS=$(echo $R | jq .success)
@@ -569,9 +561,9 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
-echo "☢ Testing device revocation..."
+echo "☢ FIXME: Testing device revocation..."
 
-DR='{ "udid" : "'${DEVICE_ID}'" }'
+DR='{ "udid" : '${DEVICE_ID}' }'
 
 R=$(curl -s -b cookies.jar \
 -H "Authentication: ${API_KEY}" \
