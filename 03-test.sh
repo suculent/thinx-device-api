@@ -541,7 +541,6 @@ R=$(curl -s -b cookies.jar \
 http://$HOST:7442/api/user/profile)
 
 SUCCESS=$(echo $R | jq .success)
-echo $SUCCESS
 if [[ $SUCCESS == true ]]; then
 	echo_ok "Successfully updated avatar."
 else
@@ -560,7 +559,6 @@ R=$(curl -s -b cookies.jar \
 http://$HOST:7442/api/user/profile)
 
 SUCCESS=$(echo $R | jq .success)
-echo $SUCCESS
 if [[ $SUCCESS == true ]]; then
 	echo_ok "Successfully updated user info."
 else
@@ -571,20 +569,19 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing device revocation..."
 
-R=$(curl -b cookies.jar \
+DR='{ "udid" : "'${DEVICE_ID}'" }'
+
+R=$(curl -s -b cookies.jar \
 -H "Authentication: ${API_KEY}" \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "udid" : "FFFFFFFFFFFF" }' \
+-d  \
 http://$HOST:7442/api/device/revoke)
 
 # {"success":false,"status":"authentication"}
 
-echo $R
-
 SUCCESS=$(echo $R | tr -d "\n" | jq .success)
-echo $SUCCESS
 if [[ $SUCCESS == true ]]; then
 	STATUS=$(echo $R | jq .status)
 	echo_ok "Device revocation result: $R"

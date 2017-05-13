@@ -1321,22 +1321,27 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 			return;
 		} else {
 
-			delete doc._rev;
+			userlib.destroy(doc._id, doc._rev, function(err) {
 
-			userlib.insert(doc, doc._id, function(err) {
-				if (err) {
-					console.log("rsa_revocation_failed:" + err);
-					res.end(JSON.stringify({
-						success: false,
-						status: "rsa_revocation_failed"
-					}));
-				} else {
-					res.end(JSON.stringify({
-						revoked: rsa_key_fingerprint,
-						success: true
-					}));
-				}
+				delete doc._rev;
+
+				userlib.insert(doc, doc._id, function(err) {
+					if (err) {
+						console.log("rsa_revocation_failed:" + err);
+						res.end(JSON.stringify({
+							success: false,
+							status: "rsa_revocation_failed"
+						}));
+					} else {
+						res.end(JSON.stringify({
+							revoked: rsa_key_fingerprint,
+							success: true
+						}));
+					}
+				});
+
 			});
+
 		}
 	});
 });
