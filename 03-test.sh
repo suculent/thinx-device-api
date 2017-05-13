@@ -53,8 +53,6 @@ echo $R
 SUCCESS=$(echo $R | tr -d "\n" | jq .registration.success)
 # TODO: Should return rather udid
 if [[ $SUCCESS == true ]]; then
-  DEVICE_ID=$(echo $R | tr -d "\n" | jq .registration.device_id)
-  echo_ok "Assigning test UDID: ${DEVICE_ID}"
 	echo_ok "Device registration result: $R"
 else
 	echo_fail $R
@@ -78,6 +76,8 @@ echo $R
 
 SUCCESS=$(echo $R | tr -d "\n" | jq .registration.success)
 if [[ $SUCCESS == true ]]; then
+  DEVICE_ID=$(echo $R | tr -d "\n" | jq .registration.device_id)
+  echo_ok "Assigning test UDID: ${DEVICE_ID}"
 	STATUS=$(echo $R | jq .status)
 	echo_ok "Device registration result: $R"
 else

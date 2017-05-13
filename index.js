@@ -1301,7 +1301,7 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 
 		if (delete_key !== null) {
 			doc.last_update = new Date();
-			user.doc.rsa_keys = new_keys;
+			doc.rsa_keys = new_keys;
 		} else {
 			res.end(JSON.stringify({
 				success: false,
@@ -1321,9 +1321,9 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 			return;
 		} else {
 
-			delete user.doc._rev;
+			delete doc._rev;
 
-			userlib.insert(user.doc, user.doc.id, function(err) {
+			userlib.insert(doc, doc._id, function(err) {
 				if (err) {
 					console.log("rsa_revocation_failed:" + err);
 					res.end(JSON.stringify({
@@ -2396,6 +2396,7 @@ app.post("/device/register", function(req, res) {
 						existing.owner = owner;
 					}
 
+
 					devicelib.insert(existing, mac, function(err, body, header) {
 						if (!err) {
 							reg.success = true;
@@ -2443,6 +2444,9 @@ app.post("/device/register", function(req, res) {
 					}
 					if (typeof(owner) !== undefined && owner !== null) {
 						device.owner = owner;
+					}
+					if (typeof(udid) !== undefined && udid !== null) {
+						device.udid = udid;
 					}
 
 					devicelib.insert(device, mac, function(err, body, header) {
