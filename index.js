@@ -2345,10 +2345,6 @@ app.post("/device/register", function(req, res) {
 			console.log("Update semver response: " + update);
 		}
 
-
-
-		console.log("Considering a device update...");
-
 		// KNOWN DEVICES:
 		// - see if new firmware is available and reply FIRMWARE_UPDATE with url
 		// - see if alias or owner changed
@@ -2376,34 +2372,39 @@ app.post("/device/register", function(req, res) {
 					existing.owner = owner;
 				}
 
-				devicelib.insert(existing, mac, function(err, body, header) {
-					if (!err) {
-						reg.success = true;
-						console.log("Device info updated for " + existing.udid);
-						sendRegistrationOKResponse(res, rdict);
+				devicelib.destroy(existing._id, existing._rev, function(err) {
 
-						return;
+					devicelib.insert(existing, mac, function(err, body, header) {
+						if (!err) {
+							reg.success = true;
+							reg.udid = udid;
+							console.log("Device info updated for " + existing.udid);
+							sendRegistrationOKResponse(res, rdict);
 
-					} else {
+							return;
 
-						reg.success = false;
-						reg.this.status = "Insert failed";
-						console.log("Device record update failed." + err);
+						} else {
 
-						console.log("CHECK5:");
-						console.log(reg);
-						console.log("CHECK5.1:");
-						console.log(rdict);
+							reg.success = false;
+							reg.this.status = "Insert failed";
+							console.log("Device record update failed." + err);
 
-						sendRegistrationOKResponse(res, rdict);
-					}
+							console.log("CHECK5:");
+							console.log(reg);
+							console.log("CHECK5.1:");
+							console.log(rdict);
+
+							sendRegistrationOKResponse(res, rdict);
+						}
+					});
+
 				});
 
 			} else {
 
 				// IS NEW!
 
-				console.log(error);
+				console.log("New device: " + error);
 
 				device.udid = uuidV1();
 				device.device_id = udid; // will deprecate
@@ -2430,10 +2431,14 @@ app.post("/device/register", function(req, res) {
 
 				devicelib.insert(device, mac, function(err, body, header) {
 					if (!err) {
-						reg.success = true;
-						reg.udid = udid;
 						console.log("Device info created.");
-						sendRegistrationOKResponse(res, rdict);
+						res.set("Connection", "close");
+						res.end(JSON.stringify({
+							registration: {
+								success: true,
+								udid: udid
+							}
+						}));
 					} else {
 						reg.success = false;
 						reg.this.status = "Insert failed";
@@ -2482,6 +2487,14 @@ app.post("/api/device/edit", function(req, res) {
 	}
 
 	console.log("Change with udid:" + udid);
+
+	if (udid === null) {
+		res.end(JSON.stringify({
+			success: false,
+			status: "missing_udid"
+		}));
+		return;
+	}
 
 	devicelib.view("devicelib", "devices_by_device_id", function(err, body) {
 
@@ -2574,6 +2587,7 @@ app.post("/api/device/edit", function(req, res) {
 						}));
 						return;
 					} else {
+						res.set("Connection", "close");
 						res.end(JSON.stringify({
 							success: true,
 							change: change
