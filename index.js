@@ -2544,6 +2544,11 @@ app.post("/api/device/edit", function(req, res) {
 		console.log("Editing device: " +
 			JSON.stringify(doc.alias));
 
+		if (typeof(doc) === "undefined") {
+			console.log("nothing to destroy...");
+			return;
+		}
+
 		// Delete device document with old alias
 		devicelib.destroy(doc._id, doc._rev, function(err) {
 
