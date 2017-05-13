@@ -36,8 +36,6 @@ echo "☢ Testing device registration..."
 
 RS='{ "registration" : { "mac" : "'${MAC}'", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "version" : "1.0.0", "checksum" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "dhho4djVGeQ:APA91bFuuZWXDQ8vSR0YKyjWIiwIoTB1ePqcyqZFU3PIxvyZMy9htu9LGPmimfzdrliRfAdci-AtzgLCIV72xmoykk-kHcYRhAFWFOChULOGxrDi00x8GgenORhx_JVxUN_fjtsN5B7T", "alias" : "rabbit" } }'
 
-echo $RS
-
 R=$(curl -s \
 -H "Authentication: ${API_KEY}" \
 -H 'Origin: device' \
@@ -188,16 +186,14 @@ R=$(curl -s -b cookies.jar \
 -d '{"alias":"test-key-name"}' \
 http://$HOST:7442/api/user/apikey)
 
-# {"success":true,"api_key":"ece10e3effb17650420c280a7d5dce79110dc084","alias":"api-key-name"}
-echo $R
-
-# todo: parse finerprint for revocation
-
 SUCCESS=$(echo $R | jq .success)
 echo $SUCCESS
-APIKEY="$API_KEY"
+APIKEY=$API_KEY
 if [[ $SUCCESS == true ]]; then
-	APIKEY=$(echo $R | jq .api_key)
+	A_KEY=$(echo $R | jq .api_key)
+  if [[ ! -z $A_KEY ]]; then
+    APIKEY=$A_KEY
+  fi
   HASH=$(echo $R | jq .hash)
 	echo_ok "New key to revoke: $APIKEY with hash $HASH"
 else
@@ -208,11 +204,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Revoking API Key..."
 
-echo $HASH
-
 RK='{ "fingerprint" : '${HASH}' }'
-
-echo $RK
 
 R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
@@ -267,7 +259,6 @@ R=$(curl -s -b cookies.jar \
 http://$HOST:7442/api/user/sources/list)
 
 SUCCESS=$(echo $R | jq .success)
-echo $SUCCESS
 SOURCES=null
 if [[ $SUCCESS == true ]]; then
 	SOURCES=$(echo $R | jq .sources)
@@ -290,7 +281,6 @@ R=$(curl -s -b cookies.jar \
 http://$HOST:7442/api/user/rsakey)
 
 SUCCESS=$(echo $R | jq .success)
-echo $SUCCESS
 FPRINT=null
 if [[ $SUCCESS == true ]]; then
 	FPRINT=$(echo $R | jq .fingerprint)
@@ -312,7 +302,6 @@ R=$(curl -s -b cookies.jar \
 http://$HOST:7442/api/user/rsakey/list)
 
 SUCCESS=$(echo $R | jq .rsa_keys)
-echo $SUCCESS
 if [[ ! -z $SUCCESS ]]; then
 	KEYS=$(echo $R | jq .rsa_keys)
 	echo_ok "Listed RSA keys: $KEYS"
@@ -326,7 +315,7 @@ echo "» Revoking RSA key..."
 
 # {"revoked":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93","success":true}
 
-R=$(curl -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -399,12 +388,10 @@ R=$(curl -s -b cookies.jar \
 -d '{ "mac" : "00:00:00:00:00:00", "alias" : "thinx-test-repo" }' \
 http://$HOST:7442/api/device/attach)
 
-echo "$R"
-
 SUCCESS=$(echo $R | jq .success)
 ASOURCE=null
 if [[ $SUCCESS == true ]]; then
-	ASOURCE=$(echo $R | jq .alias)
+	ASOURCE=$(echo $R | jq .attached)
 	echo_ok "Attached source alias: $ASOURCE"
 else
 	echo_fail $R
@@ -414,19 +401,16 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing builder..."
 
-# Q: {"build":{"hash":"5a2bbb50-350a-11e7-872e-5b8d369649c8","source":"thinx-test-repo"}}
-
-# {"build":{"success":true,"status":"Dry-run started. Build will not be deployed.","id":"85695a10-3015-11e7-9101-a5cf1f2b8f3f"}}
+BC='{ "build" : { "hash" : '${DEVICE_ID}', "source" : "thinx-test-repo", "dryrun" : true } }'
 
 R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "build" : { "hash" : "5a2bbb50-350a-11e7-872e-5b8d369649c8", "source" : "thinx-test-repo", "dryrun" : true } }' \
+-d "$BC" \
 http://$HOST:7442/api/build)
 
 SUCCESS=$(echo $R | jq .build.success)
-echo $SUCCESS
 BUILD_ID=null
 if [[ $SUCCESS == true ]]; then
 	BUILD_ID=$(echo $R | jq .build.id)
@@ -462,7 +446,7 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
-echo "☢ FIXME: Build log list..."
+echo "☢ Build log list..."
 
 R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
@@ -470,10 +454,7 @@ R=$(curl -s -b cookies.jar \
 -H "Content-Type: application/json" \
 http://$HOST:7442/api/user/logs/build/list)
 
-echo "${R}"
-
 SUCCESS=$(echo $R | jq .success)
-echo $SUCCESS
 BLIST=null
 if [[ $SUCCESS == true ]]; then
 	BLIST=$(echo $R | jq .)
@@ -484,7 +465,7 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
-echo "☢ FIXME: Build log fetch..."
+echo "☢ Build log fetch..."
 
 R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
@@ -494,7 +475,6 @@ R=$(curl -s -b cookies.jar \
 http://$HOST:7442/api/user/logs/build)
 
 SUCCESS=$(echo $R | jq .success)
-echo $SUCCESS
 BLOG=null
 if [[ $SUCCESS == true ]]; then
 	BLOG=$(echo $R | jq .)
@@ -576,12 +556,10 @@ R=$(curl -s -b cookies.jar \
 -d '{ "alias" : "thinx-test-repo" }' \
 http://$HOST:7442/api/user/source/revoke)
 
-echo "$R"
-
 SUCCESS=$(echo $R | jq .success)
 RSOURCE=null
 if [[ $SUCCESS == true ]]; then
-	RSOURCE=$(echo $R | jq .removed)
+	RSOURCE=$(echo $R | jq .alias)
 	echo_ok "Removed source alias: $RSOURCE"
 else
 	echo_fail "$R"

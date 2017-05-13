@@ -575,7 +575,7 @@ app.post("/api/device/revoke", function(req, res) {
 	console.log("Attempt to revoke device: " + udid);
 
 	devicelib.view("devicelib", "devices_by_id", {
-		"key": udid,
+		//"key": udid,
 		"include_docs": true
 	}, function(err, body) {
 
@@ -597,6 +597,16 @@ app.post("/api/device/revoke", function(req, res) {
 		console.log("revoked device: " + JSON.stringify(body));
 
 		var doc = body.rows[0];
+
+		for (var dindex in body.rows) {
+			var dev = body.rows[0];
+			console.log("dev:" + JSON.sringify(dev));
+			if (udid.indexof(dev.udid) != -1) {
+				doc = dev;
+				break;
+			}
+		}
+
 		if (typeof(doc) === "undefined") {
 			res.end(JSON.stringify({
 				success: false,
