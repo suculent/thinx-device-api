@@ -5,7 +5,7 @@
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
-API_KEY='a98dc4e8db30f07642ffa7898b42c18245f7b6c1'
+API_KEY='a621d30a812b7d581d455a2af6d4a416968e2622'
 OWNER_ID='eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f'
 
 function echo_fail() { # $1 = string
@@ -175,7 +175,7 @@ R=$(curl -s -b cookies.jar \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "changes" : [ { "device_id" : "FFFFFFFFFFFF", "alias" : "new-test-alias" } ] }' \
+-d '{ "changes" : { "device_id" : "FFFFFFFFFFFF", "alias" : "new-test-alias" } }' \
 http://$HOST:7442/api/device/edit)
 
 # {"success":true,"status":"updated"}
