@@ -2374,27 +2374,26 @@ app.post("/device/register", function(req, res) {
 
 				devicelib.destroy(existing._id, existing._rev, function(err) {
 
+					delete existing._rev;
+
 					devicelib.insert(existing, mac, function(err, body, header) {
 						if (!err) {
-							reg.success = true;
-							reg.udid = udid;
-							console.log("Device info updated for " + existing.udid);
-							sendRegistrationOKResponse(res, rdict);
-
-							return;
-
+							res.set("Connection", "close");
+							res.end(JSON.stringify({
+								registration: {
+									success: true,
+									udid: udid,
+									status: "Device info updated."
+								}
+							}));
 						} else {
-
-							reg.success = false;
-							reg.this.status = "Insert failed";
-							console.log("Device record update failed." + err);
-
-							console.log("CHECK5:");
-							console.log(reg);
-							console.log("CHECK5.1:");
-							console.log(rdict);
-
-							sendRegistrationOKResponse(res, rdict);
+							res.set("Connection", "close");
+							res.end(JSON.stringify({
+								registration: {
+									success: false,
+									status: "insert_failed"
+								}
+							}));
 						}
 					});
 
