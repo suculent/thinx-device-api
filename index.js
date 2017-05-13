@@ -1192,8 +1192,6 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			return;
 		}
 
-
-
 		if (typeof(user) === "undefined") {
 			console.log("User " + owner + " not found.");
 			res.end(JSON.stringify({
@@ -1203,7 +1201,7 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			return;
 		}
 
-		console.log("FIXME: Seeking rsa_keys in: " + JSON.stringify(user.rsa_keys));
+		console.log("FIXME: Seeking rsa_keys in: " + JSON.stringify(user));
 
 		var exportedKeys = [];
 		var fingerprints = Object.keys(user.rsa_keys);
