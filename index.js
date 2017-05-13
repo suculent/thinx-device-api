@@ -1203,7 +1203,7 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			return;
 		}
 
-		console.log("FIXME: Seeking rsa_keys user: " + JSON.stringify(user));
+		console.log("FIXME: Seeking rsa_keys in: " + JSON.stringify(user.rsa_keys));
 
 		var exportedKeys = [];
 		var fingerprints = Object.keys(user.rsa_keys);
