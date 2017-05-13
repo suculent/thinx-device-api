@@ -1182,16 +1182,18 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			return;
 		}
 
-		// OK console.log("user: " + JSON.stringify(user));
+
 
 		if (typeof(user) === "undefined") {
-			console.log("User " + user.id + " not found.");
+			console.log("User " + owner + " not found.");
 			res.end(JSON.stringify({
 				success: false,
 				status: "userid_not_found"
 			}));
 			return;
 		}
+
+		console.log("FIXME: Seeking rsa_keys user: " + JSON.stringify(user));
 
 		var exportedKeys = [];
 		var fingerprints = Object.keys(user.rsa_keys);
@@ -1203,6 +1205,8 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			};
 			exportedKeys.push(info);
 		}
+
+		console.log("FIXME: exportedKeys: " + JSON.stringify(exportedKeys));
 
 		var reply = JSON.stringify({
 			rsa_keys: exportedKeys
@@ -2847,9 +2851,9 @@ app.post("/api/build", function(req, res) {
 				}
 			}
 
-			console.log(udid);
-			console.log(owner);
-			console.log(git);
+			console.log("udid: " + udid);
+			console.log("owner: " + owner);
+			console.log("git: " + git);
 
 			if ((typeof(udid) === "undefined" || build === null) ||
 				(typeof(owner) === "undefined" || owner === null) ||
@@ -2999,7 +3003,7 @@ app.get("/api/user/logs/build/list", function(req, res) {
 
 	blog.list(owner, function(err, body) {
 
-		if (err) {
+		if (err !== null) {
 			console.log(err);
 			res.end(JSON.stringify({
 				success: false,

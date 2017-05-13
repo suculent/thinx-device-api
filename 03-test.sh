@@ -439,13 +439,17 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing builder..."
 
+# Q: {"build":{"hash":"5a2bbb50-350a-11e7-872e-5b8d369649c8","source":"thinx-test-repo"}}
+
 # {"build":{"success":true,"status":"Dry-run started. Build will not be deployed.","id":"85695a10-3015-11e7-9101-a5cf1f2b8f3f"}}r
+
+
 
 R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "build" : { "hash" : "2d5b0e45f791cb3efd828d2a451e0dc64e4aefa3", "source" : "thinx-firmware-esp8266", "dryrun" : true } }' \
+-d '{ "build" : { "hash" : "5a2bbb50-350a-11e7-872e-5b8d369649c8", "source" : "thinx-test-repo", "dryrun" : true } }' \
 http://$HOST:7442/api/build)
 
 SUCCESS=$(echo $R | jq .build.success)
@@ -514,10 +518,8 @@ R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "build_id" : "0xBUILD"' \
+-d '{ "build_id" : "ff16cba945cff2ca578b29c7024eb653"' \
 http://$HOST:7442/api/user/logs/build)
-
-echo "${R}"
 
 SUCCESS=$(echo $R | jq .success)
 echo $SUCCESS
@@ -576,7 +578,7 @@ R=$(curl -s -b cookies.jar \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d  \
+-d "$DR" \
 http://$HOST:7442/api/device/revoke)
 
 # {"success":false,"status":"authentication"}
