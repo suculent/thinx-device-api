@@ -131,27 +131,6 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
-echo "» Fetching device catalog..."
-
-R=$(curl -s -b cookies.jar \
--H "Origin: rtm.thinx.cloud" \
--H "User-Agent: THiNX-Web" \
--H "Content-Type: application/json" \
-http://$HOST:7442/api/user/devices)
-
-# {"devices":[{"id":"...
-
-SUCCESS=$(echo $R | jq .devices)
-# echo $SUCCESS
-if [[ ! -z $SUCCESS ]]; then
-	DEVICES=$(echo $R | jq .devices)
-	echo_ok "Listed devices: $DEVICES"
-else
-	echo_fail $R
-fi
-
-echo
-echo "--------------------------------------------------------------------------------"
 echo "» Requesting new API Key..."
 
 R=$(curl -s -b cookies.jar \
@@ -520,6 +499,28 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
+echo "» Fetching device catalog..."
+
+R=$(curl -s -b cookies.jar \
+-H "Origin: rtm.thinx.cloud" \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+http://$HOST:7442/api/user/devices)
+
+# {"devices":[{"id":"...
+
+SUCCESS=$(echo $R | jq .devices)
+# echo $SUCCESS
+if [[ ! -z $SUCCESS ]]; then
+	DEVICES=$(echo $R | jq .devices)
+	echo_ok "Listed devices: $DEVICES"
+else
+	echo_fail $R
+fi
+
+
+echo
+echo "--------------------------------------------------------------------------------"
 echo "☢ FIXME: Assigning device alias..."
 
 CH='{ "changes" : { "device_id" : '${DEVICE_ID}', "alias" : "new-test-alias" } }'
@@ -542,6 +543,28 @@ if [[ $SUCCESS == true ]]; then
 else
 	echo_fail $R
 fi
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "» Fetching device catalog..."
+
+R=$(curl -s -b cookies.jar \
+-H "Origin: rtm.thinx.cloud" \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+http://$HOST:7442/api/user/devices)
+
+# {"devices":[{"id":"...
+
+SUCCESS=$(echo $R | jq .devices)
+# echo $SUCCESS
+if [[ ! -z $SUCCESS ]]; then
+	DEVICES=$(echo $R | jq .devices)
+	echo_ok "Listed devices: $DEVICES"
+else
+	echo_fail $R
+fi
+
 
 echo
 echo "--------------------------------------------------------------------------------"

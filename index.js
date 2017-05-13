@@ -594,18 +594,19 @@ app.post("/api/device/revoke", function(req, res) {
 			return;
 		}
 
-		console.log("revoked device: " + JSON.stringify(body));
-
-		var doc = body.rows[0];
+		var doc = null;
 
 		for (var dindex in body.rows) {
 			var dev = body.rows[0];
 			console.log("dev:" + JSON.stringify(dev));
 			if (udid.indexOf(dev.udid) != -1) {
+				console.log("Found device");
 				doc = dev;
 				break;
 			}
 		}
+
+		console.log("Device to be revoked: " + JSON.stringify(doc));
 
 		if (typeof(doc) === "undefined") {
 			res.end(JSON.stringify({
@@ -615,9 +616,8 @@ app.post("/api/device/revoke", function(req, res) {
 			}));
 			return; // prevent breaking db
 		}
-		doc.udid = udid;
 
-		var logmessage = "Revoking device: " + doc.udid;
+		var logmessage = "Revoking device: " + JSON.stringify(doc);
 		console.log(logmessage);
 		alog.log(owner, logmessage);
 
