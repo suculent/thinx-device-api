@@ -2976,6 +2976,10 @@ app.post("/api/user/logs/build", function(req, res) {
 		return;
 	}
 
+	var build_id = req.body.build_id;
+
+	console.log("Fetching build log for " + build_id);
+
 	blog.fetch(req.body.build_id, function(err, body) {
 
 		if (err) {
@@ -2997,6 +3001,8 @@ app.post("/api/user/logs/build", function(req, res) {
 			}));
 			return;
 		}
+
+		console.log(JSON.stringify(body));
 
 		res.end(JSON.stringify({
 			success: true,
@@ -3083,9 +3089,6 @@ app.post("/api/login", function(req, res) {
 					if (typeof(req.session === "undefined")) {
 						console.log("ERROR, no session!");
 					}
-
-					console.log("login->owners_by_username->doc:" + JSON.stringify(
-						user_data.doc));
 
 					req.session.owner = user_data.doc.owner; // what if there's no session?
 					console.log("ASsigning session owner: " + req.session.owner);
