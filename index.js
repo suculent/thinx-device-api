@@ -1004,12 +1004,12 @@ app.post("/api/user/source/revoke", function(req, res) {
 			return;
 		}
 
-		var doc = user.doc;
+		var doc = user;
 
 		console.log("doc:" + doc);
 
 		if (!doc) {
-			console.log("User " + users[index].id + " not found.");
+			console.log("Owner " + owner + " not found.");
 			res.end(JSON.stringify({
 				success: false,
 				status: "user_not_found"
@@ -1233,10 +1233,15 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 
 	console.log("Searching by username " + username);
 
-	userlib.get(owner, function(err, user) {
+	userlib.get(owner, function(err, doc) {
 
-		if (err) {
-			console.log("ERRX:" + err);
+		if (err || !doc) {
+			if (err) {
+				console.log("ERRX:" + err);
+			} else {
+				console.log("User " + owner + " not found.");
+			}
+
 			res.end(JSON.stringify({
 				success: false,
 				status: "owner_not_found"
@@ -1244,12 +1249,8 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 			return;
 		}
 
-		console.log("apikey/revoke/user:" + JSON.stringify(user));
-
-		var doc = user.doc;
-
 		if (!doc) {
-			console.log("User " + user.id + " not found.");
+
 			return;
 		}
 

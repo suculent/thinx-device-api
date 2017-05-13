@@ -381,8 +381,6 @@ R=$(curl -s -b cookies.jar \
 -d '{ "alias" : "thinx-firmware-esp8266" }' \
 http://$HOST:7442/api/user/source/revoke)
 
-echo '${R}'
-
 SUCCESS=$(echo $R | jq .success)
 echo $SUCCESS
 RSOURCE=null
