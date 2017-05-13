@@ -3302,6 +3302,8 @@ var database_compact_timer = setTimeout(database_compactor, COMPACT_TIMEOUT);
 
 // Prevent crashes on uncaught exceptions
 
+/*
 process.on("uncaughtException", function(err) {
 	console.log("Caught exception: " + err);
 });
+*/
