@@ -668,7 +668,6 @@ app.post("/api/user/apikey", function(req, res) {
 
 	console.log("Searching for owner " + owner);
 
-
 	userlib.get(owner, function(err, doc) {
 
 		if (err) {
@@ -680,7 +679,7 @@ app.post("/api/user/apikey", function(req, res) {
 			return;
 		}
 
-		console.log("doc: " + JSON.stringify(doc));
+		//console.log("doc: " + JSON.stringify(doc));
 
 		if (doc === null) {
 			console.log("User " + username + " not found.");
@@ -758,8 +757,6 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 		if (!user) {
 			console.log("User " + owner + " not found.");
 			return;
-		} else {
-			console.log("ud: " + JSON.stringify(user));
 		}
 
 		// Search API key by hash
