@@ -2770,7 +2770,6 @@ app.post("/api/build", function(req, res) {
 			status: "missing_source_alias"
 		}));
 	}
-	var source_alias = build.source;
 
 	devicelib.view("devicelib", "devices_by_owner", {
 		"key": owner,
@@ -2841,10 +2840,12 @@ app.post("/api/build", function(req, res) {
 
 			// Finds first source with given source_alias
 			var sources = doc.repos;
+			console.log("Searching for repository to be built:" + build.source)
 			console.log("Parsing repos:" + JSON.stringify(sources));
 			for (var index in sources) {
 				var source = sources[index];
-				if (source.alias.indexOf(source_alias) !== -1) {
+				console.log("in source: " + source);
+				if (source.alias.indexOf(build.source) !== -1) {
 					git = source.url;
 					console.log("Found repo: " + git);
 					break;
