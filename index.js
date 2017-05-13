@@ -508,6 +508,17 @@ app.post("/api/device/detach", function(req, res) {
 			return;
 		}
 
+		var rows = body.rows[0];
+		if (typeof(rows) !== "undefined") {
+			console.log("DETACH rows: " + rows);
+		} else {
+			res.end(JSON.stringify({
+				success: false,
+				status: "mac_not_found"
+			}));
+			return;
+		}
+
 		var doc = body.rows[0].value;
 
 		console.log("Detaching repository from device: " + JSON.stringify(doc.device_id));
@@ -680,15 +691,19 @@ app.post("/api/user/apikey", function(req, res) {
 			keys = doc.api_keys;
 		}
 
+		var new_hash = sha256(new_api_key);
+
 		keys[keys.length] = {
 			"key": new_api_key,
-			"hash": sha256(new_api_key),
+			"hash": new_hash,
 			"alias": new_api_key_alias
 		};
 
-		console.log("[WARNING-NEW]: Storing key to redis: ");
+		// Store all keys to redis instead of CouchDB
 		client.set("ak:" + doc._id, JSON.stringify(keys));
 
+		// Will partially deprecate deprecate when API Keys will be
+		// everywhere taken from Redis only (tedious refactoring).
 		doc.api_keys = keys;
 
 		userlib.destroy(doc._id, doc._rev, function(err) {
@@ -700,9 +715,11 @@ app.post("/api/user/apikey", function(req, res) {
 					console.log("/api/user/apikey ERROR:" + err);
 				} else {
 					console.log(doc.owner + " API Keys updated.");
+					alog.log(owner, "API Key created.");
 					res.end(JSON.stringify({
 						success: true,
-						api_key: new_api_key
+						api_key: new_api_key,
+						hash: new_hash
 					}));
 				}
 			});
@@ -776,6 +793,7 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 						status: "revocation_failed"
 					}));
 				} else {
+					alog.log(owner, "API Key revoked");
 					res.end(JSON.stringify({
 						revoked: api_key,
 						success: true
@@ -1237,6 +1255,10 @@ app.post("/api/user/rsakey/revoke", function(req, res) {
 		var delete_key = null;
 
 		var fingerprints = Object.keys(doc.rsa_keys);
+
+		console.log(fingerprints);
+		console.log(JSON.stringify(fingerprints));
+
 		var new_keys = {};
 		for (var i = 0; i < fingerprints.length; i++) {
 			var key = doc.rsa_keys[fingerprints[i]];
@@ -2212,7 +2234,7 @@ app.post("/device/register", function(req, res) {
 
 		var udid = uuidV1(); // is returned to device which should immediately take over this value instead of mac for new registration
 		if (typeof(reg.udid) !== "undefined") {
-			udid = reg.udid;
+			//udid = reg.udid; overridden
 		}
 
 		//
@@ -2241,9 +2263,9 @@ app.post("/device/register", function(req, res) {
 			owner = known_owner; // should force update in device library
 		}
 
-		// Re-use existing UDID or create new one
-		if (device_id !== null) {
-			reg.device_id = device_id;
+		// Will deprecate.
+		if (udid !== null) {
+			reg.device_id = udid;
 		}
 
 		console.log("Device firmware: " + fw);
@@ -2293,7 +2315,7 @@ app.post("/device/register", function(req, res) {
 			console.log("Considering a new device...");
 
 			//device.udid = uuidV1(); // is returned to device which should immediately take over this value instead of mac for new registration
-			device.device_id = device.udid; // backwards compatibility
+			//device.device_id = device.udid; // backwards compatibility
 
 			devicelib.insert(device, device.udid, function(err, body, header) {
 
@@ -2311,7 +2333,9 @@ app.post("/device/register", function(req, res) {
 					console.log("Device inserted. Response: " + JSON.stringify(
 							body) +
 						"\n");
+					alog.log(owner, "Device inserted: " + udid);
 					reg.success = true;
+					reg.udid = udid;
 					reg.status = "OK";
 				}
 				sendRegistrationOKResponse(res, rdict);
@@ -2343,6 +2367,7 @@ app.post("/device/register", function(req, res) {
 					if (typeof(alias) !== undefined && alias !== null) {
 						existing.alias = alias;
 					}
+					// device notifies on owner change
 					if (typeof(owner) !== undefined && owner !== null) {
 						existing.owner = owner;
 					}
@@ -2376,7 +2401,8 @@ app.post("/device/register", function(req, res) {
 
 					console.log(error);
 
-					device.device_id = uuidV1();
+					device.udid = uuidV1();
+					device.device_id = udid; // will deprecate
 
 					device.lastupdate = new Date();
 					if (typeof(fw) !== undefined && fw !== null) {

@@ -26,23 +26,32 @@ if [[ -z $HOST ]]; then
 	HOST='localhost'
 fi
 
+MAC='00:00:00:00:00:00'
+
 echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing device registration..."
+
+RS='{ "registration" : { "mac" : "'$MAC'", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "version" : "1.0.0", "checksum" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "dhho4djVGeQ:APA91bFuuZWXDQ8vSR0YKyjWIiwIoTB1ePqcyqZFU3PIxvyZMy9htu9LGPmimfzdrliRfAdci-AtzgLCIV72xmoykk-kHcYRhAFWFOChULOGxrDi00x8GgenORhx_JVxUN_fjtsN5B7T", "alias" : "rabbit" } }'
 
 R=$(curl -s \
 -H "Authentication: ${API_KEY}" \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "version" : "1.0.0", "checksum" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "dhho4djVGeQ:APA91bFuuZWXDQ8vSR0YKyjWIiwIoTB1ePqcyqZFU3PIxvyZMy9htu9LGPmimfzdrliRfAdci-AtzgLCIV72xmoykk-kHcYRhAFWFOChULOGxrDi00x8GgenORhx_JVxUN_fjtsN5B7T", "alias" : "rabbit" } }' \
+-d $RS \
 http://$HOST:7442/device/register)
 
 # {"success":false,"status":"authentication"}
 
 echo "TODO: we need to parse UDID here for update test..."
 
+echo $RS
+
+echo $R
+
 SUCCESS=$(echo $R | tr -d "\n" | jq .registration.success)
+DEVICE_ID=$(echo $R | tr -d "\n" | jq .registration.udid)
 if [[ $SUCCESS == true ]]; then
 	echo_ok "Device registration result: $R"
 else
@@ -145,12 +154,14 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Assigning device alias..."
 
+CH='{ "changes" : { "device_id" : "'$DEVICE_ID'", "alias" : "new-test-alias" } }'
+
 R=$(curl -s -b cookies.jar \
 -H "Authentication: ${API_KEY}" \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "changes" : { "device_id" : "FFFFFFFFFFFF", "alias" : "new-test-alias" } }' \
+-d $CH \
 http://$HOST:7442/api/device/edit)
 
 # {"success":true,"status":"updated"}
@@ -335,7 +346,7 @@ R=$(curl -s -b cookies.jar \
 -d '{ "url" : "https://github.com/suculent/thinx-firmware-esp8266.git", "alias" : "thinx-firmware-esp8266" }' \
 http://$HOST:7442/api/user/source)
 
-SUCCESS=$(echo $R | jq .)
+SUCCESS=$(echo $R | jq .success)
 echo $SUCCESS
 SOURCEA=null
 if [[ $SUCCESS == true ]]; then
@@ -374,13 +385,11 @@ echo "» Testing source detach..."
 
 # {"success":true,"attached":null}
 
-DEVICE_ID="00:00:00:00:00:00"
-
 R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--d '{ "mac" : "${DEVICE_ID}" }' \
+-d '{ "mac" : "'${MAC}'" }' \
 http://$HOST:7442/api/device/detach)
 
 SUCCESS=$(echo $R | jq .success)
