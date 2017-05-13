@@ -2246,7 +2246,6 @@ app.post("/device/register", function(req, res) {
 		var success = false;
 		var status = "OK";
 
-		var device_id = mac;
 		var device_version = "1.0.0"; // default
 
 		if (typeof(reg.version) !== "undefined" && reg.version !== null) {
@@ -2268,12 +2267,14 @@ app.post("/device/register", function(req, res) {
 			checksum = reg.checksum;
 		}
 
-		var udid; // is returned to device which should immediately take over this value instead of mac for new registration
-
+		// will deprecate
+		var device_id;
 		if (typeof(reg.device_id) !== "undefined") {
-			udid = reg.device_id; // overridden
+			device_id = reg.device_id; // overridden
 		}
 
+		// will be set in stone
+		var udid; // is returned to device which should immediately take over this value instead of mac for new registration
 		if (typeof(reg.udid) !== "undefined") {
 			udid = reg.udid; // overridden
 		}
@@ -2382,7 +2383,7 @@ app.post("/device/register", function(req, res) {
 							res.end(JSON.stringify({
 								registration: {
 									success: true,
-									udid: udid,
+									udid: existing.udid,
 									status: "Device info updated."
 								}
 							}));
@@ -2435,7 +2436,7 @@ app.post("/device/register", function(req, res) {
 						res.end(JSON.stringify({
 							registration: {
 								success: true,
-								udid: udid
+								udid: device.udid
 							}
 						}));
 					} else {
