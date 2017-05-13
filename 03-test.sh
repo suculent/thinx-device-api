@@ -74,7 +74,7 @@ echo $R
 
 SUCCESS=$(echo $R | tr -d "\n" | jq .registration.success)
 if [[ $SUCCESS == true ]]; then
-  DEVICE_ID=$(echo $R | tr -d "\n" | jq .registration.device_id)
+  DEVICE_ID=$(echo $R | tr -d "\n" | jq .registration.udid)
   echo_ok "Assigning test UDID: ${DEVICE_ID}"
 	STATUS=$(echo $R | jq .status)
 	echo_ok "Device registration result: $R"
@@ -156,7 +156,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Assigning device alias..."
 
-CH='{ "changes" : { "device_id" : '$DEVICE_ID', "alias" : "new-test-alias" } }'
+CH='{ "changes" : { "device_id" : '${DEVICE_ID}', "alias" : "new-test-alias" } }'
 
 echo "POST ${CH}"
 
@@ -165,7 +165,7 @@ R=$(curl -s -b cookies.jar \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d "${CH}" \
+-d "$CH" \
 http://$HOST:7442/api/device/edit)
 
 # {"success":true,"status":"updated"}

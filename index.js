@@ -575,7 +575,7 @@ app.post("/api/device/revoke", function(req, res) {
 	console.log("Attempt to revoke device: " + udid);
 
 	devicelib.view("devicelib", "devices_by_udid", {
-		"key": udid,
+		//"key": udid,
 		"include_docs": true
 	}, function(err, body) {
 
@@ -2480,7 +2480,7 @@ app.post("/api/device/edit", function(req, res) {
 
 	var change = changes; // TODO: support bulk operations
 
-	var udid = change.device_id;
+	var udid = changes.device_id;
 
 	// TODO: Support bulk operations
 	if (typeof(udid) === "undefined") {
