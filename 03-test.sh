@@ -122,31 +122,6 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
-echo "☢ Testing device revocation..."
-
-R=$(curl -b cookies.jar \
--H "Authentication: ${API_KEY}" \
--H 'Origin: device' \
--H "User-Agent: THiNX-Client" \
--H "Content-Type: application/json" \
--d '{ "udid" : "FFFFFFFFFFFF" }' \
-http://$HOST:7442/api/device/revoke)
-
-# {"success":false,"status":"authentication"}
-
-echo $R
-
-SUCCESS=$(echo $R | tr -d "\n" | jq .success)
-echo $SUCCESS
-if [[ $SUCCESS == true ]]; then
-	STATUS=$(echo $R | jq .status)
-	echo_ok "Device revocation result: $R"
-else
-	echo_fail $R
-fi
-
-echo
-echo "--------------------------------------------------------------------------------"
 echo "» Fetching device catalog..."
 
 R=$(curl -s -b cookies.jar \
@@ -199,6 +174,7 @@ R=$(curl -s -b cookies.jar \
 http://$HOST:7442/api/user/apikey)
 
 # {"success":true,"api_key":"ece10e3effb17650420c280a7d5dce79110dc084","alias":"api-key-name"}
+echo $R
 
 SUCCESS=$(echo $R | jq .success)
 echo $SUCCESS
@@ -279,29 +255,6 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
-echo "» Revoking RSA key..."
-
-# {"revoked":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93","success":true}
-
-R=$(curl -v -b cookies.jar \
--H 'Origin: rtm.thinx.cloud' \
--H "User-Agent: THiNX-Web" \
--H "Content-Type: application/json" \
--d '{ "fingerprint" : "d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93" }' \
-http://$HOST:7442/api/user/rsakey/revoke)
-
-SUCCESS=$(echo $R | jq .success)
-echo $SUCCESS
-RPRINT=null
-if [[ $SUCCESS == true ]]; then
-	RPRINT=$(echo $R | jq .revoked)
-	echo_ok "Added RSA key: $RPRINT"
-else
-	echo_fail $R
-fi
-
-echo
-echo "--------------------------------------------------------------------------------"
 echo "» Pushing RSA key..."
 
 # {"success":true,"fingerprint":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93"}
@@ -340,6 +293,31 @@ echo $SUCCESS
 if [[ ! -z $SUCCESS ]]; then
 	KEYS=$(echo $R | jq .rsa_keys)
 	echo_ok "Listed RSA keys: $KEYS"
+else
+	echo_fail $R
+fi
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "» Revoking RSA key..."
+
+# {"revoked":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93","success":true}
+
+R=$(curl -b cookies.jar \
+-H 'Origin: rtm.thinx.cloud' \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+-d '{ "fingerprint" : "d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93" }' \
+http://$HOST:7442/api/user/rsakey/revoke)
+
+echo $R
+
+SUCCESS=$(echo $R | jq .success)
+echo $SUCCESS
+RPRINT=null
+if [[ $SUCCESS == true ]]; then
+	RPRINT=$(echo $R | jq .revoked)
+	echo_ok "Added RSA key: $RPRINT"
 else
 	echo_fail $R
 fi
@@ -551,6 +529,31 @@ R=$(curl -s -b cookies.jar \
 http://$HOST:7442/api/user/profile)
 
 echo $R
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "☢ Testing device revocation..."
+
+R=$(curl -b cookies.jar \
+-H "Authentication: ${API_KEY}" \
+-H 'Origin: device' \
+-H "User-Agent: THiNX-Client" \
+-H "Content-Type: application/json" \
+-d '{ "udid" : "FFFFFFFFFFFF" }' \
+http://$HOST:7442/api/device/revoke)
+
+# {"success":false,"status":"authentication"}
+
+echo $R
+
+SUCCESS=$(echo $R | tr -d "\n" | jq .success)
+echo $SUCCESS
+if [[ $SUCCESS == true ]]; then
+	STATUS=$(echo $R | jq .status)
+	echo_ok "Device revocation result: $R"
+else
+	echo_fail $R
+fi
 
 #echo
 #echo "☢ Running nyc code coverage..."

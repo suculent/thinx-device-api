@@ -2725,7 +2725,6 @@ app.post("/api/build", function(req, res) {
 		var rows = body.rows; // devices returned
 		var udid = null;
 		var device = null;
-		var mac = null;
 
 		for (var row in rows) {
 			device = rows[row].doc;
@@ -2739,7 +2738,6 @@ app.post("/api/build", function(req, res) {
 				console.log("Searching " + device_udid_hash + " in " + db_udid);
 				if (device_udid_hash.indexOf(db_udid) != -1) {
 					udid = device.device_id; // target device ID
-					mac = device.mac; // target device ID mac, will deprecate
 					break;
 				}
 			}
@@ -2748,7 +2746,6 @@ app.post("/api/build", function(req, res) {
 				if (username.indexOf(device.owner) !== -1) {
 					if (device_udid_hash.indexOf(db_udid) != -1) {
 						udid = device.device_id; // target device ID hash
-						mac = device.mac; // target device ID mac, will deprecate
 						break;
 					}
 				}
@@ -2789,8 +2786,11 @@ app.post("/api/build", function(req, res) {
 				}
 			}
 
+			console.log(udid);
+			console.log(owner);
+			console.log(git);
+
 			if ((typeof(udid) === "undefined" || build === null) ||
-				(typeof(mac) === "undefined" || mac === null) ||
 				(typeof(owner) === "undefined" || owner === null) ||
 				(typeof(git) === "undefined" || git === null)) {
 				rdict = {
