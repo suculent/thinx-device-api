@@ -574,8 +574,8 @@ app.post("/api/device/revoke", function(req, res) {
 	alog.log(owner, "Attempt to revoke device: " + udid);
 	console.log("Attempt to revoke device: " + udid);
 
-	devicelib.view("devicelib", "devices_by_id", {
-		//"key": udid,
+	devicelib.view("devicelib", "devices_by_udid", {
+		"key": udid,
 		"include_docs": true
 	}, function(err, body) {
 
@@ -1016,7 +1016,7 @@ app.post("/api/user/source/revoke", function(req, res) {
 
 		var doc = user;
 
-		console.log("doc:" + doc);
+		console.log("doc:" + JSON.stringify(doc));
 
 		if (!doc) {
 			console.log("Owner " + owner + " not found.");
@@ -1201,11 +1201,11 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			return;
 		}
 
-		console.log("FIXME: Seeking rsa_keys in: " + JSON.stringify(user));
+		//console.log("FIXME: Seeking rsa_keys in: " + JSON.stringify(user));
 
 		var exportedKeys = [];
 		var fingerprints = Object.keys(user.rsa_keys);
-		console.log("fingerprints: " + JSON.stringify[fingerprints]);
+		console.log("fingerprints: " + JSON.stringify(fingerprints));
 		for (var i = 0; i < fingerprints.length; i++) {
 			var key = user.rsa_keys[fingerprints[i]];
 			var info = {
@@ -1214,8 +1214,6 @@ app.get("/api/user/rsakey/list", function(req, res) {
 			};
 			exportedKeys.push(info);
 		}
-
-		console.log("FIXME: exportedKeys: " + JSON.stringify(exportedKeys));
 
 		var reply = JSON.stringify({
 			rsa_keys: exportedKeys
@@ -2192,8 +2190,6 @@ app.post("/device/register", function(req, res) {
 				}
 			});
 			return;
-		} else {
-			isNew = false;
 		}
 
 		if (body.rows.length === 0) {
@@ -2275,8 +2271,13 @@ app.post("/device/register", function(req, res) {
 		}
 
 		var udid = uuidV1(); // is returned to device which should immediately take over this value instead of mac for new registration
+
+		if (typeof(reg.device_id) !== "undefined") {
+			udid = reg.device_id; // overridden
+		}
+
 		if (typeof(reg.udid) !== "undefined") {
-			//udid = reg.udid; overridden
+			udid = reg.udid; // overridden
 		}
 
 		//
@@ -2351,148 +2352,115 @@ app.post("/device/register", function(req, res) {
 			console.log("Update semver response: " + update);
 		}
 
-		if (isNew) {
 
-			// Create UDID for new device
-			console.log("Considering a new device...");
 
-			//device.udid = uuidV1(); // is returned to device which should immediately take over this value instead of mac for new registration
-			//device.device_id = device.udid; // backwards compatibility
+		console.log("Considering a device update...");
 
-			devicelib.insert(device, device.udid, function(err, body, header) {
+		// KNOWN DEVICES:
+		// - see if new firmware is available and reply FIRMWARE_UPDATE with url
+		// - see if alias or owner changed
+		// - otherwise reply just OK
 
-				if (err == "Error: error happened in DB connection") {
-					process.exit(3);
+		devicelib.get(mac, function(error, existing) {
+
+			if (!error) {
+
+				existing.lastupdate = new Date();
+				if (typeof(fw) !== undefined && fw !== null) {
+					existing.firmware = fw;
+				}
+				if (typeof(hash) !== undefined && hash !== null) {
+					existing.hash = hash;
+				}
+				if (typeof(push) !== undefined && push !== null) {
+					existing.push = push;
+				}
+				if (typeof(alias) !== undefined && alias !== null) {
+					existing.alias = alias;
+				}
+				// device notifies on owner change
+				if (typeof(owner) !== undefined && owner !== null) {
+					existing.owner = owner;
 				}
 
-				if (err) {
-					console.log("Inserting device failed. " + err + "\n");
-					reg.success = false;
-					reg.status = "Insertion failed";
-					console.log(reg);
 
-				} else {
-					console.log("Device inserted. Response: " + JSON.stringify(
-							body) +
-						"\n");
-					alog.log(owner, "Device inserted: " + udid);
-					reg.success = true;
-					reg.udid = udid;
-					reg.status = "OK";
+				devicelib.insert(existing, mac, function(err, body, header) {
+					if (!err) {
+						reg.success = true;
+						console.log("Device info updated.");
+						sendRegistrationOKResponse(res, rdict);
+
+						return;
+
+					} else {
+
+						reg.success = false;
+						reg.this.status = "Insert failed";
+						console.log("Device record update failed." + err);
+
+						console.log("CHECK5:");
+						console.log(reg);
+						console.log("CHECK5.1:");
+						console.log(rdict);
+
+						sendRegistrationOKResponse(res, rdict);
+					}
+				});
+
+			} else {
+
+				// IS NEW!
+
+				console.log(error);
+
+				device.udid = uuidV1();
+				device.device_id = udid; // will deprecate
+
+				device.lastupdate = new Date();
+				if (typeof(fw) !== undefined && fw !== null) {
+					device.firmware = fw;
 				}
-				sendRegistrationOKResponse(res, rdict);
-			});
-
-		} else {
-
-			console.log("Considering a device update...");
-
-			// KNOWN DEVICES:
-			// - see if new firmware is available and reply FIRMWARE_UPDATE with url
-			// - see if alias or owner changed
-			// - otherwise reply just OK
-
-			devicelib.get(mac, function(error, existing) {
-
-				if (!error) {
-
-					existing.lastupdate = new Date();
-					if (typeof(fw) !== undefined && fw !== null) {
-						existing.firmware = fw;
-					}
-					if (typeof(hash) !== undefined && hash !== null) {
-						existing.hash = hash;
-					}
-					if (typeof(push) !== undefined && push !== null) {
-						existing.push = push;
-					}
-					if (typeof(alias) !== undefined && alias !== null) {
-						existing.alias = alias;
-					}
-					// device notifies on owner change
-					if (typeof(owner) !== undefined && owner !== null) {
-						existing.owner = owner;
-					}
-
-
-					devicelib.insert(existing, mac, function(err, body, header) {
-						if (!err) {
-							reg.success = true;
-							console.log("Device info updated.");
-							sendRegistrationOKResponse(res, rdict);
-
-							return;
-
-						} else {
-
-							reg.success = false;
-							reg.this.status = "Insert failed";
-							console.log("Device record update failed." + err);
-
-							console.log("CHECK5:");
-							console.log(reg);
-							console.log("CHECK5.1:");
-							console.log(rdict);
-
-							sendRegistrationOKResponse(res, rdict);
-						}
-					});
-
-				} else {
-
-					// IS NEW!
-
-					console.log(error);
-
-					device.udid = uuidV1();
-					device.device_id = udid; // will deprecate
-
-					device.lastupdate = new Date();
-					if (typeof(fw) !== undefined && fw !== null) {
-						device.firmware = fw;
-					}
-					if (typeof(hash) !== undefined && hash !== null) {
-						device.hash = hash;
-					}
-					if (typeof(push) !== undefined && push !== null) {
-						device.push = push;
-					}
-					if (typeof(alias) !== undefined && alias !== null) {
-						device.alias = alias;
-					}
-					if (typeof(owner) !== undefined && owner !== null) {
-						device.owner = owner;
-					}
-					if (typeof(udid) !== undefined && udid !== null) {
-						device.udid = udid;
-					}
-
-					devicelib.insert(device, mac, function(err, body, header) {
-						if (!err) {
-							reg.success = true;
-							console.log("Device info created.");
-
-							sendRegistrationOKResponse(res, rdict);
-
-							return;
-
-						} else {
-
-							reg.success = false;
-							reg.this.status = "Insert failed";
-							console.log("Device record update failed." + err);
-
-							console.log("CHECK6:");
-							console.log(reg);
-							console.log("CHECK6.1:");
-							console.log(rdict);
-
-							sendRegistrationOKResponse(res, rdict);
-						}
-					});
+				if (typeof(hash) !== undefined && hash !== null) {
+					device.hash = hash;
 				}
-			});
-		}
+				if (typeof(push) !== undefined && push !== null) {
+					device.push = push;
+				}
+				if (typeof(alias) !== undefined && alias !== null) {
+					device.alias = alias;
+				}
+				if (typeof(owner) !== undefined && owner !== null) {
+					device.owner = owner;
+				}
+				if (typeof(udid) !== undefined && udid !== null) {
+					device.udid = udid;
+				}
+
+				devicelib.insert(device, mac, function(err, body, header) {
+					if (!err) {
+						reg.success = true;
+						console.log("Device info created.");
+
+						sendRegistrationOKResponse(res, rdict);
+
+						return;
+
+					} else {
+
+						reg.success = false;
+						reg.this.status = "Insert failed";
+						console.log("Device record update failed." + err);
+
+						console.log("CHECK6:");
+						console.log(reg);
+						console.log("CHECK6.1:");
+						console.log(rdict);
+
+						sendRegistrationOKResponse(res, rdict);
+					}
+				});
+			}
+		});
 	});
 });
 
@@ -2849,7 +2817,7 @@ app.post("/api/build", function(req, res) {
 
 			// Finds first source with given source_alias
 			var sources = doc.repos;
-			console.log("Searching for repository to be built:" + build.source)
+			console.log("Searching for repository to be built:" + build.source);
 			console.log("Parsing repos:" + JSON.stringify(sources));
 			for (var index in sources) {
 				var source = sources[index];
@@ -3283,7 +3251,8 @@ var options = {
 
 // FIXME: Link to letsencrypt SSL keys using configuration
 https.createServer(options, app).listen(serverPort + 1);
-http.createServer(app).listen(serverPort);
+http.createServer(
+	app).listen(serverPort);
 
 // Will probably deprecate...
 //app.listen(serverPort, function() {
@@ -3292,10 +3261,12 @@ var product = package_info.description;
 var version = package_info.version;
 
 console.log("");
-console.log("-=[ ☢ " + product + " v" + version + " rev. " + app.version() +
+console.log("-=[ ☢ " + product + " v" + version + " rev. " +
+	app.version() +
 	" ☢ ]=-");
 console.log("");
-console.log("» Started on port " + serverPort + " (HTTP) and " + (serverPort +
+console.log("» Started on port " + serverPort +
+	" (HTTP) and " + (serverPort +
 		1) +
 	" (HTTPS)");
 //});

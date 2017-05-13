@@ -6,7 +6,7 @@
       "map": "function (doc) { if(doc.mac) { emit (doc.mac, doc); } }"
     },
     "devices_by_owner": {
-      "map": "function (doc) { if(doc.owner) { emit (doc); } }"
+      "map": "function (doc) { if(doc.owner) { emit (doc.owner, doc); } }"
     },
     "devices_by_source": {
       "map": "function (doc) { if(doc.source) { emit (doc); } }"
@@ -21,7 +21,7 @@
       "map": "function (doc) { if(doc.device_id) { emit (doc); } }"
     },
     "devices_by_udid": {
-      "map": "function (doc) { if(doc.device_id) { emit (doc); } }"
+      "map": "function (doc) { if(doc.udid) { emit (doc); } }"
     }
   }
 }

@@ -150,6 +150,8 @@ else
 	echo_fail $R
 fi
 
+sleep 1
+
 echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Assigning device alias..."
@@ -288,6 +290,8 @@ if [[ $SUCCESS == true ]]; then
 else
 	echo_fail $R
 fi
+
+sleep 1
 
 echo
 echo "--------------------------------------------------------------------------------"
