@@ -600,7 +600,7 @@ app.post("/api/device/revoke", function(req, res) {
 
 		for (var dindex in body.rows) {
 			var dev = body.rows[0];
-			console.log("dev:" + JSON.sringify(dev));
+			console.log("dev:" + JSON.stringify(dev));
 			if (udid.indexof(dev.udid) != -1) {
 				doc = dev;
 				break;
@@ -938,8 +938,6 @@ app.post("/api/user/source", function(req, res) {
 			console.log(err);
 			return;
 		}
-
-		console.log("body:" + JSON.stringify(body));
 
 		var user = body;
 		var doc = body;
