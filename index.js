@@ -2173,6 +2173,8 @@ app.post("/device/register", function(req, res) {
 		return;
 	}
 
+	console.log("Searching owners...");
+
 	userlib.view("users", "owners_by_username", { // because owners_by_apikey does not work anymore... apikeys should have to be in separate table
 		"include_docs": true // might be useless
 	}, function(err, body) {
@@ -2351,9 +2353,13 @@ app.post("/device/register", function(req, res) {
 		// - see if alias or owner changed
 		// - otherwise reply just OK
 
+		console.log("Searching device...");
+
 		devicelib.get(mac, function(error, existing) {
 
 			if (!error) {
+
+				console.log("Found existing device: " + JSON.stringify(existing));
 
 				existing.lastupdate = new Date();
 				if (typeof(fw) !== undefined && fw !== null) {
@@ -2422,12 +2428,8 @@ app.post("/device/register", function(req, res) {
 				if (typeof(alias) !== undefined && alias !== null) {
 					device.alias = alias;
 				}
-				if (typeof(owner) !== undefined && owner !== null) {
-					device.owner = owner;
-				}
-				if (typeof(udid) !== undefined && udid !== null) {
-					device.udid = udid;
-				}
+
+				console.log("Inserting device..." + JSON.stringify(device));
 
 				devicelib.insert(device, mac, function(err, body, header) {
 					if (!err) {
