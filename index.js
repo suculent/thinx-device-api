@@ -597,13 +597,8 @@ app.post("/api/device/revoke", function(req, res) {
 		doc.udid = udid;
 
 		var logmessage = "Revoking device: " + doc.udid;
-
 		console.log(logmessage);
-
 		alog.log(owner, logmessage);
-
-		doc.source = null;
-		delete doc._rev;
 
 		devicelib.destroy(doc._id, doc._rev, function(err) {
 			if (err) {
@@ -3234,6 +3229,7 @@ var watcher_callback = function(result) {
 				"No change detected on repository so far."
 			);
 		} else {
+			// watcher_callback result: {"local_path":"/var/www/html/bin/8beef0c4f4a758c32bcf4f52fa59d401e9400bbe97d302d22f2b837f0b88d616/e52bfe40-3726-11e7-915b-933ab4410309","version":747,"revision":"27ee5b4cd3eee787d60dd7deccc2a2a6d34f3a92","changed":true}
 			console.log(
 				"CHANGE DETECTED! - TODO: Commence re-build (will notify user but needs to get all required user data first (owner/device is in path)"
 			);
