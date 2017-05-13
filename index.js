@@ -2431,23 +2431,17 @@ app.post("/device/register", function(req, res) {
 				devicelib.insert(device, mac, function(err, body, header) {
 					if (!err) {
 						reg.success = true;
+						reg.udid = udid;
 						console.log("Device info created.");
-
 						sendRegistrationOKResponse(res, rdict);
-
-						return;
-
 					} else {
-
 						reg.success = false;
 						reg.this.status = "Insert failed";
 						console.log("Device record update failed." + err);
-
 						console.log("CHECK6:");
 						console.log(reg);
 						console.log("CHECK6.1:");
 						console.log(rdict);
-
 						sendRegistrationOKResponse(res, rdict);
 					}
 				});
