@@ -601,7 +601,7 @@ app.post("/api/device/revoke", function(req, res) {
 		for (var dindex in body.rows) {
 			var dev = body.rows[0];
 			console.log("dev:" + JSON.stringify(dev));
-			if (udid.indexof(dev.udid) != -1) {
+			if (udid.indexOf(dev.udid) != -1) {
 				doc = dev;
 				break;
 			}

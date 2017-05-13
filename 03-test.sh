@@ -150,33 +150,6 @@ else
 	echo_fail $R
 fi
 
-sleep 1
-
-echo
-echo "--------------------------------------------------------------------------------"
-echo "☢ Assigning device alias..."
-
-CH='{ "changes" : { "device_id" : '${DEVICE_ID}', "alias" : "new-test-alias" } }'
-
-echo "POST ${CH}"
-
-R=$(curl -s -b cookies.jar \
--H "Authentication: ${API_KEY}" \
--H 'Origin: device' \
--H "User-Agent: THiNX-Client" \
--H "Content-Type: application/json" \
--d "$CH" \
-http://$HOST:7442/api/device/edit)
-
-# {"success":true,"status":"updated"}
-
-SUCCESS=$(echo $R | tr -d "\n" | jq .success)
-if [[ $SUCCESS == true ]]; then
-	echo_ok "Alias assignment result: $R"
-else
-	echo_fail $R
-fi
-
 echo
 echo "--------------------------------------------------------------------------------"
 echo "» Requesting new API Key..."
@@ -525,30 +498,6 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
-echo "☢ FIXME: Testing device revocation..."
-
-DR='{ "udid" : '${DEVICE_ID}' }'
-
-R=$(curl -s -b cookies.jar \
--H "Authentication: ${API_KEY}" \
--H 'Origin: device' \
--H "User-Agent: THiNX-Client" \
--H "Content-Type: application/json" \
--d "$DR" \
-http://$HOST:7442/api/device/revoke)
-
-# {"success":false,"status":"authentication"}
-
-SUCCESS=$(echo $R | tr -d "\n" | jq .success)
-if [[ $SUCCESS == true ]]; then
-	STATUS=$(echo $R | jq .status)
-	echo_ok "Device revocation result: $R"
-else
-	echo_fail $R
-fi
-
-echo
-echo "--------------------------------------------------------------------------------"
 echo "» Testing source removal..."
 
 # {"success":true,"removed":"thinx-test-repo"}
@@ -568,6 +517,61 @@ if [[ $SUCCESS == true ]]; then
 else
 	echo_fail "$R"
 fi
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "☢ FIXME: Testing device revocation..."
+
+DR='{ "udid" : '${DEVICE_ID}' }'
+
+echo $DR
+
+R=$(curl -s -b cookies.jar \
+-H "Authentication: ${API_KEY}" \
+-H 'Origin: device' \
+-H "User-Agent: THiNX-Client" \
+-H "Content-Type: application/json" \
+-d "$DR" \
+http://$HOST:7442/api/device/revoke)
+
+# {"success":false,"status":"authentication"}
+
+SUCCESS=$(echo $R | tr -d "\n" | jq .success)
+if [[ $SUCCESS == true ]]; then
+	STATUS=$(echo $R | jq .status)
+	echo_ok "Device revocation result: $R"
+else
+	echo_fail $R
+fi
+
+sleep 1
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "☢ FIXME: Assigning device alias..."
+
+CH='{ "changes" : { "device_id" : '${DEVICE_ID}', "alias" : "new-test-alias" } }'
+
+echo "POST ${CH}"
+
+R=$(curl -s -b cookies.jar \
+-H "Authentication: ${API_KEY}" \
+-H 'Origin: device' \
+-H "User-Agent: THiNX-Client" \
+-H "Content-Type: application/json" \
+-d "$CH" \
+http://$HOST:7442/api/device/edit)
+
+# {"success":true,"status":"updated"}
+
+SUCCESS=$(echo $R | tr -d "\n" | jq .success)
+if [[ $SUCCESS == true ]]; then
+	echo_ok "Alias assignment result: $R"
+else
+	echo_fail $R
+fi
+
+
 
 #echo
 #echo "☢ Running nyc code coverage..."
