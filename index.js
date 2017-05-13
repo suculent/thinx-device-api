@@ -599,9 +599,9 @@ app.post("/api/device/revoke", function(req, res) {
 		for (var dindex in body.rows) {
 			var dev = body.rows[0];
 			console.log("dev:" + JSON.stringify(dev));
-			if (udid.indexOf(dev.udid) != -1) {
+			if (udid.indexOf(dev.doc.udid) != -1) {
 				console.log("Found device");
-				doc = dev;
+				doc = dev.doc;
 				break;
 			}
 		}
@@ -621,7 +621,7 @@ app.post("/api/device/revoke", function(req, res) {
 		console.log(logmessage);
 		alog.log(owner, logmessage);
 
-		devicelib.destroy(doc._id, doc._rev, function(err) {
+		devicelib.destroy(doc.id, doc._rev, function(err) {
 			if (err) {
 				console.log("/api/device/revoke ERROR:" + err);
 				res.end(JSON.stringify({
@@ -2515,12 +2515,13 @@ app.post("/api/device/edit", function(req, res) {
 			return;
 		}
 
-		console.log("searching: " + udid);
+		console.log("searching: " + udid + " in: " + JSON.stringify(body.rows));
 
 		var device = null;
 
 		for (var dindex in body.rows) {
 			var dev = body.rows[dindex].key;
+			console.log("adev: " + JSON.stringify(dev));
 			console.log("Comparing " + udid + " to " + dev.device_id);
 			if (udid.indexOf(dev.device_id) != -1) {
 				console.log("Found dev" + JSON.stringify(dev));
