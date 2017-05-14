@@ -611,7 +611,7 @@ app.post("/api/device/revoke", function(req, res) {
 
 			console.log("Device to be revoked: " + JSON.stringify(doc));
 
-			if (typeof(doc) === "undefined") {
+			if (typeof(doc) === "undefined" || (doc == null)) {
 				res.end(JSON.stringify({
 					success: false,
 					status: "device_not_found",

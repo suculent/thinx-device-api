@@ -521,7 +521,7 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
-echo "☢ FIXME: Assigning device alias..."
+echo "☢ Assigning device alias..."
 
 CH='{ "changes" : { "device_id" : '${DEVICE_ID}', "alias" : "new-test-alias" } }'
 
