@@ -3079,13 +3079,13 @@ app.get("/api/user/logs/build/list", function(req, res) {
 
 		var builds = [];
 		for (var bindex in body.rows) {
-			var row = body.rows[bindex].doc;
-			console.log(JSON.stringify(row));
+			var row = body.rows[bindex];
+			console.log("row: " + JSON.stringify(row));
 			var build = {
-				build_id: row.id,
-				message: row.message,
-				date: row.date,
-				udid: row.udid
+				build_id: row._id,
+				message: row.log.message,
+				date: row.log.date,
+				udid: row.log.udid
 			};
 			builds.push(build);
 		}
