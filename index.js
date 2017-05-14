@@ -2741,14 +2741,17 @@ app.post("/api/build", function(req, res) {
 		dryrun = build.dryrun;
 	}
 
-	if (typeof(build.hash) === "undefined") {
+	var udid = null;
+	if (typeof(build.udid) !== "undefined") {
+		udid = build.udid;
+	} else {
 		return res.end(JSON.stringify({
 			success: false,
-			status: "missing_device_hash"
+			status: "missing_device_udid"
 		}));
 	}
-	var device_udid_hash = build.hash;
-	console.log("Build for hash: " + build.hash);
+
+	console.log("Build for udid: " + udid);
 
 	if (typeof(build.source) === "undefined") {
 		return res.end(JSON.stringify({
@@ -2773,7 +2776,7 @@ app.post("/api/build", function(req, res) {
 		}
 
 		var rows = body.rows; // devices returned
-		var udid = device_udid_hash;
+		var udid = null;
 		var device = null;
 
 		for (var row in rows) {
@@ -2785,8 +2788,8 @@ app.post("/api/build", function(req, res) {
 			var device_owner = device.owner;
 			console.log("Searching " + owner + " in " + device_owner);
 			if (device_owner.indexOf(owner) !== -1) {
-				console.log("Searching " + device_udid_hash + " in " + db_udid);
-				if (device_udid_hash.indexOf(db_udid) != -1) {
+				console.log("Searching " + udid + " in " + db_udid);
+				if (udid.indexOf(db_udid) != -1) {
 					udid = device.udid; // target device ID
 					break;
 				}
@@ -2794,7 +2797,7 @@ app.post("/api/build", function(req, res) {
 			// will deprecate when all devices will be re-registered using owner and not username
 			if (typeof(username) !== "undefined") {
 				if (username.indexOf(device.owner) !== -1) {
-					if (device_udid_hash.indexOf(db_udid) != -1) {
+					if (udid.indexOf(db_udid) != -1) {
 						udid = device.udid; // target device ID hash
 						break;
 					}

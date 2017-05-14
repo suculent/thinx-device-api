@@ -357,7 +357,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing builder..."
 
-BC='{ "build" : { "hash" : '${DEVICE_ID}', "source" : "thinx-test-repo", "dryrun" : true } }'
+BC='{ "build" : { "udid" : '${DEVICE_ID}', "source" : "thinx-test-repo", "dryrun" : true } }'
 
 R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
