@@ -2530,8 +2530,8 @@ app.post("/api/device/edit", function(req, res) {
 			for (var dindex in body.rows) {
 				var dev = body.rows[dindex].value;
 				console.log("adev: " + JSON.stringify(dev));
-				console.log("Comparing " + udid + " to " + dev.device_id);
-				if (udid.indexOf(dev.device_id) != -1) {
+				console.log("Comparing " + udid + " to " + dev.udid);
+				if (udid.indexOf(dev.udid) != -1) {
 					console.log("Found dev" + JSON.stringify(dev));
 					device = dev;
 					break;
