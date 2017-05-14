@@ -598,11 +598,11 @@ app.post("/api/device/revoke", function(req, res) {
 			var doc = null;
 
 			for (var dindex in body.rows) {
-				var device = body.rows[0].value;
+				var device = body.rows[dindex].value;
 				console.log("dev:" + JSON.stringify(device));
 				var device_udid = device.udid;
 				console.log("Comparing " + udid + "to " + device_udid);
-				if (udid.indexOf(device_udid) != -1) {
+				if (device_udid.indexOf(udid) != -1) {
 					console.log("Found device");
 					doc = device;
 					break;
