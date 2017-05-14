@@ -600,8 +600,9 @@ app.post("/api/device/revoke", function(req, res) {
 
 			for (var dindex in body.rows) {
 				var device = body.rows[0].value;
-				var device_udid = device.udid;
 				console.log("dev:" + JSON.stringify(device));
+				var device_udid = device.udid;
+				console.log("Comparing " + udid + "to " + device_udid);
 				if (udid.indexOf(device_udid) != -1) {
 					console.log("Found device");
 					doc = device;
@@ -611,7 +612,7 @@ app.post("/api/device/revoke", function(req, res) {
 
 			console.log("Device to be revoked: " + JSON.stringify(doc));
 
-			if (typeof(doc) === "undefined" || (doc == null)) {
+			if (typeof(doc) === "undefined" || (doc === null)) {
 				res.end(JSON.stringify({
 					success: false,
 					status: "device_not_found",
