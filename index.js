@@ -1086,19 +1086,19 @@ app.post("/api/user/source/revoke", function(req, res) {
 					// no devices to be detached
 				}
 
-				console.log("Searching for attached devices with repo: " + alias +
+				console.log("repo_revoke_Searching for attached devices with repo: " +
+					alias +
 					" in: " + JSON.stringify(body.rows));
 
 				// Warning, may not restore device if called without device parameter!
 				var insert_on_success = function(err, device) {
-					console.log("insert_on_success err: " + err);
-					console.log("insert_on_success device: " + JSON.stringify(device));
+					console.log("(2) repo_revoke_insert_on_success err: " + err);
 					var newdevice = device;
 					delete newdevice._rev;
 					delete newdevice._deleted_conflicts;
 					devicelib.insert(newdevice, newdevice._id, function(err) {
 						if (err) {
-							console.log("pre-insert err:" + err);
+							console.log("(3) repo_revoke_pre-insert err:" + err);
 						}
 					});
 				};
@@ -1106,10 +1106,10 @@ app.post("/api/user/source/revoke", function(req, res) {
 				for (var dindex in body.rows) {
 					var device = body.rows[0].value;
 					if (device.source == alias) {
-						console.log("alias equal: Will destroy/insert device.");
+						console.log("repo_revoke alias equal: Will destroy/insert device.");
 						device.source = null;
-						insert_on_success(false, device); // may result in conflict or duplicate
 						devicelib.destroy(device._id, device._rev, function(err) {
+							console.log("(1) repo_revoke_destroy err: " + err);
 							insert_on_success(err, device);
 						});
 					}
@@ -3083,7 +3083,7 @@ app.get("/api/user/logs/build/list", function(req, res) {
 			var row = body.rows[bindex];
 			//console.log("row: " + JSON.stringify(row));
 			// FIXME: Should cover all logs...
-			if (row.doc.log.length !== 0) {
+			if (row.doc.log.length !== 1) {
 				console.log("UNSOLVED CASE - LOG TOO LONG!");
 			}
 			var lastIndex = row.doc.log.length - 1;
