@@ -3079,8 +3079,7 @@ app.get("/api/user/logs/build/list", function(req, res) {
 
 		var builds = [];
 		for (var bindex in body.rows) {
-			console.log(bindex);
-			var row = body.rows[bindex].value;
+			var row = body.rows[bindex];
 			console.log(JSON.stringify(row));
 			var build = {
 				build_id: row.id,
