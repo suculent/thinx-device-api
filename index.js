@@ -2498,7 +2498,7 @@ app.post("/api/device/edit", function(req, res) {
 	devicelib.view("devicelib", "devices_by_owner", {
 			key: owner,
 			include_docs: true
-		}
+		},
 
 		function(err, body) {
 
