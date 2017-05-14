@@ -1027,8 +1027,6 @@ app.post("/api/user/source/revoke", function(req, res) {
 
 		var doc = user;
 
-		console.log("doc:" + JSON.stringify(doc));
-
 		if (!doc) {
 			console.log("Owner " + owner + " not found.");
 			res.end(JSON.stringify({
@@ -1097,8 +1095,11 @@ app.post("/api/user/source/revoke", function(req, res) {
 					console.log("insert_on_success device: " + JSON.stringify(device));
 					var newdevice = device;
 					delete newdevice._rev;
+					delete newdevice._deleted_conflicts;
 					devicelib.insert(newdevice, newdevice._id, function(err) {
-						console.log("pre-insert err:" + err);
+						if (err) {
+							console.log("pre-insert err:" + err);
+						}
 					});
 				};
 
@@ -3080,7 +3081,7 @@ app.get("/api/user/logs/build/list", function(req, res) {
 		var builds = [];
 		for (var bindex in body.rows) {
 			var row = body.rows[bindex];
-			console.log("row: " + JSON.stringify(row));
+			//console.log("row: " + JSON.stringify(row));
 			// FIXME: Should cover all logs...
 			var lastIndex = row.doc.log.length - 1;
 			var build = {
