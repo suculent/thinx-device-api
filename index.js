@@ -313,7 +313,7 @@ app.post("/api/user/profile", function(req, res) {
 					alog.log(owner, "Profile update failed.");
 					res.end(JSON.stringify({
 						"success": true,
-						update_key: update_value
+						update_key: doc
 					}));
 				}
 			});
