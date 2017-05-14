@@ -3324,7 +3324,7 @@ app.post("/api/login", function(req, res) {
 				}
 			});
 		} else {
-			failureResponse(res, 541, "authentication exception");
+			failureResponse(res, 403, "unauthorized");
 		}
 	});
 });

@@ -6,16 +6,16 @@
 
 **ROADMAP**
 
-x 1: Profile Editing
-x 2: Device Editing
-* 3: Use API Keys from Redis
-* 4: Working Arduino C implementation (lib?)
-* 5: Bare data support (LUA/uPy)
-* 6: Statistics
-x 7: Fix postfix
-* 8: Builder, build tests
+* 1: Device Editing
+* 2: Use API Keys from Redis
+* 3: Working Arduino C implementation (lib?)
+* 4: Bare data support (LUA/uPy)
+* 5: Statistics
+* 6: Builder, build tests
 
 ### Last week
+
+14/5/2017 - 1.4.850: base build logs; working on statistics aggregator, added tests; profile editing; device editing; migration to udid in requests
 
 13/5/2017 - 1.4.800: all current tests pass
 
