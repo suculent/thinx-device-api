@@ -574,72 +574,74 @@ app.post("/api/device/revoke", function(req, res) {
 	alog.log(owner, "Attempt to revoke device: " + udid);
 	console.log("Attempt to revoke device: " + udid);
 
-	devicelib.view("devicelib", "devices_by_udid", {
-		//"key": udid,
-		"include_docs": true
-	}, function(err, body) {
+	devicelib.view("devicelib", "devices_by_owner",
+		/*{
+			"key": owner,
+			"include_docs": true
+		},*/
+		function(err, body) {
 
-		if (err) {
-			console.log(err);
-			return;
-		}
-
-		if (body.rows.count === 0) {
-			alog.log(owner, "No such device: " + doc.alias +
-				" (${doc.udid})");
-			res.end(JSON.stringify({
-				success: false,
-				status: "no_such_device"
-			}));
-			return;
-		}
-
-		var doc = null;
-
-		for (var dindex in body.rows) {
-			var dev = body.rows[0];
-			console.log("dev:" + JSON.stringify(dev));
-			if (udid.indexOf(dev.doc.udid) != -1) {
-				console.log("Found device");
-				doc = dev.doc;
-				break;
-			}
-		}
-
-		console.log("Device to be revoked: " + JSON.stringify(doc));
-
-		if (typeof(doc) === "undefined") {
-			res.end(JSON.stringify({
-				success: false,
-				status: "device_not_found",
-				err_udid: udid
-			}));
-			return; // prevent breaking db
-		}
-
-		var logmessage = "Revoking device: " + JSON.stringify(doc);
-		console.log(logmessage);
-		alog.log(owner, logmessage);
-
-		devicelib.destroy(doc.id, doc._rev, function(err) {
 			if (err) {
-				console.log("/api/device/revoke ERROR:" + err);
+				console.log(err);
+				return;
+			}
+
+			if (body.rows.count === 0) {
+				alog.log(owner, "No such device: " + doc.alias +
+					" (${doc.udid})");
 				res.end(JSON.stringify({
 					success: false,
-					status: "revocation_failed"
+					status: "no_such_device"
 				}));
 				return;
-			} else {
-				var logmessage = "Revocation succeed: " + doc.alias +
-					" (${doc.udid})";
-				alog.log(owner, logmessage);
-				res.end(JSON.stringify({
-					success: true,
-					revoked: doc.udid
-				}));
 			}
+
+			var doc = null;
+
+			for (var dindex in body.rows) {
+				var dev = body.rows[0];
+				console.log("dev:" + JSON.stringify(dev));
+				if (udid.indexOf(dev.doc.udid) != -1) {
+					console.log("Found device");
+					doc = dev.doc;
+					break;
+				}
+			}
+
+			console.log("Device to be revoked: " + JSON.stringify(doc));
+
+			if (typeof(doc) === "undefined") {
+				res.end(JSON.stringify({
+					success: false,
+					status: "device_not_found",
+					err_udid: udid
+				}));
+				return; // prevent breaking db
+			}
+
+			var logmessage = "Revoking device: " + JSON.stringify(doc);
+			console.log(logmessage);
+			alog.log(owner, logmessage);
+
+			devicelib.destroy(doc.id, doc._rev, function(err) {
+				if (err) {
+					console.log("/api/device/revoke ERROR:" + err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "revocation_failed"
+					}));
+					return;
+				} else {
+					var logmessage = "Revocation succeed: " + doc.alias +
+						" (${doc.udid})";
+					alog.log(owner, logmessage);
+					res.end(JSON.stringify({
+						success: true,
+						revoked: doc.udid
+					}));
+				}
+			});
 		});
-	});
 });
 
 /*
@@ -2493,113 +2495,114 @@ app.post("/api/device/edit", function(req, res) {
 		return;
 	}
 
-	devicelib.view("devicelib", "devices_by_device_id", function(err, body) {
-
-		if (err) {
-			console.log(err);
-			res.end(JSON.stringify({
-				success: false,
-				status: "device_not_found"
-			}));
-			return;
-		}
-
-		//console.log("searching: " + body);
-
-		if (body.rows.length === 0) {
-			console.log(JSON.stringify(body));
-			res.end(JSON.stringify({
-				success: false,
-				status: "no_such_device"
-			}));
-			return;
-		}
-
-		console.log("searching: " + udid + " in: " + JSON.stringify(body.rows));
-
-		var device = null;
-
-		for (var dindex in body.rows) {
-			var dev = body.rows[dindex].key;
-			console.log("adev: " + JSON.stringify(dev));
-			console.log("Comparing " + udid + " to " + dev.device_id);
-			if (udid.indexOf(dev.device_id) != -1) {
-				console.log("Found dev" + JSON.stringify(dev));
-				device = dev;
-				break;
-			}
-		}
-
-		if (device === null) {
-			res.end(JSON.stringify({
-				success: false,
-				status: "no_such_device"
-			}));
-			return;
-		}
-
-		var doc = device;
-
-		console.log("doc: " + JSON.stringify(doc));
-
-		console.log("Editing device: " +
-			JSON.stringify(doc.alias));
-
-		if (typeof(doc) === "undefined") {
-			console.log("nothing to destroy...");
-			return;
-		}
-
-		// Delete device document with old alias
-		devicelib.destroy(doc._id, doc._rev, function(err) {
-
-			delete doc._rev;
+	devicelib.view("devicelib", "devices_by_owner",
+		function(err, body) {
 
 			if (err) {
-				console.log("/api/device/edit ERROR:" + err);
+				console.log(err);
 				res.end(JSON.stringify({
 					success: false,
-					status: "destroy_failed"
+					status: "device_not_found"
 				}));
 				return;
 			}
 
-			if (typeof(change.alias) !== "undefined") {
-				doc.alias = change.alias;
-				console.log("Changing alias: " +
-					JSON.stringify(doc.alias) + " to " + change.alias);
+			//console.log("searching: " + body);
+
+			if (body.rows.length === 0) {
+				console.log(JSON.stringify(body));
+				res.end(JSON.stringify({
+					success: false,
+					status: "no_such_device"
+				}));
+				return;
 			}
 
-			if (typeof(change.avatar) !== "undefined") {
-				doc.avatar = change.avatar;
-				console.log("Changing avatar: " +
-					JSON.stringify(doc.avatar) + " to " + change.avatar);
+			console.log("searching: " + udid + " in: " + JSON.stringify(body.rows));
+
+			var device = null;
+
+			for (var dindex in body.rows) {
+				var dev = body.rows[dindex].key;
+				console.log("adev: " + JSON.stringify(dev));
+				console.log("Comparing " + udid + " to " + dev.device_id);
+				if (udid.indexOf(dev.device_id) != -1) {
+					console.log("Found dev" + JSON.stringify(dev));
+					device = dev;
+					break;
+				}
 			}
 
+			if (device === null) {
+				res.end(JSON.stringify({
+					success: false,
+					status: "no_such_device"
+				}));
+				return;
+			}
+
+			var doc = device;
+
+			console.log("doc: " + JSON.stringify(doc));
+
+			console.log("Editing device: " +
+				JSON.stringify(doc.alias));
+
+			if (typeof(doc) === "undefined") {
+				console.log("nothing to destroy...");
+				return;
+			}
+
+			// Delete device document with old alias
 			devicelib.destroy(doc._id, doc._rev, function(err) {
 
 				delete doc._rev;
 
-				// Create device document with new alias
-				devicelib.insert(doc, doc._id, function(err, body, header) {
-					if (err) {
-						console.log("/api/device/edit ERROR:" + err);
-						res.end(JSON.stringify({
-							success: false,
-							status: "device_not_changed"
-						}));
-						return;
-					} else {
-						res.set("Connection", "close");
-						res.end(JSON.stringify({
-							success: true,
-							change: change
-						}));
-					}
+				if (err) {
+					console.log("/api/device/edit ERROR:" + err);
+					res.end(JSON.stringify({
+						success: false,
+						status: "destroy_failed"
+					}));
+					return;
+				}
+
+				if (typeof(change.alias) !== "undefined") {
+					doc.alias = change.alias;
+					console.log("Changing alias: " +
+						JSON.stringify(doc.alias) + " to " + change.alias);
+				}
+
+				if (typeof(change.avatar) !== "undefined") {
+					doc.avatar = change.avatar;
+					console.log("Changing avatar: " +
+						JSON.stringify(doc.avatar) + " to " + change.avatar);
+				}
+
+				devicelib.destroy(doc._id, doc._rev, function(err) {
+
+					delete doc._rev;
+
+					// Create device document with new alias
+					devicelib.insert(doc, doc._id, function(err, body, header) {
+						if (err) {
+							console.log("/api/device/edit ERROR:" + err);
+							res.end(JSON.stringify({
+								success: false,
+								status: "device_not_changed"
+							}));
+							return;
+						} else {
+							res.set("Connection", "close");
+							res.end(JSON.stringify({
+								success: true,
+								change: change
+							}));
+						}
+					});
 				});
 			});
 		});
-	});
 });
 
 function sendRegistrationOKResponse(res, dict) {
@@ -3340,7 +3343,7 @@ initWatcher(watcher);
 var database_compactor = function() {
 	console.log("» Running database compact jobs...");
 	nano.db.compact("builds");
-	nano.db.compact("deviceslib");
+	nano.db.compact("devicelib");
 	nano.db.compact("logs");
 	nano.db.compact("users");
 	console.log("» Database compact jobs completed.");
