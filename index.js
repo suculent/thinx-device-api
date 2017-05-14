@@ -2590,7 +2590,7 @@ app.post("/api/device/edit", function(req, res) {
 				//console.log("adev: " + JSON.stringify(dev));
 				console.log("Comparing " + udid + " to " + dev.udid);
 				if (udid.indexOf(dev.udid) != -1) {
-					console.log("Found dev" + JSON.stringify(dev));
+					//console.log("Found dev" + JSON.stringify(dev));
 					device = dev;
 					break;
 				}
@@ -2606,7 +2606,7 @@ app.post("/api/device/edit", function(req, res) {
 
 			var doc = device;
 
-			console.log("doc: " + JSON.stringify(doc));
+			//console.log("doc: " + JSON.stringify(doc));
 
 			console.log("Editing device: " +
 				JSON.stringify(doc.alias));
@@ -3078,7 +3078,9 @@ app.get("/api/user/logs/build/list", function(req, res) {
 
 		var builds = [];
 		for (var bindex in body.rows) {
+			console.log(bindex);
 			var row = body.rows[bindex].value;
+			console.log(JSON.stringify(row));
 			var build = {
 				build_id: row.id,
 				message: row.message,
