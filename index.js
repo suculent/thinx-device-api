@@ -1081,7 +1081,7 @@ app.post("/api/user/source/revoke", function(req, res) {
 					console.log("insert_on_success err: " + err);
 					console.log("insert_on_success device: " + device);
 					var newdevice = device;
-					delete newdevicedevice._rev;
+					delete newdevice._rev;
 					devicelib.insert(newdevice, newdevice._id, function(err) {
 						console.log("pre-insert err:" + err);
 					});
