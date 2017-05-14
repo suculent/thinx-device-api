@@ -6,16 +6,18 @@
 
 **ROADMAP**
 
-* 1: Profile Editing
-* 2: Device Editing
+x 1: Profile Editing
+x 2: Device Editing
 * 3: Use API Keys from Redis
 * 4: Working Arduino C implementation (lib?)
 * 5: Bare data support (LUA/uPy)
 * 6: Statistics
-* 7: Fix postfix
+x 7: Fix postfix
 * 8: Builder, build tests
 
 ### Last week
+
+13/5/2017 - 1.4.800: all current tests pass
 
 12/5/2017 - 1.4.737: added HTTPS-endpoint for proxy; working device renaming and LUA/Arduino registration
 

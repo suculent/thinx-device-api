@@ -609,8 +609,6 @@ app.post("/api/device/revoke", function(req, res) {
 				}
 			}
 
-			console.log("Device to be revoked: " + JSON.stringify(doc));
-
 			if (typeof(doc) === "undefined" || (doc === null)) {
 				res.end(JSON.stringify({
 					success: false,
@@ -620,7 +618,7 @@ app.post("/api/device/revoke", function(req, res) {
 				return; // prevent breaking db
 			}
 
-			var logmessage = "Revoking device: " + JSON.stringify(doc);
+			var logmessage = "Revoking device: " + JSON.stringify(doc.udid);
 			console.log(logmessage);
 			alog.log(owner, logmessage);
 
@@ -2775,12 +2773,12 @@ app.post("/api/build", function(req, res) {
 		}
 
 		var rows = body.rows; // devices returned
-		var udid = null;
+		var udid = device_udid_hash;
 		var device = null;
 
 		for (var row in rows) {
 			device = rows[row].doc;
-			var db_udid = device.device_id;
+			var db_udid = device.udid;
 
 			console.log(JSON.stringify(device));
 
@@ -2789,7 +2787,7 @@ app.post("/api/build", function(req, res) {
 			if (device_owner.indexOf(owner) !== -1) {
 				console.log("Searching " + device_udid_hash + " in " + db_udid);
 				if (device_udid_hash.indexOf(db_udid) != -1) {
-					udid = device.device_id; // target device ID
+					udid = device.udid; // target device ID
 					break;
 				}
 			}
@@ -2797,7 +2795,7 @@ app.post("/api/build", function(req, res) {
 			if (typeof(username) !== "undefined") {
 				if (username.indexOf(device.owner) !== -1) {
 					if (device_udid_hash.indexOf(db_udid) != -1) {
-						udid = device.device_id; // target device ID hash
+						udid = device.udid; // target device ID hash
 						break;
 					}
 				}
