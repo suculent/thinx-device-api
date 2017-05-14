@@ -1492,7 +1492,7 @@ app.post("/api/user/create", function(req, res) {
 					"'>activate</a> your THiNX account.</html>"
 			});
 
-			console.log("Sending reset e-mail: " + JSON.stringify(
+			console.log("Sending activation e-mail: " + JSON.stringify(
 				activationEmail));
 
 			activationEmail.send(function(err) {
@@ -3111,12 +3111,17 @@ app.post("/api/user/logs/build", function(req, res) {
 			return;
 		}
 
-		console.log(JSON.stringify(body));
+		var logs = [];
+		for (var lindex in body.rows) {
+			var lrec = body.rows[lindex].value.log;
+			logs.push(lrec);
+		}
 
-		res.end(JSON.stringify({
-			success: true,
-			log: body
-		}));
+		console.log("Build-logs: " + JSON.stringify(logs));
+
+		var response = body;
+		response.success = true;
+		res.end(JSON.stringify(response));
 	});
 });
 
