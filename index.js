@@ -3076,6 +3076,12 @@ app.get("/api/user/logs/build/list", function(req, res) {
 			return;
 		}
 
+		var builds = [];
+		for (var bindex in body.rows) {
+			var row = body.rows[bindex];
+			builds.push(row.id);
+		}
+
 		res.end(JSON.stringify({
 			success: true,
 			builds: body
