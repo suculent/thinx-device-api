@@ -2808,8 +2808,9 @@ app.post("/api/build", function(req, res) {
 	devicelib.view("devicelib", "devices_by_owner", {
 		"key": owner,
 		"include_docs": true
-	}, function(err, body, udid) {
+	}, function(err, body, xudid) {
 
+		console.log("devicelib.view xudid: " + JSON.stringify(xudid));
 		console.log("devicelib.view udid: " + udid);
 
 		if (err) {
