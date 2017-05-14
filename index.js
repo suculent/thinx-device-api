@@ -1082,13 +1082,9 @@ app.post("/api/user/source/revoke", function(req, res) {
 				}
 
 				if (body.rows.length === 0) {
-					console.log("body: " + JSON.stringify(body));
+					console.log("no-devices to be detached; body: " + JSON.stringify(body));
 					// no devices to be detached
 				}
-
-				console.log("repo_revoke_Searching for attached devices with repo: " +
-					alias +
-					" in: " + JSON.stringify(body.rows));
 
 				// Warning, may not restore device if called without device parameter!
 				var insert_on_success = function(err, device) {
