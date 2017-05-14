@@ -1079,7 +1079,7 @@ app.post("/api/user/source/revoke", function(req, res) {
 				// Warning, may not restore device if called without device parameter!
 				var insert_on_success = function(err, device) {
 					console.log("insert_on_success err: " + err);
-					console.log("insert_on_success device: " + device);
+					console.log("insert_on_success device: " + JSON.stringify(device));
 					var newdevice = device;
 					delete newdevice._rev;
 					devicelib.insert(newdevice, newdevice._id, function(err) {
