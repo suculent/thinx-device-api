@@ -3082,10 +3082,10 @@ app.get("/api/user/logs/build/list", function(req, res) {
 			var row = body.rows[bindex];
 			console.log("row: " + JSON.stringify(row));
 			var build = {
-				build_id: row._id,
-				message: row.log.message,
-				date: row.log.date,
-				udid: row.log.udid
+				build_id: row.doc.log.build,
+				message: row.doc.log.message,
+				date: row.doc.log.date,
+				udid: row.doc.log.udid
 			};
 			builds.push(build);
 		}
