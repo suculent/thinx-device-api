@@ -574,11 +574,10 @@ app.post("/api/device/revoke", function(req, res) {
 	alog.log(owner, "Attempt to revoke device: " + udid);
 	console.log("Attempt to revoke device: " + udid);
 
-	devicelib.view("devicelib", "devices_by_owner",
-		/*{
+	devicelib.view("devicelib", "devices_by_owner", {
 			"key": owner,
 			"include_docs": true
-		},*/
+		},
 		function(err, body) {
 
 			if (err) {
