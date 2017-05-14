@@ -2789,10 +2789,11 @@ app.post("/api/build", function(req, res) {
 	if (typeof(build.udid) !== "undefined") {
 		udid = build.udid;
 	} else {
-		return res.end(JSON.stringify({
+		res.end(JSON.stringify({
 			success: false,
 			status: "missing_device_udid"
 		}));
+		return;
 	}
 
 	console.log("Build for udid: " + udid);
@@ -2807,7 +2808,9 @@ app.post("/api/build", function(req, res) {
 	devicelib.view("devicelib", "devices_by_owner", {
 		"key": owner,
 		"include_docs": true
-	}, function(err, body) {
+	}, function(err, body, udid) {
+
+		console.log("devicelib.view udid: " + udid);
 
 		if (err) {
 			if (err.toString() == "Error: missing") {
@@ -2820,7 +2823,6 @@ app.post("/api/build", function(req, res) {
 		}
 
 		var rows = body.rows; // devices returned
-		var udid = null;
 		var device = null;
 
 		for (var row in rows) {
