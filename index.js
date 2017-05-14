@@ -3429,8 +3429,10 @@ var database_compact_timer = setTimeout(database_compactor, COMPACT_TIMEOUT);
 
 // Prevent crashes on uncaught exceptions
 
-/*
-process.on("uncaughtException", function(err) {
-	console.log("Caught exception: " + err);
-});
-*/
+if (app_config.safe_mode === true) {
+	process.on("uncaughtException", function(err) {
+		console.log("Caught exception: " + err);
+	});
+} else {
+	console.log("Safe mode disabled. App will exit and log on exception.");
+}
