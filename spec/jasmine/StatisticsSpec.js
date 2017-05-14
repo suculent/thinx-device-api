@@ -1,12 +1,5 @@
 describe("Statistics", function() {
 
-  it("should return today path element", function() {
-    var s = require('../../lib/thinx/statistics');
-    var result = s.todayPathElement();
-    console.log(result);
-    expect(result).toBeDefined();
-  });
-
   it("should be able to return today results for owner", function() {
     var s = require('../../lib/thinx/statistics');
     var result = s.today(
@@ -21,6 +14,13 @@ describe("Statistics", function() {
     var s = require('../../lib/thinx/statistics');
     var result = s.aggregate();
     expect(result).toBe(true);
+  });
+
+  it("should return today path element", function() {
+    var s = require('../../lib/thinx/statistics');
+    var result = s.todayPathElement();
+    console.log(result);
+    expect(result).toBeDefined();
   });
 
 });
