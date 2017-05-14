@@ -2546,7 +2546,7 @@ app.post("/api/device/edit", function(req, res) {
 		change = changes[0];
 	}
 
-	console.log("Change with udid:" + udid);
+	//console.log("Change with udid:" + udid);
 
 	if (udid === null) {
 		res.end(JSON.stringify({
@@ -2590,7 +2590,7 @@ app.post("/api/device/edit", function(req, res) {
 			for (var dindex in body.rows) {
 				var dev = body.rows[dindex].value;
 				//console.log("adev: " + JSON.stringify(dev));
-				console.log("Comparing " + udid + " to " + dev.udid);
+				//console.log("Comparing " + udid + " to " + dev.udid);
 				if (udid.indexOf(dev.udid) != -1) {
 					//console.log("Found dev" + JSON.stringify(dev));
 					device = dev;
