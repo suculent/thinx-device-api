@@ -3079,12 +3079,18 @@ app.get("/api/user/logs/build/list", function(req, res) {
 		var builds = [];
 		for (var bindex in body.rows) {
 			var row = body.rows[bindex];
-			builds.push(row.id);
+			var build = {
+				build_id: row.id,
+				message: row.message,
+				date: row.date,
+				udid: row.udid
+			};
+			builds.push(build);
 		}
 
 		res.end(JSON.stringify({
 			success: true,
-			builds: body
+			builds: builds
 		}));
 
 	});
