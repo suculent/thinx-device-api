@@ -587,7 +587,7 @@ app.post("/api/device/revoke", function(req, res) {
 	var username = req.session.username;
 
 	alog.log(owner, "Attempt to revoke device: " + udid);
-	console.log("Attempt to revoke device: " + udid);
+	//console.log("Attempt to revoke device: " + udid);
 
 	devicelib.view("devicelib", "devices_by_owner", {
 			"key": owner,
@@ -618,7 +618,7 @@ app.post("/api/device/revoke", function(req, res) {
 				var device_udid = device.udid;
 				console.log("Comparing " + udid + "to " + device_udid);
 				if (device_udid.indexOf(udid) != -1) {
-					console.log("Found device");
+					console.log("Device for revocation found.");
 					doc = device;
 					break;
 				}
@@ -639,7 +639,7 @@ app.post("/api/device/revoke", function(req, res) {
 
 			devicelib.destroy(doc._id, doc._rev, function(err) {
 				if (err) {
-					console.log("/api/device/revoke ERROR:" + err);
+					console.log(err);
 					res.end(JSON.stringify({
 						success: false,
 						status: "revocation_failed"
