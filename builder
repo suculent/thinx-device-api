@@ -4,11 +4,13 @@ echo
 echo "-=[ ☢ THiNX IoT RTM BUILDER ☢ ]=-"
 echo
 
+echo "Running from: $(pwd)"
+
 OWNER_ID='886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445' 		# name of folder where workspaces reside
 RUN=true			# dry-run switch
 DEVICE='UNKNOWN'	# builds for no device by default, not even ANY
 OPEN=false			# show build result in Finder
-BUILD_ID=0
+BUILD_ID=null
 ORIGIN=$(pwd)
 
 # tested:
@@ -44,6 +46,8 @@ case $i in
     ;;
 esac
 done
+
+
 
 OWNER_ID_HOME=/var/www/html/bin/$OWNER_ID
 DEPLOYMENT_PATH=${OWNER_ID_HOME}/${UDID}
@@ -214,26 +218,28 @@ if [[ ! ${RUN} ]]; then
 
 	STATUS='"DRY_RUN_OK"'
 
-else
-
-	
+else	
 
 	echo "TODO: Support post-build deployment of different platforms here..."
 
 	# Deploy binary (may require rotating previous file or timestamping/renaming previous version of the file)
 	 # WARNING: bin was elf here but it seems kind of wrong. needs testing
-	mv ".pioenvs/d1_mini/firmware.bin" "${COMMIT}.bin"
 
-	echo "Deploying $COMMIT.bin to $DEPLOYMENT_PATH..." >> $LOG_PATH
+	# platform-dependent:
+	BUILD_ARTIFACT=".pioenvs/d1_mini/firmware.bin"
 
-	mv $COMMIT.bin $DEPLOYMENT_PATH
-
-	STATUS='"DEPLOYED"'
-
-	if [[ $(uname) == "Darwin" ]]; then
-		if [[ $OPEN ]]; then
-			open $DEPLOYMENT_PATH
+	if [[ -f ${BUILD_ARTIFACT} ]]; then
+		mv ${BUILD_ARTIFACT} "${COMMIT}.bin"
+		echo "Deploying $COMMIT.bin to $DEPLOYMENT_PATH..." >> $LOG_PATH
+		mv $COMMIT.bin $DEPLOYMENT_PATH
+		STATUS='"DEPLOYED"'
+		if [[ $(uname) == "Darwin" ]]; then
+			if [[ $OPEN ]]; then
+				open $DEPLOYMENT_PATH
+			fi
 		fi
+	else
+		STATUS='"BUILD FAILED."'
 	fi
 fi
 
@@ -242,9 +248,9 @@ echo $STATUS >> $LOG_PATH
 popd > /dev/null
 popd > /dev/null
 
-DEPLOYMENT_PATH=$(echo ${DEPLOYMENT_PATH} | tr -d '/var/www/html')
+DISPLAY_DEPLOYMENT_PATH=$(echo ${DEPLOYMENT_PATH} | tr -d '/var/www/html')
 
-echo "DP" $DEPLOYMENT_PATH >> $LOG_PATH
+echo "DP" $DISPLAY_DEPLOYMENT_PATH >> $LOG_PATH
 
 echo "BID" "${BUILD_ID}" >> $LOG_PATH
 echo "CID" "${COMMIT}" >> $LOG_PATH

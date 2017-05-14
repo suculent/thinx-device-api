@@ -365,9 +365,25 @@ app.get("/api/user/devices", function(req, res) {
 
 			for (var row in rows) {
 				var rowData = rows[row];
+				var dvc = rowData.value;
 				// Compare owner to device owner
 				if (owner.indexOf(rowData.key) != -1) {
-					devices.push(rowData);
+					if (typeof(dvc.source) === "undefined") {
+						dvc.source = null;
+					}
+
+					var deviceDescriptor = {
+						udid: dvc.udid,
+						mac: dvc.mac,
+						firmware: dvc.firmware,
+						alias: dvc.alias,
+						owner: dvc.owner,
+						version: dvc.version,
+						lastupdate: dvc.lastupdate,
+						source: dvc.source
+					};
+
+					devices.push(deviceDescriptor);
 				}
 			}
 			var reply = JSON.stringify({
@@ -2453,6 +2469,7 @@ app.post("/device/register", function(req, res) {
 				console.log("New device: " + error);
 
 				device.udid = uuidV1();
+				device.source = null;
 				device.device_id = udid; // will deprecate
 
 				device.lastupdate = new Date();
