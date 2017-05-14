@@ -99,7 +99,7 @@ echo "  REPO_NAME: ${REPO_NAME}"
 echo "Cleaning workspace..."
 
 # Clean
-rm -rf ./tenants/$OWNER_ID/$REPO_PATH
+rm -rf ./tenants/$OWNER_ID/$REPO_PATH/*
 
 echo "Creating workspace..." >> $LOG_PATH
 
@@ -107,12 +107,17 @@ echo "Creating workspace..." >> $LOG_PATH
 pushd ./tenants/$OWNER_ID > /dev/null
 
 # Create new working directory
+set +e
 mkdir -p ./tenants/$OWNER_ID/$REPO_PATH
+set -e
 
 # enter git user folder if any
 if [[ -d ${GIT_USER} ]]; then
 	pushd ${GIT_USER}
 fi
+
+# Clean workspace
+rm -rf $REPO_PATH/*
 
 # Fetch project
 git clone $GIT_REPO >> $LOG_PATH
