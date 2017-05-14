@@ -1034,11 +1034,10 @@ app.post("/api/user/source/revoke", function(req, res) {
 			}
 		}
 
+		// Update user with new repos
 		userlib.destroy(doc._id, doc._rev, function(err) {
-
 			doc.repos = sources;
 			delete doc._rev;
-
 			userlib.insert(doc, doc._id, function(err, body, header) {
 				if (err) {
 					console.log("/api/user/source ERROR:" + err);
@@ -1054,7 +1053,52 @@ app.post("/api/user/source/revoke", function(req, res) {
 					}));
 				}
 			});
-		});
+		}); // userlib
+
+		// FIXME: DB cleanup: get all devices by owner and detach if attached
+		devicelib.view("devicelib", "devices_by_owner", {
+				key: owner,
+				include_docs: true
+			},
+
+			function(err, body) {
+
+				if (err) {
+					console.log(err);
+					// no devices to be detached
+				}
+
+				if (body.rows.length === 0) {
+					console.log("body: " + JSON.stringify(body));
+					// no devices to be detached
+				}
+
+				console.log("Searching for attached devices with repo: " + alias +
+					" in: " + JSON.stringify(body.rows));
+
+				// Warning, may not restore device if called without device parameter!
+				var insert_on_success = function(err, device) {
+					console.log("insert_on_success err: " + err);
+					console.log("insert_on_success device: " + device);
+					var newdevice = device;
+					delete newdevicedevice._rev;
+					devicelib.insert(newdevice, newdevice._id, function(err) {
+						console.log("pre-insert err:" + err);
+					});
+				};
+
+				for (var dindex in body.rows) {
+					var device = body.rows[0].value;
+					if (device.source == alias) {
+						console.log("alias equal: Will destroy/insert device.");
+						device.source = null;
+						insert_on_success(false, device); // may result in conflict or duplicate
+						//devicelib.destroy(device._id, device._rev, insert_on_success(err, device));
+					}
+				}
+
+			}); // devicelib
+
 	});
 });
 
