@@ -88,26 +88,26 @@ if [[ "$user" == "git" ]]; then
 	REPO_NAME="$(echo $REPO_PATH | grep / | cut -d/ -f2-)"
 fi
 
-echo "  url: $url" >> $LOG_PATH
-echo "  proto: $proto" >> $LOG_PATH
-echo "  user: $user" >> $LOG_PATH
-echo "  host: $host" >> $LOG_PATH
-echo "  port: $port" >> $LOG_PATH
-echo "  REPO_PATH: $REPO_PATH" >> $LOG_PATH
-echo "  REPO_NAME: ${REPO_NAME}" >> $LOG_PATH
+echo "  url: $url"
+echo "  proto: $proto"
+echo "  user: $user"
+echo "  host: $host"
+echo "  port: $port"
+echo "  REPO_PATH: $REPO_PATH"
+echo "  REPO_NAME: ${REPO_NAME}"
 
-echo "Cleaning workspace..." >> $LOG_PATH
+echo "Cleaning workspace..."
 
 # Clean
 rm -rf ./tenants/$OWNER_ID/$REPO_PATH
 
 echo "Creating workspace..." >> $LOG_PATH
 
-# Create new working directory
-mkdir -p ./tenants/$OWNER_ID/$REPO_PATH
-
 # TODO: only if $REPO_NAME contains slash(es)
 pushd ./tenants/$OWNER_ID > /dev/null
+
+# Create new working directory
+mkdir -p ./tenants/$OWNER_ID/$REPO_PATH
 
 # enter git user folder if any
 if [[ -d ${GIT_USER} ]]; then
@@ -218,7 +218,7 @@ if [[ ! ${RUN} ]]; then
 
 	STATUS='"DRY_RUN_OK"'
 
-else	
+else
 
 	echo "TODO: Support post-build deployment of different platforms here..."
 
@@ -252,15 +252,15 @@ DISPLAY_DEPLOYMENT_PATH=$(echo ${DEPLOYMENT_PATH} | tr -d '/var/www/html')
 
 echo "DP" $DISPLAY_DEPLOYMENT_PATH >> $LOG_PATH
 
-echo "BID" "${BUILD_ID}" >> $LOG_PATH
-echo "CID" "${COMMIT}" >> $LOG_PATH
-echo "VER" "${VERSION}" >> $LOG_PATH
-echo "GIT" "${GIT_REPO}" >> $LOG_PATH
-echo "DEP" "${DEPLOYMENT_PATH}" >> $LOG_PATH
-echo "UDID" "${UDID}" >> $LOG_PATH
-echo "SHA" "${SHA}" >> $LOG_PATH
-echo "TNT" "${OWNER_ID}" >> $LOG_PATH
-echo "STA" "${STATUS}" >> $LOG_PATH
+echo "BID" "${BUILD_ID}"
+echo "CID" "${COMMIT}"
+echo "VER" "${VERSION}"
+echo "GIT" "${GIT_REPO}"
+echo "DEP" "${DEPLOYMENT_PATH}"
+echo "UDID" "${UDID}"
+echo "SHA" "${SHA}"
+echo "TNT" "${OWNER_ID}"
+echo "STA" "${STATUS}"
 
 cd $ORIGIN
 
