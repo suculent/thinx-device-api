@@ -1954,12 +1954,25 @@ app.get("/api/user/profile", function(req, res) {
 			avatar = body.avatar;
 		}
 
+		var fn = body.first_name;
+		var ln = body.last_name;
+
+		if (typeof(body.info) !== "undefined") {
+			if (typeof(body.info.first_name !== "undefined")) {
+				fn = body.info.first_name;
+			}
+			if (typeof(body.info.last_name !== "undefined")) {
+				ln = body.info.first_name;
+			}
+		}
+
 		var profile = {
-			first_name: body.first_name,
-			last_name: body.last_name,
+			first_name: fn,
+			last_name: ln,
 			username: body.username,
 			owner: body.owner,
-			avatar: avatar
+			avatar: avatar,
+			info: body.info
 		};
 
 		res.end(JSON.stringify({
