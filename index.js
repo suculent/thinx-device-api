@@ -3081,11 +3081,12 @@ app.get("/api/user/logs/build/list", function(req, res) {
 		for (var bindex in body.rows) {
 			var row = body.rows[bindex];
 			console.log("row: " + JSON.stringify(row));
+			// FIXME: Should cover all logs...
 			var build = {
-				build_id: row.doc.log.build,
-				message: row.doc.log.message,
-				date: row.doc.log.date,
-				udid: row.doc.log.udid
+				build_id: row.doc.log[0].build,
+				message: row.doc.log[0].message,
+				date: row.doc.log[0].date,
+				udid: row.doc.log[0].udid
 			};
 			builds.push(build);
 		}
