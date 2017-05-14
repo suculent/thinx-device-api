@@ -1108,7 +1108,9 @@ app.post("/api/user/source/revoke", function(req, res) {
 						console.log("alias equal: Will destroy/insert device.");
 						device.source = null;
 						insert_on_success(false, device); // may result in conflict or duplicate
-						//devicelib.destroy(device._id, device._rev, insert_on_success(err, device));
+						devicelib.destroy(device._id, device._rev, function(err) {
+							insert_on_success(err, device);
+						});
 					}
 				}
 
@@ -2824,9 +2826,8 @@ app.post("/api/build", function(req, res) {
 	devicelib.view("devicelib", "devices_by_owner", {
 		"key": owner,
 		"include_docs": true
-	}, function(err, body, xudid) {
+	}, function(err, body) {
 
-		console.log("devicelib.view xudid: " + JSON.stringify(xudid));
 		console.log("devicelib.view udid: " + udid);
 
 		if (err) {
@@ -2846,7 +2847,7 @@ app.post("/api/build", function(req, res) {
 			device = rows[row].doc;
 			var db_udid = device.udid;
 
-			console.log(JSON.stringify(device));
+			//console.log(JSON.stringify(device));
 
 			var device_owner = device.owner;
 			console.log("Searching " + owner + " in " + device_owner);
@@ -2896,7 +2897,7 @@ app.post("/api/build", function(req, res) {
 			console.log("Parsing repos:" + JSON.stringify(sources));
 			for (var index in sources) {
 				var source = sources[index];
-				console.log("in source: " + source);
+				console.log("in source: " + JSON.stringify(source));
 				if (source.alias.indexOf(build.source) !== -1) {
 					git = source.url;
 					console.log("Found repo: " + git);
