@@ -333,11 +333,10 @@ app.get("/api/user/devices", function(req, res) {
 
 	console.log("Listing devices by owner:" + owner);
 
-	devicelib.view("devicelib", "devices_by_owner",
-		/*{
-			"key": owner,
-			"include_docs": true
-		},*/
+	devicelib.view("devicelib", "devices_by_owner", {
+			//"key": owner,
+			"include_docs": false
+		},
 		function(err, body) {
 
 			if (err) {
