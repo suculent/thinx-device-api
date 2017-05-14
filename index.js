@@ -3083,9 +3083,11 @@ app.get("/api/user/logs/build/list", function(req, res) {
 			var row = body.rows[bindex];
 			//console.log("row: " + JSON.stringify(row));
 			// FIXME: Should cover all logs...
+			if (row.doc.log.length !== 0) {
+				console.log("UNSOLVED CASE - LOG TOO LONG!");
+			}
 			var lastIndex = row.doc.log.length - 1;
 			var build = {
-				build_id: row.doc.log[lastIndex].build,
 				message: row.doc.log[lastIndex].message,
 				date: row.doc.log[lastIndex].date,
 				udid: row.doc.log[lastIndex].udid
