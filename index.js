@@ -238,6 +238,8 @@ app.post("/api/user/profile", function(req, res) {
 	var update_key = null;
 	var update_value = null;
 
+	console.log("Updating profile with request: " + JSON.stringify(req.body));
+
 	if (typeof(req.body.avatar) !== "undefined") {
 
 		update_key = "avatar";
@@ -255,7 +257,7 @@ app.post("/api/user/profile", function(req, res) {
 		}));
 	}
 
-	//console.log("Updating owner: " + owner + "(" + username + ")");
+	console.log("Updating owner: " + owner + "(" + username + ")");
 	alog.log(owner, "Attempt to update owner: " + owner +
 		" with: " + update_key);
 
@@ -779,7 +781,7 @@ app.post("/api/user/apikey/revoke", function(req, res) {
 		var keys = user.api_keys; // array
 		var api_key_index = null;
 		var api_key = null;
-		console.log("keys: " + keys);
+		console.log("keys: " + JSON.stringify(keys));
 		for (var index in keys) {
 			var internal_hash = keys[index].hash;
 			console.log("ihash: " + internal_hash + " ahash: " + api_key_hash);
