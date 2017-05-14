@@ -599,11 +599,12 @@ app.post("/api/device/revoke", function(req, res) {
 			var doc = null;
 
 			for (var dindex in body.rows) {
-				var dev = body.rows[0];
+				var device = body.rows[0].value;
+				var device_udid = device.udid;
 				console.log("dev:" + JSON.stringify(dev));
-				if (udid.indexOf(dev.value.udid) != -1) {
+				if (udid.indexOf(device_udid) != -1) {
 					console.log("Found device");
-					doc = dev.doc;
+					doc = device;
 					break;
 				}
 			}
@@ -623,7 +624,7 @@ app.post("/api/device/revoke", function(req, res) {
 			console.log(logmessage);
 			alog.log(owner, logmessage);
 
-			devicelib.destroy(doc.id, doc._rev, function(err) {
+			devicelib.destroy(doc._id, doc._rev, function(err) {
 				if (err) {
 					console.log("/api/device/revoke ERROR:" + err);
 					res.end(JSON.stringify({
