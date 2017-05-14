@@ -3082,11 +3082,12 @@ app.get("/api/user/logs/build/list", function(req, res) {
 			var row = body.rows[bindex];
 			console.log("row: " + JSON.stringify(row));
 			// FIXME: Should cover all logs...
+			var lastIndex = row.doc.log.length - 1;
 			var build = {
-				build_id: row.doc.log[0].build,
-				message: row.doc.log[0].message,
-				date: row.doc.log[0].date,
-				udid: row.doc.log[0].udid
+				build_id: row.doc.log[lastIndex].build,
+				message: row.doc.log[lastIndex].message,
+				date: row.doc.log[lastIndex].date,
+				udid: row.doc.log[lastIndex].udid
 			};
 			builds.push(build);
 		}
@@ -3144,6 +3145,7 @@ app.post("/api/user/logs/build", function(req, res) {
 
 		var logs = [];
 		for (var lindex in body.rows) {
+			console.log("body.rows[lindex]", body.rows[lindex]);
 			var lrec = body.rows[lindex].value.log;
 			logs.push(lrec);
 		}
