@@ -18,4 +18,8 @@ describe("Build log", function() {
     expect(true).toBe(true);
   });
 
+  xit("should be able to tail log for build_id", function() {
+    expect(true).toBe(true);
+  });
+
 });

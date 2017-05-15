@@ -3172,6 +3172,51 @@ app.post("/api/user/logs/build", function(req, res) {
 	});
 });
 
+// WARNING! New, untested!
+
+/* Returns specific build log for owner */
+app.post("/api/user/logs/tail", function(req, res) {
+
+	// TODO: Time-out after about 60 seconds of no activity...
+
+	if (!validateSecurePOSTRequest(req)) return;
+	if (!validateSession(req, res)) return;
+
+	var owner = req.session.owner;
+	var username = req.session.username;
+
+	if (typeof(req.body.build_id) == "undefined") {
+		res.end(JSON.stringify({
+			success: false,
+			status: "missing_build_id"
+		}));
+		return;
+	}
+
+	var build_id = req.body.build_id;
+
+	console.log("Tailing build log for " + build_id);
+
+	// Called when tail returns new line
+	var line_callback = function(data) {
+		console.log(data);
+		// TODO: XHR Response implementation missing
+		res.set("Connection", "keep-alive");
+		res.send(JSON.stringify(data));
+	};
+
+	// Called on error
+	var error_callback = function(err) {
+		console.log(err);
+		// TODO: XHR Response implementation missing
+		res.set("Connection", "close");
+		res.end(JSON.stringify(err));
+	};
+
+	blog.tail(req.body.build_id, line_callback, error_callback);
+
+});
+
 
 
 /*
