@@ -37,6 +37,7 @@ var alog = require("./lib/thinx/audit");
 var blog = require("./lib/thinx/build");
 var watcher = require("./lib/thinx/repository");
 var apikey = require("./lib/thinx/apikey");
+var stats = require("./lib/thinx/statistics");
 
 var rdict = {};
 var watched_repos = [];
@@ -3390,16 +3391,6 @@ app.get("/api/logout", function(req, res) {
 	res.redirect("http://rtm.thinx.cloud/"); // HOME_URL (Apache)
 });
 
-/** Tested with: !device_register.spec.js` */
-app.get("/", function(req, res) {
-	console.log("/ called with owner: " + req.session.owner);
-	if (req.session.owner) {
-		res.redirect("http://rtm.thinx.cloud:80/app");
-	} else {
-		res.end("This is API ROOT."); // insecure
-	}
-});
-
 /*
  * Statistics
  */
@@ -3441,6 +3432,16 @@ app.get("/api/user/stats", function(req, res) {
 			stats: body
 		}));
 	});
+});
+
+/** Tested with: !device_register.spec.js` */
+app.get("/", function(req, res) {
+	console.log("/ called with owner: " + req.session.owner);
+	if (req.session.owner) {
+		res.redirect("http://rtm.thinx.cloud:80/app");
+	} else {
+		res.end("This is API ROOT."); // insecure
+	}
 });
 
 /* Server */
