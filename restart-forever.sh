@@ -1,5 +1,10 @@
 #!/bin/bash
 
+
+# optional
+# git pull
+# npm install .
+
 # Restarts the server using `forever` process manager
 
 # Terminate all possible instances
