@@ -6,14 +6,13 @@
 
 **ROADMAP**
 
-* 1: Device Editing
-* 2: Use API Keys from Redis
-* 3: Working Arduino C implementation (lib?)
-* 4: Bare data support (LUA/uPy)
-* 5: Statistics
-* 6: Builder, build tests
+* 1: Statistics
+* 2: Builder Logging, build tests
+* 3: Use API Keys from Redis
+* 4: Working Arduino C implementation (lib?)
+* 5: Bare data support (LUA/uPy)
 
-15/5/2017 - 1.4.860: adjusted logging to trackable, added statistics aggregator, security audit and code-quality checks, 
+15/5/2017 - 1.4.860: adjusted logging to trackable, added statistics aggregator, security audit and code-quality checks using SonarQube, 
 
 ### Fifth week
 
