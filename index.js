@@ -1095,7 +1095,6 @@ app.post("/api/user/source/revoke", function(req, res) {
 
 				// Warning, may not restore device if called without device parameter!
 				var insert_on_success = function(err, device) {
-					console.log("(2) repo_revoke_insert_on_success err: " + err);
 					var newdevice = device;
 					delete newdevice._rev;
 					delete newdevice._deleted_conflicts;
@@ -1112,7 +1111,6 @@ app.post("/api/user/source/revoke", function(req, res) {
 						console.log("repo_revoke alias equal: Will destroy/insert device.");
 						device.source = null;
 						devicelib.destroy(device._id, device._rev, function(err) {
-							console.log("(1) repo_revoke_destroy err: " + err);
 							insert_on_success(err, device);
 						});
 					}
