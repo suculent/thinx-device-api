@@ -3559,3 +3559,5 @@ if (app_config.safe_mode === true) {
 } else {
 	console.log("Safe mode disabled. App will exit and log on exception.");
 }
+
+stats.aggregate();
