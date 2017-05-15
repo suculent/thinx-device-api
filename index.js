@@ -171,7 +171,6 @@ app.use(parser.urlencoded({
 
 app.all("/*", function(req, res, next) {
 
-	console.log("[" + req.method + "]:" + req.url);
 
 	var origin = req.get("origin");
 
@@ -218,9 +217,9 @@ app.all("/*", function(req, res, next) {
 
 	if ((typeof(req.session) !== "undefined") && (typeof(req.session
 			.owner) !== "undefined")) {
-		console.log(req.session.owner, req.method + " : " + req.url);
+		console.log("[OID:" + req.session.owner + "] ", req.method + " : " + req.url);
 	} else {
-		console.log("API", req.method + " : " + req.url);
+		console.log("[OID:0] [" + req.method + "]:" + req.url);
 	}
 });
 
@@ -2105,9 +2104,8 @@ app.post("/device/firmware", function(req, res) {
 		alog.log(owner, "Attempt to register device: " + udid + " alias: " +
 			alias);
 
-		// Bail out on invalid API key
 		if (api_key_valid === false) {
-			console.log("Invalid API key on firmware update.");
+			console.log("[APIKEY_INVALID] on firmware update.");
 			alog.log(owner, "Attempt to use invalid API Key: " + api_key +
 				"  on firmware update.");
 			res.end(JSON.stringify({
@@ -2217,7 +2215,7 @@ app.post("/device/register", function(req, res) {
 
 	rdict.registration = {};
 
-	console.log("[!!!SEC!!!] Registration request: " + JSON.stringify(req.body));
+	//console.log("[!!!SEC!!!] Registration request: " + JSON.stringify(req.body));
 
 	var mac = reg.mac;
 	var fw = "unknown";
@@ -2307,7 +2305,7 @@ app.post("/device/register", function(req, res) {
 		deploy.initWithOwner(owner); // creates user path if does not exist
 
 		if (api_key_valid === false) {
-			console.log("Invalid API key on registration.");
+			console.log("[APIKEY_INVALID] on registration.");
 			alog.log(owner, "Attempt to use invalid API Key: " + api_key +
 				" on device registration.");
 			res.end(JSON.stringify({
@@ -2433,7 +2431,7 @@ app.post("/device/register", function(req, res) {
 
 			if (!error) {
 
-				console.log("Found existing device: " + JSON.stringify(existing));
+				console.log("[DEVICE_CHECKIN] Known device: " + JSON.stringify(reg));
 
 				existing.lastupdate = new Date();
 				if (typeof(fw) !== undefined && fw !== null) {
@@ -2482,9 +2480,7 @@ app.post("/device/register", function(req, res) {
 
 			} else {
 
-				// IS NEW!
-
-				console.log("New device: " + error);
+				console.log("[DEVICE_NEW] New device: " + JSON.stringify(reg));
 
 				device.udid = uuidV1();
 				device.source = null;
@@ -2970,7 +2966,7 @@ app.post("/api/build", function(req, res) {
 
 function buildCommand(build_id, owner, git, udid, dryrun) {
 
-	console.log("Executing build chain...");
+	console.log("[BUILD_STARTED] Executing build chain...")
 
 	var exec = require("child_process").exec;
 	CMD = "./builder --owner=" + owner + " --udid=" + udid + " --git=" +
@@ -2983,27 +2979,30 @@ function buildCommand(build_id, owner, git, udid, dryrun) {
 
 	blog.log(build_id, owner, udid, "Running build...");
 
+	console.log("[BUILD] Running sync-exec...");
+
+	var sexec = require("sync-exec");
+	var temp = sexec(CMD).stdout; // .replace("\n", "");
+
+	console.log("[BUILD_COMPLETED] sexec-stdout: " + temp);
+
 	console.log(CMD);
 	exec(CMD, function(err, stdout, stderr) {
-		console.log("WARNING: exec-test only...");
+		console.log("[BUILD] Running standard exec...");
 		if (err) {
-			blog.log(build_id, owner, udid, "Build start failed...");
+			blog.log(build_id, owner, udid, "Build start failed.");
+			console.log("[BUILD_FAIL] Build start failed.");
 			console.error("err: " + err);
 			return;
 		}
 		if (stderr) {
 			blog.log(build_id, owner, udid, stderr);
+			console.log("[BUILD_FAIL] Build start failed.");
 			console.error("stderr:" + stderr);
 		}
-		console.log(build_id + " : " + stdout);
+		console.log("[BUILD] " + build_id + " : " + stdout);
 		blog.log(build_id, owner, udid, stdout);
 	});
-
-	console.log("build using sync-exec:");
-
-	var sexec = require("sync-exec");
-	var temp = sexec(CMD).stdout; // .replace("\n", "");
-	console.log("sexec-stdout: " + temp);
 
 	blog.log(build_id, owner, udid, temp);
 }
@@ -3337,7 +3336,7 @@ app.post("/api/login", function(req, res) {
 					return;
 
 				} else {
-					console.log("Password mismatch for " + username);
+					console.log("[PASSWORD_INVALID] for " + username);
 					alog.log(req.session.owner, "Password mismatch for: " + username);
 					res.end(JSON.stringify({
 						status: "password_mismatch",
@@ -3400,6 +3399,51 @@ app.get("/", function(req, res) {
 		res.end("This is API ROOT."); // insecure
 	}
 });
+
+/*
+ * Statistics
+ */
+
+/* Returns all audit logs per owner */
+app.get("/api/user/stats", function(req, res) {
+
+	if (!validateSecureGETRequest(req)) return;
+	if (!validateSession(req, res)) return;
+
+	var owner = req.session.owner;
+
+	stats.today(owner, function(err, body) {
+
+		if (err) {
+			console.log(err);
+			res.end(JSON.stringify({
+				success: false,
+				status: "stats_fetch_failed",
+				error: err
+			}));
+			return;
+		}
+
+		if (!body) {
+			console.log("Statistics for owner " + owner + " not found.");
+			res.end(JSON.stringify({
+				success: false,
+				status: "stats_fetch_failed",
+				error: err
+			}));
+			return;
+		}
+
+		console.log("stats.today: " + JSON.stringify(body));
+
+		res.end(JSON.stringify({
+			success: true,
+			stats: body
+		}));
+	});
+});
+
+/* Server */
 
 app.version = function() {
 	return v.revision();
