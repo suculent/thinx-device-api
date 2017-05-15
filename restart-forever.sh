@@ -12,7 +12,7 @@ set +e
 service thinx stop
 killall node
 forever stopall
-set -+
+set -e
 
 # Start the server in background
 nohup forever -o /var/log/thinx.log index.js &
