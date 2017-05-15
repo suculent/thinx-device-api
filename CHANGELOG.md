@@ -13,7 +13,9 @@
 * 5: Statistics
 * 6: Builder, build tests
 
-### Last week
+15/5/2017 - 1.4.860: adjusted logging to trackable, added statistics aggregator, security audit and code-quality checks, 
+
+### Fifth week
 
 14/5/2017 - 1.4.850: base build logs; working on statistics aggregator, added tests; profile editing; device editing; migration to udid in requests
 
