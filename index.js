@@ -156,12 +156,17 @@ app.use(session({
 	name: "x-thx-session",
 	resave: true,
 	rolling: true,
-	saveUninitialized: true
+	saveUninitialized: true,
 }));
 
-app.use(parser.json());
+app.use(parser.json({
+	limit: '10mb'
+}));
+
 app.use(parser.urlencoded({
-	extended: true
+	extended: true,
+	parameterLimit: 10000,
+	limit: '10mb'
 }));
 
 app.all("/*", function(req, res, next) {
