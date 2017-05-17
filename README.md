@@ -1,6 +1,6 @@
 # ☢ thinx-device-api
 
-[![Coverage Status](https://coveralls.io/repos/github/suculent/thinx-firmware-esp8266/badge.svg?branch=master)](https://coveralls.io/github/suculent/thinx-firmware-esp8266?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/suculent/thinx-device-api/badge.svg?branch=master)](https://coveralls.io/github/suculent/thinx-device-api?branch=master)
 
 API Server running on node.js.
 
