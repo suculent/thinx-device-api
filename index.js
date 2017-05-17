@@ -3630,7 +3630,23 @@ var ThinxApp = function() {
   var database_compact_timer = setTimeout(database_compactor,
     COMPACT_TIMEOUT);
 
-  // Prevent crashes on uncaught exceptions
+  //
+  // Log aggregator
+  //
+
+  var log_aggregator = function() {
+    console.log("» Running log aggregation jobs...");
+    stats.aggregate();
+    console.log("» Aggregation jobs completed.");
+  };
+
+  var AGGREGATOR_TIMEOUT = 3600000;
+  var log_aggregator_timer = setTimeout(log_aggregator,
+    AGGREGATOR_TIMEOUT);
+
+  //
+  // Safe-mode (Prevent crashes on uncaught exceptions)
+  //
 
   if (app_config.safe_mode === true) {
     process.on("uncaughtException", function(err) {
@@ -3639,10 +3655,6 @@ var ThinxApp = function() {
   } else {
     console.log("Safe mode disabled. App will exit and log on exception.");
   }
-
-
-
-  //stats.aggregate();
 };
 
 var thx = new ThinxApp();
