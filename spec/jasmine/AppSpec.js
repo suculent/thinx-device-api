@@ -4,9 +4,9 @@ describe("App", function() {
     //
   });
 
-  it("should not fail", function() {
-    //require('../../index.js');
+  it("app should not fail", function() {
+    var thinx = require('../../index.js');
     expect(true).toBe(true);
-  });
+  }, 10000);
 
 });
