@@ -1040,7 +1040,7 @@ var ThinxApp = function() {
     var owner = req.session.owner;
     var username = req.session.username;
 
-    if (typeof(req.body.alias) === "undefined") {
+    if (typeof(req.body.source_id) === "undefined") {
       res.end(JSON.stringify({
         success: false,
         status: "missing_source_id"
@@ -1087,7 +1087,7 @@ var ThinxApp = function() {
           } else {
             res.end(JSON.stringify({
               success: true,
-              alias: alias
+              source: doc
             }));
           }
         });
