@@ -418,10 +418,10 @@ var ThinxApp = function() {
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
 
-    if (typeof(req.body.alias) === "undefined") {
+    if (typeof(req.body.source_id) === "undefined") {
       res.end(JSON.stringify({
         success: false,
-        status: "missing_alias"
+        status: "missing_source_id"
       }));
       return;
     }
@@ -435,7 +435,7 @@ var ThinxApp = function() {
     }
 
     var mac = req.body.mac;
-    var alias = req.body.alias;
+    var source_id = req.body.source_id;
     var owner = req.session.owner;
     var username = req.session.username;
 
@@ -488,7 +488,7 @@ var ThinxApp = function() {
         console.log(repo_path + " is not a directory.");
       }
 
-      doc.source = alias;
+      doc.source = source_id;
 
       devicelib.destroy(doc._id, doc._rev, function(err) {
         delete doc._rev;
@@ -504,7 +504,7 @@ var ThinxApp = function() {
           } else {
             res.end(JSON.stringify({
               success: true,
-              attached: alias
+              attached: source_id
             }));
           }
         });
