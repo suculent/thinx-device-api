@@ -1,7 +1,5 @@
 #!/bin/bash
 
-DAEMON="node index.js"
-
 echo
 echo "☢  THiNX RE-DEPLOYMENT STARTED ☢"
 echo
@@ -20,6 +18,8 @@ service thinx-app status
 service thinx-app stop
 
 killall node
+	
+forever stopall
 
 echo
 echo "» Fetching current app version from GIT..."
@@ -33,10 +33,9 @@ npm install .
 
 if [[ $CIRCLECI == true ]]; then
 	echo
-	echo "☢  Running node.js without console for CI..."
-	nohup node index.js >> /var/log/thinx.log &
-	#forever start index.js -lo /var/log/thinx.log
-	#service thinx-app start
+	echo "☢  Running node.js without console for CI..."	
+	nohup forever -o /var/log/thinx.log index.js &
+	#service thinx-app start	
 	exit 0
 else
 
@@ -44,7 +43,9 @@ else
 	echo "☢  Running node.js as a background process..."
 
 	mkdir logs
-	nohup node index.js >> /var/log/thinx.log &
+	killall node
+	forever stopall
+	nohup forever -o /var/log/thinx.log index.js &
 	#service thinx-app start
 
 	echo
