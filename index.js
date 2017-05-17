@@ -974,6 +974,8 @@ var ThinxApp = function() {
     var url = req.body.url;
     var alias = req.body.alias;
 
+    var source_id = uuidV1();
+
     userlib.get(owner, function(err, body) {
 
       if (err) {
@@ -1000,10 +1002,10 @@ var ThinxApp = function() {
       };
 
       if (typeof(doc.repos) === "undefined") {
-        doc.repos = [];
+        doc.repos = {};
       }
 
-      doc.repos.push(new_source);
+      doc.repos[source_id] = new_source;
 
       userlib.destroy(doc._id, doc._rev, function(err) {
 
@@ -1020,7 +1022,8 @@ var ThinxApp = function() {
           } else {
             res.end(JSON.stringify({
               success: true,
-              source: new_source
+              source: new_source,
+              source_id: source_id
             }));
           }
         });
@@ -1040,12 +1043,12 @@ var ThinxApp = function() {
     if (typeof(req.body.alias) === "undefined") {
       res.end(JSON.stringify({
         success: false,
-        status: "missing_source_alias"
+        status: "missing_source_id"
       }));
       return;
     }
 
-    var alias = req.body.alias;
+    var source_id = req.body.source_id;
 
     userlib.get(owner, function(err, user) {
 
@@ -1065,16 +1068,9 @@ var ThinxApp = function() {
         return;
       }
 
-      var sources = [];
-      for (var index in doc.repos) {
-        var source = doc.repos[index];
-        // TODO: Sources should have UUID as well
-        if (source.alias.indexOf(alias) !== -1) {
-          // skip this one to delete
-        } else {
-          sources.push(source);
-        }
-      }
+      var sources = doc.repos;
+
+      delete sources[source_id];
 
       // Update user with new repos
       userlib.destroy(doc._id, doc._rev, function(err) {

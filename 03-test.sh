@@ -303,10 +303,10 @@ R=$(curl -s -b cookies.jar \
 http://$HOST:7442/api/user/source)
 
 SUCCESS=$(echo $R | jq .success)
-SOURCEA=null
+SOURCE_ID=null
 if [[ $SUCCESS == true ]]; then
-	SOURCEA=$(echo $R | jq .source.alias)
-	echo_ok "Added source alias: $SOURCEA"
+  SOURCE_ID=$(echo $R | jq .source_id)
+	echo_ok "Added source ID: $SOURCE_ID"
 else
 	echo_fail $R
 fi
@@ -502,12 +502,18 @@ echo "» Testing source removal..."
 
 # {"success":true,"removed":"thinx-test-repo"}
 
-R=$(curl -s -b cookies.jar \
+RQ='{ "source_id" : '${SOURCE_ID}' }'
+
+echo "POST ${RQ}"
+
+R=$(curl -v -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--d '{ "alias" : "thinx-test-repo" }' \
+-d "$RQ" \
 http://$HOST:7442/api/user/source/revoke)
+
+echo $R
 
 SUCCESS=$(echo $R | jq .success)
 RSOURCE=null
