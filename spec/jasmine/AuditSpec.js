@@ -3,14 +3,20 @@ describe("Audit log", function() {
   var Audit = require('../../lib/thinx/audit');
 
   beforeEach(function() {
-    //audit = new Audit();
+    var audit = require('../../lib/thinx/audit');
   });
 
-  xit("should be able to fetch audit log", function() {
+  it("should be able to fetch audit log", function() {
+    var r = Audit.fetch(
+      "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f"
+    );
     expect(true).toBe(true);
   });
 
-  xit("should be able to log", function() {
+  it("should be able to log", function() {
+    var s = Audit.log(
+      "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
+      "test message");
     expect(true).toBe(true);
   });
 

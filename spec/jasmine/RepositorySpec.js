@@ -1,9 +1,14 @@
 describe("Repository Watcher", function() {
 
-  var Watcher = require('../../lib/thinx/repository');
+
 
   beforeEach(function() {
     //watcher = new Watcher();
+  });
+
+  it("should be able to initialize", function() {
+    var Watcher = require('../../lib/thinx/repository');
+    expect(Watcher).toBeDefined();
   });
 
   xit("should be able to watch repository", function() {

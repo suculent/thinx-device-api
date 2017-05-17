@@ -1,13 +1,17 @@
 describe("Build log", function() {
 
-  var Build = require('../../lib/thinx/build');
 
   beforeEach(function() {
     //build = new Build();
   });
 
+  it("should be able to initialize", function() {
+    var Build = require('../../lib/thinx/build');
+    expect(Build).toBeDefined();
+  });
+
   xit("should be able to list build logs", function() {
-    expect(true).toBe(true);
+    expect(true).toBe(false);
   });
 
   xit("should be able to fetch specific build log", function() {

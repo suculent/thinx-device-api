@@ -1,12 +1,11 @@
 describe("API Key", function() {
 
-  var Apikey = require('../../lib/thinx/apikey');
-
   beforeEach(function() {
     //apikey = new Apikey();
   });
 
-  xit("should be able to generate an API Keys", function() {
+  it("should be able to generate an API Keys", function() {
+    var Apikey = require('../../lib/thinx/apikey');
     expect(true).toBe(true);
   });
 

@@ -1,5 +1,10 @@
 describe("Statistics", function() {
 
+  it("should be able to initialize", function() {
+    var s = require('../../lib/thinx/statistics');
+    expect(s).toBeDefined();
+  });
+
   it("should be able to return today results for owner", function() {
     var s = require('../../lib/thinx/statistics');
     var result = s.today(
