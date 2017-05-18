@@ -7,12 +7,18 @@
 **ROADMAP**
 
 * 1: Statistics
-* 2: Builder Logging, build tests
-* 3: Use API Keys from Redis
+* 2: Use API Keys from Redis
+* 3: Builder Logging, build tests
 * 4: Working Arduino C implementation (lib?)
 * 5: Bare data support (LUA/uPy)
 
-15/5/2017 - 1.4.860: adjusted logging to trackable, added statistics aggregator, security audit and code-quality checks using SonarQube, 
+18/5/2017 - 1.5.886: migrating to UDID from MAC; adding Redis API Key store
+
+17/5/2017 - 1.5.880: test coverage reports; circle.ci tests; added source_id
+
+16/5/2017 - 1.4.868: profile, sparkline chart, log UI
+
+15/5/2017 - 1.4.860: adjusted logging to trackable, added statistics aggregator, security audit and code-quality checks using SonarQube,
 
 ### Fifth week
 
