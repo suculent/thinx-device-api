@@ -3493,11 +3493,11 @@ var ThinxApp = function() {
         return;
       }
 
-      console.log("[STATS] Today: " + JSON.stringify(body));
+      console.log("[STATS] Today: " + body);
 
       res.end(JSON.stringify({
         success: true,
-        stats: body
+        stats: JSON.parse(body)
       }));
     });
   });
