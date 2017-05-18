@@ -256,8 +256,6 @@ var ThinxApp = function() {
     var update_key = null;
     var update_value = null;
 
-    //console.log("Updating profile with request: " + JSON.stringify(req.body));
-
     if (typeof(req.body.avatar) !== "undefined") {
 
       update_key = "avatar";
