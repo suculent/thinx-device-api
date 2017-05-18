@@ -32,6 +32,7 @@
     "express": "^4.8.7",
     "express-session": "^1.7.6",
     "firebase-admin": "^4.2.0",
+    "fs-extra": "^3.0.1",
     "gulp-repository-watch": "0.0.4",
     "gulp-util": "^3.0.8",
     "http-signature": "1.0.0",
