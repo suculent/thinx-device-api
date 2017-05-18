@@ -1124,7 +1124,7 @@ var ThinxApp = function() {
 
           for (var dindex in body.rows) {
             var device = body.rows[0].value;
-            if (device.source == alias) {
+            if (device.source == source_id) {
               console.log(
                 "repo_revoke alias equal: Will destroy/insert device."
               );
