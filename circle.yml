@@ -2,11 +2,17 @@ machine:
   node:
     version:
       5.9.0
+  environment:
+    REDIS_URL: redis://localhost:6391
 
 dependencies:
   pre:
     - npm install .
-    - echo "Creating cached directories (installer should do it)..."
+    - wget http://download.redis.io/releases/redis-3.2.0.tar.gz
+    - tar xzf redis-3.2.0.tar.gz
+    - cd redis-3.2.0 && make
+  cache_directories:
+    - redis-3.2.0
 
 ## Customize database setup
 database:
@@ -16,13 +22,14 @@ database:
 ## Customize test commands
 test:
   pre:
-    - bash ./01-analyze.sh
+    - sudo service redis-server start --port 6391    
     - bash ./02-deploy.sh:
         background: true
   commands:    
     - bash ./03-test.sh
   post:
     - curl -sSL https://download.sourceclear.com/ci.sh | bash
+    - bash ./01-analyze.sh
 
 ## Customize deployment commands
 deployment:
