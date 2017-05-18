@@ -349,7 +349,7 @@ var ThinxApp = function() {
 
     var owner = req.session.owner;
 
-    console.log("Listing devices by owner:" + owner);
+    //console.log("Listing devices by owner:" + owner);
 
     devicelib.view("devicelib", "devices_by_owner", {
         //"key": owner,
@@ -987,8 +987,7 @@ var ThinxApp = function() {
         return;
       }
 
-      console.log("Listing Repositories: " +
-        JSON.stringify(user.repos));
+      //console.log("Listing Repositories: " + JSON.stringify(user.repos));
       res.end(JSON.stringify({
         success: true,
         sources: user.repos
@@ -3549,7 +3548,7 @@ var ThinxApp = function() {
         return;
       }
 
-      console.log("stats.today: " + JSON.stringify(body));
+      console.log("[STATS] Today: " + JSON.stringify(body));
 
       res.end(JSON.stringify({
         success: true,
