@@ -437,7 +437,7 @@ var ThinxApp = function() {
     var username = req.session.username;
     var udid = req.body.udid;
 
-    alog.log(owner, "Attempt to attach repository: " + alias +
+    alog.log(owner, "Attempt to attach repository: " + source_id +
       " to device: " + udid);
 
     devicelib.view("devicelib", "devices_by_udid", {
