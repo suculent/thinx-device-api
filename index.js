@@ -3593,6 +3593,8 @@ var ThinxApp = function() {
       }
 
       for (var index in body.rows) {
+        console.log("[why is device_id empty?] watcher doc:" + JSON.stringify(
+          body.rows[index].doc));
         var owner = body.rows[index].doc.owner;
         var device_id = body.rows[index].doc.device_id;
         var path = deploy.pathForDevice(owner, device_id);
