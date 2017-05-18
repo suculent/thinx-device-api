@@ -550,7 +550,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Assigning device alias..."
 
-CH='{ "changes" : { "device_id" : '${DEVICE_ID}', "alias" : "new-test-alias" } }'
+CH='{ "changes" : { "udid" : '${DEVICE_ID}', "alias" : "new-test-alias" } }'
 
 echo "POST ${CH}"
 

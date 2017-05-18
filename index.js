@@ -426,24 +426,24 @@ var ThinxApp = function() {
       return;
     }
 
-    if (typeof(req.body.mac) === "undefined") {
+    if (typeof(req.body.udid) === "undefined") {
       res.end(JSON.stringify({
         success: false,
-        status: "missing_mac"
+        status: "missing_udid"
       }));
       return;
     }
 
-    var mac = req.body.mac;
     var source_id = req.body.source_id;
     var owner = req.session.owner;
     var username = req.session.username;
+    var udid = req.body.udid;
 
     alog.log(owner, "Attempt to attach repository: " + alias +
-      " to device: " + mac);
+      " to device: " + udid);
 
-    devicelib.view("devicelib", "devices_by_mac", {
-      "key": mac,
+    devicelib.view("devicelib", "devices_by_udid", {
+      "key": udid,
       "include_docs": true
     }, function(err, body) {
 
@@ -459,7 +459,7 @@ var ThinxApp = function() {
         }));
         alog.log(owner,
           "Attempt to attach repository to non-existent device: " +
-          mac);
+          udid);
         return;
       }
 
@@ -469,7 +469,7 @@ var ThinxApp = function() {
           doc.hash));
 
       deploy.initWithOwner(doc.owner);
-      var repo_path = deploy.pathForDevice(doc.owner, doc.device_id);
+      var repo_path = deploy.pathForDevice(doc.owner, doc.udid);
       console.log("repo_path: " + repo_path);
 
       mkdirp(repo_path, function(err) {
@@ -513,28 +513,28 @@ var ThinxApp = function() {
   });
 
   /* Detach code source from a device. Expects unique device identifier. */
-  // FIXME: Should be based on device_id instead of MAC
+  // FIXME: Should be based on udid instead of MAC
   app.post("/api/device/detach", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
 
-    if (typeof(req.body.mac) === "undefined") {
+    if (typeof(req.body.udid) === "undefined") {
       res.end(JSON.stringify({
         success: false,
-        status: "missing_mac"
+        status: "missing_udid"
       }));
       return;
     }
 
-    var mac = req.body.mac;
     var owner = req.session.owner;
     var username = req.session.username;
+    var udid = req.body.udid;
 
-    alog.log(owner, "Attempt to detach repository from device: " + mac);
+    alog.log(owner, "Attempt to detach repository from device: " + udid);
 
-    devicelib.view("devicelib", "devices_by_mac", {
-      "key": mac,
+    devicelib.view("devicelib", "devices_by_udid", {
+      "key": udid,
       "include_docs": true
     }, function(err, body) {
 
@@ -549,7 +549,7 @@ var ThinxApp = function() {
       } else {
         res.end(JSON.stringify({
           success: false,
-          status: "mac_not_found"
+          status: "udid_not_found"
         }));
         return;
       }
@@ -557,9 +557,9 @@ var ThinxApp = function() {
       var doc = body.rows[0].value;
 
       console.log("Detaching repository from device: " + JSON.stringify(
-        doc.device_id));
+        doc.udid));
 
-      var repo_path = deploy.pathForDevice(doc.owner, doc.device_id);
+      var repo_path = deploy.pathForDevice(doc.owner, doc.udid);
       console.log("repo_path: " + repo_path);
       if (fs.existsSync(repo_path)) {
         watcher.unwatchRepository(repo_path);
@@ -748,7 +748,22 @@ var ThinxApp = function() {
       };
 
       // Store all keys to redis instead of CouchDB
-      client.set("ak:" + doc._id, JSON.stringify(keys));
+      // client.set("ak:" + doc._id, JSON.stringify(keys));
+      apikey.create(owner, new_api_key_alias, function(success,
+        object) {
+        if (success) {
+          console.log("[TEST] APIKEY created: " + JSON.stringify(
+            object));
+          res.end(JSON.stringify({
+            success: true,
+            api_key: new_api_key,
+            hash: object.hash
+          }));
+          return;
+        } else {
+          console.log("[TEST] APIKEY creation failed.");
+        }
+      }); // rest is will deprecate when this will work...
 
       // Will partially deprecate deprecate when API Keys will be
       // everywhere taken from Redis only (tedious refactoring).
@@ -786,6 +801,23 @@ var ThinxApp = function() {
     var api_key_hash = req.body.fingerprint;
 
     console.log("Revoke API Key by hash: " + api_key_hash);
+
+    apikey.revoke(owner, api_key_hash, function(success) {
+      if (success) {
+        console.log("[TEST] APIKEY revoked: " + api_key_hash);
+        res.end(JSON.stringify({
+          revoked: api_key_hash,
+          success: true
+        }));
+        return;
+      } else {
+        console.log("[TEST] APIKEY revocation failed.");
+        res.end(JSON.stringify({
+          success: false,
+          status: "revocation_failed"
+        }));
+      }
+    }); // rest will deprecate
 
     userlib.get(owner, function(err, user) {
 
@@ -829,6 +861,8 @@ var ThinxApp = function() {
 
       user.last_update = new Date();
 
+
+
       userlib.destroy(user._id, user._rev, function(err) {
 
         delete user._rev;
@@ -860,6 +894,24 @@ var ThinxApp = function() {
 
     var owner = req.session.owner;
 
+    apikey.list(owner, function(success, keys) {
+      if (success) {
+        console.log("[TEST] API Key list success: " + JSON.stringify(
+          keys));
+        res.end(JSON.stringify({
+          api_keys: keys
+        }));
+        return;
+      } else {
+        console.log("[TEST] API Key list failure.");
+        res.end(JSON.stringify({
+          success: false,
+          status: "apikey_list_failed"
+        }));
+      }
+
+    }); // rest will deprecate
+
     userlib.get(owner, function(err, user) {
 
       if (err) {
@@ -883,6 +935,7 @@ var ThinxApp = function() {
         return;
       }
 
+      /*
       client.get("ak:" + user._id, function(err, redis_keys) {
         if ((typeof(redis_keys) !== "undefined") || (redis_keys !==
             null)) {
@@ -892,7 +945,7 @@ var ThinxApp = function() {
         } else {
           console.log("[WARNING-NEW]: fetched no redis_keys");
         }
-      });
+      });*/
 
       var exportedKeys = [];
       for (var index in user.api_keys) {
@@ -2085,7 +2138,7 @@ var ThinxApp = function() {
     var checksum = req.body.checksum;
     var commit = req.body.commit;
     var alias = req.body.alias;
-    var owner = req.body.owner; // TODO: should be inferred from API Key, not required in request! But API Key is inside user which is a fail and should be stored in redis instead just with owner's secret ID reference.
+    var owner = req.body.owner; // TODO: should be inferred from API Key, but that is indexed by owner...
 
     console.log("TODO: Validate if SHOULD update device " + mac +
       " using commit " + commit + " with checksum " + checksum +
@@ -2251,7 +2304,7 @@ var ThinxApp = function() {
   }); // app.get
 
   // Device login/registration
-  // FIXME: MAC will be allowed for initial regitra
+  // FIXME: MAC will be allowed for initial regitration
   app.post("/device/register", function(req, res) {
 
     validateRequest(req, res);
@@ -2399,9 +2452,8 @@ var ThinxApp = function() {
       }
 
       // will deprecate
-      var device_id;
       if (typeof(reg.device_id) !== "undefined") {
-        device_id = reg.device_id; // overridden
+        udid = reg.device_id; // overridden
       }
 
       // will be set in stone
@@ -2447,7 +2499,6 @@ var ThinxApp = function() {
         alias: alias,
         owner: owner,
         version: device_version,
-        device_id: device_id,
         udid: udid,
         lastupdate: new Date(),
         lastkey: sha256(api_key)
@@ -2547,7 +2598,6 @@ var ThinxApp = function() {
 
           device.udid = uuidV1();
           device.source = null;
-          device.device_id = udid; // will deprecate
 
           device.lastupdate = new Date();
           if (typeof(fw) !== undefined && fw !== null) {
@@ -2617,7 +2667,7 @@ var ThinxApp = function() {
 
     var change = changes; // TODO: support bulk operations
 
-    var udid = changes.device_id;
+    var udid = changes.udid;
 
     // TODO: Support bulk operations
     if (typeof(udid) === "undefined") {
@@ -3039,7 +3089,7 @@ var ThinxApp = function() {
 
   function buildCommand(build_id, owner, git, udid, dryrun) {
 
-    console.log("[BUILD_STARTED] Executing build chain...")
+    console.log("[BUILD_STARTED] Executing build chain...");
 
     var exec = require("child_process").exec;
     CMD = "./builder --owner=" + owner + " --udid=" + udid + " --git=" +
@@ -3593,11 +3643,9 @@ var ThinxApp = function() {
       }
 
       for (var index in body.rows) {
-        console.log("[why is device_id empty?] watcher doc:" + JSON.stringify(
-          body.rows[index].doc));
         var owner = body.rows[index].doc.owner;
-        var device_id = body.rows[index].doc.device_id;
-        var path = deploy.pathForDevice(owner, device_id);
+        var udid = body.rows[index].doc.udid;
+        var path = deploy.pathForDevice(owner, udid);
         //console.log("Watcher checks path " + path);
         if (!fs.existsSync(path)) {
           continue;

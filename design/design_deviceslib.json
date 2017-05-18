@@ -15,10 +15,7 @@
       "map": "function (doc) { if(doc.id) { emit (doc); } }"
     },
     "watcher_view": {
-      "map": "function (doc) { if(doc.source != null) { emit (doc.owner, doc.device_id, doc.source); } }"
-    },
-    "devices_by_device_id": {
-      "map": "function (doc) { if(doc.device_id) { emit (doc); } }"
+      "map": "function (doc) { if(doc.source != null) { emit (doc.owner, doc.udid, doc.source); } }"
     },
     "devices_by_udid": {
       "map": "function (doc) { if(doc.udid) { emit (doc); } }"
