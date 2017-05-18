@@ -20,7 +20,7 @@ module.exports = function(config) {
 
 
     // list of files to exclude
-    exclude: [],
+    exclude: ["spec/**"],
 
 
     // preprocess matching files before serving them to the browser
