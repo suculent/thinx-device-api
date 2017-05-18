@@ -6,6 +6,7 @@ node_modules/
 tenants/
 sessions/
 logs/
+statistics/
 
 cookie.jar
 
@@ -18,3 +19,4 @@ coverage/
 
 # Sonar
 .scannerwork/
+
