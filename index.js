@@ -1036,6 +1036,10 @@ var ThinxApp = function() {
             });
           };
 
+          var insert = function(err, device) {
+            insert_on_success(err, device);
+          };
+
           for (var dindex in body.rows) {
             var device = body.rows[0].value;
             if (device.source == source_id) {
@@ -1043,10 +1047,10 @@ var ThinxApp = function() {
                 "repo_revoke alias equal: Will destroy/insert device."
               );
               device.source = null;
-              devicelib.destroy(device._id, device._rev, function(
-                err) {
-                insert_on_success(err, device);
-              });
+              devicelib.destroy(
+                device._id,
+                device._rev,
+                insert(err, device));
             }
           }
 
@@ -1297,7 +1301,7 @@ var ThinxApp = function() {
             rsa_key_fingerprint);
           delete_key = true;
         } else {
-          new_keys[fingerprint] = fingerprints[fingerprint];
+          new_keys[fingerprint] = key;
         }
       }
 
@@ -2872,9 +2876,11 @@ var ThinxApp = function() {
 
         // Finds first source with given source_id
         var sources = Object.keys(doc.repos);
-        console.log("Searching for repository to be built:" +
+        console.log(
+          "[API-BUILD] Searching for repository to be built:" +
           JSON.stringify(build));
-        //console.log("Parsing repos:" + JSON.stringify(sources));
+        console.log("[API-BUILD] Parsing repos:" + JSON.stringify(
+          sources));
         for (var index in sources) {
           var source = sources[index];
           console.log("in source: " + JSON.stringify(source));
@@ -2885,9 +2891,9 @@ var ThinxApp = function() {
           }
         }
 
-        console.log("udid: " + udid);
-        console.log("owner: " + owner);
-        console.log("git: " + git);
+        console.log("[API-BUILD] udid: " + udid);
+        console.log("[API-BUILD] owner: " + owner);
+        console.log("[API-BUILD] git: " + git);
 
         if ((typeof(udid) === "undefined" || build === null) ||
           (typeof(owner) === "undefined" || owner === null) ||
