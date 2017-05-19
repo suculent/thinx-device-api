@@ -446,7 +446,7 @@ var ThinxApp = function() {
     console.log("[OID:%{owner}] [DEVICE_ATTACH] " + udid);
 
     devicelib.view("devicelib", "devices_by_udid", {
-      "keys": udid,
+      "key": udid,
       "include_docs": true
     }, function(err, body) {
 
