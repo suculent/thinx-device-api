@@ -6,15 +6,20 @@
 
 **ROADMAP**
 
+It seems to be almost done. Let's have a month for bugfixing and tweaking. There are still things that would not work after initial install (tech tail, e.g. mqtt configuration and other post-installs)
+
 * 1: Statistics
-* 2: Use API Keys from Redis
-* 3: Builder Logging, build tests
-* 4: Working Arduino C implementation (lib?)
-* 5: Bare data support (LUA/uPy)
+* 2: Builder Logging, build tests
+* 3: Working Arduino C implementation (lib?) - still crashes a bit
+* 4: Bare data support (LUA/uPy)
+
+20/5/2017 - TODO: Statistics, cleaning log, tag all known log events with OID
+
+19/5/2017 - 1.5.962: successfully tested registration with Robodyn D1; introduced websocket logtail against runtime log, still working on statistics and popover; migrating fully to Redis API Key store; completed migration to udid; changed statistics directory structure; solved long-term issue with couch queries (bad doc)
 
 18/5/2017 - 1.5.886: migrating to UDID from MAC; adding Redis API Key store
 
-17/5/2017 - 1.5.880: test coverage reports; circle.ci tests; added source_id
+17/5/2017 - 1.5.880: test coverage reports; circle.ci tests; added source_id; version bump (changed UI API security requirements, intentionally not backwards compatible)
 
 16/5/2017 - 1.4.868: profile, sparkline chart, log UI
 

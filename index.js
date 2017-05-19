@@ -12,8 +12,12 @@ var ThinxApp = function() {
 
   };
 
+  // include and initialize the rollbar library with your access token
+  var rollbar = require("rollbar");
+  rollbar.init("5505bac5dc6c4542ba3bd947a150cb55");
 
-  //require("./core.js");
+  // record a generic message and send to rollbar
+  rollbar.reportMessage("API BOOTSTRAP");
 
   //
   // Shared Configuration
@@ -213,7 +217,7 @@ var ThinxApp = function() {
     // Custom user agent is required for devices
     var client = req.get("User-Agent");
     if (client == client_user_agent) {
-      //console.log("Device Agent: " + client);
+
       if (origin == "device") {
         next();
         return;
@@ -354,10 +358,8 @@ var ThinxApp = function() {
 
     var owner = req.session.owner;
 
-    //console.log("Listing devices by owner:" + owner);
-
     devicelib.view("devicelib", "devices_by_owner", {
-        //"key": owner,
+        "key": owner,
         "include_docs": false
       },
       function(err, body) {
@@ -709,7 +711,7 @@ var ThinxApp = function() {
 
     var new_api_key = sha256(new Date().toString()).substring(0, 40);
 
-    //console.log("Searching for owner " + owner);
+
 
     userlib.get(owner, function(err, doc) {
 
@@ -722,7 +724,7 @@ var ThinxApp = function() {
         return;
       }
 
-      //console.log("doc: " + JSON.stringify(doc));
+
 
       if (doc === null) {
         console.log("User " + username + " not found.");
@@ -733,7 +735,7 @@ var ThinxApp = function() {
         return;
       }
 
-      //console.log("/api/use/apikey doc:" + JSON.stringify(doc));
+
 
       var keys = [];
       if (typeof(doc.api_keys) === "undefined") {
@@ -814,7 +816,7 @@ var ThinxApp = function() {
         }));
         return;
       } else {
-        //console.log("[TEST] API Key list failure.");
+
         res.end(JSON.stringify({
           success: false,
           status: "apikey_list_failed"
@@ -846,7 +848,7 @@ var ThinxApp = function() {
         return;
       }
 
-      //console.log("Listing Repositories: " + JSON.stringify(user.repos));
+
       res.end(JSON.stringify({
         success: true,
         sources: user.repos
@@ -1103,7 +1105,7 @@ var ThinxApp = function() {
         return;
       }
 
-      //console.log("body: " + JSON.stringify(doc));
+
 
       if (!doc) {
         console.log("User " + owner + " not found.");
@@ -1199,7 +1201,7 @@ var ThinxApp = function() {
         return;
       }
 
-      //console.log("FIXME: Seeking rsa_keys in: " + JSON.stringify(user));
+
 
       var exportedKeys = [];
       var fingerprints = Object.keys(user.rsa_keys);
@@ -1215,7 +1217,7 @@ var ThinxApp = function() {
       var reply = JSON.stringify({
         rsa_keys: exportedKeys
       });
-      //console.log("Listing RSA keys: " + reply);
+
       res.end(reply);
     });
   });
@@ -1239,7 +1241,7 @@ var ThinxApp = function() {
 
     var rsa_key_fingerprint = req.body.fingerprint;
 
-    //console.log("Searching by username " + username);
+
 
     userlib.get(owner, function(err, doc) {
 
@@ -1477,7 +1479,7 @@ var ThinxApp = function() {
 
     alog.log(owner, "Attempt to reset password with: " + reset_key);
 
-    //console.log("Searching for owner " + owner);
+
 
     userlib.view("users", "owners_by_resetkey", {
       "key": reset_key,
@@ -1554,7 +1556,7 @@ var ThinxApp = function() {
     var ac_key = req.query.activation;
     var ac_owner = req.query.owner;
 
-    //console.log("Searching ac_key " + ac_key + " for owner: " +ac_owner);
+
 
     userlib.view("users", "owners_by_activation", {
       "key": ac_key,
@@ -2037,7 +2039,7 @@ var ThinxApp = function() {
         var anowner = all_users.rows[oindex];
         for (var kindex in anowner.doc.api_keys) {
           var k = anowner.doc.api_keys[kindex].key;
-          //console.log("Comparing: " + k);
+
           if (k.indexOf(api_key) != -1) {
             user_data = anowner.doc;
             owner = anowner.doc.owner;
@@ -2171,7 +2173,7 @@ var ThinxApp = function() {
 
     rdict.registration = {};
 
-    //console.log("[!!!SEC!!!] Registration request: " + JSON.stringify(req.body));
+
 
     var mac = reg.mac;
     var fw = "unknown";
@@ -2201,7 +2203,7 @@ var ThinxApp = function() {
       return;
     }
 
-    //console.log("Searching owners...");
+
 
     userlib.view("users", "owners_by_username", { // because owners_by_apikey does not work anymore... apikeys should have to be in separate table
       "include_docs": true // might be useless
@@ -2228,10 +2230,7 @@ var ThinxApp = function() {
         return;
       }
 
-      //console.log("owners:" + JSON.stringify(body.rows));
-      //console.log("Searching for api-key: " + api_key);
 
-      //console.log("in: " + JSON.stringify(body.rows));
 
       var user_data = null;
       var owner = null;
@@ -2243,7 +2242,7 @@ var ThinxApp = function() {
         var anowner = body.rows[oindex];
         for (var kindex in anowner.doc.api_keys) {
           var k = anowner.doc.api_keys[kindex].key;
-          //console.log("Comparing: " + k);
+
           if (k.indexOf(api_key) != -1) {
             user_data = anowner.doc;
             owner = anowner.doc.owner;
@@ -2396,7 +2395,7 @@ var ThinxApp = function() {
       // - see if alias or owner changed
       // - otherwise reply just OK
 
-      //console.log("Searching device...");
+
 
       devicelib.get(mac, function(error, existing) {
 
@@ -2536,7 +2535,7 @@ var ThinxApp = function() {
       change = changes[0];
     }
 
-    //console.log("Change with udid:" + udid);
+
 
     if (udid === null) {
       res.end(JSON.stringify({
@@ -2562,7 +2561,7 @@ var ThinxApp = function() {
           return;
         }
 
-        //console.log("searching: " + body);
+
 
         if (body.rows.length === 0) {
           console.log(JSON.stringify(body));
@@ -2573,16 +2572,16 @@ var ThinxApp = function() {
           return;
         }
 
-        //console.log("searching: " + udid + " in: " + JSON.stringify(body.rows));
+
 
         var device = null;
 
         for (var dindex in body.rows) {
           var dev = body.rows[dindex].value;
-          //console.log("adev: " + JSON.stringify(dev));
-          //console.log("Comparing " + udid + " to " + dev.udid);
+
+
           if (udid.indexOf(dev.udid) != -1) {
-            //console.log("Found dev" + JSON.stringify(dev));
+
             device = dev;
             break;
           }
@@ -2598,12 +2597,10 @@ var ThinxApp = function() {
 
         var doc = device;
 
-        //console.log("doc: " + JSON.stringify(doc));
 
-        //console.log("Editing device: " + JSON.stringify(doc.alias));
 
         if (typeof(doc) === "undefined") {
-          //console.log("nothing to destroy...");
+
           return;
         }
 
@@ -2623,12 +2620,12 @@ var ThinxApp = function() {
 
           if (typeof(change.alias) !== "undefined") {
             doc.alias = change.alias;
-            //console.log("Changing alias: " + JSON.stringify(doc.alias) + " to " + change.alias);
+
           }
 
           if (typeof(change.avatar) !== "undefined") {
             doc.avatar = change.avatar;
-            //console.log("Changing avatar: " + JSON.stringify(doc.avatar) + " to " + change.avatar);
+
           }
 
           devicelib.destroy(doc._id, doc._rev, function(err) {
@@ -2695,7 +2692,7 @@ var ThinxApp = function() {
   function validateSecureGETRequest(req, res) {
     // Only log webapp user-agent
     var ua = req.headers["user-agent"];
-    //console.log("☢ User-Agent: " + ua);
+
     if (req.method != "GET") {
       console.log("validateSecure: Not a get request.");
       req.session.destroy(function(err) {
@@ -2812,7 +2809,7 @@ var ThinxApp = function() {
       "include_docs": true
     }, function(err, body) {
 
-      //console.log("devicelib.view udid: " + udid);
+
 
       if (err) {
         if (err.toString() == "Error: missing") {
@@ -2831,12 +2828,12 @@ var ThinxApp = function() {
         device = rows[row].doc;
         var db_udid = device.udid;
 
-        //console.log(JSON.stringify(device));
+
 
         var device_owner = device.owner;
-        //console.log("Searching " + owner + " in " + device_owner);
+
         if (device_owner.indexOf(owner) !== -1) {
-          //console.log("Searching " + udid + " in " + db_udid);
+
           if (udid.indexOf(db_udid) != -1) {
             udid = device.udid; // target device ID
             break;
@@ -2877,12 +2874,12 @@ var ThinxApp = function() {
 
         // Finds first source with given source_id
         var sources = Object.keys(doc.repos);
-        //console.log( "[API-BUILD] Searching for repository to be built:" + JSON.stringify(build));
-        //console.log("[API-BUILD] Parsing repos:" + JSON.stringify( sources));
+
+
         for (var index in sources) {
           var source = doc.repos[sources[index]];
           var source_id = sources[index];
-          //console.log("in source: " + JSON.stringify(source));
+
           if (source_id.indexOf(build.source_id) !== -1) {
             git = source.url;
             console.log("Found repo: " + git);
@@ -2966,7 +2963,7 @@ var ThinxApp = function() {
         console.log(err);
       } else {
         console.log('Build log saved...');
-        //console.log("Updating permissions for " + log_path;
+
         //fs.chmodSync(log_path, '644');
       }
     });
@@ -2986,7 +2983,7 @@ var ThinxApp = function() {
           "] [BUILD_FAIL] Build start failed (stderr).");
         console.error("stderr:" + stderr);
       }
-      //console.log("[BUILD] " + build_id + " : " + stdout);
+
       blog.log(build_id, owner, udid, stdout);
     });
 
@@ -3028,7 +3025,7 @@ var ThinxApp = function() {
         return;
       }
 
-      //console.log("alog.fetch: " + JSON.stringify(body));
+
 
       res.end(JSON.stringify({
         success: true,
@@ -3082,7 +3079,7 @@ var ThinxApp = function() {
       var builds = [];
       for (var bindex in body.rows) {
         var row = body.rows[bindex];
-        //console.log("row: " + JSON.stringify(row));
+
         // FIXME: Should cover all logs...
         if (row.doc.log.length !== 1) {
           console.log("UNSOLVED CASE - LOG TOO LONG!");
@@ -3245,7 +3242,7 @@ var ThinxApp = function() {
       });
     }
 
-    //console.log("Serching user " + username);
+
 
     userlib.view("users", "owners_by_username", {
       "key": username,
@@ -3301,7 +3298,7 @@ var ThinxApp = function() {
               }));
               return;
             } else if (client_type == "webapp") {
-              //console.log("Redirecting through JSON body...");
+
               res.end(JSON.stringify({
                 "redirectURL": "http://rtm.thinx.cloud:80/app"
               }));
@@ -3406,7 +3403,7 @@ var ThinxApp = function() {
         return;
       }
 
-      console.log("[STATS] Today: " + body);
+      console.log("[STATS] result of stats.today callback: " + body);
 
       res.end(JSON.stringify({
         success: true,
@@ -3551,7 +3548,7 @@ var ThinxApp = function() {
         var owner = body.rows[index].doc.owner;
         var udid = body.rows[index].doc.udid;
         var path = deploy.pathForDevice(owner, udid);
-        //console.log("Watcher checks path " + path);
+
         if (!fs.existsSync(path)) {
           continue;
         } else {

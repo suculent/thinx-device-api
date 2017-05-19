@@ -1,12 +1,11 @@
 {
-  "_id": "_design/builds",
   "language": "javascript",
   "views": {
     "builds_by_build_id": {
-      "map": "function (doc) { if(doc.build_id) { emit (doc); } }"
+      "map": "function (doc) { if(doc.build_id) { emit (doc.build_id, doc); } }"
     },
     "builds_by_owner": {
-      "map": "function (doc) { if(doc.owner) { emit (doc); } }"
+      "map": "function (doc) { if(doc.owner) { emit (doc.owner, doc); } }"
     }
   }
 }
