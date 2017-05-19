@@ -455,8 +455,6 @@ var ThinxApp = function() {
         return;
       }
 
-      console.log(JSON.stringify(body));
-
       if (body.rows.length === 0) {
         res.end(JSON.stringify({
           success: false,
@@ -468,10 +466,10 @@ var ThinxApp = function() {
         return;
       }
 
-      var doc = body.rows[0].value.doc;
+      var doc = body.rows[0].value;
       alog.log(doc.owner, "Attaching repository to device: " + JSON
         .stringify(
-          doc.hash));
+          doc));
 
       deploy.initWithOwner(doc.owner);
       var repo_path = deploy.pathForDevice(doc.owner, doc.udid);
