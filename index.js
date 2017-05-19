@@ -750,8 +750,6 @@ var ThinxApp = function() {
         "alias": new_api_key_alias
       };
 
-      // Store all keys to redis instead of CouchDB
-      // client.set("ak:" + doc._id, JSON.stringify(keys));
       apikey.create(owner, new_api_key_alias, function(success,
         object) {
         if (success) {
@@ -766,29 +764,6 @@ var ThinxApp = function() {
         } else {
           console.log("[TEST] APIKEY creation failed.");
         }
-      }); // rest is will deprecate when this will work...
-
-      // Will partially deprecate deprecate when API Keys will be
-      // everywhere taken from Redis only (tedious refactoring).
-      doc.api_keys = keys;
-
-      userlib.destroy(doc._id, doc._rev, function(err) {
-
-        delete doc._rev;
-
-        userlib.insert(doc, doc._id, function(err, body, header) {
-          if (err) {
-            console.log("/api/user/apikey ERROR:" + err);
-          } else {
-            console.log(doc.owner + " API Keys updated.");
-            alog.log(owner, "API Key created.");
-            res.end(JSON.stringify({
-              success: true,
-              api_key: new_api_key,
-              hash: new_hash
-            }));
-          }
-        });
       });
     });
   });
@@ -803,7 +778,7 @@ var ThinxApp = function() {
     var username = req.session.username;
     var api_key_hash = req.body.fingerprint;
 
-    console.log("Revoke API Key by hash: " + api_key_hash);
+    console.log("[OID:%{owner}] [APIKEY_REVOKE] " + api_key_hash);
 
     apikey.revoke(owner, api_key_hash, function(success) {
       if (success) {
@@ -820,72 +795,6 @@ var ThinxApp = function() {
           status: "revocation_failed"
         }));
       }
-    }); // rest will deprecate
-
-    userlib.get(owner, function(err, user) {
-
-      if (err) {
-        console.log(err);
-        return;
-      }
-
-      if (!user) {
-        console.log("User " + owner + " not found.");
-        return;
-      }
-
-      // Search API key by hash
-      var keys = user.api_keys; // array
-      var api_key_index = null;
-      var api_key = null;
-      console.log("keys: " + JSON.stringify(keys));
-      for (var index in keys) {
-        var internal_hash = keys[index].hash;
-        console.log("ihash: " + internal_hash + " ahash: " +
-          api_key_hash);
-        if (internal_hash.indexOf(api_key_hash) !== -1) {
-          api_key_index = index;
-          api_key = keys[index].key;
-          console.log("Found and splicing index " + api_key_index +
-            " key " +
-            api_key);
-          user.api_keys.splice(api_key_index, 1); // important
-          break;
-        }
-      }
-
-      if (api_key_index === null) {
-        res.end(JSON.stringify({
-          success: false,
-          status: "hash_not_found"
-        }));
-        return;
-      }
-
-      user.last_update = new Date();
-
-
-
-      userlib.destroy(user._id, user._rev, function(err) {
-
-        delete user._rev;
-
-        userlib.insert(user, user._id, function(err) {
-          if (err) {
-            console.log(err);
-            res.end(JSON.stringify({
-              success: false,
-              status: "revocation_failed"
-            }));
-          } else {
-            alog.log(owner, "API Key revoked");
-            res.end(JSON.stringify({
-              revoked: api_key,
-              success: true
-            }));
-          }
-        });
-      });
     });
   });
 
@@ -1355,9 +1264,8 @@ var ThinxApp = function() {
       var delete_key = null;
 
       if (typeof(keys !== "undefined")) {
-
+        //
       } else {
-        console.log("Searching rsa_keys in " + JSON.stringify(doc));
         res.end(JSON.stringify({
           success: false,
           status: "rsa_keys_not_found"
@@ -1366,9 +1274,6 @@ var ThinxApp = function() {
       }
 
       var fingerprints = Object.keys(doc.rsa_keys);
-
-      console.log("fingerprints:" + fingerprints);
-      console.log(JSON.stringify(fingerprints));
 
       if (typeof(fingerprints) === "undefined") {
         console.log("ERROR: No fingerprints in keys: " + JSON.stringify(
@@ -2898,10 +2803,10 @@ var ThinxApp = function() {
 
     console.log("Build for udid: " + udid);
 
-    if (typeof(build.source) === "undefined") {
+    if (typeof(build.source_id) === "undefined") {
       return res.end(JSON.stringify({
         success: false,
-        status: "missing_source_alias"
+        status: "missing_source_id"
       }));
     }
 
@@ -2910,7 +2815,7 @@ var ThinxApp = function() {
       "include_docs": true
     }, function(err, body) {
 
-      console.log("devicelib.view udid: " + udid);
+      //console.log("devicelib.view udid: " + udid);
 
       if (err) {
         if (err.toString() == "Error: missing") {
@@ -2973,15 +2878,15 @@ var ThinxApp = function() {
 
         var git = null;
 
-        // Finds first source with given source_alias
-        var sources = doc.repos;
+        // Finds first source with given source_id
+        var sources = Object.keys(doc.repos);
         console.log("Searching for repository to be built:" +
-          build.source);
-        console.log("Parsing repos:" + JSON.stringify(sources));
+          JSON.stringify(build));
+        //console.log("Parsing repos:" + JSON.stringify(sources));
         for (var index in sources) {
           var source = sources[index];
           console.log("in source: " + JSON.stringify(source));
-          if (source.alias.indexOf(build.source) !== -1) {
+          if (source.indexOf(build.source_id) !== -1) {
             git = source.url;
             console.log("Found repo: " + git);
             break;
