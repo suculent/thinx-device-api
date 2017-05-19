@@ -51,6 +51,8 @@ var ThinxApp = function() {
   var apikey = require("./lib/thinx/apikey");
   var stats = require("./lib/thinx/statistics");
 
+  var sexec = require("sync-exec");
+
   var WebSocket = require("ws");
 
   var rdict = {};
@@ -2344,6 +2346,13 @@ var ThinxApp = function() {
 
       var mqtt = "/devices/" + udid;
 
+      CMD = "mosquitto_passwd -b mqtt_passwords " + udid + " " +
+        api_key;
+      var temp = exec(CMD).stdout.replace("\n", "");
+      console.log("[REGISTER] Creating mqtt account...");
+
+      //
+
       var device = {
         mac: mac,
         firmware: fw,
@@ -2953,7 +2962,7 @@ var ThinxApp = function() {
 
     blog.log(build_id, owner, udid, "Running build...");
 
-    console.log("[OID:" + owner + "] [BUILD_STARTED] Running sync-exec...");
+    console.log("[OID:" + owner + "] [BUILD_STARTED] Running /...");
 
     var sexec = require("sync-exec");
     var temp = sexec(CMD).stdout; // .replace("\n", "");
@@ -3192,7 +3201,7 @@ var ThinxApp = function() {
       res.end(JSON.stringify(err));
     };
 
-    blog.logtail(req.body.build_id, _ws);
+    blog.logtail(req.body.build_id, owner, _ws);
 
   });
 
