@@ -443,7 +443,7 @@ var ThinxApp = function() {
     alog.log(owner, "Attempt to attach repository: " + source_id +
       " to device: " + udid);
 
-    devicelib.search("devicelib", "devices_by_udid", {
+    devicelib.find("devicelib", "devices_by_udid", {
       "q": udid,
       "include_docs": true
     }, function(err, body) {
@@ -1326,11 +1326,8 @@ var ThinxApp = function() {
         }));
         return;
       } else {
-
         userlib.destroy(doc._id, doc._rev, function(err) {
-
           delete doc._rev;
-
           userlib.insert(doc, doc._id, function(err) {
             if (err) {
               console.log("rsa_revocation_failed:" + err);
@@ -1345,9 +1342,7 @@ var ThinxApp = function() {
               }));
             }
           });
-
         });
-
       }
     });
   });
@@ -2345,6 +2340,8 @@ var ThinxApp = function() {
 
       console.log("Device firmware: " + fw);
 
+      var mqtt = "/devices/" + udid
+
       var device = {
         mac: mac,
         firmware: fw,
@@ -2355,6 +2352,7 @@ var ThinxApp = function() {
         owner: owner,
         version: device_version,
         udid: udid,
+        mqtt: mqtt,
         lastupdate: new Date(),
         lastkey: sha256(api_key)
       };
@@ -2882,9 +2880,10 @@ var ThinxApp = function() {
         console.log("[API-BUILD] Parsing repos:" + JSON.stringify(
           sources));
         for (var index in sources) {
-          var source = sources[index];
+          var source = doc.repos[sources[index]];
+          var source_id = sources[index];
           console.log("in source: " + JSON.stringify(source));
-          if (source.indexOf(build.source_id) !== -1) {
+          if (source_id.indexOf(build.source_id) !== -1) {
             git = source.url;
             console.log("Found repo: " + git);
             break;
