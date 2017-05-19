@@ -713,7 +713,7 @@ var ThinxApp = function() {
 
     var new_api_key = sha256(new Date().toString()).substring(0, 40);
 
-    console.log("Searching for owner " + owner);
+    //console.log("Searching for owner " + owner);
 
     userlib.get(owner, function(err, doc) {
 
@@ -1243,7 +1243,7 @@ var ThinxApp = function() {
 
     var rsa_key_fingerprint = req.body.fingerprint;
 
-    console.log("Searching by username " + username);
+    //console.log("Searching by username " + username);
 
     userlib.get(owner, function(err, doc) {
 
@@ -1481,7 +1481,7 @@ var ThinxApp = function() {
 
     alog.log(owner, "Attempt to reset password with: " + reset_key);
 
-    console.log("Searching for owner " + owner);
+    //console.log("Searching for owner " + owner);
 
     userlib.view("users", "owners_by_resetkey", {
       "key": reset_key,
@@ -1558,8 +1558,7 @@ var ThinxApp = function() {
     var ac_key = req.query.activation;
     var ac_owner = req.query.owner;
 
-    console.log("Searching ac_key " + ac_key + " for owner: " +
-      ac_owner);
+    //console.log("Searching ac_key " + ac_key + " for owner: " +ac_owner);
 
     userlib.view("users", "owners_by_activation", {
       "key": ac_key,
@@ -2206,7 +2205,7 @@ var ThinxApp = function() {
       return;
     }
 
-    console.log("Searching owners...");
+    //console.log("Searching owners...");
 
     userlib.view("users", "owners_by_username", { // because owners_by_apikey does not work anymore... apikeys should have to be in separate table
       "include_docs": true // might be useless
@@ -2234,7 +2233,7 @@ var ThinxApp = function() {
       }
 
       //console.log("owners:" + JSON.stringify(body.rows));
-      console.log("Searching for api-key: " + api_key);
+      //console.log("Searching for api-key: " + api_key);
 
       //console.log("in: " + JSON.stringify(body.rows));
 
@@ -2401,7 +2400,7 @@ var ThinxApp = function() {
       // - see if alias or owner changed
       // - otherwise reply just OK
 
-      console.log("Searching device...");
+      //console.log("Searching device...");
 
       devicelib.get(mac, function(error, existing) {
 
@@ -2839,9 +2838,9 @@ var ThinxApp = function() {
         //console.log(JSON.stringify(device));
 
         var device_owner = device.owner;
-        console.log("Searching " + owner + " in " + device_owner);
+        //console.log("Searching " + owner + " in " + device_owner);
         if (device_owner.indexOf(owner) !== -1) {
-          console.log("Searching " + udid + " in " + db_udid);
+          //console.log("Searching " + udid + " in " + db_udid);
           if (udid.indexOf(db_udid) != -1) {
             udid = device.udid; // target device ID
             break;
@@ -2882,15 +2881,12 @@ var ThinxApp = function() {
 
         // Finds first source with given source_id
         var sources = Object.keys(doc.repos);
-        console.log(
-          "[API-BUILD] Searching for repository to be built:" +
-          JSON.stringify(build));
-        console.log("[API-BUILD] Parsing repos:" + JSON.stringify(
-          sources));
+        //console.log( "[API-BUILD] Searching for repository to be built:" + JSON.stringify(build));
+        //console.log("[API-BUILD] Parsing repos:" + JSON.stringify( sources));
         for (var index in sources) {
           var source = doc.repos[sources[index]];
           var source_id = sources[index];
-          console.log("in source: " + JSON.stringify(source));
+          //console.log("in source: " + JSON.stringify(source));
           if (source_id.indexOf(build.source_id) !== -1) {
             git = source.url;
             console.log("Found repo: " + git);
