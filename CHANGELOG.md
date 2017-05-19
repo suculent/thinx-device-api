@@ -8,6 +8,7 @@
 
 It seems to be almost done. Let's have a month for bugfixing and tweaking. There are still things that would not work after initial install (tech tail, e.g. mqtt configuration and other post-installs)
 
+* 0: Async log should write to logfile instead of shellscript.
 * 1: Statistics
 * 2: Builder Logging, build tests
 * 3: Working Arduino C implementation (lib?) - still crashes a bit
