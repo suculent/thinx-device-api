@@ -213,7 +213,7 @@ var ThinxApp = function() {
     // Custom user agent is required for devices
     var client = req.get("User-Agent");
     if (client == client_user_agent) {
-      console.log("Device Agent: " + client);
+      //console.log("Device Agent: " + client);
       if (origin == "device") {
         next();
         return;
@@ -647,7 +647,7 @@ var ThinxApp = function() {
           var device = body.rows[dindex].value;
           //console.log("dev:" + JSON.stringify(device));
           var device_udid = device.udid;
-          console.log("Comparing " + udid + "to " + device_udid);
+          //console.log("Comparing " + udid + "to " + device_udid);
           if (device_udid.indexOf(udid) != -1) {
             console.log("Device for revocation found.");
             doc = device;
@@ -2042,11 +2042,11 @@ var ThinxApp = function() {
         var anowner = all_users.rows[oindex];
         for (var kindex in anowner.doc.api_keys) {
           var k = anowner.doc.api_keys[kindex].key;
-          console.log("Comparing: " + k);
+          //console.log("Comparing: " + k);
           if (k.indexOf(api_key) != -1) {
             user_data = anowner.doc;
             owner = anowner.doc.owner;
-            console.log("Valid key found.");
+            console.log("API Key valid.");
             api_key_valid = true;
             break;
           }
@@ -2248,7 +2248,7 @@ var ThinxApp = function() {
         var anowner = body.rows[oindex];
         for (var kindex in anowner.doc.api_keys) {
           var k = anowner.doc.api_keys[kindex].key;
-          console.log("Comparing: " + k);
+          //console.log("Comparing: " + k);
           if (k.indexOf(api_key) != -1) {
             user_data = anowner.doc;
             owner = anowner.doc.owner;
@@ -2605,11 +2605,10 @@ var ThinxApp = function() {
 
         //console.log("doc: " + JSON.stringify(doc));
 
-        console.log("Editing device: " +
-          JSON.stringify(doc.alias));
+        //console.log("Editing device: " + JSON.stringify(doc.alias));
 
         if (typeof(doc) === "undefined") {
-          console.log("nothing to destroy...");
+          //console.log("nothing to destroy...");
           return;
         }
 
@@ -2629,16 +2628,12 @@ var ThinxApp = function() {
 
           if (typeof(change.alias) !== "undefined") {
             doc.alias = change.alias;
-            console.log("Changing alias: " +
-              JSON.stringify(doc.alias) + " to " + change.alias
-            );
+            //console.log("Changing alias: " + JSON.stringify(doc.alias) + " to " + change.alias);
           }
 
           if (typeof(change.avatar) !== "undefined") {
             doc.avatar = change.avatar;
-            console.log("Changing avatar: " +
-              JSON.stringify(doc.avatar) + " to " + change.avatar
-            );
+            //console.log("Changing avatar: " + JSON.stringify(doc.avatar) + " to " + change.avatar);
           }
 
           devicelib.destroy(doc._id, doc._rev, function(err) {
