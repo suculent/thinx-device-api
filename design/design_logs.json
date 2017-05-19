@@ -6,7 +6,7 @@
       "map": "function (doc) { if(doc.id) { emit (doc.id, doc); } }"
     },
     "logs_by_owner": {
-      "map": "function (doc) { if(doc.owner) { emit (doc); } }"
+      "map": "function (doc) { if(doc.owner) { emit (doc.id, doc); } }"
     }
   }
 }
