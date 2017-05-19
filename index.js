@@ -443,6 +443,8 @@ var ThinxApp = function() {
     alog.log(owner, "Attempt to attach repository: " + source_id +
       " to device: " + udid);
 
+    console.log("[OID:%{owner}] [DEVICE_ATTACH] " + udid);
+
     devicelib.view("devicelib", "devices_by_udid", {
       "keys": udid,
       "include_docs": true
@@ -452,6 +454,8 @@ var ThinxApp = function() {
         console.log("find error: " + err);
         return;
       }
+
+      console.log(JSON.stringify(body));
 
       if (body.rows.length === 0) {
         res.end(JSON.stringify({
@@ -464,7 +468,7 @@ var ThinxApp = function() {
         return;
       }
 
-      var doc = body.rows[0].doc;
+      var doc = body.rows[0].value.doc;
       alog.log(doc.owner, "Attaching repository to device: " + JSON
         .stringify(
           doc.hash));
