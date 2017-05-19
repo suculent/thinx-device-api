@@ -29,6 +29,7 @@ var ThinxApp = function() {
   var serverPort = app_config.port;
 
   var uuidV1 = require("uuid/v1");
+  var url = require("url");
   var http = require("http");
   var https = require("https");
   var parser = require("body-parser");
@@ -49,6 +50,8 @@ var ThinxApp = function() {
   var watcher = require("./lib/thinx/repository");
   var apikey = require("./lib/thinx/apikey");
   var stats = require("./lib/thinx/statistics");
+
+  var WebSocket = require("ws");
 
   var rdict = {};
   var watched_repos = [];
@@ -610,6 +613,8 @@ var ThinxApp = function() {
 
     alog.log(owner, "Attempt to revoke device: " + udid);
     //console.log("Attempt to revoke device: " + udid);
+
+    var apikey = require("./lib/thinx/apikey");
 
     devicelib.view("devicelib", "devices_by_owner", {
         "key": owner,
@@ -3525,8 +3530,56 @@ var ThinxApp = function() {
 
   // FIXME: Link to letsencrypt SSL keys using configuration
   https.createServer(options, app).listen(serverPort + 1);
-  http.createServer(
-    app).listen(serverPort);
+  http.createServer(app).listen(serverPort);
+
+  var wsapp = express();
+
+  wsapp.use(function(req, res) {
+    res.send({
+      msg: "hello"
+    });
+  });
+
+  // WebSocket Server
+  var wserver = http.createServer(wsapp);
+  var wss = new WebSocket.Server({
+    port: 7447,
+    server: wserver
+  });
+
+  wss.on('connection', function connection(ws, req) {
+    var location = url.parse(req.url, true);
+    // You might use location.query.access_token to authenticate or share sessions
+    // or req.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
+
+    // If the WebSocket is closed before the following send is attempted
+    ws.send('something');
+
+    // Errors (both immediate and async write errors) can be detected in an optional
+    // callback. The callback is also the only way of being notified that data has
+    // actually been sent.
+    ws.send('something', function ack(error) {
+      // If error is not defined, the send has been completed, otherwise the error
+      // object will indicate what failed.
+    });
+
+    // Immediate errors can also be handled with `try...catch`, but **note** that
+    // since sends are inherently asynchronous, socket write failures will *not* be
+    // captured when this technique is used.
+    try {
+      ws.send('something');
+    } catch (e) { /* handle error */ }
+
+    ws.on('message', function incoming(message) {
+      console.log('received: %s', message);
+    });
+
+    ws.send('something');
+  });
+
+  wserver.listen(7444, function listening() {
+    console.log('WebSocket listening on port %d', wserver.address().port);
+  });
 
   // Will probably deprecate...
   //app.listen(serverPort, function() {

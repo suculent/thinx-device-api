@@ -54,7 +54,8 @@
     "sync-exec": "^0.6.2",
     "tail": "^1.2.1",
     "uuid": "^3.0.1",
-    "web-push": "^3.2.2"
+    "web-push": "^3.2.2",
+    "ws": "^3.0.0"
   },
   "devDependencies": {
     "coveralls": "^2.13.1",
