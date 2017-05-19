@@ -2967,7 +2967,22 @@ var ThinxApp = function() {
     var sexec = require("sync-exec");
     var temp = sexec(CMD).stdout; // .replace("\n", "");
 
-    console.log("[BUILD_COMPLETED] sexec-stdout: " + temp);
+    console.log("[BUILD_COMPLETED] sexec-stdout: " + temp); // TODO: Store to logfile
+
+    var log_path = '/var/www/html/bin/' + owner + '/' + udid + '/' + build_id +
+      '.log';
+
+    fs.writeFile(log_path, temp, function(err) {
+      if (err) {
+        console.log(err);
+      } else {
+        fs.close(fd, function() {
+          console.log('Build log saved...');
+        });
+        //console.log("Updating permissions for " + log_path;
+        //fs.chmodSync(log_path, '644');
+      }
+    });
 
     console.log("[OID:" + owner + "] [BUILD_STARTED] Running normal-exec...");
     exec(CMD, function(err, stdout, stderr) {
