@@ -3406,7 +3406,7 @@ var ThinxApp = function() {
         return;
       }
 
-      console.log("[STATS] Today: " + body);
+      console.log("[STATS] result of stats.today callback: " + body);
 
       res.end(JSON.stringify({
         success: true,
