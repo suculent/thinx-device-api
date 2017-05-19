@@ -443,13 +443,13 @@ var ThinxApp = function() {
     alog.log(owner, "Attempt to attach repository: " + source_id +
       " to device: " + udid);
 
-    devicelib.find("devicelib", "devices_by_udid", {
-      "q": udid,
+    devicelib.view("devicelib", "devices_by_udid", {
+      "keys": udid,
       "include_docs": true
     }, function(err, body) {
 
       if (err) {
-        console.log(err);
+        console.log("find error: " + err);
         return;
       }
 

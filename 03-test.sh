@@ -357,7 +357,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing builder..."
 
-BC='{ "build" : { "udid" : '${DEVICE_ID}', "source" : "thinx-test-repo", "dryrun" : true } }'
+BC='{ "build" : { "udid" : '${DEVICE_ID}', "source_id" : "'${SOURCE_ID}'", "dryrun" : true } }'
 
 echo "$BC"
 

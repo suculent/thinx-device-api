@@ -9,16 +9,16 @@
       "map": "function (doc) { if(doc.owner) { emit (doc.owner, doc); } }"
     },
     "devices_by_source": {
-      "map": "function (doc) { if(doc.source) { emit (doc); } }"
+      "map": "function (doc) { if(doc.source) { emit (doc.source, doc); } }"
     },
     "devices_by_id": {
-      "map": "function (doc) { if(doc.id) { emit (doc); } }"
+      "map": "function (doc) { if(doc.id) { emit (doc.id, doc); } }"
     },
     "watcher_view": {
       "map": "function (doc) { if(doc.source != null) { emit (doc.owner, doc.udid, doc.source); } }"
     },
     "devices_by_udid": {
-      "map": "function (doc) { if(doc.udid) { emit (doc); } }"
+      "map": "function (doc) { if(doc.udid) { emit (doc.udid, doc); } }"
     }
   }
 }
