@@ -285,7 +285,6 @@ var ThinxApp = function() {
       }));
     }
 
-    console.log("Updating owner: " + owner + "(" + username + ")");
     alog.log(owner, "Attempt to update owner: " + owner +
       " with: " + update_key);
 
@@ -666,7 +665,7 @@ var ThinxApp = function() {
         }
 
         var logmessage = "Revoking device: " + JSON.stringify(doc.udid);
-        //console.log(logmessage);
+        console.log(logmessage);
         alog.log(owner, logmessage);
 
         devicelib.destroy(doc._id, doc._rev, function(err) {
@@ -2404,8 +2403,9 @@ var ThinxApp = function() {
 
         if (!error) {
 
-          console.log("[DEVICE_CHECKIN] Known device: " + JSON.stringify(
-            reg));
+          console.log("[OID:" + owner +
+            "] [DEVICE_CHECKIN] Known device: " + JSON.stringify(
+              reg));
 
           existing.lastupdate = new Date();
           if (typeof(fw) !== undefined && fw !== null) {
@@ -2456,8 +2456,9 @@ var ThinxApp = function() {
 
         } else {
 
-          console.log("[DEVICE_NEW] New device: " + JSON.stringify(
-            reg));
+          console.log("[OID:" + owner +
+            "] [DEVICE_NEW] New device: " + JSON.stringify(
+              reg));
 
           device.udid = uuidV1();
           device.source = null;
@@ -2956,7 +2957,7 @@ var ThinxApp = function() {
     var sexec = require("sync-exec");
     var temp = sexec(CMD).stdout; // .replace("\n", "");
 
-    console.log("[BUILD_COMPLETED] sexec-stdout: " + temp); // TODO: Store to logfile
+    console.log("[OID:" + owner + "] [BUILD_COMPLETED] sexec-stdout: " + temp); // TODO: Store to logfile
 
     var log_path = '/var/www/html/bin/' + owner + '/' + udid + '/' + build_id +
       '.log';
@@ -2964,10 +2965,6 @@ var ThinxApp = function() {
     fs.writeFile(log_path, temp, function(err) {
       if (err) {
         console.log(err);
-      } else {
-        console.log('Build log saved...');
-
-        //fs.chmodSync(log_path, '644');
       }
     });
 
@@ -3027,8 +3024,6 @@ var ThinxApp = function() {
         }));
         return;
       }
-
-
 
       res.end(JSON.stringify({
         success: true,
@@ -3123,8 +3118,6 @@ var ThinxApp = function() {
 
     var build_id = req.body.build_id;
 
-    console.log("Fetching build log for " + build_id);
-
     blog.fetch(req.body.build_id, function(err, body) {
 
       if (err) {
@@ -3149,12 +3142,12 @@ var ThinxApp = function() {
 
       var logs = [];
       for (var lindex in body.rows) {
-        console.log("body.rows[lindex]", body.rows[lindex]);
         var lrec = body.rows[lindex].value.log;
         logs.push(lrec);
       }
 
-      console.log("Build-logs: " + JSON.stringify(logs));
+      console.log("Build-logs for " + build_id + ": " + JSON.stringify(
+        logs));
 
       var response = body;
       response.success = true;

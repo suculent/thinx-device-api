@@ -17,7 +17,6 @@ describe("API Key", function() {
           console.log("[jasmine] Failed.");
         }
         expect(object).toBeDefined();
-        done();
       });
 
   }, 1000);
@@ -35,7 +34,6 @@ describe("API Key", function() {
           console.log("Verification failed.");
         }
         expect(success).toBe(true);
-        done();
       });
 
   }, 1000);
@@ -53,7 +51,6 @@ describe("API Key", function() {
           console.log("[jasmine] Revocation failed.");
         }
         expect(object).toBeDefined();
-        done();
       });
 
   }, 1000);
@@ -70,7 +67,6 @@ describe("API Key", function() {
           console.log("[jasmine] Listing failed.");
         }
         expect(object).toBeDefined();
-        done();
       });
 
   }, 1000);
