@@ -3049,7 +3049,7 @@ var ThinxApp = function() {
 
     blog.log(build_id, owner, udid, "Running build...");
 
-    console.log("[BUILD] Running sync-exec...");
+    console.log("[OID:" + owner + "] [BUILD] Running sync-exec...");
 
     var sexec = require("sync-exec");
     var temp = sexec(CMD).stdout; // .replace("\n", "");
@@ -3061,16 +3061,18 @@ var ThinxApp = function() {
       console.log("[BUILD] Running standard exec...");
       if (err) {
         blog.log(build_id, owner, udid, "Build start failed.");
-        console.log("[BUILD_FAIL] Build start failed.");
+        console.log("[OID:" + owner +
+          "] [BUILD_FAIL] Build start failed (err).");
         console.error("err: " + err);
         return;
       }
       if (stderr) {
         blog.log(build_id, owner, udid, stderr);
-        console.log("[BUILD_FAIL] Build start failed.");
+        console.log("[OID:" + owner +
+          "] [BUILD_FAIL] Build start failed (stderr).");
         console.error("stderr:" + stderr);
       }
-      console.log("[BUILD] " + build_id + " : " + stdout);
+      //console.log("[BUILD] " + build_id + " : " + stdout);
       blog.log(build_id, owner, udid, stdout);
     });
 
@@ -3287,7 +3289,7 @@ var ThinxApp = function() {
       res.end(JSON.stringify(err));
     };
 
-    blog.tail(req.body.build_id, line_callback, error_callback);
+    blog.logtail(req.body.build_id, _ws);
 
   });
 
@@ -3546,8 +3548,10 @@ var ThinxApp = function() {
     port: 7447,
     server: wserver
   });
+  var _ws = null;
 
   wss.on('connection', function connection(ws, req) {
+    _ws = ws;
     var location = url.parse(req.url, true);
     // You might use location.query.access_token to authenticate or share sessions
     // or req.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
@@ -3578,7 +3582,7 @@ var ThinxApp = function() {
   });
 
   wserver.listen(7444, function listening() {
-    console.log('WebSocket listening on port %d', wserver.address().port);
+    console.log('» WebSocket listening on port %d', wserver.address().port);
   });
 
   // Will probably deprecate...
@@ -3626,8 +3630,6 @@ var ThinxApp = function() {
 
   var initWatcher = function(watcher) {
 
-    console.log("» Starting GIT watcher...");
-
     devicelib.view("devicelib", "watcher_view", {
       "include_docs": true
     }, function(err, body) {
@@ -3636,6 +3638,8 @@ var ThinxApp = function() {
         console.log(err);
         return;
       }
+
+      console.log("» Starting GIT watcher...");
 
       for (var index in body.rows) {
         var owner = body.rows[index].doc.owner;
