@@ -12,6 +12,12 @@ var ThinxApp = function() {
 
   };
 
+  // include and initialize the rollbar library with your access token
+  var rollbar = require("rollbar");
+  rollbar.init("5505bac5dc6c4542ba3bd947a150cb55");
+
+  // record a generic message and send to rollbar
+  rollbar.reportMessage("API BOOTSTRAP");
 
   //
   // Shared Configuration
