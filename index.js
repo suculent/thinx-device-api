@@ -2345,11 +2345,13 @@ var ThinxApp = function() {
       console.log("Device firmware: " + fw);
 
       var mqtt = "/devices/" + udid;
-
       CMD = "mosquitto_passwd -b mqtt_passwords " + udid + " " +
         api_key;
-      var temp = exec(CMD).stdout.replace("\n", "");
+      var temp = sexec(CMD).stdout.replace("\n", "");
       console.log("[REGISTER] Creating mqtt account...");
+      if (temp) {
+        console.log(temp);
+      }
 
       //
 
