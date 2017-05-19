@@ -12,9 +12,12 @@ var ThinxApp = function() {
 
   };
 
-  // include and initialize the rollbar library with your access token
-  var rollbar = require("rollbar");
-  rollbar.init("5505bac5dc6c4542ba3bd947a150cb55");
+  var Rollbar = require('rollbar');
+  var rollbar = new Rollbar({
+    accessToken: '5505bac5dc6c4542ba3bd947a150cb55',
+    handleUncaughtExceptions: true,
+    handleUnhandledRejections: true
+  });
 
   // record a generic message and send to rollbar
   rollbar.reportMessage("API BOOTSTRAP");
@@ -663,7 +666,7 @@ var ThinxApp = function() {
         }
 
         var logmessage = "Revoking device: " + JSON.stringify(doc.udid);
-        console.log(logmessage);
+        //console.log(logmessage);
         alog.log(owner, logmessage);
 
         devicelib.destroy(doc._id, doc._rev, function(err) {
