@@ -2969,9 +2969,7 @@ var ThinxApp = function() {
       if (err) {
         console.log(err);
       } else {
-        fs.close(fd, function() {
-          console.log('Build log saved...');
-        });
+        console.log('Build log saved...');
         //console.log("Updating permissions for " + log_path;
         //fs.chmodSync(log_path, '644');
       }
