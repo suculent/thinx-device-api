@@ -666,7 +666,7 @@ var ThinxApp = function() {
         }
 
         var logmessage = "Revoking device: " + JSON.stringify(doc.udid);
-        console.log(logmessage);
+        //console.log(logmessage);
         alog.log(owner, logmessage);
 
         devicelib.destroy(doc._id, doc._rev, function(err) {
