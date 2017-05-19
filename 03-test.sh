@@ -341,7 +341,7 @@ R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--d '{ "udid" : "'${DEVICE_ID}'", "source_id" : "'${SOURCE_ID}'" }' \
+-d '{ "udid" : "'${DEVICE_ID}'", "source_id" : '${SOURCE_ID}' }' \
 http://$HOST:7442/api/device/attach)
 
 SUCCESS=$(echo $R | jq .success)
@@ -357,7 +357,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing builder..."
 
-BC='{ "build" : { "udid" : '${DEVICE_ID}', "source_id" : "'${SOURCE_ID}'", "dryrun" : true } }'
+BC='{ "build" : { "udid" : '${DEVICE_ID}', "source_id" : '${SOURCE_ID}', "dryrun" : true } }'
 
 echo "$BC"
 
