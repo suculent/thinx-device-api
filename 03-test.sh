@@ -131,6 +131,25 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
+echo "☢ Statistics..."
+
+R=$(curl -s -b cookies.jar \
+-H "Origin: rtm.thinx.cloud" \
+-H "User-Agent: THiNX-Client" \
+-H "Content-Type: application/json" \
+http://$HOST:7442/api/user/stats)
+
+echo "$R"
+
+SUCCESS=$(echo $R | jq .success)
+if [[ $SUCCESS == true ]]; then
+	echo_ok "Successfully updated user info."
+else
+	echo_fail $R
+fi
+
+echo
+echo "--------------------------------------------------------------------------------"
 echo "» Requesting new API Key..."
 
 R=$(curl -s -b cookies.jar \
@@ -477,24 +496,6 @@ else
 	echo_fail $R
 fi
 
-echo
-echo "--------------------------------------------------------------------------------"
-echo "☢ Statistics..."
-
-R=$(curl -s -b cookies.jar \
--H "Origin: rtm.thinx.cloud" \
--H "User-Agent: THiNX-Client" \
--H "Content-Type: application/json" \
-http://$HOST:7442/api/user/stats)
-
-echo "$R"
-
-SUCCESS=$(echo $R | jq .success)
-if [[ $SUCCESS == true ]]; then
-	echo_ok "Successfully updated user info."
-else
-	echo_fail $R
-fi
 
 echo
 echo "--------------------------------------------------------------------------------"
