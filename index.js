@@ -443,7 +443,7 @@ var ThinxApp = function() {
     alog.log(owner, "Attempt to attach repository: " + source_id +
       " to device: " + udid);
 
-    console.log("[OID:%{owner}] [DEVICE_ATTACH] " + udid);
+    console.log(`[OID:%{owner}] [DEVICE_ATTACH] ` + udid);
 
     devicelib.view("devicelib", "devices_by_udid", {
       "key": udid,
@@ -782,7 +782,7 @@ var ThinxApp = function() {
     var username = req.session.username;
     var api_key_hash = req.body.fingerprint;
 
-    console.log("[OID:%{owner}] [APIKEY_REVOKE] " + api_key_hash);
+    console.log(`[OID:%{owner}] [APIKEY_REVOKE] ` + api_key_hash);
 
     apikey.revoke(owner, api_key_hash, function(success) {
       if (success) {
@@ -2344,7 +2344,7 @@ var ThinxApp = function() {
 
       console.log("Device firmware: " + fw);
 
-      var mqtt = "/devices/" + udid
+      var mqtt = "/devices/" + udid;
 
       var device = {
         mac: mac,
