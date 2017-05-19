@@ -59,7 +59,7 @@ set -e
 
 LOG_PATH="${DEPLOYMENT_PATH}/${BUILD_ID}.log"
 
-echo "Created deployment/log path..." >> $LOG_PATH
+echo "Created deployment/log path..."
 
 # extract the protocol
 proto="$(echo $GIT_REPO | grep :// | sed -e's,^\(.*://\).*,\1,g')"
@@ -99,16 +99,16 @@ echo "  REPO_NAME: ${REPO_NAME}"
 echo "Cleaning workspace..."
 
 # Clean
-rm -rf ./tenants/$OWNER_ID/$REPO_PATH/*
+rm -rf ./tenants/$OWNER_ID/$REPO_PATH/**
 
-echo "Creating workspace..." >> $LOG_PATH
+echo "Creating workspace..."
 
 # TODO: only if $REPO_NAME contains slash(es)
 pushd ./tenants/$OWNER_ID > /dev/null
 
 # Create new working directory
 set +e
-mkdir -p ./tenants/$OWNER_ID/$REPO_PATH
+mkdir -p ./$REPO_PATH
 set -e
 
 # enter git user folder if any
@@ -120,7 +120,7 @@ fi
 rm -rf $REPO_PATH/*
 
 # Fetch project
-git clone $GIT_REPO >> $LOG_PATH
+git clone $GIT_REPO
 
 if [[ -d $REPO_NAME ]]; then
 	pushd ./$REPO_NAME > /dev/null
@@ -129,10 +129,10 @@ else
 fi
 
 COMMIT=$(git rev-parse HEAD)
-echo "Fetched commit ID: ${COMMIT}" >> $LOG_PATH
+echo "Fetched commit ID: ${COMMIT}"
 
 VERSION=$(git rev-list HEAD --count)
-echo "Version: ${VERSION}" >> $LOG_PATH
+echo "Version: ${VERSION}"
 
 # Overwrite Thinx.h file (should be required)
 
@@ -154,7 +154,7 @@ BUILD_DATE=`date +%Y-%m-%d`
 
 # TODO: Change this to a sed template, this is tedious
 
-echo "Building Thinx.h..." >> $LOG_PATH
+echo "Building Thinx.h..."
 
 echo "//" > $THINX_FILE
 echo "// This is an auto-generated file, it will be re-written by THiNX on cloud build." >> $THINX_FILE
@@ -184,26 +184,26 @@ echo "WARNING: API port is fixed to 7442 in builder shell-script.";
 echo "int thinx_api_port = 7442;" >> $THINX_FILE
 
 # Build
-cat $THINX_FILE >> $LOG_PATH
+cat $THINX_FILE
 
-echo "Build step..." >> $LOG_PATH
+echo "Build step..."
 
 if [[ -f package.json ]]; then
-	echo >> $LOG_PATH
-	echo "THiNX does not support npm builds." >> $LOG_PATH
-	echo "If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues" >> $LOG_PATH
+	echo
+	echo "THiNX does not support npm builds."
+	echo "If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues"
 	exit 0
 
 elif [[ ! -f platformio.ini ]]; then
-	echo >> $LOG_PATH
-	echo "This not a compatible project so far." >> $LOG_PATH
-	echo "If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues" >> $LOG_PATH
+	echo
+	echo "This not a compatible project so far."
+	echo "If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues"
 	exit 1
 fi
 
 echo "TODO: Support no-compile deployment of Micropython/LUA here..."
 
-platformio run >> $LOG_PATH
+platformio run
 
 SHA=0
 
@@ -219,7 +219,7 @@ echo
 
 if [[ ! ${RUN} ]]; then
 
-	echo "☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> $LOG_PATH
+	echo "☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment."
 
 	STATUS='"DRY_RUN_OK"'
 
@@ -235,7 +235,7 @@ else
 
 	if [[ -f ${BUILD_ARTIFACT} ]]; then
 		mv ${BUILD_ARTIFACT} "${COMMIT}.bin"
-		echo "Deploying $COMMIT.bin to $DEPLOYMENT_PATH..." >> $LOG_PATH
+		echo "Deploying $COMMIT.bin to $DEPLOYMENT_PATH..."
 		mv $COMMIT.bin $DEPLOYMENT_PATH
 		STATUS='"DEPLOYED"'
 		if [[ $(uname) == "Darwin" ]]; then
@@ -248,14 +248,14 @@ else
 	fi
 fi
 
-echo $STATUS >> $LOG_PATH
+echo $STATUS
 
 popd > /dev/null
 popd > /dev/null
 
 DISPLAY_DEPLOYMENT_PATH=$(echo ${DEPLOYMENT_PATH} | tr -d '/var/www/html')
 
-echo "DP" $DISPLAY_DEPLOYMENT_PATH >> $LOG_PATH
+echo "DP" $DISPLAY_DEPLOYMENT_PATH
 
 echo "BID" "${BUILD_ID}"
 echo "CID" "${COMMIT}"
@@ -271,8 +271,8 @@ cd $ORIGIN
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
 CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${COMMIT}.bin ${UDID} ${SHA} ${OWNER_ID} ${STATUS}"
-echo $CMD >> $LOG_PATH
+echo $CMD
 RESULT=$(node notifier.js $CMD)
-echo $RESULT >> $LOG_PATH
+	echo $RESULT
 
 cat $LOG_PATH
