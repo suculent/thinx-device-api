@@ -3185,14 +3185,6 @@ var ThinxApp = function() {
 
     console.log("Tailing build log for " + build_id);
 
-    // Called when tail returns new line
-    var line_callback = function(data) {
-      console.log(data);
-      // TODO: XHR Response implementation missing
-      res.set("Connection", "keep-alive");
-      res.send(JSON.stringify(data));
-    };
-
     // Called on error
     var error_callback = function(err) {
       console.log(err);
@@ -3201,7 +3193,7 @@ var ThinxApp = function() {
       res.end(JSON.stringify(err));
     };
 
-    blog.logtail(req.body.build_id, owner, _ws);
+    blog.logtail(req.body.build_id, owner, _ws, error_callback);
 
   });
 
