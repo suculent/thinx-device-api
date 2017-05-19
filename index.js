@@ -352,10 +352,8 @@ var ThinxApp = function() {
 
     var owner = req.session.owner;
 
-
-
     devicelib.view("devicelib", "devices_by_owner", {
-        //"key": owner,
+        "key": owner,
         "include_docs": false
       },
       function(err, body) {
