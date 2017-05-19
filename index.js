@@ -1199,7 +1199,6 @@ var ThinxApp = function() {
 
       var exportedKeys = [];
       var fingerprints = Object.keys(user.rsa_keys);
-      console.log("fingerprints: " + JSON.stringify(fingerprints));
       for (var i = 0; i < fingerprints.length; i++) {
         var key = user.rsa_keys[fingerprints[i]];
         var info = {
@@ -1212,7 +1211,7 @@ var ThinxApp = function() {
       var reply = JSON.stringify({
         rsa_keys: exportedKeys
       });
-      console.log("Listing RSA keys: " + reply);
+      //console.log("Listing RSA keys: " + reply);
       res.end(reply);
     });
   });
@@ -2776,11 +2775,6 @@ var ThinxApp = function() {
 
     var rdict = {};
 
-    // FIXME: Change 'hash' to 'udid' in /build request
-    // '{ "build" : { "hash" : "2d5b0e45f791cb3efd828d2a451e0dc64e4aefa3", "source" : "thinx-firmware-esp8266", "dryrun" : true } }'
-
-    console.log(JSON.stringify(req.body));
-
     var owner = req.session.owner;
     var username = req.session.username;
     var build = req.body.build; // build descriptor wrapper	;
@@ -2800,8 +2794,6 @@ var ThinxApp = function() {
       }));
       return;
     }
-
-    console.log("Build for udid: " + udid);
 
     if (typeof(build.source_id) === "undefined") {
       return res.end(JSON.stringify({
@@ -2954,16 +2946,15 @@ var ThinxApp = function() {
 
     blog.log(build_id, owner, udid, "Running build...");
 
-    console.log("[OID:" + owner + "] [BUILD] Running sync-exec...");
+    console.log("[OID:" + owner + "] [BUILD_STARTED] Running sync-exec...");
 
     var sexec = require("sync-exec");
     var temp = sexec(CMD).stdout; // .replace("\n", "");
 
     console.log("[BUILD_COMPLETED] sexec-stdout: " + temp);
 
-    console.log(CMD);
+    console.log("[OID:" + owner + "] [BUILD_STARTED] Running normal-exec...");
     exec(CMD, function(err, stdout, stderr) {
-      console.log("[BUILD] Running standard exec...");
       if (err) {
         blog.log(build_id, owner, udid, "Build start failed.");
         console.log("[OID:" + owner +
