@@ -22,10 +22,10 @@ database:
 ## Customize test commands
 test:
   pre:
-    - sudo service redis-server start --port 6391    
+    - sudo service redis-server start
     - bash ./02-deploy.sh:
         background: true
-  commands:    
+  commands:
     - bash ./03-test.sh
   post:
     - curl -sSL https://download.sourceclear.com/ci.sh | bash
