@@ -14,6 +14,8 @@ killall node
 forever stopall
 set -e
 
+git pull
+
 # Start the server in background
 nohup forever -o /var/log/thinx.log index.js &
 
