@@ -1447,6 +1447,7 @@ var ThinxApp = function() {
         "7038e0500 a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f4": {
           alias: "THiNX Vanilla Device Firmware",
           url: "git@github.com:suculent/thinx-firmware-esp8266.git",
+          branch: "origin/master",
           devices: [
             "ANY"
           ]
@@ -3478,15 +3479,8 @@ var ThinxApp = function() {
    * WebSocket Server
    */
 
-  var wsapp = express();
-
-  wsapp.use(function(req, res) {
-    res.send({
-      msg: "TEST"
-    });
-  });
-
   // WebSocket Server
+  var wsapp = express();
   var wserver = http.createServer(wsapp);
   var wss = new WebSocket.Server({
     port: 7447,
@@ -3495,24 +3489,30 @@ var ThinxApp = function() {
   var _ws = null;
 
   wss.on('connection', function connection(ws, req) {
+
     _ws = ws;
+
     var location = url.parse(req.url, true);
     console.log("WSS connection on location: " + location);
-
     console.log("WSS cookie: " + req.headers.cookie);
 
     // You might use location.query.access_token to authenticate or share sessions
     // or req.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
 
     try {
-      ws.send('HELLO');
+      var welcome_message = {
+        notification: {
+          title: "Live Feed Connected",
+          body: "Live notifications and log view available."
+        }
+      };
+      ws.send(JSON.stringify(welcome_message));
     } catch (e) { /* handle error */ }
 
     ws.on('message', function incoming(message) {
       console.log('received: %s', message);
     });
 
-    ws.send('READY');
   });
 
   wserver.listen(7444, function listening() {
