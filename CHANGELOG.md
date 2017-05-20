@@ -13,7 +13,7 @@ It seems to be almost done. Let's have a month for bugfixing and tweaking. There
 * 3: Working Arduino C implementation (lib?) - still crashes a bit
 * 4: Bare data support (LUA/uPy)
 
-20/5/2017 - 1.5.979: added Rollbar; added statistics with log tagging
+20/5/2017 - 1.5.979: added Rollbar; added statistics with log tagging; 36% test coverage
 
 19/5/2017 - 1.5.962: successfully tested registration with Robodyn D1; introduced websocket logtail against runtime log, still working on statistics and popover; migrating fully to Redis API Key store; completed migration to udid; changed statistics directory structure; solved long-term issue with couch queries (bad doc)
 
