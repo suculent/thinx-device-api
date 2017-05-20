@@ -3493,7 +3493,7 @@ var ThinxApp = function() {
     _ws = ws;
 
     var location = url.parse(req.url, true);
-    console.log("WSS connection on location: " + location);
+    console.log("WSS connection on location: " + JSON.stringify(location));
     console.log("WSS cookie: " + req.headers.cookie);
 
     // You might use location.query.access_token to authenticate or share sessions

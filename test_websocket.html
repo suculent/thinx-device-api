@@ -7,18 +7,21 @@
          {
             if ("WebSocket" in window)
             {
-               var ws = new WebSocket("ws://thinx.cloud:7447/test");
+               var ws = new WebSocket("ws://thinx.cloud:7447/message_queue/owner_id");
 
                ws.onopen = function()
                {
-                  ws.send("Message to send");
+                  var message = {
+                    logtail: "build_id"
+                  }
+                  ws.send(JSON.stringify(message));
                   console.log("Test message sent...");
                };
 
                ws.onmessage = function (evt)
                {
                   var received_msg = evt.data;
-                  console.log(received_msg);
+                  console.log(JSON.parse(received_msg);
                };
 
                ws.onclose = function()
