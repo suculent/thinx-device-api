@@ -2225,8 +2225,6 @@ var ThinxApp = function() {
 
     rdict.registration = {};
 
-
-
     var mac = reg.mac;
     var fw = "unknown";
     if (!reg.hasOwnProperty("firmware")) {
@@ -2478,8 +2476,9 @@ var ThinxApp = function() {
                   res.end(JSON.stringify({
                     registration: {
                       success: true,
+                      owner: owner,
                       udid: existing.udid,
-                      status: "Device info updated."
+                      status: "OK"
                     }
                   }));
                 } else {

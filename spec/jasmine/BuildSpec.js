@@ -88,6 +88,7 @@ describe("Build log", function() {
     var error_callback = function(err) {
       console.log(err);
       expect(true).toBe(true);
+
     };
     blog.logtail(build_id, owner, _ws, error_callback);
   }, 1000);
