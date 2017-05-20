@@ -12,6 +12,7 @@ describe("Statistics", function() {
       function(result) {
         console.log(result);
         expect(result).toBeDefined();
+        this.done();
       });
   });
 
