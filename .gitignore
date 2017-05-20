@@ -8,6 +8,8 @@ sessions/
 logs/
 statistics/
 
+mqtt_passwords
+
 cookie.jar
 
 coverage/
