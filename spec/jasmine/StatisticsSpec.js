@@ -15,7 +15,7 @@ describe("Statistics", function() {
       });
   });
 
-  xit("should be able to aggregate statistics", function() {
+  it("should be able to aggregate statistics", function() {
     var s = require('../../lib/thinx/statistics');
     var result = s.aggregate();
     expect(result).toBe(true);

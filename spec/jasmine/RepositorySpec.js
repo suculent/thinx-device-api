@@ -1,7 +1,5 @@
 describe("Repository Watcher", function() {
 
-
-
   beforeEach(function() {
     //watcher = new Watcher();
   });
