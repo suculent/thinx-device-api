@@ -677,6 +677,16 @@ var ThinxApp = function() {
             }));
             return;
           } else {
+
+            // MQTT
+            var mqtt = "/devices/" + udid;
+            CMD = "mosquitto_passwd -D mqtt_passwords " + udid;
+            var temp = sexec(CMD).stdout.replace("\n", "");
+            console.log("[REVOKE] Revoking mqtt account...");
+            if (temp) {
+              console.log("[REVOKE_ERROR] MQTT: " + temp);
+            }
+
             var logmessage = "Revocation succeed: " + doc.alias +
               " (${doc.udid})";
             alog.log(owner, logmessage);
@@ -2340,17 +2350,6 @@ var ThinxApp = function() {
 
       console.log("Device firmware: " + fw);
 
-      var mqtt = "/devices/" + udid;
-      CMD = "mosquitto_passwd -b mqtt_passwords " + udid + " " +
-        api_key;
-      var temp = sexec(CMD).stdout.replace("\n", "");
-      console.log("[REGISTER] Creating mqtt account...");
-      if (temp) {
-        console.log(temp);
-      }
-
-      //
-
       var device = {
         mac: mac,
         firmware: fw,
@@ -2459,6 +2458,17 @@ var ThinxApp = function() {
           console.log("[OID:" + owner +
             "] [DEVICE_NEW] New device: " + JSON.stringify(
               reg));
+
+          // MQTT
+          var mqtt = "/devices/" + udid;
+          CMD = "mosquitto_passwd -b mqtt_passwords " + udid +
+            " " +
+            api_key;
+          var temp = sexec(CMD).stdout.replace("\n", "");
+          console.log("[REGISTER] Creating mqtt account...");
+          if (temp) {
+            console.log("[REGISTER_ERROR] MQTT: " + temp);
+          }
 
           device.udid = uuidV1();
           device.source = null;
