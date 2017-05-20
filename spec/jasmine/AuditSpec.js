@@ -3,14 +3,18 @@ describe("Audit log", function() {
   var Audit = require('../../lib/thinx/audit');
 
   beforeEach(function() {
-    var audit = require('../../lib/thinx/audit');
+    //var audit = require('../../lib/thinx/audit');
   });
 
   it("should be able to fetch audit log", function() {
     var r = Audit.fetch(
-      "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f"
+      "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
+      function(err, body) {
+        expect(err).toBe(null);
+        expect(body).toBeDefined();
+      }
     );
-    expect(true).toBe(true);
+
   });
 
   it("should be able to log", function() {
