@@ -473,6 +473,17 @@ var ThinxApp = function() {
       }
 
       var doc = body.rows[0].value;
+
+      // make sure we don't destroy whole database
+      if (typeof(doc) === "undefined" || (doc === null)) {
+        res.end(JSON.stringify({
+          success: false,
+          status: "device_not_found",
+          err_udid: udid
+        }));
+        return;
+      }
+
       alog.log(doc.owner, "Attaching repository to device: " + JSON
         .stringify(
           doc));
@@ -565,6 +576,16 @@ var ThinxApp = function() {
 
       var doc = body.rows[0].value;
 
+      // make sure we don't destroy whole database
+      if (typeof(doc) === "undefined" || (doc === null)) {
+        res.end(JSON.stringify({
+          success: false,
+          status: "device_not_found",
+          err_udid: udid
+        }));
+        return;
+      }
+
       console.log("Detaching repository from device: " + JSON.stringify(
         doc.udid));
 
@@ -655,13 +676,14 @@ var ThinxApp = function() {
           }
         }
 
+        // make sure we don't destroy whole database
         if (typeof(doc) === "undefined" || (doc === null)) {
           res.end(JSON.stringify({
             success: false,
             status: "device_not_found",
             err_udid: udid
           }));
-          return; // prevent breaking db
+          return;
         }
 
         var logmessage = "Revoking device: " + JSON.stringify(doc.udid);
@@ -677,6 +699,16 @@ var ThinxApp = function() {
             }));
             return;
           } else {
+
+            // MQTT
+            var mqtt = "/devices/" + udid;
+            CMD = "mosquitto_passwd -D mqtt_passwords " + udid;
+            var temp = sexec(CMD).stdout.replace("\n", "");
+            console.log("[REVOKE] Revoking mqtt account...");
+            if (temp) {
+              console.log("[REVOKE_ERROR] MQTT: " + temp);
+            }
+
             var logmessage = "Revocation succeed: " + doc.alias +
               " (${doc.udid})";
             alog.log(owner, logmessage);
@@ -1045,7 +1077,19 @@ var ThinxApp = function() {
           };
 
           for (var dindex in body.rows) {
+
             var device = body.rows[0].value;
+
+            // make sure we don't destroy whole database
+            if (typeof(device) === "undefined" || (device === null)) {
+              res.end(JSON.stringify({
+                success: false,
+                status: "device_not_found",
+                err_udid: udid
+              }));
+              return;
+            }
+
             if (device.source == source_id) {
               console.log(
                 "repo_revoke alias equal: Will destroy/insert device."
@@ -2340,17 +2384,6 @@ var ThinxApp = function() {
 
       console.log("Device firmware: " + fw);
 
-      var mqtt = "/devices/" + udid;
-      CMD = "mosquitto_passwd -b mqtt_passwords " + udid + " " +
-        api_key;
-      var temp = sexec(CMD).stdout.replace("\n", "");
-      console.log("[REGISTER] Creating mqtt account...");
-      if (temp) {
-        console.log(temp);
-      }
-
-      //
-
       var device = {
         mac: mac,
         firmware: fw,
@@ -2401,7 +2434,7 @@ var ThinxApp = function() {
 
       devicelib.get(mac, function(error, existing) {
 
-        if (!error) {
+        if (!error && existing) {
 
           console.log("[OID:" + owner +
             "] [DEVICE_CHECKIN] Known device: " + JSON.stringify(
@@ -2459,6 +2492,17 @@ var ThinxApp = function() {
           console.log("[OID:" + owner +
             "] [DEVICE_NEW] New device: " + JSON.stringify(
               reg));
+
+          // MQTT
+          var mqtt = "/devices/" + udid;
+          CMD = "mosquitto_passwd -b mqtt_passwords " + udid +
+            " " +
+            api_key;
+          var temp = sexec(CMD).stdout.replace("\n", "");
+          console.log("[REGISTER] Creating mqtt account...");
+          if (temp) {
+            console.log("[REGISTER_ERROR] MQTT: " + temp);
+          }
 
           device.udid = uuidV1();
           device.source = null;
@@ -2565,8 +2609,6 @@ var ThinxApp = function() {
           return;
         }
 
-
-
         if (body.rows.length === 0) {
           console.log(JSON.stringify(body));
           res.end(JSON.stringify({
@@ -2576,22 +2618,17 @@ var ThinxApp = function() {
           return;
         }
 
-
-
-        var device = null;
+        var doc = null;
 
         for (var dindex in body.rows) {
           var dev = body.rows[dindex].value;
-
-
           if (udid.indexOf(dev.udid) != -1) {
-
-            device = dev;
+            doc = dev;
             break;
           }
         }
 
-        if (device === null) {
+        if (doc === null) {
           res.end(JSON.stringify({
             success: false,
             status: "no_such_device"
@@ -2599,12 +2636,13 @@ var ThinxApp = function() {
           return;
         }
 
-        var doc = device;
-
-
-
-        if (typeof(doc) === "undefined") {
-
+        // make sure we don't destroy whole database
+        if (typeof(doc) === "undefined" || (doc === null)) {
+          res.end(JSON.stringify({
+            success: false,
+            status: "device_not_found",
+            err_udid: udid
+          }));
           return;
         }
 
