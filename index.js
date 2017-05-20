@@ -3452,8 +3452,8 @@ var ThinxApp = function() {
     }
   });
 
-  /* 
-   * HTTP/HTTPS API Server 
+  /*
+   * HTTP/HTTPS API Server
    */
 
   app.version = function() {
@@ -3469,8 +3469,8 @@ var ThinxApp = function() {
   https.createServer(options, app).listen(serverPort + 1);
   http.createServer(app).listen(serverPort);
 
-  /* 
-   * WebSocket Server 
+  /*
+   * WebSocket Server
    */
 
   var wsapp = express();
@@ -3495,10 +3495,10 @@ var ThinxApp = function() {
     console.log("WSS connection on location: "+location);
 
     console.log("WSS cookie: "+req.headers.cookie);
-    
+
     // You might use location.query.access_token to authenticate or share sessions
     // or req.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
-    
+
     try {
       ws.send('HELLO');
     } catch (e) { /* handle error */ }
@@ -3515,7 +3515,7 @@ var ThinxApp = function() {
   });
 
 
-  /* 
+  /*
    * Bootstrap banner section
    */
 

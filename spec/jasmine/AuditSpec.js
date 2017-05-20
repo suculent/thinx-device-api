@@ -14,7 +14,6 @@ describe("Audit log", function() {
         expect(body).toBeDefined();
       }
     );
-
   });
 
   it("should be able to log", function() {
