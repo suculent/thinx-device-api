@@ -11,64 +11,43 @@ describe("API Key", function() {
       function(success,
         object) {
         if (success) {
-          console.log("[jasmine] Created: " + JSON.stringify(object));
           generated_key_hash = object.hash;
-        } else {
-          console.log("[jasmine] Failed.");
         }
         expect(object).toBeDefined();
       });
-
-  }, 1000);
+  });
 
   //verify: function(owner, apikey, callback)
   it("should be able to verify API Keys", function() {
     APIKey.verify(
       "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
       "310c20ed9dcd4663551bd04cc53a58a52c8d9f1b",
-      function(success,
-        object) {
-        if (success) {
-          console.log("[jasmine] Verified: " + JSON.stringify(object));
-        } else {
-          console.log("Verification failed.");
-        }
+      function(success) {
         expect(success).toBe(true);
       });
-
-  }, 1000);
+  });
 
   //revoke: function(owner, apikey_hash, callback)
   it("should be able to revoke API Keys", function() {
     APIKey.revoke(
-      "d4d37cb2c00766f433a5feb7e3b97d82fb4b8971",
+      generated_key_hash,
       "sample-key-hash",
-      function(success,
-        object) {
-        if (success) {
-          console.log("[jasmine] Revoked: " + JSON.stringify(object));
-        } else {
-          console.log("[jasmine] Revocation failed.");
-        }
-        expect(object).toBeDefined();
+      function(success) {
+        expect(success).toBeDefined();
       });
-
-  }, 1000);
+  });
 
   //list: function(owner, callback)
   it("should be able to list API Keys", function() {
     APIKey.list(
       "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
-      function(success,
-        object) {
+      function(success, object) {
         if (success) {
-          console.log("[jasmine] Listed: " + JSON.stringify(object));
+          expect(object).toBeDefined();
         } else {
-          console.log("[jasmine] Listing failed.");
+          console.log("[jasmine] Listing failed:" + object);
         }
-        expect(object).toBeDefined();
       });
-
-  }, 1000);
+  });
 
 });

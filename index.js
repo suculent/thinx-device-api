@@ -3219,7 +3219,6 @@ var ThinxApp = function() {
 
     console.log("Tailing build log for " + build_id);
 
-    // Called on error
     var error_callback = function(err) {
       console.log(err);
       // TODO: XHR Response implementation missing
@@ -3453,7 +3452,9 @@ var ThinxApp = function() {
     }
   });
 
-  /* Server */
+  /*
+   * HTTP/HTTPS API Server
+   */
 
   app.version = function() {
     return v.revision();
@@ -3464,15 +3465,19 @@ var ThinxApp = function() {
     cert: fs.readFileSync(app_config.ssl_cert)
   };
 
-  // FIXME: Link to letsencrypt SSL keys using configuration
+  // FIXME: Link to letsencrypt SSL keys using configuration for CircleCI
   https.createServer(options, app).listen(serverPort + 1);
   http.createServer(app).listen(serverPort);
+
+  /*
+   * WebSocket Server
+   */
 
   var wsapp = express();
 
   wsapp.use(function(req, res) {
     res.send({
-      msg: "hello"
+      msg: "TEST"
     });
   });
 
@@ -3487,40 +3492,33 @@ var ThinxApp = function() {
   wss.on('connection', function connection(ws, req) {
     _ws = ws;
     var location = url.parse(req.url, true);
+    console.log("WSS connection on location: "+location);
+
+    console.log("WSS cookie: "+req.headers.cookie);
+
     // You might use location.query.access_token to authenticate or share sessions
     // or req.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
 
-    // If the WebSocket is closed before the following send is attempted
-    ws.send('something');
-
-    // Errors (both immediate and async write errors) can be detected in an optional
-    // callback. The callback is also the only way of being notified that data has
-    // actually been sent.
-    ws.send('something', function ack(error) {
-      // If error is not defined, the send has been completed, otherwise the error
-      // object will indicate what failed.
-    });
-
-    // Immediate errors can also be handled with `try...catch`, but **note** that
-    // since sends are inherently asynchronous, socket write failures will *not* be
-    // captured when this technique is used.
     try {
-      ws.send('something');
+      ws.send('HELLO');
     } catch (e) { /* handle error */ }
 
     ws.on('message', function incoming(message) {
       console.log('received: %s', message);
     });
 
-    ws.send('something');
+    ws.send('READY');
   });
 
   wserver.listen(7444, function listening() {
     console.log('» WebSocket listening on port %d', wserver.address().port);
   });
 
-  // Will probably deprecate...
-  //app.listen(serverPort, function() {
+
+  /*
+   * Bootstrap banner section
+   */
+
   var package_info = require("./package.json");
   var product = package_info.description;
   var version = package_info.version;
@@ -3536,7 +3534,6 @@ var ThinxApp = function() {
     " (HTTP) and " + (serverPort +
       1) +
     " (HTTPS)");
-  //});
 
   /* Should load all devices with attached repositories and watch those repositories.
    * Maintains list of watched repositories for runtime handling purposes.
