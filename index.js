@@ -2384,6 +2384,8 @@ var ThinxApp = function() {
 
       console.log("Device firmware: " + fw);
 
+      var mqtt = "/devices/" + udid;
+
       var device = {
         mac: mac,
         firmware: fw,
@@ -2494,7 +2496,6 @@ var ThinxApp = function() {
               reg));
 
           // MQTT
-          var mqtt = "/devices/" + udid;
           CMD = "mosquitto_passwd -b mqtt_passwords " + udid +
             " " +
             api_key;
