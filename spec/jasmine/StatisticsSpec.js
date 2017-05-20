@@ -14,7 +14,7 @@ describe("Statistics", function() {
         expect(result).toBeDefined();
         this.done();
       });
-  });
+  }, 1000);
 
   it("should be able to aggregate statistics", function() {
     var s = require('../../lib/thinx/statistics');
@@ -30,7 +30,7 @@ describe("Statistics", function() {
         console.log(err, body);
         expect(body).toBe(true);
       });
-  });
+  }, 1000);
 
   it("should return today path element", function() {
     var s = require('../../lib/thinx/statistics');
