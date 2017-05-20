@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html>
+   <head>
+
+      <script type="text/javascript">
+         function WebSocketTest()
+         {
+            if ("WebSocket" in window)
+            {
+               var ws = new WebSocket("ws://thinx.cloud:7447/test");
+
+               ws.onopen = function()
+               {
+                  ws.send("Message to send");
+                  console.log("Test message sent...");
+               };
+
+               ws.onmessage = function (evt)
+               {
+                  var received_msg = evt.data;
+                  console.log(received_msg);
+               };
+
+               ws.onclose = function()
+               {
+                  alert("Connection is closed...");
+               };
+            }
+
+            else
+            {
+               // The browser doesn't support WebSocket
+               alert("WebSocket NOT supported by your Browser!");
+            }
+         }
+      </script>
+
+   </head>
+   <body>
+
+      <div id="sse">
+         <a href="javascript:WebSocketTest()">Run WebSocket</a>
+      </div>
+
+   </body>
+</html>
