@@ -2481,6 +2481,7 @@ var ThinxApp = function() {
                       status: "OK"
                     }
                   }));
+                  return;
                 } else {
                   res.set("Connection", "close");
                   res.end(JSON.stringify({
@@ -2538,9 +2539,12 @@ var ThinxApp = function() {
               res.end(JSON.stringify({
                 registration: {
                   success: true,
-                  udid: device.udid
+                  owner: owner,
+                  udid: device.udid,
+                  status: "OK"
                 }
               }));
+              return;
             } else {
               reg.success = false;
               reg.this.status = "Insert failed";
