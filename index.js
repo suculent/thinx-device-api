@@ -916,6 +916,11 @@ var ThinxApp = function() {
     }
 
     var branch = "origin/master";
+    if ((typeof(req.body.branch) !== "undefined") &&
+      (req.body.branch !== null)) {
+      branch = req.body.branch;
+    }
+
     var url = req.body.url;
     var alias = req.body.alias;
 
@@ -3492,9 +3497,9 @@ var ThinxApp = function() {
   wss.on('connection', function connection(ws, req) {
     _ws = ws;
     var location = url.parse(req.url, true);
-    console.log("WSS connection on location: "+location);
+    console.log("WSS connection on location: " + location);
 
-    console.log("WSS cookie: "+req.headers.cookie);
+    console.log("WSS cookie: " + req.headers.cookie);
 
     // You might use location.query.access_token to authenticate or share sessions
     // or req.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
