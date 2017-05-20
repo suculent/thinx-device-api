@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Using API Key 'static-test-key' : e172704e2c4e978782a5aecec4ebca9c88017a2a
+# Using API Key 'static-test-key' : 310c20ed9dcd4663551bd04cc53a58a52c8d9f1b
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
