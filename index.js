@@ -3416,14 +3416,12 @@ var ThinxApp = function() {
 
     var owner = req.session.owner;
 
-    stats.today(owner, function(err, body) {
+    stats.today(owner, function(success, body) {
 
-      if (err) {
-        console.log(err);
+      if (!success) {
         res.end(JSON.stringify({
           success: false,
-          status: "stats_fetch_failed",
-          error: err
+          status: "stats_fetch_failed"
         }));
         return;
       }
@@ -3432,14 +3430,12 @@ var ThinxApp = function() {
         console.log("Statistics for owner " + owner + " not found.");
         res.end(JSON.stringify({
           success: false,
-          status: "stats_fetch_failed",
-          error: err
+          status: "no_results"
         }));
         return;
       }
 
       console.log("[STATS] result of stats.today callback: " + body);
-
       res.end(JSON.stringify({
         success: true,
         stats: JSON.parse(body)
