@@ -16,7 +16,7 @@ It seems to be almost done. Let's have a week for fixing bugs and tweaking. Ther
 
 ### Seventh week
 
-21/5/2017 - 1.5.1046: realtime Web socket log-tail; fixed weeks-old Arduino issue (actually in the parser!)
+21/5/2017 - 1.5.1053: realtime Web socket log-tail; fixed weeks-old Arduino issue (actually in the parser!)
 
 20/5/2017 - 1.5.1020: added Rollbar; added statistics with log tagging; bumped from 11 to 48% test coverage; MQTT authentication tested on device; example Web socket connection and working on log-tail implementation; aligned registration responses with firmware expectations
 
