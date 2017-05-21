@@ -533,7 +533,6 @@ var ThinxApp = function() {
   });
 
   /* Detach code source from a device. Expects unique device identifier. */
-  // FIXME: Should be based on udid instead of MAC
   app.post("/api/device/detach", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
@@ -1043,7 +1042,6 @@ var ThinxApp = function() {
         });
       }); // userlib
 
-      // FIXME: DB cleanup: get all devices by owner and detach if attached
       devicelib.view("devicelib", "devices_by_owner", {
           key: owner,
           include_docs: true
@@ -1167,8 +1165,7 @@ var ThinxApp = function() {
         return;
       }
 
-      // FIXME: Change username to owner_id
-      var file_name = username + "-" + Math.floor(new Date() /
+      var file_name = owner + "-" + Math.floor(new Date() /
         1000) + ".pub";
       var ssh_path = "../.ssh/" + file_name;
 
@@ -2145,7 +2142,6 @@ var ThinxApp = function() {
           version: existing.version
         };
 
-        // FIXME: Validate checksum, commit and mac that should be part of request
         var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(
           device);
         var url = firmwareUpdateDescriptor.url;
@@ -3131,18 +3127,16 @@ var ThinxApp = function() {
       for (var bindex in body.rows) {
         var row = body.rows[bindex];
 
-        // FIXME: Should cover all logs...
-        if (row.doc.log.length !== 1) {
-          console.log("UNSOLVED CASE - LOG TOO LONG!");
+        for (var dindex in row.doc.log) {
+          var lastIndex = row.doc.log[dindex];
+          var build = {
+            message: lastIndex.message,
+            date: lastIndex.date,
+            udid: lastIndex.udid,
+            build_id: lastIndex.build
+          };
+          builds.push(build);
         }
-        var lastIndex = row.doc.log.length - 1;
-        var build = {
-          message: row.doc.log[lastIndex].message,
-          date: row.doc.log[lastIndex].date,
-          udid: row.doc.log[lastIndex].udid,
-          build_id: row.doc.log[lastIndex].build
-        };
-        builds.push(build);
       }
 
       res.end(JSON.stringify({
