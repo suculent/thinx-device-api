@@ -3535,14 +3535,14 @@ var ThinxApp = function() {
       if (typeof(object.logtail) !== "undefined") {
         var build_id = object.logtail.build_id;
         var owner_id = object.logtail.owner_id;
-        blog.logtail(build_id, owner_id, ws, logtail_callback);
+        blog.logtail(build_id, owner_id, _ws, logtail_callback);
       } else {
         console.log("parser said: unknown message");
       }
     });
 
     // Debug only
-    //blog.logtail(build_id, owner_id, _ws, logtail_callback);
+    blog.logtail(build_id, owner_id, ws, logtail_callback);
 
   });
 
