@@ -3137,7 +3137,8 @@ var ThinxApp = function() {
         var build = {
           message: row.doc.log[lastIndex].message,
           date: row.doc.log[lastIndex].date,
-          udid: row.doc.log[lastIndex].udid
+          udid: row.doc.log[lastIndex].udid,
+          build_id: row.doc.log[lastIndex].build
         };
         builds.push(build);
       }
