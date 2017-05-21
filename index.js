@@ -2572,6 +2572,8 @@ var ThinxApp = function() {
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
 
+    res.set("Connection", "close");
+
     if (typeof(req.body.changes) === "undefined") {
       res.end(JSON.stringify({
         success: false,
@@ -2700,7 +2702,6 @@ var ThinxApp = function() {
                 }));
                 return;
               } else {
-                res.set("Connection", "close");
                 res.end(JSON.stringify({
                   success: true,
                   change: change
