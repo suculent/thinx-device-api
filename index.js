@@ -3482,7 +3482,9 @@ var ThinxApp = function() {
   // FIXME: Link to letsencrypt SSL keys using configuration for CircleCI
   https.createServer(options, app).listen(serverPort + 1);
   http.createServer(app).listen(serverPort);
-  var wserver = http.createServer(app).listen(7447);
+
+  var wsapp = express();
+  var wserver = http.createServer(wsapp);
 
   /*
    * WebSocket Server
@@ -3643,10 +3645,10 @@ var ThinxApp = function() {
 
   if (app_config.safe_mode === true) {
     process.on("uncaughtException", function(err) {
-      console.log("Caught exception: " + err);
+      console.log("» Caught exception: " + err);
     });
   } else {
-    console.log("Safe mode disabled. App will exit and log on exception.");
+    console.log("» Safe mode disabled. App will exit and log on exception.");
   }
 };
 
