@@ -11,6 +11,8 @@ It seems to be almost done. Let's have a week for fixing bugs and tweaking. Ther
 * 1: Async log should write to logfile instead of shellscript for tailing.
 * 2: Builder Logging, build tests
 * 3: Bare data support (LUA/uPy) for dumb firmwares (there is a lot of them)
+* 4: Improve statistics (count last 24 hours or something)
+* 5: Make devices respond/receive MQTT messages (LUA first)
 
 ### Seventh week
 
