@@ -3532,13 +3532,14 @@ var ThinxApp = function() {
     ws.on('message', function incoming(message) {
       console.log('received: %s', message);
       if (typeof(message.logtail) !== "undefined") {
-        var build_id = message.logtail;
+        var build_id = message.logtail.build_id;
+        var owner_id = message.logtail.owner_id;
         blog.logtail(build_id, owner_id, ws, logtail_callback);
       }
     });
 
     // Debug only
-    blog.logtail(build_id, owner_id, _ws, logtail_callback);
+    //blog.logtail(build_id, owner_id, _ws, logtail_callback);
 
   });
 
