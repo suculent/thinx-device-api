@@ -3525,18 +3525,20 @@ var ThinxApp = function() {
       ws.send(JSON.stringify(welcome_message));
     } catch (e) { /* handle error */ }
 
+    var logtail_callback = function(err) {
+      console.log("logtail_callback" + err);
+    };
+
     ws.on('message', function incoming(message) {
       console.log('received: %s', message);
-
       if (typeof(message.logtail) !== "undefined") {
         var build_id = message.logtail;
-        var logtail_callback = function(err) {
-          console.log("logtail_callback" + err);
-        };
-        blog.logtail(build_id, owner_id, _ws, logtail_callback);
+        blog.logtail(build_id, owner_id, ws, logtail_callback);
       }
-
     });
+
+    // Debug only
+    blog.logtail(build_id, owner_id, _ws, logtail_callback);
 
   });
 
