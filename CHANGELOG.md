@@ -15,6 +15,8 @@ It seems to be almost done. Let's have a week for bugfixing and tweaking. There 
 
 ### Seventh week
 
+21/5/2017 - 1.5.1034: working websocket logtail (on app log so far because elsewhere nothing happens); fixed weeks-old Arduino issue (parser!)
+
 20/5/2017 - 1.5.1020: added Rollbar; added statistics with log tagging; bumped from 11 to 48% test coverage; MQTT authentication tested on device; example websocket connection and working on logtail implementation; aligned registration responses with firmware expectations
 
 19/5/2017 - 1.5.962: successfully tested registration with Robodyn D1; introduced websocket logtail against runtime log, still working on statistics and popover; migrating fully to Redis API Key store; completed migration to udid; changed statistics directory structure; solved long-term issue with couch queries (bad doc)
