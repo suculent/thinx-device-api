@@ -3505,11 +3505,13 @@ var ThinxApp = function() {
     console.log("WSS connection on location: " + JSON.stringify(location));
     console.log("WSS cookie: " + req.headers.cookie);
 
-    var owner = req.session.owner;
-    console.log("WSS owner: " + req.headers.cookie);
-
-    // You might use location.query.access_token to authenticate or share sessions
-    // or req.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
+    if (typeof(req.session.owner) !== "undefined") {
+      var owner = req.session.owner;
+      console.log("WSS owner: " + req.headers.cookie);
+    } else {
+      console.log("WSS has no owner, must use location path or href: " +
+        location.path);
+    }
 
     try {
       var welcome_message = {
