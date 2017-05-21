@@ -3482,13 +3482,13 @@ var ThinxApp = function() {
   // FIXME: Link to letsencrypt SSL keys using configuration for CircleCI
   https.createServer(options, app).listen(serverPort + 1);
   http.createServer(app).listen(serverPort);
-  var wserver = http.createServer(app).listen(7447);
+  //var wserver = http.createServer(app).listen(7447);
 
   /*
    * WebSocket Server
    */
 
-  // WebSocket Server  
+  // WebSocket Server
   var wss = new WebSocket.Server({
     port: 7447,
     server: wserver
