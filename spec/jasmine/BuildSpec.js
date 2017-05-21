@@ -37,19 +37,14 @@ describe("Build log", function() {
   wss.on('connection', function connection(ws, req) {
     _ws = ws;
     var location = url.parse(req.url, true);
-    console.log("WSS connection on location: " + location);
-
-    console.log("WSS cookie: " + req.headers.cookie);
-
-    // You might use location.query.access_token to authenticate or share sessions
-    // or req.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
-
+    // console.log("» WSS connection on location: " + location);
+    //console.log("» WSS cookie: " + req.headers.cookie);
     try {
       ws.send('HELLO');
     } catch (e) { /* handle error */ }
 
     ws.on('message', function incoming(message) {
-      console.log('received: %s', message);
+      console.log('» Websocket message: %s', message);
     });
 
     ws.send('READY');

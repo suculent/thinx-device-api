@@ -3502,6 +3502,22 @@ var ThinxApp = function() {
 
     _ws = ws;
 
+    var logtail_callback = function(err) {
+      console.log("logtail_callback" + err);
+    };
+
+    ws.on("message", function incoming(message) {
+      console.log("» Websocket incoming message: %s", message);
+      var object = JSON.parse(message);
+      if (typeof(object.logtail) !== "undefined") {
+        var build_id = object.logtail.build_id;
+        var owner_id = object.logtail.owner_id;
+        blog.logtail(build_id, owner_id, _ws, logtail_callback);
+      } else {
+        console.log("» Websocketparser said: unknown message");
+      }
+    });
+
     var location = url.parse(req.url, true);
     console.log("WSS connection on location: " + JSON.stringify(location));
     console.log("WSS cookie: " + req.headers.cookie);
@@ -3511,9 +3527,12 @@ var ThinxApp = function() {
     var owner_id = query[1].replace("/", "");
     var build_id = query[2].replace("/", "");
 
-    console.log(JSON.stringify(query));
-    console.log(owner_id);
-    console.log(build_id);
+    // Start tailing log
+    if ((typeof(build_id) !== "undefined") && (typeof(owner_id) !==
+        "undefined")) {
+      blog.logtail(build_id, owner_id, ws, logtail_callback);
+      return;
+    }
 
     try {
       var welcome_message = {
@@ -3525,24 +3544,7 @@ var ThinxApp = function() {
       ws.send(JSON.stringify(welcome_message));
     } catch (e) { /* handle error */ }
 
-    var logtail_callback = function(err) {
-      console.log("logtail_callback" + err);
-    };
 
-    ws.on("message", function incoming(message) {
-      console.log("received: %s", message);
-      var object = JSON.parse(message);
-      if (typeof(object.logtail) !== "undefined") {
-        var build_id = object.logtail.build_id;
-        var owner_id = object.logtail.owner_id;
-        blog.logtail(build_id, owner_id, _ws, logtail_callback);
-      } else {
-        console.log("parser said: unknown message");
-      }
-    });
-
-    // Debug only
-    blog.logtail(build_id, owner_id, ws, logtail_callback);
 
   });
 
