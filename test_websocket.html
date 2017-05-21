@@ -7,12 +7,15 @@
          {
             if ("WebSocket" in window)
             {
-               var ws = new WebSocket("ws://thinx.cloud:7447/00390230-3981-11e7-a58d-81e4acfbeb86");
+               var ws = new WebSocket("ws://thinx.cloud:7447/eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f/00390230-3981-11e7-a58d-81e4acfbeb86");
 
                ws.onopen = function()
                {
                   var message = {
-                    logtail: "00390230-3981-11e7-a58d-81e4acfbeb86"
+                    logtail: {
+                      owner_id: "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
+                      build_id: "00390230-3981-11e7-a58d-81e4acfbeb86"
+                    }
                   }
                   ws.send(JSON.stringify(message));
                   console.log("Test message sent...");

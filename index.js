@@ -3505,13 +3505,14 @@ var ThinxApp = function() {
     console.log("WSS connection on location: " + JSON.stringify(location));
     console.log("WSS cookie: " + req.headers.cookie);
 
-    if (typeof(req.session.owner) !== "undefined") {
-      var owner = req.session.owner;
-      console.log("WSS owner: " + req.headers.cookie);
-    } else {
-      console.log("WSS has no owner, must use location path or href: " +
-        location.path);
-    }
+    var query = location.path.split("/");
+
+    var owner_id = query[1].replace("/", "");
+    var build_id = query[2].replace("/", "");
+
+    console.log(JSON.stringify(query));
+    console.log(owner_id);
+    console.log(build_id);
 
     try {
       var welcome_message = {
@@ -3531,7 +3532,7 @@ var ThinxApp = function() {
         var logtail_callback = function(err) {
           console.log("logtail_callback" + err);
         };
-        blog.logtail(build_id, owner, _ws, logtail_callback);
+        blog.logtail(build_id, owner_id, _ws, logtail_callback);
       }
 
     });
