@@ -3505,6 +3505,9 @@ var ThinxApp = function() {
     console.log("WSS connection on location: " + JSON.stringify(location));
     console.log("WSS cookie: " + req.headers.cookie);
 
+    var owner = req.session.owner;
+    console.log("WSS owner: " + req.headers.cookie);
+
     // You might use location.query.access_token to authenticate or share sessions
     // or req.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
 
@@ -3520,6 +3523,15 @@ var ThinxApp = function() {
 
     ws.on('message', function incoming(message) {
       console.log('received: %s', message);
+
+      if (typeof(message.logtail) !== "undefined") {
+        var build_id = message.logtail;
+        var logtail_callback = function(err) {
+          console.log("logtail_callback" + err);
+        };
+        blog.logtail(build_id, owner, _ws, logtail_callback);
+      }
+
     });
 
   });
