@@ -2316,8 +2316,10 @@ var ThinxApp = function() {
           api_key +
           " on device registration.");
         res.end(JSON.stringify({
-          success: false,
-          status: "authentication"
+          registration: {
+            success: false,
+            status: "authentication"
+          }
         }));
         return;
       } else {
@@ -2477,6 +2479,7 @@ var ThinxApp = function() {
                     registration: {
                       success: true,
                       owner: owner,
+                      alias: alias,
                       udid: existing.udid,
                       status: "OK"
                     }
@@ -2540,6 +2543,7 @@ var ThinxApp = function() {
                 registration: {
                   success: true,
                   owner: owner,
+                  alias: device.alias,
                   udid: device.udid,
                   status: "OK"
                 }
