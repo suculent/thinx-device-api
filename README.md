@@ -2,23 +2,27 @@
 
 [![Coverage Status](https://coveralls.io/repos/github/suculent/thinx-device-api/badge.svg?branch=master)](https://coveralls.io/github/suculent/thinx-device-api?branch=master)
 
-API Server running on node.js.
+IoT Device Management Server running on node.js.
+
+• Leverages MQTT as an optional side-chain transport layer.
 
 • Serves as an IoT device registration endpoint while storing device data using CouchDB server and Redis session-store.
 
-• Application is a back-end data provider (security agent) for RTM admin console running on the same server (currently on Apache, but should converge to node.js).
+• Application is a back-end data provider (security agent) for RTM admin console running on the same server (currently on Apache, but should converge to NGINX).
 
 • Provides control to a build server that pushes new firmware versions to client applications (FCM push) and devices (MQTT).
 
 ## Supported IoT Platforms
 
 * ESP8266 (thinx-firmware-esp8266)
-* Expected: Arduino
+* Tested on Wemos D1 Mini, Wemos D1 Mini Pro, Robodyn D1, Robodyn D1 Mini and NodeMCU with Arduino, LUA and Micropython-based core firmwares
+* Expected: Any Arduino with networking support.
 
 ## Prerequisites
 
 * Linux Server (possibly Raspberry Pi but not tested)
-* API runs on HTTP port 7442 (possibly HTTPS 7441)
+* API runs on HTTP port 7442 (possibly HTTPS 7443) and 7447 (websocket)
+* MQTT runs on HTTP port 1883 (possibly HTTPS 8883)
 * Admin runs on HTTP/HTTPS port (80/443)
 
 ## Installation

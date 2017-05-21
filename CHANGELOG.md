@@ -6,12 +6,14 @@
 
 **ROADMAP**
 
-It seems to be almost done. Let's have a month for bugfixing and tweaking. There are still things that would not work after initial install (tech tail, e.g. mqtt configuration and other post-installs)
+It seems to be almost done. Let's have a week for bugfixing and tweaking. There are still things that would not work after initial install (tech tail, e.g. mqtt configuration and other post-installs)
 
 * 1: Async log should write to logfile instead of shellscript.
 * 2: Builder Logging, build tests
 * 3: Working Arduino C implementation (lib?) - still crashes a bit
-* 4: Bare data support (LUA/uPy)
+* 4: Bare data support (LUA/uPy) for dumb firmwares (there is a lot of them)
+
+### Seventh week
 
 20/5/2017 - 1.5.1016: added Rollbar; added statistics with log tagging; bumped from 11 to 48% test coverage; MQTT authentication tested on device; example websocket connection and working on logtail implementation; aligned registration responses with firmware expectations
 
