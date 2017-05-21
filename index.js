@@ -1143,7 +1143,7 @@ var ThinxApp = function() {
 
     var new_key_alias = req.body.alias;
     var new_key_body = req.body.key;
-    var new_key_fingerprint = fingerprint(new_key_body);
+    var new_key_fingerprint = eval(fingerprint(new_key_body));
 
     userlib.get(owner, function(err, doc) {
 
@@ -1155,8 +1155,6 @@ var ThinxApp = function() {
         }));
         return;
       }
-
-
 
       if (!doc) {
         console.log("User " + owner + " not found.");
