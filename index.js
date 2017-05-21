@@ -2212,6 +2212,8 @@ var ThinxApp = function() {
 
     validateRequest(req, res);
 
+    res.set("Connection", "close");
+
     if (typeof(req.body.registration) == "undefined") {
       res.end(JSON.stringify({
         success: false,
@@ -2571,8 +2573,6 @@ var ThinxApp = function() {
 
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
-
-    res.set("Connection", "close");
 
     if (typeof(req.body.changes) === "undefined") {
       res.end(JSON.stringify({
