@@ -104,7 +104,7 @@ rm -rf ./tenants/$OWNER_ID/$REPO_PATH/**
 echo "Creating workspace..."
 
 # TODO: only if $REPO_NAME contains slash(es)
-pushd ./tenants/$OWNER_ID > /dev/null
+pushd ./tenants/$OWNER_ID
 
 # Create new working directory
 set +e
@@ -123,9 +123,9 @@ rm -rf $REPO_PATH/*
 git clone $GIT_REPO
 
 if [[ -d $REPO_NAME ]]; then
-	pushd ./$REPO_NAME > /dev/null
+	pushd ./$REPO_NAME
 else
-	pushd ./$REPO_PATH > /dev/null
+	pushd ./$REPO_PATH
 fi
 
 COMMIT=$(git rev-parse HEAD)
@@ -250,8 +250,8 @@ fi
 
 echo $STATUS
 
-popd > /dev/null
-popd > /dev/null
+popd
+popd
 
 DISPLAY_DEPLOYMENT_PATH=$(echo ${DEPLOYMENT_PATH} | tr -d '/var/www/html')
 
