@@ -3520,9 +3520,6 @@ var ThinxApp = function() {
       };
       ws.send(JSON.stringify(welcome_message));
     } catch (e) { /* handle error */ }
-
-
-
   });
 
   wserver.listen(7444, function listening() {

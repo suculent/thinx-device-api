@@ -14,6 +14,8 @@ It seems to be almost done. Let's have a week for fixing bugs and tweaking. Ther
 * 4: Improve statistics (count last 24 hours or something)
 * 5: Make devices respond/receive MQTT messages (LUA first)
 
+22/5/2017 - 1.5.1062: working on audit/build log; test coverage
+
 ### Seventh week
 
 21/5/2017 - 1.5.1053: realtime Web socket log-tail; fixed weeks-old Arduino issue (actually in the parser!)
