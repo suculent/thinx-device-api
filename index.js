@@ -686,7 +686,6 @@ var ThinxApp = function() {
         }
 
         var logmessage = "Revoking device: " + JSON.stringify(doc.udid);
-        console.log(logmessage);
         alog.log(owner, logmessage);
 
         devicelib.destroy(doc._id, doc._rev, function(err) {
@@ -705,7 +704,6 @@ var ThinxApp = function() {
             var mqtt = "/devices/" + udid;
             CMD = "mosquitto_passwd -D mqtt_passwords " + udid;
             var temp = sexec(CMD).stdout.replace("\n", "");
-            console.log("[REVOKE] Revoking mqtt account...");
             if (temp) {
               console.log("[REVOKE_ERROR] MQTT: " + temp);
             }
@@ -741,11 +739,9 @@ var ThinxApp = function() {
       }));
       return;
     }
+
     var new_api_key_alias = req.body.alias;
-
     var new_api_key = sha256(new Date().toString()).substring(0, 40);
-
-
 
     userlib.get(owner, function(err, doc) {
 
@@ -758,8 +754,6 @@ var ThinxApp = function() {
         return;
       }
 
-
-
       if (doc === null) {
         console.log("User " + username + " not found.");
         res.end(JSON.stringify({
@@ -768,8 +762,6 @@ var ThinxApp = function() {
         }));
         return;
       }
-
-
 
       var keys = [];
       if (typeof(doc.api_keys) === "undefined") {
@@ -789,16 +781,12 @@ var ThinxApp = function() {
       apikey.create(owner, new_api_key_alias, function(success,
         object) {
         if (success) {
-          console.log("[TEST] APIKEY created: " + JSON.stringify(
-            object));
           res.end(JSON.stringify({
             success: true,
             api_key: new_api_key,
             hash: object.hash
           }));
           return;
-        } else {
-          console.log("[TEST] APIKEY creation failed.");
         }
       });
     });
@@ -818,14 +806,12 @@ var ThinxApp = function() {
 
     apikey.revoke(owner, api_key_hash, function(success) {
       if (success) {
-        console.log("[TEST] APIKEY revoked: " + api_key_hash);
         res.end(JSON.stringify({
           revoked: api_key_hash,
           success: true
         }));
         return;
       } else {
-        console.log("[TEST] APIKEY revocation failed.");
         res.end(JSON.stringify({
           success: false,
           status: "revocation_failed"
@@ -2581,10 +2567,9 @@ var ThinxApp = function() {
 
     var owner = req.session.owner;
     var username = req.session.username;
-
     var changes = req.body.changes;
 
-    console.log("CHANGES: " + JSON.stringify(changes));
+    //console.log("CHANGES: " + JSON.stringify(changes));
 
     var change = changes; // TODO: support bulk operations
 
@@ -2936,7 +2921,7 @@ var ThinxApp = function() {
 
           if (source_id.indexOf(build.source_id) !== -1) {
             git = source.url;
-            console.log("Found repo: " + git);
+            console.log("[API-BUILD]: " + git);
             break;
           }
         }
@@ -3075,8 +3060,6 @@ var ThinxApp = function() {
         return;
       }
 
-      console.log("alog.fetched body: '" + JSON.stringify(body) + "'");
-
       res.end(JSON.stringify({
         success: true,
         logs: body
@@ -3197,8 +3180,9 @@ var ThinxApp = function() {
         logs.push(lrec);
       }
 
-      console.log("Build-logs for " + build_id + ": " + JSON.stringify(
-        logs));
+      console.log("Build-logs for build_id " + build_id + ": " + JSON
+        .stringify(
+          logs));
 
       var response = body;
       response.success = true;

@@ -408,12 +408,14 @@ R=$(curl -s -b cookies.jar \
 -H "Content-Type: application/json" \
 http://$HOST:7442/api/user/logs/audit)
 
+echo $R
+
 SUCCESS=$(echo $R | jq .success)
 ASOURCE=null
 if [[ $SUCCESS == true ]]; then
 	ALOG=$(echo $R | jq .logs.rows)
   if [[ ! -z $ALOG ]]; then
-	   echo_ok "Fetched audit log."
+	   echo_ok "Fetched audit log:" $R
   else
     echo_fail $(echo $R | jq .)
   fi
@@ -507,7 +509,7 @@ RQ='{ "source_id" : '${SOURCE_ID}' }'
 
 echo "POST ${RQ}"
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
