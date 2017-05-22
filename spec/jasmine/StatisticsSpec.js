@@ -21,10 +21,11 @@ describe("Statistics", function() {
       });
   }, 10000);
 
-  it("should be able to aggregate statistics", function() {
+  it("should be able to aggregate statistics", function(done) {
     var result = s.aggregate();
     expect(result).toBe(true);
-  });
+    done();
+  }, 10000);
 
   it("should be able to parse statistics per owner", function() {
     s.parse(

@@ -2,7 +2,7 @@ describe("Build log", function() {
 
   var blog = require("../../lib/thinx/build");
 
-  var build_id = "0036db20-3e6a-11e7-85ee-81b263fbf7fe";
+  var build_id = "0b7384a0-3818-11e7-b36a-b5bff48e5684";
   var owner =
     "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f";
   var udid = "fcdd7b20-3980-11e7-a58d-81e4acfbeb86";
@@ -71,7 +71,12 @@ describe("Build log", function() {
   }, 6000);
 
   it("should be able to log", function() {
-    blog.log(build_id, owner, udid, "Testing build log writer...");
+    blog.log(build_id, owner, udid, "Testing build log create...");
+    expect(true).toBe(true);
+  });
+
+  it("should be able to append existing log", function() {
+    blog.log(build_id, owner, udid, "Testing build log append...");
     expect(true).toBe(true);
   });
 

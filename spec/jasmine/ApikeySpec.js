@@ -27,6 +27,15 @@ describe("API Key", function() {
       });
   });
 
+  it("should be able to verify invalid API Keys", function() {
+    APIKey.verify(
+      "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7x",
+      "310c20ed9dcd4663551bd04cc53a58a52c8d9f1b",
+      function(success) {
+        expect(success).toBe(false);
+      });
+  });
+
   //revoke: function(owner, apikey_hash, callback)
   it("should be able to revoke API Keys", function() {
     APIKey.revoke(
@@ -34,6 +43,15 @@ describe("API Key", function() {
       "sample-key-hash",
       function(success) {
         expect(success).toBeDefined();
+      });
+  });
+
+  it("should be able to fail on invalid API Key revocation", function() {
+    APIKey.revoke(
+      "nonsense",
+      "sample-key-hash",
+      function(success) {
+        expect(success).toBe(false);
       });
   });
 
