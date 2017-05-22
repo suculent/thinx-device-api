@@ -3054,7 +3054,7 @@ var ThinxApp = function() {
 
     alog.fetch(owner, function(err, body) {
 
-      if (err) {
+      if (err !== false) {
         console.log(err);
         res.end(JSON.stringify({
           success: false,
@@ -3073,6 +3073,8 @@ var ThinxApp = function() {
         }));
         return;
       }
+
+      console.log("alog.fetched body: '" + JSON.stringify(body) + "'");
 
       res.end(JSON.stringify({
         success: true,
