@@ -3428,7 +3428,6 @@ var ThinxApp = function() {
     var owner = req.session.owner;
 
     stats.today(owner, function(success, body) {
-
       if (!success) {
         res.end(JSON.stringify({
           success: false,
@@ -3436,7 +3435,6 @@ var ThinxApp = function() {
         }));
         return;
       }
-
       if (!body) {
         console.log("Statistics for owner " + owner + " not found.");
         res.end(JSON.stringify({
@@ -3445,8 +3443,6 @@ var ThinxApp = function() {
         }));
         return;
       }
-
-      console.log("[STATS] result of stats.today callback: " + body);
       res.end(JSON.stringify({
         success: true,
         stats: JSON.parse(body)
