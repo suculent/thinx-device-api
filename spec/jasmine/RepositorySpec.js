@@ -40,7 +40,7 @@ describe("Repository Watcher", function() {
     expect(watcher).toBeDefined();
   });
 
-  xit("should be able to watch repository", function() {
+  it("should be able to watch repository", function() {
 
     watcher.watchRepository(repo_path, true, function(result) {
       if (typeof(result) !== "undefined") {
@@ -60,7 +60,7 @@ describe("Repository Watcher", function() {
       }
       expect(true).toBe(true);
     });
-  }, 1000);
+  });
 
   it("should be able tell repository has changed", function() {
     watcher.checkRepositoryChange(repo_path, false, function(err,
@@ -68,7 +68,7 @@ describe("Repository Watcher", function() {
       //console.log(err, result);
       expect(true).toBe(true);
     });
-  }, 1000);
+  });
 
   it("should be able to unwatch repository", function() {
     watcher.unwatchRepository();

@@ -1,12 +1,13 @@
-describe("App", function() {
+describe("XApp", function() {
 
   beforeEach(function() {
     //
   });
 
-  xit("app should not fail", function() {
+  xit("should not fail", function(done) {
     var ThinxApp = require('../../index.js');
     expect(ThinxApp).toBeDefined();
-  }, 10000);
+    done();
+  }, 1000);
 
 });

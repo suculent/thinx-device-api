@@ -2,7 +2,7 @@ describe("Build log", function() {
 
   var blog = require("../../lib/thinx/build");
 
-  var build_id = "00390230-3981-11e7-a58d-81e4acfbeb86";
+  var build_id = "0036db20-3e6a-11e7-85ee-81b263fbf7fe";
   var owner =
     "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f";
   var udid = "fcdd7b20-3980-11e7-a58d-81e4acfbeb86";
@@ -50,28 +50,24 @@ describe("Build log", function() {
     ws.send('READY');
   });
 
-
-  beforeEach(function() {
-    //build = new Build();
-  });
-
   it("should be able to initialize", function() {
     expect(blog).toBeDefined();
   });
 
-  it("should be able to list build logs", function() {
+  it("should be able to list build logs", function(done) {
     blog.list(owner, function(err, body) {
       console.log(err, body);
       expect(true).toBe(true);
+      done();
     });
-  });
+  }, 5000);
 
-  it("should be able to fetch specific build log", function() {
+  it("should be able to fetch specific build log", function(done) {
     blog.fetch(build_id, function(err, body) {
       console.log(err, body);
       expect(true).toBe(true);
+      done();
     });
-
   }, 1000);
 
   it("should be able to log", function() {
@@ -83,9 +79,8 @@ describe("Build log", function() {
     var error_callback = function(err) {
       console.log(err);
       expect(true).toBe(true);
-
     };
     blog.logtail(build_id, owner, _ws, error_callback);
-  }, 1000);
+  });
 
 });

@@ -2,11 +2,8 @@
   "_id": "_design/logs",
   "language": "javascript",
   "views": {
-    "logs_by_id": {
-      "map": "function (doc) { if(doc.id) { emit (doc.id, doc); } }"
-    },
     "logs_by_owner": {
-      "map": "function (doc) { if(doc.owner) { emit (doc.id, doc); } }"
+      "map": "function (doc) { if(doc.owner) { emit (doc._id, doc ); } }"
     }
   }
 }
