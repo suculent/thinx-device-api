@@ -65,10 +65,10 @@ describe("Build log", function() {
   it("should be able to fetch specific build log", function(done) {
     blog.fetch(build_id, function(err, body) {
       console.log(err, body);
-      expect(true).toBe(true);
+      expect(err).toBeDefined();
       done();
     });
-  }, 1000);
+  }, 6000);
 
   it("should be able to log", function() {
     blog.log(build_id, owner, udid, "Testing build log writer...");
