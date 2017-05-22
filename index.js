@@ -690,6 +690,7 @@ var ThinxApp = function() {
         alog.log(owner, logmessage);
 
         devicelib.destroy(doc._id, doc._rev, function(err) {
+
           if (err) {
             console.log(err);
             res.end(JSON.stringify({
@@ -697,6 +698,7 @@ var ThinxApp = function() {
               status: "revocation_failed"
             }));
             return;
+
           } else {
 
             // MQTT
@@ -707,9 +709,8 @@ var ThinxApp = function() {
             if (temp) {
               console.log("[REVOKE_ERROR] MQTT: " + temp);
             }
-
-            var logmessage = "Revocation succeed: " + doc.alias +
-              " (${doc.udid})";
+            console.log("[OID:" + owner + "] [DEVICE_REVOCATION] " +
+              doc.udid);
             alog.log(owner, logmessage);
             res.end(JSON.stringify({
               success: true,
