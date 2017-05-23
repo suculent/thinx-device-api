@@ -34,6 +34,7 @@ var ThinxApp = function() {
   var client_user_agent = app_config.client_user_agent;
   var db = app_config.database_uri;
   var serverPort = app_config.port;
+  var socketPort = app_config.socket;
 
   var uuidV1 = require("uuid/v1");
   var url = require("url");
@@ -3461,8 +3462,8 @@ var ThinxApp = function() {
   https.createServer(options, app).listen(serverPort + 1);
   http.createServer(app).listen(serverPort);
 
-  //var wsapp = express();
-  var wserver = http.createServer(7442);
+  var wsapp = express();
+  var wserver = http.createServer(wsapp);
 
   /*
    * WebSocket Server
@@ -3470,7 +3471,7 @@ var ThinxApp = function() {
 
   // WebSocket Server
   var wss = new WebSocket.Server({
-    port: 7447,
+    port: socketPort,
     server: wserver
   });
   var _ws = null;
