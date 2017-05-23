@@ -3305,8 +3305,6 @@ var ThinxApp = function() {
 
             if (typeof(req.session === "undefined")) {
               console.log("ERROR, no session!");
-              failureResponse(res, 403, "unauthorized");
-              return;
             }
 
             req.session.owner = user_data.doc.owner; // what if there's no session?
@@ -3331,7 +3329,6 @@ var ThinxApp = function() {
               }));
               return;
             } else if (client_type == "webapp") {
-
               res.end(JSON.stringify({
                 "redirectURL": "http://rtm.thinx.cloud:80/app"
               }));
@@ -3359,11 +3356,7 @@ var ThinxApp = function() {
       }
 
       if (typeof(req.session.owner) == "undefined") {
-
         if (client_type == "device") {
-          res.end(JSON.stringify({
-            status: "ERROR"
-          }));
           return;
         } else if (client_type == "webapp") {
           res.redirect("http://rtm.thinx.cloud:80/"); // redirects browser, not in XHR?
