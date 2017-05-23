@@ -60,7 +60,7 @@ describe("Build log", function() {
       expect(true).toBe(true);
       done();
     });
-  }, 5000);
+  }, 15000);
 
   it("should be able to fetch specific build log", function(done) {
     blog.fetch(build_id, function(err, body) {
