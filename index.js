@@ -196,8 +196,8 @@ var ThinxApp = function() {
     limit: '10mb'
   }));
 
-  var helmet = require('helmet');
-  app.use(helmet());
+  //var helmet = require('helmet');
+  //app.use(helmet());
   app.disable('x-powered-by');
 
   app.all("/*", function(req, res, next) {
