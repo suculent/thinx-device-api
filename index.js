@@ -3458,7 +3458,7 @@ var ThinxApp = function() {
   http.createServer(app).listen(serverPort);
 
   var wsapp = express();
-  var wserver = http.createServer(wsapp);
+  var wserver = http.createServer(wsapp).listen(socketPort);
 
   /*
    * WebSocket Server
