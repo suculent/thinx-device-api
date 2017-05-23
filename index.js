@@ -3305,6 +3305,8 @@ var ThinxApp = function() {
 
             if (typeof(req.session === "undefined")) {
               console.log("ERROR, no session!");
+              failureResponse(res, 403, "unauthorized");
+              return;
             }
 
             req.session.owner = user_data.doc.owner; // what if there's no session?
