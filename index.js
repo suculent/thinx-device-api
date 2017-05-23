@@ -171,6 +171,8 @@ var ThinxApp = function() {
   var redisStore = require('connect-redis')(session);
   var client = redis.createClient();
 
+  app.set('trust proxy', 1);
+
   app.use(session({
     secret: session_config.secret,
     store: new redisStore({
@@ -193,6 +195,10 @@ var ThinxApp = function() {
     parameterLimit: 10000,
     limit: '10mb'
   }));
+
+  var helmet = require('helmet');
+  app.use(helmet());
+  app.disable('x-powered-by');
 
   app.all("/*", function(req, res, next) {
 
