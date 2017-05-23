@@ -171,7 +171,7 @@ var ThinxApp = function() {
   var redisStore = require('connect-redis')(session);
   var client = redis.createClient();
 
-  app.set('trust proxy', 1) // trust first proxy
+  //app.set('trust proxy', 1) // trust first proxy
 
   app.use(session({
     secret: session_config.secret,
