@@ -3129,7 +3129,7 @@ var ThinxApp = function() {
       res.end(JSON.stringify({
         success: true,
         builds: builds
-      }));
+      }).replace("\n", "<br/>"));
 
     });
   });
