@@ -1139,7 +1139,7 @@ var ThinxApp = function() {
     var new_key_body = req.body.key;
 
     var new_key_fingerprint = fprint(new_key_body);
-    console.log("new_key_fingerprint: " + new_key_fingerprint);
+    // console.log("new_key_fingerprint: " + new_key_fingerprint);
 
     userlib.get(owner, function(err, doc) {
 
@@ -1192,7 +1192,7 @@ var ThinxApp = function() {
         doc.rsa_keys = {};
       }
 
-      console.log("Adding RSA Key with fprint: " +
+      console.log("[OID:" + owner + "] [__RSAKEY_ADDED__] " +
         new_key_fingerprint);
 
       doc.rsa_keys[new_key_fingerprint] = new_ssh_key;
@@ -1209,7 +1209,7 @@ var ThinxApp = function() {
               status: "key-not-added"
             }));
           } else {
-            console.log("RSA Key successfully added.");
+            // console.log("RSA Key successfully added.");
             res.end(JSON.stringify({
               success: true,
               fingerprint: new_key_fingerprint
@@ -2997,7 +2997,7 @@ var ThinxApp = function() {
 
     console.log("[OID:" + owner + "] [BUILD_STARTED] Running /...");
 
-    var temp = exec.execSync(CMD).stdout; // .replace("\n", "");
+    var temp = exec.execSync(CMD); // .replace("\n", "");
 
     console.log("[OID:" + owner + "] [BUILD_COMPLETED] sexec-stdout: " + temp); // TODO: Store to logfile
 
