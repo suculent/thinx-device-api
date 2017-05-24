@@ -2,7 +2,7 @@
   "type": "thinx_server_config",
   "database_uri": "http://rtmapi:frohikey@thinx.cloud:5984",
   "port": 7442,
-  "websocket": 7447,
+  "websocket": 7444,
   "deploy_root": "/var/www/html/bin",
   "safe_mode": false,
   "slack_webhook": "https://hooks.slack.com/services/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",
