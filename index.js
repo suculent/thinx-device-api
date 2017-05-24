@@ -59,7 +59,7 @@ var ThinxApp = function() {
   var apikey = require("./lib/thinx/apikey");
   var stats = require("./lib/thinx/statistics");
 
-  var exec = require('child_process')
+  var exec = require('child_process');
 
   var WebSocket = require("ws");
 
@@ -2856,8 +2856,6 @@ var ThinxApp = function() {
       "include_docs": true
     }, function(err, body) {
 
-
-
       if (err) {
         if (err.toString() == "Error: missing") {
           res.end(JSON.stringify({
@@ -2874,13 +2872,9 @@ var ThinxApp = function() {
       for (var row in rows) {
         device = rows[row].doc;
         var db_udid = device.udid;
-
-
-
         var device_owner = device.owner;
 
         if (device_owner.indexOf(owner) !== -1) {
-
           if (udid.indexOf(db_udid) != -1) {
             udid = device.udid; // target device ID
             break;
@@ -2921,12 +2915,9 @@ var ThinxApp = function() {
 
         // Finds first source with given source_id
         var sources = Object.keys(doc.repos);
-
-
         for (var index in sources) {
           var source = doc.repos[sources[index]];
           var source_id = sources[index];
-
           if (source_id.indexOf(build.source_id) !== -1) {
             git = source.url;
             console.log("[API-BUILD]: " + git);
@@ -2953,6 +2944,24 @@ var ThinxApp = function() {
         }
 
         var build_id = uuidV1();
+
+        // Tag device asynchronously with last build ID
+        devicelib.destroy(device._id, device._rev, function(err) {
+          if (err) {
+            console.log("DATABASE CORRUPTION ISSUE!");
+            console.log(err);
+            return;
+          }
+          device.build_id = build_id;
+          delete device._rev;
+          devicelib.insert(device, device._id, function(err,
+            body,
+            header) {
+            if (err) {
+              console.log(err, body);
+            }
+          });
+        });
 
         if (dryrun === false) {
           rdict = {
