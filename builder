@@ -6,6 +6,8 @@ echo
 
 echo "Running from: $(pwd)"
 
+set +e
+
 OWNER_ID='886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445' 		# name of folder where workspaces reside
 RUN=true			# dry-run switch
 DEVICE='UNKNOWN'	# builds for no device by default, not even ANY
@@ -47,15 +49,12 @@ case $i in
 esac
 done
 
-
-
 OWNER_ID_HOME=/var/www/html/bin/$OWNER_ID
 DEPLOYMENT_PATH=${OWNER_ID_HOME}/${UDID}
 
 # Create user-referenced folder in public www space
 set +e
 mkdir -p $DEPLOYMENT_PATH
-set -e
 
 LOG_PATH="${DEPLOYMENT_PATH}/${BUILD_ID}.log"
 
@@ -107,7 +106,6 @@ echo "Creating workspace..."
 pushd ./tenants/$OWNER_ID
 
 # Create new working directory
-set +e
 mkdir -p ./$REPO_PATH
 set -e
 
@@ -117,7 +115,8 @@ if [[ -d ${GIT_USER} ]]; then
 fi
 
 # Clean workspace
-rm -rf $REPO_PATH/*
+echo "Cleaning repository path..."
+rm -rf $REPO_NAME
 
 # Fetch project
 git clone $GIT_REPO
@@ -276,3 +275,5 @@ RESULT=$(node notifier.js $CMD)
 	echo $RESULT
 
 cat $LOG_PATH
+
+set -e
