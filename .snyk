@@ -1,0 +1,28 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.7.1
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  'npm:qs:20170213':
+    - nano > follow > request > qs:
+        reason: 'yes'
+        expires: '2017-06-23T20:24:03.076Z'
+    - codecov.io > request > qs:
+        reason: 'yes'
+        expires: '2017-06-23T20:24:03.076Z'
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  'npm:hawk:20160119':
+    - codecov.io > request > hawk:
+        patched: '2017-05-24T20:23:09.576Z'
+    - nano > follow > request > hawk:
+        patched: '2017-05-24T20:23:09.576Z'
+  'npm:ms:20170412':
+    - firebase-admin > jsonwebtoken > ms:
+        patched: '2017-05-24T20:23:09.576Z'
+    - rollbar > debug > ms:
+        patched: '2017-05-24T20:23:09.576Z'
+  'npm:request:20160119':
+    - codecov.io > request:
+        patched: '2017-05-24T20:23:09.576Z'
+    - nano > follow > request:
+        patched: '2017-05-24T20:23:09.576Z'
