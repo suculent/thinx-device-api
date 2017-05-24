@@ -252,7 +252,9 @@ var ThinxApp = function() {
       console.log("[OID:" + req.session.owner + "] ", req.method +
         " : " + req.url);
     } else {
-      console.log("[OID:0] [" + req.method + "]:" + req.url);
+      if (req.method != "OPTIONS") {
+        console.log("[OID:0] [" + req.method + "]:" + req.url);
+      }
     }
   });
 
@@ -1179,8 +1181,7 @@ var ThinxApp = function() {
               fs.close(fd, function() {
                 console.log('RSA key installed...');
               });
-              console.log("Updating permissions for " +
-                ssh_path);
+              //console.log("Updating permissions for " + ssh_path);
               fs.chmodSync(ssh_path, '644');
             }
           });
