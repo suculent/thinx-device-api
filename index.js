@@ -1135,7 +1135,7 @@ var ThinxApp = function() {
 
     var new_key_alias = req.body.alias;
     var new_key_body = req.body.key;
-    var new_key_fingerprint = fingerprint(new_key_body).toString();
+    var new_key_fingerprint = fingerprint(new_key_body);
 
     console.log("new_key_fingerprint: " + new_key_fingerprint);
 
@@ -1242,8 +1242,6 @@ var ThinxApp = function() {
         }));
         return;
       }
-
-
 
       var exportedKeys = [];
       var fingerprints = Object.keys(user.rsa_keys);
