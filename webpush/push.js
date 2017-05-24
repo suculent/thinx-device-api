@@ -5,8 +5,6 @@ var webpush = require('web-push');
 // VAPID keys should only be generated only once.
 // var vapidKeys = webpush.generateVAPIDKeys();
 
-
-
 webpush.setGCMAPIKey(
   'AAAARM9VDGs:APA91bFTsVBhu9mLYMYOFOc6QaFqg4RPGXsSvmlfBMWVBRxAtprFxs-l4wbpfu5SJ8sNdvo0hwTHjYzYXRg7W3CAFTdBwn8nfFXDtM8cz-ySxpLVGJQCJSKxc8M5lk5MLpUxYrMjop9x '
 );

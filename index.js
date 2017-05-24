@@ -2501,7 +2501,7 @@ var ThinxApp = function() {
           CMD = "mosquitto_passwd -b mqtt_passwords " + udid +
             " " +
             api_key;
-          var temp = exec.execSync(CMD).stdour;
+          var temp = exec.execSync(CMD);
           console.log("[REGISTER] Creating mqtt account...");
           if (temp) {
             console.log("[REGISTER_ERROR] MQTT: " + temp);
@@ -2993,7 +2993,6 @@ var ThinxApp = function() {
 
     console.log("[BUILD_STARTED] Executing build chain...");
 
-    var exec = require("child_process").exec;
     CMD = "./builder --owner=" + owner + " --udid=" + udid + " --git=" +
       git +
       " --id=" + build_id;
@@ -3316,18 +3315,21 @@ var ThinxApp = function() {
           // TODO: Second option (direct compare) will deprecate soon.
           if (password.indexOf(user_data.value) !== -1) {
 
-            req.session.owner = user_data.doc.owner; // what if there's no session?
-            console.log("[OID:" + req.session.owner +
-              "] [NEW_SESSION]");
-            req.session.username = user_data.doc.username;
+            // what if there's no session?
+            if (typeof(req.session) !== "undefined") {
+              req.session.owner = user_data.doc.owner;
+              console.log("[OID:" + req.session.owner +
+                "] [NEW_SESSION]");
+              req.session.username = user_data.doc.username;
 
-            var minute = 5 * 60 * 1000;
-            req.session.cookie.httpOnly = true;
-            req.session.cookie.maxAge = 20 * minute;
-            req.session.cookie.secure = false;
+              var minute = 5 * 60 * 1000;
+              req.session.cookie.httpOnly = true;
+              req.session.cookie.maxAge = 20 * minute;
+              req.session.cookie.secure = false;
 
-            alog.log(req.session.owner, "User logged in: " +
-              username);
+              alog.log(req.session.owner, "User logged in: " +
+                username);
+            }
 
             // TODO: write last_seen timestamp to DB here __for devices__
             // console.log("client_type: " + client_type);
