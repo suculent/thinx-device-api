@@ -3307,7 +3307,8 @@ var ThinxApp = function() {
           if (password.indexOf(user_data.value) !== -1) {
 
             if (typeof(req.session === "undefined")) {
-              console.log("ERROR, no session!");
+              //console.log("ERROR, no session!");
+              req.session = {};
             }
 
             req.session.owner = user_data.doc.owner; // what if there's no session?
