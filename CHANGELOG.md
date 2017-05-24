@@ -14,9 +14,11 @@ It seems to be almost done. Let's have a week for fixing bugs and tweaking. Ther
 * 4: Improve statistics (count last 24 hours or something)
 * 5: Make devices respond/receive MQTT messages (LUA first)
 
+### Eight week
+
 24/5/2017 - 1.5.1100: replaced MQTT implementation on the device side, working websocket log-tail
 
-23/5/2017 - 1.5.1080: fixes and fortification with aim to prevent DDoS attacks, tested CloudFlare
+23/5/2017 - 1.5.1080: fixes and fortification with aim to prevent DDoS attacks, tested CloudFlare; evening off...
 
 22/5/2017 - 1.5.1062: working on audit/build log; test coverage
 
@@ -28,7 +30,7 @@ It seems to be almost done. Let's have a week for fixing bugs and tweaking. Ther
 
 19/5/2017 - 1.5.962: successfully tested registration with Robodyn D1; introduced Web socket log-tail against runtime log, still working on statistics and popover; migrating fully to Redis API Key store; completed migration to udid; changed statistics directory structure; solved long-term issue with couch queries (bad doc)
 
-18/5/2017 - 1.5.886: migrating to UDID from MAC; adding Redis API Key store
+18/5/2017 - 1.5.886: migrating to UDID from MAC; adding Redis API Key store; evening off...
 
 17/5/2017 - 1.5.880: test coverage reports; circle.ci tests; added source_id; version bump (changed UI API security requirements, intentionally not backwards compatible)
 
