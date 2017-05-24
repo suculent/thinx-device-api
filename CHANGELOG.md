@@ -14,6 +14,10 @@ It seems to be almost done. Let's have a week for fixing bugs and tweaking. Ther
 * 4: Improve statistics (count last 24 hours or something)
 * 5: Make devices respond/receive MQTT messages (LUA first)
 
+24/5/2017 - 1.5.1100: replaced MQTT implementation on the device side, working websocket log-tail
+
+23/5/2017 - 1.5.1080: fixes and fortification with aim to prevent DDoS attacks, tested CloudFlare
+
 22/5/2017 - 1.5.1062: working on audit/build log; test coverage
 
 ### Seventh week
