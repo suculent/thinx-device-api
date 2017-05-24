@@ -3279,8 +3279,6 @@ var ThinxApp = function() {
       });
     }
 
-
-
     userlib.view("users", "owners_by_username", {
       "key": username,
       "include_docs": true // might be useless
@@ -3308,11 +3306,6 @@ var ThinxApp = function() {
 
           // TODO: Second option (direct compare) will deprecate soon.
           if (password.indexOf(user_data.value) !== -1) {
-
-            if (typeof(req.session === "undefined")) {
-              //console.log("ERROR, no session!");
-              req.session = {};
-            }
 
             req.session.owner = user_data.doc.owner; // what if there's no session?
             console.log("[OID:" + req.session.owner +
