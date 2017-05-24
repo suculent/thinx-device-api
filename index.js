@@ -34,6 +34,7 @@ var ThinxApp = function() {
   var client_user_agent = app_config.client_user_agent;
   var db = app_config.database_uri;
   var serverPort = app_config.port;
+  var socketPort = app_config.socket;
 
   var uuidV1 = require("uuid/v1");
   var url = require("url");
@@ -3134,7 +3135,7 @@ var ThinxApp = function() {
       res.end(JSON.stringify({
         success: true,
         builds: builds
-      }));
+      }).replace("\n", "<br/>"));
 
     });
   });
@@ -3334,7 +3335,6 @@ var ThinxApp = function() {
               }));
               return;
             } else if (client_type == "webapp") {
-
               res.end(JSON.stringify({
                 "redirectURL": "http://rtm.thinx.cloud:80/app"
               }));
@@ -3362,11 +3362,7 @@ var ThinxApp = function() {
       }
 
       if (typeof(req.session.owner) == "undefined") {
-
         if (client_type == "device") {
-          res.end(JSON.stringify({
-            status: "ERROR"
-          }));
           return;
         } else if (client_type == "webapp") {
           res.redirect("http://rtm.thinx.cloud:80/"); // redirects browser, not in XHR?
@@ -3464,42 +3460,33 @@ var ThinxApp = function() {
   };
 
   // FIXME: Link to letsencrypt SSL keys using configuration for CircleCI
+
+  /*
+   * HTTP/S Server
+   */
+
   https.createServer(options, app).listen(serverPort + 1);
   http.createServer(app).listen(serverPort);
-
-  var wsapp = express();
-  var wserver = http.createServer(wsapp);
 
   /*
    * WebSocket Server
    */
 
-  // WebSocket Server
+  var wsapp = express();
+  var wserver = http.createServer(wsapp);
   var wss = new WebSocket.Server({
-    port: 7447,
+    port: socketPort,
     server: wserver
   });
+
   var _ws = null;
+  this.ws = "2";
 
   wss.on('connection', function connection(ws, req) {
 
+    console.log("» Websocket Connection.");
+
     _ws = ws;
-
-    var logtail_callback = function(err) {
-      console.log("logtail_callback" + err);
-    };
-
-    ws.on("message", function incoming(message) {
-      console.log("» Websocket incoming message: %s", message);
-      var object = JSON.parse(message);
-      if (typeof(object.logtail) !== "undefined") {
-        var build_id = object.logtail.build_id;
-        var owner_id = object.logtail.owner_id;
-        blog.logtail(build_id, owner_id, _ws, logtail_callback);
-      } else {
-        console.log("» Websocketparser said: unknown message");
-      }
-    });
 
     var location = url.parse(req.url, true);
     console.log("WSS connection on location: " + JSON.stringify(location));
@@ -3509,6 +3496,26 @@ var ThinxApp = function() {
 
     var owner_id = query[1].replace("/", "");
     var build_id = query[2].replace("/", "");
+
+    var logtail_callback = function(err) {
+      console.log("[index.js] logtail_callback:" + err);
+    };
+
+    ws.on("message", function incoming(message) {
+      console.log("» Websocket incoming message: %s", message);
+      var object = JSON.parse(message);
+      if (typeof(object.logtail) !== "undefined") {
+        console.log("» Websocket logtail request: %s", JSON.stringify(
+          object.logtail));
+        var build_id = object.logtail.build_id;
+        var owner_id = object.logtail.owner_id;
+        console.log("[index.js] requesting logtail for ws:" + JSON.stringify(
+          _ws));
+        blog.logtail(build_id, owner_id, _ws, logtail_callback);
+      } else {
+        console.log("» Websocketparser said: unknown message");
+      }
+    });
 
     // Start tailing log
     if ((typeof(build_id) !== "undefined") && (typeof(owner_id) !==
