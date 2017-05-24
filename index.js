@@ -59,7 +59,7 @@ var ThinxApp = function() {
   var apikey = require("./lib/thinx/apikey");
   var stats = require("./lib/thinx/statistics");
 
-  var sexec = require("sync-exec");
+  var exec = require('child_process')
 
   var WebSocket = require("ws");
 
@@ -710,7 +710,7 @@ var ThinxApp = function() {
             // MQTT
             var mqtt = "/devices/" + udid;
             CMD = "mosquitto_passwd -D mqtt_passwords " + udid;
-            var temp = sexec(CMD).stdout.replace("\n", "");
+            var temp = exec.execSync(CMD);
             if (temp) {
               console.log("[REVOKE_ERROR] MQTT: " + temp);
             }
@@ -2500,7 +2500,7 @@ var ThinxApp = function() {
           CMD = "mosquitto_passwd -b mqtt_passwords " + udid +
             " " +
             api_key;
-          var temp = sexec(CMD).stdout.replace("\n", "");
+          var temp = exec.execSync(CMD).stdour;
           console.log("[REGISTER] Creating mqtt account...");
           if (temp) {
             console.log("[REGISTER_ERROR] MQTT: " + temp);
@@ -2996,8 +2996,7 @@ var ThinxApp = function() {
 
     console.log("[OID:" + owner + "] [BUILD_STARTED] Running /...");
 
-    var sexec = require("sync-exec");
-    var temp = sexec(CMD).stdout; // .replace("\n", "");
+    var temp = exec.execSync(CMD).stdout; // .replace("\n", "");
 
     console.log("[OID:" + owner + "] [BUILD_COMPLETED] sexec-stdout: " + temp); // TODO: Store to logfile
 
