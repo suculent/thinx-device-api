@@ -1346,7 +1346,7 @@ var ThinxApp = function() {
             rsa_key_fingerprint);
           delete_key = true;
         } else {
-          new_keys[fingerprint] = key;
+          new_keys[rsa_key_fingerprint] = key;
         }
       }
 
