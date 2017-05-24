@@ -43,7 +43,7 @@ var ThinxApp = function() {
   var parser = require("body-parser");
   var nano = require("nano")(db);
   var sha256 = require("sha256");
-  var fingerprint = require('ssh-fingerprint');
+  var fprint = require('ssh-fingerprint');
   var Emailer = require('email').Email;
   var fs = require("fs");
   var gutil = require('gulp-util');
@@ -1135,8 +1135,8 @@ var ThinxApp = function() {
 
     var new_key_alias = req.body.alias;
     var new_key_body = req.body.key;
-    var new_key_fingerprint = fingerprint(new_key_body);
 
+    var new_key_fingerprint = fprint(new_key_body);
     console.log("new_key_fingerprint: " + new_key_fingerprint);
 
     userlib.get(owner, function(err, doc) {
@@ -1186,6 +1186,13 @@ var ThinxApp = function() {
           });
         }
       });
+
+      if (typeof(doc.rsa_keys) === "undefined") {
+        doc.rsa_keys = {};
+      }
+
+      console.log("Adding RSA Key with fprint: " +
+        new_key_fingerprint);
 
       doc.rsa_keys[new_key_fingerprint] = new_ssh_key;
 
@@ -1281,8 +1288,6 @@ var ThinxApp = function() {
 
     var rsa_key_fingerprint = req.body.fingerprint;
 
-
-
     userlib.get(owner, function(err, doc) {
 
       if (err || !doc) {
@@ -1300,7 +1305,6 @@ var ThinxApp = function() {
       }
 
       if (!doc) {
-
         return;
       }
 
@@ -1319,7 +1323,6 @@ var ThinxApp = function() {
       }
 
       var fingerprints = Object.keys(doc.rsa_keys);
-
       if (typeof(fingerprints) === "undefined") {
         console.log("ERROR: No fingerprints in keys: " + JSON.stringify(
           keys));
@@ -1334,7 +1337,6 @@ var ThinxApp = function() {
       for (var i = 0; i < fingerprints.length; i++) {
         var key = doc.rsa_keys[fingerprints[i]];
         if (fingerprints[i].indexOf(rsa_key_fingerprint) !== -1) {
-
           if (fs.existsSync(key.key)) {
             console.log("Deleting RSA key file:" + key.key);
             fs.unlink(key.key);
