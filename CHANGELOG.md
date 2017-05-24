@@ -16,7 +16,7 @@ It seems to be almost done. Let's have a week for fixing bugs and tweaking. Ther
 
 ### Eight week
 
-24/5/2017 - 1.5.1100: replaced MQTT implementation on the device side, working websocket log-tail
+24/5/2017 - 1.5.1104: replaced MQTT implementation on the device side, working websocket log-tail
 
 23/5/2017 - 1.5.1080: fixes and fortification with aim to prevent DDoS attacks, tested CloudFlare; evening off...
 
