@@ -3503,8 +3503,7 @@ var ThinxApp = function() {
           object.logtail));
         var build_id = object.logtail.build_id;
         var owner_id = object.logtail.owner_id;
-        console.log("[index.js] requesting logtail for ws:" + JSON.stringify(
-          _ws));
+        console.log("[index.js] requesting logtail for:" + build_id);
         blog.logtail(build_id, owner_id, _ws, logtail_callback);
       } else {
         console.log("» Websocketparser said: unknown message");
