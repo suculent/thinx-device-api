@@ -3467,6 +3467,7 @@ var ThinxApp = function() {
    */
 
   var wsapp = express();
+  /*
   wsapp.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
@@ -3474,7 +3475,7 @@ var ThinxApp = function() {
     res.header("Access-Control-Allow-Methods",
       "PUT, GET, POST, DELETE, OPTIONS");
     next();
-  });
+  });*/
   var wserver = http.createServer(wsapp);
   var wss = new WebSocket.Server({
     port: socketPort,
