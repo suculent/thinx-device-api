@@ -297,7 +297,9 @@ devicelib.get(mac, function(err, doc) {
     for (var pindex in push_tokens) {
       var registrationToken = push_tokens[pindex];
       if ((typeof(registrationToken) !== "undefined") ||
-        registrationToken !== true)  {
+        registrationToken.length > 0)  {
+        console.log("Sending GCM notification to  registration token: " +
+          registrationToken);
         admin.messaging().sendToDevice(registrationToken, message)
           .then(successFunction)
           .catch(failureFunction);
