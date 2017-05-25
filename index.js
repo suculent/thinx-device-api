@@ -3693,7 +3693,7 @@ var ThinxApp = function() {
   //
 
   function respond(res, object) {
-    respond(res, object);
+    res.end(JSON.stringify(object));
   }
 
 };
