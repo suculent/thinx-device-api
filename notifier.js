@@ -296,13 +296,13 @@ devicelib.get(mac, function(err, doc) {
 
     for (var pindex in push_tokens) {
       var registrationToken = push_tokens[pindex];
-      admin.messaging().sendToDevice(registrationToken, message)
-        .then(successFunction)
-        .catch(failureFunction);
-
-      console.log("\n");
+      if ((typeof(registrationToken) !== "undefined") ||
+        registrationToken !== true)  {
+        admin.messaging().sendToDevice(registrationToken, message)
+          .then(successFunction)
+          .catch(failureFunction);
+      }
     }
-
 
     //
     // Notify devices (MQTT)
@@ -312,7 +312,6 @@ devicelib.get(mac, function(err, doc) {
     if (status == "DEPLOYED") {
       notify_device_channel(owner, mac, message);
     }
-
 
   });
 });
@@ -339,7 +338,7 @@ var pushNotificationPayload = {
 
 function notify_device_channel(owner, mac, message) {
 
-  var channel = "/devices/" + owner + "/" + mac;
+  var channel = "/thinx/devices/" + owner + "/" + mac;
   console.log("Posting to MQTT queue " + channel);
   var client = mqtt.connect("mqtt://guest:guest@thinx.cloud:1883");
 
@@ -352,12 +351,14 @@ function notify_device_channel(owner, mac, message) {
       retain: true
     });
 
+    /*
     var homeMessage = {
       text: "Released update for device '" + mac + "' owned by '" +
         owner + "'"
     };
     client.subscribe("/home");
     client.publish("/home", JSON.stringify(homeMessage));
+    */
     client.end();
   });
 
