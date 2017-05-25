@@ -3022,7 +3022,7 @@ var ThinxApp = function() {
     */
 
     console.log("[OID:" + owner + "] [BUILD_STARTED] Running normal-exec...");
-    exec(CMD, function(err, stdout, stderr) {
+    exec.exec(CMD, function(err, stdout, stderr) {
       if (err) {
         blog.log(build_id, owner, udid, "Build start failed.");
         console.log("[OID:" + owner +
