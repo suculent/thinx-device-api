@@ -3005,6 +3005,8 @@ var ThinxApp = function() {
 
     console.log("[OID:" + owner + "] [BUILD_STARTED] Running /...");
 
+    /*
+
     var temp = exec.execSync(CMD); // .replace("\n", "");
 
     console.log("[OID:" + owner + "] [BUILD_COMPLETED] sexec-stdout: " + temp); // TODO: Store to logfile
@@ -3017,6 +3019,7 @@ var ThinxApp = function() {
         console.log(err);
       }
     });
+    */
 
     console.log("[OID:" + owner + "] [BUILD_STARTED] Running normal-exec...");
     exec(CMD, function(err, stdout, stderr) {
@@ -3033,11 +3036,13 @@ var ThinxApp = function() {
           "] [BUILD_FAIL] Build start failed (stderr).");
         console.error("stderr:" + stderr);
       }
-
-      blog.log(build_id, owner, udid, stdout);
+      if (stdout) {
+        console.log("[BUILD] " + stdout);
+        blog.log(build_id, owner, udid, stdout);
+      }
     });
 
-    blog.log(build_id, owner, udid, temp);
+    //blog.log(build_id, owner, udid, temp);
   }
 
   /*
