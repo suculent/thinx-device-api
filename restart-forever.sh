@@ -1,23 +1,14 @@
 #!/bin/bash
 
-
-# optional
-# git pull
-# npm install .
-
-# Restarts the server using `forever` process manager
-
 # Terminate all possible instances
 set +e
 service thinx stop
-killall node
 forever stopall
+killall node
 set -e
 
 git pull
-
-# Start the server in background
-nohup forever -o /var/log/thinx.log index.js &
+# should npm install .
 
 ACCESS_TOKEN=5505bac5dc6c4542ba3bd947a150cb55
 ENVIRONMENT=production
@@ -29,6 +20,9 @@ curl https://api.rollbar.com/api/1/deploy/ \
   -F environment=$ENVIRONMENT \
   -F revision=$REVISION \
   -F local_username=$LOCAL_USERNAME
+
+# Start the server in background
+nohup forever -o /var/log/thinx.log index.js > /var/log/thinx.log &
 
 # Watch the log
 tail -f /var/log/thinx.log
