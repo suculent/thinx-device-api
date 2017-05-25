@@ -4,15 +4,20 @@
 
 var ThinxApp = function() {
 
+  /*
+  This class should have no interfaces whatsoever
+  (except for commandline arguments, there are no such at this point).
+
+  Any interface would be sign of falure, everything needs to be moved to underlying classes.
+
   var _private = {
-
   };
-
   var _public = {
-
   };
+  */
 
   var Rollbar = require('rollbar');
+
   var rollbar = new Rollbar({
     accessToken: '5505bac5dc6c4542ba3bd947a150cb55',
     handleUncaughtExceptions: true,
@@ -20,7 +25,7 @@ var ThinxApp = function() {
   });
 
   // record a generic message and send to rollbar
-  rollbar.reportMessage("API BOOTSTRAP");
+  // rollbar.reportMessage("API BOOTSTRAP");
 
   //
   // Shared Configuration
@@ -64,7 +69,8 @@ var ThinxApp = function() {
   var WebSocket = require("ws");
 
   var rdict = {};
-  var watched_repos = [];
+
+  // EXTRACT TO: db.js -->
 
   /*
    * Databases
@@ -162,10 +168,13 @@ var ThinxApp = function() {
   var buildlib = require("nano")(db).use("managed_builds");
   var userlib = require("nano")(db).use("managed_users");
 
+  // <-- EXTRACT TO: db.js && databases must not be held by app class
+
   // Express App
 
   var express = require("express");
   var session = require("express-session");
+
   var app = express();
 
   var redis = require("redis");
@@ -197,18 +206,17 @@ var ThinxApp = function() {
     limit: '10mb'
   }));
 
-  //var helmet = require('helmet');
-  //app.use(helmet());
-  app.disable('x-powered-by');
+  // What purpose have those Enterprise security measures in open-source?
+  // Heh, heheh :o)
+  // app.disable('x-powered-by');
+  app.use(function(req, res, next) {
+    res.setHeader('X-Powered-By', '🍺');
+    next();
+  });
 
   app.all("/*", function(req, res, next) {
 
-
     var origin = req.get("origin");
-
-    if (typeof(req.session) === "undefined") {
-      console.log("---session-less-request---");
-    }
 
     // FIXME: This is a hack. It should not work like this. We just need to find out,
     // why the login page rejects CORS on browser-side (redirect from successful
@@ -216,10 +224,14 @@ var ThinxApp = function() {
 
     if (typeof(origin) === "undefined") {
       origin = "rtm.thinx.cloud";
+      rollbar.reportMessage(
+        "SEC-ERR: Turning 'undefined' origin to 'rtm.thinx.cloud'");
     }
 
     if (origin === null) {
       origin = "rtm.thinx.cloud";
+      rollbar.reportMessage(
+        "SEC-ERR: Turning null origin to 'rtm.thinx.cloud'");
     }
 
     var allowedOrigin = origin;
@@ -227,8 +239,8 @@ var ThinxApp = function() {
     // Custom user agent is required for devices
     var client = req.get("User-Agent");
     if (client == client_user_agent) {
-
       if (origin == "device") {
+        console.log("Skipping CORS for browser-less device requests...");
         next();
         return;
       }
@@ -247,6 +259,7 @@ var ThinxApp = function() {
       next();
     }
 
+    // log owner ID and request method to application log only
     if ((typeof(req.session) !== "undefined") && (typeof(req.session
         .owner) !== "undefined")) {
       console.log("[OID:" + req.session.owner + "] ", req.method +
@@ -278,20 +291,16 @@ var ThinxApp = function() {
     var update_value = null;
 
     if (typeof(req.body.avatar) !== "undefined") {
-
       update_key = "avatar";
       update_value = req.body.avatar;
-
     } else if (typeof(req.body.info) !== "undefined") {
-
       update_key = "info";
       update_value = req.body.info;
-
     } else {
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "invalid_protocol"
-      }));
+      });
     }
 
     alog.log(owner, "Attempt to update owner: " + owner +
@@ -303,20 +312,20 @@ var ThinxApp = function() {
       if (err) {
         console.log(err);
         alog.log(owner, "Profile update failed.");
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "owner_not_found"
-        }));
+        });
         return;
       }
 
       if (!doc) {
         console.log("Document for " + owner + " not found.");
         alog.log(owner, "Profile update failed.");
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "document_not_found"
-        }));
+        });
         return;
       }
 
@@ -326,10 +335,10 @@ var ThinxApp = function() {
 
         if (err) {
           console.log(err);
-          res.end(JSON.stringify({
+          respond(res, {
             success: false,
             status: "destroy_error"
-          }));
+          });
           return;
         }
 
@@ -340,17 +349,17 @@ var ThinxApp = function() {
           if (err) {
             console.log(err);
             alog.log(owner, "Profile updated.");
-            res.end(JSON.stringify({
+            respond(res, {
               success: false,
               status: "profile_update_failed"
-            }));
+            });
             return;
           } else {
             alog.log(owner, "Profile update failed.");
-            res.end(JSON.stringify({
+            respond(res, {
               "success": true,
               update_key: doc
-            }));
+            });
           }
         });
       });
@@ -377,9 +386,9 @@ var ThinxApp = function() {
 
         if (err) {
           if (err.toString() == "Error: missing") {
-            res.end(JSON.stringify({
+            respond(res, {
               result: "none"
-            }));
+            });
           }
           console.log("/api/user/devices: Error: " + err.toString());
           return;
@@ -435,18 +444,18 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     if (typeof(req.body.source_id) === "undefined") {
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "missing_source_id"
-      }));
+      });
       return;
     }
 
     if (typeof(req.body.udid) === "undefined") {
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "missing_udid"
-      }));
+      });
       return;
     }
 
@@ -471,10 +480,10 @@ var ThinxApp = function() {
       }
 
       if (body.rows.length === 0) {
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "udid_not_found"
-        }));
+        });
         alog.log(owner,
           "Attempt to attach repository to non-existent device: " +
           udid);
@@ -485,11 +494,11 @@ var ThinxApp = function() {
 
       // make sure we don't destroy whole database
       if (typeof(doc) === "undefined" || (doc === null)) {
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "device_not_found",
           err_udid: udid
-        }));
+        });
         return;
       }
 
@@ -499,20 +508,17 @@ var ThinxApp = function() {
 
       deploy.initWithOwner(doc.owner);
       var repo_path = deploy.pathForDevice(doc.owner, doc.udid);
-      console.log("repo_path: " + repo_path);
+      console
+        .log(
+          "repo_path: " + repo_path);
 
       mkdirp(repo_path, function(err) {
         if (err) console.error(err);
         else console.log(repo_path + ' created.');
       });
 
-      if (typeof(watched_repos) === "undefined") {
-        watched_repos = [];
-      }
-
       if (fs.existsSync(repo_path)) {
         watcher.watchRepository(repo_path, watcher_callback);
-        watched_repos.push(repo_path);
       } else {
         console.log(repo_path + " is not a directory.");
       }
@@ -525,16 +531,16 @@ var ThinxApp = function() {
           header) {
           if (err) {
             console.log("/api/device/attach ERROR:" + err);
-            res.end(JSON.stringify({
+            respond(res, {
               success: false,
               status: "attach_failed"
-            }));
+            });
             return;
           } else {
-            res.end(JSON.stringify({
+            respond(res, {
               success: true,
               attached: source_id
-            }));
+            });
           }
         });
       });
@@ -548,10 +554,10 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     if (typeof(req.body.udid) === "undefined") {
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "missing_udid"
-      }));
+      });
       return;
     }
 
@@ -575,10 +581,10 @@ var ThinxApp = function() {
       if (typeof(rows) !== "undefined") {
         console.log("DETACH rows: " + rows);
       } else {
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "udid_not_found"
-        }));
+        });
         return;
       }
 
@@ -586,11 +592,11 @@ var ThinxApp = function() {
 
       // make sure we don't destroy whole database
       if (typeof(doc) === "undefined" || (doc === null)) {
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "device_not_found",
           err_udid: udid
-        }));
+        });
         return;
       }
 
@@ -598,10 +604,10 @@ var ThinxApp = function() {
         doc.udid));
 
       var repo_path = deploy.pathForDevice(doc.owner, doc.udid);
-      console.log("repo_path: " + repo_path);
+      console.log(
+        "repo_path: " + repo_path);
       if (fs.existsSync(repo_path)) {
         watcher.unwatchRepository(repo_path);
-        watched_repos.splice(watched_repos.indexOf(repo_path));
       }
 
       doc.source = null;
@@ -614,16 +620,16 @@ var ThinxApp = function() {
           header) {
           if (err) {
             console.log("/api/device/detach ERROR:" + err);
-            res.end(JSON.stringify({
+            respond(res, {
               success: false,
               status: "detach_failed"
-            }));
+            });
             return;
           } else {
-            res.end(JSON.stringify({
+            respond(res, {
               success: true,
               attached: doc.source
-            }));
+            });
           }
         });
       });
@@ -637,10 +643,10 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     if (typeof(req.body.udid) === "undefined") {
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "missing_udid"
-      }));
+      });
       return;
     }
 
@@ -666,10 +672,10 @@ var ThinxApp = function() {
         if (body.rows.count === 0) {
           alog.log(owner, "No such device: " + doc.alias +
             " (${doc.udid})");
-          res.end(JSON.stringify({
+          respond(res, {
             success: false,
             status: "no_such_device"
-          }));
+          });
           return;
         }
 
@@ -686,25 +692,26 @@ var ThinxApp = function() {
 
         // make sure we don't destroy whole database
         if (typeof(doc) === "undefined" || (doc === null)) {
-          res.end(JSON.stringify({
+          respond(res, {
             success: false,
             status: "device_not_found",
             err_udid: udid
-          }));
+          });
           return;
         }
 
         var logmessage = "Revoking device: " + JSON.stringify(doc.udid);
-        alog.log(owner, logmessage);
+        alog.log(
+          owner, logmessage);
 
         devicelib.destroy(doc._id, doc._rev, function(err) {
 
           if (err) {
             console.log(err);
-            res.end(JSON.stringify({
+            respond(res, {
               success: false,
               status: "revocation_failed"
-            }));
+            });
             return;
 
           } else {
@@ -716,13 +723,14 @@ var ThinxApp = function() {
             if (temp) {
               console.log("[REVOKE_ERROR] MQTT: " + temp);
             }
-            console.log("[OID:" + owner + "] [DEVICE_REVOCATION] " +
+            console.log("[OID:" + owner +
+              "] [DEVICE_REVOCATION] " +
               doc.udid);
             alog.log(owner, logmessage);
-            res.end(JSON.stringify({
+            respond(res, {
               success: true,
               revoked: doc.udid
-            }));
+            });
           }
         });
       });
@@ -742,10 +750,10 @@ var ThinxApp = function() {
     var username = req.session.username;
 
     if (typeof(req.body.alias) === "undefined") {
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "missing_alias"
-      }));
+      });
       return;
     }
 
@@ -756,19 +764,19 @@ var ThinxApp = function() {
 
       if (err) {
         console.log(err);
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: err
-        }));
+        });
         return;
       }
 
       if (doc === null) {
         console.log("User " + username + " not found.");
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "user_not_found"
-        }));
+        });
         return;
       }
 
@@ -790,11 +798,11 @@ var ThinxApp = function() {
       apikey.create(owner, new_api_key_alias, function(success,
         object) {
         if (success) {
-          res.end(JSON.stringify({
+          respond(res, {
             success: true,
             api_key: new_api_key,
             hash: object.hash
-          }));
+          });
           return;
         }
       });
@@ -815,16 +823,16 @@ var ThinxApp = function() {
 
     apikey.revoke(owner, api_key_hash, function(success) {
       if (success) {
-        res.end(JSON.stringify({
+        respond(res, {
           revoked: api_key_hash,
           success: true
-        }));
+        });
         return;
       } else {
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "revocation_failed"
-        }));
+        });
       }
     });
   });
@@ -840,16 +848,16 @@ var ThinxApp = function() {
     apikey.list(owner, function(success, keys) {
       if (success) {
 
-        res.end(JSON.stringify({
+        respond(res, {
           api_keys: keys
-        }));
+        });
         return;
       } else {
 
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "apikey_list_failed"
-        }));
+        });
       }
     });
   });
@@ -870,18 +878,18 @@ var ThinxApp = function() {
 
       if (err) {
         console.log(err);
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "api-user-apikey-list_error"
-        }));
+        });
         return;
       }
 
 
-      res.end(JSON.stringify({
+      respond(res, {
         success: true,
         sources: user.repos
-      }));
+      });
     });
   });
 
@@ -895,18 +903,18 @@ var ThinxApp = function() {
     var username = req.session.username;
 
     if (typeof(req.body.alias) === "undefined") {
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "missing_source_alias"
-      }));
+      });
       return;
     }
 
     if (typeof(req.body.url) === "undefined") {
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "missing_source_url"
-      }));
+      });
       return;
     }
 
@@ -933,10 +941,10 @@ var ThinxApp = function() {
 
       if (!doc) {
         console.log("User " + owner + " not found.");
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "user_not_found"
-        }));
+        });
         return;
       }
 
@@ -959,17 +967,17 @@ var ThinxApp = function() {
         userlib.insert(doc, doc._id, function(err, body, header) {
           if (err) {
             console.log("/api/user/source ERROR:" + err);
-            res.end(JSON.stringify({
+            respond(res, {
               success: false,
               status: "key-not-added"
-            }));
+            });
             return;
           } else {
-            res.end(JSON.stringify({
+            respond(res, {
               success: true,
               source: new_source,
               source_id: source_id
-            }));
+            });
           }
         });
       });
@@ -986,10 +994,10 @@ var ThinxApp = function() {
     var username = req.session.username;
 
     if (typeof(req.body.source_id) === "undefined") {
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "missing_source_id"
-      }));
+      });
       return;
     }
 
@@ -1006,10 +1014,10 @@ var ThinxApp = function() {
 
       if (!doc) {
         console.log("Owner " + owner + " not found.");
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "user_not_found"
-        }));
+        });
         return;
       }
 
@@ -1024,16 +1032,16 @@ var ThinxApp = function() {
         userlib.insert(doc, doc._id, function(err, body, header) {
           if (err) {
             console.log("/api/user/source ERROR:" + err);
-            res.end(JSON.stringify({
+            respond(res, {
               success: false,
               status: "source_not_removed"
-            }));
+            });
             return;
           } else {
-            res.end(JSON.stringify({
+            respond(res, {
               success: true,
               source: doc
-            }));
+            });
           }
         });
       }); // userlib
@@ -1080,12 +1088,13 @@ var ThinxApp = function() {
             var device = body.rows[0].value;
 
             // make sure we don't destroy whole database
-            if (typeof(device) === "undefined" || (device === null)) {
-              res.end(JSON.stringify({
+            if (typeof(device) === "undefined" || (device ===
+                null)) {
+              respond(res, {
                 success: false,
                 status: "device_not_found",
                 err_udid: udid
-              }));
+              });
               return;
             }
 
@@ -1120,18 +1129,18 @@ var ThinxApp = function() {
 
     // Validate those inputs from body... so far must be set
     if (typeof(req.body.alias) === "undefined") {
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "missing_ssh_alias"
-      }));
+      });
       return;
     }
 
     if (typeof(req.body.key) === "undefined") {
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "missing_ssh_key"
-      }));
+      });
       return;
     }
 
@@ -1145,19 +1154,19 @@ var ThinxApp = function() {
 
       if (err) {
         console.log(err);
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "user_not_found"
-        }));
+        });
         return;
       }
 
       if (!doc) {
         console.log("User " + owner + " not found.");
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "userid_not_found"
-        }));
+        });
         return;
       }
 
@@ -1204,16 +1213,16 @@ var ThinxApp = function() {
         userlib.insert(doc, doc._id, function(err, body, header) {
           if (err) {
             console.log("/api/user/rsakey ERROR:" + err);
-            res.end(JSON.stringify({
+            respond(res, {
               success: false,
               status: "key-not-added"
-            }));
+            });
           } else {
             // console.log("RSA Key successfully added.");
-            res.end(JSON.stringify({
+            respond(res, {
               success: true,
               fingerprint: new_key_fingerprint
-            }));
+            });
           }
         });
       });
@@ -1235,19 +1244,19 @@ var ThinxApp = function() {
 
       if (err) {
         console.log(err);
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "user_not_found"
-        }));
+        });
         return;
       }
 
       if (typeof(user) === "undefined") {
         console.log("User " + owner + " not found.");
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "userid_not_found"
-        }));
+        });
         return;
       }
 
@@ -1280,10 +1289,10 @@ var ThinxApp = function() {
     var username = req.session.username;
 
     if (typeof(req.body.fingerprint) === "undefined") {
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "missing_attribute:fingerprint"
-      }));
+      });
       return;
     }
 
@@ -1298,10 +1307,10 @@ var ThinxApp = function() {
           console.log("User " + owner + " not found.");
         }
 
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "owner_not_found"
-        }));
+        });
         return;
       }
 
@@ -1316,10 +1325,10 @@ var ThinxApp = function() {
       if (typeof(keys !== "undefined")) {
         //
       } else {
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "rsa_keys_not_found"
-        }));
+        });
         return;
       }
 
@@ -1327,10 +1336,10 @@ var ThinxApp = function() {
       if (typeof(fingerprints) === "undefined") {
         console.log("ERROR: No fingerprints in keys: " + JSON.stringify(
           keys));
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "fingerprint_not_found"
-        }));
+        });
         return;
       }
 
@@ -1354,10 +1363,10 @@ var ThinxApp = function() {
         doc.last_update = new Date();
         doc.rsa_keys = new_keys;
       } else {
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "fingerprint_not_found"
-        }));
+        });
         return;
       }
 
@@ -1365,10 +1374,10 @@ var ThinxApp = function() {
       if (err) {
         console.log("Cannot destroy user on password-reset");
         console.log(err);
-        res.end(JSON.stringify({
+        respond(res, {
           status: "user_not_reset",
           success: false
-        }));
+        });
         return;
       } else {
         userlib.destroy(doc._id, doc._rev, function(err) {
@@ -1376,15 +1385,15 @@ var ThinxApp = function() {
           userlib.insert(doc, doc._id, function(err) {
             if (err) {
               console.log("rsa_revocation_failed:" + err);
-              res.end(JSON.stringify({
+              respond(res, {
                 success: false,
                 status: "rsa_revocation_failed"
-              }));
+              });
             } else {
-              res.end(JSON.stringify({
+              respond(res, {
                 revoked: rsa_key_fingerprint,
                 success: true
-              }));
+              });
             }
           });
         });
@@ -1420,10 +1429,10 @@ var ThinxApp = function() {
       } else {
         var user_should_not_exist = body.rows.length;
         if (user_should_not_exist > 0) {
-          res.end(JSON.stringify({
+          respond(res, {
             success: false,
             status: "email_already_exists"
-          }));
+          });
           console.log("Already exists.");
           return;
         }
@@ -1465,10 +1474,10 @@ var ThinxApp = function() {
 
         if (err) {
           if (err.statusCode == 409) {
-            res.end(JSON.stringify({
+            respond(res, {
               success: false,
               status: "email_already_exists"
-            }));
+            });
           } else {
             console.log(err);
           }
@@ -1498,16 +1507,16 @@ var ThinxApp = function() {
         activationEmail.send(function(err) {
           if (err) {
             console.log(err);
-            res.end(JSON.stringify({
+            respond(res, {
               success: false,
               status: "activation_failed"
-            }));
+            });
           } else {
             console.log("Activation email sent.");
-            res.end(JSON.stringify({
+            respond(res, {
               success: true,
               status: "email_sent"
-            }));
+            });
           }
         });
       }); // insert
@@ -1537,10 +1546,10 @@ var ThinxApp = function() {
             console.log(err);
             res.end(err);
           } else {
-            res.end(JSON.stringify({
+            respond(res, {
               success: false,
               status: "invalid_protocol"
-            }));
+            });
             console.log("Not a valid request.");
           }
         });
@@ -1548,10 +1557,10 @@ var ThinxApp = function() {
       }
 
       if (body.rows.length === 0) {
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "user_not_found"
-        }));
+        });
         return;
       }
 
@@ -1571,10 +1580,10 @@ var ThinxApp = function() {
 
         if (req.query.reset_key != user_reset_key) {
           console.log("reset_key does not match");
-          res.end(JSON.stringify({
+          respond(res, {
             success: false,
             status: "invalid_reset_key"
-          }));
+          });
           return;
         } else {
           res.redirect('http://rtm.thinx.cloud:80' +
@@ -1612,16 +1621,16 @@ var ThinxApp = function() {
 
         req.session.destroy(function(err) {
           console.log(err);
-          res.end(JSON.stringify({
+          respond(res, {
             status: "user_not_found",
             success: false
-          }));
+          });
         });
 
-        res.end(JSON.stringify({
+        respond(res, {
           status: "activation",
           success: false
-        }));
+        });
 
       } else {
         res.redirect('http://rtm.thinx.cloud:80' +
@@ -1647,10 +1656,10 @@ var ThinxApp = function() {
     }
 
     if (password1 !== password2) {
-      res.end(JSON.stringify({
+      respond(res, {
         status: "password_mismatch",
         success: false
-      }));
+      });
     } else {
       console.log("Passwords match....");
     }
@@ -1674,10 +1683,10 @@ var ThinxApp = function() {
             if (err) {
               console.log(err);
             } else {
-              res.end(JSON.stringify({
+              respond(res, {
                 status: "reset",
                 success: false
-              }));
+              });
               console.log("Not a valid request.");
             }
           });
@@ -1687,25 +1696,26 @@ var ThinxApp = function() {
           console.log("resetting user: " + JSON.stringify(body));
 
           if (body.rows.length === 0) {
-            res.end(JSON.stringify({
+            respond(res, {
               status: "reset_user_not_found",
               success: false
-            }));
+            });
             return;
           }
 
           var userdoc = body.rows[0];
 
           userdoc.doc.password = sha256(password1);
-          userdoc.doc.last_reset = new Date();
+          userdoc.doc.last_reset =
+            new Date();
           userdoc.doc.reset_key = null;
 
           if (err) {
             console.log("Cannot destroy user on password-set");
-            res.end(JSON.stringify({
+            respond(res, {
               status: "user_not_reset",
               success: false
-            }));
+            });
             return;
           }
 
@@ -1716,20 +1726,20 @@ var ThinxApp = function() {
           userlib.insert(userdoc.doc, userdoc.owner, function(err) {
             if (err) {
               console.log("Cannot insert user on password-set");
-              res.end(JSON.stringify({
+              respond(res, {
                 status: "user_not_saved",
                 success: false
-              }));
+              });
               return;
             } else {
               console.log(
                 "Password reset completed saving new user document."
               );
-              res.end(JSON.stringify({
+              respond(res, {
                 status: "password_reset_successful",
                 success: true,
                 redirect: "http://thinx.cloud/"
-              }));
+              });
               return;
             }
           });
@@ -1750,10 +1760,10 @@ var ThinxApp = function() {
 
         if (err) {
           console.log("Error: " + err.toString());
-          res.end(JSON.stringify({
+          respond(res, {
             status: "reset",
             success: false
-          }));
+          });
           return;
 
         } else {
@@ -1761,10 +1771,10 @@ var ThinxApp = function() {
           console.log("activating user: " + JSON.stringify(body));
 
           if (body.rows.length === 0) {
-            res.end(JSON.stringify({
+            respond(res, {
               status: "activated_user_not_found",
               success: false
-            }));
+            });
             return;
           }
 
@@ -1776,7 +1786,8 @@ var ThinxApp = function() {
 
           userdoc.password = sha256(password1);
           userdoc.activation_date = new Date();
-          userdoc.activation = null;
+          userdoc
+            .activation = null;
 
           console.log("Updating user document: " + JSON.stringify(
             userdoc));
@@ -1792,10 +1803,10 @@ var ThinxApp = function() {
                 console.log(
                   "Could not re-insert user on new activation."
                 );
-                res.end(JSON.stringify({
+                respond(res, {
                   status: "user_not_saved",
                   success: false
-                }));
+                });
                 return;
               } else {
                 // TODO: Password-reset success page, should redirect to login.
@@ -1803,10 +1814,10 @@ var ThinxApp = function() {
                   "Password reset success page, should redirect to login..."
                 );
                 //res.redirect("http://rtm.thinx.cloud:80/");
-                res.end(JSON.stringify({
+                respond(res, {
                   redirect: "http://rtm.thinx.cloud:80/",
                   success: true
-                }));
+                });
                 return;
               }
             });
@@ -1833,26 +1844,26 @@ var ThinxApp = function() {
 
       if (err) {
         console.log("Error: " + err.toString());
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "user_not_found"
-        }));
+        });
         return;
       } else {
         console.log("password reset users: " + body.rows.length);
         if (body.rows.length > 2) {
-          res.end(JSON.stringify({
+          respond(res, {
             success: false,
             status: "too_many_users"
-          }));
+          });
           return;
         }
 
         if (body.rows.length === 0) {
-          res.end(JSON.stringify({
+          respond(res, {
             success: false,
             status: "email_not_found"
-          }));
+          });
           return;
         }
       }
@@ -1860,10 +1871,10 @@ var ThinxApp = function() {
       var user = body.rows[0].doc;
       if (typeof(user) === "undefined" || user === null) {
         console.log("User not found.");
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "user_not_found"
-        }));
+        });
         return;
       }
 
@@ -1880,10 +1891,10 @@ var ThinxApp = function() {
 
           if (err) {
             console.log(err);
-            res.end(JSON.stringify({
+            respond(res, {
               success: false,
               status: "insert_failed"
-            }));
+            });
             return;
           }
 
@@ -1908,16 +1919,16 @@ var ThinxApp = function() {
           resetEmail.send(function(err) {
             if (err) {
               console.log(err);
-              res.end(JSON.stringify({
+              respond(res, {
                 success: false,
                 status: err
-              }));
+              });
             } else {
               console.log("Reset e-mail sent.");
-              res.end(JSON.stringify({
+              respond(res, {
                 success: true,
                 status: "email_sent"
-              }));
+              });
             }
           });
         });
@@ -1937,12 +1948,11 @@ var ThinxApp = function() {
     var owner = req.session.owner;
 
     userlib.get(owner, function(err, body) {
-
       if (err) {
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: err
-        }));
+        });
         return;
       }
 
@@ -1972,10 +1982,10 @@ var ThinxApp = function() {
         info: body.info
       };
 
-      res.end(JSON.stringify({
+      respond(res, {
         success: true,
         profile: profile
-      }));
+      });
     });
   });
 
@@ -1991,16 +2001,16 @@ var ThinxApp = function() {
     var api_key = null;
 
     if (typeof(req.body.mac) === "undefined") {
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "missing_mac"
-      }));
+      });
       return;
     }
 
     if (typeof(req.body.hash) === "undefined") {
       /* optional, we'll find latest checksum if not available
-      res.end(JSON.stringify({
+      respond(res, {
       	success: false,
       	status: "missing_udid"
       }));
@@ -2010,7 +2020,7 @@ var ThinxApp = function() {
 
     if (typeof(req.body.checksum) === "undefined") {
       /* optional, we'll find latest checksum if not available
-      res.end(JSON.stringify({
+      respond(res, {
       	success: false,
       	status: "missing_checksum"
       }));
@@ -2020,7 +2030,7 @@ var ThinxApp = function() {
 
     if (typeof(req.body.commit) === "undefined") {
       /* optional, we'll find latest commit_id if not available
-      res.end(JSON.stringify({
+      respond(res, {
       	success: false,
       	status: "missing_commit"
       }));
@@ -2048,10 +2058,10 @@ var ThinxApp = function() {
       api_key = req.headers.authentication;
     } else {
       console.log("ERROR: Update requests must contain API key!");
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "authentication"
-      }));
+      });
       return;
     }
 
@@ -2103,10 +2113,10 @@ var ThinxApp = function() {
         alog.log(owner, "Attempt to use invalid API Key: " +
           api_key +
           "  on firmware update.");
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "api_key_invalid"
-        }));
+        });
         return;
       } else {
         alog.log(owner, "Firmware request with API Key: " + api_key);
@@ -2156,10 +2166,10 @@ var ThinxApp = function() {
           var path = deploy.pathForDevice(owner, mac);
           fs.open(ssh_path, 'r', function(err, fd) {
             if (err) {
-              res.end(JSON.stringify({
+              respond(res, {
                 success: false,
                 status: "not_found"
-              }));
+              });
               return console.log(err);
             } else {
               var buffer = fs.readFileSync(path);
@@ -2185,10 +2195,10 @@ var ThinxApp = function() {
           }); // fs.open
 
         } else {
-          res.end(JSON.stringify({
+          respond(res, {
             success: true,
             status: "no_update_available"
-          }));
+          });
           console.log("No firmware update available for " +
             JSON.stringify(
               device));
@@ -2206,10 +2216,10 @@ var ThinxApp = function() {
     res.set("Connection", "close");
 
     if (typeof(req.body.registration) == "undefined") {
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "no_registration"
-      }));
+      });
       return;
     }
 
@@ -2239,10 +2249,10 @@ var ThinxApp = function() {
     } else {
       console.log("ERROR: Registration requests now require API key!");
       alog.log(owner, "Attempt to register witout API Key!");
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "authentication"
-      }));
+      });
       return;
     }
 
@@ -2266,10 +2276,10 @@ var ThinxApp = function() {
       }
 
       if (body.rows.length === 0) {
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "owner_not_found"
-        }));
+        });
         return;
       }
 
@@ -2308,12 +2318,12 @@ var ThinxApp = function() {
         alog.log(owner, "Attempt to use invalid API Key: " +
           api_key +
           " on device registration.");
-        res.end(JSON.stringify({
+        respond(res, {
           registration: {
             success: false,
             status: "authentication"
           }
-        }));
+        });
         return;
       } else {
         alog.log(owner, "Using API Key: " + api_key);
@@ -2468,7 +2478,7 @@ var ThinxApp = function() {
                 body, header) {
                 if (!err) {
                   res.set("Connection", "close");
-                  res.end(JSON.stringify({
+                  respond(res, {
                     registration: {
                       success: true,
                       owner: owner,
@@ -2476,16 +2486,16 @@ var ThinxApp = function() {
                       udid: existing.udid,
                       status: "OK"
                     }
-                  }));
+                  });
                   return;
                 } else {
                   res.set("Connection", "close");
-                  res.end(JSON.stringify({
+                  respond(res, {
                     registration: {
                       success: false,
                       status: "insert_failed"
                     }
-                  }));
+                  });
                 }
               });
 
@@ -2532,7 +2542,7 @@ var ThinxApp = function() {
             if (!err) {
               console.log("Device info created.");
               res.set("Connection", "close");
-              res.end(JSON.stringify({
+              respond(res, {
                 registration: {
                   success: true,
                   owner: owner,
@@ -2540,7 +2550,7 @@ var ThinxApp = function() {
                   udid: device.udid,
                   status: "OK"
                 }
-              }));
+              });
               return;
             } else {
               reg.success = false;
@@ -2566,10 +2576,10 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     if (typeof(req.body.changes) === "undefined") {
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "missing_changes"
-      }));
+      });
       return;
     }
 
@@ -2592,10 +2602,10 @@ var ThinxApp = function() {
 
 
     if (udid === null) {
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "missing_udid"
-      }));
+      });
       return;
     }
 
@@ -2608,19 +2618,19 @@ var ThinxApp = function() {
 
         if (err) {
           console.log(err);
-          res.end(JSON.stringify({
+          respond(res, {
             success: false,
             status: "device_not_found"
-          }));
+          });
           return;
         }
 
         if (body.rows.length === 0) {
           console.log(JSON.stringify(body));
-          res.end(JSON.stringify({
+          respond(res, {
             success: false,
             status: "no_such_device"
-          }));
+          });
           return;
         }
 
@@ -2635,20 +2645,20 @@ var ThinxApp = function() {
         }
 
         if (doc === null) {
-          res.end(JSON.stringify({
+          respond(res, {
             success: false,
             status: "no_such_device"
-          }));
+          });
           return;
         }
 
         // make sure we don't destroy whole database
         if (typeof(doc) === "undefined" || (doc === null)) {
-          res.end(JSON.stringify({
+          respond(res, {
             success: false,
             status: "device_not_found",
             err_udid: udid
-          }));
+          });
           return;
         }
 
@@ -2659,10 +2669,10 @@ var ThinxApp = function() {
 
           if (err) {
             console.log("/api/device/edit ERROR:" + err);
-            res.end(JSON.stringify({
+            respond(res, {
               success: false,
               status: "destroy_failed"
-            }));
+            });
             return;
           }
 
@@ -2686,16 +2696,16 @@ var ThinxApp = function() {
               if (err) {
                 console.log("/api/device/edit ERROR:" +
                   err);
-                res.end(JSON.stringify({
+                respond(res, {
                   success: false,
                   status: "device_not_changed"
-                }));
+                });
                 return;
               } else {
-                res.end(JSON.stringify({
+                respond(res, {
                   success: true,
                   change: change
-                }));
+                });
               }
             });
           });
@@ -2713,10 +2723,10 @@ var ThinxApp = function() {
     res.writeHead(code, {
       "Content-Type": "application/json"
     });
-    res.end(JSON.stringify({
+    respond(res, {
       success: false,
       "reason": reason
-    }));
+    });
   }
 
   function validateRequest(req, res) {
@@ -2837,18 +2847,19 @@ var ThinxApp = function() {
     if (typeof(build.udid) !== "undefined") {
       udid = build.udid;
     } else {
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "missing_device_udid"
-      }));
+      });
       return;
     }
 
     if (typeof(build.source_id) === "undefined") {
-      return res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "missing_source_id"
-      }));
+      });
+      return;
     }
 
     devicelib.view("devicelib", "devices_by_owner", {
@@ -2858,9 +2869,9 @@ var ThinxApp = function() {
 
       if (err) {
         if (err.toString() == "Error: missing") {
-          res.end(JSON.stringify({
+          respond(res, {
             result: "no_devices"
-          }));
+          });
         }
         console.log("/api/build: Error: " + err.toString());
         return;
@@ -2896,18 +2907,18 @@ var ThinxApp = function() {
 
         if (err) {
           console.log(err);
-          res.end(JSON.stringify({
+          respond(res, {
             success: false,
             status: "api_build-device_fetch_error"
-          }));
+          });
           return;
         }
 
         if (typeof(doc) === "undefined") {
-          res.end(JSON.stringify({
+          respond(res, {
             success: false,
             status: "no_such_owner"
-          }));
+          });
           return;
         }
 
@@ -2926,7 +2937,9 @@ var ThinxApp = function() {
         }
 
         console.log("[API-BUILD] udid: " + udid);
-        console.log("[API-BUILD] owner: " + owner);
+        console.log(
+          "[API-BUILD] owner: " +
+          owner);
         console.log("[API-BUILD] git: " + git);
 
         if ((typeof(udid) === "undefined" || build === null) ||
@@ -2939,7 +2952,7 @@ var ThinxApp = function() {
             }
           };
 
-          res.end(JSON.stringify(rdict));
+          respond(res, rdict);
           return;
         }
 
@@ -2981,7 +2994,7 @@ var ThinxApp = function() {
           };
         }
 
-        res.end(JSON.stringify(rdict));
+        respond(res, rdict);
 
         buildCommand(build_id, owner, git, udid, dryrun);
 
@@ -3021,7 +3034,8 @@ var ThinxApp = function() {
     });
     */
 
-    console.log("[OID:" + owner + "] [BUILD_STARTED] Running normal-exec...");
+    console.log("[OID:" + owner +
+      "] [BUILD_STARTED] Running normal-exec...");
     exec.exec(CMD, function(err, stdout, stderr) {
       if (err) {
         blog.log(build_id, owner, udid, "Build start failed.");
@@ -3062,28 +3076,29 @@ var ThinxApp = function() {
 
       if (err !== false) {
         console.log(err);
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "log_fetch_failed",
           error: err
-        }));
+        });
         return;
-      }
+      } else {
 
-      if (!body) {
-        console.log("Log for owner " + owner + " not found.");
-        res.end(JSON.stringify({
-          success: false,
-          status: "log_fetch_failed",
-          error: err
-        }));
-        return;
-      }
+        if (!body) {
+          console.log("Log for owner " + owner + " not found.");
+          respond(res, {
+            success: false,
+            status: "log_fetch_failed",
+            error: err
+          });
+          return;
+        }
 
-      res.end(JSON.stringify({
-        success: true,
-        logs: body
-      }));
+        respond(res, {
+          success: true,
+          logs: body
+        });
+      }
     });
   });
 
@@ -3098,34 +3113,33 @@ var ThinxApp = function() {
     if (typeof(owner) === "undefined") {
       if (err) {
         console.log(err);
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "session_failed",
           error: err
-        }));
+        });
         return;
       }
     }
 
     blog.list(owner, function(err, body) {
-
       if (err !== null) {
         console.log(err);
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "build_list_failed",
           error: err
-        }));
+        });
         return;
       }
 
       if (!body) {
         console.log("Log for owner " + owner + " not found.");
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "build_list_empty",
           error: err
-        }));
+        });
         return;
       }
 
@@ -3145,10 +3159,10 @@ var ThinxApp = function() {
         }
       }
 
-      res.end(JSON.stringify({
+      respond(res, {
         success: true,
         builds: builds
-      }).replace("\n", "<br/>"));
+      });
 
     });
   });
@@ -3163,34 +3177,33 @@ var ThinxApp = function() {
     var username = req.session.username;
 
     if (typeof(req.body.build_id) == "undefined") {
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "missing_build_id"
-      }));
+      });
       return;
     }
 
     var build_id = req.body.build_id;
 
     blog.fetch(req.body.build_id, function(err, body) {
-
       if (err) {
         console.log(err);
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "build_fetch_failed",
           error: err
-        }));
+        });
         return;
       }
 
       if (!body) {
         console.log("Log for owner " + owner + " not found.");
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "build_fetch_empty",
           error: err
-        }));
+        });
         return;
       }
 
@@ -3200,13 +3213,14 @@ var ThinxApp = function() {
         logs.push(lrec);
       }
 
-      console.log("Build-logs for build_id " + build_id + ": " + JSON
+      console.log("Build-logs for build_id " + build_id + ": " +
+        JSON
         .stringify(
           logs));
 
       var response = body;
       response.success = true;
-      res.end(JSON.stringify(response));
+      respond(res, response);
     });
   });
 
@@ -3224,10 +3238,10 @@ var ThinxApp = function() {
     var username = req.session.username;
 
     if (typeof(req.body.build_id) == "undefined") {
-      res.end(JSON.stringify({
+      respond(res, {
         success: false,
         status: "missing_build_id"
-      }));
+      });
       return;
     }
 
@@ -3239,7 +3253,7 @@ var ThinxApp = function() {
       console.log(err);
       // TODO: XHR Response implementation missing
       res.set("Connection", "close");
-      res.end(JSON.stringify(err));
+      respond(res, err);
     };
 
     blog.logtail(req.body.build_id, owner, _ws, error_callback);
@@ -3339,21 +3353,21 @@ var ThinxApp = function() {
             // TODO: write last_seen timestamp to DB here __for devices__
             // console.log("client_type: " + client_type);
             if (client_type == "device") {
-              res.end(JSON.stringify({
+              respond(res, {
                 status: "WELCOME",
                 success: true
-              }));
+              });
               return;
             } else if (client_type == "webapp") {
-              res.end(JSON.stringify({
+              respond(res, {
                 "redirectURL": "http://rtm.thinx.cloud:80/app"
-              }));
+              });
               return;
             } else {
-              res.end(JSON.stringify({
+              respond(res, {
                 status: "OK",
                 success: true
-              }));
+              });
             }
             // TODO: If user-agent contains app/device... (what?)
             return;
@@ -3362,10 +3376,10 @@ var ThinxApp = function() {
             console.log("[PASSWORD_INVALID] for " + username);
             alog.log(req.session.owner, "Password mismatch for: " +
               username);
-            res.end(JSON.stringify({
+            respond(res, {
               status: "password_mismatch",
               success: false
-            }));
+            });
             return;
           }
         }
@@ -3385,10 +3399,10 @@ var ThinxApp = function() {
           if (err) {
             console.log(err);
           } else {
-            res.end(JSON.stringify({
+            respond(res, {
               success: false,
               status: "no session (owner)"
-            }));
+            });
             console.log("Not a post request.");
             return;
           }
@@ -3425,24 +3439,24 @@ var ThinxApp = function() {
 
     stats.today(owner, function(success, body) {
       if (!success) {
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "stats_fetch_failed"
-        }));
+        });
         return;
       }
       if (!body) {
         console.log("Statistics for owner " + owner + " not found.");
-        res.end(JSON.stringify({
+        respond(res, {
           success: false,
           status: "no_results"
-        }));
+        });
         return;
       }
-      res.end(JSON.stringify({
+      respond(res, {
         success: true,
         stats: JSON.parse(body)
-      }));
+      });
     });
   });
 
@@ -3475,7 +3489,12 @@ var ThinxApp = function() {
    * HTTP/S Server
    */
 
-  https.createServer(options, app).listen(serverPort + 1);
+  // disable HTTPS on CIRCLE_CI
+  if (process.env.CIRCLE_CI === false) {
+    https.createServer(options, app).listen(serverPort + 1);
+  }
+
+  // Legacy HTTP support for old devices without HTTPS proxy
   http.createServer(app).listen(serverPort);
 
   /*
@@ -3483,15 +3502,6 @@ var ThinxApp = function() {
    */
 
   var wsapp = express();
-  /*
-  wsapp.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "X-Requested-With");
-    res.header("Access-Control-Allow-Headers", "Content-Type");
-    res.header("Access-Control-Allow-Methods",
-      "PUT, GET, POST, DELETE, OPTIONS");
-    next();
-  });*/
   var wserver = http.createServer(wsapp);
   var wss = new WebSocket.Server({
     port: socketPort,
@@ -3508,7 +3518,8 @@ var ThinxApp = function() {
     _ws = ws;
 
     var location = url.parse(req.url, true);
-    console.log("WSS connection on location: " + JSON.stringify(location));
+    console.log("WSS connection on location: " + JSON.stringify(
+      location));
     console.log("WSS cookie: " + req.headers.cookie);
 
     var query = location.path.split("/");
@@ -3586,7 +3597,6 @@ var ThinxApp = function() {
   var watcher_callback = function(result) {
     if (typeof(result) !== "undefined") {
       console.log("watcher_callback result: " + JSON.stringify(result));
-      //watched_repos.splice(watched_repos.indexOf(path));
       if (result === false) {
         console.log(
           "No change detected on repository so far."
@@ -3602,31 +3612,26 @@ var ThinxApp = function() {
     }
   };
 
+  // REFACTOR: Get array of deploy_paths and attach watcher callback (if deploy path exists)
   var initWatcher = function(watcher) {
-
     devicelib.view("devicelib", "watcher_view", {
       "include_docs": true
     }, function(err, body) {
-
+      console.log("» Starting GIT watcher...");
       if (err) {
         console.log(err);
         return;
       }
-
-      console.log("» Starting GIT watcher...");
-
       for (var index in body.rows) {
         var owner = body.rows[index].doc.owner;
         var udid = body.rows[index].doc.udid;
-        var path = deploy.pathForDevice(owner, udid);
-
+        var path = build.pathForDevice(owner, udid);
         if (!fs.existsSync(path)) {
           continue;
         } else {
           console.log("Trying to watch path: " + path);
           if (fs.lstatSync(path).isDirectory()) {
             watcher.watchRepository(path, watcher_callback);
-            watched_repos.push(path);
           } else {
             console.log(path + " is not a directory.");
           }
@@ -3642,12 +3647,20 @@ var ThinxApp = function() {
   //
 
   var database_compactor = function() {
+    rollbar.reportMessage(
+      "Database compact job started.");
     console.log("» Running database compact jobs...");
-    nano.db.compact("builds");
-    nano.db.compact("devicelib");
-    nano.db.compact("logs");
-    nano.db.compact("users");
-    console.log("» Database compact jobs completed.");
+    nano.db.compact("logs", "logs_by_owner", function(err) {
+      nano.db.compact("builds", "builds_by_build_id", function(err) {
+        nano.db.compact("builds", "builds_by_owner", function(err) {
+          nano.db.compact("devicelib");
+          nano.db.compact("users");
+          rollbar.reportMessage(
+            "Database compact job completed.");
+          console.log("» Database compact jobs completed.");
+        });
+      });
+    });
   };
 
   var COMPACT_TIMEOUT = 30000;
@@ -3660,6 +3673,7 @@ var ThinxApp = function() {
 
   var log_aggregator = function() {
     console.log("» Running log aggregation jobs...");
+    rollbar.reportMessage("Running aggregator.");
     stats.aggregate();
     console.log("» Aggregation jobs completed.");
   };
@@ -3669,16 +3683,13 @@ var ThinxApp = function() {
     AGGREGATOR_TIMEOUT);
 
   //
-  // Safe-mode (Prevent crashes on uncaught exceptions)
+  // HTTP/S Request Tools
   //
 
-  if (app_config.safe_mode === true) {
-    process.on("uncaughtException", function(err) {
-      console.log("» Caught exception: " + err);
-    });
-  } else {
-    console.log("» Safe mode disabled. App will exit and log on exception.");
+  function respond(res, object) {
+    respond(res, object);
   }
+
 };
 
 var thx = new ThinxApp();

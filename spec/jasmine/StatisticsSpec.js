@@ -7,8 +7,12 @@ describe("Statistics", function() {
   });
 
   it("should be able to store results", function() {
-    s.write_stats(false, s.todayPathElement() + ".json", s
-      .todayPathElement(), {});
+    var path =
+      "./statistics/eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f/" +
+      _public.todayPathElement() + ".json";
+    s.write_stats(false, path, "./statistics", {
+      "message": "test"
+    });
   });
 
   it("should be able to return today results for owner", function(done) {
