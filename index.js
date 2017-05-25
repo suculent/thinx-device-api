@@ -1286,119 +1286,131 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
-    var username = req.session.username;
 
+    // Support bulk updates
+    var fingerprints = [];
+    if (typeof(req.body.changes) === "undefined") {
+      fingerprints = req.body.changes; // expects list of fingerprints
+      for (var index in fingerprints) {
+        public_apikey_revoke_fingerprint(owner, fingerprints[index]);
+      }
+    }
+
+    // Will deprecate
     if (typeof(req.body.fingerprint) === "undefined") {
       respond(res, {
         success: false,
         status: "missing_attribute:fingerprint"
       });
       return;
+    } else {
+      public_apikey_revoke_fingerprint(owner, req.body.fingerprint);
     }
 
-    var rsa_key_fingerprint = req.body.fingerprint;
+    // Should move to /lib/thinx/apikey.js
+    function public_apikey_revoke_fingerprint(owner, fingerprint) {
 
-    userlib.get(owner, function(err, doc) {
+      userlib.get(owner, function(err, doc) {
 
-      if (err || !doc) {
-        if (err) {
-          console.log("ERRX:" + err);
-        } else {
-          console.log("User " + owner + " not found.");
-        }
-
-        respond(res, {
-          success: false,
-          status: "owner_not_found"
-        });
-        return;
-      }
-
-      if (!doc) {
-        return;
-      }
-
-      // Search RSA key by hash
-      var keys = doc.rsa_keys;
-      var delete_key = null;
-
-      if (typeof(keys !== "undefined")) {
-        //
-      } else {
-        respond(res, {
-          success: false,
-          status: "rsa_keys_not_found"
-        });
-        return;
-      }
-
-      var fingerprints = Object.keys(doc.rsa_keys);
-      if (typeof(fingerprints) === "undefined") {
-        console.log("ERROR: No fingerprints in keys: " + JSON.stringify(
-          keys));
-        respond(res, {
-          success: false,
-          status: "fingerprint_not_found"
-        });
-        return;
-      }
-
-      var new_keys = {};
-      for (var i = 0; i < fingerprints.length; i++) {
-        var key = doc.rsa_keys[fingerprints[i]];
-        if (fingerprints[i].indexOf(rsa_key_fingerprint) !== -1) {
-          if (fs.existsSync(key.key)) {
-            console.log("Deleting RSA key file:" + key.key);
-            fs.unlink(key.key);
+        if (err || !doc) {
+          if (err) {
+            console.log("ERRX:" + err);
+          } else {
+            console.log("User " + owner + " not found.");
           }
-          console.log("Removing RSA key from database: " +
-            rsa_key_fingerprint);
-          delete_key = true;
-        } else {
-          new_keys[rsa_key_fingerprint] = key;
-        }
-      }
 
-      if (delete_key !== null) {
-        doc.last_update = new Date();
-        doc.rsa_keys = new_keys;
-      } else {
-        respond(res, {
-          success: false,
-          status: "fingerprint_not_found"
-        });
-        return;
-      }
-
-
-      if (err) {
-        console.log("Cannot destroy user on password-reset");
-        console.log(err);
-        respond(res, {
-          status: "user_not_reset",
-          success: false
-        });
-        return;
-      } else {
-        userlib.destroy(doc._id, doc._rev, function(err) {
-          delete doc._rev;
-          userlib.insert(doc, doc._id, function(err) {
-            if (err) {
-              console.log("rsa_revocation_failed:" + err);
-              respond(res, {
-                success: false,
-                status: "rsa_revocation_failed"
-              });
-            } else {
-              respond(res, {
-                revoked: rsa_key_fingerprint,
-                success: true
-              });
-            }
+          respond(res, {
+            success: false,
+            status: "owner_not_found"
           });
-        });
-      }
-    });
+          return;
+        }
+
+        if (!doc) {
+          return;
+        }
+
+        // Search RSA key by hash
+        var keys = doc.rsa_keys;
+        var delete_key = null;
+
+        if (typeof(keys !== "undefined")) {
+          //
+        } else {
+          respond(res, {
+            success: false,
+            status: "rsa_keys_not_found"
+          });
+          return;
+        }
+
+        var fingerprints = Object.keys(doc.rsa_keys);
+        if (typeof(fingerprints) === "undefined") {
+          console.log("ERROR: No fingerprints in keys: " + JSON.stringify(
+            keys));
+          respond(res, {
+            success: false,
+            status: "fingerprint_not_found"
+          });
+          return;
+        }
+
+        var new_keys = {};
+        for (var i = 0; i < fingerprints.length; i++) {
+          var key = doc.rsa_keys[fingerprints[i]];
+          if (fingerprints[i].indexOf(rsa_key_fingerprint) !== -1) {
+            if (fs.existsSync(key.key)) {
+              console.log("Deleting RSA key file:" + key.key);
+              fs.unlink(key.key);
+            }
+            console.log("Removing RSA key from database: " +
+              rsa_key_fingerprint);
+            delete_key = true;
+          } else {
+            new_keys[rsa_key_fingerprint] = key;
+          }
+        }
+
+        if (delete_key !== null) {
+          doc.last_update = new Date();
+          doc.rsa_keys = new_keys;
+        } else {
+          respond(res, {
+            success: false,
+            status: "fingerprint_not_found"
+          });
+          return;
+        }
+
+        if (err) {
+          console.log("Cannot destroy user on password-reset");
+          console.log(err);
+          respond(res, {
+            status: "user_not_reset",
+            success: false
+          });
+          return;
+        } else {
+          userlib.destroy(doc._id, doc._rev, function(err) {
+            delete doc._rev;
+            userlib.insert(doc, doc._id, function(err) {
+              if (err) {
+                console.log("rsa_revocation_failed:" + err);
+                respond(res, {
+                  success: false,
+                  status: "rsa_revocation_failed"
+                });
+              } else {
+                respond(res, {
+                  revoked: rsa_key_fingerprint,
+                  success: true
+                });
+              }
+            });
+          });
+        }
+      });
+    }
   });
 
   /*
@@ -1878,7 +1890,6 @@ var ThinxApp = function() {
         return;
       }
 
-
       console.log("Creating new reset-key...");
       user.reset_key = sha256(new Date().toString());
 
@@ -2043,7 +2054,7 @@ var ThinxApp = function() {
     var checksum = req.body.checksum;
     var commit = req.body.commit;
     var alias = req.body.alias;
-    var owner = req.body.owner; // TODO: should be inferred from API Key, but that is indexed by owner...
+    var owner = req.body.owner;
 
     console.log("TODO: Validate if SHOULD update device " + mac +
       " using commit " + commit + " with checksum " + checksum +
@@ -2256,9 +2267,12 @@ var ThinxApp = function() {
       return;
     }
 
+    // TODO: If device gives udid, get by udid (existing)
+    // TODO: If device gives owner, search by owner_id
+    // TODO: If device gives username, search by username
 
-
-    userlib.view("users", "owners_by_username", { // because owners_by_apikey does not work anymore... apikeys should have to be in separate table
+    userlib.view("users", "owners_by_username", {
+      //"key": username,
       "include_docs": true // might be useless
     }, function(err, body) {
 
@@ -2283,11 +2297,8 @@ var ThinxApp = function() {
         return;
       }
 
-
-
       var user_data = null;
       var owner = null;
-
       var api_key_valid = false;
 
       // search API Key in owners, this will take a while...
@@ -2295,7 +2306,6 @@ var ThinxApp = function() {
         var anowner = body.rows[oindex];
         for (var kindex in anowner.doc.api_keys) {
           var k = anowner.doc.api_keys[kindex].key;
-
           if (k.indexOf(api_key) != -1) {
             user_data = anowner.doc;
             owner = anowner.doc.owner;
@@ -2440,8 +2450,6 @@ var ThinxApp = function() {
       // - see if new firmware is available and reply FIRMWARE_UPDATE with url
       // - see if alias or owner changed
       // - otherwise reply just OK
-
-
 
       devicelib.get(mac, function(error, existing) {
 
@@ -2598,8 +2606,6 @@ var ThinxApp = function() {
       console.log("WARNING! Bulk operations not supported".red);
       change = changes[0];
     }
-
-
 
     if (udid === null) {
       respond(res, {
