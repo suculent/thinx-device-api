@@ -1100,8 +1100,7 @@ var ThinxApp = function() {
                 null)) {
               respond(res, {
                 success: false,
-                status: "device_not_found",
-                err_udid: udid
+                status: "device_not_found"
               });
               return;
             }
@@ -1293,7 +1292,7 @@ var ThinxApp = function() {
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
 
-    var owner = null;
+    var owner;
 
     if (typeof(req.body.owner) !== "undefined") {
       owner = req.body.owner;
@@ -1309,7 +1308,9 @@ var ThinxApp = function() {
     if (typeof(req.body.changes) === "undefined") {
       var fingerprints = req.body.changes; // expects list of fingerprints
       for (var index in fingerprints) {
-        public_apikey_revoke_fingerprint(owner, fingerprints[index]);
+        if (fingerprints.hasOwnProperty(index)) {
+          public_apikey_revoke_fingerprint(owner, fingerprints[index]);
+        }
       }
     }
 
@@ -1678,7 +1679,7 @@ var ThinxApp = function() {
     var password2 = req.body.rpassword;
 
     var request_owner = null;
-    if (typeof(req.body.owner) !== undefined) {
+    if (typeof(req.body.owner) !== "undefined") {
       request_owner = req.body.owner;
     } else {
       console.log("Request has no owner for fast-search.");
@@ -2114,7 +2115,7 @@ var ThinxApp = function() {
 
       // Find user and match api_key
       var api_key_valid = false;
-      var user_data = null;
+      var user_data;
 
       // search API Key in owners, this will take a while...
       for (var oindex in all_users.rows) {
@@ -2267,16 +2268,16 @@ var ThinxApp = function() {
 
     var push = reg.push;
     var alias = reg.alias;
-    var username = reg.owner;
-    var success = false;
-    var status = "ERROR";
+    var username = reg.owner; // TODO: Search devices by username
+    var success;
+    var status;
 
     // Headers must contain Authentication header
     if (typeof(req.headers.authentication) !== "undefined") {
       api_key = req.headers.authentication;
     } else {
       console.log("ERROR: Registration requests now require API key!");
-      alog.log(owner, "Attempt to register witout API Key!");
+      alog.log(username, "Attempt to register witout API Key!");
       respond(res, {
         success: false,
         status: "authentication"
@@ -2314,8 +2315,8 @@ var ThinxApp = function() {
         return;
       }
 
-      var user_data = null;
-      var owner = null;
+      var user_data;
+      var owner;
       var api_key_valid = false;
 
       // search API Key in owners, this will take a while...
@@ -2367,8 +2368,6 @@ var ThinxApp = function() {
         device_version = reg.version;
       }
 
-      var firmware_url = "";
-      var known_alias = "";
       var known_owner = "";
 
       var hash = null;
@@ -2400,10 +2399,6 @@ var ThinxApp = function() {
 
       reg.success = success;
       reg.status = status;
-
-      if (alias != known_alias) {
-        known_alias = alias; // should force update in device library
-      }
 
       if (known_owner === "") {
         known_owner = owner;
@@ -2477,20 +2472,20 @@ var ThinxApp = function() {
               reg));
 
           existing.lastupdate = new Date();
-          if (typeof(fw) !== undefined && fw !== null) {
+          if (typeof(fw) !== "undefined" && fw !== null) {
             existing.firmware = fw;
           }
-          if (typeof(hash) !== undefined && hash !== null) {
+          if (typeof(hash) !== "undefined" && hash !== null) {
             existing.hash = hash;
           }
-          if (typeof(push) !== undefined && push !== null) {
+          if (typeof(push) !== "undefined" && push !== null) {
             existing.push = push;
           }
-          if (typeof(alias) !== undefined && alias !== null) {
+          if (typeof(alias) !== "undefined" && alias !== null) {
             existing.alias = alias;
           }
           // device notifies on owner change
-          if (typeof(owner) !== undefined && owner !== null) {
+          if (typeof(owner) !== "undefined" && owner !== null) {
             existing.owner = owner;
           }
 
@@ -2546,16 +2541,16 @@ var ThinxApp = function() {
           device.source = null;
 
           device.lastupdate = new Date();
-          if (typeof(fw) !== undefined && fw !== null) {
+          if (typeof(fw) !== "undefined" && fw !== null) {
             device.firmware = fw;
           }
-          if (typeof(hash) !== undefined && hash !== null) {
+          if (typeof(hash) !== "undefined" && hash !== null) {
             device.hash = hash;
           }
-          if (typeof(push) !== undefined && push !== null) {
+          if (typeof(push) !== "undefined" && push !== null) {
             device.push = push;
           }
-          if (typeof(alias) !== undefined && alias !== null) {
+          if (typeof(alias) !== "undefined" && alias !== null) {
             device.alias = alias;
           }
 
@@ -2609,7 +2604,6 @@ var ThinxApp = function() {
     }
 
     var owner = req.session.owner;
-    var username = req.session.username;
     var changes = req.body.changes;
 
     //console.log("CHANGES: " + JSON.stringify(changes));
@@ -2620,7 +2614,7 @@ var ThinxApp = function() {
 
     // TODO: Support bulk operations
     if (typeof(udid) === "undefined") {
-      console.log("WARNING! Bulk operations not supported".red);
+      console.log("WARNING! Bulk operations not supported");
       change = changes[0];
     }
 
@@ -3042,14 +3036,10 @@ var ThinxApp = function() {
     console.log("[OID:" + owner + "] [BUILD_STARTED] Running /...");
 
     /*
-
     var temp = exec.execSync(CMD); // .replace("\n", "");
-
-    console.log("[OID:" + owner + "] [BUILD_COMPLETED] sexec-stdout: " + temp); // TODO: Store to logfile
-
+    console.log("[OID:" + owner + "] [BUILD_COMPLETED] sexec-stdout: " + temp);
     var log_path = '/var/www/html/bin/' + owner + '/' + udid + '/' + build_id +
       '.log';
-
     fs.writeFile(log_path, temp, function(err) {
       if (err) {
         console.log(err);
@@ -3134,15 +3124,12 @@ var ThinxApp = function() {
     var owner = req.session.owner;
 
     if (typeof(owner) === "undefined") {
-      if (err) {
-        console.log(err);
-        respond(res, {
-          success: false,
-          status: "session_failed",
-          error: err
-        });
-        return;
-      }
+      respond(res, {
+        success: false,
+        status: "session_failed",
+        error: err
+      });
+      return;
     }
 
     blog.list(owner, function(err, body) {

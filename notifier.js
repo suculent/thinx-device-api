@@ -6,6 +6,14 @@
 // Shared Configuration
 //
 
+var Rollbar = require('rollbar');
+
+var rollbar = new Rollbar({
+  accessToken: '5505bac5dc6c4542ba3bd947a150cb55',
+  handleUncaughtExceptions: true,
+  handleUnhandledRejections: true
+});
+
 var config = require("./conf/config.json");
 var sha256 = require("sha256");
 
@@ -138,11 +146,7 @@ devicelib.get(mac, function(err, doc) {
 
   if (err) {
     console.log(err);
-    res.end(JSON.stringify({
-      success: false,
-      status: "device_not_found"
-    }));
-    return;
+    Rollbar.warning(err);
   }
 
   var source = doc.source;
