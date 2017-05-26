@@ -491,7 +491,7 @@ var ThinxApp = function() {
       var doc = body.rows[0].value;
 
       // make sure we don't destroy whole database
-      if (typeof(doc) == "undefined") {
+      if ((typeof(doc) === "undefined") || doc === null) {
         respond(res, {
           success: false,
           status: "device_not_found",
@@ -588,7 +588,7 @@ var ThinxApp = function() {
       var doc = body.rows[0].value;
 
       // make sure we don't destroy whole database
-      if (typeof(doc) == "undefined") {
+      if ((typeof(doc) === "undefined") || doc === null) {
         respond(res, {
           success: false,
           status: "device_not_found",
@@ -687,7 +687,7 @@ var ThinxApp = function() {
         }
 
         // make sure we don't destroy whole database
-        if (typeof(doc) == "undefined") {
+        if ((typeof(doc) === "undefined") || doc === null) {
           respond(res, {
             success: false,
             status: "device_not_found",
@@ -1075,7 +1075,7 @@ var ThinxApp = function() {
 
           for (var rindex in body.rows) {
 
-            var device = body.rows[0].value;
+            var device = body.rows[rindex].value;
 
             // make sure we don't destroy whole database
             if (typeof(device) === "undefined" || (device ===
@@ -2649,7 +2649,7 @@ var ThinxApp = function() {
         }
 
         // make sure we don't destroy whole database
-        if (typeof(doc) == "undefined") {
+        if ((typeof(doc) === "undefined") || doc === null) {
           respond(res, {
             success: false,
             status: "device_not_found",
@@ -2896,7 +2896,7 @@ var ThinxApp = function() {
           return;
         }
 
-        if (typeof(doc) == "undefined") {
+        if ((typeof(doc) === "undefined") || doc === null) {
           respond(res, {
             success: false,
             status: "no_such_owner"
@@ -2909,6 +2909,9 @@ var ThinxApp = function() {
         // Finds first source with given source_id
         var sources = Object.keys(doc.repos);
         for (var index in sources) {
+          if (typeof(doc.repos) === "undefined") continue;
+          if (!sources.hasOwnProperty(index)) continue;
+          if (!doc.repos.hasOwnProperty(sources[index])) continue;
           var source = doc.repos[sources[index]];
           var source_id = sources[index];
           if (source_id.indexOf(build.source_id) !== -1) {

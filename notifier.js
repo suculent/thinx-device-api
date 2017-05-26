@@ -163,10 +163,11 @@ devicelib.get(udid, function(err, doc) {
       return false;
     }
 
-
     for (var index in body.rows) {
-      if (typeof(body.rows[index].push !== "undefined")) {
-        push_tokens.push(body.rows[index].push);
+      var item = body.rows[index];
+      if (!item.hasOwnProperty(push)) continue;
+      if (typeof(item.push !== "undefined")) {
+        push_tokens.push(item.push);
       }
     }
 
