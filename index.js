@@ -1273,8 +1273,8 @@ var ThinxApp = function() {
 
     var owner;
 
-    if (typeof(req.body.owner) !== "undefined") {
-      owner = req.body.owner;
+    if (typeof(req.session.owner) !== "undefined") {
+      owner = req.session.owner;
     } else {
       respond(res, {
         success: false,
