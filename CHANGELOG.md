@@ -16,7 +16,7 @@ It seems to be almost done. Let's have a week for fixing bugs and tweaking. Ther
 
 ### Eight week
 
-26/5/2017 - 1.5.1122: migrated from Apache to NGINX; updated node.js to v7.10
+26/5/2017 - 1.5.1122: migrated from Apache to NGINX; updated node.js to v7.10; linting code with Sonarqube
 
 25/5/2017 - added integrations with Support Desk, Uptime Robot
 
