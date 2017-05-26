@@ -1326,7 +1326,12 @@ var ThinxApp = function() {
           return;
         }
 
-        if (typeof(doc) === "undefined") {
+        if (!doc.hasOwnProperty("rsa_keys")) {
+          Rollbar.warning("User " + owner + " has no RSA keys.");
+          respond(res, {
+            success: false,
+            status: "no_keys"
+          });
           return;
         }
 
@@ -3093,7 +3098,11 @@ var ThinxApp = function() {
 
       var builds = [];
       for (var bindex in body.rows) {
+
         var row = body.rows[bindex];
+
+        if (typeof(row.doc) === "undefined") continue;
+        if (typeof(row.doc.log) === "undefined") continue;
 
         for (var dindex in row.doc.log) {
           var lastIndex = row.doc.log[dindex];
