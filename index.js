@@ -491,7 +491,16 @@ var ThinxApp = function() {
       var doc = body.rows[0].value;
 
       // make sure we don't destroy whole database
-      if ((typeof(doc) === "undefined") || doc === null) {
+      if (typeof(doc) === "undefined") {
+        respond(res, {
+          success: false,
+          status: "device_not_found",
+          err_udid: udid
+        });
+        return;
+      }
+
+      if (doc === null) {
         respond(res, {
           success: false,
           status: "device_not_found",
@@ -588,7 +597,7 @@ var ThinxApp = function() {
       var doc = body.rows[0].value;
 
       // make sure we don't destroy whole database
-      if ((typeof(doc) === "undefined") || doc === null) {
+      if (typeof(doc) === "undefined") {
         respond(res, {
           success: false,
           status: "device_not_found",
@@ -687,7 +696,7 @@ var ThinxApp = function() {
         }
 
         // make sure we don't destroy whole database
-        if ((typeof(doc) === "undefined") || doc === null) {
+        if (typeof(doc) === "undefined") {
           respond(res, {
             success: false,
             status: "device_not_found",
@@ -2649,7 +2658,7 @@ var ThinxApp = function() {
         }
 
         // make sure we don't destroy whole database
-        if ((typeof(doc) === "undefined") || doc === null) {
+        if (typeof(doc) === "undefined") {
           respond(res, {
             success: false,
             status: "device_not_found",
@@ -2896,7 +2905,7 @@ var ThinxApp = function() {
           return;
         }
 
-        if ((typeof(doc) === "undefined") || doc === null) {
+        if (typeof(doc) === "undefined") {
           respond(res, {
             success: false,
             status: "no_such_owner"

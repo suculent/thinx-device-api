@@ -165,7 +165,7 @@ devicelib.get(udid, function(err, doc) {
 
     for (var index in body.rows) {
       var item = body.rows[index];
-      if (!item.hasOwnProperty(push)) continue;
+      if (!item.hasOwnProperty("push")) continue;
       if (typeof(item.push !== "undefined")) {
         push_tokens.push(item.push);
       }
