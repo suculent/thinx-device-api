@@ -2180,7 +2180,8 @@ var ThinxApp = function() {
               res.end(buffer);
               fs.close(fd, function() {
                 console.log(
-                  'Sending firmware update...');
+                  'Sending firmware update from ' +
+                  path + '...');
               });
 
               devicelib.insert(existing, mac, function(err,
@@ -2991,18 +2992,6 @@ var ThinxApp = function() {
 
     console.log("[OID:" + owner + "] [BUILD_STARTED] Running /...");
 
-    /*
-    var temp = exec.execSync(CMD); // .replace("\n", "");
-    console.log("[OID:" + owner + "] [BUILD_COMPLETED] sexec-stdout: " + temp);
-    var log_path = '/var/www/html/bin/' + owner + '/' + udid + '/' + build_id +
-      '.log';
-    fs.writeFile(log_path, temp, function(err) {
-      if (err) {
-        console.log(err);
-      }
-    });
-    */
-
     console.log("[OID:" + owner +
       "] [BUILD_STARTED] Running normal-exec...");
     exec.exec(CMD, function(err, stdout, stderr) {
@@ -3592,7 +3581,6 @@ var ThinxApp = function() {
           "No change detected on repository so far."
         );
       } else {
-        // watcher_callback result: {"local_path":"/var/www/html/bin/8beef0c4f4a758c32bcf4f52fa59d401e9400bbe97d302d22f2b837f0b88d616/e52bfe40-3726-11e7-915b-933ab4410309","version":747,"revision":"27ee5b4cd3eee787d60dd7deccc2a2a6d34f3a92","changed":true}
         console.log(
           "CHANGE DETECTED! - TODO: Commence re-build (will notify user but needs to get all required user data first (owner/device is in path)"
         );

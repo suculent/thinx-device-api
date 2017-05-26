@@ -49,8 +49,12 @@ case $i in
 esac
 done
 
-OWNER_ID_HOME=/var/www/html/bin/$OWNER_ID
-DEPLOYMENT_PATH=${OWNER_ID_HOME}/${UDID}
+THINX_ROOT=$(pwd)
+
+echo "Starting builder at path ${THINX_ROOT}"
+
+OWNER_ID_HOME=$THINX_ROOT/data/$OWNER_ID
+DEPLOYMENT_PATH=$OWNER_ID_HOME/$UDID
 
 # Create user-referenced folder in public www space
 set +e
