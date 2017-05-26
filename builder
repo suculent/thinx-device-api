@@ -56,9 +56,11 @@ DEPLOYMENT_PATH=${OWNER_ID_HOME}/${UDID}
 set +e
 mkdir -p $DEPLOYMENT_PATH
 
-LOG_PATH="${DEPLOYMENT_PATH}/${BUILD_ID}.log"
+LOG_PATH="${DEPLOYMENT_PATH}${BUILD_ID}.log"
 
 echo "Created deployment/log path..."
+
+echo $LOG_PATH
 
 # extract the protocol
 proto="$(echo $GIT_REPO | grep :// | sed -e's,^\(.*://\).*,\1,g')"
