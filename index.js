@@ -216,10 +216,6 @@ var ThinxApp = function() {
   // What purpose have those Enterprise security measures in open-source?
   // Heh, heheh :o)
   // app.disable('x-powered-by');
-  app.use(function(req, res, next) {
-    res.setHeader('X-Powered-By', '🍺');
-    next();
-  });
 
   app.all("/*", function(req, res, next) {
 
@@ -259,6 +255,7 @@ var ThinxApp = function() {
       "Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
     res.header("Access-Control-Allow-Headers",
       "Content-type,Accept,X-Access-Token,X-Key");
+    res.header("X-Powered-By", "🍺");
 
     if (req.method == "OPTIONS") {
       res.status(200).end();
