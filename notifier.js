@@ -63,11 +63,6 @@ if (typeof(commit_id) === "undefined" || commit_id === "") {
   commit_id = "18ee75e3a56c07a9eff08f75df69ef96f919653f"; // test only!
 }
 
-// We"ll build for ZERO-MAC by default instead of "ANY" to prevent accidents
-if (typeof(mac) === "undefined" || mac === "") {
-  mac = "00:00:00:00:00:00";
-}
-
 // Attribute all builds to test user by default
 if (typeof(owner) === "undefined" || owner === "") {
   owner = "test";
@@ -130,7 +125,7 @@ console.log("commit_id : " + commit_id + "\n");
 console.log("version : " + version + "\n");
 console.log("repo_url : " + repo_url + "\n");
 console.log("build_path : " + build_path + "\n");
-console.log("mac : " + mac + "\n"); // should change to udid!
+console.log("udid : " + udid + "\n");
 console.log("sha : " + sha + "\n");
 console.log("status : " + status + "\n");
 
@@ -142,7 +137,7 @@ blog.log(build_id, owner, udid, "Starting build notifier...");
 // Device -> Souce Alias -> User -> Sources ...
 //
 
-devicelib.get(mac, function(err, doc) {
+devicelib.get(udid, function(err, doc) {
 
   if (err) {
     console.log(err);
@@ -181,8 +176,7 @@ devicelib.get(mac, function(err, doc) {
 
     var buildEnvelope = {
       url: repo_url,
-      //  path: build_path,
-      mac: mac,
+      udid: udid,
       commit: commit_id,
       version: version,
       checksum: sha,
@@ -194,7 +188,7 @@ devicelib.get(mac, function(err, doc) {
 
     // save to build_path
 
-    var envelopePath = deploymentPathForDevice(owner, mac) + "/" +
+    var envelopePath = deploymentPathForDevice(owner, udid) + "/" +
       commit_id +
       ".json";
     console.log("Saving build envelope: " + envelopePath);
@@ -223,7 +217,6 @@ devicelib.get(mac, function(err, doc) {
 
     // Select targets
 
-    // TODO: -- fetch devices with matching MAC or any
     // TODO: -- collect push tokens (each only once)
 
     // Notify admin (Slack)
@@ -265,7 +258,7 @@ devicelib.get(mac, function(err, doc) {
       data: {
         type: "update",
         url: repo_url || "/bin/test/firmware.elf",
-        mac: mac || "5C:CF:7F:EE:90:E0;ANY",
+        udid: udid,
         commit: commit_id ||
           "18ee75e3a56c07a9eff08f75df69ef96f919653a",
         version: version || "0.0.1",
@@ -299,6 +292,7 @@ devicelib.get(mac, function(err, doc) {
     };
 
     for (var pindex in push_tokens) {
+      if (!push_tokens.hasOwnProperty(pindex)) return;
       var registrationToken = push_tokens[pindex];
       if ((typeof(registrationToken) !== "undefined") && (
           registrationToken !== null)) {
@@ -319,38 +313,32 @@ devicelib.get(mac, function(err, doc) {
 
     // Device channel
     if (status == "DEPLOYED") {
-      notify_device_channel(owner, mac, message);
+      notify_device_channel(owner, udid, message);
     }
 
   });
 });
-
-
 
 // Prepare payload
 
 var pushNotificationPayload = {
   firmware_update: {
     url: build_path,
-    mac: mac,
+    udid: udid,
     commit: commit_id,
     version: version,
     checksum: sha
   }
 };
 
-
-
 //
 // MQTT Notifications (for Devices)
 //
 
-function notify_device_channel(owner, mac, message) {
-
-  var channel = "/thinx/devices/" + owner + "/" + mac;
+function notify_device_channel(owner, udid, message) {
+  var channel = "/thinx/devices/" + owner + "/" + udid;
   console.log("Posting to MQTT queue " + channel);
   var client = mqtt.connect("mqtt://guest:guest@thinx.cloud:1883");
-
   client.on("connect", function() {
     console.log("Connected to MQTT, will post to " + channel);
     client.subscribe(channel);
@@ -359,31 +347,14 @@ function notify_device_channel(owner, mac, message) {
     client.publish(channel, JSON.stringify(message), {
       retain: true
     });
-
-    /*
-    var homeMessage = {
-      text: "Released update for device '" + mac + "' owned by '" +
-        owner + "'"
-    };
-    client.subscribe("/home");
-    client.publish("/home", JSON.stringify(homeMessage));
-    */
     client.end();
   });
 
   console.log("\n");
 }
 
-
-function deploymentPathForDevice(owner, mac) {
-  // MMAC is file-system agnostic and easy to search
-  var mmac = mac.toString().replace(":", "-");
-
-  // Get path for owner (and optinaly a device)
+function deploymentPathForDevice(owner, udid) {
   var user_path = config.deploy_root + "/" + owner;
-  var device_path = user_path;
-  if (mac.indexOf("ANY") != -1) {
-    device_path = device_path + "/" + mac;
-  }
+  var device_path = user_path + "/" + udid;
   return device_path;
 }

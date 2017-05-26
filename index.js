@@ -173,7 +173,6 @@ var ThinxApp = function() {
   initDatabases();
 
   var devicelib = require("nano")(db).use("managed_devices");
-  var buildlib = require("nano")(db).use("managed_builds");
   var userlib = require("nano")(db).use("managed_users");
 
   // <-- EXTRACT TO: db.js && databases must not be held by app class
@@ -720,8 +719,6 @@ var ThinxApp = function() {
 
           } else {
 
-            // MQTT
-            var mqtt = "/devices/" + udid;
             CMD = "mosquitto_passwd -D mqtt_passwords " + udid;
             var temp = exec.execSync(CMD);
             if (temp) {
@@ -1079,11 +1076,11 @@ var ThinxApp = function() {
             });
           };
 
-          var insert = function(err, device) {
+          function insert(err, device) {
             insert_on_success(err, device);
-          };
+          }
 
-          for (var dindex in body.rows) {
+          for (var rindex in body.rows) {
 
             var device = body.rows[0].value;
 
@@ -1104,8 +1101,7 @@ var ThinxApp = function() {
               device.source = null;
               devicelib.destroy(
                 device._id,
-                device._rev,
-                insert(err, device));
+                device._rev, insert(err, device));
             }
           }
 
@@ -1366,7 +1362,7 @@ var ThinxApp = function() {
         var new_keys = {};
         for (var i = 0; i < fingerprints.length; i++) {
           var key = doc.rsa_keys[fingerprints[i]];
-          if (fingerprints[i].indexOf(rsa_key_fingerprint) !== -1) {
+          if (fingerprints[i].indexOf(fingerprint) !== -1) {
             if (fs.existsSync(key.key)) {
               console.log("Deleting RSA key file:" + key.key);
               fs.unlink(key.key);
@@ -2484,7 +2480,7 @@ var ThinxApp = function() {
 
               delete existing._rev;
 
-              devicelib.insert(existing, mac, function(err,
+              devicelib.insert(existing, udid, function(err,
                 body, header) {
                 if (!err) {
                   res.set("Connection", "close");
@@ -2547,7 +2543,7 @@ var ThinxApp = function() {
           console.log("Inserting device..." + JSON.stringify(
             device));
 
-          devicelib.insert(device, mac, function(err, body,
+          devicelib.insert(device, udid, function(err, body,
             header) {
             if (!err) {
               console.log("Device info created.");
@@ -2754,9 +2750,6 @@ var ThinxApp = function() {
   }
 
   function validateSecureGETRequest(req, res) {
-    // Only log webapp user-agent
-    var ua = req.headers["user-agent"];
-
     if (req.method != "GET") {
       console.log("validateSecure: Not a get request.");
       req.session.destroy(function(err) {
@@ -2772,7 +2765,6 @@ var ThinxApp = function() {
   }
 
   function validateSecureDELETERequest(req, res) {
-    var ua = req.headers["user-agent"];
     if (req.method != "DELETE") {
       console.log("validateSecure: Not a delete request.");
       req.session.destroy(function(err) {
@@ -2788,7 +2780,6 @@ var ThinxApp = function() {
   }
 
   function validateSecurePOSTRequest(req, res) {
-    var ua = req.headers["user-agent"];
     if (req.method != "POST") {
       console.log("validateSecure: Not a post request.");
       req.session.destroy(function(err) {
@@ -2887,6 +2878,7 @@ var ThinxApp = function() {
       var device = null;
 
       for (var row in rows) {
+        if (!rows.hasOwnProperty(row)) continue;
         device = rows[row].doc;
         var db_udid = device.udid;
         var device_owner = device.owner;
@@ -3163,7 +3155,6 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
-    var username = req.session.username;
 
     if (typeof(req.body.build_id) == "undefined") {
       respond(res, {
