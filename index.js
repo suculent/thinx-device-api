@@ -3661,7 +3661,7 @@ var ThinxApp = function() {
 
   function log_aggregator() {
     console.log("» Running log aggregation jobs...");
-    rollbar.reportMessage("Running aggregator.");
+    rollbar.info("Running aggregator.");
     stats.aggregate();
     console.log("» Aggregation jobs completed.");
   }
