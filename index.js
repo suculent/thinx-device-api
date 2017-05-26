@@ -31,7 +31,16 @@ var ThinxApp = function() {
   // Shared Configuration
   //
 
-  require('console-stamp')(console, 'yyyy-mm-dd HH:MM:ss.l');
+  require('console-stamp')(console, {
+    metadata: function() {
+      return ("");
+    },
+    colors: {
+      stamp: "green",
+      label: "white",
+      metadata: "red"
+    }
+  });
 
   var session_config = require("./conf/node-session.json");
   var app_config = require("./conf/config.json");
@@ -3519,6 +3528,11 @@ var ThinxApp = function() {
 
   wss.on('connection', function connection(ws, req) {
 
+    req.on('error', function(err) {
+      console.log("WSS REQ ERROR: " + err);
+      return;
+    });
+
     //console.log("» Websocket Connection.");
 
     _ws = ws;
@@ -3571,6 +3585,9 @@ var ThinxApp = function() {
       };
       ws.send(JSON.stringify(welcome_message));
     } catch (e) { /* handle error */ }
+  }).on('error', function(err) {
+    console.log("WSS ERROR: " + err);
+    return;
   });
 
   wserver.listen(7444, function listening() {
