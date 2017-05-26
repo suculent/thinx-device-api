@@ -144,6 +144,11 @@ devicelib.get(udid, function(err, doc) {
     Rollbar.warning(err);
   }
 
+  if (!doc.hasOwnProperty(source)) {
+    Rollbar.info("device has no source on build!");
+    return false;
+  }
+
   var source = doc.source;
 
   // Collect push tokens

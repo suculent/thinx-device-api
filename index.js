@@ -24,8 +24,6 @@ var ThinxApp = function() {
     handleUnhandledRejections: true
   });
 
-  rollbar.info("API BOOTSTRAP");
-
   //
   // Shared Configuration
   //
@@ -221,14 +219,12 @@ var ThinxApp = function() {
 
     if (typeof(origin) === "undefined") {
       origin = "rtm.thinx.cloud";
-      rollbar.reportMessage(
-        "SEC-ERR: Turning 'undefined' origin to 'rtm.thinx.cloud'");
+      //rollbar.reportMessage("SEC-ERR: Turning 'undefined' origin to 'rtm.thinx.cloud'");
     }
 
     if (origin === null) {
       origin = "rtm.thinx.cloud";
-      rollbar.reportMessage(
-        "SEC-ERR: Turning null origin to 'rtm.thinx.cloud'");
+      //rollbar.reportMessage( "SEC-ERR: Turning null origin to 'rtm.thinx.cloud'");
     }
 
     var allowedOrigin = origin;
@@ -3646,16 +3642,12 @@ var ThinxApp = function() {
   //
 
   function database_compactor() {
-    rollbar.reportMessage(
-      "Database compact job started.");
     console.log("» Running database compact jobs...");
     nano.db.compact("logs", "logs_by_owner", function(err) {
       nano.db.compact("builds", "builds_by_build_id", function(err) {
         nano.db.compact("builds", "builds_by_owner", function(err) {
           nano.db.compact("devicelib");
           nano.db.compact("users");
-          rollbar.reportMessage(
-            "Database compact job completed.");
           console.log("» Database compact jobs completed.");
         });
       });
