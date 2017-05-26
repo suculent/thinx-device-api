@@ -654,8 +654,6 @@ var ThinxApp = function() {
 
     alog.log(owner, "Attempt to revoke device: " + udid);
 
-    var apikey = require("./lib/thinx/apikey");
-
     devicelib.view("devicelib", "devices_by_owner", {
         "key": owner,
         "include_docs": true
@@ -668,8 +666,7 @@ var ThinxApp = function() {
         }
 
         if (body.rows.count === 0) {
-          alog.log(owner, "No such device: " + doc.alias +
-            " (${doc.udid})");
+          alog.log(owner, "No such device: " + udid);
           respond(res, {
             success: false,
             status: "no_such_device"
@@ -776,7 +773,7 @@ var ThinxApp = function() {
         return;
       }
 
-      var keys = [];
+      var keys;
       if (typeof(doc.api_keys) === "undefined") {
         keys = [];
       } else {
@@ -2643,7 +2640,6 @@ var ThinxApp = function() {
         }
 
         var doc;
-
         for (var dindex in body.rows) {
           if (body.rows[dindex].hasOwnProperty("value")) {
             var dev = body.rows[dindex].value;
@@ -2653,6 +2649,9 @@ var ThinxApp = function() {
             }
           }
         }
+
+        if (typeof(doc) === "undefined") return;
+        if (doc == null) return;
 
         // Delete device document with old alias
         devicelib.destroy(doc._id, doc._rev, function(err) {
