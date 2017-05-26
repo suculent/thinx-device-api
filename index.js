@@ -59,10 +59,7 @@ var ThinxApp = function() {
   var fprint = require('ssh-fingerprint');
   var Emailer = require('email').Email;
   var fs = require("fs");
-  var gutil = require('gulp-util');
-  var request = require("request");
   var mkdirp = require('mkdirp');
-  var path = require('path');
 
   var deploy = require("./lib/thinx/deployment");
   var v = require("./lib/thinx/version");
@@ -1398,7 +1395,7 @@ var ThinxApp = function() {
               });
             } else {
               respond(res, {
-                revoked: rsa_key_fingerprint,
+                revoked: fingerprint,
                 success: true
               });
             }
@@ -2093,7 +2090,6 @@ var ThinxApp = function() {
 
       // Find user and match api_key
       var api_key_valid = false;
-      var user_data;
 
       // search API Key in owners, this will take a while...
       for (var oindex in all_users.rows) {
@@ -2102,7 +2098,6 @@ var ThinxApp = function() {
           var k = anowner.doc.api_keys[kindex].key;
 
           if (k.indexOf(api_key) != -1) {
-            user_data = anowner.doc;
             owner = anowner.doc.owner;
             console.log("API Key valid.");
             api_key_valid = true;
@@ -2156,11 +2151,7 @@ var ThinxApp = function() {
 
         var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(
           device);
-        var url = firmwareUpdateDescriptor.url;
         var mac = firmwareUpdateDescriptor.mac;
-        var commit = firmwareUpdateDescriptor.commit;
-        var version = firmwareUpdateDescriptor.version;
-        var checksum = firmwareUpdateDescriptor.checksum;
 
         console.log(
           "Seaching for possible firmware update... (owneer:" +
@@ -2170,8 +2161,8 @@ var ThinxApp = function() {
 
         var update = deploy.hasUpdateAvailable(device);
         if (update === true) {
-          var path = deploy.pathForDevice(owner, mac);
-          fs.open(ssh_path, 'r', function(err, fd) {
+          var path = deploy.latestFirmwarePath(owner, udid);
+          fs.open(path, 'r', function(err, fd) {
             if (err) {
               respond(res, {
                 success: false,
@@ -2293,7 +2284,6 @@ var ThinxApp = function() {
         return;
       }
 
-      var user_data;
       var owner;
       var api_key_valid = false;
 
@@ -2303,7 +2293,6 @@ var ThinxApp = function() {
         for (var kindex in anowner.doc.api_keys) {
           var k = anowner.doc.api_keys[kindex].key;
           if (k.indexOf(api_key) != -1) {
-            user_data = anowner.doc;
             owner = anowner.doc.owner;
             console.log("Valid key found.");
             api_key_valid = true;
@@ -3078,8 +3067,7 @@ var ThinxApp = function() {
     if (typeof(owner) === "undefined") {
       respond(res, {
         success: false,
-        status: "session_failed",
-        error: err
+        status: "session_failed"
       });
       return;
     }
