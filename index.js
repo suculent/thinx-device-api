@@ -1328,7 +1328,7 @@ var ThinxApp = function() {
           return;
         }
 
-        if (!doc) {
+        if (typeof(doc) === "undefined") {
           return;
         }
 
@@ -1715,7 +1715,7 @@ var ThinxApp = function() {
             new Date();
           userdoc.doc.reset_key = null;
 
-          if (err) {
+          if (err !== null) {
             console.log("Cannot destroy user on password-set");
             respond(res, {
               status: "user_not_reset",
@@ -2054,8 +2054,8 @@ var ThinxApp = function() {
       " and owner: " +
       owner);
 
-    var success = false;
-    var status = "ERROR";
+    var success;
+    var status;
 
     // Headers must contain Authentication header
     if (typeof(req.headers.authentication) !== "undefined") {
@@ -2126,12 +2126,12 @@ var ThinxApp = function() {
 
       // See if we know this MAC which is a primary key in db
 
-      if (err) {
+      if (err !== null) {
         console.log("Querying devices failed. " + err + "\n");
       }
 
-      var success = false;
-      var status = "OK";
+      var success;
+      var status;
 
       devicelib.view("devicelib", "devices_by_id", {
         "key": udid,
@@ -3276,7 +3276,11 @@ var ThinxApp = function() {
       // Find user and match password
       var all_users = body.rows;
       for (var index in all_users) {
+
+        if (!all_users.hasOwnProperty(index)) continue;
         var user_data = all_users[index];
+
+        if (!user_data.hasOwnProperty("key")) continue;
         if (username == user_data.key) {
 
           // TODO: Second option (direct compare) will deprecate soon.
