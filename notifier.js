@@ -139,7 +139,7 @@ blog.log(build_id, owner, udid, "Starting build notifier...");
 
 devicelib.get(udid, function(err, doc) {
 
-  if (err || !doc) {
+  if (err || typeof(doc) == "undefined") {
     console.log(err);
     Rollbar.warning(err);
   }
