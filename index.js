@@ -674,6 +674,7 @@ var ThinxApp = function() {
         var doc;
 
         for (var dindex in body.rows) {
+          if (!body.rows[dindex].hasOwnProperty("value")) continue;
           var device = body.rows[dindex].value;
           var device_udid = device.udid;
           if (device_udid.indexOf(udid) != -1) {
@@ -3105,7 +3106,13 @@ var ThinxApp = function() {
         if (typeof(row.doc.log) === "undefined") continue;
 
         for (var dindex in row.doc.log) {
+          if (row.doc.log.hasOwnProperty(dindex)) continue;
           var lastIndex = row.doc.log[dindex];
+          if (lastIndex.hasOwnProperty("message")) lastIndex.message =
+            "";
+          if (lastIndex.hasOwnProperty("date")) lastIndex.date = "";
+          if (lastIndex.hasOwnProperty("udid")) lastIndex.udid = "";
+          if (lastIndex.hasOwnProperty("build")) lastIndex.build = "";
           var build = {
             message: lastIndex.message,
             date: lastIndex.date,
@@ -3165,6 +3172,8 @@ var ThinxApp = function() {
 
       var logs = [];
       for (var lindex in body.rows) {
+        if (!body.rows[lindex].hasOwnProperty("value")) continue;
+        if (!body.rows[lindex].value.hasOwnProperty("log")) continue;
         var lrec = body.rows[lindex].value.log;
         logs.push(lrec);
       }
