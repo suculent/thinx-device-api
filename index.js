@@ -488,25 +488,17 @@ var ThinxApp = function() {
         return;
       }
 
-      var doc = body.rows[0].value;
+      var doc;
 
-      // make sure we don't destroy whole database
-      if (typeof(doc) === "undefined") {
+      if (!body.rows[0].hasOwnProperty("value")) {
         respond(res, {
           success: false,
           status: "device_not_found",
           err_udid: udid
         });
         return;
-      }
-
-      if (doc === null) {
-        respond(res, {
-          success: false,
-          status: "device_not_found",
-          err_udid: udid
-        });
-        return;
+      } else {
+        doc = body.rows[0].value;
       }
 
       alog.log(doc.owner, "Attaching repository to device: " + JSON
@@ -594,24 +586,25 @@ var ThinxApp = function() {
         return;
       }
 
-      var doc = body.rows[0].value;
-
-      // make sure we don't destroy whole database
-      if (typeof(doc) === "undefined") {
+      var doc;
+      if (!body.rows[0].hasOwnProperty("value")) {
         respond(res, {
           success: false,
           status: "device_not_found",
           err_udid: udid
         });
         return;
+      } else {
+        doc = body.rows[0].value;
       }
 
       console.log("Detaching repository from device: " + JSON.stringify(
         doc.udid));
 
       var repo_path = deploy.pathForDevice(doc.owner, doc.udid);
-      console.log(
-        "repo_path: " + repo_path);
+      console
+        .log(
+          "repo_path: " + repo_path);
       if (fs.existsSync(repo_path)) {
         watcher.unwatchRepository(repo_path);
       }
@@ -684,7 +677,7 @@ var ThinxApp = function() {
           return;
         }
 
-        var doc = null;
+        var doc;
 
         for (var dindex in body.rows) {
           var device = body.rows[dindex].value;
@@ -695,14 +688,15 @@ var ThinxApp = function() {
           }
         }
 
-        // make sure we don't destroy whole database
-        if (typeof(doc) === "undefined") {
+        if (!body.rows[0].hasOwnProperty("value")) {
           respond(res, {
             success: false,
             status: "device_not_found",
             err_udid: udid
           });
           return;
+        } else {
+          doc = body.rows[0].value;
         }
 
         var logmessage = "Revoking device: " + JSON.stringify(doc.udid);
@@ -1084,16 +1078,16 @@ var ThinxApp = function() {
 
           for (var rindex in body.rows) {
 
-            var device = body.rows[rindex].value;
-
-            // make sure we don't destroy whole database
-            if (typeof(device) === "undefined" || (device ===
-                null)) {
+            var device;
+            if (!body.rows[rindex].hasOwnProperty("value")) {
               respond(res, {
                 success: false,
-                status: "device_not_found"
+                status: "device_not_found",
+                err_udid: udid
               });
               return;
+            } else {
+              doc = body.rows[rindex].value;
             }
 
             if (device.source == source_id) {
@@ -1103,7 +1097,10 @@ var ThinxApp = function() {
               device.source = null;
               devicelib.destroy(
                 device._id,
-                device._rev, insert(err, device));
+                device._rev,
+                function(err) {
+                  if (!err) insert(err, device);
+                });
             }
           }
 
@@ -2639,32 +2636,16 @@ var ThinxApp = function() {
           return;
         }
 
-        var doc = null;
+        var doc;
 
         for (var dindex in body.rows) {
-          var dev = body.rows[dindex].value;
-          if (udid.indexOf(dev.udid) != -1) {
-            doc = dev;
-            break;
+          if (body.rows[dindex].hasOwnProperty("value")) {
+            var dev = body.rows[dindex].value;
+            if (udid.indexOf(dev.udid) != -1) {
+              doc = dev;
+              break;
+            }
           }
-        }
-
-        if (doc === null) {
-          respond(res, {
-            success: false,
-            status: "no_such_device"
-          });
-          return;
-        }
-
-        // make sure we don't destroy whole database
-        if (typeof(doc) === "undefined") {
-          respond(res, {
-            success: false,
-            status: "device_not_found",
-            err_udid: udid
-          });
-          return;
         }
 
         // Delete device document with old alias
@@ -2920,7 +2901,8 @@ var ThinxApp = function() {
         for (var index in sources) {
           if (typeof(doc.repos) === "undefined") continue;
           if (!sources.hasOwnProperty(index)) continue;
-          if (!doc.repos.hasOwnProperty(sources[index])) continue;
+          if (!doc.repos.hasOwnProperty(sources[index]))
+            continue;
           var source = doc.repos[sources[index]];
           var source_id = sources[index];
           if (source_id.indexOf(build.source_id) !== -1) {
