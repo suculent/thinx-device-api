@@ -2853,8 +2853,13 @@ var ThinxApp = function() {
         device = rows[row].doc;
         if (!device.hasOwnProperty("udid")) continue;
         var db_udid = device.udid;
-        if (!device.hasOwnProperty("owner")) device_owner = owner;
-        var device_owner = device.owner;
+
+        var device_owner;
+        if (device.hasOwnProperty("owner")) {
+          device_owner = device.owner;
+        } else {
+          device_owner = owner;
+        }
 
         if (device_owner.indexOf(owner) !== -1) {
           if (udid.indexOf(db_udid) != -1) {
