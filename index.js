@@ -2097,10 +2097,16 @@ var ThinxApp = function() {
 
       // search API Key in owners, this will take a while...
       for (var oindex in all_users.rows) {
+        if (!all_users.hasOwnProperty("rows")) continue;
+        if (!all_users.rows.hasOwnProperty(oindex)) continue;
         var anowner = all_users.rows[oindex];
+        if (!anowner.hasOwnProperty("doc")) continue;
+        if (!anowner.doc.hasOwnProperty("api_keys")) continue;
         for (var kindex in anowner.doc.api_keys) {
+          if (!anowner.doc.api_keys.hasOwnProperty(kindex)) continue;
+          if (!anowner.doc.api_keys[kindex].hasOwnProperty("key"))
+            continue;
           var k = anowner.doc.api_keys[kindex].key;
-
           if (k.indexOf(api_key) != -1) {
             owner = anowner.doc.owner;
             console.log("API Key valid.");
