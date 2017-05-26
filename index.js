@@ -1076,19 +1076,27 @@ var ThinxApp = function() {
             insert_on_success(err, device);
           }
 
+          function callback(err) {
+            if (!err) insert(err, device);
+          }
+
           for (var rindex in body.rows) {
 
             var device;
             if (!body.rows[rindex].hasOwnProperty("value")) {
               respond(res, {
                 success: false,
-                status: "device_not_found",
-                err_udid: udid
+                status: "device_not_found"
               });
               return;
             } else {
-              doc = body.rows[rindex].value;
+              if (body.rows[rindex].value !== null) {
+                device = body.rows[rindex].value;
+              }
             }
+
+            if ((typeof(device) === "undefined")) return;
+            if (device === null) return;
 
             if (device.source == source_id) {
               console.log(
@@ -1098,9 +1106,7 @@ var ThinxApp = function() {
               devicelib.destroy(
                 device._id,
                 device._rev,
-                function(err) {
-                  if (!err) insert(err, device);
-                });
+                callback);
             }
           }
 
