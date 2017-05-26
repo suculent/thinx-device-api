@@ -24,8 +24,7 @@ var ThinxApp = function() {
     handleUnhandledRejections: true
   });
 
-  // record a generic message and send to rollbar
-  // rollbar.reportMessage("API BOOTSTRAP");
+  rollbar.info("API BOOTSTRAP");
 
   //
   // Shared Configuration
@@ -1294,12 +1293,21 @@ var ThinxApp = function() {
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
 
-    var owner = req.session.owner;
+    var owner = null;
+
+    if (typeof(req.body.owner) !== "undefined") {
+      owner = req.body.owner;
+    } else {
+      respond(res, {
+        success: false,
+        status: "missing_attribute:owner"
+      });
+      return;
+    }
 
     // Support bulk updates
-    var fingerprints = [];
     if (typeof(req.body.changes) === "undefined") {
-      fingerprints = req.body.changes; // expects list of fingerprints
+      var fingerprints = req.body.changes; // expects list of fingerprints
       for (var index in fingerprints) {
         public_apikey_revoke_fingerprint(owner, fingerprints[index]);
       }
@@ -3649,9 +3657,14 @@ var ThinxApp = function() {
         return;
       }
       for (var index in body.rows) {
+
+        if (!body.rows[index].hasOwnProperty("doc")) continue;
+        if (!body.rows[index].doc.hasOwnProperty("owner")) continue;
+        if (!body.rows[index].doc.hasOwnProperty("udid")) continue;
+
         var owner = body.rows[index].doc.owner;
         var udid = body.rows[index].doc.udid;
-        var path = build.pathForDevice(owner, udid);
+        var path = blog.pathForDevice(owner, udid);
         if (!fs.existsSync(path)) {
           continue;
         } else {
@@ -3672,7 +3685,7 @@ var ThinxApp = function() {
   // Database compactor
   //
 
-  var database_compactor = function() {
+  function database_compactor() {
     rollbar.reportMessage(
       "Database compact job started.");
     console.log("» Running database compact jobs...");
@@ -3687,26 +3700,20 @@ var ThinxApp = function() {
         });
       });
     });
-  };
-
-  var COMPACT_TIMEOUT = 30000;
-  var database_compact_timer = setTimeout(database_compactor,
-    COMPACT_TIMEOUT);
+  }
+  setTimeout(database_compactor, 300);
 
   //
   // Log aggregator
   //
 
-  var log_aggregator = function() {
+  function log_aggregator() {
     console.log("» Running log aggregation jobs...");
     rollbar.reportMessage("Running aggregator.");
     stats.aggregate();
     console.log("» Aggregation jobs completed.");
-  };
-
-  var AGGREGATOR_TIMEOUT = 3600000;
-  var log_aggregator_timer = setTimeout(log_aggregator,
-    AGGREGATOR_TIMEOUT);
+  }
+  setTimeout(log_aggregator, 360000);
 
   //
   // HTTP/S Request Tools
