@@ -1,0 +1,25 @@
+# This affects access control for clients with no username and I don't like it at forst sight. Is it needed?
+topic read $SYS/#
+
+# This affects all clients.
+pattern write $SYS/broker/connection/%c/state
+pattern read /thinx/announcements
+
+# Client-specific Access Control
+
+# Administrator and WebApp can write to announcements
+
+user iot_god
+topic write /thinx/announcements
+
+user rtm_api
+topic write /thinx/announcements
+
+# Each user can access only its own topics, rest will be generated.
+
+user owner_id
+topic /thinx/owner_id/#
+
+user device_id
+topic /thinx/owner_id/device_id
+topic /thinx/owner_id/shared/#
