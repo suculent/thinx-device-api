@@ -2849,8 +2849,11 @@ var ThinxApp = function() {
 
       for (var row in rows) {
         if (!rows.hasOwnProperty(row)) continue;
+        if (!rows[row].hasOwnProperty("doc")) continue;
         device = rows[row].doc;
+        if (!device.hasOwnProperty("udid")) continue;
         var db_udid = device.udid;
+        if (!device.hasOwnProperty("owner")) device_owner = owner;
         var device_owner = device.owner;
 
         if (device_owner.indexOf(owner) !== -1) {
@@ -3100,6 +3103,7 @@ var ThinxApp = function() {
       var builds = [];
       for (var bindex in body.rows) {
 
+        if (!body.rows.hasOwnProperty(bindex)) continue;
         var row = body.rows[bindex];
 
         if (typeof(row.doc) === "undefined") continue;

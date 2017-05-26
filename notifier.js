@@ -164,6 +164,7 @@ devicelib.get(udid, function(err, doc) {
     }
 
     for (var index in body.rows) {
+      if (!body.rows.hasOwnProperty(index)) continue;
       var item = body.rows[index];
       if (!item.hasOwnProperty("push")) continue;
       if (typeof(item.push !== "undefined")) {
