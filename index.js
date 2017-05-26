@@ -927,7 +927,6 @@ var ThinxApp = function() {
         return;
       }
 
-      var user = body;
       var doc = body;
 
       if (!doc) {
@@ -1351,7 +1350,7 @@ var ThinxApp = function() {
         }
 
         var fingerprints = Object.keys(doc.rsa_keys);
-        if (typeof(fingerprints) === "undefined") {
+        if (typeof(doc.rsa_keys) === "undefined") {
           console.log("ERROR: No fingerprints in keys: " + JSON.stringify(
             keys));
           respond(res, {
@@ -1370,10 +1369,10 @@ var ThinxApp = function() {
               fs.unlink(key.key);
             }
             console.log("Removing RSA key from database: " +
-              rsa_key_fingerprint);
+              fingerprint);
             delete_key = true;
           } else {
-            new_keys[rsa_key_fingerprint] = key;
+            new_keys[fingerprint] = key;
           }
         }
 
@@ -1388,33 +1387,24 @@ var ThinxApp = function() {
           return;
         }
 
-        if (err) {
-          console.log("Cannot destroy user on password-reset");
-          console.log(err);
-          respond(res, {
-            status: "user_not_reset",
-            success: false
+        userlib.destroy(doc._id, doc._rev, function(err) {
+          delete doc._rev;
+          userlib.insert(doc, doc._id, function(err) {
+            if (err) {
+              console.log("rsa_revocation_failed:" + err);
+              respond(res, {
+                success: false,
+                status: "rsa_revocation_failed"
+              });
+            } else {
+              respond(res, {
+                revoked: rsa_key_fingerprint,
+                success: true
+              });
+            }
           });
-          return;
-        } else {
-          userlib.destroy(doc._id, doc._rev, function(err) {
-            delete doc._rev;
-            userlib.insert(doc, doc._id, function(err) {
-              if (err) {
-                console.log("rsa_revocation_failed:" + err);
-                respond(res, {
-                  success: false,
-                  status: "rsa_revocation_failed"
-                });
-              } else {
-                respond(res, {
-                  revoked: rsa_key_fingerprint,
-                  success: true
-                });
-              }
-            });
-          });
-        }
+        });
+
       });
     }
   });
@@ -2651,7 +2641,6 @@ var ThinxApp = function() {
         }
 
         if (typeof(doc) === "undefined") return;
-        if (doc == null) return;
 
         // Delete device document with old alias
         devicelib.destroy(doc._id, doc._rev, function(err) {
