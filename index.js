@@ -710,7 +710,7 @@ var ThinxApp = function() {
 
           } else {
 
-            CMD = "mosquitto_passwd -D mqtt_passwords " + udid;
+            let CMD = "mosquitto_passwd -D mqtt_passwords " + udid;
             var temp = exec.execSync(CMD);
             if (temp) {
               console.log("[REVOKE_ERROR] MQTT: " + temp);
@@ -1070,7 +1070,7 @@ var ThinxApp = function() {
             insert_on_success(err, device);
           }
 
-          function callback(err) {
+          function callback(err, device) {
             if (!err) insert(err, device);
           }
 
@@ -1098,7 +1098,7 @@ var ThinxApp = function() {
               devicelib.destroy(
                 device._id,
                 device._rev,
-                callback);
+                callback(err, device));
             }
           }
 
