@@ -139,13 +139,13 @@ blog.log(build_id, owner, udid, "Starting build notifier...");
 
 devicelib.get(udid, function(err, doc) {
 
-  if (err) {
+  if (err || !doc) {
     console.log(err);
     Rollbar.warning(err);
   }
 
-  if (!doc.hasOwnProperty(source)) {
-    Rollbar.info("device has no source on build!");
+  if (!doc.hasOwnProperty("source")) {
+    Rollbar.info("device " + udid + "has no source on build!");
     return false;
   }
 
