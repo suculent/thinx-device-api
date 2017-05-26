@@ -293,7 +293,6 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
-    var username = req.session.username;
 
     var update_key = null;
     var update_value = null;
@@ -469,7 +468,6 @@ var ThinxApp = function() {
 
     var source_id = req.body.source_id;
     var owner = req.session.owner;
-    var username = req.session.username;
     var udid = req.body.udid;
 
     alog.log(owner, "Attempt to attach repository: " + source_id +
@@ -501,7 +499,7 @@ var ThinxApp = function() {
       var doc = body.rows[0].value;
 
       // make sure we don't destroy whole database
-      if (typeof(doc) === "undefined" || (doc === null)) {
+      if (typeof(doc) == "undefined") {
         respond(res, {
           success: false,
           status: "device_not_found",
@@ -570,7 +568,6 @@ var ThinxApp = function() {
     }
 
     var owner = req.session.owner;
-    var username = req.session.username;
     var udid = req.body.udid;
 
     alog.log(owner, "Attempt to detach repository from device: " + udid);
@@ -599,7 +596,7 @@ var ThinxApp = function() {
       var doc = body.rows[0].value;
 
       // make sure we don't destroy whole database
-      if (typeof(doc) === "undefined" || (doc === null)) {
+      if (typeof(doc) == "undefined") {
         respond(res, {
           success: false,
           status: "device_not_found",
@@ -660,7 +657,6 @@ var ThinxApp = function() {
 
     var udid = req.body.udid;
     var owner = req.session.owner;
-    var username = req.session.username;
 
     alog.log(owner, "Attempt to revoke device: " + udid);
 
@@ -699,7 +695,7 @@ var ThinxApp = function() {
         }
 
         // make sure we don't destroy whole database
-        if (typeof(doc) === "undefined" || (doc === null)) {
+        if (typeof(doc) == "undefined") {
           respond(res, {
             success: false,
             status: "device_not_found",
@@ -755,7 +751,6 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
-    var username = req.session.username;
 
     if (typeof(req.body.alias) === "undefined") {
       respond(res, {
@@ -780,7 +775,7 @@ var ThinxApp = function() {
       }
 
       if (doc === null) {
-        console.log("User " + username + " not found.");
+        console.log("User " + owner + " not found.");
         respond(res, {
           success: false,
           status: "user_not_found"
@@ -824,7 +819,6 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
-    var username = req.session.username;
     var api_key_hash = req.body.fingerprint;
 
     console.log("[OID:" + owner + "] [APIKEY_REVOKE] " + api_key_hash);
@@ -908,7 +902,6 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
-    var username = req.session.username;
 
     if (typeof(req.body.alias) === "undefined") {
       respond(res, {
@@ -999,7 +992,6 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
-    var username = req.session.username;
 
     if (typeof(req.body.source_id) === "undefined") {
       respond(res, {
@@ -1132,7 +1124,6 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
-    var username = req.session.username;
 
     // Validate those inputs from body... so far must be set
     if (typeof(req.body.alias) === "undefined") {
@@ -1244,7 +1235,6 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
-    var username = req.session.username;
 
     // Get all users
     userlib.get(owner, function(err, user) {
@@ -2670,7 +2660,7 @@ var ThinxApp = function() {
         }
 
         // make sure we don't destroy whole database
-        if (typeof(doc) === "undefined" || (doc === null)) {
+        if (typeof(doc) == "undefined") {
           respond(res, {
             success: false,
             status: "device_not_found",
@@ -2852,7 +2842,6 @@ var ThinxApp = function() {
     var rdict = {};
 
     var owner = req.session.owner;
-    var username = req.session.username;
     var build = req.body.build; // build descriptor wrapper	;
 
     var dryrun = false;
@@ -2908,15 +2897,6 @@ var ThinxApp = function() {
             break;
           }
         }
-        // will deprecate when all devices will be re-registered using owner and not username
-        if (typeof(username) !== "undefined") {
-          if (username.indexOf(device.owner) !== -1) {
-            if (udid.indexOf(db_udid) != -1) {
-              udid = device.udid; // target device ID hash
-              break;
-            }
-          }
-        }
       }
 
       // Converts build.git to git url by seeking in users' repos
@@ -2931,7 +2911,7 @@ var ThinxApp = function() {
           return;
         }
 
-        if (typeof(doc) === "undefined") {
+        if (typeof(doc) == "undefined") {
           respond(res, {
             success: false,
             status: "no_such_owner"
@@ -3083,7 +3063,6 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
-    var username = req.session.username;
 
     alog.fetch(owner, function(err, body) {
 
@@ -3245,7 +3224,6 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
-    var username = req.session.username;
 
     if (typeof(req.body.build_id) == "undefined") {
       respond(res, {
