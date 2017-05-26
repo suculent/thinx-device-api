@@ -3519,14 +3519,21 @@ var ThinxApp = function() {
 
   wss.on('connection', function connection(ws, req) {
 
-    console.log("» Websocket Connection.");
+    //console.log("» Websocket Connection.");
 
     _ws = ws;
 
     var location = url.parse(req.url, true);
-    console.log("WSS connection on location: " + JSON.stringify(
+    console.log("» WSS connection on location: " + JSON.stringify(
       location));
-    console.log("WSS cookie: " + req.headers.cookie);
+
+    if (typeof(req.headers.cookie) === "undefined") {
+      if (req.headers.cookie.indexOf("x-thx-session") === -1) {
+        console.log("» WSS cookie: " + req.headers.cookie); // FIXME: insecure, remove this
+        console.log("» Not authorized, exiting websocket");
+        return;
+      }
+    }
 
     var query = location.path.split("/");
 
@@ -3538,14 +3545,10 @@ var ThinxApp = function() {
     };
 
     ws.on("message", function incoming(message) {
-      console.log("» Websocket incoming message: %s", message);
       var object = JSON.parse(message);
       if (typeof(object.logtail) !== "undefined") {
-        console.log("» Websocket logtail request: %s", JSON.stringify(
-          object.logtail));
         var build_id = object.logtail.build_id;
         var owner_id = object.logtail.owner_id;
-        console.log("[index.js] requesting logtail for:" + build_id);
         blog.logtail(build_id, owner_id, _ws, logtail_callback);
       } else {
         console.log("» Websocketparser said: unknown message");
