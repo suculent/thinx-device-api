@@ -1075,13 +1075,11 @@ var ThinxApp = function() {
 
           for (var rindex in body.rows) {
 
+            if (!body.rows.hasOwnProperty(rindex)) continue;
+
             var device;
             if (!body.rows[rindex].hasOwnProperty("value")) {
-              respond(res, {
-                success: false,
-                status: "device_not_found"
-              });
-              return;
+              continue;
             } else {
               if (body.rows[rindex].value !== null) {
                 device = body.rows[rindex].value;
