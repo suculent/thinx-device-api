@@ -358,6 +358,10 @@ var ThinxApp = function() {
     });
   });
 
+  app.get("/api/logout", function(req, res) {
+    res.redirect("https://thinx.cloud:80/");
+  });
+
   /*
    * Devices
    */
@@ -3433,12 +3437,10 @@ var ThinxApp = function() {
     return v.revision();
   };
 
-  var options = {
+  var ssl_options = {
     key: fs.readFileSync(app_config.ssl_key),
     cert: fs.readFileSync(app_config.ssl_cert)
   };
-
-  // FIXME: Link to letsencrypt SSL keys using configuration for CircleCI
 
   /*
    * HTTP/S Server
@@ -3446,7 +3448,7 @@ var ThinxApp = function() {
 
   // disable HTTPS on CIRCLE_CI
   if (process.env.CIRCLE_CI === false) {
-    https.createServer(options, app).listen(serverPort + 1);
+    https.createServer(ssl_options, app).listen(serverPort + 1);
   }
 
   // Legacy HTTP support for old devices without HTTPS proxy
