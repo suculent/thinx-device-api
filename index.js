@@ -2990,10 +2990,9 @@ var ThinxApp = function() {
       "] [BUILD_STARTED] Running normal-exec...");
     exec.exec(CMD, function(err, stdout, stderr) {
       if (err) {
-        blog.log(build_id, owner, udid, "Build start failed.");
+        blog.log(build_id, owner, udid, "Build start failed: " + err);
         console.log("[OID:" + owner +
-          "] [BUILD_FAIL] Build start failed (err).");
-        console.error("err: " + err);
+          "] [BUILD_FAIL] Build start failed: " + err);
         return;
       }
       if (stderr) {

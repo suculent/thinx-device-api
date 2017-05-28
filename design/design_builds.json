@@ -1,4 +1,5 @@
 {
+  "_id": "_design/builds",
   "language": "javascript",
   "views": {
     "builds_by_build_id": {
@@ -7,5 +8,8 @@
     "builds_by_owner": {
       "map": "function (doc) { if(doc.owner) { emit (doc.owner, doc); } }"
     }
+  },
+  "updates": {
+    "delete_expired": "function (doc, req) { if (doc.date < req.query.mindate) { doc._deleted: true; return [doc, \"deleted\"] }}"
   }
 }
