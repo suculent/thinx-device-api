@@ -66,6 +66,7 @@ echo "[THiNX] Making deployment path: ${DISPLAY_DEPLOYMENT_PATH}"
 # Create user-referenced folder in public www space
 set +e
 mkdir -p $DEPLOYMENT_PATH
+set -e
 
 LOG_PATH="${DEPLOYMENT_PATH}${BUILD_ID}.log"
 
@@ -122,7 +123,7 @@ echo "[THiNX] Creating workspace..."
 # TODO: only if $REPO_NAME contains slash(es)
 OWNER_PATH=./tenants/$OWNER_ID
 if [[ ! -d $OWNER_PATH ]]; then
-	mkdir -p OWNER_PATH
+	mkdir -p $OWNER_PATH
 fi
 
 echo "[THiNX]Entering owner folder $OWNER_PATH"
@@ -133,9 +134,9 @@ echo "[THiNX]Creating new working directory $REPO_PATH"
 mkdir -p ./$REPO_PATH
 
 # enter git user folder if any
-if [[ -d ${GIT_USER} ]]; then
+if [[ -d $GIT_USER ]]; then
 	echo "[THINX][DEBUG] Entering git user folder!!!"
-	pushd ${GIT_USER}
+	pushd $GIT_USER
 fi
 
 # Clean workspace
@@ -205,7 +206,7 @@ echo "int thinx_api_port = 7442;" >> $THINX_FILE
 # Build
 echo
 echo "[THiNX] Generated header file Thinx.h:"
-cat $THINX_FILE
+cat $THINX_FILE >> $LOG_PATH
 echo
 
 echo "[THiNX] TODO: Support no-compile deployment of Micropython/LUA here..."
@@ -224,7 +225,7 @@ fi
 
 echo "[THiNX] Build step..."
 
-platformio run
+platformio run >> $LOG_PATH
 
 SHA=0
 
@@ -296,15 +297,13 @@ cat $LOG_PATH
 CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${COMMIT}.bin ${UDID} ${SHA} ${OWNER_ID} ${STATUS}"
 echo $CMD
 RESULT=$(node notifier.js $CMD)
-echo -e $RESULT
-echo -e $RESULT > $LOG_PATH
+echo -e '${RESULT}'
+echo -e "${RESULT}" > $LOG_PATH
 
 # Upgrade Platformio in case new version is available
 if [[ $RESULT=="*brew update && brew upgrade*" ]]; then
 	echo "Auto-updating platformio..."
 	brew update && brew upgrade
 fi
-
-set -e
 
 echo "Done."
