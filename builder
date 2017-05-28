@@ -304,7 +304,11 @@ echo -e "${RESULT}" > $LOG_PATH
 # Upgrade Platformio in case new version is available
 if [[ $RESULT=="*brew update && brew upgrade*" ]]; then
 	echo "Auto-updating platformio..."
-	brew update && brew upgrade
+	if [[ $(uname -a)=="Darwin" ]]; then
+		brew update && brew upgrade
+	else
+		python -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
+	fi
 fi
 
 echo "Done."
