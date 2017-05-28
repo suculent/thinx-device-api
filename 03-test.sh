@@ -413,7 +413,7 @@ echo $R
 SUCCESS=$(echo $R | jq .success)
 ASOURCE=null
 if [[ $SUCCESS == true ]]; then
-	ALOG=$(echo $R | jq .logs.rows)
+	ALOG=$(echo $R | jq .logs)
   if [[ ! -z $ALOG ]]; then
 	   echo_ok "Fetched audit log:" $R
   else
@@ -566,6 +566,8 @@ R=$(curl -s -b cookies.jar \
 http://$HOST:7442/api/device/edit)
 
 # {"success":true,"status":"updated"}
+
+echo $R
 
 SUCCESS=$(echo $R | tr -d "\n" | jq .success)
 if [[ $SUCCESS == true ]]; then

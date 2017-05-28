@@ -709,7 +709,7 @@ var ThinxApp = function() {
             let CMD = "mosquitto_passwd -D mqtt_passwords " + udid;
             var temp = exec.execSync(CMD);
             if (temp) {
-              console.log("[REVOKE_ERROR] MQTT: " + temp);
+              // console.log("[REVOKE_ERROR] MQTT: " + temp);
             }
             console.log("[OID:" + owner +
               "] [DEVICE_REVOCATION] " +
@@ -1063,10 +1063,12 @@ var ThinxApp = function() {
           };
 
           function insert(err, device) {
+            delete device._rev;
             insert_on_success(err, device);
           }
 
           function callback(err, device) {
+            delete device._rev;
             if (!err) insert(err, device);
           }
 
@@ -2577,7 +2579,7 @@ var ThinxApp = function() {
     var owner = req.session.owner;
     var changes = req.body.changes;
 
-    //console.log("CHANGES: " + JSON.stringify(changes));
+    console.log("CHANGES: " + JSON.stringify(changes));
 
     var change = changes; // TODO: support bulk operations
 
