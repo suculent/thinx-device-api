@@ -358,10 +358,6 @@ var ThinxApp = function() {
     });
   });
 
-  app.get("/api/logout", function(req, res) {
-    res.redirect("https://thinx.cloud:80/");
-  });
-
   /*
    * Devices
    */
@@ -2584,10 +2580,12 @@ var ThinxApp = function() {
 
     for (var changeindex in changes) {
       var udid = changes[changeindex].udid;
-      update_device(owner, udid, changes[changeindex]);
+      console.log("Processing change " + changeindex + "for udid " + udid);
+
+      if (udid) {
+        update_device(owner, udid, changes[changeindex]);
+      }
     }
-
-
 
     function update_device(owner, udid, changes) {
 
@@ -2615,7 +2613,6 @@ var ThinxApp = function() {
             });
             return;
           }
-
           var doc;
           for (var dindex in body.rows) {
             if (body.rows[dindex].hasOwnProperty("value")) {
@@ -3447,7 +3444,8 @@ var ThinxApp = function() {
    */
 
   // disable HTTPS on CIRCLE_CI
-  if (process.env.CIRCLE_CI === false) {
+  if (process.env.CIRCLE_CI !== true) {
+    console.log("Starting HTTPS server on " + (serverPort + 1) + "...");
     https.createServer(ssl_options, app).listen(serverPort + 1);
   }
 
