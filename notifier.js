@@ -144,6 +144,11 @@ devicelib.get(udid, function(err, doc) {
     Rollbar.warning(err);
   }
 
+  if (typeof(doc === "undefined")) {
+    console.log("No such device with udid " + udid);
+    return;
+  }
+
   if (!doc.hasOwnProperty("source")) {
     Rollbar.info("device " + udid + "has no source on build!");
     return false;
