@@ -1296,14 +1296,9 @@ var ThinxApp = function() {
     }
 
     // Will deprecate
-    if (typeof(req.body.fingerprint) === "undefined") {
-      respond(res, {
-        success: false,
-        status: "missing_attribute:fingerprint"
-      });
-      return;
-    } else {
+    if (typeof(req.body.fingerprint) !== "undefined") {
       public_apikey_revoke_fingerprint(owner, req.body.fingerprint);
+      return;
     }
 
     // Should move to /lib/thinx/apikey.js
