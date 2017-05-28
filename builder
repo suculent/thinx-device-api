@@ -56,7 +56,7 @@ done
 THINX_ROOT=$(pwd)
 echo "[THiNX] Starting builder at path ${THINX_ROOT}"
 
-OWNER_ID_HOME=$THINX_ROOT/data/$OWNER_ID
+OWNER_ID_HOME=$THINX_ROOT/data/$OWNER_ID/$BUILD_ID
 echo "[THiNX] Owner workspace: ${OWNER_ID_HOME}"
 
 DEPLOYMENT_PATH=$THINX_WEB_ROOT/$OWNER_ID_HOME/$UDID
@@ -65,6 +65,7 @@ echo "[THiNX] Making deployment path: ${DISPLAY_DEPLOYMENT_PATH}"
 
 # Create user-referenced folder in public www space
 set +e
+mkdir -p $OWNER_ID_HOME
 mkdir -p $DEPLOYMENT_PATH
 set -e
 
@@ -116,12 +117,12 @@ echo
 echo "[THiNX] Cleaning workspace..."
 
 # Clean
-rm -rf ./tenants/$OWNER_ID/$REPO_PATH/**
+rm -rf ./tenants/$OWNER_ID/$UDID/$BUILD_ID/$REPO_PATH/**
 
 echo "[THiNX] Creating workspace..."
 
 # TODO: only if $REPO_NAME contains slash(es)
-OWNER_PATH=./tenants/$OWNER_ID
+OWNER_PATH=./tenants/$OWNER_ID/$UDID/$BUILD_ID
 if [[ ! -d $OWNER_PATH ]]; then
 	mkdir -p $OWNER_PATH
 fi
