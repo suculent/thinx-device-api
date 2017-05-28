@@ -111,8 +111,7 @@ nano.db.create("managed_builds", function(err, body, header) {
     ) {
       // silently fail, this is ok
     } else {
-      console.log("» RepositBuildory database creation completed. " + err +
-        "\n");
+      console.log("» Repository database attached.\n");
     }
   } else {
     console.log("» Build database creation completed. Response: " +
@@ -144,7 +143,7 @@ devicelib.get(udid, function(err, doc) {
     Rollbar.warning(err);
   }
 
-  if (typeof(doc === "undefined")) {
+  if (typeof(doc) === "undefined") {
     console.log("No such device with udid " + udid);
     return;
   }

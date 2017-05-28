@@ -19,9 +19,9 @@ DEVICE='UNKNOWN'	# builds for no device by default, not even ANY
 OPEN=false			# show build result in Finder
 BUILD_ID='test-build-id'
 ORIGIN=$(pwd)
-UDID='x9502420-3e60-11e7-8a5f-61bde3bd4c27'
+UDID='f8e88e40-43c8-11e7-9ad3-b7281c2b9610'
 
-# ./builder --id=test-build-id --owner=eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f --udid=d6596720-4236-11e7-aa00-9996a42cd255 --git=git@github.com:suculent/thinx-firmware-esp8266.git
+# ./builder --id=test-build-id --owner=eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f --udid=f8e88e40-43c8-11e7-9ad3-b7281c2b9610 --git=git@github.com:suculent/thinx-firmware-esp8266.git
 
 for i in "$@"
 do
@@ -297,7 +297,7 @@ cat $LOG_PATH
 CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${COMMIT}.bin ${UDID} ${SHA} ${OWNER_ID} ${STATUS}"
 echo $CMD
 RESULT=$(node notifier.js $CMD)
-echo -e '${RESULT}'
+echo -e "${RESULT}"
 echo -e "${RESULT}" > $LOG_PATH
 
 # Upgrade Platformio in case new version is available
