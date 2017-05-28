@@ -204,8 +204,6 @@ devicelib.get(udid, function(err, doc) {
       ".json";
     console.log("Saving build envelope: " + envelopePath);
 
-
-
     fs.open(envelopePath, "w", function(err, fd) {
       if (err) {
         throw "error opening file: " + err;
@@ -234,20 +232,22 @@ devicelib.get(udid, function(err, doc) {
 
     // Bundled notification types:
 
+    console.log("STATUS: " + status);
+
     if (status === true) {
       slack.alert({
         text: "Build successfully completed.",
         username: "notifier.js",
         fields: buildEnvelope
       });
-    } else if (status == "DEPLOYED") {
+    } else if (status.indexOf("DEPLOYED") !== 1) {
       slack.alert({
         text: "Deployment successful.", // todo: reference git_url + commit_id here
         username: "notifier.js",
         icon_emoji: ":ghost:",
         fields: buildEnvelope
       });
-    } else if (status == "DRY_RUN_OK") {
+    } else if (status.indexOf("DRY_RUN_OK") !== 1) {
       slack.alert({
         text: "Dry run successful. Firmware left undeployed.", // todo: reference git_url + commit_id here
         username: "notifier.js",
