@@ -2354,7 +2354,7 @@ var ThinxApp = function() {
         checksum = reg.checksum;
       }
 
-      var udid = uuidV1; // is returned to device which should immediately take over this value instead of mac for new registration
+      var udid = uuidV1(); // is returned to device which should immediately take over this value instead of mac for new registration
       if (typeof(reg.udid) !== "undefined") {
         udid = reg.udid; // overridden
       }
