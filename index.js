@@ -2354,13 +2354,7 @@ var ThinxApp = function() {
         checksum = reg.checksum;
       }
 
-      // will deprecate
-      if (typeof(reg.device_id) !== "undefined") {
-        udid = reg.device_id; // overridden
-      }
-
-      // will be set in stone
-      var udid; // is returned to device which should immediately take over this value instead of mac for new registration
+      var udid = uuidV1; // is returned to device which should immediately take over this value instead of mac for new registration
       if (typeof(reg.udid) !== "undefined") {
         udid = reg.udid; // overridden
       }
@@ -2501,6 +2495,8 @@ var ThinxApp = function() {
             "] [DEVICE_NEW] New device: " + JSON.stringify(
               reg));
 
+          device.udid = udid;
+
           // MQTT
           CMD = "mosquitto_passwd -b mqtt_passwords " + udid +
             " " +
@@ -2511,7 +2507,7 @@ var ThinxApp = function() {
             console.log("[REGISTER_ERROR] MQTT: " + temp);
           }
 
-          device.udid = uuidV1();
+
           device.source = null;
 
           device.lastupdate = new Date();

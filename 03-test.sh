@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Using API Key 'static-test-key' : 310c20ed9dcd4663551bd04cc53a58a52c8d9f1b
+# Using API Key 'static-test-key' : 88e94c304080d95f7382751d472b39f54d687121
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
-API_KEY='310c20ed9dcd4663551bd04cc53a58a52c8d9f1b'
+API_KEY='88e94c304080d95f7382751d472b39f54d687121'
 OWNER_ID='eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f'
 
 DEVICE_ID=null

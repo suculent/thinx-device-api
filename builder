@@ -1,28 +1,32 @@
 #!/bin/bash
 
 echo
-echo "-=[ ☢ THiNX IoT RTM BUILDER ☢ ]=-"
+echo "[THiNX] -=[ ☢ THiNX IoT RTM BUILDER ☢ ]=-"
 echo
 
-echo "Running from: $(pwd)"
+echo "[THiNX] Running from: $(pwd)"
 
-set +e
+# FIXME: This is system environment variable and should be configured on installation,
+# or injected by build class from Node.js
 
-OWNER_ID='886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445' 		# name of folder where workspaces reside
+if [[ -z $THINX_WEB_ROOT ]]; then
+		THINX_WEB_ROOT='/var/www/html/bin'
+fi
+
+OWNER_ID='eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f' 		# name of folder where workspaces reside
 RUN=true			# dry-run switch
 DEVICE='UNKNOWN'	# builds for no device by default, not even ANY
 OPEN=false			# show build result in Finder
-BUILD_ID=null
+BUILD_ID='test-build-id'
 ORIGIN=$(pwd)
+UDID='x9502420-3e60-11e7-8a5f-61bde3bd4c27'
 
-# tested:
-# ./builder --build-id="cli-manual" --owner=886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445 --udid=47fc9ab2-2227-11e7-8584-4c327591230d --git=git@github.com:suculent/thinx-firmware-esp8266.git
-# ./builder --build-id="cli-manual" --owner=886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445 --udid=47fc9ab2-2227-11e7-8584-4c327591230d --git=git@github.com:suculent/thinx-firmware-esp8266.git
+# ./builder --id=test-build-id --owner=eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f --udid=d6596720-4236-11e7-aa00-9996a42cd255 --git=git@github.com:suculent/thinx-firmware-esp8266.git
 
 for i in "$@"
 do
 case $i in
-	-i=*|--id=*)
+	  -i=*|--id=*)
       BUILD_ID="${i#*=}"
     ;;
     -o=*|--owner=*)
@@ -40,9 +44,9 @@ case $i in
     --open)
       OPEN=true
     ;;
-	-u|--udid)
-	  UDID="${i#*=}"
-	;;
+		-u|--udid)
+		    UDID="${i#*=}"
+		;;
     *)
       # unknown option
     ;;
@@ -50,11 +54,14 @@ esac
 done
 
 THINX_ROOT=$(pwd)
-
-echo "Starting builder at path ${THINX_ROOT}"
+echo "[THiNX] Starting builder at path ${THINX_ROOT}"
 
 OWNER_ID_HOME=$THINX_ROOT/data/$OWNER_ID
-DEPLOYMENT_PATH=$OWNER_ID_HOME/$UDID
+echo "[THiNX] Owner workspace: ${OWNER_ID_HOME}"
+
+DEPLOYMENT_PATH=$THINX_WEB_ROOT/$OWNER_ID_HOME/$UDID
+DISPLAY_DEPLOYMENT_PATH=$(echo ${DEPLOYMENT_PATH} | tr -d '$THINX_WEB_ROOT')
+echo "[THiNX] Making deployment path: ${DISPLAY_DEPLOYMENT_PATH}"
 
 # Create user-referenced folder in public www space
 set +e
@@ -62,9 +69,11 @@ mkdir -p $DEPLOYMENT_PATH
 
 LOG_PATH="${DEPLOYMENT_PATH}${BUILD_ID}.log"
 
-echo "Created deployment/log path..."
+echo "[THiNX] Created deployment/log path..."
 
 echo $LOG_PATH
+echo "[THiNX] Log path: $LOG_PATH"
+
 
 # extract the protocol
 proto="$(echo $GIT_REPO | grep :// | sed -e's,^\(.*://\).*,\1,g')"
@@ -93,35 +102,44 @@ if [[ "$user" == "git" ]]; then
 	REPO_NAME="$(echo $REPO_PATH | grep / | cut -d/ -f2-)"
 fi
 
-echo "  url: $url"
-echo "  proto: $proto"
-echo "  user: $user"
-echo "  host: $host"
-echo "  port: $port"
-echo "  REPO_PATH: $REPO_PATH"
-echo "  REPO_NAME: ${REPO_NAME}"
+echo "[THiNX]   url: $url"
+echo "[THiNX]   proto: $proto"
+echo "[THiNX]   user: $user"
+echo "[THiNX]   host: $host"
+echo "[THiNX]   port: $port"
+echo "[THiNX]   REPO_PATH: $REPO_PATH"
+echo "[THiNX]   REPO_NAME: ${REPO_NAME}"
 
-echo "Cleaning workspace..."
+echo
+
+echo "[THiNX] Cleaning workspace..."
 
 # Clean
 rm -rf ./tenants/$OWNER_ID/$REPO_PATH/**
 
-echo "Creating workspace..."
+echo "[THiNX] Creating workspace..."
 
 # TODO: only if $REPO_NAME contains slash(es)
-pushd ./tenants/$OWNER_ID
+OWNER_PATH=./tenants/$OWNER_ID
+if [[ ! -d $OWNER_PATH ]]; then
+	mkdir -p OWNER_PATH
+fi
+
+echo "[THiNX]Entering owner folder $OWNER_PATH"
+pushd $OWNER_PATH
 
 # Create new working directory
+echo "[THiNX]Creating new working directory $REPO_PATH"
 mkdir -p ./$REPO_PATH
-set -e
 
 # enter git user folder if any
 if [[ -d ${GIT_USER} ]]; then
+	echo "[THINX][DEBUG] Entering git user folder!!!"
 	pushd ${GIT_USER}
 fi
 
 # Clean workspace
-echo "Cleaning repository path..."
+echo "[THiNX] Cleaning repository path..."
 rm -rf $REPO_NAME
 
 # Fetch project
@@ -134,10 +152,10 @@ else
 fi
 
 COMMIT=$(git rev-parse HEAD)
-echo "Fetched commit ID: ${COMMIT}"
+echo "[THiNX] Fetched commit ID: ${COMMIT}"
 
 VERSION=$(git rev-list HEAD --count)
-echo "Version: ${VERSION}"
+echo "[THiNX] Repository version/revision: ${VERSION}"
 
 # Overwrite Thinx.h file (should be required)
 
@@ -159,54 +177,52 @@ BUILD_DATE=`date +%Y-%m-%d`
 
 # TODO: Change this to a sed template, this is tedious
 
-echo "Building Thinx.h..."
+echo "[THiNX] Building Thinx.h..."
+echo
 
 echo "//" > $THINX_FILE
 echo "// This is an auto-generated file, it will be re-written by THiNX on cloud build." >> $THINX_FILE
 echo "//" >> $THINX_FILE
-
 echo "" >> $THINX_FILE
-
+echo "// build-time constants" >> $THINX_FILE
 echo "static const String thinx_commit_id = \"${COMMIT}\";" >> $THINX_FILE
-echo "static const String thinx_cloud_url = \"${THINX_CLOUD_URL}\";" >> $THINX_FILE
 echo "static const String thinx_mqtt_url = \"${THINX_MQTT_URL}\";" >> $THINX_FILE
+echo "static const String thinx_cloud_url = \"${THINX_CLOUD_URL}\";" >> $THINX_FILE
 echo "static const String thinx_firmware_version = \"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\";" >> $THINX_FILE
 echo "static const String thinx_firmware_version_short = \"${REPO_VERSION}\";" >> $THINX_FILE
 echo "static const String app_version = \"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\";" >> $THINX_FILE
-echo "String thinx_owner = \"${THINX_OWNER}\";" >> $THINX_FILE
+echo "" >> $THINX_FILE
+echo "// dynamic variables" >> $THINX_FILE
 echo "String thinx_alias = \"${THINX_ALIAS}\";" >> $THINX_FILE
 echo "String thinx_api_key = \"VANILLA_API_KEY\";" >> $THINX_FILE # this just adds placeholder, key must not leak in binary...
+echo "String thinx_owner = \"${THINX_OWNER}\";" >> $THINX_FILE
 echo "String thinx_udid = \"${UDID}\";" >> $THINX_FILE # this just adds placeholder, key should not leak
-
-echo
-echo $THINX_FILE
 echo "" >> $THINX_FILE
-echo
-
-echo "WARNING: MQTT port is fixed to 1883 in builder shell-script.";
 echo "int thinx_mqtt_port = 1883;" >> $THINX_FILE
-echo "WARNING: API port is fixed to 7442 in builder shell-script.";
 echo "int thinx_api_port = 7442;" >> $THINX_FILE
 
-# Build
-cat $THINX_FILE
 
-echo "Build step..."
+# Build
+echo
+echo "[THiNX] Generated header file Thinx.h:"
+cat $THINX_FILE
+echo
+
+echo "[THiNX] TODO: Support no-compile deployment of Micropython/LUA here..."
 
 if [[ -f package.json ]]; then
 	echo
-	echo "THiNX does not support npm builds."
-	echo "If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues"
-	exit 0
+	echo "[THiNX] THiNX does not support npm builds."
+	echo "[THiNX] If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues"
 
 elif [[ ! -f platformio.ini ]]; then
 	echo
-	echo "This not a compatible project so far."
-	echo "If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues"
+	echo "[THiNX] This not a compatible project so far. Cannot build Arduino project without importing to Platform.io first."
+	echo "[THiNX] If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues"
 	exit 1
 fi
 
-echo "TODO: Support no-compile deployment of Micropython/LUA here..."
+echo "[THiNX] Build step..."
 
 platformio run
 
@@ -217,20 +233,17 @@ if [[ $?==0 ]] ; then
 	SHAX=$(shasum -a 256 .pioenvs/d1_mini/firmware.bin)
 	SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
 else
-	STATUS='"FAILED"'
+	STATUS='"BUILD FAILED."'
 fi
 
 echo
 
 if [[ ! ${RUN} ]]; then
-
-	echo "☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment."
-
+	echo "[THiNX] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment."
 	STATUS='"DRY_RUN_OK"'
-
 else
 
-	echo "TODO: Support post-build deployment of different platforms here..."
+	echo "[THiNX] TODO: Support post-build deployment of different platforms here..."
 
 	# Deploy binary (may require rotating previous file or timestamping/renaming previous version of the file)
 	 # WARNING: bin was elf here but it seems kind of wrong. needs testing
@@ -240,7 +253,7 @@ else
 
 	if [[ -f ${BUILD_ARTIFACT} ]]; then
 		mv ${BUILD_ARTIFACT} "${COMMIT}.bin"
-		echo "Deploying $COMMIT.bin to $DEPLOYMENT_PATH..."
+		echo "[THiNX] Deploying $COMMIT.bin to $DEPLOYMENT_PATH..."
 		mv $COMMIT.bin $DEPLOYMENT_PATH
 		STATUS='"DEPLOYED"'
 		if [[ $(uname) == "Darwin" ]]; then
@@ -253,12 +266,14 @@ else
 	fi
 fi
 
-echo $STATUS
+echo "[THiNX] Build completed with status: $STATUS"
 
 popd
 popd
 
-DISPLAY_DEPLOYMENT_PATH=$(echo ${DEPLOYMENT_PATH} | tr -d '/var/www/html')
+echo
+
+echo "[THiNX] Post-flight check:"
 
 echo "DP" $DISPLAY_DEPLOYMENT_PATH
 
@@ -274,12 +289,22 @@ echo "STA" "${STATUS}"
 
 cd $ORIGIN
 
+echo "[THiNX] Log path: $LOG_PATH"
+cat $LOG_PATH
+
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
 CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${COMMIT}.bin ${UDID} ${SHA} ${OWNER_ID} ${STATUS}"
 echo $CMD
 RESULT=$(node notifier.js $CMD)
-	echo $RESULT
+echo -e $RESULT
+echo -e $RESULT > $LOG_PATH
 
-cat $LOG_PATH
+# Upgrade Platformio in case new version is available
+if [[ $RESULT=="*brew update && brew upgrade*" ]]; then
+	echo "Auto-updating platformio..."
+	brew update && brew upgrade
+fi
 
 set -e
+
+echo "Done."
