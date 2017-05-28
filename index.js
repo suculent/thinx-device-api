@@ -2578,109 +2578,103 @@ var ThinxApp = function() {
 
     var change = changes; // TODO: support bulk operations
 
-    var udid = changes.udid;
-
-    // TODO: Support bulk operations
-    if (typeof(udid) === "undefined") {
-      console.log("WARNING! Bulk operations not supported");
-      change = changes[0];
+    for (var changeindex in changes) {
+      var udid = changes[changeindex].udid;
+      update_device(owner, udid, changes[changeindex]);
     }
 
-    if (udid === null) {
-      respond(res, {
-        success: false,
-        status: "missing_udid"
-      });
-      return;
-    }
 
-    devicelib.view("devicelib", "devices_by_owner", {
-        key: owner,
-        include_docs: true
-      },
 
-      function(err, body) {
+    function update_device(owner, udid, changes) {
 
-        if (err) {
-          console.log(err);
-          respond(res, {
-            success: false,
-            status: "device_not_found"
-          });
-          return;
-        }
+      devicelib.view("devicelib", "devices_by_owner", {
+          key: owner,
+          include_docs: true
+        },
 
-        if (body.rows.length === 0) {
-          console.log(JSON.stringify(body));
-          respond(res, {
-            success: false,
-            status: "no_such_device"
-          });
-          return;
-        }
-
-        var doc;
-        for (var dindex in body.rows) {
-          if (body.rows[dindex].hasOwnProperty("value")) {
-            var dev = body.rows[dindex].value;
-            if (udid.indexOf(dev.udid) != -1) {
-              doc = dev;
-              break;
-            }
-          }
-        }
-
-        if (typeof(doc) === "undefined") return;
-
-        // Delete device document with old alias
-        devicelib.destroy(doc._id, doc._rev, function(err) {
-
-          delete doc._rev;
+        function(err, body) {
 
           if (err) {
-            console.log("/api/device/edit ERROR:" + err);
+            console.log(err);
             respond(res, {
               success: false,
-              status: "destroy_failed"
+              status: "device_not_found"
             });
             return;
           }
 
-          if (typeof(change.alias) !== "undefined") {
-            doc.alias = change.alias;
-
+          if (body.rows.length === 0) {
+            console.log(JSON.stringify(body));
+            respond(res, {
+              success: false,
+              status: "no_such_device"
+            });
+            return;
           }
 
-          if (typeof(change.avatar) !== "undefined") {
-            doc.avatar = change.avatar;
-
+          var doc;
+          for (var dindex in body.rows) {
+            if (body.rows[dindex].hasOwnProperty("value")) {
+              var dev = body.rows[dindex].value;
+              if (udid.indexOf(dev.udid) != -1) {
+                doc = dev;
+                break;
+              }
+            }
           }
 
+          if (typeof(doc) === "undefined") return;
+
+          // Delete device document with old alias
           devicelib.destroy(doc._id, doc._rev, function(err) {
 
             delete doc._rev;
 
-            // Create device document with new alias
-            devicelib.insert(doc, doc._id, function(err, body,
-              header) {
-              if (err) {
-                console.log("/api/device/edit ERROR:" +
-                  err);
-                respond(res, {
-                  success: false,
-                  status: "device_not_changed"
-                });
-                return;
-              } else {
-                respond(res, {
-                  success: true,
-                  change: change
-                });
-              }
+            if (err) {
+              console.log("/api/device/edit ERROR:" + err);
+              respond(res, {
+                success: false,
+                status: "destroy_failed"
+              });
+              return;
+            }
+
+            if (typeof(change.alias) !== "undefined") {
+              doc.alias = change.alias;
+
+            }
+
+            if (typeof(change.avatar) !== "undefined") {
+              doc.avatar = change.avatar;
+
+            }
+
+            devicelib.destroy(doc._id, doc._rev, function(err) {
+
+              delete doc._rev;
+
+              // Create device document with new alias
+              devicelib.insert(doc, doc._id, function(err, body,
+                header) {
+                if (err) {
+                  console.log("/api/device/edit ERROR:" +
+                    err);
+                  respond(res, {
+                    success: false,
+                    status: "device_not_changed"
+                  });
+                  return;
+                } else {
+                  respond(res, {
+                    success: true,
+                    change: change
+                  });
+                }
+              });
             });
           });
         });
-      });
+    }
   });
 
   function sendRegistrationOKResponse(res, dict) {
