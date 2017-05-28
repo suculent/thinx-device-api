@@ -2393,6 +2393,7 @@ var ThinxApp = function() {
         push: push,
         alias: alias,
         owner: owner,
+        source: null,
         version: device_version,
         udid: udid,
         mqtt: mqtt,
