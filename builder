@@ -254,9 +254,9 @@ else
 	BUILD_ARTIFACT=".pioenvs/d1_mini/firmware.bin"
 
 	if [[ -f ${BUILD_ARTIFACT} ]]; then
-		mv ${BUILD_ARTIFACT} "${BUILD_ID}.bin"
+		cp ${BUILD_ARTIFACT} ${BUILD_ID}.bin
 		echo "[THiNX] Deploying $BUILD_ID.bin to $DEPLOYMENT_PATH..."
-		mv $COMMIT.bin $DEPLOYMENT_PATH
+		mv ${BUILD_ID}.bin ${DEPLOYMENT_PATH}
 		STATUS='"DEPLOYED"'
 		if [[ $(uname) == "Darwin" ]]; then
 			if [[ $OPEN ]]; then
