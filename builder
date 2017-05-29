@@ -69,7 +69,7 @@ mkdir -p $OWNER_ID_HOME
 mkdir -p $DEPLOYMENT_PATH
 set -e
 
-LOG_PATH="${DEPLOYMENT_PATH}${BUILD_ID}.log"
+LOG_PATH="${DEPLOYMENT_PATH}/${BUILD_ID}.log"
 
 echo "[THiNX] Created deployment/log path..."
 
@@ -254,8 +254,8 @@ else
 	BUILD_ARTIFACT=".pioenvs/d1_mini/firmware.bin"
 
 	if [[ -f ${BUILD_ARTIFACT} ]]; then
-		mv ${BUILD_ARTIFACT} "${COMMIT}.bin"
-		echo "[THiNX] Deploying $COMMIT.bin to $DEPLOYMENT_PATH..."
+		mv ${BUILD_ARTIFACT} "${BUILD_ID}.bin"
+		echo "[THiNX] Deploying $BUILD_ID.bin to $DEPLOYMENT_PATH..."
 		mv $COMMIT.bin $DEPLOYMENT_PATH
 		STATUS='"DEPLOYED"'
 		if [[ $(uname) == "Darwin" ]]; then
@@ -295,7 +295,7 @@ echo "[THiNX] Log path: $LOG_PATH"
 cat $LOG_PATH
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
-CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${COMMIT}.bin ${UDID} ${SHA} ${OWNER_ID} ${STATUS}"
+CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${BUILD_ID}.bin ${UDID} ${SHA} ${OWNER_ID} ${STATUS}"
 echo $CMD
 RESULT=$(node notifier.js $CMD)
 echo -e "${RESULT}"

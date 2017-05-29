@@ -2580,11 +2580,12 @@ var ThinxApp = function() {
 
     var change = changes; // TODO: support bulk operations
 
+    var udid;
     for (var changeindex in changes) {
-      var udid = changes[changeindex].udid;
+      if (!changes[changeindex].hasOwnProperty(udid)) continue;
+      udid = changes[changeindex].udid;
       console.log("Processing change " + changeindex + "for udid " + udid);
-
-      if (udid) {
+      if (udid !== null) {
         update_device(owner, udid, changes[changeindex]);
       }
     }
