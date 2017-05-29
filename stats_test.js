@@ -6,7 +6,6 @@ stats.today(owner, function(success, body) {
 
   if (success) {
     console.log("[TEST] success:", success);
-    console.log("[TEST] body:", body);
     return;
   }
 
