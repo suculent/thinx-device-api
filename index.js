@@ -210,7 +210,6 @@ var ThinxApp = function() {
     limit: '10mb'
   }));
 
-
   app.all("/*", function(req, res, next) {
 
     var origin = req.get("origin");
@@ -1070,8 +1069,8 @@ var ThinxApp = function() {
           }
 
           function callback(err, device) {
-            delete device._rev;
-            if (!err) insert(err, device);
+            //delete device._rev;
+            //if (!err) insert(err, device);
           }
 
           for (var rindex in body.rows) {
@@ -1095,9 +1094,10 @@ var ThinxApp = function() {
                 "repo_revoke alias equal: Will destroy/insert device."
               );
               device.source = null;
-              devicelib.destroy(
-                device._id,
-                device._rev, (callback(err, device))
+
+              devicelib.insert(device,
+                device._rev,
+                callback(err, device)
               );
             }
           }
