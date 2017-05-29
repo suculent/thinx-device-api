@@ -11,6 +11,7 @@ describe("API Key", function() {
       function(success,
         object) {
         if (success) {
+          console.log("Key ready to revoke: " + generated_key_hash);
           generated_key_hash = object.hash;
         }
         expect(object).toBeDefined();
@@ -19,9 +20,10 @@ describe("API Key", function() {
 
   //verify: function(owner, apikey, callback)
   it("should be able to verify API Keys", function() {
+    console.log("Verifying key: " + generated_key_hash);
     APIKey.verify(
       "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
-      "310c20ed9dcd4663551bd04cc53a58a52c8d9f1b",
+      generated_key_hash,
       function(success) {
         expect(success).toBe(true);
       });
@@ -38,6 +40,7 @@ describe("API Key", function() {
 
   //revoke: function(owner, apikey_hash, callback)
   it("should be able to revoke API Keys", function() {
+    console.log("Revoking valid key: " + generated_key_hash);
     APIKey.revoke(
       generated_key_hash,
       "sample-key-hash",
@@ -47,6 +50,7 @@ describe("API Key", function() {
   });
 
   it("should be able to fail on invalid API Key revocation", function() {
+    console.log("Revoking invalid key...");
     APIKey.revoke(
       "nonsense",
       "sample-key-hash",
@@ -61,6 +65,7 @@ describe("API Key", function() {
       "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
       function(success, object) {
         if (success) {
+          console.log(JSON.stringify(object));
           expect(object).toBeDefined();
         } else {
           console.log("[jasmine] Listing failed:" + object);
