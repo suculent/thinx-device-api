@@ -1069,8 +1069,8 @@ var ThinxApp = function() {
           }
 
           function callback(err, device) {
-            //delete device._rev;
-            //if (!err) insert(err, device);
+            delete device._rev;
+            if (err) insert(err, device);
           }
 
           for (var rindex in body.rows) {
