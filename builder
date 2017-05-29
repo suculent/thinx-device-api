@@ -122,7 +122,7 @@ rm -rf ./tenants/$OWNER_ID/$UDID/$BUILD_ID/$REPO_PATH/**
 echo "[THiNX] Creating workspace..."
 
 # TODO: only if $REPO_NAME contains slash(es)
-OWNER_PATH=./tenants/$OWNER_ID/$UDID/$BUILD_ID
+OWNER_PATH=./repositories/$OWNER_ID/$UDID/$BUILD_ID
 if [[ ! -d $OWNER_PATH ]]; then
 	mkdir -p $OWNER_PATH
 fi
