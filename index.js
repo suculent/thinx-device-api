@@ -571,7 +571,7 @@ var ThinxApp = function() {
 
       var rows = body.rows[0];
       if (typeof(rows) !== "undefined") {
-        console.log("DETACH rows: " + rows);
+        console.log("DETACH rows: " + JSON.stringify(rows));
       } else {
         respond(res, {
           success: false,
