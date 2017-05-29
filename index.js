@@ -783,15 +783,20 @@ var ThinxApp = function() {
         "alias": new_api_key_alias
       };
 
+      console.log("Creating api key...");
+
       apikey.create(owner, new_api_key_alias, function(success,
         object) {
         if (success) {
+          console.log("Created API key " + object.hash);
           respond(res, {
             success: true,
             api_key: new_api_key,
             hash: object.hash
           });
           return;
+        } else {
+          console.log("Creating api key failed!");
         }
       });
     });

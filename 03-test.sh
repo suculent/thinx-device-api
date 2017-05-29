@@ -303,7 +303,7 @@ SUCCESS=$(echo $R | jq .success)
 RPRINT=null
 if [[ $SUCCESS == true ]]; then
 	RPRINT=$(echo $R | jq .revoked)
-	echo_ok "Added RSA key: $RPRINT"
+	echo_ok "Revoked RSA key: $RPRINT"
 else
 	echo_fail $R
 fi
