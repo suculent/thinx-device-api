@@ -3410,6 +3410,8 @@ var ThinxApp = function() {
         });
         return;
       }
+      console.log("STATS BODY STRING TO BE JSON PARSED: " + body);
+      rollbar.info(body);
       respond(res, {
         success: true,
         stats: JSON.parse(body)
