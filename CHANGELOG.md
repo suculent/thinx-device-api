@@ -14,7 +14,11 @@ It seems to be almost done. Let's have a week for fixing bugs and tweaking. Ther
 * 4: Improve statistics (count last 24 hours or something)
 * 5: Make devices respond/receive MQTT messages (LUA first)
 
+26/5/2017
+
 ### Eight week
+
+27/5/2017 - 1.5.1158: various fixes and refactoring; working on builder/logger; separating user workspaces per build id
 
 26/5/2017 - 1.5.1122: migrated from Apache to NGINX; updated node.js to v7.10; linting code with Sonarqube; designing MQTT architecture with AirSensor/2
 
