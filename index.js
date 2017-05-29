@@ -24,7 +24,7 @@ var ThinxApp = function() {
     handleUnhandledRejections: true
   });
 
-  require('ssl-root-cas').inject()
+  require('ssl-root-cas').inject();
 
   //
   // Shared Configuration
@@ -1097,8 +1097,8 @@ var ThinxApp = function() {
               device.source = null;
               devicelib.destroy(
                 device._id,
-                device._rev,
-                callback(err, device));
+                device._rev, (callback(err, device))
+              );
             }
           }
 
