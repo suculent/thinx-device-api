@@ -839,13 +839,12 @@ var ThinxApp = function() {
 
     apikey.list(owner, function(success, keys) {
       if (success) {
-
+        console.log("Fetched keys: " + JSON.stringify(keys));
         respond(res, {
           api_keys: keys
         });
         return;
       } else {
-
         respond(res, {
           success: false,
           status: "apikey_list_failed"
