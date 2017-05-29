@@ -5,8 +5,9 @@ describe("App", function() {
   });
 
   it("should not fail", function(done) {
-    var ThinxApp = require('../../index.js');
+    var ThinxApp = require('../../notifier.js');
     expect(ThinxApp).toBeDefined();
-  }, 20000);  
+    done();
+  }, 1000);
 
 });
