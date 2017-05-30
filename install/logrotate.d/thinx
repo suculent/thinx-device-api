@@ -1,4 +1,4 @@
-/var/log/thinx.log
+~/.pm2/logs/index-out-0.log
 {
 	su root adm
 	rotate 4
