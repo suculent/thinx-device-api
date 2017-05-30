@@ -140,7 +140,7 @@ devicelib.get(udid, function(err, doc) {
 
   if (err || typeof(doc) == "undefined") {
     console.log(err);
-    Rollbar.warning(err);
+    rollbar.warning(err);
   }
 
   if (typeof(doc) === "undefined") {
@@ -149,7 +149,7 @@ devicelib.get(udid, function(err, doc) {
   }
 
   if (!doc.hasOwnProperty("source")) {
-    Rollbar.info("device " + udid + "has no source on build!");
+    rollbar.info("device " + udid + "has no source on build!");
     return false;
   }
 

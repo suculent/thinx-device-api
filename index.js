@@ -3418,9 +3418,7 @@ var ThinxApp = function() {
         console.log("Returned JSON Object: " + JSON.stringify(body));
       }
 
-      console.log("STATS BODY STRING TO BE JSON PARSED: " + JSON.stringify(
-        body));
-      rollbar.info(body);
+      console.log("STATS BODY JSON PARSED: " + JSON.stringify(body));
       respond(res, {
         success: true,
         stats: body
