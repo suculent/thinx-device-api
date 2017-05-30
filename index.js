@@ -3413,12 +3413,8 @@ var ThinxApp = function() {
 
       if (validateJSON(body)) {
         body = JSON.parse(body);
-        //console.log("Returned JSON Object: " + JSON.stringify(body));
-      } else {
-        //console.log("Returned JSON String: " + body);
       }
 
-      console.log("STATS BODY JSON PARSED: " + JSON.stringify(body));
       respond(res, {
         success: true,
         stats: body
