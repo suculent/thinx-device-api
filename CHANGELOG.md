@@ -14,6 +14,8 @@ It seems to be almost done. Let's have a week for fixing bugs and tweaking. Ther
 
 ### 9th week
 
+30/5/2017 - 1.5.1230: fixes in websocket, build-log and build-logger
+
 29/5/2017 - 1.5.1208: fixes UI in proxy, api keys and statistics
 
 26/5/2017 - 1.5.1180: fixes in UI, logging, builder, sockets, logout

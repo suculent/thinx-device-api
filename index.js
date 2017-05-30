@@ -1188,6 +1188,18 @@ var ThinxApp = function() {
 
       if (typeof(doc.rsa_keys) === "undefined") {
         doc.rsa_keys = {};
+      } else {
+        if ((typeof(doc.rsa_keys[new_key_fingerprint]) !==
+            "undefined") && (doc.rsa_keys[new_key_fingerprint] !==
+            null)) {
+          console.log("RSA Key " + new_key_fingerprint +
+            " already exists.");
+          respond(res, {
+            success: false,
+            status: "already_exists"
+          });
+          return;
+        }
       }
 
       console.log("[OID:" + owner + "] [__RSAKEY_ADDED__] " +
