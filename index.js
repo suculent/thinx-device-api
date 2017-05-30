@@ -3474,7 +3474,6 @@ var ThinxApp = function() {
   });
 
   var _ws = null;
-  this.ws = "2";
 
   wss.on('connection', function connection(ws, req) {
 
@@ -3519,12 +3518,14 @@ var ThinxApp = function() {
       }
     });
 
+    /*
     // Start tailing log
     if ((typeof(build_id) !== "undefined") && (typeof(owner_id) !==
         "undefined")) {
       blog.logtail(build_id, owner_id, ws, logtail_callback);
       return;
     }
+    */
 
     try {
       var welcome_message = {
