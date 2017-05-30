@@ -3410,11 +3410,20 @@ var ThinxApp = function() {
         });
         return;
       }
-      console.log("STATS BODY STRING TO BE JSON PARSED: " + body);
+
+      if (validateJSON(body)) {
+        body = JSON.parse(body);
+        console.log("Returned JSON String: " + body);
+      } else {
+        console.log("Returned JSON Object: " + JSON.stringify(body));
+      }
+
+      console.log("STATS BODY STRING TO BE JSON PARSED: " + JSON.stringify(
+        body));
       rollbar.info(body);
       respond(res, {
         success: true,
-        stats: JSON.parse(body)
+        stats: body
       });
     });
   });
@@ -3651,6 +3660,15 @@ var ThinxApp = function() {
 
   function respond(res, object) {
     res.end(JSON.stringify(object));
+  }
+
+  function validateJSON(str) {
+    try {
+      JSON.parse(str);
+    } catch (e) {
+      return false;
+    }
+    return true;
   }
 
 };

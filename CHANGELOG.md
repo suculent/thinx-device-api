@@ -2,11 +2,9 @@
 
 ## Change log
 
-### Hopefully The Last Week
-
 **ROADMAP**
 
-It seems to be almost done. Let's have a week for fixing bugs and tweaking. There are still things that would not work after initial install (tech tail, e.g. mqtt configuration and other post-installs)
+It seems to be almost done. Let's have a week for fixing bugs and tweaking. There are still things that would not work after initial install (tech tail, e.g. mqtt configuration and other post-installs; bulk UI operations though update functions)
 
 * 1: Async log should write to logfile instead of shellscript for tailing.
 * 2: Builder Logging, build tests
@@ -14,7 +12,11 @@ It seems to be almost done. Let's have a week for fixing bugs and tweaking. Ther
 * 4: Improve statistics (count last 24 hours or something)
 * 5: Make devices respond/receive MQTT messages (LUA first)
 
-26/5/2017
+### 9th week
+
+29/5/2017 - 1.5.1208: fixes UI in proxy, api keys and statistics
+
+26/5/2017 - 1.5.1180: fixes in UI, logging, builder, sockets, logout
 
 ### Eight week
 
