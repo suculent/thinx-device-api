@@ -3,10 +3,9 @@
 node_modules/
 
 # Runtime data that are not to be stored from server back to repository
+data/
 repositories/
-sessions/
-logs/
-statistics/
+# statistics/ lets try to keep those
 
 mqtt_passwords
 
@@ -21,3 +20,6 @@ coverage/
 
 # Sonar
 .scannerwork/
+
+# Log file copy, should be discarded after use
+statistics/stats.temp
