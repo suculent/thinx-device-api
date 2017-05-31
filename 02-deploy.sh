@@ -17,9 +17,9 @@ echo "» Checking if node.js is running..."
 service thinx-app status
 service thinx-app stop
 
-killall node
-
-forever stopall
+killall node # will deprecate
+killall tail # will deprecate
+forever stopall # will deprecate
 
 echo
 echo "» Fetching current app version from GIT..."
@@ -34,7 +34,7 @@ npm install .
 if [[ $CIRCLECI == true ]]; then
 	echo
 	echo "☢  Running node.js without console for CI..."
-	nohup forever -o /var/log/thinx.log index.js &&
+	pm2 start index.js
 
 	ACCESS_TOKEN=6aa9f20bef804b75a50338e03830919d
 	ENVIRONMENT=test
@@ -57,7 +57,7 @@ else
 	mkdir logs
 	killall node
 	forever stopall
-	nohup forever -o /var/log/thinx.log index.js &&
+	pm2 start index.js
 
 	ACCESS_TOKEN=6aa9f20bef804b75a50338e03830919d
 	ENVIRONMENT=development
@@ -75,9 +75,9 @@ else
 	echo
 
 
-	if [[ -f /var/log/thinx.log ]]; then
-		tail -f -n200 /var/log/thinx.log
+	if [[ -f ~/.pm2/logs/index-out-0.log ]]; then
+		tail -f -n200 ~/.pm2/logs/index-out-0.log
 	else
-		echo "/var/log/thinx.log not found, exiting silently..."
+		echo "~/.pm2/logs/index-out-0.log not found, exiting silently..."
 	fi
 fi

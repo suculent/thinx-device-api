@@ -22,7 +22,7 @@ curl https://api.rollbar.com/api/1/deploy/ \
   -F local_username=$LOCAL_USERNAME
 
 # Start the server in background
-nohup forever -o /var/log/thinx.log index.js > /var/log/thinx.log &
+pm2 start index.js
 
 # Watch the log
-tail -f /var/log/thinx.log
+tail -f ~/.pm2/logs/index-out-0.log
