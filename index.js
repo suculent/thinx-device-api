@@ -1602,7 +1602,7 @@ var ThinxApp = function() {
           });
           return;
         } else {
-          res.redirect('https://thinx.cloud' +
+          res.redirect('http://rtm.thinx.cloud:80' +
             '/password.html?reset_key=' +
             reset_key +
             '&owner=' + user.owner);
@@ -1649,7 +1649,7 @@ var ThinxApp = function() {
         });
 
       } else {
-        res.redirect('https://thinx.cloud' +
+        res.redirect('http://rtm.thinx.cloud:80' +
           '/password.html?activation=' +
           ac_key +
           '&owner=' + ac_owner);
@@ -1829,9 +1829,9 @@ var ThinxApp = function() {
                 console.log(
                   "Password reset success page, should redirect to login..."
                 );
-                //res.redirect("https://thinx.cloud/");
+                //res.redirect("http://rtm.thinx.cloud:80/");
                 respond(res, {
-                  redirect: "https://thinx.cloud/",
+                  redirect: "http://rtm.thinx.cloud:80/",
                   success: true
                 });
                 return;
@@ -2790,7 +2790,7 @@ var ThinxApp = function() {
           console.log(
             "validateSession: Invalid session, redirecting to login!"
           );
-          res.redirect("https://thinx.cloud/"); // redirects browser, not in XHR?
+          res.redirect("http://rtm.thinx.cloud:80/"); // redirects browser, not in XHR?
         }
       });
     }
@@ -3331,7 +3331,7 @@ var ThinxApp = function() {
               return;
             } else if (client_type == "webapp") {
               respond(res, {
-                "redirectURL": "https://thinx.cloud/app"
+                "redirectURL": "http://rtm.thinx.cloud:80/app"
               });
               return;
             } else {
@@ -3360,7 +3360,7 @@ var ThinxApp = function() {
         if (client_type == "device") {
           return;
         } else if (client_type == "webapp") {
-          res.redirect("https://thinx.cloud/"); // redirects browser, not in XHR?
+          res.redirect("http://rtm.thinx.cloud:80/"); // redirects browser, not in XHR?
           return;
         }
 
@@ -3393,9 +3393,7 @@ var ThinxApp = function() {
         }
       });
     }
-    respond(res, {
-      "redirectURL": "https://thinx.cloud:443/"
-    });
+    res.redirect("/"); // HOME_URL (Apache)
   });
 
   /*
