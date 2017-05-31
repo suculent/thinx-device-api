@@ -118,7 +118,7 @@ R=$(curl -s -c cookies.jar \
 -d '{ "username" : "test", "password" : "tset" }' \
 http://$HOST:7442/api/login)
 
-# {"redirectURL":"http://rtm.thinx.cloud:80/app"}
+# {"redirectURL":"https://thinx.cloud/app"}
 
 SUCCESS=$(echo $R | jq .redirectURL)
 echo $SUCCESS
