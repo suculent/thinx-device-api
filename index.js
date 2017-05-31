@@ -393,10 +393,10 @@ var ThinxApp = function() {
         // Show all devices for admin (if not limited by query)
         if (req.session.admin === true && typeof(req.body.query) ==
           "undefined") {
-          var response = JSON.stringify({
+          respond(res, {
+            success: true,
             devices: devices
           });
-          res.end(response);
           return;
         }
 
@@ -423,10 +423,10 @@ var ThinxApp = function() {
             devices.push(deviceDescriptor);
           }
         }
-        var reply = JSON.stringify({
+        respond(res, {
+          success: true,
           devices: devices
         });
-        res.end(reply);
       });
   });
 
@@ -495,26 +495,20 @@ var ThinxApp = function() {
         doc = body.rows[0].value;
       }
 
-      alog.log(doc.owner, "Attaching repository to device: " + JSON
-        .stringify(
-          doc));
+      var docstring = JSON.stringify(doc);
+
+      alog.log(doc.owner, "Attaching repository to device: " +
+        docstring);
+      console.log("Attaching repository to device: " + docstring);
 
       deploy.initWithOwner(doc.owner);
       var repo_path = deploy.pathForDevice(doc.owner, doc.udid);
-      console
-        .log(
-          "repo_path: " + repo_path);
+      console.log("[ATTACH] repo_path: " + repo_path);
 
       mkdirp(repo_path, function(err) {
         if (err) console.error(err);
-        else console.log(repo_path + ' created.');
+        else console.log("[ATTACH] " + repo_path + ' created.');
       });
-
-      if (fs.existsSync(repo_path)) {
-        watcher.watchRepository(repo_path, watcher_callback);
-      } else {
-        console.log(repo_path + " is not a directory.");
-      }
 
       doc.source = source_id;
 
@@ -534,6 +528,14 @@ var ThinxApp = function() {
               success: true,
               attached: source_id
             });
+          }
+
+          if (fs.existsSync(repo_path)) {
+            watcher.watchRepository(repo_path,
+              watcher_callback);
+          } else {
+            console.log("[ATTACH+WATCH] " + repo_path +
+              " is not a directory.");
           }
         });
       });
