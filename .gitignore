@@ -9,8 +9,10 @@ logs/
 statistics/
 
 mqtt_passwords
+dhparams.pem
 
-cookie.jar
+cookies.jar
+nohup.out
 
 coverage/
 .nyc_output/
