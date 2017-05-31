@@ -3393,7 +3393,7 @@ var ThinxApp = function() {
         }
       });
     }
-    res.redirect("http://rtm.thinx.cloud/"); // HOME_URL (Apache)
+    res.redirect("/"); // HOME_URL (Apache)
   });
 
   /*
@@ -3440,7 +3440,7 @@ var ThinxApp = function() {
   app.get("/", function(req, res) {
     console.log("/ called with owner: " + req.session.owner);
     if (req.session.owner) {
-      res.redirect("http://rtm.thinx.cloud:80/app");
+      res.redirect("/");
     } else {
       res.end("This is API ROOT."); // insecure
     }
