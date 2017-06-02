@@ -44,6 +44,11 @@ var ThinxApp = function() {
   var session_config = require("./conf/node-session.json");
   var app_config = require("./conf/config.json");
 
+  // Fix for (mainly) builder in pm2
+  if (process.env.CIRCLE_CI !== true) {
+    process.chdir(app_config.project_root);
+  }
+
   var client_user_agent = app_config.client_user_agent;
   var db = app_config.database_uri;
   var serverPort = app_config.port;
@@ -2983,6 +2988,8 @@ var ThinxApp = function() {
 
   function buildCommand(build_id, owner, git, udid, dryrun) {
 
+
+
     console.log("[BUILD_STARTED] Executing build chain...");
 
     CMD = "./builder --owner=" + owner + " --udid=" + udid + " --git=" +
@@ -3005,7 +3012,7 @@ var ThinxApp = function() {
     console.log("[OID:" + owner + "] [BUILD_STARTED] Running /...");
 
     console.log("[OID:" + owner +
-      "] [BUILD_STARTED] Running normal-exec...");
+      "] [BUILD_STARTED] Running normal-exec... from " + __dirname);
     exec.exec(CMD, function(err, stdout, stderr) {
       if (err) {
         blog.log(build_id, owner, udid, "Build start failed: " + err);
