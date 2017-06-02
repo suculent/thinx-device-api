@@ -3006,33 +3006,29 @@ var ThinxApp = function() {
     }
 
     console.log("Creting build log for udid: " + udid);
-
-    blog.log(build_id, owner, udid, "Running build...");
-
-    console.log("[OID:" + owner + "] [BUILD_STARTED] Running /...");
-
     console.log("[OID:" + owner +
       "] [BUILD_STARTED] Running normal-exec... from " + __dirname);
+
     exec.exec(CMD, function(err, stdout, stderr) {
+
       if (err) {
         blog.log(build_id, owner, udid, "Build start failed: " + err);
         console.log("[OID:" + owner +
           "] [BUILD_FAIL] Build start failed: " + err);
         return;
+      } else {
+        blog.log(build_id, owner, udid, "Running build...");
       }
+
       if (stderr) {
-        blog.log(build_id, owner, udid, stderr);
         console.log("[OID:" + owner +
           "] [BUILD_FAIL] Build start failed (stderr).");
         console.error("stderr:" + stderr);
       }
       if (stdout) {
         console.log("[BUILD] " + stdout);
-        blog.log(build_id, owner, udid, stdout);
       }
     });
-
-    //blog.log(build_id, owner, udid, temp);
   }
 
   /*
