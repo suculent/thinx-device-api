@@ -3461,17 +3461,16 @@ var ThinxApp = function() {
     return v.revision();
   };
 
-  var ssl_options = {
-    key: fs.readFileSync(app_config.ssl_key),
-    cert: fs.readFileSync(app_config.ssl_cert)
-  };
-
   /*
    * HTTP/S Server
    */
 
   // disable HTTPS on CIRCLE_CI
   if (process.env.CIRCLE_CI !== true) {
+    var ssl_options = {
+      key: fs.readFileSync(app_config.ssl_key),
+      cert: fs.readFileSync(app_config.ssl_cert)
+    };
     console.log("Starting HTTPS server on " + (serverPort + 1) + "...");
     https.createServer(ssl_options, app).listen(serverPort + 1);
   }
