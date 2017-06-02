@@ -57,7 +57,8 @@ else
 	mkdir logs
 	killall node
 	forever stopall
-	pm2 start index.js
+	cd /root/thinx-device-api
+	pm2 start /root/thinx-device-api/index.js
 
 	ACCESS_TOKEN=6aa9f20bef804b75a50338e03830919d
 	ENVIRONMENT=development
