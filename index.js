@@ -2827,12 +2827,6 @@ var ThinxApp = function() {
         return;
       }
       udid = build.udid;
-    } else {
-      respond(res, {
-        success: false,
-        status: "missing_device_udid"
-      });
-      return;
     }
 
     if (typeof(build.source_id) === "undefined") {
