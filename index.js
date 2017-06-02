@@ -2993,6 +2993,13 @@ var ThinxApp = function() {
       CMD = CMD + " --dry-run";
     }
 
+    if (udid === null) {
+      console.log("Cannot build without udid!");
+      return;
+    }
+
+    console.log("Creting build log for udid: " + udid);
+
     blog.log(build_id, owner, udid, "Running build...");
 
     console.log("[OID:" + owner + "] [BUILD_STARTED] Running /...");
