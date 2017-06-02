@@ -709,7 +709,7 @@ var ThinxApp = function() {
 
           } else {
 
-            let CMD = "mosquitto_passwd -D mqtt_passwords " + udid;
+            let CMD = "mosquitto_passwd -D mqtt_passwords " + doc.udid;
             var temp = exec.execSync(CMD);
             if (temp) {
               // console.log("[REVOKE_ERROR] MQTT: " + temp);
@@ -2819,6 +2819,13 @@ var ThinxApp = function() {
 
     var udid = null;
     if (typeof(build.udid) !== "undefined") {
+      if (udid === null) {
+        respond(res, {
+          success: false,
+          status: "missing_device_udid"
+        });
+        return;
+      }
       udid = build.udid;
     } else {
       respond(res, {

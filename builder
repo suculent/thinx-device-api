@@ -76,6 +76,10 @@ echo "[THiNX] Created deployment/log path..."
 echo $LOG_PATH
 echo "[THiNX] Log path: $LOG_PATH"
 
+if [[ ! -d .git ]]; then
+	echo "Not a GIT repository."
+fi
+
 
 # extract the protocol
 proto="$(echo $GIT_REPO | grep :// | sed -e's,^\(.*://\).*,\1,g')"

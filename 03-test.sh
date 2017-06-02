@@ -26,7 +26,7 @@ function echo_ok() { # $1 = string
 rm -rf cookies.jar
 
 if [[ -z $HOST ]]; then
-	HOST='localhost'
+	HOST='thinx.cloud'
 fi
 
 
