@@ -303,7 +303,7 @@ CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${BUILD_ID}
 echo $CMD
 RESULT=$(node notifier.js $CMD)
 echo -e "${RESULT}"
-echo -e "${RESULT}" > $LOG_PATH
+echo -e "${RESULT}" >> $LOG_PATH
 
 # Upgrade Platformio in case new version is available
 if [[ $RESULT=="*brew update && brew upgrade*" ]]; then
