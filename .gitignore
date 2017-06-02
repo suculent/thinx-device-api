@@ -12,6 +12,7 @@ repositories/
 
 mqtt_passwords
 dhparams.pem
+dump.rdb
 
 cookies.jar
 nohup.out
@@ -26,5 +27,4 @@ coverage/
 # Sonar
 .scannerwork/
 
-# Log file copy, should be discarded after use
-statistics/stats.temp
+statistics/**
