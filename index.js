@@ -2819,7 +2819,7 @@ var ThinxApp = function() {
 
     var udid = null;
     if (typeof(build.udid) !== "undefined") {
-      if (udid === null) {
+      if (build.udid === null) {
         respond(res, {
           success: false,
           status: "missing_device_udid"
