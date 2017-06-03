@@ -72,6 +72,7 @@ var ThinxApp = function() {
   var blog = require("./lib/thinx/build");
   var watcher = require("./lib/thinx/repository");
   var apikey = require("./lib/thinx/apikey");
+  var rsakey = require("./lib/thinx/rsakey");
   var stats = require("./lib/thinx/statistics");
 
   var exec = require('child_process');
@@ -1306,22 +1307,25 @@ var ThinxApp = function() {
 
     // Support bulk updates
     if (typeof(req.body.changes) === "undefined") {
-      var fingerprints = req.body.changes; // expects list of fingerprints
-      for (var index in fingerprints) {
-        if (fingerprints.hasOwnProperty(index)) {
-          public_apikey_revoke_fingerprint(owner, fingerprints[index]);
-        }
-      }
+      var fingerprints = req.body.changes;
+      rsakey.revoke(req, res, owner, fingerprints, function(success,
+        message) {
+        respond(res, {
+          success: success,
+          status: message
+        });
+      });
+      return;
     }
 
     // Will deprecate
     if (typeof(req.body.fingerprint) !== "undefined") {
-      public_apikey_revoke_fingerprint(owner, req.body.fingerprint);
-      return;
+      rsakey.revoke(req, res, owner, [fingerprint]);
     }
 
-    // Should move to /lib/thinx/apikey.js
-    function public_apikey_revoke_fingerprint(owner, fingerprint) {
+    // Moved to /lib/thinx/rsakey.js
+    /*
+    function public_rsakey_revoke_fingerprint(owner, fingerprint) {
 
       userlib.get(owner, function(err, doc) {
 
@@ -1419,7 +1423,7 @@ var ThinxApp = function() {
         });
 
       });
-    }
+    }*/
   });
 
   /*
