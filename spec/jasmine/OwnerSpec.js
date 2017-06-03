@@ -28,6 +28,7 @@ describe("Owner", function() {
 
 // exports.profile = Owner.profile;
 // exports.create = Owner.create;
+// exports.create = Owner.update;
 // exports.begin_reset_password = Owner.begin_reset_password;
 // exports.password_reset = Owner.password_reset;
 // exports.activate = Owner.activate;

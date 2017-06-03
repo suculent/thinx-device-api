@@ -222,7 +222,7 @@ var ThinxApp = function() {
 
     var origin = req.get("origin");
 
-    // FIXME: This is a hack. It should not work like this. We just need to find out,
+    // TODO: This is a hack. It should not work like this. We just need to find out,
     // why the login page rejects CORS on browser-side (redirect from successful
     // Password-change operation).
 
@@ -1109,6 +1109,8 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
+
+    // TODO: TODO: TODO: Start from here and move rest of function code to rsakey.js:list
 
     // Get all users
     userlib.get(owner, function(err, user) {
