@@ -72,8 +72,10 @@ var ThinxApp = function() {
   var blog = require("./lib/thinx/build");
   var watcher = require("./lib/thinx/repository");
   var apikey = require("./lib/thinx/apikey");
+  var user = require("./lib/thinx/owner");
   var rsakey = require("./lib/thinx/rsakey");
   var stats = require("./lib/thinx/statistics");
+  var sources = require("./lib/thinx/sources");
 
   var exec = require('child_process');
 
@@ -307,7 +309,7 @@ var ThinxApp = function() {
     alog.log(owner, "Attempt to update owner: " + owner +
       " with: " + update_key);
 
-    // Fetch complete user
+    // Fetch complete user for editing
     userlib.get(owner, function(err, doc) {
 
       if (err) {
@@ -873,27 +875,23 @@ var ThinxApp = function() {
 
     var owner = req.session.owner;
 
-    userlib.get(owner, function(err, user) {
-
-      if (err) {
-        console.log(err);
+    sources.list(owner, function(success, response) {
+      if (success === false) {
         respond(res, {
-          success: false,
+          success: success,
           status: "api-user-apikey-list_error"
         });
-        return;
+      } else {
+        respond(res, {
+          success: success,
+          status: response
+        });
       }
-
-
-      respond(res, {
-        success: true,
-        sources: user.repos
-      });
     });
   });
 
   /* Adds a GIT repository. Expects URL, alias and a optional branch (origin/master is default). */
-  // FIXME: TODO: Refactor to lib/thinx/owner.js (operations with userlib) # add_sources()
+  // FIXME: TODO: Refactor to lib/thinx/sources.js (operations with userlib) # add(owner, alias, url, branch, callback)
   app.post("/api/user/source", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
@@ -926,64 +924,24 @@ var ThinxApp = function() {
     var url = req.body.url;
     var alias = req.body.alias;
 
-    var source_id = uuidV1();
-
-    userlib.get(owner, function(err, body) {
-
-      if (err) {
-        console.log(err);
-        return;
-      }
-
-      var doc = body;
-
-      if (!doc) {
-        console.log("User " + owner + " not found.");
+    sources.add(owner, alias, url, branch, function(success, response) {
+      if (success === false) {
         respond(res, {
-          success: false,
-          status: "user_not_found"
+          success: success,
+          status: message
         });
-        return;
-      }
-
-      var new_source = {
-        alias: alias,
-        url: url,
-        branch: branch
-      };
-
-      if (typeof(doc.repos) === "undefined") {
-        doc.repos = {};
-      }
-
-      doc.repos[source_id] = new_source;
-
-      userlib.destroy(doc._id, doc._rev, function(err) {
-
-        delete doc._rev;
-
-        userlib.insert(doc, doc._id, function(err, body, header) {
-          if (err) {
-            console.log("/api/user/source ERROR:" + err);
-            respond(res, {
-              success: false,
-              status: "key-not-added"
-            });
-            return;
-          } else {
-            respond(res, {
-              success: true,
-              source: new_source,
-              source_id: source_id
-            });
-          }
+      } else {
+        respond(res, {
+          success: success,
+          source: response,
+          source_id: response._id
         });
-      });
+      }
     });
   });
 
   /* Removes a GIT repository. Expects alias. */
-  // FIXME: TODO: Refactor to lib/thinx/owner.js (operations with userlib) # remove_sources()
+  // FIXME: TODO: Refactor to lib/thinx/sources.js (operations with userlib) # remove()
   app.post("/api/user/source/revoke", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
@@ -1001,123 +959,18 @@ var ThinxApp = function() {
 
     var source_id = req.body.source_id;
 
-    userlib.get(owner, function(err, user) {
-
-      if (err) {
-        console.log(err);
-        return;
-      }
-
-      var doc = user;
-
-      if (!doc) {
-        console.log("Owner " + owner + " not found.");
+    sources.revoke(owner, source_id, function(success, message) {
+      if (success === false) {
         respond(res, {
-          success: false,
-          status: "user_not_found"
+          success: success,
+          status: message
         });
-        return;
+      } else {
+        respond(res, {
+          success: success,
+          source: response
+        });
       }
-
-      var sources = doc.repos;
-
-      delete sources[source_id];
-
-      // Update user with new repos
-      userlib.destroy(doc._id, doc._rev, function(err) {
-        doc.repos = sources;
-        delete doc._rev;
-        userlib.insert(doc, doc._id, function(err, body, header) {
-          if (err) {
-            console.log("/api/user/source ERROR:" + err);
-            respond(res, {
-              success: false,
-              status: "source_not_removed"
-            });
-            return;
-          } else {
-            respond(res, {
-              success: true,
-              source: doc
-            });
-          }
-        });
-      }); // userlib
-
-      devicelib.view("devicelib", "devices_by_owner", {
-          key: owner,
-          include_docs: true
-        },
-
-        function(err, body) {
-
-          if (err) {
-            console.log(err);
-            // no devices to be detached
-          }
-
-          if (body.rows.length === 0) {
-            console.log("no-devices to be detached; body: " +
-              JSON.stringify(body));
-            // no devices to be detached
-          }
-
-          // Warning, may not restore device if called without device parameter!
-          var insert_on_success = function(err, device) {
-            var newdevice = device;
-            delete newdevice._rev;
-            delete newdevice._deleted_conflicts;
-            devicelib.insert(newdevice, newdevice._id, function(
-              err) {
-              if (err) {
-                console.log(
-                  "(3) repo_revoke_pre-insert err:" + err
-                );
-              }
-            });
-          };
-
-          function insert(err, device) {
-            delete device._rev;
-            insert_on_success(err, device);
-          }
-
-          function callback(err, device) {
-            delete device._rev;
-            if (err) insert(err, device);
-          }
-
-          for (var rindex in body.rows) {
-
-            if (!body.rows.hasOwnProperty(rindex)) continue;
-
-            var device;
-            if (!body.rows[rindex].hasOwnProperty("value")) {
-              continue;
-            } else {
-              if (body.rows[rindex].value !== null) {
-                device = body.rows[rindex].value;
-              }
-            }
-
-            if ((typeof(device) === "undefined")) return;
-            if (device === null) return;
-
-            if (device.source == source_id) {
-              console.log(
-                "repo_revoke alias equal: Will destroy/insert device."
-              );
-              device.source = null;
-
-              devicelib.insert(device,
-                device._rev,
-                callback(err, device)
-              );
-            }
-          }
-
-        }); // devicelib
-
     });
   });
 
@@ -1874,7 +1727,6 @@ var ThinxApp = function() {
 
 
   // /user/profile GET
-  // FIXME: TODO: Refactor to lib/thinx/owner.js # profile()
   app.get("/api/user/profile", function(req, res) {
 
     // reject on invalid headers
@@ -1883,46 +1735,20 @@ var ThinxApp = function() {
 
     var owner = req.session.owner;
 
-    userlib.get(owner, function(err, body) {
-      if (err) {
-        respond(res, {
-          success: false,
-          status: err
+    user.profile(owner, function(status, response) {
+      if (success === false) {
+        respond({
+          success: success,
+          status: response
         });
-        return;
+      } else {
+        respond({
+          success: success,
+          profile: message
+        });
       }
-
-      var avatar = app_config.default_avatar;
-      if (typeof(body.avatar) !== "undefined") {
-        avatar = body.avatar;
-      }
-
-      var fn = body.first_name;
-      var ln = body.last_name;
-
-      if (typeof(body.info) !== "undefined") {
-        if (typeof(body.info.first_name !== "undefined")) {
-          fn = body.info.first_name;
-        }
-        if (typeof(body.info.last_name !== "undefined")) {
-          ln = body.info.first_name;
-        }
-      }
-
-      var profile = {
-        first_name: fn,
-        last_name: ln,
-        username: body.username,
-        owner: body.owner,
-        avatar: avatar,
-        info: body.info
-      };
-
-      respond(res, {
-        success: true,
-        profile: profile
-      });
     });
+
   });
 
   //
