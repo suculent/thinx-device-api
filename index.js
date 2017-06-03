@@ -279,6 +279,8 @@ var ThinxApp = function() {
    * { avatar: "base64hexdata..." }
    * { info: { "arbitrary" : "user info data "} } }
    */
+
+  // FIXME: TODO: Refactor to lib/thinx/owner.js (operations with userlib)
   app.post("/api/user/profile", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
@@ -370,6 +372,7 @@ var ThinxApp = function() {
    */
 
   /* List all devices for user. */
+  // FIXME: TODO: Refactor to lib/thinx/devices.js (operations with devicelib)
   app.get("/api/user/devices", function(req, res) {
 
     if (!validateSecureGETRequest(req)) return;
@@ -437,6 +440,7 @@ var ThinxApp = function() {
   });
 
   /* Attach code source to a device. Expects unique device identifier and source alias. */
+  // FIXME: TODO: Refactor to lib/thinx/devices.js (operations with devicelib)
   app.post("/api/device/attach", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
@@ -549,6 +553,7 @@ var ThinxApp = function() {
   });
 
   /* Detach code source from a device. Expects unique device identifier. */
+  // FIXME: TODO: Refactor to lib/thinx/devices.js (operations with devicelib)
   app.post("/api/device/detach", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
@@ -638,6 +643,7 @@ var ThinxApp = function() {
   });
 
   /* Revokes a device. Expects unique device identifier. */
+  // FIXME: TODO: Refactor to lib/thinx/devices.js (operations with devicelib)
   app.post("/api/device/revoke", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
@@ -887,6 +893,7 @@ var ThinxApp = function() {
   });
 
   /* Adds a GIT repository. Expects URL, alias and a optional branch (origin/master is default). */
+  // FIXME: TODO: Refactor to lib/thinx/owner.js (operations with userlib) # add_sources()
   app.post("/api/user/source", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
@@ -976,6 +983,7 @@ var ThinxApp = function() {
   });
 
   /* Removes a GIT repository. Expects alias. */
+  // FIXME: TODO: Refactor to lib/thinx/owner.js (operations with userlib) # remove_sources()
   app.post("/api/user/source/revoke", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
@@ -1117,6 +1125,7 @@ var ThinxApp = function() {
    * RSA Keys
    */
 
+  // FIXME: TODO: Refactor to lib/thinx/owner.js (operations with rsa keys in userlib) # add_rsakey()
   app.post("/api/user/rsakey", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
@@ -1240,6 +1249,7 @@ var ThinxApp = function() {
 
   /* Lists all SSH keys for user. */
   // TODO L8TR: Mangle keys as display placeholders only, but support this in revocation!
+  // FIXME: TODO: Refactor to lib/thinx/owner.js (operations with rsa keys in userlib) # rsa_keys()
   app.get("/api/user/rsakey/list", function(req, res) {
 
     if (!validateSecureGETRequest(req)) return;
@@ -1322,108 +1332,6 @@ var ThinxApp = function() {
     if (typeof(req.body.fingerprint) !== "undefined") {
       rsakey.revoke(req, res, owner, [fingerprint]);
     }
-
-    // Moved to /lib/thinx/rsakey.js
-    /*
-    function public_rsakey_revoke_fingerprint(owner, fingerprint) {
-
-      userlib.get(owner, function(err, doc) {
-
-        if (err || !doc) {
-          if (err) {
-            console.log("ERRX:" + err);
-          } else {
-            console.log("User " + owner + " not found.");
-          }
-
-          respond(res, {
-            success: false,
-            status: "owner_not_found"
-          });
-          return;
-        }
-
-        if (!doc.hasOwnProperty("rsa_keys")) {
-          Rollbar.warning("User " + owner + " has no RSA keys.");
-          respond(res, {
-            success: false,
-            status: "no_keys"
-          });
-          return;
-        }
-
-        // Search RSA key by hash
-        var keys = doc.rsa_keys;
-        var delete_key = null;
-
-        if (typeof(keys !== "undefined")) {
-          //
-        } else {
-          respond(res, {
-            success: false,
-            status: "rsa_keys_not_found"
-          });
-          return;
-        }
-
-        var fingerprints = Object.keys(doc.rsa_keys);
-        if (typeof(doc.rsa_keys) === "undefined") {
-          console.log("ERROR: No fingerprints in keys: " + JSON.stringify(
-            keys));
-          respond(res, {
-            success: false,
-            status: "fingerprint_not_found"
-          });
-          return;
-        }
-
-        var new_keys = {};
-        for (var i = 0; i < fingerprints.length; i++) {
-          var key = doc.rsa_keys[fingerprints[i]];
-          if (fingerprints[i].indexOf(fingerprint) !== -1) {
-            if (fs.existsSync(key.key)) {
-              console.log("Deleting RSA key file:" + key.key);
-              fs.unlink(key.key);
-            }
-            console.log("Removing RSA key from database: " +
-              fingerprint);
-            delete_key = true;
-          } else {
-            new_keys[fingerprint] = key;
-          }
-        }
-
-        if (delete_key !== null) {
-          doc.last_update = new Date();
-          doc.rsa_keys = new_keys;
-        } else {
-          respond(res, {
-            success: false,
-            status: "fingerprint_not_found"
-          });
-          return;
-        }
-
-        userlib.destroy(doc._id, doc._rev, function(err) {
-          delete doc._rev;
-          userlib.insert(doc, doc._id, function(err) {
-            if (err) {
-              console.log("rsa_revocation_failed:" + err);
-              respond(res, {
-                success: false,
-                status: "rsa_revocation_failed"
-              });
-            } else {
-              respond(res, {
-                revoked: fingerprint,
-                success: true
-              });
-            }
-          });
-        });
-
-      });
-    }*/
   });
 
   /*
@@ -1432,6 +1340,7 @@ var ThinxApp = function() {
 
   // /user/create GET
   /* Create username based on e-mail. Owner is  be unique (email hash). */
+  // FIXME: TODO: Refactor to lib/thinx/owner.js (operations with rsa keys in userlib) # create()
   app.post("/api/user/create", function(req, res) {
 
     var first_name = req.body.first_name;
@@ -1550,14 +1459,13 @@ var ThinxApp = function() {
 
 
   /* Endpoint for the password reset e-mail. */
+  // FIXME: TODO: Refactor to lib/thinx/owner.js (operations with rsa keys in userlib) # password_reset()
   app.get("/api/user/password/reset", function(req, res) {
 
     var owner = req.query.owner; // for faster search
     var reset_key = req.query.reset_key; // for faster search
 
     alog.log(owner, "Attempt to reset password with: " + reset_key);
-
-
 
     userlib.view("users", "owners_by_resetkey", {
       "key": reset_key,
@@ -1627,6 +1535,7 @@ var ThinxApp = function() {
   });
 
   /* Endpoint for the user activation e-mail, should proceed to password set. */
+  // FIXME: TODO: Refactor to lib/thinx/owner.js # activate()
   app.get("/api/user/activate", function(req, res) {
 
     console.log(JSON.stringify(req.query));
@@ -1668,6 +1577,7 @@ var ThinxApp = function() {
   });
 
   /* Used by the password.html page to perform the change in database. Should revoke reset_key when done. */
+  // FIXME: TODO: Refactor to lib/thinx/owner.js # set_password()
   app.post("/api/user/password/set", function(req, res) {
 
     var password1 = req.body.password;
@@ -1858,6 +1768,7 @@ var ThinxApp = function() {
 
   // /user/password/reset POST
   /* Used to initiate password-reset session, creates reset key with expiraation and sends password-reset e-mail. */
+  // FIXME: TODO: Refactor to lib/thinx/owner.js # begin_reset_password()
   app.post("/api/user/password/reset", function(req, res) {
 
     var email = req.body.email;
@@ -1963,6 +1874,7 @@ var ThinxApp = function() {
 
 
   // /user/profile GET
+  // FIXME: TODO: Refactor to lib/thinx/owner.js # profile()
   app.get("/api/user/profile", function(req, res) {
 
     // reject on invalid headers
@@ -2018,6 +1930,7 @@ var ThinxApp = function() {
   //
 
   // Firmware update retrieval. Serves binary [by owner (?) - should not be required] and device MAC.
+  // FIXME: TODO: Refactor to lib/thinx/device.js # firmware()
   app.post("/device/firmware", function(req, res) {
 
     validateRequest(req, res);
@@ -2234,6 +2147,7 @@ var ThinxApp = function() {
 
   // Device login/registration
   // FIXME: MAC will be allowed for initial regitration
+  // FIXME: TODO: Refactor to lib/thinx/device.js # register()
   app.post("/device/register", function(req, res) {
 
     validateRequest(req, res);
@@ -2572,7 +2486,9 @@ var ThinxApp = function() {
               console.log(reg);
               console.log("CHECK6.1:");
               console.log(rdict);
-              sendRegistrationOKResponse(res, rdict);
+              var json = JSON.stringify(dict);
+              res.set("Connection", "close");
+              res.end(json);
             }
           });
         }
@@ -2581,6 +2497,7 @@ var ThinxApp = function() {
   });
 
   // Device editing (alias only so far)
+  // FIXME: TODO: Refactor to lib/thinx/device.js # edit()
   app.post("/api/device/edit", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
@@ -2702,12 +2619,6 @@ var ThinxApp = function() {
     }
   });
 
-  function sendRegistrationOKResponse(res, dict) {
-    var json = JSON.stringify(dict);
-    res.set("Connection", "close");
-    res.end(json);
-  }
-
   function failureResponse(res, code, reason) {
     res.writeHead(code, {
       "Content-Type": "application/json"
@@ -2810,7 +2721,8 @@ var ThinxApp = function() {
    * Builder
    */
 
-  // Build respective firmware and notify target device(s)
+  // Build respective firmware and notify target device(s
+  // FIXME: TODO: Refactor to lib/thinx/build.js (build operations / with buildlog) # build()
   app.post("/api/build", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
@@ -2991,8 +2903,6 @@ var ThinxApp = function() {
   });
 
   function buildCommand(build_id, owner, git, udid, dryrun) {
-
-
 
     console.log("[BUILD_STARTED] Executing build chain...");
 

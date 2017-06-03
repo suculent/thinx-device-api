@@ -1,6 +1,6 @@
 describe("Build log", function() {
 
-  var blog = require("../../lib/thinx/build");
+  var blog = require("../../lib/thinx/buildlog");
 
   var build_id = "0b7384a0-3818-11e7-b36a-b5bff48e5684";
   var owner =
