@@ -1006,103 +1006,23 @@ var ThinxApp = function() {
     var new_key_alias = req.body.alias;
     var new_key_body = req.body.key;
 
-    var new_key_fingerprint = fprint(new_key_body);
-    // console.log("new_key_fingerprint: " + new_key_fingerprint);
-
-    userlib.get(owner, function(err, doc) {
-
-      if (err) {
-        console.log(err);
+    rsakey.add(owner, new_key_alias, new_key_body, function(success,
+      response) {
+      if (success === false) {
         respond(res, {
-          success: false,
-          status: "user_not_found"
+          success: success,
+          source: response
         });
-        return;
-      }
-
-      if (!doc) {
-        console.log("User " + owner + " not found.");
-        respond(res, {
-          success: false,
-          status: "userid_not_found"
-        });
-        return;
-      }
-
-      var file_name = owner + "-" + Math.floor(new Date() /
-        1000) + ".pub";
-      var ssh_path = "../.ssh/" + file_name;
-
-      var new_ssh_key = {
-        alias: new_key_alias,
-        key: ssh_path
-      };
-
-      fs.open(ssh_path, 'w+', function(err, fd) {
-        if (err) {
-          console.log(err);
-        } else {
-          fs.writeFile(ssh_path, new_ssh_key, function(err) {
-            if (err) {
-              console.log(err);
-            } else {
-              fs.close(fd, function() {
-                console.log('RSA key installed...');
-              });
-              //console.log("Updating permissions for " + ssh_path);
-              fs.chmodSync(ssh_path, '644');
-            }
-          });
-        }
-      });
-
-      if (typeof(doc.rsa_keys) === "undefined") {
-        doc.rsa_keys = {};
       } else {
-        if ((typeof(doc.rsa_keys[new_key_fingerprint]) !==
-            "undefined") && (doc.rsa_keys[new_key_fingerprint] !==
-            null)) {
-          console.log("RSA Key " + new_key_fingerprint +
-            " already exists.");
-          respond(res, {
-            success: false,
-            status: "already_exists"
-          });
-          return;
-        }
-      }
-
-      console.log("[OID:" + owner + "] [__RSAKEY_ADDED__] " +
-        new_key_fingerprint);
-
-      doc.rsa_keys[new_key_fingerprint] = new_ssh_key;
-
-      userlib.destroy(doc._id, doc._rev, function(err) {
-
-        delete doc._rev;
-
-        userlib.insert(doc, doc._id, function(err, body, header) {
-          if (err) {
-            console.log("/api/user/rsakey ERROR:" + err);
-            respond(res, {
-              success: false,
-              status: "key-not-added"
-            });
-          } else {
-            // console.log("RSA Key successfully added.");
-            respond(res, {
-              success: true,
-              fingerprint: new_key_fingerprint
-            });
-          }
+        respond(res, {
+          success: success,
+          fingerprint: response
         });
-      });
+      }
     });
   });
 
-  /* Lists all SSH keys for user. */
-  // TODO L8TR: Mangle keys as display placeholders only, but support this in revocation!
-  // FIXME: TODO: Refactor to lib/thinx/owner.js (operations with rsa keys in userlib) # rsa_keys()
+  /* Lists all RSA keys for user. */
   app.get("/api/user/rsakey/list", function(req, res) {
 
     if (!validateSecureGETRequest(req)) return;
@@ -1110,46 +1030,20 @@ var ThinxApp = function() {
 
     var owner = req.session.owner;
 
-    // TODO: TODO: TODO: Start from here and move rest of function code to rsakey.js:list
-
-    // Get all users
-    userlib.get(owner, function(err, user) {
-
-      if (err) {
-        console.log(err);
+    rsakey.list(owner, function(success, response) {
+      if (success === false) {
         respond(res, {
-          success: false,
-          status: "user_not_found"
+          success: success,
+          status: response
         });
-        return;
-      }
-
-      if (typeof(user) === "undefined") {
-        console.log("User " + owner + " not found.");
+      } else {
         respond(res, {
-          success: false,
-          status: "userid_not_found"
+          success: success,
+          rsa_keys: response
         });
-        return;
       }
-
-      var exportedKeys = [];
-      var fingerprints = Object.keys(user.rsa_keys);
-      for (var i = 0; i < fingerprints.length; i++) {
-        var key = user.rsa_keys[fingerprints[i]];
-        var info = {
-          name: key.alias,
-          fingerprint: fingerprints[i]
-        };
-        exportedKeys.push(info);
-      }
-
-      var reply = JSON.stringify({
-        rsa_keys: exportedKeys
-      });
-
-      res.end(reply);
     });
+
   });
 
   /* Deletes RSA Key by its fingerprint */
