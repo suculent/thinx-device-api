@@ -4,18 +4,6 @@
 
 var ThinxApp = function() {
 
-  /*
-  This class should have no interfaces whatsoever
-  (except for commandline arguments, there are no such at this point).
-
-  Any interface would be sign of falure, everything needs to be moved to underlying classes.
-
-  var _private = {
-  };
-  var _public = {
-  };
-  */
-
   var Rollbar = require('rollbar');
 
   var rollbar = new Rollbar({
@@ -555,7 +543,7 @@ var ThinxApp = function() {
   });
 
   /* Detach code source from a device. Expects unique device identifier. */
-  // FIXME: TODO: Refactor to lib/thinx/devices.js (operations with devicelib)
+  // FIXME: TODO: Refactor to lib/thinx/devices.js (operations with devicelib) detach()
   app.post("/api/device/detach", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
@@ -645,7 +633,7 @@ var ThinxApp = function() {
   });
 
   /* Revokes a device. Expects unique device identifier. */
-  // FIXME: TODO: Refactor to lib/thinx/devices.js (operations with devicelib)
+  // FIXME: TODO: Refactor to lib/thinx/devices.js (operations with devicelib) revoke()
   app.post("/api/device/revoke", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
@@ -891,7 +879,6 @@ var ThinxApp = function() {
   });
 
   /* Adds a GIT repository. Expects URL, alias and a optional branch (origin/master is default). */
-  // FIXME: TODO: Refactor to lib/thinx/sources.js (operations with userlib) # add(owner, alias, url, branch, callback)
   app.post("/api/user/source", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
@@ -941,7 +928,6 @@ var ThinxApp = function() {
   });
 
   /* Removes a GIT repository. Expects alias. */
-  // FIXME: TODO: Refactor to lib/thinx/sources.js (operations with userlib) # remove()
   app.post("/api/user/source/revoke", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
@@ -978,7 +964,6 @@ var ThinxApp = function() {
    * RSA Keys
    */
 
-  // FIXME: TODO: Refactor to lib/thinx/owner.js (operations with rsa keys in userlib) # add_rsakey()
   app.post("/api/user/rsakey", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
