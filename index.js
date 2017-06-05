@@ -58,6 +58,7 @@ var ThinxApp = function() {
   var v = require("./lib/thinx/version");
   var alog = require("./lib/thinx/audit");
   var blog = require("./lib/thinx/build");
+  var builder = require("./lib/thinx/builder");
   var watcher = require("./lib/thinx/repository");
   var apikey = require("./lib/thinx/apikey");
   var user = require("./lib/thinx/owner");
@@ -262,471 +263,59 @@ var ThinxApp = function() {
   });
 
   /*
-   * User Profile
-   */
-
-  /* Updates user profile allowing following types of bulked changes:
-   * { avatar: "base64hexdata..." }
-   * { info: { "arbitrary" : "user info data "} } }
-   */
-
-  // FIXME: TODO: Refactor to lib/thinx/owner.js (operations with userlib)
-  app.post("/api/user/profile", function(req, res) {
-
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
-
-    var owner = req.session.owner;
-
-    var update_key = null;
-    var update_value = null;
-
-    if (typeof(req.body.avatar) !== "undefined") {
-      update_key = "avatar";
-      update_value = req.body.avatar;
-    } else if (typeof(req.body.info) !== "undefined") {
-      update_key = "info";
-      update_value = req.body.info;
-    } else {
-      respond(res, {
-        success: false,
-        status: "invalid_protocol"
-      });
-    }
-
-    alog.log(owner, "Attempt to update owner: " + owner +
-      " with: " + update_key);
-
-    // Fetch complete user for editing
-    userlib.get(owner, function(err, doc) {
-
-      if (err) {
-        console.log(err);
-        alog.log(owner, "Profile update failed.");
-        respond(res, {
-          success: false,
-          status: "owner_not_found"
-        });
-        return;
-      }
-
-      if (!doc) {
-        console.log("Document for " + owner + " not found.");
-        alog.log(owner, "Profile update failed.");
-        respond(res, {
-          success: false,
-          status: "document_not_found"
-        });
-        return;
-      }
-
-      doc[update_key] = update_value;
-
-      userlib.destroy(doc._id, doc._rev, function(err) {
-
-        if (err) {
-          console.log(err);
-          respond(res, {
-            success: false,
-            status: "destroy_error"
-          });
-          return;
-        }
-
-        delete doc._rev;
-
-        userlib.insert(doc, doc._id, function(err, body, header) {
-
-          if (err) {
-            console.log(err);
-            alog.log(owner, "Profile updated.");
-            respond(res, {
-              success: false,
-              status: "profile_update_failed"
-            });
-            return;
-          } else {
-            alog.log(owner, "Profile update failed.");
-            respond(res, {
-              "success": true,
-              update_key: doc
-            });
-          }
-        });
-      });
-    });
-  });
-
-  /*
    * Devices
    */
 
   /* List all devices for user. */
-  // FIXME: TODO: Refactor to lib/thinx/devices.js (operations with devicelib)
   app.get("/api/user/devices", function(req, res) {
-
     if (!validateSecureGETRequest(req)) return;
     if (!validateSession(req, res)) return;
-
     var owner = req.session.owner;
-
-    devicelib.view("devicelib", "devices_by_owner", {
-        "key": owner,
-        "include_docs": false
-      },
-      function(err, body) {
-
-        if (err) {
-          if (err.toString() == "Error: missing") {
-            respond(res, {
-              result: "none"
-            });
-          }
-          console.log("/api/user/devices: Error: " + err.toString());
-          return;
-        }
-
-        var rows = body.rows; // devices returned
-        var devices = []; // an array by design (needs push), to be encapsulated later
-
-        // Show all devices for admin (if not limited by query)
-        if (req.session.admin === true && typeof(req.body.query) ==
-          "undefined") {
-          respond(res, {
-            success: true,
-            devices: devices
-          });
-          return;
-        }
-
-        for (var row in rows) {
-          var rowData = rows[row];
-          var dvc = rowData.value;
-          // Compare owner to device owner
-          if (owner.indexOf(rowData.key) != -1) {
-            if (typeof(dvc.source) === "undefined") {
-              dvc.source = null;
-            }
-
-            var deviceDescriptor = {
-              udid: dvc.udid,
-              mac: dvc.mac,
-              firmware: dvc.firmware,
-              alias: dvc.alias,
-              owner: dvc.owner,
-              version: dvc.version,
-              lastupdate: dvc.lastupdate,
-              source: dvc.source
-            };
-
-            devices.push(deviceDescriptor);
-          }
-        }
-        respond(res, {
-          success: true,
-          devices: devices
-        });
+    devices.list(owner, function(success, status) {
+      respond(res, {
+        success: success,
+        status: status
       });
+    });
   });
 
   /* Attach code source to a device. Expects unique device identifier and source alias. */
-  // FIXME: TODO: Refactor to lib/thinx/devices.js (operations with devicelib)
   app.post("/api/device/attach", function(req, res) {
-
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
-
-    if (typeof(req.body.source_id) === "undefined") {
-      respond(res, {
-        success: false,
-        status: "missing_source_id"
-      });
-      return;
-    }
-
-    if (typeof(req.body.udid) === "undefined") {
-      respond(res, {
-        success: false,
-        status: "missing_udid"
-      });
-      return;
-    }
-
-    var source_id = req.body.source_id;
     var owner = req.session.owner;
-    var udid = req.body.udid;
-
-    alog.log(owner, "Attempt to attach repository: " + source_id +
-      " to device: " + udid);
-
-    console.log("[OID:" + owner + "] [DEVICE_ATTACH] " + udid);
-
-    devicelib.view("devicelib", "devices_by_udid", {
-      "key": udid,
-      "include_docs": true
-    }, function(err, body) {
-
-      if (err) {
-        console.log("find error: " + err);
-        return;
-      }
-
-      if (body.rows.length === 0) {
-        respond(res, {
-          success: false,
-          status: "udid_not_found"
-        });
-        alog.log(owner,
-          "Attempt to attach repository to non-existent device: " +
-          udid);
-        return;
-      }
-
-      var doc;
-
-      if (!body.rows[0].hasOwnProperty("value")) {
-        respond(res, {
-          success: false,
-          status: "device_not_found",
-          err_udid: udid
-        });
-        return;
-      } else {
-        doc = body.rows[0].value;
-      }
-
-      var docstring = JSON.stringify(doc);
-
-      alog.log(doc.owner, "Attaching repository to device: " +
-        docstring);
-      console.log("Attaching repository to device: " + docstring);
-
-      deploy.initWithOwner(doc.owner);
-      var repo_path = deploy.pathForDevice(doc.owner, doc.udid);
-      console.log("[ATTACH] repo_path: " + repo_path);
-
-      mkdirp(repo_path, function(err) {
-        if (err) console.error(err);
-        else console.log("[ATTACH] " + repo_path + ' created.');
-      });
-
-      doc.source = source_id;
-
-      devicelib.destroy(doc._id, doc._rev, function(err) {
-        delete doc._rev;
-        devicelib.insert(doc, doc._id, function(err, body,
-          header) {
-          if (err) {
-            console.log("/api/device/attach ERROR:" + err);
-            respond(res, {
-              success: false,
-              status: "attach_failed"
-            });
-            return;
-          } else {
-            respond(res, {
-              success: true,
-              attached: source_id
-            });
-          }
-
-          if (fs.existsSync(repo_path)) {
-            watcher.watchRepository(repo_path,
-              watcher_callback);
-          } else {
-            console.log("[ATTACH+WATCH] " + repo_path +
-              " is not a directory.");
-          }
-        });
+    devices.attach(owner, req.body, function(succes, status) {
+      respond(res, {
+        success: success,
+        status: status
       });
     });
   });
 
   /* Detach code source from a device. Expects unique device identifier. */
-  // FIXME: TODO: Refactor to lib/thinx/devices.js (operations with devicelib) detach()
   app.post("/api/device/detach", function(req, res) {
-
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
-
-    if (typeof(req.body.udid) === "undefined") {
-      respond(res, {
-        success: false,
-        status: "missing_udid"
-      });
-      return;
-    }
-
     var owner = req.session.owner;
-    var udid = req.body.udid;
-
-    alog.log(owner, "Attempt to detach repository from device: " + udid);
-
-    devicelib.view("devicelib", "devices_by_udid", {
-      "key": udid,
-      "include_docs": true
-    }, function(err, body) {
-
-      if (err) {
-        console.log(err);
-        return;
-      }
-
-      var rows = body.rows[0];
-      if (typeof(rows) !== "undefined") {
-        console.log("DETACH rows: " + JSON.stringify(rows));
-      } else {
-        respond(res, {
-          success: false,
-          status: "udid_not_found"
-        });
-        return;
-      }
-
-      var doc;
-      if (!body.rows[0].hasOwnProperty("value")) {
-        respond(res, {
-          success: false,
-          status: "device_not_found",
-          err_udid: udid
-        });
-        return;
-      } else {
-        doc = body.rows[0].value;
-      }
-
-      console.log("Detaching repository from device: " + JSON.stringify(
-        doc.udid));
-
-      var repo_path = deploy.pathForDevice(doc.owner, doc.udid);
-      console
-        .log(
-          "repo_path: " + repo_path);
-      if (fs.existsSync(repo_path)) {
-        watcher.unwatchRepository(repo_path);
-      }
-
-      doc.source = null;
-
-      devicelib.destroy(doc._id, doc._rev, function(err) {
-
-        delete doc._rev;
-
-        devicelib.insert(doc, doc._id, function(err, body,
-          header) {
-          if (err) {
-            console.log("/api/device/detach ERROR:" + err);
-            respond(res, {
-              success: false,
-              status: "detach_failed"
-            });
-            return;
-          } else {
-            respond(res, {
-              success: true,
-              attached: doc.source
-            });
-          }
-        });
+    devices.detach(owner, req.body, function(succes, status) {
+      respond(res, {
+        success: success,
+        status: status
       });
     });
   });
 
   /* Revokes a device. Expects unique device identifier. */
-  // FIXME: TODO: Refactor to lib/thinx/devices.js (operations with devicelib) revoke()
   app.post("/api/device/revoke", function(req, res) {
-
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
-
-    if (typeof(req.body.udid) === "undefined") {
-      respond(res, {
-        success: false,
-        status: "missing_udid"
-      });
-      return;
-    }
-
-    var udid = req.body.udid;
     var owner = req.session.owner;
-
-    alog.log(owner, "Attempt to revoke device: " + udid);
-
-    devicelib.view("devicelib", "devices_by_owner", {
-        "key": owner,
-        "include_docs": true
-      },
-      function(err, body) {
-
-        if (err) {
-          console.log(err);
-          return;
-        }
-
-        if (body.rows.count === 0) {
-          alog.log(owner, "No such device: " + udid);
-          respond(res, {
-            success: false,
-            status: "no_such_device"
-          });
-          return;
-        }
-
-        var doc;
-
-        for (var dindex in body.rows) {
-          if (!body.rows[dindex].hasOwnProperty("value")) continue;
-          var device = body.rows[dindex].value;
-          var device_udid = device.udid;
-          if (device_udid.indexOf(udid) != -1) {
-            doc = device;
-            break;
-          }
-        }
-
-        if (!body.rows[0].hasOwnProperty("value")) {
-          respond(res, {
-            success: false,
-            status: "device_not_found",
-            err_udid: udid
-          });
-          return;
-        } else {
-          doc = body.rows[0].value;
-        }
-
-        var logmessage = "Revoking device: " + JSON.stringify(doc.udid);
-        alog.log(
-          owner, logmessage);
-
-        devicelib.destroy(doc._id, doc._rev, function(err) {
-
-          if (err) {
-            console.log(err);
-            respond(res, {
-              success: false,
-              status: "revocation_failed"
-            });
-            return;
-
-          } else {
-
-            let CMD = "mosquitto_passwd -D mqtt_passwords " + doc.udid;
-            var temp = exec.execSync(CMD);
-            if (temp) {
-              // console.log("[REVOKE_ERROR] MQTT: " + temp);
-            }
-            console.log("[OID:" + owner +
-              "] [DEVICE_REVOCATION] " +
-              doc.udid);
-            alog.log(owner, logmessage);
-            respond(res, {
-              success: true,
-              revoked: doc.udid
-            });
-          }
-        });
+    devices.revoke(owner, req.body, function(succes, status) {
+      respond(res, {
+        success: success,
+        status: status
       });
+    });
   });
 
   /*
@@ -1074,538 +663,82 @@ var ThinxApp = function() {
 
   // /user/create GET
   /* Create username based on e-mail. Owner is  be unique (email hash). */
-  // FIXME: TODO: Refactor to lib/thinx/owner.js (operations with rsa keys in userlib) # create()
   app.post("/api/user/create", function(req, res) {
-
-    var first_name = req.body.first_name;
-    var last_name = req.body.last_name;
-    var email = req.body.email;
-    var username = req.body.owner;
-    // password will be set on successful e-mail activation
-
-    var new_owner_hash = sha256(email);
-
-    userlib.view("users", "owners_by_username", {
-      "key": new_owner_hash,
-      "include_docs": true // might be useless
-    }, function(err, body) {
-
-      if (err) {
-        if (err != "Error: missing") {
-          console.log("Error: " + err.toString());
-        }
-      } else {
-        var user_should_not_exist = body.rows.length;
-        if (user_should_not_exist > 0) {
-          respond(res, {
-            success: false,
-            status: "email_already_exists"
-          });
-          console.log("Already exists.");
-          return;
-        }
-      }
-
-      var new_api_keys = [];
-      var new_rsa_keys = {};
-
-      var new_activation_date = new Date().toString();
-      var new_activation_token = sha256(new_activation_date);
-
-      var default_repo = {
-        "7038e0500 a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f4": {
-          alias: "THiNX Vanilla Device Firmware",
-          url: "git@github.com:suculent/thinx-firmware-esp8266.git",
-          branch: "origin/master",
-          devices: [
-            "ANY"
-          ]
-        }
-      };
-
-      // Create user document
-      var new_user = {
-        owner: new_owner_hash,
-        username: username,
-        email: email,
-        api_keys: new_api_keys,
-        rsa_keys: new_rsa_keys,
-        first_name: first_name,
-        last_name: last_name,
-        activation: new_activation_token,
-        activation_date: new_activation_date,
-        repos: [default_repo]
-      };
-
-      userlib.insert(new_user, new_owner_hash, function(err,
-        body, header) {
-
-        if (err) {
-          if (err.statusCode == 409) {
-            respond(res, {
-              success: false,
-              status: "email_already_exists"
-            });
-          } else {
-            console.log(err);
-          }
-          return;
-        }
-
-        console.log("Sending activation email...");
-
-        // Creates registration e-mail with activation link
-        var activationEmail = new Emailer({
-          bodyType: "html",
-          from: "api@thinx.cloud",
-          to: email,
-          subject: "Account activation",
-          body: "<!DOCTYPE html>Hello " + first_name +
-            " " +
-            last_name +
-            ". Please <a href='http://rtm.thinx.cloud:7442/api/user/activate?owner=" +
-            username + "&activation=" +
-            new_activation_token +
-            "'>activate</a> your THiNX account.</html>"
-        });
-
-        console.log("Sending activation e-mail: " + JSON.stringify(
-          activationEmail));
-
-        activationEmail.send(function(err) {
-          if (err) {
-            console.log(err);
-            respond(res, {
-              success: false,
-              status: "activation_failed"
-            });
-          } else {
-            console.log("Activation email sent.");
-            respond(res, {
-              success: true,
-              status: "email_sent"
-            });
-          }
-        });
-      }); // insert
-    }); // view
-  }); // post
-
+    owner.create(body, function(success, status) {
+      respond(res, {
+        success: success,
+        status: message
+      });
+    });
+  });
 
   /* Endpoint for the password reset e-mail. */
-  // FIXME: TODO: Refactor to lib/thinx/owner.js (operations with rsa keys in userlib) # password_reset()
   app.get("/api/user/password/reset", function(req, res) {
-
     var owner = req.query.owner; // for faster search
     var reset_key = req.query.reset_key; // for faster search
-
-    alog.log(owner, "Attempt to reset password with: " + reset_key);
-
-    userlib.view("users", "owners_by_resetkey", {
-      "key": reset_key,
-      "include_docs": true
-    }, function(err, body) {
-
-      if (err) {
-        console.log("Error: " + err.toString());
-        req.session.destroy(function(err) {
-          if (err) {
-            console.log(err);
-            res.end(err);
-          } else {
-            respond(res, {
-              success: false,
-              status: "invalid_protocol"
-            });
-            console.log("Not a valid request.");
-          }
-        });
-        return;
-      }
-
-      if (body.rows.length === 0) {
-        respond(res, {
-          success: false,
-          status: "user_not_found"
-        });
-        return;
-      }
-
-      var user = body.rows[0].doc;
-
-      if (typeof(req.query.reset_key) !== "undefined") {
-
-        var reset_key = req.query.reset_key;
-        var user_reset_key = user.reset_key;
-
-        if (typeof(user_reset_key) === "undefined") {
-          user_reset_key = null;
-        }
-
-        console.log("Attempt to reset password with key: " +
-          reset_key);
-
-        if (req.query.reset_key != user_reset_key) {
-          console.log("reset_key does not match");
-          respond(res, {
-            success: false,
-            status: "invalid_reset_key"
-          });
-          return;
-        } else {
-          res.redirect('http://rtm.thinx.cloud:80' +
-            '/password.html?reset_key=' +
-            reset_key +
-            '&owner=' + user.owner);
-          return;
-        }
-
-      } else {
-
-        console.log("Missing reset key.");
-
-      }
+    owner.begin_password_reset(owner, reset_key, function(status, message) {
+      respond(res, {
+        success: success,
+        status: message
+      });
+      // TODO: Redirect to root to login...
     });
   });
 
   /* Endpoint for the user activation e-mail, should proceed to password set. */
-  // FIXME: TODO: Refactor to lib/thinx/owner.js # activate()
   app.get("/api/user/activate", function(req, res) {
-
     console.log(JSON.stringify(req.query));
-
     var ac_key = req.query.activation;
     var ac_owner = req.query.owner;
-
-
-
-    userlib.view("users", "owners_by_activation", {
-      "key": ac_key,
-      "include_docs": true
-    }, function(err, body) {
-
-      if (err) {
-        console.log("Error: " + err.toString());
-
-        req.session.destroy(function(err) {
-          console.log(err);
-          respond(res, {
-            status: "user_not_found",
-            success: false
-          });
-        });
-
-        respond(res, {
-          status: "activation",
-          success: false
-        });
-
-      } else {
-        res.redirect('http://rtm.thinx.cloud:80' +
-          '/password.html?activation=' +
-          ac_key +
-          '&owner=' + ac_owner);
-        return;
-      }
+    owner.activate(ac_owner, ac_key, function(success, message) {
+      respond(res, {
+        success: success,
+        status: message
+      });
     });
   });
 
   /* Used by the password.html page to perform the change in database. Should revoke reset_key when done. */
-  // FIXME: TODO: Refactor to lib/thinx/owner.js # set_password()
   app.post("/api/user/password/set", function(req, res) {
-
-    var password1 = req.body.password;
-    var password2 = req.body.rpassword;
-
-    var request_owner = null;
-    if (typeof(req.body.owner) !== "undefined") {
-      request_owner = req.body.owner;
-    } else {
-      console.log("Request has no owner for fast-search.");
-    }
-
-    if (password1 !== password2) {
+    owner.set_password(owner, body, function(success, message) {
       respond(res, {
-        status: "password_mismatch",
-        success: false
+        success: success,
+        status: message
       });
-    } else {
-      console.log("Passwords match....");
-    }
-
-    if (typeof(req.body.reset_key) !== "undefined") {
-
-      alog.log(request_owner, "Attempt to set password with: " + req.body
-        .reset_key);
-
-      console.log("Performing password reset...");
-
-      // Validate password reset_key
-      userlib.view("users", "owners_by_resetkey", {
-        "key": req.body.reset_key,
-        "include_docs": true
-      }, function(err, body) {
-
-        if (err) {
-          console.log("Error: " + err.toString());
-          req.session.destroy(function(err) {
-            if (err) {
-              console.log(err);
-            } else {
-              respond(res, {
-                status: "reset",
-                success: false
-              });
-              console.log("Not a valid request.");
-            }
-          });
-          return;
-        } else {
-
-          console.log("resetting user: " + JSON.stringify(body));
-
-          if (body.rows.length === 0) {
-            respond(res, {
-              status: "reset_user_not_found",
-              success: false
-            });
-            return;
-          }
-
-          var userdoc = body.rows[0];
-
-          userdoc.doc.password = sha256(password1);
-          userdoc.doc.last_reset =
-            new Date();
-          userdoc.doc.reset_key = null;
-
-          if (err !== null) {
-            console.log("Cannot destroy user on password-set");
-            respond(res, {
-              status: "user_not_reset",
-              success: false
-            });
-            return;
-          }
-
-          console.log("Creating document...");
-
-          delete userdoc.doc._rev;
-
-          userlib.insert(userdoc.doc, userdoc.owner, function(err) {
-            if (err) {
-              console.log("Cannot insert user on password-set");
-              respond(res, {
-                status: "user_not_saved",
-                success: false
-              });
-              return;
-            } else {
-              console.log(
-                "Password reset completed saving new user document."
-              );
-              respond(res, {
-                status: "password_reset_successful",
-                success: true,
-                redirect: "http://thinx.cloud/"
-              });
-              return;
-            }
-          });
-        }
-      });
-
-    } else if (typeof(req.body.activation) !== "undefined") {
-
-      console.log("Performing new activation...");
-
-      alog.log(request_owner, "Attempt to activate account with: " +
-        req.body.activation);
-
-      userlib.view("users", "owners_by_activation", {
-        "key": req.body.activation,
-        "include_docs": true
-      }, function(err, body) {
-
-        if (err) {
-          console.log("Error: " + err.toString());
-          respond(res, {
-            status: "reset",
-            success: false
-          });
-          return;
-
-        } else {
-
-          console.log("activating user: " + JSON.stringify(body));
-
-          if (body.rows.length === 0) {
-            respond(res, {
-              status: "activated_user_not_found",
-              success: false
-            });
-            return;
-          }
-
-          console.log("Activating user: " + JSON.stringify(body));
-
-          var userdoc = body.rows[0].doc;
-
-          deploy.initWithOwner(userdoc.owner);
-
-          userdoc.password = sha256(password1);
-          userdoc.activation_date = new Date();
-          userdoc
-            .activation = null;
-
-          console.log("Updating user document: " + JSON.stringify(
-            userdoc));
-
-          userlib.destroy(userdoc._id, userdoc._rev, function(err) {
-
-            delete userdoc._rev; // should force new revision...
-
-            userlib.insert(userdoc, userdoc._id, function(err) {
-
-              if (err) {
-                console.log(err);
-                console.log(
-                  "Could not re-insert user on new activation."
-                );
-                respond(res, {
-                  status: "user_not_saved",
-                  success: false
-                });
-                return;
-              } else {
-                // TODO: Password-reset success page, should redirect to login.
-                console.log(
-                  "Password reset success page, should redirect to login..."
-                );
-                //res.redirect("http://rtm.thinx.cloud:80/");
-                respond(res, {
-                  redirect: "http://rtm.thinx.cloud:80/",
-                  success: true
-                });
-                return;
-              }
-            });
-
-          });
-        }
-      });
-    } else {
-      console.log("No reset or activation? Edge assert!");
-      failureResponse(res, 403, "Password change not authorized.");
-    }
+    });
   });
 
   // /user/password/reset POST
   /* Used to initiate password-reset session, creates reset key with expiraation and sends password-reset e-mail. */
-  // FIXME: TODO: Refactor to lib/thinx/owner.js # begin_reset_password()
   app.post("/api/user/password/reset", function(req, res) {
+    owner.reset_password_init(email, function(success, message) {
+      respond(res, {
+        success: success,
+        status: message
+      });
+    });
+  });
 
-    var email = req.body.email;
+  /*
+   * User Profile
+   */
 
-    userlib.view("users", "owners_by_email", {
-      "key": email,
-      "include_docs": true // might be useless
-    }, function(err, body) {
+  /* Updates user profile allowing following types of bulked changes:
+   * { avatar: "base64hexdata..." }
+   * { info: { "arbitrary" : "user info data "} } }
+   */
 
-      if (err) {
-        console.log("Error: " + err.toString());
-        respond(res, {
-          success: false,
-          status: "user_not_found"
-        });
-        return;
-      } else {
-        console.log("password reset users: " + body.rows.length);
-        if (body.rows.length > 2) {
-          respond(res, {
-            success: false,
-            status: "too_many_users"
-          });
-          return;
-        }
-
-        if (body.rows.length === 0) {
-          respond(res, {
-            success: false,
-            status: "email_not_found"
-          });
-          return;
-        }
-      }
-
-      var user = body.rows[0].doc;
-      if (typeof(user) === "undefined" || user === null) {
-        console.log("User not found.");
-        respond(res, {
-          success: false,
-          status: "user_not_found"
-        });
-        return;
-      }
-
-      console.log("Creating new reset-key...");
-      user.reset_key = sha256(new Date().toString());
-
-      userlib.destroy(user._id, user._rev, function(err) {
-
-        delete user._rev;
-
-        userlib.insert(user, user.owner, function(err, body,
-          header) {
-
-          if (err) {
-            console.log(err);
-            respond(res, {
-              success: false,
-              status: "insert_failed"
-            });
-            return;
-          }
-
-          console.log("Resetting password for user: " +
-            JSON.stringify(user));
-
-          var resetEmail = new Emailer({
-            bodyType: "html",
-            from: "api@thinx.cloud",
-            to: email,
-            subject: "Password reset",
-            body: "<!DOCTYPE html>Hello " + user.first_name +
-              " " + user.last_name +
-              ". Someone has requested to <a href='http://rtm.thinx.cloud:7442/api/user/password/reset?owner=" +
-              user.owner + "&reset_key=" + user.reset_key +
-              "'>reset</a> your THiNX password.</html>"
-          });
-
-          console.log("Sending reset e-mail: " + JSON.stringify(
-            resetEmail));
-
-          resetEmail.send(function(err) {
-            if (err) {
-              console.log(err);
-              respond(res, {
-                success: false,
-                status: err
-              });
-            } else {
-              console.log("Reset e-mail sent.");
-              respond(res, {
-                success: true,
-                status: "email_sent"
-              });
-            }
-          });
-        });
-        // Calling page already displays "Relax. You reset link is on its way."
-      }); // insert
-    }); // view
-  }); // post
-
+  app.post("/api/user/profile", function(req, res) {
+    if (!validateSecurePOSTRequest(req)) return;
+    if (!validateSession(req, res)) return;
+    var owner = req.session.owner;
+    owner.update(owner, req.body, function(success, status) {
+      respond(res, {
+        success: success,
+        status: status
+      });
+    });
+  });
 
   // /user/profile GET
   app.get("/api/user/profile", function(req, res) {
@@ -1637,228 +770,20 @@ var ThinxApp = function() {
   //
 
   // Firmware update retrieval. Serves binary [by owner (?) - should not be required] and device MAC.
-  // FIXME: TODO: Refactor to lib/thinx/device.js # firmware()
   app.post("/device/firmware", function(req, res) {
-
     validateRequest(req, res);
-
-    var api_key = null;
-
-    if (typeof(req.body.mac) === "undefined") {
-      respond(res, {
-        success: false,
-        status: "missing_mac"
+    device.firmware(req.body, function(success, message) {
+      respond({
+        success: success,
+        status: message
       });
-      return;
-    }
-
-    if (typeof(req.body.hash) === "undefined") {
-      /* optional, we'll find latest checksum if not available
-      respond(res, {
-      	success: false,
-      	status: "missing_udid"
-      }));
-      return;
-      */
-    }
-
-    if (typeof(req.body.checksum) === "undefined") {
-      /* optional, we'll find latest checksum if not available
-      respond(res, {
-      	success: false,
-      	status: "missing_checksum"
-      }));
-      return;
-      */
-    }
-
-    if (typeof(req.body.commit) === "undefined") {
-      /* optional, we'll find latest commit_id if not available
-      respond(res, {
-      	success: false,
-      	status: "missing_commit"
-      }));
-      return;
-      */
-    }
-
-    var mac = req.body.mac; // will deprecate
-    var udid = req.body.udid;
-    var checksum = req.body.checksum;
-    var commit = req.body.commit;
-    var alias = req.body.alias;
-    var owner = req.body.owner;
-
-    console.log("TODO: Validate if SHOULD update device " + mac +
-      " using commit " + commit + " with checksum " + checksum +
-      " and owner: " +
-      owner);
-
-    var success;
-    var status;
-
-    // Headers must contain Authentication header
-    if (typeof(req.headers.authentication) !== "undefined") {
-      api_key = req.headers.authentication;
-    } else {
-      console.log("ERROR: Update requests must contain API key!");
-      respond(res, {
-        success: false,
-        status: "authentication"
-      });
-      return;
-    }
-
-    userlib.view("users", "owners_by_username", {
-      "include_docs": true // might be useless
-    }, function(err, all_users) {
-
-      if (err) {
-        console.log("Error: " + err.toString());
-        req.session.destroy(function(err) {
-          if (err) {
-            console.log(err);
-          } else {
-            failureResponse(res, 501, "protocol");
-            console.log("Not a valid request.");
-          }
-        });
-        return;
-      } else {
-        isNew = false;
-      }
-
-      // Find user and match api_key
-      var api_key_valid = false;
-
-      // search API Key in owners, this will take a while...
-      for (var oindex in all_users.rows) {
-        if (!all_users.hasOwnProperty("rows")) continue;
-        if (!all_users.rows.hasOwnProperty(oindex)) continue;
-        var anowner = all_users.rows[oindex];
-        if (!anowner.hasOwnProperty("doc")) continue;
-        if (!anowner.doc.hasOwnProperty("api_keys")) continue;
-        for (var kindex in anowner.doc.api_keys) {
-          if (!anowner.doc.api_keys.hasOwnProperty(kindex)) continue;
-          if (!anowner.doc.api_keys[kindex].hasOwnProperty("key"))
-            continue;
-          var k = anowner.doc.api_keys[kindex].key;
-          if (k.indexOf(api_key) != -1) {
-            owner = anowner.doc.owner;
-            console.log("API Key valid.");
-            api_key_valid = true;
-            break;
-          }
-        }
-      }
-
-      alog.log(owner, "Attempt to register device: " + udid +
-        " alias: " +
-        alias);
-
-      if (api_key_valid === false) {
-        console.log("[APIKEY_INVALID] on firmware update.");
-        alog.log(owner, "Attempt to use invalid API Key: " +
-          api_key +
-          "  on firmware update.");
-        respond(res, {
-          success: false,
-          status: "api_key_invalid"
-        });
-        return;
-      } else {
-        alog.log(owner, "Firmware request with API Key: " + api_key);
-      }
-
-      // See if we know this MAC which is a primary key in db
-
-      if (err !== null) {
-        console.log("Querying devices failed. " + err + "\n");
-      }
-
-      var success;
-      var status;
-
-      devicelib.view("devicelib", "devices_by_id", {
-        "key": udid,
-        "include_docs": true
-      }, function(err, existing) {
-
-        if (err) {
-          console.log(err);
-          return;
-        }
-
-        var device = {
-          mac: existing.mac,
-          owner: existing.owner,
-          version: existing.version
-        };
-
-        var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(
-          device);
-        var mac = firmwareUpdateDescriptor.mac;
-
-        console.log(
-          "Seaching for possible firmware update... (owneer:" +
-          device.owner + ")");
-
-        deploy.initWithDevice(device);
-
-        var update = deploy.hasUpdateAvailable(device);
-        if (update === true) {
-          var path = deploy.latestFirmwarePath(owner, udid);
-          fs.open(path, 'r', function(err, fd) {
-            if (err) {
-              respond(res, {
-                success: false,
-                status: "not_found"
-              });
-              return console.log(err);
-            } else {
-              var buffer = fs.readFileSync(path);
-              res.end(buffer);
-              fs.close(fd, function() {
-                console.log(
-                  'Sending firmware update from ' +
-                  path + '...');
-              });
-
-              devicelib.insert(existing, mac, function(err,
-                body, header) {
-                if (!err) {
-                  console.log("Device updated.");
-                  return;
-                } else {
-                  console.log(
-                    "Device record update failed." +
-                    err);
-                }
-              }); // insert
-
-            }
-          }); // fs.open
-
-        } else {
-          respond(res, {
-            success: true,
-            status: "no_update_available"
-          });
-          console.log("No firmware update available for " +
-            JSON.stringify(
-              device));
-        }
-      }); // device get
-    }); // user view
-  }); // app.get
+    });
+  });
 
   // Device login/registration
   // FIXME: MAC will be allowed for initial regitration
-  // FIXME: TODO: Refactor to lib/thinx/device.js # register()
   app.post("/device/register", function(req, res) {
-
     validateRequest(req, res);
-
     res.set("Connection", "close");
 
     if (typeof(req.body.registration) == "undefined") {
@@ -1870,341 +795,17 @@ var ThinxApp = function() {
     }
 
     var reg = req.body.registration;
-    var api_key = null;
 
-    rdict.registration = {};
-
-    var mac = reg.mac;
-    var fw = "unknown";
-    if (!reg.hasOwnProperty("firmware")) {
-      fw = "undefined";
-    } else {
-      fw = reg.firmware;
-      console.log("Setting firmware " + fw);
-    }
-
-    var push = reg.push;
-    var alias = reg.alias;
-    var username = reg.owner; // TODO: Search devices by username
-    var success;
-    var status;
-
-    // Headers must contain Authentication header
-    if (typeof(req.headers.authentication) !== "undefined") {
-      api_key = req.headers.authentication;
-    } else {
-      console.log("ERROR: Registration requests now require API key!");
-      alog.log(username, "Attempt to register witout API Key!");
+    device.register(reg, function(success, message) {
       respond(res, {
-        success: false,
-        status: "authentication"
-      });
-      return;
-    }
-
-    // TODO: If device gives udid, get by udid (existing)
-    // TODO: If device gives owner, search by owner_id
-    // TODO: If device gives username, search by username
-
-    userlib.view("users", "owners_by_username", {
-      //"key": username,
-      "include_docs": true // might be useless
-    }, function(err, body) {
-
-      if (err) {
-        console.log("Error: " + err.toString());
-        req.session.destroy(function(err) {
-          if (err) {
-            console.log(err);
-          } else {
-            failureResponse(res, 501, "protocol");
-            console.log("Not a valid request.");
-          }
-        });
-        return;
-      }
-
-      if (body.rows.length === 0) {
-        respond(res, {
-          success: false,
-          status: "owner_not_found"
-        });
-        return;
-      }
-
-      var owner;
-      var api_key_valid = false;
-
-      // search API Key in owners, this will take a while...
-      for (var oindex in body.rows) {
-        var anowner = body.rows[oindex];
-        for (var kindex in anowner.doc.api_keys) {
-          var k = anowner.doc.api_keys[kindex].key;
-          if (k.indexOf(api_key) != -1) {
-            owner = anowner.doc.owner;
-            console.log("Valid key found.");
-            api_key_valid = true;
-            break;
-          }
-        }
-      }
-
-      alog.log(owner, "Attempt to register device: " + hash +
-        " alias: " +
-        alias);
-
-      var deploy = require("./lib/thinx/deployment");
-      deploy.initWithOwner(owner); // creates user path if does not exist
-
-      if (api_key_valid === false) {
-        console.log("[APIKEY_INVALID] on registration.");
-        alog.log(owner, "Attempt to use invalid API Key: " +
-          api_key +
-          " on device registration.");
-        respond(res, {
-          registration: {
-            success: false,
-            status: "authentication"
-          }
-        });
-        return;
-      } else {
-        alog.log(owner, "Using API Key: " + api_key);
-      }
-
-      var success = false;
-      var status = "OK";
-
-      var device_version = "1.0.0"; // default
-
-      if (typeof(reg.version) !== "undefined" && reg.version !==
-        null) {
-        console.log("Updating device version to " + reg.version);
-        device_version = reg.version;
-      }
-
-      var known_owner = "";
-
-      var hash = null;
-      if (typeof(reg.hash) !== "undefined") {
-        hash = reg.hash;
-      }
-
-      var checksum = hash;
-      if (typeof(reg.checksum) !== "undefined") {
-        checksum = reg.checksum;
-      }
-
-      var udid = uuidV1(); // is returned to device which should immediately take over this value instead of mac for new registration
-      if (typeof(reg.udid) !== "undefined") {
-        udid = reg.udid; // overridden
-      }
-
-      //
-      // Construct response
-      //
-
-      reg = rdict.registration;
-
-      reg.success = success;
-      reg.status = status;
-
-      if (known_owner === "") {
-        known_owner = owner;
-      }
-
-      if (owner != known_owner) {
-        // TODO: Fail from device side, notify admin.
-        console.log("owner is not known_owner (" + owner + ", " +
-          known_owner +
-          ")");
-        reg.owner = known_owner;
-        owner = known_owner; // should force update in device library
-      }
-
-      console.log("Device firmware: " + fw);
-
-      var mqtt = "/devices/" + udid;
-
-      var device = {
-        mac: mac,
-        firmware: fw,
-        hash: hash,
-        checksum: checksum,
-        push: push,
-        alias: alias,
-        owner: owner,
-        source: null,
-        version: device_version,
-        udid: udid,
-        mqtt: mqtt,
-        lastupdate: new Date(),
-        lastkey: sha256(api_key)
-      };
-
-      console.log("Seaching for possible firmware update...");
-
-      console.log("Checking update for device descriptor:\n" + JSON
-        .stringify(
-          device));
-
-      //var deploy = require("./lib/thinx/deployment");
-      var update = deploy.hasUpdateAvailable(device);
-      if (update === true) {
-        console.log("Firmware update available.");
-        var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(
-          device);
-        reg.status = "FIRMWARE_UPDATE";
-        reg.success = true;
-        reg.url = firmwareUpdateDescriptor.url;
-        reg.mac = firmwareUpdateDescriptor.mac;
-        reg.commit = firmwareUpdateDescriptor.commit;
-        reg.version = firmwareUpdateDescriptor.version;
-        reg.checksum = firmwareUpdateDescriptor.checksum;
-      } else if (update === false) {
-        reg.success = true;
-        console.log("No firmware update available.");
-      } else {
-        console.log("Update semver response: " + update);
-      }
-
-      // KNOWN DEVICES:
-      // - see if new firmware is available and reply FIRMWARE_UPDATE with url
-      // - see if alias or owner changed
-      // - otherwise reply just OK
-
-      devicelib.get(mac, function(error, existing) {
-
-        if (!error && existing) {
-
-          console.log("[OID:" + owner +
-            "] [DEVICE_CHECKIN] Known device: " + JSON.stringify(
-              reg));
-
-          existing.lastupdate = new Date();
-          if (typeof(fw) !== "undefined" && fw !== null) {
-            existing.firmware = fw;
-          }
-          if (typeof(hash) !== "undefined" && hash !== null) {
-            existing.hash = hash;
-          }
-          if (typeof(push) !== "undefined" && push !== null) {
-            existing.push = push;
-          }
-          if (typeof(alias) !== "undefined" && alias !== null) {
-            existing.alias = alias;
-          }
-          // device notifies on owner change
-          if (typeof(owner) !== "undefined" && owner !== null) {
-            existing.owner = owner;
-          }
-
-          devicelib.destroy(existing._id, existing._rev,
-            function(err) {
-
-              delete existing._rev;
-
-              devicelib.insert(existing, udid, function(err,
-                body, header) {
-                if (!err) {
-                  res.set("Connection", "close");
-                  respond(res, {
-                    registration: {
-                      success: true,
-                      owner: owner,
-                      alias: alias,
-                      udid: existing.udid,
-                      status: "OK"
-                    }
-                  });
-                  return;
-                } else {
-                  res.set("Connection", "close");
-                  respond(res, {
-                    registration: {
-                      success: false,
-                      status: "insert_failed"
-                    }
-                  });
-                }
-              });
-
-            });
-
-        } else {
-
-          console.log("[OID:" + owner +
-            "] [DEVICE_NEW] New device: " + JSON.stringify(
-              reg));
-
-          device.udid = udid;
-
-          // MQTT
-          CMD = "mosquitto_passwd -b mqtt_passwords " + udid +
-            " " +
-            api_key;
-          var temp = exec.execSync(CMD);
-          console.log("[REGISTER] Creating mqtt account...");
-          if (temp) {
-            console.log("[REGISTER_ERROR] MQTT: " + temp);
-          }
-
-
-          device.source = null;
-
-          device.lastupdate = new Date();
-          if (typeof(fw) !== "undefined" && fw !== null) {
-            device.firmware = fw;
-          }
-          if (typeof(hash) !== "undefined" && hash !== null) {
-            device.hash = hash;
-          }
-          if (typeof(push) !== "undefined" && push !== null) {
-            device.push = push;
-          }
-          if (typeof(alias) !== "undefined" && alias !== null) {
-            device.alias = alias;
-          }
-
-          console.log("Inserting device..." + JSON.stringify(
-            device));
-
-          devicelib.insert(device, udid, function(err, body,
-            header) {
-            if (!err) {
-              console.log("Device info created.");
-              res.set("Connection", "close");
-              respond(res, {
-                registration: {
-                  success: true,
-                  owner: owner,
-                  alias: device.alias,
-                  udid: device.udid,
-                  status: "OK"
-                }
-              });
-              return;
-            } else {
-              reg.success = false;
-              reg.this.status = "Insert failed";
-              console.log("Device record update failed." +
-                err);
-              console.log("CHECK6:");
-              console.log(reg);
-              console.log("CHECK6.1:");
-              console.log(rdict);
-              var json = JSON.stringify(dict);
-              res.set("Connection", "close");
-              res.end(json);
-            }
-          });
-        }
+        success: success,
+        message: message
       });
     });
+
   });
 
   // Device editing (alias only so far)
-  // FIXME: TODO: Refactor to lib/thinx/device.js # edit()
   app.post("/api/device/edit", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
@@ -2221,109 +822,12 @@ var ThinxApp = function() {
     var owner = req.session.owner;
     var changes = req.body.changes;
 
-    console.log("CHANGES: " + JSON.stringify(changes));
-
-    var change = changes; // TODO: support bulk operations
-
-    var udid;
-    for (var changeindex in changes) {
-      if (!changes[changeindex].hasOwnProperty(udid)) continue;
-      udid = changes[changeindex].udid;
-      console.log("Processing change " + changeindex + "for udid " + udid);
-      if (udid !== null) {
-        update_device(owner, udid, changes[changeindex]);
-      }
-    }
-
-    function update_device(owner, udid, changes) {
-
-      devicelib.view("devicelib", "devices_by_owner", {
-          key: owner,
-          include_docs: true
-        },
-
-        function(err, body) {
-
-          if (err) {
-            console.log(err);
-            respond(res, {
-              success: false,
-              status: "device_not_found"
-            });
-            return;
-          }
-
-          if (body.rows.length === 0) {
-            console.log(JSON.stringify(body));
-            respond(res, {
-              success: false,
-              status: "no_such_device"
-            });
-            return;
-          }
-          var doc;
-          for (var dindex in body.rows) {
-            if (body.rows[dindex].hasOwnProperty("value")) {
-              var dev = body.rows[dindex].value;
-              if (udid.indexOf(dev.udid) != -1) {
-                doc = dev;
-                break;
-              }
-            }
-          }
-
-          if (typeof(doc) === "undefined") return;
-
-          // Delete device document with old alias
-          devicelib.destroy(doc._id, doc._rev, function(err) {
-
-            delete doc._rev;
-
-            if (err) {
-              console.log("/api/device/edit ERROR:" + err);
-              respond(res, {
-                success: false,
-                status: "destroy_failed"
-              });
-              return;
-            }
-
-            if (typeof(change.alias) !== "undefined") {
-              doc.alias = change.alias;
-
-            }
-
-            if (typeof(change.avatar) !== "undefined") {
-              doc.avatar = change.avatar;
-
-            }
-
-            devicelib.destroy(doc._id, doc._rev, function(err) {
-
-              delete doc._rev;
-
-              // Create device document with new alias
-              devicelib.insert(doc, doc._id, function(err, body,
-                header) {
-                if (err) {
-                  console.log("/api/device/edit ERROR:" +
-                    err);
-                  respond(res, {
-                    success: false,
-                    status: "device_not_changed"
-                  });
-                  return;
-                } else {
-                  respond(res, {
-                    success: true,
-                    change: change
-                  });
-                }
-              });
-            });
-          });
-        });
-    }
+    device.edit(owner, changes, function(success, message) {
+      respond(res, {
+        success: success,
+        message: message
+      });
+    });
   });
 
   function failureResponse(res, code, reason) {
@@ -2429,228 +933,29 @@ var ThinxApp = function() {
    */
 
   // Build respective firmware and notify target device(s
-  // FIXME: TODO: Refactor to lib/thinx/build.js (build operations / with buildlog) # build()
   app.post("/api/build", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
 
-    var rdict = {};
-
     var owner = req.session.owner;
-    var build = req.body.build; // build descriptor wrapper	;
+    var wrapper = req.body.build;
 
-    var dryrun = false;
-    if (typeof(build.dryrun) != "undefined") {
-      dryrun = build.dryrun;
-    }
-
-    var udid = null;
-    if (typeof(build.udid) !== "undefined") {
-      if (build.udid === null) {
+    builder.build(owner, wrapper, function(success, message, build_id) {
+      if (success) {
         respond(res, {
-          success: false,
-          status: "missing_device_udid"
+          success: success,
+          status: message,
+          build_id: build_id
         });
-        return;
-      }
-      udid = build.udid;
-    }
-
-    if (typeof(build.source_id) === "undefined") {
-      respond(res, {
-        success: false,
-        status: "missing_source_id"
-      });
-      return;
-    }
-
-    devicelib.view("devicelib", "devices_by_owner", {
-      "key": owner,
-      "include_docs": true
-    }, function(err, body) {
-
-      if (err) {
-        if (err.toString() == "Error: missing") {
-          respond(res, {
-            result: "no_devices"
-          });
-        }
-        console.log("/api/build: Error: " + err.toString());
-        return;
-      }
-
-      var rows = body.rows; // devices returned
-      var device = null;
-
-      for (var row in rows) {
-        if (!rows.hasOwnProperty(row)) continue;
-        if (!rows[row].hasOwnProperty("doc")) continue;
-        device = rows[row].doc;
-        if (!device.hasOwnProperty("udid")) continue;
-        var db_udid = device.udid;
-
-        var device_owner;
-        if (device.hasOwnProperty("owner")) {
-          device_owner = device.owner;
-        } else {
-          device_owner = owner;
-        }
-
-        if (device_owner.indexOf(owner) !== -1) {
-          if (udid.indexOf(db_udid) != -1) {
-            udid = device.udid; // target device ID
-            break;
-          }
-        }
-      }
-
-      // Converts build.git to git url by seeking in users' repos
-      userlib.get(owner, function(err, doc) {
-
-        if (err) {
-          console.log(err);
-          respond(res, {
-            success: false,
-            status: "api_build-device_fetch_error"
-          });
-          return;
-        }
-
-        if (typeof(doc) === "undefined") {
-          respond(res, {
-            success: false,
-            status: "no_such_owner"
-          });
-          return;
-        }
-
-        var git = null;
-
-        // Finds first source with given source_id
-        var sources = Object.keys(doc.repos);
-        for (var index in sources) {
-          if (typeof(doc.repos) === "undefined") continue;
-          if (!sources.hasOwnProperty(index)) continue;
-          if (!doc.repos.hasOwnProperty(sources[index]))
-            continue;
-          var source = doc.repos[sources[index]];
-          var source_id = sources[index];
-          if (source_id.indexOf(build.source_id) !== -1) {
-            git = source.url;
-            console.log("[API-BUILD]: " + git);
-            break;
-          }
-        }
-
-        console.log("[API-BUILD] udid: " + udid);
-        console.log(
-          "[API-BUILD] owner: " +
-          owner);
-        console.log("[API-BUILD] git: " + git);
-
-        if ((typeof(udid) === "undefined" || build === null) ||
-          (typeof(owner) === "undefined" || owner === null) ||
-          (typeof(git) === "undefined" || git === null)) {
-          rdict = {
-            build: {
-              success: false,
-              status: "invalid_params"
-            }
-          };
-
-          respond(res, rdict);
-          return;
-        }
-
-        var build_id = uuidV1();
-
-        // Tag device asynchronously with last build ID
-        devicelib.destroy(device._id, device._rev, function(err) {
-          if (err) {
-            console.log("DATABASE CORRUPTION ISSUE!");
-            console.log(err);
-            return;
-          }
-          device.build_id = build_id;
-          delete device._rev;
-          devicelib.insert(device, device._id, function(err,
-            body,
-            header) {
-            if (err) {
-              console.log(err, body);
-            }
-          });
+      } else {
+        respond(res, {
+          success: success,
+          status: message
         });
-
-        if (dryrun === false) {
-          rdict = {
-            build: {
-              success: true,
-              status: "Build started.",
-              id: build_id
-            }
-          };
-        } else {
-          rdict = {
-            build: {
-              success: true,
-              status: "Dry-run started. Build will not be deployed.",
-              id: build_id
-            }
-          };
-        }
-
-        respond(res, rdict);
-
-        buildCommand(build_id, owner, git, udid, dryrun);
-
-      });
+      }
     });
   });
-
-  function buildCommand(build_id, owner, git, udid, dryrun) {
-
-    console.log("[BUILD_STARTED] Executing build chain...");
-
-    CMD = "./builder --owner=" + owner + " --udid=" + udid + " --git=" +
-      git +
-      " --id=" + build_id;
-
-    if (dryrun === true) {
-      CMD = CMD + " --dry-run";
-    }
-
-    if (udid === null) {
-      console.log("Cannot build without udid!");
-      return;
-    }
-
-    console.log("Creting build log for udid: " + udid);
-    console.log("[OID:" + owner +
-      "] [BUILD_STARTED] Running normal-exec... from " + __dirname);
-
-    exec.exec(CMD, function(err, stdout, stderr) {
-
-      if (err) {
-        blog.log(build_id, owner, udid, "Build start failed: " + err);
-        console.log("[OID:" + owner +
-          "] [BUILD_FAIL] Build start failed: " + err);
-        return;
-      } else {
-        blog.log(build_id, owner, udid, "Running build...");
-      }
-
-      if (stderr) {
-        console.log("[OID:" + owner +
-          "] [BUILD_FAIL] Build start failed (stderr).");
-        console.error("stderr:" + stderr);
-      }
-      if (stdout) {
-        console.log("[BUILD] " + stdout);
-      }
-    });
-  }
 
   /*
    * Build and Audit Logs
@@ -2747,7 +1052,8 @@ var ThinxApp = function() {
             "";
           if (lastIndex.hasOwnProperty("date")) lastIndex.date = "";
           if (lastIndex.hasOwnProperty("udid")) lastIndex.udid = "";
-          if (lastIndex.hasOwnProperty("build")) lastIndex.build = "";
+          if (lastIndex.hasOwnProperty("build")) lastIndex.build =
+            "";
           var build = {
             message: lastIndex.message,
             date: lastIndex.date,
