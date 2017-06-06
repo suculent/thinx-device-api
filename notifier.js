@@ -128,7 +128,7 @@ console.log("udid : " + udid + "\n");
 console.log("sha : " + sha + "\n");
 console.log("status : " + status + "\n");
 
-var blog = require("./lib/thinx/build");
+var blog = require("./lib/thinx/buildlog");
 
 blog.log(build_id, owner, udid, "Starting build notifier...");
 

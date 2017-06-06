@@ -57,7 +57,7 @@ var ThinxApp = function() {
   var deploy = require("./lib/thinx/deployment");
   var v = require("./lib/thinx/version");
   var alog = require("./lib/thinx/audit");
-  var blog = require("./lib/thinx/build");
+  var blog = require("./lib/thinx/buildlog");
   var builder = require("./lib/thinx/builder");
   var watcher = require("./lib/thinx/repository");
   var apikey = require("./lib/thinx/apikey");
@@ -338,8 +338,9 @@ var ThinxApp = function() {
       return;
     }
 
+    var new_api_key = sha256(new Date());
     var new_api_key_alias = req.body.alias;
-    var new_api_key = sha256(new Date().toString()).substring(0, 40);
+    var new_api_key_hash = sha256(new_api_key);
 
     userlib.get(owner, function(err, doc) {
 
@@ -368,11 +369,9 @@ var ThinxApp = function() {
         keys = doc.api_keys;
       }
 
-      var new_hash = sha256(new_api_key);
-
       keys[keys.length] = {
         "key": new_api_key,
-        "hash": new_hash,
+        "hash": new_api_key_hash,
         "alias": new_api_key_alias
       };
 
