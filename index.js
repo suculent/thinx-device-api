@@ -759,7 +759,7 @@ var ThinxApp = function() {
 
     var owner = req.session.owner;
 
-    user.profile(owner, function(status, response) {
+    user.profile(owner, function(success, response) {
       if (success === false) {
         respond({
           success: success,
