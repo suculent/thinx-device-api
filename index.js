@@ -34,15 +34,19 @@ var ThinxApp = function() {
 
   // Fix for (mainly) builder in pm2
   if (process.env.CIRCLE_CI === true) {
+    console.log("Starting on Circle CI...");
     app_config = require("./conf/config-test.json");
   }
 
-  if (process.env.LOGNAME === "sychram") {
-    console.log()
+  if (process.env.LOGNAME == "sychram") {
+    console.log("Starting on workstation...");
     app_config = require("./conf/config-local.json");
   }
 
-  if (process.env.)
+  if (process.env.LOGNAME == "root") {
+    console.log("Starting in production mode...");
+    app_config = require("./conf/config.json");
+  }
 
   var client_user_agent = app_config.client_user_agent;
   var db = app_config.database_uri;
