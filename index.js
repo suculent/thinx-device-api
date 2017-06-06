@@ -30,12 +30,19 @@ var ThinxApp = function() {
   });
 
   var session_config = require("./conf/node-session.json");
-  var app_config = require("./conf/config.json");
+  var app_config = require("./conf/config.json"); // this file should be actually omitted from repository
 
   // Fix for (mainly) builder in pm2
-  if (process.env.CIRCLE_CI !== true) {
-    process.chdir(app_config.project_root);
+  if (process.env.CIRCLE_CI === true) {
+    app_config = require("./conf/config-test.json");
   }
+
+  if (process.env.LOGNAME === "sychram") {
+    console.log()
+    app_config = require("./conf/config-local.json");
+  }
+
+  if (process.env.)
 
   var client_user_agent = app_config.client_user_agent;
   var db = app_config.database_uri;

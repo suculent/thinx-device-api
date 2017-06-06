@@ -1,16 +1,17 @@
 #!/bin/bash
 
 echo
-echo "[THiNX] -=[ ☢ THiNX IoT RTM BUILDER ☢ ]=-"
+echo "[builder.sh] -=[ ☢ THiNX IoT RTM BUILDER ☢ ]=-"
 echo
 
-echo "[THiNX] Running from: $(pwd)"
+echo "[builder.sh] Running from: $(pwd)"
 
 # FIXME: This is system environment variable and should be configured on installation,
 # or injected by build class from Node.js
 
 if [[ -z $THINX_WEB_ROOT ]]; then
 		THINX_WEB_ROOT='/var/www/html/bin'
+		echo "Setting THINX_WEB_ROOT env var to default ${THINX_WEB_ROOT}"
 fi
 
 OWNER_ID='eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f' 		# name of folder where workspaces reside
@@ -54,14 +55,14 @@ esac
 done
 
 THINX_ROOT=$(pwd)
-echo "[THiNX] Starting builder at path ${THINX_ROOT}"
+echo "[builder.sh] Starting builder at path ${THINX_ROOT}"
 
 OWNER_ID_HOME=$THINX_ROOT/data/$OWNER_ID
-echo "[THiNX] Owner workspace: ${OWNER_ID_HOME}"
+echo "[builder.sh] Owner workspace: ${OWNER_ID_HOME}"
 
 DEPLOYMENT_PATH=$OWNER_ID_HOME/$UDID/$BUILD_ID
 DISPLAY_DEPLOYMENT_PATH=$(echo ${DEPLOYMENT_PATH} | tr -d '$THINX_WEB_ROOT')
-echo "[THiNX] Making deployment path: ${DISPLAY_DEPLOYMENT_PATH}"
+echo "[builder.sh] Making deployment path: ${DISPLAY_DEPLOYMENT_PATH}"
 
 # Create user-referenced folder in public www space
 set +e
@@ -71,10 +72,10 @@ set -e
 
 LOG_PATH="${DEPLOYMENT_PATH}/${BUILD_ID}.log"
 
-echo "[THiNX] Created deployment/log path..."
+echo "[builder.sh] Created deployment/log path..."
 
 echo $LOG_PATH
-echo "[THiNX] Log path: $LOG_PATH"
+echo "[builder.sh] Log path: $LOG_PATH"
 
 if [[ ! -d .git ]]; then
 	echo "Not a GIT repository."
@@ -108,22 +109,22 @@ if [[ "$user" == "git" ]]; then
 	REPO_NAME="$(echo $REPO_PATH | grep / | cut -d/ -f2-)"
 fi
 
-echo "[THiNX]   url: $url"
-echo "[THiNX]   proto: $proto"
-echo "[THiNX]   user: $user"
-echo "[THiNX]   host: $host"
-echo "[THiNX]   port: $port"
-echo "[THiNX]   REPO_PATH: $REPO_PATH"
-echo "[THiNX]   REPO_NAME: ${REPO_NAME}"
+echo "[builder.sh]   url: $url"
+echo "[builder.sh]   proto: $proto"
+echo "[builder.sh]   user: $user"
+echo "[builder.sh]   host: $host"
+echo "[builder.sh]   port: $port"
+echo "[builder.sh]   REPO_PATH: $REPO_PATH"
+echo "[builder.sh]   REPO_NAME: ${REPO_NAME}"
 
 echo
 
-echo "[THiNX] Cleaning workspace..."
+echo "[builder.sh] Cleaning workspace..."
 
 # Clean
 rm -rf ./tenants/$OWNER_ID/$UDID/$BUILD_ID/$REPO_PATH/**
 
-echo "[THiNX] Creating workspace..."
+echo "[builder.sh] Creating workspace..."
 
 # TODO: only if $REPO_NAME contains slash(es)
 OWNER_PATH=./repositories/$OWNER_ID/$UDID/$BUILD_ID
@@ -131,23 +132,26 @@ if [[ ! -d $OWNER_PATH ]]; then
 	mkdir -p $OWNER_PATH
 fi
 
-echo "[THiNX]Entering owner folder $OWNER_PATH"
+echo "[builder.sh] Entering owner folder $OWNER_PATH"
 pushd $OWNER_PATH
 
 # Create new working directory
-echo "[THiNX]Creating new working directory $REPO_PATH"
+echo "[builder.sh] Creating new working directory $REPO_PATH"
 mkdir -p ./$REPO_PATH
+
+ls
 
 # enter git user folder if any
 if [[ -d $GIT_USER ]]; then
-	echo "[THINX][DEBUG] Entering git user folder!!!"
+	echo "[builder.sh][DEBUG] Entering git user folder inside workspace ./${GIT_USER}..."
 	pushd $GIT_USER
 fi
 
 # Clean workspace
-echo "[THiNX] Cleaning repository path..."
+echo "[builder.sh] Cleaning previous git repository / workspace in $REPO_NAME..."
 rm -rf $REPO_NAME
 
+echo "[builder.sh] Cloning ${GIT_REPO}..."
 # Fetch project
 git clone $GIT_REPO
 
@@ -158,10 +162,10 @@ else
 fi
 
 COMMIT=$(git rev-parse HEAD)
-echo "[THiNX] Fetched commit ID: ${COMMIT}"
+echo "[builder.sh] Fetched commit ID: ${COMMIT}"
 
 VERSION=$(git rev-list HEAD --count)
-echo "[THiNX] Repository version/revision: ${VERSION}"
+echo "[builder.sh] Repository version/revision: ${VERSION}"
 
 # Overwrite Thinx.h file (should be required)
 
@@ -183,7 +187,7 @@ BUILD_DATE=`date +%Y-%m-%d`
 
 # TODO: Change this to a sed template, this is tedious
 
-echo "[THiNX] Building Thinx.h..."
+echo "[builder.sh] Building Thinx.h..."
 echo
 
 echo "//" > $THINX_FILE
@@ -210,25 +214,25 @@ echo "int thinx_api_port = 7442;" >> $THINX_FILE
 
 # Build
 echo
-echo "[THiNX] Generated header file Thinx.h:"
+echo "[builder.sh] Generated header file Thinx.h:"
 cat $THINX_FILE >> $LOG_PATH
 echo
 
-echo "[THiNX] TODO: Support no-compile deployment of Micropython/LUA here..."
+echo "[builder.sh] TODO: Support no-compile deployment of Micropython/LUA here..."
 
 if [[ -f package.json ]]; then
 	echo
-	echo "[THiNX] THiNX does not support npm builds."
-	echo "[THiNX] If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues"
+	echo "[builder.sh] THiNX does not support npm builds."
+	echo "[builder.sh] If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues"
 
 elif [[ ! -f platformio.ini ]]; then
 	echo
-	echo "[THiNX] This not a compatible project so far. Cannot build Arduino project without importing to Platform.io first."
-	echo "[THiNX] If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues"
+	echo "[builder.sh] This not a compatible project so far. Cannot build Arduino project without importing to Platform.io first."
+	echo "[builder.sh] If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues"
 	exit 1
 fi
 
-echo "[THiNX] Build step..."
+echo "[builder.sh] Build step..."
 
 platformio run >> $LOG_PATH
 
@@ -245,11 +249,11 @@ fi
 echo
 
 if [[ ! ${RUN} ]]; then
-	echo "[THiNX] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment."
+	echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment."
 	STATUS='"DRY_RUN_OK"'
 else
 
-	echo "[THiNX] TODO: Support post-build deployment of different platforms here..."
+	echo "[builder.sh] TODO: Support post-build deployment of different platforms here..."
 
 	# Deploy binary (may require rotating previous file or timestamping/renaming previous version of the file)
 	 # WARNING: bin was elf here but it seems kind of wrong. needs testing
@@ -259,7 +263,7 @@ else
 
 	if [[ -f ${BUILD_ARTIFACT} ]]; then
 		cp ${BUILD_ARTIFACT} ${BUILD_ID}.bin
-		echo "[THiNX] Deploying $BUILD_ID.bin to $DEPLOYMENT_PATH..."
+		echo "[builder.sh] Deploying $BUILD_ID.bin to $DEPLOYMENT_PATH..."
 		mv ${BUILD_ID}.bin ${DEPLOYMENT_PATH}
 		STATUS='"DEPLOYED"'
 		if [[ $(uname) == "Darwin" ]]; then
@@ -272,28 +276,26 @@ else
 	fi
 fi
 
-echo "[THiNX] Build completed with status: $STATUS"
+echo "[builder.sh] Build completed with status: $STATUS"
 
 popd
 popd
 
 echo
 
-echo "[THiNX] Post-flight check:"
+echo "[builder.sh] Post-flight check:"
 
 echo "DP" $DISPLAY_DEPLOYMENT_PATH
 
-echo "BID" "${BUILD_ID}"
-echo "CID" "${COMMIT}"
-echo "VER" "${VERSION}"
-echo "GIT" "${GIT_REPO}"
-echo "DEP" "${DEPLOYMENT_PATH}"
+echo "BUILD_ID" "${BUILD_ID}"
+echo "COMMIT" "${COMMIT}"
+echo "VERSION" "${VERSION}"
+echo "GIT_REPO" "${GIT_REPO}"
+echo "DEPLOYMENT_PATH" "${DEPLOYMENT_PATH}"
 echo "UDID" "${UDID}"
 echo "SHA" "${SHA}"
-echo "TNT" "${OWNER_ID}"
-echo "STA" "${STATUS}"
-
-cd $ORIGIN
+echo "OWNER_ID" "${OWNER_ID}"
+echo "STATUS" "${STATUS}"
 
 echo "[THiNX] Log path: $LOG_PATH"
 cat $LOG_PATH
@@ -301,6 +303,7 @@ cat $LOG_PATH
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
 CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${BUILD_ID}.bin ${UDID} ${SHA} ${OWNER_ID} ${STATUS}"
 echo $CMD
+cd $ORIGIN # go back to application root folder
 RESULT=$(node notifier.js $CMD)
 echo -e "${RESULT}"
 echo -e "${RESULT}" >> $LOG_PATH
