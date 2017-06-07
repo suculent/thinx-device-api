@@ -507,6 +507,7 @@ var ThinxApp = function() {
     var alias = req.body.alias;
 
     sources.add(owner, alias, url, branch, function(success, response) {
+      console.log(JSON.stringify(response));
       if (success === false) {
         respond(res, {
           success: success,
