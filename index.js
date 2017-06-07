@@ -768,7 +768,7 @@ var ThinxApp = function() {
       } else {
         respond({
           success: success,
-          profile: message
+          profile: response
         });
       }
     });
