@@ -34,7 +34,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing device registration..."
 
-RS='{ "registration" : { "mac" : "'${MAC}'", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "version" : "1.0.0", "checksum" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "dhho4djVGeQ:APA91bFuuZWXDQ8vSR0YKyjWIiwIoTB1ePqcyqZFU3PIxvyZMy9htu9LGPmimfzdrliRfAdci-AtzgLCIV72xmoykk-kHcYRhAFWFOChULOGxrDi00x8GgenORhx_JVxUN_fjtsN5B7T", "alias" : "rabbit" } }'
+RS='{ "registration" : { "mac" : "'${MAC}'", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "version" : "1.0.0", "checksum" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "dhho4djVGeQ:APA91bFuuZWXDQ8vSR0YKyjWIiwIoTB1ePqcyqZFU3PIxvyZMy9htu9LGPmimfzdrliRfAdci-AtzgLCIV72xmoykk-kHcYRhAFWFOChULOGxrDi00x8GgenORhx_JVxUN_fjtsN5B7T", "alias" : "rabbit", "owner": "'${OWNER_ID}'" } }'
 
 R=$(curl -s \
 -H "Authentication: ${API_KEY}" \
@@ -65,7 +65,7 @@ R=$(curl -s \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "registration" : { "mac" : "FFFFFFFFFFFF", "firmware" : "none", "version" : "0.0.0", "hash" : "hash", "push" : "none", "alias" : "to-be-deleted", "owner": "886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445" } }' \
+-d '{ "registration" : { "mac" : "FFFFFFFFFFFF", "firmware" : "none", "version" : "2.0.0", "hash" : "hash", "push" : "none", "alias" : "to-be-deleted", "owner": "'${OWNER_ID}'" } }' \
 http://$HOST:7442/device/register)
 
 # {"success":false,"status":"authentication"}

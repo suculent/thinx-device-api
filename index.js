@@ -820,6 +820,8 @@ var ThinxApp = function() {
 
     var registration = req.body.registration;
 
+    console.log("Registering device with: " + JSON.stringify(registration));
+
     device.register(registration, req.headers.authentication, function(
       success, message) {
       respond(res, {
@@ -827,7 +829,6 @@ var ThinxApp = function() {
         message: message
       });
     });
-
   });
 
   // Device editing (alias only so far)
