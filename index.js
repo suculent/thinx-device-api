@@ -348,51 +348,16 @@ var ThinxApp = function() {
     var new_api_key_hash = sha256(new_api_key);
 
     console.log("Getting owner " + owner + " for api key...");
-
-    userlib.get(owner, function(err, doc) {
-
-      if (err) {
-        console.log(err);
+    apikey.create(owner, new_api_key_alias, function(success,
+      object) {
+      if (success) {
         respond(res, {
-          success: false,
-          status: err
+          success: true,
+          api_key: new_api_key,
+          hash: object.hash
         });
         return;
       }
-
-      if (doc === null) {
-        console.log("User " + owner + " not found.");
-        respond(res, {
-          success: false,
-          status: "user_not_found"
-        });
-        return;
-      }
-
-      var keys;
-      if (typeof(doc.api_keys) === "undefined") {
-        keys = [];
-      } else {
-        keys = doc.api_keys;
-      }
-
-      keys[keys.length] = {
-        "key": new_api_key,
-        "hash": new_api_key_hash,
-        "alias": new_api_key_alias
-      };
-
-      apikey.create(owner, new_api_key_alias, function(success,
-        object) {
-        if (success) {
-          respond(res, {
-            success: true,
-            api_key: new_api_key,
-            hash: object.hash
-          });
-          return;
-        }
-      });
     });
   });
 
