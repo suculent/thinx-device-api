@@ -807,29 +807,18 @@ var ThinxApp = function() {
         success: false,
         status: "no_body"
       });
-      return;
-    }
-
-    if (typeof(req.body.registration) === "undefined") {
+    } else if (typeof(req.body.registration) === "undefined") {
       respond(res, {
         success: false,
         status: "no_registration"
       });
-      return;
-    }
-
-    var registration = req.body.registration;
-
-    console.log("Registering device with: " + JSON.stringify(registration));
-
-    device.register(registration, req.headers.authentication, function(
-      success, message) {
-      res.set("Connection", "close");
-      respond(res, {
-        success: success,
-        message: message
+    } else {
+      var registration = req.body.registration;
+      device.register(registration, req.headers.authentication, function(
+        success, response) {
+        respond(res, response);
       });
-    });
+    }
   });
 
   // Device editing (alias only so far)
