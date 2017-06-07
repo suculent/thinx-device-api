@@ -783,15 +783,10 @@ var ThinxApp = function() {
   // Firmware update retrieval. Serves binary [by owner (?) - should not be required] and device MAC.
   app.post("/device/firmware", function(req, res) {
     validateRequest(req, res);
-    // FIXME: Remove this log...
-    console.log(JSON.stringify(req.body));
-    device.firmware(req.body, req.headers.authentication, function(
-      success, message) {
-      respond(res, {
-        success: success,
-        status: message
+    device.firmware(req.body, req.headers.authentication,
+      function(success, response) {
+        respond(res, response);
       });
-    });
   });
 
   // Device login/registration
