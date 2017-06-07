@@ -302,7 +302,7 @@ var ThinxApp = function() {
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
     var owner = req.session.owner;
-    devices.detach(owner, req.body, function(succes, status) {
+    devices.detach(owner, req.body, function(success, status) {
       respond(res, {
         success: success,
         status: status
