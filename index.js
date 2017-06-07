@@ -75,8 +75,6 @@ var ThinxApp = function() {
 
   var WebSocket = require("ws");
 
-  var rdict = {};
-
   // EXTRACT TO: db.js -->
 
   /*
@@ -883,21 +881,6 @@ var ThinxApp = function() {
     return true;
   }
 
-  function validateSecureDELETERequest(req, res) {
-    if (req.method != "DELETE") {
-      console.log("validateSecure: Not a delete request.");
-      req.session.destroy(function(err) {
-        if (err) {
-          console.log(err);
-        } else {
-          failureResponse(res, 500, "protocol");
-        }
-      });
-      return false;
-    }
-    return true;
-  }
-
   function validateSecurePOSTRequest(req, res) {
     if (req.method != "POST") {
       console.log("validateSecure: Not a post request.");
@@ -1456,10 +1439,9 @@ var ThinxApp = function() {
       }
     }
 
-    var query = location.path.split("/");
-
-    var owner_id = query[1].replace("/", "");
-    var build_id = query[2].replace("/", "");
+    //var query = location.path.split("/");
+    //var owner_id = query[1].replace("/", "");
+    //var build_id = query[2].replace("/", "");
 
     var logtail_callback = function(err) {
       console.log("[index.js] logtail_callback:" + err);
