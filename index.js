@@ -761,12 +761,12 @@ var ThinxApp = function() {
 
     user.profile(owner, function(success, response) {
       if (success === false) {
-        respond({
+        respond(res, {
           success: success,
           status: response
         });
       } else {
-        respond({
+        respond(res, {
           success: success,
           profile: response
         });
@@ -783,7 +783,7 @@ var ThinxApp = function() {
   app.post("/device/firmware", function(req, res) {
     validateRequest(req, res);
     device.firmware(req.body, function(success, message) {
-      respond({
+      respond(res, {
         success: success,
         status: message
       });
