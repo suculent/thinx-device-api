@@ -347,6 +347,8 @@ var ThinxApp = function() {
     var new_api_key_alias = req.body.alias;
     var new_api_key_hash = sha256(new_api_key);
 
+    console.log("Getting owner " + owner + " for api key...");
+
     userlib.get(owner, function(err, doc) {
 
       if (err) {
