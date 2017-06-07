@@ -66,6 +66,7 @@ var ThinxApp = function() {
   var alog = require("./lib/thinx/audit");
   var blog = require("./lib/thinx/buildlog");
   var builder = require("./lib/thinx/builder");
+  var device = require("./lib/thinx/device");
   var watcher = require("./lib/thinx/repository");
   var apikey = require("./lib/thinx/apikey");
   var user = require("./lib/thinx/owner");
@@ -536,7 +537,7 @@ var ThinxApp = function() {
 
     var source_id = req.body.source_id;
 
-    sources.revoke(owner, source_id, function(success, message) {
+    sources.remove(owner, source_id, function(success, message) {
       if (success === false) {
         respond(res, {
           success: success,
