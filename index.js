@@ -342,7 +342,7 @@ var ThinxApp = function() {
       return;
     }
 
-    var new_api_key = sha256(new Date());
+    var new_api_key = sha256(new Date().toString());
     var new_api_key_alias = req.body.alias;
     var new_api_key_hash = sha256(new_api_key);
 
@@ -782,6 +782,8 @@ var ThinxApp = function() {
   // Firmware update retrieval. Serves binary [by owner (?) - should not be required] and device MAC.
   app.post("/device/firmware", function(req, res) {
     validateRequest(req, res);
+    // FIXME: Remove this log...
+    console.log(JSON.stringify(req.body));
     device.firmware(req.body, function(success, message) {
       respond(res, {
         success: success,
@@ -793,10 +795,12 @@ var ThinxApp = function() {
   // Device login/registration
   // FIXME: MAC will be allowed for initial regitration
   app.post("/device/register", function(req, res) {
+
     validateRequest(req, res);
+
     res.set("Connection", "close");
 
-    if (typeof(req.body.registration) == "undefined") {
+    if (typeof(req.body.registration) === "undefined") {
       respond(res, {
         success: false,
         status: "no_registration"
@@ -804,9 +808,9 @@ var ThinxApp = function() {
       return;
     }
 
-    var reg = req.body.registration;
+    var registration = req.body.registration;
 
-    device.register(reg, function(success, message) {
+    device.register(registration, function(success, message) {
       respond(res, {
         success: success,
         message: message
