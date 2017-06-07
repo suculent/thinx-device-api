@@ -26,7 +26,7 @@ function echo_ok() { # $1 = string
 rm -rf cookies.jar
 
 if [[ -z $HOST ]]; then
-	HOST='thinx.cloud'
+	HOST='rtm.thinx.cloud'
 fi
 
 
@@ -131,10 +131,10 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Logging in..."
 
-R=$(curl -v -s -c cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H "Origin: thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
-http://$HOST:80/app)
+http://$HOST/app)
 
 SUCCESS=$(echo $R)
 echo $SUCCESS

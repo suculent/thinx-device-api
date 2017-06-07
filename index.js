@@ -1209,6 +1209,8 @@ var ThinxApp = function() {
       });
     }
 
+    console.log("Searching user...");
+
     userlib.view("users", "owners_by_username", {
       "key": username,
       "include_docs": true // might be useless
@@ -1227,6 +1229,8 @@ var ThinxApp = function() {
         });
         return;
       }
+
+      console.log("Results: " + JSON.stringify(body));
 
       // Find user and match password
       var all_users = body.rows;
@@ -1298,7 +1302,7 @@ var ThinxApp = function() {
         } else if (client_type == "webapp") {
           // res.redirect("http://rtm.thinx.cloud:80/"); // redirects browser, not in XHR?
           respond(res, {
-            "redirectURL": "http://rtm.thinx.cloud:80/app"
+            "redirectURL": "http://thinx.cloud:80/app"
           });
           return;
         }
