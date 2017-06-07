@@ -674,7 +674,7 @@ var ThinxApp = function() {
   // /user/create GET
   /* Create username based on e-mail. Owner is  be unique (email hash). */
   app.post("/api/user/create", function(req, res) {
-    owner.create(body, function(success, status) {
+    user.create(body, function(success, status) {
       respond(res, {
         success: success,
         status: message
@@ -686,7 +686,7 @@ var ThinxApp = function() {
   app.get("/api/user/password/reset", function(req, res) {
     var owner = req.query.owner; // for faster search
     var reset_key = req.query.reset_key; // for faster search
-    owner.begin_password_reset(owner, reset_key, function(status, message) {
+    user.begin_password_reset(owner, reset_key, function(status, message) {
       respond(res, {
         success: success,
         status: message
@@ -700,7 +700,7 @@ var ThinxApp = function() {
     console.log(JSON.stringify(req.query));
     var ac_key = req.query.activation;
     var ac_owner = req.query.owner;
-    owner.activate(ac_owner, ac_key, function(success, message) {
+    user.activate(ac_owner, ac_key, function(success, message) {
       respond(res, {
         success: success,
         status: message
@@ -710,7 +710,7 @@ var ThinxApp = function() {
 
   /* Used by the password.html page to perform the change in database. Should revoke reset_key when done. */
   app.post("/api/user/password/set", function(req, res) {
-    owner.set_password(owner, body, function(success, message) {
+    user.set_password(owner, body, function(success, message) {
       respond(res, {
         success: success,
         status: message
@@ -721,7 +721,7 @@ var ThinxApp = function() {
   // /user/password/reset POST
   /* Used to initiate password-reset session, creates reset key with expiraation and sends password-reset e-mail. */
   app.post("/api/user/password/reset", function(req, res) {
-    owner.reset_password_init(email, function(success, message) {
+    user.reset_password_init(email, function(success, message) {
       respond(res, {
         success: success,
         status: message
@@ -742,7 +742,7 @@ var ThinxApp = function() {
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
     var owner = req.session.owner;
-    owner.update(owner, req.body, function(success, status) {
+    user.update(owner, req.body, function(success, status) {
       respond(res, {
         success: success,
         status: status
