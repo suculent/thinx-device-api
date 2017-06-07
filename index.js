@@ -289,7 +289,7 @@ var ThinxApp = function() {
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
     var owner = req.session.owner;
-    devices.attach(owner, req.body, function(succes, status) {
+    devices.attach(owner, req.body, function(success, status) {
       respond(res, {
         success: success,
         status: status
@@ -315,7 +315,7 @@ var ThinxApp = function() {
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
     var owner = req.session.owner;
-    devices.revoke(owner, req.body, function(succes, status) {
+    devices.revoke(owner, req.body, function(success, status) {
       respond(res, {
         success: success,
         status: status
