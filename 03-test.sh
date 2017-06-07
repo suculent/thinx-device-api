@@ -110,7 +110,7 @@ echo "--------------------------------------------------------------------------
 echo "» Testing authentication..."
 
 R=$(curl -v -s -c cookies.jar \
--H "Origin: rtm.thinx.cloud" \
+-H "Origin: thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -d '{ "username" : "test", "password" : "tset" }' \
@@ -118,7 +118,7 @@ http://$HOST:7442/api/login)
 
 # {"redirectURL":"https://thinx.cloud/app"}
 
-SUCCESS=$(echo $R | jq .success )
+SUCCESS=$(echo $R | jq .redirectURL )
 echo $SUCCESS
 if [[ ! -z $SUCCESS ]]; then
 	URL=$(echo $R | jq .redirectURL)
@@ -127,14 +127,29 @@ else
 	echo_fail $R
 fi
 
-exit $?
+echo
+echo "--------------------------------------------------------------------------------"
+echo "» Logging in..."
+
+R=$(curl -v -s -c cookies.jar \
+-H "Origin: thinx.cloud" \
+-H "User-Agent: THiNX-Web" \
+http://$HOST:80/app)
+
+SUCCESS=$(echo $R)
+echo $SUCCESS
+if [[ ! -z $SUCCESS ]]; then
+	echo_ok "$R"
+else
+	echo_fail $R
+fi
 
 echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Statistics..."
 
 R=$(curl -v -s -b cookies.jar \
--H "Origin: rtm.thinx.cloud" \
+-H "Origin: thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
 http://$HOST:7442/api/user/stats)
@@ -148,12 +163,14 @@ else
 	echo_fail $R
 fi
 
+exit $?
+
 echo
 echo "--------------------------------------------------------------------------------"
 echo "» Requesting new API Key..."
 
 R=$(curl -v -s -b cookies.jar \
--H 'Origin: rtm.thinx.cloud' \
+-H 'Origin: thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -d '{ "alias" : "test-key-name" }' \
@@ -180,7 +197,7 @@ echo "» Revoking API Key..."
 RK='{ "fingerprint" : '${HASH}' }'
 
 R=$(curl -v -s -b cookies.jar \
--H 'Origin: rtm.thinx.cloud' \
+-H 'Origin: thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -d "$RK" \
@@ -203,7 +220,7 @@ echo "--------------------------------------------------------------------------
 echo "» Fetching API Keys..."
 
 R=$(curl -v -s -b cookies.jar \
--H "Origin: rtm.thinx.cloud" \
+-H "Origin: thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 http://$HOST:7442/api/user/apikey/list)
@@ -226,7 +243,7 @@ echo "» Fetching user sources..."
 # {"success":true,"sources":[{"alias":"thinx-firmware-esp8266","url":"https://github.com/suculent/thinx-firmware-esp8266.git","branch":"origin/master"},{"alias":"thinx-firmware-esp8266","url":"https://github.com/suculent/thinx-firmware-esp8266.git","branch":"origin/master"}]}
 
 R=$(curl -v -s -b cookies.jar \
--H 'Origin: rtm.thinx.cloud' \
+-H 'Origin: thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 http://$HOST:7442/api/user/sources/list)
@@ -247,7 +264,7 @@ echo "» Pushing RSA key..."
 # {"success":true,"fingerprint":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93"}
 
 R=$(curl -v -s -b cookies.jar \
--H 'Origin: rtm.thinx.cloud' \
+-H 'Origin: thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -d '{ "alias" : "name", "key" : "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0PF7uThKgcEwtBga4gRdt7tiPmxzRhJgxUdUrNKj0z4rDhs09gmXyN1EBH3oATJOMwdZ7J19eP/qRFK+bbkOacP6Hh0+eCr54bySpqyNPAeQFFXWzLXJ6t/di/vH0deutYBNH6S5yVz+Df/04IjoVIf+AMDYA8ppJ3WtBm0Qp/1UjYDM3Hc93JtDwr6AUoq/k0oAroP4ikL2gyXnmVjMX0DIkBwEScXhFDi1X6u6PWvFPLeZeB5MWQUo+VnBwFctExOmEt3RWJdwv7s8uRnoaFDA2OxlQ8cMWjCx0Z/aftl8AaV/TwpFTc1Fz/LhZ54Ud3s4usHji9720aAkSXGfD test@thinx.cloud" }' \
@@ -271,7 +288,7 @@ echo "» Listing RSA keys..."
 # {"rsa_keys":[{"name":"name","fingerprint":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93"}]}
 
 R=$(curl -v -s -b cookies.jar \
--H 'Origin: rtm.thinx.cloud' \
+-H 'Origin: thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 http://$HOST:7442/api/user/rsakey/list)
@@ -291,7 +308,7 @@ echo "» Revoking RSA key..."
 # {"revoked":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93","success":true}
 
 R=$(curl -v -s -b cookies.jar \
--H 'Origin: rtm.thinx.cloud' \
+-H 'Origin: thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -d '{ "fingerprint" : "d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93" }' \
@@ -315,7 +332,7 @@ echo "» Testing source add..."
 # {"success":true,"source":{"alias":"thinx-firmware-esp8266","url":"https://github.com/suculent/thinx-firmware-esp8266.git","branch":"origin/master"}}
 
 R=$(curl -v -s -b cookies.jar \
--H 'Origin: rtm.thinx.cloud' \
+-H 'Origin: thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -d '{ "url" : "https://github.com/suculent/thinx-firmware-esp8266.git", "alias" : "thinx-test-repo" }' \
@@ -337,7 +354,7 @@ echo "» Testing source detach..."
 # {"success":true,"attached":null}
 
 R=$(curl -v -s -b cookies.jar \
--H 'Origin: rtm.thinx.cloud' \
+-H 'Origin: thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -d '{ "udid" : '${DEVICE_ID}' }' \
@@ -357,7 +374,7 @@ echo "» Testing source attach..."
 # {"success":true,"attached":"thinx-test-repo"}
 
 R=$(curl -v -s -b cookies.jar \
--H 'Origin: rtm.thinx.cloud' \
+-H 'Origin: thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -d '{ "udid" : '${DEVICE_ID}', "source_id" : '${SOURCE_ID}' }' \
@@ -381,7 +398,7 @@ BC='{ "build" : { "udid" : '${DEVICE_ID}', "source_id" : '${SOURCE_ID}', "dryrun
 echo "$BC"
 
 R=$(curl -v -s -b cookies.jar \
--H "Origin: rtm.thinx.cloud" \
+-H "Origin: thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
 -d "$BC" \
@@ -403,7 +420,7 @@ echo "☢ Audit log fetch..."
 # {"success":true,"logs":{"total_rows":769,"offset":0,"rows":[{"id":"ff16cba945cff2ca578b29c7024eb653","key":{"_id":"ff16cba945cff2ca578b29c7024eb653","_rev":"1-0213b9d3716d6cbc5b5c8e7d1b6deae8","message":"GET : /api/user/devices","owner":"eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f","date":"2017-05-11T15:50:40.729Z"},...
 
 R=$(curl -v -s -b cookies.jar \
--H "Origin: rtm.thinx.cloud" \
+-H "Origin: thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
 http://$HOST:7442/api/user/logs/audit)
@@ -428,7 +445,7 @@ echo "--------------------------------------------------------------------------
 echo "☢ Build log list..."
 
 R=$(curl -v -s -b cookies.jar \
--H "Origin: rtm.thinx.cloud" \
+-H "Origin: thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
 http://$HOST:7442/api/user/logs/build/list)
@@ -447,7 +464,7 @@ echo "--------------------------------------------------------------------------
 echo "☢ Build log fetch..."
 
 R=$(curl -v -s -b cookies.jar \
--H "Origin: rtm.thinx.cloud" \
+-H "Origin: thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
 -d '{ "build_id" : "2adf9af0-3817-11e7-b36a-b5bff48e5684" }' \
@@ -467,7 +484,7 @@ echo "--------------------------------------------------------------------------
 echo "☢ User avatar set..."
 
 R=$(curl -v -s -b cookies.jar \
--H "Origin: rtm.thinx.cloud" \
+-H "Origin: thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
 -d '{ "avatar" : "data:image/png;base64,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"}' \
@@ -485,7 +502,7 @@ echo "--------------------------------------------------------------------------
 echo "☢ User info set..."
 
 R=$(curl -v -s -b cookies.jar \
--H "Origin: rtm.thinx.cloud" \
+-H "Origin: thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
 -d '{ "info" : { "first_name" : "Custom", "last_name" : "Custom", "mobile_phone" : "+420603861240", "notifications": { "all" : false, "important" : false, "info" : false }, "security" : { "unique_api_keys" : true } } }' \
@@ -510,7 +527,7 @@ RQ='{ "source_id" : '${SOURCE_ID}' }'
 echo "POST ${RQ}"
 
 R=$(curl -v -s -b cookies.jar \
--H 'Origin: rtm.thinx.cloud' \
+-H 'Origin: thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -d "$RQ" \
@@ -532,7 +549,7 @@ echo "--------------------------------------------------------------------------
 echo "» Fetching device catalog..."
 
 R=$(curl -v -s -b cookies.jar \
--H "Origin: rtm.thinx.cloud" \
+-H "Origin: thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 http://$HOST:7442/api/user/devices)
@@ -581,7 +598,7 @@ echo "--------------------------------------------------------------------------
 echo "» Fetching device catalog..."
 
 R=$(curl -v -s -b cookies.jar \
--H "Origin: rtm.thinx.cloud" \
+-H "Origin: thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 http://$HOST:7442/api/user/devices)

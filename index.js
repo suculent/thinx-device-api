@@ -1170,6 +1170,8 @@ var ThinxApp = function() {
   // Front-end authentication, returns session on valid authentication
   app.post("/api/login", function(req, res) {
 
+    console.log("Logging in...");
+
     var client_type = "webapp";
     var ua = req.headers["user-agent"];
     var validity = ua.indexOf(client_user_agent);
