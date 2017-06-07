@@ -824,6 +824,7 @@ var ThinxApp = function() {
 
     device.register(registration, req.headers.authentication, function(
       success, message) {
+      res.set("Connection", "close");
       respond(res, {
         success: success,
         message: message
