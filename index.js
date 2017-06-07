@@ -53,19 +53,15 @@ var ThinxApp = function() {
   var serverPort = app_config.port;
   var socketPort = app_config.socket;
 
-  var uuidV1 = require("uuid/v1");
   var url = require("url");
   var http = require("http");
   var https = require("https");
   var parser = require("body-parser");
   var nano = require("nano")(db);
   var sha256 = require("sha256");
-  var fprint = require('ssh-fingerprint');
-  var Emailer = require('email').Email;
-  var fs = require("fs");
-  var mkdirp = require('mkdirp');
 
-  var deploy = require("./lib/thinx/deployment");
+  var fs = require("fs");
+
   var v = require("./lib/thinx/version");
   var alog = require("./lib/thinx/audit");
   var blog = require("./lib/thinx/buildlog");
@@ -76,8 +72,6 @@ var ThinxApp = function() {
   var rsakey = require("./lib/thinx/rsakey");
   var stats = require("./lib/thinx/statistics");
   var sources = require("./lib/thinx/sources");
-
-  var exec = require('child_process');
 
   var WebSocket = require("ws");
 
