@@ -67,6 +67,7 @@ var ThinxApp = function() {
   var blog = require("./lib/thinx/buildlog");
   var builder = require("./lib/thinx/builder");
   var device = require("./lib/thinx/device");
+  var devices = require("./lib/thinx/devices");
   var watcher = require("./lib/thinx/repository");
   var apikey = require("./lib/thinx/apikey");
   var user = require("./lib/thinx/owner");
@@ -546,7 +547,7 @@ var ThinxApp = function() {
       } else {
         respond(res, {
           success: success,
-          source: response
+          source: message
         });
       }
     });
