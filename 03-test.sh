@@ -86,17 +86,15 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing firmware update (owner test)..."
 
-R=$(curl -s \
+R=$(curl -v -s \
 -H "Authentication: ${API_KEY}" \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "mac" : "00:00:00:00:00:00", "udid" : "47fc9ab2-2227-11e7-8584-4c327591230d", "hash" : "hash", "commit" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "checksum" : "02e2436d60c629e2ab6357d0d314dd6fe28bd0331b18ca6b19a25cd6f969d0a8", "owner" : "886d515f173e4698f15140366113b7c98c678401b815a592d88c866d13bf5445"  }' \
+-d '{ "mac" : "00:00:00:00:00:00", "udid" : "47fc9ab2-2227-11e7-8584-4c327591230d", "hash" : "hash", "commit" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "checksum" : "02e2436d60c629e2ab6357d0d314dd6fe28bd0331b18ca6b19a25cd6f969d0a8", "owner": "'${OWNER_ID}'" }' \
 http://$HOST:7442/device/firmware)
 
 # {"success":false,"status":"api_key_invalid"}
-
-
 
 SUCCESS=$(echo $R | jq .success)
 echo $SUCCESS
@@ -111,7 +109,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Testing authentication..."
 
-R=$(curl -s -c cookies.jar \
+R=$(curl -v -s -c cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -120,7 +118,7 @@ http://$HOST:7442/api/login)
 
 # {"redirectURL":"https://thinx.cloud/app"}
 
-SUCCESS=$(echo $R | jq .redirectURL)
+SUCCESS=$(echo $R | jq .success )
 echo $SUCCESS
 if [[ ! -z $SUCCESS ]]; then
 	URL=$(echo $R | jq .redirectURL)
@@ -129,11 +127,13 @@ else
 	echo_fail $R
 fi
 
+exit $?
+
 echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Statistics..."
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
@@ -152,11 +152,11 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Requesting new API Key..."
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--d '{"alias":"test-key-name"}' \
+-d '{ "alias" : "test-key-name" }' \
 http://$HOST:7442/api/user/apikey)
 
 SUCCESS=$(echo $R | jq .success)
@@ -179,7 +179,7 @@ echo "» Revoking API Key..."
 
 RK='{ "fingerprint" : '${HASH}' }'
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -202,7 +202,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Fetching API Keys..."
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -225,7 +225,7 @@ echo "» Fetching user sources..."
 
 # {"success":true,"sources":[{"alias":"thinx-firmware-esp8266","url":"https://github.com/suculent/thinx-firmware-esp8266.git","branch":"origin/master"},{"alias":"thinx-firmware-esp8266","url":"https://github.com/suculent/thinx-firmware-esp8266.git","branch":"origin/master"}]}
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -246,7 +246,7 @@ echo "» Pushing RSA key..."
 
 # {"success":true,"fingerprint":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93"}
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -270,7 +270,7 @@ echo "» Listing RSA keys..."
 
 # {"rsa_keys":[{"name":"name","fingerprint":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93"}]}
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -290,7 +290,7 @@ echo "» Revoking RSA key..."
 
 # {"revoked":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93","success":true}
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -314,7 +314,7 @@ echo "» Testing source add..."
 
 # {"success":true,"source":{"alias":"thinx-firmware-esp8266","url":"https://github.com/suculent/thinx-firmware-esp8266.git","branch":"origin/master"}}
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -336,7 +336,7 @@ echo "» Testing source detach..."
 
 # {"success":true,"attached":null}
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -356,7 +356,7 @@ echo "» Testing source attach..."
 
 # {"success":true,"attached":"thinx-test-repo"}
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -380,7 +380,7 @@ BC='{ "build" : { "udid" : '${DEVICE_ID}', "source_id" : '${SOURCE_ID}', "dryrun
 
 echo "$BC"
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
@@ -402,7 +402,7 @@ echo "☢ Audit log fetch..."
 
 # {"success":true,"logs":{"total_rows":769,"offset":0,"rows":[{"id":"ff16cba945cff2ca578b29c7024eb653","key":{"_id":"ff16cba945cff2ca578b29c7024eb653","_rev":"1-0213b9d3716d6cbc5b5c8e7d1b6deae8","message":"GET : /api/user/devices","owner":"eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f","date":"2017-05-11T15:50:40.729Z"},...
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
@@ -427,7 +427,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Build log list..."
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
@@ -446,7 +446,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Build log fetch..."
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
@@ -466,7 +466,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ User avatar set..."
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
@@ -484,7 +484,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ User info set..."
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
@@ -509,7 +509,7 @@ RQ='{ "source_id" : '${SOURCE_ID}' }'
 
 echo "POST ${RQ}"
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -531,7 +531,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Fetching device catalog..."
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -557,7 +557,7 @@ CH='{ "changes" : { "udid" : '${DEVICE_ID}', "alias" : "new-test-alias" } }'
 
 echo "POST ${CH}"
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H "Authentication: ${API_KEY}" \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
@@ -580,7 +580,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Fetching device catalog..."
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -606,7 +606,7 @@ DR='{ "udid" : '${DEVICE_ID}' }'
 
 echo $DR
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H "Authentication: ${API_KEY}" \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
@@ -632,7 +632,7 @@ DR='{ "udid" : '${DEVICE_ID}' }'
 
 echo $DR
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H "Authentication: ${API_KEY}" \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \

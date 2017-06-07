@@ -1294,7 +1294,10 @@ var ThinxApp = function() {
         if (client_type == "device") {
           return;
         } else if (client_type == "webapp") {
-          res.redirect("http://rtm.thinx.cloud:80/"); // redirects browser, not in XHR?
+          // res.redirect("http://rtm.thinx.cloud:80/"); // redirects browser, not in XHR?
+          respond(res, {
+            "redirectURL": "http://rtm.thinx.cloud:80/app"
+          });
           return;
         }
 
