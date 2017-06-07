@@ -651,19 +651,26 @@ var ThinxApp = function() {
     // Support bulk updates
     if (typeof(req.body.changes) === "undefined") {
       var fingerprints = req.body.changes;
-      rsakey.revoke(req, res, owner, fingerprints, function(success,
-        message) {
-        respond(res, {
-          success: success,
-          status: message
+      rsakey.revoke(req, res, owner, fingerprints,
+        function(success, message) {
+          respond(res, {
+            success: success,
+            status: message
+          });
         });
-      });
       return;
     }
 
     // Will deprecate
     if (typeof(req.body.fingerprint) !== "undefined") {
-      rsakey.revoke(req, res, owner, [fingerprint]);
+      rsakey.revoke(req, res, owner, [fingerprint],
+        function(success, message) {
+          respond(res, {
+            success: success,
+            status: message
+          });
+        });
+      return;
     }
   });
 
