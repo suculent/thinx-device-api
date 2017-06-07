@@ -644,7 +644,7 @@ var ThinxApp = function() {
     // Support bulk updates
     if (typeof(req.body.changes) === "undefined") {
       var fingerprints = req.body.changes;
-      rsakey.revoke(req, res, owner, fingerprints,
+      rsakey.revoke(owner, fingerprints,
         function(success, message) {
           respond(res, {
             success: success,
@@ -656,7 +656,7 @@ var ThinxApp = function() {
 
     // Will deprecate
     if (typeof(req.body.fingerprint) !== "undefined") {
-      rsakey.revoke(req, res, owner, [fingerprint],
+      rsakey.revoke(owner, [fingerprint],
         function(success, message) {
           respond(res, {
             success: success,
@@ -784,7 +784,8 @@ var ThinxApp = function() {
     validateRequest(req, res);
     // FIXME: Remove this log...
     console.log(JSON.stringify(req.body));
-    device.firmware(req.body, function(success, message) {
+    device.firmware(req.body, req.headers.authentication, function(
+      success, message) {
       respond(res, {
         success: success,
         status: message
@@ -818,7 +819,8 @@ var ThinxApp = function() {
 
     var registration = req.body.registration;
 
-    device.register(registration, function(success, message) {
+    device.register(registration, req.headers.authentication, function(
+      success, message) {
       respond(res, {
         success: success,
         message: message
