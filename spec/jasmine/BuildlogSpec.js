@@ -54,13 +54,12 @@ describe("Build log", function() {
     expect(blog).toBeDefined();
   });
 
-  it("should be able to list build logs", function(done) {
+  it("should be able to list build logs", function() {
     blog.list(owner, function(err, body) {
       console.log(err, body);
-      expect(true).toBe(true);
-      done();
+      expect(body).toBeDefined();
     });
-  }, 15000);
+  });
 
   it("should be able to fetch specific build log", function(done) {
     blog.fetch(build_id, function(err, body) {
@@ -68,7 +67,7 @@ describe("Build log", function() {
       expect(err).toBeDefined();
       done();
     });
-  }, 6000);
+  }, 10000);
 
   it("should be able to log", function() {
     blog.log(build_id, owner, udid, "Testing build log create...");

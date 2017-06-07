@@ -800,6 +800,14 @@ var ThinxApp = function() {
 
     res.set("Connection", "close");
 
+    if (typeof(req.body) === "undefined") {
+      respond(res, {
+        success: false,
+        status: "no_body"
+      });
+      return;
+    }
+
     if (typeof(req.body.registration) === "undefined") {
       respond(res, {
         success: false,
