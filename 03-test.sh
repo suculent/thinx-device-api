@@ -242,7 +242,7 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
-echo "» Revoking RSA key..."
+echo "» Revoking RSA key(s)..."
 
 # {"revoked":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93","success":true}
 
@@ -250,7 +250,7 @@ R=$(curl -v -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--d '{ "fingerprint" : "d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93" }' \
+-d '{ "fingerprints" : [ "d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93" ] }' \
 http://$HOST:7442/api/user/rsakey/revoke)
 
 echo "${R}"
@@ -282,30 +282,6 @@ FPRINT=null
 if [[ $SUCCESS == true ]]; then
 	FPRINT=$(echo $R | jq .fingerprint)
 	echo_ok "Added RSA key: $FPRINT"
-else
-	echo_fail $R
-fi
-
-echo
-echo "--------------------------------------------------------------------------------"
-echo "» Revoking RSA key..."
-
-# {"revoked":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93","success":true}
-
-R=$(curl -v -s -b cookies.jar \
--H 'Origin: rtm.thinx.cloud' \
--H "User-Agent: THiNX-Web" \
--H "Content-Type: application/json" \
--d '{ "fingerprint" : "d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93" }' \
-http://$HOST:7442/api/user/rsakey/revoke)
-
-echo "${R}"
-
-SUCCESS=$(echo $R | jq .success)
-RPRINT=null
-if [[ $SUCCESS == true ]]; then
-	RPRINT=$(echo $R | jq .revoked)
-	echo_ok "Revoked RSA key: $RPRINT"
 else
 	echo_fail $R
 fi
