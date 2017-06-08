@@ -421,7 +421,10 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
     sources.list(req.session.owner, function(success, response) {
       if (success === true) {
-        respond(res, response);
+        respond(res, {
+          success: true,
+          sources: response
+        });
       } else {
         respond(res, response);
       }
