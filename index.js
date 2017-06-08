@@ -345,13 +345,15 @@ var ThinxApp = function() {
 
     var new_api_key_alias = req.body.alias;
 
-    console.log("Getting owner " + owner + " for api key...");
+
     apikey.create(owner, new_api_key_alias, function(success,
       object) {
       if (success) {
+        console.log("Getting owner " + owner + " for api key... \n" +
+          JSON.stringify(object));
         respond(res, {
           success: true,
-          api_key: new_api_key,
+          api_key: object.key,
           hash: object.hash
         });
         return;
