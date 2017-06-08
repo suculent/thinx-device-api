@@ -466,14 +466,7 @@ var ThinxApp = function() {
     sources.add(req.session.owner, alias, url, branch,
       function(success, response) {
         console.log(JSON.stringify(response));
-        if (success === false) {
-          respond(res, response);
-        } else {
-          respond(res, {
-            success: true,
-            source: response
-          });
-        }
+        respond(res, response);
       });
   });
 
