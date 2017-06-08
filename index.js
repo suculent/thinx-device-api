@@ -466,16 +466,9 @@ var ThinxApp = function() {
       function(success, response) {
         console.log(JSON.stringify(response));
         if (success === false) {
-          respond(res, {
-            success: success,
-            status: message
-          });
+          respond(res, message);
         } else {
-          respond(res, {
-            success: success,
-            source: response,
-            source_id: response._id
-          });
+          respond(res, message);
         }
       });
   });
