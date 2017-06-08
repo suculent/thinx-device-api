@@ -343,9 +343,7 @@ var ThinxApp = function() {
       return;
     }
 
-    var new_api_key = sha256(new Date().toString());
     var new_api_key_alias = req.body.alias;
-    var new_api_key_hash = sha256(new_api_key);
 
     console.log("Getting owner " + owner + " for api key...");
     apikey.create(owner, new_api_key_alias, function(success,
