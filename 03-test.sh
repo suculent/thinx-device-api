@@ -91,7 +91,7 @@ R=$(curl -s \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "mac" : "00:00:00:00:00:00", "udid" : "47fc9ab2-2227-11e7-8584-4c327591230d", "hash" : "hash", "commit" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "checksum" : "02e2436d60c629e2ab6357d0d314dd6fe28bd0331b18ca6b19a25cd6f969d0a8", "owner": "'${OWNER_ID}'" }' \
+-d '{ "mac" : "00:00:00:00:00:00", "udid" : '${DEVICE_ID}', "hash" : "hash", "commit" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "checksum" : "02e2436d60c629e2ab6357d0d314dd6fe28bd0331b18ca6b19a25cd6f969d0a8", "owner": "'${OWNER_ID}'" }' \
 http://$HOST:7442/device/firmware)
 
 # {"success":false,"status":"api_key_invalid"}
@@ -482,6 +482,8 @@ else
 	echo_fail $R
 fi
 
+exit 0
+
 echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ User info set..."
@@ -550,6 +552,9 @@ else
 fi
 
 
+
+# next seems to break it...
+
 echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Assigning device alias..."
@@ -577,7 +582,7 @@ else
 	echo_fail $R
 fi
 
-exit 0
+
 
 echo
 echo "--------------------------------------------------------------------------------"
