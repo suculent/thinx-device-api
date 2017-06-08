@@ -276,11 +276,8 @@ var ThinxApp = function() {
     if (!validateSecureGETRequest(req)) return;
     if (!validateSession(req, res)) return;
     var owner = req.session.owner;
-    devices.list(owner, function(success, status) {
-      respond(res, {
-        success: success,
-        status: status
-      });
+    devices.list(owner, function(success, response) {
+      respond(res, response);
     });
   });
 
@@ -735,8 +732,6 @@ var ThinxApp = function() {
 
     validateRequest(req, res);
 
-    res.set("Connection", "close");
-
     if (typeof(req.body) === "undefined") {
       respond(res, {
         success: false,
@@ -751,6 +746,7 @@ var ThinxApp = function() {
       var registration = req.body.registration;
       device.register(registration, req.headers.authentication, function(
         success, response) {
+        res.set("Connection", "close");
         respond(res, response);
       });
     }
