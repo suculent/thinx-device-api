@@ -580,7 +580,7 @@ var ThinxApp = function() {
     }
 
     // Support bulk updates
-    if (typeof(req.body.fingerprints) === "undefined") {
+    if (typeof(req.body.fingerprints) !== "undefined") {
       var fingerprints = req.body.fingerprints;
       console.log("Fingerprints: " + JSON.stringify(fingerprints));
       rsakey.revoke(owner, fingerprints,
@@ -604,6 +604,12 @@ var ThinxApp = function() {
         });
       return;
     }
+
+    respond(res, {
+      success: false,
+      status: "invalid_query"
+    });
+
   });
 
   /*
