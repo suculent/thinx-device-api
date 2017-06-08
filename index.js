@@ -494,7 +494,7 @@ var ThinxApp = function() {
    * RSA Keys
    */
 
-  app.post("/api/user/rsakey", function(req, res) {
+  app.post("/api/user/rsakey/add", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;

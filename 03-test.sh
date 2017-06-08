@@ -242,6 +242,26 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
+echo "» Listing RSA keys..."
+
+# {"rsa_keys":[{"name":"name","fingerprint":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93"}]}
+
+R=$(curl -s -b cookies.jar \
+-H 'Origin: rtm.thinx.cloud' \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+http://$HOST:7442/api/user/rsakey/list)
+
+SUCCESS=$(echo $R | jq .rsa_keys)
+if [[ ! -z $SUCCESS ]]; then
+	KEYS=$(echo $R | jq .rsa_keys)
+	echo_ok "Listed RSA keys: $KEYS"
+else
+	echo_fail $R
+fi
+
+echo
+echo "--------------------------------------------------------------------------------"
 echo "» Revoking RSA key(s)..."
 
 # {"revoked":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93","success":true}
@@ -275,7 +295,7 @@ R=$(curl -s -b cookies.jar \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -d '{ "alias" : "Initial RSA Key", "key" : "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0PF7uThKgcEwtBga4gRdt7tiPmxzRhJgxUdUrNKj0z4rDhs09gmXyN1EBH3oATJOMwdZ7J19eP/qRFK+bbkOacP6Hh0+eCr54bySpqyNPAeQFFXWzLXJ6t/di/vH0deutYBNH6S5yVz+Df/04IjoVIf+AMDYA8ppJ3WtBm0Qp/1UjYDM3Hc93JtDwr6AUoq/k0oAroP4ikL2gyXnmVjMX0DIkBwEScXhFDi1X6u6PWvFPLeZeB5MWQUo+VnBwFctExOmEt3RWJdwv7s8uRnoaFDA2OxlQ8cMWjCx0Z/aftl8AaV/TwpFTc1Fz/LhZ54Ud3s4usHji9720aAkSXGfD test@thinx.cloud" }' \
-http://$HOST:7442/api/user/rsakey)
+http://$HOST:7442/api/user/rsakey/add)
 
 SUCCESS=$(echo $R | jq .success)
 FPRINT=null
@@ -305,6 +325,8 @@ if [[ ! -z $SUCCESS ]]; then
 else
 	echo_fail $R
 fi
+
+exit 0
 
 echo
 echo "--------------------------------------------------------------------------------"
@@ -382,17 +404,17 @@ BC='{ "build" : { "udid" : '${DEVICE_ID}', "source_id" : '${SOURCE_ID}', "dryrun
 
 echo "$BC"
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
 -d "$BC" \
 http://$HOST:7442/api/build)
 
-SUCCESS=$(echo $R | jq .build.success)
+SUCCESS=$(echo $R | jq .success)
 BUILD_ID=null
 if [[ $SUCCESS == true ]]; then
-	BUILD_ID=$(echo $R | jq .build.id)
+	BUILD_ID=$(echo $R | jq .build_id)
 	echo_ok "New build ID: $BUILD_ID"
 else
 	echo_fail $R
@@ -636,7 +658,7 @@ DR='{ "udid" : '${DEVICE_ID}' }'
 
 echo $DR
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H "Authentication: ${API_KEY}" \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
