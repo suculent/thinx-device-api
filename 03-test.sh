@@ -131,7 +131,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Statistics..."
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
@@ -262,8 +262,6 @@ else
 	echo_fail $R
 fi
 
-sleep 1
-
 echo
 echo "--------------------------------------------------------------------------------"
 echo "» Listing RSA keys..."
@@ -320,6 +318,8 @@ R=$(curl -v -s -b cookies.jar \
 -H "Content-Type: application/json" \
 -d '{ "url" : "https://github.com/suculent/thinx-firmware-esp8266.git", "alias" : "thinx-test-repo" }' \
 http://$HOST:7442/api/user/source)
+
+echo $R
 
 SUCCESS=$(echo $R | jq .success)
 SOURCE_ID=null
@@ -397,6 +397,8 @@ if [[ $SUCCESS == true ]]; then
 else
 	echo_fail $R
 fi
+
+exit 0
 
 echo
 echo "--------------------------------------------------------------------------------"

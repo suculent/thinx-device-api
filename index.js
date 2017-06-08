@@ -468,7 +468,10 @@ var ThinxApp = function() {
         if (success === false) {
           respond(res, response);
         } else {
-          respond(res, response);
+          respond(res, {
+            status: true,
+            attached: response
+          });
         }
       });
   });
