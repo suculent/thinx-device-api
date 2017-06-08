@@ -330,8 +330,6 @@ else
 	echo_fail $R
 fi
 
-exit 0
-
 echo
 echo "--------------------------------------------------------------------------------"
 echo "» Testing source add..."
@@ -694,8 +692,6 @@ exit 0
 #echo "☢ Running Karma..."
 
 # karma start
-
-exit 0
 
 echo
 echo "» Terminating node.js..."
