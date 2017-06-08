@@ -580,8 +580,6 @@ else
 	echo_fail $R
 fi
 
-exit 0
-
 echo
 echo "--------------------------------------------------------------------------------"
 echo "» Fetching device catalog..."
@@ -656,7 +654,7 @@ else
 	echo_fail $R
 fi
 
-
+exit 0
 
 #echo
 #echo "☢ Running nyc code coverage..."
