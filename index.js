@@ -580,8 +580,9 @@ var ThinxApp = function() {
     }
 
     // Support bulk updates
-    if (typeof(req.body.changes) === "undefined") {
-      var fingerprints = req.body.changes;
+    if (typeof(req.body.fingerprints) === "undefined") {
+      var fingerprints = req.body.fingerprints;
+      console.log("Fingerprints: " + JSON.stringify(fingerprints));
       rsakey.revoke(owner, fingerprints,
         function(success, response) {
           respond(res, {
