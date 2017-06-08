@@ -586,7 +586,7 @@ var ThinxApp = function() {
         function(success, response) {
           respond(res, {
             success: success,
-            status: message
+            status: response
           });
         });
       return;
