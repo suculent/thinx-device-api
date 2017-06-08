@@ -486,7 +486,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ User info set..."
 
-R=$(curlv -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
