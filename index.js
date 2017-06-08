@@ -1284,18 +1284,20 @@ var ThinxApp = function() {
     var owner = req.session.owner;
 
     stats.today(owner, function(success, body) {
-      if (!success) {
-        respond(res, {
-          success: false,
-          status: "stats_fetch_failed"
-        });
-        return;
-      }
+
       if (!body) {
         console.log("Statistics for owner " + owner + " not found.");
         respond(res, {
           success: false,
           status: "no_results"
+        });
+        return;
+      }
+
+      if (!success) {
+        respond(res, {
+          success: false,
+          status: body
         });
         return;
       }
