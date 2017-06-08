@@ -293,7 +293,7 @@ var ThinxApp = function() {
     devices.attach(owner, body, function(success, status) {
       respond(res, {
         success: success,
-        status: status
+        attached: status
       });
     });
   });
@@ -877,19 +877,8 @@ var ThinxApp = function() {
     var owner = req.session.owner;
     var wrapper = req.body.build;
 
-    builder.build(owner, wrapper, function(success, message, build_id) {
-      if (success) {
-        respond(res, {
-          success: success,
-          status: message,
-          build_id: build_id
-        });
-      } else {
-        respond(res, {
-          success: success,
-          status: message
-        });
-      }
+    builder.build(owner, wrapper, function(success, response) {
+      respond(res, response);
     });
   });
 
