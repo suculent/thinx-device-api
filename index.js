@@ -1283,6 +1283,8 @@ var ThinxApp = function() {
 
     var owner = req.session.owner;
 
+    console.log("Statistics for owner " + owner);
+
     stats.today(owner, function(success, body) {
 
       if (!body) {
