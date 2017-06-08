@@ -356,7 +356,7 @@ echo "» Testing source attach..."
 
 # {"success":true,"attached":"thinx-test-repo"}
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -397,8 +397,6 @@ if [[ $SUCCESS == true ]]; then
 else
 	echo_fail $R
 fi
-
-exit 0
 
 echo
 echo "--------------------------------------------------------------------------------"
@@ -502,6 +500,7 @@ else
 	echo_fail $R
 fi
 
+exit 0
 
 echo
 echo "--------------------------------------------------------------------------------"
