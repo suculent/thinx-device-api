@@ -86,7 +86,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing firmware update (owner test)..."
 
-R=$(curl -v -s \
+R=$(curl -s \
 -H "Authentication: ${API_KEY}" \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
@@ -109,7 +109,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Testing authentication..."
 
-R=$(curl -v -s -c cookies.jar \
+R=$(curl -s -c cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -152,7 +152,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Requesting new API Key..."
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -179,7 +179,7 @@ echo "» Revoking API Key..."
 
 RK='{ "fingerprint" : '${HASH}' }'
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -202,7 +202,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Fetching API Keys..."
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -246,7 +246,7 @@ echo "» Pushing RSA key..."
 
 # {"success":true,"fingerprint":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93"}
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -270,7 +270,7 @@ echo "» Listing RSA keys..."
 
 # {"rsa_keys":[{"name":"name","fingerprint":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93"}]}
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \

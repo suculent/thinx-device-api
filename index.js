@@ -422,17 +422,10 @@ var ThinxApp = function() {
     var owner = req.session.owner;
 
     sources.list(owner, function(success, response) {
-      if (success === false) {
-        respond(res, {
-          success: success,
-          status: "api-user-apikey-list_error"
-        });
-      } else {
-        respond(res, {
-          success: success,
-          status: response
-        });
-      }
+      respond(res, {
+        success: success,
+        status: response
+      });
     });
   });
 
