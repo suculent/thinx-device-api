@@ -278,11 +278,13 @@ echo "${R}"
 SUCCESS=$(echo $R | jq .success)
 RPRINT=null
 if [[ $SUCCESS == true ]]; then
-	RPRINT=$(echo $R | jq .revoked)
+	RPRINT=$(echo $R | jq .status)
 	echo_ok "Revoked RSA key: $RPRINT"
 else
 	echo_fail $R
 fi
+
+sleep 2
 
 echo
 echo "--------------------------------------------------------------------------------"
@@ -305,6 +307,8 @@ if [[ $SUCCESS == true ]]; then
 else
 	echo_fail $R
 fi
+
+sleep 2
 
 echo
 echo "--------------------------------------------------------------------------------"
