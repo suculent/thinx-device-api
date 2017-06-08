@@ -466,9 +466,9 @@ var ThinxApp = function() {
       function(success, response) {
         console.log(JSON.stringify(response));
         if (success === false) {
-          respond(res, message);
+          respond(res, response);
         } else {
-          respond(res, message);
+          respond(res, response);
         }
       });
   });
