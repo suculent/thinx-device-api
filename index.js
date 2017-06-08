@@ -417,17 +417,17 @@ var ThinxApp = function() {
 
   /* List available sources */
   app.get("/api/user/sources/list", function(req, res) {
-
     if (!validateSecureGETRequest(req)) return;
     if (!validateSession(req, res)) return;
-
-    var owner = req.session.owner;
-
-    sources.list(owner, function(success, response) {
-      respond(res, {
-        success: success,
-        status: response
-      });
+    sources.list(req.session.owner, function(success, response) {
+      if (success === true) {
+        respond(res, {
+          success: success,
+          sources: response
+        });
+      } else {
+        respond(res, response);
+      }
     });
   });
 
@@ -436,8 +436,6 @@ var ThinxApp = function() {
 
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
-
-    var owner = req.session.owner;
 
     if (typeof(req.body.alias) === "undefined") {
       respond(res, {
@@ -464,21 +462,22 @@ var ThinxApp = function() {
     var url = req.body.url;
     var alias = req.body.alias;
 
-    sources.add(owner, alias, url, branch, function(success, response) {
-      console.log(JSON.stringify(response));
-      if (success === false) {
-        respond(res, {
-          success: success,
-          status: message
-        });
-      } else {
-        respond(res, {
-          success: success,
-          source: response,
-          source_id: response._id
-        });
-      }
-    });
+    sources.add(req.session.owner, alias, url, branch,
+      function(success, response) {
+        console.log(JSON.stringify(response));
+        if (success === false) {
+          respond(res, {
+            success: success,
+            status: message
+          });
+        } else {
+          respond(res, {
+            success: success,
+            source: response,
+            source_id: response._id
+          });
+        }
+      });
   });
 
   /* Removes a GIT repository. Expects alias. */
@@ -500,17 +499,7 @@ var ThinxApp = function() {
     var source_id = req.body.source_id;
 
     sources.remove(owner, source_id, function(success, message) {
-      if (success === false) {
-        respond(res, {
-          success: success,
-          status: message
-        });
-      } else {
-        respond(res, {
-          success: success,
-          source: message
-        });
-      }
+      respond(res, message);
     });
   });
 

@@ -250,7 +250,7 @@ R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--d '{ "alias" : "name", "key" : "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0PF7uThKgcEwtBga4gRdt7tiPmxzRhJgxUdUrNKj0z4rDhs09gmXyN1EBH3oATJOMwdZ7J19eP/qRFK+bbkOacP6Hh0+eCr54bySpqyNPAeQFFXWzLXJ6t/di/vH0deutYBNH6S5yVz+Df/04IjoVIf+AMDYA8ppJ3WtBm0Qp/1UjYDM3Hc93JtDwr6AUoq/k0oAroP4ikL2gyXnmVjMX0DIkBwEScXhFDi1X6u6PWvFPLeZeB5MWQUo+VnBwFctExOmEt3RWJdwv7s8uRnoaFDA2OxlQ8cMWjCx0Z/aftl8AaV/TwpFTc1Fz/LhZ54Ud3s4usHji9720aAkSXGfD test@thinx.cloud" }' \
+-d '{ "alias" : "Initial RSA Key", "key" : "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0PF7uThKgcEwtBga4gRdt7tiPmxzRhJgxUdUrNKj0z4rDhs09gmXyN1EBH3oATJOMwdZ7J19eP/qRFK+bbkOacP6Hh0+eCr54bySpqyNPAeQFFXWzLXJ6t/di/vH0deutYBNH6S5yVz+Df/04IjoVIf+AMDYA8ppJ3WtBm0Qp/1UjYDM3Hc93JtDwr6AUoq/k0oAroP4ikL2gyXnmVjMX0DIkBwEScXhFDi1X6u6PWvFPLeZeB5MWQUo+VnBwFctExOmEt3RWJdwv7s8uRnoaFDA2OxlQ8cMWjCx0Z/aftl8AaV/TwpFTc1Fz/LhZ54Ud3s4usHji9720aAkSXGfD test@thinx.cloud" }' \
 http://$HOST:7442/api/user/rsakey)
 
 SUCCESS=$(echo $R | jq .success)
@@ -336,7 +336,7 @@ echo "» Testing source detach..."
 
 # {"success":true,"attached":null}
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -362,6 +362,8 @@ R=$(curl -v -s -b cookies.jar \
 -H "Content-Type: application/json" \
 -d '{ "udid" : '${DEVICE_ID}', "source_id" : '${SOURCE_ID}' }' \
 http://$HOST:7442/api/device/attach)
+
+echo $R
 
 SUCCESS=$(echo $R | jq .success)
 ASOURCE=null
@@ -427,7 +429,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Build log list..."
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
@@ -446,7 +448,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Build log fetch..."
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
@@ -466,7 +468,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ User avatar set..."
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
@@ -484,7 +486,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ User info set..."
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curlv -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
@@ -606,7 +608,7 @@ DR='{ "udid" : '${DEVICE_ID}' }'
 
 echo $DR
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H "Authentication: ${API_KEY}" \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
