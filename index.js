@@ -583,7 +583,7 @@ var ThinxApp = function() {
     if (typeof(req.body.changes) === "undefined") {
       var fingerprints = req.body.changes;
       rsakey.revoke(owner, fingerprints,
-        function(success, message) {
+        function(success, response) {
           respond(res, {
             success: success,
             status: message

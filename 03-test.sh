@@ -131,7 +131,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Statistics..."
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -v -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
@@ -225,7 +225,7 @@ echo "» Fetching user sources..."
 
 # {"success":true,"sources":[{"alias":"thinx-firmware-esp8266","url":"https://github.com/suculent/thinx-firmware-esp8266.git","branch":"origin/master"},{"alias":"thinx-firmware-esp8266","url":"https://github.com/suculent/thinx-firmware-esp8266.git","branch":"origin/master"}]}
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -236,48 +236,6 @@ SOURCES=null
 if [[ $SUCCESS == true ]]; then
 	SOURCES=$(echo $R | jq .sources)
 	echo_ok "Listing sources: $SOURCES"
-else
-	echo_fail $R
-fi
-
-echo
-echo "--------------------------------------------------------------------------------"
-echo "» Pushing RSA key..."
-
-# {"success":true,"fingerprint":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93"}
-
-R=$(curl -s -b cookies.jar \
--H 'Origin: rtm.thinx.cloud' \
--H "User-Agent: THiNX-Web" \
--H "Content-Type: application/json" \
--d '{ "alias" : "Initial RSA Key", "key" : "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0PF7uThKgcEwtBga4gRdt7tiPmxzRhJgxUdUrNKj0z4rDhs09gmXyN1EBH3oATJOMwdZ7J19eP/qRFK+bbkOacP6Hh0+eCr54bySpqyNPAeQFFXWzLXJ6t/di/vH0deutYBNH6S5yVz+Df/04IjoVIf+AMDYA8ppJ3WtBm0Qp/1UjYDM3Hc93JtDwr6AUoq/k0oAroP4ikL2gyXnmVjMX0DIkBwEScXhFDi1X6u6PWvFPLeZeB5MWQUo+VnBwFctExOmEt3RWJdwv7s8uRnoaFDA2OxlQ8cMWjCx0Z/aftl8AaV/TwpFTc1Fz/LhZ54Ud3s4usHji9720aAkSXGfD test@thinx.cloud" }' \
-http://$HOST:7442/api/user/rsakey)
-
-SUCCESS=$(echo $R | jq .success)
-FPRINT=null
-if [[ $SUCCESS == true ]]; then
-	FPRINT=$(echo $R | jq .fingerprint)
-	echo_ok "Added RSA key: $FPRINT"
-else
-	echo_fail $R
-fi
-
-echo
-echo "--------------------------------------------------------------------------------"
-echo "» Listing RSA keys..."
-
-# {"rsa_keys":[{"name":"name","fingerprint":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93"}]}
-
-R=$(curl -s -b cookies.jar \
--H 'Origin: rtm.thinx.cloud' \
--H "User-Agent: THiNX-Web" \
--H "Content-Type: application/json" \
-http://$HOST:7442/api/user/rsakey/list)
-
-SUCCESS=$(echo $R | jq .rsa_keys)
-if [[ ! -z $SUCCESS ]]; then
-	KEYS=$(echo $R | jq .rsa_keys)
-	echo_ok "Listed RSA keys: $KEYS"
 else
 	echo_fail $R
 fi
@@ -308,11 +266,77 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
+echo "» Pushing RSA key..."
+
+# {"success":true,"fingerprint":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93"}
+
+R=$(curl -s -b cookies.jar \
+-H 'Origin: rtm.thinx.cloud' \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+-d '{ "alias" : "Initial RSA Key", "key" : "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0PF7uThKgcEwtBga4gRdt7tiPmxzRhJgxUdUrNKj0z4rDhs09gmXyN1EBH3oATJOMwdZ7J19eP/qRFK+bbkOacP6Hh0+eCr54bySpqyNPAeQFFXWzLXJ6t/di/vH0deutYBNH6S5yVz+Df/04IjoVIf+AMDYA8ppJ3WtBm0Qp/1UjYDM3Hc93JtDwr6AUoq/k0oAroP4ikL2gyXnmVjMX0DIkBwEScXhFDi1X6u6PWvFPLeZeB5MWQUo+VnBwFctExOmEt3RWJdwv7s8uRnoaFDA2OxlQ8cMWjCx0Z/aftl8AaV/TwpFTc1Fz/LhZ54Ud3s4usHji9720aAkSXGfD test@thinx.cloud" }' \
+http://$HOST:7442/api/user/rsakey)
+
+SUCCESS=$(echo $R | jq .success)
+FPRINT=null
+if [[ $SUCCESS == true ]]; then
+	FPRINT=$(echo $R | jq .fingerprint)
+	echo_ok "Added RSA key: $FPRINT"
+else
+	echo_fail $R
+fi
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "» Revoking RSA key..."
+
+# {"revoked":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93","success":true}
+
+R=$(curl -v -s -b cookies.jar \
+-H 'Origin: rtm.thinx.cloud' \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+-d '{ "fingerprint" : "d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93" }' \
+http://$HOST:7442/api/user/rsakey/revoke)
+
+echo "${R}"
+
+SUCCESS=$(echo $R | jq .success)
+RPRINT=null
+if [[ $SUCCESS == true ]]; then
+	RPRINT=$(echo $R | jq .revoked)
+	echo_ok "Revoked RSA key: $RPRINT"
+else
+	echo_fail $R
+fi
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "» Listing RSA keys..."
+
+# {"rsa_keys":[{"name":"name","fingerprint":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93"}]}
+
+R=$(curl -s -b cookies.jar \
+-H 'Origin: rtm.thinx.cloud' \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+http://$HOST:7442/api/user/rsakey/list)
+
+SUCCESS=$(echo $R | jq .rsa_keys)
+if [[ ! -z $SUCCESS ]]; then
+	KEYS=$(echo $R | jq .rsa_keys)
+	echo_ok "Listed RSA keys: $KEYS"
+else
+	echo_fail $R
+fi
+
+echo
+echo "--------------------------------------------------------------------------------"
 echo "» Testing source add..."
 
 # {"success":true,"source":{"alias":"thinx-firmware-esp8266","url":"https://github.com/suculent/thinx-firmware-esp8266.git","branch":"origin/master"}}
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
