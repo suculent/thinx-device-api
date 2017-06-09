@@ -172,7 +172,6 @@ echo "[builder.sh] Repository version/revision: ${VERSION}"
 THINX_FILE="$(find . | grep '/Thinx.h')"
 THINX_CLOUD_URL="thinx.cloud"
 THINX_MQTT_URL="mqtt://${THINX_CLOUD_URL}"
-THINX_OWNER=$OWNER_ID
 
 if [[ ! -z $DEVICE_ALIAS ]]; then
 	THINX_ALIAS=$DEVICE_ALIAS
@@ -205,7 +204,7 @@ echo "" >> $THINX_FILE
 echo "// dynamic variables" >> $THINX_FILE
 echo "String thinx_alias = \"${THINX_ALIAS}\";" >> $THINX_FILE
 echo "String thinx_api_key = \"VANILLA_API_KEY\";" >> $THINX_FILE # this just adds placeholder, key must not leak in binary...
-echo "String thinx_owner = \"${THINX_OWNER}\";" >> $THINX_FILE
+echo "String thinx_owner = \"${OWNER_ID}\";" >> $THINX_FILE
 echo "String thinx_udid = \"${UDID}\";" >> $THINX_FILE # this just adds placeholder, key should not leak
 echo "" >> $THINX_FILE
 echo "int thinx_mqtt_port = 1883;" >> $THINX_FILE

@@ -17,9 +17,11 @@ describe("Owner", function() {
   xit("should be able to begin reset owner password", function() {});
   xit("should be able to activate owner", function() {});
   xit("should be able to set owner password", function() {});
+
   xit("should be able to add new source", function() {});
   xit("should be able to remove a sources", function() {});
   xit("should be able to list sources", function() {});
+
   xit("should be able to add new rsa key", function() {});
   xit("should be able to remove rsa keys", function() {});
   xit("should be able to list rsa keys", function() {});
