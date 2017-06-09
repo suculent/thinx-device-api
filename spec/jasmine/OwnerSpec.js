@@ -13,31 +13,31 @@ describe("Owner", function() {
     });
   });
 
-  xit("should be able to create owner profile", function() {});
+  it("should be able to update owner avatar", function() {
+    var body = {
+      avatar: "test-image-vole"
+    };
+    User.update(owner, body, function(success, response) {
+      console.log(JSON.stringify(response));
+      expect(success).toBe(true);
+    });
+  });
+
+  it("should be able to update owner info", function() {
+    var body = {
+      info: "test-deletes-your-data-dude"
+    };
+    User.update(owner, body, function(success, response) {
+      console.log(JSON.stringify(response));
+      expect(success).toBe(true);
+    });
+  });
+
+  // Happens on this data-type but is sources.js responsibility, where's the fail?
+
   xit("should be able to begin reset owner password", function() {});
-  xit("should be able to activate owner", function() {});
   xit("should be able to set owner password", function() {});
 
-  xit("should be able to add new source", function() {});
-  xit("should be able to remove a sources", function() {});
-  xit("should be able to list sources", function() {});
-
-  xit("should be able to add new rsa key", function() {});
-  xit("should be able to remove rsa keys", function() {});
-  xit("should be able to list rsa keys", function() {});
-
+  xit("should be able to activate owner", function() {});
+  xit("should be able to create owner profile", function() {});
 });
-
-// exports.profile = Owner.profile;
-// exports.create = Owner.create;
-// exports.create = Owner.update;
-// exports.begin_reset_password = Owner.begin_reset_password;
-// exports.password_reset = Owner.password_reset;
-// exports.activate = Owner.activate;
-// exports.set_password = Owner.set_password;
-// exports.add_source = Owner.add_source;
-// exports.remove_sources = Owner.remove_sources;
-// exports.sources = Owner.sources;
-// exports.add_rsakey = Owner.add_rsakey;
-// exports.remove_rsakeys = Owner.remove_rsakeys;
-// exports.rsa_keys = Owner.rsa_keys;
