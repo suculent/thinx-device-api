@@ -14,7 +14,7 @@ It seems to be almost done. Let's have a week for fixing bugs and tweaking. Ther
 
 ### 10th week
 
-9/6/2017 - 1.6.1382: aligned firmware implementation for 'owner' attribute; re-tested (Arduino OK)
+9/6/2017 - 1.6.1382: aligned firmware implementation for 'owner' attribute; re-tested (Arduino OK); updated tests (at least does not break the owner, but later...)
 
 8/6/2017 - 1.6.1380: completing post-refactoring fixes
 
