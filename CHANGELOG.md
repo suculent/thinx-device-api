@@ -6,12 +6,17 @@
 
 It seems to be almost done. Let's have a week for fixing bugs and tweaking. There are still things that would not work after initial install (tech tail, e.g. mqtt configuration and other post-installs; bulk UI operations though update functions)
 
+* 1: Bulk operations
 * 2: Builder Logging, build tests
 * 3: Bare data support (LUA/uPy) for dumb firmwares (there is a lot of them), MongooseOS?
 * 4: Improve statistics (count last 24 hours or something)
 * 5: Make devices respond/receive MQTT messages (LUA first)
 
 ### 10th week
+
+8/6/2017 - 1.6.1380: completing post-refactoring fixes
+
+7/6/2017 - 1.6.1322: post-refactoring fixes
 
 6/6/2017 - 1.6.1268: extended API Key format to prevent collisions; testing and fixing refactoring changes merged to master (staging phase).
 

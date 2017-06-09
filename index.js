@@ -1203,7 +1203,7 @@ var ThinxApp = function() {
               return;
             } else if (client_type == "webapp") {
               respond(res, {
-                "redirectURL": "http://rtm.thinx.cloud:80/app"
+                "redirectURL": "http://rtm.thinx.cloud:80/app/#/dashboard.html"
               });
               return;
             } else {
@@ -1234,7 +1234,7 @@ var ThinxApp = function() {
         } else if (client_type == "webapp") {
           // res.redirect("http://rtm.thinx.cloud:80/"); // redirects browser, not in XHR?
           respond(res, {
-            "redirectURL": "http://thinx.cloud:80/app"
+            "redirectURL": "http://rtm.thinx.cloud:80/app/#/dashboard.html"
           });
           return;
         }
