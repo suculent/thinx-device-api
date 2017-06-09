@@ -21,14 +21,12 @@ describe("Device", function() {
 
   xit("should be able to edit device details", function() {
     // Like what? Aliens, sauce...
+    // exports.edit = Device.edit
   });
 
   xit("should be able to provide device firmware", function() {
     // Zo far prowides OK when happpyz.
+    // exports.firmware = Device.firmware;
   });
 
 });
-
-// exports.register = Device.register;
-// exports.firmware = Device.firmware;
-// exports.edit = Device.edit
