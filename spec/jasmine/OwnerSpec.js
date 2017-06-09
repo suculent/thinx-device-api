@@ -33,11 +33,9 @@ describe("Owner", function() {
     });
   });
 
-  // Happens on this data-type but is sources.js responsibility, where's the fail?
-
-  xit("should be able to begin reset owner password", function() {});
-  xit("should be able to set owner password", function() {});
-
+  // This expects activated account and e-mail fetch support
   xit("should be able to activate owner", function() {});
   xit("should be able to create owner profile", function() {});
+  xit("should be able to begin reset owner password", function() {});
+  xit("should be able to set owner password", function() {});
 });
