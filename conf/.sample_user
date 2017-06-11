@@ -1,6 +1,6 @@
 {
    "_id": "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
-   "_rev": "1059-eff1274d3faad9224bde0ea540698c45",
+   "_rev": "1245-ea432a4238aa02b87082e3fe5b351d33",
    "username": "test",
    "owner": "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
    "password": "18ea285983df355f3024e412fb46ad6cbd98a7ffe6872e26612e35f38aa39c41",
@@ -9,39 +9,13 @@
    "first_name": "Sàmō",
    "last_name": "Sëtō",
    "rsa_keys": {
-       "d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93": {
-           "alias": "name",
-           "key": "../.ssh/eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f-1496872670.pub"
-       },
-       "f7:7c:38:f9:84:3e:8e:af:3e:7f:2b:53:81:bd:b6:27": {
-           "alias": "fzxvxc",
-           "key": "../.ssh/eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f-1496934162.pub"
-       }
    },
    "repos": {
-       "6d1ceb80-4c61-11e7-9bd0-f14beac7c0e7": {
-           "alias": "thinx-test-repo",
-           "url": "https://github.com/suculent/thinx-firmware-esp8266.git",
-           "branch": "origin/master"
-       },
-       "f20d8340-4c61-11e7-9bd0-f14beac7c0e7": {
-           "alias": "thinx-firmware-esp8266-test",
-           "url": "git@github.com:suculent/thinx-firmware-esp8266.git",
-           "branch": "vvbn"
-       },
        "e5236ea0-4c62-11e7-879f-45127a70fec6": {
            "alias": "thinx-test-repo",
            "url": "https://github.com/suculent/thinx-firmware-esp8266.git",
            "branch": "origin/master"
        },
-       "73e16a2ba7714b4ea413d289e6dfa1d6735919c40b1bc9c224ce9f45549d85b0": "thinx-test-repo",
-       "746a1726c484823c9e6aa4ab4fe838be70f65031dca0af7c09cbfefdfbbe74f6": {
-           "alias": "thinx-test-repo",
-           "url": "https://github.com/suculent/thinx-firmware-esp8266.git",
-           "branch": "origin/master"
-       }
-   },
-   "sources": {
        "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f4": {
            "alias": "THiNX Vanilla Device Firmware",
            "url": "git@github.com:suculent/thinx-firmware-esp8266.git",
@@ -63,5 +37,6 @@
        "security": {
            "unique_api_keys": true
        }
-   }
+   },
+   "last_update": "2017-06-09T22:03:47.828Z"
 }
