@@ -1,9 +1,8 @@
-var generated_key_hash = null;
 var RSAKey = require('../../lib/thinx/rsakey');
 var owner =
   "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f";
 var revoked_fingerprints = [
-  "d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93"
+  "a9:fd:f3:8e:97:7d:f4:c1:e1:39:3f:fd:2b:3b:5f:9f"
 ];
 
 var test_key_body = "matej-jasmine-test-rsa-key";
@@ -18,51 +17,51 @@ describe("RSA Key", function() {
         console.log("RSA add result: " + JSON.stringify(response));
         this.revoked_fingerprint = response;
         expect(success).toBe(true);
-
-        it("should be able to revoke multiple RSA Keys at once",
-          function(done) {
-            RSAKey.revoke(owner, [this.revoked_fingerprint],
-              function(success, message) {
-                console.log("RSA revocation result: " + JSON.stringify(
-                  message));
-                expect(success).toBe(true);
-                expect(message).toBeDefined();
-                done();
-
-                it("should fail on invalid revocation", function(
-                  done) {
-                  RSAKey.revoke(owner, [this.revoked_fingerprint],
-                    function(success, message) {
-                      console.log("RSA revocation result: " +
-                        JSON.stringify(
-                          message));
-                      expect(success).toBe(false);
-                      expect(message).toBeDefined();
-                      done();
-
-                      it("should be able to list RSA Keys",
-                        function(done) {
-                          RSAKey.list(owner, function(
-                            success, message) {
-                            console.log(
-                              "RSA list result: " +
-                              JSON.stringify(
-                                message));
-                            expect(success).toBe(true);
-                            done();
-                          });
-                        });
-
-                    });
-                }, 10000);
-
-              });
-
-          }, 1000);
-
         done();
       });
 
+  }, 10000);
+
+  it("should fail on invalid revocation", function(
+    done) {
+    RSAKey.revoke(owner, [
+        "a9:fd:f3:8e:97:7d:f4:c1:e1:39:3f:fd:2b:3b:5f:9_"
+      ],
+      function(success, message) {
+        console.log("RSA revocation result: " +
+          JSON.stringify(
+            message));
+        expect(success).toBe(false);
+        expect(message).toBeDefined();
+        done();
+      }, 10000);
+
+    it("should be able to revoke multiple RSA Keys at once",
+      function(done) {
+        RSAKey.revoke(owner, [
+            "a9:fd:f3:8e:97:7d:f4:c1:e1:39:3f:fd:2b:3b:5f:9f"
+          ],
+          function(success, message) {
+            console.log("RSA revocation result: " + JSON.stringify(
+              message));
+            expect(success).toBe(true);
+            expect(message).toBeDefined();
+            done();
+          });
+      }, 10000);
+
+    it("should be able to list RSA Keys",
+      function(done) {
+        RSAKey.list(owner, function(
+          success, message) {
+          console.log(
+            "RSA list result: " +
+            JSON.stringify(
+              message));
+          expect(success).toBe(true);
+          done();
+        });
+      });
   }, 10000);
 
 });

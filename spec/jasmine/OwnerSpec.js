@@ -52,48 +52,42 @@ describe("Owner", function() {
       }
       console.log(JSON.stringify(response));
       done();
-
-      it("should be able to fetch owner profile", function(done) {
-        User.profile(owner, function(success, response) {
-          expect(response).toBeDefined();
-          expect(success).toBe(true);
-          done();
-
-          it("should be able to update owner avatar",
-            function(done) {
-              var body = {
-                avatar: avatar_image
-              };
-              User.update(owner, body, function(success,
-                response) {
-                console.log(JSON.stringify(response));
-                expect(success).toBe(true);
-                done();
-
-                it(
-                  "should be able to update owner info",
-                  function(done) {
-                    var body = {
-                      info: test_info
-                    };
-                    User.update(owner, body,
-                      function(success, response) {
-                        console.log(JSON.stringify(
-                          response));
-                        expect(success).toBe(true);
-                        done();
-                      });
-                  }, 10000);
-
-
-              });
-            }, 10000);
-
-        });
-      }, 10000);
-
     });
 
+  }, 10000);
+
+  it("should be able to update owner avatar",
+    function(done) {
+      var body = {
+        avatar: avatar_image
+      };
+      User.update(owner, body, function(success,
+        response) {
+        console.log(JSON.stringify(response));
+        expect(success).toBe(true);
+        done();
+      });
+    }, 10000);
+
+  it("should be able to fetch owner profile", function(done) {
+    User.profile(owner, function(success, response) {
+      expect(response).toBeDefined();
+      expect(success).toBe(true);
+      done();
+    });
+  }, 10000);
+
+  it("should be able to update owner info", function(done) {
+    var body = {
+      info: test_info
+    };
+    User.update(owner, body,
+      function(success, response) {
+        console.log(JSON.stringify(
+          response));
+        expect(success).toBe(true);
+        done();
+      });
   }, 10000);
 
   // This expects activated account and e-mail fetch support
@@ -103,42 +97,35 @@ describe("Owner", function() {
       expect(response).toBeDefined();
       console.log(JSON.stringify(response));
       done();
-
-      it("should be able to set owner password", function(done) {
-        var body = {
-          password: "tset",
-          rpassword: "tset",
-          owner: owner,
-          reset_key: reset_key
-        };
-        User.set_password(owner, body, function(success,
-          response) {
-          expect(success).toBe(true);
-          expect(response).toBeDefined();
-          console.log(JSON.stringify(response));
-          done();
-
-          it(
-            "should be able to begin reset owner password",
-            function(done) {
-              User.password_reset_init(email, function(
-                success, response) {
-                expect(success).toBe(true);
-                expect(response).toBeDefined();
-                console.log(JSON.stringify(response));
-                if (response) {
-                  reset_key = response; // store reset token for next step
-                }
-                done();
-              });
-            }, 10000);
-
-        });
-      }, 10000);
-
     });
   }, 10000);
 
+  it("should be able to begin reset owner password", function(done) {
+    User.password_reset_init(email, function(
+      success, response) {
+      expect(success).toBe(true);
+      expect(response).toBeDefined();
+      console.log(JSON.stringify(response));
+      if (response) {
+        reset_key = response; // store reset token for next step
+      }
+      done();
+    });
+  }, 10000);
 
-
+  it("should be able to set owner password", function(done) {
+    var body = {
+      password: "tset",
+      rpassword: "tset",
+      owner: owner,
+      reset_key: reset_key
+    };
+    User.set_password(owner, body, function(success,
+      response) {
+      expect(success).toBe(true);
+      expect(response).toBeDefined();
+      console.log(JSON.stringify(response));
+      done();
+    });
+  }, 10000);
 });

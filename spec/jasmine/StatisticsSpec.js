@@ -46,6 +46,6 @@ describe("Statistics", function() {
         expect(body).toBe(true);
         done();
       });
-  }, 30000);
+  }, 60000);
 
 });

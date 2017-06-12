@@ -24,7 +24,7 @@ describe("Builder", function() {
     builder.build(owner, wrapper, function(success, message, build_id) {
       done();
     });
-  });
+  }, 60000);
 
   it("should be able to run", function(done) {
     var wrapper = {
@@ -37,6 +37,6 @@ describe("Builder", function() {
     builder.build(owner, wrapper, function(success, message, build_id) {
       done();
     });
-  });
+  }, 60000);
 
 });
