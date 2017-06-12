@@ -221,12 +221,12 @@ var ThinxApp = function() {
     // Password-change operation).
 
     if (typeof(origin) === "undefined") {
-      origin = "rtm.thinx.cloud";
+      origin = "*";
       //rollbar.reportMessage("SEC-ERR: Turning 'undefined' origin to 'rtm.thinx.cloud'");
     }
 
     if (origin === null) {
-      origin = "rtm.thinx.cloud";
+      origin = "*";
       //rollbar.reportMessage( "SEC-ERR: Turning null origin to 'rtm.thinx.cloud'");
     }
 
