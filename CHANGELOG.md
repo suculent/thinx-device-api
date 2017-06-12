@@ -14,7 +14,7 @@ It seems to be almost done. Let's have a week for fixing bugs and tweaking. Ther
 
 ### 11th week
 
-12/6/2017 - 1.3.1397: advancing in test coverage, fixing bugs
+12/6/2017 - 1.6.1412: advancing in test coverage, fixing bugs
 
 ### 10th week
 
