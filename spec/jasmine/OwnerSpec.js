@@ -100,7 +100,7 @@ describe("Owner", function() {
   it("should be able to set owner password", function() {
     var body = {
       password: "tset",
-      password2: "tset",
+      rpassword: "tset",
       owner: owner,
       reset_key: reset_key
     };

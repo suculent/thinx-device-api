@@ -6,17 +6,17 @@ describe("Device", function() {
   var owner =
     "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f";
   var apikey =
-    "88eb20839c1d8bf43819818b75a25cef3244c28e77817386b7b73b043193cef4";
+    "8b1dff1958cc9b0aa784ce7096c7a29886ce9875ff821b339a38b87040da8afa";
 
   var RS =
-    '{ "registration" : { "mac" : "00:00:00:00:00:00:00", "firmware" : "DeviceSpec.js", "version" : "1.0.0", "checksum" : "nevermind", "push" : "forget", "alias" : "npmtest", "owner": "' +
-    owner + '", "udid": "to-be-deleted-on-test" } }';
+    '{ "registration" : { "mac" : "00:00:00:00:00:00:00", "firmware" : "DeviceSpec.js", "version" : "1.0.0", "checksum" : "nevermind", "push" : "forget", "alias" : "npmtest", "owner": "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f", "udid": "to-be-deleted-on-test" } }';
 
   var body = JSON.parse(RS);
 
   it("should be able to register a device", function(done) {
     device.register(JSON.parse(RS), apikey,
       function(success, response) {
+        console.log("Registration result: " + JSON.stringify(response));
         expect(success).toBe(true);
         done();
       });
@@ -26,6 +26,8 @@ describe("Device", function() {
     function(done) {
       device.register(JSON.parse(RS), apikey,
         function(success, response) {
+          console.log("Re-registration result: " + JSON.stringify(
+            response));
           expect(success).toBe(true);
           done();
         });
@@ -33,9 +35,11 @@ describe("Device", function() {
 
   it("should be able to edit device alias", function() {
     var changes = {
-      alias: Date().toString()
+      alias: Date().toString(),
+      udid: "to-be-deleted-on-test"
     };
     device.edit(owner, changes, function(success, response) {
+      console.log("Editing result: " + JSON.stringify(response));
       expect(success).toBe(true);
       expect(response).toBeDefined();
     });
@@ -44,6 +48,8 @@ describe("Device", function() {
   it("should be able to provide device firmware", function() {
     // Returns "OK" when current firmware is valid.
     device.firmware(body, apikey, function(success, response) {
+      console.log("Firmware fetch result: " + JSON.stringify(
+        response));
       expect(success).toBe(true);
       expect(response).toBeDefined();
       console.log("Firmware check response: " + JSON.stringify(

@@ -1221,6 +1221,9 @@ var ThinxApp = function() {
               });
               return;
             } else if (client_type == "webapp") {
+              console.log("href: " + req.uri.href);
+              console.log("host: " + req.uri.host);
+              console.log("protocol: " + req.uri.protocol);
               respond(res, {
                 "redirectURL": "http://rtm.thinx.cloud:80/app/#/dashboard.html"
               });

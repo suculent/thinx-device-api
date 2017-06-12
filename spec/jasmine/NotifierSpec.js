@@ -9,7 +9,7 @@ describe("Notifier", function() {
 
   var exec = require("child_process");
 
-  it("is complicated", function(done) {
+  it("is complicated", function() {
     // Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope
     // (or stores into DB later)
 
@@ -41,6 +41,6 @@ describe("Notifier", function() {
     var temp = exec.execSync(CMD);
     expect(temp).toBeDefined();
 
-  }, 10000);
+  });
 
 });
