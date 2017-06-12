@@ -1221,7 +1221,8 @@ var ThinxApp = function() {
               });
               return;
             } else if (client_type == "webapp") {
-              console.log("REQ: " + JSON.stringify(req));
+              console.log("REQH: " + JSON.stringify(req.headers));
+              console.log("REQQ: " + JSON.stringify(req.query));
               console.log("REQUEST host: " + req.headers.host);
               respond(res, {
                 "redirectURL": "/app/#/dashboard.html"
