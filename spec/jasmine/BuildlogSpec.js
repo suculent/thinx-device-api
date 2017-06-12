@@ -16,6 +16,7 @@ describe("Build log", function() {
   var http = require("http");
   var https = require("https");
   var WebSocket = require("ws");
+  var ws_done;
 
   var wsapp = express();
 
@@ -35,6 +36,9 @@ describe("Build log", function() {
   var _ws = null;
 
   wss.on('connection', function connection(ws, req) {
+
+    ws_done();
+
     _ws = ws;
     var location = url.parse(req.url, true);
     // console.log("» WSS connection on location: " + location);
@@ -54,10 +58,11 @@ describe("Build log", function() {
     expect(blog).toBeDefined();
   });
 
-  it("should be able to list build logs", function() {
+  it("should be able to list build logs", function(done) {
     blog.list(owner, function(err, body) {
       console.log(err, body);
       expect(body).toBeDefined();
+      done();
     });
   });
 
@@ -69,20 +74,23 @@ describe("Build log", function() {
     });
   }, 10000);
 
-  it("should be able to log", function() {
+  it("should be able to log", function(done) {
     blog.log(build_id, owner, udid, "Testing build log create...");
     expect(true).toBe(true);
+    done();
   });
 
-  it("should be able to append existing log", function() {
+  it("should be able to append existing log", function(done) {
     blog.log(build_id, owner, udid, "Testing build log append...");
     expect(true).toBe(true);
+    done();
   });
 
   it("should be able to tail log for build_id", function() {
     var error_callback = function(err) {
       console.log(err);
       expect(true).toBe(true);
+      ws_done = done();
     };
     blog.logtail(build_id, owner, _ws, error_callback);
   });

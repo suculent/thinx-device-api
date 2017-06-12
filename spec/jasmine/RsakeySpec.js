@@ -10,7 +10,7 @@ var test_key_body = "matej-jasmine-test-rsa-key";
 
 describe("RSA Key", function() {
 
-  it("should be able to add RSA Keys first", function() {
+  it("should be able to add RSA Keys first", function(done) {
 
     RSAKey.add(owner, "matej-jasmine-test-rsa-key", test_key_body,
       function(success, response) {
@@ -20,15 +20,17 @@ describe("RSA Key", function() {
         expect(success).toBe(true);
 
         it("should be able to revoke multiple RSA Keys at once",
-          function() {
+          function(done) {
             RSAKey.revoke(owner, [this.revoked_fingerprint],
               function(success, message) {
                 console.log("RSA revocation result: " + JSON.stringify(
                   message));
                 expect(success).toBe(true);
                 expect(message).toBeDefined();
+                done();
 
-                it("should fail on invalid revocation", function() {
+                it("should fail on invalid revocation", function(
+                  done) {
                   RSAKey.revoke(owner, [this.revoked_fingerprint],
                     function(success, message) {
                       console.log("RSA revocation result: " +
@@ -36,18 +38,31 @@ describe("RSA Key", function() {
                           message));
                       expect(success).toBe(false);
                       expect(message).toBeDefined();
-                    });
-                });
-              });
-          });
-      });
-  });
+                      done();
 
-  it("should be able to list RSA Keys", function() {
-    RSAKey.list(owner, function(success, message) {
-      console.log("RSA list result: " + JSON.stringify(message));
-      expect(success).toBe(true);
-    });
-  });
+                      it("should be able to list RSA Keys",
+                        function(done) {
+                          RSAKey.list(owner, function(
+                            success, message) {
+                            console.log(
+                              "RSA list result: " +
+                              JSON.stringify(
+                                message));
+                            expect(success).toBe(true);
+                            done();
+                          });
+                        });
+
+                    });
+                }, 10000);
+
+              });
+
+          }, 1000);
+
+        done();
+      });
+
+  }, 10000);
 
 });

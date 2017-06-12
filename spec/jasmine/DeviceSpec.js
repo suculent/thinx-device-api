@@ -19,33 +19,40 @@ describe("Device", function() {
         console.log("Registration result: " + JSON.stringify(response));
         expect(success).toBe(true);
         done();
+
+        it(
+          "should receive different response for already-registered revice",
+          function(done) {
+            device.register(JSON.parse(RS), apikey,
+              function(success, response) {
+                console.log("Re-registration result: " + JSON.stringify(
+                  response));
+                expect(success).toBe(true);
+                done();
+
+                it("should be able to edit device alias",
+                  function(done) {
+                    var changes = {
+                      alias: Date().toString(),
+                      udid: "to-be-deleted-on-test"
+                    };
+                    device.edit(owner, changes, function(
+                      success, response) {
+                      console.log("Editing result: " + JSON
+                        .stringify(response));
+                      expect(success).toBe(true);
+                      expect(response).toBeDefined();
+                      done();
+                    });
+                  });
+
+              });
+          });
+
       });
   });
 
-  it("should receive different response for already-registered revice",
-    function(done) {
-      device.register(JSON.parse(RS), apikey,
-        function(success, response) {
-          console.log("Re-registration result: " + JSON.stringify(
-            response));
-          expect(success).toBe(true);
-          done();
-        });
-    });
-
-  it("should be able to edit device alias", function() {
-    var changes = {
-      alias: Date().toString(),
-      udid: "to-be-deleted-on-test"
-    };
-    device.edit(owner, changes, function(success, response) {
-      console.log("Editing result: " + JSON.stringify(response));
-      expect(success).toBe(true);
-      expect(response).toBeDefined();
-    });
-  });
-
-  it("should be able to provide device firmware", function() {
+  it("should be able to provide device firmware", function(done) {
     // Returns "OK" when current firmware is valid.
     device.firmware(body, apikey, function(success, response) {
       console.log("Firmware fetch result: " + JSON.stringify(
@@ -54,6 +61,7 @@ describe("Device", function() {
       expect(response).toBeDefined();
       console.log("Firmware check response: " + JSON.stringify(
         response));
+      done();
     });
   });
 

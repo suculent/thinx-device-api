@@ -12,7 +12,13 @@ It seems to be almost done. Let's have a week for fixing bugs and tweaking. Ther
 * 4: Improve statistics (count last 24 hours or something)
 * 5: Make devices respond/receive MQTT messages (LUA first)
 
+### 11th week
+
+12/6/2017 - 1.3.1397: advancing in test coverage, fixing bugs
+
 ### 10th week
+
+9/6/2017 - completing required tests
 
 9/6/2017 - 1.6.1382: aligned firmware implementation for 'owner' attribute; re-tested (Arduino OK); updated tests (at least does not break the owner, but later...)
 

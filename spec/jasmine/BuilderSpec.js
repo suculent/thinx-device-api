@@ -13,7 +13,7 @@ describe("Builder", function() {
     expect(builder).toBeDefined();
   });
 
-  it("should be able to dry-run", function() {
+  it("should be able to dry-run", function(done) {
     var wrapper = {
       build: {
         udid: udid,
@@ -21,10 +21,12 @@ describe("Builder", function() {
         dryrun: true
       }
     };
-    builder.build(owner, wrapper, function(success, message, build_id) {});
+    builder.build(owner, wrapper, function(success, message, build_id) {
+      done();
+    });
   });
 
-  it("should be able to run", function() {
+  it("should be able to run", function(done) {
     var wrapper = {
       build: {
         udid: udid,
@@ -32,7 +34,9 @@ describe("Builder", function() {
         dryrun: false
       }
     };
-    builder.build(owner, wrapper, function(success, message, build_id) {});
+    builder.build(owner, wrapper, function(success, message, build_id) {
+      done();
+    });
   });
 
 });

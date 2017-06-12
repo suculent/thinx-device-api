@@ -65,7 +65,6 @@ describe("Repository Watcher", function() {
   it("should be able tell repository has changed", function() {
     watcher.checkRepositoryChange(repo_path, false, function(err,
       result) {
-      //console.log(err, result);
       expect(true).toBe(true);
     });
   });
