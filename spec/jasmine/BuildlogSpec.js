@@ -2,7 +2,7 @@ describe("Build log", function() {
 
   var blog = require("../../lib/thinx/buildlog");
 
-  var build_id = "0b7384a0-3818-11e7-b36a-b5bff48e5684";
+  var build_id = "0xBUILD_ID";
   var owner =
     "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f";
   var udid = "fcdd7b20-3980-11e7-a58d-81e4acfbeb86";
