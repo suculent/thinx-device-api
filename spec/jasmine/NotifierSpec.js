@@ -15,8 +15,8 @@ describe("Notifier", function() {
 
     // Hey, this should be JUST a notification, tyfole, no destructives.
     var test_build_id = Date().toString();
-    var test_commit_id = "committed a crime";
-    var test_version = "committed a crime";
+    var test_commit_id = "crime_commit_id";
+    var test_version = "v0.0";
     var test_repo =
       "https://github.com/suculent/thinx-firmware-esp8266.git";
     var test_binary = "nothing.bin";
@@ -43,7 +43,8 @@ describe("Notifier", function() {
     var temp = exec.execSync(CMD);
 
     expect(temp).toBeDefined();
-    done();
+    //done();
+
   }, 10000);
 
 });

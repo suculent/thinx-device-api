@@ -12,6 +12,8 @@ describe("Device", function() {
     '{ "registration" : { "mac" : "00:00:00:00:00:00:00", "firmware" : "DeviceSpec.js", "version" : "1.0.0", "checksum" : "nevermind", "push" : "forget", "alias" : "npmtest", "owner": "' +
     owner + '", "udid": "to-be-deleted-on-test" } }';
 
+  var body = JSON.parse(RS);
+
   it("should be able to register a device", function(done) {
     device.register(JSON.parse(RS), apikey,
       function(success, response) {

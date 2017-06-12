@@ -617,7 +617,7 @@ var ThinxApp = function() {
    */
 
   // /user/create GET
-  /* Create username based on e-mail. Owner is  be unique (email hash). */
+  /* Create username based on e-mail. Owner must be unique (email hash). */
   app.post("/api/user/create", function(req, res) {
     user.create(body, function(success, status) {
       respond(res, {
@@ -631,12 +631,15 @@ var ThinxApp = function() {
   app.get("/api/user/password/reset", function(req, res) {
     var owner = req.query.owner; // for faster search
     var reset_key = req.query.reset_key; // for faster search
-    user.begin_password_reset(owner, reset_key, function(status, message) {
-      respond(res, {
-        success: success,
-        status: message
-      });
-      // TODO: Redirect to root to login...
+    user.password_reset(owner, reset_key, function(status, message) {
+      if (!success) {
+        respond(res, {
+          success: success,
+          status: message
+        });
+      } else {
+        res.redirect(message.redirectURL);
+      }
     });
   });
 
@@ -646,10 +649,18 @@ var ThinxApp = function() {
     var ac_key = req.query.activation;
     var ac_owner = req.query.owner;
     user.activate(ac_owner, ac_key, function(success, message) {
-      respond(res, {
-        success: success,
-        status: message
-      });
+
+      if (!success) {
+        req.session.destroy(function(err) {
+          console.log(err);
+        });
+        respond(res, {
+          success: success,
+          status: message
+        });
+      } else {
+        res.redirect(message.redirectURL);
+      }
     });
   });
 
@@ -666,7 +677,7 @@ var ThinxApp = function() {
   // /user/password/reset POST
   /* Used to initiate password-reset session, creates reset key with expiraation and sends password-reset e-mail. */
   app.post("/api/user/password/reset", function(req, res) {
-    user.reset_password_init(email, function(success, message) {
+    user.password_reset_init(email, function(success, message) {
       respond(res, {
         success: success,
         status: message
