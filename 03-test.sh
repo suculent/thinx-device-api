@@ -474,7 +474,7 @@ R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "build_id" : "2adf9af0-3817-11e7-b36a-b5bff48e5684" }' \
+-d '{ "build_id" : "0xBUILD_ID" }' \
 http://$HOST:7442/api/user/logs/build)
 
 SUCCESS=$(echo $R | jq .success)
@@ -532,7 +532,7 @@ RQ='{ "source_id" : '${SOURCE_ID}' }'
 
 echo "POST ${RQ}"
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -554,7 +554,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Fetching device catalog..."
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
