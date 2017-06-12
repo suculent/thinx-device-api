@@ -43,7 +43,7 @@ describe("Device", function() {
 
   it("should be able to provide device firmware", function() {
     // Returns "OK" when current firmware is valid.
-    device.firmware(body, api_key, function(success, response) {
+    device.firmware(body, apikey, function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
       console.log("Firmware check response: " + JSON.stringify(

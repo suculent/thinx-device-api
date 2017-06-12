@@ -8,16 +8,15 @@ describe("Owner", function() {
 
   var source_id = null;
 
-  it("should be able to list owner sources", function(done) {
+  it("should be able to list owner sources", function() {
     Sources.list(owner, function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
       console.log(response);
-      done();
     });
   }, 10000);
 
-  it("should be able to add source", function(done) {
+  it("should be able to add source", function() {
     Sources.add(owner, "test-git-repo",
       "https://github.com/suculent/thinx-device-api",
       "origin/master",
@@ -26,17 +25,15 @@ describe("Owner", function() {
         expect(response).toBeDefined();
         source_id = response.source_id;
         console.log(response);
-        done();
       });
   }, 10000);
 
-  it("should be able to remove previously added source", function(done) {
+  it("should be able to remove previously added source", function() {
     Sources.remove(owner, source_id, function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
       source_id = response.source_id;
       console.log(response);
-      done();
     });
   }, 10000);
 

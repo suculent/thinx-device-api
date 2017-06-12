@@ -633,9 +633,11 @@ var ThinxApp = function() {
     var reset_key = req.query.reset_key; // for faster search
     user.password_reset(owner, reset_key, function(status, message) {
       if (!success) {
-        respond(res, {
-          success: success,
-          status: message
+        req.session.destroy(function(err) {
+          respond(res, {
+            success: success,
+            status: message
+          });
         });
       } else {
         res.redirect(message.redirectURL);
@@ -667,6 +669,9 @@ var ThinxApp = function() {
   /* Used by the password.html page to perform the change in database. Should revoke reset_key when done. */
   app.post("/api/user/password/set", function(req, res) {
     user.set_password(owner, body, function(success, message) {
+      if (!success) {
+        req.session.destroy();
+      }
       respond(res, {
         success: success,
         status: message
@@ -678,6 +683,9 @@ var ThinxApp = function() {
   /* Used to initiate password-reset session, creates reset key with expiraation and sends password-reset e-mail. */
   app.post("/api/user/password/reset", function(req, res) {
     user.password_reset_init(email, function(success, message) {
+      if (!success) {
+        req.session.destroy();
+      }
       respond(res, {
         success: success,
         status: message
