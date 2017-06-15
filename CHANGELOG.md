@@ -14,6 +14,8 @@ It seems to be almost done. Let's have a week for fixing bugs and tweaking. Ther
 
 ### 11th week
 
+15-16/6/2017 - refactoring Arduino C example and C++ library (roadmap task 5)
+
 12/6/2017 - 1.6.1412: advancing in test coverage, fixing bugs
 
 ### 10th week
