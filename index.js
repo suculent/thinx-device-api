@@ -482,7 +482,6 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
-
     if (typeof(req.body.source_id) === "undefined") {
       respond(res, {
         success: false,
@@ -491,9 +490,8 @@ var ThinxApp = function() {
       return;
     }
 
-    var source_id = req.body.source_id;
-
-    sources.remove(owner, source_id, function(success, message) {
+    var source_ids = req.body.source_ids;
+    sources.remove(owner, source_ids, function(success, message) {
       respond(res, message);
     });
   });

@@ -190,7 +190,7 @@ SUCCESS=$(echo $R | jq .success)
 echo $SUCCESS
 RKEY=null
 if [[ $SUCCESS == true ]]; then
-	RKEY=$(echo $R | jq .sources)
+	RKEY=$(echo $R | jq .)
 	echo_ok "Revoked API key: $APIKEY"
 else
 	echo_fail $R
@@ -528,7 +528,7 @@ echo "» Testing source removal..."
 
 # {"success":true,"removed":"thinx-test-repo"}
 
-RQ='{ "source_id" : '${SOURCE_ID}' }'
+RQ='{ "source_ids" : ['${SOURCE_ID}'] }'
 
 echo "POST ${RQ}"
 
@@ -544,7 +544,7 @@ echo $R
 SUCCESS=$(echo $R | jq .success)
 RSOURCE=null
 if [[ $SUCCESS == true ]]; then
-	RSOURCE=$(echo $R | jq .alias)
+	RSOURCE=$(echo $R | jq .)
 	echo_ok "Removed source alias: $RSOURCE"
 else
 	echo_fail "$R"

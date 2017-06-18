@@ -31,7 +31,7 @@ describe("Owner", function() {
   }, 10000);
 
   it("should be able to remove previously added source", function(done) {
-    Sources.remove(owner, source_id, function(success, response) {
+    Sources.remove(owner, [source_id], function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
       source_id = response.source_id;
