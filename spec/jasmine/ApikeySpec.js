@@ -66,8 +66,7 @@ describe("API Key", function() {
   it("should be able to fail on invalid API Key revocation", function(done) {
     console.log("Revoking invalid key...");
     APIKey.revoke(
-      "nonsense",
-      "sample-key-hash",
+      "nonsense", ["sample-key-hash"],
       function(success) {
         expect(success).toBe(false);
         done();

@@ -173,9 +173,9 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
-echo "» Revoking API Key..."
+echo "» Revoking API Keys..."
 
-RK='{ "fingerprint" : '${HASH}' }'
+RK='{ "fingerprints" : ['${HASH}'] }'
 
 R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
