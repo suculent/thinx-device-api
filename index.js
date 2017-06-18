@@ -376,8 +376,6 @@ var ThinxApp = function() {
       api_key_hashes = req.body.fingerprints;
     }
 
-    console.log("[OID:" + owner + "] [APIKEY_REVOKE] " + api_key_hash);
-
     apikey.revoke(owner, api_key_hashes, function(success) {
       if (success) {
         respond(res, {
