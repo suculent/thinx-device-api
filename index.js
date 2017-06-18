@@ -379,7 +379,7 @@ var ThinxApp = function() {
     apikey.revoke(owner, api_key_hashes, function(success) {
       if (success) {
         respond(res, {
-          revoked: api_key_hash,
+          revoked: api_key_hashes,
           success: true
         });
         return;
