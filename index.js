@@ -482,10 +482,10 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
-    if (typeof(req.body.source_id) === "undefined") {
+    if (typeof(req.body.source_ids) === "undefined") {
       respond(res, {
         success: false,
-        status: "missing_source_id"
+        status: "missing_source_ids"
       });
       return;
     }
