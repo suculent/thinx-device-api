@@ -366,11 +366,19 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
-    var api_key_hash = req.body.fingerprint;
+    var api_key_hashes = [];
+
+    if (typeof(req.body.fingerprint) !== "undefined") {
+      api_key_hashes = [req.body.fingerprint];
+    }
+
+    if (typeof(req.body.fingerprints) !== "undefined") {
+      api_key_hashes = req.body.fingerprints;
+    }
 
     console.log("[OID:" + owner + "] [APIKEY_REVOKE] " + api_key_hash);
 
-    apikey.revoke(owner, api_key_hash, function(success) {
+    apikey.revoke(owner, api_key_hashes, function(success) {
       if (success) {
         respond(res, {
           revoked: api_key_hash,
