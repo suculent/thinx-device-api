@@ -757,24 +757,30 @@ var ThinxApp = function() {
       });
     }
     console.log("OTT: " + ott);
-    var body = {
-      use: "ott",
-      ott: ott
-    };
-    device.firmware(body, req.headers.authentication,
-      function(success, response) {
-        console.log("OTT response: " + JSON.stringify(response));
-        respond(res, response);
-      });
+    device.ott_update(ott, function(success, response) {
+      console.log("OTT response: " + JSON.stringify(response));
+      respond(res, response);
+    });
   });
 
   // Firmware update retrieval. Serves binary [by owner (?) - should not be required] and device MAC.
   app.post("/device/firmware", function(req, res) {
     validateRequest(req, res);
-    device.firmware(req.body, req.headers.authentication,
-      function(success, response) {
-        respond(res, response);
-      });
+
+    if ((typeof(req.body.use) !== "undefined") && (req.body.use == "ott")) {
+
+      device.ott_request(req.owner, req.body, req.headers.authentication,
+        function(success, response) {
+          respond(res, response);
+        });
+
+    } else {
+
+      device.firmware(req.body, req.headers.authentication,
+        function(success, response) {
+          respond(res, response);
+        });
+    }
   });
 
   // Device login/registration
