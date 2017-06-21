@@ -58,6 +58,7 @@ else
 	# cannot really detect fail in binary stream: echo_fail $R
 fi
 
+if [[ $OTT !== 1 ]]; then
 echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing firmware update (OTT-FETCH)..."
@@ -75,6 +76,10 @@ if [[ $SUCCESS == true ]]; then
 	echo_ok "Firmware update result: $R"
 else
 	echo_fail $R
+fi
+
+else
+  echo "Skipping OTT Fetch, no OTT given as a result of last test."
 fi
 
 exit 0
