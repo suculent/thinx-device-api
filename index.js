@@ -756,7 +756,7 @@ var ThinxApp = function() {
         status: "missing_ott"
       });
     }
-    console.log("OTT: " + ott);
+    console.log("Update with OTT: " + ott);
     device.ott_update(ott, function(success, response) {
       console.log("OTT response: " + JSON.stringify(response));
       respond(res, response);
