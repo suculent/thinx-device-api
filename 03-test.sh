@@ -43,12 +43,13 @@ http://$HOST:7442/device/firmware)
 
 echo $R
 
-OTT=0
+OTT=1
 
 # {{"success":false,"status":"NOT_AVAILABLE"}
 
 SUCCESS=$(echo $R | jq .success)
 echo $SUCCESS
+if [[ $SUCCESS == false ]]; then
 	STATUS=$(echo $R | jq .status)
 	echo_ok "Firmware update result: $STATUS"
 else
