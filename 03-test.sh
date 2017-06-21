@@ -8,7 +8,7 @@ NC='\033[0m' # No Color
 API_KEY='88eb20839c1d8bf43819818b75a25cef3244c28e77817386b7b73b043193cef4'
 OWNER_ID='eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f'
 
-DEVICE_ID=null
+DEVICE_ID=a80cc610-4faf-11e7-9a9c-41d4f7ab4083
 MAC='00:00:00:00:00:00'
 
 function echo_fail() { # $1 = string
@@ -28,6 +28,54 @@ rm -rf cookies.jar
 if [[ -z $HOST ]]; then
 	HOST='rtm.thinx.cloud'
 fi
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "☢ Testing firmware update (OTT-INIT)..."
+
+R=$(curl -s \
+-H "Authentication: ${API_KEY}" \
+-H 'Origin: device' \
+-H "User-Agent: THiNX-Client" \
+-H "Content-Type: application/json" \
+-d '{ "mac" : "00:00:00:00:00:00", "udid" : "'${DEVICE_ID}'", "hash" : "hash", "commit" : "e58fa9bf7f478442c9d34593f0defc78718c873x", "checksum" : "02e2436d60c629e2ab6357d0d314dd6fe28bd0331b18ca6b19a25cd6f969d0a8", "owner": "'${OWNER_ID}'", "use":"ott" }' \
+http://$HOST:7442/device/firmware)
+
+echo $R
+
+OTT=$R
+
+# {"success":false,"status":"api_key_invalid"}
+
+SUCCESS=$(echo $R | jq .success)
+echo $SUCCESS
+if [[ $SUCCESS == true ]]; then
+	STATUS=$(echo $R | jq .status)
+	echo_ok "Firmware update result: $R"
+else
+	echo_fail $R
+fi
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "☢ Testing firmware update (OTT-FETCH)..."
+
+R=$(curl -v http://$HOST:7442/device/firmware?ott=$OTT)
+
+echo $R
+
+# {"success":false,"status":"api_key_invalid"}
+
+SUCCESS=$(echo $R | jq .success)
+echo $SUCCESS
+if [[ $SUCCESS == true ]]; then
+	STATUS=$(echo $R | jq .status)
+	echo_ok "Firmware update result: $R"
+else
+	echo_fail $R
+fi
+
+exit 0
 
 
 echo

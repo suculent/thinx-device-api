@@ -4,18 +4,21 @@
 
 **ROADMAP**
 
-It seems to be almost done. Let's have a week for fixing bugs and tweaking. There are still things that would not work after initial install (tech tail, e.g. mqtt configuration and other post-installs)
+It seems to be almost done. Let's have a week for fixing bugs and tweaking. There are still things that would not work after initial install (tech tail, e.g. mqtt configuration and other post-installs; bulk UI operations though update functions)
 
-* 1: Builder Logging, build tests
-* 2: Make devices respond/receive MQTT messages (LUA first)
-* 3: Improve statistics (count last 24 hours or something)
-* 4: Bare data support (LUA/uPy) for dumb firmwares (there is a lot of them), MongooseOS?
+* 1: Bulk operations
+* 2: Builder Logging, build tests
+* 3: Bare data support (LUA/uPy) for dumb firmwares (there is a lot of them), MongooseOS?
+* 4: Improve statistics (count last 24 hours or something)
+* 5: Make devices respond/receive MQTT messages (LUA first)
+
+### 12th week
 
 ### 11th week
 
-18/6/2017 - 1.6.1421 - finalizing bulk revocation
+18/6/2017 - finalizing bulk revocation; 3D printer arrived so there's a bit of distraction
 
-15-16/6/2017 - refactored Arduino C example and C++ library (roadmap task 5)
+15-16/6/2017 - refactoring Arduino C example and C++ library (roadmap task 5)
 
 12/6/2017 - 1.6.1412: advancing in test coverage, fixing bugs
 

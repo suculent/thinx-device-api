@@ -747,6 +747,27 @@ var ThinxApp = function() {
   // Main Device API
   //
 
+  // Firmware update retrieval for OTT requests
+  app.get("/device/firmware", function(req, res) {
+    var ott = req.query.ott;
+    if (typeof(ott) === "undefined") {
+      respond(res, {
+        success: false,
+        status: "missing_ott"
+      });
+    }
+    console.log("OTT: " + ott);
+    var body = {
+      use: "ott",
+      ott: ott
+    };
+    device.firmware(body, req.headers.authentication,
+      function(success, response) {
+        console.log("OTT response: " + JSON.stringify(response));
+        respond(res, response);
+      });
+  });
+
   // Firmware update retrieval. Serves binary [by owner (?) - should not be required] and device MAC.
   app.post("/device/firmware", function(req, res) {
     validateRequest(req, res);
