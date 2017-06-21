@@ -116,9 +116,6 @@ echo "[builder.sh]   host: $host"
 echo "[builder.sh]   port: $port"
 echo "[builder.sh]   REPO_PATH: $REPO_PATH"
 echo "[builder.sh]   REPO_NAME: ${REPO_NAME}"
-
-echo
-
 echo "[builder.sh] Cleaning workspace..."
 
 # Clean
@@ -187,7 +184,6 @@ BUILD_DATE=`date +%Y-%m-%d`
 # TODO: Change this to a sed template, this is tedious
 
 echo "[builder.sh] Building Thinx.h..."
-echo
 
 echo "//" > $THINX_FILE
 echo "// This is an auto-generated file, it will be re-written by THiNX on cloud build." >> $THINX_FILE
@@ -212,20 +208,16 @@ echo "int thinx_api_port = 7442;" >> $THINX_FILE
 
 
 # Build
-echo
 echo "[builder.sh] Generated header file Thinx.h:"
 cat $THINX_FILE >> $LOG_PATH
-echo
 
 echo "[builder.sh] TODO: Support no-compile deployment of Micropython/LUA here..."
 
 if [[ -f package.json ]]; then
-	echo
 	echo "[builder.sh] THiNX does not support npm builds."
 	echo "[builder.sh] If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues"
 
 elif [[ ! -f platformio.ini ]]; then
-	echo
 	echo "[builder.sh] This not a compatible project so far. Cannot build Arduino project without importing to Platform.io first."
 	echo "[builder.sh] If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues"
 	exit 1
@@ -244,8 +236,6 @@ if [[ $?==0 ]] ; then
 else
 	STATUS='"BUILD FAILED."'
 fi
-
-echo
 
 if [[ ! ${RUN} ]]; then
 	echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment."
@@ -279,8 +269,6 @@ echo "[builder.sh] Build completed with status: $STATUS"
 
 popd
 popd
-
-echo
 
 echo "[builder.sh] Post-flight check:"
 
