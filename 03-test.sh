@@ -51,14 +51,14 @@ SUCCESS=$(echo $R | jq .success)
 echo $SUCCESS
 if [[ $SUCCESS == false ]]; then
 	STATUS=$(echo $R | jq .status)
-	echo_ok "Firmware update result: $STATUS"
+	echo_fail "Firmware update result: $STATUS"
 else
-  echo_ok "Firmware update result:\n$R"
-  OTT=$R
+  OTT=$(echo $R | jq .ott)
+  echo_ok "Firmware update result:\n$OTT"
 	# cannot really detect fail in binary stream: echo_fail $R
 fi
 
-if [[ $OTT !== 1 ]]; then
+if [[ $OTT != "1" ]]; then
 echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing firmware update (OTT-FETCH)..."
