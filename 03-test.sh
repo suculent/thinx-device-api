@@ -43,17 +43,18 @@ http://$HOST:7442/device/firmware)
 
 echo $R
 
-OTT=$R
+OTT=0
 
-# {"success":false,"status":"api_key_invalid"}
+# {{"success":false,"status":"NOT_AVAILABLE"}
 
 SUCCESS=$(echo $R | jq .success)
 echo $SUCCESS
-if [[ $SUCCESS == true ]]; then
 	STATUS=$(echo $R | jq .status)
-	echo_ok "Firmware update result: $R"
+	echo_ok "Firmware update result: $STATUS"
 else
-	echo_fail $R
+  echo_ok "Firmware update result:\n$R"
+  OTT=$R
+	# cannot really detect fail in binary stream: echo_fail $R
 fi
 
 echo
