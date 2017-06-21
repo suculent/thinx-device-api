@@ -63,6 +63,8 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing firmware update (OTT-FETCH)..."
 
+OTT=$(echo $OTT | tr -d '"')
+
 R=$(curl -v http://$HOST:7442/device/firmware?ott=$OTT)
 
 echo $R
