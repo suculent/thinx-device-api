@@ -22,7 +22,7 @@ BUILD_ID='test-build-id'
 ORIGIN=$(pwd)
 UDID='f8e88e40-43c8-11e7-9ad3-b7281c2b9610'
 
-# ./builder --id=test-build-id --owner=eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f --udid=f8e88e40-43c8-11e7-9ad3-b7281c2b9610 --git=git@github.com:suculent/thinx-firmware-esp8266.git
+# ./builder --id=test-build-id --owner=eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f --udid=a80cc610-4faf-11e7-9a9c-41d4f7ab4083 --git=git@github.com:suculent/thinx-firmware-esp8266.git
 
 for i in "$@"
 do
@@ -45,7 +45,7 @@ case $i in
     --open)
       OPEN=true
     ;;
-		-u|--udid)
+		-u=*|--udid=*)
 		    UDID="${i#*=}"
 		;;
     *)
