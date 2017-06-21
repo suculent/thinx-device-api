@@ -38,7 +38,7 @@ R=$(curl -s \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "mac" : "00:00:00:00:00:00", "udid" : "'${DEVICE_ID}'", "hash" : "hash", "commit" : "e58fa9bf7f478442c9d34593f0defc78718c873x", "checksum" : "02e2436d60c629e2ab6357d0d314dd6fe28bd0331b18ca6b19a25cd6f969d0a8", "owner": "'${OWNER_ID}'", "use":"ott" }' \
+-d '{ "mac" : "00:00:00:00:00:00", "udid" : "'${DEVICE_ID}'", "commit" : "269c6fa21cf7e02d7db098b1fc20d14b9c8ce600", "checksum" : "30fe5d8f019d3a352deb9c1f4e7568a251fb4e8c333dbe2ea6b592f55784dd49", "owner": "'${OWNER_ID}'", "use":"ott" }' \
 http://$HOST:7442/device/firmware)
 
 echo $R

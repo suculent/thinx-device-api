@@ -14,6 +14,8 @@ It seems to be almost done. Let's have a week for fixing bugs and tweaking. Ther
 
 ### 12th week
 
+21/6/2017 - fixed builder; added OTT (limited-time-url) update implementation;
+
 ### 11th week
 
 18/6/2017 - finalizing bulk revocation; 3D printer arrived so there's a bit of distraction
