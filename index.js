@@ -488,6 +488,7 @@ var ThinxApp = function() {
         success: false,
         status: "no_names_given"
       });
+      return;
     }
 
     envvar.revoke(owner, env_var_names, function(success) {
