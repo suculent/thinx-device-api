@@ -473,7 +473,7 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
-    var env_var_names = [];
+    var env_var_names;
 
     if (typeof(req.body.name) !== "undefined") {
       env_var_names = [req.body.key];
@@ -481,6 +481,13 @@ var ThinxApp = function() {
 
     if (typeof(req.body.names) !== "undefined") {
       env_var_names = req.body.keys;
+    }
+
+    if (typeof(env_var_names) === "undefined") {
+      respond(res, {
+        success: false,
+        status: "no_names_given"
+      });
     }
 
     envvar.revoke(owner, env_var_names, function(success) {
