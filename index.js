@@ -509,7 +509,9 @@ var ThinxApp = function() {
 
     apienv.list(owner, function(success, response) {
       if (success) {
-        respond(res, response);
+        respond(res, {
+          env_vars: response
+        });
         return;
       } else {
         respond(res, {
