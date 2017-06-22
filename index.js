@@ -497,7 +497,6 @@ var ThinxApp = function() {
           revoked: env_var_names,
           success: true
         });
-        return;
       } else {
         respond(res, {
           success: false,
