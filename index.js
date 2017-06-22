@@ -507,11 +507,9 @@ var ThinxApp = function() {
 
     var owner = req.session.owner;
 
-    apienv.list(owner, function(success, vars) {
+    apienv.list(owner, function(success, response) {
       if (success) {
-        respond(res, {
-          env_vars: vars
-        });
+        respond(res, response);
         return;
       } else {
         respond(res, {
