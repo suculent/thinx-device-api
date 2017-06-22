@@ -4,22 +4,24 @@
 
 **ROADMAP**
 
-It seems to be almost done. Let's have a week for fixing bugs and tweaking. There are still things that would not work after initial install (tech tail, e.g. mqtt configuration and other post-installs; bulk UI operations though update functions)
+The device registration and checkin is working, firmwares can be provided using OTT, repositories are fetched and built, devices are notified, RSA keys stored but not tested, there's even support for environment variables not yet baked into the builder(s). MQTT is not a priority so far, instead we're trying to focus on firmware update side. It seems to be almost done. 
 
-* Support for environment variables
-* Support for building custom NodeMCU, Micropython or MongooseOS firmware
+* Split low-level builders for 'ino', 'pio', 'mos', 'lua' and 'upy' and manage using node.js classes
 * Builder Logging, build tests
-* Bare data support (LUA/uPy) for dumb firmwares (there is a lot of them), MongooseOS?
+* Update support (LUA/uPy/mos) for file-based dumb firmwares = allow file-based upload where applicable
 * Improve statistics (count last 24 hours or something)
 * Make devices respond/receive MQTT messages (LUA first)
+* Support for environment variables
+* Support for building custom NodeMCU, Micropython or MongooseOS firmware
+* Installer, disaster recovery.
 
 **LONG-TERM ROADMAP**
 
 ### 12th week
 
-22/6/2017 - 1.6.xxxx: buffer responses are now binary as expected; added support for secure API environment variables (for Micropython/LUA ssid/pass parametrization)
+22/6/2017 - 1.6.1486: buffer responses are now binary as expected; added support for secure API environment variables (for Micropython/LUA parametrization); published all five variants of firmware base repositories
 
-21/6/2017 - 1.6.1465: fixed builder; OTT (One-Time-Token) update supported;
+21/6/2017 - 1.6.1465: fixed builder; OTT (One-Time-Token) update supported; (OTT will mean version bump to 1.7)
 
 ### 11th week
 

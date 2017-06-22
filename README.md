@@ -15,11 +15,23 @@ IoT Device Management Server running on node.js.
 
 • Provides control to a build server that pushes new firmware versions to client applications (FCM push) and devices (MQTT).
 
+## Future roadmap
+
+* Custom firmware builder for MongooseOS, NodeMCU and Micropython (allow module selection, add THiNX as an OS-level library)
+
 ## Supported IoT Platforms
 
 * ESP8266 (thinx-firmware-esp8266)
 * Tested on Wemos D1 Mini, Wemos D1 Mini Pro, Robodyn D1, Robodyn D1 Mini and NodeMCU with Arduino, LUA and Micropython-based core firmwares
-* Expected: Any Arduino with networking support.
+* Expected: Any Arduino with networking support, MongooseOS
+
+THiNX platform agent repositories:
+
+[Platform.io](https://github.com/suculent/thinx-firmware-esp8266-pio)
+[Arduino](https://github.com/suculent/thinx-firmware-esp8266-ino)
+[NodeMCU LUA](https://github.com/suculent/thinx-firmware-esp8266-lua)
+[Micropython](https://github.com/suculent/thinx-firmware-esp8266-upy)
+[MongooseOS](https://github.com/suculent/thinx-firmware-esp8266-mos)
 
 ## Prerequisites
 
@@ -32,6 +44,6 @@ IoT Device Management Server running on node.js.
 
 Ree RTM.md for all details.
 
-## Endpoints (deprecated)
+## Endpoints
 
 See 03-test.sh. There is no point of maintaining documentation for this at current stage of development and user base zero.
