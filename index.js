@@ -476,11 +476,11 @@ var ThinxApp = function() {
     var env_var_names = [];
 
     if (typeof(req.body.name) !== "undefined") {
-      env_var_names = [req.body.name];
+      env_var_names = [req.body.key];
     }
 
     if (typeof(req.body.names) !== "undefined") {
-      env_var_names = req.body.names;
+      env_var_names = req.body.keys;
     }
 
     envvar.revoke(owner, env_var_names, function(success) {

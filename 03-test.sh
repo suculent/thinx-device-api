@@ -113,7 +113,7 @@ R=$(curl -v -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--d '{ "names" : [ "WIFI_SSID" ] }' \
+-d '{ "keys" : [ "WIFI_SSID" ] }' \
 http://$HOST:7442/api/user/env/revoke)
 
 echo "${R}"
@@ -139,13 +139,13 @@ R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--d '{ "name" : "WIFI_SSID", "value" : "<enter-your-ssid-password>" }' \
+-d '{ "key" : "WIFI_SSID", "value" : "<enter-your-ssid-password>" }' \
 http://$HOST:7442/api/user/env/add)
 
 SUCCESS=$(echo $R | jq .success)
 FPRINT=null
 if [[ $SUCCESS == true ]]; then
-	FPRINT=$(echo $R | jq .fingerprint)
+	FPRINT=$(echo $R | jq .value)
 	echo_ok "Added ENV var: $FPRINT"
 else
 	echo_fail $R
