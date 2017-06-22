@@ -418,6 +418,110 @@ var ThinxApp = function() {
   });
 
   /*
+   * Environment Variables
+   */
+
+  /* Creates new env var. */
+  app.post("/api/user/env/add", function(req, res) {
+
+    if (!validateSecurePOSTRequest(req)) return;
+    if (!validateSession(req, res)) return;
+
+    var owner = req.session.owner;
+
+    if (typeof(req.body.key) === "undefined") {
+      respond(res, {
+        success: false,
+        status: "missing_key"
+      });
+      return;
+    }
+
+    if (typeof(req.body.value) === "undefined") {
+      respond(res, {
+        success: false,
+        status: "missing_value"
+      });
+      return;
+    }
+
+    var key = req.body.key;
+    var value = req.body.value;
+
+    apienv.create(owner, key, value, function(success,
+      object) {
+      if (success) {
+        respond(res, {
+          success: true,
+          key: key,
+          value: value
+        });
+      } else {
+        respond(res, {
+          success: success,
+          message: object
+        });
+      }
+    });
+  });
+
+  /* Deletes env var by its name */
+  app.post("/api/user/env/revoke", function(req, res) {
+
+    if (!validateSecurePOSTRequest(req)) return;
+    if (!validateSession(req, res)) return;
+
+    var owner = req.session.owner;
+    var env_var_names = [];
+
+    if (typeof(req.body.name) !== "undefined") {
+      env_var_names = [req.body.name];
+    }
+
+    if (typeof(req.body.names) !== "undefined") {
+      env_var_names = req.body.names;
+    }
+
+    envvar.revoke(owner, env_var_names, function(success) {
+      if (success) {
+        respond(res, {
+          revoked: api_key_hashes,
+          success: true
+        });
+        return;
+      } else {
+        respond(res, {
+          success: false,
+          status: "env_revocation_failed"
+        });
+      }
+    });
+  });
+
+  /* Lists all env vars for user. */
+  app.get("/api/user/env/list", function(req, res) {
+
+    if (!validateSecureGETRequest(req)) return;
+    if (!validateSession(req, res)) return;
+
+    var owner = req.session.owner;
+
+    apienv.list(owner, function(success, vars) {
+      if (success) {
+        respond(res, {
+          env_vars: vars
+        });
+        return;
+      } else {
+        respond(res, {
+          success: false,
+          status: "env_list_failed"
+        });
+      }
+    });
+  });
+
+  /*
    * Sources (GIT Repositories)
    */
 

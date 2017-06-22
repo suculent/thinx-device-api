@@ -6,15 +6,20 @@
 
 It seems to be almost done. Let's have a week for fixing bugs and tweaking. There are still things that would not work after initial install (tech tail, e.g. mqtt configuration and other post-installs; bulk UI operations though update functions)
 
-* 1: Bulk operations
-* 2: Builder Logging, build tests
-* 3: Bare data support (LUA/uPy) for dumb firmwares (there is a lot of them), MongooseOS?
-* 4: Improve statistics (count last 24 hours or something)
-* 5: Make devices respond/receive MQTT messages (LUA first)
+* Builder Logging, build tests
+* Bare data support (LUA/uPy) for dumb firmwares (there is a lot of them), MongooseOS?
+* Improve statistics (count last 24 hours or something)
+* Make devices respond/receive MQTT messages (LUA first)
+
+**LONG-TERM ROADMAP**
+
+* Support for environment variables
+* Support for building custom NodeMCU, Micropython or MongooseOS firmware
+
 
 ### 12th week
 
-22/6/2017 - 1.6.xxxx: buffer responses are now binary as expected
+22/6/2017 - 1.6.xxxx: buffer responses are now binary as expected; added support for secure API environment variables
 
 21/6/2017 - 1.6.1465: fixed builder; OTT (One-Time-Token) update supported;
 
