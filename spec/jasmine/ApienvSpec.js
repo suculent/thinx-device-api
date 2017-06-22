@@ -12,7 +12,6 @@ describe("API Env", function() {
         "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
         "sample-var-name",
         "sample-var-value",
-
         function(success,
           object) {
           if (success) {
