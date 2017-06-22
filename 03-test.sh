@@ -71,11 +71,10 @@ echo $R
 
 # {"success":false,"status":"api_key_invalid"}
 
-SUCCESS=$(echo $R | jq .success)
-echo $SUCCESS
-if [[ $SUCCESS == true ]]; then
-	STATUS=$(echo $R | jq .status)
-	echo_ok "Firmware update result: $R"
+SUCCESS=$(echo $R | jq .type)
+if [[ $SUCCESS == "Buffer" ]]; then
+	DATA=$(echo $R | jq .data)
+	echo_ok "Firmware update result: $DATA"
 else
 	echo_fail $R
 fi

@@ -4,6 +4,8 @@
 
 var ThinxApp = function() {
 
+  var typeOf = require('typeof');
+
   var Rollbar = require('rollbar');
 
   var rollbar = new Rollbar({
@@ -758,8 +760,9 @@ var ThinxApp = function() {
     }
     console.log("Update with OTT: " + ott);
     device.ott_update(ott, function(success, response) {
-      console.log("OTT response: " + JSON.stringify(response));
+      //console.log("OTT response: " + JSON.stringify(response));
       respond(res, response);
+
     });
   });
 
@@ -1374,7 +1377,9 @@ var ThinxApp = function() {
     if (req.session.owner) {
       res.redirect("/");
     } else {
-      res.end("This is API ROOT."); // insecure
+      console.log("Logout to irigin: " + req.protocol + '://' + req.get(
+        'host'));
+      res.redirect(req.protocol + '://' + req.get('host'));
     }
   });
 
@@ -1598,7 +1603,16 @@ var ThinxApp = function() {
   //
 
   function respond(res, object) {
-    res.end(JSON.stringify(object));
+
+    if (typeOf(response) == "buffer") {
+      res.end(object);
+
+    } else if (typeOf(response) == "string") {
+      res.end(object);
+
+    } else {
+      res.end(JSON.stringify(object));
+    }
   }
 
   function validateJSON(str) {

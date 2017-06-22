@@ -14,7 +14,9 @@ It seems to be almost done. Let's have a week for fixing bugs and tweaking. Ther
 
 ### 12th week
 
-21/6/2017 - fixed builder; added OTT (limited-time-url) update implementation;
+22/6/2017 - 1.6.xxxx: buffer responses are now binary as expected
+
+21/6/2017 - 1.6.1465: fixed builder; OTT (One-Time-Token) update supported;
 
 ### 11th week
 
