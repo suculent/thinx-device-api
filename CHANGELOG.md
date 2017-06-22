@@ -6,6 +6,8 @@
 
 It seems to be almost done. Let's have a week for fixing bugs and tweaking. There are still things that would not work after initial install (tech tail, e.g. mqtt configuration and other post-installs; bulk UI operations though update functions)
 
+* Support for environment variables
+* Support for building custom NodeMCU, Micropython or MongooseOS firmware
 * Builder Logging, build tests
 * Bare data support (LUA/uPy) for dumb firmwares (there is a lot of them), MongooseOS?
 * Improve statistics (count last 24 hours or something)
@@ -13,13 +15,9 @@ It seems to be almost done. Let's have a week for fixing bugs and tweaking. Ther
 
 **LONG-TERM ROADMAP**
 
-* Support for environment variables
-* Support for building custom NodeMCU, Micropython or MongooseOS firmware
-
-
 ### 12th week
 
-22/6/2017 - 1.6.xxxx: buffer responses are now binary as expected; added support for secure API environment variables
+22/6/2017 - 1.6.xxxx: buffer responses are now binary as expected; added support for secure API environment variables (for Micropython/LUA ssid/pass parametrization)
 
 21/6/2017 - 1.6.1465: fixed builder; OTT (One-Time-Token) update supported;
 

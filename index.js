@@ -494,7 +494,7 @@ var ThinxApp = function() {
     envvar.revoke(owner, env_var_names, function(success) {
       if (success) {
         respond(res, {
-          revoked: api_key_hashes,
+          revoked: env_var_names,
           success: true
         });
         return;
