@@ -1397,12 +1397,18 @@ var ThinxApp = function() {
 
   // disable HTTPS on CIRCLE_CI
   if (process.env.CIRCLE_CI !== true) {
-    var ssl_options = {
-      key: fs.readFileSync(app_config.ssl_key),
-      cert: fs.readFileSync(app_config.ssl_cert)
-    };
-    console.log("Starting HTTPS server on " + (serverPort + 1) + "...");
-    https.createServer(ssl_options, app).listen(serverPort + 1);
+
+    if ((fs.existsSync(app_config.ssl_key)) &&
+      (fs.existsSync(app_config.ssl_cert))) {
+      var ssl_options = {
+        key: fs.readFileSync(app_config.ssl_key),
+        cert: fs.readFileSync(app_config.ssl_cert)
+      };
+      console.log("Starting HTTPS server on " + (serverPort + 1) + "...");
+      https.createServer(ssl_options, app).listen(serverPort + 1);
+    } else {
+      console.log("Skipping HTTPS server, SSL key or certificate not found.");
+    }
   }
 
   // Legacy HTTP support for old devices without HTTPS proxy
@@ -1604,10 +1610,10 @@ var ThinxApp = function() {
 
   function respond(res, object) {
 
-    if (typeOf(response) == "buffer") {
+    if (typeOf(object) == "buffer") {
       res.end(object);
 
-    } else if (typeOf(response) == "string") {
+    } else if (typeOf(object) == "string") {
       res.end(object);
 
     } else {
