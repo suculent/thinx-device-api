@@ -71,6 +71,7 @@ var ThinxApp = function() {
   var device = require("./lib/thinx/device");
   var devices = require("./lib/thinx/devices");
   var watcher = require("./lib/thinx/repository");
+  var apienv = require("./lib/thinx/apienv");
   var apikey = require("./lib/thinx/apikey");
   var user = require("./lib/thinx/owner");
   var rsakey = require("./lib/thinx/rsakey");
