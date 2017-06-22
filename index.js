@@ -476,11 +476,11 @@ var ThinxApp = function() {
     var env_var_names;
 
     if (typeof(req.body.name) !== "undefined") {
-      env_var_names = [req.body.key];
+      env_var_names = [req.body.name];
     }
 
     if (typeof(req.body.names) !== "undefined") {
-      env_var_names = req.body.keys;
+      env_var_names = req.body.names;
     }
 
     if (typeof(env_var_names) === "undefined") {
