@@ -46,7 +46,7 @@ Ree RTM.md for all details.
 
 ### GitHub Webhook support
 
-You can direct your GitHub webhooks to http://thinx.cloud:9000/ after adding a valid deploy key from GitHub to THiNX RTM.
+You can direct your GitHub webhooks to http://thinx.cloud:9001/ after adding a valid deploy key from GitHub to THiNX RTM.
 
 ## Endpoints
 
