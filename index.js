@@ -1438,7 +1438,8 @@ var ThinxApp = function() {
       });
     }
     console.log(JSON.stringify(req.params));
-    res.status(401).end();
+    //res.status(401).end();
+    res.redirect("http://thinx.cloud/");
   });
 
   /*
