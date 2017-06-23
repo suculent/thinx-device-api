@@ -6,9 +6,15 @@ ignore:
     - nano > follow > request > qs:
         reason: 'yes'
         expires: '2017-06-23T20:24:03.076Z'
+      codecov.io > request > qs:
+        reason: 'yes'
+        expires: '2017-07-23T21:05:53.502Z'
     - codecov.io > request > qs:
         reason: 'yes'
         expires: '2017-06-23T20:24:03.076Z'
+      nano > follow > request > qs:
+        reason: 'yes'
+        expires: '2017-07-23T21:05:53.502Z'
 # patches apply the minimum changes required to fix a vulnerability
 patch:
   'npm:hawk:20160119':

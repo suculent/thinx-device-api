@@ -20,7 +20,7 @@
     "coverage": "nyc jasmine; nyc report --reporter=text-lcov | coveralls",
     "snyk-protect": "snyk protect",
     "prepublish": "npm run snyk-protect",
-    "test": "echo"
+    "test": "snyk test && echo"
   },
   "preferGlobal": true,
   "dependencies": {
@@ -49,11 +49,11 @@
     "mkdirp": "^0.5.1",
     "mqtt": "^2.6.2",
     "nano": "^6.2.0",
-    "node-vault": "^0.5.6",
+    "node-vault": "^0.5.7",
     "path": "^0.12.7",
     "qs": "6.0.4",
     "redis": "^2.7.1",
-    "request": "2.68.0",
+    "request": "^2.74.0",
     "rollbar": "2.0.1",
     "semver": "5.3.0",
     "sha256": "^0.2.0",
