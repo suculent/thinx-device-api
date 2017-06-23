@@ -491,7 +491,7 @@ var ThinxApp = function() {
       return;
     }
 
-    apienv.revoke(owner, env_var_names, function(success) {
+    apienv.revoke(owner, env_var_names, function(success, response) {
       if (success) {
         respond(res, {
           revoked: env_var_names,
