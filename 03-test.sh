@@ -31,6 +31,28 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
+echo "» Testing authentication..."
+
+R=$(curl -s -c cookies.jar \
+-H "Origin: rtm.thinx.cloud" \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+-d '{ "username" : "test", "password" : "tset" }' \
+http://$HOST:7442/api/login)
+
+# {"redirectURL":"https://thinx.cloud/app"}
+
+SUCCESS=$(echo $R | jq .redirectURL )
+echo $SUCCESS
+if [[ ! -z $SUCCESS ]]; then
+	URL=$(echo $R | jq .redirectURL)
+	echo_ok "Redirected to login: $SUCCESS"
+else
+	echo_fail $R
+fi
+
+echo
+echo "--------------------------------------------------------------------------------"
 echo "☢ Testing firmware update (OTT-INIT)..."
 
 R=$(curl -s \
@@ -65,16 +87,18 @@ echo "☢ Testing firmware update (OTT-FETCH)..."
 
 OTT=$(echo $OTT | tr -d '"')
 
-R=$(curl -v http://$HOST:7442/device/firmware?ott=$OTT)
+R=$(curl -s http://$HOST:7442/device/firmware?ott=$OTT)
 
-echo $R
-
-# {"success":false,"status":"api_key_invalid"}
+# {"type":"Buffer","data":"..."}
 
 SUCCESS=$(echo $R | jq .type)
 if [[ $SUCCESS == "Buffer" ]]; then
 	DATA=$(echo $R | jq .data)
-	echo_ok "Firmware update result: $DATA"
+  if [ ! -z $DATA ]; then
+	   echo_ok "Firmware update result: $DATA"
+  else
+    echo_fail $R
+  fi
 else
 	echo_fail $R
 fi
@@ -83,13 +107,42 @@ else
   echo "Skipping OTT Fetch, no OTT given as a result of last test."
 fi
 
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "» Pushing Env var..."
+
+# {"success":true,"fingerprint":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93"}
+
+echo "${R}"
+
+R=$(curl -s -b cookies.jar \
+-H "Authentication: ${API_KEY}" \
+-H 'Origin: rtm.thinx.cloud' \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+-d '{ "key" : "WIFI_SSID", "value" : "<enter-your-ssid-password>" }' \
+http://$HOST:7442/api/user/env/add)
+
+SUCCESS=$(echo $R | jq .success)
+FPRINT=null
+if [[ $SUCCESS == true ]]; then
+	FPRINT=$(echo $R | jq .value)
+	echo_ok "Added ENV var: $FPRINT"
+else
+	echo_fail $R
+fi
+
+sleep 2
+
 echo
 echo "--------------------------------------------------------------------------------"
 echo "» Listing Env vars..."
 
-#
+echo "${R}"
 
 R=$(curl -s -b cookies.jar \
+-H "Authentication: ${API_KEY}" \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -110,10 +163,11 @@ echo "» Revoking ENV var(s)..."
 # {"revoked":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93","success":true}
 
 R=$(curl -v -s -b cookies.jar \
+-H "Authentication: ${API_KEY}" \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--d '{ "keys" : [ "WIFI_SSID" ] }' \
+-d '{ "names" : [ "WIFI_SSID" ] }' \<
 http://$HOST:7442/api/user/env/revoke)
 
 echo "${R}"
@@ -121,35 +175,13 @@ echo "${R}"
 SUCCESS=$(echo $R | jq .success)
 RPRINT=null
 if [[ $SUCCESS == true ]]; then
-	RPRINT=$(echo $R | jq .status)
+	RPRINT=$(echo $R | jq .revoked)
 	echo_ok "Revoked Env var: $RPRINT"
 else
 	echo_fail $R
 fi
 
 sleep 2
-
-echo
-echo "--------------------------------------------------------------------------------"
-echo "» Pushing Env var..."
-
-# {"success":true,"fingerprint":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93"}
-
-R=$(curl -s -b cookies.jar \
--H 'Origin: rtm.thinx.cloud' \
--H "User-Agent: THiNX-Web" \
--H "Content-Type: application/json" \
--d '{ "key" : "WIFI_SSID", "value" : "<enter-your-ssid-password>" }' \
-http://$HOST:7442/api/user/env/add)
-
-SUCCESS=$(echo $R | jq .success)
-FPRINT=null
-if [[ $SUCCESS == true ]]; then
-	FPRINT=$(echo $R | jq .value)
-	echo_ok "Added ENV var: $FPRINT"
-else
-	echo_fail $R
-fi
 
 exit 0
 
@@ -225,28 +257,6 @@ echo $SUCCESS
 if [[ $SUCCESS == true ]]; then
 	STATUS=$(echo $R | jq .status)
 	echo_ok "Firmware update result: $R"
-else
-	echo_fail $R
-fi
-
-echo
-echo "--------------------------------------------------------------------------------"
-echo "» Testing authentication..."
-
-R=$(curl -s -c cookies.jar \
--H "Origin: rtm.thinx.cloud" \
--H "User-Agent: THiNX-Web" \
--H "Content-Type: application/json" \
--d '{ "username" : "test", "password" : "tset" }' \
-http://$HOST:7442/api/login)
-
-# {"redirectURL":"https://thinx.cloud/app"}
-
-SUCCESS=$(echo $R | jq .redirectURL )
-echo $SUCCESS
-if [[ ! -z $SUCCESS ]]; then
-	URL=$(echo $R | jq .redirectURL)
-	echo_ok "Redirected to login: $SUCCESS"
 else
 	echo_fail $R
 fi
