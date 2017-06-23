@@ -44,6 +44,10 @@ THiNX platform agent repositories:
 
 Ree RTM.md for all details.
 
+### GitHub Webhook support
+
+You can direct your GitHub webhooks to http://thinx.cloud:9000/ after adding a valid deploy key from GitHub to THiNX RTM.
+
 ## Endpoints
 
 See 03-test.sh. There is no point of maintaining documentation for this at current stage of development and user base zero.

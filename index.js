@@ -1065,6 +1065,8 @@ var ThinxApp = function() {
 
     alog.fetch(owner, function(err, body) {
 
+      console.log("alog-body: " + JSON.stringify(body));
+
       if (err !== false) {
         console.log(err);
         respond(res, {
@@ -1072,9 +1074,7 @@ var ThinxApp = function() {
           status: "log_fetch_failed",
           error: err
         });
-        return;
       } else {
-
         if (!body) {
           console.log("Log for owner " + owner + " not found.");
           respond(res, {
@@ -1082,13 +1082,12 @@ var ThinxApp = function() {
             status: "log_fetch_failed",
             error: err
           });
-          return;
+        } else {
+          respond(res, {
+            success: true,
+            logs: body
+          });
         }
-
-        respond(res, {
-          success: true,
-          logs: body
-        });
       }
     });
   });
