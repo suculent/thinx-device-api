@@ -1437,8 +1437,8 @@ var ThinxApp = function() {
         }
       });
     }
-    console.log(JSON.stringify(reg.params));
-    res.redirect("/"); // HOME_URL (Apache)
+    console.log(JSON.stringify(req.params));
+    res.status(401).end();
   });
 
   /*
