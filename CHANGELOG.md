@@ -4,7 +4,7 @@
 
 **ROADMAP**
 
-The device registration and checkin is working, firmwares can be provided using OTT, repositories are fetched and built, devices are notified, RSA keys stored but not tested, there's even support for environment variables not yet baked into the builder(s). MQTT is not a priority so far, instead we're trying to focus on firmware update side. It seems to be almost done. 
+The device registration and checkin is working, firmwares can be provided using OTT, repositories are fetched and built, devices are notified, RSA keys stored but not tested, there's even support for environment variables not yet baked into the builder(s). MQTT is not a priority so far, instead we're trying to focus on firmware update side. It seems to be almost done.
 
 * Split low-level builders for 'ino', 'pio', 'mos', 'lua' and 'upy' and manage using node.js classes
 * Builder Logging, build tests
@@ -18,6 +18,8 @@ The device registration and checkin is working, firmwares can be provided using 
 **LONG-TERM ROADMAP**
 
 ### 12th week
+
+23/6/2017 - 1.7.1500: added deploy-hook; fixed Enviro revocations, version bump due to OTT support and multiple firmware OS builders
 
 22/6/2017 - 1.6.1486: buffer responses are now binary as expected; added support for secure API environment variables (for Micropython/LUA parametrization); published all five variants of firmware base repositories
 
