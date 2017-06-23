@@ -1065,8 +1065,6 @@ var ThinxApp = function() {
 
     alog.fetch(owner, function(err, body) {
 
-      console.log("alog-body: " + JSON.stringify(body));
-
       if (err !== false) {
         console.log(err);
         respond(res, {
