@@ -7,13 +7,23 @@
 
 IoT Device Management Server running on node.js.
 
-• Leverages MQTT as an optional side-chain transport layer.
+## The Purpose
 
-• Serves as an IoT device registration endpoint while storing device data using CouchDB server and Redis session-store.
+As a user I have already many IoT new and/or legacy devices at home. Sometimes I need to change WiFi credentials on a switch that is mounted on a ceiling. Sometimes I want to swap whole firmware for new one, but not always I want to rewrite working legacy LUA code to Arduino C. That's why we have decided to create THiNX.
 
-• Application is a back-end data provider (security agent) for RTM admin console running on the same server (currently on Apache, but should converge to NGINX).
+> Update your IoT device by pushing to a git repository. Swap your operating system for another over-the-air. Migrate multiple devices at once between WiFi networks.
 
-• Provides control to a build server that pushes new firmware versions to client applications (FCM push) and devices (MQTT).
+* Implements Continuous Integration practices to update device apps/configurations from a GitHub repository using commit hooks.
+
+* Helps building secure MQTT infrastructure as an optional side-chain transport layer.
+
+* Serves as an IoT device registration endpoint while storing device data using CouchDB server and Redis session-store.
+
+* API is a back-end data provider (security agent) for RTM Admin Console Application.
+
+* Provides control to a build server that pushes new firmware versions to client applications (FCM push) and devices (MQTT).
+
+* Provides HTTP-to-HTTPS proxy to secure legacy IoT devices that are not capable of TLS and/or AES-level encryption. 
 
 ## Future roadmap
 
@@ -35,10 +45,11 @@ THiNX platform agent repositories:
 
 ## Prerequisites
 
-* Linux Server (possibly Raspberry Pi but not tested)
+* Linux Server (min. 2 GB RAM)
 * API runs on HTTP port 7442 (possibly HTTPS 7443) and 7447 (websocket)
 * MQTT runs on HTTP port 1883 (possibly HTTPS 8883)
 * Admin runs on HTTP/HTTPS port (80/443)
+* GitHub commit hooks are listened to on port 9001
 
 ## Installation
 
