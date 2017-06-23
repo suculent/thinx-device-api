@@ -30,6 +30,7 @@
     "codecov.io": "^0.1.6",
     "colors": "^1.1.2",
     "connect-redis": "^3.2.0",
+    "connect-timeout": "^1.9.0",
     "console-stamp": "^0.2.5",
     "dateformat": "^2.0.0",
     "email": "^0.2.6",
