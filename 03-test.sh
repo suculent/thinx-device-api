@@ -781,6 +781,8 @@ else
 	echo_fail $R
 fi
 
+sleep 2
+
 echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing device revocation..."
