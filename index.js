@@ -499,8 +499,8 @@ var ThinxApp = function() {
         });
       } else {
         respond(res, {
-          success: false,
-          status: "env_revocation_failed"
+          success: success,
+          status: response
         });
       }
     });
