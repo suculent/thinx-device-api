@@ -11,15 +11,15 @@ The device registration and checkin is working, firmwares can be provided using 
 * Update support (LUA/uPy/mos) for file-based dumb firmwares = allow file-based upload where applicable
 * Improve statistics (count last 24 hours or something)
 * Make devices respond/receive MQTT messages (LUA first)
-* Support for environment variables
-* Support for building custom NodeMCU, Micropython or MongooseOS firmware
-* Installer, disaster recovery.
 
 **LONG-TERM ROADMAP**
 
+* Support for building custom NodeMCU, Micropython or MongooseOS firmware
+* Installer, disaster recovery (except for existing DO backup).
+
 ### 12th week
 
-23/6/2017 - 1.7.1500: added deploy-hook; fixed Enviro revocations, version bump due to OTT support and multiple firmware OS builders; fixed user logout (+ also on invalid session)
+23/6/2017 - 1.7.1500: added deploy-hook (hook fails but nothing is fetched, use pm2 pullAndRestart ft.); fixed Enviro revocations, version bump due to OTT support and multiple firmware OS builders; fixed user logout (+ also on invalid session)
 
 22/6/2017 - 1.6.1486: buffer responses are now binary as expected; added support for secure API environment variables (for Micropython/LUA parametrization); published all five variants of firmware base repositories
 
