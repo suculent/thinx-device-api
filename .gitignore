@@ -11,8 +11,9 @@ repos/
 # Runtime data that are not to be stored from server back to repository
 sessions/**
 logs/**
-data/
+data/**
 repositories/
+avatars/**
 
 mqtt_passwords
 dhparams.pem
