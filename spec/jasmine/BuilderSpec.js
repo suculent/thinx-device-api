@@ -2,7 +2,7 @@ describe("Builder", function() {
 
   var builder = require("../../lib/thinx/builder");
 
-  var build_id = "0xBUILD_ID";
+  var build_id = "0xBUILDERSPEC_BUILD_ID";
   var owner =
     "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f";
   var udid = "fcdd7b20-3980-11e7-a58d-81e4acfbeb86";

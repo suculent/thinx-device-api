@@ -6,10 +6,11 @@ describe("Device", function() {
   var owner =
     "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f";
   var apikey =
-    "8b1dff1958cc9b0aa784ce7096c7a29886ce9875ff821b339a38b87040da8afa";
+    "1e1ed4110359eccce9541e33d0ef444d1f3ebd8fe771b754280cccdfeb3cc4e5";
 
   var RS =
-    '{ "registration" : { "mac" : "00:00:00:00:00:00:00", "firmware" : "DeviceSpec.js", "version" : "1.0.0", "checksum" : "nevermind", "push" : "forget", "alias" : "npmtest", "owner": "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f", "udid": "to-be-deleted-on-test" } }';
+    '{ "registration" : { "mac" : "00:00:00:00:00:00:00", "firmware" : "DeviceSpec.js", "version" : "1.0.0", "checksum" : "nevermind", "push" : "forget", "alias" : "npmtest", "owner": "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f", "udid": "to-be-deleted-on-test", "owner": "' +
+    owner + '" } }';
 
   var body = JSON.parse(RS);
 
