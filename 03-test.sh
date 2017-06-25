@@ -53,6 +53,29 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
+echo "» Testing profile..."
+
+R=$(curl -s -b cookies.jar \
+-H "Origin: rtm.thinx.cloud" \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+http://$HOST:7442/api/user/profile)
+
+# {"redirectURL":"https://thinx.cloud/app"}
+
+SUCCESS=$(echo $R | jq . )
+echo $SUCCESS
+if [[ ! -z $SUCCESS ]]; then
+	URL=$(echo $R | jq .)
+	echo_ok "User profile response: $SUCCESS"
+else
+	echo_fail $R
+fi
+
+exit 0
+
+echo
+echo "--------------------------------------------------------------------------------"
 echo "☢ Testing firmware update (OTT-INIT)..."
 
 R=$(curl -s \
@@ -605,7 +628,7 @@ R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "build_id" : "0xBUILD_ID" }' \
+-d '{ "build_id" : "f168def0-597f-11e7-a932-014d5b00c004" }' \
 http://$HOST:7442/api/user/logs/build)
 
 SUCCESS=$(echo $R | jq .success)

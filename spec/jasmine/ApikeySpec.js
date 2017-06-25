@@ -2,7 +2,8 @@ var generated_key_hash = null;
 var APIKey = require('../../lib/thinx/apikey');
 
 var test_key =
-  "8b1dff1958cc9b0aa784ce7096c7a29886ce9875ff821b339a38b87040da8afa";
+  "1e1ed4110359eccce9541e33d0ef444d1f3ebd8fe771b754280cccdfeb3cc4e5";
+"1e1ed4110359eccce9541e33d0ef444d1f3ebd8fe771b754280cccdfeb3cc4e5";
 
 describe("API Key", function() {
 

@@ -73,6 +73,7 @@ describe("Owner", function() {
     User.profile(owner, function(success, response) {
       expect(response).toBeDefined();
       expect(success).toBe(true);
+      console.log(JSON.stringify(response));
       done();
     });
   }, 10000);
