@@ -13,6 +13,7 @@ sessions/**
 logs/**
 data/
 repositories/
+avatars/**
 
 mqtt_passwords
 dhparams.pem
