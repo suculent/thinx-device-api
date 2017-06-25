@@ -219,12 +219,13 @@ var ThinxApp = function() {
 
     var origin = req.get("origin");
 
+    /**/
     // TODO: This is a hack. It should not work like this. We just need to find out,
     // why the login page rejects CORS on browser-side (redirect from successful
     // Password-change operation).
 
     if (typeof(origin) === "undefined") {
-      origin = "*";
+      origin = "rtm.thinx.cloud";
       //rollbar.reportMessage("SEC-ERR: Turning 'undefined' origin to 'rtm.thinx.cloud'");
     }
 
@@ -232,6 +233,7 @@ var ThinxApp = function() {
       origin = "*";
       //rollbar.reportMessage( "SEC-ERR: Turning null origin to 'rtm.thinx.cloud'");
     }
+
 
     var allowedOrigin = origin;
 
