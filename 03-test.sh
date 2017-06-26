@@ -74,7 +74,7 @@ ASOURCE=null
 if [[ $SUCCESS == true ]]; then
 	ALOG=$(echo $R | jq .logs)
   if [[ ! -z $ALOG ]]; then
-	   echo_ok "Fetched audit log:" $R
+	   echo_ok "Fetched audit log:" $ALOG
   else
     echo_fail $(echo $R | jq .)
   fi
