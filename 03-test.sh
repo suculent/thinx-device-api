@@ -57,6 +57,74 @@ R=""
 
 echo
 echo "--------------------------------------------------------------------------------"
+echo "☢ Audit log fetch..."
+
+# {"success":true,"logs":{"total_rows":769,"offset":0,"rows":[{"id":"ff16cba945cff2ca578b29c7024eb653","key":{"_id":"ff16cba945cff2ca578b29c7024eb653","_rev":"1-0213b9d3716d6cbc5b5c8e7d1b6deae8","message":"GET : /api/user/devices","owner":"eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f","date":"2017-05-11T15:50:40.729Z"},...
+
+R=$(curl -s -b cookies.jar \
+-H "Origin: rtm.thinx.cloud" \
+-H "User-Agent: THiNX-Client" \
+-H "Content-Type: application/json" \
+http://$HOST:7442/api/user/logs/audit)
+
+echo $R
+
+SUCCESS=$(echo $R | jq .success)
+ASOURCE=null
+if [[ $SUCCESS == true ]]; then
+	ALOG=$(echo $R | jq .logs)
+  if [[ ! -z $ALOG ]]; then
+	   echo_ok "Fetched audit log:" $R
+  else
+    echo_fail $(echo $R | jq .)
+  fi
+else
+	echo_fail $R
+fi
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "☢ Build log list..."
+
+R=$(curl -s -b cookies.jar \
+-H "Origin: rtm.thinx.cloud" \
+-H "User-Agent: THiNX-Client" \
+-H "Content-Type: application/json" \
+http://$HOST:7442/api/user/logs/build/list)
+
+SUCCESS=$(echo $R | jq .success)
+BLIST=null
+if [[ $SUCCESS == true ]]; then
+	BLIST=$(echo $R | jq .)
+	echo_ok "Fetched build log: $BLIST"
+else
+	echo_fail $R
+fi
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "☢ Build log fetch..."
+
+R=$(curl -s -b cookies.jar \
+-H "Origin: rtm.thinx.cloud" \
+-H "User-Agent: THiNX-Client" \
+-H "Content-Type: application/json" \
+-d '{ "build_id" : "f168def0-597f-11e7-a932-014d5b00c004" }' \
+http://$HOST:7442/api/user/logs/build)
+
+SUCCESS=$(echo $R | jq .success)
+BLOG=null
+if [[ $SUCCESS == true ]]; then
+	BLOG=$(echo $R | jq .)
+	echo_ok "Fetched build log: $BLOG"
+else
+	echo_fail $R
+fi
+
+exit 0
+
+echo
+echo "--------------------------------------------------------------------------------"
 echo "» Pushing Env var..."
 
 # {"success":true,"fingerprint":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93"}
@@ -133,74 +201,6 @@ else
 fi
 
 sleep 2
-
-exit 0
-
-echo
-echo "--------------------------------------------------------------------------------"
-echo "☢ Audit log fetch..."
-
-# {"success":true,"logs":{"total_rows":769,"offset":0,"rows":[{"id":"ff16cba945cff2ca578b29c7024eb653","key":{"_id":"ff16cba945cff2ca578b29c7024eb653","_rev":"1-0213b9d3716d6cbc5b5c8e7d1b6deae8","message":"GET : /api/user/devices","owner":"eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f","date":"2017-05-11T15:50:40.729Z"},...
-
-R=$(curl -s -b cookies.jar \
--H "Origin: rtm.thinx.cloud" \
--H "User-Agent: THiNX-Client" \
--H "Content-Type: application/json" \
-http://$HOST:7442/api/user/logs/audit)
-
-echo $R
-
-SUCCESS=$(echo $R | jq .success)
-ASOURCE=null
-if [[ $SUCCESS == true ]]; then
-	ALOG=$(echo $R | jq .logs)
-  if [[ ! -z $ALOG ]]; then
-	   echo_ok "Fetched audit log:" $R
-  else
-    echo_fail $(echo $R | jq .)
-  fi
-else
-	echo_fail $R
-fi
-
-echo
-echo "--------------------------------------------------------------------------------"
-echo "☢ Build log list..."
-
-R=$(curl -s -b cookies.jar \
--H "Origin: rtm.thinx.cloud" \
--H "User-Agent: THiNX-Client" \
--H "Content-Type: application/json" \
-http://$HOST:7442/api/user/logs/build/list)
-
-SUCCESS=$(echo $R | jq .success)
-BLIST=null
-if [[ $SUCCESS == true ]]; then
-	BLIST=$(echo $R | jq .)
-	echo_ok "Fetched build log: $BLIST"
-else
-	echo_fail $R
-fi
-
-echo
-echo "--------------------------------------------------------------------------------"
-echo "☢ Build log fetch..."
-
-R=$(curl -s -b cookies.jar \
--H "Origin: rtm.thinx.cloud" \
--H "User-Agent: THiNX-Client" \
--H "Content-Type: application/json" \
--d '{ "build_id" : "f168def0-597f-11e7-a932-014d5b00c004" }' \
-http://$HOST:7442/api/user/logs/build)
-
-SUCCESS=$(echo $R | jq .success)
-BLOG=null
-if [[ $SUCCESS == true ]]; then
-	BLOG=$(echo $R | jq .)
-	echo_ok "Fetched build log: $BLOG"
-else
-	echo_fail $R
-fi
 
 echo
 echo "--------------------------------------------------------------------------------"
