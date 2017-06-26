@@ -1109,10 +1109,12 @@ var ThinxApp = function() {
       return;
     }
 
+    var builds = [];
+
     blog.list(owner, function(err, body) {
 
-      if (err !== null) {
-        console.log(err);
+      if (err) {
+        console.log("err: " + err);
         respond(res, {
           success: false,
           status: "build_list_failed",
@@ -1131,8 +1133,6 @@ var ThinxApp = function() {
         return;
       }
 
-      var builds = [];
-
       console.log("build-logs: " + JSON.stringify(body));
 
       for (var bindex in body.rows) {
@@ -1145,13 +1145,8 @@ var ThinxApp = function() {
         //if (typeof(row.doc) === "undefined") continue;
         //if (typeof(row.doc.log) === "undefined") continue;
 
-        for (var dindex in row.doc.log) {
-          //if (row.doc.log.hasOwnProperty(dindex)) continue;
-          var lastIndex = row.doc.log[dindex];
-          //if (lastIndex.hasOwnProperty("message")) lastIndex.message = "";
-          //if (lastIndex.hasOwnProperty("date")) lastIndex.date = "";
-          //if (lastIndex.hasOwnProperty("udid")) lastIndex.udid = "";
-          //if (lastIndex.hasOwnProperty("build")) lastIndex.build = "";
+        if (typeof(row.doc.log) === "undefined") {
+
           var build = {
             message: lastIndex.message,
             date: lastIndex.date,
@@ -1159,10 +1154,29 @@ var ThinxApp = function() {
             build_id: lastIndex.build
           };
           builds.push(build);
+
+        } else {
+
+          for (var dindex in row.doc.log) {
+            //if (row.doc.log.hasOwnProperty(dindex)) continue;
+            var lastIndex = row.doc.log[dindex];
+            //if (lastIndex.hasOwnProperty("message")) lastIndex.message = "";
+            //if (lastIndex.hasOwnProperty("date")) lastIndex.date = "";
+            //if (lastIndex.hasOwnProperty("udid")) lastIndex.udid = "";
+            //if (lastIndex.hasOwnProperty("build")) lastIndex.build = "";
+            var build = {
+              message: lastIndex.message,
+              date: lastIndex.date,
+              udid: lastIndex.udid,
+              build_id: lastIndex.build
+            };
+            builds.push(build);
+          }
+
         }
       }
 
-      console.log(builds);
+      console.log("builds:" + JSON.stringify(builds));
 
       respond(res, {
         success: true,
@@ -1374,9 +1388,9 @@ var ThinxApp = function() {
               });
               return;
             } else if (client_type == "webapp") {
-              console.log("REQH: " + JSON.stringify(req.headers));
-              console.log("REQQ: " + JSON.stringify(req.query)); // returns empty!
-              console.log("REQUEST host: " + req.headers.host);
+              //console.log("Allow-Origin REQH: " + JSON.stringify(req.headers));
+              //console.log("Allow-Origin REQQ: " + JSON.stringify(req.query)); // returns empty!
+              //console.log("Allow-Origin REQUEST host: " + req.headers.host);
               respond(res, {
                 "redirectURL": "/app/#/dashboard.html"
               });
@@ -1528,7 +1542,8 @@ var ThinxApp = function() {
       console.log("Starting HTTPS server on " + (serverPort + 1) + "...");
       https.createServer(ssl_options, app).listen(serverPort + 1);
     } else {
-      console.log("Skipping HTTPS server, SSL key or certificate not found.");
+      console.log(
+        "Skipping HTTPS server, SSL key or certificate not found.");
     }
   }
 
