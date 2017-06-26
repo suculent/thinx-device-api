@@ -67,7 +67,7 @@ R=$(curl -s -b cookies.jar \
 -H "Content-Type: application/json" \
 http://$HOST:7442/api/user/logs/audit)
 
-# echo $R
+echo "AUDITLOGFETCH:" $R
 
 SUCCESS=$(echo $R | jq .success)
 if [[ $SUCCESS == true ]]; then
