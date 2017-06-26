@@ -1162,7 +1162,7 @@ var ThinxApp = function() {
       }
 
       respond(res, {
-        success: true,
+        success: false,
         builds: builds
       });
 
