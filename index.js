@@ -1131,16 +1131,19 @@ var ThinxApp = function() {
       }
 
       var builds = [];
+
       for (var bindex in body.rows) {
 
-        if (!body.rows.hasOwnProperty(bindex)) continue;
+        //if (!body.rows.hasOwnProperty(bindex)) continue;
         var row = body.rows[bindex];
 
-        if (typeof(row.doc) === "undefined") continue;
-        if (typeof(row.doc.log) === "undefined") continue;
+        console.log("Build log row: " + JSON.stringify(row));
+
+        //if (typeof(row.doc) === "undefined") continue;
+        //if (typeof(row.doc.log) === "undefined") continue;
 
         for (var dindex in row.doc.log) {
-          if (row.doc.log.hasOwnProperty(dindex)) continue;
+          //if (row.doc.log.hasOwnProperty(dindex)) continue;
           var lastIndex = row.doc.log[dindex];
           if (lastIndex.hasOwnProperty("message")) lastIndex.message =
             "";
