@@ -67,14 +67,11 @@ R=$(curl -s -b cookies.jar \
 -H "Content-Type: application/json" \
 http://$HOST:7442/api/user/logs/audit)
 
-echo "AUDITLOGFETCH:" $R
-
 SUCCESS=$(echo $R | jq .success)
 if [[ $SUCCESS == true ]]; then
 	ALOG=$(echo $R | jq .logs)
-  echo $ALOG
   if [[ ! -z "${ALOG}" ]]; then
-	   echo_ok "Fetched audit log:" $ALOG
+	   echo_ok "Fetched audit log: $ALOG"
   else
     echo_fail $(echo $R | jq .)
   fi
