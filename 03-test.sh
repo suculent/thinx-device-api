@@ -33,7 +33,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Testing authentication..."
 
-R=$(curl -s -c cookies.jar \
+R=$(curl -v -c cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -41,6 +41,8 @@ R=$(curl -s -c cookies.jar \
 http://$HOST:7442/api/login)
 
 # {"redirectURL":"https://thinx.cloud/app"}
+
+echo $R
 
 SUCCESS=$(echo $R | jq .redirectURL )
 echo $SUCCESS
@@ -50,6 +52,89 @@ if [[ ! -z $SUCCESS ]]; then
 else
 	echo_fail $R
 fi
+
+R=""
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "» Pushing Env var..."
+
+# {"success":true,"fingerprint":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93"}
+
+echo "${R}"
+
+R=$(curl -v -b cookies.jar \
+-H "Authentication: ${API_KEY}" \
+-H 'Origin: rtm.thinx.cloud' \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+-d '{ "key" : "WIFI_SSID", "value" : "<enter-your-ssid-password>" }' \
+http://$HOST:7442/api/user/env/add)
+
+echo $R
+
+SUCCESS=$(echo $R | jq .success)
+FPRINT=null
+if [[ $SUCCESS == true ]]; then
+	FPRINT=$(echo $R | jq .object)
+	echo_ok "Added ENV var: $FPRINT"
+else
+	echo_fail $R
+fi
+
+sleep 2
+
+R=""
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "» Listing Env vars..."
+
+echo "${R}"
+
+R=$(curl -s -b cookies.jar \
+-H "Authentication: ${API_KEY}" \
+-H 'Origin: rtm.thinx.cloud' \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+http://$HOST:7442/api/user/env/list)
+
+SUCCESS=$(echo $R | jq .)
+if [[ ! -z $SUCCESS ]]; then
+	KEYS=$(echo $R | jq .env_vars)
+	echo_ok "Listed Env vars: $KEYS"
+else
+	echo_fail $R
+fi
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "» Revoking ENV var(s)..."
+
+# {"revoked":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93","success":true}
+
+R=$(curl -v -s -b cookies.jar \
+-H "Authentication: ${API_KEY}" \
+-H 'Origin: rtm.thinx.cloud' \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+-d '{ "names" : [ "WIFI_SSID" ] }' \
+http://$HOST:7442/api/user/env/revoke)
+
+echo "${R}"
+
+SUCCESS=$(echo $R | jq .success)
+RPRINT=null
+if [[ $SUCCESS == true ]]; then
+	RPRINT=$(echo $R | jq .revoked)
+	echo_ok "Revoked Env var: $RPRINT"
+else
+	echo_fail $R
+fi
+
+sleep 2
+
+exit 0
 
 echo
 echo "--------------------------------------------------------------------------------"
@@ -116,8 +201,6 @@ if [[ $SUCCESS == true ]]; then
 else
 	echo_fail $R
 fi
-
-exit 0
 
 echo
 echo "--------------------------------------------------------------------------------"
@@ -196,81 +279,6 @@ else
   echo "Skipping OTT Fetch, no OTT given as a result of last test."
 fi
 
-
-echo
-echo "--------------------------------------------------------------------------------"
-echo "» Pushing Env var..."
-
-# {"success":true,"fingerprint":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93"}
-
-echo "${R}"
-
-R=$(curl -s -b cookies.jar \
--H "Authentication: ${API_KEY}" \
--H 'Origin: rtm.thinx.cloud' \
--H "User-Agent: THiNX-Web" \
--H "Content-Type: application/json" \
--d '{ "key" : "WIFI_SSID", "value" : "<enter-your-ssid-password>" }' \
-http://$HOST:7442/api/user/env/add)
-
-SUCCESS=$(echo $R | jq .success)
-FPRINT=null
-if [[ $SUCCESS == true ]]; then
-	FPRINT=$(echo $R | jq .value)
-	echo_ok "Added ENV var: $FPRINT"
-else
-	echo_fail $R
-fi
-
-sleep 2
-
-echo
-echo "--------------------------------------------------------------------------------"
-echo "» Listing Env vars..."
-
-echo "${R}"
-
-R=$(curl -s -b cookies.jar \
--H "Authentication: ${API_KEY}" \
--H 'Origin: rtm.thinx.cloud' \
--H "User-Agent: THiNX-Web" \
--H "Content-Type: application/json" \
-http://$HOST:7442/api/user/env/list)
-
-SUCCESS=$(echo $R | jq .env_vars)
-if [[ ! -z $SUCCESS ]]; then
-	KEYS=$(echo $R | jq .env_vars)
-	echo_ok "Listed Env vars: $KEYS"
-else
-	echo_fail $R
-fi
-
-echo
-echo "--------------------------------------------------------------------------------"
-echo "» Revoking ENV var(s)..."
-
-# {"revoked":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93","success":true}
-
-R=$(curl -v -s -b cookies.jar \
--H "Authentication: ${API_KEY}" \
--H 'Origin: rtm.thinx.cloud' \
--H "User-Agent: THiNX-Web" \
--H "Content-Type: application/json" \
--d '{ "names" : [ "WIFI_SSID" ] }' \<
-http://$HOST:7442/api/user/env/revoke)
-
-echo "${R}"
-
-SUCCESS=$(echo $R | jq .success)
-RPRINT=null
-if [[ $SUCCESS == true ]]; then
-	RPRINT=$(echo $R | jq .revoked)
-	echo_ok "Revoked Env var: $RPRINT"
-else
-	echo_fail $R
-fi
-
-sleep 2
 
 echo
 echo "--------------------------------------------------------------------------------"
