@@ -33,7 +33,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "» Testing authentication..."
 
-R=$(curl -v -c cookies.jar \
+R=$(curl -s -c cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -74,6 +74,8 @@ else
 	echo_fail $R
 fi
 
+exit 0
+
 echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Build log fetch..."
@@ -94,7 +96,7 @@ else
 	echo_fail $R
 fi
 
-exit 0
+
 
 echo
 echo "--------------------------------------------------------------------------------"

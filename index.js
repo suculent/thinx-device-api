@@ -1148,12 +1148,10 @@ var ThinxApp = function() {
         for (var dindex in row.doc.log) {
           //if (row.doc.log.hasOwnProperty(dindex)) continue;
           var lastIndex = row.doc.log[dindex];
-          if (lastIndex.hasOwnProperty("message")) lastIndex.message =
-            "";
-          if (lastIndex.hasOwnProperty("date")) lastIndex.date = "";
-          if (lastIndex.hasOwnProperty("udid")) lastIndex.udid = "";
-          if (lastIndex.hasOwnProperty("build")) lastIndex.build =
-            "";
+          //if (lastIndex.hasOwnProperty("message")) lastIndex.message = "";
+          //if (lastIndex.hasOwnProperty("date")) lastIndex.date = "";
+          //if (lastIndex.hasOwnProperty("udid")) lastIndex.udid = "";
+          //if (lastIndex.hasOwnProperty("build")) lastIndex.build = "";
           var build = {
             message: lastIndex.message,
             date: lastIndex.date,
@@ -1163,6 +1161,8 @@ var ThinxApp = function() {
           builds.push(build);
         }
       }
+
+      console.log(builds);
 
       respond(res, {
         success: true,
