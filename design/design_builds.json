@@ -1,12 +1,13 @@
 {
   "_id": "_design/builds",
+  "_rev": "9-e129b044e49e893bd2f3c93fa822b737",
   "language": "javascript",
   "views": {
     "builds_by_build_id": {
-      "map": "function (doc) { if(doc.build_id) { emit (doc.build_id, doc); } }"
+      "map": "function (doc) { if(doc.build_id) { emit (doc.build_id, { timestamp: doc.timestamp, udid: doc.udid, message: doc.message, owner: doc.owner, log: doc.log } ); } }"
     },
     "builds_by_owner": {
-      "map": "function (doc) { if(doc.owner) { emit (doc.timestamp, doc); } }"
+      "map": "function (doc) { if(doc.owner) { emit ([doc.timestamp, doc.owner], { timestamp: doc.timestamp, udid: doc.udid, message: doc.message, log: doc.log } ); } }"
     }
   },
   "updates": {
