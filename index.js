@@ -451,21 +451,22 @@ var ThinxApp = function() {
     var key = req.body.key;
     var value = req.body.value;
 
-    apienv.create(owner, key, value, function(success,
-      object) {
-      if (success) {
-        respond(res, {
-          success: true,
-          key: key,
-          value: value
-        });
-      } else {
-        respond(res, {
-          success: success,
-          message: object
-        });
-      }
-    });
+    apienv.create(owner, key, value,
+      function(success, object) {
+        if (success) {
+          respond(res, {
+            success: true,
+            key: key,
+            value: value,
+            object: object
+          });
+        } else {
+          respond(res, {
+            success: success,
+            message: object
+          });
+        }
+      });
   });
 
   /* Deletes env var by its name */
