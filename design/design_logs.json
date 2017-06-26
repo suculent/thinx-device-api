@@ -3,7 +3,7 @@
   "language": "javascript",
   "views": {
     "logs_by_owner": {
-      "map": "function (doc) { if(doc.owner) { emit ([doc.date, doc.owner], { date: doc.date, message: doc.message }); } }"
+      "map": "function (doc) { if(doc.owner) { emit ([doc.date, doc.owner], { date: doc.date, message: doc.message, owner: doc.owner }); } }"
     }
   }
 }
