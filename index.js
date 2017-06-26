@@ -1109,9 +1109,11 @@ var ThinxApp = function() {
       return;
     }
 
-    var builds = [];
+
 
     blog.list(owner, function(err, body) {
+
+      var builds = [];
 
       if (err) {
         console.log("err: " + err);
@@ -1133,44 +1135,28 @@ var ThinxApp = function() {
         return;
       }
 
-      console.log("build-logs: " + JSON.stringify(body));
-
       for (var bindex in body.rows) {
 
-        //if (!body.rows.hasOwnProperty(bindex)) continue;
         var row = body.rows[bindex];
-
         console.log("Build log row: " + JSON.stringify(row));
 
-        //if (typeof(row.doc) === "undefined") continue;
-        //if (typeof(row.doc.log) === "undefined") continue;
-
-        if (typeof(row.doc.log) === "undefined") {
-
+        if (typeof(row.value.log) === "undefined") {
           var build = {
-            message: lastIndex.message,
-            date: lastIndex.date,
-            udid: lastIndex.udid,
-            build_id: lastIndex.build
+            date: body.value.timestamp,
+            udid: body.value.udid
           };
           builds.push(build);
-
         } else {
 
-          for (var dindex in row.doc.log) {
-            //if (row.doc.log.hasOwnProperty(dindex)) continue;
-            var lastIndex = row.doc.log[dindex];
-            //if (lastIndex.hasOwnProperty("message")) lastIndex.message = "";
-            //if (lastIndex.hasOwnProperty("date")) lastIndex.date = "";
-            //if (lastIndex.hasOwnProperty("udid")) lastIndex.udid = "";
-            //if (lastIndex.hasOwnProperty("build")) lastIndex.build = "";
-            var build = {
+          for (var dindex in row.value.log) {
+            var lastIndex = row.value.log[dindex];
+            var buildlog = {
               message: lastIndex.message,
               date: lastIndex.date,
               udid: lastIndex.udid,
               build_id: lastIndex.build
             };
-            builds.push(build);
+            builds.push(buildlog);
           }
 
         }
