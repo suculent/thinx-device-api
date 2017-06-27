@@ -190,21 +190,32 @@ echo "// This is an auto-generated file, it will be re-written by THiNX on cloud
 echo "//" >> $THINX_FILE
 echo "" >> $THINX_FILE
 echo "// build-time constants" >> $THINX_FILE
-echo "static const String thinx_commit_id = \"${COMMIT}\";" >> $THINX_FILE
-echo "static const String thinx_mqtt_url = \"${THINX_MQTT_URL}\";" >> $THINX_FILE
-echo "static const String thinx_cloud_url = \"${THINX_CLOUD_URL}\";" >> $THINX_FILE
-echo "static const String thinx_firmware_version = \"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\";" >> $THINX_FILE
-echo "static const String thinx_firmware_version_short = \"${REPO_VERSION}\";" >> $THINX_FILE
-echo "static const String app_version = \"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\";" >> $THINX_FILE
+echo "#define THINX_COMMIT_ID \"${COMMIT}\"" >> $THINX_FILE
+echo "#define THINX_MQTT_URL \"${THINX_MQTT_URL}\"" >> $THINX_FILE
+echo "#define THINX_CLOUD_URL = \"${THINX_CLOUD_URL}\"" >> $THINX_FILE
+echo "#define THINX_FIRMWARE_VERSION \"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\"" >> $THINX_FILE
+echo "#define THINX_FIRMWARE_VERSION_SHORT \"${REPO_VERSION}\"" >> $THINX_FILE
+echo "#define THINX_APP_VERSION \"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\"" >> $THINX_FILE
 echo "" >> $THINX_FILE
 echo "// dynamic variables" >> $THINX_FILE
-echo "String thinx_alias = \"${THINX_ALIAS}\";" >> $THINX_FILE
-echo "String thinx_api_key = \"VANILLA_API_KEY\";" >> $THINX_FILE # this just adds placeholder, key must not leak in binary...
-echo "String thinx_owner = \"${OWNER_ID}\";" >> $THINX_FILE
-echo "String thinx_udid = \"${UDID}\";" >> $THINX_FILE # this just adds placeholder, key should not leak
+echo "#define THINX_ALIAS \"${THINX_ALIAS}\"" >> $THINX_FILE
+echo "#define THINX_API_KEY \"VANILLA_API_KEY\"" >> $THINX_FILE # this just adds placeholder, key must not leak in binary...
+echo "#define THINX_OWNER \"${OWNER_ID}\"" >> $THINX_FILE
+
 echo "" >> $THINX_FILE
-echo "int thinx_mqtt_port = 1883;" >> $THINX_FILE
-echo "int thinx_api_port = 7442;" >> $THINX_FILE
+echo "#define THINX_MQTT_PORT 1883" >> $THINX_FILE
+echo "#define THINX_API_PORT 7442" >> $THINX_FILE
+echo "" >> $THINX_FILE
+echo "#define THINX_UDID \"${UDID}\"" >> $THINX_FILE # this just adds placeholder, key should not leak
+
+
+echo "#define THINX_COMMIT_ID \"$(git rev-parse HEAD)\"" >> $THINX_FILE
+echo "#define THINX_MQTT_URL \"${THINX_MQTT_URL}\"" >> $THINX_FILE
+echo "#define THINX_CLOUD_URL \"${THINX_CLOUD_URL}\"" >> $THINX_FILE
+echo "#define THINX_FIRMWARE_VERSION = \"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\"" >> $THINX_FILE
+echo "#define THINX_FIRMWARE_VERSION_SHORT = \"${REPO_VERSION}\""; >> $THINX_FILE
+
+
 
 
 # Build
