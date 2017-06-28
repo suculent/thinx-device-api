@@ -166,7 +166,10 @@ echo "[builder.sh] Repository version/revision: ${VERSION}"
 
 # Overwrite Thinx.h file (should be required)
 
-THINX_FILE="$(find . | grep '/Thinx.h')"
+THINX_FILE="$(find . | grep '/thinx.h')"
+
+echo "Found THiNX-File: ${THINX_FILE}"
+
 THINX_CLOUD_URL="thinx.cloud"
 THINX_MQTT_URL="mqtt://${THINX_CLOUD_URL}"
 
@@ -208,15 +211,11 @@ echo "#define THINX_API_PORT 7442" >> $THINX_FILE
 echo "" >> $THINX_FILE
 echo "#define THINX_UDID \"${UDID}\"" >> $THINX_FILE # this just adds placeholder, key should not leak
 
-
 echo "#define THINX_COMMIT_ID \"$(git rev-parse HEAD)\"" >> $THINX_FILE
 echo "#define THINX_MQTT_URL \"${THINX_MQTT_URL}\"" >> $THINX_FILE
 echo "#define THINX_CLOUD_URL \"${THINX_CLOUD_URL}\"" >> $THINX_FILE
 echo "#define THINX_FIRMWARE_VERSION = \"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\"" >> $THINX_FILE
 echo "#define THINX_FIRMWARE_VERSION_SHORT = \"${REPO_VERSION}\""; >> $THINX_FILE
-
-
-
 
 # Build
 echo "[builder.sh] Generated header file Thinx.h:"

@@ -199,6 +199,9 @@ var ThinxApp = function() {
       port: 6379,
       client: client
     }),
+    cookie: {
+      maxAge: 86400000
+    },
     name: "x-thx-session",
     resave: true,
     rolling: true,
@@ -1311,6 +1314,16 @@ var ThinxApp = function() {
           return;
         }
       });
+    }
+
+    if (typeof(req.body.remember === "undefined")) {
+      var hour = 3600000;
+      req.session.cookie.expires = new Date(Date.now() + hour);
+      req.session.cookie.maxAge = hour;
+    } else {
+      var fortnight = 3600000 * 24 * 14;
+      req.session.cookie.expires = new Date(Date.now() + fortnight);
+      req.session.cookie.maxAge = fortnight;
     }
 
     console.log("Searching user...");
