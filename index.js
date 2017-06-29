@@ -194,7 +194,7 @@ var ThinxApp = function() {
 
   var hour = 3600000;
   var day = hour * 24;
-  var fortnight = day * 14;  
+  var fortnight = day * 14;
 
   app.use(session({
     secret: session_config.secret,
@@ -1145,7 +1145,7 @@ var ThinxApp = function() {
       for (var bindex in body.rows) {
 
         var row = body.rows[bindex];
-        console.log("Build log row: " + JSON.stringify(row));
+        //console.log("Build log row: " + JSON.stringify(row));
 
         if (typeof(row.value.log) === "undefined") {
           var build = {
@@ -1324,7 +1324,7 @@ var ThinxApp = function() {
       var hour = 3600000;
       req.session.cookie.expires = new Date(Date.now() + hour);
       req.session.cookie.maxAge = hour;
-    } else {      
+    } else {
       req.session.cookie.expires = new Date(Date.now() + fortnight);
       req.session.cookie.maxAge = fortnight;
     }
