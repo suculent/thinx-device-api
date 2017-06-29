@@ -25,7 +25,8 @@ describe("Statistics", function() {
   it("should be able to return today results for owner", function(done) {
     var result = s.today(
       "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
-      function(result) {
+      function(error, result) {
+        expect(error).toBe(false);
         console.log("daily stats: " + result);
         expect(result).toBeDefined();
         done();
@@ -51,7 +52,8 @@ describe("Statistics", function() {
   it("should be able to return weekly results for owner", function(done) {
     var result = s.week(
       "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
-      function(result) {
+      function(error, result) {
+        expect(error).toBe(false);
         console.log("weekly stats: " + result);
         expect(result).toBeDefined();
         done();
