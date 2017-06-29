@@ -192,6 +192,10 @@ var ThinxApp = function() {
 
   app.set('trust proxy', 1);
 
+  var hour = 3600000;
+  var day = hour * 24;
+  var fortnight = day * 14;  
+
   app.use(session({
     secret: session_config.secret,
     store: new redisStore({
@@ -200,7 +204,7 @@ var ThinxApp = function() {
       client: client
     }),
     cookie: {
-      maxAge: 86400000
+      expires: hour
     },
     name: "x-thx-session",
     resave: true,
@@ -1320,8 +1324,7 @@ var ThinxApp = function() {
       var hour = 3600000;
       req.session.cookie.expires = new Date(Date.now() + hour);
       req.session.cookie.maxAge = hour;
-    } else {
-      var fortnight = 3600000 * 24 * 14;
+    } else {      
       req.session.cookie.expires = new Date(Date.now() + fortnight);
       req.session.cookie.maxAge = fortnight;
     }
@@ -1475,7 +1478,7 @@ var ThinxApp = function() {
 
     console.log("Statistics for owner " + owner);
 
-    stats.today(owner, function(success, body) {
+    stats.week(owner, function(success, body) {
 
       if (!body) {
         console.log("Statistics for owner " + owner + " not found.");
