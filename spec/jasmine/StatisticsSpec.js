@@ -26,7 +26,7 @@ describe("Statistics", function() {
     var result = s.today(
       "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
       function(result) {
-        console.log(result);
+        console.log("daily stats: " + result);
         expect(result).toBeDefined();
         done();
       });
@@ -47,5 +47,15 @@ describe("Statistics", function() {
         done();
       });
   }, 60000);
+
+  it("should be able to return weekly results for owner", function(done) {
+    var result = s.week(
+      "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
+      function(result) {
+        console.log("weekly stats: " + result);
+        expect(result).toBeDefined();
+        done();
+      });
+  }, 10000);
 
 });
