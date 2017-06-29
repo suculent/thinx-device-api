@@ -1169,8 +1169,6 @@ var ThinxApp = function() {
         }
       }
 
-      console.log("builds:" + JSON.stringify(builds));
-
       respond(res, {
         success: true,
         builds: builds
@@ -1461,7 +1459,7 @@ var ThinxApp = function() {
     }
     console.log(JSON.stringify(req.params));
     //res.status(401).end();
-    res.redirect("http://thinx.cloud/");
+    res.redirect("https://rtm.thinx.cloud/");
   });
 
   /*
