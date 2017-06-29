@@ -1035,8 +1035,8 @@ var ThinxApp = function() {
           console.log(
             "validateSession: Invalid session, redirecting to login!"
           );
-          res.redirect("http://thinx.cloud/");
-          //res.status(401).end(); // return 401 unauthorized to XHR/API calls
+          //res.redirect("https://rtm.thinx.cloud/");
+          res.status(401).end(); // return 401 unauthorized to XHR/API calls
         }
       });
     }
