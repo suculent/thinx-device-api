@@ -20,7 +20,8 @@
     "coverage": "nyc jasmine; nyc report --reporter=text-lcov | coveralls",
     "snyk-protect": "snyk protect",
     "prepublish": "npm run snyk-protect",
-    "test": "snyk test && echo"
+    "test": "echo",
+    "snyk": "snyk test"
   },
   "preferGlobal": true,
   "dependencies": {

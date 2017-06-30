@@ -6,15 +6,22 @@ ignore:
     - nano > follow > request > qs:
         reason: 'yes'
         expires: '2017-06-23T20:24:03.076Z'
-      codecov.io > request > qs:
-        reason: 'yes'
-        expires: '2017-07-23T21:05:53.502Z'
     - codecov.io > request > qs:
         reason: 'yes'
         expires: '2017-06-23T20:24:03.076Z'
-      nano > follow > request > qs:
+    - codecov.io > request > qs:
         reason: 'yes'
         expires: '2017-07-23T21:05:53.502Z'
+    - nano > follow > request > qs:
+        reason: 'yes'
+        expires: '2017-07-23T21:05:53.502Z'
+  'npm:http-signature:20150122':
+    - codecov.io > request > http-signature:
+        reason: no remediation at this time
+        expires: '2017-07-30T07:28:09.687Z'
+    - nano > follow > request > http-signature:
+        reason: None given
+        expires: '2017-07-30T07:28:09.687Z'
 # patches apply the minimum changes required to fix a vulnerability
 patch:
   'npm:hawk:20160119':

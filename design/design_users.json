@@ -1,18 +1,25 @@
 {
 	"_id": "_design/users",
+	"_rev": "10-c2b4f13cc280f438d990a88b3a20e7d4",
 	"language": "javascript",
 	"views": {
 		"owners_by_username": {
 			"map": "function (doc) { if(doc.username) { emit (doc.username, doc); } }"
 		},
 		"owners_by_email": {
-			"map": "function (doc) { if(doc.email) { emit (doc.email, doc.owner, doc.username, doc.activation, doc); } }"
+			"map": "function (doc) { if(doc.email) { emit (doc.email, doc); } }"
 		},
 		"owners_by_activation": {
-			"map": "function (doc) { if(doc.activation) { emit (doc.activation, doc.owner, doc.username); } }"
+			"map": "function (doc) { if(doc.activation) { emit (doc.activation, doc ); } }"
+		},
+		"owners_by_id": {
+			"map": "function (doc) { if(doc.owner) { emit (doc.owner, doc); } }"
 		},
 		"owners_by_resetkey": {
-			"map": "function (doc) { if(doc.reset_key) { emit (doc.reset_key, doc.owner, doc.username); } }"
+			"map": "function (doc) { if(doc.reset_key) { emit (doc.reset_key, doc); } }"
+		},
+		"rsa_keys_by_owner": {
+			"map": "function (doc) { if(doc._id) { emit (doc.owner, doc.rsa_keys); } }"
 		}
 	}
 }

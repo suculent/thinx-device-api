@@ -226,29 +226,28 @@ var ThinxApp = function() {
 
     var origin = req.get("origin");
 
-    /**/
-    // TODO: This is a hack. It should not work like this. We just need to find out,
-    // why the login page rejects CORS on browser-side (redirect from successful
-    // Password-change operation).
+    /*
+    // FIXME:
+    */
 
     if (typeof(origin) === "undefined") {
       origin = "rtm.thinx.cloud";
-      //rollbar.reportMessage("SEC-ERR: Turning 'undefined' origin to 'rtm.thinx.cloud'");
+      rollbar.reportMessage(
+        "SEC-ERR: Turning 'undefined' origin to 'rtm.thinx.cloud'");
     }
 
     if (origin === null) {
-      origin = "*";
-      //rollbar.reportMessage( "SEC-ERR: Turning null origin to 'rtm.thinx.cloud'");
+      origin = "*.thinx.cloud";
+      rollbar.reportMessage(
+        "SEC-ERR: Turning null origin to 'rtm.thinx.cloud'");
     }
-
 
     var allowedOrigin = origin;
 
-    // Custom user agent is required for devices
+    // Skip CORS for browser-less device requests
     var client = req.get("User-Agent");
     if (client == client_user_agent) {
       if (origin == "device") {
-        console.log("Skipping CORS for browser-less device requests...");
         next();
         return;
       }
@@ -274,7 +273,8 @@ var ThinxApp = function() {
         " : " + req.url);
     } else {
       if (req.method != "OPTIONS") {
-        console.log("[OID:0] [" + req.method + "]:" + req.url);
+        console.log("[OID:0] [" + req.method + "]:" + req.url + "(" +
+          client + ")");
       }
     }
   });
@@ -1016,30 +1016,21 @@ var ThinxApp = function() {
     return true;
   }
 
+  // Terminates session in case it has no valid owner.
   function validateSession(req, res) {
-    var sessionValid = false;
     if (typeof(req.session.owner) !== "undefined") {
-      if (typeof(req.session.username) !== "undefined") {
-        sessionValid = true;
-      } else {
-        console.log("validateSession: No username!");
-      }
+      return true;
     } else {
-      console.log("validateSession: No owner!");
-    }
-    if (sessionValid === false) {
-      req.session.destroy(function(err) {
-        if (err) {
-          console.log(err);
-        } else {
-          console.log(
-            "validateSession: Invalid session, redirecting to login!"
-          );
+      if (typeof(req.session) !== "undefined") {
+        req.session.destroy(function(err) {
+          if (err) {
+            console.log("Session destroy error: " + JSON.stringify(err));
+          }
           res.status(401).end(); // return 401 unauthorized to XHR/API calls
-        }
-      });
+        });
+      }
+      return false;
     }
-    return sessionValid;
   }
 
   /*
@@ -1269,8 +1260,6 @@ var ThinxApp = function() {
 
   });
 
-
-
   /*
    * Authentication
    */
@@ -1328,6 +1317,22 @@ var ThinxApp = function() {
 
     console.log("Searching user...");
 
+    var updateLastSeen = function(doc) {
+      delete doc._rev;
+      doc.last_seen = new Date();
+      userlib.insert(doc, doc._id, function(err, body, header) {
+        if (err) {
+          console.log(err);
+          alog.log(owner, "Last seen update failed.");
+          callback(false, "last_seen_failed");
+          return;
+        } else {
+          alog.log(owner, "Last seen updated.");
+          callback(true, doc[update_key]);
+        }
+      });
+    };
+
     userlib.view("users", "owners_by_username", {
       "key": username,
       "include_docs": true // might be useless
@@ -1347,73 +1352,81 @@ var ThinxApp = function() {
         return;
       }
 
-      //console.log("Results: " + JSON.stringify(body));
-
       // Find user and match password
       var all_users = body.rows;
+      var user_data = null;
       for (var index in all_users) {
-
-        if (!all_users.hasOwnProperty(index)) continue;
-        var user_data = all_users[index];
-
-        if (!user_data.hasOwnProperty("key")) continue;
-        if (username == user_data.key) {
-
-          // TODO: Second option (direct compare) will deprecate soon.
-          if (password.indexOf(user_data.value) !== -1) {
-
-            // what if there's no session?
-            if (typeof(req.session) !== "undefined") {
-              req.session.owner = user_data.doc.owner;
-              console.log("[OID:" + req.session.owner +
-                "] [NEW_SESSION]");
-              req.session.username = user_data.doc.username;
-
-              var minute = 5 * 60 * 1000;
-              req.session.cookie.httpOnly = true;
-              req.session.cookie.maxAge = 20 * minute;
-              req.session.cookie.secure = false;
-
-              alog.log(req.session.owner, "User logged in: " +
-                username);
-            }
-
-            // TODO: write last_seen timestamp to DB here __for devices__
-            // console.log("client_type: " + client_type);
-            if (client_type == "device") {
-              respond(res, {
-                status: "WELCOME",
-                success: true
-              });
-              return;
-            } else if (client_type == "webapp") {
-              //console.log("Allow-Origin REQH: " + JSON.stringify(req.headers));
-              //console.log("Allow-Origin REQQ: " + JSON.stringify(req.query)); // returns empty!
-              //console.log("Allow-Origin REQUEST host: " + req.headers.host);
-              respond(res, {
-                "redirectURL": "/app/#/dashboard.html"
-              });
-              return;
-            } else {
-              respond(res, {
-                status: "OK",
-                success: true
-              });
-            }
-            // TODO: If user-agent contains app/device... (what?)
-            return;
-
-          } else {
-            console.log("[LOGIN_INVALID] for " + username);
-            alog.log(req.session.owner, "Password mismatch for: " +
-              username);
-            respond(res, {
-              status: "password_mismatch",
-              success: false
-            });
-            return;
-          }
+        var all_user_data = all_users[index];
+        if (username != all_user_data.key) {
+          continue;
+        } else {
+          user_data = all_user_data;
+          break;
         }
+      }
+
+      if (user_data === null) {
+        failureResponse(res, 403, "unauthorized");
+      }
+
+      console.log("Found user: " + JSON.stringify(user_data));
+
+      // TODO: Second option (direct compare) will deprecate soon.
+      if (password.indexOf(user_data.value) !== -1) {
+
+        // what if there's no session?
+        if (typeof(req.session) !== "undefined") {
+          req.session.owner = user_data.doc.owner;
+          console.log("[OID:" + req.session.owner +
+            "] [NEW_SESSION]");
+          req.session.username = user_data.doc.username;
+
+          var minute = 5 * 60 * 1000;
+          req.session.cookie.httpOnly = true;
+          req.session.cookie.maxAge = 20 * minute;
+          req.session.cookie.secure = false;
+
+          alog.log(req.session.owner, "User logged in: " +
+            username);
+        }
+
+        userlib.get(req.session.owner, function(error, udoc) {
+          updateLastSeen(udoc);
+        });
+
+        // console.log("client_type: " + client_type);
+        if (client_type == "device") {
+          respond(res, {
+            status: "WELCOME",
+            success: true
+          });
+          return;
+        } else if (client_type == "webapp") {
+          //console.log("Allow-Origin REQH: " + JSON.stringify(req.headers));
+          //console.log("Allow-Origin REQQ: " + JSON.stringify(req.query)); // returns empty!
+          //console.log("Allow-Origin REQUEST host: " + req.headers.host);
+          respond(res, {
+            "redirectURL": "/app/#/dashboard.html"
+          });
+          return;
+        } else {
+          respond(res, {
+            status: "OK",
+            success: true
+          });
+        }
+        // TODO: If user-agent contains app/device... (what?)
+        return;
+
+      } else {
+        console.log("[LOGIN_INVALID] for " + username);
+        alog.log(req.session.owner, "Password mismatch for: " +
+          username);
+        respond(res, {
+          status: "password_mismatch",
+          success: false
+        });
+        return;
       }
 
       if (typeof(req.session.owner) == "undefined") {
@@ -1738,6 +1751,12 @@ var ThinxApp = function() {
     console.log("» Aggregation jobs completed.");
   }
   setTimeout(log_aggregator, 360000);
+
+  //
+  // MQTT Messenger/listener (experimental)
+  //
+
+  var messenger = require("./lib/thinx/messenger");
 
   //
   // HTTP/S Request Tools
