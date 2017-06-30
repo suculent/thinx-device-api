@@ -1,0 +1,75 @@
+{
+  "success": true,
+  "builds": [
+    {
+      "message": "Build start failed: Error: Command failed: /root/thinx-device-api/builder --owner=eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f --udid=5eed69a0-59cb-11e7-bc71-3de04517a8b2 --git=git@github.com:suculent/thinx-firmware-esp8266-pio.git --id=5692f8d0-59d8-11e7-b9cc-eb0e0ab008b7
+Cloning into 'thinx-firmware-esp8266-pio'...
+",
+      "date": "2017-06-25T18:58:57.824Z",
+      "udid": "5eed69a0-59cb-11e7-bc71-3de04517a8b2",
+      "build_id": "5692f8d0-59d8-11e7-b9cc-eb0e0ab008b7"
+    },
+    {
+      "message": "Build start failed: Error: Command failed: /root/thinx-device-api/builder --owner=eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f --udid=28a1d1a0-59d1-11e7-9412-b5c7fe5fb95f --git=https://github.com/suculent/thinx-firmware-esp8266.git --id=30464d00-59d1-11e7-9412-b5c7fe5fb95f --dry-run
+Cloning into 'thinx-firmware-esp8266'...
+fatal: Not a git repository (or any of the parent directories): .git
+",
+      "date": "2017-06-25T18:07:46.768Z",
+      "udid": "28a1d1a0-59d1-11e7-9412-b5c7fe5fb95f",
+      "build_id": "30464d00-59d1-11e7-9412-b5c7fe5fb95f"
+    },
+    {
+      "message": "Build start failed: Error: Command failed: /root/thinx-device-api/builder --owner=eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f --udid=5eed69a0-59cb-11e7-bc71-3de04517a8b2 --git=git@github.com:suculent/thinx-firmware-esp8266-pio.git --id=f020c790-59cc-11e7-bc71-3de04517a8b2
+Cloning into 'thinx-firmware-esp8266-pio'...
+",
+      "date": "2017-06-25T17:37:21.405Z",
+      "udid": "5eed69a0-59cb-11e7-bc71-3de04517a8b2",
+      "build_id": "f020c790-59cc-11e7-bc71-3de04517a8b2"
+    },
+    {
+      "message": "Build start failed: Error: Command failed: /root/thinx-device-api/builder --owner=eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f --udid=f8e88e40-43c8-11e7-9ad3-b7281c2b9610 --git=git@github.com:suculent/thinx-firmware-esp8266-ino.git --id=846dfec0-59c5-11e7-843a-0ffbebab9ee5
+Cloning into 'thinx-firmware-esp8266-ino'...
+fatal: No names found, cannot describe anything.
+",
+      "date": "2017-06-25T16:44:14.266Z",
+      "udid": "f8e88e40-43c8-11e7-9ad3-b7281c2b9610",
+      "build_id": "846dfec0-59c5-11e7-843a-0ffbebab9ee5"
+    },
+    {
+      "message": "Starting build notifier...",
+      "date": "2017-06-25T15:11:43.852Z",
+      "udid": "00:00:00:00:00:00",
+      "build_id": "no_build_id"
+    },
+    {
+      "message": "Testing build log create...",
+      "date": "2017-06-25T15:11:39.682Z",
+      "udid": "fcdd7b20-3980-11e7-a58d-81e4acfbeb86",
+      "build_id": "0xBUILD_ID"
+    },
+    {
+      "message": "Build start failed: Error: Command failed: /root/thinx-device-api/builder --owner=eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f --udid=e2de61c0-4fb1-11e7-bf09-096d8c80e270 --git=git@github.com:suculent/thinx-firmware-esp8266-pio.git --id=f168def0-597f-11e7-a932-014d5b00c004
+Cloning into 'thinx-firmware-esp8266-pio'...
+",
+      "date": "2017-06-25T08:26:12.312Z",
+      "udid": "e2de61c0-4fb1-11e7-bf09-096d8c80e270",
+      "build_id": "f168def0-597f-11e7-a932-014d5b00c004"
+    },
+    {
+      "message": "Build start failed: Error: Command failed: /root/thinx-device-api/builder --owner=eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f --udid=0753f580-592e-11e7-850b-4f3518cdcf9d --git=https://github.com/suculent/thinx-firmware-esp8266.git --id=0e2876b0-592e-11e7-850b-4f3518cdcf9d --dry-run
+Cloning into 'thinx-firmware-esp8266'...
+fatal: Not a git repository (or any of the parent directories): .git
+",
+      "date": "2017-06-24T22:40:01.653Z",
+      "udid": "0753f580-592e-11e7-850b-4f3518cdcf9d",
+      "build_id": "0e2876b0-592e-11e7-850b-4f3518cdcf9d"
+    },
+    {
+      "message": "Starting build notifier...",
+      "date": "2017-06-21T20:18:41.533Z",
+      "udid": "f8e88e40-43c8-11e7-9ad3-b7281c2b9610",
+      "build_id": "test-build-id"
+    }
+  ]
+}
+

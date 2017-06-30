@@ -20,38 +20,37 @@ describe("Device", function() {
         console.log("Registration result: " + JSON.stringify(response));
         expect(success).toBe(true);
         done();
+      }, 5000);
 
-        it(
-          "should receive different response for already-registered revice",
-          function(done) {
-            device.register(JSON.parse(RS), apikey,
-              function(success, response) {
-                console.log("Re-registration result: " + JSON.stringify(
-                  response));
-                expect(success).toBe(true);
-                done();
-
-                it("should be able to edit device alias",
-                  function(done) {
-                    var changes = {
-                      alias: Date().toString(),
-                      udid: "to-be-deleted-on-test"
-                    };
-                    device.edit(owner, changes, function(
-                      success, response) {
-                      console.log("Editing result: " + JSON
-                        .stringify(response));
-                      expect(success).toBe(true);
-                      expect(response).toBeDefined();
-                      done();
-                    });
-                  });
-
-              });
-          });
-
+    it("should be able to edit device alias",
+      function(done) {
+        var changes = {
+          alias: Date().toString(),
+          udid: "to-be-deleted-on-test"
+        };
+        device.edit(owner, changes, function(
+          success, response) {
+          console.log("Editing result: " + JSON
+            .stringify(response));
+          expect(success).toBe(true);
+          expect(response).toBeDefined();
+          done();
+        });
       });
-  });
+  }, 5000);
+
+  it(
+    "should receive different response for already-registered revice",
+    function(done) {
+      device.register(JSON.parse(RS), apikey,
+        function(success, response) {
+          console.log("Re-registration result: " + JSON.stringify(
+            response));
+          expect(success).toBe(true);
+          done();
+        });
+
+    }, 5000);
 
   it("should be able to provide device firmware", function(done) {
     // Returns "OK" when current firmware is valid.
@@ -64,6 +63,6 @@ describe("Device", function() {
         response));
       done();
     });
-  });
+  }, 5999);
 
 });
