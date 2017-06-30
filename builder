@@ -68,7 +68,7 @@ echo "[builder.sh] Making deployment path: ${DISPLAY_DEPLOYMENT_PATH}"
 set +e
 mkdir -p $OWNER_ID_HOME
 mkdir -p $DEPLOYMENT_PATH
-#set -e
+set -e
 
 LOG_PATH="${DEPLOYMENT_PATH}/${BUILD_ID}.log"
 echo "[builder.sh] Log path: $LOG_PATH"
@@ -184,11 +184,12 @@ else
 	THINX_ALIAS="vanilla"
 fi
 
+set +e
 THX_VERSION="$(git describe --abbrev=0 --tags)"
-
 if [[ $? > 0 ]]; then
 	THX_VERSION="1.0"
 fi
+set -e
 
 REPO_NAME="$(basename $(pwd))"
 REPO_VERSION="${THX_VERSION}.${VERSION}" # todo: is not semantic at all
