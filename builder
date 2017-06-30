@@ -71,14 +71,7 @@ mkdir -p $DEPLOYMENT_PATH
 #set -e
 
 LOG_PATH="${DEPLOYMENT_PATH}/${BUILD_ID}.log"
-
-echo "[builder.sh] Created deployment/log path..."
-
-echo $LOG_PATH
 echo "[builder.sh] Log path: $LOG_PATH"
-
-
-
 
 # extract the protocol
 proto="$(echo $GIT_REPO | grep :// | sed -e's,^\(.*://\).*,\1,g')"
@@ -114,12 +107,11 @@ echo "[builder.sh]   host: $host"
 echo "[builder.sh]   port: $port"
 echo "[builder.sh]   REPO_PATH: $REPO_PATH"
 echo "[builder.sh]   REPO_NAME: ${REPO_NAME}"
+
 echo "[builder.sh] Cleaning workspace..."
 
 # Clean
 rm -rf $THINX_ROOT/tenants/$OWNER_ID/$UDID/$BUILD_ID/$REPO_PATH/**
-
-echo "[builder.sh] Creating workspace..."
 
 # TODO: only if $REPO_NAME contains slash(es)
 OWNER_PATH=$THINX_ROOT/repositories/$OWNER_ID/$UDID/$BUILD_ID
@@ -128,7 +120,7 @@ if [[ ! -d $OWNER_PATH ]]; then
 fi
 
 echo "[builder.sh] Entering owner folder $OWNER_PATH"
-pushd $OWNER_PATH
+pushd $OWNER_PATH > /dev/null
 
 # Create new working directory
 echo "[builder.sh] Creating new working directory $REPO_PATH"
@@ -139,7 +131,7 @@ ls
 # enter git user folder if any
 if [[ -d $GIT_USER ]]; then
 	echo "[builder.sh][DEBUG] Entering git user folder inside workspace ./${GIT_USER}..."
-	pushd $GIT_USER
+	pushd $GIT_USER > /dev/null
 fi
 
 # Clean workspace
@@ -192,6 +184,11 @@ else
 fi
 
 THX_VERSION="$(git describe --abbrev=0 --tags)"
+
+if [[ $? > 0 ]]; then
+	THX_VERSION="1.0"
+fi
+
 REPO_NAME="$(basename $(pwd))"
 REPO_VERSION="${THX_VERSION}.${VERSION}" # todo: is not semantic at all
 BUILD_DATE=`date +%Y-%m-%d`
@@ -222,12 +219,6 @@ echo "#define THINX_MQTT_PORT 1883" >> "${THINX_FILE}"
 echo "#define THINX_API_PORT 7442" >> "${THINX_FILE}"
 echo "" >> "${THINX_FILE}"
 echo "#define THINX_UDID \"${UDID}\"" >> "${THINX_FILE}" # this just adds placeholder, key should not leak
-
-echo "#define THINX_COMMIT_ID \"$(git rev-parse HEAD)\"" >> "${THINX_FILE}"
-echo "#define THINX_MQTT_URL \"${THINX_MQTT_URL}\"" >> "${THINX_FILE}"
-echo "#define THINX_CLOUD_URL \"${THINX_CLOUD_URL}\"" >> "${THINX_FILE}"
-echo "#define THINX_FIRMWARE_VERSION = \"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\"" >> "${THINX_FILE}"
-echo "#define THINX_FIRMWARE_VERSION_SHORT = \"${REPO_VERSION}\""; >> "${THINX_FILE}"
 
 # Build
 echo "[builder.sh] Generated header file Thinx.h:"
