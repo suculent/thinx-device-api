@@ -1352,14 +1352,17 @@ var ThinxApp = function() {
       // Find user and match password
       var all_users = body.rows;
 
-      console.log("Found users: " + JSON.stringify(all_users));
+      console.log("Searching " + username " in " + all_users.count +
+        " users.");
 
       var user_data = null;
       for (var index in all_users) {
         var all_user_data = all_users[index];
+        console.log("Parsing " + JSON.stringify(all_user_data));
         if (username != all_user_data.key) {
           continue;
         } else {
+          console.log("Found user: " + JSON.stringify(all_user_data));
           user_data = all_user_data.value;
           break;
         }
