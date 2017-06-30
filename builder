@@ -77,9 +77,7 @@ echo "[builder.sh] Created deployment/log path..."
 echo $LOG_PATH
 echo "[builder.sh] Log path: $LOG_PATH"
 
-if [[ ! -d .git ]]; then
-	echo "Not a GIT repository."
-fi
+
 
 
 # extract the protocol
@@ -119,12 +117,12 @@ echo "[builder.sh]   REPO_NAME: ${REPO_NAME}"
 echo "[builder.sh] Cleaning workspace..."
 
 # Clean
-rm -rf ./tenants/$OWNER_ID/$UDID/$BUILD_ID/$REPO_PATH/**
+rm -rf $THINX_ROOT/tenants/$OWNER_ID/$UDID/$BUILD_ID/$REPO_PATH/**
 
 echo "[builder.sh] Creating workspace..."
 
 # TODO: only if $REPO_NAME contains slash(es)
-OWNER_PATH=./repositories/$OWNER_ID/$UDID/$BUILD_ID
+OWNER_PATH=$THINX_ROOT/repositories/$OWNER_ID/$UDID/$BUILD_ID
 if [[ ! -d $OWNER_PATH ]]; then
 	mkdir -p $OWNER_PATH
 fi
@@ -152,10 +150,15 @@ echo "[builder.sh] Cloning ${GIT_REPO}..."
 # Fetch project
 git clone $GIT_REPO
 
+
 if [[ -d $REPO_NAME ]]; then
 	pushd ./$REPO_NAME
 else
 	pushd ./$REPO_PATH
+fi
+
+if [[ ! -d .git ]]; then
+	echo "Not a GIT repository: $(pwd)"
 fi
 
 COMMIT=$(git rev-parse HEAD)
@@ -168,9 +171,16 @@ echo "[builder.sh] Repository version/revision: ${VERSION}"
 
 echo "Seaching THiNX-File in ${OWNER_PATH}..."
 
+echo $(pwd)
+
 THINX_FILE="$(find ${OWNER_PATH} | grep '/thinx.h')"
 
-echo "Found THiNX-File: ${THINX_FILE}"
+if [[ -z $THINX_FILE ]]; then
+	echo "No THiNX-File found!"
+	exit 1 # will deprecate on modularization for more platforms
+else
+	echo "Found THiNX-File: ${THINX_FILE}"
+fi
 
 THINX_CLOUD_URL="thinx.cloud"
 THINX_MQTT_URL="mqtt://${THINX_CLOUD_URL}"
