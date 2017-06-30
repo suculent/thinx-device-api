@@ -1331,7 +1331,7 @@ var ThinxApp = function() {
     };
 
     userlib.view("users", "owners_by_username", {
-      "key": username,
+      //"key": username,
       "include_docs": true // might be useless
     }, function(err, body) {
 
@@ -1391,10 +1391,6 @@ var ThinxApp = function() {
             username);
         }
 
-        userlib.get(req.session.owner, function(error, udoc) {
-          updateLastSeen(udoc);
-        });
-
         // console.log("client_type: " + client_type);
         if (client_type == "device") {
           respond(res, {
@@ -1409,6 +1405,12 @@ var ThinxApp = function() {
           respond(res, {
             "redirectURL": "/app/#/dashboard.html"
           });
+
+          userlib.get(req.session.owner, function(error, udoc) {
+            // TODO: FIXME before enabling, seems to delete user like this...
+            //updateLastSeen(udoc);
+          });
+
           return;
         } else {
           respond(res, {
