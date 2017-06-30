@@ -283,7 +283,7 @@ var ThinxApp = function() {
     }
 
     if (req.originalUrl.indexOf("php")) {
-      BLACKLIST.push(getClientIp(reqs));
+      BLACKLIST.push(getClientIp(req));
       res.status(418).end();
     }
 
