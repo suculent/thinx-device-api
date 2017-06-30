@@ -1332,7 +1332,7 @@ var ThinxApp = function() {
 
     userlib.view("users", "owners_by_username", {
       //"key": username,
-      "include_docs": true // might be useless
+      "include_docs": false // might be useless
     }, function(err, body) {
 
       if (err) {
@@ -1352,13 +1352,14 @@ var ThinxApp = function() {
       // Find user and match password
       var all_users = body;
 
-      console.log("Searching " + username + " in " + all_users.count +
+      console.log("Searching " + username + " in " + all_users.length +
         " users.");
 
       var user_data = null;
       for (var index in all_users) {
         var all_user_data = all_users[index];
-        console.log("Parsing " + JSON.stringify(all_user_data));
+        console.log("Parsing index " + index + " with data " + JSON.stringify(
+          all_user_data));
         if (username != all_user_data.key) {
           continue;
         } else {
