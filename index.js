@@ -355,7 +355,6 @@ var ThinxApp = function() {
 
     var new_api_key_alias = req.body.alias;
 
-
     apikey.create(owner, new_api_key_alias, function(success,
       object) {
       if (success) {
@@ -1352,6 +1351,9 @@ var ThinxApp = function() {
 
       // Find user and match password
       var all_users = body.rows;
+
+      console.log("Found users: " + JSON.stringify(all_users));
+
       var user_data = null;
       for (var index in all_users) {
         var all_user_data = all_users[index];
@@ -1365,6 +1367,7 @@ var ThinxApp = function() {
 
       if (user_data === null) {
         failureResponse(res, 403, "unauthorized");
+        return;
       }
 
       console.log("Found user: " + JSON.stringify(user_data));
