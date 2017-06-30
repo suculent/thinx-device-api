@@ -1352,7 +1352,7 @@ var ThinxApp = function() {
       // Find user and match password
       var all_users = body.rows;
 
-      console.log("Searching " + username " in " + all_users.count +
+      console.log("Searching " + username + " in " + all_users.count +
         " users.");
 
       var user_data = null;
