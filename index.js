@@ -1360,7 +1360,7 @@ var ThinxApp = function() {
         if (username != all_user_data.key) {
           continue;
         } else {
-          user_data = all_user_data;
+          user_data = all_user_data.value;
           break;
         }
       }
