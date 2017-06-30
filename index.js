@@ -1363,7 +1363,7 @@ var ThinxApp = function() {
         if (username != all_user_data.key) {
           continue;
         } else {
-          console.log("Found user: " + JSON.stringify(all_user_data));
+          console.log("Found user 1: " + JSON.stringify(all_user_data));
           user_data = all_user_data;
           break;
         }
@@ -1375,17 +1375,17 @@ var ThinxApp = function() {
         return;
       }
 
-      console.log("Found user: " + JSON.stringify(user_data));
+      console.log("Found user ě: " + JSON.stringify(user_data));
 
       // TODO: Second option (direct compare) will deprecate soon.
-      if (password.indexOf(user_data.value.password) !== -1) {
+      if (password.indexOf(user_data.password) !== -1) {
 
         // what if there's no session?
         if (typeof(req.session) !== "undefined") {
-          req.session.owner = user_data.doc.owner;
+          req.session.owner = user_data.owner;
           console.log("[OID:" + req.session.owner +
             "] [NEW_SESSION]");
-          req.session.username = user_data.doc.username;
+          req.session.username = user_data.username;
 
           var minute = 5 * 60 * 1000;
           req.session.cookie.httpOnly = true;
