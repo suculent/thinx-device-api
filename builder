@@ -72,6 +72,7 @@ mkdir -p $DEPLOYMENT_PATH
 
 LOG_PATH="${DEPLOYMENT_PATH}/${BUILD_ID}.log"
 echo "[builder.sh] Log path: $LOG_PATH"
+touch $LOG_PATH
 
 # extract the protocol
 proto="$(echo $GIT_REPO | grep :// | sed -e's,^\(.*://\).*,\1,g')"
@@ -204,7 +205,7 @@ echo "" >> "${THINX_FILE}"
 echo "// build-time constants" >> "${THINX_FILE}"
 echo "#define THINX_COMMIT_ID \"${COMMIT}\"" >> "${THINX_FILE}"
 echo "#define THINX_MQTT_URL \"${THINX_MQTT_URL}\"" >> "${THINX_FILE}"
-echo "#define THINX_CLOUD_URL = \"${THINX_CLOUD_URL}\"" >> "${THINX_FILE}"
+echo "#define THINX_CLOUD_URL \"${THINX_CLOUD_URL}\"" >> "${THINX_FILE}"
 echo "#define THINX_FIRMWARE_VERSION \"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\"" >> "${THINX_FILE}"
 echo "#define THINX_FIRMWARE_VERSION_SHORT \"${REPO_VERSION}\"" >> "${THINX_FILE}"
 echo "#define THINX_APP_VERSION \"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\"" >> "${THINX_FILE}"
@@ -298,7 +299,8 @@ echo "OWNER_ID" "${OWNER_ID}"
 echo "STATUS" "${STATUS}"
 
 echo "[THiNX] Log path: $LOG_PATH"
-cat $LOG_PATH
+
+#cat $LOG_PATH
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
 CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${BUILD_ID}.bin ${UDID} ${SHA} ${OWNER_ID} ${STATUS}"
