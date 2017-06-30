@@ -1016,30 +1016,21 @@ var ThinxApp = function() {
     return true;
   }
 
+  // Terminates session in case it has no valid owner.
   function validateSession(req, res) {
-    var sessionValid = false;
     if (typeof(req.session.owner) !== "undefined") {
-      if (typeof(req.session.username) !== "undefined") {
-        sessionValid = true;
-      } else {
-        console.log("validateSession: No username!");
-      }
+      return true;
     } else {
-      console.log("validateSession: No owner!");
-    }
-    if (sessionValid === false) {
-      req.session.destroy(function(err) {
-        if (err) {
-          console.log(err);
-        } else {
-          console.log(
-            "validateSession: Invalid session, redirecting to login!"
-          );
+      if (typeof(req.session) !== "undefined") {
+        req.session.destroy(function(err) {
+          if (err) {
+            console.log("Session destroy error: " + JSON.stringify(err));
+          }
           res.status(401).end(); // return 401 unauthorized to XHR/API calls
-        }
-      });
+        });
+      }
+      return false;
     }
-    return sessionValid;
   }
 
   /*
