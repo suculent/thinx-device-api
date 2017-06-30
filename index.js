@@ -1350,7 +1350,7 @@ var ThinxApp = function() {
       }
 
       // Find user and match password
-      var all_users = body.rows;
+      var all_users = body;
 
       console.log("Searching " + username + " in " + all_users.count +
         " users.");
@@ -1376,7 +1376,7 @@ var ThinxApp = function() {
       console.log("Found user: " + JSON.stringify(user_data));
 
       // TODO: Second option (direct compare) will deprecate soon.
-      if (password.indexOf(user_data.value) !== -1) {
+      if (password.indexOf(user_data.value.password) !== -1) {
 
         // what if there's no session?
         if (typeof(req.session) !== "undefined") {
