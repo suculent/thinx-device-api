@@ -244,14 +244,20 @@ var ThinxApp = function() {
 
     var allowedOrigin = origin;
 
-    // Skip CORS for browser-less device requests
     var client = req.get("User-Agent");
+
+    if (client.indexOf("Jorgee") !== -1) {
+      res.status(418).end();
+    }
+
     if (client == client_user_agent) {
       if (origin == "device") {
         next();
         return;
       }
     }
+
+
 
     res.header("Access-Control-Allow-Origin", allowedOrigin); // rtm.thinx.cloud
     res.header("Access-Control-Allow-Credentials", "true");
@@ -272,6 +278,10 @@ var ThinxApp = function() {
       console.log("[OID:" + req.session.owner + "] ", req.method +
         " : " + req.url);
     } else {
+      // Skip logging for monitoring sites
+      if (client.indexOf("uptimerobot")) {
+        return;
+      }
       if (req.method != "OPTIONS") {
         console.log("[OID:0] [" + req.method + "]:" + req.url + "(" +
           client + ")");
