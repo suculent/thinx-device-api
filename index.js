@@ -1358,13 +1358,12 @@ var ThinxApp = function() {
       var user_data = null;
       for (var index in all_users) {
         var all_user_data = all_users[index];
-        console.log("Parsing index " + index + " with data " + JSON.stringify(
-          all_user_data));
+        console.log("Parsing user at index " + index);
         if (username != all_user_data.key) {
           continue;
         } else {
           console.log("Found user 1: " + JSON.stringify(all_user_data));
-          user_data = all_user_data;
+          user_data = all_user_data.value;
           break;
         }
       }
@@ -1375,7 +1374,7 @@ var ThinxApp = function() {
         return;
       }
 
-      console.log("Found user ě: " + JSON.stringify(user_data));
+      console.log("Found user data 2: " + JSON.stringify(user_data));
 
       // TODO: Second option (direct compare) will deprecate soon.
       if (password.indexOf(user_data.password) !== -1) {
