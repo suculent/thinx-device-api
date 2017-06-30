@@ -68,7 +68,7 @@ echo "[builder.sh] Making deployment path: ${DISPLAY_DEPLOYMENT_PATH}"
 set +e
 mkdir -p $OWNER_ID_HOME
 mkdir -p $DEPLOYMENT_PATH
-set -e
+#set -e
 
 LOG_PATH="${DEPLOYMENT_PATH}/${BUILD_ID}.log"
 
@@ -166,7 +166,9 @@ echo "[builder.sh] Repository version/revision: ${VERSION}"
 
 # Overwrite Thinx.h file (should be required)
 
-THINX_FILE="$(find . | grep '/thinx.h')"
+echo "Seaching THiNX-File in ${OWNER_PATH}..."
+
+THINX_FILE="$(find ${OWNER_PATH} | grep '/thinx.h')"
 
 echo "Found THiNX-File: ${THINX_FILE}"
 
