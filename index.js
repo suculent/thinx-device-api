@@ -287,10 +287,11 @@ var ThinxApp = function() {
       res.status(418).end();
     }
 
-    if (req.originalUrl.indexOf("\x04\x01\x00")) {
+    /*
+    if (req.originalUrl.indexOf("\\x04\\x01\\x00")) {
       BLACKLIST.push(getClientIp(req));
       res.status(418).end();
-    }
+    }*/
 
     if (client == client_user_agent) {
       if (origin == "device") {
