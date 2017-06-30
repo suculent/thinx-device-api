@@ -223,7 +223,7 @@ echo "" >> "${THINX_FILE}"
 echo "#define THINX_UDID \"${UDID}\"" >> "${THINX_FILE}" # this just adds placeholder, key should not leak
 
 # Build
-echo "[builder.sh] Generated header file Thinx.h:"
+echo "[builder.sh] Finished building Thinx.h"
 cat $THINX_FILE >> $LOG_PATH
 
 echo "[builder.sh] TODO: Support no-compile deployment of Micropython/LUA here..."
@@ -306,8 +306,8 @@ echo "[THiNX] Log path: $LOG_PATH"
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
 CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${BUILD_ID}.bin ${UDID} ${SHA} ${OWNER_ID} ${STATUS}"
 echo $CMD
-cd $ORIGIN # go back to application root folder
-RESULT=$(node notifier.js $CMD)
+pushd $ORIGIN # go back to application root folder
+RESULT=$(node $THINX_ROOT/notifier.js $CMD)
 echo -e "${RESULT}"
 echo -e "${RESULT}" >> $LOG_PATH
 
