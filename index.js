@@ -239,6 +239,7 @@ var ThinxApp = function() {
     limit: '10mb'
   }));
 
+  /*
   app.use(function(req, res, next) {
     var ipAddress = getClientIp(req);
     if (BLACKLIST.toString().indexOf(ipAddress) === -1) {
@@ -247,6 +248,7 @@ var ThinxApp = function() {
       res.status(418).end();
     }
   });
+  */
 
   app.all("/*", function(req, res, next) {
 
@@ -272,6 +274,7 @@ var ThinxApp = function() {
 
     var client = req.get("User-Agent");
 
+    /*
     if (client.indexOf("Jorgee") !== -1) {
       BLACKLIST.push(getClientIp(req));
       res.status(418).end();
@@ -287,7 +290,7 @@ var ThinxApp = function() {
       res.status(418).end();
     }
 
-    /*
+    
     if (req.originalUrl.indexOf("\\x04\\x01\\x00")) {
       BLACKLIST.push(getClientIp(req));
       res.status(418).end();
