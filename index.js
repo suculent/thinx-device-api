@@ -1364,12 +1364,13 @@ var ThinxApp = function() {
           continue;
         } else {
           console.log("Found user: " + JSON.stringify(all_user_data));
-          user_data = all_user_data.value;
+          user_data = all_user_data;
           break;
         }
       }
 
       if (user_data === null) {
+        console.log("No user data, not authorized.");
         failureResponse(res, 403, "unauthorized");
         return;
       }
