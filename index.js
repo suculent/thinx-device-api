@@ -1594,12 +1594,14 @@ var ThinxApp = function() {
    * HTTP/S Server
    */
 
+  var ssl_options = null;
+
   // disable HTTPS on CIRCLE_CI
   if (process.env.CIRCLE_CI !== true) {
 
     if ((fs.existsSync(app_config.ssl_key)) &&
       (fs.existsSync(app_config.ssl_cert))) {
-      var ssl_options = {
+      ssl_options = {
         key: fs.readFileSync(app_config.ssl_key),
         cert: fs.readFileSync(app_config.ssl_cert)
       };
@@ -1619,7 +1621,7 @@ var ThinxApp = function() {
    */
 
   var wsapp = express();
-  var wserver = http.createServer(wsapp);
+  var wserver = https.createServer(ssl_options, wsapp);
   var wss = new WebSocket.Server({
     port: socketPort,
     server: wserver
