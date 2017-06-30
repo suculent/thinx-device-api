@@ -23,3 +23,6 @@ topic /thinx/owner_id/#
 user device_id
 topic /thinx/owner_id/device_id
 topic /thinx/owner_id/shared/#
+
+user thinx_messenger
+topic /thinx/#
