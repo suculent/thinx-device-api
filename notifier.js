@@ -37,7 +37,7 @@ var mqtt = require("mqtt");
 
 var rdict = {};
 
-console.log("-=[ ☢ THiNX IoT RTM NOTIFIER ☢ ]=-" + "\n");
+console.log("-=[ ☢ THiNX IoT RTM NOTIFIER ☢ ]=-");
 
 // Parse input params
 
@@ -111,22 +111,22 @@ nano.db.create("managed_builds", function(err, body, header) {
     ) {
       // silently fail, this is ok
     } else {
-      console.log("» Repository database attached.\n");
+      console.log("» Repository database attached.");
     }
   } else {
     console.log("» Build database creation completed. Response: " +
-      JSON.stringify(body) + "\n");
+      JSON.stringify(body));
   }
 });
 
-console.log("build_id : " + build_id + "\n");
-console.log("commit_id : " + commit_id + "\n");
-console.log("version : " + version + "\n");
-console.log("repo_url : " + repo_url + "\n");
-console.log("build_path : " + build_path + "\n");
-console.log("udid : " + udid + "\n");
-console.log("sha : " + sha + "\n");
-console.log("status : " + status + "\n");
+console.log("build_id : " + build_id);
+console.log("commit_id : " + commit_id);
+console.log("version : " + version);
+console.log("repo_url : " + repo_url);
+console.log("build_path : " + build_path);
+console.log("udid : " + udid);
+console.log("sha : " + sha);
+console.log("status : " + status);
 
 var blog = require("./lib/thinx/buildlog");
 
@@ -216,7 +216,6 @@ devicelib.get(udid, function(err, doc) {
               console.log("Build envelope saved successfully:");
               //console.log(JSON.stringify(buildEnvelope));
             }
-            console.log("\n");
           });
       }
     });
@@ -281,8 +280,6 @@ devicelib.get(udid, function(err, doc) {
         body: "Je k dispozici aktualizace software pro Akustim. Přejete si ji nainstalovat?"
       }
     };
-
-    console.log("\n");
 
     // TODO: Get registration token from device database instead
 
@@ -360,8 +357,6 @@ function notify_device_channel(owner, udid, message) {
     });
     client.end();
   });
-
-  console.log("\n");
 }
 
 function deploymentPathForDevice(owner, udid) {
