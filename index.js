@@ -290,7 +290,7 @@ var ThinxApp = function() {
       res.status(418).end();
     }
 
-    
+
     if (req.originalUrl.indexOf("\\x04\\x01\\x00")) {
       BLACKLIST.push(getClientIp(req));
       res.status(418).end();
@@ -1793,15 +1793,19 @@ var ThinxApp = function() {
         if (!fs.existsSync(path)) {
           continue;
         } else {
+
+          return;
+
           console.log("Trying to watch path?: " + path +
             "(This is deprecated and should be replaced with a commit hook.)"
           );
+
           if (fs.lstatSync(path).isDirectory()) {
 
             // TODO: FIXME: There's a plenty of build_ids on this path and somewhere deep in that
             // is the repository workspace. We should use only the new one or re-fetch.
 
-            var workspace = getNewestFolder(path + "/", new RegExp('.*'));
+            var workspace = getNewestFolder(path, new RegExp('.*'));
 
             // TODO: get source details by source identifier from owner
             watcher.watchRepository(workspace, watcher_callback);
