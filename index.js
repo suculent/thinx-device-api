@@ -1352,9 +1352,6 @@ var ThinxApp = function() {
       // Find user and match password
       var all_users = body.rows;
 
-      console.log("Searching " + username + " in " + all_users.length +
-        " users.");
-
       var user_data = null;
       for (var index in all_users) {
         var all_user_data = all_users[index];
@@ -1362,7 +1359,6 @@ var ThinxApp = function() {
         if (username != all_user_data.key) {
           continue;
         } else {
-          console.log("Found user 1: " + JSON.stringify(all_user_data));
           user_data = all_user_data.value;
           break;
         }
@@ -1373,8 +1369,6 @@ var ThinxApp = function() {
         failureResponse(res, 403, "unauthorized");
         return;
       }
-
-      console.log("Found user data 2: " + JSON.stringify(user_data));
 
       // TODO: Second option (direct compare) will deprecate soon.
       if (password.indexOf(user_data.password) !== -1) {
