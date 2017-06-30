@@ -1311,8 +1311,6 @@ var ThinxApp = function() {
   // Front-end authentication, returns session on valid authentication
   app.post("/api/login", function(req, res) {
 
-    console.log("Logging in...");
-
     var client_type = "webapp";
     var ua = req.headers["user-agent"];
     var validity = ua.indexOf(client_user_agent);
@@ -1359,8 +1357,6 @@ var ThinxApp = function() {
       req.session.cookie.maxAge = fortnight;
     }
 
-    console.log("Searching user...");
-
     var updateLastSeen = function(doc) {
       delete doc._rev;
       doc.last_seen = new Date();
@@ -1402,7 +1398,6 @@ var ThinxApp = function() {
       var user_data = null;
       for (var index in all_users) {
         var all_user_data = all_users[index];
-        console.log("Parsing user at index " + index);
         if (username != all_user_data.key) {
           continue;
         } else {
@@ -1534,7 +1529,7 @@ var ThinxApp = function() {
 
     var owner = req.session.owner;
 
-    console.log("Statistics for owner " + owner);
+    console.log("[OID:" + owner + "] [STATS_GET]");
 
     stats.week(owner, function(success, body) {
 
