@@ -3,11 +3,10 @@ describe("Devices", function() {
   var generated_key_hash = null;
   var devices = require('../../lib/thinx/devices');
 
-  var owner =
-    "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f";
-  var source_id =
-    "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f4";
-  var udid = "to-be-deleted-on-test";
+  var envi = require("_envi.json");
+  var owner = envi.owner;
+  var source_id = envi.sid;
+  var udid = envi.udid;
 
   // All of this expects successful device registration to safely revoke!
 

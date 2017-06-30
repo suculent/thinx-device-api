@@ -1,17 +1,17 @@
 describe("Deployer", function() {
 
+
   var deploy = require('../../lib/thinx/deployment');
 
-  var owner =
-    "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f";
-
-  var udid = "fcdd7b20-3980-11e7-a58d-81e4acfbeb86";
+  var envi = require("_envi.json");
+  var owner = envi.owner;
+  var udid = envi.udid;
 
   var device = {
-    mac: "0",
-    owner: owner,
-    version: "1",
-    udid: udid
+    mac: envi.mac,
+    owner: envi.owner,
+    version: envi.version,
+    udid: envi.udid
   };
 
   beforeEach(function() {

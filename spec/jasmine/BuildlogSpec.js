@@ -2,10 +2,12 @@ describe("Build log", function() {
 
   var blog = require("../../lib/thinx/buildlog");
 
-  var build_id = "f168def0-597f-11e7-a932-014d5b00c004";
-  var owner =
-    "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f";
-  var udid = "fcdd7b20-3980-11e7-a58d-81e4acfbeb86";
+  var envi = require("_envi.json");
+  var owner = envi.owner;
+  var udid = envi.udid;
+  var apikey = envi.ak;
+
+  var build_id = envi.build_id; // "f168def0-597f-11e7-a932-014d5b00c004";
 
   /*
    * WebSocket Server

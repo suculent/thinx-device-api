@@ -3,8 +3,8 @@ describe("Owner", function() {
   var generated_key_hash = null;
   var Sources = require('../../lib/thinx/sources');
 
-  var owner =
-    "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f";
+  var envi = require("_envi.json");
+  var owner = envi.owner;
 
   var source_id = null;
 
@@ -26,18 +26,21 @@ describe("Owner", function() {
         expect(response).toBeDefined();
         source_id = response.source_id;
         console.log(response);
+
+        it("should be able to remove previously added source",
+          function(done) {
+            Sources.remove(owner, [source_id], function(success,
+              response) {
+              expect(success).toBe(true);
+              expect(response).toBeDefined();
+              source_id = response.source_id;
+              console.log(response);
+              done();
+            });
+          }, 10000);
+
         done();
       });
-  }, 10000);
-
-  it("should be able to remove previously added source", function(done) {
-    Sources.remove(owner, [source_id], function(success, response) {
-      expect(success).toBe(true);
-      expect(response).toBeDefined();
-      source_id = response.source_id;
-      console.log(response);
-      done();
-    });
   }, 10000);
 
 });

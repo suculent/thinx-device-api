@@ -2,13 +2,16 @@ describe("Statistics", function() {
 
   var s = require('../../lib/thinx/statistics');
 
+  var envi = require("_envi.json");
+  var owner = envi.owner;
+
   it("should be able to initialize", function() {
     expect(s).toBeDefined();
   });
 
   it("should be able to store results", function() {
     var path =
-      "./statistics/eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f/" +
+      "./statistics/" + owner + "/" +
       s.todayPathElement() + ".json";
     s.write_stats(false, path, "./statistics", {
       "message": "test"
@@ -24,7 +27,7 @@ describe("Statistics", function() {
 
   it("should be able to return today results for owner", function(done) {
     var result = s.today(
-      "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
+      owner,
       function(error, result) {
         expect(error).toBe(false);
         console.log("daily stats: " + result);
@@ -41,7 +44,7 @@ describe("Statistics", function() {
 
   it("should be able to parse statistics per owner", function(done) {
     s.parse(
-      "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
+      owner,
       function(err, body) {
         console.log(err, body);
         expect(body).toBe(true);
@@ -51,7 +54,7 @@ describe("Statistics", function() {
 
   it("should be able to return weekly results for owner", function(done) {
     var result = s.week(
-      "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
+      owner,
       function(error, result) {
         expect(error).toBe(false);
         console.log("weekly stats: " + result);
