@@ -80,6 +80,23 @@ var ThinxApp = function() {
 
   var WebSocket = require("ws");
 
+  // list of previously discovered attackers
+  var BLACKLIST = ['203.218.194.124'];
+
+  var getClientIp = function(req) {
+    var ipAddress = req.connection.remoteAddress;
+    if (!ipAddress) {
+      return '';
+    }
+    // convert from "::ffff:192.0.0.1"  to "192.0.0.1"
+    if (ipAddress.substr(0, 7) == "::ffff:") {
+      ipAddress = ipAddress.substr(7);
+    }
+    return ipAddress;
+  };
+
+
+
   // EXTRACT TO: db.js -->
 
   /*
@@ -222,6 +239,15 @@ var ThinxApp = function() {
     limit: '10mb'
   }));
 
+  app.use(function(req, res, next) {
+    var ipAddress = getClientIp(req);
+    if (BLACKLIST.toString().indexOf(ipAddress) === -1) {
+      next();
+    } else {
+      res.status(418).end();
+    }
+  });
+
   app.all("/*", function(req, res, next) {
 
     var origin = req.get("origin");
@@ -247,6 +273,17 @@ var ThinxApp = function() {
     var client = req.get("User-Agent");
 
     if (client.indexOf("Jorgee") !== -1) {
+      BLACKLIST.push(getClientIp(req));
+      res.status(418).end();
+    }
+
+    if (req.originalUrl.indexOf("admin")) {
+      BLACKLIST.push(getClientIp(req));
+      res.status(418).end();
+    }
+
+    if (req.originalUrl.indexOf("php")) {
+      BLACKLIST.push(getClientIp(reqs));
       res.status(418).end();
     }
 
