@@ -1331,7 +1331,7 @@ var ThinxApp = function() {
     };
 
     userlib.view("users", "owners_by_username", {
-      //"key": username,
+      "key": username,
       "include_docs": false // might be useless
     }, function(err, body) {
 
