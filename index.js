@@ -355,7 +355,6 @@ var ThinxApp = function() {
 
     var new_api_key_alias = req.body.alias;
 
-
     apikey.create(owner, new_api_key_alias, function(success,
       object) {
       if (success) {
@@ -592,7 +591,6 @@ var ThinxApp = function() {
 
     sources.add(req.session.owner, alias, url, branch,
       function(success, response) {
-        console.log(JSON.stringify(response));
         respond(res, response);
       });
   });
@@ -882,7 +880,6 @@ var ThinxApp = function() {
     }
     console.log("Update with OTT: " + ott);
     device.ott_update(ott, function(success, response) {
-      //console.log("OTT response: " + JSON.stringify(response));
       respond(res, response);
 
     });
@@ -1354,6 +1351,9 @@ var ThinxApp = function() {
 
       // Find user and match password
       var all_users = body.rows;
+
+      console.log("Found users: " + JSON.stringify(all_users));
+
       var user_data = null;
       for (var index in all_users) {
         var all_user_data = all_users[index];
@@ -1367,6 +1367,7 @@ var ThinxApp = function() {
 
       if (user_data === null) {
         failureResponse(res, 403, "unauthorized");
+        return;
       }
 
       console.log("Found user: " + JSON.stringify(user_data));
@@ -1687,6 +1688,32 @@ var ThinxApp = function() {
     }
   };
 
+  var getNewestFolder = function(dir, regexp) {
+    newest = null;
+    files = fs.readdirSync(dir);
+    one_matched = 0;
+
+    for (i = 0; i < files.length; i++) {
+
+      if (regexp.test(files[i]) === false) {
+        continue;
+      } else if (one_matched === 0) {
+        newest = files[i];
+        one_matched = 1;
+        continue;
+      }
+
+      f1_time = fs.statSync(files[i]).mtime.getTime();
+      f2_time = fs.statSync(newest).mtime.getTime();
+      if (f1_time > f2_time)
+        newest[i] = files[i];
+    }
+
+    if (newest !== null)
+      return (dir + newest);
+    return null;
+  };
+
   // REFACTOR: Get array of deploy_paths and attach watcher callback (if deploy path exists)
   var initWatcher = function(watcher) {
     devicelib.view("devicelib", "watcher_view", {
@@ -1699,6 +1726,11 @@ var ThinxApp = function() {
       }
       for (var index in body.rows) {
 
+        var source = body.rows[index].doc.source;
+        if (typeof(source) === "undefined" || source === null) {
+          continue;
+        }
+
         if (!body.rows[index].hasOwnProperty("doc")) continue;
         if (!body.rows[index].doc.hasOwnProperty("owner")) continue;
         if (!body.rows[index].doc.hasOwnProperty("udid")) continue;
@@ -1706,12 +1738,23 @@ var ThinxApp = function() {
         var owner = body.rows[index].doc.owner;
         var udid = body.rows[index].doc.udid;
         var path = blog.pathForDevice(owner, udid);
+
         if (!fs.existsSync(path)) {
           continue;
         } else {
-          console.log("Trying to watch path: " + path);
+          console.log("Trying to watch path?: " + path +
+            "(This is deprecated and should be replaced with a commit hook.)"
+          );
           if (fs.lstatSync(path).isDirectory()) {
-            watcher.watchRepository(path, watcher_callback);
+
+            // TODO: FIXME: There's a plenty of build_ids on this path and somewhere deep in that
+            // is the repository workspace. We should use only the new one or re-fetch.
+
+            var workspace = getNewestFolder(path + "/", new RegExp('.*'));
+
+            // TODO: get source details by source identifier from owner
+            watcher.watchRepository(workspace, watcher_callback);
+
           } else {
             console.log(path + " is not a directory.");
           }

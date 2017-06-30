@@ -1,9 +1,8 @@
 var generated_key_hash = null;
 var APIKey = require('../../lib/thinx/apikey');
 
-var test_key =
-  "1e1ed4110359eccce9541e33d0ef444d1f3ebd8fe771b754280cccdfeb3cc4e5";
-"1e1ed4110359eccce9541e33d0ef444d1f3ebd8fe771b754280cccdfeb3cc4e5";
+var envi = require("_envi.json");
+var owner = envi.owner;
 
 describe("API Key", function() {
 
@@ -12,7 +11,7 @@ describe("API Key", function() {
     //create: function(owner, apikey_alias, callback)
     it("should be able to generate new API Keys", function(done) {
       APIKey.create(
-        "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
+        owner,
         "sample-key",
         function(success,
           object) {
@@ -26,7 +25,7 @@ describe("API Key", function() {
               console.log("Verifying key: " +
                 generated_key_hash);
               APIKey.verify(
-                "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
+                owner,
                 this.generated_key_hash,
                 function(success) {
                   expect(success).toBe(true);
@@ -54,7 +53,7 @@ describe("API Key", function() {
 
     it("should be able to verify invalid API Keys", function(done) {
       APIKey.verify(
-        "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
+        owner,
         "invalid-api-key",
         function(success) {
           expect(success).toBe(false);
@@ -77,7 +76,7 @@ describe("API Key", function() {
   //list: function(owner, callback)
   it("should be able to list API Keys", function(done) {
     APIKey.list(
-      "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
+      owner,
       function(success, object) {
         if (success) {
           console.log(JSON.stringify(object));

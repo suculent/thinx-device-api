@@ -181,7 +181,7 @@ devicelib.get(udid, function(err, doc) {
       }
     }
 
-    console.log(JSON.stringify(body));
+    //console.log(JSON.stringify(body));
 
     // Create build envelope
 
@@ -214,7 +214,7 @@ devicelib.get(udid, function(err, doc) {
               console.log("Build envelope save error: " + err);
             } else {
               console.log("Build envelope saved successfully:");
-              console.log(JSON.stringify(buildEnvelope));
+              //console.log(JSON.stringify(buildEnvelope));
             }
             console.log("\n");
           });

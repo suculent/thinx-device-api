@@ -1,6 +1,12 @@
 var RSAKey = require('../../lib/thinx/rsakey');
-var owner =
-  "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f";
+
+var envi = require("_envi.json");
+var owner = envi.owner;
+
+var invalid_fingerprints = [
+  "a9:fd:f3:8e:97:7d:f4:c1:e1:39:3f:fd:2b:3b:5f:9_"
+];
+
 var revoked_fingerprints = [
   "a9:fd:f3:8e:97:7d:f4:c1:e1:39:3f:fd:2b:3b:5f:9f"
 ];
@@ -24,9 +30,7 @@ describe("RSA Key", function() {
 
   it("should fail on invalid revocation", function(
     done) {
-    RSAKey.revoke(owner, [
-        "a9:fd:f3:8e:97:7d:f4:c1:e1:39:3f:fd:2b:3b:5f:9_"
-      ],
+    RSAKey.revoke(owner, invalid_fingerprints,
       function(success, message) {
         console.log("RSA revocation result: " +
           JSON.stringify(
@@ -38,9 +42,7 @@ describe("RSA Key", function() {
 
     it("should be able to revoke multiple RSA Keys at once",
       function(done) {
-        RSAKey.revoke(owner, [
-            "a9:fd:f3:8e:97:7d:f4:c1:e1:39:3f:fd:2b:3b:5f:9f"
-          ],
+        RSAKey.revoke(owner, revoked_fingerprints,
           function(success, message) {
             console.log("RSA revocation result: " + JSON.stringify(
               message));
@@ -52,8 +54,7 @@ describe("RSA Key", function() {
 
     it("should be able to list RSA Keys",
       function(done) {
-        RSAKey.list(owner, function(
-          success, message) {
+        RSAKey.list(owner, function(success, message) {
           console.log(
             "RSA list result: " +
             JSON.stringify(

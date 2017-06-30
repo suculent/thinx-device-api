@@ -1,6 +1,9 @@
 var generated_key_name = null;
 var APIEnv = require('../../lib/thinx/apienv');
 
+var envi = require("_envi.json");
+var owner = envi.owner;
+
 describe("API Env", function() {
 
   describe("Storage", function() {
@@ -11,7 +14,7 @@ describe("API Env", function() {
       function(done) {
         console.log("Revoking invalid env var...");
         APIEnv.revoke(
-          "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f", [
+          owner, [
             "sample-key-hash"
           ],
           function(success) {
@@ -24,7 +27,7 @@ describe("API Env", function() {
     it("should be able to list environment variables",
       function(done) {
         APIEnv.list(
-          "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
+          owner,
           function(success, object) {
             if (success) {
               console.log(JSON.stringify(object));
@@ -41,7 +44,7 @@ describe("API Env", function() {
     it("should be able to store new environment varriable", function(
       done) {
       APIEnv.create(
-        "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
+        owner,
         "sample-var-name",
         "sample-var-value",
         function(success, object) {
@@ -55,7 +58,7 @@ describe("API Env", function() {
               function(done) {
                 console.log("Fetching env var...");
                 APIEnv.fetch(
-                  "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
+                  owner,
                   "sample-var-name",
                   function(err, response) {
                     expect(err).toBe(false);
@@ -66,7 +69,7 @@ describe("API Env", function() {
                       "should be able to revoke environment variables",
                       function(done) {
                         APIEnv.revoke(
-                          "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f",
+                          owner,
                           this.generated_key_name,
                           function(success, object) {
                             if (success) {
@@ -93,7 +96,5 @@ describe("API Env", function() {
     }, 30000);
 
   });
-
-
 
 });

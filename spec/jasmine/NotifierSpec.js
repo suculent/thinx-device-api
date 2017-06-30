@@ -1,7 +1,7 @@
 describe("Notifier", function() {
 
-  var owner =
-    "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f";
+  var envi = require("_envi.json");
+  var owner = envi.owner;
 
   // Well, this will be some fun. The notifier.js is being called on following circumstances:
   // node.js process exeutes the builder.sh (should do that in background, but initial test versions did this synchronously
