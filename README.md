@@ -23,11 +23,15 @@ As a user I have already many IoT new and/or legacy devices at home. Sometimes I
 
 * Provides control to a build server that pushes new firmware versions to client applications (FCM push) and devices (MQTT).
 
-* Provides HTTP-to-HTTPS proxy to secure legacy IoT devices that are not capable of TLS and/or AES-level encryption. 
+* Provides HTTP-to-HTTPS proxy to secure legacy IoT devices that are not capable of TLS and/or AES-level encryption.
+
+* Allows transfer of device ownership (e.g. for pre-configured devices).
 
 ## Future roadmap
 
 * Custom firmware builder for MongooseOS, NodeMCU and Micropython (allow module selection, add THiNX as an OS-level library)
+
+* Transfer device to another owner along with sources/firmware.
 
 ## Supported IoT Platforms
 

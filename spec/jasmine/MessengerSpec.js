@@ -34,8 +34,6 @@ describe("Messenger", function() {
       it("should be able to publish upon connection", function() {
         Messenger.publish(test_owner, udid, "test");
       });
-
-
       done();
     });
   }, 5000);

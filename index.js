@@ -77,6 +77,7 @@ var ThinxApp = function() {
   var rsakey = require("./lib/thinx/rsakey");
   var stats = require("./lib/thinx/statistics");
   var sources = require("./lib/thinx/sources");
+  var transfer = require("./lib/thinx/transfer");
 
   var WebSocket = require("ws");
 
@@ -1311,6 +1312,205 @@ var ThinxApp = function() {
 
     blog.logtail(req.body.build_id, owner, _ws, error_callback);
 
+  });
+
+  /*
+   * Device Transfer
+   */
+
+  /* Request device transfer */
+  app.post("/api/transfer/request", function(req, res) {
+
+    if (!validateSecurePOSTRequest(req)) return;
+    if (!validateSession(req, res)) return;
+
+    var owner = req.session.owner;
+
+    transfer.request(owner, req.body, function(success, response) {
+      if (success === false) {
+        console.log(response);
+        respond(res, {
+          success: false,
+          status: "transfer_request_failed",
+          error: response
+        });
+      } else {
+        respond(res, {
+          success: true,
+          status: response
+        });
+      }
+    });
+  });
+
+  /* Decline device transfer (all by e-mail, selective will be POST) */
+  app.get("/api/transfer/decline", function(req, res) {
+
+    if (!validateSecureGETRequest(req)) return;
+    if (!validateSession(req, res)) return;
+
+    var owner = req.session.owner;
+
+    if (typeof(req.query.transfer_id) !== "undefined") {
+      respond(res, {
+        success: false,
+        status: "transfer_id missing"
+      });
+      return;
+    }
+
+    var body = {
+      transfer_id: req.query.transfer_id,
+      udids: []
+    };
+
+    transfer.decline(body, function(success, response) {
+      if (success === false) {
+        console.log(response);
+        respond(res, {
+          success: false,
+          status: "transfer_decline_failed",
+          error: response
+        });
+      } else {
+        respond(res, {
+          success: true,
+          status: response
+        });
+      }
+    });
+  });
+
+  /* Decline selective device transfer */
+  app.post("/api/transfer/decline", function(req, res) {
+
+    if (!validateSecurePOSTRequest(req)) return;
+    if (!validateSession(req, res)) return;
+
+    if (typeof(req.body.owner) !== "undefined") {
+      respond(res, {
+        success: false,
+        status: "owner_missing"
+      });
+      return;
+    }
+
+    if (typeof(req.body.transfer_id) !== "undefined") {
+      respond(res, {
+        success: false,
+        status: "transfer_id_missing"
+      });
+      return;
+    }
+
+    if (typeof(req.body.udids) !== "undefined") {
+      respond(res, {
+        success: false,
+        status: "udids_missing"
+      });
+      return;
+    }
+
+    transfer.decline(body, function(success, response) {
+      if (success === false) {
+        console.log(response);
+        respond(res, {
+          success: false,
+          status: "selective_transfer_decline_failed",
+          error: response
+        });
+      } else {
+        respond(res, {
+          success: true,
+          status: response
+        });
+      }
+    });
+  });
+
+  /* Accept device transfer (all by e-mail, selective will be POST) */
+  app.get("/api/transfer/accept", function(req, res) {
+
+    if (!validateSecureGETRequest(req)) return;
+    if (!validateSession(req, res)) return;
+
+    var owner = req.session.owner;
+
+    if (typeof(req.query.transfer_id) !== "undefined") {
+      respond(res, {
+        success: false,
+        status: "transfer_id missing"
+      });
+      return;
+    }
+
+    var body = {
+      transfer_id: req.query.transfer_id,
+      udids: []
+    };
+
+    transfer.accept(body, function(success, response) {
+      if (success === false) {
+        console.log(response);
+        respond(res, {
+          success: false,
+          status: "transfer_accept_failed",
+          error: response
+        });
+      } else {
+        respond(res, {
+          success: true,
+          status: response
+        });
+      }
+    });
+  });
+
+  /* Accept selective device transfer */
+  app.post("/api/transfer/accept", function(req, res) {
+
+    if (!validateSecurePOSTRequest(req)) return;
+    if (!validateSession(req, res)) return;
+
+    if (typeof(req.body.owner) !== "undefined") {
+      respond(res, {
+        success: false,
+        status: "owner_missing"
+      });
+      return;
+    }
+
+    if (typeof(req.body.transfer_id) !== "undefined") {
+      respond(res, {
+        success: false,
+        status: "transfer_id_missing"
+      });
+      return;
+    }
+
+    if (typeof(req.body.udids) !== "undefined") {
+      respond(res, {
+        success: false,
+        status: "udids_missing"
+      });
+      return;
+    }
+
+    transfer.accept(body, function(success, response) {
+      if (success === false) {
+        console.log(response);
+        respond(res, {
+          success: false,
+          status: "selective_transfer_accept_failed",
+          error: response
+        });
+      } else {
+        respond(res, {
+          success: true,
+          status: response
+        });
+      }
+    });
   });
 
   /*

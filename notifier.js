@@ -35,6 +35,8 @@ var fs = require("fs");
 var nano = require("nano")(db);
 var mqtt = require("mqtt");
 
+var Messenger = require('lib/thinx/messenger');
+
 var rdict = {};
 
 console.log("-=[ ☢ THiNX IoT RTM NOTIFIER ☢ ]=-");
@@ -321,7 +323,8 @@ devicelib.get(udid, function(err, doc) {
 
     // Device channel
     if (status == "DEPLOYED") {
-      notify_device_channel(owner, udid, message);
+      messenger.publish(owner, udid, message);
+      notify_device_channel(owner, udid, message); // deprecated; integration testing only
     }
 
   });
@@ -340,10 +343,12 @@ var pushNotificationPayload = {
 };
 
 //
-// MQTT Notifications (for Devices)
+// MQTT Notifications (deprecated, done through Messenger)
 //
 
+*
 function notify_device_channel(owner, udid, message) {
+  console.log("notify_device_channel is DEPRECATED");
   var channel = "/thinx/devices/" + owner + "/" + udid;
   console.log("Posting to MQTT queue " + channel);
   var client = mqtt.connect("mqtt://guest:guest@thinx.cloud:1883");
@@ -358,6 +363,7 @@ function notify_device_channel(owner, udid, message) {
     client.end();
   });
 }
+
 
 function deploymentPathForDevice(owner, udid) {
   var user_path = __dirname + config.deploy_root + "/" + owner;

@@ -6,18 +6,39 @@
 
 The device registration and checkin is working, firmwares can be provided using OTT, repositories are fetched and built, devices are notified, RSA keys stored but not tested, there's even support for environment variables not yet baked into the builder(s). MQTT is not a priority so far, instead we're trying to focus on firmware update side. It seems to be almost done.
 
+* bake-in env-vars inside builders
 * Split low-level builders for 'ino', 'pio', 'mos', 'lua' and 'upy' and manage using node.js classes
-* Builder Logging, build tests
 * Update support (LUA/uPy/mos) for file-based dumb firmwares = allow file-based upload where applicable
-* Improve statistics (count last 24 hours or something)
 * Make devices respond/receive MQTT messages (LUA first)
+* Optionally migrate sources when transferring device (requires extracting sources to separate db).
 
 **LONG-TERM ROADMAP**
 
 * Support for building custom NodeMCU, Micropython or MongooseOS firmware
 * Installer, disaster recovery (except for existing DO backup).
+* Websocket on login (notifications)
+
+### 13th week
+
+2/7/2017 - 1.7.1637: added tests and implementation for device transfer with e-mail confirmation and optionally partial accept; not tested; integrated Messenger with Notifier
+
+1/7/2017 - secure web socket, platform.io builder/logger integration
+
+30/6/2017 - MQTT messenger, refactoring, fixes, IP blacklisting
+
+29/6/2017 - weekly statistics and logout
+
+28/6/2017 - session cookie for "remember me"
+
+27/6/2017 - technical debt fixes and generating thinx.h in new format for C/C++
+
+26/6/2017 - 1.7.1542: refactoring, cleanup, audit/build log fices
 
 ### 12th week
+
+25/6/2017 - semver-related fixes, cleanup
+
+24/6/2017 - extracted avatar from database to file
 
 23/6/2017 - 1.7.1500: added deploy-hook (hook fails but nothing is fetched, use pm2 pullAndRestart ft.); fixed Enviro revocations, version bump due to OTT support and multiple firmware OS builders; fixed user logout (+ also on invalid session)
 
