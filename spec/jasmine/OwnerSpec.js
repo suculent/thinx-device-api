@@ -105,8 +105,7 @@ describe("Owner", function() {
       owner: owner,
       reset_key: reset_key
     };
-    User.set_password(owner, body, function(success,
-      response) {
+    User.set_password(body, function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
       console.log(JSON.stringify(response));

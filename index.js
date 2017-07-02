@@ -833,7 +833,7 @@ var ThinxApp = function() {
 
   /* Used by the password.html page to perform the change in database. Should revoke reset_key when done. */
   app.post("/api/user/password/set", function(req, res) {
-    user.set_password(owner, body, function(success, message) {
+    user.set_password(req.body, function(success, message) {
       if (!success) {
         req.session.destroy();
       }
