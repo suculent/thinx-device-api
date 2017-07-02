@@ -32,7 +32,7 @@ The device registration and checkin is working, firmwares can be provided using 
 
 27/6/2017 - technical debt fixes and generating thinx.h in new format for C/C++
 
-26/6/2017 - 1.7.1542: refactoring, cleanup, audit/build log fices
+26/6/2017 - 1.7.1542: refactoring, cleanup, audit/build log fixes
 
 ### 12th week
 
