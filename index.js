@@ -253,7 +253,7 @@ var ThinxApp = function() {
 
   app.all("/*", function(req, res, next) {
 
-    var allowedOrigin = "rtm.thinx.cloud";
+    var allowedOrigin = "*.thinx.cloud";
     var client = req.get("User-Agent");
 
     if (client.indexOf("Jorgee") !== -1) {
