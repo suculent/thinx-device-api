@@ -253,8 +253,11 @@ var ThinxApp = function() {
 
   app.all("/*", function(req, res, next) {
 
-    var allowedOrigin = "*.thinx.cloud";
-    allowedOrigin = req.origin; // FIXME: HACK
+    var allowedOrigin = "*";
+
+    //if (typeof(req.origin !== "undefined")) {
+    //allowedOrigin = req.origin; // FIXME: HACK
+    //}
 
     var client = req.get("User-Agent");
 
@@ -263,20 +266,21 @@ var ThinxApp = function() {
       res.status(418).end();
     }
 
-    if (req.originalUrl.indexOf("admin")) {
+    if (req.originalUrl.indexOf("admin") !== -1) {
       BLACKLIST.push(getClientIp(req));
       res.status(418).end();
     }
 
-    if (req.originalUrl.indexOf("php")) {
+    if (req.originalUrl.indexOf("php") !== -1) {
       BLACKLIST.push(getClientIp(req));
       res.status(418).end();
     }
 
-    if (req.originalUrl.indexOf("\\x04\\x01\\x00")) {
+    if (req.originalUrl.indexOf("\\x04\\x01\\x00") !== -1) {
       BLACKLIST.push(getClientIp(req));
       res.status(418).end();
     }
+
     res.header("Access-Control-Allow-Origin", allowedOrigin); // rtm.thinx.cloud
     res.header("Access-Control-Allow-Credentials", "true");
     res.header(
