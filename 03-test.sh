@@ -625,7 +625,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing builder..."
 
-BC='{ "build" : { "udid" : '${DEVICE_ID}', "source_id" : '${SOURCE_ID}', "dryrun" : true } }'
+BC='{ "build" : { "udid" : '${DEVICE_ID}', "source_id" : '${SOURCE_ID}', "dryrun" : false } }'
 
 echo "$BC"
 
