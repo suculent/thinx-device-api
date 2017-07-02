@@ -256,6 +256,8 @@ var ThinxApp = function() {
     // CORS must be enabled esp. for devices
     var allowedOrigin = req.origin;
 
+    console.log("allowedOrigin: " + allowedOrigin);
+
     //if (typeof(req.origin !== "undefined")) {
     //allowedOrigin = req.origin; // FIXME: HACK
     //}
@@ -265,21 +267,29 @@ var ThinxApp = function() {
     if (client.indexOf("Jorgee") !== -1) {
       BLACKLIST.push(getClientIp(req));
       res.status(418).end();
+      console.log("Jorgee is blacklisted.");
+      return;
     }
 
     if (req.originalUrl.indexOf("admin") !== -1) {
       BLACKLIST.push(getClientIp(req));
       res.status(418).end();
+      console.log("admin is blacklisted.");
+      return;
     }
 
     if (req.originalUrl.indexOf("php") !== -1) {
       BLACKLIST.push(getClientIp(req));
       res.status(418).end();
+      console.log("php is blacklisted.");
+      return;
     }
 
     if (req.originalUrl.indexOf("\\x04\\x01\\x00") !== -1) {
       BLACKLIST.push(getClientIp(req));
       res.status(418).end();
+      console.log("hrrtbleed is blacklisted.");
+      return;
     }
 
     res.header("Access-Control-Allow-Origin", allowedOrigin); // rtm.thinx.cloud
