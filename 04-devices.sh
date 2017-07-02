@@ -5,7 +5,7 @@
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
-API_KEY='1e1ed4110359eccce9541e33d0ef444d1f3ebd8fe771b754280cccdfeb3cc4e5'
+API_KEY='900879b2015ac3801bd2d4b294edf48ef39e9647adf4ed8b0e0744251083a13d'
 OWNER_ID='4f1122fa074af4dabab76a5205474882c82de33f50ecd962d25d3628cd0603be' # cimrman is the originating device owner for transfer tests; saturnin is receiver
 
 function echo_fail() { # $1 = string
