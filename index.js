@@ -778,7 +778,7 @@ var ThinxApp = function() {
   // /user/create GET
   /* Create username based on e-mail. Owner must be unique (email hash). */
   app.post("/api/user/create", function(req, res) {
-    user.create(body, function(success, status) {
+    user.create(req.body, function(success, status) {
       respond(res, {
         success: success,
         status: message
@@ -1472,7 +1472,7 @@ var ThinxApp = function() {
       return;
     }
 
-    transfer.accept(body, function(success, response) {
+    transfer.accept(req.body, function(success, response) {
       if (success === false) {
         console.log(response);
         respond(res, {
