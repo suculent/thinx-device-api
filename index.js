@@ -256,8 +256,8 @@ var ThinxApp = function() {
     // CORS must be enabled esp. for devices
     var allowedOrigin = "rtm.thinx.cloud";
 
-    if (typeof(req.origin) !== "undefined") {
-      allowedOrigin = req.origin;
+    if (typeof(req.headers.origin) !== "undefined") {
+      allowedOrigin = req.headers.origin;
     }
 
     console.log("allowedOrigin: " + allowedOrigin);
