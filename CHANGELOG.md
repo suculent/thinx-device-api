@@ -20,7 +20,7 @@ The device registration and checkin is working, firmwares can be provided using 
 
 ### 13th week
 
-2/7/2017 - 1.7.1637: added tests and implementation for device transfer with e-mail confirmation and optionally partial accept; not tested; integrated Messenger with Notifier
+2/7/2017 - 1.7.1638: added tests and implementation for device transfer with e-mail confirmation and optionally partial accept; not tested; integrated Messenger with Notifier
 
 1/7/2017 - secure web socket, platform.io builder/logger integration
 

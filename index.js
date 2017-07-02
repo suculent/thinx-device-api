@@ -253,29 +253,9 @@ var ThinxApp = function() {
 
   app.all("/*", function(req, res, next) {
 
-    var origin = req.get("origin");
-
-    /*
-    // FIXME:
-    */
-
-    if (typeof(origin) === "undefined") {
-      origin = "rtm.thinx.cloud";
-      rollbar.reportMessage(
-        "SEC-ERR: Turning 'undefined' origin to 'rtm.thinx.cloud'");
-    }
-
-    if (origin === null) {
-      origin = "*.thinx.cloud";
-      rollbar.reportMessage(
-        "SEC-ERR: Turning null origin to 'rtm.thinx.cloud'");
-    }
-
-    var allowedOrigin = origin;
-
+    var allowedOrigin = "rtm.thinx.cloud";
     var client = req.get("User-Agent");
 
-    /*
     if (client.indexOf("Jorgee") !== -1) {
       BLACKLIST.push(getClientIp(req));
       res.status(418).end();
@@ -291,21 +271,10 @@ var ThinxApp = function() {
       res.status(418).end();
     }
 
-
     if (req.originalUrl.indexOf("\\x04\\x01\\x00")) {
       BLACKLIST.push(getClientIp(req));
       res.status(418).end();
-    }*/
-
-    if (client == client_user_agent) {
-      if (origin == "device") {
-        next();
-        return;
-      }
     }
-
-
-
     res.header("Access-Control-Allow-Origin", allowedOrigin); // rtm.thinx.cloud
     res.header("Access-Control-Allow-Credentials", "true");
     res.header(
@@ -317,6 +286,13 @@ var ThinxApp = function() {
       res.status(200).end();
     } else {
       next();
+    }
+
+    if (client == client_user_agent) {
+      if (origin == "device") {
+        next();
+        return;
+      }
     }
 
     // log owner ID and request method to application log only
@@ -2028,14 +2004,11 @@ var ThinxApp = function() {
 
   function database_compactor() {
     console.log("» Running database compact jobs...");
-    nano.db.compact("logs", "logs_by_owner", function(err) {
-      nano.db.compact("builds", "builds_by_build_id", function(err) {
-        nano.db.compact("builds", "builds_by_owner", function(err) {
-          nano.db.compact("devicelib");
-          nano.db.compact("users");
-          console.log("» Database compact jobs completed.");
-        });
-      });
+    nano.db.compact("logs");
+    nano.db.compact("builds");
+    nano.db.compact("devicelib");
+    nano.db.compact("users", "owners_by_username", function(err) {
+      console.log("» Database compact jobs completed.");
     });
   }
   setTimeout(database_compactor, 300);
