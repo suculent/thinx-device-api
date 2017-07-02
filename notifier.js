@@ -346,7 +346,6 @@ var pushNotificationPayload = {
 // MQTT Notifications (deprecated, done through Messenger)
 //
 
-*
 function notify_device_channel(owner, udid, message) {
   console.log("notify_device_channel is DEPRECATED");
   var channel = "/thinx/devices/" + owner + "/" + udid;
