@@ -781,7 +781,7 @@ var ThinxApp = function() {
     user.create(req.body, function(success, status) {
       respond(res, {
         success: success,
-        status: message
+        status: status
       });
     });
   });
