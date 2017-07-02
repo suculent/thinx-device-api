@@ -814,7 +814,7 @@ var ThinxApp = function() {
   app.get("/api/user/password/reset", function(req, res) {
     var owner = req.query.owner; // for faster search
     var reset_key = req.query.reset_key; // for faster search
-    user.password_reset(owner, reset_key, function(status, message) {
+    user.password_reset(owner, reset_key, function(success, message) {
       if (!success) {
         req.session.destroy(function(err) {
           respond(res, {
