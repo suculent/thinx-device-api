@@ -306,9 +306,11 @@ var ThinxApp = function() {
     }
 
     if (client == client_user_agent) {
-      if (origin == "device") {
-        next();
-        return;
+      if (typeof(req.headers.origin) !== "undefined") {
+        if (req.headers.origin == "device") {
+          next();
+          return;
+        }
       }
     }
 
