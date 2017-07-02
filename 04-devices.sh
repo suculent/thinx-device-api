@@ -36,13 +36,13 @@ COUNTER=0
              echo "--------------------------------------------------------------------------------"
              echo "☢ Testing device registration..."
 
-             R=$(curl -s \
+             R=$(curl -v \
              -H "Authentication: ${API_KEY}" \
              -H 'Origin: device' \
              -H "User-Agent: THiNX-Client" \
              -H "Content-Type: application/json" \
              -d "${TEST_DEVICE}" \
-             http://$HOST:7442/device/register)
+             https://$HOST:7443/device/register)
 
              # {"success":false,"status":"authentication"}
 

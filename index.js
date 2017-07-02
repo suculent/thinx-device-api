@@ -292,6 +292,11 @@ var ThinxApp = function() {
       return;
     }
 
+    if (req.headers.origin == "device") {
+      next();
+      return;
+    }
+
     res.header("Access-Control-Allow-Origin", allowedOrigin); // rtm.thinx.cloud
     res.header("Access-Control-Allow-Credentials", "true");
     res.header(
