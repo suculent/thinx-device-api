@@ -865,7 +865,7 @@ var ThinxApp = function() {
   // /user/password/reset POST
   /* Used to initiate password-reset session, creates reset key with expiraation and sends password-reset e-mail. */
   app.post("/api/user/password/reset", function(req, res) {
-    user.password_reset_init(email, function(success, message) {
+    user.password_reset_init(req.body.email, function(success, message) {
       if (!success) {
         req.session.destroy();
       }
