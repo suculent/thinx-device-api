@@ -254,6 +254,8 @@ var ThinxApp = function() {
   app.all("/*", function(req, res, next) {
 
     var allowedOrigin = "*.thinx.cloud";
+    allowedOrigin = req.origin; // FIXME: HACK
+
     var client = req.get("User-Agent");
 
     if (client.indexOf("Jorgee") !== -1) {
