@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "checksum": "ffffffffffffffffffffffffffffffffffffffff",
     "alias": "transfer-test-device-00",
-    "owner": "4f1122fa074af4dabab76a5205474882c82de33f50ecd962d25d3628cd0603be"
+    "owner": "72f90591653886f96ca8789af51f31b1d062b4426a179840d945967f65fdb175"
   }
 }, {
   "registration": {
@@ -14,7 +14,7 @@
     "version": "1.0.0",
     "checksum": "ffffffffffffffffffffffffffffffffffffffff",
     "alias": "transfer-test-device-01",
-    "owner": "4f1122fa074af4dabab76a5205474882c82de33f50ecd962d25d3628cd0603be"
+    "owner": "72f90591653886f96ca8789af51f31b1d062b4426a179840d945967f65fdb175"
   }
 }, {
   "registration": {
@@ -23,7 +23,7 @@
     "version": "1.0.0",
     "checksum": "ffffffffffffffffffffffffffffffffffffffff",
     "alias": "transfer-test-device-02",
-    "owner": "4f1122fa074af4dabab76a5205474882c82de33f50ecd962d25d3628cd0603be"
+    "owner": "72f90591653886f96ca8789af51f31b1d062b4426a179840d945967f65fdb175"
   }
 }, {
   "registration": {
@@ -32,7 +32,7 @@
     "version": "1.0.0",
     "checksum": "ffffffffffffffffffffffffffffffffffffffff",
     "alias": "transfer-test-device-03",
-    "owner": "4f1122fa074af4dabab76a5205474882c82de33f50ecd962d25d3628cd0603be"
+    "owner": "72f90591653886f96ca8789af51f31b1d062b4426a179840d945967f65fdb175"
   }
 }, {
   "registration": {
@@ -41,6 +41,6 @@
     "version": "1.0.0",
     "checksum": "ffffffffffffffffffffffffffffffffffffffff",
     "alias": "transfer-test-device-04",
-    "owner": "4f1122fa074af4dabab76a5205474882c82de33f50ecd962d25d3628cd0603be"
+    "owner": "72f90591653886f96ca8789af51f31b1d062b4426a179840d945967f65fdb175"
   }
 }]

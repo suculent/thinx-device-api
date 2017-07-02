@@ -5,8 +5,8 @@
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
-API_KEY='900879b2015ac3801bd2d4b294edf48ef39e9647adf4ed8b0e0744251083a13d'
-OWNER_ID='4f1122fa074af4dabab76a5205474882c82de33f50ecd962d25d3628cd0603be' # cimrman is the originating device owner for transfer tests; saturnin is receiver
+API_KEY='9dea00184411724edee0988431623e03222452e10b9b57b95190e3769d9b2f3e' # satan
+OWNER_ID='72f90591653886f96ca8789af51f31b1d062b4426a179840d945967f65fdb175' # satan; cimrman is the originating device owner for transfer tests; saturnin is receiver
 
 function echo_fail() { # $1 = string
     COLOR=$RED
