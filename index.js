@@ -1343,9 +1343,6 @@ var ThinxApp = function() {
   /* Decline device transfer (all by e-mail, selective will be POST) */
   app.get("/api/transfer/decline", function(req, res) {
 
-    if (!validateSecureGETRequest(req)) return;
-    if (!validateSession(req, res)) return;
-
     var owner = req.session.owner;
 
     if (typeof(req.query.transfer_id) !== "undefined") {
@@ -1427,9 +1424,6 @@ var ThinxApp = function() {
 
   /* Accept device transfer (all by e-mail, selective will be POST) */
   app.get("/api/transfer/accept", function(req, res) {
-
-    if (!validateSecureGETRequest(req)) return;
-    if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
 
