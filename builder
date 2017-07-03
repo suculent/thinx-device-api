@@ -179,8 +179,8 @@ else
 	echo "Found THiNX-File: ${THINX_FILE}" >> $LOG_PATH
 fi
 
-THINX_CLOUD_URL="thinx.cloud"
-THINX_MQTT_URL="mqtt://${THINX_CLOUD_URL}"
+THINX_CLOUD_URL="rtm.thinx.cloud"
+THINX_MQTT_URL="${THINX_CLOUD_URL}"
 
 if [[ ! -z $DEVICE_ALIAS ]]; then
 	THINX_ALIAS=$DEVICE_ALIAS
