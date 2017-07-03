@@ -9,7 +9,7 @@ describe("Device", function() {
   var apikey = envi.ak;
 
   var RS =
-    '{ "registration" : { "mac" : "00:00:00:00:00:00:00", "firmware" : "DeviceSpec.js", "version" : "1.0.0", "checksum" : "nevermind", "push" : "forget", "alias" : "npmtest", "owner": "eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f", "udid": "to-be-deleted-on-test", "owner": "' +
+    '{ "registration" : { "mac" : "00:00:00:00:00:00:00", "firmware" : "DeviceSpec.js", "version" : "1.0.0", "checksum" : "nevermind", "push" : "forget", "alias" : "npmtest", "owner": "18ea285983df355f3024e412fb46ad6cbd98a7ffe6872e26612e35f38aa39c41", "udid": "to-be-deleted-on-test", "owner": "' +
     owner + '" } }';
 
   var body = JSON.parse(RS);
