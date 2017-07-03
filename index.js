@@ -1427,10 +1427,10 @@ var ThinxApp = function() {
 
     var owner = req.session.owner;
 
-    if (typeof(req.query.transfer_id) !== "undefined") {
+    if (typeof(req.query.transfer_id) === "undefined") {
       respond(res, {
         success: false,
-        status: "transfer_id missing"
+        status: "transfer_id_missing"
       });
       return;
     }
