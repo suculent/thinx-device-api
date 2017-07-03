@@ -1,6 +1,6 @@
 var stats = require("./lib/thinx/statistics");
 
-var owner = "18ea285983df355f3024e412fb46ad6cbd98a7ffe6872e26612e35f38aa39c41";
+var owner = "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12";
 
 stats.today(owner, function(success, body) {
 

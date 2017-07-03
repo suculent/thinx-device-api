@@ -6,7 +6,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 API_KEY='1e1ed4110359eccce9541e33d0ef444d1f3ebd8fe771b754280cccdfeb3cc4e5'
-OWNER_ID='18ea285983df355f3024e412fb46ad6cbd98a7ffe6872e26612e35f38aa39c41'
+OWNER_ID='cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12'
 
 DEVICE_ID=a80cc610-4faf-11e7-9a9c-41d4f7ab4083
 MAC='00:00:00:00:00:00'
@@ -59,7 +59,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Audit log fetch..."
 
-# {"success":true,"logs":{"total_rows":769,"offset":0,"rows":[{"id":"ff16cba945cff2ca578b29c7024eb653","key":{"_id":"ff16cba945cff2ca578b29c7024eb653","_rev":"1-0213b9d3716d6cbc5b5c8e7d1b6deae8","message":"GET : /api/user/devices","owner":"18ea285983df355f3024e412fb46ad6cbd98a7ffe6872e26612e35f38aa39c41","date":"2017-05-11T15:50:40.729Z"},...
+# {"success":true,"logs":{"total_rows":769,"offset":0,"rows":[{"id":"ff16cba945cff2ca578b29c7024eb653","key":{"_id":"ff16cba945cff2ca578b29c7024eb653","_rev":"1-0213b9d3716d6cbc5b5c8e7d1b6deae8","message":"GET : /api/user/devices","owner":"cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12","date":"2017-05-11T15:50:40.729Z"},...
 
 R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \

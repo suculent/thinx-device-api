@@ -17,7 +17,7 @@ if [[ -z $THINX_WEB_ROOT ]]; then
 		echo "Setting THINX_WEB_ROOT env var to default ${THINX_WEB_ROOT}"
 fi
 
-OWNER_ID='18ea285983df355f3024e412fb46ad6cbd98a7ffe6872e26612e35f38aa39c41' 		# name of folder where workspaces reside
+OWNER_ID='cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12' 		# name of folder where workspaces reside
 RUN=true			# dry-run switch
 DEVICE='UNKNOWN'	# builds for no device by default, not even ANY
 OPEN=false			# show build result in Finder
@@ -25,7 +25,7 @@ BUILD_ID='test-build-id'
 ORIGIN=$(pwd)
 UDID='f8e88e40-43c8-11e7-9ad3-b7281c2b9610'
 
-# ./builder --id=test-build-id --owner=18ea285983df355f3024e412fb46ad6cbd98a7ffe6872e26612e35f38aa39c41 --udid=a80cc610-4faf-11e7-9a9c-41d4f7ab4083 --git=git@github.com:suculent/thinx-firmware-esp8266.git
+# ./builder --id=test-build-id --owner=cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12 --udid=a80cc610-4faf-11e7-9a9c-41d4f7ab4083 --git=git@github.com:suculent/thinx-firmware-esp8266.git
 
 for i in "$@"
 do

@@ -1,9 +1,9 @@
 {
-   "_id": "18ea285983df355f3024e412fb46ad6cbd98a7ffe6872e26612e35f38aa39c41",
+   "_id": "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
    "_rev": "1489-b077dccfbc53b1e8eda8bc2f5d2aea5e",
    "username": "test",
-   "owner": "18ea285983df355f3024e412fb46ad6cbd98a7ffe6872e26612e35f38aa39c41",
-   "password": "18ea285983df355f3024e412fb46ad6cbd98a7ffe6872e26612e35f38aa39c41",
+   "owner": "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
+   "password": "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
    "last_seen": null,
    "email": "syxra@syxra.cz",
    "first_name": "Sàmō",
@@ -11,11 +11,11 @@
    "rsa_keys": {
        "a9:fd:f3:8e:97:7d:f4:c1:e1:39:3f:fd:2b:3b:5f:9f": {
            "alias": "matej-jasmine-test-rsa-key",
-           "key": "../.ssh/18ea285983df355f3024e412fb46ad6cbd98a7ffe6872e26612e35f38aa39c41-1498405006.pub"
+           "key": "../.ssh/cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12-1498405006.pub"
        },
        "d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93": {
            "alias": "Initial RSA Key",
-           "key": "../.ssh/18ea285983df355f3024e412fb46ad6cbd98a7ffe6872e26612e35f38aa39c41-1498343993.pub"
+           "key": "../.ssh/cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12-1498343993.pub"
        }
    },
    "repos": {
