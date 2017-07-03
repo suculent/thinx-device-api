@@ -260,8 +260,6 @@ var ThinxApp = function() {
       allowedOrigin = req.headers.origin;
     }
 
-    console.log("allowedOrigin: " + allowedOrigin);
-
     var client = req.get("User-Agent");
 
     if (client.indexOf("Jorgee") !== -1) {
