@@ -4,7 +4,8 @@ set +e
 
 echo
 echo "[builder.sh] -=[ ☢ THiNX IoT RTM BUILDER ☢ ]=-"
-echo
+echo "[builder.sh] -=[ ☢ THiNX IoT RTM BUILDER ☢ ]=-" >> $LOG_PATH
+echo >> $LOG_PATH
 
 echo "[builder.sh] Running from: $(pwd)"
 
@@ -73,6 +74,9 @@ mkdir -p $DEPLOYMENT_PATH
 LOG_PATH="${DEPLOYMENT_PATH}/${BUILD_ID}.log"
 echo "[builder.sh] Log path: $LOG_PATH"
 touch $LOG_PATH
+echo "[builder.sh] Starting builder at path ${THINX_ROOT}" >> $LOG_PATH
+echo "[builder.sh] Owner workspace: ${OWNER_ID_HOME}" >> $LOG_PATH
+echo "[builder.sh] Making deployment path: ${DISPLAY_DEPLOYMENT_PATH}" >> $LOG_PATH
 
 # extract the protocol
 proto="$(echo $GIT_REPO | grep :// | sed -e's,^\(.*://\).*,\1,g')"
@@ -101,13 +105,13 @@ if [[ "$user" == "git" ]]; then
 	REPO_NAME="$(echo $REPO_PATH | grep / | cut -d/ -f2-)"
 fi
 
-echo "[builder.sh]   url: $url"
-echo "[builder.sh]   proto: $proto"
-echo "[builder.sh]   user: $user"
-echo "[builder.sh]   host: $host"
-echo "[builder.sh]   port: $port"
-echo "[builder.sh]   REPO_PATH: $REPO_PATH"
-echo "[builder.sh]   REPO_NAME: ${REPO_NAME}"
+echo "[builder.sh]   url: $url" >> $LOG_PATH
+echo "[builder.sh]   proto: $proto" >> $LOG_PATH
+echo "[builder.sh]   user: $user" >> $LOG_PATH
+echo "[builder.sh]   host: $host" >> $LOG_PATH
+echo "[builder.sh]   port: $port" >> $LOG_PATH
+echo "[builder.sh]   REPO_PATH: $REPO_PATH" >> $LOG_PATH
+echo "[builder.sh]   REPO_NAME: ${REPO_NAME}" >> $LOG_PATH
 
 echo "[builder.sh] Cleaning workspace..."
 
@@ -139,7 +143,7 @@ fi
 echo "[builder.sh] Cleaning previous git repository / workspace in $REPO_NAME..."
 rm -rf $REPO_NAME
 
-echo "[builder.sh] Cloning ${GIT_REPO}..."
+echo "[builder.sh] Cloning ${GIT_REPO}..." >> $LOG_PATH
 # Fetch project
 git clone $GIT_REPO
 
@@ -151,28 +155,28 @@ else
 fi
 
 if [[ ! -d .git ]]; then
-	echo "Not a GIT repository: $(pwd)"
+	echo "Not a GIT repository: $(pwd)" >> $LOG_PATH
 fi
 
 COMMIT=$(git rev-parse HEAD)
-echo "[builder.sh] Fetched commit ID: ${COMMIT}"
+echo "[builder.sh] Fetched commit ID: ${COMMIT}" >> $LOG_PATH
 
 VERSION=$(git rev-list HEAD --count)
-echo "[builder.sh] Repository version/revision: ${VERSION}"
+echo "[builder.sh] Repository version/revision: ${VERSION}" >> $LOG_PATH
 
 # Overwrite Thinx.h file (should be required)
 
-echo "Seaching THiNX-File in ${OWNER_PATH}..."
+echo "Seaching THiNX-File in ${OWNER_PATH}..." >> $LOG_PATH
 
 echo $(pwd)
 
 THINX_FILE="$(find ${OWNER_PATH} | grep '/thinx.h')"
 
 if [[ -z $THINX_FILE ]]; then
-	echo "No THiNX-File found!"
+	echo "No THiNX-File found!" >> $LOG_PATH
 	exit 1 # will deprecate on modularization for more platforms
 else
-	echo "Found THiNX-File: ${THINX_FILE}"
+	echo "Found THiNX-File: ${THINX_FILE}" >> $LOG_PATH
 fi
 
 THINX_CLOUD_URL="thinx.cloud"
@@ -195,7 +199,7 @@ BUILD_DATE=`date +%Y-%m-%d`
 
 # TODO: Change this to a sed template, this is tedious
 
-echo "[builder.sh] Building Thinx.h..."
+echo "[builder.sh] Building Thinx.h..." >> $LOG_PATH
 
 echo "//" > "${THINX_FILE}"
 echo "// This is an auto-generated file, it will be re-written by THiNX on cloud build." >> "${THINX_FILE}"
@@ -221,18 +225,18 @@ echo "" >> "${THINX_FILE}"
 echo "#define THINX_UDID \"${UDID}\"" >> "${THINX_FILE}" # this just adds placeholder, key should not leak
 
 # Build
-echo "[builder.sh] Finished building Thinx.h"
+echo "[builder.sh] Finished building Thinx.h" >> $LOG_PATH
 cat $THINX_FILE >> $LOG_PATH
 
 echo "[builder.sh] TODO: Support no-compile deployment of Micropython/LUA here..."
 
 if [[ -f package.json ]]; then
-	echo "[builder.sh] THiNX does not support npm builds."
-	echo "[builder.sh] If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues"
+	echo "[builder.sh] THiNX does not support npm builds." >> $LOG_PATH
+	echo "[builder.sh] If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues" >> $LOG_PATH
 
 elif [[ ! -f platformio.ini ]]; then
-	echo "[builder.sh] This not a compatible project so far. Cannot build Arduino project without importing to Platform.io first."
-	echo "[builder.sh] If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues"
+	echo "[builder.sh] This not a compatible project so far. Cannot build Arduino project without importing to Platform.io first." >> $LOG_PATH
+	echo "[builder.sh] If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues" >> $LOG_PATH
 	exit 1
 fi
 
@@ -251,7 +255,7 @@ else
 fi
 
 if [[ ! ${RUN} ]]; then
-	echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment."
+	echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> $LOG_PATH
 	STATUS='"DRY_RUN_OK"'
 else
 
@@ -278,32 +282,32 @@ else
 	fi
 fi
 
-echo "[builder.sh] Build completed with status: $STATUS"
+echo "[builder.sh] Build completed with status: $STATUS" >> $LOG_PATH
 
 popd
 popd
 
-echo "[builder.sh] Post-flight check:"
+echo "[builder.sh] Post-flight check:" >> $LOG_PATH
 
-echo "DP" $DISPLAY_DEPLOYMENT_PATH
+echo "DP" $DISPLAY_DEPLOYMENT_PATH >> $LOG_PATH
 
-echo "BUILD_ID" "${BUILD_ID}"
-echo "COMMIT" "${COMMIT}"
-echo "VERSION" "${VERSION}"
-echo "GIT_REPO" "${GIT_REPO}"
-echo "DEPLOYMENT_PATH" "${DEPLOYMENT_PATH}"
-echo "UDID" "${UDID}"
-echo "SHA" "${SHA}"
-echo "OWNER_ID" "${OWNER_ID}"
-echo "STATUS" "${STATUS}"
+echo "BUILD_ID" "${BUILD_ID}" >> $LOG_PATH
+echo "COMMIT" "${COMMIT}" >> $LOG_PATH
+echo "VERSION" "${VERSION}" >> $LOG_PATH
+echo "GIT_REPO" "${GIT_REPO}" >> $LOG_PATH
+echo "DEPLOYMENT_PATH" "${DEPLOYMENT_PATH}" >> $LOG_PATH
+echo "UDID" "${UDID}" >> $LOG_PATH
+echo "SHA" "${SHA}" >> $LOG_PATH
+echo "OWNER_ID" "${OWNER_ID}" >> $LOG_PATH
+echo "STATUS" "${STATUS}" >> $LOG_PATH
 
-echo "[THiNX] Log path: $LOG_PATH"
+echo "[THiNX] Log path: $LOG_PATH" >> $LOG_PATH
 
 #cat $LOG_PATH
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
 CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${BUILD_ID}.bin ${UDID} ${SHA} ${OWNER_ID} ${STATUS}"
-echo $CMD
+echo $CMD >> $LOG_PATH
 pushd $ORIGIN # go back to application root folder
 RESULT=$(node $THINX_ROOT/notifier.js $CMD)
 echo -e "${RESULT}"
@@ -315,6 +319,7 @@ if [[ $RESULT=="*platformio upgrade*" ]]; then
 		platformio upgrade
 fi
 
+echo "Done." >> $LOG_PATH
 echo "Done."
 
 set -e
