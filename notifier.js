@@ -132,7 +132,7 @@ console.log("status : " + status);
 
 var blog = require("./lib/thinx/buildlog");
 
-blog.log(build_id, owner, udid, "Starting build notifier...");
+blog.log(build_id, owner, udid, "Build completed.");
 
 //
 // Device -> Souce Alias -> User -> Sources ...
