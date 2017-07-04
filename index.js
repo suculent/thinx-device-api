@@ -82,7 +82,7 @@ var ThinxApp = function() {
   var WebSocket = require("ws");
 
   // list of previously discovered attackers
-  var BLACKLIST = ['203.218.194.124'];
+  var BLACKLIST = ['203.218.194.124', '179.128.55.14'];
 
   var getClientIp = function(req) {
     var ipAddress = req.connection.remoteAddress;
@@ -240,16 +240,15 @@ var ThinxApp = function() {
     limit: '10mb'
   }));
 
-  /*
+  
   app.use(function(req, res, next) {
     var ipAddress = getClientIp(req);
-    if (BLACKLIST.toString().indexOf(ipAddress) === -1) {
+    if (BLACKLIST.indexOf(ipAddress) === -1) {
       next();
     } else {
       res.status(418).end();
     }
-  });
-  */
+  });  
 
   app.all("/*", function(req, res, next) {
 
