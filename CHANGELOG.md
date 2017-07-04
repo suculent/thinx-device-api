@@ -20,9 +20,9 @@ The device registration and checkin is working, firmwares can be provided using 
 
 ### 14th week
 
-1.7.1706: secure websocket logtail
+1.7.1706: secure websocket logtail; working on device transfer; injecting env-vars to current builder prototype
 
-1.7.168x: working on device transfer and logtail  
+1.7.168x: working on device transfer and logtail
 
 ### 13th week
 

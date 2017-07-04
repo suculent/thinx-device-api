@@ -4,9 +4,6 @@ set +e
 
 echo
 echo "[builder.sh] -=[ ☢ THiNX IoT RTM BUILDER ☢ ]=-"
-echo "[builder.sh] -=[ ☢ THiNX IoT RTM BUILDER ☢ ]=-" >> "${LOG_PATH}"
-echo >> "${LOG_PATH}"
-
 echo "[builder.sh] Running from: $(pwd)"
 
 # FIXME: This is system environment variable and should be configured on installation,
@@ -38,6 +35,9 @@ case $i in
     ;;
     -a=*|--alias=*)
       DEVICE_ALIAS="${i#*=}"
+    ;;
+		-e=*|--env=*)
+      ENV_VARS="${i#*=}"
     ;;
     -g=*|--git=*)
       GIT_REPO="${i#*=}"
@@ -74,6 +74,7 @@ mkdir -p $DEPLOYMENT_PATH
 LOG_PATH="${DEPLOYMENT_PATH}/${BUILD_ID}.log"
 echo "[builder.sh] Log path: $LOG_PATH"
 touch $LOG_PATH
+echo "[builder.sh] -=[ ☢ THiNX IoT RTM BUILDER ☢ ]=-" >> "${LOG_PATH}"
 echo "[builder.sh] Starting builder at path ${THINX_ROOT}" >> "${LOG_PATH}"
 echo "[builder.sh] Owner workspace: ${OWNER_ID_HOME}" >> "${LOG_PATH}"
 echo "[builder.sh] Making deployment path: ${DISPLAY_DEPLOYMENT_PATH}" >> "${LOG_PATH}"
@@ -223,6 +224,16 @@ echo "#define THINX_MQTT_PORT 1883" >> "${THINX_FILE}"
 echo "#define THINX_API_PORT 7442" >> "${THINX_FILE}"
 echo "" >> "${THINX_FILE}"
 echo "#define THINX_UDID \"${UDID}\"" >> "${THINX_FILE}" # this just adds placeholder, key should not leak
+
+if [[ ! -z "${ENV_VARS}" ]]; then
+	echo "[builder.sh] ENV_VARS: ${ENV_VARS}" >> "${LOG_PATH}"
+	ALLVARS=$(echo ${ENV_VARS} | jq .)
+	echo $ALLVARS
+	for i in $ALLVARS; do
+					 echo variable: $i >> "${LOG_PATH}"
+					 # todo: write this key:value to thinx.h
+	done
+fi
 
 # Build
 echo "[builder.sh] Finished building Thinx.h" >> "${LOG_PATH}"
