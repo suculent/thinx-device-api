@@ -1863,23 +1863,26 @@ var ThinxApp = function() {
     });
 
     /*
-    // Start tailing log
-    if ((typeof(build_id) !== "undefined") && (typeof(owner_id) !==
-        "undefined")) {
-      blog.logtail(build_id, owner_id, ws, logtail_callback);
-      return;
+      // Start tailing log
+      if ((typeof(build_id) !== "undefined") && (typeof(owner_id) !==
+          "undefined")) {
+        blog.logtail(build_id, owner_id, ws, logtail_callback);
+        return;
+      }
+
+
+      try {
+        var welcome_message = {
+          notification: {
+            title: "Live Feed Connected",
+            body: "Live notifications and log view available."
+          }
+        };
+        ws.send(JSON.stringify(welcome_message));
+      } catch (e) {
     }
     */
 
-    try {
-      var welcome_message = {
-        notification: {
-          title: "Live Feed Connected",
-          body: "Live notifications and log view available."
-        }
-      };
-      ws.send(JSON.stringify(welcome_message));
-    } catch (e) { /* handle error */ }
   }).on('error', function(err) {
     console.log("WSS ERROR: " + err);
     return;
