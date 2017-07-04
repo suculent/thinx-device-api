@@ -18,6 +18,10 @@ The device registration and checkin is working, firmwares can be provided using 
 * Installer, disaster recovery (except for existing DO backup).
 * Websocket on login (notifications)
 
+### 14th week
+
+1.7.1706: secure websocket logtail
+
 ### 13th week
 
 1.7.1664: tested/fixed user creation and password reset; origin fix; test script creating devices for multi transfer; added tests and implementation for device transfer with e-mail confirmation and optionally partial accept; not tested; integrated Messenger with Notifier

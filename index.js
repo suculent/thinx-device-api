@@ -1852,18 +1852,6 @@ var ThinxApp = function() {
       }
     });
 
-    /*
-      try {
-        var welcome_message = {
-          notification: {
-            title: "Live Feed Connected",
-            body: "Live notifications and log view available."
-          }
-        };
-        ws.send(JSON.stringify(welcome_message));
-      } catch (e) {
-    }
-    */
 
   }).on('error', function(err) {
     console.log("WSS ERROR: " + err);
