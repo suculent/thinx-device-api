@@ -35,7 +35,7 @@ var fs = require("fs");
 var nano = require("nano")(db);
 var mqtt = require("mqtt");
 
-var Messenger = require('lib/thinx/messenger');
+var Messenger = require('./lib/thinx/messenger');
 
 var rdict = {};
 

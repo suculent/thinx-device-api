@@ -1729,8 +1729,6 @@ var ThinxApp = function() {
 
     var owner = req.session.owner;
 
-    console.log("[OID:" + owner + "] [STATS_GET]");
-
     stats.week(owner, function(success, body) {
 
       if (!body) {
@@ -1829,10 +1827,13 @@ var ThinxApp = function() {
 
     _ws = ws;
 
-    if (typeof(req.headers.cookie) === "undefined") {
-      if (req.headers.cookie.indexOf("x-thx-session") === -1) {
-        console.log("» WSS cookie: " + req.headers.cookie); // FIXME: insecure, remove this
+    var cookies = req.headers.cookie;
+
+    if (typeof(req.headers.cookie) !== "undefined") {
+      if (cookies.indexOf("x-thx-session") === -1) {
+        console.log("» WSS cookies: " + cookies);
         console.log("» Not authorized, exiting websocket");
+        wss.close();
         return;
       }
     }
