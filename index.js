@@ -1827,13 +1827,7 @@ var ThinxApp = function() {
       return;
     });
 
-    //console.log("» Websocket Connection.");
-
     _ws = ws;
-
-    var location = url.parse(req.url, true);
-    console.log("» WSS connection on location: " + JSON.stringify(
-      location));
 
     if (typeof(req.headers.cookie) === "undefined") {
       if (req.headers.cookie.indexOf("x-thx-session") === -1) {
@@ -1842,10 +1836,6 @@ var ThinxApp = function() {
         return;
       }
     }
-
-    //var query = location.path.split("/");
-    //var owner_id = query[1].replace("/", "");
-    //var build_id = query[2].replace("/", "");
 
     var logtail_callback = function(err) {
       console.log("[index.js] logtail_callback:" + err);
@@ -1863,14 +1853,6 @@ var ThinxApp = function() {
     });
 
     /*
-      // Start tailing log
-      if ((typeof(build_id) !== "undefined") && (typeof(owner_id) !==
-          "undefined")) {
-        blog.logtail(build_id, owner_id, ws, logtail_callback);
-        return;
-      }
-
-
       try {
         var welcome_message = {
           notification: {
