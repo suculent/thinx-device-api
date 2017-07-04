@@ -1832,9 +1832,9 @@ var ThinxApp = function() {
     if (typeof(req.headers.cookie) !== "undefined") {
       if (cookies.indexOf("x-thx-session") === -1) {
         console.log("» WSS cookies: " + cookies);
-        console.log("» Not authorized, exiting websocket");
-        wss.close();
-        return;
+        console.log("» Not authorized using x-thx-session");
+        //wss.close();
+        //return;
       }
     }
 
