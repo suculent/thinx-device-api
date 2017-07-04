@@ -241,14 +241,14 @@ devicelib.get(udid, function(err, doc) {
         username: "notifier.js",
         fields: buildEnvelope
       });
-    } else if (status.indexOf("DEPLOYED") !== 1) {
+    } else if (status.indexOf("DEPLOYED") !== -1) {
       slack.alert({
         text: "Deployment successful.", // todo: reference git_url + commit_id here
         username: "notifier.js",
         icon_emoji: ":ghost:",
         fields: buildEnvelope
       });
-    } else if (status.indexOf("DRY_RUN_OK") !== 1) {
+    } else if (status.indexOf("DRY_RUN_OK") !== -1) {
       slack.alert({
         text: "Dry run successful. Firmware left undeployed.", // todo: reference git_url + commit_id here
         username: "notifier.js",
