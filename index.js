@@ -1622,10 +1622,10 @@ var ThinxApp = function() {
             "] [NEW_SESSION]");
           req.session.username = user_data.username;
 
-          var minute = 5 * 60 * 1000;
-          req.session.cookie.httpOnly = true;
+          var minute = 60 * 1000;
+          //req.session.cookie.httpOnly = true;
           req.session.cookie.maxAge = 20 * minute;
-          req.session.cookie.secure = false;
+          req.session.cookie.secure = true;
 
           alog.log(req.session.owner, "User logged in: " +
             username);
@@ -1638,10 +1638,11 @@ var ThinxApp = function() {
             success: true
           });
           return;
+
         } else if (client_type == "webapp") {
-          //console.log("Allow-Origin REQH: " + JSON.stringify(req.headers));
-          //console.log("Allow-Origin REQQ: " + JSON.stringify(req.query)); // returns empty!
-          //console.log("Allow-Origin REQUEST host: " + req.headers.host);
+          console.log("Allow-Origin REQH: " + JSON.stringify(req.headers));
+          console.log("Allow-Origin REQQ: " + JSON.stringify(req.query)); // returns empty!
+          console.log("Allow-Origin REQUEST host: " + req.headers.host);
           respond(res, {
             "redirectURL": "/app/#/dashboard.html"
           });
@@ -1654,20 +1655,24 @@ var ThinxApp = function() {
             }
 
             // TODO: FIXME before enabling, seems to delete user like this...
+            console.log(
+              "TODO: FIXME: updateLastSeen(udoc) destroys the user!"
+            );
             //updateLastSeen(udoc);
           });
-
           return;
-        } else {
+
+        } else { // other client whan webapp or device
           respond(res, {
             status: "OK",
             success: true
           });
         }
+
         // TODO: If user-agent contains app/device... (what?)
         return;
 
-      } else {
+      } else { // password invalid
         console.log("[LOGIN_INVALID] for " + username);
         alog.log(req.session.owner, "Password mismatch for: " +
           username);
