@@ -1641,10 +1641,12 @@ var ThinxApp = function() {
 
         } else if (client_type == "webapp") {
           console.log("Allow-Origin REQH: " + JSON.stringify(req.headers));
-          console.log("Allow-Origin REQQ: " + JSON.stringify(req.query)); // returns empty!
+          console.log("Allow-Origin REQS: " + JSON.stringify(req.session)); // should have owner.
           console.log("Allow-Origin REQUEST host: " + req.headers.host);
+
           respond(res, {
-            "redirectURL": "/app/#/dashboard.html"
+            success: true,
+            "redirectURL": "/app"
           });
 
           userlib.get(req.session.owner, function(error, udoc) {
