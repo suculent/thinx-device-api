@@ -1647,6 +1647,12 @@ var ThinxApp = function() {
           });
 
           userlib.get(req.session.owner, function(error, udoc) {
+
+            if (error) {
+              console.log("owner get error: " + err);
+              return;
+            }
+
             // TODO: FIXME before enabling, seems to delete user like this...
             //updateLastSeen(udoc);
           });
