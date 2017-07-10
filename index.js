@@ -240,15 +240,16 @@ var ThinxApp = function() {
     limit: '10mb'
   }));
 
-  
+  /*
   app.use(function(req, res, next) {
     var ipAddress = getClientIp(req);
-    if (BLACKLIST.indexOf(ipAddress) === -1) {
+    if (BLACKLIST.toString().indexOf(ipAddress) === -1) {
       next();
     } else {
       res.status(418).end();
     }
-  });  
+  });
+  */
 
   app.all("/*", function(req, res, next) {
 
