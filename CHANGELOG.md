@@ -11,12 +11,17 @@ The device registration and checkin is working, firmwares can be provided using 
 * Update support (LUA/uPy/mos) for file-based dumb firmwares = allow file-based upload where applicable
 * Make devices respond/receive MQTT messages (LUA first)
 * Optionally migrate sources when transferring device (requires extracting sources to separate db).
+* Improve statistics (daily parse limiting)
 
 **LONG-TERM ROADMAP**
 
 * Support for building custom NodeMCU, Micropython or MongooseOS firmware
 * Installer, disaster recovery (except for existing DO backup).
 * Websocket on login (notifications)
+
+### 15th week
+
+10/7/2017 - 1.7.1730: completed logtail implementation for all cases; fixed login redirect and updated certificates (shared)
 
 ### 14th week
 
