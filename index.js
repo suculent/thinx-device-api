@@ -1645,7 +1645,6 @@ var ThinxApp = function() {
           console.log("Allow-Origin REQUEST host: " + req.headers.host);
 
           respond(res, {
-            success: true,
             "redirectURL": "/app"
           });
 
