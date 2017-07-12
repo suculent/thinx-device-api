@@ -281,7 +281,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing device registration..."
 
-RS='{ "registration" : { "mac" : "'${MAC}'", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "version" : "1.0.0", "checksum" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "dhho4djVGeQ:APA91bFuuZWXDQ8vSR0YKyjWIiwIoTB1ePqcyqZFU3PIxvyZMy9htu9LGPmimfzdrliRfAdci-AtzgLCIV72xmoykk-kHcYRhAFWFOChULOGxrDi00x8GgenORhx_JVxUN_fjtsN5B7T", "alias" : "rabbit", "owner": "'${OWNER_ID}'" } }'
+RS='{ "registration" : { "mac" : "'${MAC}'", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "version" : "1.0.0", "checksum" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "dhho4djVGeQ:APA91bFuuZWXDQ8vSR0YKyjWIiwIoTB1ePqcyqZFU3PIxvyZMy9htu9LGPmimfzdrliRfAdci-AtzgLCIV72xmoykk-kHcYRhAFWFOChULOGxrDi00x8GgenORhx_JVxUN_fjtsN5B7T", "alias" : "rabbit", "owner": "'${OWNER_ID}'", "platform" : "platformio" } }'
 
 R=$(curl -s \
 -H "Authentication: ${API_KEY}" \
