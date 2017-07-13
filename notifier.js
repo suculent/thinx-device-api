@@ -325,6 +325,8 @@ devicelib.get(udid, function(err, doc) {
     if (status == "DEPLOYED") {
       messenger.publish(owner, udid, message);
       notify_device_channel(owner, udid, message); // deprecated; integration testing only
+      sleep(5);
+      process.exit(0);
     }
 
   });
