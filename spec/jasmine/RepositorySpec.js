@@ -1,7 +1,7 @@
 describe("Repository Watcher", function() {
 
   var watcher = require('../../lib/thinx/repository');
-  var repo_path = "../..";
+  var repo_path = "../test_repository/thinx-firmware-esp8266-ino";
 
   var watcher_callback = function(result) {
     if (typeof(result) !== "undefined") {
@@ -61,6 +61,13 @@ describe("Repository Watcher", function() {
       expect(true).toBe(true);
     });
   });
+
+  if ("should be able to infer platform from repository contents", function() {
+      watcher.getPlatform(repo_path, function(error, result) {
+        expect(result).toBeDefined();
+        console.log("Platform: " + result);
+      });
+    });
 
   it("should be able tell repository has changed", function() {
     watcher.checkRepositoryChange(repo_path, false, function(err,

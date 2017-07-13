@@ -1,0 +1,28 @@
+#######################################
+# Syntax Coloring Map for THiNXLib
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+THiNX	KEYWORD1
+EAVManager KEYWORD 2
+EAVManagerParameter KEYWORD 2
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+initWithAPIKey	KEYWORD2
+mqtt_callback	KEYWORD1
+mqtt_client	KEYWORD1
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+# __DEBUG__	LITERAL1
+# __DEBUG_JSON__	LITERAL1
+# __USE_WIFI_MANAGER__	LITERAL1
+# MQTT_BUFFER_SIZE LITERAL1
