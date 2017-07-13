@@ -1,0 +1,45 @@
+############################# Filebeat #####################################
+filebeat:
+  prospectors:
+    -
+      paths:
+        - /root/.pm2/index-*-0.log
+      fields:
+        logzio_codec: plain
+        token: PgdzLQwqXrIufOkdIuGCqmLIFoRAhnnE
+      fields_under_root: true
+      ignore_older: 3h
+      document_type: THiNX-App
+    -
+      paths:
+        - /var/log/nginx/access.log
+      fields:
+        logzio_codec: plain
+        token: PgdzLQwqXrIufOkdIuGCqmLIFoRAhnnE
+      fields_under_root: true
+      ignore_older: 3h
+      document_type: nginx
+    -
+      paths:
+        - /var/log/nginx/error.log
+      fields:
+        logzio_codec: plain
+        token: PgdzLQwqXrIufOkdIuGCqmLIFoRAhnnE
+      fields_under_root: true
+      ignore_older: 3h
+      document_type: nginx-error
+  registry_file: /var/lib/filebeat/registry
+############################# Output ##########################################
+output:
+  logstash:
+    hosts: ["listener.logz.io:5015"]
+
+#########  The below configuration is used for Filebeat 1.3 or lower
+    tls:
+      certificate_authorities: ['/etc/pki/tls/certs/COMODORSADomainValidationSecureServerCA.crt']   
+      
+########  The below configuration is used for Filebeat 5.0 or higher      
+    ssl:
+      certificate_authorities: ['/etc/pki/tls/certs/COMODORSADomainValidationSecureServerCA.crt']
+
+
