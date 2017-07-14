@@ -2,7 +2,7 @@ describe("Build log", function() {
 
   var blog = require("../../lib/thinx/buildlog");
 
-  var envi = require("_envi.json");
+  var envi = require("./_envi.json");
   var owner = envi.owner;
   var udid = envi.udid;
   var apikey = envi.ak;

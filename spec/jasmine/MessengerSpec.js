@@ -1,7 +1,7 @@
 var generated_key_name = null;
 var Messenger = require('../../lib/thinx/messenger');
 
-var envi = require("_envi.json");
+var envi = require("./_envi.json");
 var test_owner = envi.owner;
 
 describe("Messenger", function() {

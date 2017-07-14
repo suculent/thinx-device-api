@@ -3,7 +3,7 @@ describe("Deployer", function() {
 
   var deploy = require('../../lib/thinx/deployment');
 
-  var envi = require("_envi.json");
+  var envi = require("./_envi.json");
   var owner = envi.owner;
   var udid = envi.udid;
 

@@ -2,7 +2,7 @@ describe("Statistics", function() {
 
   var s = require('../../lib/thinx/statistics');
 
-  var envi = require("_envi.json");
+  var envi = require("./_envi.json");
   var owner = envi.owner;
 
   it("should be able to initialize", function() {

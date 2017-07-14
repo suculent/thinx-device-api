@@ -3,7 +3,7 @@ describe("Owner", function() {
   var generated_key_hash = null;
   var User = require('../../lib/thinx/owner');
 
-  var envi = require("_envi.json");
+  var envi = require("./_envi.json");
   var owner = envi.owner;
   var avatar_image = envi.test_avatar;
   var email = envi.email;

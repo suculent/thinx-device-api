@@ -3,7 +3,7 @@ describe("Owner", function() {
   var generated_key_hash = null;
   var Sources = require('../../lib/thinx/sources');
 
-  var envi = require("_envi.json");
+  var envi = require("./_envi.json");
   var owner = envi.owner;
 
   var source_id = null;

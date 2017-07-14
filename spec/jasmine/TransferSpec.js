@@ -1,6 +1,6 @@
 describe("Transfer", function() {
 
-  var envi = require("_envi.json");
+  var envi = require("./_envi.json");
   var owner = envi.owner;
 
   var Transfer = require("../../lib/thinx/transfer");

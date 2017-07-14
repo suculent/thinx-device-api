@@ -1,6 +1,6 @@
 var RSAKey = require('../../lib/thinx/rsakey');
 
-var envi = require("_envi.json");
+var envi = require("./_envi.json");
 var owner = envi.owner;
 
 var invalid_fingerprints = [

@@ -1,7 +1,7 @@
 var generated_key_name = null;
 var APIEnv = require('../../lib/thinx/apienv');
 
-var envi = require("_envi.json");
+var envi = require("./_envi.json");
 var owner = envi.owner;
 
 describe("API Env", function() {

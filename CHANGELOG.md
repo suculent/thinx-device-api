@@ -21,7 +21,9 @@ The device registration and checkin is working, firmwares can be provided using 
 
 ### 15th week
 
-10/7/2017: platform attribute added to registration/UI; 
+13/7/2017: fixed device registration for LUA firmware together with MQTT login and duplicate MAC record pruning
+
+12/7/2017: platform attribute added to registration/UI; 
 
 10/7/2017 - 1.7.1730: completed logtail implementation for all cases; fixed login redirect and updated certificates (shared)
 

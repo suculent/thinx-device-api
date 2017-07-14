@@ -3,7 +3,7 @@ describe("Device", function() {
   var generated_key_hash = null;
   var device = require('../../lib/thinx/device');
 
-  var envi = require("_envi.json");
+  var envi = require("./_envi.json");
   var owner = envi.owner;
   var udid = envi.udid;
   var apikey = envi.ak;
