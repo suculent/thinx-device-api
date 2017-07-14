@@ -63,6 +63,7 @@
     "ssh-fingerprint": "0.0.1",
     "ssl-root-cas": "^1.2.3",
     "tail": "^1.2.1",
+    "typeof": "^1.0.0",
     "uuid": "^3.0.1",
     "web-push": "^3.2.2",
     "ws": "^3.0.0"
