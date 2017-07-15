@@ -936,13 +936,14 @@ var ThinxApp = function() {
     console.log("Update with OTT: " + ott);
     device.ott_update(ott, function(success, response) {
       respond(res, response);
-
     });
   });
 
   // Firmware update retrieval. Serves binary [by owner (?) - should not be required] and device MAC.
   app.post("/device/firmware", function(req, res) {
+
     validateRequest(req, res);
+    res.set("Connection", "close");
 
     if ((typeof(req.body.use) !== "undefined") && (req.body.use == "ott")) {
 
@@ -961,10 +962,12 @@ var ThinxApp = function() {
   });
 
   // Device login/registration
-  // FIXME: MAC will be allowed for initial regitration
+  // MAC is be allowed for initial regitration where device is given new UDID
+
   app.post("/device/register", function(req, res) {
 
     validateRequest(req, res);
+    res.set("Connection", "close");
 
     if (typeof(req.body) === "undefined") {
       respond(res, {
