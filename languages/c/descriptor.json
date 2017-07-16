@@ -1,0 +1,8 @@
+{
+  "name": "C/C++",
+  "DEFINE": "#define ",
+  "ASSIGN": " ",
+  "COMMENT": "//",
+  "STRINGSTOP": "\"",
+  "EOL": ""
+}

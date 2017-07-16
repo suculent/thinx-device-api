@@ -1,0 +1,8 @@
+{
+  "name": "JavaScript",
+  "DEFINE": "var ",
+  "ASSIGN": " = ",
+  "COMMENT": "//",
+  "STRINGSTOP": "\"",
+  "EOL": ";"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "LUA",
+  "DEFINE": "",
+  "ASSIGN": " = ",
+  "COMMENT": "--",
+  "STRINGSTOP": "\"",
+  "EOL": ""
+}

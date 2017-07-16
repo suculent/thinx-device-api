@@ -1,0 +1,205 @@
+#!/bin/bash
+
+THINX_ROOT=/Users/sychram/Repositories/thinx-device-api
+
+WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-ino
+#WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-mos
+#WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-lua
+#WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-pio
+#WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-upy
+
+function infer_platform
+{
+		local path=$1
+
+		platform="unknown"
+		ALL=$(ls $path)
+
+		for XDIR in $ALL; do
+				if [[ -d $path/$XDIR ]]; then
+					FILES=$(ls $path/$XDIR | grep "\.ino")
+					for FILE in $FILES
+					do
+						if [[ -f $path/$XDIR/$FILE ]]; then
+							platform="arduino"
+						fi
+					done
+				fi
+		done
+
+		# Platform.io
+
+		if [[ -f "$path/platformio.ini" ]]; then
+			platform="platformio"
+
+		# Arduino
+
+	  elif [[ -f "$path/**/*.ino" ]]; then
+			platform="arduino"
+
+		elif [[ -f "$path/*.ino" ]]; then
+			platform="arduino"
+
+		# NodeMCU (LUA)
+
+		elif [[ -f "$path/init.lua" ]]; then
+			platform="nodemcu"
+
+		# Micropython
+
+		elif [[ -f "$path/main.py" ]]; then
+			platform="micropython"
+
+		elif [[ -f "$path/boot.py" ]]; then
+			platform="micropython"
+
+		# Mongoose OS
+
+		elif [[ -d "$path/default-1.0" ]]; then
+			platform="mongoose"
+		fi
+
+		echo $platform
+}
+
+function platform_name
+{
+		local DSC_PATH="$THINX_ROOT/platforms/$1/descriptor.json"
+		echo $(cat $DSC_PATH | jq .name | tr -d '\"' )
+}
+
+function language_for_platform
+{
+		local DSC_PATH="$THINX_ROOT/platforms/$1/descriptor.json"
+		echo $(cat $DSC_PATH | jq .language | tr -d '\"' )
+}
+
+function language_name
+{
+		local DSC_PATH="$THINX_ROOT/languages/$1/descriptor.json"
+		echo $(cat $DSC_PATH | jq .name | tr -d '\"' )
+}
+
+function generate_thinx_file
+{
+	local WORKDIR=$1
+	local BUILDFILE=$2
+	PLATFORM=$(infer_platform $WORKDIR)
+	PLATFORM_NAME=$(platform_name $PLATFORM)
+	LANGUAGE=$(language_for_platform $PLATFORM)
+	LANGUAGE_NAME=$(language_name $LANGUAGE)
+
+	echo "Target platform: $PLATFORM_NAME"
+	echo "Target language: $LANGUAGE_NAME"
+	echo
+
+	THINX_FILE=$(thinx_file_from_json $BUILDFILE $LANGUAGE)
+
+	echo "Generated header:"
+	echo "$THINX_FILE" # "" keeps CR/LFs
+
+	case "$platform" in
+
+        arduino)
+
+            ;;
+
+        platformio)
+
+            ;;
+
+        nodemcu)
+
+            ;;
+
+        python)
+
+            ;;
+
+        mongooseos)
+
+            ;;
+
+        #*)
+      #      echo $"Unknown platform."
+    #        exit 1
+
+  esac
+
+
+
+
+}
+
+#
+# platform-agnostic header generator
+#
+
+function thinx_file_from_json
+{
+		local LANG_PATH="$THINX_ROOT/languages/$2/descriptor.json"
+		local LANG=$(cat $LANG_PATH)
+		local LANGUAGE_NAME=$(echo $LANG | jq .name | tr -d '"')
+		local DEFINE=$(echo $LANG | jq .DEFINE | tr -d '\"' )
+		local ASSIGN=$(echo $LANG | jq .ASSIGN | tr -d '\"' )
+		local COMMENT=$(echo $LANG | jq .COMMENT | tr -d '\"' )
+		local EOL=$(echo $LANG | jq .EOL | tr -d '" ')
+
+		local STRINGSTOP=$(echo $LANG | jq .STRINGSTOP | tr -d '\')
+		STRINGSTOP=$(echo "${STRINGSTOP:1:${#STRINGSTOP}-2}")
+
+
+		BUILDFILE=$(cat $1)
+		KEYS=$(echo $BUILDFILE | jq keys)
+		VARS=$(echo $BUILDFILE | jq .[])
+
+		# echo $VARS
+
+		#echo "[THiNX-Builder] THiNX Build Descriptor: " #$DESCRIPTOR
+
+		FIRST=true
+
+		for K in $KEYS; do
+
+			K=$(echo $K | tr -d '",')
+
+			if [[ "$K" == "[" ]]; then
+				echo # condition must not be empty
+			elif [[ "$K" == "]" ]]; then
+				echo # condition must not be empty
+			else
+
+				VALUE=$(echo $BUILDFILE | jq .$K | tr -d '"')
+
+				if [[ "$K" == *"COMMENT"* ]]; then
+
+						# replace %%LANGUAGE_NAME%% with LANGUAGE_NAME in string
+						VALUE=${VALUE/\%\%LANGUAGE_NAME\%\%/$LANGUAGE_NAME}
+
+						echo "$COMMENT $VALUE"
+
+				else
+
+					# Space between header comments and rest...
+					if [[ $FIRST == true ]]; then
+						FIRST=false
+						echo " "
+					fi
+
+					if [[ $VALUE == "true" || $VALUE == false ]]; then
+						echo "$DEFINE$K$ASSIGN$VALUE$EOL"
+					elif [[ ${VALUE} == ?(-)+([0-9]) ]]; then
+						echo "$DEFINE$K$ASSIGN$VALUE$EOL"
+					else
+						echo "$DEFINE$K$ASSIGN$STRINGSTOP$VALUE$STRINGSTOP$EOL"
+					fi
+				fi
+			fi
+
+		done
+		echo " 	"
+}
+
+BUILDFILE='builder.thinx.json'
+
+generate_thinx_file $WORKDIR $BUILDFILE

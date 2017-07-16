@@ -1,0 +1,8 @@
+{
+  "name": "Micropython",
+  "DEFINE": "",
+  "ASSIGN": " = ",
+  "COMMENT": "#",
+  "STRINGSTOP": "'",
+  "EOL": " "
+}
