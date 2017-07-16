@@ -871,7 +871,10 @@ var ThinxApp = function() {
           status: message
         });
       } else {
-        respond(res, message);
+        respond(res, {
+          success: success,
+          status: message
+        });
       }
     });
   });
