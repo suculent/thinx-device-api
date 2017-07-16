@@ -866,11 +866,13 @@ var ThinxApp = function() {
     user.password_reset_init(req.body.email, function(success, message) {
       if (!success) {
         req.session.destroy();
+        respond(res, {
+          success: success,
+          status: message
+        });
+      } else {
+        respond(res, message);
       }
-      respond(res, {
-        success: success,
-        status: message
-      });
     });
   });
 
