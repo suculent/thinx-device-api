@@ -852,11 +852,13 @@ var ThinxApp = function() {
     user.set_password(req.body, function(success, message) {
       if (!success) {
         req.session.destroy();
+        respond(res, {
+          success: success,
+          status: message
+        });
+      } else {
+        respond(res, message);
       }
-      respond(res, {
-        success: success,
-        status: message
-      });
     });
   });
 
