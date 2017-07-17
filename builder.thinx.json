@@ -16,5 +16,5 @@
   "THINX_MQTT_PORT": 1883,
   "THINX_API_PORT": 7442,
   "THINX_PROXY": "thinx.local",
-  "THINX_PLATFORM": "platformio"
+  "THINX_PLATFORM": "%%THINX_PLATFORM%%"
 }
