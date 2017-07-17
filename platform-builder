@@ -2,11 +2,31 @@
 
 THINX_ROOT=/Users/sychram/Repositories/thinx-device-api
 
+JSON='builder.thinx.json'
+
 WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-ino
 #WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-mos
 #WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-lua
 #WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-pio
 #WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-upy
+
+for i in "$@"
+do
+case $i in
+	  -j*|--json=*)
+      JSON="${i#*=}"
+    ;;
+    -r=*|--root=*)
+      THINX_ROOT="${i#*=}"
+    ;;
+    -w=*|--workdir=*)
+      WORKDIR="${i#*=}"
+    ;;
+    *)
+      # unknown option
+    ;;
+esac
+done
 
 function infer_platform
 {
@@ -200,6 +220,6 @@ function thinx_file_from_json
 		echo " 	"
 }
 
-BUILDFILE='builder.thinx.json'
 
-generate_thinx_file $WORKDIR $BUILDFILE
+
+generate_thinx_file $WORKDIR $JSON
