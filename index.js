@@ -1585,6 +1585,9 @@ var ThinxApp = function() {
     };
   });
 
+  if (typeof(username) === "undefined") {
+    callback(false, "login_failed");
+  }
 
   userlib.view("users", "owners_by_username", {
     "key": username,
@@ -1676,9 +1679,9 @@ var ThinxApp = function() {
 
             updateLastSeen(udoc);
           }
-          
+
         });
-        
+
         return;
 
       } else { // other client whan webapp or device
