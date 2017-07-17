@@ -82,6 +82,12 @@ function infer_platform
 		echo $platform
 }
 
+function output_file
+{
+		local DSC_PATH="$THINX_ROOT/platforms/$1/descriptor.json"
+		echo $(cat $DSC_PATH | jq .header | tr -d '\"' )
+}
+
 function platform_name
 {
 		local DSC_PATH="$THINX_ROOT/platforms/$1/descriptor.json"
@@ -108,47 +114,7 @@ function generate_thinx_file
 	PLATFORM_NAME=$(platform_name $PLATFORM)
 	LANGUAGE=$(language_for_platform $PLATFORM)
 	LANGUAGE_NAME=$(language_name $LANGUAGE)
-
-	echo "Target platform: $PLATFORM_NAME"
-	echo "Target language: $LANGUAGE_NAME"
-	echo
-
-	THINX_FILE=$(thinx_file_from_json $BUILDFILE $LANGUAGE)
-
-	echo "Generated header:"
-	echo "$THINX_FILE" # "" keeps CR/LFs
-
-	case "$platform" in
-
-        arduino)
-
-            ;;
-
-        platformio)
-
-            ;;
-
-        nodemcu)
-
-            ;;
-
-        python)
-
-            ;;
-
-        mongooseos)
-
-            ;;
-
-        #*)
-      #      echo $"Unknown platform."
-    #        exit 1
-
-  esac
-
-
-
-
+	thinx_file_from_json $BUILDFILE $LANGUAGE $WORKDIR
 }
 
 #
@@ -157,6 +123,7 @@ function generate_thinx_file
 
 function thinx_file_from_json
 {
+		local WORKDIR=$3
 		local LANG_PATH="$THINX_ROOT/languages/$2/descriptor.json"
 		local LANG=$(cat $LANG_PATH)
 		local LANGUAGE_NAME=$(echo $LANG | jq .name | tr -d '"')
@@ -168,6 +135,25 @@ function thinx_file_from_json
 		local STRINGSTOP=$(echo $LANG | jq .STRINGSTOP | tr -d '\')
 		STRINGSTOP=$(echo "${STRINGSTOP:1:${#STRINGSTOP}-2}")
 
+		#local OUTFILE=$WORKDIR/$(output_file $PLATFORM)
+
+		OUTFILE=$(output_file $PLATFORM)
+
+		ALL=$(ls $WORKDIR)
+		for XDIR in $ALL; do
+				if [[ -d $WORKDIR/$XDIR ]]; then
+					FILES=$(ls $WORKDIR/$XDIR | grep "\.ino")
+					for FILE in $FILES
+					do
+						if [[ -f $WORKDIR/$XDIR/$FILE ]]; then
+							# platform="arduino"
+							OUTFILE=$WORKDIR/$XDIR/$OUTFILE
+						fi
+					done
+				fi
+		done
+
+		echo $OUTFILE
 
 		BUILDFILE=$(cat $1)
 		KEYS=$(echo $BUILDFILE | jq keys)
@@ -175,9 +161,11 @@ function thinx_file_from_json
 
 		# echo $VARS
 
-		#echo "[THiNX-Builder] THiNX Build Descriptor: " #$DESCRIPTOR
+		#echo "[THiNX-Builder] THiNX Build Descriptor: " $BUILDFILE
 
 		FIRST=true
+
+		rm -rf "$OUTFILE"
 
 		for K in $KEYS; do
 
@@ -196,7 +184,7 @@ function thinx_file_from_json
 						# replace %%LANGUAGE_NAME%% with LANGUAGE_NAME in string
 						VALUE=${VALUE/\%\%LANGUAGE_NAME\%\%/$LANGUAGE_NAME}
 
-						echo "$COMMENT $VALUE"
+						echo "$COMMENT $VALUE" >> "$OUTFILE"
 
 				else
 
@@ -207,19 +195,20 @@ function thinx_file_from_json
 					fi
 
 					if [[ $VALUE == "true" || $VALUE == false ]]; then
-						echo "$DEFINE$K$ASSIGN$VALUE$EOL"
+						echo "$DEFINE$K$ASSIGN$VALUE$EOL" >> "$OUTFILE"
 					elif [[ ${VALUE} == ?(-)+([0-9]) ]]; then
-						echo "$DEFINE$K$ASSIGN$VALUE$EOL"
+						echo "$DEFINE$K$ASSIGN$VALUE$EOL" >> "$OUTFILE"
 					else
-						echo "$DEFINE$K$ASSIGN$STRINGSTOP$VALUE$STRINGSTOP$EOL"
+						echo "$DEFINE$K$ASSIGN$STRINGSTOP$VALUE$STRINGSTOP$EOL" >> "$OUTFILE"
 					fi
 				fi
 			fi
 
 		done
-		echo " 	"
+
+		cat $OUTFILE
 }
 
-
+echo "Generating header in $WORKDIR"
 
 generate_thinx_file $WORKDIR $JSON
