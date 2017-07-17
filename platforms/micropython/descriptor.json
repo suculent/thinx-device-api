@@ -1,4 +1,5 @@
 {
   "name": "Micropython",
-  "language": "python"
+  "language": "python",
+  "header": "thinx.py"
 }

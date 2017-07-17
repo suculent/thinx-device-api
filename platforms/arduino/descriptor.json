@@ -1,4 +1,5 @@
 {
-  "name" : "Arduino",
-  "language" : "c"
+  "name": "Arduino",
+  "language": "c",
+  "header": "thinx.h"
 }
