@@ -71,7 +71,7 @@ echo "[builder.sh] Making deployment path: ${DISPLAY_DEPLOYMENT_PATH}"
 mkdir -p $OWNER_ID_HOME
 mkdir -p $DEPLOYMENT_PATH
 
-LOG_PATH="${DEPLOYMENT_PATH}/${BUILD_ID}.log"
+LOG_PATH="${DEPLOYMENT_PATH}/build.log"
 echo "[builder.sh] Log path: $LOG_PATH"
 touch $LOG_PATH
 echo "[builder.sh] -=[ ☢ THiNX IoT RTM BUILDER ☢ ]=-" >> "${LOG_PATH}"
