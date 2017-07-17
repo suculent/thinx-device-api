@@ -3,11 +3,11 @@
 THINX_ROOT=$(pwd)
 
 # Sample data for testing only, should return error missing JSON
-JSON='builder.thinx.json'
+#JSON='builder.thinx.json'
 
 # Sample repositories for testing only, should return error missing workdir
 #WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-ino
-WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-mos
+#WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-mos
 #WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-lua
 #WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-pio
 #WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-upy
@@ -29,6 +29,17 @@ case $i in
     ;;
 esac
 done
+
+if [[ ! -d $WORKDIR ]]; then
+	echo "--workdir= must be set"
+	exit 1
+fi
+
+if [[ ! -d $JSON ]]; then
+	echo "--json= must be set"
+	exit 1
+fi
+
 
 function infer_platform
 {
