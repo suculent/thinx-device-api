@@ -1,4 +1,5 @@
 {
-  "name" : "MongooseOS",
-  "language" : "javascript"
+  "name": "MongooseOS",
+  "language": "c",
+  "header": "thinx.h"
 }

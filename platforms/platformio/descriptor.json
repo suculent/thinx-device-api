@@ -1,4 +1,5 @@
 {
   "name": "Platform.io",
-  "language": "c"
+  "language": "c",
+  "header": "thinx.h"
 }

@@ -1,4 +1,5 @@
 {
-  "name" : "NodeMCU",
-  "language" : "lua"
+  "name": "NodeMCU",
+  "language": "lua",
+  "header": "config.lua"
 }
