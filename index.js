@@ -857,6 +857,9 @@ var ThinxApp = function() {
           status: message
         });
       } else {
+        console.log(
+          "Returning message on app.post /api/user/password/set :" +
+          message);
         respond(res, message);
       }
     });
