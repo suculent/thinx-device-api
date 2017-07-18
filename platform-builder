@@ -214,6 +214,10 @@ function thinx_file_from_json
 		cat $OUTFILE
 }
 
-echo "Generating header in $WORKDIR"
+echo "Generating THiNX header, injecting environment variables..."
 
-generate_thinx_file $WORKDIR $JSON
+generate_thinx_file ${WORKDIR} ${JSON}
+
+echo "Linting..."
+
+bash ./linter --language=${LANGUAGE_NAME} --workdir=${WORKDIR}
