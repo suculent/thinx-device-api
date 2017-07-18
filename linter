@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source "$(pwd)/infer"
+
 # Sample repositories for testing only, should return error missing workdir
 #WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-ino
 #WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-mos; LANGUAGE="cpp"
@@ -7,7 +9,7 @@
 #WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-pio
 #WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-upy
 
-echo "[linter] -=[ ☢ THiNX IoT CODE LINTER ☢ ]=-"
+echo "-=[ ☢ THiNX IoT CODE LINTER ☢ ]=-"
 
 for i in "$@"
 do
@@ -17,27 +19,27 @@ case $i in
     ;;
     -l=*|--language=*)
       LANGUAGE="${i#*=}"
-    ;;    
+    ;;
     *)
       # unknown option
     ;;
 esac
 done
 
-if [[ -z $WORKDIR ]]; then		
+if [[ -z $WORKDIR ]]; then
 	echo "--workdir is not defined (specify path to a repository)"
 	exit 1
 fi
 
 
-if [[ -z $LANGUAGE ]]; then		
+if [[ -z $LANGUAGE ]]; then
 	echo "--language is not defined (inferred by platform-builder)"
 	exit 1
 fi
 
 
 THINX_ROOT=$(pwd)
-echo "[linter] Running from: $THINX_ROOT"
+echo "Current working directory: $THINX_ROOT"
 
 if [[ -z $THINX_ROOT ]]; then
 		THINX_ROOT=$(pwd)
@@ -45,12 +47,12 @@ if [[ -z $THINX_ROOT ]]; then
 fi
 
 case $LANGUAGE in
-	
+
 	c)
       TOOL_PATH="cppcheck"
       TOOL_ATTRS="--force -U PROGMEM"
       EXTENSIONS=( "c" "ino" "cpp" )
-    ;;    
+    ;;
 
     javascript)
       TOOL_PATH="eslint"
@@ -69,7 +71,7 @@ case $LANGUAGE in
       TOOL_PATH=""
       EXTENSIONS=( py )
     ;;
-    
+
     *)
       echo "Unknown language: $LANGUAGE"
       exit 1
@@ -79,7 +81,7 @@ esac
 ALL=$(ls $WORKDIR)
 echo "" > $WORKDIR/lint.txt
 
-echo "[linter] workdir: $WORKDIR"
+echo "Working directory: $WORKDIR"
 
 # for each extension per language
 for EXT in $EXTENSIONS; do
@@ -87,18 +89,18 @@ for EXT in $EXTENSIONS; do
 	echo "Linting files in \"${EXT}\" language..."
 
 	# cppcheck is able to work recursively on its own
-	if [[ "${TOOL_PATH}" == "cppcheck" ]]; then		
+	if [[ "${TOOL_PATH}" == "cppcheck" ]]; then
 		TOOL_PATH=$(which $TOOL_PATH)
 		CMD="${TOOL_PATH} ${TOOL_ATTRS} ${WORKDIR}"
 		exec $CMD > "$WORKDIR/lint.txt"
-		cat "$WORKDIR/lint.txt"		
+		cat "$WORKDIR/lint.txt"
 	else
 
 		# recursion implementation for other linters
 		for XDIR in $ALL; do
 
 			# as folders
-			if [[ -d $WORKDIR/$XDIR ]]; then		
+			if [[ -d $WORKDIR/$XDIR ]]; then
 				echo "XDIR: $XDIR"
 				FILEZ=$(ls "$WORKDIR/$XDIR" | grep \.${EXT})
 

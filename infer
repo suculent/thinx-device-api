@@ -1,0 +1,176 @@
+#!/bin/bash
+
+# THiNX Builder Library Functions
+
+function infer_platform
+{
+		local path=$1
+
+		platform="unknown"
+		ALL=$(ls $path)
+
+		for XDIR in $ALL; do
+				if [[ -d $path/$XDIR ]]; then
+					FILES=$(ls $path/$XDIR | grep "\.ino")
+					for FILE in $FILES
+					do
+						if [[ -f $path/$XDIR/$FILE ]]; then
+							platform="arduino"
+						fi
+					done
+				fi
+		done
+
+		# Platform.io
+
+		if [[ -f "$path/platformio.ini" ]]; then
+			platform="platformio"
+
+		# Arduino
+
+	  elif [[ -f "$path/**/*.ino" ]]; then
+			platform="arduino"
+
+		elif [[ -f "$path/*.ino" ]]; then
+			platform="arduino"
+
+		# NodeMCU (LUA)
+
+		elif [[ -f "$path/init.lua" ]]; then
+			platform="nodemcu"
+
+		# Micropython
+
+		elif [[ -f "$path/main.py" ]]; then
+			platform="micropython"
+
+		elif [[ -f "$path/boot.py" ]]; then
+			platform="micropython"
+
+		# Mongoose OS
+
+		elif [[ -d "$path/default-1.0" ]]; then
+			platform="mongoose"
+		fi
+
+		echo $platform
+}
+
+function output_file
+{
+		local DSC_PATH="$THINX_ROOT/platforms/$1/descriptor.json"
+		echo $(cat $DSC_PATH | jq .header | tr -d '\"' )
+}
+
+function platform_name
+{
+		local DSC_PATH="$THINX_ROOT/platforms/$1/descriptor.json"
+		echo $(cat $DSC_PATH | jq .name | tr -d '\"' )
+}
+
+function language_for_platform
+{
+		local DSC_PATH="$THINX_ROOT/platforms/$1/descriptor.json"
+		echo $(cat $DSC_PATH | jq .language | tr -d '\"' )
+}
+
+function language_name
+{
+		local DSC_PATH="$THINX_ROOT/languages/$1/descriptor.json"
+		echo $(cat $DSC_PATH | jq .name | tr -d '\"' )
+}
+
+function generate_thinx_file
+{
+	local WORKDIR=$1
+	local BUILDFILE=$2
+	PLATFORM=$(infer_platform $WORKDIR)
+	PLATFORM_NAME=$(platform_name $PLATFORM)
+	LANGUAGE=$(language_for_platform $PLATFORM)
+	LANGUAGE_NAME=$(language_name $LANGUAGE)
+	thinx_file_from_json $BUILDFILE $LANGUAGE $WORKDIR
+}
+
+#
+# platform-agnostic header generator
+#
+
+function thinx_file_from_json
+{
+		local WORKDIR=$3
+		local LANG_PATH="$THINX_ROOT/languages/$2/descriptor.json"
+		local LANG=$(cat $LANG_PATH)
+		local LANGUAGE_NAME=$(echo $LANG | jq .name | tr -d '"')
+		local DEFINE=$(echo $LANG | jq .DEFINE | tr -d '\"' )
+		local ASSIGN=$(echo $LANG | jq .ASSIGN | tr -d '\"' )
+		local COMMENT=$(echo $LANG | jq .COMMENT | tr -d '\"' )
+		local EOL=$(echo $LANG | jq .EOL | tr -d '" ')
+
+		local STRINGSTOP=$(echo $LANG | jq .STRINGSTOP | tr -d '\')
+		STRINGSTOP=$(echo "${STRINGSTOP:1:${#STRINGSTOP}-2}")
+
+		OUTFILE=$(output_file $PLATFORM)
+		BUILDFILE="$(cat $1)"
+		PLATFORM=$(infer_platform $WORKDIR)
+
+		# for JavaScript will just provide the JSON as-is...
+		if [[ "$PLATFORM" == "mongoose" ]]; then
+			VALUE2="${BUILDFILE/\%\%LANGUAGE_NAME\%\%/$LANGUAGE_NAME}"
+			VALUE2=${VALUE2/\%\%THINX_PLATFORM\%\%/$PLATFORM}
+			echo $VALUE2 > "$OUTFILE"
+			echo $VALUE2
+			cat $OUTFILE
+			exit 0
+		fi
+
+		# other languages need special treatment...
+		ALL=$(ls $WORKDIR)
+		for XDIR in $ALL; do
+				if [[ -d $WORKDIR/$XDIR ]]; then
+					FILES=$(ls $WORKDIR/$XDIR | grep "\.ino")
+					for FILE in $FILES
+					do
+						if [[ -f $WORKDIR/$XDIR/$FILE ]]; then
+							# platform="arduino"
+							OUTFILE=$WORKDIR/$XDIR/$OUTFILE
+						fi
+					done
+				fi
+		done
+		echo $OUTFILE
+
+		KEYS=$(echo $BUILDFILE | jq keys)
+		VARS=$(echo $BUILDFILE | jq .[])
+		FIRST=true
+		rm -rf "$OUTFILE"
+
+		for K in $KEYS; do
+			K=$(echo $K | tr -d '",')
+			if [[ "$K" == "[" ]]; then
+				echo > /dev/null # condition must not be empty
+			elif [[ "$K" == "]" ]]; then
+				echo > /dev/null # condition must not be empty
+			else
+				VALUE=$(echo $BUILDFILE | jq .$K | tr -d '"')
+				if [[ "$K" == *"COMMENT"* ]]; then
+						VALUE=${VALUE/\%\%LANGUAGE_NAME\%\%/$LANGUAGE_NAME}
+						VALUE=${VALUE/\%\%THINX_PLATFORM\%\%/$PLATFORM}
+						echo "$COMMENT $VALUE" >> "$OUTFILE"
+				else
+					# Space between header comments and rest...
+					if [[ $FIRST == true ]]; then
+						FIRST=false
+						echo " " >> "$OUTFILE"
+					fi
+					if [[ $VALUE == "true" || $VALUE == false ]]; then
+						echo "$DEFINE$K$ASSIGN$VALUE$EOL" >> "$OUTFILE"
+					elif [[ ${VALUE} == ?(-)+([0-9]) ]]; then
+						echo "$DEFINE$K$ASSIGN$VALUE$EOL" >> "$OUTFILE"
+					else
+						echo "$DEFINE$K$ASSIGN$STRINGSTOP$VALUE$STRINGSTOP$EOL" >> "$OUTFILE"
+					fi
+				fi
+			fi
+		done
+		cat $OUTFILE
+}
