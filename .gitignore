@@ -5,7 +5,6 @@ pid/
 vault
 
 # OS sdks
-tools/
 repos/
 
 # Runtime data that are not to be stored from server back to repository
