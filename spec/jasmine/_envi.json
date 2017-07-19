@@ -1,9 +1,9 @@
 {
-  oid: "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
-  udid: "f8e88e40-43c8-11e7-9ad3-b7281c2b9610",
-  mac: "5CCF7FF1A174",
-  version: "1.6.9",
-  test_info: {
+  "oid": "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
+  "udid": "f8e88e40-43c8-11e7-9ad3-b7281c2b9610",
+  "mac": "5CCF7FF1A174",
+  "version": "1.6.9",
+  "test_info": {
     "first_name": "Custom",
     "last_name": "Custom",
     "mobile_phone": "+420603861240",
