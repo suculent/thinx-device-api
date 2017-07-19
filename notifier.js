@@ -202,7 +202,7 @@ devicelib.get(udid, function(err, doc) {
     // save to build_path
 
     var envelopePath = deploymentPathForDevice(owner, udid) + "/" +
-      build_id + "/" + build_id + ".json";
+      build_id + "/build.json";
 
     console.log("Saving build envelope: " + envelopePath);
 
