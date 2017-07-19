@@ -19,36 +19,41 @@
        }
    },
    "repos": {
-       "e5236ea0-4c62-11e7-879f-45127a70fec6": {
-           "alias": "thinx-test-repo",
-           "url": "https://github.com/suculent/thinx-firmware-esp8266.git",
-           "branch": "origin/master"
-       },
-       "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f3": {
-           "alias": "THiNX Vanilla Device Firmware",
-           "url": "git@github.com:suculent/thinx-firmware-esp8266-ino.git",
-           "branch": "origin/master"
-       },
-       "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f4": {
-           "alias": "THiNX Vanilla ESP8266 Platform.io",
-           "url": "git@github.com:suculent/thinx-firmware-esp8266-pio.git",
-           "branch": "origin/master"
-       },
-       "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f5": {
-           "alias": "THiNX Vanilla ESP8266 LUA",
-           "url": "git@github.com:suculent/thinx-firmware-esp8266-lua.git",
-           "branch": "origin/master"
-       },
-       "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f6": {
-           "alias": "THiNX Vanilla ESP8266 Micropython",
-           "url": "git@github.com:suculent/thinx-firmware-esp8266-upy.git",
-           "branch": "origin/master"
-       },
-       "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f7": {
-           "alias": "THiNX Vanilla ESP8266 MongooseOS",
-           "url": "git@github.com:suculent/thinx-firmware-esp8266-mos.git",
-           "branch": "origin/master"
-       }
+   "e5236ea0-4c62-11e7-879f-45127a70fec6": {
+       "alias": "thinx-test-repo",
+       "url": "https://github.com/suculent/thinx-firmware-esp8266.git",
+       "branch": "origin/master"
+   },
+   "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f3": {
+       "alias": "THiNX Vanilla ESP8266 Arduino",
+       "url": "git@github.com:suculent/thinx-firmware-esp8266-ino.git",
+       "branch": "origin/master",
+ "platform: "arduino"
+   },
+   "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f4": {
+       "alias": "THiNX Vanilla ESP8266 Platform.io",
+       "url": "git@github.com:suculent/thinx-firmware-esp8266-pio.git",
+       "branch": "origin/master",
+ "platform: "platformio"
+   },
+   "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f5": {
+       "alias": "THiNX Vanilla ESP8266 LUA",
+       "url": "git@github.com:suculent/thinx-firmware-esp8266-lua.git",
+       "branch": "origin/master",
+ "platform: "nodemcu"
+   },
+   "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f6": {
+       "alias": "THiNX Vanilla ESP8266 Micropython",
+       "url": "git@github.com:suculent/thinx-firmware-esp8266-upy.git",
+       "branch": "origin/master",
+ "platform: "micropython"
+   },
+   "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f7": {
+       "alias": "THiNX Vanilla ESP8266 MongooseOS",
+       "url": "git@github.com:suculent/thinx-firmware-esp8266-mos.git",
+       "branch": "origin/master",
+ "platform: "mongoose"
+   }
    },
    "info": {
        "first_name": "Něco maže",
