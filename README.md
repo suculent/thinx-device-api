@@ -62,6 +62,7 @@ With built-in THiNX Client Library:
 
 [Micropython](https://github.com/suculent/nodemcu-micropython)
 
+Arduino, Plaform.io and MongooseOS are firmwares by nature.
 
 ## Dockerized Firmware Builders
 
