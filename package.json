@@ -1,7 +1,7 @@
 {
   "name": "thinx",
   "description": "THiNX IoT RTM API",
-  "version": "1.7.1725",
+  "version": "1.8.1820",
   "author": {
     "name": "Matej Sychra"
   },
@@ -18,8 +18,6 @@
   },
   "scripts": {
     "coverage": "nyc jasmine; nyc report --reporter=text-lcov | coveralls",
-    "snyk-protect": "snyk protect",
-    "prepublish": "npm run snyk-protect",
     "test": "echo",
     "snyk": "snyk test"
   },

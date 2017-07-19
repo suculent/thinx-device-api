@@ -4,24 +4,26 @@
 
 **ROADMAP**
 
-The device registration and checkin is working, firmwares can be provided using OTT, repositories are fetched and built, devices are notified, RSA keys stored but not tested, there's even support for environment variables not yet baked into the builder(s). MQTT is not a priority so far, instead we're trying to focus on firmware update side. It seems to be almost done.
+The device registration and checkin is working, firmwares can be provided using OTT, repositories are fetched and built, devices are notified, RSA keys stored but not tested, there's even support for environment variables and building custom firmwares bakedin.
+
+MQTT is not a priority so far, instead we're trying to focus on firmware update side. It seems to be almost done.
 
 * Update support (LUA/uPy/mos) for file-based dumb firmwares = allow file-based upload where applicable
-* Make devices respond/receive MQTT messages (LUA first)
+* Make devices respond/receive MQTT messages (LUA works, next is Micropython and Platformio/Arduino/C++ which currently fails to receive callback)
 * Optionally migrate sources when transferring device (requires extracting sources to separate db).
 * Improve statistics (daily parse limiting)
 
 **LONG-TERM ROADMAP**
 
-* Support for building custom NodeMCU, Micropython or MongooseOS firmware
 * Installer, disaster recovery (except for existing DO backup).
-* Websocket on login (notifications)
+
+### 16th week
+
+19/7/2017: 1.8.1820 - Micropython docker-based builder; NodeMCU docker-based builder; integration; THiNX system library for nodemcu-firmware; pre-building apps to Micropython; MAC address normalization and other UI tweaks; NodeMCU, Micropython or MongooseOS firmware; websocket opens on login
+
+18/7/2017: inferring source platform on prefetch, parametrized multi-language config builder; env-vars should be pre-built now
 
 ### 15th week
-
-19/7/2017 - Micropython docker-based builder; NodeMCU docker-based builder; integration; THiNX system library for nodemcu-firmware; pre-building apps to Micropython
-
-18/7/2017 - 1.7.1786: inferring source platform on prefetch, parametrized multi-language config builder; env-vars should be pre-built now
 
 13/7/2017: fixed device registration for LUA firmware together with MQTT login and duplicate MAC record pruning
 
