@@ -212,23 +212,46 @@ OUTFILE=null
 case $PLATFORM in
 
     micropython)
-			OUTFILE=${DEPLOYMENT_PATH}/boot.py
-			git clone https://github.com/ubergesundheit/micropython-build
+		  OUTFILE=${DEPLOYMENT_PATH}/boot.py
+			OUTPATH=${DEPLOYMENT_PATH}/
+			docker pull suculent/micropython-docker-build
+			cd ./tools/micropython-docker-build
+			cd modules
+			# TODO: FIXME: Inject data from user repository to filesystem here...
+			git clone https://github.com/suculent/thinx-firmware-esp8266-upy.git
+			mv ./thinx-firmware-esp8266-upy/boot.py ./boot.py
+			rm -rf thinx-firmware-esp8266-upy
+			docker build --force-rm -t thinx-micropython . # optionally --build-arg VERSION=v1.8.1 .
+			docker run --rm -it -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython /bin/bash
+			rm -rf ./build; make clean; make V=1
 			# TODO: FIXME: Inject filesystem here
-			docker build -t micropython --build-arg VERSION=v1.8.1 .
-			cp -v "${OWNER_PATH}/boot.py" "$OUTFILE" >> "${LOG_PATH}"
+			cp -v ./build/*.bin "$OUTPATH" >> "${LOG_PATH}"
+			rm -rf ./build/*
     ;;
 
 		nodemcu)
 			OUTFILE=${DEPLOYMENT_PATH}/thinx.lua
-			# TODO: FIXME: Inject filesystem here
-			docker run --rm -ti -v `pwd`:/opt/nodemcu-firmware marcelstoer/nodemcu-build
+			OUTPATH=${DEPLOYMENT_PATH}/
+			docker pull suculent/nodemcu-docker-build
+			cd ./tools/nodemcu-firmware
+			# possibly lua-modules extended with thinx
+			# TODO: copy the LUA files to correct place/filesystem AND/OR deployment path
 			cp -v "${OWNER_PATH}/*.lua" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
+			docker run --rm -ti -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build
+			# Options:
+			# You can pass the following optional parameters to the Docker build like so docker run -e "<parameter>=value" -e ....
+			# IMAGE_NAME The default firmware file names are nodemcu_float|integer_<branch>_<timestamp>.bin. If you define an image name it replaces the <branch>_<timestamp> suffix and the full image names become nodemcu_float|integer_<image_name>.bin.
+			# INTEGER_ONLY Set this to 1 if you don't need NodeMCU with floating support, cuts the build time in half.
+			# FLOAT_ONLY Set this to 1 if you only need NodeMCU with floating support, cuts the build time in half.
+
+			cp -v ./bin/*.bin "$OUTPATH" >> "${LOG_PATH}"
+			rm -rf ./bin/*
     ;;
 
     mongoose)
-			OUTFILE=${DEPLOYMENT_PATH}/thinx.js # FIXME: warning! this may be c-header
-			mos build
+			OUTFILE=${DEPLOYMENT_PATH}/mos_build.zip # FIXME: warning! this may be c-header
+			echo "TODO: This expects repository with mos.yml; should copy thinx.json into ./fs/thinx.json"
+			mos build --arch esp8266
 			cp -vR "${OWNER_PATH}/*" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
 			echo $MSG; echo $MSG >> "${LOG_PATH}"
     ;;
