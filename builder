@@ -252,7 +252,8 @@ case $PLATFORM in
 			OUTFILE=${DEPLOYMENT_PATH}/mos_build.zip # FIXME: warning! this may be c-header
 			echo "TODO: This expects repository with mos.yml; should copy thinx.json into ./fs/thinx.json"
 			mos build --arch esp8266
-			cp -vR "${OWNER_PATH}/*" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
+			# generates build/fw.zip on success
+			cp -vR "${OWNER_PATH}/build/fw.zip" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
 			echo $MSG; echo $MSG >> "${LOG_PATH}"
     ;;
 
