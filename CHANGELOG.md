@@ -19,6 +19,8 @@ The device registration and checkin is working, firmwares can be provided using 
 
 ### 15th week
 
+19/7/2017 - Micropython docker-based builder; NodeMCU docker-based builder; integration; THiNX system library for nodemcu-firmware; pre-building apps to Micropython
+
 18/7/2017 - 1.7.1786: inferring source platform on prefetch, parametrized multi-language config builder; env-vars should be pre-built now
 
 13/7/2017: fixed device registration for LUA firmware together with MQTT login and duplicate MAC record pruning
