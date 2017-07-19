@@ -17,7 +17,7 @@ avatars/*
 mqtt_passwords
 dhparams.pem
 dump.rdb
-conf/config.json
+#conf/config.json
 
 cookies.jar
 nohup.out
