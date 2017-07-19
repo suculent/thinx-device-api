@@ -33,7 +33,7 @@ fi
 
 
 if [[ -z $LANGUAGE ]]; then
-	echo "--language is not defined (inferred by platform-builder)"
+	echo "--language is not defined (inferred by pre-builder)"
 	exit 1
 fi
 
