@@ -213,19 +213,23 @@ case $PLATFORM in
 
     micropython)
 			OUTFILE=${DEPLOYMENT_PATH}/boot.py
+			git clone https://github.com/ubergesundheit/micropython-build
+			# TODO: FIXME: Inject filesystem here
+			docker build -t micropython --build-arg VERSION=v1.8.1 .
 			cp -v "${OWNER_PATH}/boot.py" "$OUTFILE" >> "${LOG_PATH}"
     ;;
 
 		nodemcu)
 			OUTFILE=${DEPLOYMENT_PATH}/thinx.lua
+			# TODO: FIXME: Inject filesystem here
+			docker run --rm -ti -v `pwd`:/opt/nodemcu-firmware marcelstoer/nodemcu-build
 			cp -v "${OWNER_PATH}/*.lua" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
     ;;
 
     mongoose)
-			OUTFILE=${DEPLOYMENT_PATH}/thinx.js
+			OUTFILE=${DEPLOYMENT_PATH}/thinx.js # FIXME: warning! this may be c-header
+			mos build
 			cp -vR "${OWNER_PATH}/*" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
-			#cp -v "${OWNER_PATH}/*.json" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
-			MSG="[builder.sh] If you need to support MongooseOS platform now, file a ticket at https://github.com/suculent/thinx-device-api/issues"
 			echo $MSG; echo $MSG >> "${LOG_PATH}"
     ;;
 
