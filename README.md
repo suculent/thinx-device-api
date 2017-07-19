@@ -7,6 +7,7 @@
 
 IoT Device Management Server running on node.js.
 
+
 ## The Purpose
 
 As a user I have already many IoT new and/or legacy devices at home. Sometimes I need to change WiFi credentials on a switch that is mounted on a ceiling. Sometimes I want to swap whole firmware for new one, but not always I want to rewrite working legacy LUA code to Arduino C. That's why we have decided to create THiNX.
@@ -27,25 +28,47 @@ As a user I have already many IoT new and/or legacy devices at home. Sometimes I
 
 * Allows transfer of device ownership (e.g. for pre-configured devices).
 
-## Future roadmap
-
 * Custom firmware builder for MongooseOS, NodeMCU and Micropython (allow module selection, add THiNX as an OS-level library)
 
 * Transfer device to another owner along with sources/firmware.
 
+
 ## Supported IoT Platforms
 
 * ESP8266 (thinx-firmware-esp8266)
+
 * Tested on Wemos D1 Mini, Wemos D1 Mini Pro, Robodyn D1, Robodyn D1 Mini and NodeMCU with Arduino, LUA and Micropython-based core firmwares
-* Expected: Any Arduino with networking support, MongooseOS
+
+* Expected: Arduino with networking support, MongooseOS
 
 THiNX platform agent repositories:
 
 [Platform.io](https://github.com/suculent/thinx-firmware-esp8266-pio)
+
 [Arduino](https://github.com/suculent/thinx-firmware-esp8266-ino)
-[NodeMCU LUA](https://github.com/suculent/thinx-firmware-esp8266-lua)
+
+[NodeMCU/LUA](https://github.com/suculent/thinx-firmware-esp8266-lua)
+
 [Micropython](https://github.com/suculent/thinx-firmware-esp8266-upy)
+
 [MongooseOS](https://github.com/suculent/thinx-firmware-esp8266-mos)
+
+
+## Custom Firmwares
+
+With built-in THiNX Client Library:
+
+[NodeMCU/LUA](https://github.com/suculent/nodemcu-firmware)
+
+[Micropython](https://github.com/suculent/nodemcu-micropython)
+
+
+## Dockerized Firmware Builders
+
+[NodeMCU/LUA](https://hub.docker.com/r/suculent/nodemcu-docker-build/)
+
+[Micropython](https://hub.docker.com/r/suculent/micropython-docker-build/)
+
 
 ## Prerequisites
 
@@ -55,6 +78,7 @@ THiNX platform agent repositories:
 * Admin runs on HTTP/HTTPS port (80/443)
 * GitHub commit hooks are listened to on port 9001
 
+
 ## Installation
 
 Ree RTM.md for all details.
@@ -62,6 +86,7 @@ Ree RTM.md for all details.
 ### GitHub Webhook support
 
 You can direct your GitHub webhooks to http://thinx.cloud:9001/ after adding a valid deploy key from GitHub to THiNX RTM.
+
 
 ## Endpoints
 

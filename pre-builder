@@ -1,0 +1,56 @@
+#!/bin/bash
+
+THINX_ROOT=$(pwd)
+
+source "$THINX_ROOT/infer"
+
+# Sample data for testing only, should return error missing JSON
+JSON='builder.thinx.json'
+
+# Sample repositories for testing only, should return error missing workdir
+WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-ino
+#WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-mos
+#WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-lua
+#WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-pio
+#WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-upy
+
+for i in "$@"
+do
+case $i in
+	  -j*|--json=*)
+      JSON="${i#*=}"
+    ;;
+    -r=*|--root=*)
+      THINX_ROOT="${i#*=}"
+    ;;
+    -w=*|--workdir=*)
+      WORKDIR="${i#*=}"
+    ;;
+    *)
+      # unknown option
+    ;;
+esac
+done
+
+if [[ ! -d "${WORKDIR}" ]]; then
+	echo "--workdir= must be set"
+	exit 1
+fi
+
+if [[ ! -f $JSON ]]; then
+	echo "--json= must be set"
+	exit 1
+fi
+
+echo
+echo "Generating THiNX header, injecting environment variables..."
+echo
+
+generate_thinx_file ${WORKDIR} ${JSON}
+
+echo
+
+PLATFORM=$(infer_platform $WORKDIR)
+PLATFORM_LANG=$(language_for_platform $PLATFORM)
+
+bash ./linter --language=${PLATFORM_LANG} --workdir=${WORKDIR}

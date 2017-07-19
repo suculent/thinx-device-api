@@ -5,7 +5,6 @@ pid/
 vault
 
 # OS sdks
-tools/
 repos/
 
 # Runtime data that are not to be stored from server back to repository
@@ -18,7 +17,7 @@ avatars/*
 mqtt_passwords
 dhparams.pem
 dump.rdb
-conf/config.json
+#conf/config.json
 
 cookies.jar
 nohup.out

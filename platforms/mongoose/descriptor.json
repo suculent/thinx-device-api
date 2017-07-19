@@ -1,5 +1,5 @@
 {
   "name": "MongooseOS",
-  "language": "c",
-  "header": "thinx.h"
+  "language": "javascript",
+  "header": "thinx.json"
 }

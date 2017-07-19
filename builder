@@ -71,7 +71,7 @@ echo "[builder.sh] Making deployment path: ${DISPLAY_DEPLOYMENT_PATH}"
 mkdir -p $OWNER_ID_HOME
 mkdir -p $DEPLOYMENT_PATH
 
-LOG_PATH="${DEPLOYMENT_PATH}/${BUILD_ID}.log"
+LOG_PATH="${DEPLOYMENT_PATH}/build.log"
 echo "[builder.sh] Log path: $LOG_PATH"
 touch $LOG_PATH
 echo "[builder.sh] -=[ ☢ THiNX IoT RTM BUILDER ☢ ]=-" >> "${LOG_PATH}"
@@ -198,100 +198,95 @@ REPO_NAME="$(basename $(pwd))"
 REPO_VERSION="${THX_VERSION}.${VERSION}" # todo: is not semantic at all
 BUILD_DATE=`date +%Y-%m-%d`
 
-# TODO: Change this to a sed template, this is tedious
-
-echo "[builder.sh] Building Thinx.h..." >> "${LOG_PATH}"
-
-echo "//" > "${THINX_FILE}"
-echo "// This is an auto-generated file, it will be re-written by THiNX on cloud build." >> "${THINX_FILE}"
-echo "//" >> "${THINX_FILE}"
-echo "" >> "${THINX_FILE}"
-echo "// build-time constants" >> "${THINX_FILE}"
-echo "#define THINX_COMMIT_ID \"${COMMIT}\"" >> "${THINX_FILE}"
-echo "#define THINX_MQTT_URL \"${THINX_MQTT_URL}\"" >> "${THINX_FILE}"
-echo "#define THINX_CLOUD_URL \"${THINX_CLOUD_URL}\"" >> "${THINX_FILE}"
-echo "#define THINX_FIRMWARE_VERSION \"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\"" >> "${THINX_FILE}"
-echo "#define THINX_FIRMWARE_VERSION_SHORT \"${REPO_VERSION}\"" >> "${THINX_FILE}"
-echo "#define THINX_APP_VERSION \"${REPO_NAME}-${REPO_VERSION}:${BUILD_DATE}\"" >> "${THINX_FILE}"
-echo "" >> "${THINX_FILE}"
-echo "// dynamic variables" >> "${THINX_FILE}"
-echo "#define THINX_ALIAS \"${THINX_ALIAS}\"" >> "${THINX_FILE}"
-echo "#define THINX_API_KEY \"VANILLA_API_KEY\"" >> "${THINX_FILE}" # this just adds placeholder, key must not leak in binary...
-echo "#define THINX_OWNER \"${OWNER_ID}\"" >> "${THINX_FILE}"
-
-echo "" >> "${THINX_FILE}"
-echo "#define THINX_MQTT_PORT 1883" >> "${THINX_FILE}"
-echo "#define THINX_API_PORT 7442" >> "${THINX_FILE}"
-echo "" >> "${THINX_FILE}"
-echo "#define THINX_UDID \"${UDID}\"" >> "${THINX_FILE}" # this just adds placeholder, key should not leak
-
-if [[ ! -z "${ENV_VARS}" ]]; then
-	echo "[builder.sh] ENV_VARS: ${ENV_VARS}" >> "${LOG_PATH}"
-	ALLVARS=$(echo ${ENV_VARS} | jq .)
-	echo $ALLVARS
-	for i in $ALLVARS; do
-					 echo variable: $i >> "${LOG_PATH}"
-					 # todo: write this key:value to thinx.h
-	done
-fi
-
 # Build
-echo "[builder.sh] Finished building Thinx.h" >> "${LOG_PATH}"
-cat $THINX_FILE >> "${LOG_PATH}"
 
-echo "[builder.sh] TODO: Support no-compile deployment of Micropython/LUA here..."
+PLATFORM=$(infer_platform $OWNER_PATH)
+LANGUAGE=$(language_for_platform $PLATFORM)
+LANGUAGE_NAME=$(language_name $LANGUAGE)
 
-if [[ -f package.json ]]; then
-	echo "[builder.sh] THiNX does not support npm builds." >> "${LOG_PATH}"
-	echo "[builder.sh] If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues" >> "${LOG_PATH}"
-
-elif [[ ! -f platformio.ini ]]; then
-	echo "[builder.sh] This not a compatible project so far. Cannot build Arduino project without importing to Platform.io first." >> "${LOG_PATH}"
-	echo "[builder.sh] If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues" >> "${LOG_PATH}"
-	exit 1
-fi
-
-echo "[builder.sh] Build step..."
-
-platformio run >> "${LOG_PATH}"
+echo "[builder.sh] Building for platform ${PLATFORM} in language ${LANGUAGE_NAME}..."
 
 SHA=0
+OUTFILE=null
 
-if [[ $?==0 ]] ; then
-	STATUS='"OK"'
-	SHAX=$(shasum -a 256 .pioenvs/d1_mini/firmware.bin)
-	SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
-else
-	STATUS='"BUILD FAILED."'
-fi
+case $PLATFORM in
 
-if [[ ! ${RUN} ]]; then
-	echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> "${LOG_PATH}"
-	STATUS='"DRY_RUN_OK"'
-else
+    micropython)
+		  OUTFILE=${DEPLOYMENT_PATH}/boot.py
+			OUTPATH=${DEPLOYMENT_PATH}/
+			docker pull suculent/micropython-docker-build
+			cd ./tools/micropython-docker-build
+			cd modules
+			# TODO: FIXME: Inject data from user repository to filesystem here...
+			git clone https://github.com/suculent/thinx-firmware-esp8266-upy.git
+			mv ./thinx-firmware-esp8266-upy/boot.py ./boot.py
+			rm -rf thinx-firmware-esp8266-upy
+			docker build --force-rm -t thinx-micropython . # optionally --build-arg VERSION=v1.8.1 .
+			docker run --rm -it -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython /bin/bash
+			rm -rf ./build; make clean; make V=1
+			# TODO: FIXME: Inject filesystem here
+			cp -v ./build/*.bin "$OUTPATH" >> "${LOG_PATH}"
+			rm -rf ./build/*
+    ;;
 
-	echo "[builder.sh] TODO: Support post-build deployment of different platforms here..."
+		nodemcu)
+			OUTFILE=${DEPLOYMENT_PATH}/thinx.lua
+			OUTPATH=${DEPLOYMENT_PATH}/
+			docker pull suculent/nodemcu-docker-build
+			cd ./tools/nodemcu-firmware
+			# possibly lua-modules extended with thinx
+			# TODO: copy the LUA files to correct place/filesystem AND/OR deployment path
+			cp -v "${OWNER_PATH}/*.lua" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
+			docker run --rm -ti -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build
+			# Options:
+			# You can pass the following optional parameters to the Docker build like so docker run -e "<parameter>=value" -e ....
+			# IMAGE_NAME The default firmware file names are nodemcu_float|integer_<branch>_<timestamp>.bin. If you define an image name it replaces the <branch>_<timestamp> suffix and the full image names become nodemcu_float|integer_<image_name>.bin.
+			# INTEGER_ONLY Set this to 1 if you don't need NodeMCU with floating support, cuts the build time in half.
+			# FLOAT_ONLY Set this to 1 if you only need NodeMCU with floating support, cuts the build time in half.
 
-	# Deploy binary (may require rotating previous file or timestamping/renaming previous version of the file)
-	 # WARNING: bin was elf here but it seems kind of wrong. needs testing
+			cp -v ./bin/*.bin "$OUTPATH" >> "${LOG_PATH}"
+			rm -rf ./bin/*
+    ;;
 
-	# platform-dependent:
-	BUILD_ARTIFACT=".pioenvs/d1_mini/firmware.bin"
+    mongoose)
+			OUTFILE=${DEPLOYMENT_PATH}/mos_build.zip # FIXME: warning! this may be c-header
+			echo "TODO: This expects repository with mos.yml; should copy thinx.json into ./fs/thinx.json"
+			mos build --arch esp8266
+			# generates build/fw.zip on success
+			cp -vR "${OWNER_PATH}/build/fw.zip" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
+			echo $MSG; echo $MSG >> "${LOG_PATH}"
+    ;;
 
-	if [[ -f ${BUILD_ARTIFACT} ]]; then
-		cp ${BUILD_ARTIFACT} ${BUILD_ID}.bin
-		echo "[builder.sh] Deploying $BUILD_ID.bin to $DEPLOYMENT_PATH..."
-		mv ${BUILD_ID}.bin ${DEPLOYMENT_PATH}
-		STATUS='"DEPLOYED"'
-		if [[ $(uname) == "Darwin" ]]; then
-			if [[ $OPEN ]]; then
-				open $DEPLOYMENT_PATH
+		arduino|platformio)
+
+			# Build
+			platformio run >> "${LOG_PATH}"
+
+			# Exit on dry run...
+			if [[ ! ${RUN} ]]; then
+				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> "${LOG_PATH}"
+				STATUS='"DRY_RUN_OK"'
+			else
+				# Check Artifacts
+				if [[ $?==0 ]] ; then
+					STATUS='"OK"'
+					OUTFILE="${OWNER_PATH}/.pioenvs/d1_mini/firmware.bin"
+					SHAX=$(shasum -a 256 $OUTFILE) # OUTFILE
+					SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
+				else
+					STATUS='"BUILD FAILED."'
+				fi
+				# TODO: deploy
 			fi
-		fi
-	else
-		STATUS='"BUILD FAILED."'
-	fi
-fi
+
+    ;;
+
+    *)
+			MSG="[builder.sh] If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues"
+			echo $MSG; echo $MSG >> "${LOG_PATH}"
+      exit 1
+    ;;
+esac
 
 echo "[builder.sh] Build completed with status: $STATUS" >> "${LOG_PATH}"
 
@@ -317,7 +312,7 @@ echo "[THiNX] Log path: $LOG_PATH" >> "${LOG_PATH}"
 #cat $LOG_PATH
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
-CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${BUILD_ID}.bin ${UDID} ${SHA} ${OWNER_ID} ${STATUS}"
+CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS}"
 echo $CMD >> "${LOG_PATH}"
 pushd $ORIGIN # go back to application root folder
 RESULT=$(node $THINX_ROOT/notifier.js $CMD)
@@ -330,7 +325,7 @@ if [[ $RESULT=="*platformio upgrade*" ]]; then
 		platformio upgrade
 fi
 
-echo "Done." >> "${LOG_PATH}"
-echo "Done."
+MSG="${BUILD_DATE} Done."
+echo $MSG; echo $MSG >> "${LOG_PATH}"
 
 set -e

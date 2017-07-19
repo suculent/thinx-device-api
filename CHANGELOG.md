@@ -6,8 +6,6 @@
 
 The device registration and checkin is working, firmwares can be provided using OTT, repositories are fetched and built, devices are notified, RSA keys stored but not tested, there's even support for environment variables not yet baked into the builder(s). MQTT is not a priority so far, instead we're trying to focus on firmware update side. It seems to be almost done.
 
-* bake-in env-vars inside builders
-* Split low-level builders for 'ino', 'pio', 'mos', 'lua' and 'upy' and manage using node.js classes
 * Update support (LUA/uPy/mos) for file-based dumb firmwares = allow file-based upload where applicable
 * Make devices respond/receive MQTT messages (LUA first)
 * Optionally migrate sources when transferring device (requires extracting sources to separate db).
@@ -21,9 +19,13 @@ The device registration and checkin is working, firmwares can be provided using 
 
 ### 15th week
 
+19/7/2017 - Micropython docker-based builder; NodeMCU docker-based builder; integration; THiNX system library for nodemcu-firmware; pre-building apps to Micropython
+
+18/7/2017 - 1.7.1786: inferring source platform on prefetch, parametrized multi-language config builder; env-vars should be pre-built now
+
 13/7/2017: fixed device registration for LUA firmware together with MQTT login and duplicate MAC record pruning
 
-12/7/2017: platform attribute added to registration/UI; 
+12/7/2017: platform attribute added to registration/UI
 
 10/7/2017 - 1.7.1730: completed logtail implementation for all cases; fixed login redirect and updated certificates (shared)
 
