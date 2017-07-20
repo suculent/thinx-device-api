@@ -1688,11 +1688,10 @@ var ThinxApp = function() {
             } else {
 
               // TODO: FIXME before enabling, seems to delete user like this...
-              console.log(
-                "TODO: FIXME: updateLastSeen(udoc) destroys the user!"
-              );
-
-              updateLastSeen(udoc);
+              //console.log(
+              //  "TODO: FIXME: updateLastSeen(udoc) destroys the user!"
+              //);
+              //updateLastSeen(udoc);
             }
 
           });
@@ -2023,7 +2022,9 @@ var ThinxApp = function() {
 
         var owner = body.rows[index].doc.owner;
         var udid = body.rows[index].doc.udid;
-        var path = blog.pathForDevice(owner, udid);
+        var path = watcher.pathForDevice(owner, udid);
+
+        console.log("Setting-up GIT repository watcher on path " + path);
 
         if (!fs.existsSync(path)) {
 
