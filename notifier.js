@@ -147,12 +147,12 @@ devicelib.get(udid, function(err, doc) {
 
   if (typeof(doc) === "undefined") {
     console.log("No such device with udid " + udid);
-    return;
+    process.exit(1);
   }
 
   if (!doc.hasOwnProperty("source")) {
     rollbar.info("device " + udid + "has no source on build!");
-    return false;
+    process.exit(1);
   }
 
   var source = doc.source;
@@ -166,12 +166,12 @@ devicelib.get(udid, function(err, doc) {
 
     if (err) {
       console.log(err);
-      return false;
+      process.exit(1);
     }
 
     if (body.rows.length === 0) {
       console.log("No results.");
-      return false;
+      process.exit(1);
     }
 
     for (var index in body.rows) {
@@ -214,16 +214,15 @@ devicelib.get(udid, function(err, doc) {
           function(err) {
             if (err) {
               console.log("Build envelope save error: " + err);
+              process.exit(1);
             } else {
               console.log("Build envelope saved successfully:");
-              //console.log(JSON.stringify(buildEnvelope));
             }
           });
       }
     });
 
     // TODO: Update current build version in managed_users.repos
-
 
     // Select targets
 
@@ -325,9 +324,12 @@ devicelib.get(udid, function(err, doc) {
     if (status == "DEPLOYED") {
       messenger.publish(owner, udid, message);
       notify_device_channel(owner, udid, message); // deprecated; integration testing only
-      sleep(5);
-      process.exit(0);
+
+
     }
+
+    sleep(5);
+    process.exit(0);
 
   });
 });
