@@ -1527,7 +1527,7 @@ var ThinxApp = function() {
   // Front-end authentication, returns session on valid authentication
   app.post("/api/login", function(req, res) {
 
-    console.log(JSON.stringify(req));
+    console.log(JSON.stringify(req.body)); // logging only req returns circular-structure-error
 
     var client_type = "webapp";
     var ua = req.headers["user-agent"];
