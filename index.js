@@ -1988,7 +1988,7 @@ var ThinxApp = function() {
 
       var filepath = dir + "/" + files[i];
       console.log("STAT> " + filepath);
-      f1_time = fs.statSync().mtime.getTime();
+      f1_time = fs.statSync(filepath).mtime.getTime();
       f2_time = fs.statSync(newest).mtime.getTime();
       if (f1_time > f2_time)
         newest[i] = files[i];
