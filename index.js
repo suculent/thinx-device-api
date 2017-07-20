@@ -4,23 +4,23 @@
 
 var ThinxApp = function() {
 
-  var typeOf = require('typeof');
+  var typeOf = require("typeof");
 
-  var Rollbar = require('rollbar');
+  var Rollbar = require("rollbar");
 
   var rollbar = new Rollbar({
-    accessToken: '5505bac5dc6c4542ba3bd947a150cb55',
+    accessToken: "5505bac5dc6c4542ba3bd947a150cb55",
     handleUncaughtExceptions: true,
     handleUnhandledRejections: true
   });
 
-  require('ssl-root-cas').inject();
+  require("ssl-root-cas").inject();
 
   //
   // Shared Configuration
   //
 
-  require('console-stamp')(console, {
+  require("console-stamp")(console, {
     metadata: function() {
       return ("");
     },
@@ -48,7 +48,10 @@ var ThinxApp = function() {
   if (process.env.LOGNAME == "root") {
     console.log("Starting in production mode...");
     app_config = require("./conf/config.json");
+    console.log(JSON.stringify(app_config));
   }
+
+  console.log("Setting up variables...");
 
   var client_user_agent = app_config.client_user_agent;
   var db = app_config.database_uri;
@@ -82,12 +85,12 @@ var ThinxApp = function() {
   var WebSocket = require("ws");
 
   // list of previously discovered attackers
-  var BLACKLIST = ['203.218.194.124', '179.128.55.14'];
+  var BLACKLIST = ["203.218.194.124", "179.128.55.14"];
 
   var getClientIp = function(req) {
     var ipAddress = req.connection.remoteAddress;
     if (!ipAddress) {
-      return '';
+      return "";
     }
     // convert from "::ffff:192.0.0.1"  to "192.0.0.1"
     if (ipAddress.substr(0, 7) == "::ffff:") {
@@ -95,8 +98,6 @@ var ThinxApp = function() {
     }
     return ipAddress;
   };
-
-
 
   // EXTRACT TO: db.js -->
 
@@ -199,16 +200,19 @@ var ThinxApp = function() {
 
   // Express App
 
+  console.log("Setting up Express Session...");
+
   var express = require("express");
   var session = require("express-session");
 
   var app = express();
 
+  console.log("Starting Redis client...");
   var redis = require("redis");
-  var redisStore = require('connect-redis')(session);
+  var redisStore = require("connect-redis")(session);
   var client = redis.createClient();
 
-  app.set('trust proxy', 1);
+  app.set("trust proxy", 1);
 
   var hour = 3600000;
   var day = hour * 24;
@@ -217,7 +221,7 @@ var ThinxApp = function() {
   app.use(session({
     secret: session_config.secret,
     store: new redisStore({
-      host: 'localhost',
+      host: "localhost",
       port: 6379,
       client: client
     }),
@@ -231,13 +235,13 @@ var ThinxApp = function() {
   }));
 
   app.use(parser.json({
-    limit: '10mb'
+    limit: "10mb"
   }));
 
   app.use(parser.urlencoded({
     extended: true,
     parameterLimit: 10000,
-    limit: '10mb'
+    limit: "10mb"
   }));
 
   /*
@@ -250,6 +254,8 @@ var ThinxApp = function() {
     }
   });
   */
+
+  console.log("Setting up router...");
 
   app.all("/*", function(req, res, next) {
 
@@ -1588,163 +1594,164 @@ var ThinxApp = function() {
         }
       });
     };
-  });
 
-  if (typeof(username) === "undefined") {
-    if (typeof(callback) === "undefined") {
-      return;
-    } else {
-      callback(false, "login_failed");
-    }
-  }
 
-  userlib.view("users", "owners_by_username", {
-    "key": username,
-    "include_docs": false // might be useless
-  }, function(err, body) {
-
-    if (err) {
-      console.log("Error: " + err.toString());
-      req.session.destroy(function(err) {
-        if (err) {
-          console.log(err);
-        } else {
-          failureResponse(res, 403, "unauthorized");
-          console.log("Owner not found: " + username);
-          return;
-        }
-      });
-      return;
-    }
-
-    // Find user and match password
-    var all_users = body.rows;
-
-    var user_data = null;
-    for (var index in all_users) {
-      var all_user_data = all_users[index];
-      if (username != all_user_data.key) {
-        continue;
+    if (typeof(username) === "undefined") {
+      if (typeof(callback) === "undefined") {
+        return;
       } else {
-        user_data = all_user_data.value;
-        break;
+        callback(false, "login_failed");
       }
     }
 
-    if (user_data === null) {
-      console.log("No user data, not authorized.");
-      failureResponse(res, 403, "unauthorized");
-      return;
-    }
+    userlib.view("users", "owners_by_username", {
+      "key": username,
+      "include_docs": false // might be useless
+    }, function(err, body) {
 
-    // TODO: Second option (direct compare) will deprecate soon.
-    if (password.indexOf(user_data.password) !== -1) {
-
-      // what if there's no session?
-      if (typeof(req.session) !== "undefined") {
-        req.session.owner = user_data.owner;
-        console.log("[OID:" + req.session.owner +
-          "] [NEW_SESSION]");
-        req.session.username = user_data.username;
-
-        var minute = 60 * 1000;
-        //req.session.cookie.httpOnly = true;
-        req.session.cookie.maxAge = 20 * minute;
-        req.session.cookie.secure = true;
-
-        alog.log(req.session.owner, "User logged in: " +
-          username);
-      }
-
-      // console.log("client_type: " + client_type);
-      if (client_type == "device") {
-        respond(res, {
-          status: "WELCOME",
-          success: true
-        });
-        return;
-
-      } else if (client_type == "webapp") {
-
-        //console.log("Allow-Origin REQH: " + JSON.stringify(req.headers));
-        //console.log("Allow-Origin REQS: " + JSON.stringify(req.session)); // should have owner.
-        //console.log("Allow-Origin REQUEST host: " + req.headers.host);
-
-        respond(res, {
-          "redirectURL": "/app"
-        });
-
-        // Make note on user login
-        userlib.get(req.session.owner, function(error, udoc) {
-
-          if (error) {
-            console.log("owner get error: " + err);
+      if (err) {
+        console.log("Error: " + err.toString());
+        req.session.destroy(function(err) {
+          if (err) {
+            console.log(err);
           } else {
-
-            // TODO: FIXME before enabling, seems to delete user like this...
-            console.log(
-              "TODO: FIXME: updateLastSeen(udoc) destroys the user!"
-            );
-
-            updateLastSeen(udoc);
+            failureResponse(res, 403, "unauthorized");
+            console.log("Owner not found: " + username);
+            return;
           }
-
-        });
-
-        return;
-
-      } else { // other client whan webapp or device
-        respond(res, {
-          status: "OK",
-          success: true
-        });
-      }
-
-      console.log("// TODO: If user-agent contains app/device... (what?)");
-      // TODO: If user-agent contains app/device... (what?)
-      return;
-
-    } else { // password invalid
-      console.log("[LOGIN_INVALID] for " + username);
-      alog.log(req.session.owner, "Password mismatch for: " +
-        username);
-      respond(res, {
-        status: "password_mismatch",
-        success: false
-      });
-      return;
-    }
-
-    if (typeof(req.session.owner) == "undefined") {
-      if (client_type == "device") {
-        return;
-      } else if (client_type == "webapp") {
-        // res.redirect("http://rtm.thinx.cloud:80/"); // redirects browser, not in XHR?
-        respond(res, {
-          "redirectURL": "http://rtm.thinx.cloud:80/app/#/dashboard.html"
         });
         return;
       }
 
-      console.log("login: Flushing session: " + JSON.stringify(
-        req.session));
-      req.session.destroy(function(err) {
-        if (err) {
-          console.log(err);
+      // Find user and match password
+      var all_users = body.rows;
+
+      var user_data = null;
+      for (var index in all_users) {
+        var all_user_data = all_users[index];
+        if (username != all_user_data.key) {
+          continue;
         } else {
+          user_data = all_user_data.value;
+          break;
+        }
+      }
+
+      if (user_data === null) {
+        console.log("No user data, not authorized.");
+        failureResponse(res, 403, "unauthorized");
+        return;
+      }
+
+      // TODO: Second option (direct compare) will deprecate soon.
+      if (password.indexOf(user_data.password) !== -1) {
+
+        // what if there's no session?
+        if (typeof(req.session) !== "undefined") {
+          req.session.owner = user_data.owner;
+          console.log("[OID:" + req.session.owner +
+            "] [NEW_SESSION]");
+          req.session.username = user_data.username;
+
+          var minute = 60 * 1000;
+          //req.session.cookie.httpOnly = true;
+          req.session.cookie.maxAge = 20 * minute;
+          req.session.cookie.secure = true;
+
+          alog.log(req.session.owner, "User logged in: " +
+            username);
+        }
+
+        // console.log("client_type: " + client_type);
+        if (client_type == "device") {
           respond(res, {
-            success: false,
-            status: "no session (owner)"
+            status: "WELCOME",
+            success: true
           });
-          console.log("Not a post request.");
+          return;
+
+        } else if (client_type == "webapp") {
+
+          //console.log("Allow-Origin REQH: " + JSON.stringify(req.headers));
+          //console.log("Allow-Origin REQS: " + JSON.stringify(req.session)); // should have owner.
+          //console.log("Allow-Origin REQUEST host: " + req.headers.host);
+
+          respond(res, {
+            "redirectURL": "/app"
+          });
+
+          // Make note on user login
+          userlib.get(req.session.owner, function(error, udoc) {
+
+            if (error) {
+              console.log("owner get error: " + err);
+            } else {
+
+              // TODO: FIXME before enabling, seems to delete user like this...
+              console.log(
+                "TODO: FIXME: updateLastSeen(udoc) destroys the user!"
+              );
+
+              updateLastSeen(udoc);
+            }
+
+          });
+
+          return;
+
+        } else { // other client whan webapp or device
+          respond(res, {
+            status: "OK",
+            success: true
+          });
+        }
+
+        console.log(
+          "// TODO: If user-agent contains app/device... (what?)");
+        // TODO: If user-agent contains app/device... (what?)
+        return;
+
+      } else { // password invalid
+        console.log("[LOGIN_INVALID] for " + username);
+        alog.log(req.session.owner, "Password mismatch for: " +
+          username);
+        respond(res, {
+          status: "password_mismatch",
+          success: false
+        });
+        return;
+      }
+
+      if (typeof(req.session.owner) == "undefined") {
+        if (client_type == "device") {
+          return;
+        } else if (client_type == "webapp") {
+          // res.redirect("http://rtm.thinx.cloud:80/"); // redirects browser, not in XHR?
+          respond(res, {
+            "redirectURL": "http://rtm.thinx.cloud:80/app/#/dashboard.html"
+          });
           return;
         }
-      });
-    } else {
-      failureResponse(res, 403, "unauthorized");
-    }
-  });
 
+        console.log("login: Flushing session: " + JSON.stringify(
+          req.session));
+        req.session.destroy(function(err) {
+          if (err) {
+            console.log(err);
+          } else {
+            respond(res, {
+              success: false,
+              status: "no session (owner)"
+            });
+            console.log("Not a post request.");
+            return;
+          }
+        });
+      } else {
+        failureResponse(res, 403, "unauthorized");
+      }
+    });
+  });
 
   // Front-end authentication, destroys session on valid authentication
   app.get("/api/logout", function(req, res) {
@@ -1775,7 +1782,8 @@ var ThinxApp = function() {
     stats.week(owner, function(success, body) {
 
       if (!body) {
-        console.log("Statistics for owner " + owner + " not found.");
+        console.log("Statistics for owner " + owner +
+          " not found.");
         respond(res, {
           success: false,
           status: "no_results"
@@ -1808,11 +1816,14 @@ var ThinxApp = function() {
     if (req.session.owner) {
       res.redirect("/");
     } else {
-      console.log("Logout to irigin: " + req.protocol + '://' + req.get(
-        'host'));
-      res.redirect(req.protocol + '://' + req.get('host'));
+      console.log("Logout to irigin: " + req.protocol + "://" + req
+        .get(
+          "host"));
+      res.redirect(req.protocol + "://" + req.get("host"));
     }
   });
+
+  console.log("Setting up server...");
 
   /*
    * HTTP/HTTPS API Server
@@ -1837,7 +1848,8 @@ var ThinxApp = function() {
         key: fs.readFileSync(app_config.ssl_key),
         cert: fs.readFileSync(app_config.ssl_cert)
       };
-      console.log("Starting HTTPS server on " + (serverPort + 1) + "...");
+      console.log("Starting HTTPS server on " + (serverPort + 1) +
+        "...");
       https.createServer(ssl_options, app).listen(serverPort + 1);
     } else {
       console.log(
@@ -1847,6 +1859,8 @@ var ThinxApp = function() {
 
   // Legacy HTTP support for old devices without HTTPS proxy
   http.createServer(app).listen(serverPort);
+
+  console.log("Server listening...");
 
   /*
    * WebSocket Server
@@ -1861,9 +1875,9 @@ var ThinxApp = function() {
 
   var _ws = null;
 
-  wss.on('connection', function connection(ws, req) {
+  wss.on("connection", function connection(ws, req) {
 
-    req.on('error', function(err) {
+    req.on("error", function(err) {
       console.log("WSS REQ ERROR: " + err);
       return;
     });
@@ -1904,13 +1918,14 @@ var ThinxApp = function() {
       }
     }));
 
-  }).on('error', function(err) {
+  }).on("error", function(err) {
     console.log("WSS ERROR: " + err);
     return;
   });
 
   wserver.listen(7444, function listening() {
-    console.log('» WebSocket listening on port %d', wserver.address().port);
+    console.log("» WebSocket listening on port %d", wserver.address()
+      .port);
   });
 
 
@@ -2000,7 +2015,8 @@ var ThinxApp = function() {
         }
 
         if (!body.rows[index].hasOwnProperty("doc")) continue;
-        if (!body.rows[index].doc.hasOwnProperty("owner")) continue;
+        if (!body.rows[index].doc.hasOwnProperty("owner"))
+          continue;
         if (!body.rows[index].doc.hasOwnProperty("udid")) continue;
 
         var owner = body.rows[index].doc.owner;
@@ -2008,10 +2024,10 @@ var ThinxApp = function() {
         var path = blog.pathForDevice(owner, udid);
 
         if (!fs.existsSync(path)) {
-          continue;
-        } else {
 
-          return;
+          continue;
+
+        } else {
 
           console.log("Trying to watch path?: " + path +
             "(This is deprecated and should be replaced with a commit hook.)"
@@ -2022,7 +2038,7 @@ var ThinxApp = function() {
             // TODO: FIXME: There's a plenty of build_ids on this path and somewhere deep in that
             // is the repository workspace. We should use only the new one or re-fetch.
 
-            var workspace = getNewestFolder(path, new RegExp('.*'));
+            var workspace = getNewestFolder(path, new RegExp(".*"));
 
             // TODO: get source details by source identifier from owner
             watcher.watchRepository(workspace, watcher_callback);
