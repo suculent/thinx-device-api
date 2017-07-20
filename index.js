@@ -1986,7 +1986,9 @@ var ThinxApp = function() {
         continue;
       }
 
-      f1_time = fs.statSync(files[i]).mtime.getTime();
+      var filepath = dir + "/" + files[i];
+      console.log("STAT> " + filepath);
+      f1_time = fs.statSync().mtime.getTime();
       f2_time = fs.statSync(newest).mtime.getTime();
       if (f1_time > f2_time)
         newest[i] = files[i];
@@ -2033,12 +2035,14 @@ var ThinxApp = function() {
             "(This is deprecated and should be replaced with a commit hook.)"
           );
 
+
           if (fs.lstatSync(path).isDirectory()) {
 
             // TODO: FIXME: There's a plenty of build_ids on this path and somewhere deep in that
             // is the repository workspace. We should use only the new one or re-fetch.
 
             var workspace = getNewestFolder(path, new RegExp(".*"));
+            console.log("newestFolder: " + workspace);
 
             // TODO: get source details by source identifier from owner
             watcher.watchRepository(workspace, watcher_callback);
