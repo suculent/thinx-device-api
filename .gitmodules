@@ -1,0 +1,16 @@
+[submodule "lua-inspect"]
+	path = tools/lua-inspect
+	url = https://github.com/davidm/lua-inspect.git
+
+[submodule "micropython-docker-build"]
+	path = tools/micropython-docker-build
+	url = https://github.com/suculent/micropython-docker-build.git
+
+[submodule "nodemcu-docker-build"]
+	path = tools/nodemcu-docker-build
+	url = https://github.com/suculent/nodemcu-docker-build.git
+
+[submodule "nodemcu-firmware"]
+        path = tools/nodemcu-firmware
+	url = https://github.com/suculent/nodemcu-firmware.git
+
