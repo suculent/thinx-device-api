@@ -2022,9 +2022,11 @@ var ThinxApp = function() {
 
         var owner = body.rows[index].doc.owner;
         var udid = body.rows[index].doc.udid;
-        var path = watcher.pathForDevice(owner, udid);
+        var path = app_config.project_root + "/data/" + owner + "/" +
+          udid;
 
-        console.log("Setting-up GIT repository watcher on path " + path);
+        console.log("Setting-up GIT repository watcher on device path " +
+          path);
 
         if (!fs.existsSync(path)) {
 
@@ -2032,18 +2034,17 @@ var ThinxApp = function() {
 
         } else {
 
-          console.log("Trying to watch path?: " + path +
-            "(This is deprecated and should be replaced with a commit hook.)"
-          );
-
-
           if (fs.lstatSync(path).isDirectory()) {
 
             // TODO: FIXME: There's a plenty of build_ids on this path and somewhere deep in that
             // is the repository workspace. We should use only the new one or re-fetch.
 
             var workspace = getNewestFolder(path, new RegExp(".*"));
-            console.log("newestFolder: " + workspace);
+
+            console.log("Trying to watch latest folder in: " +
+              workspace +
+              "(This is deprecated and should be replaced with a commit hook.)"
+            );
 
             // TODO: get source details by source identifier from owner
             watcher.watchRepository(workspace, watcher_callback);

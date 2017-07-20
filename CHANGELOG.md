@@ -19,7 +19,7 @@ MQTT is not a priority so far, instead we're trying to focus on firmware update 
 
 ### 16th week
 
-20/7... - Using custom API Key on build; 
+20/7/2018: 1.8.1838 - Using custom API Key on build; fixes and fighting nasty bug; eslint cleanup
 
 19/7/2017: 1.8.1820 - Micropython docker-based builder; NodeMCU docker-based builder; integration; THiNX system library for nodemcu-firmware; pre-building apps to Micropython; MAC address normalization and other UI tweaks; NodeMCU, Micropython or MongooseOS firmware; websocket opens on login
 
