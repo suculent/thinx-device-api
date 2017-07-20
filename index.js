@@ -1981,7 +1981,7 @@ var ThinxApp = function() {
       if (regexp.test(files[i]) === false) {
         continue;
       } else if (one_matched === 0) {
-        newest = files[i];
+        newest = dir + "/" + files[i];
         one_matched = 1;
         continue;
       }
@@ -1995,7 +1995,7 @@ var ThinxApp = function() {
     }
 
     if (newest !== null)
-      return (dir + newest);
+      return (newest);
     return null;
   };
 
