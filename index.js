@@ -1894,6 +1894,11 @@ var ThinxApp = function() {
       }
     }
 
+    messenger.initWithOwner(req.session.owner, function(error, message) {
+      console.log("Messenger init with error " + error + "message:" +
+        message);
+    });
+
     var logtail_callback = function(err) {
       console.log("[index.js] logtail_callback:" + err);
     };
