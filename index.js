@@ -1904,7 +1904,7 @@ var ThinxApp = function() {
         var build_id = object.logtail.build_id;
         var owner_id = object.logtail.owner_id;
         blog.logtail(build_id, owner_id, _ws, logtail_callback);
-        messenger.initWithOwner(owner_id, function(error, message) {
+        messenger.initWithOwner(owner_id, ws, function(error, message) {
           console.log("Messenger init with error " + error +
             "message:" +
             message);
