@@ -1894,11 +1894,6 @@ var ThinxApp = function() {
       }
     }
 
-    messenger.initWithOwner(req.session.owner, function(error, message) {
-      console.log("Messenger init with error " + error + "message:" +
-        message);
-    });
-
     var logtail_callback = function(err) {
       console.log("[index.js] logtail_callback:" + err);
     };
@@ -1909,6 +1904,11 @@ var ThinxApp = function() {
         var build_id = object.logtail.build_id;
         var owner_id = object.logtail.owner_id;
         blog.logtail(build_id, owner_id, _ws, logtail_callback);
+        messenger.initWithOwner(owner_id, function(error, message) {
+          console.log("Messenger init with error " + error +
+            "message:" +
+            message);
+        });
       } else {
         console.log("» Websocketparser said: unknown message");
       }
