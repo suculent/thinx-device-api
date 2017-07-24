@@ -17,6 +17,8 @@ MQTT is not a priority so far, instead we're trying to focus on firmware update 
 
 * Installer, disaster recovery (except for existing DO backup).
 
+- Using platform in device list; integrating MQTT messenger
+
 ### 16th week
 
 20/7/2018: 1.8.1838 - Using custom API Key on build; fixes and fighting nasty bug; eslint cleanup

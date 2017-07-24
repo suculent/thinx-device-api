@@ -37,7 +37,7 @@ As a user I have already many IoT new and/or legacy devices at home. Sometimes I
 
 * ESP8266 (thinx-firmware-esp8266)
 
-* Tested on Wemos D1 Mini, Wemos D1 Mini Pro, Robodyn D1, Robodyn D1 Mini and NodeMCU with Arduino, LUA and Micropython-based core firmwares
+* Tested on Wemos D1 Mini, Wemos D1 Mini Pro, RobotDyn D1, RobotDyn D1 Mini, RobotDyn MEGA WiFi and various NodeMCU (Lolin, AI-THINKER) boards with Arduino, LUA and Micropython-based core firmwares
 
 * Expected: Arduino with networking support, MongooseOS
 
