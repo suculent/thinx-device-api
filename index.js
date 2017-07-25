@@ -1881,8 +1881,6 @@ var ThinxApp = function() {
 
     _ws = ws;
 
-
-
     var cookies = req.headers.cookie;
 
     if (typeof(req.headers.cookie) !== "undefined") {
@@ -1892,7 +1890,7 @@ var ThinxApp = function() {
         //wss.close();
         //return;
       }
-      console.log(JSON.stringify(req.headers));
+      console.log(JSON.stringify(req.session));
     }
 
     // TODO: Fixme, get oid somewhere for this...
