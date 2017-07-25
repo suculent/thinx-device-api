@@ -313,7 +313,7 @@ echo "[THiNX] Log path: $LOG_PATH" >> "${LOG_PATH}"
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
 CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS}"
-echo $CMD >> "${LOG_PATH}"
+echo "Executing Notifier: " $CMD >> "${LOG_PATH}"
 pushd $ORIGIN # go back to application root folder
 RESULT=$(node $THINX_ROOT/notifier.js $CMD)
 echo -e "${RESULT}"
@@ -325,7 +325,8 @@ if [[ $RESULT=="*platformio upgrade*" ]]; then
 		platformio upgrade
 fi
 
+CLEANUP_RESULT=$(bash ./docker-cleanup.sh)
+echo $CLEANUP_RESULT; echo $CLEANUP_RESULT >> "${LOG_PATH}"
+
 MSG="${BUILD_DATE} Done."
 echo $MSG; echo $MSG >> "${LOG_PATH}"
-
-set -e
