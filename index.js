@@ -1913,6 +1913,7 @@ var ThinxApp = function() {
       }
     }
 
+    /*
     // TODO: Fixme, get oid somewhere for this...
     messenger.initWithOwner(
       "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
@@ -1921,8 +1922,9 @@ var ThinxApp = function() {
         message) {
         console.log("Messenger init with error " + error +
           "message:" +
-          message);
+          JSON.stringify(message));
       });
+      */
 
     var logtail_callback = function(err) {
       console.log("[index.js] logtail_callback:" + err);
@@ -1930,16 +1932,20 @@ var ThinxApp = function() {
 
     ws.on("message", function incoming(message) {
       var object = JSON.parse(message);
+      console.log("WS Message: " + message);
       if (typeof(object.logtail) !== "undefined") {
         var build_id = object.logtail.build_id;
         var owner_id = object.logtail.owner_id;
         blog.logtail(build_id, owner_id, _ws, logtail_callback);
+
         messenger.initWithOwner(owner_id, _ws, function(error,
           message) {
-          console.log("Messenger init with error " + error +
+          console.log("Messenger init on message with error " +
+            error +
             "message:" +
-            message);
+            JSON.stringify(message));
         });
+
       } else {
         console.log("» Websocketparser said: unknown message");
       }
@@ -2022,7 +2028,7 @@ var ThinxApp = function() {
       }
 
       var filepath = dir + "/" + files[i];
-      console.log("STAT> " + filepath);
+      //console.log("STAT> " + filepath);
       f1_time = fs.statSync(filepath).mtime.getTime();
       f2_time = fs.statSync(newest).mtime.getTime();
       if (f1_time > f2_time)
