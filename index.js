@@ -1687,7 +1687,8 @@ var ThinxApp = function() {
                   console.log("Last-seen update failed: " +
                     err);
                 } else {
-                  alog.log(owner, "Last seen updated.");
+                  alog.log(req.session.owner,
+                    "Last seen updated.");
                 }
               });
 
