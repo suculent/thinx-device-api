@@ -1,6 +1,6 @@
 {
   "_id": "_design/builds",
-  "_rev": "9-e129b044e49e893bd2f3c93fa822b737",
+  "_rev": "26-ed89b1f09ed2c2d2c5e17a160e6a77a0",
   "language": "javascript",
   "views": {
     "builds_by_build_id": {
@@ -11,6 +11,6 @@
     }
   },
   "updates": {
-    "delete_expired": "function (doc, req) { if (doc.date < req.query.mindate) { doc._deleted: true; return [doc, \"deleted\"] }}"
+    "delete_expired": "function (doc, req) { if (doc.timestamp < req.query.mindate) { doc._deleted = true; return [doc, 'deleted']; } else return [doc, doc._id] }"
   }
 }

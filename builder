@@ -325,7 +325,7 @@ if [[ $RESULT=="*platformio upgrade*" ]]; then
 		platformio upgrade
 fi
 
-CLEANUP_RESULT=$(bash ./docker-cleanup.sh)
+CLEANUP_RESULT=$(bash ./couch_cleanup.sh)
 echo $CLEANUP_RESULT; echo $CLEANUP_RESULT >> "${LOG_PATH}"
 
 MSG="${BUILD_DATE} Done."
