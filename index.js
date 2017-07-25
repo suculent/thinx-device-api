@@ -1914,7 +1914,8 @@ var ThinxApp = function() {
     }
 
 
-    // TODO: Fixme, get oid somewhere for this...
+    /*
+    // FIXED, got oid somewhere else for this...
     messenger.initWithOwner(
       "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
       _ws,
@@ -1923,7 +1924,7 @@ var ThinxApp = function() {
         console.log("Messenger init with success " + success +
           "message:" +
           JSON.stringify(message));
-      });
+      });*/
 
 
     var logtail_callback = function(err) {
