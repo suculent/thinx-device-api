@@ -1881,6 +1881,8 @@ var ThinxApp = function() {
 
     _ws = ws;
 
+
+
     var cookies = req.headers.cookie;
 
     if (typeof(req.headers.cookie) !== "undefined") {
@@ -1890,7 +1892,19 @@ var ThinxApp = function() {
         //wss.close();
         //return;
       }
+      console.log(JSON.stringify(req.headers));
     }
+
+    // TODO: Fixme, get oid somewhere for this...
+    messenger.initWithOwner(
+      "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
+      _ws,
+      function(error,
+        message) {
+        console.log("Messenger init with error " + error +
+          "message:" +
+          message);
+      });
 
     var logtail_callback = function(err) {
       console.log("[index.js] logtail_callback:" + err);
@@ -1902,7 +1916,8 @@ var ThinxApp = function() {
         var build_id = object.logtail.build_id;
         var owner_id = object.logtail.owner_id;
         blog.logtail(build_id, owner_id, _ws, logtail_callback);
-        messenger.initWithOwner(owner_id, ws, function(error, message) {
+        messenger.initWithOwner(owner_id, _ws, function(error,
+          message) {
           console.log("Messenger init with error " + error +
             "message:" +
             message);
