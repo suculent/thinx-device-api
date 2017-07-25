@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source ./infer # utility functions
+
 set +e
 
 echo
