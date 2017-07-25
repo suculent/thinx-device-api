@@ -16,7 +16,7 @@
 
 ### 17th week
 
-25/7/2017: 1.8.1857 - Finally working couchdb design document to delete old build-logs (after 7 days) and audit-logs (after 1 month); finally working MQTT subscribe/callback for Arduino-C/Platform.io; integrated MQTT and Websocket notifications
+25/7/2017: 1.9.1903 - Finally working couchdb design document to delete old build-logs (after 7 days) and audit-logs (after 1 month); finally working MQTT subscribe/callback for Arduino-C/Platform.io; integrated MQTT and Websocket notifications
 
 24/7/2017: Using platform in device list; integrating MQTT messenger
 
