@@ -4,30 +4,25 @@
 
 **ROADMAP**
 
-The device registration and checkin is working, firmwares can be provided using OTT, repositories are fetched and built, devices are notified, RSA keys stored but not tested, there's even support for environment variables and building custom firmwares bakedin.
-
-MQTT is not a priority so far, instead we're trying to focus on firmware update side. It seems to be almost done.
-
 * Update support (LUA/uPy/mos) for file-based dumb firmwares = allow file-based upload where applicable
-* Make devices respond/receive MQTT messages (LUA works, next is Micropython and Platformio/Arduino/C++ which currently fails to receive callback)
+* Make devices respond/receive MQTT messages (LUA works, next is Micropython and Platformio/Arduino/C++)
 * Optionally migrate sources when transferring device (requires extracting sources to separate db).
 * Improve statistics (daily parse limiting)
+* Actionable Notifications (send text/boolean responses to devices using MQTT directly from the web)
 
 **LONG-TERM ROADMAP**
 
 * Installer, disaster recovery (except for existing DO backup).
 
-- Using platform in device list; integrating MQTT messenger
-
 ### 17th week
 
-25/7/2018: 1.8.1857 - Finally working couchdb design document to delete old build-logs (after 7 days) and audit-logs (after 1 month); finally working MQTT subscribe/callback for Arduino-C/Platform.io
+25/7/2017: 1.8.1857 - Finally working couchdb design document to delete old build-logs (after 7 days) and audit-logs (after 1 month); finally working MQTT subscribe/callback for Arduino-C/Platform.io; integrated MQTT and Websocket notifications
 
-24/7/2018: T.B.D.
+24/7/2017: Using platform in device list; integrating MQTT messenger
 
 ### 16th week
 
-20/7/2018: 1.8.1838 - Using custom API Key on build; fixes and fighting nasty bug; eslint cleanup
+20/7/2017: 1.8.1838 - Using custom API Key on build; fixes and fighting nasty bug; eslint cleanup
 
 19/7/2017: 1.8.1820 - Micropython docker-based builder; NodeMCU docker-based builder; integration; THiNX system library for nodemcu-firmware; pre-building apps to Micropython; MAC address normalization and other UI tweaks; NodeMCU, Micropython or MongooseOS firmware; websocket opens on login
 
