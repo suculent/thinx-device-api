@@ -1909,11 +1909,11 @@ var ThinxApp = function() {
         //return;
       }
       if (typeof(req.session) !== "undefined") {
-        console.log(JSON.stringify(req.session));
+        console.log("Session: " + JSON.stringify(req.session));
       }
     }
 
-    /*
+
     // TODO: Fixme, get oid somewhere for this...
     messenger.initWithOwner(
       "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
@@ -1923,7 +1923,7 @@ var ThinxApp = function() {
         console.log("Messenger init with error " + error +
           "message:" +
           JSON.stringify(message));
-      });*/
+      });
 
 
     var logtail_callback = function(err) {
