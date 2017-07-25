@@ -19,7 +19,11 @@ MQTT is not a priority so far, instead we're trying to focus on firmware update 
 
 - Using platform in device list; integrating MQTT messenger
 
-25/7/2018: - Finally working couchdb design document to delete old build-logs (after 7 days) and audit-logs (after 1 month, up to 3 months max); finally working MQTT subscribe/callback for Arduino C/PIO
+### 17th week
+
+25/7/2018: 1.8.1857 - Finally working couchdb design document to delete old build-logs (after 7 days) and audit-logs (after 1 month); finally working MQTT subscribe/callback for Arduino-C/Platform.io
+
+24/7/2018: T.B.D.
 
 ### 16th week
 
