@@ -5,10 +5,10 @@ THINX_ROOT=$(pwd)
 source "$THINX_ROOT/infer"
 
 # Sample data for testing only, should return error missing JSON
-JSON='builder.thinx.json'
+#JSON='builder.thinx.json'
 
 # Sample repositories for testing only, should return error missing workdir
-WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-ino
+#WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-ino
 #WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-mos
 #WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-lua
 #WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-pio
@@ -51,6 +51,8 @@ generate_thinx_file ${WORKDIR} ${JSON}
 echo
 
 PLATFORM=$(infer_platform $WORKDIR)
+echo "platform 4 linter: ${PLATFORM}"
 PLATFORM_LANG=$(language_for_platform $PLATFORM)
+echo "language 4 linter: ${PLATFORM_LANG}"
 
 bash ./linter --language=${PLATFORM_LANG} --workdir=${WORKDIR}
