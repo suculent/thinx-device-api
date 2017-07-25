@@ -1913,7 +1913,7 @@ var ThinxApp = function() {
       }
     }
 
-    /*
+
     // TODO: Fixme, get oid somewhere for this...
     messenger.initWithOwner(
       "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
@@ -1924,7 +1924,7 @@ var ThinxApp = function() {
           "message:" +
           JSON.stringify(message));
       });
-      */
+
 
     var logtail_callback = function(err) {
       console.log("[index.js] logtail_callback:" + err);
