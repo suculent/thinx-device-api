@@ -1576,21 +1576,14 @@ var ThinxApp = function() {
     }
 
     var updateLastSeen = function(doc) {
-      userlib.destroy(doc._id, doc._rev, function(err, result) {
-        if (!error) {
-          delete doc._rev;
-          doc.last_seen = new Date();
-          userlib.insert(doc, doc._id, function(err, body, header) {
-            if (err) {
-              console.log(err);
-              alog.log(owner, "Last seen update failed.");
-              callback(false, "last_seen_failed");
-              return;
-            } else {
-              alog.log(owner, "Last seen updated.");
-              callback(true, doc[update_key]);
-            }
-          });
+
+      userlib.atomic("users", "checkin", doc._id, {
+        last_seen: new Date()
+      }, function(error, response) {
+        if (err) {
+          console.log("Last-seen update failed: " + err);
+        } else {
+          alog.log(owner, "Last seen updated.");
         }
       });
     };
@@ -1687,13 +1680,18 @@ var ThinxApp = function() {
               console.log("owner get error: " + err);
             } else {
 
-              // TODO: FIXME before enabling, seems to delete user like this...
-              //console.log(
-              //  "TODO: FIXME: updateLastSeen(udoc) destroys the user!"
-              //);
-              //updateLastSeen(udoc);
-            }
+              userlib.atomic("users", "checkin", udoc._id, {
+                last_seen: new Date()
+              }, function(error, response) {
+                if (err) {
+                  console.log("Last-seen update failed: " +
+                    err);
+                } else {
+                  alog.log(owner, "Last seen updated.");
+                }
+              });
 
+            }
           });
 
           return;
