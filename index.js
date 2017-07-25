@@ -1864,6 +1864,23 @@ var ThinxApp = function() {
    */
 
   var wsapp = express();
+
+  wsapp.use(session({
+    secret: session_config.secret,
+    store: new redisStore({
+      host: "localhost",
+      port: 6379,
+      client: client
+    }),
+    cookie: {
+      expires: hour
+    },
+    name: "x-thx-session",
+    resave: false,
+    rolling: true,
+    saveUninitialized: true,
+  }));
+
   var wserver = https.createServer(ssl_options, wsapp);
   var wss = new WebSocket.Server({
     port: socketPort,
@@ -1890,7 +1907,9 @@ var ThinxApp = function() {
         //wss.close();
         //return;
       }
-      console.log(JSON.stringify(req.session));
+      if (typeof(req.session) !== "undefined") {
+        console.log(JSON.stringify(req.session));
+      }
     }
 
     // TODO: Fixme, get oid somewhere for this...
