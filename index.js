@@ -2076,13 +2076,6 @@ var ThinxApp = function() {
             // is the repository workspace. We should use only the new one or re-fetch.
 
             var workspace = getNewestFolder(path, new RegExp(".*"));
-
-            console.log("Trying to watch latest folder in: " +
-              workspace +
-              "(This is deprecated and should be replaced with a commit hook.)"
-            );
-
-            // TODO: get source details by source identifier from owner
             watcher.watchRepository(workspace, watcher_callback);
 
           } else {
