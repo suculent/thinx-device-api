@@ -171,14 +171,14 @@ echo "Seaching THiNX-File in ${OWNER_PATH}..." >> "${LOG_PATH}"
 
 echo $(pwd)
 
-THINX_FILE="$(find ${OWNER_PATH} | grep '/thinx.h')"
-
-if [[ -z $THINX_FILE ]]; then
-	echo "No THiNX-File found!" >> "${LOG_PATH}"
-	exit 1 # will deprecate on modularization for more platforms
-else
-	echo "Found THiNX-File: ${THINX_FILE}" >> "${LOG_PATH}"
-fi
+#THINX_FILE=$( find ${OWNER_PATH} | grep "/thinx.h" )
+#
+#if [[ -z $THINX_FILE ]]; then
+#	echo "No THiNX-File found!" >> "${LOG_PATH}"
+#	exit 1 # will deprecate on modularization for more platforms
+#else
+#	echo "Found THiNX-File: ${THINX_FILE}" >> "${LOG_PATH}"
+#fi
 
 THINX_CLOUD_URL="rtm.thinx.cloud"
 THINX_MQTT_URL="${THINX_CLOUD_URL}"
