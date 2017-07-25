@@ -1918,9 +1918,9 @@ var ThinxApp = function() {
     messenger.initWithOwner(
       "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
       _ws,
-      function(error,
+      function(success,
         message) {
-        console.log("Messenger init with error " + error +
+        console.log("Messenger init with success " + success +
           "message:" +
           JSON.stringify(message));
       });
