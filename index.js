@@ -2012,14 +2012,6 @@ var ThinxApp = function() {
       }
     });
 
-    ws.send(JSON.stringify({
-      "notification": {
-        "title": "Notification",
-        "body": "This is a sample notification",
-        "type": "info"
-      }
-    }));
-
   }).on("error", function(err) {
     console.log("WSS ERROR: " + err);
     return;
