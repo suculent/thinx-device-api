@@ -1808,6 +1808,57 @@ var ThinxApp = function() {
     });
   });
 
+  /*
+   * Actionable Notifications
+   */
+
+  /* Respond to actionable notification */
+  app.post("/api/device/notification", function(req, res) {
+
+    if (!validateSecureGETRequest(req)) return;
+    if (!validateSession(req, res)) return;
+
+    var owner = req.session.owner;
+    var device = req.body.udid;
+    var nid = "nid:" + device;
+    var reply = req.body.reply;
+
+    if (typeof(device) === "undefined") {
+      respond(res, {
+        success: false,
+        status: "missing_udid"
+      });
+      return;
+    }
+
+    if (typeof(nid) === "undefined") {
+      respond(res, {
+        success: false,
+        status: "missing_nid"
+      });
+      return;
+    }
+
+    if (typeof(nid) === "undefined") {
+      respond(res, {
+        success: false,
+        status: "missing_reply"
+      });
+      return;
+    }
+
+    messenger.publish(owner, device, {
+      nid: nid,
+      reply: reply
+    });
+
+
+  });
+
+  /*
+   * Root
+   */
+
   /** Tested with: !device_register.spec.js` */
   app.get("/", function(req, res) {
     console.log("/ called with owner: " + req.session.owner);
