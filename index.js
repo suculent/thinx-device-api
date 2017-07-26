@@ -1995,12 +1995,16 @@ var ThinxApp = function() {
 
       } else if (typeof(object.init) !== "undefined") {
 
-        messenger.initWithOwner(object.init, _ws, function(error,
+        messenger.initWithOwner(object.init, _ws, function(success,
           message) {
-          console.log("Messenger init on message with error " +
-            error +
-            "message:" +
-            JSON.stringify(message));
+          if (!success) {
+            console.log("Messenger init on message with success " +
+              error +
+              "message: " +
+              JSON.stringify(message));
+          } else {
+            console.log("Messenger init success.");
+          }
         });
 
       } else {

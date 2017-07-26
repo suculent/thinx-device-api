@@ -340,3 +340,6 @@ echo $CLEANUP_RESULT; echo $CLEANUP_RESULT >> "${LOG_PATH}"
 
 MSG="${BUILD_DATE} Done."
 echo $MSG; echo $MSG >> "${LOG_PATH}"
+
+# copy whole log output to console for easier debugging
+cat "${LOG_PATH}"
