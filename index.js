@@ -48,10 +48,7 @@ var ThinxApp = function() {
   if (process.env.LOGNAME == "root") {
     console.log("Starting in production mode...");
     app_config = require("./conf/config.json");
-    console.log(JSON.stringify(app_config));
   }
-
-  console.log("Setting up variables...");
 
   var client_user_agent = app_config.client_user_agent;
   var db = app_config.database_uri;
@@ -200,8 +197,6 @@ var ThinxApp = function() {
 
   // Express App
 
-  console.log("Setting up Express Session...");
-
   var express = require("express");
   var session = require("express-session");
 
@@ -254,8 +249,6 @@ var ThinxApp = function() {
     }
   });
   */
-
-  console.log("Setting up router...");
 
   app.all("/*", function(req, res, next) {
 
@@ -1861,18 +1854,16 @@ var ThinxApp = function() {
 
   /** Tested with: !device_register.spec.js` */
   app.get("/", function(req, res) {
-    console.log("/ called with owner: " + req.session.owner);
+    var protocol = req.protocol;
+    var host = req.get("host");
     if (req.session.owner) {
+      console.log("/ called with owner: " + req.session.owner);
       res.redirect("/");
     } else {
-      console.log("Logout to irigin: " + req.protocol + "://" + req
-        .get(
-          "host"));
-      res.redirect(req.protocol + "://" + req.get("host"));
+      console.log("Redirecting to: " + protocol + "://" + host);
+      res.redirect(protocol + "://" + host);
     }
   });
-
-  console.log("Setting up server...");
 
   /*
    * HTTP/HTTPS API Server
