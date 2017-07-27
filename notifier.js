@@ -328,7 +328,6 @@ devicelib.get(udid, function(err, doc) {
 
     }
 
-    sleep(5);
     process.exit(0);
 
   });
