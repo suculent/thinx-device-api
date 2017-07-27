@@ -10,9 +10,19 @@ IoT Device Management Server running on node.js.
 
 ## The Purpose
 
-As a user I have already many IoT new and/or legacy devices at home. Sometimes I need to change WiFi credentials on a switch that is mounted on a ceiling. Sometimes I want to swap whole firmware for new one, but not always I want to rewrite working legacy LUA code to Arduino C. That's why we have decided to create THiNX.
+> Update IoT device by pushing to a git repository. Swap operating system for another over-the-air. Migrate multiple devices at once between WiFi networks.
 
-> Update your IoT device by pushing to a git repository. Swap your operating system for another over-the-air. Migrate multiple devices at once between WiFi networks.
+As a user I have already many IoT new and/or legacy devices at home and new platforms are coming every day.
+
+Sometimes we need to change WiFi credentials on a wireless switch mounted on a ceiling. The other day I we want to swap whole firmware for new one, but not always to rewrite working legacy LUA or Micropython code to Platformio.
+
+It also covers other use-cases like remotely managing devices for customers with automatic updates for headless devices, or semi-automatic (with user consent after build and tests succed).
+
+> That's why we have decided to create the uber-platform: THiNX.
+
+Currently we're capable of building firmwares for Platformio, NodeMCU and Micropython (and simple Arduino firmware is also coming soon)
+
+* Remote Things Management console for monitoring devices, attaching source code and managing updates.
 
 * Implements Continuous Integration practices to update device apps/configurations from a GitHub repository using commit hooks.
 
@@ -22,7 +32,7 @@ As a user I have already many IoT new and/or legacy devices at home. Sometimes I
 
 * API is a back-end data provider (security agent) for RTM Admin Console Application.
 
-* Provides control to a build server that pushes new firmware versions to client applications (FCM push) and devices (MQTT).
+* Provides control to a dockerized build servers and pushes new firmware versions to client applications (FCM push) and devices (MQTT).
 
 * Provides HTTP-to-HTTPS proxy to secure legacy IoT devices that are not capable of TLS and/or AES-level encryption.
 
@@ -39,9 +49,9 @@ As a user I have already many IoT new and/or legacy devices at home. Sometimes I
 
 * Tested on Wemos D1 Mini, Wemos D1 Mini Pro, RobotDyn D1, RobotDyn D1 Mini, RobotDyn MEGA WiFi and various NodeMCU (Lolin, AI-THINKER) boards with Arduino, LUA and Micropython-based core firmwares
 
-* Expected: Arduino with networking support, MongooseOS
+* Expected: Arduino with networking support, MongooseOS-based devices...
 
-THiNX platform agent repositories:
+THiNX Platform Library repositories:
 
 [Platform.io](https://github.com/suculent/thinx-firmware-esp8266-pio)
 
@@ -73,16 +83,19 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 
 ## Prerequisites
 
-* Linux Server (min. 2 GB RAM)
+* Linux Server (min. 2 GB RAM, 32GB SSD)
+
+## Port mapping
+
 * API runs on HTTP port 7442 (possibly HTTPS 7443) and 7447 (websocket)
 * MQTT runs on HTTP port 1883 (possibly HTTPS 8883)
 * Admin runs on HTTP/HTTPS port (80/443)
-* GitHub commit hooks are listened to on port 9001
-
+* GitHub commit hooks are listened to on port 9000, 9001
+* Optional monitoring services (Keymetrics, TrueSight) may run on other ports as well...
 
 ## Installation
 
-Ree RTM.md for all details.
+Ree RTM.md for all details. Currently not public until safely dockerized.
 
 ### GitHub Webhook support
 
