@@ -1,5 +1,5 @@
 {
-  "name" : "node.js",
-  "language" : "javascript",
-  "header" : "thinx.json"
+  "name": "nodejs",
+  "language": "javascript",
+  "header": "thinx.json"
 }
