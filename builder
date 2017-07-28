@@ -216,8 +216,8 @@ echo "Language name: ${LANGUAGE_NAME}"
 
 echo "[builder.sh] Building for platform ${PLATFORM} in language ${LANGUAGE_NAME}..."
 
-SHA=0
-OUTFILE=null
+SHA="0x00000000"
+OUTFILE="build.failed"
 
 case $PLATFORM in
 
