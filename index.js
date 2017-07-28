@@ -1807,7 +1807,7 @@ var ThinxApp = function() {
   /* Respond to actionable notification */
   app.post("/api/device/notification", function(req, res) {
 
-    if (!validateSecureGETRequest(req)) return;
+    if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
