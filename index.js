@@ -1520,8 +1520,6 @@ var ThinxApp = function() {
   // Front-end authentication, returns session on valid authentication
   app.post("/api/login", function(req, res) {
 
-    console.log(JSON.stringify(req.body)); // logging only req returns circular-structure-error
-
     var client_type = "webapp";
     var ua = req.headers["user-agent"];
     var validity = ua.indexOf(client_user_agent);
@@ -1976,7 +1974,7 @@ var ThinxApp = function() {
     ws.on("message", function incoming(message) {
 
       var object = JSON.parse(message);
-      console.log("WS Message: " + message);
+      //console.log("WS Message: " + message);
 
       if (typeof(object.logtail) !== "undefined") {
 
@@ -1993,8 +1991,6 @@ var ThinxApp = function() {
               error +
               "message: " +
               JSON.stringify(message));
-          } else {
-            console.log("Messenger init success.");
           }
         });
 
