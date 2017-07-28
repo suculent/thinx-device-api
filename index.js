@@ -1290,8 +1290,6 @@ var ThinxApp = function() {
   /* Returns specific build log for owner */
   app.post("/api/user/logs/tail", function(req, res) {
 
-    // TODO: Time-out after about 60 seconds of no activity...
-
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
 
@@ -1311,7 +1309,6 @@ var ThinxApp = function() {
 
     var error_callback = function(err) {
       console.log(err);
-      // TODO: XHR Response implementation missing
       res.set("Connection", "close");
       respond(res, err);
     };
@@ -1695,9 +1692,6 @@ var ThinxApp = function() {
           });
         }
 
-        console.log(
-          "// TODO: If user-agent contains app/device... (what?)");
-        // TODO: If user-agent contains app/device... (what?)
         return;
 
       } else { // password invalid

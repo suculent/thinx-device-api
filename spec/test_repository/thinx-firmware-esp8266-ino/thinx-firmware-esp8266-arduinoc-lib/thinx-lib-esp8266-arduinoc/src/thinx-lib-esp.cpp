@@ -365,10 +365,6 @@ void THiNX::start_mqtt() {
   int willQos = 0;
   bool willRetain = false;
 
-  // TODO: Reimplement
-  // if (thx.mqtt_client->connect( id, user, pass, willTopic, willQos, willRetain, thx_disconnected_response.c_str()))
-  // FIXME: willTopic, willQos, willRetain, thx_disconnected_response.c_str()
-
   if (mqtt_client->connect(MQTT::Connect(id).set_auth(user, pass))) {
 
     mqtt_client->set_callback([this](const MQTT::Publish &pub) {
@@ -537,7 +533,7 @@ void THiNX::saveDeviceInfo()
   } else {
     Serial.println("*TH: Cannot save configuration, formatting SPIFFS...");
     SPIFFS.format();
-    Serial.println("*TH: Trying to save again..."); // TODO: visual feedback
+    Serial.println("*TH: Trying to save again...");
     f = SPIFFS.open("/thinx.cfg", "w");
     if (f) {
       saveDeviceInfo();

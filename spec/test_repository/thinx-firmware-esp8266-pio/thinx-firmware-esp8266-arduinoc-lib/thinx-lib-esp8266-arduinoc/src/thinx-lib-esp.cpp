@@ -153,7 +153,7 @@ void THiNX::esp_update(String url) {
 
 void THiNX::thinx_parse(String payload) {
 
-  // TODO: Should parse response only for this device_id (which must be internal and not a mac)
+  // TODO: Should parse response only for this udid
   int startIndex = payload.indexOf("{\"registration\"") ;
   int endIndex = payload.indexOf("}}") + 2;
 
@@ -226,7 +226,7 @@ void THiNX::thinx_parse(String payload) {
 
     String mac = registration["mac"];
     Serial.println(String("mac: ") + mac);
-    // TODO: must be this or ANY
+    // TODO: must be this (ANY will not be supported for security reasons)
 
     String commit = registration["commit"];
     Serial.println(String("commit: ") + commit);
