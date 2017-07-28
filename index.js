@@ -319,8 +319,7 @@ var ThinxApp = function() {
     // log owner ID and request method to application log only
     if ((typeof(req.session) !== "undefined") && (typeof(req.session
         .owner) !== "undefined")) {
-      console.log("[OID:" + req.session.owner + "] ", req.method +
-        " : " + req.url);
+      // console.log("[OID:" + req.session.owner + "] ", req.method + " : " + req.url);
     } else {
       // Skip logging for monitoring sites
       if (client.indexOf("uptimerobot")) {
