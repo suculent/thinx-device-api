@@ -88,6 +88,22 @@ function generate_thinx_file
 	PLATFORM_NAME=$(platform_name $PLATFORM)
 	LANGUAGE=$(language_for_platform $PLATFORM)
 	LANGUAGE_NAME=$(language_name $LANGUAGE)
+
+	if [[ -z ${BUILDFILE} ]]; then
+		echo "BUILDFILE not specified."
+		exit 3
+	fi
+
+	if [[ -z ${LANGUAGE} ]]; then
+		echo "LANGUAGE not inferred correctly."
+		exit 3
+	fi
+
+	if [[ -z ${WORKDIR} ]]; then
+		echo "WORKDIR not specified."
+		exit 3
+	fi
+
 	thinx_file_from_json $BUILDFILE $LANGUAGE $WORKDIR
 }
 
@@ -115,6 +131,20 @@ function thinx_file_from_json
 
 		# for JavaScript will just provide the JSON as-is...
 		if [[ "$PLATFORM" == "mongoose" ]]; then
+			echo "Pre-building JSON for MongooseOS..."
+			VALUE2="${BUILDFILE/\%\%LANGUAGE_NAME\%\%/$LANGUAGE_NAME}"
+			VALUE2=${VALUE2/\%\%THINX_PLATFORM\%\%/$PLATFORM}
+			echo $VALUE2 > "$OUTFILE"
+			echo $VALUE2
+			cat $OUTFILE
+			exit 0
+		fi
+
+		# Micropython could use pre-build file but we'll go with JSON until
+		# the firmware will be wholy built. Then pre-built file makes sense
+		# from security point of view. Until then, makes no difference.
+		if [[ "$PLATFORM" == "micropython" ]]; then
+			echo "Pre-building JSON for Micropython..."
 			VALUE2="${BUILDFILE/\%\%LANGUAGE_NAME\%\%/$LANGUAGE_NAME}"
 			VALUE2=${VALUE2/\%\%THINX_PLATFORM\%\%/$PLATFORM}
 			echo $VALUE2 > "$OUTFILE"
