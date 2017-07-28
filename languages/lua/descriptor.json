@@ -1,5 +1,6 @@
 {
   "name": "LUA",
+  "extensions": ["lua"],
   "DEFINE": "",
   "ASSIGN": " = ",
   "COMMENT": "--",

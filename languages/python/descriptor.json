@@ -1,5 +1,6 @@
 {
   "name": "Micropython",
+  "extensions": ["py"],
   "DEFINE": "",
   "ASSIGN": " = ",
   "COMMENT": "#",

@@ -1,5 +1,6 @@
 {
   "name": "JavaScript",
+  "extensions": ["js"],
   "DEFINE": "var ",
   "ASSIGN": " = ",
   "COMMENT": "//",
