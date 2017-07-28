@@ -1048,7 +1048,8 @@ var ThinxApp = function() {
 
   function validateSecureGETRequest(req, res) {
     if (req.method != "GET") {
-      console.log("validateSecure: Not a get request.");
+      console.log("validateSecure: Not a get request." + JSON.stringify(req.query
+        .params));
       req.session.destroy(function(err) {
         if (err) {
           console.log(err);
