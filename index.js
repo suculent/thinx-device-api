@@ -951,15 +951,15 @@ var ThinxApp = function() {
     validateRequest(req, res);
     res.set("Connection", "close");
 
+    // Device will create OTT request and fetch firmware from given OTT-URL
     if ((typeof(req.body.use) !== "undefined") && (req.body.use == "ott")) {
-
       device.ott_request(req.owner, req.body, req.headers.authentication,
         function(success, response) {
           respond(res, response);
         });
 
+      // Device will fetch firmware/files now (wrapped as JSON or in binary, depending on type (firmware/file))
     } else {
-
       device.firmware(req.body, req.headers.authentication,
         function(success, response) {
           respond(res, response);
