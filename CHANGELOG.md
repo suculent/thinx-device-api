@@ -1,5 +1,9 @@
 # ☢ thinx-device-api change log
 
+### 18th week
+
+1/8/2017: Working on multi-file upload and multi-platform support on firmware update in order to align with Micropython/NodeMCU systems. 
+
 ### 17th week
 
 27/7/2017: 0.9.1921 - Working on state of union for Micropython/LUA/Arduino/Platformio Firmware Libraries. Extracted shared code for Arduino /Platformio in their respective repositories. Implemented file updates and messaging both on LUA/Micropython side (not tested so far) pinning version 0.9 as current alpha.
