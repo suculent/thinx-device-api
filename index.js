@@ -107,7 +107,7 @@ var ThinxApp = function() {
     prefix = fs.readFileSync(app_config.project_root + '/conf/.thx_prefix');
     prefix = prefix + "_";
   } catch (e) {
-    console.log(e);
+    //console.log(e);
   }
 
   function initDatabases() {

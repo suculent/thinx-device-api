@@ -111,7 +111,7 @@ try {
   prefix = fs.readFileSync(app_config.project_root + '/conf/.thx_prefix');
   prefix = prefix + "_";
 } catch (e) {
-  console.log(e);
+  //console.log(e);
 }
 nano.db.create(prefix + "managed_builds", function(err, body, header) {
   if (err) {
