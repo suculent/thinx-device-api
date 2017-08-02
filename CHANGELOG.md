@@ -2,6 +2,8 @@
 
 ### 18th week
 
+2/8/2017: Dockerized install support
+
 1/8/2017: Working on multi-file upload and multi-platform support on firmware update in order to align with Micropython/NodeMCU systems. 
 
 ### 17th week
