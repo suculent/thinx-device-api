@@ -106,8 +106,13 @@ if (typeof(sha) === "undefined" || sha === "") {
 }
 
 // Initially creates DB, otherwise fails silently.
-var prefix = fs.readFileSync('./conf/.thx_prefix') ? fs.readFileSync(
-  './conf/.thx_prefix') + "_" : "";
+var prefix = "";
+try {
+  prefix = fs.readFileSync(app_config.project_root + '/conf/.thx_prefix');
+  prefix = prefix + "_";
+} catch (e) {
+  console.log(e);
+}
 nano.db.create(prefix + "managed_builds", function(err, body, header) {
   if (err) {
     if (err ==

@@ -102,8 +102,13 @@ var ThinxApp = function() {
    * Databases
    */
 
-  var prefix = fs.readFileSync('./conf/.thx_prefix') ? fs.readFileSync(
-    './conf/.thx_prefix') + "_" : "";
+  var prefix = "";
+  try {
+    prefix = fs.readFileSync(app_config.project_root + '/conf/.thx_prefix');
+    prefix = prefix + "_";
+  } catch (e) {
+    console.log(e);
+  }
 
   function initDatabases() {
 
