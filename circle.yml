@@ -29,7 +29,6 @@ test:
   commands:
     - bash ./03-test.sh
   post:
-    - curl -sSL https://download.sourceclear.com/ci.sh | bash
     - bash ./01-analyze.sh
 
 ## Customize deployment commands
