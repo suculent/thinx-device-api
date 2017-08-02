@@ -19,10 +19,10 @@ var sha256 = require("sha256");
 
 var db = config.database_uri;
 
-var userlib = require("nano")(db).use("managed_users");
-var buildlib = require("nano")(db).use("managed_builds");
-var loglib = require("nano")(db).use("managed_logs");
-var devicelib = require("nano")(db).use("managed_devices");
+var userlib = require("nano")(db).use(prefix + "managed_users");
+var buildlib = require("nano")(db).use(prefix + "managed_builds");
+var loglib = require("nano")(db).use(prefix + "managed_logs");
+var devicelib = require("nano")(db).use(prefix + "managed_devices");
 
 var client_user_agent = config.client_user_agent;
 var slack_webhook = config.slack_webhook;
@@ -106,7 +106,9 @@ if (typeof(sha) === "undefined" || sha === "") {
 }
 
 // Initially creates DB, otherwise fails silently.
-nano.db.create("managed_builds", function(err, body, header) {
+var prefix = fs.readFileSync('./conf/.thx_prefix') ? fs.readFileSync(
+  './conf/.thx_prefix') + "_" : "";
+nano.db.create(prefix + "managed_builds", function(err, body, header) {
   if (err) {
     if (err ==
       "Error: The build database could not be created, the file already exists."

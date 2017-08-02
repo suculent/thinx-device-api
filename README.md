@@ -95,9 +95,20 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 
 ## Installation
 
-Ree RTM.md for all details. Currently not public until safely dockerized.
+### Using Docker
 
-### GitHub Webhook support
+Experimental Docker installation can be found at [https://hub.docker.com/r/suculent/thinx-docker/](Docker Hub).
+
+First of all, set a valid FQDN for your new THiNX instance on your DNS server. Use this FQDN to parametrize the Docker image:
+
+    docker pull suculent/thinx-docker
+    
+    docker build --build-arg THINX_HOSTNAME=staging.thinx.cloud -t suculent/thinx-docker .
+    
+    docker run -ti -e THINX_HOSTNAME='staging.thinx.cloud' -e THINX_OWNER='suculent@me.com' suculent/thinx-docker
+
+
+## GitHub Webhook support
 
 You can direct your GitHub webhooks to http://thinx.cloud:9001/ after adding a valid deploy key from GitHub to THiNX RTM.
 

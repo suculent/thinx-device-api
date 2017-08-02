@@ -102,9 +102,12 @@ var ThinxApp = function() {
    * Databases
    */
 
+  var prefix = fs.readFileSync('./conf/.thx_prefix') ? fs.readFileSync(
+    './conf/.thx_prefix') + "_" : "";
+
   function initDatabases() {
 
-    nano.db.create("managed_devices", function(err, body, header) {
+    nano.db.create(prefix + "managed_devices", function(err, body, header) {
       if (err) {
         handleDatabaseErrors(err, "managed_devices");
       } else {
@@ -114,7 +117,7 @@ var ThinxApp = function() {
       }
     });
 
-    nano.db.create("managed_builds", function(err, body, header) {
+    nano.db.create(prefix + "managed_builds", function(err, body, header) {
       if (err) {
         handleDatabaseErrors(err, "managed_builds");
       } else {
@@ -125,7 +128,7 @@ var ThinxApp = function() {
       }
     });
 
-    nano.db.create("managed_users", function(err, body, header) {
+    nano.db.create(prefix + "managed_users", function(err, body, header) {
       if (err) {
         handleDatabaseErrors(err, "managed_users");
       } else {
@@ -190,8 +193,8 @@ var ThinxApp = function() {
 
   initDatabases();
 
-  var devicelib = require("nano")(db).use("managed_devices");
-  var userlib = require("nano")(db).use("managed_users");
+  var devicelib = require("nano")(db).use(prefix + "managed_devices");
+  var userlib = require("nano")(db).use(prefix + "managed_users");
 
   // <-- EXTRACT TO: db.js && databases must not be held by app class
 
