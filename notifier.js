@@ -19,6 +19,15 @@ var sha256 = require("sha256");
 
 var db = config.database_uri;
 
+// Initially creates DB, otherwise fails silently.
+var prefix = "";
+try {
+  prefix = fs.readFileSync(app_config.project_root + '/conf/.thx_prefix');
+  prefix = prefix + "_";
+} catch (e) {
+  //console.log(e);
+}
+
 var userlib = require("nano")(db).use(prefix + "managed_users");
 var buildlib = require("nano")(db).use(prefix + "managed_builds");
 var loglib = require("nano")(db).use(prefix + "managed_logs");
@@ -105,14 +114,6 @@ if (typeof(sha) === "undefined" || sha === "") {
   }
 }
 
-// Initially creates DB, otherwise fails silently.
-var prefix = "";
-try {
-  prefix = fs.readFileSync(app_config.project_root + '/conf/.thx_prefix');
-  prefix = prefix + "_";
-} catch (e) {
-  //console.log(e);
-}
 nano.db.create(prefix + "managed_builds", function(err, body, header) {
   if (err) {
     if (err ==
