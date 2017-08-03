@@ -1562,7 +1562,8 @@ var ThinxApp = function() {
       });
     }
 
-    if (typeof(req.body.remember === "undefined")) {
+    if (typeof(req.body.remember === "undefined") || (req.body.remember ===
+        0)) {
       var hour = 3600000;
       req.session.cookie.expires = new Date(Date.now() + hour);
       req.session.cookie.maxAge = hour;
