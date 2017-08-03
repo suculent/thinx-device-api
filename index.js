@@ -1645,7 +1645,18 @@ var ThinxApp = function() {
 
           var minute = 60 * 1000;
           //req.session.cookie.httpOnly = true;
-          req.session.cookie.maxAge = 20 * minute;
+
+          if (typeof(req.body.remember === "undefined") || (req.body.remember ===
+              0)) {
+            var hour = 3600000;
+            req.session.cookie.expires = new Date(Date.now() + hour);
+            req.session.cookie.maxAge = hour;
+          } else {
+            req.session.cookie.expires = new Date(Date.now() +
+              fortnight);
+            req.session.cookie.maxAge = fortnight;
+          }
+
           req.session.cookie.secure = true;
 
           alog.log(req.session.owner, "User logged in: " +
