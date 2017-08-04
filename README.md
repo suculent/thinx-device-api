@@ -115,6 +115,42 @@ First of all, set a valid FQDN for your new THiNX instance on your DNS server. U
     
     docker run -ti -e THINX_HOSTNAME='staging.thinx.cloud' -e THINX_OWNER='suculent@me.com' suculent/thinx-docker
 
+### Installing Platform Builders
+
+Attach to the running container with bash:
+
+```
+docker run -ti -e THINX_HOSTNAME='staging.thinx.cloud' -e THINX_OWNER='suculent@me.com' suculent/thinx-docker /bin/bash
+
+```
+
+Fetch required builder images from Docker Hub:
+
+```
+cd /root/thinx-device-api/tools
+git pull --recurse-submodules
+    
+pushd ./arduino-docker-build
+docker pull suculent/arduino-docker-build
+popd
+    
+pushd ./platformio-docker-build
+docker pull suculent/platformio-docker-build
+popd
+    
+pushd ./micropython-docker-build
+docker pull suculent/micropython-docker-build
+popd
+    
+pushd ./mongoose-docker-build
+docker pull suculent/mongoose-docker-build
+popd
+    
+pushd ./nodemcu-docker-build
+docker pull suculent/nodemcu-docker-build
+popd
+```
+    
 
 ## GitHub Webhook support
 
