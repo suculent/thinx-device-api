@@ -74,16 +74,24 @@ With built-in THiNX Client Library:
 
 Arduino, Plaform.io and MongooseOS are firmwares by nature.
 
+
 ## Dockerized Firmware Builders
 
-[NodeMCU/LUA](https://hub.docker.com/r/suculent/nodemcu-docker-build/)
+[PlatformIO](https://github.com/suculent/platformio-docker-build)
 
-[Micropython](https://hub.docker.com/r/suculent/micropython-docker-build/)
+[Arduino](https://github.com/suculent/arduino-docker-build)
+
+[MongooseOS](https://github.com/suculent/mongooseos-docker-build)
+
+[NodeMCU/LUA](https://github.com/suculent/nodemcu-docker-build/)
+
+[Micropython](https://github.com/suculent/micropython-docker-build/)
 
 
 ## Prerequisites
 
 * Linux Server (min. 2 GB RAM, 32GB SSD)
+* Docker
 
 ## Port mapping
 

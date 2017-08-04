@@ -10,7 +10,18 @@
 	path = tools/nodemcu-docker-build
 	url = https://github.com/suculent/nodemcu-docker-build.git
 
+[submodule "platformio-docker-build"]
+	path = tools/platformio-docker-build
+	url = https://github.com/suculent/platformio-docker-build.git
+
+[submodule "arduino-docker-build"]
+	path = tools/arduino-docker-build
+	url = https://github.com/suculent/arduino-docker-build.git
+
+[submodule "mongoose-docker-build"]
+	path = tools/mongoose-docker-build
+	url = https://github.com/suculent/mongoose-docker-build.git
+
 [submodule "nodemcu-firmware"]
         path = tools/nodemcu-firmware
 	url = https://github.com/suculent/nodemcu-firmware.git
-
