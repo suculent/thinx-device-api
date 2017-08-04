@@ -127,28 +127,7 @@ docker run -ti -e THINX_HOSTNAME='staging.thinx.cloud' -e THINX_OWNER='suculent@
 Fetch required builder images from Docker Hub:
 
 ```
-cd /root/thinx-device-api/tools
-git pull --recurse-submodules
-    
-pushd ./arduino-docker-build
-docker pull suculent/arduino-docker-build
-popd
-    
-pushd ./platformio-docker-build
-docker pull suculent/platformio-docker-build
-popd
-    
-pushd ./micropython-docker-build
-docker pull suculent/micropython-docker-build
-popd
-    
-pushd ./mongoose-docker-build
-docker pull suculent/mongoose-docker-build
-popd
-    
-pushd ./nodemcu-docker-build
-docker pull suculent/nodemcu-docker-build
-popd
+bash ./install-builders.sh
 ```
     
 
