@@ -2094,61 +2094,6 @@ var ThinxApp = function() {
     return null;
   };
 
-  /* deprecated in favor of githooked
-  var initWatcher = function(watcher) {
-    devicelib.view("devicelib", "watcher_view", {
-      "include_docs": true
-    }, function(err, body) {
-      console.log("» Starting GIT watcher...");
-      if (err) {
-        console.log(err);
-        return;
-      }
-      for (var index in body.rows) {
-
-        var source = body.rows[index].doc.source;
-        if (typeof(source) === "undefined" || source === null) {
-          continue;
-        }
-
-        if (!body.rows[index].hasOwnProperty("doc")) continue;
-        if (!body.rows[index].doc.hasOwnProperty("owner"))
-          continue;
-        if (!body.rows[index].doc.hasOwnProperty("udid")) continue;
-
-        var owner = body.rows[index].doc.owner;
-        var udid = body.rows[index].doc.udid;
-        var path = app_config.project_root + "/data/" + owner + "/" +
-          udid;
-
-        console.log("Setting-up GIT repository watcher on device path " +
-          path);
-
-        if (!fs.existsSync(path)) {
-
-          continue;
-
-        } else {
-
-          if (fs.lstatSync(path).isDirectory()) {
-
-            // TODO: FIXME: There's a plenty of build_ids on this path and somewhere deep in that
-            // is the repository workspace. We should use only the new one or re-fetch.
-
-            var workspace = getNewestFolder(path, new RegExp(".*"));
-            watcher.watchRepository(workspace, watcher_callback);
-
-          } else {
-            console.log(path + " is not a directory.");
-          }
-        }
-      }
-    });
-  };
-
-  initWatcher(watcher);
-  */
-
   //
   // Database compactor
   //
