@@ -38,6 +38,12 @@ const char HTTP_FAVICON[] PROGMEM         = "data:image/x-icon;base64,AAABAAEAEB
 
 #define WIFI_MANAGER_MAX_PARAMS 10
 
+#define __WiFi_DEBUG__
+#ifdef __WiFi_DEBUG__
+//char ssid[] = "THiNX-IoT";     //  your network SSID (name)
+//char pass[] = "<enter-your-ssid-password>";  // your network password
+#endif
+
 class EAVManagerParameter {
   public:
     EAVManagerParameter(const char *custom);

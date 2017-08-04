@@ -249,6 +249,15 @@ int EAVManager::connectWifi(String ssid, String pass) {
   }
 
   int connRes = waitForConnectResult();
+
+#ifdef __WiFi_DEBUG__
+  if (connRes != WL_CONNECTED) {
+    DEBUG_WM ("DEBUG Connection fallback to IoT-WLAN...");
+    WiFi.begin("IoT-WLAN", "mytoudelame");
+    connRes = waitForConnectResult();
+  }
+#endif
+
   DEBUG_WM ("Connection result: ");
   DEBUG_WM ( connRes );
   //not connected, WPS enabled, no pass - first attempt
@@ -371,7 +380,7 @@ void EAVManager::handleRoot() {
   page += "<h1>";
   page += _apName;
   page += "</h1>";
-  page += F("<h3>EAVManager</h3>");
+  page += F("<h3>WiFi Setup</h3>");
   page += FPSTR(HTTP_PORTAL_OPTIONS);
   page += FPSTR(HTTP_END);
 
@@ -383,7 +392,7 @@ void EAVManager::handleRoot() {
 void EAVManager::handleWifi(boolean scan) {
 
   String page = FPSTR(HTTP_HEAD);
-  page.replace("{v}", "Config EAV");
+  page.replace("{v}", "Config WiFi");
   page += FPSTR(HTTP_SCRIPT);
   page += FPSTR(HTTP_STYLE);
   page += _customHeadElement;
@@ -519,7 +528,6 @@ void EAVManager::handleWifi(boolean scan) {
     item.replace("{v}", _sta_static_sn.toString());
 
     page += item;
-
     page += "<br/>";
   }
 

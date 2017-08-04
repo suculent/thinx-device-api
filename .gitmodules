@@ -4,11 +4,11 @@
 
 [submodule "tools/micropython-docker-build"]
 	path = tools/micropython-docker-build
-	url = /Users/sychram/Repositories/thinx-device-api/tools/micropython-docker-build.git
+	url = https://github.com/suculent/micropython-docker-build.git
 
 [submodule "tools/nodemcu-docker-build"]
 	path = tools/nodemcu-docker-build
-	url = /Users/sychram/Repositories/thinx-device-api/tools/nodemcu-docker-build.git
+	url = https://github.com/suculent/nodemcu-docker-build.git
 
 [submodule "tools/nodemcu-firmware"]
 	path = tools/nodemcu-firmware
@@ -16,12 +16,12 @@
 
 [submodule "tools/arduino-docker-build"]
 	path = tools/arduino-docker-build
-	url = /Users/sychram/Repositories/thinx-device-api/tools/arduino-docker-build
+	url = https://github.com/suculent/arduino-docker-build
 
 [submodule "tools/platformio-docker-build"]
 	path = tools/platformio-docker-build
-	url = /Users/sychram/Repositories/thinx-device-api/tools/platformio-docker-build
+	url = https://github.com/suculent/platformio-docker-build
 
 [submodule "tools/mongoose-docker-build"]
 	path = tools/mongoose-docker-build
-	url = /Users/sychram/Repositories/thinx-device-api/tools/mongoose-docker-build
+	url = https://github.com/suculent/mongoose-docker-build

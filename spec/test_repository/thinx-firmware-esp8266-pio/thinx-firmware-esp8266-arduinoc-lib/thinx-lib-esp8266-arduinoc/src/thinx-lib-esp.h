@@ -3,30 +3,20 @@
 #define __DEBUG__
 #define __DEBUG_JSON__
 
-#define __USE_WIFI_MANAGER__
-
 #include <stdio.h>
 #include "ArduinoJson/ArduinoJson.h"
 
 #include <FS.h>
-
-// Inject SSID and Password from 'Settings.h' for testing where we do not use EAVManager
-#ifndef __USE_WIFI_MANAGER__
-#include "Settings.h"
-#else
-// Custom clone of EAVManager (we shall revert back to OpenSource if this won't be needed)
-// Purpose: SSID/password injection in AP mode
-// Solution: re-implement from UDP in mobile application
-//
-// Changes so far: `int connectWifi()` moved to public section in header
-// - buildable, but requires UDP end-to-end)
 #include "EAVManager/EAVManager.h"
 #include <EAVManager.h>
-#endif
 
 // Using better than Arduino-bundled version of MQTT https://github.com/Imroy/pubsubclient
 #include "PubSubClient/PubSubClient.h" // Local checkout
 //#include <PubSubClient.h> // Arduino Library
+
+// TODO: Add UDP AT&U= responder like in EAV? Considered unsafe. Device will notify available update and download/install it on its own (possibly throught THiNX Security Gateway (THiNX )
+// IN PROGRESS: Add MQTT client (target IP defined using Thinx.h) and forced firmware update responder (will update on force or save in-memory state from new or retained mqtt notification)
+// TODO: Add UDP responder AT&U only to update to next available firmware (from save in-memory state)
 
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
@@ -38,6 +28,14 @@ class THiNX {
 
   public:
 
+    enum payload_type {
+      Unknown = 0,
+      UPDATE = 1,		// Firmware Update Response Payload
+      REGISTRATION = 2,		// Registration Response Payload
+      NOTIFICATION = 3, // Notification/Interaction Response Payload
+      Reserved = 255,		// Reserved
+    };
+
     // Public API
     void initWithAPIKey(String);
     void publish();
@@ -46,6 +44,10 @@ class THiNX {
     // Internal public API
     String thx_connected_response = "{ \"status\" : \"connected\" }";
     String thx_disconnected_response = "{ \"status\" : \"disconnected\" }";
+    String thx_reboot_response = "{ \"status\" : \"rebooting\" }";
+    String thx_update_question = "{ title: \"Update Available\", body: \"There is an update available for this device. Do you want to install it now?\", type: \"actionable\", response_type: \"bool\" }";
+
+    String checkin_body();
 
     THiNX(String);
     THiNX();
@@ -78,53 +80,12 @@ class THiNX {
 
     uint8_t buf[MQTT_BUFFER_SIZE];
 
-    void receive_ota(const MQTT::Publish& pub) {
-      Serial.println("*TH: MQTT update...");
-      uint32_t startTime = millis();
-      uint32_t size = pub.payload_len();
-      if (size == 0)
-        return;
-
-      Serial.print("Receiving OTA of ");
-      Serial.print(size);
-      Serial.println(" bytes...");
-
-      Serial.setDebugOutput(true);
-      if (ESP.updateSketch(*pub.payload_stream(), size, true, false)) {
-        Serial.println("Clearing retained message.");
-        THiNX::mqtt_client->publish(MQTT::Publish(pub.topic(), "").set_retain());
-        THiNX::mqtt_client->disconnect();
-
-        Serial.printf("Update Success: %u\nRebooting...\n", millis() - startTime);
-        ESP.restart();
-        delay(10000);
-      }
-
-      Update.printError(Serial);
-      Serial.setDebugOutput(false);
-    }
-
-    inline void mqtt_callback(const MQTT::Publish& pub) {
-      Serial.println("*TH: MQTT callback...");
-      if (pub.has_stream()) {
-        Serial.print(pub.topic());
-        Serial.print(" => ");
-        if (pub.has_stream()) {
-          uint8_t buf[MQTT_BUFFER_SIZE];
-          int read;
-          while (read = pub.payload_stream()->read(buf, MQTT_BUFFER_SIZE)) {
-            // Do something with data in buffer
-            Serial.write(buf, read);
-          }
-          pub.payload_stream()->stop();
-          Serial.println("stop.");
-        } else {
-          Serial.println(pub.payload_string());
-        }
-      }
-    }
-
     String thinx_mqtt_channel();
+    String thinx_mqtt_status_channel();
+
+    // Response parsers
+    //void parse_registration(JSONObject);
+    //void parse_update(JSONObject);
 
     private:
 
@@ -147,9 +108,9 @@ class THiNX {
 
       void checkin();
       void senddata(String);
-      void thinx_parse(String);
+      void parse(String);
       void connect();
-      void esp_update(String);
+      void update_and_reboot(String);
 
       // MQTT
       int last_mqtt_reconnect;
@@ -162,7 +123,7 @@ class THiNX {
       // Data Storage
       bool shouldSaveConfig;
 
-      bool restoreDeviceInfo();
-      void saveDeviceInfo();
+      bool restore_device_info();
+      void save_device_info();
       String deviceInfo();
 };

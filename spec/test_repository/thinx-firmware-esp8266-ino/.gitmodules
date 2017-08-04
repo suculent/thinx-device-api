@@ -1,0 +1,3 @@
+[submodule "thinx-firmware-esp8266-ino/thinx-lib-esp8266-arduinoc"]
+	path = thinx-firmware-esp8266-ino/thinx-lib-esp8266-arduinoc
+	url = https://github.com/suculent/thinx-lib-esp8266-arduinoc.git
