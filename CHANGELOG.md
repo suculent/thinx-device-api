@@ -2,7 +2,7 @@
 
 ### 18th week
 
-4/8/2017: 0.9.2000 - Working Docker images for all firmwares
+4/8/2017: 0.9.2020 - Working Docker images for all firmwares; working webhooks resulting with a git pull (`repository updated with timer` should deprecate soon)
 
 3/8/2017: 0.9.1998 - Base Docker images for Arduino, Platformio and MongooseOS (problem with pip install in platformio?); UI tweaks; logging fixes; 
 
