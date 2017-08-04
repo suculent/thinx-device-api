@@ -2094,7 +2094,7 @@ var ThinxApp = function() {
     return null;
   };
 
-  // REFACTOR: Get array of deploy_paths and attach watcher callback (if deploy path exists)
+  /* deprecated in favor of githooked
   var initWatcher = function(watcher) {
     devicelib.view("devicelib", "watcher_view", {
       "include_docs": true
@@ -2147,6 +2147,7 @@ var ThinxApp = function() {
   };
 
   initWatcher(watcher);
+  */
 
   //
   // Database compactor
