@@ -2,7 +2,9 @@
 
 ### 18th week
 
-3/8/2017: 0.9.1998 - Base Docker images for Arduno, Platformio and MongooseOS (problem with pip install in platformio?); UI tweaks; logging fixes; 
+4/8/2017: 0.9.2000 - Working Docker images for all firmwares
+
+3/8/2017: 0.9.1998 - Base Docker images for Arduino, Platformio and MongooseOS (problem with pip install in platformio?); UI tweaks; logging fixes; 
 
 2/8/2017: Dockerized install support
 
