@@ -1,5 +1,15 @@
 # ☢ thinx-device-api change log
 
+**ROADMAP:**
+
+* test hook-for-build
+* test pio build
+* test e2e pio update
+* test ino build + e2e
+* test lua build + inject + e2e
+* test upy build + inject + e2e
+* test mos build + develop library + e2e
+
 ### 18th week
 
 4/8/2017: 0.9.2020 - Working Docker images for all firmwares; working webhooks resulting with a git pull (`repository updated with timer` should deprecate soon)
