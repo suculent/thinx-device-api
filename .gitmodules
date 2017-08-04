@@ -25,3 +25,12 @@
 [submodule "nodemcu-firmware"]
         path = tools/nodemcu-firmware
 	url = https://github.com/suculent/nodemcu-firmware.git
+[submodule "tools/arduino-docker-build"]
+	path = tools/arduino-docker-build
+	url = /Users/sychram/Repositories/thinx-device-api/tools/arduino-docker-build
+[submodule "tools/platformio-docker-build"]
+	path = tools/platformio-docker-build
+	url = /Users/sychram/Repositories/thinx-device-api/tools/platformio-docker-build
+[submodule "tools/mongoose-docker-build"]
+	path = tools/mongoose-docker-build
+	url = /Users/sychram/Repositories/thinx-device-api/tools/mongoose-docker-build

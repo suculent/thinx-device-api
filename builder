@@ -239,40 +239,116 @@ case $PLATFORM in
 			# TODO: FIXME: Inject filesystem here
 			cp -v ./build/*.bin "$OUTPATH" >> "${LOG_PATH}"
 			rm -rf ./build/*
+
+			# Exit on dry run...
+			if [[ ! ${RUN} ]]; then
+				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> "${LOG_PATH}"
+				STATUS='"DRY_RUN_OK"'
+			else
+				# Check Artifacts
+				if [[ $?==0 ]] ; then
+					STATUS='"OK"'
+					##OUTFILE="${OWNER_PATH}/.pioenvs/d1_mini/firmware.bin"????
+					SHAX=$(shasum -a 256 $OUTFILE) # OUTFILE
+					SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
+				else
+					STATUS='"BUILD FAILED."'
+				fi
+				# TODO: deploy
+			fi
     ;;
 
 		nodemcu)
 			OUTFILE=${DEPLOYMENT_PATH}/thinx.lua
 			OUTPATH=${DEPLOYMENT_PATH}/
-			docker pull suculent/nodemcu-docker-build
-			cd ./tools/nodemcu-firmware
 			# possibly lua-modules extended with thinx
 			# TODO: copy the LUA files to correct place/filesystem AND/OR deployment path
 			cp -v "${OWNER_PATH}/*.lua" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
-			docker run --rm -ti -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build
+
 			# Options:
 			# You can pass the following optional parameters to the Docker build like so docker run -e "<parameter>=value" -e ....
 			# IMAGE_NAME The default firmware file names are nodemcu_float|integer_<branch>_<timestamp>.bin. If you define an image name it replaces the <branch>_<timestamp> suffix and the full image names become nodemcu_float|integer_<image_name>.bin.
 			# INTEGER_ONLY Set this to 1 if you don't need NodeMCU with floating support, cuts the build time in half.
 			# FLOAT_ONLY Set this to 1 if you only need NodeMCU with floating support, cuts the build time in half.
 
+			docker run --rm -ti -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build
+
 			cp -v ./bin/*.bin "$OUTPATH" >> "${LOG_PATH}"
 			rm -rf ./bin/*
+
+			# Exit on dry run...
+			if [[ ! ${RUN} ]]; then
+				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> "${LOG_PATH}"
+				STATUS='"DRY_RUN_OK"'
+			else
+				# Check Artifacts
+				if [[ $?==0 ]] ; then
+					STATUS='"OK"'
+					##OUTFILE="${OWNER_PATH}/.pioenvs/d1_mini/firmware.bin"????
+					SHAX=$(shasum -a 256 $OUTFILE) # OUTFILE
+					SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
+				else
+					STATUS='"BUILD FAILED."'
+				fi
+				# TODO: deploy
+			fi
     ;;
 
     mongoose)
 			OUTFILE=${DEPLOYMENT_PATH}/mos_build.zip # FIXME: warning! this may be c-header
 			echo "TODO: This expects repository with mos.yml; should copy thinx.json into ./fs/thinx.json"
-			mos build --arch esp8266
-			# generates build/fw.zip on success
+			docker run --rm -ti -v `pwd`:/opt/mongoose-builder suculent/mongoose-docker-build
+			# should generate build/** on success
 			cp -vR "${OWNER_PATH}/build/fw.zip" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
 			echo $MSG; echo $MSG >> "${LOG_PATH}"
+
+			# Exit on dry run...
+			if [[ ! ${RUN} ]]; then
+				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> "${LOG_PATH}"
+				STATUS='"DRY_RUN_OK"'
+			else
+				# Check Artifacts
+				if [[ $?==0 ]] ; then
+					STATUS='"OK"'
+					##OUTFILE="${OWNER_PATH}/.pioenvs/d1_mini/firmware.bin"????
+					SHAX=$(shasum -a 256 $OUTFILE) # OUTFILE
+					SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
+				else
+					STATUS='"BUILD FAILED."'
+				fi
+				# TODO: deploy
+			fi
     ;;
 
-		arduino|platformio)
+		arduino)
+			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
+			docker run --rm -ti -v `pwd`:/opt/arduino-builder suculent/arduino-docker-build
+			echo "TODO: Deploy artifacts."
+
+			# Exit on dry run...
+			if [[ ! ${RUN} ]]; then
+				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> "${LOG_PATH}"
+				STATUS='"DRY_RUN_OK"'
+			else
+				# Check Artifacts
+				if [[ $?==0 ]] ; then
+					STATUS='"OK"'
+					##OUTFILE="${OWNER_PATH}/.pioenvs/d1_mini/firmware.bin"????
+					SHAX=$(shasum -a 256 $OUTFILE) # OUTFILE
+					SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
+				else
+					STATUS='"BUILD FAILED."'
+				fi
+				# TODO: deploy
+			fi
+
+		;;
+
+		platformio)
+			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 
 			# Build
-			platformio run >> "${LOG_PATH}"
+			docker run --rm -ti -v `pwd`:/opt/platformio-builder suculent/platformio-docker-build
 
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
