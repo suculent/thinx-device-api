@@ -31,3 +31,18 @@
 [submodule "spec/test_repository/nodemcu-docker-build"]
 	path = spec/test_repository/nodemcu-docker-build
 	url = https://github.com/suculent/nodemcu-docker-build.git
+[submodule "spec/test_repository/thinx-firmware-esp8266-lua"]
+	path = spec/test_repository/thinx-firmware-esp8266-lua
+	url = https://github.com/suculent/thinx-firmware-esp8266-lua.git
+[submodule "spec/test_repository/thinx-firmware-esp8266-pio"]
+	path = spec/test_repository/thinx-firmware-esp8266-pio
+	url = https://github.com/suculent/thinx-firmware-esp8266-pio.git
+[submodule "spec/test_repository/thinx-firmware-esp8266-upy"]
+	path = spec/test_repository/thinx-firmware-esp8266-upy
+	url = https://github.com/suculent/thinx-firmware-esp8266-upy.git
+[submodule "spec/test_repository/thinx-firmware-esp8266-ino"]
+	path = spec/test_repository/thinx-firmware-esp8266-ino
+	url = https://github.com/suculent/thinx-firmware-esp8266-ino.git
+[submodule "spec/test_repository/thinx-firmware-esp8266-mos"]
+	path = spec/test_repository/thinx-firmware-esp8266-mos
+	url = https://github.com/suculent/thinx-firmware-esp8266-mos.git
