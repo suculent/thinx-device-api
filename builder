@@ -151,6 +151,7 @@ rm -rf $REPO_NAME
 echo "[builder.sh] Cloning ${GIT_REPO}..." >> "${LOG_PATH}"
 # Fetch project
 git clone $GIT_REPO
+git submodule update --init --recursive
 
 
 if [[ -d $REPO_NAME ]]; then
