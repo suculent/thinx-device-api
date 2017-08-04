@@ -24,7 +24,7 @@ forever stopall # will deprecate
 echo
 echo "» Fetching current app version from GIT..."
 
-git pull --recurse-submodules # origin master is the default tracking branch
+git submodule update --init --recursive # origin master is the default tracking branch
 
 echo
 echo "» Re-installing npm packages..."
