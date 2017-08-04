@@ -36,17 +36,17 @@ var ThinxApp = function() {
 
   // Fix for (mainly) builder in pm2
   if (process.env.CIRCLE_CI === true) {
-    console.log("Starting on Circle CI...");
+    console.log("» Starting on Circle CI...");
     app_config = require("./conf/config-test.json");
   }
 
   if (process.env.LOGNAME == "sychram") {
-    console.log("Starting on workstation...");
+    console.log("» Starting on workstation...");
     app_config = require("./conf/config-local.json");
   }
 
   if (process.env.LOGNAME == "root") {
-    console.log("Starting in production mode...");
+    console.log("» Starting in production mode...");
     app_config = require("./conf/config.json");
   }
 
@@ -210,7 +210,7 @@ var ThinxApp = function() {
 
   var app = express();
 
-  console.log("Starting Redis client...");
+  console.log("» Starting Redis client...");
   var redis = require("redis");
   var redisStore = require("connect-redis")(session);
   var client = redis.createClient();
@@ -1900,7 +1900,7 @@ var ThinxApp = function() {
         key: fs.readFileSync(app_config.ssl_key),
         cert: fs.readFileSync(app_config.ssl_cert)
       };
-      console.log("Starting HTTPS server on " + (serverPort + 1) +
+      console.log("» Starting HTTPS server on " + (serverPort + 1) +
         "...");
       https.createServer(ssl_options, app).listen(serverPort + 1);
     } else {
@@ -1911,8 +1911,6 @@ var ThinxApp = function() {
 
   // Legacy HTTP support for old devices without HTTPS proxy
   http.createServer(app).listen(serverPort);
-
-  console.log("Server listening...");
 
   /*
    * WebSocket Server
