@@ -228,14 +228,12 @@ var ThinxApp = function() {
       port: 6379,
       client: client
     }),
-    cookie: {
-      expires: hour
-    },
     name: "x-thx-session",
     resave: true,
-    rolling: true,
+    rolling: false,
     saveUninitialized: true,
   }));
+  // rolling was true
 
   app.use(parser.json({
     limit: "10mb"
