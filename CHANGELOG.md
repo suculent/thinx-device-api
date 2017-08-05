@@ -1,8 +1,36 @@
 # ☢ thinx-device-api change log
 
-**ROADMAP:**
+## PLATFORM STATUS
 
-* test hook-for-build
+### PlatformIO
+
+We need to take care of spelling. Docker builder works and fails on bugs in library dependency mapping.
+Deployment is not verified, therefore update cannot be tested.
+
+### Arduino
+
+Docker builder works and fails on bugs in library dependency mapping.
+Deployment is not verified, therefore update cannot be tested.
+
+### NodeMCU
+
+File-based update has been pre-tested. Docker builder works fine but needs tighter integration with sources.
+Deployment is not verified, therefore update cannot be tested.
+There's currently no known test-device (Miki?)
+
+### Micropython
+
+Docker builder works fine but needs tighter integration with sources.
+Deployment is not verified, therefore update cannot be tested.
+There's currently no known test-device.
+
+### MongooseOS
+
+The Docker builder is ready but library is missing. Direct portability using arduino-compat is complicated while Stream.h is not available. There's a contributor missing to take care of this, but we have a test device (WiFi-NodeM from RobotDyn).
+Deployment is not verified, therefore update cannot be tested.
+
+## ROADMAP
+
 * test pio build
 * test e2e pio update
 * test ino build + e2e
@@ -10,7 +38,11 @@
 * test upy build + inject + e2e
 * test mos build + develop library + e2e
 
+## CHANGELOG
+
 ### 18th week
+
+5/8/2017: - Testing and fixing platform-builders for PlatformIO and Arduino; first Device Init for Mongoose (library integration analysis); working logs from Docker
 
 4/8/2017: 0.9.2020 - Working Docker images for all firmwares; working webhooks resulting with a git pull (`repository updated with timer` should deprecate soon)
 
