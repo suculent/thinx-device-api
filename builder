@@ -24,6 +24,8 @@ BUILD_ID='test-build-id'
 ORIGIN=$(pwd)
 UDID='f8e88e40-43c8-11e7-9ad3-b7281c2b9610'
 
+SHA='__NONE__'
+
 # ./builder --id=test-build-id --owner=cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12 --udid=a80cc610-4faf-11e7-9a9c-41d4f7ab4083 --git=git@github.com:suculent/thinx-firmware-esp8266.git
 
 for i in "$@"
@@ -270,6 +272,8 @@ case $PLATFORM in
 			OUTPATH=${DEPLOYMENT_PATH}/
 			# possibly lua-modules extended with thinx
 
+			mv "./thinx_build.json" "$THINX_ROOT/tools/nodemcu-firmware/local/fs/thinx.json"
+
 			cp -v "${OWNER_PATH}/*.lua" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
 			# TODO: copy the LUA files to tools/nodemcu-firmware/local/fs
 
@@ -308,6 +312,10 @@ case $PLATFORM in
     mongoose)
 			OUTFILE=${DEPLOYMENT_PATH}/mos_build.zip # FIXME: warning! this may be c-header
 			echo "TODO: This expects repository with mos.yml; should copy thinx.json into ./fs/thinx.json"
+
+			TNAME=$(find . -name "thinx.json")
+			mv "./thinx_build.json" "$NAME"
+
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/mongoose-builder suculent/mongoose-docker-build >> "${LOG_PATH}"
 
 			# Exit on dry run...
