@@ -118,10 +118,10 @@ echo "[builder.sh]   port: $port" >> "${LOG_PATH}"
 echo "[builder.sh]   REPO_PATH: $REPO_PATH" >> "${LOG_PATH}"
 echo "[builder.sh]   REPO_NAME: ${REPO_NAME}" >> "${LOG_PATH}"
 
-echo "[builder.sh] Cleaning workspace..."
+#echo "[builder.sh] Cleaning workspace..."
 
 # Clean
-rm -rf $THINX_ROOT/tenants/$OWNER_ID/$UDID/$BUILD_ID/$REPO_PATH/**
+#rm -rf $THINX_ROOT/tenants/$OWNER_ID/$UDID/$BUILD_ID/$REPO_PATH/**
 
 # TODO: only if $REPO_NAME contains slash(es)
 OWNER_PATH=$THINX_ROOT/repositories/$OWNER_ID/$UDID/$BUILD_ID
@@ -151,10 +151,6 @@ rm -rf $REPO_NAME
 echo "[builder.sh] Cloning ${GIT_REPO}..." >> "${LOG_PATH}"
 # Fetch project
 git clone $GIT_REPO
-pushd *
-git submodule update --init --recursive
-popd
-
 
 if [[ -d $REPO_NAME ]]; then
 	pushd ./$REPO_NAME
@@ -162,8 +158,11 @@ else
 	pushd ./$REPO_PATH
 fi
 
+git submodule update --init --recursive
+
 if [[ ! -d .git ]]; then
 	echo "Not a GIT repository: $(pwd)" >> "${LOG_PATH}"
+	ls
 fi
 
 COMMIT=$(git rev-parse HEAD)
@@ -243,12 +242,8 @@ case $PLATFORM in
 			git clone https://github.com/suculent/thinx-firmware-esp8266-upy.git
 			mv ./thinx-firmware-esp8266-upy/boot.py ./boot.py
 			rm -rf thinx-firmware-esp8266-upy
-			#docker build --force-rm -t thinx-micropython . >> "${LOG_PATH}" # optionally --build-arg VERSION=v1.8.1 .
 			docker run ${DOCKER_PREFIX} --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython >> "${LOG_PATH}"
 			rm -rf ./build; make clean; make V=1
-			# TODO: FIXME: Inject filesystem here
-			cp -v ./build/*.bin "$OUTPATH" >> "${LOG_PATH}"
-			rm -rf ./build/*
 
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
@@ -258,6 +253,8 @@ case $PLATFORM in
 				# Check Artifacts
 				if [[ $?==0 ]] ; then
 					STATUS='"OK"'
+					cp -v ./build/*.bin "$OUTPATH" >> "${LOG_PATH}"
+					rm -rf ./build/*
 					##OUTFILE="${OWNER_PATH}/.pioenvs/d1_mini/firmware.bin"????
 					SHAX=$(shasum -a 256 $OUTFILE) # OUTFILE
 					SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
@@ -288,10 +285,6 @@ case $PLATFORM in
 			# TODO: May be skipped with file-only update
 
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build >> "${LOG_PATH}"
-
-			cp -v ./bin/*.bin "$OUTPATH" >> "${LOG_PATH}"
-			rm -rf ./bin/*
-
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
 				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> "${LOG_PATH}"
@@ -299,6 +292,8 @@ case $PLATFORM in
 			else
 				# Check Artifacts
 				if [[ $?==0 ]] ; then
+					cp -v ./bin/*.bin "$OUTPATH" >> "${LOG_PATH}"
+					rm -rf ./bin/*
 					STATUS='"OK"'
 					##OUTFILE="${OWNER_PATH}/.pioenvs/d1_mini/firmware.bin"????
 					SHAX=$(shasum -a 256 $OUTFILE) # OUTFILE
@@ -314,9 +309,6 @@ case $PLATFORM in
 			OUTFILE=${DEPLOYMENT_PATH}/mos_build.zip # FIXME: warning! this may be c-header
 			echo "TODO: This expects repository with mos.yml; should copy thinx.json into ./fs/thinx.json"
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/mongoose-builder suculent/mongoose-docker-build >> "${LOG_PATH}"
-			# should generate build/** on success
-			cp -vR "${OWNER_PATH}/build/fw.zip" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
-			echo $MSG; echo $MSG >> "${LOG_PATH}"
 
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
@@ -326,7 +318,8 @@ case $PLATFORM in
 				# Check Artifacts
 				if [[ $?==0 ]] ; then
 					STATUS='"OK"'
-					##OUTFILE="${OWNER_PATH}/.pioenvs/d1_mini/firmware.bin"????
+					cp -vR "${OWNER_PATH}/build/fw.zip" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
+					echo $MSG; echo $MSG >> "${LOG_PATH}"
 					SHAX=$(shasum -a 256 $OUTFILE) # OUTFILE
 					SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
 				else
@@ -339,7 +332,6 @@ case $PLATFORM in
 		arduino)
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/arduino-builder suculent/arduino-docker-build >> "${LOG_PATH}"
-			echo "TODO: Deploy artifacts."
 
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
@@ -349,6 +341,7 @@ case $PLATFORM in
 				# Check Artifacts
 				if [[ $?==0 ]] ; then
 					STATUS='"OK"'
+					echo "TODO: Deploy artifacts."
 					##OUTFILE="${OWNER_PATH}/.pioenvs/d1_mini/firmware.bin"????
 					SHAX=$(shasum -a 256 $OUTFILE) # OUTFILE
 					SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
