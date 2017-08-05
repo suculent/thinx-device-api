@@ -272,14 +272,20 @@ case $PLATFORM in
 			OUTFILE=${DEPLOYMENT_PATH}/thinx.lua
 			OUTPATH=${DEPLOYMENT_PATH}/
 			# possibly lua-modules extended with thinx
-			# TODO: copy the LUA files to correct place/filesystem AND/OR deployment path
+
 			cp -v "${OWNER_PATH}/*.lua" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
+			# TODO: copy the LUA files to tools/nodemcu-firmware/local/fs
+
+			rm -rf $THINX_ROOT/tools/nodemcu-firmware/local/fs/** # cleanup first
+			cp -v "${OWNER_PATH}/*.lua" "$THINX_ROOT/tools/nodemcu-firmware/local/fs" >> "${LOG_PATH}"
 
 			# Options:
 			# You can pass the following optional parameters to the Docker build like so docker run -e "<parameter>=value" -e ....
 			# IMAGE_NAME The default firmware file names are nodemcu_float|integer_<branch>_<timestamp>.bin. If you define an image name it replaces the <branch>_<timestamp> suffix and the full image names become nodemcu_float|integer_<image_name>.bin.
 			# INTEGER_ONLY Set this to 1 if you don't need NodeMCU with floating support, cuts the build time in half.
 			# FLOAT_ONLY Set this to 1 if you only need NodeMCU with floating support, cuts the build time in half.
+
+			# TODO: May be skipped with file-only update
 
 			docker run ${DOCKER_PREFIX} --rm -ti -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build >> "${LOG_PATH}"
 
