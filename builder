@@ -236,15 +236,15 @@ case $PLATFORM in
     micropython)
 		  OUTFILE=${DEPLOYMENT_PATH}/boot.py
 			OUTPATH=${DEPLOYMENT_PATH}/
-			docker pull suculent/micropython-docker-build
-			cd ./tools/micropython-docker-build
-			cd modules
+			#docker pull suculent/micropython-docker-build
+			#cd ./tools/micropython-docker-build
+			#cd modules
 			# TODO: FIXME: Inject data from user repository to filesystem here...
 			git clone https://github.com/suculent/thinx-firmware-esp8266-upy.git
 			mv ./thinx-firmware-esp8266-upy/boot.py ./boot.py
 			rm -rf thinx-firmware-esp8266-upy
-			docker build --force-rm -t thinx-micropython . # optionally --build-arg VERSION=v1.8.1 .
-			docker run ${DOCKER_PREFIX} --rm -it -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython /bin/bash
+			#docker build --force-rm -t thinx-micropython . >> "${LOG_PATH}" # optionally --build-arg VERSION=v1.8.1 .
+			docker run ${DOCKER_PREFIX} --rm -it -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython >> "${LOG_PATH}"
 			rm -rf ./build; make clean; make V=1
 			# TODO: FIXME: Inject filesystem here
 			cp -v ./build/*.bin "$OUTPATH" >> "${LOG_PATH}"
@@ -281,7 +281,7 @@ case $PLATFORM in
 			# INTEGER_ONLY Set this to 1 if you don't need NodeMCU with floating support, cuts the build time in half.
 			# FLOAT_ONLY Set this to 1 if you only need NodeMCU with floating support, cuts the build time in half.
 
-			docker run ${DOCKER_PREFIX} --rm -ti -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build
+			docker run ${DOCKER_PREFIX} --rm -ti -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build >> "${LOG_PATH}"
 
 			cp -v ./bin/*.bin "$OUTPATH" >> "${LOG_PATH}"
 			rm -rf ./bin/*
@@ -307,7 +307,7 @@ case $PLATFORM in
     mongoose)
 			OUTFILE=${DEPLOYMENT_PATH}/mos_build.zip # FIXME: warning! this may be c-header
 			echo "TODO: This expects repository with mos.yml; should copy thinx.json into ./fs/thinx.json"
-			docker run ${DOCKER_PREFIX} --rm -ti -v `pwd`:/opt/mongoose-builder suculent/mongoose-docker-build
+			docker run ${DOCKER_PREFIX} --rm -ti -v `pwd`:/opt/mongoose-builder suculent/mongoose-docker-build >> "${LOG_PATH}"
 			# should generate build/** on success
 			cp -vR "${OWNER_PATH}/build/fw.zip" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
 			echo $MSG; echo $MSG >> "${LOG_PATH}"
@@ -332,7 +332,7 @@ case $PLATFORM in
 
 		arduino)
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
-			docker run ${DOCKER_PREFIX} --rm -ti -v `pwd`:/opt/arduino-builder suculent/arduino-docker-build
+			docker run ${DOCKER_PREFIX} --rm -ti -v `pwd`:/opt/arduino-builder suculent/arduino-docker-build >> "${LOG_PATH}"
 			echo "TODO: Deploy artifacts."
 
 			# Exit on dry run...
@@ -358,7 +358,7 @@ case $PLATFORM in
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 
 			# Build
-			docker run ${DOCKER_PREFIX} --rm -ti -v `pwd`:/opt/platformio-builder suculent/platformio-docker-build
+			docker run ${DOCKER_PREFIX} --rm -ti -v `pwd`:/opt/platformio-builder suculent/platformio-docker-build >> "${LOG_PATH}"
 
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
