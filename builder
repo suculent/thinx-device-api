@@ -244,7 +244,7 @@ case $PLATFORM in
 			mv ./thinx-firmware-esp8266-upy/boot.py ./boot.py
 			rm -rf thinx-firmware-esp8266-upy
 			#docker build --force-rm -t thinx-micropython . >> "${LOG_PATH}" # optionally --build-arg VERSION=v1.8.1 .
-			docker run ${DOCKER_PREFIX} --rm -it -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython >> "${LOG_PATH}"
+			docker run ${DOCKER_PREFIX} --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython >> "${LOG_PATH}"
 			rm -rf ./build; make clean; make V=1
 			# TODO: FIXME: Inject filesystem here
 			cp -v ./build/*.bin "$OUTPATH" >> "${LOG_PATH}"
@@ -287,7 +287,7 @@ case $PLATFORM in
 
 			# TODO: May be skipped with file-only update
 
-			docker run ${DOCKER_PREFIX} --rm -ti -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build >> "${LOG_PATH}"
+			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build >> "${LOG_PATH}"
 
 			cp -v ./bin/*.bin "$OUTPATH" >> "${LOG_PATH}"
 			rm -rf ./bin/*
@@ -313,7 +313,7 @@ case $PLATFORM in
     mongoose)
 			OUTFILE=${DEPLOYMENT_PATH}/mos_build.zip # FIXME: warning! this may be c-header
 			echo "TODO: This expects repository with mos.yml; should copy thinx.json into ./fs/thinx.json"
-			docker run ${DOCKER_PREFIX} --rm -ti -v `pwd`:/opt/mongoose-builder suculent/mongoose-docker-build >> "${LOG_PATH}"
+			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/mongoose-builder suculent/mongoose-docker-build >> "${LOG_PATH}"
 			# should generate build/** on success
 			cp -vR "${OWNER_PATH}/build/fw.zip" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
 			echo $MSG; echo $MSG >> "${LOG_PATH}"
@@ -338,7 +338,7 @@ case $PLATFORM in
 
 		arduino)
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
-			docker run ${DOCKER_PREFIX} --rm -ti -v `pwd`:/opt/arduino-builder suculent/arduino-docker-build >> "${LOG_PATH}"
+			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/arduino-builder suculent/arduino-docker-build >> "${LOG_PATH}"
 			echo "TODO: Deploy artifacts."
 
 			# Exit on dry run...
@@ -364,7 +364,7 @@ case $PLATFORM in
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 
 			# Build
-			docker run ${DOCKER_PREFIX} --rm -ti -v `pwd`:/opt/platformio-builder suculent/platformio-docker-build >> "${LOG_PATH}"
+			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/platformio-builder suculent/platformio-docker-build >> "${LOG_PATH}"
 
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
@@ -429,7 +429,7 @@ if [[ $RESULT=="*platformio upgrade*" ]]; then
 		platformio upgrade
 fi
 
-CLEANUP_RESULT=$(bash ./couch_cleanup.sh)
+CLEANUP_RESULT=$(bash $THINX_ROOT/couch_cleanup.sh)
 echo $CLEANUP_RESULT; echo $CLEANUP_RESULT >> "${LOG_PATH}"
 
 MSG="${BUILD_DATE} Done."
