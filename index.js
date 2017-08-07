@@ -895,10 +895,12 @@ var ThinxApp = function() {
    */
 
   app.post("/api/user/profile", function(req, res) {
+    console.log("/api/user/profile");
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
     var owner = req.session.owner;
     user.update(owner, req.body, function(success, status) {
+      console.log("Updating user profile...");
       respond(res, {
         success: success,
         status: status
