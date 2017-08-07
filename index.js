@@ -1991,7 +1991,8 @@ var ThinxApp = function() {
         });
 
       } else {
-        console.log("» Websocketparser said: unknown message");
+        console.log("» Websocketparser said: unknown message: " +
+          JSON.stringify(message));
       }
     });
 
