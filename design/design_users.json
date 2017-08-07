@@ -21,5 +21,8 @@
 		"rsa_keys_by_owner": {
 			"map": "function (doc) { if(doc._id) { emit (doc.owner, doc.rsa_keys); } }"
 		}
+	},
+	"updates": {
+		"edit": "function (doc, req) { var fields = JSON.parse(req.body); for (var i in fields) { doc[i] = fields[i] } var resp = eval(uneval(doc)); delete resp._revisions; return [doc, toJSON(resp)]; }"
 	}
 }
