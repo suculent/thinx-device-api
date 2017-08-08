@@ -24,8 +24,6 @@ BUILD_ID='test-build-id'
 ORIGIN=$(pwd)
 UDID='f8e88e40-43c8-11e7-9ad3-b7281c2b9610'
 
-SHA='__NONE__'
-
 # ./builder --id=test-build-id --owner=cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12 --udid=a80cc610-4faf-11e7-9a9c-41d4f7ab4083 --git=git@github.com:suculent/thinx-firmware-esp8266.git
 
 for i in "$@"
@@ -224,6 +222,7 @@ echo "[builder.sh] Building for platform ${PLATFORM} in language ${LANGUAGE_NAME
 
 SHA="0x00000000"
 OUTFILE="build.failed"
+BUILD_SUCCESS=false
 
 # If running inside Docker, we'll start builders as siblings
 if [ -f /.dockerenv ]; then
@@ -247,18 +246,24 @@ case $PLATFORM in
 			docker run ${DOCKER_PREFIX} --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython >> "${LOG_PATH}"
 			rm -rf ./build; make clean; make V=1
 
+			if [[ $?==0 ]] ; then
+				BUILD_SUCCESS=true
+			fi
+
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
 				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> "${LOG_PATH}"
 				STATUS='"DRY_RUN_OK"'
 			else
 				# Check Artifacts
-				if [[ $?==0 ]] ; then
+				if [[ $BUILD_SUCCESS==true ]] ; then
 					STATUS='"OK"'
 					cp -v ./build/*.bin "$OUTPATH" >> "${LOG_PATH}"
+					cp -vR ./build/**/*.py "$OUTPATH" >> "${LOG_PATH}"
 					rm -rf ./build/*
-					##OUTFILE="${OWNER_PATH}/.pioenvs/d1_mini/firmware.bin"????
-					SHAX=$(shasum -a 256 $OUTFILE) # OUTFILE
+					ls "$OUTPATH" >> "${LOG_PATH}"
+					OUTFILE="${OUTPATH}/*.bin"
+					SHAX=$(shasum -a 256 $OUTFILE)
 					SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
 				else
 					STATUS='"BUILD FAILED."'
@@ -268,15 +273,11 @@ case $PLATFORM in
     ;;
 
 		nodemcu)
-			OUTFILE=${DEPLOYMENT_PATH}/thinx.lua
+			OUTFILE=${DEPLOYMENT_PATH}/thinx.lua # there is more!
 			OUTPATH=${DEPLOYMENT_PATH}/
 			# possibly lua-modules extended with thinx
-
 			mv "./thinx_build.json" "$THINX_ROOT/tools/nodemcu-firmware/local/fs/thinx.json"
-
 			cp -v "${OWNER_PATH}/*.lua" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
-			# TODO: copy the LUA files to tools/nodemcu-firmware/local/fs
-
 			rm -rf $THINX_ROOT/tools/nodemcu-firmware/local/fs/** # cleanup first
 			cp -v "${OWNER_PATH}/*.lua" "$THINX_ROOT/tools/nodemcu-firmware/local/fs" >> "${LOG_PATH}"
 
@@ -289,18 +290,24 @@ case $PLATFORM in
 			# TODO: May be skipped with file-only update
 
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build >> "${LOG_PATH}"
+
+			if [[ $?==0 ]] ; then
+				BUILD_SUCCESS=true
+			fi
+
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
 				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> "${LOG_PATH}"
 				STATUS='"DRY_RUN_OK"'
 			else
 				# Check Artifacts
-				if [[ $?==0 ]] ; then
+				if [[ $BUILD_SUCCESS==true ]] ; then
 					cp -v ./bin/*.bin "$OUTPATH" >> "${LOG_PATH}"
 					rm -rf ./bin/*
 					STATUS='"OK"'
-					##OUTFILE="${OWNER_PATH}/.pioenvs/d1_mini/firmware.bin"????
-					SHAX=$(shasum -a 256 $OUTFILE) # OUTFILE
+					ls "$OWNER_PATH" >> "${LOG_PATH}"
+					OUTFILE="${OWNER_PATH}/firmware.bin"
+					SHAX=$(shasum -a 256 $OUTFILE)
 					SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
 				else
 					STATUS='"BUILD FAILED."'
@@ -310,13 +317,19 @@ case $PLATFORM in
     ;;
 
     mongoose)
-			OUTFILE=${DEPLOYMENT_PATH}/mos_build.zip # FIXME: warning! this may be c-header
-			echo "TODO: This expects repository with mos.yml; should copy thinx.json into ./fs/thinx.json"
+			OUTFILE=${DEPLOYMENT_PATH}/mos_build.zip # FIXME: warning! multiple files here
+			OUTPATH=${DEPLOYMENT_PATH}/
 
+			# should copy thinx.json into ./fs/thinx.json
 			TNAME=$(find . -name "thinx.json")
-			mv "./thinx_build.json" "$NAME"
+			echo "Moving thinx_build.json to $TNAME"
+			mv "./thinx_build.json" "$TNAME"
 
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/mongoose-builder suculent/mongoose-docker-build >> "${LOG_PATH}"
+
+			if [[ $?==0 ]] ; then
+				BUILD_SUCCESS=true
+			fi
 
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
@@ -324,9 +337,11 @@ case $PLATFORM in
 				STATUS='"DRY_RUN_OK"'
 			else
 				# Check Artifacts
-				if [[ $?==0 ]] ; then
+				if [[ $BUILD_SUCCESS==true ]] ; then
 					STATUS='"OK"'
-					cp -vR "${OWNER_PATH}/build/fw.zip" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
+					ls "$OWNER_PATH/build" >> "${LOG_PATH}"
+					unzip "${OWNER_PATH}/build/fw.zip" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
+					ls "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
 					echo $MSG; echo $MSG >> "${LOG_PATH}"
 					SHAX=$(shasum -a 256 $OUTFILE) # OUTFILE
 					SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
@@ -340,6 +355,9 @@ case $PLATFORM in
 		arduino)
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/arduino-builder suculent/arduino-docker-build >> "${LOG_PATH}"
+			if [[ $?==0 ]] ; then
+				BUILD_SUCCESS=true
+			fi
 
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
@@ -347,11 +365,15 @@ case $PLATFORM in
 				STATUS='"DRY_RUN_OK"'
 			else
 				# Check Artifacts
-				if [[ $?==0 ]] ; then
+				if [[ $BUILD_SUCCESS==true ]] ; then
 					STATUS='"OK"'
 					echo "TODO: Deploy artifacts."
-					##OUTFILE="${OWNER_PATH}/.pioenvs/d1_mini/firmware.bin"????
-					SHAX=$(shasum -a 256 $OUTFILE) # OUTFILE
+					OUTFILE="${OWNER_PATH}/*.bin"
+					pwd
+					ls
+					ls "$OWNER_PATH" >> "${LOG_PATH}"
+					cp -vR "${OWNER_PATH}/firmware.bin" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
+					SHAX=$(shasum -a 256 $OUTFILE)
 					SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
 				else
 					STATUS='"BUILD FAILED."'
@@ -363,9 +385,10 @@ case $PLATFORM in
 
 		platformio)
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
-
-			# Build
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/platformio-builder suculent/platformio-docker-build >> "${LOG_PATH}"
+			if [[ $?==0 ]] ; then
+				BUILD_SUCCESS=true
+			fi
 
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
@@ -373,11 +396,14 @@ case $PLATFORM in
 				STATUS='"DRY_RUN_OK"'
 			else
 				# Check Artifacts
-				if [[ $?==0 ]] ; then
+				if [[ $BUILD_SUCCESS==true ]] ; then
 					STATUS='"OK"'
+					ls "${OWNER_PATH}/.pioenvs/" >> "${LOG_PATH}"
+					# TODO: d1_mini is a board name that is not parametrized but must be eventually
 					OUTFILE="${OWNER_PATH}/.pioenvs/d1_mini/firmware.bin"
-					SHAX=$(shasum -a 256 $OUTFILE) # OUTFILE
+					SHAX=$(shasum -a 256 $OUTFILE)
 					SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
+					cp -vR "${OUTFILE}" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
 				else
 					STATUS='"BUILD FAILED."'
 				fi
