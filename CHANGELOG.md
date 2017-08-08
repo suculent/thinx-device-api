@@ -40,7 +40,13 @@ Deployment is not verified, therefore update cannot be tested.
 
 ## CHANGELOG
 
+8/8/2017: 0.9.2080 - Minimal MongooseOS registration example for testing Docker builder;
+
+7/8/2017: 0.9.2060 - Starting MongooseOS project
+
 ### 18th week
+
+6/8/2017:
 
 5/8/2017: - Testing and fixing platform-builders for PlatformIO and Arduino; first Device Init for Mongoose (library integration analysis); working logs from Docker
 
