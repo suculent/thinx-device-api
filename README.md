@@ -30,7 +30,7 @@ IoT Device Management Server running on node.js.
 
 ## Installation
 
-Ree RTM.md for all details.
+Easiest install is through [Docker](https://hub.docker.com/r/suculent/thinx-docker/).
 
 ## Endpoints (deprecated)
 
