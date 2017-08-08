@@ -26,8 +26,8 @@ There's currently no known test-device.
 
 ### MongooseOS
 
-The Docker builder is ready but library is missing. Direct portability using arduino-compat is complicated while Stream.h is not available. There's a contributor missing to take care of this, but we have a test device (WiFi-NodeM from RobotDyn).
-Deployment is not verified, therefore update cannot be tested.
+The Docker builder is ready but library is missing. Minimum app is available now, therefore update can be developed.
+Test device is assigned.
 
 ## ROADMAP
 
@@ -40,13 +40,15 @@ Deployment is not verified, therefore update cannot be tested.
 
 ## CHANGELOG
 
-8/8/2017: 0.9.2080 - Minimal MongooseOS registration example for testing Docker builder;
+
+
+8/8/2017: 0.9.2080 RELEASE - Minimal MongooseOS registration example for testing Docker builder; checking LUA module registration (fixed memory issues)
 
 7/8/2017: 0.9.2060 - Starting MongooseOS project
 
 ### 18th week
 
-6/8/2017:
+6/8/2017: 0.9.2080
 
 5/8/2017: - Testing and fixing platform-builders for PlatformIO and Arduino; first Device Init for Mongoose (library integration analysis); working logs from Docker
 
