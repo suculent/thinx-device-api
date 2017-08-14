@@ -1825,6 +1825,57 @@ var ThinxApp = function() {
   });
 
   /*
+   * Device Configuration
+   */
+
+  /* Respond to actionable notification */
+  app.post("/api/device/push", function(req, res) {
+
+    if (!validateSecurePOSTRequest(req)) return;
+    if (!validateSession(req, res)) return;
+
+    /*
+    var owner = req.session.owner;
+    var device = req.body.udid;
+    var nid = "nid:" + device;
+    var reply = req.body.reply;
+
+    if (typeof(device) === "undefined") {
+      respond(res, {
+        success: false,
+        status: "missing_udid"
+      });
+      return;
+    }
+
+    if (typeof(nid) === "undefined") {
+      respond(res, {
+        success: false,
+        status: "missing_nid"
+      });
+      return;
+    }
+
+    if (typeof(nid) === "undefined") {
+      respond(res, {
+        success: false,
+        status: "missing_reply"
+      });
+      return;
+    }
+    */
+
+    devices.push(owner, body, function(error, response) {
+      respond(res, {
+        success: error,
+        status: response
+      });
+    });
+
+
+  });
+
+  /*
    * Actionable Notifications
    */
 
