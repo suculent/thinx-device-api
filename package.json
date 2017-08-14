@@ -50,6 +50,7 @@
     "mqtt": "^2.9.0",
     "nano": "^6.2.0",
     "node-vault": "^0.5.7",
+    "parse-date": "^1.1.0",
     "path": "^0.12.7",
     "qs": "6.0.4",
     "recursive-search": "^1.0.1",
