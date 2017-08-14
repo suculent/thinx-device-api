@@ -24,6 +24,23 @@ describe("Messenger", function() {
     });
   }, 5000);
 
+  // init
+  it("should be able to initialize on its own", function() {
+    Messenger.initWithOwner(test_owner, function(success, status) {
+      expect(success).toBe(true);
+      expect(status).toBeDefined();
+      done();
+    });
+  });
+
+  it("should be able to get all owners", function(done) {
+    Messenger.getAllOwners(function(success, status) {
+      expect(success).toBe(true);
+      console.log(JSON.stringify(status));
+      done();
+    });
+  }, 5000);
+
   // initWithOwner: function(owner, callback)
   it("should be able to connect", function(done) {
     Messenger.initWithOwner(test_owner, function(success, status) {
@@ -38,17 +55,4 @@ describe("Messenger", function() {
     });
   }, 15000);
 
-  // init
-  it("should be able to initialize on its own", function() {
-    Messenger.initWithOwner(test_owner);
-  });
-
-  it("should be able to get all owners", function(done) {
-    Messenger.getAllOwners(function(success, status) {
-      expect(success).toBe(true);
-      console.log(JSON.stringify(status));
-      done();
-    });
-  }, 5000);
-
-});
+}, 10000);
