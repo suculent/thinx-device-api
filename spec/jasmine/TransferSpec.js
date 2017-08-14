@@ -33,7 +33,7 @@ describe("Transfer", function() {
           console.log(JSON.stringify(response));
           done();
         });
-      });
+      }, 10000);
 
       //accept: function(body, callback) {
       it("should be able to accept transferred devices", function(
@@ -48,9 +48,11 @@ describe("Transfer", function() {
           console.log(JSON.stringify(response));
           done();
         });
-      });
+      }, 10000);
 
       done();
-    });
-  });
+    }, 1000);
+
+  }, 10000);
+
 });

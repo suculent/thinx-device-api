@@ -17,6 +17,8 @@ describe("RSA Key", function() {
 
   it("should be able to add RSA Keys first", function(done) {
 
+    console.log("owner:" + owner);
+
     RSAKey.add(owner, "matej-jasmine-test-rsa-key", test_key_body,
       function(success, response) {
         console.log(response);
