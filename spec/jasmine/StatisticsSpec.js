@@ -45,6 +45,7 @@ describe("Statistics", function() {
   it("should be able to parse statistics per owner", function(done) {
     s.parse(
       owner,
+      true,
       function(err, body) {
         console.log(err, body);
         expect(body).toBe(true);
