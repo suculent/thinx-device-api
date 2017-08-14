@@ -15,6 +15,7 @@ describe("Device", function() {
   var body = JSON.parse(RS);
 
   console.log("Using test API_KEY: " + apikey);
+  console.log("Using request: " + RS);
 
   it("should be able to register itself.", function(done) {
 
