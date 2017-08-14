@@ -22,6 +22,7 @@ describe("Transfer", function() {
       expect(success).toBe(true);
       expect(response).toBeDefined();
       this.dynamic_transfer_request_id = response;
+      done();
 
       //decline: function(body, callback) {
       it("should be able to decline device transfer", function(done) {
@@ -38,7 +39,6 @@ describe("Transfer", function() {
         });
       }, 5000);
 
-      done();
     });
   }, 10000);
 
@@ -53,6 +53,7 @@ describe("Transfer", function() {
       expect(success).toBe(true);
       expect(response).toBeDefined();
       this.dynamic_transfer_request_id = response;
+      done();
 
       //accept: function(body, callback) {
       it("should be able to accept transferred devices", function(
@@ -70,7 +71,6 @@ describe("Transfer", function() {
         });
       }, 5000);
 
-      done();
     });
   }, 10000);
 });
