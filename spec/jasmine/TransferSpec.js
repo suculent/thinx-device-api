@@ -20,36 +20,37 @@ describe("Transfer", function() {
       expect(success).toBe(true);
       expect(response).toBeDefined();
       this.dynamic_transfer_request_id = response;
+
+      //decline: function(body, callback) {
+      it("should be able to decline device transfer", function(done) {
+        var body = {
+          transfer_id: this.dynamic_transfer_request_id,
+          udids: [envi.udid]
+        };
+        Transfer.decline(body, function(success, response) {
+          expect(success).toBe(true);
+          expect(response).toBeDefined();
+          console.log(JSON.stringify(response));
+          done();
+        });
+      });
+
+      //accept: function(body, callback) {
+      it("should be able to accept transferred devices", function(
+        done) {
+        var body = {
+          transfer_id: this.dynamic_transfer_request_id,
+          udids: [envi.udid]
+        };
+        Transfer.accept(body, function(success, response) {
+          expect(success).toBe(true);
+          expect(response).toBeDefined();
+          console.log(JSON.stringify(response));
+          done();
+        });
+      });
+
       done();
     });
   });
-
-  //decline: function(body, callback) {
-  it("should be able to decline device transfer", function(done) {
-    var body = {
-      transfer_id: this.dynamic_transfer_request_id,
-      udids: [envi.udid]
-    };
-    Transfer.decline(body, function(success, response) {
-      expect(success).toBe(true);
-      expect(response).toBeDefined();
-      console.log(JSON.stringify(response));
-      done();
-    });
-  });
-
-  //accept: function(body, callback) {
-  it("should be able to accept transferred devices", function(done) {
-    var body = {
-      transfer_id: this.dynamic_transfer_request_id,
-      udids: [envi.udid]
-    };
-    Transfer.accept(body, function(success, response) {
-      expect(success).toBe(true);
-      expect(response).toBeDefined();
-      console.log(JSON.stringify(response));
-      done();
-    });
-  });
-
 });
