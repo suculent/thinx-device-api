@@ -97,4 +97,8 @@ describe("Build log", function() {
     blog.logtail(build_id, owner, _ws, error_callback);
   });
 
+  it("should provide path for device", function() {
+    expect(blog.pathForDevice(owner, udid)).toBeDefined();
+  });
+
 });
