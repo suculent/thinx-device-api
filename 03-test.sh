@@ -98,7 +98,7 @@ else
 	echo_fail $R
 fi
 
-exit 0
+#exit 0
 
 echo
 echo "--------------------------------------------------------------------------------"
@@ -238,9 +238,8 @@ OTT=1
 
 # {{"success":false,"status":"NOT_AVAILABLE"}
 
-SUCCESS=$(echo $R | jq .success)
-echo $SUCCESS
-if [[ $SUCCESS == false ]]; then
+SUCCESS=$(echo $R | jq .ott)
+if [[ -z $SUCCESS ]]; then
 	STATUS=$(echo $R | jq .status)
 	echo_fail "Firmware update result: $STATUS"
 else
@@ -281,7 +280,9 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing device registration..."
 
-RS='{ "registration" : { "mac" : "'${MAC}'", "firmware" : "EAV-App-0.4.0-beta:2017/04/08", "version" : "1.0.0", "checksum" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "dhho4djVGeQ:APA91bFuuZWXDQ8vSR0YKyjWIiwIoTB1ePqcyqZFU3PIxvyZMy9htu9LGPmimfzdrliRfAdci-AtzgLCIV72xmoykk-kHcYRhAFWFOChULOGxrDi00x8GgenORhx_JVxUN_fjtsN5B7T", "alias" : "rabbit", "owner": "'${OWNER_ID}'", "platform" : "platformio" } }'
+RS='{ "registration" : { "mac" : "'${MAC}'", "firmware" : "THiNX-Test-0.4.0-beta:2017/04/08", "version" : "1.0.0", "checksum" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "push" : "dhho4djVGeQ:APA91bFuuZWXDQ8vSR0YKyjWIiwIoTB1ePqcyqZFU3PIxvyZMy9htu9LGPmimfzdrliRfAdci-AtzgLCIV72xmoykk-kHcYRhAFWFOChULOGxrDi00x8GgenORhx_JVxUN_fjtsN5B7T", "alias" : "rabbit", "owner": "'${OWNER_ID}'", "platform" : "platformio" } }'
+
+echo $RS
 
 R=$(curl -s \
 -H "Authentication: ${API_KEY}" \
@@ -602,6 +603,9 @@ echo "--------------------------------------------------------------------------
 echo "» Testing source attach..."
 
 # {"success":true,"attached":"thinx-test-repo"}
+
+echo 'Device ID: '${DEVICE_ID}
+echo 'Source ID: '${SOURCE_ID}
 
 R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
