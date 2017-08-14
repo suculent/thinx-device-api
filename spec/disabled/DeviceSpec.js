@@ -9,10 +9,12 @@ describe("Device", function() {
   var apikey = envi.ak;
 
   var RS =
-    '{ "registration" : { "mac" : "00:00:00:00:00:00:00", "firmware" : "DeviceSpec.js", "version" : "1.0.0", "checksum" : "nevermind", "push" : "forget", "alias" : "npmtest", "owner": "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12", "udid": "to-be-deleted-on-test", "owner": "' +
+    '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "DeviceSpec.js", "version" : "1.0.0", "checksum" : "nevermind", "push" : "forget", "alias" : "npmtest", "owner": "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12", "udid": "to-be-deleted-on-test", "owner": "' +
     owner + '" } }';
 
   var body = JSON.parse(RS);
+
+  console.log("Using test API_KEY: " + apikey);
 
   it("should be able to register a device", function(done) {
     device.register(JSON.parse(RS), apikey,
