@@ -1,5 +1,5 @@
 var envi = require("./_envi.json");
-var owner = envi.owner;
+var owner = envi.oid;
 
 describe("Audit log", function() {
 

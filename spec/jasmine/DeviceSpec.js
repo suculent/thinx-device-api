@@ -4,7 +4,7 @@ describe("Device", function() {
   var device = require('../../lib/thinx/device');
 
   var envi = require("./_envi.json");
-  var owner = envi.owner;
+  var owner = envi.oid;
   var udid = envi.udid;
   var apikey = envi.ak;
 

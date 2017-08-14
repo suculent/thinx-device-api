@@ -3,7 +3,7 @@ describe("Builder", function() {
   var builder = require("../../lib/thinx/builder");
 
   var envi = require("./_envi.json");
-  var owner = envi.owner;
+  var owner = envi.oid;
   var udid = envi.udid;
   var apikey = envi.ak;
   var build_id = envi.build_id; // "f168def0-597f-11e7-a932-014d5b00c004";

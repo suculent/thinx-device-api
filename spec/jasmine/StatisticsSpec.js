@@ -3,7 +3,7 @@ describe("Statistics", function() {
   var s = require('../../lib/thinx/statistics');
 
   var envi = require("./_envi.json");
-  var owner = envi.owner;
+  var owner = envi.oid;
 
   it("should be able to initialize", function() {
     expect(s).toBeDefined();
