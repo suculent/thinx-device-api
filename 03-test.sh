@@ -57,6 +57,27 @@ R=""
 
 echo
 echo "--------------------------------------------------------------------------------"
+echo "» Fetching device catalog..."
+
+R=$(curl -s -b cookies.jar \
+-H "Origin: rtm.thinx.cloud" \
+-H "User-Agent: THiNX-Web" \
+-H "Content-Type: application/json" \
+http://$HOST:7442/api/user/devices)
+
+# {"devices":[{"id":"...
+
+SUCCESS=$(echo $R | jq .devices)
+echo "Response: " $R
+if [[ ! -z $SUCCESS ]]; then
+	DEVICES=$(echo $R | jq .devices)
+	echo_ok "Listed devices: $DEVICES"
+else
+	echo_fail $R
+fi
+
+echo
+echo "--------------------------------------------------------------------------------"
 echo "☢ Audit log fetch..."
 
 # {"success":true,"logs":{"total_rows":769,"offset":0,"rows":[{"id":"ff16cba945cff2ca578b29c7024eb653","key":{"_id":"ff16cba945cff2ca578b29c7024eb653","_rev":"1-0213b9d3716d6cbc5b5c8e7d1b6deae8","message":"GET : /api/user/devices","owner":"cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12","date":"2017-05-11T15:50:40.729Z"},...
@@ -560,14 +581,14 @@ echo "» Testing source add..."
 
 # {"success":true,"source":{"alias":"thinx-firmware-esp8266","url":"https://github.com/suculent/thinx-firmware-esp8266.git","branch":"origin/master"}}
 
-R=$(curl -s -b cookies.jar \
+R=$(curl -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -d '{ "url" : "https://github.com/suculent/thinx-firmware-esp8266.git", "alias" : "thinx-test-repo" }' \
 http://$HOST:7442/api/user/source)
 
-echo $R
+echo "Response: " $R
 
 SUCCESS=$(echo $R | jq .success)
 echo $SUCCESS
@@ -587,7 +608,7 @@ echo "» Testing source detach..."
 
 echo "Detaching device id: $DEVICE_ID"
 
-R=$(curl -v -b cookies.jar \
+R=$(curl -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -754,7 +775,7 @@ CH='{ "changes" : { "udid" : '${DEVICE_ID}', "alias" : "new-test-alias" } }'
 
 echo "POST ${CH}"
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H "Authentication: ${API_KEY}" \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
@@ -769,27 +790,6 @@ echo $R
 SUCCESS=$(echo $R | tr -d "\n" | jq .success)
 if [[ $SUCCESS == true ]]; then
 	echo_ok "Alias assignment result: $R"
-else
-	echo_fail $R
-fi
-
-echo
-echo "--------------------------------------------------------------------------------"
-echo "» Fetching device catalog..."
-
-R=$(curl -v -s -b cookies.jar \
--H "Origin: rtm.thinx.cloud" \
--H "User-Agent: THiNX-Web" \
--H "Content-Type: application/json" \
-http://$HOST:7442/api/user/devices)
-
-# {"devices":[{"id":"...
-
-SUCCESS=$(echo $R | jq .devices)
-# echo $SUCCESS
-if [[ ! -z $SUCCESS ]]; then
-	DEVICES=$(echo $R | jq .devices)
-	echo_ok "Listed devices: $DEVICES"
 else
 	echo_fail $R
 fi
