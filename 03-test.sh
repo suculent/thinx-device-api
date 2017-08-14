@@ -128,7 +128,7 @@ echo "» Pushing Env var..."
 
 echo "${R}"
 
-R=$(curl -v -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H "Authentication: ${API_KEY}" \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
@@ -174,11 +174,11 @@ fi
 
 echo
 echo "--------------------------------------------------------------------------------"
-echo "» Revoking ENV var(s)..."
+echo "» Revoking Env vars..."
 
 # {"revoked":"d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93","success":true}
 
-R=$(curl -v -s -b cookies.jar \
+R=$(curl -s -b cookies.jar \
 -H "Authentication: ${API_KEY}" \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
@@ -570,6 +570,7 @@ http://$HOST:7442/api/user/source)
 echo $R
 
 SUCCESS=$(echo $R | jq .success)
+echo $SUCCESS
 SOURCE_ID=null
 if [[ $SUCCESS == true ]]; then
   SOURCE_ID=$(echo $R | jq .source_id)
@@ -584,7 +585,9 @@ echo "» Testing source detach..."
 
 # {"success":true,"attached":null}
 
-R=$(curl -s -b cookies.jar \
+echo "Detaching device id: $DEVICE_ID"
+
+R=$(curl -V -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
@@ -596,6 +599,10 @@ if [[ $SUCCESS == true ]]; then
 	echo_ok "Detached source from device: ${DEVICE_ID}"
 else
 	echo_fail $R
+fi
+
+if [[ -z $SOURCE_ID ]]; then
+  exit 1
 fi
 
 echo
