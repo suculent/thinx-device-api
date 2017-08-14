@@ -1834,8 +1834,10 @@ var ThinxApp = function() {
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
 
-    /*
+
     var owner = req.session.owner;
+
+    /*
     var device = req.body.udid;
     var nid = "nid:" + device;
     var reply = req.body.reply;
@@ -1865,7 +1867,7 @@ var ThinxApp = function() {
     }
     */
 
-    devices.push(owner, body, function(error, response) {
+    devices.push(owner, req.body, function(error, response) {
       respond(res, {
         success: error,
         status: response
