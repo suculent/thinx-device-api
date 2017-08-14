@@ -13,8 +13,8 @@ describe("API Key", function() {
       APIKey.create(
         owner,
         "sample-key",
-        function(success,
-          object) {
+        function(success, object) {
+
           if (success) {
             this.generated_key_hash = object.hash;
             console.log("Key ready to revoke: " + this.generated_key_hash);
@@ -29,22 +29,24 @@ describe("API Key", function() {
                 this.generated_key_hash,
                 function(success) {
                   expect(success).toBe(true);
+
+                  //revoke: function(owner, apikey_hash, callback)
+                  it("should be able to revoke API Keys",
+                    function() {
+                      console.log("Revoking valid key: " +
+                        generated_key_hash);
+                      APIKey.revoke(
+                        generated_key_hash,
+                        "sample-key-hash",
+                        function(success) {
+                          expect(success).toBeDefined();
+                          done();
+                        });
+                    }, 5000);
+
                   done();
                 });
             }, 5000);
-
-            //revoke: function(owner, apikey_hash, callback)
-            it("should be able to revoke API Keys", function() {
-              console.log("Revoking valid key: " +
-                generated_key_hash);
-              APIKey.revoke(
-                generated_key_hash,
-                "sample-key-hash",
-                function(success) {
-                  expect(success).toBeDefined();
-                });
-            });
-
           }
           expect(object).toBeDefined();
           done();

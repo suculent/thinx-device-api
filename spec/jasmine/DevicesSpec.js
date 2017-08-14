@@ -19,7 +19,7 @@ describe("Devices", function() {
         response));
       done();
     });
-  });
+  }, 5000);
 
   it("should be able to attach a repository to device(s)", function(done) {
     var body = {
