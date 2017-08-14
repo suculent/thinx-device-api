@@ -7,7 +7,7 @@ machine:
 
 dependencies:
   pre:
-    - sudo apt-get install coveralls
+    - npm install coveralls -g
     - npm install pm2 -g
     - npm install nyc -g
     - npm install .
