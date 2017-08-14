@@ -17,54 +17,83 @@ describe("Device", function() {
   console.log("Using test API_KEY: " + apikey);
 
   it("should be able to register itself.", function(done) {
+
     device.register(JSON.parse(RS), apikey,
       function(success, response) {
         console.log("Registration result: " + JSON.stringify(response));
         expect(success).toBe(true);
-        done();
-      }, 5000);
 
-    it("should be able to change its alias.",
-      function(done) {
-        var changes = {
-          alias: Date().toString(),
-          udid: "to-be-deleted-on-test"
-        };
-        device.edit(owner, changes, function(
-          success, response) {
-          console.log("Editing result: " + JSON
-            .stringify(response));
-          expect(success).toBe(true);
-          expect(response).toBeDefined();
-          done();
-        });
+        it("should be able to provide device firmware",
+          function(done) {
+            // Returns "OK" when current firmware is valid.
+            device.firmware(body, apikey, function(
+              success,
+              response) {
+              console.log("Firmware fetch result: " +
+                JSON.stringify(
+                  response));
+              expect(success).toBe(true);
+              expect(response).toBeDefined();
+              console.log(
+                "Firmware check response: " +
+                JSON.stringify(
+                  response));
+              done();
+            });
+          }, 5000);
+
+        it("should be able to change its alias.",
+          function(done) {
+            var changes = {
+              alias: Date().toString(),
+              udid: "to-be-deleted-on-test"
+            };
+            device.edit(owner, changes, function(
+              success, response) {
+              console.log("Editing result: " + JSON
+                .stringify(response));
+              expect(success).toBe(true);
+              expect(response).toBeDefined();
+              done();
+            });
+          }, 5000);
+
+        it(
+          "should receive different response for already-registered revice",
+          function(done) {
+            device.register(JSON.parse(RS), apikey,
+              function(success, response) {
+                console.log("Re-registration result: " + JSON.stringify(
+                  response));
+                expect(success).toBe(true);
+                done();
+              });
+          }, 5000);
+
+        it("should be able to store OTT request", function(done) {
+          device.storeOTT({
+            sample: "body"
+          }, function(success, response) {
+            expect(success).toBe(true);
+            expect(response).toBeDefined();
+            var ott = response.ott;
+
+            it("should be able to fetch OTT request",
+              function(done) {
+                device.fetchOTT(ott, function(success,
+                  response) {
+                  expect(success).toBe(true);
+                  expect(response).toBeDefined();
+                  done();
+                });
+              }, 5000);
+
+            done();
+          });
+        }, 5000);
+
       });
-  }, 5000);
 
-  it(
-    "should receive different response for already-registered revice",
-    function(done) {
-      device.register(JSON.parse(RS), apikey,
-        function(success, response) {
-          console.log("Re-registration result: " + JSON.stringify(
-            response));
-          expect(success).toBe(true);
-          done();
-        });
-
-    }, 5000);
-
-  it("should be able to provide device firmware", function(done) {
-    // Returns "OK" when current firmware is valid.
-    device.firmware(body, apikey, function(success, response) {
-      console.log("Firmware fetch result: " + JSON.stringify(
-        response));
-      expect(success).toBe(true);
-      expect(response).toBeDefined();
-      console.log("Firmware check response: " + JSON.stringify(
-        response));
-      done();
-    });
-  }, 5999);
+  }, 15000); // register
 
 });

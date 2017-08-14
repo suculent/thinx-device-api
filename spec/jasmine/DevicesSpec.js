@@ -7,6 +7,7 @@ describe("Devices", function() {
   var owner = envi.owner;
   var source_id = envi.sid;
   var udid = envi.udid;
+  var ak = envi.ak;
 
   // All of this expects successful device registration to safely revoke!
 
