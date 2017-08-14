@@ -16,7 +16,7 @@ describe("Device", function() {
 
   console.log("Using test API_KEY: " + apikey);
 
-  it("should be able to register a device", function(done) {
+  it("should be able to register itself.", function(done) {
     device.register(JSON.parse(RS), apikey,
       function(success, response) {
         console.log("Registration result: " + JSON.stringify(response));
@@ -24,7 +24,7 @@ describe("Device", function() {
         done();
       }, 5000);
 
-    it("should be able to edit device alias",
+    it("should be able to change its alias.",
       function(done) {
         var changes = {
           alias: Date().toString(),
