@@ -17,7 +17,7 @@ describe("Transfer", function() {
       udids: [envi.udid]
     };
 
-    Transfer.request(owner, body, function(success, response) {
+    Transfer.request(this.owner, body, function(success, response) {
       console.log(response);
       expect(success).toBe(true);
       expect(response).toBeDefined();
@@ -48,7 +48,7 @@ describe("Transfer", function() {
       udids: [envi.udid]
     };
 
-    Transfer.request(owner, body, function(success, response) {
+    Transfer.request(this.owner, body, function(success, response) {
       console.log(response);
       expect(success).toBe(true);
       expect(response).toBeDefined();
