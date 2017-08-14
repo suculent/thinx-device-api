@@ -587,7 +587,7 @@ echo "» Testing source detach..."
 
 echo "Detaching device id: $DEVICE_ID"
 
-R=$(curl -V -b cookies.jar \
+R=$(curl -v -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
