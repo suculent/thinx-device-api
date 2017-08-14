@@ -33,7 +33,7 @@ describe("Devices", function() {
         response));
       done();
     });
-  });
+  }, 10000);
 
   it("should be able to detach a repository from device(s)", function(done) {
     var body = {

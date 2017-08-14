@@ -33,14 +33,14 @@ describe("Messenger", function() {
       // publish: function(owner, udid, message)
       it("should be able to publish upon connection", function() {
         Messenger.publish(test_owner, udid, "test");
+        done();
       });
-      done();
     });
-  }, 5000);
+  }, 15000);
 
   // init
   it("should be able to initialize on its own", function() {
-    Messenger.init();
+    Messenger.initWithOwner(test_owner);
   });
 
   it("should be able to get all owners", function(done) {
