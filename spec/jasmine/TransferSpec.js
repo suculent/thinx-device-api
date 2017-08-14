@@ -15,6 +15,7 @@ describe("Transfer", function() {
       to: "cimrman@thinx.cloud",
       udids: [envi.udid]
     };
+
     Transfer.request(owner, body, function(success, response) {
       console.log(response);
       expect(success).toBe(true);
@@ -30,10 +31,11 @@ describe("Transfer", function() {
         Transfer.decline(body, function(success, response) {
           expect(success).toBe(true);
           expect(response).toBeDefined();
-          console.log(JSON.stringify(response));
+          console.log("transfer decline response: " + JSON.stringify(
+            response));
           done();
         });
-      }, 10000);
+      }, 5000);
 
       //accept: function(body, callback) {
       it("should be able to accept transferred devices", function(
@@ -45,13 +47,14 @@ describe("Transfer", function() {
         Transfer.accept(body, function(success, response) {
           expect(success).toBe(true);
           expect(response).toBeDefined();
-          console.log(JSON.stringify(response));
+          console.log("transfer accept response: " + JSON.stringify(
+            response));
           done();
         });
-      }, 10000);
+      }, 5000);
 
       done();
-    }, 1000);
+    });
 
   }, 10000);
 
