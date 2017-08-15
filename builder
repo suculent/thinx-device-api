@@ -362,11 +362,9 @@ case $PLATFORM in
 				if [[ $BUILD_SUCCESS==true ]] ; then
 					STATUS='"OK"'
 					echo "TODO: Deploy artifacts."
-					pwd
-					ls
-					HEXFILE=./*.with_bootloader.hex
-					OUTFILE="${HEXFILE}"
 					cd *
+					OUTFILE=$(./*.with_bootloader.hex)
+					echo "OUTFILE: $OUTFILE"
 					pwd
 					ls
 					ls "$OWNER_PATH" >> "${LOG_PATH}"
