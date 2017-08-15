@@ -33,7 +33,7 @@ var ThinxApp = function() {
 
   var session_config = require("./conf/node-session.json");
   var app_config = require("./conf/config.json"); // this file should be actually omitted from repository
-  if (process.env.CIRCLE_CI === true) {
+  if (typeof(process.env.CIRCLE_USERNAME) !== "undefined") {
     console.log("» Starting on Circle CI...");
     app_config = require("./conf/config-test.json");
   }
