@@ -46,6 +46,7 @@ describe("Repository Watcher", function() {
   it("should be able to watch repository", function() {
 
     watcher.watchRepository(repo_path, true, function(result) {
+
       if (typeof(result) !== "undefined") {
         console.log("watcher_callback result: " + JSON.stringify(
           result));
@@ -76,6 +77,7 @@ describe("Repository Watcher", function() {
     watcher.checkRepositoryChange(repo_path, false, function(err,
       result) {
       expect(true).toBe(true);
+      console.log(result);
     });
   });
 
