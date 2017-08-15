@@ -434,6 +434,7 @@ fi
 
 if [[ "${OUTFILE}" == "" ]]; then
 	OUTFILE="<none>"
+fi
 
 echo "[builder.sh] Build completed with status: $STATUS" >> "${LOG_PATH}"
 
