@@ -34,7 +34,6 @@ describe("Messenger", function() {
   });
 
   it("should be able to get all owners", function(done) {
-    Messenger.init(); // get all devices
     Messenger.getAllOwners(function(success, status) {
       expect(success).toBe(true);
       console.log(JSON.stringify(status));
@@ -53,6 +52,8 @@ describe("Messenger", function() {
         Messenger.publish(test_owner, udid, "test");
         done();
       });
+
+      done();
     });
   }, 15000);
 

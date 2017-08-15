@@ -86,8 +86,7 @@ describe("Owner", function() {
   }, 10000);
 
   it("should be able to begin reset owner password", function(done) {
-    User.password_reset_init(email, function(
-      success, response) {
+    User.password_reset_init(email, function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
       console.log(JSON.stringify(response));
