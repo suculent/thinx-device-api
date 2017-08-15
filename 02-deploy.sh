@@ -55,8 +55,6 @@ else
 	echo "☢  Running node.js as a background process..."
 
 	mkdir logs
-	killall node
-	forever stopall
 	cd /root/thinx-device-api
 	pm2 start /root/thinx-device-api/index.js
 

@@ -867,7 +867,7 @@ fi
 
 if [ ! -z $CIRCLE ]; then
 
-	killall node
+	#killall node
 	pm2 stop index
 	exit 0
 
