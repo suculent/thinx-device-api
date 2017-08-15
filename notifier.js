@@ -52,6 +52,12 @@ console.log("-=[ ☢ THiNX IoT RTM NOTIFIER ☢ ]=-");
 
 // Parse input params
 
+// [2] d47b83c0-81ce-11e7-b5a2-8f1cacde898b
+// [3] c796c171dc598c11a1ea3b29a6a3def9b7b2949d
+// [4] 16
+// [5] git@github.com:suculent/thinx-firmware-esp8266-ino.git
+// [6] d2d7b050-7c53-11e7-b94e-15f5f3a64973 0x00000000 cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12 "OK"
+
 var build_id = process.argv[2]; // unique build identifier
 var commit_id = process.argv[3]; // build artifact commit_id
 var version = process.argv[4]; // build artifact version
@@ -132,6 +138,7 @@ nano.db.create(prefix + "managed_builds", function(err, body, header) {
 console.log("build_id : " + build_id);
 console.log("commit_id : " + commit_id);
 console.log("version : " + version);
+console.log("outfile/build_path : " + build_path);
 console.log("repo_url : " + repo_url);
 console.log("build_path : " + build_path);
 console.log("udid : " + udid);

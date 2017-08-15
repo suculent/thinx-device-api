@@ -411,16 +411,19 @@ case $PLATFORM in
     ;;
 esac
 
-if [ $STATUS !== "BUILD FAILED." ]; then
+if [ $STATUS != "BUILD FAILED." ]; then
 	SHAX=$(shasum -a 256 $OUTFILE)
 	SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
 else
 	SHA="0x00000000"
 fi
 
-if [ ! -f $OUTFILE ]; then
-	OUTFILE="nothing"
+if [[ ! -f "${OUTFILE}" ]]; then
+	OUTFILE="<none>"
 fi
+
+if [[ "${OUTFILE}" == "" ]]; then
+	OUTFILE="<none>"
 
 echo "[builder.sh] Build completed with status: $STATUS" >> "${LOG_PATH}"
 
