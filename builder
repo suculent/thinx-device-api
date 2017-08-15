@@ -248,7 +248,7 @@ case $PLATFORM in
 			docker run ${DOCKER_PREFIX} --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython >> "${LOG_PATH}"
 			rm -rf ./build; make clean; make V=1
 
-			if [[ $?==0 ]] ; then
+			if [[ $? == 0 ]] ; then
 				BUILD_SUCCESS=true
 			fi
 
@@ -260,7 +260,7 @@ case $PLATFORM in
 				STATUS='"DRY_RUN_OK"'
 			else
 				# Check Artifacts
-				if [[ $BUILD_SUCCESS==true ]] ; then
+				if [[ $BUILD_SUCCESS == true ]] ; then
 					STATUS='"OK"'
 					cp -v ./build/*.bin "$OUTPATH" >> "${LOG_PATH}"
 					cp -vR ./build/**/*.py "$OUTPATH" >> "${LOG_PATH}"
@@ -293,7 +293,7 @@ case $PLATFORM in
 
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build >> "${LOG_PATH}"
 
-			if [[ $?==0 ]] ; then
+			if [[ $? == 0 ]] ; then
 				BUILD_SUCCESS=true
 			fi
 
@@ -305,7 +305,7 @@ case $PLATFORM in
 				STATUS='"DRY_RUN_OK"'
 			else
 				# Check Artifacts
-				if [[ $BUILD_SUCCESS==true ]] ; then
+				if [[ $BUILD_SUCCESS == true ]] ; then
 					cp -v ./bin/*.bin "$OUTPATH" >> "${LOG_PATH}"
 					rm -rf ./bin/*
 					STATUS='"OK"'
@@ -329,7 +329,7 @@ case $PLATFORM in
 
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/mongoose-builder suculent/mongoose-docker-build >> "${LOG_PATH}"
 
-			if [[ $?==0 ]] ; then
+			if [[ $? == 0 ]] ; then
 				BUILD_SUCCESS=true
 			fi
 
@@ -341,7 +341,7 @@ case $PLATFORM in
 				STATUS='"DRY_RUN_OK"'
 			else
 				# Check Artifacts
-				if [[ $BUILD_SUCCESS==true ]] ; then
+				if [[ $BUILD_SUCCESS == true ]] ; then
 					STATUS='"OK"'
 					ls "$OWNER_PATH/build" >> "${LOG_PATH}"
 					unzip "${OWNER_PATH}/build/fw.zip" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
@@ -360,9 +360,12 @@ case $PLATFORM in
 			ls >> "${LOG_PATH}"
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/arduino-docker-build >> "${LOG_PATH}"
-			if [[ $?==0 ]] ; then
+			RESULT=$?
+			if [[ $RESULT == 0 ]] ; then
 				BUILD_SUCCESS=true
 				echo "Docker build succeeded." >> "${LOG_PATH}"
+			else
+				echo "Docker build with result ${RESULT}" >> "${LOG_PATH}"
 			fi
 			ls >> "${LOG_PATH}"
 			# Exit on dry run...
@@ -371,7 +374,7 @@ case $PLATFORM in
 				STATUS='"DRY_RUN_OK"'
 			else
 				# Check Artifacts
-				if [[ $BUILD_SUCCESS==true ]] ; then
+				if [[ $BUILD_SUCCESS == true ]] ; then
 					STATUS='"OK"'
 					echo "Exporting artifacts" >> "${LOG_PATH}"
 					pwd >> "${LOG_PATH}"
@@ -395,7 +398,7 @@ case $PLATFORM in
 		platformio)
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/platformio-builder suculent/platformio-docker-build >> "${LOG_PATH}"
-			if [[ $?==0 ]] ; then
+			if [[ $? == 0 ]] ; then
 				BUILD_SUCCESS=true
 			fi
 			ls
@@ -406,7 +409,7 @@ case $PLATFORM in
 				STATUS='"DRY_RUN_OK"'
 			else
 				# Check Artifacts
-				if [[ $BUILD_SUCCESS==true ]] ; then
+				if [[ $BUILD_SUCCESS == true ]] ; then
 					STATUS='"OK"'
 					ls "${OWNER_PATH}/.pioenvs/" >> "${LOG_PATH}"
 					# TODO: d1_mini is a board name that is not parametrized but must be eventually
