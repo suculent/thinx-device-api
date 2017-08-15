@@ -382,9 +382,11 @@ case $PLATFORM in
 					echo "OUTFILE: $OUTFILE" >> "${LOG_PATH}"
 					# Deploy Artifacts
 					cd $(ls -d */)
+					echo "Current workdir: " >> "${LOG_PATH}"
 					pwd >> "${LOG_PATH}"
+					echo "Current workdir contents: " >> "${LOG_PATH}"
 					ls >> "${LOG_PATH}"
-					cp -v *.ino.with_bootloader.hex "$OUTFILE" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
+					cp -v ./*.ino.with_bootloader.hex "$OUTFILE" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
 					echo "$DEPLOYMENT_PATH contains:" >> "${LOG_PATH}"
 					ls $DEPLOYMENT_PATH >> "${LOG_PATH}"
 				else
