@@ -372,6 +372,9 @@ case $PLATFORM in
 					ls
 					echo "OUTFILE: $OUTFILE"
 					# Deploy Artifacts
+					cd $(ls -d */)
+					pwd
+					ls
 					cp -v *.ino.with_bootloader.hex "$OUTFILE" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
 					echo "$DEPLOYMENT_PATH contains:"
 					ls $DEPLOYMENT_PATH
@@ -478,3 +481,5 @@ echo $MSG; echo $MSG >> "${LOG_PATH}"
 
 # copy whole log output to console for easier debugging
 cat "${LOG_PATH}"
+
+exit 0
