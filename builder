@@ -353,8 +353,6 @@ case $PLATFORM in
 				BUILD_SUCCESS=true
 			fi
 
-			ls
-
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
 				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> "${LOG_PATH}"
@@ -364,7 +362,10 @@ case $PLATFORM in
 				if [[ $BUILD_SUCCESS==true ]] ; then
 					STATUS='"OK"'
 					echo "TODO: Deploy artifacts."
-					OUTFILE="${OWNER_PATH}/*.bin"
+					pwd
+					ls
+					HEXFILE=./*.with_bootloader.hex
+					OUTFILE="${HEXFILE}"
 					cd *
 					pwd
 					ls
