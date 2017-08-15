@@ -46,15 +46,13 @@ describe("Messenger", function() {
     Messenger.initWithOwner(test_owner, function(success, status) {
       expect(success).toBe(true);
       console.log(JSON.stringify(status));
-
-      // publish: function(owner, udid, message)
-      it("should be able to publish upon connection", function() {
-        Messenger.publish(test_owner, udid, "test");
-        done();
-      });
-
       done();
     });
   }, 15000);
+
+  // publish: function(owner, udid, message); returns nothing
+  it("should be able to publish upon connection", function() {
+    Messenger.publish(test_owner, udid, "test");
+  });
 
 }, 10000);
