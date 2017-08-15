@@ -368,18 +368,17 @@ case $PLATFORM in
 				# Check Artifacts
 				if [[ $BUILD_SUCCESS==true ]] ; then
 					STATUS='"OK"'
-					echo "TODO: Deploy artifacts."
-					cd *
-					OUTFILE=$(./*.with_bootloader.hex)
-					echo "OUTFILE: $OUTFILE"
 					pwd
 					ls
-					ls "$OWNER_PATH" >> "${LOG_PATH}"
-					cp -vR "${OWNER_PATH}/firmware.bin" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
+					echo "OUTFILE: $OUTFILE"
+					# Deploy Artifacts
+					cp -v *.ino.with_bootloader.hex "$OUTFILE" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
+					echo "$DEPLOYMENT_PATH contains:"
+					ls $DEPLOYMENT_PATH
 				else
 					STATUS='"BUILD FAILED."'
 				fi
-				# TODO: deploy
+
 			fi
 
 		;;
