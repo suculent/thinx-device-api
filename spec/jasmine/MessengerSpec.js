@@ -3,6 +3,7 @@ var Messenger = require('../../lib/thinx/messenger');
 
 var envi = require("./_envi.json");
 var test_owner = envi.oid;
+var udid = envi.udid;
 
 describe("Messenger", function() {
 

@@ -849,7 +849,7 @@ else
 	echo_fail $R
 fi
 
-exit 0
+#exit 0
 
 #echo
 #echo "☢ Running nyc code coverage..."
@@ -864,20 +864,28 @@ exit 0
 
 # karma start
 
-echo
-echo "» Terminating node.js..."
 
-DAEMON="node index.js"
-NODEZ=$(ps -ax | grep "$DAEMON")
+if [ ! -z $CIRCLE ]; then
 
-if [[ $(echo $NODEZ | wc -l) > 1 ]]; then
+	killall node
+	pm2 stop index
+	exit 0
 
-	echo "${NODEZ}" | while IFS="pts" read A B ; do
-		NODE=$($A | tr -d ' ')
-		echo "Killing: " $NODE $B
-		kill "$NODE"
-	done
+	echo
+	echo "» Terminating node.js..."
 
-else
-	echo "${NODEZ}"
+	DAEMON="node index.js"
+	NODEZ=$(ps -ax | grep "$DAEMON")
+
+	if [[ $(echo $NODEZ | wc -l) > 1 ]]; then
+
+		echo "${NODEZ}" | while IFS="pts" read A B ; do
+			NODE=$($A | tr -d ' ')
+			echo "Killing: " $NODE $B
+			kill "$NODE"
+		done
+
+	else
+		echo "${NODEZ}"
+	fi
 fi

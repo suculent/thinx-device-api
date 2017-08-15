@@ -19,7 +19,6 @@ dependencies:
     - pwd; ls
   cache_directories:
     - redis-3.2.0
-    - thinx-device-api
 
 ## Customize database setup
 database:
