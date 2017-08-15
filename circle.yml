@@ -7,10 +7,8 @@ machine:
 
 dependencies:
   pre:
-    - sudo apt update && apt install -y mosquitto mosquitto-clients
-    - npm install coveralls -g
-    - npm install pm2 -g
-    - npm install nyc -g
+    - sudo apt-get update && sudo apt-get install -y mosquitto mosquitto-clients
+    - npm install coveralls pm2 nyc -g
     - npm install .
     - wget http://download.redis.io/releases/redis-3.2.0.tar.gz
     - tar xzf redis-3.2.0.tar.gz
@@ -19,6 +17,7 @@ dependencies:
     - pwd; ls
   cache_directories:
     - redis-3.2.0
+    - thinx-device-api
 
 ## Customize database setup
 database:
