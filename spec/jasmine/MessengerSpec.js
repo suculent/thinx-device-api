@@ -46,6 +46,7 @@ describe("Messenger", function() {
   it("should be able to connect", function(done) {
     Messenger.initWithOwner(test_owner, function(success, status) {
       expect(success).toBe(true);
+      expect(status).toBeDefined();
       console.log(JSON.stringify(status));
       done();
     });

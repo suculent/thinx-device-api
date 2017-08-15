@@ -25,10 +25,12 @@ describe("Devices", function() {
       source_id: source_id,
       udid: udid
     };
+    console.log("Attach request...");
     devices.attach(owner, body, function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
       console.log("Attach response: " + JSON.stringify(response));
+      console.log("Waiting for response......");
       done();
     });
   }, 10000);

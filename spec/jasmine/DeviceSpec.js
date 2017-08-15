@@ -7,6 +7,7 @@ describe("Device", function() {
   var owner = envi.oid;
   var udid = envi.udid;
   var apikey = envi.ak;
+  var ott = null;
 
   var RS =
     '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "DeviceSpec.js", "version" : "1.0.0", "checksum" : "nevermind", "push" : "forget", "alias" : "npmtest", "owner": "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12", "udid": "to-be-deleted-on-test", "owner": "' +
@@ -80,14 +81,15 @@ describe("Device", function() {
     }, function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
-      var ott = response.ott;
+      this.ott = response.ott;
       done();
     });
   }, 5000);
 
   it("should be able to fetch OTT request",
     function(done) {
-      device.fetchOTT(ott, function(success,
+      expect(this.ott).toBeDefined();
+      device.fetchOTT(this.ott, function(success,
         response) {
         expect(success).toBe(true);
         expect(response).toBeDefined();
