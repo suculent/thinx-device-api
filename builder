@@ -221,7 +221,7 @@ echo "Language name: ${LANGUAGE_NAME}"
 echo "[builder.sh] Building for platform ${PLATFORM} in language ${LANGUAGE_NAME}..."
 
 SHA="0x00000000"
-OUTFILE="build.failed"
+OUTFILE="<failed>"
 BUILD_SUCCESS=false
 
 # If running inside Docker, we'll start builders as siblings
@@ -355,8 +355,11 @@ case $PLATFORM in
     ;;
 
 		arduino)
+		  echo "Building for Arduino from folder:">> "${LOG_PATH}"
+		  pwd >> "${LOG_PATH}"
+			ls >> "${LOG_PATH}"
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
-			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/arduino-builder suculent/arduino-docker-build >> "${LOG_PATH}"
+			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/arduino-docker-build >> "${LOG_PATH}"
 			if [[ $?==0 ]] ; then
 				BUILD_SUCCESS=true
 				echo "Docker build succeeded." >> "${LOG_PATH}"
