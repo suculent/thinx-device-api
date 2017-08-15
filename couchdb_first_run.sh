@@ -19,7 +19,7 @@ if [ ! -z "$DB" ]; then
     echo "Creating database: \"$DB\"..."
     curl -X PUT http://$USER:$PASS@127.0.0.1:5984/$DB
 
-    echo $THX_PREFIX ./conf/.thx_prefix
+    echo $THX_PREFIX >> ./conf/.thx_prefix
 
     sed -i -- 's/rtmapi:frohikey/${USER}:${PASS}/g' ./conf/conf.json
     curl -X PUT http://$USER:$PASS@127.0.0.1:5984/${THX_PREFIX}_managed_devices/_design/devicelib -d @design/design_deviceslib.json
