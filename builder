@@ -359,6 +359,21 @@ case $PLATFORM in
     ;;
 
 		arduino)
+		for FILE in `ls -l`
+			do
+			    if test -d $FILE
+			    then
+			      echo "$FILE is a subdirectory, entering..."
+						# TODO: if $FILE contains *.ino
+						INOS=$($FILE/*.ino)
+						if [[ ! -z "${INOS}" ]]; then
+							cd $FILE
+							break
+						else
+							echo "Skipping ${FILE} for there are no INOS inside..."
+						fi
+			    fi
+			done
 		  echo "Building for Arduino from folder:"
 		  echo "Building for Arduino from folder:" >> "${LOG_PATH}"
 			pwd
