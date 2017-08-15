@@ -476,9 +476,9 @@ echo -e "${RESULT}"
 echo -e "${RESULT}" >> "${LOG_PATH}"
 
 # Upgrade Platformio in case new version is available
-if [[ $RESULT=="*platformio upgrade*" ]]; then
+if [[ $RESULTAuto-updating platformio..."*platformio upgrade*" ]]; then
 		echo "Auto-updating platformio..."
-		platformio upgrade
+		platformio upgrade > /dev/null
 fi
 
 CLEANUP_RESULT=$(bash $THINX_ROOT/couch_cleanup.sh)
