@@ -7,7 +7,7 @@ machine:
 
 dependencies:
   pre:
-    - sudo apt-get update && sudo apt-get install -y mosquitto mosquitto-clients
+    - sudo apt-get update && sudo apt-get install -y mosquitto mosquitto-clients sendmail
     - npm install coveralls pm2 nyc -g
     - npm install .
     - wget http://download.redis.io/releases/redis-3.2.0.tar.gz
