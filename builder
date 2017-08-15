@@ -231,6 +231,8 @@ else
 	DOCKER_PREFIX=""
 fi
 
+echo "Current work path: $(pwd)" >> "${LOG_PATH}"
+
 case $PLATFORM in
 
     micropython)
@@ -357,9 +359,9 @@ case $PLATFORM in
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/arduino-builder suculent/arduino-docker-build >> "${LOG_PATH}"
 			if [[ $?==0 ]] ; then
 				BUILD_SUCCESS=true
+				echo "Docker build succeeded." >> "${LOG_PATH}"
 			fi
-			ls
-
+			ls >> "${LOG_PATH}"
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
 				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> "${LOG_PATH}"
@@ -368,16 +370,17 @@ case $PLATFORM in
 				# Check Artifacts
 				if [[ $BUILD_SUCCESS==true ]] ; then
 					STATUS='"OK"'
-					pwd
-					ls
-					echo "OUTFILE: $OUTFILE"
+					echo "Exporting artifacts" >> "${LOG_PATH}"
+					pwd >> "${LOG_PATH}"
+					ls >> "${LOG_PATH}"
+					echo "OUTFILE: $OUTFILE" >> "${LOG_PATH}"
 					# Deploy Artifacts
 					cd $(ls -d */)
-					pwd
-					ls
+					pwd >> "${LOG_PATH}"
+					ls >> "${LOG_PATH}"
 					cp -v *.ino.with_bootloader.hex "$OUTFILE" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
-					echo "$DEPLOYMENT_PATH contains:"
-					ls $DEPLOYMENT_PATH
+					echo "$DEPLOYMENT_PATH contains:" >> "${LOG_PATH}"
+					ls $DEPLOYMENT_PATH >> "${LOG_PATH}"
 				else
 					STATUS='"BUILD FAILED."'
 				fi
@@ -421,15 +424,13 @@ case $PLATFORM in
     ;;
 esac
 
-if [ $STATUS != "BUILD FAILED." ]; then
-	SHAX=$(shasum -a 256 $OUTFILE)
-	SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
-else
-	SHA="0x00000000"
-fi
 
 if [[ ! -f "${OUTFILE}" ]]; then
 	OUTFILE="<none>"
+	SHA="0x00000000"
+else
+	SHAX=$(shasum -a 256 $OUTFILE)
+	SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
 fi
 
 if [[ "${OUTFILE}" == "" ]]; then
