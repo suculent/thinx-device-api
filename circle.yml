@@ -27,15 +27,15 @@ database:
 
 ## Customize test commands
 test:
-  pre:    
+  pre:
     - sudo service redis-server start
     - bash ./02-deploy.sh:
         background: true
   commands:
     - bash ./03-test.sh
-    - killall node
+
   post:
-    - bash ./01-analyze.sh    
+    - bash ./01-analyze.sh
 
 ## Customize deployment commands
 deployment:

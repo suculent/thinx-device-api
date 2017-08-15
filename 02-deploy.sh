@@ -17,7 +17,7 @@ echo "» Checking if node.js is running..."
 service thinx-app status
 service thinx-app stop
 
-killall node # will deprecate
+#killall node # will deprecate
 killall tail # will deprecate
 forever stopall # will deprecate
 
