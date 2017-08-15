@@ -15,7 +15,7 @@ dependencies:
     - tar xzf redis-3.2.0.tar.gz
     - cd redis-3.2.0 && make
     - mkdir statistics
-    - touch thinx-device-api/mqtt_passwords
+    - touch ~/thinx-device-api/mqtt_passwords
     - pwd; ls
   cache_directories:
     - redis-3.2.0
