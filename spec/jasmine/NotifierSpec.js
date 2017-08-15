@@ -2,14 +2,13 @@ describe("Notifier", function() {
 
   var envi = require("./_envi.json");
   var owner = envi.oid;
+  var exec = require("child_process");
 
   // Well, this will be some fun. The notifier.js is being called on following circumstances:
   // node.js process exeutes the builder.sh (should do that in background, but initial test versions did this synchronously
   // builder.sh calls the node.js with statically allocated parameters. and the damned feat hijak is cool and like edrush and better than those rappers.
 
-  var exec = require("child_process");
-
-  it("is complicated", function(done) {
+  it("should be able to send a notification", function(done) {
     // Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope
     // (or stores into DB later)
 
@@ -37,9 +36,9 @@ describe("Notifier", function() {
       status;
 
     // CMD: "${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${BUILD_ID}.bin ${UDID} ${SHA} ${OWNER_ID} ${STATUS}";
-    var exec = require("child_process");
-    var temp = exec.execSync(CMD);
-    expect(temp).toBeDefined();
+    var error = exec.execSync(CMD);
+    console.log("Notifier result: " + error.toString());
+    expect(error).not.toBeDefined();
     done();
 
   }, 60000);

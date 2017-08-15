@@ -33,7 +33,7 @@ describe("Devices", function() {
       console.log("Waiting for response......");
       done();
     });
-  }, 10000);
+  }, 30000);
 
   it("should be able to detach a repository from device(s)", function(done) {
     var body = {
@@ -45,7 +45,7 @@ describe("Devices", function() {
       console.log("Detach response: " + JSON.stringify(response));
       done();
     });
-  });
+  }, 30000);
 
   // requires specific device registered for this test only (udid "to-be-deleted-on-test")
   it("should be able to revoke devices for owner", function(done) {
@@ -58,6 +58,5 @@ describe("Devices", function() {
       console.log("Revoke response: " + JSON.stringify(response));
       done();
     });
-  });
-
+  }, 30000);
 });
