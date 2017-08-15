@@ -263,8 +263,6 @@ case $PLATFORM in
 					rm -rf ./build/*
 					ls "$OUTPATH" >> "${LOG_PATH}"
 					OUTFILE="${OUTPATH}/*.bin"
-					SHAX=$(shasum -a 256 $OUTFILE)
-					SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
 				else
 					STATUS='"BUILD FAILED."'
 				fi
@@ -307,8 +305,6 @@ case $PLATFORM in
 					STATUS='"OK"'
 					ls "$OWNER_PATH" >> "${LOG_PATH}"
 					OUTFILE="${OWNER_PATH}/firmware.bin"
-					SHAX=$(shasum -a 256 $OUTFILE)
-					SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
 				else
 					STATUS='"BUILD FAILED."'
 				fi
@@ -343,8 +339,6 @@ case $PLATFORM in
 					unzip "${OWNER_PATH}/build/fw.zip" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
 					ls "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
 					echo $MSG; echo $MSG >> "${LOG_PATH}"
-					SHAX=$(shasum -a 256 $OUTFILE) # OUTFILE
-					SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
 				else
 					STATUS='"BUILD FAILED."'
 				fi
@@ -359,6 +353,8 @@ case $PLATFORM in
 				BUILD_SUCCESS=true
 			fi
 
+			ls
+
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
 				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> "${LOG_PATH}"
@@ -369,12 +365,11 @@ case $PLATFORM in
 					STATUS='"OK"'
 					echo "TODO: Deploy artifacts."
 					OUTFILE="${OWNER_PATH}/*.bin"
+					cd *
 					pwd
 					ls
 					ls "$OWNER_PATH" >> "${LOG_PATH}"
 					cp -vR "${OWNER_PATH}/firmware.bin" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
-					SHAX=$(shasum -a 256 $OUTFILE)
-					SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
 				else
 					STATUS='"BUILD FAILED."'
 				fi
@@ -401,8 +396,6 @@ case $PLATFORM in
 					ls "${OWNER_PATH}/.pioenvs/" >> "${LOG_PATH}"
 					# TODO: d1_mini is a board name that is not parametrized but must be eventually
 					OUTFILE="${OWNER_PATH}/.pioenvs/d1_mini/firmware.bin"
-					SHAX=$(shasum -a 256 $OUTFILE)
-					SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
 					cp -vR "${OUTFILE}" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
 				else
 					STATUS='"BUILD FAILED."'
@@ -418,6 +411,13 @@ case $PLATFORM in
       exit 1
     ;;
 esac
+
+if [ $STATUS !== "BUILD FAILED." ]; then
+	SHAX=$(shasum -a 256 $OUTFILE)
+	SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
+else
+	SHA="0x00000000"
+fi
 
 echo "[builder.sh] Build completed with status: $STATUS" >> "${LOG_PATH}"
 
