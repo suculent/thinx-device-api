@@ -418,6 +418,10 @@ else
 	SHA="0x00000000"
 fi
 
+if [ ! -f $OUTFILE ]; then
+	OUTFILE="nothing"
+fi
+
 echo "[builder.sh] Build completed with status: $STATUS" >> "${LOG_PATH}"
 
 popd
@@ -431,6 +435,7 @@ echo "BUILD_ID" "${BUILD_ID}" >> "${LOG_PATH}"
 echo "COMMIT" "${COMMIT}" >> "${LOG_PATH}"
 echo "VERSION" "${VERSION}" >> "${LOG_PATH}"
 echo "GIT_REPO" "${GIT_REPO}" >> "${LOG_PATH}"
+echo "OUTFILE" "${OUTFILE}" >> "${LOG_PATH}"
 echo "DEPLOYMENT_PATH" "${DEPLOYMENT_PATH}" >> "${LOG_PATH}"
 echo "UDID" "${UDID}" >> "${LOG_PATH}"
 echo "SHA" "${SHA}" >> "${LOG_PATH}"
