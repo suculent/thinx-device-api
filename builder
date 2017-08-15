@@ -53,6 +53,8 @@ case $i in
 		-u=*|--udid=*)
 		    UDID="${i#*=}"
 		;;
+		-w=*|--workdir=*)
+				WORKDIR="${i#*=}"
     *)
       # unknown option
     ;;
@@ -129,14 +131,13 @@ if [[ ! -d $OWNER_PATH ]]; then
 	mkdir -p $OWNER_PATH
 fi
 
-echo "[builder.sh] Entering owner folder $OWNER_PATH"
-pushd $OWNER_PATH > /dev/null
+echo "[builder.sh] Entering owner folder $OWNER_PATH" >> "${LOG_PATH}"
+pushd $OWNER_PATH >> "${LOG_PATH}"
 
 # Create new working directory
-echo "[builder.sh] Creating new working directory $REPO_PATH"
+echo "[builder.sh] Creating new working directory $REPO_PATH" >> "${LOG_PATH}"
 mkdir -p ./$REPO_PATH
-
-ls
+ls >> "${LOG_PATH}"
 
 # enter git user folder if any
 if [[ -d $GIT_USER ]]; then
@@ -230,6 +231,8 @@ if [ -f /.dockerenv ]; then
 else
 	DOCKER_PREFIX=""
 fi
+
+pushd $WORKDIR  >> "${LOG_PATH}"
 
 echo "Current work path: $(pwd)" >> "${LOG_PATH}"
 
@@ -460,6 +463,7 @@ fi
 
 echo "[builder.sh] Build completed with status: $STATUS" >> "${LOG_PATH}"
 
+popd
 popd
 popd
 
