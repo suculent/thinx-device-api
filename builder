@@ -478,7 +478,7 @@ echo -e "${RESULT}"
 echo -e "${RESULT}" >> "${LOG_PATH}"
 
 # Upgrade Platformio in case new version is available
-if [[ $RESULTAuto-updating platformio..."*platformio upgrade*" ]]; then
+if [[ $RESULT == "*platformio upgrade*" ]]; then
 		echo "Auto-updating platformio..."
 		platformio upgrade > /dev/null
 fi
