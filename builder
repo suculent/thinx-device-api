@@ -250,6 +250,8 @@ case $PLATFORM in
 				BUILD_SUCCESS=true
 			fi
 
+			ls
+
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
 				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> "${LOG_PATH}"
@@ -293,6 +295,8 @@ case $PLATFORM in
 				BUILD_SUCCESS=true
 			fi
 
+			ls
+
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
 				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> "${LOG_PATH}"
@@ -327,6 +331,8 @@ case $PLATFORM in
 				BUILD_SUCCESS=true
 			fi
 
+			ls
+
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
 				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> "${LOG_PATH}"
@@ -352,6 +358,7 @@ case $PLATFORM in
 			if [[ $?==0 ]] ; then
 				BUILD_SUCCESS=true
 			fi
+			ls
 
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
@@ -383,6 +390,7 @@ case $PLATFORM in
 			if [[ $?==0 ]] ; then
 				BUILD_SUCCESS=true
 			fi
+			ls
 
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
