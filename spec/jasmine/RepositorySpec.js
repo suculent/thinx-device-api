@@ -1,7 +1,10 @@
 describe("Repository Watcher", function() {
 
   var watcher = require('../../lib/thinx/repository');
-  var repo_path = "../test_repository/thinx-firmware-esp8266-ino";
+
+  // tests are run from ROOT
+  var repo_path =
+    "./spec/test_repository/thinx-firmware-esp8266-ino";
 
   var watcher_callback = function(result) {
     if (typeof(result) !== "undefined") {
