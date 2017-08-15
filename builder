@@ -355,18 +355,24 @@ case $PLATFORM in
     ;;
 
 		arduino)
-		  echo "Building for Arduino from folder:">> "${LOG_PATH}"
+		  echo "Building for Arduino from folder:"
+		  echo "Building for Arduino from folder:" >> "${LOG_PATH}"
+			pwd
 		  pwd >> "${LOG_PATH}"
+			ls
 			ls >> "${LOG_PATH}"
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/arduino-docker-build >> "${LOG_PATH}"
 			RESULT=$?
 			if [[ $RESULT == 0 ]] ; then
 				BUILD_SUCCESS=true
+				echo "Docker build succeeded."
 				echo "Docker build succeeded." >> "${LOG_PATH}"
 			else
+				echo "Docker build with result ${RESULT}"
 				echo "Docker build with result ${RESULT}" >> "${LOG_PATH}"
 			fi
+			ls
 			ls >> "${LOG_PATH}"
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
@@ -376,25 +382,32 @@ case $PLATFORM in
 				# Check Artifacts
 				if [[ $BUILD_SUCCESS == true ]] ; then
 					STATUS='"OK"'
+					echo "Exporting artifacts"
 					echo "Exporting artifacts" >> "${LOG_PATH}"
+					pwd
 					pwd >> "${LOG_PATH}"
+					ls
 					ls >> "${LOG_PATH}"
+					echo "OUTFILE: $OUTFILE"
 					echo "OUTFILE: $OUTFILE" >> "${LOG_PATH}"
 					# Deploy Artifacts
 					cd $(ls -d */)
+					echo "Current workdir: "
 					echo "Current workdir: " >> "${LOG_PATH}"
+					pwd
 					pwd >> "${LOG_PATH}"
 					echo "Current workdir contents: " >> "${LOG_PATH}"
+					ls
 					ls >> "${LOG_PATH}"
 					cp -v ./*.ino.with_bootloader.hex "$OUTFILE" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
+					echo "$DEPLOYMENT_PATH contains:"
 					echo "$DEPLOYMENT_PATH contains:" >> "${LOG_PATH}"
+					ls $DEPLOYMENT_PATH
 					ls $DEPLOYMENT_PATH >> "${LOG_PATH}"
 				else
 					STATUS='"BUILD FAILED."'
 				fi
-
 			fi
-
 		;;
 
 		platformio)
