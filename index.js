@@ -33,18 +33,14 @@ var ThinxApp = function() {
 
   var session_config = require("./conf/node-session.json");
   var app_config = require("./conf/config.json"); // this file should be actually omitted from repository
-
-  // Fix for (mainly) builder in pm2
   if (process.env.CIRCLE_CI === true) {
     console.log("» Starting on Circle CI...");
     app_config = require("./conf/config-test.json");
   }
-
   if (process.env.LOGNAME == "sychram") {
     console.log("» Starting on workstation...");
     app_config = require("./conf/config-local.json");
   }
-
   if (process.env.LOGNAME == "root") {
     console.log("» Starting in production mode...");
     app_config = require("./conf/config.json");
