@@ -1952,7 +1952,7 @@ var ThinxApp = function() {
   var ssl_options = null;
 
   // disable HTTPS on CIRCLE CI
-  if (typeof(process.env.CIRCLE_USERNAME) !== "undefined") {
+  if (typeof(process.env.CIRCLE_USERNAME) === "undefined") {
 
     if ((fs.existsSync(app_config.ssl_key)) &&
       (fs.existsSync(app_config.ssl_cert))) {
