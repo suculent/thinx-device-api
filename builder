@@ -480,6 +480,6 @@ MSG="${BUILD_DATE} Done."
 echo $MSG; echo $MSG >> "${LOG_PATH}"
 
 # copy whole log output to console for easier debugging
-cat "${LOG_PATH}"
+#cat "${LOG_PATH}"
 
 exit 0
