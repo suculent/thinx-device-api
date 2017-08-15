@@ -140,7 +140,7 @@ console.log("status : " + status);
 
 var blog = require("./lib/thinx/buildlog");
 
-blog.log(build_id, owner, udid, "Build completed.");
+blog.log(build_id, owner, udid, status);
 
 //
 // Device -> Souce Alias -> User -> Sources ...
@@ -242,7 +242,7 @@ devicelib.get(udid, function(err, doc) {
 
     console.log("STATUS: " + status);
 
-    if (status === true) {
+    if (status === true || status.indexOf("OK") === 0) {
       slack.alert({
         text: "Build successfully completed.",
         username: "notifier.js",
