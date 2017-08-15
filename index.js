@@ -1995,11 +1995,18 @@ var ThinxApp = function() {
     saveUninitialized: true,
   }));
 
-  var wserver = https.createServer(ssl_options, wsapp);
+  var wserver = null;
+  if (typeof(process.env.CIRCLE_USERNAME) === "undefined") {
+    wserver = https.createServer(ssl_options, wsapp);
+  } else {
+    wserver = http.createServer(wsapp);
+  }
+
   var wss = new WebSocket.Server({
     port: socketPort,
     server: wserver
   });
+
 
   var _ws = null;
 
