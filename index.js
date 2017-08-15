@@ -1951,14 +1951,15 @@ var ThinxApp = function() {
 
   var ssl_options = null;
 
-  // disable HTTPS on CIRCLE_CI
-  if (process.env.CIRCLE_CI !== true) {
+  // disable HTTPS on CIRCLE CI
+  if (typeof(process.env.CIRCLE_USERNAME) !== "undefined") {
 
     if ((fs.existsSync(app_config.ssl_key)) &&
       (fs.existsSync(app_config.ssl_cert))) {
       ssl_options = {
         key: fs.readFileSync(app_config.ssl_key),
-        cert: fs.readFileSync(app_config.ssl_cert)
+        cert: fs.readFileSync(app_config.ssl_cert),
+        NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
       };
       console.log("» Starting HTTPS server on " + (serverPort + 1) +
         "...");
