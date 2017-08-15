@@ -365,7 +365,8 @@ case $PLATFORM in
 			    then
 			      echo "$FILE is a subdirectory, entering..."
 						# TODO: if $FILE contains *.ino
-						INOS=$($FILE/*.ino)
+						INOS=$(ls $FILE/*.ino)
+						echo "INOS: ${INOS}"
 						if [[ ! -z "${INOS}" ]]; then
 							cd $FILE
 							break
