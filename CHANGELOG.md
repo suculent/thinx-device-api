@@ -9,14 +9,14 @@ Deployment is not verified, therefore update cannot be tested.
 
 ### Arduino
 
-Docker builder works and fails on bugs in library dependency mapping.
+Docker builder works in specified workdir and fails on bugs in library dependency mapping.
 Deployment is not verified, therefore update cannot be tested.
 
 ### NodeMCU
 
-File-based update has been pre-tested. Docker builder works fine but needs tighter integration with sources.
+File-based update has been pre-tested. Docker builder works fine but needs tighter integration with sources (workdir).
 Deployment is not verified, therefore update cannot be tested.
-There's currently no known test-device (Miki?)
+There's currently no test-device (Miki?) but many actually in production.
 
 ### Micropython
 
@@ -31,6 +31,8 @@ Test device is assigned.
 
 ## ROADMAP
 
+* fix dependency imports (prefetch all known Arduino libs to ino/pio environments)
+
 * test pio build
 * test e2e pio update
 * test ino build + e2e
@@ -40,7 +42,11 @@ Test device is assigned.
 
 ## CHANGELOG
 
+15/8/2017: 0.9.2203 - Restored Circle CI testing workflow; advancing Arduino Docker Build - directed path to workdir results in successful build start, but managed library <THiNXLib.h> needs to be fetched to local repo first (inside Docker builder image).
 
+### 19th week
+
+...getting stucked on SPIFFS-related crashes on Arduino, while doing a lots of fixes on UI...
 
 8/8/2017: 0.9.2080 RELEASE - Minimal MongooseOS registration example for testing Docker builder; checking LUA module registration (fixed memory issues)
 
