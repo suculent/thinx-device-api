@@ -55,6 +55,7 @@ case $i in
 		;;
 		-w=*|--workdir=*)
 				WORKDIR="${i#*=}"
+		;;
     *)
       # unknown option
     ;;
