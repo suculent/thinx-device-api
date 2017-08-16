@@ -446,14 +446,14 @@ case $PLATFORM in
 				echo "PIOD: $PIOD"
 				if [[ -d "${PIOD}" ]]; then
 					echo "$PIOD is a subdirectory, entering..."
-					cd $PIOD					
+					cd $PIOD
 				else
 					echo "Skipping ${FILE} for there are no PIOS inside..."
 				fi
 		  fi
 
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
-			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/platformio-builder suculent/platformio-docker-build >> "${LOG_PATH}"
+			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/platformio-builder suculent/platformio-docker-build # >> "${LOG_PATH}"
 			if [[ $? == 0 ]] ; then
 				BUILD_SUCCESS=true
 			fi
