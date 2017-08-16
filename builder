@@ -437,6 +437,24 @@ case $PLATFORM in
 		;;
 
 		platformio)
+		for FILE in `ls -l`
+			do
+					if test -d $PDIR
+					then
+						echo "$FILE is a subdirectory, entering..."
+						PIOS=$(ls $PDIR/platformio.ini)
+						echo "PIOS: ${PIOS}"
+						if [[ ! -z "${PIOS}" ]]; then
+							cd $PDIR
+							echo "Found platformio.ini in $PDIR"
+							pwd
+							break
+						else
+							echo "Skipping ${PDIR} for there are no PIOS inside..."
+						fi
+					fi
+			done
+
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/platformio-builder suculent/platformio-docker-build >> "${LOG_PATH}"
 			if [[ $? == 0 ]] ; then
