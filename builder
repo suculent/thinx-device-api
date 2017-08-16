@@ -446,8 +446,7 @@ case $PLATFORM in
 				echo "PIOD: $PIOD"
 				if [[ -d "${PIOD}" ]]; then
 					echo "$PIOD is a subdirectory, entering..."
-					cd $PIOD
-					break
+					cd $PIOD					
 				else
 					echo "Skipping ${FILE} for there are no PIOS inside..."
 				fi
