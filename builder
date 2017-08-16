@@ -444,8 +444,9 @@ case $PLATFORM in
 			      echo "$FILE is a subdirectory, entering..."
 						# TODO: if $FILE contains platformio.ini
 						PIO=$(find . -name "platformio.ini")
-						if [[ ! -z "${PIO}" ]]; then
-							cd basename $PIO
+						PIOD=$(echo $PIO | tr -d "platformio.ini")
+						if [[ ! -z "${PIOD}" ]]; then
+							cd $PIOD
 							break
 						else
 							echo "Skipping ${FILE} for there are no PIOS inside..."
