@@ -437,28 +437,36 @@ case $PLATFORM in
 		;;
 
 		platformio)
-		for FILE in `ls -l`
-			do
-			    if test -d $FILE
-			    then
-			      echo "$FILE is a subdirectory, entering..."
-						# TODO: if $FILE contains platformio.ini
-						PIO=$(find . -name "platformio.ini")
-						PIOD=$(echo $PIO | tr -d "platformio.ini")
-						if [[ ! -z "${PIOD}" ]]; then
-							cd $PIOD
-							break
-						else
-							echo "Skipping ${FILE} for there are no PIOS inside..."
-						fi
-			    fi
-			done
+
+		if [[ ! -f "./platformio.ini " ]]; then
+
+			for FILE in `ls -l`
+				do
+				    if test -d $FILE
+				    then
+							# TODO: if $FILE contains platformio.ini
+							PIO=$(find . -name "platformio.ini")
+							echo "PIO: $PIO"
+							PIOD=$(echo $PIO | tr -d "platformio.ini")
+							echo "PIOD: $PIOD"
+							if [[ -d "${PIOD}" ]]; then
+								echo "$PIOD is a subdirectory, entering..."
+								cd $PIOD
+								break
+							else
+								echo "Skipping ${FILE} for there are no PIOS inside..."
+							fi
+				    fi
+				done
+
+			fi
 
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/platformio-builder suculent/platformio-docker-build >> "${LOG_PATH}"
 			if [[ $? == 0 ]] ; then
 				BUILD_SUCCESS=true
 			fi
+			echo "Current folder contents after build:"
 			ls
 
 			# Exit on dry run...
@@ -476,7 +484,6 @@ case $PLATFORM in
 				else
 					STATUS='"BUILD FAILED."'
 				fi
-				# TODO: deploy
 			fi
 
     ;;
