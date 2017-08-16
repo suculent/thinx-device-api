@@ -386,14 +386,22 @@ case $PLATFORM in
 			RESULT=$?
 			if [[ $RESULT == 0 ]] ; then
 				BUILD_SUCCESS=true
+				echo " "
 				echo "Docker build succeeded."
+				echo " "
+
+				echo " " >> "${LOG_PATH}"
 				echo "Docker build succeeded." >> "${LOG_PATH}"
+				echo " " >> "${LOG_PATH}"
 			else
+				echo " "
 				echo "Docker build with result ${RESULT}"
+				echo " "
+
+				echo " " >> "${LOG_PATH}"
 				echo "Docker build with result ${RESULT}" >> "${LOG_PATH}"
+				echo " " >> "${LOG_PATH}"
 			fi
-			ls
-			ls >> "${LOG_PATH}"
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
 				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> "${LOG_PATH}"
@@ -404,10 +412,7 @@ case $PLATFORM in
 					STATUS='"OK"'
 					echo "Exporting artifacts"
 					echo "Exporting artifacts" >> "${LOG_PATH}"
-					pwd
-					pwd >> "${LOG_PATH}"
-					ls
-					ls >> "${LOG_PATH}"
+
 					echo "OUTFILE: $OUTFILE"
 					echo "OUTFILE: $OUTFILE" >> "${LOG_PATH}"
 					# Deploy Artifacts
@@ -419,9 +424,10 @@ case $PLATFORM in
 					echo "Current workdir contents: " >> "${LOG_PATH}"
 					ls
 					ls >> "${LOG_PATH}"
-					cp -v ./*.ino.with_bootloader.hex "$OUTFILE" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
-					echo "$DEPLOYMENT_PATH contains:"
-					echo "$DEPLOYMENT_PATH contains:" >> "${LOG_PATH}"
+					cp -vf *.bin "$OUTFILE" >> "${LOG_PATH}"
+					cp -vf *.elf "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
+					echo "Deployment path $DEPLOYMENT_PATH contains:"
+					echo "Deployment path $DEPLOYMENT_PATH contains:" >> "${LOG_PATH}"
 					ls $DEPLOYMENT_PATH
 					ls $DEPLOYMENT_PATH >> "${LOG_PATH}"
 				else
