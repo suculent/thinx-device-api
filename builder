@@ -236,6 +236,7 @@ fi
 pushd $WORKDIR  >> "${LOG_PATH}"
 
 echo "Current work path: $(pwd)" >> "${LOG_PATH}"
+ls >> "${LOG_PATH}"
 
 case $PLATFORM in
 
@@ -449,6 +450,9 @@ case $PLATFORM in
 							echo "PIO: $PIO"
 							PIOD=$(echo $PIO | tr -d "platformio.ini")
 							echo "PIOD: $PIOD"
+							if [[ "${PIOD}" == "/" ]]; then
+								break
+							fi
 							if [[ -d "${PIOD}" ]]; then
 								echo "$PIOD is a subdirectory, entering..."
 								cd $PIOD
