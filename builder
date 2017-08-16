@@ -439,20 +439,18 @@ case $PLATFORM in
 		platformio)
 		for FILE in `ls -l`
 			do
-					if test -d $PDIR
-					then
-						echo "$FILE is a subdirectory, entering..."
-						PIOS=$(ls $PDIR/platformio.ini)
-						echo "PIOS: ${PIOS}"
-						if [[ ! -z "${PIOS}" ]]; then
-							cd $PDIR
-							echo "Found platformio.ini in $PDIR"
-							pwd
+			    if test -d $FILE
+			    then
+			      echo "$FILE is a subdirectory, entering..."
+						# TODO: if $FILE contains platformio.ini
+						PIO=$(find . -name "platformio.ini")
+						if [[ ! -z "${PIO}" ]]; then
+							cd basename $PIO
 							break
 						else
-							echo "Skipping ${PDIR} for there are no PIOS inside..."
+							echo "Skipping ${FILE} for there are no PIOS inside..."
 						fi
-					fi
+			    fi
 			done
 
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
