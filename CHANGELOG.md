@@ -42,6 +42,8 @@ Test device is assigned.
 
 ## CHANGELOG
 
+16/8/2017: - Working Arduino and PlatformIO Docker builder incl. artifact collection. 
+
 15/8/2017: 0.9.2203 - Restored Circle CI testing workflow; advancing Arduino Docker Build - directed path to workdir results in successful build start, but managed library <THiNXLib.h> needs to be fetched to local repo first (inside Docker builder image).
 
 ### 19th week
@@ -60,7 +62,7 @@ Test device is assigned.
 
 4/8/2017: 0.9.2020 - Working Docker images for all firmwares; working webhooks resulting with a git pull (`repository updated with timer` should deprecate soon)
 
-3/8/2017: 0.9.1998 - Base Docker images for Arduino, Platformio and MongooseOS (problem with pip install in platformio?); UI tweaks; logging fixes; 
+3/8/2017: 0.9.1998 - Base Docker images for Arduino, Platformio and MongooseOS (problem with pip install in platformio?); UI tweaks; logging fixes;
 
 2/8/2017: Dockerized install support
 
