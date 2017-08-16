@@ -453,7 +453,8 @@ case $PLATFORM in
 		  fi
 
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
-			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/platformio-builder suculent/platformio-docker-build # >> "${LOG_PATH}"
+			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build # >> "${LOG_PATH}"
+			# docker run --rm -ti -v `pwd`:/opt/workspace suculent/platformio-docker-build
 			if [[ $? == 0 ]] ; then
 				BUILD_SUCCESS=true
 			fi
