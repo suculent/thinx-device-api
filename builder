@@ -79,6 +79,17 @@ mkdir -p $DEPLOYMENT_PATH
 LOG_PATH="${DEPLOYMENT_PATH}/build.log"
 echo "[builder.sh] Log path: $LOG_PATH"
 touch $LOG_PATH
+
+if [[ -f "lint.txt" ]]; then
+	echo "Found LINT results in current folder:"
+	echo "lint.txt" >> "${LOG_PATH}"
+fi
+
+if [[ -f "../lint.txt" ]]; then
+	echo "Found LINT results in parent folder:"
+	echo "../lint.txt" >> "${LOG_PATH}"
+fi
+
 echo "Logging to ${LOG_PATH}"
 echo "Logging to ${LOG_PATH}" >> "${LOG_PATH}"
 echo "[builder.sh] <b> -=[ ☢ THiNX IoT RTM BUILDER ☢ ]=- </b>" >> "${LOG_PATH}"
