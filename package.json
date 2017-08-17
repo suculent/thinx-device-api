@@ -17,8 +17,8 @@
     "node": ">=4.3.2"
   },
   "scripts": {
-    "coverage": "nyc jasmine; nyc report --reporter=text-lcov | coveralls",
-    "test": "nyc jasmine; nyc report --reporter=text-lcov | coveralls",
+    "coverage": "nyc jasmine --stop-on-failure=false; nyc report --reporter=text-lcov | coveralls",
+    "test": "nyc jasmine --stop-on-failure=false; nyc report --reporter=text-lcov | coveralls",
     "snyk": "snyk test"
   },
   "preferGlobal": true,
