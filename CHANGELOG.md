@@ -1,47 +1,10 @@
 # ☢ thinx-device-api change log
 
-## PLATFORM STATUS
-
-### PlatformIO
-
-We need to take care of spelling. Docker builder works.
-Deployment update can be tested now.
-
-### Arduino
-
-Docker builder works in specified workdir.
-Deployment update can be tested now.
-
-### NodeMCU
-
-File-based update has been pre-tested. Docker builder works fine but needs tighter integration with sources (workdir).
-Deployment is not verified, therefore update cannot be tested.
-There's currently no known test-device but many actually in production.
-
-### Micropython
-
-Docker builder works fine but needs tighter integration with sources.
-Deployment is not verified, therefore update cannot be tested.
-There's currently no known test-device.
-
-### MongooseOS
-
-The Docker builder is ready but library is missing. Minimum app is available now, therefore update can be developed.
-Test device is assigned.
-
-## ROADMAP
-
-* test e2e pio update
-* test e2e ino update 
-* test lua build + inject + e2e
-* test upy build + inject + e2e
-* test mos build + develop library + e2e
-
 ## CHANGELOG
 
 ### 20th week
 
-17/8/2017: 0.9.2228 - Docker Build Parametrization using YML (dependency management), log sorting, fixing tests, remote configuration support for INO/PIO, solving issues with missing mosquitto_password tool in unit tests, signing builds, lint
+17/8/2017: 0.9.2237 - Docker Build Parametrization using YML (dependency management), log sorting, fixing tests, remote configuration support for INO/PIO, solving issues with missing mosquitto_password tool in unit tests, signing builds, lint, landing page almost done.
 
 16/8/2017: 0.9.2215 - Working Arduino and PlatformIO Docker builder incl. artifact collection; started working on landing page.
 

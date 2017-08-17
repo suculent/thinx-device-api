@@ -110,9 +110,9 @@ Experimental Docker installation can be found at [https://hub.docker.com/r/sucul
 First of all, set a valid FQDN for your new THiNX instance on your DNS server. Use this FQDN to parametrize the Docker image:
 
     docker pull suculent/thinx-docker
-    
+
     docker build --build-arg THINX_HOSTNAME=staging.thinx.cloud -t suculent/thinx-docker .
-    
+
     docker run -ti -e THINX_HOSTNAME='staging.thinx.cloud' -e THINX_OWNER='suculent@me.com' suculent/thinx-docker
 
 ### Installing Platform Builders
@@ -129,7 +129,7 @@ Fetch required builder images from Docker Hub:
 ```
 bash ./install-builders.sh
 ```
-    
+
 
 ## GitHub Webhook support
 
@@ -139,3 +139,36 @@ You can direct your GitHub webhooks to http://thinx.cloud:9001/ after adding a v
 ## Endpoints
 
 See 03-test.sh. There is no point of maintaining documentation for this at current stage of development and user base zero.
+
+
+# Platforms State of Union
+
+### PlatformIO
+
+* We need to take care of corret spelling for PlatformIO (and Git as well).
+* Docker builder works. Deployment update can be tested now.
+
+### Arduino
+
+* Docker builder works in specified workdir.
+* Deployment update can be tested now.
+
+### NodeMCU
+
+* File-based update has been pre-tested. Docker builder works fine but needs tighter integration with sources (workdir).
+* Deployment is not verified, therefore update cannot be tested.
+* There's currently no known test-device but many actually in production.
+
+### Micropython
+
+* Docker builder works fine but needs tighter integration with sources.
+* Deployment is not verified, therefore update cannot be tested now.
+
+
+# Roadmap
+
+* test e2e pio update
+* test e2e ino update
+* test lua build + inject + e2e
+* test upy build + inject + e2e
+* test mos build + develop library + e2e
