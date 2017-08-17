@@ -4,19 +4,19 @@
 
 ### PlatformIO
 
-We need to take care of spelling. Docker builder works and fails on bugs in library dependency mapping.
-Deployment is not verified, therefore update cannot be tested.
+We need to take care of spelling. Docker builder works.
+Deployment update can be tested now.
 
 ### Arduino
 
-Docker builder works in specified workdir and fails on bugs in library dependency mapping.
-Deployment is not verified, therefore update cannot be tested.
+Docker builder works in specified workdir.
+Deployment update can be tested now.
 
 ### NodeMCU
 
 File-based update has been pre-tested. Docker builder works fine but needs tighter integration with sources (workdir).
 Deployment is not verified, therefore update cannot be tested.
-There's currently no test-device (Miki?) but many actually in production.
+There's currently no known test-device but many actually in production.
 
 ### Micropython
 
@@ -31,18 +31,19 @@ Test device is assigned.
 
 ## ROADMAP
 
-* fix dependency imports (prefetch all known Arduino libs to ino/pio environments)
-
-* test pio build
 * test e2e pio update
-* test ino build + e2e
+* test e2e ino update 
 * test lua build + inject + e2e
 * test upy build + inject + e2e
 * test mos build + develop library + e2e
 
 ## CHANGELOG
 
-16/8/2017: - Working Arduino and PlatformIO Docker builder incl. artifact collection. 
+### 20th week
+
+17/8/2017: 0.9.2228 - Docker Build Parametrization using YML (dependency management), log sorting, fixing tests, remote configuration support for INO/PIO, solving issues with missing mosquitto_password tool in unit tests, signing builds, lint
+
+16/8/2017: 0.9.2215 - Working Arduino and PlatformIO Docker builder incl. artifact collection; started working on landing page.
 
 15/8/2017: 0.9.2203 - Restored Circle CI testing workflow; advancing Arduino Docker Build - directed path to workdir results in successful build start, but managed library <THiNXLib.h> needs to be fetched to local repo first (inside Docker builder image).
 
