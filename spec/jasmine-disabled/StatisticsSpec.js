@@ -42,10 +42,21 @@ describe("Statistics", function() {
     done();
   }, 10000);
 
-  it("should be able to parse statistics per owner", function(done) {
+  it("should be able to parse today statistics per owner", function(done) {
     s.parse(
       owner,
       true,
+      function(err, body) {
+        console.log(err, body);
+        expect(body).toBe(true);
+        done();
+      });
+  }, 60000);
+
+  it("should be able to parse all statistics per owner", function(done) {
+    s.parse(
+      owner,
+      false,
       function(err, body) {
         console.log(err, body);
         expect(body).toBe(true);

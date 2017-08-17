@@ -1932,7 +1932,6 @@ var ThinxApp = function() {
       console.log("/ called with owner: " + req.session.owner);
       res.redirect("/");
     } else {
-      console.log("Redirecting to: " + protocol + "://" + host);
       res.redirect(protocol + "://" + host);
     }
   });
