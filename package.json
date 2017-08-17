@@ -18,7 +18,7 @@
   },
   "scripts": {
     "coverage": "nyc jasmine; nyc report --reporter=text-lcov | coveralls",
-    "test": "pm2 stop index; nyc jasmine; nyc report --reporter=text-lcov | coveralls; pm2 start index",
+    "test": "nyc jasmine; nyc report --reporter=text-lcov | coveralls",
     "snyk": "snyk test"
   },
   "preferGlobal": true,
