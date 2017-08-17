@@ -10,8 +10,8 @@ describe("Device", function() {
   var ott = null;
 
   var RS =
-    '{ "registration" : { "mac" : "00:00:00:00:00:00", "firmware" : "DeviceSpec.js", "version" : "1.0.0", "checksum" : "nevermind", "push" : "forget", "alias" : "npmtest", "owner": "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12", "udid": "to-be-deleted-on-test", "owner": "' +
-    owner + '" } }';
+    '{ "registration" : { "mac" : "000000000000", "firmware" : "DeviceSpec.js", "version" : "1.0.0", "checksum" : "nevermind", "push" : "forget", "alias" : "npmtest", "udid": "to-be-deleted-on-test", "owner": "' +
+    owner + '", "platform":"platformio" } }';
 
   var body = JSON.parse(RS);
 

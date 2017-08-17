@@ -9,7 +9,7 @@ API_KEY='1e1ed4110359eccce9541e33d0ef444d1f3ebd8fe771b754280cccdfeb3cc4e5'
 OWNER_ID='cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12'
 
 DEVICE_ID=a80cc610-4faf-11e7-9a9c-41d4f7ab4083
-MAC='00:00:00:00:00:00'
+MAC='000000000000'
 
 function echo_fail() { # $1 = string
     COLOR=$RED
