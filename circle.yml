@@ -29,13 +29,13 @@ database:
 test:
   pre:
     - sudo service redis-server start
+  commands:
+    - npm run coverage
+  post:
     - bash ./02-deploy.sh:
         background: true
-  commands:
-    - bash ./03-test.sh
-
-  post:
     - bash ./01-analyze.sh
+    - bash ./03-test.sh
 
 ## Customize deployment commands
 deployment:
