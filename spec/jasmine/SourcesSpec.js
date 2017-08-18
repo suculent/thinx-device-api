@@ -16,8 +16,8 @@ describe("Sources", function() {
         this.source_id = response.source_id;
         done();
 
+        // not tested here yet, how does it work?
         describe("Source", function() {
-
           var envi = require("./_envi.json");
           it("should be able to be removed",
             function(done) {
@@ -40,8 +40,7 @@ describe("Sources", function() {
     Sources.list(owner, function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
-      console.log("Source List Response: " + JSON.stringify(
-        response));
+      //console.log("Source List Response: " + JSON.stringify(response)); works here, valid...
       done();
     });
   }, 10000);
