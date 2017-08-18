@@ -108,29 +108,25 @@ describe("Device", function() {
     }, 5000);
 
   it("should be able to store OTT request", function(done) {
-    device.storeOTT({
-      sample: "body"
-    }, function(success, response) {
+    device.storeOTT(JRS2, function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
       expect(response.ott).toBeDefined();
       this.ott = response.ott;
-
-      it("should be able to fetch OTT request",
-        function(done) {
-          expect(this.ott).toBeDefined();
-          device.fetchOTT(this.ott, function(success,
-            response) {
-            expect(success).toBe(true);
-            expect(response).toBeDefined();
-            done();
-          });
-        }, 5000);
-
       done();
+
+      describe("OTT", function() {
+        it("should be able to fetch OTT request",
+          function(done) {
+            expect(this.ott).toBeDefined();
+            device.fetchOTT(this.ott, function(success,
+              response) {
+              expect(success).toBe(true);
+              expect(response).toBeDefined();
+              done();
+            });
+          }, 5000);
+      });
     });
   }, 5000);
-
-
-
 });
