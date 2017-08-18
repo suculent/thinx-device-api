@@ -10,11 +10,29 @@ describe("Sources", function() {
       "https://github.com/suculent/thinx-device-api",
       "origin/master",
       function(success, response) {
+        console.log("Source Add Response: " + JSON.stringify(response));
         expect(success).toBe(true);
         expect(response).toBeDefined();
         this.source_id = response.source_id;
-        console.log("Source Add Response: " + JSON.stringify(response));
         done();
+
+        describe("Source", function() {
+
+          var envi = require("./_envi.json");
+          it("should be able to be removed",
+            function(done) {
+              Sources.remove(owner, [source_id], function(success,
+                response) {
+                expect(success).toBe(true);
+                expect(response).toBeDefined();
+                source_id = this.source_id;
+                console.log("Source Removal Response: " + JSON.stringify(
+                  response));
+                done();
+              });
+            }, 10000);
+        });
+
       });
   }, 10000);
 
@@ -35,7 +53,7 @@ describe("Sources", function() {
         expect(success).toBe(true);
         expect(response).toBeDefined();
         source_id = this.source_id;
-        console.log("Source Removal Response: " + JSON.stringify(
+        console.log("Sources Removal Response: " + JSON.stringify(
           response));
         done();
       });

@@ -24,7 +24,7 @@ describe("Notifier", function() {
     var owner_id = owner;
     var status = "TESTING_NOTIFIER";
 
-    var CMD = "node notifier.js " +
+    var CMD = "node ../../notifier.js " +
       test_build_id + " " +
       test_commit_id + " " +
       test_version + " " +

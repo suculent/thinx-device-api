@@ -42,16 +42,6 @@ describe("Messenger", function() {
     });
   }, 5000);
 
-  // initWithOwner: function(owner, callback)
-  it("should be able to connect", function(done) {
-    Messenger.initWithOwner(test_owner, function(success, status) {
-      expect(success).toBe(true);
-      expect(status).toBeDefined();
-      console.log(JSON.stringify(status));
-      done();
-    });
-  }, 15000);
-
   // publish: function(owner, udid, message); returns nothing
   it("should be able to publish upon connection", function() {
     Messenger.publish(test_owner, udid, "test");
