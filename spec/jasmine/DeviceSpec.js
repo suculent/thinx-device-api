@@ -31,7 +31,7 @@ describe("Device", function() {
 
   var JRS2 = {
     registration: {
-      mac: "N0NMOCKED100",
+      mac: "N0:NM:OC:KE:D1:00",
       firmware: "DeviceSpec.js",
       version: "1.0.0",
       checksum: "alevim",
@@ -57,6 +57,7 @@ describe("Device", function() {
         expect(this.udid).toBeDefined();
         this.udid = response.udid;
         console.log("Received UDID: " + this.udid);
+        done();
 
         it("should be able to provide device firmware",
           function(done) {
@@ -75,7 +76,6 @@ describe("Device", function() {
             });
           }, 5000);
 
-        done();
       });
   }, 15000); // register
 
@@ -115,18 +115,17 @@ describe("Device", function() {
       this.ott = response.ott;
       done();
 
-      describe("OTT", function() {
-        it("should be able to fetch OTT request",
-          function(done) {
-            expect(this.ott).toBeDefined();
-            device.fetchOTT(this.ott, function(success,
-              response) {
-              expect(success).toBe(true);
-              expect(response).toBeDefined();
-              done();
-            });
-          }, 5000);
-      });
+      it("should be able to fetch OTT request",
+        function(done) {
+          expect(this.ott).toBeDefined();
+          device.fetchOTT(this.ott, function(success,
+            response) {
+            expect(success).toBe(true);
+            expect(response).toBeDefined();
+            done();
+          });
+        }, 5000);
+
     });
   }, 5000);
 });
