@@ -22,8 +22,10 @@ var db = config.database_uri;
 // Initially creates DB, otherwise fails silently.
 var prefix = "";
 try {
-  prefix = fs.readFileSync(app_config.project_root + '/conf/.thx_prefix');
-  prefix = prefix + "_";
+  var pfx_path = app_config.project_root + '/conf/.thx_prefix';
+  if (fs.existsSync(pfx_path)) {
+    prefix = fs.readFileSync(pfx_path) + "_";
+  }
 } catch (e) {
   //console.log(e);
 }
