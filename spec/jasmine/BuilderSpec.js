@@ -17,27 +17,23 @@ describe("Builder", function() {
   });
 
   it("should be able to dry-run", function(done) {
-    var wrapper = {
-      build: {
-        udid: udid,
-        source_id: source_id,
-        dryrun: true
-      }
+    var build = {
+      udid: udid,
+      source_id: source_id,
+      dryrun: true
     };
-    builder.build(owner, wrapper, function(success, message, build_id) {
+    builder.build(owner, build, function(success, message, build_id) {
       done();
     });
   }, 60000);
 
   it("should be able to run", function(done) {
-    var wrapper = {
-      build: {
-        udid: udid,
-        source_id: source_id,
-        dryrun: false
-      }
+    var build = {
+      udid: udid,
+      source_id: source_id,
+      dryrun: false
     };
-    builder.build(owner, wrapper, function(success, message, build_id) {
+    builder.build(owner, build, function(success, message, build_id) {
       done();
     });
   }, 60000);
