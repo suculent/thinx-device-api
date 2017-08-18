@@ -31,6 +31,8 @@ var ThinxApp = function() {
     }
   });
 
+  console.log("--- " + new Date() + " ---");
+
   var session_config = require("./conf/node-session.json");
   var app_config = require("./conf/config.json"); // this file should be actually omitted from repository
   if (typeof(process.env.CIRCLE_USERNAME) !== "undefined") {
