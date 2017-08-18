@@ -11,9 +11,37 @@ describe("Device", function() {
 
   var RS =
     '{ "registration" : { "mac" : "000000000000", "firmware" : "DeviceSpec.js", "version" : "1.0.0", "checksum" : "nevermind", "push" : "forget", "alias" : "npmtest", "udid": "to-be-deleted-on-test", "owner": "' +
-    owner + '", "platform":"platformio" } }';
+    owner + '", "platform": "platformio" } }';
 
-  var body = JSON.parse(RS);
+  var JRS = {
+    registration: {
+      mac: "111111111111",
+      firmware: "DeviceSpec.js",
+      version: "1.0.0",
+      checksum: "nevim",
+      push: "forget",
+      alias: "npm-test-ino-one",
+      owner: owner,
+      platform: "arduino"
+    }
+  };
+
+  var JRS2 = {
+    registration: {
+      mac: "N0NMOCKED100",
+      firmware: "DeviceSpec.js",
+      version: "1.0.0",
+      checksum: "nevim",
+      push: "forget",
+      alias: "robodyn-mega-wifi",
+      owner: owner,
+      platform: "arduino",
+      udid: "d2d7b050-7c53-11e7-b94e-15f5f3a64973"
+    }
+  };
+
+  var body = JRS; // JSON.parse(RS);
+  RS = JSON.stringify(JRS);
 
   console.log("Using test API_KEY: " + apikey);
   console.log("Using request: " + RS);
@@ -24,6 +52,9 @@ describe("Device", function() {
       function(success, response) {
         console.log("Registration result: " + JSON.stringify(response));
         expect(success).toBe(true);
+        expect(this.udid).toBeDefined();
+        this.udid = response.udid;
+        console.log("Received UDID: " + this.udid);
         done();
       });
   }, 15000); // register
@@ -31,6 +62,8 @@ describe("Device", function() {
   it("should be able to provide device firmware",
     function(done) {
       // Returns "OK" when current firmware is valid.
+      body.udid = this.udid;
+      console.log("Using UDID: " + this.udid);
       device.firmware(body, apikey, function(
         success,
         response) {
@@ -66,7 +99,7 @@ describe("Device", function() {
   it(
     "should receive different response for already-registered revice",
     function(done) {
-      device.register(JSON.parse(RS), apikey,
+      device.register(JRS2, apikey,
         function(success, response) {
           console.log("Re-registration result: " + JSON.stringify(
             response));
