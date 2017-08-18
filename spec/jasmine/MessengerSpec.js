@@ -43,8 +43,8 @@ describe("Messenger", function() {
   }, 5000);
 
   // publish: function(owner, udid, message); returns nothing
-  it("should be able to publish upon connection", function() {
+  it("should be able to publish upon connection", function(done) {
     Messenger.publish(test_owner, udid, "test");
+    done();
   });
-
 });
