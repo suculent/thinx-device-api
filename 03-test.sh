@@ -334,7 +334,7 @@ R=$(curl -s \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "registration" : { "mac" : "FF:FF:FF:FF:FF:FF", "firmware" : "none", "version" : "2.0.0", "hash" : "hash", "push" : "none", "alias" : "to-be-deleted", "owner": "'${OWNER_ID}'" } }' \
+-d '{ "registration" : { "mac" : "FF:FF:FF:FF:FF:FF", "firmware" : "none", "version" : "2.0.0", "hash" : "hash", "push" : "none", "alias" : "created-by-03-test.sh", "owner": "'${OWNER_ID}'" } }' \
 http://$HOST:7442/device/register)
 
 # {"success":false,"status":"authentication"}
