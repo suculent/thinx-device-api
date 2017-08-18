@@ -17,10 +17,10 @@ describe("Device", function() {
 
   var JRS = {
     registration: {
-      mac: "111111111111",
+      mac: "11:11:11:11:11:11",
       firmware: "DeviceSpec.js",
       version: "1.0.0",
-      checksum: "nevim",
+      checksum: "xevim",
       push: "forget",
       alias: "npm-test-ino-one",
       owner: owner,
@@ -34,7 +34,7 @@ describe("Device", function() {
       mac: "N0NMOCKED100",
       firmware: "DeviceSpec.js",
       version: "1.0.0",
-      checksum: "nevim",
+      checksum: "alevim",
       push: "forget",
       alias: "robodyn-mega-wifi",
       owner: owner,
@@ -83,7 +83,7 @@ describe("Device", function() {
     function(done) {
       var changes = {
         alias: Date().toString(),
-        udid: "to-be-deleted-on-test"
+        udid: "11:11:11:11:11:11"
       };
       device.edit(owner, changes, function(
         success, response) {

@@ -11,11 +11,11 @@
    "rsa_keys": {
        "a9:fd:f3:8e:97:7d:f4:c1:e1:39:3f:fd:2b:3b:5f:9f": {
            "alias": "matej-jasmine-test-rsa-key",
-           "key": "../.ssh/eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f-1498405006.pub"
+           "key": "../.ssh/cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12-1498405006.pub"
        },
        "d3:04:a5:05:a2:11:ff:44:4b:47:15:68:4d:2a:f8:93": {
            "alias": "Initial RSA Key",
-           "key": "../.ssh/eaabae0d5165c5db4c46c3cb6f062938802f58d9b88a1b46ed69421809f0bf7f-1498343993.pub"
+           "key": "../.ssh/cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12-1498343993.pub"
        }
    },
    "repos": {
