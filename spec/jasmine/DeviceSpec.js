@@ -131,6 +131,7 @@ describe("Device", function() {
   it("should be able to normalize a MAC address", function(done) {
     var nmac = device.normalizedMAC("123456789012");
     expect(nmac).toBeDefined();
+    done();
   });
 
 });

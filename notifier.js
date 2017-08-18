@@ -15,6 +15,19 @@ var rollbar = new Rollbar({
 });
 
 var config = require("./conf/config.json");
+if (typeof(process.env.CIRCLE_USERNAME) !== "undefined") {
+  console.log("» Starting on Circle CI...");
+  config = require("./conf/config-test.json");
+}
+if (process.env.LOGNAME == "sychram") {
+  console.log("» Starting on workstation...");
+  config = require("./conf/config-local.json");
+}
+if (process.env.LOGNAME == "root") {
+  console.log("» Starting in production mode...");
+  config = require("./conf/config.json");
+}
+
 var sha256 = require("sha256");
 
 var db = config.database_uri;
