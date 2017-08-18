@@ -219,19 +219,11 @@ BUILD_DATE=`date +%Y-%m-%d`
 
 # Build
 
-echo "Inferring platform from ${OWNER_PATH}"
 PLATFORM=$(infer_platform ".")
-echo "Platform: ${PLATFORM}"
-
-echo "Inferring language from platform ${PLATFORM}"
 LANGUAGE=$(language_for_platform $PLATFORM)
-echo "Language: ${LANGUAGE}"
-
-echo "Inferring language name from language ${LANGUAGE}"
 LANGUAGE_NAME=$(language_name $LANGUAGE)
-echo "Language name: ${LANGUAGE_NAME}"
 
-echo "[builder.sh] Building for platform ${PLATFORM} in language ${LANGUAGE_NAME}..."
+echo "[builder.sh] Building for platform '${PLATFORM}' in language '${LANGUAGE_NAME}'..."
 
 SHA="0x00000000"
 OUTFILE="<failed>"

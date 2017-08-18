@@ -23,7 +23,7 @@ describe("Builder", function() {
     builder.build(owner, build, function(success, message, build_id) {
       done();
     });
-  }, 60000);
+  }, 120000);
 
   it("should be able to run", function(done) {
     var build = {
@@ -34,7 +34,7 @@ describe("Builder", function() {
     builder.build(owner, build, function(success, message, build_id) {
       done();
     });
-  }, 60000);
+  }, 120000);
 
   it("supports certain languages", function() {
     var languages = builder.supportedLanguages();
