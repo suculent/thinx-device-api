@@ -31,6 +31,9 @@ var ThinxApp = function() {
     }
   });
 
+  console.log(" ");
+  console.log(" ");
+  console.log(" ");
   console.log("--- " + new Date() + " ---");
 
   var session_config = require("./conf/node-session.json");
