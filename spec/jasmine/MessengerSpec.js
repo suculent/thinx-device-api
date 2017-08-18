@@ -37,7 +37,7 @@ describe("Messenger", function() {
   it("should be able to get all owners", function(done) {
     Messenger.getAllOwners(function(success, status) {
       expect(success).toBe(true);
-      console.log(JSON.stringify(status));
+      console.log("owners: " + JSON.stringify(status));
       done();
     });
   }, 5000);
