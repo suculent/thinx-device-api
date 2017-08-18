@@ -31,8 +31,6 @@ test:
     - mkdir -p $CIRCLE_TEST_REPORTS/reports
     - eslint ./src/ --format junit --output-file $CIRCLE_TEST_REPORTS/reports/eslint.xml
     - sudo service redis-server start
-  override:
-    - bundle exec rspec --format progress --format RspecJunitFormatter -o $CIRCLE_TEST_REPORTS/rspec.xml
   commands:
     - npm run coverage
   post:
