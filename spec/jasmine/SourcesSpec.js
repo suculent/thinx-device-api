@@ -1,45 +1,41 @@
-describe("Owner", function() {
+describe("Sources", function() {
 
-  var generated_key_hash = null;
   var Sources = require('../../lib/thinx/sources');
-
   var envi = require("./_envi.json");
   var owner = envi.oid;
+  var source_id = null; // will be populated by test and then destroyed
 
-  var source_id = null;
-
-  it("should be able to add source", function(done) {
-    Sources.add(owner, "test-git-repo",
+  it("should be able to be added", function(done) {
+    Sources.add(owner, "test-git-repo-SourcesSpec.js",
       "https://github.com/suculent/thinx-device-api",
       "origin/master",
       function(success, response) {
         expect(success).toBe(true);
         expect(response).toBeDefined();
-        source_id = response.source_id;
-        console.log(response);
+        this.source_id = response.source_id;
+        console.log("Source Add Response: "+response);
         done();
       });
   }, 10000);
 
-  it("should be able to list owner sources", function(done) {
+  it("should be able to provide a list", function(done) {
     Sources.list(owner, function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
-      console.log(response);
+      console.log("Source List Response: "+response);
       done();
     });
   }, 10000);
 
-  it("should be able to remove previously added source",
+  it("should be able to be removed",
     function(done) {
       Sources.remove(owner, [source_id], function(success,
         response) {
         expect(success).toBe(true);
         expect(response).toBeDefined();
-        source_id = response.source_id;
-        console.log(response);
+        source_id = this.source_id;
+        console.log("Source Removal Response: "+response);
         done();
       });
     }, 10000);
-
 });
