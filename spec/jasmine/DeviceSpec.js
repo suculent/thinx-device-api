@@ -71,8 +71,8 @@ describe("Device", function() {
         console.log("Firmware fetch result: " +
           JSON.stringify(
             response));
-        expect(success).toBe(true);
-        expect(response).toBeDefined();
+        expect(success).toBe(false);
+        expect(response.status).toBe("UPDATE_NOT_FOUND");
         console.log(
           "Firmware check response: " +
           JSON.stringify(
