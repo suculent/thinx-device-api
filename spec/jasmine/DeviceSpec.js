@@ -24,7 +24,8 @@ describe("Device", function() {
       push: "forget",
       alias: "npm-test-ino-one",
       owner: owner,
-      platform: "arduino"
+      platform: "arduino",
+      udid: "to-be-deleted-on-test"
     }
   };
 
@@ -56,30 +57,27 @@ describe("Device", function() {
         expect(this.udid).toBeDefined();
         this.udid = response.udid;
         console.log("Received UDID: " + this.udid);
+
+        it("should be able to provide device firmware",
+          function(done) {
+            // Returns "OK" when current firmware is valid.
+            body.udid = this.udid;
+            console.log("Using this.UDID: " + this.udid);
+            device.firmware(body, apikey, function(
+              success,
+              response) {
+              console.log("Firmware fetch result: " +
+                JSON.stringify(
+                  response));
+              expect(success).toBe(false);
+              expect(response.status).toBe("UPDATE_NOT_FOUND");
+              done();
+            });
+          }, 5000);
+
         done();
       });
   }, 15000); // register
-
-  it("should be able to provide device firmware",
-    function(done) {
-      // Returns "OK" when current firmware is valid.
-      body.udid = this.udid;
-      console.log("Using UDID: " + this.udid);
-      device.firmware(body, apikey, function(
-        success,
-        response) {
-        console.log("Firmware fetch result: " +
-          JSON.stringify(
-            response));
-        expect(success).toBe(false);
-        expect(response.status).toBe("UPDATE_NOT_FOUND");
-        console.log(
-          "Firmware check response: " +
-          JSON.stringify(
-            response));
-        done();
-      });
-    }, 5000);
 
   it("should be able to change its alias.",
     function(done) {
