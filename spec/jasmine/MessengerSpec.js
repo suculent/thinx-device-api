@@ -26,7 +26,7 @@ describe("Messenger", function() {
   }, 5000);
 
   // init
-  it("should be able to initialize on its own", function() {
+  it("should be able to initialize on its own", function(done) {
     Messenger.initWithOwner(test_owner, null, function(success, status) {
       expect(success).toBe(true);
       expect(status).toBeDefined();
@@ -47,4 +47,4 @@ describe("Messenger", function() {
     Messenger.publish(test_owner, udid, "test");
   });
 
-}, 10000);
+});
