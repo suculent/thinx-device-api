@@ -355,12 +355,15 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing firmware update (owner test)..."
 
+
+echo $R
+
 R=$(curl -s \
 -H "Authentication: ${API_KEY}" \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "mac" : "00:00:00:00:00:00", "udid" : '${DEVICE_ID}', "hash" : "hash", "commit" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "checksum" : "02e2436d60c629e2ab6357d0d314dd6fe28bd0331b18ca6b19a25cd6f969d0a8", "owner": "'${OWNER_ID}'" }' \
+-d '{ "mac" : "FF:FF:FF:FF:FF:FF", "udid" : "'${DEVICE_ID}'", "hash" : "hash", "commit" : "e58fa9bf7f478442c9d34593f0defc78718c8732", "checksum" : "02e2436d60c629e2ab6357d0d314dd6fe28bd0331b18ca6b19a25cd6f969d0a8", "owner": "'${OWNER_ID}'" }' \
 http://$HOST:7442/device/firmware)
 
 # {"success":false,"status":"api_key_invalid"}
@@ -612,7 +615,7 @@ R=$(curl -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--d '{ "udid" : '${DEVICE_ID}' }' \
+-d '{ "udid" : "'${DEVICE_ID}'" }' \
 http://$HOST:7442/api/device/detach)
 
 SUCCESS=$(echo $R | jq .success)
@@ -639,7 +642,7 @@ R=$(curl -s -b cookies.jar \
 -H 'Origin: rtm.thinx.cloud' \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
--d '{ "udid" : '${DEVICE_ID}', "source_id" : '${SOURCE_ID}' }' \
+-d '{ "udid" : "'${DEVICE_ID}'", "source_id" : "'${SOURCE_ID}'" }' \
 http://$HOST:7442/api/device/attach)
 
 echo $R
@@ -657,7 +660,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing builder..."
 
-BC='{ "build" : { "udid" : '${DEVICE_ID}', "source_id" : '${SOURCE_ID}', "dryrun" : false } }'
+BC='{ "build" : { "udid" : "'${DEVICE_ID}'", "source_id" : "'${SOURCE_ID}'", "dryrun" : false } }'
 
 echo "$BC"
 
@@ -799,7 +802,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Testing device revocation..."
 
-DR='{ "udid" : '${DEVICE_ID}' }'
+DR='{ "udid" : "'${DEVICE_ID}'" }'
 
 echo $DR
 
@@ -812,6 +815,8 @@ R=$(curl -s -b cookies.jar \
 http://$HOST:7442/api/device/revoke)
 
 # {"success":false,"status":"authentication"}
+
+echo $R
 
 SUCCESS=$(echo $R | tr -d "\n" | jq .success)
 if [[ $SUCCESS == true ]]; then
