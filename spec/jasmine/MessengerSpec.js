@@ -27,7 +27,7 @@ describe("Messenger", function() {
 
   // init
   it("should be able to initialize on its own", function() {
-    Messenger.initWithOwner(test_owner, function(success, status) {
+    Messenger.initWithOwner(test_owner, null, function(success, status) {
       expect(success).toBe(true);
       expect(status).toBeDefined();
       done();
