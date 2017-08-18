@@ -9,9 +9,11 @@ describe("Device", function() {
   var apikey = envi.ak;
   var ott = null;
 
-  var RS =
-    '{ "registration" : { "mac" : "000000000000", "firmware" : "DeviceSpec.js", "version" : "1.0.0", "checksum" : "nevermind", "push" : "forget", "alias" : "npmtest", "udid": "to-be-deleted-on-test", "owner": "' +
-    owner + '", "platform": "platformio" } }';
+  /*
+    var RS =
+      '{ "registration" : { "mac" : "000000000000", "firmware" : "DeviceSpec.js", "version" : "1.0.0", "checksum" : "nevermind", "push" : "forget", "alias" : "npmtest", "udid": "to-be-deleted-on-test", "owner": "' +
+      owner + '", "platform": "platformio" } }';
+      */
 
   var JRS = {
     registration: {
@@ -41,14 +43,13 @@ describe("Device", function() {
   };
 
   var body = JRS; // JSON.parse(RS);
-  RS = JSON.stringify(JRS);
 
   console.log("Using test API_KEY: " + apikey);
-  console.log("Using request: " + RS);
+  console.log("Using request: " + JSON.stringify(JRS));
 
   it("should be able to register itself.", function(done) {
 
-    device.register(JSON.parse(RS), apikey,
+    device.register(JRS, apikey,
       function(success, response) {
         console.log("Registration result: " + JSON.stringify(response));
         expect(success).toBe(true);
