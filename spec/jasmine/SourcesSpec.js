@@ -13,7 +13,7 @@ describe("Sources", function() {
         expect(success).toBe(true);
         expect(response).toBeDefined();
         this.source_id = response.source_id;
-        console.log("Source Add Response: "+response);
+        console.log("Source Add Response: " + JSON.stringify(response));
         done();
       });
   }, 10000);
@@ -22,7 +22,8 @@ describe("Sources", function() {
     Sources.list(owner, function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
-      console.log("Source List Response: "+response);
+      console.log("Source List Response: " + JSON.stringify(
+        response));
       done();
     });
   }, 10000);
@@ -34,7 +35,8 @@ describe("Sources", function() {
         expect(success).toBe(true);
         expect(response).toBeDefined();
         source_id = this.source_id;
-        console.log("Source Removal Response: "+response);
+        console.log("Source Removal Response: " + JSON.stringify(
+          response));
         done();
       });
     }, 10000);
