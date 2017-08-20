@@ -4,6 +4,8 @@
 
 ### 20th week
 
+20/8/2017: 0.9.2290 - Fixed device pruning, initial MongooseOS integration tests (blocked by get MAC issue)
+
 17/8/2017: 0.9.2237 - Docker Build Parametrization using YML (dependency management), log sorting, fixing tests, remote configuration support for INO/PIO, solving issues with missing mosquitto_password tool in unit tests, signing builds, lint, landing page almost done.
 
 16/8/2017: 0.9.2215 - Working Arduino and PlatformIO Docker builder incl. artifact collection; started working on landing page.

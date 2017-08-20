@@ -17,9 +17,7 @@ echo "» Checking if node.js is running..."
 service thinx-app status
 service thinx-app stop
 
-#killall node # will deprecate
 killall tail # will deprecate
-forever stopall # will deprecate
 
 echo
 echo "» Fetching current app version from GIT..."
@@ -33,8 +31,8 @@ npm install .
 
 if [[ $CIRCLECI == true ]]; then
 	echo
-	echo "☢  Running node.js without console for CI..."
-	pm2 start index.js
+	echo "☢  NOT Running node.js for CI, npm test will start it on its own..."
+	# pm2 start index.js
 
 	ACCESS_TOKEN=6aa9f20bef804b75a50338e03830919d
 	ENVIRONMENT=test
