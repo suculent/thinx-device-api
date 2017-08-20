@@ -32,7 +32,7 @@ test:
 #    - bash ./02-deploy.sh:
 #        background: true
   commands:
-    - pm2 stop index
+#    - pm2 stop index
     - npm run coverage
   post:
     - bash ./01-analyze.sh
