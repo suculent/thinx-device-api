@@ -996,8 +996,6 @@ var ThinxApp = function() {
     validateRequest(req, res);
     res.set("Connection", "close");
 
-    console.log("DEBUG MOS REG:" + JSON.stringify(req.body));
-
     if (typeof(req.body) === "undefined") {
       respond(res, {
         success: false,
