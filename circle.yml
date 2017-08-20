@@ -29,8 +29,8 @@ test:
     - mkdir -p $CIRCLE_TEST_REPORTS/reports
     - eslint ./src/ --format junit --output-file $CIRCLE_TEST_REPORTS/reports/eslint.xml
     - sudo service redis-server start
-    - bash ./02-deploy.sh:
-        background: true
+#    - bash ./02-deploy.sh:
+#        background: true
   commands:
     - pm2 stop index
     - npm run coverage
