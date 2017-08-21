@@ -327,7 +327,7 @@ case $PLATFORM in
     ;;
 
     mongoose)
-			OUTFILE=${DEPLOYMENT_PATH}/build/fw.zip
+			OUTFILE=${DEPLOYMENT_PATH}/fw.zip
 			OUTPATH=${DEPLOYMENT_PATH}/
 
 			# should copy thinx.json into ./fs/thinx.json
@@ -344,7 +344,7 @@ case $PLATFORM in
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/mongoose-builder suculent/mongoose-docker-build >> "${LOG_PATH}"
 
 			if [[ $? == 0 ]] ; then
-				if [[ -f $OUTFILE ]]; then
+				if [[ -f $(pwd)/build/fw.zip ]]; then
 					BUILD_SUCCESS=true
 				else
 					echo "OUTFILE not created."
@@ -361,6 +361,7 @@ case $PLATFORM in
 				# Check Artifacts
 				if [[ $BUILD_SUCCESS == true ]] ; then
 					STATUS='"OK"'
+					cp $(pwd)/build/fw.zip $OUTFILE
 					ls "$OWNER_PATH/build" >> "${LOG_PATH}"
 					unzip "${OWNER_PATH}/build/fw.zip" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
 					ls "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
