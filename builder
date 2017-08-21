@@ -332,6 +332,12 @@ case $PLATFORM in
 
 			# should copy thinx.json into ./fs/thinx.json
 			TNAME=$(find . -name "thinx.json")
+			if [[ -z $TNAME ]]; then
+				if [[ ! -d "./fs" ]]; then
+					mkdir ./fs
+				fi
+				TNAME=$(pwd)/fs/thinx.json
+			fi
 			echo "Moving thinx_build.json to $TNAME"
 			mv "./thinx_build.json" "$TNAME"
 
