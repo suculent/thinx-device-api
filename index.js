@@ -826,6 +826,17 @@ var ThinxApp = function() {
     });
   });
 
+  // /user/delete POST
+  /* Delete user document */
+  app.post("/api/user/delete", function(req, res) {
+    user.delete(req.body, function(success, status) {
+      respond(res, {
+        success: success,
+        status: status
+      });
+    });
+  });
+
   /* Endpoint for the password reset e-mail. */
   app.get("/api/user/password/reset", function(req, res) {
     var owner = req.query.owner; // for faster search
