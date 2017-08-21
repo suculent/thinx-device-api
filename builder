@@ -327,7 +327,7 @@ case $PLATFORM in
     ;;
 
     mongoose)
-			OUTFILE=${DEPLOYMENT_PATH}/mos_build.zip # FIXME: warning! multiple files here
+			OUTFILE=${DEPLOYMENT_PATH}/build/fw.zip
 			OUTPATH=${DEPLOYMENT_PATH}/
 
 			# should copy thinx.json into ./fs/thinx.json
@@ -344,7 +344,11 @@ case $PLATFORM in
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/mongoose-builder suculent/mongoose-docker-build >> "${LOG_PATH}"
 
 			if [[ $? == 0 ]] ; then
-				BUILD_SUCCESS=true
+				if [[ -f $OUTFILE ]]; then
+					BUILD_SUCCESS=true
+				else
+					echo "OUTFILE not created."
+				fi
 			fi
 
 			ls
@@ -364,87 +368,86 @@ case $PLATFORM in
 				else
 					STATUS='"BUILD FAILED."'
 				fi
-				# TODO: deploy
 			fi
     ;;
 
 		arduino)
-		for FILE in `ls -l`
-			do
-			    if test -d $FILE
-			    then
-			      echo "$FILE is a subdirectory, entering..."
-						# TODO: if $FILE contains *.ino
-						INOS=$(ls $FILE/*.ino)
-						echo "INOS: ${INOS}"
-						if [[ ! -z "${INOS}" ]]; then
-							cd $FILE
-							break
-						else
-							echo "Skipping ${FILE} for there are no INOS inside..."
-						fi
-			    fi
-			done
-		  echo "Building for Arduino from folder:"
-		  echo "Building for Arduino from folder:" >> "${LOG_PATH}"
-			pwd
-		  pwd >> "${LOG_PATH}"
-			ls
-			ls >> "${LOG_PATH}"
-			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
-			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/arduino-docker-build >> "${LOG_PATH}"
-			RESULT=$?
-			if [[ $RESULT == 0 ]] ; then
-				BUILD_SUCCESS=true
-				echo " "
-				echo "Docker build succeeded."
-				echo " "
+			for FILE in `ls -l`
+				do
+				    if test -d $FILE
+				    then
+				      echo "$FILE is a subdirectory, entering..."
+							# TODO: if $FILE contains *.ino
+							INOS=$(ls $FILE/*.ino)
+							echo "INOS: ${INOS}"
+							if [[ ! -z "${INOS}" ]]; then
+								cd $FILE
+								break
+							else
+								echo "Skipping ${FILE} for there are no INOS inside..."
+							fi
+				    fi
+				done
+			  echo "Building for Arduino from folder:"
+			  echo "Building for Arduino from folder:" >> "${LOG_PATH}"
+				pwd
+			  pwd >> "${LOG_PATH}"
+				ls
+				ls >> "${LOG_PATH}"
+				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
+				docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/arduino-docker-build >> "${LOG_PATH}"
+				RESULT=$?
+				if [[ $RESULT == 0 ]] ; then
+					BUILD_SUCCESS=true
+					echo " "
+					echo "Docker build succeeded."
+					echo " "
 
-				echo " " >> "${LOG_PATH}"
-				echo "Docker build succeeded." >> "${LOG_PATH}"
-				echo " " >> "${LOG_PATH}"
-			else
-				echo " "
-				echo "Docker build with result ${RESULT}"
-				echo " "
-
-				echo " " >> "${LOG_PATH}"
-				echo "Docker build with result ${RESULT}" >> "${LOG_PATH}"
-				echo " " >> "${LOG_PATH}"
-			fi
-			# Exit on dry run...
-			if [[ ! ${RUN} ]]; then
-				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> "${LOG_PATH}"
-				STATUS='"DRY_RUN_OK"'
-			else
-				# Check Artifacts
-				if [[ $BUILD_SUCCESS == true ]] ; then
-					STATUS='"OK"'
-					echo "Exporting artifacts"
-					echo "Exporting artifacts" >> "${LOG_PATH}"
-
-					echo "OUTFILE: $OUTFILE"
-					echo "OUTFILE: $OUTFILE" >> "${LOG_PATH}"
-					# Deploy Artifacts
-					cd $(ls -d */)
-					echo "Current workdir: "
-					echo "Current workdir: " >> "${LOG_PATH}"
-					pwd
-					pwd >> "${LOG_PATH}"
-					echo "Current workdir contents: " >> "${LOG_PATH}"
-					ls
-					ls >> "${LOG_PATH}"
-					cp -vf *.bin "$OUTFILE" >> "${LOG_PATH}"
-					cp -vf *.elf "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
-					echo "Deployment path $DEPLOYMENT_PATH contains:"
-					echo "Deployment path $DEPLOYMENT_PATH contains:" >> "${LOG_PATH}"
-					ls $DEPLOYMENT_PATH
-					ls $DEPLOYMENT_PATH >> "${LOG_PATH}"
+					echo " " >> "${LOG_PATH}"
+					echo "Docker build succeeded." >> "${LOG_PATH}"
+					echo " " >> "${LOG_PATH}"
 				else
-					STATUS='"BUILD FAILED."'
+					echo " "
+					echo "Docker build with result ${RESULT}"
+					echo " "
+
+					echo " " >> "${LOG_PATH}"
+					echo "Docker build with result ${RESULT}" >> "${LOG_PATH}"
+					echo " " >> "${LOG_PATH}"
 				fi
-			fi
-		;;
+				# Exit on dry run...
+				if [[ ! ${RUN} ]]; then
+					echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." >> "${LOG_PATH}"
+					STATUS='"DRY_RUN_OK"'
+				else
+					# Check Artifacts
+					if [[ $BUILD_SUCCESS == true ]] ; then
+						STATUS='"OK"'
+						echo "Exporting artifacts"
+						echo "Exporting artifacts" >> "${LOG_PATH}"
+
+						echo "OUTFILE: $OUTFILE"
+						echo "OUTFILE: $OUTFILE" >> "${LOG_PATH}"
+						# Deploy Artifacts
+						cd $(ls -d */)
+						echo "Current workdir: "
+						echo "Current workdir: " >> "${LOG_PATH}"
+						pwd
+						pwd >> "${LOG_PATH}"
+						echo "Current workdir contents: " >> "${LOG_PATH}"
+						ls
+						ls >> "${LOG_PATH}"
+						cp -vf *.bin "$OUTFILE" >> "${LOG_PATH}"
+						cp -vf *.elf "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
+						echo "Deployment path $DEPLOYMENT_PATH contains:"
+						echo "Deployment path $DEPLOYMENT_PATH contains:" >> "${LOG_PATH}"
+						ls $DEPLOYMENT_PATH
+						ls $DEPLOYMENT_PATH >> "${LOG_PATH}"
+					else
+						STATUS='"BUILD FAILED."'
+					fi
+				fi
+			;;
 
 		platformio)
 
