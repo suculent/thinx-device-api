@@ -481,9 +481,9 @@ case $PLATFORM in
 				# Check Artifacts
 				if [[ $BUILD_SUCCESS == true ]] ; then
 					STATUS='"OK"'
-					ls "${OWNER_PATH}/.pioenvs/" >> "${LOG_PATH}"
+					ls "${OWNER_PATH}/*/.pioenvs/" >> "${LOG_PATH}"
 					# TODO: d1_mini is a board name that is not parametrized but must be eventually
-					OUTFILE="${OWNER_PATH}/.pioenvs/d1_mini/firmware.bin"
+					OUTFILE="${OWNER_PATH}/*/.pioenvs/d1_mini/firmware.bin"
 					cp -vR "${OUTFILE}" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
 				else
 					STATUS='"BUILD FAILED."'
