@@ -49,7 +49,7 @@ function infer_platform
 
 		# Mongoose OS
 
-	elif [[ -d "$path/mos.yml" ]]; then
+	elif [[ -f "$path/mos.yml" ]]; then
 			platform="mongoose"
 		fi
 
