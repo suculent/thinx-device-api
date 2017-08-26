@@ -1242,7 +1242,7 @@ var ThinxApp = function() {
             var lastIndex = row.value.log[dindex];
             var buildlog = {
               message: lastIndex.message,
-              date: lastIndex.date,
+              date: lastIndex.timestamp,
               udid: lastIndex.udid,
               build_id: lastIndex.build
             };
