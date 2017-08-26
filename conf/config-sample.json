@@ -3,7 +3,8 @@
   "database_uri": "http://localhost:5984",
   "port": 7442,
   "deploy_root": "./data",
-  "slack_webhook": "https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/fFIhDLTO37QX2y8ljBExSqC8",
+  "slack_webhook": "https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/fFIhDLTO37QX2y8ljBEx",
+  "slack_bot_token": "xoxb-231567564272",
   "fcm_auth": "./conf/google-server-key.json",
   "client_user_agent": "THiNX-Client"
 }
