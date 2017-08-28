@@ -4,7 +4,7 @@
 
 ### 21th week (after vacation)
 
-28/8/2017: 0.9.2332: Base Slack integration (SlackBot listening to incoming messages; web-socket forwarder ready)
+28/8/2017: 0.9.2349: Base Slack integration (SlackBot listening to incoming messages; web-socket forwarder ready); refactored registration, working LUA firmware example
 
 26/8/2017: 0.9.2330: E-mail registration testing & fixes
 
