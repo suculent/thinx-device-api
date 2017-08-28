@@ -2,6 +2,12 @@
 
 ## CHANGELOG
 
+### 21th week (after vacation)
+
+28/8/2017: 0.9.2332: Base Slack integration (SlackBot listening to incoming messages; web-socket forwarder ready)
+
+26/8/2017: 0.9.2330: E-mail registration testing & fixes
+
 ### 20th week
 
 21/8/2017: - Working MongooseOS builder and firmware prototype
