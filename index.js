@@ -1849,7 +1849,11 @@ var ThinxApp = function() {
     var owner = req.session.owner;
     var message = req.body.message;
     messenger.slack(owner, message, function(err, response) {
-      console.log("Chat: '" + message + "' with error " + err);
+      if (err) {
+        console.log("[OID:" + owner + "] Chat message failed with error " + err.toString());
+      } else {
+        console.log("[OID:" + owner + "] Chat message sent.");
+      }
       respond(res, {
         success: !err,
         status: response
