@@ -1849,7 +1849,11 @@ var ThinxApp = function() {
     var owner = req.session.owner;
     var message = req.body.message;
     messenger.slack(owner, message, function(err, response) {
-      console.log(err, response);
+      console.log("Chat: '" + message + "' with error " + err);
+      respond(res, {
+        success: !err,
+        status: response
+      });
     });
   });
 
@@ -1859,7 +1863,11 @@ var ThinxApp = function() {
     var owner = req.session.owner;
     var message = req.body.message;
     messenger.slack(owner, message, function(err, response) {
-      console.log(err, response);
+      console.log("Message: '" + message + "' with error " + err);
+      respond(res, {
+        success: !err,
+        status: response
+      });
     });
   });
 
