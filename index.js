@@ -2090,7 +2090,7 @@ var ThinxApp = function() {
     ws.on("message", function incoming(message) {
 
       var object = JSON.parse(message);
-      //console.log("WS Message: " + message);
+      console.log("WS Message: " + message);
 
       if (typeof(object.logtail) !== "undefined") {
 
