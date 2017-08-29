@@ -1852,7 +1852,7 @@ var ThinxApp = function() {
     var message = req.body.message;
 
     messenger.slack(owner, message, function(err, response) {
-      console.log(data);
+      console.log(err, response);
     });
 
   });
