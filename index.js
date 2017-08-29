@@ -1844,17 +1844,23 @@ var ThinxApp = function() {
 
   /* Websocket to Slack chat */
   app.post("/api/user/chat", function(req, res) {
-
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
-
     var owner = req.session.owner;
     var message = req.body.message;
-
     messenger.slack(owner, message, function(err, response) {
       console.log(err, response);
     });
+  });
 
+  app.post("/api/user/message", function(req, res) {
+    if (!validateSecurePOSTRequest(req)) return;
+    if (!validateSession(req, res)) return;
+    var owner = req.session.owner;
+    var message = req.body.message;
+    messenger.slack(owner, message, function(err, response) {
+      console.log(err, response);
+    });
   });
 
   /*
