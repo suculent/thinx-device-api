@@ -2,6 +2,10 @@
 
 ## CHANGELOG
 
+### 22th week 
+
+28/8/2017: 0.9.2374: fixed duplicate username and e-mail creation
+
 ### 21th week (after vacation)
 
 28/8/2017: 0.9.2349: Base Slack integration (SlackBot listening to incoming messages; web-socket forwarder ready); refactored registration, working LUA firmware example
