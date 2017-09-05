@@ -1,6 +1,6 @@
 # ☢ thinx-device-api
 
-[![Twitter: @igraczech](https://img.shields.io/badge/contact-%40igraczech-green.svg?style=flat)](https://twitter.com/igraczech)
+[![Twitter: @thinxcloud](https://img.shields.io/badge/contact-%40thinxcloud-green.svg?style=flat)](https://twitter.com/thinxcloud)
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://github.com/suculent/fastlane-plugin-apprepo/blob/master/LICENSE)
 [![Build Status](https://img.shields.io/circleci/project/github/suculent/thinx-device-api/master.svg)](https://circleci.com/gh/suculent/thinx-device-api)
 [![Coverage Status](https://coveralls.io/repos/github/suculent/thinx-device-api/badge.svg?branch=master)](https://coveralls.io/github/suculent/thinx-device-api?branch=master)
@@ -105,7 +105,7 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 
 ### Using Docker
 
-Experimental Docker installation can be found at [https://hub.docker.com/r/suculent/thinx-docker/](Docker Hub).
+Experimental Docker installation can be found at [Docker Hub](https://hub.docker.com/r/suculent/thinx-docker/).
 
 First of all, set a valid FQDN for your new THiNX instance on your DNS server. Use this FQDN to parametrize the Docker image:
 
