@@ -1,6 +1,6 @@
 # ☢ thinx-device-api
 
-[![Twitter: @igraczech](https://img.shields.io/badge/contact-%40igraczech-green.svg?style=flat)](https://twitter.com/igraczech)
+[![Twitter: @thinxcloud](https://img.shields.io/badge/contact-%40thinxcloud-green.svg?style=flat)](https://twitter.com/thinxcloud)
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://github.com/suculent/fastlane-plugin-apprepo/blob/master/LICENSE)
 [![Build Status](https://img.shields.io/circleci/project/github/suculent/thinx-device-api/master.svg)](https://circleci.com/gh/suculent/thinx-device-api)
 [![Coverage Status](https://coveralls.io/repos/github/suculent/thinx-device-api/badge.svg?branch=master)](https://coveralls.io/github/suculent/thinx-device-api?branch=master)
@@ -10,17 +10,17 @@ IoT Device Management Server running on node.js.
 
 ## The Purpose
 
-> Update IoT device by pushing to a git repository. Swap operating system for another over-the-air. Migrate multiple devices at once between WiFi networks.
+> Update IoT device by pushing to a Git repository. Swap operating system for another over-the-air. Migrate multiple devices at once between WiFi networks.
 
 As a user I have already many IoT new and/or legacy devices at home and new platforms are coming every day.
 
-Sometimes we need to change WiFi credentials on a wireless switch mounted on a ceiling. The other day I we want to swap whole firmware for new one, but not always to rewrite working legacy LUA or Micropython code to Platformio.
+Sometimes we need to change WiFi credentials on a wireless switch mounted on a ceiling. The other day I we want to swap whole firmware for new one, but not always to rewrite working legacy LUA or Micropython code to PlatformIO.
 
 It also covers other use-cases like remotely managing devices for customers with automatic updates for headless devices, or semi-automatic (with user consent after build and tests succed).
 
-> That's why we have decided to create the uber-platform: THiNX.
+> That's why we have decided to create the über-platform: THiNX.
 
-Currently we're capable of building firmwares for Platformio, NodeMCU and Micropython (and simple Arduino firmware is also coming soon)
+Currently we're capable of building firmwares for PlatformIO, NodeMCU and Micropython (and simple Arduino firmware is also coming soon)
 
 * Remote Things Management console for monitoring devices, attaching source code and managing updates.
 
@@ -81,7 +81,7 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 
 [Arduino](https://github.com/suculent/arduino-docker-build)
 
-[MongooseOS](https://github.com/suculent/mongooseos-docker-build)
+[MongooseOS](https://github.com/suculent/mongoose-docker-build)
 
 [NodeMCU/LUA](https://github.com/suculent/nodemcu-docker-build/)
 
@@ -105,7 +105,7 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 
 ### Using Docker
 
-Experimental Docker installation can be found at [https://hub.docker.com/r/suculent/thinx-docker/](Docker Hub).
+Experimental Docker installation can be found at [Docker Hub](https://hub.docker.com/r/suculent/thinx-docker/).
 
 First of all, set a valid FQDN for your new THiNX instance on your DNS server. Use this FQDN to parametrize the Docker image:
 
@@ -143,10 +143,16 @@ See 03-test.sh. There is no point of maintaining documentation for this at curre
 
 # Platforms State of Union
 
+### Overall
+
+* We need to take care of correct spelling for PlatformIO (and Git as well).
+* ACL implementation for MQTT is next in the queue.
+
 ### PlatformIO
 
-* We need to take care of corret spelling for PlatformIO (and Git as well).
-* Docker builder works. Deployment update can be tested now.
+* Docker builder works. 
+* Deployment update can be tested now.
+* Firmware can be tested/tuned now.
 
 ### Arduino
 
@@ -157,18 +163,17 @@ See 03-test.sh. There is no point of maintaining documentation for this at curre
 
 * File-based update has been pre-tested. Docker builder works fine but needs tighter integration with sources (workdir).
 * Deployment is not verified, therefore update cannot be tested.
-* There's currently no known test-device but many actually in production.
 
 ### Micropython
 
 * Docker builder works fine but needs tighter integration with sources.
 * Deployment is not verified, therefore update cannot be tested now.
 
-
 # Roadmap
 
-* test e2e pio update
-* test e2e ino update
-* test lua build + inject + e2e
-* test upy build + inject + e2e
-* test mos build + develop library + e2e
+* PlatformIO: end-to-end update
+* Arduino: end-to-end update
+* Arduino/PlatformIO: end-to-end MQTT
+* LUA: build, file update
+* UPY: build, file update
+* MOS: build, file update; firmware update; library
