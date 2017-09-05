@@ -2,9 +2,13 @@
 
 ## CHANGELOG
 
-### 22th week 
+### 22th week
 
-28/8/2017: 0.9.2374: fixed duplicate username and e-mail creation
+05/9/2017: 0.9.2387: improved registration procedure, testing with multiple ESP8266 devices with PlatformIO IDE
+
+04/9/2017: 0.9.2380: fixed normalized MAC matching; working on Arduino firmware
+
+03/9/2017: 0.9.2374: fixed duplicate username and e-mail creation; working on Arduino firmware
 
 ### 21th week (after vacation)
 
