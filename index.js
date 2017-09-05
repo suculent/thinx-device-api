@@ -1976,6 +1976,24 @@ var ThinxApp = function() {
   });
 
   /*
+   * Slack OAuth Dance
+   */
+
+  app.get("/slack/direct_install", function(req, res) {
+    res.redirect(
+      "https://slack.com/oauth/authorize?client_id=233115403974.233317554391&scope=channels%3Ahistory%20users%3Aread&state=abcdefg"
+    );
+  });
+
+  app.get("/slack/redirect", function(req, res) {
+    respond(res, {
+      success: true,
+      status: "slack_redirect_uri_hit"
+    });
+    //res.redirect("https://slack.com/oauth/authorize?client_id=233115403974.233317554391&scope=channels%3Ahistory%20users%3Aread&state=abcdefg");
+  });
+
+  /*
    * Root
    */
 
