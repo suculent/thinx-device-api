@@ -1972,7 +1972,6 @@ var ThinxApp = function() {
       reply: reply
     });
 
-
   });
 
   /*
@@ -1981,7 +1980,7 @@ var ThinxApp = function() {
 
   app.get("/slack/direct_install", function(req, res) {
     res.redirect(
-      "https://slack.com/oauth/authorize?client_id=233115403974.233317554391&scope=channels%3Ahistory%20users%3Aread&state=abcdefg"
+      "https://slack.com/oauth/authorize?client_id=233115403974.233317554391&scope=channels%3Ahistory%20users%3Aread%20chat%3write%3bot%20chat%3write%3user&state=Online"
     );
   });
 
@@ -1990,7 +1989,7 @@ var ThinxApp = function() {
       success: true,
       status: "slack_redirect_uri_hit"
     });
-    //res.redirect("https://slack.com/oauth/authorize?client_id=233115403974.233317554391&scope=channels%3Ahistory%20users%3Aread&state=abcdefg");
+    //res.redirect("https://slack.com/oauth/authorize?client_id=233115403974.233317554391&scope=channels%3Ahistory%20users%3Aread%20chat%3write%3bot%20chat%3write%3user&state=Online");
   });
 
   /*
