@@ -81,7 +81,7 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 
 [Arduino](https://github.com/suculent/arduino-docker-build)
 
-[MongooseOS](https://github.com/suculent/mongooseos-docker-build)
+[MongooseOS](https://github.com/suculent/mongoose-docker-build)
 
 [NodeMCU/LUA](https://github.com/suculent/nodemcu-docker-build/)
 
