@@ -4,7 +4,7 @@
 
 ### 22th week
 
-05/9/2017: 0.9.2387: improved registration procedure, testing with multiple ESP8266 devices with PlatformIO IDE
+05/9/2017: 0.9.2389: improved registration procedure, testing with multiple ESP8266 devices with PlatformIO IDE; added Code of Conduct and some basic Community rules (not reviewed)
 
 04/9/2017: 0.9.2380: fixed normalized MAC matching; working on Arduino firmware
 

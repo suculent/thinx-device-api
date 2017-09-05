@@ -22,7 +22,7 @@ The following behaviors are kindly asked of all community members:
 
 *   Clean your credentials before commit, or test on publicly available WiFi.
 *   Commit working code. How do you find out it's working? Cover it with tests as we do it with [Coveralls](http://coveralls.io).
-*   Attempt collaboration before verbal conflict. We do this in our free time and our kids do not want to wait for their parents responding to stupid questions or explaining other grown-ups how to behave. 
+*   Attempt collaboration before verbal conflict. We do this in our free time and our kids do not want to wait for their parents responding to stupid questions or explaining other grown-ups how to behave.
 *   We're old-fashioned programmers who don't click. Give some respect before totally kicking us off with your diamond-value 5-liner. We'll give you the respect back then.
 
 ## 4. Unacceptable Behavior
@@ -52,9 +52,7 @@ If a community member engages in unacceptable behavior, the community organizers
 
 ## 6. Reporting Guidelines
 
-If you are subject to or witness unacceptable behavior, or have any other concerns, please notify a community organizer as soon as possible. tmy0x3@icloud.com.
-
-
+If you are subject to or witness unacceptable behavior, or have any other concerns, please notify a community organizer @suculent as soon as possible.
 
 Additionally, community organizers are available to help community members engage with local law enforcement or to otherwise help those experiencing unacceptable behavior feel safe. In the context of in-person events, organizers will also provide escorts as desired by the person experiencing distress.
 
