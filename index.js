@@ -1980,16 +1980,22 @@ var ThinxApp = function() {
 
   app.get("/slack/direct_install", function(req, res) {
     res.redirect(
-      "https://slack.com/oauth/authorize?client_id=233115403974.233317554391&scope=channels%3Ahistory%20users%3Aread%20chat%3write%3bot%20chat%3write%3user&state=Online"
+      "https://slack.com/oauth/authorize?client_id=233115403974.233317554391&scope=channels%3Ahistory%20users%3Aread%20chat%3write%3bot%20chat%3write%3user&state=Online&redirect_uri=http://thinx.cloud"
     );
   });
 
   app.get("/slack/redirect", function(req, res) {
     respond(res, {
       success: true,
-      status: "slack_redirect_uri_hit"
+      status: "slack_redirect_uri_get"
     });
-    //res.redirect("https://slack.com/oauth/authorize?client_id=233115403974.233317554391&scope=channels%3Ahistory%20users%3Aread%20chat%3write%3bot%20chat%3write%3user&state=Online");
+  });
+
+  app.post("/slack/redirect", function(req, res) {
+    respond(res, {
+      success: true,
+      status: "slack_redirect_uri_post"
+    });
   });
 
   /*
