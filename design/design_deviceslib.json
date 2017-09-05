@@ -22,7 +22,7 @@
     }
   },
   "updates": {
-    "modify": "function (doc, req) { var fields = JSON.parse(req.body); for (var i in fields) { doc[i] = fields[i] } var resp = eval(uneval(doc)); delete resp._revisions; return [doc, toJSON(resp)]; }",
+    "modify": "function (doc, req) { if (doc == null) return []; var fields = JSON.parse(req.body); for (var i in fields) { doc[i] = fields[i] }; var resp = eval(uneval(doc)); delete resp._revisions; return [doc, toJSON(resp)]; }",
     "attach": "function (doc, req) { var request = JSON.parse(req.body); doc.source = request.source_id; var resp = eval(uneval(doc)); delete resp._revisions; return [doc, toJSON(resp)]; }"
   }
 }
