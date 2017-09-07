@@ -1571,6 +1571,7 @@ var ThinxApp = function() {
         }
       });
     }
+
     var username = req.body.username;
     var password = sha256(req.body.password);
 
@@ -1655,6 +1656,16 @@ var ThinxApp = function() {
       if (user_data === null) {
         console.log("No user data, not authorized.");
         failureResponse(res, 403, "unauthorized");
+        return;
+      }
+
+      // Exit when user is marked as deleted but not destroyed yet
+      var deleted = user_data.deleted;
+      if ((typeof(deleted) !== "undefined") && (deleted === true)) {
+        respond(res, {
+          status: "account_deleted",
+          success: failed
+        });
         return;
       }
 
@@ -1980,11 +1991,13 @@ var ThinxApp = function() {
 
   app.get("/slack/direct_install", function(req, res) {
     res.redirect(
-      "https://slack.com/oauth/authorize?client_id=233115403974.233317554391&scope=channels%3Ahistory%20users%3Aread%20chat%3write%3bot%20chat%3write%3user&state=Online&redirect_uri=http://thinx.cloud"
+      "https://slack.com/oauth/authorize?client_id=233115403974.233317554391&scope=bot&state=Online&redirect_uri=https://rtm.thinx.cloud:7443/slack/redirect"
     );
   });
 
   app.get("/slack/redirect", function(req, res) {
+    console.log("Redirect Code: " + req.code);
+    console.log("Redirect State: " + req.state);
     respond(res, {
       success: true,
       status: "slack_redirect_uri_get"
@@ -1992,6 +2005,7 @@ var ThinxApp = function() {
   });
 
   app.post("/slack/redirect", function(req, res) {
+    console.log("Redirect POST: " + JSON.stringify(req.body));
     respond(res, {
       success: true,
       status: "slack_redirect_uri_post"
