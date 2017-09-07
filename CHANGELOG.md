@@ -4,11 +4,15 @@
 
 ### 22th week
 
-05/9/2017: 0.9.2389: improved registration procedure, testing with multiple ESP8266 devices with PlatformIO IDE; added Code of Conduct and some basic Community rules (not reviewed); device icons supported
+7/9/2017: user account deletion
 
-04/9/2017: 0.9.2380: fixed normalized MAC matching; working on Arduino firmware
+6/9/2017: bugfixes, random device naming, device icons, working on Slack integration...
 
-03/9/2017: 0.9.2374: fixed duplicate username and e-mail creation; working on Arduino firmware
+5/9/2017: 0.9.2389: improved registration procedure, testing with multiple ESP8266 devices with PlatformIO IDE; added Code of Conduct and some basic Community rules (not reviewed); device icons supported
+
+4/9/2017: 0.9.2380: fixed normalized MAC matching; working on Arduino firmware
+
+3/9/2017: 0.9.2374: fixed duplicate username and e-mail creation; working on Arduino firmware
 
 ### 21th week (after vacation)
 
