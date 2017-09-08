@@ -1069,6 +1069,12 @@ var ThinxApp = function() {
     if (validity === 0) {
       return true;
     } else {
+
+      // TODO: FIXME: Replace client_user_agent string with array!
+      if (ua.indexOf("SIGFOX") !== -1) {
+        return true;
+      }
+
       console.log("User-Agent: " + ua + " invalid!");
       res.writeHead(401, {
         "Content-Type": "text/plain"
