@@ -1669,8 +1669,8 @@ var ThinxApp = function() {
       var deleted = user_data.deleted;
       if ((typeof(deleted) !== "undefined") && (deleted === true)) {
         respond(res, {
-          status: "account_deleted",
-          success: true
+          status: "user_not_found",
+          success: false
         });
         return;
       }
