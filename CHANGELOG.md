@@ -4,6 +4,12 @@
 
 ### 22th week
 
+10/9/2017:
+
+9/9/2017:
+
+8/9/2017: registered first SigFox device using callback API (just needs minor manual udid intervention)
+
 7/9/2017: user account deletion
 
 6/9/2017: bugfixes, random device naming, device icons, working on Slack integration...
@@ -12,9 +18,9 @@
 
 4/9/2017: 0.9.2380: fixed normalized MAC matching; working on Arduino firmware
 
-3/9/2017: 0.9.2374: fixed duplicate username and e-mail creation; working on Arduino firmware
-
 ### 21th week (after vacation)
+
+3/9/2017: 0.9.2374: fixed duplicate username and e-mail creation; working on Arduino firmware
 
 28/8/2017: 0.9.2349: Base Slack integration (SlackBot listening to incoming messages; web-socket forwarder ready); refactored registration, working LUA firmware example
 
