@@ -1670,7 +1670,7 @@ var ThinxApp = function() {
       if ((typeof(deleted) !== "undefined") && (deleted === true)) {
         respond(res, {
           status: "account_deleted",
-          success: failed
+          success: true
         });
         return;
       }
