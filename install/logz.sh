@@ -1,3 +1,5 @@
+#!/bin/bash
+
 wget https://raw.githubusercontent.com/logzio/public-certificates/master/COMODORSADomainValidationSecureServerCA.crt
 sudo mkdir -p /etc/pki/tls/certs
 sudo cp COMODORSADomainValidationSecureServerCA.crt /etc/pki/tls/certs/
@@ -13,6 +15,3 @@ sudo apt-get update && sudo apt-get install filebeat
 
 mkdir -p /etc/filebeat
 cp ./filebeat.yml /etc/filebeat/filebeat.yml
-
-
-

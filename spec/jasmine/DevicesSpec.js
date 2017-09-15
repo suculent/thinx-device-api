@@ -47,7 +47,7 @@ describe("Devices", function() {
     });
   }, 30000);
 
-  // requires specific device registered for this test only (udid "to-be-deleted-on-test")
+  // requires specific device registered for this test only (udid "6ef6d300-8053-11e7-8d27-0fa2e6ecef21")
   it("should be able to revoke devices for owner", function(done) {
     var body = {
       udid: udid

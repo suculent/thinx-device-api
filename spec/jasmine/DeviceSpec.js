@@ -11,10 +11,11 @@ describe("Device", function() {
 
   /*
     var RS =
-      '{ "registration" : { "mac" : "000000000000", "firmware" : "DeviceSpec.js", "version" : "1.0.0", "checksum" : "nevermind", "push" : "forget", "alias" : "npmtest", "udid": "to-be-deleted-on-test", "owner": "' +
+      '{ "registration" : { "mac" : "000000000000", "firmware" : "DeviceSpec.js", "version" : "1.0.0", "checksum" : "nevermind", "push" : "forget", "alias" : "npmtest", "udid": "6ef6d300-8053-11e7-8d27-0fa2e6ecef21", "owner": "' +
       owner + '", "platform": "platformio" } }';
       */
 
+  // This UDID is to be deleted at the end of test.
   var JRS = {
     registration: {
       mac: "11:11:11:11:11:11",
@@ -25,7 +26,7 @@ describe("Device", function() {
       alias: "npm-test-ino-one",
       owner: owner,
       platform: "arduino",
-      udid: "to-be-deleted-on-test"
+      udid: "6ef6d300-8053-11e7-8d27-0fa2e6ecef21"
     }
   };
 

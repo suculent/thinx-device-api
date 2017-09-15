@@ -235,7 +235,7 @@ http://$HOST:7442/api/user/profile)
 SUCCESS=$(echo $R | jq . )
 echo $SUCCESS
 if [[ ! -z $SUCCESS ]]; then
-	URL=$(echo $R | jq .)
+#	URL=$(echo $R | jq .)
 	echo_ok "User profile response: $SUCCESS"
 else
 	echo_fail $R
@@ -438,9 +438,9 @@ http://$HOST:7442/api/user/apikey/revoke)
 
 SUCCESS=$(echo $R | jq .success)
 echo $SUCCESS
-RKEY=null
+#RKEY=null
 if [[ $SUCCESS == true ]]; then
-	RKEY=$(echo $R | jq .)
+#	RKEY=$(echo $R | jq .)
 	echo_ok "Revoked API key: $APIKEY"
 else
 	echo_fail $R

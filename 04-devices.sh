@@ -6,7 +6,6 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 API_KEY='9dea00184411724edee0988431623e03222452e10b9b57b95190e3769d9b2f3e' # satan
-OWNER_ID='72f90591653886f96ca8789af51f31b1d062b4426a179840d945967f65fdb175' # satan; cimrman is the originating device owner for transfer tests; saturnin is receiver
 
 function echo_fail() { # $1 = string
     COLOR=$RED
