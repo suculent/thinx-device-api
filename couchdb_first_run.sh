@@ -21,7 +21,7 @@ if [ ! -z "$DB" ]; then
 
     echo $THX_PREFIX >> ./conf/.thx_prefix
 
-    sed -i -- 's/rtmapi:frohikey/${USER}:${PASS}/g' ./conf/conf.json
+    sed -i -- "s/rtmapi:frohikey/${USER}:${PASS}/g" ./conf/conf.json
     curl -X PUT http://$USER:$PASS@127.0.0.1:5984/${THX_PREFIX}_managed_devices/_design/devicelib -d @design/design_deviceslib.json
     curl -X PUT http://$USER:$PASS@127.0.0.1:5984/${THX_PREFIX}_managed_users/_design/users -d @design/design_users.json
     curl -X PUT http://$USER:$PASS@127.0.0.1:5984/${THX_PREFIX}_managed_logs/_design/logs -d @design/design_logs.json
