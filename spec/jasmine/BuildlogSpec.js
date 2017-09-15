@@ -40,9 +40,9 @@ describe("Build log", function() {
   wss.on('connection', function connection(ws, req) {
 
     _ws = ws;
-    var location = url.parse(req.url, true);
-    // console.log("» WSS connection on location: " + location);
-    //console.log("» WSS cookie: " + req.headers.cookie);
+    var location = req.url;
+    console.log("» WSS connection on location: " + location);
+    console.log("» WSS cookie: " + req.headers.cookie);
     try {
       ws.send('HELLO');
     } catch (e) { /* handle error */ }
@@ -93,7 +93,7 @@ describe("Build log", function() {
       function(err) {
         console.log(err);
         expect(true).toBe(true);
-        ws_done = done();
+        ws_done = this.done();
       });
   }, 5000);
 
