@@ -19,7 +19,9 @@
   "scripts": {
     "coverage": "nyc jasmine --stop-on-failure=false; nyc report --reporter=text-lcov | coveralls",
     "test": "nyc jasmine --stop-on-failure=false; nyc report --reporter=text-lcov | coveralls",
-    "snyk": "snyk test"
+    "snyk": "snyk test",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "preferGlobal": true,
   "dependencies": {
@@ -58,7 +60,7 @@
     "redis": "^2.7.1",
     "regex": "^0.1.1",
     "request": "^2.74.0",
-    "rollbar": "2.0.1",
+    "rollbar": "^2.1.0",
     "semver": "5.3.0",
     "sha256": "^0.2.0",
     "sillyname": "^0.1.0",
