@@ -286,7 +286,7 @@ devicelib.get(udid, function(err, doc) {
       });
     } else {
       slack.alert({
-        text: "Build failed.",
+        text: "FAILED",
         username: "notifier.js",
         icon_emoji: ":computerage:",
         fields: buildEnvelope

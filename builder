@@ -276,7 +276,7 @@ case $PLATFORM in
 					ls "$OUTPATH" >> "${LOG_PATH}"
 					OUTFILE="${OUTPATH}/*.bin"
 				else
-					STATUS='"BUILD FAILED."'
+					STATUS='"FAILED"'
 				fi
 				# TODO: deploy
 			fi
@@ -286,9 +286,26 @@ case $PLATFORM in
 			OUTFILE=${DEPLOYMENT_PATH}/thinx.lua # there is more!
 			OUTPATH=${DEPLOYMENT_PATH}/
 			# possibly lua-modules extended with thinx
-			mv "./thinx_build.json" "$THINX_ROOT/tools/nodemcu-firmware/local/fs/thinx.json"
+
+			echo "DEBUGGING builder.sh: For NodeMCU (pwd/ls)..."
+			pwd
+			ls
+
+			CONFIG_PATH="$THINX_ROOT/tools/nodemcu-firmware/local/fs/thinx.json"
+
+			echo "DEBUGGING builder.sh: Deconfiguring..."
+			rm -rf $CONFIG_PATH
+
+			echo "DEBUGGING builder.sh: Configuring..."
+			mv "./thinx_build.json" $CONFIG_PATH
+
+			echo "DEBUGGING builder.sh: Installing new config..."
 			cp -v "${OWNER_PATH}/*.lua" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
+
+			echo "DEBUGGING builder.sh: Cleaning SPIFFS folder..."
 			rm -rf $THINX_ROOT/tools/nodemcu-firmware/local/fs/** # cleanup first
+
+			echo "DEBUGGING builder.sh: Copying pre-built SPIFFS data..."
 			cp -v "${OWNER_PATH}/*.lua" "$THINX_ROOT/tools/nodemcu-firmware/local/fs" >> "${LOG_PATH}"
 
 			# Options:
@@ -297,14 +314,16 @@ case $PLATFORM in
 			# INTEGER_ONLY Set this to 1 if you don't need NodeMCU with floating support, cuts the build time in half.
 			# FLOAT_ONLY Set this to 1 if you only need NodeMCU with floating support, cuts the build time in half.
 
-			# TODO: May be skipped with file-only update
+			# TODO: Docker run may be skipped with file-only update, implement toggle switch
 
+			echo "DEBUGGING builder.sh: Running Dockerized builder..."
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build >> "${LOG_PATH}"
 
 			if [[ $? == 0 ]] ; then
 				BUILD_SUCCESS=true
 			fi
 
+			pwd
 			ls
 
 			# Exit on dry run...
@@ -320,7 +339,7 @@ case $PLATFORM in
 					ls "$OWNER_PATH" >> "${LOG_PATH}"
 					OUTFILE="${OWNER_PATH}/firmware.bin"
 				else
-					STATUS='"BUILD FAILED."'
+					STATUS='"FAILED"'
 				fi
 				# TODO: deploy
 			fi
@@ -367,7 +386,7 @@ case $PLATFORM in
 					ls "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
 					echo $MSG; echo $MSG >> "${LOG_PATH}"
 				else
-					STATUS='"BUILD FAILED."'
+					STATUS='"FAILED"'
 				fi
 			fi
     ;;
@@ -445,7 +464,7 @@ case $PLATFORM in
 						ls $DEPLOYMENT_PATH
 						ls $DEPLOYMENT_PATH >> "${LOG_PATH}"
 					else
-						STATUS='"BUILD FAILED."'
+						STATUS='"FAILED"'
 					fi
 				fi
 			;;
@@ -488,7 +507,7 @@ case $PLATFORM in
 					OUTFILE="$APATH"
 					cp -vR "${OUTFILE}" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
 				else
-					STATUS='"BUILD FAILED."'
+					STATUS='"FAILED"'
 				fi
 			fi
 
@@ -521,6 +540,8 @@ popd
 popd
 
 echo "[builder.sh] Post-flight check:" >> "${LOG_PATH}"
+
+pwd
 
 echo "DP" $DISPLAY_DEPLOYMENT_PATH >> "${LOG_PATH}"
 
