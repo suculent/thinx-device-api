@@ -299,14 +299,19 @@ case $PLATFORM in
 			echo "DEBUGGING builder.sh: Configuring..."
 			mv "./thinx_build.json" $CONFIG_PATH
 
+			echo "DEBUGGING builder.sh: Searching LUA files..."
+			LUA_FILES=$(find ${OWNER_PATH} -name "*.lua" )
+
+			echo "DEBUGGING builder.sh: ${LUA_FILES}"
+
 			echo "DEBUGGING builder.sh: Installing new config..."
-			cp -v "${OWNER_PATH}/*.lua" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
+			cp -v "${LUA_FILES}" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
 
 			echo "DEBUGGING builder.sh: Cleaning SPIFFS folder..."
 			rm -rf $THINX_ROOT/tools/nodemcu-firmware/local/fs/** # cleanup first
 
 			echo "DEBUGGING builder.sh: Copying pre-built SPIFFS data..."
-			cp -v "${OWNER_PATH}/*.lua" "$THINX_ROOT/tools/nodemcu-firmware/local/fs" >> "${LOG_PATH}"
+			cp -v "${LUA_FILES}" "$THINX_ROOT/tools/nodemcu-firmware/local/fs" >> "${LOG_PATH}"
 
 			# Options:
 			# You can pass the following optional parameters to the Docker build like so docker run -e "<parameter>=value" -e ....
