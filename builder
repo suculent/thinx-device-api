@@ -306,16 +306,19 @@ case $PLATFORM in
 			echo "DEBUGGING builder.sh: Searching LUA files..."
 			LUA_FILES=$(find ${OWNER_PATH} -name "*.lua" )
 
-			echo "DEBUGGING builder.sh: ${LUA_FILES}"
-
-			echo "DEBUGGING builder.sh: Installing new config..."
-			cp -v "${LUA_FILES}" "$DEPLOYMENT_PATH" >> "${LOG_PATH}"
+			echo "DEBUGGING builder.sh: LUA_FILES:\n ${LUA_FILES}"
 
 			echo "DEBUGGING builder.sh: Cleaning SPIFFS folder..."
 			rm -rf $THINX_ROOT/tools/nodemcu-firmware/local/fs/** # cleanup first
 
-			echo "DEBUGGING builder.sh: Copying pre-built SPIFFS data..."
-			cp -v "${LUA_FILES}" "$THINX_ROOT/tools/nodemcu-firmware/local/fs" >> "${LOG_PATH}"
+			echo "DEBUGGING builder.sh: Customizing firmware..."
+
+			for luafile in ${LUA_FILES[@]}; do
+				# option #1 - copy as app
+				cp -v "${luafile}" "$DEPLOYMENT_PATH"
+				# option #2 - build into filesystem root
+				cp -v "${luafile}" "$THINX_ROOT/tools/nodemcu-firmware/local/fs"
+		  done
 
 			# Options:
 			# You can pass the following optional parameters to the Docker build like so docker run -e "<parameter>=value" -e ....
@@ -332,7 +335,9 @@ case $PLATFORM in
 				BUILD_SUCCESS=true
 			fi
 
+			echo "DEBUGGING builder.sh: Where are we?"
 			pwd
+			echo "DEBUGGING builder.sh: What is here?"
 			ls
 
 			# Exit on dry run...
