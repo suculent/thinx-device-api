@@ -2,6 +2,9 @@
 
 ## CHANGELOG
 
+19/9/2017: e2e integration of NodeMCU dockerized builder
+18/9/2017: NodeMCU LUA firmware checkin tests
+
 ### 22th week
 
 10/9/2017:

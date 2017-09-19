@@ -365,16 +365,23 @@ case $PLATFORM in
 			else
 				# Check Artifacts
 				if [[ $BUILD_SUCCESS == true ]] ; then
-					cp -v ./bin/*.bin "$OUTPATH" >> "${LOG_PATH}"
-					rm -rf ./bin/*
+
+					echo "Listing output directory: "
+					pwd
+					ls
+					echo "Listing binary artifacts: "
+					ls ./bin
+
+					echo "Copying binary artifacts..." >> "${LOG_PATH}"
+					cp -v ./bin/*.bin "${DEPLOYMENT_PATH}" >> "${LOG_PATH}"
 					STATUS='"OK"'
+					echo "TODO: deploying..."
+					echo "OWNER PATH: " $OWNER_PATH
 					ls "$OWNER_PATH" >> "${LOG_PATH}"
 					OUTFILE="${OWNER_PATH}/firmware.bin"
 				else
 					STATUS='"FAILED"'
 				fi
-				# TODO: deploy
-				echo "TODO: deploy..."
 			fi
     ;;
 
