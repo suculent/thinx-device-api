@@ -306,7 +306,7 @@ case $PLATFORM in
 
 			echo "DEBUGGING builder.sh: Cleaning SPIFFS folder..."
 			if [ -f ${DEPLOYMENT_PATH}/local/fs/* ]; then
-				# echo "Cleaning local/fs"
+				echo "Cleaning local/fs"
 				# rm -rf ${DEPLOYMENT_PATH}/local/fs/** # cleanup first
 			fi
 
@@ -339,7 +339,11 @@ case $PLATFORM in
 				# option #1 - deploy LUA files without building
 				cp -vf "${luafile}" "$DEPLOYMENT_PATH"
 				# option #2 - build into filesystem root
-				cp -vf "${luafile}" "./local/fs/"
+				CPATH=./local/fs/$(basename ${luafile})
+				if [[ -f $FSPATH ]]; then
+					rm -rf $FSPATH
+					cp -vf "${luafile}" $FSPATH
+				fi
 		  done
 
 			echo "DEBUGGING builder.sh: Running Dockerized builder..."
