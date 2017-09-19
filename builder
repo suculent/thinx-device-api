@@ -304,7 +304,7 @@ case $PLATFORM in
 			OUTPATH=${DEPLOYMENT_PATH}
 			OUTFILE=${DEPLOYMENT_PATH}/thinx.lua # there is more files here!
 
-			echo "DEBUGGING builder.sh: Cleaning SPIFFS folder..."
+			echo "NodeMCU Build: Cleaning SPIFFS folder..."
 			if [ -f ${DEPLOYMENT_PATH}/local/fs/* ]; then
 				echo "Cleaning local/fs"
 				# rm -rf ${DEPLOYMENT_PATH}/local/fs/** # cleanup first
@@ -315,25 +315,25 @@ case $PLATFORM in
 
 			# possibly lua-modules extended with thinx
 
-			echo "DEBUGGING builder.sh: For NodeMCU (pwd/ls)..."
+			echo "NodeMCU Build: For NodeMCU (pwd/ls)..."
 			pwd
 			ls
 
 			CONFIG_PATH="./local/fs/thinx.json"
 
 			if [ -f $CONFIG_PATH ]; then
-				echo "DEBUGGING builder.sh: Deconfiguring..."
+				echo "NodeMCU Build: Deconfiguring..."
 				rm -rf $CONFIG_PATH
 			fi
 
-			echo "DEBUGGING builder.sh: Configuring..."
+			echo "NodeMCU Build: Configuring..."
 			mv "./thinx_build.json" $CONFIG_PATH
 
 			LUA_FILES=$(find . -name "*.lua" -maxdepth 1)
-			echo "DEBUGGING builder.sh: LUA_FILES:"
+			echo "NodeMCU Build: LUA_FILES:"
 			echo ${LUA_FILES}
 
-			echo "DEBUGGING builder.sh: Customizing firmware..."
+			echo "NodeMCU Build: Customizing firmware..."
 
 			for luafile in ${LUA_FILES[@]}; do
 				# option #1 - deploy LUA files without building
@@ -346,16 +346,21 @@ case $PLATFORM in
 				fi
 		  done
 
-			echo "DEBUGGING builder.sh: Running Dockerized builder..."
+			if [ -f ./bin/* ]; then
+				echo "NodeMCU Build: Cleaning bin & map files..."
+				rm -rf ./bin/*
+			fi
+
+			echo "NodeMCU Build: Running Dockerized builder..."
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build >> "${LOG_PATH}"
 
 			if [[ $? == 0 ]] ; then
 				BUILD_SUCCESS=true
 			fi
 
-			echo "DEBUGGING builder.sh: Where are we?"
+			echo "NodeMCU Build: Where are we?"
 			pwd
-			echo "DEBUGGING builder.sh: What is here?"
+			echo "NodeMCU Build: What is here?"
 			ls
 
 			# Exit on dry run...
@@ -366,19 +371,19 @@ case $PLATFORM in
 				# Check Artifacts
 				if [[ $BUILD_SUCCESS == true ]] ; then
 
-					echo "Listing output directory: "
+					echo "NodeMCU Build: Listing output directory: "
 					pwd
 					ls
-					echo "Listing binary artifacts: "
+					echo "NodeMCU Build: Listing binary artifacts: "
 					ls ./bin
 
-					echo "Copying binary artifacts..." >> "${LOG_PATH}"
+					echo "NodeMCU Build: Copying binary artifacts..." >> "${LOG_PATH}"
 					cp -v ./bin/*.bin "${DEPLOYMENT_PATH}" >> "${LOG_PATH}"
 					STATUS='"OK"'
-					echo "TODO: deploying..."
-					echo "OWNER PATH: " $OWNER_PATH
+					echo "NodeMCU Build: OWNER PATH: " $OWNER_PATH
 					ls "$OWNER_PATH" >> "${LOG_PATH}"
 					OUTFILE="${OWNER_PATH}/firmware.bin"
+
 				else
 					STATUS='"FAILED"'
 				fi
