@@ -163,7 +163,7 @@ rm -rf $REPO_NAME
 
 echo "[builder.sh] Cloning ${GIT_REPO}..." >> "${LOG_PATH}"
 # Fetch project
-git clone --quiet $GIT_REPO
+git clone --quiet --recurse-submodules $GIT_REPO
 
 if [[ -d $REPO_NAME ]]; then
 	echo "Directory $REPO_NAME exists, entering..."
