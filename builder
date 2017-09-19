@@ -305,10 +305,13 @@ case $PLATFORM in
 			OUTFILE=${DEPLOYMENT_PATH}/thinx.lua # there is more files here!
 
 			echo "DEBUGGING builder.sh: Cleaning SPIFFS folder..."
-			rm -rf ${DEPLOYMENT_PATH}/local/fs/** # cleanup first
+			if [ -f ${DEPLOYMENT_PATH}/local/fs/* ]; then
+				# echo "Cleaning local/fs"
+				# rm -rf ${DEPLOYMENT_PATH}/local/fs/** # cleanup first
+			fi
 
-			# Copy firmware sources
-			cp -vR "$THINX_ROOT/tools/nodemcu-firmware/**" .
+			# Copy firmware sources to current working directory
+			cp -vR $THINX_ROOT/tools/nodemcu-firmware/* .
 
 			# possibly lua-modules extended with thinx
 
@@ -318,8 +321,8 @@ case $PLATFORM in
 
 			CONFIG_PATH="./local/fs/thinx.json"
 
-			echo "DEBUGGING builder.sh: Deconfiguring..."
 			if [ -f $CONFIG_PATH ]; then
+				echo "DEBUGGING builder.sh: Deconfiguring..."
 				rm -rf $CONFIG_PATH
 			fi
 
