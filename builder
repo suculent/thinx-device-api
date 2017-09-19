@@ -248,8 +248,10 @@ ls >> "${LOG_PATH}"
 case $PLATFORM in
 
     micropython)
+
+			OUTPATH=${DEPLOYMENT_PATH}
 		  OUTFILE=${DEPLOYMENT_PATH}/boot.py
-			OUTPATH=${DEPLOYMENT_PATH}/
+
 			#docker pull suculent/micropython-docker-build
 			#cd ./tools/micropython-docker-build
 			#cd modules
@@ -287,15 +289,34 @@ case $PLATFORM in
     ;;
 
 		nodemcu)
-			OUTFILE=${DEPLOYMENT_PATH}/thinx.lua # there is more!
-			OUTPATH=${DEPLOYMENT_PATH}/
+
+			# Options:
+			# You can pass the following optional parameters to the Docker build like so docker run -e "<parameter>=value" -e ....
+			# IMAGE_NAME The default firmware file names are nodemcu_float|integer_<branch>_<timestamp>.bin. If you define an image name it replaces the <branch>_<timestamp> suffix and the full image names become nodemcu_float|integer_<image_name>.bin.
+			# INTEGER_ONLY Set this to 1 if you don't need NodeMCU with floating support, cuts the build time in half.
+			# FLOAT_ONLY Set this to 1 if you only need NodeMCU with floating support, cuts the build time in half.
+			# TODO: Docker run may be skipped with file-only update, implement toggle switch...
+
+		  # WARNING! This is a specific builder (like Micropython).
+			# Source files must be copied from source folder to the WORKDIR
+			# which is actually a source of nodemcu-firmware (esp-open-sdk).
+
+			OUTPATH=${DEPLOYMENT_PATH}
+			OUTFILE=${DEPLOYMENT_PATH}/thinx.lua # there is more files here!
+
+			echo "DEBUGGING builder.sh: Cleaning SPIFFS folder..."
+			rm -rf ${DEPLOYMENT_PATH}/local/fs/** # cleanup first
+
+			# Copy firmware sources
+			cp -vR "$THINX_ROOT/tools/nodemcu-firmware" ${DEPLOYMENT_PATH}
+
 			# possibly lua-modules extended with thinx
 
 			echo "DEBUGGING builder.sh: For NodeMCU (pwd/ls)..."
 			pwd
 			ls
 
-			CONFIG_PATH="$THINX_ROOT/tools/nodemcu-firmware/local/fs/thinx.json"
+			CONFIG_PATH="${DEPLOYMENT_PATH}/local/fs/thinx.json"
 
 			echo "DEBUGGING builder.sh: Deconfiguring..."
 			rm -rf $CONFIG_PATH
@@ -303,13 +324,8 @@ case $PLATFORM in
 			echo "DEBUGGING builder.sh: Configuring..."
 			mv "./thinx_build.json" $CONFIG_PATH
 
-			echo "DEBUGGING builder.sh: Searching LUA files..."
 			LUA_FILES=$(find ${OWNER_PATH} -name "*.lua" )
-
 			echo "DEBUGGING builder.sh: LUA_FILES:\n ${LUA_FILES}"
-
-			echo "DEBUGGING builder.sh: Cleaning SPIFFS folder..."
-			rm -rf $THINX_ROOT/tools/nodemcu-firmware/local/fs/** # cleanup first
 
 			echo "DEBUGGING builder.sh: Customizing firmware..."
 
@@ -317,19 +333,11 @@ case $PLATFORM in
 				# option #1 - copy as app
 				cp -v "${luafile}" "$DEPLOYMENT_PATH"
 				# option #2 - build into filesystem root
-				cp -v "${luafile}" "$THINX_ROOT/tools/nodemcu-firmware/local/fs"
+				cp -v "${luafile}" "${DEPLOYMENT_PATH}/local/fs"
 		  done
 
-			# Options:
-			# You can pass the following optional parameters to the Docker build like so docker run -e "<parameter>=value" -e ....
-			# IMAGE_NAME The default firmware file names are nodemcu_float|integer_<branch>_<timestamp>.bin. If you define an image name it replaces the <branch>_<timestamp> suffix and the full image names become nodemcu_float|integer_<image_name>.bin.
-			# INTEGER_ONLY Set this to 1 if you don't need NodeMCU with floating support, cuts the build time in half.
-			# FLOAT_ONLY Set this to 1 if you only need NodeMCU with floating support, cuts the build time in half.
-
-			# TODO: Docker run may be skipped with file-only update, implement toggle switch
-
 			echo "DEBUGGING builder.sh: Running Dockerized builder..."
-			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build >> "${LOG_PATH}"
+			docker run ${DOCKER_PREFIX} --rm -t -v ${DEPLOYMENT_PATH}:/opt/nodemcu-firmware suculent/nodemcu-docker-build >> "${LOG_PATH}"
 
 			if [[ $? == 0 ]] ; then
 				BUILD_SUCCESS=true
@@ -356,6 +364,7 @@ case $PLATFORM in
 					STATUS='"FAILED"'
 				fi
 				# TODO: deploy
+				echo "TODO: deploy..."
 			fi
     ;;
 
