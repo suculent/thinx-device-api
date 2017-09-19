@@ -308,7 +308,7 @@ case $PLATFORM in
 			rm -rf ${DEPLOYMENT_PATH}/local/fs/** # cleanup first
 
 			# Copy firmware sources
-			cp -vR "$THINX_ROOT/tools/nodemcu-firmware" .
+			cp -vR "$THINX_ROOT/tools/nodemcu-firmware/**" .
 
 			# possibly lua-modules extended with thinx
 
@@ -326,16 +326,17 @@ case $PLATFORM in
 			echo "DEBUGGING builder.sh: Configuring..."
 			mv "./thinx_build.json" $CONFIG_PATH
 
-			LUA_FILES=$(find . -name "*.lua" )
-			echo "DEBUGGING builder.sh: LUA_FILES:\n ${LUA_FILES}"
+			LUA_FILES=$(find . -name "*.lua" -maxdepth 1)
+			echo "DEBUGGING builder.sh: LUA_FILES:"
+			echo ${LUA_FILES}
 
 			echo "DEBUGGING builder.sh: Customizing firmware..."
 
 			for luafile in ${LUA_FILES[@]}; do
 				# option #1 - deploy LUA files without building
-				cp -v "${luafile}" "$DEPLOYMENT_PATH"
+				cp -vf "${luafile}" "$DEPLOYMENT_PATH"
 				# option #2 - build into filesystem root
-				cp -v "${luafile}" "./local/fs"
+				cp -vf "${luafile}" "./local/fs/"
 		  done
 
 			echo "DEBUGGING builder.sh: Running Dockerized builder..."
