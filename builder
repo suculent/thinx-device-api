@@ -308,7 +308,7 @@ case $PLATFORM in
 			rm -rf ${DEPLOYMENT_PATH}/local/fs/** # cleanup first
 
 			# Copy firmware sources
-			cp -vR "$THINX_ROOT/tools/nodemcu-firmware" ${DEPLOYMENT_PATH}
+			cp -vR "$THINX_ROOT/tools/nodemcu-firmware" .
 
 			# possibly lua-modules extended with thinx
 
@@ -316,28 +316,30 @@ case $PLATFORM in
 			pwd
 			ls
 
-			CONFIG_PATH="${DEPLOYMENT_PATH}/local/fs/thinx.json"
+			CONFIG_PATH="./local/fs/thinx.json"
 
 			echo "DEBUGGING builder.sh: Deconfiguring..."
-			rm -rf $CONFIG_PATH
+			if [ -f $CONFIG_PATH ]; then
+				rm -rf $CONFIG_PATH
+			fi
 
 			echo "DEBUGGING builder.sh: Configuring..."
 			mv "./thinx_build.json" $CONFIG_PATH
 
-			LUA_FILES=$(find ${OWNER_PATH} -name "*.lua" )
+			LUA_FILES=$(find . -name "*.lua" )
 			echo "DEBUGGING builder.sh: LUA_FILES:\n ${LUA_FILES}"
 
 			echo "DEBUGGING builder.sh: Customizing firmware..."
 
 			for luafile in ${LUA_FILES[@]}; do
-				# option #1 - copy as app
+				# option #1 - deploy LUA files without building
 				cp -v "${luafile}" "$DEPLOYMENT_PATH"
 				# option #2 - build into filesystem root
-				cp -v "${luafile}" "${DEPLOYMENT_PATH}/local/fs"
+				cp -v "${luafile}" "./local/fs"
 		  done
 
 			echo "DEBUGGING builder.sh: Running Dockerized builder..."
-			docker run ${DOCKER_PREFIX} --rm -t -v ${DEPLOYMENT_PATH}:/opt/nodemcu-firmware suculent/nodemcu-docker-build >> "${LOG_PATH}"
+			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build >> "${LOG_PATH}"
 
 			if [[ $? == 0 ]] ; then
 				BUILD_SUCCESS=true
