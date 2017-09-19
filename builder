@@ -143,11 +143,11 @@ if [[ ! -d $OWNER_PATH ]]; then
 	mkdir -p $OWNER_PATH
 fi
 
-echo "[builder.sh] Entering owner folder $OWNER_PATH" >> "${LOG_PATH}"
+echo "[builder.sh] Entering OWNER_PATH $OWNER_PATH" >> "${LOG_PATH}"
 pushd $OWNER_PATH >> "${LOG_PATH}"
 
 # Create new working directory
-echo "[builder.sh] Creating new working directory $REPO_PATH" >> "${LOG_PATH}"
+echo "[builder.sh] Creating new REPO_PATH $REPO_PATH" >> "${LOG_PATH}"
 mkdir -p ./$REPO_PATH
 ls >> "${LOG_PATH}"
 
@@ -166,8 +166,10 @@ echo "[builder.sh] Cloning ${GIT_REPO}..." >> "${LOG_PATH}"
 git clone $GIT_REPO
 
 if [[ -d $REPO_NAME ]]; then
+	echo "Directory $REPO_NAME exists, entering..."
 	pushd ./$REPO_NAME
 else
+	echo "Directory $REPO_NAME does not exist, entering $REPO_PATH instead..."
 	pushd ./$REPO_PATH
 fi
 
@@ -223,7 +225,7 @@ PLATFORM=$(infer_platform ".")
 LANGUAGE=$(language_for_platform $PLATFORM)
 LANGUAGE_NAME=$(language_name $LANGUAGE)
 
-echo "[builder.sh] Building for platform '${PLATFORM}' in language '${LANGUAGE_NAME}'..."
+echo "[builder.sh] Building for platform '${PLATFORM}' in language '${LANGUAGE_NAME}'..." >> "${LOG_PATH}"
 
 SHA="0x00000000"
 OUTFILE="<failed>"
@@ -236,9 +238,11 @@ else
 	DOCKER_PREFIX=""
 fi
 
+echo "Changing current directory to WORKDIR $WORKDIR..." >> "${LOG_PATH}"
 pushd $WORKDIR  >> "${LOG_PATH}"
 
 echo "Current work path: $(pwd)" >> "${LOG_PATH}"
+echo "Listing files in work path:" >> "${LOG_PATH}"
 ls >> "${LOG_PATH}"
 
 case $PLATFORM in
