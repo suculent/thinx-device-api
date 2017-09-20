@@ -208,8 +208,11 @@ echo "[builder.sh] Repository version/revision: ${VERSION}" | tee -a "${LOG_PATH
 
 # Search for thinx.yml
 
-$nodemcu_build_float=true
 $nodemcu_build_type='firmware'
+$nodemcu_build_float=true
+
+$micropython_build_type='firmware'
+$micropython_platform='esp8266'
 
 if [ -f ./thinx.yml ]; then
 	echo "Found thinx.yml file, reading..." | tee -a "${LOG_PATH}"
@@ -280,8 +283,16 @@ case $PLATFORM in
 
     micropython)
 
+			BUILD_TYPE=$micropython_build_type
+			if [[ $BUILD_TYPE == "firmware" ]];
+				echo "Build type: firmware" | tee -a "${LOG_PATH}"
+				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
+			else
+				echo "Build type: file" | tee -a "${LOG_PATH}"
+				OUTFILE=${DEPLOYMENT_PATH}/boot.py # there is more files here!
+			fi
+
 			OUTPATH=${DEPLOYMENT_PATH}
-		  OUTFILE=${DEPLOYMENT_PATH}/boot.py
 
 			#docker pull suculent/micropython-docker-build
 			#cd ./tools/micropython-docker-build
@@ -321,13 +332,6 @@ case $PLATFORM in
 
 		nodemcu)
 
-			# Options:
-			# You can pass the following optional parameters to the Docker build like so docker run -e "<parameter>=value" -e ....
-			# IMAGE_NAME The default firmware file names are nodemcu_float|integer_<branch>_<timestamp>.bin. If you define an image name it replaces the <branch>_<timestamp> suffix and the full image names become nodemcu_float|integer_<image_name>.bin.
-			# INTEGER_ONLY Set this to 1 if you don't need NodeMCU with floating support, cuts the build time in half.
-			# FLOAT_ONLY Set this to 1 if you only need NodeMCU with floating support, cuts the build time in half.
-			# TODO: Docker run may be skipped with file-only update, implement toggle switch...
-
 		  # WARNING! This is a specific builder (like Micropython).
 			# Source files must be copied from source folder to the WORKDIR
 			# which is actually a source of nodemcu-firmware (esp-open-sdk).
@@ -335,12 +339,16 @@ case $PLATFORM in
 			DROP_INTEGER_USE_FLOAT=$nodemcu_build_float
 			if [[ $DROP_INTEGER_USE_FLOAT==true ]]; then
 				OUTFILE_PREFIX='nodemcu_integer'
+				INTEGER_ONLY=true
+				DOCKER_PARAMS="-e INTEGER_ONLY=true"
 			else
 				OUTFILE_PREFIX='nodemcu_float'
+				FLOAT_ONLY=true
+				DOCKER_PARAMS="-e FLOAT_ONLY=true"
 			fi
 
 			BUILD_TYPE=$nodemcu_build_type
-			if [[ $BUILD_TYPE == "firmware" ]];
+			if [[ $BUILD_TYPE == "firmware" ]]; then
 				echo "Build type: firmware" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 			else
@@ -357,13 +365,7 @@ case $PLATFORM in
 			fi
 
 			# Copy firmware sources to current working directory
-			cp -vR $THINX_ROOT/tools/nodemcu-firmware/* .
-
-			# possibly lua-modules extended with thinx
-
-			echo "NodeMCU Build: For NodeMCU (pwd/ls)..." | tee -a "${LOG_PATH}"
-			pwd
-			ls
+			cp -vfR $THINX_ROOT/tools/nodemcu-firmware/* .
 
 			CONFIG_PATH="./local/fs/thinx.json"
 
@@ -381,48 +383,50 @@ case $PLATFORM in
 
 			echo "NodeMCU Build: Customizing firmware..." | tee -a "${LOG_PATH}"
 
-			for luafile in ${LUA_FILES[@]}; do
-				# option #1 - deploy LUA files without building
+			if [[ $BUILD_TYPE == "firmware" ]]; then
+
+				# build into filesystem root
+				for luafile in ${LUA_FILES[@]}; do
+					FSPATH=./local/fs/$(basename ${luafile})
+					if [[ -f $FSPATH ]]; then
+						rm -rf $FSPATH
+						cp -vf "${luafile}" $FSPATH
+					fi
+					if [ -f ./bin/* ]; then
+						echo "NodeMCU Build: Cleaning bin & map files..." | tee -a "${LOG_PATH}"
+						rm -rf ./bin/*
+					fi
+				done
+
+				echo "NodeMCU Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
+				docker run ${DOCKER_PREFIX} --rm -t ${DOCKER_PARAMS} -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build | tee -a "${LOG_PATH}"
+
+			else
+				# deploy LUA files without building
 				cp -vf "${luafile}" "$DEPLOYMENT_PATH"
-				# option #2 - build into filesystem root
-				CPATH=./local/fs/$(basename ${luafile})
-				if [[ -f $FSPATH ]]; then
-					rm -rf $FSPATH
-					cp -vf "${luafile}" $FSPATH
-				fi
-		  done
-
-			if [ -f ./bin/* ]; then
-				echo "NodeMCU Build: Cleaning bin & map files..." | tee -a "${LOG_PATH}"
-				rm -rf ./bin/*
-			fi
-
-			echo "NodeMCU Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
-			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build | tee -a "${LOG_PATH}"
-
+			fs
+		  
 			if [[ $? == 0 ]] ; then
 				BUILD_SUCCESS=true
 			fi
 
-			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
 				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." | tee -a "${LOG_PATH}"
 				STATUS='"DRY_RUN_OK"'
 			else
-				# Check Artifacts
 				if [[ $BUILD_SUCCESS == true ]] ; then
-
 					echo "NodeMCU Build: Listing output directory: " | tee -a "${LOG_PATH}"
 					pwd | tee -a "${LOG_PATH}"
 					ls | tee -a "${LOG_PATH}"
 					echo "NodeMCU Build: Listing binary artifacts: " | tee -a "${LOG_PATH}"
 					ls ./bin | tee -a "${LOG_PATH}"
-
-					echo "NodeMCU Build: Copying binary artifacts..." | tee -a "${LOG_PATH}"
-					cp -v "./bin/${OUTFILE_PREFIX}*.bin" "${DEPLOYMENT_PATH}/firmware.bin" | tee -a "${LOG_PATH}"
-					STATUS='"OK"'
+					if [[ $BUILD_TYPE == "firmware" ]]; then
+						echo "NodeMCU Build: Copying binary artifacts..." | tee -a "${LOG_PATH}"
+						cp -v "./bin/${OUTFILE_PREFIX}*.bin" "${DEPLOYMENT_PATH}/firmware.bin" | tee -a "${LOG_PATH}"
+					fi
 					echo "NodeMCU Build: DEPLOYMENT_PATH: " $DEPLOYMENT_PATH
 					ls "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
+					STATUS='"OK"'
 				else
 					STATUS='"FAILED"'
 				fi
@@ -431,7 +435,7 @@ case $PLATFORM in
 
     mongoose)
 			OUTFILE=${DEPLOYMENT_PATH}/fw.zip
-			OUTPATH=${DEPLOYMENT_PATH}/
+			OUTPATH=${DEPLOYMENT_PATH}
 
 			# should copy thinx.json into ./fs/thinx.json
 			TNAME=$(find . -name "thinx.json")

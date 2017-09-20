@@ -2,14 +2,27 @@
 
 ## CHANGELOG
 
-19/9/2017: .2427 e2e integration of NodeMCU dockerized builder
+### 23th week
+
+24/9/2017:
+
+23/9/2017:
+
+22/9/2017:
+
+21/9/2017:
+
+20/9/2017:
+
+19/9/2017: 0.9.2435 end-to-end integration of NodeMCU dockerized builder; added support for thinx.yml parametrization of build type (firmware/files) and firmware type (integer/float); updated logging to split both to console and logfile
+
 18/9/2017: NodeMCU LUA firmware checkin tests
+
+15/9/2017: code style and vulnerability fixes
 
 ### 22th week
 
-10/9/2017:
-
-9/9/2017:
+10/9/2017: minor fixes (user delete)
 
 8/9/2017: registered first SigFox device using callback API (just needs minor manual udid intervention)
 
