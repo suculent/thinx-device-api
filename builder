@@ -283,6 +283,9 @@ case $PLATFORM in
 
     micropython)
 
+		  # WARNING! This is a specific builder (like NodeMCU).
+			# Injects thinx to esp8266/modules in firmware mode. Should also prebuild SPIFFS.
+
 			BUILD_TYPE=$micropython_build_type
 			if [[ $BUILD_TYPE == "firmware" ]];
 				echo "Build type: firmware" | tee -a "${LOG_PATH}"
@@ -294,39 +297,73 @@ case $PLATFORM in
 
 			OUTPATH=${DEPLOYMENT_PATH}
 
-			#docker pull suculent/micropython-docker-build
-			#cd ./tools/micropython-docker-build
-			#cd modules
-			# TODO: FIXME: Inject data from user repository to filesystem here...
-			git clone https://github.com/suculent/thinx-firmware-esp8266-upy.git
-			mv ./thinx-firmware-esp8266-upy/boot.py ./boot.py
-			rm -rf thinx-firmware-esp8266-upy
-			docker run ${DOCKER_PREFIX} --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython | tee -a "${LOG_PATH}"
-			rm -rf ./build; make clean; make V=1
+			#echo "Micropython Build: Cleaning SPIFFS folder..." | tee -a "${LOG_PATH}"
+			#if [ -f ${DEPLOYMENT_PATH}/local/fs/* ]; then
+			#	echo "Cleaning local/fs" | tee -a "${LOG_PATH}"
+			#	# rm -rf ${DEPLOYMENT_PATH}/local/fs/** # cleanup first
+			#fi
+
+			#CONFIG_PATH="./local/fs/thinx.json"
+
+			#if [ -f $CONFIG_PATH ]; then
+			#	echo "Micropython Build: Deconfiguring..." | tee -a "${LOG_PATH}"
+			#	rm -rf $CONFIG_PATH
+			#fi
+
+			#echo "Micropython Build: Configuring..." | tee -a "${LOG_PATH}"
+			#mv "./thinx_build.json" $CONFIG_PATH
+
+			#UPY_FILES=$(find . -name "*.py" -maxdepth 1)
+			#echo "Micropython Build: UPY_FILES:" | tee -a "${LOG_PATH}"
+			#echo ${UPY_FILES} | tee -a "${LOG_PATH}"
+
+			echo "Micropython Build: Customizing firmware..." | tee -a "${LOG_PATH}"
+
+			for pyfile in ${UPY_FILES[@]}; do
+				if [[ $BUILD_TYPE == "firmware" ]]; then
+					FSPATH=./$(basename ${pyfile}) # we should already stand in this folder
+					if [[ -f $FSPATH ]]; then
+						rm -rf $FSPATH
+						cp -vf "${pyfile}" $FSPATH
+					fi
+				else
+					cp -vf "${luafile}" "$DEPLOYMENT_PATH"
+				fi
+			done
+
+			if [[ $BUILD_TYPE == "firmware" ]]; then
+				echo "Micropython Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
+				docker run ${DOCKER_PREFIX} --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython | tee -a "${LOG_PATH}"
+				rm -rf ./build; make clean; make V=1
+			fi
 
 			if [[ $? == 0 ]] ; then
 				BUILD_SUCCESS=true
 			fi
 
-			ls
+			ls | tee -a "${LOG_PATH}"
 
-			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
 				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." | tee -a "${LOG_PATH}"
 				STATUS='"DRY_RUN_OK"'
 			else
 				# Check Artifacts
 				if [[ $BUILD_SUCCESS == true ]] ; then
+					echo "NodeMCU Build: Listing output directory: " | tee -a "${LOG_PATH}"
+					pwd | tee -a "${LOG_PATH}"
+					ls | tee -a "${LOG_PATH}"
+					echo "NodeMCU Build: Listing binary artifacts: " | tee -a "${LOG_PATH}"
+					ls ./bin | tee -a "${LOG_PATH}"
+					if [[ $BUILD_TYPE == "firmware" ]]; then
+						cp -v ./build/*.bin "$OUTPATH" | tee -a "${LOG_PATH}"
+						rm -rf ./build/*
+					fi
+					echo "Micropython Build: DEPLOYMENT_PATH: " $DEPLOYMENT_PATH
+					ls "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 					STATUS='"OK"'
-					cp -v ./build/*.bin "$OUTPATH" | tee -a "${LOG_PATH}"
-					cp -vR ./build/**/*.py "$OUTPATH" | tee -a "${LOG_PATH}"
-					rm -rf ./build/*
-					ls "$OUTPATH" | tee -a "${LOG_PATH}"
-					OUTFILE="${OUTPATH}/*.bin"
 				else
 					STATUS='"FAILED"'
 				fi
-				# TODO: deploy
 			fi
     ;;
 
@@ -404,8 +441,8 @@ case $PLATFORM in
 			else
 				# deploy LUA files without building
 				cp -vf "${luafile}" "$DEPLOYMENT_PATH"
-			fs
-		  
+			fi
+
 			if [[ $? == 0 ]] ; then
 				BUILD_SUCCESS=true
 			fi

@@ -2004,6 +2004,8 @@ var ThinxApp = function() {
   app.get("/slack/redirect", function(req, res) {
     console.log("Redirect Code: " + req.code);
     console.log("Redirect State: " + req.state);
+    console.log(JSON.stringify(req.body));
+    console.log(JSON.stringify(req.url));
     respond(res, {
       success: true,
       status: "slack_redirect_uri_get"
