@@ -2009,8 +2009,8 @@ var ThinxApp = function() {
 
     console.log("Redirect URL: " + JSON.stringify(req.url));
     console.log("Redirect GET: " + JSON.stringify(req.body));
-    console.log("Redirect Code: " + req.code);
-    console.log("Redirect State: " + req.state);
+    console.log("Redirect Code: " + req.query.code);
+    console.log("Redirect State: " + req.query.state);
 
     // https://slack.com/api/oauth.access?client_id=233115403974.233317554391&client_secret=ccbaae01e5259ed283ef63321be597da&code=owner_id&redirect_uri=https://rtm.thinx.cloud:7443/slack/redirect
     var options = {
@@ -2018,7 +2018,8 @@ var ThinxApp = function() {
       host: 'slack.com',
       hostname: 'slack.com',
       port: 443,
-      path: '/api/oauth.access?client_id=233115403974.233317554391&client_secret=ccbaae01e5259ed283ef63321be597da&code=owner_id&redirect_uri=https://rtm.thinx.cloud:7443/slack/redirect'
+      path: '/api/oauth.access?client_id=233115403974.233317554391&client_secret=ccbaae01e5259ed283ef63321be597da&code=owner_id&redirect_uri=https://rtm.thinx.cloud:7443/slack/redirect&code=' +
+        req.query.code
     };
 
     var areq = https.get(options, function(res) {
