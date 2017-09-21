@@ -2001,7 +2001,7 @@ var ThinxApp = function() {
 
   app.get("/slack/direct_install", function(req, res) {
     res.redirect(
-      "https://slack.com/oauth/authorize?client_id=233115403974.233317554391&scope=bot&state=Online&redirect_uri=https://rtm.thinx.cloud:7443/slack/redirect"
+      "https://slack.com/oauth/authorize?client_id=233115403974.233317554391&scope=commands+bot+client&state=Online&redirect_uri=https://rtm.thinx.cloud:7443/slack/redirect"
     );
   });
 
@@ -2018,7 +2018,7 @@ var ThinxApp = function() {
       host: 'slack.com',
       hostname: 'slack.com',
       port: 443,
-      path: '/api/oauth.access?client_id=233115403974.233317554391&client_secret=ccbaae01e5259ed283ef63321be597da&code=owner_id&redirect_uri=https://rtm.thinx.cloud:7443/slack/redirect&code=' +
+      path: '/api/oauth.access?client_id=233115403974.233317554391&client_secret=ccbaae01e5259ed283ef63321be597da&redirect_uri=https://rtm.thinx.cloud:7443/slack/redirect&scope=bot&code=' +
         req.query.code
     };
 
@@ -2036,7 +2036,7 @@ var ThinxApp = function() {
         console.log('BODY: ' + body);
         // ...and/or process the entire body here.
         var auth_data = JSON.parse(body);
-        var token = auth_data.access_token;
+        var token = auth_data.bot_access_token;
         if (typeof(token) !== "undefined") {
           client.set("__SLACK_BOT_TOKEN__", token);
           console.log("Saving new Bot token (TODO: tell mesenger): ", token);
@@ -2049,7 +2049,7 @@ var ThinxApp = function() {
     });
 
     res.redirect(
-      "/app/#/profile/help"
+      "https:/rtm.thinx.cloud/app/#/profile/help"
     );
 
   });
