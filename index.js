@@ -61,7 +61,6 @@ var ThinxApp = function() {
   var socketPort = app_config.socket;
 
   var url = require("url");
-  var http = require("http");
   var https = require("https");
   var parser = require("body-parser");
   var nano = require("nano")(db);
