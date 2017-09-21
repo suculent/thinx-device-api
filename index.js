@@ -16,6 +16,10 @@ var ThinxApp = function() {
 
   require("ssl-root-cas").inject();
 
+  var http = require('http');
+  var redis = require("redis");
+  var client = redis.createClient();
+
   //
   // Shared Configuration
   //
@@ -2002,10 +2006,43 @@ var ThinxApp = function() {
   });
 
   app.get("/slack/redirect", function(req, res) {
+    console.log("Redirect GET: " + JSON.stringify(req.body));
     console.log("Redirect Code: " + req.code);
     console.log("Redirect State: " + req.state);
-    console.log(JSON.stringify(req.body));
-    console.log(JSON.stringify(req.url));
+
+    // https://slack.com/api/oauth.access?client_id=233115403974.233317554391&client_secret=ccbaae01e5259ed283ef63321be597da&code=owner_id&redirect_uri=https://rtm.thinx.cloud:7443/slack/redirect
+    var options = {
+      protocol: 'https',
+      host: 'slack.com',
+      path: '/api/oauth.access?client_id=233115403974.233317554391&client_secret=ccbaae01e5259ed283ef63321be597da&code=owner_id&redirect_uri=https://rtm.thinx.cloud:7443/slack/redirect'
+    };
+
+    var areq = http.get(options, function(res) {
+      console.log('STATUS: ' + res.statusCode);
+      console.log('HEADERS: ' + JSON.stringify(res.headers));
+
+      // Buffer the body entirely for processing as a whole.
+      var bodyChunks = [];
+      res.on('data', function(chunk) {
+        // You can process streamed parts here...
+        bodyChunks.push(chunk);
+      }).on('end', function() {
+        var body = Buffer.concat(bodyChunks);
+        console.log('BODY: ' + body);
+        // ...and/or process the entire body here.
+        var auth_data = JSON.parse(body);
+        var token = auth_data.access_token;
+        if (typeof(token) !== "undefined") {
+          client.set("__SLACK_BOT_TOKEN__", token);
+          console.log("Saving new Bot token (TODO: tell mesenger): ", token);
+        }
+      });
+    });
+
+    areq.on('error', function(e) {
+      console.log('ERROR: ' + e.message);
+    });
+
     respond(res, {
       success: true,
       status: "slack_redirect_uri_get"
