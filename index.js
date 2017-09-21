@@ -2048,18 +2048,10 @@ var ThinxApp = function() {
       console.log('ERROR: ' + e.message);
     });
 
-    respond(res, {
-      success: true,
-      status: "slack_redirect_uri_get"
-    });
-  });
+    res.redirect(
+      "/app/#/profile/help"
+    );
 
-  app.post("/slack/redirect", function(req, res) {
-    console.log("Redirect POST: " + JSON.stringify(req.body));
-    respond(res, {
-      success: true,
-      status: "slack_redirect_uri_post"
-    });
   });
 
   /*
