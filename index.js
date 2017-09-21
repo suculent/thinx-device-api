@@ -2001,7 +2001,7 @@ var ThinxApp = function() {
 
   app.get("/slack/direct_install", function(req, res) {
     res.redirect(
-      "https://slack.com/oauth/authorize?client_id=233115403974.233317554391&scope=commands+bot+client&state=Online&redirect_uri=https://rtm.thinx.cloud:7443/slack/redirect"
+      "https://slack.com/oauth/authorize?client_id=233115403974.233317554391&scope=commands+bot&state=Online&redirect_uri=https://rtm.thinx.cloud:7443/slack/redirect"
     );
   });
 
