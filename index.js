@@ -2012,12 +2012,14 @@ var ThinxApp = function() {
 
     // https://slack.com/api/oauth.access?client_id=233115403974.233317554391&client_secret=ccbaae01e5259ed283ef63321be597da&code=owner_id&redirect_uri=https://rtm.thinx.cloud:7443/slack/redirect
     var options = {
-      protocol: 'https',
+      protocol: 'http',
       host: 'slack.com',
+      hostname: 'slack.com',
+      port: 443,
       path: '/api/oauth.access?client_id=233115403974.233317554391&client_secret=ccbaae01e5259ed283ef63321be597da&code=owner_id&redirect_uri=https://rtm.thinx.cloud:7443/slack/redirect'
     };
 
-    var areq = http.get(options, function(res) {
+    var areq = https.get(options, function(res) {
       console.log('STATUS: ' + res.statusCode);
       console.log('HEADERS: ' + JSON.stringify(res.headers));
 
