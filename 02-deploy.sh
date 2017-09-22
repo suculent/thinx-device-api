@@ -58,8 +58,8 @@ else
 
 	ACCESS_TOKEN=6aa9f20bef804b75a50338e03830919d
 	ENVIRONMENT=development
-	LOCAL_USERNAME=`whoami`
-	REVISION=`git log -n 1 --pretty=format:"%H"`
+	LOCAL_USERNAME=$(whoami)
+	REVISION=$(git log -n 1 --pretty=format:"%H")
 
 	curl https://api.rollbar.com/api/1/deploy/ \
 	  -F access_token=$ACCESS_TOKEN \

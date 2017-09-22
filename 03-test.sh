@@ -48,7 +48,7 @@ SUCCESS=$(echo $R | jq .redirectURL )
 echo $SUCCESS
 if [[ ! -z $SUCCESS ]]; then
 	URL=$(echo $R | jq .redirectURL)
-	echo_ok "Redirected to login: $SUCCESS"
+	echo_ok "Redirected to login: $URL"
 else
 	echo_fail $R
 fi
