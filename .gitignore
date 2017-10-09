@@ -32,3 +32,6 @@ coverage/
 .scannerwork/
 
 statistics/**
+
+# Codacy
+.profile
