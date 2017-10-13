@@ -1,5 +1,6 @@
 # ☢ thinx-device-api
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/9a7d084ad97e430ba12333f384b44255)](https://www.codacy.com/app/suculent/thinx-device-api?utm_source=github.com&utm_medium=referral&utm_content=suculent/thinx-device-api&utm_campaign=badger)
 [![Twitter: @thinxcloud](https://img.shields.io/badge/contact-%40thinxcloud-green.svg?style=flat)](https://twitter.com/thinxcloud)
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://github.com/suculent/fastlane-plugin-apprepo/blob/master/LICENSE)
 [![Build Status](https://img.shields.io/circleci/project/github/suculent/thinx-device-api/master.svg)](https://circleci.com/gh/suculent/thinx-device-api)
@@ -133,7 +134,7 @@ bash ./install-builders.sh
 
 ## GitHub Webhook support
 
-You can direct your GitHub webhooks to http://thinx.cloud:9001/ after adding a valid deploy key from GitHub to THiNX RTM.
+You can direct your GitHub webhooks to https://thinx.cloud:9001/ after adding a valid deploy key from GitHub to THiNX RTM.
 
 
 ## Endpoints

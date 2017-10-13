@@ -2,17 +2,11 @@
 
 ## CHANGELOG
 
+13/10/2017:
+
+### Break
+
 ### 23th week
-
-24/9/2017:
-
-23/9/2017:
-
-22/9/2017:
-
-21/9/2017:
-
-20/9/2017:
 
 19/9/2017: 0.9.2435 end-to-end integration of NodeMCU dockerized builder; added support for thinx.yml parametrization of build type (firmware/files) and firmware type (integer/float); updated logging to split both to console and logfile
 

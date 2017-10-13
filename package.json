@@ -17,8 +17,8 @@
     "node": ">=4.3.2"
   },
   "scripts": {
-    "coverage": "nyc jasmine --stop-on-failure=false; nyc report --reporter=text-lcov | coveralls",
-    "test": "nyc jasmine --stop-on-failure=false; nyc report --reporter=text-lcov | coveralls",
+    "coverage": "nyc jasmine --stop-on-failure=false; nyc report --reporter=text-lcov | coveralls && cat ./coverage/lcov.info | node_modules/.bin/codacy-coverage",
+    "test": "nyc jasmine --stop-on-failure=false; nyc report --reporter=text-lcov | coveralls && cat ./coverage/lcov.info | node_modules/.bin/codacy-coverage",
     "snyk": "snyk test",
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect"
@@ -29,6 +29,7 @@
     "body-parser": "^1.7.0",
     "brace-expansion": "1.1.7",
     "chalk": "^1.1.3",
+    "codacy-coverage": "^2.0.3",
     "codecov.io": "^0.1.6",
     "colors": "^1.1.2",
     "connect-redis": "^3.2.0",
