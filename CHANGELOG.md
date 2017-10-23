@@ -2,6 +2,8 @@
 
 ## CHANGELOG
 
+23/10/2017: 0.9.2464 - improvements and debugging the Password reset & Activation user journeys
+
 13/10/2017:
 
 ### Break
