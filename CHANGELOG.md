@@ -2,7 +2,7 @@
 
 ## CHANGELOG
 
-23/10/2017: 0.9.2464 - improvements and debugging the Password reset & Activation user journeys
+23/10/2017: 0.9.2464 - improvements and debugging the Password reset & Activation user journeys; passed tests of activation and password resets; explicit Location & SigFox support (additional attributes: status, snr, lat, lon and station)
 
 13/10/2017:
 

@@ -1,0 +1,5 @@
+{
+  "name" : "Sigfox",
+  "language" : "c",
+  "header" : "thinx.h"
+}
