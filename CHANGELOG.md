@@ -12,7 +12,7 @@
 
 19/9/2017: 0.9.2435 end-to-end integration of NodeMCU dockerized builder; added support for thinx.yml parametrization of build type (firmware/files) and firmware type (integer/float); updated logging to split both to console and logfile
 
-18/9/2017: NodeMCU LUA firmware checkin tests
+18/9/2017: NodeMCU Lua firmware checkin tests
 
 15/9/2017: code style and vulnerability fixes
 
@@ -34,7 +34,7 @@
 
 3/9/2017: 0.9.2374: fixed duplicate username and e-mail creation; working on Arduino firmware
 
-28/8/2017: 0.9.2349: Base Slack integration (SlackBot listening to incoming messages; web-socket forwarder ready); refactored registration, working LUA firmware example
+28/8/2017: 0.9.2349: Base Slack integration (SlackBot listening to incoming messages; web-socket forwarder ready); refactored registration, working Lua firmware example
 
 26/8/2017: 0.9.2330: E-mail registration testing & fixes
 
@@ -54,7 +54,7 @@
 
 ...getting stucked on SPIFFS-related crashes on Arduino, while doing a lots of fixes on UI...
 
-8/8/2017: 0.9.2080 RELEASE - Minimal MongooseOS registration example for testing Docker builder; checking LUA module registration (fixed memory issues)
+8/8/2017: 0.9.2080 RELEASE - Minimal MongooseOS registration example for testing Docker builder; checking Lua module registration (fixed memory issues)
 
 7/8/2017: 0.9.2060 - Starting MongooseOS project
 
@@ -74,7 +74,7 @@
 
 ### 17th week
 
-27/7/2017: 0.9.1921 - Working on state of union for Micropython/LUA/Arduino/Platformio Firmware Libraries. Extracted shared code for Arduino /Platformio in their respective repositories. Implemented file updates and messaging both on LUA/Micropython side (not tested so far) pinning version 0.9 as current alpha.
+27/7/2017: 0.9.1921 - Working on state of union for Micropython/Lua/Arduino/Platformio Firmware Libraries. Extracted shared code for Arduino /Platformio in their respective repositories. Implemented file updates and messaging both on Lua/Micropython side (not tested so far) pinning version 0.9 as current alpha.
 
 26/7/2017: 0.9.1912 - Actionable Notifications (send text/boolean responses to devices using MQTT directly from the web)
 
@@ -92,7 +92,7 @@
 
 ### 15th week
 
-13/7/2017: fixed device registration for LUA firmware together with MQTT login and duplicate MAC record pruning
+13/7/2017: fixed device registration for Lua firmware together with MQTT login and duplicate MAC record pruning
 
 12/7/2017: platform attribute added to registration/UI
 
@@ -132,7 +132,7 @@ VACATION DOWNTIME until 9/7/2017
 
 23/6/2017 - 0.7.1500: added deploy-hook (hook fails but nothing is fetched, use pm2 pullAndRestart ft.); fixed Enviro revocations, version bump due to OTT support and multiple firmware OS builders; fixed user logout (+ also on invalid session)
 
-22/6/2017 - 0.6.1486: buffer responses are now binary as expected; added support for secure API environment variables (for Micropython/LUA parametrization); published all five variants of firmware base repositories
+22/6/2017 - 0.6.1486: buffer responses are now binary as expected; added support for secure API environment variables (for Micropython/Lua parametrization); published all five variants of firmware base repositories
 
 21/6/2017 - 0.6.1465: fixed builder; OTT (One-Time-Token) update supported; (OTT will mean version bump to 1.7)
 
@@ -206,7 +206,7 @@ VACATION DOWNTIME until 9/7/2017
 
 13/5/2017 - 0.4.800: all current tests pass
 
-12/5/2017 - 0.4.737: added HTTPS-endpoint for proxy; working device renaming and LUA/Arduino registration
+12/5/2017 - 0.4.737: added HTTPS-endpoint for proxy; working device renaming and Lua/Arduino registration
 
 11/5/2017 - 0.4.722: big laundry done; added HTTPS-proxy; build progress tracking, prototyping Redis API Key storage
 
@@ -220,7 +220,7 @@ VACATION DOWNTIME until 9/7/2017
 
 7/5/2017 - 0.3.585: Added API endpoints for fetching audit log, build log list and build log (incomplete), builder now saves build logs next to build/envelope file with same filename (build-id)
 
-6/5/2017 - 0.3.581: Core client implementation templates for ESP8266/NodeMCU LUA and Micropython-based firmwares (registration and SPIFFS only, no OTA, not tested)
+6/5/2017 - 0.3.581: Core client implementation templates for ESP8266/NodeMCU Lua and Micropython-based firmwares (registration and SPIFFS only, no OTA, not tested)
 
 5/5/2017 - 0.3.576: improved tests, enabled editing device alias through API, working logrotate; working device registration step (with issues only on device side)
 

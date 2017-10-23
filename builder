@@ -414,16 +414,16 @@ case $PLATFORM in
 			echo "NodeMCU Build: Configuring..." | tee -a "${LOG_PATH}"
 			mv "./thinx_build.json" $CONFIG_PATH
 
-			LUA_FILES=$(find . -name "*.lua" -maxdepth 1)
-			echo "NodeMCU Build: LUA_FILES:" | tee -a "${LOG_PATH}"
-			echo ${LUA_FILES} | tee -a "${LOG_PATH}"
+			FILES=$(find . -name "*.lua" -maxdepth 1)
+			echo "NodeMCU Build: FILES:" | tee -a "${LOG_PATH}"
+			echo ${FILES} | tee -a "${LOG_PATH}"
 
 			echo "NodeMCU Build: Customizing firmware..." | tee -a "${LOG_PATH}"
 
 			if [[ $BUILD_TYPE == "firmware" ]]; then
 
 				# build into filesystem root
-				for luafile in ${LUA_FILES[@]}; do
+				for luafile in ${FILES[@]}; do
 					FSPATH=./local/fs/$(basename ${luafile})
 					if [[ -f $FSPATH ]]; then
 						rm -rf $FSPATH
@@ -439,7 +439,7 @@ case $PLATFORM in
 				docker run ${DOCKER_PREFIX} --rm -t ${DOCKER_PARAMS} -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build | tee -a "${LOG_PATH}"
 
 			else
-				# deploy LUA files without building
+				# deploy Lua files without building
 				cp -vf "${luafile}" "$DEPLOYMENT_PATH"
 			fi
 

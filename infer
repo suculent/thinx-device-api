@@ -34,7 +34,7 @@ function infer_platform
 		elif [[ -f "$path/*.ino" ]]; then
 			platform="arduino"
 
-		# NodeMCU (LUA)
+		# NodeMCU (Lua)
 
 		elif [[ -f "$path/init.lua" ]]; then
 			platform="nodemcu"

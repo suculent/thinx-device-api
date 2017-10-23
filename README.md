@@ -15,7 +15,7 @@ IoT Device Management Server running on node.js.
 
 As a user I have already many IoT new and/or legacy devices at home and new platforms are coming every day.
 
-Sometimes we need to change WiFi credentials on a wireless switch mounted on a ceiling. The other day I we want to swap whole firmware for new one, but not always to rewrite working legacy LUA or Micropython code to PlatformIO.
+Sometimes we need to change WiFi credentials on a wireless switch mounted on a ceiling. The other day I we want to swap whole firmware for new one, but not always to rewrite working legacy Lua or Micropython code to PlatformIO.
 
 It also covers other use-cases like remotely managing devices for customers with automatic updates for headless devices, or semi-automatic (with user consent after build and tests succed).
 
@@ -48,7 +48,7 @@ Currently we're capable of building firmwares for PlatformIO, NodeMCU and Microp
 
 * ESP8266 (thinx-firmware-esp8266)
 
-* Tested on Wemos D1 Mini, Wemos D1 Mini Pro, RobotDyn D1, RobotDyn D1 Mini, RobotDyn MEGA WiFi and various NodeMCU (Lolin, AI-THINKER) boards with Arduino, LUA and Micropython-based core firmwares
+* Tested on Wemos D1 Mini, Wemos D1 Mini Pro, RobotDyn D1, RobotDyn D1 Mini, RobotDyn MEGA WiFi and various NodeMCU (Lolin, AI-THINKER) boards with Arduino, Lua and Micropython-based core firmwares
 
 * Expected: Arduino with networking support, MongooseOS-based devices...
 
@@ -58,7 +58,7 @@ THiNX Platform Library repositories:
 
 [Arduino](https://github.com/suculent/thinx-firmware-esp8266-ino)
 
-[NodeMCU/LUA](https://github.com/suculent/thinx-firmware-esp8266-lua)
+[NodeMCU/Lua](https://github.com/suculent/thinx-firmware-esp8266-lua)
 
 [Micropython](https://github.com/suculent/thinx-firmware-esp8266-upy)
 
@@ -69,7 +69,7 @@ THiNX Platform Library repositories:
 
 With built-in THiNX Client Library:
 
-[NodeMCU/LUA](https://github.com/suculent/nodemcu-firmware)
+[NodeMCU/Lua](https://github.com/suculent/nodemcu-firmware)
 
 [Micropython](https://github.com/suculent/nodemcu-micropython)
 
@@ -84,7 +84,7 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 
 [MongooseOS](https://github.com/suculent/mongoose-docker-build)
 
-[NodeMCU/LUA](https://github.com/suculent/nodemcu-docker-build/)
+[NodeMCU/Lua](https://github.com/suculent/nodemcu-docker-build/)
 
 [Micropython](https://github.com/suculent/micropython-docker-build/)
 
@@ -151,7 +151,7 @@ See 03-test.sh. There is no point of maintaining documentation for this at curre
 
 ### PlatformIO
 
-* Docker builder works. 
+* Docker builder works.
 * Deployment update can be tested now.
 * Firmware can be tested/tuned now.
 
@@ -175,6 +175,6 @@ See 03-test.sh. There is no point of maintaining documentation for this at curre
 * PlatformIO: end-to-end update
 * Arduino: end-to-end update
 * Arduino/PlatformIO: end-to-end MQTT
-* LUA: build, file update
+* Lua: build, file update
 * UPY: build, file update
 * MOS: build, file update; firmware update; library

@@ -1,5 +1,5 @@
 {
-  "name": "LUA",
+  "name": "Lua",
   "extensions": ["lua"],
   "DEFINE": "",
   "ASSIGN": " = ",

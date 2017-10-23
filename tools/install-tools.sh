@@ -11,7 +11,7 @@ docker ps --filter status=dead --filter status=exited -aq | xargs docker rm -v
 
 
 ################################################################################
-# LUA
+# Lua
 git clone https://github.com/suculent/nodemcu-firmware.git
 git clone https://github.com/davidm/lua-inspect
 docker pull suculent/nodemcu-docker-build
