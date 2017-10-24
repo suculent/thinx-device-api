@@ -2291,7 +2291,7 @@ var ThinxApp = function() {
       console.log("» Database compact jobs completed.");
     });
   }
-  setTimeout(database_compactor, 3600 * 1000);
+  setInterval(database_compactor, 3600 * 1000);
 
   //
   // Log aggregator
@@ -2303,7 +2303,7 @@ var ThinxApp = function() {
     stats.aggregate();
     console.log("» Aggregation jobs completed.");
   }
-  setTimeout(log_aggregator, 86400 * 1000);
+  setInterval(log_aggregator, 86400 * 1000 / 2);
 
   //
   // MQTT Messenger/listener (experimental)
