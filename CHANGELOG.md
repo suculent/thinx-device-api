@@ -2,6 +2,10 @@
 
 ## CHANGELOG
 
+27/10/2017: 0.9.2482 - major bugfixes in Arduino libraries (stable release)
+
+24/10/2017: 0.9.2472 - fixed password reset, fixed statistics parser timer, reduced vulnerabilities
+
 23/10/2017: 0.9.2464 - improvements and debugging the Password reset & Activation user journeys; passed tests of activation and password resets; explicit Location & SigFox support (additional attributes: status, snr, lat, lon and station)
 
 13/10/2017:
