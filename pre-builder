@@ -55,4 +55,4 @@ echo "platform 4 linter: ${PLATFORM}"
 PLATFORM_LANG=$(language_for_platform $PLATFORM)
 echo "language 4 linter: ${PLATFORM_LANG}"
 
-bash ./linter --language=${PLATFORM_LANG} --workdir=${WORKDIR}
+bash $THINX_ROOT/linter --language=${PLATFORM_LANG} --workdir=${WORKDIR}
