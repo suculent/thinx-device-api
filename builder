@@ -272,8 +272,8 @@ echo "Changing current directory to WORKDIR $WORKDIR..." | tee -a "${LOG_PATH}"
 cd $WORKDIR  | tee -a "${LOG_PATH}"
 
 echo "Current work path: $(pwd)" | tee -a "${LOG_PATH}"
-echo "Listing files in work path:" | tee -a "${LOG_PATH}"
-ls | tee -a "${LOG_PATH}"
+#echo "Listing files in work path:" | tee -a "${LOG_PATH}"
+#ls | tee -a "${LOG_PATH}"
 
 case $PLATFORM in
 
@@ -605,8 +605,8 @@ case $PLATFORM in
 			if [[ $? == 0 ]] ; then
 				BUILD_SUCCESS=true
 			fi
-			echo "Current folder contents after build:" | tee -a "${LOG_PATH}"
-			ls | tee -a "${LOG_PATH}"
+			#echo "Current folder contents after build:" | tee -a "${LOG_PATH}"
+			#ls | tee -a "${LOG_PATH}"
 
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
@@ -684,8 +684,8 @@ if [[ $RESULT == "*platformio upgrade*" ]]; then
 		platformio upgrade > /dev/null
 fi
 
-CLEANUP_RESULT=$(bash $THINX_ROOT/couch_cleanup.sh)
-echo $CLEANUP_RESULT | tee -a "${LOG_PATH}"
+CLEANUP_RESULT=$(bash $THINX_ROOT/couch_cleanup.sh &)
+#echo $CLEANUP_RESULT | tee -a "${LOG_PATH}"
 
 MSG="${BUILD_DATE} Done."
 echo $MSG | tee -a "${LOG_PATH}"
