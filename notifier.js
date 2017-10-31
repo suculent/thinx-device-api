@@ -234,6 +234,9 @@ devicelib.get(udid, function(err, doc) {
     var envelopePath = deploymentPathForDevice(owner, udid) + "/" +
       build_id + "/build.json";
 
+    var deployedEnvelopePath = deploymentPathForDevice(owner, udid) + "/" +
+      "/build.json";
+
     console.log("Saving build envelope: " + envelopePath);
 
     fs.open(envelopePath, "w", function(err, fd) {
@@ -247,6 +250,22 @@ devicelib.get(udid, function(err, doc) {
               process.exit(1);
             } else {
               console.log("Build envelope saved successfully:");
+            }
+          });
+      }
+    });
+
+    fs.open(deployedEnvelopePath, "w", function(err, fd) {
+      if (err) {
+        throw "error opening file: " + err;
+      } else {
+        fs.writeFile(deployedEnvelopePath, JSON.stringify(buildEnvelope),
+          function(err) {
+            if (err) {
+              console.log("Deploy envelope save error: " + err);
+              process.exit(1);
+            } else {
+              console.log("Deploy envelope saved successfully:");
             }
           });
       }

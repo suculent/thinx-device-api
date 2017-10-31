@@ -2,6 +2,8 @@
 
 ## CHANGELOG
 
+31/10/2017: 0.9.2520 - passing tests for PlatformIO/Arduino builds
+
 30/10/2017: 0.9.2484 - major update in Arduino library (working with/without WiFiManager, added working callback, added owner ID setting to captive portal); secondary test implementation also works (EAV)
 
 27/10/2017: 0.9.2482 - major bugfixes in Arduino libraries (stable release)

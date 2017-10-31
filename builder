@@ -90,6 +90,7 @@ OWNER_ID_HOME=$THINX_ROOT/data/$OWNER_ID
 echo "[builder.sh] Owner workspace: ${OWNER_ID_HOME}"
 
 DEPLOYMENT_PATH=$OWNER_ID_HOME/$UDID/$BUILD_ID
+TARGET_PATH=$OWNER_ID_HOME/$UDID
 echo "[builder.sh] Deployment path: ${DEPLOYMENT_PATH}"
 DISPLAY_DEPLOYMENT_PATH=$(echo ${DEPLOYMENT_PATH} | tr -d "$THINX_WEB_ROOT")
 echo "[builder.sh] Display deployment path: ${DISPLAY_DEPLOYMENT_PATH}"
@@ -586,6 +587,7 @@ case $PLATFORM in
 						cp -vf *.bin "$OUTFILE" | tee -a "${LOG_PATH}"
 						cp -vf *.elf "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 						echo "Deployment path $DEPLOYMENT_PATH contains:" | tee -a "${LOG_PATH}"
+						cp -vR "${OUTFILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
 						ls $DEPLOYMENT_PATH | tee -a "${LOG_PATH}"
 					else
 						STATUS='"FAILED"'
@@ -627,6 +629,7 @@ case $PLATFORM in
 					STATUS='"OK"'
 					echo "[builder.sh] ☢ Exporting PlatformIO artifact: ${OUTFILE}"
 					cp -vR "${OUTFILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
+					cp -vR "${OUTFILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
 				else
 					STATUS='"FAILED"'
 				fi
