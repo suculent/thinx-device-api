@@ -1656,7 +1656,10 @@ var ThinxApp = function() {
           continue;
         } else {
           user_data = all_user_data.value;
-          console.log("Found all_user_data: " + JSON.stringify(all_user_data));
+          // cleanup          
+          if (typeof(user_data._deleted_conflicts) !== "undefined") {
+            delete user_data._deleted_conflicts;
+          }
           break;
         }
       }
