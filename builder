@@ -180,8 +180,8 @@ fi
 echo "[builder.sh] Cleaning previous git repository / workspace in ${REPO_NAME}..." | tee -a "${LOG_PATH}"
 rm -rf $REPO_NAME
 
-echo "[builder.sh] Cloning ${GIT_REPO}..." | tee -a "${LOG_PATH}"
 # Fetch project
+echo "[builder.sh] Cloning ${GIT_REPO}..." | tee -a "${LOG_PATH}"
 git clone --quiet --recurse-submodules $GIT_REPO
 
 if [[ -d $REPO_NAME ]]; then
@@ -197,6 +197,9 @@ git submodule update --init --recursive
 if [[ ! -d .git ]]; then
 	echo "Not a GIT repository: $(pwd)" | tee -a "${LOG_PATH}"
 fi
+
+pwd | tee -a "${LOG_PATH}"
+ls | tee -a "${LOG_PATH}"
 
 COMMIT=$(git rev-parse HEAD)
 echo "[builder.sh] Fetched commit ID: ${COMMIT}" | tee -a "${LOG_PATH}"
@@ -220,9 +223,9 @@ fi
 
 # Overwrite Thinx.h file (should be required)
 
-echo "Searching THiNX-File in $(pwd)..." | tee -a "${LOG_PATH}"
+echo "Searching THiNX-File in $($OWNER_PATH/$REPO_PATH)..." | tee -a "${LOG_PATH}"
 
-THINX_FILE=$( find . -name "thinx.h" )
+THINX_FILE=$( find $OWNER_PATH/$REPO_PATH -name "thinx.h" )
 
 if [[ -z $THINX_FILE ]]; then
 	echo "No THiNX-File found!" | tee -a "${LOG_PATH}"
@@ -251,7 +254,7 @@ BUILD_DATE=$(date +%Y-%m-%d)
 
 # Build
 
-PLATFORM=$(infer_platform ".")
+PLATFORM=$(infer_platform $OWNER_PATH/$REPO_PATH)
 LANGUAGE=$(language_for_platform $PLATFORM)
 LANGUAGE_NAME=$(language_name $LANGUAGE)
 
@@ -272,8 +275,8 @@ echo "Changing current directory to WORKDIR $WORKDIR..." | tee -a "${LOG_PATH}"
 cd $WORKDIR  | tee -a "${LOG_PATH}"
 
 echo "Current work path: $(pwd)" | tee -a "${LOG_PATH}"
-#echo "Listing files in work path:" | tee -a "${LOG_PATH}"
-#ls | tee -a "${LOG_PATH}"
+echo "Listing files in work path:" | tee -a "${LOG_PATH}"
+ls | tee -a "${LOG_PATH}"
 
 case $PLATFORM in
 
