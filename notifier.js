@@ -237,7 +237,7 @@ devicelib.get(udid, function(err, doc) {
     console.log("envelopePath: " + envelopePath);
 
     var deployedEnvelopePath = deploymentPathForDevice(owner, udid) +
-      "build.json";
+      "/build.json";
 
     console.log("deployedEnvelopePath: " + deployedEnvelopePath);
 
@@ -245,18 +245,34 @@ devicelib.get(udid, function(err, doc) {
 
     console.log("Saving build envelope: " + envelopeString);
 
-    var stream = fs.createWriteStream(deployedEnvelopePath);
-    stream.once('open', function(fd) {
-      stream.write(envelopeString);
-      stream.end();
+    buffer = new Buffer(envelopeString + "\n");
+
+    fs.open(envelopePath, 'w+', function(err, fd) {
+      if (err) {
+        throw 'error opening file: ' + err;
+      }
+
+      fs.write(fd, buffer, 0, buffer.length, null, function(err) {
+        if (err) throw 'error writing file: ' + err;
+        fs.close(fd, function() {
+          console.log('file written');
+        });
+      });
     });
 
-    fs.writeFile(envelopePath, envelopeString, function(err) {
+    fs.open(deployedEnvelopePath, 'w+', function(err, fd) {
       if (err) {
-        return console.log(err);
+        throw 'error opening file: ' + err;
       }
-      console.log("The file was saved!");
+
+      fs.write(fd, buffer, 0, buffer.length, null, function(err) {
+        if (err) throw 'error writing file: ' + err;
+        fs.close(fd, function() {
+          console.log('file written');
+        });
+      });
     });
+
 
     // TODO: Update current build version in managed_users.repos
 
