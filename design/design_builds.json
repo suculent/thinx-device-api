@@ -15,6 +15,7 @@
   },
   "updates" : {
     "delete_expired" : "function (doc, req) { if (doc.timestamp < req.query.mindate) { doc._deleted = true; return [doc, 'deleted']; } else return [doc, doc._id] }",
-    "log" : "function(doc, req) { doc.log.push(req.body.record); doc.last_update = req.body.record.timestamp; return doc._id; }"
+    "log" : "function(doc, req) { doc.log.push(req.body.record); doc.last_update = req.body.record.timestamp; return doc._id; }",
+    "state" : "function(doc, req) { doc.state = req.body.state; return doc._id; }"
   }
 }

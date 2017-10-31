@@ -1665,7 +1665,7 @@ var ThinxApp = function() {
       }
 
       if (user_data === null) {
-        console.log("No user data, " + username + "not authorized.");
+        console.log("No user data, " + username + " not authorized.");
         failureResponse(res, 403, "unauthorized");
         return;
       }
