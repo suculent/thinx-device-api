@@ -674,14 +674,14 @@ echo "[THiNX] Log path: $LOG_PATH" | tee -a "${LOG_PATH}"
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
 CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS}"
 echo "Executing Notifier: " $CMD | tee -a "${LOG_PATH}"
-cd ./$ORIGIN # go back to application root folder
+cd $ORIGIN # go back to application root folder
 RESULT=$(node $THINX_ROOT/notifier.js $CMD)
 echo -e "${RESULT}" | tee -a "${LOG_PATH}"
 
 # Upgrade Platformio in case new version is available
 if [[ $RESULT == "*platformio upgrade*" ]]; then
 		echo "Auto-updating platformio..."
-		platformio upgrade > /dev/null
+		platformio upgrade > /dev/null 
 fi
 
 CLEANUP_RESULT=$(bash $THINX_ROOT/couch_cleanup.sh)
