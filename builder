@@ -116,7 +116,7 @@ echo "Logging to ${LOG_PATH}" | tee -a "${LOG_PATH}"
 echo "[builder.sh] <b> -=[ ☢ THiNX IoT RTM BUILDER ☢ ]=- </b>" | tee -a "${LOG_PATH}"
 echo "[builder.sh] Starting builder at path ${THINX_ROOT}" | tee -a "${LOG_PATH}"
 echo "[builder.sh] Owner workspace: ${OWNER_ID_HOME}" | tee -a "${LOG_PATH}"
-echo "[builder.sh] Making deployment path: ${DISPLAY_DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
+echo "[builder.sh] Making deployment path: ${DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
 
 # extract the protocol
 proto="$(echo $GIT_REPO | grep :// | sed -e's,^\(.*://\).*,\1,g')"
@@ -159,18 +159,18 @@ echo "[builder.sh]   REPO_NAME: ${REPO_NAME}" | tee -a "${LOG_PATH}"
 #rm -rf $THINX_ROOT/tenants/$OWNER_ID/$UDID/$BUILD_ID/$REPO_PATH/**
 
 # TODO: only if $REPO_NAME contains slash(es)
-OWNER_PATH=$THINX_ROOT/repositories/$OWNER_ID/$UDID/$BUILD_ID
-if [[ ! -d $OWNER_PATH ]]; then
-	mkdir -p $OWNER_PATH
+BUILD_PATH=$THINX_ROOT/repositories/$OWNER_ID/$UDID/$BUILD_ID
+if [[ ! -d $BUILD_PATH ]]; then
+	mkdir -p $BUILD_PATH
 fi
 
-echo "[builder.sh] Entering OWNER_PATH $OWNER_PATH" | tee -a "${LOG_PATH}"
-cd $OWNER_PATH | tee -a "${LOG_PATH}"
-cd $OWNER_PATH && echo $(pwd) | tee -a "${LOG_PATH}"
+echo "[builder.sh] Entering BUILD_PATH $BUILD_PATH" | tee -a "${LOG_PATH}"
+cd $BUILD_PATH | tee -a "${LOG_PATH}"
+cd $BUILD_PATH && echo $(pwd) | tee -a "${LOG_PATH}"
 
 # Create new working directory
 echo "[builder.sh] Creating new REPO_PATH $REPO_PATH" | tee -a "${LOG_PATH}"
-mkdir -p $OWNER_PATH/$REPO_PATH
+mkdir -p $BUILD_PATH/$REPO_PATH
 
 # enter git user folder if any
 if [[ -d $GIT_USER ]]; then
@@ -185,7 +185,7 @@ rm -rf $REPO_NAME
 
 # Fetch project
 echo "[builder.sh] Cloning ${GIT_REPO}..." | tee -a "${LOG_PATH}"
-cd $OWNER_PATH && git clone --quiet --recurse-submodules $GIT_REPO
+cd $BUILD_PATH/$GIT_USER && git clone --quiet --recurse-submodules $GIT_REPO
 
 if [[ -d $REPO_NAME ]]; then
 	echo "Directory $REPO_NAME exists, entering..." | tee -a "${LOG_PATH}"
@@ -199,13 +199,13 @@ fi
 
 pwd | tee -a "${LOG_PATH}"
 
-cd $OWNER_PATH/$REPO_PATH && git submodule update --init --recursive
+cd $BUILD_PATH/$REPO_PATH && git submodule update --init --recursive
 
-if [[ ! -d $OWNER_PATH/$REPO_PATH/.git ]]; then
+if [[ ! -d $BUILD_PATH/$REPO_PATH/.git ]]; then
 	echo "Not a GIT repository: $(pwd)" | tee -a "${LOG_PATH}"
 fi
 
-cd $OWNER_PATH/$REPO_PATH && ls | tee -a "${LOG_PATH}"
+cd $BUILD_PATH/$REPO_PATH && ls | tee -a "${LOG_PATH}"
 
 COMMIT=$(git rev-parse HEAD)
 echo "[builder.sh] Fetched commit ID: ${COMMIT}" | tee -a "${LOG_PATH}"
@@ -229,9 +229,9 @@ fi
 
 # Overwrite Thinx.h file (should be required)
 
-echo "[builder.sh] Searching THiNX-File in $OWNER_PATH/$REPO_PATH..." | tee -a "${LOG_PATH}"
+echo "[builder.sh] Searching THiNX-File in $BUILD_PATH/$REPO_PATH..." | tee -a "${LOG_PATH}"
 
-THINX_FILE=$( find $OWNER_PATH/$REPO_PATH -name "thinx.h" -maxdepth 5)
+THINX_FILE=$( find $BUILD_PATH/$REPO_PATH -name "thinx.h" -maxdepth 5)
 
 if [[ -z $THINX_FILE ]]; then
 	echo "[builder.sh] No THiNX-File found!" | tee -a "${LOG_PATH}"
@@ -260,7 +260,7 @@ BUILD_DATE=$(date +%Y-%m-%d)
 
 # Build
 
-PLATFORM=$(infer_platform $OWNER_PATH/$REPO_PATH)
+PLATFORM=$(infer_platform $BUILD_PATH/$REPO_PATH)
 LANGUAGE=$(language_for_platform $PLATFORM)
 LANGUAGE_NAME=$(language_name $LANGUAGE)
 
@@ -511,8 +511,8 @@ case $PLATFORM in
 				if [[ $BUILD_SUCCESS == true ]] ; then
 					STATUS='"OK"'
 					cp $(pwd)/build/fw.zip $OUTFILE
-					ls "$OWNER_PATH/build" | tee -a "${LOG_PATH}"
-					unzip "${OWNER_PATH}/build/fw.zip" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
+					ls "$BUILD_PATH/build" | tee -a "${LOG_PATH}"
+					unzip "${BUILD_PATH}/build/fw.zip" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 					ls "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 					echo $MSG; echo $MSG | tee -a "${LOG_PATH}"
 				else
