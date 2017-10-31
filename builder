@@ -688,10 +688,10 @@ RESULT=$(node $THINX_ROOT/notifier.js $CMD)
 echo -e "${RESULT}" | tee -a "${LOG_PATH}"
 
 # Upgrade Platformio in case new version is available
-if [[ $RESULT == "*platformio upgrade*" ]]; then
+#if [[ $RESULT == "*platformio upgrade*" ]]; then
 		# echo "Auto-updating platformio..."
 		#platformio upgrade > /dev/null
-fi
+#fi
 
 MSG="${BUILD_DATE} Done."
 echo $MSG | tee -a "${LOG_PATH}"
