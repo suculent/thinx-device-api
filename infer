@@ -59,25 +59,25 @@ function infer_platform
 function output_file
 {
 		local DSC_PATH="$THINX_ROOT/platforms/$1/descriptor.json"
-		echo $(cat $DSC_PATH | jq .header | tr -d '\"' )
+		echo $(cat $DSC_PATH | jq .header | tr -d '"' 2> /dev/null )
 }
 
 function platform_name
 {
 		local DSC_PATH="$THINX_ROOT/platforms/$1/descriptor.json"
-		echo $(cat $DSC_PATH | jq .name | tr -d '\"' )
+		echo $(cat $DSC_PATH | jq .name | tr -d '"' 2> /dev/null )
 }
 
 function language_for_platform
 {
 		local DSC_PATH="$THINX_ROOT/platforms/$1/descriptor.json"
-		echo $(cat $DSC_PATH | jq .language | tr -d '\"' )
+		echo $(cat $DSC_PATH | jq .language | tr -d '"' 2> /dev/null )
 }
 
 function language_name
 {
 		local DSC_PATH="$THINX_ROOT/languages/$1/descriptor.json"
-		echo $(cat $DSC_PATH | jq .name | tr -d '\"' )
+		echo $(cat $DSC_PATH | jq .name | tr -d '"' 2> /dev/null )
 }
 
 function generate_thinx_file
@@ -116,13 +116,13 @@ function thinx_file_from_json
 		local WORKDIR=$3
 		local LANG_PATH="$THINX_ROOT/languages/$2/descriptor.json"
 		local LANG=$(cat $LANG_PATH)
-		local LANGUAGE_NAME=$(echo $LANG | jq .name | tr -d '"')
-		local DEFINE=$(echo $LANG | jq .DEFINE | tr -d '\"' )
-		local ASSIGN=$(echo $LANG | jq .ASSIGN | tr -d '\"' )
-		local COMMENT=$(echo $LANG | jq .COMMENT | tr -d '\"' )
-		local EOL=$(echo $LANG | jq .EOL | tr -d '" ')
+		local LANGUAGE_NAME=$(echo $LANG | jq .name | tr -d '"' 2> /dev/null)
+		local DEFINE=$(echo $LANG | jq .DEFINE | tr -d '"' 2> /dev/null)
+		local ASSIGN=$(echo $LANG | jq .ASSIGN | tr -d '"' 2> /dev/null)
+		local COMMENT=$(echo $LANG | jq .COMMENT | tr -d '"' 2> /dev/null)
+		local EOL=$(echo $LANG | jq .EOL | tr -d '"' 2> /dev/null)
 
-		local STRINGSTOP=$(echo $LANG | jq .STRINGSTOP | tr -d '\')
+		local STRINGSTOP=$(echo $LANG | jq .STRINGSTOP | tr -d '\\' 2> /dev/null)
 		STRINGSTOP=$(echo "${STRINGSTOP:1:${#STRINGSTOP}-2}")
 
 		OUTFILE=$(output_file $PLATFORM)
@@ -181,7 +181,7 @@ function thinx_file_from_json
 			elif [[ "$K" == "]" ]]; then
 				echo > /dev/null # condition must not be empty
 			else
-				VALUE=$(echo $BUILDFILE | jq .$K | tr -d '"')
+				VALUE=$(echo $BUILDFILE | jq .$K | tr -d '"' 2> /dev/null)
 				if [[ "$K" == *"COMMENT"* ]]; then
 						VALUE=${VALUE/\%\%LANGUAGE_NAME\%\%/$LANGUAGE_NAME}
 						VALUE=${VALUE/\%\%THINX_PLATFORM\%\%/$PLATFORM}
