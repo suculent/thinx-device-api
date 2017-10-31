@@ -234,41 +234,31 @@ devicelib.get(udid, function(err, doc) {
     var envelopePath = deploymentPathForDevice(owner, udid) + "/" +
       build_id + "/build.json";
 
+    console.log("envelopePath: " + envelopePath);
+
     var deployedEnvelopePath = deploymentPathForDevice(owner, udid) + "/" +
       "/build.json";
 
-    console.log("Saving build envelope: " + JSON.stringify(buildEnvelope));
+    console.log("deployedEnvelopePath: " + deployedEnvelopePath);
 
-    fs.open(envelopePath, "w", function(err, fd) {
+    var envelopeString = JSON.stringify(buildEnvelope);
+
+    console.log("Saving build envelope: " + envelopeString);
+
+    fs.writeFile(envelopePath, JSON.stringify(buildEnvelope), function(err) {
       if (err) {
-        throw "error opening file: " + err;
+        console.log("Build envelope save error: " + err);
+        process.exit(1);
       } else {
-        fs.writeFile(envelopePath, JSON.stringify(buildEnvelope),
-          function(err) {
-            if (err) {
-              console.log("Build envelope save error: " + err);
-              process.exit(1);
-            } else {
-              console.log("Build envelope saved successfully:");
-            }
-          });
+        console.log("Build envelope saved successfully:");
       }
     });
 
-    fs.open(deployedEnvelopePath, "w", function(err, fd) {
+    fs.writeFile(deployedEnvelopePath, envelopeString, function(err) {
       if (err) {
-        throw "error opening file: " + err;
-      } else {
-        fs.writeFile(deployedEnvelopePath, JSON.stringify(buildEnvelope),
-          function(err) {
-            if (err) {
-              console.log("Deploy envelope save error: " + err);
-              process.exit(1);
-            } else {
-              console.log("Deploy envelope saved successfully:");
-            }
-          });
+        return console.log(err);
       }
+      console.log("The file was saved!");
     });
 
     // TODO: Update current build version in managed_users.repos
