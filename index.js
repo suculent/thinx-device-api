@@ -2211,7 +2211,7 @@ var ThinxApp = function() {
 
       } else {
         var m = JSON.stringify(message);
-        if (m != "{}") {
+        if ((m != "{}") || (typeof(message) == "undefined")) {
           console.log("» Websocketparser said: unknown message: " + m);
         }
       }
