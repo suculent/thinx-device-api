@@ -245,13 +245,10 @@ devicelib.get(udid, function(err, doc) {
 
     console.log("Saving build envelope: " + envelopeString);
 
-    fs.writeFile(envelopePath, JSON.stringify(buildEnvelope), function(err) {
-      if (err) {
-        console.log("Build envelope save error: " + err);
-        process.exit(1);
-      } else {
-        console.log("Build envelope saved successfully:");
-      }
+    var stream = fs.createWriteStream(deployedEnvelopePath);
+    stream.once('open', function(fd) {
+      stream.write(envelopeString);
+      stream.end();
     });
 
     fs.writeFile(deployedEnvelopePath, envelopeString, function(err) {
