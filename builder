@@ -164,17 +164,16 @@ if [[ ! -d $OWNER_PATH ]]; then
 fi
 
 echo "[builder.sh] Entering OWNER_PATH $OWNER_PATH" | tee -a "${LOG_PATH}"
-pushd $OWNER_PATH | tee -a "${LOG_PATH}"
+cd $OWNER_PATH | tee -a "${LOG_PATH}"
 
 # Create new working directory
 echo "[builder.sh] Creating new REPO_PATH $REPO_PATH" | tee -a "${LOG_PATH}"
-mkdir -p ./$REPO_PATH
-ls | tee -a "${LOG_PATH}"
+mkdir -p $OWNER_PATH/$REPO_PATH
 
 # enter git user folder if any
 if [[ -d $GIT_USER ]]; then
 	echo "[builder.sh][DEBUG] Entering git user folder inside workspace ./${GIT_USER}..." | tee -a "${LOG_PATH}"
-	pushd $GIT_USER > /dev/null
+	cd ./$GIT_USER > /dev/null
 fi
 
 # Clean workspace
@@ -187,17 +186,19 @@ git clone --quiet --recurse-submodules $GIT_REPO
 
 if [[ -d $REPO_NAME ]]; then
 	echo "Directory $REPO_NAME exists, entering..." | tee -a "${LOG_PATH}"
-	pushd ./$REPO_NAME
+	cd ./$REPO_NAME
 else
 	echo "Directory $REPO_NAME does not exist, entering $REPO_PATH instead..." | tee -a "${LOG_PATH}"
-	pushd ./$REPO_PATH
+	cd ./$REPO_PATH
 fi
 
 git submodule update --init --recursive
 
+pwd
+ls
+
 if [[ ! -d .git ]]; then
 	echo "Not a GIT repository: $(pwd)" | tee -a "${LOG_PATH}"
-	ls
 fi
 
 COMMIT=$(git rev-parse HEAD)
@@ -226,11 +227,11 @@ echo "Seaching THiNX-File in ${OWNER_PATH}..." | tee -a "${LOG_PATH}"
 
 echo $(pwd)
 
-THINX_FILE=$( find ${OWNER_PATH} | grep "/thinx.h" )
+THINX_FILE=$( find ${OWNER_PATH}/$REPO_PATH} --name "/thinx.h" )
 
 if [[ -z $THINX_FILE ]]; then
 	echo "No THiNX-File found!" | tee -a "${LOG_PATH}"
-#	exit 1 # will deprecate on modularization for more platforms
+	exit 1 # will deprecate on modularization for more platforms
 else
 	echo "Found THiNX-File: ${THINX_FILE}" | tee -a "${LOG_PATH}"
 fi
@@ -251,7 +252,7 @@ fi
 
 REPO_NAME="$(basename $(pwd))"
 REPO_VERSION="${THX_VERSION}.${VERSION}" # todo: is not semantic at all
-BUILD_DATE=`date +%Y-%m-%d`
+BUILD_DATE=$(date +%Y-%m-%d)
 
 # Build
 
@@ -273,7 +274,7 @@ else
 fi
 
 echo "Changing current directory to WORKDIR $WORKDIR..." | tee -a "${LOG_PATH}"
-pushd $WORKDIR  | tee -a "${LOG_PATH}"
+cd $WORKDIR  | tee -a "${LOG_PATH}"
 
 echo "Current work path: $(pwd)" | tee -a "${LOG_PATH}"
 echo "Listing files in work path:" | tee -a "${LOG_PATH}"
@@ -603,7 +604,7 @@ case $PLATFORM in
 		  fi
 
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
-			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build # | tee -a "${LOG_PATH}"
+			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build | tee -a "${LOG_PATH}"
 			# docker run --rm -ti -v `pwd`:/opt/workspace suculent/platformio-docker-build
 			if [[ $? == 0 ]] ; then
 				BUILD_SUCCESS=true
@@ -653,10 +654,6 @@ fi
 
 echo "[builder.sh] Build completed with status: $STATUS" | tee -a "${LOG_PATH}"
 
-popd
-popd
-popd
-
 echo "[builder.sh] Post-flight check:" | tee -a "${LOG_PATH}"
 
 pwd | tee -a "${LOG_PATH}"
@@ -681,7 +678,7 @@ echo "[THiNX] Log path: $LOG_PATH" | tee -a "${LOG_PATH}"
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
 CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS}"
 echo "Executing Notifier: " $CMD | tee -a "${LOG_PATH}"
-pushd $ORIGIN # go back to application root folder
+cd ./$ORIGIN # go back to application root folder
 RESULT=$(node $THINX_ROOT/notifier.js $CMD)
 echo -e "${RESULT}" | tee -a "${LOG_PATH}"
 
