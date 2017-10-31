@@ -194,9 +194,6 @@ fi
 
 git submodule update --init --recursive
 
-pwd
-ls
-
 if [[ ! -d .git ]]; then
 	echo "Not a GIT repository: $(pwd)" | tee -a "${LOG_PATH}"
 fi
@@ -209,11 +206,11 @@ echo "[builder.sh] Repository version/revision: ${VERSION}" | tee -a "${LOG_PATH
 
 # Search for thinx.yml
 
-$nodemcu_build_type='firmware'
+$nodemcu_build_type="firmware"
 $nodemcu_build_float=true
 
-$micropython_build_type='firmware'
-$micropython_platform='esp8266'
+$micropython_build_type="firmware"
+$micropython_platform="esp8266"
 
 if [ -f ./thinx.yml ]; then
 	echo "Found thinx.yml file, reading..." | tee -a "${LOG_PATH}"
@@ -223,11 +220,9 @@ fi
 
 # Overwrite Thinx.h file (should be required)
 
-echo "Seaching THiNX-File in ${OWNER_PATH}..." | tee -a "${LOG_PATH}"
+echo "Seaching THiNX-File in $(pwd)..." | tee -a "${LOG_PATH}"
 
-echo $(pwd)
-
-THINX_FILE=$( find ${OWNER_PATH}/$REPO_PATH} --name "/thinx.h" )
+THINX_FILE=$( find $(pwd) -name "/thinx.h" )
 
 if [[ -z $THINX_FILE ]]; then
 	echo "No THiNX-File found!" | tee -a "${LOG_PATH}"
@@ -236,7 +231,7 @@ else
 	echo "Found THiNX-File: ${THINX_FILE}" | tee -a "${LOG_PATH}"
 fi
 
-THINX_CLOUD_URL="rtm.thinx.cloud"
+THINX_CLOUD_URL="thinx.cloud"
 THINX_MQTT_URL="${THINX_CLOUD_URL}"
 
 if [[ ! -z $DEVICE_ALIAS ]]; then
@@ -604,7 +599,7 @@ case $PLATFORM in
 		  fi
 
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
-			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build | tee -a "${LOG_PATH}"
+			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build #| tee -a "${LOG_PATH}"
 			# docker run --rm -ti -v `pwd`:/opt/workspace suculent/platformio-docker-build
 			if [[ $? == 0 ]] ; then
 				BUILD_SUCCESS=true
