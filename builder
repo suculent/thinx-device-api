@@ -599,7 +599,7 @@ case $PLATFORM in
 				fi
 		  fi
 
-			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
+			OUTFILE=$(pwd)/build/firmware.bin
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build | tee -a "${LOG_PATH}"
 			# docker run --rm -ti -v `pwd`:/opt/workspace suculent/platformio-docker-build
 			if [[ $? == 0 ]] ; then
@@ -616,10 +616,7 @@ case $PLATFORM in
 				# Check Artifacts
 				if [[ $BUILD_SUCCESS == true ]] ; then
 					STATUS='"OK"'
-					APATH=$(find ${OWNER_PATH} -name "firmware.bin")
-					ls "$APATH" | tee -a "${LOG_PATH}"
-					# TODO: d1_mini is a board name that is not parametrized but must be eventually
-					OUTFILE="$APATH"
+					echo "[builder.sh] ☢ Exporting PlatformIO artifact: ${OUTFILE}"
 					cp -vR "${OUTFILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 				else
 					STATUS='"FAILED"'
