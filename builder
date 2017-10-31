@@ -166,7 +166,7 @@ fi
 
 echo "[builder.sh] Entering OWNER_PATH $OWNER_PATH" | tee -a "${LOG_PATH}"
 cd $OWNER_PATH | tee -a "${LOG_PATH}"
-echo $(pwd) | tee -a "${LOG_PATH}"
+cd $OWNER_PATH && echo $(pwd) | tee -a "${LOG_PATH}"
 
 # Create new working directory
 echo "[builder.sh] Creating new REPO_PATH $REPO_PATH" | tee -a "${LOG_PATH}"
@@ -185,7 +185,7 @@ rm -rf $REPO_NAME
 
 # Fetch project
 echo "[builder.sh] Cloning ${GIT_REPO}..." | tee -a "${LOG_PATH}"
-git clone --quiet --recurse-submodules $GIT_REPO
+cd $OWNER_PATH && git clone --quiet --recurse-submodules $GIT_REPO
 
 if [[ -d $REPO_NAME ]]; then
 	echo "Directory $REPO_NAME exists, entering..." | tee -a "${LOG_PATH}"
