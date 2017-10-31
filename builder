@@ -689,12 +689,12 @@ echo -e "${RESULT}" | tee -a "${LOG_PATH}"
 
 # Upgrade Platformio in case new version is available
 if [[ $RESULT == "*platformio upgrade*" ]]; then
-		echo "Auto-updating platformio..."
-		platformio upgrade > /dev/null
+		# echo "Auto-updating platformio..."
+		#platformio upgrade > /dev/null
 fi
-
-CLEANUP_RESULT=$(bash $THINX_ROOT/couch_cleanup.sh &)
-#echo $CLEANUP_RESULT | tee -a "${LOG_PATH}"
 
 MSG="${BUILD_DATE} Done."
 echo $MSG | tee -a "${LOG_PATH}"
+
+# cleanup DB
+# bash $THINX_ROOT/couch_cleanup.sh > /dev/null &

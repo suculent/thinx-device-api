@@ -236,8 +236,8 @@ devicelib.get(udid, function(err, doc) {
 
     console.log("envelopePath: " + envelopePath);
 
-    var deployedEnvelopePath = deploymentPathForDevice(owner, udid) + "/" +
-      "/build.json";
+    var deployedEnvelopePath = deploymentPathForDevice(owner, udid) +
+      "build.json";
 
     console.log("deployedEnvelopePath: " + deployedEnvelopePath);
 
@@ -251,7 +251,7 @@ devicelib.get(udid, function(err, doc) {
       stream.end();
     });
 
-    fs.writeFile(deployedEnvelopePath, envelopeString, function(err) {
+    fs.writeFile(envelopePath, envelopeString, function(err) {
       if (err) {
         return console.log(err);
       }
