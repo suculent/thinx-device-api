@@ -165,6 +165,7 @@ fi
 
 echo "[builder.sh] Entering OWNER_PATH $OWNER_PATH" | tee -a "${LOG_PATH}"
 cd $OWNER_PATH | tee -a "${LOG_PATH}"
+echo $(pwd) | tee -a "${LOG_PATH}"
 
 # Create new working directory
 echo "[builder.sh] Creating new REPO_PATH $REPO_PATH" | tee -a "${LOG_PATH}"
@@ -223,7 +224,7 @@ fi
 
 # Overwrite Thinx.h file (should be required)
 
-echo "Searching THiNX-File in $($OWNER_PATH/$REPO_PATH)..." | tee -a "${LOG_PATH}"
+echo "Searching THiNX-File in $OWNER_PATH/$REPO_PATH..." | tee -a "${LOG_PATH}"
 
 THINX_FILE=$( find $OWNER_PATH/$REPO_PATH -name "thinx.h" )
 
