@@ -247,20 +247,8 @@ devicelib.get(udid, function(err, doc) {
 
     buffer = new Buffer(envelopeString + "\n");
 
-    fs.open(envelopePath, 'w+', function(err, fd) {
-      if (err) {
-        throw 'error opening file: ' + err;
-      }
-      fs.writeFileSync(envelopePath, envelopeString);
-    });
-
-    fs.open(deployedEnvelopePath, 'w+', function(err, fd) {
-      if (err) {
-        throw 'error opening file: ' + err;
-      }
-
-      fs.writeFileSync(deployedEnvelopePath, buffer);
-    });
+    fs.writeFileSync(envelopePath, buffer);
+    fs.writeFileSync(deployedEnvelopePath, buffer);
 
 
     // TODO: Update current build version in managed_users.repos
