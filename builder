@@ -199,14 +199,13 @@ fi
 
 pwd | tee -a "${LOG_PATH}"
 
-git submodule update --init --recursive
+cd $OWNER_PATH && git submodule update --init --recursive
 
 if [[ ! -d .git ]]; then
 	echo "Not a GIT repository: $(pwd)" | tee -a "${LOG_PATH}"
 fi
 
-pwd | tee -a "${LOG_PATH}"
-ls | tee -a "${LOG_PATH}"
+cd $OWNER_PATH && ls | tee -a "${LOG_PATH}"
 
 COMMIT=$(git rev-parse HEAD)
 echo "[builder.sh] Fetched commit ID: ${COMMIT}" | tee -a "${LOG_PATH}"
@@ -232,7 +231,7 @@ fi
 
 echo "[builder.sh] Searching THiNX-File in $(pwd)..." | tee -a "${LOG_PATH}"
 
-THINX_FILE=$( find . -name "thinx.h" -maxdepth 5)
+THINX_FILE=$( find $OWNER_PATH -name "thinx.h" -maxdepth 5)
 
 if [[ -z $THINX_FILE ]]; then
 	echo "[builder.sh] No THiNX-File found!" | tee -a "${LOG_PATH}"
