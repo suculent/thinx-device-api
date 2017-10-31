@@ -1618,7 +1618,6 @@ var ThinxApp = function() {
       });
     };
 
-
     if (typeof(username) === "undefined") {
       if (typeof(callback) === "undefined") {
         return;
@@ -1696,25 +1695,17 @@ var ThinxApp = function() {
           if (typeof(req.body.remember === "undefined") || (req.body.remember ===
               0)) {
             var hour = 3600000;
-            req.session.cookie.expires = new Date(Date.now() + hour);
+            req.session.cookie.expires = new Date(Date.now() + hour, "isoDate");
             req.session.cookie.maxAge = hour;
             res.cookie("x-thx-session-expire", req.session.cookie.expires, {
               maxAge: req.session.cookie.maxAge,
               httpOnly: false
             });
-            res.cookie("x-thx-session", hour, {
-              maxAge: hour,
-              httpOnly: false
-            });
           } else {
             req.session.cookie.expires = new Date(Date.now() +
-              fortnight);
+              fortnight, "isoDate");
             req.session.cookie.maxAge = fortnight;
             res.cookie("x-thx-session-expire", fortnight, {
-              maxAge: fortnight,
-              httpOnly: false
-            });
-            res.cookie("x-thx-session", fortnight, {
               maxAge: fortnight,
               httpOnly: false
             });
