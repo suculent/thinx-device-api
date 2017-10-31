@@ -251,13 +251,7 @@ devicelib.get(udid, function(err, doc) {
       if (err) {
         throw 'error opening file: ' + err;
       }
-
-      fs.write(fd, buffer, 0, buffer.length, null, function(err) {
-        if (err) throw 'error writing file: ' + err;
-        fs.close(fd, function() {
-          console.log('file written');
-        });
-      });
+      fs.writeFileSync(envelopePath, envelopeString);
     });
 
     fs.open(deployedEnvelopePath, 'w+', function(err, fd) {
@@ -265,12 +259,7 @@ devicelib.get(udid, function(err, doc) {
         throw 'error opening file: ' + err;
       }
 
-      fs.write(fd, buffer, 0, buffer.length, null, function(err) {
-        if (err) throw 'error writing file: ' + err;
-        fs.close(fd, function() {
-          console.log('file written');
-        });
-      });
+      fs.writeFileSync(deployedEnvelopePath, buffer);
     });
 
 

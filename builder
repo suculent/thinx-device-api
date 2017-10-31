@@ -198,15 +198,13 @@ else
 	pwd | tee -a "${LOG_PATH}"
 fi
 
-pwd | tee -a "${LOG_PATH}"
-
 cd $BUILD_PATH/$REPO_PATH && git submodule update --init --recursive
 
 if [[ ! -d $BUILD_PATH/$REPO_PATH/.git ]]; then
 	echo "Not a GIT repository: $(pwd)" | tee -a "${LOG_PATH}"
 fi
 
-cd $BUILD_PATH/$REPO_PATH && ls | tee -a "${LOG_PATH}"
+cd $BUILD_PATH/$REPO_PATH
 
 COMMIT=$(git rev-parse HEAD)
 echo "[builder.sh] Fetched commit ID: ${COMMIT}" | tee -a "${LOG_PATH}"
@@ -282,8 +280,6 @@ echo "Changing current directory to WORKDIR $WORKDIR..." | tee -a "${LOG_PATH}"
 cd $WORKDIR  | tee -a "${LOG_PATH}"
 
 echo "Current work path: $(pwd)" | tee -a "${LOG_PATH}"
-echo "Listing files in work path:" | tee -a "${LOG_PATH}"
-ls | tee -a "${LOG_PATH}"
 
 case $PLATFORM in
 
