@@ -90,8 +90,9 @@ OWNER_ID_HOME=$THINX_ROOT/data/$OWNER_ID
 echo "[builder.sh] Owner workspace: ${OWNER_ID_HOME}"
 
 DEPLOYMENT_PATH=$OWNER_ID_HOME/$UDID/$BUILD_ID
+echo "[builder.sh] Deployment path: ${DEPLOYMENT_PATH}"
 DISPLAY_DEPLOYMENT_PATH=$(echo ${DEPLOYMENT_PATH} | tr -d "$THINX_WEB_ROOT")
-echo "[builder.sh] Making deployment path: ${DISPLAY_DEPLOYMENT_PATH}"
+echo "[builder.sh] Display deployment path: ${DISPLAY_DEPLOYMENT_PATH}"
 
 # Create user-referenced folder in public www space
 mkdir -p $OWNER_ID_HOME
@@ -175,6 +176,7 @@ mkdir -p $OWNER_PATH/$REPO_PATH
 if [[ -d $GIT_USER ]]; then
 	echo "[builder.sh][DEBUG] Entering git user folder inside workspace ./${GIT_USER}..." | tee -a "${LOG_PATH}"
 	cd ./$GIT_USER > /dev/null
+	pwd | tee -a "${LOG_PATH}"
 fi
 
 # Clean workspace
@@ -188,10 +190,14 @@ git clone --quiet --recurse-submodules $GIT_REPO
 if [[ -d $REPO_NAME ]]; then
 	echo "Directory $REPO_NAME exists, entering..." | tee -a "${LOG_PATH}"
 	cd ./$REPO_NAME
+	pwd | tee -a "${LOG_PATH}"
 else
 	echo "Directory $REPO_NAME does not exist, entering $REPO_PATH instead..." | tee -a "${LOG_PATH}"
 	cd ./$REPO_PATH
+	pwd | tee -a "${LOG_PATH}"
 fi
+
+pwd | tee -a "${LOG_PATH}"
 
 git submodule update --init --recursive
 
@@ -224,15 +230,15 @@ fi
 
 # Overwrite Thinx.h file (should be required)
 
-echo "Searching THiNX-File in $OWNER_PATH/$REPO_PATH..." | tee -a "${LOG_PATH}"
+echo "[builder.sh] Searching THiNX-File in $(pwd)..." | tee -a "${LOG_PATH}"
 
-THINX_FILE=$( find $OWNER_PATH/$REPO_PATH -name "thinx.h" )
+THINX_FILE=$( find . -name "thinx.h" -maxdepth 5)
 
 if [[ -z $THINX_FILE ]]; then
-	echo "No THiNX-File found!" | tee -a "${LOG_PATH}"
-	exit 1 # will deprecate on modularization for more platforms
+	echo "[builder.sh] No THiNX-File found!" | tee -a "${LOG_PATH}"
+	# exit 1 # will deprecate on modularization for more platforms
 else
-	echo "Found THiNX-File: ${THINX_FILE}" | tee -a "${LOG_PATH}"
+	echo "[builder.sh] Found THiNX-File: ${THINX_FILE}" | tee -a "${LOG_PATH}"
 fi
 
 THINX_CLOUD_URL="thinx.cloud"
