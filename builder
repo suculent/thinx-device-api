@@ -177,7 +177,7 @@ if [[ -d $GIT_USER ]]; then
 fi
 
 # Clean workspace
-echo "[builder.sh] Cleaning previous git repository / workspace in $REPO_NAME..." | tee -a "${LOG_PATH}"
+echo "[builder.sh] Cleaning previous git repository / workspace in ${REPO_NAME}..." | tee -a "${LOG_PATH}"
 rm -rf $REPO_NAME
 
 echo "[builder.sh] Cloning ${GIT_REPO}..." | tee -a "${LOG_PATH}"
@@ -201,16 +201,19 @@ fi
 COMMIT=$(git rev-parse HEAD)
 echo "[builder.sh] Fetched commit ID: ${COMMIT}" | tee -a "${LOG_PATH}"
 
+pwd
+ls
+
 VERSION=$(git rev-list HEAD --count)
 echo "[builder.sh] Repository version/revision: ${VERSION}" | tee -a "${LOG_PATH}"
 
 # Search for thinx.yml
 
-$nodemcu_build_type="firmware"
-$nodemcu_build_float=true
+nodemcu_build_type="firmware"
+nodemcu_build_float=true
 
-$micropython_build_type="firmware"
-$micropython_platform="esp8266"
+micropython_build_type="firmware"
+micropython_platform="esp8266"
 
 if [ -f ./thinx.yml ]; then
 	echo "Found thinx.yml file, reading..." | tee -a "${LOG_PATH}"
@@ -220,9 +223,12 @@ fi
 
 # Overwrite Thinx.h file (should be required)
 
-echo "Seaching THiNX-File in $(pwd)..." | tee -a "${LOG_PATH}"
+echo "Searching THiNX-File in $(pwd)..." | tee -a "${LOG_PATH}"
 
-THINX_FILE=$( find $(pwd) -name "/thinx.h" )
+pwd
+ls
+
+THINX_FILE=$( find . -name "thinx.h" )
 
 if [[ -z $THINX_FILE ]]; then
 	echo "No THiNX-File found!" | tee -a "${LOG_PATH}"
