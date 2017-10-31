@@ -90,7 +90,7 @@ OWNER_ID_HOME=$THINX_ROOT/data/$OWNER_ID
 echo "[builder.sh] Owner workspace: ${OWNER_ID_HOME}"
 
 DEPLOYMENT_PATH=$OWNER_ID_HOME/$UDID/$BUILD_ID
-DISPLAY_DEPLOYMENT_PATH=$(echo ${DEPLOYMENT_PATH} | tr -d '$THINX_WEB_ROOT')
+DISPLAY_DEPLOYMENT_PATH=$(echo ${DEPLOYMENT_PATH} | tr -d "$THINX_WEB_ROOT")
 echo "[builder.sh] Making deployment path: ${DISPLAY_DEPLOYMENT_PATH}"
 
 # Create user-referenced folder in public www space
@@ -201,9 +201,6 @@ fi
 COMMIT=$(git rev-parse HEAD)
 echo "[builder.sh] Fetched commit ID: ${COMMIT}" | tee -a "${LOG_PATH}"
 
-pwd
-ls
-
 VERSION=$(git rev-list HEAD --count)
 echo "[builder.sh] Repository version/revision: ${VERSION}" | tee -a "${LOG_PATH}"
 
@@ -224,9 +221,6 @@ fi
 # Overwrite Thinx.h file (should be required)
 
 echo "Searching THiNX-File in $(pwd)..." | tee -a "${LOG_PATH}"
-
-pwd
-ls
 
 THINX_FILE=$( find . -name "thinx.h" )
 
@@ -289,7 +283,7 @@ case $PLATFORM in
 			# Injects thinx to esp8266/modules in firmware mode. Should also prebuild SPIFFS.
 
 			BUILD_TYPE=$micropython_build_type
-			if [[ $BUILD_TYPE == "firmware" ]];
+			if [[ $BUILD_TYPE == "firmware" ]]; then
 				echo "Build type: firmware" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 			else
@@ -519,6 +513,7 @@ case $PLATFORM in
     ;;
 
 		arduino)
+
 			for FILE in `ls -l`
 				do
 				    if test -d $FILE

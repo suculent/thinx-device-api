@@ -2174,7 +2174,6 @@ var ThinxApp = function() {
     ws.on("message", function incoming(message) {
 
       var object = JSON.parse(message);
-      console.log("WS Message: " + message);
 
       if (typeof(object.logtail) !== "undefined") {
 
@@ -2195,8 +2194,10 @@ var ThinxApp = function() {
         });
 
       } else {
-        console.log("» Websocketparser said: unknown message: " +
-          JSON.stringify(message));
+        var m = JSON.stringify(message);
+        if (m != "{}") {
+          console.log("» Websocketparser said: unknown message: " + m);
+        }
       }
     });
 
