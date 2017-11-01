@@ -8,8 +8,8 @@
   "build_id": "test_build_id",
   "email": "cimrman@thinx.cloud",
   "test_info": {
-    "first_name": "Custom",
-    "last_name": "Custom",
+    "first_name": "Jasmine",
+    "last_name": "Test",
     "mobile_phone": "+420603861240",
     "notifications": {
       "all": false,

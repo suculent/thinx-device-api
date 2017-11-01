@@ -7,8 +7,8 @@
   "ak": "4fe12206cd56393162f0f9ac924a1f92d2a36420b761cacfd2524df4b574bd9d",
   "build_id": "test_build_id",
   "test_info": {
-    "first_name": "Custom",
-    "last_name": "Custom",
+    "first_name": "Jasmine",
+    "last_name": "Test",
     "mobile_phone": "+420603861240",
     "notifications": {
       "all": false,

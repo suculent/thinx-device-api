@@ -707,7 +707,7 @@ R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "info" : { "first_name" : "Custom", "last_name" : "Custom", "mobile_phone" : "+420603861240", "notifications": { "all" : false, "important" : false, "info" : false }, "security" : { "unique_api_keys" : true } } }' \
+-d '{ "info" : { "first_name" : "Bash", "last_name" : "Test", "mobile_phone" : "+420603861240", "notifications": { "all" : false, "important" : false, "info" : false }, "security" : { "unique_api_keys" : true } } }' \
 http://$HOST:7442/api/user/profile)
 
 SUCCESS=$(echo $R | jq .success)
