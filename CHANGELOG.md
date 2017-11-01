@@ -2,7 +2,7 @@
 
 ## CHANGELOG
 
-31/10/2017: 0.9.2520 - passing tests for PlatformIO/Arduino builds
+31/10/2017: 0.9.2540 - passing tests for PlatformIO/Arduino builds; optimized build speed for ESP8266/ESP32; firmware update offer testing positive
 
 30/10/2017: 0.9.2484 - major update in Arduino library (working with/without WiFiManager, added working callback, added owner ID setting to captive portal); secondary test implementation also works (EAV)
 
