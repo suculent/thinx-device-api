@@ -974,6 +974,7 @@ var ThinxApp = function() {
     }
     console.log("Update with OTT: " + ott);
     device.ott_update(ott, function(success, response) {
+      res.set("Connection", "close");
       respond(res, response);
     });
   });
@@ -2329,6 +2330,8 @@ var ThinxApp = function() {
   function respond(res, object) {
 
     if (typeOf(object) == "buffer") {
+      console.log("Sending buffer: ");
+      console.log(object);
       res.end(object);
 
     } else if (typeOf(object) == "string") {
