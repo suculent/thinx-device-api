@@ -2332,7 +2332,7 @@ var ThinxApp = function() {
     if (typeOf(object) == "buffer") {
       console.log("Sending buffer: ");
       console.log(object);
-      res.send(object);
+      res.end(object);
 
     } else if (typeOf(object) == "string") {
       res.end(object);

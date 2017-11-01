@@ -2,6 +2,8 @@
 
 ## CHANGELOG
 
+1/11/2017: 0.9.2561 - historically first end-to-end device attempt to fetch firmware for update (ESP8266) using OTT
+
 31/10/2017: 0.9.2540 - passing tests for PlatformIO/Arduino builds; optimized build speed for ESP8266/ESP32; firmware update offer testing positive
 
 30/10/2017: 0.9.2484 - major update in Arduino library (working with/without WiFiManager, added working callback, added owner ID setting to captive portal); secondary test implementation also works (EAV)
