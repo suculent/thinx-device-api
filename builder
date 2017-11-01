@@ -671,13 +671,14 @@ echo "UDID" "${UDID}" | tee -a "${LOG_PATH}"
 echo "SHA" "${SHA}" | tee -a "${LOG_PATH}"
 echo "OWNER_ID" "${OWNER_ID}" | tee -a "${LOG_PATH}"
 echo "STATUS" "${STATUS}" | tee -a "${LOG_PATH}"
+echo "PLATFORM" "${PLATFORM}" | tee -a "${LOG_PATH}"
 
 echo "[THiNX] Log path: $LOG_PATH" | tee -a "${LOG_PATH}"
 
 #cat $LOG_PATH
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
-CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS}"
+CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM}"
 echo "Executing Notifier: " $CMD | tee -a "${LOG_PATH}"
 cd $ORIGIN # go back to application root folder
 RESULT=$(node $THINX_ROOT/notifier.js $CMD)

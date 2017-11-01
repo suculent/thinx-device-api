@@ -82,6 +82,7 @@ var udid = process.argv[7]; // udid address of target device or ANY
 var sha = process.argv[8]; // sha hash of the binary
 var owner = process.argv[9]; // owner_id
 var status = process.argv[10] || true; // build result status
+var platform = process.argv[11] || "unknown"; // build result status
 
 // Validate params
 
@@ -154,6 +155,7 @@ console.log("build_id : " + build_id);
 console.log("commit_id : " + commit_id);
 console.log("version : " + version);
 console.log("outfile/build_path : " + build_path);
+console.log("platform : " + platform);
 console.log("repo_url : " + repo_url);
 console.log("build_path : " + build_path);
 console.log("udid : " + udid);
@@ -218,6 +220,7 @@ devicelib.get(udid, function(err, doc) {
     // Create build envelope
 
     var buildEnvelope = {
+      platform: platform,
       url: repo_url,
       udid: udid,
       commit: commit_id,
