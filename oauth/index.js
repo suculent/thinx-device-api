@@ -2,8 +2,8 @@
 
 const express = require('express');
 const simpleOauthModule = require('simple-oauth2');
-const hd = require('os').homedir();
-const cfg = require('.thinx.json');
+// const hd = require('os').homedir();
+const cfg = require('./.thinx.json');
 const https = require('https');
 
 const app = express();
@@ -64,6 +64,22 @@ app.get('/oauth/cb', (req, res) => {
         // The whole response has been received. Print out the result.
         resp.on('end', () => {
           console.log(JSON.parse(data));
+
+	// Sample data
+	// { id: '1',
+  	// email: 'a@b.c',
+	//  verified_email: true,
+	//  name: 'Matěj Sychra',
+	//  given_name: 'Matěj',
+	//  family_name: 'Sychra',
+  	//  picture: 'https://lh6.googleusercontent.com/-EvPu53ri3zs/AAAAAAAAAAI/AAAAAAAAAA8/YKTOivykmHY/photo.jpg',
+	//  locale: 'en-GB',
+	//  hd: 'syxra.cz' }
+
+	// TODO: extract e-mail, given_name, family_name and picture if any
+	const email = JSON.parse(data).email;
+	// const owner_id = sha256(email);
+
         });
         res.redirect('/oauth/success');
       }).on("error", (err) => {
@@ -89,5 +105,5 @@ app.get('/oauth/', (req, res) => {
 });
 
 app.listen(8444, () => {
-  console.log('Express server started on port 3001'); // eslint-disable-line
+  console.log('Express server started on port 8444'); // eslint-disable-line
 });
