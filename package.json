@@ -73,7 +73,8 @@
     "typeof" : "^1.0.0",
     "uuid" : "^3.0.1",
     "web-push" : "^3.2.2",
-    "ws" : "^3.0.0"
+    "ws" : "^3.0.0",
+    "simple-oauth2" : "*"
   },
   "devDependencies" : {
     "coveralls" : "^2.13.1",
