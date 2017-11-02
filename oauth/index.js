@@ -3,7 +3,7 @@
 const express = require('express');
 const simpleOauthModule = require('simple-oauth2');
 const hd = require('os').homedir();
-const cfg = require(hd + '/.thinx.json');
+const cfg = require('.thinx.json');
 const https = require('https');
 
 const app = express();
