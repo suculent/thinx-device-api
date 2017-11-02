@@ -180,6 +180,9 @@ var ThinxApp = function() {
   }
 
   /*
+
+  // Vault server must be started, initialized and root token to unseal key must be known
+
   // Database access
   // ./vault write secret/password value=13fd9bae19f4daffa17b34f05dbd9eb8281dce90 owner=test revoked=false
   // Vault init & unseal:
@@ -194,7 +197,7 @@ var ThinxApp = function() {
   // get new instance of the client
   var vault = require("node-vault")(options);
 
-  // init vault server
+  // init vault server and use it to store secret information (user password or similar key, and/or device location)
   vault.init({
   		secret_shares: 1,
   		secret_threshold: 1
@@ -210,6 +213,11 @@ var ThinxApp = function() {
   		})
   	})
   	.catch(console.error);
+
+  vault.write('secret/hello', { value: 'world', lease: '1s' })
+    .then( () => vault.read('secret/hello'))
+    .then( () => vault.delete('secret/hello'))
+    .catch(console.error);
 
   */
 
@@ -1146,8 +1154,11 @@ var ThinxApp = function() {
 
     var owner = req.session.owner;
     var wrapper = req.body.build;
-
-    builder.build(owner, wrapper, function(success, response) {
+    var notifiers = {
+      messenger: messenger,
+      websocket: _ws
+    };
+    builder.build(owner, wrapper, notifiers, function(success, response) {
       respond(res, response);
     });
   });
