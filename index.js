@@ -1684,10 +1684,7 @@ var ThinxApp = function() {
       // Exit when user is marked as deleted but not destroyed yet
       var deleted = user_data.deleted;
       if ((typeof(deleted) !== "undefined") && (deleted === true)) {
-        respond(res, {
-          status: "user_not_found",
-          success: false
-        });
+        failureResponse(res, 403, "User account deactivated.");
         return;
       }
 
