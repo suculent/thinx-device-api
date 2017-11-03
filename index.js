@@ -2174,19 +2174,19 @@ var ThinxApp = function() {
 
               } else {
 
-                res.redirect("https://rtm.rhinx.cloud:7443/app");
-
-                userlib.atomic("users", "checkin", udoc._id, {
+                userlib.atomic("users", "checkin", owner_id, {
                   last_seen: new Date()
                 }, function(error, response) {
-                  if (err) {
+                  if (error) {
                     console.log("Last-seen update failed: " +
-                      err);
+                      error);
                   } else {
                     alog.log(req.session.owner,
                       "Last seen updated.");
                   }
                 });
+
+                res.redirect("https://rtm.rhinx.cloud:7443/app");
 
               }
             });
