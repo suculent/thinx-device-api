@@ -83,6 +83,9 @@ var ThinxApp = function() {
   var sources = require("./lib/thinx/sources");
   var transfer = require("./lib/thinx/transfer");
 
+  var slack_webhook = app_config.slack_webhook;
+  var thinx_slack = require("slack-notify")(slack_webhook);
+
   var WebSocket = require("ws");
 
   // list of previously discovered attackers
@@ -1676,6 +1679,11 @@ var ThinxApp = function() {
       }
 
       if (user_data === null) {
+        slack.alert({
+          text: "Attempt to login with non-existent user!",
+          username: username,
+          fields: [req.body]
+        });
         console.log("No user data, " + username + " not authorized.");
         failureResponse(res, 403, "unauthorized");
         return;
@@ -1684,7 +1692,7 @@ var ThinxApp = function() {
       // Exit when user is marked as deleted but not destroyed yet
       var deleted = user_data.deleted;
       if ((typeof(deleted) !== "undefined") && (deleted === true)) {
-        failureResponse(res, 403, "user_account_deactivated.");
+        failureResponse(res, 403, "user_account_deactivated");
         return;
       }
 
@@ -2174,9 +2182,9 @@ var ThinxApp = function() {
     if (typeof(req.headers.cookie) !== "undefined") {
       if (cookies.indexOf("x-thx-session") === -1) {
         console.log("» WSS cookies: " + cookies);
-        console.log("» Not authorized using x-thx-session");
-        //wss.close();
-        //return;
+        console.log("» No x-thx-session cookie found in: " + JSON.stringify(req.headers.cookie));
+        wss.close();
+        return;
       }
       if (typeof(req.session) !== "undefined") {
         console.log("Session: " + JSON.stringify(req.session));
@@ -2188,6 +2196,9 @@ var ThinxApp = function() {
     };
 
     ws.on("message", function incoming(message) {
+
+      // skip empty messages
+      if (message == "{}") return;
 
       var object = JSON.parse(message);
 
