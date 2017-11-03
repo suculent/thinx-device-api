@@ -65,20 +65,20 @@ app.get('/oauth/cb', (req, res) => {
         resp.on('end', () => {
           console.log(JSON.parse(data));
 
-	// Sample data
-	// { id: '1',
-  	// email: 'a@b.c',
-	//  verified_email: true,
-	//  name: 'Matěj Sychra',
-	//  given_name: 'Matěj',
-	//  family_name: 'Sychra',
-  	//  picture: 'https://lh6.googleusercontent.com/-EvPu53ri3zs/AAAAAAAAAAI/AAAAAAAAAA8/YKTOivykmHY/photo.jpg',
-	//  locale: 'en-GB',
-	//  hd: 'syxra.cz' }
+          // Sample data
+          // { id: '1',
+          // email: 'a@b.c',
+          //  verified_email: true,
+          //  name: 'Matěj Sychra',
+          //  given_name: 'Matěj',
+          //  family_name: 'Sychra',
+          //  picture: 'https://lh6.googleusercontent.com/-EvPu53ri3zs/AAAAAAAAAAI/AAAAAAAAAA8/YKTOivykmHY/photo.jpg',
+          //  locale: 'en-GB',
+          //  hd: 'syxra.cz' }
 
-	// TODO: extract e-mail, given_name, family_name and picture if any
-	const email = JSON.parse(data).email;
-	// const owner_id = sha256(email);
+          // TODO: extract e-mail, given_name, family_name and picture if any
+          const email = JSON.parse(data).email;
+          // const owner_id = sha256(email);
 
         });
         res.redirect('/oauth/success');
