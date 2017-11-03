@@ -1785,7 +1785,7 @@ var ThinxApp = function() {
           userlib.get(req.session.owner, function(error, udoc) {
 
             if (error) {
-              console.log("owner get error: " + err);
+              console.log("owner get error: " + error);
             } else {
 
               userlib.atomic("users", "checkin", udoc._id, {
@@ -2151,30 +2151,25 @@ var ThinxApp = function() {
 
           // The whole response has been received. Print out the result.
           resp.on('end', () => {
-            console.log("[oauth]" + JSON.parse(data));
 
-            // Sample data
-            // { id: '1',
-            // email: 'a@b.c',
-            //  verified_email: true,
-            //  name: 'Matěj Sychra',
-            //  given_name: 'Matěj',
-            //  family_name: 'Sychra',
-            //  picture: 'https://lh6.googleusercontent.com/-EvPu53ri3zs/AAAAAAAAAAI/AAAAAAAAAA8/YKTOivykmHY/photo.jpg',
-            //  locale: 'en-GB',
-            //  hd: 'syxra.cz' }
+            const odata = JSON.parse(data);
 
-            // TODO: extract e-mail, given_name, family_name and picture if any
-            const email = JSON.parse(data).email;
+            // TODO: Remove
+            console.log("[oauth] response: " + JSON.stringify(odata));
+
+            const email = odata.email;
+            const family_name = odata.family_name;
+            const given_name = odata.given_name;
+            const picture = odata.picture;
+            const locale = odata.locale;
+
             const owner_id = sha256(email);
 
-            //res.redirect('/oauth/success');
-
-            // Make note on user login
+            // Check user and make note on user login
             userlib.get(owner_id, function(error, udoc) {
 
               if (error) {
-                console.log("owner get error: " + err);
+                console.log("oauth owner get error: " + error);
                 res.redirect('/oauth/error');
 
               } else {
