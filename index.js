@@ -2174,9 +2174,7 @@ var ThinxApp = function() {
 
               } else {
 
-                respond(res, {
-                  "redirectURL": "/app"
-                });
+                res.redirect("https://rtm.rhinx.cloud:7443/app");
 
                 userlib.atomic("users", "checkin", udoc._id, {
                   last_seen: new Date()
