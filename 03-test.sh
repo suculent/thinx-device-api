@@ -5,7 +5,7 @@
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
-API_KEY='1e1ed4110359eccce9541e33d0ef444d1f3ebd8fe771b754280cccdfeb3cc4e5'
+API_KEY='dd585cc48af5d04aac66db0699bbc5d7d6bfc77f0ec3f3740952c4b416830db9'
 OWNER_ID='cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12'
 
 DEVICE_ID=a80cc610-4faf-11e7-9a9c-41d4f7ab4083
@@ -38,7 +38,7 @@ R=$(curl -s -c cookies.jar \
 -H "User-Agent: THiNX-Web" \
 -H "Content-Type: application/json" \
 -d '{ "username" : "test", "password" : "tset" }' \
-http://$HOST:7442/api/login)
+http://$HOST:7443/api/login)
 
 # {"redirectURL":"https://thinx.cloud/app"}
 
@@ -334,7 +334,7 @@ R=$(curl -s \
 -H 'Origin: device' \
 -H "User-Agent: THiNX-Client" \
 -H "Content-Type: application/json" \
--d '{ "registration" : { "mac" : "FF:FF:FF:FF:FF:FF", "firmware" : "none", "version" : "2.0.0", "hash" : "hash", "push" : "none", "alias" : "created-by-03-test.sh", "owner": "'${OWNER_ID}'" } }' \
+-d '{ "registration" : { "mac" : "FF:FF:FF:FF:FF:FF", "firmware" : "this-is-a-test-device", "version" : 2, "hash" : "hash", "alias" : "created-by-03-test.sh", "owner": "'${OWNER_ID}'" } }' \
 http://$HOST:7442/device/register)
 
 # {"success":false,"status":"authentication"}
@@ -394,7 +394,7 @@ else
 	echo_fail $R
 fi
 
-#exit $?
+exit $?
 
 echo
 echo "--------------------------------------------------------------------------------"
