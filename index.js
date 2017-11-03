@@ -1067,7 +1067,7 @@ var ThinxApp = function() {
     });
     respond(res, {
       success: false,
-      "reason": reason
+      "status": reason
     });
   }
 
@@ -1684,7 +1684,7 @@ var ThinxApp = function() {
       // Exit when user is marked as deleted but not destroyed yet
       var deleted = user_data.deleted;
       if ((typeof(deleted) !== "undefined") && (deleted === true)) {
-        failureResponse(res, 403, "User account deactivated.");
+        failureResponse(res, 403, "user_account_deactivated.");
         return;
       }
 
