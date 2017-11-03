@@ -1,7 +1,7 @@
 {
-  "web" : {
-    "client_id" : "85jH9doJVYapBAzEnTFcouXXX",
-    "client_secret" : "r1N0My4Q4jSNIoMM21E1GXdPd8gcgMWF5RNNsgnt3j5rSgTXXX",
-    "redirect_uris" : "http://thinx.cloud:8444/oauth/cb"
+  "web": {
+    "client_id": "85jH9doJVYapBAzEnTFcouXXX",
+    "client_secret": "r1N0My4Q4jSNIoMM21E1GXdPd8gcgMWF5RNNsgnt3j5rSgTXXX",
+    "redirect_uris": "https://thinx.cloud:7443/oauth/cb"
   }
 }

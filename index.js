@@ -2174,6 +2174,8 @@ var ThinxApp = function() {
 
               } else {
 
+                console.log(JSON.stringify(udoc));
+
                 userlib.atomic("users", "checkin", owner_id, {
                   last_seen: new Date()
                 }, function(error, response) {
@@ -2189,10 +2191,17 @@ var ThinxApp = function() {
                 req.session.owner = owner_id;
                 req.session.username = udoc.username;
 
-                req.session.cookie.secure = true;
+                // req.session.cookie.secure = true;
+
                 req.session.cookie.expires = new Date(Date.now() +
                   fortnight, "isoDate");
                 req.session.cookie.maxAge = fortnight;
+
+                req.cookie("x-thx-session-expire", fortnight, {
+                  maxAge: fortnight,
+                  httpOnly: false
+                });
+
                 res.cookie("x-thx-session-expire", fortnight, {
                   maxAge: fortnight,
                   httpOnly: false
@@ -2218,15 +2227,8 @@ var ThinxApp = function() {
     });
   });
 
-  // May deprecate... is rediret to /app
-  app.get('/oauth/success', (req, res) => {
-    respond(res, {
-      "redirectURL": "/app"
-    });
-  });
-
   app.get('/oauth/error', (req, res) => {
-    res.send('error');
+    res.send('OAuth error');
   });
 
   /*
