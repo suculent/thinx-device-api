@@ -60,7 +60,7 @@ var ThinxApp = function() {
   //
 
   const simpleOauthModule = require('simple-oauth2');
-  const cfg = require('conf/google-oauth.json');
+  const cfg = require('./conf/google-oauth.json');
   const oauth2 = simpleOauthModule.create({
     client: {
       id: cfg.web.client_id,
@@ -2109,7 +2109,7 @@ var ThinxApp = function() {
   });
 
 
-  /* 
+  /*
    * OAuth 2 with Google
    */
 
