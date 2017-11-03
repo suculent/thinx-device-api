@@ -1601,6 +1601,19 @@ var ThinxApp = function() {
   // Front-end authentication, returns session on valid authentication
   app.post("/api/login", function(req, res) {
 
+    var updateLastSeen = function(doc) {
+
+      userlib.atomic("users", "checkin", doc._id, {
+        last_seen: new Date()
+      }, function(error, response) {
+        if (err) {
+          console.log("Last-seen update failed: " + err);
+        } else {
+          alog.log(owner, "Last seen updated.");
+        }
+      });
+    };
+
     var client_type = "webapp";
     var ua = req.headers["user-agent"];
     var validity = ua.indexOf(client_user_agent);
@@ -1622,6 +1635,71 @@ var ThinxApp = function() {
         }
       });
     }
+
+    // OAuth takeover
+
+    var oauth = req.body.oauth;
+    if (typeof(oauth) !== "undefined") {
+      client.get(oauth, function(err, owner_id) {
+        if (err) {
+          console.log("[oauth] takeover failed");
+          failureResponse(res, 403, "unauthorized");
+        } else {
+          userlib.get("users", owner_id, function(err, doc) {
+
+            if (err) {
+              console.log("Error: " + err.toString());
+              failureResponse(res, 403, "unauthorized");
+              return;
+            }
+
+            updateLastSeen(doc);
+
+            // what if there's no session?
+            //if (typeof(req.session) === "undefined") {
+            req.session.owner = doc.owner;
+            console.log("[OID:" + req.session.owner +
+              "] [NEW_SESSION]");
+            req.session.username = doc.username;
+
+            var minute = 60 * 1000;
+            //req.session.cookie.httpOnly = true;
+
+            if (typeof(req.body.remember === "undefined") || (req.body.remember ===
+                0)) {
+              var hour = 3600000;
+              req.session.cookie.expires = new Date(Date.now() + hour, "isoDate");
+              req.session.cookie.maxAge = hour;
+              res.cookie("x-thx-session-expire", req.session.cookie.expires, {
+                maxAge: req.session.cookie.maxAge,
+                httpOnly: false
+              });
+            } else {
+              req.session.cookie.expires = new Date(Date.now() +
+                fortnight, "isoDate");
+              req.session.cookie.maxAge = fortnight;
+              res.cookie("x-thx-session-expire", fortnight, {
+                maxAge: fortnight,
+                httpOnly: false
+              });
+            }
+
+            req.session.cookie.secure = true;
+            //}
+
+            alog.log(req.session.owner, "OAuth User logged in: " +
+              doc.username);
+
+            respond(res, {
+              "redirectURL": "/app"
+            });
+
+          });
+        }
+      });
+    }
+
+    // Username/password authentication
 
     var username = req.body.username;
     var password = sha256(req.body.password);
@@ -1648,19 +1726,6 @@ var ThinxApp = function() {
       req.session.cookie.expires = new Date(Date.now() + fortnight);
       req.session.cookie.maxAge = fortnight;
     }
-
-    var updateLastSeen = function(doc) {
-
-      userlib.atomic("users", "checkin", doc._id, {
-        last_seen: new Date()
-      }, function(error, response) {
-        if (err) {
-          console.log("Last-seen update failed: " + err);
-        } else {
-          alog.log(owner, "Last seen updated.");
-        }
-      });
-    };
 
     if (typeof(username) === "undefined") {
       if (typeof(callback) === "undefined") {
@@ -1729,7 +1794,7 @@ var ThinxApp = function() {
       if (password.indexOf(user_data.password) !== -1) {
 
         // what if there's no session?
-        if (typeof(req.session) !== "undefined") {
+        if (typeof(req.session) === "undefined") {
           req.session.owner = user_data.owner;
           console.log("[OID:" + req.session.owner +
             "] [NEW_SESSION]");
@@ -2140,7 +2205,8 @@ var ThinxApp = function() {
     t.then(res2 => {
       console.log(res2);
 
-      https.get('https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' +
+      https.get(
+        'https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' +
         res2
         .access_token, (resp) => {
           let data = '';
@@ -2191,26 +2257,18 @@ var ThinxApp = function() {
                 req.session.owner = owner_id;
                 req.session.username = udoc.username;
 
-                // req.session.cookie.secure = true;
+                req.session.cookie.secure = true;
 
                 req.session.cookie.expires = new Date(Date.now() +
                   fortnight, "isoDate");
                 req.session.cookie.maxAge = fortnight;
-
-                req.cookie("x-thx-session-expire", fortnight, {
-                  maxAge: fortnight,
-                  httpOnly: false
-                });
-
-                res.cookie("x-thx-session-expire", fortnight, {
-                  maxAge: fortnight,
-                  httpOnly: false
-                });
-
                 alog.log(req.session.owner, "OAuth2 User logged in: " +
                   udoc.username);
 
-                res.redirect("https://rtm.thinx.cloud/app");
+                client.set(res2, owner_id);
+                client.expire(res2, 3600);
+
+                res.redirect("https://rtm.thinx.cloud/app?oauth=" + res2);
 
               }
             });
@@ -2334,7 +2392,8 @@ var ThinxApp = function() {
     if (typeof(req.headers.cookie) !== "undefined") {
       if (cookies.indexOf("x-thx-session") === -1) {
         console.log("» WSS cookies: " + cookies);
-        console.log("» No x-thx-session cookie found in: " + JSON.stringify(req.headers.cookie));
+        console.log("» No x-thx-session cookie found in: " + JSON.stringify(req.headers
+          .cookie));
         wss.close();
         return;
       }
