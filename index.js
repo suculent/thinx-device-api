@@ -1679,7 +1679,7 @@ var ThinxApp = function() {
       }
 
       if (user_data === null) {
-        slack.alert({
+        thinx_slack.alert({
           text: "Attempt to login with non-existent user!",
           username: username,
           fields: [req.body]
