@@ -2199,7 +2199,7 @@ var ThinxApp = function() {
                 });
 
                 alog.log(req.session.owner, "OAuth2 User logged in: " +
-                  username);
+                  udoc.username);
 
                 res.redirect("https://rtm.thinx.cloud/app");
 
