@@ -2186,7 +2186,22 @@ var ThinxApp = function() {
                   }
                 });
 
-                res.redirect("https://rtm.rhinx.cloud:7443/app");
+                req.session.owner = owner_id;
+                req.session.username = udoc.username;
+
+                req.session.cookie.secure = true;
+                req.session.cookie.expires = new Date(Date.now() +
+                  fortnight, "isoDate");
+                req.session.cookie.maxAge = fortnight;
+                res.cookie("x-thx-session-expire", fortnight, {
+                  maxAge: fortnight,
+                  httpOnly: false
+                });
+
+                alog.log(req.session.owner, "OAuth2 User logged in: " +
+                  username);
+
+                res.redirect("https://rtm.thinx.cloud/app");
 
               }
             });
