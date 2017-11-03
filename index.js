@@ -1638,8 +1638,8 @@ var ThinxApp = function() {
 
     // OAuth takeover
 
-    var oauth = req.body.oauth;
-    if (typeof(oauth) !== "undefined") {
+    const oauth = req.body.oauth;
+    if ((typeof(oauth) !== "undefined") && (oauth !== NULL)) {
       client.get(oauth, function(err, owner_id) {
         if (err) {
           console.log("[oauth] takeover failed");
@@ -1701,6 +1701,7 @@ var ThinxApp = function() {
 
     // Username/password authentication
 
+
     var username = req.body.username;
     var password = sha256(req.body.password);
 
@@ -1716,6 +1717,7 @@ var ThinxApp = function() {
         }
       });
     }
+
 
     if (typeof(req.body.remember === "undefined") || (req.body.remember ===
         0)) {
@@ -1734,6 +1736,7 @@ var ThinxApp = function() {
         callback(false, "login_failed");
       }
     }
+
 
     userlib.view("users", "owners_by_username", {
       "key": username,
@@ -1793,8 +1796,8 @@ var ThinxApp = function() {
       // TODO: Second option (direct compare) will deprecate soon.
       if (password.indexOf(user_data.password) !== -1) {
 
-        // what if there's no session?
-        if (typeof(req.session) === "undefined") {
+        // what if there's NEW session?
+        if (typeof(req.session) !== "undefined") {
           req.session.owner = user_data.owner;
           console.log("[OID:" + req.session.owner +
             "] [NEW_SESSION]");
