@@ -1602,12 +1602,11 @@ var ThinxApp = function() {
   app.post("/api/login", function(req, res) {
 
     var updateLastSeen = function(doc) {
-
       userlib.atomic("users", "checkin", doc._id, {
         last_seen: new Date()
       }, function(error, response) {
-        if (err) {
-          console.log("Last-seen update failed: " + err);
+        if (error) {
+          console.log("Last-seen update failed: " + error);
         } else {
           alog.log(owner, "Last seen updated.");
         }
