@@ -1638,7 +1638,10 @@ var ThinxApp = function() {
 
     // OAuth takeover
 
+    console.log("login body: " + JSON.stringify(req.body));
+
     const oauth = req.body.oauth;
+
     if ((typeof(oauth) !== "undefined") && (oauth !== NULL)) {
       console.log("[oauth] logging with token: " + oauth);
       client.get(oauth, function(err, owner_id) {
@@ -1646,6 +1649,7 @@ var ThinxApp = function() {
           console.log("[oauth] takeover failed");
           failureResponse(res, 403, "unauthorized");
         } else {
+          console.log("[oauth] fetching owner: " + owner_id);
           userlib.get("users", owner_id, function(err, doc) {
 
             if (err) {
@@ -1694,9 +1698,11 @@ var ThinxApp = function() {
             respond(res, {
               "redirectURL": "/app"
             });
+            return;
 
           });
         }
+        return;
       });
       return;
     }
