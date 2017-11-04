@@ -1642,7 +1642,7 @@ var ThinxApp = function() {
 
     const oauth = req.body.token;
 
-    if ((typeof(oauth) !== "undefined") && (oauth !== NULL)) {
+    if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
       console.log("[oauth] logging with token: " + oauth);
       client.get(oauth, function(err, owner_id) {
         if (err) {
