@@ -1650,7 +1650,8 @@ var ThinxApp = function() {
           failureResponse(res, 403, "unauthorized");
         } else {
           console.log("[oauth] fetching owner: " + owner_id);
-          userlib.get("users", owner_id, function(err, doc) {
+
+          userlib.get(owner_id, function(err, doc) {
 
             if (err) {
               console.log("Error: " + err.toString());
