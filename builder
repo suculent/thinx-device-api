@@ -543,6 +543,9 @@ case $PLATFORM in
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 				docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/arduino-docker-build | tee -a "${LOG_PATH}"
 				RESULT=$?
+
+				# TODO: Check for firmware.bin! Result is of tee (probably)
+
 				if [[ $RESULT == 0 ]] ; then
 					BUILD_SUCCESS=true
 					echo " "
@@ -661,6 +664,9 @@ pwd | tee -a "${LOG_PATH}"
 
 echo "DP" $DISPLAY_DEPLOYMENT_PATH | tee -a "${LOG_PATH}"
 
+# add THINX_FIRMWARE_VERSION to the build.json envelope in order to differ between upgrades and crossgrades
+THINX_FIRMWARE_VERSION=$(jq "./thinx_build.json" .THINX_FIRMWARE_VERSION)
+
 echo "BUILD_ID" "${BUILD_ID}" | tee -a "${LOG_PATH}"
 echo "COMMIT" "${COMMIT}" | tee -a "${LOG_PATH}"
 echo "VERSION" "${VERSION}" | tee -a "${LOG_PATH}"
@@ -672,13 +678,14 @@ echo "SHA" "${SHA}" | tee -a "${LOG_PATH}"
 echo "OWNER_ID" "${OWNER_ID}" | tee -a "${LOG_PATH}"
 echo "STATUS" "${STATUS}" | tee -a "${LOG_PATH}"
 echo "PLATFORM" "${PLATFORM}" | tee -a "${LOG_PATH}"
+echo "THINX_FIRMWARE_VERSION" "${THINX_FIRMWARE_VERSION}" | tee -a "${LOG_PATH}"
 
 echo "[THiNX] Log path: $LOG_PATH" | tee -a "${LOG_PATH}"
 
 #cat $LOG_PATH
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
-CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM}"
+CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION}"
 echo "Executing Notifier: " $CMD | tee -a "${LOG_PATH}"
 cd $ORIGIN # go back to application root folder
 RESULT=$(node $THINX_ROOT/notifier.js $CMD)

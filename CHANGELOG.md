@@ -2,6 +2,8 @@
 
 ## CHANGELOG
 
+4/11/2017: - Working Google+ login with creating new users on-the-fly; THiNXLib: Push Config (with callback), MDNS support for local proxy query and public MQTT methods.
+
 3/11/2017: - Arduino builder: custom libraries from lib folder next to .ino file are now copied to libraries as installed by library manager, overwriting manager libraries installed using thinx.yml; Arduino library: updated for easy developer UX; universal OAuth support for UI
 
 2/11/2017: 0.9.2562 - starting with Google+ OAuth2 implementation (via @PexMor); even faster platformio builds (via @IvanKravets)

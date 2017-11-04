@@ -83,6 +83,7 @@ var sha = process.argv[8]; // sha hash of the binary
 var owner = process.argv[9]; // owner_id
 var status = process.argv[10] || true; // build result status
 var platform = process.argv[11] || "unknown"; // build result status
+var thinx_firmware_version = process.argv[12] || "unknown-1.0.0"; // build result status
 
 // Validate params
 
@@ -161,6 +162,8 @@ console.log("build_path : " + build_path);
 console.log("udid : " + udid);
 console.log("sha : " + sha);
 console.log("status : " + status);
+console.log("thinx_firmware_version : " + thinx_firmware_version);
+
 
 var blog = require("./lib/thinx/buildlog");
 
@@ -225,6 +228,7 @@ devicelib.get(udid, function(err, doc) {
       udid: udid,
       commit: commit_id,
       version: version,
+      firmware: thinx_firmware_version,
       checksum: sha,
       build_id: build_id,
       owner: owner,
