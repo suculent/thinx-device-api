@@ -1608,7 +1608,7 @@ var ThinxApp = function() {
         if (error) {
           console.log("Last-seen update failed: " + error);
         } else {
-          alog.log(owner, "Last seen updated.");
+          alog.log(doc._id, "Last seen updated.");
         }
       });
     };
