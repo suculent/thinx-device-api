@@ -2268,10 +2268,10 @@ var ThinxApp = function() {
                 alog.log(req.session.owner, "OAuth2 User logged in: " +
                   udoc.username);
 
-                client.set(res2, owner_id);
-                client.expire(res2, 3600);
+                client.set(res2.access_token, owner_id);
+                client.expire(res2.access_token, 3600);
 
-                res.redirect("https://rtm.thinx.cloud/app?oauth=" + res2);
+                res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + res2.access_token);
 
               }
             });
