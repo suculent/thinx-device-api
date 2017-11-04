@@ -1643,18 +1643,58 @@ var ThinxApp = function() {
 
     if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
       console.log("[oauth] logging with token: " + oauth);
-      client.get(oauth, function(err, owner_id) {
+      client.get(oauth, function(err, userWrapper) {
         if (err) {
           console.log("[oauth] takeover failed");
           failureResponse(res, 403, "unauthorized");
         } else {
+
+          var wrapper = JSON.parse(userWrapper);
+          const owner_id = wrapper.owner_id;
+
           console.log("[oauth] fetching owner: " + owner_id);
 
           userlib.get(owner_id, function(err, doc) {
 
             if (err) {
-              console.log("Error: " + err.toString());
-              failureResponse(res, 403, "unauthorized");
+
+              //
+              // Support for creating accounts to non-existent e-mails automatically
+              //
+
+              console.log("[oauth] owner_id not found, creating: " + owner_id);
+              user.create(wrapper, function(success, status) {
+
+                console.log("Result creating OAuth user:");
+                console.log(success, status);
+
+                req.session.owner = wrapper.owner_id;
+                console.log("[OID:" + req.session.owner +
+                  "] [NEW_SESSION] [oauth]");
+                req.session.username = wrapper.owner_id;
+
+                var minute = 60 * 1000;
+
+                //req.session.cookie.httpOnly = true;
+
+                req.session.cookie.expires = new Date(Date.now() +
+                  fortnight, "isoDate");
+                req.session.cookie.maxAge = fortnight;
+                res.cookie("x-thx-session-expire", fortnight, {
+                  maxAge: fortnight,
+                  httpOnly: false
+                });
+
+                req.session.cookie.secure = true;
+
+                alog.log(req.session.owner, "OAuth User created: " +
+                  wrapper.first_name + " " + wrapper.last_name);
+
+                respond(res, {
+                  "redirectURL": "/app"
+                });
+              });
+
               return;
             }
 
@@ -2278,7 +2318,14 @@ var ThinxApp = function() {
                 alog.log(req.session.owner, "OAuth2 User logged in: " +
                   udoc.username);
 
-                client.set(res2.access_token, owner_id);
+                var userWrapper = {
+                  first_name: given_name,
+                  last_name: family_name,
+                  email: email,
+                  owner_id: owner_id
+                };
+
+                client.set(res2.access_token, JSON.stringify(userWrapper));
                 client.expire(res2.access_token, 3600);
 
                 res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + res2.access_token);
