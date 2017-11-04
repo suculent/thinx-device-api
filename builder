@@ -266,7 +266,7 @@ LANGUAGE_NAME=$(language_name $LANGUAGE)
 echo "[builder.sh] Building for platform '${PLATFORM}' in language '${LANGUAGE_NAME}'..." | tee -a "${LOG_PATH}"
 
 SHA="0x00000000"
-OUTFILE="<failed>"
+OUTFILE="<none>"
 BUILD_SUCCESS=false
 
 # If running inside Docker, we'll start builders as siblings
@@ -289,35 +289,16 @@ case $PLATFORM in
 			# Injects thinx to esp8266/modules in firmware mode. Should also prebuild SPIFFS.
 
 			BUILD_TYPE=$micropython_build_type
-			if [[ $BUILD_TYPE == "firmware" ]]; then
-				echo "Build type: firmware" | tee -a "${LOG_PATH}"
-				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
-			else
+			if [[ $BUILD_TYPE == "file" ]]; then
 				echo "Build type: file" | tee -a "${LOG_PATH}"
-				OUTFILE=${DEPLOYMENT_PATH}/boot.py # there is more files here!
+				OUTFILE=${DEPLOYMENT_PATH}/boot.py
+				cp -vf *.py ${DEPLOYMENT_PATH} # copy all .py files without building
+			else
+				echo "Build type: firmware (or undefined)" | tee -a "${LOG_PATH}"
+				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 			fi
 
 			OUTPATH=${DEPLOYMENT_PATH}
-
-			#echo "Micropython Build: Cleaning SPIFFS folder..." | tee -a "${LOG_PATH}"
-			#if [ -f ${DEPLOYMENT_PATH}/local/fs/* ]; then
-			#	echo "Cleaning local/fs" | tee -a "${LOG_PATH}"
-			#	# rm -rf ${DEPLOYMENT_PATH}/local/fs/** # cleanup first
-			#fi
-
-			#CONFIG_PATH="./local/fs/thinx.json"
-
-			#if [ -f $CONFIG_PATH ]; then
-			#	echo "Micropython Build: Deconfiguring..." | tee -a "${LOG_PATH}"
-			#	rm -rf $CONFIG_PATH
-			#fi
-
-			#echo "Micropython Build: Configuring..." | tee -a "${LOG_PATH}"
-			#mv "./thinx_build.json" $CONFIG_PATH
-
-			#UPY_FILES=$(find . -name "*.py" -maxdepth 1)
-			#echo "Micropython Build: UPY_FILES:" | tee -a "${LOG_PATH}"
-			#echo ${UPY_FILES} | tee -a "${LOG_PATH}"
 
 			echo "Micropython Build: Customizing firmware..." | tee -a "${LOG_PATH}"
 
@@ -387,12 +368,12 @@ case $PLATFORM in
 			fi
 
 			BUILD_TYPE=$nodemcu_build_type
-			if [[ $BUILD_TYPE == "firmware" ]]; then
-				echo "Build type: firmware" | tee -a "${LOG_PATH}"
-				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
-			else
+			if [[ $BUILD_TYPE == "file" ]]; then
 				echo "Build type: file" | tee -a "${LOG_PATH}"
-				OUTFILE=${DEPLOYMENT_PATH}/thinx.lua # there is more files here!
+				OUTFILE=${DEPLOYMENT_PATH}/thinx.lua
+			else
+				echo "Build type: firmware (or undefined)" | tee -a "${LOG_PATH}"
+				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 			fi
 
 			OUTPATH=${DEPLOYMENT_PATH}
@@ -442,7 +423,7 @@ case $PLATFORM in
 
 			else
 				# deploy Lua files without building
-				cp -vf "${luafile}" "$DEPLOYMENT_PATH"
+				cp -vf *.lua "$DEPLOYMENT_PATH"
 			fi
 
 			if [[ $? == 0 ]] ; then
@@ -691,7 +672,7 @@ cd $ORIGIN # go back to application root folder
 RESULT=$(node $THINX_ROOT/notifier.js $CMD)
 echo -e "${RESULT}" | tee -a "${LOG_PATH}"
 
-# Upgrade Platformio in case new version is available
+# Upgrade Platformio in case new version is available (useless until commits its docker image)
 #if [[ $RESULT == "*platformio upgrade*" ]]; then
 		# echo "Auto-updating platformio..."
 		#platformio upgrade > /dev/null
