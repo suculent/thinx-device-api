@@ -1640,6 +1640,7 @@ var ThinxApp = function() {
 
     const oauth = req.body.oauth;
     if ((typeof(oauth) !== "undefined") && (oauth !== NULL)) {
+      console.log("[oauth] logging with token: " + oauth);
       client.get(oauth, function(err, owner_id) {
         if (err) {
           console.log("[oauth] takeover failed");
@@ -1659,7 +1660,7 @@ var ThinxApp = function() {
             //if (typeof(req.session) === "undefined") {
             req.session.owner = doc.owner;
             console.log("[OID:" + req.session.owner +
-              "] [NEW_SESSION]");
+              "] [NEW_SESSION] [oauth]");
             req.session.username = doc.username;
 
             var minute = 60 * 1000;
@@ -1697,6 +1698,7 @@ var ThinxApp = function() {
           });
         }
       });
+      return;
     }
 
     // Username/password authentication
@@ -2233,6 +2235,8 @@ var ThinxApp = function() {
             const locale = odata.locale;
 
             const owner_id = sha256(email);
+
+            console.log("[oauth] searching for owner_id: " + owner_id);
 
             // Check user and make note on user login
             userlib.get(owner_id, function(error, udoc) {
