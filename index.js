@@ -1643,10 +1643,15 @@ var ThinxApp = function() {
 
     if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
       console.log("[oauth] logging with token: " + oauth);
+
       client.get(oauth, function(err, userWrapper) {
+
         if (err) {
+
           console.log("[oauth] takeover failed");
           failureResponse(res, 403, "unauthorized");
+          return;
+
         } else {
 
           var wrapper = JSON.parse(userWrapper);
@@ -2331,10 +2336,12 @@ var ThinxApp = function() {
                 owner_id: owner_id
               };
 
-              client.set(res2.access_token, JSON.stringify(userWrapper));
-              client.expire(res2.access_token, 3600);
+              var token = sha256(res2.access_token);
 
-              res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + res2.access_token);
+              client.set(token, JSON.stringify(userWrapper));
+              client.expire(token, 3600);
+
+              res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
 
               // }
             });
