@@ -2291,52 +2291,52 @@ var ThinxApp = function() {
 
                 if (error.indexOf("Error: deleted") != -1) {
                   console.log("[oauth] user account already deleted");
-                  res.redirect('/oauth/account-deleted');
+                  // res.redirect('/oauth/account-deleted');
                 } else {
                   console.log("oauth owner get error: " + error);
                   res.redirect('/oauth/error');
                 }
 
-              } else {
+              } //else {
 
-                console.log(JSON.stringify(udoc));
+              console.log(JSON.stringify(udoc));
 
-                userlib.atomic("users", "checkin", owner_id, {
-                  last_seen: new Date()
-                }, function(error, response) {
-                  if (error) {
-                    console.log("Last-seen update failed: " +
-                      error);
-                  } else {
-                    alog.log(req.session.owner,
-                      "Last seen updated.");
-                  }
-                });
+              userlib.atomic("users", "checkin", owner_id, {
+                last_seen: new Date()
+              }, function(error, response) {
+                if (error) {
+                  console.log("Last-seen update failed: " +
+                    error);
+                } else {
+                  alog.log(req.session.owner,
+                    "Last seen updated.");
+                }
+              });
 
-                req.session.owner = owner_id;
-                req.session.username = udoc.username;
+              req.session.owner = owner_id;
+              req.session.username = udoc.username;
 
-                req.session.cookie.secure = true;
+              req.session.cookie.secure = true;
 
-                req.session.cookie.expires = new Date(Date.now() +
-                  fortnight, "isoDate");
-                req.session.cookie.maxAge = fortnight;
-                alog.log(req.session.owner, "OAuth2 User logged in: " +
-                  udoc.username);
+              req.session.cookie.expires = new Date(Date.now() +
+                fortnight, "isoDate");
+              req.session.cookie.maxAge = fortnight;
+              alog.log(req.session.owner, "OAuth2 User logged in: " +
+                udoc.username);
 
-                var userWrapper = {
-                  first_name: given_name,
-                  last_name: family_name,
-                  email: email,
-                  owner_id: owner_id
-                };
+              var userWrapper = {
+                first_name: given_name,
+                last_name: family_name,
+                email: email,
+                owner_id: owner_id
+              };
 
-                client.set(res2.access_token, JSON.stringify(userWrapper));
-                client.expire(res2.access_token, 3600);
+              client.set(res2.access_token, JSON.stringify(userWrapper));
+              client.expire(res2.access_token, 3600);
 
-                res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + res2.access_token);
+              res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + res2.access_token);
 
-              }
+              // }
             });
 
           });
@@ -2353,6 +2353,61 @@ var ThinxApp = function() {
 
   app.get('/oauth/error', (req, res) => {
     res.send('OAuth error');
+  });
+
+  /*
+   * thinx-connect gateway validation (device calls /lick with its mac and must receive its api key)
+   * therefore gateway must be authenticated as well by an api key!
+   */
+
+  app.get('/lick', (req, res) => {
+    var mac = req.query.mac;
+    // return last device api key to verify this gateway is valid
+    // search device by mac and return hash of its api key
+
+    // search by mac, return last api key hash
+
+    devicelib.view("devicelib", "devices_by_mac", {
+        key: device.normalizedMAC(reg.query.mac),
+        include_docs: true
+      },
+
+      function(err, body) {
+
+        if (err) {
+          console.log(
+            "Device with this UUID/MAC not found. Seems like new one..."
+          );
+          respond(res, {
+            success: false,
+            status: "device_key_unknown"
+          });
+          return;
+        }
+
+        var _device = require("./lib/thinx/device");
+        console.log("Known device identified by MAC address: " + _device.normalizedMAC(
+          reg.mac));
+
+        if (body.rows.length === 0) {
+          // device not found by mac; this is a new device...
+          respond(res, {
+            success: false,
+            status: "device_not_found"
+          });
+        } else {
+
+          console.log("ROWS:" + JSON.stringify(body.rows));
+
+          // Device should receive hash of its api key but is unable to calculate aes so it will get the key
+          var device = body.rows[0];
+          var lastkey = device.lastkey;
+          respond(res, {
+            success: true,
+            status: lastkey
+          });
+        }
+      });
   });
 
   /*
