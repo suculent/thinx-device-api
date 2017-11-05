@@ -1416,16 +1416,11 @@ var ThinxApp = function() {
     transfer.request(owner, req.body, function(success, response) {
       if (success === false) {
         console.log(response);
-        respond(res, {
-          success: false,
-          status: "transfer_request_failed",
-          error: response
-        });
+        res.redirect(
+          "https://rtm.thinx.cloud/transfer_result.html?success=failed?reason=" +
+          reponse);
       } else {
-        respond(res, {
-          success: true,
-          status: response
-        });
+        res.redirect("https://rtm.thinx.cloud/transfer_result.html?success=true");
       }
     });
   });
@@ -1451,16 +1446,11 @@ var ThinxApp = function() {
     transfer.decline(body, function(success, response) {
       if (success === false) {
         console.log(response);
-        respond(res, {
-          success: false,
-          status: "transfer_decline_failed",
-          error: response
-        });
+        res.redirect(
+          "https://rtm.thinx.cloud/transfer_result.html?success=failed?reason=" +
+          reponse);
       } else {
-        respond(res, {
-          success: true,
-          status: response
-        });
+        res.redirect("https://rtm.thinx.cloud/transfer_result.html?success=true");
       }
     });
   });
@@ -1497,17 +1487,11 @@ var ThinxApp = function() {
 
     transfer.decline(body, function(success, response) {
       if (success === false) {
-        console.log(response);
-        respond(res, {
-          success: false,
-          status: "selective_transfer_decline_failed",
-          error: response
-        });
+        res.redirect(
+          "https://rtm.thinx.cloud/transfer_result.html?success=failed?reason=selective_decline_failed"
+        );
       } else {
-        respond(res, {
-          success: true,
-          status: response
-        });
+        res.redirect("https://rtm.thinx.cloud/transfer_result.html?success=true");
       }
     });
   });
@@ -1533,16 +1517,11 @@ var ThinxApp = function() {
     transfer.accept(body, function(success, response) {
       if (success === false) {
         console.log(response);
-        respond(res, {
-          success: false,
-          status: "transfer_accept_failed",
-          error: response
-        });
+        res.redirect(
+          "https://rtm.thinx.cloud/transfer_result.html?success=failed?reason=" +
+          reponse);
       } else {
-        respond(res, {
-          success: true,
-          status: response
-        });
+        res.redirect("https://rtm.thinx.cloud/transfer_result.html?success=true");
       }
     });
   });
@@ -1580,16 +1559,9 @@ var ThinxApp = function() {
     transfer.accept(req.body, function(success, response) {
       if (success === false) {
         console.log(response);
-        respond(res, {
-          success: false,
-          status: "selective_transfer_accept_failed",
-          error: response
-        });
+        res.redirect("https://rtm.thinx.cloud/transfer_result.html?success=failed");
       } else {
-        respond(res, {
-          success: true,
-          status: response
-        });
+        res.redirect("https://rtm.thinx.cloud/transfer_result.html?success=true");
       }
     });
   });
