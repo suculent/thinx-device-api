@@ -1655,7 +1655,13 @@ var ThinxApp = function() {
         } else {
 
           var wrapper = JSON.parse(userWrapper);
-          const owner_id = wrapper.owner_id;
+
+          console.log("Wrapper: " + userWrapper);
+
+          // Support older wrappers
+          if (typeof(wrapper.owner_id) !== "undefined") {
+            owner_id = wrapper.owner_id;
+          }
 
           console.log("[oauth] fetching owner: " + owner_id);
 
