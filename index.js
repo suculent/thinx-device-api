@@ -1638,8 +1638,9 @@ var ThinxApp = function() {
     // OAuth takeover
 
     console.log("login body: " + req.body);
+    console.log("login body: " + JSON.stringify(req.body));
 
-    const oauth = req.body.token;
+    var oauth = req.body.token;
 
     console.log("token: " + oauth);
 
