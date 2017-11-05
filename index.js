@@ -1639,12 +1639,12 @@ var ThinxApp = function() {
 
     console.log("login body: " + req.body);
 
-    //var body = JSON.parse(body);
-    //console.log("json body: " + body);
+    var body = JSON.parse(body);
+    console.log("json body: " + body);
 
-    const oauth = req.body.token;
+    const oauth = body.token;
 
-    console.log("oauth: " + oauth);
+    console.log("token: " + oauth);
 
     if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
       console.log("[oauth] logging with token: " + oauth);
