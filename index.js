@@ -1760,6 +1760,9 @@ var ThinxApp = function() {
 
     // Username/password authentication
 
+    if (typeof(req.body.password) === "undefined") {
+      return; // no error, just oauth 
+    }
 
     var username = req.body.username;
     var password = sha256(req.body.password);
