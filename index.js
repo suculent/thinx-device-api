@@ -2288,8 +2288,14 @@ var ThinxApp = function() {
             userlib.get(owner_id, function(error, udoc) {
 
               if (error) {
-                console.log("oauth owner get error: " + error);
-                res.redirect('/oauth/error');
+
+                if (error.indexOf("Error: deleted") != -1) {
+                  console.log("[oauth] user account already deleted");
+                  res.redirect('/oauth/account-deleted');
+                } else {
+                  console.log("oauth owner get error: " + error);
+                  res.redirect('/oauth/error');
+                }
 
               } else {
 
