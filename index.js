@@ -1641,6 +1641,8 @@ var ThinxApp = function() {
 
     const oauth = req.body.token;
 
+    console.log("oauth: " + oauth);
+
     if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
       console.log("[oauth] logging with token: " + oauth);
 
@@ -1761,7 +1763,7 @@ var ThinxApp = function() {
     // Username/password authentication
 
     if (typeof(req.body.password) === "undefined") {
-      return; // no error, just oauth 
+      return; // no error, just exit on oauth
     }
 
     var username = req.body.username;
