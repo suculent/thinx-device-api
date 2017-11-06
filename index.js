@@ -35,6 +35,9 @@ var ThinxApp = function() {
     }
   });
 
+  const minute = 60 * 1000;
+  const hour = 3600000;
+
   console.log(" ");
   console.log(" ");
   console.log(" ");
@@ -1609,15 +1612,14 @@ var ThinxApp = function() {
 
     // OAuth takeover
 
-    console.log("login body: " + req.body);
-    console.log("login body: " + JSON.stringify(req.body));
+    console.log("[login] body: " + JSON.stringify(req.body));
 
     var oauth = req.body.token;
 
-    console.log("token: " + oauth);
+    console.log("[login] token: " + oauth);
 
     if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
-      console.log("[oauth] logging with token: " + oauth);
+      console.log("[login] with token: " + oauth);
 
       client.get(oauth, function(err, userWrapper) {
 
@@ -1631,23 +1633,20 @@ var ThinxApp = function() {
 
           var wrapper = JSON.parse(userWrapper);
 
-          console.log("Wrapper: " + userWrapper);
+          console.log("[login] wrapper: " + userWrapper);
 
           // Support older wrappers
           if (typeof(wrapper.owner_id) !== "undefined") {
             owner_id = wrapper.owner_id;
           }
 
-          console.log("[oauth] fetching owner: " + owner_id);
+          console.log("[login] fetching owner: " + owner_id);
 
           userlib.get(owner_id, function(err, doc) {
 
             if (err) {
 
-              //
               // Support for creating accounts to non-existent e-mails automatically
-              //
-
               console.log("[oauth] owner_id not found, creating: " + owner_id);
               user.create(wrapper, function(success, status) {
 
@@ -1681,50 +1680,36 @@ var ThinxApp = function() {
                 });
               });
 
-              return;
-            }
+            } else {
 
-            updateLastSeen(doc);
+              // what if there's no session?
+              //if (typeof(req.session) === "undefined") {
 
-            // what if there's no session?
-            //if (typeof(req.session) === "undefined") {
-            req.session.owner = doc.owner;
-            console.log("[OID:" + req.session.owner +
-              "] [NEW_SESSION] [oauth]");
-            req.session.username = doc.username;
+              console.log("[OID:" + req.session.owner +
+                "] [NEW_SESSION] [oauth]");
 
-            var minute = 60 * 1000;
-            //req.session.cookie.httpOnly = true;
+              req.session.owner = doc.owner;
+              req.session.username = doc.username;
 
-            if (typeof(req.body.remember === "undefined") || (req.body.remember ===
-                0)) {
-              var hour = 3600000;
+
               req.session.cookie.expires = new Date(Date.now() + hour, "isoDate");
               req.session.cookie.maxAge = hour;
               res.cookie("x-thx-session-expire", req.session.cookie.expires, {
                 maxAge: req.session.cookie.maxAge,
                 httpOnly: false
               });
-            } else {
-              req.session.cookie.expires = new Date(Date.now() +
-                fortnight, "isoDate");
-              req.session.cookie.maxAge = fortnight;
-              res.cookie("x-thx-session-expire", fortnight, {
-                maxAge: fortnight,
-                httpOnly: false
+              req.session.cookie.secure = true;
+              //req.session.cookie.httpOnly = true;
+
+              alog.log(req.session.owner, "OAuth User logged in: " +
+                doc.username);
+
+              updateLastSeen(doc);
+              respond(res, {
+                "redirectURL": "/app"
               });
+
             }
-
-            req.session.cookie.secure = true;
-            //}
-
-            alog.log(req.session.owner, "OAuth User logged in: " +
-              doc.username);
-
-            respond(res, {
-              "redirectURL": "/app"
-            });
-            return;
 
           });
         }
