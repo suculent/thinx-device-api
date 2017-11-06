@@ -37,6 +37,8 @@ var ThinxApp = function() {
 
   const minute = 60 * 1000;
   const hour = 3600000;
+  const day = hour * 24;
+  const fortnight = day * 14;
 
   console.log(" ");
   console.log(" ");
@@ -274,10 +276,6 @@ var ThinxApp = function() {
   var redisStore = require("connect-redis")(session);
 
   app.set("trust proxy", 1);
-
-  const hour = 3600000;
-  var day = hour * 24;
-  var fortnight = day * 14;
 
   app.use(session({
     secret: session_config.secret,
