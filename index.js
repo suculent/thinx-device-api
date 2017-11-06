@@ -275,7 +275,7 @@ var ThinxApp = function() {
 
   app.set("trust proxy", 1);
 
-  var hour = 3600000;
+  const hour = 3600000;
   var day = hour * 24;
   var fortnight = day * 14;
 
@@ -1743,7 +1743,6 @@ var ThinxApp = function() {
 
     if (typeof(req.body.remember === "undefined") || (req.body.remember ===
         0)) {
-      var hour = 3600000;
       req.session.cookie.expires = new Date(Date.now() + hour);
       req.session.cookie.maxAge = hour;
     } else {
@@ -1830,7 +1829,6 @@ var ThinxApp = function() {
 
           if (typeof(req.body.remember === "undefined") || (req.body.remember ===
               0)) {
-            var hour = 3600000;
             req.session.cookie.expires = new Date(Date.now() + hour, "isoDate");
             req.session.cookie.maxAge = hour;
             res.cookie("x-thx-session-expire", req.session.cookie.expires, {
