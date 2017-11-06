@@ -2259,7 +2259,7 @@ var ThinxApp = function() {
 
               if (error) {
 
-                if (error.indexOf("Error: deleted") != -1) {
+                if (error.toString().indexOf("Error: deleted") !== -1) {
                   console.log("[oauth] user account already deleted");
                   // res.redirect('/oauth/account-deleted');
                 } else {
