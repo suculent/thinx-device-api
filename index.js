@@ -2277,11 +2277,14 @@ var ThinxApp = function() {
                   console.log("[oauth] user account already deleted");
                   // res.redirect('/oauth/account-deleted');
                 } else {
+
                   // No such owner, create...
                   user.create(userWrapper, function(success, status) {
 
                     console.log("Result creating OAuth user:");
                     console.log(success, status);
+
+                    // TODO: Edit user, set info...
 
                     req.session.owner = userWrapper.owner_id;
                     console.log("[OID:" + req.session.owner +
