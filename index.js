@@ -2252,6 +2252,14 @@ var ThinxApp = function() {
 
             const owner_id = sha256(email);
 
+            var userWrapper = {
+              first_name: given_name,
+              last_name: family_name,
+              email: email,
+              owner_id: owner_id,
+              username: owner_id
+            };
+
             console.log("[oauth] searching for owner_id: " + owner_id);
 
             // Check user and make note on user login
@@ -2263,8 +2271,39 @@ var ThinxApp = function() {
                   console.log("[oauth] user account already deleted");
                   // res.redirect('/oauth/account-deleted');
                 } else {
-                  console.log("oauth owner get error: " + error);
-                  res.redirect('/oauth/error');
+                  // No such owner, create...
+                  user.create(userWrapper, function(success, status) {
+
+                    console.log("Result creating OAuth user:");
+                    console.log(success, status);
+
+                    req.session.owner = owner_id;
+                    console.log("[OID:" + req.session.owner +
+                      "] [NEW_SESSION] [oauth]");
+                    req.session.username = owner_id;
+
+                    var minute = 60 * 1000;
+
+                    //req.session.cookie.httpOnly = true;
+
+                    req.session.cookie.expires = new Date(Date.now() +
+                      fortnight, "isoDate");
+                    req.session.cookie.maxAge = fortnight;
+                    res.cookie("x-thx-session-expire", fortnight, {
+                      maxAge: fortnight,
+                      httpOnly: false
+                    });
+
+                    req.session.cookie.secure = true;
+
+                    alog.log(req.session.owner, "OAuth User created: " +
+                      first_name + " " + last_name);
+
+                    respond(res, {
+                      "redirectURL": "/app"
+                    });
+
+                  });
                 }
 
               } //else {
@@ -2294,13 +2333,6 @@ var ThinxApp = function() {
               alog.log(req.session.owner, "OAuth2 User logged in: " +
                 udoc.username);
 
-              var userWrapper = {
-                first_name: given_name,
-                last_name: family_name,
-                email: email,
-                owner_id: owner_id
-              };
-
               var token = sha256(res2.access_token);
 
               client.set(token, JSON.stringify(userWrapper));
@@ -2318,7 +2350,7 @@ var ThinxApp = function() {
         res.redirect('/oauth/error');
       });
     }).catch(err => {
-      console.log(err);
+      console.log("Oauth error: " + err);
       res.redirect('/oauth/error');
     });
   });
