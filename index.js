@@ -2340,7 +2340,7 @@ var ThinxApp = function() {
                 fortnight, "isoDate");
               req.session.cookie.maxAge = fortnight;
               alog.log(req.session.owner, "OAuth2 User logged in: " +
-                udoc.username);
+                username);
 
               var token = sha256(res2.access_token);
 
