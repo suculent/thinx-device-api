@@ -1654,7 +1654,6 @@ var ThinxApp = function() {
                 req.session.owner = wrapper.owner_id;
                 console.log("[OID:" + req.session.owner +
                   "] [NEW_SESSION] [oauth]");
-                req.session.username = wrapper.owner_id;
 
                 var minute = 60 * 1000;
 
@@ -1687,7 +1686,6 @@ var ThinxApp = function() {
                 "] [NEW_SESSION] [oauth]");
 
               req.session.owner = doc.owner;
-              req.session.username = doc.username;
 
 
               req.session.cookie.expires = new Date(Date.now() + hour, "isoDate");
@@ -1820,7 +1818,6 @@ var ThinxApp = function() {
           req.session.owner = user_data.owner;
           console.log("[OID:" + req.session.owner +
             "] [NEW_SESSION]");
-          req.session.username = user_data.username;
 
           var minute = 60 * 1000;
           //req.session.cookie.httpOnly = true;
@@ -2289,7 +2286,6 @@ var ThinxApp = function() {
                     req.session.owner = userWrapper.owner_id;
                     console.log("[OID:" + req.session.owner +
                       "] [NEW_SESSION] [oauth]");
-                    req.session.username = userWrapper.owner_id;
 
                     var minute = 60 * 1000;
 
@@ -2332,7 +2328,6 @@ var ThinxApp = function() {
               });
 
               req.session.owner = owner_id;
-              req.session.username = userWrapper.username;
 
               req.session.cookie.secure = true;
 
