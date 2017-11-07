@@ -2302,7 +2302,7 @@ var ThinxApp = function() {
                     req.session.cookie.secure = true;
 
                     alog.log(req.session.owner, "OAuth User created: " +
-                      first_name + " " + last_name);
+                      given_name + " " + family_name);
 
                     respond(res, {
                       "redirectURL": "/app"
