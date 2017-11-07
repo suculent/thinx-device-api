@@ -2286,10 +2286,10 @@ var ThinxApp = function() {
                     console.log("Result creating OAuth user:");
                     console.log(success, status);
 
-                    req.session.owner = owner_id;
+                    req.session.owner = userWrapper.owner_id;
                     console.log("[OID:" + req.session.owner +
                       "] [NEW_SESSION] [oauth]");
-                    req.session.username = owner_id;
+                    req.session.username = userWrapper.owner_id;
 
                     var minute = 60 * 1000;
 
@@ -2332,7 +2332,7 @@ var ThinxApp = function() {
               });
 
               req.session.owner = owner_id;
-              req.session.username = udoc.username;
+              req.session.username = userWrapper.username;
 
               req.session.cookie.secure = true;
 
