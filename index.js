@@ -2207,6 +2207,11 @@ var ThinxApp = function() {
 
   // Callback service parsing the authorization token and asking for the access token
   app.get('/oauth/cb', (req, res) => {
+
+    if (typeof(req.session) !== "undefined") {
+      req.session.destroy();
+    }
+
     const code = req.query.code;
     const options = {
       code: code,
@@ -2249,6 +2254,11 @@ var ThinxApp = function() {
             const given_name = odata.given_name;
             const picture = odata.picture;
             const locale = odata.locale;
+
+            if (typeof(email) === "undefined") {
+              console.log("Error: no email in response.");
+              res.redirect('/oauth/error');
+            }
 
             const owner_id = sha256(email);
 
