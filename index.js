@@ -2202,15 +2202,14 @@ var ThinxApp = function() {
   // Initial page redirecting to OAuth2 provider
   app.get('/oauth/google', (req, res) => {
     console.log("[oauth] Redirecting to authorizationUri: " + authorizationUri);
+    if (typeof(req.session) !== "undefined") {
+      req.session.destroy();
+    }
     res.redirect(authorizationUri);
   });
 
   // Callback service parsing the authorization token and asking for the access token
   app.get('/oauth/cb', (req, res) => {
-
-    if (typeof(req.session) !== "undefined") {
-      req.session.destroy();
-    }
 
     const code = req.query.code;
     const options = {
