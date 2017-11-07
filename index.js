@@ -2304,9 +2304,13 @@ var ThinxApp = function() {
                     alog.log(req.session.owner, "OAuth User created: " +
                       given_name + " " + family_name);
 
+                    res.redirect("http://rtm.thinx.cloud/app");
+
+                    /*
                     respond(res, {
                       "redirectURL": "/app"
                     });
+                    */
 
                   });
                 }
