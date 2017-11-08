@@ -234,15 +234,6 @@ fi
 
 echo "[builder.sh] Searching THiNX-File in $BUILD_PATH/$REPO_PATH..." | tee -a "${LOG_PATH}"
 
-THINX_FILE=$( find $BUILD_PATH/$REPO_PATH -name "thinx.h" )
-
-if [[ -z $THINX_FILE ]]; then
-	echo "[builder.sh] No THiNX-File found!" | tee -a "${LOG_PATH}"
-	# exit 1 # will deprecate on modularization for more platforms
-else
-	echo "[builder.sh] Found THiNX-File: ${THINX_FILE}" | tee -a "${LOG_PATH}"
-fi
-
 THINX_CLOUD_URL="thinx.cloud"
 THINX_MQTT_URL="${THINX_CLOUD_URL}"
 
@@ -507,6 +498,16 @@ case $PLATFORM in
 
 		arduino)
 
+
+			THINX_FILE=$( find $BUILD_PATH/$REPO_PATH -name "thinx.h" )
+
+			if [[ -z $THINX_FILE ]]; then
+				echo "[builder.sh] WARNING! No THiNX-File found! in $BUILD_PATH/$REPO_PATH: $THINX_FILE" | tee -a "${LOG_PATH}"
+				# exit 1 # will deprecate on modularization for more platforms
+			else
+				echo "[builder.sh] Found THiNX-File: ${THINX_FILE}" | tee -a "${LOG_PATH}"
+			fi
+
 			for FILE in `ls -l`
 				do
 				    if test -d $FILE
@@ -582,6 +583,15 @@ case $PLATFORM in
 			;;
 
 		platformio)
+
+			THINX_FILE=$( find $BUILD_PATH/$REPO_PATH -name "thinx.h" )
+
+			if [[ -z $THINX_FILE ]]; then
+				echo "[builder.sh] WARNING! No THiNX-File found! in $BUILD_PATH/$REPO_PATH: $THINX_FILE" | tee -a "${LOG_PATH}"
+				# exit 1 # will deprecate on modularization for more platforms
+			else
+				echo "[builder.sh] Found THiNX-File: ${THINX_FILE}" | tee -a "${LOG_PATH}"
+			fi
 
 			if [[ ! -f "./platformio.ini" ]]; then
 				PIO=$(find . -name "platformio.ini")
