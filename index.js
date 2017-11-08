@@ -1251,8 +1251,6 @@ var ThinxApp = function() {
       return;
     }
 
-
-
     blog.list(owner, function(err, body) {
 
       var builds = [];
@@ -1280,6 +1278,7 @@ var ThinxApp = function() {
       for (var bindex in body.rows) {
 
         var row = body.rows[bindex];
+
         //console.log("Build log row: " + JSON.stringify(row));
 
         if (typeof(row.value.log) === "undefined") {
