@@ -2,7 +2,7 @@
 
 ## CHANGELOG
 
-8/11/2017: Bugfixes, stabilizing Arduino builds with new example project. 
+8/11/2017: 0.9.2682: Bugfixes, stabilized (Arduino) builder with new example project. 
 
 7/11/2017: Experimental byte-value transformer for (float) Battery voltages; library update with setStatus support
 
