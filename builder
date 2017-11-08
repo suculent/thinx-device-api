@@ -210,10 +210,10 @@ if [[ ! -d $BUILD_PATH/$REPO_PATH/.git ]]; then
 	ls
 fi
 
-COMMIT=$(git rev-parse HEAD)
+COMMIT=$(cd $BUILD_PATH/$REPO_PATH && git rev-parse HEAD)
 echo "[builder.sh] Fetched commit ID: ${COMMIT}" | tee -a "${LOG_PATH}"
 
-VERSION=$(git rev-list HEAD --count)
+VERSION=$(cd $BUILD_PATH/$REPO_PATH && git rev-list HEAD --count)
 echo "[builder.sh] Repository version/revision: ${VERSION}" | tee -a "${LOG_PATH}"
 
 # Search for thinx.yml
@@ -224,17 +224,17 @@ nodemcu_build_float=true
 micropython_build_type="firmware"
 micropython_platform="esp8266"
 
-if [ -f ./thinx.yml ]; then
+if [ -f $BUILD_PATH/$REPO_PATH/thinx.yml ]; then
 	echo "Found thinx.yml file, reading..." | tee -a "${LOG_PATH}"
-	parse_yaml ./thinx.yml
-	eval $(parse_yaml ./thinx.yml)
+	parse_yaml $BUILD_PATH/$REPO_PATH/thinx.yml
+	eval $(parse_yaml $BUILD_PATH/$REPO_PATH/thinx.yml)
 fi
 
 # Overwrite Thinx.h file (should be required)
 
 echo "[builder.sh] Searching THiNX-File in $BUILD_PATH/$REPO_PATH..." | tee -a "${LOG_PATH}"
 
-THINX_FILE=$( find $BUILD_PATH/$REPO_PATH -maxdepth 10 -name "thinx.h")
+THINX_FILE=$( find $BUILD_PATH/$REPO_PATH -name "thinx.h" )
 
 if [[ -z $THINX_FILE ]]; then
 	echo "[builder.sh] No THiNX-File found!" | tee -a "${LOG_PATH}"
@@ -252,12 +252,12 @@ else
 	THINX_ALIAS="vanilla"
 fi
 
-THX_VERSION="$(git describe --abbrev=0 --tags)"
+THX_VERSION="$(cd $BUILD_PATH/$REPO_PATH && git describe --abbrev=0 --tags)"
 if [[ $? > 0 ]]; then
 	THX_VERSION="1.0"
 fi
 
-REPO_NAME="$(basename $(pwd))"
+REPO_NAME="$(basename $BUILD_PATH/$REPO_PATH )"
 REPO_VERSION="${THX_VERSION}.${VERSION}" # todo: is not semantic at all
 BUILD_DATE=$(date +%Y-%m-%d)
 
@@ -296,7 +296,7 @@ case $PLATFORM in
 			if [[ $BUILD_TYPE == "file" ]]; then
 				echo "Build type: file" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/boot.py
-				cp -vf *.py ${DEPLOYMENT_PATH} # copy all .py files without building
+				cp -vf $WORKDIR/*.py ${DEPLOYMENT_PATH} # copy all .py files without building
 			else
 				echo "Build type: firmware (or undefined)" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
@@ -306,15 +306,17 @@ case $PLATFORM in
 
 			echo "Micropython Build: Customizing firmware..." | tee -a "${LOG_PATH}"
 
+			UPY_FILES=$(find $WORKDIR -name *.py)
+
 			for pyfile in ${UPY_FILES[@]}; do
 				if [[ $BUILD_TYPE == "firmware" ]]; then
-					FSPATH=./$(basename ${pyfile}) # we should already stand in this folder
+					FSPATH=$WORKDIR/$(basename ${pyfile}) # we should already stand in this folder
 					if [[ -f $FSPATH ]]; then
 						rm -rf $FSPATH
 						cp -vf "${pyfile}" $FSPATH
 					fi
 				else
-					cp -vf "${luafile}" "$DEPLOYMENT_PATH"
+					cp -vf "${pyfile}" "$DEPLOYMENT_PATH"
 				fi
 			done
 
