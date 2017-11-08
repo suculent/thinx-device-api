@@ -1,21 +1,21 @@
 {
-  "_id" : "_design/builds",
-  "_rev" : "26-ed89b1f09ed2c2d2c5e17a160e6a77a0",
-  "language" : "javascript",
-  "views" : {
-    "builds_by_build_id" : {
-      "map" : "function (doc) { if(doc.build_id) { emit (doc.build_id, { timestamp: doc.timestamp, udid: doc.udid, message: doc.message, owner: doc.owner, log: doc.log } ); } }"
+  "_id": "_design/builds",
+  "_rev": "26-ed89b1f09ed2c2d2c5e17a160e6a77a0",
+  "language": "javascript",
+  "views": {
+    "builds_by_build_id": {
+      "map": "function (doc) { if(doc.build_id) { emit (doc.build_id, { timestamp: doc.timestamp, udid: doc.udid, message: doc.message, owner: doc.owner, log: doc.log } ); } }"
     },
-    "builds_by_owner" : {
-      "map" : "function (doc) { if(doc.owner) { emit ([doc.timestamp, doc.owner], { timestamp: doc.timestamp, udid: doc.udid, message: doc.message, log: doc.log } ); } }"
+    "builds_by_owner": {
+      "map": "function (doc) { if(doc.owner) { emit ([doc.timestamp, doc.owner], { timestamp: doc.timestamp, udid: doc.udid, message: doc.message, log: doc.log } ); } }"
     },
-    "latest_builds" : {
-      "map" : "function (doc) {emit(doc.last_update,doc)}"
+    "latest_builds": {
+      "map": "function (doc) {emit(doc.last_update,doc)}"
     }
   },
-  "updates" : {
-    "delete_expired" : "function (doc, req) { if (doc.timestamp < req.query.mindate) { doc._deleted = true; return [doc, 'deleted']; } else return [doc, doc._id] }",
-    "log" : "function(doc, req) { doc.log.push(req.body.record); doc.last_update = req.body.record.timestamp; return doc._id; }",
-    "state" : "function(doc, req) { doc.state = req.body.state; return doc._id; }"
+  "updates": {
+    "delete_expired": "function (doc, req) { if (doc.timestamp < req.query.mindate) { doc._deleted = true; return [doc, 'deleted']; } else return [doc, doc._id] }",
+    "log": "function(doc, req) { doc.log.push(req.body.record); doc.last_update = req.body.record.timestamp; return [doc, doc._id]; }",
+    "state": "function(doc, req) { doc.state = req.body.state; return [doc, doc._id]; }"
   }
 }

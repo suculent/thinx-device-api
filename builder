@@ -234,7 +234,7 @@ fi
 
 echo "[builder.sh] Searching THiNX-File in $BUILD_PATH/$REPO_PATH..." | tee -a "${LOG_PATH}"
 
-THINX_FILE=$( find $BUILD_PATH/$REPO_PATH -name "thinx.h" -maxdepth 5)
+THINX_FILE=$( find $BUILD_PATH/$REPO_PATH -maxdepth 10 -name "thinx.h")
 
 if [[ -z $THINX_FILE ]]; then
 	echo "[builder.sh] No THiNX-File found!" | tee -a "${LOG_PATH}"
@@ -401,7 +401,7 @@ case $PLATFORM in
 			echo "NodeMCU Build: Configuring..." | tee -a "${LOG_PATH}"
 			mv "./thinx_build.json" $CONFIG_PATH
 
-			FILES=$(find . -name "*.lua" -maxdepth 1)
+			FILES=$(find . -maxdepth 1 -name "*.lua")
 			echo "NodeMCU Build: FILES:" | tee -a "${LOG_PATH}"
 			echo ${FILES} | tee -a "${LOG_PATH}"
 
