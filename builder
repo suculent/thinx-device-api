@@ -668,7 +668,11 @@ pwd | tee -a "${LOG_PATH}"
 echo "DP" $DISPLAY_DEPLOYMENT_PATH | tee -a "${LOG_PATH}"
 
 # add THINX_FIRMWARE_VERSION to the build.json envelope in order to differ between upgrades and crossgrades
-THINX_FIRMWARE_VERSION=$(jq "./thinx_build.json" .THINX_FIRMWARE_VERSION)
+BUILD_FILE=$( find $BUILD_PATH/$REPO_PATH -name "thinx_build.json" )
+if [[ -z $BUILD_FILE ]]; then
+	BUILD_FILE=$( find $WORKDIR -name "thinx_build.json" )
+fi
+THINX_FIRMWARE_VERSION=$(jq $BUILD_FILE .THINX_FIRMWARE_VERSION)
 
 echo "BUILD_ID" "${BUILD_ID}" | tee -a "${LOG_PATH}"
 echo "COMMIT" "${COMMIT}" | tee -a "${LOG_PATH}"
