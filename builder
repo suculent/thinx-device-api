@@ -205,10 +205,10 @@ fi
 cd $BUILD_PATH/$REPO_PATH && git submodule update --init --recursive
 
 if [[ ! -d $BUILD_PATH/$REPO_PATH/.git ]]; then
-	echo "Not a GIT repository: $(pwd)" | tee -a "${LOG_PATH}"
+	echo "WARNING! Not a GIT repository: $BUILD_PATH/$REPO_PATH/.git" | tee -a "${LOG_PATH}"
+	pwd
+	ls
 fi
-
-cd $BUILD_PATH/$REPO_PATH
 
 COMMIT=$(git rev-parse HEAD)
 echo "[builder.sh] Fetched commit ID: ${COMMIT}" | tee -a "${LOG_PATH}"
