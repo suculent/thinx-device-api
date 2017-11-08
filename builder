@@ -192,28 +192,33 @@ rm -rf $REPO_NAME
 echo "[builder.sh] Cloning ${GIT_REPO}..." | tee -a "${LOG_PATH}"
 cd $BUILD_PATH/$GIT_USER && git clone --quiet --recurse-submodules $GIT_REPO
 
+SINK=""
 if [[ -d $REPO_NAME ]]; then
 	echo "Directory $REPO_NAME exists, entering..." | tee -a "${LOG_PATH}"
 	cd ./$REPO_NAME
+	SINK=$BUILD_PATH/$GIT_USER/$REPO_NAME
+	echo "SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
 	pwd | tee -a "${LOG_PATH}"
 else
 	echo "Directory $REPO_NAME does not exist, entering $REPO_PATH instead..." | tee -a "${LOG_PATH}"
+	SINK=$BUILD_PATH/$GIT_USER/$REPO_PATH
 	cd ./$REPO_PATH
+	echo "SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
 	pwd | tee -a "${LOG_PATH}"
 fi
 
-cd $BUILD_PATH/$REPO_PATH && git submodule update --init --recursive
+cd $SINK && git submodule update --init --recursive
 
-if [[ ! -d $BUILD_PATH/$REPO_PATH/.git ]]; then
+if [[ ! -d $SINK/.git ]]; then
 	echo "WARNING! Not a GIT repository: $BUILD_PATH/$REPO_PATH/.git" | tee -a "${LOG_PATH}"
 	pwd
 	ls
 fi
 
-COMMIT=$(cd $BUILD_PATH/$REPO_PATH && git rev-parse HEAD)
+COMMIT=$(cd $SINK && git rev-parse HEAD)
 echo "[builder.sh] Fetched commit ID: ${COMMIT}" | tee -a "${LOG_PATH}"
 
-VERSION=$(cd $BUILD_PATH/$REPO_PATH && git rev-list HEAD --count)
+VERSION=$(cd $SINK && git rev-list HEAD --count)
 echo "[builder.sh] Repository version/revision: ${VERSION}" | tee -a "${LOG_PATH}"
 
 # Search for thinx.yml
@@ -224,10 +229,11 @@ nodemcu_build_float=true
 micropython_build_type="firmware"
 micropython_platform="esp8266"
 
-if [ -f $BUILD_PATH/$REPO_PATH/thinx.yml ]; then
+YML=$(find $BUILD_PATH/$REPO_PATH -name "thinx.yml")
+if [ -f $YML ]; then
 	echo "Found thinx.yml file, reading..." | tee -a "${LOG_PATH}"
-	parse_yaml $BUILD_PATH/$REPO_PATH/thinx.yml
-	eval $(parse_yaml $BUILD_PATH/$REPO_PATH/thinx.yml)
+	parse_yaml $YML
+	eval $(parse_yaml $YML)
 fi
 
 # Overwrite Thinx.h file (should be required)
@@ -254,7 +260,7 @@ BUILD_DATE=$(date +%Y-%m-%d)
 
 # Build
 
-PLATFORM=$(infer_platform $BUILD_PATH/$REPO_PATH)
+PLATFORM=$(infer_platform $SINK)
 LANGUAGE=$(language_for_platform $PLATFORM)
 LANGUAGE_NAME=$(language_name $LANGUAGE)
 
