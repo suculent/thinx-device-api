@@ -1609,13 +1609,9 @@ var ThinxApp = function() {
 
     // OAuth takeover
 
-    console.log("[login] body: " + JSON.stringify(req.body));
-
     var oauth = req.body.token;
-
-    console.log("[login] token: " + oauth);
-
     if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
+
       console.log("[login] with token: " + oauth);
 
       client.get(oauth, function(err, userWrapper) {
@@ -2219,12 +2215,12 @@ var ThinxApp = function() {
         return res.json('Authentication failed');
       }
 
-      console.log('[oauth] The resulting token: ', result);
+      // console.log('[oauth] The resulting token: ', result);
       const token = oauth2.accessToken.create(result);
       return token;
     });
     t.then(res2 => {
-      console.log(res2);
+      //console.log(res2);
 
       https.get(
         'https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' +
@@ -2242,7 +2238,7 @@ var ThinxApp = function() {
             const odata = JSON.parse(data);
 
             // TODO: Remove
-            console.log("[oauth] response: " + JSON.stringify(odata));
+            //console.log("[oauth] response: " + JSON.stringify(odata));
 
             const email = odata.email;
             const family_name = odata.family_name;
