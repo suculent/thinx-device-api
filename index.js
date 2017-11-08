@@ -2274,9 +2274,20 @@ var ThinxApp = function() {
               if (error) {
 
                 if (error.toString().indexOf("Error: deleted") !== -1) {
-                  console.log("[oauth] user account already deleted");
-                  // res.redirect('/oauth/account-deleted');
+                  // TODO: Redirect to error page with reason
+                  console.log("[oauth] user document deleted");
+                  res.redirect('/oauth/account-doc-deleted');
+                  return;
+
                 } else {
+
+                  if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
+                    true) {
+                    // TODO: Redirect to error page with reason
+                    console.log("[oauth] user account marked as deleted");
+                    res.redirect('/oauth/account-deleted');
+                    return;
+                  }
 
                   // No such owner, create...
                   user.create(userWrapper, function(success, status) {
@@ -2297,10 +2308,6 @@ var ThinxApp = function() {
                     req.session.cookie.expires = new Date(Date.now() +
                       fortnight, "isoDate");
                     req.session.cookie.maxAge = fortnight;
-                    res.cookie("x-thx-session-expire", fortnight, {
-                      maxAge: fortnight,
-                      httpOnly: false
-                    });
 
                     req.session.cookie.secure = true;
 
@@ -2310,7 +2317,7 @@ var ThinxApp = function() {
                     var token = sha256(res2.access_token);
 
                     client.set(token, JSON.stringify(userWrapper));
-                    client.expire(token, 3600);
+                    client.expire(token, 30);
 
                     res.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
                       token);
