@@ -147,8 +147,8 @@ if [[ "$user" == "git" ]]; then
 fi
 
 # make sure to remove trailing git for HTTP URLs as well...
-REPO_PATH=$(echo $REPO_PATH | tr -d '.git')
-REPO_NAME=$(echo $REPO_NAME | tr -d '.git')
+REPO_PATH=${REPO_PATH%.git}
+REPO_NAME=${REPO_NAME%.git}
 
 echo "[builder.sh]   url: $url" | tee -a "${LOG_PATH}"
 echo "[builder.sh]   proto: $proto" | tee -a "${LOG_PATH}"
