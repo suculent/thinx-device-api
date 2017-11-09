@@ -113,7 +113,7 @@ if [[ -f "../lint.txt" ]]; then
 	echo "../lint.txt" | tee -a "${LOG_PATH}"
 fi
 
-echo "Logging to ${LOG_PATH}" | tee -a "${LOG_PATH}"
+echo "[builder.sh] Logging to ${LOG_PATH}" | tee -a "${LOG_PATH}"
 echo "[builder.sh] <b> -=[ ☢ THiNX IoT RTM BUILDER ☢ ]=- </b>" | tee -a "${LOG_PATH}"
 echo "[builder.sh] Starting builder at path ${THINX_ROOT}" | tee -a "${LOG_PATH}"
 echo "[builder.sh] Owner workspace: ${OWNER_ID_HOME}" | tee -a "${LOG_PATH}"
@@ -150,13 +150,13 @@ fi
 REPO_PATH=${REPO_PATH%.git}
 REPO_NAME=${REPO_NAME%.git}
 
-echo "[builder.sh]   url: $url" | tee -a "${LOG_PATH}"
-echo "[builder.sh]   proto: $proto" | tee -a "${LOG_PATH}"
-echo "[builder.sh]   user: $user" | tee -a "${LOG_PATH}"
-echo "[builder.sh]   host: $host" | tee -a "${LOG_PATH}"
-echo "[builder.sh]   port: $port" | tee -a "${LOG_PATH}"
-echo "[builder.sh]   REPO_PATH: $REPO_PATH" | tee -a "${LOG_PATH}"
-echo "[builder.sh]   REPO_NAME: ${REPO_NAME}" | tee -a "${LOG_PATH}"
+echo "[builder.sh] - url: $url" | tee -a "${LOG_PATH}"
+echo "[builder.sh] - proto: $proto" | tee -a "${LOG_PATH}"
+echo "[builder.sh] - user: $user" | tee -a "${LOG_PATH}"
+echo "[builder.sh] - host: $host" | tee -a "${LOG_PATH}"
+echo "[builder.sh] - port: $port" | tee -a "${LOG_PATH}"
+echo "[builder.sh] - REPO_PATH: $REPO_PATH" | tee -a "${LOG_PATH}"
+echo "[builder.sh] - REPO_NAME: ${REPO_NAME}" | tee -a "${LOG_PATH}"
 
 #echo "[builder.sh] Cleaning workspace..."
 
@@ -179,7 +179,7 @@ mkdir -p $BUILD_PATH/$REPO_PATH
 
 # enter git user folder if any
 if [[ -d $GIT_USER ]]; then
-	echo "[builder.sh][DEBUG] Entering git user folder inside workspace ./${GIT_USER}..." | tee -a "${LOG_PATH}"
+	echo "[builder.sh] Entering git user folder inside workspace ./${GIT_USER}..." | tee -a "${LOG_PATH}"
 	cd ./$GIT_USER > /dev/null
 	pwd | tee -a "${LOG_PATH}"
 fi
@@ -194,23 +194,23 @@ cd $BUILD_PATH/$GIT_USER && git clone --quiet --recurse-submodules $GIT_REPO
 
 SINK=""
 if [[ -d $REPO_NAME ]]; then
-	echo "Directory $REPO_NAME exists, entering..." | tee -a "${LOG_PATH}"
+	echo "[builder.sh] Directory $REPO_NAME exists, entering..." | tee -a "${LOG_PATH}"
 	cd ./$REPO_NAME
 	SINK=$BUILD_PATH/$GIT_USER/$REPO_NAME
-	echo "SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
+	echo "[builder.sh] SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
 	pwd | tee -a "${LOG_PATH}"
 else
-	echo "Directory $REPO_NAME does not exist, entering $REPO_PATH instead..." | tee -a "${LOG_PATH}"
+	echo "[builder.sh] Directory $REPO_NAME does not exist, entering $REPO_PATH instead..." | tee -a "${LOG_PATH}"
 	SINK=$BUILD_PATH/$GIT_USER/$REPO_PATH
 	cd ./$REPO_PATH
-	echo "SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
+	echo "[builder.sh] SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
 	pwd | tee -a "${LOG_PATH}"
 fi
 
 cd $SINK && git submodule update --init --recursive
 
 if [[ ! -d $SINK/.git ]]; then
-	echo "WARNING! Not a GIT repository: $BUILD_PATH/$REPO_PATH/.git" | tee -a "${LOG_PATH}"
+	echo "[builder.sh] WARNING! Not a GIT repository: $BUILD_PATH/$REPO_PATH/.git" | tee -a "${LOG_PATH}"
 	pwd
 	ls
 fi
@@ -231,7 +231,7 @@ micropython_platform="esp8266"
 
 YML=$(find $BUILD_PATH/$REPO_PATH -name "thinx.yml")
 if [ -f $YML ]; then
-	echo "Found thinx.yml file, reading..." | tee -a "${LOG_PATH}"
+	echo "[builder.sh] Found thinx.yml file, reading..." | tee -a "${LOG_PATH}"
 	parse_yaml $YML
 	eval $(parse_yaml $YML)
 fi
@@ -277,10 +277,10 @@ else
 	DOCKER_PREFIX=""
 fi
 
-echo "Changing current directory to WORKDIR $WORKDIR..." | tee -a "${LOG_PATH}"
+echo "[builder.sh] Changing current directory to WORKDIR $WORKDIR..." | tee -a "${LOG_PATH}"
 cd $WORKDIR  | tee -a "${LOG_PATH}"
 
-echo "Current work path: $(pwd)" | tee -a "${LOG_PATH}"
+echo "[builder.sh] Current work path: $(pwd)" | tee -a "${LOG_PATH}"
 
 case $PLATFORM in
 
@@ -295,13 +295,13 @@ case $PLATFORM in
 				OUTFILE=${DEPLOYMENT_PATH}/boot.py
 				cp -vf $WORKDIR/*.py ${DEPLOYMENT_PATH} # copy all .py files without building
 			else
-				echo "Build type: firmware (or undefined)" | tee -a "${LOG_PATH}"
+				echo "[builder.sh] Build type: firmware (or undefined)" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 			fi
 
 			OUTPATH=${DEPLOYMENT_PATH}
 
-			echo "Micropython Build: Customizing firmware..." | tee -a "${LOG_PATH}"
+			echo "[builder.sh] Micropython Build: Customizing firmware..." | tee -a "${LOG_PATH}"
 
 			UPY_FILES=$(find $WORKDIR -name *.py)
 
@@ -318,8 +318,10 @@ case $PLATFORM in
 			done
 
 			if [[ $BUILD_TYPE == "firmware" ]]; then
-				echo "Micropython Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
+				echo "[builder.sh] Micropython Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
+				echo "[builder.sh] running Docker >>>"
 				docker run ${DOCKER_PREFIX} --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython | tee -a "${LOG_PATH}"
+				echo "[builder.sh] Docker completed <<<"
 				rm -rf ./build; make clean; make V=1
 			fi
 
@@ -335,16 +337,16 @@ case $PLATFORM in
 			else
 				# Check Artifacts
 				if [[ $BUILD_SUCCESS == true ]] ; then
-					echo "NodeMCU Build: Listing output directory: " | tee -a "${LOG_PATH}"
+					echo "[builder.sh] NodeMCU Build: Listing output directory: " | tee -a "${LOG_PATH}"
 					pwd | tee -a "${LOG_PATH}"
 					ls | tee -a "${LOG_PATH}"
-					echo "NodeMCU Build: Listing binary artifacts: " | tee -a "${LOG_PATH}"
+					echo "[builder.sh] NodeMCU Build: Listing binary artifacts: " | tee -a "${LOG_PATH}"
 					ls ./bin | tee -a "${LOG_PATH}"
 					if [[ $BUILD_TYPE == "firmware" ]]; then
 						cp -v ./build/*.bin "$OUTPATH" | tee -a "${LOG_PATH}"
 						rm -rf ./build/*
 					fi
-					echo "Micropython Build: DEPLOYMENT_PATH: " $DEPLOYMENT_PATH
+					echo "[builder.sh] Micropython Build: DEPLOYMENT_PATH: " $DEPLOYMENT_PATH
 					ls "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 					STATUS='"OK"'
 				else
@@ -372,16 +374,16 @@ case $PLATFORM in
 
 			BUILD_TYPE=$nodemcu_build_type
 			if [[ $BUILD_TYPE == "file" ]]; then
-				echo "Build type: file" | tee -a "${LOG_PATH}"
+				echo "[builder.sh] Build type: file" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/thinx.lua
 			else
-				echo "Build type: firmware (or undefined)" | tee -a "${LOG_PATH}"
+				echo "[builder.sh] Build type: firmware (or undefined)" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 			fi
 
 			OUTPATH=${DEPLOYMENT_PATH}
 
-			echo "NodeMCU Build: Cleaning SPIFFS folder..." | tee -a "${LOG_PATH}"
+			echo "[builder.sh] NodeMCU Build: Cleaning SPIFFS folder..." | tee -a "${LOG_PATH}"
 			if [ -f ${DEPLOYMENT_PATH}/local/fs/* ]; then
 				echo "Cleaning local/fs" | tee -a "${LOG_PATH}"
 				# rm -rf ${DEPLOYMENT_PATH}/local/fs/** # cleanup first
@@ -393,18 +395,18 @@ case $PLATFORM in
 			CONFIG_PATH="./local/fs/thinx.json"
 
 			if [ -f $CONFIG_PATH ]; then
-				echo "NodeMCU Build: Deconfiguring..." | tee -a "${LOG_PATH}"
+				echo "[builder.sh] NodeMCU Build: Deconfiguring..." | tee -a "${LOG_PATH}"
 				rm -rf $CONFIG_PATH
 			fi
 
-			echo "NodeMCU Build: Configuring..." | tee -a "${LOG_PATH}"
+			echo "[builder.sh] NodeMCU Build: Configuring..." | tee -a "${LOG_PATH}"
 			mv "./thinx_build.json" $CONFIG_PATH
 
 			FILES=$(find . -maxdepth 1 -name "*.lua")
-			echo "NodeMCU Build: FILES:" | tee -a "${LOG_PATH}"
+			echo "[builder.sh] NodeMCU Build: FILES:" | tee -a "${LOG_PATH}"
 			echo ${FILES} | tee -a "${LOG_PATH}"
 
-			echo "NodeMCU Build: Customizing firmware..." | tee -a "${LOG_PATH}"
+			echo "[builder.sh] NodeMCU Build: Customizing firmware..." | tee -a "${LOG_PATH}"
 
 			if [[ $BUILD_TYPE == "firmware" ]]; then
 
@@ -416,13 +418,15 @@ case $PLATFORM in
 						cp -vf "${luafile}" $FSPATH
 					fi
 					if [ -f ./bin/* ]; then
-						echo "NodeMCU Build: Cleaning bin & map files..." | tee -a "${LOG_PATH}"
+						echo "[builder.sh] NodeMCU Build: Cleaning bin & map files..." | tee -a "${LOG_PATH}"
 						rm -rf ./bin/*
 					fi
 				done
 
-				echo "NodeMCU Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
+				echo "[builder.sh] NodeMCU Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
+				echo "[builder.sh] running Docker >>>"
 				docker run ${DOCKER_PREFIX} --rm -t ${DOCKER_PARAMS} -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build | tee -a "${LOG_PATH}"
+				echo "[builder.sh] Docker completed <<<"
 
 			else
 				# deploy Lua files without building
@@ -438,16 +442,16 @@ case $PLATFORM in
 				STATUS='"DRY_RUN_OK"'
 			else
 				if [[ $BUILD_SUCCESS == true ]] ; then
-					echo "NodeMCU Build: Listing output directory: " | tee -a "${LOG_PATH}"
+					echo "[builder.sh] NodeMCU Build: Listing output directory: " | tee -a "${LOG_PATH}"
 					pwd | tee -a "${LOG_PATH}"
 					ls | tee -a "${LOG_PATH}"
-					echo "NodeMCU Build: Listing binary artifacts: " | tee -a "${LOG_PATH}"
+					echo "[builder.sh] NodeMCU Build: Listing binary artifacts: " | tee -a "${LOG_PATH}"
 					ls ./bin | tee -a "${LOG_PATH}"
 					if [[ $BUILD_TYPE == "firmware" ]]; then
-						echo "NodeMCU Build: Copying binary artifacts..." | tee -a "${LOG_PATH}"
+						echo "[builder.sh] NodeMCU Build: Copying binary artifacts..." | tee -a "${LOG_PATH}"
 						cp -v "./bin/${OUTFILE_PREFIX}*.bin" "${DEPLOYMENT_PATH}/firmware.bin" | tee -a "${LOG_PATH}"
 					fi
-					echo "NodeMCU Build: DEPLOYMENT_PATH: " $DEPLOYMENT_PATH
+					echo "[builder.sh] NodeMCU Build: DEPLOYMENT_PATH: " $DEPLOYMENT_PATH
 					ls "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 					STATUS='"OK"'
 				else
@@ -468,16 +472,18 @@ case $PLATFORM in
 				fi
 				TNAME=$(pwd)/fs/thinx.json
 			fi
-			echo "Moving thinx_build.json to $TNAME" | tee -a "${LOG_PATH}"
+			echo "[builder.sh] Moving thinx_build.json to $TNAME" | tee -a "${LOG_PATH}"
 			mv "./thinx_build.json" "$TNAME"
 
+			echo "[builder.sh] running Docker >>>"
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/mongoose-builder suculent/mongoose-docker-build | tee -a "${LOG_PATH}"
+			echo "[builder.sh] Docker completed <<<"
 
 			if [[ $? == 0 ]] ; then
 				if [[ -f $(pwd)/build/fw.zip ]]; then
 					BUILD_SUCCESS=true
 				else
-					echo "OUTFILE not created." | tee -a "${LOG_PATH}"
+					echo "[builder.sh] OUTFILE not created." | tee -a "${LOG_PATH}"
 				fi
 			fi
 
@@ -495,7 +501,7 @@ case $PLATFORM in
 					ls "$BUILD_PATH/build" | tee -a "${LOG_PATH}"
 					unzip "${BUILD_PATH}/build/fw.zip" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 					ls "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
-					echo $MSG; echo $MSG | tee -a "${LOG_PATH}"
+					echo "[builder.sh]" $MSG; echo $MSG | tee -a "${LOG_PATH}"
 				else
 					STATUS='"FAILED"'
 				fi
@@ -518,44 +524,43 @@ case $PLATFORM in
 				do
 				    if test -d $FILE
 				    then
-				      echo "$FILE is a subdirectory, entering..." | tee -a "${LOG_PATH}"
+				      echo "[builder.sh] $FILE is a subdirectory, entering..." | tee -a "${LOG_PATH}"
 							# TODO: if $FILE contains *.ino
 							INOS=$(ls $FILE/*.ino)
-							echo "INOS: ${INOS}" | tee -a "${LOG_PATH}"
 							if [[ ! -z "${INOS}" ]]; then
+								echo "[builder.sh] Selecting Arduini project: ${INOS}" | tee -a "${LOG_PATH}"
 								cd $FILE
 								break
 							else
-								echo "Skipping ${FILE} for there are no INOS inside..." | tee -a "${LOG_PATH}"
+								echo "[builder.sh] Skipping ${FILE} for there are no INOS inside..." | tee -a "${LOG_PATH}"
 							fi
 				    fi
 				done
-			  echo "Building for Arduino from folder:" | tee -a "${LOG_PATH}"
-			  pwd | tee -a "${LOG_PATH}"
-				ls
-				ls | tee -a "${LOG_PATH}"
+			  echo "[builder.sh] Building for Arduino from folder:" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
-				docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/arduino-docker-build | tee -a "${LOG_PATH}"
-				RESULT=$?
+
+				echo "[builder.sh] running Docker >>>"
+				docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/arduino-docker-build && RESULT=$? | tee -a "${LOG_PATH}"
+				echo "[builder.sh] Docker completed <<<"
 
 				# TODO: Check for firmware.bin! Result is of tee (probably)
 
 				if [[ $RESULT == 0 ]] ; then
 					BUILD_SUCCESS=true
 					echo " "
-					echo "Docker build succeeded."
+					echo "[builder.sh] Docker build succeeded."
 					echo " "
 
 					echo " " | tee -a "${LOG_PATH}"
-					echo "Docker build succeeded." | tee -a "${LOG_PATH}"
+					echo "[builder.sh] Docker build succeeded." | tee -a "${LOG_PATH}"
 					echo " " | tee -a "${LOG_PATH}"
 				else
 					echo " "
-					echo "Docker build with result ${RESULT}"
+					echo "[builder.sh] Docker build with result ${RESULT}"
 					echo " "
 
 					echo " " | tee -a "${LOG_PATH}"
-					echo "Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
+					echo "[builder.sh] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
 					echo " " | tee -a "${LOG_PATH}"
 				fi
 				# Exit on dry run...
@@ -566,20 +571,20 @@ case $PLATFORM in
 					# Check Artifacts
 					if [[ $BUILD_SUCCESS == true ]] ; then
 						STATUS='"OK"'
-						echo "Exporting artifacts" | tee -a "${LOG_PATH}"
+						echo "[builder.sh] Exporting artifacts" | tee -a "${LOG_PATH}"
 
-						echo "OUTFILE: $OUTFILE" | tee -a "${LOG_PATH}"
+						echo "[builder.sh] OUTFILE: $OUTFILE" | tee -a "${LOG_PATH}"
 						# Deploy Artifacts
 						cd $(ls -d */)
-						echo "Current workdir: " | tee -a "${LOG_PATH}"
+						echo "[builder.sh] Current workdir: " | tee -a "${LOG_PATH}"
 						pwd
 						pwd | tee -a "${LOG_PATH}"
-						echo "Current workdir contents: " | tee -a "${LOG_PATH}"
+						echo "[builder.sh] Current workdir contents: " | tee -a "${LOG_PATH}"
 						ls
 						ls | tee -a "${LOG_PATH}"
 						cp -vf *.bin "$OUTFILE" | tee -a "${LOG_PATH}"
 						cp -vf *.elf "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
-						echo "Deployment path $DEPLOYMENT_PATH contains:" | tee -a "${LOG_PATH}"
+						echo "[builder.sh] Deployment path $DEPLOYMENT_PATH contains:" | tee -a "${LOG_PATH}"
 						cp -vR "${OUTFILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
 						ls $DEPLOYMENT_PATH | tee -a "${LOG_PATH}"
 					else
@@ -605,15 +610,19 @@ case $PLATFORM in
 				PIOD=$(echo $PIO | tr -d "platformio.ini")
 				echo "PIOD: $PIOD" | tee -a "${LOG_PATH}"
 				if [[ -d "${PIOD}" ]]; then
-					echo "$PIOD is a subdirectory, entering..." | tee -a "${LOG_PATH}"
+					echo "[builder.sh] $PIOD is a subdirectory, entering..." | tee -a "${LOG_PATH}"
 					cd $PIOD
 				else
-					echo "Skipping ${FILE} for there are no PIOS inside..." | tee -a "${LOG_PATH}"
+					echo "[builder.sh] Skipping ${FILE} for there are no PIOS inside..." | tee -a "${LOG_PATH}"
 				fi
 		  fi
 
 			OUTFILE=$(pwd)/build/firmware.bin
+
+			echo "[builder.sh] running Docker >>>"
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build | tee -a "${LOG_PATH}"
+			echo "[builder.sh] Docker completed <<<"
+
 			# docker run --rm -ti -v `pwd`:/opt/workspace suculent/platformio-docker-build
 			if [[ $? == 0 ]] ; then
 				BUILD_SUCCESS=true
@@ -687,13 +696,13 @@ echo "STATUS" "${STATUS}" | tee -a "${LOG_PATH}"
 echo "PLATFORM" "${PLATFORM}" | tee -a "${LOG_PATH}"
 echo "THINX_FIRMWARE_VERSION" "${THINX_FIRMWARE_VERSION}" | tee -a "${LOG_PATH}"
 
-echo "[THiNX] Log path: $LOG_PATH" | tee -a "${LOG_PATH}"
+echo "[builder.sh] Log path: $LOG_PATH" | tee -a "${LOG_PATH}"
 
 #cat $LOG_PATH
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
 CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION}"
-echo "Executing Notifier: " $CMD | tee -a "${LOG_PATH}"
+echo "[builder.sh] Executing Notifier: " $CMD | tee -a "${LOG_PATH}"
 cd $ORIGIN # go back to application root folder
 RESULT=$(node $THINX_ROOT/notifier.js $CMD)
 echo -e "${RESULT}" | tee -a "${LOG_PATH}"
@@ -705,7 +714,7 @@ echo -e "${RESULT}" | tee -a "${LOG_PATH}"
 #fi
 
 MSG="${BUILD_DATE} Done."
-echo $MSG | tee -a "${LOG_PATH}"
+echo "[builder.sh]" $MSG | tee -a "${LOG_PATH}"
 
 # cleanup DB
-# bash $THINX_ROOT/couch_cleanup.sh > /dev/null &
+# bash $THINX_ROOT/couch_cleanup.sh && > /dev/null
