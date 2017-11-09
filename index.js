@@ -2531,10 +2531,10 @@ var ThinxApp = function() {
     if (typeof(req.headers.cookie) !== "undefined") {
       if (cookies.indexOf("thinx-") === -1) {
         console.log("» WSS cookies: " + cookies);
-        console.log("» No x-thx-session cookie found in: " + JSON.stringify(req.headers
+        console.log("» WARNING! No thinx-cookie found in: " + JSON.stringify(req.headers
           .cookie));
-        wss.close();
-        return;
+        // wss.close();
+        // return;
       }
       if (typeof(req.session) !== "undefined") {
         console.log("Session: " + JSON.stringify(req.session));
