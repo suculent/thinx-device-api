@@ -99,6 +99,7 @@ var ThinxApp = function() {
     github_ocfg = require('./conf/github-oauth.json');
     console.log("GitHub Config loaded: " + JSON.stringify(github_ocfg));
 
+    // will deprecate
     github_login_handler = require('login-with-github')({
       client_id: github_ocfg.client_id,
       client_secret: github_ocfg.client_secret,
@@ -106,12 +107,13 @@ var ThinxApp = function() {
       fetch_user: true
     });
 
+    // seems to work
     githubOAuth = require('github-oauth')({
       githubClient: github_ocfg.client_id,
       githubSecret: github_ocfg.client_secret,
       baseURL: 'https://rtm.thinx.cloud/',
       loginURI: '/oauth/github',
-      callbackURI: '/oauth/cb',
+      callbackURI: 'https://thinx.cloud:7443/oauth/cb',
       scope: 'user'
     });
 
