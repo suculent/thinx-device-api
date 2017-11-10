@@ -2,6 +2,8 @@
 
 ## CHANGELOG
 
+10/11/2017: 0.9.2758: added GitHub login and Status Transformer editor
+
 9/11/2017: added prototype status transformer as a part of user profile
 
 8/11/2017: 0.9.2682: Bugfixes, stabilized (Arduino) builder with new example project.
