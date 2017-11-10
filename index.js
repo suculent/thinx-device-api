@@ -89,8 +89,6 @@ var ThinxApp = function() {
   // OAuth2 for GitHub
   //
 
-  require("login-with-github");
-
   var github_ocfg = null;
   var github_login_handler = null;
 
@@ -2211,11 +2209,15 @@ var ThinxApp = function() {
    */
 
   // Initial page redirecting to OAuth2 provider
-  app.get('/oauth/github', (req, res) => {
-    // User requested login, destroy existing session first...
-    if (typeof(req.session) !== "undefined") {
-      req.session.destroy();
-    }
+  app.get('/oauth/github', function(req, res) {
+
+    // TODO: User requested login, destroy existing session first...
+    //if (typeof(req.session) !== "undefined") {
+    //  req.session.destroy();
+    //}
+
+    console.log("[oauth][github] Running handler...");
+
     github_login_handler(req, res, function(err) {
       // if login errored 
       console.log("[oauth][github] Logging with GitHub...");
