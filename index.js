@@ -887,7 +887,7 @@ var ThinxApp = function() {
   // /user/create GET
   /* Create username based on e-mail. Owner must be unique (email hash). */
   app.post("/api/user/create", function(req, res) {
-    user.create(req.body, function(success, status) {
+    user.create(req.body, true, function(success, status) {
       respond(res, {
         success: success,
         status: status
@@ -1668,7 +1668,7 @@ var ThinxApp = function() {
 
               // Support for creating accounts to non-existent e-mails automatically
               console.log("[oauth] owner_id not found, creating: " + owner_id);
-              user.create(wrapper, function(success, status) {
+              user.create(wrapper, false, function(success, status) {
 
                 console.log("Result creating OAuth user:");
                 console.log(success, status);
@@ -2322,7 +2322,7 @@ var ThinxApp = function() {
                 }
 
                 // No such owner, create...
-                user.create(userWrapper, function(success, status) {
+                user.create(userWrapper, false, function(success, status) {
 
                   console.log("[OID:" + owner_id +
                     "] [NEW_SESSION] [oauth]");
@@ -2507,7 +2507,7 @@ var ThinxApp = function() {
                   }
 
                   // No such owner, create...
-                  user.create(userWrapper, function(success, status) {
+                  user.create(userWrapper, false, function(success, status) {
 
                     req.session.owner = userWrapper.owner_id;
                     console.log("[OID:" + req.session.owner +

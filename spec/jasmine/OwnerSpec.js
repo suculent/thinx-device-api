@@ -23,7 +23,7 @@ describe("Owner", function() {
       email: email,
       owner: "0x0z1mmerman"
     };
-    User.create(body, function(success, response) {
+    User.create(body, true, function(success, response) {
       if (response.toString().indexOf("email_already_exists") !== -1) {
         expect(success).toBe(false);
       } else {
