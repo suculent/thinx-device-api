@@ -2369,11 +2369,11 @@ var ThinxApp = function() {
               }
             });
 
-            req.session.owner = owner_id;
-            req.session.cookie.secure = true;
-            req.session.cookie.expires = new Date(Date.now() + fortnight,
-              "isoDate");
-            req.session.cookie.maxAge = fortnight;
+            //req.session.owner = owner_id;
+            //req.session.cookie.secure = true;
+            //req.session.cookie.expires = new Date(Date.now() + fortnight,"isoDate");
+            //req.session.cookie.maxAge = fortnight;
+
             alog.log(req.session.owner, "OAuth2 User logged in...");
 
             client.set(token, JSON.stringify(userWrapper));
@@ -2381,7 +2381,7 @@ var ThinxApp = function() {
 
             console.log("Redirecting to login (1)");
 
-            serverResponse.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
+            global_response.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
               token);
 
 
