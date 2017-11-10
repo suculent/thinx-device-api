@@ -66,6 +66,8 @@ patch:
         patched: '2017-09-15T10:14:34.694Z'
     - login-with-github > request:
         patched: '2017-11-10T10:27:57.594Z'
+    - github-oauth > request:
+        patched: '2017-11-10T13:26:40.285Z'
   'npm:moment:20160126':
     - fs-finder > moment:
         patched: '2017-09-15T10:14:34.694Z'
