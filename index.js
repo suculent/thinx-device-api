@@ -2392,20 +2392,14 @@ var ThinxApp = function() {
 
     console.log("Called /oauth/cb from?");
 
-    const code = req.query.code;
-    const options = {
-      code: code,
-      redirect_uri: cfg.web.redirect_uris[0]
-    };
-
     var referer;
 
     if ((typeof(req.headers.referer) !== "undefined") && req.headers.referer !== null) {
-      console.log("Ref: " + req.headers.referer);
-      if (req.headers.referer.indexOf("github") !== -1) {
+      console.log("Req.headers.origin: " + req.headers.origin);
+      if (req.headers.origin.indexOf("github") !== -1) {
         referer = "github";
       }
-      if (req.headers.referer.indexOf("google") !== -1) {
+      if (req.headers.origin.indexOf("google") !== -1) {
         referer = "google";
       }
     }
@@ -2551,6 +2545,12 @@ var ThinxApp = function() {
     }
 
     /// IF GOOGLE
+
+    const code = req.query.code;
+    const options = {
+      code: code,
+      redirect_uri: cfg.web.redirect_uris[0]
+    };
 
     var t = oauth2.authorizationCode.getToken(options, (error, result) => {
       if (error) {
@@ -2861,10 +2861,9 @@ var ThinxApp = function() {
     var cookies = req.headers.cookie;
 
     if (typeof(req.headers.cookie) !== "undefined") {
-      if (cookies.indexOf("thinx-") === -1) {
-        console.log("» WSS cookies: " + cookies);
-        console.log("» WARNING! No thinx-cookie found in: " + JSON.stringify(req.headers
-          .cookie));
+      if (cookies.indexOf("x-thx-") === -1) {
+        //console.log("» WSS cookies: " + cookies);
+        console.log("» WARNING! No thinx-cookie found in: " + JSON.stringify(req.headers.cookie));
         // wss.close();
         // return;
       }
