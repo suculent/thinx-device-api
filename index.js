@@ -2240,7 +2240,7 @@ var ThinxApp = function() {
       console.log(JSON.stringify("Getting user..."));
 
       var request_options = {
-        host: 'api.github.com',
+        host: 'github.com',
         headers: {
           'user-agent': 'THiNX OAuth'
         },
