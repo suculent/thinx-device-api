@@ -113,7 +113,7 @@ var ThinxApp = function() {
       githubSecret: github_ocfg.client_secret,
       baseURL: 'https://rtm.thinx.cloud',
       loginURI: '/oauth/login',
-      callbackURI: github_ocfg.redirect_uris,
+      callbackURI: '/oauth/gcb',
       scope: 'user'
     });
 
@@ -2391,7 +2391,7 @@ var ThinxApp = function() {
 
   // Callback service parsing the authorization token and asking for the access token
   app.get('/oauth/gcb', function(req, res) {
-    console.log("Github OAuth2 Callback");
+    console.log("Github OAuth2 Callback...");
     githubOAuth.callback(req, res, function(err) {
       console.log("cberr: ", err);
     });
