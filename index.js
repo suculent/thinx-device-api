@@ -2259,7 +2259,7 @@ var ThinxApp = function() {
         // The whole response has been received. Print out the result.
         res.on('end', () => {
 
-          var token = "ghat:" + oauth_token;
+          var token = "ghat:" + oauth_token.access_token;
           console.log(token);
 
           var hdata = JSON.parse(data);
