@@ -55,7 +55,7 @@ var slack = require("slack-notify")(slack_webhook);
 var that = this;
 
 var http = require("http");
-var fs = require("fs");
+var fs = require("fs-extra");
 var nano = require("nano")(db);
 var mqtt = require("mqtt");
 
@@ -254,8 +254,21 @@ devicelib.get(udid, function(err, doc) {
 
     buffer = new Buffer(envelopeString + "\n");
 
-    fs.writeFileSync(envelopePath, buffer);
-    fs.writeFileSync(deployedEnvelopePath, buffer);
+    fs.ensureFile(envelopePath, err => {
+      if (err) {
+        console.log(err);
+      } else {
+        fs.writeFileSync(envelopePath, buffer);
+      }
+    });
+
+    fs.ensureFile(deployedEnvelopePath, err => {
+      if (err) {
+        console.log(err);
+      } else {
+        fs.writeFileSync(deployedEnvelopePath, buffer);
+      }
+    });
 
 
     // TODO: Update current build version in managed_users.repos
