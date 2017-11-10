@@ -533,7 +533,7 @@ case $PLATFORM in
 							# TODO: if $FILE contains *.ino
 							INOS=$(ls $FILE/*.ino)
 							if [[ ! -z "${INOS}" ]]; then
-								echo "[builder.sh] Selecting Arduini project: ${INOS}" | tee -a "${LOG_PATH}"
+								echo "[builder.sh] Selecting Arduino project: ${INOS}" | tee -a "${LOG_PATH}"
 								cd $FILE
 								break
 							else
@@ -687,11 +687,12 @@ BUILD_FILE=$( find $BUILD_PATH/$REPO_PATH -name "thinx_build.json" )
 if [[ -z $BUILD_FILE ]]; then
 	BUILD_FILE=$( find $WORKDIR -name "thinx_build.json" )
 fi
-if [[ -z $BUILD_FILE ]]; then
-	echo "Np build file found, generating last-minute version..."
-	THINX_FIRMWARE_VERSION=$(basename $(pwd))-$THX_VERSION.$THX_REVISION
-else
-	THINX_FIRMWARE_VERSION=$(jq $BUILD_FILE .THINX_FIRMWARE_VERSION)
+if [ ! -z ${BUILD_FILE} ]; then
+	THINX_FIRMWARE_VERSION="$(jq $BUILD_FILE .THINX_FIRMWARE_VERSION)"
+fi
+if [ ! -z ${THINX_FIRMWARE_VERSION} ]; then
+	echo "No build file found, generating last-minute version..."
+	THINX_FIRMWARE_VERSION="$(basename $(pwd))-${THX_VERSION}.${THX_REVISION}"
 fi
 
 echo "BUILD_ID" "${BUILD_ID}" | tee -a "${LOG_PATH}"
