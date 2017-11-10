@@ -90,7 +90,8 @@ var ThinxApp = function() {
   //
 
   var github_ocfg = null;
-  var github_login_handler = null;
+
+  var github_login_handler;
 
   try {
     github_ocfg = require('./conf/github-oauth.json');
