@@ -2249,8 +2249,6 @@ var ThinxApp = function() {
         path: '/user?access_token=' + oauth_token.access_token
       };
 
-      console.log(JSON.stringify(request_options));
-
       https.get(request_options, (res) => {
 
         var data = '';
@@ -2261,11 +2259,8 @@ var ThinxApp = function() {
         // The whole response has been received. Print out the result.
         res.on('end', () => {
 
-          console.log("Oauth user response: " + JSON.stringify(data));
           var token = "ghat:" + oauth_token;
-
-          //console.log(JSON.stringify(serverResponse, null, 2));
-          //console.log(data);
+          console.log(token);
 
           var hdata = JSON.parse(data);
           var name_array = hdata.name.split(" ");
@@ -2276,7 +2271,7 @@ var ThinxApp = function() {
 
           if (typeof(email) === "undefined") {
             console.log("Error: no email in response.");
-            serverResponse.redirect(
+            global_response.redirect(
               'https://rtm.thinx.cloud/error.html?success=failed&reason=oauth_no_email'
             );
           }
@@ -2296,8 +2291,11 @@ var ThinxApp = function() {
           // Check user and make note on user login
           userlib.get(owner_id, function(error, udoc) {
 
+
             // Error case covers creating new user/managing deleted account
             if (error) {
+
+              console.log("Failed with error: " + error);
 
               if (error.toString().indexOf("Error: deleted") !== -1) {
                 // TODO: Redirect to error page with reason
@@ -2349,13 +2347,13 @@ var ThinxApp = function() {
                   global_response.redirect(
                     "https://rtm.thinx.cloud/app/#/oauth/" + token);
 
-                  return;
+                  console.log("Redirecting to login (2)");
 
                 });
-
+                return;
               }
 
-
+              console.log("UDOC:");
               console.log(JSON.stringify(udoc));
 
               userlib.atomic("users", "checkin", owner_id, {
@@ -2381,6 +2379,8 @@ var ThinxApp = function() {
 
               client.set(token, JSON.stringify(userWrapper));
               client.expire(token, 3600);
+
+              console.log("Redirecting to login (1)");
 
               global_response.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
                 token);
