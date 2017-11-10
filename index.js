@@ -2247,7 +2247,7 @@ var ThinxApp = function() {
       https.get(request_options, (err, resp) => {
 
         if (err) {
-          console.log("GHO err: " + err);
+          console.log("GHO err: " + JSON.stringify(err));
           return;
         }
 
