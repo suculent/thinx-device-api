@@ -97,8 +97,6 @@ var ThinxApp = function() {
 
   try {
     github_ocfg = require('./conf/github-oauth.json');
-    console.log("GitHub Config loaded: " + JSON.stringify(github_ocfg));
-
     githubOAuth = require('github-oauth')({
       githubClient: github_ocfg.client_id,
       githubSecret: github_ocfg.client_secret,
@@ -107,7 +105,6 @@ var ThinxApp = function() {
       callbackURI: github_ocfg.redirect_uri,
       scope: 'user'
     });
-
   } catch (e) {
     console.log(e);
   }
@@ -2276,7 +2273,9 @@ var ThinxApp = function() {
 
           if (typeof(email) === "undefined") {
             console.log("Error: no email in response.");
-            res.redirect('/oauth/error');
+            serverResponse.redirect(
+              'https://rtm.thinx.cloud/error.html?success=failed&reason=oauth_no_email'
+            );
           }
 
           const owner_id = sha256(email);
@@ -2378,7 +2377,8 @@ var ThinxApp = function() {
               client.set(token, JSON.stringify(userWrapper));
               client.expire(token, 3600);
 
-              res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
+              serverResponse.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
+                token);
 
             } // else no such user
           }); // userlib.get
