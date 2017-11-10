@@ -2182,6 +2182,7 @@ var ThinxApp = function() {
     };
 
     var areq = https.get(options, function(res) {
+
       console.log('STATUS: ' + res.statusCode);
       console.log('HEADERS: ' + JSON.stringify(res.headers));
 
@@ -2190,6 +2191,7 @@ var ThinxApp = function() {
       res.on('data', function(chunk) {
         // You can process streamed parts here...
         bodyChunks.push(chunk);
+
       }).on('end', function() {
         var body = Buffer.concat(bodyChunks);
         console.log('BODY: ' + body);
@@ -2201,7 +2203,7 @@ var ThinxApp = function() {
           console.log("Saving new Bot token (TODO: tell mesenger): ", token);
         }
       });
-    }).set('User-Agent', 'THiNX%20OAuth'); // Application name from GitHub / Settings / Developer Settings, should be in JSON
+    });
 
     areq.on('error', function(e) {
       console.log('ERROR: ' + e.message);
@@ -2242,6 +2244,7 @@ var ThinxApp = function() {
 
         // The whole response has been received. Print out the result.
         resp.on('end', () => {
+
           console.log("Oauth user response: " + JSON.stringify(data));
 
           var token = "ghat:" + oauth_token;
@@ -2356,7 +2359,7 @@ var ThinxApp = function() {
 
 
         });
-      });
+      }).set('User-Agent', 'THiNX OAuth'); // Application name from GitHub / Settings / Developer Settings, should be in JSON;
 
 
 
