@@ -85,6 +85,26 @@ var ThinxApp = function() {
     state: '3(#0/!~12345', // this string shall be random (returned upon auth provider call back)
   });
 
+  // 
+  // OAuth2 for GitHub
+  //
+
+  require("login-with-github");
+
+  var github_ocfg = null;
+  var github_login_handler = null;
+
+  try {
+    github_ocfg = require('./conf/github-oauth.json');
+    github_login_handler = require('login-with-github')({
+      client_id: github_ocfg.client_id,
+      client_secret: github_ocfg.client_secret,
+      login_path: '/login/github'
+    }); // /login/github = /oauth/github?
+  } catch (e) {
+    console.log(e);
+  }
+
   //
   // App
   //
@@ -1909,7 +1929,7 @@ var ThinxApp = function() {
         } else if (client_type == "webapp") {
           // res.redirect("http://rtm.thinx.cloud:80/"); // redirects browser, not in XHR?
           respond(res, {
-            "redirectURL": "http://rtm.thinx.cloud:80/app/#/dashboard.html"
+            "redirectURL": "http://rtm.thinx.cloud/app/#/dashboard.html" // should be without /#/dashboard.html
           });
           return;
         }
@@ -2186,6 +2206,140 @@ var ThinxApp = function() {
 
   });
 
+  /*
+   * OAuth 2 with GitHub
+   */
+
+  // Initial page redirecting to OAuth2 provider
+  app.get('/oauth/github', (req, res) => {
+    // User requested login, destroy existing session first...
+    if (typeof(req.session) !== "undefined") {
+      req.session.destroy();
+    }
+    github_login_handler(req, res, function(err) {
+      // if login errored 
+      console.log("[oauth][github] Logging with GitHub...");
+      if (err) throw err;
+      // if login was successful 
+      console.log("[oauth][github] GitHub Login successfull...");
+      if (req.github_user) {
+        var token = "ghat:" + req.github_access_token;
+        console.log(JSON.stringify(req.github_user, null, 2));
+
+        const odata = req.github_user;
+        const email = odata.email;
+        const family_name = odata.family_name;
+        const given_name = odata.given_name;
+        const picture = odata.picture;
+        const locale = odata.locale;
+
+        if (typeof(email) === "undefined") {
+          console.log("Error: no email in response.");
+          res.redirect('/oauth/error');
+        }
+
+        const owner_id = sha256(email);
+
+        var userWrapper = {
+          first_name: given_name,
+          last_name: family_name,
+          email: email,
+          owner_id: owner_id,
+          username: owner_id
+        };
+
+        console.log("[oauth][github] searching for owner_id: " + owner_id);
+
+        // Check user and make note on user login
+        userlib.get(owner_id, function(error, udoc) {
+
+          if (error) {
+
+            if (error.toString().indexOf("Error: deleted") !== -1) {
+              // TODO: Redirect to error page with reason
+              console.log("[oauth] user document deleted");
+              res.redirect('/oauth/account-doc-deleted');
+              return;
+
+            } else {
+
+              if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
+                true) {
+                // TODO: Redirect to error page with reason
+                console.log("[oauth] user account marked as deleted");
+                res.redirect('/oauth/account-deleted');
+                return;
+              }
+
+              // No such owner, create...
+              user.create(userWrapper, function(success, status) {
+
+                req.session.owner = userWrapper.owner_id;
+                console.log("[OID:" + req.session.owner +
+                  "] [NEW_SESSION] [oauth]");
+
+                var minute = 60 * 1000;
+
+                req.session.cookie.expires = new Date(Date.now() +
+                  fortnight, "isoDate");
+                req.session.cookie.maxAge = fortnight;
+                req.session.cookie.secure = true;
+
+                alog.log(req.session.owner, "OAuth User created: " +
+                  given_name + " " + family_name);
+
+                var token = sha256(token);
+                client.set(token, JSON.stringify(userWrapper));
+                client.expire(token, 30);
+
+                res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
+
+                return;
+
+              });
+
+            }
+
+
+            console.log(JSON.stringify(udoc));
+
+            userlib.atomic("users", "checkin", owner_id, {
+              last_seen: new Date()
+            }, function(error, response) {
+              if (error) {
+                console.log("Last-seen update failed: " +
+                  error);
+              } else {
+                alog.log(req.session.owner,
+                  "Last seen updated.");
+              }
+            });
+
+            req.session.owner = owner_id;
+            req.session.cookie.secure = true;
+            req.session.cookie.expires = new Date(Date.now() + fortnight, "isoDate");
+            req.session.cookie.maxAge = fortnight;
+            alog.log(req.session.owner, "OAuth2 User logged in...");
+
+            var token = sha256(res2.access_token);
+
+            client.set(token, JSON.stringify(userWrapper));
+            client.expire(token, 3600);
+
+            res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
+          } // else not github user
+        });
+
+      } else {
+        // else no login attempted 
+
+        res.writeHead(200, {
+          'Content-Type': 'text/html'
+        });
+        res.end('<a href="/login/github">login with github</a>');
+      }
+    });
+  });
 
   /*
    * OAuth 2 with Google
@@ -2193,15 +2347,18 @@ var ThinxApp = function() {
 
   // Initial page redirecting to OAuth2 provider
   app.get('/oauth/google', (req, res) => {
-    console.log("[oauth] Redirecting to authorizationUri: " + authorizationUri);
+    // User requested login, destroy existing session first...
     if (typeof(req.session) !== "undefined") {
       req.session.destroy();
     }
+    console.log("[oauth][google] Redirecting to authorizationUri: " + authorizationUri);
     res.redirect(authorizationUri);
   });
 
   // Callback service parsing the authorization token and asking for the access token
   app.get('/oauth/cb', (req, res) => {
+
+    console.log("Called /oauth/cb from?");
 
     const code = req.query.code;
     const options = {
@@ -2220,7 +2377,7 @@ var ThinxApp = function() {
       return token;
     });
     t.then(res2 => {
-      //console.log(res2);
+      console.log(res2);
 
       https.get(
         'https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' +
@@ -2236,9 +2393,6 @@ var ThinxApp = function() {
           resp.on('end', () => {
 
             const odata = JSON.parse(data);
-
-            // TODO: Remove
-            //console.log("[oauth] response: " + JSON.stringify(odata));
 
             const email = odata.email;
             const family_name = odata.family_name;
@@ -2287,42 +2441,35 @@ var ThinxApp = function() {
                   // No such owner, create...
                   user.create(userWrapper, function(success, status) {
 
-                    console.log("Result creating OAuth user:");
-                    console.log(success, status);
-
-                    // TODO: Edit user, set info...
-
                     req.session.owner = userWrapper.owner_id;
                     console.log("[OID:" + req.session.owner +
                       "] [NEW_SESSION] [oauth]");
 
                     var minute = 60 * 1000;
 
-                    //req.session.cookie.httpOnly = true;
-
                     req.session.cookie.expires = new Date(Date.now() +
                       fortnight, "isoDate");
                     req.session.cookie.maxAge = fortnight;
-
                     req.session.cookie.secure = true;
 
-                    alog.log(req.session.owner, "OAuth User created: " +
+                    alog.log(req.session.owner,
+                      "OAuth User created: " +
                       given_name + " " + family_name);
 
                     var token = sha256(res2.access_token);
-
                     client.set(token, JSON.stringify(userWrapper));
                     client.expire(token, 30);
 
-                    res.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
+                    res.redirect(
+                      "https://rtm.thinx.cloud/app/#/oauth/" +
                       token);
 
                     return;
 
                   });
-                }
 
-              } //else {
+                }
+              }
 
               console.log(JSON.stringify(udoc));
 
@@ -2339,9 +2486,7 @@ var ThinxApp = function() {
               });
 
               req.session.owner = owner_id;
-
               req.session.cookie.secure = true;
-
               req.session.cookie.expires = new Date(Date.now() +
                 fortnight, "isoDate");
               req.session.cookie.maxAge = fortnight;
@@ -2354,7 +2499,6 @@ var ThinxApp = function() {
 
               res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
 
-              // }
             });
 
           });

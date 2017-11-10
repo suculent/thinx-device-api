@@ -50,6 +50,7 @@
     "gulp-util": "^3.0.8",
     "http-signature": "1.0.0",
     "karma-coverage": "*",
+    "login-with-github": "^0.1.1",
     "minimatch": "3.0.2",
     "mkdirp": "^0.5.1",
     "mqtt": "^2.9.0",
