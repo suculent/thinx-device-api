@@ -2249,28 +2249,28 @@ var ThinxApp = function() {
 
       console.log(JSON.stringify(request_options));
 
-      https.get(request_options, (resp) => {
+      https.get(request_options, (res) => {
 
         var data = '';
-        resp.on('data', (chunk) => {
+        res.on('data', (chunk) => {
           data += chunk;
         });
 
         // The whole response has been received. Print out the result.
-        resp.on('end', () => {
+        res.on('end', () => {
 
           console.log("Oauth user response: " + JSON.stringify(data));
-
           var token = "ghat:" + oauth_token;
 
           //console.log(JSON.stringify(serverResponse, null, 2));
-          console.log(data);
+          //console.log(data);
 
-          const hdata = JSON.parse(data);
+          var hdata = JSON.parse(data);
+          var name_array = hdata.name.split(" ");
           const email = hdata.email;
-          const family_name = hdata.name.split(" ")[0];
-          const given_name = hdata.name.split(" ")[1] || " ";
-          const picture = hdata.avatar_url;
+          const given_name = name_array[0];
+          const family_name = name_array[name_array.count - 1];
+          const picture = hdata.avatar_url; // TODO: Fetch and save to owner...
 
           if (typeof(email) === "undefined") {
             console.log("Error: no email in response.");
@@ -2292,12 +2292,15 @@ var ThinxApp = function() {
           // Check user and make note on user login
           userlib.get(owner_id, function(error, udoc) {
 
+            // Error case covers creating new user/managing deleted account
             if (error) {
 
               if (error.toString().indexOf("Error: deleted") !== -1) {
                 // TODO: Redirect to error page with reason
                 console.log("[oauth] user document deleted");
-                res.redirect('/oauth/account-doc-deleted');
+                res.redirect(
+                  'https://rtm.thinx.cloud/error.html?success=failed&reason=account_document_deleted'
+                );
                 return;
 
               } else {
@@ -2306,7 +2309,9 @@ var ThinxApp = function() {
                   true) {
                   // TODO: Redirect to error page with reason
                   console.log("[oauth] user account marked as deleted");
-                  res.redirect('/oauth/account-deleted');
+                  res.redirect(
+                    'https://rtm.thinx.cloud/error.html?success=failed&reason=account_deleted'
+                  );
                   return;
                 }
 
@@ -2367,7 +2372,8 @@ var ThinxApp = function() {
               client.expire(token, 3600);
 
               res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
-            } // else not github user
+
+            } // else no such user
 
           }); // userlib.get
 
@@ -2447,15 +2453,15 @@ var ThinxApp = function() {
       https.get(
         'https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' +
         res2
-        .access_token, (resp) => {
+        .access_token, (res) => {
           let data = '';
           // A chunk of data has been recieved.
-          resp.on('data', (chunk) => {
+          res.on('data', (chunk) => {
             data += chunk;
           });
 
           // The whole response has been received. Print out the result.
-          resp.on('end', () => {
+          res.on('end', () => {
 
             const odata = JSON.parse(data);
 
@@ -2466,8 +2472,9 @@ var ThinxApp = function() {
             const locale = odata.locale;
 
             if (typeof(email) === "undefined") {
-              console.log("Error: no email in response.");
-              res.redirect('/oauth/error');
+              res.redirect(
+                'https://rtm.thinx.cloud/error.html?success=failed&reason=missing_email'
+              );
             }
 
             const owner_id = sha256(email);
@@ -2572,16 +2579,17 @@ var ThinxApp = function() {
 
         }).on("error", (err) => {
         console.log("Error: " + err.message);
-        res.redirect('/oauth/error');
+        res.redirect('https://rtm.thinx.cloud/error.html?success=failed&reason=' +
+          err.message);
       });
     }).catch(err => {
       console.log("Oauth error: " + err);
-      res.redirect('/oauth/error');
+      res.redirect('https://rtm.thinx.cloud/error.html?success=failed&reason=' + err.message);
     });
   });
 
   app.get('/oauth/error', (req, res) => {
-    res.send('OAuth error');
+    res.redirect('https://rtm.thinx.cloud/error.html?success=failed&reason=' + err.message);
   });
 
   /*
