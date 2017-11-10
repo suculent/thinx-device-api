@@ -103,7 +103,7 @@ var ThinxApp = function() {
     github_login_handler = require('login-with-github')({
       client_id: github_ocfg.client_id,
       client_secret: github_ocfg.client_secret,
-      login_path: 'https://thinx.cloud:7443/oauth/cb',
+      login_path: 'https://thinx.cloud:7443/oauth/cb?type=github',
       fetch_user: true
     });
 
@@ -113,14 +113,14 @@ var ThinxApp = function() {
       githubSecret: github_ocfg.client_secret,
       baseURL: 'https://rtm.thinx.cloud/',
       loginURI: '/oauth/github',
-      callbackURI: 'https://thinx.cloud:7443/oauth/cb',
+      callbackURI: 'https://thinx.cloud:7443/oauth/cb?type=github',
       scope: 'user'
     });
 
     // Authorization uri definition
     github_authorizationUri =
       "https://github.com/login/oauth/authorize?scope=user%20email&client_id=" + github_ocfg.client_id +
-      "&state=in45w4&allow_signup=true&redirect_uri=https://thinx.cloud:7443/oauth/cb";
+      "&state=in45w4&allow_signup=true&redirect_uri=https://thinx.cloud:7443/oauth/cb?type=github";
 
     console.log("GitHub Login Handler ready: " + JSON.stringify(github_login_handler));
 
@@ -2394,13 +2394,19 @@ var ThinxApp = function() {
 
     var referer;
 
-    if ((typeof(req.headers.referer) !== "undefined") && req.headers.referer !== null) {
-      console.log("Req.headers: " + JSON.stringify(req.headers));
-      if (req.headers.origin.indexOf("github") !== -1) {
-        referer = "github";
-      }
-      if (req.headers.origin.indexOf("google") !== -1) {
+    if ((typeof(req.query.type) !== "undefined") && req.query.type !== null) {
+      console.log("req.query.type: " + JSON.stringify(req.query.type));
+
+      // Google (did not initially require query type)
+      if (req.query.type.indexOf("google") !== -1) {
         referer = "google";
+      } else {
+        referer = "google";
+      }
+
+      // GitHub
+      if (req.query.type.indexOf("github") !== -1) {
+        referer = "github";
       }
     }
 
