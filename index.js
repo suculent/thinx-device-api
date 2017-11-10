@@ -2246,8 +2246,12 @@ var ThinxApp = function() {
 
       https.get(request_options, (err, resp) => {
 
-        let data = '';
-        // A chunk of data has been recieved.
+        if (err) {
+          console.log("GHO err: " + err);
+          return;
+        }
+
+        var data = '';
         resp.on('data', (chunk) => {
           data += chunk;
         });
