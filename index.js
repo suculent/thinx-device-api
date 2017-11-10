@@ -104,7 +104,7 @@ var ThinxApp = function() {
       githubSecret: github_ocfg.client_secret,
       baseURL: 'https://rtm.thinx.cloud',
       loginURI: '/oauth/login',
-      callbackURI: '/oauth/gcb',
+      callbackURI: ':7443/oauth/gcb',
       scope: 'user'
     });
 
