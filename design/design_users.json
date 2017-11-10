@@ -1,6 +1,5 @@
 {
 	"_id": "_design/users",
-	"_rev": "11-762407436ca50dee69f86a256205da6d",
 	"language": "javascript",
 	"views": {
 		"owners_by_username": {
@@ -21,6 +20,9 @@
 		"rsa_keys_by_owner": {
 			"map": "function (doc) { if(doc._id) { emit (doc.owner, doc.rsa_keys); } }"
 		}
+	},
+	"filters": {
+		"del": "function(doc) {    return !doc._deleted;}"
 	},
 	"updates": {
 		"checkin": "function (doc, req) { doc.last_seen = new Date(); return [doc, doc._id]; }",

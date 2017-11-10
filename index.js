@@ -2239,6 +2239,8 @@ var ThinxApp = function() {
 
       console.log(JSON.stringify("Getting user..."));
 
+      // Application name from GitHub / Settings / Developer Settings, should be in JSON;
+
       var request_options = {
         host: 'api.github.com',
         headers: {
@@ -2298,21 +2300,25 @@ var ThinxApp = function() {
               if (error.toString().indexOf("Error: deleted") !== -1) {
                 // TODO: Redirect to error page with reason
                 console.log("[oauth] user document deleted");
-                res.redirect(
+                serverResponse.redirect(
                   'https://rtm.thinx.cloud/error.html?success=failed&reason=account_document_deleted'
                 );
                 return;
 
               } else {
 
-                if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
-                  true) {
-                  // TODO: Redirect to error page with reason
-                  console.log("[oauth] user account marked as deleted");
-                  res.redirect(
-                    'https://rtm.thinx.cloud/error.html?success=failed&reason=account_deleted'
-                  );
-                  return;
+
+                // May exist, but be deleted. Can be cleared using Filtered Replication Handler "del"
+                if (typeof(udoc) !== "undefined") {
+                  if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
+                    true) {
+                    // TODO: Redirect to error page with reason
+                    console.log("[oauth] user account marked as deleted");
+                    this.redirect(
+                      'https://rtm.thinx.cloud/error.html?success=failed&reason=account_deleted'
+                    );
+                    return;
+                  }
                 }
 
                 // No such owner, create...
@@ -2336,7 +2342,8 @@ var ThinxApp = function() {
                   client.set(token, JSON.stringify(userWrapper));
                   client.expire(token, 30);
 
-                  res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
+                  this.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
+                    token);
 
                   return;
 
@@ -2374,16 +2381,9 @@ var ThinxApp = function() {
               res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
 
             } // else no such user
-
           }); // userlib.get
-
-
         });
-
-      }); // Application name from GitHub / Settings / Developer Settings, should be in JSON;
-
-
-
+      });
     }
   });
 
@@ -2415,17 +2415,17 @@ var ThinxApp = function() {
   app.get('/oauth/gcb', function(req, res) {
     console.log("Github OAuth2 Callback...");
     githubOAuth.callback(req, res, function(err) {
-      //console.log("cberr: ", err);
-      //if (!err) {
-      //  console.log(JSON.stringify(res.body));
-      //}
-      console.log(JSON.stringify(req.query.params));
+      console.log("cberr: ", err);
+      if (!err) {
+        console.log("Should login with token now...");
+      } else {
+        console.log(err.message);
+      }
     });
   });
 
   // Callback service parsing the authorization token and asking for the access token
   app.get('/oauth/cb', function(req, res) {
-
 
     console.log("Google OAuth2 Callback");
 
