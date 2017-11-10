@@ -254,6 +254,11 @@ if [[ $? > 0 ]]; then
 	THX_VERSION="1.0"
 fi
 
+THX_REVISION="$(cd $BUILD_PATH/$REPO_PATH && git rev-list HEAD --count)"
+if [[ $? > 0 ]]; then
+	THX_REVISION="1"
+fi
+
 REPO_NAME="$(basename $BUILD_PATH/$REPO_PATH )"
 REPO_VERSION="${THX_VERSION}.${VERSION}" # todo: is not semantic at all
 BUILD_DATE=$(date +%Y-%m-%d)
@@ -682,7 +687,12 @@ BUILD_FILE=$( find $BUILD_PATH/$REPO_PATH -name "thinx_build.json" )
 if [[ -z $BUILD_FILE ]]; then
 	BUILD_FILE=$( find $WORKDIR -name "thinx_build.json" )
 fi
-THINX_FIRMWARE_VERSION=$(jq $BUILD_FILE .THINX_FIRMWARE_VERSION)
+if [[ -z $BUILD_FILE ]]; then
+	echo "Np build file found, generating last-minute version..."
+	THINX_FIRMWARE_VERSION=$(basename $(pwd))-$THX_VERSION.$THX_REVISION
+else
+	THINX_FIRMWARE_VERSION=$(jq $BUILD_FILE .THINX_FIRMWARE_VERSION)
+fi
 
 echo "BUILD_ID" "${BUILD_ID}" | tee -a "${LOG_PATH}"
 echo "COMMIT" "${COMMIT}" | tee -a "${LOG_PATH}"
