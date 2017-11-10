@@ -2224,10 +2224,17 @@ var ThinxApp = function() {
     github_login_handler(req, res, function(err) {
       // if login errored 
       console.log("[oauth][github] Logging with GitHub...");
+
       if (err) throw err;
       // if login was successful 
       console.log("[oauth][github] GitHub Login successfull...");
+
+      console.log(JSON.stringify(req.github_user));
+
+      console.log(JSON.stringify(res.github_user));
+
       if (req.github_user) {
+
         var token = "ghat:" + req.github_access_token;
         console.log(JSON.stringify(req.github_user, null, 2));
 
