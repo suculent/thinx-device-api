@@ -111,8 +111,8 @@ var ThinxApp = function() {
     githubOAuth = require('github-oauth')({
       githubClient: github_ocfg.client_id,
       githubSecret: github_ocfg.client_secret,
-      baseURL: 'https://rtm.thinx.cloud/',
-      loginURI: 'https://rtm.thinx.cloud/oauth/login',
+      baseURL: 'https://rtm.thinx.cloud',
+      loginURI: '/oauth/login',
       callbackURI: github_ocfg.redirect_uris,
       scope: 'user'
     });
@@ -2238,9 +2238,10 @@ var ThinxApp = function() {
 
   // Initial page redirecting to OAuth2 provider
   app.get('/oauth/github', function(req, res) {
-    //if (typeof(req.session) !== "undefined") {
-    //  req.session.destroy();
-    //}
+    if (typeof(req.session) !== "undefined") {
+      req.session.destroy();
+    }
+    console.log('Starting GitHub Login...');
     githubOAuth.login(req, res);
   });
 
@@ -2390,6 +2391,7 @@ var ThinxApp = function() {
 
   // Callback service parsing the authorization token and asking for the access token
   app.get('/oauth/gcb', function(req, res) {
+    console.log("Github OAuth2 Callback");
     githubOAuth.callback(req, res, function(err) {
       console.log("cberr: ", err);
     });
@@ -2399,7 +2401,7 @@ var ThinxApp = function() {
   app.get('/oauth/cb', function(req, res) {
 
 
-    console.log("Called /oauth/cb from " + referer);
+    console.log("Google OAuth2 Callback");
 
     /// CALLBACK FOR GOOGLE OAUTH ONLY!
 
