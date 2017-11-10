@@ -112,8 +112,8 @@ var ThinxApp = function() {
       githubClient: github_ocfg.client_id,
       githubSecret: github_ocfg.client_secret,
       baseURL: 'https://rtm.thinx.cloud/',
-      loginURI: '/oauth/github',
-      callbackURI: 'https://thinx.cloud:7443/oauth/cb?type=github',
+      loginURI: '/oauth/login',
+      callbackURI: github_ocfg.redirect_uris,
       scope: 'user'
     });
 
@@ -2238,12 +2238,10 @@ var ThinxApp = function() {
 
   // Initial page redirecting to OAuth2 provider
   app.get('/oauth/github', function(req, res) {
-    if (typeof(req.session) !== "undefined") {
-      req.session.destroy();
-    }
-
+    //if (typeof(req.session) !== "undefined") {
+    //  req.session.destroy();
+    //}
     githubOAuth.login(req, res);
-
   });
 
   githubOAuth.on('error', function(err) {
@@ -2251,7 +2249,10 @@ var ThinxApp = function() {
   });
 
   githubOAuth.on('token', function(oauth_token, serverResponse) {
+
     console.log('here is your shiny new github oauth_token', oauth_token);
+
+    serverResponse.end(JSON.stringify(oauth_token));
 
     // if login was successful 
     console.log("[oauth][github] GitHub Login successfull...");
