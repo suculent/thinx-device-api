@@ -46,6 +46,7 @@
     "fs-finder": "^1.8.1",
     "gith": "^1.0.4",
     "githooked": "^1.1.1",
+    "github-oauth": "^0.2.2",
     "gulp-repository-watch": "0.0.4",
     "gulp-util": "^3.0.8",
     "http-signature": "1.0.0",
