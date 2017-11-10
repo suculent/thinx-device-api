@@ -102,9 +102,9 @@ var ThinxApp = function() {
     githubOAuth = require('github-oauth')({
       githubClient: github_ocfg.client_id,
       githubSecret: github_ocfg.client_secret,
-      baseURL: 'https://rtm.thinx.cloud',
+      baseURL: github_ocfg.base_url, // should be rather gotten from global config!
       loginURI: '/oauth/login',
-      callbackURI: ':7443/oauth/gcb',
+      callbackURI: github_ocfg.redirect_uri,
       scope: 'user'
     });
 
