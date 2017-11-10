@@ -2395,7 +2395,7 @@ var ThinxApp = function() {
     var referer;
 
     if ((typeof(req.headers.referer) !== "undefined") && req.headers.referer !== null) {
-      console.log("Req.headers.origin: " + req.headers.origin);
+      console.log("Req.headers: " + JSON.stringify(req.headers));
       if (req.headers.origin.indexOf("github") !== -1) {
         referer = "github";
       }
