@@ -2235,7 +2235,7 @@ var ThinxApp = function() {
     // if login was successful 
     console.log("[oauth][github] GitHub Login successfull...");
 
-    if (oauth_token) {
+    if (oauth_token.access_token) {
 
       console.log(JSON.stringify("Getting user..."));
 
@@ -2338,13 +2338,12 @@ var ThinxApp = function() {
                   alog.log(req.session.owner, "OAuth User created: " +
                     given_name + " " + family_name);
 
-                  var token = sha256(token);
                   client.set(token, JSON.stringify(userWrapper));
                   client.expire(token, 30);
-
                   global_token = token;
 
-                  global_response.redirect(
+                  //global_response.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
+                  serverResponse.redirect(
                     "https://rtm.thinx.cloud/app/#/oauth/" + token);
 
                   console.log("Redirecting to login (2)");
@@ -2375,20 +2374,22 @@ var ThinxApp = function() {
               req.session.cookie.maxAge = fortnight;
               alog.log(req.session.owner, "OAuth2 User logged in...");
 
-              var token = sha256(res2.access_token);
-
               client.set(token, JSON.stringify(userWrapper));
               client.expire(token, 3600);
 
               console.log("Redirecting to login (1)");
 
-              global_response.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
+              serverResponse.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
                 token);
 
-            } // else no such user
+            } else {
+              console.log("No such user (gh).");
+            }
+
           }); // userlib.get
-        });
-      });
+
+        }); // res.end        
+      }); // https.get
     }
   });
 
