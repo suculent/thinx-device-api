@@ -2348,43 +2348,42 @@ var ThinxApp = function() {
 
                   console.log("Redirecting to login (2)");
 
+
                 });
                 return;
               }
-
-              console.log("UDOC:");
-              console.log(JSON.stringify(udoc));
-
-              userlib.atomic("users", "checkin", owner_id, {
-                last_seen: new Date()
-              }, function(error, response) {
-                if (error) {
-                  console.log("Last-seen update failed: " +
-                    error);
-                } else {
-                  alog.log(req.session.owner,
-                    "Last seen updated.");
-                }
-              });
-
-              req.session.owner = owner_id;
-              req.session.cookie.secure = true;
-              req.session.cookie.expires = new Date(Date.now() + fortnight,
-                "isoDate");
-              req.session.cookie.maxAge = fortnight;
-              alog.log(req.session.owner, "OAuth2 User logged in...");
-
-              client.set(token, JSON.stringify(userWrapper));
-              client.expire(token, 3600);
-
-              console.log("Redirecting to login (1)");
-
-              serverResponse.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
-                token);
-
-            } else {
-              console.log("No such user (gh).");
             }
+
+            console.log("UDOC:");
+            console.log(JSON.stringify(udoc));
+
+            userlib.atomic("users", "checkin", owner_id, {
+              last_seen: new Date()
+            }, function(error, response) {
+              if (error) {
+                console.log("Last-seen update failed: " +
+                  error);
+              } else {
+                alog.log(req.session.owner,
+                  "Last seen updated.");
+              }
+            });
+
+            req.session.owner = owner_id;
+            req.session.cookie.secure = true;
+            req.session.cookie.expires = new Date(Date.now() + fortnight,
+              "isoDate");
+            req.session.cookie.maxAge = fortnight;
+            alog.log(req.session.owner, "OAuth2 User logged in...");
+
+            client.set(token, JSON.stringify(userWrapper));
+            client.expire(token, 3600);
+
+            console.log("Redirecting to login (1)");
+
+            serverResponse.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
+              token);
+
 
           }); // userlib.get
 
