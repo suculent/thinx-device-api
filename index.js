@@ -2225,17 +2225,215 @@ var ThinxApp = function() {
 
   githubOAuth.on('token', function(oauth_token, serverResponse) {
 
-    console.log('here is your shiny new github oauth_token', oauth_token);
+      console.log('here is your shiny new github oauth_token', oauth_token);
 
-    // if login was successful 
-    console.log("[oauth][github] GitHub Login successfull...");
+      // if login was successful 
+      console.log("[oauth][github] GitHub Login successfull...");
 
-    if (oauth_token) {
+      if (oauth_token) {
 
-      console.log(JSON.stringify("Getting user..."));
+        console.log(JSON.stringify("Getting user..."));
 
-      https.get('https://api.github.com/user&access_token=' + oauth_token, (resp) => {
+        https.get('https://api.github.com/user&access_token=' + oauth_token)
+          .set('User-Agent', 'THiNX OAuth')
+          .end, (err, resp) => {
 
+            let data = '';
+            // A chunk of data has been recieved.
+            resp.on('data', (chunk) => {
+              data += chunk;
+            });
+
+            // The whole response has been received. Print out the result.
+            resp.on('end', () => {
+
+              console.log("Oauth user response: " + JSON.stringify(data));
+
+              var token = "ghat:" + oauth_token;
+
+              //console.log(JSON.stringify(serverResponse, null, 2));
+              console.log(data);
+
+              const hdata = JSON.parse(data);
+              const email = hdata.email;
+              const family_name = hdata.name.split(" ")[0];
+              const given_name = hdata.name.split(" ")[1] || " ";
+              const picture = hdata.avatar_url;
+
+              if (typeof(email) === "undefined") {
+                console.log("Error: no email in response.");
+                res.redirect('/oauth/error');
+              }
+
+              const owner_id = sha256(email);
+
+              var userWrapper = {
+                first_name: given_name,
+                last_name: family_name,
+                email: email,
+                owner_id: owner_id,
+                username: owner_id
+              };
+
+              console.log("[oauth][github] searching for owner_id: " + owner_id);
+
+              // Check user and make note on user login
+              userlib.get(owner_id, function(error, udoc) {
+
+                if (error) {
+
+                  if (error.toString().indexOf("Error: deleted") !== -1) {
+                    // TODO: Redirect to error page with reason
+                    console.log("[oauth] user document deleted");
+                    res.redirect('/oauth/account-doc-deleted');
+                    return;
+
+                  } else {
+
+                    if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
+                      true) {
+                      // TODO: Redirect to error page with reason
+                      console.log("[oauth] user account marked as deleted");
+                      res.redirect('/oauth/account-deleted');
+                      return;
+                    }
+
+                    // No such owner, create...
+                    user.create(userWrapper, function(success, status) {
+
+                      req.session.owner = userWrapper.owner_id;
+                      console.log("[OID:" + req.session.owner +
+                        "] [NEW_SESSION] [oauth]");
+
+                      var minute = 60 * 1000;
+
+                      req.session.cookie.expires = new Date(Date.now() +
+                        fortnight, "isoDate");
+                      req.session.cookie.maxAge = fortnight;
+                      req.session.cookie.secure = true;
+
+                      alog.log(req.session.owner, "OAuth User created: " +
+                        given_name + " " + family_name);
+
+                      var token = sha256(token);
+                      client.set(token, JSON.stringify(userWrapper));
+                      client.expire(token, 30);
+
+                      res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
+
+                      return;
+
+                    });
+
+                  }
+
+
+                  console.log(JSON.stringify(udoc));
+
+                  userlib.atomic("users", "checkin", owner_id, {
+                    last_seen: new Date()
+                  }, function(error, response) {
+                    if (error) {
+                      console.log("Last-seen update failed: " +
+                        error);
+                    } else {
+                      alog.log(req.session.owner,
+                        "Last seen updated.");
+                    }
+                  });
+
+                  req.session.owner = owner_id;
+                  req.session.cookie.secure = true;
+                  req.session.cookie.expires = new Date(Date.now() + fortnight,
+                    "isoDate");
+                  req.session.cookie.maxAge = fortnight;
+                  alog.log(req.session.owner, "OAuth2 User logged in...");
+
+                  var token = sha256(res2.access_token);
+
+                  client.set(token, JSON.stringify(userWrapper));
+                  client.expire(token, 3600);
+
+                  res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
+                } // else not github user
+
+              });
+
+
+            });
+          }); // Application name from GitHub / Settings / Developer Settings, should be in JSON;
+
+
+
+    }
+  });
+
+// Initial page redirecting to OAuth2 provider
+app.get('/oauth/github', function(req, res) {
+  if (typeof(req.session) !== "undefined") {
+    req.session.destroy();
+  }
+  console.log('Starting GitHub Login...');
+  githubOAuth.login(req, res);
+});
+
+/*
+ * OAuth 2 with Google
+ */
+
+// Initial page redirecting to OAuth2 provider
+app.get('/oauth/google', function(req, res) {
+  // User requested login, destroy existing session first...
+  if (typeof(req.session) !== "undefined") {
+    req.session.destroy();
+  }
+  console.log("[oauth][google] Redirecting to authorizationUri: " +
+    authorizationUri);
+  res.redirect(authorizationUri);
+});
+
+// Callback service parsing the authorization token and asking for the access token
+app.get('/oauth/gcb', function(req, res) {
+  console.log("Github OAuth2 Callback...");
+  githubOAuth.callback(req, res, function(err) {
+    console.log("cberr: ", err);
+    if (!err) {
+      console.log(JSON.stringify(res.body));
+    }
+  });
+});
+
+// Callback service parsing the authorization token and asking for the access token
+app.get('/oauth/cb', function(req, res) {
+
+
+  console.log("Google OAuth2 Callback");
+
+  /// CALLBACK FOR GOOGLE OAUTH ONLY!
+
+  const code = req.query.code;
+  const options = {
+    code: code,
+    redirect_uri: cfg.web.redirect_uris[0]
+  };
+
+  var t = oauth2.authorizationCode.getToken(options, (error, result) => {
+    if (error) {
+      console.error('[oauth] Access Token Error', error.message);
+      return res.json('Authentication failed');
+    }
+
+    // console.log('[oauth] The resulting token: ', result);
+    const token = oauth2.accessToken.create(result);
+    return token;
+  });
+  t.then(res2 => {
+    console.log(res2);
+
+    https.get(
+      'https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' +
+      res2
+      .access_token, (resp) => {
         let data = '';
         // A chunk of data has been recieved.
         resp.on('data', (chunk) => {
@@ -2245,18 +2443,13 @@ var ThinxApp = function() {
         // The whole response has been received. Print out the result.
         resp.on('end', () => {
 
-          console.log("Oauth user response: " + JSON.stringify(data));
+          const odata = JSON.parse(data);
 
-          var token = "ghat:" + oauth_token;
-
-          //console.log(JSON.stringify(serverResponse, null, 2));
-          console.log(data);
-
-          const hdata = JSON.parse(data);
-          const email = hdata.email;
-          const family_name = hdata.name.split(" ")[0];
-          const given_name = hdata.name.split(" ")[1] || " ";
-          const picture = hdata.avatar_url;
+          const email = odata.email;
+          const family_name = odata.family_name;
+          const given_name = odata.given_name;
+          const picture = odata.picture;
+          const locale = odata.locale;
 
           if (typeof(email) === "undefined") {
             console.log("Error: no email in response.");
@@ -2273,7 +2466,7 @@ var ThinxApp = function() {
             username: owner_id
           };
 
-          console.log("[oauth][github] searching for owner_id: " + owner_id);
+          console.log("[oauth] searching for owner_id: " + owner_id);
 
           // Check user and make note on user login
           userlib.get(owner_id, function(error, udoc) {
@@ -2291,7 +2484,8 @@ var ThinxApp = function() {
                 if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
                   true) {
                   // TODO: Redirect to error page with reason
-                  console.log("[oauth] user account marked as deleted");
+                  console.log(
+                    "[oauth] user account marked as deleted");
                   res.redirect('/oauth/account-deleted');
                   return;
                 }
@@ -2310,610 +2504,418 @@ var ThinxApp = function() {
                   req.session.cookie.maxAge = fortnight;
                   req.session.cookie.secure = true;
 
-                  alog.log(req.session.owner, "OAuth User created: " +
+                  alog.log(req.session.owner,
+                    "OAuth User created: " +
                     given_name + " " + family_name);
 
-                  var token = sha256(token);
+                  var token = sha256(res2.access_token);
                   client.set(token, JSON.stringify(userWrapper));
                   client.expire(token, 30);
 
-                  res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
+                  res.redirect(
+                    "https://rtm.thinx.cloud/app/#/oauth/" +
+                    token);
 
                   return;
 
                 });
 
               }
-
-
-              console.log(JSON.stringify(udoc));
-
-              userlib.atomic("users", "checkin", owner_id, {
-                last_seen: new Date()
-              }, function(error, response) {
-                if (error) {
-                  console.log("Last-seen update failed: " +
-                    error);
-                } else {
-                  alog.log(req.session.owner,
-                    "Last seen updated.");
-                }
-              });
-
-              req.session.owner = owner_id;
-              req.session.cookie.secure = true;
-              req.session.cookie.expires = new Date(Date.now() + fortnight,
-                "isoDate");
-              req.session.cookie.maxAge = fortnight;
-              alog.log(req.session.owner, "OAuth2 User logged in...");
-
-              var token = sha256(res2.access_token);
-
-              client.set(token, JSON.stringify(userWrapper));
-              client.expire(token, 3600);
-
-              res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
-            } // else not github user
-
-          });
-
-
-        });
-      }).set('User-Agent', 'THiNX OAuth'); // Application name from GitHub / Settings / Developer Settings, should be in JSON;
-
-
-
-    }
-  });
-
-  // Initial page redirecting to OAuth2 provider
-  app.get('/oauth/github', function(req, res) {
-    if (typeof(req.session) !== "undefined") {
-      req.session.destroy();
-    }
-    console.log('Starting GitHub Login...');
-    githubOAuth.login(req, res);
-  });
-
-  /*
-   * OAuth 2 with Google
-   */
-
-  // Initial page redirecting to OAuth2 provider
-  app.get('/oauth/google', function(req, res) {
-    // User requested login, destroy existing session first...
-    if (typeof(req.session) !== "undefined") {
-      req.session.destroy();
-    }
-    console.log("[oauth][google] Redirecting to authorizationUri: " +
-      authorizationUri);
-    res.redirect(authorizationUri);
-  });
-
-  // Callback service parsing the authorization token and asking for the access token
-  app.get('/oauth/gcb', function(req, res) {
-    console.log("Github OAuth2 Callback...");
-    githubOAuth.callback(req, res, function(err) {
-      console.log("cberr: ", err);
-      if (!err) {
-        console.log(JSON.stringify(res.body));
-      }
-    });
-  });
-
-  // Callback service parsing the authorization token and asking for the access token
-  app.get('/oauth/cb', function(req, res) {
-
-
-    console.log("Google OAuth2 Callback");
-
-    /// CALLBACK FOR GOOGLE OAUTH ONLY!
-
-    const code = req.query.code;
-    const options = {
-      code: code,
-      redirect_uri: cfg.web.redirect_uris[0]
-    };
-
-    var t = oauth2.authorizationCode.getToken(options, (error, result) => {
-      if (error) {
-        console.error('[oauth] Access Token Error', error.message);
-        return res.json('Authentication failed');
-      }
-
-      // console.log('[oauth] The resulting token: ', result);
-      const token = oauth2.accessToken.create(result);
-      return token;
-    });
-    t.then(res2 => {
-      console.log(res2);
-
-      https.get(
-        'https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' +
-        res2
-        .access_token, (resp) => {
-          let data = '';
-          // A chunk of data has been recieved.
-          resp.on('data', (chunk) => {
-            data += chunk;
-          });
-
-          // The whole response has been received. Print out the result.
-          resp.on('end', () => {
-
-            const odata = JSON.parse(data);
-
-            const email = odata.email;
-            const family_name = odata.family_name;
-            const given_name = odata.given_name;
-            const picture = odata.picture;
-            const locale = odata.locale;
-
-            if (typeof(email) === "undefined") {
-              console.log("Error: no email in response.");
-              res.redirect('/oauth/error');
             }
 
-            const owner_id = sha256(email);
+            console.log(JSON.stringify(udoc));
 
-            var userWrapper = {
-              first_name: given_name,
-              last_name: family_name,
-              email: email,
-              owner_id: owner_id,
-              username: owner_id
-            };
-
-            console.log("[oauth] searching for owner_id: " + owner_id);
-
-            // Check user and make note on user login
-            userlib.get(owner_id, function(error, udoc) {
-
+            userlib.atomic("users", "checkin", owner_id, {
+              last_seen: new Date()
+            }, function(error, response) {
               if (error) {
-
-                if (error.toString().indexOf("Error: deleted") !== -1) {
-                  // TODO: Redirect to error page with reason
-                  console.log("[oauth] user document deleted");
-                  res.redirect('/oauth/account-doc-deleted');
-                  return;
-
-                } else {
-
-                  if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
-                    true) {
-                    // TODO: Redirect to error page with reason
-                    console.log(
-                      "[oauth] user account marked as deleted");
-                    res.redirect('/oauth/account-deleted');
-                    return;
-                  }
-
-                  // No such owner, create...
-                  user.create(userWrapper, function(success, status) {
-
-                    req.session.owner = userWrapper.owner_id;
-                    console.log("[OID:" + req.session.owner +
-                      "] [NEW_SESSION] [oauth]");
-
-                    var minute = 60 * 1000;
-
-                    req.session.cookie.expires = new Date(Date.now() +
-                      fortnight, "isoDate");
-                    req.session.cookie.maxAge = fortnight;
-                    req.session.cookie.secure = true;
-
-                    alog.log(req.session.owner,
-                      "OAuth User created: " +
-                      given_name + " " + family_name);
-
-                    var token = sha256(res2.access_token);
-                    client.set(token, JSON.stringify(userWrapper));
-                    client.expire(token, 30);
-
-                    res.redirect(
-                      "https://rtm.thinx.cloud/app/#/oauth/" +
-                      token);
-
-                    return;
-
-                  });
-
-                }
+                console.log("Last-seen update failed: " +
+                  error);
+              } else {
+                alog.log(req.session.owner,
+                  "Last seen updated.");
               }
-
-              console.log(JSON.stringify(udoc));
-
-              userlib.atomic("users", "checkin", owner_id, {
-                last_seen: new Date()
-              }, function(error, response) {
-                if (error) {
-                  console.log("Last-seen update failed: " +
-                    error);
-                } else {
-                  alog.log(req.session.owner,
-                    "Last seen updated.");
-                }
-              });
-
-              req.session.owner = owner_id;
-              req.session.cookie.secure = true;
-              req.session.cookie.expires = new Date(Date.now() +
-                fortnight, "isoDate");
-              req.session.cookie.maxAge = fortnight;
-              alog.log(req.session.owner, "OAuth2 User logged in...");
-
-              var token = sha256(res2.access_token);
-
-              client.set(token, JSON.stringify(userWrapper));
-              client.expire(token, 3600);
-
-              res.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
-                token);
-
             });
 
+            req.session.owner = owner_id;
+            req.session.cookie.secure = true;
+            req.session.cookie.expires = new Date(Date.now() +
+              fortnight, "isoDate");
+            req.session.cookie.maxAge = fortnight;
+            alog.log(req.session.owner, "OAuth2 User logged in...");
+
+            var token = sha256(res2.access_token);
+
+            client.set(token, JSON.stringify(userWrapper));
+            client.expire(token, 3600);
+
+            res.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
+              token);
+
           });
 
-        }).on("error", (err) => {
-        console.log("Error: " + err.message);
-        res.redirect('/oauth/error');
-      });
-    }).catch(err => {
-      console.log("Oauth error: " + err);
-      res.redirect('/oauth/error');
-    });
-  });
-
-  app.get('/oauth/error', (req, res) => {
-    res.send('OAuth error');
-  });
-
-  /*
-   * thinx-connect gateway validation (device calls /lick with its mac and must receive its api key)
-   * therefore gateway must be authenticated as well by an api key!
-   */
-
-  app.get('/lick', (req, res) => {
-    var mac = req.query.mac;
-    // return last device api key to verify this gateway is valid
-    // search device by mac and return hash of its api key
-
-    // search by mac, return last api key hash
-
-    devicelib.view("devicelib", "devices_by_mac", {
-        key: device.normalizedMAC(reg.query.mac),
-        include_docs: true
-      },
-
-      function(err, body) {
-
-        if (err) {
-          console.log(
-            "Device with this UUID/MAC not found. Seems like new one..."
-          );
-          respond(res, {
-            success: false,
-            status: "device_key_unknown"
-          });
-          return;
-        }
-
-        var _device = require("./lib/thinx/device");
-        console.log("Known device identified by MAC address: " + _device.normalizedMAC(
-          reg.mac));
-
-        if (body.rows.length === 0) {
-          // device not found by mac; this is a new device...
-          respond(res, {
-            success: false,
-            status: "device_not_found"
-          });
-        } else {
-
-          console.log("ROWS:" + JSON.stringify(body.rows));
-
-          // Device should receive hash of its api key but is unable to calculate aes so it will get the key
-          var device = body.rows[0];
-          var lastkey = device.lastkey;
-          respond(res, {
-            success: true,
-            status: lastkey
-          });
-        }
-      });
-  });
-
-  /*
-   * Root
-   */
-
-  /** Tested with: !device_register.spec.js` */
-  app.get("/", function(req, res) {
-    var protocol = req.protocol;
-    var host = req.get("host");
-    if (req.session.owner) {
-      console.log("/ called with owner: " + req.session.owner);
-      res.redirect("/");
-    } else {
-      res.redirect(protocol + "://" + host);
-    }
-  });
-
-  /*
-   * HTTP/HTTPS API Server
-   */
-
-  app.version = function() {
-    return v.revision();
-  };
-
-  /*
-   * HTTP/S Server
-   */
-
-  var ssl_options = null;
-
-  // disable HTTPS on CIRCLE CI
-  if (typeof(process.env.CIRCLE_USERNAME) === "undefined") {
-
-    if ((fs.existsSync(app_config.ssl_key)) &&
-      (fs.existsSync(app_config.ssl_cert))) {
-      ssl_options = {
-        key: fs.readFileSync(app_config.ssl_key),
-        cert: fs.readFileSync(app_config.ssl_cert),
-        NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
-      };
-      console.log("» Starting HTTPS server on " + (serverPort + 1) +
-        "...");
-      https.createServer(ssl_options, app).listen(serverPort + 1);
-    } else {
-      console.log(
-        "Skipping HTTPS server, SSL key or certificate not found.");
-    }
-  }
-
-  // Legacy HTTP support for old devices without HTTPS proxy
-  http.createServer(app).listen(serverPort);
-
-  /*
-   * WebSocket Server
-   */
-
-  var wsapp = express();
-
-  wsapp.use(session({
-    secret: session_config.secret,
-    store: new redisStore({
-      host: "localhost",
-      port: 6379,
-      client: client
-    }),
-    cookie: {
-      expires: hour
-    },
-    name: "x-thx-session",
-    resave: false,
-    rolling: true,
-    saveUninitialized: true,
-  }));
-
-  var wserver = null;
-  if (typeof(process.env.CIRCLE_USERNAME) === "undefined") {
-    wserver = https.createServer(ssl_options, wsapp);
-  } else {
-    wserver = http.createServer(wsapp);
-  }
-
-  var wss = new WebSocket.Server({
-    port: socketPort,
-    server: wserver
-  });
-
-
-  var _ws = null;
-
-  wss.on("connection", function connection(ws, req) {
-
-    req.on("error", function(err) {
-      console.log("WSS REQ ERROR: " + err);
-      return;
-    });
-
-    _ws = ws;
-
-    var cookies = req.headers.cookie;
-
-    if (typeof(req.headers.cookie) !== "undefined") {
-      if (cookies.indexOf("x-thx-") === -1) {
-        //console.log("» WSS cookies: " + cookies);
-        console.log("» WARNING! No thinx-cookie found in: " + JSON.stringify(req.headers.cookie));
-        // wss.close();
-        // return;
-      }
-      if (typeof(req.session) !== "undefined") {
-        console.log("Session: " + JSON.stringify(req.session));
-      }
-    }
-
-    var logtail_callback = function(err) {
-      console.log("[index.js] logtail_callback:" + err);
-    };
-
-    ws.on("message", function incoming(message) {
-
-      // skip empty messages
-      if (message == "{}") return;
-
-      var object = JSON.parse(message);
-
-      if (typeof(object.logtail) !== "undefined") {
-
-        var build_id = object.logtail.build_id;
-        var owner_id = object.logtail.owner_id;
-        blog.logtail(build_id, owner_id, _ws, logtail_callback);
-
-      } else if (typeof(object.init) !== "undefined") {
-
-        messenger.initWithOwner(object.init, _ws, function(success,
-          message) {
-          if (!success) {
-            console.log("Messenger init on message with success " +
-              error +
-              "message: " +
-              JSON.stringify(message));
-          }
         });
 
+      }).on("error", (err) => {
+      console.log("Error: " + err.message);
+      res.redirect('/oauth/error');
+    });
+  }).catch(err => {
+    console.log("Oauth error: " + err);
+    res.redirect('/oauth/error');
+  });
+});
+
+app.get('/oauth/error', (req, res) => {
+  res.send('OAuth error');
+});
+
+/*
+ * thinx-connect gateway validation (device calls /lick with its mac and must receive its api key)
+ * therefore gateway must be authenticated as well by an api key!
+ */
+
+app.get('/lick', (req, res) => {
+  var mac = req.query.mac;
+  // return last device api key to verify this gateway is valid
+  // search device by mac and return hash of its api key
+
+  // search by mac, return last api key hash
+
+  devicelib.view("devicelib", "devices_by_mac", {
+      key: device.normalizedMAC(reg.query.mac),
+      include_docs: true
+    },
+
+    function(err, body) {
+
+      if (err) {
+        console.log(
+          "Device with this UUID/MAC not found. Seems like new one..."
+        );
+        respond(res, {
+          success: false,
+          status: "device_key_unknown"
+        });
+        return;
+      }
+
+      var _device = require("./lib/thinx/device");
+      console.log("Known device identified by MAC address: " + _device.normalizedMAC(
+        reg.mac));
+
+      if (body.rows.length === 0) {
+        // device not found by mac; this is a new device...
+        respond(res, {
+          success: false,
+          status: "device_not_found"
+        });
       } else {
-        var m = JSON.stringify(message);
-        if ((m != "{}") || (typeof(message) == "undefined")) {
-          console.log("» Websocketparser said: unknown message: " + m);
-        }
+
+        console.log("ROWS:" + JSON.stringify(body.rows));
+
+        // Device should receive hash of its api key but is unable to calculate aes so it will get the key
+        var device = body.rows[0];
+        var lastkey = device.lastkey;
+        respond(res, {
+          success: true,
+          status: lastkey
+        });
       }
     });
+});
 
-  }).on("error", function(err) {
-    console.log("WSS ERROR: " + err);
+/*
+ * Root
+ */
+
+/** Tested with: !device_register.spec.js` */
+app.get("/", function(req, res) {
+  var protocol = req.protocol;
+  var host = req.get("host");
+  if (req.session.owner) {
+    console.log("/ called with owner: " + req.session.owner);
+    res.redirect("/");
+  } else {
+    res.redirect(protocol + "://" + host);
+  }
+});
+
+/*
+ * HTTP/HTTPS API Server
+ */
+
+app.version = function() {
+  return v.revision();
+};
+
+/*
+ * HTTP/S Server
+ */
+
+var ssl_options = null;
+
+// disable HTTPS on CIRCLE CI
+if (typeof(process.env.CIRCLE_USERNAME) === "undefined") {
+
+  if ((fs.existsSync(app_config.ssl_key)) &&
+    (fs.existsSync(app_config.ssl_cert))) {
+    ssl_options = {
+      key: fs.readFileSync(app_config.ssl_key),
+      cert: fs.readFileSync(app_config.ssl_cert),
+      NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
+    };
+    console.log("» Starting HTTPS server on " + (serverPort + 1) +
+      "...");
+    https.createServer(ssl_options, app).listen(serverPort + 1);
+  } else {
+    console.log(
+      "Skipping HTTPS server, SSL key or certificate not found.");
+  }
+}
+
+// Legacy HTTP support for old devices without HTTPS proxy
+http.createServer(app).listen(serverPort);
+
+/*
+ * WebSocket Server
+ */
+
+var wsapp = express();
+
+wsapp.use(session({
+  secret: session_config.secret,
+  store: new redisStore({
+    host: "localhost",
+    port: 6379,
+    client: client
+  }),
+  cookie: {
+    expires: hour
+  },
+  name: "x-thx-session",
+  resave: false,
+  rolling: true,
+  saveUninitialized: true,
+}));
+
+var wserver = null;
+if (typeof(process.env.CIRCLE_USERNAME) === "undefined") {
+  wserver = https.createServer(ssl_options, wsapp);
+} else {
+  wserver = http.createServer(wsapp);
+}
+
+var wss = new WebSocket.Server({
+  port: socketPort,
+  server: wserver
+});
+
+
+var _ws = null;
+
+wss.on("connection", function connection(ws, req) {
+
+  req.on("error", function(err) {
+    console.log("WSS REQ ERROR: " + err);
     return;
   });
 
-  wserver.listen(7444, function listening() {
-    console.log("» WebSocket listening on port %d", wserver.address()
-      .port);
+  _ws = ws;
+
+  var cookies = req.headers.cookie;
+
+  if (typeof(req.headers.cookie) !== "undefined") {
+    if (cookies.indexOf("x-thx-") === -1) {
+      //console.log("» WSS cookies: " + cookies);
+      console.log("» WARNING! No thinx-cookie found in: " + JSON.stringify(req.headers.cookie));
+      // wss.close();
+      // return;
+    }
+    if (typeof(req.session) !== "undefined") {
+      console.log("Session: " + JSON.stringify(req.session));
+    }
+  }
+
+  var logtail_callback = function(err) {
+    console.log("[index.js] logtail_callback:" + err);
+  };
+
+  ws.on("message", function incoming(message) {
+
+    // skip empty messages
+    if (message == "{}") return;
+
+    var object = JSON.parse(message);
+
+    if (typeof(object.logtail) !== "undefined") {
+
+      var build_id = object.logtail.build_id;
+      var owner_id = object.logtail.owner_id;
+      blog.logtail(build_id, owner_id, _ws, logtail_callback);
+
+    } else if (typeof(object.init) !== "undefined") {
+
+      messenger.initWithOwner(object.init, _ws, function(success,
+        message) {
+        if (!success) {
+          console.log("Messenger init on message with success " +
+            error +
+            "message: " +
+            JSON.stringify(message));
+        }
+      });
+
+    } else {
+      var m = JSON.stringify(message);
+      if ((m != "{}") || (typeof(message) == "undefined")) {
+        console.log("» Websocketparser said: unknown message: " + m);
+      }
+    }
   });
 
+}).on("error", function(err) {
+  console.log("WSS ERROR: " + err);
+  return;
+});
 
-  /*
-   * Bootstrap banner section
-   */
+wserver.listen(7444, function listening() {
+  console.log("» WebSocket listening on port %d", wserver.address()
+    .port);
+});
 
-  var package_info = require("./package.json");
-  var product = package_info.description;
-  var version = package_info.version;
 
-  console.log("");
-  console.log("-=[ ☢ " + product + " v" + version +
-    " rev. " +
-    app.version() +
-    " ☢ ]=-");
-  console.log("");
-  console.log("» Started on port " +
-    serverPort +
-    " (HTTP) and " + (serverPort +
-      1) +
-    " (HTTPS)");
+/*
+ * Bootstrap banner section
+ */
 
-  /* Should load all devices with attached repositories and watch those repositories.
-   * Maintains list of watched repositories for runtime handling purposes.
-   * TODO: Re-build on change.
-   */
+var package_info = require("./package.json");
+var product = package_info.description;
+var version = package_info.version;
 
-  var watcher_callback = function(result) {
-    if (typeof(result) !== "undefined") {
-      console.log("watcher_callback result: " + JSON.stringify(result));
-      if (result === false) {
-        console.log(
-          "No change detected on repository so far."
-        );
-      } else {
-        console.log(
-          "CHANGE DETECTED! - TODO: Commence re-build (will notify user but needs to get all required user data first (owner/device is in path)"
-        );
-      }
+console.log("");
+console.log("-=[ ☢ " + product + " v" + version +
+  " rev. " +
+  app.version() +
+  " ☢ ]=-");
+console.log("");
+console.log("» Started on port " +
+  serverPort +
+  " (HTTP) and " + (serverPort +
+    1) +
+  " (HTTPS)");
+
+/* Should load all devices with attached repositories and watch those repositories.
+ * Maintains list of watched repositories for runtime handling purposes.
+ * TODO: Re-build on change.
+ */
+
+var watcher_callback = function(result) {
+  if (typeof(result) !== "undefined") {
+    console.log("watcher_callback result: " + JSON.stringify(result));
+    if (result === false) {
+      console.log(
+        "No change detected on repository so far."
+      );
     } else {
-      console.log("watcher_callback: no result");
+      console.log(
+        "CHANGE DETECTED! - TODO: Commence re-build (will notify user but needs to get all required user data first (owner/device is in path)"
+      );
     }
-  };
+  } else {
+    console.log("watcher_callback: no result");
+  }
+};
 
-  var getNewestFolder = function(dir, regexp) {
-    newest = null;
-    files = fs.readdirSync(dir);
-    one_matched = 0;
+var getNewestFolder = function(dir, regexp) {
+  newest = null;
+  files = fs.readdirSync(dir);
+  one_matched = 0;
 
-    for (i = 0; i < files.length; i++) {
+  for (i = 0; i < files.length; i++) {
 
-      if (regexp.test(files[i]) === false) {
-        continue;
-      } else if (one_matched === 0) {
-        newest = dir + "/" + files[i];
-        one_matched = 1;
-        continue;
-      }
-
-      var filepath = dir + "/" + files[i];
-      //console.log("STAT> " + filepath);
-      f1_time = fs.statSync(filepath).mtime.getTime();
-      f2_time = fs.statSync(newest).mtime.getTime();
-      if (f1_time > f2_time)
-        newest[i] = files[i];
+    if (regexp.test(files[i]) === false) {
+      continue;
+    } else if (one_matched === 0) {
+      newest = dir + "/" + files[i];
+      one_matched = 1;
+      continue;
     }
 
-    if (newest !== null)
-      return (newest);
-    return null;
-  };
-
-  //
-  // Database compactor
-  //
-
-  function database_compactor() {
-    console.log("» Running database compact jobs...");
-    nano.db.compact("logs");
-    nano.db.compact("builds");
-    nano.db.compact("devicelib");
-    nano.db.compact("users", "owners_by_username", function(err) {
-      console.log("» Database compact jobs completed.");
-    });
-  }
-  setInterval(database_compactor, 3600 * 1000);
-
-  //
-  // Log aggregator
-  //
-
-  function log_aggregator() {
-    console.log("» Running log aggregation jobs...");
-    rollbar.info("Running aggregator.");
-    stats.aggregate();
-    console.log("» Aggregation jobs completed.");
-  }
-  setInterval(log_aggregator, 86400 * 1000 / 2);
-
-  //
-  // MQTT Messenger/listener (experimental)
-  //
-
-  var messenger = require("./lib/thinx/messenger");
-
-  //
-  // HTTP/S Request Tools
-  //
-
-  function respond(res, object) {
-
-    if (typeOf(object) == "buffer") {
-      console.log("Sending buffer: ");
-      console.log(object);
-      res.header("Content-type", "application/binary");
-      res.send(object);
-
-    } else if (typeOf(object) == "string") {
-      res.end(object);
-
-    } else {
-      res.end(JSON.stringify(object));
-    }
+    var filepath = dir + "/" + files[i];
+    //console.log("STAT> " + filepath);
+    f1_time = fs.statSync(filepath).mtime.getTime();
+    f2_time = fs.statSync(newest).mtime.getTime();
+    if (f1_time > f2_time)
+      newest[i] = files[i];
   }
 
-  function validateJSON(str) {
-    try {
-      JSON.parse(str);
-    } catch (e) {
-      return false;
-    }
-    return true;
+  if (newest !== null)
+    return (newest);
+  return null;
+};
+
+//
+// Database compactor
+//
+
+function database_compactor() {
+  console.log("» Running database compact jobs...");
+  nano.db.compact("logs");
+  nano.db.compact("builds");
+  nano.db.compact("devicelib");
+  nano.db.compact("users", "owners_by_username", function(err) {
+    console.log("» Database compact jobs completed.");
+  });
+}
+setInterval(database_compactor, 3600 * 1000);
+
+//
+// Log aggregator
+//
+
+function log_aggregator() {
+  console.log("» Running log aggregation jobs...");
+  rollbar.info("Running aggregator.");
+  stats.aggregate();
+  console.log("» Aggregation jobs completed.");
+}
+setInterval(log_aggregator, 86400 * 1000 / 2);
+
+//
+// MQTT Messenger/listener (experimental)
+//
+
+var messenger = require("./lib/thinx/messenger");
+
+//
+// HTTP/S Request Tools
+//
+
+function respond(res, object) {
+
+  if (typeOf(object) == "buffer") {
+    console.log("Sending buffer: ");
+    console.log(object);
+    res.header("Content-type", "application/binary");
+    res.send(object);
+
+  } else if (typeOf(object) == "string") {
+    res.end(object);
+
+  } else {
+    res.end(JSON.stringify(object));
   }
+}
+
+function validateJSON(str) {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
 
 };
 
