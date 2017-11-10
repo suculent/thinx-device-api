@@ -2433,7 +2433,7 @@ var ThinxApp = function() {
       //if (!err) {
       //  console.log(JSON.stringify(res.body));
       //}
-      console.log(JSON.strigify(req.query.params));
+      console.log(JSON.stringify(req.query.params));
     });
   });
 
