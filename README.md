@@ -17,13 +17,13 @@ As a user I have already many IoT new and/or legacy devices at home and new plat
 
 Sometimes we need to change WiFi credentials on a wireless switch mounted on a ceiling. The other day I we want to swap whole firmware for new one, but not always to rewrite working legacy Lua or Micropython code to PlatformIO.
 
-It also covers other use-cases like remotely managing devices for customers with automatic updates for headless devices, or semi-automatic (with user consent after build and tests succed).
+It also covers other use-cases like remotely managing devices for customers with automatic updates for headless devices, or semi-automatic (with user consent after build and tests succeeded).
 
 > That's why we have decided to create the über-platform: THiNX.
 
 Currently we're capable of building firmwares for PlatformIO, NodeMCU and Micropython (and simple Arduino firmware is also coming soon)
 
-* Remote Things Management console for monitoring devices, attaching source code and managing updates.
+* Remote Things Management console for monitoring devices, attaching source code, pushing data, managing incoming payloads and firmware updates.
 
 * Implements Continuous Integration practices to update device apps/configurations from a GitHub repository using commit hooks.
 
@@ -43,16 +43,24 @@ Currently we're capable of building firmwares for PlatformIO, NodeMCU and Microp
 
 * Transfer device to another owner along with sources/firmware.
 
+* Device status messages can be transformed using custom JavaScript lambda-style functions.
+
+* Supports OAuth login with Google and GitHub.
+
 
 ## Supported IoT Platforms
 
-* ESP8266 (thinx-firmware-esp8266)
+* ESP8266 (thinx-firmware-esp8266-arduino) for PlatformIO and Arduino IDE
 
-* Tested on Wemos D1 Mini, Wemos D1 Mini Pro, RobotDyn D1, RobotDyn D1 Mini, RobotDyn MEGA WiFi and various NodeMCU (Lolin, AI-THINKER) boards with Arduino, Lua and Micropython-based core firmwares
+* Tested on Wemos D1 Mini, Wemos D1 Mini Pro, RobotDyn D1, RobotDyn D1 Mini, RobotDyn MEGA WiFi and various NodeMCU (Lolin, AI-THINKER) boards with Arduino, Lua and Micropython-based core firmwares...
 
 * Expected: Arduino with networking support, MongooseOS-based devices...
 
-THiNX Platform Library repositories:
+THiNX Platform Library repository:
+
+[thinx-firmware-esp8266-arduino](https://github.com/suculent/thinx-firmware-esp8266-arduino)
+
+THiNX Platform Library Sample repositories:
 
 [Platform.io](https://github.com/suculent/thinx-firmware-esp8266-pio)
 
@@ -96,7 +104,7 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 
 ## Port mapping
 
-* API runs on HTTP port 7442 (possibly HTTPS 7443) and 7447 (websocket)
+* API runs on HTTP port 7442 (possibly HTTPS 7443) and 7447 (web socket)
 * MQTT runs on HTTP port 1883 (possibly HTTPS 8883)
 * Admin runs on HTTP/HTTPS port (80/443)
 * GitHub commit hooks are listened to on port 9000, 9001
@@ -108,7 +116,7 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 
 Experimental Docker installation can be found at [Docker Hub](https://hub.docker.com/r/suculent/thinx-docker/).
 
-First of all, set a valid FQDN for your new THiNX instance on your DNS server. Use this FQDN to parametrize the Docker image:
+First of all, set a valid FQDN for your new THiNX instance on your DNS server. Use this FQDN to parametrise the Docker image:
 
     docker pull suculent/thinx-docker
 
@@ -134,7 +142,7 @@ bash ./install-builders.sh
 
 ## GitHub Webhook support
 
-You can direct your GitHub webhooks to https://thinx.cloud:9001/ after adding a valid deploy key from GitHub to THiNX RTM.
+You can direct your GitHub web-hooks to https://thinx.cloud:9001/ after adding a valid deploy key from GitHub to THiNX RTM.
 
 
 ## Endpoints
@@ -146,23 +154,21 @@ See 03-test.sh. There is no point of maintaining documentation for this at curre
 
 ### Overall
 
-* We need to take care of correct spelling for PlatformIO (and Git as well).
-* ACL implementation for MQTT is next in the queue.
+Platform libraries are now stabilised on the basic level, approaching first release version 1.0.
 
 ### PlatformIO
 
 * Docker builder works.
 * Deployment update can be tested now.
-* Firmware can be tested/tuned now.
 
 ### Arduino
 
-* Docker builder works in specified workdir.
+* Docker builder has been recently updated.
 * Deployment update can be tested now.
 
 ### NodeMCU
 
-* File-based update has been pre-tested. Docker builder works fine but needs tighter integration with sources (workdir).
+* File-based update has been pre-tested. Docker builder works fine but needs tighter integration with sources (`$workdir`).
 * Deployment is not verified, therefore update cannot be tested.
 
 ### Micropython
@@ -172,9 +178,23 @@ See 03-test.sh. There is no point of maintaining documentation for this at curre
 
 # Roadmap
 
+## On-Horizon
+
 * PlatformIO: end-to-end update
 * Arduino: end-to-end update
+* Status Transformers: server-side lambda functions
+
+## Platform support
+
+* ESP32 (WiFi Manager is already available!)
+
+## Near Future
+
+* ACL implementation for MQTT is next in the queue.
 * Arduino/PlatformIO: end-to-end MQTT
+
+## Vote for it...
+
 * Lua: build, file update
 * UPY: build, file update
 * MOS: build, file update; firmware update; library

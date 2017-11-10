@@ -540,7 +540,8 @@ case $PLATFORM in
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 
 				echo "[builder.sh] running Docker >>>"
-				docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/arduino-docker-build && RESULT=$? | tee -a "${LOG_PATH}"
+				docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/arduino-docker-build | tee -a "${LOG_PATH}"
+				RESULT=$?
 				echo "[builder.sh] Docker completed <<<"
 
 				# TODO: Check for firmware.bin! Result is of tee (probably)
