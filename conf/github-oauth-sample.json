@@ -2,6 +2,6 @@
   "web": {
     "client_id": "c02b22ca87b0f8d4a157",
     "client_secret": "72bc57a73b58ae144f9a32c83ab38ec9174182c7",
-    "redirect_uris": "http://thinx.cloud:8444/oauth/cb?type=github"
+    "redirect_uris": "http://thinx.cloud:8444/oauth/gcb"
   }
 }

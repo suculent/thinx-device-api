@@ -103,7 +103,7 @@ var ThinxApp = function() {
     github_login_handler = require('login-with-github')({
       client_id: github_ocfg.client_id,
       client_secret: github_ocfg.client_secret,
-      login_path: 'https://thinx.cloud:7443/oauth/cb?type=github',
+      login_path: 'https://thinx.cloud:7443/oauth/gcb',
       fetch_user: true
     });
 
@@ -112,16 +112,15 @@ var ThinxApp = function() {
       githubClient: github_ocfg.client_id,
       githubSecret: github_ocfg.client_secret,
       baseURL: 'https://rtm.thinx.cloud/',
-      loginURI: '/oauth/login',
+      loginURI: 'https://rtm.thinx.cloud/oauth/login',
       callbackURI: github_ocfg.redirect_uris,
-      scope: 'user',
-      code: 'code'
+      scope: 'user'
     });
 
     // Authorization uri definition
     github_authorizationUri =
       "https://github.com/login/oauth/authorize?scope=user%20email&client_id=" + github_ocfg.client_id +
-      "&state=in45w4&allow_signup=true&redirect_uri=https://thinx.cloud:7443/oauth/cb?type=github";
+      "&state=in45w4&allow_signup=true&redirect_uri=https://thinx.cloud:7443/oauth/gcb";
 
     console.log("GitHub Login Handler ready: " + JSON.stringify(github_login_handler));
 
@@ -2390,37 +2389,19 @@ var ThinxApp = function() {
   });
 
   // Callback service parsing the authorization token and asking for the access token
+  app.get('/oauth/gcb', function(req, res) {
+    githubOAuth.callback(req, res, function(err) {
+      console.log("cberr: ", err);
+    });
+  });
+
+  // Callback service parsing the authorization token and asking for the access token
   app.get('/oauth/cb', function(req, res) {
 
 
-    var referer;
-
-    if ((typeof(req.query.type) !== "undefined") && req.query.type !== null) {
-      console.log("req.query.type: " + JSON.stringify(req.query.type));
-
-      // Google (did not initially require query type)
-      if (req.query.type.indexOf("google") !== -1) {
-        referer = "google";
-      } else {
-        referer = "google";
-      }
-
-      // GitHub
-      if (req.query.type.indexOf("github") !== -1) {
-        referer = "github";
-      }
-    }
-
     console.log("Called /oauth/cb from " + referer);
 
-    /// IF GITHUB
-
-    if (referer === "github") {
-      githubOAuth.callback(req, res);
-      return;
-    }
-
-    /// IF GOOGLE
+    /// CALLBACK FOR GOOGLE OAUTH ONLY!
 
     const code = req.query.code;
     const options = {
