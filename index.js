@@ -2225,124 +2225,146 @@ var ThinxApp = function() {
 
     console.log('here is your shiny new github oauth_token', oauth_token);
 
-    serverResponse.end(JSON.stringify(oauth_token));
+    // serverResponse.end(JSON.stringify(oauth_token));
 
     // if login was successful 
     console.log("[oauth][github] GitHub Login successfull...");
 
     console.log(JSON.stringify(oauth_token));
 
-    console.log(JSON.stringify(serverResponse));
+    //    console.log(JSON.stringify(serverResponse.body));
 
     if (serverResponse) {
 
-      var token = "ghat:" + req.oauth_token;
-      //console.log(JSON.stringify(serverResponse, null, 2));
+      https.get(
+        'https://github.com/user&access_token=' +
+        oauth_token, (resp) => {
+          let data = '';
+          // A chunk of data has been recieved.
+          resp.on('data', (chunk) => {
+            data += chunk;
+          });
 
-      const odata = req.github_user;
-      const email = odata.email;
-      const family_name = odata.family_name;
-      const given_name = odata.given_name;
-      const picture = odata.picture;
-      const locale = odata.locale;
+          // The whole response has been received. Print out the result.
+          resp.on('end', () => {
+            console.log("Oauth user response: " + JSON.stringify(data));
 
-      if (typeof(email) === "undefined") {
-        console.log("Error: no email in response.");
-        res.redirect('/oauth/error');
-      }
+            var token = "ghat:" + oauth_token;
 
-      const owner_id = sha256(email);
+            //console.log(JSON.stringify(serverResponse, null, 2));
+            console.log(data);
 
-      var userWrapper = {
-        first_name: given_name,
-        last_name: family_name,
-        email: email,
-        owner_id: owner_id,
-        username: owner_id
-      };
+            const hdata = JSON.parse(data);
+            const email = hdata.email;
+            const family_name = hdata.name.split(" ")[0];
+            const given_name = hdata.name.split(" ")[1] || " ";
+            const picture = hdata.avatar_url;
 
-      console.log("[oauth][github] searching for owner_id: " + owner_id);
-
-      // Check user and make note on user login
-      userlib.get(owner_id, function(error, udoc) {
-
-        if (error) {
-
-          if (error.toString().indexOf("Error: deleted") !== -1) {
-            // TODO: Redirect to error page with reason
-            console.log("[oauth] user document deleted");
-            res.redirect('/oauth/account-doc-deleted');
-            return;
-
-          } else {
-
-            if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
-              true) {
-              // TODO: Redirect to error page with reason
-              console.log("[oauth] user account marked as deleted");
-              res.redirect('/oauth/account-deleted');
-              return;
+            if (typeof(email) === "undefined") {
+              console.log("Error: no email in response.");
+              res.redirect('/oauth/error');
             }
 
-            // No such owner, create...
-            user.create(userWrapper, function(success, status) {
+            const owner_id = sha256(email);
 
-              req.session.owner = userWrapper.owner_id;
-              console.log("[OID:" + req.session.owner +
-                "] [NEW_SESSION] [oauth]");
+            var userWrapper = {
+              first_name: given_name,
+              last_name: family_name,
+              email: email,
+              owner_id: owner_id,
+              username: owner_id
+            };
 
-              var minute = 60 * 1000;
+            console.log("[oauth][github] searching for owner_id: " + owner_id);
 
-              req.session.cookie.expires = new Date(Date.now() +
-                fortnight, "isoDate");
-              req.session.cookie.maxAge = fortnight;
-              req.session.cookie.secure = true;
+            // Check user and make note on user login
+            userlib.get(owner_id, function(error, udoc) {
 
-              alog.log(req.session.owner, "OAuth User created: " +
-                given_name + " " + family_name);
+              if (error) {
 
-              var token = sha256(token);
-              client.set(token, JSON.stringify(userWrapper));
-              client.expire(token, 30);
+                if (error.toString().indexOf("Error: deleted") !== -1) {
+                  // TODO: Redirect to error page with reason
+                  console.log("[oauth] user document deleted");
+                  res.redirect('/oauth/account-doc-deleted');
+                  return;
 
-              res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
+                } else {
 
-              return;
+                  if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
+                    true) {
+                    // TODO: Redirect to error page with reason
+                    console.log("[oauth] user account marked as deleted");
+                    res.redirect('/oauth/account-deleted');
+                    return;
+                  }
+
+                  // No such owner, create...
+                  user.create(userWrapper, function(success, status) {
+
+                    req.session.owner = userWrapper.owner_id;
+                    console.log("[OID:" + req.session.owner +
+                      "] [NEW_SESSION] [oauth]");
+
+                    var minute = 60 * 1000;
+
+                    req.session.cookie.expires = new Date(Date.now() +
+                      fortnight, "isoDate");
+                    req.session.cookie.maxAge = fortnight;
+                    req.session.cookie.secure = true;
+
+                    alog.log(req.session.owner, "OAuth User created: " +
+                      given_name + " " + family_name);
+
+                    var token = sha256(token);
+                    client.set(token, JSON.stringify(userWrapper));
+                    client.expire(token, 30);
+
+                    res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
+
+                    return;
+
+                  });
+
+                }
+
+
+                console.log(JSON.stringify(udoc));
+
+                userlib.atomic("users", "checkin", owner_id, {
+                  last_seen: new Date()
+                }, function(error, response) {
+                  if (error) {
+                    console.log("Last-seen update failed: " +
+                      error);
+                  } else {
+                    alog.log(req.session.owner,
+                      "Last seen updated.");
+                  }
+                });
+
+                req.session.owner = owner_id;
+                req.session.cookie.secure = true;
+                req.session.cookie.expires = new Date(Date.now() + fortnight,
+                  "isoDate");
+                req.session.cookie.maxAge = fortnight;
+                alog.log(req.session.owner, "OAuth2 User logged in...");
+
+                var token = sha256(res2.access_token);
+
+                client.set(token, JSON.stringify(userWrapper));
+                client.expire(token, 3600);
+
+                res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
+              } // else not github user
 
             });
 
-          }
 
-
-          console.log(JSON.stringify(udoc));
-
-          userlib.atomic("users", "checkin", owner_id, {
-            last_seen: new Date()
-          }, function(error, response) {
-            if (error) {
-              console.log("Last-seen update failed: " +
-                error);
-            } else {
-              alog.log(req.session.owner,
-                "Last seen updated.");
-            }
           });
+        });
 
-          req.session.owner = owner_id;
-          req.session.cookie.secure = true;
-          req.session.cookie.expires = new Date(Date.now() + fortnight, "isoDate");
-          req.session.cookie.maxAge = fortnight;
-          alog.log(req.session.owner, "OAuth2 User logged in...");
 
-          var token = sha256(res2.access_token);
 
-          client.set(token, JSON.stringify(userWrapper));
-          client.expire(token, 3600);
-
-          res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
-        } // else not github user
-
-      });
     }
   });
 
