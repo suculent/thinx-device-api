@@ -2249,27 +2249,7 @@ var ThinxApp = function() {
 
       console.log(JSON.stringify(request_options));
 
-      https.get(request_options, (err, resp) => {
-
-        if (err) {
-          console.log("GHO err: " + err.toString());
-
-          var cache = [];
-
-          console.log(JSON.stringify(err, function(key, value) {
-            if (typeof value === 'object' && value !== null) {
-              if (cache.indexOf(value) !== -1) {
-                // Circular reference found, discard key
-                return;
-              }
-              // Store value in our collection
-              cache.push(value);
-            }
-            return value;
-          }));
-
-          return;
-        }
+      https.get(request_options, (resp) => {
 
         var data = '';
         resp.on('data', (chunk) => {
