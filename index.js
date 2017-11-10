@@ -94,6 +94,7 @@ var ThinxApp = function() {
 
   try {
     github_ocfg = require('./conf/github-oauth.json');
+    console.log("GitHub Config loaded: " + JSON.stringify(github_ocfg));
     github_login_handler = require('login-with-github')({
       client_id: github_ocfg.client_id,
       client_secret: github_ocfg.client_secret,
