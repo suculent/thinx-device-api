@@ -2254,6 +2254,8 @@ var ThinxApp = function() {
         if (err) {
           console.log("GHO err: " + err.toString());
 
+          var cache = [];
+
           console.log(JSON.stringify(err, function(key, value) {
             if (typeof value === 'object' && value !== null) {
               if (cache.indexOf(value) !== -1) {
@@ -2427,10 +2429,11 @@ var ThinxApp = function() {
   app.get('/oauth/gcb', function(req, res) {
     console.log("Github OAuth2 Callback...");
     githubOAuth.callback(req, res, function(err) {
-      console.log("cberr: ", err);
-      if (!err) {
-        console.log(JSON.stringify(res.body));
-      }
+      //console.log("cberr: ", err);
+      //if (!err) {
+      //  console.log(JSON.stringify(res.body));
+      //}
+      console.log(JSON.strigify(req.query.params));
     });
   });
 
