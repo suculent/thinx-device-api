@@ -5,6 +5,7 @@
 var ThinxApp = function() {
 
   var global_token = null;
+  var global_response = null;
 
   var typeOf = require("typeof");
 
@@ -2345,7 +2346,8 @@ var ThinxApp = function() {
 
                   global_token = token;
 
-                  //this.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
+                  global_response.redirect(
+                    "https://rtm.thinx.cloud/app/#/oauth/" + token);
 
                   return;
 
@@ -2417,6 +2419,7 @@ var ThinxApp = function() {
   // Callback service parsing the authorization token and asking for the access token
   app.get('/oauth/gcb', function(req, res) {
     global_token = null; // reset token; single user only!!!!
+    global_response = res;
     console.log("Github OAuth2 Callback...");
     githubOAuth.callback(req, res, function(err) {
       console.log("cberr: ", err);
