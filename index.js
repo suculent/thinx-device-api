@@ -99,6 +99,7 @@ var ThinxApp = function() {
       client_secret: github_ocfg.client_secret,
       login_path: '/login/github'
     }); // /login/github = /oauth/github?
+    console.log("GitHub Login Handler ready: " + JSON.stringify(github_login_handler));
   } catch (e) {
     console.log(e);
   }
@@ -2334,11 +2335,7 @@ var ThinxApp = function() {
 
       } else {
         // else no login attempted 
-
-        res.writeHead(200, {
-          'Content-Type': 'text/html'
-        });
-        res.end('<a href="/login/github">login with github</a>');
+        res.redirect("https://rtm.thinx.cloud/app");
       }
     });
   });
@@ -2348,7 +2345,7 @@ var ThinxApp = function() {
    */
 
   // Initial page redirecting to OAuth2 provider
-  app.get('/oauth/google', (req, res) => {
+  app.get('/oauth/google', function(req, res) {
     // User requested login, destroy existing session first...
     if (typeof(req.session) !== "undefined") {
       req.session.destroy();
@@ -2358,7 +2355,7 @@ var ThinxApp = function() {
   });
 
   // Callback service parsing the authorization token and asking for the access token
-  app.get('/oauth/cb', (req, res) => {
+  app.get('/oauth/cb', function(req, res) {
 
     console.log("Called /oauth/cb from?");
 
