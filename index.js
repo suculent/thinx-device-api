@@ -100,14 +100,14 @@ var ThinxApp = function() {
     github_login_handler = require('login-with-github')({
       client_id: github_ocfg.client_id,
       client_secret: github_ocfg.client_secret,
-      login_path: '/oauth/cb',
+      login_path: 'https://thinx.cloud:7443/oauth/cb',
       fetch_user: true
     });
 
     // Authorization uri definition
     github_authorizationUri =
-      "https://github.com/login/oauth/authorize?scope=user:email&client_id=" + github_ocfg.client_id +
-      "&redirect_uri=https://thinx.cloud:7443/oauth/cb&state=in45w4&allow_signup=true";
+      "https://github.com/login/oauth/authorize?scope=user%20email&client_id=" + github_ocfg.client_id +
+      "&state=in45w4&allow_signup=true&redirect_uri=https://thinx.cloud:7443/oauth/cb";
 
     console.log("GitHub Login Handler ready: " + JSON.stringify(github_login_handler));
   } catch (e) {
