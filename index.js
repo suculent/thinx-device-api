@@ -2225,7 +2225,7 @@ var ThinxApp = function() {
 
   githubOAuth.on('token', function(oauth_token, serverResponse) {
 
-    console.log('here is your shiny new github oauth_token', oauth_token);
+    console.log('here is your shiny new github oauth_token', oauth_token.access_token);
 
     // if login was successful 
     console.log("[oauth][github] GitHub Login successfull...");
@@ -2237,11 +2237,12 @@ var ThinxApp = function() {
       var request_options = {
         host: 'https://api.github.com',
         headers: {
-          'user-agent': 'THiNX OAuth'
+          'user-agent': 'THiNX%020OAuth'
         },
-        path: '/user&access_token=' + oauth_token
+        path: '/user&access_token=' + oauth_token.access_token
       };
 
+      console.log(JSON.stringify(request_options));
 
       https.get(request_options, (err, resp) => {
 
