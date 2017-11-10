@@ -2225,6 +2225,11 @@ var ThinxApp = function() {
 
   githubOAuth.on('token', function(oauth_token, serverResponse) {
 
+    if (typeof(oauth_token.access_token) === "undefined") {
+      console.log("Fetching token failed.");
+      return;
+    }
+
     console.log('here is your shiny new github oauth_token', oauth_token.access_token);
 
     // if login was successful 
@@ -2247,7 +2252,7 @@ var ThinxApp = function() {
       https.get(request_options, (err, resp) => {
 
         if (err) {
-          console.log("GHO err: " + JSON.stringify(err));
+          console.log("GHO err: " + err.toString());
           return;
         }
 
