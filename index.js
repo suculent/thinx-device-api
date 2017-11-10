@@ -99,15 +99,6 @@ var ThinxApp = function() {
     github_ocfg = require('./conf/github-oauth.json');
     console.log("GitHub Config loaded: " + JSON.stringify(github_ocfg));
 
-    // will deprecate
-    github_login_handler = require('login-with-github')({
-      client_id: github_ocfg.client_id,
-      client_secret: github_ocfg.client_secret,
-      login_path: 'https://thinx.cloud:7443/oauth/gcb',
-      fetch_user: true
-    });
-
-    // seems to work
     githubOAuth = require('github-oauth')({
       githubClient: github_ocfg.client_id,
       githubSecret: github_ocfg.client_secret,
@@ -116,16 +107,6 @@ var ThinxApp = function() {
       callbackURI: '/oauth/gcb',
       scope: 'user'
     });
-
-    // Authorization uri definition
-    github_authorizationUri =
-      "https://github.com/login/oauth/authorize?scope=user%20email&client_id=" + github_ocfg.client_id +
-      "&state=in45w4&allow_signup=true&redirect_uri=https://thinx.cloud:7443/oauth/gcb";
-
-    console.log("GitHub Login Handler ready: " + JSON.stringify(github_login_handler));
-
-    ///
-
 
   } catch (e) {
     console.log(e);
@@ -2236,15 +2217,6 @@ var ThinxApp = function() {
    * OAuth 2 with GitHub
    */
 
-  // Initial page redirecting to OAuth2 provider
-  app.get('/oauth/github', function(req, res) {
-    if (typeof(req.session) !== "undefined") {
-      req.session.destroy();
-    }
-    console.log('Starting GitHub Login...');
-    githubOAuth.login(req, res);
-  });
-
   githubOAuth.on('error', function(err) {
     console.error('there was a login error', err);
   });
@@ -2374,6 +2346,15 @@ var ThinxApp = function() {
     }
   });
 
+  // Initial page redirecting to OAuth2 provider
+  app.get('/oauth/github', function(req, res) {
+    if (typeof(req.session) !== "undefined") {
+      req.session.destroy();
+    }
+    console.log('Starting GitHub Login...');
+    githubOAuth.login(req, res);
+  });
+
   /*
    * OAuth 2 with Google
    */
@@ -2394,6 +2375,9 @@ var ThinxApp = function() {
     console.log("Github OAuth2 Callback...");
     githubOAuth.callback(req, res, function(err) {
       console.log("cberr: ", err);
+      if (!err) {
+        console.log(JSON.stringify(res.body));
+      }
     });
   });
 
