@@ -2302,7 +2302,7 @@ var ThinxApp = function() {
               if (error.toString().indexOf("Error: deleted") !== -1) {
                 // TODO: Redirect to error page with reason
                 console.log("[oauth] user document deleted");
-                serverResponse.redirect(
+                global_response.redirect(
                   'https://rtm.thinx.cloud/error.html?success=failed&reason=account_document_deleted'
                 );
                 return;
@@ -2316,7 +2316,7 @@ var ThinxApp = function() {
                     true) {
                     // TODO: Redirect to error page with reason
                     console.log("[oauth] user account marked as deleted");
-                    this.redirect(
+                    global_response.redirect(
                       'https://rtm.thinx.cloud/error.html?success=failed&reason=account_deleted'
                     );
                     return;
@@ -2382,7 +2382,7 @@ var ThinxApp = function() {
               client.set(token, JSON.stringify(userWrapper));
               client.expire(token, 3600);
 
-              serverResponse.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
+              global_response.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
                 token);
 
             } // else no such user
