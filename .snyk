@@ -1,5 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.7.1
+version: v1.8.0
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   'npm:qs:20170213':
@@ -64,9 +64,17 @@ patch:
         patched: '2017-09-15T10:14:34.694Z'
     - codecov.io > request:
         patched: '2017-09-15T10:14:34.694Z'
+    - login-with-github > request:
+        patched: '2017-11-10T10:27:57.594Z'
   'npm:moment:20160126':
     - fs-finder > moment:
         patched: '2017-09-15T10:14:34.694Z'
   'npm:debug:20170905':
     - rollbar > debug:
         patched: '2017-09-27T22:45:09.600Z'
+  'npm:minimatch:20160620':
+    - login-with-github > middler > minimatch:
+        patched: '2017-11-10T10:27:57.594Z'
+  'npm:qs:20140806-1':
+    - login-with-github > request > qs:
+        patched: '2017-11-10T10:27:57.594Z'
