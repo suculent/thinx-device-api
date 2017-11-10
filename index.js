@@ -2201,7 +2201,7 @@ var ThinxApp = function() {
           console.log("Saving new Bot token (TODO: tell mesenger): ", token);
         }
       });
-    });
+    }).set('User-Agent', 'THiNX%20OAuth'); // Application name from GitHub / Settings / Developer Settings, should be in JSON
 
     areq.on('error', function(e) {
       console.log('ERROR: ' + e.message);
