@@ -114,7 +114,8 @@ var ThinxApp = function() {
       baseURL: 'https://rtm.thinx.cloud/',
       loginURI: '/oauth/login',
       callbackURI: github_ocfg.redirect_uris,
-      scope: 'user'
+      scope: 'user',
+      code: 'code'
     });
 
     // Authorization uri definition
