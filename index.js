@@ -2324,15 +2324,8 @@ var ThinxApp = function() {
                 // No such owner, create...
                 user.create(userWrapper, function(success, status) {
 
-                  //req.session.owner = userWrapper.owner_id;
-                  console.log("[OID:" + req.session.owner +
+                  console.log("[OID:" + owner_id +
                     "] [NEW_SESSION] [oauth]");
-
-                  var minute = 60 * 1000;
-
-                  //req.session.cookie.expires = new Date(Date.now() + fortnight, "isoDate");
-                  //req.session.cookie.maxAge = fortnight;
-                  //req.session.cookie.secure = true;
 
                   alog.log(owner_id, "OAuth User created: " +
                     given_name + " " + family_name);
@@ -2340,8 +2333,6 @@ var ThinxApp = function() {
                   client.set(token, JSON.stringify(userWrapper));
                   client.expire(token, 30);
                   global_token = token;
-
-                  //global_response.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
                   global_response.redirect(
                     "https://rtm.thinx.cloud/app/#/oauth/" + token);
 
@@ -2368,11 +2359,6 @@ var ThinxApp = function() {
               }
             });
 
-            //req.session.owner = owner_id;
-            //req.session.cookie.secure = true;
-            //req.session.cookie.expires = new Date(Date.now() + fortnight,"isoDate");
-            //req.session.cookie.maxAge = fortnight;
-
             alog.log(owner_id, "OAuth2 User logged in...");
 
             client.set(token, JSON.stringify(userWrapper));
@@ -2382,7 +2368,6 @@ var ThinxApp = function() {
 
             global_response.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
               token);
-
 
           }); // userlib.get
 
