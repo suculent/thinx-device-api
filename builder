@@ -692,7 +692,7 @@ if [ ! -z ${BUILD_FILE} ]; then
 fi
 if [ ! -z ${THINX_FIRMWARE_VERSION} ]; then
 	echo "No build file found, generating last-minute version..."
-	THINX_FIRMWARE_VERSION="$(basename $(pwd))-${THX_VERSION}.${THX_REVISION}"
+	THINX_FIRMWARE_VERSION="${REPO_NAME}-${THX_VERSION}.${THX_REVISION}"
 fi
 
 echo "BUILD_ID" "${BUILD_ID}" | tee -a "${LOG_PATH}"
