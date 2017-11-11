@@ -688,9 +688,7 @@ if [[ -z $BUILD_FILE ]]; then
 	BUILD_FILE=$( find $WORKDIR -name "thinx_build.json" )
 fi
 if [ ! -z ${BUILD_FILE} ]; then
-	# escape slashes in json for jq
-	printf "%q" "$(cat $BUILD_FILE)" > "./thinx_build.tmp"
-	THINX_FIRMWARE_VERSION="$(jq ./thinx_build.tmp .0.THINX_FIRMWARE_VERSION)"
+	THINX_FIRMWARE_VERSION="$(jq .THINX_FIRMWARE_VERSION ${BUILD_FILE})"
 fi
 if [ ! -z ${THINX_FIRMWARE_VERSION} ]; then
 	echo "No build file found, generating last-minute version..."
