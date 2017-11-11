@@ -338,7 +338,7 @@ case $PLATFORM in
 
 			if [[ ! ${RUN} ]]; then
 				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." | tee -a "${LOG_PATH}"
-				STATUS='"DRY_RUN_OK"'
+				STATUS='DRY_RUN_OK'
 			else
 				# Check Artifacts
 				if [[ $BUILD_SUCCESS == true ]] ; then
@@ -353,9 +353,9 @@ case $PLATFORM in
 					fi
 					echo "[builder.sh] Micropython Build: DEPLOYMENT_PATH: " $DEPLOYMENT_PATH
 					ls "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
-					STATUS='"OK"'
+					STATUS='OK'
 				else
-					STATUS='"FAILED"'
+					STATUS='FAILED'
 				fi
 			fi
     ;;
@@ -444,7 +444,7 @@ case $PLATFORM in
 
 			if [[ ! ${RUN} ]]; then
 				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." | tee -a "${LOG_PATH}"
-				STATUS='"DRY_RUN_OK"'
+				STATUS='DRY_RUN_OK'
 			else
 				if [[ $BUILD_SUCCESS == true ]] ; then
 					echo "[builder.sh] NodeMCU Build: Listing output directory: " | tee -a "${LOG_PATH}"
@@ -458,9 +458,9 @@ case $PLATFORM in
 					fi
 					echo "[builder.sh] NodeMCU Build: DEPLOYMENT_PATH: " $DEPLOYMENT_PATH
 					ls "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
-					STATUS='"OK"'
+					STATUS='OK'
 				else
-					STATUS='"FAILED"'
+					STATUS='FAILED'
 				fi
 			fi
     ;;
@@ -497,18 +497,18 @@ case $PLATFORM in
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
 				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." | tee -a "${LOG_PATH}"
-				STATUS='"DRY_RUN_OK"'
+				STATUS='DRY_RUN_OK'
 			else
 				# Check Artifacts
 				if [[ $BUILD_SUCCESS == true ]] ; then
-					STATUS='"OK"'
+					STATUS='OK'
 					cp $(pwd)/build/fw.zip $OUTFILE
 					ls "$BUILD_PATH/build" | tee -a "${LOG_PATH}"
 					unzip "${BUILD_PATH}/build/fw.zip" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 					ls "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 					echo "[builder.sh]" $MSG; echo $MSG | tee -a "${LOG_PATH}"
 				else
-					STATUS='"FAILED"'
+					STATUS='FAILED'
 				fi
 			fi
     ;;
@@ -572,11 +572,11 @@ case $PLATFORM in
 				# Exit on dry run...
 				if [[ ! ${RUN} ]]; then
 					echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." | tee -a "${LOG_PATH}"
-					STATUS='"DRY_RUN_OK"'
+					STATUS='DRY_RUN_OK'
 				else
 					# Check Artifacts
 					if [[ $BUILD_SUCCESS == true ]] ; then
-						STATUS='"OK"'
+						STATUS='OK'
 						echo "[builder.sh] Exporting artifacts" | tee -a "${LOG_PATH}"
 
 						echo "[builder.sh] OUTFILE: $OUTFILE" | tee -a "${LOG_PATH}"
@@ -594,7 +594,7 @@ case $PLATFORM in
 						cp -vR "${OUTFILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
 						ls $DEPLOYMENT_PATH | tee -a "${LOG_PATH}"
 					else
-						STATUS='"FAILED"'
+						STATUS='FAILED'
 					fi
 				fi
 			;;
@@ -639,16 +639,16 @@ case $PLATFORM in
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
 				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." | tee -a "${LOG_PATH}"
-				STATUS='"DRY_RUN_OK"'
+				STATUS='DRY_RUN_OK'
 			else
 				# Check Artifacts
 				if [[ $BUILD_SUCCESS == true ]] ; then
-					STATUS='"OK"'
+					STATUS='OK'
 					echo "[builder.sh] ☢ Exporting PlatformIO artifact: ${OUTFILE}"
 					cp -vR "${OUTFILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 					cp -vR "${OUTFILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
 				else
-					STATUS='"FAILED"'
+					STATUS='FAILED'
 				fi
 			fi
 
