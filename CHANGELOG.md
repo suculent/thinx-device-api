@@ -2,7 +2,7 @@
 
 ## CHANGELOG
 
-10/11/2017: 0.9.2758: added GitHub login and Status Transformer editor
+10/11/2017: 0.9.2758: added GitHub login and Status Transformer editor; bugfixes for Arduino builds and builds in general; still tailing lambdas...
 
 9/11/2017: added prototype status transformer as a part of user profile
 
