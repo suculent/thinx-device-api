@@ -2272,7 +2272,8 @@ var ThinxApp = function() {
           if (typeof(email) === "undefined") {
             console.log("Error: no email in response.");
             global_response.redirect(
-              'https://rtm.thinx.cloud/error.html?success=failed&reason=oauth_no_email'
+              'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
+              "No e-mail in response."
             );
           }
 
@@ -2301,7 +2302,8 @@ var ThinxApp = function() {
                 // TODO: Redirect to error page with reason
                 console.log("[oauth] user document deleted");
                 global_response.redirect(
-                  'https://rtm.thinx.cloud/error.html?success=failed&reason=account_document_deleted'
+                  'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
+                  'Account document deleted.'
                 );
                 return;
 
@@ -2315,7 +2317,8 @@ var ThinxApp = function() {
                     // TODO: Redirect to error page with reason
                     console.log("[oauth] user account marked as deleted");
                     global_response.redirect(
-                      'https://rtm.thinx.cloud/error.html?success=failed&reason=account_deleted'
+                      'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
+                      'Account deleted.'
                     );
                     return;
                   }
@@ -2468,7 +2471,8 @@ var ThinxApp = function() {
 
             if (typeof(email) === "undefined") {
               res.redirect(
-                'https://rtm.thinx.cloud/error.html?success=failed&reason=missing_email'
+                'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
+                'E-mail missing.'
               );
             }
 
@@ -2574,17 +2578,16 @@ var ThinxApp = function() {
 
         }).on("error", (err) => {
         console.log("Error: " + err.message);
-        res.redirect('https://rtm.thinx.cloud/error.html?success=failed&reason=' +
+        res.redirect(
+          'https://rtm.thinx.cloud/error.html?success=failed&title=OAuth-Error&reason=' +
           err.message);
       });
     }).catch(err => {
       console.log("Oauth error: " + err);
-      res.redirect('https://rtm.thinx.cloud/error.html?success=failed&reason=' + err.message);
+      res.redirect(
+        'https://rtm.thinx.cloud/error.html?success=failed&title=OAuth-Error&reason=' +
+        err.message);
     });
-  });
-
-  app.get('/oauth/error', (req, res) => {
-    res.redirect('https://rtm.thinx.cloud/error.html?success=failed&reason=' + err.message);
   });
 
   /*
