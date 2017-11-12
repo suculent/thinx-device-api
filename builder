@@ -329,7 +329,7 @@ case $PLATFORM in
 				set -o pipefail
 				docker run ${DOCKER_PREFIX} --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython | tee -a "${LOG_PATH}"
 				echo "${PIPESTATUS[@]}"
-				if [[ ! -z $(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
+				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
 				fi
 				echo "[builder.sh] Docker completed <<<"
@@ -435,7 +435,7 @@ case $PLATFORM in
 				set -o pipefail
 				docker run ${DOCKER_PREFIX} --rm -t ${DOCKER_PARAMS} -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build | tee -a "${LOG_PATH}"
 				echo "${PIPESTATUS[@]}"
-				if [[ ! -z $(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
+				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
 				fi
 				echo "[builder.sh] Docker completed <<<"
@@ -556,7 +556,7 @@ case $PLATFORM in
 
 				# TODO: Check for firmware.bin! Result is of tee (probably)
 
-				if [[ ! -z $(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
+				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
 					echo " "
 					echo "[builder.sh] Docker build succeeded."
