@@ -2,6 +2,7 @@
 
 source ./infer # utility functions
 
+# do not exit when subsequent tools fail...
 set +e
 
 echo
