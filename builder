@@ -325,14 +325,15 @@ case $PLATFORM in
 			if [[ $BUILD_TYPE == "firmware" ]]; then
 				echo "[builder.sh] Micropython Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
 				echo "[builder.sh] running Docker >>>"
+				set -o pipefail
 				docker run ${DOCKER_PREFIX} --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython | tee -a "${LOG_PATH}"
+				echo "${PIPESTATUS[@]}"
+				if [[ $? == 0 ]] ; then
+					BUILD_SUCCESS=true
+				fi
 				echo "[builder.sh] Docker completed <<<"
-				rm -rf ./build; make clean; make V=1
-			fi
-
-			if [[ $? == 0 ]] ; then
-				BUILD_SUCCESS=true
-			fi
+				rm -rf ./build; make clean; make V=1				
+			fi	
 
 			ls | tee -a "${LOG_PATH}"
 
@@ -430,18 +431,19 @@ case $PLATFORM in
 
 				echo "[builder.sh] NodeMCU Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
 				echo "[builder.sh] running Docker >>>"
+				set -o pipefail
 				docker run ${DOCKER_PREFIX} --rm -t ${DOCKER_PARAMS} -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build | tee -a "${LOG_PATH}"
+				echo "${PIPESTATUS[@]}"
+				if [[ $? == 0 ]] ; then
+					BUILD_SUCCESS=true
+				fi
 				echo "[builder.sh] Docker completed <<<"
 
 			else
 				# deploy Lua files without building
 				cp -vf *.lua "$DEPLOYMENT_PATH"
 			fi
-
-			if [[ $? == 0 ]] ; then
-				BUILD_SUCCESS=true
-			fi
-
+			
 			if [[ ! ${RUN} ]]; then
 				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." | tee -a "${LOG_PATH}"
 				STATUS='DRY_RUN_OK'
@@ -481,9 +483,9 @@ case $PLATFORM in
 			mv "./thinx_build.json" "$TNAME"
 
 			echo "[builder.sh] running Docker >>>"
-			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/mongoose-builder suculent/mongoose-docker-build | tee -a "${LOG_PATH}"
-			echo "[builder.sh] Docker completed <<<"
-
+			set -o pipefail
+			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/mongoose-builder suculent/mongoose-docker-build | tee -a "${LOG_PATH}"			
+			echo "${PIPESTATUS[@]}"
 			if [[ $? == 0 ]] ; then
 				if [[ -f $(pwd)/build/fw.zip ]]; then
 					BUILD_SUCCESS=true
@@ -491,6 +493,7 @@ case $PLATFORM in
 					echo "[builder.sh] OUTFILE not created." | tee -a "${LOG_PATH}"
 				fi
 			fi
+			echo "[builder.sh] Docker completed <<<"
 
 			ls
 
@@ -545,7 +548,9 @@ case $PLATFORM in
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 
 				echo "[builder.sh] running Docker >>>"
+				set -o pipefail
 				docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/arduino-docker-build | tee -a "${LOG_PATH}"
+				echo "${PIPESTATUS[@]}"
 				RESULT=$?
 				echo "[builder.sh] Docker completed <<<"
 
@@ -569,6 +574,7 @@ case $PLATFORM in
 					echo "[builder.sh] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
 					echo " " | tee -a "${LOG_PATH}"
 				fi
+				
 				# Exit on dry run...
 				if [[ ! ${RUN} ]]; then
 					echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." | tee -a "${LOG_PATH}"
@@ -626,13 +632,15 @@ case $PLATFORM in
 			OUTFILE=$(pwd)/build/firmware.bin
 
 			echo "[builder.sh] running Docker >>>"
-			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build | tee -a "${LOG_PATH}"
-			echo "[builder.sh] Docker completed <<<"
-
-			# docker run --rm -ti -v `pwd`:/opt/workspace suculent/platformio-docker-build
+			set -o pipefail
+			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build | tee -a "${LOG_PATH}"			
+			echo "${PIPESTATUS[@]}"
 			if [[ $? == 0 ]] ; then
 				BUILD_SUCCESS=true
+			else 
+				BUILD_SUCCESS=$?
 			fi
+			echo "[builder.sh] Docker completed <<<"
 			#echo "Current folder contents after build:" | tee -a "${LOG_PATH}"
 			#ls | tee -a "${LOG_PATH}"
 
@@ -661,6 +669,8 @@ case $PLATFORM in
     ;;
 esac
 
+# cleanup all subdirectories
+ls -d  $DEPLOYMENT_PATH/*/ | xargs rm -rf
 
 if [[ ! -f "${OUTFILE}" ]]; then
 	OUTFILE="<none>"
