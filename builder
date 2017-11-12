@@ -329,7 +329,7 @@ case $PLATFORM in
 				set -o pipefail
 				docker run ${DOCKER_PREFIX} --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython | tee -a "${LOG_PATH}"
 				echo "${PIPESTATUS[@]}"
-				if [[ $? == 0 ]] ; then
+				if [[ ! -z $(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
 				fi
 				echo "[builder.sh] Docker completed <<<"
@@ -435,7 +435,7 @@ case $PLATFORM in
 				set -o pipefail
 				docker run ${DOCKER_PREFIX} --rm -t ${DOCKER_PARAMS} -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build | tee -a "${LOG_PATH}"
 				echo "${PIPESTATUS[@]}"
-				if [[ $? == 0 ]] ; then
+				if [[ ! -z $(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
 				fi
 				echo "[builder.sh] Docker completed <<<"
@@ -487,7 +487,7 @@ case $PLATFORM in
 			set -o pipefail
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/mongoose-builder suculent/mongoose-docker-build | tee -a "${LOG_PATH}"			
 			echo "${PIPESTATUS[@]}"
-			if [[ $? == 0 ]] ; then
+			if [[ ! -z =$(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 				if [[ -f $(pwd)/build/fw.zip ]]; then
 					BUILD_SUCCESS=true
 				else
@@ -551,13 +551,12 @@ case $PLATFORM in
 				echo "[builder.sh] running Docker >>>"
 				set -o pipefail
 				docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/arduino-docker-build | tee -a "${LOG_PATH}"
-				echo "${PIPESTATUS[@]}"
-				RESULT=$?
+				echo "PIPESTATUS ${PIPESTATUS[@]}"
 				echo "[builder.sh] Docker completed <<<"
 
 				# TODO: Check for firmware.bin! Result is of tee (probably)
 
-				if [[ $RESULT == 0 ]] ; then
+				if [[ ! -z $(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
 					echo " "
 					echo "[builder.sh] Docker build succeeded."
@@ -636,7 +635,7 @@ case $PLATFORM in
 			set -o pipefail
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build | tee -a "${LOG_PATH}"			
 			echo "${PIPESTATUS[@]}"
-			if [[ $? == 0 ]] ; then
+			if [[ ! -z =$(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 				BUILD_SUCCESS=true
 			else 
 				BUILD_SUCCESS=$?
