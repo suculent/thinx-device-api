@@ -4,13 +4,25 @@
 
 ## 31th week
 
+19/11/2017: sprint review
+
+18/11/2017:
+
+17/11/2017:
+
+16/11/2017: business-trip / day off
+
+15/11/2017: business-trip / day off
+
+14/11/2017:
+
 13/11/2017: 0.9.2798: installed experimental LoRa Server & Application Server; added notes only to the Dockerfile so far (may use https://hub.docker.com/r/loraserver/lora-app-server/ instead of installing into THiNX Docker container)
 
 ## 30th week
 
 12/11/2017: 0.9.2796: fixed firmware versioning, error page, build status marker in log, updated builders
 
-11/11/2017: 0.9.2778: bugfixes in versioning and builder, fixing log record 
+11/11/2017: 0.9.2778: bugfixes in versioning and builder, fixing log record
 
 10/11/2017: 0.9.2758: added GitHub login and Status Transformer editor; bugfixes for Arduino builds and builds in general; still tailing lambdas...
 
