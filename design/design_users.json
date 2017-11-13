@@ -1,5 +1,6 @@
 {
 	"_id": "_design/users",
+	"_rev": "17-90084ec5f18942e79c80d5c3d88f311b",
 	"language": "javascript",
 	"views": {
 		"owners_by_username": {
@@ -26,6 +27,6 @@
 	},
 	"updates": {
 		"checkin": "function (doc, req) { doc.last_seen = new Date(); return [doc, doc._id]; }",
-		"edit": "function(doc, req) { var fields = JSON.parse(req.body); for (var i in fields) { doc[i] = fields[i] } var resp = eval(uneval(doc)); delete resp._revisions; return [doc, toJSON(resp)]; }"
+		"edit": "function(doc, req) { var fields = JSON.parse(req.body); for (var i in fields) { if (i === 'info') { for (var s in fields[i]) { doc[i][s] = fields[i][s]; } } else { doc[i] = fields[i]; } } var resp = eval(uneval(doc)); delete resp._revisions; return [doc, toJSON(resp)]; }"
 	}
 }

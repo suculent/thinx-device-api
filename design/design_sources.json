@@ -1,16 +1,17 @@
 {
-  "_id" : "_design/sources",
-  "language" : "javascript",
-  "views" : {
-    "sources_by_owner" : {
-      "map" : "function (doc) { if(doc.owner) { emit (doc.owner, doc); } }"
+  "_id": "_design/sources",
+  "_rev": "1-fecafbd386736fff59beb1149ad5ada5",
+  "language": "javascript",
+  "views": {
+    "sources_by_owner": {
+      "map": "function (doc) { if(doc.owner) { emit (doc.owner, doc); } }"
     },
-    "sources_by_id" : {
-      "map" : "function (doc) { if(doc.id) { emit (doc.id, doc); } }"
+    "sources_by_id": {
+      "map": "function (doc) { if(doc.id) { emit (doc.id, doc); } }"
     }
   },
-  "updates" : {
-    "add" : "function (doc, req) { doc.sources = req.body.sources; return [doc, doc._id]; }",
-    "remove" : "function (doc, req) { delete doc.sources[req.body.source_id]; return [doc.sources, doc._id]; }"
+  "updates": {
+    "add": "function (doc, req) { doc.sources = req.body.sources; return [doc, doc._id]; }",
+    "remove": "function (doc, req) { delete doc.sources[req.body.source_id]; return [doc.sources, doc._id]; }"
   }
 }

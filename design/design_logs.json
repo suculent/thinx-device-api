@@ -1,9 +1,15 @@
 {
   "_id": "_design/logs",
+  "_rev": "2-23d053900f8b050325337fcc2badd12e",
   "language": "javascript",
   "views": {
     "logs_by_owner": {
-      "map": "function (doc) { if(doc.owner) { emit ([doc.date, doc.owner], { date: doc.date, message: doc.message, owner: doc.owner }); } }"
+      "map": "function (doc) { if(doc.owner) { emit ([doc.date, doc.owner], { date: doc.date, message: doc.message, owner: doc.owner }); }}"
     }
+  },
+  "updates": {
+    "delete_expired": "function (doc, req) { if (doc.date < req.query.mindate) { doc._deleted = true; return [doc, 'deleted']; } else return [doc, doc._id] }",
+    "log": "function(doc, req) { doc.log.push(req.body.record); doc.last_update = req.body.record.timestamp; return doc._id; }",
+    "state": "function(doc, req) { doc.state = req.body.state; return doc._id; }"
   }
 }
