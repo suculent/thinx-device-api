@@ -1,11 +1,14 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.8.0
+version: v1.7.1
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   'npm:qs:20170213':
     - nano > follow > request > qs:
         reason: 'yes'
         expires: '2017-06-23T20:24:03.076Z'
+      login-with-github > request > qs:
+        reason: None given
+        expires: '2017-12-13T13:20:20.056Z'
     - codecov.io > request > qs:
         reason: 'yes'
         expires: '2017-06-23T20:24:03.076Z'
@@ -25,20 +28,39 @@ ignore:
     - codecov.io > request > http-signature:
         reason: no remediation at this time
         expires: '2017-10-15T10:15:04.980Z'
+      login-with-github > request > http-signature:
+        reason: no patch available
+        expires: '2017-12-13T13:20:20.056Z'
     - nano > follow > request > http-signature:
         reason: None given
         expires: '2017-10-15T10:15:04.980Z'
   'npm:moment:20161019':
     - fs-finder > moment:
         reason: None given
-        expires: '2017-10-15T10:15:04.980Z'
+        expires: '2017-12-13T13:20:20.056Z'
   'npm:tunnel-agent:20170305':
     - codecov.io > request > tunnel-agent:
         reason: None given
         expires: '2017-10-15T10:15:04.980Z'
+      login-with-github > request > tunnel-agent:
+        reason: None given
+        expires: '2017-12-13T13:20:20.056Z'
     - nano > follow > request > tunnel-agent:
         reason: None given
         expires: '2017-10-15T10:15:04.980Z'
+  'npm:mime:20170907':
+    - github-oauth > request > mime:
+        reason: none
+        expires: '2017-12-13T13:20:20.056Z'
+    - github-oauth > request > form-data > mime:
+        reason: None given
+        expires: '2017-12-13T13:20:20.056Z'
+    - login-with-github > request > mime:
+        reason: None given
+        expires: '2017-12-13T13:20:20.056Z'
+    - login-with-github > request > form-data > mime:
+        reason: None given
+        expires: '2017-12-13T13:20:20.056Z'
 # patches apply the minimum changes required to fix a vulnerability
 patch:
   'npm:hawk:20160119':
@@ -58,8 +80,12 @@ patch:
   'npm:request:20160119':
     - codecov.io > request:
         patched: '2017-05-24T20:23:09.576Z'
+      login-with-github > request:
+        patched: '2017-11-13T13:18:45.910Z'
     - nano > follow > request:
         patched: '2017-05-24T20:23:09.576Z'
+      github-oauth > request:
+        patched: '2017-11-13T13:18:45.910Z'
     - nano > follow > request:
         patched: '2017-09-15T10:14:34.694Z'
     - codecov.io > request:
@@ -74,7 +100,10 @@ patch:
         patched: '2017-09-27T22:45:09.600Z'
   'npm:minimatch:20160620':
     - login-with-github > middler > minimatch:
-        patched: '2017-11-10T10:27:57.594Z'
+        patched: '2017-11-13T13:18:45.910Z'
   'npm:qs:20140806-1':
     - login-with-github > request > qs:
-        patched: '2017-11-10T10:27:57.594Z'
+        patched: '2017-11-13T13:18:45.910Z'
+  'npm:qs:20140806':
+    - login-with-github > request > qs:
+        patched: '2017-11-13T13:18:45.910Z'
