@@ -2,6 +2,16 @@
 
 ## CHANGELOG
 
+## 31th week
+
+13/11/2017: 0.9.2798: installed experimental LoRa Server & Application Server; added notes only to the Dockerfile so far (may use https://hub.docker.com/r/loraserver/lora-app-server/ instead of installing into THiNX Docker container)
+
+## 30th week
+
+12/11/2017: 0.9.2796: fixed firmware versioning, error page, build status marker in log, updated builders
+
+11/11/2017: 0.9.2778: bugfixes in versioning and builder, fixing log record 
+
 10/11/2017: 0.9.2758: added GitHub login and Status Transformer editor; bugfixes for Arduino builds and builds in general; still tailing lambdas...
 
 9/11/2017: added prototype status transformer as a part of user profile
@@ -11,6 +21,8 @@
 7/11/2017: Experimental byte-value transformer for (float) Battery voltages; library update with setStatus support
 
 6/11/2017: minor fixes
+
+## 29th week
 
 5/11/2017: fixes, builder updates, OAuth redirects
 
@@ -26,13 +38,13 @@
 
 30/10/2017: 0.9.2484 - major update in Arduino library (working with/without WiFiManager, added working callback, added owner ID setting to captive portal); secondary test implementation also works (EAV)
 
+## 28th week
+
 27/10/2017: 0.9.2482 - major bugfixes in Arduino libraries (stable release)
 
 24/10/2017: 0.9.2472 - fixed password reset, fixed statistics parser timer, reduced vulnerabilities
 
 23/10/2017: 0.9.2464 - improvements and debugging the Password reset & Activation user journeys; passed tests of activation and password resets; explicit Location & SigFox support (additional attributes: status, snr, lat, lon and station)
-
-13/10/2017:
 
 ### Break
 
