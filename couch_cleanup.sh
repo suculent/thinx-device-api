@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Cleanup script, should be called at least daily with cron.
+# Performs database backup. May delete and recreate some DBs by backwards migration without deleted items.
+
 if [ -f ./conf/.thx_prefix ]; then
   PREFIX="http://localhost:5984/$(cat ./conf/.thx_prefix)_"
 else
