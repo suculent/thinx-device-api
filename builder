@@ -761,6 +761,3 @@ echo -e "${RESULT}" | tee -a "${LOG_PATH}"
 
 MSG="${BUILD_DATE} Done."
 echo "[builder.sh]" $MSG | tee -a "${LOG_PATH}"
-
-# cleanup DB
-# bash $THINX_ROOT/couch_cleanup.sh && > /dev/null
