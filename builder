@@ -303,6 +303,11 @@ case $PLATFORM in
 			else
 				echo "[builder.sh] Build type: firmware (or undefined)" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
+				if [ $(stat -f%z $OUTFILE) < 10000 ]]; then
+					rm -rf $OUTFILE
+					BUILD_SUCCESS=false
+					echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
+				fi
 			fi
 
 			OUTPATH=${DEPLOYMENT_PATH}
@@ -332,9 +337,14 @@ case $PLATFORM in
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
 				fi
+				if [ $(stat -f%z $OUTFILE) < 10000 ]]; then
+					rm -rf $OUTFILE
+					BUILD_SUCCESS=false
+					echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
+				fi
 				echo "[builder.sh] Docker completed <<<"
-				rm -rf ./build; make clean; make V=1				
-			fi	
+				rm -rf ./build; make clean; make V=1
+			fi
 
 			ls | tee -a "${LOG_PATH}"
 
@@ -386,6 +396,11 @@ case $PLATFORM in
 			else
 				echo "[builder.sh] Build type: firmware (or undefined)" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
+				if [ $(stat -f%z $OUTFILE) < 10000 ]]; then
+					rm -rf $OUTFILE
+					BUILD_SUCCESS=false
+					echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
+				fi
 			fi
 
 			OUTPATH=${DEPLOYMENT_PATH}
@@ -444,7 +459,7 @@ case $PLATFORM in
 				# deploy Lua files without building
 				cp -vf *.lua "$DEPLOYMENT_PATH"
 			fi
-			
+
 			if [[ ! ${RUN} ]]; then
 				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." | tee -a "${LOG_PATH}"
 				STATUS='DRY_RUN_OK'
@@ -485,7 +500,7 @@ case $PLATFORM in
 
 			echo "[builder.sh] running Docker >>>"
 			set -o pipefail
-			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/mongoose-builder suculent/mongoose-docker-build | tee -a "${LOG_PATH}"			
+			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/mongoose-builder suculent/mongoose-docker-build | tee -a "${LOG_PATH}"
 			echo "${PIPESTATUS[@]}"
 			if [[ ! -z =$(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 				if [[ -f $(pwd)/build/fw.zip ]]; then
@@ -558,23 +573,22 @@ case $PLATFORM in
 
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
-					echo " "
-					echo "[builder.sh] Docker build succeeded."
-					echo " "
 
-					echo " " | tee -a "${LOG_PATH}"
-					echo "[builder.sh] Docker build succeeded." | tee -a "${LOG_PATH}"
-					echo " " | tee -a "${LOG_PATH}"
+					if [ $(stat -f%z $OUTFILE) < 10000 ]]; then
+						rm -rf $OUTFILE
+						BUILD_SUCCESS=false
+						echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
+					else
+						cho " " | tee -a "${LOG_PATH}"
+						echo "[builder.sh] Docker build succeeded." | tee -a "${LOG_PATH}"
+						echo " " | tee -a "${LOG_PATH}"
+					fi
 				else
-					echo " "
-					echo "[builder.sh] Docker build with result ${RESULT}"
-					echo " "
-
 					echo " " | tee -a "${LOG_PATH}"
 					echo "[builder.sh] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
 					echo " " | tee -a "${LOG_PATH}"
 				fi
-				
+
 				# Exit on dry run...
 				if [[ ! ${RUN} ]]; then
 					echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." | tee -a "${LOG_PATH}"
@@ -633,11 +647,11 @@ case $PLATFORM in
 
 			echo "[builder.sh] running Docker >>>"
 			set -o pipefail
-			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build | tee -a "${LOG_PATH}"			
+			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build | tee -a "${LOG_PATH}"
 			echo "${PIPESTATUS[@]}"
 			if [[ ! -z =$(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 				BUILD_SUCCESS=true
-			else 
+			else
 				BUILD_SUCCESS=$?
 			fi
 			echo "[builder.sh] Docker completed <<<"
@@ -652,9 +666,19 @@ case $PLATFORM in
 				# Check Artifacts
 				if [[ $BUILD_SUCCESS == true ]] ; then
 					STATUS='OK'
-					echo "[builder.sh] ☢ Exporting PlatformIO artifact: ${OUTFILE}"
-					cp -vR "${OUTFILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
-					cp -vR "${OUTFILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
+					if [ $(stat -f%z $OUTFILE) < 10000 ]]; then
+						rm -rf $OUTFILE
+						BUILD_SUCCESS=false
+						echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
+					else
+						echo " " | tee -a "${LOG_PATH}"
+						echo "[builder.sh] Docker build succeeded." | tee -a "${LOG_PATH}"
+						echo " " | tee -a "${LOG_PATH}"
+
+						echo "[builder.sh] ☢ Exporting PlatformIO artifact: ${OUTFILE}"
+						cp -vR "${OUTFILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
+						cp -vR "${OUTFILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
+					fi
 				else
 					STATUS='FAILED'
 				fi
