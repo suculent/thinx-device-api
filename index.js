@@ -2422,7 +2422,7 @@ var ThinxApp = function() {
   });
 
   // Callback service parsing the authorization token and asking for the access token
-  app.get('/oauth/cb', function(req, res) {
+  app.get('/oauth/cb', function(req, ores) {
 
     console.log("Google OAuth2 Callback");
 
@@ -2445,6 +2445,7 @@ var ThinxApp = function() {
       return token;
     });
     t.then(res2 => {
+
       console.log(res2);
 
       global_token = res2.access_token;
@@ -2452,15 +2453,15 @@ var ThinxApp = function() {
       https.get(
         'https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' +
         res2
-        .access_token, (res) => {
+        .access_token, (res3) => {
           let data = '';
           // A chunk of data has been recieved.
-          res.on('data', (chunk) => {
+          res3.on('data', (chunk) => {
             data += chunk;
           });
 
           // The whole response has been received. Print out the result.
-          res.on('end', () => {
+          res3.on('end', () => {
 
             const odata = JSON.parse(data);
 
@@ -2470,10 +2471,8 @@ var ThinxApp = function() {
             const picture = odata.picture;
             const locale = odata.locale;
 
-
-
             if (typeof(email) === "undefined") {
-              res.redirect(
+              res3.redirect(
                 'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
                 'E-mail missing.'
               );
@@ -2499,7 +2498,7 @@ var ThinxApp = function() {
                 if (error.toString().indexOf("Error: deleted") !== -1) {
                   // TODO: Redirect to error page with reason
                   console.log("[oauth] user document deleted");
-                  res.redirect(
+                  ores.redirect(
                     'https://rtm.thinx.cloud/error.html?success=failed&title=OAuth-Error&reason=' +
                     'account_doc_deleted');
                   return;
@@ -2509,7 +2508,7 @@ var ThinxApp = function() {
                   if (typeof(udoc) === "undefined") {
                     console.log("Not found user for owner_id: " + owner_id +
                       " with email: " + email);
-                    res.redirect(
+                    ores.redirect(
                       'https://rtm.thinx.cloud/error.html?success=failed&title=OAuth-Error&reason=' +
                       'user_not_found');
                     return;
@@ -2522,7 +2521,7 @@ var ThinxApp = function() {
                     // TODO: Redirect to error page with reason
                     console.log(
                       "[oauth] user account marked as deleted");
-                    res.redirect(
+                    ores.redirect(
                       'https://rtm.thinx.cloud/error.html?success=failed&title=OAuth-Error&reason=' +
                       'account_deleted');
                     return;
@@ -2591,8 +2590,7 @@ var ThinxApp = function() {
               client.set(token, JSON.stringify(userWrapper));
               client.expire(token, 3600);
 
-              return res.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
-                token);
+              ores.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
 
             });
 
