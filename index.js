@@ -2413,8 +2413,7 @@ var ThinxApp = function() {
       if (!err) {
         console.log("Should login with token now...");
         if (global_token !== null) {
-          res.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
-            global_token);
+          res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + global_token);
         }
       } else {
         console.log(err.message);
@@ -2448,6 +2447,8 @@ var ThinxApp = function() {
     t.then(res2 => {
       console.log(res2);
 
+      global_token = res2.access_token;
+
       https.get(
         'https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' +
         res2
@@ -2469,6 +2470,8 @@ var ThinxApp = function() {
             const picture = odata.picture;
             const locale = odata.locale;
 
+
+
             if (typeof(email) === "undefined") {
               res.redirect(
                 'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
@@ -2476,7 +2479,7 @@ var ThinxApp = function() {
               );
             }
 
-            const owner_id = sha256(email);
+            const owner_id = sha256(prefix + email);
 
             var userWrapper = {
               first_name: given_name,
@@ -2546,14 +2549,11 @@ var ThinxApp = function() {
                       given_name + " " + family_name);
 
                     var token = sha256(res2.access_token);
+                    global_token = token;
                     client.set(token, JSON.stringify(userWrapper));
                     client.expire(token, 30);
 
-                    res.redirect(
-                      "https://rtm.thinx.cloud/app/#/oauth/" +
-                      token);
-
-                    return;
+                    // Do not return here... continue with created user...
 
                   });
 
@@ -2574,20 +2574,24 @@ var ThinxApp = function() {
                 }
               });
 
+              /*
+
               req.session.owner = owner_id;
               req.session.cookie.secure = true;
               req.session.cookie.expires = new Date(Date.now() +
                 fortnight, "isoDate");
               req.session.cookie.maxAge = fortnight;
 
-              alog.log(req.session.owner, "OAuth2 User logged in...");
+              */
+
+              alog.log(owner_id, " OAuth2 User logged in...");
 
               var token = sha256(res2.access_token);
 
               client.set(token, JSON.stringify(userWrapper));
               client.expire(token, 3600);
 
-              res.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
+              return res.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
                 token);
 
             });
