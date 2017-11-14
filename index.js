@@ -88,7 +88,7 @@ var ThinxApp = function() {
     state: '3(#0/!~12345', // this string shall be random (returned upon auth provider call back)
   });
 
-  // 
+  //
   // OAuth2 for GitHub
   //
 
@@ -2232,7 +2232,7 @@ var ThinxApp = function() {
 
     console.log('here is your shiny new github oauth_token', oauth_token.access_token);
 
-    // if login was successful 
+    // if login was successful
     console.log("[oauth][github] GitHub Login successfull...");
 
     if (oauth_token.access_token) {
@@ -2374,7 +2374,7 @@ var ThinxApp = function() {
 
           }); // userlib.get
 
-        }); // res.end        
+        }); // res.end
       }); // https.get
     }
   });
@@ -2496,17 +2496,32 @@ var ThinxApp = function() {
                 if (error.toString().indexOf("Error: deleted") !== -1) {
                   // TODO: Redirect to error page with reason
                   console.log("[oauth] user document deleted");
-                  res.redirect('/oauth/account-doc-deleted');
+                  res.redirect(
+                    'https://rtm.thinx.cloud/error.html?success=failed&title=OAuth-Error&reason=' +
+                    'account_doc_deleted');
                   return;
 
                 } else {
+
+                  if (typeof(udoc) === "undefined") {
+                    console.log("Not found user for owner_id: " + owner_id +
+                      " with email: " + email);
+                    res.redirect(
+                      'https://rtm.thinx.cloud/error.html?success=failed&title=OAuth-Error&reason=' +
+                      'user_not_found');
+                    return;
+                  }
+
+                  console.log("Userlib get error: " + error.toString());
 
                   if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
                     true) {
                     // TODO: Redirect to error page with reason
                     console.log(
                       "[oauth] user account marked as deleted");
-                    res.redirect('/oauth/account-deleted');
+                    res.redirect(
+                      'https://rtm.thinx.cloud/error.html?success=failed&title=OAuth-Error&reason=' +
+                      'account_deleted');
                     return;
                   }
 
@@ -2517,12 +2532,14 @@ var ThinxApp = function() {
                     console.log("[OID:" + req.session.owner +
                       "] [NEW_SESSION] [oauth]");
 
+                    /*
                     var minute = 60 * 1000;
 
                     req.session.cookie.expires = new Date(Date.now() +
                       fortnight, "isoDate");
                     req.session.cookie.maxAge = fortnight;
                     req.session.cookie.secure = true;
+                    */
 
                     alog.log(req.session.owner,
                       "OAuth User created: " +
@@ -2562,6 +2579,7 @@ var ThinxApp = function() {
               req.session.cookie.expires = new Date(Date.now() +
                 fortnight, "isoDate");
               req.session.cookie.maxAge = fortnight;
+
               alog.log(req.session.owner, "OAuth2 User logged in...");
 
               var token = sha256(res2.access_token);
