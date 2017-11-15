@@ -14,7 +14,7 @@
 
 15/11/2017: business-trip / day off
 
-14/11/2017:
+14/11/2017: fixed Google login hangup
 
 13/11/2017: 0.9.2798: installed experimental LoRa Server & Application Server; added notes only to the Dockerfile so far (may use https://hub.docker.com/r/loraserver/lora-app-server/ instead of installing into THiNX Docker container)
 
