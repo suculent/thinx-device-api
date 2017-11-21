@@ -2,7 +2,7 @@
 
 ## CHANGELOG
 
-21/11/2017: creating MQTT ACL on-the-run (new users and devices only); zipping and providing build artifacts
+21/11/2017: 0.9.2838 creating MQTT ACL on-the-run (new users and devices only); zipping and providing build artifacts; API Key and Source ownership migration
 
 20/11/2017: added method for attaching additional "Push Notification Token" parameter to a device using API Key
 
