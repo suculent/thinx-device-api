@@ -1100,7 +1100,7 @@ var ThinxApp = function() {
   // UDID is required, valid Push token is required. Potential point for DDoS attacks,
   // would use at least SOME authentication.
 
-  app.post("/device/push", function(req, res) {
+  app.post("/device/addpush", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
 
@@ -1122,6 +1122,7 @@ var ThinxApp = function() {
       });
     }
   });
+
 
   // Device editing (alias only so far)
   app.post("/api/device/edit", function(req, res) {
@@ -1248,6 +1249,47 @@ var ThinxApp = function() {
     builder.build(owner, wrapper, notifiers, function(success, response) {
       respond(res, response);
     });
+  });
+
+  // Get build artifacts
+  app.get("/api/device/artifacts", function(req, res) {
+
+    if (!validateSecureGETRequest(req)) return;
+    if (!validateSession(req, res)) return;
+
+    var owner = req.session.owner;
+
+    var device = req.body.udid;
+
+    if (typeof(device) === "undefined") {
+      respond(res, {
+        success: false,
+        status: "missing_udid"
+      });
+      return;
+    }
+
+    var build_id = req.body.build_id;
+
+    if (typeof(device) === "undefined") {
+      respond(res, {
+        success: false,
+        status: "missing_build_id"
+      });
+      return;
+    }
+
+    const artifact_data = deployment.artifact(owner, udid, build_id);
+
+    if (artifact_data.length > 0) {
+      respond(res, artifact_data);
+    } else {
+      respond(res, {
+        success: false,
+        status: "artifact_not_found"
+      });
+    }
+
   });
 
   /*
@@ -2092,7 +2134,6 @@ var ThinxApp = function() {
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
 
-
     var owner = req.session.owner;
 
     /*
@@ -2131,8 +2172,6 @@ var ThinxApp = function() {
         status: response
       });
     });
-
-
   });
 
   /*

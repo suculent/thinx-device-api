@@ -300,6 +300,7 @@ case $PLATFORM in
 				echo "Build type: file" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/boot.py
 				cp -vf $WORKDIR/*.py ${DEPLOYMENT_PATH} # copy all .py files without building
+				zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./* # zip artefacts
 			else
 				echo "[builder.sh] Build type: firmware (or undefined)" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
@@ -322,9 +323,11 @@ case $PLATFORM in
 					if [[ -f $FSPATH ]]; then
 						rm -rf $FSPATH
 						cp -vf "${pyfile}" $FSPATH
+						zip -rv "${BUILD_ID}.zip" ${pyfile} ./* # zip artefacts
 					fi
 				else
 					cp -vf "${pyfile}" "$DEPLOYMENT_PATH"
+					zip -rv "${BUILD_ID}.zip" ${pyfile} ./* # zip artefacts
 				fi
 			done
 
@@ -336,6 +339,7 @@ case $PLATFORM in
 				echo "${PIPESTATUS[@]}"
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
+					zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./* # zip artefacts
 				fi
 				if [ $(stat -f%z $OUTFILE) < 10000 ]]; then
 					rm -rf $OUTFILE
@@ -361,6 +365,7 @@ case $PLATFORM in
 					ls ./bin | tee -a "${LOG_PATH}"
 					if [[ $BUILD_TYPE == "firmware" ]]; then
 						cp -v ./build/*.bin "$OUTPATH" | tee -a "${LOG_PATH}"
+						zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./build/* # zip artefacts
 						rm -rf ./build/*
 					fi
 					echo "[builder.sh] Micropython Build: DEPLOYMENT_PATH: " $DEPLOYMENT_PATH
@@ -393,9 +398,11 @@ case $PLATFORM in
 			if [[ $BUILD_TYPE == "file" ]]; then
 				echo "[builder.sh] Build type: file" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/thinx.lua
+				zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ${OUTFILE} # zip artefacts
 			else
 				echo "[builder.sh] Build type: firmware (or undefined)" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
+				zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ${OUTFILE} # zip artefacts
 				if [ $(stat -f%z $OUTFILE) < 10000 ]]; then
 					rm -rf $OUTFILE
 					BUILD_SUCCESS=false
@@ -452,12 +459,14 @@ case $PLATFORM in
 				echo "${PIPESTATUS[@]}"
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
+					zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./bin/* # zip artefacts
 				fi
 				echo "[builder.sh] Docker completed <<<"
 
 			else
 				# deploy Lua files without building
 				cp -vf *.lua "$DEPLOYMENT_PATH"
+				zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ${FILES} # zip artefacts
 			fi
 
 			if [[ ! ${RUN} ]]; then
@@ -476,6 +485,7 @@ case $PLATFORM in
 					fi
 					echo "[builder.sh] NodeMCU Build: DEPLOYMENT_PATH: " $DEPLOYMENT_PATH
 					ls "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
+					zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./bin/* # zip artefacts
 					STATUS='OK'
 				else
 					STATUS='FAILED'
@@ -505,6 +515,7 @@ case $PLATFORM in
 			if [[ ! -z =$(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 				if [[ -f $(pwd)/build/fw.zip ]]; then
 					BUILD_SUCCESS=true
+					zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./build/* # zip artefacts
 				else
 					echo "[builder.sh] OUTFILE not created." | tee -a "${LOG_PATH}"
 				fi
@@ -526,6 +537,7 @@ case $PLATFORM in
 					unzip "${BUILD_PATH}/build/fw.zip" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 					ls "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 					echo "[builder.sh]" $MSG; echo $MSG | tee -a "${LOG_PATH}"
+					zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./build/* # zip artefacts
 				else
 					STATUS='FAILED'
 				fi
@@ -582,6 +594,7 @@ case $PLATFORM in
 						cho " " | tee -a "${LOG_PATH}"
 						echo "[builder.sh] Docker build succeeded." | tee -a "${LOG_PATH}"
 						echo " " | tee -a "${LOG_PATH}"
+						zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ${OUTFILE} # zip artefacts
 					fi
 				else
 					echo " " | tee -a "${LOG_PATH}"
@@ -613,6 +626,7 @@ case $PLATFORM in
 						echo "[builder.sh] Deployment path $DEPLOYMENT_PATH contains:" | tee -a "${LOG_PATH}"
 						cp -vR "${OUTFILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
 						ls $DEPLOYMENT_PATH | tee -a "${LOG_PATH}"
+						zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./*.bin ./*.elf # zip artefacts
 					else
 						STATUS='FAILED'
 					fi
@@ -678,6 +692,8 @@ case $PLATFORM in
 						echo "[builder.sh] ☢ Exporting PlatformIO artifact: ${OUTFILE}"
 						cp -vR "${OUTFILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 						cp -vR "${OUTFILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
+
+						zip -rv "${BUILD_ID}.zip" ${OUTFILE} ./build/*.bin ./build/*.elf # zip artefacts
 					fi
 				else
 					STATUS='FAILED'
@@ -700,6 +716,7 @@ if [[ ! -f "${OUTFILE}" ]]; then
 	OUTFILE="<none>"
 	SHA="0x00000000"
 else
+	echo "Calculating checksum for $OUTFILE"
 	SHAX=$(shasum -a 256 $OUTFILE)
 	SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
 fi
@@ -727,6 +744,10 @@ fi
 if [ ! -z ${THINX_FIRMWARE_VERSION} ]; then
 	echo "No build file found, generating last-minute version..."
 	THINX_FIRMWARE_VERSION="${REPO_NAME}-${THX_VERSION}.${THX_REVISION}"
+fi
+
+if [[ -f "${BUILD_ID}.zip" ]];
+	cp ${BUILD_ID}.zip $DEPLOYMENT_PATH/
 fi
 
 echo "BUILD_ID" "${BUILD_ID}" | tee -a "${LOG_PATH}"

@@ -209,16 +209,35 @@ devicelib.get(udid, function(err, doc) {
       process.exit(1);
     }
 
+    // Parse all devices with same source (?)
+
     for (var index in body.rows) {
-      if (!body.rows.hasOwnProperty(index)) continue;
+      //if (!body.rows.hasOwnProperty(index)) continue;
       var item = body.rows[index];
-      if (!item.hasOwnProperty("push")) continue;
+      // if (!item.hasOwnProperty("push")) continue;
       if (typeof(item.push !== "undefined")) {
         push_tokens.push(item.push);
       }
     }
 
-    //console.log(JSON.stringify(body));
+    console.log(JSON.stringify(body));
+
+    var device = body.rows[0];
+    device.last_build_id = build_id;
+    device.last_build_date = new Date().toString();
+
+    const apath = build_path + "/" + build_id + ".zip";
+    if (fs.existsSync(apath)) {
+      device.artifact = apath;
+    }
+
+    // Save last_build_id, last_build_date and artifact
+    devicelib.atomic("devicelib", "modify", udid, device, function(error, body) {
+      if (error) {
+        console.log("Notifier device update error: " + error);
+      }
+    });
+
 
     // Create build envelope
 
@@ -233,7 +252,8 @@ devicelib.get(udid, function(err, doc) {
       build_id: build_id,
       owner: owner,
       status: status,
-      timestamp: new Date()
+      timestamp: device.last_build_date,
+      artifact: device.artifact
     };
 
     // save to build_path
@@ -289,13 +309,6 @@ devicelib.get(udid, function(err, doc) {
         username: "notifier.js",
         fields: buildEnvelope
       });
-    } else if (status.indexOf("DEPLOYED") !== -1) {
-      slack.alert({
-        text: "Deployment successful.", // todo: reference git_url + commit_id here
-        username: "notifier.js",
-        icon_emoji: ":ghost:",
-        fields: buildEnvelope
-      });
     } else if (status.indexOf("DRY_RUN_OK") !== -1) {
       slack.alert({
         text: "Dry run successful. Firmware left undeployed.", // todo: reference git_url + commit_id here
@@ -311,6 +324,8 @@ devicelib.get(udid, function(err, doc) {
         fields: buildEnvelope
       });
     }
+
+
 
     // Notify users (FCM)
 
