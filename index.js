@@ -1096,6 +1096,33 @@ var ThinxApp = function() {
     }
   });
 
+  // Device push attach
+  // UDID is required, valid Push token is required. Potential point for DDoS attacks,
+  // would use at least SOME authentication.
+
+  app.post("/device/push", function(req, res) {
+
+    if (!validateSecurePOSTRequest(req)) return;
+
+    if (typeof(req.body) === "undefined") {
+      respond(res, {
+        success: false,
+        status: "no_body"
+      });
+    } else if (typeof(req.body.push) === "undefined") {
+      respond(res, {
+        success: false,
+        status: "no_registration"
+      });
+    } else {
+      var registration = req.body.push;
+      device.push(registration, req.headers.authentication, function(
+        success, response) {
+        respond(res, response);
+      });
+    }
+  });
+
   // Device editing (alias only so far)
   app.post("/api/device/edit", function(req, res) {
 

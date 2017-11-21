@@ -2,6 +2,10 @@
 
 ## CHANGELOG
 
+21/11/2017: creating MQTT ACL on-the-run (new users and devices only)
+
+20/11/2017: added method for attaching additional "Push Notification Token" parameter to a device using API Key
+
 ## 31th week
 
 19/11/2017: sprint review
