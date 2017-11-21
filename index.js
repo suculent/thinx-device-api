@@ -1252,9 +1252,9 @@ var ThinxApp = function() {
   });
 
   // Get build artifacts
-  app.get("/api/device/artifacts", function(req, res) {
+  app.post("/api/device/artifacts", function(req, res) {
 
-    if (!validateSecureGETRequest(req)) return;
+    if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
