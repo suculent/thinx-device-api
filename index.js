@@ -135,6 +135,7 @@ var ThinxApp = function() {
   var builder = require("./lib/thinx/builder");
   var device = require("./lib/thinx/device");
   var devices = require("./lib/thinx/devices");
+  var deployment = require("./lib/thinx/deployment");
   var watcher = require("./lib/thinx/repository");
   var apienv = require("./lib/thinx/apienv");
   var apikey = require("./lib/thinx/apikey");
