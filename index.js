@@ -1260,9 +1260,9 @@ var ThinxApp = function() {
 
     var owner = req.session.owner;
 
-    var device = req.body.udid;
+    var udid = req.body.udid;
 
-    if (typeof(device) === "undefined") {
+    if (typeof(udid) === "undefined") {
       respond(res, {
         success: false,
         status: "missing_udid"
@@ -1272,7 +1272,7 @@ var ThinxApp = function() {
 
     var build_id = req.body.build_id;
 
-    if (typeof(device) === "undefined") {
+    if (typeof(build_id) === "undefined") {
       respond(res, {
         success: false,
         status: "missing_build_id"
