@@ -746,7 +746,7 @@ if [ ! -z ${THINX_FIRMWARE_VERSION} ]; then
 	THINX_FIRMWARE_VERSION="${REPO_NAME}-${THX_VERSION}.${THX_REVISION}"
 fi
 
-if [[ -f "${BUILD_ID}.zip" ]];
+if [[ -f "${BUILD_ID}.zip" ]]; then
 	cp ${BUILD_ID}.zip $DEPLOYMENT_PATH/
 fi
 
