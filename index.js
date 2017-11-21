@@ -1284,6 +1284,7 @@ var ThinxApp = function() {
 
     if (artifact_data.length > 0) {
       console.log("Sending artifact data...");
+      res.header("Content-Disposition", "inline; filename=\"build.zip\"");
       res.set("Connection", "close");
       respond(res, artifact_data);
     } else {
@@ -3006,9 +3007,8 @@ var ThinxApp = function() {
     if (typeOf(object) == "buffer") {
       console.log("Sending buffer: ");
       console.log(object);
-      res.header("Content-type", "application/binary");
+      res.header("Content-Type", "application/octet-stream");
       res.send(object);
-
 
     } else if (typeOf(object) == "string") {
       res.end(object);
