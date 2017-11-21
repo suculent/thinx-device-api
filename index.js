@@ -1283,6 +1283,8 @@ var ThinxApp = function() {
     const artifact_data = deployment.artifact(owner, udid, build_id);
 
     if (artifact_data.length > 0) {
+      console.log("Sending artifact data...");
+      res.set("Connection", "close");
       respond(res, artifact_data);
     } else {
       respond(res, {
@@ -3006,6 +3008,7 @@ var ThinxApp = function() {
       console.log(object);
       res.header("Content-type", "application/binary");
       res.send(object);
+
 
     } else if (typeOf(object) == "string") {
       res.end(object);

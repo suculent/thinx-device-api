@@ -747,7 +747,7 @@ if [ ! -z ${THINX_FIRMWARE_VERSION} ]; then
 fi
 
 if [[ -f "${BUILD_ID}.zip" ]]; then
-	cp ${BUILD_ID}.zip $DEPLOYMENT_PATH/
+	cp ${BUILD_ID}.zip $TARGET_PATH/
 fi
 
 echo "BUILD_ID" "${BUILD_ID}" | tee -a "${LOG_PATH}"
