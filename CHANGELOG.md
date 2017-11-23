@@ -1,5 +1,21 @@
 # Change Log
 
+## [Unreleased](https://github.com/suculent/thinx-device-api/tree/HEAD)
+
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2838...HEAD)
+
+**Implemented enhancements:**
+
+- Add JIRA integration [\#15](https://github.com/suculent/thinx-device-api/issues/15)
+
+**Closed issues:**
+
+- Faster messenger start on getDevices [\#16](https://github.com/suculent/thinx-device-api/issues/16)
+
+**Merged pull requests:**
+
+- \[Snyk Update\] New fixes for 1 vulnerable dependency path [\#14](https://github.com/suculent/thinx-device-api/pull/14) ([snyk-bot](https://github.com/snyk-bot))
+
 ## [0.9.2838](https://github.com/suculent/thinx-device-api/tree/0.9.2838) (2017-11-21)
 [Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2805...0.9.2838)
 
