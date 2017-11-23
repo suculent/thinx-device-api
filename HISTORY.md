@@ -1,6 +1,10 @@
 # ☢ thinx-device-api change log
 
-## CHANGELOG
+## HISTORY
+
+23/11/2017: Rollbar and issues are automatically managed in JIRA as well.
+
+22/11/2017: Build artifacts can be downloaded as of now.
 
 21/11/2017: 0.9.2838 creating MQTT ACL on-the-run (new users and devices only); zipping and providing build artifacts; API Key and Source ownership migration
 
