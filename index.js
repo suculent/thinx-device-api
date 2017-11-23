@@ -2333,11 +2333,31 @@ var ThinxApp = function() {
           var token = "ghat:" + oauth_token.access_token;
           console.log(token);
 
+          var given_name = "GitHub";
+          var family_name = "User";
+          var name_array = [];
+
           var hdata = JSON.parse(data);
-          var name_array = hdata.name.split(" ");
+
+          if ((typeof(hdata.name) !== "undefined") || hdata.name === null) {
+            name_array = hdata.name.split(" ");
+            given_name = name_array[0];
+            family_name = name_array[name_array.count - 1];
+          } else {
+            console.log("Warning: no name in response.");
+          }
+
+          console.log("hdata: " + hdata);
+
+          if ((typeof(hdata.name) !== "undefined") || hdata.name === null) {
+            name_array = hdata.name.split(" ");
+            given_name = name_array[0];
+            family_name = name_array[name_array.count - 1];
+          } else {
+            console.log("Warning: no name in GitHub access token response.");
+          }
+
           const email = hdata.email;
-          const given_name = name_array[0];
-          const family_name = name_array[name_array.count - 1];
           const picture = hdata.avatar_url; // TODO: Fetch and save to owner...
 
           if (typeof(email) === "undefined") {
