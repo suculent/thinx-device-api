@@ -18,7 +18,7 @@
   },
   "scripts": {
     "coverage": "nyc npm test; nyc report --reporter=text-lcov > ./coverage/lcov.info && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls && cat ./coverage/lcov.info | ./node_modules/.bin/codacy-coverage",
-    "test": "nyc npm test; nyc report --reporter=text-lcov > ./coverage/lcov.info && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls && cat ./coverage/lcov.info | ./node_modules/.bin/codacy-coverage",
+    "test": "nyc npm test",
     "snyk": "snyk test",
     "snyk-protect": "snyk protect"
   },
