@@ -1,3 +1,274 @@
+# Change Log
+
+## [0.9.2838](https://github.com/suculent/thinx-device-api/tree/0.9.2838) (2017-11-21)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2805...0.9.2838)
+
+**Merged pull requests:**
+
+- \[Snyk\] Fix for 3 vulnerable dependency paths [\#13](https://github.com/suculent/thinx-device-api/pull/13) ([snyk-bot](https://github.com/snyk-bot))
+
+## [0.9.2805](https://github.com/suculent/thinx-device-api/tree/0.9.2805) (2017-11-13)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2798...0.9.2805)
+
+**Closed issues:**
+
+- Crash when connecting in STA mode [\#6](https://github.com/suculent/thinx-device-api/issues/6)
+
+## [0.9.2798](https://github.com/suculent/thinx-device-api/tree/0.9.2798) (2017-11-13)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2758...0.9.2798)
+
+## [0.9.2758](https://github.com/suculent/thinx-device-api/tree/0.9.2758) (2017-11-10)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2621...0.9.2758)
+
+**Merged pull requests:**
+
+- \[Snyk Update\] New fixes for 4 vulnerable dependency paths [\#11](https://github.com/suculent/thinx-device-api/pull/11) ([snyk-bot](https://github.com/snyk-bot))
+
+## [0.9.2621](https://github.com/suculent/thinx-device-api/tree/0.9.2621) (2017-11-05)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2571...0.9.2621)
+
+## [0.9.2571](https://github.com/suculent/thinx-device-api/tree/0.9.2571) (2017-11-02)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2520...0.9.2571)
+
+## [0.9.2520](https://github.com/suculent/thinx-device-api/tree/0.9.2520) (2017-11-01)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2519...0.9.2520)
+
+## [0.9.2519](https://github.com/suculent/thinx-device-api/tree/0.9.2519) (2017-10-31)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2492...0.9.2519)
+
+## [0.9.2492](https://github.com/suculent/thinx-device-api/tree/0.9.2492) (2017-10-31)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2482...0.9.2492)
+
+## [0.9.2482](https://github.com/suculent/thinx-device-api/tree/0.9.2482) (2017-10-27)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2472...0.9.2482)
+
+**Merged pull requests:**
+
+- \[Snyk Update\] New fixes for 1 vulnerable dependency path [\#10](https://github.com/suculent/thinx-device-api/pull/10) ([snyk-bot](https://github.com/snyk-bot))
+
+## [0.9.2472](https://github.com/suculent/thinx-device-api/tree/0.9.2472) (2017-10-23)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2464...0.9.2472)
+
+## [0.9.2464](https://github.com/suculent/thinx-device-api/tree/0.9.2464) (2017-10-23)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2238...0.9.2464)
+
+**Merged pull requests:**
+
+- Add a Codacy badge to README.md [\#9](https://github.com/suculent/thinx-device-api/pull/9) ([codacy-badger](https://github.com/codacy-badger))
+- \[Snyk Update\] New fixes for 1 vulnerable dependency path [\#8](https://github.com/suculent/thinx-device-api/pull/8) ([snyk-bot](https://github.com/snyk-bot))
+- Update README.md [\#7](https://github.com/suculent/thinx-device-api/pull/7) ([qool](https://github.com/qool))
+- Create LICENSE [\#5](https://github.com/suculent/thinx-device-api/pull/5) ([suculent](https://github.com/suculent))
+- Created CODE\_OF\_CONDUCT.md [\#4](https://github.com/suculent/thinx-device-api/pull/4) ([suculent](https://github.com/suculent))
+
+## [0.9.2238](https://github.com/suculent/thinx-device-api/tree/0.9.2238) (2017-08-17)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2228...0.9.2238)
+
+## [0.9.2228](https://github.com/suculent/thinx-device-api/tree/0.9.2228) (2017-08-17)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2072...0.9.2228)
+
+## [0.9.2072](https://github.com/suculent/thinx-device-api/tree/0.9.2072) (2017-08-16)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2203...0.9.2072)
+
+## [0.9.2203](https://github.com/suculent/thinx-device-api/tree/0.9.2203) (2017-08-15)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2080...0.9.2203)
+
+## [0.9.2080](https://github.com/suculent/thinx-device-api/tree/0.9.2080) (2017-08-08)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2020...0.9.2080)
+
+## [0.9.2020](https://github.com/suculent/thinx-device-api/tree/0.9.2020) (2017-08-04)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2013...0.9.2020)
+
+## [0.9.2013](https://github.com/suculent/thinx-device-api/tree/0.9.2013) (2017-08-04)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2007...0.9.2013)
+
+## [0.9.2007](https://github.com/suculent/thinx-device-api/tree/0.9.2007) (2017-08-04)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.1998...0.9.2007)
+
+## [0.9.1998](https://github.com/suculent/thinx-device-api/tree/0.9.1998) (2017-08-03)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.1921...0.9.1998)
+
+## [0.9.1921](https://github.com/suculent/thinx-device-api/tree/0.9.1921) (2017-07-27)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.8.1921...0.9.1921)
+
+## [1.8.1921](https://github.com/suculent/thinx-device-api/tree/1.8.1921) (2017-07-27)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.9.1904...1.8.1921)
+
+## [1.9.1904](https://github.com/suculent/thinx-device-api/tree/1.9.1904) (2017-07-25)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.8.1857...1.9.1904)
+
+## [1.8.1857](https://github.com/suculent/thinx-device-api/tree/1.8.1857) (2017-07-25)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.8.1838...1.8.1857)
+
+## [1.8.1838](https://github.com/suculent/thinx-device-api/tree/1.8.1838) (2017-07-20)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.7.1730...1.8.1838)
+
+## [1.7.1730](https://github.com/suculent/thinx-device-api/tree/1.7.1730) (2017-07-10)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.7.1725...1.7.1730)
+
+## [1.7.1725](https://github.com/suculent/thinx-device-api/tree/1.7.1725) (2017-07-10)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.7.1638...1.7.1725)
+
+**Merged pull requests:**
+
+- \[Snyk Update\] New fixes for 1 vulnerable dependency path [\#2](https://github.com/suculent/thinx-device-api/pull/2) ([snyk-bot](https://github.com/snyk-bot))
+
+## [1.7.1638](https://github.com/suculent/thinx-device-api/tree/1.7.1638) (2017-07-01)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.7.1542...1.7.1638)
+
+## [1.7.1542](https://github.com/suculent/thinx-device-api/tree/1.7.1542) (2017-06-26)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/tag-1...1.7.1542)
+
+## [tag-1](https://github.com/suculent/thinx-device-api/tree/tag-1) (2017-06-23)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/tag...tag-1)
+
+## [tag](https://github.com/suculent/thinx-device-api/tree/tag) (2017-06-23)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.6.1465-nightly...tag)
+
+## [1.6.1465-nightly](https://github.com/suculent/thinx-device-api/tree/1.6.1465-nightly) (2017-06-22)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.6.1421...1.6.1465-nightly)
+
+## [1.6.1421](https://github.com/suculent/thinx-device-api/tree/1.6.1421) (2017-06-18)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.6.1390-nightly...1.6.1421)
+
+## [1.6.1390-nightly](https://github.com/suculent/thinx-device-api/tree/1.6.1390-nightly) (2017-06-09)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.6.1322-post-refactoring...1.6.1390-nightly)
+
+## [1.6.1322-post-refactoring](https://github.com/suculent/thinx-device-api/tree/1.6.1322-post-refactoring) (2017-06-07)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.6-DAPI-version-bump...1.6.1322-post-refactoring)
+
+## [1.6-DAPI-version-bump](https://github.com/suculent/thinx-device-api/tree/1.6-DAPI-version-bump) (2017-06-06)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.6.1268-test...1.6-DAPI-version-bump)
+
+## [1.6.1268-test](https://github.com/suculent/thinx-device-api/tree/1.6.1268-test) (2017-06-06)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.5.1200...1.6.1268-test)
+
+## [1.5.1200](https://github.com/suculent/thinx-device-api/tree/1.5.1200) (2017-05-29)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.5.1190...1.5.1200)
+
+## [1.5.1190](https://github.com/suculent/thinx-device-api/tree/1.5.1190) (2017-05-29)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.5.1105...1.5.1190)
+
+## [1.5.1105](https://github.com/suculent/thinx-device-api/tree/1.5.1105) (2017-05-24)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.5.1100...1.5.1105)
+
+## [1.5.1100](https://github.com/suculent/thinx-device-api/tree/1.5.1100) (2017-05-24)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.5.1080...1.5.1100)
+
+## [1.5.1080](https://github.com/suculent/thinx-device-api/tree/1.5.1080) (2017-05-24)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.5.1053-weekly...1.5.1080)
+
+## [1.5.1053-weekly](https://github.com/suculent/thinx-device-api/tree/1.5.1053-weekly) (2017-05-21)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.5.1020...1.5.1053-weekly)
+
+## [1.5.1020](https://github.com/suculent/thinx-device-api/tree/1.5.1020) (2017-05-21)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.5.1016...1.5.1020)
+
+## [1.5.1016](https://github.com/suculent/thinx-device-api/tree/1.5.1016) (2017-05-20)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.5.1013...1.5.1016)
+
+## [1.5.1013](https://github.com/suculent/thinx-device-api/tree/1.5.1013) (2017-05-20)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.5.1000...1.5.1013)
+
+## [1.5.1000](https://github.com/suculent/thinx-device-api/tree/1.5.1000) (2017-05-20)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.5.985...1.5.1000)
+
+## [1.5.985](https://github.com/suculent/thinx-device-api/tree/1.5.985) (2017-05-20)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.4.850...1.5.985)
+
+## [1.4.850](https://github.com/suculent/thinx-device-api/tree/1.4.850) (2017-05-14)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.4.800...1.4.850)
+
+## [1.4.800](https://github.com/suculent/thinx-device-api/tree/1.4.800) (2017-05-14)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.4.737...1.4.800)
+
+## [1.4.737](https://github.com/suculent/thinx-device-api/tree/1.4.737) (2017-05-12)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.4.728...1.4.737)
+
+## [1.4.728](https://github.com/suculent/thinx-device-api/tree/1.4.728) (2017-05-12)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.4.726...1.4.728)
+
+## [1.4.726](https://github.com/suculent/thinx-device-api/tree/1.4.726) (2017-05-11)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.4.722...1.4.726)
+
+## [1.4.722](https://github.com/suculent/thinx-device-api/tree/1.4.722) (2017-05-11)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.4.602...1.4.722)
+
+## [1.4.602](https://github.com/suculent/thinx-device-api/tree/1.4.602) (2017-05-08)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.3.580...1.4.602)
+
+## [1.3.580](https://github.com/suculent/thinx-device-api/tree/1.3.580) (2017-05-05)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.3.530...1.3.580)
+
+**Merged pull requests:**
+
+- THX-65: added mkdirp dependency, creating user bin folder on account … [\#1](https://github.com/suculent/thinx-device-api/pull/1) ([suculent](https://github.com/suculent))
+
+## [1.3.530](https://github.com/suculent/thinx-device-api/tree/1.3.530) (2017-05-02)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.2.530...1.3.530)
+
+## [1.2.530](https://github.com/suculent/thinx-device-api/tree/1.2.530) (2017-04-29)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.1...1.2.530)
+
+## [1.1](https://github.com/suculent/thinx-device-api/tree/1.1) (2017-04-28)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.2.491...1.1)
+
+## [1.2.491](https://github.com/suculent/thinx-device-api/tree/1.2.491) (2017-04-28)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.2.473...1.2.491)
+
+## [1.2.473](https://github.com/suculent/thinx-device-api/tree/1.2.473) (2017-04-28)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/THX-8-startup-service...1.2.473)
+
+## [THX-8-startup-service](https://github.com/suculent/thinx-device-api/tree/THX-8-startup-service) (2017-04-27)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.1.339...THX-8-startup-service)
+
+## [1.1.339](https://github.com/suculent/thinx-device-api/tree/1.1.339) (2017-04-25)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.1.317...1.1.339)
+
+## [1.1.317](https://github.com/suculent/thinx-device-api/tree/1.1.317) (2017-04-25)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.1.310...1.1.317)
+
+## [1.1.310](https://github.com/suculent/thinx-device-api/tree/1.1.310) (2017-04-24)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.1.219...1.1.310)
+
+## [1.1.219](https://github.com/suculent/thinx-device-api/tree/1.1.219) (2017-04-19)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.1.186...1.1.219)
+
+## [1.1.186](https://github.com/suculent/thinx-device-api/tree/1.1.186) (2017-04-16)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.0.181-release...1.1.186)
+
+## [1.0.181-release](https://github.com/suculent/thinx-device-api/tree/1.0.181-release) (2017-04-16)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.0.12...1.0.181-release)
+
+## [1.0.12](https://github.com/suculent/thinx-device-api/tree/1.0.12) (2017-04-15)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.0.0...1.0.12)
+
+## [1.0.0](https://github.com/suculent/thinx-device-api/tree/1.0.0) (2017-04-15)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.3.0...1.0.0)
+
+## [0.3.0](https://github.com/suculent/thinx-device-api/tree/0.3.0) (2017-04-15)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.2.0...0.3.0)
+
+## [0.2.0](https://github.com/suculent/thinx-device-api/tree/0.2.0) (2017-04-14)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.0.8...0.2.0)
+
+## [0.0.8](https://github.com/suculent/thinx-device-api/tree/0.0.8) (2017-04-12)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.0.6...0.0.8)
+
+## [0.0.6](https://github.com/suculent/thinx-device-api/tree/0.0.6) (2017-04-11)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.0.5...0.0.6)
+
+## [0.0.5](https://github.com/suculent/thinx-device-api/tree/0.0.5) (2017-04-11)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.0.4...0.0.5)
+
+## [0.0.4](https://github.com/suculent/thinx-device-api/tree/0.0.4) (2017-04-11)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.0.3...0.0.4)
+
+## [0.0.3](https://github.com/suculent/thinx-device-api/tree/0.0.3) (2017-04-10)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.0.2...0.0.3)
+
+## [0.0.2](https://github.com/suculent/thinx-device-api/tree/0.0.2) (2017-04-10)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/CHANGELOG...0.0.2)
+
 # ☢ thinx-device-api change log
 
 ## CHANGELOG
@@ -326,3 +597,6 @@ Device registration with API key
 10/4/2017 - 0.0.2: Builder and notifier
 
 09/4/2017 - 0.0.1: Device registration
+
+
+\* *This Change Log was automatically generated by [github_changelog_generator](https://github.com/skywinder/Github-Changelog-Generator)*
