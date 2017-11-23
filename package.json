@@ -50,7 +50,7 @@
     "http-signature": "1.0.0",
     "karma-coverage": "*",
     "minimatch": "3.0.2",
-    "moment": "2.11.2",
+    "moment": "2.15.2",
     "mkdirp": "^0.5.1",
     "mqtt": "^2.11.0",
     "parse-date": "^1.1.0",
