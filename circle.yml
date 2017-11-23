@@ -35,7 +35,7 @@ test:
   commands:
 #    - pm2 stop index
 #    - npm run coverage
-    - npm test
+#    - npm test
   post:
     - bash ./01-analyze.sh
     - bash ./03-test.sh
