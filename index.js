@@ -8,7 +8,6 @@ var ThinxApp = function() {
   var global_response = null;
 
   var typeOf = require("typeof");
-
   var Rollbar = require("rollbar");
 
   var rollbar = new Rollbar({
@@ -1259,7 +1258,6 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
-
     var udid = req.body.udid;
 
     if (typeof(udid) === "undefined") {
@@ -1283,7 +1281,6 @@ var ThinxApp = function() {
     const artifact_data = deployment.artifact(owner, udid, build_id);
 
     if (artifact_data.length > 0) {
-      console.log("Sending artifact data...");
       res.header("Content-Disposition", "attachment; filename=\"" + build_id + ".zip\"");
       res.header("Content-Type", "application/zip");
       res.set("Connection", "close");
@@ -1782,8 +1779,6 @@ var ThinxApp = function() {
                 "] [NEW_SESSION] [oauth]");
 
               req.session.owner = doc.owner;
-
-
               req.session.cookie.expires = new Date(Date.now() + hour, "isoDate");
               req.session.cookie.maxAge = hour;
               res.cookie("x-thx-session-expire", req.session.cookie.expires, {
@@ -2019,7 +2014,7 @@ var ThinxApp = function() {
           req.session));
         req.session.destroy(function(err) {
           if (err) {
-            console.log(err);
+            console.log("Session destroy error: " + err);
           } else {
             respond(res, {
               success: false,
