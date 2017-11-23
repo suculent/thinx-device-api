@@ -2,7 +2,7 @@
 
 ## HISTORY
 
-23/11/2017: Rollbar and issues are automatically managed in JIRA as well.
+23/11/2017: Rollbar and issues are automatically managed in JIRA as well, added JIRA/GitHub integration (10EUR/month)
 
 22/11/2017: Build artifacts can be downloaded as of now.
 
