@@ -1123,8 +1123,7 @@ var ThinxApp = function() {
     }
   });
 
-
-  // Device editing (alias only so far)
+  // Device editing
   app.post("/api/device/edit", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
