@@ -47,19 +47,28 @@ var ThinxApp = function() {
   console.log(" ");
   console.log("--- " + new Date() + " ---");
 
+  var google_ocfg;
+  var github_ocfg;
+
   var session_config = require("./conf/node-session.json");
   var app_config = require("./conf/config.json"); // this file should be actually omitted from repository
   if (typeof(process.env.CIRCLE_USERNAME) !== "undefined") {
     console.log("» Starting on Circle CI...");
     app_config = require("./conf/config-test.json");
+    google_ocfg = require('./conf/google-oauth-test.json');
+    github_ocfg = require('./conf/github-oauth-test.json');
   }
   if (process.env.LOGNAME == "sychram") {
     console.log("» Starting on workstation...");
     app_config = require("./conf/config-local.json");
+    google_ocfg = require('./conf/google-oauth.json');
+    github_ocfg = require('./conf/github-oauth.json');
   }
   if (process.env.LOGNAME == "root") {
     console.log("» Starting in production mode...");
     app_config = require("./conf/config.json");
+    google_ocfg = require('./conf/google-oauth.json');
+    github_ocfg = require('./conf/github-oauth.json');
   }
 
   //
@@ -67,11 +76,11 @@ var ThinxApp = function() {
   //
 
   const simpleOauthModule = require('simple-oauth2');
-  const cfg = require('./conf/google-oauth.json');
+
   const oauth2 = simpleOauthModule.create({
     client: {
-      id: cfg.web.client_id,
-      secret: cfg.web.client_secret,
+      id: google_ocfg.web.client_id,
+      secret: google_ocfg.web.client_secret,
     },
     auth: {
       tokenHost: 'https://accounts.google.com/',
@@ -82,7 +91,7 @@ var ThinxApp = function() {
 
   // Authorization uri definition
   const authorizationUri = oauth2.authorizationCode.authorizeURL({
-    redirect_uri: cfg.web.redirect_uris[0],
+    redirect_uri: google_ocfg.web.redirect_uris[0],
     scope: 'email openid profile',
     state: '3(#0/!~12345', // this string shall be random (returned upon auth provider call back)
   });
@@ -91,14 +100,11 @@ var ThinxApp = function() {
   // OAuth2 for GitHub
   //
 
-  var github_ocfg = null;
-
   var github_login_handler;
   var github_authorizationUri;
   var githubOAuth;
 
   try {
-    github_ocfg = require('./conf/github-oauth.json');
     githubOAuth = require('github-oauth')({
       githubClient: github_ocfg.client_id,
       githubSecret: github_ocfg.client_secret,
@@ -2516,7 +2522,7 @@ var ThinxApp = function() {
     const code = req.query.code;
     const options = {
       code: code,
-      redirect_uri: cfg.web.redirect_uris[0]
+      redirect_uri: google_ocfg.web.redirect_uris[0]
     };
 
     var t = oauth2.authorizationCode.getToken(options, (error, result) => {
