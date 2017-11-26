@@ -1,8 +1,7 @@
 # Change Log
 
-## [Unreleased](https://github.com/suculent/thinx-device-api/tree/HEAD)
-
-[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2838...HEAD)
+## [0.9.2882](https://github.com/suculent/thinx-device-api/tree/0.9.2882) (2017-11-26)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2838...0.9.2882)
 
 **Implemented enhancements:**
 
@@ -10,6 +9,7 @@
 
 **Closed issues:**
 
+- BUILD\_IDS appears unused. Verify it or export it. [\#17](https://github.com/suculent/thinx-device-api/issues/17)
 - Faster messenger start on getDevices [\#16](https://github.com/suculent/thinx-device-api/issues/16)
 
 **Merged pull requests:**
@@ -283,11 +283,15 @@
 [Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.0.2...0.0.3)
 
 ## [0.0.2](https://github.com/suculent/thinx-device-api/tree/0.0.2) (2017-04-10)
-[Full Changelog](https://github.com/suculent/thinx-device-api/compare/CHANGELOG...0.0.2)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/HISTORY...0.0.2)
 
 # ☢ thinx-device-api change log
 
-## CHANGELOG
+## HISTORY
+
+23/11/2017: Rollbar and issues are automatically managed in JIRA as well, added JIRA/GitHub integration (10EUR/month)
+
+22/11/2017: Build artifacts can be downloaded as of now.
 
 21/11/2017: 0.9.2838 creating MQTT ACL on-the-run (new users and devices only); zipping and providing build artifacts; API Key and Source ownership migration
 
