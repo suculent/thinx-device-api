@@ -2,7 +2,7 @@
 
 ## HISTORY
 
-28/11/2017: updating Arduino Docker builder with ESP32 support
+28/11/2017: 0.9.2890: updating Arduino Docker builder with ESP32 support; logging support fixes
 
 27/11/2017: Web UI updates, ESP32httpUpdate ported, initial release of THiNX32Lib for Arduino ESP32
 
