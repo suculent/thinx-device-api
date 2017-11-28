@@ -1996,7 +1996,7 @@ var ThinxApp = function() {
       } else { // password invalid
         console.log("[LOGIN_INVALID] for " + username);
         alog.log(req.session.owner, "Password mismatch for: " +
-          username);
+          username, "error");
         respond(res, {
           status: "password_mismatch",
           success: false
