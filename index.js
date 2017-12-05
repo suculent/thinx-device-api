@@ -2857,7 +2857,7 @@ var ThinxApp = function() {
     var cookies = req.headers.cookie;
 
     if (typeof(req.headers.cookie) !== "undefined") {
-      if (cookies.indexOf("x-thx-") === -1) {
+      if (cookies.indexOf("thinx-") === -1) {
         //console.log("» WSS cookies: " + cookies);
         console.log("» WARNING! No thinx-cookie found in: " + JSON.stringify(req.headers.cookie));
         // wss.close();
