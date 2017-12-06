@@ -25,9 +25,3 @@
 [submodule "tools/mongoose-docker-build"]
 	path = tools/mongoose-docker-build
 	url = https://github.com/suculent/mongoose-docker-build
-[submodule "spec/test_repository/micropython-docker-build"]
-	path = spec/test_repository/micropython-docker-build
-	url = https://github.com/suculent/micropython-docker-build.git
-[submodule "spec/test_repository/nodemcu-docker-build"]
-	path = spec/test_repository/nodemcu-docker-build
-	url = https://github.com/suculent/nodemcu-docker-build.git
