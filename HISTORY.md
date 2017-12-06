@@ -2,7 +2,15 @@
 
 ## HISTORY
 
+## 33th week
+
+06/12/2017: 0.9.2902: improved CouchDB security; testing restore from backup
+
+## 32th week
+
 28/11/2017: 0.9.2890: updating Arduino Docker builder with ESP32 support; logging support fixes
+
+## 31th week
 
 27/11/2017: Web UI updates, ESP32httpUpdate ported, initial release of THiNX32Lib for Arduino ESP32
 
