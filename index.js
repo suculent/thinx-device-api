@@ -1853,11 +1853,12 @@ var ThinxApp = function() {
 
     userlib.view("users", "owners_by_username", {
       "key": username,
-      "include_docs": false // might be useless
+      "include_docs": true // might be useless
     }, function(err, body) {
 
       if (err) {
-        console.log("Error: " + err.toString());
+        console.log("Userlib view Error: " + err.toString());
+
         req.session.destroy(function(err) {
           if (err) {
             console.log(err);
