@@ -15,11 +15,11 @@ fi
 # delete all logs older than one month
 DB=${PREFIX}'managed_builds/'
 MINDATE=$(date -d '7 days ago' '+%Y-%m-%d')
-curl -s -X GET "$DB/_all_docs" | jq '.rows | .[].id' | sed -e 's/"//g' | sed -e 's/_design.*//g' | xargs -I id curl -X POST ${DB}/_design/builds/_update/delete_expired/id?mindate=${MINDATE}T00:00:00.000Z
+curl -s -X GET "$DB/_all_docs" | jq '.rows | .[].id' | sed -e 's/"//g' | sed -e 's/_design.*//g' | xargs -I id curl -s -X POST ${DB}/_design/builds/_update/delete_expired/id?mindate=${MINDATE}T00:00:00.000Z
 
 DB=${PREFIX}'managed_logs/'
 MINDATE=$(date -d '1 month ago' '+%Y-%m-%d')
-curl -s -X GET "$DB/_all_docs" | jq '.rows | .[].id' | sed -e 's/"//g' | sed -e 's/_design.*//g' | xargs -I id curl -X POST ${DB}/_design/logs/_update/delete_expired/id?mindate=${MINDATE}T00:00:00.000Z
+curl -s -X GET "$DB/_all_docs" | jq '.rows | .[].id' | sed -e 's/"//g' | sed -e 's/_design.*//g' | xargs -I id curl -s -X POST ${DB}/_design/logs/_update/delete_expired/id?mindate=${MINDATE}T00:00:00.000Z
 
 
 #
@@ -49,12 +49,12 @@ do
     BARE_NAME=$(echo $DB_NAME | sed 's/[0-9.]//g')
     echo "Processing BARE_NAME: $BARE_NAME"
     TARGET_NAME=$(echo $BARE_NAME | sed 's/managed/replicated/g')
-    echo "Processing TARGET_NAME: $TARGET_NAME"
 
     # Remove old replica (may backup as well)
+    echo "Deleting database TARGET_NAME: $TARGET_NAME"
     curl -XDELETE $TARGET_NAME -H 'Content-Type: application/json'
 
-    # Replicate again
+    echo "Replicating database $BARE_NAME to $TARGET_NAME:"
     curl -XPOST ${PREFIX}_replicate -H 'Content-Type: application/json' -d'{"source":"'${BARE_NAME}'","target":"'${TARGET_NAME}'", "create_target":true }'
 
     # Swap replica with live DB
