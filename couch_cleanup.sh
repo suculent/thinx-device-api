@@ -29,16 +29,22 @@ curl -s -X GET "$DB/_all_docs" | jq '.rows | .[].id' | sed -e 's/"//g' | sed -e 
 # 1. replicate running database(s)
 # 2.
 
-SHARDS=$(ls /opt/couchdb/data/shards)
+#SHARDS=$(ls /opt/couchdb/data/shards)
+
+# We have set shards to 1 so we can just parse this one:
+SHARDS=$(ls /opt/couchdb/data/shards/00000000-ffffffff)
 for SHARD in $SHARDS
 do
+  if [[ $SHARD!=="00000000-ffffffff" ]]; then
+    continue 
+  fi
   echo "Processing shard $SHARD"
   MANAGED_DBS=$(ls /opt/couchdb/data/shards/$SHARD/managed_*.couch)
   for DB in $MANAGED_DBS
   do
-    DB_NAME=$(basename $DB)
+    DATABASE_NAME=$(basename $DB)
     # echo "Extracting DB_NAME: $DB_NAME"
-    DB_NAME=$(echo $DB_NAME | sed 's/.couch//g')
+    DB_NAME=$(echo $DATABASE_NAME | sed 's/.couch//g')
     # echo "Processing DB_NAME: $DB_NAME"
     BARE_NAME=$(echo $DB_NAME | sed 's/[0-9.]//g')
     echo "Processing BARE_NAME: $BARE_NAME"
@@ -46,12 +52,19 @@ do
     echo "Processing TARGET_NAME: $TARGET_NAME"
 
     # Remove old replica (may backup as well)
-    # curl -XDELETE $TARGET_NAME -H 'Content-Type: application/json'
+    curl -XDELETE $TARGET_NAME -H 'Content-Type: application/json'
 
     # Replicate again
     curl -XPOST ${PREFIX}_replicate -H 'Content-Type: application/json' -d'{"source":"'${BARE_NAME}'","target":"'${TARGET_NAME}'", "create_target":true }'
 
     # Swap replica with live DB
+
+    # Move running version to a backup
+    mv $DATABASE_NAME.couch $DB_NAME.backup
+
+    # Move replica to a running version
+    mv $TARGET_NAME $DATABASE_NAME.couch
+
   done
 done
 
