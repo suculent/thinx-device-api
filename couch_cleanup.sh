@@ -45,8 +45,17 @@ do
     echo "Processing BARE_NAME: $BARE_NAME"
     TARGET_NAME=$(echo $BARE_NAME | sed 's/managed/replicated/g')
     echo "Processing TARGET_NAME: $TARGET_NAME"
-  fi
-fi
+
+    # Remove old replica (may backup as well)
+    # curl -XDELETE $TARGET_NAME -H 'Content-Type: application/json'
+
+    # Replicate again
+    curl -XPOST ${PREFIX}_replicate -H 'Content-Type: application/json' -d'{"source":"$DB_NAME","target":"$TARGET_NAME", "create_target":true }'
+
+    # Swap replica with live DB
+
+  done
+done
 
 exit 0
 
