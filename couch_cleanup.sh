@@ -38,7 +38,7 @@ do
   do
     DB_NAME=$(basename $DB)
     echo "Extracting DB_NAME: $DB_NAME"
-    DB_NAME=$(echo $DB_NAME | sed 's/\.couch/couch/g')
+    DB_NAME=$(echo $DB_NAME | sed 's/.couch//g')
     echo "Processing DB_NAME: $DB_NAME"
     BARE_NAME=$(echo $DB_NAME | sed 's/[0-9.]//g')
     echo "Processing BARE_NAME: $BARE_NAME"
@@ -49,7 +49,7 @@ do
     # curl -XDELETE $TARGET_NAME -H 'Content-Type: application/json'
 
     # Replicate again
-    curl -XPOST ${PREFIX}_replicate -H 'Content-Type: application/json' -d'{"source":"${DB_NAME}","target":"${TARGET_NAME}", "create_target":true }'
+    curl -XPOST ${PREFIX}_replicate -H 'Content-Type: application/json' -d'{"source":"'${DB_NAME}'","target":"'${TARGET_NAME}'", "create_target":true }'
 
     # Swap replica with live DB
   done
