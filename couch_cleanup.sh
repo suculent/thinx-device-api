@@ -30,11 +30,11 @@ curl -s -X GET "$DB/_all_docs" | jq '.rows | .[].id' | sed -e 's/"//g' | sed -e 
 # 2.
 
 SHARDS=$(ls /opt/couchdb/data/shards)
-for SHARD in $SHARDS[@]
+for SHARD in $SHARDS
 do
   echo "Processing shard $SHARD"
   MANAGED_DBS=$(ls /opt/couchdb/data/shards/$SHARD/managed_*.couch)
-  for DB in $MANAGED_DBS[@]
+  for DB in $MANAGED_DBS
   do
     DB_NAME=$(basename $DB)
     echo "Extracting DB_NAME: $DB_NAME"
@@ -44,6 +44,14 @@ do
     echo "Processing BARE_NAME: $BARE_NAME"
     TARGET_NAME=$(echo $BARE_NAME | sed 's/managed/replicated/g')
     echo "Processing TARGET_NAME: $TARGET_NAME"
+
+    # Remove old replica (may backup as well)
+    # curl -XDELETE $TARGET_NAME -H 'Content-Type: application/json'
+
+    # Replicate again
+    curl -XPOST ${PREFIX}_replicate -H 'Content-Type: application/json' -d'{"source":"$DB_NAME","target":"$TARGET_NAME", "create_target":true }'
+
+    # Swap replica with live DB
   done
 done
 
