@@ -31,11 +31,11 @@ curl -s -X GET "$DB/_all_docs" | jq '.rows | .[].id' | sed -e 's/"//g' | sed -e 
 # 2.
 
 SHARDS=$(ls /opt/couchdb/data/shards)
-for SHARD in $SHARDS[@]
+for SHARD in $SHARDS
 do
   echo "Processing shard $SHARD"
   MANAGED_DBS=$(ls /opt/couchdb/data/shards/$SHARD/managed_*.couch)
-  for DB in $MANAGED_DBS[@]
+  for DB in $MANAGED_DBS
   do
     DB_NAME=$(basename $DB)
     echo "Extracting DB_NAME: $DB_NAME"
