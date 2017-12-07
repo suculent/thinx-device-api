@@ -36,7 +36,7 @@ SHARDS=$(ls /opt/couchdb/data/shards/00000000-ffffffff)
 for SHARD in $SHARDS
 do
   if [[ $SHARD!=="00000000-ffffffff" ]]; then
-    continue 
+    continue
   fi
   echo "Processing shard $SHARD"
   MANAGED_DBS=$(ls /opt/couchdb/data/shards/$SHARD/managed_*.couch)
@@ -60,63 +60,16 @@ do
     # Swap replica with live DB
 
     # Move running version to a backup
-    mv $DATABASE_NAME.couch $DB_NAME.backup
+    SRCA=$DATABASE_NAME.couch
+    DSTA=$DB_NAME.backup
+    echo "Moving $SRCA to $DSTA"
+    mv $SRCA $DSTA
 
     # Move replica to a running version
-    mv $TARGET_NAME $DATABASE_NAME.couch
+    SRCB=$TARGET_NAME.couch
+    DSTB=$DATABASE_NAME.couch
+    echo "Moving $SRCB to $DSTB"
+    mv $SRCB $DSTB
 
   done
 done
-
-exit 0
-
-# migrate databases with optional cleanup
-DATE=$(date "+%Y-%m-%d")
-curl -XPOST ${PREFIX}_replicate -H 'Content-Type: application/json' -d'{"source":"managed_builds","target":"replicated_builds", "create_target":true }'
-echo "Migration of builds completed."
-
-#
-# Old way to swap databases... deprecated.
-#
-
-if [[ -f /opt/couchdb/data/managed_builds.backup ]]; then
-  rm /opt/couchdb/data/managed_builds.backup
-fi
-mv /opt/couchdb/data/managed_builds.couch /opt/couchdb/data/managed_builds.backup
-mv /opt/couchdb/data/managed_builds_${DATE}.couch /opt/couchdb/data/managed_builds.couch
-
-curl -XPOST ${PREFIX}_replicate -H 'Content-Type: application/json' -d'{"source":"managed_devices","target":"managed_devices_'${DATE}'", "create_target":true }'
-echo "Migration of devices completed."
-
-if [[ -f /opt/couchdb/data/managed_devices.backup ]]; then
-  rm /opt/couchdb/data/managed_devices.backup
-fi
-mv /opt/couchdb/data/managed_devices.couch /opt/couchdb/data/managed_devices.backup
-mv /opt/couchdb/data/managed_devices_${DATE}.couch /opt/couchdb/data/managed_devices.couch
-
-curl -XPOST ${PREFIX}_replicate -H 'Content-Type: application/json' -d'{"source":"managed_logs","target":"managed_logs_'${DATE}'", "create_target":true }'
-echo "Migration of logs completed."
-
-if [[ -f /opt/couchdb/data/managed_logs.backup ]]; then
-  rm /opt/couchdb/data/managed_logs.backup
-fi
-mv /opt/couchdb/data/managed_logs.couch /opt/couchdb/data/managed_logs.backup
-mv /opt/couchdb/data/managed_logs_${DATE}.couch /opt/couchdb/data/managed_logs.couch
-
-curl -XPOST ${PREFIX}_replicate -H 'Content-Type: application/json' -d'{"source":"managed_sources","target":"managed_sources_'${DATE}'", "create_target":true }'
-echo "Migration of sources completed."
-
-if [[ -f /opt/couchdb/data/managed_sources.backup ]]; then
-  rm /opt/couchdb/data/managed_sources.backup
-fi
-mv /opt/couchdb/data/managed_sources.couch /opt/couchdb/data/managed_sources.backup
-mv /opt/couchdb/data/managed_sources_${DATE}.couch /opt/couchdb/data/managed_sources.couch
-
-curl -XPOST ${PREFIX}_replicate -H 'Content-Type: application/json' -d'{"source":"managed_users","target":"managed_users_'${DATE}'", "create_target":true, "filter":"users/del"}'
-echo "Migration of users (without deletions) completed."
-
-if [[ -f /opt/couchdb/data/managed_users.backup ]]; then
-  rm /opt/couchdb/data/managed_users.backup
-fi
-mv /opt/couchdb/data/managed_users.couch /opt/couchdb/data/managed_users.backup
-mv /opt/couchdb/data/managed_users_${DATE}.couch /opt/couchdb/data/managed_users.couch

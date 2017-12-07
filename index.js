@@ -219,17 +219,6 @@ var ThinxApp = function() {
             body) + "\n");
       }
     });
-
-    nano.db.create(prefix + "managed_sources", function(err, body, header) {
-      if (err) {
-        handleDatabaseErrors(err, "managed_sources");
-      } else {
-        console.log("» Source database creation completed. Response: " +
-          JSON
-          .stringify(
-            body) + "\n");
-      }
-    });
   }
 
   function handleDatabaseErrors(err, name) {

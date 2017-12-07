@@ -45,4 +45,3 @@ curl -X PUT http://$COUCH_USER:$COUCH_PASS@$COUCH_URL:5984/managed_devices/_desi
 curl -X PUT http://$COUCH_USER:$COUCH_PASS@$COUCH_URL:5984/managed_users/_design/users -d @design/design_users.json
 curl -X PUT http://$COUCH_USER:$COUCH_PASS@$COUCH_URL:5984/managed_logs/_design/logs -d @design/design_logs.json
 curl -X PUT http://$COUCH_USER:$COUCH_PASS@$COUCH_URL:5984/managed_builds/_design/builds -d @design/design_builds.json
-curl -X PUT http://$COUCH_USER:$COUCH_PASS@$COUCH_URL:5984/managed_sources/_design/sources -d @design/design_sources.json
