@@ -22,7 +22,6 @@ MINDATE=$(date -d '1 month ago' '+%Y-%m-%d')
 curl -s -X GET "$DB/_all_docs" | jq '.rows | .[].id' | sed -e 's/"//g' | sed -e 's/_design.*//g' | xargs -I id curl -X POST ${DB}/_design/logs/_update/delete_expired/id?mindate=${MINDATE}T00:00:00.000Z
 
 
-
 #
 # This is a new implementation for CouchDB 2 where data are separated into shards
 #
@@ -53,7 +52,6 @@ do
     curl -XPOST ${PREFIX}_replicate -H 'Content-Type: application/json' -d'{"source":"${DB_NAME}","target":"${TARGET_NAME}", "create_target":true }'
 
     # Swap replica with live DB
-
   done
 done
 
