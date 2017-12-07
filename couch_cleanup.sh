@@ -22,12 +22,42 @@ MINDATE=$(date -d '1 month ago' '+%Y-%m-%d')
 curl -s -X GET "$DB/_all_docs" | jq '.rows | .[].id' | sed -e 's/"//g' | sed -e 's/_design.*//g' | xargs -I id curl -X POST ${DB}/_design/logs/_update/delete_expired/id?mindate=${MINDATE}T00:00:00.000Z
 
 
+#
+# This is a new implementation for CouchDB 2 where data are separated into shards
+#
+
+# 1. replicate running database(s)
+# 2.
+
+SHARDS=$(ls /opt/couchdb/data/shards)
+for SHARD in $SHARDS[@]
+do
+  echo "Processing shard $SHARD"
+  MANAGED_DBS=$(ls /opt/couchdb/data/shards/$SHARD/managed_*.couch)
+  for DB in $MANAGED_DBS[@]
+  do
+    DB_NAME=$(basename $DB)
+    echo "Extracting DB_NAME: $DB_NAME"
+    DB_NAME=$(echo $DB_NAME | tr -d '.couch')
+    echo "Processing DB_NAME: $DB_NAME"
+    BARE_NAME=$(echo $DB_NAME | sed 's/[0-9]//g')
+    echo "Processing BARE_NAME: $BARE_NAME"
+    TARGET_NAME=$(echo $BARE_NAME | sed 's/managed/replicated/g')
+    echo "Processing TARGET_NAME: $TARGET_NAME"
+  done
+done
+
+exit 0
+
 # migrate databases with optional cleanup
 DATE=$(date "+%Y-%m-%d")
-curl -XPOST ${PREFIX}_replicate -H 'Content-Type: application/json' -d'{"source":"managed_builds","target":"managed_builds_'${DATE}'", "create_target":true }'
+curl -XPOST ${PREFIX}_replicate -H 'Content-Type: application/json' -d'{"source":"managed_builds","target":"replicated_builds", "create_target":true }'
 echo "Migration of builds completed."
 
-# swap databases
+#
+# Old way to swap databases... deprecated.
+#
+
 if [[ -f /opt/couchdb/data/managed_builds.backup ]]; then
   rm /opt/couchdb/data/managed_builds.backup
 fi
