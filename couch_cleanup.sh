@@ -22,7 +22,7 @@ MINDATE=$(date -d '1 month ago' '+%Y-%m-%d')
 curl -s -X GET "$DB/_all_docs" | jq '.rows | .[].id' | sed -e 's/"//g' | sed -e 's/_design.*//g' | xargs -I id curl -X POST ${DB}/_design/logs/_update/delete_expired/id?mindate=${MINDATE}T00:00:00.000Z
 
 
-# migrate databases witg optional cleanup
+# migrate databases with optional cleanup
 DATE=$(date "+%Y-%m-%d")
 curl -XPOST ${PREFIX}_replicate -H 'Content-Type: application/json' -d'{"source":"managed_builds","target":"managed_builds_'${DATE}'", "create_target":true }'
 echo "Migration of builds completed."
