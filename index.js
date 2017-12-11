@@ -52,6 +52,7 @@ var ThinxApp = function() {
 
   var session_config = require("./conf/node-session.json");
   var app_config = require("./conf/config.json"); // this file should be actually omitted from repository
+
   if (typeof(process.env.CIRCLE_USERNAME) !== "undefined") {
     console.log("» Starting on Circle CI...");
     app_config = require("./conf/config-test.json");
@@ -2505,8 +2506,6 @@ var ThinxApp = function() {
   // Callback service parsing the authorization token and asking for the access token
   app.get('/oauth/cb', function(req, ores) {
 
-    console.log("Google OAuth2 Callback");
-
     /// CALLBACK FOR GOOGLE OAUTH ONLY!
 
     const code = req.query.code;
@@ -2526,8 +2525,6 @@ var ThinxApp = function() {
       return token;
     });
     t.then(res2 => {
-
-      console.log(res2);
 
       global_token = res2.access_token;
 
