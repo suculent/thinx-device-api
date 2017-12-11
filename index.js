@@ -54,7 +54,7 @@ var ThinxApp = function() {
   var app_config = require("./conf/config.json"); // this file should be actually omitted from repository
 
   if (typeof(process.env.CIRCLE_USERNAME) !== "undefined") {
-    console.log("» Starting on Circle CI...");
+    console.log("» Starting server on Circle CI...");
     app_config = require("./conf/config-test.json");
     google_ocfg = require('./conf/google-oauth-test.json');
     github_ocfg = require('./conf/github-oauth-test.json');

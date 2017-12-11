@@ -16,11 +16,11 @@ var rollbar = new Rollbar({
 
 var config = require("./conf/config.json");
 if (typeof(process.env.CIRCLE_USERNAME) !== "undefined") {
-  console.log("» Starting on Circle CI...");
+  console.log("» Starting notifier on Circle CI...");
   config = require("./conf/config-test.json");
 }
 if (process.env.LOGNAME == "sychram") {
-  console.log("» Starting on workstation...");
+  console.log("» Starting notifier on workstation...");
   config = require("./conf/config-local.json");
 }
 if (process.env.LOGNAME == "root") {
