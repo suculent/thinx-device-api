@@ -182,19 +182,7 @@ Platform libraries are now stabilised on the basic level, approaching first rele
 
 * PlatformIO: end-to-end update
 * Arduino: end-to-end update
-* Status Transformers: server-side lambda functions
 
 ## Platform support
 
-* ESP32 (WiFi Manager is already available!)
-
-## Near Future
-
-* ACL implementation for MQTT is next in the queue.
-* Arduino/PlatformIO: end-to-end MQTT
-
-## Vote for it...
-
-* Lua: build, file update
-* UPY: build, file update
-* MOS: build, file update; firmware update; library
+* ESP32 (library THiNX32)
