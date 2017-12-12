@@ -12,17 +12,21 @@ describe("Notifier", function() {
     // Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope
     // (or stores into DB later)
 
+    // CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION}"
+
     // Hey, this should be JUST a notification, no destructives.
     var test_build_id = "no_build_id";
     var test_commit_id = "crime_commit_id";
     var test_version = "v0.0";
     var test_repo =
-      "https://github.com/suculent/thinx-firmware-esp8266.git";
+      "https://github.com/suculent/thinx-firmware-esp8266-pio.git";
     var test_binary = "nothing.bin";
     var test_udid = "00:00:00:00:00:00";
     var sha = "one-sha-256-pls";
     var owner_id = owner;
     var status = "TESTING_NOTIFIER";
+    var platform = "platformio";
+    var version = "thinx-firmware-version-1.0";
 
     var CMD = "node ~/thinx-device-api/notifier.js " +
       test_build_id + " " +
@@ -33,7 +37,9 @@ describe("Notifier", function() {
       test_udid + " " +
       sha + " " +
       owner_id + " " +
-      status;
+      status + " " +
+      platform + " " +
+      version;
 
     // CMD: "${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${BUILD_ID}.bin ${UDID} ${SHA} ${OWNER_ID} ${STATUS}";
     var error = exec.execSync(CMD);
