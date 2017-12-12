@@ -12,6 +12,10 @@ else
   PREFIX="http://${COUCHDB_CREDS}@localhost:5984/"
 fi
 
+if [ ! -z $CIRCLE_USERNAME ]; then
+  PREFIX="http://${COUCHDB_CREDS}@dev.thinx.cloud:5984/"
+fi
+
 # delete all logs older than one month
 DB=${PREFIX}'managed_builds/'
 MINDATE=$(date -d '7 days ago' '+%Y-%m-%d')
