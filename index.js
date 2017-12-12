@@ -2831,7 +2831,6 @@ var ThinxApp = function() {
 
 
   var _ws = null;
-
   wss.on("connection", function connection(ws, req) {
 
     req.on("error", function(err) {
@@ -2859,43 +2858,47 @@ var ThinxApp = function() {
       console.log("[index.js] logtail_callback:" + err);
     };
 
-    ws.on("message", function incoming(message) {
+    // May not exist while testing...
+    if (typeof(ws) !== "undefined" && ws !== null) {
+      ws.on("message", function incoming(message) {
 
-      // skip empty messages
-      if (message == "{}") return;
+        // skip empty messages
+        if (message == "{}") return;
 
-      var object = JSON.parse(message);
+        var object = JSON.parse(message);
 
-      if (typeof(object.logtail) !== "undefined") {
+        if (typeof(object.logtail) !== "undefined") {
 
-        var build_id = object.logtail.build_id;
-        var owner_id = object.logtail.owner_id;
-        blog.logtail(build_id, owner_id, _ws, logtail_callback);
+          var build_id = object.logtail.build_id;
+          var owner_id = object.logtail.owner_id;
+          blog.logtail(build_id, owner_id, _ws, logtail_callback);
 
-      } else if (typeof(object.init) !== "undefined") {
+        } else if (typeof(object.init) !== "undefined") {
 
-        messenger.initWithOwner(object.init, _ws, function(success,
-          message) {
-          if (!success) {
-            console.log("Messenger init on message with success " +
-              error +
-              "message: " +
-              JSON.stringify(message));
+          messenger.initWithOwner(object.init, _ws, function(success,
+            message) {
+            if (!success) {
+              console.log("Messenger init on message with success " +
+                error +
+                "message: " +
+                JSON.stringify(message));
+            }
+          });
+
+        } else {
+          var m = JSON.stringify(message);
+          if ((m != "{}") || (typeof(message) == "undefined")) {
+            console.log("» Websocketparser said: unknown message: " + m);
           }
-        });
-
-      } else {
-        var m = JSON.stringify(message);
-        if ((m != "{}") || (typeof(message) == "undefined")) {
-          console.log("» Websocketparser said: unknown message: " + m);
         }
-      }
-    });
+      });
+    }
 
   }).on("error", function(err) {
     console.log("WSS ERROR: " + err);
     return;
   });
+
 
   wserver.listen(7444, function listening() {
     console.log("» WebSocket listening on port %d", wserver.address()
