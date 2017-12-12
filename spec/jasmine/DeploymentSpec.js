@@ -50,8 +50,7 @@ describe("Deployer", function() {
   });
 
   it("should be able to return latest firmware envelope", function() {
-    var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(
-      device);
+    var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(device);
     expect(firmwareUpdateDescriptor).toBeDefined();
   });
 

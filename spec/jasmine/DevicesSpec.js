@@ -33,7 +33,7 @@ describe("Devices", function() {
       console.log("Waiting for response......");
       done();
     });
-  }, 30000);
+  }, 5000);
 
   it("should be able to detach a repository from device(s)", function(done) {
     var body = {

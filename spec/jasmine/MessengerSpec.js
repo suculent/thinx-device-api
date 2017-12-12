@@ -32,7 +32,7 @@ describe("Messenger", function() {
       expect(status).toBeDefined();
       done();
     });
-  });
+  }, 5000);
 
   it("should be able to get all owners", function(done) {
     Messenger.getAllOwners(function(success, status) {
@@ -46,5 +46,5 @@ describe("Messenger", function() {
   it("should be able to publish upon connection", function(done) {
     Messenger.publish(test_owner, udid, "test");
     done();
-  });
+  }, 5000);
 });
