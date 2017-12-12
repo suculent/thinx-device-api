@@ -9,11 +9,7 @@ describe("Device", function() {
   var apikey = envi.ak;
   var ott = null;
 
-  /*
-    var RS =
-      '{ "registration" : { "mac" : "000000000000", "firmware" : "DeviceSpec.js", "version" : "1.0.0", "checksum" : "nevermind", "push" : "forget", "alias" : "npmtest", "udid": "6ef6d300-8053-11e7-8d27-0fa2e6ecef21", "owner": "' +
-      owner + '", "platform": "platformio" } }';
-      */
+  // TODO: FIXME: owner is not being loaded from _envi.json in certain circumstances
 
   // This UDID is to be deleted at the end of test.
   var JRS = {
@@ -24,11 +20,12 @@ describe("Device", function() {
       checksum: "xevim",
       push: "forget",
       alias: "npm-test-ino-one",
-      owner: owner,
-      platform: "arduino",
-      udid: "6ef6d300-8053-11e7-8d27-0fa2e6ecef21"
+      owner: "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
+      platform: "arduino"
     }
   };
+
+  // udid: "6ef6d300-8053-11e7-8d27-0fa2e6ecef21"
 
   var JRS2 = {
     registration: {
@@ -38,7 +35,7 @@ describe("Device", function() {
       checksum: "alevim",
       push: "forget",
       alias: "robodyn-mega-wifi",
-      owner: owner,
+      owner: "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
       platform: "arduino",
       udid: "d2d7b050-7c53-11e7-b94e-15f5f3a64973"
     }
@@ -54,6 +51,7 @@ describe("Device", function() {
     device.register(JRS, apikey,
       function(success, response) {
         console.log("• DeviceSpec.js: Registration result: " + JSON.stringify(response));
+        console.log("Registration Response: " + response);
         expect(success).toBe(true);
         expect(this.udid).toBeDefined();
         this.udid = response.udid;
@@ -110,6 +108,7 @@ describe("Device", function() {
 
   it("should be able to store OTT request", function(done) {
     device.storeOTT(JRS2, function(success, response) {
+      console.log("• OTT Response: " + response);
       expect(success).toBe(true);
       expect(response).toBeDefined();
       expect(response.ott).toBeDefined();
@@ -120,6 +119,11 @@ describe("Device", function() {
 
   it("should be able to fetch OTT request",
     function(done) {
+      if (typeof(this.ott) === "undefined") {
+        console.log("No OTT saved.");
+        done();
+        return;
+      }
       expect(this.ott).toBeDefined();
       device.fetchOTT(this.ott, function(success,
         response) {
