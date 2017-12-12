@@ -13,32 +13,28 @@ describe("Device", function() {
 
   // This UDID is to be deleted at the end of test.
   var JRS = {
-    registration: {
-      mac: "11:11:11:11:11:11",
-      firmware: "DeviceSpec.js",
-      version: "1.0.0",
-      checksum: "xevim",
-      push: "forget",
-      alias: "npm-test-ino-one",
-      owner: "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
-      platform: "arduino"
-    }
+    mac: "11:11:11:11:11:11",
+    firmware: "DeviceSpec.js",
+    version: "1.0.0",
+    checksum: "xevim",
+    push: "forget",
+    alias: "npm-test-ino-one",
+    owner: "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
+    platform: "arduino"
   };
 
   // udid: "6ef6d300-8053-11e7-8d27-0fa2e6ecef21"
 
   var JRS2 = {
-    registration: {
-      mac: "N0:NM:OC:KE:D1:00",
-      firmware: "DeviceSpec.js",
-      version: "1.0.0",
-      checksum: "alevim",
-      push: "forget",
-      alias: "robodyn-mega-wifi",
-      owner: "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
-      platform: "arduino",
-      udid: "d2d7b050-7c53-11e7-b94e-15f5f3a64973"
-    }
+    mac: "N0:NM:OC:KE:D1:00",
+    firmware: "DeviceSpec.js",
+    version: "1.0.0",
+    checksum: "alevim",
+    push: "forget",
+    alias: "robodyn-mega-wifi",
+    owner: "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
+    platform: "arduino",
+    udid: "d2d7b050-7c53-11e7-b94e-15f5f3a64973"
   };
 
   var body = JRS; // JSON.parse(RS);
@@ -107,7 +103,7 @@ describe("Device", function() {
     }, 5000);
 
   it("should be able to store OTT request", function(done) {
-    device.storeOTT(JRS2, function(success, response) {
+    device.storeOTT(JSON.stringify(JRS2), function(success, response) {
       console.log("• OTT Response: " + response);
       expect(success).toBe(true);
       expect(response).toBeDefined();
