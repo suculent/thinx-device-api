@@ -43,10 +43,9 @@ describe("Repository Watcher", function() {
     expect(watcher).toBeDefined();
   });
 
-  it("should be able to watch repository", function() {
+  it("should be able to watch repository", function(done) {
 
     watcher.watchRepository(repo_path, true, function(result) {
-
       if (typeof(result) !== "undefined") {
         console.log("watcher_callback result: " + JSON.stringify(
           result));
@@ -62,8 +61,9 @@ describe("Repository Watcher", function() {
       } else {
         console.log("watcher_callback: no result");
       }
-      expect(true).toBe(true);
+      done();
     });
+    done();
   });
 
   if ("should be able to infer platform from repository contents", function() {

@@ -9,8 +9,8 @@ describe("Owner", function() {
   var email = envi.email;
   var test_info = envi.test_info;
 
-  var activation_key = null;
-  var reset_key = null;
+  var activation_key;
+  var reset_key;
 
   // activation key is provided by e-mail for security,
   // cimrman@thinx.cloud receives his activation token in response
@@ -25,13 +25,15 @@ describe("Owner", function() {
     };
     User.create(body, true, function(success, response) {
       if (response.toString().indexOf("email_already_exists") !== -1) {
+        console.log(response);
         expect(success).toBe(false);
       } else {
         expect(success).toBe(true);
       }
       expect(response).toBeDefined();
       if (response) {
-        activation_key = response; // store activation token for next step
+        console.log("Activation rest response: " + response);
+        this.activation_key = response; // store activation token for next step
       }
       console.log(JSON.stringify(response));
       done();
@@ -90,7 +92,8 @@ describe("Owner", function() {
       expect(response).toBeDefined();
       console.log(JSON.stringify(response));
       if (response) {
-        reset_key = response; // store reset token for next step
+        this.reset_key = response; // store reset token for next step
+        expect(this.reset_key).toBeDefined();
       }
       done();
     });
@@ -101,7 +104,7 @@ describe("Owner", function() {
       password: "tset",
       rpassword: "tset",
       owner: owner,
-      reset_key: reset_key
+      reset_key: this.reset_key
     };
     User.set_password(body, function(success, response) {
       expect(success).toBe(true);

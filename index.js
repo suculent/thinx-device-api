@@ -115,7 +115,7 @@ var ThinxApp = function() {
       scope: 'user'
     });
   } catch (e) {
-    console.log(e);
+    console.log("GitHub OAUTH Initialization error: " + e);
   }
 
   //

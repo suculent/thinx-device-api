@@ -47,11 +47,11 @@ describe("Sources", function() {
 
   it("should be able to be removed",
     function(done) {
+      var source_id = this.source_id;
       Sources.remove(owner, [source_id], function(success,
         response) {
         expect(success).toBe(true);
         expect(response).toBeDefined();
-        source_id = this.source_id;
         console.log("Sources Removal Response: " + JSON.stringify(
           response));
         done();

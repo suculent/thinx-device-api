@@ -18,9 +18,10 @@ describe("Device", function() {
     version: "1.0.0",
     checksum: "xevim",
     push: "forget",
-    alias: "npm-test-ino-one",
+    alias: "virtual-test-device-1-delete",
     owner: "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
-    platform: "arduino"
+    platform: "arduino",
+    udid: "436ba180-c085-11e7-a172-872cac9d771d"
   };
 
   // udid: "6ef6d300-8053-11e7-8d27-0fa2e6ecef21"
@@ -31,7 +32,7 @@ describe("Device", function() {
     version: "1.0.0",
     checksum: "alevim",
     push: "forget",
-    alias: "robodyn-mega-wifi",
+    alias: "virtual-test-device-2-static",
     owner: "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
     platform: "arduino",
     udid: "d2d7b050-7c53-11e7-b94e-15f5f3a64973"
@@ -43,6 +44,38 @@ describe("Device", function() {
   console.log("• DeviceSpec.js: Using request: " + JSON.stringify(JRS));
 
   it("should be able to register itself.", function(done) {
+
+    device.register(JRS, apikey,
+      function(success, response) {
+        console.log("• DeviceSpec.js: Registration result: " + JSON.stringify(response));
+        console.log("Registration Response: " + response);
+        expect(success).toBe(true);
+        expect(this.udid).toBeDefined();
+        this.udid = response.udid;
+        console.log("• DeviceSpec.js: Received UDID: " + this.udid);
+        done();
+
+        it("should be able to provide device firmware",
+          function(done) {
+            // Returns "OK" when current firmware is valid.
+            body.udid = this.udid;
+            console.log("• DeviceSpec.js: Using this.UDID: " + this.udid);
+            device.firmware(body, apikey, function(
+              success,
+              response) {
+              console.log("• DeviceSpec.js: Firmware fetch result: " +
+                JSON.stringify(
+                  response));
+              expect(success).toBe(false);
+              expect(response.status).toBe("UPDATE_NOT_FOUND");
+              done();
+            });
+          }, 5000);
+
+      });
+  }, 15000); // register
+
+  it("should be able to register device for revocation testing", function(done) {
 
     device.register(JRS, apikey,
       function(success, response) {
@@ -93,7 +126,7 @@ describe("Device", function() {
   it(
     "should receive different response for already-registered revice",
     function(done) {
-      device.register(JRS2, apikey,
+      device.register(JRS, apikey,
         function(success, response) {
           console.log("• DeviceSpec.js: Re-registration result: " + JSON.stringify(
             response));
@@ -103,7 +136,7 @@ describe("Device", function() {
     }, 5000);
 
   it("should be able to store OTT request", function(done) {
-    device.storeOTT(JSON.stringify(JRS2), function(success, response) {
+    device.storeOTT(JRS2, function(success, response) {
       console.log("• OTT Response: " + response);
       expect(success).toBe(true);
       expect(response).toBeDefined();

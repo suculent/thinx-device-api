@@ -30,8 +30,8 @@ describe("Messenger", function() {
     Messenger.initWithOwner(test_owner, null, function(success, status) {
       expect(success).toBe(true);
       expect(status).toBeDefined();
-      done();
     });
+    done();
   }, 5000);
 
   it("should be able to get all owners", function(done) {

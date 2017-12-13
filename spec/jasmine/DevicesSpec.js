@@ -48,6 +48,7 @@ describe("Devices", function() {
   }, 30000);
 
   // requires specific device registered for this test only (udid "436ba180-c085-11e7-a172-872cac9d771d")
+  // this device must be created using DeviceSpec.js test
   it("should be able to revoke devices for owner", function(done) {
     var body = {
       udid: udid
