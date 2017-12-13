@@ -2250,6 +2250,12 @@ var ThinxApp = function() {
 
       // Buffer the body entirely for processing as a whole.
       var bodyChunks = [];
+
+      if (typeof(res) === "undefined") {
+        console.log("No response.");
+        return;
+      }
+
       res.on('data', function(chunk) {
         // You can process streamed parts here...
         bodyChunks.push(chunk);
@@ -2281,185 +2287,188 @@ var ThinxApp = function() {
    * OAuth 2 with GitHub
    */
 
-  githubOAuth.on('error', function(err) {
-    console.error('there was a login error', err);
-  });
+  if (typeof(githubOAuth) !== "undefined") {
 
-  githubOAuth.on('token', function(oauth_token, serverResponse) {
+    githubOAuth.on('error', function(err) {
+      console.error('there was a login error', err);
+    });
 
-    if (typeof(oauth_token.access_token) === "undefined") {
-      console.log("Fetching token failed.");
-      return;
-    }
+    githubOAuth.on('token', function(oauth_token, serverResponse) {
 
-    console.log('here is your shiny new github oauth_token', oauth_token.access_token);
+      if (typeof(oauth_token.access_token) === "undefined") {
+        console.log("Fetching token failed.");
+        return;
+      }
 
-    // if login was successful
-    console.log("[oauth][github] GitHub Login successfull...");
+      console.log('here is your shiny new github oauth_token', oauth_token.access_token);
 
-    if (oauth_token.access_token) {
+      // if login was successful
+      console.log("[oauth][github] GitHub Login successfull...");
 
-      console.log(JSON.stringify("Getting user..."));
+      if (oauth_token.access_token) {
 
-      // Application name from GitHub / Settings / Developer Settings, should be in JSON;
+        console.log(JSON.stringify("Getting user..."));
 
-      var request_options = {
-        host: 'api.github.com',
-        headers: {
-          'user-agent': 'THiNX OAuth'
-        },
-        path: '/user?access_token=' + oauth_token.access_token
-      };
+        // Application name from GitHub / Settings / Developer Settings, should be in JSON;
 
-      https.get(request_options, (res) => {
+        var request_options = {
+          host: 'api.github.com',
+          headers: {
+            'user-agent': 'THiNX OAuth'
+          },
+          path: '/user?access_token=' + oauth_token.access_token
+        };
 
-        var data = '';
-        res.on('data', (chunk) => {
-          data += chunk;
-        });
+        https.get(request_options, (res) => {
 
-        // The whole response has been received. Print out the result.
-        res.on('end', () => {
+          var data = '';
+          res.on('data', (chunk) => {
+            data += chunk;
+          });
 
-          var token = "ghat:" + oauth_token.access_token;
-          console.log(token);
+          // The whole response has been received. Print out the result.
+          res.on('end', () => {
 
-          var given_name = "GitHub";
-          var family_name = "User";
-          var name_array = [];
+            var token = "ghat:" + oauth_token.access_token;
+            console.log(token);
 
-          var hdata = JSON.parse(data);
+            var given_name = "GitHub";
+            var family_name = "User";
+            var name_array = [];
 
-          if ((typeof(hdata.name) !== "undefined") || hdata.name === null) {
-            name_array = hdata.name.split(" ");
-            given_name = name_array[0];
-            family_name = name_array[name_array.count - 1];
-          } else {
-            console.log("Warning: no name in response.");
-          }
+            var hdata = JSON.parse(data);
 
-          console.log("hdata: " + hdata);
-
-          if ((typeof(hdata.name) !== "undefined") || hdata.name === null) {
-            name_array = hdata.name.split(" ");
-            given_name = name_array[0];
-            family_name = name_array[name_array.count - 1];
-          } else {
-            console.log("Warning: no name in GitHub access token response.");
-          }
-
-          const email = hdata.email;
-          const picture = hdata.avatar_url; // TODO: Fetch and save to owner...
-
-          if (typeof(email) === "undefined") {
-            console.log("Error: no email in response.");
-            global_response.redirect(
-              'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
-              "No e-mail in response."
-            );
-          }
-
-          const owner_id = sha256(email);
-
-          var userWrapper = {
-            first_name: given_name,
-            last_name: family_name,
-            email: email,
-            owner_id: owner_id,
-            username: owner_id
-          };
-
-          console.log("[oauth][github] searching for owner_id: " + owner_id);
-
-          // Check user and make note on user login
-          userlib.get(owner_id, function(error, udoc) {
-
-
-            // Error case covers creating new user/managing deleted account
-            if (error) {
-
-              console.log("Failed with error: " + error);
-
-              if (error.toString().indexOf("Error: deleted") !== -1) {
-                // TODO: Redirect to error page with reason
-                console.log("[oauth] user document deleted");
-                global_response.redirect(
-                  'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
-                  'Account document deleted.'
-                );
-                return;
-
-              } else {
-
-
-                // May exist, but be deleted. Can be cleared using Filtered Replication Handler "del"
-                if (typeof(udoc) !== "undefined") {
-                  if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
-                    true) {
-                    // TODO: Redirect to error page with reason
-                    console.log("[oauth] user account marked as deleted");
-                    global_response.redirect(
-                      'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
-                      'Account deleted.'
-                    );
-                    return;
-                  }
-                }
-
-                // No such owner, create...
-                user.create(userWrapper, false, function(success, status) {
-
-                  console.log("[OID:" + owner_id +
-                    "] [NEW_SESSION] [oauth]");
-
-                  alog.log(owner_id, "OAuth User created: " +
-                    given_name + " " + family_name);
-
-                  client.set(token, JSON.stringify(userWrapper));
-                  client.expire(token, 30);
-                  global_token = token;
-                  global_response.redirect(
-                    "https://rtm.thinx.cloud/app/#/oauth/" + token);
-
-                  console.log("Redirecting to login (2)");
-
-
-                });
-                return;
-              }
+            if ((typeof(hdata.name) !== "undefined") || hdata.name === null) {
+              name_array = hdata.name.split(" ");
+              given_name = name_array[0];
+              family_name = name_array[name_array.count - 1];
+            } else {
+              console.log("Warning: no name in response.");
             }
 
-            console.log("UDOC:");
-            console.log(JSON.stringify(udoc));
+            console.log("hdata: " + hdata);
 
-            userlib.atomic("users", "checkin", owner_id, {
-              last_seen: new Date()
-            }, function(error, response) {
+            if ((typeof(hdata.name) !== "undefined") || hdata.name === null) {
+              name_array = hdata.name.split(" ");
+              given_name = name_array[0];
+              family_name = name_array[name_array.count - 1];
+            } else {
+              console.log("Warning: no name in GitHub access token response.");
+            }
+
+            const email = hdata.email;
+            const picture = hdata.avatar_url; // TODO: Fetch and save to owner...
+
+            if (typeof(email) === "undefined") {
+              console.log("Error: no email in response.");
+              global_response.redirect(
+                'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
+                "No e-mail in response."
+              );
+            }
+
+            const owner_id = sha256(email);
+
+            var userWrapper = {
+              first_name: given_name,
+              last_name: family_name,
+              email: email,
+              owner_id: owner_id,
+              username: owner_id
+            };
+
+            console.log("[oauth][github] searching for owner_id: " + owner_id);
+
+            // Check user and make note on user login
+            userlib.get(owner_id, function(error, udoc) {
+
+
+              // Error case covers creating new user/managing deleted account
               if (error) {
-                console.log("Last-seen update failed: " +
-                  error);
-              } else {
-                alog.log(owner_id,
-                  "Last seen updated.");
+
+                console.log("Failed with error: " + error);
+
+                if (error.toString().indexOf("Error: deleted") !== -1) {
+                  // TODO: Redirect to error page with reason
+                  console.log("[oauth] user document deleted");
+                  global_response.redirect(
+                    'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
+                    'Account document deleted.'
+                  );
+                  return;
+
+                } else {
+
+
+                  // May exist, but be deleted. Can be cleared using Filtered Replication Handler "del"
+                  if (typeof(udoc) !== "undefined") {
+                    if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
+                      true) {
+                      // TODO: Redirect to error page with reason
+                      console.log("[oauth] user account marked as deleted");
+                      global_response.redirect(
+                        'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
+                        'Account deleted.'
+                      );
+                      return;
+                    }
+                  }
+
+                  // No such owner, create...
+                  user.create(userWrapper, false, function(success, status) {
+
+                    console.log("[OID:" + owner_id +
+                      "] [NEW_SESSION] [oauth]");
+
+                    alog.log(owner_id, "OAuth User created: " +
+                      given_name + " " + family_name);
+
+                    client.set(token, JSON.stringify(userWrapper));
+                    client.expire(token, 30);
+                    global_token = token;
+                    global_response.redirect(
+                      "https://rtm.thinx.cloud/app/#/oauth/" + token);
+
+                    console.log("Redirecting to login (2)");
+
+
+                  });
+                  return;
+                }
               }
-            });
 
-            alog.log(owner_id, "OAuth2 User logged in...");
+              console.log("UDOC:");
+              console.log(JSON.stringify(udoc));
 
-            client.set(token, JSON.stringify(userWrapper));
-            client.expire(token, 3600);
+              userlib.atomic("users", "checkin", owner_id, {
+                last_seen: new Date()
+              }, function(error, response) {
+                if (error) {
+                  console.log("Last-seen update failed: " +
+                    error);
+                } else {
+                  alog.log(owner_id,
+                    "Last seen updated.");
+                }
+              });
 
-            console.log("Redirecting to login (1)");
+              alog.log(owner_id, "OAuth2 User logged in...");
 
-            global_response.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
-              token);
+              client.set(token, JSON.stringify(userWrapper));
+              client.expire(token, 3600);
 
-          }); // userlib.get
+              console.log("Redirecting to login (1)");
 
-        }); // res.end
-      }); // https.get
-    }
-  });
+              global_response.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
+                token);
+
+            }); // userlib.get
+
+          }); // res.end
+        }); // https.get
+      }
+    });
+  }
 
   // Initial page redirecting to OAuth2 provider
   app.get('/oauth/github', function(req, res) {
@@ -2467,7 +2476,9 @@ var ThinxApp = function() {
       req.session.destroy();
     }
     console.log('Starting GitHub Login...');
-    githubOAuth.login(req, res);
+    if (typeof(githubOAuth) !== "undefined") {
+      githubOAuth.login(req, res);
+    }
   });
 
   /*
@@ -2831,74 +2842,82 @@ var ThinxApp = function() {
 
 
   var _ws = null;
-  wss.on("connection", function connection(ws, req) {
 
-    req.on("error", function(err) {
-      console.log("WSS REQ ERROR: " + err);
+  if (typeof(wss) !== "undefined") {
+
+    wss.on("connection", function connection(ws, req) {
+
+      if (typeof(req) === "undefined") {
+        console.log("No request on wss.on");
+        return;
+      }
+
+      req.on("error", function(err) {
+        console.log("WSS REQ ERROR: " + err);
+        return;
+      });
+
+      _ws = ws;
+
+      var cookies = req.headers.cookie;
+
+      if (typeof(req.headers.cookie) !== "undefined") {
+        if (cookies.indexOf("thinx-") === -1) {
+          //console.log("» WSS cookies: " + cookies);
+          console.log("» WARNING! No thinx-cookie found in: " + JSON.stringify(req.headers.cookie));
+          // wss.close();
+          // return;
+        }
+        if (typeof(req.session) !== "undefined") {
+          console.log("Session: " + JSON.stringify(req.session));
+        }
+      }
+
+      var logtail_callback = function(err) {
+        console.log("[index.js] logtail_callback:" + err);
+      };
+
+      // May not exist while testing...
+      if (typeof(ws) !== "undefined" && ws !== null) {
+        ws.on("message", function incoming(message) {
+
+          // skip empty messages
+          if (message == "{}") return;
+
+          var object = JSON.parse(message);
+
+          if (typeof(object.logtail) !== "undefined") {
+
+            var build_id = object.logtail.build_id;
+            var owner_id = object.logtail.owner_id;
+            blog.logtail(build_id, owner_id, _ws, logtail_callback);
+
+          } else if (typeof(object.init) !== "undefined") {
+
+            messenger.initWithOwner(object.init, _ws, function(success,
+              message) {
+              if (!success) {
+                console.log("Messenger init on message with success " +
+                  error +
+                  "message: " +
+                  JSON.stringify(message));
+              }
+            });
+
+          } else {
+            var m = JSON.stringify(message);
+            if ((m != "{}") || (typeof(message) == "undefined")) {
+              console.log("» Websocketparser said: unknown message: " + m);
+            }
+          }
+        });
+      }
+
+    }).on("error", function(err) {
+      console.log("WSS ERROR: " + err);
       return;
     });
-
-    _ws = ws;
-
-    var cookies = req.headers.cookie;
-
-    if (typeof(req.headers.cookie) !== "undefined") {
-      if (cookies.indexOf("thinx-") === -1) {
-        //console.log("» WSS cookies: " + cookies);
-        console.log("» WARNING! No thinx-cookie found in: " + JSON.stringify(req.headers.cookie));
-        // wss.close();
-        // return;
-      }
-      if (typeof(req.session) !== "undefined") {
-        console.log("Session: " + JSON.stringify(req.session));
-      }
-    }
-
-    var logtail_callback = function(err) {
-      console.log("[index.js] logtail_callback:" + err);
-    };
-
-    // May not exist while testing...
-    if (typeof(ws) !== "undefined" && ws !== null) {
-      ws.on("message", function incoming(message) {
-
-        // skip empty messages
-        if (message == "{}") return;
-
-        var object = JSON.parse(message);
-
-        if (typeof(object.logtail) !== "undefined") {
-
-          var build_id = object.logtail.build_id;
-          var owner_id = object.logtail.owner_id;
-          blog.logtail(build_id, owner_id, _ws, logtail_callback);
-
-        } else if (typeof(object.init) !== "undefined") {
-
-          messenger.initWithOwner(object.init, _ws, function(success,
-            message) {
-            if (!success) {
-              console.log("Messenger init on message with success " +
-                error +
-                "message: " +
-                JSON.stringify(message));
-            }
-          });
-
-        } else {
-          var m = JSON.stringify(message);
-          if ((m != "{}") || (typeof(message) == "undefined")) {
-            console.log("» Websocketparser said: unknown message: " + m);
-          }
-        }
-      });
-    }
-
-  }).on("error", function(err) {
-    console.log("WSS ERROR: " + err);
-    return;
-  });
-
+  }
 
   wserver.listen(7444, function listening() {
     console.log("» WebSocket listening on port %d", wserver.address()
