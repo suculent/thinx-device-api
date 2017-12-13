@@ -8,7 +8,7 @@ describe("Notifier", function() {
   // node.js process exeutes the builder.sh (should do that in background, but initial test versions did this synchronously
   // builder.sh calls the node.js with statically allocated parameters. and the damned feat hijak is cool and like edrush and better than those rappers.
 
-  it("should be able to send a notification", function(done) {
+  it("should be able to send a notification", function() {
     // Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope
     // (or stores into DB later)
 
@@ -21,7 +21,7 @@ describe("Notifier", function() {
     var test_repo =
       "https://github.com/suculent/thinx-firmware-esp8266-pio.git";
     var test_binary = "nothing.bin";
-    var test_udid = "00:00:00:00:00:00";
+    var test_udid = "11:11:11:11:11:11";
     var sha = "one-sha-256-pls";
     var owner_id = owner;
     var status = "TESTING_NOTIFIER";
@@ -45,8 +45,7 @@ describe("Notifier", function() {
     var error = exec.execSync(CMD);
     console.log("Notifier result: " + error.toString());
     expect(error).not.toBeDefined();
-    done();
 
-  }, 60000);
+  });
 
 });
