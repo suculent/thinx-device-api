@@ -5,9 +5,11 @@ describe("Sources", function() {
   var owner = envi.oid;
   var source_id = null; // will be populated by test and then destroyed
 
+  const source_name = "test-git-repo-" + new Date("isoDate").toString();
+
   it("should be able to be added", function(done) {
-    Sources.add(owner, "test-git-repo-SourcesSpec.js",
-      "https://github.com/suculent/thinx-device-api",
+    Sources.add(owner,
+      source_name,
       "origin/master",
       function(success, response) {
         if (success === false) {
@@ -43,7 +45,7 @@ describe("Sources", function() {
     Sources.list(owner, function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
-      //console.log("Source List Response: " + JSON.stringify(response)); works here, valid...
+      console.log("Source List Response: " + JSON.stringify(response));
       done();
     });
   }, 10000);
