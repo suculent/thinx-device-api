@@ -136,7 +136,7 @@ describe("Device", function() {
     }, 5000);
 
   it("should be able to store OTT request", function(done) {
-    device.storeOTT(JRS2, function(success, response) {
+    device.storeOTT(JSON.stringify(JRS2), function(success, response) {
       console.log("• OTT Response: " + response);
       expect(success).toBe(true);
       expect(response).toBeDefined();
@@ -148,12 +148,12 @@ describe("Device", function() {
 
   it("should be able to fetch OTT request",
     function(done) {
+      expect(this.ott).toBeDefined();
       if (typeof(this.ott) === "undefined") {
         console.log("No OTT saved.");
         done();
         return;
       }
-      expect(this.ott).toBeDefined();
       device.fetchOTT(this.ott, function(success,
         response) {
         expect(success).toBe(true);

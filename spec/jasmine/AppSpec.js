@@ -1,8 +1,9 @@
 describe("App", function() {
 
   it("should not fail", function(done) {
-    var ThinxApp = require('../../index.js');
-    expect(ThinxApp).toBeDefined();
+    require('../../index.js');
+    var thx = new ThinxApp();
+    expect(thx).toBeDefined();
     done();
   }, 20000);
 
