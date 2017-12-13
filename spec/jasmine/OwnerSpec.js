@@ -25,7 +25,7 @@ describe("Owner", function() {
     };
     User.create(body, true, function(success, response) {
       if (response.toString().indexOf("email_already_exists") !== -1) {
-        console.log(response);
+        console.log(response);        
         expect(success).toBe(false);
       } else {
         expect(success).toBe(true);

@@ -1,22 +1,27 @@
 {
-  "oid": "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
+  "oid": "4f1122fa074af4dabab76a5205474882c82de33f50ecd962d25d3628cd0603be",
   "udid": "436ba180-c085-11e7-a172-872cac9d771d",
-  "mac": "00:00:00:00:00:00",
+  "mac": "11:11:11:11:11:11",
   "version": "1.7.2",
   "sid": "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f4",
-  "ak": "b29c2e7ecfbcd3dcbbdc744b735b794a8a5b5aed3f50960470eb5388a423dd57",
+  "ak": "010742f7700c4c91936a0a9b6b2181bec876b7932b635194a614a3d547b60b73",
   "build_id": "b1fb3850-de84-11e7-87b3-2d28e305da6d",
   "email": "jenkina@teacloud.net",
   "test_info": {
-    "first_name": "Jenkina",
-    "last_name": "Teacloud",
-    "mobile_phone": "+420603861240",
+    "first_name": "Jára",
+    "last_name": "Cimrman",
+    "mobile_phone": " ",
     "security": {
       "important_notifications": true
     },
     "goals": [],
-    "username": "jenkina",
-    "owner": "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
-    "email": "jenkina@teacloud.net"
+    "username": "cimrman",
+    "owner": "4f1122fa074af4dabab76a5205474882c82de33f50ecd962d25d3628cd0603be",
+    "email": "cimrman@thinx.cloud",
+    "transformers": [{
+      "ufid": "vt:b688d51871191b9f645678b10ce70ec23704ef5c549019b8beeaec9939401755",
+      "alias": "Empty",
+      "body": "var transformer = function(status, device) { return status };"
+    }]
   }
 }
