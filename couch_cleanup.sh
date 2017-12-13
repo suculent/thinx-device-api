@@ -47,12 +47,11 @@ do
   for DB in $MANAGED_DBS
   do
     DATABASE_NAME=$(basename $DB)
-    # echo "Extracting DB_NAME: $DB_NAME"
-    DB_NAME=$(echo $DATABASE_NAME | sed 's/.couch//g')
-    # echo "Processing DB_NAME: $DB_NAME"
-    BARE_NAME=$(echo $DB_NAME | sed 's/[0-9.]//g')
+    DB_NAME=${DATABASE_NAME//.couch/} #DB_NAME=$(echo $DATABASE_NAME | sed 's/.couch//g')
+    BARE_NAME=${DB_NAME//[0-9.]/}
+    TARGET_NAME=${BARE_NAME//managed/replicated)
+
     echo "Processing BARE_NAME: $BARE_NAME"
-    TARGET_NAME=$(echo $BARE_NAME | sed 's/managed/replicated/g')
 
     # Remove old replica (may backup as well)
     echo "Deleting database TARGET_NAME: $TARGET_NAME"
