@@ -25,7 +25,7 @@ describe("Owner", function() {
     };
     User.create(body, true, function(success, response) {
       if (response.toString().indexOf("email_already_exists") !== -1) {
-        console.log(response);        
+        console.log(response);
         expect(success).toBe(false);
       } else {
         expect(success).toBe(true);
@@ -48,7 +48,7 @@ describe("Owner", function() {
       };
       User.update(owner, body, function(success,
         response) {
-        console.log(JSON.stringify(response));
+        console.log("avatar update response: " + JSON.stringify(response));
         expect(success).toBe(true);
         done();
       });
@@ -58,7 +58,9 @@ describe("Owner", function() {
     User.profile(owner, function(success, response) {
       expect(response).toBeDefined();
       expect(success).toBe(true);
-      console.log(JSON.stringify(response));
+      if (success === false) {
+        console.log("profile fetch response: " + JSON.stringify(response));
+      }
       done();
     });
   }, 10000);

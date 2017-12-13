@@ -42,7 +42,9 @@ describe("Devices", function() {
     devices.detach(owner, body, function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
-      console.log("Detach response: " + JSON.stringify(response));
+      if (success === false) {
+        console.log("Detach response: " + JSON.stringify(response));
+      }
       done();
     });
   }, 30000);

@@ -80,7 +80,7 @@ echo
 echo "--------------------------------------------------------------------------------"
 echo "☢ Audit log fetch..."
 
-# {"success":true,"logs":{"total_rows":769,"offset":0,"rows":[{"id":"ff16cba945cff2ca578b29c7024eb653","key":{"_id":"ff16cba945cff2ca578b29c7024eb653","_rev":"1-0213b9d3716d6cbc5b5c8e7d1b6deae8","message":"GET : /api/user/devices","owner":"cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12","date":"2017-05-11T15:50:40.729Z"},...
+# {"success":true,"logs":{"total_rows":769,"offset":0,"rows":[{"id":"ff16cba945cff2ca578b29c7024eb653","key":{"_id":"ff16cba945cff2ca578b29c7024eb653","_rev":"1-0213b9d3716d6cbc5b5c8e7d1b6deae8","message":"GET : /api/user/devices","owner":"4f1122fa074af4dabab76a5205474882c82de33f50ecd962d25d3628cd0603be","date":"2017-05-11T15:50:40.729Z"},...
 
 R=$(curl -s -b cookies.jar \
 -H "Origin: rtm.thinx.cloud" \

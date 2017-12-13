@@ -19,7 +19,7 @@ describe("Device", function() {
     checksum: "xevim",
     push: "forget",
     alias: "virtual-test-device-1-delete",
-    owner: "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
+    owner: owner,
     platform: "arduino",
     udid: "436ba180-c085-11e7-a172-872cac9d771d"
   };
@@ -33,7 +33,7 @@ describe("Device", function() {
     checksum: "alevim",
     push: "forget",
     alias: "virtual-test-device-2-static",
-    owner: "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12",
+    owner: owner,
     platform: "arduino",
     udid: "d2d7b050-7c53-11e7-b94e-15f5f3a64973"
   };
