@@ -2,6 +2,8 @@
 
 ## HISTORY
 
+13/12/2017: 0.9.2943: improving test coverage
+
 ## 33th week
 
 06/12/2017: 0.9.2902: improved CouchDB security; testing restore from backup
