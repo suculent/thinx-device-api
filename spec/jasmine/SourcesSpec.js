@@ -10,6 +10,9 @@ describe("Sources", function() {
       "https://github.com/suculent/thinx-device-api",
       "origin/master",
       function(success, response) {
+        if (success === false) {
+          console.log(response);
+        }
         console.log("Source Add Response: " + JSON.stringify(response));
         expect(success).toBe(true);
         expect(response).toBeDefined();

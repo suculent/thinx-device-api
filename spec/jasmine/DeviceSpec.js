@@ -12,7 +12,7 @@ describe("Device", function() {
   // TODO: FIXME: owner is not being loaded from _envi.json in certain circumstances
 
   // This UDID is to be deleted at the end of test.
-  var JRS = {
+  const JRS = {
     mac: "11:11:11:11:11:11",
     firmware: "DeviceSpec.js",
     version: "1.0.0",
@@ -26,7 +26,7 @@ describe("Device", function() {
 
   // udid: "6ef6d300-8053-11e7-8d27-0fa2e6ecef21"
 
-  var JRS2 = {
+  const JRS2 = {
     mac: "N0:NM:OC:KE:D1:00",
     firmware: "DeviceSpec.js",
     version: "1.0.0",
@@ -45,8 +45,13 @@ describe("Device", function() {
 
   it("should be able to register itself.", function(done) {
 
-    device.register(JRS, apikey,
+    device.register(JRS2, apikey,
       function(success, response) {
+
+        if (success === false) {
+          console.log(response);
+        }
+
         console.log("• DeviceSpec.js: Registration result: " + JSON.stringify(response));
         console.log("Registration Response: " + response);
         expect(success).toBe(true);
@@ -79,6 +84,9 @@ describe("Device", function() {
 
     device.register(JRS, apikey,
       function(success, response) {
+        if (success === false) {
+          console.log(response);
+        }
         console.log("• DeviceSpec.js: Registration result: " + JSON.stringify(response));
         console.log("Registration Response: " + response);
         expect(success).toBe(true);
@@ -115,6 +123,9 @@ describe("Device", function() {
       };
       device.edit(owner, changes, function(
         success, response) {
+        if (success === false) {
+          console.log(response);
+        }
         console.log("• DeviceSpec.js: Editing result: " + JSON
           .stringify(response));
         expect(success).toBe(true);
@@ -128,6 +139,9 @@ describe("Device", function() {
     function(done) {
       device.register(JRS, apikey,
         function(success, response) {
+          if (success === false) {
+            console.log(response);
+          }
           console.log("• DeviceSpec.js: Re-registration result: " + JSON.stringify(
             response));
           expect(success).toBe(true);
@@ -156,6 +170,9 @@ describe("Device", function() {
       }
       device.fetchOTT(this.ott, function(success,
         response) {
+        if (success === false) {
+          console.log(response);
+        }
         expect(success).toBe(true);
         expect(response).toBeDefined();
         done();

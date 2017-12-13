@@ -21,7 +21,7 @@ describe("Owner", function() {
       first_name: "Jára",
       last_name: "Cimrman",
       email: email,
-      owner: "0x0z1mmerman"
+      owner: "cimrman"
     };
     User.create(body, true, function(success, response) {
       if (response.toString().indexOf("email_already_exists") !== -1) {
@@ -49,6 +49,9 @@ describe("Owner", function() {
       User.update(owner, body, function(success,
         response) {
         console.log("avatar update response: " + JSON.stringify(response));
+        if (success === false) {
+          console.log(response);
+        }
         expect(success).toBe(true);
         done();
       });
@@ -90,6 +93,9 @@ describe("Owner", function() {
 
   it("should be able to begin reset owner password", function(done) {
     User.password_reset_init(email, function(success, response) {
+      if (success === false) {
+        console.log(response);
+      }
       expect(success).toBe(true);
       expect(response).toBeDefined();
       console.log(JSON.stringify(response));
@@ -109,6 +115,9 @@ describe("Owner", function() {
       reset_key: this.reset_key
     };
     User.set_password(body, function(success, response) {
+      if (success === false) {
+        console.log(response);
+      }
       expect(success).toBe(true);
       expect(response).toBeDefined();
       console.log(JSON.stringify(response));
