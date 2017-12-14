@@ -304,7 +304,7 @@ case $PLATFORM in
 			else
 				echo "[builder.sh] Build type: firmware (or undefined)" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
-				if [ $(stat -f%z $OUTFILE) < 10000 ]]; then
+				if [[ $(find $OUTFILE -type f -size +10000c 2>/dev/null) ]]; then
 					rm -rf $OUTFILE
 					BUILD_SUCCESS=false
 					echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
@@ -341,7 +341,7 @@ case $PLATFORM in
 					BUILD_SUCCESS=true
 					zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./* # zip artefacts
 				fi
-				if [ $(stat -f%z $OUTFILE) < 10000 ]]; then
+				if [[ $(find $OUTFILE -type f -size +10000c 2>/dev/null) ]]; then
 					rm -rf $OUTFILE
 					BUILD_SUCCESS=false
 					echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
@@ -403,7 +403,7 @@ case $PLATFORM in
 				echo "[builder.sh] Build type: firmware (or undefined)" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 				zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ${OUTFILE} # zip artefacts
-				if [ $(stat -f%z $OUTFILE) < 10000 ]]; then
+				if [[ $(find $OUTFILE -type f -size +10000c 2>/dev/null) ]]; then
 					rm -rf $OUTFILE
 					BUILD_SUCCESS=false
 					echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
@@ -586,7 +586,7 @@ case $PLATFORM in
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
 
-					if [ $(stat -f%z $OUTFILE) < 10000 ]]; then
+					if [[ $(find $OUTFILE -type f -size +10000c 2>/dev/null) ]]; then
 						rm -rf $OUTFILE
 						BUILD_SUCCESS=false
 						echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
@@ -680,7 +680,7 @@ case $PLATFORM in
 				# Check Artifacts
 				if [[ $BUILD_SUCCESS == true ]] ; then
 					STATUS='OK'
-					if [ $(stat -f%z $OUTFILE) < 10000 ]]; then
+					if [[ $(find $OUTFILE -type f -size +10000c 2>/dev/null) ]]; then
 						rm -rf $OUTFILE
 						BUILD_SUCCESS=false
 						echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"

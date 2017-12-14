@@ -21,7 +21,7 @@ describe("Device", function() {
     alias: "virtual-test-device-1-delete",
     owner: owner,
     platform: "arduino",
-    udid: "436ba180-c085-11e7-a172-872cac9d771d"
+    udid: "d6ff2bb0-df34-11e7-b351-eb37822aa172"
   };
 
   // udid: "6ef6d300-8053-11e7-8d27-0fa2e6ecef21"
