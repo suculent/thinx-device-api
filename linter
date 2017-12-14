@@ -92,7 +92,7 @@ for EXT in $EXTENSIONS; do
 	if [[ "${TOOL_PATH}" == "cppcheck" ]]; then
 		TOOL_PATH=$(which $TOOL_PATH)
 		CMD="${TOOL_PATH} ${TOOL_ATTRS} ${WORKDIR}"
-		exec $CMD > "$WORKDIR/lint.txt"
+		echo $($CMD) > "$WORKDIR/lint.txt"
 		cat "$WORKDIR/lint.txt"
 	else
 
