@@ -87,14 +87,15 @@ describe("Build log", function() {
     done();
   }, 5000);
 
-  it("should be able to tail log for build_id", function() {
+  it("should be able to tail log for build_id", function(done) {
     blog.logtail(build_id, require("./_envi.json").oid, _ws,
       function(err) {
         console.log(err);
         expect(true).toBe(true);
-        ws_done = this.done();
+        ws_done = done();
+        done();
       });
-  }, 5000);
+  }, 15000);
 
   it("should provide path for device", function() {
     expect(blog.pathForDevice(owner, udid)).toBeDefined();
