@@ -27,12 +27,10 @@ describe("Repository Watcher", function() {
   watcher.callback = function(err) {
     // watcher exit_callback
     console.log("Callback 1");
-    expect(true).toBe(true);
   };
   watcher.exit_callback = function(err) {
     // watcher exit_callback
     console.log("Callback 2");
-    expect(true).toBe(true);
   };
 
   beforeEach(function() {
@@ -44,7 +42,6 @@ describe("Repository Watcher", function() {
   });
 
   it("should be able to watch repository", function(done) {
-
     watcher.watchRepository(repo_path, true, function(result) {
       if (typeof(result) !== "undefined") {
         console.log("watcher_callback result: " + JSON.stringify(
@@ -61,25 +58,25 @@ describe("Repository Watcher", function() {
       } else {
         console.log("watcher_callback: no result");
       }
-      done();
     });
     done();
-  });
+  }, 15000);
 
-  if ("should be able to infer platform from repository contents", function() {
-      watcher.getPlatform(repo_path, function(error, result) {
-        expect(result).toBeDefined();
-        console.log("Platform: " + result);
-      });
+  it("should be able to infer platform from repository contents", function(done) {
+    watcher.getPlatform(repo_path, function(error, result) {
+      expect(result).toBeDefined();
+      console.log("Platform: " + result);
+      done();
     });
+  }, 5000);
 
-  it("should be able tell repository has changed", function() {
-    watcher.checkRepositoryChange(repo_path, false, function(err,
-      result) {
-      expect(true).toBe(true);
-      console.log(result);
+  it("should be able tell repository has changed", function(done) {
+    watcher.checkRepositoryChange(repo_path, false, function(result) {
+      expect(result).toBeDefined();
+      console.log("Repository change result: " + result);
+      done();
     });
-  });
+  }, 5000);
 
   it("should be able to unwatch repository", function() {
     watcher.unwatchRepository();

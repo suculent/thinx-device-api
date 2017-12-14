@@ -25,14 +25,16 @@ describe("Owner", function() {
     };
     User.create(body, true, function(success, response) {
       if (response.toString().indexOf("already_exists") !== -1) {
-        console.log(response);
         expect(success).toBe(false);
       } else {
         expect(success).toBe(true);
       }
       expect(response).toBeDefined();
+      if (response.indexOf("username_already_exists" !== -1)) {
+        done();
+      }
       if (response) {
-        console.log("Activation rest response: " + response);
+        console.log("Activation response: " + response);
         this.activation_key = response; // store activation token for next step
       }
       console.log(JSON.stringify(response));
