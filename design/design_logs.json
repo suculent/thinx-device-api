@@ -1,6 +1,6 @@
 {
   "_id": "_design/logs",
-  "_rev": "2-23d053900f8b050325337fcc2badd12e",
+  "_rev": "4-85e5ac376aaf8bd391c4ed31de1c32f7",
   "language": "javascript",
   "views": {
     "logs_by_owner": {

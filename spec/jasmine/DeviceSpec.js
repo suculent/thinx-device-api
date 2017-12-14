@@ -151,7 +151,7 @@ describe("Device", function() {
 
   it("should be able to store OTT request", function(done) {
     device.storeOTT(JSON.stringify(JRS2), function(success, response) {
-      console.log("• OTT Response: " + response);
+      console.log("• OTT Response: " + JSON.stringify(response));
       expect(success).toBe(true);
       expect(response).toBeDefined();
       expect(response.ott).toBeDefined();
