@@ -19,6 +19,7 @@ dependencies:
     - touch ~/thinx-device-api/mqtt_passwords
     - pwd; ls
     - gem install github_changelog_generator
+    - echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
 ## Customize database setup
 database:
