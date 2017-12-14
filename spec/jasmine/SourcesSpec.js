@@ -5,7 +5,7 @@ describe("Sources", function() {
   var owner = envi.oid;
   var source_id;
 
-  const source_name = "test-git-repo-" + new Date("isoDate").toString();
+  const source_name = "thinx-device-api-test";
 
   it("should be able to be added", function(done) {
     Sources.add(owner,
@@ -33,19 +33,17 @@ describe("Sources", function() {
     });
   }, 10000);
 
-  it("should be able to be removed",
-    function(done) {
-      expect(this.source_id).toBeDefined();
-      Sources.remove(owner, [this.source_id], function(success,
-        response) {
-        if (success === false) {
-          console.log("Error removing source: " + response);
-        }
-        expect(success).toBe(true);
-        expect(response).toBeDefined();
-        console.log("Sources Removal Response: " + JSON.stringify(
-          response));
-        done();
-      });
-    }, 10000);
+  it("should be able to be removed", function(done) {
+    expect(this.source_id).toBeDefined();
+    Sources.remove(owner, [this.source_id], function(success, response) {
+      if (success === false) {
+        console.log("Error removing source: " + response);
+      }
+      expect(success).toBe(true);
+      expect(response).toBeDefined();
+      console.log("Sources Removal Response: " + JSON.stringify(response));
+      done();
+    });
+  }, 10000);
+
 });

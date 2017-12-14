@@ -140,7 +140,8 @@ describe("Device", function() {
       device.register(JRS, apikey,
         function(success, response) {
           if (success === false) {
-            console.log(response);
+            console.log("should receive different response for already-registered revice: " +
+              response);
           }
           console.log("• DeviceSpec.js: Re-registration result: " + JSON.stringify(
             response));
@@ -160,14 +161,15 @@ describe("Device", function() {
     });
   }, 5000);
 
-  it("should be able to fetch OTT request",
-    function(done) {
-      expect(this.ott).toBeDefined();
-      if (typeof(this.ott) === "undefined") {
-        console.log("No OTT saved.");
-        done();
-        return;
-      }
+  it("should be able to fetch OTT request", function(done) {
+
+    device.storeOTT(JSON.stringify(JRS2), function(success, response) {
+      console.log("• OTT Response: " + JSON.stringify(response));
+      expect(success).toBe(true);
+      expect(response).toBeDefined();
+      expect(response.ott).toBeDefined();
+      this.ott = response.ott;
+
       device.fetchOTT(this.ott, function(success,
         response) {
         if (success === false) {
@@ -177,12 +179,14 @@ describe("Device", function() {
         expect(response).toBeDefined();
         done();
       });
-    }, 5000);
+    });
+
+  }, 15000);
 
   it("should be able to normalize a MAC address", function(done) {
     var nmac = device.normalizedMAC("123456789012");
     expect(nmac).toBeDefined();
     done();
-  });
+  }, 5000);
 
 });
