@@ -3,41 +3,24 @@ describe("Sources", function() {
   var Sources = require('../../lib/thinx/sources');
   var envi = require("./_envi.json");
   var owner = envi.oid;
-  var source_id = null; // will be populated by test and then destroyed
+  var source_id;
 
   const source_name = "test-git-repo-" + new Date("isoDate").toString();
 
   it("should be able to be added", function(done) {
     Sources.add(owner,
       source_name,
+      "https://github.com/suculent/thinx-device-api",
       "origin/master",
       function(success, response) {
         if (success === false) {
-          console.log(response);
+          console.log("Error adding source: " + response);
         }
         console.log("Source Add Response: " + JSON.stringify(response));
         expect(success).toBe(true);
         expect(response).toBeDefined();
         this.source_id = response.source_id;
         done();
-
-        // not tested here yet, how does it work?
-        describe("Source", function() {
-          var envi = require("./_envi.json");
-          it("should be able to be removed",
-            function(done) {
-              Sources.remove(owner, [source_id], function(success,
-                response) {
-                expect(success).toBe(true);
-                expect(response).toBeDefined();
-                source_id = this.source_id;
-                console.log("Source Removal Response: " + JSON.stringify(
-                  response));
-                done();
-              });
-            }, 10000);
-        });
-
       });
   }, 10000);
 
@@ -52,9 +35,12 @@ describe("Sources", function() {
 
   it("should be able to be removed",
     function(done) {
-      var source_id = this.source_id;
-      Sources.remove(owner, [source_id], function(success,
+      expect(this.source_id).toBeDefined();
+      Sources.remove(owner, [this.source_id], function(success,
         response) {
+        if (success === false) {
+          console.log("Error removing source: " + response);
+        }
         expect(success).toBe(true);
         expect(response).toBeDefined();
         console.log("Sources Removal Response: " + JSON.stringify(

@@ -24,7 +24,7 @@ describe("Owner", function() {
       owner: "cimrman"
     };
     User.create(body, true, function(success, response) {
-      if (response.toString().indexOf("email_already_exists") !== -1) {
+      if (response.toString().indexOf("already_exists") !== -1) {
         console.log(response);
         expect(success).toBe(false);
       } else {
@@ -115,8 +115,9 @@ describe("Owner", function() {
       reset_key: this.reset_key
     };
     User.set_password(body, function(success, response) {
+      expect(this.reset_key).toBeDefined();
       if (success === false) {
-        console.log(response);
+        console.log("Password set result: " + response);
       }
       expect(success).toBe(true);
       expect(response).toBeDefined();

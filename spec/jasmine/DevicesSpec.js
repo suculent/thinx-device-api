@@ -57,7 +57,6 @@ describe("Devices", function() {
     };
     devices.revoke(owner, body, function(success, response) {
       expect(success).toBe(true);
-      expect(response).toBeDefined();
       console.log("Revoke response: " + JSON.stringify(response));
       done();
     });

@@ -84,7 +84,6 @@ describe("Build log", function() {
 
   it("should be able to append existing log", function(done) {
     blog.log(build_id, owner, udid, "Testing build log append...");
-    expect(true).toBe(true);
     done();
   }, 5000);
 
