@@ -82,27 +82,11 @@ describe("Device", function() {
               console.log("• DeviceSpec.js: Received UDID: " + this.udid);
               done();
 
-              it("should be able to provide device firmware",
-                function(done) {
-                  // Returns "OK" when current firmware is valid.
-                  body.udid = this.udid;
-                  console.log("• DeviceSpec.js: Using this.UDID: " + this.udid);
-                  device.firmware(body, this.apikey, function(
-                    success,
-                    response) {
-                    console.log("• DeviceSpec.js: Firmware fetch result: " +
-                      JSON.stringify(
-                        response));
-                    expect(success).toBe(false);
-                    expect(response.status).toBe("UPDATE_NOT_FOUND");
-                    done();
-                  });
-                }, 5000);
-
             });
         }, 15000); // register
 
-        it("should be able to register device for revocation testing", function(done) {
+        it("should be able to register device for revocation testing", function(
+          revocation_create_done) {
 
           device.register(JRS, apikey,
             function(success, response) {
@@ -113,30 +97,52 @@ describe("Device", function() {
               expect(this.udid).toBeDefined();
               this.udid = response.udid;
               console.log("• DeviceSpec.js: Received UDID: " + this.udid);
-              done();
 
-              it("should be able to provide device firmware",
-                function(done) {
-                  // Returns "OK" when current firmware is valid.
+              it("should be able to revoke a device",
+                function(revocation_done) {
                   body.udid = this.udid;
                   console.log("• DeviceSpec.js: Using this.UDID: " + this.udid);
-                  device.firmware(body, apikey, function(
+                  device.revoke(body, this.apikey, function(
                     success,
                     response) {
-                    console.log("• DeviceSpec.js: Firmware fetch result: " +
+                    console.log("• DeviceSpec.js: Revocation result: " +
                       JSON.stringify(
                         response));
                     expect(success).toBe(false);
                     expect(response.status).toBe("UPDATE_NOT_FOUND");
-                    done();
+                    revocation_done();
                   });
                 }, 5000);
-
             });
+
+          revocation_create_done();
+
         }, 15000); // register
 
+
+
       });
+
+    done();
+
   }, 30000);
+
+  it("should be able to provide device firmware",
+    function(firmware_done) {
+      // Returns "OK" when current firmware is valid.
+      body.udid = this.udid;
+      console.log("• DeviceSpec.js: Using this.UDID: " + this.udid);
+      device.firmware(body, apikey, function(
+        success,
+        response) {
+        console.log("• DeviceSpec.js: Firmware fetch result: " +
+          JSON.stringify(
+            response));
+        expect(success).toBe(false);
+        expect(response.status).toBe("UPDATE_NOT_FOUND");
+        firmware_done();
+      });
+    }, 5000);
 
   it("should be able to change its alias.",
     function(done) {
