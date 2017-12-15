@@ -14,6 +14,8 @@ describe("Notifier", function() {
 
     // CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION}"
 
+    // 22fd7ed0-e193-11e7-b6e6-1bece759073e 3ee7bb498a6cd6d28a1b91f605f533384490f45b 131 git@github.com:suculent/thinx-firmware-esp8266-pio.git <none> d6ff2bb0-df34-11e7-b351-eb37822aa172 0x00000000 4f1122fa074af4dabab76a5205474882c82de33f50ecd962d25d3628cd0603be OK platformio
+
     // Hey, this should be JUST a notification, no destructives.
     var test_build_id = "no_build_id";
     var test_commit_id = "crime_commit_id";
@@ -21,7 +23,7 @@ describe("Notifier", function() {
     var test_repo =
       "https://github.com/suculent/thinx-firmware-esp8266-pio.git";
     var test_binary = "nothing.bin";
-    var test_udid = "11:11:11:11:11:11";
+    var test_udid = "d6ff2bb0-df34-11e7-b351-eb37822aa172";
     var sha = "one-sha-256-pls";
     var owner_id = owner;
     var status = "TESTING_NOTIFIER";

@@ -130,7 +130,7 @@ describe("Device", function() {
   it("should be able to provide device firmware",
     function(firmware_done) {
       // Returns "OK" when current firmware is valid.
-      var body = {};
+      var body = JRS2;
       body.udid = udid;
       console.log("• DeviceSpec.js: Using UDID: " + udid);
       device.firmware(body, apikey, function(
