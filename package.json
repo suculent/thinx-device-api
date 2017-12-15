@@ -20,7 +20,8 @@
     "coverage" : "nyc jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls && cat lcov.info | codacy-coverage",
     "snyk" : "snyk test",
     "snyk-protect" : "snyk protect",
-    "test" : "nyc jasmine; nyc report --reporter=text-lcov > ./coverage/lcov.info && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls && cat ./coverage/lcov.info | ./node_modules/.bin/codacy-coverage"
+    "test" : "nyc jasmine",
+    "coverage_new" : "nyc jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls && cat lcov.info | codacy-coverage"
   },
   "preferGlobal" : true,
   "dependencies" : {
