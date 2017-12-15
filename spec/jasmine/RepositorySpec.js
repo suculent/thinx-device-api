@@ -70,13 +70,12 @@ describe("Repository Watcher", function() {
     });
   }, 15000);
 
-  it("should be able tell repository has changed", function(done) {
+  it("should be able tell repository has changed", function() {
     watcher.checkRepositoryChange(repo_path, false, function(result) {
       expect(result).toBeDefined();
       console.log("Repository change result: " + result);
-      done();
     });
-  }, 5000);
+  });
 
   it("should be able to unwatch repository", function() {
     watcher.unwatchRepository();

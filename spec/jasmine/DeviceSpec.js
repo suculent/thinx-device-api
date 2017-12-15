@@ -130,16 +130,17 @@ describe("Device", function() {
   it("should be able to provide device firmware",
     function(firmware_done) {
       // Returns "OK" when current firmware is valid.
-      body.udid = this.udid;
-      console.log("• DeviceSpec.js: Using this.UDID: " + this.udid);
+      var body = {};
+      body.udid = udid;
+      console.log("• DeviceSpec.js: Using UDID: " + udid);
       device.firmware(body, apikey, function(
-        success,
-        response) {
+        success, response) {
         console.log("• DeviceSpec.js: Firmware fetch result: " +
           JSON.stringify(
             response));
         expect(success).toBe(false);
         expect(response.status).toBe("UPDATE_NOT_FOUND");
+        console.log("firmware reponse: " + JSON.stringify(response));
         firmware_done();
       });
     }, 5000);
