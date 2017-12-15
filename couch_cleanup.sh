@@ -49,7 +49,7 @@ do
     DATABASE_NAME=$(basename $DB)
     DB_NAME=${DATABASE_NAME//.couch/} #DB_NAME=$(echo $DATABASE_NAME | sed 's/.couch//g')
     BARE_NAME=${DB_NAME//[0-9.]/}
-    TARGET_NAME=${BARE_NAME//managed/replicated)
+    TARGET_NAME=${BARE_NAME//managed/replicated}
 
     echo "Processing BARE_NAME: $BARE_NAME"
 
