@@ -2,7 +2,9 @@
 
 ## HISTORY
 
-13/12/2017: 0.9.2943: improving test coverage
+15/12/2017: 0.9.2951: improving test coverage
+14/12/2017: 0.9.2943: improving test coverage (5 failures resolved, 7 remaining)
+13/12/2017: 0.9.2943: improving test coverage (3 failures resolved, 12 remaining)
 
 ## 33th week
 
