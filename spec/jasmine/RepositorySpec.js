@@ -63,12 +63,13 @@ describe("Repository Watcher", function() {
   }, 15000);
 
   it("should be able to infer platform from repository contents", function(done) {
+    console.log("Inferring at " + repo_path);
     watcher.getPlatform(repo_path, function(error, result) {
       expect(result).toBeDefined();
       console.log("Platform: " + result);
       done();
     });
-  }, 5000);
+  }, 15000);
 
   it("should be able tell repository has changed", function(done) {
     watcher.checkRepositoryChange(repo_path, false, function(result) {

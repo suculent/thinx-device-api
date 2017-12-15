@@ -34,18 +34,34 @@ describe("Sources", function() {
   }, 10000);
 
   it("should be able to be removed", function(done) {
-    expect(this.source_id).toBeDefined();
-    Sources.remove(owner, [this.source_id], function(success, response) {
-      if (success === false) {
-        console.log("Error removing source: " + response);
-      }
-      expect(success).toBe(true);
-      //expect(response).toBeDefined();
-      if (typeof(response) !== "undefined") {
-        console.log("Sources Removal Response: " + JSON.stringify(response));
-      }
-      done();
-    });
-  }, 10000);
+
+    /// Add something to be removed
+    Sources.add(owner,
+      "to-be-deleted-on-test",
+      "https://github.com/suculent/thinx-device-api",
+      "origin/master",
+      function(success, response) {
+        if (success === false) {
+          console.log("Error adding source: " + response);
+        }
+        console.log("Source Add Response: " + JSON.stringify(response));
+        //expect(success).toBe(true);
+        expect(response).toBeDefined();
+        this.source_id = response.source_id;
+
+        Sources.remove(owner, [this.source_id], function(success, response) {
+          if (success === false) {
+            console.log("Error removing source: " + response);
+          }
+          expect(success).toBe(true);
+          //expect(response).toBeDefined();
+          if (typeof(response) !== "undefined") {
+            console.log("Sources Removal Response: " + JSON.stringify(response));
+          }
+          done();
+        });
+
+      });
+  }, 20000);
 
 });

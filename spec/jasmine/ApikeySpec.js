@@ -53,17 +53,17 @@ describe("API Key", function() {
         });
     }, 15000);
 
-    it("should be able to verify invalid API Keys", function(done) {
-      APIKey.verify(
-        owner,
-        "invalid-api-key",
-        function(success) {
-          expect(success).toBe(false);
-          done();
-        });
-    }, 5000);
-
   }, 10000);
+
+  it("should be able to verify invalid API Keys", function(done) {
+    APIKey.verify(
+      owner,
+      "invalid-api-key",
+      function(success) {
+        expect(success).toBe(false);
+        done();
+      });
+  }, 5000);
 
   it("should be able to fail on invalid API Key revocation", function(done) {
     console.log("Revoking invalid key...");

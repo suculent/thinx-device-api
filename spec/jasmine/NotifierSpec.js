@@ -8,7 +8,7 @@ describe("Notifier", function() {
   // node.js process exeutes the builder.sh (should do that in background, but initial test versions did this synchronously
   // builder.sh calls the node.js with statically allocated parameters. and the damned feat hijak is cool and like edrush and better than those rappers.
 
-  it("should be able to send a notification", function() {
+  it("should be able to send a notification", function(done) {
     // Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope
     // (or stores into DB later)
 
@@ -45,7 +45,7 @@ describe("Notifier", function() {
     var error = exec.execSync(CMD);
     console.log("Notifier result: " + error.toString());
     expect(error).not.toBeDefined();
-
+    done();
   });
 
-});
+}, 10000);

@@ -9,6 +9,8 @@ describe("Device", function() {
   var apikey = envi.ak;
   var ott = null;
 
+  var APIKey = require('../../lib/thinx/apikey');
+
   // TODO: FIXME: owner is not being loaded from _envi.json in certain circumstances
 
   // This UDID is to be deleted at the end of test.
@@ -43,88 +45,104 @@ describe("Device", function() {
   console.log("• DeviceSpec.js: Using test API_KEY: " + apikey);
   console.log("• DeviceSpec.js: Using request: " + JSON.stringify(JRS));
 
-  it("should be able to register itself.", function(done) {
+  //create: function(owner, apikey_alias, callback)
+  it("API keys are required to do this on new instance", function(done) {
+    APIKey.create(
+      owner,
+      "sample-key",
+      function(success, object) {
 
-    device.register(JRS2, apikey,
-      function(success, response) {
+        expect(success).toBe(true);
 
-        if (success === false) {
-          console.log(response);
-          expect(response).toBeDefined();
-          if (response === "owner_found_but_no_key") {
-            done();
-            return;
-          }
+        if (success) {
+          this.apikey = object.hash;
+          console.log("Key ready: " + this.apikey);
         }
 
-        console.log("• DeviceSpec.js: Registration result: " + JSON.stringify(response));
-        console.log("Registration Response: " + response);
-        expect(success).toBe(true);
-        expect(this.udid).toBeDefined();
-        this.udid = response.udid;
-        console.log("• DeviceSpec.js: Received UDID: " + this.udid);
-        done();
+        it("should be able to register itself.", function(done) {
 
-        it("should be able to provide device firmware",
-          function(done) {
-            // Returns "OK" when current firmware is valid.
-            body.udid = this.udid;
-            console.log("• DeviceSpec.js: Using this.UDID: " + this.udid);
-            device.firmware(body, apikey, function(
-              success,
-              response) {
-              console.log("• DeviceSpec.js: Firmware fetch result: " +
-                JSON.stringify(
-                  response));
-              expect(success).toBe(false);
-              expect(response.status).toBe("UPDATE_NOT_FOUND");
+          device.register(JRS2, this.apikey,
+            function(success, response) {
+
+              if (success === false) {
+                console.log(response);
+                expect(response).toBeDefined();
+                if (response === "owner_found_but_no_key") {
+                  done();
+                  return;
+                }
+              }
+
+              console.log("• DeviceSpec.js: Registration result: " + JSON.stringify(
+                response));
+              console.log("Registration Response: " + response);
+              expect(success).toBe(true);
+              expect(this.udid).toBeDefined();
+              this.udid = response.udid;
+              console.log("• DeviceSpec.js: Received UDID: " + this.udid);
               done();
+
+              it("should be able to provide device firmware",
+                function(done) {
+                  // Returns "OK" when current firmware is valid.
+                  body.udid = this.udid;
+                  console.log("• DeviceSpec.js: Using this.UDID: " + this.udid);
+                  device.firmware(body, this.apikey, function(
+                    success,
+                    response) {
+                    console.log("• DeviceSpec.js: Firmware fetch result: " +
+                      JSON.stringify(
+                        response));
+                    expect(success).toBe(false);
+                    expect(response.status).toBe("UPDATE_NOT_FOUND");
+                    done();
+                  });
+                }, 5000);
+
             });
-          }, 5000);
+        }, 15000); // register
+
+        it("should be able to register device for revocation testing", function(done) {
+
+          device.register(JRS, apikey,
+            function(success, response) {
+              console.log("• DeviceSpec.js: Registration result: " + JSON.stringify(
+                response));
+              console.log("Registration Response: " + response);
+              expect(success).toBe(true);
+              expect(this.udid).toBeDefined();
+              this.udid = response.udid;
+              console.log("• DeviceSpec.js: Received UDID: " + this.udid);
+              done();
+
+              it("should be able to provide device firmware",
+                function(done) {
+                  // Returns "OK" when current firmware is valid.
+                  body.udid = this.udid;
+                  console.log("• DeviceSpec.js: Using this.UDID: " + this.udid);
+                  device.firmware(body, apikey, function(
+                    success,
+                    response) {
+                    console.log("• DeviceSpec.js: Firmware fetch result: " +
+                      JSON.stringify(
+                        response));
+                    expect(success).toBe(false);
+                    expect(response.status).toBe("UPDATE_NOT_FOUND");
+                    done();
+                  });
+                }, 5000);
+
+            });
+        }, 15000); // register
 
       });
-  }, 15000); // register
-
-  it("should be able to register device for revocation testing", function(done) {
-
-    device.register(JRS, apikey,
-      function(success, response) {
-        if (success === false) {
-          console.log(response);
-        }
-        console.log("• DeviceSpec.js: Registration result: " + JSON.stringify(response));
-        console.log("Registration Response: " + response);
-        expect(success).toBe(true);
-        expect(this.udid).toBeDefined();
-        this.udid = response.udid;
-        console.log("• DeviceSpec.js: Received UDID: " + this.udid);
-        done();
-
-        it("should be able to provide device firmware",
-          function(done) {
-            // Returns "OK" when current firmware is valid.
-            body.udid = this.udid;
-            console.log("• DeviceSpec.js: Using this.UDID: " + this.udid);
-            device.firmware(body, apikey, function(
-              success,
-              response) {
-              console.log("• DeviceSpec.js: Firmware fetch result: " +
-                JSON.stringify(
-                  response));
-              expect(success).toBe(false);
-              expect(response.status).toBe("UPDATE_NOT_FOUND");
-              done();
-            });
-          }, 5000);
-
-      });
-  }, 15000); // register
+  }, 30000);
 
   it("should be able to change its alias.",
     function(done) {
       var changes = {
         alias: Date().toString(),
-        udid: "11:11:11:11:11:11"
+        udid: envi.udid
       };
       device.edit(owner, changes, function(
         success, response) {
@@ -146,7 +164,8 @@ describe("Device", function() {
         function(success, response) {
           expect(response).toBeDefined();
           if (success === false) {
-            console.log("should receive different response for already-registered revice: " +
+            console.log(
+              "should receive different response for already-registered revice: " +
               response);
             // this is also OK... on CircleCI there are no older API Keys in Redis
             if (response === "owner_found_but_no_key") {
