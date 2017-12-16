@@ -2,6 +2,8 @@
 
 ## HISTORY
 
+16/12/2017: 0.9.29xx: storing MQTT traffic to redis, providing on API request (so far)
+
 15/12/2017: 0.9.2971: stable release, all tests pass
 14/12/2017: 0.9.2943: improving test coverage (5 failures resolved, 7 remaining)
 13/12/2017: 0.9.2943: improving test coverage (3 failures resolved, 12 remaining)

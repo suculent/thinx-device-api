@@ -445,6 +445,30 @@ var ThinxApp = function() {
     });
   });
 
+  /* Fetch device data. */
+  app.post("/api/device/data", function(req, res) {
+    if (!validateSecurePOSTRequest(req)) return;
+    if (!validateSession(req, res)) return;
+    var owner = req.session.owner;
+    var udid = req.body.udid;
+
+    if (typeof(udid) !== "undefined") {
+      messenger.data(owner + "/" + udid, function(success, response) {
+        respond(res, {
+          success: success,
+          response: response
+        });
+      });
+    } else {
+      messenger.data(owner, function(success, response) {
+        respond(res, {
+          success: success,
+          response: response
+        });
+      });
+    }
+  });
+
   /* Detach code source from a device. Expects unique device identifier. */
   app.post("/api/device/detach", function(req, res) {
     if (!validateSecurePOSTRequest(req)) return;
