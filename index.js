@@ -446,13 +446,18 @@ var ThinxApp = function() {
   });
 
   /* TEST ONLY! Get device data. */
-  app.get("/api/hack", function(req, res) {
+  app.get("/api/device/data/:udid", function(req, res) {
 
     // Could be also authenticated using headers:
     // X-THX-Owner-ID:
     // X-THX-API-Key:
 
-    const udid = "4bf09450-da0c-11e7-81fb-f98aa91c89a5";
+    var udid = "4bf09450-da0c-11e7-81fb-f98aa91c89a5";
+
+    // Test only
+    if (typeof(req.params.udid) !== "undefined") {
+      udid = req.params.udid;
+    }
 
     messenger.data("", udid, function(success, response) {
       respond(res, {
