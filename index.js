@@ -445,6 +445,16 @@ var ThinxApp = function() {
     });
   });
 
+  /* TEST ONLY! Get device data. */
+  app.get("/api/device/data", function(req, res) {
+    messenger.data("", function(success, response) {
+      respond(res, {
+        success: success,
+        response: response
+      });
+    });
+  });
+
   /* Fetch device data. */
   app.post("/api/device/data", function(req, res) {
     if (!validateSecurePOSTRequest(req)) return;
