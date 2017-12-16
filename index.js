@@ -448,21 +448,20 @@ var ThinxApp = function() {
   /* TEST ONLY! Get device data. */
   app.get("/api/hack", function(req, res) {
 
-    // Could be šalso authenticated using headers:
+    // Could be also authenticated using headers:
     // X-THX-Owner-ID:
     // X-THX-API-Key:
-    // apikey.verify(owner, api_key, function(success, message) {
 
-    // if (success) {};
+    const udid = "4bf09450-da0c-11e7-81fb-f98aa91c89a5";
 
-    messenger.data("", function(success, response) {
+    messenger.data("", udid, function(success, response) {
       respond(res, {
         success: success,
         response: response
       });
     });
 
-    // });
+    // }); -- apikey
   });
 
   /* Fetch device data. */
@@ -471,22 +470,17 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
     var owner = req.session.owner;
     var udid = req.body.udid;
+    // var apikey = req.body.key;
+    // apikey.verify(owner, api_key, function(success, message) {
 
-    if (typeof(udid) !== "undefined") {
-      messenger.data(owner + "/" + udid, function(success, response) {
-        respond(res, {
-          success: success,
-          response: response
-        });
+    messenger.data(owner, udid, function(success, response) {
+      respond(res, {
+        success: success,
+        response: response
       });
-    } else {
-      messenger.data(owner, function(success, response) {
-        respond(res, {
-          success: success,
-          response: response
-        });
-      });
-    }
+    });
+
+    //}); -- apikey
   });
 
   /* Detach code source from a device. Expects unique device identifier. */
