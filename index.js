@@ -446,13 +446,23 @@ var ThinxApp = function() {
   });
 
   /* TEST ONLY! Get device data. */
-  app.get("/api/device/data", function(req, res) {
+  app.get("/api/hack", function(req, res) {
+
+    // Could be šalso authenticated using headers:
+    // X-THX-Owner-ID:
+    // X-THX-API-Key:
+    // apikey.verify(owner, api_key, function(success, message) {
+
+    // if (success) {};
+
     messenger.data("", function(success, response) {
       respond(res, {
         success: success,
         response: response
       });
     });
+
+    // });
   });
 
   /* Fetch device data. */
