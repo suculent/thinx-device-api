@@ -457,6 +457,11 @@ var ThinxApp = function() {
     // Test only
     if (typeof(req.params.udid) !== "undefined") {
       udid = req.params.udid;
+    } else {
+      respond(res, {
+        success: false,
+        response: "missing_udid"
+      });
     }
 
     messenger.data("", udid, function(success, response) {
