@@ -3051,6 +3051,7 @@ var ThinxApp = function() {
   //
 
   var messenger = require("./lib/thinx/messenger");
+  messenger.init();
 
   //
   // HTTP/S Request Tools
