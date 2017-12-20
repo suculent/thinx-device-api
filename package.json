@@ -22,7 +22,7 @@
     "snyk-protect" : "snyk protect",
     "test" : "nyc jasmine",
     "coverage_new" : "nyc jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls && cat lcov.info | codacy-coverage",
-    "prepare" : "npm run snyk-protect"
+    "prepare" : "echo npm run snyk-protect"
   },
   "preferGlobal" : true,
   "dependencies" : {
