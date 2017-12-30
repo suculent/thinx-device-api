@@ -50,7 +50,7 @@ Currently we're capable of building firmwares for PlatformIO, NodeMCU and Microp
 
 ## Supported IoT Platforms
 
-* ESP8266 (thinx-firmware-esp8266-arduino) for PlatformIO and Arduino IDE
+* ESP8266 for PlatformIO and Arduino IDE
 
 * Tested on Wemos D1 Mini, Wemos D1 Mini Pro, RobotDyn D1, RobotDyn D1 Mini, RobotDyn MEGA WiFi and various NodeMCU (Lolin, AI-THINKER) boards with Arduino, Lua and Micropython-based core firmwares...
 
@@ -58,7 +58,7 @@ Currently we're capable of building firmwares for PlatformIO, NodeMCU and Microp
 
 THiNX Platform Library repository:
 
-[thinx-firmware-esp8266-arduino](https://github.com/suculent/thinx-firmware-esp8266-arduino)
+[thinx-lib-esp8266-arduinoc](https://github.com/suculent/thinx-lib-esp8266-arduinoc)
 
 THiNX Platform Library Sample repositories:
 
