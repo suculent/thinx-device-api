@@ -1930,8 +1930,7 @@ var ThinxApp = function() {
       if (user_data === null) {
         thinx_slack.alert({
           text: "Attempt to login with non-existent user!",
-          username: username,
-          fields: req.body
+          username: username
         });
         console.log("No user data, " + username + " not authorized.");
         failureResponse(res, 403, "unauthorized");
