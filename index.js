@@ -2406,7 +2406,7 @@ var ThinxApp = function() {
             const email = hdata.email;
             const picture = hdata.avatar_url; // TODO: Fetch and save to owner...
 
-            if (typeof(email) === "undefined") {
+            if (typeof(email) === "undefined" || email === null) {
               console.log("Error: no email in response.");
               global_response.redirect(
                 'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
@@ -2414,7 +2414,18 @@ var ThinxApp = function() {
               );
             }
 
-            const owner_id = sha256(email);
+            var owner_id = null;
+
+            try {
+              owner_id = sha256(email);
+            } catch (e) {
+              console.log("error parsing e-mail: " + e + " email: " + email);
+              global_response.redirect(
+                'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
+                'Missing e-mail.'
+              );
+              return;
+            }
 
             var userWrapper = {
               first_name: given_name,
