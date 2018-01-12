@@ -1770,7 +1770,8 @@ var ThinxApp = function() {
           console.log("[login] wrapper: " + userWrapper);
 
           // Support older wrappers
-          if (typeof(wrapper.owner_id) !== "undefined") {
+          if ((typeof(wrapper) !== "undefined") && (typeof(wrapper.owner_id) !==
+              "undefined")) {
             owner_id = wrapper.owner_id;
           }
 
