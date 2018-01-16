@@ -1135,6 +1135,7 @@ var ThinxApp = function() {
       var registration = req.body.registration;
       device.register(registration, req.headers.authentication, function(
         success, response) {
+        response.timestamp = Math.floor(new Date() / 1000);
         respond(res, response);
       });
     }
@@ -1929,9 +1930,9 @@ var ThinxApp = function() {
       }
 
       if (user_data === null) {
+        var err_string = "Attempt to login with non-existent user " + username + "!";
         thinx_slack.alert({
-          text: "Attempt to login with non-existent user!",
-          username: username
+          text: err_string
         });
         console.log("No user data, " + username + " not authorized.");
         failureResponse(res, 403, "unauthorized");
