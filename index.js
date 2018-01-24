@@ -38,7 +38,7 @@ var ThinxApp = function() {
   });
 
   const minute = 60 * 1000;
-  const hour = 3600000;
+  const hour = 3600 * 1000;
   const day = hour * 24;
   const fortnight = day * 14;
 
@@ -302,6 +302,11 @@ var ThinxApp = function() {
 
   app.use(session({
     secret: session_config.secret,
+    "cookie": {
+      "maxAge": 86400000,
+      "secure": true,
+      "httpOnly": true
+    },
     store: new redisStore({
       host: "localhost",
       port: 6379,
@@ -312,7 +317,7 @@ var ThinxApp = function() {
     rolling: false,
     saveUninitialized: true,
   }));
-  // rolling was true
+  // rolling was true; This resets the expiration date on the cookie to the given default.
 
   app.use(parser.json({
     limit: "10mb"
@@ -1752,6 +1757,7 @@ var ThinxApp = function() {
     // OAuth takeover
 
     var oauth = req.body.token;
+
     if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
 
       console.log("[login] with token: " + oauth);
@@ -1795,17 +1801,14 @@ var ThinxApp = function() {
 
                 var minute = 60 * 1000;
 
-                //req.session.cookie.httpOnly = true;
-
-                req.session.cookie.expires = new Date(Date.now() +
-                  fortnight, "isoDate");
+                req.session.cookie.secure = true;
+                req.session.cookie.httpOnly = true;
                 req.session.cookie.maxAge = fortnight;
                 res.cookie("x-thx-session-expire", fortnight, {
                   maxAge: fortnight,
                   httpOnly: false
                 });
 
-                req.session.cookie.secure = true;
 
                 alog.log(req.session.owner, "OAuth User created: " +
                   wrapper.first_name + " " + wrapper.last_name);
@@ -1824,12 +1827,7 @@ var ThinxApp = function() {
                 "] [NEW_SESSION] [oauth]");
 
               req.session.owner = doc.owner;
-              req.session.cookie.expires = new Date(Date.now() + hour, "isoDate");
-              req.session.cookie.maxAge = hour;
-              res.cookie("x-thx-session-expire", req.session.cookie.expires, {
-                maxAge: req.session.cookie.maxAge,
-                httpOnly: false
-              });
+              req.session.cookie.maxAge = new Date(Date.now() + hour);
               req.session.cookie.secure = true;
               //req.session.cookie.httpOnly = true;
 
@@ -1875,10 +1873,8 @@ var ThinxApp = function() {
 
     if (typeof(req.body.remember === "undefined") || (req.body.remember ===
         0)) {
-      req.session.cookie.expires = new Date(Date.now() + hour);
-      req.session.cookie.maxAge = hour;
+      req.session.cookie.maxAge = 24 * hour;
     } else {
-      req.session.cookie.expires = new Date(Date.now() + fortnight);
       req.session.cookie.maxAge = fortnight;
     }
 
@@ -1960,15 +1956,12 @@ var ThinxApp = function() {
 
           if (typeof(req.body.remember === "undefined") || (req.body.remember ===
               0)) {
-            req.session.cookie.expires = new Date(Date.now() + hour, "isoDate");
-            req.session.cookie.maxAge = hour;
+            req.session.cookie.maxAge = 24 * hour;
             res.cookie("x-thx-session-expire", req.session.cookie.expires, {
               maxAge: req.session.cookie.maxAge,
               httpOnly: false
             });
           } else {
-            req.session.cookie.expires = new Date(Date.now() +
-              fortnight, "isoDate");
             req.session.cookie.maxAge = fortnight;
             res.cookie("x-thx-session-expire", fortnight, {
               maxAge: fortnight,
@@ -2682,16 +2675,6 @@ var ThinxApp = function() {
                     req.session.owner = userWrapper.owner_id;
                     console.log("[OID:" + req.session.owner +
                       "] [NEW_SESSION] [oauth]");
-
-                    /*
-                    var minute = 60 * 1000;
-
-                    req.session.cookie.expires = new Date(Date.now() +
-                      fortnight, "isoDate");
-                    req.session.cookie.maxAge = fortnight;
-                    req.session.cookie.secure = true;
-                    */
-
                     alog.log(req.session.owner,
                       "OAuth User created: " +
                       given_name + " " + family_name);
@@ -2721,16 +2704,6 @@ var ThinxApp = function() {
                     "Last seen updated.");
                 }
               });
-
-              /*
-
-              req.session.owner = owner_id;
-              req.session.cookie.secure = true;
-              req.session.cookie.expires = new Date(Date.now() +
-                fortnight, "isoDate");
-              req.session.cookie.maxAge = fortnight;
-
-              */
 
               alog.log(owner_id, " OAuth2 User logged in...");
 
@@ -2884,7 +2857,7 @@ var ThinxApp = function() {
     },
     name: "x-thx-session",
     resave: false,
-    rolling: true,
+    rolling: false,
     saveUninitialized: true,
   }));
 
@@ -2924,7 +2897,8 @@ var ThinxApp = function() {
       if (typeof(req.headers.cookie) !== "undefined") {
         if (cookies.indexOf("thinx-") === -1) {
           //console.log("» WSS cookies: " + cookies);
-          console.log("» WARNING! No thinx-cookie found in: " + JSON.stringify(req.headers.cookie));
+          console.log("» WARNING! No thinx-cookie found in: " + JSON.stringify(req.headers
+            .cookie));
           // wss.close();
           // return;
         }
