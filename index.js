@@ -2381,9 +2381,13 @@ var ThinxApp = function() {
             var hdata = JSON.parse(data);
 
             if ((typeof(hdata.name) !== "undefined") || hdata.name === null) {
-              name_array = hdata.name.split(" ");
-              given_name = name_array[0];
-              family_name = name_array[name_array.count - 1];
+              if (hdata.name.indexOf(" ") > -1) {
+                name_array = hdata.name.split(" ");
+                given_name = name_array[0];
+                family_name = name_array[name_array.count - 1];
+              } else {
+                given_name = hdata.name;
+              }
             } else {
               console.log("Warning: no name in response.");
             }
@@ -2391,9 +2395,13 @@ var ThinxApp = function() {
             console.log("hdata: " + hdata);
 
             if ((typeof(hdata.name) !== "undefined") || hdata.name === null) {
-              name_array = hdata.name.split(" ");
-              given_name = name_array[0];
-              family_name = name_array[name_array.count - 1];
+              if (hdata.name.indexOf(" ") > -1) {
+                name_array = hdata.name.split(" ");
+                given_name = name_array[0];
+                family_name = name_array[name_array.count - 1];
+              } else {
+                given_name = hdata.name;
+              }
             } else {
               console.log("Warning: no name in GitHub access token response.");
             }
