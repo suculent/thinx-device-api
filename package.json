@@ -70,7 +70,7 @@
     "simple-oauth2": "^1.4.0",
     "slack-notify": "^0.1.6",
     "slackbots": "^1.0.2",
-    "snyk": "^1.49.2",
+    "snyk": "^1.69.7",
     "ssh-fingerprint": "0.0.1",
     "ssl-root-cas": "^1.2.4",
     "tail": "^1.2.3",
