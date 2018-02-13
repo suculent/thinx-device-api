@@ -315,7 +315,7 @@ var ThinxApp = function() {
     name: "x-thx-session",
     resave: true,
     rolling: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
   }));
   // rolling was true; This resets the expiration date on the cookie to the given default.
 
@@ -2866,7 +2866,7 @@ var ThinxApp = function() {
     name: "x-thx-session",
     resave: false,
     rolling: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
   }));
 
   var wserver = null;
