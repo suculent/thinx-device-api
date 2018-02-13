@@ -525,6 +525,37 @@ var ThinxApp = function() {
   });
 
   /*
+   * Transformers
+   */
+
+  app.post("/api/transformer/run", function(req, res) {
+    if (!validateSecurePOSTRequest(req)) return;
+    if (!validateSession(req, res)) return;
+    var owner = req.session.owner;    
+    if (typeof(owner) == "undefined" || owner == null) {
+      respond(res, {
+        success: false,
+        status: "owner_not_found"
+      });
+      return;
+    }
+    var udid = req.body.device_id;
+    if (typeof(udid) == "undefined" || udid == null) {
+      respond(res, {
+        success: false,
+        status: "udid_not_found"
+      });
+      return;
+    }
+    device.run_transformers(udid, owner, function(success, status) {
+      respond(res, {
+        success: success,
+        status: status
+      });
+    });
+  });
+
+  /*
    * API Keys
    */
 
