@@ -2,6 +2,23 @@
 
 ## HISTORY
 
+15/02/2018 0.9.3036:
+
+» added base implementation for manual transformer action (dry-run)
+» fixed new implementation of device revocation
+» prevented saving uninitialized sessions to Redis (clutter)
+» new user will have empty default transformers, because without device, those cannot be deleted
+» vulnerable dependency fixes
+» added missing user defaults
+» improved name parser for oauth logins
+» changes in default cookie expiration, removed rolling cookie to maintain custom expiration intervals for long-term logins
+» added registration response to serve approximate time instead of complex NNTP
+» fixed error/warning badge in transformers
+» fixed unintentional password leak
+» search different logfiles in case nothing is found (should be done much better, for /var/log/, better path without `..` etc.
+» reordered audit test to create a record first
+» other minor bugfixes
+
 ## 35th week (Pre-XMAS)
 
 18/12/2018: 0.9.3010: deployed different LoraWAN Server (by gotthardp) using Docker; updating THiNXLib for MQTT integrations

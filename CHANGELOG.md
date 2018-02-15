@@ -1,5 +1,36 @@
 # Change Log
 
+## [0.9.3028](https://github.com/suculent/thinx-device-api/tree/0.9.3028) (2018-02-13)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3021...0.9.3028)
+
+## [0.9.3021](https://github.com/suculent/thinx-device-api/tree/0.9.3021) (2018-01-12)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3010...0.9.3021)
+
+## [0.9.3010](https://github.com/suculent/thinx-device-api/tree/0.9.3010) (2017-12-18)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2971...0.9.3010)
+
+## [0.9.2971](https://github.com/suculent/thinx-device-api/tree/0.9.2971) (2017-12-15)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2968...0.9.2971)
+
+## [0.9.2968](https://github.com/suculent/thinx-device-api/tree/0.9.2968) (2017-12-15)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2918...0.9.2968)
+
+## [0.9.2918](https://github.com/suculent/thinx-device-api/tree/0.9.2918) (2017-12-07)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2904...0.9.2918)
+
+## [0.9.2904](https://github.com/suculent/thinx-device-api/tree/0.9.2904) (2017-12-06)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2983...0.9.2904)
+
+## [0.9.2983](https://github.com/suculent/thinx-device-api/tree/0.9.2983) (2017-12-04)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2890...0.9.2983)
+
+**Merged pull requests:**
+
+- \[Snyk Update\] New fixes for 1 vulnerable dependency path [\#18](https://github.com/suculent/thinx-device-api/pull/18) ([snyk-bot](https://github.com/snyk-bot))
+
+## [0.9.2890](https://github.com/suculent/thinx-device-api/tree/0.9.2890) (2017-11-28)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2882...0.9.2890)
+
 ## [0.9.2882](https://github.com/suculent/thinx-device-api/tree/0.9.2882) (2017-11-26)
 [Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.2838...0.9.2882)
 
@@ -132,13 +163,13 @@
 [Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.7.1542...1.7.1638)
 
 ## [1.7.1542](https://github.com/suculent/thinx-device-api/tree/1.7.1542) (2017-06-26)
-[Full Changelog](https://github.com/suculent/thinx-device-api/compare/tag-1...1.7.1542)
-
-## [tag-1](https://github.com/suculent/thinx-device-api/tree/tag-1) (2017-06-23)
-[Full Changelog](https://github.com/suculent/thinx-device-api/compare/tag...tag-1)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/tag...1.7.1542)
 
 ## [tag](https://github.com/suculent/thinx-device-api/tree/tag) (2017-06-23)
-[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.6.1465-nightly...tag)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/tag-1...tag)
+
+## [tag-1](https://github.com/suculent/thinx-device-api/tree/tag-1) (2017-06-23)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.6.1465-nightly...tag-1)
 
 ## [1.6.1465-nightly](https://github.com/suculent/thinx-device-api/tree/1.6.1465-nightly) (2017-06-22)
 [Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.6.1421...1.6.1465-nightly)
@@ -288,6 +319,48 @@
 # ☢ thinx-device-api change log
 
 ## HISTORY
+
+15/02/2018 0.9.3036:
+
+» added base implementation for manual transformer action (dry-run)
+» fixed new implementation of device revocation
+» prevented saving uninitialized sessions to Redis (clutter)
+» new user will have empty default transformers, because without device, those cannot be deleted
+» vulnerable dependency fixes
+» added missing user defaults
+» improved name parser for oauth logins
+» changes in default cookie expiration, removed rolling cookie to maintain custom expiration intervals for long-term logins
+» added registration response to serve approximate time instead of complex NNTP
+» fixed error/warning badge in transformers
+» fixed unintentional password leak
+» search different logfiles in case nothing is found (should be done much better, for /var/log/, better path without `..` etc.
+» reordered audit test to create a record first
+» other minor bugfixes
+
+## 35th week (Pre-XMAS)
+
+18/12/2018: 0.9.3010: deployed different LoraWAN Server (by gotthardp) using Docker; updating THiNXLib for MQTT integrations
+
+## 34th week
+
+16/12/2017: 0.9.29xx: storing MQTT traffic to redis, providing on API request (so far)
+15/12/2017: 0.9.2971: stable release, all tests pass
+14/12/2017: 0.9.2943: improving test coverage (5 failures resolved, 7 remaining)
+13/12/2017: 0.9.2943: improving test coverage (3 failures resolved, 12 remaining)
+
+## 33th week
+
+06/12/2017: 0.9.2902: improved CouchDB security; testing restore from backup
+
+## 32th week
+
+28/11/2017: 0.9.2890: updating Arduino Docker builder with ESP32 support; logging support fixes
+
+## 31th week
+
+27/11/2017: Web UI updates, ESP32httpUpdate ported, initial release of THiNX32Lib for Arduino ESP32
+
+26/11/2017: 0.9.2882: version bump: zipped artifacts, UI changes, MQTT ACL
 
 23/11/2017: Rollbar and issues are automatically managed in JIRA as well, added JIRA/GitHub integration (10EUR/month)
 
