@@ -14,7 +14,7 @@ describe("Device", function() {
   // TODO: FIXME: owner is not being loaded from _envi.json in certain circumstances
 
   // This UDID is to be deleted at the end of test.
-  const JRS = {
+  var JRS = {
     mac: "11:11:11:11:11:11",
     firmware: "DeviceSpec.js",
     version: "1.0.0",
@@ -28,7 +28,7 @@ describe("Device", function() {
 
   // udid: "6ef6d300-8053-11e7-8d27-0fa2e6ecef21"
 
-  const JRS2 = {
+  var JRS2 = {
     mac: "N0:NM:OC:KE:D1:00",
     firmware: "DeviceSpec.js",
     version: "1.0.0",

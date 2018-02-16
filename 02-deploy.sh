@@ -59,6 +59,10 @@ else
 	ACCESS_TOKEN=6aa9f20bef804b75a50338e03830919d
 	ENVIRONMENT=development
 	LOCAL_USERNAME=$(whoami)
+	if [[ LOCAL_USERNAME == "root" ]]; then
+		ENVIRONMENT=production
+	fi
+	
 	REVISION=$(git log -n 1 --pretty=format:"%H")
 
 	curl https://api.rollbar.com/api/1/deploy/ \
