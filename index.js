@@ -531,7 +531,7 @@ var ThinxApp = function() {
   app.post("/api/transformer/run", function(req, res) {
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
-    var owner = req.session.owner;    
+    var owner = req.session.owner;
     if (typeof(owner) == "undefined" || owner == null) {
       respond(res, {
         success: false,
@@ -1171,7 +1171,10 @@ var ThinxApp = function() {
       var registration = req.body.registration;
       device.register(registration, req.headers.authentication, function(
         success, response) {
-        response.timestamp = Math.floor(new Date() / 1000);
+        // Append timestamp inside as library is not parsing HTTP response JSON properly
+        if (typeof(response.registration) !== "undefined") {
+          response.registration.timestamp = Math.floor(new Date() / 1000);
+        }
         respond(res, response);
       });
     }
