@@ -1,10 +1,10 @@
-var generated_key_hash = null;
-var APIKey = require('../../lib/thinx/apikey');
-
-var envi = require("./_envi.json");
-var owner = envi.oid;
-
 describe("API Key", function() {
+
+  var generated_key_hash = null;
+  var APIKey = require("../../lib/thinx/apikey");
+
+  var envi = require("./_envi.json");
+  var owner = envi.oid;
 
   describe("Generator", function() {
 

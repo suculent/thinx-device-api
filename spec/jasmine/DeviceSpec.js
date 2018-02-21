@@ -1,49 +1,49 @@
-var generated_key_hash = null;
-var device = require('../../lib/thinx/device');
-
-var envi = require("./_envi.json");
-var owner = envi.oid;
-var udid = envi.udid;
-var apikey = envi.ak;
-var ott = null;
-
-var APIKey = require('../../lib/thinx/apikey');
-
-// TODO: FIXME: owner is not being loaded from _envi.json in certain circumstances
-
-// This UDID is to be deleted at the end of test.
-var JRS = {
-  mac: "11:11:11:11:11:11",
-  firmware: "DeviceSpec.js",
-  version: "1.0.0",
-  checksum: "xevim",
-  push: "forget",
-  alias: "virtual-test-device-1-delete",
-  owner: owner,
-  platform: "arduino",
-  udid: "d6ff2bb0-df34-11e7-b351-eb37822aa172"
-};
-
-// udid: "6ef6d300-8053-11e7-8d27-0fa2e6ecef21"
-
-var JRS2 = {
-  mac: "N0:NM:OC:KE:D1:00",
-  firmware: "DeviceSpec.js",
-  version: "1.0.0",
-  checksum: "alevim",
-  push: "forget",
-  alias: "virtual-test-device-2-static",
-  owner: owner,
-  platform: "arduino",
-  udid: "d2d7b050-7c53-11e7-b94e-15f5f3a64973"
-};
-
-var body = JRS; // JSON.parse(RS);
-
-console.log("• DeviceSpec.js: Using test API_KEY: " + apikey);
-console.log("• DeviceSpec.js: Using request: " + JSON.stringify(JRS));
-
 describe("Device", function() {
+
+  var device = require("../../lib/thinx/device");
+  var APIKey = require("../../lib/thinx/apikey");
+  var envi = require("./_envi.json");
+
+  var owner = envi.oid;
+  var udid = envi.udid;
+  var apikey = envi.ak;
+  var ott = null;
+
+  var generated_key_hash = null;
+
+  // TODO: FIXME: owner is not being loaded from _envi.json in certain circumstances
+
+  // This UDID is to be deleted at the end of test.
+  var JRS = {
+    mac: "11:11:11:11:11:11",
+    firmware: "DeviceSpec.js",
+    version: "1.0.0",
+    checksum: "xevim",
+    push: "forget",
+    alias: "virtual-test-device-1-delete",
+    owner: owner,
+    platform: "arduino",
+    udid: "d6ff2bb0-df34-11e7-b351-eb37822aa172"
+  };
+
+  // udid: "6ef6d300-8053-11e7-8d27-0fa2e6ecef21"
+
+  var JRS2 = {
+    mac: "N0:NM:OC:KE:D1:00",
+    firmware: "DeviceSpec.js",
+    version: "1.0.0",
+    checksum: "alevim",
+    push: "forget",
+    alias: "virtual-test-device-2-static",
+    owner: owner,
+    platform: "arduino",
+    udid: "d2d7b050-7c53-11e7-b94e-15f5f3a64973"
+  };
+
+  var body = JRS; // JSON.parse(RS);
+
+  console.log("• DeviceSpec.js: Using test API_KEY: " + apikey);
+  console.log("• DeviceSpec.js: Using request: " + JSON.stringify(JRS));
 
   //create: function(owner, apikey_alias, callback)
   it("API keys are required to do this on new instance", function(done) {

@@ -1,7 +1,7 @@
 describe("Devices", function() {
 
   var generated_key_hash = null;
-  var devices = require('../../lib/thinx/devices');
+  var devices = require("../../lib/thinx/devices");
 
   var envi = require("./_envi.json");
   var owner = envi.oid;

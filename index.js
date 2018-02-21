@@ -1172,6 +1172,7 @@ var ThinxApp = function() {
       device.register(registration, req.headers.authentication, function(
         success, response) {
         // Append timestamp inside as library is not parsing HTTP response JSON properly
+        // when it ends with anything else than }} 
         if (typeof(response.registration) !== "undefined") {
           response.registration.timestamp = Math.floor(new Date() / 1000);
         }

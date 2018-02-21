@@ -38,3 +38,6 @@ statistics/**
 
 # Codacy
 .profile
+
+# Circle CI
+./package-lock.json
