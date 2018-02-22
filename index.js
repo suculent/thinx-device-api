@@ -1172,7 +1172,7 @@ var ThinxApp = function() {
       device.register(registration, req.headers.authentication, function(
         success, response) {
         // Append timestamp inside as library is not parsing HTTP response JSON properly
-        // when it ends with anything else than }} 
+        // when it ends with anything else than }}
         if (typeof(response.registration) !== "undefined") {
           response.registration.timestamp = Math.floor(new Date() / 1000);
         }
@@ -1252,7 +1252,8 @@ var ThinxApp = function() {
       return true;
     } else {
 
-      // TODO: FIXME: Replace client_user_agent string with array!
+      // TODO: FIXME: Replace client_user_agent string with array of options!
+      //
       if (ua.indexOf("SIGFOX") !== -1) {
         return true;
       }
@@ -2675,7 +2676,7 @@ var ThinxApp = function() {
 
             console.log("[oauth] searching for owner_id: " + owner_id);
 
-            // Check user and make note on user login
+            // Asynchronously check user and make note on user login
             userlib.get(owner_id, function(error, udoc) {
 
               if (error) {
@@ -2749,16 +2750,11 @@ var ThinxApp = function() {
               });
 
               alog.log(owner_id, " OAuth2 User logged in...");
-
               var token = sha256(res2.access_token);
-
               client.set(token, JSON.stringify(userWrapper));
               client.expire(token, 3600);
-
               ores.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
-
             });
-
           });
 
         }).on("error", (err) => {

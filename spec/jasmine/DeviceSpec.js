@@ -59,6 +59,8 @@ describe("Device", function() {
           console.log("Key ready: " + this.apikey);
         }
 
+        describe("Having existing API key ", function() {
+
         it("should be able to register itself.", function(done) {
 
           device.register(JRS2, this.apikey,
@@ -138,7 +140,7 @@ describe("Device", function() {
 
         }, 15000); // register
 
-
+        });
 
       });
 
