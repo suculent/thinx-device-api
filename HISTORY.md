@@ -2,6 +2,13 @@
 
 ## HISTORY
 
+05/03/2018 0.9.3058:
+
+» fixes to Status key storage reliability (Value Histories will move to InfluxDB soon but status histories will remain)
+» test fixes and testing with Redis 4 and CouchDB 2.1
+» timestamp support
+» full disaster recovery tests
+
 15/02/2018 0.9.3036:
 
 » added base implementation for manual transformer action (dry-run)
