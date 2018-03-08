@@ -2611,6 +2611,27 @@ var ThinxApp = function() {
     });
   });
 
+  app.post('/gdpr', function(req, res) {
+
+    //if (!validateSecurePOSTRequest(req)) return;
+    if (!validateSession(req, res)) return;
+
+    var owner = req.session.owner;
+    var gdpr_consent = req.body.gdpr_consent;
+
+    // Edit/save user
+    user.update(owner, req.body, function(success, status) {
+      console.log("Updating user profile...");
+      respond(res, {
+        success: success,
+        status: status
+      });
+    });
+
+    // Logout or redirect to dashboard...
+
+  };
+
   // Callback service parsing the authorization token and asking for the access token
   app.get('/oauth/cb', function(req, ores) {
 
@@ -2749,11 +2770,18 @@ var ThinxApp = function() {
                 }
               });
 
+              var gdpr = false;
+              if (typeof(udoc.info) !== "undefined") {
+                if (typeof(udoc.info.gdpr_consent) !== "undefined" && udoc.info.gdpr_consent == true) {
+                  gdpr = true;
+                }
+              }
+
               alog.log(owner_id, " OAuth2 User logged in...");
               var token = sha256(res2.access_token);
               client.set(token, JSON.stringify(userWrapper));
               client.expire(token, 3600);
-              ores.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
+              ores.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token + "/"+gdpr);
             });
           });
 
