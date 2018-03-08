@@ -2628,9 +2628,8 @@ var ThinxApp = function() {
       });
     });
 
-    // Logout or redirect to dashboard...
-
-  };
+    // Logout or redirect to dashboard...    
+  });
 
   // Callback service parsing the authorization token and asking for the access token
   app.get('/oauth/cb', function(req, ores) {
