@@ -8,7 +8,7 @@ machine:
 dependencies:
   pre:
     - git submodule update --init --recursive
-    - sudo apt-get install mosquitto sendmail
+    - sudo apt-get update && apt-get install -y --fix-missing mosquitto sendmail
     - npm install coveralls pm2 nyc eslint -g
     - npm install .
     - wget http://download.redis.io/releases/redis-4.0.8.tar.gz
