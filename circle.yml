@@ -6,9 +6,10 @@ machine:
     REDIS_URL: redis://localhost:6391
 
 dependencies:
-  pre:
+  pre:    
+    - sudo apt-get update
+    - sudo apt-get install -y --fix-missing mosquitto sendmail
     - git submodule update --init --recursive
-    - sudo apt-get update && apt-get install -y --fix-missing mosquitto sendmail
     - npm install coveralls pm2 nyc eslint -g
     - npm install .
     - wget http://download.redis.io/releases/redis-4.0.8.tar.gz
@@ -30,7 +31,7 @@ test:
   pre:
     - mkdir -p $CIRCLE_TEST_REPORTS/reports
     - eslint ./src/ --format junit --output-file $CIRCLE_TEST_REPORTS/reports/eslint.xml
-    - sudo service redis-server start
+    - service redis-server start
 #    - bash ./02-deploy.sh:
 #        background: true
   commands:
