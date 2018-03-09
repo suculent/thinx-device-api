@@ -2703,7 +2703,7 @@ var ThinxApp = function() {
           }
         });
 
-        userlib.destroy(user._id, user._rev, function(err)) {
+        userlib.destroy(user._id, user._rev, function(err) {
           if (err) {
             respond(res, {
               success: false,
@@ -2892,7 +2892,7 @@ var ThinxApp = function() {
    * therefore gateway must be authenticated as well by an api key!
    */
 
-  app.get('/lick', (req, res) => {
+  app.get('/lick', function(req, res) {
     var mac = req.query.mac;
     // return last device api key to verify this gateway is valid
     // search device by mac and return hash of its api key

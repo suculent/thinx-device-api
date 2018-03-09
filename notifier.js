@@ -274,7 +274,7 @@ devicelib.get(udid, function(err, doc) {
 
     buffer = new Buffer(envelopeString + "\n");
 
-    fs.ensureFile(envelopePath, err => {
+    fs.ensureFile(envelopePath, function(err) {
       if (err) {
         console.log(err);
       } else {
@@ -282,7 +282,7 @@ devicelib.get(udid, function(err, doc) {
       }
     });
 
-    fs.ensureFile(deployedEnvelopePath, err => {
+    fs.ensureFile(deployedEnvelopePath, function(err) {
       if (err) {
         console.log(err);
       } else {
