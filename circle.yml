@@ -8,8 +8,7 @@ machine:
 dependencies:
   pre:
     - git submodule update --init --recursive
-    - wget http://repo.mosquitto.org/debian/mosquitto-repo.gpg.key && sudo apt-key add mosquitto-repo.gpg.key && cd /etc/apt/sources.list.d/ && sudo wget http://repo.mosquitto.org/debian/mosquitto-wheezy.list && sudo apt-get update && sudo apt-get install mosquitto
-    - sudo apt-get install sendmail
+    - sudo apt-get install mosquitto sendmail
     - npm install coveralls pm2 nyc eslint -g
     - npm install .
     - wget http://download.redis.io/releases/redis-4.0.8.tar.gz
