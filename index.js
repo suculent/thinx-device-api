@@ -2611,6 +2611,7 @@ var ThinxApp = function() {
     });
   });
 
+  /* Use to issue/withdraw GDPR consent. */
   app.post('/gdpr', function(req, res) {
 
     //if (!validateSecurePOSTRequest(req)) return;
@@ -2628,7 +2629,95 @@ var ThinxApp = function() {
       });
     });
 
-    // Logout or redirect to dashboard...    
+    // Logout or redirect to dashboard...
+  });
+
+  /* Used to provide user data in compliance with GDPR. */
+  app.post('/gdpr/transfer', function(req, res) {
+
+    if (!validateSecurePOSTRequest(req)) return;
+    if (!validateSession(req, res)) return;
+
+    var owner_id = req.session.owner;
+    userlib.get(owner_id, function(error, user) {
+      if (error) {
+        respond(res, {
+          success: false,
+          status: error
+        });
+      } else {
+        devices.list(owner_id, function(dsuccess, devices) {
+          apienv.list(owner_id, function(esuccess, envs) {
+            respond(res, {
+              success: !error && dsuccess && esuccess,
+              user_data: user,
+              device_data: response,
+              environment: envs
+            });
+          });
+        });
+      }
+    });
+  });
+
+  /* Used to revoke user data in compliance with GDPR. */
+  app.post('/gdpr/revoke', function(req, res) {
+    if (!validateSecurePOSTRequest(req)) return;
+    if (!validateSession(req, res)) return;
+    var owner_id = req.session.owner;
+    if (req.body.owner !== owner_id) {
+      respond(res, {
+        success: false,
+        status: "deletion_not_confirmed"
+      });
+      return;
+    }
+
+    userlib.get(owner_id, function(error, user) {
+      if (error) {
+        respond(res, {
+          success: false,
+          status: error
+        });
+      } else {
+
+        console.log("Deleting owner " + owner_id);
+        devices.list(owner_id, function(dsuccess, devices) {
+          for (var index in devices) {
+            devices.revoke(owner, req.body, function(success, status) {
+              respond(res, {
+                success: success,
+                status: status
+              });
+            });
+          }
+        });
+
+        console.log("Deleting all API keys for this owner...");
+        client.expire("ak:" + owner_id, 1);
+
+        client.keys("/"+owner_id+"/*", function (err, obj_keys) {
+          console.dir("Deleting Redis cache for this owner: " + JSON.stringify(obj));
+          for (var key in obj_keys) {
+            client.expire(key, 1);
+          }
+        });
+
+        userlib.destroy(user._id, user._rev, function(err)) {
+          if (err) {
+            respond(res, {
+              success: false,
+              status: "Your data deletion failed. Personal data may NOT been deleted successfully. Please contact THiNX data processor in order to fix this GDPR issue for you.";
+            });
+          } else {
+            respond(res, {
+              success: true,
+              status: "Your personal data has been marked as deleted. It will be removed from the system completely on midnight.";
+            });
+          }
+        }
+      }
+    });
   });
 
   // Callback service parsing the authorization token and asking for the access token
