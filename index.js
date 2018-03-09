@@ -2674,11 +2674,14 @@ var ThinxApp = function() {
     }
 
     userlib.get(owner_id, function(error, user) {
+
       if (error) {
+
         respond(res, {
           success: false,
           status: error
         });
+
       } else {
 
         console.log("Deleting owner " + owner_id);
@@ -2712,11 +2715,13 @@ var ThinxApp = function() {
           } else {
             respond(res, {
               success: true,
-              status: "Your personal data has been marked as deleted. It will be removed from the system completely on midnight.";
+              status: "Your personal data has been marked as deleted. It will be removed from the system completely on midnight."
             });
           }
-        }
-      }
+        });
+
+      } // endif
+
     });
   });
 
