@@ -2707,7 +2707,7 @@ var ThinxApp = function() {
           if (err) {
             respond(res, {
               success: false,
-              status: "Your data deletion failed. Personal data may NOT been deleted successfully. Please contact THiNX data processor in order to fix this GDPR issue for you.";
+              status: "Your data deletion failed. Personal data may NOT been deleted successfully. Please contact THiNX data processor in order to fix this GDPR issue for you."
             });
           } else {
             respond(res, {
