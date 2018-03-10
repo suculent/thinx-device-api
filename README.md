@@ -11,6 +11,7 @@ IoT Device Management Server running on node.js.
 
 ## The Purpose
 
+
 > Update IoT device by pushing to a Git repository. Swap operating system for another over-the-air. Migrate multiple devices at once between WiFi networks.
 
 As a user I have already many IoT new and/or legacy devices at home and new platforms are coming every day.
@@ -59,11 +60,15 @@ Currently we're capable of building firmwares for PlatformIO, NodeMCU and Microp
 
 * Expected: Arduino with networking support
 
-THiNX Platform Library repository:
+Base THiNXLib Platform Library in C++:
 
-[thinx-lib-esp8266-arduinoc](https://github.com/suculent/thinx-lib-esp8266-arduinoc)
+[Source Repo for Arduino Library Manager](https://github.com/suculent/thinx-lib-esp8266-arduinoc)
 
-THiNX Platform Library Sample repositories:
+[THiNXLib for ESP8266](https://github.com/suculent/thinx-lib-esp8266)
+
+[THiNXLib for ESP32](https://github.com/suculent/thinx-lib-esp32)
+
+THiNX Platform Library repositories for various IDEs and firmwares:
 
 [Platform.io](https://github.com/suculent/thinx-firmware-esp8266-pio)
 
