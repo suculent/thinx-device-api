@@ -51,10 +51,13 @@ Currently we're capable of building firmwares for PlatformIO, NodeMCU and Microp
 ## Supported IoT Platforms
 
 * ESP8266 for PlatformIO and Arduino IDE
+* Micropython
+* Lua
+* MongooseOS
 
 * Tested on Wemos D1 Mini, Wemos D1 Mini Pro, RobotDyn D1, RobotDyn D1 Mini, RobotDyn MEGA WiFi and various NodeMCU (Lolin, AI-THINKER) boards with Arduino, Lua and Micropython-based core firmwares...
 
-* Expected: Arduino with networking support, MongooseOS-based devices...
+* Expected: Arduino with networking support
 
 THiNX Platform Library repository:
 
