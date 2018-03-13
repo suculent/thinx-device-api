@@ -15,6 +15,9 @@ dependencies:
     - wget http://download.redis.io/releases/redis-4.0.8.tar.gz
     - tar xzf redis-4.0.8.tar.gz
     - cd redis-4.0.8 && make
+    - make install
+    - mkdir /etc/redis
+    - cp /tmp/redis-stable/redis.conf /etc/redis    
     - mkdir statistics
     - touch ~/thinx-device-api/mqtt_passwords
     - pwd; ls
@@ -31,7 +34,8 @@ test:
   pre:
     - mkdir -p $CIRCLE_TEST_REPORTS/reports
     - eslint ./src/ --format junit --output-file $CIRCLE_TEST_REPORTS/reports/eslint.xml
-    - service redis-server start
+#    - service redis-server start
+    - /usr/local/bin/redis-server /etc/redis/redis.conf &
 #    - bash ./02-deploy.sh:
 #        background: true
   commands:

@@ -2447,6 +2447,7 @@ var ThinxApp = function() {
 
             if (typeof(email) === "undefined" || email === null) {
               console.log("Error: no email in response.");
+              console.log("ERROR! This redirect won't work as headers are already set.");
               global_response.redirect(
                 'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
                 "No e-mail in response."
@@ -2459,6 +2460,7 @@ var ThinxApp = function() {
               owner_id = sha256(email);
             } catch (e) {
               console.log("error parsing e-mail: " + e + " email: " + email);
+              console.log("ERROR! This redirect won't work as headers are already set.");
               global_response.redirect(
                 'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
                 'Missing e-mail.'
