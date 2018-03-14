@@ -2527,8 +2527,10 @@ var ThinxApp = function() {
                     client.set(token, JSON.stringify(userWrapper));
                     client.expire(token, 30);
                     global_token = token;
-                    global_response.redirect(
-                      "https://rtm.thinx.cloud/app/#/oauth/" + token);
+
+                    const ourl = "https://rtm.thinx.cloud/app/#/oauth/" + token + "/true"; // require GDPR consent
+                    console.log(ourl);
+                    global_response.redirect(ourl);
 
                     console.log("Redirecting to login (2)");
 
@@ -2560,8 +2562,16 @@ var ThinxApp = function() {
 
               console.log("Redirecting to login (1)");
 
-              global_response.redirect("https://rtm.thinx.cloud/app/#/oauth/" +
-                token);
+              var gdpr = false;
+              if (typeof(udoc.info) !== "undefined") {
+                if (typeof(udoc.info.gdpr_consent) !== "undefined" && udoc.info.gdpr_consent == true) {
+                  gdpr = true;
+                }
+              }
+
+              const ourl = "https://rtm.thinx.cloud/app/#/oauth/" + token + "/" + gdpr; // require GDPR consent
+              console.log(ourl);
+              global_response.redirect(ourl);
 
             }); // userlib.get
 
