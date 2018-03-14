@@ -2790,15 +2790,20 @@ var ThinxApp = function() {
               username: owner_id
             };
 
-            console.log("[oauth] searching for owner_id: " + owner_id);
+            console.log("[oauth][google] searching for owner_id: " + owner_id);
 
             // Asynchronously check user and make note on user login
             userlib.get(owner_id, function(error, udoc) {
 
               if (error) {
 
+                  console.log("User does not exist...");
+
+                // User does not exist
+
                 if (error.toString().indexOf("Error: deleted") !== -1) {
-                  // TODO: Redirect to error page with reason
+
+                  // Redirect to error page with reason for deleted documents
                   console.log("[oauth] user document deleted");
                   ores.redirect(
                     'https://rtm.thinx.cloud/error.html?success=failed&title=OAuth-Error&reason=' +
@@ -2807,6 +2812,8 @@ var ThinxApp = function() {
 
                 } else {
 
+                  // Otherwise crate new one
+                  /*
                   if (typeof(udoc) === "undefined") {
                     console.log("Not found user for owner_id: " + owner_id +
                       " with email: " + email);
@@ -2815,8 +2822,8 @@ var ThinxApp = function() {
                       'user_not_found');
                     return;
                   }
-
-                  console.log("Userlib get error: " + error.toString());
+                  */
+                  console.log("Userlib get OTHER error: " + error.toString());
 
                   if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
                     true) {
@@ -2828,6 +2835,8 @@ var ThinxApp = function() {
                       'account_deleted');
                     return;
                   }
+
+                  console.log("Creating new user...");
 
                   // No such owner, create...
                   user.create(userWrapper, false, function(success, status) {
@@ -2844,11 +2853,14 @@ var ThinxApp = function() {
                     client.set(token, JSON.stringify(userWrapper));
                     client.expire(token, 30);
 
-                    // Do not return here... continue with created user...
-
+                    alog.log(owner_id, " OAuth2 User logged in...");
+                    var token = sha256(res2.access_token);
+                    client.set(token, JSON.stringify(userWrapper));
+                    client.expire(token, 3600);
+                    ores.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token + "/true"); // require GDPR consent
                   });
-
                 }
+                return;
               }
 
               console.log(JSON.stringify(udoc));
@@ -2878,6 +2890,7 @@ var ThinxApp = function() {
               client.expire(token, 3600);
               ores.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token + "/"+gdpr);
             });
+
           });
 
         }).on("error", (err) => {
