@@ -2799,6 +2799,9 @@ var ThinxApp = function() {
             // Asynchronously check user and make note on user login
             userlib.get(owner_id, function(error, udoc) {
 
+              console.log("userlib.get error:" + error);
+              console.log("userlib.get udoc:" + udoc);
+
               if (error) {
 
                   console.log("User does not exist...");
@@ -2918,6 +2921,7 @@ var ThinxApp = function() {
   /*
    * thinx-connect gateway validation (device calls /lick with its mac and must receive its api key)
    * therefore gateway must be authenticated as well by an api key!
+   * UNUSED, INCOMPLETE. DRAFT.
    */
 
   app.get('/lick', function(req, res) {
@@ -3078,13 +3082,27 @@ var ThinxApp = function() {
       var cookies = req.headers.cookie;
 
       if (typeof(req.headers.cookie) !== "undefined") {
+
         if (cookies.indexOf("thx-") === -1) {
           //console.log("» WSS cookies: " + cookies);
-          console.log("» WARNING! No thinx-cookie found in: " + JSON.stringify(req.headers
+          console.log("» WARNING! No thx-cookie found in: " + JSON.stringify(req.headers
             .cookie));
           // wss.close();
           // return;
+        } else {
+          console.log("» INFO: thx-cookie found.");
         }
+
+        if (cookies.indexOf("thinx-") === -1) {
+          //console.log("» WSS cookies: " + cookies);
+          console.log("» WARNING! No thx-cookie found in: " + JSON.stringify(req.headers
+            .cookie));
+          // wss.close();
+          // return;
+        } else {
+          console.log("» INFO: thinx-cookie found.");
+        }
+
         if (typeof(req.session) !== "undefined") {
           console.log("Session: " + JSON.stringify(req.session));
         }
