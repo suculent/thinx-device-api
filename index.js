@@ -2825,15 +2825,17 @@ var ThinxApp = function() {
                   */
                   console.log("Userlib get OTHER error: " + error.toString());
 
-                  if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
-                    true) {
-                    // TODO: Redirect to error page with reason
-                    console.log(
-                      "[oauth] user account marked as deleted");
-                    ores.redirect(
-                      'https://rtm.thinx.cloud/error.html?success=failed&title=OAuth-Error&reason=' +
-                      'account_deleted');
-                    return;
+                  if (typeof(udoc) !== "undefined") {
+                    if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
+                      true) {
+                      // TODO: Redirect to error page with reason
+                      console.log(
+                        "[oauth] user account marked as deleted");
+                      ores.redirect(
+                        'https://rtm.thinx.cloud/error.html?success=failed&title=OAuth-Error&reason=' +
+                        'account_deleted');
+                      return;
+                    }
                   }
 
                   console.log("Creating new user...");
