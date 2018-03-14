@@ -1756,6 +1756,8 @@ var ThinxApp = function() {
   // Front-end authentication, returns session on valid authentication
   app.post("/api/login", function(req, res) {
 
+    console.log(JSON.stringify(req.body));
+
     var updateLastSeen = function(doc) {
       userlib.atomic("users", "checkin", doc._id, {
         last_seen: new Date()
@@ -2738,10 +2740,12 @@ var ThinxApp = function() {
       redirect_uri: google_ocfg.web.redirect_uris[0]
     };
 
+    console.log("TODO: Validate code "+code);
+
     var t = oauth2.authorizationCode.getToken(options, (error, result) => {
       if (error) {
         console.error('[oauth] Access Token Error', error.message);
-        return res.json('Authentication failed');
+        return ores.json('Authentication failed');
       }
 
       // console.log('[oauth] The resulting token: ', result);
@@ -2859,6 +2863,7 @@ var ThinxApp = function() {
                     var token = sha256(res2.access_token);
                     client.set(token, JSON.stringify(userWrapper));
                     client.expire(token, 3600);
+                    //ores.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
                     ores.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token + "/true"); // require GDPR consent
                   });
                 }
@@ -2890,6 +2895,7 @@ var ThinxApp = function() {
               var token = sha256(res2.access_token);
               client.set(token, JSON.stringify(userWrapper));
               client.expire(token, 3600);
+              //ores.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
               ores.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token + "/"+gdpr);
             });
 
@@ -2903,7 +2909,7 @@ var ThinxApp = function() {
       });
     }).catch(err => {
       console.log("Oauth error: " + err);
-      res.redirect(
+      ores.redirect(
         'https://rtm.thinx.cloud/error.html?success=failed&title=OAuth-Error&reason=' +
         err.message);
     });
