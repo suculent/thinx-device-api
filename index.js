@@ -2901,7 +2901,7 @@ var ThinxApp = function() {
               client.set(token, JSON.stringify(userWrapper));
               client.expire(token, 3600);
               //ores.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
-              const ourl = "https://rtm.thinx.cloud/app/#/oauth/" + token + "/" + gdpr); // require GDPR consent
+              const ourl = "https://rtm.thinx.cloud/app/#/oauth/" + token + "/" + gdpr; // require GDPR consent
               console.log(ourl);
               ores.redirect(ourl);
             });
