@@ -2867,7 +2867,9 @@ var ThinxApp = function() {
                     client.set(token, JSON.stringify(userWrapper));
                     client.expire(token, 3600);
                     //ores.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
-                    ores.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token + "/true"); // require GDPR consent
+                    const ourl = "https://rtm.thinx.cloud/app/#/oauth/" + token + "/true"; // require GDPR consent
+                    console.log(ourl);
+                    ores.redirect(ourl);
                   });
                 }
                 return;
@@ -2899,7 +2901,9 @@ var ThinxApp = function() {
               client.set(token, JSON.stringify(userWrapper));
               client.expire(token, 3600);
               //ores.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token);
-              ores.redirect("https://rtm.thinx.cloud/app/#/oauth/" + token + "/"+gdpr);
+              const ourl = "https://rtm.thinx.cloud/app/#/oauth/" + token + "/" + gdpr); // require GDPR consent
+              console.log(ourl);
+              ores.redirect(ourl);
             });
 
           });
@@ -3095,7 +3099,7 @@ var ThinxApp = function() {
 
         if (cookies.indexOf("thinx-") === -1) {
           //console.log("» WSS cookies: " + cookies);
-          console.log("» WARNING! No thx-cookie found in: " + JSON.stringify(req.headers
+          console.log("» WARNING! No thinx-cookie found in: " + JSON.stringify(req.headers
             .cookie));
           // wss.close();
           // return;
