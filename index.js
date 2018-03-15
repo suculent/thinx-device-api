@@ -1814,7 +1814,8 @@ var ThinxApp = function() {
               "undefined")) {
             owner_id = wrapper.owner_id;
           }
-          console.log("[login] fetching owner: " + owner_id);
+          console.log("[login][oauth] fetching owner: " + owner_id);
+
           userlib.get(owner_id, function(err, doc) {
 
             if (err) {
@@ -1851,10 +1852,11 @@ var ThinxApp = function() {
 
             } else {
 
+              req.session.owner = doc.owner;
+
               console.log("[OID:" + req.session.owner +
                 "] [NEW_SESSION] [oauth]");
 
-              req.session.owner = doc.owner;
               req.session.cookie.maxAge = new Date(Date.now() + hour);
               req.session.cookie.secure = true;
               req.session.cookie.httpOnly = true;
@@ -1894,19 +1896,6 @@ var ThinxApp = function() {
       return;
     }
 
-    if (typeof(username) == "undefined" || typeof(password) ==
-      "undefined" && typeof(oauth) == "undefined") {
-      req.session.destroy(function(err) {
-        if (err) {
-          console.log(err);
-        } else {
-          failureResponse(res, 403, "unauthorized");
-          console.log("User unknown.");
-          return;
-        }
-      });
-    }
-
     //
     // Search the user in DB
     //
@@ -1914,12 +1903,17 @@ var ThinxApp = function() {
     var username = req.body.username;
     var password = sha256(req.body.password);
 
-    if (typeof(username) === "undefined") {
-      if (typeof(callback) === "undefined") {
-        return;
-      } else {
-        callback(false, "login_failed");
-      }
+    if (typeof(username) === "undefined" || typeof(password) ===
+      "undefined" && typeof(oauth) === "undefined") {
+      req.session.destroy(function(err) {
+        if (err) {
+          console.log(err);
+        } else {
+          failureResponse(res, 403, "unauthorized");
+          console.log("User unknown.");
+        }
+      });
+      return;
     }
 
     userlib.view("users", "owners_by_username", {
