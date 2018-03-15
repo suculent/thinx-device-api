@@ -1798,6 +1798,7 @@ var ThinxApp = function() {
     //
 
     var oauth = req.body.token;
+    var owner_id = null;
 
     if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
       console.log("[login] with token: " + oauth);
@@ -1810,9 +1811,9 @@ var ThinxApp = function() {
           var wrapper = JSON.parse(userWrapper);
           console.log("[login] wrapper: " + userWrapper);
           // Support older wrappers
-          if ((typeof(wrapper) !== "undefined") && (typeof(wrapper.owner_id) !==
+          if ((typeof(wrapper) !== "undefined") && (typeof(wrapper.owner) !==
               "undefined")) {
-            owner_id = wrapper.owner_id;
+            owner_id = wrapper.owner;
           }
           console.log("[login][oauth] fetching owner: " + owner_id);
 
@@ -1827,7 +1828,7 @@ var ThinxApp = function() {
                 console.log("Result creating OAuth user:");
                 console.log(success, status);
 
-                req.session.owner = wrapper.owner_id;
+                req.session.owner = wrapper.owner;
                 console.log("[OID:" + req.session.owner +
                   "] [NEW_SESSION] [oauth]");
 
@@ -1923,11 +1924,11 @@ var ThinxApp = function() {
 
       if (err) {
         console.log("Userlib view Error: " + err.toString());
+        failureResponse(res, 403, "unauthorized");
         req.session.destroy(function(err) {
           if (err) {
             console.log(err);
           } else {
-            failureResponse(res, 403, "unauthorized");
             console.log("Owner not found: " + username);
           }
         });
@@ -2020,7 +2021,7 @@ var ThinxApp = function() {
           */
 
           // Make note on user login
-          userlib.get(user_data.owner, function(error, udoc) {
+          userlib.get(user_data.owner_id, function(error, udoc) {
 
             if (error) {
               console.log("owner get error: " + error);
@@ -2033,11 +2034,10 @@ var ThinxApp = function() {
                   console.log("Last-seen update failed: " +
                     err);
                 } else {
-                  alog.log(user_data.owner,
+                  alog.log(udoc.owner,
                     "Last seen updated.");
                 }
               });
-
             }
           });
 
@@ -2066,7 +2066,7 @@ var ThinxApp = function() {
       // Login successful, redirect to app authentication route with some token...
       //
 
-      var ourl = "https://rtm.thinx.cloud/app/#/dashboard.html"; // legacy fallback only, deprecated.
+      var ourl = null; // outgoing URL
 
       var gdpr = false; // by default we must require GDPR consent
       if (typeof(user_data.gdpr) === "undefined" || user_data.gdpr === true) {
@@ -2473,7 +2473,7 @@ var ThinxApp = function() {
               first_name: given_name,
               last_name: family_name,
               email: email,
-              owner_id: owner_id,
+              owner: owner_id,
               username: owner_id
             };
 
@@ -2861,7 +2861,7 @@ var ThinxApp = function() {
                   // No such owner, create...
                   user.create(userWrapper, false, function(success, status) {
 
-                    req.session.owner = userWrapper.owner_id;
+                    req.session.owner = userWrapper.owner;
                     console.log("[OID:" + req.session.owner +
                       "] [NEW_SESSION] [oauth]");
                     alog.log(req.session.owner,
