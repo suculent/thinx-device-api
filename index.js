@@ -47,6 +47,10 @@ var ThinxApp = function() {
   console.log(" ");
   console.log("--- " + new Date() + " ---");
 
+  //
+  // Environment-dependent configurations
+  //
+
   var google_ocfg;
   var github_ocfg;
 
@@ -2658,10 +2662,10 @@ var ThinxApp = function() {
 
             var changes = {
               gdpr_consent: req.body.gdpr_consent
-            }
+            };
 
             // Edit and save user's GDPR consent
-            user.update(owner, changes, function(success, status) {
+            user.update(owner_id, changes, function(success, status) {
               console.log("Updating user profile...");
               respond(res, {
                 success: success,
@@ -2719,14 +2723,11 @@ var ThinxApp = function() {
     }
 
     userlib.get(owner_id, function(error, user) {
-
       if (error) {
-
         respond(res, {
           success: false,
           status: error
         });
-
       } else {
 
         console.log("Deleting owner " + owner_id);
@@ -2860,17 +2861,6 @@ var ThinxApp = function() {
 
                 } else {
 
-                  // Otherwise crate new one
-                  /*
-                  if (typeof(udoc) === "undefined") {
-                    console.log("Not found user for owner_id: " + owner_id +
-                      " with email: " + email);
-                    ores.redirect(
-                      'https://rtm.thinx.cloud/error.html?success=failed&title=OAuth-Error&reason=' +
-                      'user_not_found');
-                    return;
-                  }
-                  */
                   console.log("Userlib get OTHER error: " + error.toString());
 
                   if (typeof(udoc) !== "undefined") {
