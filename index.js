@@ -1768,7 +1768,7 @@ var ThinxApp = function() {
   // Front-end authentication, returns session on valid authentication
   app.post("/api/login", function(req, res) {
 
-    //console.log(JSON.stringify(req.body));
+    console.log(JSON.stringify(req.body));
 
     // Request must be post
     if (req.method != "POST") {
@@ -1851,9 +1851,6 @@ var ThinxApp = function() {
 
             } else {
 
-              // what if there's no session?
-              //if (typeof(req.session) === "undefined") {
-
               console.log("[OID:" + req.session.owner +
                 "] [NEW_SESSION] [oauth]");
 
@@ -1876,9 +1873,7 @@ var ThinxApp = function() {
               respond(res, {
                 "redirectURL": "/app"
               });
-
             }
-
           });
         }
         return;
@@ -2006,7 +2001,7 @@ var ThinxApp = function() {
 
           req.session.cookie.secure = true;
 
-          alog.log(req.session.owner, "User logged in: " +
+          alog.log(user_data.owner, "User logged in: " +
             username);
         }
 
@@ -2027,7 +2022,7 @@ var ThinxApp = function() {
           });
 
           // Make note on user login
-          userlib.get(req.session.owner, function(error, udoc) {
+          userlib.get(user_data.owner, function(error, udoc) {
 
             if (error) {
               console.log("owner get error: " + error);
@@ -2040,7 +2035,7 @@ var ThinxApp = function() {
                   console.log("Last-seen update failed: " +
                     err);
                 } else {
-                  alog.log(req.session.owner,
+                  alog.log(user_data.owner,
                     "Last seen updated.");
                 }
               });
