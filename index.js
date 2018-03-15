@@ -2011,11 +2011,13 @@ var ThinxApp = function() {
 
         } else if (client_type == "webapp") {
 
-          console.log("Suspicious codepath: redirectong to /app in username/password login.");
+          /*
+          console.log("Suspicious codepath: redirecting to /app in username/password login.");
 
           respond(res, {
             "redirectURL": "/app"
           });
+          */
 
           // Make note on user login
           userlib.get(user_data.owner, function(error, udoc) {
@@ -2039,16 +2041,15 @@ var ThinxApp = function() {
             }
           });
 
-          return;
+          // return; continue...
 
         } else { // other client whan webapp or device
           respond(res, {
             status: "OK",
             success: true
           });
+          return;
         }
-
-        return;
 
       } else { // password invalid
         console.log("[LOGIN_INVALID] for " + username);
@@ -2082,7 +2083,7 @@ var ThinxApp = function() {
 
       if (typeof(req.session.owner) !== "undefined") {
 
-        // Device or WebApp?
+        // Device or WebApp... requires  valid session
         if (client_type == "device") {
           return;
         } else if (client_type == "webapp") {
@@ -2091,6 +2092,8 @@ var ThinxApp = function() {
         }
 
       } else {
+
+        // Invalid session causes flush and logout
         console.log("login: Flushing session: " + JSON.stringify(req.session));
         failureResponse(res, 403, "unauthorized");
         req.session.destroy(function(err) {
