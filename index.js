@@ -1809,11 +1809,13 @@ var ThinxApp = function() {
           return;
         } else {
           var wrapper = JSON.parse(userWrapper);
-          console.log("[login] wrapper: " + userWrapper);
+
           // Support older wrappers
           if ((typeof(wrapper) !== "undefined") && (typeof(wrapper.owner) !==
               "undefined")) {
             owner_id = wrapper.owner;
+          } else {
+            console.log("[login] wrapper: " + userWrapper);
           }
           console.log("[login][oauth] fetching owner: " + owner_id);
 
@@ -2630,21 +2632,49 @@ var ThinxApp = function() {
   app.post('/gdpr', function(req, res) {
 
     //if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    //if (!validateSession(req, res)) return;
 
-    var owner = req.session.owner;
+    // var owner = req.session.owner;
     var gdpr_consent = req.body.gdpr_consent;
+    var token = req.body.token;
 
-    // Edit/save user
-    user.update(owner, req.body, function(success, status) {
-      console.log("Updating user profile...");
-      respond(res, {
-        success: success,
-        status: status
-      });
+    client.get(token, function(err, userWrapper) {
+
+      if (err) {
+        console.log("[oauth][gdpr] takeover failed");
+        failureResponse(res, 403, "unauthorized");
+        return;
+      } else {
+        var wrapper = JSON.parse(userWrapper);
+        const owner_id = wrapper.owner;
+        console.log("[login][oauth] fetching owner: " + owner_id);
+        userlib.get(owner_id, function(err, doc) {
+          if (err) {
+            respond(res, {
+              success: false,
+              status: "gdpr_consent_failed"
+            });
+          } else {
+
+            var changes = {
+              gdpr_consent: req.body.gdpr_consent
+            }
+
+            // Edit and save user's GDPR consent
+            user.update(owner, changes, function(success, status) {
+              console.log("Updating user profile...");
+              respond(res, {
+                success: success,
+                status: status
+              });
+            });
+          }
+        });
+      }
     });
 
     // Logout or redirect to dashboard...
+
   });
 
   /* Used to provide user data in compliance with GDPR. */
