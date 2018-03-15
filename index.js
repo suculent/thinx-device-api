@@ -1879,6 +1879,8 @@ var ThinxApp = function() {
         return;
       });
       return;
+    } else {
+
     }
 
     //
@@ -1893,7 +1895,7 @@ var ThinxApp = function() {
     }
 
     if (typeof(username) == "undefined" || typeof(password) ==
-      "undefined" && typeof(oauth) !== "undefined") {
+      "undefined" && typeof(oauth) == "undefined") {
       req.session.destroy(function(err) {
         if (err) {
           console.log(err);
