@@ -2,6 +2,12 @@
 
 ## HISTORY
 
+15/03/2018 0.9.3088:
+
+» Implementing GDPR consent request, refactoring authentication procedure
+» Google/GitHub OAuth login fixes and improvements
+» Updated git-hooks, preparing dockerized staging installer
+
 05/03/2018 0.9.3058:
 
 » fixes to Status key storage reliability (Value Histories will move to InfluxDB soon but status histories will remain)
