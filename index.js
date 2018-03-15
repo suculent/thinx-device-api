@@ -1800,31 +1800,21 @@ var ThinxApp = function() {
     var oauth = req.body.token;
 
     if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
-
       console.log("[login] with token: " + oauth);
-
       client.get(oauth, function(err, userWrapper) {
-
         if (err) {
-
           console.log("[oauth] takeover failed");
           failureResponse(res, 403, "unauthorized");
           return;
-
         } else {
-
           var wrapper = JSON.parse(userWrapper);
-
           console.log("[login] wrapper: " + userWrapper);
-
           // Support older wrappers
           if ((typeof(wrapper) !== "undefined") && (typeof(wrapper.owner_id) !==
               "undefined")) {
             owner_id = wrapper.owner_id;
           }
-
           console.log("[login] fetching owner: " + owner_id);
-
           userlib.get(owner_id, function(err, doc) {
 
             if (err) {
@@ -1908,7 +1898,7 @@ var ThinxApp = function() {
     }
 
     if (typeof(username) == "undefined" || typeof(password) ==
-      "undefined") {
+      "undefined" && typeof(oauth) !== "undefined") {
       req.session.destroy(function(err) {
         if (err) {
           console.log(err);
@@ -2099,7 +2089,7 @@ var ThinxApp = function() {
         ourl = "https://rtm.thinx.cloud/app/#/auth/" + token + "/" + gdpr; // require GDPR consent
       }
 
-      if (typeof(req.session.owner) == "undefined") {
+      if (typeof(req.session.owner) !== "undefined") {
 
         // Device or WebApp?
         if (client_type == "device") {
