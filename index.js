@@ -2832,7 +2832,7 @@ var ThinxApp = function() {
               first_name: given_name,
               last_name: family_name,
               email: email,
-              owner_id: owner_id,
+              owner: owner_id,
               username: owner_id
             };
 
