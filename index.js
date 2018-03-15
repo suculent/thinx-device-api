@@ -115,7 +115,7 @@ var ThinxApp = function() {
       scope: 'user'
     });
   } catch (e) {
-    console.log("GitHub OAUTH Initialization error: " + e);
+    console.log("github-oauth github_ocfg init error: " + e);
   }
 
   //
@@ -1753,31 +1753,22 @@ var ThinxApp = function() {
    * Authentication
    */
 
+   var updateLastSeen = function(doc) {
+     userlib.atomic("users", "checkin", doc._id, {
+       last_seen: new Date()
+     }, function(error, response) {
+       if (error) {
+         console.log("Last-seen update failed: " + error);
+       } else {
+         alog.log(doc._id, "Last seen updated.");
+       }
+     });
+   };
+
   // Front-end authentication, returns session on valid authentication
   app.post("/api/login", function(req, res) {
 
-    console.log(JSON.stringify(req.body));
-
-    var updateLastSeen = function(doc) {
-      userlib.atomic("users", "checkin", doc._id, {
-        last_seen: new Date()
-      }, function(error, response) {
-        if (error) {
-          console.log("Last-seen update failed: " + error);
-        } else {
-          alog.log(doc._id, "Last seen updated.");
-        }
-      });
-    };
-
-    var client_type = "webapp";
-    var ua = req.headers["user-agent"];
-    var validity = ua.indexOf(client_user_agent);
-
-    if (validity === 0) {
-      console.log(ua);
-      client_type = "device";
-    }
+    //console.log(JSON.stringify(req.body));
 
     // Request must be post
     if (req.method != "POST") {
@@ -1792,7 +1783,19 @@ var ThinxApp = function() {
       });
     }
 
-    // OAuth takeover
+    var client_type = "webapp";
+    var ua = req.headers["user-agent"];
+    var validity = ua.indexOf(client_user_agent);
+
+    if (validity === 0) {
+      console.log(ua);
+      client_type = "device";
+    }
+
+
+    //
+    // OAuth login Variant (with external token)
+    //
 
     var oauth = req.body.token;
 
@@ -1886,14 +1889,16 @@ var ThinxApp = function() {
       return;
     }
 
-    // Username/password authentication
+    //
+    // Username/password login Variant (with local token)
+    //
+
+    /* Input validation */
 
     if (typeof(req.body.password) === "undefined") {
-      return; // no error, just exit on oauth
+      callback(false, "login_failed");
+      return;
     }
-
-    var username = req.body.username;
-    var password = sha256(req.body.password);
 
     if (typeof(username) == "undefined" || typeof(password) ==
       "undefined") {
@@ -1908,13 +1913,19 @@ var ThinxApp = function() {
       });
     }
 
-
     if (typeof(req.body.remember === "undefined") || (req.body.remember ===
         0)) {
       req.session.cookie.maxAge = 24 * hour;
     } else {
       req.session.cookie.maxAge = fortnight;
     }
+
+    //
+    // Search the user in DB
+    //
+
+    var username = req.body.username;
+    var password = sha256(req.body.password);
 
     if (typeof(username) === "undefined") {
       if (typeof(callback) === "undefined") {
@@ -1924,7 +1935,6 @@ var ThinxApp = function() {
       }
     }
 
-
     userlib.view("users", "owners_by_username", {
       "key": username,
       "include_docs": true // might be useless
@@ -1932,14 +1942,12 @@ var ThinxApp = function() {
 
       if (err) {
         console.log("Userlib view Error: " + err.toString());
-
         req.session.destroy(function(err) {
           if (err) {
             console.log(err);
           } else {
             failureResponse(res, 403, "unauthorized");
             console.log("Owner not found: " + username);
-            return;
           }
         });
         return;
@@ -2023,9 +2031,7 @@ var ThinxApp = function() {
 
         } else if (client_type == "webapp") {
 
-          //console.log("Allow-Origin REQH: " + JSON.stringify(req.headers));
-          //console.log("Allow-Origin REQS: " + JSON.stringify(req.session)); // should have owner.
-          //console.log("Allow-Origin REQUEST host: " + req.headers.host);
+          console.log("Suspicious codepath: redirectong to /app in username/password login.");
 
           respond(res, {
             "redirectURL": "/app"
@@ -2075,33 +2081,43 @@ var ThinxApp = function() {
         return;
       }
 
-      if (typeof(req.session.owner) == "undefined") {
+      //
+      // Login successful, redirect to app authentication route with some token...
+      //
+
+      var ourl = "https://rtm.thinx.cloud/app/#/dashboard.html"; // legacy fallback only, deprecated.
+
+      var gdpr = false; // by default we must require GDPR consent
+      if (typeof(user_data.gdpr) === "undefined" || user_data.gdpr === true) {
+        gdpr = true;
+      }
+
+      if (typeof(oauth) === "undefined") {
+        const token = sha256(user_data.email + ":" + user_data.activation_date);
+        client.set(token, JSON.stringify(user_data));
+        client.expire(token, 30);
+        global_token = token;
+        ourl = "https://rtm.thinx.cloud/app/#/oauth/" + token + "/" + gdpr; // require GDPR consent
+      }
+
+      if (typeof(req.session.owner) !== "undefined") {
+
+        // Device or WebApp?
         if (client_type == "device") {
           return;
         } else if (client_type == "webapp") {
-          // res.redirect("http://rtm.thinx.cloud:80/"); // redirects browser, not in XHR?
-          respond(res, {
-            "redirectURL": "http://rtm.thinx.cloud/app/#/dashboard.html" // should be without /#/dashboard.html
-          });
+          respond(res, { "redirectURL": ourl });
           return;
         }
 
-        console.log("login: Flushing session: " + JSON.stringify(
-          req.session));
+      } else {
+        console.log("login: Flushing session: " + JSON.stringify(req.session));
+        failureResponse(res, 403, "unauthorized");
         req.session.destroy(function(err) {
           if (err) {
             console.log("Session destroy error: " + err);
-          } else {
-            respond(res, {
-              success: false,
-              status: "no session (owner)"
-            });
-            console.log("Not a post request.");
-            return;
           }
         });
-      } else {
-        failureResponse(res, 403, "unauthorized");
       }
     });
   });
@@ -2618,6 +2634,8 @@ var ThinxApp = function() {
         console.log("Should login with token now...");
         if (global_token !== null) {
           res.redirect("https://rtm.thinx.cloud/app/#/oauth/" + global_token);
+
+
         }
       } else {
         console.log(err.message);
