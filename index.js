@@ -1870,7 +1870,14 @@ var ThinxApp = function() {
               req.session.owner = doc.owner;
               req.session.cookie.maxAge = new Date(Date.now() + hour);
               req.session.cookie.secure = true;
-              //req.session.cookie.httpOnly = true;
+              req.session.cookie.httpOnly = true;
+
+              if (typeof(req.body.remember === "undefined") || (req.body.remember ===
+                  0)) {
+                req.session.cookie.maxAge = 24 * hour;
+              } else {
+                req.session.cookie.maxAge = fortnight;
+              }
 
               alog.log(req.session.owner, "OAuth User logged in: " +
                 doc.username);
@@ -1911,13 +1918,6 @@ var ThinxApp = function() {
           return;
         }
       });
-    }
-
-    if (typeof(req.body.remember === "undefined") || (req.body.remember ===
-        0)) {
-      req.session.cookie.maxAge = 24 * hour;
-    } else {
-      req.session.cookie.maxAge = fortnight;
     }
 
     //
@@ -1998,7 +1998,6 @@ var ThinxApp = function() {
             "] [NEW_SESSION]");
 
           var minute = 60 * 1000;
-          //req.session.cookie.httpOnly = true;
 
           if (typeof(req.body.remember === "undefined") || (req.body.remember ===
               0)) {
@@ -2100,7 +2099,7 @@ var ThinxApp = function() {
         ourl = "https://rtm.thinx.cloud/app/#/auth/" + token + "/" + gdpr; // require GDPR consent
       }
 
-      if (typeof(req.session.owner) !== "undefined") {
+      if (typeof(req.session.owner) == "undefined") {
 
         // Device or WebApp?
         if (client_type == "device") {
