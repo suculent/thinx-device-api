@@ -2084,7 +2084,7 @@ var ThinxApp = function() {
         client.set(token, JSON.stringify(user_data));
         client.expire(token, 30);
         global_token = token;
-        ourl = "https://rtm.thinx.cloud/app/#/auth/" + token + "/" + gdpr; // require GDPR consent
+        ourl = "https://rtm.thinx.cloud/auth.html?t=" + token + "&g=" + gdpr; // require GDPR consent
       }
 
       if (typeof(req.session.owner) !== "undefined") {
@@ -2533,7 +2533,7 @@ var ThinxApp = function() {
                     client.expire(token, 30);
                     global_token = token;
 
-                    const ourl = "https://rtm.thinx.cloud/app/#/auth/" + token + "/true"; // require GDPR consent
+                    const ourl = "https://rtm.thinx.cloud/auth.html&t=" + token + "&g=true"; // require GDPR consent
                     console.log(ourl);
                     global_response.redirect(ourl);
 
@@ -2574,7 +2574,7 @@ var ThinxApp = function() {
                 }
               }
 
-              const ourl = "https://rtm.thinx.cloud/app/#/auth/" + token + "/" + gdpr; // require GDPR consent
+              const ourl = "https://rtm.thinx.cloud/auth.html?t=" + token + "&g=" + gdpr; // require GDPR consent
               console.log(ourl);
               global_response.redirect(ourl);
 
@@ -2622,8 +2622,9 @@ var ThinxApp = function() {
       if (!err) {
         console.log("Should login with token now...");
         if (global_token !== null) {
-          res.redirect("https://rtm.thinx.cloud/app/#/auth/" + global_token);
-
+          const rurl = "https://rtm.thinx.cloud/auth.html?t=" + global_token + "&g=" + false; // require GDPR consent
+          res.redirect(rurl);
+          global_token = null; // reset token for next login attempt
 
         }
       } else {
@@ -2897,8 +2898,7 @@ var ThinxApp = function() {
                     var token = sha256(res2.access_token);
                     client.set(token, JSON.stringify(userWrapper));
                     client.expire(token, 3600);
-                    //ores.redirect("https://rtm.thinx.cloud/app/#/auth/" + token);
-                    const ourl = "https://rtm.thinx.cloud/app/#/auth/" + token + "/true"; // require GDPR consent
+                    const ourl = "https://rtm.thinx.cloud/auth.html?t=" + token + "&g=true"; // require GDPR consent
                     console.log(ourl);
                     ores.redirect(ourl);
                   });
@@ -2931,8 +2931,7 @@ var ThinxApp = function() {
               var token = sha256(res2.access_token);
               client.set(token, JSON.stringify(userWrapper));
               client.expire(token, 3600);
-              //ores.redirect("https://rtm.thinx.cloud/app/#/auth/" + token);
-              const ourl = "https://rtm.thinx.cloud/app/#/auth/" + token + "/" + gdpr; // require GDPR consent
+              const ourl = "https://rtm.thinx.cloud/auth.html?t=" + token + "&g=" + gdpr; // require GDPR consent
               console.log(ourl);
               ores.redirect(ourl);
             });
