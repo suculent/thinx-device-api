@@ -2075,8 +2075,10 @@ var ThinxApp = function() {
       var ourl = null; // outgoing URL
 
       var require_gdpr_consent = false;
-      if (typeof(user_data.gdpr_consent) === "undefined" || user_data.gdpr_consent === false) {
+      if (typeof(user_data.gdpr_consent) === "undefined") {
         require_gdpr_consent = true;
+      } else {
+        require_gdpr_consent = user_data.gdpr_consent;
       }
 
       if (typeof(oauth) === "undefined") {
