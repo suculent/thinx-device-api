@@ -2074,9 +2074,9 @@ var ThinxApp = function() {
 
       var ourl = null; // outgoing URL
 
-      var gdpr = false; // by default we must require GDPR consent
-      if (typeof(user_data.gdpr) === "undefined" || user_data.gdpr === true) {
-        gdpr = true;
+      var require_gdpr_consent = false;
+      if (typeof(user_data.gdpr) === "undefined" || user_data.gdpr === false) {
+        require_gdpr_consent = true;
       }
 
       if (typeof(oauth) === "undefined") {
@@ -2084,7 +2084,7 @@ var ThinxApp = function() {
         client.set(token, JSON.stringify(user_data));
         client.expire(token, 30);
         global_token = token;
-        ourl = "https://rtm.thinx.cloud/auth.html?t=" + token + "&g=" + gdpr; // require GDPR consent
+        ourl = "https://rtm.thinx.cloud/auth.html?t=" + token + "&g=" + require_gdpr_consent; // require GDPR consent
       }
 
       if (typeof(req.session.owner) !== "undefined") {
@@ -2666,7 +2666,7 @@ var ThinxApp = function() {
             };
 
             // Edit and save user's GDPR consent
-            user.update(owner_id, changes, function(success, status) {
+            user.update(owner_id, req.body, function(success, status) {
               console.log("Updating user profile...");
               respond(res, {
                 success: success,
