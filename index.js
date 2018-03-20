@@ -2075,7 +2075,7 @@ var ThinxApp = function() {
       var ourl = null; // outgoing URL
 
       var require_gdpr_consent = false;
-      if (typeof(user_data.gdpr) === "undefined" || user_data.gdpr === false) {
+      if (typeof(user_data.gdpr_consent) === "undefined" || user_data.gdpr_consent === false) {
         require_gdpr_consent = true;
       }
 
@@ -2569,7 +2569,7 @@ var ThinxApp = function() {
 
               var gdpr = false;
               if (typeof(udoc.info) !== "undefined") {
-                if (typeof(udoc.info.gdpr_consent) !== "undefined" && udoc.info.gdpr_consent == true) {
+                if (typeof(udoc.gdpr_consent) !== "undefined" && udoc.gdpr_consent == true) {
                   gdpr = true;
                 }
               }
@@ -2922,7 +2922,7 @@ var ThinxApp = function() {
 
               var gdpr = false;
               if (typeof(udoc.info) !== "undefined") {
-                if (typeof(udoc.info.gdpr_consent) !== "undefined" && udoc.info.gdpr_consent == true) {
+                if (typeof(udoc.gdpr_consent) !== "undefined" && udoc.gdpr_consent == true) {
                   gdpr = true;
                 }
               }
