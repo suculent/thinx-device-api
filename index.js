@@ -2074,11 +2074,11 @@ var ThinxApp = function() {
 
       var ourl = null; // outgoing URL
 
-      var require_gdpr_consent = false;
+      var skip_gdpr_page = false;
       if (typeof(user_data.gdpr_consent) === "undefined") {
-        require_gdpr_consent = true;
+        skip_gdpr_page = true;
       } else {
-        require_gdpr_consent = user_data.gdpr_consent;
+        skip_gdpr_page = user_data.gdpr_consent;
       }
 
       if (typeof(oauth) === "undefined") {
@@ -2086,7 +2086,7 @@ var ThinxApp = function() {
         client.set(token, JSON.stringify(user_data));
         client.expire(token, 30);
         global_token = token;
-        ourl = "https://rtm.thinx.cloud/auth.html?t=" + token + "&g=" + require_gdpr_consent; // require GDPR consent
+        ourl = "https://rtm.thinx.cloud/auth.html?t=" + token + "&g=" + skip_gdpr_page;
       }
 
       if (typeof(req.session.owner) !== "undefined") {
@@ -2843,9 +2843,6 @@ var ThinxApp = function() {
 
             // Asynchronously check user and make note on user login
             userlib.get(owner_id, function(error, udoc) {
-
-              console.log("userlib.get error:" + error);
-              console.log("userlib.get udoc:" + udoc);
 
               if (error) {
 
