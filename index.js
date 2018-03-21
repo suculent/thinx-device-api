@@ -1815,8 +1815,7 @@ var ThinxApp = function() {
           var wrapper = JSON.parse(userWrapper);
 
           // Support older wrappers
-          if ((typeof(wrapper) !== "undefined") && (typeof(wrapper.owner) !==
-              "undefined")) {
+          if ((typeof(wrapper) !== "undefined") && wrapper !== null) {
             owner_id = wrapper.owner;
           } else {
             console.log("[login] wrapper: " + userWrapper);
