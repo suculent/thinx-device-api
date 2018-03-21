@@ -2667,6 +2667,11 @@ var ThinxApp = function() {
               gdpr_consent: req.body.gdpr_consent
             };
 
+            // Mark user document as deleted with this change in case of no consent
+            if (gdpr_consent == false) {
+              changes['delete'] = true;
+            }
+
             // Edit and save user's GDPR consent
             user.update(owner_id, req.body, function(success, status) {
               console.log("Updating user profile...");
