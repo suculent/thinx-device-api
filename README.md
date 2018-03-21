@@ -80,6 +80,8 @@ THiNX Platform Library repositories for various IDEs and firmwares:
 
 [MongooseOS](https://github.com/suculent/thinx-firmware-esp8266-mos)
 
+[NodeJS](https://github.com/suculent/thinx-firmware-js)
+
 
 ## Custom Firmwares
 
