@@ -2714,7 +2714,7 @@ var ThinxApp = function() {
             respond(res, {
               success: !error && dsuccess && esuccess,
               user_data: user,
-              device_data: response,
+              device_data: devices,
               environment: envs
             });
           });
