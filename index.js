@@ -2652,6 +2652,13 @@ var ThinxApp = function() {
         return;
       } else {
         var wrapper = JSON.parse(userWrapper);
+        if (typeof(wrapper) === "undefined" || wrapper === null) {
+          respond(res, {
+            success: false,
+            status: "handover_failed"
+          });
+          return;
+        }
         const owner_id = wrapper.owner;
         console.log("[login][oauth] fetching owner: " + owner_id);
         userlib.get(owner_id, function(err, doc) {
