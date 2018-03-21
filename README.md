@@ -56,6 +56,8 @@ Currently we're capable of building firmwares for PlatformIO, NodeMCU and Microp
 * Lua
 * MongooseOS
 
+* NodeJS (Mac/Linux/Windows) - any device capable of running node.js can use JavaScript port of THiNXLib
+
 * Tested on Wemos D1 Mini, Wemos D1 Mini Pro, RobotDyn D1, RobotDyn D1 Mini, RobotDyn MEGA WiFi and various NodeMCU (Lolin, AI-THINKER) boards with Arduino, Lua and Micropython-based core firmwares...
 
 * Expected: Arduino with networking support
@@ -107,7 +109,7 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 [Micropython](https://github.com/suculent/micropython-docker-build/)
 
 
-## Prerequisites
+## Prerequisites for running own THiNX Server
 
 * Linux Server (min. 2 GB RAM, 32GB SSD)
 * Docker
