@@ -1604,10 +1604,10 @@ var ThinxApp = function() {
       if (success === false) {
         console.log(response);
         res.redirect(
-          "https://rtm.thinx.cloud/transfer_result.html?success=failed&reason=" +
+          "https://rtm.thinx.cloud/error.html?success=failed&reason=" +
           reponse);
       } else {
-        res.redirect("https://rtm.thinx.cloud/transfer_result.html?success=true");
+        res.redirect("https://rtm.thinx.cloud/error.html?success=true");
       }
     });
   });
@@ -1634,10 +1634,10 @@ var ThinxApp = function() {
       if (success === false) {
         console.log(response);
         res.redirect(
-          "https://rtm.thinx.cloud/transfer_result.html?success=failed&reason=" +
+          "https://rtm.thinx.cloud/error.html?success=failed&reason=" +
           reponse);
       } else {
-        res.redirect("https://rtm.thinx.cloud/transfer_result.html?success=true");
+        res.redirect("https://rtm.thinx.cloud/error.html?success=true");
       }
     });
   });
@@ -1675,10 +1675,10 @@ var ThinxApp = function() {
     transfer.decline(body, function(success, response) {
       if (success === false) {
         res.redirect(
-          "https://rtm.thinx.cloud/transfer_result.html?success=failed&reason=selective_decline_failed"
+          "https://rtm.thinx.cloud/error.html?success=failed&reason=selective_decline_failed"
         );
       } else {
-        res.redirect("https://rtm.thinx.cloud/transfer_result.html?success=true");
+        res.redirect("https://rtm.thinx.cloud/error.html?success=true");
       }
     });
   });
@@ -1705,10 +1705,10 @@ var ThinxApp = function() {
       if (success === false) {
         console.log(response);
         res.redirect(
-          "https://rtm.thinx.cloud/transfer_result.html?success=failed&reason=" +
+          "https://rtm.thinx.cloud/error.html?success=failed&reason=" +
           reponse);
       } else {
-        res.redirect("https://rtm.thinx.cloud/transfer_result.html?success=true");
+        res.redirect("https://rtm.thinx.cloud/error.html?success=true");
       }
     });
   });
@@ -1746,9 +1746,9 @@ var ThinxApp = function() {
     transfer.accept(req.body, function(success, response) {
       if (success === false) {
         console.log(response);
-        res.redirect("https://rtm.thinx.cloud/transfer_result.html?success=failed");
+        res.redirect("https://rtm.thinx.cloud/error.html?success=failed");
       } else {
-        res.redirect("https://rtm.thinx.cloud/transfer_result.html?success=true");
+        res.redirect("https://rtm.thinx.cloud/error.html?success=true");
       }
     });
   });
