@@ -302,9 +302,9 @@ var ThinxApp = function() {
   console.log("» Starting Redis client...");
   var redisStore = require("connect-redis")(session);
 
-  app.set("trust proxy", 1);  
+  app.set("trust proxy", 1);
 
-  app.use(express.static('static'));
+  app.use('/static', express.static(path.join(__dirname, 'static')));
 
   app.use(session({
     secret: session_config.secret,
