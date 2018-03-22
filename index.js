@@ -304,6 +304,8 @@ var ThinxApp = function() {
 
   app.set("trust proxy", 1);
 
+  app.use("/static", express.static("static"));
+
   app.use(session({
     secret: session_config.secret,
     "cookie": {
@@ -1167,6 +1169,7 @@ var ThinxApp = function() {
         status: "no_body"
       });
     } else if (typeof(req.body.registration) === "undefined") {
+      console.log("Incoming request has no `registration` in body.");
       respond(res, {
         success: false,
         status: "no_registration"
