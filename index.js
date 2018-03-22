@@ -304,6 +304,8 @@ var ThinxApp = function() {
 
   app.set("trust proxy", 1);
 
+  require('path');
+
   app.use('/static', express.static(path.join(__dirname, 'static')));
 
   app.use(session({
