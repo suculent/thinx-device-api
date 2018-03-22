@@ -19,8 +19,9 @@ var ThinxApp = function() {
   require("ssl-root-cas").inject();
 
   var http = require('http');
-  var redis = require("redis");
+  var redis = require('redis');
   var client = redis.createClient();
+  var path = require('path');
 
   //
   // Shared Configuration
@@ -305,8 +306,6 @@ var ThinxApp = function() {
   app.set("trust proxy", 1);
 
   require('path');
-
-  //app.use('/static', express.static(path.join(__dirname, 'static')));
 
   app.use(session({
     secret: session_config.secret,
@@ -3071,6 +3070,8 @@ var ThinxApp = function() {
         "Skipping HTTPS server, SSL key or certificate not found.");
     }
   }
+
+  app.use('/static', express.static(path.join(__dirname, 'static')));
 
   // Legacy HTTP support for old devices without HTTPS proxy
   http.createServer(app).listen(serverPort);
