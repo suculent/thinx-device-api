@@ -3,6 +3,9 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/9a7d084ad97e430ba12333f384b44255)](https://www.codacy.com/app/suculent/thinx-device-api?utm_source=github.com&utm_medium=referral&utm_content=suculent/thinx-device-api&utm_campaign=badger)
 [![Twitter: @thinxcloud](https://img.shields.io/badge/contact-%40thinxcloud-green.svg?style=flat)](https://twitter.com/thinxcloud)
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://github.com/suculent/fastlane-plugin-apprepo/blob/master/LICENSE)
+
+The CircleCI build is limited and therefore returns mostly bad results. Closer look may show better numbers:
+
 [![Build Status](https://img.shields.io/circleci/project/github/suculent/thinx-device-api/master.svg)](https://circleci.com/gh/suculent/thinx-device-api)
 [![Coverage Status](https://coveralls.io/repos/github/suculent/thinx-device-api/badge.svg?branch=master)](https://coveralls.io/github/suculent/thinx-device-api?branch=master)
 
@@ -56,6 +59,8 @@ Currently we're capable of building firmwares for PlatformIO, NodeMCU and Microp
 * Lua
 * MongooseOS
 
+* NodeJS (Mac/Linux/Windows) - any device capable of running node.js can use JavaScript port of THiNXLib
+
 * Tested on Wemos D1 Mini, Wemos D1 Mini Pro, RobotDyn D1, RobotDyn D1 Mini, RobotDyn MEGA WiFi and various NodeMCU (Lolin, AI-THINKER) boards with Arduino, Lua and Micropython-based core firmwares...
 
 * Expected: Arduino with networking support
@@ -79,6 +84,8 @@ THiNX Platform Library repositories for various IDEs and firmwares:
 [Micropython](https://github.com/suculent/thinx-firmware-esp8266-upy)
 
 [MongooseOS](https://github.com/suculent/thinx-firmware-esp8266-mos)
+
+[NodeJS](https://github.com/suculent/thinx-firmware-js)
 
 
 ## Custom Firmwares
@@ -105,7 +112,7 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 [Micropython](https://github.com/suculent/micropython-docker-build/)
 
 
-## Prerequisites
+## Prerequisites for running own THiNX Server
 
 * Linux Server (min. 2 GB RAM, 32GB SSD)
 * Docker
