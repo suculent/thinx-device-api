@@ -2,6 +2,13 @@
 
 ## HISTORY
 
+23/03/2018 0.9.3238:
+
+» Static file provider
+» Status Transformer integration with Slack and Grafana
+» GDPR, content download provider
+» NodeJS client library
+
 15/03/2018 0.9.3088:
 
 » Implementing GDPR consent request, refactoring authentication procedure
