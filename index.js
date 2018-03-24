@@ -3320,7 +3320,8 @@ var ThinxApp = function() {
 
   // run detached container on port 7474 waiting...
   console.log("Starting status transformer sandbox...");
-  const st_command = "docker run -d suculent/thinx-node-transformer";
+  const img = "suculent/thinx-node-transformer";
+  const st_command = "docker pull " + img + "; docker run -d " + img;
   try {
     console.log(exec.execSync(st_command).toString());
   } catch(e) {
