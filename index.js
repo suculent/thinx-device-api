@@ -3315,6 +3315,19 @@ var ThinxApp = function() {
   messenger.init();
 
   //
+  // Status Transformer Server
+  //
+
+  // run detached container on port 7474 waiting...
+  console.log("Starting status transformer sandbox...");
+  const st_command = "docker run -d suculent/thinx-node-transformer";
+  try {
+    console.log(exec.execSync(st_command).toString());
+  } catch(e) {
+    console.log("ST DOCKER may throw when already running: " + e);
+  }
+
+  //
   // HTTP/S Request Tools
   //
 
