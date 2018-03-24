@@ -2,7 +2,12 @@
 
 ## HISTORY
 
-23/03/2018 0.9.3238:
+25/03/2018 0.9.3138:
+
+» Status Transformer Sandbox Execution Environment
+» GDPR and Revocation improvements
+
+23/03/2018 0.9.3128:
 
 » Static file provider
 » Status Transformer integration with Slack and Grafana
