@@ -2,10 +2,12 @@
 
 ## HISTORY
 
-25/03/2018 0.9.3138:
+25/03/2018 0.9.3144:
 
 » Status Transformer Sandbox Execution Environment
 » GDPR and Revocation improvements
+» Fixed device revocation
+» NodeJS Client Docker `suculent/thinx-node-docker`
 
 23/03/2018 0.9.3128:
 
