@@ -97,7 +97,7 @@ describe("Device", function() {
                         response));
                     expect(success).toBe(false);
                     expect(response).toBe("UPDATE_NOT_FOUND");
-                    console.log("firmware reponse: " + JSON.stringify(
+                    console.log("firmware response: " + JSON.stringify(
                       response));
                     firmware_done();
                   });

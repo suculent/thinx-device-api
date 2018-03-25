@@ -1609,7 +1609,7 @@ var ThinxApp = function() {
         console.log(response);
         res.redirect(
           "https://rtm.thinx.cloud/error.html?success=failed&reason=" +
-          reponse);
+          response);
       } else {
         res.redirect("https://rtm.thinx.cloud/error.html?success=true");
       }
@@ -1639,7 +1639,7 @@ var ThinxApp = function() {
         console.log(response);
         res.redirect(
           "https://rtm.thinx.cloud/error.html?success=failed&reason=" +
-          reponse);
+          response);
       } else {
         res.redirect("https://rtm.thinx.cloud/error.html?success=true");
       }
@@ -1710,7 +1710,7 @@ var ThinxApp = function() {
         console.log(response);
         res.redirect(
           "https://rtm.thinx.cloud/error.html?success=failed&reason=" +
-          reponse);
+          response);
       } else {
         res.redirect("https://rtm.thinx.cloud/error.html?success=true");
       }
