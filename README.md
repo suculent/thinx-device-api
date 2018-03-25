@@ -154,6 +154,28 @@ Fetch required builder images from Docker Hub:
 bash ./install-builders.sh
 ```
 
+### Run after boot
+
+We're currently using /etc/rc.local to kick thinx up after a failure:
+
+```
+
+# MQTT service
+mosquitto > /root/thinx-device-api/mosquitto.log &
+
+# Redis service
+redis-server > /root/thinx-device-api/redis.log &
+
+# CouchDB service
+/etc/init.d/couchdb start
+
+# NodeJS Sandbox
+docker run -d suculent/thinx-node-tranformer
+
+# THiNX itself
+cd /root/thinx-device-api/ && pm2 start index
+
+```
 
 ## GitHub Webhook support
 
