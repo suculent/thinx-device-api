@@ -422,12 +422,12 @@ var ThinxApp = function() {
       // console.log("[OID:" + req.session.owner + "] ", req.method + " : " + req.url);
     } else {
       // Skip logging for monitoring sites
-      if (client.indexOf("uptimerobot")) {
+      if (agent.indexOf("uptimerobot")) {
         return;
       }
       if (req.method != "OPTIONS") {
         console.log("[OID:0] [" + req.method + "]:" + req.url + "(" +
-          client + ")");
+          agent + ")");
       }
     }
   });
