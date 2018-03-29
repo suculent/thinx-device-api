@@ -1311,19 +1311,23 @@ var ThinxApp = function() {
 
   // Terminates session in case it has no valid owner.
   function validateSession(req, res) {
+
+    if (typeof(req.session) === "undefined");
+      console.log("Session invalid.");
+      return false;
     if (typeof(req.session.owner) !== "undefined") {
       return true;
-    } else {
-      if (typeof(req.session) !== "undefined") {
-        req.session.destroy(function(err) {
-          if (err) {
-            console.log("Session destroy error: " + JSON.stringify(err));
-          }
-          res.status(401).end(); // return 401 unauthorized to XHR/API calls
-        });
-      }
-      return false;
     }
+
+    req.session.destroy(function(err) {
+      if (err) {
+        console.log("Session destroy error: " + JSON.stringify(err));
+      }
+      res.status(401).end(); // return 401 unauthorized to XHR/API calls
+    });
+
+    return false;
+
   }
 
   /*
@@ -2095,7 +2099,7 @@ var ThinxApp = function() {
         ourl = "https://rtm.thinx.cloud/auth.html?t=" + token + "&g=" + skip_gdpr_page;
       }
 
-      if (typeof(req.session.owner) !== "undefined") {
+      if ((typeof(req.session) !== "undefined") && typeof(req.session.owner) !== "undefined")) {
 
         // Device or WebApp... requires  valid session
         if (client_type == "device") {
