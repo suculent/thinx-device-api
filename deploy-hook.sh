@@ -4,4 +4,4 @@
 
 # npm install removed as it takes too long...
 
-nohup githooked -p 9000 bash 'cd /var/www/rtm/www; git pull origin master; cd /root/thinx-device-api; git pull origin master --recurse-submodules; bash ./tools/install-builders.sh; snyk protect; curl https://api.rollbar.com/api/1/deploy/ -F access_token=6aa9f20bef804b75a50338e03830919d -F environment=production -F revision=$(git log -n 1 --pretty=format:"%H") -F local_username=root; pm2 restart thinx' &
+nohup githooked -p 9000 bash 'cd /var/www/rtm/www; git pull origin current; cd /root/thinx-device-api; git pull origin master --recurse-submodules; bash ./tools/install-builders.sh; snyk protect; curl https://api.rollbar.com/api/1/deploy/ -F access_token=6aa9f20bef804b75a50338e03830919d -F environment=production -F revision=$(git log -n 1 --pretty=format:"%H") -F local_username=root; pm2 restart index' &
