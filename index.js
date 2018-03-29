@@ -21,9 +21,6 @@ var ThinxApp = function() {
   var http = require('http');
   var redis = require('redis');
   var client = redis.createClient();
-
-  client.set("BGSAVE");
-
   var path = require('path');
 
   //
@@ -359,9 +356,9 @@ var ThinxApp = function() {
       allowedOrigin = req.headers.origin;
     }
 
-    var agent = req.get("User-Agent");
+    var client = req.get("User-Agent");
 
-    if (agent.indexOf("Jorgee") !== -1) {
+    if (client.indexOf("Jorgee") !== -1) {
       BLACKLIST.push(getClientIp(req));
       res.status(418).end();
       console.log("Jorgee is blacklisted.");
@@ -407,7 +404,7 @@ var ThinxApp = function() {
       next();
     }
 
-    if (agent == client_user_agent) {
+    if (client == client_user_agent) {
       if (typeof(req.headers.origin) !== "undefined") {
         if (req.headers.origin == "device") {
           next();
@@ -422,12 +419,12 @@ var ThinxApp = function() {
       // console.log("[OID:" + req.session.owner + "] ", req.method + " : " + req.url);
     } else {
       // Skip logging for monitoring sites
-      if (agent.indexOf("uptimerobot")) {
+      if (client.indexOf("uptimerobot")) {
         return;
       }
       if (req.method != "OPTIONS") {
         console.log("[OID:0] [" + req.method + "]:" + req.url + "(" +
-          agent + ")");
+          client + ")");
       }
     }
   });
