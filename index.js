@@ -2099,7 +2099,7 @@ var ThinxApp = function() {
         ourl = "https://rtm.thinx.cloud/auth.html?t=" + token + "&g=" + skip_gdpr_page;
       }
 
-      if ((typeof(req.session) !== "undefined") && typeof(req.session.owner) !== "undefined")) {
+      if ( (typeof(req.session) !== "undefined") && (typeof(req.session.owner) !== "undefined") ) {
 
         // Device or WebApp... requires  valid session
         if (client_type == "device") {
