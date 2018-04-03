@@ -6,7 +6,7 @@ var ThinxApp = function() {
 
   var global_token = null;
   var global_response = null;
-
+  var exec = require("child_process");
   var typeOf = require("typeof");
   var Rollbar = require("rollbar");
 
@@ -3319,13 +3319,13 @@ var ThinxApp = function() {
   //
 
   // run detached container on port 7474 waiting...
-  console.log("Starting status transformer sandbox...");
+  console.log("Starting NodeJS Docker sandbox...");
   const img = "suculent/thinx-node-transformer";
   const st_command = "docker pull " + img + "; docker run -d " + img;
   try {
     console.log(exec.execSync(st_command).toString());
   } catch(e) {
-    console.log("ST DOCKER may throw when already running: " + e);
+    console.log("Status Transformer Docker exec error: " + e);
   }
 
   //
