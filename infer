@@ -167,7 +167,7 @@ function thinx_file_from_json
 					done
 				fi
 		done
-		echo $OUTFILE
+		echo "Exporting Infer output to : $OUTFILE"
 
 		KEYS=$(echo $BUILDFILE | jq keys)
 		VARS=$(echo $BUILDFILE | jq .[])
