@@ -856,18 +856,11 @@ var ThinxApp = function() {
      var owner = req.session.owner;
 
      rsakey.create(owner, function(success,
-       response) {
-       if (success === true) {
+       response) {       
          respond(res, {
            success: success,
            status: response
          });
-       } else {
-         respond(res, {
-           success: false,
-           error: response
-         });
-       }
      });
    });
 
