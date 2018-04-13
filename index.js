@@ -856,7 +856,7 @@ var ThinxApp = function() {
      var owner = req.session.owner;
 
      rsakey.create(owner, function(success,
-       response) {       
+       response) {
          respond(res, {
            success: success,
            status: response
@@ -907,26 +907,14 @@ var ThinxApp = function() {
     }
 
     // Support bulk updates
-    if (typeof(req.body.fingerprints) !== "undefined") {
-      var fingerprints = req.body.fingerprints;
-      console.log("Fingerprints: " + JSON.stringify(fingerprints));
-      rsakey.revoke(owner, fingerprints,
+    if (typeof(req.body.filenames) !== "undefined") {
+      var filenames = req.body.filenames;
+      console.log("Fingerprints: " + JSON.stringify(filenames));
+      rsakey.revoke(owner, filenames,
         function(success, response) {
           respond(res, {
             success: success,
             status: response
-          });
-        });
-      return;
-    }
-
-    // Will deprecate
-    if (typeof(req.body.fingerprint) !== "undefined") {
-      rsakey.revoke(owner, [fingerprint],
-        function(success, message) {
-          respond(res, {
-            success: success,
-            status: message
           });
         });
       return;
