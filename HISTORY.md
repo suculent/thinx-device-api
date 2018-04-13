@@ -2,7 +2,7 @@
 
 ## HISTORY
 
-13/04/2018 0.9.3195:
+13/04/2018 0.9.3230:
 
 » Library fixes for Arduino, ESP8266/ESP32 and test/specs
 » Upgraded and fixedimplementation to @slack/client 4.0
