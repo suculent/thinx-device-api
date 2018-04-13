@@ -21,9 +21,6 @@ var ThinxApp = function() {
   var http = require('http');
   var redis = require('redis');
   var client = redis.createClient();
-
-  client.set("BGSAVE");
-
   var path = require('path');
 
   //
@@ -359,9 +356,9 @@ var ThinxApp = function() {
       allowedOrigin = req.headers.origin;
     }
 
-    var agent = req.get("User-Agent");
+    var client = req.get("User-Agent");
 
-    if (agent.indexOf("Jorgee") !== -1) {
+    if (client.indexOf("Jorgee") !== -1) {
       BLACKLIST.push(getClientIp(req));
       res.status(418).end();
       console.log("Jorgee is blacklisted.");
@@ -407,7 +404,7 @@ var ThinxApp = function() {
       next();
     }
 
-    if (agent == client_user_agent) {
+    if (client == client_user_agent) {
       if (typeof(req.headers.origin) !== "undefined") {
         if (req.headers.origin == "device") {
           next();
@@ -422,12 +419,12 @@ var ThinxApp = function() {
       // console.log("[OID:" + req.session.owner + "] ", req.method + " : " + req.url);
     } else {
       // Skip logging for monitoring sites
-      if (agent.indexOf("uptimerobot")) {
+      if (client.indexOf("uptimerobot")) {
         return;
       }
       if (req.method != "OPTIONS") {
         console.log("[OID:0] [" + req.method + "]:" + req.url + "(" +
-          agent + ")");
+          client + ")");
       }
     }
   });
@@ -1314,23 +1311,19 @@ var ThinxApp = function() {
 
   // Terminates session in case it has no valid owner.
   function validateSession(req, res) {
-
-    if (typeof(req.session) === "undefined");
-      console.log("Session invalid.");
-      return false;
     if (typeof(req.session.owner) !== "undefined") {
       return true;
-    }
-
-    req.session.destroy(function(err) {
-      if (err) {
-        console.log("Session destroy error: " + JSON.stringify(err));
+    } else {
+      if (typeof(req.session) !== "undefined") {
+        req.session.destroy(function(err) {
+          if (err) {
+            console.log("Session destroy error: " + JSON.stringify(err));
+          }
+          res.status(401).end(); // return 401 unauthorized to XHR/API calls
+        });
       }
-      res.status(401).end(); // return 401 unauthorized to XHR/API calls
-    });
-
-    return false;
-
+      return false;
+    }
   }
 
   /*
@@ -2102,7 +2095,7 @@ var ThinxApp = function() {
         ourl = "https://rtm.thinx.cloud/auth.html?t=" + token + "&g=" + skip_gdpr_page;
       }
 
-      if ( (typeof(req.session) !== "undefined") && (typeof(req.session.owner) !== "undefined") ) {
+      if (typeof(req.session.owner) !== "undefined") {
 
         // Device or WebApp... requires  valid session
         if (client_type == "device") {
