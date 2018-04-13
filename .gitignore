@@ -1,3 +1,8 @@
+deploy-hook.log
+mosquitto.lo*
+mqtt_passwords 
+redis.log
+
 # System files
 .DS_Store
 node_modules/
