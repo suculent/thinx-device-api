@@ -1181,8 +1181,11 @@ var ThinxApp = function() {
         success, response) {
         // Append timestamp inside as library is not parsing HTTP response JSON properly
         // when it ends with anything else than }}
+
         if ( success & typeof(response.registration) !== "undefined") {
           response.registration.timestamp = Math.floor(new Date() / 1000);
+        } else {
+          console.log("device registration failed with response: "+JSON.stringify(response));
         }
         respond(res, response);
       });
@@ -3318,10 +3321,32 @@ var ThinxApp = function() {
   // Status Transformer Server
   //
 
+
   // run detached container on port 7474 waiting...
-  console.log("Starting NodeJS Docker sandbox...");
+  console.log("Starting Status Transformer Sandbox...");
   const img = "suculent/thinx-node-transformer";
-  const st_command = "docker pull " + img + "; docker run -d " + img;
+
+  // Get running transformers if any
+  const docker_check_cmd = "docker ps | grep transformer | cut -d' ' -f1";
+  var container_already_running;
+  try {
+    container_already_running = exec.execSync(docker_check_cmd).toString();
+  } catch(e) {
+    console.log("Status Transformer Docker check error: " + e);
+  }
+
+  // Kill existing transformers if any
+  console.log("Docker ST check result: " + result);
+  if (container_already_running) {
+    try {
+      exec.execSync("docker kill "+result);
+    } catch(e) {
+      console.log("Status Transformer Docker kill error: " + e);
+    }
+  }
+
+  // Pull fresh transformer container and start
+  const st_command = "docker pull " + img + "; docker run -d -p 7474:7474 -v $(pwd)/logs:/logs " + img;
   try {
     console.log(exec.execSync(st_command).toString());
   } catch(e) {
@@ -3333,16 +3358,13 @@ var ThinxApp = function() {
   //
 
   function respond(res, object) {
-
     if (typeOf(object) == "buffer") {
       console.log("Sending buffer: ");
       console.log(object);
       res.header("Content-Type", "application/octet-stream");
       res.send(object);
-
     } else if (typeOf(object) == "string") {
       res.end(object);
-
     } else {
       res.end(JSON.stringify(object));
     }
