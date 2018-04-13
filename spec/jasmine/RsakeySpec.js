@@ -9,7 +9,7 @@ describe("RSA Key", function() {
     "a9:fd:f3:8e:97:7d:f4:c1:e1:39:3f:fd:2b:3b:5f:9_"
   ];
 
-  var revoked_fingerprints = [
+  var revoked_filenames = [
     "a9:fd:f3:8e:97:7d:f4:c1:e1:39:3f:fd:2b:3b:5f:9f"
   ];
 
@@ -41,7 +41,7 @@ describe("RSA Key", function() {
 
     it("should be able to revoke multiple RSA Keys at once",
       function(done) {
-        RSAKey.revoke(owner, revoked_fingerprints,
+        RSAKey.revoke(owner, revoked_filenames,
           function(success, message) {
             console.log("RSA revocation result: " + JSON.stringify(
               message));
