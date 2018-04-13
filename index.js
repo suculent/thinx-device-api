@@ -864,57 +864,13 @@ var ThinxApp = function() {
          });
        } else {
          respond(res, {
-           success: success,
-           pubkey: response.pub
+           success: false,
+           error: response
          });
        }
      });
    });
-
-   // deprecated
-  app.post("/api/user/rsakey/add", function(req, res) {
-
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
-
-    var owner = req.session.owner;
-
-    // Validate those inputs from body... so far must be set
-    if (typeof(req.body.alias) === "undefined") {
-      respond(res, {
-        success: false,
-        status: "missing_ssh_alias"
-      });
-      return;
-    }
-
-    if (typeof(req.body.key) === "undefined") {
-      respond(res, {
-        success: false,
-        status: "missing_ssh_key"
-      });
-      return;
-    }
-
-    var new_key_alias = req.body.alias;
-    var new_key_body = req.body.key;
-
-    rsakey.add(owner, new_key_alias, new_key_body, function(success,
-      response) {
-      if (success === false) {
-        respond(res, {
-          success: success,
-          status: response
-        });
-      } else {
-        respond(res, {
-          success: success,
-          fingerprint: response
-        });
-      }
-    });
-  });
-
+   
   /* Lists all RSA keys for user. */
   app.get("/api/user/rsakey/list", function(req, res) {
 
