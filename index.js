@@ -849,6 +849,29 @@ var ThinxApp = function() {
    * RSA Keys
    */
 
+   app.get("/api/user/rsakey/add", function(req, res) {
+
+     if (!validateSession(req, res)) return;
+
+     var owner = req.session.owner;
+
+     rsakey.create(owner, function(success,
+       response) {
+       if (success === false) {
+         respond(res, {
+           success: success,
+           status: response
+         });
+       } else {
+         respond(res, {
+           success: success,
+           pubkey: response.pub
+         });
+       }
+     });
+   });
+
+   // deprecated?
   app.post("/api/user/rsakey/add", function(req, res) {
 
     if (!validateSecurePOSTRequest(req)) return;
