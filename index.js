@@ -857,7 +857,7 @@ var ThinxApp = function() {
 
      rsakey.create(owner, function(success,
        response) {
-       if (success === false) {
+       if (success === true) {
          respond(res, {
            success: success,
            status: response
@@ -870,7 +870,7 @@ var ThinxApp = function() {
        }
      });
    });
-   
+
   /* Lists all RSA keys for user. */
   app.get("/api/user/rsakey/list", function(req, res) {
 
