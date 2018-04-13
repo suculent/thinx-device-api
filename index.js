@@ -3346,7 +3346,7 @@ var ThinxApp = function() {
   }
 
   // Pull fresh transformer container and start
-  const st_command = "docker pull " + img + "; docker run -d -p 7474:7474 -v $(pwd)/logs:/logs " + img;
+  const st_command = "docker pull " + img + "; docker run -d -p " + app_config.lambda + ":7474 -v $(pwd)/logs:/logs " + img;
   try {
     console.log(exec.execSync(st_command).toString());
   } catch(e) {
