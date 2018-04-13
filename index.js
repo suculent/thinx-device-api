@@ -3336,7 +3336,7 @@ var ThinxApp = function() {
   }
 
   // Kill existing transformers if any
-  console.log("Docker ST check result: " + result);
+  console.log("Docker ST check result: " + container_already_running);
   if (container_already_running) {
     try {
       exec.execSync("docker kill "+result);
