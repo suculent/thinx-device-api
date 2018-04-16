@@ -3306,7 +3306,10 @@ var ThinxApp = function() {
   }
 
   // Pull fresh transformer container and start
-  const st_command = "docker pull " + img + "; docker run -d -p " + app_config.lambda + ":7474 -v $(pwd)/logs:/logs " + img;
+  const docker_pull_cmd = "docker pull " + img + "; ";
+  const git_pull_cmd = "cd ~/thinx-node-transformer; git pull origin master; ";
+  const docker_run_cmd = "docker run -d -p " + app_config.lambda + ":7474 -v $(pwd)/logs:/logs -v $(pwd):/app " + img;
+  const st_command = docker_pull_cmd + git_pull_cmd + docker_run_cmd;
   try {
     console.log(exec.execSync(st_command).toString());
   } catch(e) {
