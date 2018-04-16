@@ -2387,25 +2387,12 @@ var ThinxApp = function() {
 
             var given_name = "GitHub";
             var family_name = "User";
-            var name_array = [];
+            var name_array = [given_name, family_name];
 
             var hdata = JSON.parse(data);
-
-            if ((typeof(hdata.name) !== "undefined") || hdata.name === null) {
-              if (hdata.name.indexOf(" ") > -1) {
-                name_array = hdata.name.split(" ");
-                given_name = name_array[0];
-                family_name = name_array[name_array.count - 1];
-              } else {
-                given_name = hdata.name;
-              }
-            } else {
-              console.log("Warning: no name in response.");
-            }
-
             console.log("hdata: " + hdata);
 
-            if ((typeof(hdata.name) !== "undefined") || hdata.name === null) {
+            if ((typeof(hdata.name) !== "undefined") || hdata.name !== null) {
               if (hdata.name.indexOf(" ") > -1) {
                 name_array = hdata.name.split(" ");
                 given_name = name_array[0];
