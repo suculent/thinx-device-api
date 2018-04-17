@@ -43,9 +43,6 @@ var ThinxApp = function() {
   const day = hour * 24;
   const fortnight = day * 14;
 
-  console.log(" ");
-  console.log(" ");
-  console.log(" ");
   console.log("--- " + new Date() + " ---");
 
   //
@@ -3168,12 +3165,10 @@ var ThinxApp = function() {
   var product = package_info.description;
   var version = package_info.version;
 
-  console.log("");
   console.log("-=[ ☢ " + product + " v" + version +
     " rev. " +
     app.version() +
     " ☢ ]=-");
-  console.log("");
   console.log("» Started on port " +
     serverPort +
     " (HTTP) and " + (serverPort +
