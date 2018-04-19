@@ -3081,23 +3081,13 @@ var ThinxApp = function() {
       if (typeof(req.headers.cookie) !== "undefined") {
 
         if (cookies.indexOf("thx-") === -1) {
-          //console.log("» WSS cookies: " + cookies);
           console.log("» WARNING! No thx-cookie found in: " + JSON.stringify(req.headers
             .cookie));
-          // wss.close();
-          // return;
-        } else {
-          console.log("» INFO: thx-cookie found.");
         }
 
         if (cookies.indexOf("thinx-") === -1) {
-          //console.log("» WSS cookies: " + cookies);
           console.log("» WARNING! No thinx-cookie found in: " + JSON.stringify(req.headers
             .cookie));
-          // wss.close();
-          // return;
-        } else {
-          console.log("» INFO: thinx-cookie found.");
         }
 
         if (typeof(req.session) !== "undefined") {
