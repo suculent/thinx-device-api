@@ -55,7 +55,7 @@ case $LANGUAGE in
     ;;
 
     javascript)
-      TOOL_PATH=$(which eslint)
+      TOOL_PATH="node $(which eslint)"
       TOOL_ATTRS=""
       EXTENSIONS=( js )
     ;;
