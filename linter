@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source "$(pwd)/infer"
+source "$/.bash_profile"
 
 # Sample repositories for testing only, should return error missing workdir
 #WORKDIR=/Users/sychram/Repositories/thinx-firmware-esp8266-ino
@@ -123,7 +124,9 @@ for EXT in $EXTENSIONS; do
 				do
 					if [[ -f $WORKDIR/$FILE ]]; then
 						# run lint on each file in subfolder
-						"$TOOL_PATH" "$TOOL_ATTRS" "$WORKDIR/$FILE" >> "$WORKDIR/lint.txt"
+						CMD="$TOOL_PATH" "$TOOL_ATTRS" "$WORKDIR/$FILE"
+						echo $CMD
+						bash $CMD >> "$WORKDIR/lint.txt"
 					fi
 				done
 			fi
