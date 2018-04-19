@@ -12,6 +12,8 @@ source "$/.bash_profile"
 
 echo "-=[ ☢ THiNX IoT CODE LINTER ☢ ]=-"
 
+whoami
+
 for i in "$@"
 do
 case $i in
@@ -56,7 +58,7 @@ case $LANGUAGE in
     ;;
 
     javascript)
-      TOOL_PATH="node $(which eslint)"
+      TOOL_PATH="$(which node) $(which eslint)"
       TOOL_ATTRS=""
       EXTENSIONS=( js )
     ;;
@@ -126,7 +128,7 @@ for EXT in $EXTENSIONS; do
 						# run lint on each file in subfolder
 						CMD="$TOOL_PATH" "$TOOL_ATTRS" "$WORKDIR/$FILE"
 						echo $CMD
-						bash $CMD >> "$WORKDIR/lint.txt"
+						/bin/bash $CMD >> "$WORKDIR/lint.txt"
 					fi
 				done
 			fi
