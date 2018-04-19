@@ -49,13 +49,13 @@ fi
 case $LANGUAGE in
 
 		c)
-      TOOL_PATH="cppcheck"
+      TOOL_PATH=$(which cppcheck)
       TOOL_ATTRS="--force -U PROGMEM"
       EXTENSIONS=( "c" "ino" "cpp" )
     ;;
 
     javascript)
-      TOOL_PATH="eslint"
+      TOOL_PATH=$(which eslint)
       TOOL_ATTRS=""
       EXTENSIONS=( js )
     ;;
@@ -67,7 +67,7 @@ case $LANGUAGE in
     ;;
 
     python)
-      TOOL_PATH="pylama"
+      TOOL_PATH=$(which pylama)
       TOOL_ATTRS=""
       EXTENSIONS=( py )
     ;;
