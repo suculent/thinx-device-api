@@ -48,7 +48,7 @@ fi
 
 case $LANGUAGE in
 
-	c)
+		c)
       TOOL_PATH="cppcheck"
       TOOL_ATTRS="--force -U PROGMEM"
       EXTENSIONS=( "c" "ino" "cpp" )
@@ -56,7 +56,7 @@ case $LANGUAGE in
 
     javascript)
       TOOL_PATH="eslint"
-      TOOL_ATTRS="--debug"
+      TOOL_ATTRS=""
       EXTENSIONS=( "js" )
     ;;
 
@@ -102,7 +102,7 @@ for EXT in $EXTENSIONS; do
 			# as folders
 			if [[ -d $WORKDIR/$XDIR ]]; then
 				echo "XDIR: $XDIR"
-				FILEZ=$(ls "$WORKDIR/$XDIR" | grep \.${EXT})
+				FILEZ=$(ls "$WORKDIR/$XDIR" | grep "\.${EXT}")
 
 				if [[ ! -z $WORKDIR/$XDIR/$FILES ]]; then
 					echo "FILES: $FILES"
@@ -111,19 +111,19 @@ for EXT in $EXTENSIONS; do
 						PATH=$WORKDIR/$XDIR/$FILE
 						if [[ -f $PATH ]]; then
 							# run lint on each file in subfolder
-							"$TOOL_PATH" "$TOOL_ATTRS" "$PATH" > "$WORKDIR/lint.txt"
+							"$TOOL_PATH" "$TOOL_ATTRS" "$PATH" >> "$WORKDIR/lint.txt"
 						fi
 					done
 				fi
 
 			# as files
 			else
-				FILES=$(ls "$WORKDIR" | grep \.${EXT})
+				FILES=$(ls "$WORKDIR" | grep "\.${EXT}")
 				for FILE in $FILES
 				do
 					if [[ -f $WORKDIR/$FILE ]]; then
 						# run lint on each file in subfolder
-						"$TOOL_PATH" "$TOOL_ATTRS" "$WORKDIR/$FILE" > "$WORKDIR/lint.txt"
+						"$TOOL_PATH" "$TOOL_ATTRS" "$WORKDIR/$FILE" >> "$WORKDIR/lint.txt"
 					fi
 				done
 			fi
