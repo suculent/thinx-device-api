@@ -232,7 +232,7 @@ micropython_platform="esp8266"
 
 YML=$(find $BUILD_PATH/$REPO_PATH -name "thinx.yml")
 if [ -f $YML ]; then
-	echo "[builder.sh] Found thinx.yml file, reading..." | tee -a "${LOG_PATH}"
+	echo "[builder.sh] Found ${YML}, reading..." | tee -a "${LOG_PATH}"
 	parse_yaml $YML
 	eval $(parse_yaml $YML)
 fi
@@ -290,6 +290,36 @@ echo "[builder.sh] Current work path: $(pwd)" | tee -a "${LOG_PATH}"
 
 case $PLATFORM in
 
+		nodejs)
+
+			# WARNING! This is a specific builder.
+			# Should only copy. Basic NodeJS client supports git and should fetch repo on its own.
+
+			OUTFILE=${DEPLOYMENT_PATH}/build
+			touch $OUTFILE
+			#	zip -rv "${BUILD_ID}.zip" | tee -a "${LOG_PATH}" ./* # zip artefacts
+			BUILD_SUCCESS=true
+			echo "[builder.sh] There's nothing to build on NodeJS projects." | tee -a "${LOG_PATH}"
+			OUTPATH=${DEPLOYMENT_PATH}
+
+			ls | tee -a "${LOG_PATH}"
+
+			if [[ ! ${RUN} ]]; then
+				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." | tee -a "${LOG_PATH}"
+				STATUS='DRY_RUN_OK'
+			else
+				# Check Artifacts
+				if [[ $BUILD_SUCCESS == true ]] ; then
+					echo "[builder.sh] NodeJS Build: Listing output directory: " | tee -a "${LOG_PATH}"
+					pwd | tee -a "${LOG_PATH}"
+					ls | tee -a "${LOG_PATH}"					
+					STATUS='OK'
+				else
+					STATUS='FAILED'
+				fi
+			fi
+		;;
+
     micropython)
 
 		  # WARNING! This is a specific builder (like NodeMCU).
@@ -300,7 +330,7 @@ case $PLATFORM in
 				echo "Build type: file" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/boot.py
 				cp -vf $WORKDIR/*.py ${DEPLOYMENT_PATH} # copy all .py files without building
-				zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./* # zip artefacts
+				zip -rv "${BUILD_ID}.zip" | tee -a "${LOG_PATH}" ./* # zip artefacts
 			else
 				echo "[builder.sh] Build type: firmware (or undefined)" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
