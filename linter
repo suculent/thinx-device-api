@@ -57,7 +57,7 @@ case $LANGUAGE in
     javascript)
       TOOL_PATH="eslint"
       TOOL_ATTRS=""
-      EXTENSIONS=( "js" )
+      EXTENSIONS=( js )
     ;;
 
     lua)
@@ -68,7 +68,7 @@ case $LANGUAGE in
 
     python)
       TOOL_PATH="pylama"
-      TOOL_PATH=""
+      TOOL_ATTRS=""
       EXTENSIONS=( py )
     ;;
 
