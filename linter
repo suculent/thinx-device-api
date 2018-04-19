@@ -78,7 +78,7 @@ case $LANGUAGE in
     ;;
 esac
 
-ALL=$(ls $WORKDIR)
+ALL=$(/bin/ls $WORKDIR)
 echo "" > $WORKDIR/lint.txt
 
 echo "Working directory: $WORKDIR"
@@ -102,7 +102,7 @@ for EXT in $EXTENSIONS; do
 			# as folders
 			if [[ -d $WORKDIR/$XDIR ]]; then
 				echo "XDIR: $XDIR"
-				FILEZ=$(ls "$WORKDIR/$XDIR" | grep "\.${EXT}")
+				FILEZ=$(/bin/ls "$WORKDIR/$XDIR" | /bin/grep "\.${EXT}")
 
 				if [[ ! -z $WORKDIR/$XDIR/$FILES ]]; then
 					echo "FILES: $FILES"
@@ -118,7 +118,7 @@ for EXT in $EXTENSIONS; do
 
 			# as files
 			else
-				FILES=$(ls "$WORKDIR" | grep "\.${EXT}")
+				FILES=$(/bin/ls "$WORKDIR" | /bin/grep "\.${EXT}")
 				for FILE in $FILES
 				do
 					if [[ -f $WORKDIR/$FILE ]]; then
