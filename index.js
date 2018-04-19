@@ -2801,7 +2801,7 @@ var ThinxApp = function() {
               username: owner_id
             };
 
-            console.log("[oauth][google] searching for owner_id: " + owner_id);
+            //console.log("[oauth][google] searching for owner_id: " + owner_id);
 
             // Asynchronously check user and make note on user login
             userlib.get(owner_id, function(error, udoc) {
@@ -2866,8 +2866,6 @@ var ThinxApp = function() {
                 }
                 return;
               }
-
-              console.log(JSON.stringify(udoc));
 
               userlib.atomic("users", "checkin", owner_id, {
                 last_seen: new Date()

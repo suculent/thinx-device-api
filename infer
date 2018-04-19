@@ -6,6 +6,10 @@ function infer_platform
 {
 		local path=$1
 
+		#
+		# WARNING! This is a duplicate implementation. Platforms are inferred using JS as well.
+		#
+
 		platform="unknown"
 		ALL=$(ls $path)
 
@@ -25,6 +29,14 @@ function infer_platform
 
 		if [[ -f "$path/platformio.ini" ]]; then
 			platform="platformio"
+
+		# NodeJS
+
+		elif [[ -f "$path/*.js" ]]; then
+			platform="nodejs"
+
+		elif [[ -f "$path/package.json" ]]; then
+			platform="nodejs"
 
 		# Arduino
 
@@ -49,7 +61,7 @@ function infer_platform
 
 		# Mongoose OS
 
-	elif [[ -f "$path/mos.yml" ]]; then
+	  elif [[ -f "$path/mos.yml" ]]; then
 			platform="mongoose"
 		fi
 
