@@ -128,7 +128,7 @@ for EXT in $EXTENSIONS; do
 						# run lint on each file in subfolder
 						CMD="$TOOL_PATH" "$TOOL_ATTRS" "$WORKDIR/$FILE"
 						echo $CMD
-						/bin/bash $CMD >> "$WORKDIR/lint.txt"
+						$CMD >> "$WORKDIR/lint.txt"
 					fi
 				done
 			fi
