@@ -2,10 +2,16 @@
 
 ## HISTORY
 
+19/04/2018 0.9.3296:
+
+» Improved support for NodeJS clients
+» Revamped Deploy Keys with support for Private repositories
+» Stabilized status transformers and device checkins (even in libs)
+
 13/04/2018 0.9.3230:
 
 » Library fixes for Arduino, ESP8266/ESP32 and test/specs
-» Upgraded and fixedimplementation to @slack/client 4.0
+» Upgraded and fixed implementation to @slack/client 4.0
 » Improved Status Transformers
 
 25/03/2018 0.9.3144:
