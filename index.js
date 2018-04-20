@@ -1736,8 +1736,6 @@ var ThinxApp = function() {
   // Front-end authentication, returns session on valid authentication
   app.post("/api/login", function(req, res) {
 
-    console.log(JSON.stringify(req.body));
-
     // Request must be post
     if (req.method != "POST") {
       req.session.destroy(function(err) {
@@ -1769,7 +1767,6 @@ var ThinxApp = function() {
     var owner_id = null;
 
     if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
-      console.log("[login] with token: " + oauth);
       client.get(oauth, function(err, userWrapper) {
         if (err) {
           console.log("[oauth] takeover failed");
@@ -1784,7 +1781,6 @@ var ThinxApp = function() {
           } else {
             console.log("[login] wrapper: " + userWrapper);
           }
-          console.log("[login][oauth] fetching owner: " + owner_id);
 
           userlib.get(owner_id, function(err, doc) {
 
@@ -2475,8 +2471,7 @@ var ThinxApp = function() {
                   // No such owner, create...
                   user.create(userWrapper, false, function(success, status) {
 
-                    console.log("[OID:" + owner_id +
-                      "] [NEW_SESSION] [oauth]");
+                    console.log("[OID:" + owner_id + "] [NEW_SESSION] [oauth]");
 
                     alog.log(owner_id, "OAuth User created: " +
                       given_name + " " + family_name);
@@ -2844,8 +2839,7 @@ var ThinxApp = function() {
                   user.create(userWrapper, false, function(success, status) {
 
                     req.session.owner = userWrapper.owner;
-                    console.log("[OID:" + req.session.owner +
-                      "] [NEW_SESSION] [oauth]");
+                    console.log("[OID:" + req.session.owner +"] [NEW_SESSION] [oauth]");
                     alog.log(req.session.owner,
                       "OAuth User created: " +
                       given_name + " " + family_name);
