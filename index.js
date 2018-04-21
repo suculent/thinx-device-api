@@ -1126,8 +1126,9 @@ var ThinxApp = function() {
         status: "no_body"
       });
     } else if (typeof(req.body.registration) === "undefined") {
-      console.log("Incoming request has no `registration` in body, BLACKLISTING!.");      
-      BLACKLIST.push(getClientIp(req));
+      var ip = getClientIp(req)
+      console.log("Incoming request has no `registration` in body, BLACKLISTING "+ip);      
+      BLACKLIST.push(ip);
       console.log(JSON.stringify(req.body));
       respond(res, {
         success: false,
