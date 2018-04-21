@@ -333,7 +333,7 @@ var ThinxApp = function() {
     limit: "10mb"
   }));
 
-  /*
+
   app.use(function(req, res, next) {
     var ipAddress = getClientIp(req);
     if (BLACKLIST.toString().indexOf(ipAddress) === -1) {
@@ -342,7 +342,6 @@ var ThinxApp = function() {
       res.status(418).end();
     }
   });
-  */
 
   app.all("/*", function(req, res, next) {
 
@@ -1127,7 +1126,8 @@ var ThinxApp = function() {
         status: "no_body"
       });
     } else if (typeof(req.body.registration) === "undefined") {
-      console.log("Incoming request has no `registration` in body.");      
+      console.log("Incoming request has no `registration` in body, BLACKLISTING!.");      
+      BLACKLIST.push(getClientIp(req));
       console.log(JSON.stringify(req.body));
       respond(res, {
         success: false,
