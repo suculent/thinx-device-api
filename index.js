@@ -1127,7 +1127,8 @@ var ThinxApp = function() {
         status: "no_body"
       });
     } else if (typeof(req.body.registration) === "undefined") {
-      console.log("Incoming request has no `registration` in body.");
+      console.log("Incoming request has no `registration` in body.");      
+      console.log(JSON.stringify(req.body));
       respond(res, {
         success: false,
         status: "no_registration"
