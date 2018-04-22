@@ -2388,7 +2388,7 @@ var ThinxApp = function() {
             var hdata = JSON.parse(data);
             console.log("hdata: " + hdata);
 
-            if ((typeof(hdata.name) !== "undefined") || hdata.name !== null) {
+            if ((typeof(hdata.name) !== "undefined") && hdata.name !== null) {
               if (hdata.name.indexOf(" ") > -1) {
                 name_array = hdata.name.split(" ");
                 given_name = name_array[0];
@@ -2398,6 +2398,7 @@ var ThinxApp = function() {
               }
             } else {
               console.log("Warning: no name in GitHub access token response.");
+              rollbar.info(hdata);
             }
 
             const email = hdata.email;
