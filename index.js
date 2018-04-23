@@ -161,7 +161,7 @@ var ThinxApp = function() {
   // list of previously discovered attackers
   var BLACKLIST = ["203.218.194.124", "179.128.55.14"];
 
-  app.enable('trust proxy');
+
 
   var getClientIp = function(req) {
     var ipAddress = req.ip;
@@ -3019,6 +3019,7 @@ var ThinxApp = function() {
   }
 
   app.use('/static', express.static(path.join(__dirname, 'static')));
+  app.set('trust proxy', ['loopback', '127.0.0.1']);
 
   // Legacy HTTP support for old devices without HTTPS proxy
   http.createServer(app).listen(serverPort);
