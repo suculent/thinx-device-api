@@ -3293,7 +3293,9 @@ var ThinxApp = function() {
     try {
       console.log(exec.execSync(st_command).toString());
     } catch(e) {
-      console.log("Status Transformer Docker exec error: " + e);
+      if ( e.indexOf("port is already allocated") !== -1) {
+        console.log("Status Transformer Docker exec error: " + e);
+      }
     }
 
   }
