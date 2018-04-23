@@ -340,7 +340,7 @@ var ThinxApp = function() {
     if (BLACKLIST.toString().indexOf(ipAddress) === -1) {
       next();
     } else {
-      res.status(418).end();
+      next();// res.status(418).end();
     }
   });
 
