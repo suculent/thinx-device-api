@@ -2399,6 +2399,8 @@ var ThinxApp = function() {
                 given_name = hdata.name;
               }
             } else {
+              family_name = hdata.login;
+              given_name = hdata.login;
               console.log("Warning: no name in GitHub access token response.");
               rollbar.info(hdata);
             }
