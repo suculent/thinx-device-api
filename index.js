@@ -2388,7 +2388,7 @@ var ThinxApp = function() {
             var name_array = [given_name, family_name];
 
             var hdata = JSON.parse(data);
-            console.log("hdata: " + hdata);
+            console.log("hdata: " + JSON.stringify(hdata));
 
             if ((typeof(hdata.name) !== "undefined") && hdata.name !== null) {
               if (hdata.name.indexOf(" ") > -1) {
