@@ -19,7 +19,8 @@
     "snyk-protect": "snyk protect",
     "test": "nyc jasmine",
     "coverage_new": "nyc jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls && cat lcov.info | codacy-coverage",
-    "prepare": "echo npm run snyk-protect"
+    "prepare": "echo npm run snyk-protect",
+    "prepublish": "npm run snyk-protect"
   },
   "dependencies": {
     "@slack/client": "^4.1.0",
@@ -67,7 +68,7 @@
     "simple-oauth2": "^1.5.2",
     "slack-notify": "^0.1.6",
     "slackbots": "^1.1.0",
-    "snyk": "^1.71.0",
+    "snyk": "^1.73.0",
     "ssh-fingerprint": "0.0.1",
     "ssl-root-cas": "^1.2.5",
     "tail": "^1.2.3",
