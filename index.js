@@ -3115,15 +3115,19 @@ var ThinxApp = function() {
 
           } else if (typeof(object.init) !== "undefined") {
 
-            messenger.initWithOwner(object.init, _ws, function(success,
-              message) {
-              if (!success) {
-                console.log("Messenger init on message with success " +
-                  error +
-                  "message: " +
-                  JSON.stringify(message));
-              }
-            });
+            if (typeof(messenger) !== "undefined") {
+              messenger.initWithOwner(object.init, _ws, function(success,
+                message) {
+                if (!success) {
+                  console.log("Messenger init on message with success " +
+                    error +
+                    "message: " +
+                    JSON.stringify(message));
+                }
+              });
+            } else {
+              console.log("Messenger is not initialized and therefore could not be activated.");
+            }
 
           } else {
             var m = JSON.stringify(message);
