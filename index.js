@@ -3232,8 +3232,19 @@ var ThinxApp = function() {
   }
 
   const cluster = require('cluster');
+  const _ = require('lodash');
 
-  if (cluster.isMaster) {
+  function isMasterProcess() {
+      if (_.has(process.env, 'NODE APP INSTANCE')) {
+          return _.get(process.env, 'NODE APP INSTANCE') === '0';
+      } else if (_.has(process.env, 'NODE_APP_INSTANCE')) {
+          return _.get(process.env, 'NODE_APP_INSTANCE') === '0';
+      } else {
+          return cluster.isMaster;
+      }
+  }
+
+  if (isMasterProcess()) {
 
     setInterval(database_compactor, 3600 * 1000);
 
