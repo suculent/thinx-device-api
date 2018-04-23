@@ -161,11 +161,14 @@ var ThinxApp = function() {
   // list of previously discovered attackers
   var BLACKLIST = ["203.218.194.124", "179.128.55.14"];
 
+  app.enable('trust proxy');
+
   var getClientIp = function(req) {
-    var ipAddress = req.connection.remoteAddress;
+    var ipAddress = req.ip;
     if (!ipAddress) {
       return "";
     }
+    console.log("Client IP: " + ipAddress);
     // convert from "::ffff:192.0.0.1"  to "192.0.0.1"
     if (ipAddress.substr(0, 7) == "::ffff:") {
       ipAddress = ipAddress.substr(7);
@@ -1141,7 +1144,6 @@ var ThinxApp = function() {
         success, response) {
         // Append timestamp inside as library is not parsing HTTP response JSON properly
         // when it ends with anything else than }}
-
         if ( success & typeof(response.registration) !== "undefined") {
           response.registration.timestamp = Math.floor(new Date() / 1000);
         } else {
