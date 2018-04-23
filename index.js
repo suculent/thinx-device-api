@@ -3151,15 +3151,8 @@ var ThinxApp = function() {
   var product = package_info.description;
   var version = package_info.version;
 
-  console.log("-=[ ☢ " + product + " v" + version +
-    " rev. " +
-    app.version() +
-    " ☢ ]=-");
-  console.log("» Started on port " +
-    serverPort +
-    " (HTTP) and " + (serverPort +
-      1) +
-    " (HTTPS)");
+  console.log("-=[ ☢ " + product + " v" + version + " rev. " + app.version() + " ☢ ]=-");
+  console.log("» Started on port " + serverPort + " (HTTP) and " + (serverPort + 1) + " (HTTPS)");
 
   /* Should load all devices with attached repositories and watch those repositories.
    * Maintains list of watched repositories for runtime handling purposes.
@@ -3224,7 +3217,6 @@ var ThinxApp = function() {
       console.log("» Database compact jobs completed.");
     });
   }
-  setInterval(database_compactor, 3600 * 1000);
 
   //
   // Log aggregator
@@ -3236,52 +3228,61 @@ var ThinxApp = function() {
     stats.aggregate();
     console.log("» Aggregation jobs completed.");
   }
-  setInterval(log_aggregator, 86400 * 1000 / 2);
 
-  //
-  // MQTT Messenger/listener (experimental)
-  //
+  const cluster = require('cluster');
 
-  var messenger = require("./lib/thinx/messenger");
-  messenger.init();
+  if (cluster.isMaster) {
 
-  //
-  // Status Transformer Server
-  //
+    setInterval(database_compactor, 3600 * 1000);
+
+    setInterval(log_aggregator, 86400 * 1000 / 2);
+
+    //
+    // MQTT Messenger/listener (experimental)
+    //
+
+    var messenger = require("./lib/thinx/messenger");
+    messenger.init();
+
+    //
+    // Status Transformer Server
+    //
 
 
-  // run detached container on port 7474 waiting...
-  console.log("Starting Status Transformer Sandbox...");
-  const img = "suculent/thinx-node-transformer";
+    // run detached container on port 7474 waiting...
+    console.log("Starting Status Transformer Sandbox...");
+    const img = "suculent/thinx-node-transformer";
 
-  // Get running transformers if any
-  const docker_check_cmd = "docker ps | grep transformer | cut -d' ' -f1";
-  var container_already_running;
-  try {
-    container_already_running = exec.execSync(docker_check_cmd).toString();
-  } catch(e) {
-    console.log("Status Transformer Docker check error: " + e);
-  }
-
-  // Kill existing transformers if any
-  console.log("Docker Status Transformer check...");
-  if (container_already_running) {
+    // Get running transformers if any
+    const docker_check_cmd = "docker ps | grep transformer | cut -d' ' -f1";
+    var container_already_running;
     try {
-      console.log(exec.execSync("docker kill "+container_already_running).toString());
+      container_already_running = exec.execSync(docker_check_cmd).toString();
     } catch(e) {
-      console.log("Status Transformer Docker kill error: " + e);
+      console.log("Status Transformer Docker check error: " + e);
     }
-  }
 
-  // Pull fresh transformer container and start
-  const docker_pull_cmd = "docker pull " + img + "; ";
-  const git_pull_cmd = "cd ~/thinx-node-transformer; git pull origin master; ";
-  const docker_run_cmd = "docker run -d -p " + app_config.lambda + ":7474 -v $(pwd)/logs:/logs -v $(pwd):/app " + img;
-  const st_command = docker_pull_cmd + git_pull_cmd + docker_run_cmd;
-  try {
-    console.log(exec.execSync(st_command).toString());
-  } catch(e) {
-    console.log("Status Transformer Docker exec error: " + e);
+    // Kill existing transformers if any
+    console.log("Docker Status Transformer check...");
+    if (container_already_running) {
+      try {
+        console.log(exec.execSync("docker kill "+container_already_running).toString());
+      } catch(e) {
+        console.log("Status Transformer Docker kill error: " + e);
+      }
+    }
+
+    // Pull fresh transformer container and start
+    const docker_pull_cmd = "docker pull " + img + "; ";
+    const git_pull_cmd = "cd ~/thinx-node-transformer; git pull origin master; ";
+    const docker_run_cmd = "docker run -d -p " + app_config.lambda + ":7474 -v $(pwd)/logs:/logs -v $(pwd):/app " + img;
+    const st_command = docker_pull_cmd + git_pull_cmd + docker_run_cmd;
+    try {
+      console.log(exec.execSync(st_command).toString());
+    } catch(e) {
+      console.log("Status Transformer Docker exec error: " + e);
+    }
+
   }
 
   //
