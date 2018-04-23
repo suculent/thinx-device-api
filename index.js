@@ -161,11 +161,14 @@ var ThinxApp = function() {
   // list of previously discovered attackers
   var BLACKLIST = ["203.218.194.124", "179.128.55.14"];
 
+  app.enable('trust proxy');
+
   var getClientIp = function(req) {
-    var ipAddress = req.connection.remoteAddress;
+    var ipAddress = req.ip;
     if (!ipAddress) {
       return "";
     }
+    console.log("Client IP: " + ipAddress);
     // convert from "::ffff:192.0.0.1"  to "192.0.0.1"
     if (ipAddress.substr(0, 7) == "::ffff:") {
       ipAddress = ipAddress.substr(7);
@@ -1141,7 +1144,6 @@ var ThinxApp = function() {
         success, response) {
         // Append timestamp inside as library is not parsing HTTP response JSON properly
         // when it ends with anything else than }}
-
         if ( success & typeof(response.registration) !== "undefined") {
           response.registration.timestamp = Math.floor(new Date() / 1000);
         } else {
@@ -2386,7 +2388,7 @@ var ThinxApp = function() {
             var name_array = [given_name, family_name];
 
             var hdata = JSON.parse(data);
-            console.log("hdata: " + hdata);
+            console.log("hdata: " + JSON.stringify(hdata));
 
             if ((typeof(hdata.name) !== "undefined") && hdata.name !== null) {
               if (hdata.name.indexOf(" ") > -1) {
@@ -2397,6 +2399,8 @@ var ThinxApp = function() {
                 given_name = hdata.name;
               }
             } else {
+              family_name = hdata.login;
+              given_name = hdata.login;
               console.log("Warning: no name in GitHub access token response.");
               rollbar.info(hdata);
             }
@@ -3230,8 +3234,19 @@ var ThinxApp = function() {
   }
 
   const cluster = require('cluster');
+  const _ = require('lodash');
 
-  if (cluster.isMaster) {
+  function isMasterProcess() {
+      if (_.has(process.env, 'NODE APP INSTANCE')) {
+          return _.get(process.env, 'NODE APP INSTANCE') === '0';
+      } else if (_.has(process.env, 'NODE_APP_INSTANCE')) {
+          return _.get(process.env, 'NODE_APP_INSTANCE') === '0';
+      } else {
+          return cluster.isMaster;
+      }
+  }
+
+  if (isMasterProcess()) {
 
     setInterval(database_compactor, 3600 * 1000);
 
@@ -3280,7 +3295,9 @@ var ThinxApp = function() {
     try {
       console.log(exec.execSync(st_command).toString());
     } catch(e) {
-      console.log("Status Transformer Docker exec error: " + e);
+      if ( e.indexOf("port is already allocated") !== -1) {
+        console.log("Status Transformer Docker exec error: " + e);
+      }
     }
 
   }

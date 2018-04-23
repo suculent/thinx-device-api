@@ -1,5 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.10.1
+version: v1.11.0
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   'npm:qs:20170213':
@@ -103,120 +103,63 @@ ignore:
     - '@slack/client > request > hawk > hoek':
         reason: None given
         expires: '2018-04-06T14:33:35.286Z'
-      firebase-admin > jsonwebtoken > joi > hoek:
-        reason: None given
-        expires: '2018-05-13T09:14:25.223Z'
     - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > hoek:
         reason: None given
         expires: '2018-04-06T14:33:35.286Z'
-      firebase-admin > jsonwebtoken > joi > topo > hoek:
-        reason: None given
-        expires: '2018-05-13T09:14:25.223Z'
     - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > request > hawk > hoek:
         reason: None given
         expires: '2018-04-06T14:33:35.286Z'
-      firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > hawk > hoek:
-        reason: None given
-        expires: '2018-05-13T09:14:25.223Z'
     - '@slack/client > request > hawk > boom > hoek':
         reason: None given
         expires: '2018-04-06T14:33:35.286Z'
-      firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > hawk > boom > hoek:
-        reason: None given
-        expires: '2018-05-13T09:14:25.223Z'
     - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > boom > hoek:
         reason: None given
         expires: '2018-04-06T14:33:35.286Z'
-      firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > hawk > sntp > hoek:
-        reason: None given
-        expires: '2018-05-13T09:14:25.223Z'
     - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > request > hawk > boom > hoek:
         reason: None given
         expires: '2018-04-06T14:33:35.286Z'
-      firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > hawk > cryptiles > boom > hoek:
-        reason: None given
-        expires: '2018-05-13T09:14:25.223Z'
     - '@slack/client > request > hawk > cryptiles > boom > hoek':
         reason: None given
         expires: '2018-04-06T14:33:35.286Z'
-      firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > request > hawk > hoek:
-        reason: None given
-        expires: '2018-05-13T09:14:25.223Z'
     - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > cryptiles > boom > hoek:
         reason: None given
         expires: '2018-04-06T14:33:35.286Z'
-      firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > request > hawk > boom > hoek:
-        reason: None given
-        expires: '2018-05-13T09:14:25.223Z'
     - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > request > hawk > cryptiles > boom > hoek:
         reason: None given
         expires: '2018-04-06T14:33:35.286Z'
-      firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > request > hawk > sntp > hoek:
-        reason: None given
-        expires: '2018-05-13T09:14:25.223Z'
     - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > hawk > cryptiles > boom > hoek:
         reason: None given
         expires: '2018-04-06T14:33:35.286Z'
-      firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > request > hawk > cryptiles > boom > hoek:
-        reason: None given
-        expires: '2018-05-13T09:14:25.223Z'
     - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > hawk > cryptiles > boom > hoek:
         reason: None given
         expires: '2018-04-06T14:33:35.287Z'
-      firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > hawk > hoek:
-        reason: None given
-        expires: '2018-05-13T09:14:25.223Z'
     - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > hawk > boom > hoek:
         reason: None given
         expires: '2018-05-13T09:14:25.223Z'
     - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > hawk > boom > hoek:
         reason: None given
         expires: '2018-04-06T14:33:35.288Z'
-      firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > hawk > sntp > hoek:
-        reason: None given
-        expires: '2018-05-13T09:14:25.223Z'
     - '@slack/client > request > hawk > sntp > hoek':
         reason: None given
         expires: '2018-04-06T14:33:35.288Z'
-      firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > hawk > cryptiles > boom > hoek:
-        reason: None given
-        expires: '2018-05-13T09:14:25.223Z'
     - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > sntp > hoek:
         reason: None given
         expires: '2018-04-06T14:33:35.288Z'
-      firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > hoek:
-        reason: None given
-        expires: '2018-05-13T09:14:25.223Z'
     - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > request > hawk > sntp > hoek:
         reason: None given
         expires: '2018-04-06T14:33:35.288Z'
-      firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > boom > hoek:
-        reason: None given
-        expires: '2018-05-13T09:14:25.223Z'
     - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > hawk > sntp > hoek:
         reason: None given
         expires: '2018-04-06T14:33:35.288Z'
-      firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > sntp > hoek:
-        reason: None given
-        expires: '2018-05-13T09:14:25.223Z'
     - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > hawk > sntp > hoek:
         reason: None given
         expires: '2018-04-06T14:33:35.288Z'
-      firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > cryptiles > boom > hoek:
-        reason: None given
-        expires: '2018-05-13T09:14:25.223Z'
     - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > hawk > hoek:
         reason: None given
         expires: '2018-04-06T14:33:35.288Z'
-      firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > hawk > hoek:
-        reason: None given
-        expires: '2018-05-13T09:14:25.223Z'
     - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > hawk > hoek:
         reason: None given
         expires: '2018-04-06T14:33:35.288Z'
-      firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > hawk > boom > hoek:
-        reason: None given
-        expires: '2018-05-13T09:14:25.223Z'
     - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > hawk > sntp > hoek:
         reason: None given
         expires: '2018-05-13T09:14:25.223Z'
@@ -277,25 +220,73 @@ ignore:
     - codacy-coverage > nsp > lab > bossy > hoek:
         reason: None given
         expires: '2018-05-13T09:14:25.224Z'
+    - firebase-admin > jsonwebtoken > joi > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > jsonwebtoken > joi > topo > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > hawk > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > hawk > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > hawk > sntp > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > hawk > cryptiles > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > request > hawk > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > request > hawk > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > request > hawk > sntp > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > request > hawk > cryptiles > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > hawk > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > hawk > sntp > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > hawk > cryptiles > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > sntp > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > cryptiles > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > hawk > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > hawk > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
   'npm:lodash:20180130':
     - karma-coverage > lodash:
         reason: None given
         expires: '2018-04-06T14:33:35.288Z'
-      graphlib > lodash:
-        reason: None given
-        expires: '2018-05-13T09:14:25.224Z'
     - gulp-repository-watch > lodash:
         reason: None given
         expires: '2018-04-06T14:33:35.288Z'
-      inquirer > lodash:
-        reason: None given
-        expires: '2018-05-13T09:14:25.224Z'
     - slack-notify > lodash:
         reason: None given
         expires: '2018-04-06T14:33:35.288Z'
-      codacy-coverage > lodash:
-        reason: None given
-        expires: '2018-05-13T09:14:25.224Z'
     - codacy-coverage > eslint > lodash:
         reason: None given
         expires: '2018-05-13T09:14:25.224Z'
@@ -341,6 +332,15 @@ ignore:
     - codacy-coverage > nock > lodash:
         reason: None given
         expires: '2018-05-13T09:14:25.224Z'
+    - graphlib > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - inquirer > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
   'npm:node-forge:20180226':
     - firebase-admin > node-forge:
         reason: None given
@@ -364,16 +364,16 @@ ignore:
     - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > protobufjs:
         reason: None given
         expires: '2018-04-06T14:33:35.288Z'
-      firebase-admin > @google-cloud/firestore > grpc > protobufjs:
-        reason: None given
-        expires: '2018-05-13T09:14:25.225Z'
     - firebase-admin > @google-cloud/firestore > google-gax > grpc > protobufjs:
         reason: None given
         expires: '2018-04-06T14:33:35.288Z'
-      firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > protobufjs:
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > protobufjs:
         reason: None given
         expires: '2018-05-13T09:14:25.225Z'
-    - firebase-admin > @google-cloud/firestore > google-gax > grpc > protobufjs:
+    - firebase-admin > @google-cloud/firestore > grpc > protobufjs:
+        reason: None given
+        expires: '2018-05-13T09:14:25.225Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > protobufjs:
         reason: None given
         expires: '2018-05-13T09:14:25.225Z'
   'npm:eslint:20180222':
@@ -472,16 +472,10 @@ patch:
   'npm:debug:20170905':
     - rollbar > debug:
         patched: '2017-09-27T22:45:09.600Z'
-      firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > tar-pack > debug:
-        patched: '2018-04-13T09:12:16.962Z'
     - codacy-coverage > debug:
         patched: '2017-12-15T16:27:39.853Z'
-      firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > tar-pack > debug:
-        patched: '2018-04-13T09:12:16.962Z'
     - codacy-coverage > nsp > eslint > debug:
         patched: '2017-12-15T16:27:39.853Z'
-      firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > tar-pack > debug:
-        patched: '2018-04-13T09:12:16.962Z'
     - codacy-coverage > nsp > eslint-plugin-hapi > no-shadow-relaxed > eslint > debug:
         patched: '2017-12-15T16:27:39.853Z'
     - codacy-coverage > nsp > lab > eslint > debug:
@@ -506,6 +500,12 @@ patch:
         patched: '2018-02-13T10:42:26.434Z'
     - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > tar-pack > debug:
         patched: '2018-02-13T10:42:26.434Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > tar-pack > debug:
+        patched: '2018-04-13T09:12:16.962Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > tar-pack > debug:
+        patched: '2018-04-13T09:12:16.962Z'
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > tar-pack > debug:
+        patched: '2018-04-13T09:12:16.962Z'
   'npm:minimatch:20160620':
     - login-with-github > middler > minimatch:
         patched: '2017-11-13T13:18:45.910Z'
@@ -523,6 +523,8 @@ patch:
         patched: '2017-12-15T16:27:39.853Z'
     - codacy-coverage > nsp > lab > jslint > glob > minimatch:
         patched: '2017-12-15T16:27:39.853Z'
+    - satelize > maxmind-db-reader > ip-address > cli > glob > minimatch:
+        patched: '2018-04-23T08:36:14.990Z'
   'npm:qs:20140806-1':
     - login-with-github > request > qs:
         patched: '2017-11-13T13:18:45.910Z'
