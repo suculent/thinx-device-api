@@ -161,18 +161,16 @@ var ThinxApp = function() {
   // list of previously discovered attackers
   var BLACKLIST = ["203.218.194.124", "179.128.55.14"];
 
-
-
   var getClientIp = function(req) {
     var ipAddress = req.ip;
     if (!ipAddress) {
       return "";
     }
-    console.log("Client IP: " + ipAddress);
     // convert from "::ffff:192.0.0.1"  to "192.0.0.1"
     if (ipAddress.substr(0, 7) == "::ffff:") {
       ipAddress = ipAddress.substr(7);
     }
+    console.log("Client IP: " + ipAddress);
     return ipAddress;
   };
 
