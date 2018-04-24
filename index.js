@@ -1127,7 +1127,7 @@ var ThinxApp = function() {
         status: "no_body"
       });
     } else if (typeof(req.body.registration) === "undefined") {
-      var ip = getClientIp(req)
+      var ip = getClientIp(req);
       console.log("Incoming request has no `registration` in body, should BLACKLIST "+ip);
       console.log(JSON.stringify(req.headers));
       BLACKLIST.push(ip);
@@ -1148,7 +1148,7 @@ var ThinxApp = function() {
           console.log("device registration failed with response: "+JSON.stringify(response));
         }
         respond(res, response);
-      });
+      }, req);
     }
   });
 
@@ -3309,7 +3309,7 @@ var ThinxApp = function() {
   // HTTP/S Request Tools
   //
 
-  function respond(res, object) {    
+  function respond(res, object) {
     res.set("Connection", "close");
     if (typeOf(object) == "buffer") {
       console.log("Sending buffer: ");
