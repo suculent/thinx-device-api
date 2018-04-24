@@ -1119,7 +1119,7 @@ var ThinxApp = function() {
   app.post("/device/register", function(req, res) {
 
     validateRequest(req, res);
-    res.set("Connection", "close");
+
 
     if (typeof(req.body) === "undefined") {
       respond(res, {
@@ -1134,7 +1134,7 @@ var ThinxApp = function() {
       console.log(JSON.stringify(req.body));
       respond(res, {
         success: false,
-        status: "no_registration"
+        status: "blacklisted"
       });
     } else {
       var registration = req.body.registration;
@@ -3309,12 +3309,13 @@ var ThinxApp = function() {
   // HTTP/S Request Tools
   //
 
-  function respond(res, object) {
+  function respond(res, object) {    
+    res.set("Connection", "close");
     if (typeOf(object) == "buffer") {
       console.log("Sending buffer: ");
       console.log(object);
       res.header("Content-Type", "application/octet-stream");
-      res.send(object);
+      res.end(object);
     } else if (typeOf(object) == "string") {
       res.end(object);
     } else {
