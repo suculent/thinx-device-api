@@ -164,13 +164,13 @@ var ThinxApp = function() {
   var getClientIp = function(req) {
     var ipAddress = req.ip;
     if (!ipAddress) {
-      return "";
+      return "207.154.230.212"; 
     }
     // convert from "::ffff:192.0.0.1"  to "192.0.0.1"
     if (ipAddress.substr(0, 7) == "::ffff:") {
       ipAddress = ipAddress.substr(7);
     }
-    console.log("Client IP: " + ipAddress);
+    // console.log("Client IP: " + ipAddress);
     return ipAddress;
   };
 
