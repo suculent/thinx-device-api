@@ -1118,10 +1118,7 @@ var ThinxApp = function() {
   // MAC is be allowed for initial regitration where device is given new UDID
 
   app.post("/device/register", function(req, res) {
-
     validateRequest(req, res);
-
-
     if (typeof(req.body) === "undefined") {
       respond(res, {
         success: false,
