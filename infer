@@ -40,10 +40,7 @@ function infer_platform
 
 		# Arduino
 
-	  elif [[ -f "$path/**/*.ino" ]]; then
-			platform="arduino"
-
-		elif [[ -f "$path/*.ino" ]]; then
+		elif [[ $(find $path -name "*.ino") ]]; then
 			platform="arduino"
 
 		# NodeMCU (Lua)

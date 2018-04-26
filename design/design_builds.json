@@ -10,7 +10,7 @@
   "updates": {
     "delete_expired": "function (doc, req) { if (doc.timestamp < req.query.mindate) { doc._deleted = true; return [doc, 'deleted']; } else return [doc, doc._id] }",
     "log": "function(doc, req) { if (doc === null) doc = {}; var fields = JSON.parse(req.body); doc.log.push(fields.record); doc.last_update = fields.record.timestamp; var resp = doc; delete resp._revisions; return [doc, toJSON(resp)]; }",
-    "state": "function(doc, req) { doc.state = req.body.state; return [doc, toJSON(doc)]; }",
-    "edit": "function(doc, req) { var fields = JSON.parse(req.body); for (var i in fields) { doc[i] = fields[i] } var resp = doc; delete resp._revisions; return [doc, toJSON(resp)]; }"
+    "state": "function(doc, req) { if (doc === null) doc = {}; doc.state = req.body.state; return [doc, toJSON(doc)]; }",
+    "edit": "function(doc, req) { if (doc === null) doc = {}; var fields = JSON.parse(req.body); for (var i in fields) { doc[i] = fields[i] } var resp = doc; delete resp._revisions; return [doc, toJSON(resp)]; }"
   }
 }
