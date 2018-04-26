@@ -32,7 +32,7 @@ function infer_platform
 
 		# NodeJS
 
-		elif [[ -f "$path/*.js" ]]; then
+	elif [[ $(find $path -name "*.js") ]]; then
 			platform="nodejs"
 
 		elif [[ -f "$path/package.json" ]]; then

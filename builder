@@ -270,6 +270,8 @@ PLATFORM=$(infer_platform $SINK)
 LANGUAGE=$(language_for_platform $PLATFORM)
 LANGUAGE_NAME=$(language_name $LANGUAGE)
 
+ls | tee -a "${LOG_PATH}"
+
 echo "[builder.sh] Building for platform '${PLATFORM}' in language '${LANGUAGE_NAME}'..." | tee -a "${LOG_PATH}"
 
 SHA="0x00000000"
@@ -312,7 +314,7 @@ case $PLATFORM in
 				if [[ $BUILD_SUCCESS == true ]] ; then
 					echo "[builder.sh] NodeJS Build: Listing output directory: " | tee -a "${LOG_PATH}"
 					pwd | tee -a "${LOG_PATH}"
-					ls | tee -a "${LOG_PATH}"					
+					ls | tee -a "${LOG_PATH}"
 					STATUS='OK'
 				else
 					STATUS='FAILED'
