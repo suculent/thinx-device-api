@@ -25,6 +25,11 @@ DB=${PREFIX}'managed_logs/'
 MINDATE=$(date -d '1 month ago' '+%Y-%m-%d')
 curl -s -X GET "$DB/_all_docs" | jq '.rows | .[].id' | sed -e 's/"//g' | sed -e 's/_design.*//g' | xargs -I id curl -s -X POST ${DB}/_design/logs/_update/delete_expired/id?mindate=${MINDATE}T00:00:00.000Z
 
+# added with GDPR: delete unused accounts after 3 months
+DB=${PREFIX}'managed_users/'
+MINDATE=$(date -d '3 months ago' '+%Y-%m-%d')
+curl -s -X GET "$DB/_all_docs" | jq '.rows | .[].id' | sed -e 's/"//g' | sed -e 's/_design.*//g' | xargs -I id curl -s -X POST ${DB}/_design/logs/_update/delete_expired/id?mindate=${MINDATE}T00:00:00.000Z
+
 
 #
 # This is a new implementation for CouchDB 2 where data are separated into shards

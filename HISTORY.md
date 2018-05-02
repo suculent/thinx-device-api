@@ -2,6 +2,13 @@
 
 ## HISTORY
 
+2/05/2018 0.9.3366:
+
+» SigFox Downlink Support
+» Fixes in Status Transformers
+» JavaScript repos supported
+» User accounts are deleted after 3 months of not being used (GDPR compliance)
+
 19/04/2018 0.9.3296:
 
 » Improved support for NodeJS clients

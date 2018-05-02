@@ -26,6 +26,7 @@
 		"del": "function(doc) {    return !doc._deleted;}"
 	},
 	"updates": {
+		"delete_expired": "function (doc, req) { if (doc.last_seen < req.query.mindate) { doc._deleted = true; return [doc, 'deleted']; } else return [doc, doc._id] }",
 		"checkin": "function (doc, req) { doc.last_seen = new Date(); return [doc, doc._id]; }",
 		"edit": "function(doc, req) { var fields = JSON.parse(req.body); for (var i in fields) { if (i === 'info') { for (var s in fields[i]) { doc[i][s] = fields[i][s]; } } else { doc[i] = fields[i]; } } var resp = doc; delete resp._revisions; return [doc, toJSON(resp)]; }"
 	}
