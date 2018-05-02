@@ -35,9 +35,19 @@ describe("Build log", function() {
     port: 7447,
     server: wserver
   });
+
   var _ws = null;
 
+  function noop() {}
+
+  function heartbeat() {
+    this.isAlive = true;
+  }
+
   wss.on('connection', function connection(ws, req) {
+
+    ws.isAlive = true;
+    ws.on('pong', heartbeat);
 
     _ws = ws;
     var location = req.url;

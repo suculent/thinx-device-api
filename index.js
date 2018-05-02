@@ -3056,10 +3056,24 @@ var ThinxApp = function() {
     server: wserver
   });
 
-
   var _ws = null;
 
+  function noop() {}
+
+  function heartbeat() {
+    this.isAlive = true;
+  }
+
   if (typeof(wss) !== "undefined") {
+
+    const interval = setInterval(function ping() {
+      wss.clients.forEach(function each(ws) {
+        if (ws.isAlive === false) return ws.terminate();
+
+        ws.isAlive = false;
+        ws.ping(noop);
+      });
+    }, 30000);
 
     wss.on("connection", function connection(ws, req) {
 
@@ -3073,6 +3087,9 @@ var ThinxApp = function() {
         return;
       });
 
+      ws.isAlive = true;
+      ws.on('pong', heartbeat);
+      
       _ws = ws;
 
       var cookies = req.headers.cookie;
