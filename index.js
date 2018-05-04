@@ -161,6 +161,8 @@ var ThinxApp = function() {
   // list of previously discovered attackers
   var BLACKLIST = ["203.218.194.124", "179.128.55.14"];
 
+  var last_client_ip = null;
+
   var getClientIp = function(req) {
     var ipAddress = req.ip;
     if (!ipAddress) {
@@ -171,7 +173,8 @@ var ThinxApp = function() {
     if (ipAddress.indexOf("::ffff:") !== -1 ) {
       ipAddress = ipAddress.replace("::ffff:", "");
     }
-    console.log("Client IP: " + ipAddress);
+    last_client_ip = ipAddress;
+    //console.log("Client IP: " + ipAddress);
     return ipAddress;
   };
 
@@ -1145,7 +1148,7 @@ var ThinxApp = function() {
         }
         if (success == false) {
           console.log("Device registration failed with response: "+JSON.stringify(response));
-        } 
+        }
         console.log("Sending response: "+JSON.stringify(response));
         respond(res, response);
       }, req);
