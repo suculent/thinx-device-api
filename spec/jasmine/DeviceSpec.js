@@ -63,7 +63,7 @@ describe("Device", function() {
 
         it("should be able to register itself.", function(done) {
 
-          device.register(JRS2, this.apikey,
+          device.register(JRS2, this.apikey, null,
             function(success, response) {
 
               if (success === false) {
@@ -109,7 +109,7 @@ describe("Device", function() {
         it("should be able to register device for revocation testing", function(
           revocation_create_done) {
 
-          device.register(JRS, apikey,
+          device.register(JRS, apikey, null,
             function(success, response) {
               console.log("• DeviceSpec.js: Registration result: " + JSON.stringify(
                 response));
@@ -172,7 +172,7 @@ describe("Device", function() {
   it(
     "should receive different response for already-registered revice",
     function(done) {
-      device.register(JRS, apikey,
+      device.register(JRS, apikey, null, 
         function(success, response) {
           expect(response).toBeDefined();
           if (success === false) {

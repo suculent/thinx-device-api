@@ -1136,7 +1136,7 @@ var ThinxApp = function() {
       });
     } else {
       var registration = req.body.registration;
-      device.register(registration, req.headers.authentication, function(
+      device.register(registration, req.headers.authentication, _ws, function(
         success, response) {
         // Append timestamp inside as library is not parsing HTTP response JSON properly
         // when it ends with anything else than }}
@@ -1145,7 +1145,7 @@ var ThinxApp = function() {
         }
         if (success == false) {
           console.log("Device registration failed with response: "+JSON.stringify(response));
-        }
+        } 
         console.log("Sending response: "+JSON.stringify(response));
         respond(res, response);
       }, req);
@@ -3089,7 +3089,7 @@ var ThinxApp = function() {
 
       ws.isAlive = true;
       ws.on('pong', heartbeat);
-      
+
       _ws = ws;
 
       var cookies = req.headers.cookie;
