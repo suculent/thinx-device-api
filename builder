@@ -590,11 +590,10 @@ case $PLATFORM in
 
 			for FILE in `ls -l`
 				do
-				    if test -d $FILE
+				    if test -d $FILE & $FILE !== "lib"
 				    then
 				      echo "[builder.sh] $FILE is a subdirectory, entering..." | tee -a "${LOG_PATH}"
-							# TODO: if $FILE contains *.ino
-							INOS=$(ls $FILE/*.ino)
+							INOS=$(find $FILE -maxdepth 1 -name "*.ino")
 							if [[ ! -z "${INOS}" ]]; then
 								echo "[builder.sh] Selecting Arduino project: ${INOS}" | tee -a "${LOG_PATH}"
 								cd $FILE
