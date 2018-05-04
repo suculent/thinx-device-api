@@ -590,18 +590,21 @@ case $PLATFORM in
 
 			for FILE in `ls -l`
 				do
-				    if test -d $FILE & $FILE !== "lib"
-				    then
-				      echo "[builder.sh] $FILE is a subdirectory, entering..." | tee -a "${LOG_PATH}"
-							INOS=$(find $FILE -maxdepth 1 -name "*.ino")
-							if [[ ! -z "${INOS}" ]]; then
-								echo "[builder.sh] Selecting Arduino project: ${INOS}" | tee -a "${LOG_PATH}"
-								cd $FILE
-								break
-							else
-								echo "[builder.sh] Skipping ${FILE} for there are no INOS inside..." | tee -a "${LOG_PATH}"
-							fi
-				    fi
+						if $FILE !== "lib"
+						then
+					    if test -d $FILE
+					    then
+					      echo "[builder.sh] $FILE is a subdirectory, entering..." | tee -a "${LOG_PATH}"
+								INOS=$(find $FILE -maxdepth 1 -name "*.ino")
+								if [[ ! -z "${INOS}" ]]; then
+									echo "[builder.sh] Selecting Arduino project: ${INOS}" | tee -a "${LOG_PATH}"
+									cd $FILE
+									break
+								else
+									echo "[builder.sh] Skipping ${FILE} for there are no INOS inside..." | tee -a "${LOG_PATH}"
+								fi
+					    fi
+						fi
 				done
 			  echo "[builder.sh] Building for Arduino from folder:" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
