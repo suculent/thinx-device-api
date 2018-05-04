@@ -32,7 +32,7 @@ function infer_platform
 
 		# NodeJS
 
-	elif [[ $(find $path -name "*.js") ]]; then
+	elif [[ $(find $path -maxdepth 1 -name "package.json") ]]; then
 			platform="nodejs"
 
 		elif [[ -f "$path/package.json" ]]; then
@@ -40,7 +40,7 @@ function infer_platform
 
 		# Arduino
 
-		elif [[ $(find $path -name "*.ino") ]]; then
+		elif [[ $(find $path -maxdepth 1 -name "*.ino") ]]; then
 			platform="arduino"
 
 		# NodeMCU (Lua)
