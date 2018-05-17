@@ -1090,7 +1090,6 @@ var ThinxApp = function() {
     }
     console.log("Update with OTT: " + ott);
     device.ott_update(ott, function(success, response) {
-      res.set("Connection", "close");
       respond(res, response);
     });
   });
@@ -1342,7 +1341,6 @@ var ThinxApp = function() {
     if (artifact_data.length > 0) {
       res.header("Content-Disposition", "attachment; filename=\"" + build_id + ".zip\"");
       res.header("Content-Type", "application/zip");
-      res.set("Connection", "close");
       respond(res, artifact_data);
     } else {
       respond(res, {
@@ -3330,7 +3328,6 @@ var ThinxApp = function() {
   //
 
   function respond(res, object) {
-    res.set("Connection", "close");
     if (typeOf(object) == "buffer") {
       console.log("Sending buffer: ");
       console.log(object);
