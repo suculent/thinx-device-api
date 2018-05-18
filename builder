@@ -625,7 +625,7 @@ case $PLATFORM in
 						BUILD_SUCCESS=false
 						echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
 					else
-						cho " " | tee -a "${LOG_PATH}"
+						echo " " | tee -a "${LOG_PATH}"
 						echo "[builder.sh] Docker build succeeded." | tee -a "${LOG_PATH}"
 						echo " " | tee -a "${LOG_PATH}"
 						zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ${OUTFILE} # zip artefacts
