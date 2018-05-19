@@ -588,9 +588,9 @@ case $PLATFORM in
 				echo "[builder.sh] Found THiNX-File: ${THINX_FILE}" | tee -a "${LOG_PATH}"
 			fi
 
-			for FILE in `ls`
+			for FILE in ./*
 				do
-						if $FILE !== "lib"
+						if "$FILE" !== "lib"
 						then
 					    if test -d $FILE
 					    then

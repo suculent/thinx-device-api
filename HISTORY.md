@@ -2,6 +2,10 @@
 
 ## HISTORY
 
+18/05/2018 
+
+» Major fixes in Arduino ESP266/ESP32 builder
+
 2/05/2018 0.9.3366:
 
 » SigFox Downlink Support
