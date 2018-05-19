@@ -688,10 +688,17 @@ case $PLATFORM in
 					cd $PIOD
 				else
 					echo "[builder.sh] Skipping ${FILE} for there are no PIOS inside..." | tee -a "${LOG_PATH}"
+					BUILD_SUCCESS=false
 				fi
 		  fi
 
-			OUTFILE=$(pwd)/build/firmware.bin
+			OUTFILE=$(find $(pwd)/ -name "firmware.bin"  | head -n 1)
+
+			if [ ! -f $OUTFILE ]; then
+				echo "$OUTFILE not found"
+				BUILD_SUCCESS=false
+			fi
+
 
 			echo "[builder.sh] running Docker >>>"
 			set -o pipefail
