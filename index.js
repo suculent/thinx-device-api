@@ -644,6 +644,7 @@ var ThinxApp = function() {
     apikey.list(owner, function(success, keys) {
       if (success) {
         respond(res, {
+          success: true,
           api_keys: keys
         });
         return;
