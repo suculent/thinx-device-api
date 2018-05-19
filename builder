@@ -712,6 +712,10 @@ case $PLATFORM in
 			echo "[builder.sh] Docker completed <<<"
 			#echo "Current folder contents after build:" | tee -a "${LOG_PATH}"
 			#ls | tee -a "${LOG_PATH}"
+			#
+			OUTFILE=$(find $(pwd)/ -name "firmware.bin"  | head -n 1)
+
+			echo "OUTFILE: ${OUTFILE}"
 
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
@@ -721,10 +725,13 @@ case $PLATFORM in
 				# Check Artifacts
 				if [[ $BUILD_SUCCESS == true ]] ; then
 					STATUS='OK'
-					if [[ $(find $OUTFILE -type f -size +10000c 2>/dev/null) ]]; then
-						rm -rf $OUTFILE
+					ls
+
+					if [[ $(find $(pwd)/ -name "firmware.bin" -type f -size +10000c 2>/dev/null) ]]; then
+						# rm -rf $OUTFILE
 						BUILD_SUCCESS=false
 						echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
+						ls
 					else
 						echo " " | tee -a "${LOG_PATH}"
 						echo "[builder.sh] Docker build succeeded." | tee -a "${LOG_PATH}"
