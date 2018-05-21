@@ -699,7 +699,6 @@ case $PLATFORM in
 				BUILD_SUCCESS=false
 			fi
 
-
 			echo "[builder.sh] running Docker >>>"
 			set -o pipefail
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build | tee -a "${LOG_PATH}"
