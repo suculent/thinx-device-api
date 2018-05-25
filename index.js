@@ -3164,8 +3164,7 @@ var ThinxApp = function() {
   }
 
   wserver.listen(7444, function listening() {
-    console.log("» WebSocket listening on port %d", wserver.address()
-      .port);
+    console.log("» WebSocket listening on port %d", wserver.address().port);
   });
 
 
@@ -3178,7 +3177,7 @@ var ThinxApp = function() {
   var version = package_info.version;
 
   console.log("-=[ ☢ " + product + " v" + version + " rev. " + app.version() + " ☢ ]=-");
-  console.log("» Started on port " + serverPort + " (HTTP) and " + (serverPort + 1) + " (HTTPS)");
+  //console.log("» Started on port " + serverPort + " (HTTP) and " + (serverPort + 1) + " (HTTPS)");
 
   /* Should load all devices with attached repositories and watch those repositories.
    * Maintains list of watched repositories for runtime handling purposes.
@@ -3289,7 +3288,7 @@ var ThinxApp = function() {
     try {
       console.log(exec.execSync(st_command).toString());
     } catch(e) {
-      if ( e.indexOf("port is already allocated") !== -1) {
+      if ( e.toString().indexOf("port is already allocated") !== -1) {
         console.log("Status Transformer Docker exec error: " + e);
       }
     }
