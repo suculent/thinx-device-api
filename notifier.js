@@ -29,6 +29,7 @@ if (process.env.LOGNAME == "root") {
 }
 
 var sha256 = require("sha256");
+var crypto = require('crypto');
 
 var db = config.database_uri;
 
@@ -84,6 +85,7 @@ var owner = process.argv[9]; // owner_id
 var status = process.argv[10] || true; // build result status
 var platform = process.argv[11] || "unknown"; // build result status
 var thinx_firmware_version = process.argv[12] || repo_url; // build result status
+var md5 = process.argv[13] || repo_url; // build result status
 
 // Validate params
 
@@ -137,6 +139,25 @@ if (typeof(sha) === "undefined" || sha === "") {
   }
 }
 
+if (typeof(md5) === "undefined" || md5 === "") {
+  var binary = build_path + ".bin";
+  console.log("Calculating md5 checksum for " + binary);
+  var data = fs.readFileSync(binary, "binary", function(err, data) {
+    if (err) {
+      console.log(err);
+    }
+  });
+  if (data) {
+    md5 = crypto.createHash('md5').update(string).digest('hex');
+    that.md5 = md5;
+    console.log("Calculated new md5: " + md5);
+  } else {
+    md5 = "";
+    that.md5 = md5;
+    console.log("Data file not found.");
+  }
+}
+
 nano.db.create(prefix + "managed_builds", function(err, body, header) {
   if (err) {
     if (err ==
@@ -163,6 +184,7 @@ console.log("udid : " + udid);
 console.log("sha : " + sha);
 console.log("status : " + status);
 console.log("thinx_firmware_version : " + thinx_firmware_version);
+console.log("md5 : " + md5);
 
 
 var blog = require("./lib/thinx/buildlog");
@@ -253,7 +275,9 @@ devicelib.get(udid, function(err, doc) {
       owner: owner,
       status: status,
       timestamp: device.last_build_date,
-      artifact: device.artifact
+      artifact: device.artifact,
+      sha: sha,
+      md5: md5
     };
 
     // save to build_path
