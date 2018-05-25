@@ -2420,7 +2420,7 @@ var ThinxApp = function() {
             var owner_id = null;
 
             try {
-              owner_id = sha256(email);
+              owner_id = sha256(prefix + email);
             } catch (e) {
               console.log("error parsing e-mail: " + e + " email: " + email);
               console.log("ERROR! This redirect won't work as headers are already set.");
