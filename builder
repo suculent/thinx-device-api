@@ -759,13 +759,16 @@ esac
 # cleanup all subdirectories
 ls -d  $DEPLOYMENT_PATH/*/ | xargs rm -rf
 
+SHA="0"
+MD5="0"
+
 if [[ ! -f "${OUTFILE}" ]]; then
 	OUTFILE="<none>"
-	SHA="0x00000000"
 else
 	echo "Calculating checksum for $OUTFILE"
 	SHAX=$(shasum -a 256 $OUTFILE)
 	SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
+	MD5=$(md5 -sq $OUTFILE)
 fi
 
 if [[ "${OUTFILE}" == "" ]]; then
@@ -773,6 +776,9 @@ if [[ "${OUTFILE}" == "" ]]; then
 fi
 
 echo "[builder.sh] Build completed with status: $STATUS" | tee -a "${LOG_PATH}"
+
+echo "[builder.sh] Build hash: $SHA" | tee -a "${LOG_PATH}"
+echo "[builder.sh] Build MD5: $MD5" | tee -a "${LOG_PATH}"
 
 echo "[builder.sh] Post-flight check:" | tee -a "${LOG_PATH}"
 
@@ -809,6 +815,7 @@ echo "OWNER_ID" "${OWNER_ID}" | tee -a "${LOG_PATH}"
 echo "STATUS" "${STATUS}" | tee -a "${LOG_PATH}"
 echo "PLATFORM" "${PLATFORM}" | tee -a "${LOG_PATH}"
 echo "THINX_FIRMWARE_VERSION" "${THINX_FIRMWARE_VERSION}" | tee -a "${LOG_PATH}"
+echo "MD5" "${MD5}" | tee -a "${LOG_PATH}"
 
 echo "[builder.sh] Log path: $LOG_PATH" | tee -a "${LOG_PATH}"
 
