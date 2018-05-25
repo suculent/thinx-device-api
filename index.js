@@ -3202,34 +3202,6 @@ var ThinxApp = function() {
     }
   };
 
-  var getNewestFolder = function(dir, regexp) {
-    newest = null;
-    files = fs.readdirSync(dir);
-    one_matched = 0;
-
-    for (i = 0; i < files.length; i++) {
-
-      if (regexp.test(files[i]) === false) {
-        continue;
-      } else if (one_matched === 0) {
-        newest = dir + "/" + files[i];
-        one_matched = 1;
-        continue;
-      }
-
-      var filepath = dir + "/" + files[i];
-      //console.log("STAT> " + filepath);
-      f1_time = fs.statSync(filepath).mtime.getTime();
-      f2_time = fs.statSync(newest).mtime.getTime();
-      if (f1_time > f2_time)
-        newest[i] = files[i];
-    }
-
-    if (newest !== null)
-      return (newest);
-    return null;
-  };
-
   //
   // Database compactor
   //
