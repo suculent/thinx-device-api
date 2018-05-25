@@ -2,7 +2,14 @@
 
 ## HISTORY
 
-18/05/2018 
+25/05/2018
+
+» SHA-256 and MD5 hash validation support
+» Updated builder for ESP8266/ESP32
+» Fixed GitHub OAuth account creation
+» Status Transformer Self-healing
+
+18/05/2018
 
 » Major fixes in Arduino ESP266/ESP32 builder
 
