@@ -4,6 +4,7 @@
 
 26/05/2018 0.9.3419
 
+» Added SSL support on the library side for ESP8266/ESP32
 » SHA-256 and MD5 hash validation support
 » Updated builder for ESP8266/ESP32
 » Fixed GitHub OAuth account creation
