@@ -1236,7 +1236,7 @@ var ThinxApp = function() {
       res.writeHead(401, {
         "Content-Type": "text/plain"
       });
-      res.end("validate: Client request has invalid User-Agent.");
+      res.end("validate: Client request has invalid User-Agent '"+ua+"'");
       return false;
     }
   }
