@@ -2,12 +2,13 @@
 
 ## HISTORY
 
-25/05/2018
+26/05/2018 0.9.3419
 
 » SHA-256 and MD5 hash validation support
 » Updated builder for ESP8266/ESP32
 » Fixed GitHub OAuth account creation
 » Status Transformer Self-healing
+» Optimized checkin (firmware provider)
 
 18/05/2018
 
