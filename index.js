@@ -1232,6 +1232,11 @@ var ThinxApp = function() {
         return true;
       }
 
+      // ESP32HTTPClient has issues overriding User-Agent?
+      if (ua.indexOf("ESP32HTTPClient") !== -1) {
+        return true;
+      }
+
       console.log("User-Agent: " + ua + " invalid!");
       res.writeHead(401, {
         "Content-Type": "text/plain"
