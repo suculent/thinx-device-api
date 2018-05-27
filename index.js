@@ -1122,6 +1122,8 @@ var ThinxApp = function() {
 
   app.post("/device/register", function(req, res) {
     console.time("register");
+    const startTime = new Date().getMilliseconds();
+    console.log("** REG START: " + startTime);
     validateRequest(req, res);
     if (typeof(req.body) === "undefined") {
       console.timeEnd("register");
@@ -1145,6 +1147,8 @@ var ThinxApp = function() {
       });
       console.timeEnd("register-response");
     } else {
+      const regTime = new Date().getMilliseconds();
+      console.log("** REG BODY: " + regTime);
       var registration = req.body.registration;
       device.register(registration, req.headers.authentication, _ws, function(
         success, response) {
@@ -1159,6 +1163,7 @@ var ThinxApp = function() {
         console.log("Sending response: "+JSON.stringify(response));
         console.timeEnd("register");
         console.time("register-response");
+        console.log("** REG END: " + new Date().getMilliseconds() - startTime);
         respond(res, response);
         console.timeEnd("register-response");
       }, req);
