@@ -616,9 +616,14 @@ case $PLATFORM in
 				set -o pipefail
 				docker run ${DOCKER_PREFIX} -t -v `pwd`:/opt/workspace suculent/arduino-docker-build | tee -a "${LOG_PATH}"
 				echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
+
+				cd build
+				
 				pwd | tee -a "${LOG_PATH}"
 				ls -la | tee -a "${LOG_PATH}"
 				echo "[builder.sh] Docker completed <<<" | tee -a "${LOG_PATH}"
+
+
 
 				# TODO: Check for firmware.bin! Result is of tee (probably)
 
