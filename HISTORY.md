@@ -2,6 +2,8 @@
 
 ## HISTORY
 
+» Added support for DST and timezone offset
+
 26/05/2018 0.9.3419
 
 » Added SSL support on the library side for ESP8266/ESP32
