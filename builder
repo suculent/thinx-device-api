@@ -609,30 +609,46 @@ case $PLATFORM in
 			  echo "[builder.sh] Building for Arduino from folder:" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 
-				echo "[builder.sh] running Docker >>>"
+				echo "Deployment path: " | tee -a "${LOG_PATH}"
+				ls ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
+
+				echo "[builder.sh] running Docker >>>" | tee -a "${LOG_PATH}"
 				set -o pipefail
-				docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/arduino-docker-build | tee -a "${LOG_PATH}"
-				echo "PIPESTATUS ${PIPESTATUS[@]}"
-				echo "[builder.sh] Docker completed <<<"
+				docker run ${DOCKER_PREFIX} -t -v `pwd`:/opt/workspace suculent/arduino-docker-build | tee -a "${LOG_PATH}"
+				echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
+
+				cd build
+				
+				pwd | tee -a "${LOG_PATH}"
+				ls -la | tee -a "${LOG_PATH}"
+				echo "[builder.sh] Docker completed <<<" | tee -a "${LOG_PATH}"
+
+
 
 				# TODO: Check for firmware.bin! Result is of tee (probably)
 
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
 
-					if [[ $(find $OUTFILE -type f -size +10000c 2>/dev/null) ]]; then
-						rm -rf $OUTFILE
+					INFILE=$( find $BUILD_PATH -name "firmware.bin" )
+
+					if [[ $(find $INFILE -type f -size +10000c 2>/dev/null) ]]; then
+						rm -rf $INFILE
 						BUILD_SUCCESS=false
 						echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
 					else
 						echo " " | tee -a "${LOG_PATH}"
 						echo "[builder.sh] Docker build succeeded." | tee -a "${LOG_PATH}"
 						echo " " | tee -a "${LOG_PATH}"
-						zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ${OUTFILE} # zip artefacts
+						BIN_FILE=$( find $BUILD_PATH -name "firmware.bin" )
+						echo "BIN_FILE: $BIN_FILE" | tee -a "${LOG_PATH}"
+						zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ${BIN_FILE} # zip artefacts
 					fi
 				else
 					echo " " | tee -a "${LOG_PATH}"
 					echo "[builder.sh] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
+					BIN_FILE=$( find $BUILD_PATH -name "firmware.bin" )
+					echo "BIN_FILE: $BIN_FILE" | tee -a "${LOG_PATH}"
 					echo " " | tee -a "${LOG_PATH}"
 				fi
 
@@ -653,8 +669,8 @@ case $PLATFORM in
 						pwd
 						pwd | tee -a "${LOG_PATH}"
 						echo "[builder.sh] Current workdir contents: " | tee -a "${LOG_PATH}"
-						ls
-						ls | tee -a "${LOG_PATH}"
+						ls -la
+						ls -la | tee -a "${LOG_PATH}"
 						cp -vf *.bin "$OUTFILE" | tee -a "${LOG_PATH}"
 						cp -vf *.elf "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 						echo "[builder.sh] Deployment path $DEPLOYMENT_PATH contains:" | tee -a "${LOG_PATH}"

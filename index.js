@@ -1121,23 +1121,34 @@ var ThinxApp = function() {
   // MAC is be allowed for initial regitration where device is given new UDID
 
   app.post("/device/register", function(req, res) {
+    console.time("register");
+    const startTime = new Date().getMilliseconds();
+    console.log("** REG START: " + startTime);
     validateRequest(req, res);
     if (typeof(req.body) === "undefined") {
+      console.timeEnd("register");
+      console.time("register-response");
       respond(res, {
         success: false,
         status: "no_body"
       });
+      console.timeEnd("register-response");
     } else if (typeof(req.body.registration) === "undefined") {
       var ip = getClientIp(req);
       console.log("Incoming request has no `registration` in body, should BLACKLIST "+ip);
       console.log(JSON.stringify(req.headers));
       BLACKLIST.push(ip);
       console.log(JSON.stringify(req.body));
+      console.timeEnd("register");
+      console.time("register-response");
       respond(res, {
         success: false,
         status: "blacklisted"
       });
+      console.timeEnd("register-response");
     } else {
+      const regTime = new Date().getMilliseconds();
+      console.log("** REG BODY: " + regTime);
       var registration = req.body.registration;
       device.register(registration, req.headers.authentication, _ws, function(
         success, response) {
@@ -1150,7 +1161,11 @@ var ThinxApp = function() {
           console.log("Device registration failed with response: "+JSON.stringify(response));
         }
         console.log("Sending response: "+JSON.stringify(response));
+        console.timeEnd("register");
+        console.time("register-response");
+        console.log("** REG END: " + new Date().getMilliseconds() - startTime);
         respond(res, response);
+        console.timeEnd("register-response");
       }, req);
     }
   });
