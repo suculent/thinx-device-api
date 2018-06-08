@@ -15,25 +15,31 @@ IoT Device Management Server running on node.js.
 ## The Purpose
 
 
-> Update IoT device by pushing to a Git repository. Swap operating system for another over-the-air. Migrate multiple devices at once between WiFi networks.
+* Update IoT device by pushing a code to a Git repository. We'll build it.
+* Swap operating system for another over-the-air.
+* Migrate multiple devices at once between WiFi networks.
+* THiNX provides complete IoT infrastructure for your device (where the data storage and visualisation can be fully up to you).
+* automatic updates for headless devices, or semi-automatic (with user consent after build and tests succeed)
 
-As a user I have already many IoT new and/or legacy devices at home and new platforms are coming every day.
+> As a user I have already many IoT new and/or legacy devices at home and new platforms are coming every day.
 
-Sometimes we need to change WiFi credentials on a wireless switch mounted on a ceiling. The other day I we want to swap whole firmware for new one, but not always to rewrite working legacy Lua or Micropython code to PlatformIO.
+> Sometimes we need to change WiFi credentials on a wireless switch mounted on a ceiling. The other day I we want to swap whole firmware for new one, but not always to rewrite working legacy Lua or Micropython code to PlatformIO.
 
-It also covers other use-cases like remotely managing devices for customers with automatic updates for headless devices, or semi-automatic (with user consent after build and tests succeeded).
+That's why we have decided to create the über-platform: THiNX.
 
-> That's why we have decided to create the über-platform: THiNX.
+## Supported hardware
 
-Currently we're capable of building firmwares for PlatformIO, NodeMCU and Micropython (and simple Arduino firmware is also coming soon)
+Currently the platform supports building firmware for Arduino, PlatformIO (also with ESP-IDF), NodeMCU, Mongoose, Micropython and features JavaScript library that is intended to use on any hardware capable of running a Node.js server.
+
+## Features
 
 * Remote Things Management console for monitoring devices, attaching source code, pushing data, managing incoming payloads and firmware updates.
 
-* Implements Continuous Integration practices to update device apps/configurations from a GitHub repository using commit hooks.
+* Continuous Integration practices to update device apps/configurations from a GitHub repository using commit hooks
 
-* Helps building secure MQTT infrastructure as an optional side-chain transport layer.
+* Building secure MQTTS infrastructure as an optional side-chain transport layer.
 
-* Serves as an IoT device registration endpoint while storing device data using CouchDB server and Redis session-store.
+* Device registration endpoint while storing device data using CouchDB server and Redis session-store.
 
 * API is a back-end data provider (security agent) for RTM Admin Console Application.
 
@@ -51,23 +57,24 @@ Currently we're capable of building firmwares for PlatformIO, NodeMCU and Microp
 
 * Supports OAuth login with Google and GitHub.
 
+* Supports InfluxDB/Grafana data storage and visualisation.
+
+* Supports LoRaWan server integration.
+
 
 ## Supported IoT Platforms
 
-* ESP8266 for PlatformIO and Arduino IDE
+* PlatformIO and Arduino IDE (ESP8266P/ESP32)
 * Micropython
 * Lua
 * MongooseOS
+* NodeJS (Mac/Linux/Windows)
 
-* NodeJS (Mac/Linux/Windows) - any device capable of running node.js can use JavaScript port of THiNXLib
+* Tested on Wemos D1 Mini, Wemos D1 Mini Pro, RobotDyn D1, RobotDyn D1 Mini, RobotDyn MEGA WiFi and various NodeMCU (Lolin, AI-THINKER) boards with Mongoose, Arduino Core, ESP-IDF, Lua and Micropython-based core firmwares...
 
-* Tested on Wemos D1 Mini, Wemos D1 Mini Pro, RobotDyn D1, RobotDyn D1 Mini, RobotDyn MEGA WiFi and various NodeMCU (Lolin, AI-THINKER) boards with Arduino, Lua and Micropython-based core firmwares...
-
-* Expected: Arduino with networking support
+* Expected: Arduino and BigClown with networking support
 
 Base THiNXLib Platform Library in C++:
-
-[Source Repo for Arduino Library Manager](https://github.com/suculent/thinx-lib-esp8266-arduinoc)
 
 [THiNXLib for ESP8266](https://github.com/suculent/thinx-lib-esp8266)
 
@@ -114,15 +121,17 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 
 ## Prerequisites for running own THiNX Server
 
-* Linux Server (min. 2 GB RAM, 32GB SSD)
+* Linux Server (min. 2 GB RAM, 32GB SSD, Ubuntu)
 * Docker
 
 ## Port mapping
 
-* API runs on HTTP port 7442 (possibly HTTPS 7443) and 7447 (web socket)
-* MQTT runs on HTTP port 1883 (possibly HTTPS 8883)
+* API runs on HTTP port 7442 (HTTPS 7443) and 7447 (web socket)
+* MQTTS runs on port 8883
 * Admin runs on HTTP/HTTPS port (80/443)
 * GitHub commit hooks are listened to on port 9000, 9001
+* Grafana (3003), InfluxDB (3004)
+* Status Transformers (localhost only, 7445)
 * Optional monitoring services (Keymetrics, TrueSight) may run on other ports as well...
 
 ## Installation
@@ -131,7 +140,7 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 
 Experimental Docker installation can be found at [Docker Hub](https://hub.docker.com/r/suculent/thinx-docker/).
 
-First of all, set a valid FQDN for your new THiNX instance on your DNS server. Use this FQDN to parametrise the Docker image:
+First of all, set a valid FQDN (THINX_HOSTNAME) for your new THiNX instance on your DNS server. Use this FQDN to parametrise the Docker image by following example:
 
     docker pull suculent/thinx-docker
 
@@ -156,7 +165,7 @@ bash ./install-builders.sh
 
 ### Run after boot
 
-We're currently using /etc/rc.local to kick thinx up after a failure:
+We're currently using /etc/rc.local to kick THiNX up after a failure:
 
 ```
 
@@ -171,6 +180,15 @@ redis-server > /root/thinx-device-api/redis.log &
 
 # NodeJS Sandbox
 docker run -d suculent/thinx-node-tranformer
+
+# Grafana/InfluxDB
+docker run -d \
+  -p 3003:3003 \
+  -p 3004:8083 \
+  -p 8086:8086 \
+  -v /root/docker-influxdb-grafana/influxdb:/var/lib/influxdb \
+  -v /root/docker-influxdb-grafana/grafana:/var/lib/grafana \
+  suculent/docker-influxdb-grafana:latest
 
 # THiNX itself
 cd /root/thinx-device-api/ && pm2 start index
@@ -191,7 +209,7 @@ See 03-test.sh. There is no point of maintaining documentation for this at curre
 
 ### Overall
 
-Platform libraries are now stabilised on the basic level, approaching first release version 1.0.
+Platform libraries are now stabilised on the basic level, approaching first release version 1.0 with default HTTPS with optional fallback to HTTP for development.
 
 ### PlatformIO
 
@@ -219,7 +237,3 @@ Platform libraries are now stabilised on the basic level, approaching first rele
 
 * PlatformIO: end-to-end update
 * Arduino: end-to-end update
-
-## Platform support
-
-* ESP32 (library THiNX32)
