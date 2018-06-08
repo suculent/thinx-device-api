@@ -1137,7 +1137,9 @@ var ThinxApp = function() {
       var ip = getClientIp(req);
       console.log("Incoming request has no `registration` in body, should BLACKLIST "+ip);
       console.log(JSON.stringify(req.headers));
+      /*
       BLACKLIST.push(ip);
+      */
       console.log(JSON.stringify(req.body));
       console.timeEnd("register");
       console.time("register-response");
