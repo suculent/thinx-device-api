@@ -6,7 +6,7 @@
   "port": 7442,
   "secure_port": 7443,
   "websocket": 7444,
-  "lambda": 7474,
+  "lambda": 7475,
   "deploy_root": "/data",
   "build_root": "/repositories",
   "slack_webhook": "https://hooks.slack.com/services/XXXXXXXX/XXXXXXXXX/Xxxx...",
