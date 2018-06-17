@@ -17,5 +17,6 @@
   "client_user_agent": "THiNX-Client",
   "project_root": "/root/thinx-device-api",
   "mqtt_server": "mqtt://thinx.cloud",
-  "mqtt_messenger_key": "5ec1fdd8-5d68-11e7-b0e3-4c327591230d"
+  "mqtt_messenger_key": "5ec1fdd8-5d68-11e7-b0e3-4c327591230d",
+  "default_avatar": ""
 }
