@@ -25,18 +25,23 @@
 [submodule "tools/mongoose-docker-build"]
 	path = tools/mongoose-docker-build
 	url = https://github.com/suculent/mongoose-docker-build
+
 [submodule "spec/test_repositories/thinx-firmware-esp32-ino"]
 	path = spec/test_repositories/thinx-firmware-esp32-ino
-	url = git@github.com:suculent/thinx-firmware-esp32-ino.git
+	url = https://github.com/suculent/thinx-firmware-esp32-ino.git
+
 [submodule "spec/test_repositories/thinx-firmware-esp8266-ino"]
 	path = spec/test_repositories/thinx-firmware-esp8266-ino
-	url = git@github.com:suculent/thinx-firmware-esp8266-ino.git
+	url = https://github.com/suculent/thinx-firmware-esp8266-ino.git
+
 [submodule "spec/test_repositories/thinx-firmware-esp8266-upy"]
 	path = spec/test_repositories/thinx-firmware-esp8266-upy
-	url = git@github.com:suculent/thinx-firmware-esp8266-upy.git
+	url = https://github.com/suculent/thinx-firmware-esp8266-upy.git
+
 [submodule "spec/test_repositories/thinx-firmware-esp8266-lua"]
 	path = spec/test_repositories/thinx-firmware-esp8266-lua
-	url = git@github.com:suculent/thinx-firmware-esp8266-lua.git
+	url = https://github.com/suculent/thinx-firmware-esp8266-lua.git
+
 [submodule "spec/test_repositories/thinx-firmware-esp8266-pio"]
 	path = spec/test_repositories/thinx-firmware-esp8266-pio
 	url = https://github.com/suculent/thinx-firmware-esp8266-pio.git
