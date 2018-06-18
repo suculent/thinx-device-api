@@ -45,8 +45,7 @@ jobs:
         # Any branch if there are none on the default branch - this should be unnecessary if you have your default branch configured correctly
         - v1-dep-
     # This is based on your 1.0 configuration file or project settings
-    - run: sudo apt-get update
-    - run: sudo apt-get install -y --fix-missing mosquitto sendmail
+    - run: sudo apt-get update && sudo apt-get install -y --fix-missing --no-install-recommends mosquitto sendmail
     - run: git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
     - run: npm install coveralls pm2 nyc eslint -g
     - run: npm install .
@@ -54,7 +53,6 @@ jobs:
     - run: tar xzf redis-4.0.8.tar.gz
     - run: cd redis-4.0.8 && make
     - run: make install
-    - run: mkdir /etc/redis
     - run: cp /tmp/redis-stable/redis.conf /etc/redis
     - run: mkdir statistics
     - run: touch ~/thinx-device-api/mqtt_passwords
