@@ -37,3 +37,6 @@
 [submodule "spec/test_repositories/thinx-firmware-esp8266-lua"]
 	path = spec/test_repositories/thinx-firmware-esp8266-lua
 	url = git@github.com:suculent/thinx-firmware-esp8266-lua.git
+[submodule "thinx-firmware-esp8266-pio"]
+	path = thinx-firmware-esp8266-pio
+	url = https://github.com/suculent/thinx-firmware-esp8266-pio.git
