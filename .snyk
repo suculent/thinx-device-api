@@ -1,5 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.11.0
+version: v1.12.0
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   'npm:qs:20170213':
@@ -540,3 +540,8 @@ patch:
   'npm:tough-cookie:20170905':
     - codacy-coverage > request-promise > request > tough-cookie:
         patched: '2017-12-15T16:27:39.853Z'
+  'npm:lodash:20180130':
+    - gulp-repository-watch > lodash:
+        patched: '2018-07-04T08:03:08.073Z'
+    - slack-notify > lodash:
+        patched: '2018-07-04T08:03:08.073Z'
