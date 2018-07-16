@@ -90,7 +90,7 @@ describe("Device", function() {
                   var body = JRS2;
                   body.udid = this.udid;
                   console.log("• DeviceSpec.js: Using UDID: " + udid);
-                  device.firmware(body, this.apikey, function(
+                  device.firmware(body, this.apikey, req, function(
                     success, response) {
                     console.log("• DeviceSpec.js: Firmware fetch result: " +
                       JSON.stringify(
@@ -172,7 +172,7 @@ describe("Device", function() {
   it(
     "should receive different response for already-registered revice",
     function(done) {
-      device.register(JRS, apikey, null, 
+      device.register(JRS, apikey, null,
         function(success, response) {
           expect(response).toBeDefined();
           if (success === false) {
