@@ -159,7 +159,7 @@ var ThinxApp = function() {
   var WebSocket = require("ws");
 
   // list of previously discovered attackers
-  var BLACKLIST = ["203.218.194.124", "179.128.55.14"];
+  var BLACKLIST = ["203.218.194.124", "179.128.55.14", "188.166.14.166"];
 
   var last_client_ip = null;
 
@@ -329,22 +329,21 @@ var ThinxApp = function() {
   // rolling was true; This resets the expiration date on the cookie to the given default.
 
   app.use(parser.json({
-    limit: "10mb"
+    limit: "1mb"
   }));
 
   app.use(parser.urlencoded({
     extended: true,
-    parameterLimit: 10000,
-    limit: "10mb"
+    parameterLimit: 1000,
+    limit: "1mb"
   }));
-
 
   app.use(function(req, res, next) {
     var ipAddress = getClientIp(req);
     if (BLACKLIST.toString().indexOf(ipAddress) === -1) {
       next();
     } else {
-      next(); // res.status(418).end();
+      res.status(418).end();
     }
   });
 
