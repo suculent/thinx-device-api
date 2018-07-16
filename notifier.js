@@ -8,12 +8,6 @@
 
 var Rollbar = require('rollbar');
 
-var rollbar = new Rollbar({
-  accessToken: '5505bac5dc6c4542ba3bd947a150cb55',
-  handleUncaughtExceptions: true,
-  handleUnhandledRejections: true
-});
-
 var config = require("./conf/config.json");
 if (typeof(process.env.CIRCLE_USERNAME) !== "undefined") {
   console.log("» Starting notifier on Circle CI...");
@@ -27,6 +21,12 @@ if (process.env.LOGNAME == "root") {
   console.log("» Starting in production mode...");
   config = require("./conf/config.json");
 }
+
+var rollbar = new Rollbar({
+  accessToken: config.rollbar_token,
+  handleUncaughtExceptions: true,
+  handleUnhandledRejections: true
+});
 
 var sha256 = require("sha256");
 var crypto = require('crypto');
