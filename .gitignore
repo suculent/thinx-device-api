@@ -19,7 +19,6 @@ data/**
 repositories/
 avatars/*
 
-mqtt_passwords
 dhparams.pem
 dump.rdb
 
@@ -46,3 +45,7 @@ statistics/**
 
 # Circle CI
 ./package-lock.json
+
+# Mosquitto
+mosquitto.aclfile
+mqtt_passwords
