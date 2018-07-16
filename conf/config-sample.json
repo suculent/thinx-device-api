@@ -1,4 +1,5 @@
 {
+  "rollbar_token": "<enter-your-rollbar.com-token>",
   "base_url": "thinx.cloud",
   "type": "thinx_server_config",
   "database_uri": "http://rtmapi:frohikey@dev.thinx.cloud:5984",

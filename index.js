@@ -10,12 +10,6 @@ var ThinxApp = function() {
   var typeOf = require("typeof");
   var Rollbar = require("rollbar");
 
-  var rollbar = new Rollbar({
-    accessToken: "5505bac5dc6c4542ba3bd947a150cb55",
-    handleUncaughtExceptions: true,
-    handleUnhandledRejections: true
-  });
-
   require("ssl-root-cas").inject();
 
   var http = require('http');
@@ -73,6 +67,12 @@ var ThinxApp = function() {
     google_ocfg = require('./conf/google-oauth.json');
     github_ocfg = require('./conf/github-oauth.json');
   }
+
+  var rollbar = new Rollbar({
+    accessToken: app_config.rollbar_token,
+    handleUncaughtExceptions: true,
+    handleUnhandledRejections: true
+  });
 
   //
   // OAuth2
