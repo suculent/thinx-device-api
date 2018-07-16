@@ -592,7 +592,7 @@ var ThinxApp = function() {
         respond(res, {
           success: true,
           api_key: object.key,
-          hash: object.hash
+          hash: sha256(object.key)
         });
         return;
       }
