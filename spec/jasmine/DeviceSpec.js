@@ -4,6 +4,8 @@ describe("Device", function() {
   var APIKey = require("../../lib/thinx/apikey");
   var envi = require("./_envi.json");
 
+  var sha256 = require("sha256");
+
   var owner = envi.oid;
   var udid = envi.udid;
   var apikey = envi.ak;
@@ -55,7 +57,7 @@ describe("Device", function() {
         expect(success).toBe(true);
 
         if (success) {
-          this.apikey = object.hash;
+          this.apikey = sha256(object.key);
           console.log("Key ready: " + this.apikey);
         }
 

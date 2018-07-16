@@ -2,6 +2,7 @@ describe("API Key", function() {
 
   var generated_key_hash = null;
   var APIKey = require("../../lib/thinx/apikey");
+  var sha256 = require("sha256");
 
   var envi = require("./_envi.json");
   var owner = envi.oid;
@@ -16,7 +17,7 @@ describe("API Key", function() {
         function(success, object) {
 
           if (success) {
-            this.generated_key_hash = object.hash;
+            this.generated_key_hash = sha256(object.key);
             console.log("Key ready to revoke: " + this.generated_key_hash);
 
             //verify: function(owner, apikey, callback)
