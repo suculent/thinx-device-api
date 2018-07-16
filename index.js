@@ -493,7 +493,7 @@ var ThinxApp = function() {
     var owner = req.session.owner;
     var udid = req.body.udid;
     // var apikey = req.body.key;
-    // apikey.verify(owner, api_key, function(success, message) {
+    // apikey.verify(owner, api_key, req, function(success, message) {
 
     messenger.data(owner, udid, function(success, response) {
       respond(res, {
@@ -1102,14 +1102,16 @@ var ThinxApp = function() {
 
     // Device will create OTT request and fetch firmware from given OTT-URL
     if ((typeof(req.body.use) !== "undefined") && (req.body.use == "ott")) {
-      device.ott_request(req.owner, req.body, req.headers.authentication,
+      // TODO: Refactor to single request parameter only
+      device.ott_request(req.owner, req.body, req.headers.authentication, req,
         function(success, response) {
           respond(res, response);
         });
 
       // Device will fetch firmware/files now (wrapped as JSON or in binary, depending on type (firmware/file))
     } else {
-      device.firmware(req.body, req.headers.authentication,
+      // TODO: use only one parameter for req
+      device.firmware(req.body, req.headers.authentication, req,
         function(success, response) {
           respond(res, response);
         });
