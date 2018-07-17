@@ -1150,6 +1150,10 @@ var ThinxApp = function() {
       });
       console.timeEnd("register-response");
     } else {
+      var ip = getClientIp(req);
+      console.log("Incoming request has `registration` in body, with IP " + ip);
+      console.log("headers: " + JSON.stringify(req.headers));
+      
       const regTime = new Date().getMilliseconds();
       console.log("** REG BODY: " + regTime);
       var registration = req.body.registration;
