@@ -358,6 +358,12 @@ var ThinxApp = function() {
 
     var client = req.get("User-Agent");
 
+    if (typeOf(client) === "undefined") {
+      console.log("Dropping connection for client without user-agent.");
+      res.status(418).end();
+      client = "";
+    }
+
     if (client.indexOf("Jorgee") !== -1) {
       BLACKLIST.push(getClientIp(req));
       res.status(418).end();
