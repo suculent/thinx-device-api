@@ -1126,6 +1126,8 @@ var ThinxApp = function() {
     const startTime = new Date().getMilliseconds();
     console.log("** REG START: " + startTime);
     validateRequest(req, res);
+    var ip = getClientIp(req);
+    console.log("** IP: " + ip);
     if (typeof(req.body) === "undefined") {
       console.timeEnd("register");
       console.time("register-response");
@@ -1135,7 +1137,7 @@ var ThinxApp = function() {
       });
       console.timeEnd("register-response");
     } else if (typeof(req.body.registration) === "undefined") {
-      var ip = getClientIp(req);
+
       console.log("Incoming request has no `registration` in body, should BLACKLIST " + ip);
       console.log("headers: " + JSON.stringify(req.headers));
       /*
@@ -1153,7 +1155,7 @@ var ThinxApp = function() {
       var ip = getClientIp(req);
       console.log("Incoming request has `registration` in body, with IP " + ip);
       console.log("headers: " + JSON.stringify(req.headers));
-      
+
       const regTime = new Date().getMilliseconds();
       console.log("** REG BODY: " + regTime);
       var registration = req.body.registration;
