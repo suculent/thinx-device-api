@@ -42,11 +42,6 @@ describe("Deployer", function() {
     function() {
       var result = deploy.hasUpdateAvailable(device);
       expect(result).toBeDefined();
-    });
-
-  it("should be able to return latest firmware version", function() {
-    var firmwareVersion = deploy.latestFirmwareVersion(device);
-    expect(firmwareVersion).not.toBeDefined();
   });
 
   it("should be able to return latest firmware envelope", function() {
