@@ -399,10 +399,8 @@ var ThinxApp = function() {
 
     res.header("Access-Control-Allow-Origin", allowedOrigin); // rtm.thinx.cloud
     res.header("Access-Control-Allow-Credentials", "true");
-    res.header(
-      "Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
-    res.header("Access-Control-Allow-Headers",
-      "Content-type,Accept,X-Access-Token,X-Key");
+    res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-type,Accept,X-Access-Token,X-Key");
 
     if (req.method == "OPTIONS") {
       res.status(200).end();
@@ -1128,29 +1126,26 @@ var ThinxApp = function() {
   // MAC is be allowed for initial regitration where device is given new UDID
 
   app.post("/device/register", function(req, res) {
-    console.time("register");
     const startTime = new Date().getMilliseconds();
     console.log("** REG START: " + startTime);
     validateRequest(req, res);
     var ip = getClientIp(req);
     console.log("** IP: " + ip);
     if (typeof(req.body) === "undefined") {
-      console.timeEnd("register");
       console.time("register-response");
       respond(res, {
         success: false,
         status: "no_body"
       });
       console.timeEnd("register-response");
-    } else if (typeof(req.body.registration) === "undefined") {
 
+    } else if (typeof(req.body.registration) === "undefined") {
       console.log("Incoming request has no `registration` in body, should BLACKLIST " + ip);
       console.log("headers: " + JSON.stringify(req.headers));
       /*
       BLACKLIST.push(ip);
       */
       console.log("body: " + JSON.stringify(req.body));
-      console.timeEnd("register");
       console.time("register-response");
       respond(res, {
         success: false,
@@ -1177,7 +1172,6 @@ var ThinxApp = function() {
             response));
         }
         console.log("Sending response: " + JSON.stringify(response));
-        console.timeEnd("register");
         console.time("register-response");
         console.log("** REG END: " + new Date().getMilliseconds() - startTime);
         respond(res, response);
@@ -1843,6 +1837,7 @@ var ThinxApp = function() {
                 req.session.cookie.secure = true;
                 req.session.cookie.httpOnly = true;
                 req.session.cookie.maxAge = fortnight;
+
                 res.cookie("x-thx-session-expire", fortnight, {
                   maxAge: fortnight,
                   httpOnly: false
