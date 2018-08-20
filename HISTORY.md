@@ -2,7 +2,21 @@
 
 ## HISTORY
 
+20/8/2018 0.9.3525
+
+» Preparation for key-escrow and end-to-end encryption
+» Vulnerability fixes and hashing optimizations
+» Updating device statuses from MQTT
+» Firmware availability check optimized
+» Fixed creating mqtt_passwords
 » Added support for DST and timezone offset
+» Client IP trackings for anti-abuse monitoring
+» Various OTT and warning fixes
+» Docker transformer fixes
+» Benchmarking response times
+» Support for DST and device-specific timezones
+» Migration to Circle CI 2.0 (in progress)
+» Debugging various login edge-cases (no-email)
 
 26/05/2018 0.9.3419
 
