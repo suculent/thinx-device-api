@@ -1,6 +1,8 @@
 deploy-hook.log
+deploy.out
 mosquitto.lo*
-mqtt_passwords 
+./mqtt_passwords
+"./mqtt_passwords "
 redis.log
 
 # System files
