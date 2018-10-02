@@ -400,8 +400,14 @@ var ThinxApp = function() {
     // Problem is, that the device API should be separate and have different Access-Control
     var allowedOrigins = ['https://rtm.thinx.cloud', 'http://rtm.thinx.cloud', '*'];
     var origin = req.headers.origin;
+    console.log("Request origin: "+origin);
     if (allowedOrigins.indexOf(origin) > -1){
-        res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      console.log("Allowed origin: "+origin);
+    } else {
+      // hack!
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      console.log("Dis-Allowed origin: "+origin);
     }
     //res.header("Access-Control-Allow-Origin", allowedOrigin); // rtm.thinx.cloud
     res.header("Access-Control-Allow-Credentials", "true");
