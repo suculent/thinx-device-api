@@ -343,7 +343,8 @@ var ThinxApp = function() {
     if (BLACKLIST.toString().indexOf(ipAddress) === -1) {
       next();
     } else {
-      res.status(418).end();
+      console.log("Returning error, blacklisted.");
+      res.status(403).end();
     }
   });
 
@@ -362,34 +363,34 @@ var ThinxApp = function() {
 
     if (typeOf(client) === "undefined") {
       console.log("Dropping connection for client without user-agent.");
-      res.status(418).end();
+      res.status(403).end();
       client = "";
     }
 
     if (client.indexOf("Jorgee") !== -1) {
       BLACKLIST.push(getClientIp(req));
-      res.status(418).end();
+      res.status(403).end();
       console.log("Jorgee is blacklisted.");
       return;
     }
 
     if (req.originalUrl.indexOf("admin") !== -1) {
       BLACKLIST.push(getClientIp(req));
-      res.status(418).end();
+      res.status(403).end();
       console.log("admin is blacklisted.");
       return;
     }
 
     if (req.originalUrl.indexOf("php") !== -1) {
       BLACKLIST.push(getClientIp(req));
-      res.status(418).end();
+      res.status(403).end();
       console.log("php is blacklisted.");
       return;
     }
 
     if (req.originalUrl.indexOf("\\x04\\x01\\x00") !== -1) {
       BLACKLIST.push(getClientIp(req));
-      res.status(418).end();
+      res.status(403).end();
       console.log("hrrtbleed is blacklisted.");
       return;
     }
