@@ -398,7 +398,7 @@ var ThinxApp = function() {
     }
 
     //res.header("Access-Control-Allow-Origin", allowedOrigin); // rtm.thinx.cloud
-    res.header("Access-Control-Allow-Origin", "*"); // rtm.thinx.cloud
+    res.header("Access-Control-Allow-Origin", "rtm.thinx.cloud"); // rtm.thinx.cloud
     res.header("Access-Control-Allow-Credentials", "true");
     res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
     res.header("Access-Control-Allow-Headers", "Content-type,Accept,X-Access-Token,X-Key");
