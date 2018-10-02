@@ -352,9 +352,11 @@ var ThinxApp = function() {
     // CORS must be enabled esp. for devices
     var allowedOrigin = "rtm.thinx.cloud";
 
+    /*
     if (typeof(req.headers.origin) !== "undefined") {
       allowedOrigin = req.headers.origin;
     }
+    */
 
     var client = req.get("User-Agent");
 
@@ -403,10 +405,15 @@ var ThinxApp = function() {
     if (allowedOrigins.indexOf(origin) > -1){
       res.setHeader('Access-Control-Allow-Origin', origin);
     } else {
-      // hack! for monitoring disallowed (unlisted, forgotten originsd)
-      console.log("Request origin: "+origin);
-      res.setHeader('Access-Control-Allow-Origin', origin);
-      console.log("Dis-Allowed origin: "+origin);
+      if ((typeof(origin) === "undefined") || (origin === NULL)) {
+        // res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+        // device-wise
+      } else {
+        // hack! for monitoring disallowed (unlisted, forgotten originsd)
+        console.log("Request origin: "+origin);
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        console.log("Dis-Allowed origin: "+origin);
+      }
     }
     //res.header("Access-Control-Allow-Origin", allowedOrigin); // rtm.thinx.cloud
     res.header("Access-Control-Allow-Credentials", "true");
