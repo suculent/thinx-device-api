@@ -159,7 +159,7 @@ var ThinxApp = function() {
   var WebSocket = require("ws");
 
   // list of previously discovered attackers
-  var BLACKLIST = ["203.218.194.124", "179.128.55.14", "188.166.14.166"];
+  var BLACKLIST = [];
 
   var last_client_ip = null;
 
