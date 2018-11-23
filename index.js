@@ -152,6 +152,7 @@ var ThinxApp = function() {
   var stats = require("./lib/thinx/statistics");
   var sources = require("./lib/thinx/sources");
   var transfer = require("./lib/thinx/transfer");
+  var messenger = require("./lib/thinx/messenger");
 
   var slack_webhook = app_config.slack_webhook;
   var thinx_slack = require("slack-notify")(slack_webhook);
@@ -3009,8 +3010,7 @@ var ThinxApp = function() {
           return;
         }
 
-        var _device = require("./lib/thinx/device");
-        console.log("Known device identified by MAC address: " + _device.normalizedMAC(
+        console.log("Known device identified by MAC address: " + device.normalizedMAC(
           reg.mac));
 
         if (body.rows.length === 0) {
@@ -3316,7 +3316,7 @@ var ThinxApp = function() {
     // MQTT Messenger/listener (experimental)
     //
 
-    var messenger = require("./lib/thinx/messenger");
+
     messenger.init();
 
     //
