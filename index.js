@@ -3313,7 +3313,7 @@ var ThinxApp = function() {
     setInterval(log_aggregator, 86400 * 1000 / 2);
 
     //
-    // MQTT Messenger/listener (experimental)
+    // MQTT Messenger/listener
     //
 
 
