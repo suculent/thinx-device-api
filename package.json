@@ -1,6 +1,6 @@
 {
 	"name": "thinx",
-	"version": "0.9.3537",
+	"version": "0.9.3550",
 	"description": "THiNX IoT RTM API",
 	"bugs": {
 		"url": "https://github.com/suculent/thinx-device-api/issues"
@@ -23,7 +23,7 @@
 		"prepublish": "npm run snyk-protect"
 	},
 	"dependencies": {
-		"@slack/client": "^4.7.0",
+		"@slack/client": "^4.8.0",
 		"base-64": "^0.1.0",
 		"base128": "^0.2.1",
 		"body-parser": "^1.18.3",
@@ -40,7 +40,7 @@
 		"dateformat": "^2.2.0",
 		"email": "^0.2.6",
 		"expect": "^23.6.0",
-		"express": "^4.16.3",
+		"express": "^4.16.4",
 		"express-session": "^1.15.6",
 		"firebase-admin": "^5.13.1",
 		"fs-extra": "^3.0.1",
@@ -66,14 +66,14 @@
 		"redis": "^2.8.0",
 		"regex": "^0.1.1",
 		"request": "^2.88.0",
-		"rollbar": "^2.4.7",
+		"rollbar": "^2.5.0",
 		"satelize": "^0.2.0",
 		"semver": "5.3.0",
 		"sha256": "^0.2.0",
 		"sillyname": "^0.1.0",
 		"simple-oauth2": "^1.6.0",
 		"slack-notify": "^0.1.6",
-		"slackbots": "^1.1.0",
+		"slackbots": "^1.2.0",
 		"snyk": "^1.103.2",
 		"ssh-fingerprint": "0.0.1",
 		"ssl-root-cas": "^1.2.5",
