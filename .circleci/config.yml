@@ -53,7 +53,8 @@ jobs:
     - run: tar xzf redis-4.0.8.tar.gz
     - run: cd redis-4.0.8 && make
     - run: make install
-    - run: cp /tmp/redis-stable/redis.conf /etc/redis
+    # - run: cp /tmp/redis-stable/redis.conf /etc/redis
+    - run: ls
     - run: mkdir statistics
     - run: touch ~/thinx-device-api/mqtt_passwords
     - run: pwd; ls
