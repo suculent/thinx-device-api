@@ -54,9 +54,8 @@ jobs:
     - run: cd redis-4.0.8 && make
     - run: make install
     # - run: cp /tmp/redis-stable/redis.conf /etc/redis
-    - run: ls
     - run: mkdir statistics
-    - run: touch ~/thinx-device-api/mqtt_passwords
+    - run: touch mqtt_passwords
     - run: pwd; ls
     - run: gem install github_changelog_generator
     - run: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
