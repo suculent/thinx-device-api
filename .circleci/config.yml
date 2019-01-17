@@ -47,9 +47,10 @@ jobs:
     # This is based on your 1.0 configuration file or project settings
     - run: sudo apt-get update && sudo apt-get install -y --fix-missing --no-install-recommends mosquitto # $sendmail
     - run: git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
-    - run: npm install coveralls pm2 nyc eslint
+    - run: npm install coveralls pm2 nyc
+    - run: npm install eslint --save-dev
     - run: npm install .
-    - run: wget http://download.redis.io/releases/redis-5.0.4.tar.gz
+    - run: wget http://download.redis.io/releases/redis-5.0.3.tar.gz
     - run: tar xzf redis-5.0.3.tar.gz
     - run: cd redis-5.0.3 && sudo make && sudo make install && cp src/redis-* ~
     - run: pwd && ls
