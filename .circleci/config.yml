@@ -47,8 +47,7 @@ jobs:
     # This is based on your 1.0 configuration file or project settings
     - run: sudo apt-get update && sudo apt-get install -y --fix-missing --no-install-recommends mosquitto # $sendmail
     - run: git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
-    - run: npm install coveralls pm2 nyc
-    - run: sudo npm install -g eslint
+    - run: npm install coveralls pm2 nyc eslint
     - run: npm install .
     - run: wget http://download.redis.io/releases/redis-4.0.8.tar.gz
     - run: tar xzf redis-4.0.8.tar.gz
@@ -84,7 +83,7 @@ jobs:
     #   This would typically be a build job when using workflows, possibly combined with build
     # This is based on your 1.0 configuration file or project settings
     - run: mkdir -p $CIRCLE_TEST_REPORTS/reports
-    - run: npm install eslint && eslint ./src/ --format junit --output-file $CIRCLE_TEST_REPORTS/reports/eslint.xml
+    - run: ./node_modules/eslint/bin/eslint.js ./src/ --format junit --output-file $CIRCLE_TEST_REPORTS/reports/eslint.xml
     - run: /usr/local/bin/redis-server /etc/redis/redis.conf &
     # The following line was run implicitly in your 1.0 builds based on what CircleCI inferred about the structure of your project. In 2.0 you need to be explicit about which commands should be run. In some cases you can discard inferred commands if they are not relevant to your project.
     - run: npm test
