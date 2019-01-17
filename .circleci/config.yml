@@ -51,7 +51,8 @@ jobs:
     - run: npm install .
     - run: wget http://download.redis.io/releases/redis-4.0.8.tar.gz
     - run: tar xzf redis-4.0.8.tar.gz
-    - run: cd redis-4.0.8 && make && make install
+    - run: cd redis-4.0.8 && sudo make && sudo make install
+    - run: pwd && ls
     # - run: cp /tmp/redis-stable/redis.conf /etc/redis
     - run: mkdir statistics
     - run: touch mqtt_passwords
