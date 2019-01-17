@@ -18,7 +18,7 @@ jobs:
     # To see the list of pre-built images that CircleCI provides for most common languages see
     # https://circleci.com/docs/2.0/circleci-images/
     docker:
-    - image: circleci/ruby:2.4
+    - image: circleci/ruby:2.4-node
     steps:    
     # Machine Setup
     #   If you break your build into multiple jobs with workflows, you will probably want to do the parts of this that are relevant in each
@@ -28,9 +28,10 @@ jobs:
     # In many cases you can simplify this from what is generated here.
     # 'See docs on artifact collection here https://circleci.com/docs/2.0/artifacts/'
     - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+    - run: curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
     # This is based on your 1.0 configuration file or project settings
     - run:
-        working_directory: ~/suculent/thinx-device-api
+        # working_directory: ~/suculent/thinx-device-api
         command: nvm install 7.10.0 && nvm alias default 7.10.0
     # Dependencies
     #   This would typically go in either a build or a build-and-test job when using workflows
@@ -55,10 +56,7 @@ jobs:
     # - run: cp /tmp/redis-stable/redis.conf /etc/redis
     - run: mkdir statistics
     - run: touch mqtt_passwords
-    - run: pwd; ls
-    - run:
-        name: Set Ruby Version
-        command:  echo "ruby-2.4" > ~/.ruby-version
+    - run: pwd; ls    
     # - run: gem install github_changelog_generator fails even with ruby 2.4
     - run: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
     # The following line was run implicitly in your 1.0 builds based on what CircleCI inferred about the structure of your project. In 2.0 you need to be explicit about which commands should be run. In some cases you can discard inferred commands if they are not relevant to your project.
