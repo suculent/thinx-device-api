@@ -17,9 +17,13 @@ jobs:
     # VM instead of a container) see https://circleci.com/docs/2.0/executor-types/
     # To see the list of pre-built images that CircleCI provides for most common languages see
     # https://circleci.com/docs/2.0/circleci-images/
+    # docker:
+    #  - image: circleci/ruby:2.4-node
     docker:
-    - image: circleci/build-image:ubuntu-14.04-XXL-upstart-1189-5614f37
-      command: /sbin/init
+      - image: suculent/thinx_baseline
+        auth:
+          username: $DOCKER_USERNAME  # can specify string literal values
+          password: $DOCKER_PASSWORD  # or project environment variable reference
     steps:    
     # Machine Setup
     #   If you break your build into multiple jobs with workflows, you will probably want to do the parts of this that are relevant in each
@@ -29,10 +33,11 @@ jobs:
     # In many cases you can simplify this from what is generated here.
     # 'See docs on artifact collection here https://circleci.com/docs/2.0/artifacts/'
     - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+    # - run: curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
     # This is based on your 1.0 configuration file or project settings
-    - run:
-        working_directory: ~/suculent/thinx-device-api
-        command: nvm install 7.10.0 && nvm alias default 7.10.0
+    #- run:
+        # working_directory: ~/suculent/thinx-device-api
+    #    command: nvm install 7.10.0 && nvm alias default 7.10.0
     # Dependencies
     #   This would typically go in either a build or a build-and-test job when using workflows
     # Restore the dependency cache
@@ -45,27 +50,24 @@ jobs:
         # Any branch if there are none on the default branch - this should be unnecessary if you have your default branch configured correctly
         - v1-dep-
     # This is based on your 1.0 configuration file or project settings
-    - run: sudo apt-get update && sudo apt-get install -y --fix-missing --no-install-recommends mosquitto sendmail
+    - run: sudo apt-get update && sudo apt-get install -y --fix-missing --no-install-recommends mosquitto # $sendmail
     - run: git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
-    - run: npm install coveralls pm2 nyc eslint -g
+    - run: npm install coveralls pm2 nyc
+    - run: npm install eslint --save-dev
     - run: npm install .
-    - run: wget http://download.redis.io/releases/redis-4.0.8.tar.gz
-    - run: tar xzf redis-4.0.8.tar.gz
-    - run: cd redis-4.0.8 && make
-    - run: make install
-    - run: cp /tmp/redis-stable/redis.conf /etc/redis
+    - run: wget http://download.redis.io/releases/redis-5.0.3.tar.gz
+    - run: tar xzf redis-5.0.3.tar.gz
+    - run: cd redis-5.0.3 && sudo make && sudo make install && cp src/redis-* ~
+    - run: pwd && ls
+    # - run: cp /tmp/redis-stable/redis.conf /etc/redis
     - run: mkdir statistics
-    - run: touch ~/thinx-device-api/mqtt_passwords
-    - run: pwd; ls
-    - run: gem install github_changelog_generator
-    - run: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+    - run: touch mqtt_passwords
+    # - run: gem install github_changelog_generator fails even with ruby 2.4
     # The following line was run implicitly in your 1.0 builds based on what CircleCI inferred about the structure of your project. In 2.0 you need to be explicit about which commands should be run. In some cases you can discard inferred commands if they are not relevant to your project.
     - run: if [ -z "${NODE_ENV:-}" ]; then export NODE_ENV=test; fi
-    - run: export PATH="~/suculent/thinx-device-api/node_modules/.bin:$PATH"
-    - run: npm install 
+    - run: export PATH="~/suculent/thinx-device-api/node_modules/.bin:$PATH"    
     - run: echo -e "export RAILS_ENV=test\nexport RACK_ENV=test" >> $BASH_ENV
-    - run: 'bundle check --path=vendor/bundle || bundle install --path=vendor/bundle
-        --jobs=4 --retry=3 '
+    - run: 'bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs=4 --retry=3 '
     # Save dependency cache
     - save_cache:
         key: v1-dep-{{ .Branch }}-{{ epoch }}
@@ -87,7 +89,7 @@ jobs:
     #   This would typically be a build job when using workflows, possibly combined with build
     # This is based on your 1.0 configuration file or project settings
     - run: mkdir -p $CIRCLE_TEST_REPORTS/reports
-    - run: eslint ./src/ --format junit --output-file $CIRCLE_TEST_REPORTS/reports/eslint.xml
+    - run: pwd && ls && ./node_modules/eslint/bin/eslint.js ./src/ --format junit --output-file $CIRCLE_TEST_REPORTS/reports/eslint.xml
     - run: /usr/local/bin/redis-server /etc/redis/redis.conf &
     # The following line was run implicitly in your 1.0 builds based on what CircleCI inferred about the structure of your project. In 2.0 you need to be explicit about which commands should be run. In some cases you can discard inferred commands if they are not relevant to your project.
     - run: npm test
