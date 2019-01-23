@@ -4,6 +4,8 @@
 
 var ThinxApp = function() {
 
+  require("sqreen");
+
   var global_token = null;
   var global_response = null;
   var exec = require("child_process");

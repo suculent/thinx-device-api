@@ -20,7 +20,7 @@ jobs:
     # docker:
     #  - image: circleci/ruby:2.4-node
     docker:
-      - image: suculent/thinx_baseline:latest
+      - image: suculent/thinx_baseline
         auth:
           username: $DOCKER_USERNAME  # can specify string literal values
           password: $DOCKER_PASSWORD  # or project environment variable reference
