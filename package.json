@@ -23,6 +23,8 @@
     "prepublish": "npm run snyk-protect"
   },
   "dependencies": {
+    "cryptiles": ">=4.1.2",
+    "hoek": ">=4.2.1",
     "@slack/client": "^4.8.0",
     "base-64": "^0.1.0",
     "base128": "^0.2.1",
