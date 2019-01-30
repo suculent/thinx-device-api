@@ -1,5 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.10.2
+version: v1.10.1
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   'npm:qs:20170213':
@@ -37,7 +37,7 @@ ignore:
   'npm:moment:20161019':
     - fs-finder > moment:
         reason: no patch available
-        expires: '2018-09-19T08:50:40.323Z'
+        expires: '2019-03-01T20:22:48.465Z'
   'npm:tunnel-agent:20170305':
     - codecov.io > request > tunnel-agent:
         reason: None given
@@ -81,7 +81,7 @@ ignore:
   'npm:moment:20170905':
     - fs-finder > moment:
         reason: no patch available
-        expires: '2018-09-19T08:50:40.323Z'
+        expires: '2019-03-01T20:22:48.465Z'
     - codacy-coverage > nsp > joi > moment:
         reason: waiting for fix
         expires: '2018-05-13T09:14:25.225Z'
@@ -89,6 +89,9 @@ ignore:
     - codacy-coverage > eslint > shelljs:
         reason: None given
         expires: '2018-05-13T09:14:25.225Z'
+      pm2 > shelljs:
+        reason: None given
+        expires: '2019-03-01T20:22:48.465Z'
     - codacy-coverage > nsp > eslint > shelljs:
         reason: None given
         expires: '2018-05-13T09:14:25.225Z'
@@ -428,7 +431,7 @@ ignore:
   'npm:cli:20160615':
     - satelize > maxmind-db-reader > ip-address > cli:
         reason: no patch available
-        expires: '2018-09-19T08:50:40.323Z'
+        expires: '2019-03-01T20:22:48.465Z'
   'npm:cryptiles:20180710':
     - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > cryptiles:
         reason: no patch available
@@ -450,6 +453,14 @@ ignore:
     - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > request > extend:
         reason: no patch available
         expires: '2018-09-19T08:50:40.323Z'
+  'npm:chownr:20180731':
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > tar > chownr:
+        reason: None given
+        expires: '2019-03-01T20:22:48.465Z'
+  'npm:mem:20180117':
+    - npm > libnpx > yargs > os-locale > mem:
+        reason: None given
+        expires: '2019-03-01T20:22:48.465Z'
 # patches apply the minimum changes required to fix a vulnerability
 patch:
   'npm:hawk:20160119':
@@ -475,8 +486,6 @@ patch:
   'npm:request:20160119':
     - codecov.io > request:
         patched: '2017-05-24T20:23:09.576Z'
-      github-oauth > request:
-        patched: '2018-08-20T08:49:18.325Z'
     - nano > follow > request:
         patched: '2017-05-24T20:23:09.576Z'
     - nano > follow > request:
@@ -491,6 +500,8 @@ patch:
         patched: '2017-11-13T13:18:45.910Z'
     - github-oauth > request:
         patched: '2017-11-15T09:01:49.621Z'
+    - github-oauth > request:
+        patched: '2018-08-20T08:49:18.325Z'
   'npm:moment:20160126':
     - fs-finder > moment:
         patched: '2018-08-20T08:49:18.325Z'
@@ -536,8 +547,6 @@ patch:
   'npm:minimatch:20160620':
     - login-with-github > middler > minimatch:
         patched: '2017-11-13T13:18:45.910Z'
-      satelize > maxmind-db-reader > ip-address > cli > glob > minimatch:
-        patched: '2018-08-20T08:49:18.325Z'
     - codacy-coverage > nsp > jslint > glob > minimatch:
         patched: '2017-12-15T16:27:39.853Z'
     - codacy-coverage > nsp > lab > eslint-plugin-hapi > no-shadow-relaxed > eslint > minimatch:
@@ -554,6 +563,8 @@ patch:
         patched: '2017-12-15T16:27:39.853Z'
     - satelize > maxmind-db-reader > ip-address > cli > glob > minimatch:
         patched: '2018-04-23T08:36:14.990Z'
+    - satelize > maxmind-db-reader > ip-address > cli > glob > minimatch:
+        patched: '2018-08-20T08:49:18.325Z'
   'npm:qs:20140806-1':
     - login-with-github > request > qs:
         patched: '2017-11-13T13:18:45.910Z'
@@ -572,14 +583,19 @@ patch:
   'npm:lodash:20180130':
     - gulp-repository-watch > lodash:
         patched: '2018-07-04T08:03:08.073Z'
-      slack-notify > lodash:
-        patched: '2018-08-20T08:49:18.325Z'
     - slack-notify > lodash:
         patched: '2018-07-04T08:03:08.073Z'
-      gulp-repository-watch > lodash:
+    - slack-notify > lodash:
+        patched: '2018-08-20T08:49:18.325Z'
+    - gulp-repository-watch > lodash:
         patched: '2018-08-20T08:49:18.325Z'
   'npm:stringstream:20180511':
     - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > request > stringstream:
         patched: '2018-08-20T08:49:18.325Z'
     - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > stringstream:
         patched: '2018-08-20T08:49:18.325Z'
+  'npm:mime:20170907':
+    - github-oauth > request > mime:
+        patched: '2019-01-30T20:20:40.236Z'
+    - github-oauth > request > form-data > mime:
+        patched: '2019-01-30T20:20:40.236Z'
