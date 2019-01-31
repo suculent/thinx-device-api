@@ -1,0 +1,18 @@
+{
+  "summary": {
+    "title": "Test",
+    "owner": "Me",
+    "description": "Iot"
+  },
+  "detail": {
+    "contributors": [],
+    "diagrams": [
+      {
+        "title": "A",
+        "thumbnail": "./public/content/images/thumbnail.jpg",
+        "id": 0
+      }
+    ],
+    "reviewer": "Me"
+  }
+}
