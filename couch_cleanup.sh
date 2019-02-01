@@ -19,16 +19,16 @@ fi
 # delete all logs older than one month
 DB=${PREFIX}'managed_builds/'
 MINDATE=$(date -d '7 days ago' '+%Y-%m-%d')
-curl -s -X GET "$DB/_all_docs" | jq '.rows | .[].id' | sed -e 's/"//g' | sed -e 's/_design.*//g' | xargs -I id curl -s -X POST ${DB}/_design/builds/_update/delete_expired/id?mindate=${MINDATE}T00:00:00.000Z
+curl -s -X GET "$DB/_all_docs" | jq '.rows | .[].id' | sed -e 's/"//g' | sed -e 's/_design.*//g' | xargs -I id curl -s -X POST ${DB}_design/builds/_update/delete_expired/id?mindate=${MINDATE}T00:00:00.000Z
 
 DB=${PREFIX}'managed_logs/'
 MINDATE=$(date -d '1 month ago' '+%Y-%m-%d')
-curl -s -X GET "$DB/_all_docs" | jq '.rows | .[].id' | sed -e 's/"//g' | sed -e 's/_design.*//g' | xargs -I id curl -s -X POST ${DB}/_design/logs/_update/delete_expired/id?mindate=${MINDATE}T00:00:00.000Z
+curl -s -X GET "$DB/_all_docs" | jq '.rows | .[].id' | sed -e 's/"//g' | sed -e 's/_design.*//g' | xargs -I id curl -s -X POST ${DB}_design/logs/_update/delete_expired/id?mindate=${MINDATE}T00:00:00.000Z
 
 # added with GDPR: delete unused accounts after 3 months
 DB=${PREFIX}'managed_users/'
 MINDATE=$(date -d '3 months ago' '+%Y-%m-%d')
-curl -s -X GET "$DB/_all_docs" | jq '.rows | .[].id' | sed -e 's/"//g' | sed -e 's/_design.*//g' | xargs -I id curl -s -X POST ${DB}/_design/logs/_update/delete_expired/id?mindate=${MINDATE}T00:00:00.000Z
+curl -s -X GET "$DB/_all_docs" | jq '.rows | .[].id' | sed -e 's/"//g' | sed -e 's/_design.*//g' | xargs -I id curl -s -X POST ${DB}_design/logs/_update/delete_expired/id?mindate=${MINDATE}T00:00:00.000Z
 
 
 #

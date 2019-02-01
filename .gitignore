@@ -1,3 +1,6 @@
+# Sqreen.io configuration
+sqreen.json
+
 deploy-hook.log
 deploy.out
 mosquitto.lo*
