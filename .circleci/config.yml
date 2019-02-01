@@ -50,14 +50,14 @@ jobs:
         # Any branch if there are none on the default branch - this should be unnecessary if you have your default branch configured correctly
         - v1-dep-
     # This is based on your 1.0 configuration file or project settings
-    - run: sudo apt-get update && sudo apt-get install -y --fix-missing --no-install-recommends mosquitto # $sendmail
+    - run: apt-get update && apt-get install -y --fix-missing --no-install-recommends mosquitto # $sendmail
     - run: git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
     - run: npm install coveralls pm2 nyc
     - run: npm install eslint --save-dev
     - run: npm install .
     - run: wget http://download.redis.io/releases/redis-5.0.3.tar.gz
     - run: tar xzf redis-5.0.3.tar.gz
-    - run: cd redis-5.0.3 && sudo make && sudo make install && cp src/redis-* ~
+    - run: cd redis-5.0.3 && make && make install && cp src/redis-* ~
     - run: pwd && ls
     # - run: cp /tmp/redis-stable/redis.conf /etc/redis
     - run: mkdir statistics
