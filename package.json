@@ -23,8 +23,6 @@
     "prepublish": "npm run snyk-protect"
   },
   "dependencies": {
-    "cryptiles": ">=4.1.2",
-    "hoek": ">=4.2.1",
     "@slack/client": "^4.8.0",
     "base-64": "^0.1.0",
     "base128": "^0.2.1",
@@ -37,6 +35,7 @@
     "connect-redis": "^3.4.0",
     "connect-timeout": "^1.9.0",
     "console-stamp": "^0.2.7",
+    "cryptiles": ">=4.1.2",
     "crypto": "^1.0.1",
     "cryptojs": "^2.5.3",
     "dateformat": "^2.2.0",
@@ -52,6 +51,7 @@
     "github-oauth": "^0.2.2",
     "gulp-repository-watch": "0.0.4",
     "gulp-util": "^3.0.8",
+    "hoek": ">=4.2.1",
     "http-signature": "^1.2.0",
     "karma-coverage": "^1.1.2",
     "lodash": "^4.17.11",
