@@ -8,38 +8,27 @@ jobs:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
       REDIS_URL: redis://localhost:6391
-    # In CircleCI 1.0 we used a pre-configured image with a large number of languages and other packages.
-    # In CircleCI 2.0 you can now specify your own image, or use one of our pre-configured images.
-    # The following configuration line tells CircleCI to use the specified docker image as the runtime environment for you job.
-    # We have selected a pre-built image that mirrors the build environment we use on
-    # the 1.0 platform, but we recommend you choose an image more tailored to the needs
-    # of each job. For more information on choosing an image (or alternatively using a
-    # VM instead of a container) see https://circleci.com/docs/2.0/executor-types/
-    # To see the list of pre-built images that CircleCI provides for most common languages see
-    # https://circleci.com/docs/2.0/circleci-images/
-    # docker:
-    #  - image: circleci/ruby:2.4-node
+    
+    # In CircleCI 2.0 you can now specify your own image, or use one of our pre-configured images.    
     docker:
       - image: suculent/thinx_baseline:first
         auth:
           username: $DOCKER_USERNAME  # can specify string literal values
           password: $DOCKER_PASSWORD  # or project environment variable reference
     steps:
+
+    # Use Remote Docker to run CouchDB and Transformer containers alongside
+    - setup_remote_docker
+
     # Machine Setup
     #   If you break your build into multiple jobs with workflows, you will probably want to do the parts of this that are relevant in each
-    # The following `checkout` command checks out your code to your working directory. In 1.0 we did this implicitly. In 2.0 you can choose where in the course of a job your code should be checked out.
+    # The following `checkout` command checks out your code to your working directory. In 1.0 we did this implicitly. In 2.0 you can choose where in the course of a job your code should be checked out.    
     - checkout
+
     # Prepare for artifact and test results  collection equivalent to how it was done on 1.0.
     # In many cases you can simplify this from what is generated here.
     # 'See docs on artifact collection here https://circleci.com/docs/2.0/artifacts/'
-    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
-    # - run: curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
-    # This is based on your 1.0 configuration file or project settings
-    #- run:
-        # working_directory: ~/suculent/thinx-device-api
-    #    command: nvm install 7.10.0 && nvm alias default 7.10.0
-    # Dependencies
-    #   This would typically go in either a build or a build-and-test job when using workflows
+    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS    
     
     # Restore the dependency cache
     - restore_cache:
@@ -50,6 +39,7 @@ jobs:
         - v1-dep-master-
         # Any branch if there are none on the default branch - this should be unnecessary if you have your default branch configured correctly
         - v1-dep-
+        
     # This is based on your 1.0 configuration file or project settings
     - run: apt-get update && apt-get install -y --fix-missing --no-install-recommends mosquitto # $sendmail
     - run: git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
