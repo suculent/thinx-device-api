@@ -2247,7 +2247,7 @@ var ThinxApp = function() {
       return;
     }
 
-    if (typeof(nid) == "undefined") {
+    if (typeof(nid) === "undefined" || nid === null) {
       respond(res, {
         success: false,
         status: "missing_nid"
@@ -2255,7 +2255,7 @@ var ThinxApp = function() {
       return;
     }
 
-    if (typeof(nid) == "undefined") {
+    if (typeof(reply) === "undefined" || reply === null) {
       respond(res, {
         success: false,
         status: "missing_reply"
@@ -2305,7 +2305,7 @@ var ThinxApp = function() {
       // Buffer the body entirely for processing as a whole.
       var bodyChunks = [];
 
-      if (typeof(res) == "undefined") {
+      if (typeof(res) === "undefined") {
         console.log("No response.");
         return;
       }
@@ -3131,7 +3131,7 @@ var ThinxApp = function() {
       };
 
       // May not exist while testing...
-      if (typeof(ws) != "undefined" && ws !== null) {
+      if (typeof(ws) != "undefined" && ws != null) {
         ws.on("message", function incoming(message) {
 
           // skip empty messages
