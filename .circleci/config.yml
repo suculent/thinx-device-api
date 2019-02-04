@@ -84,7 +84,7 @@ jobs:
     - run: wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.3.0.1492-linux.zip
     - run: unzip sonar-scanner*.zip && pwd && ls
     - run: PATH=$PATH:sonar-scanner-cli-3.3.0.1492-linux/bin/
-    - run: bash ./99-sonar.sh
+    - run: pwd && ls && bash ./99-sonar.sh
 
     # Test
     #   This would typically be a build job when using workflows, possibly combined with build
