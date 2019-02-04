@@ -44,7 +44,7 @@ jobs:
     - run: apt-get update && apt-get install -y --fix-missing --no-install-recommends mosquitto # $sendmail
     - run: git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
     - run: npm install coveralls pm2 nyc
-    - run: npm install eslint --save-dev
+    - run: npm install eslint -g --save-dev
     - run: npm install .
     - run: wget http://download.redis.io/releases/redis-5.0.3.tar.gz
     - run: tar xzf redis-5.0.3.tar.gz
@@ -89,7 +89,7 @@ jobs:
     # Test
     #   This would typically be a build job when using workflows, possibly combined with build
     - run: mkdir -p $CIRCLE_TEST_REPORTS/reports
-    - run: pwd && ls && ./node_modules/eslint/bin/eslint.js ./lib/ --format junit --output-file $CIRCLE_TEST_REPORTS/reports/eslint.xml
+    - run: eslint ./lib/ --format junit --output-file $CIRCLE_TEST_REPORTS/reports/eslint.xml
     - run: /usr/local/bin/redis-server /etc/redis/redis.conf &
     - run: cp ./conf/config-test.json ./conf/config.json
     - run: npm test
