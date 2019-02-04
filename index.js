@@ -2305,7 +2305,7 @@ var ThinxApp = function() {
       // Buffer the body entirely for processing as a whole.
       var bodyChunks = [];
 
-      if (typeof(res) === "undefined" || res === null) {
+      if (typeof(res) === "undefined" || res == null) {
         console.log("No response.");
         return;
       }
@@ -3131,7 +3131,7 @@ var ThinxApp = function() {
       };
 
       // May not exist while testing...
-      if (typeof(ws) !== "undefined" && ws !== null) {
+      if (typeof(ws) !== "undefined" && ws != null) {
         ws.on("message", function incoming(message) {
 
           // skip empty messages
