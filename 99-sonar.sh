@@ -1,4 +1,4 @@
-
+#!/bin/bash
 
 sonar-scanner \
   -Dsonar.projectKey=suculent_thinx-device-api \
