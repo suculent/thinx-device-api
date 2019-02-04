@@ -34,7 +34,6 @@ var ThinxApp = function() {
     }
   });
 
-  const minute = 60 * 1000;
   const hour = 3600 * 1000;
   const day = hour * 24;
   const fortnight = day * 14;
@@ -105,8 +104,6 @@ var ThinxApp = function() {
   // OAuth2 for GitHub
   //
 
-  var github_login_handler;
-  var github_authorizationUri;
   var githubOAuth;
 
   try {
@@ -146,7 +143,10 @@ var ThinxApp = function() {
   var device = require("./lib/thinx/device");
   var devices = require("./lib/thinx/devices");
   var deployment = require("./lib/thinx/deployment");
+
   var watcher = require("./lib/thinx/repository");
+  watcher.watch();
+
   var apienv = require("./lib/thinx/apienv");
   var apikey = require("./lib/thinx/apikey");
   var user = require("./lib/thinx/owner");
@@ -352,15 +352,6 @@ var ThinxApp = function() {
   });
 
   app.all("/*", function(req, res, next) {
-
-    // CORS must be enabled esp. for devices
-    var allowedOrigin = "rtm.thinx.cloud";
-
-    /*
-    if (typeof(req.headers.origin) !== "undefined") {
-      allowedOrigin = req.headers.origin;
-    }
-    */
 
     var client = req.get("User-Agent");
 
@@ -1175,8 +1166,8 @@ var ThinxApp = function() {
       });
       console.timeEnd("register-response");
     } else {
-      var ip = getClientIp(req);
-      console.log("Incoming request has `registration` in body, with IP " + ip);
+      var rip = getClientIp(req);
+      console.log("Incoming request has `registration` in body, with IP " + rip);
       console.log("headers: " + JSON.stringify(req.headers));
 
       const regTime = new Date().getMilliseconds();
@@ -1186,7 +1177,7 @@ var ThinxApp = function() {
         success, response) {
         // Append timestamp inside as library is not parsing HTTP response JSON properly
         // when it ends with anything else than }}
-        if (success & typeof(response.registration) !== "undefined") {
+        if (success && typeof(response.registration) !== "undefined") {
           response.registration.timestamp = Math.floor(new Date() / 1000);
         }
         if (success === false) {
@@ -1243,10 +1234,7 @@ var ThinxApp = function() {
       return;
     }
 
-    var owner = req.session.owner;
-    var changes = req.body.changes;
-
-    device.edit(owner, changes, function(success, message) {
+    device.edit(req.session.owner, req.body.changes, function(success, message) {
       respond(res, {
         success: success,
         message: message
@@ -1347,17 +1335,13 @@ var ThinxApp = function() {
 
   // Build respective firmware and notify target device(s
   app.post("/api/build", function(req, res) {
-
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
-
-    var owner = req.session.owner;
-    var wrapper = req.body.build;
     var notifiers = {
       messenger: messenger,
       websocket: _ws
     };
-    builder.build(owner, wrapper, notifiers, function(success, response) {
+    builder.build(req.session.owner, req.body.build, notifiers, function(success, response) {
       respond(res, response);
     });
   });
@@ -1854,8 +1838,6 @@ var ThinxApp = function() {
                 console.log("[OID:" + req.session.owner +
                   "] [NEW_SESSION] [oauth]");
 
-                var minute = 60 * 1000;
-
                 req.session.cookie.secure = true;
                 req.session.cookie.httpOnly = true;
                 req.session.cookie.maxAge = fortnight;
@@ -1905,8 +1887,6 @@ var ThinxApp = function() {
         return;
       });
       return;
-    } else {
-
     }
 
     //
@@ -2001,8 +1981,6 @@ var ThinxApp = function() {
           req.session.owner = user_data.owner;
           console.log("[OID:" + req.session.owner +
             "] [NEW_SESSION]");
-
-          var minute = 60 * 1000;
 
           if (typeof(req.body.remember === "undefined") || (req.body.remember ===
               0)) {
@@ -2238,36 +2216,6 @@ var ThinxApp = function() {
 
     var owner = req.session.owner;
 
-    /*
-    var device = req.body.udid;
-    var nid = "nid:" + device;
-    var reply = req.body.reply;
-
-    if (typeof(device) === "undefined") {
-      respond(res, {
-        success: false,
-        status: "missing_udid"
-      });
-      return;
-    }
-
-    if (typeof(nid) === "undefined") {
-      respond(res, {
-        success: false,
-        status: "missing_nid"
-      });
-      return;
-    }
-
-    if (typeof(nid) === "undefined") {
-      respond(res, {
-        success: false,
-        status: "missing_reply"
-      });
-      return;
-    }
-    */
-
     devices.push(owner, req.body, function(error, response) {
       respond(res, {
         success: error,
@@ -2287,11 +2235,11 @@ var ThinxApp = function() {
     if (!validateSession(req, res)) return;
 
     var owner = req.session.owner;
-    var device = req.body.udid;
-    var nid = "nid:" + device;
+    var device_id = req.body.udid;
+    var nid = "nid:" + device_id;
     var reply = req.body.reply;
 
-    if (typeof(device) === "undefined") {
+    if (typeof(device_id) === "undefined") {
       respond(res, {
         success: false,
         status: "missing_udid"
@@ -2299,7 +2247,7 @@ var ThinxApp = function() {
       return;
     }
 
-    if (typeof(nid) === "undefined") {
+    if (typeof(nid) == "undefined") {
       respond(res, {
         success: false,
         status: "missing_nid"
@@ -2307,7 +2255,7 @@ var ThinxApp = function() {
       return;
     }
 
-    if (typeof(nid) === "undefined") {
+    if (typeof(nid) == "undefined") {
       respond(res, {
         success: false,
         status: "missing_reply"
@@ -2315,7 +2263,7 @@ var ThinxApp = function() {
       return;
     }
 
-    messenger.publish(owner, device, {
+    messenger.publish(owner, device_id, {
       nid: nid,
       reply: reply
     });
@@ -2357,7 +2305,7 @@ var ThinxApp = function() {
       // Buffer the body entirely for processing as a whole.
       var bodyChunks = [];
 
-      if (typeof(res) === "undefined") {
+      if (typeof(res) == "undefined") {
         console.log("No response.");
         return;
       }
@@ -2463,7 +2411,6 @@ var ThinxApp = function() {
             }
 
             const email = hdata.email;
-            const picture = hdata.avatar_url; // TODO: Fetch and save to owner...
 
             if (typeof(email) === "undefined" || email === null) {
               console.log("Error: no email in response.");
@@ -2764,14 +2711,14 @@ var ThinxApp = function() {
 
         console.log("Deleting owner " + owner_id);
         devices.list(owner_id, function(dsuccess, devices) {
-          for (var index in devices) {
+          devices.forEach(function(){
             devices.revoke(owner, req.body, function(success, status) {
               respond(res, {
                 success: success,
                 status: status
               });
             });
-          }
+          });
         });
 
         console.log("Deleting all API keys for this owner...");
@@ -2848,8 +2795,6 @@ var ThinxApp = function() {
             const email = odata.email;
             const family_name = odata.family_name;
             const given_name = odata.given_name;
-            const picture = odata.picture;
-            const locale = odata.locale;
 
             if (typeof(email) === "undefined") {
               res3.redirect(
@@ -2917,15 +2862,15 @@ var ThinxApp = function() {
                       "OAuth User created: " +
                       given_name + " " + family_name);
 
-                    var token = sha256(res2.access_token);
-                    global_token = token;
-                    client.set(token, JSON.stringify(userWrapper));
-                    client.expire(token, 30);
+                    var gtoken = sha256(res2.access_token);
+                    global_token = gtoken;
+                    client.set(gtoken, JSON.stringify(userWrapper));
+                    client.expire(gtoken, 30);
 
                     alog.log(owner_id, " OAuth2 User logged in...");
-                    var token = sha256(res2.access_token);
-                    client.set(token, JSON.stringify(userWrapper));
-                    client.expire(token, 3600);
+                    var otoken = sha256(res2.access_token);
+                    client.set(otoken, JSON.stringify(userWrapper));
+                    client.expire(otoken, 3600);
                     const ourl = "https://rtm.thinx.cloud/auth.html?t=" +
                       token + "&g=true"; // require GDPR consent
                     console.log(ourl);
@@ -2988,9 +2933,6 @@ var ThinxApp = function() {
    */
 
   app.get('/lick', function(req, res) {
-    var mac = req.query.mac;
-    // return last device api key to verify this gateway is valid
-    // search device by mac and return hash of its api key
 
     // search by mac, return last api key hash
 
@@ -3001,7 +2943,7 @@ var ThinxApp = function() {
 
       function(err, body) {
 
-        if (err) {
+        if (err || (typeof(body) == "undefined") || (body === null)) {
           console.log(
             "Device with this UUID/MAC not found. Seems like new one..."
           );
@@ -3012,8 +2954,11 @@ var ThinxApp = function() {
           return;
         }
 
-        console.log("Known device identified by MAC address: " + device.normalizedMAC(
-          reg.mac));
+        if (typeof(this.device) != "undefined" && this.device !== null) {
+          console.log("Known device identified by MAC address: " + this.device.normalizedMAC(reg.mac));
+        } else {
+          console.log("Refactoring error: device is: " + this.device);
+        }
 
         if (body.rows.length === 0) {
           // device not found by mac; this is a new device...
@@ -3135,7 +3080,7 @@ var ThinxApp = function() {
 
   if (typeof(wss) !== "undefined") {
 
-    const interval = setInterval(function ping() {
+    setInterval(function ping() {
       wss.clients.forEach(function each(ws) {
         if (ws.isAlive === false) {
           ws.terminate();
@@ -3186,7 +3131,7 @@ var ThinxApp = function() {
       };
 
       // May not exist while testing...
-      if (typeof(ws) !== "undefined" && ws !== null) {
+      if (typeof(ws) != "undefined" && ws !== null) {
         ws.on("message", function incoming(message) {
 
           // skip empty messages
@@ -3246,29 +3191,6 @@ var ThinxApp = function() {
   var version = package_info.version;
 
   console.log("-=[ ☢ " + product + " v" + version + " rev. " + app.version() + " ☢ ]=-");
-  //console.log("» Started on port " + serverPort + " (HTTP) and " + (serverPort + 1) + " (HTTPS)");
-
-  /* Should load all devices with attached repositories and watch those repositories.
-   * Maintains list of watched repositories for runtime handling purposes.
-   * TODO: Re-build on change.
-   */
-
-  var watcher_callback = function(result) {
-    if (typeof(result) !== "undefined") {
-      console.log("watcher_callback result: " + JSON.stringify(result));
-      if (result === false) {
-        console.log(
-          "No change detected on repository so far."
-        );
-      } else {
-        console.log(
-          "CHANGE DETECTED! - TODO: Commence re-build (will notify user but needs to get all required user data first (owner/device is in path)"
-        );
-      }
-    } else {
-      console.log("watcher_callback: no result");
-    }
-  };
 
   //
   // Database compactor
