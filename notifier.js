@@ -203,7 +203,7 @@ devicelib.get(udid, function(err, doc) {
     return;
   }
 
-  if (typeof(doc) === "undefined") {
+  if ((typeof(doc) === "undefined") || doc === null) {
     console.log("No such device with udid " + udid);
     process.exit(1);
   }
