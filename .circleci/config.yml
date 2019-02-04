@@ -97,6 +97,12 @@ jobs:
     - run: bash ./01-analyze.sh
     - run: bash ./03-test.sh
 
+    # Sonarcloud Integration
+    - run: wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.3.0.1492-linux.zip
+    - run: unzip sonar-scanner*.zip && pwd && ls
+    - run: PATH=$PATH:sonar-scanner-cli-3.3.0.1492-linux/bin/
+    - run: bash ./99-sonar.sh
+
     # Deployment
     # Your existing circle.yml file contains deployment steps.
     # The config translation tool does not support translating deployment steps
