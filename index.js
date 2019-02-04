@@ -556,7 +556,7 @@ var ThinxApp = function() {
     if (!validateSecurePOSTRequest(req)) return;
     if (!validateSession(req, res)) return;
     var owner = req.session.owner;
-    if (typeof(owner) == "undefined" || owner == null) {
+    if (typeof(owner) === "undefined" || owner === null) {
       respond(res, {
         success: false,
         status: "owner_not_found"
@@ -564,7 +564,7 @@ var ThinxApp = function() {
       return;
     }
     var udid = req.body.device_id;
-    if (typeof(udid) == "undefined" || udid == null) {
+    if (typeof(udid) === "undefined" || udid === null) {
       respond(res, {
         success: false,
         status: "udid_not_found"
@@ -2305,7 +2305,7 @@ var ThinxApp = function() {
       // Buffer the body entirely for processing as a whole.
       var bodyChunks = [];
 
-      if (typeof(res) === "undefined" || res == null) {
+      if (typeof(res) === "undefined" || res === null) {
         console.log("No response.");
         return;
       }
@@ -3131,7 +3131,7 @@ var ThinxApp = function() {
       };
 
       // May not exist while testing...
-      if (typeof(ws) != "undefined" && ws != null) {
+      if (typeof(ws) !== "undefined" && ws !== null) {
         ws.on("message", function incoming(message) {
 
           // skip empty messages
