@@ -26,7 +26,7 @@ describe("Statistics", function() {
   });
 
   it("should be able to return today results for owner", function(done) {
-    var result = s.today(
+    s.today(
       owner,
       function(error, result) {
         expect(error).toBe(false);
@@ -65,7 +65,7 @@ describe("Statistics", function() {
   }, 60000);
 
   it("should be able to return weekly results for owner", function(done) {
-    var result = s.week(
+    s.week(
       owner,
       function(error, result) {
         expect(error).toBe(false);

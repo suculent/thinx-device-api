@@ -197,12 +197,13 @@ blog.log(build_id, owner, udid, status);
 
 devicelib.get(udid, function(err, doc) {
 
-  if (err || typeof(doc) == "undefined") {
+  if (err || typeof(doc) === "undefined" || doc === null) {
     console.log(err);
     rollbar.warning(err);
+    return;
   }
 
-  if (typeof(doc) === "undefined") {
+  if ((typeof(doc) === "undefined") || doc === null) {
     console.log("No such device with udid " + udid);
     process.exit(1);
   }
