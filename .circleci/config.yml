@@ -80,10 +80,11 @@ jobs:
 
     - run: bash ./00-init_db_design.sh
 
-    # Sonarcloud Integration
-    - run: wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.3.0.1492-linux.zip
-    - run: unzip sonar-scanner*.zip
-    - run: export PATH=$PATH:$(pwd)/sonar-scanner-cli-3.3.0.1492-linux/bin/ && which sonar-scanner && bash ./99-sonar.sh
+    # Sonarcloud Integration (requires JAVA)
+    # - run: wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.3.0.1492-linux.zip
+    # - run: unzip sonar-scanner*.zip
+    # - run: which java
+    # - run: alias sonar-scanner="$(pwd)/sonar-scanner-3.3.0.1492-linux/bin/sonar-scanner" && which sonar-scanner && bash ./99-sonar.sh
 
     # Test
     #   This would typically be a build job when using workflows, possibly combined with build
