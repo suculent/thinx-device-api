@@ -87,7 +87,7 @@
   },
   "devDependencies": {
     "coveralls": "^3.0.2",
-    "eslint": "^5.12.1",
+    "eslint": "^5.13.0",
     "grunt": "^1.0.3",
     "grunt-karma-coveralls": "^2.5.4",
     "jasmine": "^2.99.0",
