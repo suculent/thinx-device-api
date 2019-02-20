@@ -1143,12 +1143,12 @@ var ThinxApp = function() {
     var ip = getClientIp(req);
     console.log("** IP: " + ip);
     if (typeof(req.body) === "undefined") {
-      console.time("register-response");
+      //console.time("register-response");
       respond(res, {
         success: false,
         status: "no_body"
       });
-      console.timeEnd("register-response");
+      //console.timeEnd("register-response");
 
     } else if (typeof(req.body.registration) === "undefined") {
       console.log("Incoming request has no `registration` in body, should BLACKLIST " + ip);
@@ -1157,12 +1157,12 @@ var ThinxApp = function() {
       BLACKLIST.push(ip);
       */
       console.log("body: " + JSON.stringify(req.body));
-      console.time("register-response");
+      //console.time("register-response");
       respond(res, {
         success: false,
         status: "blacklisted"
       });
-      console.timeEnd("register-response");
+      //console.timeEnd("register-response");
     } else {
       var rip = getClientIp(req);
       console.log("Incoming request has `registration` in body, with IP " + rip);
@@ -1182,11 +1182,11 @@ var ThinxApp = function() {
           console.log("Device registration failed with response: " + JSON.stringify(
             response));
         }
-        console.log("Sending response: " + JSON.stringify(response));
-        console.time("register-response");
-        console.log("** REG END: " + new Date().getMilliseconds() - startTime);
+        console.log("» Sending response: " + JSON.stringify(response, null, 4));
+        //console.time("register-response");
+        //console.log("** REG END: " + new Date().getMilliseconds() - startTime);
         respond(res, response);
-        console.timeEnd("register-response");
+        //console.timeEnd("register-response");
       }, req);
     }
   });
