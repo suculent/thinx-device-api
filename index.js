@@ -395,7 +395,7 @@ var ThinxApp = function() {
     }
 
     // Problem is, that the device API should be separate and have different Access-Control
-    var allowedOrigins = ['https://rtm.thinx.cloud', 'http://rtm.thinx.cloud', 'https://cdnjs.cloudflare.com', 'https://d37gvrvc0wt4s1.cloudfront.net', '*'];
+    var allowedOrigins = [app_config.public_url, 'http://rtm.thinx.cloud', 'https://cdnjs.cloudflare.com', 'https://d37gvrvc0wt4s1.cloudfront.net', '*'];
     var origin = req.headers.origin;
     if (allowedOrigins.indexOf(origin) > -1){
       res.setHeader('Access-Control-Allow-Origin', origin);
@@ -1609,10 +1609,10 @@ var ThinxApp = function() {
       if (success === false) {
         console.log(response);
         res.redirect(
-          "https://rtm.thinx.cloud/error.html?success=failed&reason=" +
+          app_config.public_url + "/error.html?success=failed&reason=" +
           response);
       } else {
-        res.redirect("https://rtm.thinx.cloud/error.html?success=true");
+        res.redirect(app_config.public_url + "/error.html?success=true");
       }
     });
   });
@@ -1639,10 +1639,10 @@ var ThinxApp = function() {
       if (success === false) {
         console.log(response);
         res.redirect(
-          "https://rtm.thinx.cloud/error.html?success=failed&reason=" +
+          app_config.public_url + "/error.html?success=failed&reason=" +
           response);
       } else {
-        res.redirect("https://rtm.thinx.cloud/error.html?success=true");
+        res.redirect(app_config.public_url + "/error.html?success=true");
       }
     });
   });
@@ -1680,10 +1680,10 @@ var ThinxApp = function() {
     transfer.decline(body, function(success, response) {
       if (success === false) {
         res.redirect(
-          "https://rtm.thinx.cloud/error.html?success=failed&reason=selective_decline_failed"
+          app_config.public_url + "/error.html?success=failed&reason=selective_decline_failed"
         );
       } else {
-        res.redirect("https://rtm.thinx.cloud/error.html?success=true");
+        res.redirect(app_config.public_url + "/error.html?success=true");
       }
     });
   });
@@ -1710,10 +1710,10 @@ var ThinxApp = function() {
       if (success === false) {
         console.log(response);
         res.redirect(
-          "https://rtm.thinx.cloud/error.html?success=failed&reason=" +
+          app_config.public_url + "/error.html?success=failed&reason=" +
           response);
       } else {
-        res.redirect("https://rtm.thinx.cloud/error.html?success=true");
+        res.redirect(app_config.public_url + "/error.html?success=true");
       }
     });
   });
@@ -1751,9 +1751,9 @@ var ThinxApp = function() {
     transfer.accept(req.body, function(success, response) {
       if (success === false) {
         console.log(response);
-        res.redirect("https://rtm.thinx.cloud/error.html?success=failed");
+        res.redirect(app_config.public_url + "/error.html?success=failed");
       } else {
-        res.redirect("https://rtm.thinx.cloud/error.html?success=true");
+        res.redirect(app_config.public_url + "/error.html?success=true");
       }
     });
   });
@@ -1847,6 +1847,7 @@ var ThinxApp = function() {
                   httpOnly: false
                 });
 
+                Sqreen.signup_track({ username: owner_id });
 
                 alog.log(req.session.owner, "OAuth User created: " +
                   wrapper.first_name + " " + wrapper.last_name);
@@ -1877,6 +1878,8 @@ var ThinxApp = function() {
               alog.log(req.session.owner, "OAuth User logged in: " +
                 doc.username);
 
+              Sqreen.auth_track(true, { doc: owner });
+
               updateLastSeen(doc);
               respond(res, {
                 "redirectURL": "/app"
@@ -1897,6 +1900,7 @@ var ThinxApp = function() {
 
     if (typeof(req.body.password) === "undefined") {
       callback(false, "login_failed");
+      Sqreen.auth_track(false, { doc: owner });
       return;
     }
 
@@ -2081,7 +2085,7 @@ var ThinxApp = function() {
         client.set(token, JSON.stringify(user_data));
         client.expire(token, 30);
         global_token = token;
-        ourl = "https://rtm.thinx.cloud/auth.html?t=" + token + "&g=" + skip_gdpr_page;
+        ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" + skip_gdpr_page;
       }
 
       if (typeof(req.session.owner) !== "undefined") {
@@ -2121,7 +2125,7 @@ var ThinxApp = function() {
     }
     console.log(JSON.stringify(req.params));
     //res.status(401).end();
-    res.redirect("https://rtm.thinx.cloud/");
+    res.redirect(app_config.public_url);
   });
 
   /*
@@ -2276,7 +2280,7 @@ var ThinxApp = function() {
 
   app.get("/slack/direct_install", function(req, res) {
     res.redirect(
-      "https://slack.com/oauth/authorize?client_id=233115403974.233317554391&scope=bot&state=Online&redirect_uri=https://rtm.thinx.cloud:7443/slack/redirect"
+      "https://slack.com/oauth/authorize?client_id=233115403974.233317554391&scope=bot&state=Online&redirect_uri=" + app_config.public_url + ":7443/slack/redirect"
     );
   });
 
@@ -2287,13 +2291,13 @@ var ThinxApp = function() {
     console.log("Redirect Code: " + req.query.code);
     console.log("Redirect State: " + req.query.state);
 
-    // https://slack.com/api/oauth.access?client_id=233115403974.233317554391&client_secret=ccbaae01e5259ed283ef63321be597da&code=owner_id&redirect_uri=https://rtm.thinx.cloud:7443/slack/redirect
+    // https://slack.com/api/oauth.access?client_id=233115403974.233317554391&client_secret=ccbaae01e5259ed283ef63321be597da&code=owner_id&redirect_uri=" + app_config.public_url + ":7443/slack/redirect
     var options = {
       protocol: 'https:',
       host: 'slack.com',
       hostname: 'slack.com',
       port: 443,
-      path: '/api/oauth.access?client_id=233115403974.233317554391&client_secret=ccbaae01e5259ed283ef63321be597da&redirect_uri=https://rtm.thinx.cloud:7443/slack/redirect&scope=bot&code=' +
+      path: '/api/oauth.access?client_id=233115403974.233317554391&client_secret=ccbaae01e5259ed283ef63321be597da&redirect_uri=" + app_config.public_url + ":7443/slack/redirect&scope=bot&code=' +
         req.query.code
     };
 
@@ -2417,7 +2421,7 @@ var ThinxApp = function() {
               console.log(
                 "ERROR! This redirect won't work as headers are already set.");
               global_response.redirect(
-                'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
+                app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
                 "No e-mail in response."
               );
             }
@@ -2431,7 +2435,7 @@ var ThinxApp = function() {
               console.log(
                 "ERROR! This redirect won't work as headers are already set.");
               global_response.redirect(
-                'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
+                app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
                 'Missing e-mail.'
               );
               return;
@@ -2454,13 +2458,15 @@ var ThinxApp = function() {
               // Error case covers creating new user/managing deleted account
               if (error) {
 
+                Sqreen.auth_track(false, { doc: userWrapper.owner_id });
+
                 console.log("Failed with error: " + error);
 
                 if (error.toString().indexOf("Error: deleted") !== -1) {
                   // TODO: Redirect to error page with reason
                   console.log("[oauth] user document deleted");
                   global_response.redirect(
-                    'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
+                    app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
                     'Account document deleted.'
                   );
                   return;
@@ -2472,10 +2478,11 @@ var ThinxApp = function() {
                   if (typeof(udoc) !== "undefined") {
                     if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
                       true) {
+                      Sqreen.auth_track(false, { doc: userWrapper.owner_id });
                       // TODO: Redirect to error page with reason
                       console.log("[oauth] user account marked as deleted");
                       global_response.redirect(
-                        'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
+                        app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
                         'Account deleted.'
                       );
                       return;
@@ -2495,10 +2502,12 @@ var ThinxApp = function() {
                     client.expire(token, 30);
                     global_token = token;
 
-                    const ourl = "https://rtm.thinx.cloud/auth.html&t=" +
+                    const ourl = app_config.public_url + "/auth.html&t=" +
                       token + "&g=true"; // require GDPR consent
                     console.log(ourl);
                     global_response.redirect(ourl);
+
+                    Sqreen.signup_track({ username: userWrapper.owner_id });
 
                     console.log("Redirecting to login (2)");
 
@@ -2538,7 +2547,9 @@ var ThinxApp = function() {
                 }
               }
 
-              const ourl = "https://rtm.thinx.cloud/auth.html?t=" + token + "&g=" +
+              Sqreen.auth_track(true, { username: userWrapper.owner_id });
+
+              const ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" +
                 gdpr; // require GDPR consent
               console.log(ourl);
               global_response.redirect(ourl);
@@ -2587,7 +2598,7 @@ var ThinxApp = function() {
       if (!err) {
         console.log("Should login with token now...");
         if (global_token !== null) {
-          const rurl = "https://rtm.thinx.cloud/auth.html?t=" + global_token + "&g=" +
+          const rurl = app_config.public_url + "/auth.html?t=" + global_token + "&g=" +
             false; // require GDPR consent
           res.redirect(rurl);
           global_token = null; // reset token for next login attempt
@@ -2798,7 +2809,7 @@ var ThinxApp = function() {
 
             if (typeof(email) === "undefined") {
               res3.redirect(
-                'https://rtm.thinx.cloud/error.html?success=failed&title=Sorry&reason=' +
+                app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
                 'E-mail missing.'
               );
             }
@@ -2829,7 +2840,7 @@ var ThinxApp = function() {
                   // Redirect to error page with reason for deleted documents
                   console.log("[oauth] user document deleted");
                   ores.redirect(
-                    'https://rtm.thinx.cloud/error.html?success=failed&title=OAuth-Error&reason=' +
+                    app_config.public_url + '/error.html?success=failed&title=OAuth-Error&reason=' +
                     'account_doc_deleted');
                   return;
 
@@ -2844,7 +2855,7 @@ var ThinxApp = function() {
                       console.log(
                         "[oauth] user account marked as deleted");
                       ores.redirect(
-                        'https://rtm.thinx.cloud/error.html?success=failed&title=OAuth-Error&reason=' +
+                        app_config.public_url + '/error.html?success=failed&title=OAuth-Error&reason=' +
                         'account_deleted');
                       return;
                     }
@@ -2871,7 +2882,7 @@ var ThinxApp = function() {
                     var otoken = sha256(res2.access_token);
                     client.set(otoken, JSON.stringify(userWrapper));
                     client.expire(otoken, 3600);
-                    const ourl = "https://rtm.thinx.cloud/auth.html?t=" +
+                    const ourl = app_config.public_url + "/auth.html?t=" +
                       token + "&g=true"; // require GDPR consent
                     console.log(ourl);
                     ores.redirect(ourl);
@@ -2904,7 +2915,7 @@ var ThinxApp = function() {
               var token = sha256(res2.access_token);
               client.set(token, JSON.stringify(userWrapper));
               client.expire(token, 3600);
-              const ourl = "https://rtm.thinx.cloud/auth.html?t=" + token +
+              const ourl = app_config.public_url + "/auth.html?t=" + token +
                 "&g=" + gdpr; // require GDPR consent
               console.log(ourl);
               ores.redirect(ourl);
@@ -2915,13 +2926,13 @@ var ThinxApp = function() {
         }).on("error", (err) => {
         console.log("Error: " + err.message);
         res.redirect(
-          'https://rtm.thinx.cloud/error.html?success=failed&title=OAuth-Error&reason=' +
+          app_config.public_url + '/error.html?success=failed&title=OAuth-Error&reason=' +
           err.message);
       });
     }).catch(err => {
       console.log("Oauth error: " + err);
       ores.redirect(
-        'https://rtm.thinx.cloud/error.html?success=failed&title=OAuth-Error&reason=' +
+        app_config.public_url + '/error.html?success=failed&title=OAuth-Error&reason=' +
         err.message);
     });
   });
