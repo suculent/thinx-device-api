@@ -1878,7 +1878,7 @@ var ThinxApp = function() {
               alog.log(req.session.owner, "OAuth User logged in: " +
                 doc.username);
 
-              Sqreen.auth_track(true, { doc: owner });
+              Sqreen.auth_track(true, { username: doc.owner });
 
               updateLastSeen(doc);
               respond(res, {
