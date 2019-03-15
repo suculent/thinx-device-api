@@ -7,7 +7,7 @@
 The CircleCI build is limited and therefore returns mostly bad results. Closer look may show better numbers:
 
 [![Build Status](https://img.shields.io/circleci/project/github/suculent/thinx-device-api/master.svg)](https://circleci.com/gh/suculent/thinx-device-api)
-[![Coverage Status](https://coveralls.io/repos/github/suculent/thinx-device-api/badge.svg?branch=master)](https://coveralls.io/github/suculent/thinx-device-api?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/suculent/thinx-device-api/badge.svg?branch=master)](https://coveralls.io/github/suculent/thinx-device-api?branch=master) [![Greenkeeper badge](https://badges.greenkeeper.io/suculent/thinx-device-api.svg)](https://greenkeeper.io/)
 
 IoT Device Management Server running on node.js.
 
