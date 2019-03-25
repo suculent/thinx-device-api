@@ -4,7 +4,7 @@
     {
       name      : "thinx",
       script    : "index.js",
-      interpreter  : "node@10.15.1",
+      interpreter  : "node@11.10.1",
     }
   ]
 }
