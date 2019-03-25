@@ -18,7 +18,7 @@ describe("API Key", function() {
 
           if (success) {
             this.generated_key_hash = sha256(object.key);
-            console.log("Key ready to revoke: " + this.generated_key_hash);
+            console.log("APIKey ready to revoke: " + this.generated_key_hash);
 
             //verify: function(owner, apikey, callback)
             it("should be able to verify API Keys", function(done) {

@@ -23,7 +23,7 @@ describe("API Env", function() {
           if (success) {
 
             this.generated_key_name = "sample-var-name";
-            console.log("Key ready to revoke: " + this.generated_key_name);
+            console.log("APIEnv ready to revoke: " + this.generated_key_name);
 
             // fetch: function(name, callback)
             if ("should be able to fetch specific env var",
