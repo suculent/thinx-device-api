@@ -47,6 +47,7 @@ describe("Device", function() {
   console.log("• DeviceSpec.js: Using test API_KEY: " + apikey);
   console.log("• DeviceSpec.js: Using request: " + JSON.stringify(JRS));
 
+
   //create: function(owner, apikey_alias, callback)
   it("API keys are required to do this on new instance", function(done) {
     APIKey.create(
@@ -149,8 +150,6 @@ describe("Device", function() {
     done();
 
   }, 30000);
-
-
 
   it("should be able to change its alias.",
     function(done) {
