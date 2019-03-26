@@ -17,7 +17,7 @@
     "coverage": "nyc jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls && cat lcov.info | codacy-coverage",
     "snyk": "snyk test",
     "snyk-protect": "snyk protect",
-    "test": "nyc jasmine",
+    "test": "nyc jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls && cat lcov.info | codacy-coverage",
     "coverage_new": "nyc jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls && cat lcov.info | codacy-coverage"
   },
   "dependencies": {
