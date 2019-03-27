@@ -67,7 +67,7 @@
     "request": "^2.88.0",
     "rollbar": "^2.5.4",
     "satelize": "^0.2.0",
-    "semver": "5.6.0",
+    "semver": "6.0.0",
     "sha256": "^0.2.0",
     "sillyname": "^0.1.0",
     "simple-oauth2": "^2.2.1",
