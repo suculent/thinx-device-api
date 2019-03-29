@@ -21,7 +21,7 @@
     "coverage_new": "nyc jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls && cat lcov.info | codacy-coverage"
   },
   "dependencies": {
-    "@slack/client": "^4.12.0",
+    "@slack/client": "^5.0.0",
     "acorn": "^6.1.1",
     "base-64": "^0.1.0",
     "base128": "^0.2.1",
