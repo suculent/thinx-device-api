@@ -140,10 +140,8 @@ if [[ "$user" == "git" ]]; then
 	len=${#REPO_NAME}
 	OLDHOST=$host
 	host="$(echo $OLDHOST | grep : | cut -d: -f2-)"
-	GIT_USER=$(echo $OLDHOST | grep : | cut -d: -f2-)
-	#echo "GIT_USER: ${GIT_USER}"
 	GIT_PATH=$REPO_PATH
-	REPO_PATH="${GIT_USER}/$(sed 's/.git//g' <<< $GIT_PATH)"
+	REPO_PATH="$(sed 's/.git//g' <<< $GIT_PATH)"
 	REPO_NAME="$(echo $REPO_PATH | grep / | cut -d/ -f2-)"
 fi
 
@@ -174,35 +172,24 @@ echo "[builder.sh] Entering BUILD_PATH $BUILD_PATH" | tee -a "${LOG_PATH}"
 cd $BUILD_PATH | tee -a "${LOG_PATH}"
 cd $BUILD_PATH && echo $(pwd) | tee -a "${LOG_PATH}"
 
-# Create new working directory
-echo "[builder.sh] Creating new REPO_PATH $REPO_PATH" | tee -a "${LOG_PATH}"
-mkdir -p $BUILD_PATH/$REPO_PATH
-
-# enter git user folder if any
-if [[ -d $GIT_USER ]]; then
-	echo "[builder.sh] Entering git user folder inside workspace ./${GIT_USER}..." | tee -a "${LOG_PATH}"
-	cd ./$GIT_USER > /dev/null
-	pwd | tee -a "${LOG_PATH}"
-fi
-
 # Clean workspace
 echo "[builder.sh] Cleaning previous git repository / workspace in ${REPO_NAME}..." | tee -a "${LOG_PATH}"
 rm -rf $REPO_NAME
 
 # Fetch project
 echo "[builder.sh] Cloning ${GIT_REPO}..." | tee -a "${LOG_PATH}"
-cd $BUILD_PATH/$GIT_USER && git clone --quiet --recurse-submodules $GIT_REPO
+cd $BUILD_PATH && git clone --quiet --recurse-submodules $GIT_REPO
 
 SINK=""
 if [[ -d $REPO_NAME ]]; then
 	echo "[builder.sh] Directory $REPO_NAME exists, entering..." | tee -a "${LOG_PATH}"
 	cd ./$REPO_NAME
-	SINK=$BUILD_PATH/$GIT_USER/$REPO_NAME
+	SINK=$BUILD_PATH/$REPO_NAME
 	echo "[builder.sh] SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
 	pwd | tee -a "${LOG_PATH}"
 else
 	echo "[builder.sh] Directory $REPO_NAME does not exist, entering $REPO_PATH instead..." | tee -a "${LOG_PATH}"
-	SINK=$BUILD_PATH/$GIT_USER/$REPO_PATH
+	SINK=$BUILD_PATH/$REPO_PATH
 	cd ./$REPO_PATH
 	echo "[builder.sh] SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
 	pwd | tee -a "${LOG_PATH}"
@@ -288,7 +275,7 @@ fi
 echo "[builder.sh] Changing current directory to WORKDIR $WORKDIR..." | tee -a "${LOG_PATH}"
 cd $WORKDIR  | tee -a "${LOG_PATH}"
 
-echo "[builder.sh] Current work path: $(pwd)" | tee -a "${LOG_PATH}"
+echo "[builder.sh] Current PWD: $(pwd)" | tee -a "${LOG_PATH}"
 
 case $PLATFORM in
 
@@ -618,7 +605,7 @@ case $PLATFORM in
 				echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
 
 				cd build
-				
+
 				pwd | tee -a "${LOG_PATH}"
 				ls -la | tee -a "${LOG_PATH}"
 				echo "[builder.sh] Docker completed <<<" | tee -a "${LOG_PATH}"
