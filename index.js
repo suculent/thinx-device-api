@@ -1794,13 +1794,15 @@ var ThinxApp = function() {
           failureResponse(res, 403, "unauthorized");
           return;
         } else {
+
           var wrapper = JSON.parse(userWrapper);
 
           // Support older wrappers
           if ((typeof(wrapper) !== "undefined") && wrapper !== null) {
             owner_id = wrapper.owner;
           } else {
-            console.log("[login] wrapper: " + userWrapper);
+            console.log("[login] wrapper error: " + userWrapper);
+            if (wrapper === null) return;
           }
 
           userlib.get(owner_id, function(err, doc) {
