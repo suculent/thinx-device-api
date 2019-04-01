@@ -41,7 +41,7 @@ fi
 
 
 THINX_ROOT=$(pwd)
-echo "Current working directory: $THINX_ROOT"
+echo "Current THINX_ROOT directory: $THINX_ROOT"
 
 if [[ -z $THINX_ROOT ]]; then
 		THINX_ROOT=$(pwd)

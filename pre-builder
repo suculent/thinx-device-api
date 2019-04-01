@@ -2,6 +2,8 @@
 
 THINX_ROOT=$(pwd)
 
+echo "Setting THINX_ROOT to $THINX_ROOT"
+
 source "$THINX_ROOT/infer"
 
 # Sample data for testing only, should return error missing JSON

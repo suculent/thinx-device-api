@@ -61,7 +61,7 @@ function infer_platform
 
 	  elif [[ -f "$path/mos.yml" ]]; then
 			platform="mongoose"
-		fi		
+		fi
 
 		echo $platform
 }

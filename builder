@@ -87,12 +87,17 @@ parse_yaml() {
 THINX_ROOT=$(pwd)
 echo "[builder.sh] Starting builder at path ${THINX_ROOT}"
 
-OWNER_ID_HOME=$THINX_ROOT/data/$OWNER_ID
+BUILD_ROOT=/mnt/data/data
+
+OWNER_ID_HOME=$BUILD_ROOT/$OWNER_ID
 echo "[builder.sh] Owner workspace: ${OWNER_ID_HOME}"
 
-DEPLOYMENT_PATH=$OWNER_ID_HOME/$UDID/$BUILD_ID
 TARGET_PATH=$OWNER_ID_HOME/$UDID
+echo "[builder.sh] Target path: ${TARGET_PATH}"
+
+DEPLOYMENT_PATH=$OWNER_ID_HOME/$UDID/$BUILD_ID
 echo "[builder.sh] Deployment path: ${DEPLOYMENT_PATH}"
+
 DISPLAY_DEPLOYMENT_PATH=$(echo ${DEPLOYMENT_PATH} | tr -d "$THINX_WEB_ROOT")
 echo "[builder.sh] Display deployment path: ${DISPLAY_DEPLOYMENT_PATH}"
 
