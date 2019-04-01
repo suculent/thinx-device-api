@@ -1963,8 +1963,9 @@ var ThinxApp = function() {
         // what if there's NEW session?
         if (typeof(req.session) !== "undefined") {
           req.session.owner = user_data.owner;
-          console.log("[OID:" + req.session.owner +
-            "] [NEW_SESSION]");
+
+          // This log message is later duplicated in [oauth] and other variants
+          // console.log("[OID:" + req.session.owner + "] [NEW_SESSION] on /login");
 
           if (typeof(req.body.remember === "undefined") || (req.body.remember ===
               0)) {
@@ -2007,11 +2008,9 @@ var ThinxApp = function() {
 
           // Make note on user login
           userlib.get(user_data.owner, function(error, udoc) {
-
             if (error) {
               console.log("[OID:"+user_data.owner + "] owner get error: " + error);
             } else {
-
               userlib.atomic("users", "checkin", udoc._id, {
                 last_seen: new Date()
               }, function(error, response) {
