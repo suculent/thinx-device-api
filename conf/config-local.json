@@ -12,6 +12,7 @@
   "build_root": "/repositories",
   "slack_webhook": "https://hooks.slack.com/services/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",
   "slack_bot_token": "xoxb-232544524481-uQ7XxyVBAPFcbviwJvmWIUJN",
+  "slack_bot_topic": "thinx",
   "fcm_auth": "./conf/thinx-cloud-firebase-adminsdk-wjhzo-9fd8c42211.json",
   "ssl_key": "/etc/letsencrypt/live/thinx.cloud/privkey.pem",
   "ssl_cert": "/etc/letsencrypt/live/thinx.cloud/cert.pem",
