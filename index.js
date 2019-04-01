@@ -2026,10 +2026,10 @@ var ThinxApp = function() {
           */
 
           // Make note on user login
-          userlib.get(user_data.owner_id, function(error, udoc) {
+          userlib.get(user_data.owner, function(error, udoc) {
 
             if (error) {
-              console.log("owner get error: " + error);
+              console.log("[OID:"+user_data.owner + "] owner get error: " + error);
             } else {
 
               userlib.atomic("users", "checkin", udoc._id, {
@@ -3124,11 +3124,6 @@ var ThinxApp = function() {
 
         if (cookies.indexOf("thx-") === -1) {
           console.log("» WARNING! No thx-cookie found in: " + JSON.stringify(req.headers
-            .cookie));
-        }
-
-        if (cookies.indexOf("thinx-") === -1) {
-          console.log("» WARNING! No thinx-cookie found in: " + JSON.stringify(req.headers
             .cookie));
         }
 
