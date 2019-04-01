@@ -2026,10 +2026,10 @@ var ThinxApp = function() {
           */
 
           // Make note on user login
-          userlib.get(user_data.owner_id, function(error, udoc) {
+          userlib.get(user_data.owner, function(error, udoc) {
 
             if (error) {
-              console.log("owner get error: " + error);
+              console.log("[OID:"+user_data.owner + "] owner get error: " + error);
             } else {
 
               userlib.atomic("users", "checkin", udoc._id, {
@@ -3127,11 +3127,6 @@ var ThinxApp = function() {
             .cookie));
         }
 
-        if (cookies.indexOf("thinx-") === -1) {
-          console.log("» WARNING! No thinx-cookie found in: " + JSON.stringify(req.headers
-            .cookie));
-        }
-
         if (typeof(req.session) !== "undefined") {
           console.log("Session: " + JSON.stringify(req.session));
         }
@@ -3209,10 +3204,10 @@ var ThinxApp = function() {
 
   function database_compactor() {
     console.log("» Running database compact jobs...");
-    nano.db.compact("logs");
-    nano.db.compact("builds");
-    nano.db.compact("devicelib");
-    nano.db.compact("users", "owners_by_username", function(err) {
+    nano.db.compact("managed_logs");
+    nano.db.compact("managed_builds");
+    nano.db.compact("managed_devices");
+    nano.db.compact("managed_users", "owners_by_username", function(err) {
       console.log("» Database compact jobs completed.");
     });
   }

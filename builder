@@ -180,6 +180,10 @@ rm -rf $REPO_NAME
 echo "[builder.sh] Cloning ${GIT_REPO}..." | tee -a "${LOG_PATH}"
 cd $BUILD_PATH && git clone --quiet --recurse-submodules $GIT_REPO
 
+pwd | tee -a "${LOG_PATH}"
+ls | tee -a "${LOG_PATH}"
+
+# Fetch submodules if any
 SINK=""
 if [[ -d $REPO_NAME ]]; then
 	echo "[builder.sh] Directory $REPO_NAME exists, entering..." | tee -a "${LOG_PATH}"
@@ -188,7 +192,7 @@ if [[ -d $REPO_NAME ]]; then
 	echo "[builder.sh] SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
 	pwd | tee -a "${LOG_PATH}"
 else
-	echo "[builder.sh] Directory $REPO_NAME does not exist, entering $REPO_PATH instead..." | tee -a "${LOG_PATH}"
+	echo "[builder.sh] REPO_NAME $REPO_NAME does not exist, entering $REPO_PATH instead..." | tee -a "${LOG_PATH}"
 	SINK=$BUILD_PATH/$REPO_PATH
 	cd ./$REPO_PATH
 	echo "[builder.sh] SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
@@ -198,7 +202,7 @@ fi
 cd $SINK && git submodule update --init --recursive
 
 if [[ ! -d $SINK/.git ]]; then
-	echo "[builder.sh] WARNING! Not a GIT repository: $BUILD_PATH/$REPO_PATH/.git" | tee -a "${LOG_PATH}"
+	echo "[builder.sh] WARNING! Not a GIT in repository: $BUILD_PATH/$REPO_PATH/.git" | tee -a "${LOG_PATH}"
 	pwd
 	ls
 fi
