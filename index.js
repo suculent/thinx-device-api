@@ -24,9 +24,6 @@ var ThinxApp = function() {
   //
 
   require("console-stamp")(console, {
-    metadata: function() {
-      return ("");
-    },
     colors: {
       stamp: "green",
       label: "white",
@@ -194,7 +191,7 @@ var ThinxApp = function() {
       prefix = fs.readFileSync(pfx_path) + "_";
     }
   } catch (e) {
-    //console.log(e);
+    console.log("[index] thx_prefix_exception" + e);
   }
 
   function initDatabases() {
