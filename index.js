@@ -1151,8 +1151,8 @@ var ThinxApp = function() {
       });
     } else {
       var rip = getClientIp(req);
-      console.log("Incoming request has `registration` in body, with IP " + rip);
-      console.log("headers: " + JSON.stringify(req.headers));
+      //console.log("Incoming request has `registration` in body, with IP " + rip);
+      //console.log("headers: " + JSON.stringify(req.headers));
 
       const regTime = new Date().getMilliseconds();
       console.log("** REG BODY: " + regTime);
