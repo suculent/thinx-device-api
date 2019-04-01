@@ -23,16 +23,6 @@ var ThinxApp = function() {
   // Shared Configuration
   //
 
-  /* console-stamp sucks or incorrectly used
-  require("console-stamp")(console, {
-    colors: {
-      stamp: "green",
-      label: "white",
-      metadata: "red"
-    }
-  });
-  */
-
   const hour = 3600 * 1000;
   const day = hour * 24;
   const fortnight = day * 14;
