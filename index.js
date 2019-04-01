@@ -593,8 +593,7 @@ var ThinxApp = function() {
     apikey.create(owner, new_api_key_alias, function(success,
       object) {
       if (success) {
-        console.log("Getting owner " + owner + " for api key... \n" +
-          JSON.stringify(object));
+        console.log("Getting owner " + owner + " for API Key...");
         respond(res, {
           success: true,
           api_key: object.key,
