@@ -23,6 +23,7 @@ var ThinxApp = function() {
   // Shared Configuration
   //
 
+  /* console-stamp sucks or incorrectly used
   require("console-stamp")(console, {
     colors: {
       stamp: "green",
@@ -30,6 +31,7 @@ var ThinxApp = function() {
       metadata: "red"
     }
   });
+  */
 
   const hour = 3600 * 1000;
   const day = hour * 24;
@@ -1825,7 +1827,7 @@ var ThinxApp = function() {
 
                 req.session.owner = wrapper.owner;
                 console.log("[OID:" + req.session.owner +
-                  "] [NEW_SESSION] [oauth]");
+                  "] [NEW_SESSION] [oauth] 1828: ");
 
                 req.session.cookie.secure = true;
                 req.session.cookie.httpOnly = true;
@@ -1851,7 +1853,7 @@ var ThinxApp = function() {
               req.session.owner = doc.owner;
 
               console.log("[OID:" + req.session.owner +
-                "] [NEW_SESSION] [oauth]");
+                "] [NEW_SESSION] [oauth] 1854:");
 
               req.session.cookie.maxAge = new Date(Date.now() + hour);
               req.session.cookie.secure = true;
@@ -2482,7 +2484,7 @@ var ThinxApp = function() {
                   user.create(userWrapper, false, function(success, status) {
 
                     console.log("[OID:" + owner_id +
-                      "] [NEW_SESSION] [oauth]");
+                      "] [NEW_SESSION] [oauth] 2485:");
 
                     alog.log(owner_id, "OAuth User created: " +
                       given_name + " " + family_name);
@@ -2857,7 +2859,7 @@ var ThinxApp = function() {
 
                     req.session.owner = userWrapper.owner;
                     console.log("[OID:" + req.session.owner +
-                      "] [NEW_SESSION] [oauth]");
+                      "] [NEW_SESSION] [oauth] 2860:");
                     alog.log(req.session.owner,
                       "OAuth User created: " +
                       given_name + " " + family_name);
