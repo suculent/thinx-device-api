@@ -1,5 +1,6 @@
 {
-  "base_url": "thinx.cloud",
+  "public_url": "localhost",
+  "rollbar_token": "<enter-your-rollbar.com-token>",
   "type": "thinx_server_config",
   "database_uri": "http://rtmapi:frohikey@thinx.cloud:5984",
   "mqtt_port": 1883,
@@ -18,5 +19,18 @@
   "project_root": "/Users/sychram/Repositories/thinx-device-api",
   "mqtt_server": "mqtt://thinx.cloud",
   "mqtt_messenger_key": "5ec1fdd8-5d68-11e7-b0e3-4c327591230d",
-  "default_avatar": ""
+  "default_avatar": "",
+  "debug": {
+    "device" : false
+  },
+  "grafana": {
+    "port": 3004,
+    "admin": "test",
+    "password": "test"
+  },
+  "influx": {
+    "port": 8086,
+    "admin": "test",
+    "password": "test"
+  }
 }
