@@ -879,7 +879,7 @@ if [ ! -z $CIRCLE ]; then
 	echo
 	echo "» Terminating node.js..."
 
-	DAEMON="node index.js"
+	DAEMON="node thinx.js"
 	NODEZ=$(ps -ax | grep "$DAEMON")
 
 	if [[ $(echo $NODEZ | wc -l) > 1 ]]; then

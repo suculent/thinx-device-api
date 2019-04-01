@@ -1154,8 +1154,8 @@ var ThinxApp = function() {
       //console.log("Incoming request has `registration` in body, with IP " + rip);
       //console.log("headers: " + JSON.stringify(req.headers));
 
-      const regTime = new Date().getMilliseconds();
-      console.log("** REG BODY: " + regTime);
+      //const regTime = new Date().getMilliseconds();
+      //console.log("** REG BODY: " + regTime);
       var registration = req.body.registration;
       device.register(registration, req.headers.authentication, _ws, function(
         success, response) {
@@ -3114,7 +3114,7 @@ var ThinxApp = function() {
       }
 
       var logtail_callback = function(err) {
-        console.log("[index.js] logtail_callback:" + err);
+        console.log("[thinx] logtail_callback:" + err);
       };
 
       // May not exist while testing...

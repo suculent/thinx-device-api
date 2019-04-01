@@ -32,7 +32,8 @@ npm install .
 if [[ $CIRCLECI == true ]]; then
 	echo
 	echo "☢  NOT Running node.js for CI, npm test will start it on its own..."
-	# pm2 start index.js
+
+	# pm2 start ecosystem.json
 
 	ACCESS_TOKEN=6aa9f20bef804b75a50338e03830919d
 	ENVIRONMENT=test
@@ -54,7 +55,7 @@ else
 
 	mkdir logs
 	cd /root/thinx-device-api
-	pm2 start /root/thinx-device-api/index.js
+	pm2 start ecosystem.json
 
 	ACCESS_TOKEN=6aa9f20bef804b75a50338e03830919d
 	ENVIRONMENT=development
@@ -62,7 +63,7 @@ else
 	if [[ LOCAL_USERNAME == "root" ]]; then
 		ENVIRONMENT=production
 	fi
-	
+
 	REVISION=$(git log -n 1 --pretty=format:"%H")
 
 	curl https://api.rollbar.com/api/1/deploy/ \
