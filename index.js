@@ -23,16 +23,15 @@ var ThinxApp = function() {
   // Shared Configuration
   //
 
+  /* console-stamp sucks or incorrectly used
   require("console-stamp")(console, {
-    metadata: function() {
-      return ("");
-    },
     colors: {
       stamp: "green",
       label: "white",
       metadata: "red"
     }
   });
+  */
 
   const hour = 3600 * 1000;
   const day = hour * 24;
@@ -194,7 +193,7 @@ var ThinxApp = function() {
       prefix = fs.readFileSync(pfx_path) + "_";
     }
   } catch (e) {
-    //console.log(e);
+    console.log("[index] thx_prefix_exception" + e);
   }
 
   function initDatabases() {
@@ -1140,17 +1139,15 @@ var ThinxApp = function() {
 
   app.post("/device/register", function(req, res) {
     const startTime = new Date().getMilliseconds();
-    console.log("** REG START: " + startTime);
+
     validateRequest(req, res);
     var ip = getClientIp(req);
-    console.log("** IP: " + ip);
+
     if (typeof(req.body) === "undefined") {
-      //console.time("register-response");
       respond(res, {
         success: false,
         status: "no_body"
       });
-      //console.timeEnd("register-response");
 
     } else if (typeof(req.body.registration) === "undefined") {
       console.log("Incoming request has no `registration` in body, should BLACKLIST " + ip);
@@ -1159,12 +1156,10 @@ var ThinxApp = function() {
       BLACKLIST.push(ip);
       */
       console.log("body: " + JSON.stringify(req.body));
-      //console.time("register-response");
       respond(res, {
         success: false,
         status: "blacklisted"
       });
-      //console.timeEnd("register-response");
     } else {
       var rip = getClientIp(req);
       console.log("Incoming request has `registration` in body, with IP " + rip);
@@ -1184,11 +1179,7 @@ var ThinxApp = function() {
           console.log("Device registration failed with response: " + JSON.stringify(
             response));
         }
-        console.log("» Sending response: " + JSON.stringify(response, null, 4));
-        //console.time("register-response");
-        //console.log("** REG END: " + new Date().getMilliseconds() - startTime);
         respond(res, response);
-        //console.timeEnd("register-response");
       }, req);
     }
   });
@@ -1836,7 +1827,7 @@ var ThinxApp = function() {
 
                 req.session.owner = wrapper.owner;
                 console.log("[OID:" + req.session.owner +
-                  "] [NEW_SESSION] [oauth]");
+                  "] [NEW_SESSION] [oauth] 1828: ");
 
                 req.session.cookie.secure = true;
                 req.session.cookie.httpOnly = true;
@@ -1862,7 +1853,7 @@ var ThinxApp = function() {
               req.session.owner = doc.owner;
 
               console.log("[OID:" + req.session.owner +
-                "] [NEW_SESSION] [oauth]");
+                "] [NEW_SESSION] [oauth] 1854:");
 
               req.session.cookie.maxAge = new Date(Date.now() + hour);
               req.session.cookie.secure = true;
@@ -2493,7 +2484,7 @@ var ThinxApp = function() {
                   user.create(userWrapper, false, function(success, status) {
 
                     console.log("[OID:" + owner_id +
-                      "] [NEW_SESSION] [oauth]");
+                      "] [NEW_SESSION] [oauth] 2485:");
 
                     alog.log(owner_id, "OAuth User created: " +
                       given_name + " " + family_name);
@@ -2868,7 +2859,7 @@ var ThinxApp = function() {
 
                     req.session.owner = userWrapper.owner;
                     console.log("[OID:" + req.session.owner +
-                      "] [NEW_SESSION] [oauth]");
+                      "] [NEW_SESSION] [oauth] 2860:");
                     alog.log(req.session.owner,
                       "OAuth User created: " +
                       given_name + " " + family_name);

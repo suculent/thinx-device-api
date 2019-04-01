@@ -41,7 +41,7 @@ try {
     prefix = fs.readFileSync(pfx_path) + "_";
   }
 } catch (e) {
-  //console.log(e);
+  console.log("[notifier] thx_prefix_exception " + e);
 }
 
 var userlib = require("nano")(db).use(prefix + "managed_users");
