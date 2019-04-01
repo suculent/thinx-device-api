@@ -574,7 +574,6 @@ case $PLATFORM in
 
 		arduino)
 
-
 			THINX_FILE=$( find $BUILD_PATH/$REPO_PATH -name "thinx.h" )
 
 			if [[ -z $THINX_FILE ]]; then
@@ -788,10 +787,8 @@ if [[ "${OUTFILE}" == "" ]]; then
 fi
 
 echo "[builder.sh] Build completed with status: $STATUS" | tee -a "${LOG_PATH}"
-
 echo "[builder.sh] Build hash: $SHA" | tee -a "${LOG_PATH}"
 echo "[builder.sh] Build MD5: $MD5" | tee -a "${LOG_PATH}"
-
 echo "[builder.sh] Post-flight check:" | tee -a "${LOG_PATH}"
 
 pwd | tee -a "${LOG_PATH}"
