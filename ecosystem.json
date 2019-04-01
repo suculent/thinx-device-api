@@ -4,6 +4,7 @@
     {
       name      : "thinx",
       script    : "index.js",
+      args      : "--log-date-format 'DD-MM HH:mm:ss.SSS'",
       interpreter  : "node@11.10.1",
     }
   ]
