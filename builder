@@ -213,7 +213,7 @@ cd $BUILD_PATH && echo $(pwd) | tee -a "${LOG_PATH}"
 echo "[builder.sh] Pulling ${GIT_REPO}..." | tee -a "${LOG_PATH}"
 pwd | tee -a "${LOG_PATH}"
 ls | tee -a "${LOG_PATH}"
-cd $BUILD_PATH
+cd .* # enter any path, there should be nothing else here
 pwd | tee -a "${LOG_PATH}"
 ls | tee -a "${LOG_PATH}"
 git pull | tee -a "${LOG_PATH}"
