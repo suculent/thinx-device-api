@@ -140,6 +140,10 @@ REPO_PATH="$(echo $url | grep / | cut -d/ -f2-)"
 # extract the end of path (if any)
 REPO_NAME="$(echo $url | grep / | cut -d/ -f3-)"
 
+#if [[ -z $REPO_NAME ]];
+#	basename $REPO_NAME
+#fi
+
 if [[ "$user" == "git" ]]; then
 	proto="git-ssl"
 	len=${#REPO_NAME}
@@ -177,15 +181,18 @@ echo "[builder.sh] Entering BUILD_PATH $BUILD_PATH" | tee -a "${LOG_PATH}"
 cd $BUILD_PATH | tee -a "${LOG_PATH}"
 cd $BUILD_PATH && echo $(pwd) | tee -a "${LOG_PATH}"
 
-# Clean workspace
-echo "[builder.sh] Cleaning previous git repository / workspace in ${REPO_NAME}..." | tee -a "${LOG_PATH}"
-rm -rf $REPO_NAME
+# Clean workspace is now deprecated as builder runs in pre-fetched repo
+# echo "[builder.sh] Cleaning previous git repository / workspace in ${REPO_NAME}..." | tee -a "${LOG_PATH}"
+# rm -rf $REPO_NAME
 
 # Fetch project
-echo "[builder.sh] Cloning ${GIT_REPO}..." | tee -a "${LOG_PATH}"
-cd $BUILD_PATH && git clone --quiet --recurse-submodules $GIT_REPO
-
+echo "[builder.sh] Pulling ${GIT_REPO}..." | tee -a "${LOG_PATH}"
 pwd | tee -a "${LOG_PATH}"
+ls | tee -a "${LOG_PATH}"
+cd $BUILD_PATH
+pwd | tee -a "${LOG_PATH}"
+ls | tee -a "${LOG_PATH}"
+git pull | tee -a "${LOG_PATH}"
 ls | tee -a "${LOG_PATH}"
 
 # Fetch submodules if any
@@ -226,7 +233,7 @@ nodemcu_build_float=true
 micropython_build_type="firmware"
 micropython_platform="esp8266"
 
-YML=$(find $BUILD_PATH/$REPO_PATH -name "thinx.yml")
+YML=$(find $BUILD_PATH/$REPO_PATH -name "thinx.yml" -maxdepth 2)
 if [ -f $YML ]; then
 	echo "[builder.sh] Found ${YML}, reading..." | tee -a "${LOG_PATH}"
 	parse_yaml $YML
