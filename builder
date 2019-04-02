@@ -239,7 +239,7 @@ fi
 pwd | tee -a "${LOG_PATH}"
 ls | tee -a "${LOG_PATH}"
 
-cd $SINK && git submodule update --init --recursive
+git submodule update --init --recursive
 
 if [[ ! -d $SINK/.git ]]; then
 	echo "[builder.sh] WARNING! No .git folder in repository: $BUILD_PATH/$REPO_PATH/.git" | tee -a "${LOG_PATH}"
@@ -654,6 +654,8 @@ case $PLATFORM in
 
 				pwd | tee -a "${LOG_PATH}"
 				ls | tee -a "${LOG_PATH}"
+				ls "sketch" | tee -a "${LOG_PATH}"
+
 				echo "[builder.sh] Docker completed <<<" | tee -a "${LOG_PATH}"
 
 
@@ -663,7 +665,14 @@ case $PLATFORM in
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
 
-					INFILE=$( find $BUILD_PATH -name "firmware.bin" )
+					# should be on $BUILD_PATH 
+					INFILE=$( find . -name "firmware.bin" )
+
+					if [[ ! -f $INFILE ]]; then
+						echo "INFILE $INFILE not found!"
+						BUILD_SUCCESS=false
+						exit 1
+					fi
 
 					if [[ $(find $INFILE -type f -size +10000c 2>/dev/null) ]]; then
 						rm -rf $INFILE
@@ -740,7 +749,7 @@ case $PLATFORM in
 				fi
 		  fi
 
-			OUTFILE=$(find $(pwd)/ -name "firmware.bin"  | head -n 1)
+			OUTFILE=$(find / -name "firmware.bin"  -maxdepth 10 | head -n 1)
 
 			if [ ! -f $OUTFILE ]; then
 				echo "$OUTFILE not found"
@@ -760,41 +769,45 @@ case $PLATFORM in
 			#echo "Current folder contents after build:" | tee -a "${LOG_PATH}"
 			#ls | tee -a "${LOG_PATH}"
 			#
-			OUTFILE=$(find $(pwd)/ -name "firmware.bin"  | head -n 1)
+			OUTFILE=$(find / -name "firmware.bin" -maxdepth 10 | head -n 1)
 
-			echo "OUTFILE: ${OUTFILE}"
-
-			# Exit on dry run...
-			if [[ ! ${RUN} ]]; then
-				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." | tee -a "${LOG_PATH}"
-				STATUS='DRY_RUN_OK'
+			if [[ ! -f $OUTFILE ]]; then
+				echo "Output file not found, nothing build or path incorrect."
+				BUILD_SUCCESS=false
 			else
-				# Check Artifacts
-				if [[ $BUILD_SUCCESS == true ]] ; then
-					STATUS='OK'
-					ls
-
-					if [[ $(find $(pwd)/ -name "firmware.bin" -type f -size +10000c 2>/dev/null) ]]; then
-						# rm -rf $OUTFILE
-						BUILD_SUCCESS=false
-						echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
-						ls
-					else
-						echo " " | tee -a "${LOG_PATH}"
-						echo "[builder.sh] Docker build succeeded." | tee -a "${LOG_PATH}"
-						echo " " | tee -a "${LOG_PATH}"
-
-						echo "[builder.sh] ☢ Exporting PlatformIO artifact: ${OUTFILE}"
-						cp -vR "${OUTFILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
-						cp -vR "${OUTFILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
-
-						zip -rv "${BUILD_ID}.zip" ${OUTFILE} ./build/*.bin ./build/*.elf # zip artefacts
-					fi
+				# Build possible, exit here on dry run...
+				if [[ ! ${RUN} ]]; then
+					echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." | tee -a "${LOG_PATH}"
+					STATUS='DRY_RUN_OK'
 				else
-					STATUS='FAILED'
+					echo "OUTFILE: ${OUTFILE}"
+					# Check Artifacts
+					if [[ $BUILD_SUCCESS == true ]] ; then
+						STATUS='OK'
+						ls
+
+						if [[ $(find $(pwd)/ -name "firmware.bin" -type f -size +10000c 2>/dev/null) ]]; then
+							# rm -rf $OUTFILE
+							BUILD_SUCCESS=false
+							echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
+							ls
+						else
+							echo " " | tee -a "${LOG_PATH}"
+							echo "[builder.sh] Docker build succeeded." | tee -a "${LOG_PATH}"
+							echo " " | tee -a "${LOG_PATH}"
+
+							# FIXME: Returns errors if no files found
+							echo "[builder.sh] ☢ Exporting PlatformIO artifact: ${OUTFILE}"
+							cp -vR "${OUTFILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
+							cp -vR "${OUTFILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
+
+							zip -rv "${BUILD_ID}.zip" ${OUTFILE} ./build/*.bin ./build/*.elf # zip artefacts
+						fi
+					else
+						STATUS='FAILED'
+					fi
 				fi
 			fi
-
     ;;
 
     *)

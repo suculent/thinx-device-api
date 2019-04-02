@@ -114,7 +114,7 @@ for EXT in $EXTENSIONS; do
 						if [[ -f $PATH ]]; then
 							# run lint on each file in subfolder
 							COMMAND="$TOOL_PATH $TOOL_ATTRS $PATH"
-							echo "COMMAND: $COMMAND"
+							echo "$COMMAND"
 							"$COMMAND" >> "$WORKDIR/lint.txt"
 						fi
 					done

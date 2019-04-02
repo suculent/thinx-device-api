@@ -2,6 +2,27 @@
 
 # THiNX Builder Library Functions
 
+function parse_yaml {
+    local prefix=$2
+    local s
+    local w
+    local fs
+    s='[[:space:]]*'
+    w='[a-zA-Z0-9_]*'
+    fs="$(echo @|tr @ '\034')
+    sed -ne "s|^\($s\)\($w\)$s:$s\"\(.*\)\"$s\$|\1$fs\2$fs\3|p" \
+        -e "s|^\($s\)\($w\)$s[:-]$s\(.*\)$s\$|\1$fs\2$fs\3|p" "$1" |
+    awk -F"$fs" '{
+    indent = length($1)/2;
+    vname[indent] = $2;
+    for (i in vname) {if (i > indent) {delete vname[i]}}
+        if (length($3) > 0) {
+            vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
+            printf("%s%s%s=(\"%s\")\n", "'"$prefix"'",vn, $2, $3);
+        }
+    }' | sed 's/_=/+=/g'
+}
+
 function infer_platform
 {
 		local path=$1
@@ -25,7 +46,7 @@ function infer_platform
 				fi
 		done
 
-		# Platform.io
+		# Platform.io (overrides Arduino)
 
 		if [[ -f "$path/platformio.ini" ]]; then
 
@@ -61,6 +82,31 @@ function infer_platform
 
 	  elif [[ -f "$path/mos.yml" ]]; then
 			platform="mongoose"
+		fi
+
+		YMLFILE=$(find $path -name "thinx.yml" -maxdepth 1 | head -n 1)
+
+		if [ -f "$YMLFILE" ]; then
+		  echo "Overriding core platform type using thinx.yml:"
+		  cat $YMLFILE
+		  echo
+		  eval $(parse_yaml "$YMLFILE" "")
+			export
+			if [[ ! -z $arduino ]]; then
+				$platform = "arduino"
+			fi
+			if [[ ! -z $platformio ]]; then
+				$platform = "platformio"
+			fi
+			if [[ ! -z $microphython ]]; then
+				$platform = "microphython"
+			fi
+			if [[ ! -z $mongoose ]]; then
+				$platform = "mongoose"
+			fi
+			if [[ ! -z $nodejs ]]; then
+				$platform = "nodejs"
+			fi
 		fi
 
 		echo $platform
