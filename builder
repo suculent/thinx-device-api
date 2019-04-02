@@ -104,7 +104,7 @@ echo "[builder.sh] Target device deployment path: ${TARGET_PATH}"
 DEPLOYMENT_PATH=$OWNER_ID_HOME/$UDID/$BUILD_ID
 echo "[builder.sh] Deployment path: ${DEPLOYMENT_PATH}"
 
-DISPLAY_DEPLOYMENT_PATH=$(sed "s/${THINX_WEB_ROOT}//g" <<< $DEPLOYMENT_PATH))
+DISPLAY_DEPLOYMENT_PATH=$(sed "s/${THINX_WEB_ROOT}//g" <<< $DEPLOYMENT_PATH)
 echo "[builder.sh] Display deployment path: ${DISPLAY_DEPLOYMENT_PATH}"
 
 # Create user-referenced folder in public www space
