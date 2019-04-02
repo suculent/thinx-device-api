@@ -669,21 +669,16 @@ case $PLATFORM in
 				echo "Deployment path: " | tee -a "${LOG_PATH}"
 				ls ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
 
-				DCMD="docker run ${DOCKER_PREFIX} -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
-				echo "[builder.sh] running Docker ${DCMD} >>>" | tee -a "${LOG_PATH}"
+				DCMD="docker run ${DOCKER_PREFIX} -t -v $(pwd):/opt/workspace suculent/arduino-docker-build | tee -a ${LOG_PATH}"
+				echo "[builder.sh] running Docker ${DCMD} >>>"
 				set -o pipefail
-				"$DCMD | tee -a ${LOG_PATH}"
+				"$DCMD"
 				echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
-
-				cd build
-
-				pwd | tee -a "${LOG_PATH}"
+				# set +o pipefail				?
+							
 				ls | tee -a "${LOG_PATH}"
-				ls "sketch" | tee -a "${LOG_PATH}"
 
 				echo "[builder.sh] Docker completed <<<" | tee -a "${LOG_PATH}"
-
-
 
 				# TODO: Check for firmware.bin! Result is of tee (probably)
 
@@ -781,7 +776,7 @@ case $PLATFORM in
 				BUILD_SUCCESS=false
 			fi
 
-			echo "[builder.sh] running Docker >>>"
+			echo "[builder.sh] running Docker PIO >>>"
 			set -o pipefail
 			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build | tee -a "${LOG_PATH}"
 			echo "${PIPESTATUS[@]}"
