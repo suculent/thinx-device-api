@@ -6,7 +6,7 @@ source ./infer # utility functions
 set +e
 
 echo
-echo "[builder.sh] -=[ ☢ THiNX IoT RTM BUILDER ☢ ]=-"
+echo "[builder.sh] -=[ ☢  THiNX IoT RTM BUILDER ☢ ]=-"
 echo "[builder.sh] Running from: $(pwd)"
 
 # FIXME: This is system environment variable and should be configured on installation,
@@ -87,13 +87,19 @@ parse_yaml() {
 THINX_ROOT=$(pwd)
 echo "[builder.sh] Starting builder at path ${THINX_ROOT}"
 
-BUILD_ROOT=/mnt/data/data
+# from app_config.data_root
 
-OWNER_ID_HOME=$BUILD_ROOT/$OWNER_ID
-echo "[builder.sh] Owner workspace: ${OWNER_ID_HOME}"
+DATA_ROOT="/mnt/data"
 
-TARGET_PATH=$OWNER_ID_HOME/$UDID
-echo "[builder.sh] Target path: ${TARGET_PATH}"
+# from app_config.build_root
+BUILD_ROOT=$DATA_ROOT/repos
+
+# from app_config.deploy_root
+OWNER_ID_HOME=$DATA_ROOT/deploy/$OWNER_ID
+echo "[builder.sh] Owner deployment home: ${OWNER_ID_HOME}"
+
+TARGET_PATH=$DATA_ROOT/deploy/$OWNER_ID/$UDID
+echo "[builder.sh] Target device deployment path: ${TARGET_PATH}"
 
 DEPLOYMENT_PATH=$OWNER_ID_HOME/$UDID/$BUILD_ID
 echo "[builder.sh] Deployment path: ${DEPLOYMENT_PATH}"
@@ -120,10 +126,11 @@ if [[ -f "../lint.txt" ]]; then
 fi
 
 echo "[builder.sh] Logging to ${LOG_PATH}" | tee -a "${LOG_PATH}"
-echo "[builder.sh] <b> -=[ ☢ THiNX IoT RTM BUILDER ☢ ]=- </b>" | tee -a "${LOG_PATH}"
 echo "[builder.sh] Starting builder at path ${THINX_ROOT}" | tee -a "${LOG_PATH}"
 echo "[builder.sh] Owner workspace: ${OWNER_ID_HOME}" | tee -a "${LOG_PATH}"
 echo "[builder.sh] Making deployment path: ${DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
+
+# TODO: Fix this, depends on protocol (changes with git+ssh)
 
 # extract the protocol
 proto="$(echo $GIT_REPO | grep :// | sed -e's,^\(.*://\).*,\1,g')"
@@ -138,7 +145,7 @@ port="$(echo $host | sed -e 's,^.*:,:,g' -e 's,.*:\([0-9]*\).*,\1,g' -e 's,[^0-9
 # extract the path (if any)
 REPO_PATH="$(echo $url | grep / | cut -d/ -f2-)"
 # extract the end of path (if any)
-REPO_NAME="$(echo $url | grep / | cut -d/ -f3-)"
+REPO_NAME="$REPO_PATH" "$(echo $url | grep / | cut -d/ -f3-)"
 
 #if [[ -z $REPO_NAME ]];
 #	basename $REPO_NAME
@@ -162,7 +169,6 @@ echo "[builder.sh] - url: $url" | tee -a "${LOG_PATH}"
 echo "[builder.sh] - proto: $proto" | tee -a "${LOG_PATH}"
 echo "[builder.sh] - user: $user" | tee -a "${LOG_PATH}"
 echo "[builder.sh] - host: $host" | tee -a "${LOG_PATH}"
-echo "[builder.sh] - port: $port" | tee -a "${LOG_PATH}"
 echo "[builder.sh] - REPO_PATH: $REPO_PATH" | tee -a "${LOG_PATH}"
 echo "[builder.sh] - REPO_NAME: ${REPO_NAME}" | tee -a "${LOG_PATH}"
 
@@ -203,20 +209,23 @@ if [[ -d $REPO_NAME ]]; then
 	SINK=$BUILD_PATH/$REPO_NAME
 	echo "[builder.sh] SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
 	pwd | tee -a "${LOG_PATH}"
+	ls la | tee -a "${LOG_PATH}"
 else
 	echo "[builder.sh] REPO_NAME $REPO_NAME does not exist, entering $REPO_PATH instead..." | tee -a "${LOG_PATH}"
 	SINK=$BUILD_PATH/$REPO_PATH
-	cd ./$REPO_PATH
+	cd $SINK
 	echo "[builder.sh] SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
 	pwd | tee -a "${LOG_PATH}"
+	ls la | tee -a "${LOG_PATH}"
 fi
 
 cd $SINK && git submodule update --init --recursive
 
 if [[ ! -d $SINK/.git ]]; then
-	echo "[builder.sh] WARNING! Not a GIT in repository: $BUILD_PATH/$REPO_PATH/.git" | tee -a "${LOG_PATH}"
-	pwd
-	ls
+	echo "[builder.sh] WARNING! No .git folder in repository: $BUILD_PATH/$REPO_PATH/.git" | tee -a "${LOG_PATH}"
+	pwd | tee -a "${LOG_PATH}"
+	ls la | tee -a "${LOG_PATH}"
+	exit 1
 fi
 
 COMMIT=$(cd $SINK && git rev-parse HEAD)
@@ -234,10 +243,12 @@ micropython_build_type="firmware"
 micropython_platform="esp8266"
 
 YML=$(find $BUILD_PATH/$REPO_PATH -name "thinx.yml" -maxdepth 2)
-if [ -f $YML ]; then
+if [[ -f $YML ]]; then
 	echo "[builder.sh] Found ${YML}, reading..." | tee -a "${LOG_PATH}"
 	parse_yaml $YML
 	eval $(parse_yaml $YML)
+else
+		exit 1
 fi
 
 # Overwrite Thinx.h file (should be required)
