@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./infer # utility functions
+source ./infer # utility functions like parse_yaml
 
 # do not exit when subsequent tools fail...
 set +e
@@ -62,27 +62,6 @@ case $i in
     ;;
 esac
 done
-
-parse_yaml() {
-    local prefix=$2
-    local s
-    local w
-    local fs
-    s='[[:space:]]*'
-    w='[a-zA-Z0-9_]*'
-    fs="$(echo @|tr @ '\034')"
-    sed -ne "s|^\($s\)\($w\)$s:$s\"\(.*\)\"$s\$|\1$fs\2$fs\3|p" \
-        -e "s|^\($s\)\($w\)$s[:-]$s\(.*\)$s\$|\1$fs\2$fs\3|p" "$1" |
-    awk -F"$fs" '{
-    indent = length($1)/2;
-    vname[indent] = $2;
-    for (i in vname) {if (i > indent) {delete vname[i]}}
-        if (length($3) > 0) {
-            vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
-            printf("%s%s%s=(\"%s\")\n", "'"$prefix"'",vn, $2, $3);
-        }
-    }' | sed 's/_=/+=/g'
-}
 
 THINX_ROOT=$(pwd)
 echo "[builder.sh] Starting builder at path ${THINX_ROOT}"
@@ -150,9 +129,7 @@ REPO_PATH="$(echo $url | grep / | cut -d/ -f2-)"
 # extract the end of path (if any)
 REPO_NAME="$(echo $url | grep / | cut -d/ -f3-)"
 
-#if [[ -z $REPO_NAME ]];
-#	basename $REPO_NAME
-#fi
+echo "REPO_NAME: ${REPO_NAME}"
 
 if [[ "$user" == "git" ]]; then
 	proto="git-ssl"
@@ -168,8 +145,10 @@ fi
 if [[ $proto == "git-ssl" ]]; then
 	echo "Overriding attributes in git-ssl mode..."
 	REPO_NAME="$(echo $url | grep / | cut -d/ -f2-)"
-	user="$(echo $host | grep : | cut -d/ -f1)"
-	host="$(echo $url | grep @ | cut -d: -f2-)"
+	user="$(echo $host | grep : | cut -d/ -f1)" # returns nil
+	host="$(echo $host | grep @ | cut -d: -f1)"
+	# host="$(echo $url | grep @ | cut -d: -f2-)" - returns suculent/keyguru-firmware-zion.git
+
 	# url: git@github.com:suculent/keyguru-firmware-zion.git
 	# user: git (OK)
 	# host: suculent (!!!)
@@ -202,21 +181,25 @@ if [[ ! -d $BUILD_PATH ]]; then
 fi
 
 echo "[builder.sh] Entering BUILD_PATH $BUILD_PATH" | tee -a "${LOG_PATH}"
-cd $BUILD_PATH | tee -a "${LOG_PATH}"
-cd $BUILD_PATH && echo $(pwd) | tee -a "${LOG_PATH}"
+cd $BUILD_PATH && pwd | tee -a "${LOG_PATH}"
 
 # Clean workspace is now deprecated as builder runs in pre-fetched repo
 # echo "[builder.sh] Cleaning previous git repository / workspace in ${REPO_NAME}..." | tee -a "${LOG_PATH}"
 # rm -rf $REPO_NAME
 
 # Fetch project
+echo "Current working directory: "
+pwd | tee -a "${LOG_PATH}"
+echo "Files: "
+ls | tee -a "${LOG_PATH}"
+cd -v .* # enter any path, there should be nothing else here
+echo "Current working directory: "
+pwd | tee -a "${LOG_PATH}"
+echo "Files: "
+ls | tee -a "${LOG_PATH}"
 echo "[builder.sh] Pulling ${GIT_REPO}..." | tee -a "${LOG_PATH}"
-pwd | tee -a "${LOG_PATH}"
-ls | tee -a "${LOG_PATH}"
-cd .* # enter any path, there should be nothing else here
-pwd | tee -a "${LOG_PATH}"
-ls | tee -a "${LOG_PATH}"
 git pull | tee -a "${LOG_PATH}"
+echo "Files: "
 ls | tee -a "${LOG_PATH}"
 
 # Fetch submodules if any
@@ -305,6 +288,17 @@ LANGUAGE=$(language_for_platform $PLATFORM)
 LANGUAGE_NAME=$(language_name $LANGUAGE)
 
 ls | tee -a "${LOG_PATH}"
+
+if [[ -z $PLATFORM ]]; then
+	echo "No language. Cannot continue builder."
+	exit 1
+fi
+
+if [[ -z $LANGUAGE ]]; then
+	echo "No language. Cannot continue builder."
+	exit 1
+fi
+
 
 echo "[builder.sh] Building for platform '${PLATFORM}' in language '${LANGUAGE_NAME}'..." | tee -a "${LOG_PATH}"
 
