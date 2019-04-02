@@ -666,13 +666,13 @@ case $PLATFORM in
 			  echo "[builder.sh] Building for Arduino from folder: $(pwd)" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 
-				echo "Deployment path: " | tee -a "${LOG_PATH}"
+				echo "[builder.sh] Deployment path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
 				ls ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
 
 				DCMD="docker run ${DOCKER_PREFIX} -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
 				echo "[builder.sh] running Docker ${DCMD} >>>"
 				set -o pipefail
-				echo $($DCMD) | tee -a ${LOG_PATH}
+				"$DCMD" # | tee -a ${LOG_PATH}
 				echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
 				# set +o pipefail				?
 
