@@ -665,7 +665,7 @@ case $PLATFORM in
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
 
-					# should be on $BUILD_PATH 
+					# should be on $BUILD_PATH
 					INFILE=$( find . -name "firmware.bin" )
 
 					if [[ ! -f $INFILE ]]; then
