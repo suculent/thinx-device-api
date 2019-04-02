@@ -13,7 +13,7 @@ echo "[builder.sh] Running from: $(pwd)"
 # or injected by build class from Node.js
 
 if [[ -z $THINX_WEB_ROOT ]]; then
-		THINX_WEB_ROOT='/var/www/html/bin'
+		THINX_WEB_ROOT="\/var\/www\/html\/bin"
 		echo "Setting THINX_WEB_ROOT env var to default ${THINX_WEB_ROOT}"
 fi
 
@@ -168,7 +168,8 @@ fi
 if [[ $proto == "git-ssl" ]]; then
 	echo "Overriding attributes in git-ssl mode..."
 	REPO_NAME="$(echo $url | grep / | cut -d/ -f2-)"
-	user="$(echo $url | grep : | cut -d/ -f1)"
+	user="$(echo $host | grep : | cut -d: -f2-)"
+	host="$(echo $url | grep @ | cut -d: -f1)"
 	# url: git@github.com:suculent/keyguru-firmware-zion.git
 	# user: git (OK)
 	# host: suculent (!!!)
@@ -240,7 +241,7 @@ cd $SINK && git submodule update --init --recursive
 if [[ ! -d $SINK/.git ]]; then
 	echo "[builder.sh] WARNING! No .git folder in repository: $BUILD_PATH/$REPO_PATH/.git" | tee -a "${LOG_PATH}"
 	pwd | tee -a "${LOG_PATH}"
-	ls la | tee -a "${LOG_PATH}"
+	ls | tee -a "${LOG_PATH}"
 	exit 1
 fi
 
