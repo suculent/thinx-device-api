@@ -52,6 +52,9 @@ case $LANGUAGE in
 
 		c)
       TOOL_PATH=$(which cppcheck)
+			if [[ -z $TOOL_PATH ]]; then
+				TOOL_PATH="/usr/bin/cppcheck"
+			fi
       TOOL_ATTRS="--force -U PROGMEM"
       EXTENSIONS=( "c" "ino" "cpp" )
     ;;
