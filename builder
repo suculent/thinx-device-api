@@ -595,9 +595,10 @@ case $PLATFORM in
 			echo "[builder.sh] Moving thinx_build.json to $TNAME" | tee -a "${LOG_PATH}"
 			mv "./thinx_build.json" "$TNAME"
 
-			echo "[builder.sh] running Docker >>>"
+			DCMD="docker run ${DOCKER_PREFIX} --rm -t -v $(pwd):/opt/mongoose-builder suculent/mongoose-docker-build | tee -a ${LOG_PATH}"
+			echo "[builder.sh] running Docker ${DCMD} >>>" | tee -a "${LOG_PATH}"
 			set -o pipefail
-			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/mongoose-builder suculent/mongoose-docker-build | tee -a "${LOG_PATH}"
+			"$DCMD | tee -a ${LOG_PATH}"
 			echo "${PIPESTATUS[@]}"
 			if [[ ! -z =$(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 				if [[ -f $(pwd)/build/fw.zip ]]; then
@@ -609,6 +610,7 @@ case $PLATFORM in
 			fi
 			echo "[builder.sh] Docker completed <<<"
 
+			echo "[builder.sh] mongoose ls:"
 			ls
 
 			# Exit on dry run...
@@ -646,6 +648,7 @@ case $PLATFORM in
 				do
 						if "$FILE" !== "lib"
 						then
+							echo "file is not a lib..."
 					    if test -d $FILE
 					    then
 					      echo "[builder.sh] $FILE is a subdirectory, entering..." | tee -a "${LOG_PATH}"
@@ -666,9 +669,10 @@ case $PLATFORM in
 				echo "Deployment path: " | tee -a "${LOG_PATH}"
 				ls ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
 
-				echo "[builder.sh] running Docker >>>" | tee -a "${LOG_PATH}"
+				DCMD="docker run ${DOCKER_PREFIX} -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
+				echo "[builder.sh] running Docker ${DCMD} >>>" | tee -a "${LOG_PATH}"
 				set -o pipefail
-				docker run ${DOCKER_PREFIX} -t -v `pwd`:/opt/workspace suculent/arduino-docker-build | tee -a "${LOG_PATH}"
+				"$DCMD | tee -a ${LOG_PATH}"
 				echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
 
 				cd build
