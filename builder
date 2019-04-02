@@ -192,7 +192,7 @@ echo "Current working directory: "
 pwd | tee -a "${LOG_PATH}"
 echo "Files: "
 ls | tee -a "${LOG_PATH}"
-cd -v .* # enter any path, there should be nothing else here
+cd .* # enter any path, there should be nothing else here
 echo "Current working directory: "
 pwd | tee -a "${LOG_PATH}"
 echo "Files: "
