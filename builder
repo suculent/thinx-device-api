@@ -168,8 +168,8 @@ fi
 if [[ $proto == "git-ssl" ]]; then
 	echo "Overriding attributes in git-ssl mode..."
 	REPO_NAME="$(echo $url | grep / | cut -d/ -f2-)"
-	user="$(echo $host | grep : | cut -d: -f2-)"
-	host="$(echo $url | grep @ | cut -d: -f1)"
+	user="$(echo $host | grep : | cut -d/ -f1)"
+	host="$(echo $url | grep @ | cut -d: -f2-)"
 	# url: git@github.com:suculent/keyguru-firmware-zion.git
 	# user: git (OK)
 	# host: suculent (!!!)
@@ -196,7 +196,7 @@ echo "[builder.sh] - REPO_NAME: ${REPO_NAME}" | tee -a "${LOG_PATH}"
 #rm -rf $THINX_ROOT/tenants/$OWNER_ID/$UDID/$BUILD_ID/$REPO_PATH/**
 
 # TODO: only if $REPO_NAME contains slash(es)
-BUILD_PATH=$THINX_ROOT/repositories/$OWNER_ID/$UDID/$BUILD_ID
+BUILD_PATH=$BUILD_ROOT/$OWNER_ID/$UDID/$BUILD_ID
 if [[ ! -d $BUILD_PATH ]]; then
 	mkdir -p $BUILD_PATH
 fi
@@ -227,6 +227,9 @@ if [[ -d $REPO_NAME ]]; then
 	SINK=$BUILD_PATH/$REPO_NAME
 	echo "[builder.sh] SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
 else
+	pwd && ls
+	pwd | tee -a "${LOG_PATH}"
+	ls | tee -a "${LOG_PATH}"
 	echo "[builder.sh] REPO_NAME ${REPO_NAME} does not exist, entering $REPO_PATH instead..." | tee -a "${LOG_PATH}"
 	SINK=$BUILD_PATH/$REPO_PATH
 	cd $SINK
