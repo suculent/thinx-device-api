@@ -145,7 +145,7 @@ fi
 if [[ $proto == "git-ssl" ]]; then
 	echo "Overriding attributes in git-ssl mode..."
 	REPO_NAME="$(echo $url | grep / | cut -d/ -f2-)"
-	user="$(echo $host | grep : | cut -d/ -f1)" # returns nil
+	user="$(echo $host | grep : | cut -d/ -f1-)" # returns nil
 	host="$(echo $host | grep @ | cut -d: -f1)"
 	# host="$(echo $url | grep @ | cut -d: -f2-)" - returns suculent/keyguru-firmware-zion.git
 
@@ -159,15 +159,16 @@ else
 fi
 
 # make sure to remove trailing git for HTTP URLs as well...
+# REPO_PATH=$BUILD_PATH/${REPO_PATH%.git}
 REPO_PATH=${REPO_PATH%.git}
 REPO_NAME=${REPO_NAME%.git}
 
-echo "[builder.sh] - url: $url" | tee -a "${LOG_PATH}"
-echo "[builder.sh] - proto: $proto" | tee -a "${LOG_PATH}"
-echo "[builder.sh] - user: $user" | tee -a "${LOG_PATH}"
-echo "[builder.sh] - host: $host" | tee -a "${LOG_PATH}"
-echo "[builder.sh] - REPO_PATH: $REPO_PATH" | tee -a "${LOG_PATH}"
-echo "[builder.sh] - REPO_NAME: ${REPO_NAME}" | tee -a "${LOG_PATH}"
+echo "[builder.sh] - url: $url" 								| tee -a "${LOG_PATH}"
+echo "[builder.sh] - proto: $proto" 						| tee -a "${LOG_PATH}"
+echo "[builder.sh] - user: $user" 							| tee -a "${LOG_PATH}"
+echo "[builder.sh] - host: $host" 							| tee -a "${LOG_PATH}"
+echo "[builder.sh] - REPO_PATH: $REPO_PATH" 		| tee -a "${LOG_PATH}"
+echo "[builder.sh] - REPO_NAME: ${REPO_NAME}" 	| tee -a "${LOG_PATH}"
 
 #echo "[builder.sh] Cleaning workspace..."
 
@@ -190,16 +191,16 @@ cd $BUILD_PATH && pwd | tee -a "${LOG_PATH}"
 # Fetch project
 echo "Current working directory: "
 pwd | tee -a "${LOG_PATH}"
-echo "Files: "
+echo "Project initial directory files: "
 ls | tee -a "${LOG_PATH}"
 cd .* # enter any path, there should be nothing else here
-echo "Current working directory: "
+echo "Project root directory: "
 pwd | tee -a "${LOG_PATH}"
-echo "Files: "
+echo "Project root directory files (pre-fetch): "
 ls | tee -a "${LOG_PATH}"
 echo "[builder.sh] Pulling ${GIT_REPO}..." | tee -a "${LOG_PATH}"
 git pull | tee -a "${LOG_PATH}"
-echo "Files: "
+echo "Project root directory files (post-fetch): "
 ls | tee -a "${LOG_PATH}"
 
 # Fetch submodules if any
