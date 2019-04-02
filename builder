@@ -104,8 +104,9 @@ echo "[builder.sh] Target device deployment path: ${TARGET_PATH}"
 DEPLOYMENT_PATH=$OWNER_ID_HOME/$UDID/$BUILD_ID
 echo "[builder.sh] Deployment path: ${DEPLOYMENT_PATH}"
 
-DISPLAY_DEPLOYMENT_PATH=$(sed "s/${THINX_WEB_ROOT}//g" <<< $DEPLOYMENT_PATH)
-echo "[builder.sh] Display deployment path: ${DISPLAY_DEPLOYMENT_PATH}"
+# seems deprecated or a mess, rather remove...
+#DISPLAY_DEPLOYMENT_PATH=$(sed 's/${THINX_WEB_ROOT}//g' <<< $DEPLOYMENT_PATH)
+#echo "[builder.sh] Display deployment path: ${DISPLAY_DEPLOYMENT_PATH}"
 
 # Create user-referenced folder in public www space
 mkdir -p $OWNER_ID_HOME
@@ -149,17 +150,6 @@ REPO_PATH="$(echo $url | grep / | cut -d/ -f2-)"
 # extract the end of path (if any)
 REPO_NAME="$(echo $url | grep / | cut -d/ -f3-)"
 
-## Following missing lines should override when "git-ssl" protocol is active
-if [[ $proto == "git-ssl" ]]; then
-	REPO_NAME="$(echo $url | grep / | cut -d/ -f2-)"
-	user="$(echo $url | grep : | cut -d/ -f1)"
-	# url: git@github.com:suculent/keyguru-firmware-zion.git
-	# user: git (OK)
-	# host: suculent (!!!)
-	# REPO_PATH: keyguru-firmware-zion ???
-	# REPO_NAME: (keyguru-firmware-zion!!!)
-fi
-
 #if [[ -z $REPO_NAME ]];
 #	basename $REPO_NAME
 #fi
@@ -172,6 +162,20 @@ if [[ "$user" == "git" ]]; then
 	GIT_PATH=$REPO_PATH
 	REPO_PATH="$(sed 's/.git//g' <<< $GIT_PATH)"
 	REPO_NAME="$(echo $REPO_PATH | grep / | cut -d/ -f2-)"
+fi
+
+## Following missing lines should override when "git-ssl" protocol is active
+if [[ $proto == "git-ssl" ]]; then
+	echo "Overriding attributes in git-ssl mode..."
+	REPO_NAME="$(echo $url | grep / | cut -d/ -f2-)"
+	user="$(echo $url | grep : | cut -d/ -f1)"
+	# url: git@github.com:suculent/keyguru-firmware-zion.git
+	# user: git (OK)
+	# host: suculent (!!!)
+	# REPO_PATH: keyguru-firmware-zion ???
+	# REPO_NAME: (keyguru-firmware-zion!!!)
+else
+	echo "In git-https mode..."
 fi
 
 # make sure to remove trailing git for HTTP URLs as well...
@@ -221,16 +225,15 @@ if [[ -d $REPO_NAME ]]; then
 	cd ./$REPO_NAME
 	SINK=$BUILD_PATH/$REPO_NAME
 	echo "[builder.sh] SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
-	pwd | tee -a "${LOG_PATH}"
-	ls la | tee -a "${LOG_PATH}"
 else
 	echo "[builder.sh] REPO_NAME ${REPO_NAME} does not exist, entering $REPO_PATH instead..." | tee -a "${LOG_PATH}"
 	SINK=$BUILD_PATH/$REPO_PATH
 	cd $SINK
 	echo "[builder.sh] SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
-	pwd | tee -a "${LOG_PATH}"
-	ls la | tee -a "${LOG_PATH}"
 fi
+
+pwd | tee -a "${LOG_PATH}"
+ls | tee -a "${LOG_PATH}"
 
 cd $SINK && git submodule update --init --recursive
 
@@ -823,7 +826,7 @@ echo "[builder.sh] Post-flight check:" | tee -a "${LOG_PATH}"
 
 pwd | tee -a "${LOG_PATH}"
 
-echo "DP" $DISPLAY_DEPLOYMENT_PATH | tee -a "${LOG_PATH}"
+#echo "DP" $DISPLAY_DEPLOYMENT_PATH | tee -a "${LOG_PATH}"
 
 # add THINX_FIRMWARE_VERSION to the build.json envelope in order to differ between upgrades and crossgrades
 BUILD_FILE=$( find $BUILD_PATH/$REPO_PATH -name "thinx_build.json" )
