@@ -595,10 +595,10 @@ case $PLATFORM in
 			echo "[builder.sh] Moving thinx_build.json to $TNAME" | tee -a "${LOG_PATH}"
 			mv "./thinx_build.json" "$TNAME"
 
-			DCMD="docker run ${DOCKER_PREFIX} --rm -t -v $(pwd):/opt/mongoose-builder suculent/mongoose-docker-build | tee -a ${LOG_PATH}"
+			DCMD="docker run ${DOCKER_PREFIX} --rm -t -v $(pwd):/opt/mongoose-builder suculent/mongoose-docker-build"
 			echo "[builder.sh] running Docker ${DCMD} >>>" | tee -a "${LOG_PATH}"
 			set -o pipefail
-			"$DCMD | tee -a ${LOG_PATH}"
+			"$DCMD"
 			echo "${PIPESTATUS[@]}"
 			if [[ ! -z =$(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 				if [[ -f $(pwd)/build/fw.zip ]]; then
@@ -663,19 +663,19 @@ case $PLATFORM in
 					    fi
 						fi
 				done
-			  echo "[builder.sh] Building for Arduino from folder:" | tee -a "${LOG_PATH}"
+			  echo "[builder.sh] Building for Arduino from folder: $(pwd)" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 
 				echo "Deployment path: " | tee -a "${LOG_PATH}"
 				ls ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
 
-				DCMD="docker run ${DOCKER_PREFIX} -t -v $(pwd):/opt/workspace suculent/arduino-docker-build | tee -a ${LOG_PATH}"
+				DCMD="docker run ${DOCKER_PREFIX} -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
 				echo "[builder.sh] running Docker ${DCMD} >>>"
 				set -o pipefail
-				"$DCMD"
+				echo $($DCMD) | tee -a ${LOG_PATH}
 				echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
 				# set +o pipefail				?
-							
+
 				ls | tee -a "${LOG_PATH}"
 
 				echo "[builder.sh] Docker completed <<<" | tee -a "${LOG_PATH}"
@@ -778,7 +778,8 @@ case $PLATFORM in
 
 			echo "[builder.sh] running Docker PIO >>>"
 			set -o pipefail
-			docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build | tee -a "${LOG_PATH}"
+			DCMD=$(docker run ${DOCKER_PREFIX} --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build)
+			echo $DCMD | tee -a "${LOG_PATH}"
 			echo "${PIPESTATUS[@]}"
 			if [[ ! -z =$(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 				BUILD_SUCCESS=true
