@@ -134,6 +134,8 @@ echo "[builder.sh] Making deployment path: ${DEPLOYMENT_PATH}" | tee -a "${LOG_P
 
 # extract the protocol
 proto="$(echo $GIT_REPO | grep :// | sed -e's,^\(.*://\).*,\1,g')"
+
+## Following works for the HTTPS protocol, not GIT+SSL
 # remove the protocol
 url="$(echo ${GIT_REPO/$proto/})"
 # extract the user (if any)
@@ -145,7 +147,18 @@ port="$(echo $host | sed -e 's,^.*:,:,g' -e 's,.*:\([0-9]*\).*,\1,g' -e 's,[^0-9
 # extract the path (if any)
 REPO_PATH="$(echo $url | grep / | cut -d/ -f2-)"
 # extract the end of path (if any)
-REPO_NAME="$REPO_PATH" "$(echo $url | grep / | cut -d/ -f3-)"
+REPO_NAME="$(echo $url | grep / | cut -d/ -f3-)"
+
+## Following missing lines should override when "git-ssl" protocol is active
+if [[ $proto == "git-ssl" ]]; Then
+	REPO_NAME="$(echo $url | grep / | cut -d/ -f2-)"
+	user="$(echo $url | grep : | cut -d/ -f1)"
+	# url: git@github.com:suculent/keyguru-firmware-zion.git
+	# user: git (OK)
+	# host: suculent (!!!)
+	# REPO_PATH: keyguru-firmware-zion ???
+	# REPO_NAME: (keyguru-firmware-zion!!!)
+fi
 
 #if [[ -z $REPO_NAME ]];
 #	basename $REPO_NAME
@@ -211,7 +224,7 @@ if [[ -d $REPO_NAME ]]; then
 	pwd | tee -a "${LOG_PATH}"
 	ls la | tee -a "${LOG_PATH}"
 else
-	echo "[builder.sh] REPO_NAME $REPO_NAME does not exist, entering $REPO_PATH instead..." | tee -a "${LOG_PATH}"
+	echo "[builder.sh] REPO_NAME ${REPO_NAME} does not exist, entering $REPO_PATH instead..." | tee -a "${LOG_PATH}"
 	SINK=$BUILD_PATH/$REPO_PATH
 	cd $SINK
 	echo "[builder.sh] SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
@@ -633,7 +646,7 @@ case $PLATFORM in
 				cd build
 
 				pwd | tee -a "${LOG_PATH}"
-				ls -la | tee -a "${LOG_PATH}"
+				ls | tee -a "${LOG_PATH}"
 				echo "[builder.sh] Docker completed <<<" | tee -a "${LOG_PATH}"
 
 
@@ -682,8 +695,7 @@ case $PLATFORM in
 						pwd
 						pwd | tee -a "${LOG_PATH}"
 						echo "[builder.sh] Current workdir contents: " | tee -a "${LOG_PATH}"
-						ls -la
-						ls -la | tee -a "${LOG_PATH}"
+						ls | tee -a "${LOG_PATH}"
 						cp -vf *.bin "$OUTFILE" | tee -a "${LOG_PATH}"
 						cp -vf *.elf "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 						echo "[builder.sh] Deployment path $DEPLOYMENT_PATH contains:" | tee -a "${LOG_PATH}"
