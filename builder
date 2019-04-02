@@ -111,52 +111,78 @@ echo "[builder.sh] Owner workspace: ${OWNER_ID_HOME}" | tee -a "${LOG_PATH}"
 echo "[builder.sh] Making deployment path: ${DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
 
 # TODO: Fix this, depends on protocol (changes with git+ssh)
-
 # extract the protocol
 proto="$(echo $GIT_REPO | grep :// | sed -e's,^\(.*://\).*,\1,g')"
+if [[ -z $proto ]]; then
+  proto="git-ssl"
+fi
+echo "proto: $proto"
 
 ## Following works for the HTTPS protocol, not GIT+SSL
 # remove the protocol
 url="$(echo ${GIT_REPO/$proto/})"
-# extract the user (if any)
-user="$(echo $url | grep @ | cut -d@ -f1)"
-# extract the host
-host="$(echo ${url/$user@/} | cut -d/ -f1)"
-# by request - try to extract the port
-port="$(echo $host | sed -e 's,^.*:,:,g' -e 's,.*:\([0-9]*\).*,\1,g' -e 's,[^0-9],,g')"
-# extract the path (if any)
-REPO_PATH="$(echo $url | grep / | cut -d/ -f2-)"
-# extract the end of path (if any)
-REPO_NAME="$(echo $url | grep / | cut -d/ -f3-)"
+echo "url: $url"
 
-echo "REPO_NAME: ${REPO_NAME}"
+user="$(echo $url | grep @ | cut -d@ -f1)"
+echo "user: $user"
+
+host="$(echo ${url/$user@/} | cut -d/ -f1)"
+echo "host: $host"
+
+# by request - try to extract the port; support custom git ports in future
+port="$(echo $host | sed -e 's,^.*:,:,g' -e 's,.*:\([0-9]*\).*,\1,g' -e 's,[^0-9],,g')"
+if [[ -z $port ]]; then
+  port=22
+fi
+echo "port: $port"
+
+REPO_PATH="$(echo $url | grep / | cut -d/ -f2-)"
+echo "REPO_PATH: $REPO_PATH"
+
+# will be overridden in git mode
+REPO_NAME="$(echo $url | grep / | cut -d/ -f3-)"
+if [[ ! -z $REPO_NAME ]]; then
+  echo "REPO_NAME A: $REPO_NAME"
+fi
+
+echo
 
 if [[ "$user" == "git" ]]; then
+  echo "Overriding for user git and git-ssl..."
 	proto="git-ssl"
 	len=${#REPO_NAME}
 	OLDHOST=$host
-	host="$(echo $OLDHOST | grep : | cut -d: -f2-)"
+
+  echo "host-x:        $host"
+
 	GIT_PATH=$REPO_PATH
 	REPO_PATH="$(sed 's/.git//g' <<< $GIT_PATH)"
-	REPO_NAME="$(echo $REPO_PATH | grep / | cut -d/ -f2-)"
-fi
-
-## Following missing lines should override when "git-ssl" protocol is active
-if [[ $proto == "git-ssl" ]]; then
-	echo "Overriding attributes in git-ssl mode..."
 	REPO_NAME="$(echo $url | grep / | cut -d/ -f2-)"
-	user="$(echo $host | grep : | cut -d/ -f1-)" # returns nil
-	host="$(echo $host | grep @ | cut -d: -f1)"
-	# host="$(echo $url | grep @ | cut -d: -f2-)" - returns suculent/keyguru-firmware-zion.git
-
-	# url: git@github.com:suculent/keyguru-firmware-zion.git
-	# user: git (OK)
-	# host: suculent (!!!)
-	# REPO_PATH: keyguru-firmware-zion ???
-	# REPO_NAME: (keyguru-firmware-zion!!!)
+  echo "REPO_NAME C:   $REPO_NAME"
+	user="$(echo $OLDHOST | grep : | cut -d: -f2-)"
+	#host="$(echo $OLDHOST | grep @ | cut -d: -f1)"
+  host="$(echo $OLDHOST | grep : | cut -d: -f1)"
+	# host="$(echo $url | grep @ | cut -d: -f2-)" # - returns suculent/keyguru-firmware-zion.git
 else
-	echo "In git-https mode..."
+	echo "In git-https mode, user is also from url..."
+  user=$(echo $url | grep / | cut -d/ -f2-)
+  echo $user
+  user=$(echo $user | grep / | cut -d/ -f1)
+  echo $user
 fi
+
+echo
+
+echo "------- RESULTS -----"
+
+echo "GIT_REPO:    $GIT_REPO"
+echo "proto:       $proto"
+echo "url:         $url"
+echo "user:        $user"
+echo "host:        $host"
+echo "port:        $port"
+echo "REPO_PATH:   $REPO_PATH"
+echo "REPO_NAME:   $REPO_NAME"
 
 # make sure to remove trailing git for HTTP URLs as well...
 # REPO_PATH=$BUILD_PATH/${REPO_PATH%.git}
