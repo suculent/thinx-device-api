@@ -104,7 +104,7 @@ echo "[builder.sh] Target device deployment path: ${TARGET_PATH}"
 DEPLOYMENT_PATH=$OWNER_ID_HOME/$UDID/$BUILD_ID
 echo "[builder.sh] Deployment path: ${DEPLOYMENT_PATH}"
 
-DISPLAY_DEPLOYMENT_PATH=$(echo ${DEPLOYMENT_PATH} | tr -d "$THINX_WEB_ROOT")
+DISPLAY_DEPLOYMENT_PATH=$(sed "s/${THINX_WEB_ROOT}//g" <<< $DEPLOYMENT_PATH))
 echo "[builder.sh] Display deployment path: ${DISPLAY_DEPLOYMENT_PATH}"
 
 # Create user-referenced folder in public www space
@@ -150,7 +150,7 @@ REPO_PATH="$(echo $url | grep / | cut -d/ -f2-)"
 REPO_NAME="$(echo $url | grep / | cut -d/ -f3-)"
 
 ## Following missing lines should override when "git-ssl" protocol is active
-if [[ $proto == "git-ssl" ]]; Then
+if [[ $proto == "git-ssl" ]]; then
 	REPO_NAME="$(echo $url | grep / | cut -d/ -f2-)"
 	user="$(echo $url | grep : | cut -d/ -f1)"
 	# url: git@github.com:suculent/keyguru-firmware-zion.git
