@@ -207,26 +207,22 @@ if [[ ! -d $BUILD_PATH ]]; then
 	mkdir -p $BUILD_PATH
 fi
 
-echo "[builder.sh] Entering BUILD_PATH $BUILD_PATH" | tee -a "${LOG_PATH}"
-cd $BUILD_PATH && pwd | tee -a "${LOG_PATH}"
+echo "[builder.sh] Entering build path..." | tee -a "${LOG_PATH}"
+cd $BUILD_PATH | tee -a "${LOG_PATH}"
 
 # Clean workspace is now deprecated as builder runs in pre-fetched repo
 # echo "[builder.sh] Cleaning previous git repository / workspace in ${REPO_NAME}..." | tee -a "${LOG_PATH}"
 # rm -rf $REPO_NAME
 
 # Fetch project
-echo "Current working directory: "
-pwd | tee -a "${LOG_PATH}"
-echo "Project initial directory files: "
+echo "Project root directory files (pre-fetch): " | tee -a "${LOG_PATH}"
 ls | tee -a "${LOG_PATH}"
-cd .* # enter any path, there should be nothing else here
-echo "Project root directory: "
-pwd | tee -a "${LOG_PATH}"
-echo "Project root directory files (pre-fetch): "
-ls | tee -a "${LOG_PATH}"
+pushd .* | tee -a "${LOG_PATH}" # enter any path, there should be nothing else here
+
 echo "[builder.sh] Pulling ${GIT_REPO}..." | tee -a "${LOG_PATH}"
 git pull | tee -a "${LOG_PATH}"
-echo "Project root directory files (post-fetch): "
+
+echo "Project root directory files (post-fetch): " | tee -a "${LOG_PATH}"
 ls | tee -a "${LOG_PATH}"
 
 # Fetch submodules if any
@@ -237,21 +233,21 @@ if [[ -d $REPO_NAME ]]; then
 	SINK=$BUILD_PATH/$REPO_NAME
 	echo "[builder.sh] SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
 else
-	pwd && ls
 	pwd | tee -a "${LOG_PATH}"
 	ls | tee -a "${LOG_PATH}"
 	echo "[builder.sh] REPO_NAME ${REPO_NAME} does not exist, entering $REPO_PATH instead..." | tee -a "${LOG_PATH}"
 	SINK=$BUILD_PATH/$REPO_PATH
+	echo "[builder.sh] Entering BUILD_PATH/REPO_PATH" | tee -a "${LOG_PATH}"
 	cd $SINK
 	echo "[builder.sh] SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
 fi
 
-git submodule update --init --recursive
+echo "[builder.sh] SRC_PATH Updating submodules..." | tee -a "${LOG_PATH}"
+
+git submodule update --init --recursive | tee -a "${LOG_PATH}"
 
 if [[ ! -d $SINK/.git ]]; then
-	echo "[builder.sh] WARNING! No .git folder in repository: $BUILD_PATH/$REPO_PATH/.git" | tee -a "${LOG_PATH}"
-	pwd | tee -a "${LOG_PATH}"
-	ls | tee -a "${LOG_PATH}"
+	echo "[builder.sh] WARNING! No .git folder on path: $BUILD_PATH/$REPO_PATH/.git" | tee -a "${LOG_PATH}"
 	exit 1
 fi
 
@@ -269,8 +265,8 @@ nodemcu_build_float=true
 micropython_build_type="firmware"
 micropython_platform="esp8266"
 
-YML=$(find $BUILD_PATH/$REPO_PATH -name "thinx.yml" -maxdepth 2)
-if [[ -f $YML ]]; then
+YML=$(find $BUILD_PATH/$REPO_PATH -name "thinx.yml")
+if [[ ! -z "$YML" ]]; then
 	echo "[builder.sh] Found ${YML}, reading..." | tee -a "${LOG_PATH}"
 	parse_yaml $YML
 	eval $(parse_yaml $YML)
