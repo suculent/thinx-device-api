@@ -284,34 +284,21 @@ devicelib.get(udid, function(err, doc) {
     var envelopePath = deploymentPathForDevice(owner, udid) + "/" +
       build_id + "/build.json";
 
-    console.log("envelopePath: " + envelopePath);
-
     var deployedEnvelopePath = deploymentPathForDevice(owner, udid) +
       "/build.json";
 
-    console.log("deployedEnvelopePath: " + deployedEnvelopePath);
-
     var envelopeString = JSON.stringify(buildEnvelope);
-
     console.log("Saving build envelope: " + envelopeString);
+
+    console.log("deployedEnvelopePath: " + envelopePath);
 
     buffer = new Buffer(envelopeString + "\n");
 
-    fs.ensureFile(envelopePath, function(err) {
-      if (err) {
-        console.log(err);
-      } else {
-        fs.writeFileSync(envelopePath, buffer);
-      }
-    });
+    console.log("saving deployedEnvelopePath: " + deployedEnvelopePath);
+    fs.writeFileSync(envelopePath, buffer);
 
-    fs.ensureFile(deployedEnvelopePath, function(err) {
-      if (err) {
-        console.log(err);
-      } else {
-        fs.writeFileSync(deployedEnvelopePath, buffer);
-      }
-    });
+    console.log("saving deployedEnvelopePath: " + deployedEnvelopePath);
+    fs.writeFileSync(deployedEnvelopePath, buffer);
 
 
     // TODO: Update current build version in managed_users.repos
