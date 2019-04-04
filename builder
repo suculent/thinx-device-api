@@ -209,14 +209,12 @@ fi
 echo "[builder.sh] Entering build path..." | tee -a "${LOG_PATH}"
 cd $BUILD_PATH | tee -a "${LOG_PATH}"
 
-# Fetch project
-pushd .* | tee -a "${LOG_PATH}" # enter any path, there should be nothing else here
-
-echo "Current dir $(pwd): " | tee -a "${LOG_PATH}"
-
 echo "[builder.sh] Pulling ${GIT_REPO}..." | tee -a "${LOG_PATH}"
 git pull | tee -a "${LOG_PATH}"
 
+# Fetch project
+pushd .* | tee -a "${LOG_PATH}" # enter any path, there should be nothing else here
+echo "Current dir $(pwd): " | tee -a "${LOG_PATH}"
 ls -la | tee -a "${LOG_PATH}"
 
 # Fetch submodules if any
