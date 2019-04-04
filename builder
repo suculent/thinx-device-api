@@ -645,9 +645,11 @@ case $PLATFORM in
 			fi
 
 			cd $BUILD_PATH/$REPO_PATH | tee -a "${LOG_PATH}"
+			# enter project folder ()
+			echo "[builder.sh] Entering fetched project repository folder..." | tee -a "${LOG_PATH}"
 			cd .* | tee -a "${LOG_PATH}"
 			pwd | tee -a "${LOG_PATH}"
-			ls $BUILD_PATH/$REPO_PATH | tee -a "${LOG_PATH}"
+			ls -la | tee -a "${LOG_PATH}"
 
 			for FILE in ./*
 				do
@@ -677,10 +679,10 @@ case $PLATFORM in
 
 				DCMD="docker run ${DOCKER_PREFIX} -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
 				$DCMD | tee -a "${LOG_PATH}"
-				echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
+				echo "[builder.sh] PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
 				set +o pipefail
 
-				echo "Resuting Contents of build folder:" | tee -a "${LOG_PATH}"
+				echo "[builder.sh] Resuting Contents of build folder:" | tee -a "${LOG_PATH}"
 				ls -la $BUILD_PATH/$REPO_PATH/build | tee -a "${LOG_PATH}"
 
 				echo "[builder.sh] Deployment path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
@@ -714,14 +716,14 @@ case $PLATFORM in
 						echo "[builder.sh] Docker build succeeded." | tee -a "${LOG_PATH}"
 						echo " " | tee -a "${LOG_PATH}"
 						BIN_FILE=$( find $BUILD_PATH/$REPO_PATH/build -name "firmware.bin" )
-						echo "BIN_FILE1: $BIN_FILE" | tee -a "${LOG_PATH}"
+						echo "[builder.sh] BIN_FILE1: $BIN_FILE" | tee -a "${LOG_PATH}"
 						zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ${BIN_FILE} # zip artefacts
 					fi
 				else
 					echo " " | tee -a "${LOG_PATH}"
 					echo "[builder.sh] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
 					BIN_FILE=$( find $BUILD_PATH/$REPO_PATH/build -name "firmware.bin" )
-					echo "BIN_FILE2: $BIN_FILE" | tee -a "${LOG_PATH}"
+					echo "[builder.sh] BIN_FILE2: $BIN_FILE" | tee -a "${LOG_PATH}"
 					echo " " | tee -a "${LOG_PATH}"
 				fi
 
@@ -734,12 +736,13 @@ case $PLATFORM in
 					if [[ $BUILD_SUCCESS == true ]] ; then
 						STATUS='OK'
 						echo "[builder.sh] Exporting artifacts" | tee -a "${LOG_PATH}"
-
-						echo "[builder.sh] OUTFILE: $OUTFILE" | tee -a "${LOG_PATH}"
+						echo "[builder.sh] OUTFILE: ${OUTFILE}" | tee -a "${LOG_PATH}"
 						# Deploy Artifacts
-						cd $(ls -d */)
+						ANYDIR=$(ls -d *)
+						if [[ ! -z $ANYDIR ]]; then
+							cd $ANYDIR
+						fi
 						echo "[builder.sh] Current workdir: " | tee -a "${LOG_PATH}"
-						pwd
 						pwd | tee -a "${LOG_PATH}"
 						echo "[builder.sh] Current workdir contents: " | tee -a "${LOG_PATH}"
 						ls | tee -a "${LOG_PATH}"
