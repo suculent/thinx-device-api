@@ -652,7 +652,7 @@ case $PLATFORM in
 					    if test -d $FILE
 					    then
 					      echo "[builder.sh] $FILE is a subdirectory, entering..." | tee -a "${LOG_PATH}"
-								INOS=$(find $FILE -maxdepth 1 -name "*.ino")
+								INOS=$(find $FILE -name "*.ino")
 								if [[ ! -z "${INOS}" ]]; then
 									echo "[builder.sh] Selecting Arduino project: ${INOS}" | tee -a "${LOG_PATH}"
 									cd $FILE
@@ -670,14 +670,15 @@ case $PLATFORM in
 				echo "[builder.sh] Deployment path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
 				ls ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
 
-				DCMD="docker run ${DOCKER_PREFIX} -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
-				echo "[builder.sh] running Docker ${DCMD} >>>"
 				set -o pipefail
+				echo "[builder.sh] running Docker ${DCMD} >>>"
+				DCMD="docker run ${DOCKER_PREFIX} -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
 				$DCMD | tee -a "${LOG_PATH}"
 				echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
-				# set +o pipefail				?
+				set +o pipefail				?
 
-				ls $BUILD_PATH/build | tee -a "${LOG_PATH}"
+				echo "Contents of build folder:" | tee -a "${LOG_PATH}"
+				ls $BUILD_PATH/$REPO_PATH/build | tee -a "${LOG_PATH}"
 
 				echo "[builder.sh] Docker completed <<<" | tee -a "${LOG_PATH}"
 
@@ -770,7 +771,7 @@ case $PLATFORM in
 				fi
 		  fi
 
-			OUTFILE=$(find / -name "firmware.bin"  -maxdepth 10 | head -n 1)
+			OUTFILE=$(find $BUILD_PATH -name "firmware.bin" | head -n 1)
 
 			if [ ! -f $OUTFILE ]; then
 				echo "$OUTFILE not found"
