@@ -644,6 +644,10 @@ case $PLATFORM in
 				echo "[builder.sh] Found THiNX-File: ${THINX_FILE}" | tee -a "${LOG_PATH}"
 			fi
 
+			cd $BUILD_PATH/$REPO_PATH | tee -a "${LOG_PATH}"
+			pwd | tee -a "${LOG_PATH}"
+			ls $BUILD_PATH/$REPO_PATH | tee -a "${LOG_PATH}"
+
 			for FILE in ./*
 				do
 						if "$FILE" !== "lib"
@@ -667,21 +671,19 @@ case $PLATFORM in
 
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 
-				echo "[builder.sh] Deployment path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
-				ls ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
-
 				set -o pipefail
 				echo "[builder.sh] running Docker ${DCMD} >>>"
-				cd $BUILD_PATH/$REPO_PATH | tee -a "${LOG_PATH}"
-				pwd | tee -a "${LOG_PATH}"
-				ls $BUILD_PATH/$REPO_PATH | tee -a "${LOG_PATH}"
+
 				DCMD="docker run ${DOCKER_PREFIX} -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
 				$DCMD | tee -a "${LOG_PATH}"
 				echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
 				set +o pipefail				?
 
-				echo "Contents of build folder:" | tee -a "${LOG_PATH}"
+				echo "Resuting Contents of build folder:" | tee -a "${LOG_PATH}"
 				ls $BUILD_PATH/$REPO_PATH/build | tee -a "${LOG_PATH}"
+
+				echo "[builder.sh] Deployment path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
+				ls ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
 
 				echo "[builder.sh] Docker completed <<<" | tee -a "${LOG_PATH}"
 
