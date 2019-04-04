@@ -426,7 +426,7 @@ case $PLATFORM in
 				echo "${PIPESTATUS[@]}"
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
-					zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./* # zip artefacts
+					zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./build/* # zip artefacts
 				fi
 				if [[ $(find $OUTFILE -type f -size +10000c 2>/dev/null) ]]; then
 					rm -rf $OUTFILE
@@ -664,6 +664,7 @@ case $PLATFORM in
 						fi
 				done
 			  echo "[builder.sh] Building for Arduino from folder: $(pwd)" | tee -a "${LOG_PATH}"
+
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 
 				echo "[builder.sh] Deployment path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
@@ -676,7 +677,7 @@ case $PLATFORM in
 				echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
 				# set +o pipefail				?
 
-				ls | tee -a "${LOG_PATH}"
+				ls ./build | tee -a "${LOG_PATH}"
 
 				echo "[builder.sh] Docker completed <<<" | tee -a "${LOG_PATH}"
 
@@ -686,7 +687,7 @@ case $PLATFORM in
 					BUILD_SUCCESS=true
 
 					# should be on $BUILD_PATH
-					INFILE=$( find . -name "firmware.bin" )
+					INFILE=$( find $BUILD_PATH -name "firmware.bin" )
 
 					if [[ ! -f $INFILE ]]; then
 						echo "INFILE $INFILE not found!"
@@ -703,14 +704,14 @@ case $PLATFORM in
 						echo "[builder.sh] Docker build succeeded." | tee -a "${LOG_PATH}"
 						echo " " | tee -a "${LOG_PATH}"
 						BIN_FILE=$( find $BUILD_PATH -name "firmware.bin" )
-						echo "BIN_FILE: $BIN_FILE" | tee -a "${LOG_PATH}"
+						echo "BIN_FILE1: $BIN_FILE" | tee -a "${LOG_PATH}"
 						zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ${BIN_FILE} # zip artefacts
 					fi
 				else
 					echo " " | tee -a "${LOG_PATH}"
 					echo "[builder.sh] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
 					BIN_FILE=$( find $BUILD_PATH -name "firmware.bin" )
-					echo "BIN_FILE: $BIN_FILE" | tee -a "${LOG_PATH}"
+					echo "BIN_FILE2: $BIN_FILE" | tee -a "${LOG_PATH}"
 					echo " " | tee -a "${LOG_PATH}"
 				fi
 
