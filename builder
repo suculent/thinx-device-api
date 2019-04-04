@@ -204,10 +204,6 @@ echo "[builder.sh] - REPO_NAME: ${REPO_NAME}" 	| tee -a "${LOG_PATH}"
 BUILD_PATH=$BUILD_ROOT/$OWNER_ID/$UDID/$BUILD_ID
 if [[ ! -d $BUILD_PATH ]]; then
 	mkdir -p $BUILD_PATH
-else
-	# Clean workspace is now deprecated as builder runs in pre-fetched repo
-
-	rm -rf $BUILD_PATH/**
 fi
 
 echo "[builder.sh] Entering build path..." | tee -a "${LOG_PATH}"
@@ -225,9 +221,9 @@ ls -la | tee -a "${LOG_PATH}"
 
 # Fetch submodules if any
 SINK=""
-if [[ -d $REPO_NAME ]]; then
+if [[ -d $BUILD_PATH/$REPO_NAME ]]; then
 	echo "[builder.sh] Directory $REPO_NAME exists, entering..." | tee -a "${LOG_PATH}"
-	cd ./$REPO_NAME
+	cd $BUILD_PATH/$REPO_NAME
 	SINK=$BUILD_PATH/$REPO_NAME
 	echo "[builder.sh] SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
 else
