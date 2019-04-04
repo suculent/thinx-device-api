@@ -673,11 +673,11 @@ case $PLATFORM in
 				DCMD="docker run ${DOCKER_PREFIX} -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
 				echo "[builder.sh] running Docker ${DCMD} >>>"
 				set -o pipefail
-				"$DCMD" # | tee -a ${LOG_PATH}
+				$($DCMD) | tee -a "${LOG_PATH}"
 				echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
 				# set +o pipefail				?
 
-				ls ./build | tee -a "${LOG_PATH}"
+				ls $BUILD_PATH/build | tee -a "${LOG_PATH}"
 
 				echo "[builder.sh] Docker completed <<<" | tee -a "${LOG_PATH}"
 
