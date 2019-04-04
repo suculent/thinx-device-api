@@ -243,8 +243,6 @@ devicelib.get(udid, function(err, doc) {
       }
     }
 
-    console.log(JSON.stringify(body));
-
     var device = body.rows[0];
     device.last_build_id = build_id;
     device.last_build_date = new Date().toString();
