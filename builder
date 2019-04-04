@@ -644,7 +644,8 @@ case $PLATFORM in
 				echo "[builder.sh] Found THiNX-File: ${THINX_FILE}" | tee -a "${LOG_PATH}"
 			fi
 
-			cd $BUILD_PATH/$REPO_PATH | tee -a "${LOG_PATH}"
+			cd -v $BUILD_PATH/$REPO_PATH | tee -a "${LOG_PATH}"
+			cd -v .* | tee -a "${LOG_PATH}"
 			pwd | tee -a "${LOG_PATH}"
 			ls $BUILD_PATH/$REPO_PATH | tee -a "${LOG_PATH}"
 
