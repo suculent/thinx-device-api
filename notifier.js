@@ -30,7 +30,7 @@ var rollbar = new Rollbar({
 
 var sha256 = require("sha256");
 var crypto = require('crypto');
-
+var fs = require('fs-extra');
 var db = config.database_uri;
 
 // Initially creates DB, otherwise fails silently.

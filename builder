@@ -633,25 +633,7 @@ case $PLATFORM in
 			cd .* | tee -a "${LOG_PATH}"
 			pwd | tee -a "${LOG_PATH}"
 			ls -la | tee -a "${LOG_PATH}"
-
-			for FILE_OR_FOLDER in ./*
-				do
-						if [[ "$FILE_OR_FOLDER" != "./lib" ]]; then
-							echo "FILE_OR_FOLDER is not a lib..."
-					    if test -d $FILE_OR_FOLDER
-					    then
-					      echo "[builder.sh] $FILE is a subdirectory, entering..." | tee -a "${LOG_PATH}"
-								INOS=$(find $FILE_OR_FOLDER -name "*.ino")
-								if [[ ! -z "${INOS}" ]]; then
-									echo "[builder.sh] Selecting Arduino project: ${INOS}" | tee -a "${LOG_PATH}"
-									cd $FILE_OR_FOLDER
-									break
-								else
-									echo "[builder.sh] Skipping ${FILE} for there are no INOS inside..." | tee -a "${LOG_PATH}"
-								fi
-					    fi
-						fi
-				done
+		
 			  echo "[builder.sh] Building for Arduino from folder: $(pwd)" | tee -a "${LOG_PATH}"
 
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
