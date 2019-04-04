@@ -63,8 +63,8 @@ case $i in
 esac
 done
 
+# will be used later with notifier...
 THINX_ROOT=$(pwd)
-echo "[builder.sh] Starting builder at path ${THINX_ROOT}"
 
 # from app_config.data_root
 
@@ -106,7 +106,6 @@ if [[ -f "../lint.txt" ]]; then
 fi
 
 echo "[builder.sh] Logging to ${LOG_PATH}" | tee -a "${LOG_PATH}"
-echo "[builder.sh] Starting builder at path ${THINX_ROOT}" | tee -a "${LOG_PATH}"
 echo "[builder.sh] Owner workspace: ${OWNER_ID_HOME}" | tee -a "${LOG_PATH}"
 echo "[builder.sh] Making deployment path: ${DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
 
@@ -199,24 +198,22 @@ echo "[builder.sh] - REPO_NAME: ${REPO_NAME}" 	| tee -a "${LOG_PATH}"
 #echo "[builder.sh] Cleaning workspace..."
 
 # Clean
-#rm -rf $THINX_ROOT/tenants/$OWNER_ID/$UDID/$BUILD_ID/$REPO_PATH/**
+
 
 # TODO: only if $REPO_NAME contains slash(es)
 BUILD_PATH=$BUILD_ROOT/$OWNER_ID/$UDID/$BUILD_ID
 if [[ ! -d $BUILD_PATH ]]; then
 	mkdir -p $BUILD_PATH
+else
+	# Clean workspace is now deprecated as builder runs in pre-fetched repo
+
+	rm -rf $BUILD_PATH/**
 fi
 
 echo "[builder.sh] Entering build path..." | tee -a "${LOG_PATH}"
 cd $BUILD_PATH | tee -a "${LOG_PATH}"
 
-# Clean workspace is now deprecated as builder runs in pre-fetched repo
-# echo "[builder.sh] Cleaning previous git repository / workspace in ${REPO_NAME}..." | tee -a "${LOG_PATH}"
-# rm -rf $REPO_NAME
-
 # Fetch project
-echo "Project root directory files (pre-fetch): " | tee -a "${LOG_PATH}"
-ls | tee -a "${LOG_PATH}"
 pushd .* | tee -a "${LOG_PATH}" # enter any path, there should be nothing else here
 
 echo "[builder.sh] Pulling ${GIT_REPO}..." | tee -a "${LOG_PATH}"
