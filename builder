@@ -391,7 +391,7 @@ case $PLATFORM in
 			else
 				echo "[builder.sh] Build type: firmware (or undefined)" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
-				if [[ $(find $OUTFILE -type f -size +10000c 2>/dev/null) ]]; then
+				if [[ -z $(find $OUTFILE -type f -size +10000c 2>/dev/null) ]]; then
 					rm -rf $OUTFILE
 					BUILD_SUCCESS=false
 					echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
@@ -428,7 +428,7 @@ case $PLATFORM in
 					BUILD_SUCCESS=true
 					zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./build/* # zip artefacts
 				fi
-				if [[ $(find $OUTFILE -type f -size +10000c 2>/dev/null) ]]; then
+				if [[ -z $(find $OUTFILE -type f -size +10000c 2>/dev/null) ]]; then
 					rm -rf $OUTFILE
 					BUILD_SUCCESS=false
 					echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
@@ -490,7 +490,7 @@ case $PLATFORM in
 				echo "[builder.sh] Build type: firmware (or undefined)" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 				zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ${OUTFILE} # zip artefacts
-				if [[ $(find $OUTFILE -type f -size +10000c 2>/dev/null) ]]; then
+				if [[ -z $(find $OUTFILE -type f -size +10000c 2>/dev/null) ]]; then
 					rm -rf $OUTFILE
 					BUILD_SUCCESS=false
 					echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
@@ -693,8 +693,8 @@ case $PLATFORM in
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
 
-					# should be on $BUILD_PATH
-					INFILE=$( find $BUILD_PATH/$REPO_PATH/build -name "firmware.bin" )
+					# should be on $BUILD_PATH and without size limit so far
+					INFILE=$( find $BUILD_PATH/$REPO_PATH/build -name "firmware.bin")
 
 					echo "[builder.sh] INFILE: ${INFILE}" | tee -a "${LOG_PATH}"
 
@@ -704,8 +704,8 @@ case $PLATFORM in
 						exit 1
 					fi
 
-					if [[ $(find $BUILD_PATH/$REPO_PATH/build -name "firmware.bin" -type f -size +10000c 2>/dev/null) ]]; then
-						# rm -rf $INFILE
+					# once again with size limit
+					if [[ -z $(find $BUILD_PATH/$REPO_PATH/build -name "firmware.bin" -type f -size +10000c 2>/dev/null) ]]; then
 						BUILD_SUCCESS=false
 						echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
 						ls -la | tee -a "${LOG_PATH}"
@@ -818,7 +818,7 @@ case $PLATFORM in
 						STATUS='OK'
 						ls
 
-						if [[ $(find $(pwd)/ -name "firmware.bin" -type f -size +10000c 2>/dev/null) ]]; then
+						if [[ -z $(find $(pwd)/ -name "firmware.bin" -type f -size +10000c 2>/dev/null) ]]; then
 							# rm -rf $OUTFILE
 							BUILD_SUCCESS=false
 							echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
