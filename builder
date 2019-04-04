@@ -233,7 +233,7 @@ ls | tee -a "${LOG_PATH}"
 SINK=""
 if [[ -d $REPO_NAME ]]; then
 	echo "[builder.sh] Directory $REPO_NAME exists, entering..." | tee -a "${LOG_PATH}"
-	cd ./$REPO_NAME
+	cd -v ./$REPO_NAME
 	SINK=$BUILD_PATH/$REPO_NAME
 	echo "[builder.sh] SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
 else
@@ -242,7 +242,7 @@ else
 	ls | tee -a "${LOG_PATH}"
 	echo "[builder.sh] REPO_NAME ${REPO_NAME} does not exist, entering $REPO_PATH instead..." | tee -a "${LOG_PATH}"
 	SINK=$BUILD_PATH/$REPO_PATH
-	cd $SINK
+	cd -v $SINK
 	echo "[builder.sh] SRC_PATH CHECK:" | tee -a "${LOG_PATH}"
 fi
 
