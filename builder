@@ -709,10 +709,10 @@ case $PLATFORM in
 						echo "[builder.sh] Exporting artifacts" | tee -a "${LOG_PATH}"
 						echo "[builder.sh] Expected OUTFILE: ${OUTFILE}" | tee -a "${LOG_PATH}"
 						# Deploy Artifacts
-						ANYDIR=$(ls -d *)
-						if [[ ! -z $ANYDIR ]]; then
-							echo "[builder.sh] Entering $ANYDIR" | tee -a "${LOG_PATH}"
-							cd $ANYDIR | tee -a "${LOG_PATH}"
+
+						if [[ ! -z ./build ]]; then
+							echo "[builder.sh] Entering ./build" | tee -a "${LOG_PATH}"
+							cd ./build | tee -a "${LOG_PATH}"
 						fi
 
 						echo "[builder.sh] Current workdir: " | tee -a "${LOG_PATH}"
