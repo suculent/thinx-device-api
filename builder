@@ -216,11 +216,12 @@ cd $BUILD_PATH | tee -a "${LOG_PATH}"
 # Fetch project
 pushd .* | tee -a "${LOG_PATH}" # enter any path, there should be nothing else here
 
+echo "Current dir $(pwd): " | tee -a "${LOG_PATH}"
+
 echo "[builder.sh] Pulling ${GIT_REPO}..." | tee -a "${LOG_PATH}"
 git pull | tee -a "${LOG_PATH}"
 
-echo "Project root directory files (post-fetch): " | tee -a "${LOG_PATH}"
-ls | tee -a "${LOG_PATH}"
+ls -la | tee -a "${LOG_PATH}"
 
 # Fetch submodules if any
 SINK=""
@@ -245,13 +246,14 @@ git submodule update --init --recursive | tee -a "${LOG_PATH}"
 
 if [[ ! -d $SINK/.git ]]; then
 	echo "[builder.sh] WARNING! No .git folder on path: $BUILD_PATH/$REPO_PATH/.git" | tee -a "${LOG_PATH}"
-	exit 1
+else
+	cd $SINK | tee -a "${LOG_PATH}"
 fi
 
-COMMIT=$(cd $SINK && git rev-parse HEAD)
+COMMIT=$(git rev-parse HEAD)
 echo "[builder.sh] Fetched commit ID: ${COMMIT}" | tee -a "${LOG_PATH}"
 
-VERSION=$(cd $SINK && git rev-list HEAD --count)
+VERSION=$(git rev-list HEAD --count)
 echo "[builder.sh] Repository version/revision: ${VERSION}" | tee -a "${LOG_PATH}"
 
 # Search for thinx.yml
