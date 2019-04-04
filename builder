@@ -636,8 +636,7 @@ case $PLATFORM in
 
 			for FILE_OR_FOLDER in ./*
 				do
-						if $FILE_OR_FOLDER !== "./lib"
-						then
+						if [[ "$FILE_OR_FOLDER" !== "./lib" ]]; then
 							echo "FILE_OR_FOLDER is not a lib..."
 					    if test -d $FILE_OR_FOLDER
 					    then
