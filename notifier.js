@@ -116,7 +116,7 @@ if (typeof(repo_url) === "undefined" || repo_url === "") {
 
 // Default path
 if (typeof(build_path) === "undefined" || build_path === "") {
-  build_path = __dirname + config.deploy_root + "/" + owner + "/" + commit_id;
+  build_path = config.data_root + config.deploy_root + "/" + owner + "/" + commit_id;
 }
 
 if (typeof(sha) === "undefined" || sha === "") {
@@ -455,7 +455,7 @@ function notify_device_channel(owner, udid, message) {
 
 
 function deploymentPathForDevice(owner, udid) {
-  var user_path = __dirname + config.deploy_root + "/" + owner;
+  var user_path = config.data_root + config.deploy_root + "/" + owner;
   var device_path = user_path + "/" + udid;
   return device_path;
 }

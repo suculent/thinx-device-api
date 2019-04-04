@@ -678,13 +678,13 @@ case $PLATFORM in
 				DCMD="docker run ${DOCKER_PREFIX} -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
 				$DCMD | tee -a "${LOG_PATH}"
 				echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
-				set +o pipefail				?
+				set +o pipefail
 
 				echo "Resuting Contents of build folder:" | tee -a "${LOG_PATH}"
-				ls $BUILD_PATH/$REPO_PATH/build | tee -a "${LOG_PATH}"
+				ls -la $BUILD_PATH/$REPO_PATH/build | tee -a "${LOG_PATH}"
 
 				echo "[builder.sh] Deployment path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
-				ls ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
+				ls -la ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
 
 				echo "[builder.sh] Docker completed <<<" | tee -a "${LOG_PATH}"
 
@@ -694,7 +694,9 @@ case $PLATFORM in
 					BUILD_SUCCESS=true
 
 					# should be on $BUILD_PATH
-					INFILE=$( find $BUILD_PATH -name "firmware.bin" )
+					INFILE=$( find $BUILD_PATH/$REPO_PATH/build -name "firmware.bin" )
+
+					echo "[builder.sh] INFILE: ${INFILE}" | tee -a "${LOG_PATH}"
 
 					if [[ ! -f $INFILE ]]; then
 						echo "INFILE $INFILE not found!"
@@ -702,22 +704,23 @@ case $PLATFORM in
 						exit 1
 					fi
 
-					if [[ $(find $INFILE -type f -size +10000c 2>/dev/null) ]]; then
-						rm -rf $INFILE
+					if [[ $(find $BUILD_PATH/$REPO_PATH/build -name "firmware.bin" -type f -size +10000c 2>/dev/null) ]]; then
+						# rm -rf $INFILE
 						BUILD_SUCCESS=false
 						echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
+						ls -la | tee -a "${LOG_PATH}"
 					else
 						echo " " | tee -a "${LOG_PATH}"
 						echo "[builder.sh] Docker build succeeded." | tee -a "${LOG_PATH}"
 						echo " " | tee -a "${LOG_PATH}"
-						BIN_FILE=$( find $BUILD_PATH -name "firmware.bin" )
+						BIN_FILE=$( find $BUILD_PATH/$REPO_PATH/build -name "firmware.bin" )
 						echo "BIN_FILE1: $BIN_FILE" | tee -a "${LOG_PATH}"
 						zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ${BIN_FILE} # zip artefacts
 					fi
 				else
 					echo " " | tee -a "${LOG_PATH}"
 					echo "[builder.sh] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
-					BIN_FILE=$( find $BUILD_PATH -name "firmware.bin" )
+					BIN_FILE=$( find $BUILD_PATH/$REPO_PATH/build -name "firmware.bin" )
 					echo "BIN_FILE2: $BIN_FILE" | tee -a "${LOG_PATH}"
 					echo " " | tee -a "${LOG_PATH}"
 				fi
