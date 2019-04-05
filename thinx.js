@@ -1093,8 +1093,11 @@ var ThinxApp = function() {
         status: "missing_ott"
       });
     }
-    console.log("Update with OTT: " + ott);
+    console.log("GET requuest for FW update with OTT: " + ott);
+
+    //
     device.ott_update(ott, function(success, response) {
+      console.log("Should respond with contents: " + JSON.stringify(response));
       respond(res, response);
     });
   });
@@ -1103,13 +1106,14 @@ var ThinxApp = function() {
   app.post("/device/firmware", function(req, res) {
 
     validateRequest(req, res);
-    res.set("Connection", "close");
+    // res.set("Connection", "close"); disabled until this will work...
 
     // Device will create OTT request and fetch firmware from given OTT-URL
     if ((typeof(req.body.use) !== "undefined") && (req.body.use == "ott")) {
       // TODO: Refactor to single request parameter only
       device.ott_request(req.owner, req.body, req.headers.authentication, req,
         function(success, response) {
+          console.log("Responding to OTT request with :" + JSON.stringify(response));
           respond(res, response);
         });
 
@@ -1118,6 +1122,7 @@ var ThinxApp = function() {
       // TODO: use only one parameter for req
       device.firmware(req.body, req.headers.authentication, req,
         function(success, response) {
+          console.log("Responding to Firmware request with :" + JSON.stringify(response));
           respond(res, response);
         });
     }
