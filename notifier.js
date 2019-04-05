@@ -287,17 +287,17 @@ devicelib.get(udid, function(err, doc) {
     var deployedEnvelopePath = deploymentPathForDevice(owner, udid) +
       "/build.json";
 
-    var envelopeString = JSON.stringify(buildEnvelope);
+    var envelopeString = JSON.stringify(buildEnvelope, null, 4);
     console.log("Saving build envelope: " + envelopeString);
 
-    console.log("deployedEnvelopePath: " + envelopePath);
+    //console.log("deployedEnvelopePath: " + envelopePath);
 
     buffer = new Buffer(envelopeString + "\n");
 
-    console.log("saving deployedEnvelopePath: " + deployedEnvelopePath);
+    //console.log("saving envelopePath: " + deployedEnvelopePath);
     fs.writeFileSync(envelopePath, buffer);
 
-    console.log("saving deployedEnvelopePath: " + deployedEnvelopePath);
+    console.log("Deploying build envelope: " + deployedEnvelopePath);
     fs.writeFileSync(deployedEnvelopePath, buffer);
 
 

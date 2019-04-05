@@ -646,7 +646,7 @@ case $PLATFORM in
 				echo "[builder.sh] PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
 				set +o pipefail
 
-				echo "[builder.sh] Resuting Contents of build folder:" | tee -a "${LOG_PATH}"
+				echo "[builder.sh] Contents of working directory after build:" | tee -a "${LOG_PATH}"
 				ls -la $BUILD_PATH/$REPO_PATH/build | tee -a "${LOG_PATH}"
 
 				echo "[builder.sh] Docker completed <<<" | tee -a "${LOG_PATH}"
@@ -696,10 +696,10 @@ case $PLATFORM in
 							cd ./build | tee -a "${LOG_PATH}"
 						fi
 
-						echo "[builder.sh] Current workdir: " | tee -a "${LOG_PATH}"
-						pwd | tee -a "${LOG_PATH}"
-						echo "[builder.sh] Current workdir contents: " | tee -a "${LOG_PATH}"
-						ls | tee -a "${LOG_PATH}"
+						#echo "[builder.sh] Current workdir: " | tee -a "${LOG_PATH}"
+						#pwd | tee -a "${LOG_PATH}"
+						#echo "[builder.sh] Current workdir contents: " | tee -a "${LOG_PATH}"
+						#ls | tee -a "${LOG_PATH}"
 
 						echo "[builder.sh] Copying deployment data..." | tee -a "${LOG_PATH}"
 
