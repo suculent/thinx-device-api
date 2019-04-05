@@ -1106,7 +1106,7 @@ var ThinxApp = function() {
   app.post("/device/firmware", function(req, res) {
 
     validateRequest(req, res);
-    // res.set("Connection", "close"); disabled until this will work...
+    res.set("Connection", "close");
 
     // Device will create OTT request and fetch firmware from given OTT-URL
     if ((typeof(req.body.use) !== "undefined") && (req.body.use == "ott")) {
