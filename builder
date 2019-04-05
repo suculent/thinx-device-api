@@ -633,7 +633,7 @@ case $PLATFORM in
 			cd .* | tee -a "${LOG_PATH}"
 			pwd | tee -a "${LOG_PATH}"
 			ls -la | tee -a "${LOG_PATH}"
-		
+
 			  echo "[builder.sh] Building for Arduino from folder: $(pwd)" | tee -a "${LOG_PATH}"
 
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
@@ -701,11 +701,18 @@ case $PLATFORM in
 						echo "[builder.sh] Current workdir contents: " | tee -a "${LOG_PATH}"
 						ls | tee -a "${LOG_PATH}"
 
-						echo "[builder.sh] Deployment path $DEPLOYMENT_PATH contains:" | tee -a "${LOG_PATH}"
+						echo "[builder.sh] Copying deployment data..." | tee -a "${LOG_PATH}"
+
+						echo "[builder.sh] to: ${OUTFILE}" | tee -a "${LOG_PATH}"
 						cp -vf "${BIN_FILE}" "$OUTFILE" | tee -a "${LOG_PATH}"
+
+						echo "[builder.sh] to: ${TARGET_PATH}" | tee -a "${LOG_PATH}"
 						cp -vf "${BIN_FILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
+
+						echo "[builder.sh] to: ${DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
 						cp -vf "${BIN_FILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 						cp -vf "${LOG_PATH}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
+
 						zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./build/*.bin ./build/*.elf # zip artefacts
 
 						echo "[builder.sh] Current path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
@@ -816,19 +823,23 @@ case $PLATFORM in
     ;;
 esac
 
-# cleanup all subdirectories
-ls -d  $DEPLOYMENT_PATH/*/ | xargs rm -rf
+cd $DEPLOYMENT_PATH
+pwd && ls | tee -a "${LOG_PATH}"
+# cleanup all subdirectories?
+# echo "Cleaning all subdirectories in deployment path..."
+# ls -d  $DEPLOYMENT_PATH/* | xargs rm -rf | tee -a "${LOG_PATH}"
 
 SHA="0"
 MD5="0"
 
 if [[ ! -f "${OUTFILE}" ]]; then
+	echo "Could not find outfile $OUTFILE"
 	OUTFILE="<none>"
 else
 	echo "Calculating checksum for $OUTFILE"
 	SHAX=$(shasum -a 256 $OUTFILE)
 	SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
-	MD5=$(md5 -sq $OUTFILE)
+	MD5=$(md5sum -b $OUTFILE)
 fi
 
 if [[ "${OUTFILE}" == "" ]]; then
