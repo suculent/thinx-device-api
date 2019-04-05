@@ -245,7 +245,7 @@ devicelib.get(udid, function(err, doc) {
 
     var device = body.rows[0];
     device.last_build_id = build_id;
-    device.last_build_date = new Date().toString();
+    device.last_build_date = new Date().getTime();
 
     const apath = build_path + "/" + build_id + ".zip";
     if (fs.existsSync(apath)) {
