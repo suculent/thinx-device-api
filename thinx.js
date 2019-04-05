@@ -1093,12 +1093,16 @@ var ThinxApp = function() {
         status: "missing_ott"
       });
     }
-    console.log("GET requuest for FW update with OTT: " + ott);
+    console.log("GET request for FW update with OTT: " + ott);
 
     //
     device.ott_update(ott, function(success, response) {
       console.log("Should respond with contents: " + JSON.stringify(response));
-      respond(res, response);
+      res.setHeader('Content-Type: application/octet-stream');
+      res.setHeader('Content-Disposition: attachment; filename=firmware.bin');
+      res.setHeader('Content-Length', reseponse.filesize);
+      res.setHeader('x-MD5', response.md5);
+      respond(res, response.buffer);
     });
   });
 
