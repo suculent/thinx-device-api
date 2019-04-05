@@ -839,7 +839,7 @@ else
 	echo "Calculating checksum for $OUTFILE"
 	SHAX=$(shasum -a 256 $OUTFILE)
 	SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
-	MD5=$(md5sum -b $OUTFILE)
+	MD5=$(md5sum "$OUTFILE" | cut -d ' ' -f 1)
 fi
 
 if [[ "${OUTFILE}" == "" ]]; then
@@ -863,7 +863,7 @@ fi
 if [ ! -z ${BUILD_FILE} ]; then
 	THINX_FIRMWARE_VERSION="$(jq .THINX_FIRMWARE_VERSION ${BUILD_FILE})"
 fi
-if [ ! -z ${THINX_FIRMWARE_VERSION} ]; then
+if [ -z ${THINX_FIRMWARE_VERSION} ]; then
 	echo "No build file found, generating last-minute version..."
 	THINX_FIRMWARE_VERSION="${REPO_NAME}-${THX_VERSION}.${THX_REVISION}"
 fi
@@ -891,7 +891,7 @@ echo "[builder.sh] Log path: $LOG_PATH" | tee -a "${LOG_PATH}"
 #cat $LOG_PATH
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
-CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION}"
+CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION} ${MD5}"
 echo "[builder.sh] Executing Notifier: " $CMD | tee -a "${LOG_PATH}"
 cd $ORIGIN # go back to application root folder
 RESULT=$(node $THINX_ROOT/notifier.js $CMD)
