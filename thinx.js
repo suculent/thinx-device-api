@@ -1100,7 +1100,7 @@ var ThinxApp = function() {
       console.log("Should respond with contents: " + JSON.stringify(response));
       res.setHeader('Content-Type', 'application/octet-stream');
       res.setHeader('Content-Disposition', 'attachment; filename=firmware.bin');
-      res.setHeader('Content-Length', reseponse.filesize);
+      res.setHeader('Content-Length', response.filesize);
       res.setHeader('x-MD5', response.md5);
       respond(res, response.buffer);
     });
