@@ -1173,21 +1173,17 @@ var ThinxApp = function() {
       //const regTime = new Date().getMilliseconds();
       //console.log("** REG BODY: " + regTime);
       var registration = req.body.registration;
-      device.register(registration, req.headers.authentication, _ws, function(
-        success, response) {
+      device.register(registration, req.headers.authentication, _ws, function(success, response) {
         // Append timestamp inside as library is not parsing HTTP response JSON properly
         // when it ends with anything else than }}
         if (success && typeof(response.registration) !== "undefined") {
           response.registration.timestamp = Math.floor(new Date() / 1000);
         }
         if (success === false) {
-          console.log("Device registration failed with response: " + JSON.stringify(
-            response, null, 4));
+          console.log("Device registration failed with response: " + JSON.stringify(response, null, 4));
         } else {
-          console.log("Device registration response: " + JSON.stringify(
-            response, null, 4));
+          console.log("Device registration response: " + JSON.stringify(response, null, 4));
         }
-
         respond(res, response);
       }, req);
     }
@@ -3303,10 +3299,12 @@ var ThinxApp = function() {
       console.log("Sending buffer: ");
       console.log(object);
       res.header("Content-Type", "application/octet-stream");
+      console.log("Sending buffer object...");
       res.end(object);
     } else if (typeOf(object) == "string") {
       res.end(object);
     } else {
+      console.log("Sending stringified object...");
       res.end(JSON.stringify(object));
     }
   }
