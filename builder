@@ -282,8 +282,7 @@ if [[ $? > 0 ]]; then
 	THX_REVISION="1"
 fi
 
-REPO_NAME="$(basename $BUILD_PATH/$REPO_PATH )"
-REPO_VERSION="${THX_VERSION}.${VERSION}" # todo: is not semantic at all
+REPO_NAME="$( basename $BUILD_PATH/$REPO_PATH )"
 BUILD_DATE=$(date +%Y-%m-%d)
 
 # Build
@@ -853,10 +852,11 @@ if [[ -z $BUILD_FILE ]]; then
 	BUILD_FILE=$( find $WORKDIR -name "thinx_build.json" )
 fi
 if [ ! -z ${BUILD_FILE} ]; then
+	echo "[builder.sh] Fetching version from thinx_build.json" | tee -a "${LOG_PATH}"
 	THINX_FIRMWARE_VERSION="$(jq .THINX_FIRMWARE_VERSION ${BUILD_FILE})"
 fi
 if [ -z ${THINX_FIRMWARE_VERSION} ]; then
-	echo "No build file found, generating last-minute version..."
+	echo "[builder.sh] No thinx_build.json file found, generating last-minute version..."
 	THINX_FIRMWARE_VERSION="${REPO_NAME}-${THX_VERSION}.${THX_REVISION}"
 fi
 
@@ -866,7 +866,7 @@ fi
 
 echo "BUILD_ID" "${BUILD_ID}" | tee -a "${LOG_PATH}"
 echo "COMMIT" "${COMMIT}" | tee -a "${LOG_PATH}"
-echo "VERSION" "${VERSION}" | tee -a "${LOG_PATH}"
+echo "THX_VERSION" "${THX_VERSION}" | tee -a "${LOG_PATH}"
 echo "GIT_REPO" "${GIT_REPO}" | tee -a "${LOG_PATH}"
 echo "OUTFILE" "${OUTFILE}" | tee -a "${LOG_PATH}"
 echo "DEPLOYMENT_PATH" "${DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
@@ -883,7 +883,7 @@ echo "[builder.sh] Log path: $LOG_PATH" | tee -a "${LOG_PATH}"
 #cat $LOG_PATH
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
-CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION} ${MD5}"
+CMD="${BUILD_ID} ${COMMIT} ${THX_VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION} ${MD5}"
 echo "[builder.sh] Executing Notifier: " $CMD | tee -a "${LOG_PATH}"
 cd $ORIGIN # go back to application root folder
 RESULT=$(node $THINX_ROOT/notifier.js $CMD)
