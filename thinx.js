@@ -1087,11 +1087,13 @@ var ThinxApp = function() {
   // Firmware update retrieval for OTT requests
   app.get("/device/firmware", function(req, res) {
     var ott = req.query.ott;
-    if (typeof(ott) === "undefined") {
+    if (typeof(ott) === "undefined" || ott === null) {
+      console.log("ERROR: GET request for FW update with no OTT!");
       respond(res, {
         success: false,
         status: "missing_ott"
       });
+      return;
     }
     console.log("GET request for FW update with OTT: " + ott);
 
