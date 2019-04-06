@@ -206,16 +206,8 @@ if [[ ! -d $BUILD_PATH ]]; then
 	mkdir -p $BUILD_PATH
 fi
 
-echo "[builder.sh] Entering build path..." | tee -a "${LOG_PATH}"
-cd $BUILD_PATH | tee -a "${LOG_PATH}"
-
-echo "[builder.sh] Pulling ${GIT_REPO}..." | tee -a "${LOG_PATH}"
-git pull | tee -a "${LOG_PATH}"
-
-# Fetch project
-pushd .* | tee -a "${LOG_PATH}" # enter any path, there should be nothing else here
-echo "Current dir $(pwd): " | tee -a "${LOG_PATH}"
-ls -la | tee -a "${LOG_PATH}"
+echo "[builder.sh] Entering build and pulling path..." | tee -a "${LOG_PATH}"
+cd $BUILD_PATH && git pull && pwd && ls | tee -a "${LOG_PATH}"
 
 # Fetch submodules if any
 SINK=""
@@ -235,7 +227,7 @@ else
 fi
 
 echo "[builder.sh] SRC_PATH Updating submodules..." | tee -a "${LOG_PATH}"
-
+pwd && ls | tee -a "${LOG_PATH}"
 git submodule update --init --recursive | tee -a "${LOG_PATH}"
 
 if [[ ! -d $SINK/.git ]]; then
