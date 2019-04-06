@@ -1095,16 +1095,17 @@ var ThinxApp = function() {
     }
     console.log("GET request for FW update with OTT: " + ott);
 
-    //
     device.ott_update(ott, function(success, response) {
-      console.log("Should respond with contents: " + JSON.stringify(response));
       if (success) {
+        console.log("SUCCESS! Should respond with contents...");
+        // contents: {"md5":"891f8fb09489c05380536ba82538a147","filesize":586416,"payload":{"type":"Buffer","data":[233
         res.setHeader('Content-Type', 'application/octet-stream');
         res.setHeader('Content-Disposition', 'attachment; filename=firmware.bin');
         res.setHeader('Content-Length', response.filesize);
         res.setHeader('x-MD5', response.md5);
-        respond(res, response.buffer);
+        respond(res, response.payload);
       } else {
+        console.log("FAILURE! Should respond with response...");
         respond(res, response);
       }
     });
@@ -1127,7 +1128,7 @@ var ThinxApp = function() {
 
       // Device will fetch firmware/files now (wrapped as JSON or in binary, depending on type (firmware/file))
     } else {
-      // TODO: use only one parameter for req
+      // TODO: use only one parameter for req or deprecate this
       device.firmware(req.body, req.headers.authentication, req,
         function(success, response) {
           console.log("Responding to Firmware request with :" + JSON.stringify(response));
