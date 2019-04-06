@@ -1182,8 +1182,12 @@ var ThinxApp = function() {
         }
         if (success === false) {
           console.log("Device registration failed with response: " + JSON.stringify(
-            response));
+            response, null, 4));
+        } else {
+          console.log("Device registration response: " + JSON.stringify(
+            response, null, 4));
         }
+
         respond(res, response);
       }, req);
     }
