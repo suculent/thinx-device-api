@@ -4,8 +4,6 @@
 
 var ThinxApp = function() {
 
-  const Sqreen = require('sqreen');
-
   var global_token = null;
   var global_response = null;
   var exec = require("child_process");
@@ -63,6 +61,8 @@ var ThinxApp = function() {
     handleUncaughtExceptions: true,
     handleUnhandledRejections: true
   });
+
+  // const Sqreen = require('sqreen');
 
   //
   // OAuth2
