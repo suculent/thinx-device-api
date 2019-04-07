@@ -62,7 +62,7 @@ var ThinxApp = function() {
     handleUnhandledRejections: true
   });
 
-  // const Sqreen = require('sqreen');
+  const Sqreen = require('sqreen');
 
   //
   // OAuth2
