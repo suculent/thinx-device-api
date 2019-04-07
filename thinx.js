@@ -3296,15 +3296,11 @@ var ThinxApp = function() {
 
   function respond(res, object) {
     if (typeOf(object) == "buffer") {
-      console.log("Sending buffer: ");
-      console.log(object);
       res.header("Content-Type", "application/octet-stream");
-      console.log("Sending buffer object...");
       res.end(object);
     } else if (typeOf(object) == "string") {
       res.end(object);
     } else {
-      console.log("Sending stringified object...");
       res.end(JSON.stringify(object));
     }
   }
