@@ -307,7 +307,7 @@ devicelib.get(udid, function(err, doc) {
 
     // TODO: -- collect push tokens (each only once)
 
-    // Notify admin (Slack)
+    // Notify admin (Slack); may be out of notifier.js scope and can be done later in core after calling notifier (means when calling builder finishes)...
 
     // Bundled notification types:
 
