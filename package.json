@@ -70,6 +70,7 @@
     "satelize": "^0.2.0",
     "semver": "5.6.0",
     "sha256": "^0.2.0",
+    "shell-escape": "^0.2.0",
     "sillyname": "^0.1.0",
     "simple-oauth2": "^2.2.1",
     "slack-notify": "^0.1.7",
