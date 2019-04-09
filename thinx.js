@@ -1813,12 +1813,14 @@ var ThinxApp = function() {
 
           var wrapper = JSON.parse(userWrapper);
 
-          // Support older wrappers
           if ((typeof(wrapper) !== "undefined") && wrapper !== null) {
             owner_id = wrapper.owner;
           } else {
-            console.log("[login] wrapper error: " + userWrapper);
-            if (wrapper === null) return;
+            console.log("[login] user wrapper error: " + userWrapper);
+            if (wrapper === null) {
+              failureResponse(res, 403, "wrapper error");
+              return;
+            }
           }
 
           userlib.get(owner_id, function(err, doc) {
