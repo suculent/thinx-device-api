@@ -1813,12 +1813,14 @@ var ThinxApp = function() {
 
           var wrapper = JSON.parse(userWrapper);
 
-          // Support older wrappers
           if ((typeof(wrapper) !== "undefined") && wrapper !== null) {
             owner_id = wrapper.owner;
           } else {
-            console.log("[login] wrapper error: " + userWrapper);
-            if (wrapper === null) return;
+            console.log("[login] user wrapper error: " + userWrapper);
+            if (wrapper === null) {
+              failureResponse(res, 403, "wrapper error");
+              return;
+            }
           }
 
           userlib.get(owner_id, function(err, doc) {
@@ -2415,8 +2417,6 @@ var ThinxApp = function() {
 
             if (typeof(email) === "undefined" || email === null) {
               console.log("Error: no email in response.");
-              console.log(
-                "ERROR! This redirect won't work as headers are already set.");
               global_response.redirect(
                 app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
                 "No e-mail in response."
@@ -2429,8 +2429,6 @@ var ThinxApp = function() {
               owner_id = sha256(prefix + email);
             } catch (e) {
               console.log("error parsing e-mail: " + e + " email: " + email);
-              console.log(
-                "ERROR! This redirect won't work as headers are already set.");
               global_response.redirect(
                 app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
                 'Missing e-mail.'
@@ -2762,14 +2760,10 @@ var ThinxApp = function() {
   app.get('/oauth/cb', function(req, ores) {
 
     /// CALLBACK FOR GOOGLE OAUTH ONLY!
-
-    const code = req.query.code;
     const options = {
-      code: code,
+      code: req.query.code,
       redirect_uri: google_ocfg.web.redirect_uris[0]
     };
-
-    console.log("TODO: Validate code " + code);
 
     var t = oauth2.authorizationCode.getToken(options, (error, result) => {
       if (error) {
