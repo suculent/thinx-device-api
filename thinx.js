@@ -2499,7 +2499,8 @@ var ThinxApp = function() {
 
                     const ourl = app_config.public_url + "/auth.html&t=" +
                       token + "&g=true"; // require GDPR consent
-                    console.log(ourl);
+                    console.log("WARNING: this request mail fail: " + ourl);
+                    // causes registration error where headers already sent!
                     global_response.redirect(ourl);
 
                     Sqreen.signup_track({ username: userWrapper.owner_id });
