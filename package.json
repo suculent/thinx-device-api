@@ -37,7 +37,7 @@
     "cryptojs": "^2.5.3",
     "dateformat": "^3.0.3",
     "email": "^0.2.6",
-    "expect": "^24.5.0",
+    "expect": "^24.8.0",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
     "firebase-admin": "^7.1.1",
