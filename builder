@@ -644,25 +644,24 @@ case $PLATFORM in
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
 					# should be on $BUILD_PATH and without size limit so far
-					INFILE=$( find $BUILD_PATH/$REPO_PATH/build -name "firmware.bin")
-					echo "[builder.sh] INFILE: ${INFILE}" | tee -a "${LOG_PATH}"
+					BIN_FILE=$( find $BUILD_PATH/$REPO_PATH -name "firmware.bin")					
+					echo "[builder.sh] BIN_FILE: ${BIN_FILE}" | tee -a "${LOG_PATH}"
 
-					if [[ ! -f $INFILE ]]; then
-						echo "INFILE $INFILE not found!"
+					if [[ ! -f $BIN_FILE ]]; then
+						echo "BIN_FILE $BIN_FILE not found!"
 						BUILD_SUCCESS=false
 						exit 1
 					fi
 
 					# once again with size limit
-					if [[ -z $(find $BUILD_PATH/$REPO_PATH/build -name "firmware.bin" -type f -size +10000c 2>/dev/null) ]]; then
+					if [[ -z $(find $BUILD_PATH/$REPO_PATH -name "firmware.bin" -type f -size +10000c 2>/dev/null) ]]; then
 						BUILD_SUCCESS=false
 						echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
 						# ls -la | tee -a "${LOG_PATH}"
 					else
 						echo "[builder.sh] Docker build succeeded." | tee -a "${LOG_PATH}"
 						echo " " | tee -a "${LOG_PATH}"
-						BIN_FILE=$( find $BUILD_PATH/$REPO_PATH/build -name "firmware.bin" )
-						echo "[builder.sh] BIN_FILE1: $BIN_FILE" | tee -a "${LOG_PATH}"
+						echo "[builder.sh] BIN_FILE: $BIN_FILE" | tee -a "${LOG_PATH}"
 						zip -rv "${BUILD_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ${BIN_FILE}
 					fi
 				else
