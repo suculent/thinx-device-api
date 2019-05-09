@@ -1,5 +1,4 @@
 #!/bin/bash
-
 source ./infer # utility functions like parse_yaml
 
 # do not exit when subsequent tools fail...
