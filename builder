@@ -227,7 +227,6 @@ else
 fi
 
 echo "[builder.sh] SRC_PATH Updating submodules..." | tee -a "${LOG_PATH}"
-pwd && ls | tee -a "${LOG_PATH}"
 git submodule update --init --recursive | tee -a "${LOG_PATH}"
 
 if [[ ! -d $SINK/.git ]]; then
@@ -781,7 +780,7 @@ case $PLATFORM in
 					# Check Artifacts
 					if [[ $BUILD_SUCCESS == true ]] ; then
 						STATUS='OK'
-						ls
+						# ls
 
 						if [[ -z $(find $(pwd)/ -name "firmware.bin" -type f -size +10000c 2>/dev/null) ]]; then
 							# rm -rf $OUTFILE

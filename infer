@@ -149,6 +149,8 @@ function generate_thinx_file
 	LANGUAGE=$(language_for_platform $PLATFORM)
 	LANGUAGE_NAME=$(language_name $LANGUAGE)
 
+  echo "Inferred platform: ${PLATFORM}"
+
 	if [[ -z ${BUILDFILE} ]]; then
 		echo "BUILDFILE not specified."
 		exit 3
