@@ -19,11 +19,19 @@
   "ssl_cert": "/etc/letsencrypt/live/thinx.cloud/cert.pem",
   "client_user_agent": "THiNX-Client",
   "project_root": "/Users/sychram/Repositories/thinx-device-api",
-  "mqtt_server": "mqtt://thinx.cloud",
-  "mqtt_messenger_key": "5ec1fdd8-5d68-11e7-b0e3-4c327591230d",
+  "mqtt": {
+    "server": "mqtt://thinx.cloud",
+    "port": 1883,
+    "data": ".",
+    "passwords": "thinx.pw",
+    "acl": "thinx.acl",
+    "key": "5ec1fdd8-5d68-11e7-b0e3-4c327591230d",
+    "username": "thinx"
+  },
   "default_avatar": "",
   "debug": {
-    "device" : false
+    "device" : false,
+    "deployment": true
   },
   "grafana": {
     "port": 3004,

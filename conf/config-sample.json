@@ -18,6 +18,15 @@
   "ssl_cert": "/etc/letsencrypt/live/thinx.cloud/cert.pem",
   "client_user_agent": "THiNX-Client",
   "project_root": "/home/ubuntu/thinx-device-api",
+  "mqtt": {
+    "server": "mqtt://thinx.cloud",
+    "port": 1883,
+    "data": ".",
+    "passwords": "thinx.pw",
+    "acl": "thinx.acl",
+    "key": "4bd1fdd8-5d68-11e7-b0e3-4c327591230f",
+    "username": "thinx"
+  },
   "data_root": "/mnt/data",
   "mqtt_server": "mqtt://thinx.cloud",
   "mqtt_messenger_key": "5ec1fdd8-5d68-11e7-b0e3-4c327591230a",
