@@ -50,6 +50,7 @@ function infer_platform
 		# Platform.io
 
 		if [[ -f "$path/platformio.ini" ]]; then
+      echo "REMOVE-ME: Found platform ini."
 			platform="platformio"
     fi
 
@@ -85,17 +86,14 @@ function infer_platform
 			platform="mongoose"
 		fi
 
+    # Override from YAML
 		YMLFILE=$(find $path -name "thinx.yml" -maxdepth 1 | head -n 1)
-
-		if [ -f "$YMLFILE" ]; then
+		if [[ -f "$YMLFILE" ]]; then
 		  eval $(parse_yaml "$YMLFILE" "")
 			if [[ ! -z $platformio ]]; then
 				platform = "platformio"
 			fi
       if [[ ! -z $arduino ]]; then
-				platform = "arduino"
-			fi
-      if [[ ! -z $arduino_platform ]]; then
 				platform = "arduino"
 			fi
 			if [[ ! -z $microphython ]]; then
