@@ -53,9 +53,11 @@ function infer_platform
 
 			platform="platformio"
 
+    fi
+
 		# NodeJS
 
-	elif [[ $(find $path -maxdepth 1 -name "package.json") ]]; then
+	  if [[ $(find $path -maxdepth 1 -name "package.json") ]]; then
 			platform="nodejs"
 
 		elif [[ -f "$path/package.json" ]]; then
@@ -89,19 +91,12 @@ function infer_platform
 
 		if [ -f "$YMLFILE" ]; then
 		  eval $(parse_yaml "$YMLFILE" "")
-			if [[ ! -z $arduino ]]; then
-				platform = "arduino"
-			fi
 			if [[ ! -z $platformio ]]; then
 				platform = "platformio"
 			fi
-
-      if [[ ! -z $platform ]]; then
-        if [[ "$platform" == "esp8266" ]]; then
-				      platform = "arduino"
-        fi
+      if [[ ! -z $arduino ]]; then
+				platform = "arduino"
 			fi
-
 			if [[ ! -z $microphython ]]; then
 				platform = "microphython"
 			fi
