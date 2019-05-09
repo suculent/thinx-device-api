@@ -49,7 +49,7 @@ function infer_platform
 
 		# Platform.io
 
-		if [[ -f $path/platformio.ini ]]; then
+		if [[ -f $path/platformio.ini ]]; then echo "OK" fi
       # echo "REMOVE-ME: Found platform ini!"
 			platform="platformio"
     fi
