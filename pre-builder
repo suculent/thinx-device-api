@@ -45,7 +45,7 @@ if [[ ! -f $JSON ]]; then
 fi
 
 echo
-echo "Generating THiNX header, injecting environment variables..."
+echo "Generating THiNX header, injecting environment variables from ${JSON}"
 echo
 
 generate_thinx_file ${WORKDIR} ${JSON}
@@ -53,9 +53,9 @@ generate_thinx_file ${WORKDIR} ${JSON}
 echo
 
 PLATFORM=$(infer_platform $WORKDIR)
-echo "platform 4 linter: ${PLATFORM}"
+echo "[pre-builder] platform: ${PLATFORM}"
 PLATFORM_LANG=$(language_for_platform $PLATFORM)
-echo "language 4 linter: ${PLATFORM_LANG}"
+echo "[pre-builder] language: ${PLATFORM_LANG}"
 
 bash $THINX_ROOT/linter --language=${PLATFORM_LANG} --workdir=${WORKDIR}
 

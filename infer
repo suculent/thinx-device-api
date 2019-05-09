@@ -49,7 +49,7 @@ function infer_platform
 
 		# Platform.io
 
-		if [[ -f "$path/platformio.ini" ]]; then
+		if [[ -f $path/platformio.ini ]]; then
       # echo "REMOVE-ME: Found platform ini!"
 			platform="platformio"
     fi
@@ -143,7 +143,7 @@ function generate_thinx_file
 	LANGUAGE=$(language_for_platform $PLATFORM)
 	LANGUAGE_NAME=$(language_name $LANGUAGE)
 
-  echo "Inferred platform: ${PLATFORM}"
+  # echo "[infer] Inferred platform: ${PLATFORM}"
 
 	if [[ -z ${BUILDFILE} ]]; then
 		echo "BUILDFILE not specified."
@@ -223,7 +223,7 @@ function thinx_file_from_json
 					done
 				fi
 		done
-		echo "Exporting Infer output to : $OUTFILE"
+		# echo "[infer] Exporting Infer output to : $OUTFILE"
 
 		KEYS=$(echo $BUILDFILE | jq keys)
 		VARS=$(echo $BUILDFILE | jq .[])

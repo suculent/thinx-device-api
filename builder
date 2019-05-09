@@ -287,7 +287,7 @@ BUILD_DATE=$(date +%Y-%m-%d)
 
 PLATFORM=$(infer_platform $SINK)
 
-echo "Inferred platform: ${PLATFORM}"
+echo "[builder] Inferred platform: ${PLATFORM}"
 
 LANGUAGE=$(language_for_platform $PLATFORM)
 LANGUAGE_NAME=$(language_name $LANGUAGE)
