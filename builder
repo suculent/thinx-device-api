@@ -643,8 +643,8 @@ case $PLATFORM in
 
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
-					# should be on $BUILD_PATH and without size limit so far
-					BIN_FILE=$( find $BUILD_PATH/$REPO_PATH -name "firmware.bin")					
+					# TODO: FIXME, can be more binfiles with partitions!
+					BIN_FILE=$( find $BUILD_PATH/$REPO_PATH -name "*.bin" | head -n 1)
 					echo "[builder.sh] BIN_FILE: ${BIN_FILE}" | tee -a "${LOG_PATH}"
 
 					if [[ ! -f $BIN_FILE ]]; then
@@ -654,7 +654,7 @@ case $PLATFORM in
 					fi
 
 					# once again with size limit
-					if [[ -z $(find $BUILD_PATH/$REPO_PATH -name "firmware.bin" -type f -size +10000c 2>/dev/null) ]]; then
+					if [[ -z $(find $BUILD_PATH/$REPO_PATH -name "*.bin" -type f -size +10000c 2>/dev/null) ]]; then
 						BUILD_SUCCESS=false
 						echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
 						# ls -la | tee -a "${LOG_PATH}"
