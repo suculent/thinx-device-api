@@ -47,12 +47,10 @@ function infer_platform
 				fi
 		done
 
-		# Platform.io (overrides Arduino)
+		# Platform.io
 
 		if [[ -f "$path/platformio.ini" ]]; then
-
 			platform="platformio"
-
     fi
 
 		# NodeJS
@@ -95,6 +93,9 @@ function infer_platform
 				platform = "platformio"
 			fi
       if [[ ! -z $arduino ]]; then
+				platform = "arduino"
+			fi
+      if [[ ! -z $arduino_platform ]]; then
 				platform = "arduino"
 			fi
 			if [[ ! -z $microphython ]]; then
