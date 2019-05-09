@@ -90,19 +90,26 @@ function infer_platform
 		if [ -f "$YMLFILE" ]; then
 		  eval $(parse_yaml "$YMLFILE" "")
 			if [[ ! -z $arduino ]]; then
-				$platform = "arduino"
+				platform = "arduino"
 			fi
 			if [[ ! -z $platformio ]]; then
-				$platform = "platformio"
+				platform = "platformio"
 			fi
+
+      if [[ ! -z $platform ]]; then
+        if [[ "$platform" == "esp8266" ]]; then
+				      platform = "arduino"
+        fi
+			fi
+
 			if [[ ! -z $microphython ]]; then
-				$platform = "microphython"
+				platform = "microphython"
 			fi
 			if [[ ! -z $mongoose ]]; then
-				$platform = "mongoose"
+				platform = "mongoose"
 			fi
 			if [[ ! -z $nodejs ]]; then
-				$platform = "nodejs"
+				platform = "nodejs"
 			fi
 		fi
 
@@ -141,6 +148,8 @@ function generate_thinx_file
 	PLATFORM_NAME=$(platform_name $PLATFORM)
 	LANGUAGE=$(language_for_platform $PLATFORM)
 	LANGUAGE_NAME=$(language_name $LANGUAGE)
+
+  echo "Inferred platform: ${PLATFORM}"
 
 	if [[ -z ${BUILDFILE} ]]; then
 		echo "BUILDFILE not specified."
