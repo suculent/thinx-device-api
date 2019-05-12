@@ -22,9 +22,8 @@
   "mqtt": {
     "server": "mqtt://thinx.cloud",
     "port": 1883,
-    "data": ".",
-    "passwords": "thinx.pw",
-    "acl": "thinx.acl",
+    "passwords": "./thinx.pw",
+    "acl": "./thinx.acl",
     "key": "5ec1fdd8-5d68-11e7-b0e3-4c327591230d",
     "username": "thinx"
   },
