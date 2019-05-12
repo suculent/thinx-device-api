@@ -3150,7 +3150,7 @@ var ThinxApp = function() {
                 message) {
                 if (!success) {
                   console.log("Messenger init on message with success " +
-                    error +
+                    success +
                     "message: " +
                     JSON.stringify(message));
                 }
