@@ -425,7 +425,8 @@ function notify_device_channel(owner, udid, message) {
   console.log("notify_device_channel is DEPRECATED");
   var channel = "/thinx/devices/" + owner + "/" + udid;
   console.log("Posting to MQTT queue " + channel);
-  var client = mqtt.connect("mqtt://guest:guest@thinx.cloud:1883");
+  const app_config = require("./conf/config.json");
+  var client = mqtt.connect("mqtt://"+app_config.mqtt.username+":"+app_config.mqtt.password+"@thinx.cloud:"+app_config.mqtt.port);
   client.on("connect", function() {
     console.log("Connected to MQTT, will post to " + channel);
     client.subscribe(channel);
