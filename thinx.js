@@ -10,6 +10,10 @@ var ThinxApp = function() {
   var typeOf = require("typeof");
   var Rollbar = require("rollbar");
 
+  var crypto = require('crypto');
+
+  console.log(crypto.getCiphers()); // log supported ciphers to debug SSL IoT transport
+
   require("ssl-root-cas").inject();
 
   var http = require('http');
