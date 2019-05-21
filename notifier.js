@@ -197,20 +197,16 @@ blog.log(build_id, owner, udid, status);
 
 devicelib.get(udid, function(err, doc) {
 
-  if (err || typeof(doc) === "undefined" || doc === null) {
+  if (err || (typeof(doc) === "undefined")) {
     console.log(err);
+    console.log("No such device with udid " + udid);
     rollbar.warning(err);
     return;
   }
 
-  if ((typeof(doc) === "undefined") || doc === null) {
-    console.log("No such device with udid " + udid);
-    process.exit(1);
-  }
-
   if (!doc.hasOwnProperty("source")) {
     rollbar.info("device " + udid + "has no source on build!");
-    process.exit(1);
+    return;
   }
 
   var source = doc.source;
