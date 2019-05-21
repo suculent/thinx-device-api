@@ -26,16 +26,3 @@
 	path = tools/mongoose-docker-build
 	url = https://github.com/suculent/mongoose-docker-build
 
-[submodule "spec/test_repositories/thinx-firmware-esp32-ino"]
-	path = spec/test_repositories/thinx-firmware-esp32-ino
-	url = https://github.com/suculent/thinx-firmware-esp32-ino.git
-
-
-[submodule "spec/test_repositories/thinx-firmware-esp8266-upy"]
-	path = spec/test_repositories/thinx-firmware-esp8266-upy
-	url = https://github.com/suculent/thinx-firmware-esp8266-upy.git
-
-[submodule "spec/test_repositories/thinx-firmware-esp8266-lua"]
-	path = spec/test_repositories/thinx-firmware-esp8266-lua
-	url = https://github.com/suculent/thinx-firmware-esp8266-lua.git
-
