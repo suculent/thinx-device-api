@@ -75,7 +75,7 @@
     "simple-oauth2": "^2.2.1",
     "slack-notify": "^0.1.7",
     "slackbots": "^1.2.0",
-    "snyk": "^1.165.2",
+    "snyk": "^1.166.0",
     "sqreen": "^1.30.2",
     "ssh-fingerprint": "0.0.1",
     "ssl-root-cas": "^1.3.1",
