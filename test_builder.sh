@@ -53,7 +53,7 @@ echo
 if [[ "$user" == "git" ]]; then
   echo "Overriding for user git and git-ssl..."
 	proto="git-ssl"
-	len=${#REPO_NAME}
+	#len=${#REPO_NAME}
 	OLDHOST=$host
 
   echo "host-x:        $host"
