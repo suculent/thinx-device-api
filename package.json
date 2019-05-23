@@ -40,7 +40,7 @@
     "expect": "^24.8.0",
     "express": "^4.17.0",
     "express-session": "^1.16.1",
-    "firebase-admin": "^7.4.0",
+    "firebase-admin": "^8.0.0",
     "fs-extra": "^7.0.1",
     "fs-finder": "^1.8.1",
     "get-random-quote": "^1.1.3",
