@@ -89,7 +89,9 @@ jobs:
     # Test
     #   This would typically be a build job when using workflows, possibly combined with build
     - run: mkdir -p $CIRCLE_TEST_REPORTS/reports
-    - run: npm install eslint -g && which eslint && eslint ./lib/ --format junit --output-file $CIRCLE_TEST_REPORTS/reports/eslint.xml
+    - run: cd ./spec/test_repositories && bash ./get-tests.sh
+    - run: npm install -g eslint
+    # - run: eslint ./lib/ --format junit --output-file $CIRCLE_TEST_REPORTS/reports/eslint.xml
     - run: /usr/local/bin/redis-server /etc/redis/redis.conf &
     - run: cp ./conf/config-test.json ./conf/config.json
 #    - run: npm run coverage ## causes tests to get stucked, failing forever and ever
@@ -100,7 +102,7 @@ jobs:
           RAILS_ENV: test
           RACK_ENV: test
 
-    - run: bash ./01-analyze.sh
+    - run: bash ./01-analyze.sh    
     - run: bash ./03-test.sh
 
     # Deployment

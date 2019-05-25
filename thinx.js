@@ -10,6 +10,10 @@ var ThinxApp = function() {
   var typeOf = require("typeof");
   var Rollbar = require("rollbar");
 
+  var crypto = require('crypto');
+
+  console.log(crypto.getCiphers()); // log supported ciphers to debug SSL IoT transport
+
   require("ssl-root-cas").inject();
 
   var http = require('http');
@@ -2416,8 +2420,8 @@ var ThinxApp = function() {
             const email = hdata.email;
 
             if (typeof(email) === "undefined" || email === null) {
-              console.log("Error: no email in response.");
-              global_response.redirect(
+              console.log("Error: no email in response, may fail further.");
+              res.redirect(
                 app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
                 "No e-mail in response."
               );
@@ -2429,7 +2433,7 @@ var ThinxApp = function() {
               owner_id = sha256(prefix + email);
             } catch (e) {
               console.log("error parsing e-mail: " + e + " email: " + email);
-              global_response.redirect(
+              res.redirect(
                 app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
                 'Missing e-mail.'
               );
@@ -2460,6 +2464,8 @@ var ThinxApp = function() {
                 if (error.toString().indexOf("Error: deleted") !== -1) {
                   // TODO: Redirect to error page with reason
                   console.log("[oauth] user document deleted");
+
+                  // This redirect also fails.
                   global_response.redirect(
                     app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
                     'Account document deleted.'
@@ -2499,15 +2505,13 @@ var ThinxApp = function() {
 
                     const ourl = app_config.public_url + "/auth.html&t=" +
                       token + "&g=true"; // require GDPR consent
-                    console.log("WARNING: this request mail fail: " + ourl);
+                    console.log("FIXME: this request will probably fail fail (cannot redirect): " + ourl);
                     // causes registration error where headers already sent!
-                    global_response.redirect(ourl);
+                    res.redirect(ourl); // was global_response!
 
                     Sqreen.signup_track({ username: userWrapper.owner_id });
 
                     console.log("Redirecting to login (2)");
-
-
                   });
                   return;
                 }
