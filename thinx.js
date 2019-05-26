@@ -66,7 +66,7 @@ var ThinxApp = function() {
     handleUnhandledRejections: true
   });
 
-  const Sqreen = require('sqreen');
+  // const Sqreen = require('sqreen');
 
   //
   // OAuth2
@@ -1851,7 +1851,7 @@ var ThinxApp = function() {
                   httpOnly: false
                 });
 
-                Sqreen.signup_track({ username: owner_id });
+                //Sqreen.signup_track({ username: owner_id });
 
                 alog.log(req.session.owner, "OAuth User created: " +
                   wrapper.first_name + " " + wrapper.last_name);
@@ -1882,7 +1882,7 @@ var ThinxApp = function() {
               alog.log(req.session.owner, "OAuth User logged in: " +
                 doc.username);
 
-              Sqreen.auth_track(true, { username: doc.owner });
+              //Sqreen.auth_track(true, { username: doc.owner });
 
               updateLastSeen(doc);
               respond(res, {
@@ -1904,7 +1904,7 @@ var ThinxApp = function() {
 
     if (typeof(req.body.password) === "undefined") {
       callback(false, "login_failed");
-      Sqreen.auth_track(false, { doc: owner });
+      //Sqreen.auth_track(false, { doc: owner });
       return;
     }
 
@@ -2457,7 +2457,7 @@ var ThinxApp = function() {
               // Error case covers creating new user/managing deleted account
               if (error) {
 
-                Sqreen.auth_track(false, { doc: userWrapper.owner_id });
+                //Sqreen.auth_track(false, { doc: userWrapper.owner_id });
 
                 console.log("Failed with error: " + error);
 
@@ -2479,7 +2479,7 @@ var ThinxApp = function() {
                   if (typeof(udoc) !== "undefined") {
                     if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
                       true) {
-                      Sqreen.auth_track(false, { doc: userWrapper.owner_id });
+                      //Sqreen.auth_track(false, { doc: userWrapper.owner_id });
                       // TODO: Redirect to error page with reason
                       console.log("[oauth] user account marked as deleted");
                       global_response.redirect(
@@ -2509,7 +2509,7 @@ var ThinxApp = function() {
                     // causes registration error where headers already sent!
                     res.redirect(ourl); // was global_response!
 
-                    Sqreen.signup_track({ username: userWrapper.owner_id });
+                    //Sqreen.signup_track({ username: userWrapper.owner_id });
 
                     console.log("Redirecting to login (2)");
                   });
@@ -2547,7 +2547,7 @@ var ThinxApp = function() {
                 }
               }
 
-              Sqreen.auth_track(true, { username: userWrapper.owner_id });
+              //Sqreen.auth_track(true, { username: userWrapper.owner_id });
 
               const ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" +
                 gdpr; // require GDPR consent
