@@ -1,5 +1,141 @@
 # Change Log
 
+## [Unreleased](https://github.com/suculent/thinx-device-api/tree/HEAD)
+
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3862...HEAD)
+
+**Closed issues:**
+
+- An in-range update of jest2 is breaking the build 🚨 [\#58](https://github.com/suculent/thinx-device-api/issues/58)
+- An in-range update of eslint is breaking the build 🚨 [\#55](https://github.com/suculent/thinx-device-api/issues/55)
+- An in-range update of ws is breaking the build 🚨 [\#53](https://github.com/suculent/thinx-device-api/issues/53)
+- An in-range update of hoek is breaking the build 🚨 [\#52](https://github.com/suculent/thinx-device-api/issues/52)
+- An in-range update of pm2 is breaking the build 🚨 [\#50](https://github.com/suculent/thinx-device-api/issues/50)
+- An in-range update of grunt is breaking the build 🚨 [\#37](https://github.com/suculent/thinx-device-api/issues/37)
+- An in-range update of firebase-admin is breaking the build 🚨 [\#36](https://github.com/suculent/thinx-device-api/issues/36)
+- An in-range update of @slack/client is breaking the build 🚨 [\#35](https://github.com/suculent/thinx-device-api/issues/35)
+- An in-range update of sqreen is breaking the build 🚨 [\#34](https://github.com/suculent/thinx-device-api/issues/34)
+- An in-range update of snyk is breaking the build 🚨 [\#33](https://github.com/suculent/thinx-device-api/issues/33)
+- An in-range update of nano is breaking the build 🚨 [\#32](https://github.com/suculent/thinx-device-api/issues/32)
+- An in-range update of rollbar is breaking the build 🚨 [\#31](https://github.com/suculent/thinx-device-api/issues/31)
+
+**Merged pull requests:**
+
+- Update firebase-admin to the latest version 🚀 [\#61](https://github.com/suculent/thinx-device-api/pull/61) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
+- Update semver to the latest version 🚀 [\#60](https://github.com/suculent/thinx-device-api/pull/60) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
+- Update ws to the latest version 🚀 [\#57](https://github.com/suculent/thinx-device-api/pull/57) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
+
+## [0.9.3862](https://github.com/suculent/thinx-device-api/tree/0.9.3862) (2019-04-09)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3843...0.9.3862)
+
+## [0.9.3843](https://github.com/suculent/thinx-device-api/tree/0.9.3843) (2019-04-06)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/3818-buildersh-arduino-stable...0.9.3843)
+
+## [3818-buildersh-arduino-stable](https://github.com/suculent/thinx-device-api/tree/3818-buildersh-arduino-stable) (2019-04-04)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3620...3818-buildersh-arduino-stable)
+
+**Closed issues:**
+
+- An in-range update of eslint is breaking the build 🚨 [\#30](https://github.com/suculent/thinx-device-api/issues/30)
+
+**Merged pull requests:**
+
+- chore\(package\): update sqreen to version 1.29.4 [\#49](https://github.com/suculent/thinx-device-api/pull/49) ([suculent](https://github.com/suculent))
+- chore\(package\): update eslint to version 5.15.3 [\#48](https://github.com/suculent/thinx-device-api/pull/48) ([suculent](https://github.com/suculent))
+- chore\(package\): update nano to version 8.0.1 [\#47](https://github.com/suculent/thinx-device-api/pull/47) ([suculent](https://github.com/suculent))
+- chore\(package\): update rollbar to version 2.5.4 [\#46](https://github.com/suculent/thinx-device-api/pull/46) ([suculent](https://github.com/suculent))
+- chore\(package\): update @slack/client to version 4.12.0 [\#45](https://github.com/suculent/thinx-device-api/pull/45) ([suculent](https://github.com/suculent))
+- chore: pin @slack/client to 4.11.0 [\#44](https://github.com/suculent/thinx-device-api/pull/44) ([suculent](https://github.com/suculent))
+- chore\(package\): update firebase-admin to version 7.1.1 [\#43](https://github.com/suculent/thinx-device-api/pull/43) ([suculent](https://github.com/suculent))
+- chore: pin firebase-admin to 7.1.0 [\#42](https://github.com/suculent/thinx-device-api/pull/42) ([suculent](https://github.com/suculent))
+- chore\(package\): update grunt to version 1.0.4 [\#41](https://github.com/suculent/thinx-device-api/pull/41) ([suculent](https://github.com/suculent))
+- fix: pin grunt to 1.0.3 [\#40](https://github.com/suculent/thinx-device-api/pull/40) ([suculent](https://github.com/suculent))
+- chore\(package\): update snyk to version 1.143.1 [\#39](https://github.com/suculent/thinx-device-api/pull/39) ([suculent](https://github.com/suculent))
+- Add Greenkeeper badge 🌴 [\#29](https://github.com/suculent/thinx-device-api/pull/29) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
+- Add license scan report and status [\#28](https://github.com/suculent/thinx-device-api/pull/28) ([fossabot](https://github.com/fossabot))
+- \[Snyk\] Fix for 2 vulnerable dependencies [\#27](https://github.com/suculent/thinx-device-api/pull/27) ([snyk-bot](https://github.com/snyk-bot))
+
+## [0.9.3620](https://github.com/suculent/thinx-device-api/tree/0.9.3620) (2019-02-04)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3556...0.9.3620)
+
+## [0.9.3556](https://github.com/suculent/thinx-device-api/tree/0.9.3556) (2018-11-23)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3550...0.9.3556)
+
+## [0.9.3550](https://github.com/suculent/thinx-device-api/tree/0.9.3550) (2018-11-23)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3537...0.9.3550)
+
+## [0.9.3537](https://github.com/suculent/thinx-device-api/tree/0.9.3537) (2018-10-02)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3525...0.9.3537)
+
+## [0.9.3525](https://github.com/suculent/thinx-device-api/tree/0.9.3525) (2018-08-20)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3422...0.9.3525)
+
+**Merged pull requests:**
+
+- \[Snyk\] Fix for 1 vulnerable dependencies [\#25](https://github.com/suculent/thinx-device-api/pull/25) ([snyk-bot](https://github.com/snyk-bot))
+- \[Snyk\] Fix for 2 vulnerable dependencies [\#24](https://github.com/suculent/thinx-device-api/pull/24) ([snyk-bot](https://github.com/snyk-bot))
+
+## [0.9.3422](https://github.com/suculent/thinx-device-api/tree/0.9.3422) (2018-05-26)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3386...0.9.3422)
+
+## [0.9.3386](https://github.com/suculent/thinx-device-api/tree/0.9.3386) (2018-05-06)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3305...0.9.3386)
+
+**Merged pull requests:**
+
+- \[Snyk Update\] New fixes for 1 vulnerable dependency path [\#23](https://github.com/suculent/thinx-device-api/pull/23) ([snyk-bot](https://github.com/snyk-bot))
+
+## [0.9.3305](https://github.com/suculent/thinx-device-api/tree/0.9.3305) (2018-04-22)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3296...0.9.3305)
+
+## [0.9.3296](https://github.com/suculent/thinx-device-api/tree/0.9.3296) (2018-04-19)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3279...0.9.3296)
+
+## [0.9.3279](https://github.com/suculent/thinx-device-api/tree/0.9.3279) (2018-04-19)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3275...0.9.3279)
+
+## [0.9.3275](https://github.com/suculent/thinx-device-api/tree/0.9.3275) (2018-04-17)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3265...0.9.3275)
+
+## [0.9.3265](https://github.com/suculent/thinx-device-api/tree/0.9.3265) (2018-04-13)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3230...0.9.3265)
+
+## [0.9.3230](https://github.com/suculent/thinx-device-api/tree/0.9.3230) (2018-04-13)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3148...0.9.3230)
+
+**Merged pull requests:**
+
+- \[Snyk Update\] New fixes for 1 vulnerable dependency path [\#22](https://github.com/suculent/thinx-device-api/pull/22) ([snyk-bot](https://github.com/snyk-bot))
+
+## [0.9.3148](https://github.com/suculent/thinx-device-api/tree/0.9.3148) (2018-04-03)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3147...0.9.3148)
+
+## [0.9.3147](https://github.com/suculent/thinx-device-api/tree/0.9.3147) (2018-03-26)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3144...0.9.3147)
+
+## [0.9.3144](https://github.com/suculent/thinx-device-api/tree/0.9.3144) (2018-03-25)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3138...0.9.3144)
+
+## [0.9.3138](https://github.com/suculent/thinx-device-api/tree/0.9.3138) (2018-03-24)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3109...0.9.3138)
+
+**Merged pull requests:**
+
+- added static gdpr consent document [\#21](https://github.com/suculent/thinx-device-api/pull/21) ([qool](https://github.com/qool))
+
+## [0.9.3109](https://github.com/suculent/thinx-device-api/tree/0.9.3109) (2018-03-20)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3088...0.9.3109)
+
+## [0.9.3088](https://github.com/suculent/thinx-device-api/tree/0.9.3088) (2018-03-15)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3058...0.9.3088)
+
+**Merged pull requests:**
+
+- \[Snyk\] Fix for 32 vulnerable dependency paths [\#20](https://github.com/suculent/thinx-device-api/pull/20) ([snyk-bot](https://github.com/snyk-bot))
+
+## [0.9.3058](https://github.com/suculent/thinx-device-api/tree/0.9.3058) (2018-03-04)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3028...0.9.3058)
+
 ## [0.9.3028](https://github.com/suculent/thinx-device-api/tree/0.9.3028) (2018-02-13)
 [Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3021...0.9.3028)
 
@@ -163,13 +299,7 @@
 [Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.7.1542...1.7.1638)
 
 ## [1.7.1542](https://github.com/suculent/thinx-device-api/tree/1.7.1542) (2017-06-26)
-[Full Changelog](https://github.com/suculent/thinx-device-api/compare/tag...1.7.1542)
-
-## [tag](https://github.com/suculent/thinx-device-api/tree/tag) (2017-06-23)
-[Full Changelog](https://github.com/suculent/thinx-device-api/compare/tag-1...tag)
-
-## [tag-1](https://github.com/suculent/thinx-device-api/tree/tag-1) (2017-06-23)
-[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.6.1465-nightly...tag-1)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.6.1465-nightly...1.7.1542)
 
 ## [1.6.1465-nightly](https://github.com/suculent/thinx-device-api/tree/1.6.1465-nightly) (2017-06-22)
 [Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.6.1421...1.6.1465-nightly)
@@ -181,13 +311,13 @@
 [Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.6.1322-post-refactoring...1.6.1390-nightly)
 
 ## [1.6.1322-post-refactoring](https://github.com/suculent/thinx-device-api/tree/1.6.1322-post-refactoring) (2017-06-07)
-[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.6-DAPI-version-bump...1.6.1322-post-refactoring)
-
-## [1.6-DAPI-version-bump](https://github.com/suculent/thinx-device-api/tree/1.6-DAPI-version-bump) (2017-06-06)
-[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.6.1268-test...1.6-DAPI-version-bump)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.6.1268-test...1.6.1322-post-refactoring)
 
 ## [1.6.1268-test](https://github.com/suculent/thinx-device-api/tree/1.6.1268-test) (2017-06-06)
-[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.5.1200...1.6.1268-test)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.6-DAPI-version-bump...1.6.1268-test)
+
+## [1.6-DAPI-version-bump](https://github.com/suculent/thinx-device-api/tree/1.6-DAPI-version-bump) (2017-06-06)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.5.1200...1.6-DAPI-version-bump)
 
 ## [1.5.1200](https://github.com/suculent/thinx-device-api/tree/1.5.1200) (2017-05-29)
 [Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.5.1190...1.5.1200)
@@ -263,10 +393,7 @@
 [Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.2.473...1.2.491)
 
 ## [1.2.473](https://github.com/suculent/thinx-device-api/tree/1.2.473) (2017-04-28)
-[Full Changelog](https://github.com/suculent/thinx-device-api/compare/THX-8-startup-service...1.2.473)
-
-## [THX-8-startup-service](https://github.com/suculent/thinx-device-api/tree/THX-8-startup-service) (2017-04-27)
-[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.1.339...THX-8-startup-service)
+[Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.1.339...1.2.473)
 
 ## [1.1.339](https://github.com/suculent/thinx-device-api/tree/1.1.339) (2017-04-25)
 [Full Changelog](https://github.com/suculent/thinx-device-api/compare/1.1.317...1.1.339)
@@ -319,6 +446,81 @@
 # ☢ thinx-device-api change log
 
 ## HISTORY
+
+20/8/2018 0.9.3525
+
+» Preparation for key-escrow and end-to-end encryption
+» Vulnerability fixes and hashing optimizations
+» Updating device statuses from MQTT
+» Firmware availability check optimized
+» Fixed creating mqtt_passwords
+» Added support for DST and timezone offset
+» Client IP trackings for anti-abuse monitoring
+» Various OTT and warning fixes
+» Docker transformer fixes
+» Benchmarking response times
+» Support for DST and device-specific timezones
+» Migration to Circle CI 2.0 (in progress)
+» Debugging various login edge-cases (no-email)
+
+26/05/2018 0.9.3419
+
+» Added SSL support on the library side for ESP8266/ESP32
+» SHA-256 and MD5 hash validation support
+» Updated builder for ESP8266/ESP32
+» Fixed GitHub OAuth account creation
+» Status Transformer Self-healing
+» Optimized checkin (firmware provider)
+
+18/05/2018
+
+» Major fixes in Arduino ESP266/ESP32 builder
+
+2/05/2018 0.9.3366:
+
+» SigFox Downlink Support
+» Fixes in Status Transformers
+» JavaScript repos supported
+» User accounts are deleted after 3 months of not being used (GDPR compliance)
+
+19/04/2018 0.9.3296:
+
+» Improved support for NodeJS clients
+» Revamped Deploy Keys with support for Private repositories
+» Stabilized status transformers and device checkins (even in libs)
+
+13/04/2018 0.9.3230:
+
+» Library fixes for Arduino, ESP8266/ESP32 and test/specs
+» Upgraded and fixed implementation to @slack/client 4.0
+» Improved Status Transformers
+
+25/03/2018 0.9.3144:
+
+» Status Transformer Sandbox Execution Environment
+» GDPR and Revocation improvements
+» Fixed device revocation
+» NodeJS Client Docker `suculent/thinx-node-docker`
+
+23/03/2018 0.9.3128:
+
+» Static file provider
+» Status Transformer integration with Slack and Grafana
+» GDPR, content download provider
+» NodeJS client library
+
+15/03/2018 0.9.3088:
+
+» Implementing GDPR consent request, refactoring authentication procedure
+» Google/GitHub OAuth login fixes and improvements
+» Updated git-hooks, preparing dockerized staging installer
+
+05/03/2018 0.9.3058:
+
+» fixes to Status key storage reliability (Value Histories will move to InfluxDB soon but status histories will remain)
+» test fixes and testing with Redis 4 and CouchDB 2.1
+» timestamp support
+» full disaster recovery tests
 
 15/02/2018 0.9.3036:
 
