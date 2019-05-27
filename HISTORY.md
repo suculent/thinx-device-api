@@ -2,6 +2,13 @@
 
 ## HISTORY
 
+27/5/2019 0.9.3992
+
+» Updating history after a very, very, very long time... the project is settling.
+» Updated security for MQTT (MQTTS support, no anonymous users allowed)
+» Improved OTA over HTTPS/TLS on ESP32 and ESP8266
+» Updated Arduino firmware
+
 20/8/2018 0.9.3525
 
 » Preparation for key-escrow and end-to-end encryption
