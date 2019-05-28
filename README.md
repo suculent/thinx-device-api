@@ -180,7 +180,7 @@ redis-server > /root/thinx-device-api/redis.log &
 /etc/init.d/couchdb start
 
 # NodeJS Sandbox
-docker run -d suculent/thinx-node-tranformer
+docker run --rm -d suculent/thinx-node-tranformer
 
 # Grafana/InfluxDB
 docker run -d \
