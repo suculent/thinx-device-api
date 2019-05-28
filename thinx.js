@@ -2425,6 +2425,7 @@ var ThinxApp = function() {
                 app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
                 "No e-mail in response."
               );
+              return;
             }
 
             var owner_id = null;
