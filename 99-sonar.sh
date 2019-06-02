@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sonar-scanner \
+/usr/local/bin/sonar-scanner \
   -Dsonar.projectKey=suculent_thinx-device-api \
   -Dsonar.organization=suculent-github \
   -Dsonar.sources=. \
