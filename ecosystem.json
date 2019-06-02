@@ -6,6 +6,7 @@
       script    : "thinx.js",
       args      : "--log-date-format 'DD-MM HH:mm:ss.SSS'",
       interpreter  : "node@11.13.0",
+      exec_mode : "fork"
     }
   ]
 }
