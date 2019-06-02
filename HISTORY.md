@@ -2,6 +2,10 @@
 
 ## HISTORY
 
+2/6/2019 0.9.4026
+
+» Added distaster recovery feature for MQTT branch after losing the MQTT passwords file
+
 27/5/2019 0.9.3992
 
 » Updating history after a very, very, very long time... the project is settling.

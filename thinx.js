@@ -3290,9 +3290,14 @@ var ThinxApp = function() {
 
     /* This operation should restore MQTT passwords only. */
     // triggered by non-existend password file
-    if (!fs.existsSync(app_config.mqtt.passwords + "disabled")) {
-      console.log("Running in disaster recovery mode...");
-      restore_owners_credentials("_all_docs");
+    if (!fs.existsSync(app_config.mqtt.passwords)) {
+      fs.ensureFile(app_config.mqtt.passwords, function(err) {
+				if (err) {
+					console.log("Error creating MQTT PASSWORDS file: " + err);
+				}
+        console.log("Running in disaster recovery mode...");
+        restore_owners_credentials("_all_docs"); // fetches only IDs and last revision, works with hundreds of users
+			});
     } // <-- if fs.existsSync...
   }
 
@@ -3347,6 +3352,8 @@ var ThinxApp = function() {
       const source_id = "ak:" + owner_id;
 
       // Get source keys
+      var default_mqtt_key = null;
+
       redis_client.get(source_id, function(err1, json_keys) {
         if (err1) {
           console.log(err1);
@@ -3360,23 +3367,20 @@ var ThinxApp = function() {
           return;
         }
 
-
-
-        console.log("RESTORING OWNER KEYS: "+JSON.stringify(json_array));
-        var default_mqtt_key = null;
+        // console.log("RESTORING OWNER KEYS: "+JSON.stringify(json_array));
         for (var ai in json_array) {
           var item = json_array[ai];
-          /* we would have to fetch owner doc to have this
+          /* we would have to fetch whole owner doc to know this
           if (item.hash == last_key_hash) {
             console.log("DR LK: "+JSON.stringify(item));
             last_key = last_key_hash;
           }*/
           if (item.alias == "Default MQTT API Key") {
             default_mqtt_key = item.key;
-            console.log("DR DK: "+JSON.stringify(item));
+            console.log("DR DK: "+JSON.stringify(item.hash));
             auth.add_mqtt_credentials(device._id, item.key);
           } else {
-            console.log("DR AK: "+JSON.stringify(item));
+            console.log("DR AK: "+JSON.stringify(item.hash));
             auth.add_mqtt_credentials(device._id, item.key);
           }
         }
@@ -3395,7 +3399,7 @@ var ThinxApp = function() {
       for (var i = 0; i < body.rows.length; i++) {
         var owner_doc = body.rows[i];
         var owner_id = owner_doc.id;
-        console.log("DOC: "+JSON.stringify(owner_doc)+" by "+owner_id);
+        console.log("Restoring credentials for owner "+owner_id);
         restore_owner_credentials(owner_id, function(success, default_mqtt_key) {
           if (success) {
             console.log("DMK: "+default_mqtt_key);
