@@ -3055,7 +3055,7 @@ var ThinxApp = function() {
     store: new redisStore({
       host: "localhost",
       port: 6379,
-      client: client
+      client: redis_client
     }),
     cookie: {
       expires: hour
