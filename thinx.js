@@ -18,7 +18,7 @@ var ThinxApp = function() {
 
   var http = require('http');
   var redis = require('redis');
-  var client = redis.createClient();
+  var redis_client = redis.createClient();
   var path = require('path');
 
   //
@@ -1808,7 +1808,7 @@ var ThinxApp = function() {
     var owner_id = null;
 
     if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
-      client.get(oauth, function(err, userWrapper) {
+      redis_client.get(oauth, function(err, userWrapper) {
         if (err) {
           console.log("[oauth] takeover failed");
           failureResponse(res, 403, "unauthorized");
@@ -2621,7 +2621,7 @@ var ThinxApp = function() {
     var gdpr_consent = req.body.gdpr_consent;
     var token = req.body.token;
 
-    client.get(token, function(err, userWrapper) {
+    redis_client.get(token, function(err, userWrapper) {
 
       if (err) {
         console.log("[oauth][gdpr] takeover failed");
@@ -3337,9 +3337,30 @@ var ThinxApp = function() {
         return;
       }
 
+      const source_id = "ak:" + owner_id;
+
+      // Get source keys
+      redis_client.get(source_id, function(err1, json_keys) {
+        if (err1) console.log(err1);
+
+        var json_array = JSON.parse(json_keys);
+        console.log("RESTORING OWNER KEYS: "+JSON.stringify(json_array));
+        for (var ai in json_array) {
+          var item = json_array[ai];
+          if (sha256(item) == last_key_hash) {
+            console.log("DR LK: "+JSON.stringify(item, false, 2));
+          } else {
+            console.log("DR AK: "+JSON.stringify(item, false, 2));
+          }
+          // auth.add_mqtt_credentials(device._id, item.key); < check first!
+        }
+
+      });
+
       forEach(body.rows, function(key, device) {
         console.log(key + "+" + JSON.stringify(device));
-        var last_key = device.lastkey;
+        const last_key_hash = dev.lastkey;
+
         console.log("DR LK: "+last_key);
         // auth.add_mqtt_credentials(device._id, device.lastkey);
       });
