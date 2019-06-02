@@ -1184,9 +1184,9 @@ var ThinxApp = function() {
           response.registration.timestamp = Math.floor(new Date() / 1000);
         }
         if (success === false) {
-          console.log("Device registration failed with response: " + JSON.stringify(response, null, 4));
+          console.log("Device registration failed with response: " + JSON.stringify(response));
         } else {
-          console.log("Device registration response: " + JSON.stringify(response, null, 4));
+          console.log("Device registration response: " + JSON.stringify(response));
         }
         respond(res, response);
       }, req);
