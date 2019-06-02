@@ -8,7 +8,7 @@ docker run -d \
   -v /root/docker-influxdb-grafana/grafana:/var/lib/grafana \
   suculent/docker-influxdb-grafana:latest
 
-docker run --user=transformer \
+docker run --rm --user=transformer \
   -d -p 7475:7474 \
   -v /var/logs:/logs \
   -v /root/thinx-node-transformer:/app \
