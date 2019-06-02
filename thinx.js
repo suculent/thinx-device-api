@@ -3321,7 +3321,7 @@ var ThinxApp = function() {
   // triggered by non-existend password file
   // if (!fs.existsSync(app_config.mqtt.passwords)) {
 
-  function restore_device_credentials(owner_id, dmk) {
+  function restore_owner_credentials(owner_id, dmk_callback) {
     devicelib.view("devicelib", "devices_by_owner", {
       "key": owner_id,
       "include_docs": false
@@ -3341,33 +3341,34 @@ var ThinxApp = function() {
 
       // Get source keys
       redis_client.get(source_id, function(err1, json_keys) {
-        if (err1) console.log(err1);
-
+        if (err1) {
+          console.log(err1);
+          dmk_callback(false, err1);
+          return;
+        }
         var json_array = JSON.parse(json_keys);
         console.log("RESTORING OWNER KEYS: "+JSON.stringify(json_array));
+        var default_mqtt_key = null;
         for (var ai in json_array) {
           var item = json_array[ai];
-          if (sha256(item) == last_key_hash) {
-            console.log("DR LK: "+JSON.stringify(item, false, 2));
-          } else {
-            console.log("DR AK: "+JSON.stringify(item, false, 2));
+          if (item.hash == last_key_hash) {
+            console.log("DR LK: "+JSON.stringify(item));
+            last_key = last_key_hash;
           }
-          // auth.add_mqtt_credentials(device._id, item.key); < check first!
+          if (item.alias == "Default MQTT API Key") {
+            default_mqtt_key = item.key;
+          } else {
+            console.log("DR AK: "+JSON.stringify(item));
+            auth.add_mqtt_credentials(device._id, item.key);
+          }
         }
-
-      });
-
-      forEach(body.rows, function(key, device) {
-        console.log(key + "+" + JSON.stringify(device));
-        const last_key_hash = dev.lastkey;
-
-        console.log("DR LK: "+last_key);
-        // auth.add_mqtt_credentials(device._id, device.lastkey);
+        auth.add_mqtt_credentials(owner_id, default_mqtt_key);
+        dmk_callback(true, default_mqtt_key);
       });
     });
   }
 
-  function restore_owner_credentials(query) {
+  function restore_owners_credentials(query) {
     userlib.get(query, function(err, body) {
       if (err) {
         console.log("DR ERR: "+err);
@@ -3378,18 +3379,18 @@ var ThinxApp = function() {
       for (var i = 0; i < body.keys.length; i++) {
         var owner_doc = body.keys[i];
         var owner_id = owner_doc._id;
-        var dmk = owner_doc.default_mqtt_key;
-        console.log("DOC: "+owner_doc+" by "+owner_id+"; DMK "+dmk);
-        if (dmk) {
-          // auth.add_mqtt_credentials(owner_id, dmk);
-        }
-        restore_device_credentials(owner_id, dmk);
+        console.log("DOC: "+owner_doc+" by "+owner_id);
+        restore_owner_credentials(owner_id, function(success, default_mqtt_key) {
+          if (success) {
+            console.log("DMK: "+default_mqtt_key);
+          }
+        });
       }
     });
   };
 
   console.log("Running in disaster recovery mode...");
-  restore_owner_credentials("_all_docs");
+  restore_owners_credentials("_all_docs");
 
   // fetch all owner ids, for each id:
   // - create password from their default mqtt key
