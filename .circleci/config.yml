@@ -94,7 +94,8 @@ jobs:
     # - run: eslint ./lib/ --format junit --output-file $CIRCLE_TEST_REPORTS/reports/eslint.xml
     - run: /usr/local/bin/redis-server /etc/redis/redis.conf &
     - run: cp ./conf/config-test.json ./conf/config.json
-#    - run: npm run coverage ## causes tests to get stucked, failing forever and ever
+    - run: docker run -d --rm -e COUCHDB_ADMIN=rtmtest -e COUCHDB_PASS=rtmtest -e NODENAME=circle2 suculent/thinx-couchdb-master
+    - run: npm run coverage 
     - run: mkdir -p $CIRCLE_TEST_REPORTS/rspec
     - run:
         command: bundler exec rspec --format RspecJunitFormatter --out $CIRCLE_TEST_REPORTS/rspec/rspec.xml --format progress spec
