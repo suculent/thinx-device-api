@@ -71,8 +71,10 @@ var ThinxApp = function() {
     handleUnhandledRejections: true
   });
 
+  var Sqreen = null;
+
   if (use_sqreen) {
-    const Sqreen = require('sqreen');
+    Sqreen = require('sqreen');
   }
 
   //
