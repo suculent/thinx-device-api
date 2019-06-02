@@ -9,8 +9,8 @@ var ThinxApp = function() {
   var exec = require("child_process");
   var typeOf = require("typeof");
   var Rollbar = require("rollbar");
-
   var crypto = require('crypto');
+  var auth = require('./lib/thinx/auth.js');
 
   console.log(crypto.getCiphers()); // log supported ciphers to debug SSL IoT transport
 
@@ -3287,7 +3287,6 @@ var ThinxApp = function() {
         console.log("Status Transformer Docker exec error: " + e);
       }
     }
-
   }
 
   //
@@ -3314,6 +3313,70 @@ var ThinxApp = function() {
     return true;
   }
 
+  //
+  // MQTT Disaster Recovery
+  //
+
+  /* This operation should restore MQTT passwords only. */
+  // triggered by non-existend password file
+  // if (!fs.existsSync(app_config.mqtt.passwords)) {
+
+  function restore_device_credentials(owner_id, dmk) {
+    devicelib.view("devicelib", "devices_by_owner", {
+      "key": owner_id,
+      "include_docs": false
+    },
+    function(err, body) {
+      if (err) {
+        console.log("list error: " + err);
+        if ((err.toString().indexOf("Error: missing") !== -1) && typeof(callback) !==
+          "undefined") {
+          callback(false, "none");
+        }
+        console.log("/api/user/devices: Error: " + err.toString());
+        return;
+      }
+
+      forEach(body.rows, function(key, device) {
+        console.log(key + "+" + JSON.stringify(device));
+        var last_key = device.lastkey;
+        console.log("DR LK: "+last_key);
+        // auth.add_mqtt_credentials(device._id, device.lastkey);
+      });
+    });
+  }
+
+  function restore_owner_credentials(query) {
+    userlib.get(query, function(err, body) {
+      if (err) {
+        console.log("DR ERR: "+err);
+        return;
+      }
+      console.log("DR ALL DOCS:");
+      console.log(JSON.stringify(body, false, 4));
+      for (var i = 0; i < body.keys.length; i++) {
+        var owner_doc = body.keys[i];
+        var owner_id = owner_doc._id;
+        var dmk = owner_doc.default_mqtt_key;
+        console.log("DOC: "+owner_doc+" by "+owner_id+"; DMK "+dmk);
+        if (dmk) {
+          // auth.add_mqtt_credentials(owner_id, dmk);
+        }
+        restore_device_credentials(owner_id, dmk);
+      }
+    });
+  };
+
+  restore_owner_credentials("_all_docs");
+
+  // fetch all owner ids, for each id:
+  // - create password from their default mqtt key
+  // (extract function) mqtt_add_credentials
+  // - fetch all devices
+  // - create password from their last_key
+  // (reuse function) mqtt_add_credentials
+
+  // } // <-- if fs.existsSync...
 };
 
 var thx = new ThinxApp();
