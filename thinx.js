@@ -3331,7 +3331,7 @@ var ThinxApp = function() {
       "key": owner_id,
       "include_docs": false
     },
-    function(err, body) {
+    function(err, device) {
       if (err) {
         console.log("list error: " + err);
         if ((err.toString().indexOf("Error: missing") !== -1) && typeof(callback) !==
@@ -3341,6 +3341,8 @@ var ThinxApp = function() {
         console.log("/api/user/devices: Error: " + err.toString());
         return;
       }
+
+      console.log("DEVICE: "+device);
 
       const source_id = "ak:" + owner_id;
 
@@ -3358,6 +3360,8 @@ var ThinxApp = function() {
           return;
         }
 
+
+
         console.log("RESTORING OWNER KEYS: "+JSON.stringify(json_array));
         var default_mqtt_key = null;
         for (var ai in json_array) {
@@ -3369,6 +3373,8 @@ var ThinxApp = function() {
           }*/
           if (item.alias == "Default MQTT API Key") {
             default_mqtt_key = item.key;
+            console.log("DR DK: "+JSON.stringify(item));
+            auth.add_mqtt_credentials(device._id, item.key);
           } else {
             console.log("DR AK: "+JSON.stringify(item));
             auth.add_mqtt_credentials(device._id, item.key);
@@ -3386,8 +3392,6 @@ var ThinxApp = function() {
         console.log("DR ERR: "+err);
         return;
       }
-      // console.log("DR ALL DOCS:");
-      console.log(JSON.stringify(body, false, 4));
       for (var i = 0; i < body.rows.length; i++) {
         var owner_doc = body.rows[i];
         var owner_id = owner_doc.id;
