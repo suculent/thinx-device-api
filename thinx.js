@@ -3290,9 +3290,14 @@ var ThinxApp = function() {
 
     /* This operation should restore MQTT passwords only. */
     // triggered by non-existend password file
-    if (!fs.existsSync(app_config.mqtt.passwords + "disabled")) {
-      console.log("Running in disaster recovery mode...");
-      restore_owners_credentials("_all_docs");
+    if (!fs.existsSync(app_config.mqtt.passwords)) {
+      fs.ensureFile(app_config.mqtt.passwords, function(err) {
+				if (err) {
+					console.log("Error creating MQTT PASSWORDS file: " + err);
+				}
+        console.log("Running in disaster recovery mode...");
+        restore_owners_credentials("_all_docs");
+			});
     } // <-- if fs.existsSync...
   }
 
@@ -3359,8 +3364,6 @@ var ThinxApp = function() {
           console.log("No keys for? "+source_id);
           return;
         }
-
-
 
         console.log("RESTORING OWNER KEYS: "+JSON.stringify(json_array));
         var default_mqtt_key = null;
