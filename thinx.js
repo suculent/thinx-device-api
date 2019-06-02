@@ -3362,10 +3362,11 @@ var ThinxApp = function() {
         var default_mqtt_key = null;
         for (var ai in json_array) {
           var item = json_array[ai];
+          /* we would have to fetch owner doc to have this
           if (item.hash == last_key_hash) {
             console.log("DR LK: "+JSON.stringify(item));
             last_key = last_key_hash;
-          }
+          }*/
           if (item.alias == "Default MQTT API Key") {
             default_mqtt_key = item.key;
           } else {
