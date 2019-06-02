@@ -3342,7 +3342,7 @@ var ThinxApp = function() {
         return;
       }
 
-      console.log("DEVICE: "+device);
+      console.log("DEVICE: "+JSON.stringify(device, false, 2));
 
       const source_id = "ak:" + owner_id;
 
@@ -3355,7 +3355,7 @@ var ThinxApp = function() {
         }
         var json_array = JSON.parse(json_keys);
 
-        if (json_array.length == 0) {
+        if (json_array == null) {
           console.log("No keys for? "+source_id);
           return;
         }
