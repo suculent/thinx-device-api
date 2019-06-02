@@ -41,20 +41,25 @@ var ThinxApp = function() {
   var session_config = require("./conf/node-session.json");
   var app_config = require("./conf/config.json"); // this file should be actually omitted from repository
 
+  // requires existing sqreen.json or ENV vars defined
+  var use_sqreen = true;
+
   if (typeof(process.env.CIRCLE_USERNAME) !== "undefined") {
     console.log("» Starting server on Circle CI...");
     app_config = require("./conf/config-test.json");
     google_ocfg = require('./conf/google-oauth-test.json');
     github_ocfg = require('./conf/github-oauth-test.json');
+    use_sqreen = false;
   }
   if (process.env.LOGNAME == "sychram") {
     console.log("» Starting on workstation...");
     app_config = require("./conf/config-local.json");
     google_ocfg = require('./conf/google-oauth.json');
     github_ocfg = require('./conf/github-oauth.json');
+    use_sqreen = false;
   }
   if (process.env.LOGNAME == "root") {
-    console.log("» Starting in production mode...");
+    console.log("» Starting in production 'root' mode (needs to control Docker until Agens)...");
     app_config = require("./conf/config.json");
     google_ocfg = require('./conf/google-oauth.json');
     github_ocfg = require('./conf/github-oauth.json');
@@ -66,7 +71,9 @@ var ThinxApp = function() {
     handleUnhandledRejections: true
   });
 
-  // const Sqreen = require('sqreen');
+  if (use_sqreen) {
+    const Sqreen = require('sqreen');
+  }
 
   //
   // OAuth2
@@ -84,13 +91,6 @@ var ThinxApp = function() {
       authorizePath: '/o/oauth2/auth',
       tokenPath: '/o/oauth2/token'
     },
-  });
-
-  // Authorization uri definition
-  const authorizationUri = oauth2.authorizationCode.authorizeURL({
-    redirect_uri: google_ocfg.web.redirect_uris[0],
-    scope: 'email openid profile',
-    state: '3(#0/!~12345', // this string shall be random (returned upon auth provider call back)
   });
 
   //
@@ -1851,7 +1851,9 @@ var ThinxApp = function() {
                   httpOnly: false
                 });
 
-                //Sqreen.signup_track({ username: owner_id });
+                if (use_sqreen) {
+                  Sqreen.signup_track({ username: owner_id });
+                }
 
                 alog.log(req.session.owner, "OAuth User created: " +
                   wrapper.first_name + " " + wrapper.last_name);
@@ -1882,7 +1884,9 @@ var ThinxApp = function() {
               alog.log(req.session.owner, "OAuth User logged in: " +
                 doc.username);
 
-              //Sqreen.auth_track(true, { username: doc.owner });
+              if (use_sqreen) {
+                Sqreen.auth_track(true, { username: doc.owner });
+              }
 
               updateLastSeen(doc);
               respond(res, {
@@ -1904,7 +1908,9 @@ var ThinxApp = function() {
 
     if (typeof(req.body.password) === "undefined") {
       callback(false, "login_failed");
-      //Sqreen.auth_track(false, { doc: owner });
+      if (use_sqreen) {
+        Sqreen.auth_track(false, { doc: owner });
+      }
       return;
     }
 
@@ -2458,7 +2464,9 @@ var ThinxApp = function() {
               // Error case covers creating new user/managing deleted account
               if (error) {
 
-                //Sqreen.auth_track(false, { doc: userWrapper.owner_id });
+                if (use_sqreen) {
+                  Sqreen.auth_track(false, { doc: userWrapper.owner_id });
+                }
 
                 console.log("Failed with error: " + error);
 
@@ -2480,7 +2488,9 @@ var ThinxApp = function() {
                   if (typeof(udoc) !== "undefined") {
                     if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
                       true) {
-                      //Sqreen.auth_track(false, { doc: userWrapper.owner_id });
+                      if (use_sqreen) {
+                        Sqreen.auth_track(false, { doc: userWrapper.owner_id });
+                      }
                       // TODO: Redirect to error page with reason
                       console.log("[oauth] user account marked as deleted");
                       global_response.redirect(
@@ -2510,7 +2520,9 @@ var ThinxApp = function() {
                     // causes registration error where headers already sent!
                     res.redirect(ourl); // was global_response!
 
-                    //Sqreen.signup_track({ username: userWrapper.owner_id });
+                    if (use_sqreen) {
+                      Sqreen.signup_track({ username: userWrapper.owner_id });
+                    }
 
                     console.log("Redirecting to login (2)");
                   });
@@ -2548,7 +2560,9 @@ var ThinxApp = function() {
                 }
               }
 
-              //Sqreen.auth_track(true, { username: userWrapper.owner_id });
+              if (use_sqreen) {
+                Sqreen.auth_track(true, { username: userWrapper.owner_id });
+              }
 
               const ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" +
                 gdpr; // require GDPR consent
@@ -2584,16 +2598,27 @@ var ThinxApp = function() {
     if (typeof(req.session) !== "undefined") {
       req.session.destroy();
     }
-    console.log("[oauth][google] Redirecting to authorizationUri: " +
-      authorizationUri);
-    res.redirect(authorizationUri);
+    crypto.randomBytes(48, function(err, buffer) {
+      var token = buffer.toString('hex');
+      console.log("saving google auth token for 5 minutes: "+token);
+      redis_client.set("oa:"+token+":g", 300); // auto-expires in 5 minutes
+      // Authorization uri definition
+      const authorizationUri = oauth2.authorizationCode.authorizeURL({
+        redirect_uri: google_ocfg.web.redirect_uris[0],
+        scope: 'email openid profile',
+        state: token // this string shall be random (returned upon auth provider call back)
+      });
+      console.log("[oauth][google] Redirecting to authorizationUri: " + authorizationUri);
+      res.redirect(authorizationUri);
+    });
   });
 
   // Callback service parsing the authorization token and asking for the access token
   app.get('/oauth/gcb', function(req, res) {
     global_token = null; // reset token; single user only!!!!
     global_response = res;
-    console.log("Github OAuth2 Callback...");
+    console.log(JSON.stringify(res));
+    console.log("Github OAuth2 Callback (TODO: validate redis oa:*:g token)...");
     githubOAuth.callback(req, res, function(err) {
       console.log("cberr: ", err);
       if (!err) {
@@ -2603,7 +2628,8 @@ var ThinxApp = function() {
             false; // require GDPR consent
           res.redirect(rurl);
           global_token = null; // reset token for next login attempt
-
+        } else {
+          console.log("global token null on gcb");
         }
       } else {
         console.log(err.message);
@@ -2870,15 +2896,17 @@ var ThinxApp = function() {
                       "OAuth User created: " +
                       given_name + " " + family_name);
 
+                    // This is weird. Token should be random and with prefix.
                     var gtoken = sha256(res2.access_token);
                     global_token = gtoken;
                     client.set(gtoken, JSON.stringify(userWrapper));
-                    client.expire(gtoken, 30);
-
+                    client.expire(gtoken, 300);
                     alog.log(owner_id, " OAuth2 User logged in...");
+
                     var otoken = sha256(res2.access_token);
                     client.set(otoken, JSON.stringify(userWrapper));
                     client.expire(otoken, 3600);
+
                     const ourl = app_config.public_url + "/auth.html?t=" +
                       token + "&g=true"; // require GDPR consent
                     console.log(ourl);
@@ -2888,15 +2916,15 @@ var ThinxApp = function() {
                 return;
               }
 
-              userlib.atomic("users", "checkin", owner_id, {
+              userlib.atomic("users", "checkin", owner_id,
+              {
                 last_seen: new Date()
-              }, function(error, response) {
+              },
+              function(error, response) {
                 if (error) {
-                  console.log("Last-seen update failed: " +
-                    error);
+                  console.log("Last-seen update failed: " + error);
                 } else {
-                  alog.log(req.session.owner,
-                    "Last seen updated.");
+                  alog.log(req.session.owner, "Last seen updated.");
                 }
               });
 
