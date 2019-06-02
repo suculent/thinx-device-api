@@ -3381,8 +3381,8 @@ var ThinxApp = function() {
       }
       console.log("DR ALL DOCS:");
       console.log(JSON.stringify(body, false, 4));
-      for (var i = 0; i < body.keys.length; i++) {
-        var owner_doc = body.keys[i];
+      for (var i = 0; i < body.rows.length; i++) {
+        var owner_doc = body.rows[i];
         var owner_id = owner_doc._id;
         console.log("DOC: "+owner_doc+" by "+owner_id);
         restore_owner_credentials(owner_id, function(success, default_mqtt_key) {
