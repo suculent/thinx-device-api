@@ -3379,12 +3379,12 @@ var ThinxApp = function() {
         console.log("DR ERR: "+err);
         return;
       }
-      console.log("DR ALL DOCS:");
+      // console.log("DR ALL DOCS:");
       console.log(JSON.stringify(body, false, 4));
       for (var i = 0; i < body.rows.length; i++) {
         var owner_doc = body.rows[i];
-        var owner_id = owner_doc._id;
-        console.log("DOC: "+owner_doc+" by "+owner_id);
+        var owner_id = owner_doc.id;
+        console.log("DOC: "+JSON.stringify(owner_doc)+" by "+owner_id);
         restore_owner_credentials(owner_id, function(success, default_mqtt_key) {
           if (success) {
             console.log("DMK: "+default_mqtt_key);
