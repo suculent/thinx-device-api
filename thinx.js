@@ -2091,8 +2091,8 @@ var ThinxApp = function() {
 
       if (typeof(oauth) === "undefined") {
         const token = sha256(user_data.email + ":" + user_data.activation_date);
-        client.set(token, JSON.stringify(user_data));
-        client.expire(token, 30);
+        redis_client.set(token, JSON.stringify(user_data));
+        redis_client.expire(token, 30);
         global_token = token;
         ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" + skip_gdpr_page;
       }
@@ -2334,7 +2334,7 @@ var ThinxApp = function() {
         var auth_data = JSON.parse(body);
         var token = auth_data.bot_access_token;
         if (typeof(token) !== "undefined") {
-          client.set("__SLACK_BOT_TOKEN__", token);
+          redis_client.set("__SLACK_BOT_TOKEN__", token);
           console.log("Saving new Bot token (TODO: tell mesenger): ", token);
         }
       });
@@ -2510,8 +2510,8 @@ var ThinxApp = function() {
                     alog.log(owner_id, "OAuth User created: " +
                       given_name + " " + family_name);
 
-                    client.set(token, JSON.stringify(userWrapper));
-                    client.expire(token, 30);
+                    redis_client.set(token, JSON.stringify(userWrapper));
+                    redis_client.expire(token, 30);
                     global_token = token;
 
                     const ourl = app_config.public_url + "/auth.html&t=" +
@@ -2547,8 +2547,8 @@ var ThinxApp = function() {
 
               alog.log(owner_id, "OAuth2 User logged in...");
 
-              client.set(token, JSON.stringify(userWrapper));
-              client.expire(token, 3600);
+              redis_client.set(token, JSON.stringify(userWrapper));
+              redis_client.expire(token, 3600);
 
               console.log("Redirecting to login (1)");
 
@@ -2760,12 +2760,12 @@ var ThinxApp = function() {
         });
 
         console.log("Deleting all API keys for this owner...");
-        client.expire("ak:" + owner_id, 1);
+        redis_client.expire("ak:" + owner_id, 1);
 
-        client.keys("/" + owner_id + "/*", function(err, obj_keys) {
+        redis_client.keys("/" + owner_id + "/*", function(err, obj_keys) {
           console.dir("Deleting Redis cache for this owner: " + JSON.stringify(obj));
           for (var key in obj_keys) {
-            client.expire(key, 1);
+            redis_client.expire(key, 1);
           }
         });
 
@@ -2899,13 +2899,13 @@ var ThinxApp = function() {
                     // This is weird. Token should be random and with prefix.
                     var gtoken = sha256(res2.access_token);
                     global_token = gtoken;
-                    client.set(gtoken, JSON.stringify(userWrapper));
-                    client.expire(gtoken, 300);
+                    redis_client.set(gtoken, JSON.stringify(userWrapper));
+                    redis_client.expire(gtoken, 300);
                     alog.log(owner_id, " OAuth2 User logged in...");
 
                     var otoken = sha256(res2.access_token);
-                    client.set(otoken, JSON.stringify(userWrapper));
-                    client.expire(otoken, 3600);
+                    redis_client.set(otoken, JSON.stringify(userWrapper));
+                    redis_client.expire(otoken, 3600);
 
                     const ourl = app_config.public_url + "/auth.html?t=" +
                       token + "&g=true"; // require GDPR consent
@@ -2938,8 +2938,8 @@ var ThinxApp = function() {
 
               alog.log(owner_id, " OAuth2 User logged in...");
               var token = sha256(res2.access_token);
-              client.set(token, JSON.stringify(userWrapper));
-              client.expire(token, 3600);
+              redis_client.set(token, JSON.stringify(userWrapper));
+              redis_client.expire(token, 3600);
               const ourl = app_config.public_url + "/auth.html?t=" + token +
                 "&g=" + gdpr; // require GDPR consent
               console.log(ourl);
