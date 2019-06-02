@@ -3287,6 +3287,13 @@ var ThinxApp = function() {
         console.log("Status Transformer Docker exec error: " + e);
       }
     }
+
+    /* This operation should restore MQTT passwords only. */
+    // triggered by non-existend password file
+    if (!fs.existsSync(app_config.mqtt.passwords + "disabled")) {
+      console.log("Running in disaster recovery mode...");
+      restore_owners_credentials("_all_docs");
+    } // <-- if fs.existsSync...
   }
 
   //
@@ -3317,9 +3324,7 @@ var ThinxApp = function() {
   // MQTT Disaster Recovery
   //
 
-  /* This operation should restore MQTT passwords only. */
-  // triggered by non-existend password file
-  // if (!fs.existsSync(app_config.mqtt.passwords)) {
+
 
   function restore_owner_credentials(owner_id, dmk_callback) {
     devicelib.view("devicelib", "devices_by_owner", {
@@ -3388,18 +3393,6 @@ var ThinxApp = function() {
       }
     });
   };
-
-  console.log("Running in disaster recovery mode...");
-  restore_owners_credentials("_all_docs");
-
-  // fetch all owner ids, for each id:
-  // - create password from their default mqtt key
-  // (extract function) mqtt_add_credentials
-  // - fetch all devices
-  // - create password from their last_key
-  // (reuse function) mqtt_add_credentials
-
-  // } // <-- if fs.existsSync...
 };
 
 var thx = new ThinxApp();
