@@ -3367,6 +3367,7 @@ var ThinxApp = function() {
     });
   };
 
+  console.log("Running in disaster recovery mode...");
   restore_owner_credentials("_all_docs");
 
   // fetch all owner ids, for each id:
