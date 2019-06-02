@@ -3352,6 +3352,12 @@ var ThinxApp = function() {
           return;
         }
         var json_array = JSON.parse(json_keys);
+
+        if (json_array.length == 0) {
+          console.log("No keys for? "+source_id);
+          return;
+        }
+
         console.log("RESTORING OWNER KEYS: "+JSON.stringify(json_array));
         var default_mqtt_key = null;
         for (var ai in json_array) {
