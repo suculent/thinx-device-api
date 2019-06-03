@@ -2619,7 +2619,7 @@ var ThinxApp = function() {
   app.get('/oauth/gcb', function(req, res) {
     global_token = null; // reset token; single user only!!!!
     global_response = res;
-    console.log(JSON.stringify(res));
+    console.log("GCB BODY: " + JSON.stringify(res.body));
     console.log("Github OAuth2 Callback (TODO: validate redis oa:*:g token)...");
     githubOAuth.callback(req, res, function(err) {
       console.log("cberr: ", err);
