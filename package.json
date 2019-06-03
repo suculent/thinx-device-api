@@ -17,7 +17,8 @@
     "sonar": "99-sonar.sh",
     "snyk": "snyk test",
     "snyk-protect": "snyk protect",
-    "test": "nyc jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls && cat lcov.info | codacy-coverage"
+    "test": "nyc jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls && cat lcov.info | codacy-coverage",
+    "prepare": "npm run snyk-protect"
   },
   "dependencies": {
     "@slack/client": "^4.12.0",
