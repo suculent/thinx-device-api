@@ -12,7 +12,7 @@ var ThinxApp = function() {
   var crypto = require('crypto');
   var auth = require('./lib/thinx/auth.js');
 
-  console.log(crypto.getCiphers()); // log supported ciphers to debug SSL IoT transport
+  // console.log(crypto.getCiphers()); // log supported ciphers to debug SSL IoT transport
 
   require("ssl-root-cas").inject();
 
