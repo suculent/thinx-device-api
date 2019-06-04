@@ -1113,7 +1113,7 @@ var ThinxApp = function() {
         res.setHeader('x-MD5', response.md5);
         respond(res, response.payload);
       } else {
-        console.log("FAILURE! Should respond with response...");
+        console.log("FAILURE! Responding with response: "+JSON.stringify(response));
         respond(res, response);
       }
     });
