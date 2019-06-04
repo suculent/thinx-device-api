@@ -1118,7 +1118,7 @@ var ThinxApp = function() {
         res.setHeader('x-MD5', response.md5);
         respond(res, response.payload);
       } else {
-        console.log("FAILURE! Responding with response: "+JSON.stringify(response));
+        console.log("No successful firmware build found: "+JSON.stringify(response));
         respond(res, response);
       }
     });
