@@ -29,6 +29,11 @@ var ThinxApp = function() {
   const day = hour * 24;
   const fortnight = day * 14;
 
+  console.log("---");
+  console.log("---");
+  console.log("---");
+  console.log("---");
+  console.log("---");
   console.log("--- " + new Date() + " ---");
 
   //
