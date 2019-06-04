@@ -2425,18 +2425,21 @@ var ThinxApp = function() {
               });
             }
 
-            const email = hdata.email;
+            var owner_id = null;
+            var email = hdata.email;
 
             if (typeof(email) === "undefined" || email === null) {
-              console.log("Error: no email in response, may fail further.");
+              console.log("Error: no email in response, should login without activation.");
+              email = hdata.login;
+              /*
+              // This is not possible in on.end()
               res.redirect(
                 app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
                 "No e-mail in response."
               );
               return;
+              */
             }
-
-            var owner_id = null;
 
             try {
               owner_id = sha256(prefix + email);
@@ -2539,11 +2542,9 @@ var ThinxApp = function() {
                 last_seen: new Date()
               }, function(error, response) {
                 if (error) {
-                  console.log("Last-seen update failed: " +
-                    error);
+                  console.log("Last-seen update failed: " + error);
                 } else {
-                  alog.log(owner_id,
-                    "Last seen updated.");
+                  alog.log(owner_id, "Last seen updated.");
                 }
               });
 
@@ -2888,8 +2889,14 @@ var ThinxApp = function() {
 
                   console.log("Creating new user...");
 
+                  // No e-mail to validate.
+                  var will_require_activation = true;
+                  if (typeof(odata.email) === "undefined") {
+                    will_require_activation = false;
+                  }
+
                   // No such owner, create...
-                  user.create(userWrapper, false, function(success, status) {
+                  user.create(userWrapper, will_require_activation, function(success, status) {
 
                     req.session.owner = userWrapper.owner;
                     console.log("[OID:" + req.session.owner +
