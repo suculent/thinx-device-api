@@ -2068,9 +2068,9 @@ var ThinxApp = function() {
         }
 
       } else { // password invalid
-        console.log("[LOGIN_INVALID] for " + username);
-        alog.log(req.session.owner, "Password mismatch for: " +
-          username, "error");
+        console.log("[LOGIN_INVALID] Password mismatch for: " + username + ", db: " + sha256(user_data.password) + " vs. " + sha256(password));
+
+        alog.log(req.session.owner, "Password mismatch for: " + username);
         respond(res, {
           status: "password_mismatch",
           success: false
@@ -2431,14 +2431,6 @@ var ThinxApp = function() {
             if (typeof(email) === "undefined" || email === null) {
               console.log("Error: no email in response, should login without activation.");
               email = hdata.login;
-              /*
-              // This is not possible in on.end()
-              res.redirect(
-                app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
-                "No e-mail in response."
-              );
-              return;
-              */
             }
 
             try {
@@ -2464,7 +2456,6 @@ var ThinxApp = function() {
 
             // Check user and make note on user login
             userlib.get(owner_id, function(error, udoc) {
-
 
               // Error case covers creating new user/managing deleted account
               if (error) {
