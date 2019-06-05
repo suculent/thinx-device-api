@@ -459,7 +459,7 @@ http://$HOST:7442/api/user/apikey/list)
 # {"api_keys":[{"name":"******************************d1343a37e4","hash":"39c1ffb0761038c3eb8fdc067132d90e5561c3ba84847a4e2f1dfb26515b2866","alias":"name"}]}
 
 SUCCESS=$(echo $R | jq .api_keys)
-# echo $SUCCESS
+echo $R
 if [[ ! -z $SUCCESS ]]; then
 	AKEYS=$(echo $R | jq .api_keys)
 	echo_ok "Listed API keys: $AKEYS"
