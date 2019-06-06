@@ -19,6 +19,37 @@ var ThinxApp = function() {
 
   var http = require('http');
   var redis = require('redis');
+
+  const r_options = {
+  password: app_config.redis_password,
+  retry_strategy: function (options) {
+      console.log('retry strategy check');
+      console.log(options);
+      if (options.error) {
+        if (options.error.code === 'ECONNREFUSED') {
+          // End reconnecting on a specific error and flush all commands with a individual error
+          return new Error('The server refused the connection');
+        }
+        if (options.error.code === 'ECONNRESET') {
+          return new Error('The server reset the connection');
+        }
+        if (options.error.code === 'ETIMEDOUT') {
+          return new Error('The server timeouted the connection');
+        }
+      }
+      if (options.total_retry_time > 1000 * 60 * 60) {
+        // End reconnecting after a specific timeout and flush all commands with a individual error
+        return new Error('Retry time exhausted');
+      }
+      if (options.attempt > 5) {
+        // End reconnecting with built in error
+        return new Error('Retry attempts ended');
+      }
+      // reconnect after
+      return 1000;
+    }
+  };
+
   var redis_client = redis.createClient("6379", "redis", r_options);
   var path = require('path');
 
