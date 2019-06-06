@@ -70,15 +70,27 @@ var ThinxApp = function() {
   if (process.env.LOGNAME == "sychram") {
     console.log("» Starting on workstation...");
     app_config = require("./conf/config-local.json");
-    google_ocfg = require('./conf/google-oauth.json');
-    github_ocfg = require('./conf/github-oauth.json');
+
+    if (fs.existsSync('./conf/google-oauth-test.json')) {
+      google_ocfg = require('./conf/google-oauth-test.json');
+    }
+
+    if (fs.existsSync('./conf/github-oauth-test.json')) {
+      github_ocfg = require('./conf/github-oauth-test.json');
+    }
     use_sqreen = false;
   }
   if (process.env.LOGNAME == "root") {
     console.log("» Starting in production 'root' mode (needs to control Docker until Agens)...");
     app_config = require("./conf/config.json");
-    google_ocfg = require('./conf/google-oauth.json');
-    github_ocfg = require('./conf/github-oauth.json');
+
+    if (fs.existsSync('./conf/google-oauth.json')) {
+      google_ocfg = require('./conf/google-oauth.json');
+    }
+
+    if (fs.existsSync('./conf/github-oauth.json')) {
+      github_ocfg = require('./conf/github-oauth.json');
+    }
   }
 
   var rollbar = new Rollbar({
