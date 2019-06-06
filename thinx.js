@@ -20,6 +20,9 @@ var ThinxApp = function() {
   var http = require('http');
   var redis = require('redis');
 
+  var session_config = require("./conf/node-session.json");
+  var app_config = require("./conf/config.json"); // this file should be actually omitted from repository
+
   const r_options = {
   password: app_config.redis_password,
   retry_strategy: function (options) {
@@ -75,8 +78,7 @@ var ThinxApp = function() {
   var google_ocfg = null;
   var github_ocfg = null;
 
-  var session_config = require("./conf/node-session.json");
-  var app_config = require("./conf/config.json"); // this file should be actually omitted from repository
+
 
   // requires existing sqreen.json or ENV vars defined
 
