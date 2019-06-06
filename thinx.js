@@ -11,6 +11,7 @@ var ThinxApp = function() {
   var Rollbar = require("rollbar");
   var crypto = require('crypto');
   var auth = require('./lib/thinx/auth.js');
+  var fs = require("fs-extra");
 
   // console.log(crypto.getCiphers()); // log supported ciphers to debug SSL IoT transport
 
@@ -164,8 +165,6 @@ var ThinxApp = function() {
   var parser = require("body-parser");
   var nano = require("nano")(db);
   var sha256 = require("sha256");
-
-  var fs = require("fs-extra");
 
   var v = require("./lib/thinx/version");
   var alog = require("./lib/thinx/audit");
