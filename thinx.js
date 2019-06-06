@@ -72,8 +72,8 @@ var ThinxApp = function() {
 
   var rollbar = new Rollbar({
     accessToken: app_config.rollbar_token,
-    handleUncaughtExceptions: true,
-    handleUnhandledRejections: true
+    captureUncaught: true,
+    captureUnhandledRejections: true
   });
 
   var Sqreen = null;
