@@ -48,7 +48,7 @@ var ThinxApp = function() {
   var app_config = require("./conf/config.json"); // this file should be actually omitted from repository
 
   // requires existing sqreen.json or ENV vars defined
-  var use_sqreen = true;
+
 
   if (typeof(process.env.CIRCLE_USERNAME) !== "undefined") {
     console.log("» Starting server on Circle CI...");
@@ -93,6 +93,8 @@ var ThinxApp = function() {
       github_ocfg = require('./conf/github-oauth.json');
     }
   }
+
+  var use_sqreen = app_config.use_screen || false;
 
   var rollbar = new Rollbar({
     accessToken: app_config.rollbar_token,
