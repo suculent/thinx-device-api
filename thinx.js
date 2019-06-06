@@ -19,7 +19,7 @@ var ThinxApp = function() {
 
   var http = require('http');
   var redis = require('redis');
-  var redis_client = redis.createClient();
+  var redis_client = redis.createClient("6379", "redis", r_options);
   var path = require('path');
 
   //
