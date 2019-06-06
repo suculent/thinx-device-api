@@ -40,8 +40,8 @@ var ThinxApp = function() {
   // Environment-dependent configurations
   //
 
-  var google_ocfg;
-  var github_ocfg;
+  var google_ocfg = null;
+  var github_ocfg = null;
 
   var session_config = require("./conf/node-session.json");
   var app_config = require("./conf/config.json"); // this file should be actually omitted from repository
