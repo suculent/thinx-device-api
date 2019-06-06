@@ -165,7 +165,7 @@ var ThinxApp = function() {
   var nano = require("nano")(db);
   var sha256 = require("sha256");
 
-  var fs = require("fs");
+  var fs = require("fs-extra");
 
   var v = require("./lib/thinx/version");
   var alog = require("./lib/thinx/audit");
