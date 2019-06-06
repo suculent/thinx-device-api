@@ -52,8 +52,19 @@ var ThinxApp = function() {
   if (typeof(process.env.CIRCLE_USERNAME) !== "undefined") {
     console.log("» Starting server on Circle CI...");
     app_config = require("./conf/config-test.json");
-    google_ocfg = require('./conf/google-oauth-test.json');
-    github_ocfg = require('./conf/github-oauth-test.json');
+
+    if (fs.existsSync('./conf/google-oauth-test.json')) {
+      google_ocfg = require('./conf/google-oauth-test.json');
+    } else {
+      console.log("Skipping Google OAuth, configuration not found...");
+    }
+
+    if (fs.existsSync('./conf/github-oauth-test.json')) {
+      github_ocfg = require('./conf/github-oauth-test.json');
+    } else {
+      console.log("Skipping GitHub OAuth, configuration not found...");
+    }
+
     use_sqreen = false;
   }
   if (process.env.LOGNAME == "sychram") {
@@ -88,17 +99,21 @@ var ThinxApp = function() {
 
   const simpleOauthModule = require('simple-oauth2');
 
-  const oauth2 = simpleOauthModule.create({
-    client: {
-      id: google_ocfg.web.client_id,
-      secret: google_ocfg.web.client_secret,
-    },
-    auth: {
-      tokenHost: 'https://accounts.google.com/',
-      authorizePath: '/o/oauth2/auth',
-      tokenPath: '/o/oauth2/token'
-    },
-  });
+  if (typeof(google_ocfg) !== "undefined" || google_ocfg !== null) {
+
+    const oauth2 = simpleOauthModule.create({
+      client: {
+        id: google_ocfg.web.client_id,
+        secret: google_ocfg.web.client_secret,
+      },
+      auth: {
+        tokenHost: 'https://accounts.google.com/',
+        authorizePath: '/o/oauth2/auth',
+        tokenPath: '/o/oauth2/token'
+      },
+    });
+
+  }
 
   //
   // OAuth2 for GitHub
@@ -106,17 +121,21 @@ var ThinxApp = function() {
 
   var githubOAuth;
 
-  try {
-    githubOAuth = require('github-oauth')({
-      githubClient: github_ocfg.client_id,
-      githubSecret: github_ocfg.client_secret,
-      baseURL: github_ocfg.base_url, // should be rather gotten from global config!
-      loginURI: '/oauth/login',
-      callbackURI: github_ocfg.redirect_uri,
-      scope: 'bot'
-    });
-  } catch (e) {
-    console.log("github-oauth github_ocfg init error: " + e);
+  if (typeof(github_ocfg) !== "undefined") {
+
+    try {
+      githubOAuth = require('github-oauth')({
+        githubClient: github_ocfg.client_id,
+        githubSecret: github_ocfg.client_secret,
+        baseURL: github_ocfg.base_url, // should be rather gotten from global config!
+        loginURI: '/oauth/login',
+        callbackURI: github_ocfg.redirect_uri,
+        scope: 'bot'
+      });
+    } catch (e) {
+      console.log("github-oauth github_ocfg init error: " + e);
+    }
+
   }
 
   //
@@ -2591,50 +2610,239 @@ var ThinxApp = function() {
    * OAuth 2 with Google
    */
 
-  // Initial page redirecting to OAuth2 provider
-  app.get('/oauth/google', function(req, res) {
-    // User requested login, destroy existing session first...
-    if (typeof(req.session) !== "undefined") {
-      req.session.destroy();
-    }
-    crypto.randomBytes(48, function(err, buffer) {
-      var token = buffer.toString('hex');
-      console.log("saving google auth token for 5 minutes: "+token);
-      redis_client.set("oa:"+token+":g", 300); // auto-expires in 5 minutes
-      // Authorization uri definition
-      const authorizationUri = oauth2.authorizationCode.authorizeURL({
-        redirect_uri: google_ocfg.web.redirect_uris[0],
-        scope: 'email openid profile',
-        state: token // this string shall be random (returned upon auth provider call back)
-      });
-      console.log("[oauth][google] Redirecting to authorizationUri: " + authorizationUri);
-      res.redirect(authorizationUri);
-    });
-  });
 
-  // Callback service parsing the authorization token and asking for the access token
-  app.get('/oauth/gcb', function(req, res) {
-    global_token = null; // reset token; single user only!!!!
-    global_response = res;
-    console.log("GCB BODY: " + JSON.stringify(res.body));
-    console.log("Github OAuth2 Callback (TODO: validate redis oa:*:g token)...");
-    githubOAuth.callback(req, res, function(err) {
-      console.log("cberr: ", err);
-      if (!err) {
-        console.log("Should login with token now...");
-        if (global_token !== null) {
-          const rurl = app_config.public_url + "/auth.html?t=" + global_token + "&g=" +
-            false; // require GDPR consent
-          res.redirect(rurl);
-          global_token = null; // reset token for next login attempt
-        } else {
-          console.log("global token null on gcb");
-        }
-      } else {
-        console.log(err.message);
+  if (typeof(google_ocfg) !== "undefined" || google_ocfg !== null) {
+
+    // Initial page redirecting to OAuth2 provider
+    app.get('/oauth/google', function(req, res) {
+      // User requested login, destroy existing session first...
+      if (typeof(req.session) !== "undefined") {
+        req.session.destroy();
       }
+      crypto.randomBytes(48, function(err, buffer) {
+        var token = buffer.toString('hex');
+        console.log("saving google auth token for 5 minutes: "+token);
+        redis_client.set("oa:"+token+":g", 300); // auto-expires in 5 minutes
+        // Authorization uri definition
+        const authorizationUri = oauth2.authorizationCode.authorizeURL({
+          redirect_uri: google_ocfg.web.redirect_uris[0],
+          scope: 'email openid profile',
+          state: token // this string shall be random (returned upon auth provider call back)
+        });
+        console.log("[oauth][google] Redirecting to authorizationUri: " + authorizationUri);
+        res.redirect(authorizationUri);
+      });
     });
-  });
+
+    // Callback service parsing the authorization token and asking for the access token
+    app.get('/oauth/cb', function(req, ores) {
+
+      /// CALLBACK FOR GOOGLE OAUTH ONLY!
+      const options = {
+        code: req.query.code,
+        redirect_uri: google_ocfg.web.redirect_uris[0]
+      };
+
+      var t = oauth2.authorizationCode.getToken(options, (error, result) => {
+        if (error) {
+          console.error('[oauth] Access Token Error', error.message);
+          return ores.json('Authentication failed');
+        }
+
+        // console.log('[oauth] The resulting token: ', result);
+        const token = oauth2.accessToken.create(result);
+        return token;
+      });
+      t.then(res2 => {
+
+        global_token = res2.access_token;
+
+        https.get(
+          'https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' +
+          res2
+          .access_token, (res3) => {
+            let data = '';
+            // A chunk of data has been recieved.
+            res3.on('data', (chunk) => {
+              data += chunk;
+            });
+
+            // The whole response has been received. Print out the result.
+            res3.on('end', () => {
+
+              const odata = JSON.parse(data);
+
+              const email = odata.email;
+              const family_name = odata.family_name;
+              const given_name = odata.given_name;
+
+              if (typeof(email) === "undefined") {
+                res3.redirect(
+                  app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
+                  'E-mail missing.'
+                );
+              }
+
+              const owner_id = sha256(prefix + email);
+
+              var userWrapper = {
+                first_name: given_name,
+                last_name: family_name,
+                email: email,
+                owner: owner_id,
+                username: owner_id
+              };
+
+              //console.log("[oauth][google] searching for owner_id: " + owner_id);
+
+              // Asynchronously check user and make note on user login
+              userlib.get(owner_id, function(error, udoc) {
+
+                if (error) {
+
+                  console.log("User does not exist...");
+
+                  // User does not exist
+
+                  if (error.toString().indexOf("Error: deleted") !== -1) {
+
+                    // Redirect to error page with reason for deleted documents
+                    console.log("[oauth] user document deleted");
+                    ores.redirect(
+                      app_config.public_url + '/error.html?success=failed&title=OAuth-Error&reason=' +
+                      'account_doc_deleted');
+                    return;
+
+                  } else {
+
+                    console.log("Userlib get OTHER error: " + error.toString());
+
+                    if (typeof(udoc) !== "undefined") {
+                      if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
+                        true) {
+                        // TODO: Redirect to error page with reason
+                        console.log(
+                          "[oauth] user account marked as deleted");
+                        ores.redirect(
+                          app_config.public_url + '/error.html?success=failed&title=OAuth-Error&reason=' +
+                          'account_deleted');
+                        return;
+                      }
+                    }
+
+                    console.log("Creating new user...");
+
+                    // No e-mail to validate.
+                    var will_require_activation = true;
+                    if (typeof(odata.email) === "undefined") {
+                      will_require_activation = false;
+                    }
+
+                    // No such owner, create...
+                    user.create(userWrapper, will_require_activation, function(success, status) {
+
+                      req.session.owner = userWrapper.owner;
+                      console.log("[OID:" + req.session.owner +
+                        "] [NEW_SESSION] [oauth] 2860:");
+                      alog.log(req.session.owner,
+                        "OAuth User created: " +
+                        given_name + " " + family_name);
+
+                      // This is weird. Token should be random and with prefix.
+                      var gtoken = sha256(res2.access_token);
+                      global_token = gtoken;
+                      redis_client.set(gtoken, JSON.stringify(userWrapper));
+                      redis_client.expire(gtoken, 300);
+                      alog.log(owner_id, " OAuth2 User logged in...");
+
+                      var otoken = sha256(res2.access_token);
+                      redis_client.set(otoken, JSON.stringify(userWrapper));
+                      redis_client.expire(otoken, 3600);
+
+                      const ourl = app_config.public_url + "/auth.html?t=" +
+                        token + "&g=true"; // require GDPR consent
+                      console.log(ourl);
+                      ores.redirect(ourl);
+                    });
+                  }
+                  return;
+                }
+
+                userlib.atomic("users", "checkin", owner_id,
+                {
+                  last_seen: new Date()
+                },
+                function(error, response) {
+                  if (error) {
+                    console.log("Last-seen update failed: " + error);
+                  } else {
+                    alog.log(req.session.owner, "Last seen updated.");
+                  }
+                });
+
+                var gdpr = false;
+                if (typeof(udoc.info) !== "undefined") {
+                  if (typeof(udoc.gdpr_consent) !== "undefined" && udoc.gdpr_consent ==
+                    true) {
+                    gdpr = true;
+                  }
+                }
+
+                alog.log(owner_id, " OAuth2 User logged in...");
+                var token = sha256(res2.access_token);
+                redis_client.set(token, JSON.stringify(userWrapper));
+                redis_client.expire(token, 3600);
+                const ourl = app_config.public_url + "/auth.html?t=" + token +
+                  "&g=" + gdpr; // require GDPR consent
+                console.log(ourl);
+                ores.redirect(ourl);
+              });
+
+            });
+
+          }).on("error", (err) => {
+          console.log("Error: " + err.message);
+          res.redirect(
+            app_config.public_url + '/error.html?success=failed&title=OAuth-Error&reason=' +
+            err.message);
+        });
+      }).catch(err => {
+        console.log("Oauth error: " + err);
+        ores.redirect(
+          app_config.public_url + '/error.html?success=failed&title=OAuth-Error&reason=' +
+          err.message);
+      });
+    });
+
+  }
+
+  if (typeof(github_ocfg) !== "undefined" || github_ocfg !== null) {
+
+    // Callback service parsing the authorization token and asking for the access token
+    app.get('/oauth/gcb', function(req, res) {
+      global_token = null; // reset token; single user only!!!!
+      global_response = res;
+      console.log("GCB BODY: " + JSON.stringify(res.body));
+      console.log("Github OAuth2 Callback (TODO: validate redis oa:*:g token)...");
+      githubOAuth.callback(req, res, function(err) {
+        console.log("cberr: ", err);
+        if (!err) {
+          console.log("Should login with token now...");
+          if (global_token !== null) {
+            const rurl = app_config.public_url + "/auth.html?t=" + global_token + "&g=" +
+              false; // require GDPR consent
+            res.redirect(rurl);
+            global_token = null; // reset token for next login attempt
+          } else {
+            console.log("global token null on gcb");
+          }
+        } else {
+          console.log(err.message);
+        }
+      });
+    });
+
+  }
 
   /* Use to issue/withdraw GDPR consent. */
   app.post('/gdpr', function(req, res) {
@@ -2787,185 +2995,7 @@ var ThinxApp = function() {
     });
   });
 
-  // Callback service parsing the authorization token and asking for the access token
-  app.get('/oauth/cb', function(req, ores) {
 
-    /// CALLBACK FOR GOOGLE OAUTH ONLY!
-    const options = {
-      code: req.query.code,
-      redirect_uri: google_ocfg.web.redirect_uris[0]
-    };
-
-    var t = oauth2.authorizationCode.getToken(options, (error, result) => {
-      if (error) {
-        console.error('[oauth] Access Token Error', error.message);
-        return ores.json('Authentication failed');
-      }
-
-      // console.log('[oauth] The resulting token: ', result);
-      const token = oauth2.accessToken.create(result);
-      return token;
-    });
-    t.then(res2 => {
-
-      global_token = res2.access_token;
-
-      https.get(
-        'https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' +
-        res2
-        .access_token, (res3) => {
-          let data = '';
-          // A chunk of data has been recieved.
-          res3.on('data', (chunk) => {
-            data += chunk;
-          });
-
-          // The whole response has been received. Print out the result.
-          res3.on('end', () => {
-
-            const odata = JSON.parse(data);
-
-            const email = odata.email;
-            const family_name = odata.family_name;
-            const given_name = odata.given_name;
-
-            if (typeof(email) === "undefined") {
-              res3.redirect(
-                app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
-                'E-mail missing.'
-              );
-            }
-
-            const owner_id = sha256(prefix + email);
-
-            var userWrapper = {
-              first_name: given_name,
-              last_name: family_name,
-              email: email,
-              owner: owner_id,
-              username: owner_id
-            };
-
-            //console.log("[oauth][google] searching for owner_id: " + owner_id);
-
-            // Asynchronously check user and make note on user login
-            userlib.get(owner_id, function(error, udoc) {
-
-              if (error) {
-
-                console.log("User does not exist...");
-
-                // User does not exist
-
-                if (error.toString().indexOf("Error: deleted") !== -1) {
-
-                  // Redirect to error page with reason for deleted documents
-                  console.log("[oauth] user document deleted");
-                  ores.redirect(
-                    app_config.public_url + '/error.html?success=failed&title=OAuth-Error&reason=' +
-                    'account_doc_deleted');
-                  return;
-
-                } else {
-
-                  console.log("Userlib get OTHER error: " + error.toString());
-
-                  if (typeof(udoc) !== "undefined") {
-                    if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
-                      true) {
-                      // TODO: Redirect to error page with reason
-                      console.log(
-                        "[oauth] user account marked as deleted");
-                      ores.redirect(
-                        app_config.public_url + '/error.html?success=failed&title=OAuth-Error&reason=' +
-                        'account_deleted');
-                      return;
-                    }
-                  }
-
-                  console.log("Creating new user...");
-
-                  // No e-mail to validate.
-                  var will_require_activation = true;
-                  if (typeof(odata.email) === "undefined") {
-                    will_require_activation = false;
-                  }
-
-                  // No such owner, create...
-                  user.create(userWrapper, will_require_activation, function(success, status) {
-
-                    req.session.owner = userWrapper.owner;
-                    console.log("[OID:" + req.session.owner +
-                      "] [NEW_SESSION] [oauth] 2860:");
-                    alog.log(req.session.owner,
-                      "OAuth User created: " +
-                      given_name + " " + family_name);
-
-                    // This is weird. Token should be random and with prefix.
-                    var gtoken = sha256(res2.access_token);
-                    global_token = gtoken;
-                    redis_client.set(gtoken, JSON.stringify(userWrapper));
-                    redis_client.expire(gtoken, 300);
-                    alog.log(owner_id, " OAuth2 User logged in...");
-
-                    var otoken = sha256(res2.access_token);
-                    redis_client.set(otoken, JSON.stringify(userWrapper));
-                    redis_client.expire(otoken, 3600);
-
-                    const ourl = app_config.public_url + "/auth.html?t=" +
-                      token + "&g=true"; // require GDPR consent
-                    console.log(ourl);
-                    ores.redirect(ourl);
-                  });
-                }
-                return;
-              }
-
-              userlib.atomic("users", "checkin", owner_id,
-              {
-                last_seen: new Date()
-              },
-              function(error, response) {
-                if (error) {
-                  console.log("Last-seen update failed: " + error);
-                } else {
-                  alog.log(req.session.owner, "Last seen updated.");
-                }
-              });
-
-              var gdpr = false;
-              if (typeof(udoc.info) !== "undefined") {
-                if (typeof(udoc.gdpr_consent) !== "undefined" && udoc.gdpr_consent ==
-                  true) {
-                  gdpr = true;
-                }
-              }
-
-              alog.log(owner_id, " OAuth2 User logged in...");
-              var token = sha256(res2.access_token);
-              redis_client.set(token, JSON.stringify(userWrapper));
-              redis_client.expire(token, 3600);
-              const ourl = app_config.public_url + "/auth.html?t=" + token +
-                "&g=" + gdpr; // require GDPR consent
-              console.log(ourl);
-              ores.redirect(ourl);
-            });
-
-          });
-
-        }).on("error", (err) => {
-        console.log("Error: " + err.message);
-        res.redirect(
-          app_config.public_url + '/error.html?success=failed&title=OAuth-Error&reason=' +
-          err.message);
-      });
-    }).catch(err => {
-      console.log("Oauth error: " + err);
-      ores.redirect(
-        app_config.public_url + '/error.html?success=failed&title=OAuth-Error&reason=' +
-        err.message);
-    });
-  });
 
   /*
    * thinx-connect gateway validation (device calls /lick with its mac and must receive its api key)
