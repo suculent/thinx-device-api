@@ -26,7 +26,7 @@ var ThinxApp = function() {
   const r_options = {
   password: app_config.redis.password,
   host: app_config.redis.host,
-  port: 6379,
+  port: app_config.redis.port,
   retry_strategy: function (options) {
       console.log('retry strategy check');
       console.log(options);
@@ -390,8 +390,8 @@ var ThinxApp = function() {
       host: app_config.redis.host,
       port: app_config.redis.post,
       pass: app_config.redis.password,
-      ttl : (60000 * 24 * 30),
-      client: redis_client // seems not working...
+      ttl : (60000 * 24 * 30) // ,
+      // client: redis_client // seems not working...
     }),
     name: "x-thx-session",
     resave: true,
@@ -3163,19 +3163,20 @@ var ThinxApp = function() {
 
   var wsapp = express();
 
+  console.log("Initializing WS session store...");
+
   wsapp.use(session({
     secret: session_config.secret,
     store: new redisStore({
       host: app_config.redis.host,
       port: app_config.redis.post,
       pass: app_config.redis.password,
-      ttl : (60000 * 24 * 30),
-      client: redis_client // seems not working...
+      ttl : (60000 * 24 * 30)
     }),
     cookie: {
       expires: hour
     },
-    name: "x-thx-session",
+    name: "x-thx-ws-session",
     resave: false,
     rolling: false,
     saveUninitialized: false,
@@ -3444,8 +3445,6 @@ var ThinxApp = function() {
   //
   // MQTT Disaster Recovery
   //
-
-
 
   function restore_owner_credentials(owner_id, dmk_callback) {
     devicelib.view("devicelib", "devices_by_owner", {
