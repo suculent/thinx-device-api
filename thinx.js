@@ -3166,9 +3166,11 @@ var ThinxApp = function() {
   wsapp.use(session({
     secret: session_config.secret,
     store: new redisStore({
-      host: "localhost",
-      port: 6379,
-      client: redis_client
+      host: app_config.redis.host,
+      port: app_config.redis.post,
+      pass: app_config.redis.password,
+      ttl : (60000 * 24 * 30),
+      client: redis_client // seems not working...
     }),
     cookie: {
       expires: hour
