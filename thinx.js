@@ -55,7 +55,7 @@ var ThinxApp = function() {
     }
   };
 
-  var redis_client = redis.createClient("6379", "redis", r_options);
+  var redis_client = redis.createClient(r_options);
   var path = require('path');
 
   //
@@ -387,9 +387,11 @@ var ThinxApp = function() {
       "httpOnly": true
     },
     store: new redisStore({
-      host: "localhost",
-      port: 6379,
-      client: redis_client
+      host: app_config.redis.host,
+      port: app_config.redis.post,
+      pass: app_config.redis.password,
+      ttl : (60000 * 24 * 30),
+      client: redis_client // seems not working...
     }),
     name: "x-thx-session",
     resave: true,
@@ -3375,7 +3377,7 @@ var ThinxApp = function() {
       console.log("Status Transformer Docker check error: " + e);
     }
 
-    /* this part will deprecate as transformer is managed by docker-compose and autorestarted now 
+    /* this part will deprecate as transformer is managed by docker-compose and autorestarted now
     // Kill existing transformers if any
     console.log("Docker Status Transformer check...");
     if (container_already_running) {
