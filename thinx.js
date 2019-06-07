@@ -25,6 +25,8 @@ var ThinxApp = function() {
 
   const r_options = {
   password: app_config.redis.password,
+  host: app_config.redis.host,
+  port: 6379,
   retry_strategy: function (options) {
       console.log('retry strategy check');
       console.log(options);
