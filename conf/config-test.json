@@ -19,6 +19,10 @@
   "client_user_agent": "THiNX-Client",
   "project_root": "/home/ubuntu/thinx-device-api",
   "data_root": "/mnt/data",
+  "redis": {
+    "host": "localhost",
+    "password": ""
+  },
   "mqtt": {
     "server": "mqtt://thinx.cloud",
     "port": 1883,

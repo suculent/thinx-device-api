@@ -24,7 +24,7 @@ var ThinxApp = function() {
   var app_config = require("./conf/config.json"); // this file should be actually omitted from repository
 
   const r_options = {
-  password: app_config.redis_password,
+  password: app_config.redis.password,
   retry_strategy: function (options) {
       console.log('retry strategy check');
       console.log(options);

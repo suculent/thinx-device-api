@@ -18,6 +18,10 @@
   "ssl_cert": "/etc/letsencrypt/live/thinx.cloud/cert.pem",
   "client_user_agent": "THiNX-Client",
   "project_root": "/home/ubuntu/thinx-device-api",
+  "redis": {
+    "host": "redis",
+    "password": "<enter-redis-password>"
+  },
   "mqtt": {
     "server": "mqtt://thinx.cloud",
     "port": 1883,
