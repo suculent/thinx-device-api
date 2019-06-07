@@ -55,7 +55,7 @@ var ThinxApp = function() {
     }
   };
 
-  var redis_client = redis.createClient(r_options);
+  var redis_client = redis.createClient(app_config.redis.port, app_config.redis.host, r_options);
   var path = require('path');
 
   //
