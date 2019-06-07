@@ -149,7 +149,7 @@ var ThinxApp = function() {
 
   const simpleOauthModule = require('simple-oauth2');
 
-  if (typeof(google_ocfg) !== "undefined" || google_ocfg !== null) {
+  if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
 
     const oauth2 = simpleOauthModule.create({
       client: {
@@ -171,7 +171,7 @@ var ThinxApp = function() {
 
   var githubOAuth;
 
-  if (typeof(github_ocfg) !== "undefined") {
+  if (typeof(github_ocfg) !== "undefined" && github_ocfg !== null) {
 
     try {
       githubOAuth = require('github-oauth')({
@@ -3375,6 +3375,7 @@ var ThinxApp = function() {
       console.log("Status Transformer Docker check error: " + e);
     }
 
+    /* this part will deprecate as transformer is managed by docker-compose and autorestarted now 
     // Kill existing transformers if any
     console.log("Docker Status Transformer check...");
     if (container_already_running) {
@@ -3387,7 +3388,7 @@ var ThinxApp = function() {
 
     // Pull fresh transformer container and start
     const docker_pull_cmd = "docker pull " + img + "; ";
-    const git_pull_cmd = "cd ~/thinx-node-transformer; git pull origin master; ";
+    const git_pull_cmd = "cd ../thinx-node-transformer; git pull origin master; ";
     const docker_run_cmd = "docker run --rm --user=transformer -d -p " + app_config.lambda +
       ":7474 -v $(pwd)/logs:/logs -v $(pwd):/app " + img;
     const st_command = docker_pull_cmd + git_pull_cmd + docker_run_cmd;
@@ -3397,7 +3398,7 @@ var ThinxApp = function() {
       if (e.toString().indexOf("port is already allocated") !== -1) {
         console.log("Status Transformer Docker exec error: " + e);
       }
-    }
+    }*/
 
     /* This operation should restore MQTT passwords only. */
     // triggered by non-existend password file
