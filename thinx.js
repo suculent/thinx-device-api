@@ -373,7 +373,14 @@ var ThinxApp = function() {
   var app = express();
 
   console.log("» Starting Redis client...");
-  //var redisStore = require("connect-redis")(session);
+  var RedisStore = require("connect-redis")(session);
+  var sessionStore = new RedisStore({
+    host: app_config.redis.host,
+    port: app_config.redis.post,
+    pass: app_config.redis.password,
+    ttl : (60000 * 24 * 30) // ,
+    // client: redis_client // seems not working...
+  });
 
   app.set("trust proxy", 1);
 
@@ -386,13 +393,7 @@ var ThinxApp = function() {
       "secure": true,
       "httpOnly": true
     },
-    store: new redisStore({
-      host: app_config.redis.host,
-      port: app_config.redis.post,
-      pass: app_config.redis.password,
-      ttl : (60000 * 24 * 30) // ,
-      // client: redis_client // seems not working...
-    }),
+    store: sessionStore,
     name: "x-thx-session",
     resave: true,
     rolling: false,
@@ -3167,12 +3168,7 @@ var ThinxApp = function() {
 
   wsapp.use(session({
     secret: session_config.secret,
-    store: new redisStore({
-      host: app_config.redis.host,
-      port: app_config.redis.post,
-      pass: app_config.redis.password,
-      ttl : (60000 * 24 * 30)
-    }),
+    store: sessionStore,
     cookie: {
       expires: hour
     },
