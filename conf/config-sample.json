@@ -1,8 +1,12 @@
 {
-  "public_url": "<enter-your-fqdn>",
-  "mx_domain": "<enter-your-mx>",
-  "rollbar_token": "<enter-your-rollbar.com-token>",
   "type": "thinx_server_config",
+  "public_url": "<enter-your-fqdn>",
+  "mailgun": {
+    "api_key": "<mailgun-api-key>",
+    "base_url": "<mailgun-base-url>",
+    "domain": "<mailgun-domain>"
+  },
+  "rollbar_token": "<enter-your-rollbar.com-token>",
   "database_uri": "http://rtmapi:frohikey@couchdb:5984",
   "mqtt_port": 1883,
   "port": 7442,

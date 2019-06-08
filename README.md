@@ -137,6 +137,19 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 
 ## Installation
 
+### Prerequisites
+
+**Required:**
+
+* Mailgun account (recently added)
+
+**Optional:**
+
+* Google Analytics integration
+* Rollbar integration
+* Sqreen integration
+* Slack integration
+
 ### Using Docker
 
 Experimental Docker installation can be found at [Docker Hub](https://hub.docker.com/r/suculent/thinx-docker/).
