@@ -1,8 +1,13 @@
 {
-  "public_url": "<enter-your-fqdn>",
-  "rollbar_token": "<enter-your-rollbar.com-token>",
   "type": "thinx_server_config",
-  "database_uri": "http://rtmapi:frohikey@dev.thinx.cloud:5984",
+  "public_url": "<enter-your-fqdn>",
+  "mailgun": {
+    "api_key": "<mailgun-api-key>",
+    "base_url": "<mailgun-base-url>",
+    "domain": "<mailgun-domain>"
+  },
+  "rollbar_token": "<enter-your-rollbar.com-token>",
+  "database_uri": "http://rtmapi:frohikey@couchdb:5984",
   "mqtt_port": 1883,
   "port": 7442,
   "secure_port": 7443,

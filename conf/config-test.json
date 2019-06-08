@@ -1,5 +1,10 @@
 {
   "public_url": "https://rtm.thinx.cloud",
+  "mailgun": {
+    "api_key": "54aa8d9dee3b3786fedf91020b06d537",
+    "base_url": "https://api.mailgun.net/v3/staging.thinx.cloud",
+    "domain": "staging.thinx.cloud"
+  },
   "rollbar_token": "<enter-your-rollbar.com-token>",
   "type": "thinx_server_config",
   "database_uri": "http://rtmtest:rtmtest@dev.thinx.cloud:5984",
