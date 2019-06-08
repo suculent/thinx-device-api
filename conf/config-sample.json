@@ -1,8 +1,9 @@
 {
   "public_url": "<enter-your-fqdn>",
+  "mx_domain": "<enter-your-mx>",
   "rollbar_token": "<enter-your-rollbar.com-token>",
   "type": "thinx_server_config",
-  "database_uri": "http://rtmapi:frohikey@dev.thinx.cloud:5984",
+  "database_uri": "http://rtmapi:frohikey@couchdb:5984",
   "mqtt_port": 1883,
   "port": 7442,
   "secure_port": 7443,
