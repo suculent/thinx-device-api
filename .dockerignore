@@ -1,0 +1,4 @@
+./.git
+#./package_lock.json
+./node_modules
+
