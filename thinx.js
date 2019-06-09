@@ -3361,44 +3361,9 @@ var ThinxApp = function() {
     // Status Transformer Server
     //
 
-
-    // run detached container on port 7474 waiting...
-    console.log("Starting Status Transformer Sandbox...");
-    const img = "suculent/thinx-node-transformer";
-
-    // Get running transformers if any
-    const docker_check_cmd = "docker ps | grep transformer | cut -d' ' -f1";
-    var container_already_running;
-    try {
-      container_already_running = exec.execSync(docker_check_cmd).toString();
-    } catch (e) {
-      console.log("Status Transformer Docker check error: " + e);
-    }
-
-    /* this part will deprecate as transformer is managed by docker-compose and autorestarted now
-    // Kill existing transformers if any
-    console.log("Docker Status Transformer check...");
-    if (container_already_running) {
-      try {
-        console.log(exec.execSync("docker kill " + container_already_running).toString());
-      } catch (e) {
-        console.log("Status Transformer Docker kill error: " + e);
-      }
-    }
-
-    // Pull fresh transformer container and start
-    const docker_pull_cmd = "docker pull " + img + "; ";
-    const git_pull_cmd = "cd ../thinx-node-transformer; git pull origin master; ";
-    const docker_run_cmd = "docker run --rm --user=transformer -d -p " + app_config.lambda +
-      ":7474 -v $(pwd)/logs:/logs -v $(pwd):/app " + img;
-    const st_command = docker_pull_cmd + git_pull_cmd + docker_run_cmd;
-    try {
-      console.log(exec.execSync(st_command).toString());
-    } catch (e) {
-      if (e.toString().indexOf("port is already allocated") !== -1) {
-        console.log("Status Transformer Docker exec error: " + e);
-      }
-    }*/
+    // Deprecated. Status Transformer is now started as separate Docker container
+    // and managed by Orchestration (docker-compose).
+    // TODO: Add Status Transformer POST TEST only...
 
     /* This operation should restore MQTT passwords only. */
     // triggered by non-existend password file

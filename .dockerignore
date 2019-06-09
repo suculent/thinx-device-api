@@ -1,4 +1,9 @@
-./.git
-#./package_lock.json
-./node_modules
-
+.git
+node_modules/
+tools/arduino-docker-build
+tools/platformio-docker-build
+#tools/micropython-docker-build
+#tools/mongoose-docker-build
+#tools/nodemcu-docker-build
+#tools/nodemcu-firmware
+#tools/lua-inspect
