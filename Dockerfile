@@ -2,7 +2,7 @@ FROM node:11.15
 
 # docker build -t suculent/thinx-device-api .
 
-# RUN INTERACTIVE: 
+# RUN INTERACTIVE:
 # docker run -ti -e THINX_HOSTNAME='staging.thinx.cloud' \
 # 	         -e THINX_OWNER='suculent@me.com' \
 #                -e REVISION=$(git rev-list head --count) \
@@ -23,7 +23,7 @@ ENV THINX_HOSTNAME=staging.thinx.cloud
 ENV THINX_OWNER_EMAIL=suculent@me.com
 
 # Update when running using `-e REVISION=$(git rev-list head --count)`
-ENV REVISION=4030 
+ENV REVISION=4030
 
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
@@ -35,14 +35,12 @@ COPY package*.json ./
 COPY . .
 
 RUN curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash \
-    && source /root/.bashrc \
-	&& export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" \
+	  && export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" \
     && npm install -g pm2 \
     && npm install
 
-
 RUN apt-get update \
- && apt-get install mosquitto_passwd
+ && apt-get install -y mosquitto
 
 # Let's add with some basic stuff.
 RUN apt-get update -qq && apt-get install -qqy \
@@ -51,13 +49,13 @@ RUN apt-get update -qq && apt-get install -qqy \
     curl \
     lxc \
     iptables
-    
+
 # Install Docker from Docker Inc. repositories.
 RUN curl -sSL https://get.docker.com/ | sh
 
 # Install the magic wrapper.
-ADD ./wrapdocker /usr/local/bin/wrapdocker
-RUN chmod +x /usr/local/bin/wrapdocker
+# FAILS: with no such file or directory: ADD ./wrapdocker /usr/local/bin/wrapdocker
+# RUN chmod +x /usr/local/bin/wrapdocker
 
 # Define additional metadata for our image.
 VOLUME /var/lib/docker
@@ -78,4 +76,3 @@ EXPOSE 9000
 EXPOSE 9001
 
 CMD [ "pm2", "start", "ecosystem.json" ]
-
