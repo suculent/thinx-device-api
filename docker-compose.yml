@@ -26,7 +26,6 @@ services:
       - 7443:7443 # API (HTTPS)
       - 7444:7444 # WebSocket
       - 7445:7445 # WebSocket SSL (reserved)
-      - 9000:9000 # Incoming GIT (Owner) Webhooks
       - 9001:9001 # Incoming GIT (User) Webhooks; will deprecate
     volumes:
       - /mnt/data/deploy:/mnt/data/deploy
