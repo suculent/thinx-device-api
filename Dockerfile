@@ -4,10 +4,12 @@ FROM node:11.13
 
 # RUN INTERACTIVE:
 # docker run -ti -e THINX_HOSTNAME='staging.thinx.cloud' \
-# 	         -e THINX_OWNER='suculent@me.com' \
+#                -e THINX_OWNER='suculent@me.com' \
 #                -e REVISION=$(git rev-list head --count) \
-# -v /mnt/data/mosquitto:
-# -v /mnt/data/mosquitto:
+#                -v /mnt/data/mosquitto/auth:/mnt/data/mosquitto/auth
+#                -v /mnt/data/mosquitto/log:/mnt/data/mosquitto/log
+#                -v /mnt/data/mosquitto/data:/mnt/data/mosquitto/data
+#                -v /mnt/data/mosquitto/ssl:/mnt/data/mosquitto/ssl
 #                   suculent/thinx-device-api bash
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -37,7 +39,11 @@ COPY package*.json ./
 COPY . .
 
 # Install OpenSSL/GnuTLS to prevent Git Fetch issues
-RUN apt-get update && apt-get install -y openssl gnutls-bin
+RUN apt-get update \
+    && apt-get install -y openssl gnutls-bin git \
+		&& git config http.sslVerify false \
+		&& git config --global http.postBuffer 1048576000
+		
 RUN curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash \
 	  && export NVM_DIR="$HOME/.nvm" \
 #		&& [ -s "$NVM_DIR/nvm.sh" ] \
@@ -66,7 +72,7 @@ RUN curl -sSL https://get.docker.com/ | sh
 # Define additional metadata for our image.
 VOLUME /var/lib/docker
 
-# Installs all tools, not just allowed in .dockerignore
+# Installs all tools, not just those currently allowed by .dockerignore
 # RUN cd tools \
 #  && bash ./install-builders.sh \
 #  && bash ./install-tools.sh
