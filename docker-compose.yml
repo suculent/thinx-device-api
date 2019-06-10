@@ -1,0 +1,34 @@
+version: '3.1'
+
+networks:
+  nat:
+    external: true
+  internal:
+    external: false
+
+services:
+  thinx-api:
+    networks:
+      - nat # for Device access
+      - internal # for Console access
+    env_file: ./.env
+    environment:
+      - THINX_HOSTNAME=${THINX_HOSTNAME}
+      - THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}
+      - REVISION=${REVISION}
+      - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
+      #- SQREEN_TOKEN=${SQREEN_TOKEN} # (optional, free for open-source)
+    image: suculent/thinx-device-api
+    build: .
+    ports:
+      # - 7440:7440 # WebAPP (RTM)?
+      - 7442:7442 # API (HTTP)
+      - 7443:7443 # API (HTTPS)
+      - 7444:7444 # WebSocket
+      - 7445:7445 # WebSocket SSL (reserved)
+      - 9000:9000 # Incoming GIT (Owner) Webhooks
+      - 9001:9001 # Incoming GIT (User) Webhooks; will deprecate
+    volumes:
+      - /mnt/data/deploy:/mnt/data/deploy
+      - /mnt/data/mosquitto/auth:/mnt/data/mosquitto
+      - /mnt/data/repos:/mnt/data/repos

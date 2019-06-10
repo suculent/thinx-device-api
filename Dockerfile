@@ -1,4 +1,4 @@
-FROM node:11.15
+FROM node:11.13
 
 # docker build -t suculent/thinx-device-api .
 
@@ -36,8 +36,12 @@ COPY package*.json ./
 # Copy app source code
 COPY . .
 
+# Install OpenSSL/GnuTLS to prevent Git Fetch issues
+RUN apt-get update && apt-get install -y openssl gnutls-bin
 RUN curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash \
-	  && export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" \
+	  && export NVM_DIR="$HOME/.nvm" \
+#		&& [ -s "$NVM_DIR/nvm.sh" ] \
+#		&& \. "$NVM_DIR/nvm.sh" \
     && npm install -g pm2 \
     && npm install
 
