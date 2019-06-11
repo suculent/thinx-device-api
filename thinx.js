@@ -3358,20 +3358,16 @@ var ThinxApp = function() {
     messenger.init();
 
     //
-    // Builder
-    //
-
-    if (!fs.existsSync('./builder.thinx.json')) {
-      console.log("Please create builder.thinx.json from builder.thinx.dist.json and adjust Builder configuration!");
-    }
-
-    //
     // Status Transformer Server
     //
 
     // Deprecated. Status Transformer is now started as separate Docker container
     // and managed by Orchestration (docker-compose).
     // TODO: Add Status Transformer POST TEST only...
+
+    //
+    // TODO: Move to messenger or owner OR DEVICES? Or extract?
+    //
 
     /* This operation should restore MQTT passwords only. */
     // triggered by non-existend password file
