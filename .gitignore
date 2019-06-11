@@ -1,3 +1,4 @@
+builder.thinx.dist.json
 .env
 lcov.info
 package-lock.json
