@@ -3358,6 +3358,14 @@ var ThinxApp = function() {
     messenger.init();
 
     //
+    // Builder
+    //
+
+    if (!fs.existsSync('./builder.thinx.json')) {
+      console.log("Please create builder.thinx.json from builder.thinx.dist.json and adjust Builder configuration!");
+    }
+
+    //
     // Status Transformer Server
     //
 
