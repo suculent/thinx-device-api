@@ -40,9 +40,7 @@ COPY . .
 
 # Install OpenSSL/GnuTLS to prevent Git Fetch issues
 RUN apt-get update \
-    && apt-get install -y openssl gnutls-bin git \
-		&& git config http.sslVerify false \
-		&& git config --global http.postBuffer 1048576000
+    && apt-get install -y openssl gnutls-bin
 		
 RUN curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash \
 	  && export NVM_DIR="$HOME/.nvm" \
