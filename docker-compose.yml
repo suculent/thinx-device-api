@@ -21,7 +21,8 @@ services:
 #    image: suculent/thinx-device-api
     build: .
     ports:
-      # - 7440:7440 # WebAPP (RTM)?
+      - 7440:7440 # WebAPP (RTM)?
+      - 7441:7441 # Reserved
       - 7442:7442 # API (HTTP)
       - 7443:7443 # API (HTTPS)
       - 7444:7444 # WebSocket

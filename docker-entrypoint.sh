@@ -19,6 +19,8 @@ export NVM_DIR="$HOME/.nvm"
 #echo "Trying again with bash..."
 #bash -c "pm2 start ecosystem.json"
 
+pm2 logs -f
+
 # sort of works but without pm2
 # node thinx.js
 

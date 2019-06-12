@@ -48,14 +48,16 @@ RUN apt-get install -qqy \
     lxc \
     iptables
 
+RUN curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+
 # Install app dependencies
 COPY package*.json ./
 
 # Copy app source code
 COPY . .
 		
-RUN curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash \
-          && export NVM_DIR="$HOME/.nvm" \
+
+RUN export NVM_DIR="$HOME/.nvm" \
           && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" \
           && npm install -g pm2 \
           && npm install
