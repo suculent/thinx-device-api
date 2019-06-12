@@ -261,7 +261,12 @@ fi
 
 echo "[builder.sh] Searching THiNX-File in $BUILD_PATH/$REPO_PATH..." | tee -a "${LOG_PATH}"
 
-THINX_CLOUD_URL="thinx.cloud"
+if [[ -z $WEB_HOSTNAME ]]; then
+	echo "WEB_HOSTNAME must be set!"
+	exit 1
+fi
+
+THINX_CLOUD_URL="${WEB_HOSTNAME}"
 THINX_MQTT_URL="${THINX_CLOUD_URL}"
 
 if [[ ! -z $DEVICE_ALIAS ]]; then

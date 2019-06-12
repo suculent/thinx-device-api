@@ -236,7 +236,7 @@ var ThinxApp = function() {
   var getClientIp = function(req) {
     var ipAddress = req.ip;
     if (!ipAddress) {
-      console.log("Unknown Client IP: thinx.cloud");
+      console.log("Unknown Client IP:" + ipAddress);
       return "207.154.230.212";
     }
     // convert from "::ffff:192.0.0.1"  to "192.0.0.1"
@@ -464,7 +464,8 @@ var ThinxApp = function() {
     }
 
     // Problem is, that the device API should be separate and have different Access-Control
-    var allowedOrigins = [app_config.public_url, 'http://rtm.thinx.cloud', 'https://cdnjs.cloudflare.com', 'https://d37gvrvc0wt4s1.cloudfront.net', '*'];
+    var webHostname = process.env.WEB_HOSTNAME || "rtm.thinx.cloud";
+    var allowedOrigins = [app_config.public_url, 'http://' + webHostname, 'https://cdnjs.cloudflare.com', 'https://d37gvrvc0wt4s1.cloudfront.net', '*'];
     var origin = req.headers.origin;
     if (allowedOrigins.indexOf(origin) > -1){
       res.setHeader('Access-Control-Allow-Origin', origin);
@@ -479,7 +480,7 @@ var ThinxApp = function() {
         console.log("Dis-Allowed origin: "+origin);
       }
     }
-    //res.header("Access-Control-Allow-Origin", allowedOrigin); // rtm.thinx.cloud
+    //res.header("Access-Control-Allow-Origin", allowedOrigin);
     res.header("Access-Control-Allow-Credentials", "true");
     res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
     res.header("Access-Control-Allow-Headers", "Content-type,Accept,X-Access-Token,X-Key");
@@ -2421,7 +2422,7 @@ var ThinxApp = function() {
     });
 
     res.redirect(
-      "https:/rtm.thinx.cloud/app/#/profile/help"
+      "https:/" + process.env.WEB_HOSTNAME + "/app/#/profile/help"
     );
 
   });
