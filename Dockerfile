@@ -32,36 +32,38 @@ ENV REVISION=4030
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
 
-# Install app dependencies
-COPY package*.json ./
+RUN apt-get update -qq \
+    && apt-get install -qqy apt-utils
 
-# Copy app source code
-COPY . .
+RUN curl -sSL https://get.docker.com/ | sh
 
 # Install OpenSSL/GnuTLS to prevent Git Fetch issues
-RUN apt-get update \
-    && apt-get install -y openssl gnutls-bin 
-		
-RUN curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash \
-	  && export NVM_DIR="$HOME/.nvm" \
-#		&& [ -s "$NVM_DIR/nvm.sh" ] \
-#		&& \. "$NVM_DIR/nvm.sh" \
-    && npm install -g pm2 \
-    && npm install
-
-RUN apt-get update \
- && apt-get install -y mosquitto
-
-# Let's add with some basic stuff.
-RUN apt-get update -qq && apt-get install -qqy \
+RUN apt-get install -qqy \
+    mosquitto \
+    openssl \
+    gnutls-bin \
     apt-transport-https \
     ca-certificates \
     curl \
     lxc \
     iptables
 
-# Install Docker from Docker Inc. repositories.
-RUN curl -sSL https://get.docker.com/ | sh
+# Install app dependencies
+COPY package*.json ./
+
+# Copy app source code
+COPY . .
+		
+RUN curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash \
+          && export NVM_DIR="$HOME/.nvm" \
+          && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" \
+          && npm install -g pm2 \
+          && npm install
+
+# Installs all tools, not just those currently allowed by .dockerignore
+# RUN cd tools \
+#  && bash ./install-builders.sh \
+#  && bash ./install-tools.sh
 
 # Install the magic wrapper.
 # FAILS: with no such file or directory: ADD ./wrapdocker /usr/local/bin/wrapdocker
@@ -70,19 +72,24 @@ RUN curl -sSL https://get.docker.com/ | sh
 # Define additional metadata for our image.
 VOLUME /var/lib/docker
 
-# Installs all tools, not just those currently allowed by .dockerignore
-# RUN cd tools \
-#  && bash ./install-builders.sh \
-#  && bash ./install-tools.sh
-
-# Expose port and start application
+# Reserved
 EXPOSE 7440
+
+# THiNX Web & Device API (HTTP)
 EXPOSE 7442
+
+# THiNX Device API (HTTPS)
 EXPOSE 7443
+
+# THiNX Web API Notification Socket
 EXPOSE 7444
 
-# Webhooks (should be only one for customers, thinx is immutable in docker)
-#EXPOSE 9000
-EXPOSE 9001
+# GitLab Webbook
+EXPOSE 9000
 
-CMD [ "pm2", "start", "ecosystem.json" ]
+# EXPOSE 9001 # Reserved by MQTT Websocket; cannot be used!
+
+# TODO: Cleanup for security reasons
+
+ADD ./docker-entrypoint.sh /docker-entrypoint.sh
+ENTRYPOINT [ "/docker-entrypoint.sh" ]

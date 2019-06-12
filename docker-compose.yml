@@ -18,7 +18,7 @@ services:
       - REVISION=${REVISION}
       - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
       #- SQREEN_TOKEN=${SQREEN_TOKEN} # (optional, free for open-source)
-    image: suculent/thinx-device-api
+#    image: suculent/thinx-device-api
     build: .
     ports:
       # - 7440:7440 # WebAPP (RTM)?
