@@ -5,7 +5,7 @@ source ./infer # utility functions like parse_yaml
 set +e
 
 echo
-echo "[builder.sh] -=[ ☢  THiNX IoT RTM BUILDER ☢ ]=-"
+echo "[builder.sh] -=[ ☢   THiNX IoT RTM BUILDER ☢  ]=-"
 echo "[builder.sh] Running from: $(pwd)"
 
 # FIXME: This is system environment variable and should be configured on installation,

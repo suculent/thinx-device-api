@@ -3,7 +3,7 @@
 ################################################################################
 # Docker Build: Mount EBS volume
 
-sudo mount -o discard,defaults /dev/disk/by-id/scsi-0DO_Volume_thinx-docker-01 /var/lib/docker; echo /dev/disk/by-id/scsi-0DO_Volume_thinx-docker-01 /var/lib/docker ext4 defaults,nofail,discard 0 0 | sudo tee -a /etc/fstab
+# sudo mount -o discard,defaults /dev/disk/by-id/scsi-0DO_Volume_thinx-docker-01 /var/lib/docker; echo /dev/disk/by-id/scsi-0DO_Volume_thinx-docker-01 /var/lib/docker ext4 defaults,nofail,discard 0 0 | sudo tee -a /etc/fstab
 
 # Clean up dead and exited containers using command:
 docker volume ls -qf dangling=true | xargs -r docker volume rm
@@ -27,7 +27,7 @@ npm install eslint
 
 ################################################################################
 # C/C++
-sudo apt-get install cppcheck
+apt-get install cppcheck
 # TODO: Use xtensa lx6 builder
 
 ################################################################################
@@ -40,7 +40,6 @@ export DOCKER_IMAGE_NAME=thinx-micropython
 
 # based on suculent/micropython-docker-build
 
-cd tools
 git clone https://github.com/suculent/micropython-docker-build.git
 pushd micropython-docker-build
 mkdir -p ./modules

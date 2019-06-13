@@ -8,6 +8,8 @@ networks:
 
 services:
   thinx-api:
+    privileged: true # because of DIND builders
+    shm_size: 256M
     networks:
       - nat # for Device access
       - internal # for Console access
@@ -17,6 +19,8 @@ services:
       - THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}
       - REVISION=${REVISION}
       - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
+      - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
+      - DOCKER_HOST=tcp://docker:2375/
       #- SQREEN_TOKEN=${SQREEN_TOKEN} # (optional, free for open-source)
 #    image: suculent/thinx-device-api
     build: .
@@ -29,6 +33,16 @@ services:
       - 7445:7445 # WebSocket SSL (reserved)
       - 9001:9001 # Incoming GIT (User) Webhooks; will deprecate
     volumes:
-      - /mnt/data/deploy:/mnt/data/deploy
-      - /mnt/data/mosquitto/auth:/mnt/data/mosquitto
-      - /mnt/data/repos:/mnt/data/repos
+      - /mnt/data/deploy:/mnt/data/deploy # Deployment
+      - /mnt/data/mosquitto/auth:/mnt/data/mosquitto # Authentication
+      - /mnt/data/repos:/mnt/data/repos # Git
+      - /var/run/docker.sock:/var/run/docker.sock # DIND
+      - /var/lib/doocker
+      - /cache
+
+  builder:
+    privileged: true # because of DIND builders
+    image: docker:dind
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # DIND
+      - /cache
