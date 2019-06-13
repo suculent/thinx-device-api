@@ -17,6 +17,7 @@ services:
       - THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}
       - REVISION=${REVISION}
       - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
+      - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
       #- SQREEN_TOKEN=${SQREEN_TOKEN} # (optional, free for open-source)
 #    image: suculent/thinx-device-api
     build: .
