@@ -465,21 +465,11 @@ var ThinxApp = function() {
 
     // Problem is, that the device API should be separate and have different Access-Control
     var webHostname = process.env.WEB_HOSTNAME || "rtm.thinx.cloud";
-    var allowedOrigins = [app_config.public_url, 'http://' + webHostname, 'https://cdnjs.cloudflare.com', 'https://d37gvrvc0wt4s1.cloudfront.net', '*'];
-    var origin = req.headers.origin;
-    if (allowedOrigins.indexOf(origin) > -1){
-      res.setHeader('Access-Control-Allow-Origin', origin);
-    } else {
-      if ((typeof(origin) === "undefined") || (origin === NULL)) {
-        // res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
-        // device-wise
-      } else {
-        // hack! for monitoring disallowed (unlisted, forgotten originsd)
-        console.log("Request origin: "+origin);
-        res.setHeader('Access-Control-Allow-Origin', origin);
-        console.log("Dis-Allowed origin: "+origin);
-      }
-    }
+    var allowedOrigins = ['*'];
+
+    console.log("headrz: "+ JSON.stringify(req.headers, false, 2));
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+
     //res.header("Access-Control-Allow-Origin", allowedOrigin);
     res.header("Access-Control-Allow-Credentials", "true");
     res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
