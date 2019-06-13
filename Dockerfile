@@ -32,22 +32,31 @@ ENV REVISION=4030
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
 
-RUN apt-get update -qq \
-    && apt-get install -qqy apt-utils
+RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
+    apt-get update -qq && \
+    apt-get install -qqy \
+    apt-transport-https \
+    apt-utils \
+    btrfs-progs \
+    ca-certificates \
+    cppcheck \
+    curl \
+    e2fsprogs \
+    gnutls-bin \
+    iptables \
+    lxc \
+    mosquitto \
+    openssl \
+    pigz \
+    python-pip \
+    xfsprogs \
+    xz-utils \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN curl -sSL https://get.docker.com/ | sh
 
-# Install OpenSSL/GnuTLS to prevent Git Fetch issues
-RUN apt-get install -qqy \
-    mosquitto \
-    openssl \
-    gnutls-bin \
-    apt-transport-https \
-    ca-certificates \
-    curl \
-    lxc \
-    iptables
 
+# Install NVM to manage Node versions with PM2
 RUN curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
 
 # Install app dependencies
@@ -55,24 +64,41 @@ COPY package*.json ./
 
 # Copy app source code
 COPY . .
-		
 
 RUN export NVM_DIR="$HOME/.nvm" \
           && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" \
-          && npm install -g pm2 \
+          && npm install -g pm2 eslint \
           && npm install
 
-# Installs all tools, not just those currently allowed by .dockerignore
-# RUN cd tools \
-#  && bash ./install-builders.sh \
-#  && bash ./install-tools.sh
+#    && zfs-dkms
 
-# Install the magic wrapper.
-# FAILS: with no such file or directory: ADD ./wrapdocker /usr/local/bin/wrapdocker
-# RUN chmod +x /usr/local/bin/wrapdocker
+# only install zfs if it's available for the current architecture
+# https://git.alpinelinux.org/cgit/aports/tree/main/zfs/APKBUILD?h=3.6-stable#n9 ("all !armhf !ppc64le" as of 2017-11-01)
+# "apk info XYZ" exits with a zero exit code but no output when the package exists but not for this arch
+#	if zfs="$(apk info --no-cache --quiet zfs)" && [ -n "$zfs" ]; then \
+#		apt-get install -y zfs; \
+#	fi
 
-# Define additional metadata for our image.
+# set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
+RUN set -x \
+	&& addgroup dockremap --gid 65536 \
+	&& adduser --system dockremap --gid 65536 \
+	&& echo 'dockremap:165536:65536' >> /etc/subuid \
+	&& echo 'dockremap:165536:65536' >> /etc/subgid
+
+# https://github.com/docker/docker/tree/master/hack/dind
+ENV DIND_COMMIT 37498f009d8bf25fbb6199e8ccd34bed84f2874b
+
+RUN set -eux; \
+	wget -O /usr/local/bin/dind "https://raw.githubusercontent.com/docker/docker/${DIND_COMMIT}/hack/dind"; \
+	chmod +x /usr/local/bin/dind
+
 VOLUME /var/lib/docker
+# EXPOSE 2375
+
+#
+# << DIND
+#
 
 # Reserved
 EXPOSE 7440
@@ -93,5 +119,5 @@ EXPOSE 9000
 
 # TODO: Cleanup for security reasons
 
-ADD ./docker-entrypoint.sh /docker-entrypoint.sh
+COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
