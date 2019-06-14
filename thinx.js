@@ -3145,7 +3145,7 @@ var ThinxApp = function() {
       };
       console.log("» Starting HTTPS server on " + (serverPort + 1) +
         "...");
-      https.createServer(ssl_options, app).listen(serverPort + 1);
+      https.createServer(ssl_options, app).listen(serverPort + 1, "0.0.0.0", function() { } );
     } else {
       console.log(
         "Skipping HTTPS server, SSL key or certificate not found.");
@@ -3156,7 +3156,7 @@ var ThinxApp = function() {
   app.set('trust proxy', ['loopback', '127.0.0.1']);
 
   // Legacy HTTP support for old devices without HTTPS proxy
-  http.createServer(app).listen(serverPort);
+  http.createServer(app).listen(serverPort, "0.0.0.0", function() { });
 
   /*
    * WebSocket Server
@@ -3292,7 +3292,7 @@ var ThinxApp = function() {
     });
   }
 
-  wserver.listen(7444, function listening() {
+  wserver.listen(7444, "0.0.0.0", function listening() {
     console.log("» WebSocket listening on port %d", wserver.address().port);
   });
 
