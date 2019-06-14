@@ -2132,7 +2132,12 @@ var ThinxApp = function() {
         }
 
       } else { // password invalid
-        console.log("[LOGIN_INVALID] Password mismatch for: " + username + ", db: " + sha256(user_data.password) + " vs. " + sha256(password));
+        const p = user_data.password;
+        if (typeof(p) === "undefined") {
+          console.log("[LOGIN_INVALID] no password set for " + username);
+        } else {
+          console.log("[LOGIN_INVALID] Password mismatch for: " + username + ", db: " + sha256(user_data.password) + " vs. " + sha256(password));
+        }
 
         alog.log(req.session.owner, "Password mismatch for: " + username);
         respond(res, {
