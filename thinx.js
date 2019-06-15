@@ -428,6 +428,7 @@ var ThinxApp = function() {
       console.log("Dropping connection for client without user-agent.");
       res.status(403).end();
       client = "";
+      return;
     }
 
     if (client.indexOf("Jorgee") !== -1) {
