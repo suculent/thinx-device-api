@@ -148,10 +148,11 @@ var ThinxApp = function() {
   //
 
   const simpleOauthModule = require('simple-oauth2');
+  var oauth2;
 
   if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
 
-    const oauth2 = simpleOauthModule.create({
+     oauth2 = simpleOauthModule.create({
       client: {
         id: google_ocfg.web.client_id,
         secret: google_ocfg.web.client_secret,
