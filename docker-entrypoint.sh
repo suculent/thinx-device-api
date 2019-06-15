@@ -6,7 +6,9 @@
 
 set -e
 
-export DOCKER_HOST="tcp://0.0.0.0:2375"
+sysctl net.ipv4.ip_forward=1
+
+export DOCKER_HOST="tcp://docker:2375"
 
 if [ "$#" -eq 0 ] || [ "${1#-}" != "$1" ]; then
 	set -- dockerd \

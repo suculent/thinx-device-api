@@ -26,8 +26,7 @@ services:
       #- SQREEN_TOKEN=${SQREEN_TOKEN} # (optional, free for open-source)
     build: . # suculent/thinx-device-api
     ports:
-      - 7440:7440 # WebAPP (RTM)?
-      - 7441:7441 # Reserved
+#      - 7441:7441 # Reserved
       - 7442:7442 # API (HTTP)
       - 7443:7443 # API (HTTPS)
       - 7444:7444 # WebSocket
@@ -37,13 +36,19 @@ services:
       - /mnt/data/deploy:/mnt/data/deploy # Deployment
       - /mnt/data/mosquitto/auth:/mnt/data/mosquitto # Authentication
       - /mnt/data/repos:/mnt/data/repos # Git
+      - /mnt/data/ssl:/mnt/data/ssl
       - /var/run/docker.sock:/var/run/docker.sock # DIND
       - /var/lib/doocker
       - /cache
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.port=7442"
+#      - "traefik.backend=thinx-api"
+#      - "traefik.frontend.rule=Host:${THINX_HOSTNAME}"
 
-  dind:
-    privileged: true # because of DIND builders
-    image: docker:dind
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock # DIND
-      - /cache
+ # dind:
+ #   privileged: true # because of DIND builders
+ #   image: docker:dind
+ #   volumes:
+ #     - /var/run/docker.sock:/var/run/docker.sock # DIND
+ #     - /cache

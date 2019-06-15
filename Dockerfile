@@ -51,6 +51,7 @@ RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
     python-pip \
     xfsprogs \
     xz-utils \
+    net-tools \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -sSL https://get.docker.com/ | sh
@@ -113,11 +114,7 @@ EXPOSE 7443
 EXPOSE 7444
 
 # GitLab Webbook
-EXPOSE 9000
-
-# EXPOSE 9001 # Reserved by MQTT Websocket; cannot be used!
-
-# TODO: Cleanup for security reasons
+EXPOSE 9002
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
