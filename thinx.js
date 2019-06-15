@@ -2589,7 +2589,7 @@ var ThinxApp = function() {
                       token + "&g=true"; // require GDPR consent
                     console.log("FIXME: this request will probably fail fail (cannot redirect): " + ourl);
                     // causes registration error where headers already sent!
-                    res.redirect(ourl); // was global_response!
+                    global_response.redirect(ourl); // must be global_response! res does not exist here.
 
                     if (use_sqreen) {
                       Sqreen.signup_track({ username: userWrapper.owner_id });
