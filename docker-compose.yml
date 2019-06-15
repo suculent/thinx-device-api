@@ -20,9 +20,6 @@ services:
       - REVISION=${REVISION}
       - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
       - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
-# Watch out, DOCKER_HOST is overridden with export in docker-entrypoint.sh at this moment.
-#      - DOCKER_HOST=tcp://dind:2375/
-#      - DOCKER_HOST=tcp://docker:2375/
       #- SQREEN_TOKEN=${SQREEN_TOKEN} # (optional, free for open-source)
     build: . # suculent/thinx-device-api
     ports:
