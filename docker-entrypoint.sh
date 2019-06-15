@@ -9,19 +9,20 @@ set -e
 sysctl net.ipv4.ip_forward=1
 
 export DOCKER_HOST="tcp://docker:2375"
+export DOCKER_HOST="unix:///var/run/docker.sock"
 
-if [ "$#" -eq 0 ] || [ "${1#-}" != "$1" ]; then
-	set -- dockerd \
-		--host=unix:///var/run/docker.sock \
-		--host=tcp://0.0.0.0:2375 \
-		"$@"
-fi
-if [ "$1" = 'dockerd' ]; then
-	if [ -x '/usr/local/bin/dind' ]; then
-		set -- '/usr/local/bin/dind' "$@"
-	fi
-	find /run /var/run -iname 'docker*.pid' -delete
-fi
+#if [ "$#" -eq 0 ] || [ "${1#-}" != "$1" ]; then
+#	set -- dockerd \
+#		--host=unix:///var/run/docker.sock \
+#		--host=tcp://0.0.0.0:2375 \
+#		"$@"
+#fi
+#if [ "$1" = 'dockerd' ]; then
+#	if [ -x '/usr/local/bin/dind' ]; then
+#		set -- '/usr/local/bin/dind' "$@"
+#	fi
+#	find /run /var/run -iname 'docker*.pid' -delete
+#fi
 
 # exec "$@"
 
