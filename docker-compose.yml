@@ -5,6 +5,8 @@ networks:
     external: true
   internal:
     external: false
+  thxnet:
+    external: true
 
 services:
   thinx-api:
@@ -13,6 +15,7 @@ services:
     networks:
       - nat # for Device access
       - internal # for Console access
+      - thxnet
     env_file: ./.env
     environment:
       - THINX_HOSTNAME=${THINX_HOSTNAME}
@@ -20,13 +23,10 @@ services:
       - REVISION=${REVISION}
       - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
       - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
-# Watch out, DOCKER_HOST is overridden with export in docker-entrypoint.sh at this moment.
-#      - DOCKER_HOST=tcp://dind:2375/
-#      - DOCKER_HOST=tcp://docker:2375/
       #- SQREEN_TOKEN=${SQREEN_TOKEN} # (optional, free for open-source)
     build: . # suculent/thinx-device-api
     ports:
-#      - 7441:7441 # Reserved
+#      - 7441:7441 # Reserved for Web HTTPS, 7440 is Web HTTP
       - 7442:7442 # API (HTTP)
       - 7443:7443 # API (HTTPS)
       - 7444:7444 # WebSocket
@@ -40,11 +40,12 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock # DIND
       - /var/lib/doocker
       - /cache
-#    labels:
-#      - "traefik.enable=true"
-#      - "traefik.port=7442"
-#      - "traefik.backend=thinx-api"
-#      - "traefik.frontend.rule=Host:${THINX_HOSTNAME}"
+    labels:
+      - "traefik.docker.network=nat"
+      - "traefik.enable=true"
+      - "traefik.port=7442"
+      - "traefik.backend=thinx-api"
+      - "traefik.frontend.rule=Host:${THINX_HOSTNAME}"
 
  # dind:
  #   privileged: true # because of DIND builders
