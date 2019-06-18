@@ -468,10 +468,16 @@ var ThinxApp = function() {
     var webHostname = process.env.WEB_HOSTNAME || "rtm.thinx.cloud";
 
     console.log("headrz: "+ JSON.stringify(req.headers, false, 2));
-    res.setHeader('Access-Control-Allow-Origin', '*');
 
-    //res.header("Access-Control-Allow-Origin", allowedOrigin);
     // cannot use this with allow origin * res.header("Access-Control-Allow-Credentials", "true");
+    if (req.originalUrl.indexOf("login") !== -1) {
+      res.header("Access-Control-Allow-Origin", app_config.public_url.replace("https://", "").replace("http://", ""));
+      res.header("Access-Control-Allow-Credentials", "true");
+    } else {
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Credentials", "false");
+    }
+
     res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
     res.header("Access-Control-Allow-Headers", "Content-type,Accept,X-Access-Token,X-Key");
 
