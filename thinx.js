@@ -471,9 +471,11 @@ var ThinxApp = function() {
 
     // cannot use this with allow origin * res.header("Access-Control-Allow-Credentials", "true");
     if (req.originalUrl.indexOf("login") !== -1) {
-      res.header("Access-Control-Allow-Origin", app_config.public_url.replace("https://", "").replace("http://", ""));
+      console.log("Setting CORS to " + app_config.public_url);
+      res.header("Access-Control-Allow-Origin", app_config.public_url);
       res.header("Access-Control-Allow-Credentials", "true");
     } else {
+      console.log("Setting CORS to *");
       res.header("Access-Control-Allow-Origin", "*");
       res.header("Access-Control-Allow-Credentials", "false");
     }

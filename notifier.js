@@ -24,8 +24,8 @@ if (process.env.LOGNAME == "root") {
 
 var rollbar = new Rollbar({
   accessToken: config.rollbar_token,
-  handleUncaughtExceptions: true,
-  handleUnhandledRejections: true
+  handleUncaughtExceptions: false,
+  handleUnhandledRejections: false
 });
 
 var sha256 = require("sha256");
