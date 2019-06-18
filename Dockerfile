@@ -27,7 +27,9 @@ ENV THINX_HOSTNAME=staging.thinx.cloud
 ENV THINX_OWNER_EMAIL=suculent@me.com
 
 # Update when running using `-e REVISION=$(git rev-list head --count)`
-ENV REVISION=4030
+ENV REVISION=4135
+
+ENV NODE_ENV=production
 
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
@@ -55,7 +57,6 @@ RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -sSL https://get.docker.com/ | sh
-
 
 # Install NVM to manage Node versions with PM2
 RUN curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
