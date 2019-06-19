@@ -102,6 +102,8 @@ VOLUME /var/lib/docker
 # << DIND
 #
 
+RUN mkdir -p /ssh-keys
+
 # THiNX Web & Device API (HTTP)
 EXPOSE 7442
 

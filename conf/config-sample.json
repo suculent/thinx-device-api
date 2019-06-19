@@ -1,5 +1,6 @@
 {
   "type": "thinx_server_config",
+  "ssh_keys": "<path-to-store-ssh-keys>",
   "public_url": "<enter-your-fqdn>",
   "mailgun": {
     "api_key": "<mailgun-api-key>",
