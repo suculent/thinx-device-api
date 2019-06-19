@@ -2394,7 +2394,7 @@ var ThinxApp = function() {
       host: 'slack.com',
       hostname: 'slack.com',
       port: 443,
-      path: '/api/oauth.access?client_id=233115403974.233317554391&client_secret=ccbaae01e5259ed283ef63321be597da&redirect_uri=" + app_config.public_url + ":7443/slack/redirect&scope=bot&code=' +
+      path: '/api/oauth.access?client_id=233115403974.233317554391&client_secret=ccbaae01e5259ed283ef63321be597da&redirect_uri=' + app_config.public_url + ':7443/slack/redirect&scope=bot&code=' +
         req.query.code
     };
 
