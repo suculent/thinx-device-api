@@ -102,9 +102,6 @@ VOLUME /var/lib/docker
 # << DIND
 #
 
-# Reserved
-EXPOSE 7440
-
 # THiNX Web & Device API (HTTP)
 EXPOSE 7442
 
