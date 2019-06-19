@@ -14,11 +14,15 @@ FROM node:11.13
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+ARG APP_HOSTNAME
 ARG THINX_HOSTNAME
 ARG THINX_OWNER_EMAIL
 ARG REVISION
 
 ARG DEBIAN_FRONTEND=noninteractive
+
+# Used for redirects back to Web
+ENV APP_HOSTNAME=console.staging.thinx.cloud
 
 # Enter FQDN you own, should have public IP
 ENV THINX_HOSTNAME=staging.thinx.cloud

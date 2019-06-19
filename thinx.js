@@ -2433,7 +2433,7 @@ var ThinxApp = function() {
     });
 
     res.redirect(
-      "https:/" + process.env.WEB_HOSTNAME + "/app/#/profile/help"
+      "https://" + process.env.APP_HOSTNAME + "/app/#/profile/help"
     );
 
   });
