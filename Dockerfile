@@ -102,6 +102,8 @@ VOLUME /var/lib/docker
 # << DIND
 #
 
+RUN mkdir -p /ssh-keys
+
 # Reserved
 EXPOSE 7440
 
