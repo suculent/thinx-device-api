@@ -104,9 +104,6 @@ VOLUME /var/lib/docker
 
 RUN mkdir -p /ssh-keys
 
-# Reserved
-EXPOSE 7440
-
 # THiNX Web & Device API (HTTP)
 EXPOSE 7442
 
