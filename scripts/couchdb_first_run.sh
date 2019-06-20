@@ -5,7 +5,12 @@ PASS=${COUCHDB_PASSWORD:-$(pwgen -s -1 16)}
 DB=${COUCHDB_DBNAME:-test}
 URL="127.0.0.1" # depends on .env variable, should be 'couchdb' instead, mapped wherever...
 
-THX_PREFIX=$(pwgen -s 5 1)
+THX_PREFIX=$(pwgen -s 12 1)
+PFX_FILE=./conf/.thx_prefix
+
+if [ -f $PFX_FILE ]; then
+  THX_PREFIX=$(cat $PFX_FILE)
+fi
 
 if [[ ! -f ./conf/config.json ]]; then
   echo "./conf/config.json not configured yet."

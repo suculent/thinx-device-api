@@ -259,6 +259,22 @@ var ThinxApp = function() {
     var pfx_path = app_config.project_root + '/conf/.thx_prefix';
     if (fs.existsSync(pfx_path)) {
       prefix = fs.readFileSync(pfx_path) + "_";
+    } else {
+      // create .thx_prefix with random key on first run!
+      fs.ensureFile(pfx_path, function(e) {
+        if (e) {
+          console.log("error creating thx_prefix: " + e);
+        } else {
+          crypto.randomBytes(12, function(err, buffer) {
+            var prefix = buffer.toString('hex');
+            fs.writeFile(prefix, "", function(err) {
+              if (err) {
+                console.log("error writing thx_prefix: " + err);
+              }
+            });
+          });
+        }
+      });
     }
   } catch (e) {
     console.log("[index] thx_prefix_exception" + e);
