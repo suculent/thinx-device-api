@@ -483,8 +483,6 @@ var ThinxApp = function() {
     // Problem is, that the device API should be separate and have different Access-Control
     var webHostname = process.env.WEB_HOSTNAME || "rtm.thinx.cloud";
 
-    console.log("headrz: "+ JSON.stringify(req.headers, false, 2));
-
     // cannot use this with allow origin * res.header("Access-Control-Allow-Credentials", "true");
     // analysis: will PROBABLY have to be refactored to anything but Device-Registration and Devoce-OTA requests
     if ((req.originalUrl.indexOf("login") !== -1) ||
