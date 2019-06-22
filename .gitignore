@@ -1,3 +1,4 @@
+.thx_prefix
 builder.thinx.dist.json
 .env
 lcov.info

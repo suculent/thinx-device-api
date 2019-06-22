@@ -5,8 +5,6 @@ networks:
     external: true
   internal:
     external: false
-  thxnet:
-    external: true
 
 services:
   thinx-api:
@@ -15,7 +13,6 @@ services:
     networks:
       - nat # for Device access
       - internal # for Console access
-      - thxnet
     env_file: ./.env
     environment:
       - THINX_HOSTNAME=${THINX_HOSTNAME}
