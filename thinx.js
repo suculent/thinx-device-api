@@ -3504,6 +3504,7 @@ var ThinxApp = function() {
       for (var i = 0; i < body.rows.length; i++) {
         var owner_doc = body.rows[i];
         var owner_id = owner_doc.id;
+        if (owner_id.indexOf("design")) continue;
         console.log("Restoring credentials for owner "+owner_id);
         restore_owner_credentials(owner_id, function(success, default_mqtt_key) {
           if (success) {
