@@ -22,13 +22,7 @@ ARG REVISION
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Used for redirects back to Web
-ENV APP_HOSTNAME=console.staging.thinx.cloud
-
-# Enter FQDN you own, should have public IP
-ENV THINX_HOSTNAME=staging.thinx.cloud
-
-# Add your e-mail to take control of LSE SSL certificate.
-ENV THINX_OWNER_EMAIL=suculent@me.com
+ENV APP_HOSTNAME=${APP_HOSTNAME}
 
 # Update when running using `-e REVISION=$(git rev-list head --count)`
 ENV REVISION=4135
