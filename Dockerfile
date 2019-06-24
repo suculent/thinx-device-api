@@ -58,6 +58,7 @@ RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
     xfsprogs \
     xz-utils \
     net-tools \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -sSL https://get.docker.com/ | sh
@@ -100,13 +101,10 @@ RUN set -eux; \
 	chmod +x /usr/local/bin/dind
 
 VOLUME /var/lib/docker
-# EXPOSE 2375
 
 #
 # << DIND
 #
-
-RUN mkdir -p /ssh-keys
 
 # THiNX Web & Device API (HTTP)
 EXPOSE 7442
