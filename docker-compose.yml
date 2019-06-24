@@ -5,8 +5,6 @@ networks:
     external: true
   internal:
     external: false
-  thxnet:
-    external: true
 
 services:
   thinx-api:
@@ -15,7 +13,6 @@ services:
     networks:
       - nat # for Device access
       - internal # for Console access
-      - thxnet
     env_file: ./.env
     environment:
       - THINX_HOSTNAME=${THINX_HOSTNAME}
@@ -37,6 +34,7 @@ services:
       - /mnt/data/mosquitto/auth:/mnt/data/mosquitto # Authentication
       - /mnt/data/repos:/mnt/data/repos # Git
       - /mnt/data/ssl:/mnt/data/ssl
+      - /mnt/data/ssh_keys:/mnt/data/ssh_keys
       - /var/run/docker.sock:/var/run/docker.sock # DIND
       - /var/lib/doocker
       - /cache
