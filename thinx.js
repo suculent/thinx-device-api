@@ -485,9 +485,9 @@ var ThinxApp = function() {
 
     // cannot use this with allow origin * res.header("Access-Control-Allow-Credentials", "true");
     // analysis: will PROBABLY have to be refactored to anything but Device-Registration and Devoce-OTA requests
-    if ((req.originalUrl.indexOf("login") !== -1) ||
-        (req.originalUrl.indexOf("api") !== -1)) {
-      console.log("Setting CORS to " + app_config.public_url);
+    if ((req.originalUrl.indexOf("register") == -1) &&
+        (req.originalUrl.indexOf("firmware") == -1)) {
+      //console.log("Setting CORS to " + app_config.public_url);
       res.header("Access-Control-Allow-Origin", app_config.public_url);
       res.header("Access-Control-Allow-Credentials", "true");
     } else {
@@ -1899,6 +1899,7 @@ var ThinxApp = function() {
     var owner_id = null;
 
     if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
+
       redis_client.get(oauth, function(err, userWrapper) {
         if (err) {
           console.log("[oauth] takeover failed");
@@ -2049,6 +2050,7 @@ var ThinxApp = function() {
       var user_data = null;
       for (var index in all_users) {
         var all_user_data = all_users[index];
+
         if (username != all_user_data.key) {
           continue;
         } else {
@@ -2066,6 +2068,7 @@ var ThinxApp = function() {
         thinx_slack.alert({
           text: err_string
         });
+
         console.log("No user data, " + username + " not authorized.");
         failureResponse(res, 403, "unauthorized");
         return;
