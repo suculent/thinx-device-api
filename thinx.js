@@ -1007,20 +1007,18 @@ var ThinxApp = function() {
     if (typeof(req.body.filenames) !== "undefined") {
       var filenames = req.body.filenames;
       console.log("Fingerprints: " + JSON.stringify(filenames));
-      rsakey.revoke(owner, filenames,
-        function(success, response) {
-          respond(res, {
-            success: success,
-            status: response
-          });
+      rsakey.revoke(owner, filenames, function(success, response) {
+        respond(res, {
+          success: success,
+          status: response
         });
+      });
+    } else {
+      respond(res, {
+        success: false,
+        status: "invalid_query"
+      });
     }
-
-    respond(res, {
-      success: false,
-      status: "invalid_query"
-    });
-
   });
 
   /*
