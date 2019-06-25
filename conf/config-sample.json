@@ -8,7 +8,7 @@
     "domain": "<mailgun-domain>"
   },
   "rollbar_token": "<enter-your-rollbar.com-token>",
-  "database_uri": "http://rtmapi:frohikey@couchdb:5984",
+  "database_uri": "http://<username>:<password>@couchdb:5984",
   "webhook_port": 9002,
   "mqtt_port": 1883,
   "port": 7442,
@@ -24,7 +24,7 @@
   "ssl_key": "/etc/letsencrypt/live/thinx.cloud/privkey.pem",
   "ssl_cert": "/etc/letsencrypt/live/thinx.cloud/cert.pem",
   "client_user_agent": "THiNX-Client",
-  "project_root": "/home/ubuntu/thinx-device-api",
+  "project_root": "/opt/thinx/thinx-device-api",
   "redis": {
     "host": "redis",
     "password": "<enter-redis-password>"
@@ -39,7 +39,7 @@
   },
   "data_root": "/mnt/data",
   "mqtt_server": "mqtt://thinx.cloud",
-  "mqtt_messenger_key": "5ec1fdd8-5d68-11e7-b0e3-4c327591230a",
+  "mqtt_messenger_key": "<mqtt_password_for_username:thinx>",
   "default_avatar": "",
   "debug": {
     "device" : false
