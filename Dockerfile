@@ -24,6 +24,9 @@ ARG DEBIAN_FRONTEND=noninteractive
 # Used for redirects back to Web
 ENV APP_HOSTNAME=${APP_HOSTNAME}
 
+# Enter FQDN you own, should have public IP
+ENV THINX_HOSTNAME=${THINX_HOSTNAME}
+
 # Update when running using `-e REVISION=$(git rev-list head --count)`
 ENV REVISION=4135
 
