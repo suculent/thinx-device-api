@@ -211,7 +211,7 @@ var ThinxApp = function() {
   // should be initialized after prefix because of DB requirements...
   var v = require("./lib/thinx/version");
   var alog = require("./lib/thinx/audit");
-  var blog = require("./lib/thinx/buildlog");
+
   var builder = require("./lib/thinx/builder");
   var device = require("./lib/thinx/device");
   var devices = require("./lib/thinx/devices");
@@ -324,6 +324,7 @@ var ThinxApp = function() {
   */
 
   initDatabases();
+  var blog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
 
   var devicelib = require("nano")(db).use(prefix + "managed_devices");
   var userlib = require("nano")(db).use(prefix + "managed_users");

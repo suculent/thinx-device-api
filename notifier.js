@@ -158,21 +158,6 @@ if (typeof(md5) === "undefined" || md5 === "") {
   }
 }
 
-nano.db.create(prefix + "managed_builds", function(err, body, header) {
-  if (err) {
-    if (err ==
-      "Error: The build database could not be created, the file already exists."
-    ) {
-      // silently fail, this is ok
-    } else {
-      console.log("» Repository database attached.");
-    }
-  } else {
-    console.log("» Build database creation completed. Response: " +
-      JSON.stringify(body));
-  }
-});
-
 console.log("build_id : " + build_id);
 console.log("commit_id : " + commit_id);
 console.log("version : " + version);
