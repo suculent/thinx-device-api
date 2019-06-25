@@ -4,6 +4,14 @@
 
 var ThinxApp = function() {
 
+
+  console.log("---");
+  console.log("---");
+  console.log("---");
+  console.log("---");
+  console.log("---");
+  console.log("--- " + new Date() + " ---");
+
   var Sqreen = null;
 
   var global_token = null;
@@ -23,7 +31,11 @@ var ThinxApp = function() {
   var redis = require('redis');
 
   var session_config = require("./conf/node-session.json");
-  var app_config = require("./conf/config.json"); // this file should be actually omitted from repository
+
+  var Globals = require("./lib/thinx/globals.js"); // static only!
+  var app_config = Globals.app_config(); // require("../../conf/config.json");
+  var prefix = Globals.prefix();
+  var rollbar = Globals.rollbar();
 
   const r_options = {
   password: app_config.redis.password,
@@ -69,20 +81,11 @@ var ThinxApp = function() {
   const day = hour * 24;
   const fortnight = day * 14;
 
-  console.log("---");
-  console.log("---");
-  console.log("---");
-  console.log("---");
-  console.log("---");
-  console.log("--- " + new Date() + " ---");
-
   //
   // Environment-dependent configurations
   //
 
-  var Globals = require("./lib/thinx/globals.js"); // static only!
-  var app_config = Globals.app_config(); // require("../../conf/config.json");
-  var prefix = Globals.prefix();
+
 
   var google_ocfg = Globals.google_ocfg();
   var github_ocfg = Globals.github_ocfg();
@@ -91,12 +94,6 @@ var ThinxApp = function() {
   if (use_sqreen) {
     Sqreen = require('sqreen');
   }
-
-  var rollbar = new Rollbar({
-    accessToken: app_config.rollbar_token,
-    captureUncaught: true,
-    captureUnhandledRejections: true
-  });
 
   //
   // OAuth2
