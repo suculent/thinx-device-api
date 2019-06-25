@@ -1854,7 +1854,7 @@ var ThinxApp = function() {
       last_seen: new Date()
     }, function(error, response) {
       if (error) {
-        console.log("Last-seen update failed: " + error);
+        console.log("Last-seen update failed (1): " + error);
       } else {
         alog.log(doc._id, "Last seen updated.");
       }
@@ -2135,7 +2135,7 @@ var ThinxApp = function() {
                 last_seen: new Date()
               }, function(error, response) {
                 if (err) {
-                  console.log("Last-seen update failed: " +
+                  console.log("Last-seen update failed (2): " +
                     err);
                 } else {
                   alog.log(udoc.owner,
@@ -2632,7 +2632,7 @@ var ThinxApp = function() {
                 last_seen: new Date()
               }, function(error, response) {
                 if (error) {
-                  console.log("Last-seen update failed: " + error);
+                  console.log("Last-seen update failed (3): " + error);
                 } else {
                   alog.log(owner_id, "Last seen updated.");
                 }
@@ -2849,7 +2849,7 @@ var ThinxApp = function() {
                 },
                 function(error, response) {
                   if (error) {
-                    console.log("Last-seen update failed: " + error);
+                    console.log("Last-seen update failed (4): " + error);
                   } else {
                     alog.log(req.session.owner, "Last seen updated.");
                   }
