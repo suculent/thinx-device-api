@@ -8,11 +8,14 @@ networks:
 
 services:
   thinx-api:
-    privileged: true # because of DIND builders
-    shm_size: 256M
+    # because of DIND builders
+    privileged: true
+    # reserve enough for builders
+    shm_size: 1024M
+    tty: true
     networks:
-      - nat # for Device access
-      - internal # for Console access
+      - nat
+      - internal
     env_file: ./.env
     environment:
       - THINX_HOSTNAME=${THINX_HOSTNAME}
@@ -21,14 +24,15 @@ services:
       - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
       - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
       #- SQREEN_TOKEN=${SQREEN_TOKEN} # (optional, free for open-source)
-    build: . # suculent/thinx-device-api
+    build: .
+    # image: suculent/thinx-device-api
     ports:
 #      - 7441:7441 # Reserved for Web HTTPS, 7440 is Web HTTP
       - 7442:7442 # API (HTTP)
       - 7443:7443 # API (HTTPS)
       - 7444:7444 # WebSocket
       - 7445:7445 # WebSocket SSL (reserved)
-      - 9002:9002 # Incoming GIT (User) Webhooks; will deprecate
+      - 9002:9002 # Incoming GIT (User) Webhooks
     volumes:
       - /mnt/data/deploy:/mnt/data/deploy # Deployment
       - /mnt/data/mosquitto:/mnt/data/mosquitto # Authentication
@@ -44,10 +48,3 @@ services:
       - "traefik.port=7442"
       - "traefik.backend=thinx-api"
       - "traefik.frontend.rule=Host:${THINX_HOSTNAME}"
-
- # dind:
- #   privileged: true # because of DIND builders
- #   image: docker:dind
- #   volumes:
- #     - /var/run/docker.sock:/var/run/docker.sock # DIND
- #     - /cache
