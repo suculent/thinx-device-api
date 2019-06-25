@@ -1014,7 +1014,6 @@ var ThinxApp = function() {
             status: response
           });
         });
-      return;
     }
 
     respond(res, {
@@ -1074,7 +1073,6 @@ var ThinxApp = function() {
     var ac_key = req.query.activation;
     var ac_owner = req.query.owner;
     user.activate(ac_owner, ac_key, function(success, message) {
-
       if (!success) {
         req.session.destroy(function(err) {
           console.log(err);
