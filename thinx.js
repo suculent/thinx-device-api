@@ -5,7 +5,6 @@
 var ThinxApp = function() {
 
   var Sqreen = null;
-  var use_sqreen = app_config.use_screen || false;
 
   var global_token = null;
   var global_response = null;
@@ -58,6 +57,7 @@ var ThinxApp = function() {
     }
   };
 
+  var use_sqreen = app_config.use_screen || false;
   var redis_client = redis.createClient(app_config.redis.port, app_config.redis.host, r_options);
   var path = require('path');
 
