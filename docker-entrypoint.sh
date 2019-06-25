@@ -63,6 +63,8 @@ echo "Trying to find pm2 before starting from absolute path..."
 
 which pm2
 
+ssh -o "StrictHostKeyChecking=no" git@github.com
+
 /root/.nvm/versions/node/v11.13.0/bin/pm2 start ecosystem.json
 
 #
