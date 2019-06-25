@@ -324,15 +324,15 @@ var ThinxApp = function() {
   */
 
   initDatabases();
+
   var blog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
 
   var devicelib = require("nano")(db).use(prefix + "managed_devices");
   var userlib = require("nano")(db).use(prefix + "managed_users");
-
   // <-- EXTRACT TO: db.js && databases must not be held by app class
+  // and they require on prefix as well...
 
   // Express App
-
   var express = require("express");
   var session = require("express-session");
 
