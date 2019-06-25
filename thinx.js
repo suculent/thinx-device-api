@@ -80,6 +80,7 @@ var ThinxApp = function() {
   // Environment-dependent configurations
   //
 
+  var Globals = require("./lib/thinx/globals.js"); // static only!
   var app_config = Globals.app_config(); // require("../../conf/config.json");
   var prefix = Globals.prefix();
 
