@@ -80,54 +80,12 @@ var ThinxApp = function() {
   // Environment-dependent configurations
   //
 
-  var google_ocfg = null;
-  var github_ocfg = null;
+  var app_config = Globals.app_config(); // require("../../conf/config.json");
+  var prefix = Globals.prefix();
 
-  // requires existing sqreen.json or ENV vars defined
-
-  if (typeof(process.env.CIRCLE_USERNAME) !== "undefined") {
-    console.log("» Starting server on Circle CI...");
-    app_config = require("./conf/config-test.json");
-
-    if (fs.existsSync('./conf/google-oauth-test.json')) {
-      google_ocfg = require('./conf/google-oauth-test.json');
-    } else {
-      console.log("Skipping Google OAuth, configuration not found...");
-    }
-
-    if (fs.existsSync('./conf/github-oauth-test.json')) {
-      github_ocfg = require('./conf/github-oauth-test.json');
-    } else {
-      console.log("Skipping GitHub OAuth, configuration not found...");
-    }
-
-    use_sqreen = false;
-  }
-  if (process.env.LOGNAME == "sychram") {
-    console.log("» Starting on workstation...");
-    app_config = require("./conf/config-local.json");
-
-    if (fs.existsSync('./conf/google-oauth-test.json')) {
-      google_ocfg = require('./conf/google-oauth-test.json');
-    }
-
-    if (fs.existsSync('./conf/github-oauth-test.json')) {
-      github_ocfg = require('./conf/github-oauth-test.json');
-    }
-    use_sqreen = false;
-  }
-  if (process.env.LOGNAME == "root") {
-    console.log("» Starting in production 'root' mode (needs to control Docker until Agens)...");
-    app_config = require("./conf/config.json");
-
-    if (fs.existsSync('./conf/google-oauth.json')) {
-      google_ocfg = require('./conf/google-oauth.json');
-    }
-
-    if (fs.existsSync('./conf/github-oauth.json')) {
-      github_ocfg = require('./conf/github-oauth.json');
-    }
-  }
+  var google_ocfg = Globals.google_ocfg();
+  var github_ocfg = Globals.github_ocfg();
+  var use_screen = Globals.use_screen(); // requires existing sqreen.json or ENV vars defined
 
   if (use_sqreen) {
     Sqreen = require('sqreen');
@@ -144,9 +102,7 @@ var ThinxApp = function() {
   //
 
   const simpleOauthModule = require('simple-oauth2');
-
   if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
-
     const oauth2 = simpleOauthModule.create({
       client: {
         id: google_ocfg.web.client_id,
@@ -158,7 +114,6 @@ var ThinxApp = function() {
         tokenPath: '/o/oauth2/token'
       },
     });
-
   }
 
   //
@@ -166,9 +121,7 @@ var ThinxApp = function() {
   //
 
   var githubOAuth;
-
   if (typeof(github_ocfg) !== "undefined" && github_ocfg !== null) {
-
     try {
       githubOAuth = require('github-oauth')({
         githubClient: github_ocfg.client_id,
@@ -181,7 +134,6 @@ var ThinxApp = function() {
     } catch (e) {
       console.log("github-oauth github_ocfg init error: " + e);
     }
-
   }
 
   //
@@ -236,7 +188,7 @@ var ThinxApp = function() {
   try {
     var pfx_path = app_config.project_root + '/conf/.thx_prefix';
     if (fs.existsSync(pfx_path)) {
-      prefix = (fs.readFileSync(pfx_path)).replace("\n", "");
+      prefix = (fs.readFileSync(pfx_path).toString()).replace("\n", "");
     } else {
       // create .thx_prefix with random key on first run!
       fs.ensureFile(pfx_path, function(e) {
