@@ -28,7 +28,7 @@ ENV APP_HOSTNAME=${APP_HOSTNAME}
 ENV THINX_HOSTNAME=${THINX_HOSTNAME}
 
 # Update when running using `-e REVISION=$(git rev-list head --count)`
-ENV REVISION=4135
+ENV REVISION=4234
 
 ENV NODE_ENV=production
 
