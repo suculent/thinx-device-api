@@ -25,7 +25,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV APP_HOSTNAME=${APP_HOSTNAME}
 
 # Enter FQDN you own, should have public IP
-ENV THINX_HOSTNAME=${THINX_HOSTNAME} # was app.keyguru.eu
+ENV THINX_HOSTNAME=${THINX_HOSTNAME}
 
 # Update when running using `-e REVISION=$(git rev-list head --count)`
 ENV REVISION=4135
