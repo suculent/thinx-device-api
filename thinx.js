@@ -4,6 +4,9 @@
 
 var ThinxApp = function() {
 
+  var Sqreen = null;
+  var use_sqreen = app_config.use_screen || false;
+
   var global_token = null;
   var global_response = null;
   var exec = require("child_process");
@@ -80,10 +83,7 @@ var ThinxApp = function() {
   var google_ocfg = null;
   var github_ocfg = null;
 
-
-
   // requires existing sqreen.json or ENV vars defined
-
 
   if (typeof(process.env.CIRCLE_USERNAME) !== "undefined") {
     console.log("» Starting server on Circle CI...");
@@ -129,19 +129,15 @@ var ThinxApp = function() {
     }
   }
 
-  var use_sqreen = app_config.use_screen || false;
+  if (use_sqreen) {
+    Sqreen = require('sqreen');
+  }
 
   var rollbar = new Rollbar({
     accessToken: app_config.rollbar_token,
     captureUncaught: true,
     captureUnhandledRejections: true
   });
-
-  var Sqreen = null;
-
-  if (use_sqreen) {
-    Sqreen = require('sqreen');
-  }
 
   //
   // OAuth2
