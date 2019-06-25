@@ -199,25 +199,7 @@ var ThinxApp = function() {
   var nano = require("nano")(db);
   var sha256 = require("sha256");
 
-  var v = require("./lib/thinx/version");
-  var alog = require("./lib/thinx/audit");
-  var blog = require("./lib/thinx/buildlog");
-  var builder = require("./lib/thinx/builder");
-  var device = require("./lib/thinx/device");
-  var devices = require("./lib/thinx/devices");
-  var deployment = require("./lib/thinx/deployment");
 
-  var watcher = require("./lib/thinx/repository");
-  watcher.watch();
-
-  var apienv = require("./lib/thinx/apienv");
-  var apikey = require("./lib/thinx/apikey");
-  var user = require("./lib/thinx/owner");
-  var rsakey = require("./lib/thinx/rsakey");
-  var stats = require("./lib/thinx/statistics");
-  var sources = require("./lib/thinx/sources");
-  var transfer = require("./lib/thinx/transfer");
-  var messenger = require("./lib/thinx/messenger");
 
   var slack_webhook = app_config.slack_webhook;
   var thinx_slack = require("slack-notify")(slack_webhook);
@@ -254,7 +236,7 @@ var ThinxApp = function() {
   try {
     var pfx_path = app_config.project_root + '/conf/.thx_prefix';
     if (fs.existsSync(pfx_path)) {
-      prefix = fs.readFileSync(pfx_path) + "_";
+      prefix = (fs.readFileSync(pfx_path)).replace("\n", "");
     } else {
       // create .thx_prefix with random key on first run!
       fs.ensureFile(pfx_path, function(e) {
@@ -275,6 +257,27 @@ var ThinxApp = function() {
   } catch (e) {
     console.log("[index] thx_prefix_exception" + e);
   }
+
+  // should be initialized after prefix because of DB requirements...
+  var v = require("./lib/thinx/version");
+  var alog = require("./lib/thinx/audit");
+  var blog = require("./lib/thinx/buildlog");
+  var builder = require("./lib/thinx/builder");
+  var device = require("./lib/thinx/device");
+  var devices = require("./lib/thinx/devices");
+  var deployment = require("./lib/thinx/deployment");
+
+  var watcher = require("./lib/thinx/repository");
+  watcher.watch();
+
+  var apienv = require("./lib/thinx/apienv");
+  var apikey = require("./lib/thinx/apikey");
+  var user = require("./lib/thinx/owner");
+  var rsakey = require("./lib/thinx/rsakey");
+  var stats = require("./lib/thinx/statistics");
+  var sources = require("./lib/thinx/sources");
+  var transfer = require("./lib/thinx/transfer");
+  var messenger = require("./lib/thinx/messenger");
 
   function initDatabases() {
 

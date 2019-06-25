@@ -38,7 +38,7 @@ var prefix = "";
 try {
   var pfx_path = config.project_root + '/conf/.thx_prefix';
   if (fs.existsSync(pfx_path)) {
-    prefix = fs.readFileSync(pfx_path) + "_";
+    prefix = (fs.readFileSync(pfx_path)).replace("\n", "");
   }
 } catch (e) {
   console.log("[notifier] thx_prefix_exception " + e);
