@@ -232,7 +232,7 @@ var ThinxApp = function() {
       } else {
         console.log("» Device database creation completed. Response: " +
           JSON.stringify(body) + "\n");
-        var db = require("nano")(db).use(prefix + "managed_devices");
+        var db = nano.db.use(prefix + "managed_devices");
         injectDesign(db, "devicelib", "./design/design_deviceslib.json");
         injectReplFilter(db, "./design/filters_devices.json");
       }
@@ -244,7 +244,7 @@ var ThinxApp = function() {
       } else {
         console.log("» Build database creation completed. Response: " +
           JSON.stringify(body) + "\n");
-        var db = require("nano")(db).use(prefix + "managed_builds");
+        var db = nano.db.use(prefix + "managed_builds");
         injectDesign(db, "builds", "./design/design_builds.json");
         injectReplFilter(db,   "./design/filters_builds.json");
       }
@@ -256,7 +256,7 @@ var ThinxApp = function() {
       } else {
         console.log("» User database creation completed. Response: " +
           JSON.stringify(body) + "\n");
-        var db = require("nano")(db).use(prefix + "managed_users");
+        var db = nano.db.use(prefix + "managed_users");
         injectDesign(db, "users", "./design/design_users.json");
         injectReplFilter(db, "./design/filters_users.json");
       }
@@ -266,9 +266,9 @@ var ThinxApp = function() {
       if (err) {
         handleDatabaseErrors(err, "managed_logs");
       } else {
-        console.log("» User database creation completed. Response: " +
+        console.log("» Log database creation completed. Response: " +
           JSON.stringify(body) + "\n");
-        var db = require("nano")(db).use(prefix + "managed_logs");
+        var db = nano.db.use(prefix + "managed_logs");
         injectDesign(db, "logs", "./design/design_logs.json");
         injectReplFilter(db,  "./design/filters_logs.json");
       }
