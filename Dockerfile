@@ -56,6 +56,7 @@ RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
     xz-utils \
     net-tools \
     git \
+    jq \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -sSL https://get.docker.com/ | sh
