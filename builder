@@ -205,7 +205,9 @@ if [[ ! -d $BUILD_PATH ]]; then
 	mkdir -p $BUILD_PATH
 fi
 
+# Should be already deprecated, as there are pre-fetches. Maybe modules?
 echo "[builder.sh] Entering build and pulling path..." | tee -a "${LOG_PATH}"
+echo $BUILD_PATH | tee -a "${LOG_PATH}"
 cd $BUILD_PATH && git pull && pwd | tee -a "${LOG_PATH}"
 
 # Fetch submodules if any
@@ -261,13 +263,13 @@ fi
 
 echo "[builder.sh] Searching THiNX-File in $BUILD_PATH/$REPO_PATH..." | tee -a "${LOG_PATH}"
 
-if [[ -z $WEB_HOSTNAME ]]; then
-	echo "WEB_HOSTNAME must be set!"
-	exit 1
+if [[ -z $THINX_HOSTNAME ]]; then
+	echo "THINX_HOSTNAME must be set!"
+	# exit 1
 fi
 
-THINX_CLOUD_URL="${WEB_HOSTNAME}"
-THINX_MQTT_URL="${THINX_CLOUD_URL}"
+THINX_CLOUD_URL="${THINX_HOSTNAME}"
+THINX_MQTT_URL="${THINX_HOSTNAME}"
 
 if [[ ! -z $DEVICE_ALIAS ]]; then
 	THINX_ALIAS=$DEVICE_ALIAS
