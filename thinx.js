@@ -35,7 +35,7 @@ var ThinxApp = function() {
   var app_config = Globals.app_config(); // require("../../conf/config.json");
   var prefix = Globals.prefix();
   var rollbar = Globals.rollbar();
-  var use_sqreen = Globals.use_screen();  
+  var use_sqreen = Globals.use_screen();
   var redis_client = redis.createClient(Globals.redis_options());
   var path = require('path');
 
@@ -2073,9 +2073,9 @@ var ThinxApp = function() {
 
       } else { // password invalid
 
-        var p = user_data.password || null;
-        if (typeof(p) === "undefined") {
-          console.log("[LOGIN_INVALID] (user not activated?) no password set for " + username);
+        var p = user_data.password;
+        if (typeof(p) === "undefined" || p === null) {
+          console.log("[LOGIN_INVALID] (not activated/no password) for " + username);
           alog.log(req.session.owner, "Password missing for: " + username);
           respond(res, {
             status: "password_missing",
