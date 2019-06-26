@@ -193,15 +193,49 @@ var ThinxApp = function() {
   var transfer = require("./lib/thinx/transfer");
   var messenger = require("./lib/thinx/messenger");
 
+  // Database preparation on first run
+
   function initDatabases() {
+
+    function injectDesign(db, design, file) {
+      const design_doc = require(file);
+      db.insert("_design/" + design, design_doc, function(err, body, header) {
+        console.log("Insert error: "+err);
+        console.log("Insert body: "+body);
+        console.log("Insert header: "+header);
+      });
+    }
+
+    function injectReplFilter(db, filter, file) {
+      const filter_doc = require(file);
+      db.insert("_design/repl_filters", filter_doc, function(err, body, header) {
+        console.log("Insert error: "+err);
+        console.log("Insert body: "+body);
+        console.log("Insert header: "+header);
+      });
+    }
+
+    function handleDatabaseErrors(err, name) {
+      if (err.toString().indexOf("the file already exists") != -1) {
+        // silently fail, this is ok
+      } else if (err.toString().indexOf("error happened") != -1) {
+        console.log("🚫 Database connectivity issue. " + err);
+        process.exit(1);
+      } else {
+        console.log("🚫 Database " + name + " creation failed. " + err);
+        process.exit(2);
+      }
+    }
 
     nano.db.create(prefix + "managed_devices", function(err, body, header) {
       if (err) {
         handleDatabaseErrors(err, "managed_devices");
       } else {
         console.log("» Device database creation completed. Response: " +
-          JSON.stringify(
-            body) + "\n");
+          JSON.stringify(body) + "\n");
+        var db = require("nano")(db).use(prefix + "managed_devices");
+        injectDesign(db, "devicelib", "./design/design_deviceslib.json");
+        injectReplFilter(db, "./design/filters_devices.json");
       }
     });
 
@@ -210,9 +244,10 @@ var ThinxApp = function() {
         handleDatabaseErrors(err, "managed_builds");
       } else {
         console.log("» Build database creation completed. Response: " +
-          JSON
-          .stringify(
-            body) + "\n");
+          JSON.stringify(body) + "\n");
+        var db = require("nano")(db).use(prefix + "managed_builds");
+        injectDesign(db, "builds", "./design/design_builds.json");
+        injectReplFilter(db,   "./design/filters_builds.json");
       }
     });
 
@@ -221,28 +256,24 @@ var ThinxApp = function() {
         handleDatabaseErrors(err, "managed_users");
       } else {
         console.log("» User database creation completed. Response: " +
-          JSON
-          .stringify(
-            body) + "\n");
+          JSON.stringify(body) + "\n");
+        var db = require("nano")(db).use(prefix + "managed_users");
+        injectDesign(db, "users", "./design/design_users.json");
+        injectReplFilter(db, "./design/filters_users.json");
       }
     });
-  }
 
-  function handleDatabaseErrors(err, name) {
-
-    if (err.toString().indexOf("the file already exists") != -1) {
-      // silently fail, this is ok
-
-    } else if (err.toString().indexOf("error happened in your connection") !=
-      -
-      1) {
-      console.log("🚫 Database connectivity issue. " + err);
-      process.exit(1);
-
-    } else {
-      console.log("🚫 Database " + name + " creation failed. " + err);
-      process.exit(2);
-    }
+    nano.db.create(prefix + "managed_logs", function(err, body, header) {
+      if (err) {
+        handleDatabaseErrors(err, "managed_logs");
+      } else {
+        console.log("» User database creation completed. Response: " +
+          JSON.stringify(body) + "\n");
+        var db = require("nano")(db).use(prefix + "managed_logs");
+        injectDesign(db, "logs", "./design/design_logs.json");
+        injectReplFilter(db,  "./design/filters_logs.json");
+      }
+    });
   }
 
   /*
@@ -293,6 +324,9 @@ var ThinxApp = function() {
 
   var devicelib = require("nano")(db).use(prefix + "managed_devices");
   var userlib = require("nano")(db).use(prefix + "managed_users");
+  var buildlib = require("nano")(db).use(prefix + "managed_builds");
+  var loglib = require("nano")(db).use(prefix + "managed_logs");
+
   // <-- EXTRACT TO: db.js && databases must not be held by app class
   // and they require on prefix as well...
 

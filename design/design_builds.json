@@ -1,6 +1,5 @@
 {
   "_id": "_design/builds",
-  "_rev": "10-243436fab65da4b8b78dacea60e2ee2b",
   "language": "javascript",
   "views": {
     "latest_builds": {

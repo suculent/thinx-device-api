@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo "Warning, this script is deprecated with docker-compose"
+
+exit 1
+
 USER=${COUCHDB_USERNAME:-couchdb}
 PASS=${COUCHDB_PASSWORD:-$(pwgen -s -1 16)}
 DB=${COUCHDB_DBNAME:-test}
@@ -33,14 +37,20 @@ if [ ! -z "$DB" ]; then
     echo "Creating database: \"$DB\"..."
     curl -X PUT http://$USER:$PASS@127.0.0.1:5984/$DB
 
-    echo $THX_PREFIX >> ./conf/.thx_prefix
+    echo -n $THX_PREFIX >> ./conf/.thx_prefix
 
     # Replace default credentials (works only if any? this should be from config.dist.json (or -sample))
     sed -i -- "s/rtmapi:frohikey/${USER}:${PASS}/g" ./conf/config.json
-    curl -X PUT http://$USER:$PASS@$URL:5984/${THX_PREFIX}_managed_devices/_design/devicelib -d @design/design_deviceslib.json
-    curl -X PUT http://$USER:$PASS@$URL:5984/${THX_PREFIX}_managed_users/_design/users -d @design/design_users.json
-    curl -X PUT http://$USER:$PASS@$URL:5984/${THX_PREFIX}_managed_logs/_design/logs -d @design/design_logs.json
-    curl -X PUT http://$USER:$PASS@$URL:5984/${THX_PREFIX}_managed_builds/_design/builds -d @design/design_builds.json
+    curl -X PUT http://$USER:$PASS@$URL:5984/${THX_PREFIX}managed_devices/_design/devicelib -d @../design/design_deviceslib.json
+    curl -X PUT http://$USER:$PASS@$URL:5984/${THX_PREFIX}managed_users/_design/users -d @../design/design_users.json
+    curl -X PUT http://$USER:$PASS@$URL:5984/${THX_PREFIX}managed_logs/_design/logs -d @../design/design_logs.json
+    curl -X PUT http://$USER:$PASS@$URL:5984/${THX_PREFIX}managed_builds/_design/builds -d @../design/design_builds.json
+
+    curl -X PUT http://$USER:$PASS@$URL:5984/${THX_PREFIX}managed_devices/_design/repl_filters -d @../design/filters_devices.json
+    curl -X PUT http://$USER:$PASS@$URL:5984/${THX_PREFIX}managed_users/_design/repl_filters -d @../design/filters_users.json
+    curl -X PUT http://$USER:$PASS@$URL:5984/${THX_PREFIX}managed_logs/_design/repl_filters -d @../design/filters_logs.json
+    curl -X PUT http://$USER:$PASS@$URL:5984/${THX_PREFIX}managed_builds/_design/repl_filters -d @../design/filters_builds.json
+
 fi
 
 echo "========================================================================"
