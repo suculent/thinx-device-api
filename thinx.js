@@ -206,12 +206,16 @@ var ThinxApp = function() {
     }
 
     function injectReplFilter(db, filter, file) {
-      const filter_doc = require(file);
-      db.insert("_design/repl_filters", filter_doc, function(err, body, header) {
-        console.log("Insert error: "+err);
-        console.log("Insert body: "+body);
-        console.log("Insert header: "+header);
-      });
+      try {
+        const filter_doc = require(file);
+        db.insert("_design/repl_filters", filter_doc, function(err, body, header) {
+          console.log("Insert error: "+err);
+          console.log("Insert body: "+body);
+          console.log("Insert header: "+header);
+        });
+      } catch (e) {
+        console.log("File may not exist: "+e);
+      }
     }
 
     function handleDatabaseErrors(err, name) {
