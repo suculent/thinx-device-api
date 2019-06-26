@@ -79,7 +79,7 @@ jobs:
         - ~/.cache/bower
         - ./node_modules
 
-    - run: bash ./00-init_db_design.sh
+    - run: bash ./scripts/00-init_db_design.sh
 
     # Sonarcloud Integration (requires JAVA)
     # - run: wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.3.0.1492-linux.zip
@@ -103,8 +103,8 @@ jobs:
           RAILS_ENV: test
           RACK_ENV: test
 
-    - run: bash ./01-analyze.sh
-    - run: bash ./03-test.sh
+    - run: bash ./scripts/01-analyze.sh
+    - run: bash ./scripts/03-test.sh
 
     # Deployment
     # Your existing circle.yml file contains deployment steps.
