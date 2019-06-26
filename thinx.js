@@ -35,15 +35,8 @@ var ThinxApp = function() {
   var app_config = Globals.app_config(); // require("../../conf/config.json");
   var prefix = Globals.prefix();
   var rollbar = Globals.rollbar();
-  var use_sqreen = Globals.use_screen();
-
-  const r_options = {
-    password: app_config.redis.password,
-    host: app_config.redis.host,
-    port: app_config.redis.port,
-    retry_strategy: Globals.redis_strategy()
-  };
-  var redis_client = redis.createClient(app_config.redis.port, app_config.redis.host, r_options);
+  var use_sqreen = Globals.use_screen();  
+  var redis_client = redis.createClient(Globals.redis_options());
   var path = require('path');
 
   //
