@@ -1956,7 +1956,7 @@ var ThinxApp = function() {
     //
 
     var username = req.body.username;
-    var password = sha256(req.body.password);
+    var password = sha256(prefix + req.body.password);
 
     if (typeof(username) === "undefined" || typeof(password) ===
       "undefined" && typeof(oauth) === "undefined") {
@@ -2027,6 +2027,10 @@ var ThinxApp = function() {
       }
 
       // TODO: Second option (direct compare) will deprecate soon.
+
+      console.log("in-password: "+password);
+      console.log("ud-password: "+user_data.password);
+
       if (password.indexOf(user_data.password) !== -1) {
 
         // what if there's NEW session?
@@ -2115,7 +2119,7 @@ var ThinxApp = function() {
             success: false
           });
         } else {
-          console.log("[LOGIN_INVALID] Password mismatch for: " + username + ", db: " + sha256(p) + " vs. " + sha256(password));
+          console.log("[LOGIN_INVALID] Password mismatch for: " + username + ", db: " + p + " vs. " + sha256(password));
           alog.log(req.session.owner, "Password mismatch for: " + username);
           respond(res, {
             status: "password_mismatch",
