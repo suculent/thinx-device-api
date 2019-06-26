@@ -13,6 +13,7 @@ services:
     # reserve enough for builders
     shm_size: 1024M
     tty: true
+    restart: always
     networks:
       - nat
       - internal
