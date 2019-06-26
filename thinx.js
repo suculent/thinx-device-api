@@ -2029,10 +2029,6 @@ var ThinxApp = function() {
       }
 
       // TODO: Second option (direct compare) will deprecate soon.
-
-      console.log("in-password: "+password);
-      console.log("ud-password: "+user_data.password);
-
       if (password.indexOf(user_data.password) !== -1) {
 
         // what if there's NEW session?
