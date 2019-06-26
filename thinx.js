@@ -3246,9 +3246,9 @@ var ThinxApp = function() {
               messenger.initWithOwner(object.init, _ws, function(success,
                 message) {
                 if (!success) {
-                  console.log("Messenger init on WS message with success " +
+                  console.log("Messenger init on WS message with result " +
                     success +
-                    "message: " +
+                    ", with message: " +
                     JSON.stringify(message));
                 }
               });
