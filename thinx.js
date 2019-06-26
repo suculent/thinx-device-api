@@ -29,47 +29,20 @@ var ThinxApp = function() {
 
   var http = require('http');
   var redis = require('redis');
-
   var session_config = require("./conf/node-session.json");
 
   var Globals = require("./lib/thinx/globals.js"); // static only!
   var app_config = Globals.app_config(); // require("../../conf/config.json");
   var prefix = Globals.prefix();
   var rollbar = Globals.rollbar();
+  var use_sqreen = Globals.use_screen();
 
   const r_options = {
-  password: app_config.redis.password,
-  host: app_config.redis.host,
-  port: app_config.redis.port,
-  retry_strategy: function (options) {
-      console.log('retry strategy check');
-      console.log(options);
-      if (options.error) {
-        if (options.error.code === 'ECONNREFUSED') {
-          // End reconnecting on a specific error and flush all commands with a individual error
-          return new Error('The server refused the connection');
-        }
-        if (options.error.code === 'ECONNRESET') {
-          return new Error('The server reset the connection');
-        }
-        if (options.error.code === 'ETIMEDOUT') {
-          return new Error('The server timeouted the connection');
-        }
-      }
-      if (options.total_retry_time > 1000 * 60 * 60) {
-        // End reconnecting after a specific timeout and flush all commands with a individual error
-        return new Error('Retry time exhausted');
-      }
-      if (options.attempt > 5) {
-        // End reconnecting with built in error
-        return new Error('Retry attempts ended');
-      }
-      // reconnect after
-      return 1000;
-    }
+    password: app_config.redis.password,
+    host: app_config.redis.host,
+    port: app_config.redis.port,
+    retry_strategy: Globals.redis_strategy()
   };
-
-  var use_sqreen = app_config.use_screen || false;
   var redis_client = redis.createClient(app_config.redis.port, app_config.redis.host, r_options);
   var path = require('path');
 
@@ -84,8 +57,6 @@ var ThinxApp = function() {
   //
   // Environment-dependent configurations
   //
-
-
 
   var google_ocfg = Globals.google_ocfg();
   var github_ocfg = Globals.github_ocfg();
