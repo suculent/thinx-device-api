@@ -9,6 +9,8 @@ IoT Device Management Server running on node.js.
 [![Build Status](https://img.shields.io/circleci/project/github/suculent/thinx-device-api/master.svg)](https://circleci.com/gh/suculent/thinx-device-api)
 [![Coverage Status](https://coveralls.io/repos/github/suculent/thinx-device-api/badge.svg?branch=master)](https://coveralls.io/github/suculent/thinx-device-api?branch=master)
 [![Greenkeeper badge](https://badges.greenkeeper.io/suculent/thinx-device-api.svg)](https://greenkeeper.io/)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=suculent_thinx-device-api&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=suculent_thinx-device-api)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=suculent_thinx-device-api&metric=security_rating)](https://sonarcloud.io/dashboard?id=suculent_thinx-device-api)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=suculent_thinx-device-api&metric=alert_status)](https://sonarcloud.io/dashboard?id=suculent_thinx-device-api)
 
 The CircleCI build is limited and therefore returns mostly bad results. Closer look may show better numbers.
