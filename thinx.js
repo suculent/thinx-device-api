@@ -1800,10 +1800,12 @@ var ThinxApp = function() {
     userlib.atomic("users", "checkin", doc._id, { last_seen: new Date()
     }, function(error, response) {
       if (error) {
-        console.log("Last-seen update failed (1): " + error);
         if (error.toString().indexOf("conflict") !== -1) {
+          console.log("Last-seen update retry...");
           delete doc._rev;
           updateLastSeen(doc);
+        } else {
+          console.log("Last-seen update failed (1): " + error);
         }
       } else {
         alog.log(doc._id, "Last seen updated.");
@@ -3240,10 +3242,11 @@ var ThinxApp = function() {
           } else if (typeof(object.init) !== "undefined") {
 
             if (typeof(messenger) !== "undefined") {
+              console.log("Initializing WS messenger with owner "+object.init);
               messenger.initWithOwner(object.init, _ws, function(success,
                 message) {
                 if (!success) {
-                  console.log("Messenger init on message with success " +
+                  console.log("Messenger init on WS message with success " +
                     success +
                     "message: " +
                     JSON.stringify(message));
