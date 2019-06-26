@@ -1800,11 +1800,14 @@ var ThinxApp = function() {
    */
 
   var updateLastSeen = function(doc) {
-    userlib.atomic("users", "checkin", doc._id, {
-      last_seen: new Date()
+    userlib.atomic("users", "checkin", doc._id, { last_seen: new Date()
     }, function(error, response) {
       if (error) {
         console.log("Last-seen update failed (1): " + error);
+        if (error.toString().indexOf("conflict") !== -1) {
+          delete doc._rev;
+          updateLastSeen(doc);
+        }
       } else {
         alog.log(doc._id, "Last seen updated.");
       }
@@ -1905,31 +1908,30 @@ var ThinxApp = function() {
 
               req.session.owner = doc.owner;
 
-              console.log("[OID:" + req.session.owner +
-                "] [NEW_SESSION] [oauth] 1854:");
+              console.log("[OID:" + doc.owner + "] [NEW_SESSION] [oauth] 1854:");
 
-              req.session.cookie.maxAge = new Date(Date.now() + hour);
+              req.session.cookie.maxAge = new Date(Date.now() + hour).getTime();
               req.session.cookie.secure = true;
               req.session.cookie.httpOnly = true;
 
-              if (typeof(req.body.remember === "undefined") || (req.body.remember ===
-                  0)) {
+              if (typeof(req.body.remember === "undefined")
+              || (req.body.remember === 0)) {
                 req.session.cookie.maxAge = 24 * hour;
               } else {
                 req.session.cookie.maxAge = fortnight;
               }
 
-              alog.log(req.session.owner, "OAuth User logged in: " +
-                doc.username);
+              alog.log("[OID:" + doc.owner + "] OAuth User logged in: " + doc.username);
 
               if (use_sqreen) {
                 Sqreen.auth_track(true, { username: doc.owner });
               }
 
-              updateLastSeen(doc);
               respond(res, {
                 "redirectURL": "/app"
               });
+
+              updateLastSeen(doc);
             }
           });
         }
