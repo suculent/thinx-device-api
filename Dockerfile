@@ -37,7 +37,7 @@ WORKDIR /opt/thinx/thinx-device-api
 
 RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
     apt-get update -qq && \
-    apt-get install -qqy \
+    apt-get install -qqy --no-install-recommends \
     apt-transport-https \
     apt-utils \
     btrfs-progs \

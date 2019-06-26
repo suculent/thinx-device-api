@@ -1,12 +1,11 @@
 {
-  apps : [
-
+  "apps" : [
     {
-      name      : "thinx",
-      script    : "thinx.js",
-      log_date_format : "YYYY-MM-DD HH:mm Z",
-      interpreter  : "node@11.13.0",
-      exec_mode : "fork"
+      "name"      : "thinx",
+      "script"    : "thinx.js",
+      "log_date_format" : "YYYY-MM-DD HH:mm Z",
+      "interpreter"  : "node@11.13.0",
+      "exec_mode" : "fork"
     }
   ]
 }
