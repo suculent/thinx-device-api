@@ -1,4 +1,4 @@
-FROM node:12.4
+FROM node:11.13
 
 # docker build -t suculent/thinx-device-api .
 
@@ -44,6 +44,7 @@ RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
     apt-get install -y --fix-missing --no-install-recommends \
     apt-transport-https \
     apt-utils \
+    build-essential \
     btrfs-progs \
     ca-certificates \
     cppcheck \
