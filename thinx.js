@@ -382,7 +382,7 @@ var ThinxApp = function() {
     if (BLACKLIST.toString().indexOf(ipAddress) === -1) {
       next();
     } else {
-      console.log("Returning error, blacklisted.");
+      console.log("Returning error 403 for blacklisted IP.");
       res.status(403).end();
     }
   });
@@ -408,7 +408,7 @@ var ThinxApp = function() {
     if (req.originalUrl.indexOf("admin") !== -1) {
       BLACKLIST.push(getClientIp(req));
       res.status(403).end();
-      console.log("admin is blacklisted.");
+      console.log("admin is blacklisted because of request "+req.originalUrl);
       return;
     }
 
