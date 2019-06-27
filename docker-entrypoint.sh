@@ -1,77 +1,26 @@
 #!/bin/bash
 
-#
-# Section: Docker-in-Docker
-#
-
-set -e
+set +e
 
 sysctl net.ipv4.ip_forward=1
 
 export DOCKER_HOST="tcp://docker:2375"
 export DOCKER_HOST="unix:///var/run/docker.sock"
 
-#if [ "$#" -eq 0 ] || [ "${1#-}" != "$1" ]; then
-#	set -- dockerd \
-#		--host=unix:///var/run/docker.sock \
-#		--host=tcp://0.0.0.0:2375 \
-#		"$@"
-#fi
-#if [ "$1" = 'dockerd' ]; then
-#	if [ -x '/usr/local/bin/dind' ]; then
-#		set -- '/usr/local/bin/dind' "$@"
-#	fi
-#	find /run /var/run -iname 'docker*.pid' -delete
-#fi
-
-# exec "$@"
-
-#
-# Section: THiNX/NVM
-#
-
 source ~/.profile
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-
-
-#
-# Firmware Builders
-#
 
 # Installs all tools, not just those currently allowed by .dockerignore, requires running Docker
 if [ ! -z $(which docker) ]; then
-  set +e
   echo "Installing Build-tools for DinD/DooD"
   pushd tools
   bash ./install-builders.sh
   bash ./install-tools.sh
   popd
-  set -e
 else
   echo "Skipping build-tools installation, Docker not available."
 fi
 
-
-#
-# Device API
-#
-
-set +e
-
-echo "Trying to find pm2 before starting from absolute path..."
-
-which pm2
-
 ssh -o "StrictHostKeyChecking=no" git@github.com
-
-/root/.nvm/versions/node/v11.13.0/bin/pm2 start ecosystem.json
-
-#
-# Section: Rollbar Deployment Success Notice
-#
-
-set -e
 
 if [ ! -z ROLLBAR_TOKEN ]; then
   LOCAL_USERNAME=$(whoami)
@@ -82,8 +31,9 @@ if [ ! -z ROLLBAR_TOKEN ]; then
     -F local_username=$LOCAL_USERNAME
 fi
 
-#
-# Section: PM2
-#
+set -e
 
-pm2 logs -f
+# workaround for log aggregator until solved using event database
+mkdir -p /opt/thinx/.pm2/logs/
+touch /opt/thinx/.pm2/logs/index-out-1.log
+node thinx.js | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
