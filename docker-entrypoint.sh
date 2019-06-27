@@ -40,12 +40,9 @@ if [[ ! -z $ROLLBAR_TOKEN ]]; then
     -F local_username=$LOCAL_USERNAME
 fi
 
-echo "Starting..."
-echo "LIST"
-ls
-echo "RUN"
-
-# -e = exits immediately if a command exits with a non-zero status (like an exception that should be cause of a restart...).
-
 set -e
-node thinx.js
+
+# workaround for log aggregator until solved using event database
+mkdir -p /opt/thinx/.pm2/logs/
+touch /opt/thinx/.pm2/logs/index-out-1.log
+node thinx.js | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
