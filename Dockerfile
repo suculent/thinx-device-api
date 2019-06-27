@@ -28,23 +28,18 @@ ENV APP_HOSTNAME=${APP_HOSTNAME}
 ENV THINX_HOSTNAME=${THINX_HOSTNAME}
 
 # Update when running using `-e REVISION=$(git rev-list head --count)`
-ENV REVISION=4276
+ENV REVISION=4234
 
 ENV NODE_ENV=production
 
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
 
-RUN sh -c "echo 'Dir::Ignore-Files-Silently:: \"(.save|.distupgrade)$\";' > /etc/apt/apt.conf.d/99ignoresave"
-
-# -qqy
-
 RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
-    apt-get update && \
-    apt-get install -y --fix-missing --no-install-recommends \
+    apt-get update -qq && \
+    apt-get install -qqy --no-install-recommends \
     apt-transport-https \
     apt-utils \
-    build-essential \
     btrfs-progs \
     ca-certificates \
     cppcheck \
@@ -54,6 +49,7 @@ RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
     iptables \
     lxc \
     mosquitto \
+    openssl \
     pigz \
     python-pip \
     xfsprogs \
@@ -63,7 +59,10 @@ RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
     jq \
     && rm -rf /var/lib/apt/lists/*
 
-    # openssl
+RUN curl -sSL https://get.docker.com/ | sh
+
+# Install NVM to manage Node versions with PM2
+RUN curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
 
 # Install app dependencies
 COPY package*.json ./
@@ -71,12 +70,19 @@ COPY package*.json ./
 # Copy app source code
 COPY . .
 
-RUN curl -sSL https://get.docker.com/ | sh
+RUN export NVM_DIR="$HOME/.nvm" \
+          && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" \
+          && npm install -g pm2 eslint \
+          && npm install
 
-RUN openssl version \
- && node -v \
- && npm install -g pm2 eslint \
- && npm install
+#    && zfs-dkms
+
+# only install zfs if it's available for the current architecture
+# https://git.alpinelinux.org/cgit/aports/tree/main/zfs/APKBUILD?h=3.6-stable#n9 ("all !armhf !ppc64le" as of 2017-11-01)
+# "apk info XYZ" exits with a zero exit code but no output when the package exists but not for this arch
+#	if zfs="$(apk info --no-cache --quiet zfs)" && [ -n "$zfs" ]; then \
+#		apt-get install -y zfs; \
+#	fi
 
 # set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
 RUN set -x \
@@ -93,6 +99,10 @@ RUN set -eux; \
 	chmod +x /usr/local/bin/dind
 
 VOLUME /var/lib/docker
+
+#
+# << DIND
+#
 
 # THiNX Web & Device API (HTTP)
 EXPOSE 7442
