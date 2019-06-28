@@ -1911,7 +1911,9 @@ var ThinxApp = function() {
 
               req.session.owner = doc.owner;
 
-              console.log("[OID:" + doc.owner + "] [NEW_SESSION] [oauth] 1854:");
+              console.log("[OID:" + doc.owner + "] [NEW_SESSION] [oauth] thinx.js:1854...");
+
+              alog.log(doc.owner, "New session.", "info");
 
               req.session.cookie.maxAge = new Date(Date.now() + hour).getTime();
               req.session.cookie.secure = true;
