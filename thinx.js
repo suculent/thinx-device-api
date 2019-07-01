@@ -15,9 +15,9 @@ var ThinxApp = function() {
 
   var global_token = null;
   var global_response = null;
-  var exec = require("child_process");
+  var exec = require("child_process"); // lgtm [js/unused-local-variable]
   var typeOf = require("typeof");
-  var Rollbar = require("rollbar");
+  var Rollbar = require("rollbar"); // lgtm [js/unused-local-variable]
   var crypto = require('crypto');
   var auth = require('./lib/thinx/auth.js');
   var fs = require("fs-extra");
@@ -33,8 +33,7 @@ var ThinxApp = function() {
   var Globals = require("./lib/thinx/globals.js"); // static only!
   var app_config = Globals.app_config(); // require("../../conf/config.json");
   var prefix = Globals.prefix();
-  var rollbar = Globals.rollbar();
-  var use_sqreen = Globals.use_screen();
+  var rollbar = Globals.rollbar(); // lgtm [js/unused-local-variable]
   var redis_client = redis.createClient(Globals.redis_options());
   var path = require('path');
 
@@ -52,9 +51,8 @@ var ThinxApp = function() {
 
   var google_ocfg = Globals.google_ocfg();
   var github_ocfg = Globals.github_ocfg();
-  var use_screen = Globals.use_screen(); // requires existing sqreen.json or ENV vars defined
 
-  if (use_sqreen) {
+  if (Globals.use_screen()) {
     Sqreen = require('sqreen');
   }
 
@@ -326,10 +324,10 @@ var ThinxApp = function() {
 
   var blog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
 
-  var devicelib = require("nano")(db).use(prefix + "managed_devices");
-  var userlib = require("nano")(db).use(prefix + "managed_users");
-  var buildlib = require("nano")(db).use(prefix + "managed_builds");
-  var loglib = require("nano")(db).use(prefix + "managed_logs");
+  var devicelib = require("nano")(db).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
+  var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
+  var buildlib = require("nano")(db).use(prefix + "managed_builds"); // lgtm [js/unused-local-variable]
+  var loglib = require("nano")(db).use(prefix + "managed_logs"); // lgtm [js/unused-local-variable]
 
   // <-- EXTRACT TO: db.js && databases must not be held by app class
   // and they require on prefix as well...
@@ -395,7 +393,6 @@ var ThinxApp = function() {
     if (typeOf(client) === "undefined") {
       console.log("Dropping connection for client without user-agent.");
       res.status(403).end();
-      client = "";
       return;
     }
 
@@ -433,7 +430,7 @@ var ThinxApp = function() {
     }
 
     // Problem is, that the device API should be separate and have different Access-Control
-    var webHostname = process.env.WEB_HOSTNAME || "rtm.thinx.cloud";
+    // var webHostname = process.env.WEB_HOSTNAME || "rtm.thinx.cloud";
 
     // cannot use this with allow origin * res.header("Access-Control-Allow-Credentials", "true");
     // analysis: will PROBABLY have to be refactored to anything but Device-Registration and Devoce-OTA requests
@@ -1896,7 +1893,7 @@ var ThinxApp = function() {
                   httpOnly: false
                 });
 
-                if (use_sqreen) {
+                if (Globals.use_screen()) {
                   Sqreen.signup_track({ username: owner_id });
                 }
 
@@ -1929,7 +1926,7 @@ var ThinxApp = function() {
 
               alog.log("[OID:" + doc.owner + "] OAuth User logged in: " + doc.username);
 
-              if (use_sqreen) {
+              if (Globals.use_screen()) {
                 Sqreen.auth_track(true, { username: doc.owner });
               }
 
@@ -1954,7 +1951,7 @@ var ThinxApp = function() {
 
     if (typeof(req.body.password) === "undefined") {
       callback(false, "login_failed");
-      if (use_sqreen) {
+      if (Globals.use_screen()) {
         Sqreen.auth_track(false, { doc: owner });
       }
       return;
@@ -2124,7 +2121,7 @@ var ThinxApp = function() {
             success: false
           });
         } else {
-          console.log("[LOGIN_INVALID] Password mismatch for: " + username + ", db: " + p + " vs. " + sha256(password));
+          console.log("[LOGIN_INVALID] Password mismatch for: " + username);
           alog.log(req.session.owner, "Password mismatch for: " + username);
           respond(res, {
             status: "password_mismatch",
@@ -2517,7 +2514,7 @@ var ThinxApp = function() {
               // Error case covers creating new user/managing deleted account
               if (error) {
 
-                if (use_sqreen) {
+                if (Globals.use_screen()) {
                   Sqreen.auth_track(false, { doc: userWrapper.owner_id });
                 }
 
@@ -2541,7 +2538,7 @@ var ThinxApp = function() {
                   if (typeof(udoc) !== "undefined") {
                     if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
                       true) {
-                      if (use_sqreen) {
+                      if (Globals.use_screen()) {
                         Sqreen.auth_track(false, { doc: userWrapper.owner_id });
                       }
                       // TODO: Redirect to error page with reason
@@ -2573,7 +2570,7 @@ var ThinxApp = function() {
                     // causes registration error where headers already sent!
                     global_response.redirect(ourl); // must be global_response! res does not exist here.
 
-                    if (use_sqreen) {
+                    if (Globals.use_screen()) {
                       Sqreen.signup_track({ username: userWrapper.owner_id });
                     }
 
@@ -2611,7 +2608,7 @@ var ThinxApp = function() {
                 }
               }
 
-              if (use_sqreen) {
+              if (Globals.use_screen()) {
                 Sqreen.auth_track(true, { username: userWrapper.owner_id });
               }
 
