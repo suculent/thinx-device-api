@@ -44,25 +44,21 @@ try {
   console.log("[notifier] thx_prefix_exception " + e);
 }
 
-var userlib = require("nano")(db).use(prefix + "managed_users");
-var buildlib = require("nano")(db).use(prefix + "managed_builds");
-var loglib = require("nano")(db).use(prefix + "managed_logs");
-var devicelib = require("nano")(db).use(prefix + "managed_devices");
+var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
+var buildlib = require("nano")(db).use(prefix + "managed_builds"); // lgtm [js/unused-local-variable]
+var loglib = require("nano")(db).use(prefix + "managed_logs"); // lgtm [js/unused-local-variable]
+var devicelib = require("nano")(db).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
 
-var client_user_agent = config.client_user_agent;
 var slack_webhook = config.slack_webhook;
 var slack = require("slack-notify")(slack_webhook);
 
 var that = this;
 
-var http = require("http");
 var fs = require("fs-extra");
 var nano = require("nano")(db);
 var mqtt = require("mqtt");
 
 var Messenger = require('./lib/thinx/messenger');
-
-var rdict = {};
 
 console.log("-=[ ☢ THiNX IoT RTM NOTIFIER ☢ ]=-");
 
@@ -219,7 +215,7 @@ devicelib.get(udid, function(err, doc) {
       //if (!body.rows.hasOwnProperty(index)) continue;
       var item = body.rows[index];
       // if (!item.hasOwnProperty("push")) continue;
-      if (typeof(item.push !== "undefined")) {
+      if (typeof(item.push) !== "undefined") {
         push_tokens.push(item.push);
       }
     }
@@ -273,7 +269,7 @@ devicelib.get(udid, function(err, doc) {
 
     //console.log("deployedEnvelopePath: " + envelopePath);
 
-    buffer = new Buffer(envelopeString + "\n");
+    var buffer = new Buffer(envelopeString + "\n");
 
     //console.log("saving envelopePath: " + deployedEnvelopePath);
     fs.writeFileSync(envelopePath, buffer);
@@ -377,7 +373,8 @@ devicelib.get(udid, function(err, doc) {
 
     // Device channel
     if (status == "DEPLOYED") {
-      messenger.publish(owner, udid, message);
+      console.log("Calling messenger publish...");
+      Messenger.publish(owner, udid, message);
       notify_device_channel(owner, udid, message); // deprecated; integration testing only
     }
 
@@ -385,18 +382,6 @@ devicelib.get(udid, function(err, doc) {
 
   });
 });
-
-// Prepare payload
-
-var pushNotificationPayload = {
-  firmware_update: {
-    url: build_path,
-    udid: udid,
-    commit: commit_id,
-    version: version,
-    checksum: sha
-  }
-};
 
 //
 // MQTT Notifications (deprecated, done through Messenger)

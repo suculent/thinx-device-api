@@ -36,7 +36,7 @@ if [[ $CIRCLECI == true ]]; then
 	# pm2 start ecosystem.json
 
 	ACCESS_TOKEN=6aa9f20bef804b75a50338e03830919d
-	ENVIRONMENT=test
+	ENVIRONMENT="test"
 	LOCAL_USERNAME=$(whoami)
 	REVISION=$(git log -n 1 --pretty=format:"%H")
 
@@ -60,7 +60,7 @@ else
 	ACCESS_TOKEN=6aa9f20bef804b75a50338e03830919d
 	ENVIRONMENT=development
 	LOCAL_USERNAME=$(whoami)
-	if [[ LOCAL_USERNAME == "root" ]]; then
+	if [[ $LOCAL_USERNAME == "root" ]]; then
 		ENVIRONMENT=production
 	fi
 

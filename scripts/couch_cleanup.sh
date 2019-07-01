@@ -44,7 +44,7 @@ curl -s -X GET "$DB/_all_docs" | jq '.rows | .[].id' | sed -e 's/"//g' | sed -e 
 SHARDS=$(ls /opt/couchdb/data/shards/00000000-ffffffff)
 for SHARD in $SHARDS
 do
-  if [[ $SHARD!=="00000000-ffffffff" ]]; then
+  if [[ $SHARD !== "00000000-ffffffff" ]]; then
     continue
   fi
   echo "Processing shard $SHARD"
