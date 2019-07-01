@@ -63,8 +63,9 @@ var ThinxApp = function() {
   //
 
   const simpleOauthModule = require('simple-oauth2');
+  var oauth2;
   if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
-    const oauth2 = simpleOauthModule.create({
+     oauth2 = simpleOauthModule.create({
       client: {
         id: google_ocfg.web.client_id,
         secret: google_ocfg.web.client_secret,
@@ -1222,7 +1223,7 @@ var ThinxApp = function() {
           response.registration.timestamp = Math.floor(new Date() / 1000);
         }
         if (success === false) {
-          console.log("Device registration failed with response: " + JSON.stringify(response));
+          console.log("Device registration failed with response: " + response);
         } else {
           console.log("Device registration response: " + JSON.stringify(response));
         }
@@ -2570,7 +2571,7 @@ var ThinxApp = function() {
                       token + "&g=true"; // require GDPR consent
                     console.log("FIXME: this request will probably fail fail (cannot redirect): " + ourl);
                     // causes registration error where headers already sent!
-                    res.redirect(ourl); // was global_response!
+                    global_response.redirect(ourl); // must be global_response! res does not exist here.
 
                     if (use_sqreen) {
                       Sqreen.signup_track({ username: userWrapper.owner_id });
