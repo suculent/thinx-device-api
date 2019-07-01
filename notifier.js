@@ -24,8 +24,8 @@ if (process.env.LOGNAME == "root") {
 
 var rollbar = new Rollbar({
   accessToken: config.rollbar_token,
-  handleUncaughtExceptions: true,
-  handleUnhandledRejections: true
+  handleUncaughtExceptions: false,
+  handleUnhandledRejections: false
 });
 
 var sha256 = require("sha256");
@@ -38,31 +38,27 @@ var prefix = "";
 try {
   var pfx_path = config.project_root + '/conf/.thx_prefix';
   if (fs.existsSync(pfx_path)) {
-    prefix = fs.readFileSync(pfx_path) + "_";
+    prefix = (fs.readFileSync(pfx_path).toString()).replace("\n", "");
   }
 } catch (e) {
   console.log("[notifier] thx_prefix_exception " + e);
 }
 
-var userlib = require("nano")(db).use(prefix + "managed_users");
-var buildlib = require("nano")(db).use(prefix + "managed_builds");
-var loglib = require("nano")(db).use(prefix + "managed_logs");
-var devicelib = require("nano")(db).use(prefix + "managed_devices");
+var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
+var buildlib = require("nano")(db).use(prefix + "managed_builds"); // lgtm [js/unused-local-variable]
+var loglib = require("nano")(db).use(prefix + "managed_logs"); // lgtm [js/unused-local-variable]
+var devicelib = require("nano")(db).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
 
-var client_user_agent = config.client_user_agent;
 var slack_webhook = config.slack_webhook;
 var slack = require("slack-notify")(slack_webhook);
 
 var that = this;
 
-var http = require("http");
 var fs = require("fs-extra");
 var nano = require("nano")(db);
 var mqtt = require("mqtt");
 
 var Messenger = require('./lib/thinx/messenger');
-
-var rdict = {};
 
 console.log("-=[ ☢ THiNX IoT RTM NOTIFIER ☢ ]=-");
 
@@ -158,21 +154,6 @@ if (typeof(md5) === "undefined" || md5 === "") {
   }
 }
 
-nano.db.create(prefix + "managed_builds", function(err, body, header) {
-  if (err) {
-    if (err ==
-      "Error: The build database could not be created, the file already exists."
-    ) {
-      // silently fail, this is ok
-    } else {
-      console.log("» Repository database attached.");
-    }
-  } else {
-    console.log("» Build database creation completed. Response: " +
-      JSON.stringify(body));
-  }
-});
-
 console.log("build_id : " + build_id);
 console.log("commit_id : " + commit_id);
 console.log("version : " + version);
@@ -234,7 +215,7 @@ devicelib.get(udid, function(err, doc) {
       //if (!body.rows.hasOwnProperty(index)) continue;
       var item = body.rows[index];
       // if (!item.hasOwnProperty("push")) continue;
-      if (typeof(item.push !== "undefined")) {
+      if (typeof(item.push) !== "undefined") {
         push_tokens.push(item.push);
       }
     }
@@ -288,7 +269,7 @@ devicelib.get(udid, function(err, doc) {
 
     //console.log("deployedEnvelopePath: " + envelopePath);
 
-    buffer = new Buffer(envelopeString + "\n");
+    var buffer = new Buffer(envelopeString + "\n");
 
     //console.log("saving envelopePath: " + deployedEnvelopePath);
     fs.writeFileSync(envelopePath, buffer);
@@ -392,7 +373,8 @@ devicelib.get(udid, function(err, doc) {
 
     // Device channel
     if (status == "DEPLOYED") {
-      messenger.publish(owner, udid, message);
+      console.log("Calling messenger publish...");
+      Messenger.publish(owner, udid, message);
       notify_device_channel(owner, udid, message); // deprecated; integration testing only
     }
 
@@ -400,18 +382,6 @@ devicelib.get(udid, function(err, doc) {
 
   });
 });
-
-// Prepare payload
-
-var pushNotificationPayload = {
-  firmware_update: {
-    url: build_path,
-    udid: udid,
-    commit: commit_id,
-    version: version,
-    checksum: sha
-  }
-};
 
 //
 // MQTT Notifications (deprecated, done through Messenger)
@@ -422,7 +392,7 @@ function notify_device_channel(owner, udid, message) {
   var channel = "/thinx/devices/" + owner + "/" + udid;
   console.log("Posting to MQTT queue " + channel);
   const app_config = require("./conf/config.json");
-  var client = mqtt.connect("mqtt://"+app_config.mqtt.username+":"+app_config.mqtt.password+"@thinx.cloud:"+app_config.mqtt.port);
+  var client = mqtt.connect("mqtt://"+app_config.mqtt.username+":"+app_config.mqtt.password+"@" + process.env.APP_HOSTNAME + ":"+app_config.mqtt.port);
   client.on("connect", function() {
     console.log("Connected to MQTT, will post to " + channel);
     client.subscribe(channel);

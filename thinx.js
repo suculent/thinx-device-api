@@ -4,11 +4,20 @@
 
 var ThinxApp = function() {
 
+  console.log("---");
+  console.log("---");
+  console.log("---");
+  console.log("---");
+  console.log("---");
+  console.log("--- " + new Date() + " ---");
+
+  var Sqreen = null;
+
   var global_token = null;
   var global_response = null;
-  var exec = require("child_process");
+  var exec = require("child_process"); // lgtm [js/unused-local-variable]
   var typeOf = require("typeof");
-  var Rollbar = require("rollbar");
+  var Rollbar = require("rollbar"); // lgtm [js/unused-local-variable]
   var crypto = require('crypto');
   var auth = require('./lib/thinx/auth.js');
   var fs = require("fs-extra");
@@ -19,43 +28,13 @@ var ThinxApp = function() {
 
   var http = require('http');
   var redis = require('redis');
-
   var session_config = require("./conf/node-session.json");
-  var app_config = require("./conf/config.json"); // this file should be actually omitted from repository
 
-  const r_options = {
-  password: app_config.redis.password,
-  host: app_config.redis.host,
-  port: 6379,
-  retry_strategy: function (options) {
-      console.log('retry strategy check');
-      console.log(options);
-      if (options.error) {
-        if (options.error.code === 'ECONNREFUSED') {
-          // End reconnecting on a specific error and flush all commands with a individual error
-          return new Error('The server refused the connection');
-        }
-        if (options.error.code === 'ECONNRESET') {
-          return new Error('The server reset the connection');
-        }
-        if (options.error.code === 'ETIMEDOUT') {
-          return new Error('The server timeouted the connection');
-        }
-      }
-      if (options.total_retry_time > 1000 * 60 * 60) {
-        // End reconnecting after a specific timeout and flush all commands with a individual error
-        return new Error('Retry time exhausted');
-      }
-      if (options.attempt > 5) {
-        // End reconnecting with built in error
-        return new Error('Retry attempts ended');
-      }
-      // reconnect after
-      return 1000;
-    }
-  };
-
-  var redis_client = redis.createClient(r_options);
+  var Globals = require("./lib/thinx/globals.js"); // static only!
+  var app_config = Globals.app_config(); // require("../../conf/config.json");
+  var prefix = Globals.prefix();
+  var rollbar = Globals.rollbar(); // lgtm [js/unused-local-variable]
+  var redis_client = redis.createClient(Globals.redis_options());
   var path = require('path');
 
   //
@@ -66,80 +45,14 @@ var ThinxApp = function() {
   const day = hour * 24;
   const fortnight = day * 14;
 
-  console.log("---");
-  console.log("---");
-  console.log("---");
-  console.log("---");
-  console.log("---");
-  console.log("--- " + new Date() + " ---");
-
   //
   // Environment-dependent configurations
   //
 
-  var google_ocfg = null;
-  var github_ocfg = null;
+  var google_ocfg = Globals.google_ocfg();
+  var github_ocfg = Globals.github_ocfg();
 
-
-
-  // requires existing sqreen.json or ENV vars defined
-
-
-  if (typeof(process.env.CIRCLE_USERNAME) !== "undefined") {
-    console.log("» Starting server on Circle CI...");
-    app_config = require("./conf/config-test.json");
-
-    if (fs.existsSync('./conf/google-oauth-test.json')) {
-      google_ocfg = require('./conf/google-oauth-test.json');
-    } else {
-      console.log("Skipping Google OAuth, configuration not found...");
-    }
-
-    if (fs.existsSync('./conf/github-oauth-test.json')) {
-      github_ocfg = require('./conf/github-oauth-test.json');
-    } else {
-      console.log("Skipping GitHub OAuth, configuration not found...");
-    }
-
-    use_sqreen = false;
-  }
-  if (process.env.LOGNAME == "sychram") {
-    console.log("» Starting on workstation...");
-    app_config = require("./conf/config-local.json");
-
-    if (fs.existsSync('./conf/google-oauth-test.json')) {
-      google_ocfg = require('./conf/google-oauth-test.json');
-    }
-
-    if (fs.existsSync('./conf/github-oauth-test.json')) {
-      github_ocfg = require('./conf/github-oauth-test.json');
-    }
-    use_sqreen = false;
-  }
-  if (process.env.LOGNAME == "root") {
-    console.log("» Starting in production 'root' mode (needs to control Docker until Agens)...");
-    app_config = require("./conf/config.json");
-
-    if (fs.existsSync('./conf/google-oauth.json')) {
-      google_ocfg = require('./conf/google-oauth.json');
-    }
-
-    if (fs.existsSync('./conf/github-oauth.json')) {
-      github_ocfg = require('./conf/github-oauth.json');
-    }
-  }
-
-  var use_sqreen = app_config.use_screen || false;
-
-  var rollbar = new Rollbar({
-    accessToken: app_config.rollbar_token,
-    captureUncaught: true,
-    captureUnhandledRejections: true
-  });
-
-  var Sqreen = null;
-
-  if (use_sqreen) {
+  if (Globals.use_screen()) {
     Sqreen = require('sqreen');
   }
 
@@ -149,9 +62,7 @@ var ThinxApp = function() {
 
   const simpleOauthModule = require('simple-oauth2');
   var oauth2;
-
   if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
-
      oauth2 = simpleOauthModule.create({
       client: {
         id: google_ocfg.web.client_id,
@@ -163,7 +74,6 @@ var ThinxApp = function() {
         tokenPath: '/o/oauth2/token'
       },
     });
-
   }
 
   //
@@ -171,9 +81,7 @@ var ThinxApp = function() {
   //
 
   var githubOAuth;
-
   if (typeof(github_ocfg) !== "undefined" && github_ocfg !== null) {
-
     try {
       githubOAuth = require('github-oauth')({
         githubClient: github_ocfg.client_id,
@@ -186,7 +94,6 @@ var ThinxApp = function() {
     } catch (e) {
       console.log("github-oauth github_ocfg init error: " + e);
     }
-
   }
 
   //
@@ -204,25 +111,7 @@ var ThinxApp = function() {
   var nano = require("nano")(db);
   var sha256 = require("sha256");
 
-  var v = require("./lib/thinx/version");
-  var alog = require("./lib/thinx/audit");
-  var blog = require("./lib/thinx/buildlog");
-  var builder = require("./lib/thinx/builder");
-  var device = require("./lib/thinx/device");
-  var devices = require("./lib/thinx/devices");
-  var deployment = require("./lib/thinx/deployment");
 
-  var watcher = require("./lib/thinx/repository");
-  watcher.watch();
-
-  var apienv = require("./lib/thinx/apienv");
-  var apikey = require("./lib/thinx/apikey");
-  var user = require("./lib/thinx/owner");
-  var rsakey = require("./lib/thinx/rsakey");
-  var stats = require("./lib/thinx/statistics");
-  var sources = require("./lib/thinx/sources");
-  var transfer = require("./lib/thinx/transfer");
-  var messenger = require("./lib/thinx/messenger");
 
   var slack_webhook = app_config.slack_webhook;
   var thinx_slack = require("slack-notify")(slack_webhook);
@@ -237,7 +126,7 @@ var ThinxApp = function() {
   var getClientIp = function(req) {
     var ipAddress = req.ip;
     if (!ipAddress) {
-      console.log("Unknown Client IP: thinx.cloud");
+      console.log("Unknown Client IP:" + ipAddress);
       return "207.154.230.212";
     }
     // convert from "::ffff:192.0.0.1"  to "192.0.0.1"
@@ -259,21 +148,96 @@ var ThinxApp = function() {
   try {
     var pfx_path = app_config.project_root + '/conf/.thx_prefix';
     if (fs.existsSync(pfx_path)) {
-      prefix = fs.readFileSync(pfx_path) + "_";
+      prefix = (fs.readFileSync(pfx_path).toString()).replace("\n", "");
+    } else {
+      // create .thx_prefix with random key on first run!
+      fs.ensureFile(pfx_path, function(e) {
+        if (e) {
+          console.log("error creating thx_prefix: " + e);
+        } else {
+          crypto.randomBytes(12, function(err, buffer) {
+            var prefix = buffer.toString('hex');
+            fs.writeFile(prefix, "", function(err) {
+              if (err) {
+                console.log("error writing thx_prefix: " + err);
+              }
+            });
+          });
+        }
+      });
     }
   } catch (e) {
     console.log("[index] thx_prefix_exception" + e);
   }
 
+  // should be initialized after prefix because of DB requirements...
+  var v = require("./lib/thinx/version");
+  var alog = require("./lib/thinx/audit");
+
+  var builder = require("./lib/thinx/builder");
+  var device = require("./lib/thinx/device");
+  var devices = require("./lib/thinx/devices");
+  var deployment = require("./lib/thinx/deployment");
+
+  var watcher = require("./lib/thinx/repository");
+  watcher.watch();
+
+  var apienv = require("./lib/thinx/apienv");
+  var apikey = require("./lib/thinx/apikey");
+  var user = require("./lib/thinx/owner");
+  var rsakey = require("./lib/thinx/rsakey");
+  var stats = require("./lib/thinx/statistics");
+  var sources = require("./lib/thinx/sources");
+  var transfer = require("./lib/thinx/transfer");
+  var messenger = require("./lib/thinx/messenger");
+
+  // Database preparation on first run
+
   function initDatabases() {
+
+    function injectDesign(db, design, file) {
+      const design_doc = require(file);
+      db.insert("_design/" + design, design_doc, function(err, body, header) {
+        console.log("Insert error: "+err);
+        console.log("Insert body: "+body);
+        console.log("Insert header: "+header);
+      });
+    }
+
+    function injectReplFilter(db, filter, file) {
+      try {
+        const filter_doc = require(file);
+        db.insert("_design/repl_filters", filter_doc, function(err, body, header) {
+          console.log("Insert error: "+err);
+          console.log("Insert body: "+body);
+          console.log("Insert header: "+header);
+        });
+      } catch (e) {
+        console.log("File may not exist: "+e);
+      }
+    }
+
+    function handleDatabaseErrors(err, name) {
+      if (err.toString().indexOf("the file already exists") != -1) {
+        // silently fail, this is ok
+      } else if (err.toString().indexOf("error happened") != -1) {
+        console.log("🚫 Database connectivity issue. " + err);
+        process.exit(1);
+      } else {
+        console.log("🚫 Database " + name + " creation failed. " + err);
+        process.exit(2);
+      }
+    }
 
     nano.db.create(prefix + "managed_devices", function(err, body, header) {
       if (err) {
         handleDatabaseErrors(err, "managed_devices");
       } else {
         console.log("» Device database creation completed. Response: " +
-          JSON.stringify(
-            body) + "\n");
+          JSON.stringify(body) + "\n");
+        var db = nano.db.use(prefix + "managed_devices");
+        injectDesign(db, "devicelib", "./design/design_deviceslib.json");
+        injectReplFilter(db, "./design/filters_devices.json");
       }
     });
 
@@ -282,9 +246,10 @@ var ThinxApp = function() {
         handleDatabaseErrors(err, "managed_builds");
       } else {
         console.log("» Build database creation completed. Response: " +
-          JSON
-          .stringify(
-            body) + "\n");
+          JSON.stringify(body) + "\n");
+        var db = nano.db.use(prefix + "managed_builds");
+        injectDesign(db, "builds", "./design/design_builds.json");
+        injectReplFilter(db,   "./design/filters_builds.json");
       }
     });
 
@@ -293,28 +258,24 @@ var ThinxApp = function() {
         handleDatabaseErrors(err, "managed_users");
       } else {
         console.log("» User database creation completed. Response: " +
-          JSON
-          .stringify(
-            body) + "\n");
+          JSON.stringify(body) + "\n");
+        var db = nano.db.use(prefix + "managed_users");
+        injectDesign(db, "users", "./design/design_users.json");
+        injectReplFilter(db, "./design/filters_users.json");
       }
     });
-  }
 
-  function handleDatabaseErrors(err, name) {
-
-    if (err.toString().indexOf("the file already exists") != -1) {
-      // silently fail, this is ok
-
-    } else if (err.toString().indexOf("error happened in your connection") !=
-      -
-      1) {
-      console.log("🚫 Database connectivity issue. " + err);
-      process.exit(1);
-
-    } else {
-      console.log("🚫 Database " + name + " creation failed. " + err);
-      process.exit(2);
-    }
+    nano.db.create(prefix + "managed_logs", function(err, body, header) {
+      if (err) {
+        handleDatabaseErrors(err, "managed_logs");
+      } else {
+        console.log("» Log database creation completed. Response: " +
+          JSON.stringify(body) + "\n");
+        var db = nano.db.use(prefix + "managed_logs");
+        injectDesign(db, "logs", "./design/design_logs.json");
+        injectReplFilter(db,  "./design/filters_logs.json");
+      }
+    });
   }
 
   /*
@@ -361,20 +322,30 @@ var ThinxApp = function() {
 
   initDatabases();
 
-  var devicelib = require("nano")(db).use(prefix + "managed_devices");
-  var userlib = require("nano")(db).use(prefix + "managed_users");
+  var blog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
+
+  var devicelib = require("nano")(db).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
+  var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
+  var buildlib = require("nano")(db).use(prefix + "managed_builds"); // lgtm [js/unused-local-variable]
+  var loglib = require("nano")(db).use(prefix + "managed_logs"); // lgtm [js/unused-local-variable]
 
   // <-- EXTRACT TO: db.js && databases must not be held by app class
+  // and they require on prefix as well...
 
   // Express App
-
   var express = require("express");
   var session = require("express-session");
 
   var app = express();
 
   console.log("» Starting Redis client...");
-  var redisStore = require("connect-redis")(session);
+  var RedisStore = require("connect-redis")(session);
+  var sessionStore = new RedisStore({
+    host: app_config.redis.host,
+    port: app_config.redis.post,
+    pass: app_config.redis.password,
+    ttl : (60000 * 24 * 30)
+  });
 
   app.set("trust proxy", 1);
 
@@ -387,13 +358,7 @@ var ThinxApp = function() {
       "secure": true,
       "httpOnly": true
     },
-    store: new redisStore({
-      host: app_config.redis.host,
-      port: app_config.redis.post,
-      pass: app_config.redis.password,
-      ttl : (60000 * 24 * 30),
-      client: redis_client // seems not working...
-    }),
+    store: sessionStore,
     name: "x-thx-session",
     resave: true,
     rolling: false,
@@ -416,7 +381,7 @@ var ThinxApp = function() {
     if (BLACKLIST.toString().indexOf(ipAddress) === -1) {
       next();
     } else {
-      console.log("Returning error, blacklisted.");
+      console.log("Returning error 403 for blacklisted IP.");
       res.status(403).end();
     }
   });
@@ -428,7 +393,7 @@ var ThinxApp = function() {
     if (typeOf(client) === "undefined") {
       console.log("Dropping connection for client without user-agent.");
       res.status(403).end();
-      client = "";
+      return;
     }
 
     if (client.indexOf("Jorgee") !== -1) {
@@ -441,7 +406,7 @@ var ThinxApp = function() {
     if (req.originalUrl.indexOf("admin") !== -1) {
       BLACKLIST.push(getClientIp(req));
       res.status(403).end();
-      console.log("admin is blacklisted.");
+      console.log("admin is blacklisted because of request "+req.originalUrl);
       return;
     }
 
@@ -465,23 +430,21 @@ var ThinxApp = function() {
     }
 
     // Problem is, that the device API should be separate and have different Access-Control
-    var allowedOrigins = [app_config.public_url, 'http://rtm.thinx.cloud', 'https://cdnjs.cloudflare.com', 'https://d37gvrvc0wt4s1.cloudfront.net', '*'];
-    var origin = req.headers.origin;
-    if (allowedOrigins.indexOf(origin) > -1){
-      res.setHeader('Access-Control-Allow-Origin', origin);
+    // var webHostname = process.env.WEB_HOSTNAME || "rtm.thinx.cloud";
+
+    // cannot use this with allow origin * res.header("Access-Control-Allow-Credentials", "true");
+    // analysis: will PROBABLY have to be refactored to anything but Device-Registration and Devoce-OTA requests
+    if ((req.originalUrl.indexOf("register") == -1) &&
+        (req.originalUrl.indexOf("firmware") == -1)) {
+      //console.log("Setting CORS to " + app_config.public_url);
+      res.header("Access-Control-Allow-Origin", app_config.public_url);
+      res.header("Access-Control-Allow-Credentials", "true");
     } else {
-      if ((typeof(origin) === "undefined") || (origin === NULL)) {
-        // res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
-        // device-wise
-      } else {
-        // hack! for monitoring disallowed (unlisted, forgotten originsd)
-        console.log("Request origin: "+origin);
-        res.setHeader('Access-Control-Allow-Origin', origin);
-        console.log("Dis-Allowed origin: "+origin);
-      }
+      console.log("Setting CORS to *");
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Credentials", "false");
     }
-    //res.header("Access-Control-Allow-Origin", allowedOrigin); // rtm.thinx.cloud
-    res.header("Access-Control-Allow-Credentials", "true");
+
     res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
     res.header("Access-Control-Allow-Headers", "Content-type,Accept,X-Access-Token,X-Key");
 
@@ -997,21 +960,18 @@ var ThinxApp = function() {
     if (typeof(req.body.filenames) !== "undefined") {
       var filenames = req.body.filenames;
       console.log("Fingerprints: " + JSON.stringify(filenames));
-      rsakey.revoke(owner, filenames,
-        function(success, response) {
-          respond(res, {
-            success: success,
-            status: response
-          });
+      rsakey.revoke(owner, filenames, function(success, response) {
+        respond(res, {
+          success: success,
+          status: response
         });
-      return;
+      });
+    } else {
+      respond(res, {
+        success: false,
+        status: "invalid_query"
+      });
     }
-
-    respond(res, {
-      success: false,
-      status: "invalid_query"
-    });
-
   });
 
   /*
@@ -1064,7 +1024,6 @@ var ThinxApp = function() {
     var ac_key = req.query.activation;
     var ac_owner = req.query.owner;
     user.activate(ac_owner, ac_key, function(success, message) {
-
       if (!success) {
         req.session.destroy(function(err) {
           console.log(err);
@@ -1840,11 +1799,16 @@ var ThinxApp = function() {
    */
 
   var updateLastSeen = function(doc) {
-    userlib.atomic("users", "checkin", doc._id, {
-      last_seen: new Date()
+    userlib.atomic("users", "checkin", doc._id, { last_seen: new Date()
     }, function(error, response) {
       if (error) {
-        console.log("Last-seen update failed: " + error);
+        if (error.toString().indexOf("conflict") !== -1) {
+          console.log("Last-seen update retry...");
+          delete doc._rev;
+          updateLastSeen(doc);
+        } else {
+          console.log("Last-seen update failed (1): " + error);
+        }
       } else {
         alog.log(doc._id, "Last seen updated.");
       }
@@ -1885,6 +1849,7 @@ var ThinxApp = function() {
     var owner_id = null;
 
     if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
+
       redis_client.get(oauth, function(err, userWrapper) {
         if (err) {
           console.log("[oauth] takeover failed");
@@ -1928,7 +1893,7 @@ var ThinxApp = function() {
                   httpOnly: false
                 });
 
-                if (use_sqreen) {
+                if (Globals.use_screen()) {
                   Sqreen.signup_track({ username: owner_id });
                 }
 
@@ -1944,31 +1909,32 @@ var ThinxApp = function() {
 
               req.session.owner = doc.owner;
 
-              console.log("[OID:" + req.session.owner +
-                "] [NEW_SESSION] [oauth] 1854:");
+              console.log("[OID:" + doc.owner + "] [NEW_SESSION] [oauth] thinx.js:1854...");
 
-              req.session.cookie.maxAge = new Date(Date.now() + hour);
+              alog.log(doc.owner, "New session.", "info");
+
+              req.session.cookie.maxAge = new Date(Date.now() + hour).getTime();
               req.session.cookie.secure = true;
               req.session.cookie.httpOnly = true;
 
-              if (typeof(req.body.remember === "undefined") || (req.body.remember ===
-                  0)) {
+              if (typeof(req.body.remember === "undefined")
+              || (req.body.remember === 0)) {
                 req.session.cookie.maxAge = 24 * hour;
               } else {
                 req.session.cookie.maxAge = fortnight;
               }
 
-              alog.log(req.session.owner, "OAuth User logged in: " +
-                doc.username);
+              alog.log("[OID:" + doc.owner + "] OAuth User logged in: " + doc.username);
 
-              if (use_sqreen) {
+              if (Globals.use_screen()) {
                 Sqreen.auth_track(true, { username: doc.owner });
               }
 
-              updateLastSeen(doc);
               respond(res, {
                 "redirectURL": "/app"
               });
+
+              updateLastSeen(doc);
             }
           });
         }
@@ -1985,7 +1951,7 @@ var ThinxApp = function() {
 
     if (typeof(req.body.password) === "undefined") {
       callback(false, "login_failed");
-      if (use_sqreen) {
+      if (Globals.use_screen()) {
         Sqreen.auth_track(false, { doc: owner });
       }
       return;
@@ -1996,7 +1962,7 @@ var ThinxApp = function() {
     //
 
     var username = req.body.username;
-    var password = sha256(req.body.password);
+    var password = sha256(prefix + req.body.password);
 
     if (typeof(username) === "undefined" || typeof(password) ===
       "undefined" && typeof(oauth) === "undefined") {
@@ -2035,6 +2001,7 @@ var ThinxApp = function() {
       var user_data = null;
       for (var index in all_users) {
         var all_user_data = all_users[index];
+
         if (username != all_user_data.key) {
           continue;
         } else {
@@ -2052,6 +2019,7 @@ var ThinxApp = function() {
         thinx_slack.alert({
           text: err_string
         });
+
         console.log("No user data, " + username + " not authorized.");
         failureResponse(res, 403, "unauthorized");
         return;
@@ -2122,7 +2090,7 @@ var ThinxApp = function() {
                 last_seen: new Date()
               }, function(error, response) {
                 if (err) {
-                  console.log("Last-seen update failed: " +
+                  console.log("Last-seen update failed (2): " +
                     err);
                 } else {
                   alog.log(udoc.owner,
@@ -2143,13 +2111,24 @@ var ThinxApp = function() {
         }
 
       } else { // password invalid
-        console.log("[LOGIN_INVALID] Password mismatch for: " + username + ", db: " + sha256(user_data.password) + " vs. " + sha256(password));
 
-        alog.log(req.session.owner, "Password mismatch for: " + username);
-        respond(res, {
-          status: "password_mismatch",
-          success: false
-        });
+        var p = user_data.password;
+        if (typeof(p) === "undefined" || p === null) {
+          console.log("[LOGIN_INVALID] (not activated/no password) for " + username);
+          alog.log(req.session.owner, "Password missing for: " + username);
+          respond(res, {
+            status: "password_missing",
+            success: false
+          });
+        } else {
+          console.log("[LOGIN_INVALID] Password mismatch for: " + username);
+          alog.log(req.session.owner, "Password mismatch for: " + username);
+          respond(res, {
+            status: "password_mismatch",
+            success: false
+          });
+        }
+
         return;
       }
 
@@ -2383,7 +2362,7 @@ var ThinxApp = function() {
       host: 'slack.com',
       hostname: 'slack.com',
       port: 443,
-      path: '/api/oauth.access?client_id=233115403974.233317554391&client_secret=ccbaae01e5259ed283ef63321be597da&redirect_uri=" + app_config.public_url + ":7443/slack/redirect&scope=bot&code=' +
+      path: '/api/oauth.access?client_id=233115403974.233317554391&client_secret=ccbaae01e5259ed283ef63321be597da&redirect_uri=' + app_config.public_url + ':7443/slack/redirect&scope=bot&code=' +
         req.query.code
     };
 
@@ -2422,7 +2401,7 @@ var ThinxApp = function() {
     });
 
     res.redirect(
-      "https:/rtm.thinx.cloud/app/#/profile/help"
+      "https://" + process.env.APP_HOSTNAME + "/app/#/profile/help"
     );
 
   });
@@ -2535,7 +2514,7 @@ var ThinxApp = function() {
               // Error case covers creating new user/managing deleted account
               if (error) {
 
-                if (use_sqreen) {
+                if (Globals.use_screen()) {
                   Sqreen.auth_track(false, { doc: userWrapper.owner_id });
                 }
 
@@ -2559,7 +2538,7 @@ var ThinxApp = function() {
                   if (typeof(udoc) !== "undefined") {
                     if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
                       true) {
-                      if (use_sqreen) {
+                      if (Globals.use_screen()) {
                         Sqreen.auth_track(false, { doc: userWrapper.owner_id });
                       }
                       // TODO: Redirect to error page with reason
@@ -2591,7 +2570,7 @@ var ThinxApp = function() {
                     // causes registration error where headers already sent!
                     global_response.redirect(ourl); // must be global_response! res does not exist here.
 
-                    if (use_sqreen) {
+                    if (Globals.use_screen()) {
                       Sqreen.signup_track({ username: userWrapper.owner_id });
                     }
 
@@ -2608,7 +2587,7 @@ var ThinxApp = function() {
                 last_seen: new Date()
               }, function(error, response) {
                 if (error) {
-                  console.log("Last-seen update failed: " + error);
+                  console.log("Last-seen update failed (3): " + error);
                 } else {
                   alog.log(owner_id, "Last seen updated.");
                 }
@@ -2629,7 +2608,7 @@ var ThinxApp = function() {
                 }
               }
 
-              if (use_sqreen) {
+              if (Globals.use_screen()) {
                 Sqreen.auth_track(true, { username: userWrapper.owner_id });
               }
 
@@ -2825,7 +2804,7 @@ var ThinxApp = function() {
                 },
                 function(error, response) {
                   if (error) {
-                    console.log("Last-seen update failed: " + error);
+                    console.log("Last-seen update failed (4): " + error);
                   } else {
                     alog.log(req.session.owner, "Last seen updated.");
                   }
@@ -3145,7 +3124,7 @@ var ThinxApp = function() {
       };
       console.log("» Starting HTTPS server on " + (serverPort + 1) +
         "...");
-      https.createServer(ssl_options, app).listen(serverPort + 1);
+      https.createServer(ssl_options, app).listen(serverPort + 1, "0.0.0.0", function() { } );
     } else {
       console.log(
         "Skipping HTTPS server, SSL key or certificate not found.");
@@ -3156,7 +3135,7 @@ var ThinxApp = function() {
   app.set('trust proxy', ['loopback', '127.0.0.1']);
 
   // Legacy HTTP support for old devices without HTTPS proxy
-  http.createServer(app).listen(serverPort);
+  http.createServer(app).listen(serverPort, "0.0.0.0", function() { });
 
   /*
    * WebSocket Server
@@ -3164,19 +3143,15 @@ var ThinxApp = function() {
 
   var wsapp = express();
 
+  console.log("Initializing WS session store...");
+
   wsapp.use(session({
     secret: session_config.secret,
-    store: new redisStore({
-      host: app_config.redis.host,
-      port: app_config.redis.post,
-      pass: app_config.redis.password,
-      ttl : (60000 * 24 * 30),
-      client: redis_client // seems not working...
-    }),
+    store: sessionStore,
     cookie: {
       expires: hour
     },
-    name: "x-thx-session",
+    name: "x-thx-ws-session",
     resave: false,
     rolling: false,
     saveUninitialized: false,
@@ -3267,12 +3242,13 @@ var ThinxApp = function() {
           } else if (typeof(object.init) !== "undefined") {
 
             if (typeof(messenger) !== "undefined") {
+              console.log("Initializing WS messenger with owner "+object.init);
               messenger.initWithOwner(object.init, _ws, function(success,
                 message) {
                 if (!success) {
-                  console.log("Messenger init on message with success " +
+                  console.log("Messenger init on WS message with result " +
                     success +
-                    "message: " +
+                    ", with message: " +
                     JSON.stringify(message));
                 }
               });
@@ -3296,7 +3272,7 @@ var ThinxApp = function() {
     });
   }
 
-  wserver.listen(7444, function listening() {
+  wserver.listen(7444, "0.0.0.0", function listening() {
     console.log("» WebSocket listening on port %d", wserver.address().port);
   });
 
@@ -3366,44 +3342,13 @@ var ThinxApp = function() {
     // Status Transformer Server
     //
 
+    // Deprecated. Status Transformer is now started as separate Docker container
+    // and managed by Orchestration (docker-compose).
+    // TODO: Add Status Transformer POST TEST only...
 
-    // run detached container on port 7474 waiting...
-    console.log("Starting Status Transformer Sandbox...");
-    const img = "suculent/thinx-node-transformer";
-
-    // Get running transformers if any
-    const docker_check_cmd = "docker ps | grep transformer | cut -d' ' -f1";
-    var container_already_running;
-    try {
-      container_already_running = exec.execSync(docker_check_cmd).toString();
-    } catch (e) {
-      console.log("Status Transformer Docker check error: " + e);
-    }
-
-    /* this part will deprecate as transformer is managed by docker-compose and autorestarted now
-    // Kill existing transformers if any
-    console.log("Docker Status Transformer check...");
-    if (container_already_running) {
-      try {
-        console.log(exec.execSync("docker kill " + container_already_running).toString());
-      } catch (e) {
-        console.log("Status Transformer Docker kill error: " + e);
-      }
-    }
-
-    // Pull fresh transformer container and start
-    const docker_pull_cmd = "docker pull " + img + "; ";
-    const git_pull_cmd = "cd ../thinx-node-transformer; git pull origin master; ";
-    const docker_run_cmd = "docker run --rm --user=transformer -d -p " + app_config.lambda +
-      ":7474 -v $(pwd)/logs:/logs -v $(pwd):/app " + img;
-    const st_command = docker_pull_cmd + git_pull_cmd + docker_run_cmd;
-    try {
-      console.log(exec.execSync(st_command).toString());
-    } catch (e) {
-      if (e.toString().indexOf("port is already allocated") !== -1) {
-        console.log("Status Transformer Docker exec error: " + e);
-      }
-    }*/
+    //
+    // TODO: Move to messenger or owner OR DEVICES? Or extract?
+    //
 
     /* This operation should restore MQTT passwords only. */
     // triggered by non-existend password file
@@ -3445,8 +3390,6 @@ var ThinxApp = function() {
   //
   // MQTT Disaster Recovery
   //
-
-
 
   function restore_owner_credentials(owner_id, dmk_callback) {
     devicelib.view("devicelib", "devices_by_owner", {
@@ -3516,6 +3459,7 @@ var ThinxApp = function() {
       for (var i = 0; i < body.rows.length; i++) {
         var owner_doc = body.rows[i];
         var owner_id = owner_doc.id;
+        if (owner_id.indexOf("design")) continue;
         console.log("Restoring credentials for owner "+owner_id);
         restore_owner_credentials(owner_id, function(success, default_mqtt_key) {
           if (success) {

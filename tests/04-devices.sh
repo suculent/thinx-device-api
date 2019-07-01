@@ -28,7 +28,7 @@ fi
 COUNTER=0
          until [ $COUNTER -gt 4 ]; do
              echo COUNTER $COUNTER
-             TEST_DEVICE=$( cat 04-test-devices.json | jq .[$COUNTER] )
+             TEST_DEVICE=$( echo 04-test-devices.json | jq .[$COUNTER] )
              echo $TEST_DEVICE
 
              echo

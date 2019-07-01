@@ -6,20 +6,6 @@
 
 var transformer = function(status, device) {
 
-  // Check the prefix for 'ba'
-  const tag = ststr.substr(0, 2); // start, length
-  var icon = "";
-  if (tag == "ba") {
-    const hex_voltage = ststr.substr(2, ststr.length - 2);
-    const voltage = hexToFloat(flipHexString("0x" + hex_voltage, 8));
-    if (voltage < 3.4) {
-      icon = "#!"; // show yellow warning sign when battery is bellow specified level
-    }
-    return "Battery " + voltage + " V" + icon;
-  } else {
-    return status; // in case return value is undefined, original status will be displayed
-  }
-
   //
   // Convenience functions
   //
@@ -39,5 +25,19 @@ var transformer = function(status, device) {
     var e = (hex >> 23) & 0xFF;
     return s * (hex & 0x7fffff | 0x800000) * 1.0 / Math.pow(2, 23) * Math.pow(2, (e - 127));
   };
+
+  // Check the prefix for 'ba'
+  const tag = ststr.substr(0, 2); // start, length
+  var icon = "";
+  if (tag == "ba") {
+    const hex_voltage = ststr.substr(2, ststr.length - 2);
+    const voltage = hexToFloat(flipHexString("0x" + hex_voltage, 8));
+    if (voltage < 3.4) {
+      icon = "#!"; // show yellow warning sign when battery is bellow specified level
+    }
+    return "Battery " + voltage + " V" + icon;
+  } else {
+    return status; // in case return value is undefined, original status will be displayed
+  }
 
 };

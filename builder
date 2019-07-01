@@ -5,7 +5,7 @@ source ./infer # utility functions like parse_yaml
 set +e
 
 echo
-echo "[builder.sh] -=[ ☢  THiNX IoT RTM BUILDER ☢ ]=-"
+echo "[builder.sh] -=[ ☢   THiNX IoT RTM BUILDER ☢  ]=-"
 echo "[builder.sh] Running from: $(pwd)"
 
 # FIXME: This is system environment variable and should be configured on installation,
@@ -205,7 +205,9 @@ if [[ ! -d $BUILD_PATH ]]; then
 	mkdir -p $BUILD_PATH
 fi
 
+# Should be already deprecated, as there are pre-fetches. Maybe modules?
 echo "[builder.sh] Entering build and pulling path..." | tee -a "${LOG_PATH}"
+echo $BUILD_PATH | tee -a "${LOG_PATH}"
 cd $BUILD_PATH && git pull && pwd | tee -a "${LOG_PATH}"
 
 # Fetch submodules if any
@@ -261,8 +263,13 @@ fi
 
 echo "[builder.sh] Searching THiNX-File in $BUILD_PATH/$REPO_PATH..." | tee -a "${LOG_PATH}"
 
-THINX_CLOUD_URL="thinx.cloud"
-THINX_MQTT_URL="${THINX_CLOUD_URL}"
+if [[ -z $THINX_HOSTNAME ]]; then
+	echo "THINX_HOSTNAME must be set!"
+	# exit 1
+fi
+
+THINX_CLOUD_URL="${THINX_HOSTNAME}"
+THINX_MQTT_URL="${THINX_HOSTNAME}"
 
 if [[ ! -z $DEVICE_ALIAS ]]; then
 	THINX_ALIAS=$DEVICE_ALIAS

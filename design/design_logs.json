@@ -1,10 +1,12 @@
 {
   "_id": "_design/logs",
-  "_rev": "4-85e5ac376aaf8bd391c4ed31de1c32f7",
   "language": "javascript",
   "views": {
     "logs_by_owner": {
       "map": "function (doc) { if(doc.owner) { emit ([doc.date, doc.owner], { date: doc.date, message: doc.message, owner: doc.owner }); }}"
+    },
+    "logs_by_date": {
+      "map": "function (doc) { if(doc.date) { emit (doc.date, doc ); } }"
     }
   },
   "updates": {

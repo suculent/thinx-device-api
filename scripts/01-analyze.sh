@@ -17,7 +17,7 @@ fi
 
 echo "» Running esLint check..."
 
-eslint **/*.js
+eslint ./**/*.js
 
 exit 0
 
