@@ -1183,7 +1183,7 @@ var ThinxApp = function() {
   // MAC is be allowed for initial regitration where device is given new UDID
 
   app.post("/device/register", function(req, res) {
-    const startTime = new Date().getMilliseconds();
+    // const startTime = new Date().getMilliseconds();
 
     validateRequest(req, res);
     var ip = getClientIp(req);
@@ -1207,6 +1207,7 @@ var ThinxApp = function() {
       });
     } else {
       var rip = getClientIp(req);
+      console.log("Incoming request from "+rip);
       //console.log("Incoming request has `registration` in body, with IP " + rip);
       //console.log("headers: " + JSON.stringify(req.headers));
 
@@ -1656,8 +1657,6 @@ var ThinxApp = function() {
   /* Decline device transfer (all by e-mail, selective will be POST) */
   app.get("/api/transfer/decline", function(req, res) {
 
-    var owner = req.session.owner;
-
     if (typeof(req.query.transfer_id) !== "undefined") {
       respond(res, {
         success: false,
@@ -1726,8 +1725,6 @@ var ThinxApp = function() {
 
   /* Accept device transfer (all by e-mail, selective will be POST) */
   app.get("/api/transfer/accept", function(req, res) {
-
-    var owner = req.session.owner;
 
     if (typeof(req.query.transfer_id) === "undefined") {
       respond(res, {
@@ -1917,8 +1914,9 @@ var ThinxApp = function() {
               req.session.cookie.secure = true;
               req.session.cookie.httpOnly = true;
 
-              if (typeof(req.body.remember === "undefined")
-              || (req.body.remember === 0)) {
+              if ( (typeof(req.body.remember) === "undefined")
+                   || (req.body.remember === 0)
+                 ) {
                 req.session.cookie.maxAge = 24 * hour;
               } else {
                 req.session.cookie.maxAge = fortnight;
@@ -2042,8 +2040,9 @@ var ThinxApp = function() {
           // This log message is later duplicated in [oauth] and other variants
           // console.log("[OID:" + req.session.owner + "] [NEW_SESSION] on /login");
 
-          if (typeof(req.body.remember === "undefined") || (req.body.remember ===
-              0)) {
+          if ( (typeof(req.body.remember) === "undefined")
+               || (req.body.remember === 0)
+            ) {
             req.session.cookie.maxAge = 24 * hour;
             res.cookie("x-thx-session-expire", req.session.cookie.expires, {
               maxAge: req.session.cookie.maxAge,
@@ -2316,7 +2315,7 @@ var ThinxApp = function() {
       return;
     }
 
-    if (typeof(nid) === "undefined" || nid == null) {
+    if (typeof(nid) === "undefined" || nid === null) {
       respond(res, {
         success: false,
         status: "missing_nid"
@@ -2464,9 +2463,10 @@ var ThinxApp = function() {
 
             if ((typeof(hdata.name) !== "undefined") && hdata.name !== null) {
               if (hdata.name.indexOf(" ") > -1) {
-                name_array = hdata.name.split(" ");
-                given_name = name_array[0];
-                family_name = name_array[name_array.count - 1];
+                var in_name_array = hdata.name.split(" ");
+                given_name = in_name_array[0];
+                family_name = in_name_array[in_name_array.count - 1];
+                name_array = [given_name, family_name];
               } else {
                 given_name = hdata.name;
               }
@@ -2641,7 +2641,7 @@ var ThinxApp = function() {
    */
 
 
-  if (typeof(google_ocfg) !== "undefined" || google_ocfg !== null) {
+  if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
 
     // Initial page redirecting to OAuth2 provider
     app.get('/oauth/google', function(req, res) {
@@ -2846,7 +2846,7 @@ var ThinxApp = function() {
 
   }
 
-  if (typeof(github_ocfg) !== "undefined" || github_ocfg !== null) {
+  if (typeof(github_ocfg) !== "undefined" && github_ocfg !== null) {
 
     // Callback service parsing the authorization token and asking for the access token
     app.get('/oauth/gcb', function(req, res) {
