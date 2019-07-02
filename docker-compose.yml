@@ -41,7 +41,7 @@ services:
       - /mnt/data/ssl:/mnt/data/ssl
       - /mnt/data/ssh_keys:/mnt/data/ssh_keys
       - /var/run/docker.sock:/var/run/docker.sock # DIND
-      - /var/lib/doocker
+      - /var/lib/docker
       - /cache
     labels:
       - "traefik.docker.network=nat"
