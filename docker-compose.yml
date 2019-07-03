@@ -1,4 +1,4 @@
-version: '3.1'
+version: '3.2'
 
 networks:
   nat:
@@ -7,6 +7,26 @@ networks:
     external: false
 
 services:
+
+  thinx-redis:
+    env_file: .env
+    networks:
+      - internal
+    image: suculent/redis-slave:latest
+    build: ./redis
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}", "--port", "6379"]
+    env_file:
+      - .env
+    environment:
+      - ALLOW_EMPTY_PASSWORD=no
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    restart: always
+    ports:
+      - "6379"
+    volumes:
+      - /mnt/data/redis:/data
+
   thinx-api:
     # because of DIND builders
     privileged: true
@@ -17,7 +37,7 @@ services:
     networks:
       - nat
       - internal
-    env_file: ./.env
+    env_file: .env
     environment:
       - THINX_HOSTNAME=${THINX_HOSTNAME}
       - THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}
