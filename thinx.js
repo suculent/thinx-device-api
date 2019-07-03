@@ -232,10 +232,10 @@ var ThinxApp = function() {
       if (err.toString().indexOf("the file already exists") != -1) {
         // silently fail, this is ok
       } else if (err.toString().indexOf("error happened") != -1) {
-        console.log("🚫 Database connectivity issue. " + err);
+        console.log("🚫 Database connectivity issue. " + err.toString() + " URI: "+app_config.database_uri);
         process.exit(1);
       } else {
-        console.log("🚫 Database " + name + " creation failed. " + err);
+        console.log("🚫 Database " + name + " creation failed. " + err + " URI: "+app_config.database_uri);
         process.exit(2);
       }
     }
@@ -334,6 +334,8 @@ var ThinxApp = function() {
   initDatabases();
 
   var blog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
+
+  console.log("Starting with prefix: '"+prefix+"'");
 
   var devicelib = require("nano")(db).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
   var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
