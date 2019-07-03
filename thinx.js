@@ -32,15 +32,6 @@ var ThinxApp = function() {
   var redis = require('redis');
   var session_config = require("./conf/node-session.json");
 
-  var ipm2 = require('pm2-interface')();
-
-  ipm2.on('ready', function() {
-    console.log('Connected to pm2');
-    ipm2.bus.on('process:exception', function(data){
-      console.log(data.pm2_env.name + 'had an exception');
-    });
-  });
-
   var Globals = require("./lib/thinx/globals.js"); // static only!
   var app_config = Globals.app_config(); // require("../../conf/config.json");
   var prefix = Globals.prefix();
