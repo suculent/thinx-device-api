@@ -2,6 +2,14 @@
 
 IoT Device Management Server running on node.js.
 
+<span style="color:red;">
+    <p><b>Transition Period Warning</b></p>
+    <p>THiNX has now passed version 1.0 upgrading to docker-compose installation with separate container services (CouchDB, Redis, Transformers, THiNX, Traefik and optional monitoring services), however not all Docker containers are yet part of the single install, namely:</p>
+    <p>• suculent/thinx-message-broker</p>
+    <p>• suculent/thinx-couchdb-master</p>
+    <p>• suculent/thinx-node-transformer</p>
+</span>
+
 [![Build Status](https://img.shields.io/circleci/project/github/suculent/thinx-device-api/master.svg)](https://circleci.com/gh/suculent/thinx-device-api)
 
 [![Coverage Status](https://coveralls.io/repos/github/suculent/thinx-device-api/badge.svg?branch=master)](https://coveralls.io/github/suculent/thinx-device-api?branch=master)

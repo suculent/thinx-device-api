@@ -105,5 +105,6 @@ EXPOSE 7444
 # GitLab Webbook
 EXPOSE 9002
 
+COPY ./.thinx_env /.thinx_env
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
