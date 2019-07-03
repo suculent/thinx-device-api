@@ -1,4 +1,4 @@
-version: '3.2'
+version: '3'
 
 networks:
   nat:
@@ -45,9 +45,6 @@ services:
     volumes:
       - /mnt/data/couchdb:/var/lib/couchdb
       - /mnt/data/couchdb:/opt/couchdb/data
-    networks:
-      - nat
-      - internal
     labels:
      - "traefik.backend.couchdb.noexpose"
 
@@ -58,8 +55,6 @@ services:
     # image: suculent/redis-slave:latest
     build: ./services/redis
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}", "--port", "6379"]
-    env_file:
-      - .env
     environment:
       - ALLOW_EMPTY_PASSWORD=no
       - REDIS_PASSWORD=${REDIS_PASSWORD}
