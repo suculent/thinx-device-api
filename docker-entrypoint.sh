@@ -16,6 +16,7 @@ export DOCKER_HOST="unix:///var/run/docker.sock"
 # exec "$@"
 
 source ~/.profile
+source /.thinx_env
 
 # Installs all tools, not just those currently allowed by .dockerignore, requires running Docker
 if [ ! -z $(which docker) ]; then
