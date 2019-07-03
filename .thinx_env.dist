@@ -1,0 +1,8 @@
+export ROLLBAR_ACCESS_TOKEN=""
+export ROLLBAR_ENVIRONMENT="production"
+export REDIS_PASSWORD=""
+export THINX_HOSTNAME=""
+export THINX_OWNER_EMAIL=""
+export REVISION=""
+export SQREEN_APPNAME=""
+export SQREEN_TOKEN=""
