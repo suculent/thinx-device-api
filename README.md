@@ -2,16 +2,30 @@
 
 IoT Device Management Server running on node.js.
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/9a7d084ad97e430ba12333f384b44255)](https://www.codacy.com/app/suculent/thinx-device-api?utm_source=github.com&utm_medium=referral&utm_content=suculent/thinx-device-api&utm_campaign=badger)
-[![Twitter: @thinxcloud](https://img.shields.io/badge/contact-%40thinxcloud-green.svg?style=flat)](https://twitter.com/thinxcloud)
-[![License](https://img.shields.io/badge/license-ISC-green.svg?style=flat)](https://github.com/suculent/fastlane-plugin-apprepo/blob/master/LICENSE)
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsuculent%2Fthinx-device-api.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsuculent%2Fthinx-device-api?ref=badge_shield)
 [![Build Status](https://img.shields.io/circleci/project/github/suculent/thinx-device-api/master.svg)](https://circleci.com/gh/suculent/thinx-device-api)
+
 [![Coverage Status](https://coveralls.io/repos/github/suculent/thinx-device-api/badge.svg?branch=master)](https://coveralls.io/github/suculent/thinx-device-api?branch=master)
+
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/suculent/thinx-device-api.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/suculent/thinx-device-api/alerts/)
+
+[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/suculent/thinx-device-api.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/suculent/thinx-device-api/context:javascript)
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/9a7d084ad97e430ba12333f384b44255)](https://www.codacy.com/app/suculent/thinx-device-api?utm_source=github.com&utm_medium=referral&utm_content=suculent/thinx-device-api&utm_campaign=badger)
+
+[![Twitter: @thinxcloud](https://img.shields.io/badge/contact-%40thinxcloud-green.svg?style=flat)](https://twitter.com/thinxcloud)
+
+[![License](https://img.shields.io/badge/license-ISC-green.svg?style=flat)](https://github.com/suculent/fastlane-plugin-apprepo/blob/master/LICENSE)
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsuculent%2Fthinx-device-api.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsuculent%2Fthinx-device-api?ref=badge_shield)
+
 [![Greenkeeper badge](https://badges.greenkeeper.io/suculent/thinx-device-api.svg)](https://greenkeeper.io/)
+
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=suculent_thinx-device-api&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=suculent_thinx-device-api)
+
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=suculent_thinx-device-api&metric=security_rating)](https://sonarcloud.io/dashboard?id=suculent_thinx-device-api)
+
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=suculent_thinx-device-api&metric=alert_status)](https://sonarcloud.io/dashboard?id=suculent_thinx-device-api)
+
 
 The CircleCI build is limited and therefore returns mostly bad results. Closer look may show better numbers.
 
