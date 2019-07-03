@@ -2,6 +2,10 @@
 
 ## HISTORY
 
+3/7/2019 1.0.x
+
+» Migrated to docker-compose based container architecture
+
 2/6/2019 0.9.4030
 
 » Added distaster recovery feature for MQTT branch after losing the MQTT passwords file

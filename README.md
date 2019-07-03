@@ -5,9 +5,8 @@ IoT Device Management Server running on node.js.
 <span style="color:red;">
     <p><b>Transition Period Warning</b></p>
     <p>THiNX has now passed version 1.0 upgrading to docker-compose installation with separate container services (CouchDB, Redis, Transformers, THiNX, Traefik and optional monitoring services), however not all Docker containers are yet part of the single install, namely:</p>
-    <p>• suculent/thinx-message-broker</p>
-    <p>• suculent/thinx-couchdb-master</p>
-    <p>• suculent/thinx-node-transformer</p>
+    <p>• suculent/thinx-landing-page</p>
+    <p>• suculent/thinx-rtm-console</p>
 </span>
 
 ```
