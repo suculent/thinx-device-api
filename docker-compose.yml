@@ -12,8 +12,8 @@ services:
     env_file: .env
     networks:
       - internal
-    image: suculent/redis-slave:latest
-    build: ./redis
+    # image: suculent/redis-slave:latest
+    build: ./services/redis
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}", "--port", "6379"]
     env_file:
       - .env
