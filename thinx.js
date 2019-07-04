@@ -3297,10 +3297,10 @@ var ThinxApp = function() {
 
   function database_compactor() {
     console.log("» Running database compact jobs...");
-    nano.db.compact("managed_logs");
-    nano.db.compact("managed_builds");
-    nano.db.compact("managed_devices");
-    nano.db.compact("managed_users", "owners_by_username", function(err) {
+    nano.db.compact(prefix + "managed_logs");
+    nano.db.compact(prefix + "managed_builds");
+    nano.db.compact(prefix + "managed_devices");
+    nano.db.compact(prefix + "managed_users", "owners_by_username", function(err) {
       console.log("» Database compact jobs completed.");
     });
   }
