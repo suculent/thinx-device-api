@@ -119,7 +119,7 @@ jobs:
         command: |
             docker ps
             docker network ls
-            docker network inspect $(docker network ls)
+            docker network inspect bridge
 
         # In cases where thinx-device-api runs as node.js app against containers
     - run: echo "127.0.0.1 thinx-redis" >> /etc/hosts
