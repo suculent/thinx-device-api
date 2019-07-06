@@ -94,7 +94,24 @@ jobs:
     - run: npm install .
     # - run: eslint ./lib/ --format junit --output-file $CIRCLE_TEST_REPORTS/reports/eslint.xml
     - run: cp ./conf/config-test.json ./conf/config.json
-    - run: docker run -d --rm -e COUCHDB_ADMIN=rtmtest -e COUCHDB_PASS=rtmtest -e NODENAME=circle2 suculent/thinx-couchdb-master
+
+    - run:
+      name: Install Docker client
+      command: |
+        set -x
+        VER="17.03.0-ce"
+        curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+        tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+        mv /tmp/docker/* /usr/bin        
+
+    - run:
+      name: Run CouchDB
+      command: docker run -d --rm -e COUCHDB_ADMIN=rtmtest -e COUCHDB_PASS=rtmtest -e NODENAME=circle2 suculent/thinx-couchdb-master
+
+    - run:
+      name: Run Redis
+      command: docker run -d --rm -e REDIS_PASSWORD=m7t0r3d1sn3m --name="thinx-redis" suculent/redis-slave:latest
+
     - run: /usr/local/bin/redis-server /etc/redis/redis.conf # &
     - run: npm run test
     - run: mkdir -p $CIRCLE_TEST_REPORTS/rspec
