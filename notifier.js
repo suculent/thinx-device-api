@@ -33,16 +33,9 @@ var crypto = require('crypto');
 var fs = require('fs-extra');
 var db = config.database_uri;
 
-// Initially creates DB, otherwise fails silently.
-var prefix = "";
-try {
-  var pfx_path = config.project_root + '/conf/.thx_prefix';
-  if (fs.existsSync(pfx_path)) {
-    prefix = (fs.readFileSync(pfx_path).toString()).replace("\n", "");
-  }
-} catch (e) {
-  console.log("[notifier] thx_prefix_exception " + e);
-}
+var Globals = require("./globals.js");
+var app_config = Globals.app_config();
+var prefix = Globals.prefix();
 
 var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
 var buildlib = require("nano")(db).use(prefix + "managed_builds"); // lgtm [js/unused-local-variable]

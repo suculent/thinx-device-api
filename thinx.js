@@ -4,13 +4,6 @@
 
 var ThinxApp = function() {
 
-
-
-  console.log("---");
-  console.log("---");
-  console.log("---");
-  console.log("---");
-  console.log("---");
   console.log("--- " + new Date() + " ---");
 
   var Sqreen = null;
@@ -2682,11 +2675,11 @@ var ThinxApp = function() {
           console.error('[oauth] Access Token Error', error.message);
           return ores.json('Authentication failed');
         }
-
         // console.log('[oauth] The resulting token: ', result);
         const token = oauth2.accessToken.create(result);
         return token;
       });
+
       t.then(res2 => {
 
         global_token = res2.access_token;
@@ -2851,7 +2844,6 @@ var ThinxApp = function() {
   }
 
   if (typeof(github_ocfg) !== "undefined" && github_ocfg !== null) {
-
     // Callback service parsing the authorization token and asking for the access token
     app.get('/oauth/gcb', function(req, res) {
       global_token = null; // reset token; single user only!!!!
@@ -2875,7 +2867,6 @@ var ThinxApp = function() {
         }
       });
     });
-
   }
 
   /* Use to issue/withdraw GDPR consent. */
@@ -2952,18 +2943,18 @@ var ThinxApp = function() {
           success: false,
           status: error
         });
-      } else {
-        devices.list(owner_id, function(dsuccess, devices) {
-          apienv.list(owner_id, function(esuccess, envs) {
-            respond(res, {
-              success: !error && dsuccess && esuccess,
-              user_data: user,
-              device_data: devices,
-              environment: envs
-            });
+        return;
+      }
+      devices.list(owner_id, function(dsuccess, devices) {
+        apienv.list(owner_id, function(esuccess, envs) {
+          respond(res, {
+            success: !error && dsuccess && esuccess,
+            user_data: user,
+            device_data: devices,
+            environment: envs
           });
         });
-      }
+      });
     });
   });
 
@@ -3181,100 +3172,97 @@ var ThinxApp = function() {
     this.isAlive = true;
   }
 
-  if (typeof(wss) !== "undefined") {
-
-    setInterval(function ping() {
-      wss.clients.forEach(function each(ws) {
-        if (ws.isAlive === false) {
-          ws.terminate();
-        } else {
-          ws.ping(noop);
-        }
-      });
-    }, 30000);
-
-    wss.on("connection", function connection(ws, req) {
-
-      if (typeof(req) === "undefined") {
-        console.log("No request on wss.on");
-        return;
+  setInterval(function ping() {
+    wss.clients.forEach(function each(ws) {
+      if (ws.isAlive === false) {
+        ws.terminate();
+      } else {
+        ws.ping(noop);
       }
+    });
+  }, 30000);
 
-      req.on("error", function(err) {
-        console.log("WSS REQ ERROR: " + err);
-        return;
-      });
+  wss.on("connection", function connection(ws, req) {
 
-      ws.isAlive = true;
-      ws.on('pong', heartbeat);
+    if (typeof(req) === "undefined") {
+      console.log("No request on wss.on");
+      return;
+    }
 
-      _ws = ws;
-
-      var cookies = req.headers.cookie;
-
-      if (typeof(req.headers.cookie) !== "undefined") {
-
-        if (cookies.indexOf("thx-") === -1) {
-          console.log("» WARNING! No thx-cookie found in: " + JSON.stringify(req.headers
-            .cookie));
-        }
-
-        if (typeof(req.session) !== "undefined") {
-          console.log("Session: " + JSON.stringify(req.session));
-        }
-      }
-
-      var logtail_callback = function(err) {
-        console.log("[thinx] logtail_callback:" + err);
-      };
-
-      // May not exist while testing...
-      if (typeof(ws) !== "undefined" && ws != null) {
-        ws.on("message", function incoming(message) {
-
-          // skip empty messages
-          if (message == "{}") return;
-
-          var object = JSON.parse(message);
-
-          if (typeof(object.logtail) !== "undefined") {
-
-            var build_id = object.logtail.build_id;
-            var owner_id = object.logtail.owner_id;
-            blog.logtail(build_id, owner_id, _ws, logtail_callback);
-
-          } else if (typeof(object.init) !== "undefined") {
-
-            if (typeof(messenger) !== "undefined") {
-              console.log("Initializing WS messenger with owner "+object.init);
-              messenger.initWithOwner(object.init, _ws, function(success,
-                message) {
-                if (!success) {
-                  console.log("Messenger init on WS message with result " +
-                    success +
-                    ", with message: " +
-                    JSON.stringify(message));
-                }
-              });
-            } else {
-              console.log(
-                "Messenger is not initialized and therefore could not be activated.");
-            }
-
-          } else {
-            var m = JSON.stringify(message);
-            if ((m != "{}") || (typeof(message) == "undefined")) {
-              console.log("» Websocketparser said: unknown message: " + m);
-            }
-          }
-        });
-      }
-
-    }).on("error", function(err) {
-      console.log("WSS ERROR: " + err);
+    req.on("error", function(err) {
+      console.log("WSS REQ ERROR: " + err);
       return;
     });
-  }
+
+    ws.isAlive = true;
+    ws.on('pong', heartbeat);
+
+    _ws = ws;
+
+    var cookies = req.headers.cookie;
+
+    if (typeof(req.headers.cookie) !== "undefined") {
+
+      if (cookies.indexOf("thx-") === -1) {
+        console.log("» WARNING! No thx-cookie found in: " + JSON.stringify(req.headers
+          .cookie));
+      }
+
+      if (typeof(req.session) !== "undefined") {
+        console.log("Session: " + JSON.stringify(req.session));
+      }
+    }
+
+    var logtail_callback = function(err) {
+      console.log("[thinx] logtail_callback:" + err);
+    };
+
+    // May not exist while testing...
+    if (typeof(ws) !== "undefined" && ws != null) {
+      ws.on("message", function incoming(message) {
+
+        // skip empty messages
+        if (message == "{}") return;
+
+        var object = JSON.parse(message);
+
+        if (typeof(object.logtail) !== "undefined") {
+
+          var build_id = object.logtail.build_id;
+          var owner_id = object.logtail.owner_id;
+          blog.logtail(build_id, owner_id, _ws, logtail_callback);
+
+        } else if (typeof(object.init) !== "undefined") {
+
+          if (typeof(messenger) !== "undefined") {
+            console.log("Initializing WS messenger with owner "+object.init);
+            messenger.initWithOwner(object.init, _ws, function(success,
+              message) {
+              if (!success) {
+                console.log("Messenger init on WS message with result " +
+                  success +
+                  ", with message: " +
+                  JSON.stringify(message));
+              }
+            });
+          } else {
+            console.log(
+              "Messenger is not initialized and therefore could not be activated.");
+          }
+
+        } else {
+          var m = JSON.stringify(message);
+          if ((m != "{}") || (typeof(message) == "undefined")) {
+            console.log("» Websocketparser said: unknown message: " + m);
+          }
+        }
+      });
+    }
+
+  }).on("error", function(err) {
+    console.log("WSS ERROR: " + err);
+    return;
+  });
 
   wserver.listen(7444, "0.0.0.0", function listening() {
     console.log("» WebSocket listening on port %d", wserver.address().port);
@@ -3316,8 +3304,12 @@ var ThinxApp = function() {
     console.log("» Aggregation jobs completed.");
   }
 
+  //
+  // Master check in cluster mode
+  //
+
   const cluster = require('cluster');
-  const _ = require('lodash');
+  const _ = require('lodash'); // WTF!
 
   function isMasterProcess() {
     if (_.has(process.env, 'NODE APP INSTANCE')) {

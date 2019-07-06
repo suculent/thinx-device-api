@@ -1,6 +1,6 @@
 {
   "name": "thinx",
-  "version": "1.0.4294",
+  "version": "1.0.4347",
   "description": "THiNX IoT RTM API",
   "bugs": {
     "url": "https://github.com/suculent/thinx-device-api/issues"
@@ -52,7 +52,6 @@
     "hoek": "^6.1.3",
     "http-signature": "^1.2.0",
     "karma-coverage": "^1.1.2",
-    "lodash": "^4.17.11",
     "mailgun-js": "^0.22.0",
     "md5": "^2.2.1",
     "minimatch": "3.0.4",

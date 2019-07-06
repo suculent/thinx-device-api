@@ -1,4 +1,4 @@
-version: '3.2'
+version: '3'
 
 networks:
   nat:
@@ -8,15 +8,53 @@ networks:
 
 services:
 
+  mosquitto:
+    env_file: .env
+    # image: suculent/thinx-message_broker
+    build: ./services/broker
+    ports:
+      - "1883:1883" # Must be exposed to devices
+      - "8883:8883" # Must be exposed to devices
+    restart: unless-stopped
+    networks:
+      - nat
+      - internal
+    volumes:
+      - /mnt/data/mosquitto/config:/mqtt/config:rw
+      - /mnt/data/mosquitto/data:/mqtt/data:rw
+      - /mnt/data/mosquitto/log:/mqtt/log:rw
+      - /mnt/data/mosquitto/ssl:/mqtt/ssl:rw
+      - /mnt/data/mosquitto/auth:/mqtt/auth:rw
+    labels:
+     - "traefik.backend.mosquitto.noexpose"
+
+  couchdb:
+    env_file: .env
+    image: apache/couchdb:2.3.1
+    # build: ./services/couchdb # currently unused!
+    restart: always
+    ports:
+      - 5984:5984 # shield this with Firewall for Administrative IP range only!
+    networks:
+      - nat
+      - internal
+    environment:
+      - COUCHDB_USER=${COUCHDB_ADMIN}
+      - COUCHDB_PASSWORD=${COUCHDB_PASS}
+      - NODENAME=${NODENAME}
+    volumes:
+      - /mnt/data/couchdb:/var/lib/couchdb
+      - /mnt/data/couchdb:/opt/couchdb/data
+    labels:
+     - "traefik.backend.couchdb.noexpose"
+
   thinx-redis:
     env_file: .env
     networks:
       - internal
-    image: suculent/redis-slave:latest
-    build: ./redis
+    # image: suculent/redis-slave:latest
+    build: ./services/redis
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}", "--port", "6379"]
-    env_file:
-      - .env
     environment:
       - ALLOW_EMPTY_PASSWORD=no
       - REDIS_PASSWORD=${REDIS_PASSWORD}
@@ -26,6 +64,23 @@ services:
       - "6379"
     volumes:
       - /mnt/data/redis:/data
+    labels:
+     - "traefik.backend.transformer.thinx-redis"
+
+  transformer:
+    env_file: .env
+    user: transformer
+    build: ./services/transformer
+    restart: always
+    environment:
+      - SQREEN_APP_NAME=${SQREEN_APP_NAME}
+      - SQREEN_TOKEN=${SQREEN_TOKEN}
+    networks:
+      - internal
+    ports:
+      - "7474"
+    labels:
+     - "traefik.backend.transformer.noexpose"
 
   thinx-api:
     # because of DIND builders
@@ -35,6 +90,7 @@ services:
     # tty: true
     restart: always
     depends_on:
+      - transformer
       - thinx-redis
     networks:
       - nat

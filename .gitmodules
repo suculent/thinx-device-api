@@ -26,3 +26,12 @@
 	path = tools/mongoose-docker-build
 	url = https://github.com/suculent/mongoose-docker-build
 
+[submodule "services/db"]
+	path = services/db
+	url = git@github.com:suculent/thinx-couchdb-master.git
+[submodule "services/broker"]
+	path = services/broker
+	url = git@github.com:suculent/thinx-message-broker.git
+[submodule "services/transformer"]
+	path = services/transformer
+	url = git@github.com:suculent/thinx-node-transformer.git
