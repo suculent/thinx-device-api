@@ -116,7 +116,10 @@ jobs:
 
     - run:
         name: Check running Docker containers
-        command: docker ps
+        command: |
+            docker ps
+            docker network ls
+            docker network inspect $(docker network ls)
 
         # In cases where thinx-device-api runs as node.js app against containers
     - run: echo "127.0.0.1 thinx-redis" >> /etc/hosts
