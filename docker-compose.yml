@@ -65,7 +65,7 @@ services:
     volumes:
       - /mnt/data/redis:/data
     labels:
-     - "traefik.backend.transformer.thinx-redis"
+     - "traefik.backend.thinx-redis"
 
   transformer:
     env_file: .env
