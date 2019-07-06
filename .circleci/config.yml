@@ -104,19 +104,24 @@ jobs:
 
     - run:
         name: Run CouchDB
-        command: docker run -d --rm -e COUCHDB_ADMIN=rtmtest -e COUCHDB_PASS=rtmtest -e NODENAME=couchdb --name="couchdb" suculent/thinx-couchdb-master
+        command: docker run -d --rm -p 5984:5984 -e COUCHDB_ADMIN=rtmtest -e COUCHDB_PASS=rtmtest -e NODENAME=couchdb --name="couchdb" suculent/thinx-couchdb-master
 
     - run:
         name: Run Redis
-        command: docker run -d --rm -e REDIS_PASSWORD=m7t0r3d1sn3m --name="thinx-redis" suculent/redis-slave:latest
+        command: docker run -d --rm -p 6379:6379 -e REDIS_PASSWORD=m7t0r3d1sn3m --name="thinx-redis" suculent/redis-slave:latest
 
     - run:
         name: Run Mosquitto
-        command: docker run -d --rm --name="mosquitto" suculent/thinx-message-broker
+        command: docker run -d --rm -p 1883:1883 --name="mosquitto" suculent/thinx-message-broker
 
     - run:
         name: Check running Docker containers
         command: docker ps
+
+        # In cases where thinx-device-api runs as node.js app against containers
+    - run: echo "127.0.0.1 thinx-redis" >> /etc/hosts
+    - run: echo "127.0.0.1 couchdb" >> /etc/hosts
+    - run: echo "127.0.0.1 mosquitto" >> /etc/hosts
 
     - run:
         name: NPM nyc jasmine
