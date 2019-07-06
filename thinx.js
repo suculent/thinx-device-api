@@ -39,6 +39,8 @@ var ThinxApp = function() {
   var redis_client = redis.createClient(Globals.redis_options());
   var path = require('path');
 
+  const cluster = require('cluster');
+
   //
   // Shared Configuration
   //
@@ -3291,17 +3293,8 @@ var ThinxApp = function() {
     console.log("» Aggregation jobs completed.");
   }
 
-  const cluster = require('cluster');
-  const _ = require('lodash');
-
   function isMasterProcess() {
-    if (_.has(process.env, 'NODE APP INSTANCE')) {
-      return _.get(process.env, 'NODE APP INSTANCE') === '0';
-    } else if (_.has(process.env, 'NODE_APP_INSTANCE')) {
-      return _.get(process.env, 'NODE_APP_INSTANCE') === '0';
-    } else {
-      return cluster.isMaster;
-    }
+    return cluster.isMaster();
   }
 
   if (isMasterProcess()) {
