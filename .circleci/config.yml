@@ -96,7 +96,7 @@ jobs:
     - run: 
     - run: cp ./conf/config-test.json ./conf/config.json
     - run: docker run -d --rm -e COUCHDB_ADMIN=rtmtest -e COUCHDB_PASS=rtmtest -e NODENAME=circle2 suculent/thinx-couchdb-master
-    - run: /usr/local/bin/redis-server /etc/redis/redis.conf &
+    - run: /usr/local/bin/redis-server /etc/redis/redis.conf # &
     - run: npm run test
     - run: mkdir -p $CIRCLE_TEST_REPORTS/rspec
     - run:
