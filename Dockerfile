@@ -62,8 +62,6 @@ RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
     jq \
     && rm -rf /var/lib/apt/lists/*
 
-    # openssl
-
 # Install app dependencies
 COPY package*.json ./
 
