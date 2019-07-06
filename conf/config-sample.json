@@ -26,7 +26,7 @@
   "client_user_agent": "THiNX-Client",
   "project_root": "/opt/thinx/thinx-device-api",
   "redis": {
-    "host": "redis",
+    "host": "thinx-redis",
     "password": "<enter-redis-password>"
   },
   "mqtt": {
