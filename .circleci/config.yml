@@ -7,7 +7,7 @@ jobs:
     environment:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
-      REDIS_URL: redis://localhost:6391
+      REDIS_URL: redis://localhost:6379
 
     # In CircleCI 2.0 you can now specify your own image, or use one of our pre-configured images.
     docker:
@@ -41,19 +41,12 @@ jobs:
         - v1-dep-
 
     # This is based on your 1.0 configuration file or project settings
-    - run: apt-get update && apt-get install -y --fix-missing --no-install-recommends curl jq mosquitto # $sendmail
+    - run: apt-get update && apt-get install -y --fix-missing --no-install-recommends curl jq
     - run: cd spec/test_repositories && bash ./get-tests.sh
     - run: git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
-    - run: npm install coveralls pm2 nyc
-    - run: npm install eslint -g
+    - run: npm install coveralls nyc eslint -g
     - run: npm install .
-    - run: wget http://download.redis.io/releases/redis-5.0.3.tar.gz
-    - run: tar xzf redis-5.0.3.tar.gz
-    - run: cd redis-5.0.3 && make && make install && cp src/redis-* ~
-    - run: pwd && ls
-    # - run: cp /tmp/redis-stable/redis.conf /etc/redis
     - run: mkdir statistics
-    - run: touch mqtt_passwords
     # - run: gem install github_changelog_generator fails even with ruby 2.4
     # The following line was run implicitly in your 1.0 builds based on what CircleCI inferred about the structure of your project. In 2.0 you need to be explicit about which commands should be run. In some cases you can discard inferred commands if they are not relevant to your project.
     - run: if [ -z "${NODE_ENV:-}" ]; then export NODE_ENV=test; fi
@@ -90,13 +83,53 @@ jobs:
     # Test
     #   This would typically be a build job when using workflows, possibly combined with build
     - run: mkdir -p $CIRCLE_TEST_REPORTS/reports
-    - run: npm install -g eslint
-    - run: npm install .
+
+    - run:
+        name: Install ESLint and project
+        command: |
+            npm install -g eslint
+            npm install .
+            cp ./conf/config-test.json ./conf/config.json
+
     # - run: eslint ./lib/ --format junit --output-file $CIRCLE_TEST_REPORTS/reports/eslint.xml
-    - run: /usr/local/bin/redis-server /etc/redis/redis.conf &
-    - run: cp ./conf/config-test.json ./conf/config.json
-    # needs some kind of DIND - run: docker run -d --rm -e COUCHDB_ADMIN=rtmtest -e COUCHDB_PASS=rtmtest -e NODENAME=circle2 suculent/thinx-couchdb-master
-    - run: npm run test
+
+    - run:
+        name: Install Docker client
+        command: |
+            set -x
+            VER="17.03.0-ce"
+            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+            mv /tmp/docker/* /usr/bin
+
+    - run:
+        name: Run CouchDB
+        command: docker run -d --rm -p 5984:5984 -e COUCHDB_ADMIN=rtmtest -e COUCHDB_PASS=rtmtest -e NODENAME=couchdb --name="couchdb" suculent/thinx-couchdb-master
+
+    - run:
+        name: Run Redis
+        command: docker run -d --rm -p 6379:6379 -e REDIS_PASSWORD=m7t0r3d1sn3m --name="thinx-redis" suculent/redis-slave:latest
+
+    - run:
+        name: Run Mosquitto
+        command: docker run -d --rm -p 1883:1883 --name="mosquitto" suculent/thinx-message-broker
+
+    - run:
+        name: Check running Docker containers
+        command: |
+            docker ps
+            docker network ls
+            docker network inspect bridge
+
+        # In cases where thinx-device-api runs as node.js app against containers in CircleCI, IPs depend on run order
+    - run: echo "172.17.0.2 couchdb" >> /etc/hosts
+    - run: echo "172.17.0.3 thinx-redis" >> /etc/hosts
+    - run: echo "172.17.0.4 mosquitto" >> /etc/hosts
+
+    - run:
+        name: NPM Test
+        command: npm run mocha
+
     - run: mkdir -p $CIRCLE_TEST_REPORTS/rspec
     - run:
         command: bundler exec rspec --format RspecJunitFormatter --out $CIRCLE_TEST_REPORTS/rspec/rspec.xml --format progress spec

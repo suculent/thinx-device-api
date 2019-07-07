@@ -47,7 +47,7 @@ var ThinxApp = function() {
   var google_ocfg = Globals.google_ocfg();
   var github_ocfg = Globals.github_ocfg();
 
-  if (Globals.use_screen()) {
+  if (Globals.use_sqreen()) {
     Sqreen = require('sqreen');
   }
 
@@ -1887,7 +1887,7 @@ var ThinxApp = function() {
                   httpOnly: false
                 });
 
-                if (Globals.use_screen()) {
+                if (Globals.use_sqreen()) {
                   Sqreen.signup_track({ username: owner_id });
                 }
 
@@ -1919,9 +1919,9 @@ var ThinxApp = function() {
                 req.session.cookie.maxAge = fortnight;
               }
 
-              alog.log("[OID:" + doc.owner + "] OAuth User logged in: " + doc.username);
+              alog.log(owner, "OAuth User logged in: " + doc.username, "info");
 
-              if (Globals.use_screen()) {
+              if (Globals.use_sqreen()) {
                 Sqreen.auth_track(true, { username: doc.owner });
               }
 
@@ -1946,7 +1946,7 @@ var ThinxApp = function() {
 
     if (typeof(req.body.password) === "undefined") {
       callback(false, "login_failed");
-      if (Globals.use_screen()) {
+      if (Globals.use_sqreen()) {
         Sqreen.auth_track(false, { doc: owner });
       }
       return;
@@ -2511,7 +2511,7 @@ var ThinxApp = function() {
               // Error case covers creating new user/managing deleted account
               if (error) {
 
-                if (Globals.use_screen()) {
+                if (Globals.use_sqreen()) {
                   Sqreen.auth_track(false, { doc: userWrapper.owner_id });
                 }
 
@@ -2535,7 +2535,7 @@ var ThinxApp = function() {
                   if (typeof(udoc) !== "undefined") {
                     if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
                       true) {
-                      if (Globals.use_screen()) {
+                      if (Globals.use_sqreen()) {
                         Sqreen.auth_track(false, { doc: userWrapper.owner_id });
                       }
                       // TODO: Redirect to error page with reason
@@ -2567,7 +2567,7 @@ var ThinxApp = function() {
                     // causes registration error where headers already sent!
                     global_response.redirect(ourl); // must be global_response! res does not exist here.
 
-                    if (Globals.use_screen()) {
+                    if (Globals.use_sqreen()) {
                       Sqreen.signup_track({ username: userWrapper.owner_id });
                     }
 
@@ -2605,7 +2605,7 @@ var ThinxApp = function() {
                 }
               }
 
-              if (Globals.use_screen()) {
+              if (Globals.use_sqreen()) {
                 Sqreen.auth_track(true, { username: userWrapper.owner_id });
               }
 
