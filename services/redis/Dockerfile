@@ -1,7 +1,6 @@
 FROM redis
 
 ARG REDIS_PASSWORD
-ENV REDIS_PASSWORD=f1nall7s3curE
 
 EXPOSE 6379
 
@@ -11,4 +10,3 @@ COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
 
 RUN echo "export REDIS_PASSWORD=${REDIS_PASSWORD}" > /redis-password
-
