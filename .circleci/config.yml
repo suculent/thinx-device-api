@@ -121,10 +121,10 @@ jobs:
             docker network ls
             docker network inspect bridge
 
-        # In cases where thinx-device-api runs as node.js app against containers
-    - run: echo "127.0.0.1 thinx-redis" >> /etc/hosts
-    - run: echo "127.0.0.1 couchdb" >> /etc/hosts
-    - run: echo "127.0.0.1 mosquitto" >> /etc/hosts
+        # In cases where thinx-device-api runs as node.js app against containers in CircleCI, IPs depend on run order
+    - run: echo "172.17.0.2 couchdb" >> /etc/hosts
+    - run: echo "172.17.0.3 thinx-redis" >> /etc/hosts
+    - run: echo "172.17.0.4 mosquitto" >> /etc/hosts
 
     - run:
         name: NPM nyc jasmine
