@@ -34,7 +34,7 @@ services:
     # build: ./services/couchdb # currently unused!
     restart: always
     ports:
-      - 5984:5984 # shield this with Firewall for Administrative IP range only!
+      - 5984 #:5984 shield this with Firewall for Administrative IP range only!
     networks:
       - nat
       - internal
