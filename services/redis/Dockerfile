@@ -1,13 +1,11 @@
 FROM redis
 
+ARG REDIS_PASSWORD
 ENV REDIS_PASSWORD=f1nall7s3curE
-
-#RUN echo never > /sys/kernel/mm/transparent_hugepage/enabled
-#RUN echo "vm.overcommit_memory = 1" > /etc/sysctl.conf
 
 EXPOSE 6379
 
-#COPY ./redis/redis.conf /etc/redis.conf
+COPY ./redis.conf /etc/redis.conf
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
