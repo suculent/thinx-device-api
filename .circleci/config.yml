@@ -127,8 +127,8 @@ jobs:
     - run: echo "172.17.0.4 mosquitto" >> /etc/hosts
 
     - run:
-        name: NPM nyc jasmine
-        command: npm run test
+        name: NPM Test
+        command: npm run mocha
 
     - run: mkdir -p $CIRCLE_TEST_REPORTS/rspec
     - run:
