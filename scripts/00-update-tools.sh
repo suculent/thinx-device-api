@@ -1,4 +1,4 @@
 #!/bin/bash
 
 # Updates the docker platform builders
-bash ./tools/install-tools.sh
+bash ./builders/install-tools.sh
