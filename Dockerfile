@@ -14,7 +14,7 @@ FROM node:11.13
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG APP_HOSTNAME
+ARG THINX_HOSTNAME
 ARG THINX_HOSTNAME
 ARG THINX_OWNER_EMAIL
 ARG REVISION
@@ -22,7 +22,7 @@ ARG REVISION
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Used for redirects back to Web
-ENV APP_HOSTNAME=${APP_HOSTNAME}
+ENV THINX_HOSTNAME=${THINX_HOSTNAME}
 
 # Enter FQDN you own, should have public IP
 ENV THINX_HOSTNAME=${THINX_HOSTNAME}
@@ -72,8 +72,7 @@ RUN curl -sSL https://get.docker.com/ | sh
 
 RUN openssl version \
  && node -v \
- && npm install -g pm2 eslint \
- && npm install
+ && npm install --only-prod .
 
 # set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
 RUN set -x \
