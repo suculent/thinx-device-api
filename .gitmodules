@@ -26,6 +26,3 @@
 	path = tools/mongoose-docker-build
 	url = https://github.com/suculent/mongoose-docker-build
 
-[submodule "services/broker"]
-	path = services/broker
-	url = git@github.com:suculent/thinx-message-broker.git
