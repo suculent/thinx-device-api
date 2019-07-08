@@ -1,0 +1,8 @@
+logs
+secrets.sh
+.env
+app/node_modules
+# app/package-lock.json # keep for CI dependency scanner
+app/sqreen.json
+app/rollbar.json
+app/transformer.log

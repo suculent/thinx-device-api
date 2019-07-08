@@ -1,0 +1,21 @@
+version: '3.2'
+networks:
+  internal:
+    external: false
+
+services:
+  transformer:
+    user: transformer
+    build: .
+    restart: always
+    env_file: .env
+    environment:
+      - SQREEN_APP_NAME=${SQREEN_APP_NAME}
+      - SQREEN_TOKEN=${SQREEN_TOKEN}
+    networks:
+      - internal
+    ports:
+      - "7474"
+    labels:
+     - "traefik.backend.transformer.noexpose"
+
