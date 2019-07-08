@@ -4,6 +4,8 @@ MAINTAINER CouchDB Developers dev@couchdb.apache.org
 
 ARG COUCHDB_USER
 ARG COUCHDB_PASSWORD
+ARG COUCHDB_COOKIE
+ARG COUCHDB_SECRET
 
 # Add CouchDB user account to make sure the IDs are assigned consistently
 RUN groupadd -g 5984 -r couchdb && useradd -u 5984 -d /opt/couchdb -g couchdb couchdb
