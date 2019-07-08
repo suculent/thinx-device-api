@@ -35,12 +35,11 @@ ENV NODE_ENV=production
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
 
+# WHY? See blame.
 RUN sh -c "echo 'Dir::Ignore-Files-Silently:: \"(.save|.distupgrade)$\";' > /etc/apt/apt.conf.d/99ignoresave"
 
-# -qqy
-
-RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
-    apt-get update && \
+# RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
+RUN apt-get update && \
     apt-get install -y --fix-missing --no-install-recommends \
     apt-transport-https \
     apt-utils \
@@ -62,13 +61,20 @@ RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
     jq \
     && rm -rf /var/lib/apt/lists/*
 
+# Install Docker
+# RUN curl -sSL https://get.docker.com/ | sh
+
+# Install Docker Client only (Docker is on the host) - fails with /bin/sh not found...
+ENV VER="17.03.0-ce"
+RUN curl -v -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+RUN tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+RUN mv /tmp/docker* /usr/bin
+
 # Install app dependencies
 COPY package*.json ./
 
 # Copy app source code
 COPY . .
-
-RUN curl -sSL https://get.docker.com/ | sh
 
 RUN openssl version \
  && node -v \
@@ -81,7 +87,7 @@ RUN set -x \
 	&& echo 'dockremap:165536:65536' >> /etc/subuid \
 	&& echo 'dockremap:165536:65536' >> /etc/subgid
 
-# https://github.com/docker/docker/tree/master/hack/dind
+# https://github.com/docker/docker/tree/master/hack/dind is this really needed now?
 ENV DIND_COMMIT 37498f009d8bf25fbb6199e8ccd34bed84f2874b
 
 RUN set -eux; \
@@ -102,6 +108,9 @@ EXPOSE 7444
 # GitLab Webbook
 EXPOSE 9002
 
+# this should be generated with sed on entrypoint, entrypoint needs /.first_run file
 COPY ./.thinx_env /.thinx_env
+
+
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
