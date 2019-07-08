@@ -6,9 +6,7 @@
     "url": "https://github.com/suculent/thinx-device-api/issues"
   },
   "license": "ISC",
-  "author": {
-    "name": "Matej Sychra"
-  },
+  "author": "Matej Sychra",
   "repository": {
     "type": "git",
     "url": "git://github.com/suculent/thinx-device-api.git"
@@ -37,7 +35,7 @@
     "express-session": "^1.16.2",
     "firebase-admin": "^8.2.0",
     "fs-extra": "^8.1.0",
-    "fs-finder": "^1.8.1",
+    "fs-finder": "file:addons/node-fs-finder",
     "get-random-quote": "^1.1.3",
     "githooked": "^1.1.2",
     "github-oauth": "^0.2.2",
@@ -76,11 +74,11 @@
     "yaml": "^1.6.0"
   },
   "devDependencies": {
-    "coveralls": "^3.0.4",
     "codacy-coverage": "^3.4.0",
+    "coveralls": "^3.0.4",
     "eslint": "^6.0.1",
     "grunt": "^1.0.4",
-    "grunt-karma-coveralls": "^2.5.4",
+    "grunt-karma-coveralls": "file:addons/grunt-karma-coveralls",
     "jasmine": "^3.3.1",
     "karma": "^4.1.0",
     "karma-coverage": "^1.1.2",
@@ -92,5 +90,13 @@
     "node": ">=4.3.2"
   },
   "preferGlobal": true,
-  "snyk": true
+  "snyk": true,
+  "homepage": "https://github.com/suculent/thinx-device-api#readme",
+  "main": "karma.conf.js",
+  "directories": {
+    "doc": "docs",
+    "lib": "lib",
+    "test": "tests"
+  },
+  "keywords": []
 }
