@@ -1,44 +1,45 @@
 {
+  "type": "thinx_server_config",
+  "version" : "1",
   "public_url": "https://rtm.thinx.cloud",
   "mailgun": {
-    "api_key": "54aa8d9dee3b3786fedf91020b06d537",
-    "base_url": "https://api.mailgun.net/v3/staging.thinx.cloud",
-    "domain": "staging.thinx.cloud"
+    "api_key": "<api-key>",
+    "base_url": "https://api.mailgun.net/v3/<your-domain>",
+    "domain": "<your-domain>"
   },
-  "rollbar_token": "<enter-your-rollbar.com-token>",
-  "type": "thinx_server_config",
-  "database_uri": "http://rtmtest:rtmtest@couchdb:5984",
-  "mqtt_port": 1883,
-  "port": 7442,
-  "secure_port": 7443,
-  "websocket": 7444,
-  "lambda": 7474,
-  "deploy_root": "/data",
-  "build_root": "/repositories",
-  "slack_webhook": "https://hooks.slack.com/services/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",
-  "slack_bot_token": "xoxb-232544524481-uQ7XxyVBAPFcbviwJvmWIUJN",
-  "slack_bot_topic": "thinx",
-  "fcm_auth": "./conf/thinx-cloud-firebase-adminsdk-wjhzo-9fd8c42211.json",
-  "ssl_key": "/etc/letsencrypt/live/thinx.cloud/privkey.pem",
-  "ssl_cert": "/etc/letsencrypt/live/thinx.cloud/cert.pem",
-  "client_user_agent": "THiNX-Client",
-  "project_root": "/home/ubuntu/thinx-device-api",
-  "data_root": "/mnt/data",
   "redis": {
     "host": "thinx-redis",
     "password": ""
   },
   "mqtt": {
-    "server": "mqtt://thinx.cloud",
+    "server": "mqtt://mosquitto",
     "port": 1883,
     "passwords": "/mnt/data/mosquitto/thinx.pw",
     "acl": "/mnt/data/mosquitto/thinx.acl",
-    "key": "5ec1fdd8-5d68-11e7-b0e3-4c327591230d",
-    "username": "thinx"
+    "key": "",
+    "username": ""
   },
-  "default_avatar": "",
+  "rollbar_token": "<enter-your-rollbar.com-token>",
+  "database_uri": "http://<username>:<password>@couchdb:5984",
+  "mqtt_port": 1883,
+  "port": 7442,
+  "secure_port": 7443,
+  "websocket": 7444,
+  "lambda": 7474,
+  "project_root": "/home/ubuntu/thinx-device-api",
+  "data_root": "/mnt/data",
+  "deploy_root": "/data",
+  "build_root": "/repositories",
+  "slack_webhook": "",
+  "slack_bot_token": "",
+  "slack_bot_topic": "thinx",
+  "fcm_auth": "./conf/thinx-cloud-firebase.json",
+  "ssl_key": "/etc/letsencrypt/live/thinx.cloud/privkey.pem",
+  "ssl_cert": "/etc/letsencrypt/live/thinx.cloud/cert.pem",
+  "client_user_agent": "THiNX-Client",
   "debug": {
-    "device" : false
+    "device" : false,
+    "deployment": true
   },
   "grafana": {
     "port": 3004,

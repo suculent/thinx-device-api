@@ -32,7 +32,7 @@ services:
 #      - "--acme.onHostRule=true"
 #    - "--acme.email=matej@keyguru.eu"
 #      - "--acme.caServer=https://acme-v02.api.letsencrypt.org/directory"
-#      - "--acme.domains=${APP_HOSTNAME},${WEB_HOSTNAME},${DEV_HOSTNAME},${IMAGES_HOSTNAME},${FILES_HOSTNAME},${CONSOLE_HOSTNAME},${LANDING_HOSTNAME}"
+#      - "--acme.domains=${THINX_HOSTNAME},${WEB_HOSTNAME},${DEV_HOSTNAME},${IMAGES_HOSTNAME},${FILES_HOSTNAME},${CONSOLE_HOSTNAME},${LANDING_HOSTNAME}"
 #    restart: unless-stopped
 #    ports:
 #      - "80:80"   # The HTTP port, should be 80 outside (does not collide on empty box)

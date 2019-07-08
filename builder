@@ -488,7 +488,7 @@ case $PLATFORM in
 			fi
 
 			# Copy firmware sources to current working directory
-			cp -vfR $THINX_ROOT/tools/nodemcu-firmware/* .
+			cp -vfR $THINX_ROOT/builders/nodemcu-firmware/* .
 
 			CONFIG_PATH="./local/fs/thinx.json"
 

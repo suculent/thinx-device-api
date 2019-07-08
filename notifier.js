@@ -384,7 +384,7 @@ function notify_device_channel(owner, udid, message) {
   var channel = "/thinx/devices/" + owner + "/" + udid;
   console.log("Posting to MQTT queue " + channel);
   const app_config = require("./conf/config.json");
-  var client = mqtt.connect("mqtt://"+app_config.mqtt.username+":"+app_config.mqtt.password+"@" + process.env.APP_HOSTNAME + ":"+app_config.mqtt.port);
+  var client = mqtt.connect("mqtt://"+app_config.mqtt.username+":"+app_config.mqtt.password+"@" + process.env.THINX_HOSTNAME + ":"+app_config.mqtt.port);
   client.on("connect", function() {
     console.log("Connected to MQTT, will post to " + channel);
     client.subscribe(channel);
