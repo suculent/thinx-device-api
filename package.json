@@ -17,7 +17,9 @@
     "snyk-protect": "snyk protect",
     "test": "nyc jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls && cat lcov.info | codacy-coverage",
     "mocha": "mocha spec/jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls && cat lcov.info | codacy-coverage",
-    "prepare": "npm run snyk-protect"
+    "prepare": "npm run snyk-protect",
+    "prepublish": "npm-auto-version",
+    "postpublish": "git push origin --tags"
   },
   "dependencies": {
     "@slack/client": "^5.0.1",
@@ -48,6 +50,7 @@
     "mqtt": "^3.0.0",
     "nano": "^8.1.0",
     "npm": "^6.10.0",
+    "npm-auto-version": "^1.0.0",
     "parse-date": "^1.1.0",
     "path": "^0.12.7",
     "qs": "6.7.0",
