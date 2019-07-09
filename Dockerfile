@@ -110,7 +110,7 @@ EXPOSE 7444
 EXPOSE 9002
 
 # this should be generated with sed on entrypoint, entrypoint needs /.first_run file
-COPY ./.thinx_env /.thinx_env
+COPY ./.thinx_env.dist /.thinx_env
 
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
