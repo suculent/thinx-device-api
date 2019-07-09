@@ -1,0 +1,46 @@
+[{
+  "registration": {
+    "mac": "CC:11:33:55:33:88:22",
+    "firmware": "none",
+    "version": "1.0.0",
+    "checksum": "ffffffffffffffffffffffffffffffffffffffff",
+    "alias": "transfer-test-device-00",
+    "owner": "72f90591653886f96ca8789af51f31b1d062b4426a179840d945967f65fdb175"
+  }
+}, {
+  "registration": {
+    "mac": "CC:11:33:55:33:88:23",
+    "firmware": "none",
+    "version": "1.0.0",
+    "checksum": "ffffffffffffffffffffffffffffffffffffffff",
+    "alias": "transfer-test-device-01",
+    "owner": "72f90591653886f96ca8789af51f31b1d062b4426a179840d945967f65fdb175"
+  }
+}, {
+  "registration": {
+    "mac": "CC:11:33:55:33:88:24",
+    "firmware": "none",
+    "version": "1.0.0",
+    "checksum": "ffffffffffffffffffffffffffffffffffffffff",
+    "alias": "transfer-test-device-02",
+    "owner": "72f90591653886f96ca8789af51f31b1d062b4426a179840d945967f65fdb175"
+  }
+}, {
+  "registration": {
+    "mac": "CC:11:33:55:33:88:25",
+    "firmware": "none",
+    "version": "1.0.0",
+    "checksum": "ffffffffffffffffffffffffffffffffffffffff",
+    "alias": "transfer-test-device-03",
+    "owner": "72f90591653886f96ca8789af51f31b1d062b4426a179840d945967f65fdb175"
+  }
+}, {
+  "registration": {
+    "mac": "CC:11:33:55:33:88:26",
+    "firmware": "none",
+    "version": "1.0.0",
+    "checksum": "ffffffffffffffffffffffffffffffffffffffff",
+    "alias": "transfer-test-device-04",
+    "owner": "72f90591653886f96ca8789af51f31b1d062b4426a179840d945967f65fdb175"
+  }
+}]
