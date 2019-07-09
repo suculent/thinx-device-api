@@ -53,6 +53,7 @@ RUN apt-get update && \
     lxc \
     mosquitto \
     pigz \
+    python \
     python-pip \
     xfsprogs \
     xz-utils \
