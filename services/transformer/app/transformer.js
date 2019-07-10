@@ -49,7 +49,7 @@ var Transformer = function() {
     http.createServer((req, res) => {
       res.writeHead(200);
       res.end('hello world\n');
-    }).listen(8000);
+    }).listen(8000, "0.0.0.0");
 
     console.log(`Worker ${process.pid} started`);
 
@@ -91,7 +91,7 @@ var Transformer = function() {
 
     const http_port = 7474;
 
-    http.createServer(app).listen(http_port);
+    http.createServer(app).listen(http_port, "0.0.0.0");
 
     console.log("Started on port: " + http_port);
 
