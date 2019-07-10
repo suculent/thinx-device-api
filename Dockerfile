@@ -1,3 +1,4 @@
+
 FROM node:11.13
 
 # docker build -t suculent/thinx-device-api .
@@ -109,7 +110,7 @@ EXPOSE 7444
 # GitLab Webbook
 EXPOSE 9002
 
-# this should be generated with sed on entrypoint, entrypoint needs /.first_run file
+# this should be generated/overwritten with sed on entrypoint, entrypoint needs /.first_run file and all ENV_VARS
 COPY ./.thinx_env.dist /.thinx_env
 
 

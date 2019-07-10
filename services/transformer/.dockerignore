@@ -1,6 +1,3 @@
 package_lock.json
 node_modules/
 logs/
-
-app/node_modules/
-app/package_lock.json

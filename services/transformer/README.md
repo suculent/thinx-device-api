@@ -6,8 +6,8 @@ Instance of NodeJS process [thinx-node-transformer](https://github.com/suculent/
 
 **Before first run**
 
-1. Register at Sqreen.io and add token to ```/app/sqreen.json```
-2. Register at Rollbar.io and add your RollbarToken=<your-token> to ```.env``` file
+1. Register at Sqreen.io and add your details as environment variables `SQREEN_APP_NAME` and `SQREEN_TOKEN`
+2. Register at Rollbar.io and your Access Token as `POST_SERVER_ITEM_ACCESS_TOKEN` environment variable
 
 See example expected code at [THiNX Wiki](https://suculent/thinx-device-api)
 

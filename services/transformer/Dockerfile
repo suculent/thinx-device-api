@@ -15,7 +15,7 @@ RUN npm --silent install --quiet node-gyp -g
 COPY / /home/node
 
 WORKDIR /home/node/app
-COPY .env /home/node/app/.env
+# not for CI: COPY .env /home/node/app/.env
 
 # Running npm install for production purpose will not run dev dependencies.
 RUN npm install -only=production
@@ -37,9 +37,7 @@ EXPOSE 7474
 
 CMD echo "Running Rollbar Deploy..." \
     && source .env \
-    && curl -s https://api.rollbar.com/api/1/deploy/ -F access_token=$RollbarToken -F environment=production -F revision=$(git log -n 1 --pretty=format:\"%H\") -F local_username=$(whoami) \
+    && curl -s https://api.rollbar.com/api/1/deploy/ -F access_token=$ROLLBAR_TOKEN -F environment=production -F revision=$(git log -n 1 --pretty=format:\"%H\") -F local_username=$(whoami) \
     && echo "Running App..." \
     && node --version \
     && node transformer.js
-
-

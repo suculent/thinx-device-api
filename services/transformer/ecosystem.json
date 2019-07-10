@@ -1,0 +1,10 @@
+{
+  apps : [
+
+    {
+      name      : "transformer",
+      script    : "transformer.js",
+      interpreter  : "node@11.10.1",
+    }
+  ]
+}
