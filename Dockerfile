@@ -1,5 +1,5 @@
-
-FROM node:11.13
+FROM node:10.16.0
+# using LTS node an attempt to fix python missing
 
 # docker build -t suculent/thinx-device-api .
 
@@ -14,24 +14,11 @@ FROM node:11.13
 #                   suculent/thinx-device-api bash
 
 ARG DEBIAN_FRONTEND=noninteractive
-
-ARG THINX_HOSTNAME
-ARG THINX_HOSTNAME
-ARG THINX_OWNER_EMAIL
-ARG REVISION
-
-ARG DEBIAN_FRONTEND=noninteractive
-
-# Used for redirects back to Web
-ENV THINX_HOSTNAME=${THINX_HOSTNAME}
-
-# Enter FQDN you own, should have public IP
-ENV THINX_HOSTNAME=${THINX_HOSTNAME}
-
-# Update when running using `-e REVISION=$(git rev-list head --count)`
-ENV REVISION=4294
-
 ENV NODE_ENV=production
+
+ARG THINX_HOSTNAME=${THINX_HOSTNAME}
+ARG THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}
+ARG REVISION=${REVISION}
 
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
