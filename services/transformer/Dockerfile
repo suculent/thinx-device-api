@@ -7,6 +7,9 @@ RUN apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python curl g
 # remove offending node_modules from development environment (may not be compatible with alpine)
 RUN rm -rf ./node_modules
 
+# https://stackoverflow.com/questions/52196518/could-not-get-uid-gid-when-building-node-docker
+RUN npm config set unsafe-perm true
+
 # allow building native extensions with alpine: https://github.com/nodejs/docker-node/issues/384
 RUN npm --silent install --quiet node-gyp -g
 
