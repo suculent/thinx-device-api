@@ -90,7 +90,7 @@ var Transformer = function() {
 
     const http_port = process.env.THINX_TRANSFORMER_PORT || 7474;
 
-    http.createServer(app).listen(http_port);
+    http.createServer(app).listen(http_port, "0.0.0.0");
 
     console.log("Started on port: " + http_port);
 
