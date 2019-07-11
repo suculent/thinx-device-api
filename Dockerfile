@@ -1,4 +1,4 @@
-FROM node:10.16.0-stretch-slim
+FROM node:10.16.0
 # using LTS node an attempt to fix python missing
 
 # docker build -t suculent/thinx-device-api .
