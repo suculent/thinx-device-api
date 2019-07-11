@@ -2,8 +2,7 @@ FROM node:10-alpine
 
 MAINTAINER Matej Sychra <suculent@me.com>
 
-RUN apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python curl git jq \
-    && npm --silent install --global --depth 0 pnpm
+RUN apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python curl git jq
 
 # remove offending node_modules from development environment (may not be compatible with alpine)
 RUN rm -rf ./node_modules
@@ -18,7 +17,7 @@ WORKDIR /home/node/app
 # not for CI: COPY .env /home/node/app/.env
 
 # Running npm install for production purpose will not run dev dependencies.
-RUN npm install -only=production
+RUN npm install . --only-prod
 
 # Create a user group 'thinx'
 RUN addgroup -S thinx
