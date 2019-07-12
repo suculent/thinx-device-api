@@ -1,0 +1,41 @@
+image: node:10.16
+# using latest stable Node LTS
+
+stages:
+  - build
+  - test
+  - deploy
+
+include:
+  - template: Code-Quality.gitlab-ci.yml
+  - template: SAST.gitlab-ci.yml
+
+variables:
+  SAST_GOSEC_LEVEL: 2
+  GIT_CLONE_PATH: $CI_BUILDS_DIR/thinx-connect
+
+before_script:
+  - npm install
+
+build:
+  stage: build
+  script:
+    - npm install .
+
+include:
+  - template: SAST.gitlab-ci.yml
+
+test:
+  stage: test
+  script:
+    - npm install .
+    - npm test
+#  artifacts:
+#    paths:
+#    - app/coverage/
+
+run:
+  stage: deploy
+  script:
+    - npm install .
+    - npm start &

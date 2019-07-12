@@ -1,6 +1,6 @@
 {
   "name": "thinx",
-  "version": "1.0.4405",
+  "version": "1.0.4406",
   "description": "THiNX IoT RTM API",
   "bugs": {
     "url": "https://github.com/suculent/thinx-device-api/issues"
@@ -16,9 +16,8 @@
     "snyk": "snyk test",
     "snyk-protect": "snyk protect",
     "test": "nyc jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls && cat lcov.info | codacy-coverage",
-    "mocha": "mocha spec/jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls && cat lcov.info | codacy-coverage",
-    "prepare": "npm run snyk-protect",
-    "prepublish": "npm-auto-version",
+    "mocha": "mocha spec/jasmine --exit; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls && cat lcov.info | codacy-coverage",
+    "prepare": "npm-auto-version && npm run snyk-protect",
     "postpublish": "git push origin --tags"
   },
   "dependencies": {
@@ -49,7 +48,7 @@
     "moment": "^2.24.0",
     "mqtt": "^3.0.0",
     "nano": "^8.1.0",
-    "npm": "^6.10.0",
+    "npm": "^6.10.1",
     "npm-auto-version": "^1.0.0",
     "parse-date": "^1.1.0",
     "path": "^0.12.7",
@@ -64,7 +63,7 @@
     "simple-oauth2": "^2.2.1",
     "slack-notify": "^0.1.7",
     "slackbots": "^1.2.0",
-    "snyk": "^1.189.0",
+    "snyk": "^1.193.1",
     "sqreen": "^1.31.0",
     "ssh-fingerprint": "0.0.1",
     "ssl-root-cas": "^1.3.1",
@@ -73,12 +72,12 @@
     "typeof": "^1.0.0",
     "utf-8": "^2.0.0",
     "uuid": "^3.3.2",
-    "ws": "^7.0.1",
+    "ws": "^7.1.0",
     "yaml": "^1.6.0"
   },
   "devDependencies": {
     "codacy-coverage": "^3.4.0",
-    "coveralls": "^3.0.4",
+    "coveralls": "^3.0.5",
     "eslint": "^6.0.1",
     "grunt": "^1.0.4",
     "grunt-karma-coveralls": "file:addons/grunt-karma-coveralls",

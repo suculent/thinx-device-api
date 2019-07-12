@@ -1,5 +1,5 @@
 {
-  "client_id": "a02b22ca87b0f8d4e157",
-  "client_secret": "d2bc57a73b58ae144d9a32c83ab38ec9174182c7",
-  "redirect_uris": "https://thinx.cloud:7443/oauth/cb?type=github"
+  "client_id": "<github-client-id>",
+  "client_secret": "<github-client-secret>",
+  "redirect_uris": "https://<your-thinx-domain>:7443/oauth/cb?type=github"
 }

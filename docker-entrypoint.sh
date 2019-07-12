@@ -8,7 +8,9 @@
 
 set +e
 
+# seems to fail...
 sysctl net.ipv4.ip_forward=1
+sysctl -w net.ipv4.conf.all.forwarding=1
 
 export DOCKER_HOST="tcp://docker:2375"
 export DOCKER_HOST="unix:///var/run/docker.sock"
