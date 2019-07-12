@@ -41,7 +41,7 @@ var Transformer = function() {
       cluster.fork();
     }
     cluster.on('exit', (worker, code, signal) => {
-      console.log(`worker ${worker.process.pid} died`);
+      console.log(`master worker ${worker.process.pid} died`);
     });
   } else {
     // Workers can share any TCP connection
@@ -49,17 +49,14 @@ var Transformer = function() {
     http.createServer((req, res) => {
       res.writeHead(200);
       res.end('hello world\n');
-    }).listen(8000, "0.0.0.0");
+    }).listen(8000);
 
     console.log(`Worker ${process.pid} started`);
 
     var Rollbar = require("rollbar");
 
-    // TODO: Load this token from a json config like sqreen.
-
-    var rbconfig = require("./rollbar.json");
     var rollbar = new Rollbar({
-      accessToken: rbconfig.token,
+      accessToken: process.env.POST_SERVER_ITEM_ACCESS_TOKEN,
       handleUncaughtExceptions: true,
       handleUnhandledRejections: true
     });
@@ -89,7 +86,9 @@ var Transformer = function() {
       limit: "1mb"
     }));
 
-    const http_port = 7474;
+    app.use(rollbar.errorHandler());
+
+    const http_port = process.env.THINX_TRANSFORMER_PORT || 7474;
 
     http.createServer(app).listen(http_port, "0.0.0.0");
 
@@ -168,47 +167,52 @@ var Transformer = function() {
 
         console.log(new Date().toString() + " job: " + JSON.stringify(job));
 
+        var exec = null;
+
+        /* jshint -W061 */
+        var cleancode;
+        var decoded = false;
+
+        if (decoded === false) {
+          try {
+            cleancode = unescape(base64.decode(code));
+            decoded = true;
+          } catch (e) {
+            console.log("Job is not a base64.");
+            decoded = false;
+          }
+        }
+
+        if (decoded === false) {
+          try {
+            cleancode = unescape(base128.decode(code));
+            decoded = true;
+          } catch (e) {
+            console.log("Job is not a base128.");
+            decoded = false;
+          }
+        }
+
         try {
-
-          var exec = null;
-
-          /* jshint -W061 */
-          var cleancode;
-          var decoded = false;
-
           if (decoded === false) {
-            try {
-              cleancode = unescape(base64.decode(code));
-              decoded = true;
-            } catch (e) {
-              console.log("Job is not a base64.");
-              decoded = false;
-            }
+            cleancode = unescape(code); // accept bare code for testing, will deprecate
           }
+        } catch (e) {
+          console.log("Accepting bare code failed.");
+          return;
+        }
 
-          if (decoded === false) {
-            try {
-              cleancode = unescape(base128.decode(code));
-              decoded = true;
-            } catch (e) {
-              console.log("Job is not a base128.");
-              decoded = false;
-            }
-          }
+        console.log("Running code:\n" + cleancode);
 
-          if (decoded === false) {
-              cleancode = unescape(code); // accept bare code for testing, will deprecate
-          }
-
-          console.log("Running code:\n" + cleancode);
-
+        try {
           eval(cleancode); // expects transformer(status, device); function only; may provide API
 
           status = transformer(status, job.params.device); // passthrough previous status
           console.log("Docker Transformer will return status: '" + status + "'");
           /* jshint +W061 */
         } catch (e) {
-          console.log("Docker Transformer Ecception: " + e);
+          // catches error from last unescape or eval?
+          console.log("Docker Transformer Exception: " + e);
           error = JSON.stringify(e);
         }
       }

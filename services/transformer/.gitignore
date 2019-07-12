@@ -1,3 +1,7 @@
+node_modules/
+app/coverage/
+coverage/
+.scannerwork
 logs
 secrets.sh
 .env
