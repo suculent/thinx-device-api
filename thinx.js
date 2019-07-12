@@ -23,14 +23,22 @@ var ThinxApp = function() {
 
   var http = require('http');
   var redis = require('redis');
+  var path = require('path');
   var session_config = require("./conf/node-session.json");
 
   var Globals = require("./lib/thinx/globals.js"); // static only!
   var app_config = Globals.app_config(); // require("../../conf/config.json");
+
   var prefix = Globals.prefix();
+  console.log("Prefix instantiated...");
+
   var rollbar = Globals.rollbar(); // lgtm [js/unused-local-variable]
+  console.log("Rollbar instantiated...");
+
   var redis_client = redis.createClient(Globals.redis_options());
-  var path = require('path');
+  console.log("Redis redis_client instantiated...");
+
+  console.log("Globals class instantiated...");
 
   //
   // Shared Configuration
@@ -3328,14 +3336,6 @@ var ThinxApp = function() {
     messenger.init();
 
     //
-    // Status Transformer Server
-    //
-
-    // Deprecated. Status Transformer is now started as separate Docker container
-    // and managed by Orchestration (docker-compose).
-    // TODO: Add Status Transformer POST TEST only...
-
-    //
     // TODO: Move to messenger or owner OR DEVICES? Or extract?
     //
 
@@ -3349,7 +3349,7 @@ var ThinxApp = function() {
         console.log("Running in disaster recovery mode...");
         restore_owners_credentials("_all_docs"); // fetches only IDs and last revision, works with hundreds of users
 			});
-    } // <-- if fs.existsSync...
+    }
   }
 
   //
