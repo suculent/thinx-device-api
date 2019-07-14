@@ -14,7 +14,9 @@ RUN npm --silent install --quiet node-gyp -g
 COPY / /home/node
 
 WORKDIR /home/node/app
-# not for CI: COPY .env /home/node/app/.env
+
+# not for CI
+COPY .env /home/node/app/.env
 
 # Running npm install for production purpose will not run dev dependencies.
 RUN npm install . --only-prod
