@@ -55,12 +55,15 @@ var ThinxApp = function() {
   var google_ocfg = Globals.google_ocfg();
   var github_ocfg = Globals.github_ocfg();
 
+  console.log("process.env.SQREEN_APP_NAME: "+process.env.SQREEN_APP_NAME);
+  console.log("process.env.SQREEN_TOKEN: "+process.env.SQREEN_TOKEN);
+
   if (Globals.use_sqreen()) {
     if ((typeof(process.env.SQREEN_APP_NAME) !== "undefined") && (typeof(process.env.SQREEN_TOKEN) !== "undefined")) {
       Sqreen = require('sqreen');
     } else {
-	console.log("Sqreen env vars not available");
-	}
+	    console.log("Sqreen env vars not available");
+	 }
   }
 
   console.log("Initializing Simple OAuth...");
