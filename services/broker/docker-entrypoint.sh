@@ -19,11 +19,6 @@ chown -R mosquitto:mosquitto /mqtt
 
 su mosquitto -s /bin/bash
 
-echo ""
-echo "MQTT config:"
-cat /mqtt/config/mosquitto.conf
-echo ""
-
 echo "Starting MQTT broker..."
 
 mosquitto -d -v -c /mqtt/config/mosquitto.conf
