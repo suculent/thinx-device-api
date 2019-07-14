@@ -3361,7 +3361,7 @@ var ThinxApp = function() {
   const cluster = require('cluster');
 
   function isMasterProcess() {
-    return cluster.isMaster();
+    return true; // cluster.isMaster();
   }
 
   if (isMasterProcess()) {
