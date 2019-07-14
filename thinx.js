@@ -7,7 +7,7 @@ var ThinxApp = function() {
 
   console.log("--- " + new Date() + " ---");
 
-  var Sqreen = null;
+  var Sqreen;
 
   var global_token = null;
   var global_response = null;
@@ -56,7 +56,11 @@ var ThinxApp = function() {
   var github_ocfg = Globals.github_ocfg();
 
   if (Globals.use_sqreen()) {
-    Sqreen = require('sqreen');
+    if ((typeof(process.env.SQREEN_APP_NAME) !== "undefined") && (typeof(process.env.SQREEN_TOKEN) !== "undefined")) {
+      Sqreen = require('sqreen');
+    } else {
+	console.log("Sqreen env vars not available");
+	}
   }
 
   console.log("Initializing Simple OAuth...");
@@ -67,6 +71,7 @@ var ThinxApp = function() {
 
   const simpleOauthModule = require('simple-oauth2');
   var oauth2;
+
   if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
      oauth2 = simpleOauthModule.create({
       client: {
