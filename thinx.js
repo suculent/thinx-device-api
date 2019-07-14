@@ -2026,6 +2026,7 @@ var ThinxApp = function() {
 
     console.log("Validating username/password");
 
+    /*
     if (typeof(username) === "undefined" || typeof(password) ===
       "undefined" && typeof(oauth) === "undefined") {
       req.session.destroy(function(err) {
@@ -2037,7 +2038,7 @@ var ThinxApp = function() {
         }
       });
       return;
-    }
+    }*/
 
     userlib.view("users", "owners_by_username", {
       "key": username,
