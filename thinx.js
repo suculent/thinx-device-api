@@ -1,6 +1,7 @@
 /*
  * This THiNX-RTM API module is responsible for responding to devices and build requests.
  */
+var Globals = require("./lib/thinx/globals.js"); // static only!
 
 var ThinxApp = function() {
 
@@ -26,7 +27,6 @@ var ThinxApp = function() {
   var path = require('path');
   var session_config = require("./conf/node-session.json");
 
-  var Globals = require("./lib/thinx/globals.js"); // static only!
   var app_config = Globals.app_config(); // require("../../conf/config.json");
 
   var prefix = Globals.prefix();
@@ -193,13 +193,12 @@ var ThinxApp = function() {
   console.log("Loading module: devices...");
   var devices = require("./lib/thinx/devices");
 
-  console.log("Loading module: repository...");
+  console.log("Loading module: deployment...");
   var deployment = require("./lib/thinx/deployment");
 
-  console.log("Loading module: repository...");
+  console.log("Loading module: repository watcher...");
 
   var watcher = require("./lib/thinx/repository");
-  watcher.watch();
 
   console.log("Loading module: apienv...");
   var apienv = require("./lib/thinx/apienv");
@@ -225,7 +224,9 @@ var ThinxApp = function() {
   console.log("Loading module: messenger...");
   var messenger = require("./lib/thinx/messenger");
 
-  console.log("Initialized app requires...");
+  console.log("Starting repository watcher...");
+  watcher.watch();
+  console.log("Done.");
 
   // Database preparation on first run
 
