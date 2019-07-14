@@ -105,7 +105,7 @@ services:
       - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
       - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
       - SQREEN_TOKEN=${SQREEN_TOKEN} # (optional, free for open-source)
-      - SQREEN_APP_NAME=${SQREEN_APP_NAME}
+      - SQREEN_APP_NAME=${SQREEN_APP_NAME} # (as well...)
     build: .
     # image: suculent/thinx-device-api
     ports:
