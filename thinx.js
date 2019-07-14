@@ -1893,10 +1893,9 @@ var ThinxApp = function() {
     var owner_id = null;
 
     console.log("oauth: "+ oauth);
+    console.log(JSON.stringify(req.body));
 
     if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
-
-      console.log(JSON.stringify(req.body));
 
       redis_client.get(oauth, function(err, userWrapper) {
         if (err) {
@@ -2012,6 +2011,8 @@ var ThinxApp = function() {
 
     var username = req.body.username;
     var password = sha256(prefix + req.body.password);
+
+    console.log("Validating username/password");
 
     if (typeof(username) === "undefined" || typeof(password) ===
       "undefined" && typeof(oauth) === "undefined") {
