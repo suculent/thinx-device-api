@@ -2,6 +2,12 @@ FROM node:10-alpine
 
 MAINTAINER Matej Sychra <suculent@me.com>
 
+ARG ROLLBAR_TOKEN=${ROLLBAR_TOKEN}
+
+RUN echo "ROLLBAR_TOKEN: " ${ROLLBAR_TOKEN}
+
+ARG REVISION=${REVISION}
+
 RUN apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python curl git jq
 
 # remove offending node_modules from development environment (may not be compatible with alpine)
@@ -39,9 +45,4 @@ USER transformer
 # Open the mapped port
 EXPOSE 7474
 
-CMD echo "Running Rollbar Deploy..." \
-    && source .env \
-    && curl -s https://api.rollbar.com/api/1/deploy/ -F access_token=$ROLLBAR_TOKEN -F environment=production -F revision=$(git log -n 1 --pretty=format:\"%H\") -F local_username=$(whoami) \
-    && echo "Running App..." \
-    && node --version \
-    && node transformer.js
+CMD [ "node", "transformer.js" ]
