@@ -60,7 +60,11 @@ var ThinxApp = function() {
 
   if (Globals.use_sqreen()) {
     if ((typeof(process.env.SQREEN_APP_NAME) !== "undefined") && (typeof(process.env.SQREEN_TOKEN) !== "undefined")) {
-      Sqreen = require('sqreen');
+      try {
+        Sqreen = require('sqreen');
+      } catch (bitch) {
+	console.log(bitch);
+	}
     } else {
 	    console.log("Sqreen env vars not available");
 	 }
