@@ -39,9 +39,11 @@ services:
       - nat
       - internal
     environment:
-      - COUCHDB_USER=${COUCHDB_ADMIN}
-      - COUCHDB_PASSWORD=${COUCHDB_PASS}
       - NODENAME=${NODENAME}
+      - COUCHDB_ADMIN=${COUCHDB_ADMIN}
+      - COUCHDB_PASS=${COUCHDB_PASS}
+      - COUCHDB_COOKIE=${COUCHDB_COOKIE}
+      - COUCHDB_SECRET=${COUCHDB_SECRET}
     volumes:
       - /mnt/data/couchdb:/var/lib/couchdb
       - /mnt/data/couchdb:/opt/couchdb/data
@@ -102,7 +104,8 @@ services:
       - REVISION=${REVISION}
       - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
       - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
-      #- SQREEN_TOKEN=${SQREEN_TOKEN} # (optional, free for open-source)
+      - SQREEN_TOKEN=${SQREEN_TOKEN} # (optional, free for open-source)
+      - SQREEN_APP_NAME=${SQREEN_APP_NAME}
     build: .
     # image: suculent/thinx-device-api
     ports:

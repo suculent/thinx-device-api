@@ -16,9 +16,14 @@ FROM node:10.16.0
 ARG DEBIAN_FRONTEND=noninteractive
 ENV NODE_ENV=production
 
-ARG THINX_HOSTNAME=${THINX_HOSTNAME}
-ARG THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}
-ARG REVISION=${REVISION}
+ENV THINX_HOSTNAME=${THINX_HOSTNAME}
+RUN echo ${THINX_HOSTNAME}
+
+ENV THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}
+RUN echo ${THINX_OWNER_EMAIL}
+
+ENV REVISION=${REVISION}
+RUN echo ${REVISION}
 
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
@@ -99,7 +104,8 @@ EXPOSE 9002
 
 # this should be generated/overwritten with sed on entrypoint, entrypoint needs /.first_run file and all ENV_VARS
 COPY ./.thinx_env.dist /.thinx_env
-
+COPY ./conf/.thx_prefix ./conf/.thx_prefix
+COPY ./conf/.thx_prefix /conf/.thx_prefix
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 ENTRYPOINT [ "/docker-entrypoint.sh" ]

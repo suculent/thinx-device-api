@@ -59,6 +59,8 @@ var ThinxApp = function() {
     Sqreen = require('sqreen');
   }
 
+  console.log("Initializing Simple OAuth...");
+
   //
   // OAuth2
   //
@@ -83,6 +85,8 @@ var ThinxApp = function() {
   // OAuth2 for GitHub
   //
 
+  console.log("Initializing GitHub OAuth...");
+
   var githubOAuth;
   if (typeof(github_ocfg) !== "undefined" && github_ocfg !== null) {
     try {
@@ -103,6 +107,8 @@ var ThinxApp = function() {
   // App
   //
 
+  console.log("Initializing App consts...");
+
   var client_user_agent = app_config.client_user_agent;
   var db = app_config.database_uri;
   var serverPort = app_config.port;
@@ -113,8 +119,6 @@ var ThinxApp = function() {
   var parser = require("body-parser");
   var nano = require("nano")(db);
   var sha256 = require("sha256");
-
-
 
   var slack_webhook = app_config.slack_webhook;
   var thinx_slack = require("slack-notify")(slack_webhook);
@@ -173,26 +177,55 @@ var ThinxApp = function() {
     console.log("[index] thx_prefix_exception" + e);
   }
 
+  console.log("Initializing app requires...");
+
   // should be initialized after prefix because of DB requirements...
   var v = require("./lib/thinx/version");
+
   var alog = require("./lib/thinx/audit");
 
+  console.log("Loading module: builder...");
   var builder = require("./lib/thinx/builder");
+
+  console.log("Loading module: device...");
   var device = require("./lib/thinx/device");
+
+  console.log("Loading module: devices...");
   var devices = require("./lib/thinx/devices");
+
+  console.log("Loading module: repository...");
   var deployment = require("./lib/thinx/deployment");
+
+  console.log("Loading module: repository...");
 
   var watcher = require("./lib/thinx/repository");
   watcher.watch();
 
+  console.log("Loading module: apienv...");
   var apienv = require("./lib/thinx/apienv");
+
+  console.log("Loading module: apikey...");
   var apikey = require("./lib/thinx/apikey");
+
+  console.log("Loading module: owner...");
   var user = require("./lib/thinx/owner");
+
+  console.log("Loading module: rsakey...");
   var rsakey = require("./lib/thinx/rsakey");
+
+  console.log("Loading module: statistics...");
   var stats = require("./lib/thinx/statistics");
+
+  console.log("Loading module: sources...");
   var sources = require("./lib/thinx/sources");
+
+  console.log("Loading module: device transfer...");
   var transfer = require("./lib/thinx/transfer");
+
+  console.log("Loading module: messenger...");
   var messenger = require("./lib/thinx/messenger");
+
+  console.log("Initialized app requires...");
 
   // Database preparation on first run
 
@@ -281,6 +314,8 @@ var ThinxApp = function() {
     });
   }
 
+  console.log("Initializing vault...");
+
   /*
 
   // Vault server must be started, initialized and root token to unseal key must be known
@@ -323,6 +358,8 @@ var ThinxApp = function() {
 
   */
 
+  console.log("Initializing DB...");
+
   initDatabases();
 
   var blog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
@@ -340,6 +377,8 @@ var ThinxApp = function() {
   // Express App
   var express = require("express");
   var session = require("express-session");
+
+  console.log("Initializing Express...");
 
   var app = express();
 
@@ -390,6 +429,8 @@ var ThinxApp = function() {
       res.status(403).end();
     }
   });
+
+  console.log("Initializing Endpoints...");
 
   app.all("/*", function(req, res, next) {
 
