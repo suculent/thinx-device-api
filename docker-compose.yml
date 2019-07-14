@@ -31,17 +31,17 @@ services:
   couchdb:
     env_file: .env
     image: apache/couchdb:2.3.1
-    # build: ./services/couchdb # currently unused!
+    # build: ./services/couchdb # currently unused for speed, should work the same except it does not log pass in entry point
     restart: always
     ports:
-      - 5984 #:5984 shield this with Firewall for Administrative IP range only!
+      - 5984:5984 # shield this with Firewall for Administrative IP range only!
     networks:
       - nat
       - internal
     environment:
       - NODENAME=${NODENAME}
-      - COUCHDB_ADMIN=${COUCHDB_ADMIN}
-      - COUCHDB_PASS=${COUCHDB_PASS}
+      - COUCHDB_USER=${COUCHDB_ADMIN}
+      - COUCHDB_PASSWORD=${COUCHDB_PASS}
       - COUCHDB_COOKIE=${COUCHDB_COOKIE}
       - COUCHDB_SECRET=${COUCHDB_SECRET}
     volumes:
@@ -59,11 +59,11 @@ services:
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}", "--port", "6379"]
     environment:
       - ALLOW_EMPTY_PASSWORD=no
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
+#      - REDIS_PASSWORD=${REDIS_PASSWORD}
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
     restart: always
     ports:
-      - "6379"
+      - 6379:6379
     volumes:
       - /mnt/data/redis:/data
     labels:
