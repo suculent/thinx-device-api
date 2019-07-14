@@ -1892,7 +1892,11 @@ var ThinxApp = function() {
     var oauth = req.body.token;
     var owner_id = null;
 
+    console.log("oauth: "+ oauth);
+
     if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
+
+      console.log(JSON.stringify(req.body));
 
       redis_client.get(oauth, function(err, userWrapper) {
         if (err) {
