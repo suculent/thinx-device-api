@@ -3,25 +3,23 @@ FROM node:10.16.0
 
 # docker build -t suculent/thinx-device-api .
 
-# RUN INTERACTIVE:
-# docker run -ti -e THINX_HOSTNAME='staging.thinx.cloud' \
-#                -e THINX_OWNER='suculent@me.com' \
-#                -e REVISION=$(git rev-list head --count) \
-#                -v /mnt/data/mosquitto/auth:/mnt/data/mosquitto/auth
-#                -v /mnt/data/mosquitto/log:/mnt/data/mosquitto/log
-#                -v /mnt/data/mosquitto/data:/mnt/data/mosquitto/data
-#                -v /mnt/data/mosquitto/ssl:/mnt/data/mosquitto/ssl
-#                   suculent/thinx-device-api bash
+
+ARG ROLLBAR_ENVIRONMENT
+ARG THINX_HOSTNAME
+ARG THINX_OWNER_EMAIL
+ARG REVISION
+ARG ROLLBAR_ACCESS_TOKEN
+ARG ROLLBAR_ENVIRONMENT
 
 ARG DEBIAN_FRONTEND=noninteractive
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 
-ARG SQREEN_APP_NAME=THiNX-API
+ARG SQREEN_APP_NAME
 ENV SQREEN_APP_NAME=${SQREEN_APP_NAME}
 
-ARG SQREEN_TOKEN=none
+ARG SQREEN_TOKEN
 ENV SQREEN_TOKEN=${SQREEN_TOKEN}
 
 ENV THINX_HOSTNAME=${THINX_HOSTNAME}

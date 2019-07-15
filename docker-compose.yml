@@ -38,17 +38,17 @@ services:
     networks:
       - nat
       - internal
-    environment:
-      - NODENAME=${NODENAME}
-      - COUCHDB_USER=${COUCHDB_ADMIN}
-      - COUCHDB_PASSWORD=${COUCHDB_PASS}
-      - COUCHDB_COOKIE=${COUCHDB_COOKIE}
-      - COUCHDB_SECRET=${COUCHDB_SECRET}
     volumes:
       - /mnt/data/couchdb:/var/lib/couchdb
       - /mnt/data/couchdb:/opt/couchdb/data
     labels:
      - "traefik.backend.couchdb.noexpose"
+#   environment:
+#      - NODENAME=${NODENAME}
+#      - COUCHDB_USER=${COUCHDB_ADMIN}
+#      - COUCHDB_PASSWORD=${COUCHDB_PASS}
+#      - COUCHDB_COOKIE=${COUCHDB_COOKIE}
+#      - COUCHDB_SECRET=${COUCHDB_SECRET}
 
   thinx-redis:
     env_file: .env
@@ -73,6 +73,9 @@ services:
     env_file: .env
     user: transformer
     build: ./services/transformer
+      args:
+        - SQREEN_APP_NAME=${SQREEN_APP_NAME}
+        - SQREEN_TOKEN=${SQREEN_TOKEN}
     restart: always
     environment:
       - SQREEN_APP_NAME=${SQREEN_APP_NAME}
@@ -98,15 +101,24 @@ services:
       - nat
       - internal
     env_file: .env
-    environment:
-      - THINX_HOSTNAME=${THINX_HOSTNAME}
-      - THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}
-      - REVISION=${REVISION}
-      - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
-      - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
-      - SQREEN_TOKEN=${SQREEN_TOKEN} # (optional, free for open-source)
-      - SQREEN_APP_NAME=${SQREEN_APP_NAME} # (as well...)
-    build: .
+    build: 
+      context: .
+      args:
+        - THINX_HOSTNAME=${THINX_HOSTNAME}
+        - THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}
+        - REVISION=${REVISION}
+        - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
+        - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
+        - SQREEN_TOKEN=${SQREEN_TOKEN}
+        - SQREEN_APP_NAME=${SQREEN_APP_NAME}
+#    environment:
+#      - THINX_HOSTNAME=${THINX_HOSTNAME}
+#      - THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}
+#      - REVISION=${REVISION}
+#      - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
+#      - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
+#      - SQREEN_TOKEN=${SQREEN_TOKEN}
+#      - SQREEN_APP_NAME=${SQREEN_APP_NAME}
     # image: suculent/thinx-device-api
     ports:
 #      - 7441:7441 # Reserved for Web HTTPS, 7440 is Web HTTP
