@@ -68,7 +68,7 @@ var ThinxApp = function() {
     } else {
 	    console.log("Sqreen env vars not available");
 	 }
-  }
+ }
 
   console.log("Initializing Simple OAuth...");
 
@@ -1966,6 +1966,8 @@ var ThinxApp = function() {
 
             } else {
 
+              // no error when getting username
+
               req.session.owner = doc.owner;
 
               console.log("[OID:" + doc.owner + "] [NEW_SESSION] [oauth] thinx.js:1854...");
@@ -2127,8 +2129,8 @@ var ThinxApp = function() {
             username);
         }
 
-        // console.log("client_type: " + client_type);
         if (client_type == "device") {
+          console.log("WELCOME client_type: " + client_type);
           respond(res, {
             status: "WELCOME",
             success: true
@@ -2137,13 +2139,12 @@ var ThinxApp = function() {
 
         } else if (client_type == "webapp") {
 
-          /*
-          console.log("Suspicious codepath: redirecting to /app in username/password login.");
+          // console.log("Suspicious codepath: redirecting to /app in username/password login.");
+          // seens OK after user check, rather breaks this.
 
           respond(res, {
             "redirectURL": "/app"
           });
-          */
 
           // Make note on user login
           userlib.get(user_data.owner, function(error, udoc) {
@@ -2164,7 +2165,7 @@ var ThinxApp = function() {
             }
           });
 
-          // return; continue...
+          return; // continue...
 
         } else { // other client whan webapp or device
           respond(res, {
