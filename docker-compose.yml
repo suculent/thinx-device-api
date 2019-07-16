@@ -1,4 +1,4 @@
-version: '3'
+version: '2.2'
 
 networks:
   nat:
@@ -33,6 +33,12 @@ services:
     image: apache/couchdb:2.3.1
     # build: ./services/couchdb # currently unused for speed, should work the same except it does not log pass in entry point
     restart: always
+    environment:
+      - NODENAME=${NODENAME}
+      - COUCHDB_USER=${COUCHDB_ADMIN}
+      - COUCHDB_PASSWORD=${COUCHDB_PASS}
+      - COUCHDB_COOKIE=${COUCHDB_COOKIE}
+      - COUCHDB_SECRET=${COUCHDB_SECRET}
     ports:
       - 5984:5984 # shield this with Firewall for Administrative IP range only!
     networks:
@@ -42,20 +48,19 @@ services:
       - /mnt/data/couchdb:/var/lib/couchdb
       - /mnt/data/couchdb:/opt/couchdb/data
     labels:
-     - "traefik.backend.couchdb.noexpose"
-#   environment:
-#      - NODENAME=${NODENAME}
-#      - COUCHDB_USER=${COUCHDB_ADMIN}
-#      - COUCHDB_PASSWORD=${COUCHDB_PASS}
-#      - COUCHDB_COOKIE=${COUCHDB_COOKIE}
-#      - COUCHDB_SECRET=${COUCHDB_SECRET}
+      - "traefik.backend.couchdb.noexpose"
 
   thinx-redis:
     env_file: .env
     networks:
       - internal
     # image: suculent/redis-slave:latest
-    build: ./services/redis
+    build:
+      context: ./services/redis
+      args:
+        - ALLOW_EMPTY_PASSWORD=no
+        - REDIS_PASSWORD=${REDIS_PASSWORD}
+        - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}", "--port", "6379"]
     environment:
       - ALLOW_EMPTY_PASSWORD=no
@@ -72,7 +77,8 @@ services:
   transformer:
     env_file: .env
     user: transformer
-    build: ./services/transformer
+    build:
+      context: ./services/transformer
       args:
         - SQREEN_APP_NAME=${SQREEN_APP_NAME}
         - SQREEN_TOKEN=${SQREEN_TOKEN}
@@ -91,7 +97,7 @@ services:
     # because of DIND builders
     privileged: true
     # reserve enough for builders
-    shm_size: 1024M
+    shm_size: 2048M
     # tty: true
     restart: always
     depends_on:
@@ -101,7 +107,7 @@ services:
       - nat
       - internal
     env_file: .env
-    build: 
+    build:
       context: .
       args:
         - THINX_HOSTNAME=${THINX_HOSTNAME}
@@ -111,14 +117,14 @@ services:
         - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
         - SQREEN_TOKEN=${SQREEN_TOKEN}
         - SQREEN_APP_NAME=${SQREEN_APP_NAME}
-#    environment:
-#      - THINX_HOSTNAME=${THINX_HOSTNAME}
-#      - THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}
-#      - REVISION=${REVISION}
-#      - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
-#      - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
-#      - SQREEN_TOKEN=${SQREEN_TOKEN}
-#      - SQREEN_APP_NAME=${SQREEN_APP_NAME}
+    environment:
+      - THINX_HOSTNAME=${THINX_HOSTNAME}
+      - THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}
+      - REVISION=${REVISION}
+      - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
+      - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
+      - SQREEN_TOKEN=${SQREEN_TOKEN}
+      - SQREEN_APP_NAME=${SQREEN_APP_NAME}
     # image: suculent/thinx-device-api
     ports:
 #      - 7441:7441 # Reserved for Web HTTPS, 7440 is Web HTTP
@@ -142,3 +148,50 @@ services:
       - "traefik.port=7442"
       - "traefik.backend=thinx-api"
       - "traefik.frontend.rule=Host:${THINX_HOSTNAME}"
+
+  console:
+    env_file:
+      - .env
+    #image: suculent/thinx-console
+    build:
+      context: ./services/thinx-console/src
+      args:
+       - NGINX_PORT=80
+       - NGINX_HOST=${WEB_HOSTNAME}
+       - WEB_HOSTNAME=${WEB_HOSTNAME}
+       - API_HOSTNAME=${API_HOSTNAME}
+       - API_BASEURL=${API_BASEURL}
+       - ENTERPRISE=${ENTERPRISE}
+       - ENVIRONMENT=${ENVIRONMENT}
+       - GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID}
+       - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
+    networks:
+      - nat
+      - internal
+    ports:
+      - "80"
+    restart: always
+#    environment:
+#     - NGINX_PORT=80
+#     - NGINX_HOST=${WEB_HOSTNAME}
+#     - WEB_HOSTNAME=${WEB_HOSTNAME}
+#     - API_HOSTNAME=${API_HOSTNAME}
+#     - API_BASEURL=${API_BASEURL}
+#     - ENTERPRISE=${ENTERPRISE}
+#     - ENVIRONMENT=${ENVIRONMENT}
+#     - GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID}
+#     - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=80"
+      - "traefik.backend=console"
+      - "traefik.frontend.rule=Host:console.staging.thinx.cloud"
+      - "traefik.frontend.entryPoints=http,https"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.SSLForceHost=true"
+      - "traefik.frontend.headers.SSLHost=console.staging.thinx.cloud"
+#      - "traefik.frontend.headers.forceSTSHeader=true"
+#      - "traefik.frontend.headers.STSSeconds=315360000"
+#      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+#      - "traefik.frontend.headers.STSPreload=true"
