@@ -1,7 +1,4 @@
-
-# docker build -t suculent/thinx-console .
-
-FROM ellerbrock/alpine-gulp AS builder
+FROM suculent/alpine-gulp AS builder
 
 ARG COMPOSE_PROJECT_NAME=keyguru
 ARG WEB_HOSTNAME=console.staging.thinx.cloud
