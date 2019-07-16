@@ -104,8 +104,7 @@ EXPOSE 9002
 
 # this should be generated/overwritten with sed on entrypoint, entrypoint needs /.first_run file and all ENV_VARS
 COPY ./.thinx_env.dist /.thinx_env
-COPY ./conf/.thx_prefix ./conf/.thx_prefix
-COPY ./conf/.thx_prefix /conf/.thx_prefix
+#COPY ./conf/.thx_prefix ./conf/.thx_prefix
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
