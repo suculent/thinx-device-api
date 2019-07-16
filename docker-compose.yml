@@ -34,7 +34,7 @@ services:
     # build: ./services/couchdb # currently unused for speed, should work the same except it does not log pass in entry point
     restart: always
     ports:
-      - 5984:5984 # shield this with Firewall for Administrative IP range only!
+      - 5984
     networks:
       - nat
       - internal
@@ -63,7 +63,7 @@ services:
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
     restart: always
     ports:
-      - 6379:6379
+      - 6379
     volumes:
       - /mnt/data/redis:/data
     labels:
@@ -72,7 +72,8 @@ services:
   transformer:
     env_file: .env
     user: transformer
-    build: ./services/transformer
+    build:
+      context: ./services/transformer
       args:
         - SQREEN_APP_NAME=${SQREEN_APP_NAME}
         - SQREEN_TOKEN=${SQREEN_TOKEN}
