@@ -1,0 +1,178 @@
+<!-- BEGIN PAGE BREADCRUMB -->
+<ul class="page-breadcrumb breadcrumb">
+  <li>
+    <a ui-sref="dashboard">Home</a>
+    <i class="fa fa-circle"></i>
+  </li>
+  <li class="active"> App Source Management </li>
+</ul>
+<!-- END PAGE BREADCRUMB -->
+<!-- BEGIN MAIN CONTENT -->
+<div class="row">
+  <div class="col-md-12">
+    <div class="note note-info" ng-hide="$root.profile.info.goals.includes('source-info')">
+      <h3>App Sources
+        <span class="close" data-close="note" ng-click="$root.profile.info.goals.push('source-info'); $emit('saveProfile');"></span>
+      </h3>
+      <p>
+        <b>Use your public or private git repositories</b>
+        <br><br>
+        Don't forget to create your <a ui-sref="deploykey">Deploy keys</a> before using private sources.
+      </p>
+    </div>
+
+    <!-- BEGIN QUICK NAV -->
+    <nav class="quick-nav" ng-show="selectedItems.length > 0">
+      <a class="quick-nav-trigger" href="#">
+        <span aria-hidden="true"></span>
+      </a>
+      <ul>
+        <li>
+          <a href="#" ng-click="revokeSources()">
+            <span>Revoke {{selectedItems.length}} Item{{selectedItems.length > 1 ? "s" : ""}}</span>
+            <i class="icon-trash"></i>
+          </a>
+        </li>
+        <li>
+          <a href="#" ng-click="selectedItems = [];">
+            <span>Deselect All</span>
+            <i class="icon-close"></i>
+          </a>
+        </li>
+      </ul>
+      <span aria-hidden="true" class="quick-nav-bg"></span>
+    </nav>
+    <div class="quick-nav-overlay"></div>
+    <!-- END QUICK NAV -->
+
+    <!-- BEGIN: ACCORDION DEMO -->
+    <div class="portlet light bordered">
+      <div class="portlet-title">
+        <div class="caption font-green-sharp">
+          <i class="icon-folder-alt font-green-sharp"></i>
+          <span class="caption-subject bold uppercase">App Sources</span>
+          <span class="caption-helper hide"></span>
+        </div>
+        <div class="actions hide">
+          <a class="btn btn-circle btn-icon-only btn-default" href="#">
+            <i class="icon-cloud-upload"></i>
+          </a>
+          <a class="btn btn-circle btn-icon-only btn-default" href="#">
+            <i class="icon-wrench"></i>
+          </a>
+        </div>
+      </div>
+      <div class="portlet-body">
+        <!-- BEGIN PORTLET-->
+        <div class="row">
+          <div class="col-xs-6">
+            <a href="#" class="btn green-haze btn-outline" ng-click="resetModal()" data-target="#pageModal" data-toggle="modal">Add Source</a>
+            <div class="btn-group btn-actions hide">
+              <a ng-show="selectedItems.length > 0" class="btn red btn-outline" href="javascript:;" data-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-bars"></i> Actions
+                <i class="fa fa-angle-down"></i>
+              </a>
+              <ul class="dropdown-menu pull-left">
+                <li><a href="javascript:;" ng-click="revokeSources()"><i class="icon-trash"></i> Revoke selected</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-xs-6 text-right">
+            <span class="input-icon right xtop-list-search">
+              <i class="icon-magnifier"></i>
+              <input type="text" class="form-control form-control-solid" ng-model="searchText" placeholder="Search...">
+            </span>
+          </div>
+        </div>
+        <div class="table-scrollable table-scrollable-borderless">
+          <table class="table table-hover table-light">
+            <tr ng-repeat="source in $root.sources | propsFilter:{'alias':searchText, 'url':searchText, 'platform':searchText}" ng-click="checkItem(source.sourceId)" ng-class="selectedItems.indexOf(source.sourceId) > -1 ? 'selected-row' : 'default-row'">
+              <td>
+                <span style="float: right">
+                  <span ng-repeat="device in $root.meta.sources[source.sourceId]">
+                    <a ui-sref="device({udid: device.udid, origin: 'source'})" stop-event title="{{device.alias}}">
+                      <span class="device-icon bg-{{device.category}} device-icon-small">
+                        <img ng-src="../assets/thinx/img/ioticons/b_medium_{{('0' + device.icon).slice(-2)}}.png" alt="Device Icon" class="device-icon-symbol" />
+                      </span>
+                    </a>
+                  </span>
+                </span>
+                <div class="row-item-title">{{source.alias}}</div>
+                <div><span class="source-label monospace-info">{{source.url}}</span></div>
+                <div>
+                  <span ng-if="source.branch.length > 0">
+                    <span class="source-origin">{{source.branch | split:"/":0}}</span> / <span class="source-branch">{{source.branch | split:"/":1}}</span>
+                  </span>
+                  <span class="badge {{source.platform}}-platform-color platform-badge">{{$root.platforms[source.platform].name}}</span>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <!-- BEGIN FORM-->
+        <form ng-submit="addSource()" class="form-horizontal form-bordered" name="sourceModal">
+          <div id="pageModal" class="modal fade" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                  <h4 class="modal-title">New Source</h4>
+                </div>
+                <div class="modal-body">
+                  <div class="form-group">
+                    <label class="control-label col-md-3">Git URL</label>
+                    <div class="col-md-9">
+                      <input ng-change="getAliasFromUrl()" ng-model="sourceUrl" type="text" class="form-control" name="sourceUrl" placeholder="git@github.com:username/repository.git" />
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-md-3">Source Alias</label>
+                    <div class="col-md-9">
+                      <input type="text" class="form-control"  ng-model="sourceAlias" name="sourceAlias" placeholder="Project Name" />
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-md-3">Branch</label>
+                    <div class="col-md-9">
+                      <input type="text" class="form-control"  ng-model="sourceBranch" name="sourceBranch" placeholder="origin/master" />
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary" ng-click="addSource()" ng-disabled="(sourceUrl == null || sourceUrl.length < 1) || (sourceAlias == null || sourceAlias.length < 1) || (sourceAlias == null || sourceAlias.length < 1) || addingSource"><i class="fa fa-check"></i> Submit</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+        <!-- END FORM-->
+
+        <!-- END PORTLET-->
+      </div>
+    </div>
+  </div>
+</div>
+<!-- END MAIN CONTENT -->
+
+
+<!-- START PAGE LOG OVERLAY -->
+<div ng-controller="LogviewController" class="log-view-overlay-conatiner" style="display:none">
+  <div class="log-view-overlay-controls">
+    <a ng-click="wsstailLog($root.modalBuildId)" title="Refresh status"><i class="icon-refresh"></i></a>
+    <a ng-click="switchWrap()" title="Toggle Word Wrap"><i class="icon-frame"></i></a>
+    <a ng-click="hideLogOverlay($root.modalBuildId)" title="Close Log"><i class="icon-close"></i></a>
+  </div>
+  <div class="log-view-overlay log-view-body force-word-wrap" scroll-glue>
+    <div class="overlay-title">Build Log <span>{{$root.modalBuildId}}</span></div>
+    {{$root.logdata[$root.modalBuildId]}}
+  </div>
+</div>
+<!-- END PAGE LOG OVERLAY -->
+
+
+<!-- BEGIN MAIN JS-->
+<script>
+QuickNav.init();
+</script>
+<!-- BEGIN MAIN JS

@@ -1,0 +1,123 @@
+<!-- BEGIN PAGE BREADCRUMB -->
+<ul class="page-breadcrumb breadcrumb">
+  <li>
+    <a ui-sref="dashboard">Home</a>
+    <i class="fa fa-circle"></i>
+  </li>
+  <li class="active"> History </li>
+</ul>
+<!-- END PAGE BREADCRUMB -->
+<!-- BEGIN MAIN CONTENT -->
+<div class="row">
+
+  <div class="col-md-12">
+    <div class="note note-info" ng-hide="$root.profile.info.goals.includes('history-info')">
+      <h3>History
+        <span class="close" data-close="note" ng-click="$root.profile.info.goals.push('history-info'); $emit('saveProfile');"></span>
+      </h3>
+      <p><b>Keep an eye on security with audit logs</b><br/><br/>Here you can browse through all important events and build logs.</p>
+    </div>
+
+    <!-- BEGIN PORTLET -->
+    <div class="portlet light">
+      <div class="portlet-title tabbable-line">
+        <div class="caption caption-md">
+          <i class="icon-hourglass theme-font"></i>
+          <span class="caption-subject font-blue-madison bold uppercase">History</span>
+        </div>
+        <ul class="nav nav-tabs">
+          <li><a href="#" data-target="#tab_buildlog" data-toggle="tab"> Builds </a></li>
+          <li><a href="#" data-target="#tab_auditlog" data-toggle="tab"> Audit Log </a></li>
+        </ul>
+      </div>
+      <div class="portlet-body">
+
+        <!--BEGIN TABS-->
+        <div class="tab-content">
+
+          <div class="portlet-input" style="margin-bottom: 10px">
+            <div class="input-icon right">
+              <i class="icon-magnifier"></i>
+              <input type="text" class="form-control form-control-solid" ng-model="list.searchText" placeholder="Search...">
+            </div>
+          </div>
+
+          <div class="tab-pane" id="tab_buildlog">
+            <div class="scroller" style="height: 638px;" data-always-visible="1" data-rail-visible1="0" data-handle-color="#D7DCE2">
+              <ul class="feeds">
+                <div ng-if="$root.buildHistory.length < 1">No builds in history...</div>
+                <li ng-repeat="build in $root.buildHistory | propsFilter:{'message':list.searchText} | orderBy:'date':true | limitTo:200 track by $index">
+                  <div class="todo-tasklist-item todo-tasklist-item-border-green">
+                    <!-- <img class="todo-userpic pull-left" src="../assets/thinx/img/default_avatar_sm.png" width="27px" height="27px" alt="Build Reporter"> -->
+                    <div>
+                      {{build.message | limitTo:32}}
+                      <a class="btn btn-circle btn-icon-only btn-default pull-right" ng-click="$emit('showLogOverlay', build.build_id)">
+                        <i class="fa fa-eye"></i>
+                      </a>
+                      <a ng-if="build.artifacts !== undefined" class="btn btn-circle btn-icon-only btn-default pull-right margin-right-10" ng-click="downloadArtifacts(build.build_id)">
+                        <i class="fa fa-cloud-download"></i>
+                      </a>
+                    </div>
+                    <!-- <div class="todo-tasklist-item-text"> {{build.message | limitTo:32}} </div> -->
+                    <!-- <div class="todo-tasklist-controls pull-left"> -->
+                    <small><a ui-sref="device({udid: build.udid})">{{$root.getDeviceByUdid(build.udid).alias}}</a></small>
+                    <span class="todo-tasklist-date">{{build.date | lastSeen:suffix:'false'}} </span>
+
+                    <!-- <span class="todo-tasklist-badge badge badge-roundless badge-success">Success</span>  -->
+                    <!-- </div> -->
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="tab-pane" id="tab_auditlog">
+            <div class="scroller" style="height: 638px;" data-always-visible="1" data-rail-visible1="0" data-handle-color="#D7DCE2">
+              <ul class="feeds">
+                <div ng-if="$root.auditlog.length < 1">Waiting for data...</div>
+                <li ng-repeat="auditEntry in $root.auditlog | propsFilter:{'message':list.searchText} | limitTo:200 track by $index">
+                  <div class="todo-tasklist-item todo-tasklist-item-border-green">
+                    <!-- <img class="todo-userpic pull-left" src="../assets/thinx/img/default_avatar_sm.png" width="27px" height="27px" alt="Event Reporter"> -->
+                    <!-- <div class="todo-tasklist-item-title"> {{auditEntry.message | limitTo:32}} </div> -->
+                    <div class="todo-tasklist-item-text"> {{auditEntry.message}} </div>
+                    <div class="todo-tasklist-controls pull-left">
+                      <span class="todo-tasklist-date"><i class="fa fa-calendar"></i> {{auditEntry.date | lastSeen:suffix:'false'}} </span>
+                      <span ng-if="auditEntry.flags.indexOf('warning') !== -1" class="todo-tasklist-badge badge badge-roundless badge-warning">Warning</span>
+                      <span ng-if="auditEntry.flags.indexOf('danger') !== -1" class="todo-tasklist-badge badge badge-roundless badge-danger">Danger</span>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+        <!--END TABS-->
+
+      </div>
+      <!-- END PORTLET -->
+
+    </div>
+  </div>
+</div>
+<!-- END MAIN CONTENT -->
+
+<!-- START PAGE LOG OVERLAY -->
+<div ng-controller="LogviewController" class="log-view-overlay-conatiner" style="display:none">
+  <div class="log-view-overlay-controls">
+    <a ng-click="wsstailLog($root.modalBuildId)" title="Refresh status"><i class="icon-refresh"></i></a>
+    <a ng-click="switchWrap()" title="Toggle Word Wrap"><i class="icon-frame"></i></a>
+    <a ng-click="hideLogOverlay($root.modalBuildId)" title="Close Log"><i class="icon-close"></i></a>
+  </div>
+  <div class="log-view-overlay log-view-body force-word-wrap" scroll-glue>
+    <div class="overlay-title">Build Log <span>{{$root.modalBuildId}}</span></div>
+    {{$root.logdata[$root.modalBuildId]}}
+  </div>
+</div>
+<!-- END PAGE LOG OVERLAY -->
+
+<!-- BEGIN MAIN JS-->
+<script>
+// call any jquery or angularjs code ehre
+</script>
+<!-- BEGIN MAIN JS -->

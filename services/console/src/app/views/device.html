@@ -1,0 +1,458 @@
+<!-- BEGIN PAGE BREADCRUMB -->
+<ul class="page-breadcrumb breadcrumb">
+  <li>
+    <a ui-sref="dashboard">Home</a>
+    <i class="fa fa-circle"></i>
+  </li>
+  <li>
+    <a ui-sref="dashboard">Dashboard</a>
+    <i class="fa fa-circle"></i>
+  </li>
+  <li class="active"> Device </li>
+</ul>
+<!-- END PAGE BREADCRUMB -->
+<!-- BEGIN MAIN CONTENT -->
+
+<!-- BEGIN PORTLET-->
+<div class="portlet light bordered form-horizontal form-bordered">
+  <div class="portlet-title">
+    <div class="caption caption-md">
+      <i class="icon-bulb font-red"></i>
+      <span class="caption-subject font-red bold uppercase">Device Settings</span>
+    </div>
+    <div class="actions">
+      <button ng-click="goBack()" class="btn grey-mint btn-outline btn-circle btn-sm"><i class="fa fa-arrow-left"></i></button>
+    </div>
+  </div>
+  <div class="portlet-body" ng-if="deviceForm.udid != null">
+
+    <!-- DEVICE BASICS -->
+    <div class="row" style="padding-bottom: 20px;">
+      <div class="col-md-3 col-sm-12 col-xs-12">
+        <div class="device-detail-icon pull-sm-left pull-xs-left bg-{{deviceForm.category}}" ng-click="toggleIconset()">
+          <img ng-src="../assets/thinx/img/ioticons/w_large_{{('0'+deviceForm.icon).slice(-2)}}.png" alt="Device Icon" />
+        </div>
+      </div>
+      <div class="col-md-9 col-sm-12 col-xs-12">
+        <h2>
+          <span editable-text="deviceForm.alias" editable-buttons="no" e-form="aliasBtnForm" onaftersave="submitDeviceFormChange('alias')" title="Device Alias">{{deviceForm.alias | limitTo: 24}}{{deviceForm.alias.length > 24 ? '…' : ''}}</span>
+          <button style="border: 0" class="btn grey-mint btn-outline btn-circle btn-sm" ng-click="aliasBtnForm.$show()" ng-hide="aliasBtnForm.$visible"><i class="fa fa-pencil"></i></button>
+        </h2>
+        <div>
+          <span editable-text="deviceForm.description" editable-buttons="no" e-form="descBtnForm" onaftersave="submitDeviceFormChange('description')" title="Device Description">{{deviceForm.description}}</span>
+          <button style="border: 0" class="btn grey-mint btn-outline btn-circle btn-sm" ng-click="descBtnForm.$show()" ng-hide="descBtnForm.$visible"><i class="fa fa-pencil"></i></button>
+        </div>
+        <div>
+          <img ng-src="../assets/thinx/img/external/{{deviceForm.base_platform}}_logo_200.png" class="platform-icon pull-left {{deviceForm.base_platform}}-platform-color" />
+          <div class="platform-title" title="Device Platform">
+            {{$root.platforms[deviceForm.base_platform].name}} | <span class="device-commit-id" title="Firmware Commit ID">{{getDeviceByUdid(deviceForm.udid).commit | limitTo: 7}}</span>
+            <br>
+            <span ng-if="!$root.platforms[deviceForm.base_platform].build">Vendor Firmware</span>
+            <span ng-if="$root.platforms[deviceForm.base_platform].build">
+              <span title="Firmware Alias">{{getDeviceByUdid(deviceForm.udid).firmware}}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ICON -->
+    <div class="row" ng-if="showIcons">
+      <div class="col-xs-12">
+        <div class="iot-iconset">
+          <a ng-repeat="icon in $root.thinx.iotIcons" class="iot-icon" ng-click="submitIcon(icon)">
+            <img style="width: 64px" ng-src="../assets/thinx/img/ioticons/b_medium_{{('0'+icon).slice(-2)}}.png" />
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAC ADDRESS -->
+    <div class="form-group">
+      <label class="control-label col-md-3">MAC Address</label>
+      <div class="col-md-9">
+        <div class="input-group" style="display: inline">
+          <input type="text" class="form-control" id="mac" ng-value="$root.getDeviceByUdid(deviceForm.udid).mac" ng-readonly="true" style="width: auto; font-family: monospace;" />
+          <span class="input-group-btn" style="float: left">
+            <button type="button" ng-click="copyToClipboard($root.getDeviceByUdid(deviceForm.udid).mac)" class="btn btn-default copy-btn" data-clipboard-target="#mac"><span class="fa fa-clipboard"></span></button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEVICE STATUS -->
+    <div class="form-group">
+      <label class="control-label col-md-3">Last Checkin</label>
+      <div class="col-md-9">
+        <span class="device-timestamp-label">
+          <i class="fa fa-clock-o"></i> {{$root.getDeviceByUdid(deviceForm.udid).lastupdate | lastSeen:'true'}}
+          <span style="font-size: .8em">| {{$root.getDeviceByUdid(deviceForm.udid).lastupdate | date:'yyyy-MM-dd HH:mm:ss Z'}}</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- TRANSFORMERS -->
+    <div class="form-group">
+      <label class="control-label col-md-3">Status Transformers</label>
+      <div class="col-md-9">
+        <div class="input-group">
+          <ui-select multiple tagging="tagTransform" tagging-label="(new transformer)" id="transformer-select" ng-model="$root.getDeviceByUdid(deviceForm.udid).transformers" theme="bootstrap" sortable="true" title="Enter Transformer Alias" on-select="transformerSelected($item)" ng-change="submitDeviceFormChange('transformers')">
+            <ui-select-match placeholder="Enter new name or select existing...">
+              {{$item.value.alias}}
+            </ui-select-match>
+            <ui-select-choices repeat="transformer.value.utid as (key, transformer) in $root.meta.transformers | filter:$select.search track by $index">
+              <div>{{transformer.value.alias}}</div>
+            </ui-select-choices>
+          </ui-select>
+          <span class="input-group-btn">
+            <button type="button" ui-sref="transformer" class="btn btn-default">
+              <span title="Manage transformers" class="fa fa-plus"></span>
+            </button>
+          </span>
+        </div>
+
+        <div ng-if="deviceForm.transformers.length > 0">
+          <div ng-repeat="utid in deviceForm.transformers">
+            <form editable-form class="form-horizontal form-bordered" name="transformerForm{{$index}}">
+              <div ng-if="deviceForm.transformersVisible.indexOf(utid) > -1" class="transformer-editor">
+                <i class="fa fa-code"></i> <input class="transformer-editable-alias" type="text" ng-model="$root.getRawTransformerByUtid(utid).alias" ng-change="$root.getRawTransformerByUtid(utid).changed = true;" />
+                <div id="editor-{{$index}}" ui-codemirror ui-codemirror-opts="editorOpts" ng-model="$root.meta.transformers[utid].body" ng-change="$root.meta.transformers[utid].changed = true;"></div>
+                <br>
+                <div>
+                  <a class="btn btn-danger"  ng-click="removeTransformer(utid)">Delete</a>
+
+                  <a class="btn btn-success" style="float: right; margin-left: 20px;" ng-click="updateTransformer(utid)" ng-disabled="!$root.meta.transformers[utid].changed">Save</a>
+                  <a class="btn btn-info" style="float: right;" ng-click="showEditorOverlay(utid)"><i class="fa fa-pencil"></i> Editor</a>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEVICE STATUS -->
+    <div class="form-group">
+      <label class="control-label col-md-3">Status</label>
+      <div class="col-md-9">
+        <p class="alert alert-danger" ng-if="$root.getDeviceByUdid(deviceForm.udid).transformer_error != undefined">
+          {{$root.getDeviceByUdid(deviceForm.udid).transformer_error}}
+        </p>
+
+        <span ng-if="$root.getDeviceByUdid(deviceForm.udid).status != undefined && $root.getDeviceByUdid(deviceForm.udid).status != null">
+          <div class="device-status">
+            <i class="fa fa-heartbeat"></i>
+            {{$root.getDeviceByUdid(deviceForm.udid).status | removeControlChars}}
+            <i class="fa fa-warning fg-alert opacity-100"
+            ng-if="$root.getDeviceByUdid(deviceForm.udid).status.toLowerCase().indexOf('#e') > -1"></i>
+            <i class="fa fa-warning fg-warning opacity-100"
+            ng-if="$root.getDeviceByUdid(deviceForm.udid).status.toLowerCase().indexOf('#w') > -1"></i>
+          </div>
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group form-divider">
+      <label class="control-label col-md-3"></label>
+      <div class="col-md-9"></div>
+    </div>
+
+    <!-- API KEY -->
+    <div class="form-group">
+      <label class="control-label col-md-3"> API Key</label>
+      <div class="col-md-9">
+        <div class="input-group">
+          <ui-select ng-model="deviceForm.keyhash" theme="bootstrap" title="Choose a key" ng-change="submitDeviceFormChange('keyhash')">
+            <ui-select-match placeholder="Select key from the list...">{{$select.selected.value.alias}}</ui-select-match>
+            <ui-select-choices repeat="apikey.value.hash as (key, apikey) in $root.apikeys | filter: { value: { alias: $select.search }}">
+              <div ng-bind-html="apikey.value.alias | highlight: $select.search"></div>
+              <small>{{apikey.value.hash | limitTo: 6 }}</small>
+            </ui-select-choices>
+          </ui-select>
+          <span class="input-group-btn">
+            <button ng-show="deviceForm.keyhash == null"  type="button" class="btn btn-warning">
+              <span title="No apikey attached..."><i class="fa fa-warning"></i></span>
+            </button>
+            <button ng-hide="deviceForm.keyhash == null" type="button" ng-click="deviceForm.keyhash = null; submitDeviceFormChange('keyhash')" class="btn btn-default"><span class="fa fa-chain-broken"></span></button>
+            <button type="button" ui-sref="apikey" class="btn btn-default"><span title="Manage API Keys" class="fa fa-plus"></span></button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group"  ng-if="deviceForm.keyhash == null">
+      <label class="control-label col-md-3"></label>
+      <div class="col-md-9">
+        <div class="alert alert-warning">
+          <span title="No API Key assigned" class="api-key-indicator"></span><strong> <i class="fa fa-warning"></i> No API Key assigned</strong>
+          <br/>
+          We recommend to create one API Key per device to be able to track key usage and misuse.<br/>
+          Key is required for build.<br/>
+
+          <span ng-if="deviceForm.base_platform == 'sigfox'">
+            On SigFox you have to change the key in the <a href="https://backend.sigfox.com" target="_blank">SigFox Backend</a> Callback Configuration manually.
+          </span>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- SOURCE -->
+    <div class="form-group">
+      <label class="control-label col-md-3">Source</label>
+      <div class="col-md-9">
+        <div class="input-group">
+          <ui-select ng-disabled="!$root.platforms[deviceForm.base_platform].build || attachingSource" ng-model="deviceForm.source" theme="bootstrap" title="Choose a source" ng-change="attachSource($select.selected.value.sourceId, deviceForm.udid)">
+            <ui-select-match placeholder="Select source from the list..."><div class="badge platform-badge {{$select.selected.value}}-platform-color" style="float: right; margin-top: 2px;">{{$root.platforms[$select.selected.value].name}}</div> {{$select.selected.value.alias}}</ui-select-match>
+            <ui-select-choices repeat="source.value.sourceId as (key, source) in $root.sources | filter: { value: { alias: $select.search }}">
+              <div>
+                <span ng-bind-html="source.value.alias | highlight: $select.search"></span>
+                <span class="badge {{source.value.platform}}-platform-color platform-badge">{{$root.platforms[source.value.platform].name}}</span>
+              </div>
+              <small>{{source.value.url}}</small>
+            </ui-select-choices>
+          </ui-select>
+          <span class="input-group-btn">
+            <button ng-disabled="attachingSource"  type="button" ng-click="detachSource(deviceForm.udid)" class="btn btn-default">
+              <span title="Detach source from device" class="fa fa-chain-broken" ng-hide="attachingSource"></span>
+              <span title="Attaching source..." ng-show="attachingSource"><i class="fa fa-spin fa-refresh"></i></span>
+            </button>
+            <button type="button" ui-sref="source" class="btn btn-default">
+              <span title="Manage sources" class="fa fa-plus"></span>
+            </button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- BUILD STATUS -->
+
+    <div class="form-group" ng-if="$root.platforms[deviceForm.base_platform].build">
+      <label class="control-label col-md-3">Build Status</label>
+      <div class="col-md-9">
+
+        <div ng-click="deviceForm.buildHistoryVisible ? deviceForm.buildHistoryVisible = false : deviceForm.buildHistoryVisible = true" class="device-build-status" ng-if="$root.meta.deviceBuilds[deviceForm.udid] != undefined && $root.meta.deviceBuilds[deviceForm.udid].length > 0">
+          <div class="row">
+            <div class="col-xs-6 text-left">
+              <i class="fa fa-cog" ng-class="meta.deviceBuilds[deviceForm.udid][0].message == 'OK' ? '' : 'fa-spin'"></i> <span class="badge" ng-class="meta.deviceBuilds[deviceForm.udid][0].message == 'OK' ? 'badge-success' : 'badge-warning'">{{meta.deviceBuilds[deviceForm.udid][0].message}}</span>
+              {{meta.deviceBuilds[deviceForm.udid][0].message}}
+            </div>
+            <div class="col-xs-6 text-right">
+              <a ng-if="meta.deviceBuilds[deviceForm.udid][0].message == 'OK'" class="btn-build-download" ng-click="downloadArtifacts(deviceForm.udid, meta.deviceBuilds[deviceForm.udid][0].build_id)"><i class="fa fa-download"></i></a>
+
+              <span class="build-status-date" title="{{meta.deviceBuilds[deviceForm.udid][0].date}}">{{meta.deviceBuilds[deviceForm.udid][0].date | lastSeen:'true'}}</span>
+
+              <a ng-click="$emit('showLogOverlay', meta.deviceBuilds[deviceForm.udid][0].build_id); $event.stopPropagation()">
+                <span class="device-build-id opacity-100"><i class="fa fa-eye"></i>{{meta.deviceBuilds[deviceForm.udid][0].build_id | limitTo:7}}</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="device-build-history" ng-if="deviceForm.buildHistoryVisible">
+
+          <div ng-repeat="(key, value) in $root.meta.deviceBuilds[deviceForm.udid] | orderBy:'date':true  | limitTo:deviceForm.buildHistoryLimit | groupBy:'build_id'">
+            <div class="row" ng-repeat="buildEntry in value" ng-if="$first">
+              <div class="col-xs-10 text-left">
+                <i class="icomoon-hammer_icon"></i>
+                <span class="build-status-date" title="{{buildEntry.date}}">{{buildEntry.date | lastSeen:'false'}}</span>
+                <a ng-click="$emit('showLogOverlay', buildEntry.build_id)">
+                  <span class="device-build-id opacity-100"> {{buildEntry.build_id | limitTo:7}}</span>
+                </a>
+                <span class="build-status-message">{{buildEntry.message}}</span>
+              </div>
+              <div class="col-xs-2 text-right">
+                <a ng-if="buildEntry.message == 'OK'" class="btn-build-download" ng-click="downloadArtifacts(deviceForm.udid, buildEntry.build_id)">
+                  <i class="fa fa-download"></i>
+                </a>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+        <div class="row"  ng-if="$root.meta.deviceBuilds.length > 1">
+          <div class="col-xs-12 text-center build-history-more">
+            <a class="btn btn-default btn-sm" ng-click="deviceForm.buildHistoryLimit = deviceForm.buildHistoryLimit + 10; $event.stopPropagation()">View More</a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- BUiLD SETUP -->
+    <div class="form-group" ng-if="$root.platforms[deviceForm.base_platform].build">
+      <label class="control-label col-md-3">Auto Update</label>
+      <div class="col-md-9">
+        <input bs-switch ng-change="submitDeviceFormChange('auto_update')" ng-model="deviceForm.auto_update" type="checkbox" switch-size="tiny" switch-on-text="On" switch-off-text="Off" ng-true-value="true" ng-false-value="false">
+        <span style="float: right">
+          <!-- <a class="btn dark btn-outline" href="javascript:;" ng-if="hasBuildId(deviceForm.udid)" ng-click="showDeviceLastBuild(deviceForm.udid, $event)" title="Open Build Log"> -->
+          <!-- <i class="fa fa-eye"></i> View Log -->
+          <!-- </a> -->
+          <button class="btn dark btn-outline" href="javascript:;"
+            ng-if="$root.platforms[deviceForm.base_platform].build && deviceForm.source != null && !attachingSource"
+            ng-hide="hasBuildId(deviceForm.udid) == null"
+            ng-disabled="deviceForm.keyhash == null"
+            ng-click="build(deviceForm.udid, deviceForm.source); $event.stopPropagation()"
+            title="Build From Source">
+            <i class="icomoon-hammer_icon"></i> Build
+          </button>
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group form-divider">
+      <label class="control-label col-md-3"></label>
+      <div class="col-md-9"></div>
+    </div>
+
+    <!-- TIMEZONE -->
+    <div class="form-group">
+      <label class="control-label col-md-3">Timezone</label>
+      <div class="col-md-9">
+        <ui-select ng-model="deviceForm.timezone_utc" theme="bootstrap" title="Choose timezone" ng-change="submitTimezone($select.selected.value.abbr, $select.selected.value.offset, $select.selected.key)">
+          <ui-select-match placeholder="Select timezone from the list...">
+            {{ $select.selected }}
+          </ui-select-match>
+          <ui-select-choices repeat="timezone.abbr as (key, timezone) in timezonesByUtc | filter:$select.search">
+            <div ng-bind-html="timezone.value.name | highlight: $select.search"></div>
+            <small>UTC {{ timezone.value.offset }} | {{timezone.value.abbr}} | {{ timezone.key }}</small>
+          </ui-select-choices>
+        </ui-select>
+        <div style="padding: 5px 5px 5px 12px">It is {{ devicetime | date :  "d. M. HH:mm" }} in device's timezone.</div>
+      </div>
+    </div>
+
+    <!-- CATEGORY -->
+    <div class="form-group">
+      <label class="control-label col-md-3">Category</label>
+      <div class="col-md-9">
+        <ui-select ng-model="deviceForm.category" theme="bootstrap" title="Choose category" ng-change="submitDeviceFormChange('category')">
+          <ui-select-match placeholder="Select category from the list...">
+            <i class="pull-left bg-{{$select.selected.id}} color-dot-out" alt="{{$select.selected.value.name}}"></i>
+            {{$select.selected.value.name}}
+          </ui-select-match>
+          <ui-select-choices repeat="category.id as (id, category) in $root.categories | filter:$select.search">
+            <i class="pull-left bg-{{category.id}} color-dot" alt="{{category.value.name}}"></i>
+            <div ng-bind-html="category.value.name | highlight: $select.search"></div>
+          </ui-select-choices>
+        </ui-select>
+      </div>
+    </div>
+
+    <!-- TAGS -->
+    <div class="form-group">
+      <label class="control-label col-md-3">Tags</label>
+      <div class="col-md-9">
+        <ui-select multiple tagging tagging-label="(create new tag)" ng-model="deviceForm.tags" theme="bootstrap" sortable="true" title="Enter tag"  ng-change="submitDeviceFormChange('tags')">
+          <ui-select-match placeholder="Select or enter tags...">
+            <span class="device-tag">{{$item}}</span>
+          </ui-select-match>
+          <ui-select-choices repeat="tag in $root.profile.info.tags | filter:$select.search track by $index">
+            {{tag}}
+          </ui-select-choices>
+        </ui-select>
+      </div>
+    </div>
+
+    <!-- MQTT CHANNEL -->
+    <div class="form-group last">
+      <label class="control-label col-md-3">MQTT Channel</label>
+      <div class="col-md-9">
+        <div class="input-group">
+          <input type="text" id="mqtt" name="mqtt" class="form-control" ng-value="'/' + $root.profile.owner + '/' + deviceForm.udid" ng-readonly="true" style="font-family: monospace;" />
+          <span class="input-group-btn">
+            <button type="button" ng-click="copyToClipboard(deviceForm.udid)" class="btn btn-default copy-btn" data-clipboard-target="#mqtt"><span class="fa fa-clipboard"></span></button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOCATION (optional) -->
+    <div class="form-group" ng-if="$root.getDeviceByUdid(deviceForm.udid).lat != undefined && $root.getDeviceByUdid(deviceForm.udid).lon != undefined && ($root.getDeviceByUdid(deviceForm.udid).lon * $root.getDeviceByUdid(deviceForm.udid).lat) > 0">
+      <label class="control-label col-md-3">Location</label>
+      <div class="col-md-9">
+        <div>
+          <a ng-href="https://www.google.com/maps/dir/?api=1&destination={{$root.getDeviceByUdid(deviceForm.udid).lat}},{{$root.getDeviceByUdid(deviceForm.udid).lon}}" target="_blank">
+            <img class="location-map-image" ng-src="https://maps.googleapis.com/maps/api/staticmap?key=AIzaSyAo8wftesNw_ebhZSVQTnzqhQbUJx_k4GI&center={{$root.getDeviceByUdid(deviceForm.udid).lat}},{{$root.getDeviceByUdid(deviceForm.udid).lon}}&amp;size=600x120&amp;sensor=false&amp;zoom=10&amp;markers=color:red%7Clabel:%7C{{$root.getDeviceByUdid(deviceForm.udid).lat}},{{$root.getDeviceByUdid(deviceForm.udid).lon}}" />
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIGNAL (optional) -->
+    <div class="form-group" ng-if="$root.getDeviceByUdid(deviceForm.udid).rssi < 0">
+      <label class="control-label col-md-3">Telemetry</label>
+      <div class="col-md-9" style="margin-top: 15px;">
+        <div class="signal-bar">
+          <img src="../assets/thinx/img/signalaxe_short.png" />
+          <span class="signal-title-50">-50</span>
+          <span class="signal-title-100">-100</span>
+          <span class="signal-title-150">-150</span>
+          <div class="noise-level" ng-style="{height: -$root.getDeviceByUdid(deviceForm.udid).rssi + -$root.getDeviceByUdid(deviceForm.udid).snr - 50 + 'px'}"></div>
+          <div class="space-level" ng-style="{height: -$root.getDeviceByUdid(deviceForm.udid).rssi - 50 + 'px'}"></div>
+          <div class="signal-level" data-ng-class="{'bg-success': $root.getDeviceByUdid(deviceForm.udid).snr >= 15, 'bg-warning': $root.getDeviceByUdid(deviceForm.udid).snr > 10 && $root.getDeviceByUdid(deviceForm.udid).snr < 15, 'bg-alert': $root.getDeviceByUdid(deviceForm.udid).snr <= 10}" ng-style="{height: $root.getDeviceByUdid(deviceForm.udid).snr + 'px', top: -$root.getDeviceByUdid(deviceForm.udid).rssi - 50 - $root.getDeviceByUdid(deviceForm.udid).snr + 'px'}"></div>
+          <span class="signal-title"><i class="fa fa-signal"></i> SNR</span>
+        </div>
+
+        <div class="device-detail-telemetry">STATUS {{deviceForm.telemetry.status}}
+          LAT/LON {{$root.getDeviceByUdid(deviceForm.udid).lat}}/{{$root.getDeviceByUdid(deviceForm.udid).lon}}
+          RSSI    {{$root.getDeviceByUdid(deviceForm.udid).rssi}}
+          SNR     {{$root.getDeviceByUdid(deviceForm.udid).snr}}
+          SIGNAL  {{- $root.getDeviceByUdid(deviceForm.udid).rssi}} dBm
+          NOISE   {{-$root.getDeviceByUdid(deviceForm.udid).rssi + -$root.getDeviceByUdid(deviceForm.udid).snr}} dB
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- END PORTLET-->
+<!-- END MAIN CONTENT -->
+
+<!-- START PAGE LOG OVERLAY -->
+<div ng-controller="LogviewController" class="log-view-overlay-conatiner" style="display:none">
+  <div class="log-view-overlay-controls">
+    <a ng-click="wsstailLog($root.modalBuildId)" title="Refresh status"><i class="icon-refresh"></i></a>
+    <a ng-click="switchWrap()" title="Toggle Word Wrap"><i class="icon-frame"></i></a>
+    <a ng-click="hideLogOverlay($root.modalBuildId)" title="Close Log"><i class="icon-close"></i></a>
+  </div>
+  <div class="log-view-overlay log-view-body force-word-wrap" scroll-glue>
+    <div class="overlay-title">Build Log <span>{{$root.modalBuildId}}</span></div>
+    {{$root.logdata[$root.modalBuildId]}}
+  </div>
+</div>
+<!-- END PAGE LOG OVERLAY -->
+
+<!-- START PAGE LOG OVERLAY -->
+<div ng-controller="EditorController" class="editor-overlay-conatiner" style="display:none">
+
+  <div class="editor-header">
+    <div class="row">
+      <div class="col-xs-5 col-sm-6 text-left">
+        <span style="font-size: .8em;">CODE EDITOR</span><br>
+        <input type="text" name="overlayEditorAlias" ng-model="overlayEditor.alias" ng-change="overlayEditor.changed = true;" class="form-control editor-alias" placeholder="Transformer Alias" />
+      </div>
+      <div class="col-xs-7 col-sm-6 text-right">
+        <a href="#" class="btn red btn-outline" ng-click="hideEditorOverlay()" title="Close editor"><i class="icon-close"></i> Close</a>
+        <a href="#" class="btn green-haze btn-outline" ng-click="overlayEditor.changed === false || saveEditor(transformerForm.utid)" ng-disabled="!overlayEditor.changed || overlayEditor.alias == null || overlayEditor.alias.length < 1 || overlayEditor.body == null || overlayEditor.body.length < 1"><i class="icon-check"></i> Save & Close</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="editor-body">
+    <div id="editor-overlay" ng-change="overlayEditor.changed = true;" ui-codemirror="{ onLoad: codemirrorLoaded }" ui-codemirror-opts="editorOpts" ng-model="overlayEditor.body"></div>
+  </div>
+
+</div>
+<!-- END PAGE LOG OVERLAY -->
+
+<!-- BEGIN MAIN JS & CSS -->
+<script type="text/javascript">
+// init clipboard
+new Clipboard('.copy-btn');
+</script>
+<!-- BEGIN MAIN JS & CSS

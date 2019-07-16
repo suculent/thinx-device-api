@@ -154,7 +154,7 @@ services:
       - .env
     #image: suculent/thinx-console
     build:
-      context: ./services/thinx-console/src
+      context: ./services/console/src
       args:
        - NGINX_PORT=80
        - NGINX_HOST=${WEB_HOSTNAME}

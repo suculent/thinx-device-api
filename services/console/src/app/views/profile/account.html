@@ -1,0 +1,222 @@
+<div class="row">
+  <div class="col-md-12">
+    <div class="portlet light">
+      <div class="portlet-title tabbable-line">
+        <div class="caption caption-md">
+          <i class="icon-globe theme-font hide"></i>
+          <span class="caption-subject font-blue-madison bold uppercase">Settings</span>
+        </div>
+        <ul class="nav nav-tabs">
+          <li class="active">
+            <a href="#" data-target="#tab_1_1" data-toggle="tab">Profile</a>
+          </li>
+          <li>
+            <a href="#" data-target="#tab_1_2" data-toggle="tab">Avatar</a>
+          </li>
+          <li>
+            <a href="#" data-target="#tab_1_3" data-toggle="tab">Preferences</a>
+          </li>
+          <li>
+            <a href="#" data-target="#tab_1_4" data-toggle="tab">Admin</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="portlet-body">
+        <div class="tab-content">
+          <!-- PERSONAL INFO TAB -->
+          <div class="tab-pane active" id="tab_1_1">
+            <form role="form" name="profileForm" ng-submit="submitProfileFormChanges(['first_name','last_name','mobile_phone','first_name', 'goals', 'tags', 'timezone_abbr', 'timezone_offset'])">
+              <div class="form-group">
+                <label class="control-label">First Name</label>
+                <input type="text" placeholder="John" class="form-control" ng-model="$root.profile.info.first_name"/>
+              </div>
+              <div class="form-group">
+                <label class="control-label">Last Name</label>
+                <input type="text" placeholder="Doe" class="form-control" ng-model="$root.profile.info.last_name"/>
+              </div>
+              <div class="form-group">
+                <label class="control-label">Default Timezone</label>
+                <ui-select ng-model="$root.profile.info.timezone_abbr" theme="bootstrap" title="Choose timezone" ng-change="$root.profile.info.timezone_offset = $select.selected.value.offset;">
+                  <ui-select-match placeholder="Select timezone from the list...">
+                    {{$select.selected.value.text}}
+                  </ui-select-match>
+                  <ui-select-choices repeat="timezone.value.abbr as (key, timezone) in timezones | filter:$select.search">
+                    <div> {{timezone.value.text}}</div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+              <div class="form-group">
+                <label class="control-label">Mobile Number</label>
+                <input type="text" class="form-control" ng-model="$root.profile.info.mobile_phone" placeholder="+420 123 456 789"/>
+              </div>
+              <div class="form-group">
+                <label class="control-label">Email</label>
+                <input type="text" placeholder="john@doe.com" class="form-control" value="{{$root.profile.email}}" ng-readonly="true"/>
+              </div>
+
+
+              <div class="margin-top-10">
+                <a href="#" ng-click="submitProfileFormChanges(['first_name','last_name','mobile_phone','first_name', 'goals', 'tags', 'timezone_abbr', 'timezone_offset'])" class="btn green-haze">Save Changes </a>
+                <a href="#" class="btn default">Cancel </a>
+              </div>
+              <br>
+              <div class="form-group">
+                <label class="control-label">Goals</label>
+                <div>
+                  <span ng-repeat="goal in $root.profile.info.goals track by $index">
+                    <span class="tag label label-info">
+                      <span>{{goal}}</span>
+                      <a ng-if="false" ng-click="removeGoal(goal)"><i class="remove glyphicon glyphicon-remove-sign glyphicon-white"></i></a>
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label">Tags</label>
+                <div>
+                  <span ng-repeat="tag in $root.profile.info.tags track by $index">
+                    <span class="tag label label-info">
+                      <span>{{tag}}</span>
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>
+          <!-- END PERSONAL INFO TAB -->
+          <!-- CHANGE AVATAR TAB -->
+          <div class="tab-pane" id="tab_1_2">
+            <div class="alert alert-warning">
+              <strong>Warning!</strong> At this time file upload is limited to 500kB ***
+            </div>
+            <form role="form" name="avatarForm" ng-submit="submitAvatarForm()">
+              <div class="form-group">
+                <div class="fileinput fileinput-new" data-provides="fileinput">
+                  <div class="fileinput-new thumbnail" style="width: 200px; height: 150px;">
+                    <img src="//www.placehold.it/200x150/EFEFEF/AAAAAA&amp;text=no+image" alt="" />
+                  </div>
+                  <div class="fileinput-preview fileinput-exists thumbnail" style="max-width: 200px; max-height: 150px;"></div>
+                  <div>
+                    <span class="btn default btn-file">
+                      <span class="fileinput-new"> Select image </span>
+                      <span class="fileinput-exists"> Change </span>
+                      <input type="file" id="newAvatarInput" name="newAvatar" ng-model="newAvatar" onchange="angular.element(this).scope().processAvatar()">
+                    </span>
+                    <a href="#" class="btn default fileinput-exists" data-dismiss="fileinput"> Remove </a>
+                  </div>
+                </div>
+              </div>
+              <div class="margin-top-10">
+                <a href="#" ng-disabled="newAvatar == null" ng-click="submitAvatarForm()"  class="btn green-haze"> Submit </a>
+                <a href="#" class="btn default"> Cancel </a>
+              </div>
+            </form>
+          </div>
+          <!-- END CHANGE AVATAR TAB -->
+          <!-- PREFERENCES TAB -->
+          <div class="tab-pane" id="tab_1_3">
+
+            <form role="form" name="securityForm" ng-submit="submitProfileFormChanges(['security'])">
+              <table class="table table-light table-hover">
+                <tr>
+                  <td>
+                    <h4>Disable push notifications globally</h4>
+                    <p><small>Disables Push Notifications for all devices.</small></p>
+                  </td>
+                  <td>
+                    <input
+                    bs-switch
+                    ng-model="$root.profile.info.security.global_push"
+                    type="checkbox"
+                    switch-size="tiny"
+                    switch-on-text="YES"
+                    switch-off-text="NO"
+                    ng-true-value="true"
+                    ng-false-value="false">
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <h4>Notify owner on important events</h4>
+                    <p><small>Device owner will get email on API outages or important updates.</small></p>
+                  </td>
+                  <td>
+                    <input
+                    bs-switch
+                    ng-model="$root.profile.info.security.important_notifications"
+                    type="checkbox"
+                    switch-size="tiny"
+                    switch-on-text="YES"
+                    switch-off-text="NO"
+                    ng-true-value="true"
+                    ng-false-value="false">
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <h4>Force unique API Keys</h4>
+                    <p><small>Allow each key for single device only</small></p>
+                  </td>
+                  <td>
+                    <input
+                    bs-switch
+                    ng-model="$root.profile.info.security.unique_api_keys"
+                    type="checkbox"
+                    switch-size="tiny"
+                    switch-on-text="YES"
+                    switch-off-text="NO"
+                    ng-true-value="true"
+                    ng-false-value="false">
+                  </td>
+                </tr>
+              </table>
+              <!--end profile-preferences-->
+              <div class="margin-top-10">
+                <a href="#" ng-click="submitProfileFormChanges(['security'])" class="btn green-haze"> Save Changes </a>
+                <a href="#" class="btn default"> Cancel </a>
+              </div>
+            </form>
+          </div>
+          <!-- END PREFERENCES TAB -->
+
+          <!-- ADMIN TAB -->
+          <div class="tab-pane" id="tab_1_4">
+
+            <form role="form" name="integrationForm" ng-submit="submitProfileFormChanges(['git_webhook'])">
+              <table class="table table-light table-hover">
+                <tr>
+                  <td colspan="2">
+                    <h4><i class="fa fa-github"></i> Slack Integration</h4>
+                    <p>
+                      <small>Enables #slackbot to send messages to your Slack team</small>
+                      <div>
+                        <a href="https://slack.com/oauth/authorize?client_id=<ENV::slackClientId>&scope=bot&state=Online&redirect_uri=<ENV::apiDirectUrl>/slack/redirect" class="btn default" target="_blank"><i class="fa fa-slack"></i> Add Slack </a>
+                      </div>
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2">
+                    <h4><i class="fa fa-github"></i> Git Webhook URL</h4>
+                    <p>
+                      <small>Enables automatic build when new code is pushed to repo.</small>
+                      <input type="text" placeholder="Enter Webhook URL" class="form-control" ng-model="$root.profile.info.git_webhook"/>
+                      <a href="https://developer.github.com/webhooks/" target="_blank" class="input-hint">How to get Git Webhhook URL?</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              <!--end profile-preferences-->
+              <div class="margin-top-10">
+                <a href="#" ng-click="submitProfileFormChanges(['git_webhook'])" class="btn green-haze"> Save Changes </a>
+                <a href="#" class="btn default"> Cancel </a>
+              </div>
+            </form>
+          </div>
+          <!-- END PREFERENCES TAB -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

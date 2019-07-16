@@ -1,0 +1,29 @@
+machine:
+  hosts:
+    rtm.thinx.loc: 127.0.0.1
+  node:
+    version:
+      7.10.0
+
+dependencies:
+  override:
+    - sudo mkdir -p /etc/nginx/sites-available
+    - sudo apt-get install nginx-light
+    - sudo cp test/scripts/default.nginx-vhost /etc/nginx/sites-available/default
+    - sudo nginx -s reload
+    - bash test/scripts/get-latest-chrome.sh
+    - npm install .
+    - npm install -g protractor
+    - webdriver-manager update
+    - webdriver-manager start:
+        background: true
+
+    - bash test/scripts/wait-for-server-start.sh
+
+test:
+  post:
+    - curl -sSL https://download.sourceclear.com/ci.sh | sh
+
+## Custom notifications
+notify:
+  - curl -X POST --data-urlencode 'payload={"text":"THiNX Console integration completed."}' https://hooks.slack.com/services/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

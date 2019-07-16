@@ -1,0 +1,126 @@
+<!-- BEGIN HEADER INNER -->
+<div class="page-header-inner container">
+  <!-- BEGIN LOGO -->
+  <div class="page-logo">
+    <a ui-sref="dashboard">
+      <img src="../assets/thinx/img/logo_line_shade_120.png" alt="THiNX Cloud Logo" class="logo-default"/>
+    </a>
+    <div class="menu-toggler sidebar-toggler">
+      <!-- DOC: Remove the above "hide" to enable the sidebar toggler button on header -->
+    </div>
+  </div>
+  <!-- END LOGO -->
+  <!-- BEGIN RESPONSIVE MENU TOGGLER -->
+  <a href="javascript:;" ng-click="event.stopPropagation();" class="menu-toggler responsive-toggler" data-toggle="collapse" data-target=".navbar-collapse"> </a>
+  <!-- END RESPONSIVE MENU TOGGLER -->
+  <!-- BEGIN PAGE TOP -->
+  <div class="page-top" style="height: inherit;">
+    <!-- BEGIN HEADER SEARCH BOX -->
+    <!-- DOC: Apply "search-form-expanded" right after the "search-form" class to have half expanded search box -->
+    <form class="search-form hidden" method="GET">
+      <div class="input-group">
+        <input type="text" class="form-control input-sm" placeholder="Search..." name="query">
+        <span class="input-group-btn">
+          <span class="btn header-search-btn">
+            <i class="icon-magnifier"></i>
+          </span>
+        </span>
+      </div>
+    </form>
+    <!-- END HEADER SEARCH BOX -->
+    <!-- BEGIN TOP NAVIGATION MENU -->
+    <div class="top-menu">
+      <ul class="nav navbar-nav pull-right">
+        <!-- BEGIN BUILDLOG DROPDOWN -->
+        <li class="dropdown dropdown-extended dropdown-dark dropdown-notification" id="header_inbox_bar">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
+            <i class="icomoon-hammer_icon"></i>
+            <span class="badge" ng-if="$root.buildHistory.length > 0"> {{$root.buildHistory.length}} </span>
+          </a>
+          <ul class="dropdown-menu">
+            <li class="external">
+              <h3>You have
+                <span class="bold">{{$root.buildHistory.length}} </span> Builds
+              </h3>
+              <a ui-sref="history({tab: 'buildlog'})" class="header-build-link">View all</a>
+            </li>
+            <li>
+              <ul class="dropdown-menu-list scroller" style="height: 275px;" data-handle-color="#637283">
+                <li ng-repeat="(key, build) in $root.buildHistory | limitTo:10 track by key">
+                  <a href="javascript:;" ng-click="$emit('showLogOverlay', build.build_id)" ng-if="$root.getDeviceByUdid(build.udid) != false">
+                    <span class="details">
+                      <span class="header-build-date">{{build.date | lastSeen:'false'}}</span>
+                      <div>
+                        {{getDeviceByUdid(build.udid).alias}}
+                      </div>
+                      <span class="header-build-udid font-{{getDeviceByUdid(build.udid).category}}">
+                        {{build.udid | limitTo:6}}
+                      </span>
+                      <span class="header-build-message">{{build.message}}</span>
+                    </span>
+                  </a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <!-- END BUILDLOG DROPDOWN -->
+        <!-- BEGIN USER LOGIN DROPDOWN -->
+        <li class="dropdown dropdown-user dropdown-dark">
+          <a href="#" class="dropdown-toggle profile-sub" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
+            <span class="username username-hide-on-mobile"> {{$root.profile.info.first_name}} {{$root.profile.info.last_name}} </span>
+            <!-- DOC: Do not remove below empty space(&nbsp;) as its purposely used -->
+            <img alt="{{$root.profile.info.first_name}} {{$root.profile.info.last_name}}" class="img-circle header-avatar" ng-src="{{$root.profile.avatar}}" />
+          </a>
+          <ul class="dropdown-menu dropdown-menu-default">
+            <li class="divider">
+            </li>
+            <li>
+              <a ui-sref="profile.dashboard">
+                <i class="icon-user"></i> My Profile
+              </a>
+            </li>
+            <!--
+            <li>
+              <a href="http://status.thinx.cloud" target="_blank">
+                <i class="icon-graph"></i> Monitoring
+              </a>
+            </li>
+            -->
+            <li>
+              <a href="https://github.com/suculent/thinx-device-api/wiki" target="_blank">
+                <i class="icon-notebook"></i> Documentation
+              </a>
+            </li>
+            <!--
+            <li>
+              <a href="http://thinx.cloud:8080" target="_blank">
+                <i class="icon-speech"></i> Forum
+              </a>
+            </li>
+            -->
+            <li class="divider">
+            </li>
+            <li>
+              <a href="<ENV::apiBaseUrl>/logout">
+                <i class="icon-key"></i> Log Out
+              </a>
+            </li>
+            <li class="divider">
+            </li>
+          </ul>
+        </li>
+        <!-- END USER LOGIN DROPDOWN -->
+        <!-- BEGIN QUICK SIDEBAR DROPDOWN -->
+        <li class="dropdown dropdown-extended quick-sidebar-toggler hide">
+          <span class="sr-only">Toggle Quick Sidebar</span>
+          <i class="icon-logout"></i>
+        </li>
+        <!-- END QUICK SIDEBAR DROPDOWN -->
+      </ul>
+    </div>
+    <!-- END TOP NAVIGATION MENU -->
+  </div>
+  <!-- END PAGE TOP -->
+</div>
+<!-- END HEADER INNER -->

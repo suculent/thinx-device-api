@@ -1,0 +1,631 @@
+<!-- BEGIN PAGE BREADCRUMB -->
+<ul class="page-breadcrumb breadcrumb">
+  <li>
+    <a ui-sref="dashboard">Home</a>
+    <i class="fa fa-circle"></i>
+  </li>
+  <li class="active"> Dashboard</li>
+</ul>
+<!-- END PAGE BREADCRUMB -->
+<!-- BEGIN MAIN CONTENT -->
+<div>
+
+
+  <!-- START SUMMARY -->
+  <div class="row" ng-if="$root.devices.length > 0">
+    <div class="col-md-12 col-sm-12">
+      <!-- BEGIN PORTLET-->
+      <div class="portlet light bordered " style="position: relative;">
+        <div class="portlet-title">
+          <div class="caption caption-md">
+            <i class="icon-graph font-green"></i>
+            <span class="caption-subject font-green bold uppercase">Summary</span>
+          </div>
+          <div class="actions">
+            <span ng-if="!chart.init || chart.computing" class="chart-overlay">
+              <i class="fa fa-spin fa-circle-o-notch"></i> Computing...
+            </span>
+
+            <div ng-if="chart.init" class="btn-group dropdown open pull-left" uib-dropdown="chartRangeSelector" style=" margin-right: 10px">
+              <button id="split-button-chart-range" type="button" class="btn btn-default btn-xs" ng-click="chartRange(7)"><small>LAST</small> {{chart.range}} <small>DAYS</small></button>
+              <button type="button" class="btn btn-default dropdown-toggle btn-xs" uib-dropdown-toggle="chartRangeSelector" aria-haspopup="true" aria-expanded="true">
+                <span class="caret"></span>
+                <span class="sr-only">Select...</span>
+              </button>
+              <ul class="dropdown-menu" uib-dropdown-menu="chartRangeSelector" role="menu" aria-labelledby="split-button-chart-range">
+                <li role="menuitem">
+                  <a href="javascript:;" ng-click="chartRange(7)">Last 7 Days</a>
+                </li>
+                <li role="menuitem">
+                  <a href="javascript:;" ng-click="chartRange(31)">Last 31 Days</a>
+                </li>
+                <li role="menuitem">
+                  <a href="javascript:;" ng-click="chartRange(365);">Last 365 Days</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="portlet-body">
+          <div class="row list-separated">
+            <div class="col-md-3 col-sm-3 col-xs-6">
+              <div class="font-grey-mint font-sm"> Checkins </div>
+              <div class="uppercase font-hg font-green"> {{$root.stats.total.RANGE_CHECKINS}}
+                <span class="font-lg font-grey-mint"></span>
+              </div>
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-6">
+              <div class="font-grey-mint font-sm"> Errors </div>
+              <div class="uppercase font-hg font-red-flamingo"> {{$root.stats.total.RANGE_ERRORS}}
+                <span class="font-lg font-grey-mint"></span>
+              </div>
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-6">
+              <!-- <div class="font-grey-mint font-sm"> Checkins </div> -->
+              <!-- <div class="uppercase font-hg font-purple"> {{$root.stats.total.DEVICE_CHECKIN}} -->
+              <!-- <span class="font-lg font-grey-mint"></span> -->
+              <!-- </div> -->
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-6">
+              <div class="font-grey-mint font-sm"> New </div>
+              <div class="uppercase font-hg font-blue"> {{$root.stats.total.DEVICE_NEW}}
+                <span class="font-lg font-grey-mint"></span>
+              </div>
+            </div>
+          </div>
+          <div id="device_statistics" class="portlet-body-morris-fit morris-chart" style="height: 230px"> </div>
+        </div>
+      </div>
+      <!-- END PORTLET-->
+    </div>
+  </div>
+  <!-- END SUMMARY -->
+
+  <!-- BEGIN DASHBOARD STATS -->
+  <div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+      <!-- BEGIN PORTLET-->
+      <div class="portlet light bordered" ng-if="false">
+        <div class="portlet-title">
+          <div class="caption caption-md">
+            <i class="icon-bar-chart font-red"></i>
+            <span class="caption-subject font-red bold uppercase">Sparklines</span>
+          </div>
+          <div class="actions hidden">
+            <div class="btn-group btn-group-devided" data-toggle="buttons">
+              <label class="btn green btn-outline btn-circle btn-sm active">
+                <input type="radio" name="options" class="toggle" id="option1" />
+                Check-ins
+              </label>
+              <label class="btn red btn-outline btn-circle btn-sm">
+                <input type="radio" name="options" class="toggle" id="option2" />
+                Updates
+              </label>
+              <label class="btn blue btn-outline btn-circle btn-sm">
+                <input type="radio" name="options" class="toggle" id="option2" />
+                MQTT
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="portlet-body">
+          <div class="row number-stats margin-bottom-30">
+            <div class="col-md-6 col-sm-6 col-xs-6">
+              <div class="stat-left">
+                <div class="stat-chart">
+                  <!-- do not line break "sparkline_bar" div. sparkline chart has an issue when the container div has line break -->
+                  <div id="sparkline_bar"></div>
+                </div>
+                <div class="stat-number">
+                  <div class="title"> Daily Check-ins </div>
+                  <div class="number"> {{$root.stats.total.DEVICE_CHECKIN}} </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 col-sm-6 col-xs-6">
+              <div class="stat-right">
+                <div class="stat-chart">
+                  <div id="sparkline_bar2"></div>
+                </div>
+                <div class="stat-number">
+                  <div class="title"> New Check-ins</div>
+                  <div class="number"> {{$root.stats.total.DEVICE_NEW}} </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- END PORTLET-->
+
+      <!-- START STATS -->
+      <div class="row hidden-xs hidden-sm">
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+          <a ui-sref="devices">
+            <div class="dashboard-stat green-steel">
+              <div class="visual">
+              </div>
+              <div class="details">
+                <div class="number"> {{$root.devices.length}} </div>
+                <div class="desc"> Devices </div>
+              </div>
+              <span class="more"> Manage
+                <i class="m-icon-swapright m-icon-white"></i>
+              </span>
+            </div>
+          </a>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+          <a ui-sref="source">
+            <div class="dashboard-stat green-seagreen">
+              <div class="visual">
+              </div>
+              <div class="details no-pointer-events">
+                <div class="number"> {{$root.sources.length}} </div>
+                <div class="desc"> Sources </div>
+              </div>
+              <span class="more"> Manage
+                <i class="m-icon-swapright m-icon-white"></i>
+              </span>
+            </div>
+          </a>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+          <a ui-sref="deploykey">
+            <div class="dashboard-stat green-meadow">
+              <div class="visual">
+              </div>
+              <div class="details">
+                <div class="number"> {{$root.deploykeys.length}} </div>
+                <div class="desc"> Deploy Keys </div>
+              </div>
+              <span class="more"> Manage
+                <i class="m-icon-swapright m-icon-white"></i>
+              </span>
+            </div>
+          </a>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+          <a ui-sref="apikey">
+            <div class="dashboard-stat green-jungle">
+              <div class="visual">
+              </div>
+              <div class="details">
+                <div class="number"> {{$root.apikeys.length}} </div>
+                <div class="desc"> API Keys </div>
+              </div>
+              <span class="more"> Manage
+                <i class="m-icon-swapright m-icon-white"></i>
+              </span>
+            </div>
+          </a>
+        </div>
+      </div>
+      <!-- END STATS -->
+
+      <!-- <div><a ui-sref="enviro"><i class="icon-globe" ></i> Variables</a> {{$root.enviros.length}}</div> -->
+
+      <!-- BEGIN PORTLET-->
+      <div class="portlet light bordered " ng-if="false">
+        <div class="portlet-title">
+          <div class="caption caption-md">
+            <i class="icon-graph font-red"></i>
+            <span class="caption-subject font-green bold uppercase">Activity</span>
+          </div>
+        </div>
+        <div class="portlet-body">
+          <!-- oldest: {{$root.stats.timeline.MIN}} -->
+          <!-- <br> -->
+          <!-- newest: {{$root.stats.timeline.MAX}} -->
+          <!-- <br> -->
+          <!-- markers: {{$root.stats.timeline.COUNT}} -->
+          <!-- <br> -->
+          <!-- span: {{$root.stats.timeline.SPAN}} -->
+          <!-- <br> -->
+          <!-- values: {{$root.stats.timeline.CHECKINS}} -->
+          <!-- <br><br> -->
+
+          <div class="text-center">
+
+            <div class="row">
+              <!-- {{marker.date | lastSeen}} -->
+              <!-- {{$root.stats.timeline.CHECKINS}} -->
+              <div class="col-xs-1" style="border-left: 1px solid #eeeeee"
+              ng-repeat="dayMarkers in $root.stats.timeline.CHECKINS | orderBy:date:false | groupBy:'date' track by $index"
+              ng-if="$index <12">
+
+              <small>{{dayMarkers[0].date | date: "MM."}}</small>
+              <br>
+              <small>{{dayMarkers[0].date | date: "dd."}}</small>
+              <br>
+
+              <span style="display: inline-block; height: {{dayMarkers.length * 10}}px; width: 10px; background-color: rgba(0,0,0,.5);" title="{{dayMarkers[0].date}}"></span>
+            </div>
+
+            <!-- <div style="clear: both;"></div> -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- END PORTLET-->
+  </div>
+</div>
+
+<!-- NO DEVICES -->
+<div class="row" ng-if="$root.devices.length < 1">
+  <div class="col-xs-12">
+    <div class="no-devices-text">
+      Welcome to THiNX IoT device management platform. Head over to the <a href="https://github.com/suculent/thinx-device-api/wiki" target="_blank">documentation</a> if you need help with registering your first device.
+    </div>
+  </div>
+</div>
+<!-- NO DEVICES -->
+
+<!-- BEGIN QUICK NAV -->
+<nav class="quick-nav" ng-show="selectedItems.length > 0">
+  <a class="quick-nav-trigger" href="#">
+    <span aria-hidden="true"></span>
+  </a>
+  <ul>
+    <li>
+      <a href="#" ng-click="revokeSelected()">
+        <span>Revoke {{selectedItems.length}} Device{{selectedItems.length > 1 ? "s" : ""}}</span>
+        <i class="icon-trash"></i>
+      </a>
+    </li>
+    <li>
+      <a href="#" ng-click="openTransferModal()">
+        <span>Transfer {{selectedItems.length}} Device{{selectedItems.length > 1 ? "s" : ""}}</span>
+        <i class="icon-present"></i>
+      </a>
+    </li>
+    <li>
+      <a href="#" ng-click="openConfigModal()">
+        <span>Push Configuration</span>
+        <i class="icon-cloud-upload"></i>
+      </a>
+    </li>
+    <li>
+      <a href="#" ng-click="selectedItems = []">
+        <span>Deselect All</span>
+        <i class="icon-close"></i>
+      </a>
+    </li>
+  </ul>
+  <span aria-hidden="true" class="quick-nav-bg"></span>
+</nav>
+<div class="quick-nav-overlay"></div>
+<!-- END QUICK NAV -->
+
+<!-- BEGIN DEVICES -->
+<div class="row" ng-if="$root.devices.length > 0">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <!-- BEGIN PORTLET-->
+    <div class="portlet light bordered ">
+      <div class="portlet-title">
+        <div class="caption caption-md">
+          <i class="icon-bulb font-red"></i>
+          <span class="caption-subject font-red bold uppercase">Devices</span>
+        </div>
+
+        <div class="actions" style="padding-bottom: 10px;">
+
+        </div>
+
+      </div>
+      <div class="portlet-body">
+        <div class="row" style="padding-left: 20px; padding-right: 20px;">
+          <div class="btn-group dropdown open pull-left" uib-dropdown="orderDropdown" style=" margin-right: 10px">
+            <button id="split-button-order" type="button" class="btn btn-default btn-xs" ng-click="list.reverse = !list.reverse"><small>ORDER BY</small> {{list.orderBy.alias}}</button>
+            <button type="button" class="btn btn-default dropdown-toggle btn-xs" uib-dropdown-toggle="orderDropdown" aria-haspopup="true" aria-expanded="true">
+              <span class="caret"></span>
+              <span class="sr-only">Select...</span>
+            </button>
+            <ul class="dropdown-menu" uib-dropdown-menu="orderDropdown" role="menu" aria-labelledby="split-button-order">
+              <li role="menuitem" ng-repeat="order in list.orderOptions">
+                <a href="javascript:;" ng-click="list.orderBy = order"><i class="fa fa-{{order.icon}}"></i> {{order.alias}}</a>
+              </li>
+            </ul>
+          </div>
+          <div class="btn-group dropdown open pull-left" uib-dropdown="groupDropdown">
+            <button id="split-button-group" type="button" class="btn btn-default btn-xs" ng-click="list.groupBy = list.groupOptions[0]"><small>GROUP BY</small> {{list.groupBy.alias}}</button>
+            <button type="button" class="btn btn-default dropdown-toggle btn-xs" uib-dropdown-toggle="groupDropdown" aria-haspopup="true" aria-expanded="true">
+              <span class="caret"></span>
+              <span class="sr-only">Select...</span>
+            </button>
+            <ul class="dropdown-menu" uib-dropdown-menu="groupDropdown" role="menu" aria-labelledby="split-button-group">
+              <li role="menuitem" ng-repeat="groupBy in list.groupOptions">
+                <a href="javascript:;" ng-click="list.groupBy = groupBy"><i class="fa fa-{{groupBy.icon}}"></i> {{groupBy.alias}}</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xs-12" style="margin: 18px 0px 0px 0px; padding-right: 20px; padding-left: 20px;">
+            <span class="input-icon left">
+              <i class="icon-magnifier"></i>
+              <input type="text" class="form-control form-control-solid" ng-model="list.searchText" placeholder="Search...">
+            </span>
+          </div>
+        </div>
+
+        <div class="row">
+          <!--  | orderBy:list.orderBy.prop:list.reverse track by device.udid -->
+          <div class="col-xs-12 device-simple-block"  ng-repeat="(key, devices) in $root.devices | propsFilter:{'alias':list.searchText, 'mac':list.searchText} | orderBy:list.orderBy.prop:list.reverse | groupBy:list.groupBy.prop"  ng-class="selectedItems.indexOf(device.udid) > -1 ? 'selected-block' : ''">
+            <!-- | propsFilter:{'alias':list.searchText, 'mac':list.searchText} | orderBy:list.orderBy.prop:list.reverse  -->
+            <div class="dash-group-delimiter"><span>{{key}}</span></div>
+            <div class="row">
+              <div ng-repeat="device in devices" class="col-xs-6 col-sm-4 col-md-4 col-lg-3">
+                <div class="device-alias">
+                  <span class="device-icon bg-{{device.category}}" style="zoom: .8">
+                    <a ui-sref="device({udid: device.udid})">
+                      <img ng-src="../assets/thinx/img/ioticons/b_medium_{{('0' + device.icon).slice(-2)}}.png" alt="Device Icon" class="device-icon-symbol" />
+                    </a>
+                  </span> {{device.alias | limitTo: 16}}{{device.alias.length > 16 ? '…' : ''}}
+                </div>
+                <div class="device-status-dash">
+                  <span ng-if="device.status == undefined || device.status == null || device.status.length <= '1'" class="opacity-50">Registered</span>
+                  {{device.status | removeControlChars | limitTo: 22}}{{device.status.length > 22 ? '…' : ''}}
+                  <i class="fa fa-warning fg-alert" ng-if="device.status.toLowerCase().indexOf('#e') > -1"></i>
+                  <i class="fa fa-warning fg-warning" ng-if="device.status.toLowerCase().indexOf('#w') > -1"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END PORTLET-->
+</div>
+</div>
+<!-- END DEVICES -->
+
+<!-- BEGIN JOURNEY -->
+<div class="row" ng-hide="$root.profile.info.goals.includes('lord')">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <!-- BEGIN PORTLET-->
+    <div class="portlet light bordered " style="background: none;">
+      <div class="portlet-title">
+        <div class="caption caption-md">
+          <i class="icon-trophy font-red"></i>
+          <span class="caption-subject font-red bold uppercase">Your Progress</span>
+        </div>
+      </div>
+      <div class="portlet-body">
+        <div class="row user-journey">
+          <div class="col-xs-3 text-center " ng-class="journeyClass('apikey')">
+            <i class="fa fa-circle"></i>
+            <div class="journay-title">PREPARE</div>
+          </div>
+          <div class="col-xs-3 text-center" ng-class="journeyClass('enroll')">
+            <span class="user-journey-bar1"></span>
+            <i class="fa fa-circle"></i>
+            <div class="journay-title">ENROLL</div>
+          </div>
+          <div class="col-xs-3 text-center" ng-class="journeyClass('build')">
+            <span class="user-journey-bar2"></span>
+            <i class="fa fa-circle"></i>
+            <div class="journay-title">BUILD</div>
+          </div>
+          <div class="col-xs-3 text-center" ng-class="journeyClass('update')">
+            <span class="user-journey-bar3"></span>
+            <i class="fa fa-circle"></i>
+            <div class="journay-title">UPDATE</div>
+          </div>
+        </div>
+        <div ng-show="$root.profile.info.goals.includes('update')" class="text-center">
+          <span class="progress-medal"></span>
+          <h2>Congratulations!</h2>
+          <p>You are The Lord of the THiNX</p>
+          <br>
+          <button class="btn green-haze btn-outline btn-lg" ng-click="$root.profile.info.goals.push('lord'); $emit('saveProfile');">Dismiss</button>
+          <br><br>
+        </div>
+      </div>
+    </div>
+    <!-- END PORTLET-->
+  </div>
+</div>
+<!-- END JOURNEY -->
+
+<!-- BEGIN MODAL TRANSFER -->
+<div id="transferModal" class="modal container fade" role="dialog" aria-hidden="true">
+  <div class="modal-dialog transfer-modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+        <h4 class="modal-title">Transfer Devices</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label class="control-label col-md-3">Transfer To</label>
+            <div class="col-md-9">
+              <input type="text" ng-model="transferForm.email" class="form-control" placeholder="Owner E-mail" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-md-3">Keep API Keys?</label>
+            <div class="col-md-9">
+              <input
+              bs-switch
+              ng-model="transferForm.mig_apikeys"
+              type="checkbox"
+              switch-size="tiny"
+              switch-on-text="Yes"
+              switch-on-color="primary"
+              switch-off-text="No"
+              switch-off-color="danger"
+              ng-true-value="true"
+              ng-false-value="false">
+            </div>
+          </div>
+          <div class="alert alert-warning" ng-if="!transferForm.mig_apikeys && isSharedKey()">
+            <strong>Warning!</strong> You are about to transfer API Key, that is shared across multiple devices.<br>
+            Generate dedicated keys before transfer to keep access to all your devices when transfer is completed.
+          </div>
+          <div class="form-group">
+            <label class="control-label col-md-3">Copy Sources?</label>
+            <div class="col-md-9">
+              <input
+              bs-switch
+              ng-model="transferForm.mig_sources"
+              type="checkbox"
+              switch-size="tiny"
+              switch-on-text="Yes"
+              switch-off-text="No"
+              ng-true-value="true"
+              ng-false-value="false">
+            </div>
+          </div>
+          <div class="alert alert-info" ng-if="transferForm.mig_sources">
+            Links to selected public or private repositories will be copied into target account.<br>
+            Access to private repositories has to be resolved by creating <b>deploy keys</b> in target account.
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" ng-disabled="transferForm.submitDisabled" ng-click="transferDevices()"><i class="fa fa-exchange"></i> Transfer</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- END MODAL TRANSFER -->
+
+<!-- BEGIN MODAL CONFIG -->
+<div id="configModal" class="modal container fade" role="dialog" aria-hidden="true">
+  <div class="modal-dialog config-modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+        <h4 class="modal-title">Push Configuration</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label class="control-label col-md-3 align-top">Target Devices</label>
+            <div class="col-md-9" style="padding-top: 8px">
+              <div ng-repeat="device in configForm.devices">
+
+                <span style="font-size: 1.2em">{{$root.getDeviceByUdid(device).alias}}</span>
+
+                <div class="device-mac-label font-{{$root.getDeviceByUdid(device).category}}">
+                  {{$root.getDeviceByUdid(device).mac}}
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-md-3 align-top">Environmental Variables</label>
+            <div class="col-md-9" style="padding-top: 8px">
+              <div ng-repeat="(key, value) in configForm.enviros" style="margin-bottom: 25px;">
+                <span style="font-size: 1.2em">{{key}}</span>
+                <div class="pull-right">
+                  <input
+                  bs-switch
+                  ng-model="configForm.enviros[key]"
+                  type="checkbox"
+                  switch-size="tiny"
+                  switch-on-text="<i class='fa fa-check'></i>"
+                  switch-on-value="true"
+                  switch-off-text="<i class='fa fa-ban'></i>"
+                  switch-off-value="false" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" ng-click="submitPushConfig()"><i class="icon-paper-plane"></i> Push Configuration</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- END MODAL TRANSFER -->
+
+<!-- START GOALS -->
+<div class="note note-info" ng-hide="$root.profile.info.goals.includes('apikey') || $root.profile.info.goals.includes('help-apikey')">
+  <h3>1. Create private API Key
+    <span class="close" data-close="note" ng-click="$root.profile.info.goals.push('apikey'); $emit('saveProfile');"></span>
+  </h3>
+  <img src="/assets/thinx/img/guide/apikey.png" class="guide-image" />
+  <p>
+    Go to Settings menu &raquo; <a ui-sref="apikey">API Keys</a> and push the <b>Create API Key</b> button to generate API Key for your new device.
+    <br><br>
+    <span class="badge badge-roundless badge-info">HINT</span> Don't forget to store the key in clipboard. Otherwise you will have to repeat this step.
+  </p>
+  </div>
+  <div class="note note-info" ng-hide="$root.profile.info.goals.includes('enroll') || $root.profile.info.goals.includes('help-enroll')">
+    <h3>2. Device Enrollment
+      <span class="close" data-close="note" ng-click="$root.profile.info.goals.push('help-enroll'); $emit('saveProfile');"></span>
+    </h3>
+    <img src="/assets/thinx/img/guide/paste.png" class="guide-image" />
+    <img src="/assets/thinx/img/guide/build.png" class="guide-image" />
+    <img src="/assets/thinx/img/guide/flash.png" class="guide-image" />
+    <p>
+      To start managing your first device you need to <b>flash it</b> with one of THiNX Vanilla Firmware's examples.
+      <br>Enroll your device by <b>pasting your API Key</b> into <b>thinx.h</b> file before flashing it or set it later when the device is in Access Point mode.
+      <br><br>
+      <span class="badge badge-roundless badge-info">HINT</span>
+      Find the right firmware at <a href="https://thinx.cloud/" target="_blank">THiNX Project Home</a> and flash it like you usually do using <a href="https://platformio.org/" target="_blank">PlatformIO</a>, <a href="https://www.arduino.cc" target="_blank">Arduino IDE</a> or <a href="https://github.com/espressif/esptool" target="_blank">Esptool</a>.
+    </p>
+  </div>
+  <div class="note note-info" ng-hide="$root.profile.info.goals.includes('enroll-setup') || $root.profile.info.goals.includes('help-enroll-setup')">
+    <h3>3. Device Setup
+      <span class="close" data-close="note" ng-click="$root.profile.info.goals.push('help-enroll-setup'); $emit('saveProfile');"></span>
+    </h3>
+    <img src="/assets/thinx/img/guide/iotdevice.png" class="guide-image" />
+    <p>
+      By default, the THiNX firmware will boot up into wifi Acces Point mode with essid <b>"THiNX-AP"</b>.
+      <br>Connect to device's wifi and wait few seconds for captive portal to pop up. Otherwise navigate to <b>192.168.4.1</b> in your browser.
+      <br>
+      Initial setup will help you to enter your SSID, password and API Key.
+      <br><br>
+      <span class="badge badge-roundless badge-info">HINT</span> Avoid this step completely by defining your <b>essid, password</b> and <b>API Key</b> in firmware header <b>thinx.h</b>.
+    </p>
+  </div>
+  <div class="note note-danger" ng-hide="$root.profile.info.goals.includes('deploykey') || $root.profile.info.goals.includes('help-deploykey')">
+    <h3>Security
+      <span class="close" data-close="note" ng-click="$root.profile.info.goals.push('help-deploykey'); $emit('saveProfile')"></span>
+    </h3>
+    <img src="/assets/thinx/img/guide/folderkey.png" class="guide-image" />
+    <p>Create your <b>Deploy Key</b> at <a ui-sref="deploykey">Deploy Key Management</a> to enable access to your private repositories.</p>
+  </div>
+  <div class="note note-success" ng-hide="$root.profile.info.goals.includes('update') || $root.profile.info.goals.includes('help-update')">
+    <h3>Well Done!
+      <span class="close" data-close="note" ng-click="$root.profile.info.goals.push('help-update'); $emit('saveProfile');"></span>
+    </h3>
+    <p>If everything went well, you can now see and control your device on <a ui-sref="dashboard">Dashboard</a> or <a ui-sref="devices">Devices panel</a>.</p>
+  </div>
+  <!-- END GOALS -->
+</div>
+<!-- END MAIN CONTENT -->
+
+<!-- START PAGE LOG OVERLAY -->
+<div ng-controller="LogviewController" class="log-view-overlay-conatiner" style="display:none">
+  <div class="log-view-overlay-controls">
+    <a ng-click="wsstailLog($root.modalBuildId)" title="Refresh status"><i class="icon-refresh"></i></a>
+    <a ng-click="switchWrap()" title="Toggle Word Wrap"><i class="icon-frame"></i></a>
+    <a ng-click="hideLogOverlay($root.modalBuildId)" title="Close Log"><i class="icon-close"></i></a>
+  </div>
+  <div class="log-view-overlay log-view-body force-word-wrap" scroll-glue>
+    <div class="overlay-title">Build Log <span>{{$root.modalBuildId}}</span></div>
+    {{$root.logdata[$root.modalBuildId]}}
+  </div>
+</div>
+<!-- END PAGE LOG OVERLAY -->
+
+<!-- BEGIN MAIN JS & CSS -->
+<script>
+// Dashboard.init();
+QuickNav.init();
+new Clipboard('.copy-btn');
+</script>
+<!-- END MAIN JS & CSS -->

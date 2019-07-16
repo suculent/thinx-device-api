@@ -1,0 +1,151 @@
+<!-- BEGIN PAGE BREADCRUMB -->
+<ul class="page-breadcrumb breadcrumb">
+  <li>
+    <a ui-sref="dashboard">Home</a>
+    <i class="fa fa-circle"></i>
+  </li>
+  <li class="active"> Environment Variables </li>
+</ul>
+<!-- END PAGE BREADCRUMB -->
+<!-- BEGIN MAIN CONTENT -->
+<div class="row">
+  <div class="col-md-12">
+
+    <div class="note note-info" ng-hide="$root.profile.info.goals.includes('enviro-info')">
+      <h3>Environment
+        <span class="close" data-close="note" ng-click="$root.profile.info.goals.push('enviro-info'); $emit('saveProfile');"></span>
+      </h3>
+      <p>
+        <b>Key-value based environment variables</b><br><br>
+        Strings, booleans and integers you define will be injected as variables to every source-code of the language you prefer using designated THiNX header or config file.<br><br>
+        You can use this to inject SSID and PASSWORD of your WiFi in case you don't want to store those in the GIT repository (e.g. in case where your repo is public).
+      </p>
+    </div>
+
+    <!-- BEGIN QUICK NAV -->
+    <nav class="quick-nav" ng-show="selectedItems.length > 0">
+      <a class="quick-nav-trigger" href="#">
+        <span aria-hidden="true"></span>
+      </a>
+      <ul>
+        <li>
+          <a href="#" ng-click="revokeEnviros()">
+            <span>Revoke {{selectedItems.length}} Item{{selectedItems.length > 1 ? "s" : ""}}</span>
+            <i class="icon-trash"></i>
+          </a>
+        </li>
+        <li>
+          <a href="#" ng-click="selectedItems = [];">
+            <span>Deselect All</span>
+            <i class="icon-close"></i>
+          </a>
+        </li>
+      </ul>
+      <span aria-hidden="true" class="quick-nav-bg"></span>
+    </nav>
+    <div class="quick-nav-overlay"></div>
+    <!-- END QUICK NAV -->
+
+    <div class="portlet light bordered">
+      <div class="portlet-title">
+        <div class="caption font-green-sharp">
+          <i class="icon-globe font-green-sharp"></i>
+          <span class="caption-subject bold uppercase">Environment Variables</span>
+          <span class="caption-helper hide"></span>
+        </div>
+        <div class="actions hide">
+          <a class="btn btn-circle btn-icon-only btn-default" href="#">
+            <i class="icon-cloud-upload"></i>
+          </a>
+          <a class="btn btn-circle btn-icon-only btn-default" href="#">
+            <i class="icon-wrench"></i>
+          </a>
+        </div>
+      </div>
+      <div class="portlet-body">
+        <div class="row">
+          <div class="col-xs-6">
+            <a href="#" class="btn green-haze btn-outline" ng-click="resetModal()" data-target="#pageModal" data-toggle="modal">Create Variable</a>
+            <div class="btn-group btn-actions hide">
+              <a ng-show="selectedItems.length > 0" class="btn red btn-outline" href="javascript:;" data-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-bars"></i> Actions
+                <i class="fa fa-angle-down"></i>
+              </a>
+              <ul class="dropdown-menu pull-left">
+                <li><a href="javascript:;" ng-click="revokeEnviros()"><i class="icon-trash"></i> Revoke selected</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-xs-6 text-right">
+            <span class="input-icon right xtop-list-search">
+              <i class="icon-magnifier"></i>
+              <input type="text" class="form-control form-control-solid" ng-model="searchText" placeholder="Search...">
+            </span>
+          </div>
+        </div>
+        <div class="table-scrollable table-scrollable-borderless">
+          <table class="table table-hover table-light">
+            <tr ng-repeat="enviro in $root.enviros | filter:searchText track by $index" ng-click="checkItem(enviro)" ng-class="selectedItems.indexOf(enviro) > -1 ? 'selected-row' : 'default-row'">
+              <td>
+                <div class="row-item-title">{{enviro}}</div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- BEGIN FORM-->
+  <form ng-submit="addEnviro()" class="form-horizontal form-bordered" name="enviroModal">
+    <div id="pageModal" class="modal fade" role="dialog" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+            <h4 class="modal-title">New Environment Value</h4>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="control-label col-md-3">Name</label>
+              <div class="col-md-9">
+                <input type="text" name="enviroName" ng-model="enviroName" class="form-control" placeholder="Variable Name" />
+              </div>
+            </div>
+            <div class="form-group last">
+              <label class="control-label col-md-3">Value</label>
+              <div class="col-md-9">
+                <textarea name="enviroValue" ng-model="enviroValue" class="form-control" placeholder="Enter value here...")></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" ng-click="addEnviro()" ng-disabled="(enviroName == null || enviroName.length < 1) || (enviroValue == null || enviroValue.length < 1)"><i class="fa fa-check"></i> Submit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+  <!-- END FORM-->
+</div>
+<!-- END MAIN CONTENT -->
+
+<!-- START PAGE LOG OVERLAY -->
+<div ng-controller="LogviewController" class="log-view-overlay-conatiner" style="display:none">
+  <div class="log-view-overlay-controls">
+    <a ng-click="wsstailLog($root.modalBuildId)" title="Refresh status"><i class="icon-refresh"></i></a>
+    <a ng-click="switchWrap()" title="Toggle Word Wrap"><i class="icon-frame"></i></a>
+    <a ng-click="hideLogOverlay($root.modalBuildId)" title="Close Log"><i class="icon-close"></i></a>
+  </div>
+  <div class="log-view-overlay log-view-body force-word-wrap" scroll-glue>
+    <div class="overlay-title">Build Log <span>{{$root.modalBuildId}}</span></div>
+    {{$root.logdata[$root.modalBuildId]}}
+  </div>
+</div>
+<!-- END PAGE LOG OVERLAY -->
+
+<!-- BEGIN MAIN JS-->
+<script>
+QuickNav.init();
+</script>
+<!-- BEGIN MAIN JS -->
