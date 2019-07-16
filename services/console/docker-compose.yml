@@ -1,0 +1,47 @@
+version: '2.2'
+
+networks:
+  nat:
+    external:
+      name: nat
+  internal:
+    external:
+      name: keyguru_internal
+
+services:
+
+  console:
+    env_file:
+      - .env
+    #image: suculent/thinx-console
+    build: ./src
+    networks:
+      - nat
+      - internal
+    ports:
+      - "80"
+    restart: always
+    environment:
+     - NGINX_PORT=80
+     - NGINX_HOST=${WEB_HOSTNAME}
+     - WEB_HOSTNAME=${WEB_HOSTNAME}
+     - API_HOSTNAME=${API_HOSTNAME}
+     - API_BASEURL=${API_BASEURL}
+     - ENTERPRISE=${ENTERPRISE}
+     - ENVIRONMENT=${ENVIRONMENT}
+     - GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID}
+     - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=80"
+      - "traefik.backend=console"
+      - "traefik.frontend.rule=Host:console.staging.thinx.cloud"
+      - "traefik.frontend.entryPoints=http,https"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.SSLForceHost=true"
+      - "traefik.frontend.headers.SSLHost=console.staging.thinx.cloud"
+#      - "traefik.frontend.headers.forceSTSHeader=true"
+#      - "traefik.frontend.headers.STSSeconds=315360000"
+#      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+#      - "traefik.frontend.headers.STSPreload=true"

@@ -1,0 +1,411 @@
+<!-- BEGIN PAGE BREADCRUMB -->
+<ul class="page-breadcrumb breadcrumb">
+  <li>
+    <a ui-sref="dashboard">Home</a>
+    <i class="fa fa-circle"></i>
+  </li>
+  <li class="active"> Devices</li>
+</ul>
+<!-- END PAGE BREADCRUMB -->
+<!-- BEGIN MAIN CONTENT -->
+<div>
+
+  <!-- BEGIN QUICK NAV -->
+  <nav class="quick-nav" ng-show="selectedItems.length > 0">
+    <a class="quick-nav-trigger" href="#">
+      <span aria-hidden="true"></span>
+    </a>
+    <ul>
+      <li>
+        <a href="#" ng-click="revokeSelected()">
+          <span>Revoke {{selectedItems.length}} Device{{selectedItems.length > 1 ? "s" : ""}}</span>
+          <i class="icon-trash"></i>
+        </a>
+      </li>
+      <li>
+        <a href="#" ng-click="openTransferModal()">
+          <span>Transfer {{selectedItems.length}} Device{{selectedItems.length > 1 ? "s" : ""}}</span>
+          <i class="icon-present"></i>
+        </a>
+      </li>
+      <li>
+        <a href="#" ng-click="openConfigModal()">
+          <span>Push Configuration</span>
+          <i class="icon-cloud-upload"></i>
+        </a>
+      </li>
+      <li>
+        <a href="#" ng-click="selectedItems = []">
+          <span>Deselect All</span>
+          <i class="icon-close"></i>
+        </a>
+      </li>
+    </ul>
+    <span aria-hidden="true" class="quick-nav-bg"></span>
+  </nav>
+  <div class="quick-nav-overlay"></div>
+  <!-- END QUICK NAV -->
+
+  <!-- NO DEVICES -->
+  <div class="row" ng-if="$root.devices.length < 1">
+    <div class="col-xs-12">
+      <div class="no-devices-text">
+        Welcome to THiNX IoT device management platform. Head over to the <a href="https://github.com/suculent/thinx-device-api/wiki" target="_blank">documentation</a> if you need help with registering your first device.
+      </div>
+    </div>
+  </div>
+  <!-- NO DEVICES -->
+
+  <!-- BEGIN DEVICES -->
+  <div class="row" ng-if="$root.devices.length > 0">
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+      <!-- BEGIN PORTLET-->
+      <div class="portlet light bordered ">
+        <div class="portlet-title">
+          <div class="caption caption-md">
+            <i class="icon-bulb font-red"></i>
+            <span class="caption-subject font-red bold uppercase">Devices</span>
+          </div>
+
+          <div class="actions">
+            <a href="#" ng-click="list.grid = true" class="btn btn-default" ng-class="{ 'active': list.grid }" title="Grid view">
+              <i class="fa fa-th"></i>
+            </a>
+            <a href="#" ng-click="list.grid = false" class="btn btn-default" ng-class="{ 'active': !list.grid }" title="List view">
+              <i class="fa fa-list-ul"></i>
+            </a>
+          </div>
+
+        </div>
+
+        <!-- list view  -->
+        <div class="portlet-body">
+          <div class="row" style="padding-left: 20px; padding-right: 20px;">
+
+            <div class="btn-group dropdown open pull-left" uib-dropdown="filterSelect" style="margin-right: 10px">
+              <button id="filter-split-button" type="button" class="btn btn-default btn-xs" ng-click="list.filterCategory = ''">
+                <small>CATEGORY </small>
+                <i class="fa fa-filter" ng-class="list.filterCategory.length > 0 ? 'font-' + list.filterCategory : ''"></i>
+                <span>{{list.filterCategory || 'All'}}</span>
+              </span>
+            </button>
+
+            <button type="button" class="btn btn-default dropdown-toggle btn-xs" uib-dropdown-toggle="filterSelect" aria-haspopup="true" aria-expanded="true">
+              <span class="caret"></span>
+              <span class="sr-only">Select...</span>
+            </button>
+
+            <ul class="dropdown-menu" uib-dropdown-menu="filterSelect" role="menu" aria-labelledby="filter-split-button">
+              <li role="menuitem" ng-repeat="category in $root.categories">
+                <i class="pull-left bg-{{category.name}} color-ribbon-vert"></i>
+                <a href="javascript:;" ng-click="list.filterCategory = category.name">{{category.name}}</a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="btn-group dropdown open pull-right" uib-dropdown="orderSelect">
+            <button id="order-split-button" type="button" class="btn btn-default btn-xs" ng-click="list.reverse = !list.reverse"><small>ORDER BY</small> {{list.orderBy.alias}}</button>
+            <button type="button" class="btn btn-default dropdown-toggle btn-xs" uib-dropdown-toggle="orderSelect" aria-haspopup="true" aria-expanded="true">
+              <span class="caret"></span>
+              <span class="sr-only">Select...</span>
+            </button>
+            <ul class="dropdown-menu" uib-dropdown-menu="orderSelect" role="menu" aria-labelledby="order-split-button">
+              <li role="menuitem" ng-repeat="order in list.orderOptions">
+                <a href="javascript:;" ng-click="list.orderBy = order"><i class="fa fa-{{order.icon}}"></i> {{order.alias}}</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xs-12" style="margin: 18px 0px 10px 0px; padding-right: 20px; padding-left: 20px;">
+            <span class="input-icon left">
+              <i class="icon-magnifier"></i>
+              <input type="text" class="form-control form-control-solid" ng-model="list.searchText" placeholder="Search...">
+            </span>
+          </div>
+        </div>
+
+        <!-- GRID VIEW Start -->
+        <div class="row" ng-if="list.grid">
+          <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 device-block"  ng-repeat="device in $root.devices | filter:{'category': list.filterCategory} | propsFilter:{'alias':list.searchText, 'mac':list.searchText} | orderBy:list.orderBy.prop:list.reverse track by device.udid"  ng-class="selectedItems.indexOf(device.udid) > -1 ? 'selected-block' : ''">
+            <div>
+              <div class="device-checkarea" ng-click="checkItem(device.udid)"></div>
+              <div class="device-lastseen-label">{{device.lastupdate | lastSeen:'false'}}</div>
+              <div class="device-alias">
+                <a ui-sref="device({udid: device.udid})">
+                  <span class="device-icon bg-{{device.category}}">
+                    <img ng-src="../assets/thinx/img/ioticons/b_medium_{{('0' + device.icon).slice(-2)}}.png" alt="Device Icon" class="device-icon-symbol" />
+                  </span></a> {{device.alias | limitTo: 16}}{{device.alias.length > 16 ? '…' : ''}}
+                </div>
+                <div class="device-mac-label"><span class="mac-label">MAC</span>{{device.mac}}</div>
+
+                <div class="device-status-dash">
+                  <i class="fa fa-heartbeat"></i>
+                  <span ng-if="device.status == undefined || device.status == null || device.status.length <= '1'" class="opacity-50">Registered</span>
+                  {{device.status | removeControlChars | limitTo: 22}}{{device.status.length > 22 ? '…' : ''}}
+                  <i class="fa fa-warning fg-alert" ng-if="device.status.toLowerCase().indexOf('#e') > -1"></i>
+                  <i class="fa fa-warning fg-warning" ng-if="device.status.toLowerCase().indexOf('#w') > -1"></i>
+                </div>
+
+
+                <div class="device-firmware">
+                  <small>{{device.firmware | limitTo: 35}}{{device.firmware.length > 35 ? '…' : ''}}</small>
+                </div>
+
+                <div ng-if="!$root.platforms[device.base_platform].build" class="device-firmware device-no-firmware"><i class="fa fa-cogs"></i> Vendor Firmware</div>
+
+                <div ng-if="hasSource(device)" class="device-firmware"><i class="fa fa-cogs"></i> {{$root.getSourceById(device.source).alias | limitTo: 26}}{{$root.getSourceById(device.source).alias.length > 26 ? '…' : ''}}</div>
+                <div ng-if="!hasSource(device) && $root.platforms[device.base_platform].build" class="device-firmware device-no-firmware"><i class="fa fa-cogs"></i> Source not attached</div>
+
+                <div class="device-block-control">
+                  <!-- non-buildable or no source -->
+                  <span ng-if="!$root.platforms[device.base_platform].build || !hasSource(device)" ng-disabled="true" class="btn btn-circle btn-icon-only" style="opacity: .3" title="No Source or Not Supported.">
+                    <i class="fa fa-ban"></i>
+                  </span>
+                  <!-- buildable with progress circle -->
+                  <span ng-if="$root.platforms[device.base_platform].build && hasSource(device)" ng-hide="hasBuildId(device.udid) == null">
+                    <a class="btn btn-circle btn-icon-only btn-default" href="#" ng-click="build(device.udid, device.source); $event.stopPropagation()" title="Build From Source">
+                      <i class="icomoon-hammer_icon"></i>
+                    </a>
+                  </span>
+                  <span ng-if="hasBuildId(device.udid) == null" ng-disabled="true" class="btn btn-circle">
+                    <i class="fa fa-spin fa-circle-o-notch"></i>
+                  </span>
+                  <!-- build running -->
+                  <span ng-if="hasBuildId(device.udid)">
+                    <a class="btn btn-circle btn-icon-only btn-default" ng-click="showDeviceLastBuild(device.udid, $event)" title="Open Build Log">
+                      <i class="fa fa-eye"></i>
+                    </a>
+                  </span>
+                  <!-- platform (all times) -->
+                  <span class="badge platform-badge {{device.base_platform}}-platform-color" title="Source Platform {{$root.platforms[device.base_platform].name}}">{{$root.platforms[device.base_platform].name}}</span>
+                  <!-- key attached -->
+                  <span ng-if="device.keyhash == null">
+                    <span title="No API Key assigned" class="api-key-indicator"><i class="fa fa-warning"></i></span>
+                  </span>
+                  <!-- device detail (all times, floats right) -->
+                  <a ui-sref="device({udid: device.udid})" style="float: right" class="btn btn-circle btn-icon-only btn-default" title="Device Settings">
+                    <i class="fa fa-pencil"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- GRID VIEW End -->
+
+          <!-- PANEL VIEW Start -->
+          <div class="row" ng-if="!list.grid">
+            <div class="col-xs-12 device-list-block"  ng-repeat="device in $root.devices | filter:{'category': list.filterCategory} | propsFilter:{'alias':list.searchText, 'mac':list.searchText} | orderBy:list.orderBy.prop:list.reverse track by device.udid"  ng-class="selectedItems.indexOf(device.udid) > -1 ? 'selected-block' : ''">
+              <div class="row">
+
+                <div class="col-xs-6 col-sm-3 col-md-3">
+                  <span class="device-mac-label" style="margin-right: 8px; font-family: monospace;"><i class="pull-left bg-{{device.category}} color-ribbon-mac"></i> {{device.mac}}</span>
+                </div>
+
+                <div class="col-xs-6 col-sm-5 col-md-5">
+                  <!-- platform (all times) -->
+                  <img ng-src="../assets/thinx/img/external/{{device.base_platform}}_logo_64_black.png" class="platform-icon-list" style="" />
+                  {{device.alias | limitTo: 32}}{{device.alias.length > 32 ? '…' : ''}}
+                </div>
+                <div class="col-xs-6 col-sm-4 col-md-4 text-right">
+
+                  <!-- key attached -->
+                  <span ng-if="device.keyhash == null">
+                    <span title="No API Key assigned" class="api-key-indicator"><i class="fa fa-warning"></i></span>
+                  </span>
+
+                  <!-- <div class="device-checkarea" ng-click="checkItem(device.udid)"></div> -->
+                  <div class="device-lastseen-label">{{device.lastupdate | date:'yyyy-MM-dd'}}</div>
+
+                  <div class="btn-group dropdown open" uib-dropdown="actionButton">
+                    <button id="action-split-button" type="button" class="btn btn-default btn-xs" ui-sref="device({udid: device.udid})">
+                      <i class="fa fa-pencil"></i> <small>Edit</small>
+                    </button>
+                    <button type="button" class="btn btn-default dropdown-toggle btn-xs" uib-dropdown-toggle="actionButton" aria-haspopup="true" aria-expanded="true">
+                      <span class="caret"></span>
+                      <span class="sr-only">Select...</span>
+                    </button>
+                    <ul class="dropdown-menu" uib-dropdown-menu="actionButton" role="menu" aria-labelledby="action-split-button">
+                      <li role="menuitem">
+                        <!-- non-buildable or no source -->
+                        <span ng-if="!$root.platforms[device.base_platform].build || !hasSource(device)" ng-disabled="true" style="opacity: .3" title="No Source or Not Supported.">
+                          <i class="fa fa-ban"></i> No Source
+                        </span>
+                        <!-- buildable with progress circle -->
+                        <span ng-if="$root.platforms[device.base_platform].build && hasSource(device)" ng-hide="hasBuildId(device.udid) == null">
+                          <a href="#"  ng-click="build(device.udid, device.source); $event.stopPropagation()" title="Build From Source">
+                            <i class="icomoon-hammer_icon"></i> Run build
+                          </a>
+                        </span>
+                        <span ng-if="hasBuildId(device.udid) == null" ng-disabled="true">
+                          <i class="fa fa-spin fa-circle-o-notch"></i>
+                        </span>
+                      </li>
+                      <li role="menuitem">
+                        <!-- build running -->
+                        <span ng-if="hasBuildId(device.udid)">
+                          <a ng-click="showDeviceLastBuild(device.udid, $event)" title="Open Build Log">
+                            <i class="fa fa-eye"></i> Show log
+                          </a>
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- PANEL VIEW End -->
+
+        </div>
+      </div>
+      <!-- END PORTLET-->
+    </div>
+  </div>
+  <!-- END DEVICES -->
+
+  <!-- BEGIN MODAL TRANSFER -->
+  <div id="transferModal" class="modal container fade" role="dialog" aria-hidden="true">
+    <div class="modal-dialog transfer-modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+          <h4 class="modal-title">Transfer Devices</h4>
+        </div>
+        <div class="modal-body">
+          <form class="form-horizontal">
+            <div class="form-group">
+              <label class="control-label col-md-3">Transfer To</label>
+              <div class="col-md-9">
+                <input type="text" ng-model="transferForm.email" name="transferEmail" class="form-control" placeholder="Owner E-mail" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label col-md-3">Keep API Keys?</label>
+              <div class="col-md-9">
+                <input
+                bs-switch
+                ng-model="transferForm.mig_apikeys"
+                type="checkbox"
+                switch-size="tiny"
+                switch-on-text="Yes"
+                switch-on-color="primary"
+                switch-off-text="No"
+                switch-off-color="danger"
+                ng-true-value="true"
+                ng-false-value="false">
+              </div>
+            </div>
+            <div class="alert alert-warning" ng-if="!transferForm.mig_apikeys && isSharedKey()">
+              <strong>Warning!</strong> You are about to transfer API Key, that is shared across multiple devices.<br>
+              Generate dedicated keys before transfer to keep access to all your devices when transfer is completed.
+            </div>
+            <div class="form-group">
+              <label class="control-label col-md-3">Copy Sources?</label>
+              <div class="col-md-9">
+                <input
+                bs-switch
+                ng-model="transferForm.mig_sources"
+                type="checkbox"
+                switch-size="tiny"
+                switch-on-text="Yes"
+                switch-off-text="No"
+                ng-true-value="true"
+                ng-false-value="false">
+              </div>
+            </div>
+            <div class="alert alert-info" ng-if="transferForm.mig_sources">
+              Links to selected public or private repositories will be copied into target account.<br>
+              Access to private repositories has to be resolved by adding <b>valid RSA Key to target account</b>.
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" ng-disabled="transferForm.submitDisabled" ng-click="transferDevices()"><i class="fa fa-exchange"></i> Transfer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END MODAL TRANSFER -->
+
+  <!-- BEGIN MODAL CONFIG -->
+  <div id="configModal" class="modal container fade" role="dialog" aria-hidden="true">
+    <div class="modal-dialog config-modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+          <h4 class="modal-title">Push Configuration</h4>
+        </div>
+        <div class="modal-body">
+          <form class="form-horizontal">
+            <div class="form-group">
+              <label class="control-label col-md-3 align-top">Target Devices</label>
+              <div class="col-md-9" style="padding-top: 8px">
+                <div ng-repeat="device in configForm.devices">
+
+                  <span style="font-size: 1.2em">{{$root.getDeviceByUdid(device).alias}}</span>
+
+                  <div class="device-mac-label font-{{$root.getDeviceByUdid(device).category}}">
+                    {{$root.getDeviceByUdid(device).mac}}
+                  </div>
+
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label col-md-3 align-top">Environmental Variables</label>
+              <div class="col-md-9" style="padding-top: 8px">
+                <div ng-repeat="(key, value) in configForm.enviros" style="margin-bottom: 25px;">
+                  <span style="font-size: 1.2em">{{key}}</span>
+                  <div class="pull-right">
+                    <input
+                    bs-switch
+                    ng-model="configForm.enviros[key]"
+                    type="checkbox"
+                    switch-size="tiny"
+                    switch-on-text="<i class='fa fa-check'></i>"
+                    switch-on-value="true"
+                    switch-off-text="<i class='fa fa-ban'></i>"
+                    switch-off-value="false" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" ng-click="submitPushConfig()"><i class="icon-paper-plane"></i> Push Configuration</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END MODAL TRANSFER -->
+
+</div>
+<!-- END MAIN CONTENT -->
+
+<!-- START PAGE LOG OVERLAY -->
+<div ng-controller="LogviewController" class="log-view-overlay-conatiner" style="display:none">
+  <div class="log-view-overlay-controls">
+    <a ng-click="wsstailLog($root.modalBuildId)" title="Refresh status"><i class="icon-refresh"></i></a>
+    <a ng-click="switchWrap()" title="Toggle Word Wrap"><i class="icon-frame"></i></a>
+    <a ng-click="hideLogOverlay($root.modalBuildId)" title="Close Log"><i class="icon-close"></i></a>
+  </div>
+  <div class="log-view-overlay log-view-body force-word-wrap" scroll-glue>
+    <div class="overlay-title">Build Log <span>{{$root.modalBuildId}}</span></div>
+    {{$root.logdata[$root.modalBuildId]}}
+  </div>
+</div>
+<!-- END PAGE LOG OVERLAY -->
+
+<!-- BEGIN MAIN JS & CSS -->
+<script>
+QuickNav.init();
+new Clipboard('.copy-btn');
+</script>
+<!-- BEGIN MAIN JS & CSS

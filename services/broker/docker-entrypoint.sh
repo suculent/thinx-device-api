@@ -23,9 +23,7 @@ echo "Starting MQTT broker..."
 
 mosquitto -d -v -c /mqtt/config/mosquitto.conf
 
-sleep 1
-
 ps -ax | grep mosquitto
 
 # Run forever so the container does not die...
-tail -f /dev/null
+sleep infinity

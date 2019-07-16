@@ -31,6 +31,9 @@ RUN echo ${THINX_OWNER_EMAIL}
 ENV REVISION=${REVISION}
 RUN echo ${REVISION}
 
+ARG AQUA_SEC_TOKEN
+ENV AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}
+
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
 
@@ -110,8 +113,11 @@ EXPOSE 9002
 
 # this should be generated/overwritten with sed on entrypoint, entrypoint needs /.first_run file and all ENV_VARS
 COPY ./.thinx_env.dist /.thinx_env
-COPY ./conf/.thx_prefix ./conf/.thx_prefix
-COPY ./conf/.thx_prefix /conf/.thx_prefix
+#COPY ./conf/.thx_prefix ./conf/.thx_prefix
+
+ADD https://get.aquasec.com/microscanner .
+RUN chmod +x microscanner
+RUN ./microscanner ${AQUA_SEC_TOKEN} --continue-on-failure
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 ENTRYPOINT [ "/docker-entrypoint.sh" ]

@@ -1,0 +1,64 @@
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet light">
+            <div class="portlet-title tabbable-line">
+                <div class="caption caption-md">
+                    <i class="icon-globe theme-font hide"></i>
+                    <span class="caption-subject font-blue-madison bold uppercase">Help</span>
+                </div>
+                <ul class="nav nav-tabs">
+                    <li class="active">
+                        <a href="#" data-target="#tab_1_1" data-toggle="tab">Slack</a>
+                    </li>
+                    <!-- <li> -->
+                        <!-- <a href="#" data-target="#tab_1_2" data-toggle="tab">General Question</a> -->
+                    <!-- </li> -->
+                    <!-- <li> -->
+                        <!-- <a href="#" data-target="#tab_1_3" data-toggle="tab">Terms Of Use</a> -->
+                    <!-- </li> -->
+                </ul>
+            </div>
+            <div class="portlet-body">
+                <div class="tab-content">
+                  <!-- GENERAL QUESTION TAB -->
+                  <div class="tab-pane active" id="tab_1_1">
+                      <a href="https://slack.com/oauth/authorize?client_id=233115403974.233317554391&scope=bot&state=Online&redirect_uri=<ENV::baseUrl>/slack/redirect" class="btn default" ><i class="fa fa-slack"></i> Add Slack </a>
+                  </div>
+                  <!-- END GENERAL QUESTION TAB -->
+                    <!-- GENERAL QUESTION TAB -->
+                    <div class="tab-pane" id="tab_1_2">
+                        <div id="accordion1" class="panel-group">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion1" href="#" data-target="#accordion1_1">
+                                          Something is wrong?
+                                        </a>
+                                    </h4>
+                                </div>
+                                <div id="accordion1_1" class="panel-collapse collapse in">
+                                    <div class="panel-body">
+
+                                      <form role="form" ng-submit="submitSystemMessageForm()">
+                                          <div class="form-group">
+                                              <label class="control-label">Message</label>
+                                              <input type="text" placeholder="Help me..." class="form-control" ng-model="messageForm.text"/>
+                                          </div>
+
+                                          <div class="margin-top-10">
+                                              <a href="#" ng-click="submitSystemMessageForm()" class="btn green-haze">Submit </a>
+                                              <a href="#" class="btn default" ng-click="message.text = null">Cancel </a>
+                                          </div>
+                                      </form>
+
+                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END GENERAL QUESTION TAB -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

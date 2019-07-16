@@ -1,12 +1,19 @@
+# Docker Container Scanners
+clair-scanner
+clair.log
+aqua.sh
+
+# Environment and data
+.env
+.thinx_env
+.thx_prefix
 environment.json
 rollbar.json
 backup.rdb
-.thinx_env
-.thx_prefix
-builder.thinx.dist.json
-.env
+builder.thinx.json
+
+# Tests
 lcov.info
-package-lock.json
 
 # Sqreen.io configuration
 sqreen.json

@@ -25,4 +25,3 @@
 [submodule "tools/mongoose-docker-build"]
 	path = tools/mongoose-docker-build
 	url = https://github.com/suculent/mongoose-docker-build
-

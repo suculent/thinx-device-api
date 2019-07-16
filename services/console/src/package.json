@@ -1,0 +1,67 @@
+{
+  "name": "thinx-console",
+  "version": "1.0.0",
+  "description": "THiNX Console",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "protractor test/conf.js",
+    "coverage": "npm test; nyc report --reporter=text-lcov | coveralls",
+    "build": "./node_modules/.bin/gulp build",
+    "buildAll": "./node_modules/.bin/gulp buildPublic buildApp",
+    "lint": "./node_modules/.bin/eslint --ignore-path .eslintignore ./"
+  },
+  "author": "Mikulas Sychra @ THiNX Cloud",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/suculent/thinx-console.git"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "qs": "6.0.4",
+    "minimatch": "3.0.2",
+    "negotiator": "0.6.1"
+  },
+  "devDependencies": {
+    "coveralls": "^3.0.5",
+    "eslint": "^6.0.1",
+    "eslint-config-angular": "^0.5.0",
+    "eslint-config-jquery": "^2.0.0",
+    "eslint-plugin-angular": "^4.0.1",
+    "eslint-plugin-jquery": "^1.5.1",
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-connect": "^5.7.0",
+    "gulp-debug": "^4.0.0",
+    "gulp-ignore": "^2.0.1",
+    "gulp-inject-envs": "^1.1.0",
+    "gulp-minify-css": "^1.2.1",
+    "gulp-noop": "^1.0.0",
+    "gulp-prettify": "^0.5.0",
+    "gulp-remove-code": "^3.0.4",
+    "gulp-rename": "^1.4.0",
+    "gulp-rtlcss": "^0.1.4",
+    "gulp-sass": "^2.0.4",
+    "gulp-sourcemaps": "^1.5.2",
+    "gulp-uglify-es": "^1.0.4",
+    "gulp-util": "^3.0.8",
+    "merge-stream": "^2.0.0",
+    "nyc": "^14.1.1",
+    "protractor": "^5.3.0"
+  },
+  "nyc": {
+    "check-coverage": true,
+    "include": [
+      "html/app/**/*.js"
+    ],
+    "exclude": [
+      "test/**/*.spec.js"
+    ],
+    "reporter": [
+      "lcov",
+      "text-summary"
+    ],
+    "cache": true,
+    "all": true,
+    "report-dir": "./coverage"
+  }
+}

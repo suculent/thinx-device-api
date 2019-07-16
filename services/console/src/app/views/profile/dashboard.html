@@ -1,0 +1,330 @@
+<div class="row">
+  <div class="col-md-12">
+    <!-- PORTLET MAIN -->
+    <div class="portlet light">
+      <div class="portlet-title ">
+        <div class="caption caption-md">
+          <i class="icon-globe theme-font hide"></i>
+          <span class="caption-subject font-blue-madison bold uppercase">Profile</span>
+        </div>
+      </div>
+      <div class="portlet-body">
+        <div>
+          <div>
+            Name
+            <h3 style="margin-top: 0px;">
+              {{$root.profile.info.first_name}} {{$root.profile.info.last_name}}
+            </h3>
+          </div>
+          <div ng-if="$root.profile.username != $root.profile.owner">
+            Username
+            <h3 style="margin-top: 0px;">
+              {{$root.profile.username}}
+            </h3>
+          </div>
+          <div>
+            Owner ID<br>
+            <div class="input-group">
+              <input type="text" id="owner" class="form-control" ng-value="$root.profile.owner" ng-readonly="true" style="font-family: monospace;" />
+              <span class="input-group-btn">
+                <button type="button" ng-click="copyToClipboard($root.profile.owner)" class="btn btn-default copy-btn" data-clipboard-target="#owner"><span class="fa fa-clipboard"></span></button>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- PORTLET ACHIEVEMENTS -->
+    <div class="portlet light">
+      <div class="portlet-title ">
+        <div class="caption caption-md">
+          <i class="icon-globe theme-font hide"></i>
+          <span class="caption-subject font-blue-madison bold uppercase">Stats</span>
+        </div>
+      </div>
+      <div class="portlet-body">
+        <!-- STAT -->
+        <div class="row list-separated profile-stat">
+          <div class="col-md-4 col-sm-4 col-xs-6">
+            <div class="uppercase profile-stat-title"> {{$root.devices.length}} </div>
+            <div class="uppercase profile-stat-text"> Devices </div>
+          </div>
+          <div class="col-md-4 col-sm-4 col-xs-6">
+            <div class="uppercase profile-stat-title"> {{$root.sources.length}} </div>
+            <div class="uppercase profile-stat-text"> Sources </div>
+          </div>
+          <div class="col-md-4 col-sm-4 col-xs-6">
+            <div class="uppercase profile-stat-title"> {{$root.apikeys.length}} </div>
+            <div class="uppercase profile-stat-text"> Apikeys </div>
+          </div>
+        </div>
+        <!-- END STAT -->
+        <!-- GOALS -->
+        <div class="row list-separated profile-stat">
+          <div class="col-md-4 col-sm-4 col-xs-6">
+            <div ng-if="$root.profile.info.goals.includes('update')" class="text-center">
+              <span class="goal-badge lott-badge"></span>
+              <div class="uppercase profile-stat-text">Lord of the THiNX</div>
+            </div>
+            <div ng-if="!$root.profile.info.goals.includes('update')" class="text-center">
+              <span class="goal-badge locked-badge"></span>
+              <div class="uppercase profile-stat-text">Locked</div>
+              <div class="uppercase profile-stat-sub">Lord of the THiNX</div>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-4 col-xs-6">
+            <div ng-if="$root.profile.info.goals.includes('tester')" class="text-center">
+              <span class="goal-badge tester-badge"></span>
+              <div class="uppercase profile-stat-text">Beta Tester</div>
+            </div>
+            <div ng-if="!$root.profile.info.goals.includes('tester')" class="text-center">
+              <span class="goal-badge locked-badge"></span>
+              <div class="uppercase profile-stat-text">Locked</div>
+              <div class="uppercase profile-stat-sub">Beta Tester</div>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-4 col-xs-6">
+            <div ng-if="$root.profile.info.goals.includes('contributor')" class="text-center">
+              <span class="goal-badge contributor-badge"></span>
+              <div class="uppercase profile-stat-text">Contributor</div>
+            </div>
+            <div ng-if="!$root.profile.info.goals.includes('contributor')" class="text-center">
+              <span class="goal-badge locked-badge"></span>
+              <div class="uppercase profile-stat-text">Locked</div>
+              <div class="uppercase profile-stat-sub">Contributor</div>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-4 col-xs-6">
+            <div ng-if="$root.profile.info.goals.includes('early')" class="text-center">
+              <span class="goal-badge early-badge"></span>
+              <div class="uppercase profile-stat-text">Early Adopter</div>
+            </div>
+            <div ng-if="!$root.profile.info.goals.includes('early')" class="text-center">
+              <span class="goal-badge locked-badge"></span>
+              <div class="uppercase profile-stat-text">Locked</div>
+              <div class="uppercase profile-stat-sub">Early Adopter</div>
+            </div>
+          </div>
+        </div>
+        <!-- END GOALS -->
+      </div>
+    </div>
+    <!-- END PORTLET ACHIEVEMENTS -->
+
+    <!-- PORTLET LICENCE -->
+    <div class="portlet light">
+      <div class="portlet-title ">
+        <div class="caption caption-md">
+          <i class="icon-globe theme-font hide"></i>
+          <span class="caption-subject font-blue-madison bold uppercase">Open beta license</span>
+        </div>
+      </div>
+      <div class="portlet-body">
+        <div>
+          <!-- <h4 class="profile-desc-title">THiNX Cloud Project Home</h4> -->
+          <span class="profile-desc-text"> At this point nothing is guaranteed, except for that we don’t store your password, only first name, last name and e-mail.</span>
+          <div class="margin-top-20 profile-desc-link">
+            <i class="fa fa-globe"></i>
+            <a href="https://thinx.cloud">THiNX Cloud Project Home</a>
+          </div>
+          <div class="margin-top-20 profile-desc-link">
+            <i class="fa fa-twitter"></i>
+            <a href="https://www.twitter.com/thinxcloud">@THiNXCloud</a>
+          </div>
+          <div class="margin-top-20 profile-desc-link">
+            <i class="fa fa-facebook"></i>
+            <a href="https://www.facebook.com/thinx.cloud">THiNX.Cloud</a>
+          </div>
+          <br>
+
+          <img src="../assets/thinx/img/logo_black_200.png" alt="THiNX Cloud Logo" style="width: 100px; margin-left: -10px; opacity: .6">
+
+          <h4 class="profile-desc-title">Remote THiNX Management Console</h4>
+          <span class="profile-desc-text"> Version {{$root.meta.version.ui}}</span>
+        </div>
+      </div>
+    </div>
+    <!-- END PORTLET LICENC -->
+
+    <!-- PORTLET NEWS -->
+    <div class="portlet light">
+      <div class="portlet-title ">
+        <div class="caption caption-md">
+          <i class="icon-globe theme-font hide"></i>
+          <span class="caption-subject font-blue-madison bold uppercase">What's New</span>
+        </div>
+      </div>
+      <div class="portlet-body">
+        <h3>1.0.0 <span class="changelog-date">03-07-2019</span></h3>
+        <ul>
+          <li>Dockerization, packaging (disabled) and other enterprise-like stuff </li>
+          <li>Fixed API build issues</li>
+          <li>Minor fixes</li>
+        </ul>
+        <h3>0.9.21 <span class="changelog-date">03-06-2019</span></h3>
+        <ul>
+          <li>Changed device platform format to more detailed "platform:mcu" (should be backward compatible)</li>
+          <li>UI fixes</li>
+        </ul>
+        <h3>0.9.20 <span class="changelog-date">08-04-2019</span></h3>
+        <ul>
+          <li>Updated device timezone controls</li>
+          <li>Disabled build for devices without apikey</li>
+          <li>Minor UI twaeaks</li>
+          <li>Build module updates</li>
+        </ul>
+        <h3>0.9.19 <span class="changelog-date">31-05-2018</span></h3>
+        <ul>
+          <li>Added user level timezone support (experimental)</li>
+          <li>Added device level timezone support (experimental)</li>
+          <li>Reduced log events</li>
+        </ul>
+        <h3>0.9.18 <span class="changelog-date">25-05-2018</span></h3>
+        <ul>
+          <li>Updated Privacy Policy according to GDPR</li>
+          <li>Fixed missing links</li>
+          <li>Removed unnecessary files</li>
+        </ul>
+        <h3>0.9.17 <span class="changelog-date">19-05-2018</span></h3>
+        <ul>
+          <li>Fixed header on small screens</li>
+          <li>Fixed build button issues</li>
+          <li>Fixed blank-user UI issues</li>
+          <li>Minor UI updates</li>
+        </ul>
+        <h3>0.9.16 <span class="changelog-date">04-05-2018</span></h3>
+        <ul>
+          <li>Updated transformer ui elements</li>
+          <li>Refactored device build status indication</li>
+          <li>New transformer default template</li>
+        </ul>
+        <h3>0.9.15 <span class="changelog-date">26-04-2018</span></h3>
+        <ul>
+          <li>Enabled chart on mobile layout</li>
+          <li>Fixed API no key warning messages</li>
+          <li>Added Status Transformer Overlay Editor (experimental)</li>
+          <li>Implemented overlay Transformer Editor into device detail</li>
+        </ul>
+        <h3>0.9.14 <span class="changelog-date">24-04-2018</span></h3>
+        <ul>
+          <li>Updated modal's input autofocus</li>
+          <li>Updated device list layout, fixed grid switch</li>
+          <li>Prevented multiple submits os source form</li>
+        </ul>
+        <h3>0.9.13 <span class="changelog-date">19-04-2018</span></h3>
+        <ul>
+          <li>Updated dashboard hints & fixed links</li>
+          <li>Updated header build info panel's layout</li>
+          <li>Added matching device list for attached sources</li>
+          <li>Added progress indicator when attaching sources</li>
+          <li>Added shortcuts from device detail to sources & apikeys</li>
+          <li>Added basic transformer management panel</li>
+        </ul>
+        <h3>0.9.12 <span class="changelog-date">13-04-2018</span></h3>
+        <ul>
+          <li>Reworked key management for private repos - RSA Keys are now Deploy Keys!</li>
+          <li>Updated tutorial info and descriptions</li>
+          <li>Resized dashboard clickable areas</li>
+          <li>Set Auditlog as default panel in History</li>
+          <li>Updated grid layout</li>
+        </ul>
+        <h3>0.9.11 <span class="changelog-date">03-04-2018</span></h3>
+        <ul>
+          <li>Added MAC into detail view</li>
+          <li>Added copy-to-clipboard feature for MAC & owner</li>
+          <li>Added version indicator</li>
+          <li>Updated dropdown menu layout</li>
+        </ul>
+        <h3>0.9.10 <span class="changelog-date">25-03-2018</span></h3>
+        <ul>
+          <li>Added new icons</li>
+          <li>Introducing dockerized tansformers</li>
+          <li>Updated tests to match UI changes</li>
+          <li>Fixed UI update on device revoke</li>
+        </ul>
+        <h3>0.9.9 <span class="changelog-date">13-03-2018</span></h3>
+        <ul>
+          <li>Added GDPR Consent Page</li>
+          <li>Added option to download user data</li>
+          <li>Added Early Adopter role</li>
+          <li>Added placeholders</li>
+          <li>Fixed login issues</li>
+          <li>Fixed Status-Transformer indicators</li>
+          <li>Disabled experimental goals control</li>
+        </ul>
+        <h3>0.9.8 <span class="changelog-date">23-02-2018</span></h3>
+        <ul>
+          <li>Moved device management to separate panel</li>
+          <li>Added Dashboard Summary</li>
+          <li>Added gruping dashboard device panel</li>
+          <li>Added dashboard activity timeline</li>
+          <li>Added iot icon expansion pack</li>
+          <li>Added Auditlog parser (experimental)</li>
+          <li>Added Dashboard Chart</li>
+          <li>Fixed History search</li>
+          <li>Updated Dashboard layout</li>
+        </ul>
+        <h3>0.9.7 <span class="changelog-date">25-03-2018</span></h3>
+        <ul>
+          <li>Added Build Hisory to Device detail</li>
+          <li>Added custom iconset with hammer icon as "build"</li>
+          <li>Added ability to download build artifacts as ZIP</li>
+          <li>Added attached device badges to Apikey list</li>
+          <li>Optimised login layout for small screens</li>
+          <li>Added device filter by category</li>
+        </ul>
+        <h3>0.9.6 <span class="changelog-date">27-11-2017</span></h3>
+        <ul>
+          <li>Added Transformers</li>
+          <li>Added Transformer highlighted editor</li>
+          <li>Optimized Profile updates</li>
+          <li>Added commit_id to device detail</li>
+          <li>Enabled Transformer management</li>
+          <li>Extended builder notification system</li>
+          <li>Basic build progress indication (notifications & ui elements)</li>
+        </ul>
+        <h3>0.9.4 <span class="changelog-date">06-11-2017</span></h3>
+        <ul>
+          <li>Added Status field to device detail &amp; dashboard</li>
+          <li>Added decorators to Status fields</li>
+          <li>Added Last Seen info to device detail</li>
+          <li>Implemented interactive floating action controls</li>
+        </ul>
+        <h3>0.9.3 <span class="changelog-date">03-11-2017</span></h3>
+        <ul>
+          <li>Added "Login with Google" feature</li>
+          <li>Added Device Transfer support</li>
+          <li>Updated Font Awesome and Simple Line Icons</li>
+        </ul>
+        <h3>0.9.2 <span class="changelog-date">31-10-2017</span></h3>
+        <ul>
+          <li>Added google static map to device detail (require "lat", "lon")<br><i>Not supported by THiNXLib yet</i></li>
+          <li>Fixed login issues</li>
+          <li>Added SNR indicator to device detail (require "rssi", "snr")</li>
+          <li>Added Telemetry data to device detail</li>
+          <li>Updated device detail layout</li>
+          <li>Added "What is New" block to user profile</li>
+        </ul>
+        <h3>0.9.1 <span class="changelog-date">22-09-2017</span></h3>
+        <ul>
+          <li>Updated stats calculations</li>
+          <li>Added sparkline indicators to dashboard stats</li>
+          <li>Major &amp; Minor bugfixes</li>
+          <li>Sigfox support</li>
+        </ul>
+        <h3>0.9.0 <span class="changelog-date">01-09-2017</span></h3>
+        <ul>
+          <li>Initial Beta release</li>
+        </ul>
+      </div>
+    </div>
+    <!-- END PORTLET ACHIEVEMENTS -->
+  </div>
+</div>
+
+<!-- BEGIN MAIN JS-->
+<script>
+Profile.init(); // init page demo
+new Clipboard('.copy-btn');
+</script>
+<!-- BEGIN MAIN JS -->

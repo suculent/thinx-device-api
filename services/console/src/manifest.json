@@ -1,0 +1,14 @@
+{
+  "name": "THiNX Console",
+  "short_name": "thinx-console",
+  "icons": [{
+    "src": "assets/thinx/img/logo_white_200.png",
+    "sizes": "200x200",
+    "type": "image/png",
+    "density": 2
+  }],
+  "scope": "/",
+  "start_url": "/index.html",
+  "display": "fullscreen",
+  "orientation": "landscape"
+}
