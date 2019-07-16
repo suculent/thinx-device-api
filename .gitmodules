@@ -26,3 +26,6 @@
 	path = tools/mongoose-docker-build
 	url = https://github.com/suculent/mongoose-docker-build
 
+[submodule "services/thinx-console"]
+	path = services/thinx-console
+	url = http://github.com/suculent/thinx-connect.git
