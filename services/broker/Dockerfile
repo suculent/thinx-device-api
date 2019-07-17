@@ -21,7 +21,7 @@ RUN echo "mosquitto" >> /etc/incron.allow && \
 RUN chown root:incron /var/spool/incron/root && \
     incrontab -l
 
-RUN crontab mosquitto /reload-cron
+RUN crontab /reload-cron
 
 EXPOSE 1883 8883 9001
 
