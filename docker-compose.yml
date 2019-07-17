@@ -40,7 +40,7 @@ services:
       - COUCHDB_COOKIE=${COUCHDB_COOKIE}
       - COUCHDB_SECRET=${COUCHDB_SECRET}
     ports:
-      - 5984:5984 # shield this with Firewall for Administrative IP range only!
+      - 5984
     networks:
       - nat
       - internal
@@ -64,11 +64,11 @@ services:
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}", "--port", "6379"]
     environment:
       - ALLOW_EMPTY_PASSWORD=no
-#      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
     restart: always
     ports:
-      - 6379:6379
+      - 6379
     volumes:
       - /mnt/data/redis:/data
     labels:
@@ -82,6 +82,9 @@ services:
       args:
         - SQREEN_APP_NAME=${SQREEN_APP_NAME}
         - SQREEN_TOKEN=${SQREEN_TOKEN}
+        - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
+        - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
+
     restart: always
     environment:
       - SQREEN_APP_NAME=${SQREEN_APP_NAME}
@@ -93,12 +96,11 @@ services:
     labels:
      - "traefik.backend.transformer.noexpose"
 
-  thinx-api:
+  api:
     # because of DIND builders
     privileged: true
     # reserve enough for builders
     shm_size: 2048M
-    # tty: true
     restart: always
     depends_on:
       - transformer
@@ -117,17 +119,8 @@ services:
         - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
         - SQREEN_TOKEN=${SQREEN_TOKEN}
         - SQREEN_APP_NAME=${SQREEN_APP_NAME}
-    environment:
-      - THINX_HOSTNAME=${THINX_HOSTNAME}
-      - THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}
-      - REVISION=${REVISION}
-      - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
-      - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
-      - SQREEN_TOKEN=${SQREEN_TOKEN}
-      - SQREEN_APP_NAME=${SQREEN_APP_NAME}
-    # image: suculent/thinx-device-api
+        - AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}
     ports:
-#      - 7441:7441 # Reserved for Web HTTPS, 7440 is Web HTTP
       - 7442:7442 # API (HTTP)
       - 7443:7443 # API (HTTPS)
       - 7444:7444 # WebSocket

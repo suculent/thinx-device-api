@@ -68,7 +68,7 @@ RUN apt-get update && \
 # RUN curl -sSL https://get.docker.com/ | sh
 
 # Install Docker Client only (Docker is on the host) - fails with /bin/sh not found...
-ENV VER="17.03.0-ce"
+ENV VER="18.06.3-ce"
 RUN curl -v -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
 RUN tar -xz -C /tmp -f /tmp/docker-$VER.tgz
 RUN mv /tmp/docker* /usr/bin
@@ -112,8 +112,8 @@ EXPOSE 7444
 EXPOSE 9002
 
 # this should be generated/overwritten with sed on entrypoint, entrypoint needs /.first_run file and all ENV_VARS
-COPY ./.thinx_env.dist /.thinx_env
-#COPY ./conf/.thx_prefix ./conf/.thx_prefix
+COPY ./.thinx_env /.thinx_env
+COPY ./conf/.thx_prefix ./conf/.thx_prefix
 
 ADD https://get.aquasec.com/microscanner .
 RUN chmod +x microscanner
