@@ -11,7 +11,7 @@ COPY ./config/mosquitto.conf /etc/mosquitto/conf.d/mosquitto.conf
 COPY ./mqtt_restart.sh /mqtt_restart.sh
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 COPY ./incron.cfg /var/spool/incron/root
-COPY ./cron.cfg /cron.cfg
+COPY ./reload-cron /reload-cron
 
 RUN echo "mosquitto" >> /etc/incron.allow && \
     echo "root" >> /etc/incron.allow && \
@@ -21,7 +21,7 @@ RUN echo "mosquitto" >> /etc/incron.allow && \
 RUN chown root:incron /var/spool/incron/root && \
     incrontab -l
 
-RUN crontab mosquitto /cron.cfg
+RUN crontab mosquitto /reload-cron
 
 EXPOSE 1883 8883 9001
 
