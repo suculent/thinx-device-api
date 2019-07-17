@@ -35,8 +35,8 @@ services:
     restart: always
     environment:
       - NODENAME=${NODENAME}
-      - COUCHDB_USER=${COUCHDB_ADMIN}
-      - COUCHDB_PASSWORD=${COUCHDB_PASS}
+      - COUCHDB_USER=${COUCHDB_USER}
+      - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
       - COUCHDB_COOKIE=${COUCHDB_COOKIE}
       - COUCHDB_SECRET=${COUCHDB_SECRET}
     ports:
