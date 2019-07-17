@@ -1,3 +1,7 @@
+[submodule "tools/arduino-docker-build"]
+	path = tools/arduino-docker-build
+	url = https://github.com/suculent/arduino-docker-build
+
 [submodule "tools/lua-inspect"]
 	path = tools/lua-inspect
 	url = https://github.com/davidm/lua-inspect.git
@@ -5,6 +9,10 @@
 [submodule "tools/micropython-docker-build"]
 	path = tools/micropython-docker-build
 	url = https://github.com/suculent/micropython-docker-build.git
+
+[submodule "tools/mongoose-docker-build"]
+	path = tools/mongoose-docker-build
+	url = https://github.com/suculent/mongoose-docker-build
 
 [submodule "tools/nodemcu-docker-build"]
 	path = tools/nodemcu-docker-build
@@ -14,14 +22,6 @@
 	path = tools/nodemcu-firmware
 	url = https://github.com/suculent/nodemcu-firmware.git
 
-[submodule "tools/arduino-docker-build"]
-	path = tools/arduino-docker-build
-	url = https://github.com/suculent/arduino-docker-build
-
 [submodule "tools/platformio-docker-build"]
 	path = tools/platformio-docker-build
 	url = https://github.com/suculent/platformio-docker-build
-
-[submodule "tools/mongoose-docker-build"]
-	path = tools/mongoose-docker-build
-	url = https://github.com/suculent/mongoose-docker-build
