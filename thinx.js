@@ -2381,14 +2381,6 @@ var ThinxApp = function() {
       return;
     }
 
-    if (typeof(nid) === "undefined" || nid === null) {
-      respond(res, {
-        success: false,
-        status: "missing_nid"
-      });
-      return;
-    }
-
     if (typeof(reply) === "undefined" || reply == null) {
       respond(res, {
         success: false,
@@ -2522,7 +2514,6 @@ var ThinxApp = function() {
 
             var given_name = "GitHub";
             var family_name = "User";
-            var name_array = [given_name, family_name];
 
             var hdata = JSON.parse(data);
             console.log("hdata: " + JSON.stringify(hdata));
@@ -2532,7 +2523,6 @@ var ThinxApp = function() {
                 var in_name_array = hdata.name.split(" ");
                 given_name = in_name_array[0];
                 family_name = in_name_array[in_name_array.count - 1];
-                name_array = [given_name, family_name];
               } else {
                 given_name = hdata.name;
               }

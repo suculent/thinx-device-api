@@ -2,11 +2,16 @@ FROM node:10-alpine
 
 MAINTAINER Matej Sychra <suculent@me.com>
 
+ARG SQREEN_APP_NAME
+ARG SQREEN_TOKEN
 ARG ROLLBAR_TOKEN=${ROLLBAR_TOKEN}
+ARG REVISION=${REVISION}
 
 RUN echo "ROLLBAR_TOKEN: " ${ROLLBAR_TOKEN}
 
-ARG REVISION=${REVISION}
+ENV ROLLBAR_TOKEN=${ROLLBAR_TOKEN}
+
+RUN echo "ROLLBAR_TOKEN: " ${ROLLBAR_TOKEN}
 
 RUN apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python curl git jq
 
