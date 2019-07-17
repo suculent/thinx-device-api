@@ -34,7 +34,6 @@ var fs = require('fs-extra');
 var db = config.database_uri;
 
 var Globals = require("./globals.js");
-var app_config = Globals.app_config();
 var prefix = Globals.prefix();
 
 var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
