@@ -13,8 +13,8 @@ services:
     # image: suculent/thinx-message_broker
     build: ./services/broker
     ports:
-      - "1883:1883" # Must be exposed to devices
-      - "8883:8883" # Must be exposed to devices
+      - 1883:1883
+      - 8883:8883
     restart: unless-stopped
     networks:
       - nat
@@ -92,7 +92,7 @@ services:
     networks:
       - internal
     ports:
-      - "7474"
+      - 7474
     labels:
      - "traefik.backend.transformer.noexpose"
 
