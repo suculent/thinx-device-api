@@ -491,13 +491,19 @@ var ThinxApp = function() {
     // Problem is, that the device API should be separate and have different Access-Control
     // var webHostname = process.env.WEB_HOSTNAME || "rtm.thinx.cloud";
 
+    if (typeof(app_config.acl_url) === "undefined") {
+      app_config.acl_url = app_config.public_url.replace("https://", "").replace("http://", "");
+    }
+
     // cannot use this with allow origin * res.header("Access-Control-Allow-Credentials", "true");
     // analysis: will PROBABLY have to be refactored to anything but Device-Registration and Devoce-OTA requests
     if ((req.originalUrl.indexOf("register") == -1) &&
+        (req.originalUrl.indexOf("login") == -1) &&
         (req.originalUrl.indexOf("firmware") == -1)) {
       //console.log("Setting CORS to " + app_config.public_url);
-      res.header("Access-Control-Allow-Origin", app_config.public_url);
+      res.header("Access-Control-Allow-Origin", app_config.acl_url);
       res.header("Access-Control-Allow-Credentials", "true");
+      console.log("Setting CORS to acl_url "+app_config.acl_url);
     } else {
       console.log("Setting CORS to *");
       res.header("Access-Control-Allow-Origin", "*");
@@ -523,8 +529,8 @@ var ThinxApp = function() {
     }
 
     // log owner ID and request method to application log only
-    if ((typeof(req.session) !== "undefined") && (typeof(req.session
-        .owner) !== "undefined")) {
+    if ((typeof(req.session) !== "undefined")
+     && (typeof(req.session.owner) !== "undefined")) {
       // console.log("[OID:" + req.session.owner + "] ", req.method + " : " + req.url);
     } else {
       // Skip logging for monitoring sites
