@@ -10,6 +10,11 @@ set +e
 
 export
 
+pwd
+
+ls ./conf
+cat conf/config.json
+
 # seems to fail...
 sysctl net.ipv4.ip_forward=1
 sysctl -w net.ipv4.conf.all.forwarding=1
