@@ -2,6 +2,11 @@
 
 ## HISTORY
 
+19/7/2019 1.0.4553
+
+» Stable docker-compose install with console included
+» Replaced HotJar with Crisp.chat
+
 3/7/2019 1.0.x
 
 » Migrated to docker-compose based container architecture

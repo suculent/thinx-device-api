@@ -4,9 +4,7 @@ IoT Device Management Server running on node.js.
 
 <span style="color:red;">
     <p><b>Transition Period Warning</b></p>
-    <p>THiNX has now passed version 1.0 upgrading to docker-compose installation with separate container services (CouchDB, Redis, Transformers, THiNX, Traefik and optional monitoring services), however not all Docker containers are yet part of the single install, namely:</p>
-    <p>• suculent/thinx-landing-page</p>
-    <p>• suculent/thinx-rtm-console</p>
+    <p>THiNX has now passed version 1.0 upgrading to docker-compose installation with separate container services (CouchDB, Redis, Transformers, THiNX, Traefik and optional monitoring services).
 </span>
 
 ```
@@ -95,11 +93,17 @@ Currently the platform supports building firmware for Arduino, PlatformIO (also 
 
 * Device status messages can be transformed using custom JavaScript lambda-style functions.
 
-* Supports OAuth login with Google and GitHub.
+* Supports OAuth login with [Google](https://www.google.com) and [GitHub](https://www.github.com).
 
 * Supports InfluxDB/Grafana data storage and visualisation.
 
 * Supports LoRaWan server integration.
+
+* Supports [Rollbar](https://rollbar.com), [Sqreen](https://www.sqreen.com) and [Crisp.chat](https://crisp.chat) integrations.
+
+* Message-queue integration using docker-compose `project` on `thinx_internal` network
+
+* Supports [Traefik](https://traefik.io) for SSL offloading.
 
 
 ## Supported IoT Platforms
@@ -166,87 +170,45 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 
 ## Port mapping
 
-* API runs on HTTP port 7442 (HTTPS 7443) and 7447 (web socket)
+* API runs on HTTP port 7442 (HTTPS 7443) and 7444 (web socket)
 * MQTTS runs on port 8883
 * Admin runs on HTTP/HTTPS port (80/443)
-* GitHub commit hooks are listened to on port 9000, 9001
-* Grafana (3003), InfluxDB (3004)
-* Status Transformers (localhost only, 7445)
-* Optional monitoring services (Keymetrics, TrueSight) may run on other ports as well...
+* GitHub commit hooks are listened to on port 9002
+* Status Transformers (internal network only, 7445)
+
+
+## Logging
+
+Use your favourite service and log-sender agent. Tested successfully with [Logz.io](https://logz.io), [Instana](https://www.instana.com) and [Sematext](https://sematext.com)
 
 ## Installation
 
 ### Prerequisites
 
-**Required:**
+**Suggested:**
 
-* Mailgun account (recently added)
+* [Mailgun](https://mailgun.com) account (recently added)
+* [Rollbar](https://rollbar.com) integration
 
 **Optional:**
 
-* Google Analytics integration
-* Rollbar integration
-* Sqreen integration
-* Slack integration
+* [Google Analytics](https://analytics.google.com) integration
+* [Sqreen](https://sqreen.com) integration
+* [Slack](https://slack.com) integration
+* [Crisp.chat](https://crisp.chat) integration
 
-### Using Docker
+### Using docker-compose
 
-Experimental Docker installation can be found at [Docker Hub](https://hub.docker.com/r/suculent/thinx-docker/).
+Make sure you have valid directory structure available at `/mnt/data` (default) and edit the .env file to suit your needs.
 
-First of all, set a valid FQDN (THINX_HOSTNAME) for your new THiNX instance on your DNS server. Use this FQDN to parametrise the Docker image by following example:
+You don't need Mailgun for developer installation, just copy-paste the activation URL from api log using `docker-compose logs -f` while creating your first admin account.
 
-    docker pull suculent/thinx-docker
-
-    docker build --build-arg THINX_HOSTNAME=staging.thinx.cloud -t suculent/thinx-docker .
-
-    docker run -ti -e THINX_HOSTNAME='staging.thinx.cloud' -e THINX_OWNER='suculent@me.com' suculent/thinx-docker
-
-### Installing Platform Builders
-
-Attach to the running container with bash:
-
-```
-docker run -ti -e THINX_HOSTNAME='staging.thinx.cloud' -e THINX_OWNER='suculent@me.com' suculent/thinx-docker /bin/bash
-
-```
-
-Fetch required builder images from Docker Hub:
-
-```
-bash ./install-builders.sh
-```
-
-### Run after boot
-
-We're currently using /etc/rc.local to kick THiNX up after a failure:
-
-```
-
-# MQTT service
-mosquitto > /root/thinx-device-api/mosquitto.log &
-
-# Redis service
-redis-server > /root/thinx-device-api/redis.log &
-
-# CouchDB service
-/etc/init.d/couchdb start
-
-# NodeJS Sandbox
-docker run --rm -d suculent/thinx-node-tranformer
-
-# Grafana/InfluxDB
-docker run -d \
-  -p 3003:3003 \
-  -p 3004:8083 \
-  -p 8086:8086 \
-  -v /root/docker-influxdb-grafana/influxdb:/var/lib/influxdb \
-  -v /root/docker-influxdb-grafana/grafana:/var/lib/grafana \
-  suculent/docker-influxdb-grafana:latest
-
-# THiNX itself
-cd /root/thinx-device-api/ && pm2 start index
-
-```
+	git clone http://github.com/suculent/thinx-device-api
+	cd thinx-device-api
+	cp .env.dist .env
+	nano env
+	./copy-envs.sh
+	docker-compose up -d --build
 
 ## GitHub Webhook support
 
@@ -283,13 +245,6 @@ Platform libraries are now stabilised on the basic level, approaching first rele
 
 * Docker builder works fine but needs tighter integration with sources.
 * Deployment is not verified, therefore update cannot be tested now.
-
-# Roadmap
-
-## On-Horizon
-
-* PlatformIO: end-to-end update
-* Arduino: end-to-end update
 
 
 ## License
