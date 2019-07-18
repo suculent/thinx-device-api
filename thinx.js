@@ -55,9 +55,6 @@ var ThinxApp = function() {
   var google_ocfg = Globals.google_ocfg();
   var github_ocfg = Globals.github_ocfg();
 
-  console.log("process.env.SQREEN_APP_NAME: "+process.env.SQREEN_APP_NAME);
-  console.log("process.env.SQREEN_TOKEN: "+process.env.SQREEN_TOKEN);
-
   if (Globals.use_sqreen()) {
     if ((typeof(process.env.SQREEN_APP_NAME) !== "undefined") && (typeof(process.env.SQREEN_TOKEN) !== "undefined")) {
       try {
@@ -498,7 +495,6 @@ var ThinxApp = function() {
     // cannot use this with allow origin * res.header("Access-Control-Allow-Credentials", "true");
     // analysis: will PROBABLY have to be refactored to anything but Device-Registration and Devoce-OTA requests
     if ((req.originalUrl.indexOf("register") == -1) &&
-        (req.originalUrl.indexOf("login") == -1) &&
         (req.originalUrl.indexOf("firmware") == -1)) {
       //console.log("Setting CORS to " + app_config.public_url);
       res.header("Access-Control-Allow-Origin", app_config.acl_url);
