@@ -25,5 +25,7 @@ mosquitto -d -v -c /mqtt/config/mosquitto.conf
 
 ps -ax | grep mosquitto
 
+pkill apt # attempt to prevent sticking, suspicious thing it is.
+
 # Run forever so the container does not die...
 sleep infinity
