@@ -1988,7 +1988,7 @@ var ThinxApp = function() {
                 req.session.cookie.maxAge = fortnight;
               }
 
-              alog.log(owner, "OAuth User logged in: " + doc.username, "info");
+              alog.log(doc.owner, "OAuth User logged in: " + doc.username, "info");
 
               if (Globals.use_sqreen()) {
                 Sqreen.auth_track(true, { username: doc.owner });
