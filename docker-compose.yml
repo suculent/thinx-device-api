@@ -32,7 +32,7 @@ services:
     env_file: .env
     image: apache/couchdb:2.3.1
     # build: ./services/couchdb # currently unused for speed, should work the same except it does not log pass in entry point
-    restart: always
+    restart: unless-stopped
     environment:
       - NODENAME=${NODENAME}
       - COUCHDB_USER=${COUCHDB_USER}
@@ -66,7 +66,7 @@ services:
       - ALLOW_EMPTY_PASSWORD=no
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
-    restart: always
+    restart: unless-stopped
     ports:
       - 6379
     volumes:
@@ -85,7 +85,7 @@ services:
         - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
         - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
 
-    restart: always
+    restart: unless-stopped
     environment:
       - SQREEN_APP_NAME=${SQREEN_APP_NAME}
       - SQREEN_TOKEN=${SQREEN_TOKEN}
@@ -101,7 +101,7 @@ services:
     privileged: true
     # reserve enough for builders
     shm_size: 2048M
-    restart: always
+    restart: unless-stopped
     depends_on:
       - transformer
       - thinx-redis
@@ -163,17 +163,17 @@ services:
       - internal
     ports:
       - "80"
-    restart: always
-#    environment:
-#     - NGINX_PORT=80
-#     - NGINX_HOST=${WEB_HOSTNAME}
-#     - WEB_HOSTNAME=${WEB_HOSTNAME}
-#     - API_HOSTNAME=${API_HOSTNAME}
-#     - API_BASEURL=${API_BASEURL}
-#     - ENTERPRISE=${ENTERPRISE}
-#     - ENVIRONMENT=${ENVIRONMENT}
-#     - GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID}
-#     - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
+    restart: unless-stopped
+    environment:
+      - NGINX_PORT=80
+      - NGINX_HOST=${WEB_HOSTNAME}
+      - WEB_HOSTNAME=${WEB_HOSTNAME}
+      - API_HOSTNAME=${API_HOSTNAME}
+      - API_BASEURL=${API_BASEURL}
+      - ENTERPRISE=${ENTERPRISE}
+      - ENVIRONMENT=${ENVIRONMENT}
+      - GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID}
+      - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
 
     labels:
       - "traefik.enable=true"
