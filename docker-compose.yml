@@ -183,7 +183,7 @@ services:
       - "traefik.backend=console"
       - "traefik.frontend.rule=Host:${APP_HOSTNAME}"
       - "traefik.frontend.entryPoints=http,https"
-      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.SSLRedirect=false"
       - "traefik.frontend.headers.SSLForceHost=true"
       - "traefik.frontend.headers.SSLHost=${APP_HOSTNAME}"
       - "traefik.frontend.headers.forceSTSHeader=true"
