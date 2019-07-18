@@ -971,8 +971,8 @@ var __module9__ = (function() {
               return true;
           }
       }
-      return true;
-  }
+      // unreachable statement -> return true;
+    }
   };
 
 
@@ -1160,7 +1160,7 @@ var __module9__ = (function() {
   }
 
 
-  var YYSTATE=YY_START
+  var YYSTATE=YY_START;
   switch($avoiding_name_collisions) {
   case 0:
                                      if(yy_.yytext.slice(-2) === "\\\\") {

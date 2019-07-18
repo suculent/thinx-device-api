@@ -1,6 +1,4 @@
 .DS_Store
-package-lock.json
-src/package-lock.json
 node_modules/
 src/node_modules/
 src/html/

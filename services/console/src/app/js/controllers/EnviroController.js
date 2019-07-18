@@ -31,7 +31,7 @@ angular.module('RTM').controller('EnviroController', ['$rootScope', '$scope', 's
     var keys = JSON.parse(data);
 
     $rootScope.enviros = keys.env_vars;
-    $scope.$apply()
+    $scope.$apply();
 
     console.log('enviros:');
     console.log($rootScope.enviros);

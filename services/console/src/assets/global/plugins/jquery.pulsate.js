@@ -77,7 +77,7 @@
   };
 
   var pause = function (options, el, count) {
-    innerfunc = function () {
+    var innerfunc = function () {
       pulse(options, el, count);
     };
     el.timer = setTimeout(innerfunc, options.pause);

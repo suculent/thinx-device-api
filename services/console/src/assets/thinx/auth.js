@@ -74,7 +74,7 @@ var Auth = function() {
                   console.log('--Logging in--' );
                   Auth.login();
                 } else {
-                  console.log(response.status)
+                  console.log(response.status);
                   $('.msg-error', $('.gdpr-form')).text('GDPR accept failed.');
                   $('.msg-error', $('.gdpr-form')).show();
                 }
@@ -133,7 +133,7 @@ var Auth = function() {
               $('.msg-reject-success').show();
               console.log('--Deleting account--' );
             } else {
-              console.log(response.status)
+              console.log(response.status);
               $('.msg-error', $('.gdpr-form')).text('GDPR reject failed.');
               $('.msg-error', $('.gdpr-form')).show();
             }

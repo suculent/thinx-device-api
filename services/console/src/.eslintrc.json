@@ -9,7 +9,10 @@
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly",
         "moment": true,
-        "angular": true
+        "angular": true,
+        "Thinx": true,
+        "toastr": true,
+        "App": true
     },
     "parserOptions": {
         "ecmaVersion": 2018

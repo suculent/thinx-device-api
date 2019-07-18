@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/LICENSE
 
 (function() {
   var mode = CodeMirror.getMode({indentUnit: 2}, "javascript");
@@ -63,6 +63,12 @@
   MT("import_trailing_comma",
      "[keyword import] {[def foo], [def bar],} [keyword from] [string 'baz']")
 
+  MT("import_dynamic",
+     "[keyword import]([string 'baz']).[property then]")
+
+  MT("import_dynamic",
+     "[keyword const] [def t] [operator =] [keyword import]([string 'baz']).[property then]")
+
   MT("const",
      "[keyword function] [def f]() {",
      "  [keyword const] [[ [def a], [def b] ]] [operator =] [[ [number 1], [number 2] ]];",
@@ -71,11 +77,43 @@
   MT("for/of",
      "[keyword for]([keyword let] [def of] [keyword of] [variable something]) {}");
 
+  MT("for await",
+     "[keyword for] [keyword await]([keyword let] [def of] [keyword of] [variable something]) {}");
+
   MT("generator",
      "[keyword function*] [def repeat]([def n]) {",
      "  [keyword for]([keyword var] [def i] [operator =] [number 0]; [variable-2 i] [operator <] [variable-2 n]; [operator ++][variable-2 i])",
      "    [keyword yield] [variable-2 i];",
      "}");
+
+  MT("let_scoping",
+     "[keyword function] [def scoped]([def n]) {",
+     "  { [keyword var] [def i]; } [variable-2 i];",
+     "  { [keyword let] [def j]; [variable-2 j]; } [variable j];",
+     "  [keyword if] ([atom true]) { [keyword const] [def k]; [variable-2 k]; } [variable k];",
+     "}");
+
+  MT("switch_scoping",
+     "[keyword switch] ([variable x]) {",
+     "  [keyword default]:",
+     "    [keyword let] [def j];",
+     "    [keyword return] [variable-2 j]",
+     "}",
+     "[variable j];")
+
+  MT("leaving_scope",
+     "[keyword function] [def a]() {",
+     "  {",
+     "    [keyword const] [def x] [operator =] [number 1]",
+     "    [keyword if] ([atom true]) {",
+     "      [keyword let] [def y] [operator =] [number 2]",
+     "      [keyword var] [def z] [operator =] [number 3]",
+     "      [variable console].[property log]([variable-2 x], [variable-2 y], [variable-2 z])",
+     "    }",
+     "    [variable console].[property log]([variable-2 x], [variable y], [variable-2 z])",
+     "  }",
+     "  [variable console].[property log]([variable x], [variable y], [variable-2 z])",
+     "}")
 
   MT("quotedStringAddition",
      "[keyword let] [def f] [operator =] [variable a] [operator +] [string 'fatarrow'] [operator +] [variable c];");
@@ -188,6 +226,12 @@
      "  [keyword return] [variable-2 x];",
      "}");
 
+  MT(
+    "param_destructuring",
+    "[keyword function] [def foo]([def x] [operator =] [string-2 `foo${][number 10][string-2 }bar`]) {",
+    "  [keyword return] [variable-2 x];",
+    "}");
+
   MT("new_target",
      "[keyword function] [def F]([def target]) {",
      "  [keyword if] ([variable-2 target] [operator &&] [keyword new].[keyword target].[property name]) {",
@@ -229,6 +273,11 @@
   MT("async_variable",
      "[keyword const] [def async] [operator =] {[property a]: [number 1]};",
      "[keyword const] [def foo] [operator =] [string-2 `bar ${][variable async].[property a][string-2 }`];")
+
+  MT("bigint", "[number 1n] [operator +] [number 0x1afn] [operator +] [number 0o064n] [operator +] [number 0b100n];")
+
+  MT("async_comment",
+     "[keyword async] [comment /**/] [keyword function] [def foo]([def args]) { [keyword return] [atom true]; }");
 
   MT("indent_switch",
      "[keyword switch] ([variable x]) {",
@@ -367,6 +416,43 @@
 
   TS("arrow prop",
      "({[property a]: [def p] [operator =>] [variable-2 p]})")
+
+  TS("generic in function call",
+     "[keyword this].[property a][operator <][type Type][operator >]([variable foo]);",
+     "[keyword this].[property a][operator <][variable Type][operator >][variable foo];")
+
+  TS("type guard",
+     "[keyword class] [def Appler] {",
+     "  [keyword static] [property assertApple]([def fruit]: [type Fruit]): [variable-2 fruit] [keyword is] [type Apple] {",
+     "    [keyword if] ([operator !]([variable-2 fruit] [keyword instanceof] [variable Apple]))",
+     "      [keyword throw] [keyword new] [variable Error]();",
+     "  }",
+     "}")
+
+  TS("type as variable",
+     "[variable type] [operator =] [variable x] [keyword as] [type Bar];");
+
+  TS("enum body",
+     "[keyword export] [keyword const] [keyword enum] [def CodeInspectionResultType] {",
+     "  [def ERROR] [operator =] [string 'problem_type_error'],",
+     "  [def WARNING] [operator =] [string 'problem_type_warning'],",
+     "  [def META],",
+     "}")
+
+  TS("parenthesized type",
+     "[keyword class] [def Foo] {",
+     "  [property x] [operator =] [keyword new] [variable A][operator <][type B], [type string][operator |](() [operator =>] [type void])[operator >]();",
+     "  [keyword private] [property bar]();",
+     "}")
+
+  TS("abstract class",
+     "[keyword export] [keyword abstract] [keyword class] [def Foo] {}")
+
+  TS("interface without semicolons",
+     "[keyword interface] [def Foo] {",
+     "  [property greet]([def x]: [type int]): [type blah]",
+     "  [property bar]: [type void]",
+     "}")
 
   var jsonld_mode = CodeMirror.getMode(
     {indentUnit: 2},

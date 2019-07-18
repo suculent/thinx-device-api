@@ -96,8 +96,8 @@ var Layout = function() {
             return;
         }
 
-        var slideSpeed = parseInt(menu.data('slide-speed'));
-        var keepExpand = menu.data('keep-expanded');
+        // var slideSpeed = parseInt(menu.data('slide-speed'));
+        // var keepExpand = menu.data('keep-expanded');
 
         // begin: handle active state
         if (menu.hasClass('page-sidebar-menu-hover-submenu') === false) {

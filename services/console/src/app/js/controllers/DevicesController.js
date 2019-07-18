@@ -281,7 +281,7 @@ angular.module('RTM').controller('DevicesController', ['$rootScope', '$scope', '
 
       $scope.configForm.resetDevices = false;
       $scope.configForm.devices = $scope.selectedItems;
-      $scope.$apply()
+      $scope.$apply();
 
       console.log("config form vars", $scope.configForm);
       $('#configModal').modal('show');

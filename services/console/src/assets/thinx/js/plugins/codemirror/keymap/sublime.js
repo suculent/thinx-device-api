@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/LICENSE
 
 // A rough approximation of Sublime Text's keybindings
 // Depends on addon/search/searchcursor.js and optionally addon/dialog/dialogs.js
@@ -99,7 +99,7 @@
   };
 
   function insertLine(cm, above) {
-    if (cm.isReadOnly()) return CodeMirror.Pass
+    if (cm.isReadOnly()) return CodeMirror.Pass;
     cm.operation(function() {
       var len = cm.listSelections().length, newSelection = [], last = -1;
       for (var i = 0; i < len; i++) {
@@ -145,7 +145,7 @@
         found = cur.findNext();
       }
       if (!found || isSelectedRange(cm.listSelections(), cur.from(), cur.to()))
-        return CodeMirror.Pass
+        return CodeMirror.Pass;
       cm.addSelection(cur.from(), cur.to());
     }
     if (fullWord)
@@ -156,8 +156,14 @@
     var ranges = cm.listSelections(), newRanges = [];
     for (var i = 0; i < ranges.length; i++) {
       var range = ranges[i];
-      var newAnchor = cm.findPosV(range.anchor, dir, "line");
-      var newHead = cm.findPosV(range.head, dir, "line");
+      var newAnchor = cm.findPosV(
+          range.anchor, dir, "line", range.anchor.goalColumn);
+      var newHead = cm.findPosV(
+          range.head, dir, "line", range.head.goalColumn);
+      newAnchor.goalColumn = range.anchor.goalColumn != null ?
+          range.anchor.goalColumn : cm.cursorCoords(range.anchor, "div").left;
+      newHead.goalColumn = range.head.goalColumn != null ?
+          range.head.goalColumn : cm.cursorCoords(range.head, "div").left;
       var newRange = {anchor: newAnchor, head: newHead};
       newRanges.push(range);
       newRanges.push(newRange);
@@ -175,7 +181,7 @@
 
   var mirror = "(){}[]";
   function selectBetweenBrackets(cm) {
-    var ranges = cm.listSelections(), newRanges = []
+    var ranges = cm.listSelections(), newRanges = [];
     for (var i = 0; i < ranges.length; i++) {
       var range = ranges[i], pos = range.head, opening = cm.scanForBracket(pos, -1);
       if (!opening) return false;
@@ -183,9 +189,15 @@
         var closing = cm.scanForBracket(pos, 1);
         if (!closing) return false;
         if (closing.ch == mirror.charAt(mirror.indexOf(opening.ch) + 1)) {
-          newRanges.push({anchor: Pos(opening.pos.line, opening.pos.ch + 1),
-                          head: closing.pos});
-          break;
+          var startPos = Pos(opening.pos.line, opening.pos.ch + 1);
+          if (CodeMirror.cmpPos(startPos, range.from()) == 0 &&
+              CodeMirror.cmpPos(closing.pos, range.to()) == 0) {
+            opening = cm.scanForBracket(opening.pos, -1);
+            if (!opening) return false;
+          } else {
+            newRanges.push({anchor: startPos, head: closing.pos});
+            break;
+          }
         }
         pos = Pos(closing.pos.line, closing.pos.ch + 1);
       }
@@ -211,7 +223,7 @@
   };
 
   cmds.swapLineUp = function(cm) {
-    if (cm.isReadOnly()) return CodeMirror.Pass
+    if (cm.isReadOnly()) return CodeMirror.Pass;
     var ranges = cm.listSelections(), linesToMove = [], at = cm.firstLine() - 1, newSels = [];
     for (var i = 0; i < ranges.length; i++) {
       var range = ranges[i], from = range.from().line - 1, to = range.to().line;
@@ -238,7 +250,7 @@
   };
 
   cmds.swapLineDown = function(cm) {
-    if (cm.isReadOnly()) return CodeMirror.Pass
+    if (cm.isReadOnly()) return CodeMirror.Pass;
     var ranges = cm.listSelections(), linesToMove = [], at = cm.lastLine() + 1;
     for (var i = ranges.length - 1; i >= 0; i--) {
       var range = ranges[i], from = range.to().line + 1, to = range.from().line;
@@ -263,7 +275,7 @@
 
   cmds.toggleCommentIndented = function(cm) {
     cm.toggleComment({ indent: true });
-  }
+  };
 
   cmds.joinLines = function(cm) {
     var ranges = cm.listSelections(), joined = [];
@@ -309,7 +321,7 @@
 
 
   function sortLines(cm, caseSensitive) {
-    if (cm.isReadOnly()) return CodeMirror.Pass
+    if (cm.isReadOnly()) return CodeMirror.Pass;
     var ranges = cm.listSelections(), toSort = [], selected;
     for (var i = 0; i < ranges.length; i++) {
       var range = ranges[i];
@@ -376,7 +388,7 @@
     var marks = cm.state.sublimeBookmarks || (cm.state.sublimeBookmarks = []);
     for (var i = 0; i < ranges.length; i++) {
       var from = ranges[i].from(), to = ranges[i].to();
-      var found = cm.findMarks(from, to);
+      var found = ranges[i].empty() ? cm.findMarksAt(from) : cm.findMarks(from, to);
       for (var j = 0; j < found.length; j++) {
         if (found[j].sublimeBookmark) {
           found[j].clear();
@@ -508,27 +520,6 @@
     cm.scrollTo(null, (pos.top + pos.bottom) / 2 - cm.getScrollInfo().clientHeight / 2);
   };
 
-  cmds.selectLinesUpward = function(cm) {
-    cm.operation(function() {
-      var ranges = cm.listSelections();
-      for (var i = 0; i < ranges.length; i++) {
-        var range = ranges[i];
-        if (range.head.line > cm.firstLine())
-          cm.addSelection(Pos(range.head.line - 1, range.head.ch));
-      }
-    });
-  };
-  cmds.selectLinesDownward = function(cm) {
-    cm.operation(function() {
-      var ranges = cm.listSelections();
-      for (var i = 0; i < ranges.length; i++) {
-        var range = ranges[i];
-        if (range.head.line < cm.lastLine())
-          cm.addSelection(Pos(range.head.line + 1, range.head.ch));
-      }
-    });
-  };
-
   function getTarget(cm) {
     var from = cm.getCursor("from"), to = cm.getCursor("to");
     if (CodeMirror.cmpPos(from, to) == 0) {
@@ -590,8 +581,6 @@
     "Cmd-Enter": "insertLineAfter",
     "Shift-Cmd-Enter": "insertLineBefore",
     "Cmd-D": "selectNextOccurrence",
-    "Shift-Cmd-Up": "addCursorToPrevLine",
-    "Shift-Cmd-Down": "addCursorToNextLine",
     "Shift-Cmd-Space": "selectScope",
     "Shift-Cmd-M": "selectBetweenBrackets",
     "Cmd-M": "goToBracket",
@@ -600,8 +589,8 @@
     "Cmd-/": "toggleCommentIndented",
     "Cmd-J": "joinLines",
     "Shift-Cmd-D": "duplicateLine",
-    "F9": "sortLines",
-    "Cmd-F9": "sortLinesInsensitive",
+    "F5": "sortLines",
+    "Cmd-F5": "sortLinesInsensitive",
     "F2": "nextBookmark",
     "Shift-F2": "prevBookmark",
     "Cmd-F2": "toggleBookmark",
@@ -621,8 +610,8 @@
     "Cmd-K Cmd-Backspace": "delLineLeft",
     "Cmd-K Cmd-0": "unfoldAll",
     "Cmd-K Cmd-J": "unfoldAll",
-    "Ctrl-Shift-Up": "selectLinesUpward",
-    "Ctrl-Shift-Down": "selectLinesDownward",
+    "Ctrl-Shift-Up": "addCursorToPrevLine",
+    "Ctrl-Shift-Down": "addCursorToNextLine",
     "Cmd-F3": "findUnder",
     "Shift-Cmd-F3": "findUnderPrevious",
     "Alt-F3": "findAllUnder",
@@ -652,8 +641,6 @@
     "Ctrl-Enter": "insertLineAfter",
     "Shift-Ctrl-Enter": "insertLineBefore",
     "Ctrl-D": "selectNextOccurrence",
-    "Alt-CtrlUp": "addCursorToPrevLine",
-    "Alt-CtrlDown": "addCursorToNextLine",
     "Shift-Ctrl-Space": "selectScope",
     "Shift-Ctrl-M": "selectBetweenBrackets",
     "Ctrl-M": "goToBracket",
@@ -683,8 +670,8 @@
     "Ctrl-K Ctrl-Backspace": "delLineLeft",
     "Ctrl-K Ctrl-0": "unfoldAll",
     "Ctrl-K Ctrl-J": "unfoldAll",
-    "Ctrl-Alt-Up": "selectLinesUpward",
-    "Ctrl-Alt-Down": "selectLinesDownward",
+    "Ctrl-Alt-Up": "addCursorToPrevLine",
+    "Ctrl-Alt-Down": "addCursorToNextLine",
     "Ctrl-F3": "findUnder",
     "Shift-Ctrl-F3": "findUnderPrevious",
     "Alt-F3": "findAllUnder",

@@ -1904,7 +1904,7 @@
 
             vals = $.isArray(vals) ? vals : [vals];
             valcount = vals.length;
-            val = vals[0];
+            //val = vals[0];
             isNull = all(null, vals);
             allMin = all(xaxisOffset, vals, true);
 

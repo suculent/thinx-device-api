@@ -219,7 +219,7 @@ function init($rootScope, $scope) {
   function updateRsakeys(data) {
     var response = JSON.parse(data);
     $rootScope.rsakeys = response.rsa_keys;
-    $scope.$apply()
+    $scope.$apply();
     console.log('//////// rsakeys:');
     //console.log($rootScope.rsakeys);
 
@@ -247,7 +247,7 @@ function init($rootScope, $scope) {
     var response = JSON.parse(data);
     // TODO: hack must be refined
     $rootScope.deploykeys = response.rsa_keys;
-    $scope.$apply()
+    $scope.$apply();
     console.log('//////// deploykeys:');
     //console.log($rootScope.deploykeys);
 
@@ -535,7 +535,7 @@ function init($rootScope, $scope) {
           if ($rootScope.auditlog[index].message.match(dangerStr) !== null || $rootScope.auditlog[index].message.match(invalidStr) !== null) {
             $rootScope.auditlog[index].flags.push('danger');
 
-            var errorDate = moment($rootScope.auditlog[index].date).format('YYYY-MM-DD')
+            var errorDate = moment($rootScope.auditlog[index].date).format('YYYY-MM-DD');
             if (typeof(errorTimeline[errorDate]) == 'undefined') {
               errorTimeline[errorDate] = 1;
             } else {
@@ -556,7 +556,7 @@ function init($rootScope, $scope) {
       if (typeof($scope.chartRange) !== "undefined") {
         $scope.chartRange($scope.chart.range);
       }
-      $scope.$apply()
+      $scope.$apply();
     } else {
       console.log('auditHistory fetch error.') ;
     }
@@ -637,12 +637,13 @@ function init($rootScope, $scope) {
       }
 
       console.log('refreshing view...');
-      $scope.$apply()
+      $scope.$apply();
     } else {
       console.log('buildHistory fetch error.') ;
     }
   }
 
+  /*
   function registerNotification() {
     $webNotification.showNotification('Wohoo!', {
       body: 'Browser Notification Test Success.',
@@ -664,6 +665,7 @@ function init($rootScope, $scope) {
       }
     });
   }
+  */
 
   Thinx.getProfile()
   .done(function(data) {

@@ -59,7 +59,7 @@ angular.module('RTM').controller('ApikeyController', ['$rootScope', '$scope', 's
 
           Thinx.apikeyList()
           .done( function(data) {
-            $scope.$emit("updateApikeys", data);;
+            $scope.$emit("updateApikeys", data);
 
             // save user-spcific goal achievement
             if (typeof($rootScope.profile.info.goals) !== 'undefined') {

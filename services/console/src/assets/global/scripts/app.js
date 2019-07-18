@@ -26,7 +26,7 @@ var App = function() {
     };
 
     // initializes main settings
-    var handleInit = function() {
+    var appInit = function() {
 
         if ($('body').css('direction') === 'rtl') {
             isRTL = true;
@@ -54,7 +54,7 @@ var App = function() {
         }
     };
 
-    var handleOnResize = function() {
+    var initOnResize = function() {
         var windowWidth = $(window).width();
         var resize;
         if (isIE8) {
@@ -86,9 +86,9 @@ var App = function() {
         }
     };
 
-    // Handles portlet tools & actions
-    var handlePortletTools = function() {
-        // handle portlet remove
+    // portlet tools & actions
+    var initPortletTools = function() {
+        // portlet remove
         $('body').on('click', '.portlet > .portlet-title > .tools > a.remove', function(e) {
             e.preventDefault();
             var portlet = $(this).closest(".portlet");
@@ -106,7 +106,7 @@ var App = function() {
             portlet.remove();
         });
 
-        // handle portlet fullscreen
+        // portlet fullscreen
         $('body').on('click', '.portlet > .portlet-title .fullscreen', function(e) {
             e.preventDefault();
             var portlet = $(this).closest(".portlet");
@@ -154,12 +154,6 @@ var App = function() {
                         var msg = 'Error on reloading the content. Please check your connection and try again.';
                         if (error == "toastr" && toastr) {
                             toastr.error(msg);
-                        } else if (error == "notific8" && $.notific8) {
-                            $.notific8('zindex', 11500);
-                            $.notific8(msg, {
-                                theme: 'ruby',
-                                life: 3000
-                            });
                         } else {
                             alert(msg);
                         }
@@ -194,8 +188,8 @@ var App = function() {
         });
     };
 
-    // Handlesmaterial design checkboxes
-    var handleMaterialDesign = function() {
+    // material design checkboxes
+    var initMaterialDesign = function() {
 
         // Material design ckeckbox and radio effects
         $('body').on('click', '.md-checkbox > label, .md-radio > label', function() {
@@ -247,7 +241,7 @@ var App = function() {
         }
 
         // Floating labels
-        var handleInput = function(el) {
+        var initInput = function(el) {
             if (el.val() != "") {
                 el.addClass('edited');
             } else {
@@ -256,10 +250,10 @@ var App = function() {
         }
 
         $('body').on('keydown', '.form-md-floating-label .form-control', function(e) {
-            handleInput($(this));
+            initInput($(this));
         });
         $('body').on('blur', '.form-md-floating-label .form-control', function(e) {
-            handleInput($(this));
+            initInput($(this));
         });
 
         $('.form-md-floating-label .form-control').each(function(){
@@ -269,8 +263,8 @@ var App = function() {
         });
     }
 
-    // Handles custom checkboxes & radios using jQuery iCheck plugin
-    var handleiCheck = function() {
+    // custom checkboxes & radios using jQuery iCheck plugin
+    var initiCheck = function() {
         if (!$().iCheck) {
             return;
         }
@@ -294,31 +288,31 @@ var App = function() {
         });
     };
 
-    // Handles Bootstrap switches
-    var handleBootstrapSwitch = function() {
+    // inits Bootstrap switches
+    var initBootstrapSwitch = function() {
         if (!$().bootstrapSwitch) {
             return;
         }
         $('.make-switch').bootstrapSwitch();
     };
 
-    // Handles Bootstrap confirmations
-    var handleBootstrapConfirmation = function() {
+    // inits Bootstrap confirmations
+    var initBootstrapConfirmation = function() {
         if (!$().confirmation) {
             return;
         }
         $('[data-toggle=confirmation]').confirmation({ btnOkClass: 'btn btn-sm btn-success', btnCancelClass: 'btn btn-sm btn-danger'});
     }
 
-    // Handles Bootstrap Accordions.
-    var handleAccordions = function() {
+    // inits Bootstrap Accordions.
+    var initAccordions = function() {
         $('body').on('shown.bs.collapse', '.accordion.scrollable', function(e) {
             App.scrollTo($(e.target));
         });
     };
 
-    // Handles Bootstrap Tabs.
-    var handleTabs = function() {
+    // inits Bootstrap Tabs.
+    var initTabs = function() {
         //activate tab if tab id provided in the URL
         if (encodeURI(location.hash)) {
             var tabid = encodeURI(location.hash.substr(1));
@@ -336,8 +330,8 @@ var App = function() {
         }
     };
 
-    // Handles Bootstrap Modals.
-    var handleModals = function() {
+    // inits Bootstrap Modals.
+    var initModals = function() {
         // fix stackable modal issue: when 2 or more modals opened, closing one of modal will remove .modal-open class.
         $('body').on('hide.bs.modal', function() {
             if ($('.modal:visible').size() > 1 && $('html').hasClass('modal-open') === false) {
@@ -365,8 +359,8 @@ var App = function() {
         });
     };
 
-    // Handles Bootstrap Tooltips.
-    var handleTooltips = function() {
+    // inits Bootstrap Tooltips.
+    var initTooltips = function() {
         // global tooltips
         $('.tooltips').tooltip();
 
@@ -398,8 +392,8 @@ var App = function() {
         });
     };
 
-    // Handles Bootstrap Dropdowns
-    var handleDropdowns = function() {
+    // inits Bootstrap Dropdowns
+    var initDropdowns = function() {
         /*
           Hold dropdown on click
         */
@@ -408,7 +402,7 @@ var App = function() {
         });
     };
 
-    var handleAlerts = function() {
+    var initAlerts = function() {
         $('body').on('click', '[data-close="alert"]', function(e) {
             $(this).parent('.alert').hide();
             $(this).closest('.note').hide();
@@ -426,19 +420,19 @@ var App = function() {
         });
     };
 
-    // Handle textarea autosize
-    var handleTextareaAutosize = function() {
+    // init textarea autosize
+    var initTextareaAutosize = function() {
         if (typeof(autosize) == "function") {
             autosize(document.querySelectorAll('textarea.autosizeme'));
         }
     }
 
-    // Handles Bootstrap Popovers
+    // inits Bootstrap Popovers
 
     // last popep popover
     var lastPopedPopover;
 
-    var handlePopovers = function() {
+    var initPopovers = function() {
         $('.popovers').popover();
 
         // close last displayed popover
@@ -450,13 +444,13 @@ var App = function() {
         });
     };
 
-    // Handles scrollable contents using jQuery SlimScroll plugin.
-    var handleScrollers = function() {
+    // inits scrollable contents using jQuery SlimScroll plugin.
+    var initScrollers = function() {
         App.initSlimScroll('.scroller');
     };
 
-    // Handles Image Preview using jQuery Fancybox plugin
-    var handleFancybox = function() {
+    // inits Image Preview using jQuery Fancybox plugin
+    var initFancybox = function() {
         if (!jQuery.fancybox) {
             return;
         }
@@ -476,8 +470,8 @@ var App = function() {
         }
     };
 
-    // Handles counterup plugin wrapper
-    var handleCounterup = function() {
+    // inits counterup plugin wrapper
+    var initCounterup = function() {
         if (!$().counterUp) {
             return;
         }
@@ -489,7 +483,7 @@ var App = function() {
     };
 
     // Fix input placeholder issue for IE8 and IE9
-    var handleFixInputPlaceholderForIE = function() {
+    var initFixInputPlaceholderForIE = function() {
         //fix html5 placeholder attribute for ie7 & ie8
         if (isIE8 || isIE9) { // ie8 & ie9
             // this is html5 placeholder fix for inputs, inputs with placeholder-no-fix class will be skipped(e.g: we need this for password fields)
@@ -515,8 +509,8 @@ var App = function() {
         }
     };
 
-    // Handle Select2 Dropdowns
-    var handleSelect2 = function() {
+    // init Select2 Dropdowns
+    var initSelect2 = function() {
         if ($().select2) {
             $.fn.select2.defaults.set("theme", "bootstrap");
             $('.select2me').select2({
@@ -527,8 +521,8 @@ var App = function() {
         }
     };
 
-    // handle group element heights
-   var handleHeight = function() {
+    // init group element heights
+   var initHeight = function() {
        $('[data-auto-height]').each(function() {
             var parent = $(this);
             var items = $('[data-height]', parent);
@@ -565,55 +559,53 @@ var App = function() {
        });
     }
 
-    //* END:CORE HANDLERS *//
+    //* CORE FEATURES END *//
 
     return {
 
         init: function() {
-            // Keep the order!
+            // Core
+            appInit();
+            initOnResize();
 
-            // Core handlers
-            handleInit();
-            handleOnResize();
+            // UI Components
+            initMaterialDesign();
+            initiCheck();
+            initBootstrapSwitch();
+            initScrollers();
+            initFancybox();
+            initSelect2();
+            initPortletTools();
+            initAlerts();
+            initDropdowns();
+            initTabs();
+            initTooltips();
+            initPopovers();
+            initAccordions();
+            initModals();
+            initBootstrapConfirmation();
+            initTextareaAutosize();
+            initCounterup();
 
-            // UI Component handlers
-            handleMaterialDesign();
-            handleiCheck();
-            handleBootstrapSwitch();
-            handleScrollers();
-            handleFancybox();
-            handleSelect2();
-            handlePortletTools();
-            handleAlerts();
-            handleDropdowns();
-            handleTabs();
-            handleTooltips();
-            handlePopovers();
-            handleAccordions();
-            handleModals();
-            handleBootstrapConfirmation();
-            handleTextareaAutosize();
-            handleCounterup();
-
-            //Handle group element heights
-            this.addResizeHandler(handleHeight); // handle auto calculating height on window resize
+            //init group element heights
+            this.addResizeHandler(initHeight); // init auto calculating height on window resize
 
             // Hacks
-            handleFixInputPlaceholderForIE(); //IE8 & IE9 input placeholder issue fix
+            initFixInputPlaceholderForIE(); //IE8 & IE9 input placeholder issue fix
         },
 
         initAjax: function() {
-            //handleUniform(); // handles custom radio & checkboxes
-            handleiCheck();
-            handleBootstrapSwitch();
-            handleScrollers();
-            handleSelect2();
-            handleFancybox();
-            handleDropdowns();
-            handleTooltips();
-            handlePopovers();
-            handleAccordions();
-            handleBootstrapConfirmation();
+            //initUniform(); // inits custom radio & checkboxes
+            initiCheck();
+            initBootstrapSwitch();
+            initScrollers();
+            initSelect2();
+            initFancybox();
+            initDropdowns();
+            initTooltips();
+            initPopovers();
+            initAccordions();
+            initBootstrapConfirmation();
         },
 
         initComponents: function() {
@@ -873,7 +865,7 @@ var App = function() {
         },
 
         initFancybox: function() {
-            handleFancybox();
+            initFancybox();
         },
 
         //public helper function to get actual input value(used in IE9 and IE8 due to placeholder attribute not supported)

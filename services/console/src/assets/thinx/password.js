@@ -98,7 +98,7 @@ var PasswordReset = function() {
                   $('.login-button').attr('href', '/');
                 }
               } else {
-                console.log(response.status)
+                console.log(response.status);
                 if (response.status == 'user_not_found') {
                   $('.msg-error', $('.reset-form')).text('User not found.');
                   $('.msg-error', $('.reset-form')).show();

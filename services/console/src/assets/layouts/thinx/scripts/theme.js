@@ -75,7 +75,9 @@ var Theme = function () {
 
         // set header
         $('.page-header > .page-header-inner').addClass("container");
-        var cont = $('body > .clearfix').after('<div class="container"></div>');
+
+        // set container
+        $('body > .clearfix').after('<div class="container"></div>');
 
         // set content
         $('.page-container').appendTo('body > .container');
@@ -231,12 +233,14 @@ var Theme = function () {
       $('.sidebar-menu-option', panel).val("hover");
     }
 
+    /*
     var sidebarOption = $('.sidebar-option', panel).val();
     var headerOption = $('.page-header-option', panel).val();
     var footerOption = $('.page-footer-option', panel).val();
     var sidebarPosOption = $('.sidebar-pos-option', panel).val();
     var sidebarStyleOption = $('.sidebar-style-option', panel).val();
     var sidebarMenuOption = $('.sidebar-menu-option', panel).val();
+    */
 
     $('.layout-option, .page-header-top-dropdown-style-option, .page-header-option, .sidebar-option, .page-footer-option, .sidebar-pos-option, .sidebar-style-option, .sidebar-menu-option', panel).change(setLayout);
   };

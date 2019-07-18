@@ -150,7 +150,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
           }
           toastr.success('Repository Detached.', '<ENV::loginPageTitle>', {timeOut: 5000});
           $scope.deviceForm.source = null;
-          $scope.$apply()
+          $scope.$apply();
         } else {
           console.log(response);
           toastr.error('Detach Failed.', '<ENV::loginPageTitle>', {timeOut: 5000});

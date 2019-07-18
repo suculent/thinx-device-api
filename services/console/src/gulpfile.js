@@ -35,6 +35,7 @@ var env = {
   baseUrl: 'https://' + process.env.WEB_HOSTNAME + ':7443',
   googleTrackingCode: process.env.GOOGLE_ANALYTICS_ID,
   rollbarAccessToken: process.env.ROLLBAR_ACCESS_TOKEN,
+  crispWebsiteId: process.env.CRISP_WEBSITE_ID,
   projectDescription: isEnterprise ? '' : 'Manage IoT devices (for MCUs eg. ESP32, ESP8266 or any systems running Node.js, Micropython, NodeMCU, Arduino...), build and update firmwares remotely (FOTA/firmware-over-the-air), transform and route sensor data (MQTT)'
 };
 
@@ -181,8 +182,10 @@ gulp.task('buildPublic', function() {
   var compiled_public_js,
       compiled_public_css;
 
+ /*
   var compiled_app_js,
       compiled_app_css;
+  */
 
   // JS
   compiled_public_js = merge(

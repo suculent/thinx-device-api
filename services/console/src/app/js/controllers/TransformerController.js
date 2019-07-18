@@ -64,7 +64,7 @@ angular.module('RTM').controller('TransformerController', ['$rootScope', '$scope
       console.log('-- updating transformer ' + utid + '--');
       $rootScope.getTransformerByUtid(utid).body = base64converter('encode', $scope.transformerForm.body);
       $rootScope.getTransformerByUtid(utid).alias = $scope.transformerForm.alias;
-    };
+    }
 
     $scope.$emit("saveProfileChanges", ["transformers"])
     $('#pageModal').modal('hide');

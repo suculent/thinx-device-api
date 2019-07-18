@@ -126,7 +126,7 @@ angular.module('RTM').controller('UserProfileController', function($rootScope, $
       toastr.error('Avatar Update Failed Badly.', '<ENV::loginPageTitle>', {timeOut: 5000});
     });
 
-  }
+  };
 
   $scope.removeGoal = function(goalId) {
     console.log('-- current goals: ' + $rootScope.profile.info.goals);
@@ -135,7 +135,7 @@ angular.module('RTM').controller('UserProfileController', function($rootScope, $
     var index = $rootScope.profile.info.goals.indexOf(goalId);
     if (index > -1) {
       $rootScope.profile.info.goals.splice(index, 1);
-    };
+    }
   };
 
 
@@ -147,7 +147,7 @@ angular.module('RTM').controller('UserProfileController', function($rootScope, $
     var index = $rootScope.profile.info.tags.indexOf(tagId);
     if (index > -1) {
       $rootScope.profile.info.tags.splice(index, 1);
-    };
+    }
   };
 
   $scope.downloadProfile = function() {

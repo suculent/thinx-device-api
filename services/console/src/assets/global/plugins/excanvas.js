@@ -895,11 +895,11 @@ if (!document.createElement('canvas').getContext) {
 
     for (var i = 0; i < this.currentPath_.length; i++) {
       var p = this.currentPath_[i];
-      var c;
+      // var c;
 
       switch (p.type) {
         case 'moveTo':
-          c = p;
+          // c = p;
           lineStr.push(' m ', mr(p.x), ',', mr(p.y));
           break;
         case 'lineTo':

@@ -22,15 +22,15 @@
     "negotiator": "0.6.1"
   },
   "devDependencies": {
-    "coveralls": "^3.0.5",
-    "eslint": "^6.0.1",
+    "coveralls": "^2.13.1",
+    "eslint": "^5.16.0",
     "eslint-config-angular": "^0.5.0",
     "eslint-config-jquery": "^2.0.0",
     "eslint-plugin-angular": "^4.0.1",
-    "eslint-plugin-jquery": "^1.5.1",
+    "eslint-plugin-jquery": "^1.5.0",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
-    "gulp-connect": "^5.7.0",
+    "gulp-connect": "^4.1.0",
     "gulp-debug": "^4.0.0",
     "gulp-ignore": "^2.0.1",
     "gulp-inject-envs": "^1.1.0",
@@ -45,7 +45,7 @@
     "gulp-uglify-es": "^1.0.4",
     "gulp-util": "^3.0.8",
     "merge-stream": "^2.0.0",
-    "nyc": "^14.1.1",
+    "nyc": "^11.0.2",
     "protractor": "^5.3.0"
   },
   "nyc": {

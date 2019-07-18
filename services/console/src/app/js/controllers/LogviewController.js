@@ -4,7 +4,8 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
     console.log('#### Build Log Overlay init')
   });
 
-  var actionNotifications = [];
+  // not implemented yet
+  //var actionNotifications = [];
 
   function openSocket() {
     if ("WebSocket" in window) {
@@ -179,7 +180,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
 
         // YES/NO
         if (msg.response_type == 'bool') {
-          var formToast = toastr['info'](
+          toastr['info'](
             msg.body + "<br><br>" +
             msg.nid + "<br><br>" +
             '<div><button type="button" id="okBtn-' + msg.nid +
@@ -211,7 +212,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
 
         // INPUT string
         if (msg.response_type == 'string') {
-          var formToast = toastr['warning'](
+          toastr['warning'](
             msg.body + "<br><br>" +
             msg.nid + "<br><br>" +
             '<div><input class="toastr-input" name="reply-' + msg.nid + '" value=""/></div><br>' +
