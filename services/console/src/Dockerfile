@@ -1,7 +1,6 @@
-
 # docker build -t suculent/thinx-console .
 
-FROM ellerbrock/alpine-gulp AS builder
+FROM suculent/alpine-gulp AS builder
 
 ARG COMPOSE_PROJECT_NAME
 ARG WEB_HOSTNAME
