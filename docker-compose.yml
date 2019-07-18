@@ -158,6 +158,7 @@ services:
        - ENVIRONMENT=${ENVIRONMENT}
        - GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID}
        - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
+       - CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID}
     networks:
       - nat
       - internal
@@ -174,6 +175,7 @@ services:
       - ENVIRONMENT=${ENVIRONMENT}
       - GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID}
       - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
+      - CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID}
 
     labels:
       - "traefik.enable=true"
