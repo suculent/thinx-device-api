@@ -15,6 +15,7 @@ jobs:
         auth:
           username: $DOCKER_USERNAME  # can specify string literal values
           password: $DOCKER_PASSWORD  # or project environment variable reference
+      - image: redis
     steps:
 
     # Use Remote Docker to run CouchDB and Transformer containers alongside
@@ -104,15 +105,21 @@ jobs:
 
     - run:
         name: Run CouchDB
-        command: docker run -d --rm -p 5984:5984 -e COUCHDB_ADMIN=rtmtest -e COUCHDB_PASS=rtmtest -e NODENAME=couchdb --name="couchdb" suculent/thinx-couchdb-master
+        command: |
+            echo "$DOCKER_PASS" | docker login --username DOCKER_USER --password-stdin
+            docker run -d --rm -p 5984:5984 -e COUCHDB_ADMIN=rtmtest -e COUCHDB_PASS=rtmtest -e NODENAME=couchdb --name="couchdb" suculent/thinx-couchdb-master
 
     - run:
         name: Run Redis
-        command: docker run -d --rm -p 6379:6379 -e REDIS_PASSWORD=m7t0r3d1sn3m --name="thinx-redis" suculent/redis-slave:latest
+        command:  |
+            echo "$DOCKER_PASS" | docker login --username DOCKER_USER --password-stdin
+            docker run -d --rm -p 6379:6379 -e REDIS_PASSWORD=testpass --name="thinx-redis" suculent/redis-slave:latest
 
     - run:
         name: Run Mosquitto
-        command: docker run -d --rm -p 1883:1883 --name="mosquitto" suculent/thinx-message-broker
+        command: |
+            echo "$DOCKER_PASS" | docker login --username DOCKER_USER --password-stdin
+            docker run -d --rm -p 1883:1883 --name="mosquitto" suculent/thinx-message-broker
 
     - run:
         name: Check running Docker containers
@@ -123,12 +130,12 @@ jobs:
 
         # In cases where thinx-device-api runs as node.js app against containers in CircleCI, IPs depend on run order
     - run: echo "172.17.0.2 couchdb" >> /etc/hosts
-    - run: echo "172.17.0.3 thinx-redis" >> /etc/hosts
+    - run: echo "127.0.0.1 thinx-redis" >> /etc/hosts
     - run: echo "172.17.0.4 mosquitto" >> /etc/hosts
 
     - run:
-        name: NPM Test
-        command: npm run mocha
+        name: NPM Test (Requires Redis)
+        command: ps -ax && npm run mocha
 
     - run: mkdir -p $CIRCLE_TEST_REPORTS/rspec
     - run:

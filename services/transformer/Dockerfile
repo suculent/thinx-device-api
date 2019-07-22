@@ -1,7 +1,5 @@
 FROM node:10-alpine
 
-MAINTAINER Matej Sychra <suculent@me.com>
-
 ARG SQREEN_APP_NAME
 ARG SQREEN_TOKEN
 ARG ROLLBAR_ACCESS_TOKEN
@@ -22,7 +20,7 @@ RUN rm -rf ./node_modules
 RUN npm config set unsafe-perm true
 
 # allow building native extensions with alpine: https://github.com/nodejs/docker-node/issues/384
-RUN npm --silent install --quiet node-gyp -g
+RUN npm install node-gyp
 
 # Sqreen.io token is inside a JSON file /app/sqreen.json
 COPY / /home/node
