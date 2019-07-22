@@ -159,7 +159,7 @@ var Transformer = function() {
       var status = input_raw;
       var error = null;
 
-      for (job_index in jobs) {
+      for (var job_index in jobs) {
 
         const job = jobs[job_index];
         const code = job.code;

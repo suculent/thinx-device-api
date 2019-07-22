@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd app
+
 if [[ -z $THINX_TRANSFORMER_PORT ]]; then
   echo "THINX_TRANSFORMER_PORT is not set. Default value: 7474; default GitLab CI value: 5000"
 fi
