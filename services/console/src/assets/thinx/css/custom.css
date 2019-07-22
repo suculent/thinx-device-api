@@ -411,7 +411,7 @@
   max-height: 100%;
   margin: 20px;
   margin-top: 0;
-  padding-top: 0;
+  /* padding-top: 0; */
   margin-right: 30px;
   border: 0;
   -webkit-border-radius: 0;
@@ -495,13 +495,10 @@
   border-radius: 0;
   padding: 20px;
   padding-top: 37px;
-  overflow: auto;
   position: absolute;
   bottom: 20px;
-
   overflow: hidden;
   margin-top: 20px;
-
   pointer-events:none;
 }
 #editor-overlay {
@@ -1212,7 +1209,7 @@
   cursor: pointer;
 }
 .device-build-status:hover {
-  border.color: #AAAAAA;
+  border-color: #AAAAAA;
 }
 .device-build-status:hover i {
   opacity: 1;
@@ -1409,7 +1406,7 @@
 }
 
 .copyright-link {
-  mergin-top: 40px;
+  margin-top: 40px;
 }
 
 
