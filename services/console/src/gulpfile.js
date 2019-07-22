@@ -27,7 +27,7 @@ var env = {
   enterprise: isEnterprise,
   projectName: process.env.COMPOSE_PROJECT_NAME,
   loginPageTitle: 'Keyguru Console',
-  hostName: process.env.API_HOSTNAME,
+  landingHostName: process.env.LANDING_HOSTNAME,
   apiBaseUrl: process.env.API_BASEURL + '/api',
   apiDirectUrl: 'https://' + process.env.API_HOSTNAME,
   slackClientId: '233115403974.233317554391',
