@@ -8,7 +8,7 @@
     "domain": "<your-domain>"
   },
   "redis": {
-    "host": "thinx-redis",
+    "host": "127.0.0.1",
     "password": "testpass"
   },
   "mqtt": {
