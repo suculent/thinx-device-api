@@ -43,7 +43,7 @@
           <button style="border: 0" class="btn grey-mint btn-outline btn-circle btn-sm" ng-click="descBtnForm.$show()" ng-hide="descBtnForm.$visible"><i class="fa fa-pencil"></i></button>
         </div>
         <div>
-          <img ng-src="../assets/thinx/img/external/{{deviceForm.base_platform}}_logo_200.png" class="platform-icon pull-left {{deviceForm.base_platform}}-platform-color" />
+          <img ng-src="../assets/thinx/img/external/{{deviceForm.base_platform}}_logo_200.png" alt="Platform icon" class="platform-icon pull-left {{deviceForm.base_platform}}-platform-color" />
           <div class="platform-title" title="Device Platform">
             {{$root.platforms[deviceForm.base_platform].name}} | <span class="device-commit-id" title="Firmware Commit ID">{{getDeviceByUdid(deviceForm.udid).commit | limitTo: 7}}</span>
             <br>
@@ -60,8 +60,8 @@
     <div class="row" ng-if="showIcons">
       <div class="col-xs-12">
         <div class="iot-iconset">
-          <a ng-repeat="icon in $root.thinx.iotIcons" class="iot-icon" ng-click="submitIcon(icon)">
-            <img style="width: 64px" ng-src="../assets/thinx/img/ioticons/b_medium_{{('0'+icon).slice(-2)}}.png" />
+          <a ng-repeat="icon in $root.thinx.iotIcons"  class="iot-icon" ng-click="submitIcon(icon)">
+            <img style="width: 64px" ng-src="../assets/thinx/img/ioticons/b_medium_{{('0'+icon).slice(-2)}}.png" alt="Platform icon" />
           </a>
         </div>
       </div>
@@ -377,7 +377,7 @@
       <div class="col-md-9">
         <div>
           <a ng-href="https://www.google.com/maps/dir/?api=1&destination={{$root.getDeviceByUdid(deviceForm.udid).lat}},{{$root.getDeviceByUdid(deviceForm.udid).lon}}" target="_blank">
-            <img class="location-map-image" ng-src="https://maps.googleapis.com/maps/api/staticmap?key=AIzaSyAo8wftesNw_ebhZSVQTnzqhQbUJx_k4GI&center={{$root.getDeviceByUdid(deviceForm.udid).lat}},{{$root.getDeviceByUdid(deviceForm.udid).lon}}&amp;size=600x120&amp;sensor=false&amp;zoom=10&amp;markers=color:red%7Clabel:%7C{{$root.getDeviceByUdid(deviceForm.udid).lat}},{{$root.getDeviceByUdid(deviceForm.udid).lon}}" />
+            <img class="location-map-image" alt="Map icon" ng-src="https://maps.googleapis.com/maps/api/staticmap?key=AIzaSyAo8wftesNw_ebhZSVQTnzqhQbUJx_k4GI&center={{$root.getDeviceByUdid(deviceForm.udid).lat}},{{$root.getDeviceByUdid(deviceForm.udid).lon}}&amp;size=600x120&amp;sensor=false&amp;zoom=10&amp;markers=color:red%7Clabel:%7C{{$root.getDeviceByUdid(deviceForm.udid).lat}},{{$root.getDeviceByUdid(deviceForm.udid).lon}}" />
           </a>
         </div>
       </div>
@@ -388,7 +388,7 @@
       <label class="control-label col-md-3">Telemetry</label>
       <div class="col-md-9" style="margin-top: 15px;">
         <div class="signal-bar">
-          <img src="../assets/thinx/img/signalaxe_short.png" />
+          <img src="../assets/thinx/img/signalaxe_short.png" alt="Signalaxe icon" />
           <span class="signal-title-50">-50</span>
           <span class="signal-title-100">-100</span>
           <span class="signal-title-150">-150</span>

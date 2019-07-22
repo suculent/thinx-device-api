@@ -555,7 +555,7 @@
   <h3>1. Create private API Key
     <span class="close" data-close="note" ng-click="$root.profile.info.goals.push('apikey'); $emit('saveProfile');"></span>
   </h3>
-  <img src="/assets/thinx/img/guide/apikey.png" class="guide-image" />
+  <img src="/assets/thinx/img/guide/apikey.png" class="guide-image" alt="Apikey icon" />
   <p>
     Go to Settings menu &raquo; <a ui-sref="apikey">API Keys</a> and push the <b>Create API Key</b> button to generate API Key for your new device.
     <br><br>
@@ -566,9 +566,9 @@
     <h3>2. Device Enrollment
       <span class="close" data-close="note" ng-click="$root.profile.info.goals.push('help-enroll'); $emit('saveProfile');"></span>
     </h3>
-    <img src="/assets/thinx/img/guide/paste.png" class="guide-image" />
-    <img src="/assets/thinx/img/guide/build.png" class="guide-image" />
-    <img src="/assets/thinx/img/guide/flash.png" class="guide-image" />
+    <img src="/assets/thinx/img/guide/paste.png" class="guide-image" alt="Paste icon" />
+    <img src="/assets/thinx/img/guide/build.png" class="guide-image" alt="Build icon" />
+    <img src="/assets/thinx/img/guide/flash.png" class="guide-image" alt="Flash icon" />
     <p>
       To start managing your first device you need to <b>flash it</b> with one of THiNX Vanilla Firmware's examples.
       <br>Enroll your device by <b>pasting your API Key</b> into <b>thinx.h</b> file before flashing it or set it later when the device is in Access Point mode.
@@ -581,7 +581,7 @@
     <h3>3. Device Setup
       <span class="close" data-close="note" ng-click="$root.profile.info.goals.push('help-enroll-setup'); $emit('saveProfile');"></span>
     </h3>
-    <img src="/assets/thinx/img/guide/iotdevice.png" class="guide-image" />
+    <img src="/assets/thinx/img/guide/iotdevice.png" class="guide-image" alt="IoT device icon" />
     <p>
       By default, the THiNX firmware will boot up into wifi Acces Point mode with essid <b>"THiNX-AP"</b>.
       <br>Connect to device's wifi and wait few seconds for captive portal to pop up. Otherwise navigate to <b>192.168.4.1</b> in your browser.
@@ -595,7 +595,7 @@
     <h3>Security
       <span class="close" data-close="note" ng-click="$root.profile.info.goals.push('help-deploykey'); $emit('saveProfile')"></span>
     </h3>
-    <img src="/assets/thinx/img/guide/folderkey.png" class="guide-image" />
+    <img src="/assets/thinx/img/guide/folderkey.png" class="guide-image" alt="Folder icon" />
     <p>Create your <b>Deploy Key</b> at <a ui-sref="deploykey">Deploy Key Management</a> to enable access to your private repositories.</p>
   </div>
   <div class="note note-success" ng-hide="$root.profile.info.goals.includes('update') || $root.profile.info.goals.includes('help-update')">
