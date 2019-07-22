@@ -2256,8 +2256,8 @@ var ThinxApp = function() {
       });
     }
     console.log(JSON.stringify(req.params));
-    //res.status(401).end();
-    res.redirect(app_config.public_url);
+    res.status(200).end();
+    //res.redirect(app_config.public_url);
   });
 
   /*

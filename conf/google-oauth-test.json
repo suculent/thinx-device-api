@@ -1,11 +1,11 @@
 {
   "web": {
-    "client_id": "295536233579-lje6pjcv0lidogrtvftbodcl6ok74657.apps.googleusercontent.com",
+    "client_id": "<client_id.",
     "project_id": "thinx-cloud",
     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
     "token_uri": "https://accounts.google.com/o/oauth2/token",
     "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-    "client_secret": "-V64yfrX0fVHmkgng2O-QRA1",
+    "client_secret": "<client_secret>",
     "redirect_uris": ["https://thinx.cloud:8443/oauth/cb"]
   }
 }
