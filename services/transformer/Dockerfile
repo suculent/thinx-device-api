@@ -20,7 +20,7 @@ RUN rm -rf ./node_modules
 RUN npm config set unsafe-perm true
 
 # allow building native extensions with alpine: https://github.com/nodejs/docker-node/issues/384
-RUN npm install node-gyp
+RUN npm install -g node-gyp
 
 # Sqreen.io token is inside a JSON file /app/sqreen.json
 COPY / /home/node
