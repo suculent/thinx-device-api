@@ -12,6 +12,15 @@ ENV REDIS_DISABLE_COMMANDS=${REDIS_DISABLE_COMMANDS}
 
 RUN echo "REDIS_PASSWORD: " ${REDIS_PASSWORD}
 
+RUN apt-get update && apt-get install -y ca-certificates apt-transport-https cron && \
+    rm -rf /etc/apt/sources.list && apt-get update
+
+# adduser --system --disabled-password --shell /bin/bash redis
+
+COPY ./bgsave-cron /bgsave-cron
+COPY ./redis_bgsave.sh /redis_bgsave.sh
+RUN crontab /bgsave-cron
+
 EXPOSE 6379
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
