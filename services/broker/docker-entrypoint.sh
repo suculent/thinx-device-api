@@ -2,6 +2,8 @@
 
 set +e
 
+touch /var/log/cron.log
+
 echo "Starting cron..."
 
 cron -f &
@@ -21,11 +23,13 @@ su mosquitto -s /bin/bash
 
 echo "Starting MQTT broker..."
 
+pkill apt # attempt to prevent sticking, suspicious thing it is.
+
+# must run in background to prevent killing container on restart
 mosquitto -d -v -c /mqtt/config/mosquitto.conf
 
 ps -ax | grep mosquitto
 
-pkill apt # attempt to prevent sticking, suspicious thing it is.
+tail -f /mqtt/log/mosquitto.log
 
-# Run forever so the container does not die...
 sleep infinity
