@@ -140,7 +140,6 @@ services:
       - "traefik.enable=true"
       - "traefik.port=7442"
       - "traefik.backend=thinx-api"
-      - "traefik.frontend.rule=Host:${THINX_HOSTNAME}"
 
   console:
     env_file:
