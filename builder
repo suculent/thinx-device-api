@@ -628,7 +628,6 @@ case $PLATFORM in
 
 			cd $BUILD_PATH/$REPO_PATH | tee -a "${LOG_PATH}"
 			ls -la | tee -a "${LOG_PATH}"
-			cd ./* | tee -a "${LOG_PATH}"
 			pwd | tee -a "${LOG_PATH}"
 			# ls -la | tee -a "${LOG_PATH}"
 
