@@ -30,8 +30,15 @@ services:
 
   couchdb:
     env_file: .env
-    image: apache/couchdb:2.3.1
-    # build: ./services/couchdb # currently unused for speed, should work the same except it does not log pass in entry point
+    # image: apache/couchdb:2.3.1
+    build:
+      context: ./services/couchdb # currently used for logging, should work the same except it does not log pass in entry point
+      args:
+      - NODENAME=${NODENAME}
+      - COUCHDB_USER=${COUCHDB_USER}
+      - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+      - COUCHDB_COOKIE=${COUCHDB_COOKIE}
+      - COUCHDB_SECRET=${COUCHDB_SECRET}
     restart: unless-stopped
     environment:
       - NODENAME=${NODENAME}
