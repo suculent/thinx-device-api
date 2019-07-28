@@ -78,9 +78,6 @@ RUN mv /tmp/docker* /usr/bin
 # Install app dependencies
 COPY package*.json ./
 
-# Copy app source code
-COPY . .
-
 RUN openssl version \
  && node -v \
  && npm install --only-prod .
@@ -113,13 +110,16 @@ EXPOSE 7444
 # GitLab Webbook
 EXPOSE 9002
 
+# Copy app source code
+COPY . .
+
 # this should be generated/overwritten with sed on entrypoint, entrypoint needs /.first_run file and all ENV_VARS
 COPY ./.thinx_env /.thinx_env
 COPY ./conf/.thx_prefix ./conf/.thx_prefix
 
-ADD https://get.aquasec.com/microscanner .
-RUN chmod +x microscanner
-RUN ./microscanner ${AQUA_SEC_TOKEN} --continue-on-failure
+#ADD https://get.aquasec.com/microscanner .
+#RUN chmod +x microscanner
+#RUN ./microscanner ${AQUA_SEC_TOKEN} --continue-on-failure
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
