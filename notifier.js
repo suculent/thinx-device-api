@@ -33,7 +33,7 @@ var crypto = require('crypto');
 var fs = require('fs-extra');
 var db = config.database_uri;
 
-var Globals = require("./globals.js");
+var Globals = require("./lib/thinx/globals.js");
 var prefix = Globals.prefix();
 
 var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
