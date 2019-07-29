@@ -2,7 +2,7 @@
 
 set -e
 
-echo "Starting Redis with password ${REDIS_PASSWORD}"
+echo "Starting Redis with password in entrypoint ${REDIS_PASSWORD}"
 
 redis-server --port 6379 --requirepass $REDIS_PASSWORD
 
