@@ -42,7 +42,7 @@ jobs:
         - v1-dep-
 
     # This is based on your 1.0 configuration file or project settings
-    - run: apt-get update && apt-get install -y --fix-missing --no-install-recommends curl jq
+    - run: apt-get update && apt-get install -y --fix-missing --no-install-recommends curl jq mosquitto
     - run: cd spec/test_repositories && bash ./get-tests.sh
     - run: git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
     - run: npm install coveralls nyc eslint -g
@@ -84,6 +84,14 @@ jobs:
     # Test
     #   This would typically be a build job when using workflows, possibly combined with build
     - run: mkdir -p $CIRCLE_TEST_REPORTS/reports
+
+    # This is a big thing... creating test mount with all sample data...
+
+    - run:
+        name: Init filesystem
+        command: |
+            mkdir -p /mnt/data/
+        # curl sample data zip from somewhere and unpack, maybe provide base filesystem zip as kind of a build...
 
     - run:
         name: Install ESLint and project
