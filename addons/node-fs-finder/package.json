@@ -26,13 +26,13 @@
 		"moment": "^2.24.0",
 		"operator-compare": "~1.0.1",
 		"escape-regexp": "~0.0.1",
-		"q": "~1.0.0",
-		"async": "^0.2.10"
+		"q": "~1.5.1",
+		"async": "^3.1.0"
 	},
 	"devDependencies": {
-		"chai": "~1.8.1",
-		"fs-mock": "~1.0.1",
-		"mocha": "~1.17.0"
+		"chai": "~4.2.0",
+		"fs-mock": "~1.2.1",
+		"mocha": "~6.2.0"
 	},
 	"scripts": {
 		"build-and-test": "npm run build && npm run test",
