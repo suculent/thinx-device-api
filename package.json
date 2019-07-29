@@ -65,7 +65,7 @@
     "slack-notify": "^0.1.7",
     "slackbots": "^1.2.0",
     "snyk": "^1.199.2",
-    "sqreen": "^1.31.0",
+    "sqreen": "^1.32.0",
     "ssh-fingerprint": "0.0.1",
     "ssl-root-cas": "^1.3.1",
     "tail": "^2.0.2",
