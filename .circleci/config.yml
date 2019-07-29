@@ -106,20 +106,20 @@ jobs:
     - run:
         name: Run CouchDB
         command: |
-            echo "$DOCKER_PASS" | docker login --username DOCKER_USER --password-stdin
-            docker run -d --rm -p 5984:5984 -e COUCHDB_ADMIN=rtmtest -e COUCHDB_PASS=rtmtest -e NODENAME=couchdb --name="couchdb" suculent/thinx-couchdb-master
+            docker login --username $DOCKER_USER --password=$DOCKER_PASS
+            docker build -t suculent/couch services/couchdb/ && docker run -d --rm -p 5984:5984 -e COUCHDB_ADMIN=rtmtest -e COUCHDB_PASS=rtmtest -e NODENAME=couchdb --name="couchdb" suculent/couch
 
     - run:
         name: Run Redis
         command:  |
-            echo "$DOCKER_PASS" | docker login --username DOCKER_USER --password-stdin
-            docker run -d --rm -p 6379:6379 -e REDIS_PASSWORD=testpass --name="thinx-redis" suculent/redis-slave:latest
+            docker login --username $DOCKER_USER --password=$DOCKER_PASS
+            docker build -t suculent/redis && docker run -d --rm -p 6379:6379 -e REDIS_PASSWORD=testpass --name="thinx-redis" suculent/redis
 
     - run:
         name: Run Mosquitto
         command: |
-            echo "$DOCKER_PASS" | docker login --username DOCKER_USER --password-stdin
-            docker run -d --rm -p 1883:1883 --name="mosquitto" suculent/thinx-message-broker
+            docker login --username $DOCKER_USER --password=$DOCKER_PASS
+            docker build -t suculent/mosquitto && docker run -d --rm -p 1883:1883 --name="mosquitto" suculent/mosquitto
 
     - run:
         name: Check running Docker containers
