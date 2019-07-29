@@ -106,19 +106,19 @@ jobs:
     - run:
         name: Run CouchDB
         command: |
-            docker login --username $DOCKER_USER --password=$DOCKER_PASSWORD
+            docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
             docker build -t suculent/couch services/couchdb/ && docker run -d --rm -p 5984:5984 -e COUCHDB_ADMIN=rtmtest -e COUCHDB_PASS=rtmtest -e NODENAME=couchdb --name="couchdb" suculent/couch
 
     - run:
         name: Run Redis
         command:  |
-            docker login --username $DOCKER_USER --password=$DOCKER_PASSWORD
+            docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
             docker build -t suculent/redis && docker run -d --rm -p 6379:6379 -e REDIS_PASSWORD=testpass --name="thinx-redis" suculent/redis
 
     - run:
         name: Run Mosquitto
         command: |
-            docker login --username $DOCKER_USER --password=$DOCKER_PASSWORD
+            docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
             docker build -t suculent/mosquitto && docker run -d --rm -p 1883:1883 --name="mosquitto" suculent/mosquitto
 
     - run:
