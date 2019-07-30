@@ -2287,9 +2287,8 @@ var ThinxApp = function() {
         }
       });
     }
-    console.log(JSON.stringify(req.params));
-    res.status(200).end();
-    //res.redirect(app_config.public_url);
+    // Redirect to login page, must be on same CORS domain (acl_url must be == public_url)...
+    res.redirect(app_config.public_url);
   });
 
   /*
