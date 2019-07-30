@@ -46,10 +46,9 @@ WORKDIR /home/node/build
 # Install app dependencies & source code
 COPY package*.json ./
 COPY . .
-RUN echo "SRC BEFORE BUILD: " && pwd && ls -la \
-    && npm install . \
-    && npm run build
-#   && npm audit fix
+RUN npm install . \
+    && npm run build \
+    && npm audit fix
 
 RUN echo "SRC/HTML AFTER BUILD: " && cd ./html && pwd && ls -la
 
