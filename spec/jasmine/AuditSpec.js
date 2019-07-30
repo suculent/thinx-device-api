@@ -16,6 +16,7 @@ describe("Audit log", function() {
     var r = Audit.fetch(
       owner,
       function(err, body) {
+        expect(err).toBe(false);
         done();
       }
     );
