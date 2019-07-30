@@ -28,7 +28,7 @@
     "eslint-config-jquery": "^2.0.0",
     "eslint-plugin-angular": "^4.0.1",
     "eslint-plugin-jquery": "^1.5.0",
-    "gulp": "^4.0.2",
+    "gulp": "~3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-connect": "^5.7.0",
     "gulp-debug": "^4.0.0",
