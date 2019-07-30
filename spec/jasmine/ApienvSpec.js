@@ -33,7 +33,7 @@ describe("API Env", function() {
                 function(err, response) {
                   expect(err).toBe(false);
                   expect(response).toBeDefined();
-
+                  console.log("running inherited test... (o'rly?)");
                   // revoke: function(owner, name, callback)
                   it(
                     "should be able to revoke environment variables",
