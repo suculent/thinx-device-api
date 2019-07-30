@@ -12,6 +12,8 @@ ARG ENVIRONMENT
 ARG GOOGLE_ANALYTICS_ID
 ARG ROLLBAR_ACCESS_TOKEN
 ARG CRISP_WEBSITE_ID
+ARG NGINX_PORT
+ARG NGINX_HOST
 
 ENV COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}
 ENV LANDING_HOSTNAME=${LANDING_HOSTNAME}
@@ -23,6 +25,8 @@ ENV ENVIRONMENT=${ENVIRONMENT}
 ENV GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID}
 ENV ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
 ENV CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID}
+ENV NGINX_PORT=${NGINX_PORT}
+ENV NGINX_HOST=${NGINX_HOST}
 
 ENV CACHEBUST=1
 
@@ -46,10 +50,9 @@ WORKDIR /home/node/build
 # Install app dependencies & source code
 COPY package*.json ./
 COPY . .
-RUN echo "SRC BEFORE BUILD: " && pwd && ls -la \
-    && npm install . \
-    && npm run build
-#   && npm audit fix
+RUN npm install . \
+    && npm run build \
+    && npm audit fix
 
 RUN echo "SRC/HTML AFTER BUILD: " && cd ./html && pwd && ls -la
 

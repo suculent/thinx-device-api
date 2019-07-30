@@ -239,27 +239,58 @@ var ThinxApp = function() {
 
   // Database preparation on first run
 
+
+
   function initDatabases() {
 
+    function getDocument(file) {
+      if (!fs.existsSync(file)) {
+        return false;
+      }
+      const data = fs.readFileSync(file);
+      if (typeof(data) === "undefined") {
+        console.log("[getDocument] no data read.");
+        return false;
+      }
+      // Parser may fail
+      try {
+        const filter_doc = JSON.parse(data);
+        return filter_doc;
+      } catch (e) {
+        console.log("File may not exist: "+e);
+        return false;
+      }
+    }
+
+    function logCouchError(err, body, header) {
+      console.log("[" + tag + "] Insert error: "+err);
+      if (typeof(body) !== "undefined") {
+        console.log("[" + tag + "] Insert body: "+body);
+      }
+      if (typeof(body) !== "undefined") {
+        console.log("[" + tag + "] Insert header: "+header);
+      }
+    }
+
     function injectDesign(db, design, file) {
-      const design_doc = require(file);
-      db.insert("_design/" + design, design_doc, function(err, body, header) {
-        console.log("Insert error: "+err);
-        console.log("Insert body: "+body);
-        console.log("Insert header: "+header);
-      });
+      let design_doc = getDocument(file);
+      if (design_doc) {
+        db.insert("_design/" + design, design_doc, function(err, body, header) {
+          logCouchError(err, body, header, "init:design:"+design);
+        });
+      } else {
+        console.log("Design doc injection issue at "+file);
+      }
     }
 
     function injectReplFilter(db, filter, file) {
-      try {
-        const filter_doc = require(file);
+      let filter_doc = getDocument(file);
+      if (filter_doc) {
         db.insert("_design/repl_filters", filter_doc, function(err, body, header) {
-          console.log("Insert error: "+err);
-          console.log("Insert body: "+body);
-          console.log("Insert header: "+header);
+          logCouchError(err, body, header, "init:repl:"+design);
         });
-      } catch (e) {
-        console.log("File may not exist: "+e);
+      } else {
+        console.log("Filter doc injection issue at "+file);
       }
     }
 
@@ -267,10 +298,10 @@ var ThinxApp = function() {
       if (err.toString().indexOf("the file already exists") != -1) {
         // silently fail, this is ok
       } else if (err.toString().indexOf("error happened") != -1) {
-        console.log("🚫 Database connectivity issue. " + err.toString() + " URI: "+app_config.database_uri);
+        console.log("[CRITICAL] 🚫 Database connectivity issue. " + err.toString() + " URI: "+app_config.database_uri);
         process.exit(1);
       } else {
-        console.log("🚫 Database " + name + " creation failed. " + err + " URI: "+app_config.database_uri);
+        console.log("[CRITICAL] 🚫 Database " + name + " creation failed. " + err + " URI: "+app_config.database_uri);
         process.exit(2);
       }
     }
@@ -1276,6 +1307,7 @@ var ThinxApp = function() {
       //console.log("** REG BODY: " + regTime);
       var registration = req.body.registration;
       device.register(registration, req.headers.authentication, _ws, function(success, response) {
+        console.log("Registration procedure complete, sending response...");
         // Append timestamp inside as library is not parsing HTTP response JSON properly
         // when it ends with anything else than }}
         if (success && typeof(response.registration) !== "undefined") {

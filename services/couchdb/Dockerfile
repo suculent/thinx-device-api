@@ -3,9 +3,16 @@ FROM debian:stretch-slim
 MAINTAINER CouchDB Developers dev@couchdb.apache.org
 
 ARG COUCHDB_USER
+ENV COUCHDB_USER=${COUCHDB_USER}
+
 ARG COUCHDB_PASSWORD
+ENV COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+
 ARG COUCHDB_COOKIE
+ENV COUCHDB_COOKIE=${COUCHDB_COOKIE}
+
 ARG COUCHDB_SECRET
+ENV COUCHDB_SECRET=${COUCHDB_SECRET}
 
 # Add CouchDB user account to make sure the IDs are assigned consistently
 RUN groupadd -g 5984 -r couchdb && useradd -u 5984 -d /opt/couchdb -g couchdb couchdb

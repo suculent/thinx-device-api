@@ -37,6 +37,8 @@ ENV AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
 
+RUN adduser --system --disabled-password --shell /bin/bash thinx
+
 # WHY? See blame.
 RUN sh -c "echo 'Dir::Ignore-Files-Silently:: \"(.save|.distupgrade)$\";' > /etc/apt/apt.conf.d/99ignoresave"
 
@@ -70,14 +72,12 @@ RUN apt-get update && \
 # Install Docker Client only (Docker is on the host) - fails with /bin/sh not found...
 ENV VER="18.06.3-ce"
 RUN curl -v -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
-RUN tar -xz -C /tmp -f /tmp/docker-$VER.tgz
-RUN mv /tmp/docker* /usr/bin
+RUN tar -xz -C /tmp -f /tmp/docker-$VER.tgz && \
+    rm -rf /tmp/docker-$VER.tgz
+RUN mv /tmp/docker/* /usr/bin
 
 # Install app dependencies
 COPY package*.json ./
-
-# Copy app source code
-COPY . .
 
 RUN openssl version \
  && node -v \
@@ -111,13 +111,17 @@ EXPOSE 7444
 # GitLab Webbook
 EXPOSE 9002
 
+# Copy app source code
+COPY . .
+
 # this should be generated/overwritten with sed on entrypoint, entrypoint needs /.first_run file and all ENV_VARS
 COPY ./.thinx_env /.thinx_env
 COPY ./conf/.thx_prefix ./conf/.thx_prefix
 
-ADD https://get.aquasec.com/microscanner .
-RUN chmod +x microscanner
-RUN ./microscanner ${AQUA_SEC_TOKEN} --continue-on-failure
+#ADD https://get.aquasec.com/microscanner .
+#RUN chmod +x microscanner
+#RUN ./microscanner ${AQUA_SEC_TOKEN} --continue-on-failure
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
+
 ENTRYPOINT [ "/docker-entrypoint.sh" ]

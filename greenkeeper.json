@@ -1,0 +1,13 @@
+{
+  "groups": {
+    "default": {
+      "packages": [
+        "addons/grunt-karma-coveralls/package.json",
+        "addons/node-fs-finder/package.json",
+        "package.json",
+        "services/console/src/package.json",
+        "services/transformer/app/package.json"
+      ]
+    }
+  }
+}

@@ -8,6 +8,8 @@
 
 set +e
 
+export SQREEN_DISABLE_STARTUP_WARNING=1
+
 export
 
 pwd

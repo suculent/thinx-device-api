@@ -8,8 +8,8 @@
     "domain": "<your-domain>"
   },
   "redis": {
-    "host": "127.0.0.1",
-    "password": "testpass"
+    "host": "localhost",
+    "password": ""
   },
   "mqtt": {
     "server": "mqtt://mosquitto",

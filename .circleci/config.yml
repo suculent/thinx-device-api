@@ -42,7 +42,7 @@ jobs:
         - v1-dep-
 
     # This is based on your 1.0 configuration file or project settings
-    - run: apt-get update && apt-get install -y --fix-missing --no-install-recommends curl jq
+    - run: apt-get update && apt-get install -y --fix-missing --no-install-recommends curl jq mosquitto
     - run: cd spec/test_repositories && bash ./get-tests.sh
     - run: git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
     - run: npm install coveralls nyc eslint -g
@@ -85,6 +85,14 @@ jobs:
     #   This would typically be a build job when using workflows, possibly combined with build
     - run: mkdir -p $CIRCLE_TEST_REPORTS/reports
 
+    # This is a big thing... creating test mount with all sample data...
+
+    - run:
+        name: Init filesystem
+        command: |
+            mkdir -p /mnt/data/
+        # curl sample data zip from somewhere and unpack, maybe provide base filesystem zip as kind of a build...
+
     - run:
         name: Install ESLint and project
         command: |
@@ -106,20 +114,20 @@ jobs:
     - run:
         name: Run CouchDB
         command: |
-            echo "$DOCKER_PASS" | docker login --username DOCKER_USER --password-stdin
-            docker run -d --rm -p 5984:5984 -e COUCHDB_ADMIN=rtmtest -e COUCHDB_PASS=rtmtest -e NODENAME=couchdb --name="couchdb" suculent/thinx-couchdb-master
+            docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
+            docker build -t suculent/couch ./services/couchdb && docker run -d --rm -p 5984:5984 -e COUCHDB_ADMIN=rtmtest -e COUCHDB_PASS=rtmtest -e NODENAME=couchdb --name="couchdb" suculent/couch
 
     - run:
         name: Run Redis
         command:  |
-            echo "$DOCKER_PASS" | docker login --username DOCKER_USER --password-stdin
-            docker run -d --rm -p 6379:6379 -e REDIS_PASSWORD=testpass --name="thinx-redis" suculent/redis-slave:latest
+            docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
+            docker build -t suculent/redis ./services/redis && docker run -d --rm -p 6379:6379 -e REDIS_PASSWORD=testpass --name="thinx-redis" suculent/redis
 
     - run:
         name: Run Mosquitto
         command: |
-            echo "$DOCKER_PASS" | docker login --username DOCKER_USER --password-stdin
-            docker run -d --rm -p 1883:1883 --name="mosquitto" suculent/thinx-message-broker
+            docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
+            docker build -t suculent/mosquitto ./services/broker && docker run -d --rm -p 1883:1883 --name="mosquitto" suculent/mosquitto
 
     - run:
         name: Check running Docker containers
