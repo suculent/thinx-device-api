@@ -30,7 +30,7 @@
 		"getmac": "^1.4.0",
 		"joi": "^14.3.1",
 		"parser": "^0.1.4",
-		"rollbar": "^2.3.9",
+		"rollbar": "^2.10.0",
 		"sqreen": "^1.32.0",
 		"ssl-root-cas": "^1.2.5",
 		"typeof": "^1.0.0",
