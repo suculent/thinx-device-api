@@ -48,13 +48,16 @@ jobs:
     - run: npm install coveralls nyc eslint -g
     - run: npm install .
     - run: mkdir statistics
+    
     # - run: gem install github_changelog_generator fails even with ruby 2.4
+    
     # The following line was run implicitly in your 1.0 builds based on what CircleCI inferred about the structure of your project. In 2.0 you need to be explicit about which commands should be run. In some cases you can discard inferred commands if they are not relevant to your project.
     - run: if [ -z "${NODE_ENV:-}" ]; then export NODE_ENV=test; fi
     - run: export PATH="~/suculent/thinx-device-api/node_modules/.bin:$PATH"
     - run: echo -e "export RAILS_ENV=test\nexport RACK_ENV=test" >> $BASH_ENV
     - run: gem install bundler
-    - run: 'bundler check --path=vendor/bundler || bundler install --path=vendor/bundler --jobs=4 --retry=3 '
+    - run: bundler check --path=vendor/bundler || bundler install --path=vendor/bundler --jobs=4 --retry=3
+    
     # Save dependency cache
     - save_cache:
         key: v1-dep-{{ .Branch }}-{{ epoch }}
@@ -143,7 +146,7 @@ jobs:
 
     - run:
         name: NPM Test (Requires Redis)
-        command: ps -ax && npm run mocha
+        command: node --version && npm run test
 
     - run: mkdir -p $CIRCLE_TEST_REPORTS/rspec
     - run:
