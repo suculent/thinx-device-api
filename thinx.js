@@ -1005,13 +1005,16 @@ var ThinxApp = function() {
       branch = req.body.branch;
     }
 
-    var url = req.body.url;
-    var alias = req.body.alias;
+    var object = {
+      owner: req.session.owner,
+      alias: req.body.alias,
+      url: req.body.url,
+      branch: branch
+    };
 
-    sources.add(req.session.owner, alias, url, branch,
-      function(success, response) {
+    sources.add(object, function(success, response) {
         respond(res, response);
-      });
+    });
   });
 
   /* Removes a GIT repository. Expects alias. */
