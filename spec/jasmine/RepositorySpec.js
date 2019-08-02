@@ -50,7 +50,7 @@ describe("Repository Watcher", function() {
   }, 15000);
 
   it("should be able tell repository has changed", function() {
-    watcher.checkRepositoryChange(repo_path, false, function(result) {
+    watcher.checkRepositoryChange(repo_path, false, function(status, result) {
       expect(result).toBeDefined();
       console.log("Repository change result: " + result);
     });
