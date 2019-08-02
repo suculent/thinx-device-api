@@ -145,11 +145,11 @@ jobs:
     - run: echo "172.17.0.4 mosquitto" >> /etc/hosts
 
     - run:
-        name: NPM Test (Requires Redis)
+        name: NPM Test (uses jasmine until Chai expect will be supported)
         command: |
             export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm use 10.16.0
-            npm run mocha
+            npm run test
 
     - run: mkdir -p $CIRCLE_TEST_REPORTS/rspec
     - run:
