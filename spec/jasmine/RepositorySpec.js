@@ -40,27 +40,6 @@ describe("Repository Watcher", function() {
     expect(watcher).toBeDefined();
   });
 
-  it("should be able to watch repository", function(done) {
-    watcher.watchRepository(repo_path, true, function(result) {
-      if (typeof(result) !== "undefined") {
-        console.log("watcher_callback result: " + JSON.stringify(
-          result));
-        if (result === false) {
-          console.log(
-            "No change detected on repository so far."
-          );
-        } else {
-          console.log(
-            "CHANGE DETECTED! - TODO: Commence re-build (will notify user but needs to get all required user data first (owner/device is in path)"
-          );
-        }
-      } else {
-        console.log("watcher_callback: no result");
-      }
-    });
-    done();
-  }, 15000);
-
   it("should be able to infer platform from repository contents", function(done) {
     console.log("Inferring at " + repo_path);
     watcher.getPlatform(repo_path, function(error, result) {
@@ -75,11 +54,6 @@ describe("Repository Watcher", function() {
       expect(result).toBeDefined();
       console.log("Repository change result: " + result);
     });
-  });
-
-  it("should be able to unwatch repository", function() {
-    watcher.unwatchRepository();
-    expect(true).toBe(true);
   });
 
   it("should be able to get revision", function() {
