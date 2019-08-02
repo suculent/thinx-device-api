@@ -272,6 +272,10 @@ var ThinxApp = function() {
   // Terminates session in case it has no valid owner.
 
   function validateSession(req, res) {
+
+    // no session is good as well in some cases
+    if (typeof(req.session) === "undefined") return true;
+
     if (typeof(req.session.owner) !== "undefined") {
       return true;
     } else {
@@ -963,7 +967,7 @@ var ThinxApp = function() {
 
   /* List available sources */
   app.get("/api/user/sources/list", function(req, res) {
-    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
+    if (!(validateSecureGETRequest(req) || validateSession(req, res))) return;
     sources.list(req.session.owner, function(success, response) {
       if (success === true) {
         respond(res, {
