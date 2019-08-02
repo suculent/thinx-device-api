@@ -143,7 +143,7 @@ function init($rootScope, $scope) {
   //console.log('$rootScope', $rootScope);
   //console.log('$scope', $scope);
 
-  if (typeof($rootScope.xhrFailedListener) == "undefined") {
+  if (typeof($rootScope.xhrFailedListener)=== "undefined") {
     $rootScope.xhrFailedListener = $rootScope.$on('xhrFailed', function(event, error){
       event.stopPropagation();
       xhrFailed(error);
@@ -158,7 +158,7 @@ function init($rootScope, $scope) {
     }
   }
 
-  if (typeof($rootScope.updateSourcesListener) == "undefined") {
+  if (typeof($rootScope.updateSourcesListener)=== "undefined") {
     $rootScope.updateSourcesListener = $rootScope.$on('updateSources', function(event, data){
       event.stopPropagation();
       updateSources(data);
@@ -192,7 +192,7 @@ function init($rootScope, $scope) {
     }
   }
 
-  if (typeof($rootScope.updateApikeysListener) == "undefined") {
+  if (typeof($rootScope.updateApikeysListener)=== "undefined") {
     $rootScope.updateApikeysListener = $rootScope.$on('updateApikeys', function(event, data){
       event.stopPropagation();
       updateApikeys(data);
@@ -209,7 +209,7 @@ function init($rootScope, $scope) {
     $rootScope.$apply()
   }
 
-  if (typeof($rootScope.updateRsakeysListener) == "undefined") {
+  if (typeof($rootScope.updateRsakeysListener)=== "undefined") {
     $rootScope.updateRsakeysListener = $rootScope.$on('updateRsakeys', function(event, data){
       event.stopPropagation();
       updateRsakeys(data);
@@ -236,7 +236,7 @@ function init($rootScope, $scope) {
     $rootScope.$apply()
   }
 
-  if (typeof($rootScope.updateDeploykeysListener) == "undefined") {
+  if (typeof($rootScope.updateDeploykeysListener)=== "undefined") {
     $rootScope.updateDeploykeysListener = $rootScope.$on('updateDeploykeys', function(event, data){
       event.stopPropagation();
       updateDeploykeys(data);
@@ -264,7 +264,7 @@ function init($rootScope, $scope) {
     $rootScope.$apply()
   }
 
-  if (typeof($rootScope.updateDevicesListener) == "undefined") {
+  if (typeof($rootScope.updateDevicesListener)=== "undefined") {
     $rootScope.updateDevicesListener = $rootScope.$on('updateDevices', function(event, data){
       event.stopPropagation();
       updateDevices(data);
@@ -315,7 +315,7 @@ function init($rootScope, $scope) {
       if (typeof($rootScope.devices[i].transformers) !== "undefined" && $rootScope.devices[i].transformers.length > 0) {
         for (var transformerIndex in $rootScope.devices[i].transformers) {
           var utid = $rootScope.devices[i].transformers[transformerIndex];
-          if ( typeof($rootScope.meta.transformerDevices[utid]) == "undefined" ) {
+          if ( typeof($rootScope.meta.transformerDevices[utid])=== "undefined" ) {
             $rootScope.meta.transformerDevices[utid] = [];
           }
           $rootScope.meta.transformerDevices[utid].push($rootScope.devices[i].udid);
@@ -391,7 +391,7 @@ function init($rootScope, $scope) {
     console.log($rootScope.profile.info.tags);
   }
 
-  if (typeof($rootScope.submitNotificationResponseListener) == "undefined") {
+  if (typeof($rootScope.submitNotificationResponseListener)=== "undefined") {
     $rootScope.submitNotificationResponseListener = $rootScope.$on('submitNotificationResponse', function(event, data){
       event.stopPropagation();
       submitNotificationResponse(data);
@@ -454,19 +454,19 @@ function init($rootScope, $scope) {
           var profile = response.profile;
 
           // set default avatar if one's missing
-          if (typeof(profile.avatar) == "undefined" || profile.avatar.length == 0) {
+          if (typeof(profile.avatar)=== "undefined" || profile.avatar.length == 0) {
             console.log('- avatar not defined, falling back to default -');
             profile.avatar = '/assets/thinx/img/default_avatar_sm.png';
           }
-          if (typeof(profile.info.goals) == "undefined") {
+          if (typeof(profile.info.goals)=== "undefined") {
             console.log('- goals not defined, retaining current -');
             profile.info['goals'] = $rootScope.profile.info.goals;
           }
-          if (typeof(profile.info.tags) == "undefined") {
+          if (typeof(profile.info.tags)=== "undefined") {
             console.log('- tags not defined, creating -');
             profile.info['tags'] = $rootScope.profile.info.tags;
           }
-          if (typeof(profile.info.transformers) == "undefined") {
+          if (typeof(profile.info.transformers)=== "undefined") {
             console.log('- transformers not defined, creating -');
             profile.info['transformers'] = $rootScope.profile.info.transformers;
           }

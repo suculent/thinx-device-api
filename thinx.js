@@ -118,6 +118,8 @@ var ThinxApp = function() {
 
   console.log("Initializing App consts...");
 
+  var _ws = null;
+
   var client_user_agent = app_config.client_user_agent;
   var db = app_config.database_uri;
   var serverPort = app_config.port;
@@ -160,7 +162,6 @@ var ThinxApp = function() {
    * Databases
    */
 
-  var prefix = "";
   try {
     var pfx_path = app_config.project_root + '/conf/.thx_prefix';
     if (fs.existsSync(pfx_path)) {
@@ -237,9 +238,36 @@ var ThinxApp = function() {
   watcher.watch();
   console.log("Done.");
 
+  // Terminates session in case it has no valid owner.
+
+  function validateSession(req, res) {
+    if (typeof(req.session.owner) !== "undefined") {
+      return true;
+    } else {
+      if (typeof(req.session) !== "undefined") {
+        req.session.destroy(function(err) {
+          if (err) {
+            console.log("Session destroy error: " + JSON.stringify(err));
+          }
+          res.status(401).end(); // return 401 unauthorized to XHR/API calls
+        });
+      }
+      return false;
+    }
+  }
+
+  function respond(res, object) {
+    if (typeOf(object) == "buffer") {
+      res.header("Content-Type", "application/octet-stream");
+      res.end(object);
+    } else if (typeOf(object) == "string") {
+      res.end(object);
+    } else {
+      res.end(JSON.stringify(object));
+    }
+  }
+
   // Database preparation on first run
-
-
 
   function initDatabases() {
 
@@ -263,16 +291,17 @@ var ThinxApp = function() {
     }
 
     function logCouchError(err, body, header) {
-      console.log("[" + tag + "] Insert error: "+err);
+      console.log("[thinx.js:couch] Insert error: "+err);
       if (typeof(body) !== "undefined") {
-        console.log("[" + tag + "] Insert body: "+body);
+        console.log("[thinx.js:couch] Insert body: "+body);
       }
       if (typeof(body) !== "undefined") {
-        console.log("[" + tag + "] Insert header: "+header);
+        console.log("[thinx.js:couch] Insert header: "+header);
       }
     }
 
     function injectDesign(db, design, file) {
+      if (typeof(design) === "undefined") return;
       let design_doc = getDocument(file);
       if (design_doc) {
         db.insert("_design/" + design, design_doc, function(err, body, header) {
@@ -295,9 +324,9 @@ var ThinxApp = function() {
     }
 
     function handleDatabaseErrors(err, name) {
-      if (err.toString().indexOf("the file already exists") != -1) {
+      if (err.toString().indexOf("the file already exists") !== -1) {
         // silently fail, this is ok
-      } else if (err.toString().indexOf("error happened") != -1) {
+      } else if (err.toString().indexOf("error happened") !== -1) {
         console.log("[CRITICAL] 🚫 Database connectivity issue. " + err.toString() + " URI: "+app_config.database_uri);
         process.exit(1);
       } else {
@@ -511,7 +540,7 @@ var ThinxApp = function() {
       return;
     }
 
-    if (req.headers.origin == "device") {
+    if (req.headers.origin === "device") {
       next();
       return;
     }
@@ -525,8 +554,8 @@ var ThinxApp = function() {
 
     // cannot use this with allow origin * res.header("Access-Control-Allow-Credentials", "true");
     // analysis: will PROBABLY have to be refactored to anything but Device-Registration and Devoce-OTA requests
-    if ((req.originalUrl.indexOf("register") == -1) &&
-        (req.originalUrl.indexOf("firmware") == -1)) {
+    if ((req.originalUrl.indexOf("register") === -1) &&
+        (req.originalUrl.indexOf("firmware") === -1)) {
       //console.log("Setting CORS to " + app_config.public_url);
       res.header("Access-Control-Allow-Origin", app_config.acl_url);
       res.header("Access-Control-Allow-Credentials", "true");
@@ -564,7 +593,7 @@ var ThinxApp = function() {
       if (client.indexOf("uptimerobot")) {
         return;
       }
-      if (req.method != "OPTIONS") {
+      if (req.method !== "OPTIONS") {
         console.log("[OID:0] [" + req.method + "]:" + req.url + "(" +
           client + ")");
       }
@@ -1388,7 +1417,7 @@ var ThinxApp = function() {
   }
 
   function validateSecureGETRequest(req, res) {
-    if (req.method != "GET") {
+    if (req.method !== "GET") {
       console.log("validateSecure: Not a get request." + JSON.stringify(req.query
         .params));
       req.session.destroy(function(err) {
@@ -1416,23 +1445,6 @@ var ThinxApp = function() {
       return false;
     }
     return true;
-  }
-
-  // Terminates session in case it has no valid owner.
-  function validateSession(req, res) {
-    if (typeof(req.session.owner) !== "undefined") {
-      return true;
-    } else {
-      if (typeof(req.session) !== "undefined") {
-        req.session.destroy(function(err) {
-          if (err) {
-            console.log("Session destroy error: " + JSON.stringify(err));
-          }
-          res.status(401).end(); // return 401 unauthorized to XHR/API calls
-        });
-      }
-      return false;
-    }
   }
 
   /*
@@ -1567,6 +1579,8 @@ var ThinxApp = function() {
 
       for (var bindex in body.rows) {
 
+        if (!{}.hasOwnProperty.call(body.rows, bindex)) return;
+
         var row = body.rows[bindex];
 
         //console.log("Build log row: " + JSON.stringify(row));
@@ -1578,18 +1592,17 @@ var ThinxApp = function() {
           };
           builds.push(build);
         } else {
-
+          // this is all wrong, it just changes key names... object should be reusable across app
           for (var dindex in row.value.log) {
-            var lastIndex = row.value.log[dindex];
+            if (!{}.hasOwnProperty.call(row.value.log, dindex)) return;
             var buildlog = {
-              message: lastIndex.message,
-              date: lastIndex.timestamp,
-              udid: lastIndex.udid,
-              build_id: lastIndex.build
+              message: row.value.log[dindex].message,
+              date: row.value.log[dindex].timestamp,
+              udid: row.value.log[dindex].udid,
+              build_id: row.value.log[dindex].build
             };
             builds.push(buildlog);
           }
-
         }
       }
 
@@ -1601,23 +1614,30 @@ var ThinxApp = function() {
     });
   });
 
+  /* Convenience adapter for log rows */
+  var getLogRows = function(body) {
+    var logs = [];
+    for (var lindex in body.rows) {
+      const item = body.rows[lindex];
+      if (!item.hasOwnProperty("value")) continue;
+      if (!item.value.hasOwnProperty("log")) continue;
+      logs.push(item.value.log);
+    }
+    return logs;
+  };
+
   /* Returns specific build log for owner */
   app.post("/api/user/logs/build", function(req, res) {
-
     if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
-
     var owner = req.session.owner;
-
-    if (typeof(req.body.build_id) == "undefined") {
+    if (typeof(req.body.build_id)=== "undefined") {
       respond(res, {
         success: false,
         status: "missing_build_id"
       });
       return;
     }
-
     var build_id = req.body.build_id;
-
     blog.fetch(req.body.build_id, function(err, body) {
       if (err) {
         console.log(err);
@@ -1628,7 +1648,6 @@ var ThinxApp = function() {
         });
         return;
       }
-
       if (!body) {
         console.log("Log for owner " + owner + " not found.");
         respond(res, {
@@ -1638,23 +1657,10 @@ var ThinxApp = function() {
         });
         return;
       }
-
-      var logs = [];
-      for (var lindex in body.rows) {
-        if (!body.rows[lindex].hasOwnProperty("value")) continue;
-        if (!body.rows[lindex].value.hasOwnProperty("log")) continue;
-        var lrec = body.rows[lindex].value.log;
-        logs.push(lrec);
-      }
-
-      console.log("Build-logs for build_id " + build_id + ": " +
-        JSON
-        .stringify(
-          logs));
-
-      var response = body;
-      response.success = true;
-      respond(res, response);
+      const logs = getLogRows(body);
+      console.log("Build-logs for build_id " + build_id + ": " + JSON.stringify(logs));
+      body.success = true;
+      respond(res, body);
     });
   });
 
@@ -1662,31 +1668,22 @@ var ThinxApp = function() {
 
   /* Returns specific build log for owner */
   app.post("/api/user/logs/tail", function(req, res) {
-
     if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
-
     var owner = req.session.owner;
-
-    if (typeof(req.body.build_id) == "undefined") {
+    if (typeof(req.body.build_id) === "undefined") {
       respond(res, {
         success: false,
         status: "missing_build_id"
       });
       return;
     }
-
-    var build_id = req.body.build_id;
-
-    console.log("Tailing build log for " + build_id);
-
     var error_callback = function(err) {
       console.log(err);
       res.set("Connection", "close");
       respond(res, err);
     };
-
+    console.log("Tailing build log for " + req.body.build_id);
     blog.logtail(req.body.build_id, owner, _ws, error_callback);
-
   });
 
   /*
@@ -3069,7 +3066,7 @@ var ThinxApp = function() {
 
       function(err, body) {
 
-        if (err || (typeof(body) == "undefined") || (body === null)) {
+        if (err || (typeof(body)=== "undefined") || (body === null)) {
           console.log(
             "Device with this UUID/MAC not found. Seems like new one..."
           );
@@ -3193,8 +3190,6 @@ var ThinxApp = function() {
     server: wserver
   });
 
-  var _ws = null;
-
   function noop() {}
 
   function heartbeat() {
@@ -3281,7 +3276,7 @@ var ThinxApp = function() {
 
         } else {
           var m = JSON.stringify(message);
-          if ((m != "{}") || (typeof(message) == "undefined")) {
+          if ((m != "{}") || (typeof(message)=== "undefined")) {
             console.log("» Websocketparser said: unknown message: " + m);
           }
         }
@@ -3376,17 +3371,6 @@ var ThinxApp = function() {
   //
   // HTTP/S Request Tools
   //
-
-  function respond(res, object) {
-    if (typeOf(object) == "buffer") {
-      res.header("Content-Type", "application/octet-stream");
-      res.end(object);
-    } else if (typeOf(object) == "string") {
-      res.end(object);
-    } else {
-      res.end(JSON.stringify(object));
-    }
-  }
 
   function validateJSON(str) {
     try {

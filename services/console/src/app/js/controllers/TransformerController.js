@@ -118,7 +118,7 @@ angular.module('RTM').controller('TransformerController', ['$rootScope', '$scope
   }
 
   $scope.resetModal = function(utid) {
-    if (typeof(utid) == "undefined") {
+    if (typeof(utid)=== "undefined") {
       $scope.transformerForm.utid = generateUtid();
       $scope.transformerForm.alias = null;
       $scope.transformerForm.body = null;
