@@ -156,6 +156,37 @@ var ThinxApp = function() {
     return ipAddress;
   };
 
+  function validateSecureGETRequest(req, res) {
+    if (req.method !== "GET") {
+      console.log("validateSecure: Not a get request." + JSON.stringify(req.query
+        .params));
+      req.session.destroy(function(err) {
+        if (err) {
+          console.log(err);
+        } else {
+          failureResponse(res, 500, "protocol");
+        }
+      });
+      return false;
+    }
+    return true;
+  }
+
+  function validateSecurePOSTRequest(req, res) {
+    if (req.method !== "POST") {
+      console.log("validateSecure: Not a post request.");
+      req.session.destroy(function(err) {
+        if (err) {
+          console.log(err);
+        } else {
+          failureResponse(res, 500, "protocol");
+        }
+      });
+      return false;
+    }
+    return true;
+  }
+
   // EXTRACT TO: db.js -->
 
   /*
@@ -1416,37 +1447,6 @@ var ThinxApp = function() {
     }
   }
 
-  function validateSecureGETRequest(req, res) {
-    if (req.method !== "GET") {
-      console.log("validateSecure: Not a get request." + JSON.stringify(req.query
-        .params));
-      req.session.destroy(function(err) {
-        if (err) {
-          console.log(err);
-        } else {
-          failureResponse(res, 500, "protocol");
-        }
-      });
-      return false;
-    }
-    return true;
-  }
-
-  function validateSecurePOSTRequest(req, res) {
-    if (req.method != "POST") {
-      console.log("validateSecure: Not a post request.");
-      req.session.destroy(function(err) {
-        if (err) {
-          console.log(err);
-        } else {
-          failureResponse(res, 500, "protocol");
-        }
-      });
-      return false;
-    }
-    return true;
-  }
-
   /*
    * Builder
    */
@@ -1869,7 +1869,7 @@ var ThinxApp = function() {
   app.post("/api/login", function(req, res) {
 
     // Request must be post
-    if (req.method != "POST") {
+    if (req.method !== "POST") {
       req.session.destroy(function(err) {
         if (err) {
           console.log(err);
@@ -2002,10 +2002,6 @@ var ThinxApp = function() {
     /* Input validation */
 
     if (typeof(req.body.password) === "undefined") {
-      callback(false, "login_failed");
-      if (Globals.use_sqreen()) {
-        Sqreen.auth_track(false, { doc: owner });
-      }
       return;
     }
 
@@ -2057,7 +2053,7 @@ var ThinxApp = function() {
       for (var index in all_users) {
         var all_user_data = all_users[index];
 
-        if (username != all_user_data.key) {
+        if (username !== all_user_data.key) {
           continue;
         } else {
           user_data = all_user_data.value;
