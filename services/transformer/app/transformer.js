@@ -113,100 +113,64 @@ var Transformer = function() {
     // Handlers
     //
 
-    app.post("/do", function(req, res) {
-
-      //
-      // Input validation
-      //
-      //
-
-      if (typeof(req.body) === "undefined") {
-        respond(res, {
-          success: false,
-          error: "missing: body"
-        });;
-        return;
-      }
-
-      var ingress = req.body;
-
+    var sanitize = function(code) {
+      var cleancode;
       try {
-        ingress = JSON.parse(req.body);
+        var exec = null;
+        var decoded = false;
+        if (decoded === false) {
+          try {
+            cleancode = unescape(base64.decode(code));
+            decoded = true;
+          } catch (e) {
+            console.log("Job is not a base64.");
+            decoded = false;
+          }
+        }
+
+        if (decoded === false) {
+          try {
+            cleancode = unescape(base128.decode(code));
+            decoded = true;
+          } catch (e) {
+            console.log("Job is not a base128.");
+            decoded = false;
+          }
+        }
+
+        if (decoded === false) {
+          cleancode = unescape(code); // accept bare code for testing, will deprecate
+        }
       } catch (e) {
-        ingress = req.body;
+        console.log("Docker Transformer Ecception: " + e);
+        error = JSON.stringify(e);
       }
 
-      console.log("---");
+      return cleancode;
+    };
 
-      var jobs = ingress.jobs;
-
-      if (typeof(ingress.jobs) === "undefined") {
-        respond(res, {
-          success: false,
-          error: "missing: body.jobs"
-        });;
-        return;
-      }
-
-      console.log(new Date().toString() + "Incoming job.");
-
-      //
-      // Run loop
-      //
+    var transform = function(req, res) {
 
       var input_raw = jobs[0].params.status;
-
       var status = input_raw;
       var error = null;
 
       for (var job_index in jobs) {
 
         const job = jobs[job_index];
-        const code = job.code;
+        const code = sanitize(job.code);
         const owner = job.owner;
         const transaction_id = job.id;
 
         console.log(new Date().toString() + " job: " + JSON.stringify(job));
 
         try {
-
-          var exec = null;
-
+          console.log("Running code:\n" + code);
           /* jshint -W061 */
-          var cleancode;
-          var decoded = false;
-
-          if (decoded === false) {
-            try {
-              cleancode = unescape(base64.decode(code));
-              decoded = true;
-            } catch (e) {
-              console.log("Job is not a base64.");
-              decoded = false;
-            }
-          }
-
-          if (decoded === false) {
-            try {
-              cleancode = unescape(base128.decode(code));
-              decoded = true;
-            } catch (e) {
-              console.log("Job is not a base128.");
-              decoded = false;
-            }
-          }
-
-          if (decoded === false) {
-              cleancode = unescape(code); // accept bare code for testing, will deprecate
-          }
-
-          console.log("Running code:\n" + cleancode);
-
-          eval(cleancode); // expects transformer(status, device); function only; may provide API
-
+          eval(code); // expects transformer(status, device); function only; may provide API
+          /* jshint +W061 */
           status = transformer(status, job.params.device); // passthrough previous status
           console.log("Docker Transformer will return status: '" + status + "'");
-          /* jshint +W061 */
         } catch (e) {
           console.log("Docker Transformer Ecception: " + e);
           error = JSON.stringify(e);
@@ -218,6 +182,37 @@ var Transformer = function() {
         output: status,
         error: error
       });
+    };
+
+    app.post("/do", function(req, res) {
+
+      if (typeof(req.body) === "undefined") {
+        respond(res, {
+          success: false,
+          error: "missing: body"
+        });
+        return;
+      }
+
+      var ingress = req.body;
+
+      try {
+        ingress = JSON.parse(req.body);
+      } catch (e) {
+        ingress = req.body;
+      }
+
+      var jobs = ingress.jobs;
+      if (typeof(ingress.jobs) === "undefined") {
+        respond(res, {
+          success: false,
+          error: "missing: body.jobs"
+        });
+        return;
+      }
+
+      console.log(new Date().toString() + "Incoming job.");
+      transform(req, res);
 
     });
 

@@ -42,7 +42,7 @@ angular.module('RTM').controller('EditorController', ['$rootScope', '$scope', 's
   };
 
   $scope.resetEditor = function(utid) {
-    if (typeof(utid) == "undefined") {
+    if (typeof(utid)=== "undefined") {
       $scope.overlayEditor.utid = generateUtid();
       $scope.overlayEditor.alias = "<my-transformer-name>";
       $scope.overlayEditor.body = base64converter('decode', $rootScope.thinx.defaults.defaultTransformerBodyBase64);

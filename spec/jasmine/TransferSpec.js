@@ -26,11 +26,11 @@ describe("Transfer", function() {
 
       //decline: function(body, callback) {
       it("should be able to decline device transfer", function(done) {
-        var body = {
+        const tbody = {
           transfer_id: this.dynamic_transfer_request_id,
           udids: [envi.udid]
         };
-        Transfer.decline(body, function(success, response) {
+        Transfer.decline(tbody, function(success, response) {
           expect(success).toBe(true);
           expect(response).toBeDefined();
           console.log("transfer decline response: " + JSON.stringify(

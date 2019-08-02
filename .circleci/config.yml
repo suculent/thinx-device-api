@@ -46,15 +46,18 @@ jobs:
     - run: cd spec/test_repositories && bash ./get-tests.sh
     - run: git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
     - run: npm install coveralls nyc eslint -g
-    - run: npm install .
+    - run: curl https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+    - run: export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    - run: export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm install 10.16.0 && nvm use 10.16.0 && rm -rf ./package-lock.json && rm -rf ./node_modules && npm install .
     - run: mkdir statistics
-    # - run: gem install github_changelog_generator fails even with ruby 2.4
+
     # The following line was run implicitly in your 1.0 builds based on what CircleCI inferred about the structure of your project. In 2.0 you need to be explicit about which commands should be run. In some cases you can discard inferred commands if they are not relevant to your project.
     - run: if [ -z "${NODE_ENV:-}" ]; then export NODE_ENV=test; fi
     - run: export PATH="~/suculent/thinx-device-api/node_modules/.bin:$PATH"
     - run: echo -e "export RAILS_ENV=test\nexport RACK_ENV=test" >> $BASH_ENV
     - run: gem install bundler
-    - run: 'bundler check --path=vendor/bundler || bundler install --path=vendor/bundler --jobs=4 --retry=3 '
+    - run: bundler check --path=vendor/bundler || bundler install --path=vendor/bundler --jobs=4 --retry=3
+
     # Save dependency cache
     - save_cache:
         key: v1-dep-{{ .Branch }}-{{ epoch }}
@@ -142,18 +145,25 @@ jobs:
     - run: echo "172.17.0.4 mosquitto" >> /etc/hosts
 
     - run:
-        name: NPM Test (Requires Redis)
-        command: ps -ax && npm run mocha
+        name: NPM Test (uses jasmine until Chai expect will be supported)
+        command: |
+            export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm use 10.16.0
+            npm run test
 
     - run: mkdir -p $CIRCLE_TEST_REPORTS/rspec
     - run:
-        command: bundler exec rspec --format RspecJunitFormatter --out $CIRCLE_TEST_REPORTS/rspec/rspec.xml --format progress spec
+        command: |
+            export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm use 10.16.0
+            bundler exec rspec --format RspecJunitFormatter --out $CIRCLE_TEST_REPORTS/rspec/rspec.xml --format progress spec
+
         environment:
           RAILS_ENV: test
           RACK_ENV: test
 
-    - run: bash ./scripts/01-analyze.sh
-    - run: bash ./scripts/03-test.sh
+    # - run: bash ./scripts/01-analyze.sh
+    # - run: bash ./scripts/03-test.sh
 
     # Deployment
     # Your existing circle.yml file contains deployment steps.

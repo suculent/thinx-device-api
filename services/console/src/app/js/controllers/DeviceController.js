@@ -322,7 +322,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
   $scope.build = function(deviceUdid, sourceId) {
     console.log('-- building firmware for ' + deviceUdid + '/' + $rootScope.getSourceById(sourceId).alias + ' --');
 
-    if (typeof($rootScope.meta.deviceBuilds[deviceUdid]) == "undefined") {
+    if (typeof($rootScope.meta.deviceBuilds[deviceUdid])=== "undefined") {
       $rootScope.meta.deviceBuilds[deviceUdid] = [];
     }
 

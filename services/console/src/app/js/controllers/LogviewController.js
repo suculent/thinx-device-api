@@ -9,7 +9,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
 
   function openSocket() {
     if ("WebSocket" in window) {
-      if (typeof($rootScope.wss) == "undefined") {
+      if (typeof($rootScope.wss)=== "undefined") {
         // open websocket
         console.log('## Opening websocket with credentials ##');
         $rootScope.wss = new WebSocket('<ENV::wssUrl>/' + $rootScope.profile.owner);
@@ -53,7 +53,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
   console.log('##### websocket init')
   openSocket();
 
-  if (typeof($rootScope.showLogOverlayListener) == "undefined") {
+  if (typeof($rootScope.showLogOverlayListener)=== "undefined") {
     $rootScope.showLogOverlayListener = $rootScope.$on('showLogOverlay', function(event, build_id){
       event.stopPropagation();
       $rootScope.showLog(build_id);
