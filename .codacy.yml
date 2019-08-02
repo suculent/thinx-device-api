@@ -10,3 +10,5 @@ engines:
 exclude_paths:
   - node_modules/**
   - spec/**
+  - services/**
+  - addons/**
