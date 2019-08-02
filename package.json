@@ -78,6 +78,7 @@
   },
   "devDependencies": {
     "codacy-coverage": "^3.4.0",
+    "codecov": "^3.5.0",
     "coveralls": "^3.0.5",
     "eslint": "^6.1.0",
     "grunt": "^1.0.4",
