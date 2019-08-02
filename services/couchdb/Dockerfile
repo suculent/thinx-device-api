@@ -20,7 +20,7 @@ RUN groupadd -g 5984 -r couchdb && useradd -u 5984 -d /opt/couchdb -g couchdb co
 # be sure GPG and apt-transport-https are available and functional
 RUN set -ex; \
         apt-get update; \
-        apt-get install -y --no-install-recommends \
+        apt-get install -y --allow-unauthenticated --no-install-recommends \
                 apt-transport-https \
                 ca-certificates \
                 dirmngr \
@@ -35,7 +35,7 @@ ENV TINI_VERSION 0.18.0
 RUN set -ex; \
 	\
 	apt-get update; \
-	apt-get install -y --no-install-recommends wget; \
+	apt-get install -y --allow-unauthenticated --no-install-recommends wget; \
 	rm -rf /var/lib/apt/lists/*; \
 	\
 	dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
@@ -97,7 +97,7 @@ RUN set -xe; \
         \
         echo "couchdb couchdb/mode select none" | debconf-set-selections; \
 # we DO want recommends this time
-        DEBIAN_FRONTEND=noninteractive apt-get install -y --allow-downgrades --allow-remove-essential --allow-change-held-packages \
+        DEBIAN_FRONTEND=noninteractive apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
                 couchdb="$COUCHDB_VERSION"~stretch \
         ; \
 # Undo symlinks to /var/log and /var/lib
