@@ -902,7 +902,7 @@ var __module9__ = (function() {
           if (this.defaultActions[state]) {
               action = this.defaultActions[state];
           } else {
-              if (symbol === null || typeof symbol=== "undefined") {
+              if (symbol === null || typeof symbol === "undefined") {
                   symbol = lex();
               }
               action = table[state] && table[state][symbol];

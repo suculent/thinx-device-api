@@ -48,7 +48,7 @@ jobs:
     - run: npm install coveralls nyc eslint -g
     - run: curl https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
     - run: export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    - run: export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm install 10.16.0 && nvm use 10.16.0 && npm install .
+    - run: export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm install 10.16.0 && nvm use 10.16.0 && rm -rf ./package-lock.json && rm -rf ./node_modules && npm install .
     - run: mkdir statistics
 
     # The following line was run implicitly in your 1.0 builds based on what CircleCI inferred about the structure of your project. In 2.0 you need to be explicit about which commands should be run. In some cases you can discard inferred commands if they are not relevant to your project.
@@ -57,7 +57,7 @@ jobs:
     - run: echo -e "export RAILS_ENV=test\nexport RACK_ENV=test" >> $BASH_ENV
     - run: gem install bundler
     - run: bundler check --path=vendor/bundler || bundler install --path=vendor/bundler --jobs=4 --retry=3
-    
+
     # Save dependency cache
     - save_cache:
         key: v1-dep-{{ .Branch }}-{{ epoch }}
@@ -149,8 +149,7 @@ jobs:
         command: |
             export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm use 10.16.0
-            node --version
-            npm run test
+            npm run mocha
 
     - run: mkdir -p $CIRCLE_TEST_REPORTS/rspec
     - run:
@@ -158,7 +157,7 @@ jobs:
             export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm use 10.16.0
             bundler exec rspec --format RspecJunitFormatter --out $CIRCLE_TEST_REPORTS/rspec/rspec.xml --format progress spec
-            
+
         environment:
           RAILS_ENV: test
           RACK_ENV: test
