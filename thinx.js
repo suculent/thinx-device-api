@@ -556,8 +556,8 @@ var ThinxApp = function() {
     }
 
     // log owner ID and request method to application log only
-    if ((typeof(req.session) !== "undefined")
-     && (typeof(req.session.owner) !== "undefined")) {
+    if ((typeof(req.session) !== "undefined") &&
+        (typeof(req.session.owner) !== "undefined")) {
       // console.log("[OID:" + req.session.owner + "] ", req.method + " : " + req.url);
     } else {
       // Skip logging for monitoring sites
@@ -577,8 +577,7 @@ var ThinxApp = function() {
 
   /* List all devices for user. */
   app.get("/api/user/devices", function(req, res) {
-    if (!validateSecureGETRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecureGETRequest(req) || validateSession(req, res))) return;
     var owner = req.session.owner;
     devices.list(owner, function(success, response) {
       respond(res, response);
@@ -587,8 +586,7 @@ var ThinxApp = function() {
 
   /* Attach code source to a device. Expects unique device identifier and source alias. */
   app.post("/api/device/attach", function(req, res) {
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
     var owner = req.session.owner;
     var body = req.body;
     devices.attach(owner, body, function(success, status) {
@@ -630,8 +628,7 @@ var ThinxApp = function() {
 
   /* Fetch device data. */
   app.post("/api/device/data", function(req, res) {
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
     var owner = req.session.owner;
     var udid = req.body.udid;
     // var apikey = req.body.key;
@@ -649,8 +646,7 @@ var ThinxApp = function() {
 
   /* Detach code source from a device. Expects unique device identifier. */
   app.post("/api/device/detach", function(req, res) {
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
     var owner = req.session.owner;
     devices.detach(owner, req.body, function(success, status) {
       respond(res, {
@@ -662,8 +658,7 @@ var ThinxApp = function() {
 
   /* Revokes a device. Expects unique device identifier. */
   app.post("/api/device/revoke", function(req, res) {
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
     var owner = req.session.owner;
     devices.revoke(owner, req.body, function(success, status) {
       respond(res, {
@@ -678,8 +673,7 @@ var ThinxApp = function() {
    */
 
   app.post("/api/transformer/run", function(req, res) {
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
     var owner = req.session.owner;
     if (typeof(owner) === "undefined" || owner === null) {
       respond(res, {
@@ -711,8 +705,7 @@ var ThinxApp = function() {
   /* Creates new api key. */
   app.post("/api/user/apikey", function(req, res) {
 
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
 
     var owner = req.session.owner;
 
@@ -743,8 +736,7 @@ var ThinxApp = function() {
   /* Deletes API Key by its hash value */
   app.post("/api/user/apikey/revoke", function(req, res) {
 
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
 
     var owner = req.session.owner;
     var api_key_hashes = [];
@@ -776,8 +768,7 @@ var ThinxApp = function() {
   /* Lists all API keys for user. */
   app.get("/api/user/apikey/list", function(req, res) {
 
-    if (!validateSecureGETRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecureGETRequest(req) || validateSession(req, res))) return;
 
     var owner = req.session.owner;
 
@@ -804,8 +795,7 @@ var ThinxApp = function() {
   /* Creates new env var. */
   app.post("/api/user/env/add", function(req, res) {
 
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
 
     var owner = req.session.owner;
 
@@ -849,8 +839,7 @@ var ThinxApp = function() {
   /* Deletes env var by its name */
   app.post("/api/user/env/revoke", function(req, res) {
 
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
 
     var owner = req.session.owner;
     var env_var_names;
@@ -889,8 +878,7 @@ var ThinxApp = function() {
   /* Lists all env vars for user. */
   app.get("/api/user/env/list", function(req, res) {
 
-    if (!validateSecureGETRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecureGETRequest(req) || validateSession(req, res))) return;
 
     var owner = req.session.owner;
 
@@ -915,8 +903,7 @@ var ThinxApp = function() {
 
   /* List available sources */
   app.get("/api/user/sources/list", function(req, res) {
-    if (!validateSecureGETRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
     sources.list(req.session.owner, function(success, response) {
       if (success === true) {
         respond(res, {
@@ -931,10 +918,7 @@ var ThinxApp = function() {
 
   /* Adds a GIT repository. Expects URL, alias and a optional branch (origin/master is default). */
   app.post("/api/user/source", function(req, res) {
-
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
-
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
     if (typeof(req.body.alias) === "undefined") {
       respond(res, {
         success: false,
@@ -968,9 +952,7 @@ var ThinxApp = function() {
 
   /* Removes a GIT repository. Expects alias. */
   app.post("/api/user/source/revoke", function(req, res) {
-
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
 
     var owner = req.session.owner;
     if (typeof(req.body.source_ids) === "undefined") {
@@ -1009,8 +991,7 @@ var ThinxApp = function() {
   /* Lists all RSA keys for user. */
   app.get("/api/user/rsakey/list", function(req, res) {
 
-    if (!validateSecureGETRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecureGETRequest(req) || validateSession(req, res))) return;
 
     var owner = req.session.owner;
 
@@ -1033,8 +1014,7 @@ var ThinxApp = function() {
   /* Deletes RSA Key by its fingerprint */
   app.post("/api/user/rsakey/revoke", function(req, res) {
 
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
 
     var owner;
 
@@ -1175,8 +1155,7 @@ var ThinxApp = function() {
 
   app.post("/api/user/profile", function(req, res) {
     console.log("/api/user/profile");
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
     var owner = req.session.owner;
     user.update(owner, req.body, function(success, status) {
       console.log("Updating user profile...");
@@ -1190,9 +1169,7 @@ var ThinxApp = function() {
   // /user/profile GET
   app.get("/api/user/profile", function(req, res) {
 
-    // reject on invalid headers
-    if (!validateSecureGETRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecureGETRequest(req) || validateSession(req, res))) return;
 
     var owner = req.session.owner;
 
@@ -1353,8 +1330,7 @@ var ThinxApp = function() {
   // Device editing
   app.post("/api/device/edit", function(req, res) {
 
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
 
     if (typeof(req.body.changes) === "undefined") {
       respond(res, {
@@ -1465,8 +1441,7 @@ var ThinxApp = function() {
 
   // Build respective firmware and notify target device(s
   app.post("/api/build", function(req, res) {
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
     var notifiers = {
       messenger: messenger,
       websocket: _ws
@@ -1478,10 +1453,7 @@ var ThinxApp = function() {
 
   // Get build artifacts
   app.post("/api/device/artifacts", function(req, res) {
-
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
-
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
     var owner = req.session.owner;
     var udid = req.body.udid;
 
@@ -1524,10 +1496,7 @@ var ThinxApp = function() {
 
   /* Returns all audit logs per owner */
   app.get("/api/user/logs/audit", function(req, res) {
-
-    if (!validateSecureGETRequest(req)) return;
-    if (!validateSession(req, res)) return;
-
+    if (!(validateSecureGETRequest(req) || validateSession(req, res))) return;
     var owner = req.session.owner;
 
     alog.fetch(owner, function(err, body) {
@@ -1560,8 +1529,7 @@ var ThinxApp = function() {
   /* Returns list of build logs for owner */
   app.get("/api/user/logs/build/list", function(req, res) {
 
-    if (!validateSecureGETRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecureGETRequest(req) || validateSession(req, res))) return;
 
     var owner = req.session.owner;
 
@@ -1636,8 +1604,7 @@ var ThinxApp = function() {
   /* Returns specific build log for owner */
   app.post("/api/user/logs/build", function(req, res) {
 
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
 
     var owner = req.session.owner;
 
@@ -1696,8 +1663,7 @@ var ThinxApp = function() {
   /* Returns specific build log for owner */
   app.post("/api/user/logs/tail", function(req, res) {
 
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
 
     var owner = req.session.owner;
 
@@ -1730,8 +1696,7 @@ var ThinxApp = function() {
   /* Request device transfer */
   app.post("/api/transfer/request", function(req, res) {
 
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
 
     var owner = req.session.owner;
 
@@ -1778,8 +1743,7 @@ var ThinxApp = function() {
   /* Decline selective device transfer */
   app.post("/api/transfer/decline", function(req, res) {
 
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
 
     if (typeof(req.body.owner) !== "undefined") {
       respond(res, {
@@ -1847,8 +1811,7 @@ var ThinxApp = function() {
   /* Accept selective device transfer */
   app.post("/api/transfer/accept", function(req, res) {
 
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
 
     if (typeof(req.body.owner) !== "undefined") {
       respond(res, {
@@ -2012,9 +1975,8 @@ var ThinxApp = function() {
               req.session.cookie.secure = true;
               req.session.cookie.httpOnly = true;
 
-              if ( (typeof(req.body.remember) === "undefined")
-                   || (req.body.remember === 0)
-                 ) {
+              if ( (typeof(req.body.remember) === "undefined") ||
+                   (req.body.remember === 0) ) {
                 req.session.cookie.maxAge = 24 * hour;
               } else {
                 req.session.cookie.maxAge = fortnight;
@@ -2026,10 +1988,7 @@ var ThinxApp = function() {
                 Sqreen.auth_track(true, { username: doc.owner });
               }
 
-              respond(res, {
-                "redirectURL": "/app"
-              });
-
+              respond(res, { "redirectURL": "/app" });
               updateLastSeen(doc);
             }
           });
@@ -2141,9 +2100,8 @@ var ThinxApp = function() {
           // This log message is later duplicated in [oauth] and other variants
           // console.log("[OID:" + req.session.owner + "] [NEW_SESSION] on /login");
 
-          if ( (typeof(req.body.remember) === "undefined")
-               || (req.body.remember === 0)
-            ) {
+          if ( (typeof(req.body.remember) === "undefined") ||
+               (req.body.remember === 0)) {
             req.session.cookie.maxAge = 24 * hour;
             res.cookie("x-thx-session-expire", req.session.cookie.expires, {
               maxAge: req.session.cookie.maxAge,
@@ -2158,9 +2116,7 @@ var ThinxApp = function() {
           }
 
           req.session.cookie.secure = true;
-
-          alog.log(user_data.owner, "User logged in: " +
-            username);
+          alog.log(user_data.owner, "User logged in: " + username);
         }
 
         if (client_type == "device") {
@@ -2176,9 +2132,7 @@ var ThinxApp = function() {
           // console.log("Suspicious codepath: redirecting to /app in username/password login.");
           // seens OK after user check, rather breaks this.
 
-          respond(res, {
-            "redirectURL": "/app"
-          });
+          respond(res, { "redirectURL": "/app" });
 
           // Make note on user login
           userlib.get(user_data.owner, function(error, udoc) {
@@ -2227,7 +2181,6 @@ var ThinxApp = function() {
             success: false
           });
         }
-
         return;
       }
 
@@ -2261,7 +2214,6 @@ var ThinxApp = function() {
           respond(res, {
             "redirectURL": ourl
           });
-          return;
         }
 
       } else {
@@ -2298,8 +2250,7 @@ var ThinxApp = function() {
   /* Returns all audit logs per owner */
   app.get("/api/user/stats", function(req, res) {
 
-    if (!validateSecureGETRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecureGETRequest(req) || validateSession(req, res))) return;
 
     var owner = req.session.owner;
 
@@ -2358,8 +2309,7 @@ var ThinxApp = function() {
   });
 
   app.post("/api/user/message", function(req, res) {
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
     var owner = req.session.owner;
     var message = req.body.message;
     messenger.slack(owner, message, function(err, response) {
@@ -2377,12 +2327,8 @@ var ThinxApp = function() {
 
   /* Respond to actionable notification */
   app.post("/api/device/push", function(req, res) {
-
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
-
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
     var owner = req.session.owner;
-
     devices.push(owner, req.body, function(error, response) {
       respond(res, {
         success: error,
@@ -2397,15 +2343,11 @@ var ThinxApp = function() {
 
   /* Respond to actionable notification */
   app.post("/api/device/notification", function(req, res) {
-
-    if (!validateSecurePOSTRequest(req)) return;
-    if (!validateSession(req, res)) return;
-
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
     var owner = req.session.owner;
     var device_id = req.body.udid;
     var nid = "nid:" + device_id;
     var reply = req.body.reply;
-
     if (typeof(device_id) === "undefined") {
       respond(res, {
         success: false,
@@ -2413,7 +2355,6 @@ var ThinxApp = function() {
       });
       return;
     }
-
     if (typeof(reply) === "undefined" || reply == null) {
       respond(res, {
         success: false,
@@ -2421,12 +2362,10 @@ var ThinxApp = function() {
       });
       return;
     }
-
     messenger.publish(owner, device_id, {
       nid: nid,
       reply: reply
     });
-
   });
 
   /*
@@ -3118,7 +3057,6 @@ var ThinxApp = function() {
    * thinx-connect gateway validation (device calls /lick with its mac and must receive its api key)
    * therefore gateway must be authenticated as well by an api key!
    * UNUSED, INCOMPLETE. DRAFT.
-   */
 
   app.get('/lick', function(req, res) {
 
@@ -3167,7 +3105,7 @@ var ThinxApp = function() {
           });
         }
       });
-  });
+  }); */
 
   /*
    * Root
@@ -3201,7 +3139,6 @@ var ThinxApp = function() {
 
   // disable HTTPS on CIRCLE CI
   if (typeof(process.env.CIRCLE_USERNAME) === "undefined") {
-
     if ((fs.existsSync(app_config.ssl_key)) &&
       (fs.existsSync(app_config.ssl_cert))) {
       ssl_options = {
@@ -3529,19 +3466,20 @@ var ThinxApp = function() {
         console.log("DR ERR: "+err);
         return;
       }
+      function reporter(success, default_mqtt_key) {
+          if (success) {
+            console.log("DMK: "+default_mqtt_key);
+          }
+      }
       for (var i = 0; i < body.rows.length; i++) {
         var owner_doc = body.rows[i];
         var owner_id = owner_doc.id;
         if (owner_id.indexOf("design")) continue;
         console.log("Restoring credentials for owner "+owner_id);
-        restore_owner_credentials(owner_id, function(success, default_mqtt_key) {
-          if (success) {
-            console.log("DMK: "+default_mqtt_key);
-          }
-        });
+        restore_owner_credentials(owner_id, reporter);
       }
     });
-  };
+  }
 };
 
 var thx = new ThinxApp();
