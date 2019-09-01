@@ -1875,6 +1875,13 @@ var ThinxApp = function() {
   // Front-end authentication, returns session on valid authentication
   app.post("/api/login", function(req, res) {
 
+    if (!app_config.debug.allow_http_login) {
+      if (!req.protocol.equals("https")) {
+        console.log("HTTP rejected for login.");
+        req.error(401);
+      }
+    }
+
     // Request must be post
     if (req.method !== "POST") {
       req.session.destroy(function(err) {
@@ -3246,12 +3253,15 @@ var ThinxApp = function() {
 
     // May not exist while testing...
     if (typeof(ws) !== "undefined" && ws != null) {
+
       ws.on("message", function incoming(message) {
 
         // skip empty messages
         if (message == "{}") return;
 
         var object = JSON.parse(message);
+
+        console.log("Incoming WS message: "+message);
 
         if (typeof(object.logtail) !== "undefined") {
 
@@ -3278,6 +3288,7 @@ var ThinxApp = function() {
           }
 
         } else {
+          /* unknown message debug, must be removed */
           var m = JSON.stringify(message);
           if ((m != "{}") || (typeof(message)=== "undefined")) {
             console.log("» Websocketparser said: unknown message: " + m);
