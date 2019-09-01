@@ -1876,7 +1876,7 @@ var ThinxApp = function() {
   app.post("/api/login", function(req, res) {
 
     if (!app_config.debug.allow_http_login) {
-      if (req.protocol != "https") {
+      if (req.protocol !== "https") {
         console.log("HTTP rejected for login.");
         req.error(401);
       }
