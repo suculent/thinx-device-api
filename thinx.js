@@ -553,6 +553,8 @@ var ThinxApp = function() {
 
   app.all("/*", function(req, res, next) {
 
+    res.cookie('XSRF-TOKEN', req.csrfToken());
+
     var client = req.get("User-Agent");
 
     if (typeOf(client) === "undefined") {
