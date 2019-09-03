@@ -22,7 +22,7 @@
   "dependencies": {
     "coveralls": "^3.0.4",
     "glob": "^7.1.4",
-    "karma-coverage": "^1.1.2",
+    "karma-coverage": "^2.0.0",
     "log-driver": "^1.2"
   },
   "peerDependencies": {
