@@ -17,6 +17,14 @@ var ThinxApp = function() {
   var crypto = require('crypto');
   var auth = require('./lib/thinx/auth.js');
   var fs = require("fs-extra");
+  var csrf = require('csurf');
+
+  // set up rate limiter
+  var RateLimit = require('express-rate-limit');
+  var limiter = new RateLimit({
+    windowMs: 1*60*1000, // 1 minute
+    max: 30
+  });
 
   // console.log(crypto.getCiphers()); // log supported ciphers to debug SSL IoT transport
 
@@ -519,6 +527,12 @@ var ThinxApp = function() {
     limit: "1mb"
   }));
 
+  // apply rate limiter to all requests
+  app.use(limiter);
+
+  // CSRF protection
+  app.use(csrf({ cookie:true }));
+
   app.use(parser.urlencoded({
     extended: true,
     parameterLimit: 1000,
@@ -592,7 +606,7 @@ var ThinxApp = function() {
     if ((req.originalUrl.indexOf("register") === -1) &&
         (req.originalUrl.indexOf("firmware") === -1)) {
       //console.log("Setting CORS to " + app_config.public_url);
-      res.header("Access-Control-Allow-Origin", app_config.acl_url);
+      res.header("Access-Control-Allow-Origin", app_config.acl_url); // lgtm [js/cors-misconfiguration-for-credentials]
       res.header("Access-Control-Allow-Credentials", "true");
       console.log("Setting CORS to acl_url "+app_config.acl_url);
     } else {
