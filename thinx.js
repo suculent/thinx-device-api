@@ -547,13 +547,13 @@ var ThinxApp = function() {
   });
 
   // CSRF protection
-  app.use(csrf({ cookie:true }));
+  //app.use(csrf({ cookie:true }));
 
   console.log("Initializing Endpoints...");
 
   app.all("/*", function(req, res, next) {
 
-    res.cookie('XSRF-TOKEN', req.csrfToken());
+    //res.cookie('XSRF-TOKEN', req.csrfToken());
 
     var client = req.get("User-Agent");
 
