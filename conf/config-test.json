@@ -20,7 +20,7 @@
     "username": ""
   },
   "rollbar_token": "<enter-your-rollbar.com-token>",
-  "database_uri": "http://rtmtest:rtmtest@localhost:5984",
+  "database_uri": "http://rtmtest:rtmtest@couchdb:5984",
   "mqtt_port": 1883,
   "port": 7442,
   "secure_port": 7443,
