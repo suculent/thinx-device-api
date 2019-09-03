@@ -3260,7 +3260,6 @@ var ThinxApp = function() {
         if (message == "{}") return;
 
         var object = JSON.parse(message);
-
         console.log("Incoming WS message: "+message);
 
         if (typeof(object.logtail) !== "undefined") {
@@ -3273,18 +3272,18 @@ var ThinxApp = function() {
 
           if (typeof(messenger) !== "undefined") {
             console.log("Initializing WS messenger with owner "+object.init);
-            messenger.initWithOwner(object.init, _ws, function(success,
-              message) {
+            messenger.initWithOwner(object.init, _ws, function(success, message) {
+              /*
               if (!success) {
                 console.log("Messenger init on WS message with result " +
                   success +
                   ", with message: " +
                   JSON.stringify(message));
               }
+              */
             });
           } else {
-            console.log(
-              "Messenger is not initialized and therefore could not be activated.");
+            console.log("Messenger is not initialized and therefore could not be activated.");
           }
 
         } else {
