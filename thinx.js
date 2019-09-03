@@ -530,9 +530,6 @@ var ThinxApp = function() {
   // apply rate limiter to all requests
   app.use(limiter);
 
-  // CSRF protection
-  app.use(csrf({ cookie:true }));
-
   app.use(parser.urlencoded({
     extended: true,
     parameterLimit: 1000,
@@ -548,6 +545,9 @@ var ThinxApp = function() {
       res.status(403).end();
     }
   });
+
+  // CSRF protection
+  app.use(csrf({ cookie:true }));
 
   console.log("Initializing Endpoints...");
 
