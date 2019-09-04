@@ -550,15 +550,15 @@ var ThinxApp = function() {
 
   // CSRF protection
   // now add csrf and other middlewares, after the router was mounted
-  app.use(bodyParser.urlencoded({ extended: false }));
-  app.use(cookieParser());
-  app.use(csrf({ cookie: true }));
+  // app.use(bodyParser.urlencoded({ extended: false }));
+  // app.use(cookieParser());
+  // app.use(csrf({ cookie: true })); collides with Sqreen
 
   console.log("Initializing Endpoints...");
 
   app.all("/*", function(req, res, next) {
 
-    res.cookie('XSRF-TOKEN', req.csrfToken());
+    // res.cookie('XSRF-TOKEN', req.csrfToken());
 
     var client = req.get("User-Agent");
 
