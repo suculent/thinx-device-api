@@ -18,7 +18,6 @@ var ThinxApp = function() {
   var auth = require('./lib/thinx/auth.js');
   var fs = require("fs-extra");
   var cookieParser = require('cookie-parser');
-  var csrf = require('csurf');
   var bodyParser = require('body-parser');
   var csrf = require('csurf');
 
@@ -548,6 +547,12 @@ var ThinxApp = function() {
       res.status(403).end();
     }
   });
+
+  // CSRF protection
+  // now add csrf and other middlewares, after the router was mounted
+  app.use(bodyParser.urlencoded({ extended: false }));
+  app.use(cookieParser());
+  app.use(csrf({ cookie: true }));
 
   console.log("Initializing Endpoints...");
 
@@ -3321,11 +3326,7 @@ var ThinxApp = function() {
     console.log("» WebSocket listening on port %d", wserver.address().port);
   });
 
-  // CSRF protection
-  // now add csrf and other middlewares, after the router was mounted
-  app.use(bodyParser.urlencoded({ extended: false }));
-  app.use(cookieParser());
-  app.use(csrf({ cookie: true }));
+
 
 
   /*
