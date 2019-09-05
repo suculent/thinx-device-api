@@ -4,7 +4,7 @@
     {
       name      : "transformer",
       script    : "transformer.js",
-      interpreter  : "node@11.10.1",
+      interpreter  : "node@10.16.3",
     }
   ]
 }
