@@ -730,8 +730,7 @@ app.post("/api/device/data", function(req, res) {
 /* Detach code source from a device. Expects unique device identifier. */
 app.post("/api/device/detach", function(req, res) {
   if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
-  var owner = req.session.owner;
-  devices.detach(owner, req.body, function(success, status) {
+  devices.detach(req.session.owner, req.body, function(success, status) {
     respond(res, {
       success: success,
       status: status
@@ -742,8 +741,7 @@ app.post("/api/device/detach", function(req, res) {
 /* Revokes a device. Expects unique device identifier. */
 app.post("/api/device/revoke", function(req, res) {
   if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
-  var owner = req.session.owner;
-  devices.revoke(owner, req.body, function(success, status) {
+  devices.revoke(req.session.owner, req.body, function(success, status) {
     respond(res, {
       success: success,
       status: status
@@ -1763,6 +1761,15 @@ app.get("/api/transfer/decline", function(req, res) {
   });
 });
 
+var parseTransferResponse = function(success, response, res) {
+  if (success === false) {
+    console.log("parseTransferResponse: " + { response });
+    res.redirect(app_config.public_url + "/error.html?success=failed&reason=" + response);
+  } else {
+    res.redirect(app_config.public_url + "/error.html?success="+success.toString());
+  }
+};
+
 /* Decline selective device transfer */
 app.post("/api/transfer/decline", function(req, res) {
 
@@ -1793,13 +1800,7 @@ app.post("/api/transfer/decline", function(req, res) {
   }
 
   transfer.decline(body, function(success, response) {
-    if (success === false) {
-      res.redirect(
-        app_config.public_url + "/error.html?success=failed&reason=selective_decline_failed"
-      );
-    } else {
-      res.redirect(app_config.public_url + "/error.html?success=true");
-    }
+    parseTransferResponse(success, response, res);
   });
 });
 
@@ -1820,14 +1821,7 @@ app.get("/api/transfer/accept", function(req, res) {
   };
 
   transfer.accept(body, function(success, response) {
-    if (success === false) {
-      console.log(response);
-      res.redirect(
-        app_config.public_url + "/error.html?success=failed&reason=" +
-        response);
-    } else {
-      res.redirect(app_config.public_url + "/error.html?success=true");
-    }
+    parseTransferResponse(success, response, res);
   });
 });
 
@@ -3427,11 +3421,10 @@ function restore_owner_credentials(owner_id, dmk_callback) {
   function(err, device) {
     if (err) {
       console.log("list error: " + err);
-      if ((err.toString().indexOf("Error: missing") !== -1) && typeof(callback) !==
-        "undefined") {
+      if ((err.toString().indexOf("Error: missing") !== -1) && typeof(callback) !== "undefined") {
         callback(false, "none");
       }
-      console.log("/api/user/devices: Error: " + err.toString());
+      console.log("restore_owner_credentials: Error: " + err.toString());
       return;
     }
 
