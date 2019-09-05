@@ -2688,6 +2688,41 @@ app.get('/oauth/github', function(req, res) {
  * OAuth 2 with Google
  */
 
+function createUserWithGoogle(req, ores, odata, userWrapper) {
+   console.log("Creating new user...");
+
+   // No e-mail to validate.
+   var will_require_activation = true;
+   if (typeof(odata.email) === "undefined") {
+     will_require_activation = false;
+   }
+
+   // No such owner, create...
+   user.create(userWrapper, will_require_activation, function(success, status) {
+
+     console.log("[OID:" + req.session.owner +
+       "] [NEW_SESSION] [oauth] 2860:");
+     alog.log(req.session.owner,
+       "OAuth User created: " +
+       given_name + " " + family_name);
+
+     // This is weird. Token should be random and with prefix.
+     var gtoken = sha256(res2.access_token);
+     global_token = gtoken;
+     redis_client.set(gtoken, JSON.stringify(userWrapper));
+     redis_client.expire(gtoken, 300);
+     alog.log(owner_id, " OAuth2 User logged in...");
+
+     var otoken = sha256(res2.access_token);
+     redis_client.set(otoken, JSON.stringify(userWrapper));
+     redis_client.expire(otoken, 3600);
+
+     const ourl = app_config.public_url + "/auth.html?t=" +
+       token + "&g=true"; // require GDPR consent
+     console.log(ourl);
+     ores.redirect(ourl);
+   });
+}
 
 if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
 
@@ -2712,10 +2747,10 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
     });
   });
 
+  /// CALLBACK FOR GOOGLE OAUTH ONLY!
   // Callback service parsing the authorization token and asking for the access token
   app.get('/oauth/cb', function(req, ores) {
 
-    /// CALLBACK FOR GOOGLE OAUTH ONLY!
     const options = {
       code: req.query.code,
       redirect_uri: google_ocfg.web.redirect_uris[0]
@@ -2732,24 +2767,13 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
     });
 
     t.then(res2 => {
-
-      global_token = res2.access_token;
-
-      https.get(
-        'https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' +
-        res2
-        .access_token, (res3) => {
+      global_token = res2.access_token; // WTF?
+      var gat_url = 'https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' + res2.access_token;
+      https.get(gat_url, (res3) => {
           let data = '';
-          // A chunk of data has been recieved.
-          res3.on('data', (chunk) => {
-            data += chunk;
-          });
-
-          // The whole response has been received. Print out the result.
+          res3.on('data', (chunk) => { data += chunk; });
           res3.on('end', () => {
-
             const odata = JSON.parse(data);
-
             const email = odata.email;
             const family_name = odata.family_name;
             const given_name = odata.given_name;
@@ -2759,6 +2783,7 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
                 app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
                 'E-mail missing.'
               );
+              return;
             }
 
             const owner_id = sha256(prefix + email);
@@ -2777,13 +2802,9 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
             userlib.get(owner_id, function(error, udoc) {
 
               if (error) {
-
                 console.log("User does not exist...");
-
                 // User does not exist
-
                 if (error.toString().indexOf("Error: deleted") !== -1) {
-
                   // Redirect to error page with reason for deleted documents
                   console.log("[oauth] user document deleted");
                   ores.redirect(
@@ -2808,48 +2829,14 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
                     }
                   }
 
-                  console.log("Creating new user...");
+                  req.session.owner = userWrapper.owner;
+                  createUserWithGoogle(req, ores, odata, userWrapper);
 
-                  // No e-mail to validate.
-                  var will_require_activation = true;
-                  if (typeof(odata.email) === "undefined") {
-                    will_require_activation = false;
-                  }
-
-                  // No such owner, create...
-                  user.create(userWrapper, will_require_activation, function(success, status) {
-
-                    req.session.owner = userWrapper.owner;
-                    console.log("[OID:" + req.session.owner +
-                      "] [NEW_SESSION] [oauth] 2860:");
-                    alog.log(req.session.owner,
-                      "OAuth User created: " +
-                      given_name + " " + family_name);
-
-                    // This is weird. Token should be random and with prefix.
-                    var gtoken = sha256(res2.access_token);
-                    global_token = gtoken;
-                    redis_client.set(gtoken, JSON.stringify(userWrapper));
-                    redis_client.expire(gtoken, 300);
-                    alog.log(owner_id, " OAuth2 User logged in...");
-
-                    var otoken = sha256(res2.access_token);
-                    redis_client.set(otoken, JSON.stringify(userWrapper));
-                    redis_client.expire(otoken, 3600);
-
-                    const ourl = app_config.public_url + "/auth.html?t=" +
-                      token + "&g=true"; // require GDPR consent
-                    console.log(ourl);
-                    ores.redirect(ourl);
-                  });
                 }
                 return;
               }
 
-              userlib.atomic("users", "checkin", owner_id,
-              {
-                last_seen: new Date()
-              },
+              userlib.atomic("users", "checkin", owner_id, { last_seen: new Date() },
               function(error, response) {
                 if (error) {
                   console.log("Last-seen update failed (4): " + error);
@@ -2872,12 +2859,9 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
               redis_client.expire(token, 3600);
               const ourl = app_config.public_url + "/auth.html?t=" + token +
                 "&g=" + gdpr; // require GDPR consent
-              console.log(ourl);
               ores.redirect(ourl);
             });
-
           });
-
         }).on("error", (err) => {
         console.log("Error: " + err.message);
         res.redirect(
@@ -2891,7 +2875,6 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
         err.message);
     });
   });
-
 }
 
 if (typeof(github_ocfg) !== "undefined" && github_ocfg !== null) {
