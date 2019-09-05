@@ -2459,6 +2459,24 @@ app.get("/slack/redirect", function(req, res) {
  * OAuth 2 with GitHub
  */
 
+ function trackUserLogin(owner_id) {
+   userlib.atomic("users", "checkin", owner_id, {
+     last_seen: new Date()
+   }, function(error, response) {
+     if (error) {
+       console.log("Last-seen update failed (3): " + error);
+     } else {
+       alog.log(owner_id, "Last seen updated.");
+     }
+   });
+
+   alog.log(owner_id, "OAuth2 User logged in...");
+
+   if (Globals.use_sqreen()) {
+     Sqreen.auth_track(true, { username: owner_id });
+   }
+ }
+
 if (typeof(githubOAuth) !== "undefined") {
 
   githubOAuth.on('error', function(err) {
@@ -2468,208 +2486,190 @@ if (typeof(githubOAuth) !== "undefined") {
   githubOAuth.on('token', function(oauth_token, serverResponse) {
 
     if (typeof(oauth_token.access_token) === "undefined") {
-      console.log("Fetching token failed.");
+      console.log("[githubOAuth] Fetching token failed.");
       return;
     }
 
-    console.log('here is your shiny new github oauth_token', oauth_token.access_token);
+    console.log("[githubOAuth]  GitHub Login successfull...");
 
-    // if login was successful
-    console.log("[oauth][github] GitHub Login successfull...");
+    if (typeof(oauth_token.access_token) === "undefined") {
+      console.log("[githubOAuth] No OAuth access token available, exiting.");
+      return;
+    }
 
-    if (oauth_token.access_token) {
+    console.log(JSON.stringify("Getting user..."));
 
-      console.log(JSON.stringify("Getting user..."));
+    // Application name from GitHub / Settings / Developer Settings, should be in JSON;
+    var request_options = {
+      host: 'api.github.com',
+      headers: {
+        'user-agent': 'THiNX OAuth'
+      },
+      path: '/user?access_token=' + oauth_token.access_token
+    };
 
-      // Application name from GitHub / Settings / Developer Settings, should be in JSON;
+    https.get(request_options, (res) => {
 
-      var request_options = {
-        host: 'api.github.com',
-        headers: {
-          'user-agent': 'THiNX OAuth'
-        },
-        path: '/user?access_token=' + oauth_token.access_token
-      };
+      var data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
 
-      https.get(request_options, (res) => {
+      // The whole response has been received. Print out the result.
+      res.on('end', () => {
 
-        var data = '';
-        res.on('data', (chunk) => {
-          data += chunk;
-        });
+        var token = "ghat:" + oauth_token.access_token;
+        console.log(token);
 
-        // The whole response has been received. Print out the result.
-        res.on('end', () => {
+        var given_name = "GitHub";
+        var family_name = "User";
 
-          var token = "ghat:" + oauth_token.access_token;
-          console.log(token);
+        var hdata = JSON.parse(data);
+        console.log("hdata: " + JSON.stringify(hdata));
 
-          var given_name = "GitHub";
-          var family_name = "User";
-
-          var hdata = JSON.parse(data);
-          console.log("hdata: " + JSON.stringify(hdata));
-
-          if ((typeof(hdata.name) !== "undefined") && hdata.name !== null) {
-            if (hdata.name.indexOf(" ") > -1) {
-              var in_name_array = hdata.name.split(" ");
-              given_name = in_name_array[0];
-              family_name = in_name_array[in_name_array.count - 1];
-            } else {
-              given_name = hdata.name;
-            }
+        if ((typeof(hdata.name) !== "undefined") && hdata.name !== null) {
+          if (hdata.name.indexOf(" ") > -1) {
+            var in_name_array = hdata.name.split(" ");
+            given_name = in_name_array[0];
+            family_name = in_name_array[in_name_array.count - 1];
           } else {
-            family_name = hdata.login;
-            given_name = hdata.login;
-            console.log("Warning: no name in GitHub access token response.");
-            rollbar.info({
-              "github login hdata": hdata
-            });
+            given_name = hdata.name;
           }
+        } else {
+          family_name = hdata.login;
+          given_name = hdata.login;
+          console.log("Warning: no name in GitHub access token response.");
+          rollbar.info({
+            "github login hdata": hdata
+          });
+        }
 
-          var owner_id = null;
-          var email = hdata.email;
+        var owner_id = null;
+        var email = hdata.email;
 
-          if (typeof(email) === "undefined" || email === null) {
-            console.log("Error: no email in response, should login without activation.");
-            email = hdata.login;
-          }
+        if (typeof(email) === "undefined" || email === null) {
+          console.log("Error: no email in response, should login without activation.");
+          email = hdata.login;
+        }
 
-          try {
-            owner_id = sha256(prefix + email);
-          } catch (e) {
-            console.log("error parsing e-mail: " + e + " email: " + email);
-            res.redirect(
-              app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
-              'Missing e-mail.'
-            );
-            return;
-          }
+        try {
+          owner_id = sha256(prefix + email);
+        } catch (e) {
+          console.log("error parsing e-mail: " + e + " email: " + email);
+          res.redirect(
+            app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
+            'Missing e-mail.'
+          );
+          return;
+        }
 
-          var userWrapper = {
-            first_name: given_name,
-            last_name: family_name,
-            email: email,
-            owner: owner_id,
-            username: owner_id
-          };
+        var userWrapper = {
+          first_name: given_name,
+          last_name: family_name,
+          email: email,
+          owner: owner_id,
+          username: owner_id
+        };
 
-          console.log("[oauth][github] searching for owner_id: " + owner_id);
+        console.log("[oauth][github] searching for owner_id: " + owner_id);
 
-          // Check user and make note on user login
-          userlib.get(owner_id, function(error, udoc) {
+        // Check user and make note on user login
+        userlib.get(owner_id, function(error, udoc) {
 
-            // Error case covers creating new user/managing deleted account
-            if (error) {
-
-              if (Globals.use_sqreen()) {
-                Sqreen.auth_track(false, { doc: userWrapper.owner_id });
-              }
-
-              console.log("Failed with error: " + error);
-
-              if (error.toString().indexOf("Error: deleted") !== -1) {
-                // TODO: Redirect to error page with reason
-                console.log("[oauth] user document deleted");
-
-                // This redirect also fails.
-                global_response.redirect(
-                  app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
-                  'Account document deleted.'
-                );
-                return;
-
-              } else {
-
-
-                // May exist, but be deleted. Can be cleared using Filtered Replication Handler "del"
-                if (typeof(udoc) !== "undefined") {
-                  if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
-                    true) {
-                    if (Globals.use_sqreen()) {
-                      Sqreen.auth_track(false, { doc: userWrapper.owner_id });
-                    }
-                    // TODO: Redirect to error page with reason
-                    console.log("[oauth] user account marked as deleted");
-                    global_response.redirect(
-                      app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
-                      'Account deleted.'
-                    );
-                    return;
-                  }
-                }
-
-                // No such owner, create...
-                user.create(userWrapper, false, function(success, status) {
-
-                  console.log("[OID:" + owner_id +
-                    "] [NEW_SESSION] [oauth] 2485:");
-
-                  alog.log(owner_id, "OAuth User created: " +
-                    given_name + " " + family_name);
-
-                  redis_client.set(token, JSON.stringify(userWrapper));
-                  redis_client.expire(token, 30);
-                  global_token = token;
-
-                  const ourl = app_config.public_url + "/auth.html&t=" +
-                    token + "&g=true"; // require GDPR consent
-                  console.log("FIXME: this request will probably fail fail (cannot redirect): " + ourl);
-                  // causes registration error where headers already sent!
-                  global_response.redirect(ourl); // must be global_response! res does not exist here.
-
-                  if (Globals.use_sqreen()) {
-                    Sqreen.signup_track({ username: userWrapper.owner_id });
-                  }
-
-                  console.log("Redirecting to login (2)");
-                });
-                return;
-              }
-            }
-
-            console.log("UDOC:");
-            console.log(JSON.stringify(udoc));
-
-            userlib.atomic("users", "checkin", owner_id, {
-              last_seen: new Date()
-            }, function(error, response) {
-              if (error) {
-                console.log("Last-seen update failed (3): " + error);
-              } else {
-                alog.log(owner_id, "Last seen updated.");
-              }
-            });
-
-            alog.log(owner_id, "OAuth2 User logged in...");
-
-            redis_client.set(token, JSON.stringify(userWrapper));
-            redis_client.expire(token, 3600);
-
-            console.log("Redirecting to login (1)");
-
-            var gdpr = false;
-            if (typeof(udoc.info) !== "undefined") {
-              if (typeof(udoc.gdpr_consent) !== "undefined" && udoc.gdpr_consent ==
-                true) {
-                gdpr = true;
-              }
-            }
+          // Error case covers creating new user/managing deleted account
+          if (error) {
 
             if (Globals.use_sqreen()) {
-              Sqreen.auth_track(true, { username: userWrapper.owner_id });
+              Sqreen.auth_track(false, { doc: userWrapper.owner_id });
             }
 
-            const ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" +
-              gdpr; // require GDPR consent
-            console.log(ourl);
-            global_response.redirect(ourl);
+            console.log("Failed with error: " + error);
 
-          }); // userlib.get
+            if (error.toString().indexOf("Error: deleted") !== -1) {
+              // TODO: Redirect to error page with reason
+              console.log("[oauth] user document deleted");
 
-        }); // res.end
-      }); // https.get
-    }
+              // This redirect also fails.
+              global_response.redirect(
+                app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
+                'Account document deleted.'
+              );
+              return;
+
+            } else {
+
+
+              // May exist, but be deleted. Can be cleared using Filtered Replication Handler "del"
+              if (typeof(udoc) !== "undefined") {
+                if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
+                  true) {
+                  if (Globals.use_sqreen()) {
+                    Sqreen.auth_track(false, { doc: userWrapper.owner_id });
+                  }
+                  // TODO: Redirect to error page with reason
+                  console.log("[oauth] user account marked as deleted");
+                  global_response.redirect(
+                    app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
+                    'Account deleted.'
+                  );
+                  return;
+                }
+              }
+
+              // No such owner, create...
+              user.create(userWrapper, false, function(success, status) {
+
+                console.log("[OID:" + owner_id +
+                  "] [NEW_SESSION] [oauth] 2485:");
+
+                alog.log(owner_id, "OAuth User created: " +
+                  given_name + " " + family_name);
+
+                redis_client.set(token, JSON.stringify(userWrapper));
+                redis_client.expire(token, 30);
+                global_token = token;
+
+                const ourl = app_config.public_url + "/auth.html&t=" +
+                  token + "&g=true"; // require GDPR consent
+                console.log("FIXME: this request will probably fail fail (cannot redirect): " + ourl);
+                // causes registration error where headers already sent!
+                global_response.redirect(ourl); // must be global_response! res does not exist here.
+
+                if (Globals.use_sqreen()) {
+                  Sqreen.signup_track({ username: userWrapper.owner_id });
+                }
+
+                console.log("Redirecting to login (2)");
+              });
+              return;
+            }
+          }
+
+          // console.log("UDOC:");
+          // console.log(JSON.stringify(udoc));
+
+          trackUserLogin(owner_id);
+
+          redis_client.set(token, JSON.stringify(userWrapper));
+          redis_client.expire(token, 3600);
+
+          console.log("Redirecting to login (1)");
+
+          var gdpr = false;
+          if (typeof(udoc.info) !== "undefined") {
+            if (typeof(udoc.gdpr_consent) !== "undefined" && udoc.gdpr_consent == true) {
+              gdpr = true;
+            }
+          }
+
+          const ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" + gdpr; // require GDPR consent
+          console.log(ourl);
+          global_response.redirect(ourl);
+
+        }); // userlib.get
+
+      }); // res.end
+    }); // https.get
   });
 }
 
