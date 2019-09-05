@@ -44,9 +44,12 @@ class Transformer {
 
   constructor() {
 
+    console.log("Starting THiNX Transformer Server Node at " + new Date().toString());
+
     this.app = express();
 
     if (cluster.isMaster) {
+      
       console.log(`Master ${process.pid} is running`);
       // Fork workers.
       const forks = numCPUs;
@@ -59,49 +62,40 @@ class Transformer {
 
     } else {
 
-      // Workers can share any TCP connection
-      // In this case it is an HTTP server
-      http.createServer(this.app).listen(8000, "0.0.0.0");
-
-      console.log("Worker " + process.pid + " started");
-
-      // TODO: Load this token from a json config like sqreen.
-
-
-
-      console.log("Starting THiNX Transformer Server Node at " + new Date().toString());
-
-      app.use(parser.json({
+      this.app.use(parser.json({
         limit: "1mb"
       }));
-
-      app.use(parser.urlencoded({
+      this.app.use(parser.urlencoded({
         extended: true,
         parameterLimit: 1000,
         limit: "1mb"
       }));
 
+      // Workers can share any TCP connection
+      http.createServer(this.app).listen(8000, "0.0.0.0");
+      console.log("Worker " + process.pid + " started");
+
       const http_port = 7474;
-
       http.createServer(this.app).listen(http_port, "0.0.0.0");
-
       console.log("Started on port: " + http_port);
-
-      app.all("/*", function(req, res, next) {
-        res.header("Access-Control-Allow-Credentials", "true");
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-        res.header("Access-Control-Allow-Headers", "Content-type,Accept,X-Access-Token,X-Key");
-        if (req.method == "OPTIONS") {
-          res.status(200).end();
-        } else {
-          next();
-        }
-      });
+      setupRoutes();
     }
+  }
+
+  setupRoutes() {
+    this.app.all("/*", function(req, res, next) {
+      res.header("Access-Control-Allow-Credentials", "true");
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+      res.header("Access-Control-Allow-Headers", "Content-type,Accept,X-Access-Token,X-Key");
+      if (req.method == "OPTIONS") {
+        res.status(200).end();
+      } else {
+        next();
+      }
+    });
 
     this.app.post("/do", function(req, res) {
-
       if (typeof(req.body) === "undefined") {
         respond(res, {
           success: false,
@@ -109,15 +103,12 @@ class Transformer {
         });
         return;
       }
-
       var ingress = req.body;
-
       try {
         ingress = JSON.parse(req.body);
       } catch (e) {
         ingress = req.body;
       }
-
       var jobs = ingress.jobs;
       if (typeof(ingress.jobs) === "undefined") {
         respond(res, {
@@ -126,10 +117,8 @@ class Transformer {
         });
         return;
       }
-
       console.log(new Date().toString() + "Incoming job.");
       transform(req, res);
-
     });
 
     /* Credits handler, returns current credits from user info */
@@ -139,7 +128,6 @@ class Transformer {
         mac: server_mac
       });
     });
-
   }
 
   sanitize(code) {
@@ -226,7 +214,6 @@ class Transformer {
       error: error
     });
   }
-
 }
 
 var server = new Transformer();
