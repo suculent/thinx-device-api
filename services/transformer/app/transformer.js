@@ -44,12 +44,9 @@ class Transformer {
 
   constructor() {
 
-    console.log("Starting THiNX Transformer Server Node at " + new Date().toString());
-
     this.app = express();
 
     if (cluster.isMaster) {
-      
       console.log(`Master ${process.pid} is running`);
       // Fork workers.
       const forks = numCPUs;
@@ -62,40 +59,45 @@ class Transformer {
 
     } else {
 
-      this.app.use(parser.json({
+      // Workers can share any TCP connection
+      // In this case it is an HTTP server
+      http.createServer(this.app).listen(8000, "0.0.0.0");
+
+      console.log("Worker " + process.pid + " started");
+
+      console.log("Starting THiNX Transformer Server Node at " + new Date().toString());
+
+      app.use(parser.json({
         limit: "1mb"
       }));
-      this.app.use(parser.urlencoded({
+
+      app.use(parser.urlencoded({
         extended: true,
         parameterLimit: 1000,
         limit: "1mb"
       }));
 
-      // Workers can share any TCP connection
-      http.createServer(this.app).listen(8000, "0.0.0.0");
-      console.log("Worker " + process.pid + " started");
-
       const http_port = 7474;
-      http.createServer(this.app).listen(http_port, "0.0.0.0");
-      console.log("Started on port: " + http_port);
-      setupRoutes();
-    }
-  }
 
-  setupRoutes() {
-    this.app.all("/*", function(req, res, next) {
-      res.header("Access-Control-Allow-Credentials", "true");
-      res.header("Access-Control-Allow-Origin", "*");
-      res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-      res.header("Access-Control-Allow-Headers", "Content-type,Accept,X-Access-Token,X-Key");
-      if (req.method == "OPTIONS") {
-        res.status(200).end();
-      } else {
-        next();
-      }
-    });
+      http.createServer(this.app).listen(http_port, "0.0.0.0");
+
+      console.log("Started on port: " + http_port);
+
+      app.all("/*", function(req, res, next) {
+        res.header("Access-Control-Allow-Credentials", "true");
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+        res.header("Access-Control-Allow-Headers", "Content-type,Accept,X-Access-Token,X-Key");
+        if (req.method == "OPTIONS") {
+          res.status(200).end();
+        } else {
+          next();
+        }
+      });
+    }
 
     this.app.post("/do", function(req, res) {
+
       if (typeof(req.body) === "undefined") {
         respond(res, {
           success: false,
@@ -103,12 +105,15 @@ class Transformer {
         });
         return;
       }
+
       var ingress = req.body;
+
       try {
         ingress = JSON.parse(req.body);
       } catch (e) {
         ingress = req.body;
       }
+
       var jobs = ingress.jobs;
       if (typeof(ingress.jobs) === "undefined") {
         respond(res, {
@@ -117,8 +122,10 @@ class Transformer {
         });
         return;
       }
+
       console.log(new Date().toString() + "Incoming job.");
       transform(req, res);
+
     });
 
     /* Credits handler, returns current credits from user info */
@@ -129,6 +136,7 @@ class Transformer {
       });
     });
   }
+
 
   sanitize(code) {
 
@@ -187,14 +195,9 @@ class Transformer {
     var error = null;
 
     for (var job_index in jobs) {
-
       const job = jobs[job_index];
       const code = sanitize(job.code);
-      const owner = job.owner;
-      const transaction_id = job.id;
-
       console.log(new Date().toString() + " job: " + JSON.stringify(job));
-
       try {
         console.log("Running code:\n" + code);
         /* jshint -W061 */
@@ -203,7 +206,7 @@ class Transformer {
         status = transformer(status, job.params.device); // passthrough previous status
         console.log("Docker Transformer will return status: '" + status + "'");
       } catch (e) {
-        console.log("Docker Transformer Ecception: " + e);
+        console.log("Docker Transformer Exception: " + e);
         error = JSON.stringify(e);
       }
     }
@@ -214,6 +217,7 @@ class Transformer {
       error: error
     });
   }
+
 }
 
 var server = new Transformer();
