@@ -312,71 +312,71 @@ function respond(res, object) {
 
 // Database preparation on first run
 
+function getDocument(file) {
+  if (!fs.existsSync(file)) {
+    return false;
+  }
+  const data = fs.readFileSync(file);
+  if (typeof(data) === "undefined") {
+    console.log("[getDocument] no data read.");
+    return false;
+  }
+  // Parser may fail
+  try {
+    const filter_doc = JSON.parse(data);
+    return filter_doc;
+  } catch (e) {
+    console.log("File may not exist: "+e);
+    return false;
+  }
+}
+
+function logCouchError(err, body, header) {
+  console.log("[thinx.js:couch] Insert error: "+err);
+  if (typeof(body) !== "undefined") {
+    console.log("[thinx.js:couch] Insert body: "+body);
+  }
+  if (typeof(body) !== "undefined") {
+    console.log("[thinx.js:couch] Insert header: "+header);
+  }
+}
+
+function injectDesign(db, design, file) {
+  if (typeof(design) === "undefined") return;
+  let design_doc = getDocument(file);
+  if (design_doc) {
+    db.insert("_design/" + design, design_doc, function(err, body, header) {
+      logCouchError(err, body, header, "init:design:"+design);
+    });
+  } else {
+    console.log("Design doc injection issue at "+file);
+  }
+}
+
+function injectReplFilter(db, filter, file) {
+  let filter_doc = getDocument(file);
+  if (filter_doc) {
+    db.insert("_design/repl_filters", filter_doc, function(err, body, header) {
+      logCouchError(err, body, header, "init:repl:"+design);
+    });
+  } else {
+    console.log("Filter doc injection issue at "+file);
+  }
+}
+
+function handleDatabaseErrors(err, name) {
+  if (err.toString().indexOf("the file already exists") !== -1) {
+    // silently fail, this is ok
+  } else if (err.toString().indexOf("error happened") !== -1) {
+    console.log("[CRITICAL] 🚫 Database connectivity issue. " + err.toString() + " URI: "+app_config.database_uri);
+    process.exit(1);
+  } else {
+    console.log("[CRITICAL] 🚫 Database " + name + " creation failed. " + err + " URI: "+app_config.database_uri);
+    process.exit(2);
+  }
+}
+
 function initDatabases() {
-
-  function getDocument(file) {
-    if (!fs.existsSync(file)) {
-      return false;
-    }
-    const data = fs.readFileSync(file);
-    if (typeof(data) === "undefined") {
-      console.log("[getDocument] no data read.");
-      return false;
-    }
-    // Parser may fail
-    try {
-      const filter_doc = JSON.parse(data);
-      return filter_doc;
-    } catch (e) {
-      console.log("File may not exist: "+e);
-      return false;
-    }
-  }
-
-  function logCouchError(err, body, header) {
-    console.log("[thinx.js:couch] Insert error: "+err);
-    if (typeof(body) !== "undefined") {
-      console.log("[thinx.js:couch] Insert body: "+body);
-    }
-    if (typeof(body) !== "undefined") {
-      console.log("[thinx.js:couch] Insert header: "+header);
-    }
-  }
-
-  function injectDesign(db, design, file) {
-    if (typeof(design) === "undefined") return;
-    let design_doc = getDocument(file);
-    if (design_doc) {
-      db.insert("_design/" + design, design_doc, function(err, body, header) {
-        logCouchError(err, body, header, "init:design:"+design);
-      });
-    } else {
-      console.log("Design doc injection issue at "+file);
-    }
-  }
-
-  function injectReplFilter(db, filter, file) {
-    let filter_doc = getDocument(file);
-    if (filter_doc) {
-      db.insert("_design/repl_filters", filter_doc, function(err, body, header) {
-        logCouchError(err, body, header, "init:repl:"+design);
-      });
-    } else {
-      console.log("Filter doc injection issue at "+file);
-    }
-  }
-
-  function handleDatabaseErrors(err, name) {
-    if (err.toString().indexOf("the file already exists") !== -1) {
-      // silently fail, this is ok
-    } else if (err.toString().indexOf("error happened") !== -1) {
-      console.log("[CRITICAL] 🚫 Database connectivity issue. " + err.toString() + " URI: "+app_config.database_uri);
-      process.exit(1);
-    } else {
-      console.log("[CRITICAL] 🚫 Database " + name + " creation failed. " + err + " URI: "+app_config.database_uri);
-      process.exit(2);
-    }
-  }
 
   nano.db.create(prefix + "managed_devices", function(err, body, header) {
     if (err) {
