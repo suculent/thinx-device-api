@@ -2444,7 +2444,7 @@ app.get("/slack/redirect", function(req, res) {
     // Buffer the body entirely for processing as a whole.
     var bodyChunks = [];
 
-    if (typeof(res) === "undefined" || res === null) {
+    if (typeof(res) === "undefined" || res == null) {
       console.log("No response.");
       return;
     }
@@ -3271,7 +3271,7 @@ wss.on("connection", function connection(ws, req) {
   };
 
   // May not exist while testing...
-  if (typeof(ws) !== "undefined" && ws !== null) {
+  if (typeof(ws) !== "undefined" && ws != null) {
 
     ws.on("message", function incoming(message) {
 

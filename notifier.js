@@ -46,7 +46,6 @@ var slack = require("slack-notify")(slack_webhook);
 
 var that = this;
 
-var fs = require("fs-extra");
 var mqtt = require("mqtt");
 
 var Messenger = require('./lib/thinx/messenger');
