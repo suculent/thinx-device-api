@@ -9,3 +9,5 @@ tools/platformio-docker-build
 #tools/nodemcu-docker-build
 #tools/nodemcu-firmware
 #tools/lua-inspect
+
+conf/
