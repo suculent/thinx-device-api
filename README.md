@@ -182,8 +182,8 @@ You don't need Mailgun for developer installation, just copy-paste the activatio
 	cd thinx-device-api
 	cp .env.dist .env
 	cp .thinx_env.dist .thinx_env
-	nano env
-	nano thinx_env
+	nano .env
+	nano .thinx_env
 	./copy-envs.sh
 	docker-compose up -d --build
 
