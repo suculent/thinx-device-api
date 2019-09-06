@@ -433,6 +433,11 @@ function handleDatabaseErrors(err, name) {
 
 function initDatabases() {
 
+  // only to fix bug in CouchDB 2.3.1 first-run
+  nano.db.create("_users", function(err, body, header) {});
+  nano.db.create("_replicator", function(err, body, header) {});
+  nano.db.create("_global_changes", function(err, body, header) {});  
+
   nano.db.create(prefix + "managed_devices", function(err, body, header) {
     if (err) {
       handleDatabaseErrors(err, "managed_devices");
