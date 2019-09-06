@@ -107,16 +107,16 @@ if (typeof(build_path) === "undefined" || build_path === "") {
 }
 
 if (typeof(sha) === "undefined" || sha === "") {
-  var binary = build_path + ".bin";
-  console.log("Calculating sha256 checksum for " + binary);
+  var binary_path_sha = build_path + ".bin";
+  console.log("Calculating sha256 checksum for " + binary_path_sha);
 
-  var data = fs.readFileSync(binary, "binary", function(err, data) {
+  var ndata = fs.readFileSync(binary_path_sha, "binary", function(err, data) {
     if (err) {
       console.log(err);
     }
   });
-  if (data) {
-    sha = sha256(data.toString());
+  if (ndata) {
+    sha = sha256(ndata.toString());
     that.sha = sha;
     console.log("Calculated new sha256: " + sha);
   } else {
@@ -127,15 +127,15 @@ if (typeof(sha) === "undefined" || sha === "") {
 }
 
 if (typeof(md5) === "undefined" || md5 === "") {
-  var binary = build_path + ".bin";
-  console.log("Calculating md5 checksum for " + binary);
-  var data = fs.readFileSync(binary, "binary", function(err, data) {
+  var binary_path = build_path + ".bin";
+  console.log("Calculating md5 checksum for " + binary_path);
+  var mdata = fs.readFileSync(binary_path, "binary", function(err, data) {
     if (err) {
       console.log(err);
     }
   });
-  if (data) {
-    md5 = crypto.createHash('md5').update(string).digest('hex');
+  if (mdata) {
+    md5 = crypto.createHash('md5').update(mdata).digest('hex');
     that.md5 = md5;
     console.log("Calculated new md5: " + md5);
   } else {
@@ -249,6 +249,12 @@ devicelib.get(udid, function(err, doc) {
 
     // save to build_path
 
+    function deploymentPathForDevice(owner, udid) {
+      var user_path = config.data_root + config.deploy_root + "/" + owner;
+      var device_path = user_path + "/" + udid;
+      return device_path;
+    }
+
     var envelopePath = deploymentPathForDevice(owner, udid) + "/" +
       build_id + "/build.json";
 
@@ -345,15 +351,12 @@ devicelib.get(udid, function(err, doc) {
     for (var pindex in push_tokens) {
       if (!push_tokens.hasOwnProperty(pindex)) return;
       var registrationToken = push_tokens[pindex];
-      if ((typeof(registrationToken) !== "undefined") && (
-          registrationToken !== null)) {
-        if (registrationToken.length > 0)  {
-          console.log(
-            "Sending GCM notification to  registration token: " +
-            registrationToken);
-          admin.messaging().sendToDevice(registrationToken, message)
-            .then(successFunction)
-            .catch(failureFunction);
+      if ((typeof(registrationToken) !== "undefined") && (registrationToken !== null)) {
+          if (registrationToken.length > 0) {
+            console.log("Sending GCM notification to  registration token: " + registrationToken);
+            admin.messaging().sendToDevice(registrationToken, message)
+              .then(successFunction)
+              .catch(failureFunction);
         }
       }
     }
@@ -361,6 +364,24 @@ devicelib.get(udid, function(err, doc) {
     //
     // Notify devices (MQTT)
     //
+
+    function notify_device_channel(owner, udid, message) {
+      console.log("notify_device_channel is DEPRECATED");
+      var channel = "/thinx/devices/" + owner + "/" + udid;
+      console.log("Posting to MQTT queue " + channel);
+      const app_config = require("./conf/config.json");
+      var client = mqtt.connect("mqtt://"+app_config.mqtt.username+":"+app_config.mqtt.password+"@" + process.env.THINX_HOSTNAME + ":"+app_config.mqtt.port);
+      client.on("connect", function() {
+        console.log("Connected to MQTT, will post to " + channel);
+        client.subscribe(channel);
+        var msg = message;
+        delete msg.notification;
+        client.publish(channel, JSON.stringify(message), {
+          retain: true
+        });
+        client.end();
+      });
+    }
 
     // Device channel
     if (status == "DEPLOYED") {
@@ -377,28 +398,3 @@ devicelib.get(udid, function(err, doc) {
 //
 // MQTT Notifications (deprecated, done through Messenger)
 //
-
-function notify_device_channel(owner, udid, message) {
-  console.log("notify_device_channel is DEPRECATED");
-  var channel = "/thinx/devices/" + owner + "/" + udid;
-  console.log("Posting to MQTT queue " + channel);
-  const app_config = require("./conf/config.json");
-  var client = mqtt.connect("mqtt://"+app_config.mqtt.username+":"+app_config.mqtt.password+"@" + process.env.THINX_HOSTNAME + ":"+app_config.mqtt.port);
-  client.on("connect", function() {
-    console.log("Connected to MQTT, will post to " + channel);
-    client.subscribe(channel);
-    var msg = message;
-    delete msg.notification;
-    client.publish(channel, JSON.stringify(message), {
-      retain: true
-    });
-    client.end();
-  });
-}
-
-
-function deploymentPathForDevice(owner, udid) {
-  var user_path = config.data_root + config.deploy_root + "/" + owner;
-  var device_path = user_path + "/" + udid;
-  return device_path;
-}

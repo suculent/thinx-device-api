@@ -75,6 +75,70 @@ console.log(bitch);
  }
 }
 
+
+//
+// HTTP/S Request Tools
+//
+
+function validateJSON(str) {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
+
+function respond(res, object) {
+  if (typeOf(object) == "buffer") {
+    res.header("Content-Type", "application/octet-stream");
+    res.end(object);
+  } else if (typeOf(object) == "string") {
+    res.end(object);
+  } else {
+    res.end(JSON.stringify(object));
+  }
+}
+
+function failureResponse(res, code, reason) {
+  res.writeHead(code, {
+    "Content-Type": "application/json"
+  });
+  respond(res, {
+    success: false,
+    "status": reason
+  });
+}
+
+function validateRequest(req, res) {
+  // Check device user-agent
+  var ua = req.headers["user-agent"];
+  var validity = ua.indexOf(client_user_agent);
+
+  if (validity === 0) {
+    return true;
+  } else {
+
+    // TODO: FIXME: Replace client_user_agent string with array of options!
+    //
+    if (ua.indexOf("SIGFOX") !== -1) {
+      return true;
+    }
+
+    // ESP32HTTPClient has issues overriding User-Agent?
+    if (ua.indexOf("ESP32HTTPClient") !== -1) {
+      return true;
+    }
+
+    console.log("User-Agent: " + ua + " invalid!");
+    res.writeHead(401, {
+      "Content-Type": "text/plain"
+    });
+    res.end("validate: Client request has invalid User-Agent '" + ua + "'");
+    return false;
+  }
+}
+
 console.log("Initializing Simple OAuth...");
 
 //
@@ -299,17 +363,6 @@ function validateSession(req, res) {
   }
 }
 
-function respond(res, object) {
-  if (typeOf(object) == "buffer") {
-    res.header("Content-Type", "application/octet-stream");
-    res.end(object);
-  } else if (typeOf(object) == "string") {
-    res.end(object);
-  } else {
-    res.end(JSON.stringify(object));
-  }
-}
-
 // Database preparation on first run
 
 function getDocument(file) {
@@ -357,7 +410,7 @@ function injectReplFilter(db, filter, file) {
   let filter_doc = getDocument(file);
   if (filter_doc) {
     db.insert("_design/repl_filters", filter_doc, function(err, body, header) {
-      logCouchError(err, body, header, "init:repl:"+design);
+      logCouchError(err, body, header, "init:repl:"+filter_doc);
     });
   } else {
     console.log("Filter doc injection issue at "+file);
@@ -1432,44 +1485,6 @@ app.post("/api/device/edit", function(req, res) {
   });
 });
 
-function failureResponse(res, code, reason) {
-  res.writeHead(code, {
-    "Content-Type": "application/json"
-  });
-  respond(res, {
-    success: false,
-    "status": reason
-  });
-}
-
-function validateRequest(req, res) {
-  // Check device user-agent
-  var ua = req.headers["user-agent"];
-  var validity = ua.indexOf(client_user_agent);
-
-  if (validity === 0) {
-    return true;
-  } else {
-
-    // TODO: FIXME: Replace client_user_agent string with array of options!
-    //
-    if (ua.indexOf("SIGFOX") !== -1) {
-      return true;
-    }
-
-    // ESP32HTTPClient has issues overriding User-Agent?
-    if (ua.indexOf("ESP32HTTPClient") !== -1) {
-      return true;
-    }
-
-    console.log("User-Agent: " + ua + " invalid!");
-    res.writeHead(401, {
-      "Content-Type": "text/plain"
-    });
-    res.end("validate: Client request has invalid User-Agent '" + ua + "'");
-    return false;
-  }
-}
 
 /*
  * Builder
@@ -1798,6 +1813,11 @@ app.post("/api/transfer/decline", function(req, res) {
     });
     return;
   }
+
+  var body = {
+    transfer_id: req.body.transfer_id,
+    udids: req.body.udids
+  };
 
   transfer.decline(body, function(success, response) {
     parseTransferResponse(success, response, res);
@@ -2517,6 +2537,8 @@ if (typeof(githubOAuth) !== "undefined") {
 
       // The whole response has been received. Print out the result.
       res.on('end', () => {
+
+
 
         var token = "ghat:" + oauth_token.access_token;
         console.log(token);
@@ -3377,19 +3399,6 @@ if (isMasterProcess()) {
       restore_owners_credentials("_all_docs"); // fetches only IDs and last revision, works with hundreds of users
 		});
   }
-}
-
-//
-// HTTP/S Request Tools
-//
-
-function validateJSON(str) {
-  try {
-    JSON.parse(str);
-  } catch (e) {
-    return false;
-  }
-  return true;
 }
 
 //
