@@ -110,6 +110,8 @@ function failureResponse(res, code, reason) {
   });
 }
 
+var client_user_agent = app_config.client_user_agent;
+
 function validateRequest(req, res) {
   // Check device user-agent
   var ua = req.headers["user-agent"];
@@ -192,7 +194,7 @@ console.log("Initializing App consts...");
 
 var _ws = null;
 
-var client_user_agent = app_config.client_user_agent;
+
 var db = app_config.database_uri;
 var serverPort = app_config.port;
 var socketPort = app_config.socket;
