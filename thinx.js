@@ -2213,7 +2213,6 @@ app.post("/api/login", function(req, res) {
           status: "password_missing",
           success: false
         });
-        return;
       } else {
         console.log("[LOGIN_INVALID] Password mismatch for: " + username);
         alog.log(req.session.owner, "Password mismatch for: " + username);
@@ -2221,9 +2220,7 @@ app.post("/api/login", function(req, res) {
           status: "password_mismatch",
           success: false
         });
-        return;
       }
-
     }
 
     //
