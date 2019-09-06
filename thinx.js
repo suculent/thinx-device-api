@@ -384,13 +384,13 @@ function getDocument(file) {
   }
 }
 
-function logCouchError(err, body, header) {
+function logCouchError(err, body, header, tag) {
   console.log("[thinx.js:couch] Insert error: "+err);
   if (typeof(body) !== "undefined") {
-    console.log("[thinx.js:couch] Insert body: "+body);
+    console.log("[thinx.js:couch] Insert body: "+body+" "+tag);
   }
-  if (typeof(body) !== "undefined") {
-    console.log("[thinx.js:couch] Insert header: "+header);
+  if (typeof(header) !== "undefined") {
+    console.log("[thinx.js:couch] Insert header: "+header+" "+tag);
   }
 }
 
@@ -2213,6 +2213,7 @@ app.post("/api/login", function(req, res) {
           status: "password_missing",
           success: false
         });
+        return;
       } else {
         console.log("[LOGIN_INVALID] Password mismatch for: " + username);
         alog.log(req.session.owner, "Password mismatch for: " + username);
@@ -2220,8 +2221,9 @@ app.post("/api/login", function(req, res) {
           status: "password_mismatch",
           success: false
         });
+        return;
       }
-      return;
+      
     }
 
     //
