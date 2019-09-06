@@ -168,7 +168,7 @@
         var notification = new NotificationAPI(title, options);
 
         //add onclick handler
-        if (options.onClick && notification) {
+        if (options.onClick) {
             notification.onclick = options.onClick;
         }
 
