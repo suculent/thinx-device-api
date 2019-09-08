@@ -436,7 +436,7 @@ function initDatabases() {
   // only to fix bug in CouchDB 2.3.1 first-run
   nano.db.create("_users", function(err, body, header) {});
   nano.db.create("_replicator", function(err, body, header) {});
-  nano.db.create("_global_changes", function(err, body, header) {});  
+  nano.db.create("_global_changes", function(err, body, header) {});
 
   nano.db.create(prefix + "managed_devices", function(err, body, header) {
     if (err) {
@@ -458,7 +458,7 @@ function initDatabases() {
         JSON.stringify(body) + "\n");
       var db = nano.db.use(prefix + "managed_builds");
       injectDesign(db, "builds", "./design/design_builds.json");
-      injectReplFilter(db,   "./design/filters_builds.json");
+      injectReplFilter(db, "./design/filters_builds.json");
     }
   });
 

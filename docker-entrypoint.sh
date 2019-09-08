@@ -14,9 +14,6 @@ export
 
 pwd
 
-ls ./conf
-cat conf/config.json
-
 # seems to fail...
 sysctl net.ipv4.ip_forward=1
 sysctl -w net.ipv4.conf.all.forwarding=1
@@ -27,12 +24,17 @@ export DOCKER_HOST="unix:///var/run/docker.sock"
 # exec "$@"
 
 source ~/.profile
-source /.thinx_env
+
+if [[ -f /.thinx_env ]]; then
+  source /.thinx_env
+else
+  echo ".thinx_env not found, expects ROLLBAR_ACCESS_TOKEN, ROLLBAR_ENVIRONMENT and REVISION variables to be set."
+fi
 
 # Installs all tools, not just those currently allowed by .dockerignore, requires running Docker
 if [ ! -z $(which docker) ]; then
   echo "Installing Build-tools for DinD/DooD"
-  pushd tools
+  pushd builders
   bash ./install-builders.sh
   popd
 else
