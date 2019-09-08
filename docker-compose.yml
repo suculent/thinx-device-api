@@ -134,7 +134,6 @@ services:
       - 7445:7445 # WebSocket SSL (reserved)
       - 9002:9002 # Incoming GIT (User) Webhooks
     volumes:
-      - /mnt/data/conf:./conf
       - /mnt/data/deploy:/mnt/data/deploy # Deployment
       - /mnt/data/mosquitto:/mnt/data/mosquitto # Authentication
       - /mnt/data/repos:/mnt/data/repos # Git
