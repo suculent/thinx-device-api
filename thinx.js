@@ -35,7 +35,7 @@ var redis = require('redis');
 var path = require('path');
 var session_config = require("./conf/node-session.json");
 
-var app_config = Globals.app_config(); // require("../../conf/config.json");
+var app_config = Globals.app_config();
 
 var prefix = Globals.prefix();
 console.log("Prefix instantiated...");

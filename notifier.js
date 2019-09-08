@@ -8,19 +8,7 @@
 
 var Rollbar = require('rollbar');
 
-var config = require("./conf/config.json");
-if (typeof(process.env.CIRCLE_USERNAME) !== "undefined") {
-  console.log("» Starting notifier on Circle CI...");
-  config = require("./conf/config-test.json");
-}
-if (process.env.LOGNAME == "sychram") {
-  console.log("» Starting notifier on workstation...");
-  config = require("./conf/config-local.json");
-}
-if (process.env.LOGNAME == "root") {
-  console.log("» Starting in production mode...");
-  config = require("./conf/config.json");
-}
+var app_config = Globals.app_config();
 
 var rollbar = new Rollbar({
   accessToken: config.rollbar_token,
