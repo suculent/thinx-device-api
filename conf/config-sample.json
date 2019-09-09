@@ -36,8 +36,8 @@
   "slack_bot_token": "xoxb-xxxx-yyyy",
   "slack_bot_topic": "thinx",
   "fcm_auth": "./conf/thinx-cloud-firebase.json",
-  "ssl_key": "/etc/letsencrypt/live/thinx.cloud/privkey.pem",
-  "ssl_cert": "/etc/letsencrypt/live/thinx.cloud/cert.pem",
+  "ssl_key": "/mnt/data/ssl/privkey.pem",
+  "ssl_cert": "/mnt/data/ssl/cert.pem",
   "client_user_agent": "THiNX-Client",
   "debug": {
     "device" : false,

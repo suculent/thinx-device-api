@@ -1,7 +1,7 @@
 describe("Deployer", function() {
 
-
-  var deploy = require('../../lib/thinx/deployment');
+  var Deployment = require('../../lib/thinx/deployment');
+  var deploy = new Deployment();
 
   var envi = require("./_envi.json");
   var owner = envi.oid;

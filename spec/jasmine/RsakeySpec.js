@@ -1,6 +1,7 @@
 describe("RSA Key", function() {
 
-  var RSAKey = require("../../lib/thinx/rsakey");
+  var rsakey = require("../../lib/thinx/rsakey");
+  var RSAKey = new rsakey();
 
   var envi = require("./_envi.json");
   var owner = envi.oid;

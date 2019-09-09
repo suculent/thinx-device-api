@@ -1,7 +1,8 @@
 describe("Owner", function() {
 
   var generated_key_hash = null;
-  var User = require('../../lib/thinx/owner');
+  var user = require('../../lib/thinx/owner');
+  var User = new user();
 
   var envi = require("./_envi.json");
   var owner = envi.oid;

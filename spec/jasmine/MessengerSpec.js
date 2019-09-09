@@ -1,5 +1,6 @@
 var generated_key_name = null;
 var Messenger = require('../../lib/thinx/messenger');
+//var Messenger = new messenger();
 
 var envi = require("./_envi.json");
 var test_owner = envi.oid;

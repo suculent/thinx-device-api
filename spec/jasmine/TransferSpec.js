@@ -3,7 +3,8 @@ describe("Transfer", function() {
   var envi = require("./_envi.json");
   var owner = envi.oid;
 
-  var Transfer = require("../../lib/thinx/transfer");
+  var transfer = require("../../lib/thinx/transfer");
+  var Transfer = new transfer();
 
   var dynamic_transfer_request_id = null;
 

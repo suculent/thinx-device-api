@@ -1,6 +1,7 @@
 describe("Build log", function() {
 
-  var blog = require("../../lib/thinx/buildlog");
+  var Blog = require("../../lib/thinx/buildlog");
+  var blog = new Blog();
 
   var envi = require("./_envi.json");
   var owner = envi.oid;

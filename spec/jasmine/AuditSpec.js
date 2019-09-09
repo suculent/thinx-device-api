@@ -3,7 +3,7 @@ var owner = envi.oid;
 
 describe("Audit log", function() {
 
-  var Audit = require('../../lib/thinx/audit');
+  var audit = require('../../lib/thinx/audit'); var Audit = new audit();
 
   it("should be able to log", function(done) {
     var s = Audit.log(owner, "Log test successful.", function(result) {

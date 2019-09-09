@@ -1,5 +1,5 @@
 var generated_key_name = null;
-var APIEnv = require('../../lib/thinx/apienv');
+var apienv = require('../../lib/thinx/apienv'); var APIEnv = new apienv();
 
 var envi = require("./_envi.json");
 var owner = envi.oid;

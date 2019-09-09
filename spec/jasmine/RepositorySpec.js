@@ -1,6 +1,7 @@
 describe("Repository Watcher", function() {
 
-  var watcher = require('../../lib/thinx/repository');
+  var Watcher = require('../../lib/thinx/repository');
+  var watcher = new Watcher();
 
   // tests are run from ROOT
   var repo_path = ".";

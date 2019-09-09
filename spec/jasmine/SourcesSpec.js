@@ -1,6 +1,8 @@
 describe("Sources", function() {
 
-  var Sources = require('../../lib/thinx/sources');
+  var sources = require('../../lib/thinx/sources');
+  var Sources = new sources();
+
   var envi = require("./_envi.json");
   var owner = envi.oid;
   var source_id;

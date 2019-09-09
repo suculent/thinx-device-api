@@ -13,7 +13,10 @@ var exec = require("child_process"); // lgtm [js/unused-local-variable]
 var typeOf = require("typeof");
 var Rollbar = require("rollbar"); // lgtm [js/unused-local-variable]
 var crypto = require('crypto');
-var auth = require('./lib/thinx/auth.js');
+
+var Auth = require('./lib/thinx/auth.js');
+var auth = new Auth();
+
 var fs = require("fs-extra");
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -392,48 +395,63 @@ try {
 console.log("Initializing app requires...");
 
 // should be initialized after prefix because of DB requirements...
-var v = require("./lib/thinx/version");
+var Version = require("./lib/thinx/version");
+var v = new Version();
 
-var alog = require("./lib/thinx/audit");
+var AuditLog = require("./lib/thinx/audit");
+var alog = new AuditLog();
 
 console.log("Loading module: builder...");
-var builder = require("./lib/thinx/builder");
+var Builder = require("./lib/thinx/builder");
+var builder = new Builder();
 
 console.log("Loading module: device...");
-var device = require("./lib/thinx/device");
+var Device = require("./lib/thinx/device");
+var device = new Device();
 
 console.log("Loading module: devices...");
-var devices = require("./lib/thinx/devices");
+var Devices = require("./lib/thinx/devices");
+var devices = new Devices();
 
 console.log("Loading module: deployment...");
-var deployment = require("./lib/thinx/deployment");
+var Deployment = require("./lib/thinx/deployment");
+var deployment = new Deployment();
 
 console.log("Loading module: apienv...");
-var apienv = require("./lib/thinx/apienv");
+var APIEnv = require("./lib/thinx/apienv");
+var apienv = new APIEnv();
 
 console.log("Loading module: apikey...");
-var apikey = require("./lib/thinx/apikey");
+var APIKey = require("./lib/thinx/apikey");
+var apikey = new APIKey();
 
 console.log("Loading module: owner...");
-var user = require("./lib/thinx/owner");
+var Owner = require("./lib/thinx/owner");
+var user = new Owner();
 
 console.log("Loading module: rsakey...");
-var rsakey = require("./lib/thinx/rsakey");
+var RSAKey = require("./lib/thinx/rsakey");
+var rsakey = new RSAKey();
 
 console.log("Loading module: statistics...");
 var stats = require("./lib/thinx/statistics");
 
 console.log("Loading module: sources...");
-var sources = require("./lib/thinx/sources");
+var Sources = require("./lib/thinx/sources");
+var sources = new Sources();
 
 console.log("Loading module: device transfer...");
-var transfer = require("./lib/thinx/transfer");
+var Transfer = require("./lib/thinx/transfer");
+var transfer = new Transfer();
 
 console.log("Loading module: messenger...");
-var messenger = require("./lib/thinx/messenger");
+//var Messenger = require("./lib/thinx/messenger");
+var messenger = require("./lib/thinx/messenger"); // new Messenger();
 
-console.log("Loading module: repository watcher...");
-var watcher = require("./lib/thinx/repository");
+console.log("Loading module: repository/watcher...");
+
+var Repository = require("./lib/thinx/repository");
+var watcher = new Repository();
 
 console.log("Starting repository watcher...");
 watcher.watch();
