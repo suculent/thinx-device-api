@@ -8,9 +8,9 @@ describe("Sanitka", function() {
     expect(s).toBe("https://github.com/suculent/thinx-device-api/  ");
   });
 
-  it("should sanitize branches", function() {
+  it("should sanitize branches (removing origin/)", function() {
     var s = sanitka.url("origin/master&");
-    expect(s).toBe("origin/master");
+    expect(s).toBe("master");
   });
 
 });
