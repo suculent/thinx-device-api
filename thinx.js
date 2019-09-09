@@ -18,7 +18,6 @@ var fs = require("fs-extra");
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var csrf = require('csurf');
-var csrfProtection = csrf({ cookie: true });
 
 // set up rate limiter
 var RateLimit = require('express-rate-limit');
@@ -168,6 +167,103 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
 //
 // OAuth2 for GitHub
 //
+
+function checkUserWithResponse(global_response, token, userWrapper) {
+
+  // Check user and make note on user login
+  userlib.get(userWrapper.owner_id, function(error, udoc) {
+
+    // Error case covers creating new user/managing deleted account
+    if (error) {
+
+      if (Globals.use_sqreen()) {
+        Sqreen.auth_track(false, { doc: userWrapper.owner_id });
+      }
+
+      console.log("Failed with error: " + error);
+
+      if (error.toString().indexOf("Error: deleted") !== -1) {
+        // TODO: Redirect to error page with reason
+        console.log("[oauth] user document deleted");
+
+        // This redirect also fails.
+        global_response.redirect(
+          app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
+          'Account document deleted.'
+        );
+        return;
+
+      } else {
+
+
+        // May exist, but be deleted. Can be cleared using Filtered Replication Handler "del"
+        if (typeof(udoc) !== "undefined") {
+          if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
+            true) {
+            if (Globals.use_sqreen()) {
+              Sqreen.auth_track(false, { doc: userWrapper.owner_id });
+            }
+            // TODO: Redirect to error page with reason
+            console.log("[oauth] user account marked as deleted");
+            global_response.redirect(
+              app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
+              'Account deleted.'
+            );
+            return;
+          }
+        }
+
+        // No such owner, create...
+        user.create(userWrapper, false, function(success, status) {
+
+          console.log("[OID:" + owner_id +
+            "] [NEW_SESSION] [oauth] 2485:");
+
+          alog.log(owner_id, "OAuth User created. ");
+
+          redis_client.set(token, JSON.stringify(userWrapper));
+          redis_client.expire(token, 30);
+          global_token = token;
+
+          const ourl = app_config.public_url + "/auth.html&t=" +
+            token + "&g=true"; // require GDPR consent
+          console.log("FIXME: this request will probably fail fail (cannot redirect): " + ourl);
+          // causes registration error where headers already sent!
+          global_response.redirect(ourl); // must be global_response! res does not exist here.
+
+          if (Globals.use_sqreen()) {
+            Sqreen.signup_track({ username: userWrapper.owner_id });
+          }
+
+          console.log("Redirecting to login (2)");
+        });
+        return;
+      }
+    }
+
+    // console.log("UDOC:");
+    // console.log(JSON.stringify(udoc));
+
+    trackUserLogin(owner_id);
+
+    redis_client.set(token, JSON.stringify(userWrapper));
+    redis_client.expire(token, 3600);
+
+    console.log("Redirecting to login (1)");
+
+    var gdpr = false;
+    if (typeof(udoc.info) !== "undefined") {
+      if (typeof(udoc.gdpr_consent) !== "undefined" && udoc.gdpr_consent == true) {
+        gdpr = true;
+      }
+    }
+
+    const ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" + gdpr; // require GDPR consent
+    console.log(ourl);
+    global_response.redirect(ourl);
+
+  }); // userlib.get
+}
 
 console.log("Initializing GitHub OAuth...");
 
@@ -588,8 +684,6 @@ app.use(parser.json({
   limit: "1mb"
 }));
 
-app.use(cookieParser());
-
 // apply rate limiter to all requests
 app.use(limiter);
 
@@ -722,8 +816,7 @@ app.all("/*", function(req, res, next) {
  */
 
 /* List all devices for user. */
-app.get("/api/user/devices", csrfProtection, function(req, res) {
-  res.header("csrf-token", req.csrfToken());
+app.get("/api/user/devices", function(req, res) {
   if (!(validateSecureGETRequest(req) || validateSession(req, res))) return;
   var owner = req.session.owner;
   devices.list(owner, function(success, response) {
@@ -1899,6 +1992,16 @@ app.post("/api/transfer/accept", function(req, res) {
  * Authentication
  */
 
+var needsGDPR = function(doc) {
+  var gdpr = false;
+  if (typeof(doc.info) !== "undefined") {
+    if (typeof(doc.gdpr_consent) !== "undefined" && doc.gdpr_consent == true) {
+      gdpr = true;
+    }
+  }
+  return gdpr;
+};
+
 var updateLastSeen = function(doc) {
   userlib.atomic("users", "checkin", doc._id, { last_seen: new Date()
   }, function(error, response) {
@@ -1915,6 +2018,145 @@ var updateLastSeen = function(doc) {
     }
   });
 };
+
+function performOAuthLogin(req, res, oauth) {
+
+  let owner_id;
+
+  redis_client.get(oauth, function(err, userWrapper) {
+    if (err) {
+      console.log("[oauth] takeover failed");
+      failureResponse(res, 403, "unauthorized");
+      return;
+    } else {
+
+      var wrapper = JSON.parse(userWrapper);
+
+      if ((typeof(wrapper) !== "undefined") && wrapper !== null) {
+        owner_id = wrapper.owner;
+      } else {
+        console.log("[login] user wrapper error: " + userWrapper);
+        if (wrapper === null) {
+          failureResponse(res, 403, "wrapper error");
+          return;
+        }
+      }
+
+      userlib.get(owner_id, function(err, doc) {
+
+        if (err) {
+
+          // Support for creating accounts to non-existent e-mails automatically
+          console.log("[oauth] owner_id not found, creating: " + owner_id);
+          user.create(wrapper, false, function(success, status) {
+
+            console.log("Result creating OAuth user:");
+            console.log(success, status);
+
+            req.session.owner = wrapper.owner;
+            console.log("[OID:" + req.session.owner +
+              "] [NEW_SESSION] [oauth] 1828: ");
+
+            req.session.cookie.secure = true;
+            req.session.cookie.httpOnly = true;
+            req.session.cookie.maxAge = fortnight;
+
+            res.cookie("x-thx-session-expire", fortnight, {
+              maxAge: fortnight,
+              httpOnly: false
+            });
+
+            if (Globals.use_sqreen()) {
+              Sqreen.signup_track({ username: owner_id });
+            }
+
+            alog.log(req.session.owner, "OAuth User created: " +
+              wrapper.first_name + " " + wrapper.last_name);
+
+            respond(res, {
+              "redirectURL": "/app"
+            });
+          });
+
+        } else {
+
+          // no error when getting username
+
+          req.session.owner = doc.owner;
+
+          console.log("[OID:" + doc.owner + "] [NEW_SESSION] [oauth] thinx.js:1854...");
+
+          alog.log(doc.owner, "New session.", "info");
+
+          req.session.cookie.maxAge = new Date(Date.now() + hour).getTime();
+          req.session.cookie.secure = true;
+          req.session.cookie.httpOnly = true;
+
+          if ( (typeof(req.body.remember) === "undefined") ||
+               (req.body.remember === 0) ) {
+            req.session.cookie.maxAge = 24 * hour;
+          } else {
+            req.session.cookie.maxAge = fortnight;
+          }
+
+          alog.log(doc.owner, "OAuth User logged in: " + doc.username, "info");
+
+          if (Globals.use_sqreen()) {
+            Sqreen.auth_track(true, { username: doc.owner });
+          }
+
+          respond(res, { "redirectURL": "/app" });
+          updateLastSeen(doc);
+        }
+      });
+    }
+    return;
+  });
+}
+
+function loginWithGDPR(req, res, user_data, client_type) {
+
+  var ourl = null; // outgoing URL
+
+  var skip_gdpr_page = false;
+  if (typeof(user_data.gdpr_consent) === "undefined") {
+    skip_gdpr_page = true;
+  } else {
+    skip_gdpr_page = user_data.gdpr_consent;
+  }
+
+  // WTF? oauth should not matter here in this code branch
+  if (typeof(oauth) === "undefined") {
+    const token = sha256(user_data.email + ":" + user_data.activation_date);
+    redis_client.set(token, JSON.stringify(user_data));
+    redis_client.expire(token, 30);
+    global_token = token;
+    ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" + skip_gdpr_page;
+  }
+
+  if (typeof(req.session.owner) !== "undefined") {
+
+    // Device or WebApp... requires  valid session
+    if (client_type == "device") {
+      return;
+    } else if (client_type == "webapp") {
+      respond(res, {
+        "redirectURL": ourl
+      });
+    }
+
+  } else {
+
+    // Invalid session causes flush and logout
+    console.log("login: Flushing session: " + JSON.stringify(req.session));
+    failureResponse(res, 403, "unauthorized");
+    req.session.destroy(function(err) {
+      if (err) {
+        console.log("Session destroy error: " + err);
+      }
+    });
+  }
+}
 
 // Front-end authentication, returns session on valid authentication
 app.post("/api/login", function(req, res) {
@@ -1960,104 +2202,11 @@ app.post("/api/login", function(req, res) {
   console.log(JSON.stringify(req.body));
 
   if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
-
-    redis_client.get(oauth, function(err, userWrapper) {
-      if (err) {
-        console.log("[oauth] takeover failed");
-        failureResponse(res, 403, "unauthorized");
-        return;
-      } else {
-
-        var wrapper = JSON.parse(userWrapper);
-
-        if ((typeof(wrapper) !== "undefined") && wrapper !== null) {
-          owner_id = wrapper.owner;
-        } else {
-          console.log("[login] user wrapper error: " + userWrapper);
-          if (wrapper === null) {
-            failureResponse(res, 403, "wrapper error");
-            return;
-          }
-        }
-
-        userlib.get(owner_id, function(err, doc) {
-
-          if (err) {
-
-            // Support for creating accounts to non-existent e-mails automatically
-            console.log("[oauth] owner_id not found, creating: " + owner_id);
-            user.create(wrapper, false, function(success, status) {
-
-              console.log("Result creating OAuth user:");
-              console.log(success, status);
-
-              req.session.owner = wrapper.owner;
-              console.log("[OID:" + req.session.owner +
-                "] [NEW_SESSION] [oauth] 1828: ");
-
-              req.session.cookie.secure = true;
-              req.session.cookie.httpOnly = true;
-              req.session.cookie.maxAge = fortnight;
-
-              res.cookie("x-thx-session-expire", fortnight, {
-                maxAge: fortnight,
-                httpOnly: false
-              });
-
-              if (Globals.use_sqreen()) {
-                Sqreen.signup_track({ username: owner_id });
-              }
-
-              alog.log(req.session.owner, "OAuth User created: " +
-                wrapper.first_name + " " + wrapper.last_name);
-
-              respond(res, {
-                "redirectURL": "/app"
-              });
-            });
-
-          } else {
-
-            // no error when getting username
-
-            req.session.owner = doc.owner;
-
-            console.log("[OID:" + doc.owner + "] [NEW_SESSION] [oauth] thinx.js:1854...");
-
-            alog.log(doc.owner, "New session.", "info");
-
-            req.session.cookie.maxAge = new Date(Date.now() + hour).getTime();
-            req.session.cookie.secure = true;
-            req.session.cookie.httpOnly = true;
-
-            if ( (typeof(req.body.remember) === "undefined") ||
-                 (req.body.remember === 0) ) {
-              req.session.cookie.maxAge = 24 * hour;
-            } else {
-              req.session.cookie.maxAge = fortnight;
-            }
-
-            alog.log(doc.owner, "OAuth User logged in: " + doc.username, "info");
-
-            if (Globals.use_sqreen()) {
-              Sqreen.auth_track(true, { username: doc.owner });
-            }
-
-            respond(res, { "redirectURL": "/app" });
-            updateLastSeen(doc);
-          }
-        });
-      }
-      return;
-    });
+    performOAuthLogin(req, res, oauth);
     return;
   }
 
-  //
   // Username/password login Variant (with local token)
-  //
-
-  /* Input validation */
 
   if (typeof(req.body.password) === "undefined") {
     return;
@@ -2071,20 +2220,6 @@ app.post("/api/login", function(req, res) {
   var password = sha256(prefix + req.body.password);
 
   console.log("Validating username/password");
-
-  /*
-  if (typeof(username) === "undefined" || typeof(password) ===
-    "undefined" && typeof(oauth) === "undefined") {
-    req.session.destroy(function(err) {
-      if (err) {
-        console.log(err);
-      } else {
-        failureResponse(res, 403, "unauthorized");
-        console.log("User unknown.");
-      }
-    });
-    return;
-  }*/
 
   userlib.view("users", "owners_by_username", {
     "key": username,
@@ -2234,49 +2369,8 @@ app.post("/api/login", function(req, res) {
       }
     }
 
-    //
     // Login successful, redirect to app authentication route with some token...
-    //
-
-    var ourl = null; // outgoing URL
-
-    var skip_gdpr_page = false;
-    if (typeof(user_data.gdpr_consent) === "undefined") {
-      skip_gdpr_page = true;
-    } else {
-      skip_gdpr_page = user_data.gdpr_consent;
-    }
-
-    if (typeof(oauth) === "undefined") {
-      const token = sha256(user_data.email + ":" + user_data.activation_date);
-      redis_client.set(token, JSON.stringify(user_data));
-      redis_client.expire(token, 30);
-      global_token = token;
-      ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" + skip_gdpr_page;
-    }
-
-    if (typeof(req.session.owner) !== "undefined") {
-
-      // Device or WebApp... requires  valid session
-      if (client_type == "device") {
-        return;
-      } else if (client_type == "webapp") {
-        respond(res, {
-          "redirectURL": ourl
-        });
-      }
-
-    } else {
-
-      // Invalid session causes flush and logout
-      console.log("login: Flushing session: " + JSON.stringify(req.session));
-      failureResponse(res, 403, "unauthorized");
-      req.session.destroy(function(err) {
-        if (err) {
-          console.log("Session destroy error: " + err);
-        }
-      });
-    }
+    loginWithGDPR(req, res, user_data, client_type);
   });
 });
 
@@ -2604,101 +2698,7 @@ if (typeof(githubOAuth) !== "undefined") {
         };
 
         console.log("[oauth][github] searching for owner_id: " + owner_id);
-
-        // Check user and make note on user login
-        userlib.get(owner_id, function(error, udoc) {
-
-          // Error case covers creating new user/managing deleted account
-          if (error) {
-
-            if (Globals.use_sqreen()) {
-              Sqreen.auth_track(false, { doc: userWrapper.owner_id });
-            }
-
-            console.log("Failed with error: " + error);
-
-            if (error.toString().indexOf("Error: deleted") !== -1) {
-              // TODO: Redirect to error page with reason
-              console.log("[oauth] user document deleted");
-
-              // This redirect also fails.
-              global_response.redirect(
-                app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
-                'Account document deleted.'
-              );
-              return;
-
-            } else {
-
-
-              // May exist, but be deleted. Can be cleared using Filtered Replication Handler "del"
-              if (typeof(udoc) !== "undefined") {
-                if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
-                  true) {
-                  if (Globals.use_sqreen()) {
-                    Sqreen.auth_track(false, { doc: userWrapper.owner_id });
-                  }
-                  // TODO: Redirect to error page with reason
-                  console.log("[oauth] user account marked as deleted");
-                  global_response.redirect(
-                    app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
-                    'Account deleted.'
-                  );
-                  return;
-                }
-              }
-
-              // No such owner, create...
-              user.create(userWrapper, false, function(success, status) {
-
-                console.log("[OID:" + owner_id +
-                  "] [NEW_SESSION] [oauth] 2485:");
-
-                alog.log(owner_id, "OAuth User created: " +
-                  given_name + " " + family_name);
-
-                redis_client.set(token, JSON.stringify(userWrapper));
-                redis_client.expire(token, 30);
-                global_token = token;
-
-                const ourl = app_config.public_url + "/auth.html&t=" +
-                  token + "&g=true"; // require GDPR consent
-                console.log("FIXME: this request will probably fail fail (cannot redirect): " + ourl);
-                // causes registration error where headers already sent!
-                global_response.redirect(ourl); // must be global_response! res does not exist here.
-
-                if (Globals.use_sqreen()) {
-                  Sqreen.signup_track({ username: userWrapper.owner_id });
-                }
-
-                console.log("Redirecting to login (2)");
-              });
-              return;
-            }
-          }
-
-          // console.log("UDOC:");
-          // console.log(JSON.stringify(udoc));
-
-          trackUserLogin(owner_id);
-
-          redis_client.set(token, JSON.stringify(userWrapper));
-          redis_client.expire(token, 3600);
-
-          console.log("Redirecting to login (1)");
-
-          var gdpr = false;
-          if (typeof(udoc.info) !== "undefined") {
-            if (typeof(udoc.gdpr_consent) !== "undefined" && udoc.gdpr_consent == true) {
-              gdpr = true;
-            }
-          }
-
-          const ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" + gdpr; // require GDPR consent
-          console.log(ourl);
-          global_response.redirect(ourl);
-
-        }); // userlib.get
+        checkUserWithResponse(global_response, token, userWrapper);
 
       }); // res.end
     }); // https.get
@@ -2719,6 +2719,36 @@ app.get('/oauth/github', function(req, res) {
 /*
  * OAuth 2 with Google
  */
+
+ function processGoogleCallbackError(error, ores, udoc, req, odata, userWrapper) {
+   console.log("User does not exist...");
+   // User does not exist
+   if (error.toString().indexOf("Error: deleted") !== -1) {
+     // Redirect to error page with reason for deleted documents
+     console.log("[oauth] user document deleted");
+     ores.redirect(
+       app_config.public_url + '/error.html?success=failed&title=OAuth-Error&reason=' +
+       'account_doc_deleted');
+     return;
+
+   } else {
+     console.log("Userlib get OTHER error: " + error.toString());
+     if (typeof(udoc) !== "undefined") {
+       if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
+         true) {
+         // TODO: Redirect to error page with reason
+         console.log(
+           "[oauth] user account marked as deleted");
+         ores.redirect(
+           app_config.public_url + '/error.html?success=failed&title=OAuth-Error&reason=' +
+           'account_deleted');
+         return;
+       }
+     }
+     req.session.owner = userWrapper.owner;
+     createUserWithGoogle(req, ores, odata, userWrapper);
+   }
+}
 
 function createUserWithGoogle(req, ores, odata, userWrapper) {
    console.log("Creating new user...");
@@ -2788,7 +2818,7 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
       redirect_uri: google_ocfg.web.redirect_uris[0]
     };
 
-    var t = oauth2.authorizationCode.getToken(options, (error, result) => {
+    var tok = oauth2.authorizationCode.getToken(options, (error, result) => {
       if (error) {
         console.error('[oauth] Access Token Error', error.message);
         return ores.json('Authentication failed');
@@ -2798,7 +2828,7 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
       return token;
     });
 
-    t.then(res2 => {
+    tok.then(res2 => {
       global_token = res2.access_token; // WTF?
       var gat_url = 'https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' + res2.access_token;
       https.get(gat_url, (res3) => {
@@ -2807,8 +2837,6 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
           res3.on('end', () => {
             const odata = JSON.parse(data);
             const email = odata.email;
-            const family_name = odata.family_name;
-            const given_name = odata.given_name;
 
             if (typeof(email) === "undefined") {
               res3.redirect(
@@ -2818,6 +2846,8 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
               return;
             }
 
+            const family_name = odata.family_name;
+            const given_name = odata.given_name;
             const owner_id = sha256(prefix + email);
 
             var userWrapper = {
@@ -2829,68 +2859,19 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
             };
 
             //console.log("[oauth][google] searching for owner_id: " + owner_id);
-
             // Asynchronously check user and make note on user login
             userlib.get(owner_id, function(error, udoc) {
-
               if (error) {
-                console.log("User does not exist...");
-                // User does not exist
-                if (error.toString().indexOf("Error: deleted") !== -1) {
-                  // Redirect to error page with reason for deleted documents
-                  console.log("[oauth] user document deleted");
-                  ores.redirect(
-                    app_config.public_url + '/error.html?success=failed&title=OAuth-Error&reason=' +
-                    'account_doc_deleted');
-                  return;
-
-                } else {
-
-                  console.log("Userlib get OTHER error: " + error.toString());
-
-                  if (typeof(udoc) !== "undefined") {
-                    if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
-                      true) {
-                      // TODO: Redirect to error page with reason
-                      console.log(
-                        "[oauth] user account marked as deleted");
-                      ores.redirect(
-                        app_config.public_url + '/error.html?success=failed&title=OAuth-Error&reason=' +
-                        'account_deleted');
-                      return;
-                    }
-                  }
-
-                  req.session.owner = userWrapper.owner;
-                  createUserWithGoogle(req, ores, odata, userWrapper);
-
-                }
+                // may also end-up creating new user
+                processGoogleCallbackError(error, ores, udoc, req, odata, userWrapper);
                 return;
               }
-
-              userlib.atomic("users", "checkin", owner_id, { last_seen: new Date() },
-              function(error, response) {
-                if (error) {
-                  console.log("Last-seen update failed (4): " + error);
-                } else {
-                  alog.log(req.session.owner, "Last seen updated.");
-                }
-              });
-
-              var gdpr = false;
-              if (typeof(udoc.info) !== "undefined") {
-                if (typeof(udoc.gdpr_consent) !== "undefined" && udoc.gdpr_consent ==
-                  true) {
-                  gdpr = true;
-                }
-              }
-
-              alog.log(owner_id, " OAuth2 User logged in...");
+              updateLastSeen(udoc);
+              alog.log(owner_id, "OAuth2 User logged in...");
               var token = sha256(res2.access_token);
               redis_client.set(token, JSON.stringify(userWrapper));
               redis_client.expire(token, 3600);
-              const ourl = app_config.public_url + "/auth.html?t=" + token +
-                "&g=" + gdpr; // require GDPR consent
+              const ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" + needsGDPR(udoc); // require GDPR consent
               ores.redirect(ourl);
             });
           });
@@ -3384,14 +3365,9 @@ function isMasterProcess() {
 if (isMasterProcess()) {
 
   setInterval(database_compactor, 3600 * 1000);
-
   setInterval(log_aggregator, 86400 * 1000 / 2);
 
-  //
   // MQTT Messenger/listener
-  //
-
-
   messenger.init();
 
   //
