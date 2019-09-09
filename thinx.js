@@ -408,10 +408,6 @@ var devices = require("./lib/thinx/devices");
 console.log("Loading module: deployment...");
 var deployment = require("./lib/thinx/deployment");
 
-console.log("Loading module: repository watcher...");
-
-var watcher = require("./lib/thinx/repository");
-
 console.log("Loading module: apienv...");
 var apienv = require("./lib/thinx/apienv");
 
@@ -435,6 +431,9 @@ var transfer = require("./lib/thinx/transfer");
 
 console.log("Loading module: messenger...");
 var messenger = require("./lib/thinx/messenger");
+
+console.log("Loading module: repository watcher...");
+var watcher = require("./lib/thinx/repository");
 
 console.log("Starting repository watcher...");
 watcher.watch();
