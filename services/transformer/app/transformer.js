@@ -100,35 +100,7 @@ class Transformer {
       });
 
     this.app.post("/do", function(req, res) {
-
-      if (typeof(req.body) === "undefined") {
-        respond(res, {
-          success: false,
-          error: "missing: body"
-        });
-        return;
-      }
-
-      var ingress = req.body;
-
-      try {
-        ingress = JSON.parse(req.body);
-      } catch (e) {
-        ingress = req.body;
-      }
-
-      var jobs = ingress.jobs;
-      if (typeof(ingress.jobs) === "undefined") {
-        respond(res, {
-          success: false,
-          error: "missing: body.jobs"
-        });
-        return;
-      }
-
-      console.log(new Date().toString() + "Incoming job.");
-      transform(req, res);
-
+      process(req, res);
     });
 
     /* Credits handler, returns current credits from user info */
@@ -138,6 +110,35 @@ class Transformer {
         mac: server_mac
       });
     });
+  }
+
+  process(req, res) {
+    if (typeof(req.body) === "undefined") {
+      respond(res, {
+        success: false,
+        error: "missing: body"
+      });
+      return;
+    }
+
+    var ingress = req.body;
+    try {
+      ingress = JSON.parse(req.body);
+    } catch (e) {
+      ingress = req.body;
+    }
+
+    var jobs = ingress.jobs;
+    if (typeof(ingress.jobs) === "undefined") {
+      respond(res, {
+        success: false,
+        error: "missing: body.jobs"
+      });
+      return;
+    }
+
+    console.log(new Date().toString() + "Incoming job.");
+    transform(req, res);
   }
 
   sanitize(code) {
