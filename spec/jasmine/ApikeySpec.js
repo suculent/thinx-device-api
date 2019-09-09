@@ -84,7 +84,7 @@ describe("API Key", function() {
       owner,
       function(success, object) {
         if (success) {
-          console.log(JSON.stringify(object));
+          //console.log(JSON.stringify(object));
           expect(object).toBeDefined();
         } else {
           console.log("[jasmine] Listing failed:" + object);
