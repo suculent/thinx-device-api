@@ -1,7 +1,7 @@
 describe("Statistics", function() {
 
-  var Statistics = require('../../lib/thinx/statistics');
-  var s = new Statistics();
+  var s = require('../../lib/thinx/statistics');
+  //var s = new Statistics();
 
   var envi = require("./_envi.json");
   var owner = envi.oid;

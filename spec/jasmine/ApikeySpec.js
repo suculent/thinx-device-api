@@ -1,7 +1,10 @@
 describe("API Key", function() {
 
   var generated_key_hash = null;
-  var apikey = require("../../lib/thinx/apikey"); var APIKey = new apikey();
+
+  var APIKey = require("../../lib/thinx/apikey");
+  var apikey = new APIKey();
+  
   var sha256 = require("sha256");
 
   var envi = require("./_envi.json");
@@ -9,7 +12,7 @@ describe("API Key", function() {
 
   //create: function(owner, apikey_alias, callback)
   it("should be able to generate new API Keys", function(done) {
-    APIKey.create(
+    apikey.create(
       owner,
       "sample-key",
       function(success, object) {
@@ -55,7 +58,7 @@ describe("API Key", function() {
 }, 10000);
 
 it("should be able to verify invalid API Keys", function(done) {
-  APIKey.verify(
+  apikey.verify(
     owner,
     "invalid-api-key",
     function(success) {
@@ -66,7 +69,7 @@ it("should be able to verify invalid API Keys", function(done) {
 
 it("should be able to fail on invalid API Key revocation", function(done) {
   console.log("Revoking invalid key...");
-  APIKey.revoke(
+  apikey.revoke(
     "nonsense", ["sample-key-hash"],
     function(success) {
       expect(success).toBe(false);
@@ -76,7 +79,7 @@ it("should be able to fail on invalid API Key revocation", function(done) {
 
 //list: function(owner, callback)
 it("should be able to list API Keys", function(done) {
-  APIKey.list(
+  apikey.list(
     owner,
     function(success, object) {
       if (success) {
