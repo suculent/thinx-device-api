@@ -56,34 +56,38 @@ class Transformer {
       cluster.on('exit', (worker, code, signal) => {
         console.log(`worker ${worker.process.pid} died`);
       });
-
     } else {
+      setupServer();
+    }
+    setupRoutes();
+  }
 
-      // Workers can share any TCP connection
-      // In this case it is an HTTP server
-      http.createServer(this.app).listen(8000, "0.0.0.0");
+  setupServer() {
+    // Workers can share any TCP connection
+    // In this case it is an HTTP server
+    http.createServer(this.app).listen(8000, "0.0.0.0");
 
-      console.log("Worker " + process.pid + " started");
+    console.log("Worker " + process.pid + " started");
+    console.log("Starting THiNX Transformer Server Node at " + new Date().toString());
 
-      console.log("Starting THiNX Transformer Server Node at " + new Date().toString());
+    this.app.use(parser.json({
+      limit: "1mb"
+    }));
 
-      app.use(parser.json({
-        limit: "1mb"
-      }));
+    this.app.use(parser.urlencoded({
+      extended: true,
+      parameterLimit: 1000,
+      limit: "1mb"
+    }));
 
-      app.use(parser.urlencoded({
-        extended: true,
-        parameterLimit: 1000,
-        limit: "1mb"
-      }));
+    const http_port = 7474;
+    http.createServer(this.app).listen(http_port, "0.0.0.0");
+    console.log("Started on port: " + http_port);
+  }
 
-      const http_port = 7474;
+  setupRoutes() {
 
-      http.createServer(this.app).listen(http_port, "0.0.0.0");
-
-      console.log("Started on port: " + http_port);
-
-      app.all("/*", function(req, res, next) {
+    this.app.all("/*", function(req, res, next) {
         res.header("Access-Control-Allow-Credentials", "true");
         res.header("Access-Control-Allow-Origin", "*");
         res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
@@ -94,7 +98,6 @@ class Transformer {
           next();
         }
       });
-    }
 
     this.app.post("/do", function(req, res) {
 
@@ -136,7 +139,6 @@ class Transformer {
       });
     });
   }
-
 
   sanitize(code) {
 
