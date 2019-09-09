@@ -154,6 +154,30 @@ blog.log(build_id, owner, udid, status);
 // Device -> Souce Alias -> User -> Sources ...
 //
 
+function notify_device_channel(owner, udid, message) {
+  console.log("notify_device_channel is DEPRECATED");
+  var channel = "/thinx/devices/" + owner + "/" + udid;
+  console.log("Posting to MQTT queue " + channel);
+  const app_config = require("./conf/config.json");
+  var client = mqtt.connect("mqtt://"+app_config.mqtt.username+":"+app_config.mqtt.password+"@" + process.env.THINX_HOSTNAME + ":"+app_config.mqtt.port);
+  client.on("connect", function() {
+    console.log("Connected to MQTT, will post to " + channel);
+    client.subscribe(channel);
+    var msg = message;
+    delete msg.notification;
+    client.publish(channel, JSON.stringify(message), {
+      retain: true
+    });
+    client.end();
+  });
+}
+
+function deploymentPathForDevice(owner, udid) {
+  var user_path = config.data_root + config.deploy_root + "/" + owner;
+  var device_path = user_path + "/" + udid;
+  return device_path;
+}
+
 devicelib.get(udid, function(err, doc) {
 
   if (err || (typeof(doc) === "undefined")) {
@@ -214,9 +238,7 @@ devicelib.get(udid, function(err, doc) {
       }
     });
 
-
     // Create build envelope
-
     var buildEnvelope = {
       platform: platform,
       url: repo_url,
@@ -235,41 +257,21 @@ devicelib.get(udid, function(err, doc) {
     };
 
     // save to build_path
-
-    function deploymentPathForDevice(owner, udid) {
-      var user_path = config.data_root + config.deploy_root + "/" + owner;
-      var device_path = user_path + "/" + udid;
-      return device_path;
-    }
-
-    var envelopePath = deploymentPathForDevice(owner, udid) + "/" +
-      build_id + "/build.json";
-
-    var deployedEnvelopePath = deploymentPathForDevice(owner, udid) +
-      "/build.json";
-
+    var envelopePath = deploymentPathForDevice(owner, udid) + "/" + build_id + "/build.json";
+    var deployedEnvelopePath = deploymentPathForDevice(owner, udid) + "/build.json";
     var envelopeString = JSON.stringify(buildEnvelope, null, 4);
     console.log("Saving build envelope: " + envelopeString);
-
     //console.log("deployedEnvelopePath: " + envelopePath);
-
     var buffer = new Buffer(envelopeString + "\n");
-
     //console.log("saving envelopePath: " + deployedEnvelopePath);
     fs.writeFileSync(envelopePath, buffer);
-
     console.log("Deploying build envelope: " + deployedEnvelopePath);
     fs.writeFileSync(deployedEnvelopePath, buffer);
 
-
     // TODO: Update current build version in managed_users.repos
-
     // Select targets
-
     // TODO: -- collect push tokens (each only once)
-
     // Notify admin (Slack); may be out of notifier.js scope and can be done later in core after calling notifier (means when calling builder finishes)...
-
     // Bundled notification types:
 
     console.log("STATUS: " + status);
@@ -296,10 +298,7 @@ devicelib.get(udid, function(err, doc) {
       });
     }
 
-
-
     // Notify users (FCM)
-
     var message = {
       data: {
         type: "update",
@@ -346,28 +345,6 @@ devicelib.get(udid, function(err, doc) {
               .catch(failureFunction);
         }
       }
-    }
-
-    //
-    // Notify devices (MQTT)
-    //
-
-    function notify_device_channel(owner, udid, message) {
-      console.log("notify_device_channel is DEPRECATED");
-      var channel = "/thinx/devices/" + owner + "/" + udid;
-      console.log("Posting to MQTT queue " + channel);
-      const app_config = require("./conf/config.json");
-      var client = mqtt.connect("mqtt://"+app_config.mqtt.username+":"+app_config.mqtt.password+"@" + process.env.THINX_HOSTNAME + ":"+app_config.mqtt.port);
-      client.on("connect", function() {
-        console.log("Connected to MQTT, will post to " + channel);
-        client.subscribe(channel);
-        var msg = message;
-        delete msg.notification;
-        client.publish(channel, JSON.stringify(message), {
-          retain: true
-        });
-        client.end();
-      });
     }
 
     // Device channel
