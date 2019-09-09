@@ -18,6 +18,7 @@ var fs = require("fs-extra");
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var csrf = require('csurf');
+var csrfProtection = csrf({ cookie: true });
 
 // set up rate limiter
 var RateLimit = require('express-rate-limit');
@@ -587,6 +588,8 @@ app.use(parser.json({
   limit: "1mb"
 }));
 
+app.use(cookieParser());
+
 // apply rate limiter to all requests
 app.use(limiter);
 
@@ -719,7 +722,8 @@ app.all("/*", function(req, res, next) {
  */
 
 /* List all devices for user. */
-app.get("/api/user/devices", function(req, res) {
+app.get("/api/user/devices", csrfProtection, function(req, res) {
+  res.header("csrf-token", req.csrfToken());
   if (!(validateSecureGETRequest(req) || validateSession(req, res))) return;
   var owner = req.session.owner;
   devices.list(owner, function(success, response) {
