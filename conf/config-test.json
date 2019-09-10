@@ -30,6 +30,7 @@
   "data_root": "/mnt/data",
   "deploy_root": "/data",
   "build_root": "/repositories",
+  "ssh_keys": "/mnt/data/ssh-keys",
   "slack_webhook": "",
   "slack_bot_token": "",
   "slack_bot_topic": "thinx",
