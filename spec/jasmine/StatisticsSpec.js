@@ -1,7 +1,8 @@
 describe("Statistics", function() {
 
-  var s = require('../../lib/thinx/statistics');
-  //var s = new Statistics();
+  var Statistics = require('../../lib/thinx/statistics');
+  var s = new Statistics();
+  s.forceLogPath(__dirname + "/../../spec/test.log");
 
   var envi = require("./_envi.json");
   var owner = envi.oid;
@@ -11,16 +12,13 @@ describe("Statistics", function() {
   });
 
   it("should be able to store results", function() {
-    var path =
-      "./statistics/" + owner + "/" +
-      s.todayPathElement() + ".json";
-    s.write_stats(false, path, "./statistics", {
+    var path = __dirname + "/../../statistics/" + owner + "/" + s.todayPathElement() + ".json";
+    s.write_stats(false, path, __dirname + "/../../statistics/", {
       "message": "test"
     });
   });
 
   it("should return today path element", function() {
-    var s = require('../../lib/thinx/statistics');
     var result = s.todayPathElement();
     console.log(result);
     expect(result).toBeDefined();
@@ -48,6 +46,7 @@ describe("Statistics", function() {
       owner,
       true,
       function(err, body) {
+        console.log("Returned today stats: ");
         console.log(err, body);
         expect(body).toBe(true);
         done();
@@ -59,6 +58,7 @@ describe("Statistics", function() {
       owner,
       false,
       function(err, body) {
+        console.log("Returned all stats: ");
         console.log(err, body);
         expect(body).toBe(true);
         done();
@@ -70,7 +70,8 @@ describe("Statistics", function() {
       owner,
       function(error, result) {
         expect(error).toBe(false);
-        console.log("weekly stats: " + result);
+        console.log("Returned weekly stats: ");
+        console.log({result});
         expect(result).toBeDefined();
         done();
       });

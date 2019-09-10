@@ -787,7 +787,7 @@ app.all("/*", function(req, res, next) {
     //console.log("Setting CORS to " + app_config.public_url);
     res.header("Access-Control-Allow-Origin", app_config.acl_url); // lgtm [js/cors-misconfiguration-for-credentials]
     res.header("Access-Control-Allow-Credentials", "true");
-    console.log("Setting CORS to acl_url "+app_config.acl_url);
+    //console.log("Setting CORS to acl_url "+app_config.acl_url);
   } else {
     console.log("Setting CORS to *");
     res.header("Access-Control-Allow-Origin", "*");
@@ -2600,23 +2600,23 @@ app.get("/slack/redirect", function(req, res) {
  * OAuth 2 with GitHub
  */
 
- function trackUserLogin(owner_id) {
-   userlib.atomic("users", "checkin", owner_id, {
-     last_seen: new Date()
-   }, function(error, response) {
-     if (error) {
-       console.log("Last-seen update failed (3): " + error);
-     } else {
-       alog.log(owner_id, "Last seen updated.");
-     }
-   });
-
-   alog.log(owner_id, "OAuth2 User logged in...");
-
-   if (Globals.use_sqreen()) {
-     Sqreen.auth_track(true, { username: owner_id });
+function trackUserLogin(owner_id) {
+ userlib.atomic("users", "checkin", owner_id, {
+   last_seen: new Date()
+ }, function(error, response) {
+   if (error) {
+     console.log("Last-seen update failed (3): " + error);
+   } else {
+     alog.log(owner_id, "Last seen updated.");
    }
+ });
+
+ alog.log(owner_id, "OAuth2 User logged in...");
+
+ if (Globals.use_sqreen()) {
+   Sqreen.auth_track(true, { username: owner_id });
  }
+}
 
 if (typeof(githubOAuth) !== "undefined") {
 
