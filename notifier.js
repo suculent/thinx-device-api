@@ -12,7 +12,7 @@ var Globals = require("./lib/thinx/globals.js");
 var app_config = Globals.app_config();
 
 var rollbar = new Rollbar({
-  accessToken: app_app_config.rollbar_token,
+  accessToken: app_config.rollbar_token,
   handleUncaughtExceptions: false,
   handleUnhandledRejections: false
 });
@@ -20,7 +20,7 @@ var rollbar = new Rollbar({
 var sha256 = require("sha256");
 var crypto = require('crypto');
 var fs = require('fs-extra');
-var db = app_app_config.database_uri;
+var db = app_config.database_uri;
 
 var Globals = require("./lib/thinx/globals.js");
 var prefix = Globals.prefix();
@@ -160,7 +160,7 @@ function notify_device_channel(owner, udid, message) {
   var channel = "/thinx/devices/" + owner + "/" + udid;
   console.log("Posting to MQTT queue " + channel);
   const app_config = require("./conf/app_config.json");
-  var client = mqtt.connect("mqtt://"+app_app_config.mqtt.username+":"+app_app_config.mqtt.password+"@" + process.env.THINX_HOSTNAME + ":"+app_app_config.mqtt.port);
+  var client = mqtt.connect("mqtt://"+app_config.mqtt.username+":"+app_config.mqtt.password+"@" + process.env.THINX_HOSTNAME + ":"+app_config.mqtt.port);
   client.on("connect", function() {
     console.log("Connected to MQTT, will post to " + channel);
     client.subscribe(channel);

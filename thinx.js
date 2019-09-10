@@ -657,7 +657,7 @@ function checkUserWithResponse(global_response, token, userWrapper) {
     // console.log("UDOC:");
     // console.log(JSON.stringify(udoc));
 
-    trackUserLogin(owner_id);
+    this.trackUserLogin(userWrapper.owner_id);
 
     redis_client.set(token, JSON.stringify(userWrapper));
     redis_client.expire(token, 3600);
