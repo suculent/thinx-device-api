@@ -2777,13 +2777,11 @@ function createUserWithGoogle(req, ores, odata, userWrapper) {
    }
 
    // No such owner, create...
-   user.create(userWrapper, will_require_activation, function(success, status) {
+   user.create(userWrapper, will_require_activation, (success, status) => {
 
-     console.log("[OID:" + req.session.owner +
-       "] [NEW_SESSION] [oauth] 2860:");
-     alog.log(req.session.owner,
-       "OAuth User created: " +
-       given_name + " " + family_name);
+     console.log("[OID:" + req.session.owner + "] [NEW_SESSION] [oauth] 2860:");
+
+     alog.log(req.session.owner, "OAuth User created: " + userWrapper.given_name + " " + userWrapper.family_name);
 
      // This is weird. Token should be random and with prefix.
      var gtoken = sha256(res2.access_token);
@@ -2796,8 +2794,7 @@ function createUserWithGoogle(req, ores, odata, userWrapper) {
      redis_client.set(otoken, JSON.stringify(userWrapper));
      redis_client.expire(otoken, 3600);
 
-     const ourl = app_config.public_url + "/auth.html?t=" +
-       token + "&g=true"; // require GDPR consent
+     const ourl = app_config.public_url + "/auth.html?t=" + token + "&g=true"; // require GDPR consent
      console.log(ourl);
      ores.redirect(ourl);
    });
