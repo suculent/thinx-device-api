@@ -10,10 +10,13 @@ describe("Sources", function() {
   const source_name = "thinx-device-api-test";
 
   it("should be able to be added", function(done) {
-    Sources.add(owner,
-      source_name,
-      "https://github.com/suculent/thinx-device-api",
-      "origin/master",
+    const source = {
+      owner: owner,
+      branch: "origin/master",
+      url: "https://github.com/suculent/thinx-firmware-esp8266-arduino",
+      platform: "arduino"
+    };
+    Sources.add(source,
       (success, response) => {
         if (success === false) {
           console.log("Error adding source: " + response);
@@ -37,12 +40,16 @@ describe("Sources", function() {
 
   it("should be able to be removed", function(done) {
 
+    const source = {
+      owner: "to-be-deleted-on-test",
+      branch: "origin/master",
+      url: "https://github.com/suculent/thinx-device-api",
+      platform: "nodejs"
+    };
+
     /// Add something to be removed
-    Sources.add(owner,
-      "to-be-deleted-on-test",
-      "https://github.com/suculent/thinx-device-api",
-      "origin/master",
-      function(success, response) {
+    Sources.add(source,
+      (success, response) => {
         if (success === false) {
           console.log("Error adding source: " + response);
         }
@@ -51,7 +58,7 @@ describe("Sources", function() {
         expect(response).toBeDefined();
         source_id = response.source_id;
 
-        Sources.remove(owner, [source_id], function(success, response) {
+        Sources.remove(source.owner, [source_id], (success, response) => {
           if (success === false) {
             console.log("Error removing source: " + response);
           }
