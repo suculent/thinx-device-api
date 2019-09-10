@@ -563,6 +563,24 @@ var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unu
 var buildlib = require("nano")(db).use(prefix + "managed_builds"); // lgtm [js/unused-local-variable]
 var loglib = require("nano")(db).use(prefix + "managed_logs"); // lgtm [js/unused-local-variable]
 
+function trackUserLogin(owner_id) {
+ userlib.atomic("users", "checkin", owner_id, {
+   last_seen: new Date()
+ }, function(error, response) {
+   if (error) {
+     console.log("Last-seen update failed (3): " + error);
+   } else {
+     alog.log(owner_id, "Last seen updated.");
+   }
+ });
+
+ alog.log(owner_id, "OAuth2 User logged in...");
+
+ if (Globals.use_sqreen()) {
+   Sqreen.auth_track(true, { username: owner_id });
+ }
+}
+
 function checkUserWithResponse(global_response, token, userWrapper) {
 
   // Check user and make note on user login
@@ -2602,23 +2620,7 @@ app.get("/slack/redirect", function(req, res) {
  * OAuth 2 with GitHub
  */
 
-function trackUserLogin(owner_id) {
- userlib.atomic("users", "checkin", owner_id, {
-   last_seen: new Date()
- }, function(error, response) {
-   if (error) {
-     console.log("Last-seen update failed (3): " + error);
-   } else {
-     alog.log(owner_id, "Last seen updated.");
-   }
- });
 
- alog.log(owner_id, "OAuth2 User logged in...");
-
- if (Globals.use_sqreen()) {
-   Sqreen.auth_track(true, { username: owner_id });
- }
-}
 
 if (typeof(githubOAuth) !== "undefined") {
 
