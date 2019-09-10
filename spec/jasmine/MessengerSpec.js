@@ -48,5 +48,5 @@ describe("Messenger", function() {
     Messenger.publish(test_owner, udid, "test");
     done();
   }, 5000);
-  
+
 });
