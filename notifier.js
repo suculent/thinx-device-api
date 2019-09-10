@@ -12,7 +12,7 @@ var Globals = require("./lib/thinx/globals.js");
 var app_config = Globals.app_config();
 
 var rollbar = new Rollbar({
-  accessToken: config.rollbar_token,
+  accessToken: app_app_config.rollbar_token,
   handleUncaughtExceptions: false,
   handleUnhandledRejections: false
 });
@@ -20,7 +20,7 @@ var rollbar = new Rollbar({
 var sha256 = require("sha256");
 var crypto = require('crypto');
 var fs = require('fs-extra');
-var db = config.database_uri;
+var db = app_app_config.database_uri;
 
 var Globals = require("./lib/thinx/globals.js");
 var prefix = Globals.prefix();
@@ -30,7 +30,7 @@ var buildlib = require("nano")(db).use(prefix + "managed_builds"); // lgtm [js/u
 var loglib = require("nano")(db).use(prefix + "managed_logs"); // lgtm [js/unused-local-variable]
 var devicelib = require("nano")(db).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
 
-var slack_webhook = config.slack_webhook;
+var slack_webhook = app_config.slack_webhook;
 var slack = require("slack-notify")(slack_webhook);
 
 var that = this;
@@ -91,7 +91,7 @@ if (typeof(repo_url) === "undefined" || repo_url === "") {
 
 // Default path
 if (typeof(build_path) === "undefined" || build_path === "") {
-  build_path = config.data_root + config.deploy_root + "/" + owner + "/" + commit_id;
+  build_path = app_config.data_root + app_config.deploy_root + "/" + owner + "/" + commit_id;
 }
 
 if (typeof(sha) === "undefined" || sha === "") {
@@ -159,8 +159,8 @@ function notify_device_channel(owner, udid, message) {
   console.log("notify_device_channel is DEPRECATED");
   var channel = "/thinx/devices/" + owner + "/" + udid;
   console.log("Posting to MQTT queue " + channel);
-  const app_config = require("./conf/config.json");
-  var client = mqtt.connect("mqtt://"+app_config.mqtt.username+":"+app_config.mqtt.password+"@" + process.env.THINX_HOSTNAME + ":"+app_config.mqtt.port);
+  const app_config = require("./conf/app_config.json");
+  var client = mqtt.connect("mqtt://"+app_app_config.mqtt.username+":"+app_app_config.mqtt.password+"@" + process.env.THINX_HOSTNAME + ":"+app_app_config.mqtt.port);
   client.on("connect", function() {
     console.log("Connected to MQTT, will post to " + channel);
     client.subscribe(channel);
@@ -174,7 +174,7 @@ function notify_device_channel(owner, udid, message) {
 }
 
 function deploymentPathForDevice(owner, udid) {
-  var user_path = config.data_root + config.deploy_root + "/" + owner;
+  var user_path = app_config.data_root + app_config.deploy_root + "/" + owner;
   var device_path = user_path + "/" + udid;
   return device_path;
 }
@@ -321,7 +321,7 @@ devicelib.get(udid, function(err, doc) {
 
     var admin = require("firebase-admin");
     var serviceAccount = require(
-      config.fcm_auth);
+      app_config.fcm_auth);
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
       databaseURL: "https://thinx-cloud.firebaseio.com"
