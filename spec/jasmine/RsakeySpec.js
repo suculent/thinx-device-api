@@ -17,9 +17,8 @@ describe("RSA Key", function() {
   it("should be able to add RSA Keys first", function(done) {
     rsakey.create(owner,
     function(success, response) {
-      console.log(response);
-      console.log("RSA add result: " + JSON.stringify(response));
       revoked_fingerprint = response;
+      console.log("RSA add result: " + JSON.stringify(response));
       expect(success).toBe(true);
       done();
     });
@@ -27,8 +26,8 @@ describe("RSA Key", function() {
 
   it("should be able to list RSA Keys", function(done) {
     rsakey.list(owner, function(success, message) {
-      console.log("RSA list result: " + JSON.stringify(message));
       expect(success).toBe(true);
+      console.log("RSA list item count: " + JSON.stringify(message.count));
       done();
     });
   }, 10000);
@@ -46,9 +45,8 @@ describe("RSA Key", function() {
   it("should be able to add RSA Key 2", function(done) {
     rsakey.create(owner,
     function(success, response) {
-      console.log(response);
-      console.log("RSA add result: " + JSON.stringify(response));
       revoked_filenames.push(response.filename);
+      console.log("RSA add result: " + JSON.stringify(response));
       expect(success).toBe(true);
       done();
     });
@@ -57,9 +55,8 @@ describe("RSA Key", function() {
   it("should be able to add RSA Key 3", function(done) {
     rsakey.create(owner,
     function(success, response) {
-      console.log(response);
-      console.log("RSA add result: " + JSON.stringify(response));
       revoked_filenames.push(response.filename);
+      console.log("RSA add result: " + JSON.stringify(response));
       expect(success).toBe(true);
       done();
     });
