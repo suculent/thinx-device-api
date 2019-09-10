@@ -32,7 +32,7 @@ describe("RSA Key", function() {
     });
   }, 10000);
 
-  xit("should fail on invalid revocation", function(done) {
+  it("should fail on invalid revocation", function(done) {
     rsakey.revoke(owner, invalid_fingerprints,
       function(success, message) {
         console.log("RSA revocation result: " +JSON.stringify(message));

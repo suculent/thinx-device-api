@@ -26,7 +26,7 @@
   "secure_port": 7443,
   "websocket": 7444,
   "lambda": 7474,
-  "project_root": "/home/ubuntu/thinx-device-api",
+  "project_root": "/root/suculent/thinx-device-api",
   "data_root": "/mnt/data",
   "deploy_root": "/data",
   "build_root": "/repositories",

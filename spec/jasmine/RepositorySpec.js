@@ -4,7 +4,9 @@ describe("Repository Watcher", function() {
   var watcher = new Watcher();
 
   // tests are run from ROOT
-  var repo_path = ".";
+  var repo_path = __dirname;
+
+  console.log("Using repo_path: "+repo_path);
 
   var watcher_callback = function(result) {
     if (typeof(result) !== "undefined") {
