@@ -107,7 +107,9 @@ describe("Build log", function() {
   });
 
   it("should provide path for device", function() {
-    expect(blog.pathForDevice(owner, udid)).toBeDefined();
+    var path = blog.pathForDevice(owner, udid);
+    console.log("path: "+path);
+    expect(path).toBeDefined();
   });
 
 });
