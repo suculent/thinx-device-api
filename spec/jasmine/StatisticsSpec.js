@@ -27,8 +27,8 @@ describe("Statistics", function() {
   it("should be able to return today results for owner", function(done) {
     s.today(
       owner,
-      function(error, result) {
-        expect(error).toBe(false);
+      function(success, result) {
+        expect(success).toBe(true);
         console.log("daily stats: " + result);
         expect(result).toBeDefined();
         done();
@@ -36,19 +36,21 @@ describe("Statistics", function() {
   }, 10000);
 
   it("should be able to aggregate statistics", function(done) {
-    var result = s.aggregate();
-    expect(result).toBe(true);
-    done();
+    var result = s.aggregate(function(success, result) {
+      expect(success).toBe(true);
+      expect(result).toBeDefined();
+      done();
+    });
   }, 10000);
 
   it("should be able to parse today statistics per owner", function(done) {
-    s.parse(
+    s.today(
       owner,
-      true,
-      function(err, body) {
+      function(success, body) {
         console.log("Returned today stats: ");
-        console.log(err, body);
-        expect(body).toBe(true);
+        console.log({ success, body });
+        expect(success).toBe(true);
+        expect(body).toBeDefined();
         done();
       });
   }, 60000);
@@ -56,11 +58,12 @@ describe("Statistics", function() {
   it("should be able to parse all statistics per owner", function(done) {
     s.parse(
       owner,
-      false,
-      function(err, body) {
+      function(success, body) {
         console.log("Returned all stats: ");
-        console.log(err, body);
-        expect(body).toBe(true);
+        expect(success).toBe(true);
+        if (success) {
+          expect(body).toBeDefined();
+        }
         done();
       });
   }, 60000);
@@ -68,8 +71,8 @@ describe("Statistics", function() {
   it("should be able to return weekly results for owner", function(done) {
     s.week(
       owner,
-      function(error, result) {
-        expect(error).toBe(false);
+      function(success, result) {
+        //expect(success).toBe(true);
         console.log("Returned weekly stats: ");
         console.log({result});
         expect(result).toBeDefined();
