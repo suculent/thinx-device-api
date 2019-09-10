@@ -8,6 +8,7 @@
 
 var Rollbar = require('rollbar');
 
+var Globals = require("./lib/thinx/globals.js");
 var app_config = Globals.app_config();
 
 var rollbar = new Rollbar({
