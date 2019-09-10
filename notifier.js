@@ -10,6 +10,7 @@ var Rollbar = require('rollbar');
 
 var Globals = require("./lib/thinx/globals.js");
 var app_config = Globals.app_config();
+var prefix = Globals.prefix();
 
 var rollbar = new Rollbar({
   accessToken: app_config.rollbar_token,
@@ -21,9 +22,6 @@ var sha256 = require("sha256");
 var crypto = require('crypto');
 var fs = require('fs-extra');
 var db = app_config.database_uri;
-
-var Globals = require("./lib/thinx/globals.js");
-var prefix = Globals.prefix();
 
 var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
 var buildlib = require("nano")(db).use(prefix + "managed_builds"); // lgtm [js/unused-local-variable]

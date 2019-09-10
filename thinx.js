@@ -629,17 +629,15 @@ function checkUserWithResponse(global_response, token, userWrapper) {
         // No such owner, create...
         user.create(userWrapper, false, (success, status) => {
 
-          console.log("[OID:" + owner_id +
-            "] [NEW_SESSION] [oauth] 2485:");
+          console.log("[OID:" + userWrapper.owner_id + "] [NEW_SESSION] [oauth] 2485:");
 
-          alog.log(owner_id, "OAuth User created. ");
+          alog.log(userWrapper.owner_id, "OAuth User created. ");
 
           redis_client.set(token, JSON.stringify(userWrapper));
           redis_client.expire(token, 30);
           global_token = token;
 
-          const ourl = app_config.public_url + "/auth.html&t=" +
-            token + "&g=true"; // require GDPR consent
+          const ourl = app_config.public_url + "/auth.html&t=" + token + "&g=true"; // require GDPR consent
           console.log("FIXME: this request will probably fail fail (cannot redirect): " + ourl);
           // causes registration error where headers already sent!
           global_response.redirect(ourl); // must be global_response! res does not exist here.
@@ -2741,7 +2739,7 @@ app.get('/oauth/github', function(req, res) {
  * OAuth 2 with Google
  */
 
- function processGoogleCallbackError(error, ores, udoc, req, odata, userWrapper) {
+ function processGoogleCallbackError(error, ores, udoc, req, odata, userWrapper, access_token) {
    console.log("User does not exist...");
    // User does not exist
    if (error.toString().indexOf("Error: deleted") !== -1) {
@@ -2767,11 +2765,11 @@ app.get('/oauth/github', function(req, res) {
        }
      }
      req.session.owner = userWrapper.owner;
-     createUserWithGoogle(req, ores, odata, userWrapper);
+     createUserWithGoogle(req, ores, odata, userWrapper, access_token);
    }
 }
 
-function createUserWithGoogle(req, ores, odata, userWrapper) {
+function createUserWithGoogle(req, ores, odata, userWrapper, access_token) {
    console.log("Creating new user...");
 
    // No e-mail to validate.
@@ -2788,13 +2786,13 @@ function createUserWithGoogle(req, ores, odata, userWrapper) {
      alog.log(req.session.owner, "OAuth User created: " + userWrapper.given_name + " " + userWrapper.family_name);
 
      // This is weird. Token should be random and with prefix.
-     var gtoken = sha256(res2.access_token);
+     var gtoken = sha256(access_token);
      global_token = gtoken;
      redis_client.set(gtoken, JSON.stringify(userWrapper));
      redis_client.expire(gtoken, 300);
      alog.log(owner_id, " OAuth2 User logged in...");
 
-     var otoken = sha256(res2.access_token);
+     var otoken = sha256(access_token);
      redis_client.set(otoken, JSON.stringify(userWrapper));
      redis_client.expire(otoken, 3600);
 
@@ -2881,7 +2879,7 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
             userlib.get(owner_id, function(error, udoc) {
               if (error) {
                 // may also end-up creating new user
-                processGoogleCallbackError(error, ores, udoc, req, odata, userWrapper);
+                processGoogleCallbackError(error, ores, udoc, req, odata, userWrapper, res2.access_token);
                 return;
               }
               updateLastSeen(udoc);
