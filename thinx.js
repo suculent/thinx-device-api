@@ -445,8 +445,8 @@ var Transfer = require("./lib/thinx/transfer");
 var transfer = new Transfer();
 
 console.log("Loading module: messenger...");
-//var Messenger = require("./lib/thinx/messenger");
-var messenger = require("./lib/thinx/messenger"); // new Messenger();
+var Messenger = require("./lib/thinx/messenger");
+var messenger = new Messenger();
 
 console.log("Loading module: repository/watcher...");
 
@@ -3303,7 +3303,7 @@ wss.on("connection", function connection(ws, req) {
                 ", with message: " +
                 JSON.stringify(message));
             }
-            
+
           });
         } else {
           console.log("Messenger is not initialized and therefore could not be activated.");
