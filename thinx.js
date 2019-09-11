@@ -3379,55 +3379,11 @@ function isMasterProcess() {
   return true; // cluster.isMaster();
 }
 
-function restore_owners_credentials(query) {
-  userlib.get(query, function(err, body) {
-    if (err) {
-      console.log("DR ERR: "+err);
-      return;
+function reporter(success, default_mqtt_key) {
+    if (success) {
+      console.log("DMK: "+default_mqtt_key);
     }
-    function reporter(success, default_mqtt_key) {
-        if (success) {
-          console.log("DMK: "+default_mqtt_key);
-        }
-    }
-    for (var i = 0; i < body.rows.length; i++) {
-      var owner_doc = body.rows[i];
-      var owner_id = owner_doc.id;
-      if (owner_id.indexOf("design")) continue;
-      console.log("Restoring credentials for owner "+owner_id);
-      restore_owner_credentials(owner_id, reporter);
-    }
-  });
 }
-
-if (isMasterProcess()) {
-
-  setInterval(database_compactor, 3600 * 1000);
-  setInterval(log_aggregator, 86400 * 1000 / 2);
-
-  // MQTT Messenger/listener
-  messenger.init();
-
-  //
-  // TODO: Move to messenger or owner OR DEVICES? Or extract?
-  //
-
-  /* This operation should restore MQTT passwords only. */
-  // triggered by non-existend password file
-  if (!fs.existsSync(app_config.mqtt.passwords)) {
-    fs.ensureFile(app_config.mqtt.passwords, function(err) {
-			if (err) {
-				console.log("Error creating MQTT PASSWORDS file: " + err);
-			}
-      console.log("Running in disaster recovery mode...");
-      restore_owners_credentials("_all_docs"); // fetches only IDs and last revision, works with hundreds of users
-		});
-  }
-}
-
-//
-// MQTT Disaster Recovery
-//
 
 function restore_owner_credentials(owner_id, dmk_callback) {
   devicelib.view("devicelib", "devices_by_owner", {
@@ -3486,3 +3442,48 @@ function restore_owner_credentials(owner_id, dmk_callback) {
     });
   });
 }
+
+function setup_restore_owners_credentials(query) {
+  userlib.get(query, (err, body) => {
+    if (err) {
+      console.log("DR ERR: "+err);
+      return;
+    }
+    for (var i = 0; i < body.rows.length; i++) {
+      var owner_doc = body.rows[i];
+      var owner_id = owner_doc.id;
+      if (owner_id.indexOf("design")) continue;
+      console.log("Restoring credentials for owner "+owner_id);
+      restore_owner_credentials(owner_id, reporter);
+    }
+  });
+}
+
+if (isMasterProcess()) {
+
+  setInterval(database_compactor, 3600 * 1000);
+  setInterval(log_aggregator, 86400 * 1000 / 2);
+
+  // MQTT Messenger/listener
+  messenger.init();
+
+  //
+  // TODO: Move to messenger or owner OR DEVICES? Or extract?
+  //
+
+  /* This operation should restore MQTT passwords only. */
+  // triggered by non-existend password file
+  if (!fs.existsSync(app_config.mqtt.passwords)) {
+    fs.ensureFile(app_config.mqtt.passwords, function(err) {
+			if (err) {
+				console.log("Error creating MQTT PASSWORDS file: " + err);
+			}
+      console.log("Running in disaster recovery mode...");
+      setup_restore_owners_credentials("_all_docs"); // fetches only IDs and last revision, works with hundreds of users
+		});
+  }
+}
+
+//
+// MQTT Disaster Recovery
+//

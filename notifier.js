@@ -95,7 +95,7 @@ if (typeof(build_path) === "undefined" || build_path === "") {
 function processSHA(build_path) {
   console.log("Processing SHA for build path...");
   var binary_path_sha = build_path + ".bin";
-  if (!existsSync(binary_path_sha)) {
+  if (!fs.existsSync(binary_path_sha)) {
     console.log("binary_path_sha does not exist at " + binary_path_sha);
     process.exit(2);
     return;
