@@ -92,15 +92,24 @@ if (typeof(build_path) === "undefined" || build_path === "") {
   build_path = app_config.data_root + app_config.deploy_root + "/" + owner + "/" + commit_id;
 }
 
-if (typeof(sha) === "undefined" || sha === "") {
+function processSHA(build_path) {
+  console.log("Processing SHA for build path...");
   var binary_path_sha = build_path + ".bin";
-  console.log("Calculating sha256 checksum for " + binary_path_sha);
-
+  if (!existsSync(binary_path_sha)) {
+    console.log("binary_path_sha does not exist at " + binary_path_sha);
+    process.exit(2);
+    return;
+  }
+  console.log("Reading file for sha256 checksum from: " + binary_path_sha);
   var ndata = fs.readFileSync(binary_path_sha, "binary", function(err, data) {
+    console.log("Calllback..." + data);
     if (err) {
       console.log(err);
+      process.exit(2);
+      return;
     }
   });
+  console.log("Processing data: "+ndata.length);
   if (ndata) {
     sha = sha256(ndata.toString());
     that.sha = sha;
@@ -110,6 +119,12 @@ if (typeof(sha) === "undefined" || sha === "") {
     that.sha = sha;
     console.log("Data file not found.");
   }
+  console.log("Done.");
+  return sha;
+}
+
+if (typeof(sha) === "undefined" || sha === "") {
+  sha = processSHA(build_path);
 }
 
 if (typeof(md5) === "undefined" || md5 === "") {

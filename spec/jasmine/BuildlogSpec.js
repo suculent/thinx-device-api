@@ -50,7 +50,8 @@ describe("Build log", function() {
   });
 
   it("should be able to tail log for build_id", function(done) {
-    blog.logtail(build_id, require("./_envi.json").oid, _ws, function(err) {
+    const no_socket = null;
+    blog.logtail(build_id, require("./_envi.json").oid, no_socket, function(err) {
         console.log(err);
         expect(err).toBe(false);
         done();
