@@ -1636,7 +1636,8 @@ app.post("/api/build", function(req, res) {
     messenger: messenger,
     websocket: _ws
   };
-  builder.build(req.session.owner, req.body.build, notifiers, function(success, response) {
+  builder.build(req.session.owner, req.body.build, notifiers,
+    function(success, response) {
     respond(res, response);
   });
 });
