@@ -83,6 +83,11 @@ console.log(bitch);
 // HTTP/S Request Tools
 //
 
+function validatedUDID(udid) {
+	var regex = /[!@#$%&*()_\+={[}\]|\:;"'<,>.?\/\\~`]/g;
+	return udid.replace(regex, "");
+}
+
 function validateJSON(str) {
   try {
     JSON.parse(str);
@@ -905,7 +910,7 @@ app.get("/api/device/data/:udid", function(req, res) {
 app.post("/api/device/data", function(req, res) {
   if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
   var owner = req.session.owner;
-  var udid = req.body.udid;
+  var udid = validatedUDID(req.body.udid);
   // var apikey = req.body.key;
   // apikey.verify(owner, api_key, function(success, message) {
 
@@ -933,7 +938,7 @@ app.post("/api/device/detach", function(req, res) {
 /* Revokes a device. Expects unique device identifier. */
 app.post("/api/device/revoke", function(req, res) {
   if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
-  devices.revoke(req.session.owner, req.body, function(success, status) {
+  devices.revoke(req.session.owner, req.body, (success, status) => {
     respond(res, {
       success: success,
       status: status
@@ -1646,7 +1651,7 @@ app.post("/api/build", function(req, res) {
 app.post("/api/device/artifacts", function(req, res) {
   if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
   var owner = req.session.owner;
-  var udid = req.body.udid;
+  var udid = validatedUDID(req.body.udid);
 
   if (typeof(udid) === "undefined") {
     respond(res, {
@@ -1946,7 +1951,7 @@ app.post("/api/transfer/decline", function(req, res) {
     return;
   }
 
-  if (typeof(req.body.udids) !== "undefined") {
+  if (typeof(validatedUDID(req.body.udid)s) !== "undefined") {
     respond(res, {
       success: false,
       status: "udids_missing"
@@ -1956,7 +1961,7 @@ app.post("/api/transfer/decline", function(req, res) {
 
   var body = {
     transfer_id: req.body.transfer_id,
-    udids: req.body.udids
+    udids: validatedUDID(req.body.udid)s
   };
 
   transfer.decline(body, function(success, response) {
@@ -2006,7 +2011,7 @@ app.post("/api/transfer/accept", function(req, res) {
     return;
   }
 
-  if (typeof(req.body.udids) !== "undefined") {
+  if (typeof(validatedUDID(req.body.udid)s) !== "undefined") {
     respond(res, {
       success: false,
       status: "udids_missing"
@@ -2525,7 +2530,7 @@ app.post("/api/device/push", function(req, res) {
 app.post("/api/device/notification", function(req, res) {
   if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
   var owner = req.session.owner;
-  var device_id = req.body.udid;
+  var device_id = validatedUDID(req.body.udid);
   var nid = "nid:" + device_id;
   var reply = req.body.reply;
   if (typeof(device_id) === "undefined") {
@@ -2895,7 +2900,7 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
           });
         }).on("error", (err) => {
         console.log("Error: " + err.message);
-        res.redirect(
+        ores.redirect(
           app_config.public_url + '/error.html?success=failed&title=OAuth-Error&reason=' +
           err.message);
       });
@@ -3047,7 +3052,7 @@ app.post('/gdpr/revoke', function(req, res) {
       console.log("Deleting owner " + owner_id);
       devices.list(owner_id, (dsuccess, devices) => {
         devices.forEach(() => {
-          devices.revoke(owner, req.body, function(success, status) {
+          devices.revoke(owner_id, req.body, function(success, status) {
             respond(res, {
               success: success,
               status: status
@@ -3391,11 +3396,11 @@ function restore_owner_credentials(owner_id, dmk_callback) {
     "key": owner_id,
     "include_docs": false
   },
-  function(err, device) {
+  (err, device) => {
     if (err) {
       console.log("list error: " + err);
       if ((err.toString().indexOf("Error: missing") !== -1) && typeof(callback) !== "undefined") {
-        callback(false, "none");
+        dmk_callback(false, "none");
       }
       console.log("restore_owner_credentials: Error: " + err.toString());
       return;
@@ -3403,9 +3408,8 @@ function restore_owner_credentials(owner_id, dmk_callback) {
 
     console.log("DEVICE: "+JSON.stringify(device, false, 2));
 
-    const source_id = "ak:" + owner_id;
-
     // Get source keys
+    const source_id = "ak:" + owner_id;
     var default_mqtt_key = null;
 
     redis_client.get(source_id, function(err1, json_keys) {
