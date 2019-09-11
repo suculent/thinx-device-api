@@ -1935,7 +1935,7 @@ app.post("/api/transfer/decline", function(req, res) {
 
   if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
 
-  if (typeof(req.body.owner) !== "undefined") {
+  if (typeof(req.body.owner) === "undefined") {
     respond(res, {
       success: false,
       status: "owner_missing"
@@ -1995,7 +1995,7 @@ app.post("/api/transfer/accept", function(req, res) {
 
   if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
 
-  if (typeof(req.body.owner) !== "undefined") {
+  if (typeof(req.body.owner) === "undefined") {
     respond(res, {
       success: false,
       status: "owner_missing"
