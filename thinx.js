@@ -2739,6 +2739,39 @@ app.get('/oauth/github', function(req, res) {
  * OAuth 2 with Google
  */
 
+ function createUserWithGoogle(req, ores, odata, userWrapper, access_token) {
+    console.log("Creating new user...");
+
+    // No e-mail to validate.
+    var will_require_activation = true;
+    if (typeof(odata.email) === "undefined") {
+      will_require_activation = false;
+    }
+
+    // No such owner, create...
+    user.create(userWrapper, will_require_activation, (success, status) => {
+
+      console.log("[OID:" + req.session.owner + "] [NEW_SESSION] [oauth] 2860:");
+
+      alog.log(req.session.owner, "OAuth User created: " + userWrapper.given_name + " " + userWrapper.family_name);
+
+      // This is weird. Token should be random and with prefix.
+      var gtoken = sha256(access_token); // "g:"+
+      global_token = gtoken;
+      redis_client.set(gtoken, JSON.stringify(userWrapper));
+      redis_client.expire(gtoken, 300);
+      alog.log(owner_id, " OAuth2 User logged in...");
+
+      var token = sha256(access_token); // "o:"+
+      redis_client.set(token, JSON.stringify(userWrapper));
+      redis_client.expire(token, 3600);
+
+      const ourl = app_config.public_url + "/auth.html?t=" + token + "&g=true"; // require GDPR consent
+      console.log(ourl);
+      ores.redirect(ourl);
+    });
+ }
+
  function processGoogleCallbackError(error, ores, udoc, req, odata, userWrapper, access_token) {
    console.log("User does not exist...");
    // User does not exist
@@ -2769,38 +2802,6 @@ app.get('/oauth/github', function(req, res) {
    }
 }
 
-function createUserWithGoogle(req, ores, odata, userWrapper, access_token) {
-   console.log("Creating new user...");
-
-   // No e-mail to validate.
-   var will_require_activation = true;
-   if (typeof(odata.email) === "undefined") {
-     will_require_activation = false;
-   }
-
-   // No such owner, create...
-   user.create(userWrapper, will_require_activation, (success, status) => {
-
-     console.log("[OID:" + req.session.owner + "] [NEW_SESSION] [oauth] 2860:");
-
-     alog.log(req.session.owner, "OAuth User created: " + userWrapper.given_name + " " + userWrapper.family_name);
-
-     // This is weird. Token should be random and with prefix.
-     var gtoken = sha256(access_token);
-     global_token = gtoken;
-     redis_client.set(gtoken, JSON.stringify(userWrapper));
-     redis_client.expire(gtoken, 300);
-     alog.log(owner_id, " OAuth2 User logged in...");
-
-     var otoken = sha256(access_token);
-     redis_client.set(otoken, JSON.stringify(userWrapper));
-     redis_client.expire(otoken, 3600);
-
-     const ourl = app_config.public_url + "/auth.html?t=" + token + "&g=true"; // require GDPR consent
-     console.log(ourl);
-     ores.redirect(ourl);
-   });
-}
 
 if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
 
