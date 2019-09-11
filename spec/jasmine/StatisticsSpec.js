@@ -25,9 +25,7 @@ describe("Statistics", function() {
   });
 
   it("should be able to return today results for owner", function(done) {
-    s.today(
-      owner,
-      function(success, result) {
+    s.today(owner, function(success, result) {
         expect(success).toBe(true);
         console.log("daily stats: " + result);
         expect(result).toBeDefined();
@@ -36,7 +34,7 @@ describe("Statistics", function() {
   }, 10000);
 
   it("should be able to aggregate statistics", function(done) {
-    var result = s.aggregate(function(success, result) {
+    s.aggregate(function(success, result) {
       expect(success).toBe(true);
       expect(result).toBeDefined();
       done();
@@ -44,11 +42,8 @@ describe("Statistics", function() {
   }, 10000);
 
   it("should be able to parse today statistics per owner", function(done) {
-    s.today(
-      owner,
-      function(success, body) {
-        console.log("Returned today stats: ");
-        console.log({ success, body });
+    s.today(owner, function(success, body) {
+        console.log("Returned today stats: " + { success, body });
         expect(success).toBe(true);
         expect(body).toBeDefined();
         done();
@@ -56,9 +51,7 @@ describe("Statistics", function() {
   }, 60000);
 
   it("should be able to parse all statistics per owner", function(done) {
-    s.parse(
-      owner,
-      function(success, body) {
+    s.parse(owner, function(success, body) {
         console.log("Returned all stats: ");
         expect(success).toBe(true);
         if (success) {
@@ -69,9 +62,7 @@ describe("Statistics", function() {
   }, 60000);
 
   it("should be able to return weekly results for owner", function(done) {
-    s.week(
-      owner,
-      function(success, result) {
+    s.week(owner, function(success, result) {
         //expect(success).toBe(true);
         console.log("Returned weekly stats: ");
         console.log({result});
