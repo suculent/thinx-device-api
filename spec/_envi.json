@@ -1,5 +1,5 @@
 {
-  "oid": "4f1122fa074af4dabab76a5205474882c82de33f50ecd962d25d3628cd0603be",
+  "oid": "0fbe2e3d9326d4b318476c8a26b4ac93d38cf7da69b04204822a3bff102dc622",
   "udid": "d6ff2bb0-df34-11e7-b351-eb37822aa172",
   "mac": "11:11:11:11:11:11",
   "version": "1.7.2",
@@ -17,7 +17,7 @@
     },
     "goals": [],
     "username": "cimrman",
-    "owner": "4f1122fa074af4dabab76a5205474882c82de33f50ecd962d25d3628cd0603be",
+    "owner": "0fbe2e3d9326d4b318476c8a26b4ac93d38cf7da69b04204822a3bff102dc622",
     "email": "cimrman@thinx.cloud",
     "transformers": [{
       "ufid": "vt:b688d51871191b9f645678b10ce70ec23704ef5c549019b8beeaec9939401755",
