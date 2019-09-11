@@ -2760,7 +2760,7 @@ app.get('/oauth/github', function(req, res) {
       global_token = gtoken;
       redis_client.set(gtoken, JSON.stringify(userWrapper));
       redis_client.expire(gtoken, 300);
-      alog.log(owner_id, " OAuth2 User logged in...");
+      alog.log(req.session.owner, " OAuth2 User logged in...");
 
       var token = sha256(access_token); // "o:"+
       redis_client.set(token, JSON.stringify(userWrapper));
@@ -2811,7 +2811,7 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
     if (typeof(req.session) !== "undefined") {
       req.session.destroy();
     }
-    crypto.randomBytes(48, function(err, buffer) {
+    crypto.randomBytes(48, (err, buffer) => {
       var token = buffer.toString('hex');
       console.log("saving google auth token for 5 minutes: "+token);
       redis_client.set("oa:"+token+":g", 300); // auto-expires in 5 minutes
@@ -3044,8 +3044,8 @@ app.post('/gdpr/revoke', function(req, res) {
     } else {
 
       console.log("Deleting owner " + owner_id);
-      devices.list(owner_id, function(dsuccess, devices) {
-        devices.forEach(function(){
+      devices.list(owner_id, (dsuccess, devices) => {
+        devices.forEach(() => {
           devices.revoke(owner, req.body, function(success, status) {
             respond(res, {
               success: success,
@@ -3059,7 +3059,7 @@ app.post('/gdpr/revoke', function(req, res) {
       redis_client.expire("ak:" + owner_id, 1);
 
       redis_client.keys("/" + owner_id + "/*", function(err, obj_keys) {
-        console.dir("Deleting Redis cache for this owner: " + JSON.stringify(obj));
+        console.dir("Deleting Redis cache for this owner: " + owner_id);
         for (var key in obj_keys) {
           redis_client.expire(key, 1);
         }
@@ -3379,6 +3379,27 @@ function isMasterProcess() {
   return true; // cluster.isMaster();
 }
 
+function restore_owners_credentials(query) {
+  userlib.get(query, function(err, body) {
+    if (err) {
+      console.log("DR ERR: "+err);
+      return;
+    }
+    function reporter(success, default_mqtt_key) {
+        if (success) {
+          console.log("DMK: "+default_mqtt_key);
+        }
+    }
+    for (var i = 0; i < body.rows.length; i++) {
+      var owner_doc = body.rows[i];
+      var owner_id = owner_doc.id;
+      if (owner_id.indexOf("design")) continue;
+      console.log("Restoring credentials for owner "+owner_id);
+      restore_owner_credentials(owner_id, reporter);
+    }
+  });
+}
+
 if (isMasterProcess()) {
 
   setInterval(database_compactor, 3600 * 1000);
@@ -3463,26 +3484,5 @@ function restore_owner_credentials(owner_id, dmk_callback) {
       auth.add_mqtt_credentials(owner_id, default_mqtt_key);
       dmk_callback(true, default_mqtt_key);
     });
-  });
-}
-
-function restore_owners_credentials(query) {
-  userlib.get(query, function(err, body) {
-    if (err) {
-      console.log("DR ERR: "+err);
-      return;
-    }
-    function reporter(success, default_mqtt_key) {
-        if (success) {
-          console.log("DMK: "+default_mqtt_key);
-        }
-    }
-    for (var i = 0; i < body.rows.length; i++) {
-      var owner_doc = body.rows[i];
-      var owner_id = owner_doc.id;
-      if (owner_id.indexOf("design")) continue;
-      console.log("Restoring credentials for owner "+owner_id);
-      restore_owner_credentials(owner_id, reporter);
-    }
   });
 }
