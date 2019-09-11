@@ -145,7 +145,8 @@ console.log("thinx_firmware_version : " + thinx_firmware_version);
 console.log("md5 : " + md5);
 
 
-var blog = require("./lib/thinx/buildlog");
+var BuildLog = require("./lib/thinx/buildlog");
+var blog = new BuildLog();
 
 blog.log(build_id, owner, udid, status);
 
