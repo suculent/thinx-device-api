@@ -1,6 +1,6 @@
 {
   "name": "thinx",
-  "version": "1.0.4749",
+  "version": "1.0.4847",
   "description": "THiNX IoT RTM API",
   "bugs": {
     "url": "https://github.com/suculent/thinx-device-api/issues"
@@ -17,7 +17,7 @@
     "snyk-protect": "snyk protect",
     "test": "nyc jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls && cat lcov.info | codacy-coverage && codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d",
     "coverage": "npm run mocha",
-    "mocha": "mocha spec/jasmine --exit --timeout=5000; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls && cat lcov.info | codacy-coverage && codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d",
+    "mocha": "mocha spec/jasmine --delay=3000 --exit --timeout=5000; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls && cat lcov.info | codacy-coverage && codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d",
     "prepare": "npm-auto-version && npm run snyk-protect",
     "postpublish": "git push origin --tags"
   },
@@ -57,6 +57,7 @@
     "parse-date": "^1.1.0",
     "path": "^0.12.7",
     "qs": "6.8.0",
+    "querystring": "^0.2.0",
     "redis": "^2.8.0",
     "request": "^2.88.0",
     "rollbar": "^2.10.0",

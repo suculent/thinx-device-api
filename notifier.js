@@ -8,10 +8,12 @@
 
 var Rollbar = require('rollbar');
 
+var Globals = require("./lib/thinx/globals.js");
 var app_config = Globals.app_config();
+var prefix = Globals.prefix();
 
 var rollbar = new Rollbar({
-  accessToken: config.rollbar_token,
+  accessToken: app_config.rollbar_token,
   handleUncaughtExceptions: false,
   handleUnhandledRejections: false
 });
@@ -19,17 +21,14 @@ var rollbar = new Rollbar({
 var sha256 = require("sha256");
 var crypto = require('crypto');
 var fs = require('fs-extra');
-var db = config.database_uri;
-
-var Globals = require("./lib/thinx/globals.js");
-var prefix = Globals.prefix();
+var db = app_config.database_uri;
 
 var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
 var buildlib = require("nano")(db).use(prefix + "managed_builds"); // lgtm [js/unused-local-variable]
 var loglib = require("nano")(db).use(prefix + "managed_logs"); // lgtm [js/unused-local-variable]
 var devicelib = require("nano")(db).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
 
-var slack_webhook = config.slack_webhook;
+var slack_webhook = app_config.slack_webhook;
 var slack = require("slack-notify")(slack_webhook);
 
 var that = this;
@@ -90,18 +89,27 @@ if (typeof(repo_url) === "undefined" || repo_url === "") {
 
 // Default path
 if (typeof(build_path) === "undefined" || build_path === "") {
-  build_path = config.data_root + config.deploy_root + "/" + owner + "/" + commit_id;
+  build_path = app_config.data_root + app_config.deploy_root + "/" + owner + "/" + commit_id;
 }
 
-if (typeof(sha) === "undefined" || sha === "") {
+function processSHA(build_path) {
+  console.log("Processing SHA for build path...");
   var binary_path_sha = build_path + ".bin";
-  console.log("Calculating sha256 checksum for " + binary_path_sha);
-
+  if (!fs.existsSync(binary_path_sha)) {
+    console.log("binary_path_sha does not exist at " + binary_path_sha);
+    process.exit(2);
+    return;
+  }
+  console.log("Reading file for sha256 checksum from: " + binary_path_sha);
   var ndata = fs.readFileSync(binary_path_sha, "binary", function(err, data) {
+    console.log("Calllback..." + data);
     if (err) {
       console.log(err);
+      process.exit(2);
+      return;
     }
   });
+  console.log("Processing data: "+ndata.length);
   if (ndata) {
     sha = sha256(ndata.toString());
     that.sha = sha;
@@ -111,6 +119,12 @@ if (typeof(sha) === "undefined" || sha === "") {
     that.sha = sha;
     console.log("Data file not found.");
   }
+  console.log("Done.");
+  return sha;
+}
+
+if (typeof(sha) === "undefined" || sha === "") {
+  sha = processSHA(build_path);
 }
 
 if (typeof(md5) === "undefined" || md5 === "") {
@@ -146,7 +160,8 @@ console.log("thinx_firmware_version : " + thinx_firmware_version);
 console.log("md5 : " + md5);
 
 
-var blog = require("./lib/thinx/buildlog");
+var BuildLog = require("./lib/thinx/buildlog");
+var blog = new BuildLog();
 
 blog.log(build_id, owner, udid, status);
 
@@ -158,7 +173,7 @@ function notify_device_channel(owner, udid, message) {
   console.log("notify_device_channel is DEPRECATED");
   var channel = "/thinx/devices/" + owner + "/" + udid;
   console.log("Posting to MQTT queue " + channel);
-  const app_config = require("./conf/config.json");
+  const app_config = require("./conf/app_config.json");
   var client = mqtt.connect("mqtt://"+app_config.mqtt.username+":"+app_config.mqtt.password+"@" + process.env.THINX_HOSTNAME + ":"+app_config.mqtt.port);
   client.on("connect", function() {
     console.log("Connected to MQTT, will post to " + channel);
@@ -173,7 +188,7 @@ function notify_device_channel(owner, udid, message) {
 }
 
 function deploymentPathForDevice(owner, udid) {
-  var user_path = config.data_root + config.deploy_root + "/" + owner;
+  var user_path = app_config.data_root + app_config.deploy_root + "/" + owner;
   var device_path = user_path + "/" + udid;
   return device_path;
 }
@@ -320,7 +335,7 @@ devicelib.get(udid, function(err, doc) {
 
     var admin = require("firebase-admin");
     var serviceAccount = require(
-      config.fcm_auth);
+      app_config.fcm_auth);
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
       databaseURL: "https://thinx-cloud.firebaseio.com"

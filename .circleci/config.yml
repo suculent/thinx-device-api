@@ -78,6 +78,7 @@ jobs:
 
     # Copy the configuration folder from docker-ignored folder to virtual mount
     - run: mkdir -p /mnt/data && cp -R ./conf /mnt/data
+    - run: mkdir -p /mnt/data/ssh-keys
 
     # Sonarcloud Integration (requires JAVA)
     # - run: wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.3.0.1492-linux.zip
@@ -141,9 +142,10 @@ jobs:
             docker network inspect bridge
 
         # In cases where thinx-device-api runs as node.js app against containers in CircleCI, IPs depend on run order
+    # - run: echo "172.17.0.2 couchdb" >> /etc/hosts
     - run: echo "172.17.0.2 couchdb" >> /etc/hosts
     - run: echo "127.0.0.1 thinx-redis" >> /etc/hosts
-    - run: echo "172.17.0.4 mosquitto" >> /etc/hosts
+    - run: echo "127.0.0.1 mosquitto" >> /etc/hosts
 
     - run:
         name: NPM Test (uses jasmine until Chai expect will be supported)

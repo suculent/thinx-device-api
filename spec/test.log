@@ -1,0 +1,180 @@
+# Sample log with no signifant events
+
+api_1          | declare -x API_BASEURL="https://thinx.cloud:7443"
+api_1          | declare -x API_HOSTNAME="thinx.cloud"
+api_1          | declare -x APP_HOSTNAME="rtm.thinx.cloud"
+api_1          | declare -x AQUA_SEC_TOKEN=""
+api_1          | declare -x COMPOSE_PROJECT_NAME="thinx"
+api_1          | declare -x COUCHDB_COOKIE="homer"
+api_1          | declare -x COUCHDB_PASSWORD="vztoudelate"
+api_1          | declare -x COUCHDB_SECRET="simson"
+api_1          | declare -x COUCHDB_USER="iot_god"
+api_1          | declare -x CRISP_WEBSITE_ID="230c6394-bab4-43a2-a402-6c86e4570cbc"
+api_1          | declare -x DIND_COMMIT="37498f009d8bf25fbb6199e8ccd34bed84f2874b"
+api_1          | declare -x ENTERPRISE="false"
+api_1          | declare -x ENVIRONMENT="production"
+api_1          | declare -x GOOGLE_ANALYTICS_ID="UA-104084480-1"
+api_1          | declare -x HOME="/root"
+api_1          | declare -x HOSTNAME="cf997f01273f"
+api_1          | declare -x NODENAME="127.0.0.1"
+api_1          | declare -x NODE_ENV="production"
+api_1          | declare -x NODE_VERSION="10.16.3"
+api_1          | declare -x OLDPWD
+api_1          | declare -x PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+api_1          | declare -x PWD="/opt/thinx/thinx-device-api"
+api_1          | declare -x REDIS_PASSWORD="f1nall7s3curE"
+api_1          | declare -x REVISION="4750"
+api_1          | declare -x ROLLBAR_ACCESS_TOKEN="98022f72fdde45e69c6a6650144c202e"
+api_1          | declare -x ROLLBAR_ENVIRONMENT="thinx"
+api_1          | declare -x RollbarToken="98022f72fdde45e69c6a6650144c202e"
+api_1          | declare -x SHLVL="1"
+api_1          | declare -x SQREEN_APP_NAME="THiNX-API"
+api_1          | declare -x SQREEN_DISABLE_STARTUP_WARNING="1"
+api_1          | declare -x SQREEN_TOKEN="org_cb31a6a1e424505c160534a5591d63a16da347eb6d9cad13005b80d20df5"
+api_1          | declare -x THINX_HOSTNAME="thinx.cloud"
+api_1          | declare -x THINX_OWNER_EMAIL="admin@thinx.cloud"
+api_1          | declare -x VER="18.06.3-ce"
+api_1          | declare -x WEB_HOSTNAME="rtm.thinx.cloud"
+api_1          | declare -x YARN_VERSION="1.17.3"
+api_1          | /opt/thinx/thinx-device-api
+api_1          | net.ipv4.ip_forward = 1
+api_1          | net.ipv4.conf.all.forwarding = 1
+api_1          | mesg: ttyname failed: Inappropriate ioctl for device
+api_1          | .thinx_env not found, expects ROLLBAR_ACCESS_TOKEN, ROLLBAR_ENVIRONMENT and REVISION variables to be set.
+api_1          | Installing Build-tools for DinD/DooD
+api_1          | /opt/thinx/thinx-device-api/builders /opt/thinx/thinx-device-api
+api_1          | Using default tag: latest
+api_1          | latest: Pulling from suculent/arduino-docker-build
+api_1          | Digest: sha256:494696c42eb0a77a0cd6657a07742d33bec7b232664eb201552a26b29c9954b7
+api_1          | Status: Image is up to date for suculent/arduino-docker-build:latest
+api_1          | Builders installed.
+api_1          | /opt/thinx/thinx-device-api
+api_1          | Adding host checking exception for github.com...
+api_1          | Pseudo-terminal will not be allocated because stdin is not a terminal.
+api_1          | Warning: Permanently added the RSA host key for IP address '140.82.118.4' to the list of known hosts.
+api_1          | Permission denied (publickey).
+api_1          | Deploying with Rollbar...
+api_1          |   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+api_1          |                                  Dload  Upload   Total   Spent    Left  Speed
+100   537  100    45  100   492    254   2784 --:--:-- --:--:-- --:--:--  2795
+api_1          | {
+api_1          |   "data": {
+api_1          |     "deploy_id": 13505077
+api_1          |   }
+api_1          | }Loading globals...
+api_1          | Loading _app_config and prefix...
+api_1          | Checking prefix at /opt/thinx/thinx-device-api/lib/thinx/../../conf/.thx_prefix
+api_1          | File exists at /opt/thinx/thinx-device-api/lib/thinx/../../conf/.thx_prefix
+api_1          | Loaded prefix:
+api_1          | --- Tue Sep 10 2019 19:44:57 GMT+0000 (Coordinated Universal Time) ---
+api_1          | Prefix instantiated...
+api_1          | Rollbar instantiated...
+api_1          | Redis redis_client instantiated...
+api_1          | Globals class instantiated...
+api_1          | Initializing Simple OAuth...
+api_1          | Initializing GitHub OAuth...
+api_1          | Initializing App consts...
+api_1          | Initializing app requires...
+api_1          | Loading module: builder...
+api_1          | builder.js: loding globals...
+api_1          | builder.js: fetching app_config...
+api_1          | builder.js: fetching prefix...
+api_1          | builder.js: prefix:
+api_1          | builder.js: connecting device DB...
+api_1          | builder.js: connecting user DB...
+api_1          | builder.js: Loading apienv...
+api_1          | builder.js: Loading buildlog...
+api_1          | builder.js: Loading repository...
+api_1          | repository.js: Loading globals...
+api_1          | repository.js Initializing...
+api_1          | builder.js: Loading apikey...
+api_1          | [ApiKey.js] creating redis_client...
+api_1          | ApiKey redis_client instantiated with options: {"password":"f1nall7s3curE","host":"thinx-redis","port":6379}
+api_1          | builder.js: Loading version...
+api_1          | builder.js: Loading build template...
+api_1          | [builder.js] Please adjust builder.thinx.dist.json before running a build.
+api_1          | builder.js: Initialized...
+api_1          | Loading module: device...
+api_1          | device.js: base128 (gets stucked on divergent node version)...
+api_1          | Loading module: devices...
+api_1          | Loading module: deployment...
+api_1          | Loading module: repository watcher...
+api_1          | Loading module: apienv...
+api_1          | Loading module: apikey...
+api_1          | Loading module: owner...
+api_1          | Loading module: rsakey...
+api_1          | Loading module: statistics...
+api_1          | Loading module: sources...
+api_1          | Loading module: device transfer...
+api_1          | Loading module: messenger...
+api_1          | Starting repository watcher...
+api_1          | [repository.js:watch] init...
+api_1          | [repository.js:watch] is master process...
+api_1          | [repository.js:watch] » Starting User Webhook Listener on port 9001, instance: undefined
+api_1          | [repository.js:watch] starting githook...
+api_1          | Webhook(s) sucessfuly initialized.
+api_1          | Done.
+api_1          | Initializing vault...
+api_1          | Initializing DB...
+api_1          | Starting with prefix: ''
+api_1          | Initializing Express...
+api_1          | » Starting Redis client...
+api_1          | Initializing Endpoints...
+api_1          | » Starting HTTPS server on 7443...
+api_1          | Initializing WS session store...
+api_1          | -=[ ☢ THiNX IoT RTM API v1.0.4749 rev. 4750 ☢ ]=-
+api_1          | » WebSocket listening on port 7444
+api_1          | [OID:MASTER] MQTT listener connected.
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | oauth: undefined
+api_1          | {"username":"test","password":"tset"}
+api_1          | Validating username/password
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Incoming WS message: {"init":"cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12"}
+api_1          | Initializing WS messenger with owner cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | MESENGER #1 CONNECT: {}
+api_1          | SECDEBUG! Connected, subscribing owner channel with options {"host":"mqtt://mosquitto","port":1883,"username":"cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12","password":"ed7fa6af27ce5fb5a33b508ed4bfcfac0a7bbf45deaa4c3b6981866a90f44286"}
+api_1          | No callback in messenger.js:134
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Getting owner cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12 for API Key...
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | oauth: undefined
+api_1          | {"username":"test","password":"tset"}
+api_1          | Validating username/password
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Incoming WS message: {"init":"cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12"}
+api_1          | Initializing WS messenger with owner cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud
+api_1          | Setting CORS to acl_url https://rtm.thinx.cloud

@@ -14,6 +14,11 @@ ENV COUCHDB_COOKIE=${COUCHDB_COOKIE}
 ARG COUCHDB_SECRET
 ENV COUCHDB_SECRET=${COUCHDB_SECRET}
 
+ARG NODENAME
+ENV NODENAME=${NODENAME}
+
+RUN echo "ENV check:" ${COUCHDB_USER} ${COUCHDB_PASSWORD} ${COUCHDB_COOKIE} ${COUCHDB_SECRET} ${NODENAME}
+
 # Add CouchDB user account to make sure the IDs are assigned consistently
 RUN groupadd -g 5984 -r couchdb && useradd -u 5984 -d /opt/couchdb -g couchdb couchdb
 

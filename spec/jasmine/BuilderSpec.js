@@ -1,7 +1,8 @@
 describe("Builder", function() {
 
   //anything in here will apply to everything in each nested describe
-  var builder = require("../../lib/thinx/builder");
+  var Builder = require("../../lib/thinx/builder");
+  var builder = new Builder();
 
   var envi = require("./_envi.json");
   var owner = envi.oid;

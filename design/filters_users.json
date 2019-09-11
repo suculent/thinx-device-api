@@ -1,38 +1,7 @@
 {
-    "_id": "_design/users",
-    "language": "javascript",
-    "views": {
-        "owners_by_username": {
-            "map": "function (doc) { if(doc.username) { emit (doc.username, doc); } }"
-        },
-        "unseen_only": {
-            "map": "function (doc) { if(typeof(doc.last_seen) === 'undefined') { emit (doc.email); } }"
-        },
-        "owners_by_email": {
-            "map": "function (doc) { if(doc.email) { if (doc.info.email) { emit(doc.info.email, doc) } else { emit (doc.email, doc); } } }"
-        },
-        "owners_by_activation": {
-            "map": "function (doc) { if(doc.activation) { emit (doc.activation, doc ); } }"
-        },
-        "owners_by_id": {
-            "map": "function (doc) { if(doc.owner) { emit (doc.owner, doc); } }"
-        },
-        "owners_by_resetkey": {
-            "map": "function (doc) { if(doc.reset_key) { emit (doc.reset_key, doc); } }"
-        },
-        "rsa_keys_by_owner": {
-            "map": "function (doc) { if(doc._id) { emit (doc.owner, doc.rsa_keys); } }"
-        },
-        "transformers_by_owner": {
-            "map": "function(doc) {\n    if (doc._id) {\n        emit(doc.email, doc.info.transformers);\n    }\n}"
-        }
-    },
-    "filters": {
-        "del": "function(doc) {    return !doc._deleted;}"
-    },
-    "updates": {
-        "delete_expired": "function (doc, req) { if (doc.last_seen < req.query.mindate) { doc._deleted = true; return [doc, 'deleted']; } else return [doc, doc._id] }",
-        "checkin": "function (doc, req) { doc.last_seen = new Date(); return [doc, doc._id]; }",
-        "edit": "function(doc, req) { var fields = JSON.parse(req.body); for (var i in fields) { if (i === 'info') { for (var s in fields[i]) { doc[i][s] = fields[i][s]; } } else { doc[i] = fields[i]; } } var resp = doc; delete resp._revisions; return [doc, toJSON(resp)]; }"
-    }
+  "_id": "_design/repl_filters",
+  "filters": {
+    "no_deleted": "function(doc,req){return !doc._deleted;};",
+    "del": "function(doc) {    return !doc._deleted;}"
+  }
 }

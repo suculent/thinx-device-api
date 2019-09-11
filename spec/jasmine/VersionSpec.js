@@ -1,6 +1,7 @@
 describe("Version", function() {
 
-  var v = require('../../lib/thinx/version');
+  const Version = require('../../lib/thinx/version');
+  const v = new Version();
 
   it("should be able to initialize", function() {
     expect(v).toBeDefined();

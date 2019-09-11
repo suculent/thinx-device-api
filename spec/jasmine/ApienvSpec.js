@@ -1,16 +1,16 @@
 var generated_key_name = null;
-var APIEnv = require('../../lib/thinx/apienv');
-
 var envi = require("./_envi.json");
 var owner = envi.oid;
+
+var APIEnv = require('../../lib/thinx/apienv');
+var apienv = new APIEnv();
 
 describe("API Env", function() {
 
   // create: function(owner, name, value, callback)
-  it("should be able to store new environment varriable", function(
-    done) {
+  it("should be able to store new environment variable", function(done) {
 
-    APIEnv.create(
+    apienv.create(
       owner,
       "sample-var-name",
       "sample-var-value",
@@ -27,7 +27,7 @@ describe("API Env", function() {
           if ("should be able to fetch specific env var",
             function(done) {
               console.log("Fetching env var...");
-              APIEnv.fetch(
+              apienv.fetch(
                 owner,
                 "sample-var-name",
                 function(err, response) {
@@ -38,7 +38,7 @@ describe("API Env", function() {
                   it(
                     "should be able to revoke environment variables",
                     function(done) {
-                      APIEnv.revoke(
+                      apienv.revoke(
                         owner,
                         this.generated_key_name,
                         function(success, object) {
@@ -68,7 +68,7 @@ describe("API Env", function() {
   // list: function(owner, callback)
   it("should be able to list environment variables",
     function(done) {
-      APIEnv.list(
+      apienv.list(
         owner,
         function(success, object) {
           if (success) {
@@ -83,11 +83,9 @@ describe("API Env", function() {
     });
 
   // revoke: function(owner, name, callback)
-  it(
-    "should be able to fail on invalid env var revocation",
-    function(done) {
+  it("should be able to fail on invalid env var revocation", function(done) {
       console.log("Revoking invalid env var...");
-      APIEnv.revoke(
+      apienv.revoke(
         owner, [
           "sample-key-hash"
         ],

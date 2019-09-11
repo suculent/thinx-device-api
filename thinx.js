@@ -13,7 +13,10 @@ var exec = require("child_process"); // lgtm [js/unused-local-variable]
 var typeOf = require("typeof");
 var Rollbar = require("rollbar"); // lgtm [js/unused-local-variable]
 var crypto = require('crypto');
-var auth = require('./lib/thinx/auth.js');
+
+var Auth = require('./lib/thinx/auth.js');
+var auth = new Auth();
+
 var fs = require("fs-extra");
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -79,6 +82,11 @@ console.log(bitch);
 //
 // HTTP/S Request Tools
 //
+
+function validatedUDID(udid) {
+	var regex = /[!@#$%&*()_\+={[}\]|\:;"'<,>.?\/\\~`]/g;
+	return udid.replace(regex, "");
+}
 
 function validateJSON(str) {
   try {
@@ -168,102 +176,7 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
 // OAuth2 for GitHub
 //
 
-function checkUserWithResponse(global_response, token, userWrapper) {
 
-  // Check user and make note on user login
-  userlib.get(userWrapper.owner_id, function(error, udoc) {
-
-    // Error case covers creating new user/managing deleted account
-    if (error) {
-
-      if (Globals.use_sqreen()) {
-        Sqreen.auth_track(false, { doc: userWrapper.owner_id });
-      }
-
-      console.log("Failed with error: " + error);
-
-      if (error.toString().indexOf("Error: deleted") !== -1) {
-        // TODO: Redirect to error page with reason
-        console.log("[oauth] user document deleted");
-
-        // This redirect also fails.
-        global_response.redirect(
-          app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
-          'Account document deleted.'
-        );
-        return;
-
-      } else {
-
-
-        // May exist, but be deleted. Can be cleared using Filtered Replication Handler "del"
-        if (typeof(udoc) !== "undefined") {
-          if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
-            true) {
-            if (Globals.use_sqreen()) {
-              Sqreen.auth_track(false, { doc: userWrapper.owner_id });
-            }
-            // TODO: Redirect to error page with reason
-            console.log("[oauth] user account marked as deleted");
-            global_response.redirect(
-              app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
-              'Account deleted.'
-            );
-            return;
-          }
-        }
-
-        // No such owner, create...
-        user.create(userWrapper, false, function(success, status) {
-
-          console.log("[OID:" + owner_id +
-            "] [NEW_SESSION] [oauth] 2485:");
-
-          alog.log(owner_id, "OAuth User created. ");
-
-          redis_client.set(token, JSON.stringify(userWrapper));
-          redis_client.expire(token, 30);
-          global_token = token;
-
-          const ourl = app_config.public_url + "/auth.html&t=" +
-            token + "&g=true"; // require GDPR consent
-          console.log("FIXME: this request will probably fail fail (cannot redirect): " + ourl);
-          // causes registration error where headers already sent!
-          global_response.redirect(ourl); // must be global_response! res does not exist here.
-
-          if (Globals.use_sqreen()) {
-            Sqreen.signup_track({ username: userWrapper.owner_id });
-          }
-
-          console.log("Redirecting to login (2)");
-        });
-        return;
-      }
-    }
-
-    // console.log("UDOC:");
-    // console.log(JSON.stringify(udoc));
-
-    trackUserLogin(owner_id);
-
-    redis_client.set(token, JSON.stringify(userWrapper));
-    redis_client.expire(token, 3600);
-
-    console.log("Redirecting to login (1)");
-
-    var gdpr = false;
-    if (typeof(udoc.info) !== "undefined") {
-      if (typeof(udoc.gdpr_consent) !== "undefined" && udoc.gdpr_consent == true) {
-        gdpr = true;
-      }
-    }
-
-    const ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" + gdpr; // require GDPR consent
-    console.log(ourl);
-    global_response.redirect(ourl);
-
-  }); // userlib.get
-}
 
 console.log("Initializing GitHub OAuth...");
 
@@ -392,49 +305,63 @@ try {
 console.log("Initializing app requires...");
 
 // should be initialized after prefix because of DB requirements...
-var v = require("./lib/thinx/version");
+var Version = require("./lib/thinx/version");
+var v = new Version();
 
-var alog = require("./lib/thinx/audit");
+var AuditLog = require("./lib/thinx/audit");
+var alog = new AuditLog();
 
 console.log("Loading module: builder...");
-var builder = require("./lib/thinx/builder");
+var Builder = require("./lib/thinx/builder");
+var builder = new Builder();
 
 console.log("Loading module: device...");
-var device = require("./lib/thinx/device");
+var Device = require("./lib/thinx/device");
+var device = new Device();
 
 console.log("Loading module: devices...");
-var devices = require("./lib/thinx/devices");
+var Devices = require("./lib/thinx/devices");
+var devices = new Devices();
 
 console.log("Loading module: deployment...");
-var deployment = require("./lib/thinx/deployment");
-
-console.log("Loading module: repository watcher...");
-
-var watcher = require("./lib/thinx/repository");
+var Deployment = require("./lib/thinx/deployment");
+var deployment = new Deployment();
 
 console.log("Loading module: apienv...");
-var apienv = require("./lib/thinx/apienv");
+var APIEnv = require("./lib/thinx/apienv");
+var apienv = new APIEnv();
 
 console.log("Loading module: apikey...");
-var apikey = require("./lib/thinx/apikey");
+var APIKey = require("./lib/thinx/apikey");
+var apikey = new APIKey();
 
 console.log("Loading module: owner...");
-var user = require("./lib/thinx/owner");
+var User = require("./lib/thinx/owner");
+var user = new User();
 
 console.log("Loading module: rsakey...");
-var rsakey = require("./lib/thinx/rsakey");
+var RSAKey = require("./lib/thinx/rsakey");
+var rsakey = new RSAKey();
 
 console.log("Loading module: statistics...");
 var stats = require("./lib/thinx/statistics");
 
 console.log("Loading module: sources...");
-var sources = require("./lib/thinx/sources");
+var Sources = require("./lib/thinx/sources");
+var sources = new Sources();
 
 console.log("Loading module: device transfer...");
-var transfer = require("./lib/thinx/transfer");
+var Transfer = require("./lib/thinx/transfer");
+var transfer = new Transfer();
 
 console.log("Loading module: messenger...");
-var messenger = require("./lib/thinx/messenger");
+var Messenger = require("./lib/thinx/messenger");
+var messenger = new Messenger();
+
+console.log("Loading module: repository/watcher...");
+
+var Repository = require("./lib/thinx/repository");
+var watcher = new Repository();
 
 console.log("Starting repository watcher...");
 watcher.watch();
@@ -641,6 +568,119 @@ var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unu
 var buildlib = require("nano")(db).use(prefix + "managed_builds"); // lgtm [js/unused-local-variable]
 var loglib = require("nano")(db).use(prefix + "managed_logs"); // lgtm [js/unused-local-variable]
 
+function trackUserLogin(owner_id) {
+ userlib.atomic("users", "checkin", owner_id, {
+   last_seen: new Date()
+ }, function(error, response) {
+   if (error) {
+     console.log("Last-seen update failed (3): " + error);
+   } else {
+     alog.log(owner_id, "Last seen updated.");
+   }
+ });
+
+ alog.log(owner_id, "OAuth2 User logged in...");
+
+ if (Globals.use_sqreen()) {
+   Sqreen.auth_track(true, { username: owner_id });
+ }
+}
+
+function checkUserWithResponse(global_response, token, userWrapper) {
+
+  // Check user and make note on user login
+  userlib.get(userWrapper.owner_id, (error, udoc) => {
+
+    // Error case covers creating new user/managing deleted account
+    if (error) {
+
+      if (Globals.use_sqreen()) {
+        Sqreen.auth_track(false, { doc: userWrapper.owner_id });
+      }
+
+      console.log("Failed with error: " + error);
+
+      if (error.toString().indexOf("Error: deleted") !== -1) {
+        // TODO: Redirect to error page with reason
+        console.log("[oauth] user document deleted");
+
+        // This redirect also fails.
+        global_response.redirect(
+          app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
+          'Account document deleted.'
+        );
+        return;
+
+      } else {
+
+
+        // May exist, but be deleted. Can be cleared using Filtered Replication Handler "del"
+        if (typeof(udoc) !== "undefined") {
+          if ((typeof(udoc.deleted) !== "undefined") && udoc.deleted ===
+            true) {
+            if (Globals.use_sqreen()) {
+              Sqreen.auth_track(false, { doc: userWrapper.owner_id });
+            }
+            // TODO: Redirect to error page with reason
+            console.log("[oauth] user account marked as deleted");
+            global_response.redirect(
+              app_config.public_url + '/error.html?success=failed&title=Sorry&reason=' +
+              'Account deleted.'
+            );
+            return;
+          }
+        }
+
+        // No such owner, create...
+        user.create(userWrapper, false, (success, status) => {
+
+          console.log("[OID:" + userWrapper.owner_id + "] [NEW_SESSION] [oauth] 2485:");
+
+          alog.log(userWrapper.owner_id, "OAuth User created. ");
+
+          redis_client.set(token, JSON.stringify(userWrapper));
+          redis_client.expire(token, 30);
+          global_token = token;
+
+          const ourl = app_config.public_url + "/auth.html&t=" + token + "&g=true"; // require GDPR consent
+          console.log("FIXME: this request will probably fail fail (cannot redirect): " + ourl);
+          // causes registration error where headers already sent!
+          global_response.redirect(ourl); // must be global_response! res does not exist here.
+
+          if (Globals.use_sqreen()) {
+            Sqreen.signup_track({ username: userWrapper.owner_id });
+          }
+
+          console.log("Redirecting to login (2)");
+        });
+        return;
+      }
+    }
+
+    // console.log("UDOC:");
+    // console.log(JSON.stringify(udoc));
+
+    trackUserLogin(userWrapper.owner_id);
+
+    redis_client.set(token, JSON.stringify(userWrapper));
+    redis_client.expire(token, 3600);
+
+    console.log("Redirecting to login (1)");
+
+    var gdpr = false;
+    if (typeof(udoc.info) !== "undefined") {
+      if (typeof(udoc.gdpr_consent) !== "undefined" && udoc.gdpr_consent == true) {
+        gdpr = true;
+      }
+    }
+
+    const ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" + gdpr; // require GDPR consent
+    console.log(ourl);
+    global_response.redirect(ourl);
+
+  }); // userlib.get
+}
+
 // <-- EXTRACT TO: db.js && databases must not be held by app class
 // and they require on prefix as well...
 
@@ -770,7 +810,7 @@ app.all("/*", function(req, res, next) {
     //console.log("Setting CORS to " + app_config.public_url);
     res.header("Access-Control-Allow-Origin", app_config.acl_url); // lgtm [js/cors-misconfiguration-for-credentials]
     res.header("Access-Control-Allow-Credentials", "true");
-    console.log("Setting CORS to acl_url "+app_config.acl_url);
+    //console.log("Setting CORS to acl_url "+app_config.acl_url);
   } else {
     console.log("Setting CORS to *");
     res.header("Access-Control-Allow-Origin", "*");
@@ -870,9 +910,9 @@ app.get("/api/device/data/:udid", function(req, res) {
 app.post("/api/device/data", function(req, res) {
   if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
   var owner = req.session.owner;
-  var udid = req.body.udid;
+  var udid = validatedUDID(req.body.udid);
   // var apikey = req.body.key;
-  // apikey.verify(owner, api_key, req, function(success, message) {
+  // apikey.verify(owner, api_key, function(success, message) {
 
   messenger.data(owner, udid, function(success, response) {
     respond(res, {
@@ -898,7 +938,7 @@ app.post("/api/device/detach", function(req, res) {
 /* Revokes a device. Expects unique device identifier. */
 app.post("/api/device/revoke", function(req, res) {
   if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
-  devices.revoke(req.session.owner, req.body, function(success, status) {
+  devices.revoke(req.session.owner, req.body, (success, status) => {
     respond(res, {
       success: success,
       status: status
@@ -1601,7 +1641,8 @@ app.post("/api/build", function(req, res) {
     messenger: messenger,
     websocket: _ws
   };
-  builder.build(req.session.owner, req.body.build, notifiers, function(success, response) {
+  builder.build(req.session.owner, req.body.build, notifiers,
+    function(success, response) {
     respond(res, response);
   });
 });
@@ -1610,7 +1651,7 @@ app.post("/api/build", function(req, res) {
 app.post("/api/device/artifacts", function(req, res) {
   if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
   var owner = req.session.owner;
-  var udid = req.body.udid;
+  var udid = validatedUDID(req.body.udid);
 
   if (typeof(udid) === "undefined") {
     respond(res, {
@@ -1894,7 +1935,7 @@ app.post("/api/transfer/decline", function(req, res) {
 
   if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
 
-  if (typeof(req.body.owner) !== "undefined") {
+  if (typeof(req.body.owner) === "undefined") {
     respond(res, {
       success: false,
       status: "owner_missing"
@@ -1910,7 +1951,7 @@ app.post("/api/transfer/decline", function(req, res) {
     return;
   }
 
-  if (typeof(req.body.udids) !== "undefined") {
+  if (typeof(validatedUDID(req.body.udid)) !== "undefined") {
     respond(res, {
       success: false,
       status: "udids_missing"
@@ -1920,7 +1961,7 @@ app.post("/api/transfer/decline", function(req, res) {
 
   var body = {
     transfer_id: req.body.transfer_id,
-    udids: req.body.udids
+    udids: validatedUDID(req.body.udid)
   };
 
   transfer.decline(body, function(success, response) {
@@ -1954,7 +1995,7 @@ app.post("/api/transfer/accept", function(req, res) {
 
   if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
 
-  if (typeof(req.body.owner) !== "undefined") {
+  if (typeof(req.body.owner) === "undefined") {
     respond(res, {
       success: false,
       status: "owner_missing"
@@ -1970,7 +2011,7 @@ app.post("/api/transfer/accept", function(req, res) {
     return;
   }
 
-  if (typeof(req.body.udids) !== "undefined") {
+  if (typeof(validatedUDID(req.body.udid)) !== "undefined") {
     respond(res, {
       success: false,
       status: "udids_missing"
@@ -2489,7 +2530,7 @@ app.post("/api/device/push", function(req, res) {
 app.post("/api/device/notification", function(req, res) {
   if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
   var owner = req.session.owner;
-  var device_id = req.body.udid;
+  var device_id = validatedUDID(req.body.udid);
   var nid = "nid:" + device_id;
   var reply = req.body.reply;
   if (typeof(device_id) === "undefined") {
@@ -2583,23 +2624,7 @@ app.get("/slack/redirect", function(req, res) {
  * OAuth 2 with GitHub
  */
 
- function trackUserLogin(owner_id) {
-   userlib.atomic("users", "checkin", owner_id, {
-     last_seen: new Date()
-   }, function(error, response) {
-     if (error) {
-       console.log("Last-seen update failed (3): " + error);
-     } else {
-       alog.log(owner_id, "Last seen updated.");
-     }
-   });
 
-   alog.log(owner_id, "OAuth2 User logged in...");
-
-   if (Globals.use_sqreen()) {
-     Sqreen.auth_track(true, { username: owner_id });
-   }
- }
 
 if (typeof(githubOAuth) !== "undefined") {
 
@@ -2720,7 +2745,40 @@ app.get('/oauth/github', function(req, res) {
  * OAuth 2 with Google
  */
 
- function processGoogleCallbackError(error, ores, udoc, req, odata, userWrapper) {
+ function createUserWithGoogle(req, ores, odata, userWrapper, access_token) {
+    console.log("Creating new user...");
+
+    // No e-mail to validate.
+    var will_require_activation = true;
+    if (typeof(odata.email) === "undefined") {
+      will_require_activation = false;
+    }
+
+    // No such owner, create...
+    user.create(userWrapper, will_require_activation, (success, status) => {
+
+      console.log("[OID:" + req.session.owner + "] [NEW_SESSION] [oauth] 2860:");
+
+      alog.log(req.session.owner, "OAuth User created: " + userWrapper.given_name + " " + userWrapper.family_name);
+
+      // This is weird. Token should be random and with prefix.
+      var gtoken = sha256(access_token); // "g:"+
+      global_token = gtoken;
+      redis_client.set(gtoken, JSON.stringify(userWrapper));
+      redis_client.expire(gtoken, 300);
+      alog.log(req.session.owner, " OAuth2 User logged in...");
+
+      var token = sha256(access_token); // "o:"+
+      redis_client.set(token, JSON.stringify(userWrapper));
+      redis_client.expire(token, 3600);
+
+      const ourl = app_config.public_url + "/auth.html?t=" + token + "&g=true"; // require GDPR consent
+      console.log(ourl);
+      ores.redirect(ourl);
+    });
+ }
+
+ function processGoogleCallbackError(error, ores, udoc, req, odata, userWrapper, access_token) {
    console.log("User does not exist...");
    // User does not exist
    if (error.toString().indexOf("Error: deleted") !== -1) {
@@ -2746,45 +2804,10 @@ app.get('/oauth/github', function(req, res) {
        }
      }
      req.session.owner = userWrapper.owner;
-     createUserWithGoogle(req, ores, odata, userWrapper);
+     createUserWithGoogle(req, ores, odata, userWrapper, access_token);
    }
 }
 
-function createUserWithGoogle(req, ores, odata, userWrapper) {
-   console.log("Creating new user...");
-
-   // No e-mail to validate.
-   var will_require_activation = true;
-   if (typeof(odata.email) === "undefined") {
-     will_require_activation = false;
-   }
-
-   // No such owner, create...
-   user.create(userWrapper, will_require_activation, function(success, status) {
-
-     console.log("[OID:" + req.session.owner +
-       "] [NEW_SESSION] [oauth] 2860:");
-     alog.log(req.session.owner,
-       "OAuth User created: " +
-       given_name + " " + family_name);
-
-     // This is weird. Token should be random and with prefix.
-     var gtoken = sha256(res2.access_token);
-     global_token = gtoken;
-     redis_client.set(gtoken, JSON.stringify(userWrapper));
-     redis_client.expire(gtoken, 300);
-     alog.log(owner_id, " OAuth2 User logged in...");
-
-     var otoken = sha256(res2.access_token);
-     redis_client.set(otoken, JSON.stringify(userWrapper));
-     redis_client.expire(otoken, 3600);
-
-     const ourl = app_config.public_url + "/auth.html?t=" +
-       token + "&g=true"; // require GDPR consent
-     console.log(ourl);
-     ores.redirect(ourl);
-   });
-}
 
 if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
 
@@ -2794,7 +2817,7 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
     if (typeof(req.session) !== "undefined") {
       req.session.destroy();
     }
-    crypto.randomBytes(48, function(err, buffer) {
+    crypto.randomBytes(48, (err, buffer) => {
       var token = buffer.toString('hex');
       console.log("saving google auth token for 5 minutes: "+token);
       redis_client.set("oa:"+token+":g", 300); // auto-expires in 5 minutes
@@ -2863,7 +2886,7 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
             userlib.get(owner_id, function(error, udoc) {
               if (error) {
                 // may also end-up creating new user
-                processGoogleCallbackError(error, ores, udoc, req, odata, userWrapper);
+                processGoogleCallbackError(error, ores, udoc, req, odata, userWrapper, res2.access_token);
                 return;
               }
               updateLastSeen(udoc);
@@ -2877,7 +2900,7 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
           });
         }).on("error", (err) => {
         console.log("Error: " + err.message);
-        res.redirect(
+        ores.redirect(
           app_config.public_url + '/error.html?success=failed&title=OAuth-Error&reason=' +
           err.message);
       });
@@ -3027,9 +3050,9 @@ app.post('/gdpr/revoke', function(req, res) {
     } else {
 
       console.log("Deleting owner " + owner_id);
-      devices.list(owner_id, function(dsuccess, devices) {
-        devices.forEach(function(){
-          devices.revoke(owner, req.body, function(success, status) {
+      devices.list(owner_id, (dsuccess, devices) => {
+        devices.forEach(() => {
+          devices.revoke(owner_id, req.body, function(success, status) {
             respond(res, {
               success: success,
               status: status
@@ -3042,7 +3065,7 @@ app.post('/gdpr/revoke', function(req, res) {
       redis_client.expire("ak:" + owner_id, 1);
 
       redis_client.keys("/" + owner_id + "/*", function(err, obj_keys) {
-        console.dir("Deleting Redis cache for this owner: " + JSON.stringify(obj));
+        console.dir("Deleting Redis cache for this owner: " + owner_id);
         for (var key in obj_keys) {
           redis_client.expire(key, 1);
         }
@@ -3282,14 +3305,14 @@ wss.on("connection", function connection(ws, req) {
         if (typeof(messenger) !== "undefined") {
           console.log("Initializing WS messenger with owner "+object.init);
           messenger.initWithOwner(object.init, _ws, function(success, message) {
-            /*
+
             if (!success) {
               console.log("Messenger init on WS message with result " +
                 success +
                 ", with message: " +
                 JSON.stringify(message));
             }
-            */
+
           });
         } else {
           console.log("Messenger is not initialized and therefore could not be activated.");
@@ -3362,45 +3385,22 @@ function isMasterProcess() {
   return true; // cluster.isMaster();
 }
 
-if (isMasterProcess()) {
-
-  setInterval(database_compactor, 3600 * 1000);
-  setInterval(log_aggregator, 86400 * 1000 / 2);
-
-  // MQTT Messenger/listener
-  messenger.init();
-
-  //
-  // TODO: Move to messenger or owner OR DEVICES? Or extract?
-  //
-
-  /* This operation should restore MQTT passwords only. */
-  // triggered by non-existend password file
-  if (!fs.existsSync(app_config.mqtt.passwords)) {
-    fs.ensureFile(app_config.mqtt.passwords, function(err) {
-			if (err) {
-				console.log("Error creating MQTT PASSWORDS file: " + err);
-			}
-      console.log("Running in disaster recovery mode...");
-      restore_owners_credentials("_all_docs"); // fetches only IDs and last revision, works with hundreds of users
-		});
-  }
+function reporter(success, default_mqtt_key) {
+    if (success) {
+      console.log("DMK: "+default_mqtt_key);
+    }
 }
-
-//
-// MQTT Disaster Recovery
-//
 
 function restore_owner_credentials(owner_id, dmk_callback) {
   devicelib.view("devicelib", "devices_by_owner", {
     "key": owner_id,
     "include_docs": false
   },
-  function(err, device) {
+  (err, device) => {
     if (err) {
       console.log("list error: " + err);
       if ((err.toString().indexOf("Error: missing") !== -1) && typeof(callback) !== "undefined") {
-        callback(false, "none");
+        dmk_callback(false, "none");
       }
       console.log("restore_owner_credentials: Error: " + err.toString());
       return;
@@ -3408,9 +3408,8 @@ function restore_owner_credentials(owner_id, dmk_callback) {
 
     console.log("DEVICE: "+JSON.stringify(device, false, 2));
 
-    const source_id = "ak:" + owner_id;
-
     // Get source keys
+    const source_id = "ak:" + owner_id;
     var default_mqtt_key = null;
 
     redis_client.get(source_id, function(err1, json_keys) {
@@ -3449,16 +3448,11 @@ function restore_owner_credentials(owner_id, dmk_callback) {
   });
 }
 
-function restore_owners_credentials(query) {
-  userlib.get(query, function(err, body) {
+function setup_restore_owners_credentials(query) {
+  userlib.get(query, (err, body) => {
     if (err) {
       console.log("DR ERR: "+err);
       return;
-    }
-    function reporter(success, default_mqtt_key) {
-        if (success) {
-          console.log("DMK: "+default_mqtt_key);
-        }
     }
     for (var i = 0; i < body.rows.length; i++) {
       var owner_doc = body.rows[i];
@@ -3469,3 +3463,32 @@ function restore_owners_credentials(query) {
     }
   });
 }
+
+if (isMasterProcess()) {
+
+  setInterval(database_compactor, 3600 * 1000);
+  setInterval(log_aggregator, 86400 * 1000 / 2);
+
+  // MQTT Messenger/listener
+  messenger.init();
+
+  //
+  // TODO: Move to messenger or owner OR DEVICES? Or extract?
+  //
+
+  /* This operation should restore MQTT passwords only. */
+  // triggered by non-existend password file
+  if (!fs.existsSync(app_config.mqtt.passwords)) {
+    fs.ensureFile(app_config.mqtt.passwords, function(err) {
+			if (err) {
+				console.log("Error creating MQTT PASSWORDS file: " + err);
+			}
+      console.log("Running in disaster recovery mode...");
+      setup_restore_owners_credentials("_all_docs"); // fetches only IDs and last revision, works with hundreds of users
+		});
+  }
+}
+
+//
+// MQTT Disaster Recovery
+//
