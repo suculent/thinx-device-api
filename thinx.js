@@ -907,7 +907,7 @@ app.post("/api/device/data", function(req, res) {
   var owner = req.session.owner;
   var udid = req.body.udid;
   // var apikey = req.body.key;
-  // apikey.verify(owner, api_key, req, function(success, message) {
+  // apikey.verify(owner, api_key, function(success, message) {
 
   messenger.data(owner, udid, function(success, response) {
     respond(res, {
