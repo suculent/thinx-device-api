@@ -1961,7 +1961,7 @@ app.post("/api/transfer/decline", function(req, res) {
 
   var body = {
     transfer_id: req.body.transfer_id,
-    udids: validatedUDID(req.body.udid)s
+    udids: validatedUDID(req.body.udid)
   };
 
   transfer.decline(body, function(success, response) {
