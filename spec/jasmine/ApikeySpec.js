@@ -28,7 +28,7 @@ describe("API Key", function() {
   it("should be able to verify API Keys (requires hash)", function(done) {
     expect(generated_key_hash).toBeDefined();
     console.log("Verifying key: " + generated_key_hash);
-    const req = { ip: "0.0.0.0 "};
+    const req = { ip: "0.0.0.0"};
     apikey.verify(
       owner,
       generated_key_hash,
@@ -53,7 +53,7 @@ describe("API Key", function() {
 
   it("should be able to verify invalid API Keys", function(done) {
     var apikey = new APIKey();
-    const req = { ip: "0.0.0.0 "};
+    const req = { ip: "0.0.0.0"};
     apikey.verify(
       owner,
       "invalid-api-key",
