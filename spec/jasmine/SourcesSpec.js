@@ -6,11 +6,11 @@ describe("Sources", function() {
   var envi = require("./_envi.json");
   var owner = envi.oid;
   var source_id;
-
   const source_name = "thinx-device-api-test";
 
   it("should be able to be added", function(done) {
     const source = {
+      name: source_name,
       owner: owner,
       branch: "origin/master",
       url: "https://github.com/suculent/thinx-firmware-esp8266-arduino",

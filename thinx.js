@@ -1951,7 +1951,7 @@ app.post("/api/transfer/decline", function(req, res) {
     return;
   }
 
-  if (typeof(validatedUDID(req.body.udid)s) !== "undefined") {
+  if (typeof(validatedUDID(req.body.udid)) !== "undefined") {
     respond(res, {
       success: false,
       status: "udids_missing"
@@ -2011,7 +2011,7 @@ app.post("/api/transfer/accept", function(req, res) {
     return;
   }
 
-  if (typeof(validatedUDID(req.body.udid)s) !== "undefined") {
+  if (typeof(validatedUDID(req.body.udid)) !== "undefined") {
     respond(res, {
       success: false,
       status: "udids_missing"

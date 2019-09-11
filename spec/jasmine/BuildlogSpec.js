@@ -12,12 +12,7 @@ describe("Build log", function() {
 
   /*
    * WebSocket Server
-   */
-
-  var express = require("express");
-  var session = require("express-session");
-  var http = require("http");
-  var https = require("https");
+   */  
 
   it("should be able to initialize", function() {
     expect(blog).toBeDefined();
