@@ -88,6 +88,11 @@ function validatedUDID(udid) {
 	return udid.replace(regex, "");
 }
 
+function validatedOwner(owner) {
+  var regex = /[!@#$%&*()_\-+={[}\]|\:;"'<,>.?\/\\~`]/g;
+  return owner.replace(regex, "");
+}
+
 function validateJSON(str) {
   try {
     JSON.parse(str);
@@ -1661,7 +1666,7 @@ app.post("/api/device/artifacts", function(req, res) {
     return;
   }
 
-  var build_id = req.body.build_id;
+  var build_id = validatedUDID(req.body.build_id);
 
   if (typeof(build_id) === "undefined") {
     respond(res, {
@@ -1821,7 +1826,8 @@ app.post("/api/user/logs/build", function(req, res) {
     });
     return;
   }
-  var build_id = req.body.build_id;
+  var build_id = validatedUDID(req.body.build_id);
+
   blog.fetch(req.body.build_id, function(err, body) {
     if (err) {
       console.log(err);
@@ -2330,8 +2336,9 @@ app.post("/api/login", function(req, res) {
         if ( (typeof(req.body.remember) === "undefined") ||
              (req.body.remember === 0)) {
           req.session.cookie.maxAge = 24 * hour;
-          res.cookie("x-thx-session-expire", req.session.cookie.expires, {
-            maxAge: req.session.cookie.maxAge,
+          var expiration = (req.session.cookie.expires < 24*hour) ? req.session.cookie.expires : 24*hour;
+          res.cookie("x-thx-session-expire", expiration, {
+            maxAge: 24 * hour,
             httpOnly: false
           });
         } else {
@@ -3006,7 +3013,7 @@ app.post('/gdpr/transfer', function(req, res) {
   if (!validateSecurePOSTRequest(req)) return;
   if (!validateSession(req, res)) return;
 
-  var owner_id = req.session.owner;
+  var owner_id = validatedOwner(req.session.owner);
   userlib.get(owner_id, function(error, user) {
     if (error) {
       respond(res, {
@@ -3032,7 +3039,7 @@ app.post('/gdpr/transfer', function(req, res) {
 app.post('/gdpr/revoke', function(req, res) {
   if (!validateSecurePOSTRequest(req)) return;
   if (!validateSession(req, res)) return;
-  var owner_id = req.session.owner;
+  var owner_id = validatedOwner(req.session.owner);
   if (req.body.owner !== owner_id) {
     respond(res, {
       success: false,
