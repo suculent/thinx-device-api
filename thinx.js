@@ -84,7 +84,7 @@ function validateJSON(str) {
   try {
     JSON.parse(str);
 
-unction failureResponse(res, code, reason) {
+function failureResponse(res, code, reason) {
   res.writeHead(code, {
     "Content-Type": "application/json"
   });
