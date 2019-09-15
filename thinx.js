@@ -1941,14 +1941,6 @@ app.post("/api/transfer/decline", function(req, res) {
 
   if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
 
-  if (typeof(req.body.owner) === "undefined") {
-    respond(res, {
-      success: false,
-      status: "owner_missing"
-    });
-    return;
-  }
-
   if (typeof(req.body.transfer_id) !== "undefined") {
     respond(res, {
       success: false,
@@ -1961,6 +1953,14 @@ app.post("/api/transfer/decline", function(req, res) {
     respond(res, {
       success: false,
       status: "udids_missing"
+    });
+    return;
+  }
+
+  if (typeof(req.body.owner) === "undefined") {
+    respond(res, {
+      success: false,
+      status: "owner_missing"
     });
     return;
   }
@@ -2001,18 +2001,20 @@ app.post("/api/transfer/accept", function(req, res) {
 
   if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
 
-  if (typeof(req.body.owner) === "undefined") {
-    respond(res, {
-      success: false,
-      status: "owner_missing"
-    });
-    return;
-  }
+  //if (!validateBodyArgs(req, res, ["transfer_id", "owner", "udid"])) return;
 
   if (typeof(req.body.transfer_id) !== "undefined") {
     respond(res, {
       success: false,
       status: "transfer_id_missing"
+    });
+    return;
+  }
+
+  if (typeof(req.body.owner) === "undefined") {
+    respond(res, {
+      success: false,
+      status: "owner_missing"
     });
     return;
   }

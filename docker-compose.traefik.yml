@@ -24,7 +24,7 @@ services:
       - "--loglevel=DEBUG"
       - "--acme=true"
       - "--acme.acmelogging=true"
-      - "--acme.storage=/traefik/acme.json" 
+      - "--acme.storage=/traefik/acme.json"
       - "--acme.entryPoint=https"
       - "--acme.httpchallenge"
       - "--acme.httpchallenge.entryPoint=http"

@@ -46,7 +46,7 @@ while [[ $COUNTER -lt $COUNT ]]; do
 
     exit 0
   fi
-  let COUNTER=COUNTER+1
+  ((COUNTER++))
 done
 
 exit 1
