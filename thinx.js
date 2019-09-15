@@ -1517,7 +1517,9 @@ app.post("/device/register", function(req, res) {
       if (success === false) {
         console.log("Device registration failed with response: " + response);
       } else {
-        console.log("Device registration response: " + JSON.stringify(response));
+        if (app_config.debug.device) {
+          console.log("Device registration response: " + JSON.stringify(response));
+        }
       }
       respond(res, response);
     }, req);
