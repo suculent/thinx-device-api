@@ -96,6 +96,12 @@ function validatedOwner(owner) {
 function validateJSON(str) {
   try {
     JSON.parse(str);
+    return true;
+  } catch(e) {
+    return false;
+  }
+  return false;
+}
 
 function failureResponse(res, code, reason) {
   res.writeHead(code, {
@@ -1562,7 +1568,9 @@ app.post("/device/register", function(req, res) {
       if (success === false) {
         console.log("Device registration failed with response: " + response);
       } else {
-        console.log("Device registration response: " + JSON.stringify(response));
+        if (app_config.debug.device) {
+          console.log("Device registration response: " + JSON.stringify(response));
+        }
       }
       respond(res, response);
     }, req);
