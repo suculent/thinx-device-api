@@ -26,7 +26,7 @@ var csrf = require('csurf');
 var RateLimit = require('express-rate-limit');
 var limiter = new RateLimit({
   windowMs: 1*60*1000, // 1 minute
-  max: 30
+  max: 500
 });
 
 // console.log(crypto.getCiphers()); // log supported ciphers to debug SSL IoT transport
@@ -96,22 +96,6 @@ function validatedOwner(owner) {
 function validateJSON(str) {
   try {
     JSON.parse(str);
-  } catch (e) {
-    return false;
-  }
-  return true;
-}
-
-function respond(res, object) {
-  if (typeOf(object) == "buffer") {
-    res.header("Content-Type", "application/octet-stream");
-    res.end(object);
-  } else if (typeOf(object) == "string") {
-    res.end(object);
-  } else {
-    res.end(JSON.stringify(object));
-  }
-}
 
 function failureResponse(res, code, reason) {
   res.writeHead(code, {
@@ -729,7 +713,6 @@ app.use(parser.json({
   limit: "1mb"
 }));
 
-// apply rate limiter to all requests
 app.use(limiter);
 
 app.use(parser.urlencoded({
