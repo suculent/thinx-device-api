@@ -57,9 +57,9 @@ class Transformer {
         console.log(`worker ${worker.process.pid} died`);
       });
     } else {
-      self.setupServer();
+      this.setupServer();
     }
-    self.setupRoutes();
+    this.setupRoutes();
   }
 
   setupServer() {
