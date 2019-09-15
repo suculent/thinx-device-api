@@ -83,6 +83,12 @@ console.log(bitch);
 function validateJSON(str) {
   try {
     JSON.parse(str);
+    return true;
+  } catch(e) {
+
+  }
+  return false;
+}
 
 function failureResponse(res, code, reason) {
   res.writeHead(code, {
