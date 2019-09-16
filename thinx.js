@@ -339,7 +339,8 @@ var RSAKey = require("./lib/thinx/rsakey");
 var rsakey = new RSAKey();
 
 console.log("Loading module: statistics...");
-var stats = require("./lib/thinx/statistics");
+var Stats = require("./lib/thinx/statistics");
+var stats = new Stats();
 
 console.log("Loading module: sources...");
 var Sources = require("./lib/thinx/sources");
@@ -3370,7 +3371,7 @@ function database_compactor() {
 
 function log_aggregator() {
   console.log("» Running log aggregation jobs...");
-  rollbar.info("Running aggregator.");
+  // rollbar.info("Running aggregator.");
   stats.aggregate();
   console.log("» Aggregation jobs completed.");
 }
