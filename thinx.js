@@ -71,8 +71,8 @@ if (Globals.use_sqreen()) {
     try {
       Sqreen = require('sqreen');
     } catch (bitch) {
-console.log(bitch);
-}
+      console.log(bitch);
+    }
   } else {
     console.log("Sqreen env vars not available");
  }
@@ -685,7 +685,7 @@ function checkUserWithResponse(global_response, token, userWrapper) {
     }
 
     const ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" + gdpr; // require GDPR consent
-    console.log(ourl);
+    console.log("ourl: "+ ourl);
     global_response.redirect(ourl);
 
   }); // userlib.get
@@ -1382,7 +1382,7 @@ app.get("/api/user/password/reset", function(req, res) {
 
 /* Endpoint for the user activation e-mail, should proceed to password set. */
 app.get("/api/user/activate", function(req, res) {
-  console.log(JSON.stringify(req.query));
+  // console.log(JSON.stringify(req.query));
   var ac_key = req.query.activation;
   var ac_owner = req.query.owner;
   user.activate(ac_owner, ac_key, function(success, message) {
@@ -1895,7 +1895,7 @@ app.post("/api/transfer/request", function(req, res) {
 
   transfer.request(owner, req.body, function(success, response) {
     if (success === false) {
-      console.log(response);
+      //console.log(response);
       res.redirect(
         app_config.public_url + "/error.html?success=failed&reason=" +
         response);
@@ -1923,7 +1923,7 @@ app.get("/api/transfer/decline", function(req, res) {
 
   transfer.decline(body, function(success, response) {
     if (success === false) {
-      console.log(response);
+      //console.log(response);
       res.redirect(
         app_config.public_url + "/error.html?success=failed&reason=" +
         response);
@@ -2176,8 +2176,6 @@ function performOAuthLogin(req, res, oauth) {
 
 function loginWithGDPR(req, res, user_data, client_type) {
 
-  console.log("in: loginWithGDPR()");
-
   var ourl = null; // outgoing URL
 
   var skip_gdpr_page = false;
@@ -2197,8 +2195,6 @@ function loginWithGDPR(req, res, user_data, client_type) {
   //}
 
   req.session.owner = user_data.owner;
-
-  console.log("req.session.owner = ", req.session.owner);
 
   if (typeof(req.session.owner) !== "undefined") {
 
@@ -2265,8 +2261,6 @@ app.post("/api/login", function(req, res) {
 
   var oauth = req.body.token;
   var owner_id = null;
-
-  console.log(JSON.stringify(req.body));
 
   if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
     // console.log("oauth: "+ oauth);
@@ -2430,7 +2424,6 @@ app.post("/api/login", function(req, res) {
       }
     }
 
-    console.log("loginWithGDPR(1)");
     // Login successful, redirect to app authentication route with some token...
     loginWithGDPR(req, res, user_data, client_type);
   });
