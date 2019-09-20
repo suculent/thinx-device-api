@@ -2167,13 +2167,13 @@ function loginWithGDPR(req, res, user_data, client_type) {
   }
 
   // WTF? oauth should not matter here in this code branch
-  if (typeof(oauth) === "undefined") {
+  //if (typeof(oauth) === "undefined") {
     const token = sha256(user_data.email + ":" + user_data.activation_date);
     redis_client.set(token, JSON.stringify(user_data));
     redis_client.expire(token, 30);
     global_token = token;
     ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" + skip_gdpr_page;
-  }
+  //}
 
   if (typeof(req.session.owner) !== "undefined") {
 
@@ -2239,10 +2239,11 @@ app.post("/api/login", function(req, res) {
   var oauth = req.body.token;
   var owner_id = null;
 
-  console.log("oauth: "+ oauth);
+
   console.log(JSON.stringify(req.body));
 
   if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
+    console.log("oauth: "+ oauth);
     performOAuthLogin(req, res, oauth);
     return;
   }
@@ -2257,10 +2258,10 @@ app.post("/api/login", function(req, res) {
   // Search the user in DB
   //
 
-  var username = req.body.username;
+  var username = req.body.username; // TODO: needs sanitizer
   var password = sha256(prefix + req.body.password);
 
-  console.log("Validating username/password");
+  console.log("Validating username/password: '"+username+"'");
 
   userlib.view("users", "owners_by_username", {
     "key": username,
@@ -2286,7 +2287,6 @@ app.post("/api/login", function(req, res) {
     var user_data = null;
     for (var index in all_users) {
       var all_user_data = all_users[index];
-
       if (username !== all_user_data.key) {
         continue;
       } else {
@@ -2411,6 +2411,7 @@ app.post("/api/login", function(req, res) {
       }
     }
 
+    console.log("loginWithGDPR(...)");
     // Login successful, redirect to app authentication route with some token...
     loginWithGDPR(req, res, user_data, client_type);
   });
