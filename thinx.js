@@ -2185,9 +2185,13 @@ function loginWithGDPR(req, res, user_data, client_type) {
     ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" + skip_gdpr_page;
   //}
 
+  req.session.owner = user_data.owner;
+
+  console.log("req.session.owner = ", req.session.owner);
+
   if (typeof(req.session.owner) !== "undefined") {
 
-    console.log("typeof(req.session.owner) is undefined");
+    console.log("typeof(req.session.owner) is undefined, redirecting to "+ourl);
 
     // Device or WebApp... requires  valid session
     if (client_type == "device") {
@@ -2372,11 +2376,10 @@ app.post("/api/login", function(req, res) {
 
         // respond(res, { "redirectURL": "/app" });
 
-        console.log("loginWithGDPR(2)");
+
         // Login successful, redirect to app authentication route with some token...
 
-        req.session.owner = user_data.owner;
-        loginWithGDPR(req, res, user_data, client_type);
+
 
         // Make note on user login
         userlib.get(user_data.owner, function(error, udoc) {
@@ -2390,6 +2393,14 @@ app.post("/api/login", function(req, res) {
                 console.log("Last-seen update failed (2): " +
                   err);
               } else {
+
+                console.log("loginWithGDPR(2)");
+                req.session.owner = user_data.owner;
+
+                console.log("Setting req.session.owner = user_data.owner: " + user_data.owner);
+
+                loginWithGDPR(req, res, user_data, client_type);
+
                 console.log("alog: Last seen update");
                 alog.log(udoc.owner, "Last seen updated.");
               }
