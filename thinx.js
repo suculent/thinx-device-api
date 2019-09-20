@@ -565,7 +565,8 @@ console.log("Initializing DB...");
 
 initDatabases();
 
-var blog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
+const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
+const blog = new Buildlog();
 
 console.log("Starting with prefix: '"+prefix+"'");
 
