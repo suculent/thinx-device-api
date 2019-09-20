@@ -12,7 +12,7 @@ describe("Build log", function() {
 
   /*
    * WebSocket Server
-   */  
+   */
 
   it("should be able to initialize", function() {
     expect(blog).toBeDefined();

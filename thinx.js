@@ -2266,11 +2266,10 @@ app.post("/api/login", function(req, res) {
   var oauth = req.body.token;
   var owner_id = null;
 
-
   console.log(JSON.stringify(req.body));
 
   if ((typeof(oauth) !== "undefined") && (oauth !== null)) {
-    console.log("oauth: "+ oauth);
+    // console.log("oauth: "+ oauth);
     performOAuthLogin(req, res, oauth);
     return;
   }
@@ -2382,16 +2381,6 @@ app.post("/api/login", function(req, res) {
 
       } else if (client_type == "webapp") {
 
-        console.log("Suspicious codepath: redirecting to /app in username/password login.");
-        // seems OK after user check, rather breaks this.
-
-        // respond(res, { "redirectURL": "/app" });
-
-
-        // Login successful, redirect to app authentication route with some token...
-
-
-
         // Make note on user login
         userlib.get(user_data.owner, function(error, udoc) {
           if (error) {
@@ -2401,18 +2390,10 @@ app.post("/api/login", function(req, res) {
               last_seen: new Date()
             }, function(error, response) {
               if (err) {
-                console.log("Last-seen update failed (2): " +
-                  err);
+                console.log("Last-seen update failed (2): " + err);
               } else {
-
-                console.log("loginWithGDPR(2)");
                 req.session.owner = user_data.owner;
-
-                console.log("Setting req.session.owner = user_data.owner: " + user_data.owner);
-
                 loginWithGDPR(req, res, user_data, client_type);
-
-                console.log("alog: Last seen update");
                 alog.log(udoc.owner, "Last seen updated.");
               }
             });
