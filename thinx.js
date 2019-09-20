@@ -565,16 +565,19 @@ var buildlib = require("nano")(db).use(prefix + "managed_builds"); // lgtm [js/u
 var loglib = require("nano")(db).use(prefix + "managed_logs"); // lgtm [js/unused-local-variable]
 
 function trackUserLogin(owner_id) {
+  console.log("trackUserLogin");
  userlib.atomic("users", "checkin", owner_id, {
    last_seen: new Date()
  }, function(error, response) {
    if (error) {
      console.log("Last-seen update failed (3): " + error);
    } else {
+     console.log("alog: Last seen updated.");
      alog.log(owner_id, "Last seen updated.");
    }
  });
 
+ console.log("alog: OAuth2 User logged in...");
  alog.log(owner_id, "OAuth2 User logged in...");
 
  if (Globals.use_sqreen()) {
@@ -2055,6 +2058,7 @@ var updateLastSeen = function(doc) {
         console.log("Last-seen update failed (1): " + error);
       }
     } else {
+      console.log("alog: Last seen updated.");
       alog.log(doc._id, "Last seen updated.");
     }
   });
@@ -2111,8 +2115,8 @@ function performOAuthLogin(req, res, oauth) {
               Sqreen.signup_track({ username: owner_id });
             }
 
-            alog.log(req.session.owner, "OAuth User created: " +
-              wrapper.first_name + " " + wrapper.last_name);
+            console.log("alog: OAuth User created.");
+            alog.log(req.session.owner, "OAuth User created: " + wrapper.first_name + " " + wrapper.last_name);
 
             respond(res, {
               "redirectURL": "/app"
@@ -2127,6 +2131,7 @@ function performOAuthLogin(req, res, oauth) {
 
           console.log("[OID:" + doc.owner + "] [NEW_SESSION] [oauth] thinx.js:1854...");
 
+          console.log("alog: New session.");
           alog.log(doc.owner, "New session.", "info");
 
           req.session.cookie.maxAge = new Date(Date.now() + hour).getTime();
@@ -2140,6 +2145,7 @@ function performOAuthLogin(req, res, oauth) {
             req.session.cookie.maxAge = fortnight;
           }
 
+          console.log("alog: OAuth User logged in:");
           alog.log(doc.owner, "OAuth User logged in: " + doc.username, "info");
 
           if (Globals.use_sqreen()) {
@@ -2147,6 +2153,8 @@ function performOAuthLogin(req, res, oauth) {
           }
 
           respond(res, { "redirectURL": "/app" });
+
+          console.log("alog: Will: updateLastSeen()");
           updateLastSeen(doc);
         }
       });
@@ -2156,6 +2164,8 @@ function performOAuthLogin(req, res, oauth) {
 }
 
 function loginWithGDPR(req, res, user_data, client_type) {
+
+  console.log("in: loginWithGDPR()");
 
   var ourl = null; // outgoing URL
 
@@ -2176,6 +2186,8 @@ function loginWithGDPR(req, res, user_data, client_type) {
   //}
 
   if (typeof(req.session.owner) !== "undefined") {
+
+    console.log("typeof(req.session.owner) undefined");
 
     // Device or WebApp... requires  valid session
     if (client_type == "device") {
@@ -2260,8 +2272,6 @@ app.post("/api/login", function(req, res) {
 
   var username = req.body.username; // TODO: needs sanitizer
   var password = sha256(prefix + req.body.password);
-
-  console.log("Validating username/password: '"+username+"'");
 
   userlib.view("users", "owners_by_username", {
     "key": username,
@@ -2357,8 +2367,8 @@ app.post("/api/login", function(req, res) {
 
       } else if (client_type == "webapp") {
 
-        // console.log("Suspicious codepath: redirecting to /app in username/password login.");
-        // seens OK after user check, rather breaks this.
+        console.log("Suspicious codepath: redirecting to /app in username/password login.");
+        // seems OK after user check, rather breaks this.
 
         respond(res, { "redirectURL": "/app" });
 
