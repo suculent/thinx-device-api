@@ -385,8 +385,18 @@ function validateSession(req, res) {
   }
 }
 
-// Database preparation on first run
+function respond(res, object) {
+  if (typeOf(object) == "buffer") {
+    res.header("Content-Type", "application/octet-stream");
+    res.end(object);
+  } else if (typeOf(object) == "string") {
+    res.end(object);
+  } else {
+    res.end(JSON.stringify(object));
+  }
+}
 
+// Database preparation on first run
 function getDocument(file) {
   if (!fs.existsSync(file)) {
     return false;
