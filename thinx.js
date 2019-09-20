@@ -2191,7 +2191,7 @@ function loginWithGDPR(req, res, user_data, client_type) {
 
   if (typeof(req.session.owner) !== "undefined") {
 
-    console.log("typeof(req.session.owner) is undefined, redirecting to "+ourl);
+    console.log("typeof(req.session.owner) is defined, redirecting to "+ourl);
 
     // Device or WebApp... requires  valid session
     if (client_type == "device") {
