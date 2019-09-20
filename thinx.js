@@ -2370,7 +2370,11 @@ app.post("/api/login", function(req, res) {
         console.log("Suspicious codepath: redirecting to /app in username/password login.");
         // seems OK after user check, rather breaks this.
 
-        respond(res, { "redirectURL": "/app" });
+        // respond(res, { "redirectURL": "/app" });
+
+        console.log("loginWithGDPR(2)");
+        // Login successful, redirect to app authentication route with some token...
+        loginWithGDPR(req, res, user_data, client_type);
 
         // Make note on user login
         userlib.get(user_data.owner, function(error, udoc) {
@@ -2384,8 +2388,8 @@ app.post("/api/login", function(req, res) {
                 console.log("Last-seen update failed (2): " +
                   err);
               } else {
-                alog.log(udoc.owner,
-                  "Last seen updated.");
+                console.log("alog: Last seen update");
+                alog.log(udoc.owner, "Last seen updated.");
               }
             });
           }
@@ -2421,7 +2425,7 @@ app.post("/api/login", function(req, res) {
       }
     }
 
-    console.log("loginWithGDPR(...)");
+    console.log("loginWithGDPR(1)");
     // Login successful, redirect to app authentication route with some token...
     loginWithGDPR(req, res, user_data, client_type);
   });
