@@ -31,6 +31,7 @@ describe("API Key", function() {
     apikey.verify(
       owner,
       generated_key_hash,
+      null,
       function(success) {
         expect(success).toBe(true);
         done();
