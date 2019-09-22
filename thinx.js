@@ -652,7 +652,7 @@ function checkUserWithResponse(global_response, token, userWrapper) {
           redis_client.expire(token, 30);
           global_token = token;
 
-          const ourl = app_config.public_url + "/auth.html&t=" + token + "&g=true"; // require GDPR consent
+          const ourl = app_config.acl_url + "/auth.html&t=" + token + "&g=true"; // require GDPR consent
           console.log("FIXME: this request will probably fail fail (cannot redirect): " + ourl);
           // causes registration error where headers already sent!
           global_response.redirect(ourl); // must be global_response! res does not exist here.
@@ -684,7 +684,7 @@ function checkUserWithResponse(global_response, token, userWrapper) {
       }
     }
 
-    const ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" + gdpr; // require GDPR consent
+    const ourl = app_config.acl_url + "/auth.html?t=" + token + "&g=" + gdpr; // require GDPR consent
     console.log("ourl: "+ ourl);
     global_response.redirect(ourl);
 
@@ -1897,10 +1897,10 @@ app.post("/api/transfer/request", function(req, res) {
     if (success === false) {
       //console.log(response);
       res.redirect(
-        app_config.public_url + "/error.html?success=failed&reason=" +
+        app_config.acl_url + "/error.html?success=failed&reason=" +
         response);
     } else {
-      res.redirect(app_config.public_url + "/error.html?success=true");
+      res.redirect(app_config.acl_url + "/error.html?success=true");
     }
   });
 });
@@ -1925,10 +1925,10 @@ app.get("/api/transfer/decline", function(req, res) {
     if (success === false) {
       //console.log(response);
       res.redirect(
-        app_config.public_url + "/error.html?success=failed&reason=" +
+        app_config.acl_url + "/error.html?success=failed&reason=" +
         response);
     } else {
-      res.redirect(app_config.public_url + "/error.html?success=true");
+      res.redirect(app_config.acl_url + "/error.html?success=true");
     }
   });
 });
@@ -1936,9 +1936,9 @@ app.get("/api/transfer/decline", function(req, res) {
 var parseTransferResponse = function(success, response, res) {
   if (success === false) {
     console.log("parseTransferResponse: " + { response });
-    res.redirect(app_config.public_url + "/error.html?success=failed&reason=" + response);
+    res.redirect(app_config.acl_url + "/error.html?success=failed&reason=" + response);
   } else {
-    res.redirect(app_config.public_url + "/error.html?success="+success.toString());
+    res.redirect(app_config.acl_url + "/error.html?success="+success.toString());
   }
 };
 
@@ -2036,9 +2036,9 @@ app.post("/api/transfer/accept", function(req, res) {
   transfer.accept(req.body, function(success, response) {
     if (success === false) {
       console.log(response);
-      res.redirect(app_config.public_url + "/error.html?success=failed");
+      res.redirect(app_config.acl_url + "/error.html?success=failed");
     } else {
-      res.redirect(app_config.public_url + "/error.html?success=true");
+      res.redirect(app_config.acl_url + "/error.html?success=true");
     }
   });
 });
@@ -2191,7 +2191,7 @@ function loginWithGDPR(req, res, user_data, client_type) {
     redis_client.set(token, JSON.stringify(user_data));
     redis_client.expire(token, 30);
     global_token = token;
-    ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" + skip_gdpr_page;
+    ourl = app_config.acl_url + "/auth.html?t=" + token + "&g=" + skip_gdpr_page;
   //}
 
   req.session.owner = user_data.owner;
@@ -2786,7 +2786,7 @@ app.get('/oauth/github', function(req, res) {
       redis_client.set(token, JSON.stringify(userWrapper));
       redis_client.expire(token, 3600);
 
-      const ourl = app_config.public_url + "/auth.html?t=" + token + "&g=true"; // require GDPR consent
+      const ourl = app_config.acl_url + "/auth.html?t=" + token + "&g=true"; // require GDPR consent
       console.log(ourl);
       ores.redirect(ourl);
     });
@@ -2908,7 +2908,7 @@ if (typeof(google_ocfg) !== "undefined" && google_ocfg !== null) {
               var token = sha256(res2.access_token);
               redis_client.set(token, JSON.stringify(userWrapper));
               redis_client.expire(token, 3600);
-              const ourl = app_config.public_url + "/auth.html?t=" + token + "&g=" + needsGDPR(udoc); // require GDPR consent
+              const ourl = app_config.acl_url + "/auth.html?t=" + token + "&g=" + needsGDPR(udoc); // require GDPR consent
               ores.redirect(ourl);
             });
           });
@@ -2939,7 +2939,7 @@ if (typeof(github_ocfg) !== "undefined" && github_ocfg !== null) {
       if (!err) {
         console.log("Should login with token now...");
         if (global_token !== null) {
-          const rurl = app_config.public_url + "/auth.html?t=" + global_token + "&g=" +
+          const rurl = app_config.acl_url + "/auth.html?t=" + global_token + "&g=" +
             false; // require GDPR consent
           res.redirect(rurl);
           global_token = null; // reset token for next login attempt
