@@ -94,13 +94,25 @@ function validatedOwner(owner) {
 }
 
 function validateJSON(str) {
+  var retVal = false;
   try {
     JSON.parse(str);
-    return true;
+    retVal = true;
   } catch(e) {
-    return false;
+    retVal = false;
   }
-  return false;
+  return retVal;
+}
+
+function respond(res, object) {
+  if (typeOf(object) == "buffer") {
+    res.header("Content-Type", "application/octet-stream");
+    res.end(object);
+  } else if (typeOf(object) == "string") {
+    res.end(object);
+  } else {
+    res.end(JSON.stringify(object));
+  }
 }
 
 function failureResponse(res, code, reason) {
@@ -382,17 +394,6 @@ function validateSession(req, res) {
       });
     }
     return false;
-  }
-}
-
-function respond(res, object) {
-  if (typeOf(object) == "buffer") {
-    res.header("Content-Type", "application/octet-stream");
-    res.end(object);
-  } else if (typeOf(object) == "string") {
-    res.end(object);
-  } else {
-    res.end(JSON.stringify(object));
   }
 }
 
