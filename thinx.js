@@ -1575,7 +1575,6 @@ app.post("/device/register", function(req, res) {
     //console.log("** REG BODY: " + regTime);
     var registration = req.body.registration;
     device.register(registration, req.headers.authentication, _ws, function(success, response) {
-      console.log("Registration procedure complete, sending response...");
       // Append timestamp inside as library is not parsing HTTP response JSON properly
       // when it ends with anything else than }}
       if (success && typeof(response.registration) !== "undefined") {
