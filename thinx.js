@@ -466,6 +466,7 @@ function initDatabases() {
 
   // only to fix bug in CouchDB 2.3.1 first-run
   nano.db.create("_users", function(err, body, header) {});
+  nano.db.create("_stats", function(err, body, header) {});
   nano.db.create("_replicator", function(err, body, header) {});
   nano.db.create("_global_changes", function(err, body, header) {});
 
