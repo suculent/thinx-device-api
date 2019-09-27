@@ -18,7 +18,7 @@ describe("RSA Key", function() {
     rsakey.create(owner,
     function(success, response) {
       revoked_fingerprint = response;
-      console.log("RSA add result: " + JSON.stringify(response));
+      console.log("RSA add result: " , {response});
       expect(success).toBe(true);
       done();
     });
@@ -46,7 +46,7 @@ describe("RSA Key", function() {
     rsakey.create(owner,
     function(success, response) {
       revoked_filenames.push(response.filename);
-      console.log("RSA add result: " + JSON.stringify(response));
+      console.log("RSA add result: " , {response});
       expect(success).toBe(true);
       done();
     });
@@ -56,7 +56,7 @@ describe("RSA Key", function() {
     rsakey.create(owner,
     function(success, response) {
       revoked_filenames.push(response.filename);
-      console.log("RSA add result: " + JSON.stringify(response));
+      console.log("RSA add result: " , {response});
       expect(success).toBe(true);
       done();
     });

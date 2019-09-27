@@ -67,7 +67,7 @@ describe("Owner", function() {
       };
       User.update(owner, body, function(success,
         response) {
-        console.log("avatar update response: " + JSON.stringify(response));
+        console.log("avatar update response: " , {response});
         if (success === false) {
           console.log(response);
         }
@@ -81,7 +81,7 @@ describe("Owner", function() {
       expect(response).toBeDefined();
       expect(success).toBe(true);
       if (success === false) {
-        console.log("profile fetch response: " + JSON.stringify(response));
+        console.log("profile fetch response: " , {response});
       }
       done();
     });

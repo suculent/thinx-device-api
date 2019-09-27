@@ -40,13 +40,13 @@ describe("Builder", function() {
   it("supports certain languages", function() {
     var languages = builder.supportedLanguages();
     expect(languages).toBeDefined();
-    console.log(JSON.stringify(languages));
+    //console.log(JSON.stringify(languages));
   });
 
   it("supports certain extensions", function() {
     var extensions = builder.supportedExtensions();
     expect(extensions).toBeDefined();
-    console.log(JSON.stringify(extensions));
+    //console.log(JSON.stringify(extensions));
   });
 
 });

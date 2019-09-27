@@ -20,7 +20,7 @@ describe("Build log", function() {
 
   it("should be able to list build logs", function(done) {
     blog.list(owner, function(err, body) {
-      console.log(err, body);
+      //console.log(err, body);
       expect(body).toBeDefined();
       done();
     });
@@ -28,7 +28,7 @@ describe("Build log", function() {
 
   it("should be able to fetch specific build log", function(done) {
     blog.fetch(build_id, function(err, body) {
-      console.log(err, body);
+      //console.log(err, body);
       expect(err).toBeDefined();
       done();
     });
@@ -46,16 +46,19 @@ describe("Build log", function() {
 
   it("should be able to tail log for build_id", function(done) {
     const no_socket = null;
-    blog.logtail(build_id, require("./_envi.json").oid, no_socket, function(err) {
-        console.log(err);
-        expect(err).toBe(false);
+    blog.logtail(build_id, require("./_envi.json").oid, no_socket, function(success) {
+        if (success !== true) {
+          console.log(success); // error reason
+        }
+        expect(success).toBe(true);
         done();
       });
   });
 
   it("should provide path for device", function() {
     var path = blog.pathForDevice(owner, udid);
-    console.log("path: "+path);
+    //console.log("path: "+path);
+    // valid is /mnt/thinx_volume/data/4f1122fa074af4dabab76a5205474882c82de33f50ecd962d25d3628cd0603be/d6ff2bb0-df34-11e7-b351-eb37822aa172
     expect(path).toBeDefined();
   });
 

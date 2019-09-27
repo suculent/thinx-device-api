@@ -21,7 +21,7 @@ describe("Sources", function() {
         if (success === false) {
           console.log("Error adding source: " + response);
         }
-        console.log("Source Add Response: " + JSON.stringify(response));
+        console.log("Source Add Response: " , {response});
         expect(success).toBe(true);
         expect(response).toBeDefined();
         source_id = response.source_id;
@@ -33,7 +33,7 @@ describe("Sources", function() {
     Sources.list(owner, function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
-      console.log("Source List Response: " + JSON.stringify(response));
+      console.log("Source List Response: " , {response});
       done();
     });
   }, 10000);
@@ -53,7 +53,7 @@ describe("Sources", function() {
         if (success === false) {
           console.log("Error adding source: " + response);
         }
-        console.log("Source Add Response: " + JSON.stringify(response));
+        console.log("Source Add Response: " , {response});
         //expect(success).toBe(true);
         expect(response).toBeDefined();
         source_id = response.source_id;
@@ -65,7 +65,7 @@ describe("Sources", function() {
           expect(success).toBe(true);
           //expect(response).toBeDefined();
           if (typeof(response) !== "undefined") {
-            console.log("Sources Removal Response: " + JSON.stringify(response));
+            console.log("Sources Removal Response: " , {response});
           }
           done();
         });
