@@ -1525,7 +1525,7 @@ app.post("/device/firmware", function(req, res) {
     // TODO: Refactor to single request parameter only
     device.ott_request(req.owner, req.body, req.headers.authentication, req,
       function(success, response) {
-        console.log("Responding to OTT request with :" + JSON.stringify(response));
+        console.log("Responding to OTT request with :" , {response});
         respond(res, response);
       });
 
@@ -1534,7 +1534,7 @@ app.post("/device/firmware", function(req, res) {
     // TODO: use only one parameter for req or deprecate this
     device.firmware(req.body, req.headers.authentication, req,
       function(success, response) {
-        console.log("Responding to Firmware request with :" + JSON.stringify(response));
+        console.log("Responding to Firmware request with :" , {response});
         respond(res, response);
       });
   }
@@ -1585,7 +1585,7 @@ app.post("/device/register", function(req, res) {
         console.log("Device registration failed with response: " + response);
       } else {
         if (app_config.debug.device) {
-          console.log("Device registration response: " + JSON.stringify(response));
+          console.log("Device registration response: " , {response});
         }
       }
       respond(res, response);
