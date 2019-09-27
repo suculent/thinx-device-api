@@ -6,8 +6,9 @@ describe("Audit log", function() {
   var Audit = require('../../lib/thinx/audit'); var audit = new Audit();
 
   it("should be able to log", function(done) {
-    audit.log(owner, "Log test successful.", function(result) {
-      expect(result).toBe(true);
+    audit.log(owner, "Log test successful.", "info", function(result) {
+      expect(result).toBeDefined();
+      expect(result).not.toBe(false);
       done();
     });
   }, 5000);

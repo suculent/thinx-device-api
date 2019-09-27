@@ -16,7 +16,7 @@ describe("API Key", function() {
       function(success, object) {
         if (success) {
           generated_key_hash = sha256(object.key);
-          console.log("APIKey ready to revoke: " + generated_key_hash);
+          console.log("APIKey generated: " + generated_key_hash);
         }
         expect(object).toBeDefined();
         done();
@@ -27,7 +27,7 @@ describe("API Key", function() {
   //verify: function(owner, apikey, callback)
   it("should be able to verify API Keys (requires hash)", function(done) {
     expect(generated_key_hash).toBeDefined();
-    console.log("Verifying key: " + generated_key_hash);
+    //console.log("Verifying key: " + generated_key_hash);
     apikey.verify(
       owner,
       generated_key_hash,
@@ -40,7 +40,7 @@ describe("API Key", function() {
 
   //revoke: function(owner, apikey_hash, callback)
   it("should be able to revoke API Keys", function(done) {
-    console.log("Revoking valid key: " + generated_key_hash);
+    //console.log("Revoking valid key: " + generated_key_hash);
     apikey.revoke(
       generated_key_hash,
       "sample-key-hash",
@@ -64,7 +64,7 @@ describe("API Key", function() {
   }, 5000);
 
   it("should be able to fail on invalid API Key revocation", function(done) {
-    console.log("Revoking invalid key...");
+    //console.log("Revoking invalid key...");
     var apikey = new APIKey();
     apikey.revoke(
       "nonsense", ["sample-key-hash"],
