@@ -17,7 +17,7 @@ describe("Devices", function() {
     devices.list(owner, function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
-      console.log("Device list: " + JSON.stringify(response));
+      console.log("Device list: " , {response});
       done();
     });
   }, 5000);
@@ -31,7 +31,7 @@ describe("Devices", function() {
     devices.attach(owner, body, function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
-      console.log("Attach response: " + JSON.stringify(response));
+      console.log("Attach response: " , {response});
       console.log("Waiting for response......");
       done();
     });
@@ -45,7 +45,7 @@ describe("Devices", function() {
       expect(success).toBe(true);
       expect(response).toBeDefined();
       if (success === false) {
-        console.log("Detach response: " + JSON.stringify(response));
+        console.log("Detach response: " , {response});
       }
       done();
     });
@@ -59,7 +59,7 @@ describe("Devices", function() {
     };
     devices.revoke(owner, body, function(success, response) {
       expect(success).toBe(true);
-      console.log("Revoke response: " + JSON.stringify(response));
+      console.log("Revoke response: " , {response});
       done();
     });
   }, 30000);

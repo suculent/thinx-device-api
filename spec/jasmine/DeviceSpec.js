@@ -13,11 +13,23 @@ describe("Device", function() {
 
   var generated_key_hash = null;
 
+  var crypto = require("crypto");
+  var fake_mac = null;
+
+  crypto.randomBytes(6, function(err, buffer) {
+    var hexa = buffer.toString('hex');
+    fake_mac = hexa.charAt(0) +
+               hexa.charAt(1) + ":" +
+               hexa.charAt(2) +
+               hexa.charAt(3) + ":" +
+               hexa.charAt(4) +
+               hexa.charAt(5);
+  });
+
   console.log("Testing with udid: ", udid);
 
   // TODO: FIXME: owner is not being loaded from _envi.json in certain circumstances
 
-  // This UDID is to be deleted at the end of test.
   var JRS = {
     mac: "11:11:11:11:11:11",
     firmware: "DeviceSpec.js",
@@ -32,8 +44,9 @@ describe("Device", function() {
 
   // udid: "6ef6d300-8053-11e7-8d27-0fa2e6ecef21"
 
+  // This UDID is to be deleted at the end of test.
   var JRS2 = {
-    mac: "N0:NM:OC:KE:D1:00",
+    mac: fake_mac,
     firmware: "DeviceSpec.js",
     version: "1.0.0",
     checksum: "alevim",
@@ -41,7 +54,7 @@ describe("Device", function() {
     alias: "virtual-test-device-2-static",
     owner: owner,
     platform: "arduino",
-    udid: envi.udid
+    udid: null
   };
 
   var body = JRS; // JSON.parse(RS);
@@ -65,7 +78,7 @@ describe("Device", function() {
 
   it("should be able to register itself.", function(done) {
     device.register(
-      JRS2,
+      JRS,
       apikey,
       null,
       function(success, response) {
@@ -79,9 +92,9 @@ describe("Device", function() {
         }
         //console.log("• DeviceSpec.js: Registration result: ", {response});
         expect(success).toBe(true);
-        udid = response.registration.udid;
-        expect(udid).toBeDefined();
-        console.log("• DeviceSpec.js: Received UDID: " + udid);
+        JRS2.udid = response.registration.udid;
+        expect(JRS2.udid).toBeDefined();
+        console.log("• DeviceSpec.js: Received UDID: " + JRS2.udid);
         done();
       });
   }, 15000); // register
@@ -167,7 +180,7 @@ describe("Device", function() {
 
   it("should be able to provide device firmware", function(firmware_done) {
       // Returns "OK" when current firmware is valid.
-      var body = JRS2;
+      var body = JRS;
       body.udid = udid;
       console.log("• DeviceSpec.js: Using UDID: " + udid);
       device.firmware(body, apikey, function(success, response) {
@@ -183,12 +196,13 @@ describe("Device", function() {
 
   it("should be able to register for revocation", function(done) {
     device.register(
-      JRS,
+      JRS2,
       apikey,
       null,
       function(success, response) {
         console.log("Registration Response: ", response);
         udid = response.registration.udid;
+        JRS.udid = udid;
         console.log("• DeviceSpec.js: Received UDID: " + udid);
         expect(success).toBe(true);
         expect(udid).toBeDefined();
@@ -199,7 +213,7 @@ describe("Device", function() {
   it("should be able to revoke a device", function(done) {
       console.log("• DeviceSpec.js: Revoking UDID: " + udid);
       device.revoke(
-        udid,
+        JRS2.udid,
         function(success, response) {
           console.log("• DeviceSpec.js: Revocation result: ", { response });
           //expect(error.reason).toBe("deleted");
