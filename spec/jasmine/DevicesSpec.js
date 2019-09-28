@@ -25,8 +25,6 @@ describe("Devices", function() {
                hexa.charAt(5);
   });
 
-  console.log("Testing with udid: ", udid);
-
   // This UDID is to be deleted at the end of test.
   var TEST_DEVICE = {
     mac: fake_mac,

@@ -26,8 +26,6 @@ describe("Device", function() {
                hexa.charAt(5);
   });
 
-  console.log("Testing with udid: ", udid);
-
   // TODO: FIXME: owner is not being loaded from _envi.json in certain circumstances
 
   var JRS = {
