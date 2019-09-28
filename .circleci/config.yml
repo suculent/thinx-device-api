@@ -169,7 +169,7 @@ jobs:
         name: NPM Test (uses jasmine until Chai expect will be supported)
         command: |
             export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            nvm use 10.16.0
+            nvm use 10.16.3
             npm run test
 
     - run: mkdir -p $CIRCLE_TEST_REPORTS/rspec
