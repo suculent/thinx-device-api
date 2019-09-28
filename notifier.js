@@ -35,7 +35,7 @@ var that = this;
 
 var mqtt = require("mqtt");
 
-var Messenger = require("./messenger");
+var Messenger = require("./lib/thinx/messenger");
 var messenger = new Messenger().getInstance(); // take singleton to prevent double initialization
 
 console.log("-=[ ☢ THiNX IoT RTM NOTIFIER ☢ ]=-");

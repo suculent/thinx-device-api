@@ -18,7 +18,7 @@ describe("RSA Key", function() {
     rsakey.create(owner,
     function(success, response) {
       revoked_fingerprint = response;
-      console.log("RSA add result: " , {response});
+      //console.log("RSA add result: " , {response});
       expect(success).toBe(true);
       done();
     });

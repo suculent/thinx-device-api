@@ -21,7 +21,7 @@ describe("Sources", function() {
         if (success === false) {
           console.log("Error adding source: " + response);
         }
-        console.log("Source Add Response: " , {response});
+        //console.log("Source Add Response: " , {response});
         expect(success).toBe(true);
         expect(response).toBeDefined();
         source_id = response.source_id;
@@ -33,7 +33,7 @@ describe("Sources", function() {
     Sources.list(owner, function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
-      console.log("Source List Response: " , {response});
+      //console.log("Source List Response: " , {response});
       done();
     });
   }, 10000);
