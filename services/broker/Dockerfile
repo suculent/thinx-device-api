@@ -25,16 +25,6 @@ RUN echo "mosquitto" >> /etc/incron.allow && \
     mkdir -p /var/spool/incron && \
     chmod +x /mqtt_restart.sh
 
-## Following code may happen only once... TODO: move to installer.
-
-# RUN echo "WARNING! Creating master MQTT account with credentials: " ${MOSQUITTO_USERNAME} $MOSQUITTO_PASSWORD
-VOLUME /mnt/data/mosquitto/auth /mqtt/auth/
-RUN touch /mqtt/auth/thinx.pw
-RUN mosquitto_passwd -b /mqtt/auth/thinx.pw ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}
-RUN touch /mqtt/auth/thinx.acl
-RUN echo "user ${MOSQUITTO_USERNAME}" >> /mqtt/auth/thinx.acl
-RUN echo "topic readwrite #" >> /mqtt/auth/thinx.acl
-
 RUN chown root:incron /var/spool/incron/root && \
     incrontab -l
 
