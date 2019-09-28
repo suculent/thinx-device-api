@@ -1,9 +1,9 @@
 FROM debian:jessie-slim
 
-ARG MOSQUITTO_PASSWORD
+ARG MOSQUITTO_PASSWORD=thinx
 ENV MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}
 
-ARG MOSQUITTO_USERNAME
+ARG MOSQUITTO_USERNAME=mosquitto
 ENV MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}
 
 RUN apt-get update && apt-get install -y ca-certificates apt-transport-https incron cron wget && \
@@ -25,12 +25,12 @@ RUN echo "mosquitto" >> /etc/incron.allow && \
     mkdir -p /var/spool/incron && \
     chmod +x /mqtt_restart.sh
 
-RUN echo "WARNING! Creating master MQTT account with credentials: " ${MOSQUITTO_USERNAME} $MOSQUITTO_PASSWORD
+## Following code may happen only once... TODO: move to installer.
 
-VOLUME /mqtt/auth/ /mqtt/auth/
-
+# RUN echo "WARNING! Creating master MQTT account with credentials: " ${MOSQUITTO_USERNAME} $MOSQUITTO_PASSWORD
+VOLUME /mnt/data/mosquitto/auth /mqtt/auth/
+RUN touch /mqtt/auth/thinx.pw
 RUN mosquitto_passwd -b /mqtt/auth/thinx.pw ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}
-
 RUN touch /mqtt/auth/thinx.acl
 RUN echo "user ${MOSQUITTO_USERNAME}" >> /mqtt/auth/thinx.acl
 RUN echo "topic readwrite #" >> /mqtt/auth/thinx.acl
