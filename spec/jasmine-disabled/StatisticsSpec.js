@@ -4,7 +4,7 @@ describe("Statistics", function() {
   var s = new Statistics();
   s.forceLogPath(__dirname + "/../../spec/test.log");
 
-  var envi = require("./_envi.json");
+  var envi = require("../_envi.json");
   var owner = envi.oid;
 
   it("should be able to initialize", function() {

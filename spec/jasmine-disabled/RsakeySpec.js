@@ -3,7 +3,7 @@ describe("RSA Key", function() {
   var RSAKey = require("../../lib/thinx/rsakey");
   var rsakey = new RSAKey();
 
-  var envi = require("./_envi.json");
+  var envi = require("../_envi.json");
   var owner = envi.oid;
 
   var invalid_fingerprints = [

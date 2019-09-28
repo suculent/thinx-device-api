@@ -3,7 +3,7 @@ describe("Sources", function() {
   var sources = require('../../lib/thinx/sources');
   var Sources = new sources();
 
-  var envi = require("./_envi.json");
+  var envi = require("../_envi.json");
   var owner = envi.oid;
   var source_id;
   const source_name = "thinx-device-api-test";

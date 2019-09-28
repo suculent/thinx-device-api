@@ -1,6 +1,6 @@
 describe("Notifier", function() {
 
-  var envi = require("./_envi.json");
+  var envi = require("../_envi.json");
   var owner = envi.oid;
   var exec = require("child_process");
 

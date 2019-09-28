@@ -2,13 +2,13 @@ var generated_key_name = null;
 var messenger = require('../../lib/thinx/messenger');
 var Messenger = new messenger();
 
-var envi = require("./_envi.json");
+var envi = require("../_envi.json");
 var test_owner = envi.oid;
 var udid = envi.udid;
 
 var user = require('../../lib/thinx/owner');
 var User = new user();
-var envi = require("./_envi.json");
+var envi = require("../_envi.json");
 var owner = envi.oid;
 var email = envi.email;
 
@@ -17,7 +17,7 @@ describe("Messenger", function() {
   var APIKey = require("../../lib/thinx/apikey");
   var apikey = new APIKey();
   var sha256 = require("sha256");
-  var envi = require("./_envi.json");
+  var envi = require("../_envi.json");
   var owner = envi.oid;
 
   var generated_key_hash;

@@ -3,7 +3,7 @@ describe("Device", function() {
   var Device = require("../../lib/thinx/device"); var device = new Device();
   var ApiKey = require("../../lib/thinx/apikey"); var APIKey = new ApiKey();
 
-  var envi = require("./_envi.json");
+  var envi = require("../_envi.json");
   var sha256 = require("sha256");
 
   var owner = envi.oid;
