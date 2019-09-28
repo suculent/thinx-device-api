@@ -364,7 +364,7 @@ var transfer = new Transfer();
 
 console.log("Loading module: messenger...");
 var Messenger = require("./lib/thinx/messenger");
-var messenger = new Messenger();
+var messenger = new Messenger().getInstance(); // take singleton to prevent double initialization
 
 console.log("Loading module: repository/watcher...");
 

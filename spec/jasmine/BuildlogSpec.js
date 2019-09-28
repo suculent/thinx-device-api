@@ -46,7 +46,7 @@ describe("Build log", function() {
 
   it("should be able to tail log for build_id", function(done) {
     const no_socket = null;
-    blog.logtail(build_id, require("./_envi.json").oid, no_socket, function(success) {
+    blog.logtail(build_id, require("../_envi.json").oid, no_socket, function(success) {
         if (success !== true) {
           console.log(success); // error reason
         }

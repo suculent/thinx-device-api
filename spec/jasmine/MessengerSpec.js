@@ -1,6 +1,6 @@
 var generated_key_name = null;
-var messenger = require('../../lib/thinx/messenger');
-var Messenger = new messenger();
+var Messenger = require('../../lib/thinx/messenger');
+var messenger = new Messenger().getInstance();
 
 var envi = require("../_envi.json");
 var test_owner = envi.oid;
@@ -54,7 +54,7 @@ describe("Messenger", function() {
 
   // getDevices: function(owner, callback)
   it("should be able to fetch devices for owner", function(done) {
-    Messenger.getDevices(test_owner, function(success, devices) {
+    messenger.getDevices(test_owner, function(success, devices) {
       expect(success).toBe(true);
       console.log("devices: ", { devices });
       done();
@@ -64,7 +64,7 @@ describe("Messenger", function() {
   // init
   it("should be able to initialize on its own", function(done) {
     const mock_socket = {};
-    Messenger.initWithOwner(test_owner, mock_socket, function(success, status) {
+    messenger.initWithOwner(test_owner, mock_socket, function(success, status) {
       expect(success).toBe(true);
       expect(status).toBeDefined();
       console.log("devices: ", { status });
@@ -83,7 +83,7 @@ describe("Messenger", function() {
 
   // publish: function(owner, udid, message); returns nothing
   it("should be able to publish upon connection", function(done) {
-    Messenger.publish(test_owner, udid, "test");
+    messenger.publish(test_owner, udid, "test");
     console.log("publishing: ", { test_owner, udid });
     done();
   }, 5000);

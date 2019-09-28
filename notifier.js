@@ -35,7 +35,8 @@ var that = this;
 
 var mqtt = require("mqtt");
 
-var Messenger = require('./lib/thinx/messenger');
+var Messenger = require("./messenger");
+var messenger = new Messenger().getInstance(); // take singleton to prevent double initialization
 
 console.log("-=[ ☢ THiNX IoT RTM NOTIFIER ☢ ]=-");
 
@@ -385,7 +386,7 @@ devicelib.get(udid, function(err, doc) {
     // Device channel
     if (status == "DEPLOYED") {
       console.log("Calling messenger publish...");
-      Messenger.publish(owner, udid, message);
+      messenger.publish(owner, udid, message);
       notify_device_channel(owner, udid, message); // deprecated; integration testing only
     }
 
