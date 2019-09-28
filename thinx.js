@@ -326,10 +326,6 @@ console.log("Loading module: device...");
 var Device = require("./lib/thinx/device");
 var device = new Device();
 
-console.log("Loading module: devices...");
-var Devices = require("./lib/thinx/devices");
-var devices = new Devices();
-
 console.log("Loading module: deployment...");
 var Deployment = require("./lib/thinx/deployment");
 var deployment = new Deployment();
@@ -365,6 +361,10 @@ var transfer = new Transfer();
 console.log("Loading module: messenger...");
 var Messenger = require("./lib/thinx/messenger");
 var messenger = new Messenger().getInstance(); // take singleton to prevent double initialization
+
+console.log("Loading module: devices...");
+var Devices = require("./lib/thinx/devices");
+var devices = new Devices(messenger);
 
 console.log("Loading module: repository/watcher...");
 

@@ -4,7 +4,10 @@ describe("Devices", function() {
 
   var Device = require("../../lib/thinx/device"); var device = new Device();
   var Devices = require("../../lib/thinx/devices");
-  var devices = new Devices();
+
+  var Messenger = require('../../lib/thinx/messenger');
+  var messenger = new Messenger().getInstance();
+  var devices = new Devices(messenger);
 
   var envi = require("../_envi.json");
   var owner = envi.oid;
