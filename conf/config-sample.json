@@ -16,7 +16,7 @@
     "port": 1883,
     "passwords": "/mnt/data/mosquitto/thinx.pw",
     "acl": "/mnt/data/mosquitto/thinx.acl",
-    "key": "<password>",
+    "password": "<password>",
     "username": "<username>"
   },
   "rollbar_token": "<enter-your-rollbar.com-token>",

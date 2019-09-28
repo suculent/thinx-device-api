@@ -16,8 +16,8 @@
     "port": 1883,
     "passwords": "/mnt/data/mosquitto/thinx.pw",
     "acl": "/mnt/data/mosquitto/thinx.acl",
-    "key": "",
-    "username": ""
+    "password": "mosquitto",
+    "username": "thinx"
   },
   "rollbar_token": "<enter-your-rollbar.com-token>",
   "database_uri": "http://rtmtest:rtmtest@couchdb:5984",

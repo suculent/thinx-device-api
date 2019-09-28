@@ -1,5 +1,11 @@
 FROM debian:jessie-slim
 
+ARG MOSQUITTO_PASSWORD
+ENV MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}
+
+ARG MOSQUITTO_USERNAME
+ENV MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}
+
 RUN apt-get update && apt-get install -y ca-certificates apt-transport-https incron cron wget && \
     wget -q --no-check-certificate -O - https://repo.mosquitto.org/debian/mosquitto-repo.gpg.key | gpg --import && \
     gpg -a --export 8277CCB49EC5B595F2D2C71361611AE430993623 | apt-key add - && \
@@ -18,6 +24,14 @@ RUN echo "mosquitto" >> /etc/incron.allow && \
     echo "root" >> /etc/incron.allow && \
     mkdir -p /var/spool/incron && \
     chmod +x /mqtt_restart.sh
+
+RUN echo "WARNING! Creating master MQTT account with credentials: ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}"
+
+RUN mosquitto_passwd -b  /mqtt/auth/thinx.pw ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}
+
+RUN touch /mqtt/auth/thinx.acl
+RUN echo "user ${MOSQUITTO_USERNAME}" >> /mqtt/auth/thinx.acl
+RUN echo "topic readwrite #" >> /mqtt/auth/thinx.acl
 
 RUN chown root:incron /var/spool/incron/root && \
     incrontab -l

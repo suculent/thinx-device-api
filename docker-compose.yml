@@ -11,7 +11,14 @@ services:
   mosquitto:
     env_file: .env
     # image: suculent/thinx-message_broker
-    build: ./services/broker
+    build:
+      context: ./services/broker
+      args:
+      - MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}
+      - MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}
+    environment:
+      - MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}
+      - MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}
     ports:
       - 1883:1883
       - 8883:8883

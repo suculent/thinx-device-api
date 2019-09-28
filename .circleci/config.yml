@@ -148,7 +148,6 @@ jobs:
         name: Run Mosquitto (setting password-less login)
         command: |
             cp ./services/broker/config/thinx.acl.dist /mnt/data/mosquitto/auth/thinx.acl
-            cp ./services/broker/config/thinx.pw.dist /mnt/data/mosquitto/auth/thinx.pw
             cp ./services/broker/config/mosquitto.conf.dist ./services/broker/config/mosquitto.conf
             docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
             docker build -t suculent/mosquitto ./services/broker && docker run -d --rm -p 1883:1883 --name="mosquitto" suculent/mosquitto
