@@ -65,8 +65,10 @@ describe("Owner", function() {
           avatar: avatar_image
         }
       };
-      User.update(owner, body, function(success,
-        response) {
+      User.update(
+        owner,
+        body,
+        function(success, response) {
         console.log("avatar update response: " , {response});
         if (success === false) {
           console.log(response);
@@ -76,6 +78,7 @@ describe("Owner", function() {
       });
     }, 10000);
 
+ /*
   it("should be able to fetch owner profile", function(done) {
     User.profile(owner, function(success, response) {
       expect(response).toBeDefined();
@@ -145,5 +148,5 @@ describe("Owner", function() {
     });
 
   });
-
+*/
 });
