@@ -43,7 +43,7 @@ describe("Sources", function() {
     const source = {
       owner: "to-be-deleted-on-test",
       branch: "origin/master",
-      url: "https://github.com/suculent/thinx-device-api",
+      url: "https://github.com/suculent/thinx-firmware-esp8266-pio",
       platform: "nodejs"
     };
 
