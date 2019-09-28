@@ -79,6 +79,22 @@ jobs:
     # Copy the configuration folder from docker-ignored folder to virtual mount
     - run: mkdir -p /mnt/data && cp -R ./conf /mnt/data
     - run: mkdir -p /mnt/data/ssh-keys
+    - run: mkdir -p /mnt/data/mosquitto/auth
+    - run: mkdir -p /mnt/data/mosquitto/config
+    - run: mkdir -p /mnt/data/mosquitto/data
+    - run: mkdir -p /mnt/data/mosquitto/log
+    - run: mkdir -p /mnt/data/mosquitto/ssl
+
+#conf
+#couchdb
+#data
+#deploy
+#mosquitto
+#redis
+#repos
+#ssh_keys
+#ssl
+
 
     # Sonarcloud Integration (requires JAVA)
     # - run: wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.3.0.1492-linux.zip
@@ -129,8 +145,11 @@ jobs:
             docker build -t suculent/redis ./services/redis && docker run -d --rm -p 6379:6379 -e REDIS_PASSWORD=testpass --name="thinx-redis" suculent/redis
 
     - run:
-        name: Run Mosquitto
+        name: Run Mosquitto (setting password-less login)
         command: |
+            cp ./services/broker/config/thinx.acl.dist /mnt/data/mosquitto/auth/thinx.acl
+            cp ./services/broker/config/thinx.pw.dist /mnt/data/mosquitto/auth/thinx.pw
+            cp ./services/broker/config/mosquitto.conf.dist ./services/broker/config/mosquitto.conf
             docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
             docker build -t suculent/mosquitto ./services/broker && docker run -d --rm -p 1883:1883 --name="mosquitto" suculent/mosquitto
 

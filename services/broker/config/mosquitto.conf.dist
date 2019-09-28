@@ -2,7 +2,7 @@ persistence true
 persistence_location /mqtt/data
 
 log_type all
-log_dest file /mqtt/log/mosquitto.log
+# log_dest file /mqtt/log/mosquitto.log
 
 allow_anonymous true
 password_file /mqtt/auth/thinx.pw
