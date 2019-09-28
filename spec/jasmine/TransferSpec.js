@@ -3,8 +3,11 @@ describe("Transfer", function() {
   var envi = require("../_envi.json");
   var owner = envi.oid;
 
+  var Messenger = require('../../lib/thinx/messenger');
+  var messenger = new Messenger().getInstance();
+
   var transfer = require("../../lib/thinx/transfer");
-  var Transfer = new transfer();
+  var Transfer = new transfer(messenger);
 
   var dynamic_transfer_request_id = null;
 

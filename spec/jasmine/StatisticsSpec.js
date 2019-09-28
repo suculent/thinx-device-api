@@ -20,14 +20,14 @@ describe("Statistics", function() {
 
   it("should return today path element", function() {
     var result = s.todayPathElement();
-    console.log(result);
+    //console.log(result);
     expect(result).toBeDefined();
   });
 
   it("should be able to return today results for owner", function(done) {
     s.today(owner, function(success, result) {
         expect(success).toBe(true);
-        console.log("daily stats: " + result);
+        //console.log("daily stats: " + result);
         expect(result).toBeDefined();
         done();
       });
@@ -43,7 +43,7 @@ describe("Statistics", function() {
 
   it("should be able to parse today statistics per owner", function(done) {
     s.today(owner, function(success, body) {
-        console.log("Returned today stats: " + { success, body });
+        //console.log("Returned today stats: ", { success, body });
         expect(success).toBe(true);
         expect(body).toBeDefined();
         done();
@@ -52,7 +52,7 @@ describe("Statistics", function() {
 
   it("should be able to parse all statistics per owner", function(done) {
     s.parse(owner, function(success, body) {
-        console.log("Returned all stats: ");
+        //console.log("Returned all stats: ");
         expect(success).toBe(true);
         if (success) {
           expect(body).toBeDefined();
@@ -64,8 +64,8 @@ describe("Statistics", function() {
   it("should be able to return weekly results for owner", function(done) {
     s.week(owner, function(success, result) {
         //expect(success).toBe(true);
-        console.log("Returned weekly stats: ");
-        console.log({result});
+        //console.log("Returned weekly stats: ");
+        //console.log({result});
         expect(result).toBeDefined();
         done();
       });

@@ -354,17 +354,18 @@ console.log("Loading module: sources...");
 var Sources = require("./lib/thinx/sources");
 var sources = new Sources();
 
-console.log("Loading module: device transfer...");
-var Transfer = require("./lib/thinx/transfer");
-var transfer = new Transfer();
-
-console.log("Loading module: messenger...");
+console.log("[thinx.js] Loading module: messenger...");
 var Messenger = require("./lib/thinx/messenger");
+console.log("[thinx.js] Getting instance: messenger...");
 var messenger = new Messenger().getInstance(); // take singleton to prevent double initialization
 
 console.log("Loading module: devices...");
 var Devices = require("./lib/thinx/devices");
 var devices = new Devices(messenger);
+
+console.log("Loading module: device transfer...");
+var Transfer = require("./lib/thinx/transfer");
+var transfer = new Transfer(messenger);
 
 console.log("Loading module: repository/watcher...");
 
