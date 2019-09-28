@@ -67,7 +67,7 @@ describe("Devices", function() {
     devices.list(owner, function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
-      console.log("Device list: " , {response});
+      //console.log("Device list: " , {response});
       done();
     });
   }, 5000);
@@ -81,13 +81,12 @@ describe("Devices", function() {
     devices.attach(owner, body, function(success, response) {
       expect(success).toBe(true);
       expect(response).toBeDefined();
-      console.log("Attach response: " , {response});
-      console.log("Waiting for response......");
+      //console.log("Attach response: " , {response});
       done();
     });
   }, 30000);
 
-  it("should be able to detach a repository from device(s)", function(done) {
+  it("should be able to detach a repository from device", function(done) {
     var body = {
       udid: TEST_DEVICE.udid
     };
@@ -109,7 +108,7 @@ describe("Devices", function() {
     };
     devices.revoke(owner, body, function(success, response) {
       expect(success).toBe(true);
-      console.log("Revoke response: " , {response});
+      //console.log("Revoke response: " , {response});
       done();
     });
   }, 30000);

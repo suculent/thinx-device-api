@@ -198,7 +198,7 @@ describe("Device", function() {
       apikey,
       null,
       function(success, response) {
-        console.log("Registration Response: ", response);
+        //console.log("Registration Response: ", response);
         udid = response.registration.udid;
         JRS.udid = udid;
         console.log("• DeviceSpec.js: Received UDID: " + udid);
