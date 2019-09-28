@@ -35,7 +35,7 @@ describe("RSA Key", function() {
   it("should fail on invalid revocation", function(done) {
     rsakey.revoke(owner, invalid_fingerprints,
       function(success, message) {
-        console.log("RSA revocation result: " +JSON.stringify(message));
+        //console.log("RSA revocation result: " +JSON.stringify(message));
         expect(success).toBe(false);
         expect(message).toBeDefined();
         done();
@@ -46,7 +46,7 @@ describe("RSA Key", function() {
     rsakey.create(owner,
     function(success, response) {
       revoked_filenames.push(response.filename);
-      console.log("RSA add result: " , {response});
+      //console.log("RSA add result: " , {response});
       expect(success).toBe(true);
       done();
     });
@@ -56,7 +56,7 @@ describe("RSA Key", function() {
     rsakey.create(owner,
     function(success, response) {
       revoked_filenames.push(response.filename);
-      console.log("RSA add result: " , {response});
+      //console.log("RSA add result: " , {response});
       expect(success).toBe(true);
       done();
     });
