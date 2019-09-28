@@ -27,10 +27,10 @@ su mosquitto -s /bin/bash
 
 echo "Starting MQTT broker..."
 
-touch /mqtt/auth/thinx.pw && ls -la /mqtt/auth
-echo "MQTT Credentials: " ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}
-mosquitto_passwd -b /mqtt/auth/thinx.pw thinx mosquitto
-touch /mqtt/auth/thinx.acl
+#touch /mqtt/auth/thinx.pw && ls -la /mqtt/auth
+#echo "MQTT Credentials: " ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}
+#mosquitto_passwd -b /mqtt/auth/thinx.pw thinx mosquitto
+#touch /mqtt/auth/thinx.acl
 
 # Should be done by copying config...
 # echo "user ${MOSQUITTO_USERNAME}" >> /mqtt/auth/thinx.acl
