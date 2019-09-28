@@ -25,9 +25,11 @@ RUN echo "mosquitto" >> /etc/incron.allow && \
     mkdir -p /var/spool/incron && \
     chmod +x /mqtt_restart.sh
 
-RUN echo "WARNING! Creating master MQTT account with credentials: ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}"
+RUN echo "WARNING! Creating master MQTT account with credentials: " ${MOSQUITTO_USERNAME} $MOSQUITTO_PASSWORD
 
-RUN mosquitto_passwd -b  /mqtt/auth/thinx.pw ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}
+VOLUME /mqtt/auth/ /mqtt/auth/
+
+RUN mosquitto_passwd -b /mqtt/auth/thinx.pw ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}
 
 RUN touch /mqtt/auth/thinx.acl
 RUN echo "user ${MOSQUITTO_USERNAME}" >> /mqtt/auth/thinx.acl
