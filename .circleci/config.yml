@@ -29,12 +29,12 @@ jobs:
     - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
 
     # Restore the dependency cache
-    #- restore_cache:
-        #keys:
+    - restore_cache:
+        keys:
           # This branch if available
-          #- v1-dependencies-{{ checksum "package.json" }}
+          - v1-dependencies-{{ checksum "package.json" }}
           # fallback to using the latest cache if no exact match is found
-          #- v1-dependencies-
+          - v1-dependencies-
 
     # This is based on your 1.0 configuration file or project settings
     - run: apt-get update && apt-get install -y --fix-missing --no-install-recommends curl jq mosquitto
@@ -79,7 +79,14 @@ jobs:
             mv /tmp/docker/* /usr/bin
 
     - run:
-        name: Docker Compose
+        name: Install Docker Compose
+        command: |
+          curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` > ~/docker-compose
+          chmod +x ~/docker-compose
+          sudo mv ~/docker-compose /usr/local/bin/docker-compose
+
+    - run:
+        name: Run Test in Compose
         command: |
           cp .env.dist .env
           cp ./conf/config-test.json ./conf/config.json
