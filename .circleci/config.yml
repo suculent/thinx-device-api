@@ -150,7 +150,7 @@ jobs:
             cp ./services/broker/config/thinx.acl.dist /mnt/data/mosquitto/auth/thinx.acl
             cp ./services/broker/config/mosquitto.conf.dist ./services/broker/config/mosquitto.conf
             docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
-            docker build -t suculent/mosquitto ./services/broker && docker run -e "MOSQUITTO_USERNAME=thinx" -e "MOSQUITTO_PASSWORD=mosquitto" -d --rm -p 1883:1883 --name="mosquitto" suculent/mosquitto
+            docker build -t suculent/mosquitto ./services/broker && docker run -d --rm -p 1883:1883 -e MOSQUITTO_USERNAME=thinx -e MOSQUITTO_PASSWORD=mosquitto --name="mosquitto" suculent/mosquitto
 
     - run:
         name: Check running Docker containers
@@ -161,7 +161,7 @@ jobs:
 
         # In cases where thinx-device-api runs as node.js app against containers in CircleCI, IPs depend on run order
 
-    - run: echo "127.0.0.1 couchdb" >> /etc/hosts
+    - run: echo "172.17.0.2 couchdb" >> /etc/hosts
     - run: echo "127.0.0.1 thinx-redis" >> /etc/hosts # 172.17.0.3
     - run: echo "127.0.0.1 mosquitto" >> /etc/hosts # 172.17.0.4
 
@@ -171,6 +171,12 @@ jobs:
             export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm use 10.16.3
             npm run test
+
+    - run:
+        name: Docker Compose
+        command: |
+          cp .env.dist .env
+          docker-compose up && docker-compose logs -f
 
     - run: mkdir -p $CIRCLE_TEST_REPORTS/rspec
     - run:
