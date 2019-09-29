@@ -107,8 +107,13 @@ jobs:
           pwd && ls -la
           cat ./.env
           docker network create nat
-          docker-compose up -d --build
+          docker-compose up -d --build mosquitto
+          docker-compose up -d --build couchdb
+          docker-compose up -d --build thinx-redis
+          docker-compose up -d --build transformer
+          docker-compose up -d --build api
           docker-compose logs -f
+        # docker-compose up -d --build console
 
     - run:
         name: Check running Docker containers
