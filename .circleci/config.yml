@@ -100,7 +100,7 @@ jobs:
           cp -vf ./conf/config-test.json ./conf/config.json
           cp -vfR ./conf /mnt/data/conf && ls -la /mnt/data/conf
           cp -vf ./.env ./.thinx_env
-          sed -i -e 's/^/export\s/' ./.thinx_env # create from .thinx_env from .env
+          sed -i -e 's/^/export /' ./.thinx_env # create from .thinx_env from .env
           cat ./.thinx_env
           export ENVIRONMENT=test
           export
