@@ -30,10 +30,10 @@ jobs:
     # Restore the dependency cache
     - restore_cache:
         keys:
-        # This branch if available
-        - v1-dependencies-{{ checksum "package.json" }}
-        # fallback to using the latest cache if no exact match is found
-        - v1-dependencies-
+          # This branch if available
+          - v1-dependencies-{{ checksum "package.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
 
     # This is based on your 1.0 configuration file or project settings
     - run: apt-get update && apt-get install -y --fix-missing --no-install-recommends curl jq mosquitto
@@ -46,18 +46,18 @@ jobs:
     - run: mkdir statistics
 
     - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+        paths:
+          - node_modules
+        key: v1-dependencies-{{ checksum "package.json" }}
 
     - run:
-      name: Install Docker client
-      command: |
-        set -x
-        VER="17.03.0-ce"
-        curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
-        tar -xz -C /tmp -f /tmp/docker-$VER.tgz
-        export PATH=$PATH:/tmp/docker      
+        name: Install Docker client
+        command: |
+          set -x
+          VER="17.03.0-ce"
+          curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+          tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+          export PATH=$PATH:/tmp/docker      
 
     # The following line was run implicitly in your 1.0 builds based on what CircleCI inferred about the structure of your project. In 2.0 you need to be explicit about which commands should be run. In some cases you can discard inferred commands if they are not relevant to your project.
     - run: if [ -z "${NODE_ENV:-}" ]; then export NODE_ENV=test; fi
@@ -74,24 +74,13 @@ jobs:
     - run: mkdir -p /mnt/data/mosquitto/data
     - run: mkdir -p /mnt/data/mosquitto/log
     - run: mkdir -p /mnt/data/mosquitto/ssl
-
-#conf
-#couchdb
-#data
-#deploy
-#mosquitto
-#redis
-#repos
-#ssh_keys
-#ssl
-
-
-    # Sonarcloud Integration (requires JAVA)
-    # - run: wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.3.0.1492-linux.zip
-    # - run: unzip sonar-scanner*.zip
-    # - run: which java
-    # - run: alias sonar-scanner="$(pwd)/sonar-scanner-3.3.0.1492-linux/bin/sonar-scanner" && which sonar-scanner && bash ./99-sonar.sh
-
+    - run: mkdir -p /mnt/data/couchdb
+    - run: mkdir -p /mnt/data/deploy
+    - run: mkdir -p /mnt/data/data
+    - run: mkdir -p /mnt/data/redis
+    - run: mkdir -p /mnt/data/repos
+    - run: mkdir -p /mnt/data/ssl
+    
     # Test
     #   This would typically be a build job when using workflows, possibly combined with build
     - run: mkdir -p $CIRCLE_TEST_REPORTS/reports
@@ -175,7 +164,6 @@ jobs:
             export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm use 10.16.0
             bundler exec rspec --format RspecJunitFormatter --out $CIRCLE_TEST_REPORTS/rspec/rspec.xml --format progress spec
-
         environment:
           RAILS_ENV: test
           RACK_ENV: test
