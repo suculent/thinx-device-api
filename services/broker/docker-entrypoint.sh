@@ -2,11 +2,11 @@
 
 set +e
 
-touch /var/log/cron.log
+#touch /var/log/cron.log
 
-sysctl -w net.ipv4.tcp_keepalive_intvl=30
-sysctl -w net.ipv4.tcp_keepalive_probes=8
-sysctl -w net.ipv4.tcp_keepalive_time=120
+#sysctl -w net.ipv4.tcp_keepalive_intvl=30
+#sysctl -w net.ipv4.tcp_keepalive_probes=8
+#sysctl -w net.ipv4.tcp_keepalive_time=120
 
 echo "Starting cron..."
 
@@ -40,7 +40,9 @@ touch /mqtt/auth/thinx.acl
 
 # Should be done by copying config, but what if the user gets changed?...
 
-if [[ -z cat /mqtt/auth/thinx.acl | grep ${MOSQUITTO_USERNAME} ]]; then
+IS_REGISTERED=$(cat /mqtt/auth/thinx.acl | grep ${MOSQUITTO_USERNAME})
+
+if [[ -z $IS_REGISTERED ]]; then
     echo "Writing initial ACL record to auth/thinx.acl"
     echo "---------" >> /mqtt/auth/thinx.acl
     echo "user ${MOSQUITTO_USERNAME}" >> /mqtt/auth/thinx.acl

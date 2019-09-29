@@ -32,7 +32,7 @@ else
 fi
 
 # Installs all tools, not just those currently allowed by .dockerignore, requires running Docker
-if [ ! -z $(which docker) ]; then
+if [[ ! -z $(which docker) ]]; then
   echo "Installing Build-tools for DinD/DooD"
   pushd builders
   bash ./install-builders.sh
