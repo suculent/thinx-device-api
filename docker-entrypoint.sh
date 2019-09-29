@@ -10,10 +10,6 @@ set +e
 
 export SQREEN_DISABLE_STARTUP_WARNING=1
 
-export
-
-pwd
-
 # seems to fail...
 sysctl net.ipv4.ip_forward=1
 sysctl -w net.ipv4.conf.all.forwarding=1
@@ -25,7 +21,10 @@ export DOCKER_HOST="unix:///var/run/docker.sock"
 
 source ~/.profile
 
+pwd
+
 if [[ -f /.thinx_env ]]; then
+  echo "Sourcing .thinx_env"
   source /.thinx_env
 else
   echo ".thinx_env not found, expects ENVIRONMENT, ROLLBAR_ACCESS_TOKEN, ROLLBAR_ENVIRONMENT and REVISION variables to be set."
