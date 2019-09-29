@@ -62,6 +62,9 @@ touch /opt/thinx/.pm2/logs/index-out-1.log
 echo "/mnt/data/conf contents:"
 ls -lf /mnt/data/conf
 
+echo "/opt/thinx/thinx-device-api/conf contents:"
+ls -lf /opt/thinx/thinx-device-api/conf
+
 if [[ $ENVIRONMENT!="test" ]]; then
   node thinx.js | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
 else

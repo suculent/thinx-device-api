@@ -90,7 +90,7 @@ jobs:
             mkdir -p /mnt/data/test-reports
 
     - run:
-        name: Copy environment files
+        name: Setup environment
         command: |
           cp -vf ./.env.dist ./.env
           cp -vf ./.env ./services/broker/.env
@@ -102,23 +102,32 @@ jobs:
           cp -vfR ./conf /mnt/data/ && ls -la /mnt/data/conf
           cp -vf ./.env ./.thinx_env
           sed -i -e 's/^/export /' ./.thinx_env # create from .thinx_env from .env
+          echo ".thinx_env contents:"
           cat ./.thinx_env
-          export ENVIRONMENT=test
           echo "Contents of /mnt/data/conf"
           ls -la /mnt/data/conf
           echo "Contents of ./conf"
           ls -la ./conf
           cat ./.env
+          docker network create nat
 
     - run:
-        name: Run Test in Compose
+        name: Pre-Build containers
         command: |
-          docker network create nat
           docker-compose build api
           docker-compose build couchdb
+
+    - run:
+        name: Start required containers
+        command: |
           docker-compose up -d --build mosquitto
           docker-compose up -d --build thinx-redis
           docker-compose up -d --build transformer
+
+    - run:
+        name: Watch log and run CouchSB and API for testing
+        command: |
+          export ENVIRONMENT=test
           docker-compose logs -f &
           docker-compose up couchdb api
 
