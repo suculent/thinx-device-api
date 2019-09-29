@@ -108,7 +108,7 @@ jobs:
           cat ./.thinx_env
           echo "Contents of ./conf"
           ls -la ./conf
-          echo "Contents of ./.env"          
+          echo "Contents of ./.env"
           cat ./.env
           echo "Contents of /mnt/data/mosquitto/**"
           ls -la /mnt/data/mosquitto/**
@@ -119,12 +119,6 @@ jobs:
           echo "Contents of /mnt/data/mosquitto/config/mosquitto.conf"
           cat /mnt/data/mosquitto/config/mosquitto.conf
           docker network create nat
-
-    - run:
-        name: Pre-Build containers
-        command: |
-          docker-compose build api
-          docker-compose build couchdb
 
     - run:
         name: Start required containers
@@ -138,7 +132,8 @@ jobs:
         command: |
           export ENVIRONMENT=test
           docker-compose logs -f &
-          docker-compose up couchdb api
+          docker-compose restart mosquitto
+          docker-compose up -d --build couchdb api
 
         # docker-compose up -d --build console
 
