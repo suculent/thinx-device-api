@@ -42,6 +42,10 @@ fi
 echo "Password file contents:"
 cat /mqtt/auth/thinx.pw
 
+echo "Config file contents:"
+cat /mqtt/config/mosquitto.conf
+
+
 touch /mqtt/auth/thinx.acl
 
 # Should be done by copying config, but what if the user gets changed?...
@@ -61,6 +65,7 @@ fi
 pkill apt # attempt to prevent sticking, suspicious thing it is.
 
 # must run in background to prevent killing container on restart
+# must be external file to allow SSL certificate changes
 mosquitto -d -v -c /mqtt/config/mosquitto.conf
 
 ps -ax | grep mosquitto
