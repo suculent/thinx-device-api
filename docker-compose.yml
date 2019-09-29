@@ -98,15 +98,18 @@ services:
         - SQREEN_TOKEN=${SQREEN_TOKEN}
         - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
         - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
-
-    restart: unless-stopped
+        - REVISION=1
+    restart: always
     environment:
       - SQREEN_APP_NAME=${SQREEN_APP_NAME}
       - SQREEN_TOKEN=${SQREEN_TOKEN}
+      - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
+      - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
+      - REVISION=1
     networks:
       - internal
     ports:
-      - 7474
+      - 7474:7474
     labels:
      - "traefik.backend.transformer.noexpose"
 
