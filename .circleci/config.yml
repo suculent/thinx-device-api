@@ -150,7 +150,7 @@ jobs:
             cp ./services/broker/config/thinx.acl.dist /mnt/data/mosquitto/auth/thinx.acl
             cp ./services/broker/config/mosquitto.conf.dist ./services/broker/config/mosquitto.conf
             docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
-            docker build -t suculent/mosquitto ./services/broker && docker run -d --rm -p 1883:1883 --name="mosquitto" suculent/mosquitto
+            docker build -t suculent/mosquitto ./services/broker && docker run -e "MOSQUITTO_USERNAME=thinx" -e "MOSQUITTO_PASSWORD=mosquitto" -d --rm -p 1883:1883 --name="mosquitto" suculent/mosquitto
 
     - run:
         name: Check running Docker containers

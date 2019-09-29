@@ -22,6 +22,9 @@ COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 COPY ./incron.cfg /var/spool/incron/root
 COPY ./reload-cron /reload-cron
 
+RUN echo "export MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}" > /mqtt_username
+RUN echo "export MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}" > /mqtt_password
+
 RUN echo "mosquitto" >> /etc/incron.allow && \
     echo "root" >> /etc/incron.allow && \
     mkdir -p /var/spool/incron && \
