@@ -68,7 +68,7 @@ ls -lf /opt/thinx/thinx-device-api/conf
 if [[ $ENVIRONMENT!="test" ]]; then
   node thinx.js | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
 else
-  npm test | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
+  npm test # | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
   cp ./lcov.info /mnt/data/test-reports
   cp -vfR ./.nyc_output /mnt/data/test-reports/.nyc_output
 fi
