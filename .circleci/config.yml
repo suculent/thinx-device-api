@@ -5,10 +5,11 @@ jobs:
 
     # In CircleCI 2.0 you can now specify your own image, or use one of our pre-configured images.
     docker:
-      - image: suculent/thinx_baseline:first
-        auth:
-          username: $DOCKER_USERNAME  # can specify string literal values
-          password: $DOCKER_PASSWORD  # or project environment variable reference
+      - image: circleci/node:10.16.3
+      #- image: suculent/thinx_baseline:first
+      #  auth:
+      #    username: $DOCKER_USERNAME  # can specify string literal values
+      #    password: $DOCKER_PASSWORD  # or project environment variable reference
 
     working_directory: ~/suculent/thinx-device-api
 
@@ -44,15 +45,6 @@ jobs:
         paths:
           - node_modules
         key: v1-dependencies-{{ checksum "package.json" }}
-
-    - run:
-        name: Install Docker client
-        command: |
-          set -x
-          VER="17.03.0-ce"
-          curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
-          tar -xz -C /tmp -f /tmp/docker-$VER.tgz
-          export PATH=$PATH:/tmp/docker
 
     - run:
         name: Init filesystem
@@ -93,7 +85,9 @@ jobs:
           cp ./conf/config-test.json ./conf/config.json
           export PATH=$PATH:/tmp/docker
           export ENVIRONMENT=test
-          docker-compose up -d --build && docker-compose logs -f
+          export
+          docker-compose up -d --build
+          docker-compose logs -f
 
     - run:
         name: Check running Docker containers
