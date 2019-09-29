@@ -23,10 +23,26 @@ jobs:
       REDIS_URL: redis://localhost:6379
 
     steps:
-    - setup_remote_docker
-    - checkout
 
-    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+    - run:
+        name: Install Docker client
+        command: |
+            set -x
+            VER="17.03.0-ce"
+            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+            mv /tmp/docker/* /usr/bin
+
+    - run:
+        name: Install Docker Compose
+        command: |
+          curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` > ~/docker-compose
+          chmod +x ~/docker-compose
+          mv ~/docker-compose /usr/local/bin/docker-compose
+
+    - setup_remote_docker
+
+    - checkout
 
     # Restore the dependency cache
     - restore_cache:
@@ -36,10 +52,11 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-    # This is based on your 1.0 configuration file or project settings
-    - run: apt-get update && apt-get install -y --fix-missing --no-install-recommends curl jq mosquitto
-    - run: cd spec/test_repositories && bash ./get-tests.sh
     - run: git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
+    - run: cd spec/test_repositories && bash ./get-tests.sh
+
+    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+    - run: mkdir -p $CIRCLE_TEST_REPORTS/reports
 
     - save_cache:
         paths:
@@ -64,26 +81,6 @@ jobs:
             mkdir -p /mnt/data/repos
             mkdir -p /mnt/data/ssl
             mkdir -p /mnt/data/test-reports
-
-    # Test
-    #   This would typically be a build job when using workflows, possibly combined with build
-    - run: mkdir -p $CIRCLE_TEST_REPORTS/reports
-
-    - run:
-        name: Install Docker client
-        command: |
-            set -x
-            VER="17.03.0-ce"
-            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
-            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
-            mv /tmp/docker/* /usr/bin
-
-    - run:
-        name: Install Docker Compose
-        command: |
-          curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` > ~/docker-compose
-          chmod +x ~/docker-compose
-          sudo mv ~/docker-compose /usr/local/bin/docker-compose
 
     - run:
         name: Run Test in Compose
