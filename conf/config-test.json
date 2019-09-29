@@ -9,7 +9,7 @@
   },
   "redis": {
     "host": "thinx-redis",
-    "password": ""
+    "password": "changeme!"
   },
   "mqtt": {
     "server": "mqtt://mosquitto",
