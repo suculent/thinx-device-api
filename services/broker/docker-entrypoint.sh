@@ -43,6 +43,7 @@ echo "Password file contents:"
 cat /mqtt/auth/thinx.pw
 
 echo "Config file contents:"
+ls -la /mqtt/config
 cat /mqtt/config/mosquitto.conf
 
 
@@ -66,7 +67,13 @@ pkill apt # attempt to prevent sticking, suspicious thing it is.
 
 # must run in background to prevent killing container on restart
 # must be external file to allow SSL certificate changes
-mosquitto -d -v -c /mqtt/config/mosquitto.conf
+if [[ -f /mqtt/config/mosquitto.conf ]]; then
+  echo "Starting with configuration file /mqtt/config/mosquitto.conf"
+  mosquitto -d -v -c /mqtt/config/mosquitto.conf
+else
+  echo "Starting without configuration file(!)"
+  mosquitto -d -v
+fi
 
 ps -ax | grep mosquitto
 
