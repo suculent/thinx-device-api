@@ -91,7 +91,7 @@ jobs:
     - run:
         name: Run Test in Compose
         command: |
-          cp -vf ./.env.dist ./.env
+          cp -vf ./.env.dist ./.env          
           cp -vf ./.env ./services/broker/.env
           cp -vf ./.env ./services/console/.env
           cp -vf ./.env ./services/couchdb/.env
@@ -99,9 +99,12 @@ jobs:
           cp -vf ./.env ./services/transformer/.env
           cp -vf ./conf/config-test.json ./conf/config.json
           cp -vfR ./conf /mnt/data/conf
+          cp -vf ./.env ./.thinx_env
+          sed -i -e 's/^/export\s/' ./.thinx_env # create from .thinx_env from .env
+          cat ./.thinx_env
           export ENVIRONMENT=test
           export
-          pwd && ls -la 
+          pwd && ls -la
           cat ./.env
           docker network create nat
           docker-compose up -d --build

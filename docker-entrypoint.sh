@@ -28,7 +28,7 @@ source ~/.profile
 if [[ -f /.thinx_env ]]; then
   source /.thinx_env
 else
-  echo ".thinx_env not found, expects ROLLBAR_ACCESS_TOKEN, ROLLBAR_ENVIRONMENT and REVISION variables to be set."
+  echo ".thinx_env not found, expects ENVIRONMENT, ROLLBAR_ACCESS_TOKEN, ROLLBAR_ENVIRONMENT and REVISION variables to be set."
 fi
 
 # Installs all tools, not just those currently allowed by .dockerignore, requires running Docker
