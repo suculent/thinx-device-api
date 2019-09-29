@@ -27,7 +27,7 @@ services:
       - nat
       - internal
     volumes:
-      - /mnt/data/mosquitto/config:/mqtt/config:rw
+      - ./services/broker/config:/mqtt/config:rw
       - /mnt/data/mosquitto/data:/mqtt/data:rw
       - /mnt/data/mosquitto/log:/mqtt/log:rw
       - /mnt/data/mosquitto/ssl:/mqtt/ssl:rw

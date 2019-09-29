@@ -142,7 +142,7 @@ jobs:
           export ENVIRONMENT=test
           docker-compose logs -f &
           docker-compose restart mosquitto
-          docker-compose up -d --build couchdb api
+          docker-compose up --build couchdb api
         # docker-compose up -d --build console
 
     - run:
