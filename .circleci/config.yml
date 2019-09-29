@@ -29,12 +29,12 @@ jobs:
     - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
 
     # Restore the dependency cache
-    - restore_cache:
-        keys:
+    #- restore_cache:
+        #keys:
           # This branch if available
-          - v1-dependencies-{{ checksum "package.json" }}
+          #- v1-dependencies-{{ checksum "package.json" }}
           # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
+          #- v1-dependencies-
 
     # This is based on your 1.0 configuration file or project settings
     - run: apt-get update && apt-get install -y --fix-missing --no-install-recommends curl jq mosquitto
