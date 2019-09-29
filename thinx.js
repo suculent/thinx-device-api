@@ -430,6 +430,7 @@ function logCouchError(err, body, header, tag) {
 
 function injectDesign(db, design, file) {
   if (typeof(design) === "undefined") return;
+  console.log("Inserting design document " + design + " from path", file);
   let design_doc = getDocument(file);
   if (design_doc != null) {
     console.log("Inserting design document", {design_doc});
@@ -442,14 +443,15 @@ function injectDesign(db, design, file) {
 }
 
 function injectReplFilter(db, filter, file) {
+  console.log("Inserting filter document " + filter + " from path", file);
   let filter_doc = getDocument(file);
-  if (filter_doc != null) {
+  if (filter_doc !== false) {
     console.log("Inserting filter document", {filter_doc});
     db.insert("_design/repl_filters", filter_doc, function(err, body, header) {
       logCouchError(err, body, header, "init:repl:"+filter_doc);
     });
   } else {
-    console.log("Filter doc injection issue at "+file);
+    console.log("Filter doc injection issue (no doc) at "+file);
   }
 }
 
