@@ -163,7 +163,7 @@ jobs:
 
     - run: echo "172.17.0.2 couchdb" >> /etc/hosts
     - run: echo "172.17.0.3 thinx-redis" >> /etc/hosts # 172.17.0.3
-    - run: echo "172.17.0.4 mosquitto" >> /etc/hosts # 172.17.0.4
+    - run: echo "127.0.0.1 mosquitto" >> /etc/hosts # 172.17.0.4
 
     - run:
         name: NPM Test (uses jasmine until Chai expect will be supported)
