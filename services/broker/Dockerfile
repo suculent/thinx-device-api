@@ -1,12 +1,12 @@
 FROM debian:jessie-slim
 
 ARG MOSQUITTO_PASSWORD
-ENV MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}
-
 ARG MOSQUITTO_USERNAME
+
+ENV MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}
 ENV MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}
 
-RUN echo "ENV check:" ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}
+RUN echo "ENV check: ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}"
 
 RUN apt-get update && apt-get install -y ca-certificates apt-transport-https incron cron wget && \
     wget -q --no-check-certificate -O - https://repo.mosquitto.org/debian/mosquitto-repo.gpg.key | gpg --import && \

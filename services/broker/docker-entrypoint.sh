@@ -28,7 +28,7 @@ su mosquitto -s /bin/bash
 echo "Starting MQTT broker..."
 
 #touch /mqtt/auth/thinx.pw && ls -la /mqtt/auth
-echo "Entrypoint MQTT Credentials: " ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}
+echo "Entrypoint MQTT Credentials:  ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}"
 #mosquitto_passwd -b /mqtt/auth/thinx.pw thinx mosquitto
 #touch /mqtt/auth/thinx.acl
 
