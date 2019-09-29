@@ -28,13 +28,27 @@ su mosquitto -s /bin/bash
 echo "Starting MQTT broker..."
 
 #touch /mqtt/auth/thinx.pw && ls -la /mqtt/auth
-echo "Entrypoint MQTT Credentials:  ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}"
-#mosquitto_passwd -b /mqtt/auth/thinx.pw thinx mosquitto
-#touch /mqtt/auth/thinx.acl
+echo "Mosquitto Entrypoint Credentials: ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}"
 
-# Should be done by copying config...
-# echo "user ${MOSQUITTO_USERNAME}" >> /mqtt/auth/thinx.acl
-# echo "topic readwrite #" >> /mqtt/auth/thinx.acl
+if [[ ! -z $MOSQUITTO_PASSWORD ]]; then
+  if [[ ! -z $MOSQUITTO_USERNAME ]]; then
+    mosquitto_passwd -b /mqtt/auth/thinx.pw ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}
+  fi
+fi
+
+touch /mqtt/auth/thinx.acl
+
+# Should be done by copying config, but what if the user gets changed?...
+
+if [[ -z cat /mqtt/auth/thinx.acl | grep ${MOSQUITTO_USERNAME} ]]; then
+    echo "Writing initial ACL record to auth/thinx.acl"
+    echo "---------" >> /mqtt/auth/thinx.acl
+    echo "user ${MOSQUITTO_USERNAME}" >> /mqtt/auth/thinx.acl
+    echo "topic readwrite #" >> /mqtt/auth/thinx.acl
+    echo " " >> /mqtt/auth/thinx.acl
+else
+    echo "Initial ACL record already exists in auth/thinx.acl"
+fi
 
 pkill apt # attempt to prevent sticking, suspicious thing it is.
 

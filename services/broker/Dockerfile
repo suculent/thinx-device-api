@@ -6,8 +6,6 @@ ARG MOSQUITTO_USERNAME
 ENV MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}
 ENV MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}
 
-RUN echo "ENV check: ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}"
-
 RUN apt-get update && apt-get install -y ca-certificates apt-transport-https incron cron wget && \
     wget -q --no-check-certificate -O - https://repo.mosquitto.org/debian/mosquitto-repo.gpg.key | gpg --import && \
     gpg -a --export 8277CCB49EC5B595F2D2C71361611AE430993623 | apt-key add - && \
@@ -36,5 +34,7 @@ RUN chown root:incron /var/spool/incron/root && \
 RUN crontab /reload-cron
 
 EXPOSE 1883 8883 9001
+
+RUN echo "ENV check: ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}"
 
 ENTRYPOINT [ "/docker-entrypoint.sh" ]

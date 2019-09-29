@@ -59,4 +59,9 @@ set -e
 # workaround for log aggregator until solved using event database
 mkdir -p /opt/thinx/.pm2/logs/
 touch /opt/thinx/.pm2/logs/index-out-1.log
-node thinx.js | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
+
+if [[ $ENVIRONMENT!="test" ]]; then
+  node thinx.js | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
+else
+  npm test | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
+fi
