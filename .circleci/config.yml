@@ -118,23 +118,31 @@ jobs:
           cp -vf ./services/broker/config/mosquitto.conf.dist /mnt/data/mosquitto/config/mosquitto.conf
           echo "Contents of /mnt/data/mosquitto/config/mosquitto.conf"
           cat /mnt/data/mosquitto/config/mosquitto.conf
+          echo "Creating Docker Network (ID):"
           docker network create nat
 
     - run:
-        name: Start required containers
+        name: Starting Mosquitto
         command: |
           docker-compose up -d --build mosquitto
+
+    - run:
+        name: Starting Redis
+        command: |
           docker-compose up -d --build thinx-redis
+
+    - run:
+        name: Starting Transformer
+        command: |
           docker-compose up -d --build transformer
 
     - run:
-        name: Watch log and run CouchSB and API for testing
+        name: Starting CouchDB and API Test
         command: |
           export ENVIRONMENT=test
           docker-compose logs -f &
           docker-compose restart mosquitto
           docker-compose up -d --build couchdb api
-
         # docker-compose up -d --build console
 
     - run:
