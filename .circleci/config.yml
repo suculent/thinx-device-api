@@ -109,6 +109,8 @@ jobs:
           echo "Contents of ./conf"
           ls -la ./conf
           cat ./.env
+          cp -vf ./services/broker/config/mosquitto.conf.dist /mnt/data/mosquitto/config/mosquitto.conf
+          cp -vf ./services/broker/config/thinx.acl.dist /mnt/data/mosquitto/auth/thinx.acl
           docker network create nat
 
     - run:

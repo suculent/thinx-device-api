@@ -9,6 +9,7 @@
   },
   "redis": {
     "host": "thinx-redis",
+    "passnote": "when not required, probably a provisioning issue...",
     "password": "changeme!"
   },
   "mqtt": {

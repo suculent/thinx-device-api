@@ -22,7 +22,7 @@ services:
     ports:
       - 1883:1883
       - 8883:8883
-    restart: unless-stopped
+    restart: always
     networks:
       - nat
       - internal
