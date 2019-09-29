@@ -47,7 +47,7 @@ var rollbar = Globals.rollbar(); // lgtm [js/unused-local-variable]
 console.log("Rollbar instantiated...");
 
 var redis_client = redis.createClient(Globals.redis_options());
-console.log("Redis redis_client instantiated...");
+console.log("Redis redis_client instantiated with ", { options: Globals.redis_options() });
 
 console.log("Globals class instantiated...");
 
