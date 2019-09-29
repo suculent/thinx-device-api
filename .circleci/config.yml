@@ -99,18 +99,25 @@ jobs:
           cp -vf ./.env ./services/redis/.env
           cp -vf ./.env ./services/transformer/.env
           cp -vf ./conf/config-test.json ./conf/config.json
-          cp -vfR ./conf /mnt/data/ && ls -la /mnt/data/conf
+          cp -vfR ./conf /mnt/data/
+          echo "Contents of /mnt/data/conf"
+          ls -la /mnt/data/conf
           cp -vf ./.env ./.thinx_env
           sed -i -e 's/^/export /' ./.thinx_env # create from .thinx_env from .env
           echo ".thinx_env contents:"
           cat ./.thinx_env
-          echo "Contents of /mnt/data/conf"
-          ls -la /mnt/data/conf
           echo "Contents of ./conf"
           ls -la ./conf
+          echo "Contents of ./.env"          
           cat ./.env
-          cp -vf ./services/broker/config/mosquitto.conf.dist /mnt/data/mosquitto/config/mosquitto.conf
+          echo "Contents of /mnt/data/mosquitto/**"
+          ls -la /mnt/data/mosquitto/**
           cp -vf ./services/broker/config/thinx.acl.dist /mnt/data/mosquitto/auth/thinx.acl
+          echo "Contents of /mnt/data/mosquitto/auth/thinx.acl"
+          cat /mnt/data/mosquitto/auth/thinx.acl
+          cp -vf ./services/broker/config/mosquitto.conf.dist /mnt/data/mosquitto/config/mosquitto.conf
+          echo "Contents of /mnt/data/mosquitto/config/mosquitto.conf"
+          cat /mnt/data/mosquitto/config/mosquitto.conf
           docker network create nat
 
     - run:

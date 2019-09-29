@@ -410,7 +410,8 @@ function getDocument(file) {
   }
   // Parser may fail
   try {
-    return JSON.parse(data);
+    const filter_doc = JSON.parse(data);
+    return filter_doc;
   } catch (e) {
     console.log("File may not exist: "+e);
     return false;
@@ -431,7 +432,7 @@ function injectDesign(db, design, file) {
   if (typeof(design) === "undefined") return;
   let design_doc = getDocument(file);
   if (design_doc) {
-    db.insert("_design/" + design, design_doc, function(err, body, header) {
+    db.insert("_design/" + design, JSON.stringify(design_doc), function(err, body, header) {
       logCouchError(err, body, header, "init:design:"+design);
     });
   } else {
@@ -442,7 +443,7 @@ function injectDesign(db, design, file) {
 function injectReplFilter(db, filter, file) {
   let filter_doc = getDocument(file);
   if (filter_doc) {
-    db.insert("_design/repl_filters", filter_doc, function(err, body, header) {
+    db.insert("_design/repl_filters", JSON.stringify(filter_doc), function(err, body, header) {
       logCouchError(err, body, header, "init:repl:"+filter_doc);
     });
   } else {

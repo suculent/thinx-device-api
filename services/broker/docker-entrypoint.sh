@@ -30,11 +30,17 @@ echo "Starting MQTT broker..."
 #touch /mqtt/auth/thinx.pw && ls -la /mqtt/auth
 echo "Mosquitto Entrypoint Credentials: ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}"
 
+touch /mqtt/auth/thinx.pw
+
 if [[ ! -z $MOSQUITTO_PASSWORD ]]; then
   if [[ ! -z $MOSQUITTO_USERNAME ]]; then
+    echo "Writing to /mqtt/auth/thinx.pw"
     mosquitto_passwd -b /mqtt/auth/thinx.pw ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}
   fi
 fi
+
+echo "Password file contents:"
+cat /mqtt/auth/thinx.pw
 
 touch /mqtt/auth/thinx.acl
 
