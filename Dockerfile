@@ -44,7 +44,7 @@ RUN sh -c "echo 'Dir::Ignore-Files-Silently:: \"(.save|.distupgrade)$\";' > /etc
 
 # RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
 RUN apt-get update && \
-    apt-get install -y --fix-missing --no-install-recommends \
+    apt-get install -qq -y --fix-missing --no-install-recommends \
     apt-transport-https \
     apt-utils \
     btrfs-progs \

@@ -46,7 +46,7 @@ ENV TINI_VERSION 0.18.0
 RUN set -ex; \
 	\
 	apt-get update; \
-	apt-get install -y --allow-unauthenticated --no-install-recommends wget; \
+	apt-get install -qq -y --allow-unauthenticated --no-install-recommends wget; \
 	rm -rf /var/lib/apt/lists/*; \
 	\
 	dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
