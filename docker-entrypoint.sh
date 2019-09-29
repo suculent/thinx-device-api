@@ -60,6 +60,9 @@ set -e
 mkdir -p /opt/thinx/.pm2/logs/
 touch /opt/thinx/.pm2/logs/index-out-1.log
 
+echo "/mnt/data/conf contents:"
+ls -lf /mnt/data/conf
+
 if [[ $ENVIRONMENT!="test" ]]; then
   node thinx.js | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
 else

@@ -43,7 +43,7 @@ RUN adduser --system --disabled-password --shell /bin/bash thinx
 RUN sh -c "echo 'Dir::Ignore-Files-Silently:: \"(.save|.distupgrade)$\";' > /etc/apt/apt.conf.d/99ignoresave"
 
 # RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
-RUN apt-get update && \
+RUN apt-get update -qq && \
     apt-get install -qq -y --fix-missing --no-install-recommends \
     apt-transport-https \
     apt-utils \

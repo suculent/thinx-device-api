@@ -105,14 +105,14 @@ jobs:
           cat ./.thinx_env
           export ENVIRONMENT=test
           export
-          pwd && ls -la
+          ls -la /mnt/data/conf
           cat ./.env
           docker network create nat
           docker-compose up -d --build mosquitto
           docker-compose up -d --build couchdb
           docker-compose up -d --build thinx-redis
           docker-compose up -d --build transformer
-          docker-compose up -d --build api
+          docker-compose rm -sf api && docker-compose up -d --build api
           docker-compose logs -f
         # docker-compose up -d --build console
 
