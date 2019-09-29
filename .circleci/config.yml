@@ -90,7 +90,7 @@ jobs:
             mkdir -p /mnt/data/test-reports
 
     - run:
-        name: Run Test in Compose
+        name: Copy environment files
         command: |
           cp -vf ./.env.dist ./.env
           cp -vf ./.env ./services/broker/.env
@@ -104,16 +104,24 @@ jobs:
           sed -i -e 's/^/export /' ./.thinx_env # create from .thinx_env from .env
           cat ./.thinx_env
           export ENVIRONMENT=test
-          export
+          echo "Contents of /mnt/data/conf"
           ls -la /mnt/data/conf
+          echo "Contents of ./conf"
+          ls -la ./conf
           cat ./.env
+
+    - run:
+        name: Run Test in Compose
+        command: |
           docker network create nat
+          docker-compose build api
+          docker-compose build couchdb
           docker-compose up -d --build mosquitto
-          docker-compose up -d --build couchdb
           docker-compose up -d --build thinx-redis
           docker-compose up -d --build transformer
           docker-compose logs -f &
-          docker-compose rm -sf api && docker-compose up --build api
+          docker-compose up couchdb api
+
         # docker-compose up -d --build console
 
     - run:
