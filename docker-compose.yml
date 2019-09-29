@@ -44,6 +44,8 @@ services:
       - NODENAME=${NODENAME}
       - COUCHDB_USER=${COUCHDB_USER}
       - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+      - COUCHDB_ADMIN=${COUCHDB_USER}
+      - COUCHDB_PASS=${COUCHDB_PASSWORD}
       - COUCHDB_COOKIE=${COUCHDB_COOKIE}
       - COUCHDB_SECRET=${COUCHDB_SECRET}
     restart: unless-stopped
@@ -51,6 +53,8 @@ services:
       - NODENAME=${NODENAME}
       - COUCHDB_USER=${COUCHDB_USER}
       - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+      - COUCHDB_ADMIN=${COUCHDB_USER}
+      - COUCHDB_PASS=${COUCHDB_PASSWORD}
       - COUCHDB_COOKIE=${COUCHDB_COOKIE}
       - COUCHDB_SECRET=${COUCHDB_SECRET}
     ports:
@@ -153,6 +157,8 @@ services:
       - /mnt/data/repos:/mnt/data/repos # Git
       - /mnt/data/ssl:/mnt/data/ssl
       - /mnt/data/ssh_keys:/mnt/data/ssh_keys
+      - /mnt/data/conf:/mnt/data/conf
+      - /mnt/data/test-reports:/mnt/data/test-reports
       - /var/run/docker.sock:/var/run/docker.sock # DIND
       - /var/lib/docker
       - /cache
