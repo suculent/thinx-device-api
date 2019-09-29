@@ -112,8 +112,8 @@ jobs:
           docker-compose up -d --build couchdb
           docker-compose up -d --build thinx-redis
           docker-compose up -d --build transformer
-          docker-compose rm -sf api && docker-compose up -d --build api
-          docker-compose logs -f
+          docker-compose logs -f &
+          docker-compose rm -sf api && docker-compose up --build api
         # docker-compose up -d --build console
 
     - run:
