@@ -52,11 +52,17 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-    - run: git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
-    - run: cd spec/test_repositories && bash ./get-tests.sh
+    - run:
+        name: Fetch all submodules and tests
+        command: |
+          git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
+          cd spec/test_repositories && bash ./get-tests.sh
 
-    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
-    - run: mkdir -p $CIRCLE_TEST_REPORTS/reports
+    - run:
+        name: Create Circle CI Artifacts Folders
+        command: |
+          mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+          mkdir -p $CIRCLE_TEST_REPORTS/reports
 
     - save_cache:
         paths:
@@ -87,9 +93,9 @@ jobs:
         command: |
           cp .env.dist .env
           cp ./conf/config-test.json ./conf/config.json
-          ls -lf /usr/bin/docker
           export ENVIRONMENT=test
           export
+          docker network create nat
           docker-compose up -d --build
           docker-compose logs -f
 
