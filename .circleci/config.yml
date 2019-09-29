@@ -1,4 +1,5 @@
 version: 2
+
 jobs:
 
   build:
@@ -129,3 +130,11 @@ jobs:
     # Save artifacts
     - store_artifacts:
         path: /mnt/data/test-reports
+
+workflows:
+  version: 2
+  integrate:
+    jobs:
+      - build
+#      - test:
+#          requires: build
