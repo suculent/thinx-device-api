@@ -434,7 +434,7 @@ function injectDesign(db, design, file) {
   let design_doc = getDocument(file);
   if (design_doc != null) {
     console.log("Inserting design document", {design_doc});
-    db.insert("_design/" + design, design_doc, function(err, body, header) {
+    db.insert(design_doc, "_design/" + design, function(err, body, header) {
       logCouchError(err, body, header, "init:design:"+design);
     });
   } else {
@@ -447,7 +447,7 @@ function injectReplFilter(db, file) {
   let filter_doc = getDocument(file);
   if (filter_doc !== false) {
     console.log("Inserting filter document", {filter_doc});
-    db.insert("_design/repl_filters", filter_doc, function(err, body, header) {
+    db.insert(filter_doc, "_design/repl_filters", function(err, body, header) {
       logCouchError(err, body, header, "init:repl:"+filter_doc);
     });
   } else {
