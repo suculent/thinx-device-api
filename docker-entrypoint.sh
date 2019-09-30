@@ -65,7 +65,7 @@ ls -lf /mnt/data/conf
 echo "/opt/thinx/thinx-device-api/conf contents:"
 ls -lf /opt/thinx/thinx-device-api/conf
 
-if [[ ! ${ENVIRONMENT}=="test" ]]; then
+if [ $ENVIRONMENT != "test" ]; then
   echo "Running AS production..."
   node thinx.js | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
 else
