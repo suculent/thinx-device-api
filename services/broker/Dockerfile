@@ -16,9 +16,6 @@ RUN apt-get update -qq && apt-get install -qq -y ca-certificates apt-transport-h
 
 COPY ./config/mosquitto.conf /etc/mosquitto/conf.d/mosquitto.conf
 
-# should use the file from volume, may be overridden...
-# COPY ./config/mosquitto.conf /mqtt/config/mosquitto.conf
-
 COPY ./mqtt_restart.sh /mqtt_restart.sh
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 COPY ./incron.cfg /var/spool/incron/root

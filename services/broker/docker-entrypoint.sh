@@ -37,6 +37,7 @@ echo "Password file contents:"
 cat /mqtt/auth/thinx.pw
 echo "<<<"
 
+echo ""
 echo "Contents of /mqtt/config:"
 ls -la /mqtt/config
 echo ""
@@ -45,9 +46,9 @@ CONFIG_FILE="/mqtt/config/mosquitto.conf"
 
 echo "Contents of ${CONFIG_FILE}"
 cat ${CONFIG_FILE}
+echo ""
 
 ACL_FILE="/mqtt/auth/thinx.acl"
-
 touch $ACL_FILE
 
 IS_REGISTERED=$(grep ${MOSQUITTO_USERNAME} ${ACL_FILE})
