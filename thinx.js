@@ -584,23 +584,23 @@ var loglib = require("nano")(db).use(prefix + "managed_logs"); // lgtm [js/unuse
 
 function trackUserLogin(owner_id) {
   console.log("trackUserLogin");
- userlib.atomic("users", "checkin", owner_id, {
-   last_seen: new Date()
- }, function(error, response) {
-   if (error) {
-     console.log("Last-seen update failed (3): " + error);
-   } else {
-     console.log("alog: Last seen updated.");
-     alog.log(owner_id, "Last seen updated.");
+   userlib.atomic("users", "checkin", owner_id, {
+     last_seen: new Date()
+   }, function(error, response) {
+     if (error) {
+       console.log("Last-seen update failed (3): " + error);
+     } else {
+       console.log("alog: Last seen updated.");
+       alog.log(owner_id, "Last seen updated.");
+     }
+   });
+
+   console.log("alog: OAuth2 User logged in...");
+   alog.log(owner_id, "OAuth2 User logged in...");
+
+   if (Globals.use_sqreen()) {
+     Sqreen.auth_track(true, { username: owner_id });
    }
- });
-
- console.log("alog: OAuth2 User logged in...");
- alog.log(owner_id, "OAuth2 User logged in...");
-
- if (Globals.use_sqreen()) {
-   Sqreen.auth_track(true, { username: owner_id });
- }
 }
 
 function checkUserWithResponse(global_response, token, userWrapper) {
