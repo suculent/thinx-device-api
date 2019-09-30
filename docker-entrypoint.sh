@@ -70,7 +70,7 @@ ls -lf /opt/thinx/thinx-device-api/conf
 if [ $ENVIRONMENT == "test" ]; then
   echo "Running in TEST MODE!"
   npm test | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
-  cp -vf ./lcov.info /mnt/data/test-reports
+  cp -vf ./lcov.info /mnt/data/test-reports/lcov.info
   cp -vfR ./.nyc_output /mnt/data/test-reports/.nyc_output
 else
   echo "Running in production mode..."
