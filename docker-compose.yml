@@ -122,7 +122,7 @@ services:
     privileged: true
     # reserve enough for builders
     shm_size: 2048M
-    restart: never # for testing, otherwise unless-stopped
+    restart: "no" # for testing, otherwise unless-stopped"
     depends_on:
       - transformer
       - thinx-redis
