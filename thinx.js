@@ -442,8 +442,8 @@ function injectDesign(db, design, file) {
   }
 }
 
-function injectReplFilter(db, filter, file) {
-  console.log("Inserting filter document " + filter + " from path", file);
+function injectReplFilter(db, file) {
+  console.log("Inserting filter document from path", file);
   let filter_doc = getDocument(file);
   if (filter_doc !== false) {
     console.log("Inserting filter document", {filter_doc});
