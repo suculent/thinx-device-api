@@ -80,11 +80,13 @@ RUN tar -xz -C /tmp -f /tmp/docker-$VER.tgz && \
 RUN mv /tmp/docker/* /usr/bin
 
 # Install app dependencies
-COPY package*.json ./
+COPY package.json ./
 
 RUN openssl version \
  && node -v \
  && npm install .
+
+RUN npm install nyc -g
 
 # set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
 RUN set -x \
