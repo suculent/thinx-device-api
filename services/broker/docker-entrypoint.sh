@@ -8,11 +8,7 @@ set +e
 #sysctl -w net.ipv4.tcp_keepalive_probes=8
 #sysctl -w net.ipv4.tcp_keepalive_time=120
 
-echo "Starting cron..."
-
 cron -f &
-
-echo "Starting incron..."
 
 # must be run as root
 incrond --foreground &
@@ -25,35 +21,35 @@ chown -R mosquitto:mosquitto /mqtt
 
 su mosquitto -s /bin/bash
 
-echo "Starting MQTT broker..."
-
-#touch /mqtt/auth/thinx.pw && ls -la /mqtt/auth
 echo "Mosquitto Entrypoint Credentials: ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}"
 
 touch /mqtt/auth/thinx.pw
 
 if [[ ! -z $MOSQUITTO_PASSWORD ]]; then
   if [[ ! -z $MOSQUITTO_USERNAME ]]; then
-    echo "Writing to /mqtt/auth/thinx.pw"
+    echo "Overwriting THiNX APP MQTT credentials in /mqtt/auth/thinx.pw"
     mosquitto_passwd -b /mqtt/auth/thinx.pw ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}
   fi
 fi
 
+echo ""
 echo "Password file contents:"
 cat /mqtt/auth/thinx.pw
+echo "<<<"
 
-echo "Config file contents:"
+echo ""
+echo "Config file & contents of /mqtt/config:"
 ls -la /mqtt/config
 cat /mqtt/config/mosquitto.conf
-
+echo "<<<"
 
 touch /mqtt/auth/thinx.acl
 
 # Should be done by copying config, but what if the user gets changed?...
 
-IS_REGISTERED=$(cat /mqtt/auth/thinx.acl | grep ${MOSQUITTO_USERNAME})
+IS_REGISTERED=`$(grep ${MOSQUITTO_USERNAME} "/mqtt/auth/thinx.acl")`
 
-if [[ -z $IS_REGISTERED ]]; then
+if [ -z $IS_REGISTERED ]; then
     echo "Writing initial ACL record to auth/thinx.acl"
     echo "---------" >> /mqtt/auth/thinx.acl
     echo "user ${MOSQUITTO_USERNAME}" >> /mqtt/auth/thinx.acl

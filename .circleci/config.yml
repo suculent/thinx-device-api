@@ -140,9 +140,9 @@ jobs:
         name: Starting CouchDB and API Test
         command: |
           export ENVIRONMENT=test
-          docker-compose logs -f &
-          docker-compose restart mosquitto
-          docker-compose up --build couchdb api
+          docker-compose up -d --build couchdb
+          timeout 1000 docker-compose up -d --build api
+          timeout 1000 docker-compose logs -f &
         # docker-compose up -d --build console
 
     - run:

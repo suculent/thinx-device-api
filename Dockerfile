@@ -74,7 +74,7 @@ RUN apt-get update -qq && \
 
 # Install Docker Client only (Docker is on the host) - fails with /bin/sh not found...
 ENV VER="18.06.3-ce"
-RUN curl -v -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+RUN curl -sL -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
 RUN tar -xz -C /tmp -f /tmp/docker-$VER.tgz && \
     rm -rf /tmp/docker-$VER.tgz
 RUN mv /tmp/docker/* /usr/bin
