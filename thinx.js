@@ -3325,14 +3325,9 @@ wss.on("connection", function connection(ws, req) {
         if (typeof(messenger) !== "undefined") {
           console.log("Initializing WS messenger with owner "+object.init);
           messenger.initWithOwner(object.init, _ws, function(success, message) {
-
             if (!success) {
-              console.log("Messenger init on WS message with result " +
-                success +
-                ", with message: " +
-                JSON.stringify(message));
+              console.log("Messenger init on WS message with result " + success + ", with message: ", { message });
             }
-
           });
         } else {
           console.log("Messenger is not initialized and therefore could not be activated.");
