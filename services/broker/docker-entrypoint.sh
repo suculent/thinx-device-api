@@ -37,35 +37,38 @@ echo "Password file contents:"
 cat /mqtt/auth/thinx.pw
 echo "<<<"
 
-echo ""
-echo "Config file & contents of /mqtt/config:"
+echo "Contents of /mqtt/config:"
 ls -la /mqtt/config
-cat /mqtt/config/mosquitto.conf
-echo "<<<"
+echo ""
 
-touch /mqtt/auth/thinx.acl
+CONFIG_FILE="/mqtt/config/mosquitto.conf"
 
-# Should be done by copying config, but what if the user gets changed?...
+echo "Contents of ${CONFIG_FILE}"
+cat ${CONFIG_FILE}
 
-IS_REGISTERED=`$(grep ${MOSQUITTO_USERNAME} "/mqtt/auth/thinx.acl")`
+ACL_FILE="/mqtt/auth/thinx.acl"
 
-if [ -z $IS_REGISTERED ]; then
-    echo "Writing initial ACL record to auth/thinx.acl"
-    echo "---------" >> /mqtt/auth/thinx.acl
-    echo "user ${MOSQUITTO_USERNAME}" >> /mqtt/auth/thinx.acl
-    echo "topic readwrite #" >> /mqtt/auth/thinx.acl
-    echo " " >> /mqtt/auth/thinx.acl
+touch $ACL_FILE
+
+IS_REGISTERED=$(grep ${MOSQUITTO_USERNAME} ${ACL_FILE})
+
+if [[ -z $IS_REGISTERED ]]; then
+    echo "Writing initial ACL record to ${ACL_FILE}..."
+    echo "user ${MOSQUITTO_USERNAME}" >> ${ACL_FILE}
+    echo 'topic readwrite #' >> ${ACL_FILE}
+    echo " " >> ${ACL_FILE}
+    cat ${ACL_FILE}
 else
-    echo "Initial ACL record already exists in auth/thinx.acl"
+    echo "Initial ACL record already exists in ${ACL_FILE}"
 fi
 
 pkill apt # attempt to prevent sticking, suspicious thing it is.
 
 # must run in background to prevent killing container on restart
 # must be external file to allow SSL certificate changes
-if [[ -f /mqtt/config/mosquitto.conf ]]; then
-  echo "Starting with configuration file /mqtt/config/mosquitto.conf"
-  mosquitto -d -v -c /mqtt/config/mosquitto.conf
+if [[ -f ${CONFIG_FILE} ]]; then
+  echo "Starting with configuration file ${CONFIG_FILE}"
+  mosquitto -d -v -c ${CONFIG_FILE}
 else
   echo "Starting without configuration file(!)"
   mosquitto -d -v
