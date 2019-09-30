@@ -87,7 +87,7 @@ RUN openssl version \
  && npm install .
 
 # Test modules
-RUN npm install nyc mocha jasmine mocha-lcov-reporter coveralls codedov codacy-coverage -g
+RUN npm install nyc mocha jasmine mocha-lcov-reporter coveralls codacy-coverage -g
 
 # set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
 RUN set -x \
