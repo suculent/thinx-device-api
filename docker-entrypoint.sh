@@ -23,9 +23,9 @@ source ~/.profile
 
 pwd
 
-if [[ -f /.thinx_env ]]; then
+if [[ -f ./.thinx_env ]]; then
   echo "Sourcing .thinx_env"
-  source /.thinx_env
+  source ./.thinx_env
 else
   echo ".thinx_env not found, expects ENVIRONMENT, ROLLBAR_ACCESS_TOKEN, ROLLBAR_ENVIRONMENT and REVISION variables to be set."
 fi
@@ -51,6 +51,8 @@ if [[ ! -z $ROLLBAR_ACCESS_TOKEN ]]; then
     -F environment=$ROLLBAR_ENVIRONMENT \
     -F revision=$REVISION \
     -F local_username=$LOCAL_USERNAME
+else
+  echo "Skipping Rollbar deployment, access token not defined..."
 fi
 
 set -e
@@ -65,12 +67,12 @@ ls -lf /mnt/data/conf
 echo "/opt/thinx/thinx-device-api/conf contents:"
 ls -lf /opt/thinx/thinx-device-api/conf
 
-if [ $ENVIRONMENT != "test" ]; then
-  echo "Running AS production..."
-  node thinx.js | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
-else
-  echo "Running AS test..."
+if [ $ENVIRONMENT == "test" ]; then
+  echo "Running in TEST MODE!"
   npm test # | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
   cp ./lcov.info /mnt/data/test-reports
   cp -vfR ./.nyc_output /mnt/data/test-reports/.nyc_output
+else
+  echo "Running in production mode..."
+  node thinx.js | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
 fi
