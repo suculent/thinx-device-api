@@ -12,15 +12,15 @@
     "password": "<enter-redis-password>"
   },
   "mqtt": {
-    "server": "mqtt://thinx.cloud",
+    "server": "mqtt://mosquitto",
     "port": 1883,
-    "passwords": "/mnt/data/mosquitto/thinx.pw",
-    "acl": "/mnt/data/mosquitto/thinx.acl",
-    "password": "<password>",
-    "username": "<username>"
+    "passwords": "/mnt/data/mosquitto/auth/thinx.pw",
+    "acl": "/mnt/data/mosquitto/auth/thinx.acl",
+    "password": "mosquitto",
+    "username": "thinx"
   },
   "rollbar_token": "<enter-your-rollbar.com-token>",
-  "database_uri": "http://<username>:<password>@couchdb:5984",
+  "database_uri": "http://rtmtest:rtmtest@couchdb:5984",
   "webhook_port": 9002,
   "mqtt_port": 1883,
   "port": 7442,
@@ -31,7 +31,7 @@
   "data_root": "/mnt/data",
   "deploy_root": "/data",
   "build_root": "/repositories",
-  "ssh_keys": "<path-to-store-ssh-keys>",
+  "ssh_keys": "/mnt/data/ssh-keys",
   "slack_webhook": "https://hooks.slack.com/services/XXXXXXXX/XXXXXXXXX/Xxxx...",
   "slack_bot_token": "xoxb-xxxx-yyyy",
   "slack_bot_topic": "thinx",
