@@ -128,6 +128,8 @@ COPY ./.thinx_env ./.thinx_env
 #RUN chmod +x microscanner
 #RUN ./microscanner ${AQUA_SEC_TOKEN} --continue-on-failure
 
+RUN mkdir -p ./.nyc_output
+
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
