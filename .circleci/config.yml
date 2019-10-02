@@ -92,6 +92,8 @@ jobs:
     - run:
         name: Setup environment
         command: |
+          rm -rf ./Dockerfile
+          mv ./Dockerfile.test ./Dockerfile
           cp -vf ./.env.dist ./.env
           cp -vf ./.env ./services/broker/.env
           cp -vf ./.env ./services/console/.env
@@ -142,7 +144,7 @@ jobs:
           export ENVIRONMENT=test
           docker-compose up -d --build couchdb
           docker-compose up --build api
-          timeout 1000 docker-compose logs -f          
+          timeout 1000 docker-compose logs -f
         # docker-compose up -d --build console
 
     - run:
