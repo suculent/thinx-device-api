@@ -119,7 +119,6 @@ EXPOSE 9002
 
 # Copy app source code
 COPY . .
-COPY ./.git /opt/thinx/thinx-device-api/.git
 
 # this should be generated/overwritten with sed on entrypoint, entrypoint needs /.first_run file and all ENV_VARS
 COPY ./.thinx_env ./.thinx_env
@@ -130,6 +129,8 @@ COPY ./.thinx_env ./.thinx_env
 #RUN ./microscanner ${AQUA_SEC_TOKEN} --continue-on-failure
 
 RUN mkdir -p ./.nyc_output
+
+RUN pwd && git init .
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
