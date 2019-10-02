@@ -82,6 +82,8 @@ RUN mv /tmp/docker/* /usr/bin
 # Install app dependencies
 COPY package.json ./
 
+RUN git init .
+
 RUN openssl version \
  && node -v \
  && npm install .
@@ -129,8 +131,6 @@ COPY ./.thinx_env ./.thinx_env
 #RUN ./microscanner ${AQUA_SEC_TOKEN} --continue-on-failure
 
 RUN mkdir -p ./.nyc_output
-
-RUN apt-get -y install git && pwd && git init .
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
