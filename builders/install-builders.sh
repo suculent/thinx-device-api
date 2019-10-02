@@ -2,6 +2,8 @@
 
 # Docker will pull those automatically when requested; disabled for faster testing
 
+echo "Skipping Builder Pre-install... will be pulled when needed."
+
 exit 0
 
 # It would be better to traverse all *-docker-build directories in loop

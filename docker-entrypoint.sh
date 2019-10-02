@@ -74,14 +74,13 @@ if [ $ENVIRONMENT == "test" ]; then
   export CC_TEST_REPORTED_ID="e181ad1424f8f92834a556089394b2faadf93e9b6c84b831cefebb7ea06a8328"
   npm run test # | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
   curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  chmod +x ./cc-test-reporter
   pwd
   ls -la
-  chmod +x ./cc-test-reporter
-  chmod +x ./.codecov.sh
-  ./.codecov.sh
+  # chmod +x ./.codecov.sh
+  # ./.codecov.sh
   cp -vf ./lcov.info /mnt/data/test-reports/lcov.info
   cp -vfR ./.nyc_output /mnt/data/test-reports/.nyc_output
-  exit 0
 else
   echo "Running in production mode..."
   node thinx.js | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
