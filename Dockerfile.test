@@ -3,7 +3,6 @@ FROM node:10.16.3
 
 # docker build -t suculent/thinx-device-api .
 
-
 ARG ROLLBAR_ENVIRONMENT
 ARG THINX_HOSTNAME
 ARG THINX_OWNER_EMAIL
@@ -81,8 +80,6 @@ RUN mv /tmp/docker/* /usr/bin
 
 # Install app dependencies
 COPY package.json ./
-
-RUN git init .
 
 RUN openssl version \
  && node -v \

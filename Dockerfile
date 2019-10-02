@@ -120,6 +120,8 @@ EXPOSE 9002
 # Copy app source code
 COPY . .
 
+RUN rm -rf ./.git
+
 # this should be generated/overwritten with sed on entrypoint, entrypoint needs /.first_run file and all ENV_VARS
 COPY ./.thinx_env ./.thinx_env
 #COPY ./conf/.thx_prefix ./conf/.thx_prefix
