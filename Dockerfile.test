@@ -119,7 +119,7 @@ EXPOSE 9002
 
 # Copy app source code
 COPY . .
-COPY ./.git ./.git
+COPY ./.git /opt/thinx/thinx-device-api/.git
 
 # this should be generated/overwritten with sed on entrypoint, entrypoint needs /.first_run file and all ENV_VARS
 COPY ./.thinx_env ./.thinx_env
