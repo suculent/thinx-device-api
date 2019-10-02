@@ -69,7 +69,16 @@ ls -lf /opt/thinx/thinx-device-api/conf
 
 if [ $ENVIRONMENT == "test" ]; then
   echo "Running in TEST MODE!"
+  export CODECOV_TOKEN="734bc9e7-5671-4020-a26e-e6141f02b53d"
+  export CODACY_PROJECT_TOKEN=9a7d084ad97e430ba12333f384b44255
+  export CC_TEST_REPORTED_ID="e181ad1424f8f92834a556089394b2faadf93e9b6c84b831cefebb7ea06a8328"
+
   npm run test # | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
+  
+  curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  chmod +x ./cc-test-reporter
+  cc-test-reporter format-coverage ./lcov.info -t lcov -o ./codeclimate.json
+  cc-test-reporter upload-coverage -r e181ad1424f8f92834a556089394b2faadf93e9b6c84b831cefebb7ea06a8328 -i ./codeclimate.json
   # bash ./codecov.sh
   cp -vf ./lcov.info /mnt/data/test-reports/lcov.info
   cp -vfR ./.nyc_output /mnt/data/test-reports/.nyc_output
