@@ -2231,7 +2231,7 @@ function loginWithGDPR(req, res, user_data, client_type) {
 // Front-end authentication, returns session on valid authentication
 app.post("/api/login", function(req, res) {
 
-  if (!app_config.debug.allow_http_login) {
+  if (typeof(app_config.debug.allow_http_login) !== "undefined" && app_config.debug.allow_http_login === false) {
     if (req.protocol !== "https") {
       console.log("HTTP rejected for login.");
       req.end(401);
@@ -3205,8 +3205,7 @@ if (typeof(process.env.CIRCLE_USERNAME) === "undefined") {
       cert: fs.readFileSync(app_config.ssl_cert),
       NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
     };
-    console.log("» Starting HTTPS server on " + (serverPort + 1) +
-      "...");
+    console.log("» Starting HTTPS server on " + (serverPort + 1) + "...");
     https.createServer(ssl_options, app).listen(serverPort + 1, "0.0.0.0", function() { } );
   } else {
     console.log(
