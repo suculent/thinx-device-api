@@ -2,6 +2,7 @@ if (typeof(process.env.SQREEN_TOKEN) !== "undefined") {
   require('sqreen');
 }
 
+/*
 var Rollbar = require("rollbar");
 
 var rbconfig = require("./rollbar.json");
@@ -10,7 +11,7 @@ var rollbar = new Rollbar({
   handleUncaughtExceptions: true,
   handleUnhandledRejections: true
 });
-
+*/
 var express = require("express");
 var session = require("express-session");
 var http = require('http');
@@ -223,4 +224,8 @@ class Transformer {
 
 }
 
+console.log("Initializing transformer...");
+
 var server = new Transformer();
+
+console.log("Transformer initialized...");

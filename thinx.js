@@ -47,7 +47,7 @@ var rollbar = Globals.rollbar(); // lgtm [js/unused-local-variable]
 console.log("Rollbar instantiated...");
 
 var redis_client = redis.createClient(Globals.redis_options());
-console.log("Redis redis_client instantiated...");
+console.log("Redis redis_client instantiated with ", { options: Globals.redis_options() });
 
 console.log("Globals class instantiated...");
 
@@ -430,9 +430,11 @@ function logCouchError(err, body, header, tag) {
 
 function injectDesign(db, design, file) {
   if (typeof(design) === "undefined") return;
+  console.log("Inserting design document " + design + " from path", file);
   let design_doc = getDocument(file);
-  if (design_doc) {
-    db.insert("_design/" + design, design_doc, function(err, body, header) {
+  if (design_doc != null) {
+    console.log("Inserting design document", {design_doc});
+    db.insert(design_doc, "_design/" + design, function(err, body, header) {
       logCouchError(err, body, header, "init:design:"+design);
     });
   } else {
@@ -440,14 +442,16 @@ function injectDesign(db, design, file) {
   }
 }
 
-function injectReplFilter(db, filter, file) {
+function injectReplFilter(db, file) {
+  console.log("Inserting filter document from path", file);
   let filter_doc = getDocument(file);
-  if (filter_doc) {
-    db.insert("_design/repl_filters", filter_doc, function(err, body, header) {
+  if (filter_doc !== false) {
+    console.log("Inserting filter document", {filter_doc});
+    db.insert(filter_doc, "_design/repl_filters", function(err, body, header) {
       logCouchError(err, body, header, "init:repl:"+filter_doc);
     });
   } else {
-    console.log("Filter doc injection issue at "+file);
+    console.log("Filter doc injection issue (no doc) at "+file);
   }
 }
 
@@ -580,23 +584,23 @@ var loglib = require("nano")(db).use(prefix + "managed_logs"); // lgtm [js/unuse
 
 function trackUserLogin(owner_id) {
   console.log("trackUserLogin");
- userlib.atomic("users", "checkin", owner_id, {
-   last_seen: new Date()
- }, function(error, response) {
-   if (error) {
-     console.log("Last-seen update failed (3): " + error);
-   } else {
-     console.log("alog: Last seen updated.");
-     alog.log(owner_id, "Last seen updated.");
+   userlib.atomic("users", "checkin", owner_id, {
+     last_seen: new Date()
+   }, function(error, response) {
+     if (error) {
+       console.log("Last-seen update failed (3): " + error);
+     } else {
+       console.log("alog: Last seen updated.");
+       alog.log(owner_id, "Last seen updated.");
+     }
+   });
+
+   console.log("alog: OAuth2 User logged in...");
+   alog.log(owner_id, "OAuth2 User logged in...");
+
+   if (Globals.use_sqreen()) {
+     Sqreen.auth_track(true, { username: owner_id });
    }
- });
-
- console.log("alog: OAuth2 User logged in...");
- alog.log(owner_id, "OAuth2 User logged in...");
-
- if (Globals.use_sqreen()) {
-   Sqreen.auth_track(true, { username: owner_id });
- }
 }
 
 function checkUserWithResponse(global_response, token, userWrapper) {
@@ -2227,10 +2231,10 @@ function loginWithGDPR(req, res, user_data, client_type) {
 // Front-end authentication, returns session on valid authentication
 app.post("/api/login", function(req, res) {
 
-  if (!app_config.debug.allow_http_login) {
+  if (typeof(app_config.debug.allow_http_login) !== "undefined" && app_config.debug.allow_http_login === false) {
     if (req.protocol !== "https") {
       console.log("HTTP rejected for login.");
-      req.error(401);
+      req.end(401);
     }
   }
 
@@ -2273,7 +2277,7 @@ app.post("/api/login", function(req, res) {
   // Username/password login Variant (with local token)
 
   if (typeof(req.body.password) === "undefined") {
-    return;
+    // return;
   }
 
   //
@@ -3201,8 +3205,7 @@ if (typeof(process.env.CIRCLE_USERNAME) === "undefined") {
       cert: fs.readFileSync(app_config.ssl_cert),
       NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
     };
-    console.log("» Starting HTTPS server on " + (serverPort + 1) +
-      "...");
+    console.log("» Starting HTTPS server on " + (serverPort + 1) + "...");
     https.createServer(ssl_options, app).listen(serverPort + 1, "0.0.0.0", function() { } );
   } else {
     console.log(
@@ -3321,14 +3324,9 @@ wss.on("connection", function connection(ws, req) {
         if (typeof(messenger) !== "undefined") {
           console.log("Initializing WS messenger with owner "+object.init);
           messenger.initWithOwner(object.init, _ws, function(success, message) {
-
             if (!success) {
-              console.log("Messenger init on WS message with result " +
-                success +
-                ", with message: " +
-                JSON.stringify(message));
+              console.log("Messenger init on WS message with result " + success + ", with message: ", { message });
             }
-
           });
         } else {
           console.log("Messenger is not initialized and therefore could not be activated.");

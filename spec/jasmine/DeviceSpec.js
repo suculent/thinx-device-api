@@ -107,7 +107,7 @@ describe("Device", function() {
       if (success === false) {
         console.log("alias edit error reason: ", response);
       } else {
-        console.log("• DeviceSpec.js: Editing result: ", { response });
+        // console.log("• DeviceSpec.js: Editing result: ", { response });
       }
 
       expect(success).toBe(true);
@@ -133,7 +133,7 @@ describe("Device", function() {
               return;
             }
           }
-          console.log("• DeviceSpec.js: Re-registration result: ", {response});
+          //console.log("• DeviceSpec.js: Re-registration result: ", {response});
           expect(success).toBe(true);
           done();
         });

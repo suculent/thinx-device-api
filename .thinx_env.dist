@@ -1,3 +1,4 @@
+export ENVIRONMENT=test
 export THINX_HOSTNAME=localhost
 export THINX_OWNER_EMAIL=admin@localhost
 export REVISION=4404

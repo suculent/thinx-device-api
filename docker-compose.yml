@@ -22,7 +22,7 @@ services:
     ports:
       - 1883:1883
       - 8883:8883
-    restart: unless-stopped
+    restart: always
     networks:
       - nat
       - internal
@@ -37,13 +37,15 @@ services:
 
   couchdb:
     env_file: .env
-    image: apache/couchdb:2.3.1
+    # image: apache/couchdb:2.3.1
     build:
       context: ./services/couchdb # currently used for logging, should work the same except it does not log pass in entry point
       args:
       - NODENAME=${NODENAME}
       - COUCHDB_USER=${COUCHDB_USER}
       - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+      - COUCHDB_ADMIN=${COUCHDB_USER}
+      - COUCHDB_PASS=${COUCHDB_PASSWORD}
       - COUCHDB_COOKIE=${COUCHDB_COOKIE}
       - COUCHDB_SECRET=${COUCHDB_SECRET}
     restart: unless-stopped
@@ -51,6 +53,8 @@ services:
       - NODENAME=${NODENAME}
       - COUCHDB_USER=${COUCHDB_USER}
       - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+      - COUCHDB_ADMIN=${COUCHDB_USER}
+      - COUCHDB_PASS=${COUCHDB_PASSWORD}
       - COUCHDB_COOKIE=${COUCHDB_COOKIE}
       - COUCHDB_SECRET=${COUCHDB_SECRET}
     ports:
@@ -98,15 +102,18 @@ services:
         - SQREEN_TOKEN=${SQREEN_TOKEN}
         - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
         - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
-
-    restart: unless-stopped
+        - REVISION=1
+    restart: always
     environment:
       - SQREEN_APP_NAME=${SQREEN_APP_NAME}
       - SQREEN_TOKEN=${SQREEN_TOKEN}
+      - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
+      - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
+      - REVISION=1
     networks:
       - internal
     ports:
-      - 7474
+      - 7474:7474
     labels:
      - "traefik.backend.transformer.noexpose"
 
@@ -115,7 +122,7 @@ services:
     privileged: true
     # reserve enough for builders
     shm_size: 2048M
-    restart: unless-stopped
+    restart: "no" # for testing, otherwise unless-stopped"
     depends_on:
       - transformer
       - thinx-redis
@@ -134,6 +141,9 @@ services:
         - SQREEN_TOKEN=${SQREEN_TOKEN}
         - SQREEN_APP_NAME=${SQREEN_APP_NAME}
         - AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}
+        - ENVIRONMENT=${ENVIRONMENT}
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT}
     ports:
       - 7442:7442 # API (HTTP)
       - 7443:7443 # API (HTTPS)
@@ -141,12 +151,14 @@ services:
       - 7445:7445 # WebSocket SSL (reserved)
       - 9002:9002 # Incoming GIT (User) Webhooks
     volumes:
-      - ./conf:/opt/thinx/thinx-device-api/conf # Configuration
+#      - ./conf:/opt/thinx/thinx-device-api/conf # Configuration
       - /mnt/data/deploy:/mnt/data/deploy # Deployment
       - /mnt/data/mosquitto:/mnt/data/mosquitto # Authentication
       - /mnt/data/repos:/mnt/data/repos # Git
       - /mnt/data/ssl:/mnt/data/ssl
       - /mnt/data/ssh_keys:/mnt/data/ssh_keys
+      - /mnt/data/conf:/mnt/data/conf
+      - /mnt/data/test-reports:/mnt/data/test-reports
       - /var/run/docker.sock:/var/run/docker.sock # DIND
       - /var/lib/docker
       - /cache
