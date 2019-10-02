@@ -41,7 +41,8 @@
   "client_user_agent": "THiNX-Client",
   "debug": {
     "device" : false,
-    "deployment": true
+    "deployment": true,
+    "allow_http_login": true
   },
   "grafana": {
     "port": 3004,

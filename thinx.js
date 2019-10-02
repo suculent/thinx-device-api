@@ -2234,7 +2234,7 @@ app.post("/api/login", function(req, res) {
   if (!app_config.debug.allow_http_login) {
     if (req.protocol !== "https") {
       console.log("HTTP rejected for login.");
-      req.error(401);
+      req.end(401);
     }
   }
 
@@ -2277,7 +2277,7 @@ app.post("/api/login", function(req, res) {
   // Username/password login Variant (with local token)
 
   if (typeof(req.body.password) === "undefined") {
-    return;
+    // return;
   }
 
   //
