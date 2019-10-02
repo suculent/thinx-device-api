@@ -144,7 +144,7 @@ jobs:
           export ENVIRONMENT=test
           docker-compose up -d --build couchdb
           docker-compose up --build api
-          timeout 1000 docker-compose logs -f
+          timeout 500 docker-compose logs -f
         # docker-compose up -d --build console
 
     - run:
