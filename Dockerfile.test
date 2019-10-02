@@ -130,7 +130,7 @@ COPY ./.thinx_env ./.thinx_env
 
 RUN mkdir -p ./.nyc_output
 
-RUN pwd && git init .
+RUN apt-get -y install git && pwd && git init .
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
