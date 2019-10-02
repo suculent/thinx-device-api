@@ -75,9 +75,10 @@ if [ $ENVIRONMENT == "test" ]; then
   npm run test # | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
   curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   chmod +x ./cc-test-reporter
-  bash ./codecov.sh
+  bash ./.codecov.sh
   cp -vf ./lcov.info /mnt/data/test-reports/lcov.info
   cp -vfR ./.nyc_output /mnt/data/test-reports/.nyc_output
+  exit 0
 else
   echo "Running in production mode..."
   node thinx.js | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
