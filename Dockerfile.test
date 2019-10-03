@@ -86,7 +86,7 @@ RUN openssl version \
  && npm install .
 
 # Test modules
-RUN npm install nyc mocha jasmine mocha-lcov-reporter coveralls codacy-coverage -g
+RUN npm install nyc mocha jasmine mocha-lcov-reporter coveralls codacy-coverage codecov -g
 
 # set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
 RUN set -x \
@@ -121,7 +121,6 @@ COPY . .
 
 # this should be generated/overwritten with sed on entrypoint, entrypoint needs /.first_run file and all ENV_VARS
 COPY ./.thinx_env ./.thinx_env
-COPY ./.codecov.sh ./.codecov.sh
 #COPY ./conf/.thx_prefix ./conf/.thx_prefix
 
 #ADD https://get.aquasec.com/microscanner .
@@ -129,6 +128,8 @@ COPY ./.codecov.sh ./.codecov.sh
 #RUN ./microscanner ${AQUA_SEC_TOKEN} --continue-on-failure
 
 RUN mkdir -p ./.nyc_output
+
+RUN codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
