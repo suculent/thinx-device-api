@@ -3,7 +3,6 @@ FROM node:10.16.3
 
 # docker build -t suculent/thinx-device-api .
 
-
 ARG ROLLBAR_ENVIRONMENT
 ARG THINX_HOSTNAME
 ARG THINX_OWNER_EMAIL
@@ -87,7 +86,7 @@ RUN openssl version \
  && npm install .
 
 # Test modules
-RUN npm install nyc mocha jasmine mocha-lcov-reporter coveralls codacy-coverage -g
+RUN npm install nyc mocha jasmine mocha-lcov-reporter coveralls codacy-coverage codecov -g
 
 # set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
 RUN set -x \
@@ -130,7 +129,7 @@ COPY ./.thinx_env ./.thinx_env
 
 RUN mkdir -p ./.nyc_output
 
-RUN apt-get -y install git && pwd && git init .
+RUN codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
