@@ -144,7 +144,8 @@ jobs:
           export ENVIRONMENT=test
           docker-compose up -d --build couchdb
           docker-compose up --build api
-          timeout 500 docker-compose logs -f
+          timeout 300 docker-compose logs -f
+          docker-compose stop
         # docker-compose up -d --build console
 
     - run:
@@ -153,7 +154,6 @@ jobs:
             docker ps
             docker network ls
             docker network inspect bridge
-            docker-compose stop
 
     # Save test results
     - store_test_results:
