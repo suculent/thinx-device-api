@@ -142,7 +142,8 @@ jobs:
         name: Starting CouchDB and API Test
         command: |
           export ENVIRONMENT=test
-          docker-compose up --build couchdb api
+          docker-compose up -d --build couchdb
+          docker-compose up -d --build api
           timeout 60 docker-compose logs -f
           docker-compose stop
         # docker-compose up -d --build console
