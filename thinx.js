@@ -165,63 +165,18 @@ console.log("Initializing app requires...");
 var Version = require("./lib/thinx/version");
 var v = new Version();
 
-var AuditLog = require("./lib/thinx/audit");
-var alog = new AuditLog();
-
-console.log("Loading module: builder...");
-var Builder = require("./lib/thinx/builder");
-var builder = new Builder();
-
-console.log("Loading module: device...");
-var Device = require("./lib/thinx/device");
-var device = new Device();
-
-console.log("Loading module: deployment...");
-var Deployment = require("./lib/thinx/deployment");
-var deployment = new Deployment();
-
-console.log("Loading module: apienv...");
-var APIEnv = require("./lib/thinx/apienv");
-var apienv = new APIEnv();
-
-console.log("Loading module: apikey...");
-var APIKey = require("./lib/thinx/apikey");
-var apikey = new APIKey();
-
-console.log("Loading module: owner...");
-var User = require("./lib/thinx/owner");
-var user = new User();
-
-console.log("Loading module: rsakey...");
-var RSAKey = require("./lib/thinx/rsakey");
-var rsakey = new RSAKey();
-
 console.log("Loading module: statistics...");
 var Stats = require("./lib/thinx/statistics");
 var stats = new Stats();
-
-console.log("Loading module: sources...");
-var Sources = require("./lib/thinx/sources");
-var sources = new Sources();
 
 console.log("[thinx.js] Loading module: messenger...");
 var Messenger = require("./lib/thinx/messenger");
 console.log("[thinx.js] Getting instance: messenger...");
 var messenger = new Messenger().getInstance(); // take singleton to prevent double initialization
 
-console.log("Loading module: devices...");
-var Devices = require("./lib/thinx/devices");
-var devices = new Devices(messenger);
-
-console.log("Loading module: device transfer...");
-var Transfer = require("./lib/thinx/transfer");
-var transfer = new Transfer(messenger);
-
 console.log("Loading module: repository/watcher...");
-
 var Repository = require("./lib/thinx/repository");
 var watcher = new Repository();
-
 console.log("Starting repository watcher...");
 watcher.watch();
 console.log("Done.");
