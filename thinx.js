@@ -189,7 +189,11 @@ function getDocument(file) {
 }
 
 function logCouchError(err, body, header, tag) {
-  console.log("[thinx.js:couch] Insert error: "+err);
+  if (err !== null) {
+    console.log("[thinx.js:couch] Insert error: "+err);
+  } else {
+    return;
+  }
   if (typeof(body) !== "undefined") {
     console.log("[thinx.js:couch] Insert body: "+body+" "+tag);
   }

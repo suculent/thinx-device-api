@@ -118,7 +118,8 @@ echo "proto: $proto"
 
 ## Following works for the HTTPS protocol, not GIT+SSL
 # remove the protocol
-url="$(echo ${GIT_REPO/$proto/})"
+# was url="$(echo ${GIT_REPO/$proto/})"
+url="$(${GIT_REPO/$proto/})"
 echo "url: $url"
 
 user="$(echo $url | grep @ | cut -d@ -f1)"
