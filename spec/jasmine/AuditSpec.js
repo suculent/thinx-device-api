@@ -1,4 +1,4 @@
-var envi = require("./_envi.json");
+var envi = require("../_envi.json");
 var owner = envi.oid;
 
 describe("Audit log", function() {
@@ -17,7 +17,7 @@ describe("Audit log", function() {
     audit.fetch(
       owner,
       function(err, body) {
-        console.log(body);
+        expect(body).toBeDefined();
         expect(err).toBe(false);
         done();
       }

@@ -1,111 +1,29 @@
 version: 2
+
 jobs:
+
   build:
+
+    # In CircleCI 2.0 you can now specify your own image, or use one of our pre-configured images.
+    docker:
+      #- image: circleci/node:10.16.3
+      - image: suculent/thinx_baseline:first
+        auth:
+          username: $DOCKER_USERNAME  # can specify string literal values
+          password: $DOCKER_PASSWORD  # or project environment variable reference
+
     working_directory: ~/suculent/thinx-device-api
+
     parallelism: 1
+
     shell: /bin/bash --login
+
     environment:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
       REDIS_URL: redis://localhost:6379
 
-    # In CircleCI 2.0 you can now specify your own image, or use one of our pre-configured images.
-    docker:
-      - image: suculent/thinx_baseline:first
-        auth:
-          username: $DOCKER_USERNAME  # can specify string literal values
-          password: $DOCKER_PASSWORD  # or project environment variable reference
-      - image: redis
     steps:
-
-    # Use Remote Docker to run CouchDB and Transformer containers alongside
-    - setup_remote_docker
-
-    # Machine Setup
-    #   If you break your build into multiple jobs with workflows, you will probably want to do the parts of this that are relevant in each
-    # The following `checkout` command checks out your code to your working directory. In 1.0 we did this implicitly. In 2.0 you can choose where in the course of a job your code should be checked out.
-    - checkout
-
-    # Prepare for artifact and test results  collection equivalent to how it was done on 1.0.
-    # In many cases you can simplify this from what is generated here.
-    # 'See docs on artifact collection here https://circleci.com/docs/2.0/artifacts/'
-    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
-
-    # Restore the dependency cache
-    - restore_cache:
-        keys:
-        # This branch if available
-        - v1-dep-{{ .Branch }}-
-        # Default branch if not
-        - v1-dep-master-
-        # Any branch if there are none on the default branch - this should be unnecessary if you have your default branch configured correctly
-        - v1-dep-
-
-    # This is based on your 1.0 configuration file or project settings
-    - run: apt-get update && apt-get install -y --fix-missing --no-install-recommends curl jq mosquitto
-    - run: cd spec/test_repositories && bash ./get-tests.sh
-    - run: git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
-    - run: npm install coveralls nyc eslint -g
-    - run: curl https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
-    - run: export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    - run: export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm install 10.16.0 && nvm use 10.16.0 && rm -rf ./package-lock.json && rm -rf ./node_modules && npm install .
-    - run: mkdir statistics
-
-    # The following line was run implicitly in your 1.0 builds based on what CircleCI inferred about the structure of your project. In 2.0 you need to be explicit about which commands should be run. In some cases you can discard inferred commands if they are not relevant to your project.
-    - run: if [ -z "${NODE_ENV:-}" ]; then export NODE_ENV=test; fi
-    - run: export PATH="~/suculent/thinx-device-api/node_modules/.bin:$PATH"
-    - run: echo -e "export RAILS_ENV=test\nexport RACK_ENV=test" >> $BASH_ENV
-    - run: gem install bundler
-    - run: bundler check --path=vendor/bundler || bundler install --path=vendor/bundler --jobs=4 --retry=3
-
-    # Save dependency cache
-    - save_cache:
-        key: v1-dep-{{ .Branch }}-{{ epoch }}
-        paths:
-        # This is a broad list of cache paths to include many possible development environments
-        # You can probably delete some of these entries
-        - vendor/bundle
-        - vendor/bundler
-        - ~/virtualenvs
-        - ~/.m2
-        - ~/.ivy2
-        - ~/.bundle
-        - ~/.bundler
-        - ~/.go_workspace
-        - ~/.gradle
-        - ~/.cache/bower
-        - ./node_modules
-
-    # Copy the configuration folder from docker-ignored folder to virtual mount
-    - run: mkdir -p /mnt/data && cp -R ./conf /mnt/data
-    - run: mkdir -p /mnt/data/ssh-keys
-
-    # Sonarcloud Integration (requires JAVA)
-    # - run: wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.3.0.1492-linux.zip
-    # - run: unzip sonar-scanner*.zip
-    # - run: which java
-    # - run: alias sonar-scanner="$(pwd)/sonar-scanner-3.3.0.1492-linux/bin/sonar-scanner" && which sonar-scanner && bash ./99-sonar.sh
-
-    # Test
-    #   This would typically be a build job when using workflows, possibly combined with build
-    - run: mkdir -p $CIRCLE_TEST_REPORTS/reports
-
-    # This is a big thing... creating test mount with all sample data...
-
-    - run:
-        name: Init filesystem
-        command: |
-            mkdir -p /mnt/data/
-        # curl sample data zip from somewhere and unpack, maybe provide base filesystem zip as kind of a build...
-
-    - run:
-        name: Install ESLint and project
-        command: |
-            npm install -g eslint
-            npm install .
-            cp ./conf/config-test.json ./conf/config.json
-
-    # - run: eslint ./lib/ --format junit --output-file $CIRCLE_TEST_REPORTS/reports/eslint.xml
 
     - run:
         name: Install Docker client
@@ -117,22 +35,117 @@ jobs:
             mv /tmp/docker/* /usr/bin
 
     - run:
-        name: Run CouchDB
+        name: Install Docker Compose
         command: |
-            docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
-            docker build -t suculent/couch ./services/couchdb && docker run -d --rm -p 5984:5984 -e COUCHDB_ADMIN=rtmtest -e COUCHDB_PASS=rtmtest -e NODENAME=couchdb --name="couchdb" suculent/couch
+          curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` > ~/docker-compose
+          chmod +x ~/docker-compose
+          mv ~/docker-compose /usr/local/bin/docker-compose
+
+    - setup_remote_docker
+
+    - checkout
+
+    # Restore the dependency cache
+    - restore_cache:
+        keys:
+          # This branch if available
+          - v1-dependencies-{{ checksum "package.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
 
     - run:
-        name: Run Redis
-        command:  |
-            docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
-            docker build -t suculent/redis ./services/redis && docker run -d --rm -p 6379:6379 -e REDIS_PASSWORD=testpass --name="thinx-redis" suculent/redis
+        name: Fetch all submodules and tests
+        command: |
+          git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
+          cd spec/test_repositories && bash ./get-tests.sh
 
     - run:
-        name: Run Mosquitto
+        name: Create Circle CI Artifacts Folders
         command: |
-            docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
-            docker build -t suculent/mosquitto ./services/broker && docker run -d --rm -p 1883:1883 --name="mosquitto" suculent/mosquitto
+          mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+          mkdir -p $CIRCLE_TEST_REPORTS/reports
+
+    - save_cache:
+        paths:
+          - node_modules
+        key: v1-dependencies-{{ checksum "package.json" }}
+
+    - run:
+        name: Init filesystem
+        command: |
+            mkdir -p /mnt/data/
+            mkdir -p /mnt/data && cp -R ./conf /mnt/data
+            mkdir -p /mnt/data/ssh-keys
+            mkdir -p /mnt/data/mosquitto/auth
+            mkdir -p /mnt/data/mosquitto/config
+            mkdir -p /mnt/data/mosquitto/data
+            mkdir -p /mnt/data/mosquitto/log
+            mkdir -p /mnt/data/mosquitto/ssl
+            mkdir -p /mnt/data/couchdb
+            mkdir -p /mnt/data/deploy
+            mkdir -p /mnt/data/data
+            mkdir -p /mnt/data/redis
+            mkdir -p /mnt/data/repos
+            mkdir -p /mnt/data/ssl
+            mkdir -p /mnt/data/test-reports
+
+    - run:
+        name: Setup environment
+        command: |
+          rm -rf ./Dockerfile
+          mv ./Dockerfile.test ./Dockerfile
+          cp -vf ./.env.dist ./.env
+          cp -vf ./.env ./services/broker/.env
+          cp -vf ./.env ./services/console/.env
+          cp -vf ./.env ./services/couchdb/.env
+          cp -vf ./.env ./services/redis/.env
+          cp -vf ./.env ./services/transformer/.env
+          cp -vf ./conf/config-test.json ./conf/config.json
+          cp -vfR ./conf /mnt/data/
+          echo "Contents of /mnt/data/conf"
+          ls -la /mnt/data/conf
+          cp -vf ./.env ./.thinx_env
+          sed -i -e 's/^/export /' ./.thinx_env # create from .thinx_env from .env
+          echo ".thinx_env contents:"
+          cat ./.thinx_env
+          echo "Contents of ./conf"
+          ls -la ./conf
+          echo "Contents of ./.env"
+          cat ./.env
+          echo "Contents of /mnt/data/mosquitto/**"
+          ls -la /mnt/data/mosquitto/**
+          cp -vf ./services/broker/config/thinx.acl.dist /mnt/data/mosquitto/auth/thinx.acl
+          echo "Contents of /mnt/data/mosquitto/auth/thinx.acl"
+          cat /mnt/data/mosquitto/auth/thinx.acl
+          cp -vf ./services/broker/config/mosquitto.conf.dist /mnt/data/mosquitto/config/mosquitto.conf
+          echo "Contents of /mnt/data/mosquitto/config/mosquitto.conf"
+          cat /mnt/data/mosquitto/config/mosquitto.conf
+          echo "Creating Docker Network (ID):"
+          docker network create nat
+
+    - run:
+        name: Starting Mosquitto
+        command: |
+          docker-compose up -d --build mosquitto
+
+    - run:
+        name: Starting Redis
+        command: |
+          docker-compose up -d --build thinx-redis
+
+    - run:
+        name: Starting Transformer
+        command: |
+          docker-compose up -d --build transformer
+
+    - run:
+        name: Starting CouchDB and API Test
+        command: |
+          export ENVIRONMENT=test
+          docker-compose up --build couchdb api
+          timeout 120 docker-compose logs -f
+          docker-compose stop
+        # docker-compose up -d --build console
 
     - run:
         name: Check running Docker containers
@@ -141,45 +154,18 @@ jobs:
             docker network ls
             docker network inspect bridge
 
-        # In cases where thinx-device-api runs as node.js app against containers in CircleCI, IPs depend on run order
-    # - run: echo "172.17.0.2 couchdb" >> /etc/hosts
-    - run: echo "172.17.0.2 couchdb" >> /etc/hosts
-    - run: echo "127.0.0.1 thinx-redis" >> /etc/hosts
-    - run: echo "127.0.0.1 mosquitto" >> /etc/hosts
-
-    - run:
-        name: NPM Test (uses jasmine until Chai expect will be supported)
-        command: |
-            export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            nvm use 10.16.0
-            npm run test
-
-    - run: mkdir -p $CIRCLE_TEST_REPORTS/rspec
-    - run:
-        command: |
-            export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            nvm use 10.16.0
-            bundler exec rspec --format RspecJunitFormatter --out $CIRCLE_TEST_REPORTS/rspec/rspec.xml --format progress spec
-
-        environment:
-          RAILS_ENV: test
-          RACK_ENV: test
-
-    # - run: bash ./scripts/01-analyze.sh
-    # - run: bash ./scripts/03-test.sh
-
-    # Deployment
-    # Your existing circle.yml file contains deployment steps.
-    # The config translation tool does not support translating deployment steps
-    # since deployment in CircleCI 2.0 are better handled through workflows.
-    # See the documentation for more information https://circleci.com/docs/2.0/workflows/
-    # Teardown
-    #   If you break your build into multiple jobs with workflows, you will probably want to do the parts of this that are relevant in each
     # Save test results
     - store_test_results:
-        path: /tmp/circleci-test-results
+        path: /mnt/data/test-reports
+
     # Save artifacts
     - store_artifacts:
-        path: /tmp/circleci-artifacts
-    - store_artifacts:
-        path: /tmp/circleci-test-results
+        path: /mnt/data/test-reports
+
+workflows:
+  version: 2
+  integrate:
+    jobs:
+      - build
+#      - test:
+#          requires: build

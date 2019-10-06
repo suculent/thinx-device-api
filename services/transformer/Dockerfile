@@ -9,7 +9,7 @@ ARG REVISION=${REVISION}
 ENV ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
 ENV ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
 
-RUN echo "ROLLBAR_ACCESS_TOKEN: " ${ROLLBAR_ACCESS_TOKEN}
+RUN echo "ROLLBAR_ACCESS_TOKEN: ${ROLLBAR_ACCESS_TOKEN}"
 
 RUN apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python curl git jq
 
@@ -31,7 +31,7 @@ WORKDIR /home/node/app
 COPY .env /home/node/app/.env
 
 # Running npm install for production purpose will not run dev dependencies.
-RUN npm install . --only-prod
+RUN npm install .
 
 # Create a user group 'thinx'
 RUN addgroup -S thinx

@@ -67,7 +67,7 @@ COPY --from=0 /home/node/build/html .
 RUN echo "SRC AFTER BUILD: " && pwd && ls -la
 
 RUN apt-get update \
- && apt-get install -y curl
+ && apt-get install -qq -y curl
 
 # Expose port (HOST:CONTAINER; nginx, may be configured from outside with docker-compose)
 EXPOSE 7440:80

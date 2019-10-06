@@ -1,13 +1,13 @@
 clair*
-.git
+#.git
 node_modules/
 package-lock.json
-tools/arduino-docker-build
-tools/platformio-docker-build
-#tools/micropython-docker-build
-#tools/mongoose-docker-build
-#tools/nodemcu-docker-build
-#tools/nodemcu-firmware
-#tools/lua-inspect
+#tools/arduino-docker-build
+#tools/platformio-docker-build
+tools/micropython-docker-build
+tools/mongoose-docker-build
+tools/nodemcu-docker-build
+tools/nodemcu-firmware
+tools/lua-inspect
 
-conf/
+#conf/

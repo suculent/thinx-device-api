@@ -1,6 +1,6 @@
 describe("Validator", function() {
 
-  var envi = require("./_envi.json");
+  var envi = require("../_envi.json");
   var owner = envi.oid;
   var udid = envi.udid;
 
@@ -46,7 +46,4 @@ describe("Validator", function() {
     expect(result).toBeDefined();
     expect(result == udid).toBe(true);
   });
-
-
-
 });

@@ -4,7 +4,7 @@ describe("Builder", function() {
   var Builder = require("../../lib/thinx/builder");
   var builder = new Builder();
 
-  var envi = require("./_envi.json");
+  var envi = require("../_envi.json");
   var owner = envi.oid;
   var udid = envi.udid;
   var apikey = envi.ak;
@@ -40,13 +40,13 @@ describe("Builder", function() {
   it("supports certain languages", function() {
     var languages = builder.supportedLanguages();
     expect(languages).toBeDefined();
-    console.log(JSON.stringify(languages));
+    //console.log(JSON.stringify(languages));
   });
 
   it("supports certain extensions", function() {
     var extensions = builder.supportedExtensions();
     expect(extensions).toBeDefined();
-    console.log(JSON.stringify(extensions));
+    //console.log(JSON.stringify(extensions));
   });
 
 });

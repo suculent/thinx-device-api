@@ -2,6 +2,7 @@ if (typeof(process.env.SQREEN_TOKEN) !== "undefined") {
   require('sqreen');
 }
 
+/*
 var Rollbar = require("rollbar");
 
 var rbconfig = require("./rollbar.json");
@@ -10,7 +11,7 @@ var rollbar = new Rollbar({
   handleUncaughtExceptions: true,
   handleUnhandledRejections: true
 });
-
+*/
 var express = require("express");
 var session = require("express-session");
 var http = require('http');
@@ -100,12 +101,12 @@ class Transformer {
       });
 
     this.app.post("/do", function(req, res) {
-      process(req, res);
+      this.process(req, res);
     });
 
     /* Credits handler, returns current credits from user info */
     this.app.get("/id", function(req, res) {
-      respond(res, {
+      this.respond(res, {
         id: server_id,
         mac: server_mac
       });
@@ -114,7 +115,7 @@ class Transformer {
 
   process(req, res) {
     if (typeof(req.body) === "undefined") {
-      respond(res, {
+      this.respond(res, {
         success: false,
         error: "missing: body"
       });
@@ -130,7 +131,7 @@ class Transformer {
 
     var jobs = ingress.jobs;
     if (typeof(ingress.jobs) === "undefined") {
-      respond(res, {
+      this.respond(res, {
         success: false,
         error: "missing: body.jobs"
       });
@@ -138,7 +139,7 @@ class Transformer {
     }
 
     console.log(new Date().toString() + "Incoming job.");
-    transform(req, res);
+    this.transform(jobs, res);
   }
 
   sanitize(code) {
@@ -148,17 +149,18 @@ class Transformer {
     try {
       var exec = null;
       var decoded = false;
-      if (decoded === false) {
-        try {
-          cleancode = unescape(base64.decode(code));
-          decoded = true;
-        } catch (e) {
-          console.log("Job is not a base64.");
-          decoded = false;
-        }
+
+      // Try unwrapping as Base64
+      try {
+        cleancode = unescape(base64.decode(code));
+        decoded = true;
+      } catch (e) {
+        console.log("Job is not a base64.");
+        decoded = false;
       }
 
       if (decoded === false) {
+        // Try unwrapping as Base128
         try {
           cleancode = unescape(base128.decode(code));
           decoded = true;
@@ -176,7 +178,6 @@ class Transformer {
       console.log("Docker Transformer Ecception: " + e);
       error = JSON.stringify(e);
     }
-
     return cleancode;
   }
 
@@ -191,18 +192,17 @@ class Transformer {
     }
   }
 
-  transform(req, res) {
-
+  process_jobs(jobs, callback) {
     var input_raw = jobs[0].params.status;
     var status = input_raw;
     var error = null;
-
     for (var job_index in jobs) {
       const job = jobs[job_index];
-      const code = sanitize(job.code);
+      const code = this.sanitize(job.code);
       console.log(new Date().toString() + " job: " + JSON.stringify(job));
       try {
         console.log("Running code:\n" + code);
+        var transformer = function() {};
         /* jshint -W061 */
         eval(code); // expects transformer(status, device); function only; may provide API
         /* jshint +W061 */
@@ -213,14 +213,20 @@ class Transformer {
         error = JSON.stringify(e);
       }
     }
+    callback(input_raw, status, error);
+  }
 
-    respond(res, {
-      input: input_raw,
-      output: status,
-      error: error
+  transform(jobs, res) {
+    this.process_jobs(jobs, (input_raw, status, error) => {
+      this.respond(res, {
+        input: input_raw,
+        output: status,
+        error: error
+      });
     });
   }
 
 }
 
 var server = new Transformer();
+console.log("Transformer initialized...");

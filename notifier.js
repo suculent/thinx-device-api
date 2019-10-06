@@ -35,7 +35,8 @@ var that = this;
 
 var mqtt = require("mqtt");
 
-var Messenger = require('./lib/thinx/messenger');
+var Messenger = require("./lib/thinx/messenger");
+var messenger = new Messenger().getInstance(); // take singleton to prevent double initialization
 
 console.log("-=[ ☢ THiNX IoT RTM NOTIFIER ☢ ]=-");
 
@@ -170,11 +171,31 @@ blog.log(build_id, owner, udid, status);
 //
 
 function notify_device_channel(owner, udid, message) {
+
+  var mqtt_password;
+  var mqtt_username;
+
+  if (typeof(app_config.mqtt.password) !== "undefined") {
+    mqtt_password = app_config.mqtt.password;
+    console.log("Setting mosquitto password from configuration file.");
+  }
+
+  if (typeof(process.env.MOSQUITTO_PASSWORD) !== "undefined") {
+    mqtt_password = process.env.MOSQUITTO_PASSWORD;
+    console.log("Setting mosquitto password from environment variable.");
+  }
+
+  if (typeof(process.env.MOSQUITTO_USERNAME) !== "undefined") {
+    mqtt_username = process.env.MOSQUITTO_USERNAME;
+    console.log("Setting mosquitto password from environment variable.");
+  }
+
   console.log("notify_device_channel is DEPRECATED");
   var channel = "/thinx/devices/" + owner + "/" + udid;
   console.log("Posting to MQTT queue " + channel);
-  const app_config = require("./conf/app_config.json");
-  var client = mqtt.connect("mqtt://"+app_config.mqtt.username+":"+app_config.mqtt.password+"@" + process.env.THINX_HOSTNAME + ":"+app_config.mqtt.port);
+
+
+  var client = mqtt.connect("mqtt://"+mqtt_username+":"+mqtt_password+"@" + process.env.THINX_HOSTNAME + ":"+app_config.mqtt.port);
   client.on("connect", function() {
     console.log("Connected to MQTT, will post to " + channel);
     client.subscribe(channel);
@@ -365,7 +386,7 @@ devicelib.get(udid, function(err, doc) {
     // Device channel
     if (status == "DEPLOYED") {
       console.log("Calling messenger publish...");
-      Messenger.publish(owner, udid, message);
+      messenger.publish(owner, udid, message);
       notify_device_channel(owner, udid, message); // deprecated; integration testing only
     }
 

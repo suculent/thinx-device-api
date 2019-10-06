@@ -8,25 +8,27 @@
     "domain": "<your-domain>"
   },
   "redis": {
-    "host": "localhost",
-    "password": ""
+    "host": "thinx-redis",
+    "passnote": "when not required, probably a provisioning issue...",
+    "password": "changeme!"
   },
   "mqtt": {
     "server": "mqtt://mosquitto",
     "port": 1883,
-    "passwords": "/mnt/data/mosquitto/thinx.pw",
-    "acl": "/mnt/data/mosquitto/thinx.acl",
-    "key": "",
-    "username": ""
+    "passwords": "/mnt/data/mosquitto/auth/thinx.pw",
+    "acl": "/mnt/data/mosquitto/auth/thinx.acl",
+    "password": "mosquitto",
+    "username": "thinx"
   },
   "rollbar_token": "<enter-your-rollbar.com-token>",
   "database_uri": "http://rtmtest:rtmtest@couchdb:5984",
+  "webhook_port": 9002,
   "mqtt_port": 1883,
   "port": 7442,
   "secure_port": 7443,
   "websocket": 7444,
-  "lambda": 7474,
-  "project_root": "/root/suculent/thinx-device-api",
+  "lambda": 7475,
+  "project_root": "/opt/thinx/thinx-device-api",
   "data_root": "/mnt/data",
   "deploy_root": "/data",
   "build_root": "/repositories",
@@ -35,12 +37,13 @@
   "slack_bot_token": "",
   "slack_bot_topic": "thinx",
   "fcm_auth": "./conf/thinx-cloud-firebase.json",
-  "ssl_key": "/etc/letsencrypt/live/thinx.cloud/privkey.pem",
-  "ssl_cert": "/etc/letsencrypt/live/thinx.cloud/cert.pem",
+  "ssl_key": "/mnt/data/ssl/privkey.pem",
+  "ssl_cert": "/mnt/data/ssl/cert.pem",
   "client_user_agent": "THiNX-Client",
   "debug": {
     "device" : false,
-    "deployment": true
+    "deployment": true,
+    "allow_http_login": true
   },
   "grafana": {
     "port": 3004,

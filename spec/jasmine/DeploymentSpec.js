@@ -3,7 +3,7 @@ describe("Deployer", function() {
   var Deployment = require('../../lib/thinx/deployment');
   var deploy = new Deployment();
 
-  var envi = require("./_envi.json");
+  var envi = require("../_envi.json");
   var owner = envi.oid;
   var udid = envi.udid;
 
@@ -45,8 +45,8 @@ describe("Deployer", function() {
   });
 
   it("should be able to return latest firmware envelope", function() {
-    var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(device);
-    expect(firmwareUpdateDescriptor).toBeDefined();
+    var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(device.owner, device.udid);
+    expect(firmwareUpdateDescriptor).toBe(false);
   });
 
 });

@@ -11,15 +11,21 @@ networks:
 services:
   transformer:
     user: transformer # or ${CURRENT_UID} if CURRENT_UID=$(id -u):$(id -g) docker-compose up
-    image: suculent/thinx-node-transformer
+    env_file: .env
+    build:
+      context: .
+      args:
+        - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
+        - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
+        - SQREEN_APP_NAME=${SQREEN_APP_NAME}
+        - SQREEN_TOKEN=${SQREEN_APP_NAME}
+        - REVISION=1
     networks:
       - internal
     ports:
       - "7474:7474"
-    networks: 
+    networks:
       - internal
     restart: always
-    env_file: .env
     labels:
     - "traefik.backend.transformer.noexpose"
-

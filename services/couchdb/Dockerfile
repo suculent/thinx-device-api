@@ -3,10 +3,16 @@ FROM debian:stretch-slim
 MAINTAINER CouchDB Developers dev@couchdb.apache.org
 
 ARG COUCHDB_USER
-ENV COUCHDB_USER=${COUCHDB_USER}
+ENV COUCHDB_USER=${COUCHDB_USERNAME}
 
 ARG COUCHDB_PASSWORD
 ENV COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+
+ARG COUCHDB_ADMIN
+ENV COUCHDB_ADMIN=${COUCHDB_ADMIN}
+
+ARG COUCHDB_PASS
+ENV COUCHDB_PASS=${COUCHDB_PASS}
 
 ARG COUCHDB_COOKIE
 ENV COUCHDB_COOKIE=${COUCHDB_COOKIE}
@@ -17,7 +23,7 @@ ENV COUCHDB_SECRET=${COUCHDB_SECRET}
 ARG NODENAME
 ENV NODENAME=${NODENAME}
 
-RUN echo "ENV check:" ${COUCHDB_USER} ${COUCHDB_PASSWORD} ${COUCHDB_COOKIE} ${COUCHDB_SECRET} ${NODENAME}
+RUN echo "ENV check: COUCHDB_USERNAME: ${COUCHDB_USERNAME} COUCHDB_PASS: ${COUCHDB_PASS} COUCHDB_ADMIN: ${COUCHDB_ADMIN} COUCHDB_PASSWORD: ${COUCHDB_PASSWORD} COUCHDB_COOKIE: ${COUCHDB_COOKIE} COUCHDB_SECRET: ${COUCHDB_SECRET} NODENAME: ${NODENAME}"
 
 # Add CouchDB user account to make sure the IDs are assigned consistently
 RUN groupadd -g 5984 -r couchdb && useradd -u 5984 -d /opt/couchdb -g couchdb couchdb
@@ -25,7 +31,7 @@ RUN groupadd -g 5984 -r couchdb && useradd -u 5984 -d /opt/couchdb -g couchdb co
 # be sure GPG and apt-transport-https are available and functional
 RUN set -ex; \
         apt-get update; \
-        apt-get install -y --allow-unauthenticated --no-install-recommends \
+        apt-get install -qq -y --allow-unauthenticated --no-install-recommends \
                 apt-transport-https \
                 ca-certificates \
                 dirmngr \
@@ -40,7 +46,7 @@ ENV TINI_VERSION 0.18.0
 RUN set -ex; \
 	\
 	apt-get update; \
-	apt-get install -y --allow-unauthenticated --no-install-recommends wget; \
+	apt-get install -qq -y --allow-unauthenticated --no-install-recommends wget; \
 	rm -rf /var/lib/apt/lists/*; \
 	\
 	dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
@@ -102,7 +108,7 @@ RUN set -xe; \
         \
         echo "couchdb couchdb/mode select none" | debconf-set-selections; \
 # we DO want recommends this time
-        DEBIAN_FRONTEND=noninteractive apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
+        DEBIAN_FRONTEND=noninteractive apt-get install -qq -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
                 couchdb="$COUCHDB_VERSION"~stretch \
         ; \
 # Undo symlinks to /var/log and /var/lib

@@ -4,7 +4,7 @@ describe("Owner", function() {
   var user = require('../../lib/thinx/owner');
   var User = new user();
 
-  var envi = require("./_envi.json");
+  var envi = require("../_envi.json");
   var owner = envi.oid;
   var avatar_image = envi.test_avatar;
   var email = envi.email;
@@ -65,9 +65,11 @@ describe("Owner", function() {
           avatar: avatar_image
         }
       };
-      User.update(owner, body, function(success,
-        response) {
-        console.log("avatar update response: " + JSON.stringify(response));
+      User.update(
+        owner,
+        body,
+        function(success, response) {
+        console.log("avatar update response: " , {response});
         if (success === false) {
           console.log(response);
         }
@@ -76,12 +78,13 @@ describe("Owner", function() {
       });
     }, 10000);
 
+ /*
   it("should be able to fetch owner profile", function(done) {
     User.profile(owner, function(success, response) {
       expect(response).toBeDefined();
       expect(success).toBe(true);
       if (success === false) {
-        console.log("profile fetch response: " + JSON.stringify(response));
+        console.log("profile fetch response: " , {response});
       }
       done();
     });
@@ -145,5 +148,5 @@ describe("Owner", function() {
     });
 
   });
-
+*/
 });

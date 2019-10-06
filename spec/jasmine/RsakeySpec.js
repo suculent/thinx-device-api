@@ -3,7 +3,7 @@ describe("RSA Key", function() {
   var RSAKey = require("../../lib/thinx/rsakey");
   var rsakey = new RSAKey();
 
-  var envi = require("./_envi.json");
+  var envi = require("../_envi.json");
   var owner = envi.oid;
 
   var invalid_fingerprints = [
@@ -18,7 +18,7 @@ describe("RSA Key", function() {
     rsakey.create(owner,
     function(success, response) {
       revoked_fingerprint = response;
-      console.log("RSA add result: " + JSON.stringify(response));
+      //console.log("RSA add result: " , {response});
       expect(success).toBe(true);
       done();
     });
@@ -35,7 +35,7 @@ describe("RSA Key", function() {
   it("should fail on invalid revocation", function(done) {
     rsakey.revoke(owner, invalid_fingerprints,
       function(success, message) {
-        console.log("RSA revocation result: " +JSON.stringify(message));
+        //console.log("RSA revocation result: " +JSON.stringify(message));
         expect(success).toBe(false);
         expect(message).toBeDefined();
         done();
@@ -46,7 +46,7 @@ describe("RSA Key", function() {
     rsakey.create(owner,
     function(success, response) {
       revoked_filenames.push(response.filename);
-      console.log("RSA add result: " + JSON.stringify(response));
+      //console.log("RSA add result: " , {response});
       expect(success).toBe(true);
       done();
     });
@@ -56,7 +56,7 @@ describe("RSA Key", function() {
     rsakey.create(owner,
     function(success, response) {
       revoked_filenames.push(response.filename);
-      console.log("RSA add result: " + JSON.stringify(response));
+      //console.log("RSA add result: " , {response});
       expect(success).toBe(true);
       done();
     });

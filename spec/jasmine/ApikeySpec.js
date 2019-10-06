@@ -5,7 +5,7 @@ describe("API Key", function() {
   var APIKey = require("../../lib/thinx/apikey");
   var apikey = new APIKey();
   var sha256 = require("sha256");
-  var envi = require("./_envi.json");
+  var envi = require("../_envi.json");
   var owner = envi.oid;
 
   //create: function(owner, apikey_alias, callback)
