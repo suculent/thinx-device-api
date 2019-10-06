@@ -75,7 +75,7 @@ jobs:
         command: |
             mkdir -p /mnt/data/
             mkdir -p /mnt/data && cp -R ./conf /mnt/data
-            mkdir -p /mnt/data/ssh-keys
+            mkdir -p /mnt/data/ssh_keys
             mkdir -p /mnt/data/mosquitto/auth
             mkdir -p /mnt/data/mosquitto/config
             mkdir -p /mnt/data/mosquitto/data
@@ -142,8 +142,9 @@ jobs:
         name: Starting CouchDB and API Test
         command: |
           export ENVIRONMENT=test
-          docker-compose up --build couchdb api
-          timeout 120 docker-compose logs -f
+          docker-compose up -d --build couchdb
+          docker-compose up -d --build api
+          timeout 60 docker-compose logs -f
           docker-compose stop
         # docker-compose up -d --build console
 

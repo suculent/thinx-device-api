@@ -63,12 +63,6 @@ if (Globals.use_sqreen()) {
  }
 }
 
-
-//
-// HTTP/S Request Tools
-//
-
-
 //
 // App
 //
@@ -77,12 +71,10 @@ console.log("Initializing App consts...");
 
 var _ws = null;
 
-
 var db = app_config.database_uri;
 var serverPort = app_config.port;
 var socketPort = app_config.socket;
 
-//var url = require("url");
 var https = require("https");
 var parser = require("body-parser");
 var nano = require("nano")(db);
@@ -306,8 +298,6 @@ console.log("Starting with prefix: '"+prefix+"'");
 
 var devicelib = require("nano")(db).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
 var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
-var buildlib = require("nano")(db).use(prefix + "managed_builds"); // lgtm [js/unused-local-variable]
-var loglib = require("nano")(db).use(prefix + "managed_logs"); // lgtm [js/unused-local-variable]
 
 const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
 const blog = new Buildlog();
