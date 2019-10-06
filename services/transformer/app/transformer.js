@@ -101,12 +101,12 @@ class Transformer {
       });
 
     this.app.post("/do", function(req, res) {
-      process(req, res);
+      this.process(req, res);
     });
 
     /* Credits handler, returns current credits from user info */
     this.app.get("/id", function(req, res) {
-      respond(res, {
+      this.respond(res, {
         id: server_id,
         mac: server_mac
       });
@@ -115,7 +115,7 @@ class Transformer {
 
   process(req, res) {
     if (typeof(req.body) === "undefined") {
-      respond(res, {
+      this.respond(res, {
         success: false,
         error: "missing: body"
       });
@@ -131,7 +131,7 @@ class Transformer {
 
     var jobs = ingress.jobs;
     if (typeof(ingress.jobs) === "undefined") {
-      respond(res, {
+      this.respond(res, {
         success: false,
         error: "missing: body.jobs"
       });
@@ -139,7 +139,7 @@ class Transformer {
     }
 
     console.log(new Date().toString() + "Incoming job.");
-    transform(jobs, res);
+    this.transform(jobs, res);
   }
 
   sanitize(code) {
@@ -198,10 +198,11 @@ class Transformer {
     var error = null;
     for (var job_index in jobs) {
       const job = jobs[job_index];
-      const code = sanitize(job.code);
+      const code = this.sanitize(job.code);
       console.log(new Date().toString() + " job: " + JSON.stringify(job));
       try {
         console.log("Running code:\n" + code);
+        var transformer = function() {};
         /* jshint -W061 */
         eval(code); // expects transformer(status, device); function only; may provide API
         /* jshint +W061 */
@@ -217,7 +218,7 @@ class Transformer {
 
   transform(jobs, res) {
     this.process_jobs(jobs, (input_raw, status, error) => {
-      respond(res, {
+      this.respond(res, {
         input: input_raw,
         output: status,
         error: error
