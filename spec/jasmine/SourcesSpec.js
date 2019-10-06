@@ -13,7 +13,7 @@ describe("Sources", function() {
       name: source_name,
       owner: owner,
       branch: "origin/master",
-      url: "https://github.com/suculent/thinx-firmware-esp8266-arduino",
+      url: "https://github.com/suculent/thinx-firmware-esp8266-pio",
       platform: "arduino"
     };
     Sources.add(source,
@@ -41,7 +41,7 @@ describe("Sources", function() {
   it("should be able to be removed", function(done) {
 
     const source = {
-      owner: "to-be-deleted-on-test",
+      owner: owner,
       branch: "origin/master",
       url: "https://github.com/suculent/thinx-firmware-esp8266-pio",
       platform: "nodejs"
