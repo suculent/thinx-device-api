@@ -46,8 +46,8 @@ var redis_client = redis.createClient(Globals.redis_options());
 
 // New imports
 
-const Validator = require('../../lib/thinx/validator');
-const Vault = require('../../lib/thinx/vault');
+const Validator = require('./lib/thinx/validator');
+const Vault = require('./lib/thinx/vault');
 
 
 //
