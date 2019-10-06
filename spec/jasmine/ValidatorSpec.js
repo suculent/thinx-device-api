@@ -46,7 +46,4 @@ describe("Validator", function() {
     expect(result).toBeDefined();
     expect(result == udid).toBe(true);
   });
-
-
-
 });
