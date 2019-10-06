@@ -100,9 +100,6 @@ var parser = require("body-parser");
 var nano = require("nano")(db);
 var sha256 = require("sha256");
 
-var slack_webhook = app_config.slack_webhook;
-var thinx_slack = require("slack-notify")(slack_webhook);
-
 var WebSocket = require("ws");
 
 // list of previously discovered attackers
