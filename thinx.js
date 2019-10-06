@@ -7,8 +7,6 @@ console.log("--- " + new Date() + " ---");
 
 var Sqreen;
 
-var global_token = null;
-var global_response = null;
 var exec = require("child_process"); // lgtm [js/unused-local-variable]
 var typeOf = require("typeof");
 var Rollbar = require("rollbar"); // lgtm [js/unused-local-variable]
