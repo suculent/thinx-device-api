@@ -139,7 +139,7 @@ class Transformer {
     }
 
     console.log(new Date().toString() + "Incoming job.");
-    transform(req, res);
+    transform(jobs, res);
   }
 
   sanitize(code) {
@@ -149,17 +149,18 @@ class Transformer {
     try {
       var exec = null;
       var decoded = false;
-      if (decoded === false) {
-        try {
-          cleancode = unescape(base64.decode(code));
-          decoded = true;
-        } catch (e) {
-          console.log("Job is not a base64.");
-          decoded = false;
-        }
+
+      // Try unwrapping as Base64
+      try {
+        cleancode = unescape(base64.decode(code));
+        decoded = true;
+      } catch (e) {
+        console.log("Job is not a base64.");
+        decoded = false;
       }
 
       if (decoded === false) {
+        // Try unwrapping as Base128
         try {
           cleancode = unescape(base128.decode(code));
           decoded = true;
@@ -172,12 +173,11 @@ class Transformer {
       if (decoded === false) {
         cleancode = unescape(code); // accept bare code for testing, will deprecate
       }
-
+      
     } catch (e) {
       console.log("Docker Transformer Ecception: " + e);
       error = JSON.stringify(e);
     }
-
     return cleancode;
   }
 
@@ -192,12 +192,10 @@ class Transformer {
     }
   }
 
-  transform(req, res) {
-
+  process_jobs(jobs, callback) {
     var input_raw = jobs[0].params.status;
     var status = input_raw;
     var error = null;
-
     for (var job_index in jobs) {
       const job = jobs[job_index];
       const code = sanitize(job.code);
@@ -214,18 +212,20 @@ class Transformer {
         error = JSON.stringify(e);
       }
     }
+    callback(input_raw, status, error);
+  }
 
-    respond(res, {
-      input: input_raw,
-      output: status,
-      error: error
+  transform(jobs, res) {
+    process_jobs(jobs, (input_raw, status, error) => {
+      respond(res, {
+        input: input_raw,
+        output: status,
+        error: error
+      });
     });
   }
 
 }
 
-console.log("Initializing transformer...");
-
 var server = new Transformer();
-
 console.log("Transformer initialized...");
