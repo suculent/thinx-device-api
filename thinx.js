@@ -326,8 +326,6 @@ var loglib = require("nano")(db).use(prefix + "managed_logs"); // lgtm [js/unuse
 const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
 const blog = new Buildlog();
 
-require('./lib/router.js')(app);
-
 //
 // <<<
 //
@@ -401,7 +399,7 @@ app.use(function(req, res, next) {
 
 console.log("Initializing Endpoints...");
 
-
+require('./lib/router.js')(app);
 
 /*
  * HTTP/HTTPS API Server
