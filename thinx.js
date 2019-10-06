@@ -8,7 +8,6 @@ console.log("--- " + new Date() + " ---");
 var Sqreen;
 
 var exec = require("child_process"); // lgtm [js/unused-local-variable]
-var typeOf = require("typeof");
 var Rollbar = require("rollbar"); // lgtm [js/unused-local-variable]
 var crypto = require('crypto');
 
@@ -37,16 +36,9 @@ var path = require('path');
 var session_config = require("./conf/node-session.json");
 
 var app_config = Globals.app_config();
-var client_user_agent = app_config.client_user_agent;
 var prefix = Globals.prefix();
 var rollbar = Globals.rollbar(); // lgtm [js/unused-local-variable]
 var redis_client = redis.createClient(Globals.redis_options());
-
-// New imports
-
-const Validator = require('./lib/thinx/validator');
-const Vault = require('./lib/thinx/vault');
-
 
 //
 // Shared Configuration
@@ -54,14 +46,10 @@ const Vault = require('./lib/thinx/vault');
 
 const hour = 3600 * 1000;
 const day = hour * 24;
-const fortnight = day * 14;
 
 //
 // Environment-dependent configurations
 //
-
-var google_ocfg = Globals.google_ocfg();
-var github_ocfg = Globals.github_ocfg();
 
 if (Globals.use_sqreen()) {
   if ((typeof(process.env.SQREEN_APP_NAME) !== "undefined") && (typeof(process.env.SQREEN_TOKEN) !== "undefined")) {
@@ -98,7 +86,6 @@ var socketPort = app_config.socket;
 var https = require("https");
 var parser = require("body-parser");
 var nano = require("nano")(db);
-var sha256 = require("sha256");
 
 var WebSocket = require("ws");
 

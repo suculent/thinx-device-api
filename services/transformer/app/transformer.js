@@ -173,7 +173,7 @@ class Transformer {
       if (decoded === false) {
         cleancode = unescape(code); // accept bare code for testing, will deprecate
       }
-      
+
     } catch (e) {
       console.log("Docker Transformer Ecception: " + e);
       error = JSON.stringify(e);
@@ -216,7 +216,7 @@ class Transformer {
   }
 
   transform(jobs, res) {
-    process_jobs(jobs, (input_raw, status, error) => {
+    this.process_jobs(jobs, (input_raw, status, error) => {
       respond(res, {
         input: input_raw,
         output: status,
