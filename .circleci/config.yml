@@ -144,6 +144,8 @@ jobs:
           export ENVIRONMENT=test
           docker-compose up -d --build couchdb
           docker-compose up -d --build api
+          echo "Tailing logs for one minute..."
+          date
           timeout 60 docker-compose logs -f
           docker-compose stop
         # docker-compose up -d --build console
