@@ -57,7 +57,7 @@ var Login = function() {
         $.ajax({
           url: urlBase + '/login',
           xhrFields: {
-            withCredentials: true
+            withCredentials: urlBase == "localhost" ? false : true
           },
           data: data,
           type: 'POST',
