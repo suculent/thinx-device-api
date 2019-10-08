@@ -1,12 +1,18 @@
 // Thninx API Ajax Class
 var urlBase = '<ENV::apiBaseUrl>';
 
-$.ajaxSetup({
-  contentType: "application/json; charset=utf-8",
-  xhrFields: {
-    withCredentials: true
-  }
-});
+if (urlBase == "localhost") {
+  $.ajaxSetup({
+    contentType: "application/json; charset=utf-8"
+  });
+} else {
+  $.ajaxSetup({
+    contentType: "application/json; charset=utf-8",
+    xhrFields: {
+      withCredentials: true
+    }
+  });
+}
 
 var Thinx = {
   // RSA
