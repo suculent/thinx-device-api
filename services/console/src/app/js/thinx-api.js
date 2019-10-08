@@ -1,7 +1,7 @@
 // Thninx API Ajax Class
 var urlBase = '<ENV::apiBaseUrl>';
 
-if (urlBase == "localhost") {
+if (urlBase.indexOf("localhost") !== -1) {
   $.ajaxSetup({
     contentType: "application/json; charset=utf-8"
   });
@@ -9,7 +9,7 @@ if (urlBase == "localhost") {
   $.ajaxSetup({
     contentType: "application/json; charset=utf-8",
     xhrFields: {
-      withCredentials: urlBase == "localhost" ? false : true
+      withCredentials: urlBase.indexOf("localhost") !== -1 ? false : true
     }
   });
 }
@@ -794,7 +794,7 @@ function getArtifacts(deviceUdid, build_id) {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', urlBase + '/device/artifacts', true);
     xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
-    xhr.withCredentials = urlBase == "localhost" ? false : true;
+    xhr.withCredentials = urlBase.indexOf("localhost") !== -1 ? false : true;
     xhr.responseType = 'blob';
     xhr.onload  = () => resolve(xhr.response);
     xhr.onerror = () => reject(xhr.statusText);

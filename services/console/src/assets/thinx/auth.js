@@ -170,7 +170,7 @@ var Auth = function() {
         data: { token: $.getQuery('t') },
         dataType: 'json',
         xhrFields: {
-          withCredentials: urlBase == "localhost" ? false : true
+          withCredentials: urlBase.indexOf("localhost") !== -1 ? false : true
         }
       })
       .done(function(response) {
