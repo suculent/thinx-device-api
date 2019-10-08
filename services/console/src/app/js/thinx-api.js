@@ -9,7 +9,7 @@ if (urlBase == "localhost") {
   $.ajaxSetup({
     contentType: "application/json; charset=utf-8",
     xhrFields: {
-      withCredentials: true
+      withCredentials: urlBase == "localhost" ? false : true
     }
   });
 }
@@ -794,7 +794,7 @@ function getArtifacts(deviceUdid, build_id) {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', urlBase + '/device/artifacts', true);
     xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
-    xhr.withCredentials = true;
+    xhr.withCredentials = urlBase == "localhost" ? false : true;
     xhr.responseType = 'blob';
     xhr.onload  = () => resolve(xhr.response);
     xhr.onerror = () => reject(xhr.statusText);
