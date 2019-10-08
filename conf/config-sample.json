@@ -31,7 +31,7 @@
   "data_root": "/mnt/data",
   "deploy_root": "/data",
   "build_root": "/repositories",
-  "ssh_keys": "/mnt/data/ssh-keys",
+  "ssh_keys": "/mnt/data/ssh_keys",
   "slack_webhook": "https://hooks.slack.com/services/XXXXXXXX/XXXXXXXXX/Xxxx...",
   "slack_bot_token": "xoxb-xxxx-yyyy",
   "slack_bot_topic": "thinx",

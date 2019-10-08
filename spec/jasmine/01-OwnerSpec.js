@@ -69,9 +69,8 @@ describe("Owner", function() {
         owner,
         body,
         function(success, response) {
-        console.log("avatar update response: " , {response});
         if (success === false) {
-          console.log(response);
+          console.log("avatar update response: " , {response});
         }
         expect(success).toBe(true);
         done();

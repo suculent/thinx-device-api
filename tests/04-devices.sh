@@ -56,6 +56,6 @@ COUNTER=0
              fi
 
 
-             let COUNTER+=1
+             (( COUNTER++ ))
          done
 exit 0
