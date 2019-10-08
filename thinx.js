@@ -7,6 +7,19 @@ console.log("--- " + new Date() + " ---");
 
 var Sqreen;
 
+if (Globals.use_sqreen()) {
+  if ((typeof(process.env.SQREEN_APP_NAME) !== "undefined") && (typeof(process.env.SQREEN_TOKEN) !== "undefined")) {
+    try {
+      Sqreen = require('sqreen');
+    } catch (bitch) {
+      console.log(bitch);
+    }
+  } else {
+    console.log("Sqreen env vars not available");
+ }
+}
+
+
 var exec = require("child_process"); // lgtm [js/unused-local-variable]
 var Rollbar = require("rollbar"); // lgtm [js/unused-local-variable]
 var crypto = require('crypto');
@@ -46,22 +59,6 @@ var redis_client = redis.createClient(Globals.redis_options());
 
 const hour = 3600 * 1000;
 const day = hour * 24;
-
-//
-// Environment-dependent configurations
-//
-
-if (Globals.use_sqreen()) {
-  if ((typeof(process.env.SQREEN_APP_NAME) !== "undefined") && (typeof(process.env.SQREEN_TOKEN) !== "undefined")) {
-    try {
-      Sqreen = require('sqreen');
-    } catch (bitch) {
-      console.log(bitch);
-    }
-  } else {
-    console.log("Sqreen env vars not available");
- }
-}
 
 //
 // App
