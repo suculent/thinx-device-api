@@ -1,7 +1,7 @@
 export ENVIRONMENT=test
 export THINX_HOSTNAME=localhost
 export THINX_OWNER_EMAIL=admin@localhost
-export REVISION=4404
+export REVISION=5146
 export CODACY_PROJECT_TOKEN=none
 export CODE_CLIMATE_CODE=none
 export ROLLBAR_ACCESS_TOKEN=none

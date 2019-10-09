@@ -1,12 +1,18 @@
 // Thninx API Ajax Class
 var urlBase = '<ENV::apiBaseUrl>';
 
-$.ajaxSetup({
-  contentType: "application/json; charset=utf-8",
-  xhrFields: {
-    withCredentials: true
-  }
-});
+if (urlBase.indexOf("localhost") !== -1) {
+  $.ajaxSetup({
+    contentType: "application/json; charset=utf-8"
+  });
+} else {
+  $.ajaxSetup({
+    contentType: "application/json; charset=utf-8",
+    xhrFields: {
+      withCredentials: urlBase.indexOf("localhost") !== -1 ? false : true
+    }
+  });
+}
 
 var Thinx = {
   // RSA
@@ -788,7 +794,7 @@ function getArtifacts(deviceUdid, build_id) {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', urlBase + '/device/artifacts', true);
     xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
-    xhr.withCredentials = true;
+    xhr.withCredentials = urlBase.indexOf("localhost") !== -1 ? false : true;
     xhr.responseType = 'blob';
     xhr.onload  = () => resolve(xhr.response);
     xhr.onerror = () => reject(xhr.statusText);
