@@ -28,12 +28,12 @@ jobs:
     - run:
           name: Install latest Docker
           command: |
-            sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-            sudo apt-get update
-            sudo apt-get install docker-ce
+            add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+            apt-get update
+            apt-get install docker-ce
 
-            sudo sh -c 'echo "{\"features\":{\"buildkit\": true}, \"experimental\": true}" > /etc/docker/daemon.json'
-            sudo systemctl restart docker
+            sh -c 'echo "{\"features\":{\"buildkit\": true}, \"experimental\": true}" > /etc/docker/daemon.json'
+            systemctl restart docker
 
             docker version
 
