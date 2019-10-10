@@ -1,6 +1,6 @@
 {
   "name": "thinx",
-  "version": "1.1.5149",
+  "version": "1.1.5150",
   "description": "THiNX IoT RTM API",
   "bugs": {
     "url": "https://github.com/suculent/thinx-device-api/issues"
@@ -25,7 +25,6 @@
     "@slack/rtm-api": "^5.0.3",
     "@slack/web-api": "^5.2.1",
     "base-64": "^0.1.0",
-    "base128": "^0.2.1",
     "body-parser": "^1.19.0",
     "brace-expansion": "1.1.11",
     "coap": "^0.23.1",
