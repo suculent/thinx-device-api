@@ -144,14 +144,12 @@ jobs:
           export ENVIRONMENT=test
           docker-compose up -d --build couchdb
           echo "Waiting 30 seconds for CouchDB to start up..."
-          sleep 60
-          curl -X PUT http://rtmtest:rtmtest@localhost:5984/_users
-          curl -X PUT http://rtmtest:rtmtest@localhost:5984/_replicator
-          curl -X PUT http://rtmtest:rtmtest@localhost:5984/_global_changes
+          timeout 60 docker-compose logs -f          
           docker-compose up -d --build api
           echo "Tailing logs for one minute..."
           date
           timeout 60 docker-compose logs -f
+          docker cp api:/mnt/data/artifacts/* /mnt/data/test-reports
           docker-compose stop
         # docker-compose up -d --build console
 
