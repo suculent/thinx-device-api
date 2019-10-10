@@ -106,8 +106,8 @@ jobs:
           ls -la /mnt/data/conf
           cp -vf ./.env ./.thinx_env
           sed -i -e 's/^/export /' ./.thinx_env # create from .thinx_env from .env
-          echo ".thinx_env contents:"
-          cat ./.thinx_env
+          # echo ".thinx_env contents:"
+          # cat ./.thinx_env
           echo "Contents of ./conf"
           ls -la ./conf
           echo "Contents of ./.env"
@@ -149,7 +149,7 @@ jobs:
           echo "Tailing logs for one minute..."
           date
           timeout 60 docker-compose logs -f
-          docker cp api:/mnt/data/artifacts/* /mnt/data/test-reports
+          docker cp api:/mnt/data/test-reports /mnt/data/test-reports
           docker-compose stop
         # docker-compose up -d --build console
 
