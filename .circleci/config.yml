@@ -149,7 +149,7 @@ jobs:
           echo "Tailing logs for one minute..."
           date
           timeout 60 docker-compose logs -f
-          docker cp api:/mnt/data/test-reports /mnt/data/test-reports
+          docker cp api_1:/mnt/data/test-reports /mnt/data/test-reports
           docker-compose stop
         # docker-compose up -d --build console
 
