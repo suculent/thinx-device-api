@@ -143,6 +143,8 @@ jobs:
         command: |
           export ENVIRONMENT=test
           docker-compose up -d --build couchdb
+          echo "Waiting 30 seconds for CouchDB to start up..."
+          sleep 30
           docker-compose up -d --build api
           echo "Tailing logs for one minute..."
           date
