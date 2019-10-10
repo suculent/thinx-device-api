@@ -26,13 +26,16 @@ jobs:
     steps:
 
     - run:
-        name: Install Docker client
-        command: |
-            set -x
-            VER="18.06.0-ce"
-            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
-            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
-            mv /tmp/docker/* /usr/bin
+          name: Install latest Docker
+          command: |
+            sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+            sudo apt-get update
+            sudo apt-get install docker-ce
+
+            sudo sh -c 'echo "{\"features\":{\"buildkit\": true}, \"experimental\": true}" > /etc/docker/daemon.json'
+            sudo systemctl restart docker
+
+            docker version
 
     - run:
         name: Install Docker Compose
