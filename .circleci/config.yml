@@ -145,6 +145,9 @@ jobs:
           docker-compose up -d --build couchdb
           echo "Waiting 30 seconds for CouchDB to start up..."
           sleep 60
+          curl -X PUT http://rtmtest:rtmtest@couchdb:5984/_users
+          curl -X PUT http://rtmtest:rtmtest@couchdb:5984/_replicator
+          curl -X PUT http://rtmtest:rtmtest@couchdb:5984/_global_changes
           docker-compose up -d --build api
           echo "Tailing logs for one minute..."
           date
