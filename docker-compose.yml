@@ -58,7 +58,7 @@ services:
       - COUCHDB_COOKIE=${COUCHDB_COOKIE}
       - COUCHDB_SECRET=${COUCHDB_SECRET}
     ports:
-      - 5984:5984 # ! testing
+      - 5984
     networks:
       - nat
       - internal
@@ -86,7 +86,7 @@ services:
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
     restart: unless-stopped
     ports:
-      - 6379:6379 # only dev!
+      - 6379
     volumes:
       - /mnt/data/redis:/data
     labels:
