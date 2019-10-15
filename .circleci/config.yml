@@ -159,7 +159,7 @@ jobs:
             docker ps
             docker network ls
             docker network inspect bridge
-            cat /mnt/data/couchdb
+            ls -la /mnt/data/couchdb/**
 
     # Save test results
     - store_test_results:
