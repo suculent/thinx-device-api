@@ -49,6 +49,11 @@ services:
       - COUCHDB_COOKIE=${COUCHDB_COOKIE}
       - COUCHDB_SECRET=${COUCHDB_SECRET}
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -XGET http://localhost:5984"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     environment:
       - NODENAME=${NODENAME}
       - COUCHDB_USER=${COUCHDB_USER}
@@ -124,6 +129,7 @@ services:
     shm_size: 2048M
     restart: "no" # for testing, otherwise unless-stopped"
     depends_on:
+      - couchdb
       - transformer
       - thinx-redis
     networks:
@@ -194,7 +200,7 @@ services:
       - nat
       - internal
     ports:
-      - 80:80
+      - 80:8080
     restart: unless-stopped
     environment:
       - NGINX_PORT=80
