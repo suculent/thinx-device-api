@@ -23,7 +23,6 @@ https.globalAgent.options.ca = require('ssl-root-cas');
 var parser = require("body-parser");
 var typeOf = require("typeof");
 var base64 = require("base-64");
-var base128 = require("base128");
 
 const uuidv1 = require('uuid/v1');
 const server_id = uuidv1();
@@ -160,12 +159,11 @@ class Transformer {
       }
 
       if (decoded === false) {
-        // Try unwrapping as Base128
         try {
-          cleancode = unescape(base128.decode(code));
+          cleancode = unescape(base64.decode(code.toString('utf8')));
           decoded = true;
         } catch (e) {
-          console.log("Job is not a base128.");
+          console.log("Base 128 not supported anymore.");
           decoded = false;
         }
       }

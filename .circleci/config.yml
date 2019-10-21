@@ -29,7 +29,7 @@ jobs:
         name: Install Docker client
         command: |
             set -x
-            VER="17.03.0-ce"
+            VER="18.06.0-ce"
             curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
             tar -xz -C /tmp -f /tmp/docker-$VER.tgz
             mv /tmp/docker/* /usr/bin
@@ -106,8 +106,8 @@ jobs:
           ls -la /mnt/data/conf
           cp -vf ./.env ./.thinx_env
           sed -i -e 's/^/export /' ./.thinx_env # create from .thinx_env from .env
-          echo ".thinx_env contents:"
-          cat ./.thinx_env
+          # echo ".thinx_env contents:"
+          # cat ./.thinx_env
           echo "Contents of ./conf"
           ls -la ./conf
           echo "Contents of ./.env"
@@ -143,10 +143,13 @@ jobs:
         command: |
           export ENVIRONMENT=test
           docker-compose up -d --build couchdb
+          echo "Waiting 30 seconds for CouchDB to start up..."
+          timeout 60 docker-compose logs -f
           docker-compose up -d --build api
           echo "Tailing logs for one minute..."
           date
           timeout 60 docker-compose logs -f
+          docker cp api_1:/mnt/data/test-reports/* $CIRCLE_TEST_REPORTS
           docker-compose stop
         # docker-compose up -d --build console
 
@@ -156,6 +159,7 @@ jobs:
             docker ps
             docker network ls
             docker network inspect bridge
+            ls -la /mnt/data/couchdb/**
 
     # Save test results
     - store_test_results:

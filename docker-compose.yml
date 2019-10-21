@@ -49,6 +49,11 @@ services:
     #  - COUCHDB_COOKIE=${COUCHDB_COOKIE}
     #  - COUCHDB_SECRET=${COUCHDB_SECRET}
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -XGET http://localhost:5984"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     environment:
       - NODENAME=${NODENAME}
       - COUCHDB_USER=${COUCHDB_USER}
@@ -58,7 +63,7 @@ services:
       - COUCHDB_COOKIE=${COUCHDB_COOKIE}
       - COUCHDB_SECRET=${COUCHDB_SECRET}
     ports:
-      - 5984:5984
+      - 5984
     networks:
       - nat
       - internal
@@ -124,6 +129,7 @@ services:
     shm_size: 2048M
     restart: "no" # for testing, otherwise unless-stopped"
     depends_on:
+      - couchdb
       - transformer
       - thinx-redis
     networks:
@@ -142,8 +148,12 @@ services:
         - SQREEN_APP_NAME=${SQREEN_APP_NAME}
         - AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}
         - ENVIRONMENT=${ENVIRONMENT}
+        - COUCHDB_USER=${COUCHDB_USER}
+        - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
     environment:
       - ENVIRONMENT=${ENVIRONMENT}
+      - COUCHDB_USER=${COUCHDB_USER}
+      - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
     ports:
       - 7442:7442 # API (HTTP)
       - 7443:7443 # API (HTTPS)

@@ -667,6 +667,10 @@ function setup_restore_owners_credentials(query) {
   });
 }
 
+function startup_quote() {
+  messenger.sendRandomQuote();
+}
+
 if (isMasterProcess()) {
 
   setInterval(database_compactor, 3600 * 1000);
@@ -674,6 +678,9 @@ if (isMasterProcess()) {
 
   // MQTT Messenger/listener
   messenger.init();
+
+  setTimeout(startup_quote, 10000); // wait for Slack init only once
+
 
   //
   // TODO: Move to messenger or owner OR DEVICES? Or extract?

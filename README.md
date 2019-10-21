@@ -141,7 +141,7 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 ## Prerequisites for running own THiNX Server
 
 * Linux Server (min. 2 GB RAM, 32GB SSD, Ubuntu)
-* Docker
+* Docker (docker-compose)
 
 ## Port mapping
 
@@ -150,7 +150,6 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 * Admin runs on HTTP/HTTPS port (80/443)
 * GitHub commit hooks are listened to on port 9002
 * Status Transformers (internal network only, 7445)
-
 
 ## Logging
 
@@ -162,6 +161,7 @@ Use your favourite service and log-sender agent. Tested successfully with [Logz.
 
 **Suggested:**
 
+* Fully Qualified Domain Name (if you're testing on localhost, configure conf/config.json to set `debug: { allow_http_login: true }` )
 * [Mailgun](https://mailgun.com) account (recently added)
 * [Rollbar](https://rollbar.com) integration
 
@@ -171,6 +171,8 @@ Use your favourite service and log-sender agent. Tested successfully with [Logz.
 * [Sqreen](https://sqreen.com) integration
 * [Slack](https://slack.com) integration
 * [Crisp.chat](https://crisp.chat) integration
+
+
 
 ### Using docker-compose
 
@@ -186,6 +188,8 @@ You don't need Mailgun for developer installation, just copy-paste the activatio
 	nano .thinx_env
 	./copy-envs.sh
 	docker-compose up -d --build
+
+Optionally see the ./circleci/config.yml for reference on installation steps.
 
 ## GitHub Webhook support
 
