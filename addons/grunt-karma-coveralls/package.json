@@ -21,7 +21,7 @@
   ],
   "dependencies": {
     "coveralls": "^3.0.4",
-    "glob": "^7.1.4",
+    "glob": "^7.1.5",
     "karma-coverage": "^2.0.0",
     "log-driver": "^1.2"
   },
