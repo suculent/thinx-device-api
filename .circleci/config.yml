@@ -158,8 +158,7 @@ jobs:
         command: |
             docker ps
             docker network ls
-            docker network inspect bridge
-            ls -la /mnt/data/couchdb/**
+            docker network inspect bridge          
 
     # Save test results
     - store_test_results:
