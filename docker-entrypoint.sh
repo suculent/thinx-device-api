@@ -65,11 +65,11 @@ set -e
 mkdir -p /opt/thinx/.pm2/logs/
 touch /opt/thinx/.pm2/logs/index-out-1.log
 
-echo "/mnt/data/conf contents:"
-ls -lf /mnt/data/conf
-
-echo "/opt/thinx/thinx-device-api/conf contents:"
-ls -lf /opt/thinx/thinx-device-api/conf
+# Configuration Debugging:
+# echo "/mnt/data/conf contents:"
+# ls -lf /mnt/data/conf
+# echo "/opt/thinx/thinx-device-api/conf contents:"
+# ls -lf /opt/thinx/thinx-device-api/conf
 
 if [ $ENVIRONMENT == "test" ]; then
   echo "Running in TEST MODE!"
