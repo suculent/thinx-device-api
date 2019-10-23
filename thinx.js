@@ -540,7 +540,9 @@ var package_info = require("./package.json");
 var product = package_info.description;
 var version = package_info.version;
 
+console.log("");
 console.log("-=[ ☢ " + product + " v" + version + " rev. " + app.version() + " ☢ ]=-");
+console.log("");
 
 //
 // Database compactor
