@@ -120,7 +120,6 @@ function processSHA(build_path) {
     that.sha = sha;
     console.log("Data file not found.");
   }
-  console.log("Done.");
   return sha;
 }
 

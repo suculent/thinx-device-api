@@ -64,8 +64,6 @@ const day = hour * 24;
 // App
 //
 
-console.log("Initializing App consts...");
-
 var _ws = null;
 
 var db = app_config.database_uri;
@@ -129,8 +127,6 @@ try {
   console.log("[index] thx_prefix_exception" + e);
 }
 
-console.log("Initializing app requires...");
-
 // should be initialized after prefix because of DB requirements...
 var Version = require("./lib/thinx/version");
 var v = new Version();
@@ -149,7 +145,6 @@ var Repository = require("./lib/thinx/repository");
 var watcher = new Repository();
 console.log("Starting repository watcher...");
 watcher.watch();
-console.log("Done.");
 
 
 //
@@ -309,8 +304,6 @@ const blog = new Buildlog();
 var express = require("express");
 var session = require("express-session");
 
-console.log("Initializing Express...");
-
 var app = express();
 
 console.log("» Starting Redis client...");
@@ -369,8 +362,6 @@ app.use(function(req, res, next) {
 // app.use(cookieParser());
 // app.use(csrf({ cookie: true })); collides with Sqreen
 
-console.log("Initializing Endpoints...");
-
 require('./lib/router.js')(app);
 
 /*
@@ -389,7 +380,7 @@ var ssl_options = null;
 
 // Legacy HTTP support for old devices without HTTPS proxy
 http.createServer(app).listen(app_config.port, "0.0.0.0", function() {
-  console.log("Legacy API started on port", app_config.port);
+  console.log("» Legacy API started on port", app_config.port);
 });
 
 if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
@@ -413,8 +404,6 @@ app.set('trust proxy', ['loopback', '127.0.0.1']);
  */
 
 var wsapp = express();
-
-console.log("Initializing WS session store...");
 
 wsapp.use(session({
   secret: session_config.secret,
@@ -558,7 +547,6 @@ console.log("-=[ ☢ " + product + " v" + version + " rev. " + app.version() + "
 //
 
 function database_compactor() {
-  console.log("» Running database compact jobs...");
   nano.db.compact("managed_logs");
   nano.db.compact("managed_builds");
   nano.db.compact("managed_devices");
@@ -572,8 +560,6 @@ function database_compactor() {
 //
 
 function log_aggregator() {
-  console.log("» Running log aggregation jobs...");
-  // rollbar.info("Running aggregator.");
   stats.aggregate();
   console.log("» Aggregation jobs completed.");
 }
