@@ -50,7 +50,7 @@ ssh -o "StrictHostKeyChecking=no" git@github.com
 echo "Deploying with Rollbar..."
 if [[ ! -z $ROLLBAR_ACCESS_TOKEN ]]; then
   LOCAL_USERNAME=$(whoami)
-  curl https://api.rollbar.com/api/1/deploy/ \
+  curl --silent https://api.rollbar.com/api/1/deploy/ \
     -F access_token=$ROLLBAR_ACCESS_TOKEN \
     -F environment=$ROLLBAR_ENVIRONMENT \
     -F revision=$REVISION \
