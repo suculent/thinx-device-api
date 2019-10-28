@@ -306,6 +306,8 @@ var session = require("express-session");
 
 var app = express();
 
+app.messenger = messenger;
+
 console.log("» Starting Redis client...");
 var RedisStore = require("connect-redis")(session);
 var sessionStore = new RedisStore({
@@ -461,6 +463,7 @@ wss.on("connection", function connection(ws, req) {
   ws.on('pong', heartbeat);
 
   _ws = ws;
+  app._ws = ws;
 
   var cookies = req.headers.cookie;
 
