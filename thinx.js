@@ -659,7 +659,12 @@ function setup_restore_owners_credentials(query) {
 }
 
 function startup_quote() {
-  messenger.sendRandomQuote();
+  if (process.env.ENTERPRISE === true) {
+    // do nothing if you don't want to
+    messenger.sendRandomQuote();
+  } else {
+    messenger.sendRandomQuote();
+  }
 }
 
 if (isMasterProcess()) {
