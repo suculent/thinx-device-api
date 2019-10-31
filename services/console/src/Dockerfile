@@ -66,7 +66,7 @@ WORKDIR /usr/share/nginx/html
 COPY --from=0 /home/node/build/html .
 RUN echo "SRC AFTER BUILD: " && pwd && ls -la
 
-COPY default.conf /etc/nginx/conf.d/default.conf
+# COPY default.conf /etc/nginx/conf.d/default.conf
 
 RUN apt-get update \
  && apt-get install -qq -y curl
