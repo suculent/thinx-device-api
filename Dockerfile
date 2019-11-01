@@ -130,9 +130,9 @@ RUN rm -rf ./.git
 COPY ./.thinx_env ./.thinx_env
 #COPY ./conf/.thx_prefix ./conf/.thx_prefix
 
-#ADD https://get.aquasec.com/microscanner .
-#RUN chmod +x microscanner
-#RUN ./microscanner ${AQUA_SEC_TOKEN} --continue-on-failure
+ADD https://get.aquasec.com/microscanner .
+RUN chmod +x microscanner
+RUN ./microscanner ${AQUA_SEC_TOKEN} --continue-on-failure
 
 RUN mkdir -p ./.nyc_output
 
