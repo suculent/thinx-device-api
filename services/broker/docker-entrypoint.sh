@@ -15,13 +15,12 @@ incrond --foreground &
 incrontab --reload
 incrontab -l
 
-echo "Switching to service user..."
 touch /mqtt/log/mosquitto.log
 chown -R mosquitto:mosquitto /mqtt
 
 su mosquitto -s /bin/bash
 
-echo "Mosquitto Entrypoint Credentials: ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}"
+# echo "Mosquitto Entrypoint Credentials: ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}"
 
 touch /mqtt/auth/thinx.pw
 
@@ -32,22 +31,7 @@ if [[ ! -z $MOSQUITTO_PASSWORD ]]; then
   fi
 fi
 
-echo ""
-echo "Password file contents:"
-cat /mqtt/auth/thinx.pw
-echo "<<<"
-
-echo ""
-echo "Contents of /mqtt/config:"
-ls -la /mqtt/config
-echo ""
-
 CONFIG_FILE="/mqtt/config/mosquitto.conf"
-
-echo "Contents of ${CONFIG_FILE}"
-cat ${CONFIG_FILE}
-echo ""
-
 ACL_FILE="/mqtt/auth/thinx.acl"
 touch $ACL_FILE
 
