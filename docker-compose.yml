@@ -199,6 +199,8 @@ services:
     networks:
       - nat
       - internal
+    logger:
+      driver: "none" # disabled for production
     ports:
       - 8000:80 # configuration for running behind reverse-proxy
       # - 80:80 # configuration for running on localhost
