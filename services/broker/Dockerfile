@@ -15,6 +15,7 @@ RUN apt-get update -qq && apt-get install -qq -y ca-certificates apt-transport-h
     rm -rf /etc/apt/sources.list && apt-get update
 
 COPY ./config/mosquitto.conf /etc/mosquitto/conf.d/mosquitto.conf
+#COPY ./config/mosquitto.conf /mqtt/config/mosquitto.conf # should use file from /mnt/data/mosquitto/config/mosquitto.conf
 
 COPY ./mqtt_restart.sh /mqtt_restart.sh
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
