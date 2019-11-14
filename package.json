@@ -60,7 +60,7 @@
     "querystring": "^0.2.0",
     "redis": "^2.8.0",
     "request": "^2.88.0",
-    "rollbar": "^2.13.0",
+    "rollbar": "^2.14.4",
     "semver": "6.3.0",
     "sha256": "^0.2.0",
     "shell-escape": "^0.2.0",
