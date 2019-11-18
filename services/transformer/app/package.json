@@ -26,7 +26,6 @@
 		"body-parser": "^1.18.2",
 		"express": "^4.16.3",
 		"express-session": "^1.15.6",
-		"getmac": "^1.4.0",
 		"joi": "^14.3.1",
 		"parser": "^0.1.4",
 		"rollbar": "^2.14.4",

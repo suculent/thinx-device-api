@@ -12,6 +12,7 @@ var rollbar = new Rollbar({
   handleUnhandledRejections: true
 });
 */
+
 var express = require("express");
 var session = require("express-session");
 var http = require('http');
@@ -24,21 +25,8 @@ var parser = require("body-parser");
 var typeOf = require("typeof");
 var base64 = require("base-64");
 
-const uuidv1 = require('uuid/v1');
-const server_id = uuidv1();
-var server_mac = null;
-
 const cluster = require('cluster');
 const numCPUs = require('os').cpus().length; // default number of forks
-
-require('getmac').getMac(function(err, macAddress) {
-  if (err) {
-    console.log("getmac error: " + err);
-  } else {
-    console.log(macAddress);
-    server_mac = macAddress;
-  }
-});
 
 class Transformer {
 
@@ -101,14 +89,6 @@ class Transformer {
 
     this.app.post("/do", function(req, res) {
       this.process(req, res);
-    });
-
-    /* Credits handler, returns current credits from user info */
-    this.app.get("/id", function(req, res) {
-      this.respond(res, {
-        id: server_id,
-        mac: server_mac
-      });
     });
   }
 
