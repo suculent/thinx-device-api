@@ -70,8 +70,8 @@ services:
     volumes:
       - /mnt/data/couchdb:/var/lib/couchdb
       - /mnt/data/couchdb:/opt/couchdb/data
-#    labels:
-#      - "traefik.backend.couchdb.noexpose"
+    labels:
+      - "traefik.backend.couchdb.noexpose"
 
   thinx-redis:
     env_file: .env
@@ -177,6 +177,7 @@ services:
       - "traefik.enable=true"
       - "traefik.port=7442"
       - "traefik.backend=thinx-api"
+      - "traefik.frontend.rule=Host:${THINX_HOSTNAME}"
 
   console:
     env_file:
@@ -199,7 +200,7 @@ services:
     networks:
       - nat
       - internal
-    logger:
+    logging:
       driver: "none" # disabled for production
     ports:
       - 8000:80 # configuration for running behind reverse-proxy
