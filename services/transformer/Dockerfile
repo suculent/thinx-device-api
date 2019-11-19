@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:10.17-alpine
 
 ARG SQREEN_APP_NAME
 ARG SQREEN_TOKEN

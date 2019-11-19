@@ -1,4 +1,4 @@
-image: node:10.16
+image: node:10.17
 # using latest stable Node LTS
 
 stages:
