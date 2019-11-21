@@ -8,6 +8,8 @@
 
 set +e
 
+cp ./artifacts/microscanner.html /mnt/data/test-reports/microscanner.html
+
 curl -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_users
 curl -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_replicator
 curl -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_global_changes
