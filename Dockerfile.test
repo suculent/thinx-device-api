@@ -87,6 +87,7 @@ COPY package.json ./
 
 RUN openssl version \
  && node -v \
+ && npm update \
  && npm install .
 
 # Test modules
