@@ -31,7 +31,7 @@ WORKDIR /home/node/app
 COPY .env /home/node/app/.env
 
 # Running npm install for production purpose will not run dev dependencies.
-RUN npm install . --only-dev
+RUN npm install . --only-prod
 
 # Create a user group 'thinx'
 RUN addgroup -S thinx

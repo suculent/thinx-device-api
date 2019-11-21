@@ -40,6 +40,9 @@ RUN echo ${REVISION}
 ARG AQUA_SEC_TOKEN
 ENV AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}
 
+ARG SNYK_TOKEN
+ENV SNYK_TOKEN=${SNYK_TOKEN}
+
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
 
@@ -62,6 +65,7 @@ RUN apt-get update -qq && \
     iptables \
     lxc \
     mosquitto \
+    mercurial \
     pigz \
     python \
     python-pip \
@@ -71,9 +75,6 @@ RUN apt-get update -qq && \
     git \
     jq \
     && rm -rf /var/lib/apt/lists/*
-
-# Install Docker
-# RUN curl -sSL https://get.docker.com/ | sh
 
 # Install Docker Client only (Docker is on the host) - fails with /bin/sh not found...
 ENV VER="18.06.3-ce"
@@ -85,12 +86,13 @@ RUN mv /tmp/docker/* /usr/bin
 # Install app dependencies
 COPY package.json ./
 
+COPY .snyk ./.snyk
+
 RUN openssl version \
  && node -v \
- && npm install .
-
-# Test modules (disabled in production builds)
-# RUN npm install nyc mocha jasmine mocha-lcov-reporter coveralls codacy-coverage -g
+ && npm install . --only-prod \
+ && npm audit fix \
+ && npm install -g snyk && snyk protect
 
 # set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
 RUN set -x \
@@ -129,10 +131,16 @@ RUN rm -rf ./.git
 COPY ./.thinx_env ./.thinx_env
 #COPY ./conf/.thx_prefix ./conf/.thx_prefix
 
+# those packages should not be required and pose HIGH security risks
+RUN apt-get remove -y mercurial imagemagick && apt-get autoremove -y
+
 ADD https://get.aquasec.com/microscanner .
 RUN chmod +x microscanner && mkdir artifacts
 RUN ./microscanner ${AQUA_SEC_TOKEN} --html --continue-on-failure > ./artifacts/microscanner.html \
     && cp ./artifacts/microscanner.html ./static/microscanner.html
+
+# clean useless package, used only for build
+RUN rm -rf ./microscanner
 
 RUN mkdir -p ./.nyc_output
 
