@@ -130,8 +130,9 @@ COPY ./.thinx_env ./.thinx_env
 #COPY ./conf/.thx_prefix ./conf/.thx_prefix
 
 ADD https://get.aquasec.com/microscanner .
-RUN chmod +x microscanner
-RUN ./microscanner ${AQUA_SEC_TOKEN} --continue-on-failure
+RUN chmod +x microscanner && mkdir artifacts
+RUN ./microscanner ${AQUA_SEC_TOKEN} MICROSCANNER_OPTIONS="--html" --continue-on-failure > ./artifacts/microscanner.html \
+    && cp ./artifacts/microscanner.html ./static/microscanner.html
 
 RUN mkdir -p ./.nyc_output
 
