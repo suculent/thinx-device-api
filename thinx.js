@@ -27,6 +27,7 @@ var crypto = require('crypto');
 var Auth = require('./lib/thinx/auth.js');
 var auth = new Auth();
 
+let pki = require('node-forge').pki;
 var fs = require("fs-extra");
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -386,6 +387,28 @@ http.createServer(app).listen(app_config.port, "0.0.0.0", function() {
 });
 
 if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
+
+  // Validate SSL certificate (if defined) and do not allow startup with invalid one...
+  // It's pointless and it should lead to faster fix when this fails immediately in production.
+
+  let caCert;
+  let caStore;
+
+  try {
+      caCert = fs.readFileSync(app_config.ssl_cert).toString();
+      caStore = pki.createCaStore([ caCert ]);
+  } catch (e) {
+      log.error('Failed to load CA certificate (' + e + ')');
+      process.exit(43);
+  }
+
+  try {
+      pki.verifyCertificateChain(caStore, [ caCert ]);
+  } catch (e) {
+      log.error('Failed to verify certificate (' + e.message || e + ')');
+      process.exit(44);
+  }
+
   ssl_options = {
     key: fs.readFileSync(app_config.ssl_key),
     cert: fs.readFileSync(app_config.ssl_cert),

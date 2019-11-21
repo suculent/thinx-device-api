@@ -1,6 +1,6 @@
 {
   "name": "thinx",
-  "version": "1.1.5158",
+  "version": "1.1.5159",
   "description": "THiNX IoT RTM API",
   "bugs": {
     "url": "https://github.com/suculent/thinx-device-api/issues"
@@ -52,6 +52,7 @@
     "moment": "^2.24.0",
     "mqtt": "^3.0.0",
     "nano": "^8.1.0",
+    "node-forge": "^0.9.1",
     "npm": "^6.12.1",
     "npm-auto-version": "^1.0.0",
     "parse-date": "^1.1.0",
