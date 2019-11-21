@@ -137,7 +137,8 @@ RUN apt-get remove -y mercurial imagemagick && apt-get autoremove -y
 ADD https://get.aquasec.com/microscanner .
 RUN chmod +x microscanner && mkdir artifacts
 RUN ./microscanner ${AQUA_SEC_TOKEN} --html --continue-on-failure > ./artifacts/microscanner.html \
-    && cp ./artifacts/microscanner.html ./static/microscanner.html
+    && cp ./artifacts/microscanner.html ./static/microscanner.html \
+    && cp ./artifacts/microscanner.html /mnt/data/test-reports/microscanner.html
 
 # clean useless package, used only for build
 RUN rm -rf ./microscanner
