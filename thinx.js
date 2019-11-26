@@ -417,7 +417,7 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
 
   console.log("» Starting HTTPS server on " + app_config.secure_port + "...");
   https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0", function() { } );
-  
+
 } else {
   console.log("Skipping HTTPS server, SSL key or certificate not found.");
 }

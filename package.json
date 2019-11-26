@@ -66,7 +66,7 @@
     "sha256": "^0.2.0",
     "shell-escape": "^0.2.0",
     "sillyname": "^0.1.0",
-    "simple-oauth2": "^2.5.2",
+    "simple-oauth2": "^3.0.1",
     "slack-notify": "^0.1.7",
     "slackbots": "^1.2.0",
     "snyk": "^1.251.1",
