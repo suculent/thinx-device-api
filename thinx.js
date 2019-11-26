@@ -402,12 +402,13 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
       process.exit(43);
   }
 
+  /*
   try {
       pki.verifyCertificateChain(caStore, [ caCert ]);
   } catch (e) {
       console.log('Failed to verify certificate (' + e.message || e + ')');
       process.exit(44);
-  }
+  }*/
 
   ssl_options = {
     key: fs.readFileSync(app_config.ssl_key),
