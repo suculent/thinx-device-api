@@ -70,6 +70,7 @@ RUN apt-get update -qq && \
     net-tools \
     git \
     jq \
+    zip \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Docker

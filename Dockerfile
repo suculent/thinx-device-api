@@ -74,6 +74,7 @@ RUN apt-get update -qq && \
     net-tools \
     git \
     jq \
+    zip \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Docker Client only (Docker is on the host) - fails with /bin/sh not found...
