@@ -278,12 +278,16 @@ else
 	THINX_ALIAS="vanilla"
 fi
 
-THX_VERSION="$(cd $BUILD_PATH/$REPO_PATH && git describe --abbrev=0 --tags)"
+echo "Changing workdir to ${BUILD_PATH}/${REPO_PATH}"
+cd $BUILD_PATH/$REPO_PATH
+
+
+THX_VERSION="$(git describe --abbrev=0 --tags)"
 if [[ $? > 0 ]]; then
 	THX_VERSION="1.0"
 fi
 
-THX_REVISION="$(cd $BUILD_PATH/$REPO_PATH && git rev-list HEAD --count)"
+THX_REVISION="$(git rev-list HEAD --count)"
 if [[ $? > 0 ]]; then
 	THX_REVISION="1"
 fi
