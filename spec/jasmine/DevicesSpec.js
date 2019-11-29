@@ -77,6 +77,16 @@ describe("Devices", function() {
     });
   }, 5000);
 
+  it("should not be able to list devices for empty owner", function(done) {
+    devices.list("", function(success, response) {
+      expect(success).toBe(true);
+      expect(response).toBeDefined();
+      expect(response.devices).toBe([]);
+      console.log("Should be empty Device list in: " , {response});
+      done();
+    });
+  }, 5000);
+
   it("should be able to attach a repository to device(s)", function(done) {
     var body = {
       source_id: source_id,

@@ -529,7 +529,7 @@ wss.on("connection", function connection(ws, req) {
       } else if (typeof(object.init) !== "undefined") {
 
         if (typeof(messenger) !== "undefined") {
-          console.log("Initializing WS messenger with owner "+object.init);
+          // console.log("Initializing WS messenger with owner "+object.init);
           messenger.initWithOwner(object.init, _ws, function(success, message) {
             if (!success) {
               console.log("Messenger init on WS message with result " + success + ", with message: ", { message });
