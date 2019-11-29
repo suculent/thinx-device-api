@@ -135,13 +135,11 @@ COPY ./.thinx_env ./.thinx_env
 # those packages should not be required and pose HIGH security risks
 RUN apt-get remove -y mercurial imagemagick && apt-get autoremove -y
 
-ADD https://get.aquasec.com/microscanner .
-RUN chmod +x microscanner && mkdir artifacts
-RUN ./microscanner ${AQUA_SEC_TOKEN} --html --continue-on-failure > ./artifacts/microscanner.html \
-    && cp ./artifacts/microscanner.html ./static/microscanner.html
-
-# clean useless package, used only for build
-RUN rm -rf ./microscanner
+#ADD https://get.aquasec.com/microscanner .
+#RUN chmod +x microscanner && mkdir artifacts
+#RUN ./microscanner ${AQUA_SEC_TOKEN} --html --continue-on-failure > ./artifacts/microscanner.html \
+#    && cp ./artifacts/microscanner.html ./static/microscanner.html
+#RUN rm -rf ./microscanner
 
 RUN mkdir -p ./.nyc_output
 
