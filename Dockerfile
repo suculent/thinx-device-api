@@ -93,8 +93,9 @@ RUN openssl version \
  && node -v \
  && npm update \
  && npm install . --only-prod \
- && npm audit fix \
- && npm install -g snyk && snyk protect
+ && npm audit fix
+
+# && npm install -g snyk && snyk protect not free or what? just fails
 
 # set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
 RUN set -x \
