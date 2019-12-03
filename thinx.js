@@ -475,6 +475,12 @@ setInterval(function ping() {
 
 wss.on("connection", function connection(ws, req) {
 
+  // May not exist while testing...
+  if (typeof(ws) === "undefined" || ws === null) {
+    console.log("Exiting WSS connecton, no WS defined!");
+    return;
+  }
+
   if (typeof(req) === "undefined") {
     console.log("No request on wss.on");
     return;
@@ -488,8 +494,8 @@ wss.on("connection", function connection(ws, req) {
   ws.isAlive = true;
   ws.on('pong', heartbeat);
 
-  _ws = ws;
-  app._ws = ws;
+  _ws = ws; // wtf, which one is used?
+  app._ws = ws; // wtf, which one is used?
 
   var cookies = req.headers.cookie;
 
@@ -509,45 +515,42 @@ wss.on("connection", function connection(ws, req) {
     console.log("[thinx] logtail_callback:" + err);
   };
 
-  // May not exist while testing...
-  if (typeof(ws) !== "undefined" && ws != null) {
+  ws.on("message", function incoming(message) {
 
-    ws.on("message", function incoming(message) {
+    // skip empty messages
+    if (message == "{}") return;
 
-      // skip empty messages
-      if (message == "{}") return;
+    var object = JSON.parse(message);
+    console.log("Incoming WS message: "+message);
 
-      var object = JSON.parse(message);
-      console.log("Incoming WS message: "+message);
+    if (typeof(object.logtail) !== "undefined") {
 
-      if (typeof(object.logtail) !== "undefined") {
+      var build_id = object.logtail.build_id;
+      var owner_id = object.logtail.owner_id;
+      blog.logtail(build_id, owner_id, _ws, logtail_callback);
 
-        var build_id = object.logtail.build_id;
-        var owner_id = object.logtail.owner_id;
-        blog.logtail(build_id, owner_id, _ws, logtail_callback);
+    } else if (typeof(object.init) !== "undefined") {
 
-      } else if (typeof(object.init) !== "undefined") {
-
-        if (typeof(messenger) !== "undefined") {
-          // console.log("Initializing WS messenger with owner "+object.init);
-          messenger.initWithOwner(object.init, _ws, function(success, message) {
-            if (!success) {
-              console.log("Messenger init on WS message with result " + success + ", with message: ", { message });
-            }
-          });
-        } else {
-          console.log("Messenger is not initialized and therefore could not be activated.");
-        }
-
+      if (typeof(messenger) !== "undefined") {
+        // console.log("Initializing WS messenger with owner "+object.init);
+        messenger.initWithOwner(object.init, _ws, function(success, message) {
+          if (!success) {
+            console.log("Messenger init on WS message with result " + success + ", with message: ", { message });
+          }
+        });
       } else {
-        /* unknown message debug, must be removed */
-        var m = JSON.stringify(message);
-        if ((m != "{}") || (typeof(message)=== "undefined")) {
-          console.log("» Websocketparser said: unknown message: " + m);
-        }
+        console.log("Messenger is not initialized and therefore could not be activated.");
       }
-    });
-  }
+
+    } else {
+      /* unknown message debug, must be removed */
+      var m = JSON.stringify(message);
+      if ((m != "{}") || (typeof(message)=== "undefined")) {
+        console.log("» Websocketparser said: unknown message: " + m);
+      }
+    }
+  });
+
 
 }).on("error", function(err) {
   console.log("WSS ERROR: " + err);
