@@ -76,3 +76,5 @@ statistics/**
 # Mosquitto
 mosquitto.aclfile
 mqtt_passwords
+
+.coverity-submit.sh
