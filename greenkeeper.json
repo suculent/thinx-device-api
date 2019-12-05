@@ -1,7 +1,7 @@
 {
   "groups": {
     "default": {
-      "packages": [        
+      "packages": [
         "package.json",
         "services/console/src/package.json",
         "services/transformer/app/package.json"
