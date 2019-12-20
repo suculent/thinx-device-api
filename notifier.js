@@ -332,6 +332,8 @@ devicelib.get(udid, function(err, doc) {
         fields: buildEnvelope
       });
     }
+    
+/*
 
     // Notify users (FCM)
     var message = {
@@ -352,6 +354,8 @@ devicelib.get(udid, function(err, doc) {
     };
 
     // TODO: Get registration token from device database instead
+
+
 
     var admin = require("firebase-admin");
     var serviceAccount = require(
@@ -381,6 +385,7 @@ devicelib.get(udid, function(err, doc) {
         }
       }
     }
+    */
 
     // Device channel
     if (status == "DEPLOYED") {
