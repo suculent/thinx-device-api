@@ -499,10 +499,7 @@ wss.on("connection", (ws, req) => {
   _ws = ws; // public websocket (!)
   app._ws = ws; // public websocket stored in app
 
-  // this.router is undefined here?
-  router._ws = ws; // trying to refresh this._ws in router as a fix
-
-  console.log("Router WS: ", router.ws);
+  console.log("app _ws: ", app._ws);
 
   var cookies = req.headers.cookie;
 
