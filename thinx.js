@@ -520,6 +520,30 @@ wss.on("connection", (ws, req) => {
     console.log("[thinx] logtail_callback error:", err, "message", result);
   };
 
+  // WARNING! New, untested! Requires websocket that is not passed here!
+
+  /* Returns specific build log for owner */
+  app.post("/api/user/logs/tail", function(req, res) {
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
+    var owner = req.session.owner;
+    if (typeof(req.body.build_id) === "undefined") {
+      respond(res, {
+        success: false,
+        status: "missing_build_id"
+      });
+      return;
+    }
+    var error_callback = function(err) {
+      console.log(err);
+      res.set("Connection", "close");
+      respond(res, err);
+    };
+    console.log("Tailing build log for " + req.body.build_id);
+    const Buildlog = require("../lib/thinx/buildlog"); // must be after initDBs as it lacks it now
+    const blog = new Buildlog();
+    blog.logtail(req.body.build_id, owner, ws, error_callback);
+  });
+
   ws.on("message", (message) => {
 
     // skip empty messages
