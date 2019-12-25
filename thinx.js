@@ -520,7 +520,7 @@ wss.on("connection", (ws, req) => {
     console.log("[thinx] logtail_callback error:", err, "message", result);
   };
 
-  // WARNING! New, untested! Requires websocket that is not passed here!
+  // WARNING! New, untested! Requires websocket.
 
   /* Returns specific build log for owner */
   app.post("/api/user/logs/tail", function(req, res) {
@@ -539,9 +539,23 @@ wss.on("connection", (ws, req) => {
       respond(res, err);
     };
     console.log("Tailing build log for " + req.body.build_id);
-    const Buildlog = require("lib/thinx/buildlog"); // must be after initDBs as it lacks it now
+    const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
     const blog = new Buildlog();
     blog.logtail(req.body.build_id, owner, ws, error_callback);
+  });
+
+  /* Override with valid socket from router.js */
+  app.post("/api/build", function(req, res) {
+    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
+    var notifiers = {
+      messenger: messenger,
+      websocket: ws
+    };
+    console.log("[router] Overriding build with notifiers:", {notifiers});
+    builder.build(req.session.owner, req.body.build, notifiers,
+      function(success, response) {
+      respond(res, response);
+    });
   });
 
   ws.on("message", (message) => {
