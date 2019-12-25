@@ -539,7 +539,7 @@ wss.on("connection", (ws, req) => {
       respond(res, err);
     };
     console.log("Tailing build log for " + req.body.build_id);
-    const Buildlog = require("../lib/thinx/buildlog"); // must be after initDBs as it lacks it now
+    const Buildlog = require("lib/thinx/buildlog"); // must be after initDBs as it lacks it now
     const blog = new Buildlog();
     blog.logtail(req.body.build_id, owner, ws, error_callback);
   });
