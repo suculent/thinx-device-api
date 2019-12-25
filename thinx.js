@@ -523,6 +523,7 @@ wss.on("connection", (ws, req) => {
   // WARNING! New, untested! Requires websocket.
 
   /* Returns specific build log for owner */
+  console.log("Mapping endpoint: /api/user/logs/tail");
   app.post("/api/user/logs/tail", function(req, res) {
     if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
     var owner = req.session.owner;
