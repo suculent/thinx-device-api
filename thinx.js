@@ -498,7 +498,9 @@ wss.on("connection", (ws, req) => {
   console.log("WSS CONNECTION: Saving websocket reference (_ws, app._ws, router._ws)");
   _ws = ws; // public websocket (!)
   app._ws = ws; // public websocket stored in app
-  this.router._ws = ws; // trying to refresh this._ws in router as a fix
+
+  // this.router is undefined here?
+  router._ws = ws; // trying to refresh this._ws in router as a fix
 
   console.log("Router WS: ", router.ws);
 
