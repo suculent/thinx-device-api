@@ -365,7 +365,7 @@ app.use(function(req, res, next) {
 // app.use(cookieParser());
 // app.use(csrf({ cookie: true })); collides with Sqreen
 
-require('./lib/router.js')(app);
+require('./lib/router.js')(app, _ws);
 
 /*
  * HTTP/HTTPS API Server
@@ -494,15 +494,16 @@ wss.on("connection", function connection(ws, req) {
   ws.isAlive = true;
   ws.on('pong', heartbeat);
 
-  _ws = ws; // wtf, which one is used?
-  app._ws = ws; // wtf, which one is used?
+  _ws = ws; // public websocket (!)
+
+  app._ws = ws; // public websocket stored in app
 
   var cookies = req.headers.cookie;
 
   if (typeof(req.headers.cookie) !== "undefined") {
 
     if (cookies.indexOf("thx-") === -1) {
-      console.log("» WARNING! No thx-cookie found in: " + JSON.stringify(req.headers
+      console.log("» WARNING! No thx-cookie found in WS: " + JSON.stringify(req.headers
         .cookie));
     }
 
@@ -515,7 +516,7 @@ wss.on("connection", function connection(ws, req) {
     console.log("[thinx] logtail_callback:" + err);
   };
 
-  ws.on("message", function incoming(message) {
+  ws.on("message", (message) => {
 
     // skip empty messages
     if (message == "{}") return;
