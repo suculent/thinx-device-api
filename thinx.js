@@ -473,7 +473,7 @@ setInterval(function ping() {
   });
 }, 30000);
 
-wss.on("connection", (ws, req) => {
+wss.on("connection", (ws, req, app = this.app) => {
 
   // May not exist while testing...
   if (typeof(ws) === "undefined" || ws === null) {
