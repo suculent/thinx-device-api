@@ -473,7 +473,7 @@ setInterval(function ping() {
   });
 }, 30000);
 
-wss.on("connection", (ws, req, app = this.app) => {
+wss.on("connection", function(ws, req) {
 
   // May not exist while testing...
   if (typeof(ws) === "undefined" || ws === null) {
@@ -496,10 +496,13 @@ wss.on("connection", (ws, req, app = this.app) => {
 
   // Should be done after validation
   console.log("WSS CONNECTION: Saving websocket reference (_ws, app._ws, router._ws)");
-  _ws = ws; // public websocket (!)
-  app._ws = ws; // public websocket stored in app
-
-  console.log("app _ws: ", app._ws);
+  _ws = ws; // public websocket (!) does not at least fail
+  if (typeof(app) === "undefined") {
+    console.log("APP undefined here!");
+  } else {
+    app._ws = ws; // public websocket stored in app, needs to be set to builder/buildlog!
+    console.log("app _ws: ", app._ws);
+  }
 
   var cookies = req.headers.cookie;
 
