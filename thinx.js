@@ -473,7 +473,7 @@ setInterval(function ping() {
   });
 }, 30000);
 
-wss.on("connection", function connection(ws, req) {
+wss.on("connection", (ws, req) => {
 
   // May not exist while testing...
   if (typeof(ws) === "undefined" || ws === null) {
@@ -494,10 +494,13 @@ wss.on("connection", function connection(ws, req) {
   ws.isAlive = true;
   ws.on('pong', heartbeat);
 
+  // Should be done after validation
+  console.log("WSS CONNECTION: Saving websocket reference (_ws, app._ws, router._ws)");
   _ws = ws; // public websocket (!)
-
   app._ws = ws; // public websocket stored in app
   router._ws = ws; // trying to refresh this._ws in router as a fix
+
+  console.log("Router WS: ", router.ws);
 
   var cookies = req.headers.cookie;
 
@@ -530,7 +533,7 @@ wss.on("connection", function connection(ws, req) {
       console.log("Initializing WS logtail with object ", {object});
 
       var build_id = object.logtail.build_id;
-      var owner_id = object.logtail.owner_id;
+      var owner_id = object.logtail.owner_id;      
       blog.logtail(build_id, owner_id, _ws, logtail_callback);
 
     } else if (typeof(object.init) !== "undefined") {
