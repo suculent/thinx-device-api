@@ -544,7 +544,7 @@ wss.on("connection", (ws, req) => {
     blog.logtail(req.body.build_id, owner, ws, error_callback);
   });
 
-  /* Override with valid socket from router.js */
+  /* Override with valid socket from router.js
   app.post("/api/build", function(req, res) {
     if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
     var notifiers = {
@@ -552,11 +552,12 @@ wss.on("connection", (ws, req) => {
       websocket: ws
     };
     console.log("[router] Overriding build with notifiers:", {notifiers});
+    // FIXME: Should fail here but override does not work anyway.
     builder.build(req.session.owner, req.body.build, notifiers,
       function(success, response) {
       respond(res, response);
     });
-  });
+  });*/
 
   ws.on("message", (message) => {
 
