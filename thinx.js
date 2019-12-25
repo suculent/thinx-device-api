@@ -516,8 +516,8 @@ wss.on("connection", (ws, req) => {
     }
   }
 
-  var logtail_callback = function(err) {
-    console.log("[thinx] logtail_callback:" + err);
+  var logtail_callback = function(err, result) {
+    console.log("[thinx] logtail_callback error:", err, "message", result);
   };
 
   ws.on("message", (message) => {
@@ -533,7 +533,7 @@ wss.on("connection", (ws, req) => {
       console.log("Initializing WS logtail with object ", {object});
 
       var build_id = object.logtail.build_id;
-      var owner_id = object.logtail.owner_id;      
+      var owner_id = object.logtail.owner_id;
       blog.logtail(build_id, owner_id, _ws, logtail_callback);
 
     } else if (typeof(object.init) !== "undefined") {
