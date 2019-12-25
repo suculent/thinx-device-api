@@ -54,8 +54,6 @@ RUN npm install . \
     && npm run build \
     && npm audit fix
 
-RUN echo "SRC/HTML AFTER BUILD: " && cd ./html && pwd && ls -la
-
 #
 # Deployment Image
 #
@@ -64,7 +62,6 @@ FROM nginx
 
 WORKDIR /usr/share/nginx/html
 COPY --from=0 /home/node/build/html .
-RUN echo "SRC AFTER BUILD: " && pwd && ls -la
 
 # COPY default.conf /etc/nginx/conf.d/default.conf
 
