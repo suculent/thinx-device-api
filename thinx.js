@@ -365,7 +365,7 @@ app.use(function(req, res, next) {
 // app.use(cookieParser());
 // app.use(csrf({ cookie: true })); collides with Sqreen
 
-require('./lib/router.js')(app, _ws);
+let router = require('./lib/router.js')(app, _ws);
 
 /*
  * HTTP/HTTPS API Server
@@ -497,6 +497,7 @@ wss.on("connection", function connection(ws, req) {
   _ws = ws; // public websocket (!)
 
   app._ws = ws; // public websocket stored in app
+  router._ws = ws; // trying to refresh this._ws in router as a fix
 
   var cookies = req.headers.cookie;
 
