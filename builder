@@ -767,10 +767,13 @@ case $PLATFORM in
 				BUILD_SUCCESS=$?
 			fi
 			echo "[builder.sh] Docker completed <<<"
-			#echo "Current folder contents after build:" | tee -a "${LOG_PATH}"
-			#ls | tee -a "${LOG_PATH}"
-			#
-			OUTFILE=$(find / -name "firmware.bin" -maxdepth 10 | head -n 1)
+
+			echo "Current folder contents after build:" | tee -a "${LOG_PATH}"
+			ls | tee -a "${LOG_PATH}"
+			echo "Build folder contents after build:" | tee -a "${LOG_PATH}"
+			ls $BUILD_PATH | tee -a "${LOG_PATH}"
+
+			OUTFILE=$(find $BUILD_PATH -name "firmware.bin" -maxdepth 10 | head -n 1)
 
 			if [[ ! -f $OUTFILE ]]; then
 				echo "Output file not found, nothing build or path incorrect."
