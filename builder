@@ -419,7 +419,7 @@ case $PLATFORM in
 					BUILD_SUCCESS=false
 					echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
 				fi
-				echo "[builder.sh] Docker completed <<<"
+				echo "[builder.sh] [micropython] Docker completed <<<"
 				rm -rf ./build; make clean; make V=1
 			fi
 
@@ -534,7 +534,7 @@ case $PLATFORM in
 					BUILD_SUCCESS=true
 					zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./bin/* # zip artefacts
 				fi
-				echo "[builder.sh] Docker completed <<<"
+				echo "[builder.sh] [nodemcu] Docker completed <<<"
 
 			else
 				# deploy Lua files without building
@@ -565,7 +565,7 @@ case $PLATFORM in
 				fi
 			fi
     ;;
-
+;;
     mongoose)
 			OUTFILE=${DEPLOYMENT_PATH}/fw.zip
 			OUTPATH=${DEPLOYMENT_PATH}
@@ -594,8 +594,7 @@ case $PLATFORM in
 					echo "[builder.sh] OUTFILE not created." | tee -a "${LOG_PATH}"
 				fi
 			fi
-			echo "[builder.sh] Docker completed <<<"
-
+			echo "[builder.sh] [mongoose] Docker completed <<<"
 			echo "[builder.sh] mongoose ls:"
 			ls
 
@@ -643,9 +642,9 @@ case $PLATFORM in
 			set +o pipefail
 
 			echo "[builder.sh] Contents of working directory after build:" | tee -a "${LOG_PATH}"
-			# ls -la $BUILD_PATH/$REPO_PATH/build | tee -a "${LOG_PATH}"
+			ls -la $BUILD_PATH/$REPO_PATH/build | tee -a "${LOG_PATH}"
 
-			echo "[builder.sh] Docker completed <<<" | tee -a "${LOG_PATH}"
+			echo "[builder.sh] [arduino] Docker completed <<<" | tee -a "${LOG_PATH}"
 
 			if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 				BUILD_SUCCESS=true
@@ -671,7 +670,7 @@ case $PLATFORM in
 					zip -rv "${BUILD_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ${BIN_FILE}
 				fi
 			else
-				echo "[builder.sh] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
+				echo "[builder.sh] [arduino] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
 			fi
 
 			# Exit on dry run...
@@ -729,10 +728,10 @@ case $PLATFORM in
 			THINX_FILE=$( find $BUILD_PATH/$REPO_PATH -name "thinx.h" )
 
 			if [[ -z $THINX_FILE ]]; then
-				echo "[builder.sh] WARNING! No THiNX-File found! in $BUILD_PATH/$REPO_PATH: $THINX_FILE" | tee -a "${LOG_PATH}"
+				echo "[builder.sh] [platformio] WARNING! No THiNX-File found! in $BUILD_PATH/$REPO_PATH: $THINX_FILE" | tee -a "${LOG_PATH}"
 				# exit 1 # will deprecate on modularization for more platforms
 			else
-				echo "[builder.sh] Found THiNX-File: ${THINX_FILE}" | tee -a "${LOG_PATH}"
+				echo "[builder.sh] [platformio] Found THiNX-File: ${THINX_FILE}" | tee -a "${LOG_PATH}"
 			fi
 
 			if [[ ! -f "./platformio.ini" ]]; then
@@ -766,11 +765,11 @@ case $PLATFORM in
 			else
 				BUILD_SUCCESS=$?
 			fi
-			echo "[builder.sh] Docker completed <<<"
+			echo "[builder.sh] [platformio] Docker completed <<<"
 
 			echo "Current folder contents after build:" | tee -a "${LOG_PATH}"
 			ls | tee -a "${LOG_PATH}"
-			echo "Build folder contents after build:" | tee -a "${LOG_PATH}"
+			echo "Current folder contents after build:" | tee -a "${LOG_PATH}"
 			ls $BUILD_PATH | tee -a "${LOG_PATH}"
 
 			OUTFILE=$(find $BUILD_PATH -name "firmware.bin" -maxdepth 10 | head -n 1)
