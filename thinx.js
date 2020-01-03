@@ -501,7 +501,7 @@ wss.on("connection", function(ws, req) {
     console.log("APP undefined here!");
   } else {
     app._ws = ws; // public websocket stored in app, needs to be set to builder/buildlog!
-    console.log("app _ws: ", app._ws);
+    // console.log("app _ws: ", app._ws);
   }
 
   var cookies = req.headers.cookie;

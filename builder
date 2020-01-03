@@ -624,110 +624,105 @@ case $PLATFORM in
 			THINX_FILE=$( find $BUILD_PATH/$REPO_PATH -name "thinx.h" )
 
 			if [[ -z $THINX_FILE ]]; then
-				echo "[builder.sh] WARNING! No THiNX-File found! in $BUILD_PATH/$REPO_PATH: $THINX_FILE" | tee -a "${LOG_PATH}"
+				echo "[builder.sh] [arduino] WARNING! No THiNX-File found! in $BUILD_PATH/$REPO_PATH: $THINX_FILE" | tee -a "${LOG_PATH}"
 				# exit 1 # will deprecate on modularization for more platforms
 			else
-				echo "[builder.sh] Found THiNX-File: ${THINX_FILE}" | tee -a "${LOG_PATH}"
+				echo "[builder.sh] [arduino] Found THiNX-File: ${THINX_FILE}" | tee -a "${LOG_PATH}"
 			fi
 
 			cd $BUILD_PATH/$REPO_PATH | tee -a "${LOG_PATH}"
-			ls -la | tee -a "${LOG_PATH}"
-			pwd | tee -a "${LOG_PATH}"
-			# ls -la | tee -a "${LOG_PATH}"
 
-			  # echo "[builder.sh] Building for Arduino from folder: $(pwd)" | tee -a "${LOG_PATH}"
+			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 
-				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
+			set -o pipefail
+			echo "[builder.sh] running THiNX Arduino Builder ${DCMD} >>>"
 
-				set -o pipefail
-				echo "[builder.sh] running THiNX Arduino Builder ${DCMD} >>>"
+			DCMD="docker run ${DOCKER_PREFIX} -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
+			$DCMD | tee -a "${LOG_PATH}"
+			echo "[builder.sh] PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
+			set +o pipefail
 
-				DCMD="docker run ${DOCKER_PREFIX} -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
-				$DCMD | tee -a "${LOG_PATH}"
-				echo "[builder.sh] PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
-				set +o pipefail
+			echo "[builder.sh] Contents of working directory after build:" | tee -a "${LOG_PATH}"
+			# ls -la $BUILD_PATH/$REPO_PATH/build | tee -a "${LOG_PATH}"
 
-				echo "[builder.sh] Contents of working directory after build:" | tee -a "${LOG_PATH}"
-				# ls -la $BUILD_PATH/$REPO_PATH/build | tee -a "${LOG_PATH}"
+			echo "[builder.sh] Docker completed <<<" | tee -a "${LOG_PATH}"
 
-				echo "[builder.sh] Docker completed <<<" | tee -a "${LOG_PATH}"
+			if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
+				BUILD_SUCCESS=true
+				# TODO: FIXME, can be more binfiles with partitions!
+				BIN_FILE=$( find $BUILD_PATH/$REPO_PATH -name "*.bin" | head -n 1)
+				echo "[builder.sh] BIN_FILE: ${BIN_FILE}" | tee -a "${LOG_PATH}"
 
-				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
-					BUILD_SUCCESS=true
-					# TODO: FIXME, can be more binfiles with partitions!
-					BIN_FILE=$( find $BUILD_PATH/$REPO_PATH -name "*.bin" | head -n 1)
-					echo "[builder.sh] BIN_FILE: ${BIN_FILE}" | tee -a "${LOG_PATH}"
-
-					if [[ ! -f $BIN_FILE ]]; then
-						echo "BIN_FILE $BIN_FILE not found!"
-						BUILD_SUCCESS=false
-						exit 1
-					fi
-
-					# once again with size limit
-					if [[ -z $(find $BUILD_PATH/$REPO_PATH -name "*.bin" -type f -size +10000c 2>/dev/null) ]]; then
-						BUILD_SUCCESS=false
-						echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
-						# ls -la | tee -a "${LOG_PATH}"
-					else
-						echo "[builder.sh] Docker build succeeded." | tee -a "${LOG_PATH}"
-						echo " " | tee -a "${LOG_PATH}"
-						echo "[builder.sh] BIN_FILE: $BIN_FILE" | tee -a "${LOG_PATH}"
-						zip -rv "${BUILD_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ${BIN_FILE}
-					fi
-				else
-					echo "[builder.sh] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
+				if [[ ! -f $BIN_FILE ]]; then
+					echo "BIN_FILE $BIN_FILE not found!"
+					BUILD_SUCCESS=false
+					exit 1
 				fi
 
-				# Exit on dry run...
-				if [[ ! ${RUN} ]]; then
-					echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." | tee -a "${LOG_PATH}"
-					STATUS='DRY_RUN_OK'
+				# once again with size limit
+				if [[ -z $(find $BUILD_PATH/$REPO_PATH -name "*.bin" -type f -size +10000c 2>/dev/null) ]]; then
+					BUILD_SUCCESS=false
+					echo "[builder.sh] Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
+					# ls -la | tee -a "${LOG_PATH}"
 				else
-					# Check Artifacts
-					if [[ $BUILD_SUCCESS == true ]] ; then
-						STATUS='OK'
-						echo "[builder.sh] Exporting artifacts" | tee -a "${LOG_PATH}"
-						echo "[builder.sh] Expected OUTFILE: ${OUTFILE}" | tee -a "${LOG_PATH}"
-						# Deploy Artifacts
-
-						if [[ ! -z ./build ]]; then
-							echo "[builder.sh] Entering ./build" | tee -a "${LOG_PATH}"
-							cd ./build | tee -a "${LOG_PATH}"
-						fi
-
-						#echo "[builder.sh] Current workdir: " | tee -a "${LOG_PATH}"
-						#pwd | tee -a "${LOG_PATH}"
-						#echo "[builder.sh] Current workdir contents: " | tee -a "${LOG_PATH}"
-						#ls | tee -a "${LOG_PATH}"
-
-						echo "[builder.sh] Copying deployment data..." | tee -a "${LOG_PATH}"
-
-						echo "[builder.sh] to: ${OUTFILE}" | tee -a "${LOG_PATH}"
-						cp -vf "${BIN_FILE}" "$OUTFILE" | tee -a "${LOG_PATH}"
-
-						echo "[builder.sh] to: ${TARGET_PATH}" | tee -a "${LOG_PATH}"
-						cp -vf "${BIN_FILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
-
-						echo "[builder.sh] to: ${DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
-						cp -vf "${BIN_FILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
-						cp -vf "${LOG_PATH}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
-
-						zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./build/*.bin ./build/*.elf # zip artefacts
-
-						echo "[builder.sh] Current path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
-						# ls -la | tee -a "${LOG_PATH}"
-						echo "[builder.sh] Deployment path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
-						# ls -la ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
-						echo "[builder.sh] Target path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
-						# ls -la ${TARGET_PATH} | tee -a "${LOG_PATH}"
-						echo "[builder.sh] Cleaning up..." | tee -a "${LOG_PATH}"
-						rm -rf $BUILD_PATH/$REPO_PATH/** | tee -a "${LOG_PATH}"
-					else
-						STATUS='FAILED'
-					fi
+					echo "[builder.sh] Docker build succeeded." | tee -a "${LOG_PATH}"
+					echo " " | tee -a "${LOG_PATH}"
+					echo "[builder.sh] BIN_FILE: $BIN_FILE" | tee -a "${LOG_PATH}"
+					zip -rv "${BUILD_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ${BIN_FILE}
 				fi
-			;;
+			else
+				echo "[builder.sh] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
+			fi
+
+			# Exit on dry run...
+			if [[ ! ${RUN} ]]; then
+				echo "[builder.sh] ☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." | tee -a "${LOG_PATH}"
+				STATUS='DRY_RUN_OK'
+			else
+				# Check Artifacts
+				if [[ $BUILD_SUCCESS == true ]] ; then
+					STATUS='OK'
+					echo "[builder.sh] Exporting artifacts" | tee -a "${LOG_PATH}"
+					echo "[builder.sh] Expected OUTFILE: ${OUTFILE}" | tee -a "${LOG_PATH}"
+					# Deploy Artifacts
+
+					if [[ ! -z ./build ]]; then
+						echo "[builder.sh] Entering ./build" | tee -a "${LOG_PATH}"
+						cd ./build | tee -a "${LOG_PATH}"
+					fi
+
+					#echo "[builder.sh] Current workdir: " | tee -a "${LOG_PATH}"
+					#pwd | tee -a "${LOG_PATH}"
+					#echo "[builder.sh] Current workdir contents: " | tee -a "${LOG_PATH}"
+					#ls | tee -a "${LOG_PATH}"
+
+					echo "[builder.sh] Copying deployment data..." | tee -a "${LOG_PATH}"
+
+					echo "[builder.sh] to: ${OUTFILE}" | tee -a "${LOG_PATH}"
+					cp -vf "${BIN_FILE}" "$OUTFILE" | tee -a "${LOG_PATH}"
+
+					echo "[builder.sh] to: ${TARGET_PATH}" | tee -a "${LOG_PATH}"
+					cp -vf "${BIN_FILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
+
+					echo "[builder.sh] to: ${DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
+					cp -vf "${BIN_FILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
+					cp -vf "${LOG_PATH}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
+
+					zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./build/*.bin ./build/*.elf # zip artefacts
+
+					echo "[builder.sh] Current path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
+					# ls -la | tee -a "${LOG_PATH}"
+					echo "[builder.sh] Deployment path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
+					# ls -la ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
+					echo "[builder.sh] Target path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
+					# ls -la ${TARGET_PATH} | tee -a "${LOG_PATH}"
+					echo "[builder.sh] Cleaning up..." | tee -a "${LOG_PATH}"
+					rm -rf $BUILD_PATH/$REPO_PATH/** | tee -a "${LOG_PATH}"
+				else
+					STATUS='FAILED'
+				fi
+			fi
+		;;
 
 		platformio)
 
