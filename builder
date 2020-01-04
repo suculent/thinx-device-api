@@ -565,7 +565,7 @@ case $PLATFORM in
 				fi
 			fi
     ;;
-;;
+
     mongoose)
 			OUTFILE=${DEPLOYMENT_PATH}/fw.zip
 			OUTPATH=${DEPLOYMENT_PATH}
