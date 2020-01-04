@@ -30,7 +30,7 @@ var auth = new Auth();
 let pki = require('node-forge').pki;
 var fs = require("fs-extra");
 var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
+// var bodyParser = require('body-parser'); unused
 var csrf = require('csurf');
 
 // set up rate limiter
@@ -338,7 +338,8 @@ app.use(session({
 // rolling was true; This resets the expiration date on the cookie to the given default.
 
 app.use(parser.json({
-  limit: "1mb"
+  limit: "1mb",
+  strict: false
 }));
 
 app.use(limiter);
