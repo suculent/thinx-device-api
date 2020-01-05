@@ -36,9 +36,12 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
             adapted_data = adapted_data.split(/\r\n|\n\r|\r|\n/g);
             // update currently observed logview
             if (typeof($rootScope.modalBuildId) !== "undefined") {
-              $rootScope.logdata[$rootScope.modalBuildId] = $rootScope.logdata[$rootScope.modalBuildId] + "\n" + adapted_data.join("\n");
+              for (let i in adapted_data) {
+                $rootScope.logdata[$rootScope.modalBuildId] = $rootScope.logdata[$rootScope.modalBuildId] + "\n" + adapted_data[i];
+              }
             }
-            $rootScope.logdata.buffer = $rootScope.logdata.buffer + "\n" + adapted_data.join("\n");
+            // unused
+            // $rootScope.logdata.buffer = $rootScope.logdata.buffer + "\n" + adapted_data.join("\n");
           }
         };
         $rootScope.wss.onclose = function() {
