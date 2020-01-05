@@ -29,11 +29,12 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
           if (msgType == "notification") {
             parseNotification(message.data);
           } else {
-            // save build data to build buffer
+            // save build data to build buffer, convert line endings
+            message.data = message.data.replace(/[\n\r]/g,"<br>")
             if (typeof($rootScope.modalBuildId) !== "undefined") {
-              $rootScope.logdata[$rootScope.modalBuildId] = $rootScope.logdata[$rootScope.modalBuildId] + "\n" + message.data;
+              $rootScope.logdata[$rootScope.modalBuildId] = $rootScope.logdata[$rootScope.modalBuildId] + "<br>" + message.data;
             }
-            $rootScope.logdata.buffer = $rootScope.logdata.buffer + "\n" + message.data;
+            $rootScope.logdata.buffer = $rootScope.logdata.buffer + "<br>" + message.data);
           }
         };
         $rootScope.wss.onclose = function() {
