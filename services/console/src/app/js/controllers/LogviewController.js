@@ -40,7 +40,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
             if (typeof($rootScope.modalBuildId) !== "undefined") {
               for (let i in adapted_data) {
                 $rootScope.logdata[$rootScope.modalBuildId] = $rootScope.logdata[$rootScope.modalBuildId] 
-                  + "\n<br><br/>" 
+                  + "\n ***" 
                   + adapted_data[i];
               }
             }
