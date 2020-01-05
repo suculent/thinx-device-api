@@ -34,7 +34,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
             if (typeof($rootScope.modalBuildId) !== "undefined") {
               $rootScope.logdata[$rootScope.modalBuildId] = $rootScope.logdata[$rootScope.modalBuildId] + "<br>" + message.data;
             }
-            $rootScope.logdata.buffer = $rootScope.logdata.buffer + "<br>" + message.data);
+            $rootScope.logdata.buffer = $rootScope.logdata.buffer + "<br>" + message.data;
           }
         };
         $rootScope.wss.onclose = function() {
