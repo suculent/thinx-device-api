@@ -33,12 +33,12 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
             // - convert line endings
             // - trim first and last character (quotes)
             let adapted_data = message.data.substring(1, message.data.length - 1);
-            adapted_data = adapted_data.replace(/(?:\r\n|\n\r|\r|\n)/g, "\n");
+            adapted_data = adapted_data.split(/\r\n|\n\r|\r|\n/g);
             // update currently observed logview
             if (typeof($rootScope.modalBuildId) !== "undefined") {
-              $rootScope.logdata[$rootScope.modalBuildId] = $rootScope.logdata[$rootScope.modalBuildId] + "\n" + adapted_data;
+              $rootScope.logdata[$rootScope.modalBuildId] = $rootScope.logdata[$rootScope.modalBuildId] + "\n" + adapted_data.join("\n");
             }
-            $rootScope.logdata.buffer = $rootScope.logdata.buffer + "\n" + adapted_data;
+            $rootScope.logdata.buffer = $rootScope.logdata.buffer + "\n" + adapted_data.join("\n");
           }
         };
         $rootScope.wss.onclose = function() {
