@@ -21,10 +21,13 @@ function($rootScope, $state) {
         $('body').removeClass('page-on-load'); // remove page loading indicator
         Layout.setAngularJsSidebarMenuActiveLink('match', null, event.currentScope.$state); // activate selected link in the sidebar menu
 
-        // auto scorll to page top
-        setTimeout(function () {
-          App.scrollTop(); // scroll to the top on content load
-        }, $rootScope.settings.layout.pageAutoScrollOnLoad);
+        // auto scroll to page top
+        if ($rootScope.settings.layout.pageAutoScrollOnLoad > 0) {
+          setTimeout(function () {
+            App.scrollTop(); // scroll to the top on content load
+          }, $rootScope.settings.layout.pageAutoScrollOnLoad);
+        }
+
       });
 
       // handle errors
