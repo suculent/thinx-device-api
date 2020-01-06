@@ -57,6 +57,7 @@ if [[ ! -z $ROLLBAR_ACCESS_TOKEN ]]; then
     -F environment=$ROLLBAR_ENVIRONMENT \
     -F revision=$REVISION \
     -F local_username=$LOCAL_USERNAME
+  echo ""
 else
   echo "[entry] Skipping Rollbar deployment, access token not defined..."
 fi
