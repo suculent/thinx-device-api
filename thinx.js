@@ -111,13 +111,13 @@ try {
     // create .thx_prefix with random key on first run!
     fs.ensureFile(pfx_path, function(e) {
       if (e) {
-        console.log("error creating thx_prefix: " + e);
+        console.log("» error creating thx_prefix: " + e);
       } else {
         crypto.randomBytes(12, function(err, buffer) {
           var prefix = buffer.toString('hex');
           fs.writeFile(prefix, "", function(err) {
             if (err) {
-              console.log("error writing thx_prefix: " + err);
+              console.log("» error writing thx_prefix: " + err);
             }
           });
         });
@@ -125,26 +125,24 @@ try {
     });
   }
 } catch (e) {
-  console.log("[index] thx_prefix_exception" + e);
+  console.log("» thx_prefix_exception" + e);
 }
 
 // should be initialized after prefix because of DB requirements...
 var Version = require("./lib/thinx/version");
 var v = new Version();
 
-console.log("Loading module: statistics...");
+console.log("Loading module: Statistics");
 var Stats = require("./lib/thinx/statistics");
 var stats = new Stats();
 
-console.log("[thinx.js] Loading module: messenger...");
+console.log("Loading module: Messenger");
 var Messenger = require("./lib/thinx/messenger");
-console.log("[thinx.js] Getting instance: messenger...");
 var messenger = new Messenger().getInstance(); // take singleton to prevent double initialization
 
-console.log("Loading module: repository/watcher...");
+console.log("Loading module: Repository");
 var Repository = require("./lib/thinx/repository");
 var watcher = new Repository();
-console.log("Starting repository watcher...");
 watcher.watch();
 
 
@@ -159,7 +157,7 @@ function getDocument(file) {
   }
   const data = fs.readFileSync(file);
   if (typeof(data) === "undefined") {
-    console.log("[getDocument] no data read.");
+    console.log("» [getDocument] no data read.");
     return false;
   }
   // Parser may fail
@@ -167,28 +165,28 @@ function getDocument(file) {
     const filter_doc = JSON.parse(data);
     return filter_doc;
   } catch (e) {
-    console.log("File may not exist: "+e);
+    console.log("» Document File may not exist: "+e);
     return false;
   }
 }
 
 function logCouchError(err, body, header, tag) {
   if (err !== null) {
-    console.log("[thinx.js:couch] Insert error: "+err);
+    console.log("» Log Couch Insert error: "+err);
   } else {
     return;
   }
   if (typeof(body) !== "undefined") {
-    console.log("[thinx.js:couch] Insert body: "+body+" "+tag);
+    console.log("» Log Couch Insert body: "+body+" "+tag);
   }
   if (typeof(header) !== "undefined") {
-    console.log("[thinx.js:couch] Insert header: "+header+" "+tag);
+    console.log("» Log Couchd Insert header: "+header+" "+tag);
   }
 }
 
 function injectDesign(db, design, file) {
   if (typeof(design) === "undefined") return;
-  console.log("Inserting design document " + design + " from path", file);
+  console.log("» Inserting design document " + design + " from path", file);
   let design_doc = getDocument(file);
   if (design_doc != null) {
     //console.log("Inserting design document", {design_doc});
@@ -196,12 +194,12 @@ function injectDesign(db, design, file) {
       logCouchError(err, body, header, "init:design:"+design);
     });
   } else {
-    console.log("Design doc injection issue at "+file);
+    console.log("» Design doc injection issue at "+file);
   }
 }
 
 function injectReplFilter(db, file) {
-  console.log("Inserting filter document from path", file);
+  console.log("» Inserting filter document from path", file);
   let filter_doc = getDocument(file);
   if (filter_doc !== false) {
     //console.log("Inserting filter document", {filter_doc});
@@ -209,7 +207,7 @@ function injectReplFilter(db, file) {
       logCouchError(err, body, header, "init:repl:"+filter_doc);
     });
   } else {
-    console.log("Filter doc injection issue (no doc) at "+file);
+    console.log("» Filter doc injection issue (no doc) at "+file);
   }
 }
 
@@ -282,11 +280,11 @@ function initDatabases() {
   });
 }
 
-console.log("Initializing DB...");
+console.log("» Initializing DB...");
 
 initDatabases();
 
-console.log("Starting with prefix: '"+prefix+"'");
+console.log("» Starting with prefix: '"+prefix+"'");
 
 var devicelib = require("nano")(db).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
 var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
@@ -309,7 +307,8 @@ var app = express();
 
 app.messenger = messenger;
 
-console.log("» Starting Redis client...");
+// console.log("» Starting Redis client...");
+
 var RedisStore = require("connect-redis")(session);
 var sessionStore = new RedisStore({
   host: app_config.redis.host,
