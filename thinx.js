@@ -466,6 +466,7 @@ function heartbeat() {
 setInterval(function ping() {
   wss.clients.forEach(function each(ws) {
     if (ws.isAlive === false) {
+      console.log("[DBUG] Terminating websocket!");
       ws.terminate();
     } else {
       ws.ping(noop);
@@ -486,7 +487,7 @@ wss.on("connection", function(ws, req) {
     return;
   }
 
-  req.on("error", function(err) {
+  wss.on("error", function(err) {
     console.log("WSS REQ ERROR: " + err);
     return;
   });
