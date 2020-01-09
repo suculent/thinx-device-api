@@ -31,16 +31,14 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
           } else {
             // save build data to build buffer
             // - convert line endings
-            // - trim first and last character (quotes)
-            let adapted_data = message.data.substring(1, message.data.length - 1);
-            adapted_data = adapted_data.replace(/\r\n|\n\t|\r|\n/g, "\n");
+            let adapted_data = message.data.replace(/\r\n|\n\t|\r|\n/g, "\n");
             adapted_data = adapted_data.split(/\n/g);
 
             // update currently observed logview
             if (typeof($rootScope.modalBuildId) !== "undefined") {
               for (let i in adapted_data) {
-                $rootScope.logdata[$rootScope.modalBuildId] = $rootScope.logdata[$rootScope.modalBuildId] 
-                  + "\n ***" 
+                $rootScope.logdata[$rootScope.modalBuildId] = $rootScope.logdata[$rootScope.modalBuildId]
+                  + "\n * "
                   + adapted_data[i];
               }
             }
