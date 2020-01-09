@@ -347,6 +347,8 @@ if [[ ! -z $FCID && ! -z $MAC && ! -z $arduino_devsec_ckey ]]; then
 					-m $MAC \
 					-f $FCID > ./embedded_signature.h
 	cat ./embedded_signature.h | tee -a "${LOG_PATH}"
+else
+	echo "[builder.sh] DevSec support disabled..." | tee -a "${LOG_PATH}"
 fi
 
 case $PLATFORM in
