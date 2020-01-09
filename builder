@@ -41,6 +41,12 @@ case $i in
 		-e=*|--env=*)
       ENV_VARS="${i#*=}"
     ;;
+		-f=*|--fcid=*)
+      FCID="${i#*=}"
+    ;;
+		-m=*|--mac=*)
+      MAC="${i#*=}"
+    ;;
     -g=*|--git=*)
       GIT_REPO="${i#*=}"
     ;;
@@ -330,6 +336,18 @@ echo "[builder.sh] Changing current directory to WORKDIR $WORKDIR..." | tee -a "
 cd $WORKDIR  | tee -a "${LOG_PATH}"
 
 echo "[builder.sh] Current PWD: $(pwd)" | tee -a "${LOG_PATH}"
+
+# In-progress: using fcid generator... needs MAC.
+
+# NOTE: This applies to (C-based) builds only with DevSec support
+DEVSEC=$($THINX_ROOT/devsec-linux)
+if [[ ! -z $FCID && ! -z $MAC && ! -z $arduino_devsec_ckey ]]; then
+	echo "[builder.sh] DevSec building signature..." | tee -a "${LOG_PATH}"
+	$DEVSEC -c $arduino_devsec_ckey \
+					-m $MAC \
+					-f $FCID > ./embedded_signature.h
+	cat ./embedded_signature.h | tee -a "${LOG_PATH}"
+fi
 
 case $PLATFORM in
 
