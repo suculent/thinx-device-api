@@ -236,16 +236,16 @@
         <div ng-click="deviceForm.buildHistoryVisible ? deviceForm.buildHistoryVisible = false : deviceForm.buildHistoryVisible = true" class="device-build-status" ng-if="$root.meta.deviceBuilds[deviceForm.udid] != undefined && $root.meta.deviceBuilds[deviceForm.udid].length > 0">
           <div class="row">
             <div class="col-xs-6 text-left">
-              <i class="fa fa-cog" ng-class="meta.deviceBuilds[deviceForm.udid][0].message == 'OK' ? '' : 'fa-spin'"></i> <span class="badge" ng-class="meta.deviceBuilds[deviceForm.udid][0].message == 'OK' ? 'badge-success' : 'badge-warning'">{{meta.deviceBuilds[deviceForm.udid][0].message}}</span>
-              {{meta.deviceBuilds[deviceForm.udid][0].message}}
+              <i class="fa fa-cog" ng-class="$root.meta.deviceBuilds[deviceForm.udid][0].message == 'OK' ? '' : 'fa-spin'"></i> <span class="badge" ng-class="$root.meta.deviceBuilds[deviceForm.udid][0].message == 'OK' ? 'badge-success' : 'badge-warning'">{{$root.meta.deviceBuilds[deviceForm.udid][0].message}}</span>
+              {{$root.meta.deviceBuilds[deviceForm.udid][0].message}}
             </div>
             <div class="col-xs-6 text-right">
-              <a ng-if="meta.deviceBuilds[deviceForm.udid][0].message == 'OK'" class="btn-build-download" ng-click="downloadArtifacts(deviceForm.udid, meta.deviceBuilds[deviceForm.udid][0].build_id)"><i class="fa fa-download"></i></a>
+              <a ng-if="$root.meta.deviceBuilds[deviceForm.udid][0].message == 'OK'" class="btn-build-download" ng-click="downloadArtifacts(deviceForm.udid, $root.meta.deviceBuilds[deviceForm.udid][0].build_id)"><i class="fa fa-download"></i></a>
 
-              <span class="build-status-date" title="{{meta.deviceBuilds[deviceForm.udid][0].date}}">{{meta.deviceBuilds[deviceForm.udid][0].date | lastSeen:'true'}}</span>
+              <span class="build-status-date" title="{{$root.meta.deviceBuilds[deviceForm.udid][0].date}}">{{$root.meta.deviceBuilds[deviceForm.udid][0].date | lastSeen:'true'}}</span>
 
-              <a ng-click="$emit('showLogOverlay', meta.deviceBuilds[deviceForm.udid][0].build_id); $event.stopPropagation()">
-                <span class="device-build-id opacity-100"><i class="fa fa-eye"></i>{{meta.deviceBuilds[deviceForm.udid][0].build_id | limitTo:7}}</span>
+              <a ng-click="$emit('showLogOverlay', $root.meta.deviceBuilds[deviceForm.udid][0].build_id); $event.stopPropagation()">
+                <span class="device-build-id opacity-100"><i class="fa fa-eye"></i>{{$root.meta.deviceBuilds[deviceForm.udid][0].build_id | limitTo:7}}</span>
               </a>
             </div>
           </div>
