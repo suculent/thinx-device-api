@@ -1,3 +1,6 @@
+# Binaries generated in container
+devsec
+
 # Docker Container Scanners
 clair-scanner
 clair.log
