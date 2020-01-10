@@ -77,7 +77,6 @@ RUN apt-get update -qq && \
     zip \
     g++ \
     libstdc++ \
-    libc-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Docker Client only (Docker is on the host) - fails with /bin/sh not found...
