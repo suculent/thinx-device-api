@@ -339,14 +339,15 @@ echo "[builder.sh] Current PWD: $(pwd)" | tee -a "${LOG_PATH}"
 
 # In-progress: using fcid generator... needs MAC.
 
-# NOTE: This applies to (C-based) builds only with DevSec support
+# NOTE: This applies to (C-based) builds only with DevSec support;
+# this is just a hack with that src folder, shouldn't be in builder instead?
 DEVSEC=$($THINX_ROOT/devsec-linux)
 if [[ ! -z $FCID && ! -z $MAC && ! -z $arduino_devsec_ckey ]]; then
-	echo "[builder.sh] DevSec building signature..." | tee -a "${LOG_PATH}"
+	echo "[builder.sh] DevSec building signature in $(pwd)" | tee -a "${LOG_PATH}"
 	$DEVSEC -c $arduino_devsec_ckey \
 					-m $MAC \
-					-f $FCID > ./embedded_signature.h
-	cat ./embedded_signature.h | tee -a "${LOG_PATH}"
+					-f $FCID > ./src/embedded_signature.h
+	cat ./src/embedded_signature.h | tee -a "${LOG_PATH}"
 else
 	echo "[builder.sh] DevSec support disabled..." | tee -a "${LOG_PATH}"
 fi
