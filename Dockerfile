@@ -75,6 +75,9 @@ RUN apt-get update -qq && \
     git \
     jq \
     zip \
+    g++ \
+    libstdc++ \
+    libc-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Docker Client only (Docker is on the host) - fails with /bin/sh not found...
@@ -132,10 +135,19 @@ RUN rm -rf ./.git
 
 # this should be generated/overwritten with sed on entrypoint, entrypoint needs /.first_run file and all ENV_VARS
 COPY ./.thinx_env ./.thinx_env
-#COPY ./conf/.thx_prefix ./conf/.thx_prefix
+
+# DevSec Support (binary needs to be built for respective platform; requires g++)
+RUN cd ./builders/devsec && ./build.sh
 
 # those packages should not be required and pose HIGH security risks
-RUN apt-get remove -y mercurial imagemagick && apt-get autoremove -y
+# g++ is a DevSec build-only dependency, imagemagick source is currently unknown but it is definitely not required
+RUN apt-get remove -y \
+    g++ \
+    libstdc++ \
+    libc-dev \
+    imagemagick \
+    && apt-get autoremove -y \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #ADD https://get.aquasec.com/microscanner .
 #RUN chmod +x microscanner && mkdir artifacts
