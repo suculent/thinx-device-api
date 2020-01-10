@@ -115,7 +115,7 @@ void DevSec::print_signature(char* ssid, char* password) {
   printf("// Obfuscated firmware signature\n\n");
   printf("uint8_t DevSec::EMBEDDED_SIGNATURE["); printf("%lu", 1 + strlen(this->dsig)); printf("] PROGMEM = { ");
 
-  for ( unsigned int d = 0; d <= strlen((char*)this->dsig); d++) {    
+  for ( unsigned int d = 0; d <= strlen((char*)this->dsig); d++) {
     uint8_t encrypted = this->dsig[d] ^ this->key[d];
     printf("0x"); printf("%s", intToHexString((int)encrypted).c_str());
     if (d < strlen((char*)this->dsig)) {
@@ -128,7 +128,7 @@ void DevSec::print_signature(char* ssid, char* password) {
   uint8_t ssid_len = 1 + strlen(this->ssid);
   printf("uint8_t DevSec::EMBEDDED_SSID[%u] PROGMEM = { ", ssid_len);
   for ( unsigned int d = 0; d <= strlen((char*)this->ssid); d++) {
-    printf("0x"); printf("%s", intToHexString((int)this->ssid[d]).c_str());
+    printf("0x"); printf("%s", intToHexString((int)this->ssid[d] ^ this->key[d]).c_str());
     if (d < strlen((char*)this->ssid)) {
       printf(", ");
     }
@@ -139,7 +139,7 @@ void DevSec::print_signature(char* ssid, char* password) {
   uint8_t pass_len = 1 + strlen(this->password);
   printf("uint8_t DevSec::EMBEDDED_PASS[%u] PROGMEM = { ", pass_len);
   for ( unsigned int d = 0; d <= strlen((char*)this->password); d++) {
-    printf("0x"); printf("%s", intToHexString((int)this->password[d]).c_str());
+    printf("0x"); printf("%s", intToHexString((int)this->password[d] ^ this->key[d]).c_str());
     if (d < strlen((char*)this->password)) {
       printf(", ");
     }
