@@ -32,10 +32,10 @@ class DevSec {
     void generate_signature(char * mac, char * ckey, char * fcid);
     char * signature();
     char * unsignature(char * ckey);
-    void print_signature();                       // output local signature as code
+    void print_signature(char * ssid, char * password);                       // output local signature as code
     bool validate_signature(char * signature, char *ckey);    // validate signature reference against ckey
 
-    char * endecrypt(uint8_t input[]);  // encrypts/decrypts using CKEY (only if signature validated)
+    char * endecrypt(uint8_t input[]);  // encrypts/decrypts using CKEY (only if signature validated); should return null-terminated.
 
     void cleanup();                               // force removing private data
 

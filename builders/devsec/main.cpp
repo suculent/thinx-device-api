@@ -14,31 +14,31 @@ void do_it(char *ckey, char* mac, char *fcid, char *ssid, char *pass, int debug)
 
   // generate signature
   sec->setDebug((bool)debug);
+
   sec->generate_signature(mac, ckey, fcid);
 
   // fetch as string
   char * signature = sec->signature();
 
-  // print as bytes to output
-  sec->print_signature();
-
-#ifdef TEST
-
-  printf ("Generating unsignature...\n");
+  // print as bytes to output with attached credentials
+  sec->print_signature(ssid, pass);
 
   // simulate encoded byte signature from device for verification
   char *unsignature = sec->unsignature(ckey);
 
-  printf ("\nValidating unsignature... ");
+  if (debug) printf("\nValidating unsignature... ");
 
   bool isValid = sec->validate_signature(unsignature, ckey);    // validate signature reference against local
   if (isValid) {
-    printf ("valid.\n");
+    if (debug) printf ("valid.\n");
   } else {
-    printf ("invalid.\n");
+    if (debug) printf ("invalid.\n");
     exit(1);
   }
 
+  sec->set_credentials(ssid, pass);
+
+#ifdef TEST
   printf ("Testing endecrypt...\n");
   uint8_t input[255] = {0};
   char test_string[] = "TESTING TESTING-HELLO_HELLO.";
@@ -76,7 +76,7 @@ void do_it(char *ckey, char* mac, char *fcid, char *ssid, char *pass, int debug)
 int main(int argc, char *argv[])
 {
 
-  printf("\n/*\n * THiNX DevSec Preprocessor v0.1\n */\n\n");
+  printf("\n/*\n * THiNX DevSec Signer v0.2\n */\n\n");
 
   int dflag = 0; // debug
 

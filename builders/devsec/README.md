@@ -17,7 +17,9 @@ Maybe python would be better, we'll see. Source is in C/C++ anyway.
 
 Following command should return signature bytes. CKEY is a string, MAC is right half of device's MAC address and FCID is FlashChipID (with debug -d flag enabled prints more for debugging).
 
-		./devsec -c "Shared encryption key." \
+		../../devsec-mac -c "Shared encryption key." \
 						 -m DD:EE:FF \
 						 -f XXDDII \
+						 -s WIFI_SSID \
+						 -p WIFI_PASSWORD \
 						 > ./src/embedded_signature.h

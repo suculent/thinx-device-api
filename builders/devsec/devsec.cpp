@@ -27,9 +27,10 @@ void DevSec::set_credentials(char * ssid, char * pass) {
     return;
   }
 
-  // TODO: encrypted first!
-  this->ssid = endecrypt(ssid);
-  this->password = endecrypt(pass);
+  char *crypted_ssid = endecrypt((uint8_t*)ssid);
+  sprintf(this->ssid, "%s", crypted_ssid);
+  char *crypted_pass = endecrypt((uint8_t*)pass);
+  sprintf(this->password, "%s", crypted_pass);
 }
 
 void DevSec::generate_signature(char *mac, char *ckey, char* fcid) {
@@ -69,8 +70,10 @@ void DevSec::generate_signature(char *mac, char *ckey, char* fcid) {
 
   this->dsig_created = true;
 
-  if (this->debug)
+  if (this->debug) {
     printf("Deriving in-memory key from CKEY and flash_chip_id:\n'");
+  }
+
   for( int c = 0; c < strlen(ckey); c++) {
     this->key[c] = ckey[c] ^ this->flash_chip_id[c%sizeof(this->flash_chip_id)];
     if (this->debug) { printf("0x"); printf("%s", intToHexString((int)this->key[c]).c_str()); }
@@ -97,7 +100,10 @@ char * DevSec::unsignature(char *ckey) {
   return (char*)this->usig;
 }
 
-void DevSec::print_signature() {
+void DevSec::print_signature(char* ssid, char* password) {
+
+  sprintf(this->ssid, "%s", ssid);
+  sprintf(this->password, "%s", password);
 
   printf("#ifndef __EMBEDDED_SIGNATURE__\n");
   printf("#define __EMBEDDED_SIGNATURE__\n");
@@ -105,31 +111,46 @@ void DevSec::print_signature() {
   printf("#include <inttypes.h>\n"); // stdlib instead of whole Arduino's byte_t
   printf("\n");
   printf("// Obfuscated firmware signature\n\n");
-  printf("uint8_t EMBEDDED_SIGNATURE["); printf("%lu", 1+sizeof(this->dsig)); printf("] PROGMEM = {\n");
+  printf("uint8_t DevSec::EMBEDDED_SIGNATURE["); printf("%lu", 1+sizeof(this->dsig)); printf("] PROGMEM = { ");
 
   for ( unsigned int d = 0; d < strlen((char*)this->dsig); d++) {
     printf("0x"); printf("%s", intToHexString((int)this->dsig[d]).c_str());
     if (d < strlen((char*)this->dsig) - 1) {
       printf(", ");
-      if ((d%8 == 0)) {
-        printf("\n");
-      }
     } else {
-      printf("0x0");
+      printf(", 0x0");
     }
   }
 
-  printf("\n};\n");
+  printf(" };\n");
 
   uint8_t ssid_len = strlen(this->ssid);
-  printf("uint8_t DevSec::EMBEDDED_SSID[%u] = PROGMEM { 0x0 };\n", ssid_len);
+  printf("uint8_t DevSec::EMBEDDED_SSID[%u] = PROGMEM { ", ssid_len);
+  for ( unsigned int d = 0; d < strlen((char*)this->ssid); d++) {
+    printf("0x"); printf("%s", intToHexString((int)this->ssid[d]).c_str());
+    if (d < strlen((char*)this->ssid) - 1) {
+      printf(", ");
+    } else {
+      printf(", 0x0"); // adds trailing zero!
+    }
+  }
+  printf(" };\n");
   // TODO: printf this->ssid (encrypted as hex string)
 
-  uint8_t pass_len = strlen(this->pass);
-  printf("uint8_t DevSec::EMBEDDED_PASS[%u] = PROGMEM { 0x0 };\n", pass_len);
+  uint8_t pass_len = strlen(this->password);
+  printf("uint8_t DevSec::EMBEDDED_PASS[%u] = PROGMEM { ", pass_len);
+  for ( unsigned int d = 0; d < strlen((char*)this->password); d++) {
+    printf("0x"); printf("%s", intToHexString((int)this->password[d]).c_str());
+    if (d < strlen((char*)this->password) - 1) {
+      printf(", ");
+    } else {
+      printf(", 0x0"); // adds trailing zero!
+    }
+  }
+  printf(" };\n");
   // TODO: printf this->password (encrypted as hey string)
 
-  printf("#endif // __EMBEDDED_SIGNATURE__\n");
+  printf("\n#endif // __EMBEDDED_SIGNATURE__\n");
 }
 
 bool DevSec::validate_signature(char * signature, char * ckey) {
@@ -166,16 +187,21 @@ bool DevSec::validate_signature(char * signature, char * ckey) {
 
 /* Performs simple symetric XOR encryption using static CKEY so does not work with strings well */
 char * DevSec::endecrypt(uint8_t input[]) {
-    // dsig is valid when key is generated, this needs the key
-    if (this->dsig_valid) {
-      for ( unsigned int d = 0; d < strlen((char*)input); ++d ) {
-        this->crypted[d] = ((char)input[d] ^ this->key[d]);
-      }
+    if (strlen((char*)input) > 255) {
+      printf("ERROR: Block too long!");
     } else {
-      printf("ERROR: DSIG must be valid for decryption.\n");
-      exit(2);
+      // dsig is valid when key is generated, this needs the key
+      if (this->dsig_valid) {
+        for ( unsigned int d = 0; d < strlen((char*)input); ++d ) {
+          this->crypted[d] = ((char)input[d] ^ this->key[d]);
+        }
+      } else {
+        printf("ERROR: DSIG must be valid for decryption.\n");
+        exit(2);
+      }
     }
-    return (char*)this->crypted;
+    this->crypted[strlen((char*)input)] = 0; // adds null termination; does not solve zero collisions!
+    return (char*) this->crypted;
 }
 
 /* Overwrites unconditionally the dsig value with zeros */
@@ -183,11 +209,9 @@ void DevSec::cleanup() {
   if (this->dsig_created) {
     printf("Note: DSIG is being erased now...\n");
   }
-
   for ( unsigned int e = 0; e < sizeof(dsig); ++e ) {
     dsig[e] = 0; // zero-out in-memory signature
   }
-
   dsig_created = false;
   dsig_valid = false;
 }
