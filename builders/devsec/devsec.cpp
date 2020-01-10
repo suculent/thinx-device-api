@@ -62,6 +62,7 @@ void DevSec::generate_signature(char *mac, char *ckey, char* fcid) {
   mac_bytes[12] = 0;
 
   sprintf(this->flash_chip_id, "%s", fcid);
+  // TODO: should actually take only last 6 bytes from MAC and 6 bytes of FCID!
   sprintf((char*)this->dsig, "%s;%s;%s", SIGBASE, mac_bytes, this->flash_chip_id);
 
   if (this->debug) { printf("\nDSIG: '"); printf("%s", (char*)this->dsig); printf("'\n"); }
@@ -125,7 +126,7 @@ void DevSec::print_signature(char* ssid, char* password) {
   printf(" };\n");
 
   uint8_t ssid_len = strlen(this->ssid);
-  printf("uint8_t DevSec::EMBEDDED_SSID[%u] = PROGMEM { ", ssid_len);
+  printf("uint8_t DevSec::EMBEDDED_SSID[%u] PROGMEM = { ", ssid_len);
   for ( unsigned int d = 0; d < strlen((char*)this->ssid); d++) {
     printf("0x"); printf("%s", intToHexString((int)this->ssid[d]).c_str());
     if (d < strlen((char*)this->ssid) - 1) {
@@ -138,7 +139,7 @@ void DevSec::print_signature(char* ssid, char* password) {
   // TODO: printf this->ssid (encrypted as hex string)
 
   uint8_t pass_len = strlen(this->password);
-  printf("uint8_t DevSec::EMBEDDED_PASS[%u] = PROGMEM { ", pass_len);
+  printf("uint8_t DevSec::EMBEDDED_PASS[%u] PROGMEM = { ", pass_len);
   for ( unsigned int d = 0; d < strlen((char*)this->password); d++) {
     printf("0x"); printf("%s", intToHexString((int)this->password[d]).c_str());
     if (d < strlen((char*)this->password) - 1) {
