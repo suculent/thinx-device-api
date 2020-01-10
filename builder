@@ -345,19 +345,8 @@ echo "[builder.sh] Current PWD: $(pwd)" | tee -a "${LOG_PATH}"
 # (This header should not be placed in project root to prevent being auto-imported;
 # which causes duplicate definitions and linker error.)
 
-#
-# Select pre-built binary; TODO: FIXME: should be rather built on container installation;
-# then the filename could be same and no binary in repo.
-#
-
-BUILD_PLATFORM=$(uname -a)
-if [[ $BUILD_PLATFORM=="linux" ]]; then
-	DEVSEC_PLATFORM=linux
-fi
-if [[ $BUILD_PLATFORM=="darwin" ]]; then
-	DEVSEC_PLATFORM=mac
-fi
-DEVSEC=$($THINX_ROOT/devsec-$DEVSEC_PLATFORM)
+# Pre-built with container
+DEVSEC=$($THINX_ROOT/devsec)
 
 #
 # Fetch path and rebuild the signature file if any...
