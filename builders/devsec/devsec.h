@@ -28,6 +28,7 @@ class DevSec {
     void setDebug(bool val);
     bool debug;
 
+    void set_credentials(char *ssid, char* pass);
     void generate_signature(char * mac, char * ckey, char * fcid);
     char * signature();
     char * unsignature(char * ckey);
@@ -48,7 +49,9 @@ class DevSec {
     bool dsig_valid;
 
     char crypted[256]; // 256 should be OK for now...
-
     char flash_chip_id[13];  // 13 chars and string end...
+
+    char ssid[32];
+    char password[32];
 
 };

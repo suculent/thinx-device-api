@@ -1,16 +1,12 @@
 #include "devsec.h"
 
 std::string DevSec::intToHexString(int intValue) {
-
     std::string hexStr;
-
     std::stringstream sstream;
     sstream << std::setfill ('0') << std::setw(2)
     << std::hex << (int)intValue;
-
     hexStr = sstream.str();
     sstream.clear();
-
     return hexStr;
 }
 
@@ -22,6 +18,18 @@ DevSec::DevSec() {
 
 void DevSec::setDebug(bool val) {
   this->debug = val;
+}
+
+void DevSec::set_credentials(char * ssid, char * pass) {
+
+  if (!this->dsig_created) {
+    printf("ERROR: No DSIG/EKEY generated to encrypt with.\n");
+    return;
+  }
+
+  // TODO: encrypted first!
+  this->ssid = endecrypt(ssid);
+  this->password = endecrypt(pass);
 }
 
 void DevSec::generate_signature(char *mac, char *ckey, char* fcid) {
@@ -57,6 +65,8 @@ void DevSec::generate_signature(char *mac, char *ckey, char* fcid) {
 
   if (this->debug) { printf("\nDSIG: '"); printf("%s", (char*)this->dsig); printf("'\n"); }
 
+  this->dsig[63] = 0; // make sure there is a termination character at the end of DSIG
+
   this->dsig_created = true;
 
   if (this->debug)
@@ -89,8 +99,13 @@ char * DevSec::unsignature(char *ckey) {
 
 void DevSec::print_signature() {
 
+  printf("#ifndef __EMBEDDED_SIGNATURE__\n");
+  printf("#define __EMBEDDED_SIGNATURE__\n");
+  printf("\n");
+  printf("#include <inttypes.h>\n"); // stdlib instead of whole Arduino's byte_t
+  printf("\n");
   printf("// Obfuscated firmware signature\n\n");
-  printf("byte dsig["); printf("%lu", 1+sizeof(this->dsig)); printf("] = {\n");
+  printf("uint8_t EMBEDDED_SIGNATURE["); printf("%lu", 1+sizeof(this->dsig)); printf("] PROGMEM = {\n");
 
   for ( unsigned int d = 0; d < strlen((char*)this->dsig); d++) {
     printf("0x"); printf("%s", intToHexString((int)this->dsig[d]).c_str());
@@ -99,11 +114,22 @@ void DevSec::print_signature() {
       if ((d%8 == 0)) {
         printf("\n");
       }
+    } else {
+      printf("0x0");
     }
   }
 
-  printf("\n};\n\n");
+  printf("\n};\n");
 
+  uint8_t ssid_len = strlen(this->ssid);
+  printf("uint8_t DevSec::EMBEDDED_SSID[%u] = PROGMEM { 0x0 };\n", ssid_len);
+  // TODO: printf this->ssid (encrypted as hex string)
+
+  uint8_t pass_len = strlen(this->pass);
+  printf("uint8_t DevSec::EMBEDDED_PASS[%u] = PROGMEM { 0x0 };\n", pass_len);
+  // TODO: printf this->password (encrypted as hey string)
+
+  printf("#endif // __EMBEDDED_SIGNATURE__\n");
 }
 
 bool DevSec::validate_signature(char * signature, char * ckey) {
@@ -126,8 +152,9 @@ bool DevSec::validate_signature(char * signature, char * ckey) {
 #endif
       isValid = false;
     }
+    // TODO: Fix this, length may differ.
     if (d == 17) {
-      break;
+      break; // compares only first 17!
     }
   }
 

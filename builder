@@ -337,20 +337,64 @@ cd $WORKDIR  | tee -a "${LOG_PATH}"
 
 echo "[builder.sh] Current PWD: $(pwd)" | tee -a "${LOG_PATH}"
 
-# In-progress: using fcid generator... needs MAC.
+### DevSec Implementation Begin --> ###
 
 # NOTE: This applies to (C-based) builds only with DevSec support;
-# this is just a hack with that src folder, shouldn't be in builder instead?
-DEVSEC=$($THINX_ROOT/devsec-linux)
-if [[ ! -z $FCID && ! -z $MAC && ! -z $arduino_devsec_ckey ]]; then
-	echo "[builder.sh] DevSec building signature in $(pwd)" | tee -a "${LOG_PATH}"
-	$DEVSEC -c $arduino_devsec_ckey \
-					-m $MAC \
-					-f $FCID > ./src/embedded_signature.h
-	cat ./src/embedded_signature.h | tee -a "${LOG_PATH}"
-else
-	echo "[builder.sh] DevSec support disabled..." | tee -a "${LOG_PATH}"
+
+# Builder searches for the signature placeholder inside a subfolder.
+# (This header should not be placed in project root to prevent being auto-imported;
+# which causes duplicate definitions and linker error.)
+
+#
+# Select pre-built binary; TODO: FIXME: should be rather built on container installation;
+# then the filename could be same and no binary in repo.
+#
+
+BUILD_PLATFORM=$(uname -a)
+if [[ $BUILD_PLATFORM=="linux" ]]; then
+	DEVSEC_PLATFORM=linux
 fi
+if [[ $BUILD_PLATFORM=="darwin" ]]; then
+	DEVSEC_PLATFORM=mac
+fi
+DEVSEC=$($THINX_ROOT/devsec-$DEVSEC_PLATFORM)
+
+#
+# Fetch path and rebuild the signature file if any...
+#
+
+SIGNATURE_FILE=$(find . -name "embedded_signature.h")
+
+if [[ ! -z $SIGNATURE_FILE ]]; then
+	echo "Signature placeholder found at: $SIGNATURE_FILE" | tee -a "${LOG_PATH}"
+fi
+
+if [[ -f $SIGNATURE_FILE ]]; then
+
+	# TODO: Validate inputs before doing this...
+	if [[ ! -z $FCID && ! -z $MAC && ! -z $arduino_devsec_ckey ]]; then
+		echo "[builder.sh] DevSec building signature in $(pwd)" | tee -a "${LOG_PATH}"
+		$DEVSEC -c $arduino_devsec_ckey \
+						-m $MAC \
+						-f $FCID \
+						-s $arduino_devsec_ssid \
+						-p $arduino_devsec_pass \
+						> $SIGNATURE_FILE
+		cat $SIGNATURE_FILE | tee -a "${LOG_PATH}"
+	else
+		# TODO: Log missing args.
+		echo "[builder.sh] Skipping DevSec support, configuration incomplete..." | tee -a "${LOG_PATH}"
+	fi
+else
+	echo "[builder.sh] [DevSec] Signature file not found at $SIGNATURE_FILE"
+fi
+
+### <-- DevSec Implementation End ###
+
+
+
+
+### Builder Implementation Begin --> ###
 
 case $PLATFORM in
 

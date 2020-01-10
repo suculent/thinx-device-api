@@ -1,9 +1,12 @@
 #!/bin/bash
 
-if $(uname -a) == "darwin"; then
-  g++ main.cpp devsec.cpp -o devsec
-fi
-
-if $(uname -a) == "linux"; then
-  g++ -std=c++11 main.cpp devsec.cpp -o devsec
+if [[ $(uname -s) == "Darwin" ]]; then
+  echo "Building DevSec binary for Mac OS..."
+  g++ main.cpp devsec.cpp -o ../../devsec-mac
+elif [[ $(uname -s) == "Linux" ]]; then
+  echo "Building DevSec binary for Linux..."
+  g++ -std=c++11 main.cpp devsec.cpp -o ../../devsec-linux
+else
+  echo "Unsupported platform for building."
+  exit 1
 fi
