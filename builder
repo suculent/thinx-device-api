@@ -364,17 +364,14 @@ else
 		# TODO: Validate inputs before doing this...
 		if [[ ! -z $FCID && ! -z $MAC && ! -z $arduino_devsec_ckey ]]; then
 			echo "[builder.sh] DevSec building signature in $(pwd)" | tee -a "${LOG_PATH}"
-			# Pre-built with container
-			chmod +x $THINX_ROOT/devsec
-			$THINX_ROOT/devsec -c $arduino_devsec_ckey \
-							-m $MAC \
-							-f $FCID \
+			$THINX_ROOT/devsec  -m $MAC -f $FCID \
+							-c $arduino_devsec_ckey \
 							-s $arduino_devsec_ssid \
 							-p $arduino_devsec_pass \
 							> $SIGNATURE_FILE
 			echo "GENERATED SIGNATURE_FILE: "
 			cat $SIGNATURE_FILE | tee -a "${LOG_PATH}"
-		else			
+		else
 			echo "[builder.sh] Skipping DevSec support, configuration incomplete..." | tee -a "${LOG_PATH}"
 		fi
 	else
