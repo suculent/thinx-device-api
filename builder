@@ -347,6 +347,9 @@ echo "[builder.sh] Current PWD: $(pwd)" | tee -a "${LOG_PATH}"
 
 # Pre-built with container
 DEVSEC=$($THINX_ROOT/devsec)
+chmod +x ./devsec
+
+echo "$DEVSEC"
 
 #
 # Fetch path and rebuild the signature file if any...
@@ -357,13 +360,14 @@ ls -la  | tee -a "${LOG_PATH}"
 SIGNATURE_FILE=$(find . -maxdepth 3 -name "embedded_signature.h")
 
 if [[ ! -z $SIGNATURE_FILE ]]; then
-	echo "Signature placeholder found at: $SIGNATURE_FILE" | tee -a "${LOG_PATH}"
+	echo "Signature placeholder found at: $SIGNATURE_FILE\n" | tee -a "${LOG_PATH}"
 else
 	if [[ -f $SIGNATURE_FILE ]]; then
 
 		# TODO: Validate inputs before doing this...
 		if [[ ! -z $FCID && ! -z $MAC && ! -z $arduino_devsec_ckey ]]; then
-			echo "[builder.sh] DevSec building signature in $(pwd)" | tee -a "${LOG_PATH}"
+			echo "[builder.sh] DevSec building signature in $(pwd)\n" | tee -a "${LOG_PATH}"
+			echo "${DEVSEC}" | tee -a "${LOG_PATH}"
 			$DEVSEC -c $arduino_devsec_ckey \
 							-m $MAC \
 							-f $FCID \
@@ -373,7 +377,7 @@ else
 			cat $SIGNATURE_FILE | tee -a "${LOG_PATH}"
 		else
 			# TODO: Log missing args.
-			echo "[builder.sh] Skipping DevSec support, configuration incomplete..." | tee -a "${LOG_PATH}"
+			echo "[builder.sh] Skipping DevSec support, configuration incomplete...\n" | tee -a "${LOG_PATH}"
 		fi
 	else
 		echo "[builder.sh] [DevSec] Signature file not found at $SIGNATURE_FILE in $(ls)" | tee -a "${LOG_PATH}"
