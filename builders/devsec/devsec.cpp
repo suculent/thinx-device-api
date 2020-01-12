@@ -67,7 +67,7 @@ void DevSec::generate_signature(char *mac, char *ckey, char* fcid) {
 
   if (this->debug) { printf("\nDSIG: '"); printf("%s", (char*)this->dsig); printf("'\n"); }
 
-  this->dsig[63] = 0; // make sure there is a termination character at the end of DSIG
+  this->dsig[sizeof(this->dsig)-1] = 0; // make sure there is a termination character at the end of DSIG
 
   this->dsig_created = true;
 
@@ -115,11 +115,14 @@ void DevSec::print_signature(char* ssid, char* password) {
   printf("// Obfuscated firmware signature\n\n");
   printf("uint8_t DevSec::EMBEDDED_SIGNATURE["); printf("%lu", 1 + strlen(this->dsig)); printf("] PROGMEM = { ");
 
-  for ( unsigned int d = 0; d <= strlen((char*)this->dsig); d++) {
-    uint8_t encrypted = this->dsig[d] ^ this->key[d];
+  // Signature should have 20 bytes exactly (without padding)
+  for ( unsigned int d = 0; d < strlen((char*)this->dsig); d++) {
+    uint8_t encrypted = 1 + this->dsig[d] ^ this->key[d];
     printf("0x"); printf("%s", intToHexString((int)encrypted).c_str());
-    if (d < strlen((char*)this->dsig)) {
+    if (d < strlen((char*)this->dsig) - 1) {
       printf(", ");
+    } else {
+      printf(", 0x0");
     }
   }
 
@@ -127,25 +130,27 @@ void DevSec::print_signature(char* ssid, char* password) {
 
   uint8_t ssid_len = 1 + strlen(this->ssid);
   printf("uint8_t DevSec::EMBEDDED_SSID[%u] PROGMEM = { ", ssid_len);
-  for ( unsigned int d = 0; d <= strlen((char*)this->ssid); d++) {
-    printf("0x"); printf("%s", intToHexString((int)this->ssid[d] ^ this->key[d]).c_str());
-    if (d < strlen((char*)this->ssid)) {
+  for ( unsigned int d = 0; d < strlen((char*)this->ssid); d++) {
+    printf("0x"); printf("%s", intToHexString(1 + (int)this->ssid[d] ^ this->key[d]).c_str());
+    if (d < strlen((char*)this->ssid) - 1) {
       printf(", ");
+    } else {
+      printf(", 0x0");
     }
   }
   printf(" };\n");
-  // TODO: printf this->ssid (encrypted as hex string)
 
   uint8_t pass_len = 1 + strlen(this->password);
   printf("uint8_t DevSec::EMBEDDED_PASS[%u] PROGMEM = { ", pass_len);
-  for ( unsigned int d = 0; d <= strlen((char*)this->password); d++) {
-    printf("0x"); printf("%s", intToHexString((int)this->password[d] ^ this->key[d]).c_str());
-    if (d < strlen((char*)this->password)) {
+  for ( unsigned int d = 0; d < strlen((char*)this->password); d++) {
+    printf("0x"); printf("%s", intToHexString(1 + (int)this->password[d] ^ this->key[d]).c_str());
+    if (d < strlen((char*)this->password) - 1) {
       printf(", ");
+    } else {
+      printf(", 0x0");
     }
   }
   printf(" };\n");
-  // TODO: printf this->password (encrypted as hey string)
 
   printf("\n#endif // __EMBEDDED_SIGNATURE__\n");
 }
@@ -183,14 +188,32 @@ bool DevSec::validate_signature(char * signature, char * ckey) {
 }
 
 /* Performs simple symetric XOR encryption using static CKEY so does not work with strings well */
-char * DevSec::endecrypt(uint8_t input[]) {
+char * DevSec::encrypt(uint8_t input[]) {
     if (strlen((char*)input) > 255) {
       printf("ERROR: Block too long!");
     } else {
       // dsig is valid when key is generated, this needs the key
       if (this->dsig_valid) {
         for ( unsigned int d = 0; d < strlen((char*)input); ++d ) {
-          this->crypted[d] = ((char)input[d] ^ this->key[d]);
+          this->crypted[d] = 1 + ((char)input[d] ^ this->key[d]);
+        }
+      } else {
+        printf("ERROR: DSIG must be valid for decryption.\n");
+        exit(2);
+      }
+    }
+    this->crypted[strlen((char*)input)] = 0; // adds null termination; does not solve zero collisions!
+    return (char*) this->crypted;
+}
+
+char * DevSec::decrypt(uint8_t input[]) {
+    if (strlen((char*)input) > 255) {
+      printf("ERROR: Block too long!");
+    } else {
+      // dsig is valid when key is generated, this needs the key
+      if (this->dsig_valid) {
+        for ( unsigned int d = 0; d < strlen((char*)input); ++d ) {
+          this->crypted[d] = ((char)input[d] ^ this->key[d]) - 1;
         }
       } else {
         printf("ERROR: DSIG must be valid for decryption.\n");

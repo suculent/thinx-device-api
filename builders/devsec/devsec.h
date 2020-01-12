@@ -35,20 +35,21 @@ class DevSec {
     void print_signature(char * ssid, char * password);                       // output local signature as code
     bool validate_signature(char * signature, char *ckey);    // validate signature reference against ckey
 
-    char * endecrypt(uint8_t input[]);  // encrypts/decrypts using CKEY (only if signature validated); should return null-terminated.
+    char * decrypt(uint8_t input[]);  // encrypts/decrypts using CKEY (only if signature validated); should return null-terminated.
+    char * encrypt(uint8_t input[]);  // encrypts/decrypts using CKEY (only if signature validated); should return null-terminated.
 
     void cleanup();                               // force removing private data
 
-    char dsig[64];                                // local device signature [26]
-    char usig[64];    // temporary unsignature store
-    char key[38];                          // obfuscation key in length of CKEY
+    char dsig[21];                                // local device signature [20+\0]
+    char usig[32];                                // temporary unsignature store
+    char key[64];                                 // obfuscation key in length of CKEY
 
   private:
 
     bool dsig_created;
     bool dsig_valid;
 
-    char crypted[256]; // 256 should be OK for now...
+    char crypted[64]; // 64 should be OK for now... (key)
     char flash_chip_id[13];  // 13 chars and string end...
 
     char ssid[32];

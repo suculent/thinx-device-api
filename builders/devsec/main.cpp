@@ -45,11 +45,11 @@ void do_it(char *ckey, char* mac, char *fcid, char *ssid, char *pass, int debug)
   sprintf((char*)input, "%s", test_string);
   // printf ("array string: %s\n", (char*)input);
 
-  char * output = sec->endecrypt(input);  // encrypts/decrypts byte array using CKEY (only if signature validated)
+  char * output = sec->encrypt(input);  // encrypts/decrypts byte array using CKEY (only if signature validated)
   // printf ("ENCODED: %s\n", output);
 
   sprintf((char*)input, "%s", output);
-  char *output2 = sec->endecrypt(input);
+  char *output2 = sec->decrypt(input);
   // printf ("DECODED: %s\n", (char*)output2);
 
   if (strcmp((char*)test_string, output2) == 0) {
