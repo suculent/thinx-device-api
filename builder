@@ -352,30 +352,30 @@ DEVSEC=$($THINX_ROOT/devsec)
 # Fetch path and rebuild the signature file if any...
 #
 
-SIGNATURE_FILE=$(find . -name "embedded_signature.h")
+SIGNATURE_FILE=$(find . -maxdepth 3 -name "embedded_signature.h")
 
 if [[ ! -z $SIGNATURE_FILE ]]; then
 	echo "Signature placeholder found at: $SIGNATURE_FILE" | tee -a "${LOG_PATH}"
-fi
-
-if [[ -f $SIGNATURE_FILE ]]; then
-
-	# TODO: Validate inputs before doing this...
-	if [[ ! -z $FCID && ! -z $MAC && ! -z $arduino_devsec_ckey ]]; then
-		echo "[builder.sh] DevSec building signature in $(pwd)" | tee -a "${LOG_PATH}"
-		$DEVSEC -c $arduino_devsec_ckey \
-						-m $MAC \
-						-f $FCID \
-						-s $arduino_devsec_ssid \
-						-p $arduino_devsec_pass \
-						> $SIGNATURE_FILE
-		cat $SIGNATURE_FILE | tee -a "${LOG_PATH}"
-	else
-		# TODO: Log missing args.
-		echo "[builder.sh] Skipping DevSec support, configuration incomplete..." | tee -a "${LOG_PATH}"
-	fi
 else
-	echo "[builder.sh] [DevSec] Signature file not found at $SIGNATURE_FILE"
+	if [[ -f $SIGNATURE_FILE ]]; then
+
+		# TODO: Validate inputs before doing this...
+		if [[ ! -z $FCID && ! -z $MAC && ! -z $arduino_devsec_ckey ]]; then
+			echo "[builder.sh] DevSec building signature in $(pwd)" | tee -a "${LOG_PATH}"
+			$DEVSEC -c $arduino_devsec_ckey \
+							-m $MAC \
+							-f $FCID \
+							-s $arduino_devsec_ssid \
+							-p $arduino_devsec_pass \
+							> $SIGNATURE_FILE
+			cat $SIGNATURE_FILE | tee -a "${LOG_PATH}"
+		else
+			# TODO: Log missing args.
+			echo "[builder.sh] Skipping DevSec support, configuration incomplete..." | tee -a "${LOG_PATH}"
+		fi
+	else
+		echo "[builder.sh] [DevSec] Signature file not found at $SIGNATURE_FILE in $(ls)" | tee -a "${LOG_PATH}"
+	fi
 fi
 
 ### <-- DevSec Implementation End ###
