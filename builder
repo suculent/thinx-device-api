@@ -357,14 +357,14 @@ SIGNATURE_FILE=$(find . -maxdepth 3 -name "embedded_signature.h")
 echo "SIGNATURE_FILE : $SIGNATURE_FILE"
 
 if [[ ! -z $SIGNATURE_FILE ]]; then
-	echo "Signature placeholder found at: $SIGNATURE_FILE" | tee -a "${LOG_PATH}"
+	echo "Signature placeholder found at: ${SIGNATURE_FILE}" | tee -a "${LOG_PATH}"
 	if [[ -f $SIGNATURE_FILE ]]; then
 
 		# TODO: Validate inputs before doing this...
 		if [[ ! -z $FCID && ! -z $MAC && ! -z $arduino_devsec_ckey ]]; then
 			echo "[builder.sh] DevSec building signature in $(pwd)" | tee -a "${LOG_PATH}"
 			$THINX_ROOT/devsec  -m $MAC -f $FCID \
-							-c $arduino_devsec_ckey \
+							-c "${arduino_devsec_ckey}" \
 							-s $arduino_devsec_ssid \
 							-p $arduino_devsec_pass \
 							> $SIGNATURE_FILE
