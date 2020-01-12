@@ -358,7 +358,6 @@ echo "SIGNATURE_FILE : $SIGNATURE_FILE"
 
 if [[ ! -z $SIGNATURE_FILE ]]; then
 	echo "Signature placeholder found at: $SIGNATURE_FILE" | tee -a "${LOG_PATH}"
-else
 	if [[ -f $SIGNATURE_FILE ]]; then
 
 		# TODO: Validate inputs before doing this...
