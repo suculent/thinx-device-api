@@ -349,7 +349,7 @@ echo "[builder.sh] Current PWD: $(pwd)" | tee -a "${LOG_PATH}"
 DEVSEC=$($THINX_ROOT/devsec)
 chmod +x ./devsec
 
-echo "$DEVSEC"
+echo "DEVSEC : $DEVSEC"
 
 #
 # Fetch path and rebuild the signature file if any...
@@ -358,6 +358,8 @@ echo "$DEVSEC"
 ls -la  | tee -a "${LOG_PATH}"
 
 SIGNATURE_FILE=$(find . -maxdepth 3 -name "embedded_signature.h")
+
+echo "SIGNATURE_FILE : $SIGNATURE_FILE"
 
 if [[ ! -z $SIGNATURE_FILE ]]; then
 	echo "Signature placeholder found at: $SIGNATURE_FILE\n" | tee -a "${LOG_PATH}"
@@ -374,6 +376,7 @@ else
 							-s $arduino_devsec_ssid \
 							-p $arduino_devsec_pass \
 							> $SIGNATURE_FILE
+			echo "GENERATED SIGNATURE_FILE: "
 			cat $SIGNATURE_FILE | tee -a "${LOG_PATH}"
 		else
 			# TODO: Log missing args.
