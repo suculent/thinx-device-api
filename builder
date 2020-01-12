@@ -352,6 +352,8 @@ DEVSEC=$($THINX_ROOT/devsec)
 # Fetch path and rebuild the signature file if any...
 #
 
+ls -la  | tee -a "${LOG_PATH}"
+
 SIGNATURE_FILE=$(find . -maxdepth 3 -name "embedded_signature.h")
 
 if [[ ! -z $SIGNATURE_FILE ]]; then
