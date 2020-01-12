@@ -117,7 +117,7 @@ void DevSec::print_signature(char* ssid, char* password) {
 
   // Signature should have 20 bytes exactly (without padding)
   for ( unsigned int d = 0; d < strlen((char*)this->dsig); d++) {
-    uint8_t encrypted = 1 + (this->dsig[d] ^ this->key[d]);
+    uint8_t encrypted = this->dsig[d] ^ (128+this->key[d]);
     printf("0x"); printf("%s", intToHexString((int)encrypted).c_str());
     if (d < strlen((char*)this->dsig) - 1) {
       printf(", ");
@@ -131,7 +131,7 @@ void DevSec::print_signature(char* ssid, char* password) {
   uint8_t ssid_len = 1 + strlen(this->ssid);
   printf("uint8_t DevSec::EMBEDDED_SSID[%u] PROGMEM = { ", ssid_len);
   for ( unsigned int d = 0; d < strlen((char*)this->ssid); d++) {
-    printf("0x"); printf("%s", intToHexString(1 + ((int)this->ssid[d] ^ this->key[d])).c_str());
+    printf("0x"); printf("%s", intToHexString((int)this->ssid[d] ^ (128+this->key[d])).c_str());
     if (d < strlen((char*)this->ssid) - 1) {
       printf(", ");
     } else {
@@ -143,7 +143,7 @@ void DevSec::print_signature(char* ssid, char* password) {
   uint8_t pass_len = 1 + strlen(this->password);
   printf("uint8_t DevSec::EMBEDDED_PASS[%u] PROGMEM = { ", pass_len);
   for ( unsigned int d = 0; d < strlen((char*)this->password); d++) {
-    printf("0x"); printf("%s", intToHexString(1 + ((int)this->password[d] ^ this->key[d])).c_str());
+    printf("0x"); printf("%s", intToHexString((int)this->password[d] ^ (128+this->key[d])).c_str());
     if (d < strlen((char*)this->password) - 1) {
       printf(", ");
     } else {
@@ -195,7 +195,7 @@ char * DevSec::encrypt(uint8_t input[]) {
       // dsig is valid when key is generated, this needs the key
       if (this->dsig_valid) {
         for ( unsigned int d = 0; d < strlen((char*)input); ++d ) {
-          this->crypted[d] = 1 + ((char)input[d] ^ this->key[d]);
+          this->crypted[d] = (char)input[d] ^ (128+this->key[d]);
         }
       } else {
         printf("ERROR: DSIG must be valid for decryption.\n");
@@ -213,7 +213,7 @@ char * DevSec::decrypt(uint8_t input[]) {
       // dsig is valid when key is generated, this needs the key
       if (this->dsig_valid) {
         for ( unsigned int d = 0; d < strlen((char*)input); ++d ) {
-          this->crypted[d] = ((char)input[d] ^ this->key[d]) - 1;
+          this->crypted[d] = (char)input[d] ^ (128+this->key[d]);
         }
       } else {
         printf("ERROR: DSIG must be valid for decryption.\n");
