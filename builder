@@ -365,7 +365,7 @@ if [[ ! -z $SIGNATURE_FILE ]]; then
 			echo "[builder.sh] DevSec building signature in $(pwd)" | tee -a "${LOG_PATH}"
 			DEVSEC_ARGS="-m ${MAC} -f ${FCID} -c '${arduino_devsec_ckey}' -s ${arduino_devsec_ssid} -p ${arduino_devsec_pass} > ${SIGNATURE_FILE}"
 			echo "DEVSEC_ARGS: $DEVSEC_ARGS" | tee -a "${LOG_PATH}"
-			$THINX_ROOT/devsec '${DEVSEC_ARGS}'
+			$THINX_ROOT/devsec "${DEVSEC_ARGS}"
 			echo "GENERATED SIGNATURE_FILE: "
 			cat $SIGNATURE_FILE | tee -a "${LOG_PATH}"
 			#if [[ grep $SIGNATURE_FILE "Non-option" ]]; then
