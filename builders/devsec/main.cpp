@@ -138,8 +138,14 @@ int main(int argc, char *argv[])
         abort ();
       }
 
+  bool option_error = false;
   for (index = optind; index < argc; index++) {
     printf ("Non-option argument %s\n", argv[index]);
+    option_error = true;
+  }
+
+  if (option_error) {
+    exit(3);
   }
 
   if ((cvalue != NULL) && (uvalue != NULL) && (fvalue != NULL)) {
