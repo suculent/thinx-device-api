@@ -145,6 +145,7 @@ int main(int argc, char *argv[])
   }
 
   if (option_error) {
+    printf ("Exiting on option_error");
     exit(3);
   }
 
