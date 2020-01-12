@@ -136,8 +136,7 @@ COPY ./.thinx_env ./.thinx_env
 
 # DevSec Support (binary needs to be built for respective platform; requires g++)
 RUN cd ./builders/devsec && ./build.sh
-
-RUN ./devsec-linux -d
+RUN ./devsec -d
 
 # those packages should not be required and pose HIGH security risks
 # g++ is a DevSec build-only dependency, imagemagick source is currently unknown but it is definitely not required
