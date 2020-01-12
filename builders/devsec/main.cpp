@@ -76,7 +76,7 @@ void do_it(char *ckey, char* mac, char *fcid, char *ssid, char *pass, int debug)
 int main(int argc, char *argv[])
 {
 
-  printf("\n/*\n * THiNX DevSec Signer v0.2\n */\n\n");
+  printf("\n/*\n * THiNX DevSec Signer v0.128\n */\n\n");
 
   int dflag = 0; // debug
 
