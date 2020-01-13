@@ -38,7 +38,7 @@ var mqtt = require("mqtt");
 var Messenger = require("./lib/thinx/messenger");
 var messenger = new Messenger().getInstance(); // take singleton to prevent double initialization
 
-console.log("-=[ ☢ THiNX IoT RTM NOTIFIER ☢ ]=-");
+console.log("\n-=[ ☢ THiNX IoT RTM NOTIFIER ☢ ]=-\n");
 
 // Parse input params
 
@@ -332,7 +332,7 @@ devicelib.get(udid, function(err, doc) {
         fields: buildEnvelope
       });
     }
-    
+
 /*
 
     // Notify users (FCM)

@@ -317,7 +317,7 @@ else
 	DOCKER_PREFIX=""
 fi
 
-pushd $WORKDIR  | tee -a "${LOG_PATH}"
+pushd $WORKDIR
 
 echo "Building in WORKDIR: $(pwd)" | tee -a "${LOG_PATH}"
 
@@ -662,10 +662,10 @@ case $PLATFORM in
 				echo "[arduino] WARNING! No THiNX-File found! in $BUILD_PATH/$REPO_PATH: $THINX_FILE" | tee -a "${LOG_PATH}"
 				# exit 1 # will deprecate on modularization for more platforms
 			else
-				echo "[arduino] Using THiNX-File: ${THINX_FILE}" | tee -a "${LOG_PATH}"
+				echo "[arduino] Using THiNX-File: ${THINX_FILE/$(pwd)//}" | tee -a "${LOG_PATH}"
 			fi
 
-			pushd $BUILD_PATH/$REPO_PATH | tee -a "${LOG_PATH}"
+			pushd $BUILD_PATH/$REPO_PATH
 
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 
