@@ -64,8 +64,7 @@ done
 THINX_ROOT=$(pwd)
 
 # from app_config.data_root
-
-DATA_ROOT="/mnt/data"
+DATA_ROOT=$(cat $THINX_ROOT/conf/config.json | jq .data_root)
 
 # from app_config.build_root
 BUILD_ROOT=$DATA_ROOT/repos
