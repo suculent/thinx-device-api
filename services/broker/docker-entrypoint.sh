@@ -20,15 +20,19 @@ chown -R mosquitto:mosquitto /mqtt
 
 su mosquitto -s /bin/bash
 
-# echo "Mosquitto Entrypoint Credentials: ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}"
-
+touch /mqtt/log/mosquitto.log
 touch /mqtt/auth/thinx.pw
 
 if [[ ! -z $MOSQUITTO_PASSWORD ]]; then
   if [[ ! -z $MOSQUITTO_USERNAME ]]; then
     echo "Overwriting THiNX APP MQTT credentials in /mqtt/auth/thinx.pw"
-    mosquitto_passwd -b /mqtt/auth/thinx.pw ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}
+    # /docker-entrypoint.sh: line 32: 16 Hangup
+    nohup mosquitto_passwd -b /mqtt/auth/thinx.pw ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}
+  else
+    echo "MOSQUITTO_USERNAME for THiNX seems not to be set properly in .env "
   fi
+else
+  echo "MOSQUITTO_PASSWORD for THiNX seems not to be set properly in .env "
 fi
 
 CONFIG_FILE="/mqtt/config/mosquitto.conf"
@@ -52,15 +56,12 @@ pkill apt # attempt to prevent sticking, suspicious thing it is.
 # must run in background to prevent killing container on restart
 # must be external file to allow SSL certificate changes
 if [[ -f ${CONFIG_FILE} ]]; then
-  echo "Starting with configuration file ${CONFIG_FILE}"
+  echo "Starting Mosquitto Daemon with configuration file ${CONFIG_FILE}"
   mosquitto -d -v -c ${CONFIG_FILE}
 else
-  echo "Starting without configuration file(!)"
+  echo "Starting Mosquitto Daemon without configuration file(!)"
   mosquitto -d -v
 fi
 
-ps -ax | grep mosquitto
-
 tail -f /mqtt/log/mosquitto.log
-
 sleep infinity
