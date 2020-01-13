@@ -496,13 +496,9 @@ wss.on("connection", function(ws, req) {
   ws.on('pong', heartbeat);
 
   // Should be done after validation
-  console.log("WSS CONNECTION: Saving websocket reference (_ws, app._ws, router._ws)");
   _ws = ws; // public websocket (!) does not at least fail
-  if (typeof(app) === "undefined") {
-    console.log("APP undefined here!");
-  } else {
+  if (typeof(app) !== "undefined") {
     app._ws = ws; // public websocket stored in app, needs to be set to builder/buildlog!
-    // console.log("app _ws: ", app._ws);
   }
 
   var cookies = req.headers.cookie;
@@ -548,41 +544,16 @@ wss.on("connection", function(ws, req) {
     blog.logtail(req.body.build_id, owner, ws, error_callback);
   });
 
-  /* Override with valid socket from router.js
-  app.post("/api/build", function(req, res) {
-    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
-    var notifiers = {
-      messenger: messenger,
-      websocket: ws
-    };
-    console.log("[router] Overriding build with notifiers:", {notifiers});
-    // FIXME: Should fail here but override does not work anyway.
-    builder.build(req.session.owner, req.body.build, notifiers,
-      function(success, response) {
-      respond(res, response);
-    });
-  });*/
-
   ws.on("message", (message) => {
-
-    // skip empty messages
-    if (message == "{}") return;
-
+    if (message.indexOf("{}") == 0) return; // skip empty messages
     var object = JSON.parse(message);
-    console.log("Incoming WS message: "+message);
-
     if (typeof(object.logtail) !== "undefined") {
-
       console.log("Initializing WS logtail with object ", {object});
-
       var build_id = object.logtail.build_id;
       var owner_id = object.logtail.owner_id;
       blog.logtail(build_id, owner_id, _ws, logtail_callback);
-
     } else if (typeof(object.init) !== "undefined") {
-
       if (typeof(messenger) !== "undefined") {
-        // console.log("Initializing WS messenger with owner "+object.init);
         messenger.initWithOwner(object.init, _ws, function(success, message) {
           if (!success) {
             console.log("Messenger init on WS message with result " + success + ", with message: ", { message });
@@ -591,7 +562,6 @@ wss.on("connection", function(ws, req) {
       } else {
         console.log("Messenger is not initialized and therefore could not be activated.");
       }
-
     } else {
       /* unknown message debug, must be removed */
       var m = JSON.stringify(message);
@@ -600,8 +570,6 @@ wss.on("connection", function(ws, req) {
       }
     }
   });
-
-
 }).on("error", function(err) {
   console.log("WSS ERROR: " + err);
   return;
