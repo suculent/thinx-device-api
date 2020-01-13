@@ -30,36 +30,36 @@ source ~/.profile
 pwd
 
 if [[ -f ./.thinx_env ]]; then
-  echo "[entry] Sourcing .thinx_env"
+  echo "[thinx] Sourcing .thinx_env"
   source ./.thinx_env
 else
-  echo "[entry] .thinx_env not found, expects ENVIRONMENT, ROLLBAR_ACCESS_TOKEN, ROLLBAR_ENVIRONMENT and REVISION variables to be set."
+  echo "[thinx] .thinx_env not found, expects ENVIRONMENT, ROLLBAR_ACCESS_TOKEN, ROLLBAR_ENVIRONMENT and REVISION variables to be set."
 fi
 
 # Installs all tools, not just those currently allowed by .dockerignore, requires running Docker
 if [[ ! -z $(which docker) ]]; then
-  echo "[entry] Installing Build-tools for DinD/DooD"
-  pushd builders
+  echo "[thinx] Installing Build-tools for DinD/DooD"
+  cd builders
   bash ./install-builders.sh
-  popd
+  cd ..
 else
   echo "Skipping build-tools installation, Docker not available."
 fi
 
-echo "[entry] Adding host checking exception for github.com..."
-ssh -o "StrictHostKeyChecking=no" git@github.com
+echo "[thinx] Adding host checking exception for github.com..."
+ssh -tt -o "StrictHostKeyChecking=no" git@github.com
 
-echo "[entry] Deploying with Rollbar..."
+echo "[thinx] Deploying with Rollbar..."
 if [[ ! -z $ROLLBAR_ACCESS_TOKEN ]]; then
   LOCAL_USERNAME=$(whoami)
   curl --silent https://api.rollbar.com/api/1/deploy/ \
     -F access_token=$ROLLBAR_ACCESS_TOKEN \
     -F environment=$ROLLBAR_ENVIRONMENT \
     -F revision=$REVISION \
-    -F local_username=$LOCAL_USERNAME
+    -F local_username=$LOCAL_USERNAME > /dev/null
   echo ""
 else
-  echo "[entry] Skipping Rollbar deployment, access token not defined..."
+  echo "[thinx] Skipping Rollbar deployment, access token not defined..."
 fi
 
 set -e
@@ -75,7 +75,7 @@ touch /opt/thinx/.pm2/logs/index-out-1.log
 # ls -lf /opt/thinx/thinx-device-api/conf
 
 if [ $ENVIRONMENT == "test" ]; then
-  echo "[entry] Running in TEST MODE!"
+  echo "[thinx] Running in TEST MODE!"
   export CODECOV_TOKEN="734bc9e7-5671-4020-a26e-e6141f02b53d"
   export CODACY_PROJECT_TOKEN=9a7d084ad97e430ba12333f384b44255
   export CC_TEST_REPORTED_ID="e181ad1424f8f92834a556089394b2faadf93e9b6c84b831cefebb7ea06a8328"
@@ -89,6 +89,6 @@ if [ $ENVIRONMENT == "test" ]; then
   cp -vf ./lcov.info /mnt/data/test-reports/lcov.info
   cp -vfR ./.nyc_output /mnt/data/test-reports/.nyc_output
 else
-  echo "[entry] Running in production mode..."
+  echo "[thinx] Starting in production mode..."
   node thinx.js | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
 fi
