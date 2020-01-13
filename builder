@@ -84,7 +84,7 @@ echo "Deployment path: ${DEPLOYMENT_PATH}"
 mkdir -p $OWNER_ID_HOME
 mkdir -p $DEPLOYMENT_PATH
 
-LOG_PATH="${DEPLOYMENT_PATH}/build.log"
+LOG_PATH="${DEPLOYMENT_PATH}/build.shell.log"
 echo "Log path: $LOG_PATH"
 touch $LOG_PATH
 
