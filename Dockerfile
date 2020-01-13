@@ -148,11 +148,11 @@ RUN apt-get remove -y \
     && apt-get autoremove -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ADD https://get.aquasec.com/microscanner .
-RUN chmod +x microscanner && mkdir artifacts
-RUN ./microscanner ${AQUA_SEC_TOKEN} --html --continue-on-failure > ./artifacts/microscanner.html \
-    && cp ./artifacts/microscanner.html ./static/microscanner.html
-RUN rm -rf ./microscanner
+#ADD https://get.aquasec.com/microscanner .
+#RUN chmod +x microscanner && mkdir artifacts
+#RUN ./microscanner ${AQUA_SEC_TOKEN} --html --continue-on-failure > ./artifacts/microscanner.html \
+#    && cp ./artifacts/microscanner.html ./static/microscanner.html
+#RUN rm -rf ./microscanner
 
 RUN mkdir -p ./.nyc_output
 
