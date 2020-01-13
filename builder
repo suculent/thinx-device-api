@@ -442,13 +442,13 @@ case $PLATFORM in
 
 			if [[ $BUILD_TYPE == "firmware" ]]; then
 				echo "Micropython Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
-				echo "running Docker >>>"
 				set -o pipefail
 				docker run ${DOCKER_PREFIX} --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython | tee -a "${LOG_PATH}"
 				echo "${PIPESTATUS[@]}"
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
-					zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./build/* # zip artefacts
+					echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
+					zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./build/** # zip artefacts
 				fi
 				if [[ -z $(find $OUTFILE -type f -size +10000c 2>/dev/null) ]]; then
 					rm -rf $OUTFILE
@@ -703,7 +703,8 @@ case $PLATFORM in
 					echo "Docker build succeeded." | tee -a "${LOG_PATH}"
 					echo " " | tee -a "${LOG_PATH}"
 					echo "BIN_FILE: $BIN_FILE" | tee -a "${LOG_PATH}"
-					zip -rv "${BUILD_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ${BIN_FILE}
+					echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
+					zip -rv "${BUILD_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ${BIN_FILE} ./build/**
 				fi
 			else
 				echo "[arduino] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
@@ -743,6 +744,7 @@ case $PLATFORM in
 					cp -vf "${BIN_FILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 					cp -vf "${LOG_PATH}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 
+					echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
 					zip -rv "${BUILD_ID}.zip" ${LOG_PATH} ./build/*.bin ./build/*.elf # zip artefacts
 
 					echo "Current path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
@@ -840,6 +842,7 @@ case $PLATFORM in
 							cp -vR "${OUTFILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 							cp -vR "${OUTFILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
 
+							echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
 							zip -rv "${BUILD_ID}.zip" ${OUTFILE} ./build/*.bin ./build/*.elf # zip artefacts
 						fi
 					else
