@@ -284,8 +284,6 @@ console.log("» Initializing DB...");
 
 initDatabases();
 
-console.log("» Starting with prefix: '"+prefix+"'");
-
 var devicelib = require("nano")(db).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
 var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
 

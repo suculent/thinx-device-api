@@ -39,16 +39,18 @@ CONFIG_FILE="/mqtt/config/mosquitto.conf"
 ACL_FILE="/mqtt/auth/thinx.acl"
 touch $ACL_FILE
 
-IS_REGISTERED=$(grep ${MOSQUITTO_USERNAME} ${ACL_FILE})
+if [[ ! -z ${MOSQUITTO_USERNAME} ]]; then
+  IS_REGISTERED=$(grep ${MOSQUITTO_USERNAME} ${ACL_FILE})
 
-if [[ -z $IS_REGISTERED ]]; then
-    echo "Writing initial ACL record to ${ACL_FILE}..."
-    echo "user ${MOSQUITTO_USERNAME}" >> ${ACL_FILE}
-    echo 'topic readwrite #' >> ${ACL_FILE}
-    echo " " >> ${ACL_FILE}
-    cat ${ACL_FILE}
-else
-    echo "Initial ACL record already exists in ${ACL_FILE}"
+  if [[ -z $IS_REGISTERED ]]; then
+      echo "Writing initial ACL record to ${ACL_FILE}..."
+      echo "user ${MOSQUITTO_USERNAME}" >> ${ACL_FILE}
+      echo 'topic readwrite #' >> ${ACL_FILE}
+      echo " " >> ${ACL_FILE}
+      cat ${ACL_FILE}
+  else
+      echo "Initial ACL record already exists in ${ACL_FILE}"
+  fi
 fi
 
 pkill apt # attempt to prevent sticking, suspicious thing it is.
