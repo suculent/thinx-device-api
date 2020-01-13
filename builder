@@ -366,13 +366,12 @@ if [[ ! -z $SIGNATURE_FILE ]]; then
 			IFS='\n'
 			DEVSEC_ARGS="$THINX_ROOT/devsec -c '\"${arduino_devsec_ckey}\"' -m ${MAC} -f ${FCID} -s ${arduino_devsec_ssid} -p ${arduino_devsec_pass} > ${SIGNATURE_FILE}"
 			echo "DEVSEC_ARGS: $DEVSEC_ARGS" | tee -a "${LOG_PATH}"
-			$THINX_ROOT/devsec  -m ${MAC} -f ${FCID} -s ${arduino_devsec_ssid} -p ${arduino_devsec_pass} -c "${arduino_devsec_ckey}" > ${SIGNATURE_FILE}
-			DEVSEC_SUCCESS=$?
+			$THINX_ROOT/devsec  -m ${MAC} -f ${FCID} -s ${arduino_devsec_ssid} -p ${arduino_devsec_pass} -c "${arduino_devsec_ckey}" > $SIGNATURE_FILE
 			IFS=$SAVED_IFS
+			DEVSEC_SUCCESS=$?
 			if [[ $DEVSEC_SUCCESS==0 ]]; then
-				echo "GENERATED SIGNATURE_FILE: "
+				echo "DEBUGGING SIGNATURE_FILE: "
 				cat $SIGNATURE_FILE | tee -a "${LOG_PATH}"
-				cat $DEVSEC_OUT > $SIGNATURE_FILE
 				echo "OK"
 			else
 				echo "Failed, keeping signature file unkept."
