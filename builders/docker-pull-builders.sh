@@ -1,11 +1,6 @@
 #!/bin/bash
 
-# Docker will pull those automatically when requested; disabled for faster testing
-
-exit 0
-
-# It would be better to traverse all *-docker-build directories in loop
-# and docker pull just the basename
+# Docker will pull those automatically when requested; this is used just for pre-pulling required components
 
 set -e
 
@@ -15,4 +10,4 @@ docker pull suculent/micropython-docker-build
 docker pull suculent/mongoose-docker-build
 docker pull suculent/nodemcu-docker-build
 
-echo "Builders installed."
+echo "Builders updated."

@@ -42,16 +42,6 @@ else
   echo "[thinx-entrypoint] .thinx_env not found, expects ENVIRONMENT, ROLLBAR_ACCESS_TOKEN, ROLLBAR_ENVIRONMENT and REVISION variables to be set."
 fi
 
-# Installs all tools, not just those currently allowed by .dockerignore, requires running Docker
-if [[ ! -z $(which docker) ]]; then
-  echo "[thinx-entrypoint] Installing Build-tools for DinD/DooD"
-  cd builders
-  bash ./install-builders.sh
-  cd ..
-else
-  echo "[thinx-entrypoint] Skipping build-tools installation, Docker not available."
-fi
-
 echo "[thinx-entrypoint] Adding host checking exception for github.com..."
 ssh -tt -o "StrictHostKeyChecking=no" git@github.com
 
