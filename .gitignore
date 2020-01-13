@@ -1,5 +1,6 @@
 # Binaries generated in container
 devsec
+embedded_signature.h
 
 # Docker Container Scanners
 clair-scanner
