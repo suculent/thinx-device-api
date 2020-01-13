@@ -363,7 +363,7 @@ if [[ ! -z $SIGNATURE_FILE ]]; then
 		if [[ ! -z $FCID && ! -z $MAC && ! -z ${arduino_devsec_ckey} ]]; then
 			echo "[builder.sh] DevSec building signature in $(pwd)" | tee -a "${LOG_PATH}"
 			SAVED_IFS=$IFS
-			IFS=:
+			IFS='\n'
 			DEVSEC_ARGS="$THINX_ROOT/devsec -c '\"${arduino_devsec_ckey}\"' -m ${MAC} -f ${FCID} -s ${arduino_devsec_ssid} -p ${arduino_devsec_pass} > ${SIGNATURE_FILE}"
 			echo "DEVSEC_ARGS: $DEVSEC_ARGS" | tee -a "${LOG_PATH}"
 			$THINX_ROOT/devsec  -m ${MAC} -f ${FCID} -s ${arduino_devsec_ssid} -p ${arduino_devsec_pass} -c "${arduino_devsec_ckey}" > ${SIGNATURE_FILE}
