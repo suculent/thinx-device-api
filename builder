@@ -754,7 +754,7 @@ case $PLATFORM in
 					echo "Target path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
 					# ls -la ${TARGET_PATH} | tee -a "${LOG_PATH}"
 					echo "Cleaning up..." | tee -a "${LOG_PATH}"
-					rm -rf $BUILD_PATH/$REPO_PATH/** | tee -a "${LOG_PATH}"
+					rm -rf $BUILD_PATH/$REPO_PATH | tee -a "${LOG_PATH}"
 				else
 					STATUS='FAILED'
 				fi
