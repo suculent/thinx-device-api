@@ -354,7 +354,7 @@ ls -la  | tee -a "${LOG_PATH}"
 
 SIGNATURE_FILE=$(find . -maxdepth 3 -name "embedded_signature.h")
 
-echo "SIGNATURE_FILE : $SIGNATURE_FILE"
+echo "SIGNATURE_FILE = $SIGNATURE_FILE"
 
 if [[ ! -z $SIGNATURE_FILE ]]; then
 	echo "Signature placeholder found at: ${SIGNATURE_FILE}" | tee -a "${LOG_PATH}"
@@ -363,18 +363,18 @@ if [[ ! -z $SIGNATURE_FILE ]]; then
 		if [[ ! -z $FCID && ! -z $MAC && ! -z ${arduino_devsec_ckey} ]]; then
 			echo "[builder.sh] DevSec building signature in $(pwd)" | tee -a "${LOG_PATH}"
 			SAVED_IFS=$IFS
-			IFS='\n'
-			DEVSEC_ARGS="$THINX_ROOT/devsec -c '\"${arduino_devsec_ckey}\"' -m ${MAC} -f ${FCID} -s ${arduino_devsec_ssid} -p ${arduino_devsec_pass} > ${SIGNATURE_FILE}"
-			echo "DEVSEC_ARGS: $DEVSEC_ARGS" | tee -a "${LOG_PATH}"
-			$THINX_ROOT/devsec  -m ${MAC} -f ${FCID} -s ${arduino_devsec_ssid} -p ${arduino_devsec_pass} -c "${arduino_devsec_ckey}" > "$(pwd)/${SIGNATURE_FILE}"
-			IFS=$SAVED_IFS
+			IFS='+'
+			DEVSEC_CONTENTS=$("$THINX_ROOT/devsec" -m ${MAC} -f ${FCID} -s ${arduino_devsec_ssid} -p ${arduino_devsec_pass} -c "${arduino_devsec_ckey}")
 			DEVSEC_SUCCESS=$?
-			if [[ $DEVSEC_SUCCESS==0 ]]; then
-				echo "DEBUGGING SIGNATURE_FILE: "
-				cat $SIGNATURE_FILE | tee -a "${LOG_PATH}"
+			IFS=$SAVED_IFS
+			echo "$DEVSEC_CONTENTS" > "$(pwd)/$SIGNATURE_FILE"
+			if [[ $DEVSEC_SUCCESS == 0 ]]; then
+				echo "DEBUGGING SIGNATURE_FILE: " | tee -a "${LOG_PATH}"
+				cat "$(pwd)/$SIGNATURE_FILE" | tee -a "${LOG_PATH}"
 				echo "OK"
 			else
-				echo "Failed, keeping signature file unkept."
+				echo "Failed, keeping signature file unkept." | tee -a "${LOG_PATH}"
+				echo $RESULT | tee -a "${LOG_PATH}"
 				exit 0
 			fi
 		else
