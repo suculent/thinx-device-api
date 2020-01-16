@@ -205,8 +205,8 @@ if (typeof(md5) === "undefined" || md5 === "") {
 
 function notify_device_channel(owner, udid, message) {
 
-  var mqtt_password;
-  var mqtt_username;
+  var mqtt_password = null;
+  var mqtt_username = null;
 
   if (typeof(app_config.mqtt.password) !== "undefined") {
     mqtt_password = app_config.mqtt.password;
@@ -221,6 +221,11 @@ function notify_device_channel(owner, udid, message) {
   if (typeof(process.env.MOSQUITTO_USERNAME) !== "undefined") {
     mqtt_username = process.env.MOSQUITTO_USERNAME;
     console.log("[notifier.js] Setting mosquitto password from environment variable.");
+  }
+
+  if ((mqtt_password === null) || (mqtt_username === null)) {
+    console.log("ERROR notifying device channel: Missing MQTT credentials in notifier.");
+    return;
   }
 
   console.log("[notifier.js] notify_device_channel is DEPRECATED");

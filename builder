@@ -64,7 +64,8 @@ done
 THINX_ROOT=$(pwd)
 
 # from app_config.data_root
-DATA_ROOT=$(cat $THINX_ROOT/conf/config.json | jq .data_root)
+DATA_ROOT_X=$(cat $THINX_ROOT/conf/config.json | jq .data_root)
+DATA_ROOT="$(sed 's/\"//g' <<< $DATA_ROOT_X)"
 
 # from app_config.build_root
 BUILD_ROOT=$DATA_ROOT/repos
@@ -201,13 +202,13 @@ fi
 # Should be already deprecated, as there are pre-fetches. Maybe modules?
 echo "Entering build and pulling path..." | tee -a "${LOG_PATH}"
 echo $BUILD_PATH | tee -a "${LOG_PATH}"
-pushd $BUILD_PATH && git pull && pwd | tee -a "${LOG_PATH}"
+cd $BUILD_PATH && git pull && pwd | tee -a "${LOG_PATH}"
 
 # Fetch submodules if any
 SINK=""
 if [[ -d $BUILD_PATH/$REPO_NAME ]]; then
 	echo "Directory $REPO_NAME exists, entering..." | tee -a "${LOG_PATH}"
-	pushd $BUILD_PATH/$REPO_NAME
+	cd $BUILD_PATH/$REPO_NAME
 	SINK=$BUILD_PATH/$REPO_NAME
 else
 	pwd | tee -a "${LOG_PATH}"
@@ -215,7 +216,7 @@ else
 	echo "REPO_NAME ${REPO_NAME} does not exist, entering $REPO_PATH instead..." | tee -a "${LOG_PATH}"
 	SINK=$BUILD_PATH/$REPO_PATH
 	echo "Entering BUILD_PATH/REPO_PATH" | tee -a "${LOG_PATH}"
-	pushd $SINK
+	cd $SINK
 fi
 
 echo "Updating submodules..." | tee -a "${LOG_PATH}"
@@ -224,7 +225,7 @@ git submodule update --init --recursive | tee -a "${LOG_PATH}"
 if [[ ! -d $SINK/.git ]]; then
 	echo "WARNING! No .git folder on path: $BUILD_PATH/$REPO_PATH/.git" | tee -a "${LOG_PATH}"
 else
-	pushd $SINK | tee -a "${LOG_PATH}"
+	cd $SINK | tee -a "${LOG_PATH}"
 fi
 
 COMMIT=$(git rev-parse HEAD)
@@ -268,7 +269,7 @@ else
 fi
 
 echo "Changing workdir to ${BUILD_PATH}/${REPO_PATH}"
-pushd $BUILD_PATH/$REPO_PATH
+cd $BUILD_PATH/$REPO_PATH
 
 
 THX_VERSION="$(git describe --abbrev=0 --tags)"
@@ -316,7 +317,7 @@ else
 	DOCKER_PREFIX=""
 fi
 
-pushd $WORKDIR
+cd $WORKDIR
 
 echo "Building in WORKDIR: $(pwd)" | tee -a "${LOG_PATH}"
 
@@ -664,7 +665,7 @@ case $PLATFORM in
 				echo "[arduino] Using THiNX-File: ${THINX_FILE/$(pwd)//}" | tee -a "${LOG_PATH}"
 			fi
 
-			pushd $BUILD_PATH/$REPO_PATH
+			cd $BUILD_PATH/$REPO_PATH
 
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 
@@ -723,7 +724,7 @@ case $PLATFORM in
 
 					if [[ ! -z ./build ]]; then
 						echo "Entering ./build" | tee -a "${LOG_PATH}"
-						pushd ./build | tee -a "${LOG_PATH}"
+						cd ./build | tee -a "${LOG_PATH}"
 					fi
 
 					#echo "Current workdir: " | tee -a "${LOG_PATH}"
@@ -778,7 +779,7 @@ case $PLATFORM in
 				echo "PIOD: $PIOD" | tee -a "${LOG_PATH}"
 				if [[ -d "${PIOD}" ]]; then
 					echo "$PIOD is a subdirectory, entering..." | tee -a "${LOG_PATH}"
-					pushd $PIOD
+					cd $PIOD
 				else
 					echo "Skipping ${FILE} for there are no PIOS inside..." | tee -a "${LOG_PATH}"
 					BUILD_SUCCESS=false
@@ -858,7 +859,7 @@ case $PLATFORM in
     ;;
 esac
 
-pushd $DEPLOYMENT_PATH
+cd $DEPLOYMENT_PATH
 pwd | tee -a "${LOG_PATH}"
 # cleanup all subdirectories?
 # echo "Cleaning all subdirectories in deployment path..."
@@ -929,7 +930,7 @@ echo "Log path: $LOG_PATH" | tee -a "${LOG_PATH}"
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
 CMD="${BUILD_ID} ${COMMIT} ${THX_VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION} ${MD5}"
 echo "Executing Notifier: " $CMD | tee -a "${LOG_PATH}"
-pushd $ORIGIN # go back to application root folder
+cd $ORIGIN # go back to application root folder
 RESULT=$(node $THINX_ROOT/notifier.js $CMD)
 echo -e "${RESULT}" | tee -a "${LOG_PATH}"
 
