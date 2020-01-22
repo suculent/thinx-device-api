@@ -35,7 +35,7 @@
     "cookie-parser": "^1.4.4",
     "csurf": "^1.10.0",
     "dateformat": "^3.0.3",
-    "expect": "^24.9.0",
+    "expect": "^25.1.0",
     "express": "^4.17.1",
     "express-rate-limit": "^5.0.0",
     "express-session": "^1.17.0",
