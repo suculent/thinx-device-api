@@ -385,7 +385,7 @@ devicelib.get(udid, function(err, doc) {
     // Save last_build_id, last_build_date and artifact
     devicelib.atomic("devicelib", "modify", udid, device, function(error, body) {
       if (error) {
-        console.log("[notifier.js] Notifier device update error: " + error);
+        console.log("[notifier.js] Notifier device update error: ", error);        
       }
     });
 
