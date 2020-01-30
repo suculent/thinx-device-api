@@ -411,7 +411,7 @@ devicelib.get(udid, function(err, doc) {
     // Notify device's channel on firmware build to enable quick unattended auto-updates; device should validate at least dsig first.
     if (status == "OK") {
       console.log("[notifier.js] Sending notification update...");
-      messenger.publish(owner, udid, registrationObject); // new implementation
+      messenger.publish(owner, udid, JSON.stringify(registrationObject)); // new implementation
     } else {
       console.log("[notifier.js] Status is not DEPLOYED, skipping device notifier...");
     }
