@@ -203,49 +203,6 @@ if (typeof(md5) === "undefined" || md5 === "") {
   }
 }
 
-function notify_device_channel(owner, udid, message) {
-
-  var mqtt_password = null;
-  var mqtt_username = null;
-
-  if (typeof(app_config.mqtt.password) !== "undefined") {
-    mqtt_password = app_config.mqtt.password;
-    console.log("[notifier.js] Setting mosquitto password from configuration file.");
-  }
-
-  if (typeof(process.env.MOSQUITTO_PASSWORD) !== "undefined") {
-    mqtt_password = process.env.MOSQUITTO_PASSWORD;
-    console.log("[notifier.js] Setting mosquitto password from environment variable.");
-  }
-
-  if (typeof(process.env.MOSQUITTO_USERNAME) !== "undefined") {
-    mqtt_username = process.env.MOSQUITTO_USERNAME;
-    console.log("[notifier.js] Setting mosquitto password from environment variable.");
-  }
-
-  if ((mqtt_password === null) || (mqtt_username === null)) {
-    console.log("ERROR notifying device channel: Missing MQTT credentials in notifier.");
-    return;
-  }
-
-  console.log("[notifier.js] notify_device_channel is DEPRECATED");
-  var channel = "/thinx/devices/" + owner + "/" + udid;
-  console.log("[notifier.js] Posting to MQTT queue " + channel);
-
-
-  var client = mqtt.connect("mqtt://"+mqtt_username+":"+mqtt_password+"@" + process.env.THINX_HOSTNAME + ":"+app_config.mqtt.port);
-  client.on("connect", function() {
-    console.log("[notifier.js] Connected to MQTT, will post to " + channel);
-    client.subscribe(channel);
-    var msg = message;
-    delete msg.notification;
-    client.publish(channel, JSON.stringify(message), {
-      retain: true
-    });
-    client.end();
-  });
-}
-
 function deploymentPathForDevice(owner, udid) {
   var user_path = app_config.data_root + app_config.deploy_root + "/" + owner;
   var device_path = user_path + "/" + udid;
@@ -265,7 +222,7 @@ function build_update_notification(repo_url, udid, alias, commit, version, sha, 
     },
     notification: {
       title: "Firmware Update",
-      body: "There's update available for device " + alias + ". Would you like to update?"
+      body: "Update available for device " + udid + "."
     }
   };
   return JSON.stringify(message);
@@ -439,13 +396,12 @@ devicelib.get(udid, function(err, doc) {
     );
 
     // Notify client's mobile app using FCM (user must have token stored)
-    notify_companion_app();
+    // notify_companion_app(message, repo_url, udid, commit_id, version, sha)
 
     // Notify device's channel on firmware build to enable quick unattended auto-updates; device should validate at least dsig first.
     if (status == "OK") {
       console.log("[notifier.js] Sending notification update...");
       messenger.publish(owner, udid, messageString); // new implementation
-      notify_device_channel(owner, udid, messageString); // preliminary update information, may not be processed correctly, check!
     } else {
       console.log("[notifier.js] Status is not DEPLOYED, skipping device notifier...");
     }
