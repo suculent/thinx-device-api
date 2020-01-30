@@ -395,13 +395,23 @@ devicelib.get(udid, function(err, doc) {
       sha
     );
 
+    notify_companion_app(messageString, repo_url, udid, commit_id, version, sha);
+
+    let registrationObject = {
+      registration: {
+        status: "FIRMWARE_UPDATE",
+        commit: commit_id,
+        version: version
+      }
+    };
+
     // Notify client's mobile app using FCM (user must have token stored)
-    // notify_companion_app(message, repo_url, udid, commit_id, version, sha)
+    //
 
     // Notify device's channel on firmware build to enable quick unattended auto-updates; device should validate at least dsig first.
     if (status == "OK") {
       console.log("[notifier.js] Sending notification update...");
-      messenger.publish(owner, udid, messageString.data); // new implementation
+      messenger.publish(owner, udid, registrationObject); // new implementation
     } else {
       console.log("[notifier.js] Status is not DEPLOYED, skipping device notifier...");
     }
