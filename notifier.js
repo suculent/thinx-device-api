@@ -433,7 +433,7 @@ devicelib.get(udid, function(err, doc) {
       repo_url,
       udid,
       device.alias,
-      commit,
+      commit_id,
       version,
       sha
     );
