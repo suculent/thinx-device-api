@@ -385,7 +385,7 @@ devicelib.get(udid, function(err, doc) {
     // Save last_build_id, last_build_date and artifact
     devicelib.atomic("devicelib", "modify", udid, device, function(error, body) {
       if (error) {
-        console.log("[notifier.js] Notifier device update error: ", error);        
+        console.log("[notifier.js] Notifier device update error: ", error);
       }
     });
 
@@ -429,16 +429,13 @@ devicelib.get(udid, function(err, doc) {
 
     notify_slack(status, slack, buildEnvelope);
 
-    let dsig = "THiNX;" + formatMacForDevSec(device.mac) + ";" + device.fcid;
-
     let messageString = build_update_notification(
       repo_url,
       udid,
       device.alias,
       commit,
       version,
-      sha,
-      dsig
+      sha
     );
 
     // Notify client's mobile app using FCM (user must have token stored)
