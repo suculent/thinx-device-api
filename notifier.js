@@ -353,7 +353,7 @@ devicelib.get(udid, function(err, doc) {
       udid: udid,
       commit: commit_id,
       version: version,
-      firmware: thinx_firmware_version,
+      firmware: thinx_firmware_version.replace(/\"/g, ''),
       checksum: sha,
       build_id: build_id,
       owner: owner,
