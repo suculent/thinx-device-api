@@ -754,8 +754,8 @@ case $PLATFORM in
 					ls -la ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
 					echo "Target path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
 					ls -la ${TARGET_PATH} | tee -a "${LOG_PATH}"
-					# echo "Cleaning up..." | tee -a "${LOG_PATH}"
-					# rm -rf $BUILD_PATH/$REPO_PATH | tee -a "${LOG_PATH}"
+					echo "Cleaning up..." | tee -a "${LOG_PATH}"
+					rm -rf $BUILD_PATH/$REPO_PATH | tee -a "${LOG_PATH}"
 				else
 					STATUS='FAILED'
 				fi
@@ -884,13 +884,9 @@ if [[ "${OUTFILE}" == "" ]]; then
 fi
 
 echo "Build completed with status: $STATUS" | tee -a "${LOG_PATH}"
-echo "Build hash: $SHA" | tee -a "${LOG_PATH}"
-echo "Build MD5: $MD5" | tee -a "${LOG_PATH}"
+
 echo "Post-flight check:" | tee -a "${LOG_PATH}"
-
 pwd | tee -a "${LOG_PATH}"
-
-#echo "DP" $DISPLAY_DEPLOYMENT_PATH | tee -a "${LOG_PATH}"
 
 # add THINX_FIRMWARE_VERSION to the build.json envelope in order to differ between upgrades and crossgrades
 BUILD_FILE=$( find $BUILD_PATH/$REPO_PATH -name "thinx_build.json" )
@@ -911,35 +907,28 @@ if [[ -f "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ]]; then
 fi
 
 echo "BUILD_ID" "${BUILD_ID}" | tee -a "${LOG_PATH}"
-echo "COMMIT" "${COMMIT}" | tee -a "${LOG_PATH}"
+#echo "COMMIT" "${COMMIT}" | tee -a "${LOG_PATH}"
 echo "THX_VERSION" "${THX_VERSION}" | tee -a "${LOG_PATH}"
 echo "GIT_REPO" "${GIT_REPO}" | tee -a "${LOG_PATH}"
 echo "OUTFILE" "${OUTFILE}" | tee -a "${LOG_PATH}"
 echo "DEPLOYMENT_PATH" "${DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
 echo "UDID" "${UDID}" | tee -a "${LOG_PATH}"
-echo "SHA" "${SHA}" | tee -a "${LOG_PATH}"
-echo "OWNER_ID" "${OWNER_ID}" | tee -a "${LOG_PATH}"
+#echo "SHA" "${SHA}" | tee -a "${LOG_PATH}"
+#echo "OWNER_ID" "${OWNER_ID}" | tee -a "${LOG_PATH}"
 echo "STATUS" "${STATUS}" | tee -a "${LOG_PATH}"
 echo "PLATFORM" "${PLATFORM}" | tee -a "${LOG_PATH}"
 echo "THINX_FIRMWARE_VERSION" "${THINX_FIRMWARE_VERSION}" | tee -a "${LOG_PATH}"
-echo "MD5" "${MD5}" | tee -a "${LOG_PATH}"
+#echo "MD5" "${MD5}" | tee -a "${LOG_PATH}"
 
-echo "Log path: $LOG_PATH" | tee -a "${LOG_PATH}"
-
+#echo "Log path: $LOG_PATH" | tee -a "${LOG_PATH}"
 #cat $LOG_PATH
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
 CMD="${BUILD_ID} ${COMMIT} ${THX_VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION} ${MD5}"
-echo "Executing Notifier: " $CMD | tee -a "${LOG_PATH}"
+echo "Executing Notifier." | tee -a "${LOG_PATH}"
 cd $ORIGIN # go back to application root folder
 RESULT=$(node $THINX_ROOT/notifier.js $CMD)
 echo -e "${RESULT}" | tee -a "${LOG_PATH}"
-
-# Upgrade Platformio in case new version is available (useless until commits its docker image)
-#if [[ $RESULT == "*platformio upgrade*" ]]; then
-		# echo "Auto-updating platformio..."
-		#platformio upgrade > /dev/null
-#fi
 
 MSG="${BUILD_DATE} Done."
 echo "[builder.sh]" $MSG | tee -a "${LOG_PATH}"
