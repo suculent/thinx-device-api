@@ -82,3 +82,6 @@ mosquitto.aclfile
 mqtt_passwords
 
 .coverity-submit.sh
+
+docker-compose.override.yml
+
