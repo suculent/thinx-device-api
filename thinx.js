@@ -404,14 +404,16 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
 
   if (ssloaded) {
 
-    let sslvalid = false;
+    let sslvalid = true;
 
+    /*
     try {
         pki.verifyCertificateChain( caStore, [ caCert ]);
         sslvalid = true;
     } catch (e) {
-        console.log('Failed to verify certificate (' + e.message || e + ')');      
+        console.log('Failed to verify certificate (' + e.message || e + ')');
     }
+    */
 
     if (sslvalid) {
       ssl_options = {
@@ -419,12 +421,12 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
         cert: fs.readFileSync(app_config.ssl_cert),
         NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
       };
-    
+
       console.log("» Starting HTTPS server on " + app_config.secure_port + "...");
       https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0", function() { } );
     } else {
       console.log("» SSL certificate validation FAILED! Check your configuration.");
-    } 
+    }
   }
 
 } else {
