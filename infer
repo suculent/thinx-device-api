@@ -49,10 +49,9 @@ function infer_platform
 
 		# Platform.io
 
-		if [[ -f $path/platformio.ini ]]; then echo "OK" fi
-      # echo "REMOVE-ME: Found platform ini!"
+		if [[ -f $path/platformio.ini ]]; then
 			platform="platformio"
-    fi
+    	fi
 
 		# NodeJS
 

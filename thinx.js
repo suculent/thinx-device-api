@@ -391,31 +391,41 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
 
   let caCert;
   let caStore;
+  let ssloaded = false;
 
   try {
       caCert = fs.readFileSync(app_config.ssl_cert).toString();
       caStore = pki.createCaStore([ caCert ]);
+      ssloaded = true;
   } catch (e) {
       console.log('Failed to load CA certificate (' + e + ')');
-      process.exit(43);
+      // process.exit(43);
   }
 
-  /*
-  try {
-      pki.verifyCertificateChain(caStore, [ caCert ]);
-  } catch (e) {
-      console.log('Failed to verify certificate (' + e.message || e + ')');
-      process.exit(44);
-  }*/
+  if (ssloaded) {
 
-  ssl_options = {
-    key: fs.readFileSync(app_config.ssl_key),
-    cert: fs.readFileSync(app_config.ssl_cert),
-    NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
-  };
+    let sslvalid = false;
 
-  console.log("» Starting HTTPS server on " + app_config.secure_port + "...");
-  https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0", function() { } );
+    try {
+        pki.verifyCertificateChain( caStore, [ caCert ]);
+        sslvalid = true;
+    } catch (e) {
+        console.log('Failed to verify certificate (' + e.message || e + ')');      
+    }
+
+    if (sslvalid) {
+      ssl_options = {
+        key: fs.readFileSync(app_config.ssl_key),
+        cert: fs.readFileSync(app_config.ssl_cert),
+        NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
+      };
+    
+      console.log("» Starting HTTPS server on " + app_config.secure_port + "...");
+      https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0", function() { } );
+    } else {
+      console.log("» SSL certificate validation FAILED! Check your configuration.");
+    } 
+  }
 
 } else {
   console.log("Skipping HTTPS server, SSL key or certificate not found.");
