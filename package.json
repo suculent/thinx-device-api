@@ -100,7 +100,7 @@
     "nyc": "^15.0.0"
   },
   "engines": {
-    "node": "10.16.x"
+    "node": "13.12.x"
   },
   "preferGlobal": true,
   "snyk": true,
