@@ -30,6 +30,7 @@ function infer_platform
 
 		#
 		# WARNING! This is a duplicate implementation. Platforms are inferred using JS as well.
+		# It will deprecate.
 		#
 
 		platform="unknown"
@@ -47,7 +48,7 @@ function infer_platform
 				fi
 		done
 
-		# Platform.io
+		# Platform.io (will be overwritten with Arduino in case of ino files!)
 
 		if [[ -f $path/platformio.ini ]]; then
 			platform="platformio"
@@ -55,7 +56,7 @@ function infer_platform
 
 		# NodeJS
 
-	  if [[ $(find $path -maxdepth 1 -name "package.json") ]]; then
+	  	if [[ $(find $path -maxdepth 1 -name "package.json") ]]; then
 			platform="nodejs"
 
 		elif [[ -f "$path/package.json" ]]; then
@@ -85,18 +86,18 @@ function infer_platform
 			platform="mongoose"
 		fi
 
-    # Override from YAML
+    	# Override from YAML
 		YMLFILE=$(find $path -name "thinx.yml" -maxdepth 1 | head -n 1)
 		if [[ -f "$YMLFILE" ]]; then
 		  eval $(parse_yaml "$YMLFILE" "")
 			if [[ ! -z $platformio ]]; then
 				platform = "platformio"
 			fi
-      if [[ ! -z $arduino ]]; then
+      		if [[ ! -z $arduino ]]; then
 				platform = "arduino"
 			fi
 			if [[ ! -z $microphython ]]; then
-				platform = "microphython"
+				platform = "micropython"
 			fi
 			if [[ ! -z $mongoose ]]; then
 				platform = "mongoose"
