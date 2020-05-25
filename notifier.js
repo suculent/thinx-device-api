@@ -287,17 +287,23 @@ blog.log(build_id, owner, udid, status);
 
 devicelib.get(udid, function(err, doc) {
 
-  if (err || (typeof(doc) === "undefined")) {
+  if (err) {
     console.log(err);
     console.log("[notifier.js] No such device with udid " + udid);
     rollbar.warning(err);
     process.exit(1);
   }
 
-  if (((typeof(doc) === "undefined") || (doc != null)) && !doc.hasOwnProperty("source")) {
+  if (((typeof(doc) === "undefined") || (doc == null))) {
     rollbar.info("device " + udid + "has no source on build!");
     process.exit(1);
   }
+
+  if (!doc.hasOwnProperty("source")) {
+    rollbar.info("device " + udid + "has no source on build!");
+    process.exit(1);
+  }
+  
 
   /*
    * 3. Collect push tokens for FCM
