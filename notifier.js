@@ -294,7 +294,7 @@ devicelib.get(udid, function(err, doc) {
     process.exit(1);
   }
 
-  if ((typeof(doc) !== "undefined") && (doc != null) && !doc.hasOwnProperty("source")) {
+  if (((typeof(doc) === "undefined") || (doc != null)) && !doc.hasOwnProperty("source")) {
     rollbar.info("device " + udid + "has no source on build!");
     process.exit(1);
   }
