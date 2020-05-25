@@ -299,11 +299,14 @@ devicelib.get(udid, function(err, doc) {
     process.exit(1);
   }
 
-  if (!doc.hasOwnProperty("source")) {
-    rollbar.info("device " + udid + "has no source on build!");
-    process.exit(1);
+  try {
+    if (!doc.hasOwnProperty("source")) {
+      rollbar.info("device " + udid + "has no source on build!");
+      process.exit(1);
+    }
+  } catch (e) {
+    console.log(e);
   }
-  
 
   /*
    * 3. Collect push tokens for FCM
