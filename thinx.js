@@ -77,7 +77,7 @@ var nano = require("nano")(db);
 var WebSocket = require("ws");
 
 // list of previously discovered attackers
-var BLACKLIST = [];
+var BLACKLIST = ["1.2.3.4"];
 
 var last_client_ip = null;
 
@@ -716,10 +716,7 @@ function setup_restore_owners_credentials(query) {
 }
 
 function startup_quote() {
-  if (process.env.ENTERPRISE === true) {
-    // do nothing if you don't want to
-    messenger.sendRandomQuote();
-  } else {
+  if (process.env.ENTERPRISE !== true) {
     messenger.sendRandomQuote();
   }
 }

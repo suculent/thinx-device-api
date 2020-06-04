@@ -25,13 +25,13 @@
 		"base-64": "^0.1.0",
 		"body-parser": "^1.18.2",
 		"express": "^4.16.3",
-		"express-session": "^1.15.6",
+		"express-session": "^1.17.1",
 		"joi": "^14.3.1",
 		"parser": "^0.1.4",
-		"rollbar": "^2.14.4",
-		"sqreen": "^1.38.3",
+		"rollbar": "^2.16.2",
+		"sqreen": "^1.41.3",
 		"ssl-root-cas": "^1.2.5",
 		"typeof": "^1.0.0",
-		"uuid": "^7.0.3"
+		"uuid": "^8.0.0"
 	}
 }
