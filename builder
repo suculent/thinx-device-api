@@ -202,7 +202,7 @@ fi
 # Should be already deprecated, as there are pre-fetches. Maybe modules?
 echo "Entering build and pulling path..." | tee -a "${LOG_PATH}"
 echo $BUILD_PATH | tee -a "${LOG_PATH}"
-cd $BUILD_PATH && git pull && pwd | tee -a "${LOG_PATH}"
+cd $BUILD_PATH && git clone && pwd | tee -a "${LOG_PATH}"
 
 # Fetch submodules if any
 SINK=""
@@ -210,6 +210,7 @@ if [[ -d $BUILD_PATH/$REPO_NAME ]]; then
 	echo "Directory $REPO_NAME exists, entering..." | tee -a "${LOG_PATH}"
 	cd $BUILD_PATH/$REPO_NAME
 	SINK=$BUILD_PATH/$REPO_NAME
+	cd $SINK
 else
 	pwd | tee -a "${LOG_PATH}"
 	# ls | tee -a "${LOG_PATH}"
@@ -242,7 +243,7 @@ nodemcu_build_float=true
 micropython_build_type="firmware"
 micropython_platform="esp8266"
 
-YML=$(find $BUILD_PATH/$REPO_PATH -name "thinx.yml")
+YML=$(find $BUILD_PATH/$REPO_NAME -name "thinx.yml")
 if [[ ! -z "$YML" ]]; then
 	echo "Found ${YML}, reading..." | tee -a "${LOG_PATH}"
 	eval $(parse_yaml $YML)
@@ -252,7 +253,7 @@ fi
 
 # Overwrite Thinx.h file (should be required)
 
-echo "Searching THiNX-File in $BUILD_PATH/$REPO_PATH..." | tee -a "${LOG_PATH}"
+echo "Searching THiNX-File in $BUILD_PATH/$REPO_NAME..." | tee -a "${LOG_PATH}"
 
 if [[ -z $THINX_HOSTNAME ]]; then
 	echo "THINX_HOSTNAME must be set!"
@@ -268,8 +269,8 @@ else
 	THINX_ALIAS="vanilla"
 fi
 
-echo "Changing workdir to ${BUILD_PATH}/${REPO_PATH}"
-cd $BUILD_PATH/$REPO_PATH
+echo "Changing workdir to ${BUILD_PATH}/${REPO_NAME}"
+cd $BUILD_PATH/$REPO_NAME
 
 
 THX_VERSION="$(git describe --abbrev=0 --tags)"
