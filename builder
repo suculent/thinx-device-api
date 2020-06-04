@@ -202,7 +202,7 @@ fi
 # Should be already deprecated, as there are pre-fetches. Maybe modules?
 echo "Entering build and pulling path..." | tee -a "${LOG_PATH}"
 echo $BUILD_PATH | tee -a "${LOG_PATH}"
-cd $BUILD_PATH && git pull && pwd | tee -a "${LOG_PATH}"
+cd $BUILD_PATH && git clone && pwd | tee -a "${LOG_PATH}"
 
 # Fetch submodules if any
 SINK=""
@@ -210,6 +210,7 @@ if [[ -d $BUILD_PATH/$REPO_NAME ]]; then
 	echo "Directory $REPO_NAME exists, entering..." | tee -a "${LOG_PATH}"
 	cd $BUILD_PATH/$REPO_NAME
 	SINK=$BUILD_PATH/$REPO_NAME
+	cd $SINK
 else
 	pwd | tee -a "${LOG_PATH}"
 	# ls | tee -a "${LOG_PATH}"
@@ -242,7 +243,7 @@ nodemcu_build_float=true
 micropython_build_type="firmware"
 micropython_platform="esp8266"
 
-YML=$(find $BUILD_PATH/$REPO_PATH -name "thinx.yml")
+YML=$(find $BUILD_PATH/$REPO_NAME -name "thinx.yml")
 if [[ ! -z "$YML" ]]; then
 	echo "Found ${YML}, reading..." | tee -a "${LOG_PATH}"
 	eval $(parse_yaml $YML)
@@ -252,7 +253,7 @@ fi
 
 # Overwrite Thinx.h file (should be required)
 
-echo "Searching THiNX-File in $BUILD_PATH/$REPO_PATH..." | tee -a "${LOG_PATH}"
+echo "Searching THiNX-File in $BUILD_PATH/$REPO_NAME..." | tee -a "${LOG_PATH}"
 
 if [[ -z $THINX_HOSTNAME ]]; then
 	echo "THINX_HOSTNAME must be set!"
@@ -268,8 +269,8 @@ else
 	THINX_ALIAS="vanilla"
 fi
 
-echo "Changing workdir to ${BUILD_PATH}/${REPO_PATH}"
-cd $BUILD_PATH/$REPO_PATH
+echo "Changing workdir to ${BUILD_PATH}/${REPO_NAME}"
+cd $BUILD_PATH/$REPO_NAME
 
 
 THX_VERSION="$(git describe --abbrev=0 --tags)"
@@ -656,16 +657,16 @@ case $PLATFORM in
 
 		arduino)
 
-			THINX_FILE=$( find $BUILD_PATH/$REPO_PATH -name "thinx.h" )
+			THINX_FILE=$( find $BUILD_PATH/$REPO_NAME -name "thinx.h" )
 
 			if [[ -z $THINX_FILE ]]; then
-				echo "[arduino] WARNING! No THiNX-File found! in $BUILD_PATH/$REPO_PATH: $THINX_FILE" | tee -a "${LOG_PATH}"
+				echo "[arduino] WARNING! No THiNX-File found! in $BUILD_PATH/$REPO_NAME: $THINX_FILE" | tee -a "${LOG_PATH}"
 				# exit 1 # will deprecate on modularization for more platforms
 			else
 				echo "[arduino] Using THiNX-File: ${THINX_FILE/$(pwd)//}" | tee -a "${LOG_PATH}"
 			fi
 
-			cd $BUILD_PATH/$REPO_PATH
+			cd $BUILD_PATH/$REPO_NAME
 
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 
@@ -678,14 +679,14 @@ case $PLATFORM in
 			set +o pipefail
 
 			echo "Contents of working directory after build:" | tee -a "${LOG_PATH}"
-			ls -la $BUILD_PATH/$REPO_PATH/build | tee -a "${LOG_PATH}"
+			ls -la $BUILD_PATH/$REPO_NAME/build | tee -a "${LOG_PATH}"
 
 			echo "[arduino] Docker completed <<<" | tee -a "${LOG_PATH}"
 
 			if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 				BUILD_SUCCESS=true
 				# TODO: FIXME, can be more binfiles with partitions!
-				BIN_FILE=$( find $BUILD_PATH/$REPO_PATH -name "*.bin" | head -n 1)
+				BIN_FILE=$( find $BUILD_PATH/$REPO_NAME -name "*.bin" | head -n 1)
 				echo "BIN_FILE: ${BIN_FILE}" | tee -a "${LOG_PATH}"
 
 				if [[ ! -f $BIN_FILE ]]; then
@@ -695,7 +696,7 @@ case $PLATFORM in
 				fi
 
 				# once again with size limit
-				if [[ -z $(find $BUILD_PATH/$REPO_PATH -name "*.bin" -type f -size +10000c 2>/dev/null) ]]; then
+				if [[ -z $(find $BUILD_PATH/$REPO_NAME -name "*.bin" -type f -size +10000c 2>/dev/null) ]]; then
 					BUILD_SUCCESS=false
 					echo "Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
 					# ls -la | tee -a "${LOG_PATH}"
@@ -755,7 +756,7 @@ case $PLATFORM in
 					echo "Target path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
 					ls -la ${TARGET_PATH} | tee -a "${LOG_PATH}"
 					echo "Cleaning up..." | tee -a "${LOG_PATH}"
-					rm -rf $BUILD_PATH/$REPO_PATH | tee -a "${LOG_PATH}"
+					rm -rf $BUILD_PATH/$REPO_NAME | tee -a "${LOG_PATH}"
 				else
 					STATUS='FAILED'
 				fi
@@ -764,10 +765,10 @@ case $PLATFORM in
 
 		platformio)
 
-			THINX_FILE=$( find $BUILD_PATH/$REPO_PATH -name "thinx.h" )
+			THINX_FILE=$( find $BUILD_PATH/$REPO_NAME -name "thinx.h" )
 
 			if [[ -z $THINX_FILE ]]; then
-				echo "[platformio] WARNING! No THiNX-File found! in $BUILD_PATH/$REPO_PATH: $THINX_FILE" | tee -a "${LOG_PATH}"
+				echo "[platformio] WARNING! No THiNX-File found! in $BUILD_PATH/$REPO_NAME: $THINX_FILE" | tee -a "${LOG_PATH}"
 				# exit 1 # will deprecate on modularization for more platforms
 			else
 				echo "[platformio] Using THiNX-File ${THINX_FILE}" | tee -a "${LOG_PATH}"
@@ -785,7 +786,7 @@ case $PLATFORM in
 					echo "Skipping ${FILE} for there are no PIOS inside..." | tee -a "${LOG_PATH}"
 					BUILD_SUCCESS=false
 				fi
-		  fi
+		  	fi
 
 			OUTFILE=$(find $BUILD_PATH -name "firmware.bin" | head -n 1)
 
@@ -889,7 +890,7 @@ echo "Post-flight check:" | tee -a "${LOG_PATH}"
 pwd | tee -a "${LOG_PATH}"
 
 # add THINX_FIRMWARE_VERSION to the build.json envelope in order to differ between upgrades and crossgrades
-BUILD_FILE=$( find $BUILD_PATH/$REPO_PATH -name "thinx_build.json" )
+BUILD_FILE=$( find $BUILD_PATH/$REPO_NAME -name "thinx_build.json" )
 if [[ -z $BUILD_FILE ]]; then
 	BUILD_FILE=$( find $WORKDIR -name "thinx_build.json" )
 fi

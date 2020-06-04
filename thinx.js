@@ -104,7 +104,7 @@ var getClientIp = function(req) {
  */
 
 try {
-  var pfx_path = app_config.project_root + '/conf/.thx_prefix';
+  var pfx_path = __dirname + '/conf/.thx_prefix';
   if (fs.existsSync(pfx_path)) {
     prefix = (fs.readFileSync(pfx_path).toString()).replace("\n", "");
   } else {
