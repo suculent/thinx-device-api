@@ -204,9 +204,13 @@ if [[ ! -d $BUILD_PATH ]]; then
 fi
 
 # Should be already deprecated, as there are pre-fetches. Maybe modules?
-echo "Entering build and pulling path..." | tee -a "${LOG_PATH}"
+echo "Entering build and pulling path... (deprecated? pre-cleaning to make sure git succeds)" | tee -a "${LOG_PATH}"
 echo $BUILD_PATH | tee -a "${LOG_PATH}"
-cd $BUILD_PATH && git clone --recursive ${GIT_REPO} -b ${GIT_BRANCH} && pwd | tee -a "${LOG_PATH}"
+cd $BUILD_PATH
+ls -la | tee -a "${LOG_PATH}"
+# allowed to fail if already pre-fetched?
+rm -rf *
+git clone --branch ${GIT_BRANCH} --recursive ${GIT_REPO} && pwd | tee -a "${LOG_PATH}"
 
 # Fetch submodules if any
 SINK=""
@@ -759,8 +763,6 @@ case $PLATFORM in
 					ls -la ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
 					echo "Target path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
 					ls -la ${TARGET_PATH} | tee -a "${LOG_PATH}"
-					echo "Cleaning up..." | tee -a "${LOG_PATH}"
-					rm -rf $BUILD_PATH/$REPO_NAME | tee -a "${LOG_PATH}"
 				else
 					STATUS='FAILED'
 				fi
