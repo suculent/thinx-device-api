@@ -905,7 +905,9 @@ if [ ! -z ${BUILD_FILE} ]; then
 	THINX_FIRMWARE_VERSION="$(jq .THINX_FIRMWARE_VERSION ${BUILD_FILE})"
 fi
 if [ -z ${THINX_FIRMWARE_VERSION} ]; then
+	pushd $BUILD_PATH/$REPO_NAME
 	TAG_VERSION=$(git describe --abbrev=0 --tags)
+	popd
 	THINX_FIRMWARE_VERSION="${REPO_NAME}-${TAG_VERSION}"
 	echo "No thinx_build.json file found, generating last-minute version: ${THINX_FIRMWARE_VERSION}"
 fi
