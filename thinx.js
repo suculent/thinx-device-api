@@ -77,7 +77,7 @@ var nano = require("nano")(db);
 var WebSocket = require("ws");
 
 // list of previously discovered attackers
-var BLACKLIST = [];
+var BLACKLIST = ["1.2.3.4"];
 
 var last_client_ip = null;
 
@@ -104,7 +104,7 @@ var getClientIp = function(req) {
  */
 
 try {
-  var pfx_path = app_config.project_root + '/conf/.thx_prefix';
+  var pfx_path = __dirname + '/conf/.thx_prefix';
   if (fs.existsSync(pfx_path)) {
     prefix = (fs.readFileSync(pfx_path).toString()).replace("\n", "");
   } else {
@@ -716,10 +716,7 @@ function setup_restore_owners_credentials(query) {
 }
 
 function startup_quote() {
-  if (process.env.ENTERPRISE === true) {
-    // do nothing if you don't want to
-    messenger.sendRandomQuote();
-  } else {
+  if (process.env.ENTERPRISE !== true) {
     messenger.sendRandomQuote();
   }
 }
