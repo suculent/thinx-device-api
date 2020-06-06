@@ -15,8 +15,9 @@ OPEN=false			# show build result in Finder
 BUILD_ID='test-build-id'
 ORIGIN=$(pwd)
 UDID='f8e88e40-43c8-11e7-9ad3-b7281c2b9610'
+GIT_BRANCH='origin/master'
 
-# ./builder --id=test-build-id --owner=cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12 --udid=a80cc610-4faf-11e7-9a9c-41d4f7ab4083 --git=git@github.com:suculent/thinx-firmware-esp8266.git
+# ./builder --id=test-build-id --owner=cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12 --udid=a80cc610-4faf-11e7-9a9c-41d4f7ab4083 --git=git@github.com:suculent/thinx-firmware-esp8266.git --branch=origin/master
 
 for i in "$@"
 do
@@ -26,21 +27,24 @@ case $i in
     ;;
     -o=*|--owner=*)
       OWNER_ID="${i#*=}"
-    ;;
+    ;;	
     -a=*|--alias=*)
       DEVICE_ALIAS="${i#*=}"
     ;;
-		-e=*|--env=*)
+	-e=*|--env=*)
       ENV_VARS="${i#*=}"
     ;;
-		-f=*|--fcid=*)
+	-f=*|--fcid=*)
       FCID="${i#*=}"
     ;;
-		-m=*|--mac=*)
+	-m=*|--mac=*)
       MAC="${i#*=}"
     ;;
     -g=*|--git=*)
       GIT_REPO="${i#*=}"
+    ;;
+	-b=*|--branch=*)
+      GIT_BRANCH="${i#*=}"
     ;;
     -d|--dry-run)
       RUN=false
@@ -200,9 +204,13 @@ if [[ ! -d $BUILD_PATH ]]; then
 fi
 
 # Should be already deprecated, as there are pre-fetches. Maybe modules?
-echo "Entering build and pulling path..." | tee -a "${LOG_PATH}"
+echo "Entering build and pulling path... (deprecated? pre-cleaning to make sure git succeds)" | tee -a "${LOG_PATH}"
 echo $BUILD_PATH | tee -a "${LOG_PATH}"
-cd $BUILD_PATH && git clone && pwd | tee -a "${LOG_PATH}"
+cd $BUILD_PATH
+ls -la | tee -a "${LOG_PATH}"
+# allowed to fail if already pre-fetched?
+rm -rf *
+git clone --branch ${GIT_BRANCH} --recursive ${GIT_REPO} && pwd | tee -a "${LOG_PATH}"
 
 # Fetch submodules if any
 SINK=""
@@ -755,8 +763,6 @@ case $PLATFORM in
 					ls -la ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
 					echo "Target path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
 					ls -la ${TARGET_PATH} | tee -a "${LOG_PATH}"
-					echo "Cleaning up..." | tee -a "${LOG_PATH}"
-					rm -rf $BUILD_PATH/$REPO_NAME | tee -a "${LOG_PATH}"
 				else
 					STATUS='FAILED'
 				fi
@@ -899,7 +905,9 @@ if [ ! -z ${BUILD_FILE} ]; then
 	THINX_FIRMWARE_VERSION="$(jq .THINX_FIRMWARE_VERSION ${BUILD_FILE})"
 fi
 if [ -z ${THINX_FIRMWARE_VERSION} ]; then
+	pushd $BUILD_PATH/$REPO_NAME
 	TAG_VERSION=$(git describe --abbrev=0 --tags)
+	popd
 	THINX_FIRMWARE_VERSION="${REPO_NAME}-${TAG_VERSION}"
 	echo "No thinx_build.json file found, generating last-minute version: ${THINX_FIRMWARE_VERSION}"
 fi
