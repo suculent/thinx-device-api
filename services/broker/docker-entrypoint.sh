@@ -15,12 +15,12 @@ incrond --foreground &
 incrontab --reload
 incrontab -l
 
-touch /mqtt/log/mosquitto.log
+touch /var/log/mosquitto.log
 chown -R mosquitto:mosquitto /mqtt
 
 su mosquitto -s /bin/bash
 
-touch /mqtt/log/mosquitto.log
+touch /var/log/mosquitto.log
 touch /mqtt/auth/thinx.pw
 
 if [[ ! -z $MOSQUITTO_PASSWORD ]]; then
@@ -65,5 +65,5 @@ else
   mosquitto -d -v
 fi
 
-tail -f /mqtt/log/mosquitto.log
+tail -f /var/log/mosquitto.log
 sleep infinity
