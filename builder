@@ -192,25 +192,15 @@ echo "- host: $host" 							| tee -a "${LOG_PATH}"
 echo "- REPO_PATH: $REPO_PATH" 		| tee -a "${LOG_PATH}"
 echo "- REPO_NAME: ${REPO_NAME}" 	| tee -a "${LOG_PATH}"
 
-#echo "Cleaning workspace..."
-
-# Clean
-
-
 # TODO: only if $REPO_NAME contains slash(es)
 BUILD_PATH=$BUILD_ROOT/$OWNER_ID/$UDID/$BUILD_ID
 if [[ ! -d $BUILD_PATH ]]; then
 	mkdir -p $BUILD_PATH
 fi
 
-# Should be already deprecated, as there are pre-fetches. Maybe modules?
-echo "Entering build and pulling path... (deprecated? pre-cleaning to make sure git succeds)" | tee -a "${LOG_PATH}"
 echo $BUILD_PATH | tee -a "${LOG_PATH}"
 cd $BUILD_PATH
 ls -la | tee -a "${LOG_PATH}"
-# allowed to fail if already pre-fetched?
-rm -rf *
-git clone --branch ${GIT_BRANCH} --recursive ${GIT_REPO} && pwd | tee -a "${LOG_PATH}"
 
 # Fetch submodules if any
 SINK=""
