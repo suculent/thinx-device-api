@@ -379,7 +379,7 @@ devicelib.get(udid, function(err, doc) {
     var envelopeString = JSON.stringify(buildEnvelope, null, 4);
     console.log("[notifier.js] Saving build envelope: " + envelopeString);
     console.log("[notifier.js] deployedEnvelopePath: " + envelopePath);
-    var buffer = new Buffer(envelopeString + "\n");
+    var buffer = new Buffer.from(envelopeString + "\n");
     console.log("[notifier.js] saving envelopePath: " + deployedEnvelopePath);
     fs.writeFileSync(envelopePath, buffer);
     console.log("[notifier.js] Deploying build envelope: " + deployedEnvelopePath);

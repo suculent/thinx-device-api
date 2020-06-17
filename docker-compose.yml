@@ -119,6 +119,7 @@ services:
       - couchdb
       - transformer
       - thinx-redis
+      - mosquitto
     networks:
       - nat
       - internal
@@ -165,6 +166,8 @@ services:
       - traefik.backend=thinx-api
       - 'traefik.frontend.rule=Host:${THINX_HOSTNAME}'
   console:
+    depends_on:
+      - api
     env_file:
       - .env
     build:
