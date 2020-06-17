@@ -120,6 +120,7 @@ services:
       - couchdb
       - transformer
       - thinx-redis
+      - mosquitto
     networks:
       - nat
       - internal
