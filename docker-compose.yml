@@ -116,6 +116,7 @@ services:
     shm_size: 2048M
     restart: 'no'
     depends_on:
+      - mosquitto
       - couchdb
       - transformer
       - thinx-redis
@@ -165,6 +166,8 @@ services:
       - traefik.backend=thinx-api
       - 'traefik.frontend.rule=Host:${THINX_HOSTNAME}'
   console:
+    depends_on:
+      - api
     env_file:
       - .env
     build:
