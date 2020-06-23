@@ -145,6 +145,11 @@ var Repository = require("./lib/thinx/repository");
 var watcher = new Repository();
 watcher.watch();
 
+console.log("Loading module: Queue");
+var Queue = require("./queue");
+var queue = new Queue();
+queue.cron(); // starts cron job for build queue from webhooks
+
 
 //
 // REFACTOR: Move to database.js
