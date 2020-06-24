@@ -2,7 +2,7 @@ describe("RSA Key", function() {
 
   let revoked_fingerprint;
   
-  var expect = require('chai').expect
+  var expect = require('chai').expect;
   var RSAKey = require("../../lib/thinx/rsakey");
   var rsakey = new RSAKey();
 

@@ -1,8 +1,8 @@
-var expect = require('chai').expect
+var expect = require('chai').expect;
 
 describe("Repository Watcher", function() {
 
-  var expect = require('chai').expect
+  var expect = require('chai').expect;
   var Watcher = require('../../lib/thinx/repository');
   var watcher = new Watcher();
 

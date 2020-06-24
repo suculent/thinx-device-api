@@ -1,6 +1,6 @@
 describe("Version", function() {
 
-  var expect = require('chai').expect
+  var expect = require('chai').expect;
   var Version = require('../../lib/thinx/version');
   var v;
 

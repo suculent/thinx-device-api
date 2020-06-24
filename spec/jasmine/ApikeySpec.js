@@ -1,6 +1,6 @@
 describe("API Key", function() {
 
-  var expect = require('chai').expect
+  var expect = require('chai').expect;
 
   var generated_key_hash = null;
 

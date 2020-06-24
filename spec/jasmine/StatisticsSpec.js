@@ -1,6 +1,6 @@
 describe("Statistics", function() {
 
-  var expect = require('chai').expect
+  var expect = require('chai').expect;
   var Statistics = require('../../lib/thinx/statistics');
   var s = new Statistics();
   s.forceLogPath(__dirname + "/../../spec/test.log");

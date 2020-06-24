@@ -1,6 +1,6 @@
 describe("Owner", function() {
 
-  var expect = require('chai').expect
+  var expect = require('chai').expect;
   
   var generated_key_hash = null;
   var user = require('../../lib/thinx/owner');

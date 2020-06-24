@@ -1,6 +1,6 @@
 describe("Build log", function() {
 
-  var expect = require('chai').expect
+  var expect = require('chai').expect;
   var BuildLog = require("../../lib/thinx/buildlog");
   var blog = new BuildLog();
 

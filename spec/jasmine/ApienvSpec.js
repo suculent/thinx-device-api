@@ -1,6 +1,6 @@
 describe("API Env", function() {
 
-  var expect = require('chai').expect
+  var expect = require('chai').expect;
 
   var generated_key_name = null;
   var envi = require("../_envi.json");

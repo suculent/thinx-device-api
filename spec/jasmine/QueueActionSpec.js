@@ -1,6 +1,7 @@
 describe("Queue Action", function() {
 
-    var expect = require('chai').expect
+    var expect = require('chai').expect;
+
     var Action = require("../../lib/thinx/queue_action");
 
     //let mock_udid_1 = "<mock-udid-1>";

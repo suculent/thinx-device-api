@@ -1,6 +1,6 @@
 describe("Queue", function() {
 
-    var expect = require('chai').expect
+    var expect = require('chai').expect;
     let Queue = require("../../lib/thinx/queue");
     
     let mock_udid_1 = "<mock-udid-1>";
