@@ -1,14 +1,16 @@
 describe("Version", function() {
 
-  const Version = require('../../lib/thinx/version');
-  const v = new Version();
+  var expect = require('chai').expect;
+  var Version = require('../../lib/thinx/version');
+  var v;
 
   it("should be able to initialize", function() {
-    expect(v).toBeDefined();
+    v = new Version();
+    expect(v).to.be.a('object');
   });
 
   it("should be able to return current project revision", function() {
-    expect(v.revision()).toBeDefined();
+    expect(v.revision()).to.be.a('number');
   });
 
 });

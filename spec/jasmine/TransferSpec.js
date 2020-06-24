@@ -1,5 +1,6 @@
 describe("Transfer", function() {
 
+  var expect = require('chai').expect;
   var envi = require("../_envi.json");
   var owner = envi.oid;
 
@@ -24,8 +25,8 @@ describe("Transfer", function() {
 
     Transfer.request(this.owner, body, function(success, response) {
       console.log(response);
-      expect(success).toBe(true);
-      expect(response).toBeDefined();
+      expect(success).to.equal(true);
+      expect(response).to.be.a('string');
       dynamic_transfer_request_id = response;
       done();
 
@@ -39,8 +40,8 @@ describe("Transfer", function() {
       udids: [envi.udid]
     };
     Transfer.decline(tbody, function(success, response) {
-      expect(success).toBe(true);
-      expect(response).toBeDefined();
+      expect(success).to.equal(true);
+      expect(response).to.be.a('string');
       console.log("transfer decline response: " + JSON.stringify(
         response));
       done();
@@ -50,8 +51,8 @@ describe("Transfer", function() {
   it("should be able to initiate device transfer for accept", function(done) {
     Transfer.request(this.owner, body, function(success, response) {
       console.log(response);
-      expect(success).toBe(true);
-      expect(response).toBeDefined();
+      expect(success).to.equal(true);
+      expect(response).to.be.a('string');
       dynamic_transfer_request_id = response;
       done();
     });
@@ -65,8 +66,8 @@ describe("Transfer", function() {
       udids: [envi.udid]
     };
     Transfer.accept(transfer_body, function(success, response) {
-      expect(success).toBe(true);
-      expect(response).toBeDefined();
+      expect(success).to.equal(true);
+      expect(response).to.be.a('string');
       console.log("transfer accept response: " + JSON.stringify(
         response));
       done();

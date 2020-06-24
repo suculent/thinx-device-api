@@ -114,9 +114,9 @@ try {
         console.log("» error creating thx_prefix: " + e);
       } else {
         crypto.randomBytes(12, function(err, buffer) {
-          var prefix = buffer.toString('hex');
-          fs.writeFile(prefix, "", function(err) {
-            if (err) {
+          var prefix_z = buffer.toString('hex');
+          fs.writeFile(prefix_z, "", function(err_z) {
+            if (err_z) {
               console.log("» error writing thx_prefix: " + err);
             }
           });
@@ -127,6 +127,10 @@ try {
 } catch (e) {
   console.log("» thx_prefix_exception" + e);
 }
+
+console.log("» Initializing DB...");
+
+initDatabases(prefix);
 
 // should be initialized after prefix because of DB requirements...
 var Version = require("./lib/thinx/version");
@@ -144,6 +148,11 @@ console.log("Loading module: Repository");
 var Repository = require("./lib/thinx/repository");
 var watcher = new Repository();
 watcher.watch();
+
+console.log("Loading module: Queue");
+var Queue = require("./lib/thinx/queue");
+var queue = new Queue();
+queue.cron(); // starts cron job for build queue from webhooks
 
 
 //
@@ -184,13 +193,13 @@ function logCouchError(err, body, header, tag) {
   }
 }
 
-function injectDesign(db, design, file) {
+function injectDesign(couch, design, file) {
   if (typeof(design) === "undefined") return;
   console.log("» Inserting design document " + design + " from path", file);
   let design_doc = getDocument(file);
   if (design_doc != null) {
     //console.log("Inserting design document", {design_doc});
-    db.insert(design_doc, "_design/" + design, function(err, body, header) {
+    couch.insert(design_doc, "_design/" + design, function(err, body, header) {
       logCouchError(err, body, header, "init:design:"+design);
     });
   } else {
@@ -198,12 +207,12 @@ function injectDesign(db, design, file) {
   }
 }
 
-function injectReplFilter(db, file) {
+function injectReplFilter(couch, file) {
   console.log("» Inserting filter document from path", file);
   let filter_doc = getDocument(file);
   if (filter_doc !== false) {
     //console.log("Inserting filter document", {filter_doc});
-    db.insert(filter_doc, "_design/repl_filters", function(err, body, header) {
+    couch.insert(filter_doc, "_design/repl_filters", function(err, body, header) {
       logCouchError(err, body, header, "init:repl:"+filter_doc);
     });
   } else {
@@ -223,7 +232,7 @@ function handleDatabaseErrors(err, name) {
   }
 }
 
-function initDatabases() {
+function initDatabases(prefix) {
 
   // only to fix bug in CouchDB 2.3.1 first-run
   nano.db.create("_users", function(err, body, header) {});
@@ -237,9 +246,9 @@ function initDatabases() {
     } else {
       console.log("» Device database creation completed. Response: " +
         JSON.stringify(body) + "\n");
-      var db = nano.db.use(prefix + "managed_devices");
-      injectDesign(db, "devicelib", "./design/design_deviceslib.json");
-      injectReplFilter(db, "./design/filters_devices.json");
+      var couch = nano.db.use(prefix + "managed_devices");
+      injectDesign(couch, "devicelib", "./design/design_deviceslib.json");
+      injectReplFilter(couch, "./design/filters_devices.json");
     }
   });
 
@@ -249,9 +258,9 @@ function initDatabases() {
     } else {
       console.log("» Build database creation completed. Response: " +
         JSON.stringify(body) + "\n");
-      var db = nano.db.use(prefix + "managed_builds");
-      injectDesign(db, "builds", "./design/design_builds.json");
-      injectReplFilter(db, "./design/filters_builds.json");
+      var couch = nano.db.use(prefix + "managed_builds");
+      injectDesign(couch, "builds", "./design/design_builds.json");
+      injectReplFilter(couch, "./design/filters_builds.json");
     }
   });
 
@@ -261,9 +270,9 @@ function initDatabases() {
     } else {
       console.log("» User database creation completed. Response: " +
         JSON.stringify(body) + "\n");
-      var db = nano.db.use(prefix + "managed_users");
-      injectDesign(db, "users", "./design/design_users.json");
-      injectReplFilter(db, "./design/filters_users.json");
+      var couch = nano.db.use(prefix + "managed_users");
+      injectDesign(couch, "users", "./design/design_users.json");
+      injectReplFilter(couch, "./design/filters_users.json");
     }
   });
 
@@ -273,16 +282,14 @@ function initDatabases() {
     } else {
       console.log("» Log database creation completed. Response: " +
         JSON.stringify(body) + "\n");
-      var db = nano.db.use(prefix + "managed_logs");
-      injectDesign(db, "logs", "./design/design_logs.json");
-      injectReplFilter(db,  "./design/filters_logs.json");
+      var couch = nano.db.use(prefix + "managed_logs");
+      injectDesign(couch, "logs", "./design/design_logs.json");
+      injectReplFilter(couch,  "./design/filters_logs.json");
     }
   });
 }
 
-console.log("» Initializing DB...");
 
-initDatabases();
 
 var devicelib = require("nano")(db).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
 var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
@@ -529,15 +536,15 @@ wss.on("connection", function(ws, req) {
     console.log("[thinx] logtail_callback error:", err, "message", result);
   };
 
-  // WARNING! New, untested! Requires websocket.
+  // WARNING! New, untested! Requires websocket and refactoring into router.
 
   /* Returns specific build log for owner */
   console.log("Mapping endpoint: /api/user/logs/tail");
-  app.post("/api/user/logs/tail", function(req, res) {
-    if (!(validateSecurePOSTRequest(req) || validateSession(req, res))) return;
-    var owner = req.session.owner;
-    if (typeof(req.body.build_id) === "undefined") {
-      respond(res, {
+  app.post("/api/user/logs/tail", function(req2, res) {
+    if (!(router.validateSecurePOSTRequest(req) || router.validateSession(req2, res))) return;
+    var owner = req2.session.owner;
+    if (typeof(req2.body.build_id) === "undefined") {
+      router.respond(res, {
         success: false,
         status: "missing_build_id"
       });
@@ -546,12 +553,12 @@ wss.on("connection", function(ws, req) {
     var error_callback = function(err) {
       console.log(err);
       res.set("Connection", "close");
-      respond(res, err);
+      router.respond(res, err);
     };
-    console.log("Tailing build log for " + req.body.build_id);
+    console.log("Tailing build log for " + req2.body.build_id);
     //const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
     //const blog = new Buildlog();
-    blog.logtail(req.body.build_id, owner, ws, error_callback);
+    blog.logtail(req2.body.build_id, owner, ws, error_callback);
   });
 
   ws.on("message", (message) => {
@@ -564,9 +571,9 @@ wss.on("connection", function(ws, req) {
       blog.logtail(build_id, owner_id, _ws, logtail_callback);
     } else if (typeof(object.init) !== "undefined") {
       if (typeof(messenger) !== "undefined") {
-        messenger.initWithOwner(object.init, _ws, function(success, message) {
+        messenger.initWithOwner(object.init, _ws, function(success, message_z) {
           if (!success) {
-            console.log("Messenger init on WS message with result " + success + ", with message: ", { message });
+            console.log("Messenger init on WS message with result " + success + ", with message: ", { message_z });
           }
         });
       } else {

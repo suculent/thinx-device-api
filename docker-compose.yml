@@ -192,8 +192,6 @@ services:
     ports:
       - '8000:80'
     restart: unless-stopped
-    depends_on:
-      - api
     environment:
       - NGINX_PORT=80
       - 'NGINX_HOST=${WEB_HOSTNAME}'
