@@ -534,12 +534,12 @@ wss.on("connection", function(ws, req) {
     console.log("[thinx] logtail_callback error:", err, "message", result);
   };
 
-  // WARNING! New, untested! Requires websocket.
+  // WARNING! New, untested! Requires websocket and refactoring into router.
 
   /* Returns specific build log for owner */
   console.log("Mapping endpoint: /api/user/logs/tail");
   app.post("/api/user/logs/tail", function(req2, res) {
-    if (!(router.validateSecurePOSTRequest(req) || validateSession(req2, res))) return;
+    if (!(router.validateSecurePOSTRequest(req) || router.validateSession(req2, res))) return;
     var owner = req2.session.owner;
     if (typeof(req2.body.build_id) === "undefined") {
       router.respond(res, {
