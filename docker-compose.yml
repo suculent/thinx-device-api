@@ -31,6 +31,13 @@ services:
       - '/mnt/data/mosquitto/auth:/mqtt/auth:rw'      
     labels:
       - traefik.backend.mosquitto.noexpose
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'mosquitto_sub -t "$SYS/#" -C 1 -u $MOSQUITTO_USERNAME -P $MOSQUITTO_PASSWORD | grep -v Error'
+      interval: 10s
+      timeout: 50s
+      retries: 5
   couchdb:
     env_file: .env
     image: 'apache/couchdb:2.3.1'
@@ -40,7 +47,7 @@ services:
         - CMD-SHELL
         - 'curl -XGET http://localhost:5984'
       interval: 10s
-      timeout: 5s
+      timeout: 50s
       retries: 5
     environment:
       - 'NODENAME=${NODENAME}'
@@ -114,13 +121,20 @@ services:
   api:
     privileged: true
     shm_size: 2048M
-    restart: 'no'
+    restart: 'always'
     depends_on:
-      - mosquitto
-      - couchdb
-      - transformer
-      - thinx-redis
-      - mosquitto
+#      - couchdb
+#      - transformer
+#      - thinx-redis
+#      - mosquitto
+      couchdb:
+        condition: service_started
+      transformer:
+        condition: service_started
+      thinx-redis:
+        condition: service_started
+      mosquitto:
+        condition: service_healthy
     networks:
       - nat
       - internal
