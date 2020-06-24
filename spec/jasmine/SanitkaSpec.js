@@ -13,4 +13,9 @@ describe("Sanitka", function() {
     expect(s).toBe("master");
   });
 
+  it("should de-escape (delete) dangerous shell characters \", \', ;", function() {
+    var s = sanitka.deescape("\"\';;;\"");
+    expect(s.length).toBe(0);
+  });
+
 });
