@@ -150,7 +150,7 @@ var watcher = new Repository();
 watcher.watch();
 
 console.log("Loading module: Queue");
-var Queue = require("./queue");
+var Queue = require("./lib/thinx/queue");
 var queue = new Queue();
 queue.cron(); // starts cron job for build queue from webhooks
 
