@@ -1,6 +1,6 @@
 describe("Notifier", function() {
 
-  var expect = require('chai').expect
+  var expect = require('chai').expect;
   var envi = require("../_envi.json");
   var owner = envi.oid;
   var exec = require("child_process");

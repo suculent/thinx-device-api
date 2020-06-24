@@ -1,6 +1,6 @@
 describe("Sanitka", function () {
 
-  var expect = require('chai').expect
+  var expect = require('chai').expect;
   var Sanitka = require('../../lib/thinx/sanitka');
   var sanitka = new Sanitka();
 

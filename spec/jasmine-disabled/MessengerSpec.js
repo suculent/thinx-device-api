@@ -1,6 +1,6 @@
 describe("Messenger", function() {
   
-  var expect = require('chai').expect
+  var expect = require('chai').expect;
 
   var generated_key_name;
   var Messenger = require('../../lib/thinx/messenger');

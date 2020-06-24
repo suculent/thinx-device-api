@@ -1,6 +1,6 @@
 describe("Deployer", function() {
 
-  var expect = require('chai').expect
+  var expect = require('chai').expect;
   var Deployment = require('../../lib/thinx/deployment');
   var deploy = new Deployment();
 

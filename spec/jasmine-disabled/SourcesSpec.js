@@ -1,6 +1,6 @@
 describe("Sources", function() {
 
-  var expect = require('chai').expect
+  var expect = require('chai').expect;
   var sources = require('../../lib/thinx/sources');
   var Sources = new sources();
 

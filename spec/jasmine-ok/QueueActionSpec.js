@@ -1,6 +1,6 @@
 describe("Queue Action", function() {
 
-    var expect = require('chai').expect
+    var expect = require('chai').expect;
 
     var Action = require("../../lib/thinx/queue_action");
 

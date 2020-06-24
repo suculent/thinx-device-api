@@ -4,7 +4,7 @@ describe("Platform", function() {
     let platform = new Platform();
     let path = "./spec/test_repositories/arduino/";
     
-    var expect = require('chai').expect
+    var expect = require('chai').expect;
 
     it("Should fetch platform from repository with callback", (done) => {
         platform.getPlatform(path, function(success, result) {
