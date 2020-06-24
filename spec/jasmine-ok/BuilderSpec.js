@@ -1,3 +1,5 @@
+var expect = require('chai').expect
+
 describe("Builder", function() {
 
   //anything in here will apply to everything in each nested describe
@@ -12,7 +14,7 @@ describe("Builder", function() {
   var source_id = envi.sid;
 
   it("should be able to initialize", function() {
-    expect(builder).toBeDefined();
+    expect(builder).to.be.a('object');
   });
 
   it("should be able to dry-run", function(done) {
@@ -39,13 +41,13 @@ describe("Builder", function() {
 
   it("supports certain languages", function() {
     var languages = builder.supportedLanguages();
-    expect(languages).toBeDefined();
+    expect(languages).to.be.a('array');
     //console.log(JSON.stringify(languages));
   });
 
   it("supports certain extensions", function() {
     var extensions = builder.supportedExtensions();
-    expect(extensions).toBeDefined();
+    expect(extensions).to.be.a('array');
     //console.log(JSON.stringify(extensions));
   });
 

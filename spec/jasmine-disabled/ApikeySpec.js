@@ -1,5 +1,7 @@
 describe("API Key", function() {
 
+  var expect = require('chai').expect
+
   var generated_key_hash = null;
 
   var APIKey = require("../../lib/thinx/apikey");
@@ -18,7 +20,7 @@ describe("API Key", function() {
           generated_key_hash = sha256(object.key);
           console.log("APIKey generated: " + generated_key_hash);
         }
-        expect(object).toBeDefined();
+        expect(object).to.be.a('string');
         done();
       }
     );
@@ -26,14 +28,14 @@ describe("API Key", function() {
 
   //verify: function(owner, apikey, callback)
   it("should be able to verify API Keys (requires hash)", function(done) {
-    expect(generated_key_hash).toBeDefined();
+    expect(generated_key_hash).to.be.a('string');
     //console.log("Verifying key: " + generated_key_hash);
     apikey.verify(
       owner,
       generated_key_hash,
       null,
       function(success) {
-        expect(success).toBe(true);
+        expect(success).to.equal(true);
         done();
       });
   });
@@ -45,7 +47,7 @@ describe("API Key", function() {
       generated_key_hash,
       "sample-key-hash",
       function(success) {
-        expect(success).toBeDefined();
+        expect(success).to.be.a('string');
         done();
       });
   });
@@ -58,7 +60,7 @@ describe("API Key", function() {
       "invalid-api-key",
       req,
       function(success) {
-        expect(success).toBe(false);
+        expect(success).to.equal(false);
         done();
       });
   }, 5000);
@@ -69,7 +71,7 @@ describe("API Key", function() {
     apikey.revoke(
       "nonsense", ["sample-key-hash"],
       function(success) {
-        expect(success).toBe(false);
+        expect(success).to.equal(false);
         done();
       }
     );
@@ -84,7 +86,7 @@ describe("API Key", function() {
       function(success, object) {
         if (success) {
           //console.log(JSON.stringify(object));
-          expect(object).toBeDefined();
+          expect(object).to.be.a('string');
         } else {
           console.log("[jasmine] Listing failed:" + object);
         }

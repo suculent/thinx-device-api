@@ -1,9 +1,8 @@
-// const { assertions } = require("expect");
-
-let Queue = require("../../lib/thinx/queue");
-
 describe("Queue", function() {
 
+    var expect = require('chai').expect
+    let Queue = require("../../lib/thinx/queue");
+    
     let mock_udid_1 = "<mock-udid-1>";
     let mock_udid_2 = "<mock-udid-2>";
     let mock_udid_3 = "<mock-udid-3>";
@@ -15,7 +14,7 @@ describe("Queue", function() {
     // init
     it("Should initialize safely without running cron", function() {
         queue_with_cron = new Queue();
-        expect(queue_with_cron).toBeDefined();
+        expect(queue_with_cron).to.be.a('string');
     });
 
     // cron
@@ -33,19 +32,19 @@ describe("Queue", function() {
     // findNext (A)
     it("Should be able find next waiting item in queue", function() {
         let next = queue_with_cron.findNext();
-        expect(next).toBeDefined();
+        expect(next).to.be.a('string');
     });
 
     // runNext
     it("Should be able run next item", function() {
         let next = queue_with_cron.findNext();
-        expect(next).toBeDefined();
+        expect(next).to.be.a('string');
     });
 
     // findNext (B)
     it("Should not be able to find anything while queue item is running", function() {
         let next = queue_with_cron.findNext();
-        expect(next).not.toBeDefined();
+        expect(next).not.to.be.a('string');
     });
 
     it("Should run loop safely", function() {

@@ -1,5 +1,6 @@
 describe("Sources", function() {
 
+  var expect = require('chai').expect
   var sources = require('../../lib/thinx/sources');
   var Sources = new sources();
 
@@ -22,8 +23,8 @@ describe("Sources", function() {
           console.log("Error adding source: " + response);
         }
         //console.log("Source Add Response: " , {response});
-        expect(success).toBe(true);
-        expect(response).toBeDefined();
+        expect(success).to.equal(true);
+        expect(response).to.be.a('string');
         source_id = response.source_id;
         done();
       });
@@ -31,8 +32,8 @@ describe("Sources", function() {
 
   it("should be able to provide a list", function(done) {
     Sources.list(owner, function(success, response) {
-      expect(success).toBe(true);
-      expect(response).toBeDefined();
+      expect(success).to.equal(true);
+      expect(response).to.be.a('string');
       //console.log("Source List Response: " , {response});
       done();
     });
@@ -54,16 +55,16 @@ describe("Sources", function() {
           console.log("Error adding source: " + response);
         }
         console.log("Source Add Response: " , {response});
-        //expect(success).toBe(true);
-        expect(response).toBeDefined();
+        //expect(success).to.equal(true);
+        expect(response).to.be.a('string');
         source_id = response.source_id;
 
         Sources.remove(source.owner, [source_id], (success, response) => {
           if (success === false) {
             console.log("Error removing source: " + response);
           }
-          expect(success).toBe(true);
-          //expect(response).toBeDefined();
+          expect(success).to.equal(true);
+          //expect(response).to.be.a('string');
           if (typeof(response) !== "undefined") {
             console.log("Sources Removal Response: " , {response});
           }

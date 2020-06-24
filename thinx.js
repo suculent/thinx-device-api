@@ -128,6 +128,10 @@ try {
   console.log("» thx_prefix_exception" + e);
 }
 
+console.log("» Initializing DB...");
+
+initDatabases(prefix);
+
 // should be initialized after prefix because of DB requirements...
 var Version = require("./lib/thinx/version");
 var v = new Version();
@@ -228,7 +232,7 @@ function handleDatabaseErrors(err, name) {
   }
 }
 
-function initDatabases() {
+function initDatabases(prefix) {
 
   // only to fix bug in CouchDB 2.3.1 first-run
   nano.db.create("_users", function(err, body, header) {});
@@ -285,9 +289,7 @@ function initDatabases() {
   });
 }
 
-console.log("» Initializing DB...");
 
-initDatabases();
 
 var devicelib = require("nano")(db).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
 var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]

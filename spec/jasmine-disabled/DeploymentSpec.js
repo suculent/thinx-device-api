@@ -1,5 +1,6 @@
 describe("Deployer", function() {
 
+  var expect = require('chai').expect
   var Deployment = require('../../lib/thinx/deployment');
   var deploy = new Deployment();
 
@@ -20,33 +21,33 @@ describe("Deployer", function() {
 
   it("should be able to initialize", function() {
     deploy.initWithOwner(owner);
-    expect(deploy).toBeDefined();
+    expect(deploy).to.be.a('string');
   });
 
   it("should be able to init with device", function() {
     deploy.initWithDevice(device);
-    expect(true).toBe(true);
+    expect(true).to.equal(true);
   });
 
   it("should be able to return path for device", function() {
     var repo_path = deploy.pathForDevice(owner, udid);
-    expect(repo_path).toBeDefined();
+    expect(repo_path).to.be.a('string');
   });
 
   it("should be able to return latest firmware path", function() {
     var firmwarePath = deploy.latestFirmwarePath(device);
-    expect(firmwarePath).toBeDefined();
+    expect(firmwarePath).to.be.a('string');
   });
 
   it("should be able to tell whether update is available for device",
     function() {
       var result = deploy.hasUpdateAvailable(device);
-      expect(result).toBeDefined();
+      expect(result).to.be.a('string');
   });
 
   it("should be able to return latest firmware envelope", function() {
     var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(device.owner, device.udid);
-    expect(firmwareUpdateDescriptor).toBe(false);
+    expect(firmwareUpdateDescriptor).to.equal(false);
   });
 
 });

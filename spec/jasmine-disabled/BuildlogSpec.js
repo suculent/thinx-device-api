@@ -1,5 +1,6 @@
 describe("Build log", function() {
 
+  var expect = require('chai').expect
   var BuildLog = require("../../lib/thinx/buildlog");
   var blog = new BuildLog();
 
@@ -15,13 +16,13 @@ describe("Build log", function() {
    */
 
   it("should be able to initialize", function() {
-    expect(blog).toBeDefined();
+    expect(blog).to.be.a('string');
   });
 
   it("should be able to list build logs", function(done) {
     blog.list(owner, function(err, body) {
       //console.log(err, body);
-      expect(body).toBeDefined();
+      expect(body).to.be.a('string');
       done();
     });
   }, 15000);
@@ -29,7 +30,7 @@ describe("Build log", function() {
   it("should be able to fetch specific build log", function(done) {
     blog.fetch(build_id, function(err, body) {
       //console.log(err, body);
-      expect(err).toBeDefined();
+      expect(err).to.be.a('string');
       done();
     });
   }, 10000);
@@ -50,7 +51,7 @@ describe("Build log", function() {
         if (success !== true) {
           console.log(success); // error reason
         }
-        expect(success).toBe(true);
+        expect(success).to.equal(true);
         done();
       });
   });
@@ -59,7 +60,7 @@ describe("Build log", function() {
     var path = blog.pathForDevice(owner, udid);
     //console.log("path: "+path);
     // valid is /mnt/thinx_volume/data/4f1122fa074af4dabab76a5205474882c82de33f50ecd962d25d3628cd0603be/d6ff2bb0-df34-11e7-b351-eb37822aa172
-    expect(path).toBeDefined();
+    expect(path).to.be.a('string');
   });
 
 });
