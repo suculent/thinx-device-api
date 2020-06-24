@@ -14,7 +14,7 @@ describe("Queue Action", function() {
     // constructor(udid), starts redis client...
     it("should be able to Init with UDID", function() {
         action = new Action(mock_udid_4);
-        expect(action).toBeDefined;
+        expect(action).to.be.a('object');
     });
 
     // queueWithSource
@@ -31,8 +31,8 @@ describe("Queue Action", function() {
 
     // toString can be called only after queueWithSource
     it("should be able return action as string", function() {
-        string_temp = action.toString();        
-        expect(string_temp).toBeDefined;
+        string_temp = action.toString();
+        expect(string_temp).to.be.a('string');
     });
 
     // withString

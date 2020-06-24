@@ -9,7 +9,7 @@ describe("Statistics", function() {
   var owner = envi.oid;
 
   it("should be able to initialize", function() {
-    expect(s).to.be.a('string');
+    expect(s).to.be.a('object');
   });
 
   it("should be able to store results", function() {
@@ -56,7 +56,7 @@ describe("Statistics", function() {
         //console.log("Returned all stats: ");
         expect(success).to.equal(true);
         if (success) {
-          expect(body).to.be.a('string');
+          expect(body).to.be.a('object');
         }
         done();
       });
@@ -67,7 +67,7 @@ describe("Statistics", function() {
         //expect(success).to.equal(true);
         //console.log("Returned weekly stats: ");
         //console.log({result});
-        expect(result).to.be.a('string');
+        expect(result).to.be.a('object');
         done();
       });
   }, 10000);

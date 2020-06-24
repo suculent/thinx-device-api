@@ -21,7 +21,7 @@ describe("Deployer", function() {
 
   it("should be able to initialize", function() {
     deploy.initWithOwner(owner);
-    expect(deploy).to.be.a('string');
+    expect(deploy).to.be.a('object');
   });
 
   it("should be able to init with device", function() {
@@ -36,13 +36,13 @@ describe("Deployer", function() {
 
   it("should be able to return latest firmware path", function() {
     var firmwarePath = deploy.latestFirmwarePath(device);
-    expect(firmwarePath).to.be.a('string');
+    expect(firmwarePath).to.be.false;
   });
 
   it("should be able to tell whether update is available for device",
     function() {
       var result = deploy.hasUpdateAvailable(device);
-      expect(result).to.be.a('string');
+      expect(result).to.be.false;
   });
 
   it("should be able to return latest firmware envelope", function() {

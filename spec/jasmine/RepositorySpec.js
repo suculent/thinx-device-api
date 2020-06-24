@@ -25,13 +25,13 @@ describe("Repository Watcher", function() {
   });
 
   it("should be able to initialize", function() {
-    expect(watcher).to.be.a('string');
+    expect(watcher).to.be.a('object');
   });
 
   it("should be able tell repository has changed", function() {
     watcher.checkRepositoryChange(repo_path, false, function(status, result) {
-      expect(result).to.be.a('string');
-      console.log("Repository change result: " + result);
+      expect(status).to.be.a('object');
+      console.log("Repository change status: ", {status});
     });
   });
 
@@ -42,7 +42,7 @@ describe("Repository Watcher", function() {
 
   it("should be able to get revision number", function() {
     var n = watcher.getRevisionNumber();
-    expect(n).to.be.a('string');
+    expect(n).to.be.a('number');
   });
 
 });

@@ -16,13 +16,13 @@ describe("Build log", function() {
    */
 
   it("should be able to initialize", function() {
-    expect(blog).to.be.a('string');
+    expect(blog).to.be.a('object');
   });
 
   it("should be able to list build logs", function(done) {
     blog.list(owner, function(err, body) {
       //console.log(err, body);
-      expect(body).to.be.a('string');
+      expect(body).to.be.a('object');
       done();
     });
   }, 15000);

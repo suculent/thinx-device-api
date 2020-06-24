@@ -82,7 +82,7 @@ describe("Devices", function() {
   it("should not be able to list devices for empty owner", function(done) {
     devices.list("", function(success, response) {
       expect(success).to.equal(true);
-      expect(response).to.be.a('string');
+      expect(response).to.be.a('object');
       expect(response.devices).to.equal([]);
       console.log("Should be empty Device list in: " , {response});
       done();

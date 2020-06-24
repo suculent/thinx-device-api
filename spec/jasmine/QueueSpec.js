@@ -14,7 +14,7 @@ describe("Queue", function() {
     // init
     it("Should initialize safely without running cron", function() {
         queue_with_cron = new Queue();
-        expect(queue_with_cron).to.be.a('string');
+        expect(queue_with_cron).to.be.a('object');
     });
 
     // cron
