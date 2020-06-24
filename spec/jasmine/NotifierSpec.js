@@ -1,5 +1,6 @@
 describe("Notifier", function() {
 
+  var expect = require('chai').expect;
   var envi = require("../_envi.json");
   var owner = envi.oid;
   var exec = require("child_process");
@@ -49,7 +50,7 @@ describe("Notifier", function() {
     var error = exec.execSync(CMD);
     console.log("Notifier result: ");
     console.log({error});
-    //expect(error).not.toBeDefined();
+    //expect(error).not.to.be.a('string');
     done();
   });
 

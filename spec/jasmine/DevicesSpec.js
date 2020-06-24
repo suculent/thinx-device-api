@@ -1,6 +1,8 @@
 describe("Devices", function() {
 
-  var generated_key_hash = null;
+  var expect = require('chai').expect;
+  
+  var generated_key_hash;
 
   var Messenger = require('../../lib/thinx/messenger');
   var messenger = new Messenger().getInstance();
@@ -51,16 +53,16 @@ describe("Devices", function() {
       function(success, response) {
         if (success === false) {
           console.log(response);
-          expect(response).toBeDefined();
+          expect(response).to.be.a('string');
           if (response === "owner_found_but_no_key") {
             done();
             return;
           }
         }
         //console.log("• DeviceSpec.js: Registration result: ", {response});
-        expect(success).toBe(true);
+        expect(success).to.equal(true);
         TEST_DEVICE.udid = response.registration.udid;
-        expect(TEST_DEVICE.udid).toBeDefined();
+        expect(TEST_DEVICE.udid).to.be.a('string');
         console.log("• DevicesSpec.js: Received UDID: " + TEST_DEVICE.udid);
         done();
       });
@@ -70,8 +72,8 @@ describe("Devices", function() {
 
   it("should be able to list devices for owner", function(done) {
     devices.list(owner, function(success, response) {
-      expect(success).toBe(true);
-      expect(response).toBeDefined();
+      expect(success).to.equal(true);
+      expect(response).to.be.a('string');
       //console.log("Device list: " , {response});
       done();
     });
@@ -79,9 +81,9 @@ describe("Devices", function() {
 
   it("should not be able to list devices for empty owner", function(done) {
     devices.list("", function(success, response) {
-      expect(success).toBe(true);
-      expect(response).toBeDefined();
-      expect(response.devices).toBe([]);
+      expect(success).to.equal(true);
+      expect(response).to.be.a('object');
+      expect(response.devices).to.equal([]);
       console.log("Should be empty Device list in: " , {response});
       done();
     });
@@ -94,8 +96,8 @@ describe("Devices", function() {
     };
     console.log("Attach request...");
     devices.attach(owner, body, function(success, response) {
-      expect(success).toBe(true);
-      expect(response).toBeDefined();
+      expect(success).to.equal(true);
+      expect(response).to.be.a('string');
       //console.log("Attach response: " , {response});
       done();
     });
@@ -106,8 +108,8 @@ describe("Devices", function() {
       udid: TEST_DEVICE.udid
     };
     devices.detach(owner, body, function(success, response) {
-      expect(success).toBe(true);
-      expect(response).toBeDefined();
+      expect(success).to.equal(true);
+      expect(response).to.be.a('string');
       if (success === false) {
         console.log("Detach response: " , {response});
       }
@@ -122,7 +124,7 @@ describe("Devices", function() {
       udid: TEST_DEVICE.udid
     };
     devices.revoke(owner, body, function(success, response) {
-      expect(success).toBe(true);
+      expect(success).to.equal(true);
       //console.log("Revoke response: " , {response});
       done();
     });

@@ -1,18 +1,20 @@
-var generated_key_name = null;
-var Messenger = require('../../lib/thinx/messenger');
-var messenger = new Messenger().getInstance();
-
-var envi = require("../_envi.json");
-var test_owner = envi.oid;
-var udid = envi.udid;
-
-var user = require('../../lib/thinx/owner');
-var User = new user();
-var envi = require("../_envi.json");
-var owner = envi.oid;
-var email = envi.email;
-
 describe("Messenger", function() {
+  
+  var expect = require('chai').expect;
+
+  var generated_key_name;
+  var Messenger = require('../../lib/thinx/messenger');
+  var messenger = new Messenger().getInstance();
+
+  var envi = require("../_envi.json");
+  var test_owner = envi.oid;
+  var udid = envi.udid;
+
+  var user = require('../../lib/thinx/owner');
+  var User = new user();
+  var envi = require("../_envi.json");
+  var owner = envi.oid;
+  var email = envi.email;
 
   var APIKey = require("../../lib/thinx/apikey");
   var apikey = new APIKey();
@@ -31,7 +33,7 @@ describe("Messenger", function() {
           generated_key_hash = sha256(object.key);
           console.log("APIKey created for MQTT: " + generated_key_hash + "with owner: " + owner);
         }
-        expect(object).toBeDefined();
+        expect(object).to.be.a('string');
         done();
       }
     );
@@ -44,7 +46,7 @@ describe("Messenger", function() {
       function(success, object) {
         if (success) {
           //console.log(JSON.stringify(object));
-          expect(object).toBeDefined();
+          expect(object).to.be.a('string');
         } else {
           console.log("[jasmine] Listing failed:" + object);
         }
@@ -55,7 +57,7 @@ describe("Messenger", function() {
   // getDevices: function(owner, callback)
   it("should be able to fetch devices for owner", function(done) {
     messenger.getDevices(test_owner, function(success, devices) {
-      expect(success).toBe(true);
+      expect(success).to.equal(true);
       console.log("devices: ", { devices });
       done();
     });
@@ -65,8 +67,8 @@ describe("Messenger", function() {
   it("should be able to initialize on its own", function(done) {
     const mock_socket = {};
     messenger.initWithOwner(test_owner, mock_socket, function(success, status) {
-      // expect(success).toBe(true);
-      expect(status).toBeDefined();
+      // expect(success).to.equal(true);
+      expect(status).to.be.a('string');
       console.log("devices: ", { success: success, status: status });
       done();
     });
@@ -75,7 +77,7 @@ describe("Messenger", function() {
   /* why? this function is unused... dead code.
   it("should be able to get all owners", function(done) {
     Messenger.getAllOwners(function(success, status) {
-      expect(success).toBe(true);
+      expect(success).to.equal(true);
       console.log("owners: " + JSON.stringify(status));
       done();
     });

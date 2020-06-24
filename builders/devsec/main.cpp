@@ -8,7 +8,7 @@
 void do_it(char *ckey, char* mac, char *fcid, char *ssid, char *pass, int debug) {
 
   if (debug)
-    printf ("ckey = %s, mac = %s, fcid = %s, ssid = %s, pass = %s, debug = %u\n", ckey, mac, fcid, ssid, pass, debug);
+    printf ("ckey = %s, mac = %s, fcid = %s, ssid = %s, pass = %s, debug = %i\n", ckey, mac, fcid, ssid, pass, debug);
 
   DevSec * sec = new DevSec();
 
@@ -18,7 +18,7 @@ void do_it(char *ckey, char* mac, char *fcid, char *ssid, char *pass, int debug)
   sec->generate_signature(mac, ckey, fcid);
 
   // fetch as string
-  char * signature = sec->signature();
+  sec->signature();
 
   // print as bytes to output with attached credentials
   sec->print_signature(ssid, pass);
@@ -68,6 +68,11 @@ void do_it(char *ckey, char* mac, char *fcid, char *ssid, char *pass, int debug)
 
   printf ("Validation should fail now without key: \n");
   isValid = sec->validate_signature(unsignature, ckey);
+  if (isValid) {
+    if (debug) printf ("valid.\n");
+  } else {
+    if (debug) printf ("invalid.\n");
+  }
 
 #endif
 

@@ -1,5 +1,7 @@
 describe("Owner", function() {
 
+  var expect = require('chai').expect;
+  
   var generated_key_hash = null;
   var user = require('../../lib/thinx/owner');
   var User = new user();
@@ -26,11 +28,11 @@ describe("Owner", function() {
     };
     User.create(body, true, function(success, response) {
       if (response.toString().indexOf("already_exists") !== -1) {
-        expect(success).toBe(false);
+        expect(success).to.equal(false);
       } else {
-        expect(success).toBe(true);
+        expect(success).to.equal(true);
       }
-      expect(response).toBeDefined();
+      expect(response).to.be.a('string');
       if (response.indexOf("username_already_exists" !== -1)) {
         done();
       }
@@ -46,8 +48,8 @@ describe("Owner", function() {
 
   it("should be able to fetch MQTT Key for owner", function(done) {
     User.mqtt_key(owner, function(success, apikey) {
-      expect(success).toBe(true);
-      expect(apikey).toBeDefined();
+      expect(success).to.equal(true);
+      expect(apikey).to.be.a('string');
       if (success) {
         console.log("MQTT apikey: ", { apikey });
       } else {
@@ -72,7 +74,7 @@ describe("Owner", function() {
         if (success === false) {
           console.log("avatar update response: " , {response});
         }
-        expect(success).toBe(true);
+        expect(success).to.equal(true);
         done();
       });
     }, 10000);
@@ -80,8 +82,8 @@ describe("Owner", function() {
  /*
   it("should be able to fetch owner profile", function(done) {
     User.profile(owner, function(success, response) {
-      expect(response).toBeDefined();
-      expect(success).toBe(true);
+      expect(response).to.be.a('string');
+      expect(success).to.equal(true);
       if (success === false) {
         console.log("profile fetch response: " , {response});
       }
@@ -97,7 +99,7 @@ describe("Owner", function() {
       function(success, response) {
         console.log(JSON.stringify(
           response));
-        expect(success).toBe(true);
+        expect(success).to.equal(true);
         done();
       });
   }, 10000);
@@ -105,8 +107,8 @@ describe("Owner", function() {
   // This expects activated account and e-mail fetch support
   it("should be able to activate owner", function(done) {
     User.activate(owner, activation_key, function(success, response) {
-      expect(success).toBe(true);
-      expect(response).toBeDefined();
+      expect(success).to.equal(true);
+      expect(response).to.be.a('string');
       console.log(JSON.stringify(response));
       done();
     });
@@ -117,12 +119,12 @@ describe("Owner", function() {
       if (success === false) {
         console.log(response);
       }
-      expect(success).toBe(true);
-      expect(response).toBeDefined();
+      expect(success).to.equal(true);
+      expect(response).to.be.a('string');
       console.log(JSON.stringify(response));
       if (response) {
         this.reset_key = response; // store reset token for next step
-        expect(this.reset_key).toBeDefined();
+        expect(this.reset_key).to.be.a('string');
       }
       done();
     });
@@ -137,12 +139,12 @@ describe("Owner", function() {
       reset_key: this.reset_key
     };
     User.set_password(body, function(success, response) {
-      expect(this.reset_key).toBeDefined();
+      expect(this.reset_key).to.be.a('string');
       if (success === false) {
         console.log("Password set result: " + response);
       }
-      expect(success).toBe(true);
-      expect(response).toBeDefined();
+      expect(success).to.equal(true);
+      expect(response).to.be.a('string');
       console.log(JSON.stringify(response));
     });
 
