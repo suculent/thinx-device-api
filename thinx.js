@@ -539,10 +539,10 @@ wss.on("connection", function(ws, req) {
   /* Returns specific build log for owner */
   console.log("Mapping endpoint: /api/user/logs/tail");
   app.post("/api/user/logs/tail", function(req2, res) {
-    if (!(validateSecurePOSTRequest(req) || validateSession(req2, res))) return;
+    if (!(router.validateSecurePOSTRequest(req) || validateSession(req2, res))) return;
     var owner = req2.session.owner;
     if (typeof(req2.body.build_id) === "undefined") {
-      respond(res, {
+      router.respond(res, {
         success: false,
         status: "missing_build_id"
       });
@@ -551,7 +551,7 @@ wss.on("connection", function(ws, req) {
     var error_callback = function(err) {
       console.log(err);
       res.set("Connection", "close");
-      respond(res, err);
+      router.respond(res, err);
     };
     console.log("Tailing build log for " + req2.body.build_id);
     //const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
