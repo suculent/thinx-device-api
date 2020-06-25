@@ -14,6 +14,7 @@ DevSec::DevSec() {
   this->dsig_created = false;
   this->dsig_valid = false;
   this->debug = false;
+  this->flash_chip_id = "FFFFFFFFFFFF";
 }
 
 void DevSec::setDebug(bool val) {
