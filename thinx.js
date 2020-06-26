@@ -22,6 +22,8 @@ if (Globals.use_sqreen()) {
 const crypto = require('crypto');
 const express = require("express");
 const session = require("express-session");
+const cluster = require('cluster');
+const bodyParser = require("body-parser");
 
 var Auth = require('./lib/thinx/auth.js');
 var auth = new Auth();
@@ -296,8 +298,8 @@ const hook_server = express();
 http.createServer(hook_server).listen(app_config.webhook_port, "0.0.0.0", function() {
   console.log("» Webhook API started on port", app_config.webhook_port);
 });
-
-hook_server.post("/*", function(req, res) {
+hook_server.use(bodyParser);
+hook_server.post("/", function(req, res) {
   let success = watcher.process_hook(req.body);
   if (success) {
     res.status(200).end();
@@ -636,8 +638,6 @@ function log_aggregator() {
 //
 // Master check in cluster mode
 //
-
-const cluster = require('cluster');
 
 function isMasterProcess() {
   return true; // cluster.isMaster();
