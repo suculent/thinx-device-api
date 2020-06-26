@@ -298,7 +298,7 @@ http.createServer(hook_server).listen(app_config.webhook_port, "0.0.0.0", functi
 });
 
 hook_server.post("/*", function(req, res) {
-  let success = watcher.process_hook(JSON.parse(req.body));
+  let success = watcher.process_hook(req.body);
   if (success) {
     res.status(200).end();
   } else {
