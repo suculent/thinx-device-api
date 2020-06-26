@@ -26,14 +26,4 @@ describe("Repository Watcher", function() {
     expect(watcher).to.be.a('object');
   });
 
-  it("should be able to get revision", function() {
-    var r = watcher.getRevision();
-    expect(r).to.be.a('string');
-  });
-
-  it("should be able to get revision number", function() {
-    var n = watcher.getRevisionNumber();
-    expect(n).to.be.a('number');
-  });
-
 });

@@ -205,9 +205,9 @@ console.log("Loading module: Messenger");
 var Messenger = require("./lib/thinx/messenger");
 var messenger = new Messenger().getInstance(); // take singleton to prevent double initialization
 
-console.log("Loading module: Repository");
+console.log("Loading module: Repository Watcher");
 var Repository = require("./lib/thinx/repository");
-var watcher = new Repository();
+const watcher = new Repository([]);
 watcher.watch();
 
 console.log("Loading module: Queue");
