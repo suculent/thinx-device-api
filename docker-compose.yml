@@ -123,18 +123,18 @@ services:
     shm_size: 2048M
     restart: 'always'
     depends_on:
-#      - couchdb
-#      - transformer
-#      - thinx-redis
-#      - mosquitto
-      couchdb:
-        condition: service_started
-      transformer:
-        condition: service_started
-      thinx-redis:
-        condition: service_started
-      mosquitto:
-        condition: service_healthy
+      - couchdb
+      - transformer
+      - thinx-redis
+      - mosquitto
+#      couchdb:
+#        condition: service_started
+#      transformer:
+#        condition: service_started
+#      thinx-redis:
+#        condition: service_started
+#      mosquitto:
+#        condition: service_healthy
     networks:
       - nat
       - internal
