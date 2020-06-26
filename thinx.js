@@ -19,19 +19,15 @@ if (Globals.use_sqreen()) {
  }
 }
 
-
-var exec = require("child_process"); // lgtm [js/unused-local-variable]
-var Rollbar = require("rollbar"); // lgtm [js/unused-local-variable]
-var crypto = require('crypto');
+const crypto = require('crypto');
+const express = require("express");
+const session = require("express-session");
 
 var Auth = require('./lib/thinx/auth.js');
 var auth = new Auth();
 
 let pki = require('node-forge').pki;
 var fs = require("fs-extra");
-var cookieParser = require('cookie-parser');
-// var bodyParser = require('body-parser'); unused
-var csrf = require('csurf');
 
 // set up rate limiter
 var RateLimit = require('express-rate-limit');
@@ -307,8 +303,6 @@ hook_server.post("/*", function(req, res) {
 }); // end Webhook Server
 
 // App
-const express = require("express");
-const session = require("express-session");
 const app = express();
 app.messenger = messenger;
 
@@ -365,8 +359,11 @@ app.use(function(req, res, next) {
 
 // CSRF protection
 // now add csrf and other middlewares, after the router was mounted
+// var bodyParser = require('body-parser');
 // app.use(bodyParser.urlencoded({ extended: false }));
+// var cookieParser = require('cookie-parser');
 // app.use(cookieParser());
+// var csrf = require('csurf');
 // app.use(csrf({ cookie: true })); collides with Sqreen
 
 let router = require('./lib/router.js')(app, _ws);
