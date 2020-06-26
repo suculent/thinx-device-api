@@ -25,10 +25,9 @@ services:
     volumes:
       - '/mnt/data/mosquitto/config:/mqtt/config:rw'
       - '/mnt/data/mosquitto/data:/mqtt/data:rw'
-      #- '/mnt/data/mosquitto/log:/mqtt/log:rw'
-      - '/mnt/data/mosquitto/log:/var/log/mosquitto:rw'
+      - '/mnt/data/mosquitto/log:/var/log:rw'
       - '/mnt/data/mosquitto/ssl:/mqtt/ssl:rw'
-      - '/mnt/data/mosquitto/auth:/mqtt/auth:rw'      
+      - '/mnt/data/mosquitto/auth:/mqtt/auth:rw'
     labels:
       - traefik.backend.mosquitto.noexpose
     healthcheck:
@@ -107,7 +106,7 @@ services:
         - REVISION=1
     restart: always
     environment:
-      - 'SQREEN_APP_NAME=${SQREEN_APP_NAME}'
+      - 'SQREEN_APP_NAME=${SQREEN_APP_NAME}'mos
       - 'SQREEN_TOKEN=${SQREEN_TOKEN}'
       - 'ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}'
       - 'ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}'
