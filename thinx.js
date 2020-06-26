@@ -299,6 +299,13 @@ http.createServer(hook_server).listen(app_config.webhook_port, "0.0.0.0", functi
 hook_server.use(express.json()); //Make sure u have added this line
 hook_server.use(express.urlencoded({ extended: false }));
 hook_server.post("/", function(req, res) {
+  // From GitHub, exit on non-push events prematurely
+  if (typeof(req.headers["X-GitHub-Event"]) !== "undefined") {
+    if ((req.headers["X-GitHub-Event"] != "push")) {
+      res.status(200).end("Accepted");
+      return;
+    }
+  }
   let success = watcher.process_hook(req.body);
   if (success) {
     res.status(200).end("Accepted");
