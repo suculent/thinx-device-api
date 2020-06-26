@@ -99,7 +99,7 @@ services:
         - REVISION=1
     restart: always
     environment:
-      - 'SQREEN_APP_NAME=${SQREEN_APP_NAME}'mos
+      - 'SQREEN_APP_NAME=${SQREEN_APP_NAME}'
       - 'SQREEN_TOKEN=${SQREEN_TOKEN}'
       - 'ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}'
       - 'ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}'
