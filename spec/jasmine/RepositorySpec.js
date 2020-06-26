@@ -26,13 +26,6 @@ describe("Repository Watcher", function() {
     expect(watcher).to.be.a('object');
   });
 
-  it("should be able tell repository has changed", function() {
-    watcher.checkRepositoryChange(repo_path, false, function(status, result) {
-      expect(status).to.be.a('object');
-      console.log("Repository change status: ", {status});
-    });
-  });
-
   it("should be able to get revision", function() {
     var r = watcher.getRevision();
     expect(r).to.be.a('string');
