@@ -207,8 +207,6 @@ var messenger = new Messenger().getInstance(); // take singleton to prevent doub
 
 console.log("Loading module: Repository Watcher");
 var Repository = require("./lib/thinx/repository");
-const watcher = new Repository();
-watcher.watch();
 
 console.log("Loading module: Queue");
 var Queue = require("./lib/thinx/queue");
@@ -296,23 +294,34 @@ function handleDatabaseErrors(err, name) {
 const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
 const blog = new Buildlog();
 
-//
-// <<<
-//
+// Webhook Server
+const hook_server = express();
+const watcher = new Repository();
+hook_server.use(function(req, res, next) {
+  watcher.process_hook(req.body.json);
+});
 
-// <-- EXTRACT TO: db.js && databases must not be held by app class
-// and they require on prefix as well...
+http.createServer(hook_server).listen(app_config.webhook_port, "0.0.0.0", function() {
+  console.log("» Webhook API started on port", app_config.webhook_port);
+});
 
-// Express App
-var express = require("express");
-var session = require("express-session");
+hook_server.use(function(req, res, next) {
+  var ipAddress = getClientIp(req);
+  if (BLACKLIST.toString().indexOf(ipAddress) === -1) {
+    next();
+  } else {
+    console.log("Returning error 403 for blacklisted IP.");
+    res.status(403).end();
+  }
+}); // end Webhook Server
 
-var app = express();
-
+// App
+const express = require("express");
+const session = require("express-session");
+const app = express();
 app.messenger = messenger;
 
-// console.log("» Starting Redis client...");
-
+// Redis
 var RedisStore = require("connect-redis")(session);
 var sessionStore = new RedisStore({
   host: app_config.redis.host,
