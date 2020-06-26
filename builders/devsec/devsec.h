@@ -50,7 +50,6 @@ class DevSec {
     bool dsig_valid;
 
     char crypted[64]; // 64 should be OK for now... (key)
-    char flash_chip_id[13];  // 13 chars and string end...
 
     char ssid[32];
     char password[32];

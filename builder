@@ -375,7 +375,7 @@ case $PLATFORM in
 
 			OUTFILE=${DEPLOYMENT_PATH}/build
 			touch $OUTFILE
-			#	zip -r "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" | tee -a "${LOG_PATH}" ./* # zip artefacts
+			#	zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" | tee -a "${LOG_PATH}" ./* # zip artefacts
 			BUILD_SUCCESS=true
 			echo "There's nothing to build on NodeJS projects." | tee -a "${LOG_PATH}"
 			OUTPATH=${DEPLOYMENT_PATH}
@@ -408,7 +408,7 @@ case $PLATFORM in
 				echo "Build type: file" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/boot.py
 				cp -vf $WORKDIR/*.py ${DEPLOYMENT_PATH} # copy all .py files without building
-				zip -r "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" | tee -a "${LOG_PATH}" ./* # zip artefacts
+				zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" | tee -a "${LOG_PATH}" ./* # zip artefacts
 			else
 				echo "Build type: firmware (or undefined)" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
@@ -431,11 +431,11 @@ case $PLATFORM in
 					if [[ -f $FSPATH ]]; then
 						rm -rf $FSPATH
 						cp -vf "${pyfile}" $FSPATH
-						zip -r "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${pyfile} ./* # zip artefacts
+						zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${pyfile} ./* # zip artefacts
 					fi
 				else
 					cp -vf "${pyfile}" "$DEPLOYMENT_PATH"
-					zip -r "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${pyfile} ./* # zip artefacts
+					zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${pyfile} ./* # zip artefacts
 				fi
 			done
 
@@ -447,7 +447,7 @@ case $PLATFORM in
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
 					echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
-					zip -r "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./build/** # zip artefacts
+					zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./build/** # zip artefacts
 				fi
 				if [[ -z $(find $OUTFILE -type f -size +10000c 2>/dev/null) ]]; then
 					rm -rf $OUTFILE
@@ -473,7 +473,7 @@ case $PLATFORM in
 					# ls ./bin | tee -a "${LOG_PATH}"
 					if [[ $BUILD_TYPE == "firmware" ]]; then
 						cp -v ./build/*.bin "$OUTPATH" | tee -a "${LOG_PATH}"
-						zip -r "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./build/* # zip artefacts
+						zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./build/* # zip artefacts
 						rm -rf ./build/*
 					fi
 					echo "Micropython Build: DEPLOYMENT_PATH: " $DEPLOYMENT_PATH
@@ -506,11 +506,11 @@ case $PLATFORM in
 			if [[ $BUILD_TYPE == "file" ]]; then
 				echo "Build type: file" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/thinx.lua
-				zip -r "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ${OUTFILE} # zip artefacts
+				zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ${OUTFILE} # zip artefacts
 			else
 				echo "Build type: firmware (or undefined)" | tee -a "${LOG_PATH}"
 				OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
-				zip -r "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ${OUTFILE} # zip artefacts
+				zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ${OUTFILE} # zip artefacts
 				if [[ -z $(find $OUTFILE -type f -size +10000c 2>/dev/null) ]]; then
 					rm -rf $OUTFILE
 					BUILD_SUCCESS=false
@@ -567,14 +567,14 @@ case $PLATFORM in
 				echo "${PIPESTATUS[@]}"
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
-					zip -r "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./bin/* # zip artefacts
+					zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./bin/* # zip artefacts
 				fi
 				echo "[nodemcu] Docker completed <<<"
 
 			else
 				# deploy Lua files without building
 				cp -vf *.lua "$DEPLOYMENT_PATH"
-				zip -r "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ${FILES} # zip artefacts
+				zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ${FILES} # zip artefacts
 			fi
 
 			if [[ ! ${RUN} ]]; then
@@ -593,7 +593,7 @@ case $PLATFORM in
 					fi
 					echo "NodeMCU Build: DEPLOYMENT_PATH: " $DEPLOYMENT_PATH
 					# ls "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
-					zip -r "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./bin/* # zip artefacts
+					zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./bin/* # zip artefacts
 					STATUS='OK'
 				else
 					STATUS='FAILED'
@@ -624,7 +624,7 @@ case $PLATFORM in
 			if [[ ! -z =$(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 				if [[ -f $(pwd)/build/fw.zip ]]; then
 					BUILD_SUCCESS=true
-					zip -r "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./build/* # zip artefacts
+					zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./build/* # zip artefacts
 				else
 					echo "OUTFILE not created." | tee -a "${LOG_PATH}"
 				fi
@@ -646,7 +646,7 @@ case $PLATFORM in
 					unzip "${BUILD_PATH}/build/fw.zip" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 					# ls "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 					echo "[builder.sh]" $MSG; echo $MSG | tee -a "${LOG_PATH}"
-					zip -r "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./build/* # zip artefacts
+					zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./build/* # zip artefacts
 				else
 					STATUS='FAILED'
 				fi
@@ -703,7 +703,7 @@ case $PLATFORM in
 					echo " " | tee -a "${LOG_PATH}"
 					echo "BIN_FILE: $BIN_FILE" | tee -a "${LOG_PATH}"
 					echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
-					zip -r "${BUILD_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ${BIN_FILE} ./build/**
+					zip -rq "${BUILD_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ${BIN_FILE} ./build/**
 				fi
 			else
 				echo "[arduino] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
@@ -745,7 +745,7 @@ case $PLATFORM in
 					# TODO: cp -vf "${BUILD_JSON_PATH}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 
 					echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
-					zip -r "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./build/*.bin ./build/*.elf # zip artefacts
+					zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./build/*.bin ./build/*.elf # zip artefacts
 
 					echo "Current path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
 					ls -la | tee -a "${LOG_PATH}"
@@ -841,7 +841,7 @@ case $PLATFORM in
 							cp -vR "${OUTFILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
 
 							echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
-							zip -r "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${OUTFILE} ./build/*.bin ./build/*.elf # zip artefacts
+							zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${OUTFILE} ./build/*.bin ./build/*.elf # zip artefacts
 						fi
 					else
 						STATUS='FAILED'
