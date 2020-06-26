@@ -2,5 +2,5 @@
 
 cov-build --dir cov-int --no-command --fs-capture-search ./
 
-zip -r thinx-device-api.zip cov-int
+zip -rq thinx-device-api.zip cov-int
 

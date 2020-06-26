@@ -61,9 +61,8 @@ void DevSec::generate_signature(char *mac, char *ckey, char* fcid) {
 
   mac_bytes[12] = 0;
 
-  sprintf(this->flash_chip_id, "%s", fcid);
   // TODO: should actually take only last 6 bytes from MAC and 6 bytes of FCID!
-  sprintf((char*)this->dsig, "%s;%s;%s", SIGBASE, mac_bytes, this->flash_chip_id);
+  sprintf((char*)this->dsig, "%s;%s;%s", SIGBASE, mac_bytes, fcid);
 
   if (this->debug) { printf("\nDSIG: '"); printf("%s", (char*)this->dsig); printf("'\n"); }
 
@@ -76,7 +75,7 @@ void DevSec::generate_signature(char *mac, char *ckey, char* fcid) {
   }
 
   for( int c = 0; c < strlen(ckey); c++) {
-    this->key[c] = ckey[c] ^ this->flash_chip_id[c%sizeof(this->flash_chip_id)];
+    this->key[c] = ckey[c] ^ fcid[c%sizeof(fcid)];
     if (this->debug) { printf("0x"); printf("%s", intToHexString((int)this->key[c]).c_str()); }
     if (c < strlen(ckey) - 1) {
       if (this->debug) printf(", ");
@@ -188,6 +187,8 @@ bool DevSec::validate_signature(char * signature, char * ckey) {
 }
 
 /* Performs simple symetric XOR encryption using static CKEY so does not work with strings well */
+
+// TODO: FIXME: use pass-by-reference to get rid of internal buffer leak
 char * DevSec::encrypt(uint8_t input[]) {
     if (strlen((char*)input) > 255) {
       printf("ERROR: Block too long!");
@@ -206,6 +207,7 @@ char * DevSec::encrypt(uint8_t input[]) {
     return (char*) this->crypted;
 }
 
+// TODO: FIXME: use pass-by-reference to get rid of internal buffer leak
 char * DevSec::decrypt(uint8_t input[]) {
     if (strlen((char*)input) > 255) {
       printf("ERROR: Block too long!");

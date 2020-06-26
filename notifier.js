@@ -94,10 +94,10 @@ if (typeof(build_path) === "undefined" || build_path === "") {
   build_path = app_config.data_root + app_config.deploy_root + "/" + owner + "/" + commit_id;
 }
 
-function notify_companion_app(message, repo_url, udid, commit_id, version, sha) {
-  /*
+/*
+function notify_companion_app(push_tokens, message, repo_url, udid, commit_id, version, sha) {
 
-      // Notify users (FCM)
+  // Notify users (FCM)
       var message = {
         data: {
           type: "update",
@@ -147,12 +147,12 @@ function notify_companion_app(message, repo_url, udid, commit_id, version, sha) 
           }
         }
       }
-      */
 }
+*/
 
-function processSHA(build_path) {
+function processSHA(a_build_path) {
   console.log("[notifier.js] Processing SHA for build path...");
-  var binary_path_sha = build_path + ".bin";
+  var binary_path_sha = a_build_path + ".bin";
   if (!fs.existsSync(binary_path_sha)) {
     console.log("[notifier.js] binary_path_sha does not exist at " + binary_path_sha);
     process.exit(2);
@@ -203,26 +203,26 @@ if (typeof(md5) === "undefined" || md5 === "") {
   }
 }
 
-function deploymentPathForDevice(owner, udid) {
-  var user_path = app_config.data_root + app_config.deploy_root + "/" + owner;
-  var device_path = user_path + "/" + udid;
+function deploymentPathForDevice(an_owner, a_udid) {
+  var user_path = app_config.data_root + app_config.deploy_root + "/" + an_owner;
+  var device_path = user_path + "/" + a_udid;
   return device_path;
 }
 
-function build_update_notification(repo_url, udid, alias, commit, version, sha, dsig) {
+function build_update_notification(a_repo_url, a_udid, a_alias, a_commit, a_version, a_sha, a_dsig) {
   var message = {
     data: {
       type: "firmware-update",
-      url: repo_url,
-      udid: udid,
-      commit: commit_id,
-      version: version,
-      checksum: sha,
-      dsig: dsig
+      url: a_repo_url,
+      udid: a_udid,
+      commit: a_commit,
+      version: a_version,
+      checksum: a_sha,
+      dsig: a_dsig
     },
     notification: {
       title: "Firmware Update",
-      body: "Update available for device " + udid + "."
+      body: "Update available for device " + a_alias + "."
     }
   };
   return JSON.stringify(message);
@@ -234,28 +234,35 @@ function formatMacForDevSec(incoming) {
   return outgoing;
 }
 
-function notify_slack(status, slack, buildEnvelope) {
-  if (status === true || status.indexOf("OK") === 0) {
-    slack.alert({
+function notificationObject(newStatus, buildEnvelope) {
+  let alertObj = {};
+  if (newStatus === true || newStatus.indexOf("OK") === 0) {
+    alertObj = {
       text: "Build successfully completed.",
       username: "notifier.js",
       fields: buildEnvelope
-    });
-  } else if (status.indexOf("DRY_RUN_OK") !== -1) {
-    slack.alert({
+    };
+  } else if (newStatus.indexOf("DRY_RUN_OK") !== -1) {
+    alertObj = {
       text: "Dry run successful. Firmware left undeployed.", // todo: reference git_url + commit_id here
       username: "notifier.js",
       icon_emoji: ":ghost:",
       fields: buildEnvelope
-    });
+    };
   } else {
-    slack.alert({
+    alertObj = {
       text: "FAILED",
       username: "notifier.js",
       icon_emoji: ":computerage:",
       fields: buildEnvelope
-    });
+    };
   }
+  return alertObj;
+}
+
+function notify_slack(newStatus, slackClient, buildEnvelope) {
+  let alertObj = notificationObject(newStatus, buildEnvelope);
+  slackClient.alert(alertObj);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -310,16 +317,17 @@ devicelib.get(udid, function(err, doc) {
 
   /*
    * 3. Collect push tokens for FCM
-   */
+  */
 
-  var push_tokens = [];
+//  var push_tokens = [];
+
   devicelib.view("devicelib", "devices_by_source", {
     "key": doc.source,
     "include_docs": true
-  }, function(err, body) {
+  }, function(derr, body) {
 
-    if (err) {
-      console.log(err);
+    if (derr) {
+      console.log(derr);
       process.exit(1);
     }
 
@@ -330,14 +338,15 @@ devicelib.get(udid, function(err, doc) {
 
     // Parse all devices with same source (?)
 
-    for (var index in body.rows) {
+    /* not needed until FCM notifications
+      for (var index in body.rows) {
       //if (!body.rows.hasOwnProperty(index)) continue;
       var item = body.rows[index];
       // if (!item.hasOwnProperty("push")) continue;
       if (typeof(item.push) !== "undefined") {
         push_tokens.push(item.push);
       }
-    }
+    } */
 
     var device = body.rows[0];
     device.last_build_id = build_id;
@@ -349,7 +358,7 @@ devicelib.get(udid, function(err, doc) {
     }
 
     // Save last_build_id, last_build_date and artifact
-    devicelib.atomic("devicelib", "modify", udid, device, function(error, body) {
+    devicelib.atomic("devicelib", "modify", udid, device, function(error) {
       if (error) {
         console.log("[notifier.js] Notifier device update error: ", error);
       }
@@ -362,7 +371,7 @@ devicelib.get(udid, function(err, doc) {
       udid: udid,
       commit: commit_id,
       version: version,
-      firmware: thinx_firmware_version.replace(/\"/g, ''),
+      firmware: thinx_firmware_version.replace(/"/g, ''),
       checksum: sha,
       build_id: build_id,
       owner: owner,
@@ -387,14 +396,13 @@ devicelib.get(udid, function(err, doc) {
 
     // TODO: Update current build version in managed_users.repos
     // Select targets
-    // TODO: -- collect push tokens (each only once)
     // Notify admin (Slack); may be out of notifier.js scope and can be done later in core after calling notifier (means when calling builder finishes)...
-    // Bundled notification types:
 
     console.log("[notifier.js] STATUS: " + status);
 
     notify_slack(status, slack, buildEnvelope);
 
+    /*
     let messageString = build_update_notification(
       repo_url,
       udid,
@@ -404,7 +412,8 @@ devicelib.get(udid, function(err, doc) {
       sha
     );
 
-    notify_companion_app(messageString, repo_url, udid, commit_id, version, sha);
+    notify_companion_app(push_tokens, messageString, repo_url, udid, commit_id, version, sha);
+    */
 
     let registrationObject = {
       registration: {
