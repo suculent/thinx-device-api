@@ -295,24 +295,15 @@ const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it
 const blog = new Buildlog();
 
 // Webhook Server
-const hook_server = express();
 const watcher = new Repository();
-hook_server.use(function(req, res, next) {
-  watcher.process_hook(req.body.json);
-});
-
+const hook_server = express();
 http.createServer(hook_server).listen(app_config.webhook_port, "0.0.0.0", function() {
   console.log("» Webhook API started on port", app_config.webhook_port);
 });
 
-hook_server.use(function(req, res, next) {
-  var ipAddress = getClientIp(req);
-  if (BLACKLIST.toString().indexOf(ipAddress) === -1) {
-    next();
-  } else {
-    console.log("Returning error 403 for blacklisted IP.");
-    res.status(403).end();
-  }
+hook_server.post("/*", function(req, res) {
+  watcher.process_hook(req.body.json);
+  res.status(200).end();
 }); // end Webhook Server
 
 // App
