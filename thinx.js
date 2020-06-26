@@ -23,7 +23,6 @@ const crypto = require('crypto');
 const express = require("express");
 const session = require("express-session");
 const cluster = require('cluster');
-const bodyParser = require("body-parser");
 
 var Auth = require('./lib/thinx/auth.js');
 var auth = new Auth();
@@ -69,7 +68,6 @@ var db = app_config.database_uri;
 var socketPort = app_config.socket;
 
 var https = require("https");
-var parser = require("body-parser");
 
 var WebSocket = require("ws");
 
@@ -298,11 +296,12 @@ const hook_server = express();
 http.createServer(hook_server).listen(app_config.webhook_port, "0.0.0.0", function() {
   console.log("» Webhook API started on port", app_config.webhook_port);
 });
-hook_server.use(bodyParser);
+hook_server.use(express.json()); //Make sure u have added this line
+hook_server.use(express.urlencoded({ extended: false }));
 hook_server.post("/", function(req, res) {
   let success = watcher.process_hook(req.body);
   if (success) {
-    res.status(200).end();
+    res.status(200).end("Accepted");
   } else {
     res.status(403).end();
   }
@@ -340,14 +339,14 @@ app.use(session({
 }));
 // rolling was true; This resets the expiration date on the cookie to the given default.
 
-app.use(parser.json({
+app.use(express.json({
   limit: "1mb",
   strict: false
 }));
 
 app.use(limiter);
 
-app.use(parser.urlencoded({
+app.use(express.urlencoded({
   extended: true,
   parameterLimit: 1000,
   limit: "1mb"
@@ -365,8 +364,7 @@ app.use(function(req, res, next) {
 
 // CSRF protection
 // now add csrf and other middlewares, after the router was mounted
-// var bodyParser = require('body-parser');
-// app.use(bodyParser.urlencoded({ extended: false }));
+// app.use(express.urlencoded({ extended: false }));
 // var cookieParser = require('cookie-parser');
 // app.use(cookieParser());
 // var csrf = require('csurf');
@@ -585,7 +583,7 @@ wss.on("connection", function(ws, req) {
       /* unknown message debug, must be removed */
       var m = JSON.stringify(message);
       if ((m != "{}") || (typeof(message)=== "undefined")) {
-        console.log("» Websocketparser said: unknown message: " + m);
+        console.log("» Websocket parser said: unknown message: " + m);
       }
     }
   });
