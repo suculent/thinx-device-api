@@ -131,7 +131,7 @@ console.log("» Initializing DB...");
 
 var nano = require("nano")(db);
 
-function initDatabases(prefix) {
+function initDatabases(dbprefix) {
 
   // only to fix bug in CouchDB 2.3.1 first-run
   nano.db.create("_users", function(err, body, header) {});
@@ -139,49 +139,49 @@ function initDatabases(prefix) {
   nano.db.create("_replicator", function(err, body, header) {});
   nano.db.create("_global_changes", function(err, body, header) {});
 
-  nano.db.create(prefix + "managed_devices", function(err, body, header) {
+  nano.db.create(dbprefix + "managed_devices", function(err, body, header) {
     if (err) {
       handleDatabaseErrors(err, "managed_devices");
     } else {
       console.log("» Device database creation completed. Response: " +
         JSON.stringify(body) + "\n");
-      var couch = nano.db.use(prefix + "managed_devices");
+      var couch = nano.db.use(dbprefix + "managed_devices");
       injectDesign(couch, "devicelib", "./design/design_deviceslib.json");
       injectReplFilter(couch, "./design/filters_devices.json");
     }
   });
 
-  nano.db.create(prefix + "managed_builds", function(err, body, header) {
+  nano.db.create(dbprefix + "managed_builds", function(err, body, header) {
     if (err) {
       handleDatabaseErrors(err, "managed_builds");
     } else {
       console.log("» Build database creation completed. Response: " +
         JSON.stringify(body) + "\n");
-      var couch = nano.db.use(prefix + "managed_builds");
+      var couch = nano.db.use(dbprefix + "managed_builds");
       injectDesign(couch, "builds", "./design/design_builds.json");
       injectReplFilter(couch, "./design/filters_builds.json");
     }
   });
 
-  nano.db.create(prefix + "managed_users", function(err, body, header) {
+  nano.db.create(dbprefix + "managed_users", function(err, body, header) {
     if (err) {
       handleDatabaseErrors(err, "managed_users");
     } else {
       console.log("» User database creation completed. Response: " +
         JSON.stringify(body) + "\n");
-      var couch = nano.db.use(prefix + "managed_users");
+      var couch = nano.db.use(dbprefix + "managed_users");
       injectDesign(couch, "users", "./design/design_users.json");
       injectReplFilter(couch, "./design/filters_users.json");
     }
   });
 
-  nano.db.create(prefix + "managed_logs", function(err, body, header) {
+  nano.db.create(dbprefix + "managed_logs", function(err, body, header) {
     if (err) {
       handleDatabaseErrors(err, "managed_logs");
     } else {
       console.log("» Log database creation completed. Response: " +
         JSON.stringify(body) + "\n");
-      var couch = nano.db.use(prefix + "managed_logs");
+      var couch = nano.db.use(dbprefix + "managed_logs");
       injectDesign(couch, "logs", "./design/design_logs.json");
       injectReplFilter(couch,  "./design/filters_logs.json");
     }
