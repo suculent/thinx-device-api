@@ -747,8 +747,8 @@ case $PLATFORM in
 					echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
 					zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./build/*.bin ./build/*.elf # zip artefacts
 
-					echo "Current path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
-					ls -la | tee -a "${LOG_PATH}"
+					#echo "Current path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
+					#ls -la | tee -a "${LOG_PATH}"
 					echo "Deployment path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
 					ls -la ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
 					echo "Target path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
