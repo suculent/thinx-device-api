@@ -1,5 +1,3 @@
-var expect = require('chai').expect;
-
 describe("Repository Watcher", function() {
 
   var expect = require('chai').expect;
