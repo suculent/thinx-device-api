@@ -286,7 +286,14 @@ console.log("[notifier.js] status : " + status);
 console.log("[notifier.js] thinx_firmware_version : " + thinx_firmware_version);
 console.log("[notifier.js] md5 : " + md5);
 
-blog.log(build_id, owner, udid, status);
+let changes = {
+  status: status
+};
+blog.atomic("builds", "edit", build_id, changes, (error, body) => {
+  if (error) {
+    console.log(error);
+  }
+});
 
 /*
  * 2. Fetch devices, retrieve source alias, owner and source...
