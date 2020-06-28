@@ -77,7 +77,7 @@ describe("Sources", function() {
   it("should be able to validate branch name", function() {
     let source = {
       branch: "origin/master"
-    }
+    };
     let result = Sources.validateBranch(source, (error) => {
       console.log(error);
     });
@@ -87,7 +87,7 @@ describe("Sources", function() {
   it("should be able to validate url", function() {
     let source = {
       url: "git@github.com/suculent/thinx-device-api"
-    }
+    };
     let result = Sources.validateBranch(source, (error) => {
       console.log(error);
     });
@@ -97,7 +97,7 @@ describe("Sources", function() {
   it("should be able to invalidate branch name", function() {
     let source = {
       branch: "origin/mas'ter"
-    }
+    };
     let result = Sources.validateBranch(source, (error) => {
       console.log(error);
     });
@@ -107,7 +107,7 @@ describe("Sources", function() {
   it("should be able to invalidate url", function() {
     let source = {
       url: "git@github.com/;;suculent/thinx-device-api"
-    }
+    };
     let result = Sources.validateBranch(source, (error) => {
       console.log(error);
     });
