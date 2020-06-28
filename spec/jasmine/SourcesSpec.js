@@ -74,4 +74,44 @@ describe("Sources", function() {
       });
   }, 20000);
 
+  it("should be able to validate branch name", function() {
+    let source = {
+      branch: "origin/master"
+    }
+    let result = Sources.validateBranch(source, (error) => {
+      console.log(error);
+    });
+    expect(result).to.be.true;
+  });
+
+  it("should be able to validate url", function() {
+    let source = {
+      url: "git@github.com/suculent/thinx-device-api"
+    }
+    let result = Sources.validateBranch(source, (error) => {
+      console.log(error);
+    });
+    expect(result).to.be.true;
+  });
+
+  it("should be able to invalidate branch name", function() {
+    let source = {
+      branch: "origin/mas'ter"
+    }
+    let result = Sources.validateBranch(source, (error) => {
+      console.log(error);
+    });
+    expect(result).to.be.false;
+  });
+
+  it("should be able to invalidate url", function() {
+    let source = {
+      url: "git@github.com/;;suculent/thinx-device-api"
+    }
+    let result = Sources.validateBranch(source, (error) => {
+      console.log(error);
+    });
+    expect(result).to.be.false;
+  });
+
 });
