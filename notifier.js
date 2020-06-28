@@ -288,7 +288,7 @@ console.log("[notifier.js] md5 : " + md5);
 
 let changes = {
   status: status
-}
+};
 blog.atomic("builds", "edit", build_id, changes, (error, body) => {
   if (error) {
     console.log(error);
