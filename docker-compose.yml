@@ -28,6 +28,7 @@ services:
       - '/mnt/data/mosquitto/log:/var/log:rw'
       - '/mnt/data/mosquitto/ssl:/mqtt/ssl:rw'
       - '/mnt/data/mosquitto/auth:/mqtt/auth:rw'
+      - '/mnt/data/mosquitto/log/cron:/var/log/exim4/mainlog:rw'
     labels:
       - traefik.backend.mosquitto.noexpose
   couchdb:
