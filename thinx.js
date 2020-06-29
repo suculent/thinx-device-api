@@ -172,8 +172,7 @@ function initDatabases(dbprefix) {
     if (err) {
       handleDatabaseErrors(err, "managed_logs");
     } else {
-      console.log("» Log database creation completed. Response: " +
-        JSON.stringify(body) + "\n");
+      console.log("» Log database creation completed. Response: " + JSON.stringify(body) + "\n");
       var couch = nano.db.use(dbprefix + "managed_logs");
       injectDesign(couch, "logs", "./design/design_logs.json");
       injectReplFilter(couch,  "./design/filters_logs.json");
