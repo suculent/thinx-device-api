@@ -627,8 +627,9 @@ function init($rootScope, $scope) {
         }
         $rootScope.meta.deviceBuilds[response.builds[index].udid].push({
           "build_id":response.builds[index].build_id,
-          "date": response.builds[index].date,
-          "message": response.builds[index].message
+          "date": response.builds[index].last_update,
+          "timestamp": response.builds[index].timestamp,
+          "state": response.builds[index].state
         });
 
         if (typeof($rootScope.meta.builds[response.builds[index].build_id]) == 'undefined') {

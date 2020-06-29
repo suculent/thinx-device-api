@@ -261,10 +261,10 @@
                 <a ng-click="$emit('showLogOverlay', buildEntry.build_id)">
                   <span class="device-build-id opacity-100"> {{buildEntry.build_id | limitTo:7}}</span>
                 </a>
-                <span class="build-status-message">{{buildEntry.message}}</span>
+                <span class="build-status-message">{{buildEntry.state}}</span>
               </div>
               <div class="col-xs-2 text-right">
-                <a ng-if="buildEntry.message == 'OK'" class="btn-build-download" ng-click="downloadArtifacts(deviceForm.udid, buildEntry.build_id)">
+                <a ng-if="buildEntry.state == 'OK'" class="btn-build-download" ng-click="downloadArtifacts(deviceForm.udid, buildEntry.build_id)">
                   <i class="fa fa-download"></i>
                 </a>
               </div>
