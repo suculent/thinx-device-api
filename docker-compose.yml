@@ -34,13 +34,15 @@ services:
     env_file: .env
     image: 'apache/couchdb:2.3.1'
     restart: unless-stopped
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - 'curl -XGET http://localhost:5984'
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    logging:
+      driver: "none" # json-file if needed
+    #healthcheck:
+    #  test:
+    #    - CMD-SHELL
+    #    - 'curl -XGET http://localhost:5984'
+    #  interval: 10s
+    #  timeout: 5s
+    #  retries: 5
     environment:
       - 'NODENAME=${NODENAME}'
       - 'COUCHDB_USER=${COUCHDB_USER}'
