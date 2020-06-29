@@ -2,6 +2,16 @@
 angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', 'settings', function($rootScope, $scope, settings) {
   $scope.$on('$viewContentLoaded', function() {
     console.log('#### Build Log Overlay init')
+
+    // Open websocket to for log & notifications transfer
+    // User profile has to be initialised first
+    if (typeof($rootScope.profile.owner) !== "undefined") {
+      console.log('##### websocket init');
+      openSocket();
+    } else {
+      console.log('##### websocket not initalised - missing owner profile');
+    }
+    
   });
 
   // not implemented yet
@@ -9,7 +19,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
 
   function openSocket() {
     if ("WebSocket" in window) {
-      if (typeof($rootScope.wss)=== "undefined") {
+      if (typeof($rootScope.wss) === "undefined") {
         // open websocket
         console.log('## Opening websocket with credentials ##');
         $rootScope.wss = new WebSocket('<ENV::wssUrl>/' + $rootScope.profile.owner);
@@ -58,11 +68,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
     }
   }
 
-  // Open websocket to for log & notifications transfer
-  console.log('##### websocket init');
-  openSocket();
-
-  if (typeof($rootScope.showLogOverlayListener)=== "undefined") {
+  if (typeof($rootScope.showLogOverlayListener) === "undefined") {
     $rootScope.showLogOverlayListener = $rootScope.$on('showLogOverlay', function(event, build_id){
       event.stopPropagation();
       $rootScope.showLog(build_id);
@@ -100,7 +106,6 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
 
 
   $rootScope.showLog = function(build_id) {
-
     console.log('--[ logdata ]-- ');
     console.log($rootScope.logdata);
     console.log('--- opening log for build_id: ' + build_id, ' ---');
