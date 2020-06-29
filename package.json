@@ -30,6 +30,7 @@
     "brace-expansion": "1.1.11",
     "chai": "^4.2.0",
     "coap": "^0.23.1",
+    "codeclimate-test-reporter": "^0.5.1",
     "colors": "^1.4.0",
     "connect-redis": "3.4.2",
     "connect-timeout": "^1.9.0",
