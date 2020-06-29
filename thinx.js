@@ -71,9 +71,6 @@ var https = require("https");
 
 var WebSocket = require("ws");
 
-// list of previously discovered attackers
-var BLACKLIST = ["1.2.3.4"];
-
 var last_client_ip = null;
 
 var getClientIp = function(req) {
@@ -175,8 +172,7 @@ function initDatabases(dbprefix) {
     if (err) {
       handleDatabaseErrors(err, "managed_logs");
     } else {
-      console.log("» Log database creation completed. Response: " +
-        JSON.stringify(body) + "\n");
+      console.log("» Log database creation completed. Response: " + JSON.stringify(body) + "\n");
       var couch = nano.db.use(dbprefix + "managed_logs");
       injectDesign(couch, "logs", "./design/design_logs.json");
       injectReplFilter(couch,  "./design/filters_logs.json");
@@ -358,16 +354,6 @@ app.use(express.urlencoded({
   parameterLimit: 1000,
   limit: "1mb"
 }));
-
-app.use(function(req, res, next) {
-  var ipAddress = getClientIp(req);
-  if (BLACKLIST.toString().indexOf(ipAddress) === -1) {
-    next();
-  } else {
-    console.log("Returning error 403 for blacklisted IP.");
-    res.status(403).end();
-  }
-});
 
 // CSRF protection
 // now add csrf and other middlewares, after the router was mounted
