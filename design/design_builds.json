@@ -3,7 +3,7 @@
   "language": "javascript",
   "views": {
     "latest_builds": {
-      "map": "function (doc) {emit([doc.owner, doc.last_update],doc)}"
+      "map": "function (doc) {emit(doc.owner,doc)}"
     }
   },
   "updates": {
