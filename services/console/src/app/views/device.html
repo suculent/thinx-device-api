@@ -236,7 +236,7 @@
         <div ng-click="deviceForm.buildHistoryVisible ? deviceForm.buildHistoryVisible = false : deviceForm.buildHistoryVisible = true" class="device-build-status" ng-if="$root.meta.deviceBuilds[deviceForm.udid] != undefined && $root.meta.deviceBuilds[deviceForm.udid].length > 0">
           <div class="row">
             <div class="col-xs-6 text-left">
-              <i class="fa fa-cog" ng-class="$root.meta.deviceBuilds[deviceForm.udid][0].state == 'OK' ? '' : 'fa-spin'"></i> <span class="badge" ng-class="$root.meta.deviceBuilds[deviceForm.udid][0].state == 'OK' ? 'badge-success' : 'badge-warning'">{{$root.meta.deviceBuilds[deviceForm.udid][0].state}}</span>
+              <i class="fa fa-cog" ng-class="$root.meta.deviceBuilds[deviceForm.udid][0].state == 'OK' || $root.meta.deviceBuilds[deviceForm.udid][0].state == 'failed'  ? '' : 'fa-spin'"></i> <span class="badge" ng-class="$root.meta.deviceBuilds[deviceForm.udid][0].state == 'OK' ? 'badge-success' : 'badge-warning'">{{$root.meta.deviceBuilds[deviceForm.udid][0].state}}</span>
               {{$root.meta.deviceBuilds[deviceForm.udid][0].state}}
             </div>
             <div class="col-xs-6 text-right">
