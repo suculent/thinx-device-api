@@ -28,7 +28,6 @@ services:
       - '/mnt/data/mosquitto/log:/var/log:rw'
       - '/mnt/data/mosquitto/ssl:/mqtt/ssl:rw'
       - '/mnt/data/mosquitto/auth:/mqtt/auth:rw'
-#      - '/mnt/data/mosquitto/log/cron/exim4.log:/var/log/exim4/mainlog:rw'
     labels:
       - traefik.backend.mosquitto.noexpose
     healthcheck:
@@ -41,7 +40,7 @@ services:
   couchdb:
     env_file: .env
     image: 'apache/couchdb:2.3.1'
-    restart: unless-stopped
+    restart: always
     healthcheck:
       test:
         - CMD-SHELL
@@ -206,7 +205,7 @@ services:
       driver: none
     ports:
       - '8000:80'
-    restart: unless-stopped
+    restart: unless-stopped # may be required for updating SSL certs
     environment:
       - NGINX_PORT=80
       - 'NGINX_HOST=${WEB_HOSTNAME}'
