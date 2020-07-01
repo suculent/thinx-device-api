@@ -377,7 +377,7 @@
       <div class="col-md-9">
         <div>
           <a ng-href="https://www.google.com/maps/dir/?api=1&destination={{$root.getDeviceByUdid(deviceForm.udid).lat}},{{$root.getDeviceByUdid(deviceForm.udid).lon}}" target="_blank">
-            <img class="location-map-image" alt="Map icon" ng-src="https://maps.googleapis.com/maps/api/staticmap?key=AIzaSyAo8wftesNw_ebhZSVQTnzqhQbUJx_k4GI&center={{$root.getDeviceByUdid(deviceForm.udid).lat}},{{$root.getDeviceByUdid(deviceForm.udid).lon}}&amp;size=600x120&amp;sensor=false&amp;zoom=10&amp;markers=color:red%7Clabel:%7C{{$root.getDeviceByUdid(deviceForm.udid).lat}},{{$root.getDeviceByUdid(deviceForm.udid).lon}}" />
+            <img class="location-map-image" alt="Map icon" ng-src="https://maps.googleapis.com/maps/api/staticmap?key=<ENV::googleMapsApikey>&center={{$root.getDeviceByUdid(deviceForm.udid).lat}},{{$root.getDeviceByUdid(deviceForm.udid).lon}}&amp;size=600x120&amp;sensor=false&amp;zoom=10&amp;markers=color:red%7Clabel:%7C{{$root.getDeviceByUdid(deviceForm.udid).lat}},{{$root.getDeviceByUdid(deviceForm.udid).lon}}" />
           </a>
         </div>
       </div>
