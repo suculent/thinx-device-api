@@ -209,9 +209,14 @@
                   <img ng-src="../assets/thinx/img/external/{{device.base_platform}}_logo_64_black.png" class="platform-icon-list" alt="Platform icon" />
                   {{device.alias | limitTo: 32}}{{device.alias.length > 32 ? '…' : ''}}
 
-                  <span style="float: right">{{device.tags}}</span>
+                  <span style="float: right">{{device.tags.join(", ")}}</span>
                 </div>
                 <div class="col-xs-6 col-sm-4 col-md-3 text-right">
+
+                  <!-- auto-update enabled -->
+                  <span ng-if="device.auto_update && device.source != null">
+                    <span title="Auto-Update enabled" class="auto-update-indicator"><i class="fa fa-cogs"></i></span>
+                  </span>
 
                   <!-- key attached -->
                   <span ng-if="device.keyhash == null">

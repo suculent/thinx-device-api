@@ -195,7 +195,13 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
 
 RTM.filter('lastSeen', function() {
   return function(date, suffix) {
-    return moment(date).fromNow(suffix);
+    if (typeof(date) === "number") {
+      // e.g. 1410715640579 -	Unix ms timestamp
+      return moment(date, 'x').fromNow(suffix);
+    } else {
+      // e.g. 2013-03-07T07:00:00+08:00 - ISO8601
+      return moment(date).fromNow(suffix);
+    }
   };
 });
 

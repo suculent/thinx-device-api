@@ -242,7 +242,7 @@
             <div class="col-xs-6 text-right">
               <a ng-if="$root.meta.deviceBuilds[deviceForm.udid][0].state == 'OK'" class="btn-build-download" ng-click="downloadArtifacts(deviceForm.udid, $root.meta.deviceBuilds[deviceForm.udid][0].build_id)"><i class="fa fa-download"></i></a>
 
-              <span class="build-status-date" title="{{$root.meta.deviceBuilds[deviceForm.udid][0].date}}">{{$root.meta.deviceBuilds[deviceForm.udid][0].date | lastSeen:'true'}}</span>
+              <span class="build-status-date" title="{{$root.meta.deviceBuilds[deviceForm.udid][0].last_update}}">{{$root.meta.deviceBuilds[deviceForm.udid][0].timestamp | lastSeen:'true'}}</span>
 
               <a ng-click="$emit('showLogOverlay', $root.meta.deviceBuilds[deviceForm.udid][0].build_id); $event.stopPropagation()">
                 <span class="device-build-id opacity-100"><i class="fa fa-eye"></i>{{$root.meta.deviceBuilds[deviceForm.udid][0].build_id | limitTo:7}}</span>
@@ -257,7 +257,7 @@
             <div class="row" ng-repeat="buildEntry in value" ng-if="$first">
               <div class="col-xs-10 text-left">
                 <i class="icomoon-hammer_icon"></i>
-                <span class="build-status-date" title="{{buildEntry.date}}">{{buildEntry.date | lastSeen:'false'}}</span>
+                <span class="build-status-date" title="{{buildEntry.last_update}}">{{buildEntry.timestamp | lastSeen:'false'}}</span>
                 <a ng-click="$emit('showLogOverlay', buildEntry.build_id)">
                   <span class="device-build-id opacity-100"> {{buildEntry.build_id | limitTo:7}}</span>
                 </a>

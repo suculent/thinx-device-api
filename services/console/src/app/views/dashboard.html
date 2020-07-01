@@ -214,34 +214,17 @@
           </div>
         </div>
         <div class="portlet-body">
-          <!-- oldest: {{$root.stats.timeline.MIN}} -->
-          <!-- <br> -->
-          <!-- newest: {{$root.stats.timeline.MAX}} -->
-          <!-- <br> -->
-          <!-- markers: {{$root.stats.timeline.COUNT}} -->
-          <!-- <br> -->
-          <!-- span: {{$root.stats.timeline.SPAN}} -->
-          <!-- <br> -->
-          <!-- values: {{$root.stats.timeline.CHECKINS}} -->
-          <!-- <br><br> -->
-
           <div class="text-center">
-
             <div class="row">
-              <!-- {{marker.date | lastSeen}} -->
-              <!-- {{$root.stats.timeline.CHECKINS}} -->
               <div class="col-xs-1" style="border-left: 1px solid #eeeeee"
               ng-repeat="dayMarkers in $root.stats.timeline.CHECKINS | orderBy:date:false | groupBy:'date' track by $index"
               ng-if="$index <12">
-
               <small>{{dayMarkers[0].date | date: "MM."}}</small>
               <br>
               <small>{{dayMarkers[0].date | date: "dd."}}</small>
               <br>
-
               <span style="display: inline-block; height: {{dayMarkers.length * 10}}px; width: 10px; background-color: rgba(0,0,0,.5);" title="{{dayMarkers[0].date}}"></span>
             </div>
-
             <!-- <div style="clear: both;"></div> -->
           </div>
         </div>
