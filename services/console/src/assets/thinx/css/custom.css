@@ -995,6 +995,11 @@
   color: orange;
 }
 
+.auto-update-indicator {
+  margin-left: 6px;
+  color: #337ab7;
+}
+
 .header-build-link {
   color: #BBBBBB !important;
 }

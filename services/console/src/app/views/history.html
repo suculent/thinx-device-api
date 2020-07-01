@@ -61,7 +61,7 @@
                     <!-- <div class="todo-tasklist-item-text"> {{build.message | limitTo:32}} </div> -->
                     <!-- <div class="todo-tasklist-controls pull-left"> -->
                     <small><a ui-sref="device({udid: build.udid})">{{$root.getDeviceByUdid(build.udid).alias}}</a></small>
-                    <span class="todo-tasklist-date">{{build.date | lastSeen:suffix:'false'}} </span>
+                    <span class="todo-tasklist-date">{{build.timestamp | lastSeen:suffix:'false'}} </span>
 
                     <!-- <span class="todo-tasklist-badge badge badge-roundless badge-success">Success</span>  -->
                     <!-- </div> -->
