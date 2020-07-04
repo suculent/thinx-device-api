@@ -703,7 +703,7 @@ case $PLATFORM in
 					echo " " | tee -a "${LOG_PATH}"
 					echo "BIN_FILE: $BIN_FILE" | tee -a "${LOG_PATH}"
 					echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
-					zip -rq "${BUILD_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ${BIN_FILE} ./build/**
+					zip -rq "${BUILD_PATH}/${BUILD_ID}.zip" ${BIN_FILE} ./build/**
 				fi
 			else
 				echo "[arduino] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
