@@ -9,7 +9,6 @@
   "updates": {
     "delete_expired": "function (doc, req) { if (doc.timestamp < req.query.mindate) { doc._deleted = true; return [doc, 'deleted']; } else return [doc, doc._id] }",
     "log": "function(doc, req) { if (doc === null) doc = { _id: req.uuid }; var fields = JSON.parse(req.body); for (var i in fields) { if (i === 'info') { for (var s in fields[i]) { doc[i][s] = fields[i][s]; } } else { doc[i] = fields[i]; } } var resp = doc; delete resp._revisions; return [doc, toJSON(resp)]; }",
-    "state": "function (doc, req) { if (doc === null) doc = {}; if (!doc['_id']) doc._id = req.uuid; if (!doc['start_time']) doc.start_time = new Date().getTime(); var newState = req.body.state; doc.state = newState; doc.timestamp = new Date().getTime(); doc.last_update = new Date().toISOString(); delete doc._revisions; return [doc, toJSON(doc)]; }",
-    "edit": "function(doc, req) { if (doc === null) doc = { _id: req.uuid }; var fields = JSON.parse(req.body); for (var i in fields) { if (i === 'info') { for (var s in fields[i]) { doc[i][s] = fields[i][s]; } } else { doc[i] = fields[i]; } } var resp = doc; delete resp._revisions; return [doc, toJSON(resp)]; }"
+    "state": "function (doc, req) { if (doc == null) return []; var fields = JSON.parse(req.body); for (var i in fields) { doc[i] = fields[i] }; delete doc._revisions; return [doc, toJSON(doc)]; }"
   }
 }
