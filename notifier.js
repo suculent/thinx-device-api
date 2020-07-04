@@ -291,7 +291,9 @@ let changes = {
 };
 blog.atomic("builds", "edit", build_id, changes, (error, body) => {
   if (error) {
-    console.log(error);
+    console.log("Notifier document edit error: ", error, body);
+  } else {
+    console.log("Notifier blog atomic edit OK");
   }
 });
 
