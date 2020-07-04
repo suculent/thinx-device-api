@@ -23,15 +23,11 @@ var crypto = require('crypto');
 var fs = require('fs-extra');
 var db = app_config.database_uri;
 
-var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
 var buildlib = require("nano")(db).use(prefix + "managed_builds"); // lgtm [js/unused-local-variable]
-var loglib = require("nano")(db).use(prefix + "managed_logs"); // lgtm [js/unused-local-variable]
 var devicelib = require("nano")(db).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
 
 var slack_webhook = app_config.slack_webhook;
 var slack = require("slack-notify")(slack_webhook);
-
-var mqtt = require("mqtt");
 
 var Messenger = require("./lib/thinx/messenger");
 var messenger = new Messenger().getInstance(); // take singleton to prevent double initialization
@@ -286,14 +282,7 @@ console.log("[notifier.js] status : " + status);
 console.log("[notifier.js] thinx_firmware_version : " + thinx_firmware_version);
 console.log("[notifier.js] md5 : " + md5);
 
-let changes = {
-  status: status
-};
-blog.atomic("builds", "edit", build_id, changes, (error, body) => {
-  if (error) {
-    console.log(error);
-  }
-});
+blog.state(build_id, owner, udid, status);
 
 /*
  * 2. Fetch devices, retrieve source alias, owner and source...
