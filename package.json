@@ -1,6 +1,6 @@
 {
   "name": "thinx",
-  "version": "1.1.5177",
+  "version": "1.1.5178",
   "description": "THiNX IoT RTM API",
   "bugs": {
     "url": "https://github.com/suculent/thinx-device-api/issues"
@@ -73,7 +73,7 @@
     "slack-notify": "^0.1.7",
     "slackbots": "^1.2.0",
     "snyk": "^1.316.2",
-    "sqreen": "=1.40.0",
+    "sqreen": "1.46.0",
     "ssh-fingerprint": "0.0.1",
     "ssl-root-cas": "^1.3.1",
     "tail": "^2.0.3",
