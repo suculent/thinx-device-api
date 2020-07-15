@@ -29,7 +29,7 @@
     "body-parser": "^1.19.0",
     "brace-expansion": "1.1.11",
     "chai": "^4.2.0",
-    "coap": "^0.23.1",
+    "coap": "^0.24.0",
     "codeclimate-test-reporter": "^0.5.1",
     "colors": "^1.4.0",
     "connect-redis": "3.4.2",
