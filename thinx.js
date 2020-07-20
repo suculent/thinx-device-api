@@ -585,7 +585,7 @@ wss.on("connection", function(ws, req) {
   return;
 });
 
-wserver.listen(7444, "0.0.0.0", function listening() {
+wserver.listen(app_config.websocket, "0.0.0.0", function listening() {
   console.log("» WebSocket listening on port %d", wserver.address().port);
 });
 
