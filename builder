@@ -442,7 +442,7 @@ case $PLATFORM in
 			if [[ $BUILD_TYPE == "firmware" ]]; then
 				echo "Micropython Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
 				set -o pipefail
-				docker run ${DOCKER_PREFIX} --cpus="1.0" --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython | tee -a "${LOG_PATH}"
+				docker run ${DOCKER_PREFIX} --cpus="0.5" --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython | tee -a "${LOG_PATH}"
 				echo "${PIPESTATUS[@]}"
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
@@ -563,7 +563,7 @@ case $PLATFORM in
 				echo "NodeMCU Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
 				echo "running Docker >>>"
 				set -o pipefail
-				docker run ${DOCKER_PREFIX} --cpus="1.0" --rm -t ${DOCKER_PARAMS} -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build | tee -a "${LOG_PATH}"
+				docker run ${DOCKER_PREFIX} --cpus="0.5" --rm -t ${DOCKER_PARAMS} -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build | tee -a "${LOG_PATH}"
 				echo "${PIPESTATUS[@]}"
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
