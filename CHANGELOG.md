@@ -1,5 +1,7 @@
 # Change Log
 
+Push.
+
 ## [Unreleased](https://github.com/suculent/thinx-device-api/tree/HEAD)
 
 [Full Changelog](https://github.com/suculent/thinx-device-api/compare/0.9.3862...HEAD)
