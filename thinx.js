@@ -292,7 +292,10 @@ const hook_server = express();
 http.createServer(hook_server).listen(app_config.webhook_port, "0.0.0.0", function() {
   console.log("» Webhook API started on port", app_config.webhook_port);
 });
-hook_server.use(express.json()); //Make sure u have added this line
+hook_server.use(express.json({
+  limit: "2mb",
+  strict: false
+}));
 hook_server.use(express.urlencoded({ extended: false }));
 hook_server.post("/", function(req, res) {
   // From GitHub, exit on non-push events prematurely
@@ -343,7 +346,7 @@ app.use(session({
 // rolling was true; This resets the expiration date on the cookie to the given default.
 
 app.use(express.json({
-  limit: "3mb",
+  limit: "1mb",
   strict: false
 }));
 
@@ -352,7 +355,7 @@ app.use(limiter);
 app.use(express.urlencoded({
   extended: true,
   parameterLimit: 1000,
-  limit: "3mb"
+  limit: "1mb"
 }));
 
 // CSRF protection
