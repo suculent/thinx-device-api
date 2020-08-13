@@ -305,12 +305,9 @@ hook_server.post("/", function(req, res) {
       return;
     }
   }
-  let success = watcher.process_hook(req.body);
-  if (success) {
-    res.status(200).end("Accepted");
-  } else {
-    res.status(403).end();
-  }
+  // do not wait for response, may take ages
+  res.status(200).end("Accepted");
+  watcher.process_hook(req.body);
 }); // end Webhook Server
 
 // App
