@@ -343,7 +343,7 @@ app.use(session({
 // rolling was true; This resets the expiration date on the cookie to the given default.
 
 app.use(express.json({
-  limit: "1mb",
+  limit: "3mb",
   strict: false
 }));
 
@@ -352,7 +352,7 @@ app.use(limiter);
 app.use(express.urlencoded({
   extended: true,
   parameterLimit: 1000,
-  limit: "1mb"
+  limit: "3mb"
 }));
 
 // CSRF protection
