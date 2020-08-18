@@ -810,7 +810,7 @@ function detachSource(deviceUdid) {
 
 function getLatestFirmwareEnvelope(deviceUdid) {
   return $.ajax({
-    url: urlBase + '/device/attach',
+    url: urlBase + '/device/envelope',
     type: 'POST',
     data: JSON.stringify({
       udid: deviceUdid
