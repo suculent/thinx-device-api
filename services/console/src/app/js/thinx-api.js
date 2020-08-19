@@ -576,10 +576,10 @@ function init($rootScope, $scope) {
   });
 
   function updateLatestFirmwareEnvelope(data) {
-    var response = JSON.parse(data);
-    $rootScope.meta.latestFirmwareEnvelope = response;
+    $rootScope.meta.latestFirmwareEnvelope = data;
 
     console.log('//////// envelope:');
+    console.log(data);
     //console.log($rootScope.apikeys);
     console.log('refreshing view...');
     $rootScope.$apply()
