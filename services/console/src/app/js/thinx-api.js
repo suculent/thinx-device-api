@@ -571,6 +571,20 @@ function init($rootScope, $scope) {
     }
   }
 
+  $scope.$on("updateLatestFirmwareEnvelope", function(event, data){
+    updateLatestFirmwareEnvelope(data);
+  });
+
+  function updateLatestFirmwareEnvelope(data) {
+    var response = JSON.parse(data);
+    $rootScope.meta.latestFirmwareEnvelope = response;
+
+    console.log('//////// envelope:');
+    //console.log($rootScope.apikeys);
+    console.log('refreshing view...');
+    $rootScope.$apply()
+  }
+
 
   $scope.$on("updateStats", function(event, data){
     updateStats(data);
@@ -692,22 +706,7 @@ function init($rootScope, $scope) {
 
 }
 
-if (typeof($rootScope.updateLatestFirmwareEnvelopeListener)=== "undefined") {
-  $rootScope.updateLatestFirmwareEnvelopeListener = $rootScope.$on('updateLatestFirmwareEnvelope', function(event, data){
-    event.stopPropagation();
-    updateLatestFirmwareEnvelope(data);
-  });
-}
 
-function updateLatestFirmwareEnvelope(data) {
-  var response = JSON.parse(data);
-  $rootScope.latestFirmwareEnvelope = response;
-
-  console.log('//////// envelope:');
-  //console.log($rootScope.apikeys);
-  console.log('refreshing view...');
-  $rootScope.$apply()
-}
 
 //////////////////////// end of init
 

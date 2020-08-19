@@ -74,6 +74,8 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
     $rootScope.meta.apikeys = {};
     $rootScope.meta.sources = {};
     $rootScope.meta.auditlogs = {}; // flags for auditlogs
+    $rootScope.meta.auditlogs = {}; // flags for auditlogs
+    $rootScope.meta.latestFirmwareEnvelope = {};
   } else {
     $rootScope.meta.version = {
       ui: '1.0.3 (beta)'
