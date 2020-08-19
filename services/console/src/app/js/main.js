@@ -65,7 +65,7 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
   if (typeof($rootScope.meta) === "undefined") {
     $rootScope.meta = {};
     $rootScope.meta.version = {
-      ui: '1.0.1 (beta)'
+      ui: '1.0.3 (beta)'
     };
     $rootScope.meta.builds = []; // builds by build_id
     $rootScope.meta.transformers = {}; // decoded transformers
@@ -76,7 +76,7 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
     $rootScope.meta.auditlogs = {}; // flags for auditlogs
   } else {
     $rootScope.meta.version = {
-      ui: '1.0.2 (beta)'
+      ui: '1.0.3 (beta)'
     };
   }
 
