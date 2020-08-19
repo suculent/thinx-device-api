@@ -689,6 +689,23 @@ function init($rootScope, $scope) {
 
 }
 
+if (typeof($rootScope.updateLatestFirmwareEnvelopeListener)=== "undefined") {
+  $rootScope.updateLatestFirmwareEnvelopeListener = $rootScope.$on('updateLatestFirmwareEnvelope', function(event, data){
+    event.stopPropagation();
+    updateLatestFirmwareEnvelope(data);
+  });
+}
+
+function updateLatestFirmwareEnvelope(data) {
+  var response = JSON.parse(data);
+  $rootScope.latestFirmwareEnvelope = response;
+
+  console.log('//////// envelope:');
+  //console.log($rootScope.apikeys);
+  console.log('refreshing view...');
+  $rootScope.$apply()
+}
+
 //////////////////////// end of init
 
 // Devices /user/devices
@@ -783,6 +800,17 @@ function attachSource(sourceId, deviceUdid) {
 function detachSource(deviceUdid) {
   return $.ajax({
     url: urlBase + '/device/detach',
+    type: 'POST',
+    data: JSON.stringify({
+      udid: deviceUdid
+    }),
+    dataType: 'json'
+  });
+}
+
+function getLatestFirmwareEnvelope(deviceUdid) {
+  return $.ajax({
+    url: urlBase + '/device/envelope',
     type: 'POST',
     data: JSON.stringify({
       udid: deviceUdid
