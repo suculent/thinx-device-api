@@ -233,7 +233,7 @@
       <label class="control-label col-md-3">Build Status</label>
       <div class="col-md-9">
 
-        <div>Latest build envelope: {{$root.meta.latestFirmwareEnvelope}}</div>
+        <div class="mb-2">Latest build envelope: {{$root.meta.latestFirmwareEnvelope}}</div>
 
         <div ng-click="deviceForm.buildHistoryVisible ? deviceForm.buildHistoryVisible = false : deviceForm.buildHistoryVisible = true" class="device-build-status" ng-if="$root.meta.deviceBuilds[deviceForm.udid] != undefined && $root.meta.deviceBuilds[deviceForm.udid].length > 0">
           <div class="row">
