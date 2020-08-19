@@ -92,6 +92,9 @@ var Thinx = {
   build: function (deviceUdid, sourceId) {
     return build(deviceUdid, sourceId);
   },
+  getLatestFirmwareEnvelope: function (deviceUdid) {
+    return getLatestFirmwareEnvelope(deviceUdid);
+  },
   getArtifacts: function (deviceUdid, build_id) {
     return getArtifacts(deviceUdid, build_id);
   },
