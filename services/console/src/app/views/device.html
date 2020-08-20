@@ -281,7 +281,12 @@
 
     <div class="form-group">
       <label class="control-label col-md-3">Latest build envelope</label>
-      <div class="col-md-9">{{$root.meta.latestFirmwareEnvelope}}</div>
+      <div class="col-md-9">
+        Version {{$root.meta.latestFirmwareEnvelope.version}} {{$root.meta.latestFirmwareEnvelope.status}} {{$root.meta.latestFirmwareEnvelope.timestamp | lastSeen:'false'}}
+        <a ng-click="$emit('showLogOverlay', $root.meta.latestFirmwareEnvelope.build_id); $event.stopPropagation()">
+          <span class="device-build-id opacity-100"><i class="fa fa-eye"></i>{{$root.meta.latestFirmwareEnvelope.build_id | limitTo:7}}</span>
+        </a>
+      </div>
     </div>
 
     <!-- BUiLD SETUP -->
