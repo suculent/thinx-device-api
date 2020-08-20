@@ -281,7 +281,7 @@
 
     <div class="form-group">
       <label class="control-label col-md-3">Latest build</label>
-      <div class="col-md-9"><b>{{$root.meta.latestFirmwareEnvelope.status}}: v{{$root.meta.latestFirmwareEnvelope.version}}</b> {{$root.meta.latestFirmwareEnvelope.timestamp | lastSeen:'true'}}
+      <div class="col-md-9" style="padding-top: 8px;"><b>Version {{$root.meta.latestFirmwareEnvelope.version}}</b> &rarr; {{$root.meta.latestFirmwareEnvelope.status}} built {{$root.meta.latestFirmwareEnvelope.timestamp | lastSeen:'true'}} ago.
         <a ng-click="$emit('showLogOverlay', $root.meta.latestFirmwareEnvelope.build_id); $event.stopPropagation()">
           <span class="device-build-id opacity-100"><i class="fa fa-eye"></i> {{$root.meta.latestFirmwareEnvelope.build_id | limitTo:7}}</span>
         </a>
