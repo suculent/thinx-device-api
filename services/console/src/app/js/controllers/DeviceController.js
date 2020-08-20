@@ -513,8 +513,8 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     // refresh view
     $scope.$apply();
 
-    // refresh latest firmware info
-    Thinx.getLatestFirmwareEnvelope()
+    // refresh latest firmware envelope
+    Thinx.getLatestFirmwareEnvelope($scope.deviceForm.udid)
     .done( function(data) {
       console.log('+++ updateLatestFirmwareEnvelope ');
       $scope.$emit("updateLatestFirmwareEnvelope", data);
