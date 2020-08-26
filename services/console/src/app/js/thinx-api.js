@@ -92,6 +92,9 @@ var Thinx = {
   build: function (deviceUdid, sourceId) {
     return build(deviceUdid, sourceId);
   },
+  getLatestFirmwareEnvelope: function (deviceUdid) {
+    return getLatestFirmwareEnvelope(deviceUdid);
+  },
   getArtifacts: function (deviceUdid, build_id) {
     return getArtifacts(deviceUdid, build_id);
   },
@@ -568,6 +571,20 @@ function init($rootScope, $scope) {
     }
   }
 
+  $scope.$on("updateLatestFirmwareEnvelope", function(event, data){
+    updateLatestFirmwareEnvelope(data);
+  });
+
+  function updateLatestFirmwareEnvelope(data) {
+    $rootScope.meta.latestFirmwareEnvelope = data;
+
+    console.log('//////// envelope:');
+    console.log(data);
+    //console.log($rootScope.apikeys);
+    console.log('refreshing view...');
+    $rootScope.$apply()
+  }
+
 
   $scope.$on("updateStats", function(event, data){
     updateStats(data);
@@ -689,6 +706,8 @@ function init($rootScope, $scope) {
 
 }
 
+
+
 //////////////////////// end of init
 
 // Devices /user/devices
@@ -783,6 +802,17 @@ function attachSource(sourceId, deviceUdid) {
 function detachSource(deviceUdid) {
   return $.ajax({
     url: urlBase + '/device/detach',
+    type: 'POST',
+    data: JSON.stringify({
+      udid: deviceUdid
+    }),
+    dataType: 'json'
+  });
+}
+
+function getLatestFirmwareEnvelope(deviceUdid) {
+  return $.ajax({
+    url: urlBase + '/device/envelope',
     type: 'POST',
     data: JSON.stringify({
       udid: deviceUdid

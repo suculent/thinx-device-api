@@ -510,7 +510,17 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     formBeforeEdit = JSON.parse(JSON.stringify($scope.deviceForm));
     console.log("form vars", $scope.deviceForm);
 
+    // refresh view
     $scope.$apply();
+
+    // refresh latest firmware envelope
+    Thinx.getLatestFirmwareEnvelope($scope.deviceForm.udid)
+    .done( function(data) {
+      console.log('+++ updateLatestFirmwareEnvelope ');
+      $scope.$emit("updateLatestFirmwareEnvelope", data);
+    })
+    .fail(error => $scope.$emit("xhrFailed", error));
+
   };
 
   $scope.toggleIconset = function() {

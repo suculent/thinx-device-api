@@ -138,7 +138,6 @@
         <p class="alert alert-danger" ng-if="$root.getDeviceByUdid(deviceForm.udid).transformer_error != undefined">
           {{$root.getDeviceByUdid(deviceForm.udid).transformer_error}}
         </p>
-
         <span ng-if="$root.getDeviceByUdid(deviceForm.udid).status != undefined && $root.getDeviceByUdid(deviceForm.udid).status != null">
           <div class="device-status">
             <i class="fa fa-heartbeat"></i>
@@ -188,11 +187,9 @@
           <br/>
           We recommend to create one API Key per device to be able to track key usage and misuse.<br/>
           Key is required for build.<br/>
-
           <span ng-if="deviceForm.base_platform == 'sigfox'">
             On SigFox you have to change the key in the <a href="https://backend.sigfox.com" target="_blank">SigFox Backend</a> Callback Configuration manually.
           </span>
-
         </div>
       </div>
     </div>
@@ -232,7 +229,6 @@
     <div class="form-group" ng-if="$root.platforms[deviceForm.base_platform].build">
       <label class="control-label col-md-3">Build Status</label>
       <div class="col-md-9">
-
         <div ng-click="deviceForm.buildHistoryVisible ? deviceForm.buildHistoryVisible = false : deviceForm.buildHistoryVisible = true" class="device-build-status" ng-if="$root.meta.deviceBuilds[deviceForm.udid] != undefined && $root.meta.deviceBuilds[deviceForm.udid].length > 0">
           <div class="row">
             <div class="col-xs-6 text-left">
@@ -273,7 +269,7 @@
           </div>
 
         </div>
-        <div class="row"  ng-if="$root.meta.deviceBuilds.length > 1">
+        <div class="row" ng-if="$root.meta.deviceBuilds.length > 1">
           <div class="col-xs-12 text-center build-history-more">
             <a class="btn btn-default btn-sm" ng-click="deviceForm.buildHistoryLimit = deviceForm.buildHistoryLimit + 10; $event.stopPropagation()">View More</a>
           </div>
@@ -281,6 +277,15 @@
 
       </div>
 
+    </div>
+
+    <div class="form-group">
+      <label class="control-label col-md-3">Latest build</label>
+      <div class="col-md-9" style="padding-top: 8px;"><b>Version {{$root.meta.latestFirmwareEnvelope.firmware}}</b> &rarr; {{$root.meta.latestFirmwareEnvelope.status}} completed {{$root.meta.latestFirmwareEnvelope.timestamp | lastSeen:'true'}} ago.
+        <a ng-click="$emit('showLogOverlay', $root.meta.latestFirmwareEnvelope.build_id); $event.stopPropagation()">
+          <span class="device-build-id opacity-100"><i class="fa fa-eye"></i> {{$root.meta.latestFirmwareEnvelope.build_id | limitTo:7}}</span>
+        </a>
+      </div>
     </div>
 
     <!-- BUiLD SETUP -->
