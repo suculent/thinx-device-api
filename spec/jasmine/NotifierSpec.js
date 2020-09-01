@@ -47,7 +47,7 @@ describe("Notifier", function() {
 
     // CMD: "${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${BUILD_ID}.bin ${UDID} ${SHA} ${OWNER_ID} ${STATUS}";
     console.log("Notifier command: " + CMD);
-    var error = exec.execSync(CMD);
+    var error = exec.execSync(CMD).toString();
     console.log("Notifier result: ");
     console.log({error});
     //expect(error).not.to.be.a('string');
