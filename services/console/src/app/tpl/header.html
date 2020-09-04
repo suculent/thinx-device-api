@@ -49,14 +49,14 @@
                 <li ng-repeat="(key, build) in $root.buildHistory | limitTo:10 track by key">
                   <a href="javascript:;" ng-click="$emit('showLogOverlay', build.build_id)" ng-if="$root.getDeviceByUdid(build.udid) != false">
                     <span class="details">
-                      <span class="header-build-date">{{build.date | lastSeen:'false'}}</span>
+                      <span class="header-build-date">{{build.timestamp | lastSeen:'false'}}</span>
                       <div>
                         {{getDeviceByUdid(build.udid).alias}}
                       </div>
                       <span class="header-build-udid font-{{getDeviceByUdid(build.udid).category}}">
                         {{build.udid | limitTo:6}}
                       </span>
-                      <span class="header-build-message">{{build.message}}</span>
+                      <span class="header-build-message">{{build.state}}</span>
                     </span>
                   </a>
                 </li>

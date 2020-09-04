@@ -14,8 +14,8 @@ var prefix = Globals.prefix();
 
 var rollbar = new Rollbar({
   accessToken: app_config.rollbar_token,
-  handleUncaughtExceptions: false,
-  handleUnhandledRejections: false
+  handleUncaughtExceptions: true,
+  handleUnhandledRejections: true
 });
 
 var sha256 = require("sha256");
@@ -23,22 +23,19 @@ var crypto = require('crypto');
 var fs = require('fs-extra');
 var db = app_config.database_uri;
 
-var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
 var buildlib = require("nano")(db).use(prefix + "managed_builds"); // lgtm [js/unused-local-variable]
-var loglib = require("nano")(db).use(prefix + "managed_logs"); // lgtm [js/unused-local-variable]
 var devicelib = require("nano")(db).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
 
 var slack_webhook = app_config.slack_webhook;
 var slack = require("slack-notify")(slack_webhook);
 
-var that = this;
-
-var mqtt = require("mqtt");
-
 var Messenger = require("./lib/thinx/messenger");
 var messenger = new Messenger().getInstance(); // take singleton to prevent double initialization
 
-console.log("-=[ ☢ THiNX IoT RTM NOTIFIER ☢ ]=-");
+var BuildLog = require("./lib/thinx/buildlog");
+var blog = new BuildLog();
+
+console.log("[notifier.js] \n-=[ ☢ THiNX IoT RTM NOTIFIER ☢ ]=-\n");
 
 // Parse input params
 
@@ -93,32 +90,88 @@ if (typeof(build_path) === "undefined" || build_path === "") {
   build_path = app_config.data_root + app_config.deploy_root + "/" + owner + "/" + commit_id;
 }
 
-function processSHA(build_path) {
-  console.log("Processing SHA for build path...");
-  var binary_path_sha = build_path + ".bin";
+/*
+function notify_companion_app(push_tokens, message, repo_url, udid, commit_id, version, sha) {
+
+  // Notify users (FCM)
+      var message = {
+        data: {
+          type: "update",
+          url: repo_url || "/bin/test/firmware.elf",
+          udid: udid,
+          commit: commit_id ||
+            "18ee75e3a56c07a9eff08f75df69ef96f919653a",
+          version: version || "0.0.1",
+          checksum: sha ||
+            "6bf6bd7fc983af6c900d8fe162acc3ba585c446ae0188e52802004631d854c60"
+        },
+        notification: {
+          title: "Aktualizace EAV",
+          body: "Je k dispozici aktualizace software pro Akustim. Přejete si ji nainstalovat?"
+        }
+      };
+
+      // TODO: Get registration token from device database instead
+
+
+
+      var admin = require("firebase-admin");
+      var serviceAccount = require(
+        app_config.fcm_auth);
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: "https://thinx-cloud.firebaseio.com"
+      });
+
+      var successFunction = function(response) {
+        console.log("[notifier.js] Successfully sent message:", response);
+      };
+
+      var failureFunction = function(error) {
+        console.log("[notifier.js] Error sending message:", error);
+      };
+
+      for (var pindex in push_tokens) {
+        if (!push_tokens.hasOwnProperty(pindex)) return;
+        var registrationToken = push_tokens[pindex];
+        if ((typeof(registrationToken) !== "undefined") && (registrationToken !== null)) {
+            if (registrationToken.length > 0) {
+              console.log("[notifier.js] Sending GCM notification to  registration token: " + registrationToken);
+              admin.messaging().sendToDevice(registrationToken, message)
+                .then(successFunction)
+                .catch(failureFunction);
+          }
+        }
+      }
+}
+*/
+
+function processSHA(a_build_path) {
+  console.log("[notifier.js] Processing SHA for build path...");
+  var binary_path_sha = a_build_path + ".bin";
   if (!fs.existsSync(binary_path_sha)) {
-    console.log("binary_path_sha does not exist at " + binary_path_sha);
+    console.log("[notifier.js] binary_path_sha does not exist at " + binary_path_sha);
     process.exit(2);
     return;
   }
-  console.log("Reading file for sha256 checksum from: " + binary_path_sha);
+  console.log("[notifier.js] Reading file for sha256 checksum from: " + binary_path_sha);
   var ndata = fs.readFileSync(binary_path_sha, "binary", function(err, data) {
-    console.log("Calllback..." + data);
+    console.log("[notifier.js] Calllback..." + data);
     if (err) {
       console.log(err);
       process.exit(2);
       return;
     }
   });
-  console.log("Processing data: "+ndata.length);
+  console.log("[notifier.js] Processing data: "+ndata.length);
   if (ndata) {
     sha = sha256(ndata.toString());
-    that.sha = sha;
-    console.log("Calculated new sha256: " + sha);
+    //that.sha = sha;
+    console.log("[notifier.js] Calculated new sha256: " + sha);
   } else {
     sha = "FILE_NOT_FOUND";
-    that.sha = sha;
-    console.log("Data file not found.");
+    //that.sha = sha;
+    console.log("[notifier.js] Data file not found.");
   }
   return sha;
 }
@@ -129,7 +182,7 @@ if (typeof(sha) === "undefined" || sha === "") {
 
 if (typeof(md5) === "undefined" || md5 === "") {
   var binary_path = build_path + ".bin";
-  console.log("Calculating md5 checksum for " + binary_path);
+  console.log("[notifier.js] Calculating md5 checksum for " + binary_path);
   var mdata = fs.readFileSync(binary_path, "binary", function(err, data) {
     if (err) {
       console.log(err);
@@ -137,125 +190,159 @@ if (typeof(md5) === "undefined" || md5 === "") {
   });
   if (mdata) {
     md5 = crypto.createHash('md5').update(mdata).digest('hex');
-    that.md5 = md5;
-    console.log("Calculated new md5: " + md5);
+    //that.md5 = md5;
+    console.log("[notifier.js] Calculated new md5: " + md5);
   } else {
     md5 = "";
-    that.md5 = md5;
-    console.log("Data file not found.");
+    //that.md5 = md5;
+    console.log("[notifier.js] Data file not found.");
   }
 }
 
-console.log("build_id : " + build_id);
-console.log("commit_id : " + commit_id);
-console.log("version : " + version);
-console.log("outfile/build_path : " + build_path);
-console.log("platform : " + platform);
-console.log("repo_url : " + repo_url);
-console.log("build_path : " + build_path);
-console.log("udid : " + udid);
-console.log("sha : " + sha);
-console.log("status : " + status);
-console.log("thinx_firmware_version : " + thinx_firmware_version);
-console.log("md5 : " + md5);
-
-
-var BuildLog = require("./lib/thinx/buildlog");
-var blog = new BuildLog();
-
-blog.log(build_id, owner, udid, status);
-
-//
-// Device -> Souce Alias -> User -> Sources ...
-//
-
-function notify_device_channel(owner, udid, message) {
-
-  var mqtt_password;
-  var mqtt_username;
-
-  if (typeof(app_config.mqtt.password) !== "undefined") {
-    mqtt_password = app_config.mqtt.password;
-    console.log("Setting mosquitto password from configuration file.");
-  }
-
-  if (typeof(process.env.MOSQUITTO_PASSWORD) !== "undefined") {
-    mqtt_password = process.env.MOSQUITTO_PASSWORD;
-    console.log("Setting mosquitto password from environment variable.");
-  }
-
-  if (typeof(process.env.MOSQUITTO_USERNAME) !== "undefined") {
-    mqtt_username = process.env.MOSQUITTO_USERNAME;
-    console.log("Setting mosquitto password from environment variable.");
-  }
-
-  console.log("notify_device_channel is DEPRECATED");
-  var channel = "/thinx/devices/" + owner + "/" + udid;
-  console.log("Posting to MQTT queue " + channel);
-
-
-  var client = mqtt.connect("mqtt://"+mqtt_username+":"+mqtt_password+"@" + process.env.THINX_HOSTNAME + ":"+app_config.mqtt.port);
-  client.on("connect", function() {
-    console.log("Connected to MQTT, will post to " + channel);
-    client.subscribe(channel);
-    var msg = message;
-    delete msg.notification;
-    client.publish(channel, JSON.stringify(message), {
-      retain: true
-    });
-    client.end();
-  });
-}
-
-function deploymentPathForDevice(owner, udid) {
-  var user_path = app_config.data_root + app_config.deploy_root + "/" + owner;
-  var device_path = user_path + "/" + udid;
+function deploymentPathForDevice(an_owner, a_udid) {
+  var user_path = app_config.data_root + app_config.deploy_root + "/" + an_owner;
+  var device_path = user_path + "/" + a_udid;
   return device_path;
 }
 
+function build_update_notification(a_repo_url, a_udid, a_alias, a_commit, a_version, a_sha, a_dsig) {
+  var message = {
+    data: {
+      type: "firmware-update",
+      url: a_repo_url,
+      udid: a_udid,
+      commit: a_commit,
+      version: a_version,
+      checksum: a_sha,
+      dsig: a_dsig
+    },
+    notification: {
+      title: "Firmware Update",
+      body: "Update available for device " + a_alias + "."
+    }
+  };
+  return JSON.stringify(message);
+}
+
+function formatMacForDevSec(incoming) {
+  let no_colons = incoming.replace(/:/g, "");
+  let outgoing = no_colons.substr(6, 6);
+  return outgoing;
+}
+
+function notificationObject(newStatus, buildEnvelope) {
+  let alertObj = {};
+  if (newStatus === true || newStatus.indexOf("OK") === 0) {
+    alertObj = {
+      text: "Build successfully completed.",
+      username: "notifier.js",
+      fields: buildEnvelope
+    };
+  } else if (newStatus.indexOf("DRY_RUN_OK") !== -1) {
+    alertObj = {
+      text: "Dry run successful. Firmware left undeployed.", // todo: reference git_url + commit_id here
+      username: "notifier.js",
+      icon_emoji: ":ghost:",
+      fields: buildEnvelope
+    };
+  } else {
+    alertObj = {
+      text: "FAILED",
+      username: "notifier.js",
+      icon_emoji: ":computerage:",
+      fields: buildEnvelope
+    };
+  }
+  return alertObj;
+}
+
+function notify_slack(newStatus, slackClient, buildEnvelope) {
+  let alertObj = notificationObject(newStatus, buildEnvelope);
+  slackClient.alert(alertObj);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+/*
+ * 1. Argument Ingestion
+ */
+
+
+console.log("[notifier.js] build_id : " + build_id);
+console.log("[notifier.js] commit_id : " + commit_id);
+console.log("[notifier.js] version : " + version);
+console.log("[notifier.js] outfile/build_path : " + build_path);
+console.log("[notifier.js] platform : " + platform);
+console.log("[notifier.js] repo_url : " + repo_url);
+console.log("[notifier.js] build_path : " + build_path);
+console.log("[notifier.js] udid : " + udid);
+console.log("[notifier.js] sha : " + sha);
+console.log("[notifier.js] status : " + status);
+console.log("[notifier.js] thinx_firmware_version : " + thinx_firmware_version);
+console.log("[notifier.js] md5 : " + md5);
+
+blog.state(build_id, owner, udid, status);
+
+/*
+ * 2. Fetch devices, retrieve source alias, owner and source...
+ */
+
 devicelib.get(udid, function(err, doc) {
 
-  if (err || (typeof(doc) === "undefined")) {
+  if (err) {
     console.log(err);
-    console.log("No such device with udid " + udid);
+    console.log("[notifier.js] No such device with udid " + udid);
     rollbar.warning(err);
-    return;
+    process.exit(1);
   }
 
-  if (!doc.hasOwnProperty("source")) {
+  if (((typeof(doc) === "undefined") || (doc == null))) {
     rollbar.info("device " + udid + "has no source on build!");
-    return;
+    process.exit(1);
   }
 
-  var source = doc.source;
+  try {
+    if (!doc.hasOwnProperty("source")) {
+      rollbar.info("device " + udid + "has no source on build!");
+      process.exit(1);
+    }
+  } catch (e) {
+    console.log(e);
+  }
 
-  // Collect push tokens
-  var push_tokens = [];
+  /*
+   * 3. Collect push tokens for FCM
+  */
+
+//  var push_tokens = [];
+
   devicelib.view("devicelib", "devices_by_source", {
-    "key": source,
+    "key": doc.source,
     "include_docs": true
-  }, function(err, body) {
+  }, function(derr, body) {
 
-    if (err) {
-      console.log(err);
+    if (derr) {
+      console.log(derr);
       process.exit(1);
     }
 
     if (body.rows.length === 0) {
-      console.log("No results.");
+      console.log("[notifier.js] No results.");
       process.exit(1);
     }
 
     // Parse all devices with same source (?)
 
-    for (var index in body.rows) {
+    /* not needed until FCM notifications
+      for (var index in body.rows) {
       //if (!body.rows.hasOwnProperty(index)) continue;
       var item = body.rows[index];
       // if (!item.hasOwnProperty("push")) continue;
       if (typeof(item.push) !== "undefined") {
         push_tokens.push(item.push);
       }
-    }
+    } */
 
     var device = body.rows[0];
     device.last_build_id = build_id;
@@ -267,9 +354,9 @@ devicelib.get(udid, function(err, doc) {
     }
 
     // Save last_build_id, last_build_date and artifact
-    devicelib.atomic("devicelib", "modify", udid, device, function(error, body) {
+    devicelib.atomic("devicelib", "modify", udid, device, function(error) {
       if (error) {
-        console.log("Notifier device update error: " + error);
+        console.log("[notifier.js] Notifier device update error: ", error);
       }
     });
 
@@ -280,7 +367,7 @@ devicelib.get(udid, function(err, doc) {
       udid: udid,
       commit: commit_id,
       version: version,
-      firmware: thinx_firmware_version,
+      firmware: thinx_firmware_version.replace(/"/g, ''),
       checksum: sha,
       build_id: build_id,
       owner: owner,
@@ -295,105 +382,52 @@ devicelib.get(udid, function(err, doc) {
     var envelopePath = deploymentPathForDevice(owner, udid) + "/" + build_id + "/build.json";
     var deployedEnvelopePath = deploymentPathForDevice(owner, udid) + "/build.json";
     var envelopeString = JSON.stringify(buildEnvelope, null, 4);
-    console.log("Saving build envelope: " + envelopeString);
-    //console.log("deployedEnvelopePath: " + envelopePath);
-    var buffer = new Buffer(envelopeString + "\n");
-    //console.log("saving envelopePath: " + deployedEnvelopePath);
+    console.log("[notifier.js] Saving build envelope: " + envelopeString);
+    console.log("[notifier.js] deployedEnvelopePath: " + envelopePath);
+    var buffer = new Buffer.from(envelopeString + "\n");
+    console.log("[notifier.js] saving envelopePath: " + deployedEnvelopePath);
     fs.writeFileSync(envelopePath, buffer);
-    console.log("Deploying build envelope: " + deployedEnvelopePath);
+    console.log("[notifier.js] Deploying build envelope: " + deployedEnvelopePath);
     fs.writeFileSync(deployedEnvelopePath, buffer);
 
     // TODO: Update current build version in managed_users.repos
     // Select targets
-    // TODO: -- collect push tokens (each only once)
     // Notify admin (Slack); may be out of notifier.js scope and can be done later in core after calling notifier (means when calling builder finishes)...
-    // Bundled notification types:
 
-    console.log("STATUS: " + status);
+    console.log("[notifier.js] STATUS: " + status);
 
-    if (status === true || status.indexOf("OK") === 0) {
-      slack.alert({
-        text: "Build successfully completed.",
-        username: "notifier.js",
-        fields: buildEnvelope
-      });
-    } else if (status.indexOf("DRY_RUN_OK") !== -1) {
-      slack.alert({
-        text: "Dry run successful. Firmware left undeployed.", // todo: reference git_url + commit_id here
-        username: "notifier.js",
-        icon_emoji: ":ghost:",
-        fields: buildEnvelope
-      });
+    notify_slack(status, slack, buildEnvelope);
+
+    /*
+    let messageString = build_update_notification(
+      repo_url,
+      udid,
+      device.alias,
+      commit_id,
+      version,
+      sha
+    );
+
+    notify_companion_app(push_tokens, messageString, repo_url, udid, commit_id, version, sha);
+    */
+
+    let registrationObject = {
+      registration: {
+        status: "FIRMWARE_UPDATE",
+        commit: commit_id,
+        version: version
+      }
+    };
+
+    // Notify client's mobile app using FCM (user must have token stored)
+    //
+
+    // Notify device's channel on firmware build to enable quick unattended auto-updates; device should validate at least dsig first.
+    if (status == "OK") {
+      console.log("[notifier.js] Sending notification update...");
+      messenger.publish(owner, udid, JSON.stringify(registrationObject)); // new implementation
     } else {
-      slack.alert({
-        text: "FAILED",
-        username: "notifier.js",
-        icon_emoji: ":computerage:",
-        fields: buildEnvelope
-      });
+      console.log("[notifier.js] Status is not DEPLOYED, skipping device notifier...");
     }
-
-    // Notify users (FCM)
-    var message = {
-      data: {
-        type: "update",
-        url: repo_url || "/bin/test/firmware.elf",
-        udid: udid,
-        commit: commit_id ||
-          "18ee75e3a56c07a9eff08f75df69ef96f919653a",
-        version: version || "0.0.1",
-        checksum: sha ||
-          "6bf6bd7fc983af6c900d8fe162acc3ba585c446ae0188e52802004631d854c60"
-      },
-      notification: {
-        title: "Aktualizace EAV",
-        body: "Je k dispozici aktualizace software pro Akustim. Přejete si ji nainstalovat?"
-      }
-    };
-
-    // TODO: Get registration token from device database instead
-
-    var admin = require("firebase-admin");
-    var serviceAccount = require(
-      app_config.fcm_auth);
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-      databaseURL: "https://thinx-cloud.firebaseio.com"
-    });
-
-    var successFunction = function(response) {
-      console.log("Successfully sent message:", response);
-    };
-
-    var failureFunction = function(error) {
-      console.log("Error sending message:", error);
-    };
-
-    for (var pindex in push_tokens) {
-      if (!push_tokens.hasOwnProperty(pindex)) return;
-      var registrationToken = push_tokens[pindex];
-      if ((typeof(registrationToken) !== "undefined") && (registrationToken !== null)) {
-          if (registrationToken.length > 0) {
-            console.log("Sending GCM notification to  registration token: " + registrationToken);
-            admin.messaging().sendToDevice(registrationToken, message)
-              .then(successFunction)
-              .catch(failureFunction);
-        }
-      }
-    }
-
-    // Device channel
-    if (status == "DEPLOYED") {
-      console.log("Calling messenger publish...");
-      messenger.publish(owner, udid, message);
-      notify_device_channel(owner, udid, message); // deprecated; integration testing only
-    }
-
-    process.exit(0);
-
   });
 });
-
-//
-// MQTT Notifications (deprecated, done through Messenger)
-//

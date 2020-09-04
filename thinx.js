@@ -19,18 +19,16 @@ if (Globals.use_sqreen()) {
  }
 }
 
-
-var exec = require("child_process"); // lgtm [js/unused-local-variable]
-var Rollbar = require("rollbar"); // lgtm [js/unused-local-variable]
-var crypto = require('crypto');
+const crypto = require('crypto');
+const express = require("express");
+const session = require("express-session");
+const cluster = require('cluster');
 
 var Auth = require('./lib/thinx/auth.js');
 var auth = new Auth();
 
+let pki = require('node-forge').pki;
 var fs = require("fs-extra");
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var csrf = require('csurf');
 
 // set up rate limiter
 var RateLimit = require('express-rate-limit');
@@ -70,13 +68,8 @@ var db = app_config.database_uri;
 var socketPort = app_config.socket;
 
 var https = require("https");
-var parser = require("body-parser");
-var nano = require("nano")(db);
 
 var WebSocket = require("ws");
-
-// list of previously discovered attackers
-var BLACKLIST = [];
 
 var last_client_ip = null;
 
@@ -103,20 +96,20 @@ var getClientIp = function(req) {
  */
 
 try {
-  var pfx_path = app_config.project_root + '/conf/.thx_prefix';
+  var pfx_path = __dirname + '/conf/.thx_prefix';
   if (fs.existsSync(pfx_path)) {
     prefix = (fs.readFileSync(pfx_path).toString()).replace("\n", "");
   } else {
     // create .thx_prefix with random key on first run!
     fs.ensureFile(pfx_path, function(e) {
       if (e) {
-        console.log("error creating thx_prefix: " + e);
+        console.log("» error creating thx_prefix: " + e);
       } else {
         crypto.randomBytes(12, function(err, buffer) {
-          var prefix = buffer.toString('hex');
-          fs.writeFile(prefix, "", function(err) {
-            if (err) {
-              console.log("error writing thx_prefix: " + err);
+          var prefix_z = buffer.toString('hex');
+          fs.writeFile(prefix_z, "", function(err_z) {
+            if (err_z) {
+              console.log("» error writing thx_prefix: " + err);
             }
           });
         });
@@ -124,27 +117,93 @@ try {
     });
   }
 } catch (e) {
-  console.log("[index] thx_prefix_exception" + e);
+  console.log("» thx_prefix_exception" + e);
 }
+
+console.log("» Initializing DB...");
+
+var nano = require("nano")(db);
+
+function initDatabases(dbprefix) {
+
+  // only to fix bug in CouchDB 2.3.1 first-run
+  nano.db.create("_users", function(err, body, header) {});
+  nano.db.create("_stats", function(err, body, header) {});
+  nano.db.create("_replicator", function(err, body, header) {});
+  nano.db.create("_global_changes", function(err, body, header) {});
+
+  nano.db.create(dbprefix + "managed_devices", function(err, body, header) {
+    if (err) {
+      handleDatabaseErrors(err, "managed_devices");
+    } else {
+      console.log("» Device database creation completed. Response: " +
+        JSON.stringify(body) + "\n");
+      var couch = nano.db.use(dbprefix + "managed_devices");
+      injectDesign(couch, "devicelib", "./design/design_deviceslib.json");
+      injectReplFilter(couch, "./design/filters_devices.json");
+    }
+  });
+
+  nano.db.create(dbprefix + "managed_builds", function(err, body, header) {
+    if (err) {
+      handleDatabaseErrors(err, "managed_builds");
+    } else {
+      console.log("» Build database creation completed. Response: " +
+        JSON.stringify(body) + "\n");
+      var couch = nano.db.use(dbprefix + "managed_builds");
+      injectDesign(couch, "builds", "./design/design_builds.json");
+      injectReplFilter(couch, "./design/filters_builds.json");
+    }
+  });
+
+  nano.db.create(dbprefix + "managed_users", function(err, body, header) {
+    if (err) {
+      handleDatabaseErrors(err, "managed_users");
+    } else {
+      console.log("» User database creation completed. Response: " +
+        JSON.stringify(body) + "\n");
+      var couch = nano.db.use(dbprefix + "managed_users");
+      injectDesign(couch, "users", "./design/design_users.json");
+      injectReplFilter(couch, "./design/filters_users.json");
+    }
+  });
+
+  nano.db.create(dbprefix + "managed_logs", function(err, body, header) {
+    if (err) {
+      handleDatabaseErrors(err, "managed_logs");
+    } else {
+      console.log("» Log database creation completed. Response: " + JSON.stringify(body) + "\n");
+      var couch = nano.db.use(dbprefix + "managed_logs");
+      injectDesign(couch, "logs", "./design/design_logs.json");
+      injectReplFilter(couch,  "./design/filters_logs.json");
+    }
+  });
+}
+
+initDatabases(prefix);
+
+var devicelib = require("nano")(db).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
+var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
 
 // should be initialized after prefix because of DB requirements...
 var Version = require("./lib/thinx/version");
 var v = new Version();
 
-console.log("Loading module: statistics...");
+console.log("Loading module: Statistics");
 var Stats = require("./lib/thinx/statistics");
 var stats = new Stats();
 
-console.log("[thinx.js] Loading module: messenger...");
+console.log("Loading module: Messenger");
 var Messenger = require("./lib/thinx/messenger");
-console.log("[thinx.js] Getting instance: messenger...");
 var messenger = new Messenger().getInstance(); // take singleton to prevent double initialization
 
-console.log("Loading module: repository/watcher...");
+console.log("Loading module: Repository Watcher");
 var Repository = require("./lib/thinx/repository");
-var watcher = new Repository();
-console.log("Starting repository watcher...");
-watcher.watch();
+
+console.log("Loading module: Queue");
+var Queue = require("./lib/thinx/queue");
+var queue = new Queue();
+queue.cron(); // starts cron job for build queue from webhooks
 
 
 //
@@ -158,7 +217,7 @@ function getDocument(file) {
   }
   const data = fs.readFileSync(file);
   if (typeof(data) === "undefined") {
-    console.log("[getDocument] no data read.");
+    console.log("» [getDocument] no data read.");
     return false;
   }
   // Parser may fail
@@ -166,49 +225,49 @@ function getDocument(file) {
     const filter_doc = JSON.parse(data);
     return filter_doc;
   } catch (e) {
-    console.log("File may not exist: "+e);
+    console.log("» Document File may not exist: "+e);
     return false;
   }
 }
 
 function logCouchError(err, body, header, tag) {
   if (err !== null) {
-    console.log("[thinx.js:couch] Insert error: "+err);
+    console.log("» Log Couch Insert error: "+err);
   } else {
     return;
   }
   if (typeof(body) !== "undefined") {
-    console.log("[thinx.js:couch] Insert body: "+body+" "+tag);
+    console.log("» Log Couch Insert body: "+body+" "+tag);
   }
   if (typeof(header) !== "undefined") {
-    console.log("[thinx.js:couch] Insert header: "+header+" "+tag);
+    console.log("» Log Couchd Insert header: "+header+" "+tag);
   }
 }
 
-function injectDesign(db, design, file) {
+function injectDesign(couch, design, file) {
   if (typeof(design) === "undefined") return;
-  console.log("Inserting design document " + design + " from path", file);
+  console.log("» Inserting design document " + design + " from path", file);
   let design_doc = getDocument(file);
   if (design_doc != null) {
     //console.log("Inserting design document", {design_doc});
-    db.insert(design_doc, "_design/" + design, function(err, body, header) {
+    couch.insert(design_doc, "_design/" + design, function(err, body, header) {
       logCouchError(err, body, header, "init:design:"+design);
     });
   } else {
-    console.log("Design doc injection issue at "+file);
+    console.log("» Design doc injection issue at "+file);
   }
 }
 
-function injectReplFilter(db, file) {
-  console.log("Inserting filter document from path", file);
+function injectReplFilter(couch, file) {
+  console.log("» Inserting filter document from path", file);
   let filter_doc = getDocument(file);
   if (filter_doc !== false) {
     //console.log("Inserting filter document", {filter_doc});
-    db.insert(filter_doc, "_design/repl_filters", function(err, body, header) {
+    couch.insert(filter_doc, "_design/repl_filters", function(err, body, header) {
       logCouchError(err, body, header, "init:repl:"+filter_doc);
     });
   } else {
-    console.log("Filter doc injection issue (no doc) at "+file);
+    console.log("» Filter doc injection issue (no doc) at "+file);
   }
 }
 
@@ -224,91 +283,38 @@ function handleDatabaseErrors(err, name) {
   }
 }
 
-function initDatabases() {
-
-  // only to fix bug in CouchDB 2.3.1 first-run
-  nano.db.create("_users", function(err, body, header) {});
-  nano.db.create("_stats", function(err, body, header) {});
-  nano.db.create("_replicator", function(err, body, header) {});
-  nano.db.create("_global_changes", function(err, body, header) {});
-
-  nano.db.create(prefix + "managed_devices", function(err, body, header) {
-    if (err) {
-      handleDatabaseErrors(err, "managed_devices");
-    } else {
-      console.log("» Device database creation completed. Response: " +
-        JSON.stringify(body) + "\n");
-      var db = nano.db.use(prefix + "managed_devices");
-      injectDesign(db, "devicelib", "./design/design_deviceslib.json");
-      injectReplFilter(db, "./design/filters_devices.json");
-    }
-  });
-
-  nano.db.create(prefix + "managed_builds", function(err, body, header) {
-    if (err) {
-      handleDatabaseErrors(err, "managed_builds");
-    } else {
-      console.log("» Build database creation completed. Response: " +
-        JSON.stringify(body) + "\n");
-      var db = nano.db.use(prefix + "managed_builds");
-      injectDesign(db, "builds", "./design/design_builds.json");
-      injectReplFilter(db, "./design/filters_builds.json");
-    }
-  });
-
-  nano.db.create(prefix + "managed_users", function(err, body, header) {
-    if (err) {
-      handleDatabaseErrors(err, "managed_users");
-    } else {
-      console.log("» User database creation completed. Response: " +
-        JSON.stringify(body) + "\n");
-      var db = nano.db.use(prefix + "managed_users");
-      injectDesign(db, "users", "./design/design_users.json");
-      injectReplFilter(db, "./design/filters_users.json");
-    }
-  });
-
-  nano.db.create(prefix + "managed_logs", function(err, body, header) {
-    if (err) {
-      handleDatabaseErrors(err, "managed_logs");
-    } else {
-      console.log("» Log database creation completed. Response: " +
-        JSON.stringify(body) + "\n");
-      var db = nano.db.use(prefix + "managed_logs");
-      injectDesign(db, "logs", "./design/design_logs.json");
-      injectReplFilter(db,  "./design/filters_logs.json");
-    }
-  });
-}
-
-console.log("Initializing DB...");
-
-initDatabases();
-
-console.log("Starting with prefix: '"+prefix+"'");
-
-var devicelib = require("nano")(db).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
-var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
-
 const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
 const blog = new Buildlog();
 
-//
-// <<<
-//
+// Webhook Server
+const watcher = new Repository();
+const hook_server = express();
+http.createServer(hook_server).listen(app_config.webhook_port, "0.0.0.0", function() {
+  console.log("» Webhook API started on port", app_config.webhook_port);
+});
+hook_server.use(express.json({
+  limit: "2mb",
+  strict: false
+}));
+hook_server.use(express.urlencoded({ extended: false }));
+hook_server.post("/", function(req, res) {
+  // From GitHub, exit on non-push events prematurely
+  if (typeof(req.headers["X-GitHub-Event"]) !== "undefined") {
+    if ((req.headers["X-GitHub-Event"] != "push")) {
+      res.status(200).end("Accepted");
+      return;
+    }
+  }
+  // do not wait for response, may take ages
+  res.status(200).end("Accepted");
+  watcher.process_hook(req.body);
+}); // end Webhook Server
 
-// <-- EXTRACT TO: db.js && databases must not be held by app class
-// and they require on prefix as well...
-
-// Express App
-var express = require("express");
-var session = require("express-session");
-
-var app = express();
-
+// App
+const app = express();
 app.messenger = messenger;
 
-console.log("» Starting Redis client...");
+// Redis
 var RedisStore = require("connect-redis")(session);
 var sessionStore = new RedisStore({
   host: app_config.redis.host,
@@ -336,35 +342,28 @@ app.use(session({
 }));
 // rolling was true; This resets the expiration date on the cookie to the given default.
 
-app.use(parser.json({
-  limit: "1mb"
+app.use(express.json({
+  limit: "1mb",
+  strict: false
 }));
 
 app.use(limiter);
 
-app.use(parser.urlencoded({
+app.use(express.urlencoded({
   extended: true,
   parameterLimit: 1000,
   limit: "1mb"
 }));
 
-app.use(function(req, res, next) {
-  var ipAddress = getClientIp(req);
-  if (BLACKLIST.toString().indexOf(ipAddress) === -1) {
-    next();
-  } else {
-    console.log("Returning error 403 for blacklisted IP.");
-    res.status(403).end();
-  }
-});
-
 // CSRF protection
 // now add csrf and other middlewares, after the router was mounted
-// app.use(bodyParser.urlencoded({ extended: false }));
+// app.use(express.urlencoded({ extended: false }));
+// var cookieParser = require('cookie-parser');
 // app.use(cookieParser());
+// var csrf = require('csurf');
 // app.use(csrf({ cookie: true })); collides with Sqreen
 
-require('./lib/router.js')(app);
+let router = require('./lib/router.js')(app, _ws);
 
 /*
  * HTTP/HTTPS API Server
@@ -386,13 +385,50 @@ http.createServer(app).listen(app_config.port, "0.0.0.0", function() {
 });
 
 if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
-  ssl_options = {
-    key: fs.readFileSync(app_config.ssl_key),
-    cert: fs.readFileSync(app_config.ssl_cert),
-    NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
-  };
-  console.log("» Starting HTTPS server on " + app_config.secure_port + "...");
-  https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0", function() { } );
+
+  // Validate SSL certificate (if defined) and do not allow startup with invalid one...
+  // It's pointless and it should lead to faster fix when this fails immediately in production.
+
+  let caCert;
+  let caStore;
+  let ssloaded = false;
+
+  try {
+      caCert = fs.readFileSync(app_config.ssl_cert).toString();
+      caStore = pki.createCaStore([ caCert ]);
+      ssloaded = true;
+  } catch (e) {
+      console.log('Failed to load CA certificate (' + e + ')');
+      // process.exit(43);
+  }
+
+  if (ssloaded) {
+
+    let sslvalid = true;
+
+    /*
+    try {
+        pki.verifyCertificateChain( caStore, [ caCert ]);
+        sslvalid = true;
+    } catch (e) {
+        console.log('Failed to verify certificate (' + e.message || e + ')');
+    }
+    */
+
+    if (sslvalid) {
+      ssl_options = {
+        key: fs.readFileSync(app_config.ssl_key),
+        cert: fs.readFileSync(app_config.ssl_cert),
+        NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
+      };
+
+      console.log("» Starting HTTPS server on " + app_config.secure_port + "...");
+      https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0", function() { } );
+    } else {
+      console.log("» SSL certificate validation FAILED! Check your configuration.");
+    }
+  }
+
 } else {
   console.log("Skipping HTTPS server, SSL key or certificate not found.");
 }
@@ -440,6 +476,7 @@ function heartbeat() {
 setInterval(function ping() {
   wss.clients.forEach(function each(ws) {
     if (ws.isAlive === false) {
+      console.log("[DBUG] Terminating websocket!");
       ws.terminate();
     } else {
       ws.ping(noop);
@@ -447,14 +484,20 @@ setInterval(function ping() {
   });
 }, 30000);
 
-wss.on("connection", function connection(ws, req) {
+wss.on("connection", function(ws, req) {
+
+  // May not exist while testing...
+  if (typeof(ws) === "undefined" || ws === null) {
+    console.log("Exiting WSS connecton, no WS defined!");
+    return;
+  }
 
   if (typeof(req) === "undefined") {
     console.log("No request on wss.on");
     return;
   }
 
-  req.on("error", function(err) {
+  wss.on("error", function(err) {
     console.log("WSS REQ ERROR: " + err);
     return;
   });
@@ -462,15 +505,18 @@ wss.on("connection", function connection(ws, req) {
   ws.isAlive = true;
   ws.on('pong', heartbeat);
 
-  _ws = ws;
-  app._ws = ws;
+  // Should be done after validation
+  _ws = ws; // public websocket (!) does not at least fail
+  if (typeof(app) !== "undefined") {
+    app._ws = ws; // public websocket stored in app, needs to be set to builder/buildlog!
+  }
 
   var cookies = req.headers.cookie;
 
   if (typeof(req.headers.cookie) !== "undefined") {
 
     if (cookies.indexOf("thx-") === -1) {
-      console.log("» WARNING! No thx-cookie found in: " + JSON.stringify(req.headers
+      console.log("» WARNING! No thx-cookie found in WS: " + JSON.stringify(req.headers
         .cookie));
     }
 
@@ -479,56 +525,67 @@ wss.on("connection", function connection(ws, req) {
     }
   }
 
-  var logtail_callback = function(err) {
-    console.log("[thinx] logtail_callback:" + err);
+  var logtail_callback = function(err, result) {
+    console.log("[thinx] logtail_callback error:", err, "message", result);
   };
 
-  // May not exist while testing...
-  if (typeof(ws) !== "undefined" && ws != null) {
+  // WARNING! New, untested! Requires websocket and refactoring into router.
 
-    ws.on("message", function incoming(message) {
+  /* Returns specific build log for owner */
+  console.log("Mapping endpoint: /api/user/logs/tail");
+  app.post("/api/user/logs/tail", function(req2, res) {
+    if (!(router.validateSecurePOSTRequest(req) || router.validateSession(req2, res))) return;
+    var owner = req2.session.owner;
+    if (typeof(req2.body.build_id) === "undefined") {
+      router.respond(res, {
+        success: false,
+        status: "missing_build_id"
+      });
+      return;
+    }
+    var error_callback = function(err) {
+      console.log(err);
+      res.set("Connection", "close");
+      router.respond(res, err);
+    };
+    console.log("Tailing build log for " + req2.body.build_id);
+    //const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
+    //const blog = new Buildlog();
+    blog.logtail(req2.body.build_id, owner, ws, error_callback);
+  });
 
-      // skip empty messages
-      if (message == "{}") return;
-
-      var object = JSON.parse(message);
-      console.log("Incoming WS message: "+message);
-
-      if (typeof(object.logtail) !== "undefined") {
-
-        var build_id = object.logtail.build_id;
-        var owner_id = object.logtail.owner_id;
-        blog.logtail(build_id, owner_id, _ws, logtail_callback);
-
-      } else if (typeof(object.init) !== "undefined") {
-
-        if (typeof(messenger) !== "undefined") {
-          console.log("Initializing WS messenger with owner "+object.init);
-          messenger.initWithOwner(object.init, _ws, function(success, message) {
-            if (!success) {
-              console.log("Messenger init on WS message with result " + success + ", with message: ", { message });
-            }
-          });
-        } else {
-          console.log("Messenger is not initialized and therefore could not be activated.");
-        }
-
+  ws.on("message", (message) => {
+    if (message.indexOf("{}") == 0) return; // skip empty messages
+    var object = JSON.parse(message);
+    if (typeof(object.logtail) !== "undefined") {
+      console.log("Initializing WS logtail with object ", {object});
+      var build_id = object.logtail.build_id;
+      var owner_id = object.logtail.owner_id;
+      blog.logtail(build_id, owner_id, _ws, logtail_callback);
+    } else if (typeof(object.init) !== "undefined") {
+      if (typeof(messenger) !== "undefined") {
+        messenger.initWithOwner(object.init, _ws, function(success, message_z) {
+          if (!success) {
+            console.log("Messenger init on WS message with result " + success + ", with message: ", { message_z });
+          }
+        });
       } else {
-        /* unknown message debug, must be removed */
-        var m = JSON.stringify(message);
-        if ((m != "{}") || (typeof(message)=== "undefined")) {
-          console.log("» Websocketparser said: unknown message: " + m);
-        }
+        console.log("Messenger is not initialized and therefore could not be activated.");
       }
-    });
-  }
-
+    } else {
+      /* unknown message debug, must be removed */
+      var m = JSON.stringify(message);
+      if ((m != "{}") || (typeof(message)=== "undefined")) {
+        console.log("» Websocket parser said: unknown message: " + m);
+      }
+    }
+  });
 }).on("error", function(err) {
   console.log("WSS ERROR: " + err);
   return;
 });
 
-wserver.listen(7444, "0.0.0.0", function listening() {
+wserver.listen(app_config.websocket, "0.0.0.0", function listening() {
   console.log("» WebSocket listening on port %d", wserver.address().port);
 });
 
@@ -572,8 +629,6 @@ function log_aggregator() {
 //
 // Master check in cluster mode
 //
-
-const cluster = require('cluster');
 
 function isMasterProcess() {
   return true; // cluster.isMaster();
@@ -659,10 +714,7 @@ function setup_restore_owners_credentials(query) {
 }
 
 function startup_quote() {
-  if (process.env.ENTERPRISE === true) {
-    // do nothing if you don't want to
-    messenger.sendRandomQuote();
-  } else {
+  if (process.env.ENTERPRISE !== true) {
     messenger.sendRandomQuote();
   }
 }

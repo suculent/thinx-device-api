@@ -11,7 +11,7 @@ server {
 
 	ssl_prefer_server_ciphers on;
 
-	ssl_dhparam /root/thinx-device-api/dhparams.pem;
+	ssl_dhparam /opt/thinx-device-api/dhparams.pem;
 
 	root /var/www/rtm/www;
 

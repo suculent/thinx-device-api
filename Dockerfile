@@ -1,5 +1,4 @@
-FROM node:10.16.3
-# using LTS node an attempt to fix python missing
+FROM node:13.12.0
 
 # docker build -t suculent/thinx-device-api .
 
@@ -41,6 +40,9 @@ RUN echo ${REVISION}
 ARG AQUA_SEC_TOKEN
 ENV AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}
 
+ARG SNYK_TOKEN
+ENV SNYK_TOKEN=${SNYK_TOKEN}
+
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
 
@@ -63,6 +65,7 @@ RUN apt-get update -qq && \
     iptables \
     lxc \
     mosquitto \
+    mercurial \
     pigz \
     python \
     python-pip \
@@ -71,10 +74,10 @@ RUN apt-get update -qq && \
     net-tools \
     git \
     jq \
+    zip \
+    g++ \
+    libstdc++ \
     && rm -rf /var/lib/apt/lists/*
-
-# Install Docker
-# RUN curl -sSL https://get.docker.com/ | sh
 
 # Install Docker Client only (Docker is on the host) - fails with /bin/sh not found...
 ENV VER="18.06.3-ce"
@@ -86,12 +89,15 @@ RUN mv /tmp/docker/* /usr/bin
 # Install app dependencies
 COPY package.json ./
 
+COPY .snyk ./.snyk
+
 RUN openssl version \
  && node -v \
- && npm install .
+ && npm update \
+ && npm install . --only-prod \
+ && npm audit fix
 
-# Test modules
-RUN npm install nyc mocha jasmine mocha-lcov-reporter coveralls codacy-coverage -g
+# && npm install -g snyk && snyk protect not free or what? just fails
 
 # set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
 RUN set -x \
@@ -128,11 +134,25 @@ RUN rm -rf ./.git
 
 # this should be generated/overwritten with sed on entrypoint, entrypoint needs /.first_run file and all ENV_VARS
 COPY ./.thinx_env ./.thinx_env
-#COPY ./conf/.thx_prefix ./conf/.thx_prefix
 
-ADD https://get.aquasec.com/microscanner .
-RUN chmod +x microscanner
-RUN ./microscanner ${AQUA_SEC_TOKEN} --continue-on-failure
+# DevSec Support (binary needs to be built for respective platform; requires g++)
+RUN cd ./builders/devsec && ./build.sh
+
+# those packages should not be required and pose HIGH security risks
+# g++ is a DevSec build-only dependency, imagemagick source is currently unknown but it is definitely not required
+RUN apt-get remove -y \
+    g++ \
+    libstdc++ \
+    libc-dev \
+    imagemagick \
+    && apt-get autoremove -y \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+#ADD https://get.aquasec.com/microscanner .
+#RUN chmod +x microscanner && mkdir artifacts
+#RUN ./microscanner ${AQUA_SEC_TOKEN} --html --continue-on-failure > ./artifacts/microscanner.html \
+#    && cp ./artifacts/microscanner.html ./static/microscanner.html
+#RUN rm -rf ./microscanner
 
 RUN mkdir -p ./.nyc_output
 

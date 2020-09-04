@@ -1,3 +1,7 @@
+# Binaries generated in container
+devsec
+embedded_signature.h
+
 # Docker Container Scanners
 clair-scanner
 clair.log
@@ -76,3 +80,5 @@ statistics/**
 # Mosquitto
 mosquitto.aclfile
 mqtt_passwords
+
+.coverity-submit.sh

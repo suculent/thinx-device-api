@@ -1,5 +1,6 @@
 describe("Device", function() {
 
+  var expect = require('chai').expect;
   var Device = require("../../lib/thinx/device"); var device = new Device();
   var ApiKey = require("../../lib/thinx/apikey"); var APIKey = new ApiKey();
 
@@ -64,11 +65,11 @@ describe("Device", function() {
   //create: function(owner, apikey_alias, callback)
   it("API keys are required to do this on new instance", function(done) {
     APIKey.create( owner, "sample-key", function(success, object) {
-      expect(success).toBe(true);
+      expect(success).to.equal(true);
       if (success) {
         apikey = sha256(object.key);
         console.log("Key ready: " + apikey);
-        expect(apikey).toBeDefined();
+        expect(apikey).to.be.a('string');
       }
       done();
     });
@@ -82,16 +83,16 @@ describe("Device", function() {
       function(success, response) {
         if (success === false) {
           console.log(response);
-          expect(response).toBeDefined();
+          expect(response).to.be.a('string');
           if (response === "owner_found_but_no_key") {
             done();
             return;
           }
         }
         //console.log("• DeviceSpec.js: Registration result: ", {response});
-        expect(success).toBe(true);
+        expect(success).to.equal(true);
         JRS2.udid = response.registration.udid;
-        expect(JRS2.udid).toBeDefined();
+        expect(JRS2.udid).to.be.a('string');
         console.log("• DeviceSpec.js: Received UDID: " + JRS2.udid);
         done();
       });
@@ -110,8 +111,8 @@ describe("Device", function() {
         // console.log("• DeviceSpec.js: Editing result: ", { response });
       }
 
-      expect(success).toBe(true);
-      expect(response).toBeDefined();
+      expect(success).to.equal(true);
+      expect(response).to.be.a('string');
       done();
     });
   }, 5000);
@@ -122,7 +123,7 @@ describe("Device", function() {
         apikey,
         null,
         function(success, response) {
-          expect(response).toBeDefined();
+          expect(response).to.be.a('string');
           if (success === false) {
             console.log(
               "should receive different response for already-registered revice: " +
@@ -134,7 +135,7 @@ describe("Device", function() {
             }
           }
           //console.log("• DeviceSpec.js: Re-registration result: ", {response});
-          expect(success).toBe(true);
+          expect(success).to.equal(true);
           done();
         });
     }, 5000);
@@ -142,9 +143,9 @@ describe("Device", function() {
   it("should be able to store OTT request", function(done) {
     device.storeOTT(JSON.stringify(JRS2), function(success, response) {
       console.log("• OTT Response: " , {response});
-      //expect(success).toBe(true); happens to be null?
-      expect(response).toBeDefined();
-      expect(response.ott).toBeDefined();
+      //expect(success).to.equal(true); happens to be null?
+      expect(response).to.be.a('string');
+      expect(response.ott).to.be.a('string');
       ott = response.ott;
       done();
     });
@@ -153,9 +154,9 @@ describe("Device", function() {
   it("should be able to fetch OTT request", function(done) {
     device.storeOTT(JSON.stringify(JRS2), function(success, response) {
       console.log("• OTT Response: " , {response});
-      //expect(success).toBe(true);
-      expect(response).toBeDefined();
-      expect(response.ott).toBeDefined();
+      //expect(success).to.equal(true);
+      expect(response).to.be.a('string');
+      expect(response.ott).to.be.a('string');
       ott = response.ott;
 
       device.fetchOTT(ott, function(success,
@@ -163,8 +164,8 @@ describe("Device", function() {
         if (success === false) {
           console.log(response);
         }
-        //expect(success).toBe(true);
-        expect(response).toBeDefined();
+        //expect(success).to.equal(true);
+        expect(response).to.be.a('string');
         done();
       });
     });
@@ -172,7 +173,7 @@ describe("Device", function() {
 
   it("should be able to normalize a MAC address", function(done) {
     var nmac = device.normalizedMAC("123456789012");
-    expect(nmac).toBeDefined();
+    expect(nmac).to.be.a('string');
     done();
   }, 5000);
 
@@ -183,10 +184,10 @@ describe("Device", function() {
       console.log("• DeviceSpec.js: Using UDID: " + udid);
       device.firmware(body, apikey, function(success, response) {
         console.log("• DeviceSpec.js: Firmware fetch result: ", {response});
-        expect(success).toBe(false);
-        expect(response.success).toBe(false);
-        expect(response.status).toBe("UPDATE_NOT_FOUND");
-        //expect(response).toBe("device_not_found"); // maybe local only
+        expect(success).to.equal(false);
+        expect(response.success).to.equal(false);
+        expect(response.status).to.equal("UPDATE_NOT_FOUND");
+        //expect(response).to.equal("device_not_found"); // maybe local only
         console.log("firmware response: ", {response});
         firmware_done();
       });
@@ -202,8 +203,8 @@ describe("Device", function() {
         udid = response.registration.udid;
         JRS.udid = udid;
         console.log("• DeviceSpec.js: Received UDID: " + udid);
-        expect(success).toBe(true);
-        expect(udid).toBeDefined();
+        expect(success).to.equal(true);
+        expect(udid).to.be.a('string');
         done();
       });
   }, 15000); // register for revocation
@@ -214,10 +215,10 @@ describe("Device", function() {
         JRS2.udid,
         function(success, response) {
           console.log("• DeviceSpec.js: Revocation result: ", { response });
-          //expect(error.reason).toBe("deleted");
-          expect(success).toBe(true);
+          //expect(error.reason).to.equal("deleted");
+          expect(success).to.equal(true);
           if (success == false) {
-            expect(response.status).toBe("device_not_found");
+            expect(response.status).to.equal("device_not_found");
           }
           done();
       });

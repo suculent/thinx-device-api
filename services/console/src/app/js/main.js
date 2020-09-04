@@ -49,7 +49,7 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
       pageSidebarClosed: false, // sidebar menu state
       pageContentWhite: true, // set page content layout
       pageBodySolid: false, // solid body color state
-      pageAutoScrollOnLoad: 1000 // auto scroll to top on page load
+      pageAutoScrollOnLoad: 1 // auto scroll to top on page load
     },
     assetsPath: '../assets',
     globalPath: '../assets/global',
@@ -65,7 +65,7 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
   if (typeof($rootScope.meta) === "undefined") {
     $rootScope.meta = {};
     $rootScope.meta.version = {
-      ui: '1.0.1 (beta)'
+      ui: '1.0.3 (beta)'
     };
     $rootScope.meta.builds = []; // builds by build_id
     $rootScope.meta.transformers = {}; // decoded transformers
@@ -74,9 +74,11 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
     $rootScope.meta.apikeys = {};
     $rootScope.meta.sources = {};
     $rootScope.meta.auditlogs = {}; // flags for auditlogs
+    $rootScope.meta.auditlogs = {}; // flags for auditlogs
+    $rootScope.meta.latestFirmwareEnvelope = {};
   } else {
     $rootScope.meta.version = {
-      ui: '1.0.2 (beta)'
+      ui: '1.0.3 (beta)'
     };
   }
 
@@ -195,7 +197,13 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
 
 RTM.filter('lastSeen', function() {
   return function(date, suffix) {
-    return moment(date).fromNow(suffix);
+    if (typeof(date) === "number") {
+      // e.g. 1410715640579 -	Unix ms timestamp
+      return moment(date, 'x').fromNow(suffix);
+    } else {
+      // e.g. 2013-03-07T07:00:00+08:00 - ISO8601
+      return moment(date).fromNow(suffix);
+    }
   };
 });
 

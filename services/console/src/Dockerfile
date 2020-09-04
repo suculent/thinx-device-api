@@ -12,6 +12,7 @@ ARG ENVIRONMENT
 ARG GOOGLE_ANALYTICS_ID
 ARG ROLLBAR_ACCESS_TOKEN
 ARG CRISP_WEBSITE_ID
+ARG GOOGLE_MAPS_APIKEY
 ARG NGINX_PORT
 ARG NGINX_HOST
 
@@ -25,6 +26,7 @@ ENV ENVIRONMENT=${ENVIRONMENT}
 ENV GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID}
 ENV ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
 ENV CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID}
+ENV GOOGLE_MAPS_APIKEY=${GOOGLE_MAPS_APIKEY}
 ENV NGINX_PORT=${NGINX_PORT}
 ENV NGINX_HOST=${NGINX_HOST}
 
@@ -54,8 +56,6 @@ RUN npm install . \
     && npm run build \
     && npm audit fix
 
-RUN echo "SRC/HTML AFTER BUILD: " && cd ./html && pwd && ls -la
-
 #
 # Deployment Image
 #
@@ -64,7 +64,6 @@ FROM nginx
 
 WORKDIR /usr/share/nginx/html
 COPY --from=0 /home/node/build/html .
-RUN echo "SRC AFTER BUILD: " && pwd && ls -la
 
 # COPY default.conf /etc/nginx/conf.d/default.conf
 

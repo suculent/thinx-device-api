@@ -1,11 +1,13 @@
-var generated_key_name = null;
-var envi = require("../_envi.json");
-var owner = envi.oid;
-
-var APIEnv = require('../../lib/thinx/apienv');
-var apienv = new APIEnv();
-
 describe("API Env", function() {
+
+  var expect = require('chai').expect;
+
+  var generated_key_name = null;
+  var envi = require("../_envi.json");
+  var owner = envi.oid;
+
+  var APIEnv = require('../../lib/thinx/apienv');
+  var apienv = new APIEnv();
 
   // create: function(owner, name, value, callback)
   it("should be able to store new environment variable", function(done) {
@@ -14,7 +16,7 @@ describe("API Env", function() {
       "sample-var-name",
       "sample-var-value",
       function(success, object) {
-        expect(object).toBeDefined();
+        expect(object).to.be.a('string');
         if (success) {
           this.generated_key_name = "sample-var-name";
           done();
@@ -28,8 +30,8 @@ describe("API Env", function() {
         owner,
         "sample-var-name",
         function(success, response) {
-          expect(success).toBe(true);
-          expect(response).toBeDefined();
+          expect(success).to.equal(true);
+          expect(response).to.be.a('string');
           done();
       });
     }, 3000);
@@ -44,7 +46,7 @@ describe("API Env", function() {
         changes,
         function(success, object) {
           if (success) {
-            expect(object).toBeDefined();
+            expect(object).to.be.a('string');
           } else {
             console.log( "[APIEnv] Revocation failed:" + object);
           }
@@ -58,7 +60,7 @@ describe("API Env", function() {
           owner,
           function(success, object) {
             if (success) {
-              expect(object).toBeDefined();
+              expect(object).to.be.a('string');
             } else {
               console.log("[APIEnv] Listing failed:" + object);
             }
@@ -75,7 +77,7 @@ describe("API Env", function() {
             owner,
             changes,
             function(success) {
-              expect(success).toBe(false);
+              expect(success).to.equal(false);
               done();
             });
           }, 5000);

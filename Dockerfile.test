@@ -1,5 +1,4 @@
-FROM node:10.16.3
-# using LTS node an attempt to fix python missing
+FROM node:13.12.0
 
 # docker build -t suculent/thinx-device-api .
 
@@ -8,6 +7,7 @@ ARG THINX_HOSTNAME
 ARG THINX_OWNER_EMAIL
 ARG REVISION
 ARG ROLLBAR_ACCESS_TOKEN
+ARG ROLLBAR_ENVIRONMENT
 ARG COUCHDB_USER
 ARG COUCHDB_PASSWORD
 
@@ -40,6 +40,9 @@ RUN echo ${REVISION}
 ARG AQUA_SEC_TOKEN
 ENV AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}
 
+ARG SNYK_TOKEN
+ENV SNYK_TOKEN=${SNYK_TOKEN}
+
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
 
@@ -62,6 +65,7 @@ RUN apt-get update -qq && \
     iptables \
     lxc \
     mosquitto \
+    mercurial \
     pigz \
     python \
     python-pip \
@@ -70,6 +74,9 @@ RUN apt-get update -qq && \
     net-tools \
     git \
     jq \
+    zip \
+    g++ \
+    libstdc++ \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Docker
@@ -87,6 +94,7 @@ COPY package.json ./
 
 RUN openssl version \
  && node -v \
+ && npm update \
  && npm install .
 
 # Test modules
@@ -125,11 +133,25 @@ COPY . .
 
 # this should be generated/overwritten with sed on entrypoint, entrypoint needs /.first_run file and all ENV_VARS
 COPY ./.thinx_env ./.thinx_env
-#COPY ./conf/.thx_prefix ./conf/.thx_prefix
+
+# DevSec Support (binary needs to be built for respective platform; requires g++)
+RUN cd ./builders/devsec && ./build.sh
+RUN ./devsec -d
+
+# those packages should not be required and pose HIGH security risks
+# g++ is a DevSec build-only dependency, imagemagick source is currently unknown but it is definitely not required
+RUN apt-get remove -y \
+    g++ \
+    libstdc++ \
+    libc-dev \
+    imagemagick \
+    && apt-get autoremove -y \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #ADD https://get.aquasec.com/microscanner .
-#RUN chmod +x microscanner
-#RUN ./microscanner ${AQUA_SEC_TOKEN} --continue-on-failure
+#RUN chmod +x microscanner && mkdir artifacts
+#RUN ./microscanner ${AQUA_SEC_TOKEN} --html --continue-on-failure > ./artifacts/microscanner.html \
+#    && cp ./artifacts/microscanner.html ./static/microscanner.html
 
 RUN mkdir -p ./.nyc_output
 

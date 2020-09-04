@@ -93,6 +93,7 @@
                     <a ui-sref="device({udid: device.udid, origin: 'source'})" stop-event title="{{device.alias}}">
                       <span class="device-icon bg-{{device.category}} device-icon-small">
                         <img ng-src="../assets/thinx/img/ioticons/b_medium_{{('0' + device.icon).slice(-2)}}.png" alt="Device Icon" class="device-icon-symbol" />
+                        <span ng-if="device.auto_update" class="badge badge-danger">AUTO</span>
                       </span>
                     </a>
                   </span>

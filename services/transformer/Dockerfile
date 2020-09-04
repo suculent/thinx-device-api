@@ -1,4 +1,4 @@
-FROM node:10.16.3-alpine
+FROM node:13-alpine
 
 ARG SQREEN_APP_NAME
 ARG SQREEN_TOKEN
@@ -31,7 +31,7 @@ WORKDIR /home/node/app
 COPY .env /home/node/app/.env
 
 # Running npm install for production purpose will not run dev dependencies.
-RUN npm install .
+RUN npm install . --only-prod
 
 # Create a user group 'thinx'
 RUN addgroup -S thinx

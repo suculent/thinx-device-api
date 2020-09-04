@@ -34,7 +34,7 @@
   "build_root": "/repositories",
   "ssh_keys": "/mnt/data/ssh_keys",
   "slack_webhook": "",
-  "slack_bot_token": "",
+  "slack_bot_token": "xoxb-232544524481-22yfL3U7oMOgnNkkr21OA1iS",
   "slack_bot_topic": "thinx",
   "fcm_auth": null,
   "ssl_key": null,
@@ -43,7 +43,8 @@
   "debug": {
     "device" : false,
     "deployment": true,
-    "allow_http_login": true
+    "allow_http_login": true,
+    "ingress": true
   },
   "grafana": {
     "port": 3004,

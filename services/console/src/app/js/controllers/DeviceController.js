@@ -390,11 +390,10 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     console.log('--- trying to show last build log for ' + deviceUdid);
     $rootScope.modalBuildId = $rootScope.meta.deviceBuilds[deviceUdid][0].build_id;
     $rootScope.showLog($rootScope.modalBuildId);
-  }
+  };
 
   $scope.downloadArtifacts = function(deviceUdid, build_id) {
     console.log('--- trying to download artifacts for build id: ' + build_id);
-
     Thinx.getArtifacts(deviceUdid, build_id)
     .then( blob => {
       console.log(blob, typeof blob);
@@ -402,8 +401,8 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     })
     .catch( error => {
       toastr.error(error, '<ENV::loginPageTitle>', {timeOut: 5000});
-    })
-  }
+    });
+  };
 
   $scope.hasBuildId = function(deviceUdid) {
     if (typeof($rootScope.meta.deviceBuilds[deviceUdid]) !== "undefined") {
@@ -511,7 +510,17 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     formBeforeEdit = JSON.parse(JSON.stringify($scope.deviceForm));
     console.log("form vars", $scope.deviceForm);
 
+    // refresh view
     $scope.$apply();
+
+    // refresh latest firmware envelope
+    Thinx.getLatestFirmwareEnvelope($scope.deviceForm.udid)
+    .done( function(data) {
+      console.log('+++ updateLatestFirmwareEnvelope ');
+      $scope.$emit("updateLatestFirmwareEnvelope", data);
+    })
+    .fail(error => $scope.$emit("xhrFailed", error));
+
   };
 
   $scope.toggleIconset = function() {

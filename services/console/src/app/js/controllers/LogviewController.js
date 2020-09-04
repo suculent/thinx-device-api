@@ -2,6 +2,16 @@
 angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', 'settings', function($rootScope, $scope, settings) {
   $scope.$on('$viewContentLoaded', function() {
     console.log('#### Build Log Overlay init')
+
+    // Open websocket to for log & notifications transfer
+    // User profile has to be initialised first
+    if (typeof($rootScope.profile.owner) !== "undefined") {
+      console.log('##### websocket init');
+      openSocket();
+    } else {
+      console.log('##### websocket not initalised - missing owner profile');
+    }
+    
   });
 
   // not implemented yet
@@ -9,7 +19,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
 
   function openSocket() {
     if ("WebSocket" in window) {
-      if (typeof($rootScope.wss)=== "undefined") {
+      if (typeof($rootScope.wss) === "undefined") {
         // open websocket
         console.log('## Opening websocket with credentials ##');
         $rootScope.wss = new WebSocket('<ENV::wssUrl>/' + $rootScope.profile.owner);
@@ -30,10 +40,19 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
             parseNotification(message.data);
           } else {
             // save build data to build buffer
+            // - convert line endings
+            let adapted_data = message.data.replace(/\r\n|\n\t|\r|\n/g, "\n");
+            adapted_data = adapted_data.split(/\n/g);
+
+            // update currently observed logview
             if (typeof($rootScope.modalBuildId) !== "undefined") {
-              $rootScope.logdata[$rootScope.modalBuildId] = $rootScope.logdata[$rootScope.modalBuildId] + "\n" + message.data;
+              for (let i in adapted_data) {
+                $rootScope.logdata[$rootScope.modalBuildId] = $rootScope.logdata[$rootScope.modalBuildId] +
+                "\n" + adapted_data[i];
+              }
             }
-            $rootScope.logdata.buffer = $rootScope.logdata.buffer + "\n" + message.data;
+            // unused
+            // $rootScope.logdata.buffer = $rootScope.logdata.buffer + "\n" + adapted_data.join("\n");
           }
         };
         $rootScope.wss.onclose = function() {
@@ -49,11 +68,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
     }
   }
 
-  // Open websocket to for log & notifications transfer
-  console.log('##### websocket init')
-  openSocket();
-
-  if (typeof($rootScope.showLogOverlayListener)=== "undefined") {
+  if (typeof($rootScope.showLogOverlayListener) === "undefined") {
     $rootScope.showLogOverlayListener = $rootScope.$on('showLogOverlay', function(event, build_id){
       event.stopPropagation();
       $rootScope.showLog(build_id);
@@ -61,37 +76,36 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
   }
 
   $rootScope.wsstailLog = function(build_id) {
-    console.log('-- refreshing log: ', build_id)
+    console.log('-- refreshing log: ', build_id);
     var message = {
       logtail: {
         owner_id: $rootScope.profile.owner,
         build_id: build_id
       }
-    }
+    };
     // $rootScope.logdata.buffer[$rootScope.modalBuildId] = "";
     $rootScope.logdata[build_id] = "";
     $rootScope.modalBuildId = build_id;
     $rootScope.wss.send(JSON.stringify(message));
-  }
+  };
 
   $rootScope.wssinit = function() {
-    console.log('-- initializing websocket ')
+    console.log('-- initializing websocket ');
     var message = {
       init: $rootScope.profile.owner
-    }
+    };
     $rootScope.wss.send(JSON.stringify(message));
-  }
+  };
 
   $rootScope.hideLogOverlay = function(build_id) {
     console.log('--- hiding log overlay --- ');
     $('.log-view-overlay-conatiner').fadeOut();
     console.log($rootScope.logdata.watchers[build_id]);
     clearInterval($rootScope.logdata.watchers[build_id]);
-  }
+  };
 
 
   $rootScope.showLog = function(build_id) {
-
     console.log('--[ logdata ]-- ');
     console.log($rootScope.logdata);
     console.log('--- opening log for build_id: ' + build_id, ' ---');
@@ -113,17 +127,17 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
       console.log('Socket not ready, trying to open it...');
       openSocket();
     }
-  }
+  };
 
   $rootScope.switchWrap = function() {
     console.log('--- toggle word-wrap --- ');
     $('.log-view-body').toggleClass('force-word-wrap');
     $('.icon-frame').toggleClass('overlay-highlight');
-  }
+  };
 
   $scope.toastrCancel = function() {
     alert('test');
-  }
+  };
 
   function parseNotification(data) {
     var msgBody = JSON.parse(data);

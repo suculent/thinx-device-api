@@ -92,6 +92,9 @@ var Thinx = {
   build: function (deviceUdid, sourceId) {
     return build(deviceUdid, sourceId);
   },
+  getLatestFirmwareEnvelope: function (deviceUdid) {
+    return getLatestFirmwareEnvelope(deviceUdid);
+  },
   getArtifacts: function (deviceUdid, build_id) {
     return getArtifacts(deviceUdid, build_id);
   },
@@ -568,6 +571,20 @@ function init($rootScope, $scope) {
     }
   }
 
+  $scope.$on("updateLatestFirmwareEnvelope", function(event, data){
+    updateLatestFirmwareEnvelope(data);
+  });
+
+  function updateLatestFirmwareEnvelope(data) {
+    $rootScope.meta.latestFirmwareEnvelope = data;
+
+    console.log('//////// envelope:');
+    console.log(data);
+    //console.log($rootScope.apikeys);
+    console.log('refreshing view...');
+    $rootScope.$apply()
+  }
+
 
   $scope.$on("updateStats", function(event, data){
     updateStats(data);
@@ -627,8 +644,10 @@ function init($rootScope, $scope) {
         }
         $rootScope.meta.deviceBuilds[response.builds[index].udid].push({
           "build_id":response.builds[index].build_id,
-          "date": response.builds[index].date,
-          "message": response.builds[index].message
+          "last_update": response.builds[index].last_update,
+          "timestamp": response.builds[index].timestamp,
+          "start_time": response.builds[index].start_time,
+          "state": response.builds[index].state
         });
 
         if (typeof($rootScope.meta.builds[response.builds[index].build_id]) == 'undefined') {
@@ -686,6 +705,8 @@ function init($rootScope, $scope) {
   .fail(error => $scope.$emit("xhrFailed", error));
 
 }
+
+
 
 //////////////////////// end of init
 
@@ -781,6 +802,17 @@ function attachSource(sourceId, deviceUdid) {
 function detachSource(deviceUdid) {
   return $.ajax({
     url: urlBase + '/device/detach',
+    type: 'POST',
+    data: JSON.stringify({
+      udid: deviceUdid
+    }),
+    dataType: 'json'
+  });
+}
+
+function getLatestFirmwareEnvelope(deviceUdid) {
+  return $.ajax({
+    url: urlBase + '/device/envelope',
     type: 'POST',
     data: JSON.stringify({
       udid: deviceUdid
