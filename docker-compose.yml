@@ -32,7 +32,7 @@ services:
       - traefik.backend.mosquitto.noexpose
   couchdb:
     env_file: .env
-    image: 'apache/couchdb:2.3.1'
+    image: 'apache/couchdb:3.1.0'
     restart: always
     healthcheck:
       test:
