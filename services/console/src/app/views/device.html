@@ -188,7 +188,7 @@
           We recommend to create one API Key per device to be able to track key usage and misuse.<br/>
           Key is required for build.<br/>
           <span ng-if="deviceForm.base_platform == 'sigfox'">
-            On SigFox you have to change the key in the <a href="https://backend.sigfox.com" target="_blank">SigFox Backend</a> Callback Configuration manually.
+            On SigFox you have to change the key in the <a href="https://backend.sigfox.com" target="_blank" rel="noopener noreferrer">SigFox Backend</a> Callback Configuration manually.
           </span>
         </div>
       </div>
@@ -381,7 +381,7 @@
       <label class="control-label col-md-3">Location</label>
       <div class="col-md-9">
         <div>
-          <a ng-href="https://www.google.com/maps/dir/?api=1&destination={{$root.getDeviceByUdid(deviceForm.udid).lat}},{{$root.getDeviceByUdid(deviceForm.udid).lon}}" target="_blank">
+          <a ng-href="https://www.google.com/maps/dir/?api=1&destination={{$root.getDeviceByUdid(deviceForm.udid).lat}},{{$root.getDeviceByUdid(deviceForm.udid).lon}}" target="_blank" rel="noopener noreferrer">
             <img class="location-map-image" alt="Map icon" ng-src="https://maps.googleapis.com/maps/api/staticmap?key=<ENV::googleMapsApikey>&center={{$root.getDeviceByUdid(deviceForm.udid).lat}},{{$root.getDeviceByUdid(deviceForm.udid).lon}}&amp;size=600x120&amp;sensor=false&amp;zoom=10&amp;markers=color:red%7Clabel:%7C{{$root.getDeviceByUdid(deviceForm.udid).lat}},{{$root.getDeviceByUdid(deviceForm.udid).lon}}" />
           </a>
         </div>
