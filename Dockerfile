@@ -132,6 +132,9 @@ COPY . .
 
 RUN rm -rf ./.git
 
+# this works around an issue where file does not exist in Gitlab CI environment
+RUN touch ./.thinx_env
+
 # this should be generated/overwritten with sed on entrypoint, entrypoint needs /.first_run file and all ENV_VARS
 COPY ./.thinx_env ./.thinx_env
 
