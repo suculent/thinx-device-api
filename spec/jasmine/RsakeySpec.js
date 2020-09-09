@@ -40,7 +40,7 @@ describe("RSA Key", function() {
       function(success, message) {
         //console.log("RSA revocation result: " +JSON.stringify(message));
         expect(success).to.equal(true); // succeds for more fingerprints if one is valid? maybe...
-        expect(message).to.be.a('string');
+        expect(message).to.be.a('array');
         done();
       });
   }, 10000);
