@@ -1,14 +1,20 @@
 var expect = require('chai').expect;
 var Repository = require('../../lib/thinx/repository');
-var watcher = new Repository();
 
 // tests are run from ROOT
 var repo_path = __dirname;
 
 describe("Repository Watcher", function() {
 
+  var watcher = new Repository();
 
   console.log("Using repo_path: "+repo_path);
+
+
+  it("should be able to initialize", function() {
+    watcher = new Repository();
+    expect(watcher).to.be.a('object');
+  });
 
   watcher.callback = function(err) {
     // watcher exit_callback
@@ -18,13 +24,5 @@ describe("Repository Watcher", function() {
     // watcher exit_callback
     console.log("Callback 2");
   };
-
-  beforeEach(function() {
-    watcher = new Watcher();
-  });
-
-  it("should be able to initialize", function() {
-    expect(watcher).to.be.a('object');
-  });
 
 });

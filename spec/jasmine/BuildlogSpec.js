@@ -45,14 +45,13 @@ describe("Build log", function() {
     done();
   });
 
-  it("should be able to tail log for build_id", function(done) {
+  it("should be able to tail log for build_id", function() {
     const no_socket = null;
     blog.logtail(build_id, require("../_envi.json").oid, no_socket, function(success) {
         if (success !== true) {
           console.log(success); // error reason
         }
         expect(success).to.equal(true);
-        done();
       });
   });
 

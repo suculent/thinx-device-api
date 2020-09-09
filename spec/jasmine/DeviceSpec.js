@@ -1,20 +1,18 @@
-describe("Device", function() {
+var expect = require('chai').expect;
+var Device = require("../../lib/thinx/device"); var device = new Device();
+var ApiKey = require("../../lib/thinx/apikey"); var APIKey = new ApiKey();
 
-  var expect = require('chai').expect;
-  var Device = require("../../lib/thinx/device"); var device = new Device();
-  var ApiKey = require("../../lib/thinx/apikey"); var APIKey = new ApiKey();
+var envi = require("../_envi.json");
+var sha256 = require("sha256");
 
-  var envi = require("../_envi.json");
-  var sha256 = require("sha256");
+var owner = envi.oid;
+var udid = envi.udid;
+var apikey = envi.ak;
+var ott = null;
 
-  var owner = envi.oid;
-  var udid = envi.udid;
-  var apikey = envi.ak;
-  var ott = null;
+var generated_key_hash = null;
 
-  var generated_key_hash = null;
-
-  var crypto = require("crypto");
+var crypto = require("crypto");
   var fake_mac = null;
 
   crypto.randomBytes(6, function(err, buffer) {
@@ -36,7 +34,7 @@ describe("Device", function() {
     checksum: "xevim",
     push: "forget",
     alias: "virtual-test-device-1-delete",
-    owner: owner,
+    owner: envi.oid,
     platform: "arduino",
     udid: "d6ff2bb0-df34-11e7-b351-eb37822aa172"
   };
@@ -58,45 +56,53 @@ describe("Device", function() {
 
   var body = JRS; // JSON.parse(RS);
 
-  //console.log("• DeviceSpec.js: Using test API_KEY: " + apikey);
-  //console.log("• DeviceSpec.js: Using request: " + JSON.stringify(JRS));
+  console.log("• DeviceSpec.js: Using test API_KEY: " + apikey);
+  console.log("• DeviceSpec.js: Using request: " + JSON.stringify(JRS));
 
 
-  //create: function(owner, apikey_alias, callback)
-  it("API keys are required to do this on new instance", function(done) {
-    APIKey.create( owner, "sample-key", function(success, object) {
-      expect(success).to.equal(true);
-      if (success) {
-        apikey = sha256(object.key);
-        console.log("Key ready: " + apikey);
-        expect(apikey).to.be.a('string');
+
+describe("Device Registration", function() {
+//create: function(owner, apikey_alias, callback)
+it("API keys are required to do this on new instance", function(done) {
+  APIKey.create( owner, "sample-key", function(success, object) {
+    expect(success).to.equal(true);
+    if (success) {
+      apikey = sha256(object.key);
+      console.log("Key ready: " + apikey);
+      expect(apikey).to.be.a('string');
+    }
+    done();
+  });
+}, 15000);
+
+it("should be able to register itself.", function(done) {
+  let req = {};
+  device.register(
+    req,
+    JRS,
+    apikey,
+    {},
+    function(success, response) {
+      if (success === false) {
+        console.log(response);
+        //expect(response).to.be.a('string');
+        if (response === "owner_found_but_no_key") {
+          done();
+          return;
+        }
       }
+      //console.log("• DeviceSpec.js: Registration result: ", {response});
+      expect(success).to.equal(true);
+      JRS2.udid = response.registration.udid;
+      expect(JRS2.udid).to.be.a('string');
+      console.log("• DeviceSpec.js: Received UDID: " + JRS2.udid);
       done();
     });
-  }, 5000);
+}, 15000); // register
 
-  it("should be able to register itself.", (done) => {
-    device.register(
-      JRS,
-      apikey,
-      null,
-      (success, response) => {
-        if (success === false) {
-          console.log(response);
-          expect(response).to.be.a('string');
-          if (response === "owner_found_but_no_key") {
-            done();
-            return;
-          }
-        }
-        //console.log("• DeviceSpec.js: Registration result: ", {response});
-        expect(success).to.equal(true);
-        JRS2.udid = response.registration.udid;
-        expect(JRS2.udid).to.be.a('string');
-        console.log("• DeviceSpec.js: Received UDID: " + JRS2.udid);
-        done();
-      });
-  }, 15000); // register
+describe("Device", function() {
+
+  
 
 
   it("should be able to change its alias.", function(done) {
@@ -119,9 +125,11 @@ describe("Device", function() {
 
 
   it("should receive different response for registered device", function(done) {
-      device.register(JRS,
+      device.register(
+        {},
+        JRS2,
         apikey,
-        null,
+        {},
         function(success, response) {
           expect(response).to.be.a('string');
           if (success === false) {
@@ -129,7 +137,7 @@ describe("Device", function() {
               "should receive different response for already-registered revice: " +
               response);
             // this is also OK... on CircleCI there are no older API Keys in Redis
-            if (response === "owner_found_but_no_key") {
+            if (response.indexOf("owner_found_but_no_key") !== -1) {
               done();
               return;
             }
@@ -224,3 +232,7 @@ describe("Device", function() {
   }, 5000);
 
 });
+
+
+});
+
