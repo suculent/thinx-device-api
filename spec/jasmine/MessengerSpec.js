@@ -29,7 +29,7 @@ describe("Messenger", function() {
       owner,
       "Test MQTT API Key",
       function(success, object) {
-        let first = object[0];
+        let first = object;
         if (success) {
           generated_key_hash = sha256(first.key);
           console.log("APIKey created for MQTT: " + generated_key_hash + "with owner: " + owner);
@@ -72,7 +72,7 @@ describe("Messenger", function() {
     messenger.initWithOwner(test_owner, mock_socket, function(success, status) {
       expect(success).to.equal(true);
       console.log("init status", {status});
-      expect(status).to.be.a('object');
+      expect(status).to.be.a('string'); // messenger_init_success
       console.log("devices: ", { success: success, status: status });
       done();
     });

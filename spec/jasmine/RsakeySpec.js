@@ -28,9 +28,9 @@ describe("RSA Key", function() {
   }, 10000);
 
   it("should be able to list RSA Keys", function(done) {
-    rsakey.list(owner, function(success, message) {
+    rsakey.list(owner, function(success, list) {
       expect(success).to.equal(true);
-      console.log("RSA list item count: " + JSON.stringify(message.count));
+      console.log("RSA list item count: " + list.length);
       done();
     });
   }, 10000);

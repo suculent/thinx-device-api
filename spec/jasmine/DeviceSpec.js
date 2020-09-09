@@ -159,13 +159,12 @@ describe("Device", function() {
       expect(response.ott).to.be.a('string');
       ott = response.ott;
 
-      device.fetchOTT(ott, function(success,
-        response) {
+      device.fetchOTT(ott, function(success, response) {
         if (success === false) {
           console.log(response);
         }
-        //expect(success).to.equal(true);
-        expect(response).to.be.a('object');
+        expect(success).to.equal(true);
+        expect(response).to.be.a('string');
         done();
       });
     });

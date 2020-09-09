@@ -37,11 +37,12 @@ describe("API Key", function() {
   it("should be able to verify API Keys (requires hash)", function(done) {
     expect(generated_key_hash).to.be.a('string');
     //console.log("Verifying key: " + generated_key_hash);
+    let req = {};
     apikey.verify(
       owner,
       generated_key_hash,
-      null,
-      function(success) {
+      req,
+      (success) => {
         console.log({success});
         expect(success).to.equal(true); // or error? what should this return?
         done();

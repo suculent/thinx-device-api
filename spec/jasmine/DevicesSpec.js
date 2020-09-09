@@ -83,7 +83,7 @@ describe("Devices", function() {
     devices.list("", function(success, response) {
       expect(success).to.equal(true);
       expect(response).to.be.a('object');
-      expect(response.devices).to.equal([]);
+      expect(response.devices).to.be.a('array');
       console.log("Should be empty Device list in: " , {response});
       done();
     });
