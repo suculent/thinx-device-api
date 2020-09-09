@@ -10,10 +10,9 @@ describe("Repository Watcher", function() {
 
   console.log("Using repo_path: "+repo_path);
 
-
   it("should be able to initialize", function() {
     watcher = new Repository();
-    expect(watcher).to.be.a('object');
+    expect(watcher);
   });
 
   watcher.callback = function(err) {

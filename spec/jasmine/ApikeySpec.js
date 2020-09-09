@@ -32,11 +32,11 @@ describe("API Key", function() {
   });
 
   //list: function(owner, callback)
-  it("should be able to list API Keys", (done) => {
+  it("should be able to list API Keys", function(done) {
     
     apikey.list(
       owner,
-      (success, object) => {
+      function(success, object) {
         if (success) {
           //console.log(JSON.stringify(object));
           expect(object).to.be.a('array');

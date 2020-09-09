@@ -37,7 +37,7 @@ describe("Queue", function() {
     // findNext (A)
     it("Should be able find next waiting item in queue", function(done) {
         queue_with_cron.findNext(function(next) {
-            expect(next).to.be.a('object');
+            expect(next);
             done();
         });
     });
