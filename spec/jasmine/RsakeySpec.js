@@ -71,7 +71,7 @@ describe("RSA Key", function() {
       function(success, message) {
         console.log("RSA revocation result: " + JSON.stringify(message));
         expect(success).to.equal(true);
-        expect(message).to.be.a('string'); // should be array of length of 2
+        expect(message).to.be.a('array'); // should be array of length of 2
         done();
       });
   }, 10000);

@@ -73,7 +73,7 @@ describe("Devices", function() {
   it("should be able to list devices for owner", function(done) {
     devices.list(owner, function(success, response) {
       expect(success).to.equal(true);
-      expect(response).to.be.a('string');
+      expect(response).to.be.a('object');
       //console.log("Device list: " , {response});
       done();
     });

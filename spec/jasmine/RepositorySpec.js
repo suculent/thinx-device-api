@@ -19,7 +19,7 @@ describe("Repository Watcher", function() {
   };
 
   beforeEach(function() {
-    //watcher = new Watcher();
+    watcher = new Watcher();
   });
 
   it("should be able to initialize", function() {

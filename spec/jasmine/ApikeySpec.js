@@ -1,3 +1,5 @@
+const { response } = require('express');
+
 describe("API Key", function() {
 
   var expect = require('chai').expect;
@@ -11,16 +13,21 @@ describe("API Key", function() {
   var owner = envi.oid;
 
   //create: function(owner, apikey_alias, callback)
-  it("should be able to generate new API Keys", function(done) {
+  it("should be able to generate new API Keys", (done) => {
     apikey.create(
       owner,
       "sample-key",
-      function(success, object) {
+      (success, object) => {
+        let first = object[0];
+        console.log("generated api key: ", {first}, {object}, {success});
         if (success) {
-          generated_key_hash = sha256(object.key);
+          generated_key_hash = sha256(first.key);
           console.log("APIKey generated: " + generated_key_hash);
+        } else {
+          console.log({object});
         }
-        expect(object).to.be.a('string');
+        expect(success);
+        expect(first);
         done();
       }
     );
@@ -35,7 +42,8 @@ describe("API Key", function() {
       generated_key_hash,
       null,
       function(success) {
-        expect(success).to.equal(true);
+        console.log({success});
+        expect(success).to.equal(true); // or error? what should this return?
         done();
       });
   });
@@ -47,7 +55,7 @@ describe("API Key", function() {
       generated_key_hash,
       "sample-key-hash",
       function(success) {
-        expect(success).to.be.a('string');
+        expect(success);
         done();
       });
   });
@@ -70,7 +78,7 @@ describe("API Key", function() {
     var apikey = new APIKey();
     apikey.revoke(
       "nonsense", ["sample-key-hash"],
-      function(success) {
+      (success) => {
         expect(success).to.equal(false);
         done();
       }
@@ -83,10 +91,10 @@ describe("API Key", function() {
     var apikey = new APIKey();
     apikey.list(
       owner,
-      function(success, object) {
+      (success, object) => {
         if (success) {
           //console.log(JSON.stringify(object));
-          expect(object).to.be.a('string');
+          expect(object).to.be.a('array');
         } else {
           console.log("[jasmine] Listing failed:" + object);
         }

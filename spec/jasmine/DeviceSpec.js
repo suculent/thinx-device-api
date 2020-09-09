@@ -75,12 +75,12 @@ describe("Device", function() {
     });
   }, 5000);
 
-  it("should be able to register itself.", function(done) {
+  it("should be able to register itself.", (done) => {
     device.register(
       JRS,
       apikey,
       null,
-      function(success, response) {
+      (success, response) => {
         if (success === false) {
           console.log(response);
           expect(response).to.be.a('string');
@@ -142,9 +142,9 @@ describe("Device", function() {
 
   it("should be able to store OTT request", function(done) {
     device.storeOTT(JSON.stringify(JRS2), function(success, response) {
-      console.log("• OTT Response: " , {response});
+      //console.log("• OTT Response: " , {response});
       //expect(success).to.equal(true); happens to be null?
-      expect(response).to.be.a('string');
+      expect(response).to.be.a('object');
       expect(response.ott).to.be.a('string');
       ott = response.ott;
       done();
@@ -153,9 +153,9 @@ describe("Device", function() {
 
   it("should be able to fetch OTT request", function(done) {
     device.storeOTT(JSON.stringify(JRS2), function(success, response) {
-      console.log("• OTT Response: " , {response});
+      //console.log("• OTT Response: " , {response});
       //expect(success).to.equal(true);
-      expect(response).to.be.a('string');
+      expect(response).to.be.a('object');
       expect(response.ott).to.be.a('string');
       ott = response.ott;
 
@@ -165,7 +165,7 @@ describe("Device", function() {
           console.log(response);
         }
         //expect(success).to.equal(true);
-        expect(response).to.be.a('string');
+        expect(response).to.be.a('object');
         done();
       });
     });

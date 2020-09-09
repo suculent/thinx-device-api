@@ -30,7 +30,7 @@ describe("Build log", function() {
   it("should be able to fetch specific build log", function(done) {
     blog.fetch(build_id, function(err, body) {
       //console.log(err, body);
-      expect(err).to.be.a('string');
+      expect(err).to.equal(false);
       done();
     });
   }, 10000);

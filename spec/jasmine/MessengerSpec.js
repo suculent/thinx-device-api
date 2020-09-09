@@ -29,11 +29,14 @@ describe("Messenger", function() {
       owner,
       "Test MQTT API Key",
       function(success, object) {
+        let first = object[0];
         if (success) {
-          generated_key_hash = sha256(object.key);
+          generated_key_hash = sha256(first.key);
           console.log("APIKey created for MQTT: " + generated_key_hash + "with owner: " + owner);
+        } else {
+          console.log({success}, {first});
         }
-        expect(object).to.be.a('string');
+        expect(object);
         done();
       }
     );
@@ -43,10 +46,10 @@ describe("Messenger", function() {
     var apikey = new APIKey();
     apikey.list(
       owner,
-      function(success, object) {
+      (success, object) => {
         if (success) {
-          //console.log(JSON.stringify(object));
-          expect(object).to.be.a('string');
+          console.log(JSON.stringify(object));
+          expect(object).to.be.a('array');
         } else {
           console.log("[jasmine] Listing failed:" + object);
         }
