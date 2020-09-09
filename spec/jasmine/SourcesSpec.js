@@ -24,7 +24,7 @@ describe("Sources", function() {
         }
         //console.log("Source Add Response: " , {response});
         expect(success).to.equal(true);
-        expect(response).to.be.a('string');
+        expect(response);
         source_id = response.source_id;
         done();
       });
@@ -56,7 +56,7 @@ describe("Sources", function() {
         }
         console.log("Source Add Response: " , {response});
         //expect(success).to.equal(true);
-        expect(response).to.be.a('string');
+        expect(response);
         source_id = response.source_id;
 
         Sources.remove(source.owner, [source_id], (rsuccess, rresponse) => {
