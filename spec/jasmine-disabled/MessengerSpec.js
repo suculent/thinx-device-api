@@ -24,7 +24,7 @@ describe("Messenger", function() {
     apikey.create(
       owner,
       "Test MQTT API Key",
-      function(success, object) {
+      (success, object) => {
         let first = object;
         console.log({first});
         if (success && first.key) {
