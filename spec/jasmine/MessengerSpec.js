@@ -40,20 +40,18 @@ describe("Messenger", function() {
   });
 
   // getDevices: function(owner, callback)
-  it("should be able to fetch devices for owner", function() {
-    messenger.getDevices(test_owner, function(success, devices) {
+  it("should be able to fetch devices for owner", function(done) {
+    messenger.getDevices(test_owner, (success, devices) => {
       expect(devices);
       console.log("devices: ", { devices });
-      //done();
+      done();
     });
-
-    //done();
   });
 
   // init
   it("should be able to initialize on its own", function(done) {
     const mock_socket = {};
-    messenger.initWithOwner(test_owner, mock_socket, function(success, status) {
+    messenger.initWithOwner(test_owner, mock_socket, (success, status) => {
       expect(success).to.equal(true);
       console.log("init status", {status});
       //expect(status).to.be.a('string'); // messenger_init_success

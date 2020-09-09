@@ -33,12 +33,11 @@ describe("API Key", function() {
 
   //list: function(owner, callback)
   it("should be able to list API Keys", function(done) {
-    
     apikey.list(
       owner,
-      function(success, object) {
+      (success, object) => {
         if (success) {
-          //console.log(JSON.stringify(object));
+          //console.log("api key list: ", JSON.stringify(object));
           expect(object).to.be.a('array');
         } else {
           console.log("[jasmine] Listing failed:" + object);

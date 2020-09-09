@@ -86,7 +86,7 @@ it("should be able to register itself.", function(done) {
       if (success === false) {
         console.log(response);
         //expect(response).to.be.a('string');
-        if (response === "owner_found_but_no_key") {
+        if (response.indexOf("owner_found_but_no_key") !== -1) {
           done();
           return;
         }
@@ -143,7 +143,7 @@ describe("Device", function() {
             }
           }
           //console.log("• DeviceSpec.js: Re-registration result: ", {response});
-          expect(success).to.equal(true);
+          expect(success).to.equal(false);
           done();
         });
     }, 5000);
