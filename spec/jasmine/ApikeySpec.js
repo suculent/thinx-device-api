@@ -18,8 +18,8 @@ describe("API Key", function() {
       owner,
       "sample-key",
       (success, object) => {
-        let first = object[0];
-        console.log("generated api key: ", {first}, {object}, {success});
+        let first = object;
+        //console.log("generated api key: ", {first}, {object}, {success});
         if (success) {
           generated_key_hash = sha256(first.key);
           console.log("APIKey generated: " + generated_key_hash);

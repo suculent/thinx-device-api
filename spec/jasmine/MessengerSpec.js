@@ -70,8 +70,9 @@ describe("Messenger", function() {
   it("should be able to initialize on its own", function(done) {
     const mock_socket = {};
     messenger.initWithOwner(test_owner, mock_socket, function(success, status) {
-      // expect(success).to.equal(true);
-      expect(status).to.be.a('string');
+      expect(success).to.equal(true);
+      console.log("init status", {status});
+      expect(status).to.be.a('object');
       console.log("devices: ", { success: success, status: status });
       done();
     });

@@ -1,11 +1,12 @@
+var expect = require('chai').expect;
+var Repository = require('../../lib/thinx/repository');
+var watcher = new Repository();
+
+// tests are run from ROOT
+var repo_path = __dirname;
+
 describe("Repository Watcher", function() {
 
-  var expect = require('chai').expect;
-  var Repository = require('../../lib/thinx/repository');
-  var watcher = new Repository();
-
-  // tests are run from ROOT
-  var repo_path = __dirname;
 
   console.log("Using repo_path: "+repo_path);
 

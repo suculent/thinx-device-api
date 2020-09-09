@@ -50,7 +50,7 @@ describe("Notifier", function() {
     var error = exec.execSync(CMD).toString();
     console.log("Notifier result: ");
     console.log({error});
-    //expect(error).not.to.be.a('string');
+    expect(error).not.to.be.a('string');
     done();
   });
 

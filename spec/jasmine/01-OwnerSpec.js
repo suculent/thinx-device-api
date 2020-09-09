@@ -34,6 +34,8 @@ describe("Owner", function() {
       console.log("create owner profile:", {success}, {response});
       if (response.indexOf("username_already_exists") !== -1) {
         expect(success).to.equal(false);
+        done();
+        return;
       } else {
         expect(success).to.equal(true);
       }
