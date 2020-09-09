@@ -74,49 +74,45 @@ describe("Sources", function() {
       });
   }, 20000);
 
-  it("should be able to validate branch name", function(done) {
+  it("should be able to validate branch name", function() {
     let source = {
       branch: "origin/master"
     };
-    Sources.validateBranch(source, (error) => {
+    let result = Sources.validateBranch(source, (error) => {
       console.log(error);
-      expect(error).to.be.false;
-      done();
     });
+    expect(result).to.equal("master");
     
   });
 
-  it("should be able to validate url", function(done) {
+  it("should be able to validate url", function() {
     let source = {
       url: "git@github.com/suculent/thinx-device-api"
     };
-    Sources.validateBranch(source, (error) => {
-      console.log("validateBranch error:", error);
-      expect(error).to.be.false;
-      done();
+    let result = Sources.validateBranch(source, (error) => {
+      console.log("validateBranch error:", error);            
     });
+    expect(result).to.equal("master");
   });
 
-  it("should be able to invalidate branch name", function(done) {
+  it("should be able to invalidate branch name", function() {
     let source = {
       branch: "origin/mas'ter"
     };
-    Sources.validateBranch(source, (error) => {
+    let result = Sources.validateBranch(source, (error) => {
       console.log(error);
-      expect(error).to.be.false;
-      done();
     });
+    expect(result).to.equal('mas\'ter');
   });
 
-  it("should be able to invalidate url", function(done) {
+  it("should be able to invalidate url", function() {
     let source = {
       url: "git@github.com/;;suculent/thinx-device-api"
     };
-    Sources.validateBranch(source, (error) => {
+    let result = Sources.validateURL(source, function(error) {
       console.log(error);
-      expect(error).to.be.false;
-      done();
     });
+    expect(result).to.equal(false);
     
   });
 
