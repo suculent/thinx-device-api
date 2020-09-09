@@ -28,9 +28,9 @@ describe("RSA Key", function() {
   }, 10000);
 
   it("should be able to list RSA Keys", function(done) {
-    rsakey.list(owner, function(success, message) {
+    rsakey.list(owner, function(success, list) {
       expect(success).to.equal(true);
-      console.log("RSA list item count: " + JSON.stringify(message.count));
+      console.log("RSA list item count: " + list.length);
       done();
     });
   }, 10000);
@@ -40,7 +40,7 @@ describe("RSA Key", function() {
       function(success, message) {
         //console.log("RSA revocation result: " +JSON.stringify(message));
         expect(success).to.equal(true); // succeds for more fingerprints if one is valid? maybe...
-        expect(message).to.be.a('string');
+        expect(message).to.be.a('array');
         done();
       });
   }, 10000);
@@ -71,7 +71,7 @@ describe("RSA Key", function() {
       function(success, message) {
         console.log("RSA revocation result: " + JSON.stringify(message));
         expect(success).to.equal(true);
-        expect(message).to.be.a('string'); // should be array of length of 2
+        expect(message).to.be.a('array'); // should be array of length of 2
         done();
       });
   }, 10000);

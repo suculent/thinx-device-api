@@ -1,74 +1,62 @@
+var expect = require('chai').expect;
+
+var generated_key_hash;
+var Messenger = require('../../lib/thinx/messenger');
+var messenger = new Messenger().getInstance();
+
+var envi = require("../_envi.json");
+var test_owner = envi.oid;
+var udid = envi.udid;
+
+var envi = require("../_envi.json");
+var owner = envi.oid;
+
+var APIKey = require("../../lib/thinx/apikey");
+var apikey = new APIKey();
+var sha256 = require("sha256");
+var envi = require("../_envi.json");
+var owner = envi.oid;
+
+
 describe("Messenger", function() {
   
-  var expect = require('chai').expect;
-
-  var generated_key_name;
-  var Messenger = require('../../lib/thinx/messenger');
-  var messenger = new Messenger().getInstance();
-
-  var envi = require("../_envi.json");
-  var test_owner = envi.oid;
-  var udid = envi.udid;
-
-  var user = require('../../lib/thinx/owner');
-  var User = new user();
-  var envi = require("../_envi.json");
-  var owner = envi.oid;
-  var email = envi.email;
-
-  var APIKey = require("../../lib/thinx/apikey");
-  var apikey = new APIKey();
-  var sha256 = require("sha256");
-  var envi = require("../_envi.json");
-  var owner = envi.oid;
-
-  var generated_key_hash;
-
   it("should be able to generate new API Keys", function(done) {
     apikey.create(
       owner,
       "Test MQTT API Key",
       function(success, object) {
-        if (success) {
-          generated_key_hash = sha256(object.key);
+        let first = object;
+        console.log({first});
+        if (success && first.key) {
+          generated_key_hash = sha256(first.key);
           console.log("APIKey created for MQTT: " + generated_key_hash + "with owner: " + owner);
+        } else {
+          console.log({success}, {first});
         }
-        expect(object).to.be.a('string');
+        expect(object);
         done();
       }
     );
   });
 
-  it("should be able to list API Keys", function(done) {
-    var apikey = new APIKey();
-    apikey.list(
-      owner,
-      function(success, object) {
-        if (success) {
-          //console.log(JSON.stringify(object));
-          expect(object).to.be.a('string');
-        } else {
-          console.log("[jasmine] Listing failed:" + object);
-        }
-        done();
-      });
-  });
-
   // getDevices: function(owner, callback)
-  it("should be able to fetch devices for owner", function(done) {
+  it("should be able to fetch devices for owner", function() {
     messenger.getDevices(test_owner, function(success, devices) {
-      expect(success).to.equal(true);
+      expect(devices);
       console.log("devices: ", { devices });
-      done();
+      //done();
     });
-  }, 5000);
+
+    //done();
+  });
 
   // init
   it("should be able to initialize on its own", function(done) {
     const mock_socket = {};
     messenger.initWithOwner(test_owner, mock_socket, function(success, status) {
-      // expect(success).to.equal(true);
-      expect(status).to.be.a('string');
+      expect(success).to.equal(true);
+      console.log("init status", {status});
+      //expect(status).to.be.a('string'); // messenger_init_success
       console.log("devices: ", { success: success, status: status });
       done();
     });
@@ -89,5 +77,19 @@ describe("Messenger", function() {
     // console.log("publishing: ", { test_owner, udid });
     done();
   }, 5000);
+
+  it("should be able to list API Keys", function(done) {
+    apikey.list(
+      owner,
+      (success, object) => {
+        if (success) {
+          //console.log("api key list: ", JSON.stringify(object));
+          expect(object).to.be.a('array');
+        } else {
+          console.log("[jasmine] Listing failed:" + object);
+        }
+        done();
+      });
+  });
 
 });

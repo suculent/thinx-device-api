@@ -9,9 +9,9 @@ describe("Sanitka", function () {
     expect(s).to.equal("https://github.com/suculent/thinx-device-api/  ");
   });
 
-  it("should sanitize branches (removing origin/)", function () {
+  it("should sanitize branches (removing &)", function () {
     var s = sanitka.url("origin/master&");
-    expect(s).to.equal("master");
+    expect(s).to.equal("origin/master");
   });
 
   it("should de-escape (delete) dangerous shell characters \", \', ;", function () {

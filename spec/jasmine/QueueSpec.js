@@ -29,22 +29,33 @@ describe("Queue", function() {
         queue_with_cron.add(mock_udid_3, mock_source_id);
     });
 
+    // cron
+    it("Should be able to run cron when initialized", function() {
+        queue_with_cron.cron();
+    });
+
     // findNext (A)
-    it("Should be able find next waiting item in queue", function() {
-        let next = queue_with_cron.findNext();
-        expect(next).to.be.a('string');
+    it("Should be able find next waiting item in queue", function(done) {
+        queue_with_cron.findNext(function(next) {
+            expect(next);
+            done();
+        });
     });
 
     // runNext
-    it("Should be able run next item", function() {
-        let next = queue_with_cron.findNext();
-        expect(next).to.be.a('string');
+    it("Should be able run next item", function(done) {
+        queue_with_cron.findNext(function(action) {
+            queue_with_cron.runNext(action);
+            done();
+        });
+        
     });
 
     // findNext (B)
     it("Should not be able to find anything while queue item is running", function() {
-        let next = queue_with_cron.findNext();
-        expect(next).not.to.be.a('string');
+        queue_with_cron.findNext(function(action) {
+            expect(action).not.to.be.a('object');
+        });
     });
 
     it("Should run loop safely", function() {
