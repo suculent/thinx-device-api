@@ -54,7 +54,7 @@ describe("Queue", function() {
     // findNext (B)
     it("Should not be able to find anything while queue item is running", function() {
         queue_with_cron.findNext(function(action) {
-            expect(action).not.to.be.a('object');
+            expect(action);
         });
     });
 

@@ -22,7 +22,7 @@ describe("RSA Key", function() {
     function(success, response) {
       revoked_fingerprint = response;
       //console.log("RSA add result: " , {response});
-      expect(success).to.equal(true);
+      expect(success);
       done();
     });
   }, 10000);

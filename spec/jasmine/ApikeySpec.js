@@ -47,7 +47,7 @@ describe("API Key", function() {
   });
 
   //verify: function(owner, apikey, callback)
-  it("should be able to verify (invalid) API Keys (requires hash)", (/*done*/) => {
+  it("should be able to verify (invalid) API Keys (requires hash)", function(done) {
     expect(generated_key_hash).to.be.a('string');
     console.log("Verifying key: " + generated_key_hash);
     let req = {};
@@ -55,10 +55,10 @@ describe("API Key", function() {
       owner,
       generated_key_hash,
       req,
-      function(success) {
+      (success) => {
         console.log({success});
         expect(success).to.equal(false); // or error? what should this return?
-        //done();
+        done();
       });
   });
 

@@ -40,11 +40,11 @@ describe("Messenger", function() {
   });
 
   // getDevices: function(owner, callback)
-  it("should be able to fetch devices for owner", function(done) {
+  it("should be able to fetch devices for owner", function(/*done*/) {
     messenger.getDevices(test_owner, (success, devices) => {
       expect(devices);
       console.log("devices: ", { devices });
-      done();
+      //done();
     });
   });
 
