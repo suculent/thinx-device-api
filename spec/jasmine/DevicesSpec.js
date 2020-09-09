@@ -75,12 +75,12 @@ describe("Devices", function() {
   }, 15000); // register
 
   // All of this expects successful device registration to safely revoke!
-
+  
   it("should be able to list devices for owner", function(done) {
     devices.list(owner, (success, response) => {
       expect(success).to.equal(true);
       expect(response).to.be.a('object');
-      //console.log("Device list: " , {response});
+      console.log("Device list: " , {response});
       done();
     });
   }, 5000);

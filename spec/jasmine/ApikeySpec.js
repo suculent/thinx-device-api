@@ -1,17 +1,35 @@
-const { response } = require('express');
+//const { response } = require('express');
 var APIKey = require("../../lib/thinx/apikey");
-var apikey = new APIKey();
+var expect = require('chai').expect;  
+var generated_key_hash = null;
+var sha256 = require("sha256");
+var envi = require("../_envi.json");
+var owner = envi.oid;
+
+describe("API Key List", function() {
+  it("should be able to list API Keys(1)", function(done) {
+    var apikey = new APIKey();
+    apikey.list(
+      owner,
+      (success, object) => {
+        if (success) {
+          //console.log("api key list(1): ", JSON.stringify(object));
+          expect(object).to.be.a('array');
+        } else {
+          console.log("[jasmine] Listing failed:" + object);
+        }
+        done();
+      });
+  });
+});
 
 describe("API Key", function() {
 
-  var expect = require('chai').expect;  
-  var generated_key_hash = null;
-  var sha256 = require("sha256");
-  var envi = require("../_envi.json");
-  var owner = envi.oid;
-
   //create: function(owner, apikey_alias, callback)
   it("should be able to generate new API Keys", function(done) {
+    console.log("With owner:", owner);
+    expect(owner);
+    var apikey = new APIKey();
     apikey.create(
       owner,
       "sample-key",
@@ -20,56 +38,48 @@ describe("API Key", function() {
         //console.log("generated api key: ", {first}, {object}, {success});
         if (success) {
           generated_key_hash = sha256(first.key);
-          console.log("APIKey generated: " + generated_key_hash);
+          console.log("APIKey generated:", generated_key_hash);
         } else {
-          console.log({object});
+          console.log("APIKey failed: ",{object});
         }
         expect(success);
         expect(first);
-        done();
+        if (done) {
+          done();
+        }        
+        //done();
       }
     );
   });
 
+  
   //list: function(owner, callback)
-  it("should be able to list API Keys", function(/*done*/) {
+  it("should be able to list API Keys (2)", function(done) {
+    var apikey = new APIKey();
     apikey.list(
       owner,
-      function(success, object) {
+       (success, object) => {
         if (success) {
-          //console.log("api key list: ", JSON.stringify(object));
+          console.log("api key list(2): OK"); // , JSON.stringify(object)
           expect(object).to.be.a('array');
         } else {
           console.log("[jasmine] Listing failed:" + object);
         }
-        //done();
+        if (done) done();
       });
-  });
+      
+  }, 15000);
 
   //verify: function(owner, apikey, callback)
-  it("should be able to verify (invalid) API Keys (requires hash)", function(done) {
-    expect(generated_key_hash).to.be.a('string');
-    console.log("Verifying key: " + generated_key_hash);
-    let req = {};
-    apikey.verify(
-      owner,
-      generated_key_hash,
-      req,
-      (success) => {
-        console.log({success});
-        expect(success).to.equal(false); // or error? what should this return?
-        done();
-      });
-  });
-
   it("should be able to verify invalid API Keys", function(done) {
     const req = { ip: "0.0.0.0" };
+    var apikey = new APIKey();
     apikey.verify(
       owner,
       "invalid-api-key",
       req,
       (success) => { // fixed (callback is not a function!)
-        console.log("verify callback");
+        console.log("verify with invalid API Key, callback, done()");
         expect(success).to.equal(false);
         done();
       });
@@ -78,22 +88,24 @@ describe("API Key", function() {
   //revoke: function(owner, apikey_hash, callback)
   it("should be able to revoke API Keys", function(done) {
     console.log("Revoking valid key: " + generated_key_hash);
+    var apikey = new APIKey();
     apikey.revoke(
       generated_key_hash,
       ["sample-key-hash"],
-      function(success, result) {
+      (success, result)  => {
         expect(success);
         done();
       });
   });
 
-  it("should be able to fail on invalid API Key revocation (callback is not a function!)", (done) => {
-    //console.log("Revoking invalid key...");
+  it("should be able to fail on invalid API Key revocation (callback is not a function!)", function() {
+    console.log("Revoking invalid-owner key...");
+    var apikey = new APIKey();
     apikey.revoke(
       "nonsense", ["sample-key-hash"],
-      function(success) {
+      (success)  => {
         expect(success).to.equal(false);
-        done();
+        //done();
       }
     );
   });
