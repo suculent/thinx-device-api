@@ -5,10 +5,10 @@ var generated_key_hash = null;
 var sha256 = require("sha256");
 var envi = require("../_envi.json");
 var owner = envi.oid;
+var apikey = new APIKey();
 
 describe("API Key List", function() {
   it("should be able to list API Keys(1)", function(done) {
-    var apikey = new APIKey();
     apikey.list(
       owner,
       (success, object) => {
@@ -26,10 +26,9 @@ describe("API Key List", function() {
 describe("API Key", function() {
 
   //create: function(owner, apikey_alias, callback)
-  it("should be able to generate new API Keys", function(done) {
-    console.log("With owner:", owner);
+  it("should be able to generate new API Key", function(done) {
+    //console.log("With owner:", owner);
     expect(owner);
-    var apikey = new APIKey();
     apikey.create(
       owner,
       "sample-key",
@@ -44,41 +43,24 @@ describe("API Key", function() {
         }
         expect(success);
         expect(first);
-        if (done) {
-          done();
-        }        
-        //done();
+        done();
       }
     );
   });
 
   
-  //list: function(owner, callback)
-  it("should be able to list API Keys (2)", function(done) {
-    var apikey = new APIKey();
-    apikey.list(
-      owner,
-       (success, object) => {
-        if (success) {
-          console.log("api key list(2): OK"); // , JSON.stringify(object)
-          expect(object).to.be.a('array');
-        } else {
-          console.log("[jasmine] Listing failed:" + object);
-        }
-        if (done) done();
-      });
-      
-  }, 15000);
+});
+
+describe("API Keys", function() {
 
   //verify: function(owner, apikey, callback)
   it("should be able to verify invalid API Keys", function(done) {
-    const req = { ip: "0.0.0.0" };
-    var apikey = new APIKey();
+    let req = { ip: "0.0.0.0" };
     apikey.verify(
       owner,
       "invalid-api-key",
       req,
-      (success) => { // fixed (callback is not a function!)
+      (success, result) => { // fixed (callback is not a function!)
         console.log("verify with invalid API Key, callback, done()");
         expect(success).to.equal(false);
         done();
@@ -88,7 +70,6 @@ describe("API Key", function() {
   //revoke: function(owner, apikey_hash, callback)
   it("should be able to revoke API Keys", function(done) {
     console.log("Revoking valid key: " + generated_key_hash);
-    var apikey = new APIKey();
     apikey.revoke(
       generated_key_hash,
       ["sample-key-hash"],
@@ -100,7 +81,6 @@ describe("API Key", function() {
 
   it("should be able to fail on invalid API Key revocation (callback is not a function!)", function() {
     console.log("Revoking invalid-owner key...");
-    var apikey = new APIKey();
     apikey.revoke(
       "nonsense", ["sample-key-hash"],
       (success)  => {
@@ -108,6 +88,22 @@ describe("API Key", function() {
         //done();
       }
     );
+  });
+
+  //list: function(owner, callback)
+  it("should be able to list API Keys (2)", function(done) {
+    apikey.list(
+      owner,
+       (success, object) => {
+        if (success) {
+          console.log("api key list(2): OK"); // , JSON.stringify(object)
+          //expect(object).to.be.a('array');
+        } else {
+          console.log("[jasmine] Listing failed:" + object);
+        }
+        if (done) done();
+      });
+      
   });
 
 });

@@ -19,6 +19,18 @@ var owner = envi.oid;
 
 
 describe("Messenger", function() {
+
+  // init
+  it("should be able to initialize on its own", function(done) {
+    const mock_socket = {};
+    messenger.initWithOwner(test_owner, mock_socket, (success, status) => {
+      expect(success).to.equal(true);
+      console.log("init status", {status}, {success});
+      //expect(status).to.be.a('string'); // messenger_init_success
+      console.log("devices: ", { success: success, status: status });
+      done();
+    });
+  }, 5000);
   
   it("should be able to generate new API Keys", function(done) {
     apikey.create(
@@ -48,18 +60,6 @@ describe("Messenger", function() {
     });
   });
 
-  // init
-  it("should be able to initialize on its own", function(done) {
-    const mock_socket = {};
-    messenger.initWithOwner(test_owner, mock_socket, (success, status) => {
-      expect(success).to.equal(true);
-      console.log("init status", {status});
-      //expect(status).to.be.a('string'); // messenger_init_success
-      console.log("devices: ", { success: success, status: status });
-      done();
-    });
-  }, 5000);
-
   /* why? this function is unused... dead code.
   it("should be able to get all owners", function(done) {
     Messenger.getAllOwners(function(success, status) {
@@ -76,6 +76,7 @@ describe("Messenger", function() {
     done();
   }, 5000);
 
+  /* this is not a messengerspec
   it("should be able to list API Keys", function(done) {
     apikey.list(
       owner,
@@ -88,6 +89,6 @@ describe("Messenger", function() {
         }
         done();
       });
-  });
+  });*/
 
 });
