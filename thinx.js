@@ -527,10 +527,12 @@ wss.on("connection", function(ws, req) {
       res.set("Connection", "close");
       router.respond(res, err);
     };
-    console.log("Tailing build log for " + req2.body.build_id);
+    
     //const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
     //const blog = new Buildlog();
-    blog.logtail(req2.body.build_id, owner, ws, error_callback);
+    let safe_id = Sanitka.branch(req2.body.build_id);
+    console.log("Tailing build log for " + safe_id);
+    blog.logtail(safe_id, owner, ws, error_callback);
   });
 
   ws.on("message", (message) => {
@@ -576,6 +578,7 @@ wserver.listen(app_config.websocket, "0.0.0.0", function listening() {
  */
 
 var package_info = require("./package.json");
+const Sanitka = require("./lib/thinx/sanitka.js");
 var product = package_info.description;
 var version = package_info.version;
 
