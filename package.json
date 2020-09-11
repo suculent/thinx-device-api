@@ -20,7 +20,7 @@
     "mocha": "mocha spec/jasmine --delay=3000 --exit --timeout=5000; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls",
     "prepare": "npm-auto-version && npm run snyk-protect",
     "postpublish": "git push origin --tags",
-    "preinstall": "npx npm-force-resolutions"
+    "preinstall": "if [ -f ./package_lock.json ]; then npx npm-force-resolutions; fi"
   },
   "dependencies": {
     "@slack/rtm-api": "^5.0.4",
