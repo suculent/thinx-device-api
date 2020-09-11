@@ -96,7 +96,8 @@
     "node-forge": "0.10.0",
     "yargs-parser": "18.1.1",
     "flat": "5.0.2",
-    "mem": "4.0.0"
+    "mem": "4.0.0",
+    "ajv": "6.12.3"
   },
   "devDependencies": {
     "codacy-coverage": "^3.4.0",
