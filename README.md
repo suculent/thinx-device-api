@@ -2,8 +2,6 @@
 
 IoT Device Management Server running on node.js.
 
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=suculent_thinx-device-api&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=suculent_thinx-device-api)
-[![Build Status](https://img.shields.io/circleci/project/github/suculent/thinx-device-api/master.svg)](https://circleci.com/gh/suculent/thinx-device-api)
 [![CodeFactor](https://www.codefactor.io/repository/github/suculent/thinx-device-api/badge)](https://www.codefactor.io/repository/github/suculent/thinx-device-api)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=suculent_thinx-device-api&metric=security_rating)](https://sonarcloud.io/dashboard?id=suculent_thinx-device-api)
 [![codebeat badge](https://codebeat.co/badges/a3b416b1-b53b-4bc5-ae6e-8a2b9ca31880)](https://codebeat.co/projects/github-com-suculent-thinx-device-api-master)
