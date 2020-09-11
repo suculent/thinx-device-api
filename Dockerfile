@@ -91,9 +91,11 @@ COPY package.json ./
 
 COPY .snyk ./.snyk
 
+# second npm install is using package_lock to fix pinned transient dependencies
 RUN openssl version \
  && node -v \
  && npm update \
+ && npm install . --only-prod \
  && npm install . --only-prod \
  && npm audit fix
 
