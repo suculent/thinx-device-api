@@ -41,12 +41,14 @@ var env = {
   projectDescription: isEnterprise ? '' : 'Manage IoT devices (for MCUs eg. ESP32, ESP8266 or any systems running Node.js, Micropython, NodeMCU, Arduino...), build and update firmwares remotely (FOTA/firmware-over-the-air), transform and route sensor data (MQTT)'
 };
 
+/*
 console.log('----------- gulp env ------------');
 console.log('isProduction: ' + isProduction);
 console.log('isEnterprise: ' + isEnterprise);
 console.log('makeBundle: ' + makeBundle);
 console.log('env: ' + JSON.stringify(env, null, 4));
 console.log('----------- -------- ------------');
+*/
 
 //*** Localhost server tast
 gulp.task('build', function() {
