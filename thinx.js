@@ -20,6 +20,7 @@ if (Globals.use_sqreen()) {
 const crypto = require('crypto');
 const express = require("express");
 const session = require("express-session");
+const helmet = require("helmet");
 
 var Auth = require('./lib/thinx/auth.js');
 var auth = new Auth();
@@ -340,6 +341,8 @@ app.use(express.urlencoded({
 // app.use(cookieParser());
 // var csrf = require('csurf');
 // app.use(csrf({ cookie: true })); collides with Sqreen
+
+app.use(helmet());
 
 let router = require('./lib/router.js')(app, _ws);
 
