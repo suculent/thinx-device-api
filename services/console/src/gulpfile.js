@@ -14,9 +14,10 @@ var debug = require('gulp-debug');
 var merge = require('merge-stream');
 var concat = require('gulp-concat');
 
-console.log('----------- gulp process.env ------------');
-console.log(JSON.stringify(process.env, null, 4));
-console.log('----------- ---------------- ------------');
+// Cleartext logging of sensitive information, development only.
+//console.log('----------- gulp process.env ------------');
+//console.log(JSON.stringify(process.env, null, 4));
+//console.log('----------- ---------------- ------------');
 
 var isProduction = typeof(process.env.ENVIRONMENT) == 'undefined' || process.env.ENVIRONMENT !== 'production' ? false : true;
 var isEnterprise = typeof(process.env.ENTERPRISE) == 'undefined' || process.env.ENTERPRISE !== 'true' ? false : true;
