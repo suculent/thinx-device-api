@@ -376,7 +376,7 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
 
   try {
       caCert = fs.readFileSync(app_config.ssl_cert).toString();
-      //caStore = pki.createCaStore([ caCert ]);
+      caStore = pki.createCaStore([ caCert ]);
       ssloaded = true;
   } catch (e) {
       console.log('Failed to load CA certificate (' + e + ')');
@@ -385,16 +385,14 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
 
   if (ssloaded) {
 
-    let sslvalid = true;
-
-    /*
+    /* TODO: Test/enable this validation to prevent running with expired SSL cert. */
+    let sslvalid = true; // TODO: should be initially false!
     try {
         pki.verifyCertificateChain( caStore, [ caCert ]);
         sslvalid = true;
     } catch (e) {
         console.log('Failed to verify certificate (' + e.message || e + ')');
     }
-    */
 
     if (sslvalid) {
       ssl_options = {
