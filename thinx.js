@@ -5,12 +5,10 @@ var Globals = require("./lib/thinx/globals.js"); // static only!
 
 console.log("--- " + new Date() + " ---");
 
-var Sqreen;
-
 if (Globals.use_sqreen()) {
   if ((typeof(process.env.SQREEN_APP_NAME) !== "undefined") && (typeof(process.env.SQREEN_TOKEN) !== "undefined")) {
     try {
-      Sqreen = require('sqreen');
+      require('sqreen');
     } catch (bitch) {
       console.log(bitch);
     }
@@ -22,7 +20,6 @@ if (Globals.use_sqreen()) {
 const crypto = require('crypto');
 const express = require("express");
 const session = require("express-session");
-const cluster = require('cluster');
 
 var Auth = require('./lib/thinx/auth.js');
 var auth = new Auth();
@@ -56,7 +53,6 @@ var redis_client = redis.createClient(Globals.redis_options());
 //
 
 const hour = 3600 * 1000;
-const day = hour * 24;
 
 //
 // App
@@ -70,24 +66,6 @@ var socketPort = app_config.socket;
 var https = require("https");
 
 var WebSocket = require("ws");
-
-var last_client_ip = null;
-
-var getClientIp = function(req) {
-  var ipAddress = req.ip;
-  if (!ipAddress) {
-    console.log("Unknown Client IP:" + ipAddress);
-    return "207.154.230.212";
-  }
-  // convert from "::ffff:192.0.0.1"  to "192.0.0.1"
-  if (ipAddress.indexOf("::ffff:") !== -1) {
-    ipAddress = ipAddress.replace("::ffff:", "");
-  }
-  last_client_ip = ipAddress;
-  //console.log("Client IP: " + ipAddress);
-  return ipAddress;
-};
-
 
 // EXTRACT TO: db.js -->
 
@@ -390,12 +368,12 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   // It's pointless and it should lead to faster fix when this fails immediately in production.
 
   let caCert;
-  let caStore;
+  //let caStore;
   let ssloaded = false;
 
   try {
       caCert = fs.readFileSync(app_config.ssl_cert).toString();
-      caStore = pki.createCaStore([ caCert ]);
+      //caStore = pki.createCaStore([ caCert ]);
       ssloaded = true;
   } catch (e) {
       console.log('Failed to load CA certificate (' + e + ')');
