@@ -2,6 +2,7 @@
  * This THiNX-RTM API module is responsible for responding to devices and build requests.
  */
 var Globals = require("./lib/thinx/globals.js"); // static only!
+const Sanitka = require("./lib/thinx/sanitka.js");
 
 console.log("--- " + new Date() + " ---");
 
@@ -343,6 +344,7 @@ app.use(express.urlencoded({
 // app.use(csrf({ cookie: true })); collides with Sqreen
 
 app.use(helmet());
+app.use(helmet.noCache());
 
 let router = require('./lib/router.js')(app, _ws);
 
@@ -578,7 +580,6 @@ wserver.listen(app_config.websocket, "0.0.0.0", function listening() {
  */
 
 var package_info = require("./package.json");
-const Sanitka = require("./lib/thinx/sanitka.js");
 var product = package_info.description;
 var version = package_info.version;
 
