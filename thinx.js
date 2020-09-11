@@ -20,6 +20,7 @@ if (Globals.use_sqreen()) {
 const crypto = require('crypto');
 const express = require("express");
 const session = require("express-session");
+const helmet = require("helmet");
 
 var Auth = require('./lib/thinx/auth.js');
 var auth = new Auth();
@@ -341,6 +342,8 @@ app.use(express.urlencoded({
 // var csrf = require('csurf');
 // app.use(csrf({ cookie: true })); collides with Sqreen
 
+app.use(helmet());
+
 let router = require('./lib/router.js')(app, _ws);
 
 /*
@@ -373,7 +376,7 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
 
   try {
       caCert = fs.readFileSync(app_config.ssl_cert).toString();
-      //caStore = pki.createCaStore([ caCert ]);
+      caStore = pki.createCaStore([ caCert ]);
       ssloaded = true;
   } catch (e) {
       console.log('Failed to load CA certificate (' + e + ')');
@@ -382,16 +385,14 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
 
   if (ssloaded) {
 
-    let sslvalid = true;
-
-    /*
+    /* TODO: Test/enable this validation to prevent running with expired SSL cert. */
+    let sslvalid = true; // TODO: should be initially false!
     try {
         pki.verifyCertificateChain( caStore, [ caCert ]);
         sslvalid = true;
     } catch (e) {
         console.log('Failed to verify certificate (' + e.message || e + ')');
     }
-    */
 
     if (sslvalid) {
       ssl_options = {

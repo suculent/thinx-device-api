@@ -46,6 +46,7 @@
     "fs-finder": "^1.8.1",
     "get-random-quote": "^1.1.3",
     "github-oauth": "^0.2.2",
+    "helmet": "^4.1.1",
     "http-signature": "^1.3.4",
     "mailgun-js": "^0.22.0",
     "md5": "^2.2.1",
