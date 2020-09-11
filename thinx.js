@@ -342,7 +342,7 @@ app.use(express.urlencoded({
 // var csrf = require('csurf');
 // app.use(csrf({ cookie: true })); collides with Sqreen
 
-// app.use(helmet());
+app.use(helmet());
 
 let router = require('./lib/router.js')(app, _ws);
 
