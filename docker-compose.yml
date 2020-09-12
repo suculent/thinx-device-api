@@ -25,11 +25,18 @@ services:
     volumes:
       - '/mnt/data/mosquitto/config:/mqtt/config:rw'
       - '/mnt/data/mosquitto/data:/mqtt/data:rw'
-      - '/mnt/data/mosquitto/log:/var/log:rw'
+      - '/mnt/data/mosquitto/log:/mqtt/log:rw'
       - '/mnt/data/mosquitto/ssl:/mqtt/ssl:rw'
       - '/mnt/data/mosquitto/auth:/mqtt/auth:rw'
     labels:
       - traefik.backend.mosquitto.noexpose
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'mosquitto_sub -t "$SYS/#" -C 1 -u $MOSQUITTO_USERNAME -P $MOSQUITTO_PASSWORD | grep -v Error'
+      interval: 10s
+      timeout: 50s
+      retries: 5
   couchdb:
     env_file: .env
     image: 'apache/couchdb:2.3.1'
