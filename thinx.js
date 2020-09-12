@@ -22,6 +22,7 @@ const crypto = require('crypto');
 const express = require("express");
 const session = require("express-session");
 const helmet = require("helmet");
+const noCache = require('nocache');
 
 var Auth = require('./lib/thinx/auth.js');
 var auth = new Auth();
@@ -344,7 +345,7 @@ app.use(express.urlencoded({
 // app.use(csrf({ cookie: true })); collides with Sqreen
 
 app.use(helmet());
-app.use(helmet.noCache());
+app.use(noCache())
 
 let router = require('./lib/router.js')(app, _ws);
 
