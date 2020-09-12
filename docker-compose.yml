@@ -186,8 +186,8 @@ services:
     networks:
       - nat
       - internal
-    logging:
-      driver: none
+#    logging:
+#      driver: none
     ports:
       - '8000:80'
     restart: unless-stopped # may be required for updating SSL certs
