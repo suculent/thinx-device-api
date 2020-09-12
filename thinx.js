@@ -308,6 +308,8 @@ app.set("trust proxy", 1);
 
 require('path');
 
+// Bypassed LGTM, because it does not make sense on this API for all endpoints,
+// what is possible is covered by helmet and no-cache.
 app.use(session({
   secret: session_config.secret,
   "cookie": {
@@ -320,7 +322,8 @@ app.use(session({
   resave: true,
   rolling: false,
   saveUninitialized: false,
-}));
+})); // lgtm [js/missing-token-validation]
+
 // rolling was true; This resets the expiration date on the cookie to the given default.
 
 app.use(express.json({
