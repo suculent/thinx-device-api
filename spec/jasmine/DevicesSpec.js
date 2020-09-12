@@ -67,6 +67,8 @@ describe("Devices", function() {
         }
         console.log("• DeviceSpec.js: Registration result: ", {response});
         expect(success);
+        expect(TEST_DEVICE);
+        expect(response.registration);
         TEST_DEVICE.udid = response.registration.udid;
         expect(TEST_DEVICE.udid).to.be.a('string');
         console.log("• DevicesSpec.js: Received UDID: " + TEST_DEVICE.udid);
