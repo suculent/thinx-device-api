@@ -36,6 +36,8 @@ services:
     restart: always
     healthcheck:
       test:
+        - interval: 10s
+        - timeout: 2s
         - CMD-SHELL
         - 'curl -XGET http://localhost:5984'
       interval: 10s
