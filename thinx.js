@@ -377,12 +377,13 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   // It's pointless and it should lead to faster fix when this fails immediately in production.
 
   let caCert;
-  //let caStore;
+  let caStore;
   let ssloaded = false;
 
   try {
       caCert = fs.readFileSync(app_config.ssl_cert).toString();
-      caStore = pki.createCaStore([ caCert ]);
+      caStore = pki.createCaStore();
+      caStore.addCertificate(caCert);
       ssloaded = true;
   } catch (e) {
       console.log('Failed to load CA certificate (' + e + ')');
