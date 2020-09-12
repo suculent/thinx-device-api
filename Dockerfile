@@ -1,4 +1,4 @@
-FROM node:13.12.0
+FROM node:14.9.0
 
 # docker build -t suculent/thinx-device-api .
 
@@ -91,9 +91,11 @@ COPY package.json ./
 
 COPY .snyk ./.snyk
 
+# second npm install is using package_lock to fix pinned transient dependencies
 RUN openssl version \
  && node -v \
  && npm update \
+ && npm install . --only-prod \
  && npm install . --only-prod \
  && npm audit fix
 
@@ -131,6 +133,9 @@ EXPOSE 9002
 COPY . .
 
 RUN rm -rf ./.git
+
+# this works around an issue where file does not exist in Gitlab CI environment
+RUN touch ./.thinx_env
 
 # this should be generated/overwritten with sed on entrypoint, entrypoint needs /.first_run file and all ENV_VARS
 COPY ./.thinx_env ./.thinx_env

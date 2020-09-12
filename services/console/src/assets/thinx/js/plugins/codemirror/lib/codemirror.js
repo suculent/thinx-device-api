@@ -1,3 +1,5 @@
+// lgtm [js/useless-regexp-character-escape]
+
 /* eslint no-empty: ["error", { "allowEmptyCatch": true }] */
 
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -1200,8 +1202,8 @@
       var prop = lineClass[1] ? "bgClass" : "textClass";
       if (output[prop] == null)
         { output[prop] = lineClass[2]; }
-      else if (!(new RegExp("(?:^|\s)" + lineClass[2] + "(?:$|\s)")).test(output[prop]))
-        { output[prop] += " " + lineClass[2]; }
+      else if (!(new RegExp("(?:^|\s)" + lineClass[2] + "(?:$|\s)")).test(output[prop])) // lgtm [js/useless-regexp-character-escape]
+        { output[prop] += " " + lineClass[2]; } // lgtm [js/useless-regexp-character-escape]
     } }
     return type
   }

@@ -40,7 +40,7 @@ describe("Transfer", function() {
       udids: [envi.udid]
     };
     Transfer.decline(tbody, function(success, response) {
-      expect(success).to.equal(true);
+      expect(success).to.equal(false);
       expect(response).to.be.a('string');
       console.log("transfer decline response: " + JSON.stringify(
         response));

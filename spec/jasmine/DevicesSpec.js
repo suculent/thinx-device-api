@@ -22,19 +22,23 @@ describe("Devices", function() {
   var crypto = require("crypto");
   var fake_mac = null;
 
-  crypto.randomBytes(6, function(err, buffer) {
-    var hexa = buffer.toString('hex');
-    fake_mac = hexa.charAt(0) +
-               hexa.charAt(1) + ":" +
-               hexa.charAt(2) +
-               hexa.charAt(3) + ":" +
-               hexa.charAt(4) +
-               hexa.charAt(5);
-  });
+  function doFakeMac() {
+    crypto.randomBytes(6, (err, buffer) => {
+      var hexa = buffer.toString('hex');
+      this.fake_mac = hexa.charAt(0) +
+                hexa.charAt(1) + ":" +
+                hexa.charAt(2) +
+                hexa.charAt(3) + ":" +
+                hexa.charAt(4) +
+                hexa.charAt(5);
+    });
+  }
+
+  fake_mac = doFakeMac();
 
   // This UDID is to be deleted at the end of test.
   var TEST_DEVICE = {
-    mac: fake_mac,
+    mac: "00:00:00:00:00:01",
     firmware: "DeviceSpec.js",
     version: "1.0.0",
     checksum: "alevim",
@@ -46,11 +50,13 @@ describe("Devices", function() {
   };
 
   it("should be able to register test device", function(done) {
+    console.log("Test attempt to register device", {TEST_DEVICE}, "with ak", ak);
     device.register(
-      TEST_DEVICE,
+      {}, /* req */
+      TEST_DEVICE, /* reg */
       ak,
-      null,
-      function(success, response) {
+      {}, /* ws */
+      (success, response) => {
         if (success === false) {
           console.log(response);
           expect(response).to.be.a('string');
@@ -59,8 +65,10 @@ describe("Devices", function() {
             return;
           }
         }
-        //console.log("• DeviceSpec.js: Registration result: ", {response});
-        expect(success).to.equal(true);
+        console.log("• DeviceSpec.js: Registration result: ", {response});
+        expect(success);
+        expect(TEST_DEVICE);
+        expect(response.registration);
         TEST_DEVICE.udid = response.registration.udid;
         expect(TEST_DEVICE.udid).to.be.a('string');
         console.log("• DevicesSpec.js: Received UDID: " + TEST_DEVICE.udid);
@@ -69,21 +77,21 @@ describe("Devices", function() {
   }, 15000); // register
 
   // All of this expects successful device registration to safely revoke!
-
+  
   it("should be able to list devices for owner", function(done) {
-    devices.list(owner, function(success, response) {
+    devices.list(owner, (success, response) => {
       expect(success).to.equal(true);
-      expect(response).to.be.a('string');
-      //console.log("Device list: " , {response});
+      expect(response).to.be.a('object');
+      console.log("Device list: " , {response});
       done();
     });
   }, 5000);
 
   it("should not be able to list devices for empty owner", function(done) {
-    devices.list("", function(success, response) {
+    devices.list("", (success, response) => {
       expect(success).to.equal(true);
       expect(response).to.be.a('object');
-      expect(response.devices).to.equal([]);
+      expect(response.devices).to.be.a('array');
       console.log("Should be empty Device list in: " , {response});
       done();
     });
@@ -95,10 +103,10 @@ describe("Devices", function() {
       udid: TEST_DEVICE.udid
     };
     console.log("Attach request...");
-    devices.attach(owner, body, function(success, response) {
-      expect(success).to.equal(true);
-      expect(response).to.be.a('string');
-      //console.log("Attach response: " , {response});
+    devices.attach(owner, body, (success, response) => {
+      expect(success);
+      expect(response);
+      console.log("Attach response: " , {response});
       done();
     });
   }, 30000);
@@ -107,9 +115,11 @@ describe("Devices", function() {
     var body = {
       udid: TEST_DEVICE.udid
     };
-    devices.detach(owner, body, function(success, response) {
-      expect(success).to.equal(true);
-      expect(response).to.be.a('string');
+    devices.detach(owner, body, (success, response) => {
+      expect(success);
+      expect(response);
+      console.log("Detach success: " , {success});
+      console.log("Detach response: " , {response});
       if (success === false) {
         console.log("Detach response: " , {response});
       }
@@ -123,9 +133,10 @@ describe("Devices", function() {
     var body = {
       udid: TEST_DEVICE.udid
     };
-    devices.revoke(owner, body, function(success, response) {
-      expect(success).to.equal(true);
-      //console.log("Revoke response: " , {response});
+    devices.revoke(owner, body, (success, response) => {
+      expect(success);
+      console.log("Revoke success: " , {success});
+      console.log("Revoke response: " , {response});
       done();
     });
   }, 30000);

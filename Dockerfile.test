@@ -1,4 +1,4 @@
-FROM node:13.12.0
+FROM node:14.9.0
 
 # docker build -t suculent/thinx-device-api .
 
@@ -133,6 +133,8 @@ COPY . .
 
 # this should be generated/overwritten with sed on entrypoint, entrypoint needs /.first_run file and all ENV_VARS
 COPY ./.thinx_env ./.thinx_env
+
+RUN touch ./.thinx_env
 
 # DevSec Support (binary needs to be built for respective platform; requires g++)
 RUN cd ./builders/devsec && ./build.sh

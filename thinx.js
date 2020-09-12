@@ -2,15 +2,14 @@
  * This THiNX-RTM API module is responsible for responding to devices and build requests.
  */
 var Globals = require("./lib/thinx/globals.js"); // static only!
+const Sanitka = require("./lib/thinx/sanitka.js");
 
 console.log("--- " + new Date() + " ---");
-
-var Sqreen;
 
 if (Globals.use_sqreen()) {
   if ((typeof(process.env.SQREEN_APP_NAME) !== "undefined") && (typeof(process.env.SQREEN_TOKEN) !== "undefined")) {
     try {
-      Sqreen = require('sqreen');
+      require('sqreen');
     } catch (bitch) {
       console.log(bitch);
     }
@@ -22,7 +21,8 @@ if (Globals.use_sqreen()) {
 const crypto = require('crypto');
 const express = require("express");
 const session = require("express-session");
-const cluster = require('cluster');
+const helmet = require("helmet");
+const noCache = require('nocache');
 
 var Auth = require('./lib/thinx/auth.js');
 var auth = new Auth();
@@ -56,7 +56,6 @@ var redis_client = redis.createClient(Globals.redis_options());
 //
 
 const hour = 3600 * 1000;
-const day = hour * 24;
 
 //
 // App
@@ -70,24 +69,6 @@ var socketPort = app_config.socket;
 var https = require("https");
 
 var WebSocket = require("ws");
-
-var last_client_ip = null;
-
-var getClientIp = function(req) {
-  var ipAddress = req.ip;
-  if (!ipAddress) {
-    console.log("Unknown Client IP:" + ipAddress);
-    return "207.154.230.212";
-  }
-  // convert from "::ffff:192.0.0.1"  to "192.0.0.1"
-  if (ipAddress.indexOf("::ffff:") !== -1) {
-    ipAddress = ipAddress.replace("::ffff:", "");
-  }
-  last_client_ip = ipAddress;
-  //console.log("Client IP: " + ipAddress);
-  return ipAddress;
-};
-
 
 // EXTRACT TO: db.js -->
 
@@ -327,6 +308,8 @@ app.set("trust proxy", 1);
 
 require('path');
 
+// Bypassed LGTM, because it does not make sense on this API for all endpoints,
+// what is possible is covered by helmet and no-cache.
 app.use(session({
   secret: session_config.secret,
   "cookie": {
@@ -339,7 +322,8 @@ app.use(session({
   resave: true,
   rolling: false,
   saveUninitialized: false,
-}));
+})); // lgtm [js/missing-token-validation]
+
 // rolling was true; This resets the expiration date on the cookie to the given default.
 
 app.use(express.json({
@@ -362,6 +346,9 @@ app.use(express.urlencoded({
 // app.use(cookieParser());
 // var csrf = require('csurf');
 // app.use(csrf({ cookie: true })); collides with Sqreen
+
+app.use(helmet());
+app.use(noCache());
 
 let router = require('./lib/router.js')(app, _ws);
 
@@ -395,7 +382,8 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
 
   try {
       caCert = fs.readFileSync(app_config.ssl_cert).toString();
-      caStore = pki.createCaStore([ caCert ]);
+      caStore = pki.createCaStore();
+      caStore.addCertificate(caCert);
       ssloaded = true;
   } catch (e) {
       console.log('Failed to load CA certificate (' + e + ')');
@@ -404,16 +392,14 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
 
   if (ssloaded) {
 
-    let sslvalid = true;
-
-    /*
+    /* TODO: Test/enable this validation to prevent running with expired SSL cert. */
+    let sslvalid = true; // TODO: should be initially false!
     try {
         pki.verifyCertificateChain( caStore, [ caCert ]);
         sslvalid = true;
     } catch (e) {
         console.log('Failed to verify certificate (' + e.message || e + ')');
     }
-    */
 
     if (sslvalid) {
       ssl_options = {
@@ -548,10 +534,12 @@ wss.on("connection", function(ws, req) {
       res.set("Connection", "close");
       router.respond(res, err);
     };
-    console.log("Tailing build log for " + req2.body.build_id);
+    
     //const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
     //const blog = new Buildlog();
-    blog.logtail(req2.body.build_id, owner, ws, error_callback);
+    let safe_id = Sanitka.branch(req2.body.build_id);
+    console.log("Tailing build log for " + safe_id);
+    blog.logtail(safe_id, owner, ws, error_callback);
   });
 
   ws.on("message", (message) => {

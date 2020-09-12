@@ -28,10 +28,11 @@
 		"express-session": "^1.17.1",
 		"joi": "^14.3.1",
 		"parser": "^0.1.4",
-		"rollbar": "^2.16.2",
-		"sqreen": "^1.41.3",
+		"rollbar": "^2.19.3",
+		"snyk": "^1.393.0",
+		"sqreen": "^1.52.0",
 		"ssl-root-cas": "^1.2.5",
 		"typeof": "^1.0.0",
-		"uuid": "^8.0.0"
+		"uuid": "^8.3.0"
 	}
 }

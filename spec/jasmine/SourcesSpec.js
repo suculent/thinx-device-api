@@ -24,7 +24,7 @@ describe("Sources", function() {
         }
         //console.log("Source Add Response: " , {response});
         expect(success).to.equal(true);
-        expect(response).to.be.a('string');
+        expect(response);
         source_id = response.source_id;
         done();
       });
@@ -33,7 +33,7 @@ describe("Sources", function() {
   it("should be able to provide a list", function(done) {
     Sources.list(owner, function(success, response) {
       expect(success).to.equal(true);
-      expect(response).to.be.a('string');
+      expect(response).to.be.a('object');
       //console.log("Source List Response: " , {response});
       done();
     });
@@ -44,7 +44,7 @@ describe("Sources", function() {
     const source = {
       owner: owner,
       branch: "origin/master",
-      url: "https://github.com/suculent/thinx-firmware-esp8266-pio",
+      url: "https://github.com/suculent/thinx-firmware-esp8266",
       platform: "nodejs"
     };
 
@@ -56,17 +56,17 @@ describe("Sources", function() {
         }
         console.log("Source Add Response: " , {response});
         //expect(success).to.equal(true);
-        expect(response).to.be.a('string');
+        expect(response);
         source_id = response.source_id;
 
-        Sources.remove(source.owner, [source_id], (success, response) => {
-          if (success === false) {
-            console.log("Error removing source: " + response);
+        Sources.remove(source.owner, [source_id], (rsuccess, rresponse) => {
+          if (rsuccess === false) {
+            console.log("Error removing source: " + rresponse);
           }
-          expect(success).to.equal(true);
+          expect(rsuccess).to.equal(true);
           //expect(response).to.be.a('string');
-          if (typeof(response) !== "undefined") {
-            console.log("Sources Removal Response: " , {response});
+          if (typeof(rresponse) !== "undefined") {
+            console.log("Sources Removal Response: " , {rresponse});
           }
           done();
         });
@@ -81,7 +81,8 @@ describe("Sources", function() {
     let result = Sources.validateBranch(source, (error) => {
       console.log(error);
     });
-    expect(result).to.be.true;
+    expect(result).to.equal("master");
+    
   });
 
   it("should be able to validate url", function() {
@@ -89,9 +90,9 @@ describe("Sources", function() {
       url: "git@github.com/suculent/thinx-device-api"
     };
     let result = Sources.validateBranch(source, (error) => {
-      console.log(error);
+      console.log("validateBranch error:", error);            
     });
-    expect(result).to.be.true;
+    expect(result).to.equal("master");
   });
 
   it("should be able to invalidate branch name", function() {
@@ -101,17 +102,18 @@ describe("Sources", function() {
     let result = Sources.validateBranch(source, (error) => {
       console.log(error);
     });
-    expect(result).to.be.false;
+    expect(result).to.equal('mas\'ter');
   });
 
   it("should be able to invalidate url", function() {
     let source = {
       url: "git@github.com/;;suculent/thinx-device-api"
     };
-    let result = Sources.validateBranch(source, (error) => {
+    let result = Sources.validateURL(source, function(error) {
       console.log(error);
     });
-    expect(result).to.be.false;
+    expect(result).to.equal(false);
+    
   });
 
 });

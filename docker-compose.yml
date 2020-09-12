@@ -39,13 +39,13 @@ services:
       retries: 5
   couchdb:
     env_file: .env
-    image: 'apache/couchdb:2.3.1'
+    image: 'apache/couchdb:3.1.0'
     restart: always
     healthcheck:
       test:
         - CMD-SHELL
         - 'curl -XGET http://localhost:5984'
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 5
     environment:
@@ -193,8 +193,8 @@ services:
     networks:
       - nat
       - internal
-    logging:
-      driver: none
+#    logging:
+#      driver: none
     ports:
       - '8000:80'
     restart: unless-stopped # may be required for updating SSL certs
