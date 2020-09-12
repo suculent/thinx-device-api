@@ -345,7 +345,7 @@ app.use(express.urlencoded({
 // app.use(csrf({ cookie: true })); collides with Sqreen
 
 app.use(helmet());
-app.use(noCache())
+app.use(noCache());
 
 let router = require('./lib/router.js')(app, _ws);
 
