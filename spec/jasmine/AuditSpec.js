@@ -11,7 +11,7 @@ describe("Audit log", function() {
 
   it("should be able to log", function(done) {
     audit.log(owner, "Log test successful.", "info", function(result) {
-      expect(result).to.be.a('string');
+      expect(result);
       expect(result).not.to.equal(false);
       done();
     });
@@ -21,7 +21,7 @@ describe("Audit log", function() {
     audit.fetch(
       owner,
       function(err, body) {
-        expect(body).to.be.a('string');
+        expect(body).to.be.a('array');
         expect(err).to.equal(false);
         done();
       }

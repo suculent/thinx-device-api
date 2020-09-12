@@ -31,7 +31,7 @@ describe("API Env", function() {
         "sample-var-name",
         function(success, response) {
           expect(success).to.equal(true);
-          expect(response).to.be.a('string');
+          expect(response);
           done();
       });
     }, 3000);
@@ -46,7 +46,7 @@ describe("API Env", function() {
         changes,
         function(success, object) {
           if (success) {
-            expect(object).to.be.a('string');
+            expect(object["sample-var-name"]).to.equal("deleted");
           } else {
             console.log( "[APIEnv] Revocation failed:" + object);
           }
@@ -60,7 +60,7 @@ describe("API Env", function() {
           owner,
           function(success, object) {
             if (success) {
-              expect(object).to.be.a('string');
+              expect(object);
             } else {
               console.log("[APIEnv] Listing failed:" + object);
             }

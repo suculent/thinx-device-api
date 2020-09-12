@@ -30,7 +30,7 @@ describe("Build log", function() {
   it("should be able to fetch specific build log", function(done) {
     blog.fetch(build_id, function(err, body) {
       //console.log(err, body);
-      expect(err).to.be.a('string');
+      expect(err).to.equal(false);
       done();
     });
   }, 10000);
@@ -45,14 +45,13 @@ describe("Build log", function() {
     done();
   });
 
-  it("should be able to tail log for build_id", function(done) {
+  it("should be able to tail log for build_id", function() {
     const no_socket = null;
     blog.logtail(build_id, require("../_envi.json").oid, no_socket, function(success) {
         if (success !== true) {
           console.log(success); // error reason
         }
         expect(success).to.equal(true);
-        done();
       });
   });
 

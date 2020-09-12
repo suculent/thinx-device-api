@@ -35,7 +35,7 @@ describe("Deployer", function() {
   });
 
   it("should be able to return latest firmware path", function() {
-    var firmwarePath = deploy.latestFirmwarePath(device);
+    var firmwarePath = deploy.latestFirmwarePath(device.owner);
     expect(firmwarePath).to.be.false;
   });
 

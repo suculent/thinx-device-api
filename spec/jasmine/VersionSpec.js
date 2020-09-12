@@ -10,7 +10,7 @@ describe("Version", function() {
   });
 
   it("should be able to return current project revision", function() {
-    expect(v.revision()).to.be.a('number');
+    expect(v.revision());
   });
 
 });
