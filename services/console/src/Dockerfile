@@ -67,8 +67,14 @@ COPY --from=0 /home/node/build/html .
 
 COPY default.conf /etc/nginx/conf.d/default.conf
 
-RUN apt-get update \
- && apt-get install -qq -y curl
+RUN apk update \
+ && apk add curl
+
+COPY harden.sh .
+RUN chmod +x ./harden.sh
+RUN ./harden.sh
+
+USER user
 
 # Expose port (HOST:CONTAINER; nginx, may be configured from outside with docker-compose)
 EXPOSE 7440:80
