@@ -60,18 +60,23 @@ RUN npm install . \
 # Deployment Image
 #
 
-FROM nginx
+#FROM nginx:1.19.2-alpine
+
+FROM nginx:1.19.2
 
 WORKDIR /usr/share/nginx/html
 COPY --from=0 /home/node/build/html .
 
-# This causes console not working, however it's almost copy of its default.conf and reason 
-# is unclear so far:
-
-# COPY default.conf /etc/nginx/conf.d/default.conf
+COPY default.conf /etc/nginx/conf.d/default.conf
 
 RUN apt-get update \
  && apt-get install -qq -y curl
+
+# Only for Alpine, but the nginx is somewhere else then?
+#COPY harden.sh .
+#RUN chmod +x ./harden.sh
+#RUN ./harden.sh
+#USER user
 
 # Expose port (HOST:CONTAINER; nginx, may be configured from outside with docker-compose)
 EXPOSE 7440:80
