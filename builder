@@ -733,15 +733,15 @@ case $PLATFORM in
 
 					echo "Copying deployment data..." | tee -a "${LOG_PATH}"
 
-					echo "to: ${OUTFILE}" | tee -a "${LOG_PATH}"
-					cp -vf "${BIN_FILE}" "$OUTFILE" | tee -a "${LOG_PATH}"
+					#echo "to: ${OUTFILE}" | tee -a "${LOG_PATH}"
+					#cp -vf "${BIN_FILE}" "$OUTFILE" | tee -a "${LOG_PATH}"
 
-					echo "to: ${TARGET_PATH}" | tee -a "${LOG_PATH}"
-					cp -vf "${BIN_FILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
+					#echo "to: ${TARGET_PATH}" | tee -a "${LOG_PATH}"
+					#cp -vf "${BIN_FILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
 
-					echo "to: ${DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
-					cp -vf "${BIN_FILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
-					cp -vf "${LOG_PATH}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
+					#echo "to: ${DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
+					#cp -vf "${BIN_FILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
+					
 					# TODO: cp -vf "${BUILD_JSON_PATH}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 
 					echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
@@ -750,9 +750,8 @@ case $PLATFORM in
 					#echo "Current path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
 					#ls -la | tee -a "${LOG_PATH}"
 					echo "Deployment path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
-					ls -la ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
-					echo "Target path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
-					ls -la ${TARGET_PATH} | tee -a "${LOG_PATH}"
+					#ls -la ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
+					#ls -la ${TARGET_PATH} | tee -a "${LOG_PATH}"
 				else
 					STATUS='FAILED'
 				fi
