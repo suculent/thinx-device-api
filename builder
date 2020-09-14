@@ -739,8 +739,8 @@ case $PLATFORM in
 					#echo "to: ${TARGET_PATH}" | tee -a "${LOG_PATH}"
 					#cp -vf "${BIN_FILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
 
-					#echo "to: ${DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
-					#cp -vf "${BIN_FILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
+					echo "to: ${DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
+					cp -vf "${BIN_FILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 					
 					# TODO: cp -vf "${BUILD_JSON_PATH}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 
