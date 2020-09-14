@@ -51,8 +51,8 @@ var Thinx = {
   sourceList: function () {
     return sourceList();
   },
-  addSource: function (sourceUrl, sourceAlias, sourceBranch) {
-    return addSource(sourceUrl, sourceAlias, sourceBranch);
+  addSource: function (sourceUrl, sourceAlias, sourceBranch, sourceCircleToken) {
+    return addSource(sourceUrl, sourceAlias, sourceBranch, sourceCircleToken);
   },
   revokeSources: function (sourceIds) {
     return revokeSources(sourceIds);
@@ -1019,14 +1019,15 @@ function sourceList() {
   });
 }
 
-function addSource(url, alias, branch) {
+function addSource(url, alias, branch, circleToken) {
   return $.ajax({
     url: urlBase + '/user/source',
     type: 'POST',
     data: JSON.stringify({
       url: url,
       alias: alias,
-      branch: branch
+      branch: branch,
+      circleToken: circleToken
     }),
     dataType: 'json'
   });
