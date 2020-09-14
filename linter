@@ -50,12 +50,11 @@ fi
 
 case $LANGUAGE in
 
-	c)
+		c)
       TOOL_PATH=$(which cppcheck)
-		if [[ -z $TOOL_PATH ]]; then
-			TOOL_PATH="/usr/bin/cppcheck"
-			echo "cppcheck not found, falling back to default path, may fail!"
-		fi
+			if [[ -z $TOOL_PATH ]]; then
+				TOOL_PATH="/usr/bin/cppcheck"
+			fi
       TOOL_ATTRS="--force -U PROGMEM"
       EXTENSIONS=( "c" "ino" "cpp" )
     ;;
@@ -95,14 +94,14 @@ for EXT in $EXTENSIONS; do
 	echo "Linting files in \"${EXT}\" language..."
 
 	# cppcheck is able to work recursively on its own
-	if [[ "${TOOL_PATH}" == "/usr/bin/cppcheck" ]]; then
-		echo "Running cppcheck..."
+	if [[ "${TOOL_PATH}" == "cppcheck" ]]; then
+		TOOL_PATH=$(which $TOOL_PATH)
 		CMD="${TOOL_PATH} ${TOOL_ATTRS} ${WORKDIR}"
 		echo $($CMD) > "$WORKDIR/lint.txt"
 		cat "$WORKDIR/lint.txt"
 	else
-		echo "Running recursive lint..."
-		# recursive implementation for other linters
+
+		# recursion implementation for other linters
 		for XDIR in $ALL; do
 
 			# as folders
