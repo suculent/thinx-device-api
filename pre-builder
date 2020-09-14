@@ -44,6 +44,11 @@ if [[ ! -f $JSON ]]; then
 	exit 1
 fi
 
+# cleanup mess
+if [[ -f ${WORKDIR}/.development ]]; then
+  rm -rf ${WORKDIR}/.development
+fi
+
 echo
 echo "Generating THiNX header, injecting environment variables from ${JSON}"
 echo
