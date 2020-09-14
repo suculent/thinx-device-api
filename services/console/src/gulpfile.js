@@ -32,7 +32,7 @@ var env = {
   apiBaseUrl: process.env.API_BASEURL + '/api',
   apiDirectUrl: 'https://' + process.env.API_HOSTNAME,
   slackClientId: '233115403974.233317554391',
-  wssUrl: 'wss://' + process.env.WEB_HOSTNAME +  ':7444',
+  wssUrl: 'wss://' + process.env.API_HOSTNAME +  ':7444',
   baseUrl: 'https://' + process.env.WEB_HOSTNAME + ':7443',
   googleTrackingCode: process.env.GOOGLE_ANALYTICS_ID,
   rollbarAccessToken: process.env.ROLLBAR_ACCESS_TOKEN,
@@ -45,7 +45,7 @@ console.log('----------- gulp env ------------');
 console.log('isProduction: ' + isProduction);
 console.log('isEnterprise: ' + isEnterprise);
 console.log('makeBundle: ' + makeBundle);
-console.log('env: ' + JSON.stringify(env, null, 4));
+//console.log('env: ' + JSON.stringify(env, null, 4));
 console.log('----------- -------- ------------');
 
 //*** Localhost server tast
