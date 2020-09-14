@@ -10,7 +10,7 @@ var noop = require('gulp-noop');
 
 var injectEnvs = require('gulp-inject-envs');
 var removeCode = require('gulp-remove-code');
-var debug = require('gulp-debug');
+//var debug = require('gulp-debug');
 var merge = require('merge-stream');
 var concat = require('gulp-concat');
 
@@ -41,12 +41,14 @@ var env = {
   projectDescription: isEnterprise ? '' : 'Manage IoT devices (for MCUs eg. ESP32, ESP8266 or any systems running Node.js, Micropython, NodeMCU, Arduino...), build and update firmwares remotely (FOTA/firmware-over-the-air), transform and route sensor data (MQTT)'
 };
 
+/*
 console.log('----------- gulp env ------------');
 console.log('isProduction: ' + isProduction);
 console.log('isEnterprise: ' + isEnterprise);
 console.log('makeBundle: ' + makeBundle);
 //console.log('env: ' + JSON.stringify(env, null, 4));
 console.log('----------- -------- ------------');
+*/
 
 //*** Localhost server tast
 gulp.task('build', function() {
@@ -74,7 +76,7 @@ gulp.task('build', function() {
       gulp.src(['public/**/*.js', '!public/**/*.min.js'], {base: '.'}),
       gulp.src(['app/**/*.js','!app/**/*.min.js'], {base: '.'})
     )
-    .pipe(debug({minimal: true}))
+    //.pipe(debug({minimal: true}))
     .pipe(removeCode(removeCodeVars))
     .pipe(injectEnvs(env))
     .pipe( isProduction ? uglify().on('error',function(e){console.log(e);}) : noop() )
@@ -93,7 +95,7 @@ gulp.task('build', function() {
       gulp.src(['public/**/*.css', '!public/**/*.min.css'], {base: '.'}),
       gulp.src(['app/**/*.css', '!app/**/*.min.css'], {base: '.'})
     )
-    .pipe(debug({minimal: true}))
+    //.pipe(debug({minimal: true}))
     .pipe(removeCode(removeCodeVars))
     .pipe(injectEnvs(env))
     .pipe( isProduction ? minifyCss() : noop() )
@@ -112,7 +114,7 @@ gulp.task('build', function() {
     gulp.src('public/**/*.html', {base: '.'}),
     gulp.src('app/**/*.html', {base: '.'})
   )
-  .pipe(debug({minimal: true}))
+  //.pipe(debug({minimal: true}))
   .pipe(removeCode(removeCodeVars))
   .pipe(injectEnvs(env))
   .pipe(prettify({
@@ -130,18 +132,18 @@ gulp.task('build', function() {
       gulp.src('app/**/*.css', {base: '.'})
     )
     .pipe(injectEnvs(env))
-    .pipe(debug({minimal: true}))
+    //.pipe(debug({minimal: true}))
     .pipe(gulp.dest(target));
   }
 
   // IMAGES
   gulp.src('assets/**/*.{gif,jpg,png,svg,ico}', {base: '.'})
-    .pipe(debug({minimal: true}))
+    //.pipe(debug({minimal: true}))
     .pipe(gulp.dest(target));
 
   // FONTS
   gulp.src('assets/**/*.{eot,ttf,woff,woff2}', {base: '.'})
-    .pipe(debug({minimal: true}))
+    //.pipe(debug({minimal: true}))
     .pipe(gulp.dest(target));
 
   // copy global plugins and scripts without processing [must be excluded in build]
@@ -150,7 +152,7 @@ gulp.task('build', function() {
     gulp.src('assets/global/**/*.{html,js,css}', {base: '.'}),
     gulp.src('assets/thinx/js/plugins/codemirror/**/*.js', {base: '.'})
   )
-  .pipe(debug({minimal: true}))
+  //.pipe(debug({minimal: true}))
   .pipe(gulp.dest(target));
 
 
@@ -203,7 +205,7 @@ gulp.task('buildPublic', function() {
           'assets/thinx/login.js'
         ], {base: '.'})
     )
-    .pipe(debug({minimal: true}))
+    //.pipe(debug({minimal: true}))
     .pipe(removeCode(removeCodeVars))
     .pipe(injectEnvs(env));
 
@@ -227,7 +229,7 @@ gulp.task('buildPublic', function() {
           'assets/thinx/css/custom.css'
         ], {base: '.'})
     )
-    .pipe(debug({minimal: true}))
+    //.pipe(debug({minimal: true}))
     .pipe(removeCode(removeCodeVars))
     .pipe(injectEnvs(env));
 
@@ -240,7 +242,7 @@ gulp.task('buildPublic', function() {
   merge(
     gulp.src('*.html', {base: '.'}),
   )
-  .pipe(debug({minimal: true}))
+  //.pipe(debug({minimal: true}))
   .pipe(removeCode(removeCodeVars))
   .pipe(injectEnvs(env))
   .pipe(prettify({
@@ -256,7 +258,7 @@ gulp.task('buildPublic', function() {
     'assets/thinx/**/*.{eot,ttf,woff,woff2}',
     'manifest.json'
   ], {base: '.'})
-    .pipe(debug({minimal: true}))
+    //.pipe(debug({minimal: true}))
     .pipe(gulp.dest(target));
 
 });

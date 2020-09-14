@@ -2,6 +2,7 @@
  * This THiNX-RTM API module is responsible for responding to devices and build requests.
  */
 var Globals = require("./lib/thinx/globals.js"); // static only!
+const Sanitka = require("./lib/thinx/sanitka.js");
 
 console.log("--- " + new Date() + " ---");
 
@@ -21,6 +22,7 @@ const crypto = require('crypto');
 const express = require("express");
 const session = require("express-session");
 const helmet = require("helmet");
+const noCache = require('nocache');
 
 var Auth = require('./lib/thinx/auth.js');
 var auth = new Auth();
@@ -306,6 +308,8 @@ app.set("trust proxy", 1);
 
 require('path');
 
+// Bypassed LGTM, because it does not make sense on this API for all endpoints,
+// what is possible is covered by helmet and no-cache.
 app.use(session({
   secret: session_config.secret,
   "cookie": {
@@ -318,7 +322,8 @@ app.use(session({
   resave: true,
   rolling: false,
   saveUninitialized: false,
-}));
+})); // lgtm [js/missing-token-validation]
+
 // rolling was true; This resets the expiration date on the cookie to the given default.
 
 app.use(express.json({
@@ -343,6 +348,7 @@ app.use(express.urlencoded({
 // app.use(csrf({ cookie: true })); collides with Sqreen
 
 app.use(helmet());
+app.use(noCache());
 
 let router = require('./lib/router.js')(app, _ws);
 
@@ -371,12 +377,13 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   // It's pointless and it should lead to faster fix when this fails immediately in production.
 
   let caCert;
-  //let caStore;
+  let caStore;
   let ssloaded = false;
 
   try {
       caCert = fs.readFileSync(app_config.ssl_cert).toString();
-      caStore = pki.createCaStore([ caCert ]);
+      caStore = pki.createCaStore();
+      caStore.addCertificate(caCert);
       ssloaded = true;
   } catch (e) {
       console.log('Failed to load CA certificate (' + e + ')');
@@ -527,10 +534,12 @@ wss.on("connection", function(ws, req) {
       res.set("Connection", "close");
       router.respond(res, err);
     };
-    console.log("Tailing build log for " + req2.body.build_id);
+    
     //const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
     //const blog = new Buildlog();
-    blog.logtail(req2.body.build_id, owner, ws, error_callback);
+    let safe_id = Sanitka.branch(req2.body.build_id);
+    console.log("Tailing build log for " + safe_id);
+    blog.logtail(safe_id, owner, ws, error_callback);
   });
 
   ws.on("message", (message) => {

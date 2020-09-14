@@ -25,7 +25,7 @@ describe("Messenger", function() {
     const mock_socket = {};
     messenger.initWithOwner(test_owner, mock_socket, (success, status) => {
       expect(success).to.equal(true);
-      console.log("init status", {status}, {success});
+      //console.log("init status", {status}, {success});
       //expect(status).to.be.a('string'); // messenger_init_success
       console.log("devices: ", { success: success, status: status });
       done();
