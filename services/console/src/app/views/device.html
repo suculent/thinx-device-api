@@ -208,7 +208,7 @@
                 <span class="badge {{source.value.platform}}-platform-color platform-badge">{{$root.platforms[source.value.platform].name}}</span>
               </div>
               <small>{{source.value.url}}</small>
-              <div ng-if="source.value.circle_key">
+              <div ng-if="source.value.circle_key.length > 0">
                 <img src="https://circleci.com/gh/{{source.value.url | split:'git@github.com:':1 | split:'.git':0 }}.svg?style=svg&circle-token={{source.value.circle_key}}" />
               </div>
             </ui-select-choices>
