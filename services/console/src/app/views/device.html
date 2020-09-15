@@ -288,12 +288,10 @@
       </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" ng-if="deviceForm.environment">
       <label class="control-label col-md-3">Environment</label>
       <div class="col-md-9" style="padding-top: 8px;">
-        <div class="alert alert-info" ng-if="deviceForm.environment">
-          <pre>{{deviceForm.environment | json}}</pre>
-        </div>
+        <pre>{{deviceForm.environment | json}}</pre>
       </div>
     </div>
 
