@@ -51,6 +51,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
   $scope.deviceForm.timezone_abbr = "UTC";
   $scope.deviceForm.timezone_offset = 0;
   $scope.deviceForm.timezone_utc = "Etc/GMT";
+  $scope.deviceForm.environment = null;
 
 
   $scope.showIcons = false;
@@ -505,6 +506,12 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     }
 
     $scope.showIcons = false;
+
+    if (typeof (device.environment) !== "undefined") {
+      $scope.deviceForm.environment = device.environment;
+    } else {
+      $scope.deviceForm.environment = null;
+    }
 
     /* save start values to compare with changes */
     formBeforeEdit = JSON.parse(JSON.stringify($scope.deviceForm));
