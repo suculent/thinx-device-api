@@ -67,7 +67,7 @@ FROM nginx:1.19.2
 WORKDIR /usr/share/nginx/html
 COPY --from=0 /home/node/build/html .
 
-COPY default.conf /etc/nginx/conf.d/default.conf
+# COPY default.conf /etc/nginx/conf.d/default.conf
 
 RUN apt-get update \
  && apt-get install -qq -y curl
