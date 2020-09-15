@@ -214,8 +214,8 @@
             </ui-select-choices>
           </ui-select>
           <span class="input-group-btn">
-            <button ng-if="deviceForm.source.circle_key" type="button" class="btn btn-default">
-              <img src="https://circleci.com/gh/{{deviceForm.source.url | split:'git@github.com:':1 | split:'.git':0 }}.svg?style=svg&circle-token={{deviceForm.source.circle_key}}" />
+            <button ng-if="$root.getSourceById(deviceForm.source).circle_key" type="button" class="btn btn-default">
+              <img src="https://circleci.com/gh/{{$root.getSourceById(deviceForm.source).url | split:'git@github.com:':1 | split:'.git':0 }}.svg?style=svg&circle-token={{$root.getSourceById(deviceForm.source).circle_key}}" />
             </button>
             <button ng-disabled="attachingSource"  type="button" ng-click="detachSource(deviceForm.udid)" class="btn btn-default">
               <span title="Detach source from device" class="fa fa-chain-broken" ng-hide="attachingSource"></span>
