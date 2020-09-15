@@ -288,6 +288,15 @@
       </div>
     </div>
 
+    <div class="form-group">
+      <label class="control-label col-md-3">Environment</label>
+      <div class="col-md-9" style="padding-top: 8px;">
+        <div class="alert alert-info" ng-if="deviceForm.environment">
+          <pre>{{deviceForm.environment | json}}</pre>
+        </div>
+      </div>
+    </div>
+
     <!-- BUiLD SETUP -->
     <div class="form-group" ng-if="$root.platforms[deviceForm.base_platform].build">
       <label class="control-label col-md-3">Auto Update</label>
@@ -297,6 +306,7 @@
           <!-- <a class="btn dark btn-outline" href="javascript:;" ng-if="hasBuildId(deviceForm.udid)" ng-click="showDeviceLastBuild(deviceForm.udid, $event)" title="Open Build Log"> -->
           <!-- <i class="fa fa-eye"></i> View Log -->
           <!-- </a> -->
+
           <button class="btn dark btn-outline" href="javascript:;"
             ng-if="$root.platforms[deviceForm.base_platform].build && deviceForm.source != null && !attachingSource"
             ng-hide="hasBuildId(deviceForm.udid) == null"
