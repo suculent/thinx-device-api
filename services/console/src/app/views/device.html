@@ -205,12 +205,18 @@
             <ui-select-choices repeat="source.value.sourceId as (key, source) in $root.sources | filter: { value: { alias: $select.search }}">
               <div>
                 <span ng-bind-html="source.value.alias | highlight: $select.search"></span>
-                <span class="badge {{source.value.platform}}-platform-color platform-badge">{{$root.platforms[source.value.platform].name}}</span>
+                <span class="badge {{source.value.base_platform}}-platform-color platform-badge">{{$root.platforms[source.value.base_platform].name}}</span>
               </div>
               <small>{{source.value.url}}</small>
+              <div ng-if="source.value.circle_key.length > 0">
+                <img src="https://circleci.com/gh/{{source.value.url | split:'git@github.com:':1 | split:'.git':0 }}.svg?style=svg&circle-token={{source.value.circle_key}}" />
+              </div>
             </ui-select-choices>
           </ui-select>
           <span class="input-group-btn">
+            <button ng-if="$root.getSourceById(deviceForm.source).circle_key" type="button" class="btn btn-default">
+              <img src="https://circleci.com/gh/{{$root.getSourceById(deviceForm.source).url | split:'git@github.com:':1 | split:'.git':0 }}.svg?style=svg&circle-token={{$root.getSourceById(deviceForm.source).circle_key}}" />
+            </button>
             <button ng-disabled="attachingSource"  type="button" ng-click="detachSource(deviceForm.udid)" class="btn btn-default">
               <span title="Detach source from device" class="fa fa-chain-broken" ng-hide="attachingSource"></span>
               <span title="Attaching source..." ng-show="attachingSource"><i class="fa fa-spin fa-refresh"></i></span>
@@ -218,6 +224,7 @@
             <button type="button" ui-sref="source" class="btn btn-default">
               <span title="Manage sources" class="fa fa-plus"></span>
             </button>
+            
           </span>
         </div>
       </div>
