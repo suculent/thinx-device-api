@@ -205,7 +205,7 @@
             <ui-select-choices repeat="source.value.sourceId as (key, source) in $root.sources | filter: { value: { alias: $select.search }}">
               <div>
                 <span ng-bind-html="source.value.alias | highlight: $select.search"></span>
-                <span class="badge {{source.value.platform}}-platform-color platform-badge">{{$root.platforms[source.value.platform].name}}</span>
+                <span class="badge {{source.value.base_platform}}-platform-color platform-badge">{{$root.platforms[source.value.base_platform].name}}</span>
               </div>
               <small>{{source.value.url}}</small>
               <div ng-if="source.value.circle_key.length > 0">
