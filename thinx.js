@@ -288,7 +288,9 @@ hook_server.post("/", function(req, res) {
   }
   // do not wait for response, may take ages
   res.status(200).end("Accepted");
+  console.log("Hook process started...");
   watcher.process_hook(req.body);
+  console.log("Hook process completed.");
 }); // end Webhook Server
 
 // App

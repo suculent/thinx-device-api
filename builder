@@ -733,11 +733,11 @@ case $PLATFORM in
 
 					echo "Copying deployment data..." | tee -a "${LOG_PATH}"
 
-					#echo "to: ${OUTFILE}" | tee -a "${LOG_PATH}"
-					#cp -vf "${BIN_FILE}" "$OUTFILE" | tee -a "${LOG_PATH}"
+					echo "to: ${OUTFILE}" | tee -a "${LOG_PATH}"
+					cp -vf "${BIN_FILE}" "$OUTFILE" | tee -a "${LOG_PATH}"
 
-					#echo "to: ${TARGET_PATH}" | tee -a "${LOG_PATH}"
-					#cp -vf "${BIN_FILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
+					echo "to: ${TARGET_PATH}" | tee -a "${LOG_PATH}"
+					cp -vf "${BIN_FILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
 
 					echo "to: ${DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
 					cp -vf "${BIN_FILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
