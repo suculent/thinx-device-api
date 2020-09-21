@@ -32,17 +32,7 @@ services:
       - traefik.backend.mosquitto.noexpose
   couchdb:
     env_file: .env
-    image: 'couchdb:3.1.1'
-    build:
-      context: ./services/couchdb
-      args:
-      - 'NODENAME=${NODENAME}'
-      - 'COUCHDB_USER=${COUCHDB_USER}'
-      - 'COUCHDB_PASSWORD=${COUCHDB_PASSWORD}'
-      - 'COUCHDB_ADMIN=${COUCHDB_USER}'
-      - 'COUCHDB_PASS=${COUCHDB_PASSWORD}'
-      - 'COUCHDB_COOKIE=${COUCHDB_COOKIE}'
-      - 'COUCHDB_SECRET=${COUCHDB_SECRET}'
+    image: 'couchdb:3.1.0'
     restart: always
     healthcheck:
       test:
