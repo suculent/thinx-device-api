@@ -196,6 +196,10 @@ You can direct your GitHub web-hooks to https://thinx.cloud:9001/ after adding a
 
 See 03-test.sh. There is no point of maintaining documentation for this at current stage of development and user base zero.
 
+## Upgrading
+
+After upgrading from versions before `1.1.5200`, you may have issue with accessing CouchDB database. It's known issue, which can be fixed by editing the `/opt/couchdb/etc/vm.args` file inside the `couchdb` container. Just change the auto-generated domain on last line to `couchdb@localhost` and you should regain your access.
+
 
 # Platforms State of Union
 
