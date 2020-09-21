@@ -140,6 +140,10 @@ RUN touch ./.thinx_env
 RUN cd ./builders/devsec && ./build.sh
 RUN ./devsec -d
 
+# download test reporter as a static binary
+curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+chmod +x ./cc-test-reporter
+
 # those packages should not be required and pose HIGH security risks
 # g++ is a DevSec build-only dependency, imagemagick source is currently unknown but it is definitely not required
 RUN apt-get remove -y \
