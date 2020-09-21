@@ -26,5 +26,3 @@
 
 # Comment this line out to enable the interactive Erlang shell on startup
 +Bd -noinput
-
--name couchdb@localhost
