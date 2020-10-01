@@ -664,6 +664,16 @@ case $PLATFORM in
 				echo "[arduino] Using THiNX-File: ${THINX_FILE/$(pwd)//}" | tee -a "${LOG_PATH}"
 			fi
 
+			ENVOUT=$(find /opt/workspace -name "environment.h" | head -n 1)
+			if [[ ! -f $ENVOUT ]]; then
+  				echo "No environment.json found"
+			else
+				echo "Will ENV_HASH write to THINX_FILE ${THINX_FILE}"
+				ENV_HASH=$(cat ${ENVOUT} | shasum -a 256 | awk '{ print $1 }')
+				echo "const char * ENV_HASH" "$ENV_HASH" ";" >> ${THINX_FILE}
+				cat ${THINX_FILE}
+			fi
+
 			cd $BUILD_PATH/$REPO_NAME
 
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
@@ -767,6 +777,16 @@ case $PLATFORM in
 				# exit 1 # will deprecate on modularization for more platforms
 			else
 				echo "[platformio] Using THiNX-File ${THINX_FILE}" | tee -a "${LOG_PATH}"
+			fi
+
+			ENVOUT=$(find /opt/workspace -name "environment.h" | head -n 1)
+			if [[ ! -f $ENVOUT ]]; then
+  				echo "No environment.json found"
+			else
+				echo "Will ENV_HASH write to THINX_FILE ${THINX_FILE}"
+				ENV_HASH=$(cat ${ENVOUT} | shasum -a 256 | awk '{ print $1 }')
+				echo "const char * ENV_HASH" "$ENV_HASH" ";" >> ${THINX_FILE}
+				cat ${THINX_FILE}
 			fi
 
 			if [[ ! -f "./platformio.ini" ]]; then
