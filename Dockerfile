@@ -95,8 +95,8 @@ COPY .snyk ./.snyk
 RUN openssl version \
  && node -v \
  && npm update \
- && npm install . --only-prod \
- && npm install . --only-prod \
+ && npm install --unsafe-perm . --only-prod \
+ && npm install --unsafe-perm . --only-prod \
  && npm audit fix
 
 # && npm install -g snyk && snyk protect not free or what? just fails
