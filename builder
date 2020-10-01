@@ -662,16 +662,17 @@ case $PLATFORM in
 				# exit 1 # will deprecate on modularization for more platforms
 			else
 				echo "[arduino] Using THiNX-File: ${THINX_FILE/$(pwd)//}" | tee -a "${LOG_PATH}"
-			fi
-
-			ENVOUT=$(find $BUILD_PATH/$REPO_NAME -name "environment.json" | head -n 1)
-			if [[ ! -f $ENVOUT ]]; then
-  				echo "No environment.json found"
-			else
-				echo "Will ENV_HASH write to THINX_FILE ${THINX_FILE}"
-				ENV_HASH=$(cat ${ENVOUT} | shasum -a 256 | awk '{ print $1 }')
-				echo "const char * ENV_HASH" "$ENV_HASH" ";" >> ${THINX_FILE}
-				cat ${THINX_FILE}
+				ENVOUT=$(find $BUILD_PATH/$REPO_NAME -name "environment.json" | head -n 1)
+				if [[ ! -f $ENVOUT ]]; then
+					echo "No environment.json found"
+				else
+					echo "Will write ENV_HASH to THINX_FILE ${THINX_FILE}"
+					echo $THINX_FILE
+					ENV_HASH=$(cat ${ENVOUT} | shasum -a 256 | awk '{ print $1 }')
+					echo $ENV_HASH					
+					echo "const char * ENV_HASH \"$ENV_HASH\";" >> ${THINX_FILE}
+					cat ${THINX_FILE}
+				fi
 			fi
 
 			cd $BUILD_PATH/$REPO_NAME
@@ -776,17 +777,18 @@ case $PLATFORM in
 				echo "[platformio] WARNING! No THiNX-File found! in $BUILD_PATH/$REPO_NAME: $THINX_FILE" | tee -a "${LOG_PATH}"
 				# exit 1 # will deprecate on modularization for more platforms
 			else
-				echo "[platformio] Using THiNX-File ${THINX_FILE}" | tee -a "${LOG_PATH}"
-			fi
-
-			ENVOUT=$(find $BUILD_PATH/$REPO_NAME -name "environment.json" | head -n 1)
-			if [[ ! -f $ENVOUT ]]; then
-  				echo "No environment.json found"
-			else
-				echo "Will ENV_HASH write to THINX_FILE ${THINX_FILE}"
-				ENV_HASH=$(cat ${ENVOUT} | shasum -a 256 | awk '{ print $1 }')
-				echo "const char * ENV_HASH" "$ENV_HASH" ";" >> ${THINX_FILE}
-				cat ${THINX_FILE}
+				echo "[platformio] Using THiNX-File: ${THINX_FILE/$(pwd)//}" | tee -a "${LOG_PATH}"
+				ENVOUT=$(find $BUILD_PATH/$REPO_NAME -name "environment.json" | head -n 1)
+				if [[ ! -f $ENVOUT ]]; then
+					echo "No environment.json found"
+				else
+					echo "Will write ENV_HASH to THINX_FILE ${THINX_FILE}"
+					echo $THINX_FILE
+					ENV_HASH=$(cat ${ENVOUT} | shasum -a 256 | awk '{ print $1 }')
+					echo $ENV_HASH					
+					echo "const char * ENV_HASH \"$ENV_HASH\";" >> ${THINX_FILE}
+					cat ${THINX_FILE}
+				fi
 			fi
 
 			if [[ ! -f "./platformio.ini" ]]; then
