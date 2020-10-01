@@ -664,7 +664,7 @@ case $PLATFORM in
 				echo "[arduino] Using THiNX-File: ${THINX_FILE/$(pwd)//}" | tee -a "${LOG_PATH}"
 			fi
 
-			ENVOUT=$(find /opt/workspace -name "environment.h" | head -n 1)
+			ENVOUT=$(find $BUILD_PATH/$REPO_NAME -name "environment.json" | head -n 1)
 			if [[ ! -f $ENVOUT ]]; then
   				echo "No environment.json found"
 			else
@@ -779,7 +779,7 @@ case $PLATFORM in
 				echo "[platformio] Using THiNX-File ${THINX_FILE}" | tee -a "${LOG_PATH}"
 			fi
 
-			ENVOUT=$(find /opt/workspace -name "environment.h" | head -n 1)
+			ENVOUT=$(find $BUILD_PATH/$REPO_NAME -name "environment.json" | head -n 1)
 			if [[ ! -f $ENVOUT ]]; then
   				echo "No environment.json found"
 			else
