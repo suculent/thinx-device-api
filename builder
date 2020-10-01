@@ -965,3 +965,8 @@ echo -e "${RESULT}" | tee -a "${LOG_PATH}"
 
 MSG="${BUILD_DATE} Done."
 echo "[builder.sh]" $MSG | tee -a "${LOG_PATH}"
+
+rm -rf $BUILD_PATH
+
+MSG="${BUILD_DATE} Deleting ${BUILD_PATH}"
+echo "[builder.sh]" $MSG | tee -a "${LOG_PATH}"
