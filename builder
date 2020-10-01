@@ -655,27 +655,29 @@ case $PLATFORM in
 
 		arduino)
 
-			THINX_FILE=$( find $BUILD_PATH/$REPO_NAME -name "thinx.h" )
+			cd $BUILD_PATH/$REPO_NAME
+
+			THINX_FILE=$( find $BUILD_PATH/$REPO_NAME -name "thinx.h"  | head -n 1)
 
 			if [[ -z $THINX_FILE ]]; then
 				echo "[arduino] WARNING! No THiNX-File found! in $BUILD_PATH/$REPO_NAME: $THINX_FILE" | tee -a "${LOG_PATH}"
 				# exit 1 # will deprecate on modularization for more platforms
 			else
-				echo "[arduino] Using THiNX-File: ${THINX_FILE/$(pwd)//}" | tee -a "${LOG_PATH}"
+				#echo "[arduino] Using THiNX-File: ${THINX_FILE/$(pwd)//}" | tee -a "${LOG_PATH}"
+				echo "[arduino] Using THiNX-File: ${THINX_FILE}" | tee -a "${LOG_PATH}"
 				ENVOUT=$(find $BUILD_PATH/$REPO_NAME -name "environment.json" | head -n 1)
 				if [[ ! -f $ENVOUT ]]; then
 					echo "No environment.json found"
 				else
-					echo "Will write ENV_HASH to THINX_FILE ${THINX_FILE}"
+					echo "Will write ENV_HASH to ${THINX_FILE}"
 					ENV_HASH=$(cat ${ENVOUT} | shasum -a 256 | awk '{ print $1 }')
-					echo "ENV_HASH: " $ENV_HASH
 					LINE="const char * ENV_HASH \"${ENV_HASH}\";"
-					echo $LINE >> "$THINX_FILE"
+					echo "ENV_HASH: " $ENV_HASH
+					echo "LINE: " $LINE
+					echo -e "$LINE" >> ${THINX_FILE}
 					cat ${THINX_FILE}
 				fi
 			fi
-
-			cd $BUILD_PATH/$REPO_NAME
 
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 
