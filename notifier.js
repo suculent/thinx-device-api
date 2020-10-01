@@ -57,6 +57,7 @@ var status = process.argv[10] || true; // build result status
 var platform = process.argv[11] || "unknown"; // build result status
 var thinx_firmware_version = process.argv[12] || repo_url; // build result status
 var md5 = process.argv[13] || repo_url; // build result status
+var env_hash = process.argv[14];
 
 // Validate params
 
@@ -146,6 +147,34 @@ function notify_companion_app(push_tokens, message, repo_url, udid, commit_id, v
 }
 */
 
+function getFileSHA(path) {
+  console.log("[notifier.js] Calculating SHA256 for file", path);
+  if (!fs.existsSync(path)) {
+    console.log("[notifier.js] path does not exist at " + path);
+    process.exit(2);
+    return;
+  }
+  var ndata = fs.readFileSync(path, "binary", function(err, data) {
+    console.log("[notifier.js] Calllback..." + data);
+    if (err) {
+      console.log(err);
+      process.exit(2);
+      return;
+    }
+  });
+  console.log("[notifier.js] Processing data: "+ndata.length);
+  if (ndata) {
+    sha = sha256(ndata.toString());
+    //that.sha = sha;
+    console.log("[notifier.js] Calculated new sha256: " + sha);
+  } else {
+    sha = "FILE_NOT_FOUND";
+    //that.sha = sha;
+    console.log("[notifier.js] Data file not found.");
+  }
+  return sha;
+}
+
 function processSHA(a_build_path) {
   console.log("[notifier.js] Processing SHA for build path...");
   var binary_path_sha = a_build_path + ".bin";
@@ -196,6 +225,17 @@ if (typeof(md5) === "undefined" || md5 === "") {
     md5 = "";
     //that.md5 = md5;
     console.log("[notifier.js] Data file not found.");
+  }
+}
+
+if (typeof(env_hash) === "undefined" || env_hash === null) {
+  let env_path = build_path + "/environment.json";
+  console.log("Notifier searching for environments...");
+  if (fs.existsSync(binary_path_sha)) {
+    env_hash = getFileSHA(env_path);
+    console.log("Notifier-generated ENV_HASH:", env_hash);
+  } else {
+    console.log(env_path, "does not exist.");
   }
 }
 
@@ -281,6 +321,7 @@ console.log("[notifier.js] sha : " + sha);
 console.log("[notifier.js] status : " + status);
 console.log("[notifier.js] thinx_firmware_version : " + thinx_firmware_version);
 console.log("[notifier.js] md5 : " + md5);
+console.log("[notifier.js] env_hash : " + env_hash);
 
 blog.state(build_id, owner, udid, status);
 
@@ -360,6 +401,8 @@ devicelib.get(udid, function(err, doc) {
       }
     });
 
+
+
     // Create build envelope
     var buildEnvelope = {
       platform: platform,
@@ -375,7 +418,8 @@ devicelib.get(udid, function(err, doc) {
       timestamp: device.last_build_date,
       artifact: device.artifact,
       sha: sha,
-      md5: md5
+      md5: md5,
+      env_hash: env_hash
     };
 
     // save to build_path
