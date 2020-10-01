@@ -667,10 +667,10 @@ case $PLATFORM in
 					echo "No environment.json found"
 				else
 					echo "Will write ENV_HASH to THINX_FILE ${THINX_FILE}"
-					echo $THINX_FILE
 					ENV_HASH=$(cat ${ENVOUT} | shasum -a 256 | awk '{ print $1 }')
-					echo $ENV_HASH					
-					echo "const char * ENV_HASH \"$ENV_HASH\";" >> ${THINX_FILE}
+					echo "ENV_HASH: " $ENV_HASH
+					LINE="const char * ENV_HASH \"${ENV_HASH}\";"
+					echo $LINE >> "$THINX_FILE"
 					cat ${THINX_FILE}
 				fi
 			fi
