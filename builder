@@ -669,13 +669,17 @@ case $PLATFORM in
 				if [[ ! -f $ENVOUT ]]; then
 					echo "No environment.json found"
 				else
-					echo "Will write ENV_HASH to ${THINX_FILE}"
-					ENV_HASH=$(cat ${ENVOUT} | shasum -a 256 | awk '{ print $1 }')
-					LINE="const char * ENV_HASH \"${ENV_HASH}\";"
-					echo "ENV_HASH: " $ENV_HASH
-					echo "LINE: " $LINE
-					echo -e "$LINE" >> ${THINX_FILE}
-					cat ${THINX_FILE}
+					if [ ! -f $THINX_FILE ]; then
+						echo "WTF THINX_FILE does not exist?"
+					else
+						echo "Will write ENV_HASH to ${THINX_FILE}"
+						ENV_HASH=$(cat ${ENVOUT} | shasum -a 256 | awk '{ print $1 }')
+						LINE="const char * ENV_HASH \"${ENV_HASH}\";"
+						echo "ENV_HASH: " $ENV_HASH
+						echo "LINE: " $LINE
+						echo -e "$LINE" >> ${THINX_FILE}
+						cat ${THINX_FILE}
+					fi
 				fi
 			fi
 
