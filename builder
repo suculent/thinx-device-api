@@ -655,16 +655,33 @@ case $PLATFORM in
 
 		arduino)
 
-			THINX_FILE=$( find $BUILD_PATH/$REPO_NAME -name "thinx.h" )
+			cd $BUILD_PATH/$REPO_NAME
+
+			THINX_FILE=$( find $BUILD_PATH/$REPO_NAME -name "thinx.h"  | head -n 1)
 
 			if [[ -z $THINX_FILE ]]; then
 				echo "[arduino] WARNING! No THiNX-File found! in $BUILD_PATH/$REPO_NAME: $THINX_FILE" | tee -a "${LOG_PATH}"
 				# exit 1 # will deprecate on modularization for more platforms
 			else
-				echo "[arduino] Using THiNX-File: ${THINX_FILE/$(pwd)//}" | tee -a "${LOG_PATH}"
+				#echo "[arduino] Using THiNX-File: ${THINX_FILE/$(pwd)//}" | tee -a "${LOG_PATH}"
+				echo "[arduino] Using THiNX-File: ${THINX_FILE}" | tee -a "${LOG_PATH}"
+				ENVOUT=$(find $BUILD_PATH/$REPO_NAME -name "environment.json" | head -n 1)
+				if [[ ! -f $ENVOUT ]]; then
+					echo "No environment.json found"
+				else
+					if [ ! -f $THINX_FILE ]; then
+						echo "WTF THINX_FILE does not exist?"
+					else
+						echo "Will write ENV_HASH to ${THINX_FILE}"
+						ENV_HASH=$(cat ${ENVOUT} | shasum -a 256 | awk '{ print $1 }')
+						LINE="#define ENV_HASH \"${ENV_HASH}\""
+						echo "ENV_HASH: " $ENV_HASH
+						sed -i '/ENV_HASH/d' ${THINX_FILE}
+						echo -e ${LINE} >> ${THINX_FILE}
+						cat ${THINX_FILE}
+					fi
+				fi
 			fi
-
-			cd $BUILD_PATH/$REPO_NAME
 
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 
@@ -766,7 +783,24 @@ case $PLATFORM in
 				echo "[platformio] WARNING! No THiNX-File found! in $BUILD_PATH/$REPO_NAME: $THINX_FILE" | tee -a "${LOG_PATH}"
 				# exit 1 # will deprecate on modularization for more platforms
 			else
-				echo "[platformio] Using THiNX-File ${THINX_FILE}" | tee -a "${LOG_PATH}"
+				#echo "[platformio] Using THiNX-File: ${THINX_FILE/$(pwd)//}" | tee -a "${LOG_PATH}"
+				echo "[platformio] Using THiNX-File: ${THINX_FILE}" | tee -a "${LOG_PATH}"
+				ENVOUT=$(find $BUILD_PATH/$REPO_NAME -name "environment.json" | head -n 1)
+				if [[ ! -f $ENVOUT ]]; then
+					echo "No environment.json found"
+				else
+					if [ ! -f $THINX_FILE ]; then
+						echo "WTF THINX_FILE does not exist?"
+					else
+						echo "Will write ENV_HASH to ${THINX_FILE}"
+						ENV_HASH=$(cat ${ENVOUT} | shasum -a 256 | awk '{ print $1 }')
+						LINE="#define ENV_HASH \"${ENV_HASH}\""
+						echo "ENV_HASH: " $ENV_HASH
+						sed -i '/ENV_HASH/d' ${THINX_FILE}
+						echo -e ${LINE} >> ${THINX_FILE}
+						cat ${THINX_FILE}
+					fi
+				fi
 			fi
 
 			if [[ ! -f "./platformio.ini" ]]; then
@@ -930,4 +964,9 @@ RESULT=$(node $THINX_ROOT/notifier.js $CMD)
 echo -e "${RESULT}" | tee -a "${LOG_PATH}"
 
 MSG="${BUILD_DATE} Done."
+echo "[builder.sh]" $MSG | tee -a "${LOG_PATH}"
+
+rm -rf $BUILD_PATH
+
+MSG="${BUILD_DATE} Deleting ${BUILD_PATH}"
 echo "[builder.sh]" $MSG | tee -a "${LOG_PATH}"
