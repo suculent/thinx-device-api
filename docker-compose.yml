@@ -45,13 +45,8 @@ services:
       test:
         - CMD-SHELL
         - 'curl -XGET http://localhost:5984'
-<<<<<<< HEAD
       interval: 10s
       timeout: 50s
-=======
-      interval: 30s
-      timeout: 5s
->>>>>>> 7615e9a14a89337f660682ccaecad3bad09c029f
       retries: 5
     environment:
       - 'NODENAME=${NODENAME}'
