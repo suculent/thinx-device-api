@@ -115,7 +115,6 @@ services:
     shm_size: 2048M
     restart: always
     depends_on:
-      - couchdb
       - transformer
       - thinx-redis
       - mosquitto
