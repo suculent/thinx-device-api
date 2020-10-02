@@ -442,7 +442,7 @@ case $PLATFORM in
 			if [[ $BUILD_TYPE == "firmware" ]]; then
 				echo "Micropython Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
 				set -o pipefail
-				docker run ${DOCKER_PREFIX} --cpus=0.5 --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython | tee -a "${LOG_PATH}"
+				docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython | tee -a "${LOG_PATH}"
 				echo "${PIPESTATUS[@]}"
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
@@ -563,7 +563,7 @@ case $PLATFORM in
 				echo "NodeMCU Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
 				echo "running Docker >>>"
 				set -o pipefail
-				docker run ${DOCKER_PREFIX} --cpus=0.5 --rm -t ${DOCKER_PARAMS} -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build | tee -a "${LOG_PATH}"
+				docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t ${DOCKER_PARAMS} -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build | tee -a "${LOG_PATH}"
 				echo "${PIPESTATUS[@]}"
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
@@ -616,7 +616,7 @@ case $PLATFORM in
 			echo "Moving thinx_build.json to $TNAME" | tee -a "${LOG_PATH}"
 			mv "./thinx_build.json" "$TNAME"
 
-			DCMD="docker run ${DOCKER_PREFIX} --cpus=0.5 --rm -t -v $(pwd):/opt/mongoose-builder suculent/mongoose-docker-build"
+			DCMD="docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t -v $(pwd):/opt/mongoose-builder suculent/mongoose-docker-build"
 			echo "running Docker ${DCMD} >>>" | tee -a "${LOG_PATH}"
 			set -o pipefail
 			"$DCMD"
@@ -688,7 +688,7 @@ case $PLATFORM in
 			set -o pipefail
 			echo "Docker: Starting THiNX Arduino Builder Container..."
 
-			DCMD="docker run ${DOCKER_PREFIX} --cpus=0.5 -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
+			DCMD="docker run ${DOCKER_PREFIX} --cpus=1.0 -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
 			$DCMD | tee -a "${LOG_PATH}"
 			#echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
 			set +o pipefail
@@ -826,7 +826,7 @@ case $PLATFORM in
 
 			echo "running Docker PIO >>>"
 			set -o pipefail
-			DCMD=$(docker run ${DOCKER_PREFIX} --cpus=0.5 --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build)
+			DCMD=$(docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build)
 			echo $DCMD | tee -a "${LOG_PATH}"
 			echo "${PIPESTATUS[@]}"
 			if [[ ! -z =$(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
