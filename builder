@@ -674,7 +674,7 @@ case $PLATFORM in
 					else
 						echo "Will write ENV_HASH to ${THINX_FILE}"
 						ENV_HASH=$(cat ${ENVOUT} | shasum -a 256 | awk '{ print $1 }')
-						LINE="const char * ENV_HASH = \"${ENV_HASH}\";"
+						LINE="const char \* ENV_HASH = \"${ENV_HASH}\";"
 						echo "ENV_HASH: " $ENV_HASH
 						echo "LINE: " $LINE
 						echo -e "$LINE" >> ${THINX_FILE}
@@ -794,7 +794,7 @@ case $PLATFORM in
 					else
 						echo "Will write ENV_HASH to ${THINX_FILE}"
 						ENV_HASH=$(cat ${ENVOUT} | shasum -a 256 | awk '{ print $1 }')
-						LINE="const char * ENV_HASH = \"${ENV_HASH}\";"
+						LINE="const char \* ENV_HASH = \"${ENV_HASH}\";"
 						echo "ENV_HASH: " $ENV_HASH
 						echo "LINE: " $LINE
 						echo -e "$LINE" >> ${THINX_FILE}
