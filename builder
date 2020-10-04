@@ -920,13 +920,13 @@ if [[ -z $BUILD_FILE ]]; then
 fi
 if [ ! -z ${BUILD_FILE} ]; then
 	echo "Fetching version from thinx_build.json" | tee -a "${LOG_PATH}"
-	THINX_FIRMWARE_VERSION="$(jq .THINX_FIRMWARE_VERSION ${BUILD_FILE})"
+	THINX_FIRMWARE_VERSION=$(jq .THINX_FIRMWARE_VERSION ${BUILD_FILE})
 fi
 if [ -z ${THINX_FIRMWARE_VERSION} ]; then
 	pushd $BUILD_PATH/$REPO_NAME
 	TAG_VERSION=$(git describe --abbrev=0 --tags)
 	popd
-	THINX_FIRMWARE_VERSION="${REPO_NAME}-${TAG_VERSION}"
+	THINX_FIRMWARE_VERSION=${REPO_NAME}-${TAG_VERSION}
 	echo "No thinx_build.json file found, generating last-minute version: ${THINX_FIRMWARE_VERSION}"
 fi
 
@@ -935,29 +935,33 @@ if [[ -f "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ]]; then
 fi
 
 echo "BUILD_ID" "${BUILD_ID}" | tee -a "${LOG_PATH}"
-#echo "COMMIT" "${COMMIT}" | tee -a "${LOG_PATH}"
+echo "COMMIT" "${COMMIT}" | tee -a "${LOG_PATH}"
 echo "THX_VERSION" "${THX_VERSION}" | tee -a "${LOG_PATH}"
 echo "GIT_REPO" "${GIT_REPO}" | tee -a "${LOG_PATH}"
 echo "OUTFILE" "${OUTFILE}" | tee -a "${LOG_PATH}"
 echo "DEPLOYMENT_PATH" "${DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
 echo "UDID" "${UDID}" | tee -a "${LOG_PATH}"
-#echo "SHA" "${SHA}" | tee -a "${LOG_PATH}"
-#echo "OWNER_ID" "${OWNER_ID}" | tee -a "${LOG_PATH}"
+echo "SHA" "${SHA}" | tee -a "${LOG_PATH}"
+echo "OWNER_ID" "${OWNER_ID}" | tee -a "${LOG_PATH}"
 echo "STATUS" "${STATUS}" | tee -a "${LOG_PATH}"
 echo "PLATFORM" "${PLATFORM}" | tee -a "${LOG_PATH}"
 echo "THINX_FIRMWARE_VERSION" "${THINX_FIRMWARE_VERSION}" | tee -a "${LOG_PATH}"
-#echo "MD5" "${MD5}" | tee -a "${LOG_PATH}"
+echo "MD5" "${MD5}" | tee -a "${LOG_PATH}"
+echo "ENV_HASH" "${ENV_HASH}" | tee -a "${LOG_PATH}"
 
 #echo "Log path: $LOG_PATH" | tee -a "${LOG_PATH}"
 #cat $LOG_PATH
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
 CMD="${BUILD_ID} ${COMMIT} ${THX_VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION} ${MD5} ${ENV_HASH}"
-echo "\nExecuting Notifier with command \"${CMD}\"" | tee -a "${LOG_PATH}"
+echo "Executing Notifier with command \"${CMD}\"" | tee -a "${LOG_PATH}"
 cd $ORIGIN # go back to application root folder
-RESULT=$(node $THINX_ROOT/notifier.js $CMD | tee -a "${LOG_PATH}")
+pwd
+ls
+RESULT=$(node ./notifier.js $CMD | tee -a "${LOG_PATH}")
 # was echo -e
-echo "${RESULT}" | tee -a "${LOG_PATH}"
+echo -e "E_RESULT: ${RESULT}" | tee -a "${LOG_PATH}"
+echo "RESULT: ${RESULT}" | tee -a "${LOG_PATH}"
 
 echo "[builder.sh] ${BUILD_DATE} Done." | tee -a "${LOG_PATH}"
 
