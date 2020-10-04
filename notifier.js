@@ -472,5 +472,6 @@ devicelib.get(udid, function(err, doc) {
     } else {
       console.log("[notifier.js] Status is not DEPLOYED, skipping device notifier...");
     }
+    process.exit(0);
   });
 });
