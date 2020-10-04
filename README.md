@@ -76,6 +76,8 @@ Currently the platform supports building firmware for Arduino, PlatformIO (also 
 
 * Supports [Traefik](https://traefik.io) for SSL offloading.
 
+* Supports external changes to device Environment object using API/API-Key. Changes in Environment for a firmware build cause firmware update even if the version of firmware is same, allowing seamless change of WiFi credentials or device build attributes).
+
 
 ## Supported IoT Platforms
 
