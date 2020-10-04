@@ -231,11 +231,11 @@ if (typeof(md5) === "undefined" || md5 === "") {
 if (typeof(env_hash) === "undefined" || env_hash === null) {
   let env_path = build_path + "/environment.json";
   console.log("Notifier searching for environments...");
-  if (fs.existsSync(binary_path_sha)) {
+  if (fs.existsSync(env_path)) {
     env_hash = getFileSHA(env_path);
     console.log("Notifier-generated ENV_HASH:", env_hash);
   } else {
-    console.log(env_path, "does not exist.");
+    console.log(env_path, "environment file for env-hash deployer does not exist!");
   }
 }
 
@@ -455,23 +455,23 @@ devicelib.get(udid, function(err, doc) {
     notify_companion_app(push_tokens, messageString, repo_url, udid, commit_id, version, sha);
     */
 
-    let registrationObject = {
-      registration: {
-        status: "FIRMWARE_UPDATE",
-        commit: commit_id,
-        version: version
-      }
-    };
-
     // Notify client's mobile app using FCM (user must have token stored)
     //
 
     // Notify device's channel on firmware build to enable quick unattended auto-updates; device should validate at least dsig first.
     if (status == "OK") {
-      console.log("[notifier.js] Sending notification update...");
-      messenger.publish(owner, udid, JSON.stringify(registrationObject)); // new implementation
+      console.log("[notifier.js] Not sending DEPLOYED notification update (gets stucked)...");
+      let updateObject = {
+        registration: {
+          status: "FIRMWARE_UPDATE",
+          commit: commit_id,
+          version: version
+        }
+      };
+      // messenger.publish(owner, udid, JSON.stringify(updateObject)); // new implementation
     } else {
       console.log("[notifier.js] Status is not DEPLOYED, skipping device notifier...");
     }
+    process.exit(0);
   });
 });
