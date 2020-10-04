@@ -957,16 +957,17 @@ echo "THINX_FIRMWARE_VERSION" "${THINX_FIRMWARE_VERSION}" | tee -a "${LOG_PATH}"
 #cat $LOG_PATH
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
-CMD="${BUILD_ID} ${COMMIT} ${THX_VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION} ${MD5}"
-echo "Executing Notifier." | tee -a "${LOG_PATH}"
+CMD="${BUILD_ID} ${COMMIT} ${THX_VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION} ${MD5} ${ENV_HASH}"
+echo "\nExecuting Notifier with command \"${CMD}\"" | tee -a "${LOG_PATH}"
 cd $ORIGIN # go back to application root folder
-RESULT=$(node $THINX_ROOT/notifier.js $CMD)
-echo -e "${RESULT}" | tee -a "${LOG_PATH}"
+RESULT=$(node $THINX_ROOT/notifier.js $CMD | tee -a "${LOG_PATH}")
+# was echo -e
+echo "${RESULT}" | tee -a "${LOG_PATH}"
 
-MSG="${BUILD_DATE} Done."
-echo "[builder.sh]" $MSG | tee -a "${LOG_PATH}"
+echo "[builder.sh] ${BUILD_DATE} Done." | tee -a "${LOG_PATH}"
 
 # rm -rf $BUILD_PATH # not a good idea, seems to destroy build.json (envelope)
 
-MSG="${BUILD_DATE} Deleting ${BUILD_PATH}"
-echo "[builder.sh]" $MSG | tee -a "${LOG_PATH}"
+MSG=""
+echo "[builder.sh] ${BUILD_DATE} NOT Deleting ${BUILD_PATH}" | tee -a "${LOG_PATH}"
+ls ${BUILD_PATH} | tee -a "${LOG_PATH}"
