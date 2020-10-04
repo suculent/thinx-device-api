@@ -231,7 +231,7 @@ if (typeof(md5) === "undefined" || md5 === "") {
 if (typeof(env_hash) === "undefined" || env_hash === null) {
   let env_path = build_path + "/environment.json";
   console.log("Notifier searching for environments...");
-  if (fs.existsSync(binary_path_sha)) {
+  if (fs.existsSync(env_path)) {
     env_hash = getFileSHA(env_path);
     console.log("Notifier-generated ENV_HASH:", env_hash);
   } else {

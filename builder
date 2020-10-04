@@ -717,8 +717,6 @@ case $PLATFORM in
 					# ls -la | tee -a "${LOG_PATH}"
 				else
 					echo "Docker build succeeded." | tee -a "${LOG_PATH}"
-					echo " " | tee -a "${LOG_PATH}"
-					echo "BIN_FILE: $BIN_FILE" | tee -a "${LOG_PATH}"
 					echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
 					zip -rq "${BUILD_PATH}/${BUILD_ID}.zip" ${BIN_FILE} ./build/**
 				fi
@@ -864,10 +862,7 @@ case $PLATFORM in
 							echo "Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
 							ls
 						else
-							echo " " | tee -a "${LOG_PATH}"
 							echo "Docker build succeeded." | tee -a "${LOG_PATH}"
-							echo " " | tee -a "${LOG_PATH}"
-
 							# FIXME: Returns errors if no files found
 							echo "☢ Exporting PlatformIO artifact: ${OUTFILE}"
 							cp -vR "${OUTFILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
