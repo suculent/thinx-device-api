@@ -235,7 +235,7 @@ if (typeof(env_hash) === "undefined" || env_hash === null) {
     env_hash = getFileSHA(env_path);
     console.log("Notifier-generated ENV_HASH:", env_hash);
   } else {
-    console.log(env_path, "does not exist.");
+    console.log(env_path, "environment file for env-hash deployer does not exist!");
   }
 }
 
