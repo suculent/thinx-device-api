@@ -953,13 +953,13 @@ echo "ENV_HASH" "${ENV_HASH}" | tee -a "${LOG_PATH}"
 #cat $LOG_PATH
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
-CMD="${BUILD_ID} ${COMMIT} ${THX_VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION} ${MD5} ${ENV_HASH}"
-echo "Executing Notifier with command \"${CMD}\"" | tee -a "${LOG_PATH}"
+CMD="node ./notifier.js ${BUILD_ID} ${COMMIT} ${THX_VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION} ${MD5} ${ENV_HASH}"
+CMD=$(echo $CMD | tr -d '"')
+echo "Executing Notifier with command ${CMD}" | tee -a "${LOG_PATH}"
 cd $ORIGIN # go back to application root folder
 pwd
-ls
-RESULT=$(node ./notifier.js $CMD | tee -a "${LOG_PATH}")
-# was echo -e
+#ls
+RESULT=$($CMD)
 echo -e "E_RESULT: ${RESULT}" | tee -a "${LOG_PATH}"
 echo "RESULT: ${RESULT}" | tee -a "${LOG_PATH}"
 
