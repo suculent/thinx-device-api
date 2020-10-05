@@ -296,7 +296,12 @@
     </div>
 
     <div class="form-group" ng-if="deviceForm.environment">
-      <label class="control-label col-md-3">Environment</label>
+      <label class="control-label col-md-3">Environment 
+        <span ng-if="$root.meta.latestFirmwareEnvelope.env_hash != undefined && device.env_hash != undefined" class="ml-2">
+          <span class="text-warning" ng-if="$root.meta.latestFirmwareEnvelope.env_hash == device.env_hash">DESYNC</span>
+          <span class="text-success" ng-if="$root.meta.latestFirmwareEnvelope.env_hash != device.env_hash">SYNC</span>
+        </label>
+      </label>
       <div class="col-md-9" style="padding-top: 8px;">
         <pre>{{deviceForm.environment | json}}</pre>
       </div>
