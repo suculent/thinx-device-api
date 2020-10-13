@@ -656,6 +656,8 @@ case $PLATFORM in
 		arduino)
 
 			cd $BUILD_PATH/$REPO_NAME
+			pwd
+			ls
 
 			THINX_FILE=$( find $BUILD_PATH/$REPO_NAME -name "thinx.h"  | head -n 1)
 
@@ -686,7 +688,9 @@ case $PLATFORM in
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 
 			set -o pipefail
-			echo "Docker: Starting THiNX Arduino Builder Container..."
+			pwd
+			ls
+			echo "Docker: Starting THiNX Arduino Builder Container in folder" $(pwd)
 
 			DCMD="docker run ${DOCKER_PREFIX} --cpus=1.0 -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
 			$DCMD | tee -a "${LOG_PATH}"
