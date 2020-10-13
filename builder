@@ -617,6 +617,7 @@ case $PLATFORM in
 			mv "./thinx_build.json" "$TNAME"
 
 			DCMD="docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t -v $(pwd):/opt/mongoose-builder suculent/mongoose-docker-build"
+			# docker run -v /var/run/docker.sock:/var/run/docker.sock --cpus=1.0 --rm -t -v $(pwd):/opt/arduino-docker-builder suculent/arduino-docker-builder
 			echo "running Docker ${DCMD} >>>" | tee -a "${LOG_PATH}"
 			set -o pipefail
 			"$DCMD"
@@ -659,7 +660,7 @@ case $PLATFORM in
 			pwd
 			ls
 
-			THINX_FILE=$( find $BUILD_PATH/$REPO_NAME -name "thinx.h"  | head -n 1)
+			THINX_FILE=$( find . -name "thinx.h"  | head -n 1)
 
 			if [[ -z $THINX_FILE ]]; then
 				echo "[arduino] WARNING! No THiNX-File found! in $BUILD_PATH/$REPO_NAME: $THINX_FILE" | tee -a "${LOG_PATH}"
@@ -690,7 +691,7 @@ case $PLATFORM in
 			set -o pipefail
 			pwd
 			ls
-			echo "Docker: Starting THiNX Arduino Builder Container in folder" $(pwd)
+			echo "Docker: Starting THiNX Arduino Builder Container in folder" $(pwd) $(ls)
 
 			DCMD="docker run ${DOCKER_PREFIX} --cpus=1.0 -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
 			$DCMD | tee -a "${LOG_PATH}"
