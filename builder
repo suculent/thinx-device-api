@@ -687,14 +687,13 @@ case $PLATFORM in
 			fi
 
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
+			WORKDIR=$(pwd)
 
 			set -o pipefail
-			pwd
-			ls
-			echo "Docker: Starting THiNX Arduino Builder Container in folder" $(pwd) $(ls)
+			echo "Docker: Starting THiNX Arduino Builder Container in folder" $(pwd)
 
 			DCMD="docker run ${DOCKER_PREFIX} --cpus=1.0 -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
-			echo "${DCMD}"
+			echo "command: ${DCMD}"
 			$DCMD | tee -a "${LOG_PATH}"
 			#echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
 			set +o pipefail
