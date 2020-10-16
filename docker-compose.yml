@@ -45,8 +45,8 @@ services:
       test:
         - CMD-SHELL
         - 'curl -XGET http://localhost:5984'
-      interval: 30s
-      timeout: 5s
+      interval: 10s
+      timeout: 50s
       retries: 5
     environment:
       - 'NODENAME=${NODENAME}'
@@ -121,11 +121,19 @@ services:
   api:
     privileged: true
     shm_size: 2048M
-    restart: always
+    restart: 'always'
     depends_on:
       - transformer
       - thinx-redis
       - mosquitto
+#      couchdb:
+#        condition: service_started
+#      transformer:
+#        condition: service_started
+#      thinx-redis:
+#        condition: service_started
+#      mosquitto:
+#        condition: service_healthy
     networks:
       - nat
       - internal
@@ -214,12 +222,12 @@ services:
       - traefik.enable=true
       - traefik.port=80
       - traefik.backend=console
-      - 'traefik.frontend.rule=Host:${APP_HOSTNAME}'
+      - 'traefik.frontend.rule=Host:${WEB_HOSTNAME}'
       - 'traefik.frontend.entryPoints=http,https'
       - traefik.frontend.headers.SSLRedirect=false
       - traefik.frontend.headers.SSLForceHost=true
-      - 'traefik.frontend.headers.SSLHost=${APP_HOSTNAME}'
-      - traefik.frontend.headers.forceSTSHeader=true
-      - traefik.frontend.headers.STSSeconds=315360000
-      - traefik.frontend.headers.STSIncludeSubdomains=true
-      - traefik.frontend.headers.STSPreload=true
+      - 'traefik.frontend.headers.SSLHost=${WEB_HOSTNAME}'
+#      - traefik.frontend.headers.forceSTSHeader=true
+#      - traefik.frontend.headers.STSSeconds=315360000
+#      - traefik.frontend.headers.STSIncludeSubdomains=true
+#      - traefik.frontend.headers.STSPreload=true

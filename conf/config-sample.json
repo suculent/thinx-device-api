@@ -39,6 +39,9 @@
   "ssl_key": "/mnt/data/ssl/privkey.pem",
   "ssl_cert": "/mnt/data/ssl/cert.pem",
   "client_user_agent": "THiNX-Client",
+  "builder" : {
+    "concurrency" : 2
+  },
   "debug": {
     "device" : false,
     "deployment": true,
