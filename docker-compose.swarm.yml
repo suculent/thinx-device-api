@@ -10,11 +10,7 @@ networks:
 services:
   mosquitto:
     env_file: .env
-    build:
-      context: ./services/broker
-      args:
-        - 'MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
-        - 'MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}'
+    image: registry.keyguru.eu:5000/thinx/mosquitto
     environment:
       - 'MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
       - 'MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}'
@@ -91,12 +87,7 @@ services:
     env_file: .env
     networks:
       - internal
-    build:
-      context: ./services/redis
-      args:
-        - ALLOW_EMPTY_PASSWORD=no
-        - 'REDIS_PASSWORD=${REDIS_PASSWORD}'
-        - 'REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL'
+    image: registry.keyguru.eu:5000/thinx/redis
     command:
       - redis-server
       - '--requirepass'
@@ -129,14 +120,7 @@ services:
   transformer:
     env_file: .env
     user: transformer
-    build:
-      context: ./services/transformer
-      args:
-        - 'SQREEN_APP_NAME=${SQREEN_APP_NAME}'
-        - 'SQREEN_TOKEN=${SQREEN_TOKEN}'
-        - 'ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}'
-        - 'ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}'
-        - REVISION=1
+    image: registry.keyguru.eu:5000/thinx/transformer
     restart: always
     environment:
       - 'SQREEN_APP_NAME=${SQREEN_APP_NAME}'
@@ -182,20 +166,7 @@ services:
       - nat
       - internal
     env_file: .env
-    build:
-      context: .
-      args:
-        - 'THINX_HOSTNAME=${THINX_HOSTNAME}'
-        - 'THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}'
-        - 'REVISION=${REVISION}'
-        - 'ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}'
-        - 'ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}'
-        - 'SQREEN_TOKEN=${SQREEN_TOKEN}'
-        - 'SQREEN_APP_NAME=${SQREEN_APP_NAME}'
-        - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
-        - 'ENVIRONMENT=${ENVIRONMENT}'
-        - 'COUCHDB_USER=${COUCHDB_USER}'
-        - 'COUCHDB_PASSWORD=${COUCHDB_PASSWORD}'
+    image: registry.keyguru.eu:5000/thinx/api
     environment:
       - 'ENVIRONMENT=${ENVIRONMENT}'
       - 'COUCHDB_USER=${COUCHDB_USER}'
@@ -240,20 +211,7 @@ services:
       - api
     env_file:
       - .env
-    build:
-      context: ./services/console/src
-      args:
-        - NGINX_PORT=80
-        - 'NGINX_HOST=${WEB_HOSTNAME}'
-        - 'LANDING_HOSTNAME=${LANDING_HOSTNAME}'
-        - 'WEB_HOSTNAME=${WEB_HOSTNAME}'
-        - 'API_HOSTNAME=${API_HOSTNAME}'
-        - 'API_BASEURL=${API_BASEURL}'
-        - 'ENTERPRISE=${ENTERPRISE}'
-        - 'ENVIRONMENT=${ENVIRONMENT}'
-        - 'GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID}'
-        - 'ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}'
-        - 'CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID}'
+    image: registry.keyguru.eu:5000/thinx/console
     networks:
       - nat
       - internal
