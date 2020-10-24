@@ -1,5 +1,4 @@
-version: 2
-
+version: 2.1
 orbs:
   node: circleci/node@3.0.0
   docker: circleci/docker@1.5.0
@@ -249,11 +248,7 @@ jobs:
     #    path: /mnt/data/test-reports
 
 workflows:
-  version: 2
-  integrate:
+  deploy:
     jobs:
       - build-mosquitto
       - build-redis
-#      - build
-#      - test:
-#          requires: build
