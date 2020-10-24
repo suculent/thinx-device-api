@@ -137,7 +137,7 @@ jobs:
           registry: registry.keyguru.eu:5000
       - docker/build:
           registry: registry.keyguru.eu:5000
-          image: thinx/device-api
+          image: thinx/api
           dockerfile: ./Dockerfile
           extra_build_args: |
             --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} \
@@ -156,7 +156,7 @@ jobs:
             docker tag $(</tmp/digest.txt) registry.keyguru.eu:5000/thinx/api:latest
 
 #
-# DEPRECATED BUILD, TRANSFER TO BUILDS ABOVE
+# DEPRECATED BUILD, KEEPING FOR TEST PURPOSES LATER
 #
 
   build:
