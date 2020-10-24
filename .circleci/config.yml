@@ -118,8 +118,17 @@ jobs:
             --build-arg ROLLBAR_ENVIRONMENT=production \
             --build-arg REVISION=$(git describe --abbrev=0) \
           tag: latest
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/console
+          registry: registry.keyguru.eu:5000
+          tag: latest
+      - run:
+          command: |
+            echo "Digest is: $(</tmp/digest.txt)"
+            docker tag $(</tmp/digest.txt) registry.keyguru.eu:5000/thinx/console:latest
 
-  build-app:
+  build-api:
     executor: docker/docker
     steps:
       - setup_remote_docker
@@ -133,9 +142,18 @@ jobs:
           extra_build_args: |
             --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} \
             --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
-            --build-arg REVISION=$(git describe --abbrev=0) \
             --build-arg ENVIRONMENT=production \
+            --build-arg REVISION=$(git describe --abbrev=0) \
           tag: latest
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/api
+          registry: registry.keyguru.eu:5000
+          tag: latest
+      - run:
+          command: |
+            echo "Digest is: $(</tmp/digest.txt)"
+            docker tag $(</tmp/digest.txt) registry.keyguru.eu:5000/thinx/api:latest
 
 #
 # DEPRECATED BUILD, TRANSFER TO BUILDS ABOVE
@@ -305,7 +323,7 @@ jobs:
 workflows:
   build-and-deploy-components:
     jobs:
-      - build-app
+      - build-api
       - build-console
       - build-mosquitto
       - build-redis
