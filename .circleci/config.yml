@@ -18,6 +18,7 @@ jobs:
       - docker/build:
           registry: registry.keyguru.eu:5000
           image: thinx/mosquitto
+          docker-context: services/broker
           extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
           tag: latest
       - docker/push:
@@ -43,6 +44,7 @@ jobs:
       - docker/build:
           registry: registry.keyguru.eu:5000
           image: thinx/redis
+          docker-context: services/redis
           extra_build_args: '--build-arg REDIS_PASSWORD=${REDIS_PASSWORD} --build-arg ALLOW_EMPTY_PASSWORD=no --build-arg REDIS_DISABLE_COMMANDS=FLUSHALL'
           tag: latest
       - docker/push:
@@ -68,6 +70,7 @@ jobs:
       - docker/build:
           registry: registry.keyguru.eu:5000
           image: thinx/transformer
+          docker-context: services/transformer
           extra_build_args: '--build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} --build-arg ROLLBAR_ENVIRONMENT=production --build-arg REVISION=$(git describe --abbrev=0)'
           tag: latest
       - docker/push:
