@@ -66,13 +66,13 @@ jobs:
       - checkout
       - run:
           command: |
-            rm -rf ./package-lock.json
+            rm -rf ./app/package-lock.json
       - docker/check:
           registry: registry.keyguru.eu:5000
       - docker/build:
           registry: registry.keyguru.eu:5000
           image: thinx/transformer
-          docker-context: services/transformer/app
+          docker-context: services/transformer
           dockerfile: services/transformer/Dockerfile
           extra_build_args: '--build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} --build-arg ROLLBAR_ENVIRONMENT=production --build-arg REVISION=$(git describe --abbrev=0)'
           tag: latest

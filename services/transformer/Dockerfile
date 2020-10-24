@@ -23,7 +23,7 @@ RUN npm config set unsafe-perm true
 RUN npm install -g node-gyp
 
 # Sqreen.io token is inside a JSON file /app/sqreen.json
-COPY / /home/node
+COPY ./app /home/node
 
 WORKDIR /home/node/app
 
