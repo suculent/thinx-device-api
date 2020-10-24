@@ -86,7 +86,21 @@ jobs:
             echo "Digest is: $(</tmp/digest.txt)"
             docker tag $(</tmp/digest.txt) registry.keyguru.eu:5000/thinx/transformer:latest
 
+  build-console:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
 
+  build-app:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+
+#
+# DEPRECATED BUILD, TRANSFER TO BUILDS ABOVE
+#
 
   build:
 
@@ -245,9 +259,15 @@ jobs:
             docker network ls
             docker network inspect bridge
 
+#
+# WORKFLOWS
+#
+
 workflows:
   build-and-deploy-components:
     jobs:
+      - build-app
+      - build-console
       - build-mosquitto
       - build-redis
       - build-transformer

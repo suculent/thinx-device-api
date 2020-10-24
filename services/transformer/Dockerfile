@@ -23,12 +23,13 @@ RUN npm config set unsafe-perm true
 RUN npm install -g node-gyp
 
 # Sqreen.io token is inside a JSON file /app/sqreen.json
-COPY ./app /home/node
+RUN mkdir -p /home/node/app
+COPY ./app/** /home/node/app
 
 WORKDIR /home/node/app
 
 # Running npm install for production purpose will not run dev dependencies.
-RUN npm install . --only-prod
+RUN ls -la && npm install . --only-prod
 
 # Create a user group 'thinx'
 RUN addgroup -S thinx
