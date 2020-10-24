@@ -27,9 +27,6 @@ COPY / /home/node
 
 WORKDIR /home/node/app
 
-# this will fail on CI! Only for rollbar ad sqreen tokens.
-COPY .env /home/node/app/.env
-
 # Running npm install for production purpose will not run dev dependencies.
 RUN npm install . --only-prod
 
