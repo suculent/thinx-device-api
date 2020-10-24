@@ -135,10 +135,13 @@ COPY . .
 RUN rm -rf ./.git
 
 # this works around an issue where file does not exist in Gitlab CI environment
+
+# this works around an issue where file does not exist in Gitlab CI environment
 RUN touch ./.thinx_env
 
+# Following is deprecated in Swarm mode, all environment variables will be external.
 # this should be generated/overwritten with sed on entrypoint, entrypoint needs /.first_run file and all ENV_VARS
-COPY ./.thinx_env ./.thinx_env
+# COPY ./.thinx_env ./.thinx_env
 
 # DevSec Support (binary needs to be built for respective platform; requires g++)
 RUN cd ./builders/devsec && ./build.sh
@@ -153,11 +156,11 @@ RUN apt-get remove -y \
     && apt-get autoremove -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-#ADD https://get.aquasec.com/microscanner .
-#RUN chmod +x microscanner && mkdir artifacts
-#RUN ./microscanner ${AQUA_SEC_TOKEN} --html --continue-on-failure > ./artifacts/microscanner.html \
-#    && cp ./artifacts/microscanner.html ./static/microscanner.html
-#RUN rm -rf ./microscanner
+ADD https://get.aquasec.com/microscanner .
+RUN chmod +x microscanner && mkdir artifacts
+RUN ./microscanner ${AQUA_SEC_TOKEN} --html --continue-on-failure > ./artifacts/microscanner.html \
+    && cp ./artifacts/microscanner.html ./static/microscanner.html
+RUN rm -rf ./microscanner
 
 RUN mkdir -p ./.nyc_output
 
