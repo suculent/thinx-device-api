@@ -99,9 +99,9 @@ jobs:
           registry: registry.keyguru.eu:5000
       - docker/build:
           registry: registry.keyguru.eu:5000
-          docker-context: services/console
+          docker-context: services/console/src
           image: thinx/console
-          dockerfile: ./services/console/Dockerfile
+          dockerfile: services/console/src/Dockerfile
           extra_build_args: |
             --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
             --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} \
