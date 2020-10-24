@@ -74,7 +74,11 @@ jobs:
           image: thinx/transformer
           docker-context: services/transformer
           dockerfile: services/transformer/Dockerfile
-          extra_build_args: '--build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} --build-arg ROLLBAR_ENVIRONMENT=production --build-arg REVISION=$(git describe --abbrev=0)'
+          extra_build_args: |
+            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} 
+            --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} 
+            --build-arg ROLLBAR_ENVIRONMENT=production 
+            --build-arg REVISION=$(git describe --abbrev=0)
           tag: latest
       - docker/push:
           digest-path: /tmp/digest.txt
@@ -93,6 +97,17 @@ jobs:
       - checkout
       - docker/check:
           registry: registry.keyguru.eu:5000
+      - docker/build:
+          registry: registry.keyguru.eu:5000
+          docker-context: services/console
+          image: thinx/console
+          dockerfile: ./services/console/Dockerfile
+          extra_build_args: |
+            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} 
+            --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} 
+            --build-arg ROLLBAR_ENVIRONMENT=production 
+            --build-arg REVISION=$(git describe --abbrev=0)
+          tag: latest
 
   build-app:
     executor: docker/docker
@@ -101,6 +116,16 @@ jobs:
       - checkout
       - docker/check:
           registry: registry.keyguru.eu:5000
+      - docker/build:
+          registry: registry.keyguru.eu:5000
+          image: thinx/device-api
+          dockerfile: ./Dockerfile
+          extra_build_args: |
+            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} 
+            --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} 
+            --build-arg ROLLBAR_ENVIRONMENT=production 
+            --build-arg REVISION=$(git describe --abbrev=0)
+          tag: latest
 
 #
 # DEPRECATED BUILD, TRANSFER TO BUILDS ABOVE
