@@ -91,12 +91,16 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
+      - docker/check:
+          registry: registry.keyguru.eu:5000
 
   build-app:
     executor: docker/docker
     steps:
       - setup_remote_docker
       - checkout
+      - docker/check:
+          registry: registry.keyguru.eu:5000
 
 #
 # DEPRECATED BUILD, TRANSFER TO BUILDS ABOVE
