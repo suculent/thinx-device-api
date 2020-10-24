@@ -1,6 +1,87 @@
 version: 2
 
+orbs:
+  node: circleci/node@3.0.0
+  docker: circleci/docker@1.5.0
+
 jobs:
+
+  build-mosquitto:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          command: |
+            rm -rf ./package-lock.json
+      - docker/check:
+          registry: registry.keyguru.eu:5000
+      - docker/build:
+          registry: registry.keyguru.eu:5000
+          image: thinx/mosquitto
+          extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
+          tag: latest
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/mosquitto
+          registry: registry.keyguru.eu:5000
+          tag: latest
+      - run:
+          command: |
+            echo "Digest is: $(</tmp/digest.txt)"
+            docker tag $(</tmp/digest.txt) registry.keyguru.eu:5000/thinx/mosquitto:latest
+
+  build-redis:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          command: |
+            rm -rf ./package-lock.json
+      - docker/check:
+          registry: registry.keyguru.eu:5000
+      - docker/build:
+          registry: registry.keyguru.eu:5000
+          image: thinx/redis
+          extra_build_args: '--build-arg REDIS_PASSWORD=${REDIS_PASSWORD} --build-arg ALLOW_EMPTY_PASSWORD=no --build-arg REDIS_DISABLE_COMMANDS=FLUSHALL'
+          tag: latest
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/redis
+          registry: registry.keyguru.eu:5000
+          tag: latest
+      - run:
+          command: |
+            echo "Digest is: $(</tmp/digest.txt)"
+            docker tag $(</tmp/digest.txt) registry.keyguru.eu:5000/thinx/redis:latest
+
+  build-transformer:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          command: |
+            rm -rf ./package-lock.json
+      - docker/check:
+          registry: registry.keyguru.eu:5000
+      - docker/build:
+          registry: registry.keyguru.eu:5000
+          image: thinx/transformer
+          extra_build_args: '--build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} --build-arg ROLLBAR_ENVIRONMENT=production --build-arg REVISION=$(git describe --abbrev=0)'
+          tag: latest
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/transformer
+          registry: registry.keyguru.eu:5000
+          tag: latest
+      - run:
+          command: |
+            echo "Digest is: $(</tmp/digest.txt)"
+            docker tag $(</tmp/digest.txt) registry.keyguru.eu:5000/thinx/transformer:latest
+
+
 
   build:
 
@@ -171,6 +252,8 @@ workflows:
   version: 2
   integrate:
     jobs:
-      - build
+      - build-mosquitto
+      - build-redis
+#      - build
 #      - test:
 #          requires: build

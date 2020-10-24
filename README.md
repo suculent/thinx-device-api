@@ -189,11 +189,19 @@ You don't need Mailgun for developer installation, just copy-paste the activatio
 
 Optionally see the ./circleci/config.yml for reference on installation steps.
 
-### Using Docker Swarm
+### Using Docker Swarm on Manager Node
 
 > To be confirmed: Install GlusterFS to make sure /mnt is available on all nodes in cluster.
+ 
+
 
 Start THiNX on worker node:
+
+	git pull git@github.com/suculent/thinx-device-api -b swarm
+	
+	cd thinx-device-api
+	
+	docker network create --scope=swarm nat
 
 	docker stack deploy -c ./docker-compose.swarm.yml
 	
