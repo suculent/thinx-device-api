@@ -75,10 +75,10 @@ jobs:
           docker-context: services/transformer
           dockerfile: services/transformer/Dockerfile
           extra_build_args: |
-            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} 
-            --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} 
-            --build-arg ROLLBAR_ENVIRONMENT=production 
-            --build-arg REVISION=$(git describe --abbrev=0)
+            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
+            --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} \
+            --build-arg ROLLBAR_ENVIRONMENT=production \
+            --build-arg REVISION=$(git describe --abbrev=0) \
           tag: latest
       - docker/push:
           digest-path: /tmp/digest.txt
@@ -103,10 +103,20 @@ jobs:
           image: thinx/console
           dockerfile: ./services/console/Dockerfile
           extra_build_args: |
-            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} 
-            --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} 
-            --build-arg ROLLBAR_ENVIRONMENT=production 
-            --build-arg REVISION=$(git describe --abbrev=0)
+            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
+            --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} \
+            --build-arg LANDING_HOSTNAME=${LANDING_HOSTNAME} \
+            --build-arg WEB_HOSTNAME=${WEB_HOSTNAME} \
+            --build-arg NGINX_HOST=${WEB_HOSTNAME} \
+            --build-arg API_HOSTNAME=${API_HOSTNAME} \
+            --build-arg API_BASEURL=${API_BASEURL} \
+            --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} \
+            --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
+            --build-arg NGINX_PORT=80 \
+            --build-arg ENTERPRISE=true \
+            --build-arg ENVIRONMENT=production \
+            --build-arg ROLLBAR_ENVIRONMENT=production \
+            --build-arg REVISION=$(git describe --abbrev=0) \
           tag: latest
 
   build-app:
@@ -121,10 +131,10 @@ jobs:
           image: thinx/device-api
           dockerfile: ./Dockerfile
           extra_build_args: |
-            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} 
-            --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} 
-            --build-arg ROLLBAR_ENVIRONMENT=production 
-            --build-arg REVISION=$(git describe --abbrev=0)
+            --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} \
+            --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
+            --build-arg REVISION=$(git describe --abbrev=0) \
+            --build-arg ENVIRONMENT=production \
           tag: latest
 
 #
