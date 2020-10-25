@@ -63,7 +63,7 @@ services:
       - 'COUCHDB_COOKIE=${COUCHDB_COOKIE}'
       - 'COUCHDB_SECRET=${COUCHDB_SECRET}'
     ports:
-      - 5984
+      - 5984:5984 # not in production!
     networks:
       - nat
       - internal
