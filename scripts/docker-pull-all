@@ -1,0 +1,7 @@
+#!/bin/bash
+
+docker pull registry.keyguru.eu:5000/thinx/transformer
+docker pull registry.keyguru.eu:5000/thinx/redis
+docker pull registry.keyguru.eu:5000/thinx/couchdb
+docker pull registry.keyguru.eu:5000/thinx/console
+docker pull registry.keyguru.eu:5000/thinx/api
