@@ -25,7 +25,7 @@ touch /mqtt/auth/thinx.pw
 
 if [[ ! -z $MOSQUITTO_PASSWORD ]]; then
   if [[ ! -z $MOSQUITTO_USERNAME ]]; then
-    echo "Overwriting THiNX APP MQTT credentials in /mqtt/auth/thinx.pw"
+    echo "Overwriting THiNX APP MQTT credentials in /mqtt/auth/thinx.pw with ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}"
     # /docker-entrypoint.sh: line 32: 16 Hangup
     nohup mosquitto_passwd -b /mqtt/auth/thinx.pw ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}
   else

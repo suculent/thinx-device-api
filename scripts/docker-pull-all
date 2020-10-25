@@ -7,6 +7,8 @@ if [ -z ${DOCKER_REGISTRY} ]; then
     exit 1
 fi
 
+docker image prune --force
+
 docker pull ${DOCKER_REGISTRY}/thinx/transformer
 docker pull ${DOCKER_REGISTRY}/thinx/redis
 docker pull ${DOCKER_REGISTRY}/thinx/couchdb

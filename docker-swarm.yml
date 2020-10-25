@@ -19,8 +19,8 @@ services:
       - 'MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
       - 'MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}'
     ports:
-      - '1883:1883'
-      - '8883:8883'
+      - 1883:1883
+      - 8883:8883
     networks:
       - nat
       - internal
