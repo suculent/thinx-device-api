@@ -206,8 +206,7 @@ services:
   console:
     depends_on:
       - api
-    env_file:
-      - .env
+    env_file: .env
     image: registry.keyguru.eu:5000/thinx/console
     networks:
       - nat
