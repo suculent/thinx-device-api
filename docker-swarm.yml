@@ -1,3 +1,7 @@
+# environment must be first imported using:
+# $ export $(cat .env)
+# until .env file is supported (if ever)
+
 version: '3.7'
 
 networks:
@@ -17,7 +21,6 @@ services:
     ports:
       - '1883:1883'
       - '8883:8883'
-    restart: always
     networks:
       - nat
       - internal
@@ -44,7 +47,6 @@ services:
   couchdb:
     env_file: .env
     image: 'couchdb:3.1.0'
-    restart: always
     healthcheck:
       test:
         - CMD-SHELL
@@ -98,7 +100,6 @@ services:
       - ALLOW_EMPTY_PASSWORD=no
       - 'REDIS_PASSWORD=${REDIS_PASSWORD}'
       - 'REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL'
-    restart: unless-stopped
     ports:
       - 6379
     volumes:
@@ -121,7 +122,6 @@ services:
     env_file: .env
     user: transformer
     image: registry.keyguru.eu:5000/thinx/transformer
-    restart: always
     environment:
       - 'SQREEN_APP_NAME=${SQREEN_APP_NAME}'
       - 'SQREEN_TOKEN=${SQREEN_TOKEN}'
@@ -147,9 +147,6 @@ services:
           - node.hostname == keyguru-production-01
       
   api:
-    privileged: true
-    shm_size: 2048M
-    restart: 'always'
     depends_on:
       - transformer
       - thinx-redis
@@ -219,7 +216,6 @@ services:
 #      driver: none
     ports:
       - '8000:80'
-    restart: unless-stopped # may be required for updating SSL certs
     environment:
       - NGINX_PORT=80
       - 'NGINX_HOST=${WEB_HOSTNAME}'
