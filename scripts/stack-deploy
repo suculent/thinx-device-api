@@ -1,0 +1,5 @@
+#!/bin/bash
+
+export $(cat .env)
+
+docker stack deploy -c ./docker-swarm.yml thinx

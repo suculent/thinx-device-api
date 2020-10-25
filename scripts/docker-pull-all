@@ -1,7 +1,14 @@
 #!/bin/bash
 
-docker pull registry.keyguru.eu:5000/thinx/transformer
-docker pull registry.keyguru.eu:5000/thinx/redis
-docker pull registry.keyguru.eu:5000/thinx/couchdb
-docker pull registry.keyguru.eu:5000/thinx/console
-docker pull registry.keyguru.eu:5000/thinx/api
+# private registry support
+
+if [ -z ${DOCKER_REGISTRY} ]; then
+    echo "DOCKER_REGISTRY variable must be set"
+    exit 1
+fi
+
+docker pull ${DOCKER_REGISTRY}/thinx/transformer
+docker pull ${DOCKER_REGISTRY}/thinx/redis
+docker pull ${DOCKER_REGISTRY}/thinx/couchdb
+docker pull ${DOCKER_REGISTRY}/thinx/console
+docker pull ${DOCKER_REGISTRY}/thinx/api

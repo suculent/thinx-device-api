@@ -5,7 +5,7 @@ const readline = require('readline');
 
 var pfx_path = __dirname + '/conf/.thx_prefix'; // old
 if (!fs.existsSync(pfx_path)) {
-  pfx_path = app_config.data_root + '/.thx_prefix'; // new
+  pfx_path = app_config.data_root + '/conf/.thx_prefix'; // new
   if (!fs.existsSync(pfx_path)) {
     console.log("Prefix file missing, clean install...");
   }
