@@ -1,15 +1,10 @@
-version: '3.3'
+version: '3.7'
 
 networks:
   net: 
     external: true
   thinx:
     attachable: true
-#  nat:
-#    external: true
-#  internal:
-#    driver: overlay
-#    attachable: true
 
 services:
   mosquitto:
@@ -25,8 +20,6 @@ services:
     networks:
       - net
       - thinx
-#      - nat
-#      - internal
     volumes:
       - '/mnt/data/mosquitto/config:/mqtt/config:rw'
       - '/mnt/data/mosquitto/data:/mqtt/data:rw'
@@ -35,17 +28,6 @@ services:
       - '/mnt/data/mosquitto/auth:/mqtt/auth:rw'
     labels:
       - traefik.backend.mosquitto.noexpose
-    deploy:
-      resources:
-        reservations:
-          cpus: '0.1'
-          memory: 16M
-        limits:
-          cpus: '0.4'
-          memory: 64M
-      placement:
-        constraints:
-          - node.role == worker
 
   couchdb:
     env_file: .env
@@ -71,31 +53,18 @@ services:
     networks:
       - net
       - thinx
-#      - nat
-#      - internal
     volumes:
       - '/mnt/data/couchdb:/var/lib/couchdb'
       - '/mnt/data/couchdb:/opt/couchdb/data'
       #- './services/couchdb/vm.args:/opt/couchdb/etc/vm.args'
     labels:
       - traefik.backend.couchdb.noexpose
-    deploy:
-      resources:
-        reservations:
-          cpus: '0.5'
-          memory: 256M
-        limits:
-          cpus: '1.0'
-          memory: 512M
-      placement:
-        constraints:
-          - node.role == worker
+
 
   thinx-redis:
     env_file: .env
     networks:
       - thinx
-#      - internal
     image: registry.keyguru.eu:5000/thinx/redis
     command:
       - redis-server
@@ -114,17 +83,6 @@ services:
       - '/mnt/data/redis:/data'
     labels:
       - traefik.backend.thinx-redis
-    deploy:
-      resources:
-        reservations:
-          cpus: '0.5'
-          memory: 32M
-        limits:
-          cpus: '1.0'
-          memory: 512M
-      placement:
-        constraints:
-          - node.role == worker
 
   transformer:
     env_file: .env
@@ -139,22 +97,10 @@ services:
       - REVISION=1
     networks:
       - thinx
-#      - internal
     ports:
       - 7474
     labels:
       - traefik.backend.transformer.noexpose
-    deploy:
-      resources:
-        reservations:
-          cpus: '0.2'
-          memory: 256M
-        limits:
-          cpus: '1.0'
-          memory: 256M
-      placement:
-        constraints:
-          - node.role == worker
       
   api:
     privileged: true
@@ -175,8 +121,6 @@ services:
     networks:
       - net
       - thinx
-#      - nat
-#      - internal
     env_file: .env
     image: registry.keyguru.eu:5000/thinx/api
     environment:
@@ -206,17 +150,6 @@ services:
       - traefik.port=7442
       - traefik.backend=thinx-api
       - 'traefik.frontend.rule=Host:${THINX_HOSTNAME}'
-    deploy:
-      resources:
-        reservations:
-          cpus: '0.5'
-          memory: 128M
-        limits:
-          cpus: '1.0'
-          memory: 512M
-      placement:
-        constraints:
-          - node.role == worker
 
   console:
     depends_on:
@@ -227,8 +160,6 @@ services:
     networks:
       - net
       - thinx
-#      - nat
-#      - internal
 #    logging:
 #      driver: none
     ports:
@@ -255,18 +186,3 @@ services:
       - traefik.frontend.headers.SSLRedirect=false
       - traefik.frontend.headers.SSLForceHost=true
       - 'traefik.frontend.headers.SSLHost=${WEB_HOSTNAME}'
-#      - traefik.frontend.headers.forceSTSHeader=true
-#      - traefik.frontend.headers.STSSeconds=315360000
-#      - traefik.frontend.headers.STSIncludeSubdomains=true
-#      - traefik.frontend.headers.STSPreload=true
-    deploy:
-      resources:
-        reservations:
-          cpus: '0.5'
-          memory: 16M
-        limits:
-          cpus: '1.0'
-          memory: 128M
-      placement:
-        constraints:
-          - node.role == worker

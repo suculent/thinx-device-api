@@ -1,4 +1,4 @@
-version: '3.3'
+version: '3.7'
 
 networks:
   nat:
@@ -39,7 +39,7 @@ services:
           memory: 64M
       placement:
         constraints:
-          - node.role == worker
+          - node.hostname == keyguru-production-01
 
   couchdb:
     env_file: .env
@@ -81,7 +81,7 @@ services:
           memory: 512M
       placement:
         constraints:
-          - node.role == worker
+          - node.hostname == keyguru-production-01
 
   thinx-redis:
     env_file: .env
@@ -115,7 +115,7 @@ services:
           memory: 512M
       placement:
         constraints:
-          - node.role == worker
+          - node.hostname == keyguru-production-01
 
   transformer:
     env_file: .env
@@ -144,7 +144,7 @@ services:
           memory: 256M
       placement:
         constraints:
-          - node.role == worker
+          - node.hostname == keyguru-production-01
       
   api:
     privileged: true
@@ -204,7 +204,7 @@ services:
           memory: 512M
       placement:
         constraints:
-          - node.role == worker
+          - node.hostname == keyguru-production-01
 
   console:
     depends_on:
@@ -255,4 +255,4 @@ services:
           memory: 128M
       placement:
         constraints:
-          - node.role == worker
+          - node.hostname == keyguru-production-01
