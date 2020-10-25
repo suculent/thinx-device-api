@@ -133,9 +133,6 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
-      - run:
-          command: |
-            echo $CONFIG_JSON > ./conf/config.json
           name: Inject configuration
       - docker/check:
           registry: registry.keyguru.eu:5000
