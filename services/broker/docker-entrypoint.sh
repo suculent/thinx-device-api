@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Keyguru Mosquitto Service v1.1"
+
 set +e
 
 #touch /var/log/cron.log

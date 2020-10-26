@@ -11,6 +11,5 @@ docker image prune --force
 
 docker pull ${DOCKER_REGISTRY}/thinx/transformer
 docker pull ${DOCKER_REGISTRY}/thinx/redis
-docker pull ${DOCKER_REGISTRY}/thinx/couchdb
 docker pull ${DOCKER_REGISTRY}/thinx/console
 docker pull ${DOCKER_REGISTRY}/thinx/api
