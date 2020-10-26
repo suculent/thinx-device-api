@@ -29,7 +29,7 @@ services:
         mode: host
     networks:
       - nat
-      - internal
+#      - internal
     volumes:
       - '/mnt/data/mosquitto/config:/mqtt/config:rw'
       - '/mnt/data/mosquitto/data:/mqtt/data:rw'
