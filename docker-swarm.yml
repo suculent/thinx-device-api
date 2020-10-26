@@ -41,6 +41,10 @@ services:
       placement:
         constraints:
           - node.hostname == keyguru-production-01
+    labels:
+      - traefik.enable=true
+      - traefik.backend=mosquitto
+      - traefik.frontend.entryPoints=mqtt,mqtts
 
   couchdb:
     env_file: .env
@@ -192,6 +196,7 @@ services:
       - traefik.port=7442
       - traefik.backend=thinx-api
       - traefik.frontend.rule=Host:${THINX_HOSTNAME}
+      - traefik.frontend.entryPoints=mqtt,mqtts,thxp,thxps
     deploy:
       resources:
         reservations:
