@@ -5,6 +5,8 @@
 version: '3.7'
 
 networks:
+  traefik-public:
+    external: true
   internal:
     driver: overlay
     attachable: true
