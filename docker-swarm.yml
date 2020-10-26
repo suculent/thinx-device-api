@@ -28,6 +28,7 @@ services:
 #        protocol: udp
 #        mode: host
     networks:
+      - ingress
       - traefik-public
       - internal
     volumes:
