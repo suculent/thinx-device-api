@@ -19,8 +19,14 @@ services:
       - MOSQUITTO_PASSWORD: ${MOSQUITTO_PASSWORD}
       - MOSQUITTO_USERNAME: ${MOSQUITTO_USERNAME}
     ports:
-      - 1883:1883
-      - 8883:8883
+    - target: 1883
+      published: 1883
+      protocol: tcp
+      mode: host
+    - target: 8883
+      published: 8883
+      protocol: udp
+      mode: host
     networks:
       - nat
       - internal
