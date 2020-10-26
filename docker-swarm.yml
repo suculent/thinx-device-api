@@ -16,17 +16,17 @@ services:
     env_file: .env
     image: registry.keyguru.eu:5000/thinx/mosquitto
     environment:
-      - MOSQUITTO_PASSWORD: ${MOSQUITTO_PASSWORD}
-      - MOSQUITTO_USERNAME: ${MOSQUITTO_USERNAME}
+      - "MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}"
+      - "MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}"
     ports:
-    - target: 1883
-      published: 1883
-      protocol: tcp
-      mode: host
-    - target: 8883
-      published: 8883
-      protocol: udp
-      mode: host
+      - target: 1883
+        published: 1883
+        protocol: tcp
+        mode: host
+      - target: 8883
+        published: 8883
+        protocol: udp
+        mode: host
     networks:
       - nat
       - internal
@@ -59,13 +59,13 @@ services:
       timeout: 50s
       retries: 5
     environment:
-      - NODENAME: ${NODENAME}
-      - COUCHDB_USER: ${COUCHDB_USER}
-      - COUCHDB_PASSWORD: ${COUCHDB_PASSWORD}
-      - COUCHDB_ADMIN: ${COUCHDB_USER}
-      - COUCHDB_PASS: ${COUCHDB_PASSWORD}
-      - COUCHDB_COOKIE: ${COUCHDB_COOKIE}
-      - COUCHDB_SECRET: ${COUCHDB_SECRET}
+      - "NODENAME=${NODENAME}"
+      - "COUCHDB_USER=${COUCHDB_USER}"
+      - "COUCHDB_PASSWORD=${COUCHDB_PASSWORD}"
+      - "COUCHDB_ADMIN=${COUCHDB_USER}"
+      - "COUCHDB_PASS=${COUCHDB_PASSWORD}"
+      - "COUCHDB_COOKIE=${COUCHDB_COOKIE}"
+      - "COUCHDB_SECRET=${COUCHDB_SECRET}"
     ports:
       - 5984:5984 # not in production!
     networks:
@@ -101,9 +101,9 @@ services:
       - '--port'
       - '6379'
     environment:
-      - ALLOW_EMPTY_PASSWORD: no
-      - REDIS_PASSWORD: ${REDIS_PASSWORD}
-      - REDIS_DISABLE_COMMANDS: FLUSHDB,FLUSHALL
+      - "ALLOW_EMPTY_PASSWORD=no"
+      - "REDIS_PASSWORD=${REDIS_PASSWORD}"
+      - "REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL"
     ports:
       - 6379
     volumes:
@@ -127,11 +127,11 @@ services:
     user: transformer
     image: registry.keyguru.eu:5000/thinx/transformer
     environment:
-      - SQREEN_APP_NAME: ${SQREEN_APP_NAME}
-      - SQREEN_TOKEN: ${SQREEN_TOKEN}
-      - ROLLBAR_ACCESS_TOKEN: ${ROLLBAR_ACCESS_TOKEN}
-      - ROLLBAR_ENVIRONMENT: ${ROLLBAR_ENVIRONMENT}
-      - REVISION: 2
+      - "SQREEN_APP_NAME: ${SQREEN_APP_NAME}"
+      - "SQREEN_TOKEN=${SQREEN_TOKEN}"
+      - "ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}"
+      - "ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}"
+      - "REVISION=2"
     networks:
       - internal
     ports:
@@ -170,9 +170,11 @@ services:
     env_file: .env
     image: registry.keyguru.eu:5000/thinx/api
     environment:
-      - ENVIRONMENT: ${ENVIRONMENT}'
-      - COUCHDB_USER: ${COUCHDB_USER}'
-      - COUCHDB_PASSWORD: ${COUCHDB_PASSWORD}'
+      - "ENVIRONMENT=${ENVIRONMENT}"
+      - "COUCHDB_USER=${COUCHDB_USER}"
+      - "COUCHDB_PASSWORD=${COUCHDB_PASSWORD}"
+      - "MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}"
+      - "MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}"
     ports:
       - '7442:7442'
       - '7443:7443'
@@ -221,17 +223,17 @@ services:
     ports:
       - '8000:80'
     environment:
-      - NGINX_PORT: 80
-      - NGINX_HOST: ${WEB_HOSTNAME}
-      - LANDING_HOSTNAME: ${LANDING_HOSTNAME}
-      - WEB_HOSTNAME: ${WEB_HOSTNAME}
-      - API_HOSTNAME: ${API_HOSTNAME}
-      - API_BASEURL: ${API_BASEURL}
-      - ENTERPRISE: ${ENTERPRISE}
-      - ENVIRONMENT: ${ENVIRONMENT}
-      - GOOGLE_ANALYTICS_ID: ${GOOGLE_ANALYTICS_ID}
-      - ROLLBAR_ACCESS_TOKEN: ${ROLLBAR_ACCESS_TOKEN}
-      - CRISP_WEBSITE_ID: ${CRISP_WEBSITE_ID}
+      - "NGINX_PORT=80"
+      - "NGINX_HOST=${WEB_HOSTNAME}"
+      - "LANDING_HOSTNAME=${LANDING_HOSTNAME}"
+      - "WEB_HOSTNAME=${WEB_HOSTNAME}"
+      - "API_HOSTNAME=${API_HOSTNAME}"
+      - "API_BASEURL=${API_BASEURL}"
+      - "ENTERPRISE=${ENTERPRISE}"
+      - "ENVIRONMENT=${ENVIRONMENT}"
+      - "GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID}"
+      - "ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}"
+      - "CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID}"
     labels:
       - traefik.enable=true
       - traefik.port=80

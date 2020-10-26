@@ -323,8 +323,28 @@ jobs:
 workflows:
   build-and-deploy-components:
     jobs:
-      - build-api
-      - build-console
-      - build-mosquitto
-      - build-redis
-      - build-transformer
+      - build-api:
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
+      - build-console:
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
+      - build-mosquitto:
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
+      - build-redis:
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
+      - build-transformer:
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
