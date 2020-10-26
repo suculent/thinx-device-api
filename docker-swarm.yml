@@ -5,8 +5,6 @@
 version: '3.7'
 
 networks:
-  ingress:
-    external: true
   internal:
     driver: overlay
     attachable: true
@@ -22,13 +20,13 @@ services:
       - target: 1883
         published: 1883
         protocol: tcp
-        mode: ingress
+#        mode: host
       - target: 8883
         published: 8883
-        protocol: udp
-        mode: ingress
+#        protocol: udp
+#        mode: host
     networks:
-      - ingress
+      - traefik-public
       - internal
     volumes:
       - '/mnt/data/mosquitto/config:/mqtt/config:rw'
@@ -69,7 +67,7 @@ services:
     ports:
       - 5984:5984 # not in production!
     networks:
-      - ingress
+      - traefik-public
       - internal
     volumes:
       - '/mnt/data/couchdb:/var/lib/couchdb'
@@ -165,7 +163,7 @@ services:
 #      mosquitto:
 #        condition: service_healthy
     networks:
-      - ingress
+      - traefik-public
       - internal
     env_file: .env
     image: registry.keyguru.eu:5000/thinx/api
@@ -216,7 +214,7 @@ services:
     env_file: .env
     image: registry.keyguru.eu:5000/thinx/console
     networks:
-      - ingress
+      - traefik-public
       - internal
 #    logging:
 #      driver: none
