@@ -28,7 +28,7 @@ services:
         protocol: udp
         mode: ingress
     networks:
-      - nat
+      - ingress
       - internal
     volumes:
       - '/mnt/data/mosquitto/config:/mqtt/config:rw'
@@ -69,7 +69,7 @@ services:
     ports:
       - 5984:5984 # not in production!
     networks:
-      - nat
+      - ingress
       - internal
     volumes:
       - '/mnt/data/couchdb:/var/lib/couchdb'
@@ -165,7 +165,7 @@ services:
 #      mosquitto:
 #        condition: service_healthy
     networks:
-      - nat
+      - ingress
       - internal
     env_file: .env
     image: registry.keyguru.eu:5000/thinx/api
@@ -216,7 +216,7 @@ services:
     env_file: .env
     image: registry.keyguru.eu:5000/thinx/console
     networks:
-      - nat
+      - ingress
       - internal
 #    logging:
 #      driver: none
