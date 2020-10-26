@@ -22,14 +22,14 @@ services:
       - target: 1883
         published: 1883
         protocol: tcp
-        mode: host
+        mode: ingress
       - target: 8883
         published: 8883
         protocol: udp
-        mode: host
+        mode: ingress
     networks:
       - nat
-#      - internal
+      - internal
     volumes:
       - '/mnt/data/mosquitto/config:/mqtt/config:rw'
       - '/mnt/data/mosquitto/data:/mqtt/data:rw'
