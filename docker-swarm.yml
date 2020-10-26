@@ -5,7 +5,7 @@
 version: '3.7'
 
 networks:
-  nat:
+  ingress:
     external: true
   internal:
     driver: overlay
