@@ -230,7 +230,7 @@ services:
 #    logging:
 #      driver: none
     environment:
-      - "NGINX_PORT=7440"
+      - "NGINX_PORT=80"
       - "NGINX_HOST=${WEB_HOSTNAME}"
       - "LANDING_HOSTNAME=${LANDING_HOSTNAME}"
       - "WEB_HOSTNAME=${WEB_HOSTNAME}"
@@ -253,7 +253,7 @@ services:
         constraints:
           - node.hostname == keyguru-production-01
       labels:
-        - "traefik.http.services.thinx-console.loadbalancer.server.port=7440"
+        - "traefik.http.services.thinx-console.loadbalancer.server.port=80"
         - "traefik.enable=true"
         - "traefik.docker.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
