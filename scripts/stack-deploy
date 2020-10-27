@@ -1,5 +1,5 @@
 #!/bin/bash
 
-export $(cat .env)
+export $(cat .env.at)
 
-docker stack deploy -c ./docker-swarm.yml thinx
+docker stack deploy --with-registry-auth -c ./docker-swarm.yml thinx
