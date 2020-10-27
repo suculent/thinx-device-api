@@ -226,11 +226,11 @@ services:
     image: registry.keyguru.eu:5000/thinx/console
     networks:
       - traefik-public
-#      - internal
+      - internal
 #    logging:
 #      driver: none
     ports:
-      - '8000:80'
+      - '7440:80'
     environment:
       - "NGINX_PORT=80"
       - "NGINX_HOST=${WEB_HOSTNAME}"
@@ -268,4 +268,4 @@ services:
         - "traefik.http.routers.console-https.tls=true"
         - "traefik.http.routers.console-https.tls.certresolver=le"
 
-        - "traefik.http.services.thinx-console.loadbalancer.server.port=8000"
+        - "traefik.http.services.thinx-console.loadbalancer.server.port=7440"
