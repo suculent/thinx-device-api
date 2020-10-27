@@ -79,4 +79,4 @@ RUN apt-get update \
 #USER user
 
 # Expose port (HOST:CONTAINER; nginx, may be configured from outside with docker-compose)
-# EXPOSE 7440:80
+EXPOSE 7440:80

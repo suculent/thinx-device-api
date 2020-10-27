@@ -228,7 +228,7 @@ services:
       - traefik-public
 #      - internal # why?
     ports:
-      - '8008:80'
+      - 7440:80
 #    logging:
 #      driver: none
     environment:
@@ -255,7 +255,8 @@ services:
         constraints:
           - node.hostname == keyguru-production-01
       labels:
-        - "traefik.http.services.thinx-console.loadbalancer.server.port=8008"
+        # should be 7440, but the 80 port of container is exposed anyway in swarm mode
+        - "traefik.http.services.thinx-console.loadbalancer.server.port=80"
         - "traefik.enable=true"
         - "traefik.docker.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
