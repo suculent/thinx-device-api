@@ -541,7 +541,7 @@ case $PLATFORM in
 			fi
 
 			echo "NodeMCU Build: Configuring..." | tee -a "${LOG_PATH}"
-			mv "./thinx_build.json" $CONFIG_PATH
+			cp "./thinx_build.json" $CONFIG_PATH
 
 			FILES=$(find . -maxdepth 1 -name "*.lua")
 			echo "NodeMCU Build: FILES:" | tee -a "${LOG_PATH}"
@@ -618,7 +618,7 @@ case $PLATFORM in
 				TNAME=$(pwd)/fs/thinx.json
 			fi
 			echo "Moving thinx_build.json to $TNAME" | tee -a "${LOG_PATH}"
-			mv "./thinx_build.json" "$TNAME"
+			cp "./thinx_build.json" "$TNAME"
 
 			DCMD="docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t -v $(pwd):/opt/mongoose-builder suculent/mongoose-docker-build"
 			# docker run -v /var/run/docker.sock:/var/run/docker.sock --cpus=1.0 --rm -t -v $(pwd):/opt/workspace suculent/arduino-docker-builder
