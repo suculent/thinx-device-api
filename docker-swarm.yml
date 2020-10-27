@@ -32,11 +32,11 @@ services:
     deploy:
       resources:
         reservations:
-          cpus: '0.1'
-          memory: 16M
-        limits:
-          cpus: '0.4'
+          cpus: '0.2'
           memory: 64M
+        limits:
+          cpus: '0.5'
+          memory: 128M
       placement:
         constraints:
           - node.hostname == keyguru-production-01
@@ -92,11 +92,11 @@ services:
     deploy:
       resources:
         reservations:
-          cpus: '0.5'
-          memory: 256M
-        limits:
           cpus: '1.0'
           memory: 512M
+        limits:
+          cpus: '1.0'
+          memory: 1024M
       placement:
         constraints:
           - node.hostname == keyguru-production-01
