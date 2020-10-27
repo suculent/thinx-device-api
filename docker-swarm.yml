@@ -226,9 +226,9 @@ services:
     image: registry.keyguru.eu:5000/thinx/console
     networks:
       - traefik-public
-      - internal
+#      - internal # why?
     ports:
-      - '80:80'
+      - '8008:80'
 #    logging:
 #      driver: none
     environment:
@@ -255,7 +255,7 @@ services:
         constraints:
           - node.hostname == keyguru-production-01
       labels:
-        - "traefik.http.services.thinx-console.loadbalancer.server.port=80"
+        - "traefik.http.services.thinx-console.loadbalancer.server.port=8008"
         - "traefik.enable=true"
         - "traefik.docker.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
@@ -268,5 +268,3 @@ services:
         - "traefik.http.routers.thinx-console-https.entrypoints=https"
         - "traefik.http.routers.thinx-console-https.tls=true"
         - "traefik.http.routers.thinx-console-https.tls.certresolver=le"
-
-        
