@@ -76,12 +76,12 @@ services:
     volumes:
     
       - type: bind
-        source: mnt/data/couchdb
+        source: /mnt/data/couchdb
         target: /opt/couchdb/data
 
       # probably deprecated
       - type: bind
-        source: mnt/data/couchdb
+        source: /mnt/data/couchdb
         target: /var/lib/couchdb
       
       - '/mnt/data/vm.args:/opt/couchdb/etc/vm.args'
