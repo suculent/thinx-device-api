@@ -24,11 +24,11 @@ services:
     networks:
       - traefik-public
     volumes:
-      - '/mnt/data/mosquitto/config:/mqtt/config:rw'
+      - '/mnt/data/mosquitto/config:/mqtt/config:ro'
+      - '/mnt/data/mosquitto/ssl:/mqtt/ssl:ro'
       - '/mnt/data/mosquitto/data:/mqtt/data:rw'
-      - '/mnt/data/mosquitto/log:/var/log:rw'
+      - '/mnt/data/mosquitto/log/mosquitto.log:/var/log/mosquitto.log:rw'
       - '/mnt/data/mosquitto/auth:/mqtt/auth:rw'
-      - '/gluster/volume1/data/mosquitto/ssl:/mqtt/ssl:rw'
     deploy:
       resources:
         reservations:
@@ -196,7 +196,7 @@ services:
       - '/mnt/data/deploy:/mnt/data/deploy'
       - '/mnt/data/mosquitto:/mnt/data/mosquitto'
       - '/mnt/data/repos:/mnt/data/repos'
-      - '/gluster/volume1/data/ssl:/mnt/data/ssl'
+      - '/mnt/data/ssl:/mnt/data/ssl'
       - '/mnt/data/ssh_keys:/mnt/data/ssh_keys'
       - '/mnt/data/conf:/mnt/data/conf'
       - '/mnt/data/test-reports:/mnt/data/test-reports'
