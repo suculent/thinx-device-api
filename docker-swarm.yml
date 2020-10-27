@@ -27,7 +27,7 @@ services:
       - '/mnt/data/mosquitto/config:/mqtt/config:ro'
       - '/mnt/data/mosquitto/ssl:/mqtt/ssl:ro'
       - '/mnt/data/mosquitto/data:/mqtt/data:rw'
-      - '/mnt/data/mosquitto/log/mosquitto.log:/var/log/mosquitto.log:rw'
+      - '/mnt/data/mosquitto/log:/mqtt/log:rw'
       - '/mnt/data/mosquitto/auth:/mqtt/auth:rw'
     deploy:
       resources:
