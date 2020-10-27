@@ -227,6 +227,8 @@ services:
     networks:
       - traefik-public
       - internal
+    ports:
+      - '7440:80'
 #    logging:
 #      driver: none
     environment:
@@ -253,7 +255,7 @@ services:
         constraints:
           - node.hostname == keyguru-production-01
       labels:
-        - "traefik.http.services.thinx-console.loadbalancer.server.port=80"
+        - "traefik.http.services.thinx-console.loadbalancer.server.port=7440"
         - "traefik.enable=true"
         - "traefik.docker.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
