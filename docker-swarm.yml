@@ -193,13 +193,19 @@ services:
       - /var/lib/docker
       - /cache
     labels:
-      - traefik.docker.network=nat
       - traefik.enable=true
       - traefik.port=7442
       - traefik.backend=thinx-api
-      - traefik.frontend.rule=Host:${THINX_HOSTNAME}
-      - traefik.frontend.entryPoints=mqtt,mqtts,thxp,thxps
-      - traefik.http.services.api.loadbalancer.server.port=7442
+      - traefik.docker.network=traefik-public
+      - traefik.constraint-label=traefik-public
+      - traefik.http.routers.thinx-api-http.rule=Host(`thinx.keyguru.at`) || Host(`${THINX_HOSTNAME}`)
+      - traefik.http.routers.thinx-api-http.entrypoints=http,thxp
+      - traefik.http.routers.thinx-api-http.middlewares=https-redirect
+      - traefik.http.routers.thinx-api-https.rule=Host(`thinx.keyguru.at`) || Host(`${THINX_HOSTNAME}`)
+      - traefik.http.routers.thinx-api-https.entrypoints=https,thxps
+      - traefik.http.routers.thinx-api-https.tls=true
+      - traefik.http.routers.thinx-api-https.tls.certresolver=le
+      - traefik.http.services.console.loadbalancer.server.port=7442
     deploy:
       resources:
         reservations:
@@ -240,16 +246,17 @@ services:
       - traefik.enable=true
       - traefik.port=80
       - traefik.backend=console
-      - traefik.frontend.rule=Host:${WEB_HOSTNAME}
-      - traefik.frontend.entryPoints=http,https
-      - traefik.frontend.headers.SSLRedirect=false
-      - traefik.frontend.headers.SSLForceHost=true
-      - traefik.frontend.headers.SSLHost=${WEB_HOSTNAME}
-      - traefik.http.services.console.loadbalancer.server.port=8080
-#      - traefik.frontend.headers.forceSTSHeader=true
-#      - traefik.frontend.headers.STSSeconds=315360000
-#      - traefik.frontend.headers.STSIncludeSubdomains=true
-#      - traefik.frontend.headers.STSPreload=true
+      - traefik.docker.network=traefik-public
+      - traefik.constraint-label=traefik-public
+      - traefik.http.routers.console-http.rule=Host(`console.keyguru.at`) || Host(`${WEB_HOSTNAME}`)
+      - traefik.http.routers.console-http.entrypoints=http
+      - traefik.http.routers.console-http.middlewares=https-redirect
+      - traefik.http.routers.console-https.rule=Host(`console.keyguru.at`) || Host(`${WEB_HOSTNAME}`)
+      - traefik.http.routers.console-https.entrypoints=https
+      - traefik.http.routers.console-https.tls=true
+      - traefik.http.routers.console-https.tls.certresolver=le
+      - traefik.http.services.console.loadbalancer.server.port=8000
+
     deploy:
       resources:
         reservations:
