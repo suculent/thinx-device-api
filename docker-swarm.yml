@@ -190,8 +190,8 @@ services:
       - '/mnt/data/conf:/mnt/data/conf'
       - '/mnt/data/test-reports:/mnt/data/test-reports'
       - '/var/run/docker.sock:/var/run/docker.sock'
-      - /var/lib/docker
-      - /cache
+      - '/var/lib/docker'
+      - '/cache'
     deploy:
       resources:
         reservations:
@@ -205,18 +205,19 @@ services:
           - node.hostname == keyguru-production-01
       labels:
         - "traefik.enable=true"
-        - "traefik.port=7442"
-        - "traefik.backend=thinx-api"
         - "traefik.docker.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
-        - "traefik.http.routers.thinx-api-http.rule=Host(`thinx.keyguru.at`) || Host(`${THINX_HOSTNAME}`)"
+
+        - "traefik.http.routers.thinx-api-http.rule=Host(`${THINX_HOSTNAME}`)"
         - "traefik.http.routers.thinx-api-http.entrypoints=http,thxp"
         - "traefik.http.routers.thinx-api-http.middlewares=https-redirect"
-        - "traefik.http.routers.thinx-api-https.rule=Host(`thinx.keyguru.at`) || Host(`${THINX_HOSTNAME}`)"
+
+        - "traefik.http.routers.thinx-api-https.rule=Host(`${THINX_HOSTNAME}`)"
         - "traefik.http.routers.thinx-api-https.entrypoints=https,thxps"
         - "traefik.http.routers.thinx-api-https.tls=true"
         - "traefik.http.routers.thinx-api-https.tls.certresolver=le"
-        - "traefik.http.services.console.loadbalancer.server.port=7442"
+
+        - "traefik.http.services.thinx-api.loadbalancer.server.port=7442"
 
   console:
     depends_on:
@@ -255,15 +256,16 @@ services:
           - node.hostname == keyguru-production-01
       labels:
         - "traefik.enable=true"
-        - "traefik.port=80"
-        - "traefik.backend=console"
         - "traefik.docker.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
-        - "traefik.http.routers.console-http.rule=Host(`console.keyguru.at`) || Host(`${WEB_HOSTNAME}`)"
+
+        - "traefik.http.routers.console-http.rule=Host(`${WEB_HOSTNAME}`)"
         - "traefik.http.routers.console-http.entrypoints=http"
         - "traefik.http.routers.console-http.middlewares=https-redirect"
-        - "traefik.http.routers.console-https.rule=Host(`console.keyguru.at`) || Host(`${WEB_HOSTNAME}`)"
+
+        - "traefik.http.routers.console-https.rule=Host(`${WEB_HOSTNAME}`)"
         - "traefik.http.routers.console-https.entrypoints=https"
         - "traefik.http.routers.console-https.tls=true"
         - "traefik.http.routers.console-https.tls.certresolver=le"
-        - "traefik.http.services.console.loadbalancer.server.port=8000"
+
+        - "traefik.http.services.thinx-console.loadbalancer.server.port=8000"
