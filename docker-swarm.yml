@@ -192,20 +192,6 @@ services:
       - '/var/run/docker.sock:/var/run/docker.sock'
       - /var/lib/docker
       - /cache
-    labels:
-      - traefik.enable=true
-      - traefik.port=7442
-      - traefik.backend=thinx-api
-      - traefik.docker.network=traefik-public
-      - traefik.constraint-label=traefik-public
-      - traefik.http.routers.thinx-api-http.rule=Host(`thinx.keyguru.at`) || Host(`${THINX_HOSTNAME}`)
-      - traefik.http.routers.thinx-api-http.entrypoints=http,thxp
-      - traefik.http.routers.thinx-api-http.middlewares=https-redirect
-      - traefik.http.routers.thinx-api-https.rule=Host(`thinx.keyguru.at`) || Host(`${THINX_HOSTNAME}`)
-      - traefik.http.routers.thinx-api-https.entrypoints=https,thxps
-      - traefik.http.routers.thinx-api-https.tls=true
-      - traefik.http.routers.thinx-api-https.tls.certresolver=le
-      - traefik.http.services.console.loadbalancer.server.port=7442
     deploy:
       resources:
         reservations:
@@ -217,6 +203,20 @@ services:
       placement:
         constraints:
           - node.hostname == keyguru-production-01
+      labels:
+        - "traefik.enable=true"
+        - "traefik.port=7442"
+        - "traefik.backend=thinx-api"
+        - "traefik.docker.network=traefik-public"
+        - "traefik.constraint-label=traefik-public"
+        - "traefik.http.routers.thinx-api-http.rule=Host(`thinx.keyguru.at`) || Host(`${THINX_HOSTNAME}`)"
+        - "traefik.http.routers.thinx-api-http.entrypoints=http,thxp"
+        - "traefik.http.routers.thinx-api-http.middlewares=https-redirect"
+        - "traefik.http.routers.thinx-api-https.rule=Host(`thinx.keyguru.at`) || Host(`${THINX_HOSTNAME}`)"
+        - "traefik.http.routers.thinx-api-https.entrypoints=https,thxps"
+        - "traefik.http.routers.thinx-api-https.tls=true"
+        - "traefik.http.routers.thinx-api-https.tls.certresolver=le"
+        - "traefik.http.services.console.loadbalancer.server.port=7442"
 
   console:
     depends_on:
@@ -242,21 +242,6 @@ services:
       - "GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID}"
       - "ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}"
       - "CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID}"
-    labels:
-      - traefik.enable=true
-      - traefik.port=80
-      - traefik.backend=console
-      - traefik.docker.network=traefik-public
-      - traefik.constraint-label=traefik-public
-      - traefik.http.routers.console-http.rule=Host(`console.keyguru.at`) || Host(`${WEB_HOSTNAME}`)
-      - traefik.http.routers.console-http.entrypoints=http
-      - traefik.http.routers.console-http.middlewares=https-redirect
-      - traefik.http.routers.console-https.rule=Host(`console.keyguru.at`) || Host(`${WEB_HOSTNAME}`)
-      - traefik.http.routers.console-https.entrypoints=https
-      - traefik.http.routers.console-https.tls=true
-      - traefik.http.routers.console-https.tls.certresolver=le
-      - traefik.http.services.console.loadbalancer.server.port=8000
-
     deploy:
       resources:
         reservations:
@@ -268,3 +253,17 @@ services:
       placement:
         constraints:
           - node.hostname == keyguru-production-01
+      labels:
+        - "traefik.enable=true"
+        - "traefik.port=80"
+        - "traefik.backend=console"
+        - "traefik.docker.network=traefik-public"
+        - "traefik.constraint-label=traefik-public"
+        - "traefik.http.routers.console-http.rule=Host(`console.keyguru.at`) || Host(`${WEB_HOSTNAME}`)"
+        - "traefik.http.routers.console-http.entrypoints=http"
+        - "traefik.http.routers.console-http.middlewares=https-redirect"
+        - "traefik.http.routers.console-https.rule=Host(`console.keyguru.at`) || Host(`${WEB_HOSTNAME}`)"
+        - "traefik.http.routers.console-https.entrypoints=https"
+        - "traefik.http.routers.console-https.tls=true"
+        - "traefik.http.routers.console-https.tls.certresolver=le"
+        - "traefik.http.services.console.loadbalancer.server.port=8000"
