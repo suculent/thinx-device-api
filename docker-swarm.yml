@@ -156,15 +156,14 @@ services:
       - transformer
       - thinx-redis
       - mosquitto
-#      couchdb:
-#        condition: service_started
-#      transformer:
-#        condition: service_started
-#      thinx-redis:
-
-#        condition: service_started
-#      mosquitto:
-#        condition: service_healthy
+    couchdb:
+      condition: service_started
+    transformer:
+      condition: service_started
+    thinx-redis:
+      condition: service_started
+    mosquitto:
+        condition: service_healthy
     networks:
       - traefik-public
       - internal

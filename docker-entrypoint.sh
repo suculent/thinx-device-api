@@ -64,7 +64,7 @@ set -e
 mkdir -p /opt/thinx/.pm2/logs/
 touch /opt/thinx/.pm2/logs/index-out-1.log
 
-if [ $ENVIRONMENT == "test" ]; then
+if [[ ${ENVIRONMENT} == "test" ]]; then
   echo "[thinx-entrypoint] Running in TEST MODE!"
   export CODECOV_TOKEN="734bc9e7-5671-4020-a26e-e6141f02b53d"
   export CODACY_PROJECT_TOKEN=9a7d084ad97e430ba12333f384b44255
