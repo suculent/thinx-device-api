@@ -40,13 +40,14 @@ services:
       placement:
         constraints:
           - node.hostname == keyguru-production-01
-    labels:
-      - traefik.enable=true
-      - traefik.backend=mosquitto
-      - traefik.frontend.entryPoints=mqtt,mqtts
-      - traefik.docker.network=traefik-public
-      - traefik.constraint-label=traefik-public
-      - traefik.http.services.mosquitto.loadbalancer.server.port=1883
+      labels:
+        - traefik.enable=true
+        - traefik.backend=mosquitto
+        - traefik.frontend.entryPoints=mqtt,mqtts
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.services.mosquitto.loadbalancer.server.port=1883
+        - "swarmpit.service.deployment.autoredeploy=true"
 
   couchdb:
     env_file: .env
@@ -87,8 +88,6 @@ services:
         source: /mnt/data/couchdb
         target: /var/lib/couchdb
 
-    labels:
-      - traefik.backend.couchdb.noexpose
     deploy:
       resources:
         reservations:
@@ -100,6 +99,9 @@ services:
       placement:
         constraints:
           - node.hostname == keyguru-production-01
+      labels:
+        - "swarmpit.service.deployment.autoredeploy=true"
+
 
   thinx-redis:
     env_file: .env
@@ -120,8 +122,6 @@ services:
       - 6379
     volumes:
       - '/mnt/data/redis:/data'
-    labels:
-      - traefik.backend.thinx-redis
     deploy:
       resources:
         reservations:
@@ -133,6 +133,8 @@ services:
       placement:
         constraints:
           - node.hostname == keyguru-production-01
+      labels:
+        - "swarmpit.service.deployment.autoredeploy=true"
 
   transformer:
     env_file: .env
@@ -161,6 +163,8 @@ services:
       placement:
         constraints:
           - node.hostname == keyguru-production-01
+      labels:
+        - "swarmpit.service.deployment.autoredeploy=true"
       
   api:
     depends_on:
@@ -229,6 +233,8 @@ services:
         - "traefik.http.routers.thinx-api-https.tls=true"
         - "traefik.http.routers.thinx-api-https.tls.certresolver=le"
 
+        - "swarmpit.service.deployment.autoredeploy=true"
+
 
   console:
     depends_on:
@@ -280,3 +286,5 @@ services:
         - "traefik.http.routers.thinx-console-https.entrypoints=https"
         - "traefik.http.routers.thinx-console-https.tls=true"
         - "traefik.http.routers.thinx-console-https.tls.certresolver=le"
+
+        - "swarmpit.service.deployment.autoredeploy=true"
