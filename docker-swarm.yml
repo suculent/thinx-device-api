@@ -75,7 +75,7 @@ services:
     volumes:
       - '/mnt/data/couchdb:/var/lib/couchdb'
       - '/mnt/data/couchdb:/opt/couchdb/data'
-      #- './services/couchdb/vm.args:/opt/couchdb/etc/vm.args'
+      - '/mnt/data/vm.args:/opt/couchdb/etc/vm.args'
     labels:
       - traefik.backend.couchdb.noexpose
     deploy:
