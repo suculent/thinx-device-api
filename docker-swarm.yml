@@ -213,8 +213,8 @@ services:
           cpus: '2.0'
           memory: 2048M
         limits:
-          cpus: '4.0'
-          memory: 4096M
+          cpus: '3.0'
+          memory: 3072M
       placement:
         constraints:
           - node.hostname == keyguru-production-01
