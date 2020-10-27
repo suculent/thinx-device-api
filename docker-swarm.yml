@@ -28,7 +28,7 @@ services:
       - '/mnt/data/mosquitto/config:/mqtt/config:rw'
       - '/mnt/data/mosquitto/data:/mqtt/data:rw'
       - '/mnt/data/mosquitto/log:/var/log:rw'
-      - '/mnt/data/mosquitto/ssl:/mqtt/ssl:rw'
+      - '/gluster/volume1/data/mosquitto/ssl:/mqtt/ssl:rw'
       - '/mnt/data/mosquitto/auth:/mqtt/auth:rw'
     deploy:
       resources:
@@ -185,7 +185,7 @@ services:
       - '/mnt/data/deploy:/mnt/data/deploy'
       - '/mnt/data/mosquitto:/mnt/data/mosquitto'
       - '/mnt/data/repos:/mnt/data/repos'
-      - '/mnt/data/ssl:/mnt/data/ssl'
+      - '/gluster/volume1/data/ssl:/mnt/data/ssl'
       - '/mnt/data/ssh_keys:/mnt/data/ssh_keys'
       - '/mnt/data/conf:/mnt/data/conf'
       - '/mnt/data/test-reports:/mnt/data/test-reports'
