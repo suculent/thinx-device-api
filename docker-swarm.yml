@@ -204,6 +204,7 @@ services:
         constraints:
           - node.hostname == keyguru-production-01
       labels:
+        - "traefik.http.services.thinx-api.loadbalancer.server.port=7442"
         - "traefik.enable=true"
         - "traefik.docker.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
@@ -217,7 +218,6 @@ services:
         - "traefik.http.routers.thinx-api-https.tls=true"
         - "traefik.http.routers.thinx-api-https.tls.certresolver=le"
 
-        - "traefik.http.services.thinx-api.loadbalancer.server.port=7442"
 
   console:
     depends_on:
@@ -230,7 +230,7 @@ services:
 #    logging:
 #      driver: none
     ports:
-      - '7440:80'
+     - '7440:80'
     environment:
       - "NGINX_PORT=80"
       - "NGINX_HOST=${WEB_HOSTNAME}"
@@ -247,25 +247,26 @@ services:
       resources:
         reservations:
           cpus: '0.5'
-          memory: 16M
+          memory: 32M
         limits:
           cpus: '1.0'
-          memory: 128M
+          memory: 256M
       placement:
         constraints:
           - node.hostname == keyguru-production-01
       labels:
+        - "traefik.http.services.thinx-console.loadbalancer.server.port=80"
         - "traefik.enable=true"
         - "traefik.docker.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
 
-        - "traefik.http.routers.console-http.rule=Host(`${WEB_HOSTNAME}`)"
-        - "traefik.http.routers.console-http.entrypoints=http"
-        - "traefik.http.routers.console-http.middlewares=https-redirect"
+        - "traefik.http.routers.thinx-console-http.rule=Host(`${WEB_HOSTNAME}`)"
+        - "traefik.http.routers.thinx-console-http.entrypoints=http"
+        - "traefik.http.routers.thinx-console-http.middlewares=https-redirect"
 
-        - "traefik.http.routers.console-https.rule=Host(`${WEB_HOSTNAME}`)"
-        - "traefik.http.routers.console-https.entrypoints=https"
-        - "traefik.http.routers.console-https.tls=true"
-        - "traefik.http.routers.console-https.tls.certresolver=le"
+        - "traefik.http.routers.thinx-console-https.rule=Host(`${WEB_HOSTNAME}`)"
+        - "traefik.http.routers.thinx-console-https.entrypoints=https"
+        - "traefik.http.routers.thinx-console-https.tls=true"
+        - "traefik.http.routers.thinx-console-https.tls.certresolver=le"
 
-        - "traefik.http.services.thinx-console.loadbalancer.server.port=7440"
+        

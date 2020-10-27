@@ -70,7 +70,7 @@ COPY --from=0 /home/node/build/html .
 # COPY default.conf /etc/nginx/conf.d/default.conf
 
 RUN apt-get update \
- && apt-get install -qq -y curl
+ && apt-get install -qq -y curl nano nmap inetutils-ping
 
 # Only for Alpine, but the nginx is somewhere else then?
 #COPY harden.sh .
