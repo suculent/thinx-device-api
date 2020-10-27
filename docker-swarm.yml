@@ -45,6 +45,9 @@ services:
       - traefik.enable=true
       - traefik.backend=mosquitto
       - traefik.frontend.entryPoints=mqtt,mqtts
+      - traefik.docker.network=traefik-public
+      - traefik.constraint-label=traefik-public
+      - traefik.http.services.mosquitto.loadbalancer.server.port=1883
 
   couchdb:
     env_file: .env
@@ -197,6 +200,7 @@ services:
       - traefik.backend=thinx-api
       - traefik.frontend.rule=Host:${THINX_HOSTNAME}
       - traefik.frontend.entryPoints=mqtt,mqtts,thxp,thxps
+      - traefik.http.services.api.loadbalancer.server.port=7442
     deploy:
       resources:
         reservations:
@@ -242,6 +246,7 @@ services:
       - traefik.frontend.headers.SSLRedirect=false
       - traefik.frontend.headers.SSLForceHost=true
       - traefik.frontend.headers.SSLHost=${WEB_HOSTNAME}
+      - traefik.http.services.console.loadbalancer.server.port=8080
 #      - traefik.frontend.headers.forceSTSHeader=true
 #      - traefik.frontend.headers.STSSeconds=315360000
 #      - traefik.frontend.headers.STSIncludeSubdomains=true
