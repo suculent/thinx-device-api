@@ -23,13 +23,12 @@ services:
       - 8883:8883
     networks:
       - traefik-public
-      - internal
     volumes:
       - '/mnt/data/mosquitto/config:/mqtt/config:rw'
       - '/mnt/data/mosquitto/data:/mqtt/data:rw'
       - '/mnt/data/mosquitto/log:/var/log:rw'
-      - '/gluster/volume1/data/mosquitto/ssl:/mqtt/ssl:rw'
       - '/mnt/data/mosquitto/auth:/mqtt/auth:rw'
+      - '/gluster/volume1/data/mosquitto/ssl:/mqtt/ssl:rw'
     deploy:
       resources:
         reservations:
@@ -70,8 +69,8 @@ services:
     ports:
       - 5984:5984 # not in production!
     networks:
-      - traefik-public
-      - internal
+      - traefik-public # not in production!
+#      - internal # for production
 
     volumes:
     
@@ -79,12 +78,15 @@ services:
         source: /mnt/data/couchdb
         target: /opt/couchdb/data
 
+      - type: bind
+        source: /mnt/data/vm.args
+        target: /opt/couchdb/etc/vm.args
+
       # probably deprecated
       - type: bind
         source: /mnt/data/couchdb
         target: /var/lib/couchdb
-      
-      - '/mnt/data/vm.args:/opt/couchdb/etc/vm.args'
+
     labels:
       - traefik.backend.couchdb.noexpose
     deploy:
