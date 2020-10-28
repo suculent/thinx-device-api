@@ -176,17 +176,6 @@ fi
 
 echo
 
-echo "------- RESULTS -----"
-
-echo "GIT_REPO:    $GIT_REPO"
-echo "proto:       $proto"
-echo "url:         $url"
-echo "user:        $user"
-echo "host:        $host"
-echo "port:        $port"
-echo "REPO_PATH:   $REPO_PATH"
-echo "REPO_NAME:   $REPO_NAME"
-
 # make sure to remove trailing git for HTTP URLs as well...
 # REPO_PATH=$BUILD_PATH/${REPO_PATH%.git}
 REPO_PATH=${REPO_PATH%.git}
