@@ -4,6 +4,10 @@ source ./infer # utility functions like parse_yaml
 # do not exit when subsequent tools fail...
 set +e
 
+if [[ -z $THINX_ROOT ]]; then
+export THINX_ROOT=/opt/thinx/thinx-device-api
+fi
+
 echo ""
 echo "-=[ ☢   THiNX IoT RTM BUILDER ☢  ]=-"
 echo ""
