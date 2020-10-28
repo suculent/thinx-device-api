@@ -385,7 +385,7 @@ devicelib.get(udid, function(err, doc) {
       }
     } */
 
-    var device = body.rows[0];
+    var device = body.rows[0].doc;
     device.last_build_id = build_id;
     device.last_build_date = new Date().getTime();
 
@@ -400,8 +400,6 @@ devicelib.get(udid, function(err, doc) {
         console.log("[notifier.js] Notifier device update error: ", error);
       }
     });
-
-
 
     // Create build envelope
     var buildEnvelope = {
