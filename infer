@@ -2,6 +2,8 @@
 
 # THiNX Builder Library Functions
 
+export THINX_ROOT=/opt/thinx/thinx-device-api
+
 function parse_yaml
 {
     local prefix=$2

@@ -39,14 +39,11 @@ if [[ -z $LANGUAGE ]]; then
 	exit 1
 fi
 
-
-THINX_ROOT=$(pwd)
-echo "Current THINX_ROOT directory: $THINX_ROOT"
-
 if [[ -z $THINX_ROOT ]]; then
-		THINX_ROOT=$(pwd)
-		echo "Setting THINX_WEB_ROOT env var to current working directory $(pwd)"
+	THINX_ROOT=/opt/thinx/thinx-device-api
 fi
+
+echo "Current THINX_ROOT directory: $THINX_ROOT"
 
 case $LANGUAGE in
 

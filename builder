@@ -4,6 +4,10 @@ source ./infer # utility functions like parse_yaml
 # do not exit when subsequent tools fail...
 set +e
 
+if [[ -z $THINX_ROOT ]]; then
+export THINX_ROOT=/opt/thinx/thinx-device-api
+fi
+
 echo ""
 echo "-=[ ☢   THiNX IoT RTM BUILDER ☢  ]=-"
 echo ""
@@ -64,11 +68,14 @@ case $i in
 esac
 done
 
-# will be used later with notifier...
-THINX_ROOT=$(pwd)
+# later used in DevSec and NodeMCU
+CONFIG_ROOT=$(pwd)
+if [[ ! -f $CONFIG_ROOT/conf/config.json ]]; then
+	CONFIG_ROOT=/mnt/data
+fi
 
 # from app_config.data_root
-DATA_ROOT_X=$(cat $THINX_ROOT/conf/config.json | jq .data_root)
+DATA_ROOT_X=$(cat $CONFIG_ROOT/conf/config.json | jq .data_root)
 DATA_ROOT="$(sed 's/\"//g' <<< $DATA_ROOT_X)"
 
 # from app_config.build_root
@@ -168,17 +175,6 @@ else
 fi
 
 echo
-
-echo "------- RESULTS -----"
-
-echo "GIT_REPO:    $GIT_REPO"
-echo "proto:       $proto"
-echo "url:         $url"
-echo "user:        $user"
-echo "host:        $host"
-echo "port:        $port"
-echo "REPO_PATH:   $REPO_PATH"
-echo "REPO_NAME:   $REPO_NAME"
 
 # make sure to remove trailing git for HTTP URLs as well...
 # REPO_PATH=$BUILD_PATH/${REPO_PATH%.git}
@@ -444,6 +440,7 @@ case $PLATFORM in
 				set -o pipefail
 				docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython | tee -a "${LOG_PATH}"
 				echo "${PIPESTATUS[@]}"
+				set +o pipefail
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
 					BUILD_SUCCESS=true
 					echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
@@ -537,7 +534,7 @@ case $PLATFORM in
 			fi
 
 			echo "NodeMCU Build: Configuring..." | tee -a "${LOG_PATH}"
-			mv "./thinx_build.json" $CONFIG_PATH
+			cp "./thinx_build.json" $CONFIG_PATH
 
 			FILES=$(find . -maxdepth 1 -name "*.lua")
 			echo "NodeMCU Build: FILES:" | tee -a "${LOG_PATH}"
@@ -614,7 +611,7 @@ case $PLATFORM in
 				TNAME=$(pwd)/fs/thinx.json
 			fi
 			echo "Moving thinx_build.json to $TNAME" | tee -a "${LOG_PATH}"
-			mv "./thinx_build.json" "$TNAME"
+			cp "./thinx_build.json" "$TNAME"
 
 			DCMD="docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t -v $(pwd):/opt/mongoose-builder suculent/mongoose-docker-build"
 			# docker run -v /var/run/docker.sock:/var/run/docker.sock --cpus=1.0 --rm -t -v $(pwd):/opt/workspace suculent/arduino-docker-builder

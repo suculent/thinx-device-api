@@ -76,29 +76,32 @@ var WebSocket = require("ws");
  * Databases
  */
 
-try {
-  var pfx_path = __dirname + '/conf/.thx_prefix';
-  if (fs.existsSync(pfx_path)) {
-    prefix = (fs.readFileSync(pfx_path).toString()).replace("\n", "");
-  } else {
-    // create .thx_prefix with random key on first run!
-    fs.ensureFile(pfx_path, function(e) {
-      if (e) {
-        console.log("» error creating thx_prefix: " + e);
-      } else {
-        crypto.randomBytes(12, function(err, buffer) {
-          var prefix_z = buffer.toString('hex');
-          fs.writeFile(prefix_z, "", function(err_z) {
-            if (err_z) {
-              console.log("» error writing thx_prefix: " + err);
-            }
-          });
-        });
-      }
-    });
+var pfx_path = __dirname + '/conf/.thx_prefix'; // old
+if (!fs.existsSync(pfx_path)) {
+  pfx_path = app_config.data_root + '/conf/.thx_prefix'; // new
+  if (!fs.existsSync(pfx_path)) {
+    console.log("Prefix file missing, clean install...");
   }
-} catch (e) {
-  console.log("» thx_prefix_exception" + e);
+}
+
+if (fs.existsSync(pfx_path)) {
+  prefix = (fs.readFileSync(pfx_path).toString()).replace("\n", "");
+} else {
+  // create .thx_prefix with random key on first run!
+  fs.ensureFile(pfx_path, function(e) {
+    if (e) {
+      console.log("» error creating thx_prefix: " + e);
+    } else {
+      crypto.randomBytes(12, function(err, buffer) {
+        var prefix_z = buffer.toString('hex');
+        fs.writeFile(prefix_z, "", function(err_z) {
+          if (err_z) {
+            console.log("» error writing thx_prefix: " + err);
+          }
+        });
+      });
+    }
+  });
 }
 
 console.log("» Initializing DB...");

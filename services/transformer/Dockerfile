@@ -23,15 +23,14 @@ RUN npm config set unsafe-perm true
 RUN npm install -g node-gyp
 
 # Sqreen.io token is inside a JSON file /app/sqreen.json
-COPY / /home/node
+RUN mkdir -p /home/node/app
+RUN ls -la
+COPY ./app/* /home/node/app/
 
 WORKDIR /home/node/app
 
-# this will fail on CI! Only for rollbar ad sqreen tokens.
-COPY .env /home/node/app/.env
-
 # Running npm install for production purpose will not run dev dependencies.
-RUN npm install . --only-prod
+RUN ls -la && npm install . --only-prod
 
 # Create a user group 'thinx'
 RUN addgroup -S thinx

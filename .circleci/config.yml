@@ -1,6 +1,163 @@
-version: 2
+version: 2.1
+orbs:
+  node: circleci/node@3.0.0
+  docker: circleci/docker@1.5.0
 
 jobs:
+
+  build-mosquitto:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          command: |
+            rm -rf ./package-lock.json
+      - docker/check:
+          registry: registry.keyguru.eu:5000
+      - docker/build:
+          registry: registry.keyguru.eu:5000
+          image: thinx/mosquitto
+          docker-context: services/broker
+          dockerfile: services/broker/Dockerfile
+          extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
+          tag: latest
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/mosquitto
+          registry: registry.keyguru.eu:5000
+          tag: latest
+      - run:
+          command: |
+            echo "Digest is: $(</tmp/digest.txt)"
+            docker tag $(</tmp/digest.txt) registry.keyguru.eu:5000/thinx/mosquitto:latest
+
+  build-redis:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          command: |
+            rm -rf ./package-lock.json
+      - docker/check:
+          registry: registry.keyguru.eu:5000
+      - docker/build:
+          registry: registry.keyguru.eu:5000
+          image: thinx/redis
+          docker-context: services/redis
+          dockerfile: services/redis/Dockerfile
+          extra_build_args: '--build-arg REDIS_PASSWORD=${REDIS_PASSWORD} --build-arg ALLOW_EMPTY_PASSWORD=no --build-arg REDIS_DISABLE_COMMANDS=FLUSHALL'
+          tag: latest
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/redis
+          registry: registry.keyguru.eu:5000
+          tag: latest
+      - run:
+          command: |
+            echo "Digest is: $(</tmp/digest.txt)"
+            docker tag $(</tmp/digest.txt) registry.keyguru.eu:5000/thinx/redis:latest
+
+  build-transformer:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          command: |
+            rm -rf ./app/package-lock.json
+      - docker/check:
+          registry: registry.keyguru.eu:5000
+      - docker/build:
+          registry: registry.keyguru.eu:5000
+          image: thinx/transformer
+          docker-context: services/transformer
+          dockerfile: services/transformer/Dockerfile
+          extra_build_args: |
+            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
+            --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} \
+            --build-arg ROLLBAR_ENVIRONMENT=production \
+            --build-arg REVISION=$(git describe --abbrev=0) \
+          tag: latest
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/transformer
+          registry: registry.keyguru.eu:5000
+          tag: latest
+      - run:
+          command: |
+            echo "Digest is: $(</tmp/digest.txt)"
+            docker tag $(</tmp/digest.txt) registry.keyguru.eu:5000/thinx/transformer:latest
+
+  build-console:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check:
+          registry: registry.keyguru.eu:5000
+      - docker/build:
+          registry: registry.keyguru.eu:5000
+          docker-context: services/console/src
+          image: thinx/console
+          dockerfile: services/console/src/Dockerfile
+          extra_build_args: |
+            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
+            --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} \
+            --build-arg LANDING_HOSTNAME=${LANDING_HOSTNAME} \
+            --build-arg WEB_HOSTNAME=${WEB_HOSTNAME} \
+            --build-arg NGINX_HOST=${WEB_HOSTNAME} \
+            --build-arg API_HOSTNAME=${API_HOSTNAME} \
+            --build-arg API_BASEURL=${API_BASEURL} \
+            --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} \
+            --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
+            --build-arg NGINX_PORT=80 \
+            --build-arg ENTERPRISE=true \
+            --build-arg ENVIRONMENT=production \
+            --build-arg ROLLBAR_ENVIRONMENT=production \
+            --build-arg REVISION=$(git describe --abbrev=0) \
+          tag: latest
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/console
+          registry: registry.keyguru.eu:5000
+          tag: latest
+      - run:
+          command: |
+            echo "Digest is: $(</tmp/digest.txt)"
+            docker tag $(</tmp/digest.txt) registry.keyguru.eu:5000/thinx/console:latest
+
+  build-api:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check:
+          registry: registry.keyguru.eu:5000
+      - docker/build:
+          registry: registry.keyguru.eu:5000
+          image: thinx/api
+          dockerfile: ./Dockerfile
+          extra_build_args: |
+            --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} \
+            --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
+            --build-arg ENVIRONMENT=production \
+            --build-arg REVISION=$(git describe --abbrev=0) \
+          tag: latest
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/api
+          registry: registry.keyguru.eu:5000
+          tag: latest
+      - run:
+          command: |
+            echo "Digest is: $(</tmp/digest.txt)"
+            docker tag $(</tmp/digest.txt) registry.keyguru.eu:5000/thinx/api:latest
+
+#
+# DEPRECATED BUILD, KEEPING FOR TEST PURPOSES LATER
+#
 
   build:
 
@@ -159,18 +316,35 @@ jobs:
             docker network ls
             docker network inspect bridge
 
-    # Save test results
-    # - store_test_results:
-    #    path: /mnt/data/test-reports
-
-    # Save artifacts
-    # - store_artifacts:
-    #    path: /mnt/data/test-reports
+#
+# WORKFLOWS
+#
 
 workflows:
-  version: 2
-  integrate:
+  build-and-deploy-components:
     jobs:
-      - build
-#      - test:
-#          requires: build
+      - build-api:
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
+      # - build-console:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-mosquitto:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-redis:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-transformer:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm

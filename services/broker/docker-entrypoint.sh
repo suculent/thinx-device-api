@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Keyguru Mosquitto Service v1.1.1"
+
 set +e
 
 #touch /var/log/cron.log
@@ -15,18 +17,17 @@ incrond --foreground &
 incrontab --reload
 incrontab -l
 
-touch /var/log/mosquitto.log
+touch /mqtt/log/mosquitto.log
 chown -R mosquitto:mosquitto /mqtt
 
 su mosquitto -s /bin/bash
 
-touch /var/log/mosquitto.log
+touch /mqtt/log/mosquitto.log
 touch /mqtt/auth/thinx.pw
 
 if [[ ! -z $MOSQUITTO_PASSWORD ]]; then
   if [[ ! -z $MOSQUITTO_USERNAME ]]; then
-    echo "Overwriting THiNX APP MQTT credentials in /mqtt/auth/thinx.pw"
-    # /docker-entrypoint.sh: line 32: 16 Hangup
+    echo "Setting MQTT credentials..."
     nohup mosquitto_passwd -b /mqtt/auth/thinx.pw ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}
   else
     echo "MOSQUITTO_USERNAME for THiNX seems not to be set properly in .env "
@@ -65,5 +66,5 @@ else
   mosquitto -d -v
 fi
 
-tail -f /var/log/mosquitto.log
+tail -f /mqtt/log/mosquitto.log
 sleep infinity
