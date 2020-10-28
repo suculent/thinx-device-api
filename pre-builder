@@ -1,10 +1,6 @@
 #!/bin/bash
 
-THINX_ROOT=$(pwd)
-
-echo "Setting THINX_ROOT to $THINX_ROOT"
-
-source "$THINX_ROOT/infer"
+THINX_ROOT=/opt/thinx/thinx-device-api
 
 # Sample data for testing only, should return error missing JSON
 #JSON='builder.thinx.json'
@@ -24,6 +20,7 @@ case $i in
     ;;
     -r=*|--root=*)
       THINX_ROOT="${i#*=}"
+      echo "Setting THINX_ROOT to $THINX_ROOT"
     ;;
     -w=*|--workdir=*)
       WORKDIR="${i#*=}"
@@ -48,6 +45,8 @@ fi
 if [[ -f ${WORKDIR}/.development ]]; then
   rm -rf ${WORKDIR}/.development
 fi
+
+source "$THINX_ROOT/infer"
 
 echo
 echo "Generating THiNX header, injecting environment variables from ${JSON}"

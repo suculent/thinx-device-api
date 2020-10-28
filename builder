@@ -65,13 +65,13 @@ esac
 done
 
 # later used in DevSec and NodeMCU
-THINX_ROOT=$(pwd)
-if [[ ! -f $THINX_ROOT/conf/config.json ]]; then
-THINX_ROOT=/mnt/data
+CONFIG_ROOT=$(pwd)
+if [[ ! -f $CONFIG_ROOT/conf/config.json ]]; then
+	CONFIG_ROOT=/mnt/data
 fi
 
 # from app_config.data_root
-DATA_ROOT_X=$(cat $THINX_ROOT/conf/config.json | jq .data_root)
+DATA_ROOT_X=$(cat $CONFIG_ROOT/conf/config.json | jq .data_root)
 DATA_ROOT="$(sed 's/\"//g' <<< $DATA_ROOT_X)"
 
 # from app_config.build_root
