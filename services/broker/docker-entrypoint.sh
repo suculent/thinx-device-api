@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Keyguru Mosquitto Service v1.1"
+echo "Keyguru Mosquitto Service v1.1.1"
 
 set +e
 
@@ -27,8 +27,7 @@ touch /mqtt/auth/thinx.pw
 
 if [[ ! -z $MOSQUITTO_PASSWORD ]]; then
   if [[ ! -z $MOSQUITTO_USERNAME ]]; then
-    echo "Overwriting THiNX APP MQTT credentials in /mqtt/auth/thinx.pw with ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}"
-    # /docker-entrypoint.sh: line 32: 16 Hangup
+    echo "Setting MQTT credentials..."
     nohup mosquitto_passwd -b /mqtt/auth/thinx.pw ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}
   else
     echo "MOSQUITTO_USERNAME for THiNX seems not to be set properly in .env "
