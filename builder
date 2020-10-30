@@ -438,7 +438,8 @@ case $PLATFORM in
 			if [[ $BUILD_TYPE == "firmware" ]]; then
 				echo "Micropython Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
 				set -o pipefail
-				docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 thinx-micropython | tee -a "${LOG_PATH}"
+				docker pull suculent/micropython-docker-build
+				docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 suculent/micropython-docker-build | tee -a "${LOG_PATH}"
 				echo "${PIPESTATUS[@]}"
 				set +o pipefail
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
@@ -560,6 +561,7 @@ case $PLATFORM in
 				echo "NodeMCU Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
 				echo "running Docker >>>"
 				set -o pipefail
+				docker pull suculent/nodemcu-docker-build
 				docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t ${DOCKER_PARAMS} -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build | tee -a "${LOG_PATH}"
 				echo "${PIPESTATUS[@]}"
 				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
@@ -613,8 +615,8 @@ case $PLATFORM in
 			echo "Moving thinx_build.json to $TNAME" | tee -a "${LOG_PATH}"
 			cp "./thinx_build.json" "$TNAME"
 
+			docker pull suculent/mongoose-docker-build
 			DCMD="docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t -v $(pwd):/opt/mongoose-builder suculent/mongoose-docker-build"
-			# docker run -v /var/run/docker.sock:/var/run/docker.sock --cpus=1.0 --rm -t -v $(pwd):/opt/workspace suculent/arduino-docker-builder
 			echo "running Docker ${DCMD} >>>" | tee -a "${LOG_PATH}"
 			set -o pipefail
 			"$DCMD"
@@ -688,7 +690,7 @@ case $PLATFORM in
 
 			set -o pipefail
 			echo "Docker: Starting THiNX Arduino Builder Container in folder" $(pwd)
-
+			docker pull suculent/arduino-docker-build
 			DCMD="docker run ${DOCKER_PREFIX} --cpus=1.0 -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
 			echo "command: ${DCMD}"
 			$DCMD | tee -a "${LOG_PATH}"
@@ -826,6 +828,7 @@ case $PLATFORM in
 
 			echo "running Docker PIO >>>"
 			set -o pipefail
+			docker pull suculent/platformio-docker-build
 			DCMD=$(docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build)
 			echo $DCMD | tee -a "${LOG_PATH}"
 			echo "${PIPESTATUS[@]}"
