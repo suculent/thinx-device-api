@@ -2,6 +2,19 @@
 
 IoT Device Management Server running on node.js.
 
+### CircleCI Build status:
+
+| Component | Status |
+|:----------|:-------|
+| `thinx-device-api` | [![THiNX](https://circleci.com/gh/suculent/thinx-device-api.svg?style=svg)](https://circleci.com/gh/suculent/thinx-device-api) |
+| `arduino-docker-build` | [![THiNX](https://circleci.com/gh/suculent/arduino-docker-build.svg?style=svg)](https://circleci.com/gh/suculent/arduino-docker-build) |
+| `platformio-docker-build` | [![THiNX](https://circleci.com/gh/suculent/platformio-docker-build.svg?style=svg)](https://circleci.com/gh/suculent/platformio-docker-build) |
+| `mongoose-docker-build` | [![THiNX](https://circleci.com/gh/suculent/mongoose-docker-build.svg?style=svg)](https://circleci.com/gh/suculent/mongoose-docker-build) |
+| `micropython-docker-build` | [![THiNX](https://circleci.com/gh/suculent/micropython-docker-build.svg?style=svg)](https://circleci.com/gh/suculent/nodemcu-docker-build) |
+| `nodemcu-docker-build` | [![THiNX](https://circleci.com/gh/suculent/nodemcu-docker-build.svg?style=svg)](https://circleci.com/gh/suculent/nodemcu-docker-build) |
+
+### Other badges
+
 [![CodeFactor](https://www.codefactor.io/repository/github/suculent/thinx-device-api/badge)](https://www.codefactor.io/repository/github/suculent/thinx-device-api)
 [![codebeat badge](https://codebeat.co/badges/a3b416b1-b53b-4bc5-ae6e-8a2b9ca31880)](https://codebeat.co/projects/github-com-suculent-thinx-device-api-master)
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/suculent/thinx-device-api.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/suculent/thinx-device-api/context:javascript)
