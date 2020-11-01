@@ -675,7 +675,7 @@ case $PLATFORM in
 						echo "WTF THINX_FILE does not exist?"
 					else
 						echo "Will write ENV_HASH to ${THINX_FILE}"
-						ENV_HASH=$(cat ${ENVOUT} | shasum -a 256 | awk '{ print $1 }')
+						ENV_HASH=$(shasum -a 256 ${ENVOUT} | awk '{ print $1 }')
 						LINE="#define ENV_HASH \"${ENV_HASH}\""
 						echo "ENV_HASH: " $ENV_HASH
 						sed -i '/ENV_HASH/d' ${THINX_FILE}
@@ -799,7 +799,7 @@ case $PLATFORM in
 						echo "WTF THINX_FILE does not exist?"
 					else
 						echo "Will write ENV_HASH to ${THINX_FILE}"
-						ENV_HASH=$(cat ${ENVOUT} | shasum -a 256 | awk '{ print $1 }')
+						ENV_HASH=$(shasum -a 256 ${ENVOUT} | awk '{ print $1 }')
 						LINE="#define ENV_HASH \"${ENV_HASH}\""
 						echo "ENV_HASH: " $ENV_HASH
 						sed -i '/ENV_HASH/d' ${THINX_FILE}
@@ -826,7 +826,7 @@ case $PLATFORM in
 
 			echo "[pine64] Docker completed <<<" | tee -a "${LOG_PATH}"
 
-			if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
+			if [[ ! -z $(grep 'THiNX BUILD SUCCESSFUL' ${LOG_PATH}) ]]; then
 				BUILD_SUCCESS=true
 				# TODO: FIXME, can be more binfiles with partitions!
 				BIN_FILE=$( find $BUILD_PATH/$REPO_NAME -name "*.bin" | head -n 1)
@@ -864,15 +864,15 @@ case $PLATFORM in
 					echo "Expected OUTFILE: ${OUTFILE}" | tee -a "${LOG_PATH}"
 					# Deploy Artifacts
 
-					if [[ ! -z ./build ]]; then
+					if [[ ! -f "./build" ]]; then
 						echo "Entering ./build" | tee -a "${LOG_PATH}"
 						cd ./build | tee -a "${LOG_PATH}"
 					fi
 
-					#echo "Current workdir: " | tee -a "${LOG_PATH}"
-					#pwd | tee -a "${LOG_PATH}"
-					#echo "Current workdir contents: " | tee -a "${LOG_PATH}"
-					#ls | tee -a "${LOG_PATH}"
+					echo "Current workdir: " | tee -a "${LOG_PATH}"
+					pwd | tee -a "${LOG_PATH}"
+					echo "Current workdir contents: " | tee -a "${LOG_PATH}"
+					ls | tee -a "${LOG_PATH}"
 
 					echo "Copying deployment data..." | tee -a "${LOG_PATH}"
 
@@ -919,8 +919,8 @@ case $PLATFORM in
 						echo "WTF THINX_FILE does not exist?"
 					else
 						echo "Will write ENV_HASH to ${THINX_FILE}"
-						ENV_HASH=$(cat ${ENVOUT} | shasum -a 256 | awk '{ print $1 }')
-						LINE="#define ENV_HASH \"${ENV_HASH}\""
+						ENV_HASH=$(shasum -a 256 ${ENVOUT} | awk '{ print $1 }')
+						LINE='#define ENV_HASH \"${ENV_HASH}\"'
 						echo "ENV_HASH: " $ENV_HASH
 						sed -i '/ENV_HASH/d' ${THINX_FILE}
 						echo -e ${LINE} >> ${THINX_FILE}
