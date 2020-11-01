@@ -777,6 +777,130 @@ case $PLATFORM in
 			fi
 		;;
 
+		pine64)
+
+			cd $BUILD_PATH/$REPO_NAME
+			pwd
+			ls
+
+			THINX_FILE=$( find . -name "thinx.h"  | head -n 1)
+
+			if [[ -z $THINX_FILE ]]; then
+				echo "[pine64] WARNING! No THiNX-File found! in $BUILD_PATH/$REPO_NAME: $THINX_FILE" | tee -a "${LOG_PATH}"
+				# exit 1 # will deprecate on modularization for more platforms
+			else
+				#echo "[pine64] Using THiNX-File: ${THINX_FILE/$(pwd)//}" | tee -a "${LOG_PATH}"
+				echo "[pine64] Using THiNX-File: ${THINX_FILE}" | tee -a "${LOG_PATH}"
+				ENVOUT=$(find $BUILD_PATH/$REPO_NAME -name "environment.json" | head -n 1)
+				if [[ ! -f $ENVOUT ]]; then
+					echo "No environment.json found"
+				else
+					if [ ! -f $THINX_FILE ]; then
+						echo "WTF THINX_FILE does not exist?"
+					else
+						echo "Will write ENV_HASH to ${THINX_FILE}"
+						ENV_HASH=$(cat ${ENVOUT} | shasum -a 256 | awk '{ print $1 }')
+						LINE="#define ENV_HASH \"${ENV_HASH}\""
+						echo "ENV_HASH: " $ENV_HASH
+						sed -i '/ENV_HASH/d' ${THINX_FILE}
+						echo -e ${LINE} >> ${THINX_FILE}
+						cat ${THINX_FILE}
+					fi
+				fi
+			fi
+
+			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
+			WORKDIR=$(pwd)
+
+			set -o pipefail
+			echo "Docker: Starting THiNX Pine64 Builder Container in folder" $(pwd)
+			docker pull suculent/pine64-docker-build
+			DCMD="docker run ${DOCKER_PREFIX} --cpus=1.0 -t -v $(pwd):/opt/workspace suculent/bl_iot_sdk-ubuntu"
+			echo "command: ${DCMD}"
+			$DCMD | tee -a "${LOG_PATH}"
+			#echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
+			set +o pipefail
+
+			#echo "Contents of working directory after build:" | tee -a "${LOG_PATH}"
+			#ls -la $BUILD_PATH/$REPO_NAME/build | tee -a "${LOG_PATH}"
+
+			echo "[pine64] Docker completed <<<" | tee -a "${LOG_PATH}"
+
+			if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
+				BUILD_SUCCESS=true
+				# TODO: FIXME, can be more binfiles with partitions!
+				BIN_FILE=$( find $BUILD_PATH/$REPO_NAME -name "*.bin" | head -n 1)
+				echo "BIN_FILE: ${BIN_FILE}" | tee -a "${LOG_PATH}"
+
+				if [[ ! -f $BIN_FILE ]]; then
+					echo "BIN_FILE $BIN_FILE not found!"
+					BUILD_SUCCESS=false
+					exit 1
+				fi
+
+				# once again with size limit
+				if [[ -z $(find $BUILD_PATH/$REPO_NAME -name "*.bin" -type f -size +10000c 2>/dev/null) ]]; then
+					BUILD_SUCCESS=false
+					echo "Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
+					# ls -la | tee -a "${LOG_PATH}"
+				else
+					echo "Docker build succeeded." | tee -a "${LOG_PATH}"
+					echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
+					zip -rq "${BUILD_PATH}/${BUILD_ID}.zip" ${BIN_FILE} ./build/**
+				fi
+			else
+				echo "[pine64] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
+			fi
+
+			# Exit on dry run...
+			if [[ ! ${RUN} ]]; then
+				echo "☢ Dry-run ${BUILD_ID} completed. Skipping actual deployment." | tee -a "${LOG_PATH}"
+				STATUS='DRY_RUN_OK'
+			else
+				# Check Artifacts
+				if [[ $BUILD_SUCCESS == true ]] ; then
+					STATUS='OK'
+					echo "Exporting artifacts" | tee -a "${LOG_PATH}"
+					echo "Expected OUTFILE: ${OUTFILE}" | tee -a "${LOG_PATH}"
+					# Deploy Artifacts
+
+					if [[ ! -z ./build ]]; then
+						echo "Entering ./build" | tee -a "${LOG_PATH}"
+						cd ./build | tee -a "${LOG_PATH}"
+					fi
+
+					#echo "Current workdir: " | tee -a "${LOG_PATH}"
+					#pwd | tee -a "${LOG_PATH}"
+					#echo "Current workdir contents: " | tee -a "${LOG_PATH}"
+					#ls | tee -a "${LOG_PATH}"
+
+					echo "Copying deployment data..." | tee -a "${LOG_PATH}"
+
+					echo "to: ${OUTFILE}" | tee -a "${LOG_PATH}"
+					cp -vf "${BIN_FILE}" "$OUTFILE" | tee -a "${LOG_PATH}"
+
+					echo "to: ${TARGET_PATH}" | tee -a "${LOG_PATH}"
+					cp -vf "${BIN_FILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
+
+					echo "to: ${DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
+					cp -vf "${BIN_FILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
+					
+					# TODO: cp -vf "${BUILD_JSON_PATH}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
+
+					echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
+					zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./build/*.bin ./build/*.elf # zip artefacts
+
+					#echo "Current path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
+					#ls -la | tee -a "${LOG_PATH}"
+					echo "Deployment path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
+					#ls -la ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
+					#ls -la ${TARGET_PATH} | tee -a "${LOG_PATH}"
+				else
+					STATUS='FAILED'
+				fi
+			fi
+		;;
+
 		platformio)
 
 			THINX_FILE=$( find $BUILD_PATH/$REPO_NAME -name "thinx.h" )

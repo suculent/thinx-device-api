@@ -141,6 +141,7 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
     'arduino': {name: 'Arduino', build: true},
     'platformio': {name: 'Platform.io', build: true},
     'nodemcu': {name: 'NodeMCU', build: true},
+    'pine64': {name: 'Pine64', build: true},
     'micropython': {name: 'Micropython', build: true},
     'mongoose': {name: 'MongooseOS', build: true},
     'nodejs': {name: 'NodeJS', build: true},
