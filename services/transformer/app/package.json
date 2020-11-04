@@ -19,7 +19,8 @@
 	"scripts": {
 		"test": "bash ./test.sh",
 		"start": "node transformer.js",
-		"coverage": "cov8 node transformer.js &"
+		"coverage": "cov8 node transformer.js &",
+		"preinstall": "if [ -f ./package_lock.json ]; then npx npm-force-resolutions; fi"
 	},
 	"dependencies": {
 		"base-64": "^0.1.0",
@@ -28,11 +29,15 @@
 		"express-session": "^1.17.1",
 		"joi": "^14.3.1",
 		"parser": "^0.1.4",
-		"rollbar": "^2.19.3",
-		"snyk": "^1.400.0",
-		"sqreen": "^1.54.0",
+		"rollbar": "^2.19.4",
+		"snyk": "^1.424.1",
+		"sqreen": "^1.55.0",
 		"ssl-root-cas": "^1.2.5",
 		"typeof": "^1.0.0",
-		"uuid": "^8.3.0"
+		"uuid": "^8.3.1"
+	},
+	"resolutions": {
+		"ajv": "^6.12.3",
+		"flat": "^5.0.2"
 	}
 }
