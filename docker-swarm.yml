@@ -24,11 +24,11 @@ services:
     networks:
       - traefik-public
     volumes:
-      - '/mnt/data/mosquitto/config:/mqtt/config:ro'
-      - '/mnt/data/mosquitto/ssl:/mqtt/ssl:ro'
-      - '/mnt/data/mosquitto/data:/mqtt/data:rw'
-      - '/mnt/data/mosquitto/log:/mqtt/log:rw'
-      - '/mnt/data/mosquitto/auth:/mqtt/auth:rw'
+      - '/mnt/data/thinx/eu/mosquitto/config:/mqtt/config:ro'
+      - '/mnt/data/thinx/eu/mosquitto/ssl:/mqtt/ssl:ro'
+      - '/mnt/data/thinx/eu/mosquitto/data:/mqtt/data:rw'
+      - '/mnt/data/thinx/eu/mosquitto/log:/mqtt/log:rw'
+      - '/mnt/data/thinx/eu/mosquitto/auth:/mqtt/auth:rw'
     deploy:
       resources:
         reservations:
@@ -121,7 +121,7 @@ services:
     ports:
       - 6379
     volumes:
-      - '/mnt/data/redis:/data'
+      - '/mnt/data/thinx/eu/redis:/data'
     deploy:
       resources:
         reservations:
@@ -197,13 +197,13 @@ services:
       - '7445:7445'
       - '9002:9002'
     volumes:
-      - '/mnt/data/deploy:/mnt/data/deploy'
-      - '/mnt/data/mosquitto:/mnt/data/mosquitto'
-      - '/mnt/data/repos:/mnt/data/repos'
-      - '/mnt/data/ssl:/mnt/data/ssl'
-      - '/mnt/data/ssh_keys:/mnt/data/ssh_keys'
-      - '/mnt/data/conf:/mnt/data/conf'
-      - '/mnt/data/test-reports:/mnt/data/test-reports'
+      - '/mnt/data/thinx/eu/deploy:/mnt/data/deploy'
+      - '/mnt/data/thinx/eu/mosquitto:/mnt/data/mosquitto'
+      - '/mnt/data/thinx/eu/repos:/mnt/data/repos'
+      - '/mnt/data/thinx/eu/ssl:/mnt/data/ssl'
+      - '/mnt/data/thinx/eu/ssh_keys:/mnt/data/ssh_keys'
+      - '/mnt/data/thinx/eu/conf:/mnt/data/conf'
+      - '/mnt/data/thinx/eu/test-reports:/mnt/data/test-reports'
       - '/var/run/docker.sock:/var/run/docker.sock'
       - '/var/lib/docker'
       - '/cache'
