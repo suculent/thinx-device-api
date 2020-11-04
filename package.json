@@ -96,13 +96,13 @@
     "hoek": "6.1.3",
     "node-forge": "0.10.0",
     "yargs-parser": "18.1.1",
-    "flat": "5.0.2",
-    "mem": "^4.0.0",
+    "mem": "4.0.0",
     "ajv": "6.12.3",
     "minimist": "1.2.3",
     "tunnel-agent": "0.6.0",
-    "ajv": "^6.12.3",
-    "flat": "^5.0.2"
+    "flat": "5.0.2",
+    "dot-prop": "5.1.1",
+    "bson": "1.1.4"
   },
   "devDependencies": {
     "codacy-coverage": "^3.4.0",
