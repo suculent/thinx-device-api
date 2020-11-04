@@ -74,6 +74,11 @@ function infer_platform
 		elif [[ -f "$path/init.lua" ]]; then
 			platform="nodemcu"
 
+		# Pine64 (Makefile, will collide with other platforms later, like esp-idf)
+
+		elif [[ -f "$path/Makefile" ]]; then
+			platform="pine64"
+
 		# Micropython
 
 		elif [[ -f "$path/main.py" ]]; then

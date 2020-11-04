@@ -2,6 +2,14 @@
 
 ## HISTORY
 
+1/11/2020 1.1.5206
+
+Long time no see, just a quick summary:
+
+» Updated to full 12FA, tested with Docker Swarm
+» Multiple parallel builds allowed
+» Parametrizing per-device builds using environment variables API
+
 19/7/2019 1.0.4553
 
 » Stable docker-compose install with console included

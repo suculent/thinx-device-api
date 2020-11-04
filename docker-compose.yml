@@ -18,7 +18,7 @@ services:
     ports:
       - '1883:1883'
       - '8883:8883'
-    restart: always
+    restart: unless-stopped
     networks:
       - nat
       - internal
@@ -40,7 +40,7 @@ services:
   couchdb:
     env_file: .env
     image: 'couchdb:3.1.0'
-    restart: always
+    restart: unless-stopped
     healthcheck:
       test:
         - CMD-SHELL
@@ -105,7 +105,7 @@ services:
         - 'ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}'
         - 'ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}'
         - REVISION=1
-    restart: always
+    restart: unless-stopped
     environment:
       - 'SQREEN_APP_NAME=${SQREEN_APP_NAME}'
       - 'SQREEN_TOKEN=${SQREEN_TOKEN}'
@@ -121,7 +121,7 @@ services:
   api:
     privileged: true
     shm_size: 2048M
-    restart: 'always'
+    restart: unless-stopped
     depends_on:
       - transformer
       - thinx-redis

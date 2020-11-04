@@ -26,6 +26,6 @@ services:
       - "7474:7474"
     networks:
       - internal
-    restart: always
+    restart: unless-stopped
     labels:
     - "traefik.backend.transformer.noexpose"
