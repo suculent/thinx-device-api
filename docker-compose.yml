@@ -121,7 +121,7 @@ services:
   api:
     privileged: true
     shm_size: 2048M
-    restart: 'always'
+    restart: unless-stopped
     depends_on:
       - transformer
       - thinx-redis
