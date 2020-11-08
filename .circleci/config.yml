@@ -21,16 +21,12 @@ jobs:
           docker-context: services/broker
           dockerfile: services/broker/Dockerfile
           extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
-          tag: latest
+          tag: 'latest,${COUNTRY}'
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/mosquitto
           registry: registry.keyguru.eu:5000
-          tag: latest
-      - run:
-          command: |
-            echo "Digest is: $(</tmp/digest.txt)"
-            docker tag $(</tmp/digest.txt) registry.keyguru.eu:5000/thinx/mosquitto:latest
+          tag: 'latest,${COUNTRY}'
 
   build-redis:
     executor: docker/docker
@@ -48,16 +44,12 @@ jobs:
           docker-context: services/redis
           dockerfile: services/redis/Dockerfile
           extra_build_args: '--build-arg REDIS_PASSWORD=${REDIS_PASSWORD} --build-arg ALLOW_EMPTY_PASSWORD=no --build-arg REDIS_DISABLE_COMMANDS=FLUSHALL'
-          tag: latest
+          tag: 'latest,${COUNTRY}'
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/redis
           registry: registry.keyguru.eu:5000
-          tag: latest
-      - run:
-          command: |
-            echo "Digest is: $(</tmp/digest.txt)"
-            docker tag $(</tmp/digest.txt) registry.keyguru.eu:5000/thinx/redis:latest
+          tag: 'latest,${COUNTRY}'
 
   build-transformer:
     executor: docker/docker
@@ -77,18 +69,14 @@ jobs:
           extra_build_args: |
             --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
             --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} \
-            --build-arg ROLLBAR_ENVIRONMENT=production \
+            --build-arg ROLLBAR_ENVIRONMENT=${ENVIRONMENT} \
             --build-arg REVISION=$(git describe --abbrev=0) \
-          tag: latest
+          tag: 'latest,${COUNTRY}'
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/transformer
           registry: registry.keyguru.eu:5000
-          tag: latest
-      - run:
-          command: |
-            echo "Digest is: $(</tmp/digest.txt)"
-            docker tag $(</tmp/digest.txt) registry.keyguru.eu:5000/thinx/transformer:latest
+          tag: 'latest,${COUNTRY}'
 
   build-console:
     executor: docker/docker
@@ -114,19 +102,15 @@ jobs:
             --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
             --build-arg NGINX_PORT=80 \
             --build-arg ENTERPRISE=true \
-            --build-arg ENVIRONMENT=production \
-            --build-arg ROLLBAR_ENVIRONMENT=production \
+            --build-arg ENVIRONMENT=${ENVIRONMENT} \
+            --build-arg ROLLBAR_ENVIRONMENT=${ENVIRONMENT} \
             --build-arg REVISION=$(git describe --abbrev=0) \
-          tag: latest
+          tag: 'latest,${COUNTRY}'
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/console
           registry: registry.keyguru.eu:5000
-          tag: latest
-      - run:
-          command: |
-            echo "Digest is: $(</tmp/digest.txt)"
-            docker tag $(</tmp/digest.txt) registry.keyguru.eu:5000/thinx/console:latest
+          tag: 'latest,${COUNTRY}'
 
   build-api:
     executor: docker/docker
@@ -142,18 +126,14 @@ jobs:
           extra_build_args: |
             --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} \
             --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
-            --build-arg ENVIRONMENT=production \
+            --build-arg ENVIRONMENT=${ENVIRONMENT} \
             --build-arg REVISION=$(git describe --abbrev=0) \
-          tag: latest
+          tag: 'latest,${COUNTRY}'
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/api
           registry: registry.keyguru.eu:5000
-          tag: latest
-      - run:
-          command: |
-            echo "Digest is: $(</tmp/digest.txt)"
-            docker tag $(</tmp/digest.txt) registry.keyguru.eu:5000/thinx/api:latest
+          tag: 'latest,${COUNTRY}'
 
 #
 # DEPRECATED BUILD, KEEPING FOR TEST PURPOSES LATER
