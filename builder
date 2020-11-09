@@ -89,7 +89,7 @@ TARGET_PATH=$DATA_ROOT/deploy/$OWNER_ID/$UDID
 echo "Target device deployment path: ${TARGET_PATH}"
 
 DEPLOYMENT_PATH=$OWNER_ID_HOME/$UDID/$BUILD_ID
-echo "Deployment path: ${DEPLOYMENT_PATH}"
+# echo "Deployment path: ${DEPLOYMENT_PATH}"
 
 # Create user-referenced folder in public www space
 mkdir -p $OWNER_ID_HOME
@@ -697,9 +697,6 @@ case $PLATFORM in
 			#echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
 			set +o pipefail
 
-			#echo "Contents of working directory after build:" | tee -a "${LOG_PATH}"
-			#ls -la $BUILD_PATH/$REPO_NAME/build | tee -a "${LOG_PATH}"
-
 			echo "[arduino] Docker completed <<<" | tee -a "${LOG_PATH}"
 
 			if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
@@ -745,11 +742,6 @@ case $PLATFORM in
 						cd ./build | tee -a "${LOG_PATH}"
 					fi
 
-					#echo "Current workdir: " | tee -a "${LOG_PATH}"
-					#pwd | tee -a "${LOG_PATH}"
-					#echo "Current workdir contents: " | tee -a "${LOG_PATH}"
-					#ls | tee -a "${LOG_PATH}"
-
 					echo "Copying deployment data..." | tee -a "${LOG_PATH}"
 
 					echo "to: ${OUTFILE}" | tee -a "${LOG_PATH}"
@@ -766,11 +758,6 @@ case $PLATFORM in
 					echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
 					zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./build/*.bin ./build/*.elf # zip artefacts
 
-					#echo "Current path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
-					#ls -la | tee -a "${LOG_PATH}"
-					echo "Deployment path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
-					#ls -la ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
-					#ls -la ${TARGET_PATH} | tee -a "${LOG_PATH}"
 				else
 					STATUS='FAILED'
 				fi
@@ -869,11 +856,6 @@ case $PLATFORM in
 						cd ./build | tee -a "${LOG_PATH}"
 					fi
 
-					echo "Current workdir: " | tee -a "${LOG_PATH}"
-					pwd | tee -a "${LOG_PATH}"
-					echo "Current workdir contents: " | tee -a "${LOG_PATH}"
-					ls | tee -a "${LOG_PATH}"
-
 					echo "Copying deployment data..." | tee -a "${LOG_PATH}"
 
 					echo "to: ${OUTFILE}" | tee -a "${LOG_PATH}"
@@ -890,11 +872,6 @@ case $PLATFORM in
 					echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
 					zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./build/*.bin ./build/*.elf # zip artefacts
 
-					#echo "Current path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
-					#ls -la | tee -a "${LOG_PATH}"
-					echo "Deployment path: ${DEPLOYMENT_PATH} " | tee -a "${LOG_PATH}"
-					#ls -la ${DEPLOYMENT_PATH} | tee -a "${LOG_PATH}"
-					#ls -la ${TARGET_PATH} | tee -a "${LOG_PATH}"
 				else
 					STATUS='FAILED'
 				fi
@@ -1097,5 +1074,3 @@ echo "[builder.sh] ${BUILD_DATE} Done." | tee -a "${LOG_PATH}"
 # rm -rf $BUILD_PATH # not a good idea, seems to destroy build.json (envelope)
 
 MSG=""
-echo "[builder.sh] ${BUILD_DATE} NOT Deleting ${BUILD_PATH}" | tee -a "${LOG_PATH}"
-ls ${BUILD_PATH} | tee -a "${LOG_PATH}"
