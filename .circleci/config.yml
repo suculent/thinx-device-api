@@ -84,9 +84,9 @@ jobs:
       - setup_remote_docker
       - checkout
       - docker/check:
-          registry: registry.keyguru.eu:5000
+          registry: registry.thinx.cloud:5000
       - docker/build:
-          registry: registry.keyguru.eu:5000
+          registry: registry.thinx.cloud:5000
           docker-context: services/console/src
           image: thinx/console
           dockerfile: services/console/src/Dockerfile
@@ -118,9 +118,9 @@ jobs:
       - setup_remote_docker
       - checkout
       - docker/check:
-          registry: registry.keyguru.eu:5000
+          registry: registry.thinx.cloud:5000
       - docker/build:
-          registry: registry.keyguru.eu:5000
+          registry: registry.thinx.cloud:5000
           image: thinx/api
           dockerfile: ./Dockerfile
           extra_build_args: |
