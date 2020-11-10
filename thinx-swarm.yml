@@ -13,7 +13,7 @@ networks:
 
 services:
   mosquitto:
-    image: ${REGISTRY}/thinx/mosquitto
+    image: ${REGISTRY}/thinx/mosquitto:cloud
     environment:
       - "MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}"
       - "MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}"
@@ -23,11 +23,11 @@ services:
     networks:
       - traefik-public
     volumes:
-      - '/mnt/data/thinx/eu/mosquitto/config:/mqtt/config:ro'
-      - '/mnt/data/thinx/eu/mosquitto/ssl:/mqtt/ssl:ro'
-      - '/mnt/data/thinx/eu/mosquitto/data:/mqtt/data:rw'
-      - '/mnt/data/thinx/eu/mosquitto/log:/mqtt/log:rw'
-      - '/mnt/data/thinx/eu/mosquitto/auth:/mqtt/auth:rw'
+      - '/mnt/data/thinx/cloud/mosquitto/config:/mqtt/config:ro'
+      - '/mnt/data/thinx/cloud/mosquitto/ssl:/mqtt/ssl:ro'
+      - '/mnt/data/thinx/cloud/mosquitto/data:/mqtt/data:rw'
+      - '/mnt/data/thinx/cloud/mosquitto/log:/mqtt/log:rw'
+      - '/mnt/data/thinx/cloud/mosquitto/auth:/mqtt/auth:rw'
     deploy:
       resources:
         reservations:
@@ -73,16 +73,16 @@ services:
     volumes:
     
       - type: bind
-        source: /mnt/data/couchdb
+        source: /mnt/data/thinx/cloud/couchdb
         target: /opt/couchdb/data
 
       - type: bind
-        source: /mnt/data/vm.args
+        source: /mnt/data/thinx/cloud/vm.args
         target: /opt/couchdb/etc/vm.args
 
       # probably deprecated
       - type: bind
-        source: /mnt/data/couchdb
+        source: /mnt/data/thinx/cloud/couchdb
         target: /var/lib/couchdb
 
     deploy:
@@ -95,7 +95,7 @@ services:
           memory: 1024M
       placement:
         constraints:
-          - node.hostname == keyguru-production-01
+          - node.hostname == thinx
       labels:
         - "swarmpit.service.deployment.autoredeploy=true"
 
@@ -104,7 +104,7 @@ services:
     env_file: .env
     networks:
       - internal
-    image: registry.keyguru.eu:5000/thinx/redis
+    image: ${REGISTRY}/thinx/redis:cloud
     command:
       - redis-server
       - '--requirepass'
@@ -118,7 +118,7 @@ services:
     ports:
       - 6379
     volumes:
-      - '/mnt/data/thinx/eu/redis:/data'
+      - '/mnt/data/thinx/cloud/redis:/data'
     deploy:
       resources:
         reservations:
@@ -129,14 +129,14 @@ services:
           memory: 512M
       placement:
         constraints:
-          - node.hostname == keyguru-production-01
+          - node.hostname == thinx
       labels:
         - "swarmpit.service.deployment.autoredeploy=true"
 
   transformer:
     env_file: .env
     user: transformer
-    image: registry.keyguru.eu:5000/thinx/transformer
+    image: ${REGISTRY}/thinx/transformer:cloud
     environment:
       - "SQREEN_APP_NAME: ${SQREEN_APP_NAME}"
       - "SQREEN_TOKEN=${SQREEN_TOKEN}"
@@ -159,7 +159,7 @@ services:
           memory: 256M
       placement:
         constraints:
-          - node.hostname == keyguru-production-01
+          - node.hostname == thinx
       labels:
         - "swarmpit.service.deployment.autoredeploy=true"
       
@@ -180,7 +180,7 @@ services:
       - traefik-public
       - internal
     env_file: .env
-    image: registry.keyguru.eu:5000/thinx/api
+    image: ${REGISTRY}/thinx/api:cloud
     environment:
       - "ENVIRONMENT=${ENVIRONMENT}"
       - "COUCHDB_USER=${COUCHDB_USER}"
@@ -194,13 +194,13 @@ services:
       - '7445:7445'
       - '9002:9002'
     volumes:
-      - '/mnt/data/thinx/eu/deploy:/mnt/data/deploy'
-      - '/mnt/data/thinx/eu/mosquitto:/mnt/data/mosquitto'
-      - '/mnt/data/thinx/eu/repos:/mnt/data/repos'
-      - '/mnt/data/thinx/eu/ssl:/mnt/data/ssl'
-      - '/mnt/data/thinx/eu/ssh_keys:/mnt/data/ssh_keys'
-      - '/mnt/data/thinx/eu/conf:/mnt/data/conf'
-      - '/mnt/data/thinx/eu/test-reports:/mnt/data/test-reports'
+      - '/mnt/data/thinx/cloud/deploy:/mnt/data/deploy'
+      - '/mnt/data/thinx/cloud/mosquitto:/mnt/data/mosquitto'
+      - '/mnt/data/thinx/cloud/repos:/mnt/data/repos'
+      - '/mnt/data/thinx/cloud/ssl:/mnt/data/ssl'
+      - '/mnt/data/thinx/cloud/ssh_keys:/mnt/data/ssh_keys'
+      - '/mnt/data/thinx/cloud/conf:/mnt/data/conf'
+      - '/mnt/data/thinx/cloud/test-reports:/mnt/data/test-reports'
       - '/var/run/docker.sock:/var/run/docker.sock'
       - '/var/lib/docker'
       - '/cache'
@@ -214,7 +214,7 @@ services:
           memory: 3072M
       placement:
         constraints:
-          - node.hostname == keyguru-production-01
+          - node.hostname == thinx
       labels:
         - "traefik.http.services.thinx-api.loadbalancer.server.port=7442"
         - "traefik.enable=true"
@@ -237,7 +237,7 @@ services:
     depends_on:
       - api
     env_file: .env
-    image: registry.keyguru.eu:5000/thinx/console
+    image: ${REGISTRY}/thinx/console:cloud
     networks:
       - traefik-public
 #      - internal # why?
@@ -267,7 +267,7 @@ services:
           memory: 256M
       placement:
         constraints:
-          - node.hostname == keyguru-production-01
+          - node.hostname == thinx
       labels:
         # should be 7440, but the 80 port of container is exposed anyway in swarm mode
         - "traefik.http.services.thinx-console.loadbalancer.server.port=80"
