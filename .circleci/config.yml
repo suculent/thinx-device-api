@@ -446,26 +446,36 @@ workflows:
                 - master
 
       - build-api-cloud:
+          context:
+            - thinx-docker-repo
           filters:
             branches:
               only:
                 - thinx-swarm
       - build-console-cloud:
+          context:
+            - thinx-docker-repo
           filters:
             branches:
               only:
                 - thinx-swarm
       - build-mosquitto-cloud:
+          context:
+            - thinx-docker-repo
           filters:
             branches:
               only:
                 - thinx-swarm
       - build-redis-cloud:
+          context:
+            - thinx-docker-repo
           filters:
             branches:
               only:
                 - thinx-swarm
       - build-transformer-cloud:
+          context:
+            - thinx-docker-repo
           filters:
             branches:
               only:
