@@ -897,7 +897,7 @@ case $PLATFORM in
 					else
 						echo "Will write ENV_HASH to ${THINX_FILE}"
 						ENV_HASH=$(shasum -a 256 ${ENVOUT} | awk '{ print $1 }')
-						LINE='#define ENV_HASH \"${ENV_HASH}\"'
+						LINE="#define ENV_HASH \"${ENV_HASH}\""
 						echo "ENV_HASH: " $ENV_HASH
 						sed -i '/ENV_HASH/d' ${THINX_FILE}
 						echo -e ${LINE} >> ${THINX_FILE}
