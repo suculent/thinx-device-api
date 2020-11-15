@@ -5,7 +5,142 @@ orbs:
 
 jobs:
 
-  build-mosquitto:
+  build-mosquitto-cloud:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          command: |
+            rm -rf ./package-lock.json
+      - docker/check:
+          registry: registry.thinx.cloud:5000
+      - docker/build:
+          registry: registry.thinx.cloud:5000
+          image: thinx/mosquitto
+          docker-context: services/broker
+          dockerfile: services/broker/Dockerfile
+          extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
+          tag: 'swarm'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/mosquitto
+          registry: registry.thinx.cloud:5000
+          tag: 'swarm'
+
+  build-redis-cloud:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          command: |
+            rm -rf ./package-lock.json
+      - docker/check:
+          registry: registry.thinx.cloud:5000
+      - docker/build:
+          registry: registry.thinx.cloud:5000
+          image: thinx/redis
+          docker-context: services/redis
+          dockerfile: services/redis/Dockerfile
+          extra_build_args: '--build-arg REDIS_PASSWORD=${REDIS_PASSWORD} --build-arg ALLOW_EMPTY_PASSWORD=no --build-arg REDIS_DISABLE_COMMANDS=FLUSHALL'
+          tag: 'swarm'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/redis
+          registry: registry.thinx.cloud:5000
+          tag: 'swarm'
+
+  build-transformer-cloud:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          command: |
+            rm -rf ./app/package-lock.json
+      - docker/check:
+          registry: registry.thinx.cloud:5000
+      - docker/build:
+          registry: registry.thinx.cloud:5000
+          image: thinx/transformer
+          docker-context: services/transformer
+          dockerfile: services/transformer/Dockerfile
+          extra_build_args: |
+            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
+            --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} \
+            --build-arg ROLLBAR_ENVIRONMENT=${ENVIRONMENT} \
+            --build-arg REVISION=$(git describe --abbrev=0) \
+          tag: 'swarm'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/transformer
+          registry: registry.thinx.cloud:5000
+          tag: 'swarm'
+
+  build-console-cloud:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check:
+          registry: registry.thinx.cloud:5000
+      - docker/build:
+          registry: registry.thinx.cloud:5000
+          docker-context: services/console/src
+          image: thinx/console
+          dockerfile: services/console/src/Dockerfile
+          extra_build_args: |
+            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
+            --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} \
+            --build-arg LANDING_HOSTNAME=${LANDING_HOSTNAME} \
+            --build-arg WEB_HOSTNAME=${WEB_HOSTNAME} \
+            --build-arg NGINX_HOST=${WEB_HOSTNAME} \
+            --build-arg API_HOSTNAME=${API_HOSTNAME} \
+            --build-arg API_BASEURL=${API_BASEURL} \
+            --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} \
+            --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
+            --build-arg NGINX_PORT=80 \
+            --build-arg ENTERPRISE=true \
+            --build-arg ENVIRONMENT=${ENVIRONMENT} \
+            --build-arg ROLLBAR_ENVIRONMENT=${ENVIRONMENT} \
+            --build-arg REVISION=$(git describe --abbrev=0) \
+          tag: 'swarm'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/console
+          registry: registry.thinx.cloud:5000
+          tag: 'swarm'
+
+  build-api-cloud:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check:
+          registry: registry.thinx.cloud:5000
+      - docker/build:
+          registry: registry.thinx.cloud:5000
+          image: thinx/api
+          dockerfile: ./Dockerfile
+          extra_build_args: |
+            --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} \
+            --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
+            --build-arg ENVIRONMENT=${ENVIRONMENT} \
+            --build-arg REVISION=$(git describe --abbrev=0) \
+          tag: 'swarm'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/api
+          registry: registry.thinx.cloud:5000
+          tag: 'swarm'
+
+          ###
+          ###
+
+          ###
+
+  build-mosquitto-eu:
     executor: docker/docker
     steps:
       - setup_remote_docker
@@ -28,7 +163,7 @@ jobs:
           registry: registry.keyguru.eu:5000
           tag: 'latest,${COUNTRY}'
 
-  build-redis:
+  build-redis-eu:
     executor: docker/docker
     steps:
       - setup_remote_docker
@@ -51,7 +186,7 @@ jobs:
           registry: registry.keyguru.eu:5000
           tag: 'latest,${COUNTRY}'
 
-  build-transformer:
+  build-transformer-eu:
     executor: docker/docker
     steps:
       - setup_remote_docker
@@ -78,7 +213,7 @@ jobs:
           registry: registry.keyguru.eu:5000
           tag: 'latest,${COUNTRY}'
 
-  build-console:
+  build-console-eu:
     executor: docker/docker
     steps:
       - setup_remote_docker
@@ -112,7 +247,7 @@ jobs:
           registry: registry.keyguru.eu:5000
           tag: 'latest,${COUNTRY}'
 
-  build-api:
+  build-api-eu:
     executor: docker/docker
     steps:
       - setup_remote_docker
@@ -309,28 +444,64 @@ workflows:
             branches:
               only:
                 - master
+
+      - build-api-cloud:
+          context:
+            - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - thinx-swarm
+      - build-console-cloud:
+          context:
+            - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - thinx-swarm
+      - build-mosquitto-cloud:
+          context:
+            - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - thinx-swarm
+      - build-redis-cloud:
+          context:
+            - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - thinx-swarm
+      - build-transformer-cloud:
+          context:
+            - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - thinx-swarm
       
-      - build-api:
+      - build-api-eu:
           filters:
             branches:
               only:
                 - keyguru-swarm
-      - build-console:
+      - build-console-eu:
           filters:
             branches:
               only:
                 - keyguru-swarm
-      - build-mosquitto:
+      - build-mosquitto-eu:
           filters:
             branches:
               only:
                 - keyguru-swarm
-      - build-redis:
+      - build-redis-eu:
           filters:
             branches:
               only:
                 - keyguru-swarm
-      - build-transformer:
+      - build-transformer-eu:
           filters:
             branches:
               only:
