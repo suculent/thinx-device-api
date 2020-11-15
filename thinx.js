@@ -734,7 +734,7 @@ if (isMasterProcess()) {
 			if (err) {
 				console.log("Error creating MQTT PASSWORDS file: " + err);
 			}
-      console.log("Running in disaster recovery mode...");
+      console.log("MQTT Passwords file not found! Running in disaster recovery mode...");
       setup_restore_owners_credentials("_all_docs"); // fetches only IDs and last revision, works with hundreds of users
 		});
   }
