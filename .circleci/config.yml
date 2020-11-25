@@ -137,7 +137,7 @@ jobs:
 
           ###
 
-  build-mosquitto-eu:
+  build-mosquitto:
     executor: docker/docker
     steps:
       - setup_remote_docker
@@ -160,7 +160,7 @@ jobs:
           registry: registry.keyguru.eu:5000
           tag: '${COUNTRY}'
 
-  build-redis-eu:
+  build-redis:
     executor: docker/docker
     steps:
       - setup_remote_docker
@@ -183,7 +183,7 @@ jobs:
           registry: registry.keyguru.eu:5000
           tag: '${COUNTRY}'
 
-  build-transformer-eu:
+  build-transformer:
     executor: docker/docker
     steps:
       - setup_remote_docker
@@ -210,7 +210,7 @@ jobs:
           registry: registry.keyguru.eu:5000
           tag: '${COUNTRY}'
 
-  build-console-eu:
+  build-console:
     executor: docker/docker
     steps:
       - setup_remote_docker
@@ -244,7 +244,7 @@ jobs:
           registry: registry.keyguru.eu:5000
           tag: '${COUNTRY}'
 
-  build-api-eu:
+  build-api:
     executor: docker/docker
     steps:
       - setup_remote_docker
@@ -478,61 +478,61 @@ workflows:
               only:
                 - thinx-swarm
       
-      - build-api-eu:
+      - build-api:
           filters:
             branches:
               only:
                 - keyguru-swarm
-      - build-console-eu:
+      - build-console:
           filters:
             branches:
               only:
                 - keyguru-swarm
-      - build-mosquitto-eu:
+      - build-mosquitto:
           filters:
             branches:
               only:
                 - keyguru-swarm
-      - build-redis-eu:
+      - build-redis:
           filters:
             branches:
               only:
                 - keyguru-swarm
-      - build-transformer-eu:
+      - build-transformer:
           filters:
             branches:
               only:
                 - keyguru-swarm
 
-      - build-api-eu:
+      - build-api:
           context:
             - thinx-staging-cz
           filters:
             branches:
               only:
                 - keyguru-swarm
-      - build-console-eu:
+      - build-console:
           context:
             - thinx-staging-cz
           filters:
             branches:
               only:
                 - keyguru-swarm
-      - build-mosquitto-eu:
+      - build-mosquitto:
           context:
             - thinx-staging-cz
           filters:
             branches:
               only:
                 - keyguru-swarm
-      - build-redis-eu:
+      - build-redis:
           context:
             - thinx-staging-cz
           filters:
             branches:
               only:
                 - keyguru-swarm
-      - build-transformer-eu:
+      - build-transformer:
           context:
             - thinx-staging-cz
           filters:
