@@ -153,12 +153,12 @@ jobs:
           docker-context: services/broker
           dockerfile: services/broker/Dockerfile
           extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
-          tag: 'latest,${COUNTRY}'
+          tag: '${COUNTRY}'
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/mosquitto
           registry: registry.keyguru.eu:5000
-          tag: 'latest,${COUNTRY}'
+          tag: '${COUNTRY}'
 
   build-redis-eu:
     executor: docker/docker
@@ -176,12 +176,12 @@ jobs:
           docker-context: services/redis
           dockerfile: services/redis/Dockerfile
           extra_build_args: '--build-arg REDIS_PASSWORD=${REDIS_PASSWORD} --build-arg ALLOW_EMPTY_PASSWORD=no --build-arg REDIS_DISABLE_COMMANDS=FLUSHALL'
-          tag: 'latest,${COUNTRY}'
+          tag: '${COUNTRY}'
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/redis
           registry: registry.keyguru.eu:5000
-          tag: 'latest,${COUNTRY}'
+          tag: '${COUNTRY}'
 
   build-transformer-eu:
     executor: docker/docker
@@ -203,12 +203,12 @@ jobs:
             --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} \
             --build-arg ROLLBAR_ENVIRONMENT=${ENVIRONMENT} \
             --build-arg REVISION=$(git describe --abbrev=0) \
-          tag: 'latest,${COUNTRY}'
+          tag: '${COUNTRY}'
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/transformer
           registry: registry.keyguru.eu:5000
-          tag: 'latest,${COUNTRY}'
+          tag: '${COUNTRY}'
 
   build-console-eu:
     executor: docker/docker
@@ -237,12 +237,12 @@ jobs:
             --build-arg ENVIRONMENT=${ENVIRONMENT} \
             --build-arg ROLLBAR_ENVIRONMENT=${ENVIRONMENT} \
             --build-arg REVISION=$(git describe --abbrev=0) \
-          tag: 'latest,${COUNTRY}'
+          tag: '${COUNTRY}'
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/console
           registry: registry.keyguru.eu:5000
-          tag: 'latest,${COUNTRY}'
+          tag: '${COUNTRY}'
 
   build-api-eu:
     executor: docker/docker
@@ -260,12 +260,12 @@ jobs:
             --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
             --build-arg ENVIRONMENT=${ENVIRONMENT} \
             --build-arg REVISION=$(git describe --abbrev=0) \
-          tag: 'latest,${COUNTRY}'
+          tag: '${COUNTRY}'
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/api
           registry: registry.keyguru.eu:5000
-          tag: 'latest,${COUNTRY}'
+          tag: '${COUNTRY}'
 
 #
 # DEPRECATED BUILD, KEEPING FOR TEST PURPOSES LATER
