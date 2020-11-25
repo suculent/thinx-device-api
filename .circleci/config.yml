@@ -516,6 +516,7 @@ workflows:
               only:
                 - keyguru-swarm
       - build-console:
+          name: "console : kgr.cz"
           context:
             - thinx-staging-cz
           filters:
@@ -523,6 +524,7 @@ workflows:
               only:
                 - keyguru-swarm
       - build-mosquitto:
+          name: "mosquitto : kgr.cz"
           context:
             - thinx-staging-cz
           filters:
@@ -530,6 +532,7 @@ workflows:
               only:
                 - keyguru-swarm
       - build-redis:
+          name: "redis : kgr.cz"
           context:
             - thinx-staging-cz
           filters:
@@ -537,6 +540,7 @@ workflows:
               only:
                 - keyguru-swarm
       - build-transformer:
+          name: "transformer : kgr.cz"
           context:
             - thinx-staging-cz
           filters:
@@ -555,6 +559,7 @@ workflows:
               only:
                 - keyguru-swarm
       - build-console:
+          name: "console : keyguru.at"
           context:
             - thinx-staging-at
           filters:
@@ -562,6 +567,7 @@ workflows:
               only:
                 - keyguru-swarm
       - build-mosquitto:
+          name: "mosquitto : keyguru.at"
           context:
             - thinx-staging-at
           filters:
@@ -569,6 +575,7 @@ workflows:
               only:
                 - keyguru-swarm
       - build-redis:
+          name: "redis : keyguru.at"
           context:
             - thinx-staging-at
           filters:
@@ -576,6 +583,7 @@ workflows:
               only:
                 - keyguru-swarm
       - build-transformer:
+          name: "transformer : keyguru.at"
           context:
             - thinx-staging-at
           filters:
