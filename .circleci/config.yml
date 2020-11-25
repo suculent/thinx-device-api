@@ -478,31 +478,32 @@ workflows:
               only:
                 - thinx-swarm
       
-      - build-api:
-          filters:
-            branches:
-              only:
-                - keyguru-swarm
-      - build-console:
-          filters:
-            branches:
-              only:
-                - keyguru-swarm
-      - build-mosquitto:
-          filters:
-            branches:
-              only:
-                - keyguru-swarm
-      - build-redis:
-          filters:
-            branches:
-              only:
-                - keyguru-swarm
-      - build-transformer:
-          filters:
-            branches:
-              only:
-                - keyguru-swarm
+      # .com build, currently unused
+      # - build-api:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-console:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-mosquitto:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-redis:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-transformer:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
 
       - build-api:
           context:
