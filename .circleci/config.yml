@@ -503,3 +503,39 @@ workflows:
             branches:
               only:
                 - keyguru-swarm
+
+      - build-api-eu:
+          context:
+            - thinx-staging-cz
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
+      - build-console-eu:
+          context:
+            - thinx-staging-cz
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
+      - build-mosquitto-eu:
+          context:
+            - thinx-staging-cz
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
+      - build-redis-eu:
+          context:
+            - thinx-staging-cz
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
+      - build-transformer-eu:
+          context:
+            - thinx-staging-cz
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
