@@ -505,37 +505,77 @@ workflows:
       #         only:
       #           - keyguru-swarm
 
-      - build-api:
+      # kgr.cz
+
+      - build-api-cz:
           context:
             - thinx-staging-cz
           filters:
             branches:
               only:
                 - keyguru-swarm
-      - build-console:
+      - build-console-cz:
           context:
             - thinx-staging-cz
           filters:
             branches:
               only:
                 - keyguru-swarm
-      - build-mosquitto:
+      - build-mosquitto-cz:
           context:
             - thinx-staging-cz
           filters:
             branches:
               only:
                 - keyguru-swarm
-      - build-redis:
+      - build-redis-cz:
           context:
             - thinx-staging-cz
           filters:
             branches:
               only:
                 - keyguru-swarm
-      - build-transformer:
+      - build-transformer-cz:
           context:
             - thinx-staging-cz
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
+
+      # keyguru.at
+
+      - build-api-at:
+          context:
+            - thinx-staging-at
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
+      - build-console-at:
+          context:
+            - thinx-staging-at
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
+      - build-mosquitto-at:
+          context:
+            - thinx-staging-at
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
+      - build-redis-at:
+          context:
+            - thinx-staging-at
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
+      - build-transformer-at:
+          context:
+            - thinx-staging-at
           filters:
             branches:
               only:
