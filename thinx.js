@@ -44,7 +44,9 @@ require("ssl-root-cas").inject();
 var http = require('http');
 var redis = require('redis');
 var path = require('path');
-var session_config = require("./conf/node-session.json");
+
+var CONFIG_ROOT = __dirname + "/../../conf";
+var session_config = require(CONFIG_ROOT + "/node-session.json");
 
 var app_config = Globals.app_config();
 var prefix = Globals.prefix();
@@ -347,8 +349,8 @@ app.use(express.urlencoded({
 // CSRF protection
 // now add csrf and other middlewares, after the router was mounted
 // app.use(express.urlencoded({ extended: false }));
-// var cookieParser = require('cookie-parser');
-// app.use(cookieParser());
+var cookieParser = require('cookie-parser');
+app.use(cookieParser());
 // var csrf = require('csurf');
 // app.use(csrf({ cookie: true })); collides with Sqreen
 
