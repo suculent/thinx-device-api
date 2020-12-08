@@ -306,7 +306,7 @@ app.messenger = messenger;
 var RedisStore = require("connect-redis")(session);
 var sessionStore = new RedisStore({
   host: app_config.redis.host,
-  port: app_config.redis.post,
+  port: app_config.redis.port,
   pass: app_config.redis.password,
   ttl : (60000 * 24 * 30)
 });
