@@ -45,7 +45,7 @@ var http = require('http');
 var redis = require('redis');
 var path = require('path');
 
-var CONFIG_ROOT = __dirname + "/../../conf";
+var CONFIG_ROOT = __dirname + "/conf";
 var session_config = require(CONFIG_ROOT + "/node-session.json");
 
 var app_config = Globals.app_config();
