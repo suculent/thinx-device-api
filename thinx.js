@@ -344,14 +344,17 @@ app.use(express.urlencoded({
   limit: "1mb"
 }));
 
+
+
 // CSRF protection
 // now add csrf and other middlewares, after the router was mounted
 // app.use(express.urlencoded({ extended: false }));
 
 var cookieParser = require('cookie-parser');
 // app.use(cookieParser());
-
-// app.use(noCache());
+let helmet = require("helmet");
+app.use(helmet);
+app.use(noCache());
 
 let router = require('./lib/router.js')(app, _ws);
 
