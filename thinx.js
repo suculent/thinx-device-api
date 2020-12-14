@@ -353,8 +353,8 @@ app.use(express.urlencoded({
 var cookieParser = require('cookie-parser');
 // app.use(cookieParser());
 let helmet = require("helmet");
-app.use(helmet);
-app.use(noCache());
+//app.use(helmet);
+//app.use(noCache());
 
 let router = require('./lib/router.js')(app, _ws);
 
