@@ -1,5 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.13.5
+version: v1.14.1
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   'npm:qs:20170213':
@@ -550,7 +550,7 @@ patch:
     - codecov.io > request:
         patched: '2017-05-24T20:23:09.576Z'
       github-oauth > request:
-        patched: '2019-07-03T18:50:11.408Z'
+        patched: '2020-12-20T16:51:43.537Z'
     - nano > follow > request:
         patched: '2017-05-24T20:23:09.576Z'
     - nano > follow > request:
@@ -567,9 +567,11 @@ patch:
         patched: '2017-11-15T09:01:49.621Z'
     - github-oauth > request:
         patched: '2018-08-20T08:49:18.325Z'
+    - github-oauth > request:
+        patched: '2019-07-03T18:50:11.408Z'
   'npm:moment:20160126':
     - fs-finder > moment:
-        patched: '2019-07-03T18:50:11.408Z'
+        patched: '2020-12-20T16:51:43.537Z'
     - fs-finder > moment:
         patched: '2017-11-15T09:01:49.621Z'
   'npm:debug:20170905':
@@ -664,8 +666,12 @@ patch:
   'npm:mime:20170907':
     - github-oauth > request > mime:
         patched: '2019-01-30T20:20:40.236Z'
+      github-oauth > request > form-data > mime:
+        patched: '2020-12-20T16:51:43.537Z'
     - github-oauth > request > form-data > mime:
         patched: '2019-01-30T20:20:40.236Z'
+      github-oauth > request > mime:
+        patched: '2020-12-20T16:51:43.537Z'
   SNYK-JS-LODASH-450202:
     - codacy-coverage > lodash:
         patched: '2019-07-03T18:50:11.408Z'
