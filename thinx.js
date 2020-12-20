@@ -272,29 +272,36 @@ const blog = new Buildlog();
 
 // Webhook Server
 const watcher = new Repository();
+
+/* Legacy Webhook Server, kept for backwards compatibility, will deprecate. */
+/* POST URL `http://<THINX_HOSTNAME>:9002/` changes to `https://<THINX_HOSTNAME>/githook` */
+
 const hook_server = express();
-http.createServer(hook_server).listen(app_config.webhook_port, "0.0.0.0", function() {
-  console.log("» Webhook API started on port", app_config.webhook_port);
-});
-hook_server.use(express.json({
-  limit: "2mb",
-  strict: false
-}));
-hook_server.use(express.urlencoded({ extended: false }));
-hook_server.post("/", function(req, res) {
-  // From GitHub, exit on non-push events prematurely
-  if (typeof(req.headers["X-GitHub-Event"]) !== "undefined") {
-    if ((req.headers["X-GitHub-Event"] != "push")) {
-      res.status(200).end("Accepted");
-      return;
+if (typeof(app_config.webhook_port) !== "undefined") {
+  http.createServer(hook_server).listen(app_config.webhook_port, "0.0.0.0", function() {
+    console.log("» Webhook API started on port", app_config.webhook_port);
+  });
+  hook_server.use(express.json({
+    limit: "2mb",
+    strict: false
+  }));
+  hook_server.use(express.urlencoded({ extended: false }));
+
+  hook_server.post("/", function(req, res) {
+    // From GitHub, exit on non-push events prematurely
+    if (typeof(req.headers["X-GitHub-Event"]) !== "undefined") {
+      if ((req.headers["X-GitHub-Event"] != "push")) {
+        res.status(200).end("Accepted");
+        return;
+      }
     }
-  }
-  // do not wait for response, may take ages
-  res.status(200).end("Accepted");
-  console.log("Hook process started...");
-  watcher.process_hook(req.body);
-  console.log("Hook process completed.");
-}); // end Webhook Server
+    // do not wait for response, may take ages
+    res.status(200).end("Accepted");
+    console.log("Hook process started...");
+    watcher.process_hook(req.body);
+    console.log("Hook process completed.");
+  }); // end of Legacy Webhook Server; will deprecate after reconfiguring all instances or if no webhook_port is defined
+}
 
 // App
 const app = express();
@@ -332,7 +339,7 @@ app.use(session({
 // rolling was true; This resets the expiration date on the cookie to the given default.
 
 app.use(express.json({
-  limit: "1mb",
+  limit: "2mb",
   strict: false
 }));
 
@@ -428,6 +435,25 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
 app.use('/static', express.static(path.join(__dirname, 'static')));
 app.set('trust proxy', ['loopback', '127.0.0.1']);
 
+/* Webhook Server (new impl.) */
+
+app.post("/githook", function(req, res) {
+  // From GitHub, exit on non-push events prematurely
+  if (typeof(req.headers["X-GitHub-Event"]) !== "undefined") {
+    if ((req.headers["X-GitHub-Event"] != "push")) {
+      res.status(200).end("Accepted");
+      return;
+    }
+  }
+  // TODO: Validate and possibly reject invalid requests to prevent injection
+
+  // do not wait for response, may take ages
+  console.log("Webhook request accepted...");
+  res.status(200).end("Accepted");
+  console.log("Webhook process started...");
+  watcher.process_hook(req.body);
+  console.log("Webhook process completed.");
+}); // end of new Webhook Server
 
 /*
  * WebSocket Server
