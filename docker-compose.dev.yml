@@ -131,7 +131,6 @@ services:
       - '7442:7442'
       - '7443:7443'
       - '7444:7444'
-      - '7445:7445'
       - '9002:9002'
     volumes:
       - '/mnt/data/deploy:/mnt/data/deploy'

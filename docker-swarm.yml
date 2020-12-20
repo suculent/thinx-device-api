@@ -194,8 +194,6 @@ services:
       - '7442:7442'
       - '7443:7443'
       - '7444:7444'
-      - '7445:7445'
-      - '9002:9002'
     volumes:
       - '/mnt/data/thinx/eu/deploy:/mnt/data/deploy'
       - '/mnt/data/thinx/eu/mosquitto:/mnt/data/mosquitto'
@@ -211,14 +209,15 @@ services:
       resources:
         reservations:
           cpus: '0.5'
-          memory: 2048M
+          memory: 1024M
         limits:
           cpus: '1.0'
-          memory: 3072M
+          memory: 2048M
       placement:
         constraints:
           - node.hostname == keyguru-production-01
       labels:
+        - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https" # 7444 websocket
         - "traefik.http.services.thinx-api.loadbalancer.server.port=7442"
         - "traefik.enable=true"
         - "traefik.docker.network=traefik-public"
