@@ -276,6 +276,16 @@ const watcher = new Repository();
 /* Legacy Webhook Server, kept for backwards compatibility, will deprecate. */
 /* POST URL `http://<THINX_HOSTNAME>:9002/` changes to `https://<THINX_HOSTNAME>/githook` */
 
+function fail_on_invalid_git_headers(req) {
+  if (typeof(req.headers["X-GitHub-Event"]) !== "undefined") {
+    if ((req.headers["X-GitHub-Event"] != "push")) {
+      res.status(200).end("Accepted");
+      return false; // do not fail
+    }
+  }
+  return true; // fail
+}
+
 const hook_server = express();
 if (typeof(app_config.webhook_port) !== "undefined") {
   http.createServer(hook_server).listen(app_config.webhook_port, "0.0.0.0", function() {
@@ -289,12 +299,7 @@ if (typeof(app_config.webhook_port) !== "undefined") {
 
   hook_server.post("/", function(req, res) {
     // From GitHub, exit on non-push events prematurely
-    if (typeof(req.headers["X-GitHub-Event"]) !== "undefined") {
-      if ((req.headers["X-GitHub-Event"] != "push")) {
-        res.status(200).end("Accepted");
-        return;
-      }
-    }
+    if (fail_on_invalid_git_headers(req)) return;
     // do not wait for response, may take ages
     res.status(200).end("Accepted");
     console.log("Hook process started...");
@@ -439,13 +444,9 @@ app.set('trust proxy', ['loopback', '127.0.0.1']);
 
 app.post("/githook", function(req, res) {
   // From GitHub, exit on non-push events prematurely
-  if (typeof(req.headers["X-GitHub-Event"]) !== "undefined") {
-    if ((req.headers["X-GitHub-Event"] != "push")) {
-      res.status(200).end("Accepted");
-      return;
-    }
-  }
+  if (fail_on_invalid_git_headers(req)) return;
   // TODO: Validate and possibly reject invalid requests to prevent injection
+  // E.g. using git_secret_key from app_config
 
   // do not wait for response, may take ages
   console.log("Webhook request accepted...");
