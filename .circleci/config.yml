@@ -78,6 +78,24 @@ jobs:
           registry: registry.thinx.cloud:5000
           tag: 'swarm'
 
+  build-worker-cloud:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check:
+          registry: registry.keyguru.eu:5000
+      - docker/build:
+          registry: registry.keyguru.eu:5000
+          image: thinx/worker
+          dockerfile: ./services/worker/Dockerfile
+          tag: 'swarm'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/worker
+          registry: registry.keyguru.eu:5000
+          tag: 'swarm'
+
   build-console-cloud:
     executor: docker/docker
     steps:
@@ -131,11 +149,6 @@ jobs:
           image: thinx/api
           registry: registry.thinx.cloud:5000
           tag: 'swarm'
-
-          ###
-          ###
-
-          ###
 
   build-mosquitto:
     executor: docker/docker
@@ -209,6 +222,24 @@ jobs:
           image: thinx/transformer
           registry: registry.keyguru.eu:5000
           tag: '${COUNTRY}'
+
+  build-worker:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check:
+          registry: registry.keyguru.eu:5000
+      - docker/build:
+          registry: registry.keyguru.eu:5000
+          image: thinx/worker
+          dockerfile: ./services/worker/Dockerfile
+          tag: 'latest'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/worker
+          registry: registry.keyguru.eu:5000
+          tag: 'latest'
 
   build-console:
     executor: docker/docker
@@ -477,6 +508,13 @@ workflows:
             branches:
               only:
                 - thinx-swarm
+      - build-worker-cloud:
+          context:
+            - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - thinx-swarm
       
       # .com build, currently unused
       # - build-api:
@@ -547,6 +585,14 @@ workflows:
             branches:
               only:
                 - keyguru-swarm
+      - build-worker:
+          name: "worker : kgr.cz"
+          context:
+            - thinx-staging-cz
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
 
       # keyguru.at
 
@@ -583,6 +629,14 @@ workflows:
               only:
                 - keyguru-swarm
       - build-transformer:
+          name: "transformer : keyguru.at"
+          context:
+            - thinx-staging-at
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
+      - build-worker:
           name: "transformer : keyguru.at"
           context:
             - thinx-staging-at
