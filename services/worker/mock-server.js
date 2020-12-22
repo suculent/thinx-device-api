@@ -14,7 +14,7 @@ class BuildServer {
             `);
         });
         
-        this.io = require('socket.io')(this.http);        
+        this.io = require('socket.io')(this.http);
         this.setupIo(this.io);
         this.workers = [];
     }

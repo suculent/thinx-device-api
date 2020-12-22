@@ -184,9 +184,13 @@ var messenger = new Messenger().getInstance(); // take singleton to prevent doub
 console.log("Loading module: Repository Watcher");
 var Repository = require("./lib/thinx/repository");
 
+var Builder = require("../lib/thinx/builder");
+console.log("Loading module: BuildServer");
+var builder = new Builder(); 
+
 console.log("Loading module: Queue");
 var Queue = require("./lib/thinx/queue");
-var queue = new Queue();
+var queue = new Queue(builder);
 queue.cron(); // starts cron job for build queue from webhooks
 
 
@@ -270,8 +274,8 @@ function handleDatabaseErrors(err, name) {
 const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
 const blog = new Buildlog();
 
-// Webhook Server
-const watcher = new Repository();
+// Starts Git Webhook Server
+const watcher = new Repository(queue);
 
 /* Legacy Webhook Server, kept for backwards compatibility, will deprecate. */
 /* POST URL `http://<THINX_HOSTNAME>:9002/` changes to `https://<THINX_HOSTNAME>/githook` */
