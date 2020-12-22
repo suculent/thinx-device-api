@@ -18,6 +18,7 @@ builder.thinx.json
 
 # Tests
 lcov.info
+test-private.sh
 
 # Sqreen.io configuration
 sqreen.json

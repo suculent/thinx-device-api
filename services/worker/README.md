@@ -24,4 +24,14 @@ Use the worker_secret variable to make sure worker cannot be called by unauthori
 
 ### Building in Development
 
-    docker build -t suculent/thinx-worker .
+	docker build -t thinx/worker .
+	
+	docker run \
+		-e THINX_SERVER=<recommended> \
+		-e WORKER_SECRET=<recommended> \
+		-e SQREEN_TOKEN=<optional> \
+		-e ROLLBAR_ACCESS_TOKEN=<optional> \
+		-e ROLLBAR_ENVIRONMENT=development \
+		-ti thinx/worker
+	
+	

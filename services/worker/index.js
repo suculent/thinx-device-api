@@ -213,17 +213,17 @@ class Worker {
         if (!this.is_running) {
             this.socket.emit('poll', 'true');
         } else {
-            console.log(new Date().getTime(), chalk.bold.orange("» ") + chalk.white("Skipping poll cron (job still running and did not timed out)."));
+            console.log(new Date().getTime(), chalk.bold.red("» ") + chalk.white("Skipping poll cron (job still running and did not timed out)."));
         }
     }
 }
 
 if (typeof(process.env.THINX_SERVER) !== "undefined") {
     let srv = process.env.THINX_SERVER;
-    console.log(new Date().getTime(), chalk.bold.orange("» ") + chalk.white("Starting build worker against"), srv);
+    console.log(new Date().getTime(), chalk.bold.red("» ") + chalk.white("Starting build worker against"), srv);
     new Worker(srv);
 } else {
     new Worker('http://localhost:3000');
-    console.log(new Date().getTime(), chalk.bold.orange("» ") + chalk.white("Starting build worker without configuration."));
+    console.log(new Date().getTime(), chalk.bold.red("» ") + chalk.white("Starting build worker without configuration."));
 }
 
