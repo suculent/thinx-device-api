@@ -81,6 +81,8 @@ class Worker {
                 if (job.secret.indexOf(process.env.WORKER_SECRET) !== 0) {
                     this.failJob(sock, job, "Invalid worker authentication");
                     return;
+                } else {
+                    console.log("Job secret valid.");
                 }
             }
         }
@@ -196,17 +198,18 @@ class Worker {
                 console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("Setting running to true..."));
                 console.log(new Date().getTime(), chalk.bold.red("» ") + chalk.bold.white("Processing incoming job..."));
                 this.is_running = true;
-                this.runJob(socket, data);
+                this.runJob(socket, data); // sync?
+                console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("Setting running to false..."));
             }
         });
     }
 
     setupScheduler() {
-        var cron_rule = "*/1 * * * *";
+        var cron_rule = "*/5 * * * *";
         schedule.scheduleJob(cron_rule, () => {
             this.loop();
         });
-        console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("Polling loop (1 minute) scheduled."));
+        console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("Polling loop (5 minutes) scheduled."));
     }
 
     loop() {
@@ -220,6 +223,10 @@ class Worker {
 
 if (typeof(process.env.THINX_SERVER) !== "undefined") {
     let srv = process.env.THINX_SERVER;
+    // fix missing http if defined in env file just like api:3000
+    if (srv.indexOf("http") == -1) {
+        srv = "http://" + srv;
+    }
     console.log(new Date().getTime(), chalk.bold.red("» ") + chalk.white("Starting build worker against"), srv);
     new Worker(srv);
 } else {

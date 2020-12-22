@@ -74,13 +74,14 @@ class BuildServer {
                 cmd: "echo hele-vole-ryby",
                 udid: "air-force-one",
                 //path: "/mnt/data/thinx/eu/repos/owner/udid/build_id/"
-                path: "/tmp/thinx-test/"
+                path: "/tmp/thinx-test/",
+                secret: true
             });
             console.log(new Date().getTime(), chalk.bold.red("» ") + chalk.white("Responding to job request with empty mock (TODO: respond with no-job or real data)."));
         });
 
         socket.on('job-status', function (msg) {
-            console.log(new Date().getTime(), chalk.bold.red("» ") + chalk.white("Incoming job status."), msg);
+            console.log(new Date().getTime(), chalk.bold.red("» ") + chalk.white("Incoming job status:"), msg);
         });
 
         socket.on('log', function (msg) {

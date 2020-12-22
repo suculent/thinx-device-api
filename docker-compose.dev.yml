@@ -7,6 +7,7 @@ networks:
     attachable: true
 
 services:
+
   mosquitto:
     env_file: .env
     image: registry.keyguru.eu:5000/thinx/mosquitto
@@ -59,7 +60,6 @@ services:
       #- './services/couchdb/vm.args:/opt/couchdb/etc/vm.args'
     labels:
       - traefik.backend.couchdb.noexpose
-
 
   thinx-redis:
     env_file: .env
@@ -150,6 +150,28 @@ services:
       - traefik.port=7442
       - traefik.backend=thinx-api
       - 'traefik.frontend.rule=Host:${THINX_HOSTNAME}'
+
+  worker:
+    env_file: .env
+    user: worker
+    image: registry.thinx.cloud:5000/thinx/worker:latest # may be changed to local build
+    environment:
+      - "SQREEN_TOKEN=${SQREEN_TOKEN}"
+      - "ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}"
+      - "ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}"
+      - "THINX_SERVER=api"
+      - "WORKER_SECRET=${WORKER_SECRET}"
+    depends_on:
+      - api
+    networks:
+      - internal
+    ports:
+      - 3000
+    labels:
+      - traefik.backend.worker.noexpose
+    volumes:
+      - /mnt/data/repos:/mnt/data/repos
+      - /mnt/data/deploy:/mnt/data/deploy
 
   console:
     depends_on:
