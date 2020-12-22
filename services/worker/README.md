@@ -4,13 +4,15 @@ This component is responsible for communication with THiNX Build Server over web
 
 Builder connects to THiNX automatically using a websocket. In some cases, address of the main server should be given.
 
+
 ### Security Precautions
 
 This container is mighty. It will perform any shell command submitted, after passing the validation (which is not a measure in open-source code).
 
 __Be careful and *NEVER EXPOSE THIS CONTAINER's PORT TO PUBLIC*.__ Worker has no authentication, because it is supposed to be placed on internal swarm network and called only from the THiNX Device API.
 
-Use the worker_secret variable to make sure worker cannot be called by unauthorized actor.
+Use the `WORKER_SECRET` variable on boths sides (API/Worker) to make sure worker or API cannot be called by unauthorized actor.
+
 
 ### Supported Environment Variables
 
@@ -21,6 +23,7 @@ Use the worker_secret variable to make sure worker cannot be called by unauthori
 | `ROLLBAR_ACCESS_TOKEN`  | Authentication token for Rollbar (optional)     |
 | `ROLLBAR_ENVIRONMENT`   | Enviroment for Rollbar (required if token set)  |
 | `WORKER_SECRET`         | If set, jobs will be validated for this secret. |
+
 
 ### Building in Development
 

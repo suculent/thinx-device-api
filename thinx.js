@@ -184,7 +184,7 @@ var messenger = new Messenger().getInstance(); // take singleton to prevent doub
 console.log("Loading module: Repository Watcher");
 var Repository = require("./lib/thinx/repository");
 
-var Builder = require("../lib/thinx/builder");
+var Builder = require("./lib/thinx/builder");
 console.log("Loading module: BuildServer");
 var builder = new Builder(); 
 
