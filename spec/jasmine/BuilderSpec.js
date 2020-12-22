@@ -23,7 +23,8 @@ describe("Builder", function() {
       source_id: source_id,
       dryrun: true
     };
-    builder.build(owner, build, [], function(success, message, build_id) {
+    let worker = null;
+    builder.build(owner, build, [], worker, function(success, message, build_id) {
       done();
     });
   }, 120000);
@@ -34,7 +35,8 @@ describe("Builder", function() {
       source_id: source_id,
       dryrun: false
     };
-    builder.build(owner, build, [], function(success, message, build_id) {
+    let worker = null;
+    builder.build(owner, build, [], worker, function(success, message, build_id) {
       done();
     });
   }, 120000);
