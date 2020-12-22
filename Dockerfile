@@ -1,4 +1,4 @@
-FROM node:14.15.0
+FROM node:14.15.3
 
 # docker build -t suculent/thinx-device-api .
 
@@ -80,7 +80,7 @@ RUN apt-get update -qq && \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Docker Client only (Docker is on the host) - fails with /bin/sh not found...
-ENV VER="18.06.3-ce"
+ENV VER="20.10.1"
 RUN curl -sL -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
 RUN tar -xz -C /tmp -f /tmp/docker-$VER.tgz && \
     rm -rf /tmp/docker-$VER.tgz
