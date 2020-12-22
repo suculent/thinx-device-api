@@ -198,17 +198,18 @@ class Worker {
                 console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("Setting running to true..."));
                 console.log(new Date().getTime(), chalk.bold.red("» ") + chalk.bold.white("Processing incoming job..."));
                 this.is_running = true;
-                this.runJob(socket, data);
+                this.runJob(socket, data); // sync?
+                console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("Setting running to false..."));
             }
         });
     }
 
     setupScheduler() {
-        var cron_rule = "*/1 * * * *";
+        var cron_rule = "*/5 * * * *";
         schedule.scheduleJob(cron_rule, () => {
             this.loop();
         });
-        console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("Polling loop (1 minute) scheduled."));
+        console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("Polling loop (5 minutes) scheduled."));
     }
 
     loop() {
