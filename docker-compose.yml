@@ -135,19 +135,6 @@ services:
       - 3000
     labels:
       - traefik.backend.worker.noexpose
-    deploy:
-      resources:
-        reservations:
-          cpus: '0.2'
-          memory: 256M
-        limits:
-          cpus: '1.0'
-          memory: 256M
-      placement:
-        constraints:
-          - node.hostname != keyguru-production-01
-      labels:
-        - "swarmpit.service.deployment.autoredeploy=true"
 
   api:
     privileged: true
