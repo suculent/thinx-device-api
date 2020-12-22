@@ -87,6 +87,7 @@ jobs:
           registry: registry.thinx.cloud:5000
       - docker/build:
           registry: registry.thinx.cloud:5000
+          docker-context: services/worker
           image: thinx/worker
           dockerfile: ./services/worker/Dockerfile
           tag: 'swarm'
@@ -232,6 +233,7 @@ jobs:
           registry: registry.keyguru.eu:5000
       - docker/build:
           registry: registry.keyguru.eu:5000
+          docker-context: services/worker
           image: thinx/worker
           dockerfile: ./services/worker/Dockerfile
           tag: 'latest'
