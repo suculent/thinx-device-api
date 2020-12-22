@@ -127,7 +127,7 @@ services:
       - "SQREEN_TOKEN=${SQREEN_TOKEN}"
       - "ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}"
       - "ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}"
-      - "THINX_SERVER=api"
+      - "THINX_SERVER=${THINX_SERVER}"
       - "WORKER_SECRET=${WORKER_SECRET}"
     networks:
       - internal
