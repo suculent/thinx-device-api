@@ -122,7 +122,7 @@ services:
   worker:
     env_file: .env
     user: worker
-    image: registry.thinx.cloud:5000/thinx/worker:swarm
+    image: registry.thinx.cloud:5000/thinx/worker:latest
     environment:
       - "SQREEN_TOKEN=${SQREEN_TOKEN}"
       - "ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}"
@@ -179,6 +179,7 @@ services:
       - '7443:7443'
       - '7444:7444'
       - '9002:9002'
+      - '3000'
     volumes:
       - '/mnt/data/deploy:/mnt/data/deploy'
       - '/mnt/data/mosquitto:/mnt/data/mosquitto'
@@ -196,6 +197,7 @@ services:
       - traefik.port=7442
       - traefik.backend=thinx-api
       - 'traefik.frontend.rule=Host:${THINX_HOSTNAME}'
+
   console:
     depends_on:
       - api
