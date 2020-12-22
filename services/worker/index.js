@@ -230,7 +230,7 @@ if (typeof(process.env.THINX_SERVER) !== "undefined") {
     console.log(new Date().getTime(), chalk.bold.red("» ") + chalk.white("Starting build worker against"), srv);
     new Worker(srv);
 } else {
-    new Worker('http://localhost:3000');
+    new Worker('http://localhost:3000'); // developer only, no authentication required
     console.log(new Date().getTime(), chalk.bold.red("» ") + chalk.white("Starting build worker without configuration."));
 }
 
