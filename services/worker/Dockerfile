@@ -25,6 +25,15 @@ RUN rm -rf ./node_modules
 # allow building native extensions with alpine: https://github.com/nodejs/docker-node/issues/384
 # RUN npm install -g node-gyp
 
+RUN apt-get update -qq && \
+    apt-get install -qq -y --fix-missing --no-install-recommends \
+    git \
+    jq \
+    zip
+#    g++ \
+#    libstdc++ \
+
+
 WORKDIR /home/node/worker
 
 COPY . .
