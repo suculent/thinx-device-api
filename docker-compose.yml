@@ -135,6 +135,9 @@ services:
       - 3000
     labels:
       - traefik.backend.worker.noexpose
+    volumes:
+      - /mnt/data/repos:/mnt/data/repos
+      - /mnt/data/deploy:/mnt/data/deploy
 
   api:
     privileged: true

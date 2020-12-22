@@ -182,6 +182,10 @@ services:
       - 3000
     labels:
       - traefik.backend.worker.noexpose
+    volumes:
+      - /mnt/data/repos:/mnt/data/repos
+      - /mnt/data/deploy:/mnt/data/deploy
+      
     deploy:
       resources:
         reservations:
@@ -224,6 +228,7 @@ services:
       - '7442:7442'
       - '7443:7443'
       - '7444:7444'
+      - '3000'
     volumes:
       - '/mnt/data/thinx/eu/deploy:/mnt/data/deploy'
       - '/mnt/data/thinx/eu/mosquitto:/mnt/data/mosquitto'
