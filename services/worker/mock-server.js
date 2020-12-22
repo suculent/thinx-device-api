@@ -1,8 +1,4 @@
 const chalk = require('chalk');
-const error = chalk.bold.red;
-const warning = chalk.keyword('orange');
-//console.log(error('Error!'));
-//console.log(warning('Warning!'));
 const app = require('express')();
 const port = process.env.PORT || 3000;
 class BuildServer {
@@ -43,13 +39,13 @@ class BuildServer {
 
         socket.on('connect', () => {
             console.log(new Date().getTime(), chalk.bold.green(`»`), chalk.white(`Worker connected: ${socket.id}`));
-            this.workers[socket.id] == true;
+            this.workers[socket.id] = true;
         });
 
         socket.on('disconnect', () => {
             console.log(new Date().getTime(), chalk.bold.red(`»`), chalk.white(`Worker disconnected: ${socket.id}`));
             if (typeof(socket.id) !== "undefined") {
-                this.workers[socket.id] == false;
+                this.workers[socket.id] = false;
             } else {
                 console.log("Socket ID undefined on disconnect.");
             }

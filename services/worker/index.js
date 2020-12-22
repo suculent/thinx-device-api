@@ -13,8 +13,8 @@ if (typeof(process.env.ROLLBAR_TOKEN) !== "undefined") {
 
 const exec = require("child_process");
 const chalk = require('chalk');
-const error = chalk.bold.red;
-const warning = chalk.keyword('orange');
+//const error = chalk.bold.red;
+//const warning = chalk.keyword('orange');
 //console.log(error('Error!'));
 //console.log(warning('Warning!'));
 const version = require('./package.json').version;
@@ -101,9 +101,10 @@ class Worker {
 				logline = string.substr(0, string.count - 2); // cut trailing newline
 			}
 
-			logline = logline.replace('\r', '').replace('\n', '');
-
 			if (logline !== "\n") {
+
+                logline = logline.replace(/\r/g, '').replace(/\n/g, '');
+
 				console.log("[" + build_id + "] »» " + logline);
 
 				// just a hack while shell.exit does not work or fails with another error
