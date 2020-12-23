@@ -80,12 +80,12 @@ class Worker {
                     this.failJob(sock, job, "Invalid job authentication");
                     return;
                 } else {
-                    console.log("[OID:" + job.owner_id + "] Job authenticateion successful.");
+                    console.log("[OID:" + job.owner + "] Job authenticateion successful.");
                 }
             }
         }
 
-        this.runShell(job.cmd, job.owner_id, job.build_id, job.udid, job.path, sock);
+        this.runShell(job.cmd, job.owner, job.build_id, job.udid, job.path, sock);
     }
 
     runShell(CMD, owner, build_id, udid, path, socket) {
