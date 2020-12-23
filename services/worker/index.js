@@ -101,7 +101,7 @@ class Worker {
 
 			if (logline !== "\n") {
 
-                logline = logline.replace(/\r/g, '').replace(/\n/g, '');
+                //logline = logline.replace(/\r/g, '').replace(/\n/g, '');
 
 				console.log("[" + build_id + "] »» " + logline);
 
