@@ -616,7 +616,7 @@ var product = package_info.description;
 var version = package_info.version;
 
 console.log("");
-console.log("-=[ ☢ " + product + " v" + version + " ☢ ]=-");
+console.log("-=[ ☢ " + product + " v" + version + " rev." + process.env.REVISION + " ☢ ]=-");
 console.log("");
 
 //
