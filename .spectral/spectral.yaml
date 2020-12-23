@@ -1,0 +1,4 @@
+match_ignores:
+    ignores:
+    - match_text: rtmtest:rtmtest@couchdb:5984
+    - match_text: rtmtest:rtmtest
