@@ -87,7 +87,7 @@ class Worker {
             }
         }
 
-        this.runShell(job.cmd, job.owner, job.build_id, job.udid, job.path, sock);
+        this.runShell(job.cmd, job.owner_id, job.build_id, job.udid, job.path, sock);
     }
 
     runShell(CMD, owner, build_id, udid, path, socket) {
