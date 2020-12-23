@@ -32,6 +32,8 @@ class Worker {
         console.log(chalk`{red  \\} {white.bold THiNX Cloud Build Worker ${version} rev. ${process.env.REVISION}} {red \\}`);
         this.setupSocket(this.socket);
         this.setupScheduler();
+        this.socket_id = null;
+        this.running = false;
     }
 
     //
@@ -168,7 +170,7 @@ class Worker {
 
         socket.on('connect', () => { 
             console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("Worker socket connected, registering..."));
-            socket.emit('register', "Hello from BuildWorker."); // refactor, post status as well (running, id...)
+            socket.emit('register', { status: "Hello from BuildWorker.", id: this.socket_id, running: this.running }); // refactor, post status as well (running, id...)
         });
 
         socket.on('disconnect', () => { 
