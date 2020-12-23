@@ -97,7 +97,7 @@ class Worker {
         if (this.validateJob(sock, job)) {
             this.runShell(job.cmd, job.owner, job.build_id, job.udid, job.path, sock);
         } else {
-            console.log(new Date().getTime(), "Job validation failed on this worker. Developer error, or attack attempt.");
+            console.log(new Date().getTime(), "« Job validation failed on this worker. Developer error, or attack attempt. No shell will be run.");
         }
     }
 

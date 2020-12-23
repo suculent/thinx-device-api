@@ -35,7 +35,7 @@ RUN apk add \
 #    libstdc++ \
 
 
-WORKDIR /home/node/worker
+WORKDIR /opt/thinx/thinx-device-api
 
 COPY . .
 
@@ -46,10 +46,15 @@ RUN ls -la && npm install . --only-prod
 RUN addgroup -S thinx
 
 # Create a user 'transformer' under 'thinx'
-RUN adduser -S -D -h /home/node/worker worker thinx
+RUN adduser -S -D -h /opt/thinx/thinx-device-api worker thinx
 
 # Chown all the files to the app user.
-RUN chown -R worker:thinx /home/node/worker
+RUN chown -R worker:thinx /opt/thinx/thinx-device-api
+
+# Make sure all production shell-scripts are executable
+RUN chmod +x /opt/thinx/thinx-device-api/pre-builder
+RUN chmod +x /opt/thinx/thinx-device-api/linter
+RUN chmod +x /opt/thinx/thinx-device-api/pre-builder
 
 # Switch to 'transformer' or 'node' user
 USER worker
