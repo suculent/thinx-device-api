@@ -76,11 +76,6 @@ class Worker {
             return false;
         }
 
-        if (typeof(job.path) === "undefined") {
-            this.failJob(sock, job, "Missing path for device");
-            return false;
-        }
-
         if (typeof(process.env.WORKER_SECRET) !== "undefined") {
             if (typeof(job.secret) === "undefined") {
                 this.failJob(sock, job, "Missing job secret");
