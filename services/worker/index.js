@@ -29,11 +29,7 @@ class Worker {
         this.client_id = null;
         this.is_running = false;
         this.socket = io(build_server);
-        console.log(chalk`
-{red +=====================================+}
-{red  \\}   {white.bold THiNX Cloud Build Worker ${version} }   {red \\}
-{red   +=====================================+}
-`);
+        console.log(chalk`{red  \\} {white.bold THiNX Cloud Build Worker ${version} rev. ${process.env.REVISION}} {red \\}`);
         this.setupSocket(this.socket);
         this.setupScheduler();
     }
