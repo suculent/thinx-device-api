@@ -375,14 +375,6 @@ let helmet = require("helmet");
 let router = require('./lib/router.js')(app, _ws);
 
 /*
- * HTTP/HTTPS API Server
- */
-
-app.version = function() {
-  return v.revision();
-};
-
-/*
  * HTTP/S Server
  */
 
@@ -626,7 +618,7 @@ var product = package_info.description;
 var version = package_info.version;
 
 console.log("");
-console.log("-=[ ☢ " + product + " v" + version + " rev. " + app.version() + " ☢ ]=-");
+console.log("-=[ ☢ " + product + " v" + version + " ☢ ]=-");
 console.log("");
 
 //

@@ -179,6 +179,15 @@ class Worker {
             console.log(new Date().getTime(), chalk.bold.red("» ") + chalk.bold.white("Worker socket disconnected."));
         });
 
+        // either by directly modifying the `auth` attribute
+        socket.on("connect_error", () => {
+            if ((typeof(process.env.WORKER_SECRET) !== "undefined")) {
+                socket.auth.token = process.env.WORKER_SECRET;
+                console.log("connect_error attempt to resolve using WORKER_SECRET");
+                socket.connect();
+            }
+        });
+
         // Business Logic Events
 
         socket.on('client id', (data) => { 

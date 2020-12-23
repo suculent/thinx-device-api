@@ -7,23 +7,13 @@ class BuildServer {
         
         this.http = require('http').Server(app);
         this.http.listen(port, function () {
-            console.log(chalk`
-        {blue *************************************************}
-        {blue *} {white.bold THiNX BuildServer Manager listening on *:${port} }{blue *}
-        {blue *************************************************}
-            `);
+            console.log(`» Build Manager Socket started on port *:${port}`);
         });
         
         this.io = require('socket.io')(this.http);
         this.setupIo(this.io);
         this.workers = [];
     }
-    
-    /*
-    app.get('/', function (req, res) {
-        res.sendFile(__dirname + '/index.html');
-    });
-    */
 
     parseSocketMessage(socket, msg) {
 
@@ -53,9 +43,11 @@ class BuildServer {
 
         // either by directly modifying the `auth` attribute
         socket.on("connect_error", () => {
-            //socket.auth.token = "abcd";
-            //socket.connect();
-            console.log("connect_error unresolved");
+            if ((typeof(process.env.WORKER_SECRET) !== "undefined")) {
+                socket.auth.token = process.env.WORKER_SECRET;
+                console.log("connect_error attempt to resolve using WORKER_SECRET");
+                socket.connect();
+            }
         });
 
         // Business Logic events
