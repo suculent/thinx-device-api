@@ -99,6 +99,8 @@ class Worker {
 
     runShell(CMD, owner, build_id, udid, path, socket) {
 
+        CMD.replace("./builder", "/opt/thinx/thinx-device-api/builder"); // WTF?
+
         console.log("[OID:" + owner + "] [BUILD_STARTED] WORKER EXEC from " + __dirname, "received command:", CMD);
         
         let shell = exec.spawn(CMD, { shell: true });
@@ -144,7 +146,8 @@ class Worker {
                 socket.emit('job-status', {
                     udid: udid,
                     build_id: build_id, 
-                    state: "Failed"
+                    state: "Failed",
+                    reason: dstring
                 });
 			}
 		}); // end shell on error data
