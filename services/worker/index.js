@@ -71,14 +71,14 @@ class Worker {
 
         if (typeof(process.env.WORKER_SECRET) !== "undefined") {
             if (typeof(job.secret) === "undefined") {
-                this.failJob(sock, job, "Missing worker secret");
+                this.failJob(sock, job, "Missing job secret");
                 return;
             } else {
                 if (job.secret.indexOf(process.env.WORKER_SECRET) !== 0) {
-                    this.failJob(sock, job, "Invalid worker authentication");
+                    this.failJob(sock, job, "Invalid job authentication");
                     return;
                 } else {
-                    console.log("Job secret valid.");
+                    console.log("[OID:" + job.owner_id + "] Job authenticateion successful.");
                 }
             }
         }
