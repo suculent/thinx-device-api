@@ -49,7 +49,7 @@ class Worker {
         this.is_running = false;
     }
 
-    validateJob(job) {
+    validateJob(sock, job) {
 
         if (typeof(job.cmd) === "undefined") {
             this.failJob(sock, job, "Missing command");
@@ -99,7 +99,7 @@ class Worker {
     }
 
     runJob(sock, job) {
-        if (this.validateJob(job)) {
+        if (this.validateJob(sock, job)) {
             this.runShell(job.cmd, job.owner, job.build_id, job.udid, job.path, sock);
         } else {
             console.log(new Date().getTime(), "Job validation failed on this worker. Developer error, or attack attempt.");
