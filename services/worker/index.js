@@ -57,12 +57,12 @@ class Worker {
         }
 
         let command = job.cmd;
-        if (command.indexOf(";") !== "undefined") {
-            console.log("Remote command contains unexpected character `;`; this security incident should be reported.");
+        if (command.indexOf(";") !== -1) {
+            console.log(new Date().getTime(), "Remote command contains unexpected character `;`; this security incident should be reported.");
             return false;
         }
-        if (command.indexOf("&") !== "undefined") {
-            console.log("Remote command contains unexpected character `&`; this security incident should be reported.");
+        if (command.indexOf("&") !== -1) {
+            console.log(new Date().getTime(), "Remote command contains unexpected character `&`; this security incident should be reported.");
             return false;
         }
 
@@ -102,7 +102,7 @@ class Worker {
         if (this.validateJob(job)) {
             this.runShell(job.cmd, job.owner, job.build_id, job.udid, job.path, sock);
         } else {
-            console.log("Job validation failed on this worker. Developer error, or attack attempt.");
+            console.log(new Date().getTime(), "Job validation failed on this worker. Developer error, or attack attempt.");
         }
     }
 
@@ -120,7 +120,7 @@ class Worker {
 			}
 
 			if (logline !== "\n") {
-				console.log("WORKER LOG [" + build_id + "] »» " + logline);
+				console.log(new Date().getTime(), "WORKER LOG [" + build_id + "] »» " + logline);
 				// just a hack while shell.exit does not work or fails with another error
 				if (logline.indexOf("STATUS OK") !== -1) {
                     socket.emit('job-status', {
@@ -148,7 +148,7 @@ class Worker {
 
 		shell.stderr.on("data", (data) => {
 			var dstring = data.toString();
-			console.log("[STDERR] " + data);
+			console.log(new Date().getTime(), "[STDERR] " + data);
 			if (dstring.indexOf("fatal:") !== -1) {
                 socket.emit('job-status', {
                     udid: udid,
@@ -193,7 +193,7 @@ class Worker {
         socket.on("connect_error", () => {
             if ((typeof(process.env.WORKER_SECRET) !== "undefined")) {
                 socket.auth.token = process.env.WORKER_SECRET;
-                console.log("connect_error attempt to resolve using WORKER_SECRET");
+                console.log(new Date().getTime(), "connect_error attempt to resolve using WORKER_SECRET");
                 socket.connect();
             }
         });
