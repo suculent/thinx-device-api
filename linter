@@ -95,7 +95,7 @@ for EXT in $EXTENSIONS; do
 		TOOL_PATH=$(which $TOOL_PATH)
 		CMD="${TOOL_PATH} ${TOOL_ATTRS} ${WORKDIR}"
 		echo $($CMD) > "$WORKDIR/lint.txt"
-		cat "$WORKDIR/lint.txt"
+		cat "$WORKDIR/lint.txt" | uniq -u
 	else
 
 		# recursion implementation for other linters
