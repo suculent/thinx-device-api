@@ -62,4 +62,6 @@ USER worker
 # Open the mapped port
 EXPOSE 3000
 
+RUN ls -la
+
 CMD [ "node", "index.js" ]

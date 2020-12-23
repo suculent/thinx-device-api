@@ -13,10 +13,6 @@ if (typeof(process.env.ROLLBAR_TOKEN) !== "undefined") {
 
 const exec = require("child_process");
 const chalk = require('chalk');
-//const error = chalk.bold.red;
-//const warning = chalk.keyword('orange');
-//console.log(error('Error!'));
-//console.log(warning('Warning!'));
 const version = require('./package.json').version;
 const schedule = require('node-schedule');
 const io = require('socket.io-client');
@@ -29,7 +25,7 @@ class Worker {
         this.client_id = null;
         this.is_running = false;
         this.socket = io(build_server);
-        console.log(new Date().getTime(), chalk.bold.red("» ") + chalk(`{red  \\} {white.bold THiNX Cloud Build Worker ${version} rev. ${process.env.REVISION}} {red \\}`));
+        console.log(new Date().getTime(), chalk.bold.red("» "), chalk(`{red  \\} {white.bold THiNX Cloud Build Worker ${version} rev. ${process.env.REVISION}} {red \\}`));
         this.setupSocket(this.socket);
         this.setupScheduler();
         this.socket_id = null;
@@ -103,9 +99,9 @@ class Worker {
 
     runShell(CMD, owner, build_id, udid, path, socket) {
 
-		var shell = exec.spawn(CMD, { shell: true });
-
-		console.log("[OID:" + owner + "] [BUILD_STARTED] EXEC from " + __dirname);
+        console.log("[OID:" + owner + "] [BUILD_STARTED] WORKER EXEC from " + __dirname, "received command:", CMD);
+        
+        let shell = exec.spawn(CMD, { shell: true });
 
 		shell.stdout.on("data", (data) => {
 			var string = data.toString();
