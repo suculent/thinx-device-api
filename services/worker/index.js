@@ -49,43 +49,61 @@ class Worker {
         this.is_running = false;
     }
 
-    runJob(sock, job) {
+    validateJob(job) {
 
         if (typeof(job.cmd) === "undefined") {
             this.failJob(sock, job, "Missing command");
-            return;
+            return false;
+        }
+
+        let command = job.cmd;
+        if (command.indexOf(";") !== "undefined") {
+            console.log("Remote command contains unexpected character `;`; this security incident should be reported.");
+            return false;
+        }
+        if (command.indexOf("&") !== "undefined") {
+            console.log("Remote command contains unexpected character `&`; this security incident should be reported.");
+            return false;
         }
 
         if (typeof(job.build_id) === "undefined") {
             this.failJob(sock, job, "Missing build_id");
-            return;
+            return false;
         }
 
         if (typeof(job.udid) === "undefined") {
             this.failJob(sock, job, "Missing udid");
-            return;
+            return false;
         }
 
         if (typeof(job.path) === "undefined") {
             this.failJob(sock, job, "Missing path for device");
-            return;
+            return false;
         }
 
         if (typeof(process.env.WORKER_SECRET) !== "undefined") {
             if (typeof(job.secret) === "undefined") {
                 this.failJob(sock, job, "Missing job secret");
-                return;
+                return false;
             } else {
                 if (job.secret.indexOf(process.env.WORKER_SECRET) !== 0) {
                     this.failJob(sock, job, "Invalid job authentication");
-                    return;
+                    return false;
                 } else {
                     console.log("[OID:" + job.owner + "] Job authenticateion successful.");
                 }
             }
         }
 
-        this.runShell(job.cmd, job.owner, job.build_id, job.udid, job.path, sock);
+        return true;
+    }
+
+    runJob(sock, job) {
+        if (this.validateJob(job)) {
+            this.runShell(job.cmd, job.owner, job.build_id, job.udid, job.path, sock);
+        } else {
+            console.log("Job validation failed on this worker. Developer error, or attack attempt.");
+        }
     }
 
     runShell(CMD, owner, build_id, udid, path, socket) {
@@ -102,11 +120,7 @@ class Worker {
 			}
 
 			if (logline !== "\n") {
-
-                //logline = logline.replace(/\r/g, '').replace(/\n/g, '');
-
-				console.log("[" + build_id + "] »» " + logline);
-
+				console.log("WORKER LOG [" + build_id + "] »» " + logline);
 				// just a hack while shell.exit does not work or fails with another error
 				if (logline.indexOf("STATUS OK") !== -1) {
                     socket.emit('job-status', {
@@ -129,9 +143,7 @@ class Worker {
                     fs.appendFileSync(build_log_path, logline);
                 }				
 			});
-
 			socket.emit('log', logline);
-
 		}); // end shell on out data
 
 		shell.stderr.on("data", (data) => {
@@ -199,14 +211,19 @@ class Worker {
         });
 
         socket.on('job', (data) => { 
-            console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white(`Incoming job:`), data);
-            if (typeof(data.mock) !== "undefined" && data.mock === true) {
+            console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white(`Worker has new job:`), data);
+            if (typeof(data.mock) === "undefined" || data.mock !== true) {
                 this.client_id = data;
-                console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("Setting running to true..."));
                 console.log(new Date().getTime(), chalk.bold.red("» ") + chalk.bold.white("Processing incoming job..."));
                 this.is_running = true;
-                this.runJob(socket, data); // sync?
-                console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("Setting running to false..."));
+                this.runJob(socket, data);
+                this.is_running = false;
+                console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("Job synchronously completed."));
+            } else {
+                console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("This is a MOCK job!"));
+                this.is_running = true;
+                this.runJob(socket, data);
+                this.is_running = false;
             }
         });
     }
