@@ -310,6 +310,7 @@ if (typeof(app_config.webhook_port) !== "undefined") {
 
 // App
 const app = express();
+app.queue = queue;
 app.messenger = messenger;
 
 // Redis
