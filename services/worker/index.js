@@ -181,7 +181,7 @@ class Worker {
         // Connectivity Events
 
         socket.on('connect', () => { 
-            console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("Worker socket connected, registering..."));
+            console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("Worker socket connected, sending registration..."));
             socket.emit('register', { status: "Hello from BuildWorker.", id: this.socket_id, running: this.running }); // refactor, post status as well (running, id...)
         });
 
