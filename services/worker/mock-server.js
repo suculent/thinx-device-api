@@ -29,13 +29,17 @@ class BuildServer {
 
         socket.on('connect', () => {
             console.log(new Date().getTime(), chalk.bold.green(`»`), chalk.white(`Worker connected: ${socket.id}`));
-            this.workers[socket.id] = true;
+            this.workers[socket.id] = {
+                connected: true
+            };
         });
 
         socket.on('disconnect', () => {
             console.log(new Date().getTime(), chalk.bold.red(`»`), chalk.white(`Worker disconnected: ${socket.id}`));
             if (typeof(socket.id) !== "undefined") {
-                this.workers[socket.id] = false;
+                this.workers[socket.id] = {
+                    connected: false
+                };
             } else {
                 console.log("Socket ID undefined on disconnect.");
             }
