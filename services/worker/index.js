@@ -111,8 +111,8 @@ class Worker {
 			var string = data.toString();
             var logline = string;
             
-            logline.replace("\r\n\r\n", "\r\n");
-            logline.replace("\n", ""); // first only is OK
+            logline.replace(/\r/g, '');
+			logline.replace(/\n/g, '');
 
 			if (logline.substr(logline.count - 3, 1) === "\n\n") {
 				logline = string.substr(0, string.count - 2); // cut trailing newline
@@ -180,11 +180,14 @@ class Worker {
             console.log("[OID:" + owner + "] [BUILD_COMPLETED] with code " + code);
             this.is_running = false;
             
-            let build_time = new Date().getTime() - build_end;
+            // calculate build time
+            let build_time = new Date().getTime() - build_start;
             if (build_time < 60) {
                 console.log("BUILD TIME:", build_time, "seconds");
             } else {
-                console.log("BUILD TIME:", build_time/60, "minutes");
+                let minutes = floor(build_time/60);
+                let seconds = build_time % 60;
+                console.log("BUILD TIME:", minutes, "minutes", seconds, "seconds");
             }
             
 
