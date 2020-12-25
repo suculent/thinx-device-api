@@ -110,7 +110,7 @@ class Worker {
             var logline = string;
             
             logline.replace("\r\n\r\n", "\r\n");
-            logline.replace("\n\n", "\n");
+            logline.replace("\n", ""); // first only is OK
 
 			if (logline.substr(logline.count - 3, 1) === "\n\n") {
 				logline = string.substr(0, string.count - 2); // cut trailing newline
@@ -123,23 +123,27 @@ class Worker {
 				if (logline.indexOf("JOB-RESULT") !== -1) {
                     
                     // parses "[86ad8d90-46e8-11eb-a48a-b59a7e739f77] »» JOB-RESULT:" {...
-                    let start_pos = string.indexOf(":");
+                    let start_pos = logline.indexOf("{");
                     let annotation_string = logline.substr(start_pos);
-                    let status = "Failed";
+
+                    let status_object = {
+                        udid: udid,
+                        state: "Failed",
+                        build_id: build_id, 
+                        owner: owner
+                    };
+
                     try {
                         let annotation_json = JSON.parse(annotation_string);
-                        status = annotation_json.status;
+                        status_object = annotation_json;
+                        
                     } catch (e) {
                         console.log("ERROR: Annotation status in \'", annotation_string, "\' not parsed.");
                     }
+
+                    status_object.completed = true;
                     
-                    socket.emit('job-status', {
-                        udid: udid,
-                        state: status,
-                        completed: true,
-                        build_id: build_id, 
-                        owner: owner,
-                    });
+                    socket.emit('job-status', status_object);
 				}
             }
             
