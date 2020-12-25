@@ -1036,7 +1036,7 @@ if [[ -z $BUILD_FILE ]]; then
 fi
 if [ ! -z ${BUILD_FILE} ]; then
 	echo "Fetching version from thinx_build.json" | tee -a "${LOG_PATH}"
-	THINX_FIRMWARE_VERSION=$(jq .THINX_FIRMWARE_VERSION ${BUILD_FILE})
+	THINX_FIRMWARE_VERSION=$(jq .THINX_FIRMWARE_VERSION ${BUILD_FILE} | tr -d '"')
 fi
 if [ -z ${THINX_FIRMWARE_VERSION} ]; then
 	pushd $BUILD_PATH/$REPO_NAME
