@@ -2,6 +2,8 @@
 
 FROM node:15-alpine
 
+echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+
 ARG SQREEN_TOKEN
 ARG THINX_SERVER
 ARG ROLLBAR_ACCESS_TOKEN
@@ -33,7 +35,7 @@ COPY ./platforms ./platforms
 
 RUN apk update && apk upgrade
 
-RUN apk add \
+RUN apk add --no-cache \
     autoreconf \
     bash \
     curl \
@@ -41,6 +43,7 @@ RUN apk add \
     gcc \
     git \
     jq \
+    jo \
     libgcc \
     libc-dev \
     libstdc++ \ 
