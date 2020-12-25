@@ -31,13 +31,16 @@ RUN apk update && apk upgrade
 
 RUN apk add \
     bash \
+    curl \
+    g++ \
     git \
     jq \
-    zip \
-    g++ \
+    libc-dev \
     libstdc++ \
-    libc-dev
+    make \
+    zip
 
+#    gcc libgcc linux-headers python
 # --> DevSec Support (binary needs to be built for respective platform; requires g++)
 RUN cd ./builders/devsec && ./build.sh
 
