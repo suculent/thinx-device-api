@@ -656,8 +656,8 @@ case $PLATFORM in
 		arduino)
 
 			cd $BUILD_PATH/$REPO_NAME
-			pwd
-			ls
+			#pwd
+			#ls
 
 			THINX_FILE=$( find . -name "thinx.h"  | head -n 1)
 
