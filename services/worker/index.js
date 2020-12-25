@@ -107,13 +107,18 @@ class Worker {
 
 		shell.stdout.on("data", (data) => {
 			var string = data.toString();
-			var logline = string;
+            var logline = string;
+            
+            logline.replace("\r\n\r\n", "\r\n");
+            logline.replace("\n\n", "\n");
+
 			if (logline.substr(logline.count - 3, 1) === "\n\n") {
 				logline = string.substr(0, string.count - 2); // cut trailing newline
 			}
 
 			if (logline !== "\n") {
-				console.log("W [" + build_id + "] »» " + logline);
+                //console.log("W [" + build_id + "] »» " + logline);
+                console.log(logline);
 				// just a hack while shell.exit does not work or fails with another error
 				if (logline.indexOf("JOB-RESULT") !== -1) {
                     
@@ -138,8 +143,6 @@ class Worker {
 				}
             }
             
-            logline.replace("\r\n\r\n", "\r\n");
-            logline.replace("\n\n", "\n");
 
 			// Something must write to build_path/build.log where the file is tailed from to websocket...
 			//var path = blog.pathForDevice(owner, udid);
