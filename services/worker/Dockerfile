@@ -2,7 +2,7 @@
 
 FROM node:15-alpine
 
-echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
 
 ARG SQREEN_TOKEN
 ARG THINX_SERVER
