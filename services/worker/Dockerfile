@@ -34,6 +34,7 @@ COPY ./platforms ./platforms
 RUN apk update && apk upgrade
 
 RUN apk add \
+    autoreconf \
     bash \
     curl \
     g++ \
