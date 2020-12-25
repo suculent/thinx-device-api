@@ -74,9 +74,13 @@ if [[ ! -f $CONFIG_ROOT/conf/config.json ]]; then
 	CONFIG_ROOT=/mnt/data
 fi
 
+if [ -f $CONFIG_ROOT/conf/config.json ]; then
 # from app_config.data_root
 DATA_ROOT_X=$(cat $CONFIG_ROOT/conf/config.json | jq .data_root)
 DATA_ROOT="$(sed 's/\"//g' <<< $DATA_ROOT_X)"
+else
+DATA_ROOT=/mnt/data
+fi
 
 # from app_config.build_root
 BUILD_ROOT=$DATA_ROOT/repos

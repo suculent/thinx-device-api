@@ -34,9 +34,41 @@ RUN apk add \
     git \
     jq \
     zip
-#    g++ \
-#    libstdc++ \
+    g++ \
+    libstdc++ \
+    libc-dev
 
+# --> DevSec Support (binary needs to be built for respective platform; requires g++)
+RUN cd ./builders/devsec && ./build.sh
+
+RUN apk remove \
+    g++ \
+    libstdc++ \
+    libc-dev
+
+# <-- DevSec
+
+ENV VER="20.10.1"
+RUN curl -sL -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+RUN tar -xz -C /tmp -f /tmp/docker-$VER.tgz && \
+    rm -rf /tmp/docker-$VER.tgz
+RUN mv /tmp/docker/* /usr/bin
+
+# set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
+RUN set -x \
+	&& addgroup dockremap --gid 65536 \
+	&& adduser --system dockremap --gid 65536 \
+	&& echo 'dockremap:165536:65536' >> /etc/subuid \
+	&& echo 'dockremap:165536:65536' >> /etc/subgid
+
+# https://github.com/docker/docker/tree/master/hack/dind is this really needed now?
+ENV DIND_COMMIT 37498f009d8bf25fbb6199e8ccd34bed84f2874b
+
+RUN set -eux; \
+	wget -O /usr/local/bin/dind "https://raw.githubusercontent.com/docker/docker/${DIND_COMMIT}/hack/dind"; \
+	chmod +x /usr/local/bin/dind
+
+VOLUME /var/lib/docker
 
 WORKDIR /opt/thinx/thinx-device-api
 
@@ -55,9 +87,9 @@ RUN adduser -S -D -h /opt/thinx/thinx-device-api worker thinx
 RUN chown -R worker:thinx /opt/thinx/thinx-device-api
 
 # Make sure all production shell-scripts are executable
-RUN chmod +x /opt/thinx/thinx-device-api/pre-builder
-RUN chmod +x /opt/thinx/thinx-device-api/linter
-RUN chmod +x /opt/thinx/thinx-device-api/pre-builder
+RUN chmod +x ./pre-builder
+RUN chmod +x ./linter
+RUN chmod +x ./pre-builder
 
 # Switch to 'transformer' or 'node' user
 USER worker
