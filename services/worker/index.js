@@ -115,10 +115,13 @@ class Worker {
 			if (logline !== "\n") {
 				console.log("W [" + build_id + "] »» " + logline);
 				// just a hack while shell.exit does not work or fails with another error
-				if (logline.indexOf("STATUS OK") !== -1) {
+				if (logline.indexOf("JOB-RESULT") !== -1) {
+                    let temp = "[86ad8d90-46e8-11eb-a48a-b59a7e739f77] »» JOB-RESULT:";
+                    let annotation_string = logline.substr(0, temp.length);
+                    let annotation_json = JSON.parse(annotation_string);
                     socket.emit('job-status', {
                         udid: udid,
-                        state: "Success",
+                        state: annotation_json.status,
                         completed: true,
                         build_id: build_id, 
                         owner: owner,

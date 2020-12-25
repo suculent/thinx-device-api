@@ -1053,7 +1053,7 @@ fi
 if [[ $WORKER==1 ]]; then
 
 # Inside Worker, we don't call notifier, but just post the results into shell... THiNX builder must then call the notifier itself (or integrate it later)
-JSON=$(jo -p \
+JSON=$(jo \
 build_id=${BUILD_ID} \
 commit=${COMMIT} \
 thx_version=${THX_VERSION} \
