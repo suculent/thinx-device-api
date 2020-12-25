@@ -116,8 +116,10 @@ class Worker {
 				console.log("W [" + build_id + "] »» " + logline);
 				// just a hack while shell.exit does not work or fails with another error
 				if (logline.indexOf("JOB-RESULT") !== -1) {
-                    let temp = "[86ad8d90-46e8-11eb-a48a-b59a7e739f77] »» JOB-RESULT:";
-                    let annotation_string = logline.substr(temp.length, logline.length);
+                    
+                    // parses "[86ad8d90-46e8-11eb-a48a-b59a7e739f77] »» JOB-RESULT:" {...
+                    let start_pos = string.indexOf(":");
+                    let annotation_string = logline.substr(start_pos);
                     let status = "Failed";
                     try {
                         let annotation_json = JSON.parse(annotation_string);
@@ -134,7 +136,10 @@ class Worker {
                         owner: owner,
                     });
 				}
-			}
+            }
+            
+            logline.replace("\r\n\r\n", "\r\n");
+            logline.replace("\n\n", "\n");
 
 			// Something must write to build_path/build.log where the file is tailed from to websocket...
 			//var path = blog.pathForDevice(owner, udid);
@@ -145,7 +150,7 @@ class Worker {
                 } else {
                     fs.appendFileSync(build_log_path, logline);
                 }				
-			});
+            });
 			socket.emit('log', logline);
 		}); // end shell on out data
 
