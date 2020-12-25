@@ -42,6 +42,8 @@ RUN apk add \
 
 WORKDIR /opt/thinx/thinx-device-api
 
+COPY . .
+
 #    gcc libgcc linux-headers python
 # --> DevSec Support (binary needs to be built for respective platform; requires g++)
 RUN pwd && ls && cd /opt/thinx/thinx-device-api/devsec && ls && ./build.sh && cd ..
@@ -74,8 +76,6 @@ RUN set -eux; \
 	chmod +x /usr/local/bin/dind
 
 VOLUME /var/lib/docker
-
-COPY . .
 
 # Running npm install for production purpose will not run dev dependencies.
 RUN ls -la && npm install . --only-prod
