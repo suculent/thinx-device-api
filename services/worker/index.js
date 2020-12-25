@@ -105,6 +105,8 @@ class Worker {
         
         let shell = exec.spawn(CMD, { shell: true });
 
+        let build_start = new Date().getTime();
+
 		shell.stdout.on("data", (data) => {
 			var string = data.toString();
             var logline = string;
@@ -175,9 +177,16 @@ class Worker {
 		}); // end shell on error data
 
 		shell.on("exit", (code) => {
-            console.log("[OID:" + owner + "] [BUILD_COMPLETED] [builder] with code " + code);
+            console.log("[OID:" + owner + "] [BUILD_COMPLETED] with code " + code);
             this.is_running = false;
-            console.log("Setting running to false, job done...");
+            
+            let build_time = new Date().getTime() - build_end;
+            if (build_time < 60) {
+                console.log("BUILD TIME:", build_time, "seconds");
+            } else {
+                console.log("BUILD TIME:", build_time/60, "minutes");
+            }
+            
 
             let state = "Failed";
 			if (code === 0) {
