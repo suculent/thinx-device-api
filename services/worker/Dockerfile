@@ -54,9 +54,6 @@ RUN apk add --no-cache \
     && rm -rf ./devsec-src \
     && apk del \
     g++ \
-    libstdc++ \
-    libc-dev \
-    libgcc \
     gcc
 
 # <-- DevSec
