@@ -40,7 +40,6 @@ RUN apk add \
     gcc \
     git \
     jq \
-    jo \
     libgcc \
     libc-dev \
     libstdc++ \ 
@@ -56,6 +55,13 @@ RUN apk add \
     libc-dev \
     libgcc \
     gcc
+
+RUN git clone git://github.com/jpmens/jo.git && \
+cd jo && \
+autoreconf -i && \
+./configure && \
+make check && \
+make install
 
 # <-- DevSec
 
