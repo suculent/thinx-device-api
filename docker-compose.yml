@@ -138,7 +138,8 @@ services:
     volumes:
       - /mnt/data/repos:/mnt/data/repos
       - /mnt/data/deploy:/mnt/data/deploy
-
+      - /var/lib/docker
+      
   api:
     privileged: true
     shm_size: 2048M
