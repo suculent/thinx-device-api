@@ -1047,8 +1047,32 @@ if [ -z ${THINX_FIRMWARE_VERSION} ]; then
 fi
 
 if [[ -f "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ]]; then
-	cp "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" $TARGET_PATH
+	cp -v "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" $TARGET_PATH
 fi
+
+if [[ $WORKER==1 ]]; then
+
+# Inside Worker, we don't call notifier, but just post the results into shell... THiNX builder must then call the notifier itself (or integrate it later)
+JSON=$(jo -p \
+build_id=${BUILD_ID} \
+commit=${COMMIT} \
+thx_version=${THX_VERSION} \
+git_repo=${GIT_REPO} \
+outfile=${OUTFILE} \
+udid=${UDID} \
+sha=${SHA} \
+owner_id=${OWNER_ID} \
+status=${STATUS} \
+platform=${PLATFORM} \
+version=${THINX_FIRMWARE_VERSION}
+md5=${MD5} \
+env_hash=${ENV_HASH})
+
+echo "JOB-RESULT: $JSON" | tee -a "${LOG_PATH}"
+
+echo "[builder.sh] ${BUILD_DATE} Done." | tee -a "${LOG_PATH}"
+
+else
 
 echo "BUILD_ID" "${BUILD_ID}" | tee -a "${LOG_PATH}"
 echo "COMMIT" "${COMMIT}" | tee -a "${LOG_PATH}"
@@ -1064,9 +1088,6 @@ echo "PLATFORM" "${PLATFORM}" | tee -a "${LOG_PATH}"
 echo "THINX_FIRMWARE_VERSION" "${THINX_FIRMWARE_VERSION}" | tee -a "${LOG_PATH}"
 echo "MD5" "${MD5}" | tee -a "${LOG_PATH}"
 echo "ENV_HASH" "${ENV_HASH}" | tee -a "${LOG_PATH}"
-
-#echo "Log path: $LOG_PATH" | tee -a "${LOG_PATH}"
-#cat $LOG_PATH
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
 CMD="node ./notifier.js ${BUILD_ID} ${COMMIT} ${THX_VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION} ${MD5} ${ENV_HASH}"
@@ -1084,3 +1105,5 @@ echo "[builder.sh] ${BUILD_DATE} Done." | tee -a "${LOG_PATH}"
 # rm -rf $BUILD_PATH # not a good idea, seems to destroy build.json (envelope)
 
 MSG=""
+
+fi

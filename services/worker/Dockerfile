@@ -15,6 +15,7 @@ ENV ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
 ENV ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
 ENV WORKER_SECRET=${WORKER_SECRET}
 ENV REVISION=${REVISION}
+ENV WORKER=1
 
 # RUN apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python curl git jq
 
@@ -23,6 +24,12 @@ ENV REVISION=${REVISION}
 
 # allow building native extensions with alpine: https://github.com/nodejs/docker-node/issues/384
 # RUN npm install -g node-gyp
+
+WORKDIR /opt/thinx/thinx-device-api
+
+COPY . .
+COPY ./devsec-src ./devsec-src
+COPY ./platforms ./platforms
 
 RUN apk update && apk upgrade
 
@@ -33,26 +40,22 @@ RUN apk add \
     gcc \
     git \
     jq \
+    jo \
     libgcc \
     libc-dev \
     libstdc++ \ 
     linux-headers \
     make \
-    zip
-
-WORKDIR /opt/thinx/thinx-device-api
-
-COPY . .
-COPY ./devsec-src ./devsec-src
-COPY ./platforms ./platforms
-
-# --> DevSec Support (binary needs to be built for respective platform; requires g++)
-RUN cd ./devsec-src && ./build.sh && cd ..
-RUN rm -rf ./devsec-src
-RUN apk del \
+    perl-utils \
+    zip \
+    && cd ./devsec-src && ./build.sh && cd .. \
+    && rm -rf ./devsec-src \
+    && apk del \
     g++ \
     libstdc++ \
-    libc-dev
+    libc-dev \
+    libgcc \
+    gcc
 
 # <-- DevSec
 
@@ -91,10 +94,10 @@ RUN adduser -S -D -h /opt/thinx/thinx-device-api worker thinx
 RUN chown -R worker:thinx /opt/thinx/thinx-device-api
 
 # Make sure all production shell-scripts are executable
-RUN chmod +x ./pre-builder
-RUN chmod +x ./linter
-RUN chmod +x ./pre-builder
-RUN chmod +x ./devsec
+RUN chmod +x ./pre-builder \
+ && chmod +x ./linter \
+ && chmod +x ./pre-builder \
+ && chmod +x ./devsec
 
 # Switch to 'transformer' or 'node' user
 USER worker
