@@ -2,7 +2,7 @@
 
 FROM node:15-alpine
 
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
 
 ARG SQREEN_TOKEN
 ARG THINX_SERVER
@@ -36,8 +36,8 @@ COPY ./platforms ./platforms
 RUN apk update && apk upgrade
 
 RUN apk add --no-cache \
-    autoreconf \
     bash \
+    bash-completions \
     curl \
     g++ \
     gcc \
