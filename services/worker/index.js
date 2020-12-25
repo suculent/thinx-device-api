@@ -185,7 +185,7 @@ class Worker {
             if (build_time < 60) {
                 console.log("BUILD TIME:", build_time, "seconds");
             } else {
-                let minutes = floor(build_time/60);
+                let minutes = Math.floor(build_time/60);
                 let seconds = build_time % 60;
                 console.log("BUILD TIME:", minutes, "minutes", seconds, "seconds");
             }

@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# THIS FILE WILL BE SOON DEPRECATED IN FAVOUR OF WORKERS
+
 source ./infer # utility functions like parse_yaml
 
 # do not exit when subsequent tools fail...
@@ -680,7 +683,7 @@ case $PLATFORM in
 						echo "ENV_HASH: " $ENV_HASH
 						sed -i '/ENV_HASH/d' ${THINX_FILE}
 						echo -e ${LINE} >> ${THINX_FILE}
-						cat ${THINX_FILE}
+						#cat ${THINX_FILE}
 					fi
 				fi
 			fi
@@ -791,7 +794,7 @@ case $PLATFORM in
 						echo "ENV_HASH: " $ENV_HASH
 						sed -i '/ENV_HASH/d' ${THINX_FILE}
 						echo -e ${LINE} >> ${THINX_FILE}
-						cat ${THINX_FILE}
+						#cat ${THINX_FILE}
 					fi
 				fi
 			fi
@@ -901,7 +904,7 @@ case $PLATFORM in
 						echo "ENV_HASH: " $ENV_HASH
 						sed -i '/ENV_HASH/d' ${THINX_FILE}
 						echo -e ${LINE} >> ${THINX_FILE}
-						cat ${THINX_FILE}
+						#cat ${THINX_FILE}
 					fi
 				fi
 			fi

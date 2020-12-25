@@ -351,7 +351,7 @@ if [[ ! -z $SIGNATURE_FILE ]]; then
 			echo "$DEVSEC_CONTENTS" > "$(pwd)/$SIGNATURE_FILE"
 			if [[ $DEVSEC_SUCCESS == 0 ]]; then
 				echo "DevSec Device Signature file generated..." | tee -a "${LOG_PATH}"
-				echo "\n$DEVSEC_CONTENTS" | tee -a "${LOG_PATH}"
+				#echo "\n$DEVSEC_CONTENTS" | tee -a "${LOG_PATH}"
 			else
 				echo "DevSec Failed, keeping signature file unkept." | tee -a "${LOG_PATH}"
 				echo $RESULT | tee -a "${LOG_PATH}"
@@ -690,7 +690,7 @@ case $PLATFORM in
 						echo "ENV_HASH: " $ENV_HASH
 						sed -i '/ENV_HASH/d' ${THINX_FILE}
 						echo -e ${LINE} >> ${THINX_FILE}
-						cat ${THINX_FILE}
+						#cat ${THINX_FILE}
 					fi
 				fi
 			fi
@@ -801,7 +801,7 @@ case $PLATFORM in
 						echo "ENV_HASH: " $ENV_HASH
 						sed -i '/ENV_HASH/d' ${THINX_FILE}
 						echo -e ${LINE} >> ${THINX_FILE}
-						cat ${THINX_FILE}
+						#cat ${THINX_FILE}
 					fi
 				fi
 			fi
@@ -911,7 +911,7 @@ case $PLATFORM in
 						echo "ENV_HASH: " $ENV_HASH
 						sed -i '/ENV_HASH/d' ${THINX_FILE}
 						echo -e ${LINE} >> ${THINX_FILE}
-						cat ${THINX_FILE}
+						#cat ${THINX_FILE}
 					fi
 				fi
 			fi
