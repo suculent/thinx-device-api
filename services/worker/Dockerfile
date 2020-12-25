@@ -37,7 +37,6 @@ RUN apk update && apk upgrade
 
 RUN apk add --no-cache \
     bash \
-    bash-completions \
     curl \
     g++ \
     gcc \
@@ -59,13 +58,6 @@ RUN apk add --no-cache \
     libc-dev \
     libgcc \
     gcc
-
-RUN git clone git://github.com/jpmens/jo.git && \
-cd jo && \
-autoreconf -i && \
-./configure && \
-make check && \
-make install
 
 # <-- DevSec
 
