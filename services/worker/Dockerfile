@@ -33,7 +33,7 @@ RUN apk add \
     bash \
     git \
     jq \
-    zip
+    zip \
     g++ \
     libstdc++ \
     libc-dev
