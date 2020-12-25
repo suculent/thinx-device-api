@@ -48,12 +48,8 @@ COPY ./platforms ./platforms
 
 #    gcc libgcc linux-headers python
 # --> DevSec Support (binary needs to be built for respective platform; requires g++)
-RUN pwd && ls
-
 RUN cd ./devsec-src && ls && ./build.sh && cd ..
-
-RUN pwd && ls
-
+RUN rm -rf ./devsec-src
 RUN apk del \
     g++ \
     libstdc++ \
@@ -69,8 +65,8 @@ RUN mv /tmp/docker/* /usr/bin
 
 # set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
 RUN set -x \
-	&& addgroup dockremap --gid 65536 \
-	&& adduser --system dockremap --gid 65536 \
+	&& addgroup dockremap -G 65536 \
+	&& adduser --system dockremap -G 65536 \
 	&& echo 'dockremap:165536:65536' >> /etc/subuid \
 	&& echo 'dockremap:165536:65536' >> /etc/subgid
 
