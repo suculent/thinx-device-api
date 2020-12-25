@@ -40,9 +40,11 @@ RUN apk add \
     make \
     zip
 
+WORKDIR /opt/thinx/thinx-device-api
+
 #    gcc libgcc linux-headers python
 # --> DevSec Support (binary needs to be built for respective platform; requires g++)
-RUN cd ./builders/devsec && ./build.sh
+RUN pushd ./devsec && ./build.sh && popd
 
 RUN apk remove \
     g++ \
@@ -72,8 +74,6 @@ RUN set -eux; \
 	chmod +x /usr/local/bin/dind
 
 VOLUME /var/lib/docker
-
-WORKDIR /opt/thinx/thinx-device-api
 
 COPY . .
 
