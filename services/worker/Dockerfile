@@ -30,10 +30,13 @@ RUN apk add \
     bash \
     curl \
     g++ \
+    gcc \
     git \
     jq \
+    libgcc \
     libc-dev \
-    libstdc++ \
+    libstdc++ \ 
+    linux-headers \
     make \
     zip
 
