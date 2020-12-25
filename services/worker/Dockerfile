@@ -46,9 +46,8 @@ COPY . .
 COPY ./devsec-src ./devsec-src
 COPY ./platforms ./platforms
 
-#    gcc libgcc linux-headers python
 # --> DevSec Support (binary needs to be built for respective platform; requires g++)
-RUN cd ./devsec-src && ls && ./build.sh && cd ..
+RUN cd ./devsec-src && ./build.sh && cd ..
 RUN rm -rf ./devsec-src
 RUN apk del \
     g++ \
@@ -102,7 +101,5 @@ USER worker
 
 # Open the mapped port
 EXPOSE 3000
-
-RUN ls -la
 
 CMD [ "node", "index.js" ]
