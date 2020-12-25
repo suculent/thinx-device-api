@@ -19,21 +19,11 @@ ENV WORKER_SECRET=${WORKER_SECRET}
 ENV REVISION=${REVISION}
 ENV WORKER=1
 
-# RUN apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python curl git jq
-
-# https://stackoverflow.com/questions/52196518/could-not-get-uid-gid-when-building-node-docker
-# RUN npm config set unsafe-perm true
-
-# allow building native extensions with alpine: https://github.com/nodejs/docker-node/issues/384
-# RUN npm install -g node-gyp
-
 WORKDIR /opt/thinx/thinx-device-api
 
-COPY . .
-COPY ./devsec-src ./devsec-src
-COPY ./platforms ./platforms
-
 RUN apk update && apk upgrade
+
+COPY ./devsec-src ./devsec-src
 
 RUN apk add --no-cache \
     bash \
@@ -56,13 +46,14 @@ RUN apk add --no-cache \
     g++ \
     gcc
 
-# <-- DevSec
+COPY . .
+COPY ./platforms ./platforms
 
 ENV VER="20.10.1"
-RUN curl -sL -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
-RUN tar -xz -C /tmp -f /tmp/docker-$VER.tgz && \
-    rm -rf /tmp/docker-$VER.tgz
-RUN mv /tmp/docker/* /usr/bin
+RUN curl -sL -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz && \
+    tar -xz -C /tmp -f /tmp/docker-$VER.tgz && \
+    rm -rf /tmp/docker-$VER.tgz && \
+   mv /tmp/docker/* /usr/bin
 
 # set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
 RUN set -x \
@@ -81,22 +72,14 @@ RUN set -eux; \
 VOLUME /var/lib/docker
 
 # Running npm install for production purpose will not run dev dependencies.
-RUN ls -la && npm install . --only-prod
+RUN npm install . --only-prod
 
 # Create a user group 'thinx'
-RUN addgroup -S thinx
-
-# Create a user 'transformer' under 'thinx'
-RUN adduser -S -D -h /opt/thinx/thinx-device-api worker thinx
-
-# Chown all the files to the app user.
-RUN chown -R worker:thinx /opt/thinx/thinx-device-api
-
-# Make sure all production shell-scripts are executable
-RUN chmod +x ./pre-builder \
- && chmod +x ./linter \
- && chmod +x ./pre-builder \
- && chmod +x ./devsec
+RUN addgroup -S thinx && \
+    adduser -S -D -h /opt/thinx/thinx-device-api worker thinx && \
+    chown -R worker:thinx /opt/thinx/thinx-device-api && \
+    chmod +x ./linter && \
+    chmod +x ./devsec
 
 # Switch to 'transformer' or 'node' user
 USER worker
