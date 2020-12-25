@@ -49,7 +49,9 @@ RUN pwd && ls
 
 RUN cd ./devsec && ls && ./build.sh && cd ..
 
-RUN apk remove \
+RUN pwd && ls
+
+RUN apk del \
     g++ \
     libstdc++ \
     libc-dev
@@ -94,6 +96,7 @@ RUN chown -R worker:thinx /opt/thinx/thinx-device-api
 RUN chmod +x ./pre-builder
 RUN chmod +x ./linter
 RUN chmod +x ./pre-builder
+RUN chmod +x ./devsec
 
 # Switch to 'transformer' or 'node' user
 USER worker
