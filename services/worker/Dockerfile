@@ -44,7 +44,7 @@ WORKDIR /opt/thinx/thinx-device-api
 
 #    gcc libgcc linux-headers python
 # --> DevSec Support (binary needs to be built for respective platform; requires g++)
-RUN pushd ./devsec && ./build.sh && popd
+RUN cd ./devsec && ./build.sh && cd ..
 
 RUN apk remove \
     g++ \
