@@ -181,7 +181,7 @@ class Worker {
             this.is_running = false;
             
             // calculate build time
-            let build_time = new Date().getTime() - build_start;
+            let build_time = (new Date().getTime() - build_start)/1000;
             if (build_time < 60) {
                 console.log("BUILD TIME:", build_time, "seconds");
             } else {
