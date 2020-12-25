@@ -43,14 +43,14 @@ RUN apk add \
 WORKDIR /opt/thinx/thinx-device-api
 
 COPY . .
-COPY ./devsec ./devsec
+COPY ./devsec-src ./devsec-src
 COPY ./platforms ./platforms
 
 #    gcc libgcc linux-headers python
 # --> DevSec Support (binary needs to be built for respective platform; requires g++)
 RUN pwd && ls
 
-RUN cd ./devsec && ls && ./build.sh && cd ..
+RUN cd ./devsec-src && ls && ./build.sh && cd ..
 
 RUN pwd && ls
 
