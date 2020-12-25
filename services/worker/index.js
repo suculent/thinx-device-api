@@ -141,7 +141,7 @@ class Worker {
 
 		shell.stderr.on("data", (data) => {
 			var dstring = data.toString();
-			console.log("ERR [" + build_id + "] »» " + logline);
+			console.log("ERR [" + build_id + "] »» " + dstring);
 			if (dstring.indexOf("fatal:") !== -1) {
                 socket.emit('job-status', {
                     udid: udid,
