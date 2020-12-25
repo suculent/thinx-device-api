@@ -65,8 +65,8 @@ RUN mv /tmp/docker/* /usr/bin
 
 # set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
 RUN set -x \
-	&& addgroup dockremap -G 65536 \
-	&& adduser --system dockremap -G 65536 \
+	&& addgroup dockremap -g 65536 \
+	&& adduser --system dockremap -g 65536 \
 	&& echo 'dockremap:165536:65536' >> /etc/subuid \
 	&& echo 'dockremap:165536:65536' >> /etc/subgid
 
