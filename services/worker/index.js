@@ -196,7 +196,8 @@ class Worker {
             socket.emit('job-status', {
                 udid: udid,
                 build_id: build_id, 
-                state: state
+                state: state,
+                elapsed: build_time
             });
 		}); // end shell on exit
 	}
