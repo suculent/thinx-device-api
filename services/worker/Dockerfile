@@ -27,7 +27,10 @@ RUN rm -rf ./node_modules
 # allow building native extensions with alpine: https://github.com/nodejs/docker-node/issues/384
 # RUN npm install -g node-gyp
 
+RUN apk update && apk upgrade
+
 RUN apk add \
+    bash \
     git \
     jq \
     zip
