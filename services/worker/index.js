@@ -25,7 +25,7 @@ class Worker {
         this.client_id = null;
         this.is_running = false;
         this.socket = io(build_server);
-        console.log(new Date().getTime(), chalk.bold.red("» "), chalk(`{red  \\} {white.bold THiNX Cloud Build Worker ${version} rev. ${process.env.REVISION}} {red \\}`));
+        console.log(new Date().getTime(), `THiNX Cloud Build Worker ${version} rev. ${process.env.REVISION}`);
         this.setupSocket(this.socket);
         this.setupScheduler();
         this.socket_id = null;
