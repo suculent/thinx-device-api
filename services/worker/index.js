@@ -141,7 +141,7 @@ class Worker {
 
 		shell.stderr.on("data", (data) => {
 			var dstring = data.toString();
-			console.log(new Date().getTime(), "[STDERR] " + data);
+			console.log("ERR [" + build_id + "] »» " + logline);
 			if (dstring.indexOf("fatal:") !== -1) {
                 socket.emit('job-status', {
                     udid: udid,
@@ -155,7 +155,7 @@ class Worker {
 		shell.on("exit", (code) => {
             console.log("[OID:" + owner + "] [BUILD_COMPLETED] [builder] with code " + code);
             this.is_running = false;
-            console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("Setting running to false, job done..."));
+            console.log("Setting running to false, job done...");
 
             let state = "Failed";
 			if (code === 0) {
