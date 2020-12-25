@@ -113,7 +113,7 @@ class Worker {
 			}
 
 			if (logline !== "\n") {
-				console.log(new Date().getTime(), "WORKER LOG [" + build_id + "] »» " + logline);
+				console.log("W [" + build_id + "] »» " + logline);
 				// just a hack while shell.exit does not work or fails with another error
 				if (logline.indexOf("STATUS OK") !== -1) {
                     socket.emit('job-status', {
