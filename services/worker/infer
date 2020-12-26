@@ -270,5 +270,4 @@ function thinx_file_from_json
 				fi
 			fi
 		done
-		cat $OUTFILE
 }
