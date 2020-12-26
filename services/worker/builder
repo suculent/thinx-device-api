@@ -95,18 +95,22 @@ swarm-build()
 	ITERATIONS=0
 
 	# 15 seconds x 4 = 1 minute; 4 x 15 minutes (max build duration) = 60
-	MAX_ITERATIONS=60
+	MAX_ITERATIONS=30
 	RUNNING=true
 
 	while $RUNNING
 	do
 		((ITERATIONS++))
-		sleep 15
+		sleep 30
 
 		STATUS=$(docker service ls | grep  $UNIQUE_NAME)
-		echo "Service Status: $STATUS"
+		echo $STATUS
 
-		if [[ "$STATUS" == *"0\/"* ]]; then
+		if grep -q "1/1" <<< "$STATUS"
+			echo "Still running..."
+		fi
+
+		if grep -q "0/0" <<< "$STATUS"
 			echo "Build completed."
 			docker service logs $UNIQUE_NAME
 			docker service rm $UNIQUE_NAME
@@ -116,11 +120,13 @@ swarm-build()
 		if [[ "$STATUS" == *"invalid"* ]]; then
 			echo "Service configuration failure."
 			# docker service rm $UNIQUE_NAME
+			docker service rm $UNIQUE_NAME
 			RUNNING=false
 		fi
 
 		if [[ "$ITERATIONS" -ge "$MAX_ITERATIONS" ]]; then
 			echo "Build Timed Out, terminating service."
+			docker service rm $UNIQUE_NAME
 			RUNNING=false
 		fi
 	done
