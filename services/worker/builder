@@ -53,6 +53,8 @@ swarm-build()
 
 	WORKDIR=$(pwd) # needs real outer path on GFS, e.g. using $COUNTRY
 
+	echo "WORKDIR-BEFORE: ${WORKDIR}"
+
 	# Workaround: replacing /mnt/data/repos with /mnt/data/thinx/$COUNTRY/repos
 
 	# will deprecate with passing the var
@@ -63,12 +65,15 @@ swarm-build()
 	# Restores internal to external mount path for service outside this container
 	FIND="/mnt/data/repos"
 	REPLACE="/mnt/data/thinx/$COUNTRY/repos"
-	WORKDIR="$WORKDIR/$FIND/$REPLACE"
+	WORKDIR=$(echo "$(pwd)/$FIND/$REPLACE")
 
 	BUILD_IMAGE=$1
 	RS=$(random-string 16)
 
 	UNIQUE_NAME="build-${RS}"
+
+	echo "WORKDIR-AFTER: ${WORKDIR}"
+	echo ls -la ${WORKDIR}
 
 	docker service create \
 	--restart-condition=none \
