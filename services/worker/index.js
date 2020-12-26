@@ -148,10 +148,8 @@ class Worker {
                     socket.emit('job-status', status_object);
 				}
             }
-            
 
 			// Something must write to build_path/build.log where the file is tailed from to websocket...
-			//var path = blog.pathForDevice(owner, udid);
 			var build_log_path = path + "/" + build_id + "/build.log";
 			fs.ensureFile(build_log_path, function (err) {
                 if (err) {
@@ -160,7 +158,9 @@ class Worker {
                     fs.appendFileSync(build_log_path, logline);
                 }				
             });
-			socket.emit('log', logline);
+
+            //socket.emit('log', logline); currently not needed, logging is done through file appends (but this is certainly faster)
+            
 		}); // end shell on out data
 
 		shell.stderr.on("data", (data) => {
@@ -181,12 +181,12 @@ class Worker {
             this.is_running = false;
             
             // calculate build time
-            let build_time = (new Date().getTime() - build_start)/1000;
+            let build_time = (new Date().getTime() - build_start)/1000; // to seconds
             if (build_time < 60) {
                 console.log("BUILD TIME:", build_time, "seconds");
             } else {
                 let minutes = Math.floor(build_time/60);
-                let seconds = build_time % 60;
+                let seconds = Math.floor(build_time % 60);
                 console.log("BUILD TIME:", minutes, "minutes", seconds, "seconds");
             }
             
