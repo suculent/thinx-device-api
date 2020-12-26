@@ -64,10 +64,10 @@ swarm-build()
 	fi
 
 	# Restores internal to external mount path for service outside this container
-	#FIND="\/mnt\/data\/repos"
-	#REPLACE="\/mnt\/data\/thinx\/$COUNTRY\/repos"
-	#WORKDIR=$(echo "$WORKDIR" | sed "s/$FIND/$REPLACE/")
-	#echo "WORKDIR-AFTER: ${WORKDIR}"
+	FIND="\/mnt\/data\/repos"
+	REPLACE="\/mnt\/data\/thinx\/$COUNTRY\/repos"
+	WORKDIR=$(echo "$WORKDIR" | sed "s/$FIND/$REPLACE/")
+	echo "WORKDIR-AFTER: ${WORKDIR}"
 	ls -la ${WORKDIR}
 
 	UNIQUE_NAME="build-$(random-string 16)"
@@ -81,8 +81,8 @@ swarm-build()
 	--reserve-memory=1GB \
 	--name $UNIQUE_NAME \
 	--mount type=bind,source=$WORKDIR,destination=/opt/workspace \
-	--mount type=bind,source=/mnt/data/deploy,destination=/mnt/data/deploy \
-	--mount type=bind,source=/mnt/data/repos,destination=/mnt/data/repos \
+	--mount type=bind,source=/mnt/data/thinx/$COUNTRY/deploy,destination=/mnt/data/deploy \
+	--mount type=bind,source=/mnt/data/thinx/$COUNTRY/repos,destination=/mnt/data/repos \
 	$BUILD_IMAGE"
 
 	echo "$OFFENDING_COMMAND"
