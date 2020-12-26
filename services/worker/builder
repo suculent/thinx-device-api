@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ ! -f ./infer]; then 
+if [[ ! -f ./infer ]]; then
 	echo "Infer tool missing!"
 	exit 1
 fi
@@ -50,7 +50,7 @@ swarm-build()
 	UNIQUE_NAME="build-${RS}"
 
 	# TODO: set --network=${NETWORK} \ properly
-	
+
 	docker service create \
 	--restart-condition=none \
 	--mount type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock \
@@ -60,6 +60,8 @@ swarm-build()
 	--reserve-memory=1GB \
 	--name $UNIQUE_NAME \
 	--mount type=bind,source=$WORKDIR,destination=/opt/workspace \
+	--mount type=bind,source=/mnt/data/deploy,destination=/mnt/data/deploy \
+	--mount type=bind,source=/mnt/data/repos,destination=/mnt/data/repos \
 	$BUILD_IMAGE
 
 	echo "» Fetching service status..."
@@ -82,6 +84,12 @@ swarm-build()
 		if [[ $STATUS == *"0/1"* ]]; then
 			echo "Build completed."
 			docker service logs $UNIQUE_NAME
+			docker service rm $UNIQUE_NAME
+			RUNNING=false
+		fi
+
+		if [[ $STATUS == *"invalid mount config"* ]]; then
+			echo "Invalid mount config."
 			docker service rm $UNIQUE_NAME
 			RUNNING=false
 		fi
