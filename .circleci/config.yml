@@ -162,7 +162,7 @@ jobs:
           command: |
             rm -rf ./package-lock.json
       - docker/check:
-          registry: registry.thinx.cloud:5000
+          registry: registry.keyguru.eu:5000
       - docker/build:
           registry: registry.keyguru.eu:5000
           image: thinx/mosquitto
