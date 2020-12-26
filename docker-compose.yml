@@ -174,6 +174,7 @@ services:
         - 'ENVIRONMENT=${ENVIRONMENT}'
         - 'COUCHDB_USER=${COUCHDB_USER}'
         - 'COUCHDB_PASSWORD=${COUCHDB_PASSWORD}'
+        - 'WORKER_SECRET=${WORKER_SECRET}'
     environment:
       - 'ENVIRONMENT=${ENVIRONMENT}'
       - 'COUCHDB_USER=${COUCHDB_USER}'
@@ -182,8 +183,8 @@ services:
       - '7442:7442'
       - '7443:7443'
       - '7444:7444'
-      - '9002:9002'
-      - '3000'
+      - '9002:9002' # deprecated webhook socket
+      - '3000' # worker socket
     volumes:
       - '/mnt/data/deploy:/mnt/data/deploy'
       - '/mnt/data/mosquitto:/mnt/data/mosquitto'

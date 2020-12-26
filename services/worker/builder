@@ -39,18 +39,23 @@ BUILD_IMAGE=suculent/arduino-docker-build
 
 swarm-build()
 {
+	echo "Examining networks..."
+	docker network ls
+
 	WORKDIR=$(pwd)
 	BUILD_IMAGE=$1
 	NETWORK=internal
 	RS=$(random-string 16)
 
 	UNIQUE_NAME="build-${RS}"
+
+	# TODO: set --network=${NETWORK} \ properly
+	
 	docker service create \
 	--restart-condition=none \
 	--mount type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock \
 	--container-label owner=thinx \
 	--limit-cpu=0.75 \
-	--network=${NETWORK} \
 	--replicas=1 \
 	--reserve-memory=1GB \
 	--name $UNIQUE_NAME \

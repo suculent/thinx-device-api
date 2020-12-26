@@ -224,12 +224,14 @@ services:
       - "COUCHDB_PASSWORD=${COUCHDB_PASSWORD}"
       - "MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}"
       - "MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}"
+      - "WORKER_SECRET=${WORKER_SECRET}"
     ports:
       - '7442:7442'
       - '7443:7443'
       - '7444:7444'
       - '3000'
     volumes:
+      - '/mnt/data/thinx/eu/statistics:/opt/thinx/thinx-device-api/statistics'
       - '/mnt/data/thinx/eu/deploy:/mnt/data/deploy'
       - '/mnt/data/thinx/eu/mosquitto:/mnt/data/mosquitto'
       - '/mnt/data/thinx/eu/repos:/mnt/data/repos'

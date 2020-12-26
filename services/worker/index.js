@@ -77,11 +77,16 @@ class Worker {
                 this.failJob(sock, job, "Missing job secret");
                 return false;
             } else {
-                if (job.secret.indexOf(process.env.WORKER_SECRET) !== 0) {
-                    this.failJob(sock, job, "Invalid job authentication");
+                if (job.secret === null) {
+                    console.log("Warning, JOB SECRET NULL! This will be error soon.", job);
                     return false;
                 } else {
-                    console.log("[OID:" + job.owner + "] Job authenticateion successful.");
+                    if (job.secret.indexOf(process.env.WORKER_SECRET) !== 0) {
+                        this.failJob(sock, job, "Invalid job authentication");
+                        return false;
+                    } else {
+                        console.log("[OID:" + job.owner + "] Job authenticateion successful.");
+                    }
                 }
             }
         }
