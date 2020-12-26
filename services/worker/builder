@@ -64,17 +64,14 @@ swarm-build()
 	fi
 
 	# Restores internal to external mount path for service outside this container
-	FIND="/mnt/data/repos"
-	REPLACE="/mnt/data/thinx/$COUNTRY/repos"
-	WORKDIR="$(pwd)/$FIND/$REPLACE"
-	
-	RS=$(random-string 16)
-
-	UNIQUE_NAME="build-${RS}"
-
-	echo "WORKDIR-AFTER: ${WORKDIR}"
+	#FIND="\/mnt\/data\/repos"
+	#REPLACE="\/mnt\/data\/thinx\/$COUNTRY\/repos"
+	#WORKDIR=$(echo "${WORKDIR}/${FIND}/${REPLACE}")
+	#echo "WORKDIR-AFTER: ${WORKDIR}"
 	echo ls -la ${WORKDIR}
 
+	UNIQUE_NAME="build-$(random-string 16)"
+	
 	docker service create \
 	--restart-condition=none \
 	--mount type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock \
