@@ -47,6 +47,8 @@ RUN apk add --no-cache \
     gcc
 
 COPY . .
+
+# this may not bee needed if belongs to linter only, however it may be required by infer
 COPY ./platforms ./platforms
 
 ENV VER="20.10.1"
@@ -78,7 +80,6 @@ RUN npm install . --only-prod
 RUN addgroup -S thinx && \
     adduser -S -D -h /opt/thinx/thinx-device-api worker thinx && \
     chown -R worker:thinx /opt/thinx/thinx-device-api && \
-    chmod +x ./linter && \
     chmod +x ./devsec
 
 # Switch to 'transformer' or 'node' user
