@@ -7,9 +7,6 @@ fi
 
 source ./infer # utility functions like parse_yaml
 
-# do not exit when subsequent tools fail...
-set +e
-
 if [[ -z $THINX_ROOT ]]; then
 export THINX_ROOT=/opt/thinx/thinx-device-api
 fi
@@ -17,6 +14,79 @@ fi
 echo ""
 echo "-=[ ☢   THiNX IoT RTM BUILDER ☢  ]=-"
 echo ""
+
+# do not exit when subsequent tools fail...
+set +e
+
+# Swarm Support
+
+random-string()
+{
+    cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w ${1:-32} | head -n 1
+}
+
+NODE_ID=$(docker info -f '{{.Swarm.NodeID}}')
+SWARM=false
+if [[ -z $NODE_ID ]]; then
+        echo "This is not a swarm node."
+		SWARM=false
+else
+        echo "This is a swarm node ${NODE_ID}"
+		SWARM=true
+fi
+
+BUILD_IMAGE=suculent/arduino-docker-build
+
+swarm-build()
+{
+	WORKDIR=$(pwd)
+	BUILD_IMAGE=$1
+	NETWORK=traefik-public
+	RS=$(random-string 16)
+
+	UNIQUE_NAME="build-${RS}"
+	docker service create \
+	--restart-condition=none \
+	--mount type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock \
+	--container-label owner=thinx \
+	--limit-cpu=0.75 \
+	--network=${NETWORK} \
+	--replicas=1 \
+	--reserve-memory=1GB \
+	--name $UNIQUE_NAME \
+	--mount type=bind,source=$WORKDIR,destination=/opt/workspace \
+	$BUILD_IMAGE
+
+	echo "» Fetching service status..."
+	INFO=$(docker service ls | grep $UNIQUE_NAME)
+	echo $INFO
+	ITERATIONS=0
+
+	# 15 seconds x 4 = 1 minute; 4 x 15 minutes (max build duration) = 60
+	MAX_ITERATIONS=60
+	RUNNING=true
+
+	while $RUNNING
+	do
+		((ITERATIONS++))
+		sleep 15
+
+		STATUS=$(docker service ls | grep  $UNIQUE_NAME)
+		echo $STATUS
+
+		if [[ $STATUS == *"0/1"* ]]; then
+			echo "Build completed."
+			docker service logs $UNIQUE_NAME
+			docker service rm $UNIQUE_NAME
+			RUNNING=false
+		fi
+
+		if [[ "$ITERATIONS" -ge "$MAX_ITERATIONS" ]]; then
+			echo "Build Timed Out, terminating service."
+			RUNNING=false
+		fi
+	done
+}
 
 OWNER_ID='cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12' 		# name of folder where workspaces reside
 RUN=true			# dry-run switch
@@ -445,26 +515,32 @@ case $PLATFORM in
 				fi
 			done
 
-			if [[ $BUILD_TYPE == "firmware" ]]; then
-				echo "Micropython Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
-				set -o pipefail
-				docker pull suculent/micropython-docker-build
-				docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 suculent/micropython-docker-build | tee -a "${LOG_PATH}"
-				echo "${PIPESTATUS[@]}"
-				set +o pipefail
-				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
-					BUILD_SUCCESS=true
-					echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
-					zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./build/** # zip artefacts
+			
+
+			if [[ $SWARM == false ]]; then
+				if [[ $BUILD_TYPE == "firmware" ]]; then
+					echo "Micropython Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
+					set -o pipefail
+					docker pull suculent/micropython-docker-build
+					docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t -v $(pwd)/modules:/micropython/esp8266/modules --workdir /micropython/esp8266 suculent/micropython-docker-build | tee -a "${LOG_PATH}"
+					echo "${PIPESTATUS[@]}"
+					set +o pipefail
+					if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
+						BUILD_SUCCESS=true
+						echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
+						zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./build/** # zip artefacts
+					fi
+					if [[ -z $(find $OUTFILE -type f -size +10000c 2>/dev/null) ]]; then
+						rm -rf $OUTFILE
+						BUILD_SUCCESS=false
+						echo "Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
+					fi
+					echo "[micropython] Docker completed <<<"
 				fi
-				if [[ -z $(find $OUTFILE -type f -size +10000c 2>/dev/null) ]]; then
-					rm -rf $OUTFILE
-					BUILD_SUCCESS=false
-					echo "Docker build failed, build artifact size is below 10k." | tee -a "${LOG_PATH}"
-				fi
-				echo "[micropython] Docker completed <<<"
-				rm -rf ./build; make clean; make V=1
+			else
+				swarm-build suculent/micropython-docker-build
 			fi
+
 
 			# ls | tee -a "${LOG_PATH}"
 
@@ -568,18 +644,23 @@ case $PLATFORM in
 					fi
 				done
 
-				echo "NodeMCU Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
-				echo "running Docker >>>"
-				set -o pipefail
-				docker pull suculent/nodemcu-docker-build
-				docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t ${DOCKER_PARAMS} -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build | tee -a "${LOG_PATH}"
-				echo "${PIPESTATUS[@]}"
-				if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
-					BUILD_SUCCESS=true
-					zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./bin/* # zip artefacts
+				
+				if [[ $SWARM == false ]]; then
+					echo "NodeMCU Build: Running Dockerized builder..." | tee -a "${LOG_PATH}"
+					echo "running Docker >>>"
+					set -o pipefail
+					docker pull suculent/nodemcu-docker-build
+					docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t ${DOCKER_PARAMS} -v `pwd`:/opt/nodemcu-firmware suculent/nodemcu-docker-build | tee -a "${LOG_PATH}"
+					echo "${PIPESTATUS[@]}"
+					if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
+						BUILD_SUCCESS=true
+						zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./bin/* # zip artefacts
+					fi
+					echo "[nodemcu] Docker completed <<<"
+				else
+					swarm-build suculent/micropython-docker-build
 				fi
-				echo "[nodemcu] Docker completed <<<"
-
+				
 			else
 				# deploy Lua files without building
 				cp -vf *.lua "$DEPLOYMENT_PATH"
@@ -625,23 +706,25 @@ case $PLATFORM in
 			echo "Moving thinx_build.json to $TNAME" | tee -a "${LOG_PATH}"
 			cp "./thinx_build.json" "$TNAME"
 
-			docker pull suculent/mongoose-docker-build
-			DCMD="docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t -v $(pwd):/opt/mongoose-builder suculent/mongoose-docker-build"
-			echo "running Docker ${DCMD} >>>" | tee -a "${LOG_PATH}"
-			set -o pipefail
-			"$DCMD"
-			echo "${PIPESTATUS[@]}"
-			if [[ ! -z =$(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
-				if [[ -f $(pwd)/build/fw.zip ]]; then
-					BUILD_SUCCESS=true
-					zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./build/* # zip artefacts
-				else
-					echo "OUTFILE not created." | tee -a "${LOG_PATH}"
+			if [[ $SWARM == false ]]; then
+				docker pull suculent/mongoose-docker-build
+				DCMD="docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t -v $(pwd):/opt/mongoose-builder suculent/mongoose-docker-build"
+				echo "running Docker ${DCMD} >>>" | tee -a "${LOG_PATH}"
+				set -o pipefail
+				"$DCMD"
+				echo "${PIPESTATUS[@]}"
+				if [[ ! -z =$(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
+					if [[ -f $(pwd)/build/fw.zip ]]; then
+						BUILD_SUCCESS=true
+						zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${LOG_PATH} ./build/* # zip artefacts
+					else
+						echo "OUTFILE not created." | tee -a "${LOG_PATH}"
+					fi
 				fi
+				echo "[mongoose] Docker completed <<<"
+			else
+				swarm-build suculent/mongoose-docker-build
 			fi
-			echo "[mongoose] Docker completed <<<"
-			echo "mongoose ls:"
-			ls
 
 			# Exit on dry run...
 			if [[ ! ${RUN} ]]; then
@@ -698,14 +781,18 @@ case $PLATFORM in
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 			WORKDIR=$(pwd)
 
-			set -o pipefail
-			echo "Docker: Starting THiNX Arduino Builder Container in folder" $(pwd)
-			docker pull suculent/arduino-docker-build
-			DCMD="docker run ${DOCKER_PREFIX} --cpus=1.0 -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
-			echo "command: ${DCMD}"
-			$DCMD | tee -a "${LOG_PATH}"
-			#echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
-			set +o pipefail
+			if [[ $SWARM == false ]]; then
+				set -o pipefail
+				echo "Docker: Starting THiNX Arduino Builder Container in folder" $(pwd)
+				docker pull suculent/arduino-docker-build
+				DCMD="docker run ${DOCKER_PREFIX} --cpus=1.0 -t -v $(pwd):/opt/workspace suculent/arduino-docker-build"
+				echo "command: ${DCMD}"
+				$DCMD | tee -a "${LOG_PATH}"
+				#echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
+				set +o pipefail
+			else
+				swarm-build suculent/arduino-docker-build
+			fi
 
 			echo "[arduino] Docker completed <<<" | tee -a "${LOG_PATH}"
 
@@ -809,17 +896,18 @@ case $PLATFORM in
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
 			WORKDIR=$(pwd)
 
-			set -o pipefail
-			echo "Docker: Starting THiNX Pine64 Builder Container in folder" $(pwd)
-			docker pull suculent/pine64-docker-build
-			DCMD="docker run ${DOCKER_PREFIX} --cpus=1.0 -t -v $(pwd):/opt/workspace suculent/bl_iot_sdk-ubuntu"
-			echo "command: ${DCMD}"
-			$DCMD | tee -a "${LOG_PATH}"
-			#echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
-			set +o pipefail
-
-			#echo "Contents of working directory after build:" | tee -a "${LOG_PATH}"
-			#ls -la $BUILD_PATH/$REPO_NAME/build | tee -a "${LOG_PATH}"
+			if [[ $SWARM == false ]]; then
+				set -o pipefail
+				echo "Docker: Starting THiNX Arduino Builder Container in folder" $(pwd)
+				docker pull suculent/pine64-docker-build
+				DCMD="docker run ${DOCKER_PREFIX} --cpus=1.0 -t -v $(pwd):/opt/workspace suculent/pine64-docker-build"
+				echo "command: ${DCMD}"
+				$DCMD | tee -a "${LOG_PATH}"
+				#echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
+				set +o pipefail
+			else
+				swarm-build suculent/pine64-docker-build
+			fi
 
 			echo "[pine64] Docker completed <<<" | tee -a "${LOG_PATH}"
 
@@ -937,17 +1025,22 @@ case $PLATFORM in
 				BUILD_SUCCESS=false
 			fi
 
-			echo "running Docker PIO >>>"
-			set -o pipefail
-			docker pull suculent/platformio-docker-build
-			DCMD=$(docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build)
-			echo $DCMD | tee -a "${LOG_PATH}"
-			echo "${PIPESTATUS[@]}"
-			if [[ ! -z =$(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
-				BUILD_SUCCESS=true
+			if [[ $SWARM == false ]]; then
+				echo "running Docker PIO >>>"
+				set -o pipefail
+				docker pull suculent/platformio-docker-build
+				DCMD=$(docker run ${DOCKER_PREFIX} --cpus=1.0 --rm -t -v `pwd`:/opt/workspace suculent/platformio-docker-build)
+				echo $DCMD | tee -a "${LOG_PATH}"
+				echo "${PIPESTATUS[@]}"
+				if [[ ! -z =$(echo ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
+					BUILD_SUCCESS=true
+				else
+					BUILD_SUCCESS=$?
+				fi
 			else
-				BUILD_SUCCESS=$?
+				swarm-build suculent/platformio-docker-build
 			fi
+
 			echo "[platformio] Docker completed <<<"
 
 			echo "Current folder contents after build:" | tee -a "${LOG_PATH}"
