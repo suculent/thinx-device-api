@@ -12,11 +12,8 @@ if (typeof(process.env.ROLLBAR_TOKEN) !== "undefined") {
 }
 
 const exec = require("child_process");
-const chalk = require('chalk');
 const version = require('./package.json').version;
-const schedule = require('node-schedule');
 const io = require('socket.io-client');
-
 const fs = require("fs-extra");
 
 class Worker {
@@ -27,7 +24,6 @@ class Worker {
         this.socket = io(build_server);
         console.log(new Date().getTime(), `» -= THiNX Cloud Build Worker ${version} rev. ${process.env.REVISION} =-`);
         this.setupSocket(this.socket);
-        // this.setupScheduler();
         this.socket_id = null;
         this.running = false;
     }
@@ -109,7 +105,6 @@ class Worker {
         console.log("[OID:" + owner + "] [BUILD_STARTED] Worker started...");
         
         let shell = exec.spawn(CMD, { shell: true });
-
         let build_start = new Date().getTime();
 
 		shell.stdout.on("data", (data) => {
@@ -147,9 +142,8 @@ class Worker {
                     } catch (e) {
                         console.log("ERROR: Annotation status in \'", annotation_string, "\' not parsed.");
                     }
-
-                    status_object.completed = true;
                     
+                    status_object.completed = true;
                     socket.emit('job-status', status_object);
 				}
             }
@@ -158,7 +152,7 @@ class Worker {
 			var build_log_path = path + "/" + build_id + "/build.log";
 			fs.ensureFile(build_log_path, function (err) {
                 if (err) {
-                    console.log(chalk.red("Log file could not be created."));
+                    console.log("» [ERROR] Log file could not be created.");
                 } else {
                     fs.appendFileSync(build_log_path, logline);
                 }				
@@ -215,12 +209,12 @@ class Worker {
         // Connectivity Events
 
         socket.on('connect', () => { 
-            console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("Worker socket connected, sending registration..."));
+            console.log(new Date().getTime(), "» Worker socket connected, sending registration...");
             socket.emit('register', { status: "Hello from BuildWorker.", id: this.socket_id, running: this.running }); // refactor, post status as well (running, id...)
         });
 
         socket.on('disconnect', () => { 
-            console.log(new Date().getTime(), chalk.bold.red("» ") + chalk.bold.white("Worker socket disconnected."));
+            console.log(new Date().getTime(), "» Worker socket disconnected.");
         });
 
         // either by directly modifying the `auth` attribute
@@ -236,25 +230,25 @@ class Worker {
 
         socket.on('client id', (data) => { 
             if (this.client_id === null) {
-                console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white(`We've got assigned initial client id: ${data}`));
+                console.log(new Date().getTime(), `» We've got assigned initial client id: ${data}`);
             } else {
-                console.log(new Date().getTime(), chalk.bold.red("» ") + chalk.white(`We've got re-assigned a new client id: ${data}`));
+                console.log(new Date().getTime(), `» We've got re-assigned a new client id: ${data}`);
             }
 
             this.client_id = data;
         });
 
         socket.on('job', (data) => { 
-            console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white(`Worker has new job:`), data);
+            console.log(new Date().getTime(), `» Worker has new job:`, data);
             if (typeof(data.mock) === "undefined" || data.mock !== true) {
                 this.client_id = data;
-                console.log(new Date().getTime(), chalk.bold.red("» ") + chalk.bold.white("Processing incoming job..."));
+                console.log(new Date().getTime(), "» Processing incoming job...");
                 this.is_running = true;
                 this.runJob(socket, data);
                 this.is_running = false;
-                console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("Job synchronously completed."));
+                console.log(new Date().getTime(), "» Job synchronously completed.");
             } else {
-                console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("This is a MOCK job!"));
+                console.log(new Date().getTime(), "» This is a MOCK job!");
                 this.is_running = true;
                 this.runJob(socket, data);
                 this.is_running = false;
@@ -262,23 +256,11 @@ class Worker {
         });
     }
 
-    /*
-
-    setupScheduler() {
-        var cron_rule = "*/5 * * * *";
-        schedule.scheduleJob(cron_rule, () => {
-            this.loop();
-        });
-        console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("Polling loop (5 minutes) scheduled."));
-    }
-
-    */
-
     loop() {
         if (!this.is_running) {
             this.socket.emit('poll', 'true');
         } else {
-            console.log(new Date().getTime(), chalk.bold.red("» ") + chalk.white("Skipping poll cron (job still running and did not timed out)."));
+            console.log(new Date().getTime(), "» Skipping poll cron (job still running and did not timed out).");
         }
     }
 }
@@ -293,10 +275,10 @@ if (typeof(process.env.THINX_SERVER) !== "undefined") {
     if (srv.indexOf("http") == -1) {
         srv = "http://" + srv;
     }
-    console.log(new Date().getTime(), chalk.bold.red("» ") + chalk.white("Starting build worker against"), srv);
+    console.log(new Date().getTime(), "» Starting build worker against", srv);
     new Worker(srv);
 } else {
     new Worker('http://localhost:3000'); // developer only, no authentication required
-    console.log(new Date().getTime(), chalk.bold.red("» ") + chalk.white("Starting build worker without configuration."));
+    console.log(new Date().getTime(), "» Starting build worker without configuration.");
 }
 
