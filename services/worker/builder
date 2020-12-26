@@ -106,7 +106,7 @@ swarm-build()
 		STATUS=$(docker service ls | grep  $UNIQUE_NAME)
 		echo "Service Status: $STATUS"
 
-		if [[ "$STATUS" == *"\t0/"* ]]; then
+		if [[ "$STATUS" == *"0\/"* ]]; then
 			echo "Build completed."
 			docker service logs $UNIQUE_NAME
 			docker service rm $UNIQUE_NAME
