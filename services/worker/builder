@@ -812,7 +812,7 @@ case $PLATFORM in
 			fi
 
 			OUTFILE=${DEPLOYMENT_PATH}/firmware.bin
-			WORKDIR=$(pwd)
+			#WORKDIR=$(pwd)
 
 			if [[ $SWARM == false ]]; then
 				set -o pipefail
@@ -825,6 +825,10 @@ case $PLATFORM in
 				set +o pipefail
 			else
 				swarm-build $WORKDIR suculent/arduino-docker-build
+				echo "WORKDIR RESULT:"
+				ls -la ${DEPLOYMENT_PATH}
+				echo "DEPLOY RESULT:"
+				ls -la
 			fi
 
 			echo "[arduino] Docker completed <<<" | tee -a "${LOG_PATH}"
@@ -1072,6 +1076,7 @@ case $PLATFORM in
 				fi
 			else
 				swarm-build $WORKDIR suculent/platformio-docker-build
+				BUILD_SUCCESS=$?
 			fi
 
 			echo "[platformio] Docker completed <<<"
@@ -1137,9 +1142,16 @@ SHA="0"
 MD5="0"
 
 if [[ ! -f "${OUTFILE}" ]]; then
-	echo "Could not find outfile $OUTFILE"
-	OUTFILE="<none>"
-else
+	FIND="\/mnt\/data\/repos"
+	REPLACE="\/mnt\/data\/thinx\/$COUNTRY\/repos"
+	OUTFILE=$(echo "$OUTFILE" | sed "s/$FIND/$REPLACE/")
+	if [[ ! -f "${OUTFILE}" ]]; then
+		echo "Could not find outfile $OUTFILE anywhere..."
+		OUTFILE=""
+	fi
+fi
+
+if [[ "${OUTFILE}" != "" ]]; then
 	echo "Calculating checksum for $OUTFILE"
 	SHAX=$(shasum -a 256 $OUTFILE)
 	SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
