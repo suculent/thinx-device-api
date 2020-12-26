@@ -74,7 +74,7 @@ swarm-build()
 
 	$SERVICE_COMMAND
 
-	echo "» Fetching service status..."
+	echo "» Monitoring build progress..."
 	INFO=$(docker service ls | grep $UNIQUE_NAME)
 	echo $INFO
 	ITERATIONS=0
@@ -1135,6 +1135,7 @@ esac
 
 cd $DEPLOYMENT_PATH
 pwd | tee -a "${LOG_PATH}"
+ls -la
 # cleanup all subdirectories?
 # echo "Cleaning all subdirectories in deployment path..."
 # ls -d  $DEPLOYMENT_PATH/* | xargs rm -rf | tee -a "${LOG_PATH}"
