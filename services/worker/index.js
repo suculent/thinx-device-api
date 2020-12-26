@@ -27,7 +27,7 @@ class Worker {
         this.socket = io(build_server);
         console.log(new Date().getTime(), `» -= THiNX Cloud Build Worker ${version} rev. ${process.env.REVISION} =-`);
         this.setupSocket(this.socket);
-        this.setupScheduler();
+        // this.setupScheduler();
         this.socket_id = null;
         this.running = false;
     }
@@ -106,7 +106,7 @@ class Worker {
 
         CMD.replace("./builder", "/opt/thinx/thinx-device-api/builder"); // WTF?
 
-        console.log("[OID:" + owner + "] [BUILD_STARTED] WORKER EXEC from " + __dirname, "received command:", CMD);
+        console.log("[OID:" + owner + "] [BUILD_STARTED] Worker started...");
         
         let shell = exec.spawn(CMD, { shell: true });
 
@@ -262,6 +262,8 @@ class Worker {
         });
     }
 
+    /*
+
     setupScheduler() {
         var cron_rule = "*/5 * * * *";
         schedule.scheduleJob(cron_rule, () => {
@@ -269,6 +271,8 @@ class Worker {
         });
         console.log(new Date().getTime(), chalk.bold.green("» ") + chalk.white("Polling loop (5 minutes) scheduled."));
     }
+
+    */
 
     loop() {
         if (!this.is_running) {
@@ -281,6 +285,10 @@ class Worker {
 
 if (typeof(process.env.THINX_SERVER) !== "undefined") {
     let srv = process.env.THINX_SERVER;
+    if (typeof(srv) === "undefined" || srv === null) {
+        console.log("THINX_SERVER environment variable must be defined in order to build firmware with proper backend binding.");
+        process.exit(1);
+    }
     // fix missing http if defined in env file just like api:3000
     if (srv.indexOf("http") == -1) {
         srv = "http://" + srv;

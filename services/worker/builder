@@ -12,7 +12,7 @@ export THINX_ROOT=/opt/thinx/thinx-device-api
 fi
 
 echo ""
-echo "-=[ ☢   THiNX IoT RTM BUILDER ☢  ]=-"
+echo "-=[ ☢  THiNX IoT RTM BUILDER ☢  ]=-"
 echo ""
 
 # do not exit when subsequent tools fail...
@@ -67,12 +67,9 @@ swarm-build()
 	FIND="\/mnt\/data\/repos"
 	REPLACE="\/mnt\/data\/thinx\/$COUNTRY\/repos"
 	WORKDIR=$(echo "$WORKDIR" | sed "s/$FIND/$REPLACE/")
-	echo "WORKDIR-AFTER: ${WORKDIR}"
-	ls -la ${WORKDIR}
-
 	UNIQUE_NAME="build-$(random-string 16)"
 
-	OFFENDING_COMMAND="docker service create \
+	SERVICE_COMMAND="docker service create \
 	--restart-condition=none \
 	--mount type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock \
 	--container-label owner=thinx \
@@ -85,9 +82,10 @@ swarm-build()
 	--mount type=bind,source=/mnt/data/thinx/$COUNTRY/repos,destination=/mnt/data/repos \
 	$BUILD_IMAGE"
 
-	echo "$OFFENDING_COMMAND"
+	# echo "$SERVICE_COMMAND"
+	echo "Starting Build Service..."
 
-	$OFFENDING_COMMAND
+	$SERVICE_COMMAND
 
 	echo "» Fetching service status..."
 	INFO=$(docker service ls | grep $UNIQUE_NAME)
@@ -106,11 +104,13 @@ swarm-build()
 		STATUS=$(docker service ls | grep  $UNIQUE_NAME)
 		echo $STATUS
 
-		if grep -q "1/1" <<< "$STATUS"
+		# if grep -q "replicated\t1/1" <<< "$STATUS"
+		if grep -q "1/1" <<< "$STATUS"; then
 			echo "Still running..."
 		fi
 
-		if grep -q "0/0" <<< "$STATUS"
+		# if grep -q "replicated\t0/0" <<< "$STATUS"
+		if grep -q "0/0" <<< "$STATUS"; then
 			echo "Build completed."
 			docker service logs $UNIQUE_NAME
 			docker service rm $UNIQUE_NAME
