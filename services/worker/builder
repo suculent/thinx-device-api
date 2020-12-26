@@ -42,6 +42,9 @@ swarm-build()
 	#echo "Examining networks..."
 	# docker network ls returns --network cz-kgr-thinx_internal \
 
+	BUILD_IMAGE=$2
+	WORKDIR=$1
+
 	echo "Examining mounts..."
 	whoami
 	cd /mnt
@@ -50,8 +53,6 @@ swarm-build()
 
 	ls -la /mnt/data/deploy
 	ls -la /mnt/data/repos
-
-	WORKDIR=$(pwd) # needs real outer path on GFS, e.g. using $COUNTRY
 
 	echo "WORKDIR-BEFORE: ${WORKDIR}"
 
@@ -65,9 +66,8 @@ swarm-build()
 	# Restores internal to external mount path for service outside this container
 	FIND="/mnt/data/repos"
 	REPLACE="/mnt/data/thinx/$COUNTRY/repos"
-	WORKDIR=$(echo "$(pwd)/$FIND/$REPLACE")
-
-	BUILD_IMAGE=$1
+	WORKDIR="$(pwd)/$FIND/$REPLACE"
+	
 	RS=$(random-string 16)
 
 	UNIQUE_NAME="build-${RS}"
@@ -576,7 +576,7 @@ case $PLATFORM in
 					echo "[micropython] Docker completed <<<"
 				fi
 			else
-				swarm-build suculent/micropython-docker-build
+				swarm-build $WORKDIR suculent/micropython-docker-build
 			fi
 
 
@@ -696,7 +696,7 @@ case $PLATFORM in
 					fi
 					echo "[nodemcu] Docker completed <<<"
 				else
-					swarm-build suculent/micropython-docker-build
+					swarm-build $WORKDIR suculent/micropython-docker-build
 				fi
 				
 			else
@@ -761,7 +761,7 @@ case $PLATFORM in
 				fi
 				echo "[mongoose] Docker completed <<<"
 			else
-				swarm-build suculent/mongoose-docker-build
+				swarm-build $WORKDIR suculent/mongoose-docker-build
 			fi
 
 			# Exit on dry run...
@@ -829,7 +829,7 @@ case $PLATFORM in
 				#echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
 				set +o pipefail
 			else
-				swarm-build suculent/arduino-docker-build
+				swarm-build $WORKDIR suculent/arduino-docker-build
 			fi
 
 			echo "[arduino] Docker completed <<<" | tee -a "${LOG_PATH}"
@@ -944,7 +944,7 @@ case $PLATFORM in
 				#echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
 				set +o pipefail
 			else
-				swarm-build suculent/pine64-docker-build
+				swarm-build $WORKDIR suculent/pine64-docker-build
 			fi
 
 			echo "[pine64] Docker completed <<<" | tee -a "${LOG_PATH}"
@@ -1076,7 +1076,7 @@ case $PLATFORM in
 					BUILD_SUCCESS=$?
 				fi
 			else
-				swarm-build suculent/platformio-docker-build
+				swarm-build $WORKDIR suculent/platformio-docker-build
 			fi
 
 			echo "[platformio] Docker completed <<<"
