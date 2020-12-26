@@ -64,4 +64,7 @@ echo "[pre-builder] language: ${PLATFORM_LANG}"
 # This enables the ./linter which is not really used since the beginning, may deprecate
 # bash $THINX_ROOT/linter --language=${PLATFORM_LANG} --workdir=${WORKDIR}
 
+# Allow anyone to build this, should be limited to worker's docker user:group
+chmod -R 777 $WORKDIR
+
 exit 0

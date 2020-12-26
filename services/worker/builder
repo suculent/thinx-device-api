@@ -826,8 +826,9 @@ case $PLATFORM in
 			else
 				swarm-build $WORKDIR suculent/arduino-docker-build
 				echo "WORKDIR RESULT:"
+				ls -la ${WORKDIR}
+				echo "DEPLOY RESULT: at ${DEPLOYMENT_PATH}"
 				ls -la ${DEPLOYMENT_PATH}
-				echo "DEPLOY RESULT:"
 				ls -la
 			fi
 
