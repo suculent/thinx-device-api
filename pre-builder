@@ -61,6 +61,7 @@ echo "[pre-builder] platform: ${PLATFORM}"
 PLATFORM_LANG=$(language_for_platform $PLATFORM)
 echo "[pre-builder] language: ${PLATFORM_LANG}"
 
-bash $THINX_ROOT/linter --language=${PLATFORM_LANG} --workdir=${WORKDIR}
+# This enables the ./linter which is not really used since the beginning, may deprecate
+# bash $THINX_ROOT/linter --language=${PLATFORM_LANG} --workdir=${WORKDIR}
 
 exit 0
