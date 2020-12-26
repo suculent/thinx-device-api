@@ -42,14 +42,24 @@ swarm-build()
 	echo "Examining networks..."
 	docker network ls
 
-	WORKDIR=$(pwd)
+	WORKDIR=$(pwd) # needs real outer path on GFS, e.g. using $COUNTRY
+
+	# Workaround: replacing /mnt/data/repos with /mnt/data/thinx/$COUNTRY/repos
+
+	# will deprecate with passing the var
+	if [[ -z $COUNTRY ]]; then
+		COUNTRY=cz
+	fi
+
+	# Restores internal to external mount path for service outside this container
+	FIND="/mnt/data/repos"
+	REPLACE="/mnt/data/thinx/$COUNTRY/repos"
+	WORKDIR="$WORKDIR/$FIND/$REPLACE"
+
 	BUILD_IMAGE=$1
-	NETWORK=internal
 	RS=$(random-string 16)
 
 	UNIQUE_NAME="build-${RS}"
-
-	# TODO: set --network=${NETWORK} \ properly
 
 	docker service create \
 	--restart-condition=none \
