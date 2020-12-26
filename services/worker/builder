@@ -45,19 +45,6 @@ swarm-build()
 	BUILD_IMAGE=$2
 	WORKDIR=$1
 
-	echo "Examining mounts..."
-	whoami
-	cd /mnt
-	ls -la
-	ls -la * 
-
-	ls -la /mnt/data/deploy
-	ls -la /mnt/data/repos
-
-	echo "WORKDIR-BEFORE: ${WORKDIR}"
-
-	# Workaround: replacing /mnt/data/repos with /mnt/data/thinx/$COUNTRY/repos
-
 	# will deprecate with passing the var
 	if [[ -z $COUNTRY ]]; then
 		COUNTRY=cz
@@ -131,6 +118,8 @@ swarm-build()
 		fi
 	done
 }
+
+# Default/mock values only
 
 OWNER_ID='cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12' 		# name of folder where workspaces reside
 RUN=true			# dry-run switch
