@@ -68,11 +68,11 @@ swarm-build()
 	#REPLACE="\/mnt\/data\/thinx\/$COUNTRY\/repos"
 	#WORKDIR=$(echo "$WORKDIR" | sed "s/$FIND/$REPLACE/")
 	#echo "WORKDIR-AFTER: ${WORKDIR}"
-	echo ls -la ${WORKDIR}
+	ls -la ${WORKDIR}
 
 	UNIQUE_NAME="build-$(random-string 16)"
-	
-	docker service create \
+
+	OFFENDING_COMMAND="docker service create \
 	--restart-condition=none \
 	--mount type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock \
 	--container-label owner=thinx \
@@ -83,7 +83,11 @@ swarm-build()
 	--mount type=bind,source=$WORKDIR,destination=/opt/workspace \
 	--mount type=bind,source=/mnt/data/deploy,destination=/mnt/data/deploy \
 	--mount type=bind,source=/mnt/data/repos,destination=/mnt/data/repos \
-	$BUILD_IMAGE
+	$BUILD_IMAGE"
+
+	echo "$OFFENDING_COMMAND"
+
+	$OFFENDING_COMMAND
 
 	echo "» Fetching service status..."
 	INFO=$(docker service ls | grep $UNIQUE_NAME)
