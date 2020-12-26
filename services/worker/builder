@@ -103,7 +103,7 @@ swarm-build()
 		sleep 15
 
 		STATUS=$(docker service ls | grep  $UNIQUE_NAME)
-		echo $STATUS
+		echo "Service Status: $STATUS"
 
 		if [[ "$STATUS" == *"0/1"* ]]; then
 			echo "Build completed."
@@ -116,7 +116,6 @@ swarm-build()
 			echo "Service configuration failure."
 			# docker service rm $UNIQUE_NAME
 			RUNNING=false
-			exit 1
 		fi
 
 		if [[ "$ITERATIONS" -ge "$MAX_ITERATIONS" ]]; then
