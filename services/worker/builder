@@ -39,8 +39,17 @@ BUILD_IMAGE=suculent/arduino-docker-build
 
 swarm-build()
 {
-	echo "Examining networks..."
-	docker network ls
+	#echo "Examining networks..."
+	# docker network ls returns --network cz-kgr-thinx_internal \
+
+	echo "Examining mounts..."
+	whoami
+	cd /mnt
+	ls -la
+	ls -la * 
+
+	ls -la /mnt/data/deploy
+	ls -la /mnt/data/repos
 
 	WORKDIR=$(pwd) # needs real outer path on GFS, e.g. using $COUNTRY
 
@@ -91,17 +100,18 @@ swarm-build()
 		STATUS=$(docker service ls | grep  $UNIQUE_NAME)
 		echo $STATUS
 
-		if [[ $STATUS == *"0/1"* ]]; then
+		if [[ "$STATUS" == *"0/1"* ]]; then
 			echo "Build completed."
 			docker service logs $UNIQUE_NAME
 			docker service rm $UNIQUE_NAME
 			RUNNING=false
 		fi
 
-		if [[ $STATUS == *"invalid mount config"* ]]; then
-			echo "Invalid mount config."
-			docker service rm $UNIQUE_NAME
+		if [[ "$STATUS" == *"invalid"* ]]; then
+			echo "Service configuration failure."
+			# docker service rm $UNIQUE_NAME
 			RUNNING=false
+			exit 1
 		fi
 
 		if [[ "$ITERATIONS" -ge "$MAX_ITERATIONS" ]]; then
