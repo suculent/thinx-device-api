@@ -131,8 +131,6 @@ services:
       - "WORKER_SECRET=${WORKER_SECRET}"
     networks:
       - internal
-    ports:
-      - 3000
     labels:
       - traefik.backend.worker.noexpose
     volumes:

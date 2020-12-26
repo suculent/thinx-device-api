@@ -41,7 +41,7 @@ swarm-build()
 {
 	WORKDIR=$(pwd)
 	BUILD_IMAGE=$1
-	NETWORK=traefik-public
+	NETWORK=internal
 	RS=$(random-string 16)
 
 	UNIQUE_NAME="build-${RS}"
