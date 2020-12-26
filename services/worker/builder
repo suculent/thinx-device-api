@@ -62,7 +62,7 @@ swarm-build()
 	--container-label owner=thinx \
 	--limit-cpu=0.75 \
 	--replicas=1 \
-	--reserve-memory=512MB \
+	--reserve-memory=1G \
 	--name $UNIQUE_NAME \
 	--mount type=bind,source=$WORKDIR,destination=/opt/workspace \
 	--mount type=bind,source=/mnt/data/thinx/$COUNTRY/deploy,destination=/mnt/data/deploy \

@@ -80,9 +80,7 @@ class Worker {
                     if (job.secret.indexOf(process.env.WORKER_SECRET) !== 0) {
                         this.failJob(sock, job, "Invalid job authentication");
                         return false;
-                    } else {
-                        console.log("[OID:" + job.owner + "] Job authenticateion successful.");
-                    }
+                    } 
                 }
             }
         }
