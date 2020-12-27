@@ -42,6 +42,7 @@ swarm-build()
 	#echo "Examining networks..."
 	# docker network ls returns --network cz-kgr-thinx_internal \
 
+	LOG_PATH=$3
 	BUILD_IMAGE=$2
 	WORKDIR=$1
 
@@ -99,7 +100,9 @@ swarm-build()
 		# if grep -q "replicated\t0/0" <<< "$STATUS"
 		if grep -q "0/0" <<< "$STATUS"; then
 			echo "Build completed."
-			docker service logs $UNIQUE_NAME
+			# append service logs to catch THINX BUILD SUCCESSFUL phrase; serves to decide to extract OUTFILE laters
+			docker service logs $UNIQUE_NAME | tee -a "$LOG_PATH"
+			# might get cleaned a bit later, but how do we do that? tagging?
 			docker service rm $UNIQUE_NAME
 			RUNNING=false
 		fi
@@ -571,7 +574,7 @@ case $PLATFORM in
 					echo "[micropython] Docker completed <<<"
 				fi
 			else
-				swarm-build $WORKDIR suculent/micropython-docker-build
+				swarm-build $WORKDIR suculent/micropython-docker-build $LOG_PATH
 			fi
 
 
@@ -691,7 +694,7 @@ case $PLATFORM in
 					fi
 					echo "[nodemcu] Docker completed <<<"
 				else
-					swarm-build $WORKDIR suculent/micropython-docker-build
+					swarm-build $WORKDIR suculent/micropython-docker-build $LOG_PATH
 				fi
 				
 			else
@@ -756,7 +759,7 @@ case $PLATFORM in
 				fi
 				echo "[mongoose] Docker completed <<<"
 			else
-				swarm-build $WORKDIR suculent/mongoose-docker-build
+				swarm-build $WORKDIR suculent/mongoose-docker-build $LOG_PATH
 			fi
 
 			# Exit on dry run...
@@ -824,12 +827,11 @@ case $PLATFORM in
 				#echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
 				set +o pipefail
 			else
-				swarm-build $WORKDIR suculent/arduino-docker-build
-				echo "WORKDIR RESULT:"
+				swarm-build $WORKDIR suculent/arduino-docker-build $LOG_PATH
+				echo "[worker] [build.sh] WORKDIR RESULT at $WORKDIR:"
 				ls -la ${WORKDIR}
-				echo "DEPLOY RESULT: at ${DEPLOYMENT_PATH}"
+				echo "[worker] [build.sh] DEPLOY RESULT at ${DEPLOYMENT_PATH}:"
 				ls -la ${DEPLOYMENT_PATH}
-				ls -la
 			fi
 
 			echo "[arduino] Docker completed <<<" | tee -a "${LOG_PATH}"
@@ -944,7 +946,7 @@ case $PLATFORM in
 				#echo "PIPESTATUS ${PIPESTATUS[@]}" | tee -a "${LOG_PATH}"
 				set +o pipefail
 			else
-				swarm-build $WORKDIR suculent/pine64-docker-build
+				swarm-build $WORKDIR suculent/pine64-docker-build $LOG_PATH
 			fi
 
 			echo "[pine64] Docker completed <<<" | tee -a "${LOG_PATH}"
@@ -1076,8 +1078,7 @@ case $PLATFORM in
 					BUILD_SUCCESS=$?
 				fi
 			else
-				swarm-build $WORKDIR suculent/platformio-docker-build
-				BUILD_SUCCESS=$?
+				swarm-build $WORKDIR suculent/platformio-docker-build $LOG_PATH
 			fi
 
 			echo "[platformio] Docker completed <<<"
