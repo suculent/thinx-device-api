@@ -312,7 +312,7 @@ fi
 
 echo $BUILD_PATH | tee -a "${LOG_PATH}"
 cd $BUILD_PATH
-ls -la | tee -a "${LOG_PATH}"
+#ls -la | tee -a "${LOG_PATH}"
 
 # Fetch submodules if any
 SINK=""
@@ -828,10 +828,10 @@ case $PLATFORM in
 				set +o pipefail
 			else
 				swarm-build $WORKDIR suculent/arduino-docker-build $LOG_PATH
-				echo "[worker] [build.sh] WORKDIR RESULT at $WORKDIR:"
-				ls -la ${WORKDIR}
-				echo "[worker] [build.sh] DEPLOY RESULT at ${DEPLOYMENT_PATH}:"
-				ls -la ${DEPLOYMENT_PATH}
+				#echo "[worker] [build.sh] WORKDIR RESULT at $WORKDIR:"
+				#ls -la ${WORKDIR}
+				#echo "[worker] [build.sh] DEPLOY RESULT at ${DEPLOYMENT_PATH}:"
+				#ls -la ${DEPLOYMENT_PATH}
 			fi
 
 			echo "[arduino] Docker completed <<<" | tee -a "${LOG_PATH}"
@@ -996,13 +996,13 @@ case $PLATFORM in
 
 					echo "Copying deployment data..." | tee -a "${LOG_PATH}"
 
-					echo "to: ${OUTFILE}" | tee -a "${LOG_PATH}"
+					#echo "to: ${OUTFILE}" | tee -a "${LOG_PATH}"
 					cp -vf "${BIN_FILE}" "$OUTFILE" | tee -a "${LOG_PATH}"
 
-					echo "to: ${TARGET_PATH}" | tee -a "${LOG_PATH}"
+					#echo "to: ${TARGET_PATH}" | tee -a "${LOG_PATH}"
 					cp -vf "${BIN_FILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
 
-					echo "to: ${DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
+					#echo "to: ${DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
 					cp -vf "${BIN_FILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 					
 					# TODO: cp -vf "${BUILD_JSON_PATH}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
@@ -1135,8 +1135,8 @@ case $PLATFORM in
 esac
 
 cd $DEPLOYMENT_PATH
-pwd | tee -a "${LOG_PATH}"
-ls -la
+# pwd | tee -a "${LOG_PATH}"
+#ls -la
 # cleanup all subdirectories?
 # echo "Cleaning all subdirectories in deployment path..."
 # ls -d  $DEPLOYMENT_PATH/* | xargs rm -rf | tee -a "${LOG_PATH}"
