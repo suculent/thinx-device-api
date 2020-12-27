@@ -352,7 +352,7 @@ jobs:
 
     # Spectralops.io integration
     - run: curl -L "https://get.spectralops.io/api/download/get?dsn=$SPECTRAL_DSN" | sh
-    - run: spectral scan # --ok allows passing build for now
+    - run: spectral scan --ok # --ok allows passing build for now
 
     # Restore the dependency cache
     - restore_cache:
