@@ -61,9 +61,9 @@ swarm-build()
 	--restart-condition=none \
 	--mount type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock \
 	--container-label owner=thinx \
-	--limit-cpu=0.75 \
+	--limit-cpu=0.9 \
 	--replicas=1 \
-	--reserve-memory=1G \
+	--reserve-memory=750MB \
 	--name $UNIQUE_NAME \
 	--mount type=bind,source=$WORKDIR,destination=/opt/workspace \
 	--mount type=bind,source=/mnt/data/thinx/$COUNTRY/deploy,destination=/mnt/data/deploy \
