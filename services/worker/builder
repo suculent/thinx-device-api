@@ -1144,8 +1144,8 @@ SHA="0"
 MD5="0"
 
 if [[ ! -f "${OUTFILE}" ]]; then
-	FIND="\/mnt\/data\/repos"
-	REPLACE="\/mnt\/data\/thinx\/$COUNTRY\/repos"
+	FIND="\/mnt\/data\/deploy"
+	REPLACE="\/mnt\/data\/thinx\/$COUNTRY\/deploy"
 	OUTFILE=$(echo "$OUTFILE" | sed "s/$FIND/$REPLACE/")
 	if [[ ! -f "${OUTFILE}" ]]; then
 		echo "Could not find outfile $OUTFILE anywhere..."
