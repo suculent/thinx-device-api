@@ -477,16 +477,9 @@ if ( (typeof(process.env.CIRCLE_USERNAME) === "undefined") || (process.env.CIRCL
   wserver = http.createServer(wsapp);
 }
 
-/*
 var wss = new WebSocket.Server({
   port: socketPort,
   server: wserver
-});
-*/
-
-var wss = new WebSocket.Server({
-  port: 7442,
-  server: server
 });
 
 function heartbeat() {
