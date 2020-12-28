@@ -61,7 +61,7 @@ swarm-build()
 	--restart-condition=none \
 	--mount type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock \
 	--container-label owner=thinx \
-	--limit-cpu=0.9 \
+	--limit-cpu=1.5 \
 	--replicas=1 \
 	--reserve-memory=750MB \
 	--name $UNIQUE_NAME \
@@ -1164,9 +1164,9 @@ if [[ "${OUTFILE}" == "" ]]; then
 	OUTFILE="<none>"
 fi
 
-echo "Build Stage completed with status: $STATUS" | tee -a "${LOG_PATH}"
+echo "[builder] Build Stage completed with status: $STATUS" | tee -a "${LOG_PATH}"
 
-echo "Post-flight check: in $(pwd)" | tee -a "${LOG_PATH}"
+echo "[builder] Post-flight check: in $(pwd)" | tee -a "${LOG_PATH}"
 
 # add THINX_FIRMWARE_VERSION to the build.json envelope in order to differ between upgrades and crossgrades
 BUILD_FILE=$( find $BUILD_PATH/$REPO_NAME -name "thinx_build.json" )
@@ -1174,18 +1174,19 @@ if [[ -z $BUILD_FILE ]]; then
 	BUILD_FILE=$( find $WORKDIR -name "thinx_build.json" )
 fi
 if [ ! -z ${BUILD_FILE} ]; then
-	echo "Fetching version from thinx_build.json" | tee -a "${LOG_PATH}"
 	THINX_FIRMWARE_VERSION=$(jq .THINX_FIRMWARE_VERSION ${BUILD_FILE} | tr -d '"')
+	echo "[builder] THINX_FIRMWARE_VERSION=$THINX_FIRMWARE_VERSION" | tee -a "${LOG_PATH}"
 fi
 if [ -z ${THINX_FIRMWARE_VERSION} ]; then
 	pushd $BUILD_PATH/$REPO_NAME
 	TAG_VERSION=$(git describe --abbrev=0 --tags)
 	popd
 	THINX_FIRMWARE_VERSION=${REPO_NAME}-${TAG_VERSION}
-	echo "No thinx_build.json file found, generating last-minute version: ${THINX_FIRMWARE_VERSION}"
+	echo "[builder] No thinx_build.json file found, generating last-minute version: ${THINX_FIRMWARE_VERSION}"
 fi
 
 if [[ -f "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ]]; then
+	echo "[builder] Copying build zip to $TARGET_PATH"
 	cp -v "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" $TARGET_PATH
 fi
 
@@ -1229,7 +1230,7 @@ echo "ENV_HASH" "${ENV_HASH}" | tee -a "${LOG_PATH}"
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
 CMD="node ./notifier.js ${BUILD_ID} ${COMMIT} ${THX_VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION} ${MD5} ${ENV_HASH}"
 CMD=$(echo $CMD | tr -d '"')
-echo "Executing Notifier with command ${CMD}" | tee -a "${LOG_PATH}"
+echo "[builder] Executing Notifier with command ${CMD}" | tee -a "${LOG_PATH}"
 cd $ORIGIN # go back to application root folder
 pwd
 #ls

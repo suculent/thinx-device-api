@@ -144,7 +144,6 @@ class Worker {
                     } else {
                         let minutes = Math.floor(build_time/60);
                         let seconds = Math.floor(build_time % 60);
-                        console.log("BUILD TIME:", );
                         elapsed_hr = minutes + " minutes " + seconds + " seconds";
                     }
 
