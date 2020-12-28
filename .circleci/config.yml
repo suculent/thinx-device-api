@@ -607,14 +607,14 @@ workflows:
 
       # keyguru.at
 
-      - build-api:
-          name: "api : keyguru.at"
-          context:
-            - thinx-staging-at
-          filters:
-            branches:
-              only:
-                - keyguru-swarm
+      # - build-api:
+      #     name: "api : keyguru.at"
+      #     context:
+      #       - thinx-staging-at
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
       # - build-console:
       #     name: "console : keyguru.at"
       #     context:
