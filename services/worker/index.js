@@ -136,9 +136,30 @@ class Worker {
                     } catch (e) {
                         console.log("ERROR: Annotation status in \'", annotation_string, "\' not parsed.");
                     }
+
+                    let elapsed_hr;
+                    let build_time = (new Date().getTime() - build_start)/1000; // to seconds
+                    if (build_time < 60) {
+                        elapsed_hr = build_time + " seconds";
+                    } else {
+                        let minutes = Math.floor(build_time/60);
+                        let seconds = Math.floor(build_time % 60);
+                        console.log("BUILD TIME:", );
+                        elapsed_hr = minutes + " minutes " + seconds + " seconds";
+                    }
+
+                    console.log("BUILD TIME:", elapsed_hr);
+
+                    status_object.elapsed = build_time;
+                    status_object.elapsed_hr = elapsed_hr;
                     
                     status_object.completed = true;
                     socket.emit('job-status', status_object); // should be called job-result everywhere, always indiates completion
+
+                    // calculate build time
+      
+            
+
 				}
             }
 
@@ -177,31 +198,10 @@ class Worker {
 		}); // end shell on error data
 
 		shell.on("exit", (code) => {
+
             console.log("[OID:" + owner + "] [BUILD_COMPLETED] with code " + code);
             this.is_running = false;
             
-            // calculate build time
-            let build_time = (new Date().getTime() - build_start)/1000; // to seconds
-            if (build_time < 60) {
-                console.log("BUILD TIME:", build_time, "seconds");
-            } else {
-                let minutes = Math.floor(build_time/60);
-                let seconds = Math.floor(build_time % 60);
-                console.log("BUILD TIME:", minutes, "minutes", seconds, "seconds");
-            }
-            
-
-            let state = "Failed";
-			if (code === 0) {
-                state = "Success";
-            }
-            
-            socket.emit('job-status', {
-                udid: udid,
-                build_id: build_id, 
-                state: state,
-                elapsed: build_time
-            });
 		}); // end shell on exit
 	}
 
