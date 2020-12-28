@@ -109,13 +109,13 @@ class Worker {
 			var string = data.toString();
             var logline = string;
             
-            logline = logline.replace(/\r/g, '');
-			logline = logline.replace(/\n/g, '');
+            logline = logline.replace(/\r\r/g, '');
+			logline = logline.replace(/\n\n/g, '');
 
 			if (logline.length > 1) {
                 //console.log("W [" + build_id + "] »» " + logline);
                 console.log(logline);
-				// just a hack while shell.exit does not work or fails with another error
+
 				if (logline.indexOf("JOB-RESULT") !== -1) {
                     
                     // parses "[86ad8d90-46e8-11eb-a48a-b59a7e739f77] »» JOB-RESULT:" {...
