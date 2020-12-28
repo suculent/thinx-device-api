@@ -1204,9 +1204,12 @@ sha=${SHA} \
 owner=${OWNER_ID} \
 status=${STATUS} \
 platform=${PLATFORM} \
-version=${THINX_FIRMWARE_VERSION}
+version=${THINX_FIRMWARE_VERSION} \
 md5=${MD5} \
-env_hash=${ENV_HASH})
+build_path=${WORKDIR} \
+log_path=${LOG_PATH} \
+env_hash=${ENV_HASH} \
+)
 
 echo "JOB-RESULT: $JSON" | tee -a "${LOG_PATH}"
 
@@ -1226,6 +1229,7 @@ echo "PLATFORM" "${PLATFORM}" | tee -a "${LOG_PATH}"
 echo "THINX_FIRMWARE_VERSION" "${THINX_FIRMWARE_VERSION}" | tee -a "${LOG_PATH}"
 echo "MD5" "${MD5}" | tee -a "${LOG_PATH}"
 echo "ENV_HASH" "${ENV_HASH}" | tee -a "${LOG_PATH}"
+
 
 # Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope (or stores into DB later)
 CMD="node ./notifier.js ${BUILD_ID} ${COMMIT} ${THX_VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION} ${MD5} ${ENV_HASH}"
