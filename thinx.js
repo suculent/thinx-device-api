@@ -469,7 +469,7 @@ wsapp.use(session({
 }));
 
 var wserver = null;
-if (typeof(process.env.CIRCLE_USERNAME) === "undefined") || process.env.CIRCLE_USERNAME === null {
+if ( (typeof(process.env.CIRCLE_USERNAME) === "undefined") || (process.env.CIRCLE_USERNAME === null) ) {
   console.log("Starting Secure Websocket Server...");
   wserver = https.createServer(ssl_options, wsapp);
 } else {
