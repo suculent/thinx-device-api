@@ -179,7 +179,7 @@ class Worker {
                 }
             });
 
-            //socket.emit('log', logline); currently not needed, logging is done through file appends (but this is certainly faster)
+            socket.emit('log', logline + "\n");
             
 		}); // end shell on out data
 
