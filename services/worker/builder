@@ -211,8 +211,8 @@ DEPLOYMENT_PATH=$OWNER_ID_HOME/$UDID/$BUILD_ID
 mkdir -p $OWNER_ID_HOME
 mkdir -p $DEPLOYMENT_PATH
 
-LOG_PATH="${DEPLOYMENT_PATH}/build.shell.log"
-echo "Log path: $LOG_PATH"
+LOG_PATH="${DEPLOYMENT_PATH}/build.log"
+echo "Creating live logfile at: $LOG_PATH"
 touch $LOG_PATH
 
 if [[ -f "lint.txt" ]]; then
@@ -430,7 +430,7 @@ fi
 
 cd $WORKDIR
 
-echo "Building in WORKDIR: $(pwd)" | tee -a "${LOG_PATH}"
+echo "Running DevSec..." | tee -a "${LOG_PATH}"
 
 ### DevSec Implementation Begin --> ###
 
@@ -473,8 +473,7 @@ fi
 
 ### <-- DevSec Implementation End ###
 
-
-
+echo "Building for ${PLATFORM} in WORKDIR: $(pwd)" | tee -a "${LOG_PATH}"
 
 ### Builder Implementation Begin --> ###
 
@@ -550,8 +549,6 @@ case $PLATFORM in
 					zip -rq "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ${pyfile} ./* # zip artefacts
 				fi
 			done
-
-			
 
 			if [[ $SWARM == false ]]; then
 				if [[ $BUILD_TYPE == "firmware" ]]; then
@@ -1165,10 +1162,9 @@ if [[ "${OUTFILE}" == "" ]]; then
 	OUTFILE="<none>"
 fi
 
-echo "Build completed with status: $STATUS" | tee -a "${LOG_PATH}"
+echo "Build Stage completed with status: $STATUS" | tee -a "${LOG_PATH}"
 
-echo "Post-flight check:" | tee -a "${LOG_PATH}"
-pwd | tee -a "${LOG_PATH}"
+echo "Post-flight check: in $(pwd)" | tee -a "${LOG_PATH}"
 
 # add THINX_FIRMWARE_VERSION to the build.json envelope in order to differ between upgrades and crossgrades
 BUILD_FILE=$( find $BUILD_PATH/$REPO_NAME -name "thinx_build.json" )
