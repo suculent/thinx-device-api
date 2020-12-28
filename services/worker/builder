@@ -84,6 +84,9 @@ swarm-build()
 	MAX_ITERATIONS=30
 	RUNNING=true
 
+	# write logs in background; should be killed later
+	docker service logs $UNIQUE_NAME | tee -a "$LOG_PATH" &
+
 	while $RUNNING
 	do
 		((ITERATIONS++))
@@ -879,16 +882,9 @@ case $PLATFORM in
 					fi
 
 					echo "Copying deployment data..." | tee -a "${LOG_PATH}"
-
-					echo "to: ${OUTFILE}" | tee -a "${LOG_PATH}"
 					cp -vf "${BIN_FILE}" "$OUTFILE" | tee -a "${LOG_PATH}"
-
-					echo "to: ${TARGET_PATH}" | tee -a "${LOG_PATH}"
 					cp -vf "${BIN_FILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
-
-					echo "to: ${DEPLOYMENT_PATH}" | tee -a "${LOG_PATH}"
 					cp -vf "${BIN_FILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
-					
 					# TODO: cp -vf "${BUILD_JSON_PATH}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 
 					echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
@@ -1207,7 +1203,6 @@ platform=${PLATFORM} \
 version=${THINX_FIRMWARE_VERSION} \
 md5=${MD5} \
 build_path=${WORKDIR} \
-log_path=${LOG_PATH} \
 env_hash=${ENV_HASH} \
 )
 
