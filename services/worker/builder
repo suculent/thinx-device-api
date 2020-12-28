@@ -355,7 +355,8 @@ micropython_platform="esp8266"
 
 YML=$(find $BUILD_PATH/$REPO_NAME -name "thinx.yml")
 if [[ ! -z "$YML" ]]; then
-	echo "Found ${YML}, reading..." | tee -a "${LOG_PATH}"
+	#echo "Found ${YML}, reading..." | tee -a "${LOG_PATH}"
+	echo "Reading thinx.yml build configuration..."
 	eval $(parse_yaml $YML)
 else
 		exit 1

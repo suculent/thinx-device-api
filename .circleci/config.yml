@@ -497,27 +497,27 @@ workflows:
             branches:
               only:
                 - thinx-swarm
-      - build-mosquitto-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
-      - build-redis-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
-      - build-transformer-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
+      # - build-mosquitto-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
+      # - build-redis-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
+      # - build-transformer-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
       - build-worker-cloud:
           context:
             - thinx-docker-repo
@@ -571,30 +571,30 @@ workflows:
             branches:
               only:
                 - keyguru-swarm
-      - build-mosquitto:
-          name: "mosquitto : kgr.cz"
-          context:
-            - thinx-staging-cz
-          filters:
-            branches:
-              only:
-                - keyguru-swarm
-      - build-redis:
-          name: "redis : kgr.cz"
-          context:
-            - thinx-staging-cz
-          filters:
-            branches:
-              only:
-                - keyguru-swarm
-      - build-transformer:
-          name: "transformer : kgr.cz"
-          context:
-            - thinx-staging-cz
-          filters:
-            branches:
-              only:
-                - keyguru-swarm
+      # - build-mosquitto:
+      #     name: "mosquitto : kgr.cz"
+      #     context:
+      #       - thinx-staging-cz
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-redis:
+      #     name: "redis : kgr.cz"
+      #     context:
+      #       - thinx-staging-cz
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-transformer:
+      #     name: "transformer : kgr.cz"
+      #     context:
+      #       - thinx-staging-cz
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
       - build-worker:
           name: "worker : kgr.cz"
           context:
@@ -614,38 +614,38 @@ workflows:
             branches:
               only:
                 - keyguru-swarm
-      - build-console:
-          name: "console : keyguru.at"
-          context:
-            - thinx-staging-at
-          filters:
-            branches:
-              only:
-                - keyguru-swarm
-      - build-mosquitto:
-          name: "mosquitto : keyguru.at"
-          context:
-            - thinx-staging-at
-          filters:
-            branches:
-              only:
-                - keyguru-swarm
-      - build-redis:
-          name: "redis : keyguru.at"
-          context:
-            - thinx-staging-at
-          filters:
-            branches:
-              only:
-                - keyguru-swarm
-      - build-transformer:
-          name: "transformer : keyguru.at"
-          context:
-            - thinx-staging-at
-          filters:
-            branches:
-              only:
-                - keyguru-swarm
+      # - build-console:
+      #     name: "console : keyguru.at"
+      #     context:
+      #       - thinx-staging-at
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-mosquitto:
+      #     name: "mosquitto : keyguru.at"
+      #     context:
+      #       - thinx-staging-at
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-redis:
+      #     name: "redis : keyguru.at"
+      #     context:
+      #       - thinx-staging-at
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-transformer:
+      #     name: "transformer : keyguru.at"
+      #     context:
+      #       - thinx-staging-at
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
       - build-worker:
           name: "transformer : keyguru.at"
           context:
