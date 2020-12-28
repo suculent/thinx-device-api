@@ -109,14 +109,10 @@ class Worker {
 			var string = data.toString();
             var logline = string;
             
-            logline.replace(/\r/g, '');
-			logline.replace(/\n/g, '');
+            logline = logline.replace(/\r/g, '');
+			logline = logline.replace(/\n/g, '');
 
-			if (logline.substr(logline.count - 3, 1) === "\n\n") {
-				logline = string.substr(0, string.count - 2); // cut trailing newline
-			}
-
-			if (logline !== "\n") {
+			if (logline.length > 1) {
                 //console.log("W [" + build_id + "] »» " + logline);
                 console.log(logline);
 				// just a hack while shell.exit does not work or fails with another error
@@ -146,14 +142,20 @@ class Worker {
 				}
             }
 
-			// Something must write to build_path/build.log where the file is tailed from to websocket...
-			var build_log_path = path + "/" + build_id + "/build.log";
-			fs.ensureFile(build_log_path, function (err) {
+            // Something must write to build_path/build.log where the file is tailed from to websocket...
+            var build_log_path = path + "/" + build_id + "/build.log";
+            fs.ensureFile(build_log_path, function (err) {
                 if (err) {
                     console.log("» [ERROR] Log file could not be created.");
                 } else {
+                    try {
+                        fs.fchmodSync(fs.openSync(build_log_path, "r"), 0o666); // allow write by build process
+                        console.log("File permission change successful");
+                    } catch (error) {
+                        console.log(error);
+                    }
                     fs.appendFileSync(build_log_path, logline);
-                }				
+                }
             });
 
             //socket.emit('log', logline); currently not needed, logging is done through file appends (but this is certainly faster)
