@@ -55,7 +55,7 @@ swarm-build()
 	FIND="\/mnt\/data\/repos"
 	REPLACE="\/mnt\/data\/thinx\/$COUNTRY\/repos"
 	WORKDIR=$(echo "$WORKDIR" | sed "s/$FIND/$REPLACE/")
-	UNIQUE_NAME="thinx_build.$(random-string 16)"
+	UNIQUE_NAME="thinx_build-$(random-string 16)"
 
 	SERVICE_COMMAND="docker service create \
 	--restart-condition=none \
