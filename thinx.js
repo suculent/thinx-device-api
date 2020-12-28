@@ -379,7 +379,7 @@ let router = require('./lib/router.js')(app, _ws);
 var ssl_options = null;
 
 // Legacy HTTP support for old devices without HTTPS proxy
-http.createServer(app).listen(app_config.port, "0.0.0.0", function() {
+let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function() {
   console.log("» Legacy API started on port", app_config.port);
 });
 
@@ -469,18 +469,25 @@ wsapp.use(session({
 }));
 
 var wserver = null;
-if (typeof(process.env.CIRCLE_USERNAME) === "undefined") {
+if (typeof(process.env.CIRCLE_USERNAME) === "undefined") || process.env.CIRCLE_USERNAME === null {
+  console.log("Starting Secure Websocket Server...");
   wserver = https.createServer(ssl_options, wsapp);
 } else {
+  console.log("Starting Insecure Websocket Server!");
   wserver = http.createServer(wsapp);
 }
 
+/*
 var wss = new WebSocket.Server({
   port: socketPort,
   server: wserver
 });
+*/
 
-function noop() {}
+var wss = new WebSocket.Server({
+  port: 7442,
+  server: server
+});
 
 function heartbeat() {
   this.isAlive = true;
