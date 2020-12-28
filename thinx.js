@@ -472,8 +472,10 @@ var wserver = null;
 if ( (typeof(process.env.CIRCLE_USERNAME) === "undefined") || (process.env.CIRCLE_USERNAME === null) ) {
   console.log("Starting Secure Websocket Server...");
   wserver = https.createServer(ssl_options, wsapp);
+  socketPort = 7445;
 } else {
   console.log("Starting Insecure Websocket Server!");
+  socketPort = 7444;
   wserver = http.createServer(wsapp);
 }
 

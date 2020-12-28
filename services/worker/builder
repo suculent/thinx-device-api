@@ -872,12 +872,11 @@ case $PLATFORM in
 				# Check Artifacts
 				if [[ $BUILD_SUCCESS == true ]] ; then
 					STATUS='OK'
-					echo "Exporting artifacts" | tee -a "${LOG_PATH}"
-					echo "Expected OUTFILE: ${OUTFILE}" | tee -a "${LOG_PATH}"
+					echo "Exporting artifacts..." | tee -a "${LOG_PATH}"
 					# Deploy Artifacts
 
 					if [[ ! -z ./build ]]; then
-						echo "Entering ./build" | tee -a "${LOG_PATH}"
+						# echo "Entering ./build" | tee -a "${LOG_PATH}"
 						cd ./build | tee -a "${LOG_PATH}"
 					fi
 
@@ -985,7 +984,7 @@ case $PLATFORM in
 					# Deploy Artifacts
 
 					if [[ ! -f "./build" ]]; then
-						echo "Entering ./build" | tee -a "${LOG_PATH}"
+						# echo "Entering ./build" | tee -a "${LOG_PATH}"
 						cd ./build | tee -a "${LOG_PATH}"
 					fi
 
@@ -1162,7 +1161,7 @@ fi
 
 echo "[builder] Build Stage completed with status: $STATUS" | tee -a "${LOG_PATH}"
 
-echo "[builder] Post-flight check: in $(pwd)" | tee -a "${LOG_PATH}"
+echo "[builder] Post-flight check..." | tee -a "${LOG_PATH}"
 
 # add THINX_FIRMWARE_VERSION to the build.json envelope in order to differ between upgrades and crossgrades
 BUILD_FILE=$( find $BUILD_PATH/$REPO_NAME -name "thinx_build.json" )
@@ -1171,7 +1170,7 @@ if [[ -z $BUILD_FILE ]]; then
 fi
 if [ ! -z ${BUILD_FILE} ]; then
 	THINX_FIRMWARE_VERSION=$(jq .THINX_FIRMWARE_VERSION ${BUILD_FILE} | tr -d '"')
-	echo "[builder] THINX_FIRMWARE_VERSION=$THINX_FIRMWARE_VERSION" | tee -a "${LOG_PATH}"
+	#echo "[builder] THINX_FIRMWARE_VERSION=$THINX_FIRMWARE_VERSION" | tee -a "${LOG_PATH}"
 fi
 if [ -z ${THINX_FIRMWARE_VERSION} ]; then
 	pushd $BUILD_PATH/$REPO_NAME
@@ -1182,7 +1181,6 @@ if [ -z ${THINX_FIRMWARE_VERSION} ]; then
 fi
 
 if [[ -f "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ]]; then
-	echo "[builder] Copying build zip to $TARGET_PATH"
 	cp -v "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" $TARGET_PATH
 fi
 

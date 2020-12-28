@@ -230,11 +230,10 @@ class Worker {
 
         socket.on('client id', (data) => { 
             if (this.client_id === null) {
-                console.log(new Date().getTime(), `» We've got assigned initial client id: ${data}`);
+                console.log(new Date().getTime(), `» Worker received initial client id: ${data}`);
             } else {
-                console.log(new Date().getTime(), `» We've got re-assigned a new client id: ${data}`);
+                console.log(new Date().getTime(), `» Worker re-assigned a new client id: ${data}`);
             }
-
             this.client_id = data;
         });
 
