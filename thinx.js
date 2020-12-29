@@ -508,13 +508,13 @@ if (!caLoaded) {
   console.log("» CA file loaded and available...");
 }
 
-let wss = new WebSocket.Server({ clientTracking: false, noServer: true }); // or { noServer: true }
+let wss = new WebSocket.Server({ noServer: true }); // or { noServer: true }
 
 server.on('upgrade', function (request, socket, head) {
   console.log("---> Handling protocol upgrade...");
   wss.handleUpgrade(request, socket, head, function (ws) {
     console.log("----> Upgrade handled, emitting connection...");
-    wss.emit('connection', ws, request, client);
+    wss.emit('connection', ws, request);
   });
 });
 
@@ -523,20 +523,23 @@ function heartbeat() {
 }
 
 setInterval(function ping() {
-  wss.clients.forEach(function each(ws) {
-    if (ws.isAlive === false) {
-      console.log("[DBUG] Terminating websocket!");
-      ws.terminate();
-    } else {
-      ws.ping(noop);
-    }
-  });
+  if (typeof(wss.clients) !== "undefined") {
+    wss.clients.forEach(function each(ws) {
+      if (ws.isAlive === false) {
+        console.log("[DBUG] Terminating websocket!");
+        ws.terminate();
+      } else {
+        ws.ping(()=>{});
+      }
+    });
+  }
 }, 30000);
 
 wss.on("connection", function(ws, req) {
 
   const owner = req.session.owner;
   console.log("-----> Incoming WSS ", owner, "connection", {req});
+  console.log('------> Total clients: ', wss.clients.length);
   
 
   // May not exist while testing...
