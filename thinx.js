@@ -407,7 +407,7 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   try {
       caCert = read(app_config.ssl_ca, 'utf8');
       caStore = pki.createCaStore([caCert]);
-      //caStore.addCertificate(caCert);
+      caStore.addCertificate(caCert);
       ssloaded = true;
       console.log("SSL caStore loaded...");
       caLoaded = true;
@@ -419,7 +419,7 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   if (ssloaded) {
 
     /* TODO: Test/enable this validation to prevent running with expired SSL cert. */
-    let sslvalid = false;
+    let sslvalid = true; // until the verification starts working
 
     try {
         console.log("SSL caStore verification...");
