@@ -4,8 +4,6 @@
 var Globals = require("./lib/thinx/globals.js"); // static only!
 const Sanitka = require("./lib/thinx/sanitka.js");
 
-console.log("--- " + new Date() + " ---");
-
 if (Globals.use_sqreen()) {
   if ((typeof(process.env.SQREEN_APP_NAME) !== "undefined") && (typeof(process.env.SQREEN_TOKEN) !== "undefined")) {
     try {
@@ -385,6 +383,8 @@ let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function(
 
 let caLoaded = false;
 
+var read = require('fs').readFileSync;
+
 if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
 
   // Validate SSL certificate (if defined) and do not allow startup with invalid one...
@@ -401,9 +401,9 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   }
 
   try {
-      caCert = fs.readFileSync(app_config.ssl_ca).toString();
-      caStore = pki.createCaStore();
-      caStore.addCertificate(caCert);
+      caCert = read(app_config.ssl_ca, 'utf8');
+      caStore = pki.createCaStore([cacert]);
+      //caStore.addCertificate(caCert);
       ssloaded = true;
       caLoaded = true;
   } catch (e) {
@@ -416,7 +416,9 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
     /* TODO: Test/enable this validation to prevent running with expired SSL cert. */
     let sslvalid = true; // TODO: should be initially false!
     try {
-        pki.verifyCertificateChain( caStore, [ caCert ]);
+        pki.verifyCertificateChain( caStore, [ caCert ], (resultat) => {
+          console.log("Verification callback result:", resultat);
+        });
         sslvalid = true;
     } catch (e) {
         console.log('Failed to verify certificate (' + e.message || e + ')');
@@ -424,13 +426,14 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
 
     if (sslvalid) {
       ssl_options = {
-        key: fs.readFileSync(app_config.ssl_key),
-        cert: fs.readFileSync(app_config.ssl_cert),
-        ca: fs.readFileSync(app_config.ssl_ca),
+        key: read(app_config.ssl_key, 'utf8'),
+        cert: read(app_config.ssl_cert, 'utf8'),
+        ca: read(app_config.ssl_ca, 'utf8'),
         NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
       };
 
       console.log("» Starting HTTPS server on " + app_config.secure_port + "...");
+      console.log("» With:", {ssl_options});
       https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0", function() { } );
     } else {
       console.log("» SSL certificate validation FAILED! Check your configuration.");
@@ -480,7 +483,7 @@ wsapp.use(session({
 
 var wserver = null;
 if ( (typeof(process.env.CIRCLE_USERNAME) === "undefined") || (process.env.CIRCLE_USERNAME === null) ) {
-  console.log("Starting Secure Websocket Server...");
+  console.log("» Starting Secure Websocket Server...");
   socketPort = 7445;
   wserver = https.createServer(ssl_options, wsapp);
 } else {
@@ -489,7 +492,7 @@ if ( (typeof(process.env.CIRCLE_USERNAME) === "undefined") || (process.env.CIRCL
   wserver = http.createServer(wsapp);
 }
 
-console.log("Creating WebSocket server on port", socketPort);
+console.log("» Creating WebSocket server on port", socketPort);
 if (!caLoaded) {
   console.log("CA file not found, expect WSS issues!");
 } else {

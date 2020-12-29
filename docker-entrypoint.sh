@@ -22,9 +22,10 @@ curl -s -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_global_c
 
 export SQREEN_DISABLE_STARTUP_WARNING=1
 
-echo "[thinx-entrypoint] Enabling IPV4 forwarding..."
-sysctl net.ipv4.ip_forward=1
-sysctl -w net.ipv4.conf.all.forwarding=1
+# Returns error in read-only filesystem; should be probably done inside the Dockerfile instead
+#echo "[thinx-entrypoint] Enabling IPV4 forwarding..."
+#sysctl net.ipv4.ip_forward=1
+#sysctl -w net.ipv4.conf.all.forwarding=1
 
 export DOCKER_HOST="tcp://docker:2375"
 export DOCKER_HOST="unix:///var/run/docker.sock"
@@ -32,8 +33,6 @@ export DOCKER_HOST="unix:///var/run/docker.sock"
 # exec "$@"
 
 source ~/.profile
-
-pwd
 
 if [[ -f ./.thinx_env ]]; then
   echo "[thinx-entrypoint] Sourcing .thinx_env"
@@ -45,7 +44,6 @@ fi
 echo "[thinx-entrypoint] Adding host checking exception for github.com..."
 ssh -tt -o "StrictHostKeyChecking=no" git@github.com
 
-echo "[thinx-entrypoint] Deploying with Rollbar..."
 if [[ ! -z $ROLLBAR_ACCESS_TOKEN ]]; then
   LOCAL_USERNAME=$(whoami)
   curl --silent https://api.rollbar.com/api/1/deploy/ \
@@ -55,7 +53,7 @@ if [[ ! -z $ROLLBAR_ACCESS_TOKEN ]]; then
     -F local_username=$LOCAL_USERNAME > /dev/null
   echo ""
 else
-  echo "[thinx-entrypoint] Skipping Rollbar deployment, access token not defined..."
+  echo "[thinx-entrypoint] Skipping Rollbar deployment, ROLLBAR_ACCESS_TOKEN not defined... [${ROLLBAR_ACCESS_TOKEN}]"
 fi
 
 set -e
