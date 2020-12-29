@@ -534,7 +534,8 @@ server.on('upgrade', function (request, socket, head) {
         });
       } catch (upgradeException) {
         // fails on duplicate upgrade, why does it happen?
-        console.log(upgradeException);
+        console.log("Exception excepted, arrived (duplicate socket upgrade).");
+        //console.log(upgradeException);
       }
     } else {
       console.log("WSS Request session undefined.");
