@@ -537,7 +537,7 @@ server.on('upgrade', function (request, socket, head) {
         console.log(upgradeException);
       }
     } else {
-      console.log("WSS Request session undefined.";
+      console.log("WSS Request session undefined.");
     }
   });
 });
