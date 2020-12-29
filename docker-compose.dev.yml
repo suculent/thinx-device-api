@@ -130,8 +130,6 @@ services:
     ports:
       - '7442:7442'
       - '7443:7443'
-      - '7444:7444'
-      - '9002:9002'
       - '3000'
     volumes:
       - '/mnt/data/deploy:/mnt/data/deploy'

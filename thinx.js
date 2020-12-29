@@ -69,7 +69,6 @@ const hour = 3600 * 1000;
 var _ws = null;
 
 var db = app_config.database_uri;
-var socketPort = app_config.websocket;
 
 var https = require("https");
 var WebSocket = require("ws");
@@ -497,20 +496,6 @@ wsapp.use(session({
   saveUninitialized: false,
 }));
 
-/*
-var wserver = null;
-if ( (typeof(process.env.CIRCLE_USERNAME) === "undefined") || (process.env.CIRCLE_USERNAME === null) ) {
-  console.log("» Starting Secure Websocket Server...");
-  socketPort = 7445;
-  wserver = https.createServer(ssl_options, wsapp);
-} else {
-  socketPort = 7444;
-  console.log("Starting Insecure Websocket Server!");
-  wserver = http.createServer(wsapp);
-}
-*/
-
-console.log("» Creating WebSocket server on port", socketPort);
 if (!caLoaded) {
   console.log("× CA file not found, expect WSS issues!");
 } else {
@@ -673,10 +658,10 @@ wss.on("connection", function(ws, req, pathname) {
     if (message.indexOf("{}") == 0) return; // skip empty messages
     var object = JSON.parse(message);
     if (typeof(object.logtail) !== "undefined") {
-      console.log("Initializing WS logtail with object ", {object});
+      //console.log("Initializing WS logtail with object ", {object});
       var build_id = object.logtail.build_id;
       var owner_id = object.logtail.owner_id;
-      console.log("Tailing build log for " + build_id);
+      //console.log("Tailing build log for " + build_id);
       blog.logtail(build_id, owner_id, _ws, logtail_callback);
     } else if (typeof(object.init) !== "undefined") {
       if (typeof(messenger) !== "undefined") {
@@ -700,13 +685,6 @@ wss.on("connection", function(ws, req, pathname) {
   console.log("WSS ERROR: " + err);
   return;
 });
-
-/*
-wserver.listen(socketPort, "0.0.0.0", function listening() {
-  console.log("» Logging WebSocket listening on port %d", wserver.address().port);
-});
-*/
-
 
 
 /*

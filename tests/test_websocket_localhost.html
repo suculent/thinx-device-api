@@ -9,7 +9,7 @@
               var owner_id = "cedc16bb6bb06daaa3ff6d30666d91aacd6e3efbf9abbc151b4dcade59af7c12";
               var build_id = "0xBUILD_ID";
 
-              var ws = new WebSocket("ws://rtm.thinx.cloud:7444/" + owner_id + "/" + build_id );
+              var ws = new WebSocket("ws://rtm.thinx.cloud/" + owner_id + "/" + build_id );
 
               ws.onopen = function() {
                   var message = {

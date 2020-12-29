@@ -99,9 +99,6 @@ EXPOSE 7442
 # THiNX Device API (HTTPS)
 EXPOSE 7443
 
-# THiNX Web API Notification Socket
-EXPOSE 7444
-
 # GitLab Webbook (optional, moved to HTTPS)
 EXPOSE 9002
 

@@ -229,7 +229,6 @@ services:
     ports:
       - '7442:7442'
       - '7443:7443'
-      - '7444:7444'
       - '3000'
     volumes:
       - '/mnt/data/thinx/eu/statistics:/opt/thinx/thinx-device-api/statistics'

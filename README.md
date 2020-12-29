@@ -156,11 +156,10 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 
 ## Port mapping
 
-* API runs on HTTP port 7442 (HTTPS 7443) and 7444 (web socket)
+* API runs on HTTP port 7442 (HTTPS 7443)
 * MQTTS runs on port 8883
 * Admin runs on HTTP/HTTPS port (80/443)
-* GitHub commit hooks are listened to on port 9002
-* Status Transformers (internal network only, 7445)
+* Status Transformers (internal network only, 7475)
 
 ## Logging
 
