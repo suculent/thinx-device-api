@@ -65,7 +65,6 @@ var db = app_config.database_uri;
 var socketPort = app_config.websocket;
 
 var https = require("https");
-
 var WebSocket = require("ws");
 
 // EXTRACT TO: db.js -->
