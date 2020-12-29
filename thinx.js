@@ -510,7 +510,7 @@ if (!caLoaded) {
   console.log("» CA file loaded and available...");
 }
 
-let wss = new WebSocket.Server(server); // or { noServer: true }
+let wss = new WebSocket.Server({ server: server }); // or { noServer: true }
 
 server.on('upgrade', function (request, socket, head) {
   console.log("---> Handling protocol upgrade...");
