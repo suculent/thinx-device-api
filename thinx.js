@@ -1,7 +1,7 @@
 /*
  * This THiNX-RTM API module is responsible for responding to devices and build requests.
  */
-var Globals = require("./lib/thinx/globals.js"); // static only!
+const Globals = require("./lib/thinx/globals.js"); // static only!
 const Sanitka = require("./lib/thinx/sanitka.js");
 
 if (Globals.use_sqreen()) {
@@ -20,15 +20,17 @@ const crypto = require('crypto');
 const express = require("express");
 const session = require("express-session");
 
-var Auth = require('./lib/thinx/auth.js');
-var auth = new Auth();
+const Auth = require('./lib/thinx/auth.js');
+const auth = new Auth();
 
-let pki = require('node-forge').pki;
-var fs = require("fs-extra");
+const pki = require('node-forge').pki;
+const fs = require("fs-extra");
+const url = require('url');
 
 // set up rate limiter
-var RateLimit = require('express-rate-limit');
-var limiter = new RateLimit({
+const RateLimit = require('express-rate-limit');
+
+let limiter = new RateLimit({
   windowMs: 1*60*1000, // 1 minute
   max: 500
 });
@@ -512,9 +514,12 @@ let wss = new WebSocket.Server({ noServer: true }); // or { noServer: true }
 
 server.on('upgrade', function (request, socket, head) {
   console.log("---> Handling protocol upgrade...");
+  let owner = request.session.owner;
+  const pathname = url.parse(request.url).pathname;
   wss.handleUpgrade(request, socket, head, function (ws) {
     console.log("----> Upgrade handled, emitting connection...");
-    wss.emit('connection', ws, request);
+    request.session.owner = owner;
+    wss.emit('connection', ws, request, pathname);
   });
 });
 
@@ -535,12 +540,10 @@ setInterval(function ping() {
   }
 }, 30000);
 
-wss.on("connection", function(ws, req) {
+wss.on("connection", function(ws, req, pathname) {
 
-  const owner = req.session.owner;
-  console.log("-----> Incoming WSS ", owner, "connection", {req});
+  console.log("-----> Incoming WSS connection", {req}, {pathname});
   console.log('------> Total clients: ', wss.clients.length);
-  
 
   // May not exist while testing...
   if (typeof(ws) === "undefined" || ws === null) {
@@ -578,6 +581,8 @@ wss.on("connection", function(ws, req) {
 
     if (typeof(req.session) !== "undefined") {
       console.log("Session: " + JSON.stringify(req.session));
+    } else {
+      console.log("No session!");
     }
   }
 
