@@ -312,6 +312,8 @@ if (typeof(app_config.webhook_port) !== "undefined") {
 
 // App
 const app = express();
+
+// DI
 app.builder = builder;
 app.queue = queue;
 app.messenger = messenger;
@@ -508,14 +510,22 @@ if (!caLoaded) {
   console.log("» CA file loaded and available...");
 }
 
-const wss = new WebSocket.Server(globalServer); // or { noServer: true }
+const wss = new WebSocket.Server({ noServer: true }); // or { noServer: true }
 
 globalServer.on('upgrade', function upgrade(request, socket, head) {
-    console.log("Handling protocol upgrade...");
+    console.log("globalServer Handling protocol upgrade...");
     wss.handleUpgrade(request, socket, head, function done(ws) {
       console.log("Upgrade handled, emitting connection...");
       wss.emit('connection', ws, request, client);
     });
+});
+
+server.on('upgrade', function upgrade(request, socket, head) {
+  console.log("server Handling protocol upgrade...");
+  wss.handleUpgrade(request, socket, head, function done(ws) {
+    console.log("Upgrade handled, emitting connection...");
+    wss.emit('connection', ws, request, client);
+  });
 });
 
 function heartbeat() {
