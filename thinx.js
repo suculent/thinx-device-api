@@ -258,10 +258,15 @@ function handleDatabaseErrors(err, name) {
     // silently fail, this is ok
   } else if (err.toString().indexOf("error happened") !== -1) {
     console.log("[CRITICAL] 🚫 Database connectivity issue. " + err.toString() + " URI: "+app_config.database_uri);
-    process.exit(1);
+    // give some time for DB to wake up until next try, also prevents too fast restarts...
+    setTimeout(function() {
+      process.exit(1);
+    }, 10000);
   } else {
     console.log("[CRITICAL] 🚫 Database " + name + " creation failed. " + err + " URI: "+app_config.database_uri);
-    process.exit(2);
+    setTimeout(function() {
+      process.exit(2);
+    }, 10000);
   }
 }
 
