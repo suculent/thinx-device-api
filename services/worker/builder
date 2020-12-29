@@ -218,6 +218,7 @@ mkdir -p $DEPLOYMENT_PATH
 LOG_PATH="${DEPLOYMENT_PATH}/build.log"
 echo "Creating live logfile at: $LOG_PATH"
 touch $LOG_PATH
+chmod 666 $LOG_PATH
 
 if [[ -f "lint.txt" ]]; then
 	echo "Found LINT results in current folder:" | tee -a "${LOG_PATH}"
