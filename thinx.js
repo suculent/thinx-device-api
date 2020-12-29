@@ -64,7 +64,7 @@ const hour = 3600 * 1000;
 var _ws = null;
 
 var db = app_config.database_uri;
-var socketPort = app_config.socket;
+var socketPort = app_config.websocket;
 
 var https = require("https");
 
@@ -471,14 +471,15 @@ wsapp.use(session({
 var wserver = null;
 if ( (typeof(process.env.CIRCLE_USERNAME) === "undefined") || (process.env.CIRCLE_USERNAME === null) ) {
   console.log("Starting Secure Websocket Server...");
-  wserver = https.createServer(ssl_options, wsapp);
   socketPort = 7445;
+  wserver = https.createServer(ssl_options, wsapp);
 } else {
-  console.log("Starting Insecure Websocket Server!");
   socketPort = 7444;
+  console.log("Starting Insecure Websocket Server!");
   wserver = http.createServer(wsapp);
 }
 
+console.log("Creating WebSocket server on port", socketPort);
 var wss = new WebSocket.Server({
   port: socketPort,
   server: wserver
@@ -603,7 +604,7 @@ wss.on("connection", function(ws, req) {
   return;
 });
 
-wserver.listen(app_config.websocket, "0.0.0.0", function listening() {
+wserver.listen(socketPort, "0.0.0.0", function listening() {
   console.log("» WebSocket listening on port %d", wserver.address().port);
 });
 
