@@ -389,6 +389,8 @@ let caLoaded = false;
 
 var read = require('fs').readFileSync;
 
+let globalServer = null;
+
 if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
 
   // Validate SSL certificate (if defined) and do not allow startup with invalid one...
@@ -407,6 +409,7 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
       caStore = pki.createCaStore([caCert]);
       //caStore.addCertificate(caCert);
       ssloaded = true;
+      console.log("SSL caStore loaded...");
       caLoaded = true;
   } catch (e) {
       console.log('Failed to load CA certificate (' + e + ')');
@@ -416,8 +419,10 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   if (ssloaded) {
 
     /* TODO: Test/enable this validation to prevent running with expired SSL cert. */
-    let sslvalid = true; // TODO: should be initially false!
+    let sslvalid = false;
+
     try {
+        console.log("SSL caStore verification...");
         pki.verifyCertificateChain( caStore, [ caCert ], (resultat) => {
           console.log("Verification callback result:", resultat);
         });
@@ -435,10 +440,10 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
       };
 
       console.log("» Starting HTTPS server on " + app_config.secure_port + "...");
-      console.log("» With:", {ssl_options});
-      https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0", function() { } );
+      //console.log("» With:", {ssl_options});
+      globalServer = https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0", function() { } );
     } else {
-      console.log("» SSL certificate validation FAILED! Check your configuration.");
+      console.log("🔴 SSL certificate validation FAILED! Check your configuration!");
     }
   }
 
@@ -496,13 +501,12 @@ if ( (typeof(process.env.CIRCLE_USERNAME) === "undefined") || (process.env.CIRCL
 
 console.log("» Creating WebSocket server on port", socketPort);
 if (!caLoaded) {
-  console.log("CA file not found, expect WSS issues!");
+  console.log("× CA file not found, expect WSS issues!");
 } else {
-  console.log("CA file loaded and available...");
+  console.log("» CA file loaded and available...");
 }
 var wss = new WebSocket.Server({
-  port: socketPort,
-  server: wserver
+    server: globalServer
 });
 
 function heartbeat() {
