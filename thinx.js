@@ -340,7 +340,7 @@ require('path');
 
 // Bypassed LGTM, because it does not make sense on this API for all endpoints,
 // what is possible is covered by helmet and no-cache.
-app.use(session({
+const sessionParser = session({
   secret: session_config.secret,
   "cookie": {
     "maxAge": 86400000,
@@ -352,7 +352,9 @@ app.use(session({
   resave: false, // was true
   rolling: false,
   saveUninitialized: false,
-})); // lgtm [js/missing-token-validation]
+});
+
+app.use(sesionParser); // lgtm [js/missing-token-validation]
 
 // rolling was true; This resets the expiration date on the cookie to the given default.
 
@@ -519,6 +521,33 @@ let wss = new WebSocket.Server({ server: server }); // or { noServer: true }
 const socketMap = new Map();
 
 server.on('upgrade', function (request, socket, head) {
+
+  console.log('Parsing session from request...');
+
+  sessionParser(request, {}, () => {
+    if (typeof(request.session) !== "undefined") {
+      if (!request.session.owner) {
+        console.log("Should destroy socket, access seems unauthorized.");
+        //socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+        //socket.destroy();
+        //return;
+      }
+  
+      console.log('Session is parsed!');
+  
+      /*
+  
+      wss.handleUpgrade(request, socket, head, function (ws) {
+        wss.emit('connection', ws, request);
+      });
+  
+      */
+    } else {
+      console.log("Session undefined on upgrade.");
+    }
+
+  });
+
   console.log("---> Handling protocol upgrade...");
   const pathname = url.parse(request.url).pathname;
   if (!map.get(pathname)) {
