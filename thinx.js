@@ -506,7 +506,7 @@ if (!caLoaded) {
   console.log("» CA file loaded and available...");
 }
 
-const wss = new WebSocket.Server({ globalServer });
+const wss = new WebSocket.Server({ noServer: true }); // or globalServer?
 
 globalServer.on('upgrade', function upgrade(request, socket, head) {
     console.log("Handling protocol upgrade...");
@@ -531,6 +531,9 @@ setInterval(function ping() {
 }, 30000);
 
 wss.on("connection", function(ws, req) {
+
+
+  console.log("Incoming WSS connection", {req});
 
   // May not exist while testing...
   if (typeof(ws) === "undefined" || ws === null) {
@@ -603,6 +606,7 @@ wss.on("connection", function(ws, req) {
   });
 
   ws.on("message", (message) => {
+    console.log("WSS message", message);
     if (message.indexOf("{}") == 0) return; // skip empty messages
     var object = JSON.parse(message);
     if (typeof(object.logtail) !== "undefined") {
