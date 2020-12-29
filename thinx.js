@@ -507,10 +507,17 @@ const socketMap = new Map();
 
 server.on('upgrade', function (request, socket, head) {
 
+  const pathname = url.parse(request.url).pathname;
+  if (socketMap.get(pathname)) {
+    console.log("Socket for this pathname already exists on upgrade.");
+    return;
+  }
+
   console.log('Parsing session from request...');
 
   sessionParser(request, {}, () => {
-    if (typeof(request.session) !== "undefined") {
+
+    if (typeof (request.session) !== "undefined") {
       if (!request.session.owner) {
         console.log("Should destroy socket, access seems unauthorized.");
         socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
@@ -519,23 +526,18 @@ server.on('upgrade', function (request, socket, head) {
       }
 
       console.log("---> Session is parsed, handling protocol upgrade...");
-      const pathname = url.parse(request.url).pathname;
-      if (!socketMap.get(pathname)) {
-        socketMap.set(pathname, socket);
-        try {
-          wss.handleUpgrade(request, socket, head, function (ws) {
-            console.log("----> Upgrade handled, emitting connection...");
-            wss.emit('connection', ws, request, pathname);
-          });
-        } catch (upgradeException) {
-          // fails on duplicate upgrade, why does it happen?
-          console.log(upgradeException);
-        }
-      } else {
-        console.log("Map for this pathname already exists:", pathname);
+      socketMap.set(pathname, socket);
+      try {
+        wss.handleUpgrade(request, socket, head, function (ws) {
+          console.log("----> Upgrade handled, emitting connection...");
+          wss.emit('connection', ws, request, pathname);
+        });
+      } catch (upgradeException) {
+        // fails on duplicate upgrade, why does it happen?
+        console.log(upgradeException);
       }
     } else {
-      console.log("Session undefined on upgrade.");
+      console.log("WSS Request session undefined.";
     }
   });
 });
