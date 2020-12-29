@@ -383,6 +383,8 @@ let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function(
   console.log("» Legacy API started on port", app_config.port);
 });
 
+let caLoaded = false;
+
 if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
 
   // Validate SSL certificate (if defined) and do not allow startup with invalid one...
@@ -392,11 +394,18 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   let caStore;
   let ssloaded = false;
 
+  if !(fs.existsSync(app_config.ssl_ca)) {
+    console.log("Did not find app_config.ssl_ca file...");
+  } else {
+
+  }
+
   try {
-      caCert = fs.readFileSync(app_config.ssl_cert).toString();
+      caCert = fs.readFileSync(app_config.ssl_ca).toString();
       caStore = pki.createCaStore();
       caStore.addCertificate(caCert);
       ssloaded = true;
+      caLoaded = true;
   } catch (e) {
       console.log('Failed to load CA certificate (' + e + ')');
       // process.exit(43);
@@ -417,6 +426,7 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
       ssl_options = {
         key: fs.readFileSync(app_config.ssl_key),
         cert: fs.readFileSync(app_config.ssl_cert),
+        ca: fs.readFileSync(app_config.ssl_ca),
         NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
       };
 
@@ -480,6 +490,11 @@ if ( (typeof(process.env.CIRCLE_USERNAME) === "undefined") || (process.env.CIRCL
 }
 
 console.log("Creating WebSocket server on port", socketPort);
+if (!caLoaded) {
+  console.log("CA file not found, expect WSS issues!");
+} else {
+  console.log("CA file loaded and available...");
+}
 var wss = new WebSocket.Server({
   port: socketPort,
   server: wserver
