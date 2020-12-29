@@ -342,7 +342,7 @@ app.use(session({
   },
   store: sessionStore,
   name: "x-thx-session",
-  resave: true,
+  resave: false, // was true
   rolling: false,
   saveUninitialized: false,
 })); // lgtm [js/missing-token-validation]
@@ -390,8 +390,6 @@ let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function(
 let caLoaded = false;
 
 var read = require('fs').readFileSync;
-
-let globalServer = null;
 
 if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
 
@@ -443,7 +441,7 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
 
       console.log("» Starting HTTPS server on " + app_config.secure_port + "...");
       //console.log("» With:", {ssl_options});
-      globalServer = https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0", function() { } );
+      https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0", function() { } );
     } else {
       console.log("🔴 SSL certificate validation FAILED! Check your configuration!");
     }
@@ -510,20 +508,12 @@ if (!caLoaded) {
   console.log("» CA file loaded and available...");
 }
 
-const wss = new WebSocket.Server({ noServer: true }); // or { noServer: true }
+let wss = new WebSocket.Server({ clientTracking: false, noServer: true }); // or { noServer: true }
 
-globalServer.on('upgrade', function upgrade(request, socket, head) {
-    console.log("globalServer Handling protocol upgrade...");
-    wss.handleUpgrade(request, socket, head, function done(ws) {
-      console.log("Upgrade handled, emitting connection...");
-      wss.emit('connection', ws, request, client);
-    });
-});
-
-server.on('upgrade', function upgrade(request, socket, head) {
-  console.log("server Handling protocol upgrade...");
-  wss.handleUpgrade(request, socket, head, function done(ws) {
-    console.log("Upgrade handled, emitting connection...");
+server.on('upgrade', function (request, socket, head) {
+  console.log("---> Handling protocol upgrade...");
+  wss.handleUpgrade(request, socket, head, function (ws) {
+    console.log("----> Upgrade handled, emitting connection...");
     wss.emit('connection', ws, request, client);
   });
 });
@@ -545,7 +535,9 @@ setInterval(function ping() {
 
 wss.on("connection", function(ws, req) {
 
-  console.log("Incoming WSS connection", {req});
+  const owner = req.session.owner;
+  console.log("-----> Incoming WSS ", owner, "connection", {req});
+  
 
   // May not exist while testing...
   if (typeof(ws) === "undefined" || ws === null) {
