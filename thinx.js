@@ -3,7 +3,7 @@
  */
 
 console.log("========================================================================");
-console.log(" CUT LOGS HERE - SERVICE RESTARTD ");
+console.log("                 CUT LOGS HERE >>> SERVICE RESTARTED ");
 console.log("========================================================================");
 
 const Globals = require("./lib/thinx/globals.js"); // static only!
@@ -550,8 +550,8 @@ server.on('upgrade', function (request, socket, head) {
 
   console.log("---> Handling protocol upgrade...");
   const pathname = url.parse(request.url).pathname;
-  if (!map.get(pathname)) {
-    map.set(pathname, socket);
+  if (!socketMap.get(pathname)) {
+    socketMap.set(pathname, socket);
     try {
       wss.handleUpgrade(request, socket, head, function (ws) {
         console.log("----> Upgrade handled, emitting connection...");
