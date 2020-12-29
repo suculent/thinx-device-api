@@ -508,6 +508,13 @@ if (!caLoaded) {
 
 const wss = new WebSocket.Server({ globalServer });
 
+globalServer.on('upgrade', function upgrade(request, socket, head) {
+    console.log("Handling protocol upgrade...");
+    wss.handleUpgrade(request, socket, head, function done(ws) {
+      wss.emit('connection', ws, request, client);
+    });
+});
+
 function heartbeat() {
   this.isAlive = true;
 }
@@ -628,7 +635,7 @@ wss.on("connection", function(ws, req) {
 });
 
 wserver.listen(socketPort, "0.0.0.0", function listening() {
-  console.log("» WebSocket listening on port %d", wserver.address().port);
+  console.log("» Logging WebSocket listening on port %d", wserver.address().port);
 });
 
 
