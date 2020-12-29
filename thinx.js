@@ -559,8 +559,8 @@ setInterval(function ping() {
 
 wss.on("connection", function(ws, req, pathname) {
 
-  console.log("-----> Incoming WSS connection", {req}, {pathname});
-  console.log('------> Total clients: ', wss.clients.length);
+  console.log("-----> Incoming WSS connection at path", pathname);
+  // console.log('------> Total clients: ', wss.clients.length); // returns undefined
 
   // May not exist while testing...
   if (typeof(ws) === "undefined" || ws === null) {
