@@ -354,7 +354,7 @@ const sessionParser = session({
   saveUninitialized: false,
 });
 
-app.use(sesionParser); // lgtm [js/missing-token-validation]
+app.use(sessionParser); // lgtm [js/missing-token-validation]
 
 // rolling was true; This resets the expiration date on the cookie to the given default.
 
