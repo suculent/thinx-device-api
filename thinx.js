@@ -1,6 +1,11 @@
 /*
  * This THiNX-RTM API module is responsible for responding to devices and build requests.
  */
+
+console.log("========================================================================");
+console.log(" CUT LOGS HERE - SERVICE RESTARTD ");
+console.log("========================================================================");
+
 const Globals = require("./lib/thinx/globals.js"); // static only!
 const Sanitka = require("./lib/thinx/sanitka.js");
 
@@ -511,14 +516,27 @@ if (!caLoaded) {
 }
 
 let wss = new WebSocket.Server({ server: server }); // or { noServer: true }
+const socketMap = new Map();
 
 server.on('upgrade', function (request, socket, head) {
   console.log("---> Handling protocol upgrade...");
   const pathname = url.parse(request.url).pathname;
-  wss.handleUpgrade(request, socket, head, function (ws) {
-    console.log("----> Upgrade handled, emitting connection...");
-    wss.emit('connection', ws, request, pathname);
-  });
+  if (!map.get(pathname)) {
+    map.set(pathname, socket);
+    try {
+      wss.handleUpgrade(request, socket, head, function (ws) {
+        console.log("----> Upgrade handled, emitting connection...");
+        wss.emit('connection', ws, request, pathname);
+      });
+    } catch (upgradeException) {
+      // fails on duplicate upgrade, why does it happen?
+      console.log(upgradeException);
+    }
+  } else {
+    console.log("Map for this pathname already exists:", pathname);
+  }
+  
+  
 });
 
 function heartbeat() {
@@ -561,6 +579,7 @@ wss.on("connection", function(ws, req, pathname) {
 
   ws.isAlive = true;
   ws.on('pong', heartbeat);
+
 
   // Should be done after validation
   _ws = ws; // public websocket (!) does not at least fail
@@ -615,6 +634,11 @@ wss.on("connection", function(ws, req, pathname) {
     blog.logtail(safe_id, owner, ws, error_callback);
   });
 
+  ws.on('close', function () {
+    map.delete(pathname);
+    console.log("Closed socket, deleting ", pathname, "from map");
+  });
+
   ws.on("message", (message) => {
     console.log("WSS message", message);
     if (message.indexOf("{}") == 0) return; // skip empty messages
@@ -661,6 +685,7 @@ wserver.listen(socketPort, "0.0.0.0", function listening() {
  */
 
 var package_info = require("./package.json");
+const { map } = require("ssl-root-cas");
 var product = package_info.description;
 var version = package_info.version;
 
