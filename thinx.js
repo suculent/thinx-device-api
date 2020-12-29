@@ -505,9 +505,8 @@ if (!caLoaded) {
 } else {
   console.log("» CA file loaded and available...");
 }
-var wss = new WebSocket.Server({
-    server: globalServer
-});
+
+const wss = new WebSocket.Server({ globalServer });
 
 function heartbeat() {
   this.isAlive = true;
