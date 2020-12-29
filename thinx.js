@@ -488,6 +488,7 @@ wsapp.use(session({
   saveUninitialized: false,
 }));
 
+/*
 var wserver = null;
 if ( (typeof(process.env.CIRCLE_USERNAME) === "undefined") || (process.env.CIRCLE_USERNAME === null) ) {
   console.log("» Starting Secure Websocket Server...");
@@ -498,6 +499,7 @@ if ( (typeof(process.env.CIRCLE_USERNAME) === "undefined") || (process.env.CIRCL
   console.log("Starting Insecure Websocket Server!");
   wserver = http.createServer(wsapp);
 }
+*/
 
 console.log("» Creating WebSocket server on port", socketPort);
 if (!caLoaded) {
@@ -506,11 +508,12 @@ if (!caLoaded) {
   console.log("» CA file loaded and available...");
 }
 
-const wss = new WebSocket.Server({ noServer: true }); // or globalServer?
+const wss = new WebSocket.Server(globalServer); // or { noServer: true }
 
 globalServer.on('upgrade', function upgrade(request, socket, head) {
     console.log("Handling protocol upgrade...");
     wss.handleUpgrade(request, socket, head, function done(ws) {
+      console.log("Upgrade handled, emitting connection...");
       wss.emit('connection', ws, request, client);
     });
 });
@@ -531,7 +534,6 @@ setInterval(function ping() {
 }, 30000);
 
 wss.on("connection", function(ws, req) {
-
 
   console.log("Incoming WSS connection", {req});
 
@@ -638,10 +640,11 @@ wss.on("connection", function(ws, req) {
   return;
 });
 
+/*
 wserver.listen(socketPort, "0.0.0.0", function listening() {
   console.log("» Logging WebSocket listening on port %d", wserver.address().port);
 });
-
+*/
 
 
 
