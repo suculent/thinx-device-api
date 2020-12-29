@@ -510,15 +510,13 @@ if (!caLoaded) {
   console.log("» CA file loaded and available...");
 }
 
-let wss = new WebSocket.Server({ noServer: true }); // or { noServer: true }
+let wss = new WebSocket.Server(server); // or { noServer: true }
 
 server.on('upgrade', function (request, socket, head) {
   console.log("---> Handling protocol upgrade...");
-  let owner = request.session.owner;
   const pathname = url.parse(request.url).pathname;
   wss.handleUpgrade(request, socket, head, function (ws) {
     console.log("----> Upgrade handled, emitting connection...");
-    request.session.owner = owner;
     wss.emit('connection', ws, request, pathname);
   });
 });
