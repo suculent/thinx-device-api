@@ -398,10 +398,8 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   let caStore;
   let ssloaded = false;
 
-  if !(fs.existsSync(app_config.ssl_ca)) {
+  if (!fs.existsSync(app_config.ssl_ca)) {
     console.log("Did not find app_config.ssl_ca file...");
-  } else {
-
   }
 
   try {
