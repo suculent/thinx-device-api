@@ -404,7 +404,7 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
 
   try {
       caCert = read(app_config.ssl_ca, 'utf8');
-      caStore = pki.createCaStore([cacert]);
+      caStore = pki.createCaStore([caCert]);
       //caStore.addCertificate(caCert);
       ssloaded = true;
       caLoaded = true;
