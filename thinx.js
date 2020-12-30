@@ -418,6 +418,7 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
       var ca = pki.certificateFromPem(caCert);
       var client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
       try {
+          console.log("SSL caStore loaded...");
           if (!ca.verify(client)) {
             console.log("Certificate verification failed.");
             sslvalid = false;
@@ -427,8 +428,6 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
       }
 
       sslvalid = true;
-
-      console.log("SSL caStore loaded...");
       ssloaded = true;
       caLoaded = true;
       
