@@ -97,8 +97,8 @@ RUN curl -sL -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/st
 
 # set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
 RUN set -x \
-	&& addgroup dockremap -g 65536 \
-	&& adduser --system dockremap -g 65536 \
+	&& addgroup dockremap --gid 65536 \
+	&& adduser --system dockremap --gid 65536 \
 	&& echo 'dockremap:165536:65536' >> /etc/subuid \
 	&& echo 'dockremap:165536:65536' >> /etc/subgid
 
