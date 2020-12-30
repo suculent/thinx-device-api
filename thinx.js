@@ -28,7 +28,8 @@ const session = require("express-session");
 const Auth = require('./lib/thinx/auth.js');
 const auth = new Auth();
 
-const pki = require('node-forge').pki;
+const x509 = require('x509');
+
 const fs = require("fs-extra");
 const url = require('url');
 
@@ -405,58 +406,46 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   // It's pointless and it should lead to faster fix when this fails immediately in production.
 
   let caCert;
-  let caStore;
   let ssloaded = false;
+  let sslvalid = false;
 
   if (!fs.existsSync(app_config.ssl_ca)) {
-    console.log("Did not find app_config.ssl_ca file...");
+    console.log("[WARNING] Did not find app_config.ssl_ca file, websocket logging will fail...");
   }
 
   try {
       caCert = read(app_config.ssl_ca, 'utf8');
-      caStore = pki.createCaStore([caCert]);
-      caStore.addCertificate(caCert);
-      ssloaded = true;
+      
+      var crt_obj = x509.parseCert(caCert);
+      console.log("notBefore:", crt_obj.notBefore);
+      console.log("notAfter:", crt_obj.notAfter);
+      console.log("now:", new Date());
+      sslvalid = true;
+
       console.log("SSL caStore loaded...");
+      ssloaded = true;
       caLoaded = true;
+      
   } catch (e) {
       console.log('Failed to load CA certificate (' + e + ')');
       // process.exit(43);
   }
 
-  if (ssloaded) {
-
-    /* TODO: Test/enable this validation to prevent running with expired SSL cert. */
-    let sslvalid = true; // until the verification starts working
-
-    try {
-        console.log("SSL caStore verification...");
-        pki.verifyCertificateChain( caStore, [ caCert ], (resultat) => {
-          console.log("Verification callback result:", resultat);
-        });
-        sslvalid = true;
-    } catch (e) {
-        console.log('Failed to verify certificate (' + e.message || e + ')');
-    }
-
-    if (sslvalid) {
+  if (ssloaded && sslvalid) {
       ssl_options = {
         key: read(app_config.ssl_key, 'utf8'),
         cert: read(app_config.ssl_cert, 'utf8'),
         ca: read(app_config.ssl_ca, 'utf8'),
         NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
       };
-
       console.log("» Starting HTTPS server on " + app_config.secure_port + "...");
-      //console.log("» With:", {ssl_options});
       https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0", function() { } );
-    } else {
-      console.log("🔴 SSL certificate validation FAILED! Check your configuration!");
-    }
+  } else {
+      console.log("🔴 SSL certificate loading FAILED! Check your configuration!");
   }
 
 } else {
-  console.log("Skipping HTTPS server, SSL key or certificate not found.");
+  console.log("» Skipping HTTPS server, SSL key or certificate not found.");
 }
 
 app.use('/static', express.static(path.join(__dirname, 'static')));
