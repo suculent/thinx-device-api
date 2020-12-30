@@ -89,7 +89,25 @@ RUN openssl version \
  && npm install --unsafe-perm . --only-prod \
  && npm audit fix
 
-# && npm install -g snyk && snyk protect not free or what? just fails
+ENV VER="20.10.1"
+RUN curl -sL -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz && \
+    tar -xz -C /tmp -f /tmp/docker-$VER.tgz && \
+    rm -rf /tmp/docker-$VER.tgz && \
+   mv /tmp/docker/* /usr/bin
+
+# set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
+RUN set -x \
+	&& addgroup dockremap -g 65536 \
+	&& adduser --system dockremap -g 65536 \
+	&& echo 'dockremap:165536:65536' >> /etc/subuid \
+	&& echo 'dockremap:165536:65536' >> /etc/subgid
+
+# https://github.com/docker/docker/tree/master/hack/dind is this really needed now?
+ENV DIND_COMMIT 37498f009d8bf25fbb6199e8ccd34bed84f2874b
+
+RUN set -eux; \
+	wget -O /usr/local/bin/dind "https://raw.githubusercontent.com/docker/docker/${DIND_COMMIT}/hack/dind"; \
+	chmod +x /usr/local/bin/dind
 
 VOLUME /var/lib/docker
 
