@@ -1,0 +1,24 @@
+{
+    "env": {
+        "browser": true,
+        "es6": true,
+        "jquery": true
+    },
+    "extends": ["jquery", "eslint:recommended"],
+    "globals": {
+        "Atomics": "readonly",
+        "SharedArrayBuffer": "readonly",
+        "moment": true,
+        "angular": true,
+        "Thinx": true,
+        "toastr": true,
+        "App": true
+    },
+    "parserOptions": {
+        "ecmaVersion": 2018
+    },
+    "rules": {
+        "no-console": "off",
+        "no-unused-vars": "off"
+    }
+}

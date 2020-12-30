@@ -1,0 +1,9 @@
+{
+  "name": "Lua",
+  "extensions": ["lua"],
+  "DEFINE": "",
+  "ASSIGN": " = ",
+  "COMMENT": "--",
+  "STRINGSTOP": "\"",
+  "EOL": ""
+}

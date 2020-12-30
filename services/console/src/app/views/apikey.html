@@ -1,0 +1,176 @@
+<!-- BEGIN PAGE BREADCRUMB -->
+<ul class="page-breadcrumb breadcrumb">
+  <li>
+    <a ui-sref="dashboard">Home</a>
+    <i class="fa fa-circle"></i>
+  </li>
+  <li class="active">
+    API Key Management
+  </li>
+</ul>
+<!-- END PAGE BREADCRUMB -->
+<!-- BEGIN MAIN CONTENT -->
+<div class="row">
+  <div class="col-md-12">
+
+    <div class="note note-info" ng-hide="$root.profile.info.goals.includes('apikey-info')">
+      <h3>API Keys
+        <span class="close" data-close="note" ng-click="$root.profile.info.goals.push('apikey-info'); $emit('saveProfile');"></span>
+      </h3>
+      <p>
+        <b>Access keys for your devices</b><br><br>
+        You can create as many keys as you like, preferably one per device.<br>
+        Per-build API Key rotation feature is coming soon.
+      </p>
+    </div>
+
+    <!-- BEGIN QUICK NAV -->
+    <nav class="quick-nav" ng-show="selectedItems.length > 0">
+      <a class="quick-nav-trigger" href="#">
+        <span aria-hidden="true"></span>
+      </a>
+      <ul>
+        <li>
+          <a href="#" ng-click="revokeApikeys()">
+            <span>Revoke {{selectedItems.length}} Item{{selectedItems.length > 1 ? "s" : ""}}</span>
+            <i class="icon-trash"></i>
+          </a>
+        </li>
+        <li>
+          <a href="#" ng-click="selectedItems = [];">
+            <span>Deselect All</span>
+            <i class="icon-close"></i>
+          </a>
+        </li>
+      </ul>
+      <span aria-hidden="true" class="quick-nav-bg"></span>
+    </nav>
+    <div class="quick-nav-overlay"></div>
+    <!-- END QUICK NAV -->
+
+    <!-- BEGIN: ACCORDION DEMO -->
+    <div class="portlet light bordered">
+      <div class="portlet-title">
+        <div class="caption font-green-sharp">
+          <i class="icon-key font-green-sharp"></i>
+          <span class="caption-subject bold uppercase">API Keys</span>
+          <span class="caption-helper hide"></span>
+        </div>
+        <div class="actions hide">
+          <a class="btn btn-circle btn-icon-only btn-default" href="#">
+            <i class="icon-cloud-upload"></i>
+          </a>
+          <a class="btn btn-circle btn-icon-only btn-default" href="#">
+            <i class="icon-wrench"></i>
+          </a>
+        </div>
+      </div>
+      <div class="portlet-body">
+        <div class="row">
+          <div class="col-xs-6">
+            <a href="#" class="btn green-haze btn-outline" ng-click="resetModal()" data-target="#pageModal" data-toggle="modal">Create API Key</a>
+            <div class="btn-group btn-actions hide">
+              <a ng-show="selectedItems.length > 0" class="btn red btn-outline" href="javascript:;" data-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-bars"></i> Actions
+                <i class="fa fa-angle-down"></i>
+              </a>
+              <ul class="dropdown-menu pull-left">
+                <li><a href="javascript:;" ng-click="revokeApikeys()"><i class="icon-trash"></i> Revoke selected</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-xs-6 text-right">
+            <span class="input-icon right xtop-list-search">
+              <i class="icon-magnifier"></i>
+              <input type="text" class="form-control form-control-solid" ng-model="searchText" placeholder="Search...">
+            </span>
+          </div>
+        </div>
+        <div class="table-scrollable table-scrollable-borderless">
+          <table class="table table-hover table-light">
+            <tr ng-repeat="apikey in $root.apikeys | propsFilter:{hash:searchText,alias:searchText}" ng-click="checkItem(apikey.hash)" ng-class="selectedItems.indexOf(apikey.hash) > -1 ? 'selected-row' : 'default-row'">
+              <td>
+                <div class="row-item-title-small">
+                  <span class="key-label monospace-info">
+                    <i class="fa fa-key apikey-icon"></i> {{apikey.name | limitTo : 10 : apikey.name.length - 10 }}
+                  </span>
+                  <span class="apikey-alias">{{apikey.alias}}</span>
+                  <span style="float: right">
+                    <span ng-repeat="device in $root.meta.apikeys[apikey.hash]">
+                      <a ui-sref="device({udid: device.udid, origin: 'apikey'})" stop-event title="{{device.alias}}">
+                        <span class="device-icon bg-{{device.category}} device-icon-small">
+                          <img ng-src="../assets/thinx/img/ioticons/b_medium_{{('0' + device.icon).slice(-2)}}.png" alt="Device Icon" class="device-icon-symbol" />
+                        </span>
+                      </a>
+                    </span>
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BEGIN FORM-->
+  <form class="form-horizontal form-bordered" name="apikeyModal">
+    <div id="pageModal" class="modal fade" role="dialog" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+            <h4 class="modal-title">New API Key</h4>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="control-label col-md-3">Key Alias</label>
+              <div class="col-md-9">
+                <input type="text" ng-model="apikeyAlias" name="apikeyAlias" class="form-control" placeholder="New Alias" ng-disabled="newApikey !== null" />
+              </div>
+            </div>
+            <div class="form-group last">
+              <label class="control-label col-md-3">Key Value</label>
+              <div class="col-md-9">
+                <input type="text" id="newApikey" name="newApikey" class="form-control new-apikey" ng-value="newApikey" ng-readonly="true" />
+                <br>
+                <div class="alert alert-warning" ng-if="newApikey !== null">
+                  <strong>WARNING</strong> Save your Key Value now. Otherwise will be lost!
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" ng-show="createButtonVisible" class="btn btn-primary" ng-click="createApikey(apikeyAlias)" ng-disabled="(apikeyAlias == null || apikeyAlias.length < 1)"><i class="fa fa-check"></i> Create</button>
+            <button type="button" ng-hide="createButtonVisible" class="btn btn-default copy-btn" data-clipboard-target="#newApikey"><i class="fa fa-clipboard"></i> Copy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+  <!-- END FORM-->
+</div>
+<!-- END MAIN CONTENT -->
+
+<!-- START PAGE LOG OVERLAY -->
+<div ng-controller="LogviewController" class="log-view-overlay-conatiner" style="display:none">
+  <div class="log-view-overlay-controls">
+    <a ng-click="wsstailLog($root.modalBuildId)" title="Refresh status"><i class="icon-refresh"></i></a>
+    <a ng-click="switchWrap()" title="Toggle Word Wrap"><i class="icon-frame"></i></a>
+    <a ng-click="hideLogOverlay($root.modalBuildId)" title="Close Log"><i class="icon-close"></i></a>
+  </div>
+  <div class="log-view-overlay log-view-body force-word-wrap" scroll-glue>
+    <div class="overlay-title">Build Log <span>{{$root.modalBuildId}}</span></div>
+    {{$root.logdata[$root.modalBuildId]}}
+  </div>
+</div>
+<!-- END PAGE LOG OVERLAY -->
+
+<!-- BEGIN MAIN JS-->
+<script>
+new Clipboard('.copy-btn');
+QuickNav.init();
+</script>
+<!-- BEGIN MAIN JS -->

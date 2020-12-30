@@ -1,0 +1,14 @@
+engines:
+ rubocop:
+   enabled: true
+ duplication:
+   enabled: true
+ metrics:
+   enabled: true
+ coverage:
+   enabled: true
+exclude_paths:
+  - node_modules/**
+  - spec/**
+  - services/**
+  - addons/**

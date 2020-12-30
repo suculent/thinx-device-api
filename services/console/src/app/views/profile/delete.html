@@ -1,0 +1,41 @@
+<div class="row">
+  <div class="col-md-12">
+    <div class="portlet light">
+      <div class="portlet-title ">
+        <div class="caption caption-md">
+          <i class="icon-globe theme-font hide"></i>
+          <span class="caption-subject font-blue-madison bold uppercase">Delete Profile</span>
+        </div>
+      </div>
+      <div class="portlet-body">
+        <p>Enter your Owner ID below to confirm complete profile removal. We are sorry to see you leave.</p>
+        <form role="form">
+          <!-- <div class="form-group"> -->
+              <!-- <label class="control-label">Username</label> -->
+              <!-- <input type="text" class="form-control" ng-model="deleteForm.username"/> -->
+          <!-- </div> -->
+          <div class="form-group">
+              <label class="control-label">Owner ID</label>
+              <input type="text" class="form-control" ng-model="deleteForm.owner"/>
+          </div>
+          <div class="alert alert-danger">
+            <strong>BEWARE</strong>
+            You are about to delete all your data from server. This process cannot be undone.
+          </div>
+          <div class="margin-top-10">
+              <a href="#" ng-click="submitUserDelete()" class="btn btn-danger" ng-disabled="checkDeleteForm()">Delete All </a>
+              <a href="#" class="btn default" ng-click="deleteForm = {username:null, owner:null}">Cancel </a>
+              <a href="#" ng-click="downloadProfile()" class="btn green-haze pull-right">Download</a>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- END PORTLET MAIN -->
+  </div>
+</div>
+
+<!-- BEGIN MAIN JS-->
+<script>
+Profile.init(); // init page demo
+</script>
+<!-- BEGIN MAIN JS -->

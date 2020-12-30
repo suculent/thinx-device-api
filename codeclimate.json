@@ -1,0 +1,514 @@
+{
+  "ci_service": {
+    "branch": "master",
+    "build_identifier": "",
+    "build_url": "",
+    "commit_sha": "2ca09a2f0aace6225aeac87104ec7091073742db",
+    "committed_at": 1569707181,
+    "name": ""
+  },
+  "environment": {
+    "gem_version": "2.5.2.3",
+    "package_version": "",
+    "pwd": "/Users/sychram/Repositories/thinx-device-api",
+    "prefix": "/Users/sychram/Repositories/thinx-device-api",
+    "rails_root": "",
+    "reporter_version": "latest",
+    "simplecov_root": ""
+  },
+  "git": {
+    "branch": "master",
+    "head": "2ca09a2f0aace6225aeac87104ec7091073742db",
+    "committed_at": 1569707181
+  },
+  "covered_percent": 40.634815672011904,
+  "covered_strength": 0,
+  "line_counts": {
+    "missed": 3591,
+    "covered": 2458,
+    "total": 6049
+  },
+  "source_files": [
+    {
+      "blob_id": "095f04aefd603d6f111210cd1d1ebe7d064479af",
+      "coverage": "[null,null,null,1,null,1,null,null,null,1,1,1,1,1,1,null,1,1,null,1,1,1,1,null,null,1,1,null,null,null,null,null,null,1,null,1,1,1,1,null,1,null,1,1,null,1,1,null,1,1,null,1,null,null,null,null,null,1,1,1,null,null,null,null,null,1,1,null,1,0,0,0,null,0,null,null,0,null,null,null,null,null,null,null,null,null,0,0,null,null,null,0,0,null,null,null,0,0,0,0,null,0,null,0,null,null,null,0,0,0,0,0,null,0,null,null,null,null,0,null,null,0,null,null,null,null,null,1,null,null,null,0,0,null,0,0,null,null,null,null,0,0,null,null,null,0,0,null,null,0,0,null,null,0,0,null,null,null,1,null,null,null,null,null,1,null,null,1,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,null,null,1,1,1,null,null,null,null,null,null,null,null,0,null,null,null,null,null,null,null,1,null,1,null,null,1,1,1,null,null,1,1,1,1,null,1,1,null,1,null,null,1,null,1,null,1,0,0,0,0,null,null,0,0,null,0,null,0,null,null,null,0,0,null,0,0,0,null,0,null,null,0,null,0,null,null,null,0,0,0,0,0,null,0,null,null,0,null,0,null,null,null,null,null,null,null,null,1,1,1,1,null,null,0,0,0,null,0,0,0,0,0,null,null,null,null,null,null,null,0,null,null,1,null,null,1,1,null,1,1,null,1,1,1,null,1,1,1,null,1,1,1,null,1,1,1,null,1,1,1,null,1,1,1,null,1,1,1,null,1,1,1,null,1,1,1,null,1,1,1,1,null,1,1,1,null,1,1,1,null,1,null,1,1,null,1,1,1,null,null,null,null,null,null,0,null,0,0,null,0,0,0,0,null,0,null,null,0,null,null,null,null,null,0,0,null,0,0,0,0,null,null,0,0,0,null,0,0,null,null,null,null,0,0,0,null,0,0,null,null,null,null,0,0,0,0,0,null,null,0,null,null,null,null,0,0,0,0,null,null,0,null,null,null,null,4,null,0,0,0,null,0,0,null,null,null,null,null,null,1,1,1,1,null,1,1,1,null,0,null,0,0,0,null,null,null,1,1,1,null,0,null,0,0,0,null,null,null,1,1,1,null,0,null,0,0,0,null,null,null,1,1,1,null,0,null,0,0,0,null,null,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,null,1,null,1,1,null,1,null,1,1,1,1,null,null,0,0,null,null,0,0,null,0,0,null,null,null,0,0,null,0,0,null,null,null,null,null,null,0,null,null,0,null,0,0,null,null,0,null,0,null,0,null,null,0,null,null,null,0,null,null,null,null,null,0,0,null,0,0,null,null,0,0,null,null,null,0,null,null,null,null,0,null,0,null,0,null,0,0,0,null,0,0,null,0,null,0,0,null,null,0,null,0,null,null,null,null,null,null,0,null,0,0,null,0,null,0,0,0,0,null,null,null,0,0,0,null,null,null,null,null,null,null,null,1,1,null,1,null,1,null,1,1,1,null,null,null,null,null,null,1,null,1,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,null,null,null,1,null,1,null,null,null,null,null,1,0,0,0,null,0,0,null,null,null,null,null,null,null,null,null,1,null,1,null,null,null,0,null,0,0,0,0,null,null,0,0,0,0,0,null,null,0,0,0,0,0,null,null,0,0,0,0,0,null,null,0,0,0,0,0,null,null,0,0,0,null,null,null,null,null,0,0,null,null,null,null,0,null,null,0,0,null,null,0,0,0,null,null,0,0,null,0,0,null,0,null,null,0,0,0,0,0,null,null,null,null,null,0,null,null,null,null,0,0,null,0,0,null,null,null,null,null,null,null,null,null,null,1,0,0,0,0,null,null,null,null,1,0,0,0,0,0,null,null,null,null,null,null,null,1,null,null,null,null,null,0,null,null,0,0,null,0,null,null,null,null,null,0,0,null,null,null,null,null,null,null,null,null,1,0,0,0,null,null,null,0,0,null,null,null,null,null,null,null,null,null,1,0,0,0,null,null,null,null,null,null,null,1,0,0,0,null,null,null,null,null,null,null,null,null,null,1,0,0,0,0,null,null,null,0,null,0,0,0,null,null,null,0,null,0,0,null,null,null,null,null,null,null,null,null,null,null,1,null,0,null,0,null,0,0,null,null,null,0,null,null,0,null,0,null,0,0,0,null,null,null,null,0,null,null,null,null,null,1,null,0,null,0,0,null,0,0,null,null,0,0,null,null,0,0,0,null,null,null,0,null,0,null,null,null,null,null,null,null,null,1,null,0,null,0,null,0,0,0,null,null,null,0,null,0,null,null,null,null,null,null,null,null,null,null,null,null,1,null,0,null,0,null,0,0,null,null,null,0,null,null,0,0,null,null,null,0,null,null,0,0,null,0,null,0,0,null,null,null,null,null,null,0,null,null,null,null,null,null,null,null,1,null,0,null,0,null,null,0,0,null,null,0,0,null,null,0,0,null,null,null,0,null,null,0,0,0,null,null,null,null,0,null,null,null,null,null,null,null,null,1,null,0,null,0,null,0,0,0,null,null,0,null,0,null,null,null,null,null,null,null,null,null,null,null,null,1,0,0,0,0,null,null,null,null,0,null,null,null,null,null,1,0,0,0,null,null,null,0,null,null,0,0,null,null,null,0,null,null,0,0,null,0,null,null,0,null,null,null,null,null,null,0,0,null,null,null,null,1,0,null,0,0,0,null,null,null,0,null,null,0,0,0,null,null,null,null,null,null,null,1,null,0,null,0,null,0,null,0,null,null,null,null,null,null,null,1,null,0,null,0,null,0,0,0,null,null,null,null,0,null,null,null,null,null,null,null,null,null,1,null,0,null,null,null,0,0,null,0,null,null,null,0,null,null,null,0,0,0,0,0,null,null,null,null,null,0,null,null,null,null,null,null,null,null,null,null,null,null,1,0,0,null,null,null,null,null,null,null,null,1,0,0,null,null,null,null,null,null,null,1,0,0,0,0,0,0,null,null,null,null,null,0,null,null,null,null,null,1,null,0,0,0,0,0,0,null,0,null,null,null,null,0,null,null,null,null,null,1,0,0,0,0,null,null,null,null,0,null,null,0,null,null,null,null,null,null,1,0,0,0,0,null,null,null,null,0,null,null,null,null,null,null,null,null,null,null,null,null,null,1,0,0,0,0,0,0,null,null,null,null,null,null,null,1,null,0,null,0,null,0,0,0,null,null,null,null,0,null,null,null,null,null,null,null,null,null,null,null,null,null,1,0,0,0,0,null,null,null,0,null,0,null,0,0,0,null,0,0,0,0,0,null,0,0,null,null,null,null,null,1,null,0,0,null,null,0,null,0,null,0,0,null,null,null,null,null,0,null,0,0,null,null,null,null,null,null,null,1,null,null,0,0,null,0,0,null,null,null,null,0,0,0,null,null,null,0,0,null,null,null,null,0,0,null,null,null,null,null,0,0,null,null,0,0,null,0,0,null,0,0,null,null,0,null,null,null,null,null,null,null,null,1,null,0,null,0,0,null,null,null,0,0,null,null,null,null,0,0,null,0,null,null,null,null,null,1,null,0,null,0,0,null,null,null,0,null,null,0,0,null,null,null,null,null,null,null,null,null,null,null,null,1,0,0,null,null,null,0,null,0,null,null,null,null,1,0,0,0,null,0,0,null,null,null,0,null,null,0,null,0,0,null,null,null,0,null,null,0,null,0,0,0,0,null,0,null,null,null,null,null,null,null,null,null,null,null,null,1,0,0,null,0,null,0,0,0,null,null,null,null,null,0,0,0,null,null,null,null,null,0,null,null,null,null,null,null,null,null,null,1,null,0,null,0,null,0,0,null,null,null,0,null,null,0,null,0,null,0,0,0,null,null,null,null,0,null,null,0,0,0,null,null,null,null,0,null,null,0,null,0,null,0,null,null,null,0,0,null,null,null,0,null,null,0,0,0,null,null,null,null,null,0,null,null,null,null,0,null,null,null,null,null,null,null,null,1,0,0,0,0,0,0,null,0,null,null,null,1,0,0,0,0,null,null,null,0,null,0,null,0,0,0,0,null,null,null,null,0,null,0,0,0,null,null,null,null,0,null,0,0,0,0,null,null,null,null,null,null,1,0,0,0,0,null,null,null,0,null,0,0,0,0,null,0,0,null,null,null,null,null,null,null,1,null,0,null,0,null,0,0,null,0,null,null,null,0,null,null,null,null,null,1,null,0,0,null,null,null,0,null,null,0,null,null,null,null,0,0,null,0,null,null,null,0,null,null,null,null,1,0,0,0,null,0,null,null,null,null,1,null,0,null,0,0,null,null,null,0,null,null,0,0,null,null,null,0,null,null,0,0,null,null,null,0,null,null,0,null,null,null,null,0,0,null,null,null,null,1,null,0,0,null,null,null,0,null,null,0,null,null,null,null,0,0,null,null,null,null,1,null,0,null,null,null,0,0,null,null,null,0,null,null,0,0,null,null,null,0,null,null,0,0,null,null,null,0,null,null,0,0,0,0,null,0,null,null,null,null,null,null,null,null,1,0,0,0,0,null,null,0,null,null,1,0,null,0,0,0,0,0,null,0,null,null,0,0,null,null,null,null,null,null,null,null,0,0,0,0,0,null,null,0,null,0,0,null,0,0,0,0,null,null,null,0,null,0,null,null,0,0,null,0,0,null,0,0,null,null,0,0,0,null,0,null,null,null,null,0,0,null,null,0,0,null,0,null,null,null,null,null,null,null,null,0,null,0,null,0,0,null,0,0,0,null,0,null,0,null,0,null,null,0,0,null,0,0,null,null,0,null,0,0,null,null,null,0,null,null,null,null,null,0,null,0,0,0,null,0,null,null,null,null,0,0,0,0,0,null,null,0,null,0,null,0,null,null,0,0,0,0,null,null,null,null,null,null,null,0,0,0,0,0,null,null,null,null,null,null,1,null,0,0,0,0,null,null,null,null,0,0,0,0,null,0,0,0,null,null,null,null,0,0,0,null,0,0,0,null,null,null,null,null,null,null,0,0,null,0,null,0,0,null,null,null,null,0,0,null,null,null,null,null,null,0,0,null,0,null,null,null,null,0,0,0,0,0,0,null,0,null,null,0,null,null,null,0,null,0,0,0,0,0,null,0,null,0,0,null,0,null,null,null,0,0,0,null,null,null,0,0,0,null,null,null,0,0,0,0,null,null,null,0,null,null,0,0,null,null,null,null,0,null,0,0,0,null,null,null,null,0,0,null,null,null,null,null,0,0,null,null,0,0,0,null,null,null,0,null,0,null,null,0,0,0,null,0,null,null,0,0,null,0,0,0,null,null,null,null,null,0,null,null,0,null,null,null,0,null,null,null,null,0,0,0,0,0,null,null,null,null,0,0,0,null,null,null,null,null,null,null,0,null,null,null,null,1,0,0,0,0,null,null,null,null,0,null,null,null,null,null,null,null,1,null,0,null,0,null,0,null,0,0,null,0,null,null,null,0,null,null,0,0,null,null,null,0,null,null,0,0,null,null,0,null,null,null,null,null,null,null,null,null,null,null,1,0,null,0,0,0,0,0,null,0,null,0,null,null,null,null,null,null,1,0,0,0,0,0,0,null,null,null,null,null,null,null,null,null,null,null,1,0,0,0,0,null,null,null,null,null,null,null,null,null,null,null,1,0,0,0,0,0,0,0,null,null,null,0,null,0,0,null,null,null,0,null,0,null,null,null,null,null,null,null,null,null,1,0,null,null,null,null,1,null,0,0,0,0,null,null,0,null,null,null,null,null,null,null,null,0,null,0,0,null,null,0,null,0,0,0,null,null,0,null,0,null,null,0,0,null,0,0,0,0,0,null,null,null,null,0,0,null,null,0,null,null,null,null,null,null,null,null,null,null,null,1,null,1,0,null,null,1,null,0,0,0,null,null,0,null,0,0,0,null,null,0,null,null,0,null,null,null,null,null,null,null,0,null,0,0,0,null,null,null,0,null,null,null,0,0,null,0,0,null,0,0,null,0,0,0,0,0,null,0,null,null,0,0,0,0,null,null,null,null,0,0,null,0,0,0,null,null,0,0,null,0,0,null,null,null,0,null,null,0,null,null,null,null,null,null,null,0,0,null,null,null,null,null,null,null,1,0,0,null,0,0,0,null,null,null,null,null,null,null,null,0,null,null,0,0,0,null,null,null,0,null,0,null,0,null,null,0,0,0,0,0,null,0,0,0,null,0,0,0,null,null,null,null,0,null,0,null,0,0,null,null,0,null,null,0,0,0,null,null,0,null,0,null,null,0,null,null,0,0,null,null,null,null,1,null,null,1,null,0,0,null,0,0,0,0,null,0,null,null,null,null,0,0,null,null,null,null,null,1,null,0,null,null,null,null,0,0,0,0,null,null,0,0,null,null,0,0,0,0,0,0,0,0,0,null,0,0,null,null,null,0,null,null,0,0,0,null,0,null,null,null,null,null,null,null,null,null,0,0,null,0,0,null,0,0,0,0,0,0,0,null,null,null,0,0,null,null,null,null,0,0,null,null,null,null,null,null,1,null,1,0,0,0,0,0,0,0,0,0,0,null,0,0,null,0,null,null,0,null,null,null,null,null,null,1,null,null,null,null,null,0,0,null,0,null,0,0,0,0,null,0,0,0,null,null,null,0,null,0,0,0,0,0,null,null,null,null,null,0,null,null,null,null,0,0,null,null,null,0,0,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,null,0,0,null,0,0,0,0,null,null,null,0,null,0,0,0,null,null,null,null,null,null,null,null,null,null,null,1,0,0,0,0,0,null,null,null,0,null,null,0,0,0,null,null,null,null,null,0,0,0,0,0,null,null,null,null,null,null,null,0,0,null,0,0,0,0,null,null,null,0,0,0,null,null,null,null,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,0,0,0,0,0,null,0,null,null,null,null,null,null,null,1,1,null,null,null,null,null,null,1,null,null,1,1,null,0,null,null,null,null,0,null,0,null,1,null,null,null,null,1,1,null,null,1,null,null,null,null,null,1,null,1,null,1,null,null,null,null,null,null,null,null,null,null,null,1,1,1,null,0,null,null,1,null,null,null,null,null,null,null,0,null,null,1,1,0,0,null,0,null,null,null,null,1,null,0,0,0,null,null,0,0,0,null,null,0,0,null,0,null,0,null,0,null,0,0,null,null,null,0,0,null,null,null,0,0,null,null,null,0,null,0,null,null,0,null,0,0,null,0,null,0,0,0,null,0,null,0,0,0,null,0,0,null,null,null,null,null,null,null,0,null,null,null,null,0,0,0,null,null,null,null,null,null,0,0,null,null,1,1,null,null,null,null,null,null,null,null,null,1,1,1,null,1,null,null,null,null,null,null,0,0,0,0,0,0,null,null,null,null,null,null,null,null,0,null,0,0,null,null,null,null,null,null,1,null,null,1,null,null,null,0,0,null,null,null,null,0,null,null,null,null,0,0,0,0,null,0,0,null,null,0,null,null,0,0,null,0,0,0,0,0,null,0,null,0,0,0,null,null,null,0,0,null,null,null,null,null,0,0,0,0,null,0,0,null,null,0,0,null,null,null,null,null,0,0,0,0,null,0,0,0,0,0,0,null,null,null,null,1,null,1,1,null,null,1,null,null,null,null,null,null,null,1,0,0,0,null,0,0]",
+      "covered_percent": 17.79483600837404,
+      "covered_strength": 0.18004187020237264,
+      "line_counts": {
+        "missed": 1178,
+        "covered": 255,
+        "total": 1433
+      },
+      "name": "thinx.js"
+    },
+    {
+      "blob_id": "a6e09d345bb7e203d5198bb76805b5b81f8edc15",
+      "coverage": "[1,null,1,1,1,null,1,1,null,null,1,null,1,1,null,null,1,1,null,null,1,1,null,1,1,null,null,1,1,null,null,1,1,null,null,1,1,null,1,1,null,null,1,1,null,1,1]",
+      "covered_percent": 100,
+      "covered_strength": 1,
+      "line_counts": {
+        "missed": 0,
+        "covered": 27,
+        "total": 27
+      },
+      "name": "spec/jasmine/ValidatorSpec.js"
+    },
+    {
+      "blob_id": "e27191c98887aada22cd51581fc291e80f1ef336",
+      "coverage": "[null,null,1,1,1,1,1,1,1,1,null,1,1,null,1,null,1,1,1,null,1,null,1,null,null,null,null,null,null,null,null,null,null,null,null,4,4,null,4,4,4,4,4,4,null,null,4,null,null,null,null,null,4,4,null,4,4,4,4,null,null,null,8,4,null,8,null,null,null,4,null,null,null,null,null,4,4,null,null,0,0,null,null,null,null,null,null,4,null,4,null,0,null,null,4,null,null,4,null,4,0,null,null,4,0,0,null,null,4,null,4,null,null,null,null,null,4,null,4,4,null,4,28,28,4,4,4,4,null,null,null,null,null,null,0,0,null,null,null,4,null,4,0,null,null,4,0,null,null,null,4,null,null,null,null,null,1,0,0,0,0,null,null,null,null,null,0,0,0,null,0,null,null,0,null,1,null,null,1,null,null,null,1,0,0,0,0,0,0,null,null,null,1,null,null,null,5,0,0,0,0,null,0,null,null,0,0,0,null,null,null,null,5,4,null,4,4,4,4,4,4,4,4,null,null,4,null,null,null,null,null,0,0,null,null,null,null,null,null,0,0,0,null,0,0,null,null,null,null,null,null,null,null,0,null,null,null,0,null,null,0,0,0,null,null,0,null,null,null,0,0,0,0,0,null,null,0,0,null,0,0,null,0,null,null,null,0,null,null,null,0,0,0,null,null,0,0,0,0,null,0,0,null,null,null,0,0,0,null,null,0,0,0,0,null,0,null,0,null,null,null,null,null,null,null,0,null,null,null,0,0,0,0,null,null,0,0,null,null,null,null,null,null,null,0,0,null,0,0,null,null,null,null,null,null,null,0,0,null,null,null,null,null,null,0,null,null,null,null,0,0,null,null,null,null,null,null,null,0,0,null,null,0,null,null,null,null,null,null,null,0,0,null,null,null,null,null,0,null,null,null,0,null,null,null,null,0,null,null,0,null,0,null,null,null,null,null,null,null,null,null,null,null,0,null,0,null,0,null,0,null,0,null,0,null,null,null,null,null,0,null,null,null,0,0,null,0,null,null,null,0,0,0,0,0,0,0,null,null,null,null,null,null,0,null,null,null,0,null,null,null,null,0,0,0,null,0,0,0,null,0,0,0,null,null,null,null,null,null,null,null,null,0,0,0,null,null,null,null,0,null,null,null,null,null,null,0,0,null,null,null,null,null,0,null,0,0,0,null,null,0,null,null,0,null,null,null,null,null,null,1,null,1,null,1,null,1,null,1,null,1,1,0,0,0,null,0,null,1,1,null,1,null,null,0,null,null,null,1,null,0,null,null,1,0,null,null,1,0,null,null,null,1,0,null,null,null,null,0,0,0,null,0,0,0,null,0,null,null,null,null,null,null,null,null,null,5,null,null,5,null,5,5,5,null,null,5,5,5,null,null,5,0,0,null,null,5,0,0,null,null,5,null,null,null,null,null,null,null,5,null,5,null,5,null,null,null,5,5,5,null,null,null,null,0,null,null,null,0,0,0,null,null,0,0,0,0,null,null,null,5,0,0,null,null,5,0,null,null,5,null,4,4,null,4,4,null,4,null,4,null,4,4,null,0,null,null,4,0,null,null,4,null,4,4,4,4,4,null,null,0,0,0,null,0,null,null,null,null,4,null,4,4,0,null,null,null,null,null,4,null,null,null,null,0,0,0,0,null,0,null,0,0,0,0,0,0,0,0,0,null,0,0,null,null,null,null,0,0,0,0,null,null,0,0,null,null,null,null,null,null,null,0,0,0,0,0,0,null,null,null,null,null,null,null,1,0,0,0,null,0,null,null,1,1,null,1,null,1,null,1,0,null,null,0,0,null,null,1,null,null,1,null,1,0,0,0,null,null,null,1,0,null,0,null,null,1,null,0,0,null,null,null,1,null,null,null,null,null,null,1,null,null,1,null,1,1,1,null,null,null,null,null,null,null,2,null,null,null,null,2,0,0,0,0,null,null,null,0,0,null,null,2,2,2,0,0,null,0,0,null,2,2,2,null,null,null,null,null,null,null,null,0,0,0,0,0,0,null,0,null,null,null,0]",
+      "covered_percent": 39.18575063613232,
+      "covered_strength": 1.3282442748091603,
+      "line_counts": {
+        "missed": 239,
+        "covered": 154,
+        "total": 393
+      },
+      "name": "lib/thinx/messenger.js"
+    },
+    {
+      "blob_id": "0488ab6bbd2b4e99a9eea6f1ef89b897681ee7b8",
+      "coverage": "[1,1,1,null,1,1,null,1,null,null,1,1,null,null,null,null,1,1,1,1,null,null,null,null,1,null,1,null,null,null,1,1,1,null,null,null,1,null,1,null,null,1,null,null,null,1,1,null,0,null,1,null,null,null,null,1,1,null,null,1,1,null,0,null,1,null,null,null,null,1,1,null,null,1,null,null,null,1,1]",
+      "covered_percent": 94.28571428571428,
+      "covered_strength": 0.9428571428571428,
+      "line_counts": {
+        "missed": 2,
+        "covered": 33,
+        "total": 35
+      },
+      "name": "spec/jasmine/ApienvSpec.js"
+    },
+    {
+      "blob_id": "137d0eaf9be2fdfdeec4672cf87e6fd0a9507105",
+      "coverage": "[1,null,1,1,null,1,1,1,null,null,1,1,1]",
+      "covered_percent": 100,
+      "covered_strength": 1,
+      "line_counts": {
+        "missed": 0,
+        "covered": 9,
+        "total": 9
+      },
+      "name": "spec/jasmine/SanitkaSpec.js"
+    },
+    {
+      "blob_id": "ae29d2a2fe855855ae178b0c366f090a92d5ba31",
+      "coverage": "[1,null,1,1,null,1,1,null,1,null,1,1,null,null,null,null,null,null,1,null,1,1,null,null,1,1,1,1,null,null,null,1,1,1,1,null,1,null,null,null,1,null,1,null,null,null,null,null,null,null,1,null,1,1,null,1,null,1,1,null,1,1,1,null,1,null,1,1,null,1]",
+      "covered_percent": 100,
+      "covered_strength": 1,
+      "line_counts": {
+        "missed": 0,
+        "covered": 35,
+        "total": 35
+      },
+      "name": "spec/jasmine/SourcesSpec.js"
+    },
+    {
+      "blob_id": "67991fdf4bdbaa5a52382624f78d4cc51d5c4968",
+      "coverage": "[1,null,1,1,null,1,1,null,1,1,null,1,null,1,null,null,null,null,null,null,null,1,null,null,1,1,1,1,1,1,null,null,null,null,null,1,1,null,null,null,1,1,1,1,null,1,null,null,null,1,1,1,1,1,1,1,null,null,null,null,1,null,1,null,null,null,1,1,1,1,null,1]",
+      "covered_percent": 100,
+      "covered_strength": 1,
+      "line_counts": {
+        "missed": 0,
+        "covered": 37,
+        "total": 37
+      },
+      "name": "spec/jasmine/TransferSpec.js"
+    },
+    {
+      "blob_id": "b62838933d23419905d219ecb3afcbe3f96b56a9",
+      "coverage": "[null,null,1,1,1,null,1,1,1,1,1,null,1,1,1,1,1,1,null,1,1,null,1,null,1,null,null,4,null,null,null,null,1,null,1,null,1,0,0,null,null,1,1,1,1,null,null,null,1,null,1,0,null,null,1,1,null,null,null,null,1,null,null,null,null,null,1,1,null,0,null,1,1,1,null,null,null,null,1,null,0,null,0,null,null,0,null,0,0,0,0,0,0,null,0,null,null,null,1,null,null,1,2,null,2,2,2,null,null,null,null,0,null,null,null,null,1,1,1,1,0,0,0,null,null,1,1,1,1,1,null,null,null,null,null,null,null,null,1,1,null,1,1,1,1,1,null,null,null,null,1,0,0,null,1,1,1,1,1,1,1,null,null,1,null,null,null,0,0,0,0,null,0,0,null,0,0,0,null,null,0,null,null,null,0,0,null,null,null,null,null,null,1,null,null,null,null,1,0,0,0,null,0,0,null,null,1,1,1,1,1,null,1,0,null,null,1,1,1,null,null,1,1,null,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,null,1,1,null,null,null,null,null,null,null,null,1,0,0,null,null,1,0,0,null,null,null,null,1,1,null,1,null,1,null,null,null,null,1,null,1,null,1,0,0,0,null,null,1,0,0,null,null,null,0,null,null,null,1,null,1,null,1,1,1,null,1,1,null,0,0,null,null,1,null,1,1,1,1,0,0,0,null,1,1,null,1,null,null,1,null,null,null,null,null,null,null,1,0,0,null,null,1,0,0,null,null,null,null,1,null,1,null,1,null,null,null,null,1,0,0,0,null,null,1,0,0,null,null,1,1,0,0,null,null,null,null,1,0,0,null,null,null,1,null,1,null,1,1,null,1,null,1,1,null,1,1,0,0,0,null,1,null,null,null,null,null,null,null,null,null,null,1,0,0,0,null,0,null,null,1,null,null,1,null,1,null,null,null,null,null,1,0,0,0,null,null,1,0,0,0,null,null,1,0,0,null,null,1,null,null,null,null,null,null,0,null,0,0,0,0,null,0,null,null,0,null,0,0,null,null,null,0]",
+      "covered_percent": 60.43478260869565,
+      "covered_strength": 0.6347826086956522,
+      "line_counts": {
+        "missed": 91,
+        "covered": 139,
+        "total": 230
+      },
+      "name": "lib/thinx/devices.js"
+    },
+    {
+      "blob_id": "3d06e9d9bb50f7b1caddbacb7a340ab16ed5cd07",
+      "coverage": "[null,null,null,null,1,1,1,1,1,1,1,null,1,1,null,1,null,1,null,null,5,5,0,null,null,null,null,0,0,0,0,null,null,null,0,0,0,0,0,0,0,null,null,0,null,null,null,null,0,0,0,null,0,0,0,null,null,0,0,0,0,0,null,null,0,0,0,0,null,null,0,null,null,0,0,0,0,null,null,null,null,null,1,1,1,null,null,0,null,null,1,0,0,null,null,1,0,0,null,null,1,0,null,null,null,null,null,0,0,0,0,0,0,0,0,null,null,null,0,null,null,null,1,null,1,0,0,0,0,0,null,null,null,1,null,null,null,1,1,null,null,null,null,null,2,2,null,2,2,2,null,null,0,0,0,null,0,0,0,0,null,null,0,null,0,null,null,null,0,null,null,null,1,1,1,null,null,null,null,0,0,0,0,null,null,0,0,0,0,0,0,0,null,0,0,0,null,0,0,null,null,0,null,null,null,0,0,null,null,null,null,1,null,1,1,null,1,null,1,0,0,null,null,null,null,null,0,null,null,1,0,0,null,null,null,null,null,0,null,null,1,0,0,null,null,null,null,null,0,null,null,1,1,null,null,null,1,null,null,1,null,1,null,1,null,null,null,null,null,1,null,null,0,null,0,0,0,null,null,0,0,0,0,null,null,null,null,null,0,null,null,0,null,null,null,null,1,1,null,1,null,null,0,0,null,null,null,0,0,null,0,0,null,null,null,null,0,0,0,null,0,0,0,0,0,0,null,null,null,0,null,0,null,null,null,null,null,null,null,0,0,null,0,null,0,0,0,0,null,null,null,null,0,null,null,null,null,null,null,null,null,null,null,null,null,0,null,null,null,null,null,0,null,null,null,null,1,null,1,0,0,null,1,null,null,null,1,0,null,null,1,1,1,1,1,null,null,null,null,null,null,0,0,0,null,0,null,null,null,0,0,null,0,0,null,null,null,0,null,0,null,null,null,null,null,0,0,null,0,0,null,null,0,0,null,null,null,null,null,0,0,0,0,null,0,null,null,0,0,0,null,null,null,null,null,null,null,null,null,1,null,null,null,1,1,0,null,1,1,1,null,null,null,1,1,0,null,1,1,1,null,null,null,null,null,null,2,null,2,null,2,0,0,null,null,null,2,null,null,null,2,2,2,2,null,null,2,0,0,0,null,null,null,2,null,2,null,2,2,null,2,2,null,2,null,2,null,null,2,null,2,null,null,2,0,2,0,2,0,2,0,2,0,2,0,null,2,null,null,2,null,2,2,0,null,null,2,2,2,null,null,2,2,null,0]",
+      "covered_percent": 37.72893772893773,
+      "covered_strength": 0.5494505494505495,
+      "line_counts": {
+        "missed": 170,
+        "covered": 103,
+        "total": 273
+      },
+      "name": "lib/thinx/repository.js"
+    },
+    {
+      "blob_id": "64207801c6c9c5de703d330a9bed7907c016751a",
+      "coverage": "[null,null,1,1,1,null,1,null,null,6,null,null,null,7,7,7,21,null,7,null,null,null,2,2,2,3,3,3,3,null,2,null,null,null,1,1,1,1,1,1,null,null,null,null,null,null,1,null,1,null,null,null,2,null,2,null,null,null,2,2,2,2,null,null,null,null,null,null,null,null,null,null,null,null,null,2,0,0,0,null,2,null,null,null,1,1,0,0,0,null,1,null,null,null,3,3,3,3,3,3,3]",
+      "covered_percent": 88,
+      "covered_strength": 2.54,
+      "line_counts": {
+        "missed": 6,
+        "covered": 44,
+        "total": 50
+      },
+      "name": "lib/thinx/rsakey.js"
+    },
+    {
+      "blob_id": "d09d219f4e4a2e5d02b40b9ce02fa9e4bf563b8a",
+      "coverage": "[null,null,1,null,null,null,8,8,7,7,7,7,7,7,7,7,null,null,null,null,5,5,5,5]",
+      "covered_percent": 100,
+      "covered_strength": 6.2,
+      "line_counts": {
+        "missed": 0,
+        "covered": 15,
+        "total": 15
+      },
+      "name": "lib/thinx/sanitka.js"
+    },
+    {
+      "blob_id": "8fcc3184839327b6f749a833735273c3cd4e883c",
+      "coverage": "[null,null,1,1,1,null,1,null,1,1,null,1,1,1,null,1,1,null,1,1,null,1,null,1,null,1,null,null,2,2,2,null,null,null,null,null,null,0,null,0,0,0,0,0,null,null,0,null,0,null,null,null,null,0,null,null,null,null,null,0,null,null,0,0,0,0,null,null,null,0,0,0,0,0,null,0,0,0,null,null,null,0,null,null,0,null,null,null,null,null,0,0,null,0,0,0,0,null,0,null,null,null,0,0,0,0,null,0,0,0,0,0,0,0,0,null,null,null,null,0,0,0,0,null,0,0,0,0,null,null,0,0,null,0,0,0,0,null,0,null,null,null,null,null,null,null,null,null,null,null,0,0,0,null,null,null,null,null,null,0,null,0,0,0,null,null,0,null,0,0,0,null,null,0,0,0,null,0,null,0,null,null,0,0,null,0,null,null,null,null,null,null,null,null,0,null,null,null,0,0,null,0,0,null,null,null,null,null,2,2,2,null,null,null,null,null,0,0,null,null,null,null,null,null,null,null,null,null,null,2,1,null,null,null,null,null,2,1,null,null,null,2,0,0,null,null,2,0,0,null,null,2,null,2,null,null,2,null,null,null,2,2,null,null,null,null,null,null,2,0,0,null,null,null,null,2,null,2,null,2,2,2,null,null,0,null,0,0,0,null,0,null,null,null,0,null,null,null,null,0,0,null,0,null,0,0,0,0,null,null,null,0,null,0,0,null,null,0,0,0,null,0,null,0,0,0,null,null,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,null,null,0,0,0,0,null,0,null,null,null,0,null,null,null,null,null,null,null,null,null,null,null,null,0,null,null,0,0,0,0,null,0,0,0,null,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,0,0,null,null,1,null,1,1,null,null,1,1,null,null,1,null,1,null,1,null,1,0,0,0,null,null,1,1,1,null,null,0,null,0,0,0,0,null,0,null,null,0,null,0,0,null,0,0,0,null,null,0,0,0,0,null,0,0,0,null,null,0,null,null,0,0,0,0,null,0,0,null,null,0,null,0,null,0,null,null,0,null,null,0,0,null,null,null,0,0,0,null,0,0,0,null,0,0,null,null,null,null,null,null,null,null,0,0,0,0,null,0,0,0,null,0,0,null,null,null,null,null,null,null,null,null,1,0,0,null,null,1,null,1,1,null,null,1,1,null,null,1,1,null,1,null,0,null,null,1,0,0,0,null,null,1,1,1,null,null,0,0,0,0,null,null,0,0,0,0,null,null,0,null,0,0,null,0,null,0,0,0,null,null,null,0]",
+      "covered_percent": 23.985239852398525,
+      "covered_strength": 0.3173431734317343,
+      "line_counts": {
+        "missed": 206,
+        "covered": 65,
+        "total": 271
+      },
+      "name": "lib/thinx/transfer.js"
+    },
+    {
+      "blob_id": "2f39fb5d2c7d0fab78fe443937c6fa52f6b81896",
+      "coverage": "[null,null,1,1,1,null,1,1,null,1,1,1,1,1,1,1,1,null,1,1,null,1,1,1,1,1,1,1,null,1,null,null,0,0,0,null,0,null,null,null,null,null,0,0,0,0,null,0,null,null,0,0,0,0,null,0,null,null,0,0,0,0,null,0,null,0,null,null,null,0,null,null,null,null,null,null,null,null,null,null,0,0,0,0,0,0,null,null,null,0,null,null,0,null,null,0,null,null,null,null,null,0,0,null,0,null,0,null,null,null,null,0,0,0,null,0,null,null,null,null,null,null,0,0,0,0,0,null,null,null,0,null,0,0,null,null,null,null,null,null,0,0,null,0,0,0,0,null,0,null,null,null,0,0,0,0,0,null,0,null,null,null,null,null,0,null,0,null,0,0,0,0,0,null,0,0,null,null,null,0,0,0,0,0,null,null,null,0,0,0,0,0,0,null,0,0,0,null,null,null,null,null,0,0,0,0,0,null,0,null,null,null,null,0,null,0,null,0,0,null,null,0,null,0,0,0,null,null,0,null,null,0,null,0,0,0,0,0,null,null,0,null,null,null,null,null,0,0,0,0,0,0,null,null,null,0,0,null,null,null,0,null,0,null,null,null,null,null,null,0,0,null,0,null,null,null,null,null,0,0,null,null,0,0,null,0,null,0,null,null,null,0,0,0,null,0,null,null,null,null,0,null,0,0,null,0,null,0,0,null,0,0,0,0,0,null,null,0,null,null,0,null,null,0,0,null,0,0,0,0,0,0,null,0,0,0,0,0,0,null,null,null,0,null,null,0,0,null,0,0,null,0,null,0,0,0,0,null,null,null,0,null,0,0,0,null,null,0,0,null,null,0,null,0,null,0,0,null,0,0,0,0,null,null,null,null,null,null,null,0,null,0,0,0,null,0,0,null,0,null,0,0,0,null,0,0,null,null,0,0,0,0,0,0,0,0,0,null,0,null,null,null,null,null,null,null,null,null,0,null,null,null,null,0,null,null,0,0,0,0,0,null,null,0,0,null,0,0,null,null,0,null,null,0,0,0,0,null,null,0,null,null,null,0,null,0,0,null,null,null,0,0,null,0,null,0,0,0,null,0,null,0,0,null,0,null,0,null,0,null,null,0,0,0,null,null,null,0,null,0,null,null,null,null,null,0,null,0,null,0,null,0,0,null,null,null,0,null,null,0,null,null,null,null,null,0,null,0,0,0,null,0,null,null,0,0,0,0,0,0,null,null,0,null,null,null,0,0,0,0,null,0,0,0,0,0,null,0,0,0,null,0,0,0,0,0,0,null,0,0,0,null,null,0,null,0,null,0,null,0,0,null,null,null,null,0,0,0,0,null,null,0,null,null,null,0,0,0,null,null,0,null,null,null,null,0,null,0,0,0,null,0,null,null,null,0,null,null,0,null,0,null,null,null,null,null,null,0,0,null,null,0,0,0,0,0,null,null,null,0,0,0,null,0,0,0,null,0,0,0,null,null,null,null,null,null,null,null,null,null,null,null,2,null,null,2,0,null,null,2,2,2,null,null,2,2,0,null,null,null,0,null,2,null,0,null,null,2,0,null,null,null,0,null,null,2,0,null,null,null,0,null,null,2,null,null,null,null,2,0,0,null,null,null,null,0,0,null,null,2,null,null,2,null,0,0,0,0,null,0,0,0,null,0,null,null,0,0,0,0,null,null,null,null,2,2,2,2,null,null,0,null,null,0,null,0,0,0,null,null,null,0,null,null,0,0,0,null,null,0,0,null,null,0,null,0,null,null,0,null,null,null,0,0,0,0,0,null,0,0,0,0,0,null,null,null,0,0,null,null,null,0,null,null,0,0,0,null,null,0,null,null,null,null,null,null,null,null,null,null,null,0,0,0,null,0,null,0,0,0,0,null,0,0,null,null,null,null,null,0,0,null,null,null,null,null,0,null,null,null,null,null,null,0,null,null,null,null,null,null,2,2,8,null,null,2,null,null,null,1,1,1,1,4,null,4,4,4,4,6,null,null,0,null,null,1]",
+      "covered_percent": 12.698412698412698,
+      "covered_strength": 0.23582766439909297,
+      "line_counts": {
+        "missed": 385,
+        "covered": 56,
+        "total": 441
+      },
+      "name": "lib/thinx/builder.js"
+    },
+    {
+      "blob_id": "9069bff8a6f6ef170f583baaaf0d318d4c201c85",
+      "coverage": "[null,null,1,null,1,1,1,null,1,1,1,1,1,1,1,1,1,1,1,1,null,1,1,1,1,1,null,1,null,1,null,1,1,1,null,1,null,1,null,null,6,null,null,null,null,0,0,null,null,null,null,2,0,0,null,2,2,2,2,0,0,null,2,2,2,null,null,null,null,null,null,null,null,9,null,4,null,null,5,null,0,null,null,5,null,null,5,3,null,2,null,2,2,1,null,2,2,11,11,11,null,null,11,9,null,null,2,null,null,null,null,null,null,null,null,null,null,null,0,0,0,null,null,0,0,0,0,0,0,0,null,0,0,null,0,0,0,null,0,0,0,null,0,0,0,null,0,0,null,null,0,null,null,null,null,null,null,null,null,null,null,0,null,null,0,0,0,0,null,null,0,null,0,null,null,0,null,null,0,0,0,0,0,0,0,0,0,0,null,null,null,null,0,0,0,null,0,0,0,null,null,null,0,null,null,null,null,0,0,null,null,null,null,0,null,0,0,0,0,null,0,0,0,null,null,null,null,null,null,0,0,0,null,null,null,null,null,null,2,null,2,0,0,0,0,null,0,0,null,null,0,null,null,0,0,null,null,0,0,null,null,null,null,null,null,0,null,null,null,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2,2,2,null,2,2,2,null,null,null,null,null,2,null,2,null,2,2,2,2,null,null,null,null,null,null,null,null,0,null,0,0,0,null,0,null,0,0,0,null,0,0,0,0,null,0,0,null,null,null,null,null,null,null,null,null,0,null,null,0,0,0,0,0,null,0,null,null,0,0,0,0,null,0,null,null,null,0,0,0,null,0,null,null,null,null,null,2,null,2,0,null,null,null,2,null,null,2,null,2,2,1,null,1,1,1,null,null,null,2,null,2,null,2,null,0,null,0,null,0,0,null,0,0,0,null,null,0,0,0,null,null,null,0,0,null,null,null,null,0,0,0,0,null,0,0,null,null,null,null,null,2,null,null,null,2,2,null,null,null,2,0,null,null,null,2,2,null,null,null,2,2,0,null,null,null,null,2,2,null,null,null,null,null,null,null,2,0,null,null,2,0,null,2,null,null,2,0,null,2,null,null,2,0,null,2,null,null,null,null,2,0,null,null,2,0,null,null,null,null,null,null,null,null,null,2,0,0,null,0,0,0,0,0,null,null,0,0,null,2,null,null,null,null,null,null,null,null,2,0,null,null,2,2,null,null,2,2,null,null,2,0,0,null,null,null,null,null,null,null,2,null,0,0,0,0,null,0,0,null,null,null,null,null,null,null,2,null,null,null,null,null,2,2,2,null,null,0,0,0,0,0,0,0,null,0,0,null,0,0,null,0,0,0,null,null,null,null,null,null,null,null,null,null,0,0,null,0,null,null,null,null,null,0,0,0,0,null,null,null,0,0,null,0,null,null,0,null,null,null,null,null,null,null,null,null,null,null,0,0,0,0,0,null,0,0,null,null,null,0,null,0,0,null,0,null,0,null,null,null,null,null,0,0,0,0,null,0,0,0,0,0,null,0,null,0,0,0,null,null,null,null,null,null,null,0,null,0,0,null,null,null,null,null,0,null,0,null,0,0,0,null,null,0,null,null,0,0,0,null,0,0,0,null,0,null,0,null,null,0,null,null,0,0,null,null,null,null,null,null,null,1,1,null,null,null,null,null,0,null,null,null,null,null,0,null,0,0,0,null,null,0,null,0,null,null,0,0,0,0,0,null,null,0,0,null,0,0,0,null,0,null,null,0,0,null,null,null,null,null,null,4,4,null,null,null,null,4,null,null,null,null,null,4,null,null,null,4,0,0,0,null,null,4,null,4,null,4,4,0,null,4,4,0,null,4,null,null,null,null,4,0,null,0,0,null,0,null,0,0,0,0,null,null,null,4,0,0,0,null,null,null,4,4,4,null,null,4,4,4,4,null,4,4,0,null,null,4,4,0,0,0,0,null,null,null,4,null,null,null,null,4,null,4,0,null,null,0,0,null,0,0,null,null,4,null,null,null,4,4,4,null,4,null,4,null,null,4,null,4,4,4,null,null,4,4,3,3,null,null,null,null,null,null,null,4,null,4,null,null,null,4,null,null,4,4,null,4,null,null,null,null,null,null,null,null,4,null,4,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,4,null,4,null,null,2,2,null,2,null,null,2,2,null,null,null,null,2,null,null,null,null,null,2,0,0,null,null,2,0,null,2,null,null,null,null,null,0,0,null,0,0,0,null,0,0,null,0,0,0,null,null,null,null,null,null,null,null,null,2,null,null,null,null,null,null,2,0,0,0,0,0,0,0,0,null,null,0,0,null,null,2,null,null,2,2,2,2,2,null,2,null,2,2,0,null,2,2,0,null,2,2,null,null,null,null,2,2,2,2,2,0,0,0,0,0,null,null,null,null,null,null,null,null,null,null,2,null,2,2,2,null,2,2,null,2,2,null,0,null,2,2,null,null,null,null,null,2,0,null,null,2,0,null,null,2,0,null,null,2,0,null,null,null,null,2,0,null,null,2,0,null,null,2,0,null,null,null,null,2,2,2,0,null,2,2,null,null,null,null,2,2,null,2,0,0,null,0,null,null,null,2,2,2,null,null,2,2,2,null,null,null,2,0,null,null,null,2,0,null,null,null,null,2,2,2,null,2,2,null,2,null,null,null,null,null,null,null,null,null,null,2,2,null,null,0,0,0,null,null,null,0,0,0,0,null,null,null,null,null,null,null,null,null,null,0,0,0,0,0,null,0,null,null,null,null,null,null,null,0,null,0,null,0,0,null,0,0,0,null,0,0,0,null,null,null,null,null,null,null,0,null,0,null,null,null,null,null,null,0,null,0,0,null,0,0,0,0,0,null,0,0,null,0,null,0,0,0,null,null,0,0,0,0,0,null,0,null,0,0,null,null,null,null,null,0,0,null,0,null,null,0,null,null,null,null,null,null,null,null,null,0,null,0,null,0,0,null,null,null,null,0,0,null,null,0,0,null,0,0,null,null,null,null,0,null,null,0,0,null,0,0,0,0,null,null,null,0,null,0,null,null,null,null,null,1,0,null,null,1,1,null,null,1,1,null,null,1,null,null,null,null,null,null,null,1,0,0,null,1,null,1,0,0,null,1,null,null,null,null,null,null,null,1,0,0,null,null,null,0,null,null,null,1,null,null,0,0,null,null,null,0,null,null,1,null,1,0,null,null,0,0,null,null,1,null,1,null,1,0,0,null,null,null,1,1,1,1,1,0,null,1,null,1,null,null,null,1,null,1,null,1,1,1,0,0,0,0,0,0,null,0,null,null,null,null,null,null,null,null,1,1,0,null,null,null,1,0,0,0,0,null,null,0,null,null,null,null,null,null,null,null,1,null,1,1,1,1,null,null,null,1,null,null,null,null,0,0,0,null,null,0,null,null,0,0,0,null,null,null,0,0,0,null,0,0,0,null,null,null,null,0,null,null,0,null,null,null,null,null,null,null,null,null,null,1,1,null,null,1,0,null,null,1,0,null,null,1,0,null,null,1,0,null,null,1,0,null,null,1,0,null,null,1,0,null,null,1,0,null,null,1,0,null,null,1,0,null,null,1,0,null,null,1,0,null,null,1,null,null,null,null,1,null,1,0,0,null,null,null,0,null,null,1,0,null,null,null,0,null,null,1,null,1,null,1,1,0,0,0,0,null,0,0,null,0,null,null,null,null,1,null,null,null,null,null,null,null,null,null,null,null,1,0,0,null,null,1,0,0,0,null,null,1,0,0,0,null,null,1,1,null,null,null,2,null,null,null,1,1,0,0,null,null,null,0,null,1,0,0,null,null,null,0,null,null,1,1,0,0,null,null,null,null,1,1,null,0,0,null,null,1,1,null,null,null,null,0]",
+      "covered_percent": 39.92395437262358,
+      "covered_strength": 0.8719898605830165,
+      "line_counts": {
+        "missed": 474,
+        "covered": 315,
+        "total": 789
+      },
+      "name": "lib/thinx/device.js"
+    },
+    {
+      "blob_id": "1e59d61b88b70452e1f6b66c3f8fd6c249127ba9",
+      "coverage": "[1,null,null,22,21,21,null,null,null,2,1,1,null,null,null,2,2,null,1,null,1]",
+      "covered_percent": 100,
+      "covered_strength": 6.818181818181818,
+      "line_counts": {
+        "missed": 0,
+        "covered": 11,
+        "total": 11
+      },
+      "name": "lib/thinx/validator.js"
+    },
+    {
+      "blob_id": "903b054069814bfa60878b1d1a7ef6df6320da98",
+      "coverage": "[1,1,1,null,1,1,1,null,1,1,1,1,1,null,1,null,1,1,1,1,1,null,null,null,1,1,null,null,null,1,1,1,null,1,1,null,null,null,null,1,1,1,null,null,1,null,1,null,0,null,1,null,null,null,null,1,1,1,1,1,null,null,null,null,1,1,1,null,2,2,2,null,null,null,null,null,null,null,null,null,null,null,null,null,1,1,null,1]",
+      "covered_percent": 97.77777777777777,
+      "covered_strength": 1.0444444444444445,
+      "line_counts": {
+        "missed": 1,
+        "covered": 44,
+        "total": 45
+      },
+      "name": "spec/jasmine/MessengerSpec.js"
+    },
+    {
+      "blob_id": "50a718e9219adc5dc8d417c4d0d6b669184b5aa6",
+      "coverage": "[1,null,1,1,1,null,1,1,1,1,1,null,null,null,null,null,null,null,null,1,1,null,null,null,null,null,1,1,1,null,0,null,1,1,1,null,1,1,1,null,1,1,null,null,null,null,1,1,1,1,1,1,null,0,null,null,1,null,null,null,1,null,1,null,null,null,null,1,null,null,null,1,1,0,null,1,1]",
+      "covered_percent": 92.3076923076923,
+      "covered_strength": 0.9230769230769231,
+      "line_counts": {
+        "missed": 3,
+        "covered": 36,
+        "total": 39
+      },
+      "name": "spec/jasmine/OwnerSpec.js"
+    },
+    {
+      "blob_id": "0936ea0804cc8323e5d5b2db10a0e8d271aad482",
+      "coverage": "[1,null,1,1,1,null,1,1,null,1,1,null,null,1,1,1,null,null,null,null,1,1,null,1,null,null,1,1,1,null,1,1,null,null,null,1,1,1,1,1,null,null,null,1,1,null,1,1,1,null,null,null,1,1,null,3,3,3,null,3,null,null,null,1,1,null,null,null,1,1]",
+      "covered_percent": 100,
+      "covered_strength": 1.205128205128205,
+      "line_counts": {
+        "missed": 0,
+        "covered": 39,
+        "total": 39
+      },
+      "name": "spec/jasmine/StatisticsSpec.js"
+    },
+    {
+      "blob_id": "188c2db1f338750e44f9317b7ebc349f2c295926",
+      "coverage": "[null,null,null,1,1,1,null,1,null,1,null,null,12,null,null,null,null,null,null,null,null,3,null,null,null,null,null,null,null,null,null,null,null,null,3,null,3,null,null,null,null,null,null,3,null,null,3,0,0,0,0,0,null,null,0,0,0,null,null,null,0,null,null,null,3,3,0,null,3,3,3,3,0,null,3,null,null,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,7,null,null,7,0,0,null,0,null,0,null,null,null,7,7,7,789,789,5,null,5,5,null,0,0,null,null,null,null,null,2,2,2,2,2,2,null,1,1,null,null,1,1,null,null,null,0,0,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2,null,null,2,0,0,0,null,null,2,2,null,null,2,0,null,0,0,null,null,null,0,0,null,0,0,0,0,null,null,null,0,0,null,null,null,0,0,0,null,null,0,null,null,null,null,null,2,null,null,null,null,null,null,null,null,null,null,null,null,4,null,4,0,0,0,null,4,4,4,0,null,4,4,4,454,454,454,454,454,null,null,454,null,null,null,null,null,454,null,4,null,0]",
+      "covered_percent": 57.692307692307686,
+      "covered_strength": 47.33653846153846,
+      "line_counts": {
+        "missed": 44,
+        "covered": 60,
+        "total": 104
+      },
+      "name": "lib/thinx/apikey.js"
+    },
+    {
+      "blob_id": "44e98d64533f3da2401bb252646b2b586fdc3a82",
+      "coverage": "[null,null,1,1,1,null,1,1,1,1,null,1,1,1,null,1,null,1,null,1,null,null,1,null,null,null,1,0,0,null,null,0,null,null,null,null,null,null,null,4,4,null,null,null,1,null,null,null,null,null,1,0,0,0,null,null,null,1,null,1,0,0,0,0,null,null,1,0,0,0,null,null,null,null,1,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,0,0,null,null,0,0,0,null,null,0,0,0,null,null,0,0,0,null,null,0,null,0,0,0,0,0,null,null,null,null,null,null,null,null,null,null,null,null,null,0,0,null,0,0,0,null,null,null,null,null,2,null,null,2,2,1,null,null,null,null,null,null,2,0,0,null,null,2,null,null,2,null,null,null,null,null,null,null,2,0,null,null,null,2,null,2,0,0,null,null,null,null,null,null,null,null,null,0,null,2,null,null,null,null,null,null,null,null,null,null,null,null,2,null,2,0,0,0,null,0,null,0,null,null,2,0,0,0,null,null,2,2,2,2,null,2,2,2,null,2,0,0,null,null,null,0,null,2,null,null,2,null,null,null,null,null,null,null,null,null,null,null,null,1,null,null,null,null,1,null,0,null,null,null,1,1,1,24,24,22,null,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,0,null,null,1,null,1,1,null,null,1,null,1,0,0,null,null,1,0,0,0,null,null,null,null,0,0,null,0,null,null,1,0,0,0,null,null,1,0,null,null,null,null,null,null,1,null,null,null,null,null,null,null,1,null,1,1,null,0,null,null,1,0,0,0,null,null,null,1,null,1,1,null,null,null,null,1,null,1,1,null,null,1,0,0,null,null,null,null,1,null,null,1,null,null,null,1,1,null,1,null,1,null,null,0,0,0,0,null,null,0,null,null,0,null,null,null,null,null,null,null,null,null,null,4,4,4,4,4,4,null,0]",
+      "covered_percent": 52.94117647058824,
+      "covered_strength": 1.2,
+      "line_counts": {
+        "missed": 80,
+        "covered": 90,
+        "total": 170
+      },
+      "name": "lib/thinx/buildlog.js"
+    },
+    {
+      "blob_id": "c3f3feeb259efd179424e3f24b1a6320717c5421",
+      "coverage": "[null,null,null,null,1,1,1,1,1,1,null,1,1,null,1,null,1,null,1,null,null,null,16,16,null,null,null,null,0,0,null,0,0,null,null,null,16,16,16,null,null,null,8,8,8,8,null,null,null,4,4,null,4,0,0,0,null,0,0,null,null,0,null,4,0,null,4,4,0,0,0,null,null,4,null,null,null,null,0,0,0,0,0,0,0,0,0,null,null,0,null,null,null,0,0,null,null,0,0,0,null,0,null,null,null,null,0,0,null,null,null,0,null,null,0,null,0,null,null,0,null,null,null,0,0,null,0,0,null,0,0,null,null,0,0,0,0,0,null,0,0,0,null,0,null,null,null,null,4,null,3,null,null,null,null,null,null,null,null,3,null,null,null,0,null,null,0,null,null,null,null,null,4,0,0,null,null,null,null,null,4,3,3,0,0,null,null,null,null,null,4,null,null,null,8,8,0,0,null,8,8,null,null,null,null,null,2,0,0,null,2,0,null,null,null,null,null,0,null,null,null,2,null,2,1,1,null,2,1,1,null,1,1,1,1,null,0,0,0,0,null,0,0,0,0,null,0,null,null,null,0,0,0,null,null,null,0,0,0,null,null,null,null,4,0,0,null,null,4,0,0,0,null,null,4,0,0,0,null,null,4,1,1,null,null,null,null,4,0,0,0,0,0,0,0,null,0,0,0,null,0]",
+      "covered_percent": 37.82051282051282,
+      "covered_strength": 1.608974358974359,
+      "line_counts": {
+        "missed": 97,
+        "covered": 59,
+        "total": 156
+      },
+      "name": "lib/thinx/deployment.js"
+    },
+    {
+      "blob_id": "810196c193d62cb6597d6c8c1b14824d49267ade",
+      "coverage": "[null,null,null,null,1,1,1,1,1,null,1,null,1,null,null,null,4,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2,null,null,2,2,2,null,2,2,2,2,2,null,null,2,0,0,0,0,0,null,0,null,null,null,null,2,0,null,null,2,0,null,null,2,null,null,null,null,null,null,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,null,null,null,null,1,3,3,3,3,3,3,0,null,3,3,null,0,null,null,3,3,3,null,0,null,null,1,1,null,null,null,null,null,180,null,1,null,null,null,null,null,null,1,null,1,null,1,0,0,0,0,0,null,null,null,null,1,1,null,1,null,0,null,0,0,null,0,null,0,0,0,null,0,0,null,null,null,null,1,1,null,null,null,null,null,null,0,null,0,null,0,0,0,0,0,0,null,0,0,null,0,null,null,0,null,null,0,0,0,null,null,null,null,1,null,null,null,null,null,1,0,0,0,null,null,1,1,null,1,null,null,null,0,null,null,null,9,null,null,null,5,null,null,null,null,null,null,null,null,null,null,null,null,5,0,0,null,5,5,5,0,null,null,5,null,5,null,5,null,null,null,null,null,null,null,null,1,null,1,0,0,0,null,null,1,null,1,0,0,0,null,null,1,null,null,null,null,null,null,1,0,0,0,null,null,1,180,null,1,1,null,null,1,null,null,null,null,null,1,null,1,0,0,0,null,null,1,null,1,0,0,0,null,null,1,null,null,null,null,null,null,1,0,0,0,null,null,1,180,1,null,null,null,1,null,1,1,null,null,1,2,2,1,1,1,1,1,1,1,null,null,1,1,null,null,null,1,1,null,null,null,1,0,0,null,1,1,null,null,null,null,null,null,null,null,null,null,null,null,null,2,2,2,null,null,2,null,2,2,2,null,2,0,0,0,0,0,null,0,0,0,null,0,0,null,null,null,2,0,0,0,null,0,null,null,2,2,null,0,0,null,null,null,null,null,null,null,null,null,null,null,null,null,1,1,null,1,null,7,null,7,6,null,null,1,1,1,null,1,0,null,null,1,1,12,12,12,null,12,12,0,null,12,null,null,null,1,null,null,null,9,null,null,null,7,7,null,null,null,1]",
+      "covered_percent": 59.917355371900825,
+      "covered_strength": 3.669421487603306,
+      "line_counts": {
+        "missed": 97,
+        "covered": 145,
+        "total": 242
+      },
+      "name": "lib/thinx/statistics.js"
+    },
+    {
+      "blob_id": "463e90df99567d7542d768403896540b009da75c",
+      "coverage": "[1,1,null,1,null,null,null,null,null,null,null,null,null,2,0,null,null,null,2,2,null,2,2,2]",
+      "covered_percent": 90,
+      "covered_strength": 1.5,
+      "line_counts": {
+        "missed": 1,
+        "covered": 9,
+        "total": 10
+      },
+      "name": "lib/thinx/version.js"
+    },
+    {
+      "blob_id": "071180bd7f16bffc1b888c442459b41f7f3afc26",
+      "coverage": "[1,null,1,1,null,null,1,null,1,null,1,0,0,0,0,null,null,null,0,null,null,null,null,0,null,0,null,null,1,null,0,null,1,null,0,null,null,1,null,null,null,1,1,null,null,1,1,1,2,2,2,null,null,null,1,1,1,1,null,null,null,1,1,1,null,null,1,1,1]",
+      "covered_percent": 75,
+      "covered_strength": 0.8333333333333334,
+      "line_counts": {
+        "missed": 9,
+        "covered": 27,
+        "total": 36
+      },
+      "name": "spec/jasmine/RepositorySpec.js"
+    },
+    {
+      "blob_id": "faba8b5dc4057f124a755e8a5615164a3b85c4f3",
+      "coverage": "[1,null,1,1,null,1,1,null,null,1,1]",
+      "covered_percent": 100,
+      "covered_strength": 1,
+      "line_counts": {
+        "missed": 0,
+        "covered": 7,
+        "total": 7
+      },
+      "name": "spec/jasmine/VersionSpec.js"
+    },
+    {
+      "blob_id": "d8105ee54efcf63c1d583d75b4b62052fb27ba20",
+      "coverage": "[null,null,1,1,null,1,null,null,3,3,null,null,null,null,null,null,null,null,null,null,null,null,1,1,null,1,null,null,1,null,0,null,0,0,null,0,null,null,0,null,null,1,1,0,null,null,null,1,1,0,0,0,null,0,null,1,null,1,null,1,0,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,null,1,0,null,1,1,1,1,1,1,null,null,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2,null,null,2,0,0,0,null,null,null,2,0,0,null,null,null,2,2,2,2,2,1,1,1,1,1,1,1,1,1,null,null,null,1,0,null,null,null,2,1,1,null,null,1,1,0,0,null,1,1,null,null,null,null,null,null,null,null,null,null,null,null,null,1,null,null,1,0,0,0,null,null,1,1,1,0,null,1,1,0,null,1,null,0]",
+      "covered_percent": 68.23529411764706,
+      "covered_strength": 0.8352941176470589,
+      "line_counts": {
+        "missed": 27,
+        "covered": 58,
+        "total": 85
+      },
+      "name": "lib/thinx/apienv.js"
+    },
+    {
+      "blob_id": "0f5e002114f03e394579bd40239aeea5b8c5597b",
+      "coverage": "[null,null,null,null,null,1,1,null,1,1,null,1,null,null,null,4,null,4,4,4,4,null,0,null,null,null,null,null,null,3,3,null,null,0,0,0,0,null,null,null,null,null,null,null,null,null,2,null,2,0,0,null,null,2,0,0,null,null,2,0,0,null,null,2,null,2,null,null,null,null,null,2,2,2,2,0,null,2,null,null,null,null,null,1,null,null,1,0,0,null,null,1,null,1,1,1,1,0,0,null,1,null,0]",
+      "covered_percent": 64.58333333333334,
+      "covered_strength": 1.2708333333333333,
+      "line_counts": {
+        "missed": 17,
+        "covered": 31,
+        "total": 48
+      },
+      "name": "lib/thinx/auth.js"
+    },
+    {
+      "blob_id": "9f71eda11c44595b13b630eb58fca02e1ecc3b70",
+      "coverage": "[null,null,1,1,1,null,1,1,null,1,1,1,null,1,1,1,1,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,1,null,1,null,null,0,null,null,null,0,null,null,null,null,0,null,null,0,null,null,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,null,0,0,0,0,null,0,0,null,null,null,null,null,null,null,null,0,0,null,null,0,0,0,0,null,0,0,0,0,0,0,null,0,null,null,null,null,null,null,null,0,null,0,null,null,null,0,null,null,null,null,null,null,null,null,null,null,null,null,null,0,null,null,0,0,0,0,null,0,0,null,null,null,null,null,null,null,2,null,null,null,2,2,0,null,2,null,null,null,null,0,0,0,0,null,0,0,0,0,null,0,null,null,null,null,null,null,null,null,null,2,2,0,0,null,2,2,228,0,0,0,null,null,2,2,2,null,0,0,0,null,0,null,null,null,null,null,null,null,null,2,null,2,0,0,null,null,2,2,null,2,2,2,null,2,2,null,null,null,2,null,null,null,null,null,null,null,null,null,2,null,null,null,null,null,null,1,1,null,1,0,0,0,null,0,null,null,1,1,1,null,null,1,0,0,null,null,1,null,null,1,0,0,null,null,1,0,0,null,null,1,1,1,1,1,1,0,0,0,0,null,1,1,null,null,null,0,0,null,null,null,null,null,null,0,0,0,0,null,null,0,null,0,null,null,null,null,0,0,0,null,null,0,0,0,null,null,0,0,null,0,0,null,null,0,null,null,0,0,0,0,null,0,null,null,null,null,null,null,null,null,null,0,null,null,null,null,0,0,0,0,null,0,0,null,null,0,0,null,null,null,0,0,0,0,0,0,0,null,null,null,0,null,null,null,null,0,null,null,null,0,0,0,null,0,null,null,null,null,null,null,null,null,null,0,0,0,0,0,null,0,null,null,0,0,0,null,null,null,null,0,null,null,0,0,0,0,null,null,0,0,null,0,null,null,0,0,0,0,null,null,0,null,0,0,0,null,0,null,0,null,0,0,0,0,null,null,0,null,0,0,0,0,0,0,null,0,null,0,null,null,0,null,null,null,0,null,null,null,null,null,null,null,0,0,0,null,null,null,null,0,0,0,0,null,null,null,0,0,0,null,null,0,0,0,0,null,null,0,0,0,0,0,0,0,0,0,0,0,null,0,null,null,0,null,null,null,0,null,null,null,null,null,null,null,null,null,null,0,null,null,0,0,0,0,0,null,0,0,null,null,null,null,null,null,null,1,1,1,1,null,null,null,1,0,0,null,null,1,null,null,1,0,null,null,1,null,1,1,null,0,0,0,null,null,null,null,1,0,null,null,null,1,null,null,null,null,1,null,0,0,null,null,1,1,null,null,1,1,1,null,null,null,0,0,null,0,0,null,null,null,null,null,null,null,null,null,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,null,0,null,0,null,0,null,0,null,0,null,null,0,0,0,0,null,0,null,null,0,0,0,null,0,0,0,null,0,0,null,null,null,null,null,null,null,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,0,null,null,0,null,0,0,0,null,0,null,0,null,null,0,0,null,null,null,0,null,0,null,null,null,null,null,null,null,0]",
+      "covered_percent": 23.734177215189874,
+      "covered_strength": 1.0253164556962024,
+      "line_counts": {
+        "missed": 241,
+        "covered": 75,
+        "total": 316
+      },
+      "name": "lib/thinx/owner.js"
+    },
+    {
+      "blob_id": "8f09380a730b0da3cec8127fe7af8e4886747a33",
+      "coverage": "[1,null,1,null,1,1,1,1,1,null,null,1,1,null,null,null,1,1,1,null,1,1,null,null,null,null,null,1,1,null,1,null,null,null,null,1,1,null,null,null,null,1,null,1,null,null,null,1,1,null,null,null,1,1,1,1,null,null,null,null,1,1,null,null,null,1,null,1,1,null,null,1,1,null,null,null,null,null,null,1,1,1,null,null,1,null,1,null,0,null,1]",
+      "covered_percent": 97.5609756097561,
+      "covered_strength": 0.975609756097561,
+      "line_counts": {
+        "missed": 1,
+        "covered": 40,
+        "total": 41
+      },
+      "name": "spec/jasmine/ApikeySpec.js"
+    },
+    {
+      "blob_id": "0650d9550de53f428d44d0bbaa6503dd522b7da2",
+      "coverage": "[1,null,1,1,null,1,1,1,1,null,1,null,null,null,null,null,1,1,null,null,1,1,null,1,1,null,null,null,1,1,null,1,1,null,null,null,1,1,1,null,null,1,1,1,null,null,1,1,1,1,0,null,1,1,null,null,null,1,1,null,null,1]",
+      "covered_percent": 97.05882352941177,
+      "covered_strength": 0.9705882352941176,
+      "line_counts": {
+        "missed": 1,
+        "covered": 33,
+        "total": 34
+      },
+      "name": "spec/jasmine/BuildlogSpec.js"
+    },
+    {
+      "blob_id": "3496c215ee60a799d6d5a6d1da1bc1d187bee430",
+      "coverage": "[1,null,1,1,null,1,1,null,1,1,1,1,null,1,null,1,1,null,1,1,1,null,null,null,null,null,null,null,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,null,null,null,null,null,null,null,null,null,null,null,1,null,null,null,null,null,null,1,1,1,1,1,1,1,null,1,null,null,null,1,1,null,null,null,null,1,0,0,0,0,0,null,null,null,1,1,1,1,1,null,null,null,null,1,1,null,null,null,1,1,0,null,null,null,null,1,1,1,null,null,null,null,1,1,null,null,null,1,1,0,null,null,null,0,0,0,null,null,null,1,1,null,null,null,1,1,1,null,1,1,1,1,null,null,null,1,1,1,null,1,1,1,null,1,null,1,0,null,null,1,1,null,null,null,null,1,1,1,1,null,null,1,null,1,1,1,1,1,1,1,1,null,1,1,null,null,null,1,1,null,null,null,null,null,1,1,1,1,1,1,null,null,null,1,1,1,null,null,1,null,1,1,0,null,1]",
+      "covered_percent": 88.67924528301887,
+      "covered_strength": 0.8867924528301887,
+      "line_counts": {
+        "missed": 12,
+        "covered": 94,
+        "total": 106
+      },
+      "name": "spec/jasmine/DeviceSpec.js"
+    },
+    {
+      "blob_id": "610582fe83ec8072337a9e6ad3275770b21e2995",
+      "coverage": "[1,null,1,1,null,1,1,null,1,null,null,null,1,null,null,null,1,1,null,1,null,1,1,null,null,null,1,1,1,1,1,null,null,null,1,1,null,null,1,1,1,null,null,null,1,1,null,1,null,1,1,null,null,null,1,1,null,1,null,1,1,null,null,null,1,1,1,null,1,1,1,1]",
+      "covered_percent": 100,
+      "covered_strength": 1,
+      "line_counts": {
+        "missed": 0,
+        "covered": 39,
+        "total": 39
+      },
+      "name": "spec/jasmine/RsakeySpec.js"
+    },
+    {
+      "blob_id": "82fddecd25c53033dc0594cf9632d4a5779bfc92",
+      "coverage": "[null,null,null,null,1,1,1,null,1,1,null,1,null,null,14,10,null,14,0,0,0,null,14,14,null,null,null,null,null,null,14,14,14,0,null,14,1,null,null,null,null,null,1,null,null,1,0,0,0,null,1,1,1130,1130,542,542,542,null,542,null,null,null,null,null,1]",
+      "covered_percent": 79.41176470588235,
+      "covered_strength": 134.1764705882353,
+      "line_counts": {
+        "missed": 7,
+        "covered": 27,
+        "total": 34
+      },
+      "name": "lib/thinx/audit.js"
+    },
+    {
+      "blob_id": "ee815d5d56b37380ad8d2bdb4ebf68e985d65887",
+      "coverage": "[null,null,1,null,1,null,1,null,1,1,null,null,1,1,1,1,1,1,null,1,null,null,null,28,null,0,0,null,0,0,null,null,0,0,0,null,null,0,0,null,0,null,0,0,null,0,0,null,0,null,null,null,0,null,0,null,0,null,0,null,null,0,null,null,28,null,null,28,0,null,null,null,null,null,null,28,null,null,null,null,null,28,null,null,null,null,null,null,1,null,null,null,0,0,null,0,0,null,0,null,null,0,0,null,0,null,null,0,null,null,null,1,1,null,null,1,1,null,null,1,1,null,0,0,null,null,null,null,null,1,null,null,null,null,null,1,null,null,null,null,null,1,1,null,null,0,0,null,1,null,1,1,1,null,0,0,null,null,null,null,0,0,0,null,0,0,0,0,0,null,null,null,null,null,null,null,null,0,0,0,0,0,0,null,0,0,0,0,0,0,null,0,0,null,null,null,null,null,null,null,null,null,11,0,0,null,11,null,null,0,0,0,0,0,0,0,null,0,0,null,null,null,0,0,null,null,0,0,0,null,0,null,null,0,0,null,null,null,null,29,0,0,null,null,29,0,0,null,29,null,null,null,1,0,null,1,1,null,null,null,1,0,null,1,null,null,null,1,0,null,1,null,null,null,4,0,null,4,null,null,null,null,1,null,1,null,1,null,null,null,1,1,1,1,1,1,1,1,1]",
+      "covered_percent": 40.55944055944056,
+      "covered_strength": 2.1188811188811187,
+      "line_counts": {
+        "missed": 85,
+        "covered": 58,
+        "total": 143
+      },
+      "name": "lib/thinx/globals.js"
+    },
+    {
+      "blob_id": "440c40c0418c51e367011c19c661d0126ef74eca",
+      "coverage": "[1,1,null,1,null,1,null,1,1,1,1,1,null,null,null,1,1,null,null,1,1,1]",
+      "covered_percent": 100,
+      "covered_strength": 1,
+      "line_counts": {
+        "missed": 0,
+        "covered": 14,
+        "total": 14
+      },
+      "name": "spec/jasmine/AuditSpec.js"
+    },
+    {
+      "blob_id": "422ab939d42a2be1d1b301337cfee1cee0602bad",
+      "coverage": "[1,null,null,1,1,null,1,1,1,1,1,1,null,1,1,null,null,1,1,null,null,null,null,1,1,null,null,null,1,1,null,null,null,null,1,1,null,null,null,1,1,1,null,null,null,1,1,1]",
+      "covered_percent": 100,
+      "covered_strength": 1,
+      "line_counts": {
+        "missed": 0,
+        "covered": 25,
+        "total": 25
+      },
+      "name": "spec/jasmine/BuilderSpec.js"
+    },
+    {
+      "blob_id": "9ab5afa34a2c8799c082e672e90e8e34efddbe62",
+      "coverage": "[1,null,1,1,null,1,1,1,null,1,null,null,null,null,null,null,1,null,null,null,1,1,1,null,null,1,1,1,null,null,1,1,1,null,null,1,1,1,null,null,1,null,1,1,null,null,1,1,1]",
+      "covered_percent": 100,
+      "covered_strength": 1,
+      "line_counts": {
+        "missed": 0,
+        "covered": 26,
+        "total": 26
+      },
+      "name": "spec/jasmine/DeploymentSpec.js"
+    },
+    {
+      "blob_id": "c1ba858965462233900d1d34da5eb5db768c7770",
+      "coverage": "[null,null,1,1,1,null,1,1,null,1,1,null,1,1,1,1,1,null,1,1,null,1,null,1,null,null,null,0,0,0,0,null,null,null,null,null,0,null,null,null,null,0,0,null,null,null,0,0,null,null,null,null,0,null,0,0,0,null,0,0,0,0,0,0,0,null,null,null,0,0,null,null,null,null,null,null,null,0,0,0,0,null,null,null,null,null,0,0,0,0,0,null,0,0,0,0,null,0,0,0,0,0,0,0,null,0,0,null,null,null,null,null,null,null,null,0,0,0,0,0,0,0,0,null,0,null,null,null,null,null,null,null,null,2,null,2,2,2,0,0,null,2,0,0,0,0,0,0,0,null,0,0,null,null,2,null,null,null,2,2,2,2,null,0,0,0,null,null,null,null,null,2,2,2,2,null,null,null,4,4,4,null,0,null,null,null,null,null,null,null,null,null,null,2,2,0,0,0,null,2,2,null,0,0,null,null,null,null,null,null,null,null,null,null,2,0,null,2,2,null,null,2,2,2,null,2,null,null,2,0,null,null,null,2,null,null,2,0,0,null,2,2,0,null,null,2,null,null,null,null,null,2,0,null,null,null,null,2,2,2,2,2,null,null,null,null,0,0,null,0,0,0,null,null,0,0,0,0,null,0,null,0,0,0,null,null,null,null,null,null,null,null,null,null,null,null,1,null,1,1,1,1,null,null,0,0,0,0,null,null,0,0,0,0,0,0,0,0,0,null,null,0,0,null,null,null,null,2,2,0,0,null,2,0,0,null,null,2,2,2,2,2]",
+      "covered_percent": 38.333333333333336,
+      "covered_strength": 0.6833333333333333,
+      "line_counts": {
+        "missed": 111,
+        "covered": 69,
+        "total": 180
+      },
+      "name": "lib/thinx/sources.js"
+    },
+    {
+      "blob_id": "7193d18cba85684d5cbe6909c8800b666c03f734",
+      "coverage": "[1,null,1,1,1]",
+      "covered_percent": 100,
+      "covered_strength": 1,
+      "line_counts": {
+        "missed": 0,
+        "covered": 4,
+        "total": 4
+      },
+      "name": "spec/jasmine/AppSpec.js"
+    },
+    {
+      "blob_id": "1bee02228f3e14e1527b9434353b38f4f2fce9a4",
+      "coverage": "[1,null,1,null,1,1,null,1,1,null,1,1,null,1,1,1,1,1,null,1,1,null,1,1,1,null,null,null,null,null,null,null,null,1,null,null,null,null,null,null,null,null,null,null,null,1,1,null,null,null,null,1,0,0,0,0,0,null,null,null,1,1,1,1,1,null,null,null,null,null,1,1,1,1,null,1,null,null,null,1,1,null,null,null,1,1,1,1,null,1,null,null,null,1,1,null,null,1,1,1,1,0,null,1,null,null,null,null,null,1,1,null,null,1,1,null,1]",
+      "covered_percent": 89.47368421052632,
+      "covered_strength": 0.8947368421052632,
+      "line_counts": {
+        "missed": 6,
+        "covered": 51,
+        "total": 57
+      },
+      "name": "spec/jasmine/DevicesSpec.js"
+    }
+  ],
+  "repo_token": ""
+}

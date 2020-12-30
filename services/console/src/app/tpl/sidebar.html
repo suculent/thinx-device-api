@@ -1,0 +1,82 @@
+<div class="page-sidebar navbar-collapse collapse">
+    <!-- BEGIN SIDEBAR MENU -->
+    <!-- DOC: Apply "page-sidebar-menu-light" class right after "page-sidebar-menu" to enable light sidebar menu style(without borders) -->
+    <!-- DOC: Apply "page-sidebar-menu-hover-submenu" class right after "page-sidebar-menu" to enable hoverable(hover vs accordion) sub menu mode -->
+    <!-- DOC: Apply "page-sidebar-menu-closed" class right after "page-sidebar-menu" to collapse("page-sidebar-closed" class must be applied to the body element) the sidebar sub menu mode -->
+    <ul class="page-sidebar-menu" data-keep-expanded="false" data-auto-scroll="true" data-slide-speed="200" ng-class="{'page-sidebar-menu-closed': settings.layout.pageSidebarClosed}">
+        <li class="heading">
+            <h3>GENERAL</h3>
+        </li>
+
+        <li class="start nav-item">
+            <a ui-sref="dashboard">
+                <i class="icon-home"></i>
+                <span class="title">Dashboard</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a ui-sref="devices">
+                <i class="icon-bulb"></i>
+                <span class="title">Devices</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a ui-sref="history">
+                <i class="icon-hourglass"></i>
+                <span class="title">History</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+					<a href="javascript:;" name="settings-sub">
+  					<i class="icon-settings"></i>
+  					<span class="title">Settings</span>
+  					<span class="selected"></span>
+  					<span class="arrow"></span>
+					</a>
+
+          <ul class="sub-menu" style="display: none;">
+            <li>
+                <a ui-sref="apikey">
+                    <i class="icon-key"></i>
+                    <span class="title">API Keys</span>
+                </a>
+            </li>
+            <li>
+                <a ui-sref="source">
+                    <i class="icon-folder-alt"></i>
+                    <span class="title">App Sources</span>
+                </a>
+            </li>
+            <li>
+                <a ui-sref="deploykey">
+                    <i class="icon-lock"></i>
+                    <span class="title">Deploy Keys</span>
+                </a>
+            </li>
+            <li>
+                <a ui-sref="transformer">
+                    <i class="icon-puzzle"></i>
+                    <span class="title">Transformers</span>
+                </a>
+            </li>
+            <li>
+                <a ui-sref="enviro">
+                    <i class="icon-globe"></i>
+                    <span class="title">Environment</span>
+                </a>
+            </li>
+            <li>
+              <a ui-sref="profile.dashboard" id="sidebar_menu_link_profile">
+                  <i class="icon-user"></i>
+                  <span class="title">User Profile</span>
+              </a>
+						</li>
+					</ul>
+				</li>
+
+    </ul>
+    <!-- END SIDEBAR MENU -->
+</div>

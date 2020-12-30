@@ -1,0 +1,17 @@
+{
+  "_id": "_design/logs",
+  "language": "javascript",
+  "views": {
+    "logs_by_owner": {
+      "map": "function (doc) { if(doc.owner) { emit ([doc.date, doc.owner], { date: doc.date, message: doc.message, owner: doc.owner }); }}"
+    },
+    "logs_by_date": {
+      "map": "function (doc) { if(doc.date) { emit (doc.date, doc ); } }"
+    }
+  },
+  "updates": {
+    "delete_expired": "function (doc, req) { if (doc.date < req.query.mindate) { doc._deleted = true; return [doc, 'deleted']; } else return [doc, doc._id] }",
+    "log": "function(doc, req) { doc.log.push(req.body.record); doc.last_update = req.body.record.timestamp; return doc._id; }",
+    "state": "function(doc, req) { doc.state = req.body.state; return doc._id; }"
+  }
+}
