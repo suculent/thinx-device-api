@@ -396,16 +396,10 @@ let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function(
   console.log("» Legacy API started on port", app_config.port);
 });
 
-let caLoaded = false;
-
 var read = require('fs').readFileSync;
 
 if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
 
-  // Validate SSL certificate (if defined) and do not allow startup with invalid one...
-  // It's pointless and it should lead to faster fix when this fails immediately in production.
-
-  let caCert;
   let ssloaded = false;
   let sslvalid = false;
 
@@ -413,27 +407,14 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
     console.log("[WARNING] Did not find app_config.ssl_ca file, websocket logging will fail...");
   }
 
-  try {
-      caCert = read(app_config.ssl_ca, 'utf8');
-      var ca = pki.certificateFromPem(caCert);
-      var client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
-      try {
-          console.log("SSL caStore loaded...");
-          if (!ca.verify(client)) {
-            console.log("Certificate verification failed.");
-            sslvalid = false;
-          }
-      } catch (err) {
-          console.log(err);
-      }
-
-      sslvalid = true;
-      ssloaded = true;
-      caLoaded = true;
-      
-  } catch (e) {
-      console.log('Failed to load CA certificate (' + e + ')');
-      // process.exit(43);
+  let caCert = read(app_config.ssl_ca, 'utf8');
+  let ca = pki.certificateFromPem(caCert);
+  let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
+  console.log("SSL certificate loaded...");
+  ssloaded = true;
+  if (!ca.verify(client)) {
+    console.log("Certificate verification failed.");
+    sslvalid = false;
   }
 
   if (ssloaded && sslvalid) {
@@ -489,12 +470,6 @@ wsapp.use(session({
   rolling: false,
   saveUninitialized: false,
 }));
-
-if (!caLoaded) {
-  console.log("× CA file not found, expect WSS issues!");
-} else {
-  console.log("» CA file loaded and available...");
-}
 
 let wss = new WebSocket.Server({ server: server }); // or { noServer: true }
 const socketMap = new Map();
