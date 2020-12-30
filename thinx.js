@@ -28,8 +28,8 @@ const session = require("express-session");
 const Auth = require('./lib/thinx/auth.js');
 const auth = new Auth();
 
-const x509 = require('x509');
 
+const pki = require('node-forge').pki;
 const fs = require("fs-extra");
 const url = require('url');
 
@@ -415,11 +415,17 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
 
   try {
       caCert = read(app_config.ssl_ca, 'utf8');
-      
-      var crt_obj = x509.parseCert(caCert);
-      console.log("notBefore:", crt_obj.notBefore);
-      console.log("notAfter:", crt_obj.notAfter);
-      console.log("now:", new Date());
+      var ca = pki.certificateFromPem(caCert);
+      var client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
+      try {
+          if (!ca.verify(client)) {
+            console.log("Certificate verification failed.");
+            sslvalid = false;
+          }
+      } catch (err) {
+          console.log(err);
+      }
+
       sslvalid = true;
 
       console.log("SSL caStore loaded...");
