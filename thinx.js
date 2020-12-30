@@ -508,37 +508,36 @@ const socketMap = new Map();
 server.on('upgrade', function (request, socket, head) {
 
   const pathname = url.parse(request.url).pathname;
-  if (socketMap.get(pathname)) {
-    console.log("Socket for this pathname already exists on upgrade.");
+
+  if (typeof (socketMap.get(pathname)) === "undefined") {
+    console.log("Socket already mapped for", pathname);
     return;
   }
 
-  console.log('Parsing session from request...');
+  if ( typeof(request.session) === "undefined" ) {
+    return;
+  }
 
   sessionParser(request, {}, () => {
 
-    if (typeof (request.session) !== "undefined") {
-      if (!request.session.owner) {
-        console.log("Should destroy socket, access seems unauthorized.");
-        socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
-        socket.destroy();
-        return;
-      }
+    if ((typeof (request.session.owner) === "undefined") || (request.session.owner === null)) {
+      console.log("Should destroy socket, access unauthorized.");
+      socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+      socket.destroy();
+      return;
+    }
 
-      console.log("---> Session is parsed, handling protocol upgrade...");
-      socketMap.set(pathname, socket);
-      try {
-        wss.handleUpgrade(request, socket, head, function (ws) {
-          console.log("----> Upgrade handled, emitting connection...");
-          wss.emit('connection', ws, request, pathname);
-        });
-      } catch (upgradeException) {
-        // fails on duplicate upgrade, why does it happen?
-        console.log("Exception excepted, arrived (duplicate socket upgrade).");
-        //console.log(upgradeException);
-      }
-    } else {
-      console.log("WSS Request session undefined.");
+    console.log("---> Session is parsed, handling protocol upgrade...");
+
+    socketMap.set(pathname, socket);
+    try {
+      wss.handleUpgrade(request, socket, head, function (ws) {
+        wss.emit('connection', ws, request);
+      });
+    } catch (upgradeException) {
+      // fails on duplicate upgrade, why does it happen?
+      console.log("Exception caught upgrading same socket twice.");
+      //console.log(upgradeException);
     }
   });
 });
@@ -560,10 +559,24 @@ setInterval(function ping() {
   }
 }, 30000);
 
-wss.on("connection", function(ws, req, pathname) {
+//
+// Behaviour of new WSS connection (authenticate and add router paths that require websocket)
+//
 
-  console.log("-----> Incoming WSS connection at path", pathname);
-  // console.log('------> Total clients: ', wss.clients.length); // returns undefined
+var logtail_callback = function(err, result) {
+  if (err) {
+    console.log("[thinx] logtail_callback error:", err, "message", result);
+  } else {
+    console.log("[thinx] logtail_callback result:", result);
+  }
+};
+
+wss.on("error", function(err) {
+  console.log("WSS REQ ERROR: " + err);
+  return;
+});
+
+wss.on("connection", function(ws, req) {
 
   // May not exist while testing...
   if (typeof(ws) === "undefined" || ws === null) {
@@ -576,14 +589,10 @@ wss.on("connection", function(ws, req, pathname) {
     return;
   }
 
-  wss.on("error", function(err) {
-    console.log("WSS REQ ERROR: " + err);
-    return;
-  });
-
+  const pathname = url.parse(req.url).pathname;
+  console.log("-----> Incoming WSS connection at path", pathname);
+  
   ws.isAlive = true;
-  ws.on('pong', heartbeat);
-
 
   // Should be done after validation
   _ws = ws; // public websocket (!) does not at least fail
@@ -594,29 +603,21 @@ wss.on("connection", function(ws, req, pathname) {
   var cookies = req.headers.cookie;
 
   if (typeof(req.headers.cookie) !== "undefined") {
-
     if (cookies.indexOf("thx-") === -1) {
-      console.log("» WARNING! No thx-cookie found in WS: " + JSON.stringify(req.headers
-        .cookie));
-    }
-
-    if (typeof(req.session) !== "undefined") {
-      console.log("Session: " + JSON.stringify(req.session));
+      console.log("» WARNING! No thx-cookie found in WS: " + JSON.stringify(req.headers.cookie));
     } else {
-      console.log("No session!");
+      console.log("» DEPRECATED thx-cookie found in WS: " + JSON.stringify(req.headers.cookie));
     }
+  } else {
+    console.log("» DEPRECATED WS has no cookie headers");
   }
-
-  var logtail_callback = function(err, result) {
-    console.log("[thinx] logtail_callback error:", err, "message", result);
-  };
-
-  // WARNING! New, untested! Requires websocket and refactoring into router.
 
   /* Returns specific build log for owner */
   console.log("Mapping endpoint: /api/user/logs/tail");
+
+  // TODO: Extract with params (ws)
   app.post("/api/user/logs/tail", function(req2, res) {
-    if (!(router.validateSecurePOSTRequest(req) || router.validateSession(req2, res))) return;
+    if (!(router.validateSecurePOSTRequest(req2) || router.validateSession(req2, res))) return;
     var owner = req2.session.owner;
     if (typeof(req2.body.build_id) === "undefined") {
       router.respond(res, {
@@ -631,18 +632,12 @@ wss.on("connection", function(ws, req, pathname) {
       router.respond(res, err);
     };
     
-    //const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
-    //const blog = new Buildlog();
     let safe_id = Sanitka.branch(req2.body.build_id);
     console.log("Tailing build log for " + safe_id);
     blog.logtail(safe_id, owner, ws, error_callback);
   });
 
-  ws.on('close', function () {
-    map.delete(pathname);
-    console.log("Closed socket, deleting ", pathname, "from map");
-  });
-
+  // TODO: Extract with params (ws, messenger)
   ws.on("message", (message) => {
     console.log("WSS message", message);
     if (message.indexOf("{}") == 0) return; // skip empty messages
@@ -671,9 +666,16 @@ wss.on("connection", function(ws, req, pathname) {
       }
     }
   });
+
+  ws.on('pong', heartbeat);
+
+  ws.on('close', function () {
+    socketMap.delete(pathname);
+    console.log("Closed socket, deleting ", pathname, "from map");
+  });
+
 }).on("error", function(err) {
-  console.log("WSS ERROR: " + err);
-  return;
+  console.log("WSS Connection Error: ", err);
 });
 
 
@@ -682,7 +684,6 @@ wss.on("connection", function(ws, req, pathname) {
  */
 
 var package_info = require("./package.json");
-const { map } = require("ssl-root-cas");
 var product = package_info.description;
 var version = package_info.version;
 
