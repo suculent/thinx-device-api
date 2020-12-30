@@ -412,9 +412,10 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
   console.log("SSL certificate loaded...");
   ssloaded = true;
-  if (!ca.verify(client)) {
+  if (ca.verify(client)) {
+    sslvalid = true;
+  } else {
     console.log("Certificate verification failed.");
-    sslvalid = false;
   }
 
   if (ssloaded && sslvalid) {
@@ -427,7 +428,7 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
       console.log("» Starting HTTPS server on " + app_config.secure_port + "...");
       https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0", function() { } );
   } else {
-      console.log("🔴 SSL certificate loading FAILED! Check your configuration!");
+      console.log("» SSL certificate loading or verification FAILED! Check your configuration!");
   }
 
 } else {
