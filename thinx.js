@@ -371,18 +371,6 @@ app.use(express.urlencoded({
   limit: "1mb"
 }));
 
-
-
-// CSRF protection
-// now add csrf and other middlewares, after the router was mounted
-// app.use(express.urlencoded({ extended: false }));
-
-var cookieParser = require('cookie-parser');
-// app.use(cookieParser());
-let helmet = require("helmet");
-//app.use(helmet);
-//app.use(noCache());
-
 let router = require('./lib/router.js')(app, _ws);
 
 /*
@@ -400,7 +388,6 @@ var read = require('fs').readFileSync;
 
 if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
 
-  let ssloaded = false;
   let sslvalid = false;
 
   if (!fs.existsSync(app_config.ssl_ca)) {
@@ -411,14 +398,13 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   let ca = pki.certificateFromPem(caCert);
   let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
   console.log("SSL certificate loaded...");
-  ssloaded = true;
   if (ca.verify(client)) {
     sslvalid = true;
   } else {
     console.log("Certificate verification failed.");
   }
 
-  if (ssloaded && sslvalid) {
+  if (sslvalid) {
       ssl_options = {
         key: read(app_config.ssl_key, 'utf8'),
         cert: read(app_config.ssl_cert, 'utf8'),
@@ -798,7 +784,7 @@ if (isMasterProcess()) {
 			if (err) {
 				console.log("Error creating MQTT PASSWORDS file: " + err);
 			}
-      console.log("MQTT Passwords file " + app_config.mqtt.passwords + " not found (configured in app_config.mqtt.passwords)! Running in disaster recovery mode...");
+      console.log("MQTT Passwords file not found (configured in app_config.mqtt.passwords)! Running in disaster recovery mode...");
       setup_restore_owners_credentials("_all_docs"); // fetches only IDs and last revision, works with hundreds of users
 		});
   }
