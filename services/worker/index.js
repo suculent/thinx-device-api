@@ -104,6 +104,7 @@ class Worker {
 
         // preprocess
         let tomes = CMD.split(" ");
+        console.log(tomes);
         let command = tomes.join(" ");
         
         let shell = exec.spawn(command, { shell: true });
