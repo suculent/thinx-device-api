@@ -101,8 +101,12 @@ class Worker {
         CMD.replace("./builder", "/opt/thinx/thinx-device-api/builder"); // WTF?
 
         console.log("[OID:" + owner + "] [BUILD_STARTED] Worker started...");
+
+        // preprocess
+        let tomes = CMD.split(" ");
+        let command = tomes.join(" ");
         
-        let shell = exec.spawn(CMD, { shell: true });
+        let shell = exec.spawn(command, { shell: true });
         let build_start = new Date().getTime();
 
 		shell.stdout.on("data", (data) => {

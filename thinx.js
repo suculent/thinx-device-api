@@ -798,7 +798,7 @@ if (isMasterProcess()) {
 			if (err) {
 				console.log("Error creating MQTT PASSWORDS file: " + err);
 			}
-      console.log("MQTT Passwords file " + app_config.mqtt.passwords + " not found (configured in app_config.mqtt.passwords)! Running in disaster recovery mode...");
+      console.log("MQTT Passwords file not found (configured in app_config.mqtt.passwords)! Running in disaster recovery mode...");
       setup_restore_owners_credentials("_all_docs"); // fetches only IDs and last revision, works with hundreds of users
 		});
   }
