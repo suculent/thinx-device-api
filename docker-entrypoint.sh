@@ -71,6 +71,7 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   chmod +x ./cc-test-reporter
   #./cc-test-reporter before-build
   npm run test # | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
+  bash <(curl -Ls https://coverage.codacy.com/get.sh) report
   pwd
   ls -la
   # chmod +x ./.codecov.sh
