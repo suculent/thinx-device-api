@@ -16,7 +16,7 @@ fi
 
 echo "[thinx-entrypoint] Creating default DBs (TODO: only if does not exist)..."
 
-DEVNULL=""
+DEVNULL="/dev/null"
 
 curl -s -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_users > $DEVNULL
 curl -s -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_replicator > $DEVNULL
@@ -33,6 +33,9 @@ export DOCKER_HOST="tcp://docker:2375"
 export DOCKER_HOST="unix:///var/run/docker.sock"
 
 # exec "$@"
+
+echo "Profile:?"
+cat .profile
 
 source ~/.profile
 
