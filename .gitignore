@@ -70,8 +70,6 @@ conf/github-oauth.json
 # Sonar
 .scannerwork/
 
-statistics/**
-
 # Codacy
 .profile
 

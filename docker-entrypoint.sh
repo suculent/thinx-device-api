@@ -14,11 +14,13 @@ if [[ -f $MICROSCANNER_ARTIFACT ]]; then
   cp $MICROSCANNER_ARTIFACT /mnt/data/test-reports/microscanner.html
 fi
 
-echo "[thinx-entrypoint] Creating default DBs..."
+echo "[thinx-entrypoint] Creating default DBs (TODO: only if does not exist)..."
 
-curl -s -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_users > /dev/null
-curl -s -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_replicator > /dev/null
-curl -s -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_global_changes > /dev/null
+DEVNULL=""
+
+curl -s -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_users > $DEVNULL
+curl -s -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_replicator > $DEVNULL
+curl -s -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_global_changes > $DEVNULL
 
 export SQREEN_DISABLE_STARTUP_WARNING=1
 
@@ -35,7 +37,11 @@ export DOCKER_HOST="unix:///var/run/docker.sock"
 source ~/.profile
 
 if [[ -f ./.thinx_env ]]; then
-  echo "[thinx-entrypoint] Sourcing .thinx_env"
+  echo "[thinx-entrypoint] Sourcing .thinx_env (remove this after finding out what's inside so important that it's not a docker env var)"
+  echo
+  export
+  echo
+  cat ./.thinx_env
   source ./.thinx_env
 else
   echo "[thinx-entrypoint] .thinx_env not found, expects ENVIRONMENT, ROLLBAR_ACCESS_TOKEN, ROLLBAR_ENVIRONMENT and REVISION variables to be set."
