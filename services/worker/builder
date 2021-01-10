@@ -834,10 +834,10 @@ case $PLATFORM in
 				set +o pipefail
 			else
 				swarm-build $WORKDIR suculent/arduino-docker-build $LOG_PATH
-				#echo "[worker] [build.sh] WORKDIR RESULT at $WORKDIR:"
-				#ls -la ${WORKDIR}
-				#echo "[worker] [build.sh] DEPLOY RESULT at ${DEPLOYMENT_PATH}:"
-				#ls -la ${DEPLOYMENT_PATH}
+				echo "[worker] [build.sh] WORKDIR RESULT at $WORKDIR:"
+				ls -la ${WORKDIR}
+				echo "[worker] [build.sh] DEPLOY RESULT at ${DEPLOYMENT_PATH}:"
+				ls -la ${DEPLOYMENT_PATH}
 			fi
 
 			echo "[arduino] Docker completed <<<" | tee -a "${LOG_PATH}"
