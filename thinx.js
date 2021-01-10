@@ -627,7 +627,7 @@ wss.on("connection", function(ws, req) {
 
   ws.on('close', function () {
     socketMap.delete(pathname);
-    console.log("Closed socket, deleting ", pathname, "from map");
+    console.log("» Closed websocket, deleting ", pathname, "from map");
   });
 
 }).on("error", function(err) {
