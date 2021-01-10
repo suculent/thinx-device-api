@@ -15,7 +15,7 @@ const exec = require("child_process");
 const version = require('./package.json').version;
 const io = require('socket.io-client');
 const fs = require("fs-extra");
-
+const chmodr = require('chmodr');
 class Worker {
 
     constructor(build_server) {
@@ -161,9 +161,6 @@ class Worker {
                     socket.emit('job-status', status_object); // should be called job-result everywhere, always indiates completion
 
                     // calculate build time
-      
-            
-
 				}
             }
 
@@ -173,13 +170,13 @@ class Worker {
                 if (err) {
                     console.log("» [ERROR] Log file could not be created.");
                 } else {
-                    try {
-                        fs.fchmodSync(fs.openSync(build_log_path, "r"), 0o776); // allow write by build process
-                        // console.log("File permission change successful");
-                    } catch (error) {
-                        console.log(error);
-                    }
-                    fs.appendFileSync(build_log_path, logline);
+                    chmodr(path + "/" + build_id, 0o777, (cherr) => {
+                        if (cherr) {
+                            console.log('Failed to execute chmodr', cherr);
+                        } else {
+                            fs.appendFileSync(build_log_path, logline);
+                        }
+                    });
                 }
             });
 
