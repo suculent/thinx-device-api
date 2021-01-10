@@ -173,13 +173,12 @@ class Worker {
                 if (err) {
                     console.log("» [ERROR] Log file could not be created.");
                 } else {
-                    /*
                     try {
-                        fs.fchmodSync(fs.openSync(build_log_path, "r"), 0o666); // allow write by build process
-                        console.log("File permission change successful");
+                        fs.fchmodSync(fs.openSync(build_log_path, "r"), 0o776); // allow write by build process
+                        // console.log("File permission change successful");
                     } catch (error) {
                         console.log(error);
-                    }*/
+                    }
                     fs.appendFileSync(build_log_path, logline);
                 }
             });
