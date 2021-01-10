@@ -24,20 +24,8 @@ curl -s -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_global_c
 
 export SQREEN_DISABLE_STARTUP_WARNING=1
 
-# Returns error in read-only filesystem; should be probably done inside the Dockerfile instead
-#echo "[thinx-entrypoint] Enabling IPV4 forwarding..."
-#sysctl net.ipv4.ip_forward=1
-#sysctl -w net.ipv4.conf.all.forwarding=1
-
 export DOCKER_HOST="tcp://docker:2375"
 export DOCKER_HOST="unix:///var/run/docker.sock"
-
-# exec "$@"
-
-echo "Profile:?"
-cat .profile
-
-source ~/.profile
 
 if [[ -f ./.thinx_env ]]; then
   echo "[thinx-entrypoint] Sourcing .thinx_env (remove this after finding out what's inside so important that it's not a docker env var)"
