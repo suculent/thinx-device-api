@@ -12,7 +12,7 @@ export THINX_ROOT=/opt/thinx/thinx-device-api
 fi
 
 echo ""
-echo "-=[ ☢  THiNX IoT RTM BUILDER ☢  ]=-"
+echo "-=[ ☢  THiNX IoT BUILD WORKER ☢  ]=-"
 echo ""
 
 # do not exit when subsequent tools fail...
@@ -28,8 +28,9 @@ random-string()
 NODE_ID=$(docker info -f '{{.Swarm.NodeID}}')
 SWARM=false
 if [[ -z $NODE_ID ]]; then
-        echo "This is not a swarm node."
-		SWARM=false
+        echo "This is not a swarm node!"
+		docker info -f '{{.Swarm.NodeID}}'
+		SWARM=true # should be false, temporary hack only! what does the docker info report?
 else
         echo "This is a swarm node ${NODE_ID}"
 		SWARM=true
