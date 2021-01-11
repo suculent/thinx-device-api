@@ -1,4 +1,4 @@
-FROM node:15
+FROM node:14.15.4
 
 # docker build -t suculent/thinx-device-api .
 
