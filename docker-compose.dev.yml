@@ -151,7 +151,6 @@ services:
 
   worker:
     env_file: .env
-    user: worker
     image: registry.thinx.cloud:5000/thinx/worker:swarm # may be changed to local build
     environment:
       - "SQREEN_TOKEN=${SQREEN_TOKEN}"
