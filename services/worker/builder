@@ -214,8 +214,14 @@ echo "Target device deployment path: ${TARGET_PATH}"
 DEPLOYMENT_PATH=$OWNER_ID_HOME/$UDID/$BUILD_ID
 echo "Deployment path: ${DEPLOYMENT_PATH}"
 
+touch $DEPLOYMENT_PATH/.write
+
+if [[ ! -f touch $DEPLOYMENT_PATH/.write ]]; then
+	echo "ERROR: Deployment path $DEPLOYMENT_PATH not writable!"
+	exit 6
+fi
+
 # Create user-referenced folder in public www space
-mkdir -p $OWNER_ID_HOME
 mkdir -p $DEPLOYMENT_PATH
 chmod -R 777 $DEPLOYMENT_PATH
 
