@@ -208,16 +208,22 @@ BUILD_ROOT=$DATA_ROOT/repos
 OWNER_ID_HOME=$DATA_ROOT/deploy/$OWNER_ID
 echo "Owner deployment home: ${OWNER_ID_HOME}"
 
+echo "-"
+
 TARGET_PATH=$DATA_ROOT/deploy/$OWNER_ID/$UDID
 echo "Target device deployment path: ${TARGET_PATH}"
+
+echo "-"
 
 DEPLOYMENT_PATH=$OWNER_ID_HOME/$UDID/$BUILD_ID
 echo "Deployment path: ${DEPLOYMENT_PATH}"
 
+echo "-"
+
 touch $DEPLOYMENT_PATH/.write
 
 if [[ ! -f $DEPLOYMENT_PATH/.write ]]; then
-	echo "ERROR: Deployment path $DEPLOYMENT_PATH not writable!"
+	echo "ERROR: Deployment path $DEPLOYMENT_PATH not writable by Worker shell! Exiting build."
 	exit 6
 fi
 

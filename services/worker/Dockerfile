@@ -77,13 +77,13 @@ VOLUME /var/lib/docker
 RUN npm install . --only-prod
 
 # Create a user group 'thinx'
-RUN addgroup -S thinx && \
-    adduser -S -D -h /opt/thinx/thinx-device-api worker thinx && \
-    chown -R worker:thinx /opt/thinx/thinx-device-api && \
-    chmod +x ./devsec
+# RUN addgroup -S thinx && \
+    # adduser -S -D -h /opt/thinx/thinx-device-api worker thinx && \
+    # chown -R worker:thinx /opt/thinx/thinx-device-api && \
+    # chmod +x ./devsec
 
 # Switch to 'transformer' or 'node' user
-USER worker
+# USER worker
 
 # Open the mapped port
 EXPOSE 3000
