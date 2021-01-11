@@ -212,16 +212,17 @@ TARGET_PATH=$DATA_ROOT/deploy/$OWNER_ID/$UDID
 echo "Target device deployment path: ${TARGET_PATH}"
 
 DEPLOYMENT_PATH=$OWNER_ID_HOME/$UDID/$BUILD_ID
-# echo "Deployment path: ${DEPLOYMENT_PATH}"
+echo "Deployment path: ${DEPLOYMENT_PATH}"
 
 # Create user-referenced folder in public www space
 mkdir -p $OWNER_ID_HOME
 mkdir -p $DEPLOYMENT_PATH
+chmod -R 776 $DEPLOYMENT_PATH
 
 LOG_PATH="${DEPLOYMENT_PATH}/build.log"
 echo "Creating live logfile at: $LOG_PATH"
 touch $LOG_PATH
-chmod 666 $LOG_PATH
+chmod 776 $LOG_PATH
 
 if [[ -f "lint.txt" ]]; then
 	echo "Found LINT results in current folder:" | tee -a "${LOG_PATH}"
