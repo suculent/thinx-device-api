@@ -848,7 +848,7 @@ case $PLATFORM in
 
 			echo "[arduino] Docker completed <<<" | tee -a "${LOG_PATH}"
 
-			if [[ ! -z $(cat ${LOG_PATH} | grep "THiNX BUILD SUCCESSFUL") ]] ; then
+			if [[ -f ${WORKDIR}/firmware.bin ]]; then
 				BUILD_SUCCESS=true
 				# TODO: FIXME, can be more binfiles with partitions!
 				BIN_FILE=$( find $BUILD_PATH/$REPO_NAME -name "*.bin" | head -n 1)
