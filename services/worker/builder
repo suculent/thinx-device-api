@@ -12,8 +12,8 @@ export THINX_ROOT=/opt/thinx/thinx-device-api
 fi
 
 echo ""
-echo "-=[ ☢  THiNX IoT BUILD WORKER v1.3.1 ☢  ]=-"
-echo ""
+echo "-=[ ☢  THiNX IoT WORKER BUILDER v1.3.2 ☢  ]=-"
+echo "."
 
 # do not exit when subsequent tools fail...
 set +e
@@ -216,7 +216,7 @@ echo "Deployment path: ${DEPLOYMENT_PATH}"
 
 touch $DEPLOYMENT_PATH/.write
 
-if [[ ! -f touch $DEPLOYMENT_PATH/.write ]]; then
+if [[ ! -f $DEPLOYMENT_PATH/.write ]]; then
 	echo "ERROR: Deployment path $DEPLOYMENT_PATH not writable!"
 	exit 6
 fi
