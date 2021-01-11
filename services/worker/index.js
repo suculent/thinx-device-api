@@ -170,8 +170,8 @@ class Worker {
                 if (err) {
                     console.log("» [ERROR] Log file could not be created.");
                 } else {
-                    fs.fchmodSync(fs.openSync(build_log_path), 0o776);
-                    chmodr(path + "/" + build_id, 0o776, (cherr) => {
+                    fs.fchmodSync(fs.openSync(build_log_path), 0o777);
+                    chmodr(path + "/" + build_id, 0o777, (cherr) => {
                         if (cherr) {
                             console.log('Failed to execute chmodr', cherr);
                         } else {

@@ -217,12 +217,17 @@ echo "Deployment path: ${DEPLOYMENT_PATH}"
 # Create user-referenced folder in public www space
 mkdir -p $OWNER_ID_HOME
 mkdir -p $DEPLOYMENT_PATH
-chmod -R 776 $DEPLOYMENT_PATH
+chmod -R 777 $DEPLOYMENT_PATH
 
 LOG_PATH="${DEPLOYMENT_PATH}/build.log"
-echo "Creating live logfile at: $LOG_PATH"
+if [[ ! -f $LOG_PATH ]]; then
+	echo "Creating new logfile at: $LOG_PATH"
+else
+	echo "Found existing logfile at: $LOG_PATH"
+	cat $LOG_PATH
+fi
+
 touch $LOG_PATH
-chmod 776 $LOG_PATH
 
 if [[ -f "lint.txt" ]]; then
 	echo "Found LINT results in current folder:" | tee -a "${LOG_PATH}"
