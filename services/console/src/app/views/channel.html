@@ -16,7 +16,7 @@
       </h3>
       <p>
         <b>Enable mesh communication </b><br><br>
-        Create "mesh" channel, shared by selected devices to allow secure communication across group of devices.
+        Create "mesh" channel, shared by selected devices to allow secure communication across group of things.
       </p>
     </div>
 
@@ -87,8 +87,8 @@
           <table class="table table-hover table-light">
             <tr ng-repeat="channel in $root.channels | propsFilter:{pubkey:searchText,date:searchText}" ng-click="checkItem(channel.mesh_id)" ng-class="selectedItems.indexOf(channel.mesh_id) > -1 ? 'selected-row' : 'default-row'">
               <td>
-                <div class="row-item-subtitle">Created on {{channel.mesh_id}}</div>
-                <div class="key-label monospace-info">{{channel.alias}}</div>
+                <div class="row-item-subtitle">{{channel.alias}}</div>
+                <div class="key-label monospace-info">{{channel.mesh_id}}</div>
               </td>
             </tr>
           </table>
@@ -107,15 +107,15 @@
           </div>
           <div class="modal-body">
             <div class="form-group">
-              <label class="control-label col-md-3">Mesh Channel Alias</label>
+              <label class="control-label col-md-3">Channel Alias</label>
               <div class="col-md-9">
                 <input type="text" ng-model="meshAlias" name="meshAlias" class="form-control" placeholder="Custom Mesh Channel" />
               </div>
             </div>
             <div class="form-group last">
-              <label class="control-label col-md-3">Mesh Channel ID</label>
+              <label class="control-label col-md-3">Mesh ID</label>
               <div class="col-md-9">
-                <input type="text" id="meshId" name="meshId" class="form-control" placeholder="custom_mesh_1" />
+                <input type="text" ng-model="meshId" name="meshId" class="form-control" placeholder="custom-mesh-id" />
                 <br>
               </div>
             </div>
