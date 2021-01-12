@@ -85,3 +85,4 @@ mqtt_passwords
 docker-compose.override.yml
 
 thinx.device.api.code-workspace
+test.out.acl

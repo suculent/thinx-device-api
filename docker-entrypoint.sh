@@ -29,9 +29,6 @@ export DOCKER_HOST="unix:///var/run/docker.sock"
 
 if [[ -f ./.thinx_env ]]; then
   echo "[thinx-entrypoint] Sourcing .thinx_env (remove this after finding out what's inside so important that it's not a docker env var)"
-  echo
-  export
-  echo
   cat ./.thinx_env
   source ./.thinx_env
 else
