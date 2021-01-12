@@ -64,9 +64,6 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
   // UI temporary data, might be saved to localstorage
   if (typeof($rootScope.meta) === "undefined") {
     $rootScope.meta = {};
-    $rootScope.meta.version = {
-      ui: '1.0.3 (beta)'
-    };
     $rootScope.meta.builds = []; // builds by build_id
     $rootScope.meta.transformers = {}; // decoded transformers
     $rootScope.meta.deviceBuilds = {}; // builds by udid
@@ -76,11 +73,11 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
     $rootScope.meta.auditlogs = {}; // flags for auditlogs
     $rootScope.meta.auditlogs = {}; // flags for auditlogs
     $rootScope.meta.latestFirmwareEnvelope = {};
-  } else {
-    $rootScope.meta.version = {
-      ui: '1.0.3 (beta)'
-    };
   }
+
+  $rootScope.meta.version = {
+    ui: '1.0.5 (beta)'
+  };
 
   // dashboard stats defaults
   $rootScope.stats = {
@@ -127,6 +124,7 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
   $rootScope.devices = [];
   //$rootScope.rsakeys = [];
   $rootScope.deploykeys = [];
+  $rootScope.channels = [];
   $rootScope.apikeys = [];
   $rootScope.enviros = [];
   $rootScope.buildHistory = [];
@@ -731,6 +729,28 @@ RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             '../assets/global/plugins/clipboardjs/clipboard.min.js',
             'js/thinx-api.js',
             'js/controllers/DeploykeyController.js',
+            'js/controllers/LogviewController.js'
+          ]
+        });
+      }]
+    }
+  })
+
+  // Mesh Channel Page
+  .state('channel', {
+    url: "/channel",
+    templateUrl: "views/channel.html",
+    data: { pageTitle: 'Mesh Channel Management' },
+    controller: "ChannelController",
+    resolve: {
+      deps: ['$ocLazyLoad', function ($ocLazyLoad) {
+        return $ocLazyLoad.load({
+          name: 'RTM',
+          insertBefore: '#ng_load_plugins_before',
+          files: [
+            '../assets/global/plugins/clipboardjs/clipboard.min.js',
+            'js/thinx-api.js',
+            'js/controllers/ChannelController.js',
             'js/controllers/LogviewController.js'
           ]
         });

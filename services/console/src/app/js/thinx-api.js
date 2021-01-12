@@ -47,6 +47,17 @@ var Thinx = {
     return revokeDeploykeys(filenames);
   },
 
+  // Channels
+  channelList: function () {
+    return channelList();
+  },
+  createChannel: function () {
+    return createChannel();
+  },
+  revokeChannels: function (meshIds) {
+    return revokeChannels(meshIds);
+  },
+
   // SOURCE
   sourceList: function () {
     return sourceList();
@@ -266,6 +277,34 @@ function init($rootScope, $scope) {
       if (!$rootScope.profile.info.goals.includes('deploykey')
       && $rootScope.deploykeys.length > 0) {
         $rootScope.profile.info.goals.push('deploykey');
+        $scope.$emit("saveProfileChanges", ["goals"]);
+      }
+    }
+
+    console.log('refreshing view...');
+    $rootScope.$apply()
+  }
+
+  if (typeof ($rootScope.updateChannelsListener) === "undefined") {
+    $rootScope.updateChannelsListener = $rootScope.$on('updateChannels', function (event, data) {
+      event.stopPropagation();
+      updateChannels(data);
+    });
+  }
+
+  function updateChannels(data) {
+    var response = JSON.parse(data);
+    // TODO: hack must be refined
+    $rootScope.channels = response;
+    $scope.$apply();
+    console.log('//////// channels:');
+    console.log($rootScope.channels);
+
+    // save user-spcific goal achievement
+    if ($rootScope.profile.info.goals.length > 0) {
+      if (!$rootScope.profile.info.goals.includes('channel')
+        && $rootScope.channels.length > 0) {
+        $rootScope.profile.info.goals.push('channel');
         $scope.$emit("saveProfileChanges", ["goals"]);
       }
     }
@@ -970,6 +1009,43 @@ function revokeDeploykeys(filenames) {
     url: urlBase + '/user/rsakey/revoke',
     type: 'POST',
     data: JSON.stringify({ filenames: filenames }),
+    dataType: 'json'
+  });
+}
+
+// Mesh channels /user/rsakey
+//
+// createChannel
+// revokeChannels [channel_ids]
+// channelList
+function channelList() {
+  return $.ajax({
+    url: urlBase + '/api/mesh/list',
+    type: 'GET'
+  });
+}
+
+function createChannel(mesh_id, alias, owner_id) {
+  return $.ajax({
+    url: urlBase + '/api/mesh/create',
+    type: 'POST',
+    data: JSON.stringify({
+      owner_id: owner_id,
+      mesh_id: mesh_id,
+      alias: alias
+    }),
+    dataType: 'json'
+  });
+}
+
+function revokeChannels(owner_id, mesh_ids) {
+  return $.ajax({
+    url: urlBase + '/api/mesh/delete',
+    type: 'POST',
+    data: JSON.stringify({ 
+      owner_id: owner_id,
+      mesh_ids: mesh_ids 
+    }),
     dataType: 'json'
   });
 }

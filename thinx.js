@@ -373,6 +373,22 @@ app.use(express.urlencoded({
 
 let router = require('./lib/router.js')(app, _ws);
 
+/* Webhook Server (new impl.) */
+
+app.post("/githook", function(req, res) {
+  // From GitHub, exit on non-push events prematurely
+  // if (fail_on_invalid_git_headers(req)) return;
+  // TODO: Validate and possibly reject invalid requests to prevent injection
+  // E.g. using git_secret_key from app_config
+
+  // do not wait for response, may take ages
+  console.log("Webhook request accepted...");
+  res.status(200).end("Accepted");
+  console.log("Webhook process started...");
+  watcher.process_hook(req.body);
+  console.log("Webhook process completed.");
+}); // end of new Webhook Server
+
 /*
  * HTTP/S Server
  */
@@ -424,21 +440,6 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
 app.use('/static', express.static(path.join(__dirname, 'static')));
 app.set('trust proxy', ['loopback', '127.0.0.1']);
 
-/* Webhook Server (new impl.) */
-
-app.post("/githook", function(req, res) {
-  // From GitHub, exit on non-push events prematurely
-  if (fail_on_invalid_git_headers(req)) return;
-  // TODO: Validate and possibly reject invalid requests to prevent injection
-  // E.g. using git_secret_key from app_config
-
-  // do not wait for response, may take ages
-  console.log("Webhook request accepted...");
-  res.status(200).end("Accepted");
-  console.log("Webhook process started...");
-  watcher.process_hook(req.body);
-  console.log("Webhook process completed.");
-}); // end of new Webhook Server
 
 /*
  * WebSocket Server

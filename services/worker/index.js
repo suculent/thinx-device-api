@@ -222,9 +222,13 @@ class Worker {
         // either by directly modifying the `auth` attribute
         socket.on("connect_error", () => {
             if ((typeof(process.env.WORKER_SECRET) !== "undefined")) {
-                socket.auth.token = process.env.WORKER_SECRET;
-                console.log(new Date().getTime(), "connect_error attempt to resolve using WORKER_SECRET");
-                socket.connect();
+                if (typeof(socket.auth) !== "undefined") {
+                    socket.auth.token = process.env.WORKER_SECRET;
+                    console.log(new Date().getTime(), "connect_error attempt to resolve using WORKER_SECRET");
+                }
+                setTimeout(function(){
+                    socket.connect();
+                }, 10000);
             }
         });
 
