@@ -1020,14 +1020,14 @@ function revokeDeploykeys(filenames) {
 // channelList
 function channelList() {
   return $.ajax({
-    url: urlBase + '/api/mesh/list',
+    url: urlBase + '/mesh/list',
     type: 'GET'
   });
 }
 
 function createChannel(mesh_id, alias, owner_id) {
   return $.ajax({
-    url: urlBase + '/api/mesh/create',
+    url: urlBase + '/mesh/create',
     type: 'POST',
     data: JSON.stringify({
       owner_id: owner_id,
@@ -1040,7 +1040,7 @@ function createChannel(mesh_id, alias, owner_id) {
 
 function revokeChannels(owner_id, mesh_ids) {
   return $.ajax({
-    url: urlBase + '/api/mesh/delete',
+    url: urlBase + '/mesh/delete',
     type: 'POST',
     data: JSON.stringify({ 
       owner_id: owner_id,
