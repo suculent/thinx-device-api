@@ -119,17 +119,10 @@
                 <br>
               </div>
             </div>
-            <div class="form-group last">
-              <label class="control-label col-md-3">Owner ID</label>
-              <div class="col-md-9">
-                <input type="text" ng-model="ownerId" name="ownerId" class="form-control" ng-value="$root.profile.owner" ng-readonly="true" />
-                <br>
-              </div>
-            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" ng-click="createChannel(meshId, meshAlias, ownerId)"
+            <button type="button" class="btn btn-primary" ng-click="createChannel(meshId, meshAlias)"
               ng-disabled="(meshAlias == null || meshAlias.length < 1) || (meshId == null || meshId.length < 1)"><i class="fa fa-check"></i> Submit</button>
           </div>
         </div>

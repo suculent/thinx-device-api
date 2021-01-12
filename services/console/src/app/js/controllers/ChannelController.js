@@ -24,7 +24,7 @@ angular.module('RTM').controller('ChannelController', ['$rootScope', '$scope', '
 
   $scope.searchText = '';
 
-  $scope.createChannel = function (mesh_id, alias, owner_id) {
+  $scope.createChannel = function (mesh_id, alias) {
 
     /*
     console.log('-- testing for duplicates --');
@@ -38,7 +38,7 @@ angular.module('RTM').controller('ChannelController', ['$rootScope', '$scope', '
     }
     */
 
-    Thinx.createChannel(mesh_id, alias, owner_id)
+    Thinx.createChannel(mesh_id, alias, $rootScope.profile.owner)
       .done(function (response) {
         if (typeof (response) !== "undefined") {
           if (response.success) {
