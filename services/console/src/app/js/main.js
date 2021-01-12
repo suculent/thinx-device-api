@@ -64,9 +64,6 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
   // UI temporary data, might be saved to localstorage
   if (typeof($rootScope.meta) === "undefined") {
     $rootScope.meta = {};
-    $rootScope.meta.version = {
-      ui: '1.0.3 (beta)'
-    };
     $rootScope.meta.builds = []; // builds by build_id
     $rootScope.meta.transformers = {}; // decoded transformers
     $rootScope.meta.deviceBuilds = {}; // builds by udid
@@ -76,11 +73,11 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
     $rootScope.meta.auditlogs = {}; // flags for auditlogs
     $rootScope.meta.auditlogs = {}; // flags for auditlogs
     $rootScope.meta.latestFirmwareEnvelope = {};
-  } else {
-    $rootScope.meta.version = {
-      ui: '1.0.3 (beta)'
-    };
   }
+
+  $rootScope.meta.version = {
+    ui: '1.0.5 (beta)'
+  };
 
   // dashboard stats defaults
   $rootScope.stats = {
