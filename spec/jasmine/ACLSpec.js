@@ -39,4 +39,10 @@ describe("ACL Manager", function() {
     });
   });
 
+  it("should be able to prune given topic", function(done) {
+    acl.prune("mesh-id2", () => {
+      done();
+    });
+  });
+
 });
