@@ -37,6 +37,13 @@ angular.module('RTM').controller('DashboardController', ['$rootScope', '$scope',
     })
     .fail(error => $scope.$emit("xhrFailed", error));
 
+    Thinx.channelList()
+    .done(function (data) {
+      console.log('+++ updateChannels ');
+      $scope.$emit("updateChannels", data);
+    })
+    .fail(error => $scope.$emit("xhrFailed", error));
+
     Thinx.deviceList()
     .done(function(data) {
       $scope.$emit("updateDevices", data);
