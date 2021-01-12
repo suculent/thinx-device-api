@@ -127,6 +127,7 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
   $rootScope.devices = [];
   //$rootScope.rsakeys = [];
   $rootScope.deploykeys = [];
+  $rootScope.channels = [];
   $rootScope.apikeys = [];
   $rootScope.enviros = [];
   $rootScope.buildHistory = [];
@@ -731,6 +732,28 @@ RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             '../assets/global/plugins/clipboardjs/clipboard.min.js',
             'js/thinx-api.js',
             'js/controllers/DeploykeyController.js',
+            'js/controllers/LogviewController.js'
+          ]
+        });
+      }]
+    }
+  })
+
+  // Mesh Channel Page
+  .state('channel', {
+    url: "/channel",
+    templateUrl: "views/channel.html",
+    data: { pageTitle: 'Mesh Channel Management' },
+    controller: "ChannelController",
+    resolve: {
+      deps: ['$ocLazyLoad', function ($ocLazyLoad) {
+        return $ocLazyLoad.load({
+          name: 'RTM',
+          insertBefore: '#ng_load_plugins_before',
+          files: [
+            '../assets/global/plugins/clipboardjs/clipboard.min.js',
+            'js/thinx-api.js',
+            'js/controllers/ChannelController.js',
             'js/controllers/LogviewController.js'
           ]
         });
