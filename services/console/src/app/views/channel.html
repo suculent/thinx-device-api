@@ -97,7 +97,7 @@
     </div>
   </div>
   <!-- BEGIN FORM-->
-  <form ng-submit="addChannel()" class="form-horizontal form-bordered" name="channelModal">
+  <form ng-submit="createChannel()" class="form-horizontal form-bordered" name="channelModal">
     <div id="pageModal" class="modal fade" role="dialog" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -112,17 +112,24 @@
                 <input type="text" ng-model="meshAlias" name="meshAlias" class="form-control" placeholder="Custom Mesh Channel" />
               </div>
             </div>
-            <div class="form-group last">
+            <div class="form-group">
               <label class="control-label col-md-3">Mesh ID</label>
               <div class="col-md-9">
                 <input type="text" ng-model="meshId" name="meshId" class="form-control" placeholder="custom-mesh-id" />
                 <br>
               </div>
             </div>
+            <div class="form-group last">
+              <label class="control-label col-md-3">Owner ID</label>
+              <div class="col-md-9">
+                <input type="text" ng-model="ownerId" name="ownerId" class="form-control" ng-value="$root.profile.owner" ng-readonly="true" />
+                <br>
+              </div>
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" ng-click="addChannel()"
+            <button type="button" class="btn btn-primary" ng-click="createChannel(meshId, meshAlias, ownerId)"
               ng-disabled="(meshAlias == null || meshAlias.length < 1) || (meshId == null || meshId.length < 1)"><i class="fa fa-check"></i> Submit</button>
           </div>
         </div>
