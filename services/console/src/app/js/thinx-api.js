@@ -51,8 +51,8 @@ var Thinx = {
   channelList: function () {
     return channelList();
   },
-  createChannel: function () {
-    return createChannel();
+  createChannel: function (meshId, alias, ownerId) {
+    return createChannel(meshId, alias, ownerId);
   },
   revokeChannels: function (meshIds) {
     return revokeChannels(meshIds);
@@ -294,8 +294,13 @@ function init($rootScope, $scope) {
 
   function updateChannels(data) {
     var response = JSON.parse(data);
-    // TODO: hack must be refined
-    $rootScope.channels = response;
+    
+    if (typeof(response.mesh_ids) === "undefined") {
+      console.log('ERROR: Invalid channel data...');
+      return;
+    }
+
+    $rootScope.channels = response.mesh_ids;
     $scope.$apply();
     console.log('//////// channels:');
     console.log($rootScope.channels);
