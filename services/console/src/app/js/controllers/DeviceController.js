@@ -291,12 +291,11 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
   $scope.channelSelected = function (channel) {
     console.log('-- new channel --', channel);
     if (typeof (channel.value.mesh_id) !== 'undefined') {
-      // if channel dowsnt exist yet, create it
-        console.log("- NOT IMPLEMENTED -");
-        $scope.$emit("saveProfileChanges", ["transformers"]);
-      } else {
-        console.log(typeof ($rootScope.getTransformerByUtid(transformer.value.utid)));
-      }
+      // channel creation via device detail is not available
+      console.log("- NOT IMPLEMENTED -");
+      $scope.$emit("saveProfileChanges", ["mesh_ids"]);
+    } else {
+      console.log("- NOT IMPLEMENTED -");
     }
   };
 

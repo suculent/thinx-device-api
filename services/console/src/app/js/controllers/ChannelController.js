@@ -49,7 +49,8 @@ angular.module('RTM').controller('ChannelController', ['$rootScope', '$scope', '
                 $scope.$emit("updateChannels", data);
               })
               .fail(error => $scope.$emit("xhrFailed", error));              
-            $scope.$apply();
+              toastr.success('Channel created.', '<ENV::loginPageTitle>', { timeOut: 5000 });
+              $('#pageModal').modal('hide');
           } else {
             console.log(response);
             $('.msg-warning').text(response.status);
