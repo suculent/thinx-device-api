@@ -85,7 +85,7 @@
 
         <div class="table-scrollable table-scrollable-borderless">
           <table class="table table-hover table-light">
-            <tr ng-repeat="deploykey in $root.deploykeys | propsFilter:{pubkey:searchText,date:searchText}" ng-click="checkItem(deploykey.filename)" ng-class="selectedItems.indexOf(deploykey.filename) > -1 ? 'selected-row' : 'default-row'">
+            <tr ng-repeat="deploykey in $root.deploykeys | propsFilter:{'pubkey': searchText, 'date': searchText}" ng-click="checkItem(deploykey.filename)" ng-class="selectedItems.indexOf(deploykey.filename) > -1 ? 'selected-row' : 'default-row'">
               <td>
                 <div class="row-item-subtitle">Created on {{deploykey.name}}</div>
                 <div class="key-label monospace-info">{{deploykey.pubkey}}</div>
