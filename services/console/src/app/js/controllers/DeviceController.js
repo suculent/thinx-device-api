@@ -25,6 +25,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     .fail(error => $scope.$emit("xhrFailed", error));
 
     $scope.attachingSource = false;
+    $scope.attachingChannel = false;
   });
 
   // end of onload function
@@ -337,7 +338,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
       value: {
         mesh_id: generateUtid(),
         alias: channelAlias,
-        owner_id: rootScope.profile.owner_id
+        owner_id: $rootScope.profile.owner_id
       }
     };
     return newChannel;
