@@ -54,8 +54,8 @@ var Thinx = {
   createChannel: function (meshId, alias, ownerId) {
     return createChannel(meshId, alias, ownerId);
   },
-  revokeChannels: function (meshIds) {
-    return revokeChannels(meshIds);
+  revokeChannels: function (ownerId, meshIds) {
+    return revokeChannels(ownerId, meshIds);
   },
 
   // SOURCE
