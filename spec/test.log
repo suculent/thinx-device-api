@@ -4,7 +4,6 @@ api_1          | /opt/thinx/thinx-device-api
 api_1          | net.ipv4.ip_forward = 1
 api_1          | net.ipv4.conf.all.forwarding = 1
 api_1          | mesg: ttyname failed: Inappropriate ioctl for device
-api_1          | .thinx_env not found, expects ROLLBAR_ACCESS_TOKEN, ROLLBAR_ENVIRONMENT and REVISION variables to be set.
 api_1          | Installing Build-tools for DinD/DooD
 api_1          | /opt/thinx/thinx-device-api/builders /opt/thinx/thinx-device-api
 api_1          | Using default tag: latest

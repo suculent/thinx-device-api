@@ -9,7 +9,6 @@ aqua.sh
 
 # Environment and data
 .env
-.thinx_env
 .thx_prefix
 environment.json
 rollbar.json

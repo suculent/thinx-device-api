@@ -27,14 +27,6 @@ export SQREEN_DISABLE_STARTUP_WARNING=1
 export DOCKER_HOST="tcp://docker:2375"
 export DOCKER_HOST="unix:///var/run/docker.sock"
 
-if [[ -f ./.thinx_env ]]; then
-  echo "[thinx-entrypoint] Sourcing .thinx_env (remove this after finding out what's inside so important that it's not a docker env var)"
-  cat ./.thinx_env
-  source ./.thinx_env
-else
-  echo "[thinx-entrypoint] .thinx_env not found, expects ENVIRONMENT, ROLLBAR_ACCESS_TOKEN, ROLLBAR_ENVIRONMENT and REVISION variables to be set."
-fi
-
 echo "[thinx-entrypoint] Adding host checking exception for github.com..."
 ssh -tt -o "StrictHostKeyChecking=no" git@github.com
 
