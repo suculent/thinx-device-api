@@ -40,6 +40,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
   $scope.deviceForm.platform = 'unknown';
   $scope.deviceForm.keyhash = null;
   $scope.deviceForm.source = null;
+  $scope.deviceForm.mesh_ids = [];
   $scope.deviceForm.auto_update = null;
   $scope.deviceForm.description = null;
   $scope.deviceForm.category = null;
@@ -486,6 +487,12 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
       $scope.deviceForm.source = device.source;
     } else {
       $scope.deviceForm.source = null;
+    }
+
+    if (typeof (device.mesh_ids) !== "undefined") {
+      $scope.deviceForm.mesh_ids = device.mesh_ids;
+    } else {
+      $scope.deviceForm.mesh_ids = [];
     }
 
     if (typeof(device.auto_update) !== "undefined") {
