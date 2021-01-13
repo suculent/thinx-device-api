@@ -136,7 +136,6 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
 
   };
 
-
   $scope.detachSource = function(deviceUdid) {
     console.log('-- detaching source from ' + deviceUdid + '--');
     Thinx.detachSource(deviceUdid)
@@ -289,6 +288,18 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     }
   };
 
+  $scope.channelSelected = function (channel) {
+    console.log('-- new channel --', channel);
+    if (typeof (channel.value.mesh_id) !== 'undefined') {
+      // if channel dowsnt exist yet, create it
+        console.log("- NOT IMPLEMENTED -");
+        $scope.$emit("saveProfileChanges", ["transformers"]);
+      } else {
+        console.log(typeof ($rootScope.getTransformerByUtid(transformer.value.utid)));
+      }
+    }
+  };
+
   function generateUtid() {
     if (typeof($scope.deviceForm.transformers) !== 'undefined') {
       return String(CryptoJS.SHA256($rootScope.profile.owner+new Date().getTime()));
@@ -296,7 +307,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     return String(0);
   }
 
-  $scope.tagTransform = function(transformerAlias) {
+  $scope.tagTransform = function (transformerAlias) {
     console.log('transformer alias search:', transformerAlias);
     var newTransformer = {
       value: {
@@ -318,6 +329,18 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     } else {
       $scope.deviceForm.transformersVisible.push(utid);
     }
+  };
+
+  $scope.channelTransform = function (channelAlias) {
+    console.log('channel alias search:', channelAlias);
+    var newChannel = {
+      value: {
+        mesh_id: generateUtid(),
+        alias: channelAlias,
+        owner_id: rootScope.profile.owner_id
+      }
+    };
+    return newChannel;
   };
 
   $scope.build = function(deviceUdid, sourceId) {
