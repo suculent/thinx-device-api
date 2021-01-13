@@ -336,7 +336,7 @@
 
         <div class="row">
           <!--  | orderBy:list.orderBy.prop:list.reverse track by device.udid -->
-          <div class="col-xs-12 device-simple-block"  ng-repeat="(key, devices) in $root.devices | propsFilter:{'alias':list.searchText, 'mac':list.searchText} | orderBy:list.orderBy.prop:list.reverse | groupBy:list.groupBy.prop"  ng-class="selectedItems.indexOf(device.udid) > -1 ? 'selected-block' : ''">
+          <div class="col-xs-12 device-simple-block"  ng-repeat="(key, devices) in $root.devices | propsFilter:{'alias': list.searchText, 'mac': list.searchText} | orderBy:list.orderBy.prop:list.reverse | groupBy:list.groupBy.prop"  ng-class="selectedItems.indexOf(device.udid) > -1 ? 'selected-block' : ''">
             <!-- | propsFilter:{'alias':list.searchText, 'mac':list.searchText} | orderBy:list.orderBy.prop:list.reverse  -->
             <div class="dash-group-delimiter"><span>{{key}}</span></div>
             <div class="row">

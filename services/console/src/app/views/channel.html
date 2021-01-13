@@ -85,7 +85,7 @@
 
         <div class="table-scrollable table-scrollable-borderless">
           <table class="table table-hover table-light">
-            <tr ng-repeat="channel in $root.channels | propsFilter:{pubkey:searchText,date:searchText}" ng-click="checkItem(channel.mesh_id)" ng-class="selectedItems.indexOf(channel.mesh_id) > -1 ? 'selected-row' : 'default-row'">
+            <tr ng-repeat="channel in $root.channels | propsFilter:{'alias': searchText, 'mesh_id': searchText}" ng-click="checkItem(channel.mesh_id)" ng-class="selectedItems.indexOf(channel.mesh_id) > -1 ? 'selected-row' : 'default-row'">
               <td>
                 <div class="row-item-subtitle">{{channel.alias}}</div>
                 <div class="key-label monospace-info">{{channel.mesh_id}}</div>
