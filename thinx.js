@@ -69,8 +69,6 @@ const hour = 3600 * 1000;
 
 var _ws = null;
 
-console.log("» DEBUG app_config", { app_config });
-
 var db = app_config.database_uri;
 
 var https = require("https");
