@@ -104,11 +104,6 @@ EXPOSE 9002
 # Copy app source code
 COPY . .
 
-# this should be generated/overwritten with sed on entrypoint, entrypoint needs /.first_run file and all ENV_VARS
-COPY ./.thinx_env ./.thinx_env
-
-RUN touch ./.thinx_env
-
 # download test reporter as a static binary
 RUN curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
 RUN chmod +x ./cc-test-reporter

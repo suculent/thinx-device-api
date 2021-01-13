@@ -123,11 +123,6 @@ EXPOSE 9002
 # Copy app source code
 COPY . .
 
-# this works around an issue where file does not exist in Gitlab CI environment
-
-# this works around an issue where file does not exist in Gitlab CI environment
-RUN touch ./.thinx_env
-
 # those packages should not be required and pose HIGH security risks
 # g++ is a DevSec build-only dependency, imagemagick source is currently unknown but it is definitely not required
 RUN apt-get remove -y \
