@@ -117,8 +117,8 @@ angular.module('RTM').controller('ChannelController', ['$rootScope', '$scope', '
   }
 
   $scope.resetModal = function() {
-    $scope.deploykeyCreated = null;
-    $scope.deploykeyValue = null;
+    $scope.meshAlias = null;
+    $scope.meshId = null;
     $scope.selectedItems = [];
   }
 
