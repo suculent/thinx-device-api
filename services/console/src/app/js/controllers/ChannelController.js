@@ -70,7 +70,7 @@ angular.module('RTM').controller('ChannelController', ['$rootScope', '$scope', '
   function revokeChannels(mesh_ids) {
     console.log('--revoking channals ' + mesh_ids.length +'--')
 
-    Thinx.revokeChannels(mesh_ids)
+    Thinx.revokeChannels(mesh_ids, $rootScope.profile.owner)
     .done(function(data) {
       if (data.success) {
         console.log('Success:', data);
