@@ -238,10 +238,76 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     });
   };
 
-  $scope.submitChannelChange = function (prop) {
+  $scope.submitChannelChange = function () {
+    console.log("- NOT IMPLEMENTED - will be used for detaching");
+  };
 
-    console.log('-- comparing channels: ', $scope.deviceForm.mesh_ids, $rootScope.devices[$scope.deviceForm.udid].mesh_ids);
+  $scope.channelSelected = function (channel) {
+    console.log('-- selecting channel --', channel);
+    if (typeof (channel.value.mesh_id) !== 'undefined') {
+      
+      // attach channel to device
+      
 
+
+    } else {
+      console.log("- NOT IMPLEMENTED -", channel.value.mesh_id);
+    }
+  };
+
+  $scope.channelTransform = function (channelAlias) {
+    console.log('channel alias search:', channelAlias);
+    var newChannel = {
+      value: {
+        mesh_id: generateUtid(),
+        alias: channelAlias,
+        owner_id: $rootScope.profile.owner_id
+      }
+    };
+    return newChannel;
+  };
+
+  $scope.attachChannel = function (meshId, deviceUdid) {
+    console.log('-- attaching ' + meshId + ' to  ' + deviceUdid + '--');
+    $scope.attachingChannel = true;
+    Thinx.attachChannel(meshId, deviceUdid)
+      .done(function (response) {
+        if (typeof (response) !== "undefined" && response.success) {
+            console.log("-- attach success --");
+            // update local data to avoid full update
+            $rootScope.getDeviceByUdid(deviceUdid).mesh_ids = response.mesh_ids;
+            $scope.attachingChannel = false;
+            $scope.$apply();
+            toastr.success('Channel Attached.', '<ENV::loginPageTitle>', { timeOut: 5000 });
+        } else {
+          console.log('error', response);
+          toastr.error('Channel Attach Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 });
+        }
+      })
+      .fail(function (error) {
+        console.error('Error:', error);
+        toastr.error('Channel Attach Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 });
+      });
+  };
+
+  $scope.detachChannel = function (meshId, deviceUdid) {
+    console.log('-- detaching channel from ' + deviceUdid + '--');
+    Thinx.detachChannel(meshId, deviceUdid)
+      .done(function (response) {
+        if (typeof (response) !== "undefined" && response.success) {
+          $rootScope.getDeviceByUdid(deviceUdid).mesh_ids = response.mesh_ids;
+          toastr.success('Channel Detached.', '<ENV::loginPageTitle>', { timeOut: 5000 });
+          $scope.deviceForm.mesh_ids = response.mesh_ids;
+          $scope.$apply();
+        } else {
+          console.log('response error', response);
+          toastr.error('Channel Detach Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 });
+        }
+      })
+      .fail(function (error) {
+        console.error('Error:', error);
+        toastr.error('Channel Detach Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 });
+      });
   };
 
   $scope.updateTransformer = function(utid) {
@@ -303,15 +369,6 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     }
   };
 
-  $scope.channelSelected = function (channel) {
-    console.log('-- new channel --', channel);
-    if (typeof (channel.value.mesh_id) !== 'undefined') {
-      // channel creation via device detail is not available
-      console.log("- NOT IMPLEMENTED -", channel.value.mesh_id);
-    } else {
-      console.log("- NOT IMPLEMENTED -", channel.value.mesh_id);
-    }
-  };
 
   function generateUtid() {
     if (typeof($scope.deviceForm.transformers) !== 'undefined') {
@@ -342,18 +399,6 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     } else {
       $scope.deviceForm.transformersVisible.push(utid);
     }
-  };
-
-  $scope.channelTransform = function (channelAlias) {
-    console.log('channel alias search:', channelAlias);
-    var newChannel = {
-      value: {
-        mesh_id: generateUtid(),
-        alias: channelAlias,
-        owner_id: $rootScope.profile.owner_id
-      }
-    };
-    return newChannel;
   };
 
   $scope.build = function(deviceUdid, sourceId) {

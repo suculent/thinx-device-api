@@ -57,7 +57,12 @@ var Thinx = {
   revokeChannels: function (ownerId, meshIds) {
     return revokeChannels(ownerId, meshIds);
   },
-
+  attachChannel: function (meshId, deviceUdid) {
+    return attachChannel(meshId, deviceUdid);
+  },
+  detachChannel: function (meshId, deviceUdid) {
+    return detachChannel(meshId, deviceUdid);
+  },
   // SOURCE
   sourceList: function () {
     return sourceList();
@@ -1055,6 +1060,29 @@ function revokeChannels(owner_id, mesh_ids) {
   });
 }
 
+function attachChannel(meshId, deviceUdid) {
+  return $.ajax({
+    url: urlBase + '/device/mesh/attach',
+    type: 'POST',
+    data: JSON.stringify({
+      mesh_id: meshId,
+      udid: deviceUdid
+    }),
+    dataType: 'json'
+  });
+}
+
+function detachSource(meshId, deviceUdid) {
+  return $.ajax({
+    url: urlBase + '/device/mesh/detach',
+    type: 'POST',
+    data: JSON.stringify({
+      mesh_id: meshId,
+      udid: deviceUdid
+    }),
+    dataType: 'json'
+  });
+}
 
 // Enviros /user/enviro
 //
