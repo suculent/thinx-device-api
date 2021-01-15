@@ -245,11 +245,8 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
   $scope.channelSelected = function (channel) {
     console.log('-- selecting channel --', channel);
     if (typeof (channel.value.mesh_id) !== 'undefined') {
-      
       // attach channel to device
-      
-
-
+      $scope.attachChannel(channel.value.mesh_id, $scope.deviceForm.udid);
     } else {
       console.log("- NOT IMPLEMENTED -", channel.value.mesh_id);
     }
