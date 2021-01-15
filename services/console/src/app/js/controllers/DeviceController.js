@@ -24,6 +24,13 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     })
     .fail(error => $scope.$emit("xhrFailed", error));
 
+    Thinx.channelList()
+    .done(function (data) {
+      console.log('+++ updateChannels ');
+      $scope.$emit("updateChannels", data);
+    })
+    .fail(error => $scope.$emit("xhrFailed", error));
+
     $scope.attachingSource = false;
     $scope.attachingChannel = false;
   });

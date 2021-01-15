@@ -398,24 +398,25 @@
     <!-- MESH CHANNELS -->
     <div class="form-group last">
       <label class="control-label col-md-3">Mesh Channels</label>
-      <div class="input-group">
-        <ui-select multiple tagging="channelTransform" tagging-label="(new channel)" id="channel-select"
-          ng-model="$root.getDeviceByUdid(deviceForm.udid).mesh_ids" theme="bootstrap" sortable="true"
-          title="Enter Channel Alias" on-select="channelSelected($item)"
-          ng-change="submitDeviceFormChange('mesh_ids')">
-          <ui-select-match placeholder="Enter new name or select existing...">
-            {{$item.value.alias}}
-          </ui-select-match>
-          <ui-select-choices
-            repeat="channel.value.mesh_id as (key, channel) in $root.channels | filter:$select.search track by $index">
-            <div>{{channel.value.alias}}</div>
-          </ui-select-choices>
-        </ui-select>
-        <span class="input-group-btn">
-          <button type="button" ui-sref="channel" class="btn btn-default">
-            <span title="Manage channels" class="fa fa-plus"></span>
-          </button>
-        </span>
+      <div class="col-md-9">
+        <div class="input-group">
+          <ui-select multiple tagging="channelTransform" tagging-label="(new channel)" id="channel-select"
+            ng-model="$root.getDeviceByUdid(deviceForm.udid).mesh_ids" theme="bootstrap" sortable="true"
+            title="Enter Channel Alias" on-select="channelSelected($item)" ng-change="submitDeviceFormChange('mesh_ids')">
+            <ui-select-match placeholder="Enter new name or select existing...">
+              {{$item.value.alias}}
+            </ui-select-match>
+            <ui-select-choices
+              repeat="channel.value.mesh_id as (key, channel) in $root.channels | filter:$select.search track by $index">
+              <div>{{channel.value.alias}}</div>
+            </ui-select-choices>
+          </ui-select>
+          <span class="input-group-btn">
+            <button type="button" ui-sref="channel" class="btn btn-default">
+              <span title="Manage channels" class="fa fa-plus"></span>
+            </button>
+          </span>
+        </div>
       </div>
     </div>
 
