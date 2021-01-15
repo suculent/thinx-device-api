@@ -407,7 +407,7 @@
             {{$item.value.alias}}
           </ui-select-match>
           <ui-select-choices
-            repeat="channel.value.mesh_id as (key, channel) in $root.meta.channels | filter:$select.search track by $index">
+            repeat="channel.value.mesh_id as (key, channel) in $root.channels | filter:$select.search track by $index">
             <div>{{channel.value.alias}}</div>
           </ui-select-choices>
         </ui-select>
