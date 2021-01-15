@@ -661,7 +661,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
   '</span>');
 
   
-  $templateCache.put('selectize/match-multiple.tpl.html',
+  $templateCache.put('select2/match-multiple.tpl.html',
   '<span class="ui-select-match">' +
     '<span ng-repeat="$item in $select.selected track by $index">' +
       '<span ' +
