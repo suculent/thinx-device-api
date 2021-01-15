@@ -371,7 +371,7 @@
     <div class="form-group">
       <label class="control-label col-md-3">Tags</label>
       <div class="col-md-9">
-        <ui-select multiple tagging tagging-label="(create new tag)" ng-model="deviceForm.tags" theme="select2" sortable="true" title="Enter tag" ng-change="submitDeviceFormChange('tags')">
+        <ui-select multiple tagging tagging-label="(create new tag)" ng-model="deviceForm.tags" theme="" sortable="true" title="Enter tag" ng-change="submitDeviceFormChange('tags')">
           <ui-select-match placeholder="Select or enter tags...">
             <span class="device-tag">{{$item}}</span>
           </ui-select-match>
@@ -401,7 +401,7 @@
       <div class="col-md-9">
         <div class="input-group">
           <ui-select multiple tagging="channelTransform" tagging-label="(new channel)" id="channel-select"
-            ng-model="deviceForm.mesh_ids" theme="select2" sortable="true"
+            ng-model="deviceForm.mesh_ids" theme="" sortable="true"
             title="Enter Channel Alias" on-select="channelSelected($item)" ng-change="submitChannelChange()">
             <ui-select-match placeholder="Enter new name or select existing...">
               {{$item.value.alias}}
