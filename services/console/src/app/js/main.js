@@ -628,8 +628,9 @@ RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
           files: [
             '../assets/thinx/js/plugins/ui-select/select.min.css',
             '../assets/thinx/js/plugins/ui-select/select.min.js',
-            '../assets/global/plugins/select2/css/select2.css',
-            
+            '../assets/global/plugins/select2/css/select2.min.css',
+            '../assets/global/plugins/select2/js/select2.full.min.js',
+
             '../assets/global/plugins/clipboardjs/clipboard.min.js',
 
             // tags input dependency
