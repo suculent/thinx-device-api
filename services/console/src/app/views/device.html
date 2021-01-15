@@ -371,7 +371,7 @@
     <div class="form-group">
       <label class="control-label col-md-3">Tags</label>
       <div class="col-md-9">
-        <ui-select multiple tagging tagging-label="(create new tag)" ng-model="deviceForm.tags" theme="bootstrap" sortable="true" title="Enter tag"  ng-change="submitDeviceFormChange('tags')">
+        <ui-select multiple tagging tagging-label="(create new tag)" ng-model="deviceForm.tags" theme="bootstrap-transformer" sortable="true" title="Enter tag" ng-change="submitDeviceFormChange('tags')">
           <ui-select-match placeholder="Select or enter tags...">
             <span class="device-tag">{{$item}}</span>
           </ui-select-match>

@@ -628,7 +628,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     $scope.showIcons = false;
   };
 
-  $templateCache.put('bootstrap/match-multiple.tpl.html',
+  $templateCache.put('bootstrap-transformer/match-multiple.tpl.html',
   '<span class="ui-select-match transformer-input-block">' +
     '<span ng-repeat="$item in $select.selected track by $index">' +
     '<span ' +
