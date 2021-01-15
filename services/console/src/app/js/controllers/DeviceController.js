@@ -238,6 +238,12 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     });
   };
 
+  $scope.submitChannelChange = function (prop) {
+
+    console.log('-- comparing channels: ', $scope.deviceForm.mesh_ids, $rootScope.devices[$scope.deviceForm.udid].mesh_ids);
+
+  };
+
   $scope.updateTransformer = function(utid) {
     if ($rootScope.getRawTransformerByUtid(utid).changed == true) {
       console.log('-- updating transformer body ' + utid + '--');
@@ -301,10 +307,9 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     console.log('-- new channel --', channel);
     if (typeof (channel.value.mesh_id) !== 'undefined') {
       // channel creation via device detail is not available
-      console.log("- NOT IMPLEMENTED -");
-      $scope.$emit("saveProfileChanges", ["mesh_ids"]);
+      console.log("- NOT IMPLEMENTED -", channel.value.mesh_id);
     } else {
-      console.log("- NOT IMPLEMENTED -");
+      console.log("- NOT IMPLEMENTED -", channel.value.mesh_id);
     }
   };
 
