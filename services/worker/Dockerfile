@@ -1,6 +1,6 @@
 # docker build -t suculent/thinx-worker .
 
-FROM node:15-alpine
+FROM node:14.15-alpine
 
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
 
@@ -81,6 +81,8 @@ RUN npm install . --only-prod
     # adduser -S -D -h /opt/thinx/thinx-device-api worker thinx && \
     # chown -R worker:thinx /opt/thinx/thinx-device-api && \
     # chmod +x ./devsec
+
+RUN chmod +x ./devsec
 
 # Switch to 'transformer' or 'node' user
 # USER worker
