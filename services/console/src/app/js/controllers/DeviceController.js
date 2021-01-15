@@ -24,7 +24,15 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     })
     .fail(error => $scope.$emit("xhrFailed", error));
 
+    Thinx.channelList()
+    .done(function (data) {
+      console.log('+++ updateChannels ');
+      $scope.$emit("updateChannels", data);
+    })
+    .fail(error => $scope.$emit("xhrFailed", error));
+
     $scope.attachingSource = false;
+    $scope.attachingChannel = false;
   });
 
   // end of onload function
@@ -40,6 +48,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
   $scope.deviceForm.platform = 'unknown';
   $scope.deviceForm.keyhash = null;
   $scope.deviceForm.source = null;
+  $scope.deviceForm.mesh_ids = [];
   $scope.deviceForm.auto_update = null;
   $scope.deviceForm.description = null;
   $scope.deviceForm.category = null;
@@ -136,7 +145,6 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
 
   };
 
-
   $scope.detachSource = function(deviceUdid) {
     console.log('-- detaching source from ' + deviceUdid + '--');
     Thinx.detachSource(deviceUdid)
@@ -230,6 +238,75 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     });
   };
 
+  $scope.submitChannelChange = function () {
+    console.log("- NOT IMPLEMENTED - will be used for detaching");
+  };
+
+  $scope.channelSelected = function (channel) {
+    console.log('-- selecting channel --', channel);
+    if (typeof (channel.value.mesh_id) !== 'undefined') {
+      // attach channel to device
+      $scope.attachChannel(channel.value.mesh_id, $scope.deviceForm.udid);
+    } else {
+      console.log("- NOT IMPLEMENTED -", channel.value.mesh_id);
+    }
+  };
+
+  $scope.channelTransform = function (channelAlias) {
+    console.log('channel alias search:', channelAlias);
+    var newChannel = {
+      value: {
+        mesh_id: generateUtid(),
+        alias: channelAlias,
+        owner_id: $rootScope.profile.owner_id
+      }
+    };
+    return newChannel;
+  };
+
+  $scope.attachChannel = function (meshId, deviceUdid) {
+    console.log('-- attaching ' + meshId + ' to  ' + deviceUdid + '--');
+    $scope.attachingChannel = true;
+    Thinx.attachChannel(meshId, deviceUdid)
+      .done(function (response) {
+        if (typeof (response) !== "undefined" && response.success) {
+            console.log("-- attach success --");
+            // update local data to avoid full update
+            $rootScope.getDeviceByUdid(deviceUdid).mesh_ids = response.mesh_ids;
+            $scope.attachingChannel = false;
+            $scope.$apply();
+            toastr.success('Channel Attached.', '<ENV::loginPageTitle>', { timeOut: 5000 });
+        } else {
+          console.log('error', response);
+          toastr.error('Channel Attach Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 });
+        }
+      })
+      .fail(function (error) {
+        console.error('Error:', error);
+        toastr.error('Channel Attach Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 });
+      });
+  };
+
+  $scope.detachChannel = function (meshId, deviceUdid) {
+    console.log('-- detaching channel from ' + deviceUdid + '--');
+    Thinx.detachChannel(meshId, deviceUdid)
+      .done(function (response) {
+        if (typeof (response) !== "undefined" && response.success) {
+          $rootScope.getDeviceByUdid(deviceUdid).mesh_ids = response.mesh_ids;
+          toastr.success('Channel Detached.', '<ENV::loginPageTitle>', { timeOut: 5000 });
+          $scope.deviceForm.mesh_ids = response.mesh_ids;
+          $scope.$apply();
+        } else {
+          console.log('response error', response);
+          toastr.error('Channel Detach Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 });
+        }
+      })
+      .fail(function (error) {
+        console.error('Error:', error);
+        toastr.error('Channel Detach Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 });
+      });
+  };
+
   $scope.updateTransformer = function(utid) {
     if ($rootScope.getRawTransformerByUtid(utid).changed == true) {
       console.log('-- updating transformer body ' + utid + '--');
@@ -289,6 +366,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     }
   };
 
+
   function generateUtid() {
     if (typeof($scope.deviceForm.transformers) !== 'undefined') {
       return String(CryptoJS.SHA256($rootScope.profile.owner+new Date().getTime()));
@@ -296,7 +374,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     return String(0);
   }
 
-  $scope.tagTransform = function(transformerAlias) {
+  $scope.tagTransform = function (transformerAlias) {
     console.log('transformer alias search:', transformerAlias);
     var newTransformer = {
       value: {
@@ -466,6 +544,12 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
       $scope.deviceForm.source = null;
     }
 
+    if (typeof (device.mesh_ids) !== "undefined") {
+      $scope.deviceForm.mesh_ids = device.mesh_ids;
+    } else {
+      $scope.deviceForm.mesh_ids = [];
+    }
+
     if (typeof(device.auto_update) !== "undefined") {
       $scope.deviceForm.auto_update = device.auto_update;
     } else {
@@ -575,5 +659,23 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
       '</span>' +
     '</span>' +
   '</span>');
+
+/*  
+  $templateCache.put('select2/match-multiple.tpl.html',
+  '<span class="ui-select-match">' +
+    '<span ng-repeat="$item in $select.selected track by $index">' +
+      '<span ' +
+        'class="ui-select-match-item btn btn-default btn-sm" ' +
+        'tabindex="-1" ' +
+        'type="button" ' +
+        'ng-disabled="$select.disabled" ' +
+        'ng-class="{\'btn-primary\':$selectMultiple.activeMatchIndex === $index, \'select-locked\':$select.isLocked(this, $index)}" ' +
+        'ui-select-sort="$select.selected">' +
+          '<span class="close ui-select-match-close" ng-hide="$select.disabled" ng-click="$selectMultiple.removeChoice($index)">&nbsp;&times;</span>' +
+          '<span uis-transclude-append></span>' +
+      '</span>' +
+    '</span>' +
+  '</span>');
+  */
 
 }]);

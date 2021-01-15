@@ -3,7 +3,7 @@
   "short_name": "thinx-console",
   "icons": [{
     "src": "/assets/thinx/img/logo_white_200.png",
-    "sizes": "200x200",
+    "sizes": "200x100",
     "type": "image/png",
     "density": 2
   }],

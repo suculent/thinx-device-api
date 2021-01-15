@@ -51,13 +51,18 @@ var Thinx = {
   channelList: function () {
     return channelList();
   },
-  createChannel: function () {
-    return createChannel();
+  createChannel: function (meshId, alias, ownerId) {
+    return createChannel(meshId, alias, ownerId);
   },
-  revokeChannels: function (meshIds) {
-    return revokeChannels(meshIds);
+  revokeChannels: function (ownerId, meshIds) {
+    return revokeChannels(ownerId, meshIds);
   },
-
+  attachChannel: function (meshId, deviceUdid) {
+    return attachChannel(meshId, deviceUdid);
+  },
+  detachChannel: function (meshId, deviceUdid) {
+    return detachChannel(meshId, deviceUdid);
+  },
   // SOURCE
   sourceList: function () {
     return sourceList();
@@ -294,8 +299,13 @@ function init($rootScope, $scope) {
 
   function updateChannels(data) {
     var response = JSON.parse(data);
-    // TODO: hack must be refined
-    $rootScope.channels = response;
+    
+    if (typeof(response.mesh_ids) === "undefined") {
+      console.log('ERROR: Invalid channel data...');
+      return;
+    }
+
+    $rootScope.channels = response.mesh_ids;
     $scope.$apply();
     console.log('//////// channels:');
     console.log($rootScope.channels);
@@ -1020,14 +1030,14 @@ function revokeDeploykeys(filenames) {
 // channelList
 function channelList() {
   return $.ajax({
-    url: urlBase + '/api/mesh/list',
+    url: urlBase + '/mesh/list',
     type: 'GET'
   });
 }
 
 function createChannel(mesh_id, alias, owner_id) {
   return $.ajax({
-    url: urlBase + '/api/mesh/create',
+    url: urlBase + '/mesh/create',
     type: 'POST',
     data: JSON.stringify({
       owner_id: owner_id,
@@ -1040,7 +1050,7 @@ function createChannel(mesh_id, alias, owner_id) {
 
 function revokeChannels(owner_id, mesh_ids) {
   return $.ajax({
-    url: urlBase + '/api/mesh/delete',
+    url: urlBase + '/mesh/delete',
     type: 'POST',
     data: JSON.stringify({ 
       owner_id: owner_id,
@@ -1050,6 +1060,29 @@ function revokeChannels(owner_id, mesh_ids) {
   });
 }
 
+function attachChannel(meshId, deviceUdid) {
+  return $.ajax({
+    url: urlBase + '/device/mesh/attach',
+    type: 'POST',
+    data: JSON.stringify({
+      mesh_id: meshId,
+      udid: deviceUdid
+    }),
+    dataType: 'json'
+  });
+}
+
+function detachSource(meshId, deviceUdid) {
+  return $.ajax({
+    url: urlBase + '/device/mesh/detach',
+    type: 'POST',
+    data: JSON.stringify({
+      mesh_id: meshId,
+      udid: deviceUdid
+    }),
+    dataType: 'json'
+  });
+}
 
 // Enviros /user/enviro
 //

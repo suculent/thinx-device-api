@@ -24,53 +24,54 @@ angular.module('RTM').controller('ChannelController', ['$rootScope', '$scope', '
 
   $scope.searchText = '';
 
-  $scope.createChannel = function() {
+  $scope.createChannel = function (mesh_id, alias) {
 
-    console.log('--creating mesh channel--')
+    /*
+    console.log('-- testing for duplicates --');
+    for (var apikeyId in $rootScope.apikeys) {
+      console.log("Looping apikeys: alias ", $rootScope.apikeys[apikeyId].alias);
 
-    Thinx.createChannel()
-    .done(function(response) {
-
-      response = JSON.parse(response);
-
-      if (typeof(response) !== "undefined") {
-        if (response.success) {
-          console.log(response);
-          toastr.success('Channel created.', '<ENV::loginPageTitle>', {timeOut: 5000});
-
-          $scope.channelCreated = response.status.mesh_id;
-          $scope.channelAlias = response.status.alias;
-
-          Thinx.channelList()
-          .done(function (data) {
-            console.log('+++ updateChannels ');
-            $scope.$emit("updateChannels", data);
-          })
-          .fail(error => $scope.$emit("xhrFailed", error));
-
-        } else {
-          console.log(response.status);
-          toastr.error('Error.', '<ENV::loginPageTitle>', {timeOut: 5000});
-        }
-      } else {
-        console.log('error');
-        console.log(response);
+      if ($rootScope.apikeys[apikeyId].alias == apikeyAlias) {
+        toastr.error('Alias must be unique.', '<ENV::loginPageTitle>', { timeOut: 5000 });
+        return;
       }
-    })
-    .fail(function(error) {
-      $('.msg-warning').text(error);
-      $('.msg-warning').show();
-      $scope.$emit("xhrFailed", error)
-      toastr.error('Error.', '<ENV::loginPageTitle>', {timeOut: 5000});
-    });
+    }
+    */
 
+    Thinx.createChannel(mesh_id, alias, $rootScope.profile.owner)
+      .done(function (response) {
+        if (typeof (response) !== "undefined") {
+          if (response.success) {
+            console.log(response);
+            Thinx.channelList()
+              .done(function (data) {
+                console.log('+++ updateChannels ');
+                $scope.$emit("updateChannels", data);
+              })
+              .fail(error => $scope.$emit("xhrFailed", error));              
+              toastr.success('Channel created.', '<ENV::loginPageTitle>', { timeOut: 5000 });
+              $('#pageModal').modal('hide');
+          } else {
+            console.log(response);
+            $('.msg-warning').text(response.status);
+            $('.msg-warning').show();
+          }
+        } else {
+          console.log('error');
+          console.log(response);
+          toastr.error('Channel creation failed.', '<ENV::loginPageTitle>', { timeOut: 5000 });
+        }
+      })
+      .fail(function (error) {
+        console.log('Error:', error);
+      });
   };
 
 
   function revokeChannels(mesh_ids) {
     console.log('--revoking channals ' + mesh_ids.length +'--')
 
-    Thinx.revokeChannels(mesh_ids)
+    Thinx.revokeChannels($rootScope.profile.owner, mesh_ids)
     .done(function(data) {
       if (data.success) {
         console.log('Success:', data);
@@ -116,8 +117,8 @@ angular.module('RTM').controller('ChannelController', ['$rootScope', '$scope', '
   }
 
   $scope.resetModal = function() {
-    $scope.deploykeyCreated = null;
-    $scope.deploykeyValue = null;
+    $scope.meshAlias = null;
+    $scope.meshId = null;
     $scope.selectedItems = [];
   }
 

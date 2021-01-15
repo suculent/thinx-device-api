@@ -129,7 +129,7 @@
 
         <!-- GRID VIEW Start -->
         <div class="row" ng-if="list.grid">
-          <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 device-block"  ng-repeat="device in $root.devices | filter:{'category': list.filterCategory} | propsFilter:{'alias':list.searchText, 'mac':list.searchText} | orderBy:list.orderBy.prop:list.reverse track by device.udid"  ng-class="selectedItems.indexOf(device.udid) > -1 ? 'selected-block' : ''">
+          <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 device-block"  ng-repeat="device in $root.devices | filter:{'category': list.filterCategory} | propsFilter:{'alias': list.searchText, 'mac': list.searchText} | orderBy:list.orderBy.prop:list.reverse track by device.udid"  ng-class="selectedItems.indexOf(device.udid) > -1 ? 'selected-block' : ''">
             <div>
               <div class="device-checkarea" ng-click="checkItem(device.udid)"></div>
               <div class="device-lastseen-label">{{device.lastupdate | lastSeen:'false'}}</div>
@@ -197,7 +197,7 @@
 
           <!-- PANEL VIEW Start -->
           <div class="row" ng-if="!list.grid">
-            <div class="col-xs-12 device-list-block"  ng-repeat="device in $root.devices | filter:{'category': list.filterCategory} | propsFilter:{'alias':list.searchText, 'mac':list.searchText} | orderBy:list.orderBy.prop:list.reverse track by device.udid"  ng-class="selectedItems.indexOf(device.udid) > -1 ? 'selected-block' : ''">
+            <div class="col-xs-12 device-list-block"  ng-repeat="device in $root.devices | filter:{'category': list.filterCategory} | propsFilter:{'alias': list.searchText, 'mac': list.searchText} | orderBy:list.orderBy.prop:list.reverse track by device.udid"  ng-class="selectedItems.indexOf(device.udid) > -1 ? 'selected-block' : ''">
               <div class="row">
 
                 <div class="col-xs-6 col-sm-3 col-md-3">

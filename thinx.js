@@ -6,6 +6,18 @@ console.log("===================================================================
 console.log("                 CUT LOGS HERE >>> SERVICE RESTARTED ");
 console.log("========================================================================");
 
+/*
+ * Bootstrap banner section
+ */
+
+var package_info = require("./package.json");
+var product = package_info.description;
+var version = package_info.version;
+
+console.log("");
+console.log("-=[ ☢ " + product + " v" + version + " rev." + process.env.REVISION + " ☢ ]=-");
+console.log("");
+
 const Globals = require("./lib/thinx/globals.js"); // static only!
 const Sanitka = require("./lib/thinx/sanitka.js");
 
@@ -635,18 +647,6 @@ wss.on("connection", function(ws, req) {
   console.log("WSS Connection Error: ", err);
 });
 
-
-/*
- * Bootstrap banner section
- */
-
-var package_info = require("./package.json");
-var product = package_info.description;
-var version = package_info.version;
-
-console.log("");
-console.log("-=[ ☢ " + product + " v" + version + " rev." + process.env.REVISION + " ☢ ]=-");
-console.log("");
 
 //
 // Database compactor

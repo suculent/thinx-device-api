@@ -201,6 +201,8 @@ gulp.task('buildPublic', function() {
           'assets/global/plugins/jquery.blockui.js',
           'assets/global/plugins/jquery-validation/js/jquery.validate.js',
           'assets/global/plugins/jquery-validation/js/additional-methods.js',
+          'assets/thinx/js/plugins/ui-select/select.js',
+          'assets/global/plugins/select2/js/select2.js',
           'assets/global/scripts/app.js', // this is shared with Private
           'assets/thinx/login.js'
         ], {base: '.'})
@@ -221,6 +223,7 @@ gulp.task('buildPublic', function() {
           'assets/global/plugins/simple-line-icons/css/simple-line-icons.css',
           'assets/global/plugins/bootstrap/css/bootstrap.css',
           'assets/global/plugins/bootstrap-switch/css/bootstrap-switch.css',
+          'assets/thinx/js/plugins/ui-select/select.css',
           'assets/global/plugins/select2/css/select2.css',
           'assets/global/plugins/select2/css/select2-bootstrap.css',
           'assets/global/css/components.css',

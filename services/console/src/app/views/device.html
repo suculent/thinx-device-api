@@ -224,7 +224,6 @@
             <button type="button" ui-sref="source" class="btn btn-default">
               <span title="Manage sources" class="fa fa-plus"></span>
             </button>
-            
           </span>
         </div>
       </div>
@@ -372,7 +371,7 @@
     <div class="form-group">
       <label class="control-label col-md-3">Tags</label>
       <div class="col-md-9">
-        <ui-select multiple tagging tagging-label="(create new tag)" ng-model="deviceForm.tags" theme="bootstrap" sortable="true" title="Enter tag"  ng-change="submitDeviceFormChange('tags')">
+        <ui-select multiple tagging tagging-label="(create new tag)" ng-model="deviceForm.tags" theme="bootstrap" sortable="true" title="Enter tag" ng-change="submitDeviceFormChange('tags')">
           <ui-select-match placeholder="Select or enter tags...">
             <span class="device-tag">{{$item}}</span>
           </ui-select-match>
@@ -384,13 +383,38 @@
     </div>
 
     <!-- MQTT CHANNEL -->
-    <div class="form-group last">
+    <div class="form-group">
       <label class="control-label col-md-3">MQTT Channel</label>
       <div class="col-md-9">
         <div class="input-group">
           <input type="text" id="mqtt" name="mqtt" class="form-control" ng-value="'/' + $root.profile.owner + '/' + deviceForm.udid" ng-readonly="true" style="font-family: monospace;" />
           <span class="input-group-btn">
             <button type="button" ng-click="copyToClipboard(deviceForm.udid)" class="btn btn-default copy-btn" data-clipboard-target="#mqtt"><span class="fa fa-clipboard"></span></button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MESH CHANNELS -->
+    <div class="form-group">
+      <label class="control-label col-md-3">Mesh Channels</label>
+      <div class="col-md-9">
+        <div class="input-group">
+          <ui-select multiple tagging="channelTransform" tagging-label="(new channel)" id="channel-select"
+              ng-model="deviceForm.mesh_ids" theme="bootstrap" sortable="true"
+              title="Enter Channel Alias" on-select="channelSelected($item)" ng-change="submitChannelChange()">
+            <ui-select-match placeholder="Enter new name or select existing...">
+              {{$item.value.alias}}
+            </ui-select-match>
+            <ui-select-choices
+              repeat="channel.value.mesh_id as (key, channel) in $root.channels | filter:$select.search track by $index">
+              <div>{{channel.value.alias}}</div>
+            </ui-select-choices>
+          </ui-select>
+          <span class="input-group-btn">
+            <button type="button" ui-sref="channel" class="btn btn-default">
+              <span title="Manage channels" class="fa fa-plus"></span>
+            </button>
           </span>
         </div>
       </div>

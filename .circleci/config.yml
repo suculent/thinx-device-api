@@ -413,10 +413,6 @@ jobs:
           cp -vfR ./conf /mnt/data/
           echo "Contents of /mnt/data/conf"
           ls -la /mnt/data/conf
-          cp -vf ./.env ./.thinx_env
-          sed -i -e 's/^/export /' ./.thinx_env # create from .thinx_env from .env
-          # echo ".thinx_env contents:"
-          # cat ./.thinx_env
           echo "Contents of ./conf"
           ls -la ./conf
           echo "Contents of ./.env"
