@@ -628,7 +628,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     $scope.showIcons = false;
   };
 
-  $templateCache.put('bootstrap-transformer/match-multiple.tpl.html',
+  $templateCache.put('bootstrap/match-multiple.tpl.html',
   '<span class="ui-select-match transformer-input-block">' +
     '<span ng-repeat="$item in $select.selected track by $index">' +
     '<span ' +
@@ -659,5 +659,23 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
       '</span>' +
     '</span>' +
   '</span>');
+
+  /*
+  $templateCache.put('bootstrap/match-multiple.tpl.html',
+  '<span class="ui-select-match">' +
+    '<span ng-repeat="$item in $select.selected track by $index">' +
+      '<span ' +
+        'class="ui-select-match-item btn btn-default btn-sm" ' +
+        'tabindex="-1" ' +
+        'type="button" ' +
+        'ng-disabled="$select.disabled" ' +
+        'ng-class="{\'btn-primary\':$selectMultiple.activeMatchIndex === $index, \'select-locked\':$select.isLocked(this, $index)}" ' +
+        'ui-select-sort="$select.selected">' +
+          '<span class="close ui-select-match-close" ng-hide="$select.disabled" ng-click="$selectMultiple.removeChoice($index)">&nbsp;&times;</span>' +
+          '<span uis-transclude-append></span>' +
+      '</span>' +
+    '</span>' +
+  '</span>');
+  */
 
 }]);
