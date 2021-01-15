@@ -202,7 +202,7 @@ gulp.task('buildPublic', function() {
           'assets/global/plugins/jquery-validation/js/jquery.validate.js',
           'assets/global/plugins/jquery-validation/js/additional-methods.js',
           'assets/thinx/js/plugins/ui-select/select.js',
-          'assets/global/plugins/select2/js/select2.full.js',
+          'assets/global/plugins/select2/js/select2.js',
           'assets/global/scripts/app.js', // this is shared with Private
           'assets/thinx/login.js'
         ], {base: '.'})
