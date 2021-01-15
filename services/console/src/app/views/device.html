@@ -371,7 +371,7 @@
     <div class="form-group">
       <label class="control-label col-md-3">Tags</label>
       <div class="col-md-9">
-        <ui-select multiple tagging tagging-label="(create new tag)" ng-model="deviceForm.tags" theme="select2" sortable="true" title="Enter tag" ng-change="submitDeviceFormChange('tags')">
+        <ui-select multiple tagging tagging-label="(create new tag)" ng-model="deviceForm.tags" theme="bootstrap" sortable="true" title="Enter tag" ng-change="submitDeviceFormChange('tags')">
           <ui-select-match placeholder="Select or enter tags...">
             <span class="device-tag">{{$item}}</span>
           </ui-select-match>
@@ -399,24 +399,38 @@
     <div class="form-group last">
       <label class="control-label col-md-3">Mesh Channels</label>
       <div class="col-md-9">
-        <div class="input-group">
-          <ui-select multiple tagging="channelTransform" tagging-label="(new channel)" id="channel-select"
-            ng-model="deviceForm.mesh_ids" theme="select2" sortable="true"
+        <ui-select multiple tagging="channelTransform" tagging-label="(new channel)" id="channel-select"
+            ng-model="deviceForm.mesh_ids" theme="bootstrap" sortable="true"
             title="Enter Channel Alias" on-select="channelSelected($item)" ng-change="submitChannelChange()">
-            <ui-select-match placeholder="Enter new name or select existing...">
-              {{$item.value.alias}}
-            </ui-select-match>
-            <ui-select-choices
-              repeat="channel.value.mesh_id as (key, channel) in $root.channels | filter:$select.search track by $index">
-              <div>{{channel.value.alias}}</div>
-            </ui-select-choices>
-          </ui-select>
-          <span class="input-group-btn">
-            <button type="button" ui-sref="channel" class="btn btn-default">
-              <span title="Manage channels" class="fa fa-plus"></span>
-            </button>
-          </span>
-        </div>
+          <ui-select-match placeholder="Enter new name or select existing...">
+            {{$item.value.alias}}
+          </ui-select-match>
+          <ui-select-choices
+            repeat="channel.value.mesh_id as (key, channel) in $root.channels | filter:$select.search track by $index">
+            <div>{{channel.value.alias}}</div>
+          </ui-select-choices>
+        </ui-select>
+        <span class="input-group-btn">
+          <button type="button" ui-sref="channel" class="btn btn-default">
+            <span title="Manage channels" class="fa fa-plus"></span>
+          </button>
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group last">
+      <label class="control-label col-md-3">DEBUG</label>
+      <div class="col-md-9">
+        <ui-select multiple 
+          ng-model="deviceForm.mesh_ids" theme="select2">
+          <ui-select-match placeholder="">
+            {{$item.value.alias}}
+          </ui-select-match>
+          <ui-select-choices
+            repeat="channel.value.mesh_id as (key, channel) in $root.channels | filter:$select.search track by $index">
+            <div>{{channel.value.alias}}</div>
+          </ui-select-choices>
+        </ui-select>
       </div>
     </div>
 
