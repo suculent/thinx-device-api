@@ -331,7 +331,7 @@ jobs:
                   "fields": [
                     {
                       "type": "plain_text",
-                      "text": ":four_leaf_clover: THiNX API build SUCCEEDED. Proceeding to deploy...",
+                      "text": ":rocket: Deploy new THiNX API $CIRCLE_TAG...",
                       "emoji": true
                     }
                   ]
