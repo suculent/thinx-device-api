@@ -557,7 +557,6 @@ wss.on("connection", function(ws, req) {
   }
 
   const pathname = url.parse(req.url).pathname;
-  console.log("-----> Incoming WSS connection at path", pathname);
   
   ws.isAlive = true;
 
@@ -570,8 +569,9 @@ wss.on("connection", function(ws, req) {
   var cookies = req.headers.cookie;
 
   if (typeof(req.headers.cookie) !== "undefined") {
-    if (cookies.indexOf("thx-") === -1) {
-      console.log("» WARNING! No thx-cookie found in WS: " + JSON.stringify(req.headers.cookie));
+    if (cookies.indexOf("thx-session") === -1) {
+      console.log("» ERROR! No thx-session found in WS: " + JSON.stringify(req.headers.cookie));
+      return;
     } else {
       console.log("» DEPRECATED thx-cookie found in WS: " + JSON.stringify(req.headers.cookie));
     }
@@ -580,7 +580,6 @@ wss.on("connection", function(ws, req) {
   }
 
   /* Returns specific build log for owner */
-  console.log("Mapping endpoint: /api/user/logs/tail");
 
   // TODO: Extract with params (ws)
   app.post("/api/user/logs/tail", function(req2, res) {
@@ -638,7 +637,6 @@ wss.on("connection", function(ws, req) {
 
   ws.on('close', function () {
     socketMap.delete(pathname);
-    console.log("» Closed websocket, deleting ", pathname, "from map");
   });
 
 }).on("error", function(err) {

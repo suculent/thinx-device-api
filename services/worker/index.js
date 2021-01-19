@@ -256,13 +256,12 @@ class Worker {
 
         socket.on('job', (data) => { 
             if (this.is_running = true) {
-                console.log("Job already running...");
+                console.log("This worker is already running...");
                 return;
             }
             console.log(new Date().getTime(), `» Worker has new job:`, data);
             if (typeof(data.mock) === "undefined" || data.mock !== true) {
                 this.client_id = data;
-                console.log(new Date().getTime(), "» Processing incoming job...");
                 this.is_running = true;
                 this.runJob(socket, data);
                 this.is_running = false;

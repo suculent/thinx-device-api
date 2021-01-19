@@ -206,12 +206,9 @@ BUILD_ROOT=$DATA_ROOT/repos
 
 # from app_config.deploy_root
 OWNER_ID_HOME=$DATA_ROOT/deploy/$OWNER_ID
-echo "Owner deployment home: ${OWNER_ID_HOME}"
-
-echo "-"
 
 TARGET_PATH=$DATA_ROOT/deploy/$OWNER_ID/$UDID
-echo "Target device deployment path: ${TARGET_PATH}"
+echo "Target path    : ${TARGET_PATH}"
 
 echo "-"
 
