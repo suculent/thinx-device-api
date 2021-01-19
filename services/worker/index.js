@@ -183,10 +183,12 @@ class Worker {
 
             socket.emit('log', logline + "\n");
             
-		}); // end shell on out data
+        }); // end shell on out data
+        
+        var dstring = "unknown";
 
 		shell.stderr.on("data", (data) => {
-			var dstring = data.toString();
+			dstring = data.toString();
 			console.log("ERR [" + build_id + "] »» ", dstring);
 			if (dstring.indexOf("fatal:") !== -1) {
                 socket.emit('job-status', {
@@ -202,6 +204,15 @@ class Worker {
 
             console.log("[OID:" + owner + "] [BUILD_COMPLETED] with code " + code);
             this.is_running = false;
+
+            if (code > 0) {
+                socket.emit('job-status', {
+                    udid: udid,
+                    build_id: build_id, 
+                    state: "Failed",
+                    reason: dstring
+                });
+            }
             
 		}); // end shell on exit
 	}
@@ -244,6 +255,10 @@ class Worker {
         });
 
         socket.on('job', (data) => { 
+            if (this.is_running = true) {
+                console.log("Job already running...");
+                return;
+            }
             console.log(new Date().getTime(), `» Worker has new job:`, data);
             if (typeof(data.mock) === "undefined" || data.mock !== true) {
                 this.client_id = data;
