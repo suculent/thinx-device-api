@@ -247,6 +247,41 @@ jobs:
           image: thinx/worker
           registry: registry.keyguru.eu:5000
           tag: 'latest'
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": ":bomb: THiNX-Worker Test completed with errors.",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: fail
+
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": ":rocket: Deploying new THiNX Worker $CIRCLE_TAG...",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: pass
 
   build-console:
     executor: docker/docker
@@ -281,6 +316,42 @@ jobs:
           image: thinx/console
           registry: registry.keyguru.eu:5000
           tag: '${COUNTRY}'
+
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": ":bomb: THiNX-Console Test completed with errors.",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: fail
+
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": ":rocket: Deploying new THiNX Console $CIRCLE_TAG...",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: pass
 
   build-api:
     executor: docker/docker
@@ -331,7 +402,7 @@ jobs:
                   "fields": [
                     {
                       "type": "plain_text",
-                      "text": ":rocket: Deploy new THiNX API $CIRCLE_TAG...",
+                      "text": ":rocket: Deploying new THiNX API $CIRCLE_TAG...",
                       "emoji": true
                     }
                   ]
