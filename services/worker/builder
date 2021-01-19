@@ -1075,7 +1075,7 @@ case $PLATFORM in
 			echo "Current build folder contents after build:" | tee -a "${LOG_PATH}"
 			ls ./.pio/build | tee -a "${LOG_PATH}"
 
-			OUTFILE=$(find . -name "firmware.bin" | head -n 1)
+			OUTFILE=$(pwd)/$(find . -name "firmware.bin" | head -n 1)
 
 			if [ ! -f $OUTFILE ]; then
 				echo "$OUTFILE not found"
