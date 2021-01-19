@@ -120,8 +120,6 @@ if (fs.existsSync(pfx_path)) {
   });
 }
 
-console.log("» Initializing DB...");
-
 var nano = require("nano")(db);
 
 function initDatabases(dbprefix) {
@@ -185,22 +183,22 @@ initDatabases(prefix);
 var devicelib = require("nano")(db).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
 var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
 
-console.log("Loading module: Statistics");
+console.log("Loaded module: Statistics");
 var Stats = require("./lib/thinx/statistics");
 var stats = new Stats();
 
-console.log("Loading module: Messenger");
+console.log("Loaded module: Messenger");
 var Messenger = require("./lib/thinx/messenger");
 var messenger = new Messenger().getInstance(); // take singleton to prevent double initialization
 
-console.log("Loading module: Repository Watcher");
+console.log("Loaded module: Repository Watcher");
 var Repository = require("./lib/thinx/repository");
 
 var Builder = require("./lib/thinx/builder");
-console.log("Loading module: BuildServer");
+console.log("Loaded module: BuildServer");
 var builder = new Builder(); 
 
-console.log("Loading module: Queue");
+console.log("Loaded module: Queue");
 var Queue = require("./lib/thinx/queue");
 var queue = new Queue(builder);
 queue.cron(); // starts cron job for build queue from webhooks
@@ -425,7 +423,7 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   let caCert = read(app_config.ssl_ca, 'utf8');
   let ca = pki.certificateFromPem(caCert);
   let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
-  console.log("SSL certificate loaded...");
+  console.log("Loaded SSL certificate.");
   if (ca.verify(client)) {
     sslvalid = true;
   } else {
