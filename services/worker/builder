@@ -1054,13 +1054,6 @@ case $PLATFORM in
 				fi
 		  	fi
 
-			OUTFILE=$(find $BUILD_PATH -name "firmware.bin" | head -n 1)
-
-			if [ ! -f $OUTFILE ]; then
-				echo "$OUTFILE not found"
-				BUILD_SUCCESS=false
-			fi
-
 			if [[ $SWARM == false ]]; then
 				echo "running Docker PIO >>>"
 				set -o pipefail
@@ -1080,12 +1073,18 @@ case $PLATFORM in
 			echo "[platformio] Docker completed <<<"
 
 			echo "Current build folder contents after build:" | tee -a "${LOG_PATH}"
-			ls ./build | tee -a "${LOG_PATH}"
+			ls ./.pio/build | tee -a "${LOG_PATH}"
 
-			OUTFILE=$(find . -name "firmware.bin" -maxdepth 10 | head -n 1)
+			OUTFILE=$(find . -name "firmware.bin" | head -n 1)
+
+			if [ ! -f $OUTFILE ]; then
+				echo "$OUTFILE not found"
+				BUILD_SUCCESS=false
+			fi
 
 			if [[ -f $OUTFILE ]]; then
 				BUILD_SUCCESS=true
+				STATUS='OK'
 				BIN_FILE=$( find $BUILD_PATH/$REPO_NAME -name "*.bin" | head -n 1)
 				echo "BIN_FILE: ${BIN_FILE}" | tee -a "${LOG_PATH}"
 
