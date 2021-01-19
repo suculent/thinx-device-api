@@ -68,7 +68,6 @@
     "querystring": "^0.2.0",
     "redis": "^2.8.0",
     "request": "^2.88.2",
-    "rimraf": "^3.0.2",
     "rollbar": "^2.19.4",
     "semver": "7.3.4",
     "sha256": "^0.2.0",
