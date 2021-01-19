@@ -2,6 +2,7 @@ version: 2.1
 orbs:
   node: circleci/node@3.0.0
   docker: circleci/docker@1.5.0
+  slack: circleci/slack@4.1.3
 
 jobs:
 
@@ -303,6 +304,41 @@ jobs:
           image: thinx/api
           registry: registry.keyguru.eu:5000
           tag: '${COUNTRY}'
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": ":bomb: THiNX-API Test completed with errors.",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: fail
+
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": ":four_leaf_clover: THiNX API build SUCCEEDED. Proceeding to deploy...",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: pass
 
 #
 # DEPRECATED BUILD, KEEPING FOR TEST PURPOSES LATER
@@ -556,6 +592,7 @@ workflows:
           name: "api : kgr.cz"
           context:
             - thinx-staging-cz
+            - slack
           filters:
             branches:
               only:
@@ -564,6 +601,7 @@ workflows:
           name: "console : kgr.cz"
           context:
             - thinx-staging-cz
+            - slack
           filters:
             branches:
               only:
@@ -596,6 +634,7 @@ workflows:
           name: "worker : kgr.cz"
           context:
             - thinx-staging-cz
+            - slack
           filters:
             branches:
               only:
