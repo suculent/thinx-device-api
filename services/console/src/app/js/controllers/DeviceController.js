@@ -287,10 +287,10 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
       });
   };
 
-  $scope.detachChannel = function (meshId) {
+  $scope.detachChannel = function (channel) {
     let deviceUdid = $scope.deviceForm.udid;
-    console.log('-- detaching channel from ' + deviceUdid + '--');
-    Thinx.detachChannel(meshId, deviceUdid)
+    console.log('-- detaching channel ' + channel.alias + ' from ' + deviceUdid + '--');
+    Thinx.detachChannel(channel.mesh_id, deviceUdid)
       .done(function (response) {
         if (typeof (response) !== "undefined" && response.success) {
           $rootScope.getDeviceByUdid(deviceUdid).mesh_ids = response.mesh_ids;
