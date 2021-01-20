@@ -287,7 +287,8 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
       });
   };
 
-  $scope.detachChannel = function (meshId, deviceUdid) {
+  $scope.detachChannel = function (meshId) {
+    let deviceUdid = $scope.deviceForm.udid;
     console.log('-- detaching channel from ' + deviceUdid + '--');
     Thinx.detachChannel(meshId, deviceUdid)
       .done(function (response) {
@@ -671,7 +672,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
         'ng-disabled="$select.disabled" ' +
         'ng-class="{\'btn-primary\':$selectMultiple.activeMatchIndex === $index, \'select-locked\':$select.isLocked(this, $index)}" ' +
         'ui-select-sort="$select.selected">' +
-          '<span class="close ui-select-match-close" ng-hide="$select.disabled" ng-click="$selectMultiple.removeChoice($index)">&nbsp;&times;</span>' +
+          '<span class="close ui-select-match-close" ng-hide="$select.disabled" ng-click="detachChannel($item.value);">&nbsp;&times;</span>' +
           '<span uis-transclude-append></span>' +
       '</span>' +
     '</span>' +
