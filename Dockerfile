@@ -1,4 +1,4 @@
-FROM node:14.15.4
+FROM node:current-buster-slim
 
 # docker build -t suculent/thinx-device-api .
 

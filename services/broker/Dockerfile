@@ -1,4 +1,4 @@
-FROM debian:jessie-slim
+FROM debian:buster-slim
 
 ARG MOSQUITTO_PASSWORD
 ARG MOSQUITTO_USERNAME
