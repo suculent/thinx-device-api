@@ -276,7 +276,7 @@ jobs:
                   "fields": [
                     {
                       "type": "plain_text",
-                      "text": ":rocket: Deploying new THiNX Worker $CIRCLE_TAG...",
+                      "text": ":rocket: Deploying new THiNX Worker ${CIRCLE_TAG} to ${ENVIRONMENT}...",
                       "emoji": true
                     }
                   ]
@@ -346,7 +346,7 @@ jobs:
                   "fields": [
                     {
                       "type": "plain_text",
-                      "text": ":rocket: Deploying new THiNX Console $CIRCLE_TAG...",
+                      "text": ":rocket: Deploying new THiNX Console ${CIRCLE_TAG} to ${ENVIRONMENT}...",
                       "emoji": true
                     }
                   ]
@@ -404,7 +404,7 @@ jobs:
                   "fields": [
                     {
                       "type": "plain_text",
-                      "text": ":rocket: Deploying new THiNX API $CIRCLE_TAG...",
+                      "text": ":rocket: Deploying new THiNX API ${CIRCLE_TAG} to ${ENVIRONMENT}...",
                       "emoji": true
                     }
                   ]
@@ -485,7 +485,7 @@ jobs:
                   "fields": [
                     {
                       "type": "plain_text",
-                      "text": ":rocket: Deploying new THiNX Worker $CIRCLE_TAG...",
+                      "text": ":rocket: Deploying new THiNX Worker ${CIRCLE_TAG} to ${ENVIRONMENT}...",
                       "emoji": true
                     }
                   ]
@@ -555,7 +555,7 @@ jobs:
                   "fields": [
                     {
                       "type": "plain_text",
-                      "text": ":rocket: Deploying new THiNX Console $CIRCLE_TAG...",
+                      "text": ":rocket: Deploying new THiNX Console  ${CIRCLE_TAG} to ${ENVIRONMENT}...",
                       "emoji": true
                     }
                   ]
@@ -613,7 +613,7 @@ jobs:
                   "fields": [
                     {
                       "type": "plain_text",
-                      "text": ":rocket: Deploying new THiNX API $CIRCLE_TAG...",
+                      "text": ":rocket: Deploying new THiNX API ${CIRCLE_TAG} to ${ENVIRONMENT}...",
                       "emoji": true
                     }
                   ]
