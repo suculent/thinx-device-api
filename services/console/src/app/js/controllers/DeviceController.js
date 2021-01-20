@@ -632,7 +632,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
   console.log("TPL Cache before", $templateCache.info());
 
   $templateCache.put('bootstrap/match-multiple.tpl.html',
-  '<span class="ui-select-match transformer-input-block">' +
+  '<span class="ui-select-match transformer-input-block">{{ $select.parserResult.itemName }}' +
     '<span ng-repeat="$item in $select.selected track by $index">' +
     '<span ' +
       // 'ng-click="$selectMultiple.removeChoice($index)" ' +
@@ -665,7 +665,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
 
 
   $templateCache.put('selectize/match-multiple.tpl.html',
-  '<span class="ui-select-match">' +
+  '<span class="ui-select-match">{{ $select.parserResult.itemName }}' +
     '<span ng-repeat="$item in $select.selected track by $index">' +
       '<span ' +
         'class="ui-select-match-item btn btn-default btn-sm" ' +
@@ -674,8 +674,8 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
         'ng-disabled="$select.disabled" ' +
         'ng-class="{\'btn-primary\':$selectMultiple.activeMatchIndex === $index, \'select-locked\':$select.isLocked(this, $index)}" ' +
         'ui-select-sort="$select.selected">' +
-          '<span ng-if="$select.parserResult.itemName == \'channel\' class="close ui-select-match-close" ng-hide="$select.disabled" ng-click="detachChannel($item.value);">&nbsp;&times;</span>' +
-          '<span ng -if= "$select.parserResult.itemName == \'tag\' class="close ui-select-match-close" ng-hide="$select.disabled" ng-click="$selectMultiple.removeChoice($index)">&nbsp;&times;</span>' +
+          '<span ng-if="$select.parserResult.itemName == \'channel\'" class="close ui-select-match-close" ng-hide="$select.disabled" ng-click="detachChannel($item.value);">&nbsp;&times;</span>' +
+          '<span ng-if="$select.parserResult.itemName == \'tag\'" class="close ui-select-match-close" ng-hide="$select.disabled" ng-click="$selectMultiple.removeChoice($index)">&nbsp;&times;</span>' +
           '<span uis-transclude-append></span>' +
       '</span>' +
     '</span>' +
