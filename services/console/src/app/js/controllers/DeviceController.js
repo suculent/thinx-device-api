@@ -629,26 +629,21 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     $scope.showIcons = false;
   };
 
-  console.log("TPL Cache before", $templateCache.info());
-
   $templateCache.put('bootstrap/match-multiple.tpl.html',
   '<span class="ui-select-match transformer-input-block">{{ $select.parserResult.itemName }}' +
     '<span ng-repeat="$item in $select.selected track by $index">' +
-    '<span ' +
-      // 'ng-click="$selectMultiple.removeChoice($index)" ' +
-      // 'ng-click="this.clickTag($index)" ' +
-      'ng-click="showEditorOverlay($item.value.utid);"' +
-      'class="ui-select-match-item transformer-editor-btn btn btn-default btn-sm" ' +
-      'tabindex="-1" ' +
-      'type="button" ' +
-      'ng-disabled="$select.disabled" ' +
-      'ng-class="{\'btn-primary\':$selectMultiple.activeMatchIndex === $index, \'select-locked\':$select.isLocked(this, $index)}" ' +
-      'ui-select-sort="$select.selected">' +
-      '<i class="fa fa-pencil"></i>' +
-    '</span>' +
-      '<span ' +
-        // 'ng-click="$selectMultiple.removeChoice($index)" ' +
-        // 'ng-click="this.clickTag($index)" ' +
+      '<span ng-if="$select.parserResult.itemName === \'transformer\'" ' +
+        'ng-click="showEditorOverlay($item.value.utid);"' +
+        'class="ui-select-match-item transformer-editor-btn btn btn-default btn-sm" ' +
+        'tabindex="-1" ' +
+        'type="button" ' +
+        'ng-disabled="$select.disabled" ' +
+        'ng-class="{\'btn-primary\':$selectMultiple.activeMatchIndex === $index, \'select-locked\':$select.isLocked(this, $index)}" ' +
+        'ui-select-sort="$select.selected">' +
+        '<i class="fa fa-pencil"></i>' +
+      '</span>' +
+
+      '<span ng-if="$select.parserResult.itemName === \'transformer\'" ' +
         'ng-click="toggleTransformer($item.value.utid)"' +
         'class="ui-select-match-item btn btn-default btn-sm" ' +
         'tabindex="-1" ' +
@@ -660,28 +655,21 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
           '<i ng-if="$item.value !== undefined" ng-class="{\'fa fa-eye-slash\':deviceForm.transformersVisible.indexOf($item.value.utid) == -1, \'fa fa-eye\': deviceForm.transformersVisible.indexOf($item.value.utid) > -1}"></i>' +
           '<span uis-transclude-append></span>' +
       '</span>' +
-    '</span>' +
-  '</span>');
-
-
-  $templateCache.put('selectize/match-multiple.tpl.html',
-  '<span class="ui-select-match">{{ $select.parserResult.itemName }}' +
-    '<span ng-repeat="$item in $select.selected track by $index">' +
-      '<span ' +
+      
+      '<span ng-if="$select.parserResult.itemName !== \'transformer\'" ' +
         'class="ui-select-match-item btn btn-default btn-sm" ' +
         'tabindex="-1" ' +
         'type="button" ' +
         'ng-disabled="$select.disabled" ' +
         'ng-class="{\'btn-primary\':$selectMultiple.activeMatchIndex === $index, \'select-locked\':$select.isLocked(this, $index)}" ' +
         'ui-select-sort="$select.selected">' +
+          // 'ng-click="this.clickTag($index)" ' + // default value
           '<span ng-if="$select.parserResult.itemName == \'channel\'" class="close ui-select-match-close" ng-hide="$select.disabled" ng-click="detachChannel($item.value);">&nbsp;&times;</span>' +
           '<span ng-if="$select.parserResult.itemName == \'tag\'" class="close ui-select-match-close" ng-hide="$select.disabled" ng-click="$selectMultiple.removeChoice($index)">&nbsp;&times;</span>' +
           '<span uis-transclude-append></span>' +
       '</span>' +
+
     '</span>' +
   '</span>');
-
-  console.log("TPL Cache after", $templateCache.info());
-
 
 }]);
