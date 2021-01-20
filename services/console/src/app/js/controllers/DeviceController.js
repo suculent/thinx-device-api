@@ -629,6 +629,8 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     $scope.showIcons = false;
   };
 
+  console.log("TPL Cache before", $templateCache.info());
+
   $templateCache.put('bootstrap/match-multiple.tpl.html',
   '<span class="ui-select-match transformer-input-block">' +
     '<span ng-repeat="$item in $select.selected track by $index">' +
@@ -664,7 +666,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
 
   $templateCache.put('selectize/match-multiple.tpl.html',
   '<span class="ui-select-match">' +
-    + 'this is parent: {{ $parent }}' + 
+  + 'this is parent: {{ $this }} {{ $scope }} {{ $parent }} {{ deviceForm }}' + 
     '<span ng-repeat="$item in $select.selected track by $index">' +
       '<span ' +
         'class="ui-select-match-item btn btn-default btn-sm" ' +
@@ -678,6 +680,8 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
       '</span>' +
     '</span>' +
   '</span>');
+
+  console.log("TPL Cache after", $templateCache.info());
 
 
 }]);
