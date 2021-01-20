@@ -627,7 +627,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     $scope.submitDeviceFormChange('icon');
     $scope.showIcons = false;
   };
-
+/*
   $templateCache.put('bootstrap/match-multiple.tpl.html',
   '<span class="ui-select-match transformer-input-block">' +
     '<span ng-repeat="$item in $select.selected track by $index">' +
@@ -660,7 +660,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     '</span>' +
   '</span>');
 
-/*  
+
   $templateCache.put('select2/match-multiple.tpl.html',
   '<span class="ui-select-match">' +
     '<span ng-repeat="$item in $select.selected track by $index">' +
