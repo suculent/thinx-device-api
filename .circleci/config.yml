@@ -788,7 +788,8 @@ jobs:
 #
 
 workflows:
-  build-and-deploy-components:
+
+  build-and-deploy:
     jobs:
     
       - build:
@@ -869,7 +870,9 @@ workflows:
       #           - keyguru-swarm
 
       # kgr.cz STAGING
-
+  
+  keyguru-staging:
+    jobs:
       - build-api:
           name: "api : kgr.cz"
           context:
@@ -928,6 +931,9 @@ workflows:
                 - keyguru-swarm
 
       # keyguru.cz PRODUCTION
+
+  keyguru-production:
+    jobs:
 
       - build-api-production:
           name: "api : keyguru.cz"
