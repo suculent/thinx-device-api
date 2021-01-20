@@ -630,7 +630,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
   };
 
   $templateCache.put('bootstrap/match-multiple.tpl.html',
-  '<span class="ui-select-match transformer-input-block">{{ $select.parserResult.itemName }}' +
+  '<span class="ui-select-match transformer-input-block">' +
     '<span ng-repeat="$item in $select.selected track by $index">' +
       '<span ng-if="$select.parserResult.itemName === \'transformer\'" ' +
         'ng-click="showEditorOverlay($item.value.utid);"' +
