@@ -665,8 +665,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
 
 
   $templateCache.put('selectize/match-multiple.tpl.html',
-  '<span class="ui-select-match">asd' +
-  + '<div>this is parent: {{ $this }} {{ $scope }} {{ $parent }} {{ deviceForm }}</div>' + 
+  '<span class="ui-select-match">asd {{ $scope | json }} {{ deviceForm | json }}' +
     '<span ng-repeat="$item in $select.selected track by $index">' +
       '<span ' +
         'class="ui-select-match-item btn btn-default btn-sm" ' +
