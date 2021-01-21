@@ -18,7 +18,8 @@
     "test": "nyc jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls",
     "coverage": "npm run mocha",
     "mocha": "mocha spec/jasmine --delay=3000 --exit --timeout=5000; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls",
-    "prepare": "npm-auto-version && npm run snyk-protect",
+    "prepare": "npm run snyk-protect",
+    "version": "npm run npm-auto-version",
     "postpublish": "git push origin --tags",
     "preinstall": "if [ -f ./package_lock.json ]; then npx npm-force-resolutions; fi"
   },
