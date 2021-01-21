@@ -106,7 +106,7 @@ RUN set -x \
 ENV DIND_COMMIT 37498f009d8bf25fbb6199e8ccd34bed84f2874b
 
 RUN set -eux; \
-	wget -O /usr/local/bin/dind "https://raw.githubusercontent.com/docker/docker/${DIND_COMMIT}/hack/dind"; \
+	curl -o /usr/local/bin/dind "https://raw.githubusercontent.com/docker/docker/${DIND_COMMIT}/hack/dind"; \
 	chmod +x /usr/local/bin/dind
 
 VOLUME /var/lib/docker
