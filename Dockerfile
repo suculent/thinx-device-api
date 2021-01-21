@@ -126,7 +126,6 @@ COPY . .
 # those packages should not be required and pose HIGH security risks
 # g++ is a DevSec build-only dependency, imagemagick source is currently unknown but it is definitely not required
 RUN apt-get remove -y \
-    imagemagick \
     && apt-get autoremove -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
