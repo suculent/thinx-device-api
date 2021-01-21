@@ -65,7 +65,7 @@
     "redis": "^2.8.0",
     "request": "^2.88.2",
     "rollbar": "^2.16.2",
-    "semver": "7.3.2",
+    "semver": "7.3.4",
     "sha256": "^0.2.0",
     "shell-escape": "^0.2.0",
     "sillyname": "^0.1.0",
