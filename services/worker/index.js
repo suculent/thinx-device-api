@@ -89,6 +89,10 @@ class Worker {
     }
 
     runJob(sock, job) {
+
+        console.log("Setting worker to running...");
+        this.is_running = true;
+
         if (this.validateJob(sock, job)) {
             this.runShell(job.cmd, job.owner, job.build_id, job.udid, job.path, sock);
         } else {
@@ -183,12 +187,15 @@ class Worker {
 
             socket.emit('log', logline + "\n");
             
-		}); // end shell on out data
+        }); // end shell on out data
+        
+        var dstring = "unknown";
 
 		shell.stderr.on("data", (data) => {
-			var dstring = data.toString();
+			dstring = data.toString();
 			console.log("ERR [" + build_id + "] »» ", dstring);
 			if (dstring.indexOf("fatal:") !== -1) {
+                this.is_running = false;
                 socket.emit('job-status', {
                     udid: udid,
                     build_id: build_id, 
@@ -202,6 +209,15 @@ class Worker {
 
             console.log("[OID:" + owner + "] [BUILD_COMPLETED] with code " + code);
             this.is_running = false;
+
+            if (code > 0) {
+                socket.emit('job-status', {
+                    udid: udid,
+                    build_id: build_id, 
+                    state: "Failed",
+                    reason: dstring
+                });
+            }
             
 		}); // end shell on exit
 	}
@@ -244,17 +260,18 @@ class Worker {
         });
 
         socket.on('job', (data) => { 
+            if (this.is_running = true) {
+                console.log("[!!!] This worker is already running... passing job", data);
+                // return;
+            }
             console.log(new Date().getTime(), `» Worker has new job:`, data);
             if (typeof(data.mock) === "undefined" || data.mock !== true) {
                 this.client_id = data;
-                console.log(new Date().getTime(), "» Processing incoming job...");
-                this.is_running = true;
                 this.runJob(socket, data);
                 this.is_running = false;
                 console.log(new Date().getTime(), "» Job synchronously completed.");
             } else {
                 console.log(new Date().getTime(), "» This is a MOCK job!");
-                this.is_running = true;
                 this.runJob(socket, data);
                 this.is_running = false;
             }

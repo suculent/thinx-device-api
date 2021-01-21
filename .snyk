@@ -37,7 +37,7 @@ ignore:
   'npm:moment:20161019':
     - fs-finder > moment:
         reason: no patch available
-        expires: '2019-07-02T21:19:54.883Z'
+        expires: '2021-02-18T18:06:22.104Z'
   'npm:tunnel-agent:20170305':
     - codecov.io > request > tunnel-agent:
         reason: None given
@@ -81,7 +81,7 @@ ignore:
   'npm:moment:20170905':
     - fs-finder > moment:
         reason: no patch available
-        expires: '2019-07-02T21:19:54.883Z'
+        expires: '2021-02-18T18:06:22.104Z'
     - codacy-coverage > nsp > joi > moment:
         reason: waiting for fix
         expires: '2018-05-13T09:14:25.225Z'
@@ -524,6 +524,18 @@ ignore:
     - npm > libnpm > npm-lifecycle > node-gyp > tar:
         reason: None given
         expires: '2019-07-02T21:19:54.883Z'
+  SNYK-JS-GLOBPARENT-1016905:
+    - mqtt > help-me > glob-stream > glob-parent:
+        reason: None given
+        expires: '2021-02-18T18:06:22.103Z'
+  SNYK-JS-PATHVAL-596926:
+    - chai > pathval:
+        reason: None given
+        expires: '2021-02-18T18:06:22.103Z'
+  SNYK-JS-Y18N-1021887:
+    - firebase-admin > @google-cloud/firestore > google-gax > @grpc/grpc-js > @grpc/proto-loader > yargs > y18n:
+        reason: None given
+        expires: '2021-02-18T18:06:22.104Z'
 # patches apply the minimum changes required to fix a vulnerability
 patch:
   'npm:hawk:20160119':
@@ -549,8 +561,6 @@ patch:
   'npm:request:20160119':
     - codecov.io > request:
         patched: '2017-05-24T20:23:09.576Z'
-      github-oauth > request:
-        patched: '2020-12-20T16:51:43.537Z'
     - nano > follow > request:
         patched: '2017-05-24T20:23:09.576Z'
     - nano > follow > request:
@@ -569,6 +579,8 @@ patch:
         patched: '2018-08-20T08:49:18.325Z'
     - github-oauth > request:
         patched: '2019-07-03T18:50:11.408Z'
+    - github-oauth > request:
+        patched: '2020-12-20T16:51:43.537Z'
   'npm:moment:20160126':
     - fs-finder > moment:
         patched: '2020-12-20T16:51:43.537Z'
@@ -666,11 +678,11 @@ patch:
   'npm:mime:20170907':
     - github-oauth > request > mime:
         patched: '2019-01-30T20:20:40.236Z'
-      github-oauth > request > form-data > mime:
-        patched: '2020-12-20T16:51:43.537Z'
     - github-oauth > request > form-data > mime:
         patched: '2019-01-30T20:20:40.236Z'
-      github-oauth > request > mime:
+    - github-oauth > request > form-data > mime:
+        patched: '2020-12-20T16:51:43.537Z'
+    - github-oauth > request > mime:
         patched: '2020-12-20T16:51:43.537Z'
   SNYK-JS-LODASH-450202:
     - codacy-coverage > lodash:

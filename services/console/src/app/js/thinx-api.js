@@ -1072,7 +1072,7 @@ function attachChannel(meshId, deviceUdid) {
   });
 }
 
-function detachSource(meshId, deviceUdid) {
+function detachChannel(meshId, deviceUdid) {
   return $.ajax({
     url: urlBase + '/device/mesh/detach',
     type: 'POST',

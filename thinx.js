@@ -120,8 +120,6 @@ if (fs.existsSync(pfx_path)) {
   });
 }
 
-console.log("» Initializing DB...");
-
 var nano = require("nano")(db);
 
 function initDatabases(dbprefix) {
@@ -185,22 +183,22 @@ initDatabases(prefix);
 var devicelib = require("nano")(db).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
 var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
 
-console.log("Loading module: Statistics");
+console.log("Loaded module: Statistics");
 var Stats = require("./lib/thinx/statistics");
 var stats = new Stats();
 
-console.log("Loading module: Messenger");
+console.log("Loaded module: Messenger");
 var Messenger = require("./lib/thinx/messenger");
 var messenger = new Messenger().getInstance(); // take singleton to prevent double initialization
 
-console.log("Loading module: Repository Watcher");
+console.log("Loaded module: Repository Watcher");
 var Repository = require("./lib/thinx/repository");
 
 var Builder = require("./lib/thinx/builder");
-console.log("Loading module: BuildServer");
+console.log("Loaded module: BuildServer");
 var builder = new Builder(); 
 
-console.log("Loading module: Queue");
+console.log("Loaded module: Queue");
 var Queue = require("./lib/thinx/queue");
 var queue = new Queue(builder);
 queue.cron(); // starts cron job for build queue from webhooks
@@ -425,7 +423,7 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   let caCert = read(app_config.ssl_ca, 'utf8');
   let ca = pki.certificateFromPem(caCert);
   let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
-  console.log("SSL certificate loaded...");
+  console.log("Loaded SSL certificate.");
   if (ca.verify(client)) {
     sslvalid = true;
   } else {
@@ -559,7 +557,6 @@ wss.on("connection", function(ws, req) {
   }
 
   const pathname = url.parse(req.url).pathname;
-  console.log("-----> Incoming WSS connection at path", pathname);
   
   ws.isAlive = true;
 
@@ -572,8 +569,9 @@ wss.on("connection", function(ws, req) {
   var cookies = req.headers.cookie;
 
   if (typeof(req.headers.cookie) !== "undefined") {
-    if (cookies.indexOf("thx-") === -1) {
-      console.log("» WARNING! No thx-cookie found in WS: " + JSON.stringify(req.headers.cookie));
+    if (cookies.indexOf("thx-session") === -1) {
+      console.log("» ERROR! No thx-session found in WS: " + JSON.stringify(req.headers.cookie));
+      return;
     } else {
       console.log("» DEPRECATED thx-cookie found in WS: " + JSON.stringify(req.headers.cookie));
     }
@@ -582,7 +580,6 @@ wss.on("connection", function(ws, req) {
   }
 
   /* Returns specific build log for owner */
-  console.log("Mapping endpoint: /api/user/logs/tail");
 
   // TODO: Extract with params (ws)
   app.post("/api/user/logs/tail", function(req2, res) {
@@ -640,7 +637,6 @@ wss.on("connection", function(ws, req) {
 
   ws.on('close', function () {
     socketMap.delete(pathname);
-    console.log("» Closed websocket, deleting ", pathname, "from map");
   });
 
 }).on("error", function(err) {
