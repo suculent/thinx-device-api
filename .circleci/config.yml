@@ -2,6 +2,7 @@ version: 2.1
 orbs:
   node: circleci/node@3.0.0
   docker: circleci/docker@1.5.0
+  slack: circleci/slack@4.1.3
 
 jobs:
 
@@ -246,6 +247,41 @@ jobs:
           image: thinx/worker
           registry: registry.keyguru.eu:5000
           tag: 'latest'
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": ":bomb: THiNX-Worker Test completed with errors.",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: fail
+
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": ":rocket: Deploying new THiNX Worker $CIRCLE_TAG...",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: pass
 
   build-console:
     executor: docker/docker
@@ -281,6 +317,42 @@ jobs:
           registry: registry.keyguru.eu:5000
           tag: '${COUNTRY}'
 
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": ":bomb: THiNX-Console Test completed with errors.",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: fail
+
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": ":rocket: Deploying new THiNX Console $CIRCLE_TAG...",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: pass
+
   build-api:
     executor: docker/docker
     steps:
@@ -303,6 +375,41 @@ jobs:
           image: thinx/api
           registry: registry.keyguru.eu:5000
           tag: '${COUNTRY}'
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": ":bomb: THiNX-API Test completed with errors.",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: fail
+
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": ":rocket: Deploying new THiNX API $CIRCLE_TAG...",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: pass
 
 #
 # DEPRECATED BUILD, KEEPING FOR TEST PURPOSES LATER
@@ -522,4 +629,135 @@ workflows:
             branches:
               only:
                 - thinx-swarm
-                
+      
+      # .com build, currently unused
+      # - build-api:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-console:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-mosquitto:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-redis:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-transformer:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+
+      # kgr.cz
+
+      - build-api:
+          name: "api : kgr.cz"
+          context:
+            - thinx-staging-cz
+            - slack
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
+      - build-console:
+          name: "console : kgr.cz"
+          context:
+            - thinx-staging-cz
+            - slack
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
+      # - build-mosquitto:
+      #     name: "mosquitto : kgr.cz"
+      #     context:
+      #       - thinx-staging-cz
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-redis:
+      #     name: "redis : kgr.cz"
+      #     context:
+      #       - thinx-staging-cz
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-transformer:
+      #     name: "transformer : kgr.cz"
+      #     context:
+      #       - thinx-staging-cz
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      - build-worker:
+          name: "worker : kgr.cz"
+          context:
+            - thinx-staging-cz
+            - slack
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
+
+      # keyguru.at
+
+      # - build-api:
+      #     name: "api : keyguru.at"
+      #     context:
+      #       - thinx-staging-at
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-console:
+      #     name: "console : keyguru.at"
+      #     context:
+      #       - thinx-staging-at
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-mosquitto:
+      #     name: "mosquitto : keyguru.at"
+      #     context:
+      #       - thinx-staging-at
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-redis:
+      #     name: "redis : keyguru.at"
+      #     context:
+      #       - thinx-staging-at
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-transformer:
+      #     name: "transformer : keyguru.at"
+      #     context:
+      #       - thinx-staging-at
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
+      # - build-worker:
+      #     name: "transformer : keyguru.at"
+      #     context:
+      #       - thinx-staging-at
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-swarm
