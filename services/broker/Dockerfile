@@ -39,6 +39,6 @@ EXPOSE 1883 8883 9001
 
 RUN echo "ENV check: ${MOSQUITTO_USERNAME} ${MOSQUITTO_PASSWORD}"
 
-RUN apt remove -y wget curl
+RUN apt remove -y wget
 
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
