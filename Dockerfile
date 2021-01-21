@@ -86,8 +86,8 @@ RUN openssl version \
  && node -v \
  && npm update \
  && npm install --unsafe-perm . --only-prod \
- && npm install --unsafe-perm . --only-prod \
- && npm audit fix
+ && npm install --unsafe-perm . --only-prod
+## && npm audit fix -- fails with buster, why?
 
 ENV VER="20.10.1"
 RUN curl -sL -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz && \
