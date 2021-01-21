@@ -40,7 +40,7 @@ USER root
 
 # Install, build, protect
 RUN apk update \
-    && apt upgrade \
+    && apk upgrade \
     && apk add g++ gcc libgcc libstdc++ linux-headers make python \
     && apk add ca-certificates \
     && update-ca-certificates \
