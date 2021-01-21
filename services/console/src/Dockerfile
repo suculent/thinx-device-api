@@ -57,7 +57,7 @@ RUN npm install . --only-prod \
     && npm run build \
     && npm audit fix
 
-RUN apk del g++ gcc curl make eslint
+RUN apk remove g++ gcc curl make eslint
 
 #
 # Deployment Image
