@@ -57,8 +57,7 @@ RUN npm install . --only-prod \
     && npm run build \
     && npm audit fix
 
-RUN apk del g++
-# gcc curl make eslint
+RUN apk del g++ gcc make
 
 #
 # Deployment Image
@@ -74,7 +73,7 @@ COPY --from=0 /home/node/build/html .
 # COPY default.conf /etc/nginx/conf.d/default.conf
 
 RUN apt-get update \
- && apt-get install -qq -y curl nano nmap inetutils-ping
+ && apt-get upgrade
 
 # Only for Alpine, but the nginx is somewhere else then?
 #COPY harden.sh .
