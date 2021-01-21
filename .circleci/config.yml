@@ -893,22 +893,22 @@ workflows:
                 - keyguru-swarm
       
       # no need to rebuild on and on for staging
-      # - build-mosquitto:
-      #     name: "mosquitto : kgr.cz"
-      #     context:
-      #       - thinx-staging-cz
-      #     filters:
-      #       branches:
-      #         only:
-      #           - keyguru-swarm
-      # - build-redis:
-      #     name: "redis : kgr.cz"
-      #     context:
-      #       - thinx-staging-cz
-      #     filters:
-      #       branches:
-      #         only:
-      #           - keyguru-swarm
+      - build-mosquitto:
+          name: "mosquitto : kgr.cz"
+          context:
+            - thinx-staging-cz
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
+      - build-redis:
+          name: "redis : kgr.cz"
+          context:
+            - thinx-staging-cz
+          filters:
+            branches:
+              only:
+                - keyguru-swarm
 
       # using generic transformer
       # - build-transformer:
