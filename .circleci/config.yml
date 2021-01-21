@@ -177,6 +177,8 @@ jobs:
           registry: registry.keyguru.eu:5000
           tag: '${COUNTRY}'
 
+  # STAGING
+
   build-redis:
     executor: docker/docker
     steps:
@@ -274,7 +276,7 @@ jobs:
                   "fields": [
                     {
                       "type": "plain_text",
-                      "text": ":rocket: Deploying new THiNX Worker $CIRCLE_TAG...",
+                      "text": ":rocket: Deploying new THiNX Worker to staging...",
                       "emoji": true
                     }
                   ]
@@ -344,7 +346,7 @@ jobs:
                   "fields": [
                     {
                       "type": "plain_text",
-                      "text": ":rocket: Deploying new THiNX Console $CIRCLE_TAG...",
+                      "text": ":rocket: Deploying new THiNX Console to staging...",
                       "emoji": true
                     }
                   ]
@@ -402,7 +404,216 @@ jobs:
                   "fields": [
                     {
                       "type": "plain_text",
-                      "text": ":rocket: Deploying new THiNX API $CIRCLE_TAG...",
+                      "text": ":rocket: Deploying new THiNX API to staging...",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: pass
+
+  ## PRODUCTION
+
+  build-redis-production:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          command: |
+            rm -rf ./package-lock.json
+      - docker/check:
+          registry: registry.keyguru.eu:5000
+      - docker/build:
+          registry: registry.keyguru.eu:5000
+          image: thinx/redis
+          docker-context: services/redis
+          dockerfile: services/redis/Dockerfile
+          extra_build_args: '--build-arg REDIS_PASSWORD=${REDIS_PASSWORD} --build-arg ALLOW_EMPTY_PASSWORD=no --build-arg REDIS_DISABLE_COMMANDS=FLUSHALL'
+          tag: '${COUNTRY}'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/redis
+          registry: registry.keyguru.eu:5000
+          tag: '${COUNTRY}'
+
+  build-worker-production:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check:
+          registry: registry.keyguru.eu:5000
+      - docker/build:
+          registry: registry.keyguru.eu:5000
+          docker-context: services/worker
+          image: thinx/worker
+          dockerfile: ./services/worker/Dockerfile
+          extra_build_args: |
+            --build-arg REVISION=$(git describe --abbrev=0) \
+          tag: 'latest'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/worker
+          registry: registry.keyguru.eu:5000
+          tag: 'latest'
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": ":bomb: THiNX-Worker Test completed with errors.",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: fail
+
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": ":rocket: Deploying new THiNX Worker to production...",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: pass
+
+  build-console-production:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check:
+          registry: registry.keyguru.eu:5000
+      - docker/build:
+          registry: registry.keyguru.eu:5000
+          docker-context: services/console/src
+          image: thinx/console
+          dockerfile: services/console/src/Dockerfile
+          extra_build_args: |
+            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
+            --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} \
+            --build-arg LANDING_HOSTNAME=${LANDING_HOSTNAME} \
+            --build-arg WEB_HOSTNAME=${WEB_HOSTNAME} \
+            --build-arg NGINX_HOST=${WEB_HOSTNAME} \
+            --build-arg API_HOSTNAME=${API_HOSTNAME} \
+            --build-arg API_BASEURL=${API_BASEURL} \
+            --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} \
+            --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
+            --build-arg NGINX_PORT=80 \
+            --build-arg ENTERPRISE=true \
+            --build-arg ENVIRONMENT=${ENVIRONMENT} \
+            --build-arg ROLLBAR_ENVIRONMENT=${ENVIRONMENT} \
+            --build-arg REVISION=$(git describe --abbrev=0) \
+          tag: '${COUNTRY}'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/console
+          registry: registry.keyguru.eu:5000
+          tag: '${COUNTRY}'
+
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": ":bomb: THiNX-Console Test completed with errors.",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: fail
+
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": ":rocket: Deploying new THiNX Console to production...",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: pass
+
+  build-api-production:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check:
+          registry: registry.keyguru.eu:5000
+      - docker/build:
+          registry: registry.keyguru.eu:5000
+          image: thinx/api
+          dockerfile: ./Dockerfile
+          extra_build_args: |
+            --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} \
+            --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
+            --build-arg ENVIRONMENT=${ENVIRONMENT} \
+            --build-arg REVISION=$(git describe --abbrev=0) \
+          tag: '${COUNTRY}'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/api
+          registry: registry.keyguru.eu:5000
+          tag: '${COUNTRY}'
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": ":bomb: THiNX-API Test completed with errors.",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: fail
+
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": ":rocket: Deploying new THiNX API to production...",
                       "emoji": true
                     }
                   ]
@@ -577,7 +788,8 @@ jobs:
 #
 
 workflows:
-  build-and-deploy-components:
+
+  build-and-deploy:
     jobs:
     
       - build:
@@ -657,8 +869,10 @@ workflows:
       #         only:
       #           - keyguru-swarm
 
-      # kgr.cz
-
+      # kgr.cz STAGING
+  
+  keyguru-staging:
+    jobs:
       - build-api:
           name: "api : kgr.cz"
           context:
@@ -677,6 +891,8 @@ workflows:
             branches:
               only:
                 - keyguru-swarm
+      
+      # no need to rebuild on and on for staging
       # - build-mosquitto:
       #     name: "mosquitto : kgr.cz"
       #     context:
@@ -693,6 +909,8 @@ workflows:
       #       branches:
       #         only:
       #           - keyguru-swarm
+
+      # using generic transformer
       # - build-transformer:
       #     name: "transformer : kgr.cz"
       #     context:
@@ -701,6 +919,7 @@ workflows:
       #       branches:
       #         only:
       #           - keyguru-swarm
+
       - build-worker:
           name: "worker : kgr.cz"
           context:
@@ -710,6 +929,47 @@ workflows:
             branches:
               only:
                 - keyguru-swarm
+
+      # keyguru.cz PRODUCTION
+
+  keyguru-production:
+    jobs:
+
+      - build-api-production:
+          name: "api : keyguru.cz"
+          context:
+            - thinx-production-cz
+            - slack
+          filters:
+            branches:
+              only:
+                - keyguru-production
+      - build-console-production:
+          name: "console : keyguru.cz"
+          context:
+            - thinx-production-cz
+            - slack
+          filters:
+            branches:
+              only:
+                - keyguru-production
+      - build-redis-production:
+          name: "redis : keyguru.cz"
+          context:
+            - thinx-production-cz
+          filters:
+            branches:
+              only:
+                - keyguru-production
+      - build-worker-production:
+          name: "worker : keyguru.cz"
+          context:
+            - thinx-production-cz
+            - slack
+          filters:
+            branches:
+              only:
+                - keyguru-production
 
       # keyguru.at
 
