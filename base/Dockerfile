@@ -51,8 +51,10 @@ ENV DIND_COMMIT 37498f009d8bf25fbb6199e8ccd34bed84f2874b
 
 WORKDIR /opt/thinx/thinx-device-api
 
-# Install app dependencies (copy from app/package.json)
+# Install app dependencies
+# package.json should be link to ../package.json
 COPY ./package.json ./
+COPY .snyk ./.snyk
 
 # install with npx and audit fix
 RUN npm update \

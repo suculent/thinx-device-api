@@ -46,11 +46,6 @@ ENV SNYK_TOKEN=${SNYK_TOKEN}
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
 
-# Install app dependencies
-COPY package.json ./
-
-COPY .snyk ./.snyk
-
 # second npm install is using package_lock to fix pinned transient dependencies
 RUN openssl version \
  && node -v \
