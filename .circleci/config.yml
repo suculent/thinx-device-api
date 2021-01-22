@@ -789,7 +789,12 @@ jobs:
 
 workflows:
 
+  #
+  # public open-source site
+  #
+
   build-and-deploy:
+
     jobs:
     
       - build:
@@ -798,7 +803,6 @@ workflows:
               only:
                 - master
 
-      # ready for at/eu production deployment
       - build-api-cloud:
           context:
             - thinx-docker-repo
@@ -806,6 +810,7 @@ workflows:
             branches:
               only:
                 - thinx-swarm
+
       - build-console-cloud:
           context:
             - thinx-docker-repo
@@ -813,6 +818,7 @@ workflows:
             branches:
               only:
                 - thinx-swarm
+
       - build-mosquitto-cloud:
           context:
             - thinx-docker-repo
@@ -820,6 +826,7 @@ workflows:
             branches:
               only:
                 - thinx-swarm
+
       - build-redis-cloud:
           context:
             - thinx-docker-repo
@@ -827,6 +834,7 @@ workflows:
             branches:
               only:
                 - thinx-swarm
+
       - build-transformer-cloud:
           context:
             - thinx-docker-repo
@@ -834,6 +842,7 @@ workflows:
             branches:
               only:
                 - thinx-swarm
+
       - build-worker-cloud:
           context:
             - thinx-docker-repo
@@ -841,38 +850,15 @@ workflows:
             branches:
               only:
                 - thinx-swarm
-      
-      # .com build, currently unused
-      # - build-api:
-      #     filters:
-      #       branches:
-      #         only:
-      #           - keyguru-swarm
-      # - build-console:
-      #     filters:
-      #       branches:
-      #         only:
-      #           - keyguru-swarm
-      # - build-mosquitto:
-      #     filters:
-      #       branches:
-      #         only:
-      #           - keyguru-swarm
-      # - build-redis:
-      #     filters:
-      #       branches:
-      #         only:
-      #           - keyguru-swarm
-      # - build-transformer:
-      #     filters:
-      #       branches:
-      #         only:
-      #           - keyguru-swarm
 
-      # kgr.cz STAGING
+  #
+  # kgr.cz STAGING
+  #
   
   keyguru-staging:
+    
     jobs:
+
       - build-api:
           name: "api : kgr.cz"
           context:
@@ -937,9 +923,12 @@ workflows:
       #         only:
       #           - keyguru-swarm
 
-      # keyguru.cz PRODUCTION
+  #
+  # keyguru.cz PRODUCTION
+  #
 
   keyguru-production:
+
     jobs:
 
       - build-api-production:
@@ -951,6 +940,7 @@ workflows:
             branches:
               only:
                 - keyguru-production
+
       - build-console-production:
           name: "console : keyguru.cz"
           context:
@@ -960,14 +950,18 @@ workflows:
             branches:
               only:
                 - keyguru-production
-      - build-redis-production:
-          name: "redis : keyguru.cz"
-          context:
-            - thinx-production-cz
-          filters:
-            branches:
-              only:
-                - keyguru-production
+
+      # considered stable at 5.0.8
+      # disabled for faster iterations
+      # - build-redis-production:
+      #     name: "redis : keyguru.cz"
+      #     context:
+      #       - thinx-production-cz
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-production
+
       - build-worker-production:
           name: "worker : keyguru.cz"
           context:
@@ -978,7 +972,7 @@ workflows:
               only:
                 - keyguru-production
 
-      # keyguru.at
+      # keyguru.at (deprecated, would need update on reuse)
 
       # - build-api:
       #     name: "api : keyguru.at"
