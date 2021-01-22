@@ -56,6 +56,7 @@ COPY .snyk ./.snyk
 
 # install with npx and audit fix
 RUN npm update \
- && npm install --unsafe-perm . --only-prod \
- && npm install --unsafe-perm . --only-prod
+  &&  npm upgrade \
+  && npm install --unsafe-perm . --only-prod \
+  && npm install --unsafe-perm . --only-prod
 ## && npm audit fix -- fails with buster, why? because of different node version
