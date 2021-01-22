@@ -6,7 +6,8 @@ RUN adduser --system --disabled-password --shell /bin/bash thinx
 # WHY? See blame.
 RUN sh -c "echo 'Dir::Ignore-Files-Silently:: \"(.save|.distupgrade)$\";' > /etc/apt/apt.conf.d/99ignoresave"
 
-# RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
+# Packages
+
 RUN apt-get update -qq && \
     apt-get install -qq -y --fix-missing --no-install-recommends \
     apt-transport-https \
@@ -32,11 +33,13 @@ RUN apt-get update -qq && \
     zip \
     && rm -rf /var/lib/apt/lists/*
 
+# Docker-in-docker
+
 ENV VER="20.10.1"
 RUN curl -sL -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz && \
     tar -xz -C /tmp -f /tmp/docker-$VER.tgz && \
     rm -rf /tmp/docker-$VER.tgz && \
-   mv /tmp/docker/* /usr/bin
+    mv /tmp/docker/* /usr/bin
 
 # set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
 RUN set -x \
@@ -47,6 +50,14 @@ RUN set -x \
 
 # https://github.com/docker/docker/tree/master/hack/dind is this really needed now?
 ENV DIND_COMMIT 37498f009d8bf25fbb6199e8ccd34bed84f2874b
+
+RUN set -eux; \
+	curl -o /usr/local/bin/dind "https://raw.githubusercontent.com/docker/docker/${DIND_COMMIT}/hack/dind"; \
+	chmod +x /usr/local/bin/dind
+
+VOLUME /var/lib/docker
+
+# Node.js app
 
 WORKDIR /opt/thinx/thinx-device-api
 

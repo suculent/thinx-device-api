@@ -51,12 +51,6 @@ RUN npm update \
  && npm install --unsafe-perm . --only-prod
 ## && npm audit fix -- fails with buster, why?
 
-RUN set -eux; \
-	curl -o /usr/local/bin/dind "https://raw.githubusercontent.com/docker/docker/${DIND_COMMIT}/hack/dind"; \
-	chmod +x /usr/local/bin/dind
-
-VOLUME /var/lib/docker
-
 # THiNX Web & Device API (HTTP)
 EXPOSE 7442
 
@@ -69,8 +63,6 @@ EXPOSE 9002
 # Copy app source code
 COPY . .
 
-# those packages should not be required and pose HIGH security risks
-# g++ is a DevSec build-only dependency, imagemagick source is currently unknown but it is definitely not required
 RUN apt-get remove -y \
     && apt-get autoremove -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
