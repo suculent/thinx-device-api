@@ -1,6 +1,6 @@
 # ./update.sh
 
-FROM thinx/base-app-image:latest
+FROM suculent/thinx-base-image:latest
 
 ARG ROLLBAR_ENVIRONMENT
 ARG THINX_HOSTNAME

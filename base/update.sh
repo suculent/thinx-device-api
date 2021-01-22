@@ -1,5 +1,10 @@
 #!/bin/bash
 
-docker build -t thinx/base-app-image .
+# expected usage:
+# ./update.sh --owner keyguru
 
-docker push thinx/base-app-image:latest
+OWNER="suculent"
+
+docker build -t $OWNER/thinx-base-image .
+
+docker push $OWNER/thinx-base-image:latest

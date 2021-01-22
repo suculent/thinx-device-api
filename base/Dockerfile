@@ -1,5 +1,3 @@
-# docker build -t registry.thinx.cloud:5000/thinx/base-app-image .
-
 FROM node:current-buster-slim
 
 RUN adduser --system --disabled-password --shell /bin/bash thinx
