@@ -1,6 +1,6 @@
-FROM node:current-buster-slim
+# ./update.sh
 
-# docker build -t suculent/thinx-device-api .
+FROM thinx/base-app-image:latest
 
 ARG ROLLBAR_ENVIRONMENT
 ARG THINX_HOSTNAME
@@ -46,37 +46,6 @@ ENV SNYK_TOKEN=${SNYK_TOKEN}
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
 
-RUN adduser --system --disabled-password --shell /bin/bash thinx
-
-# WHY? See blame.
-RUN sh -c "echo 'Dir::Ignore-Files-Silently:: \"(.save|.distupgrade)$\";' > /etc/apt/apt.conf.d/99ignoresave"
-
-# RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
-RUN apt-get update -qq && \
-    apt-get install -qq -y --fix-missing --no-install-recommends \
-    apt-transport-https \
-    apt-utils \
-    btrfs-progs \
-    ca-certificates \
-    curl \
-    e2fsprogs \
-    gnutls-bin \
-    iptables \
-    lxc \
-    mosquitto \
-    mercurial \
-    pigz \
-    python \
-    python-pip \
-    ssh \
-    xfsprogs \
-    xz-utils \
-    net-tools \
-    git \
-    jq \
-    zip \
-    && rm -rf /var/lib/apt/lists/*
-
 # Install app dependencies
 COPY package.json ./
 
@@ -89,22 +58,6 @@ RUN openssl version \
  && npm install --unsafe-perm . --only-prod \
  && npm install --unsafe-perm . --only-prod
 ## && npm audit fix -- fails with buster, why?
-
-ENV VER="20.10.1"
-RUN curl -sL -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz && \
-    tar -xz -C /tmp -f /tmp/docker-$VER.tgz && \
-    rm -rf /tmp/docker-$VER.tgz && \
-   mv /tmp/docker/* /usr/bin
-
-# set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
-RUN set -x \
-	&& addgroup dockremap --gid 65536 \
-	&& adduser --system dockremap --gid 65536 \
-	&& echo 'dockremap:165536:65536' >> /etc/subuid \
-	&& echo 'dockremap:165536:65536' >> /etc/subgid
-
-# https://github.com/docker/docker/tree/master/hack/dind is this really needed now?
-ENV DIND_COMMIT 37498f009d8bf25fbb6199e8ccd34bed84f2874b
 
 RUN set -eux; \
 	curl -o /usr/local/bin/dind "https://raw.githubusercontent.com/docker/docker/${DIND_COMMIT}/hack/dind"; \
@@ -139,8 +92,5 @@ RUN apt-get remove -y \
 RUN mkdir -p ./.nyc_output
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
-
-# Does not work on r/o filesystem
-# RUN sysctl net.ipv4.ip_forward=1 && sysctl -w net.ipv4.conf.all.forwarding=1
 
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
