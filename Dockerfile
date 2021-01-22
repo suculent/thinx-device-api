@@ -68,6 +68,7 @@ RUN apt-get update -qq && \
     pigz \
     python \
     python-pip \
+    ssh \
     xfsprogs \
     xz-utils \
     net-tools \
