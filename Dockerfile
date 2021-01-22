@@ -47,10 +47,7 @@ ENV SNYK_TOKEN=${SNYK_TOKEN}
 WORKDIR /opt/thinx/thinx-device-api
 
 # second npm install is using package_lock to fix pinned transient dependencies
-RUN openssl version \
- && node -v \
- && npm update \
- && npm install --unsafe-perm . --only-prod \
+RUN npm update \
  && npm install --unsafe-perm . --only-prod
 ## && npm audit fix -- fails with buster, why?
 
