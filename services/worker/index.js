@@ -20,9 +20,8 @@ class Worker {
 
     constructor(build_server) {
         this.client_id = null;
-        this.is_running = false;
         this.socket = io(build_server);
-        console.log(new Date().getTime(), `» -= THiNX Cloud Build Worker ${version} rev. ${process.env.REVISION} =-`);
+        console.log(new Date().getTime(), `» -= THiNX Cloud Build Worker ${version} =-`);
         this.setupSocket(this.socket);
         this.socket_id = null;
         this.running = false;
@@ -38,7 +37,7 @@ class Worker {
             status: "Failed",
             details: details
         });
-        this.is_running = false;
+        this.running = false;
     }
 
     validateJob(sock, job) {
@@ -91,7 +90,7 @@ class Worker {
     runJob(sock, job) {
 
         console.log("Setting worker to running...");
-        this.is_running = true;
+        this.running = true;
 
         if (this.validateJob(sock, job)) {
             this.runShell(job.cmd, job.owner, job.build_id, job.udid, job.path, sock);
@@ -195,7 +194,7 @@ class Worker {
 			dstring = data.toString();
 			console.log("ERR [" + build_id + "] »» ", dstring);
 			if (dstring.indexOf("fatal:") !== -1) {
-                this.is_running = false;
+                this.running = false;
                 socket.emit('job-status', {
                     udid: udid,
                     build_id: build_id, 
@@ -208,7 +207,7 @@ class Worker {
 		shell.on("exit", (code) => {
 
             console.log("[OID:" + owner + "] [BUILD_COMPLETED] with code " + code);
-            this.is_running = false;
+            this.running = false;
 
             if (code > 0) {
                 socket.emit('job-status', {
@@ -227,8 +226,7 @@ class Worker {
         // Connectivity Events
 
         socket.on('connect', () => { 
-            console.log(new Date().getTime(), "» Worker socket connected, sending registration...");
-            socket.emit('register', { status: "Hello from BuildWorker.", id: this.socket_id, running: this.running }); // refactor, post status as well (running, id...)
+            socket.emit('register', { status: "Hello from BuildWorker.", id: this.socket_id, running: this.running });
         });
 
         socket.on('disconnect', () => { 
@@ -260,7 +258,7 @@ class Worker {
         });
 
         socket.on('job', (data) => { 
-            if (this.is_running = true) {
+            if (this.running = true) {
                 console.log("[!!!] This worker is already running... passing job", data);
                 // return;
             }
@@ -268,18 +266,18 @@ class Worker {
             if (typeof(data.mock) === "undefined" || data.mock !== true) {
                 this.client_id = data;
                 this.runJob(socket, data);
-                this.is_running = false;
+                this.irunning = false;
                 console.log(new Date().getTime(), "» Job synchronously completed.");
             } else {
                 console.log(new Date().getTime(), "» This is a MOCK job!");
                 this.runJob(socket, data);
-                this.is_running = false;
+                this.irunning = false;
             }
         });
     }
 
     loop() {
-        if (!this.is_running) {
+        if (!this.running) {
             this.socket.emit('poll', 'true');
         } else {
             console.log(new Date().getTime(), "» Skipping poll cron (job still running and did not timed out).");
