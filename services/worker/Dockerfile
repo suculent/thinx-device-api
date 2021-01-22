@@ -64,9 +64,9 @@ RUN set -x \
 	&& echo 'dockremap:165536:65536' >> /etc/subuid \
 	&& echo 'dockremap:165536:65536' >> /etc/subgid
 
-# https://github.com/docker/docker/tree/master/hack/dind is this really needed now?
-# ENV DIND_COMMIT 37498f009d8bf25fbb6199e8ccd34bed84f2874b
-
+# Docker-in-Docker, allows running another service/container 
+# based on https://github.com/docker/docker/tree/master/hack/dind
+ENV DIND_COMMIT 37498f009d8bf25fbb6199e8ccd34bed84f2874b
 RUN set -eux; \
 	wget -O /usr/local/bin/dind "https://raw.githubusercontent.com/docker/docker/${DIND_COMMIT}/hack/dind"; \
 	chmod +x /usr/local/bin/dind
@@ -76,7 +76,7 @@ VOLUME /var/lib/docker
 # Running npm install for production purpose will not run dev dependencies.
 RUN npm install . --only-prod
 
-# Create a user group 'thinx'
+# Create a user group 'thinx' (problem with rights across containers)
 # RUN addgroup -S thinx && \
     # adduser -S -D -h /opt/thinx/thinx-device-api worker thinx && \
     # chown -R worker:thinx /opt/thinx/thinx-device-api && \
@@ -85,7 +85,7 @@ RUN npm install . --only-prod
 RUN chmod +x ./devsec
 
 # Switch to 'transformer' or 'node' user
-# USER worker
+# USER worker problem with rights across containers)
 
 # Open the mapped port
 EXPOSE 3000
