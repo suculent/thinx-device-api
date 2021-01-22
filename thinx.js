@@ -2,6 +2,8 @@
  * This THiNX-RTM API module is responsible for responding to devices and build requests.
  */
 
+let start_timestamp = new Date().getTime();
+
 console.log("========================================================================");
 console.log("                 CUT LOGS HERE >>> SERVICE RESTARTED ");
 console.log("========================================================================");
@@ -15,7 +17,7 @@ var product = package_info.description;
 var version = package_info.version;
 
 console.log("");
-console.log("-=[ ☢ " + product + " v" + version + " rev." + process.env.REVISION + " ☢ ]=-");
+console.log("-=[ ☢ " + product + " v" + version + " ☢ ]=-");
 console.log("");
 
 const Globals = require("./lib/thinx/globals.js"); // static only!
@@ -408,6 +410,9 @@ var ssl_options = null;
 // Legacy HTTP support for old devices without HTTPS proxy
 let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function() {
   console.log("» Legacy API started on port", app_config.port);
+  let end_timestamp = new Date().getTime() - start_timestamp;
+  let seconds = Math.ceil(end_timestamp / 1000);
+  console.log("Startup phase took: ", seconds, "seconds");
 });
 
 var read = require('fs').readFileSync;
@@ -417,7 +422,9 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   let sslvalid = false;
 
   if (!fs.existsSync(app_config.ssl_ca)) {
-    console.log("[WARNING] Did not find app_config.ssl_ca file, websocket logging will fail...");
+    const message = "[WARNING] Did not find app_config.ssl_ca file, websocket logging will fail...";
+    rollbar.warn(message);
+    console.log(message);
   }
 
   let caCert = read(app_config.ssl_ca, 'utf8');
@@ -616,6 +623,7 @@ wss.on("connection", function(ws, req) {
       blog.logtail(build_id, owner_id, _ws, logtail_callback);
     } else if (typeof(object.init) !== "undefined") {
       if (typeof(messenger) !== "undefined") {
+        console.log("Initializing messenger in WS...");
         messenger.initWithOwner(object.init, _ws, function(success, message_z) {
           if (!success) {
             console.log("Messenger init on WS message with result " + success + ", with message: ", { message_z });
@@ -765,6 +773,7 @@ if (isMasterProcess()) {
   setInterval(log_aggregator, 86400 * 1000 / 2);
 
   // MQTT Messenger/listener
+  console.log("Initializing messenger...");
   messenger.init();
 
   setTimeout(startup_quote, 10000); // wait for Slack init only once
