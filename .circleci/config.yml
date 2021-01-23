@@ -630,7 +630,7 @@ jobs:
 
     # In CircleCI 2.0 you can now specify your own image, or use one of our pre-configured images.
     docker:
-      - image: suculent/thinx-base-image:first
+      - image: suculent/thinx-base-image:latest
         auth:
           username: $DOCKER_USERNAME  # can specify string literal values
           password: $DOCKER_PASSWORD  # or project environment variable reference
