@@ -858,7 +858,7 @@ workflows:
           filters:
             branches:
               only:
-                - keyguru-swarm
+                - keyguru-staging
 
       # disabled for faster iterations
       # - build-console:
@@ -869,7 +869,7 @@ workflows:
       #     filters:
       #       branches:
       #         only:
-      #           - keyguru-swarm
+      #           - keyguru-staging
 
       # disabled for faster iterations      
       # no need to rebuild on and on for staging
@@ -880,7 +880,7 @@ workflows:
       #     filters:
       #       branches:
       #         only:
-      #           - keyguru-swarm
+      #           - keyguru-staging
 
       # disabled for faster iterations
       # - build-redis:
@@ -890,7 +890,7 @@ workflows:
       #     filters:
       #       branches:
       #         only:
-      #           - keyguru-swarm
+      #           - keyguru-staging
 
       # disabled for faster iterations
       # using generic transformer
@@ -901,7 +901,7 @@ workflows:
       #     filters:
       #       branches:
       #         only:
-      #           - keyguru-swarm
+      #           - keyguru-staging
 
       # disabled for faster iterations
       # - build-worker:
@@ -912,7 +912,7 @@ workflows:
       #     filters:
       #       branches:
       #         only:
-      #           - keyguru-swarm
+      #           - keyguru-staging
 
   #
   # keyguru.cz PRODUCTION
@@ -972,7 +972,7 @@ workflows:
       #     filters:
       #       branches:
       #         only:
-      #           - keyguru-swarm
+      #           - keyguru-staging
       # - build-console:
       #     name: "console : keyguru.at"
       #     context:
@@ -980,7 +980,7 @@ workflows:
       #     filters:
       #       branches:
       #         only:
-      #           - keyguru-swarm
+      #           - keyguru-staging
       # - build-mosquitto:
       #     name: "mosquitto : keyguru.at"
       #     context:
@@ -988,7 +988,7 @@ workflows:
       #     filters:
       #       branches:
       #         only:
-      #           - keyguru-swarm
+      #           - keyguru-staging
       # - build-redis:
       #     name: "redis : keyguru.at"
       #     context:
@@ -996,7 +996,7 @@ workflows:
       #     filters:
       #       branches:
       #         only:
-      #           - keyguru-swarm
+      #           - keyguru-staging
       # - build-transformer:
       #     name: "transformer : keyguru.at"
       #     context:
@@ -1004,7 +1004,7 @@ workflows:
       #     filters:
       #       branches:
       #         only:
-      #           - keyguru-swarm
+      #           - keyguru-staging
       # - build-worker:
       #     name: "transformer : keyguru.at"
       #     context:
@@ -1012,4 +1012,4 @@ workflows:
       #     filters:
       #       branches:
       #         only:
-      #           - keyguru-swarm
+      #           - keyguru-staging
