@@ -630,7 +630,7 @@ jobs:
 
     # In CircleCI 2.0 you can now specify your own image, or use one of our pre-configured images.
     docker:
-      - image: suculent/thinx_baseline:first
+      - image: suculent/thinx-base-image:latest
         auth:
           username: $DOCKER_USERNAME  # can specify string literal values
           password: $DOCKER_PASSWORD  # or project environment variable reference
@@ -647,15 +647,6 @@ jobs:
       REDIS_URL: redis://localhost:6379
 
     steps:
-
-    - run:
-        name: Install Docker client
-        command: |
-            set -x
-            VER="18.06.0-ce"
-            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
-            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
-            mv /tmp/docker/* /usr/bin
 
     - run:
         name: Install Docker Compose
