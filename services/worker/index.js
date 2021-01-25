@@ -217,6 +217,9 @@ class Worker {
                     reason: dstring
                 });
             }
+
+            const close_underlying_connection = false;
+            socket.disconnect(close_underlying_connection);
             
 		}); // end shell on exit
 	}
