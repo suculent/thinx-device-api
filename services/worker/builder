@@ -1185,7 +1185,6 @@ status=${STATUS} \
 platform=${PLATFORM} \
 version=${THINX_FIRMWARE_VERSION} \
 md5=${MD5} \
-build_path=${WORKDIR} \
 env_hash=${ENV_HASH} \
 )
 
