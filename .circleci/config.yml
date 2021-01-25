@@ -903,16 +903,16 @@ workflows:
       #         only:
       #           - keyguru-staging
 
-      # disabled for faster iterations
-      # - build-worker:
-      #     name: "worker : kgr.cz"
-      #     context:
-      #       - thinx-staging-cz
-      #       - slack
-      #     filters:
-      #       branches:
-      #         only:
-      #           - keyguru-staging
+      # disable for faster iterations
+      - build-worker:
+          name: "worker : kgr.cz"
+          context:
+            - thinx-staging-cz
+            - slack
+          filters:
+            branches:
+              only:
+                - keyguru-staging
 
   #
   # keyguru.cz PRODUCTION
