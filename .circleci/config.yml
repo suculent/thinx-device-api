@@ -860,18 +860,18 @@ workflows:
               only:
                 - keyguru-staging
 
-      # disabled for faster iterations
-      # - build-console:
-      #     name: "console : kgr.cz"
-      #     context:
-      #       - thinx-staging-cz
-      #       - slack
-      #     filters:
-      #       branches:
-      #         only:
-      #           - keyguru-staging
+      # disable for faster iterations
+      - build-console:
+          name: "console : kgr.cz"
+          context:
+            - thinx-staging-cz
+            - slack
+          filters:
+            branches:
+              only:
+                - keyguru-staging
 
-      # disabled for faster iterations      
+      # disabled for faster iterations
       # no need to rebuild on and on for staging
       # - build-mosquitto:
       #     name: "mosquitto : kgr.cz"

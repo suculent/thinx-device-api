@@ -217,6 +217,9 @@ echo "Deployment path: ${DEPLOYMENT_PATH}"
 
 echo "-"
 
+mkdir -p $DEPLOYMENT_PATH
+chmod -R 777 $DEPLOYMENT_PATH
+
 touch $DEPLOYMENT_PATH/.write
 
 if [[ ! -f $DEPLOYMENT_PATH/.write ]]; then
@@ -225,8 +228,6 @@ if [[ ! -f $DEPLOYMENT_PATH/.write ]]; then
 fi
 
 # Create user-referenced folder in public www space
-mkdir -p $DEPLOYMENT_PATH
-chmod -R 777 $DEPLOYMENT_PATH
 
 LOG_PATH="${DEPLOYMENT_PATH}/build.log"
 if [[ ! -f $LOG_PATH ]]; then
