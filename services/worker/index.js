@@ -32,11 +32,10 @@ class Worker {
     //
 
     failJob(sock, job, details) {
-        sock.emit('job-status', {
-            build_id: job.build_id,
-            status: "Failed",
-            details: details
-        });
+        let copy = JSON.parse(JSON.stringify(job));
+        copy.status = "Failed";
+        copy.details = details;
+        sock.emit('job-status', copy);
         this.running = false;
     }
 
