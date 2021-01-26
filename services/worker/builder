@@ -344,7 +344,7 @@ fi
 COMMIT=$(git rev-parse HEAD)
 echo "Fetched commit ID: ${COMMIT}" | tee -a "${LOG_PATH}"
 
-VERSION=$(git rev-list HEAD --count)
+VERSION=$(git rev-list --all --count)
 echo "Repository version/revision: ${VERSION}" | tee -a "${LOG_PATH}"
 
 # Search for thinx.yml
@@ -391,7 +391,7 @@ if [[ $? > 0 ]]; then
 	THX_VERSION="1.0"
 fi
 
-THX_REVISION="$(git rev-list HEAD --count)"
+THX_REVISION="$(git rev-list --all --count)"
 if [[ $? > 0 ]]; then
 	THX_REVISION="1"
 fi
@@ -1177,7 +1177,7 @@ build_id=${BUILD_ID} \
 commit=${COMMIT} \
 thx_version=${THX_VERSION} \
 git_repo=${GIT_REPO} \
-outfile=${OUTFILE} \
+outfile=$(basename ${OUTFILE}) \
 udid=${UDID} \
 sha=${SHA} \
 owner=${OWNER_ID} \
