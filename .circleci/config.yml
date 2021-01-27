@@ -943,15 +943,15 @@ workflows:
                 - keyguru-production
 
       # considered stable at 5.0.8
-      # disabled for faster iterations
-      # - build-redis-production:
-      #     name: "redis : keyguru.cz"
-      #     context:
-      #       - thinx-production-cz
-      #     filters:
-      #       branches:
-      #         only:
-      #           - keyguru-production
+      # disable for faster iterations
+      - build-redis-production:
+          name: "redis : keyguru.cz"
+          context:
+            - thinx-production-cz
+          filters:
+            branches:
+              only:
+                - keyguru-production
 
       - build-worker-production:
           name: "worker : keyguru.cz"
