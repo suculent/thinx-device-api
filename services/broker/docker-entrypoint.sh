@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Keyguru Mosquitto Service v1.1.1"
+echo "THiNX Mosquitto Service v1.1.1"
 
 set +e
 

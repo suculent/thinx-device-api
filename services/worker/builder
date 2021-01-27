@@ -290,9 +290,7 @@ if [[ "$user" == "git" ]]; then
 	REPO_NAME="$(echo $url | grep / | cut -d/ -f2-)"
     echo "REPO_NAME C:   $REPO_NAME" | tee -a "${LOG_PATH}"
 	user="$(echo $OLDHOST | grep : | cut -d: -f2-)"
-	#host="$(echo $OLDHOST | grep @ | cut -d: -f1)"
     host="$(echo $OLDHOST | grep : | cut -d: -f1)"
-	# host="$(echo $url | grep @ | cut -d: -f2-)" # - returns suculent/keyguru-firmware-zion.git
 else
 	echo "In git-https mode, user is also from url..." | tee -a "${LOG_PATH}"
   	user=$(echo $url | grep / | cut -d/ -f2-)

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # expected usage:
-# ./update.sh --owner keyguru
+# ./update.sh --owner suculent
 
 OWNER="suculent"
 
