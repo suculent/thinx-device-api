@@ -201,22 +201,21 @@ Optionally see the ./circleci/config.yml for reference on installation steps.
 
 ### Using Docker Swarm on Manager Node
 
-> To be confirmed: Install GlusterFS to make sure /mnt is available on all nodes in cluster.
+> Install GlusterFS to make sure /mnt is available on all nodes in cluster.
  
+Start THiNX on manager node:
 
-
-Start THiNX on worker node:
-
+```
 	git pull git@github.com/suculent/thinx-device-api -b swarm
 	
 	cd thinx-device-api
 	
 	docker network create --scope=swarm nat
 
-	docker stack deploy -c ./docker-compose.swarm.yml
-	
-	
+	docker stack deploy -c ./docker-swarm.yml
+```
 
+It's perfectly possible to run multiple instances of THiNX in Swarm. Just keep in mind that in order to support legacy HTTP transport devices, you need to have THiNX API port set differently for each instance (e.g. 7442 for production, 7441 for staging) because Swarm does not allow exposing same port twice across different services in same swarm.
 ## GitHub Webhook support
 
 You can direct your GitHub web-hooks to https://thinx.cloud:9001/ after adding a valid deploy key from GitHub to THiNX RTM.
