@@ -579,11 +579,10 @@ wss.on("connection", function(ws, req) {
     if (cookies.indexOf("thx-session") === -1) {
       console.log("» ERROR! No thx-session found in WS: " + JSON.stringify(req.headers.cookie));
       return;
-    } else {
-      console.log("» DEPRECATED thx-cookie found in WS: " + JSON.stringify(req.headers.cookie));
     }
   } else {
-    console.log("» DEPRECATED WS has no cookie headers");
+    console.log("» DEPRECATED WS has no cookie headers!");
+    return;
   }
 
   /* Returns specific build log for owner */

@@ -14,7 +14,7 @@ networks:
 services:
   mosquitto:
     env_file: .env
-    image: registry.keyguru.eu:5000/thinx/mosquitto
+    image: registry.thinx.cloud:5000/thinx/mosquitto
     environment:
       - "MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}"
       - "MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}"
@@ -37,9 +37,6 @@ services:
         limits:
           cpus: '0.5'
           memory: 128M
-      placement:
-        constraints:
-          - node.hostname == keyguru-production-01
       labels:
         - traefik.enable=true
         - traefik.backend=mosquitto
@@ -96,9 +93,6 @@ services:
         limits:
           cpus: '1.0'
           memory: 1024M
-      placement:
-        constraints:
-          - node.hostname == keyguru-production-01
       labels:
         - "swarmpit.service.deployment.autoredeploy=true"
 
@@ -107,7 +101,7 @@ services:
     env_file: .env
     networks:
       - internal
-    image: registry.keyguru.eu:5000/thinx/redis
+    image: registry.thinx.cloud:5000/thinx/redis
     command:
       - redis-server
       - '--requirepass'
@@ -130,16 +124,13 @@ services:
         limits:
           cpus: '1.0'
           memory: 512M
-      placement:
-        constraints:
-          - node.hostname == keyguru-production-01
       labels:
         - "swarmpit.service.deployment.autoredeploy=true"
 
   transformer:
     env_file: .env
     user: transformer
-    image: registry.keyguru.eu:5000/thinx/transformer
+    image: registry.thinx.cloud:5000/thinx/transformer
     environment:
       - "SQREEN_APP_NAME: ${SQREEN_APP_NAME}"
       - "SQREEN_TOKEN=${SQREEN_TOKEN}"
@@ -160,9 +151,6 @@ services:
         limits:
           cpus: '1.0'
           memory: 256M
-      placement:
-        constraints:
-          - node.hostname == keyguru-production-01
       labels:
         - "swarmpit.service.deployment.autoredeploy=true"
 
@@ -194,9 +182,6 @@ services:
         limits:
           cpus: '1.0'
           memory: 256M
-      placement:
-        constraints:
-          - node.hostname != keyguru-production-01
       labels:
         - "swarmpit.service.deployment.autoredeploy=true"
       
@@ -217,7 +202,7 @@ services:
       - traefik-public
       - internal
     env_file: .env
-    image: registry.keyguru.eu:5000/thinx/api
+    image: registry.thinx.cloud:5000/thinx/api
     environment:
       - "ENVIRONMENT=${ENVIRONMENT}"
       - "COUCHDB_USER=${COUCHDB_USER}"
@@ -249,9 +234,6 @@ services:
         limits:
           cpus: '1.0'
           memory: 2048M
-      placement:
-        constraints:
-          - node.hostname == keyguru-production-01
       labels:
         - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https" # 7444 websocket
         - "traefik.http.services.thinx-api.loadbalancer.server.port=7442"
@@ -275,7 +257,7 @@ services:
     depends_on:
       - api
     env_file: .env
-    image: registry.keyguru.eu:5000/thinx/console
+    image: registry.thinx.cloud:5000/thinx/console
     networks:
       - traefik-public
 #      - internal # why?
@@ -303,9 +285,6 @@ services:
         limits:
           cpus: '1.0'
           memory: 256M
-      placement:
-        constraints:
-          - node.hostname == keyguru-production-01
       labels:
         # should be 7440, but the 80 port of container is exposed anyway in swarm mode
         - "traefik.http.services.thinx-console.loadbalancer.server.port=80"

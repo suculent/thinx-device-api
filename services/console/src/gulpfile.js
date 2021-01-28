@@ -27,7 +27,7 @@ var env = {
   environment: isProduction ? 'production' : 'development',
   enterprise: isEnterprise,
   projectName: process.env.COMPOSE_PROJECT_NAME,
-  loginPageTitle: 'Keyguru Console',
+  loginPageTitle: 'THiNX Console',
   landingHostName: process.env.LANDING_HOSTNAME,
   apiBaseUrl: process.env.API_BASEURL + '/api',
   apiDirectUrl: 'https://' + process.env.API_HOSTNAME,
@@ -38,7 +38,7 @@ var env = {
   rollbarAccessToken: process.env.ROLLBAR_ACCESS_TOKEN,
   crispWebsiteId: process.env.CRISP_WEBSITE_ID,
   googleMapsApikey: process.env.GOOGLE_MAPS_APIKEY,
-  projectDescription: isEnterprise ? '' : 'Manage IoT devices (for MCUs eg. ESP32, ESP8266 or any systems running Node.js, Micropython, NodeMCU, Arduino...), build and update firmwares remotely (FOTA/firmware-over-the-air), transform and route sensor data (MQTT)'
+  projectDescription: isEnterprise ? '' : 'Manage IoT devices (for MCUs eg. ESP32, ESP8266 or any systems running Node.js, Micropython, NodeMCU, Arduino, Pine64...), build and update firmwares remotely (FOTA/firmware-over-the-air), transform and route sensor data (MQTT)'
 };
 
 /*

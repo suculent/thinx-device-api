@@ -32,11 +32,10 @@ class Worker {
     //
 
     failJob(sock, job, details) {
-        sock.emit('job-status', {
-            build_id: job.build_id,
-            status: "Failed",
-            details: details
-        });
+        let copy = JSON.parse(JSON.stringify(job));
+        copy.status = "Failed";
+        copy.details = details;
+        sock.emit('job-status', copy);
         this.running = false;
     }
 
@@ -217,6 +216,9 @@ class Worker {
                     reason: dstring
                 });
             }
+
+            const close_underlying_connection = false;
+            socket.disconnect(close_underlying_connection);
             
 		}); // end shell on exit
 	}
