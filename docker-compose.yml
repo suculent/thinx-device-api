@@ -57,7 +57,7 @@ services:
       - 'COUCHDB_COOKIE=${COUCHDB_COOKIE}'
       - 'COUCHDB_SECRET=${COUCHDB_SECRET}'
     ports:
-      - 5984
+      - 5984:5984
     networks:
       - nat
       - internal
@@ -177,7 +177,7 @@ services:
       - traefik.docker.network=nat
       - traefik.enable=true
       - traefik.port=7442
-      - traefik.backend=thinx-api
+      - traefik.backend=api
       - 'traefik.frontend.rule=Host:${THINX_HOSTNAME}'
   console:
     depends_on:
