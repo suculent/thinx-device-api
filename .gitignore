@@ -1,6 +1,6 @@
 # Binaries generated in container
-devsec
-embedded_signature.h
+# devsec
+# embedded_signature.h
 
 # Docker Container Scanners
 clair-scanner
@@ -9,7 +9,6 @@ aqua.sh
 
 # Environment and data
 .env
-.thinx_env
 .thx_prefix
 environment.json
 rollbar.json
@@ -18,6 +17,7 @@ builder.thinx.json
 
 # Tests
 lcov.info
+test-private.sh
 
 # Sqreen.io configuration
 sqreen.json
@@ -69,8 +69,6 @@ conf/github-oauth.json
 # Sonar
 .scannerwork/
 
-statistics/**
-
 # Codacy
 .profile
 
@@ -86,3 +84,4 @@ mqtt_passwords
 docker-compose.override.yml
 
 thinx.device.api.code-workspace
+test.out.acl

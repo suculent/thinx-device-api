@@ -84,7 +84,7 @@
         </div>
         <div class="table-scrollable table-scrollable-borderless">
           <table class="table table-hover table-light">
-            <tr ng-repeat="rsakey in $root.rsakeys | propsFilter:{fingerprint:searchText,name:searchText}" ng-click="checkItem(rsakey.fingerprint)" ng-class="selectedItems.indexOf(rsakey.fingerprint) > -1 ? 'selected-row' : 'default-row'">
+            <tr ng-repeat="rsakey in $root.rsakeys | propsFilter:{'fingerprint': searchText, 'name': searchText}" ng-click="checkItem(rsakey.fingerprint)" ng-class="selectedItems.indexOf(rsakey.fingerprint) > -1 ? 'selected-row' : 'default-row'">
               <td>
                 <div class="row-item-title">{{rsakey.name}}</div>
                 <div class="key-label monospace-info">{{rsakey.fingerprint}}</div>

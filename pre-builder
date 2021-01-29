@@ -46,7 +46,7 @@ if [[ -f ${WORKDIR}/.development ]]; then
   rm -rf ${WORKDIR}/.development
 fi
 
-source "$THINX_ROOT/infer"
+source "$THINX_ROOT/services/worker/infer"
 
 echo
 echo "Generating THiNX header, injecting environment variables from ${JSON}"
@@ -61,6 +61,10 @@ echo "[pre-builder] platform: ${PLATFORM}"
 PLATFORM_LANG=$(language_for_platform $PLATFORM)
 echo "[pre-builder] language: ${PLATFORM_LANG}"
 
-bash $THINX_ROOT/linter --language=${PLATFORM_LANG} --workdir=${WORKDIR}
+# This enables the ./linter which is not really used since the beginning, may deprecate
+# bash $THINX_ROOT/linter --language=${PLATFORM_LANG} --workdir=${WORKDIR}
+
+# Allow anyone to build this, should be limited to worker's docker user:group
+chmod -R 777 $WORKDIR
 
 exit 0

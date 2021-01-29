@@ -156,11 +156,10 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 
 ## Port mapping
 
-* API runs on HTTP port 7442 (HTTPS 7443) and 7444 (web socket)
+* API runs on HTTP port 7442 (HTTPS 7443)
 * MQTTS runs on port 8883
 * Admin runs on HTTP/HTTPS port (80/443)
-* GitHub commit hooks are listened to on port 9002
-* Status Transformers (internal network only, 7445)
+* Status Transformers (internal network only, 7475)
 
 ## Logging
 
@@ -194,9 +193,7 @@ You don't need Mailgun for developer installation, just copy-paste the activatio
 	git clone http://github.com/suculent/thinx-device-api
 	cd thinx-device-api
 	cp .env.dist .env
-	cp .thinx_env.dist .thinx_env
 	nano .env
-	nano .thinx_env
 	./copy-envs.sh
 	docker-compose up -d --build
 

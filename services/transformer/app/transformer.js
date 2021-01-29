@@ -35,14 +35,14 @@ class Transformer {
     this.app = express();
 
     if (cluster.isMaster) {
-      console.log(`Master ${process.pid} is running`);
+      console.log(`[transformer] Master ${process.pid} is running`);
       // Fork workers.
       const forks = numCPUs;
       for (let i = 0; i < forks; i++) {
         cluster.fork();
       }
       cluster.on('exit', (worker, code, signal) => {
-        console.log(`worker ${worker.process.pid} died`);
+        console.log(`[transformer] worker ${worker.process.pid} died`);
       });
     } else {
       this.setupServer();
@@ -55,8 +55,7 @@ class Transformer {
     // In this case it is an HTTP server
     http.createServer(this.app).listen(8000, "0.0.0.0");
 
-    console.log("Worker " + process.pid + " started");
-    console.log("Starting THiNX Transformer Server Node at " + new Date().toString());
+    console.log("[transformer] Node " + process.pid + " started");
 
     this.app.use(parser.json({
       limit: "1mb"
@@ -70,7 +69,7 @@ class Transformer {
 
     const http_port = 7474;
     http.createServer(this.app).listen(http_port, "0.0.0.0");
-    console.log("Started on port: " + http_port);
+    console.log("[transformer] Started on port: " + http_port);
   }
 
   setupRoutes() {
@@ -134,7 +133,7 @@ class Transformer {
         cleancode = unescape(base64.decode(code));
         decoded = true;
       } catch (e) {
-        console.log("Job is not a base64.");
+        console.log("[transformer] Job is not a base64.");
         decoded = false;
       }
 
@@ -143,7 +142,7 @@ class Transformer {
           cleancode = unescape(base64.decode(code.toString('utf8')));
           decoded = true;
         } catch (e) {
-          console.log("Base 128 not supported anymore.");
+          console.log("[transformer] Base 128 not supported anymore.");
           decoded = false;
         }
       }
@@ -153,7 +152,7 @@ class Transformer {
       }
 
     } catch (e) {
-      console.log("Docker Transformer Ecception: " + e);
+      console.log("[transformer] Docker Transformer Ecception: " + e);
       error = JSON.stringify(e);
     }
     return cleancode;
@@ -179,15 +178,15 @@ class Transformer {
       const code = this.sanitize(job.code);
       console.log(new Date().toString() + " job: " + JSON.stringify(job));
       try {
-        console.log("Running code:\n" + code);
+        console.log("[transformer] Running code:\n" + code);
         var transformer = function() {};
         /* jshint -W061 */
         eval(code); // expects transformer(status, device); function only; may provide API
         /* jshint +W061 */
         status = transformer(status, job.params.device); // passthrough previous status
-        console.log("Docker Transformer will return status: '" + status + "'");
+        console.log("[transformer] Docker Transformer will return status: '" + status + "'");
       } catch (e) {
-        console.log("Docker Transformer Exception: " + e);
+        console.log("[transformer] Docker Transformer Exception: " + e);
         error = JSON.stringify(e);
       }
     }
@@ -206,5 +205,4 @@ class Transformer {
 
 }
 
-var server = new Transformer();
-console.log("Transformer initialized...");
+new Transformer();

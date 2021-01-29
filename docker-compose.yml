@@ -33,7 +33,7 @@ services:
     healthcheck:
       test:
         - CMD-SHELL
-        - 'mosquitto_sub -t "$SYS/#" -C 1 -u $MOSQUITTO_USERNAME -P $MOSQUITTO_PASSWORD | grep -v Error'
+        - 'mosquitto_sub -t "$SYS/#" -C 1 -i health-$(hostname) -u $MOSQUITTO_USERNAME -P $MOSQUITTO_PASSWORD | grep -v Error'
       interval: 10s
       timeout: 50s
       retries: 5
@@ -118,6 +118,27 @@ services:
       - 7474
     labels:
       - traefik.backend.transformer.noexpose
+
+  worker:
+    env_file: .env
+    image: registry.thinx.cloud:5000/thinx/worker:swarm
+    environment:
+      - "SQREEN_TOKEN=${SQREEN_TOKEN}"
+      - "ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}"
+      - "ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}"
+      - "THINX_SERVER=${THINX_SERVER}"
+      - "WORKER_SECRET=${WORKER_SECRET}"
+    networks:
+      - internal
+    labels:
+      - traefik.backend.worker.noexpose
+    volumes:
+      - /mnt/data/repos:/mnt/data/repos
+      - /mnt/data/deploy:/mnt/data/deploy
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker
+      - /cache
+      
   api:
     privileged: true
     shm_size: 2048M
@@ -152,6 +173,7 @@ services:
         - 'ENVIRONMENT=${ENVIRONMENT}'
         - 'COUCHDB_USER=${COUCHDB_USER}'
         - 'COUCHDB_PASSWORD=${COUCHDB_PASSWORD}'
+        - 'WORKER_SECRET=${WORKER_SECRET}'
     environment:
       - 'ENVIRONMENT=${ENVIRONMENT}'
       - 'COUCHDB_USER=${COUCHDB_USER}'
@@ -159,9 +181,7 @@ services:
     ports:
       - '7442:7442'
       - '7443:7443'
-      - '7444:7444'
-      - '7445:7445'
-      - '9002:9002'
+      - '3000' # worker socket
     volumes:
       - '/mnt/data/deploy:/mnt/data/deploy'
       - '/mnt/data/mosquitto:/mnt/data/mosquitto'
@@ -169,16 +189,18 @@ services:
       - '/mnt/data/ssl:/mnt/data/ssl'
       - '/mnt/data/ssh_keys:/mnt/data/ssh_keys'
       - '/mnt/data/conf:/mnt/data/conf'
+      - '/mnt/data/statistics:/opt/thinx/thinx-device-api/statistics'
       - '/mnt/data/test-reports:/mnt/data/test-reports'
       - '/var/run/docker.sock:/var/run/docker.sock'
-      - /var/lib/docker
-      - /cache
+      - '/var/lib/docker'
+      - '/cache'
     labels:
       - traefik.docker.network=nat
       - traefik.enable=true
       - traefik.port=7442
       - traefik.backend=api
       - 'traefik.frontend.rule=Host:${THINX_HOSTNAME}'
+
   console:
     depends_on:
       - api

@@ -14,7 +14,7 @@ networks:
 services:
   mosquitto:
     env_file: .env
-    image: registry.keyguru.eu:5000/thinx/mosquitto
+    image: registry.thinx.cloud:5000/thinx/mosquitto
     environment:
       - "MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}"
       - "MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}"
@@ -37,9 +37,6 @@ services:
         limits:
           cpus: '0.5'
           memory: 128M
-      placement:
-        constraints:
-          - node.hostname == keyguru-production-01
       labels:
         - traefik.enable=true
         - traefik.backend=mosquitto
@@ -96,9 +93,6 @@ services:
         limits:
           cpus: '1.0'
           memory: 1024M
-      placement:
-        constraints:
-          - node.hostname == keyguru-production-01
       labels:
         - "swarmpit.service.deployment.autoredeploy=true"
 
@@ -107,7 +101,7 @@ services:
     env_file: .env
     networks:
       - internal
-    image: registry.keyguru.eu:5000/thinx/redis
+    image: registry.thinx.cloud:5000/thinx/redis
     command:
       - redis-server
       - '--requirepass'
@@ -130,16 +124,13 @@ services:
         limits:
           cpus: '1.0'
           memory: 512M
-      placement:
-        constraints:
-          - node.hostname == keyguru-production-01
       labels:
         - "swarmpit.service.deployment.autoredeploy=true"
 
   transformer:
     env_file: .env
     user: transformer
-    image: registry.keyguru.eu:5000/thinx/transformer
+    image: registry.thinx.cloud:5000/thinx/transformer
     environment:
       - "SQREEN_APP_NAME: ${SQREEN_APP_NAME}"
       - "SQREEN_TOKEN=${SQREEN_TOKEN}"
@@ -160,9 +151,37 @@ services:
         limits:
           cpus: '1.0'
           memory: 256M
-      placement:
-        constraints:
-          - node.hostname == keyguru-production-01
+      labels:
+        - "swarmpit.service.deployment.autoredeploy=true"
+
+  worker:
+    env_file: .env
+    image: registry.thinx.cloud:5000/thinx/worker:swarm
+    environment:
+      - "SQREEN_TOKEN=${SQREEN_TOKEN}"
+      - "ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}"
+      - "ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}"
+      - "THINX_SERVER=http://api:3000"
+      - "WORKER_SECRET=${WORKER_SECRET}"
+      - "THINX_HOSTNAME=${THINX_HOSTNAME}"
+    networks:
+      - internal
+    ports:
+      - 3000
+    labels:
+      - traefik.backend.worker.noexpose
+    volumes:
+      - /mnt/data/repos:/mnt/data/repos
+      - /mnt/data/deploy:/mnt/data/deploy
+      
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.2'
+          memory: 256M
+        limits:
+          cpus: '1.0'
+          memory: 256M
       labels:
         - "swarmpit.service.deployment.autoredeploy=true"
       
@@ -183,20 +202,20 @@ services:
       - traefik-public
       - internal
     env_file: .env
-    image: registry.keyguru.eu:5000/thinx/api
+    image: registry.thinx.cloud:5000/thinx/api
     environment:
       - "ENVIRONMENT=${ENVIRONMENT}"
       - "COUCHDB_USER=${COUCHDB_USER}"
       - "COUCHDB_PASSWORD=${COUCHDB_PASSWORD}"
       - "MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}"
       - "MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}"
+      - "WORKER_SECRET=${WORKER_SECRET}"
     ports:
       - '7442:7442'
       - '7443:7443'
-      - '7444:7444'
-      - '7445:7445'
-      - '9002:9002'
+      - '3000'
     volumes:
+      - '/mnt/data/thinx/eu/statistics:/opt/thinx/thinx-device-api/statistics'
       - '/mnt/data/thinx/eu/deploy:/mnt/data/deploy'
       - '/mnt/data/thinx/eu/mosquitto:/mnt/data/mosquitto'
       - '/mnt/data/thinx/eu/repos:/mnt/data/repos'
@@ -211,14 +230,12 @@ services:
       resources:
         reservations:
           cpus: '0.5'
-          memory: 2048M
+          memory: 1024M
         limits:
           cpus: '1.0'
-          memory: 3072M
-      placement:
-        constraints:
-          - node.hostname == keyguru-production-01
+          memory: 2048M
       labels:
+        - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https" # 7444 websocket
         - "traefik.http.services.thinx-api.loadbalancer.server.port=7442"
         - "traefik.enable=true"
         - "traefik.docker.network=traefik-public"
@@ -240,7 +257,7 @@ services:
     depends_on:
       - api
     env_file: .env
-    image: registry.keyguru.eu:5000/thinx/console
+    image: registry.thinx.cloud:5000/thinx/console
     networks:
       - traefik-public
 #      - internal # why?
@@ -268,9 +285,6 @@ services:
         limits:
           cpus: '1.0'
           memory: 256M
-      placement:
-        constraints:
-          - node.hostname == keyguru-production-01
       labels:
         # should be 7440, but the 80 port of container is exposed anyway in swarm mode
         - "traefik.http.services.thinx-console.loadbalancer.server.port=80"

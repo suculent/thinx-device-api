@@ -3,7 +3,7 @@
 # This scripts exports SSL certificates to other file-based services on same domain (MQTT, THiNX API)
 
 # Production
-#EXPORT_NAME="app.keyguru.eu"
+EXPORT_NAME="rtm.thinx.cloud" # TODO: get from some ENV_VAR!!!
 
 # Staging
 EXPORT_NAME="staging.thinx.cloud" # TODO: get from some ENV_VAR!!!

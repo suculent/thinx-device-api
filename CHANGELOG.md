@@ -1,6 +1,6 @@
 # Change Log
 
-Around version 1.5.5200, this document is completely deprecated and kept for reference of the project startup phase.
+Around version 1.2.5200, this document is completely deprecated and kept for reference of the project startup phase.
 
 ## [Unreleased](https://github.com/suculent/thinx-device-api/tree/HEAD)
 

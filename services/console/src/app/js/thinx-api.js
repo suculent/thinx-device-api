@@ -47,6 +47,22 @@ var Thinx = {
     return revokeDeploykeys(filenames);
   },
 
+  // Channels
+  channelList: function () {
+    return channelList();
+  },
+  createChannel: function (meshId, alias, ownerId) {
+    return createChannel(meshId, alias, ownerId);
+  },
+  revokeChannels: function (ownerId, meshIds) {
+    return revokeChannels(ownerId, meshIds);
+  },
+  attachChannel: function (meshId, deviceUdid) {
+    return attachChannel(meshId, deviceUdid);
+  },
+  detachChannel: function (meshId, deviceUdid) {
+    return detachChannel(meshId, deviceUdid);
+  },
   // SOURCE
   sourceList: function () {
     return sourceList();
@@ -266,6 +282,39 @@ function init($rootScope, $scope) {
       if (!$rootScope.profile.info.goals.includes('deploykey')
       && $rootScope.deploykeys.length > 0) {
         $rootScope.profile.info.goals.push('deploykey');
+        $scope.$emit("saveProfileChanges", ["goals"]);
+      }
+    }
+
+    console.log('refreshing view...');
+    $rootScope.$apply()
+  }
+
+  if (typeof ($rootScope.updateChannelsListener) === "undefined") {
+    $rootScope.updateChannelsListener = $rootScope.$on('updateChannels', function (event, data) {
+      event.stopPropagation();
+      updateChannels(data);
+    });
+  }
+
+  function updateChannels(data) {
+    var response = JSON.parse(data);
+    
+    if (typeof(response.mesh_ids) === "undefined") {
+      console.log('ERROR: Invalid channel data...');
+      return;
+    }
+
+    $rootScope.channels = response.mesh_ids;
+    $scope.$apply();
+    console.log('//////// channels:');
+    console.log($rootScope.channels);
+
+    // save user-spcific goal achievement
+    if ($rootScope.profile.info.goals.length > 0) {
+      if (!$rootScope.profile.info.goals.includes('channel')
+        && $rootScope.channels.length > 0) {
+        $rootScope.profile.info.goals.push('channel');
         $scope.$emit("saveProfileChanges", ["goals"]);
       }
     }
@@ -974,6 +1023,66 @@ function revokeDeploykeys(filenames) {
   });
 }
 
+// Mesh channels /user/rsakey
+//
+// createChannel
+// revokeChannels [channel_ids]
+// channelList
+function channelList() {
+  return $.ajax({
+    url: urlBase + '/mesh/list',
+    type: 'GET'
+  });
+}
+
+function createChannel(mesh_id, alias, owner_id) {
+  return $.ajax({
+    url: urlBase + '/mesh/create',
+    type: 'POST',
+    data: JSON.stringify({
+      owner_id: owner_id,
+      mesh_id: mesh_id,
+      alias: alias
+    }),
+    dataType: 'json'
+  });
+}
+
+function revokeChannels(owner_id, mesh_ids) {
+  return $.ajax({
+    url: urlBase + '/mesh/delete',
+    type: 'POST',
+    data: JSON.stringify({ 
+      owner_id: owner_id,
+      mesh_ids: mesh_ids 
+    }),
+    dataType: 'json'
+  });
+}
+
+function attachChannel(meshId, deviceUdid) {
+  return $.ajax({
+    url: urlBase + '/device/mesh/attach',
+    type: 'POST',
+    data: JSON.stringify({
+      mesh_id: meshId,
+      udid: deviceUdid
+    }),
+    dataType: 'json'
+  });
+}
+
+function detachChannel(meshId, deviceUdid) {
+  return $.ajax({
+    url: urlBase + '/device/mesh/detach',
+    type: 'POST',
+    data: JSON.stringify({
+      mesh_id: meshId,
+      udid: deviceUdid
+    }),
+    dataType: 'json'
+  });
+}
 
 // Enviros /user/enviro
 //

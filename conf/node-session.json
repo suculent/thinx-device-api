@@ -1,5 +1,5 @@
 {
-  "secret": "Q3UBzdH9GEfiRCTKbi5MTPyChpzXLsTD",
+  "secret": "<some-session-secret>",
   "driver": "file",
   "lifetime": 300000,
   "expireOnClose": false,

@@ -27,7 +27,6 @@
   "mqtt_port": 1883,
   "port": 7442,
   "secure_port": 7443,
-  "websocket": 7444,
   "lambda": 7475,
   "project_root": "/opt/thinx/thinx-device-api",
   "data_root": "/mnt/data",

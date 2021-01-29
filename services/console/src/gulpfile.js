@@ -27,18 +27,18 @@ var env = {
   environment: isProduction ? 'production' : 'development',
   enterprise: isEnterprise,
   projectName: process.env.COMPOSE_PROJECT_NAME,
-  loginPageTitle: 'Keyguru Console',
+  loginPageTitle: 'THiNX Console',
   landingHostName: process.env.LANDING_HOSTNAME,
   apiBaseUrl: process.env.API_BASEURL + '/api',
   apiDirectUrl: 'https://' + process.env.API_HOSTNAME,
   slackClientId: '233115403974.233317554391',
-  wssUrl: 'wss://' + process.env.API_HOSTNAME +  ':7444',
+  wssUrl: 'wss://' + process.env.API_HOSTNAME, // moved to https server + ':7445' is expectedly exposed TCP/SSL service
   baseUrl: 'https://' + process.env.WEB_HOSTNAME + ':7443',
   googleTrackingCode: process.env.GOOGLE_ANALYTICS_ID,
   rollbarAccessToken: process.env.ROLLBAR_ACCESS_TOKEN,
   crispWebsiteId: process.env.CRISP_WEBSITE_ID,
   googleMapsApikey: process.env.GOOGLE_MAPS_APIKEY,
-  projectDescription: isEnterprise ? '' : 'Manage IoT devices (for MCUs eg. ESP32, ESP8266 or any systems running Node.js, Micropython, NodeMCU, Arduino...), build and update firmwares remotely (FOTA/firmware-over-the-air), transform and route sensor data (MQTT)'
+  projectDescription: isEnterprise ? '' : 'Manage IoT devices (for MCUs eg. ESP32, ESP8266 or any systems running Node.js, Micropython, NodeMCU, Arduino, Pine64...), build and update firmwares remotely (FOTA/firmware-over-the-air), transform and route sensor data (MQTT)'
 };
 
 /*
@@ -201,6 +201,8 @@ gulp.task('buildPublic', function() {
           'assets/global/plugins/jquery.blockui.js',
           'assets/global/plugins/jquery-validation/js/jquery.validate.js',
           'assets/global/plugins/jquery-validation/js/additional-methods.js',
+          'assets/thinx/js/plugins/ui-select/select.js',
+          //'assets/global/plugins/select2/js/select2.js',
           'assets/global/scripts/app.js', // this is shared with Private
           'assets/thinx/login.js'
         ], {base: '.'})
@@ -221,8 +223,9 @@ gulp.task('buildPublic', function() {
           'assets/global/plugins/simple-line-icons/css/simple-line-icons.css',
           'assets/global/plugins/bootstrap/css/bootstrap.css',
           'assets/global/plugins/bootstrap-switch/css/bootstrap-switch.css',
-          'assets/global/plugins/select2/css/select2.css',
-          'assets/global/plugins/select2/css/select2-bootstrap.css',
+          'assets/thinx/js/plugins/ui-select/select.css',
+          //'assets/global/plugins/select2/css/select2.css',
+          //'assets/global/plugins/select2/css/select2-bootstrap.css',
           'assets/global/css/components.css',
           'assets/global/css/plugins.css',
           'assets/thinx/css/login.css',

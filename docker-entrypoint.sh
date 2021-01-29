@@ -14,38 +14,22 @@ if [[ -f $MICROSCANNER_ARTIFACT ]]; then
   cp $MICROSCANNER_ARTIFACT /mnt/data/test-reports/microscanner.html
 fi
 
-echo "[thinx-entrypoint] Creating default DBs..."
+echo "[thinx-entrypoint] Creating default DBs (TODO: only if does not exist)..."
 
-curl -s -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_users > /dev/null
-curl -s -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_replicator > /dev/null
-curl -s -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_global_changes > /dev/null
+DEVNULL="/dev/null"
+
+curl -s -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_users > $DEVNULL
+curl -s -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_replicator > $DEVNULL
+curl -s -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_global_changes > $DEVNULL
 
 export SQREEN_DISABLE_STARTUP_WARNING=1
-
-echo "[thinx-entrypoint] Enabling IPV4 forwarding..."
-sysctl net.ipv4.ip_forward=1
-sysctl -w net.ipv4.conf.all.forwarding=1
 
 export DOCKER_HOST="tcp://docker:2375"
 export DOCKER_HOST="unix:///var/run/docker.sock"
 
-# exec "$@"
-
-source ~/.profile
-
-pwd
-
-if [[ -f ./.thinx_env ]]; then
-  echo "[thinx-entrypoint] Sourcing .thinx_env"
-  source ./.thinx_env
-else
-  echo "[thinx-entrypoint] .thinx_env not found, expects ENVIRONMENT, ROLLBAR_ACCESS_TOKEN, ROLLBAR_ENVIRONMENT and REVISION variables to be set."
-fi
-
 echo "[thinx-entrypoint] Adding host checking exception for github.com..."
 ssh -tt -o "StrictHostKeyChecking=no" git@github.com
 
-echo "[thinx-entrypoint] Deploying with Rollbar..."
 if [[ ! -z $ROLLBAR_ACCESS_TOKEN ]]; then
   LOCAL_USERNAME=$(whoami)
   curl --silent https://api.rollbar.com/api/1/deploy/ \
@@ -55,7 +39,7 @@ if [[ ! -z $ROLLBAR_ACCESS_TOKEN ]]; then
     -F local_username=$LOCAL_USERNAME > /dev/null
   echo ""
 else
-  echo "[thinx-entrypoint] Skipping Rollbar deployment, access token not defined..."
+  echo "[thinx-entrypoint] Skipping Rollbar deployment, ROLLBAR_ACCESS_TOKEN not defined... [${ROLLBAR_ACCESS_TOKEN}]"
 fi
 
 set -e
@@ -73,6 +57,7 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   chmod +x ./cc-test-reporter
   #./cc-test-reporter before-build
   npm run test # | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
+  bash <(curl -Ls https://coverage.codacy.com/get.sh) report
   pwd
   ls -la
   # chmod +x ./.codecov.sh

@@ -11,7 +11,7 @@ ENV REDIS_DISABLE_COMMANDS=${REDIS_DISABLE_COMMANDS}
 
 RUN echo "REDIS_PASSWORD ON BUILD: ${REDIS_PASSWORD}"
 
-RUN apt-get update -qq && apt-get install -qq -y ca-certificates apt-transport-https cron && \
+RUN apt-get update -qq && apt-get upgrade && apt-get install -qq -y ca-certificates apt-transport-https cron && \
     rm -rf /etc/apt/sources.list && apt-get update
 
 # adduser --system --disabled-password --shell /bin/bash redis

@@ -23,9 +23,16 @@ describe("Builder", function() {
       source_id: source_id,
       dryrun: true
     };
-    builder.build(owner, build, [], function(success, message, build_id) {
-      done();
-    });
+    let worker = null;
+    builder.build(
+      owner,
+      build,
+      [], // notifiers
+      function(success, message, build_id) {
+        done();
+      }, // callback
+      worker
+    );
   }, 120000);
 
   it("should be able to run", function(done) {
@@ -34,9 +41,16 @@ describe("Builder", function() {
       source_id: source_id,
       dryrun: false
     };
-    builder.build(owner, build, [], function(success, message, build_id) {
-      done();
-    });
+    let worker = null;
+    builder.build(
+      owner, 
+      build, 
+      [], // notifiers
+      function(success, message, build_id) {
+        done();
+      }, // callback
+      worker
+    );
   }, 120000);
 
   it("supports certain languages", function() {
