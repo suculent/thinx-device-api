@@ -861,58 +861,58 @@ workflows:
                 - keyguru-staging
 
       # disabled for faster iterations
-      # - build-console:
-      #     name: "console : kgr.cz"
-      #     context:
-      #       - thinx-staging-cz
-      #       - slack
-      #     filters:
-      #       branches:
-      #         only:
-      #           - keyguru-staging
+      - build-console:
+          name: "console : kgr.cz"
+          context:
+            - thinx-staging-cz
+            - slack
+          filters:
+            branches:
+              only:
+                - keyguru-staging
 
       # disabled for faster iterations      
       # no need to rebuild on and on for staging
-      # - build-mosquitto:
-      #     name: "mosquitto : kgr.cz"
-      #     context:
-      #       - thinx-staging-cz
-      #     filters:
-      #       branches:
-      #         only:
-      #           - keyguru-staging
+      - build-mosquitto:
+          name: "mosquitto : kgr.cz"
+          context:
+            - thinx-staging-cz
+          filters:
+            branches:
+              only:
+                - keyguru-staging
 
       # disabled for faster iterations
-      # - build-redis:
-      #     name: "redis : kgr.cz"
-      #     context:
-      #       - thinx-staging-cz
-      #     filters:
-      #       branches:
-      #         only:
-      #           - keyguru-staging
+      - build-redis:
+          name: "redis : kgr.cz"
+          context:
+            - thinx-staging-cz
+          filters:
+            branches:
+              only:
+                - keyguru-staging
 
       # disabled for faster iterations
       # using generic transformer
-      # - build-transformer:
-      #     name: "transformer : kgr.cz"
-      #     context:
-      #       - thinx-staging-cz
-      #     filters:
-      #       branches:
-      #         only:
-      #           - keyguru-staging
+      - build-transformer:
+          name: "transformer : kgr.cz"
+          context:
+            - thinx-staging-cz
+          filters:
+            branches:
+              only:
+                - keyguru-staging
 
       # disabled for faster iterations
-      # - build-worker:
-      #     name: "worker : kgr.cz"
-      #     context:
-      #       - thinx-staging-cz
-      #       - slack
-      #     filters:
-      #       branches:
-      #         only:
-      #           - keyguru-staging
+      - build-worker:
+          name: "worker : kgr.cz"
+          context:
+            - thinx-staging-cz
+            - slack
+          filters:
+            branches:
+              only:
+                - keyguru-staging
 
   #
   # keyguru.cz PRODUCTION
