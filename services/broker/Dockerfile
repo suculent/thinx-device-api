@@ -6,13 +6,13 @@ ARG MOSQUITTO_USERNAME
 ENV MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}
 ENV MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}
 
-RUN apt-get update -qq && apt-get upgrade && apt-get install -qq -y procps gpg ca-certificates apt-transport-https incron cron wget && \
+RUN apt-get update -qq -y && apt-get upgrade -y && apt-get install -qq -y gpg ca-certificates apt-transport-https incron cron wget procps && \
     wget -q --no-check-certificate -O - https://repo.mosquitto.org/debian/mosquitto-repo.gpg.key | gpg --import && \
     gpg -a --export 8277CCB49EC5B595F2D2C71361611AE430993623 | apt-key add - && \
     wget -q --no-check-certificate -O /etc/apt/sources.list.d/mosquitto-buster.list https://repo.mosquitto.org/debian/mosquitto-buster.list && \
-    apt-get update -qq && apt-get install -qq -y mosquitto mosquitto-clients && \
+    apt-get update -qq -y && apt-get install -qq -y mosquitto mosquitto-clients && \
     adduser --system --disabled-password --shell /bin/bash mosquitto && \
-    rm -rf /etc/apt/sources.list && apt-get update
+    rm -rf /etc/apt/sources.list && apt-get update -y
 
 COPY ./config/mosquitto.conf /etc/mosquitto/conf.d/mosquitto.conf
 #COPY ./config/mosquitto.conf /mqtt/config/mosquitto.conf # should use file from /mnt/data/mosquitto/config/mosquitto.conf
