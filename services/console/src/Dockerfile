@@ -72,7 +72,7 @@ COPY --from=0 /home/node/build/html .
 
 # COPY default.conf /etc/nginx/conf.d/default.conf
 
-RUN apt-get update \
+RUN apt-get update -y \
  && apt-get upgrade
 
 # Only for Alpine, but the nginx is somewhere else then?
