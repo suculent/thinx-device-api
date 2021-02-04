@@ -222,6 +222,7 @@ services:
       - '/mnt/data/thinx/eu/ssl:/mnt/data/ssl'
       - '/mnt/data/thinx/eu/ssh_keys:/mnt/data/ssh_keys'
       - '/mnt/data/thinx/eu/conf:/mnt/data/conf'
+      - '/mnt/data/thinx/eu/statistics:/mnt/data/statistics'
       - '/mnt/data/thinx/eu/test-reports:/mnt/data/test-reports'
       - '/var/run/docker.sock:/var/run/docker.sock'
       - '/var/lib/docker'
