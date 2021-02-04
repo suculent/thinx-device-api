@@ -27,7 +27,6 @@
   "secure_port": 7443,
   "lambda": 7474,
   "webhook_port" : 9002,
-  "project_root": "/opt/thinx/thinx-device-api",
   "data_root": "/mnt/data",
   "deploy_root": "/data",
   "build_root": "/repositories",
