@@ -264,7 +264,7 @@
 
         <div class="device-build-history" ng-if="deviceForm.buildHistoryVisible">
 
-          <div ng-repeat="(key, value) in $root.meta.deviceBuilds[deviceForm.udid] | orderBy:'date':true  | limitTo:deviceForm.buildHistoryLimit | groupBy:'build_id'">
+          <div ng-repeat="(key, value) in $root.meta.deviceBuilds[deviceForm.udid] | orderBy:'last_update':true  | limitTo:deviceForm.buildHistoryLimit | groupBy:'build_id'">
             <div class="row" ng-repeat="buildEntry in value" ng-if="$first">
               <div class="col-xs-10 text-left">
                 <i class="icomoon-hammer_icon"></i>
