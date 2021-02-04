@@ -668,10 +668,10 @@ function init($rootScope, $scope) {
     updateBuildHistory(data);
   });
 
-  function sortByDate(b,a) {
-    if (a.date < b.date)
+  function sortByLastUpdate(b,a) {
+    if (a.last_update < b.last_update)
       return -1;
-    if (a.date > b.date)
+    if (a.last_update > b.last_update)
       return 1;
     return 0;
   }
@@ -708,7 +708,7 @@ function init($rootScope, $scope) {
 
       // sort device build entries by date
       for (let index in $rootScope.meta.deviceBuilds) {
-        $rootScope.meta.deviceBuilds[index].sort(sortByDate);
+        $rootScope.meta.deviceBuilds[index].sort(sortByLastUpdate);
       }
 
       console.log('refreshing view...');

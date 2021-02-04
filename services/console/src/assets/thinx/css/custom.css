@@ -1392,6 +1392,11 @@
   pointer-events: none;
 }
 
+.badge-success-thinx {
+  background-color: #33b754;
+  background-image: none; 
+}
+
 /* QUICK NAV HACKING */
 .quick-nav {
   top: 85%;

@@ -1,5 +1,5 @@
 # pinned to 13 until npm audit will be available for 15
-FROM node:13-buster-slim
+FROM node:14-buster-slim
 
 RUN adduser --system --disabled-password --shell /bin/bash thinx
 
