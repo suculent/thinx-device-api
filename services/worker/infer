@@ -89,23 +89,14 @@ function infer_platform
 
 		# Mongoose OS
 
-	  	elif [[ -f "$path/mos.yml" ]]; then
+	  elif [[ -f "$path/mos.yml" ]]; then
 			platform="mongoose"
 		fi
 
     	# Override from YAML
 		YMLFILE=$(find $path -name "thinx.yml" -maxdepth 1 | head -n 1)
 		if [[ -f "$YMLFILE" ]]; then
-
-			echo "Overriding platform using thinx.yml"
-			
-			echo "platformio: " $platformio
-			echo "arduino: " $arduino
-			echo "microphython: " $microphython
-			echo "mongoose: " $mongoose
-			echo "nodejs: " $nodejs
-
-		    eval $(parse_yaml "$YMLFILE" "")
+		  eval $(parse_yaml "$YMLFILE" "")
 			if [[ ! -z $platformio ]]; then
 				platform = "platformio"
 			fi
