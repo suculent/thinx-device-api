@@ -88,7 +88,7 @@ swarm-build()
 	RUNNING=true
 
 	# write logs in background; should be killed later
-	docker service logs --timestamps --raw --no-task-ids --no-trunc $UNIQUE_NAME | tee -a "$LOG_PATH" &
+	docker service logs $UNIQUE_NAME | tee -a "$LOG_PATH" &
 
 	while $RUNNING
 	do
