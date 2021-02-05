@@ -26,7 +26,7 @@ describe('pages with login', function() {
 
   it('should log in with Google', function() {
     browser.waitForAngularEnabled(false);
-    browser.get('https://thinx.cloud:7443/oauth/google');
+    browser.get('https://api.thinx.cloud/oauth/google');
     browser.waitForAngularEnabled(true);
     browser.driver.sleep(1500);
     browser.driver.findElement(by.css('input[type="email"]')).sendKeys(googleTestEmail);
@@ -40,7 +40,7 @@ describe('pages with login', function() {
 
   it('should log in with Github', function() {
     browser.waitForAngularEnabled(false);
-    browser.get('https://thinx.cloud:7443/oauth/github');
+    browser.get('https://api.thinx.cloud/oauth/github');
     browser.waitForAngularEnabled(true);
     browser.driver.sleep(1500);
     browser.driver.findElement(by.css('#login_field')).sendKeys(githubTestEmail);
