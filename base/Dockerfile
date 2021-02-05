@@ -1,5 +1,5 @@
 # pinned to 13 until npm audit will be available for 15 and issue with gid will be solved
-FROM node:13-buster-slim
+FROM node:15-buster-slim
 
 RUN adduser --system --disabled-password --shell /bin/bash thinx
 
@@ -68,7 +68,7 @@ COPY .snyk ./.snyk
 
 # install with npx and audit fix
 RUN npm update \
-  &&  npm upgrade \
+  && npm upgrade \
   && npm install --unsafe-perm . --only-prod \
   && npm install --unsafe-perm . --only-prod
 ## && npm audit fix -- fails with buster, why? because of different node version
