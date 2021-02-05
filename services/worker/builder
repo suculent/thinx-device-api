@@ -1073,10 +1073,10 @@ case $PLATFORM in
 
 			echo "[platformio] Docker completed <<<"
 
-			echo "Current build folder contents after build:" | tee -a "${LOG_PATH}"
+			echo "Current .pio/build folder contents after build:" | tee -a "${LOG_PATH}"
 			ls ./.pio/build | tee -a "${LOG_PATH}"
 
-			OUTFILE=$(pwd)/$(find . -name "firmware.bin" | head -n 1)
+			OUTFILE=$(pwd)/$(find . -name "*.bin" | head -n 1)
 
 			if [ ! -f $OUTFILE ]; then
 				echo "$OUTFILE not found"
@@ -1086,11 +1086,12 @@ case $PLATFORM in
 			if [[ -f $OUTFILE ]]; then
 				BUILD_SUCCESS=true
 				STATUS='OK'
-				BIN_FILE=$( find $BUILD_PATH/$REPO_NAME -name "*.bin" | head -n 1)
-				echo "BIN_FILE: ${BIN_FILE}" | tee -a "${LOG_PATH}"
+				BIN_FILE=$OUTFILE
 
-				if [[ ! -f $BIN_FILE ]]; then
-					echo "BIN_FILE $BIN_FILE not found!"
+				echo "OUTFILE: ${OUTFILE}" | tee -a "${LOG_PATH}"
+
+				if [[ ! -f $OUTFILE ]]; then
+					echo "OUTFILE $OUTFILE not found!"
 					BUILD_SUCCESS=false
 					exit 1
 				fi
@@ -1103,7 +1104,15 @@ case $PLATFORM in
 				else
 					echo "Docker build succeeded." | tee -a "${LOG_PATH}"
 					echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
+
 					zip -rq "${BUILD_PATH}/${BUILD_ID}.zip" ${BIN_FILE} ./build/**
+
+
+					echo "Copying deployment data..." | tee -a "${LOG_PATH}"
+
+					cp -vf "${BIN_FILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
+					cp -vf "${BIN_FILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
+					cp -vf "${BUILD_PATH}/${BUILD_ID}.zip" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 				fi
 			else
 				echo "[arduino] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
