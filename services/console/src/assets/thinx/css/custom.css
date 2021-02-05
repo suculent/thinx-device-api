@@ -411,7 +411,6 @@
   max-height: 100%;
   margin: 20px;
   margin-top: 0;
-  /* padding-top: 0; */
   margin-right: 30px;
   border: 0;
   -webkit-border-radius: 0;
@@ -495,6 +494,7 @@
   border-radius: 0;
   padding: 20px;
   padding-top: 37px;
+
   position: absolute;
   bottom: 20px;
   overflow: hidden;
