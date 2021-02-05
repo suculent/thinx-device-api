@@ -11,18 +11,18 @@ angular.module('RTM').controller('SourceController', ['$rootScope', '$scope', 's
 
     Thinx.init($rootScope, $scope);
 
-    Thinx.deviceList()
-    .done(function (data) {
-      $scope.$emit("updateDevices", data);
-    })
-    .fail(error => $scope.$emit("xhrFailed", error));
-
     Thinx.sourceList()
     .done( function(data) {
       console.log('+++ updateSources ');
       $scope.$emit("updateSources", data);
     })
     .fail(error => console.log('Error:', error));
+
+    Thinx.deviceList()
+    .done(function (data) {
+      $scope.$emit("updateDevices", data);
+    })
+    .fail(error => $scope.$emit("xhrFailed", error));
 
     $scope.resetModal();
     $scope.searchText = '';

@@ -17,7 +17,6 @@ angular.module('RTM').controller('ApikeyController', ['$rootScope', '$scope', 's
     })
     .fail(error => console.log('Error:', error));
 
-
     Thinx.deviceList()
     .done(function(data) {
       $scope.$emit("updateDevices", data);
