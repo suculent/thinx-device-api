@@ -15,14 +15,14 @@ angular.module('RTM').controller('SourceController', ['$rootScope', '$scope', 's
     .done( function(data) {
       console.log('+++ updateSources ');
       $scope.$emit("updateSources", data);
+
+      Thinx.deviceList()
+      .done(function (data) {
+        $scope.$emit("updateDevices", data);
+      })
+      .fail(error => $scope.$emit("xhrFailed", error));
     })
     .fail(error => console.log('Error:', error));
-
-    Thinx.deviceList()
-    .done(function (data) {
-      $scope.$emit("updateDevices", data);
-    })
-    .fail(error => $scope.$emit("xhrFailed", error));
 
     $scope.resetModal();
     $scope.searchText = '';
