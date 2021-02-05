@@ -2,6 +2,14 @@
 
 ## HISTORY
 
+5/2/2021 1.3.7437
+
+» Build process fixes
+» Improved PlatformIO support (environments, targets)
+» Full HTTPS/MQTTS with THiNX firmware supported
+» Better support for external API control (device environment values)
+» Mesh support (specific comm channels for device groups)
+
 1/11/2020 1.1.5206
 
 Long time no see, just a quick summary:

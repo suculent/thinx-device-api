@@ -57,7 +57,9 @@ Currently the platform supports building firmware for Arduino, PlatformIO (also 
 
 * Remote Things Management console for monitoring devices, attaching source code, pushing data, managing incoming payloads and firmware updates.
 
-* Continuous Integration practices to update device apps/configurations from a GitHub repository using commit hooks
+* Supports running in Docker Swarm, allowing to pass firmware-builds to specific nodes, etc.
+
+* Continuous Integration practices to update device apps/configurations from a GitHub repository using commit hooks.
 
 * Building secure MQTTS infrastructure as an optional side-chain transport layer.
 
@@ -79,13 +81,11 @@ Currently the platform supports building firmware for Arduino, PlatformIO (also 
 
 * Supports OAuth login with [Google](https://www.google.com) and [GitHub](https://www.github.com).
 
-* Supports InfluxDB/Grafana data storage and visualisation.
-
 * Supports LoRaWan server integration.
 
 * Supports [Rollbar](https://rollbar.com), [Sqreen](https://www.sqreen.com) and [Crisp.chat](https://crisp.chat) integrations.
 
-* Message-queue integration using docker-compose `project` on `thinx_internal` network
+* Message-queue integration using single broker across many instances.
 
 * Supports [Traefik](https://traefik.io) for SSL offloading.
 
@@ -200,6 +200,10 @@ You don't need Mailgun for developer installation, just copy-paste the activatio
 Optionally see the ./circleci/config.yml for reference on installation steps.
 
 ### Using Docker Swarm on Manager Node
+
+THiNX expects Traefik load-balancer (e.g. with Swarmpit) in Docker Swarm. Example swarm compose file contains appropriate labels for Traefik in Swarm mode.
+
+THiNX also expects some kind of shared storage folder in `/mnt/data` default path. We have this mounted using GluserFS across all nodes so it does not matter where you run thinx app, console, mosquitto broker, worker or builders... all flatfile data are always available everywhere.
 
 > Install GlusterFS to make sure /mnt is available on all nodes in cluster.
  
