@@ -113,9 +113,14 @@ swarm-build()
 			RUNNING=false
 		fi
 
+		if [[ "$STATUS" == *"No such image"* ]]; then
+			echo "Service image failure."
+			docker service rm $UNIQUE_NAME
+			RUNNING=false
+		fi
+
 		if [[ "$STATUS" == *"invalid"* ]]; then
 			echo "Service configuration failure."
-			# docker service rm $UNIQUE_NAME
 			docker service rm $UNIQUE_NAME
 			RUNNING=false
 		fi
@@ -826,8 +831,8 @@ case $PLATFORM in
 				set +o pipefail
 			else
 				swarm-build $WORKDIR suculent/arduino-docker-build $LOG_PATH
-				echo "[worker] [build.sh] WORKDIR RESULT at $WORKDIR:"
-				ls -la ${WORKDIR}
+				#echo "[worker] [build.sh] WORKDIR RESULT at $WORKDIR:"
+				#ls -la ${WORKDIR}
 				echo "[worker] [build.sh] DEPLOY RESULT at ${DEPLOYMENT_PATH}:"
 				ls -la ${DEPLOYMENT_PATH}
 			fi

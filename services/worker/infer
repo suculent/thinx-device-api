@@ -112,6 +112,8 @@ function infer_platform
 			if [[ ! -z $nodejs ]]; then
 				platform = "nodejs"
 			fi
+		else
+			echo "thinx.yml not found at $YMLFILE"
 		fi
 
 		echo $platform

@@ -1,4 +1,4 @@
-# pinned to 13 until npm audit will be available for 15
+# pinned to 13 until npm audit will be available for 15 and issue with gid will be solved
 FROM node:13-buster-slim
 
 RUN adduser --system --disabled-password --shell /bin/bash thinx
@@ -42,11 +42,11 @@ RUN curl -sL -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/st
     mv /tmp/docker/* /usr/bin
 
 # set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
-RUN set -x \
-	&& addgroup dockremap --gid 65536 \
-	&& adduser --system dockremap --gid 65536 \
-	&& echo 'dockremap:165536:65536' >> /etc/subuid \
-	&& echo 'dockremap:165536:65536' >> /etc/subgid
+# RUN set -x \
+#	&& addgroup dockremap --gid 65536 \
+#	&& adduser --system dockremap --gid 65536 \
+#	&& echo 'dockremap:165536:65536' >> /etc/subuid \
+#	&& echo 'dockremap:165536:65536' >> /etc/subgid
 
 # https://github.com/docker/docker/tree/master/hack/dind is this really needed now?
 ENV DIND_COMMIT 37498f009d8bf25fbb6199e8ccd34bed84f2874b
