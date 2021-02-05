@@ -143,31 +143,31 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
     var msgBody = JSON.parse(data);
     var msg = msgBody.notification;
 
+    if (typeof ($rootScope.meta.notifications) !== 'undefined') {
+      $rootScope.meta.notifications.push(msg);
+
+      // TODO: process specific build notifications
+
+      // MESSAGES
+      // fetching_git
+      // build_running
+      // build_completed
+
+      // ERRORS
+      // error_api_key_list_failed
+      // error_io_failed
+      // error_platform_unknown
+      // error_configuring_build
+      // error_starting_build
+
+      // $rootScope.meta.deviceStatus[msg.udid].push({
+      // });
+    }
+
     // perform device build notification updates
     if (typeof(msg.udid) !== "undefined") {
         console.log('------------ GOT NOTIFICATION FOR DEVICE');
         console.log(msg);
-
-        if (typeof($rootScope.meta.notifications) !== 'undefined') {
-            $rootScope.meta.notifications.push(msg);
-
-            // TODO: process specific build notifications
-
-            // MESSAGES
-            // fetching_git
-            // build_running
-            // build_completed
-
-            // ERRORS
-            // error_api_key_list_failed
-            // error_io_failed
-            // error_platform_unknown
-            // error_configuring_build
-            // error_starting_build
-
-            // $rootScope.meta.deviceStatus[msg.udid].push({
-            // });
-        }
 
         if (msg.body == "build_completed") {
 
@@ -183,7 +183,6 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
           .fail(error => $scope.$emit("xhrFailed", error));
 
         }
-
     }
 
     // determine what to do based on message type
@@ -260,11 +259,11 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
           JSON.stringify(msg.body),
           msgTitle,
           {
-            timeOut: 6000,
+            timeOut: 8000,
             tapToDismiss: true,
             closeButton: true,
             closeMethod: 'fadeOut',
-            closeDuration: 300,
+            closeDuration: 500,
             closeEasing: 'swing',
             progressBar: true
           }
@@ -272,12 +271,24 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
 
         Thinx.deviceList().done(function(data) {
           $scope.$emit("updateDevices", data);
-          //$scope.$apply();
         })
         .fail(error => $scope.$emit("xhrFailed", error));
 
+        Thinx.getBuildHistory()
+          .done(function (data) {
+            $scope.$emit("updateBuildHistory", data);
+          })
+          .fail(error => $scope.$emit("xhrFailed", error));
+
         // non-actionable notification without status
       } else {
+
+        // Supported types
+        // error: 'error',
+        // info: 'info',
+        // success: 'success',
+        // warning: 'warning'
+        
         toastr[msg.type](
           JSON.stringify(msg.body),
           msg.title,
@@ -289,6 +300,10 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
             closeEasing: 'swing'
           });
       }
+
+    } else {
+
+      console.log('Skipping undefined message type...');
 
     }
   }
