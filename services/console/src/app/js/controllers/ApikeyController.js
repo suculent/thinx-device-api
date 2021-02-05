@@ -14,15 +14,14 @@ angular.module('RTM').controller('ApikeyController', ['$rootScope', '$scope', 's
     Thinx.apikeyList()
     .done( function(data) {
       $scope.$emit("updateApikeys", data);
+
+      Thinx.deviceList()
+      .done(function (data) {
+        $scope.$emit("updateDevices", data);
+      })
+      .fail(error => $scope.$emit("xhrFailed", error));
     })
     .fail(error => console.log('Error:', error));
-
-
-    Thinx.deviceList()
-    .done(function(data) {
-      $scope.$emit("updateDevices", data);
-    })
-    .fail(error => $scope.$emit("xhrFailed", error));
 
     $scope.resetModal();
     $scope.searchText = '';
