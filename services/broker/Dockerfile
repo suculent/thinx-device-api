@@ -26,11 +26,11 @@ RUN export GO_ARCH=$(uname -m | sed -es/x86_64/amd64/ -es/armv7l/armv6l/ -es/aar
     go version && \
     rm go${GO_VERSION}.linux-${GO_ARCH}.tar.gz
 
-#Build the plugin from local source
-COPY ./ ./
+# Build the plugin from local source
+COPY ./goauth ./
 
 #Build the plugin.
-RUN export PATH=$PATH:/usr/local/go/bin && export CGO_CFLAGS="-I/usr/local/include -fPIC" && export CGO_LDFLAGS="-shared" &&  make
+RUN export PATH=$PATH:/usr/local/go/bin && export CGO_CFLAGS="-I/usr/local/include -fPIC" && export CGO_LDFLAGS="-shared" && pwd && ls && make
 
 #Start from a new image.
 FROM debian:stable-slim
