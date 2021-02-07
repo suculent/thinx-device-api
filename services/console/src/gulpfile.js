@@ -33,7 +33,7 @@ var env = {
   apiDirectUrl: 'https://' + process.env.API_HOSTNAME,
   slackClientId: '233115403974.233317554391',
   wssUrl: 'wss://' + process.env.API_HOSTNAME, // moved to https server + ':7445' is expectedly exposed TCP/SSL service
-  baseUrl: 'https://' + process.env.WEB_HOSTNAME + ':7443',
+  baseUrl: 'https://' + process.env.WEB_HOSTNAME,
   googleTrackingCode: process.env.GOOGLE_ANALYTICS_ID,
   rollbarAccessToken: process.env.ROLLBAR_ACCESS_TOKEN,
   crispWebsiteId: process.env.CRISP_WEBSITE_ID,
