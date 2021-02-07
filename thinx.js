@@ -481,10 +481,10 @@ const socketMap = new Map();
 
 server.on('upgrade', function (request, socket, head) {
 
-  const pathname = url.parse(request.url).pathname;
+  const owner = url.parse(request.url).pathname.replace("/", "");
 
-  if (typeof (socketMap.get(pathname)) === "undefined") {
-    console.log("Socket already mapped for", pathname);
+  if (typeof (socketMap.get(owner)) === "undefined") {
+    console.log("Socket already mapped for", owner);
     return;
   }
 
@@ -503,7 +503,7 @@ server.on('upgrade', function (request, socket, head) {
 
     console.log("---> Session is parsed, handling protocol upgrade...");
 
-    socketMap.set(pathname, socket);
+    socketMap.set(owner, socket);
     try {
       wss.handleUpgrade(request, socket, head, function (ws) {
         wss.emit('connection', ws, request);
@@ -565,9 +565,8 @@ wss.on('connection', function(ws, req) {
     return;
   }
 
-  console.log("request", {req});
-
-  const pathname = url.parse(req.url).pathname.replace("/", "");
+  // extract owner_id from pathname removing trailing slash
+  const owner = url.parse(req.url).pathname.replace("/", "");
   
   ws.isAlive = true;
 
@@ -588,8 +587,8 @@ wss.on('connection', function(ws, req) {
     return;
   }
 
-  console.log("Owner socket", pathname, "started... (TODO: socketMap.set)");
-  app._ws[pathname] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
+  console.log("Owner socket", owner, "started... (TODO: socketMap.set)");
+  app._ws[owner] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
   
 
   /* Returns specific build log for owner */
@@ -597,7 +596,6 @@ wss.on('connection', function(ws, req) {
   // TODO: Extract with params (ws)
   app.post("/api/user/logs/tail", function(req2, res) {
     if (!(router.validateSecurePOSTRequest(req2) || router.validateSession(req2, res))) return;
-    var owner = req2.session.owner;
     if (typeof(req2.body.build_id) === "undefined") {
       router.respond(res, {
         success: false,
@@ -605,15 +603,8 @@ wss.on('connection', function(ws, req) {
       });
       return;
     }
-    var error_callback = function(err) {
-      console.log(err);
-      res.set("Connection", "close");
-      router.respond(res, err);
-    };
-    
     let safe_id = Sanitka.branch(req2.body.build_id);
     console.log("Tailing build log for " + safe_id);
-    blog.logtail(safe_id, owner, ws, error_callback);
   });
 
   // TODO: Extract with params (ws, messenger)
@@ -650,7 +641,7 @@ wss.on('connection', function(ws, req) {
   ws.on('pong', heartbeat);
 
   ws.on('close', function () {
-    socketMap.delete(pathname);
+    socketMap.delete(owner);
   });
 
 }).on("error", function(err) {

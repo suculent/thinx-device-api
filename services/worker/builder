@@ -78,7 +78,7 @@ swarm-build()
 
 	$SERVICE_COMMAND
 
-	echo "» Monitoring build progress..."
+	echo "» Extracting Docker Service Log:"
 	INFO=$(docker service ls | grep $UNIQUE_NAME)
 	echo $INFO
 	ITERATIONS=0
@@ -806,13 +806,11 @@ case $PLATFORM in
 					if [ ! -f $THINX_FILE ]; then
 						echo "WTF THINX_FILE does not exist?"
 					else
-						echo "Will write ENV_HASH to ${THINX_FILE}"
+						echo "[arduino] Will write ENV_HASH to ${THINX_FILE}"
 						ENV_HASH=$(shasum -a 256 ${ENVOUT} | awk '{ print $1 }')
 						LINE="#define ENV_HASH \"${ENV_HASH}\""
-						echo "ENV_HASH: " $ENV_HASH
 						sed -i '/ENV_HASH/d' ${THINX_FILE}
 						echo -e ${LINE} >> ${THINX_FILE}
-						#cat ${THINX_FILE}
 					fi
 				fi
 			fi
@@ -913,13 +911,11 @@ case $PLATFORM in
 					if [ ! -f $THINX_FILE ]; then
 						echo "WTF THINX_FILE does not exist?"
 					else
-						echo "Will write ENV_HASH to ${THINX_FILE}"
+						echo "[pine64] Will write ENV_HASH to ${THINX_FILE}"
 						ENV_HASH=$(shasum -a 256 ${ENVOUT} | awk '{ print $1 }')
 						LINE="#define ENV_HASH \"${ENV_HASH}\""
-						echo "ENV_HASH: " $ENV_HASH
 						sed -i '/ENV_HASH/d' ${THINX_FILE}
 						echo -e ${LINE} >> ${THINX_FILE}
-						#cat ${THINX_FILE}
 					fi
 				fi
 			fi
@@ -1026,13 +1022,11 @@ case $PLATFORM in
 					if [ ! -f $THINX_FILE ]; then
 						echo "WTF THINX_FILE does not exist?"
 					else
-						echo "Will write ENV_HASH to ${THINX_FILE}"
+						echo "[platformio] Will write ENV_HASH to ${THINX_FILE}"
 						ENV_HASH=$(shasum -a 256 ${ENVOUT} | awk '{ print $1 }')
 						LINE="#define ENV_HASH \"${ENV_HASH}\""
-						echo "ENV_HASH: " $ENV_HASH
 						sed -i '/ENV_HASH/d' ${THINX_FILE}
 						echo -e ${LINE} >> ${THINX_FILE}
-						#cat ${THINX_FILE}
 					fi
 				fi
 			fi
