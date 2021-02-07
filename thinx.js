@@ -565,6 +565,7 @@ wss.on('connection', function(ws, req) {
     return;
   }
 
+  console.log({req});
 
   const pathname = url.parse(req.url).pathname;
   
@@ -587,7 +588,7 @@ wss.on('connection', function(ws, req) {
     return;
   }
 
-  console.log("Owner socket", pathname, "started...");
+  console.log("Owner socket", pathname, "started... (TODO: socketMap.set)");
   app._ws[pathname] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
   
 
