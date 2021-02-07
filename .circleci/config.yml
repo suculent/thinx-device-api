@@ -38,9 +38,9 @@ jobs:
           command: |
             rm -rf ./package-lock.json
       - docker/check:
-          registry: registry.thinx.cloud:5000
+          #registry: registry.thinx.cloud:5000
       - docker/build:
-          registry: registry.thinx.cloud:5000
+          #registry: registry.thinx.cloud:5000
           image: thinx/mosquitto
           docker-context: services/broker
           dockerfile: services/broker/Dockerfile
@@ -49,7 +49,7 @@ jobs:
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/mosquitto
-          registry: registry.thinx.cloud:5000
+#          registry: registry.thinx.cloud:5000
           tag: 'test'
 
   build-redis-cloud:
@@ -344,9 +344,12 @@ workflows:
     
       - build:
           filters:
+            context:
+              - thinx-docker-repo
             branches:
               only:
                 - master
+                - features/mqtt-auth-plugin
 
       - build-api-cloud:
           context:
@@ -374,8 +377,6 @@ workflows:
 
 
       - test-mosquitto-cloud:
-          context:
-            - thinx-docker-repo
           filters:
             branches:
               only:

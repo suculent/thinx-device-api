@@ -7,11 +7,7 @@ networks:
 services:
   mosquitto:
     env_file: .env
-    build:
-      context: ./services/broker
-      args:
-        - 'MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
-        - 'MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}'
+    image: thinx/mosquitto:test
     environment:
       - 'MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
       - 'MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}'
