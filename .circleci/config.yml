@@ -371,7 +371,6 @@ workflows:
             branches:
               only:
                 - thinx-swarm
-                - features/mqtt-auth-plugin
 
 
       - test-mosquitto-cloud:
