@@ -569,9 +569,8 @@ wss.on("connection", function(ws, req) {
 
   // Should be done after validation
   _ws = ws; // public websocket (!) does not at least fail
-  if (typeof(app) !== "undefined") {
-    app._ws = ws; // public websocket stored in app, needs to be set to builder/buildlog!
-  }
+  app._ws = ws; // public websocket stored in app, needs to be set to builder/buildlog!
+  
 
   var cookies = req.headers.cookie;
 
