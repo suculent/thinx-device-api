@@ -565,9 +565,9 @@ wss.on('connection', function(ws, req) {
     return;
   }
 
-  console.log({req});
+  console.log("request", {req});
 
-  const pathname = url.parse(req.url).pathname;
+  const pathname = url.parse(req.url).pathname.replace("/", "");
   
   ws.isAlive = true;
 
