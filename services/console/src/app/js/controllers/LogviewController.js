@@ -17,6 +17,9 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
   // not implemented yet
   //var actionNotifications = [];
 
+  console.log('#### LogviewController: Initialising Websocket');
+  openSocket();
+
   function openSocket() {
     if ("WebSocket" in window) {
       if (typeof($rootScope.wss) === "undefined") {
