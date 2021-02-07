@@ -30,10 +30,10 @@ services:
       - '/mnt/data/mosquitto/auth:/mqtt/auth:rw'
     labels:
       - traefik.backend.mosquitto.noexpose
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - 'mosquitto_sub -t "$SYS/#" -C 1 -i health-$(hostname) -u $MOSQUITTO_USERNAME -P $MOSQUITTO_PASSWORD | grep -v Error'
+#    healthcheck:
+#      test:
+#        - CMD-SHELL
+#        - 'mosquitto_sub -t "$SYS/#" -C 1 -i "health-$(hostname)" -u $MOSQUITTO_USERNAME -P $MOSQUITTO_PASSWORD | grep -v Error'
       interval: 10s
       timeout: 50s
       retries: 5
