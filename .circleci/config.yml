@@ -348,6 +348,7 @@ workflows:
             branches:
               only:
                 - thinx-swarm
+                - mqtt-auth-plugin
 
       - build-redis-cloud:
           context:
