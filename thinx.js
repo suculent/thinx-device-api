@@ -573,8 +573,6 @@ wss.on('connection', function(ws, req) {
   // Should be done after validation
   _ws = ws; // public websocket (!) does not at least fail
 
-  console.log("Owner socket", req.session.owner, "started...");
-  app._ws[req.session.owner] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
   
 
   var cookies = req.headers.cookie;
@@ -588,6 +586,10 @@ wss.on('connection', function(ws, req) {
     console.log("» DEPRECATED WS has no cookie headers!");
     return;
   }
+
+  console.log("Owner socket", pathname, "started...");
+  app._ws[pathname] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
+  
 
   /* Returns specific build log for owner */
 
