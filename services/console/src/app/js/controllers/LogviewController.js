@@ -17,8 +17,13 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
   // not implemented yet
   //var actionNotifications = [];
 
-  console.log('#### LogviewController: Initialising Websocket');
-  openSocket();
+  if (typeof ($rootScope.initWebsocketListener) === "undefined") {
+    $rootScope.initWebsocketListener = $rootScope.$on('initWebsocket', function (event, owner_id) {
+      event.stopPropagation();
+      console.log("DEBUG owner_id initWebsocketListener", owner_id);
+      openSocket();
+    });
+  }
 
   function openSocket() {
     if ("WebSocket" in window) {
