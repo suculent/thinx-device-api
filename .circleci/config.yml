@@ -296,6 +296,7 @@ jobs:
           echo "###### > Tailing completed, stopping test."
           date
           docker-compose stop
+#          codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d
 
     - run:
         name: Check running Docker containers
