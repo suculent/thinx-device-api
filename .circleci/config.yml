@@ -37,10 +37,8 @@ jobs:
       - run:
           command: |
             rm -rf ./package-lock.json
-      - docker/check:
-          #registry: registry.thinx.cloud:5000
+      - docker/check
       - docker/build:
-          #registry: registry.thinx.cloud:5000
           image: thinx/mosquitto
           docker-context: services/broker
           dockerfile: services/broker/Dockerfile
@@ -49,7 +47,6 @@ jobs:
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/mosquitto
-#          registry: registry.thinx.cloud:5000
           tag: 'test'
 
   build-redis-cloud:
@@ -343,9 +340,9 @@ workflows:
     jobs:
     
       - build:
-          filters:
-            context:
+          context:
               - thinx-docker-repo
+          filters:
             branches:
               only:
                 - master
@@ -374,7 +371,6 @@ workflows:
             branches:
               only:
                 - thinx-swarm
-
 
       - test-mosquitto-cloud:
           filters:
