@@ -552,7 +552,7 @@ wss.on("error", function(err) {
 
 app._ws = []; // array of all owner websockets
 
-wss.on("connection", function(ws, req) {
+wss.on('connection', function(ws, req) {
 
   // May not exist while testing...
   if (typeof(ws) === "undefined" || ws === null) {
