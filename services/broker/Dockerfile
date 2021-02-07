@@ -69,25 +69,12 @@ ENTRYPOINT ["sh", "-c", "/usr/sbin/mosquitto -c /etc/mosquitto/mosquitto.conf" ]
 
 
 COPY ./config/mosquitto.conf /etc/mosquitto/conf.d/mosquitto.conf
-#COPY ./config/mosquitto.conf /mqtt/config/mosquitto.conf # should use file from /mnt/data/mosquitto/config/mosquitto.conf
 
 COPY ./mqtt_restart.sh /mqtt_restart.sh
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
-COPY ./incron.cfg /var/spool/incron/root
-# COPY ./reload-cron /reload-cron
 
 RUN echo "export MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}" > /mqtt_username
 RUN echo "export MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}" > /mqtt_password
-
-RUN echo "mosquitto" >> /etc/incron.allow && \
-    echo "root" >> /etc/incron.allow && \
-    mkdir -p /var/spool/incron && \
-    chmod +x /mqtt_restart.sh
-
-RUN chown root:incron /var/spool/incron/root && \
-    incrontab -l
-
-# RUN crontab /reload-cron
 
 EXPOSE 1883 8883 9001
 
