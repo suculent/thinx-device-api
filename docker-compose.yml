@@ -34,9 +34,9 @@ services:
 #      test:
 #        - CMD-SHELL
 #        - 'mosquitto_sub -t "$SYS/#" -C 1 -i "health-$(hostname)" -u $MOSQUITTO_USERNAME -P $MOSQUITTO_PASSWORD | grep -v Error'
-      interval: 10s
-      timeout: 50s
-      retries: 5
+#      interval: 10s
+#      timeout: 50s
+#      retries: 5
   couchdb:
     env_file: .env
     image: 'couchdb:3.1.0'
