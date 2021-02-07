@@ -81,8 +81,6 @@ const hour = 3600 * 1000;
 // App
 //
 
-var _ws = null;
-
 var db = app_config.database_uri;
 
 var https = require("https");
@@ -383,7 +381,7 @@ app.use(express.urlencoded({
   limit: "1mb"
 }));
 
-let router = require('./lib/router.js')(app, _ws);
+let router = require('./lib/router.js')(app);
 
 /* Webhook Server (new impl.) */
 
@@ -570,11 +568,6 @@ wss.on('connection', function(ws, req) {
   
   ws.isAlive = true;
 
-  // Should be done after validation
-  _ws = ws; // public websocket (!) does not at least fail
-
-  
-
   var cookies = req.headers.cookie;
 
   if (typeof(req.headers.cookie) !== "undefined") {
@@ -617,11 +610,11 @@ wss.on('connection', function(ws, req) {
       var build_id = object.logtail.build_id;
       var owner_id = object.logtail.owner_id;
       //console.log("Tailing build log for " + build_id);
-      blog.logtail(build_id, owner_id, _ws, logtail_callback);
+      blog.logtail(build_id, owner_id, app._ws[owner_id], logtail_callback);
     } else if (typeof(object.init) !== "undefined") {
       if (typeof(messenger) !== "undefined") {
         console.log("Initializing messenger in WS...");
-        messenger.initWithOwner(object.init, _ws, function(success, message_z) {
+        messenger.initWithOwner(object.init, app._ws[owner_id], function(success, message_z) {
           if (!success) {
             console.log("Messenger init on WS message with result " + success + ", with message: ", { message_z });
           }
