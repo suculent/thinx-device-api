@@ -277,16 +277,22 @@
             <div class="row" ng-repeat="buildEntry in value" ng-if="$first">
               <div class="col-xs-10 text-left">
 
-                <span ng-if="buildEntry.state != 'OK' && buildEntry.state != 'Success' && buildEntry.state != 'FAILED'"
-                  class="badge">{{buildEntry.state}}</span>
-                <span ng-if="buildEntry.state == 'OK'" class="badge badge-success badge-build-history">{{buildEntry.state}}</span>
-                <span ng-if="buildEntry.state == 'Success'" class="badge badge-success-thinx badge-build-history">{{buildEntry.state}}</span>
-                <span ng-if="buildEntry.state == 'FAILED'" class="badge badge-danger badge-build-history">{{buildEntry.state}}</span>
-                
-                <span class="build-status-date" title="{{buildEntry.last_update}}">{{buildEntry.timestamp | lastSeen:'false'}}</span>
-                <a ng-click="$emit('showLogOverlay', buildEntry.build_id)">
-                  <span class="device-build-id opacity-100"> {{buildEntry.build_id | limitTo:7}}</span>
-                </a>
+                <div class="row">
+                  <div class="col-xs-3 text-left">
+                    <span ng-if="buildEntry.state != 'OK' && buildEntry.state != 'Success' && buildEntry.state != 'FAILED'"
+                      class="badge">{{buildEntry.state}}</span>
+                    <span ng-if="buildEntry.state == 'OK'" class="badge badge-success badge-build-history">{{buildEntry.state}}</span>
+                    <span ng-if="buildEntry.state == 'Success'"
+                      class="badge badge-success-thinx badge-build-history">{{buildEntry.state}}</span>
+                    <span ng-if="buildEntry.state == 'FAILED'" class="badge badge-danger badge-build-history">{{buildEntry.state}}</span>
+                  </div>
+                  <div class="col-xs-9 text-right">
+                    <span class="build-status-date" title="{{buildEntry.last_update}}">{{buildEntry.timestamp | lastSeen:'false'}}</span>
+                    <a ng-click="$emit('showLogOverlay', buildEntry.build_id)">
+                      <span class="device-build-id opacity-100"> {{buildEntry.build_id | limitTo:7}}</span>
+                    </a>
+                  </div>
+                </div>
                 
               </div>
               <div class="col-xs-2 text-right">
