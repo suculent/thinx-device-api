@@ -28,6 +28,29 @@ jobs:
           image: thinx/mosquitto
           registry: registry.thinx.cloud:5000
           tag: 'swarm'
+  
+  test-mosquitto-cloud:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          command: |
+            rm -rf ./package-lock.json
+      - docker/check:
+          registry: registry.thinx.cloud:5000
+      - docker/build:
+          registry: registry.thinx.cloud:5000
+          image: thinx/mosquitto
+          docker-context: services/broker
+          dockerfile: services/broker/Dockerfile
+          extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
+          tag: 'test'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/mosquitto
+          registry: registry.thinx.cloud:5000
+          tag: 'test'
 
   build-redis-cloud:
     executor: docker/docker
@@ -348,7 +371,16 @@ workflows:
             branches:
               only:
                 - thinx-swarm
-                - mqtt-auth-plugin
+                - features/mqtt-auth-plugin
+
+
+      - test-mosquitto-cloud:
+          context:
+            - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - features/mqtt-auth-plugin
 
       - build-redis-cloud:
           context:
