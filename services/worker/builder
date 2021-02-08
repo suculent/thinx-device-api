@@ -95,16 +95,16 @@ swarm-build()
 		((ITERATIONS++))
 		sleep 30
 
-		STATUS=$(docker service ls | grep  $UNIQUE_NAME)
-		echo $STATUS
+		DSTATUS=$(docker service ls | grep  $UNIQUE_NAME)
+		echo $DSTATUS
 
-		# if grep -q "replicated\t1/1" <<< "$STATUS"
-		if grep -q "1/1" <<< "$STATUS"; then
+		# if grep -q "replicated\t1/1" <<< "$DSTATUS"
+		if grep -q "1/1" <<< "$DSTATUS"; then
 			echo "Still running..."
 		fi
 
-		# if grep -q "replicated\t0/0" <<< "$STATUS"
-		if grep -q "0/0" <<< "$STATUS"; then
+		# if grep -q "replicated\t0/0" <<< "$DSTATUS"
+		if grep -q "0/0" <<< "$DSTATUS"; then
 			echo "Build completed."
 			# append service logs to catch THINX BUILD SUCCESSFUL phrase; serves to decide to extract OUTFILE laters
 			docker service logs $UNIQUE_NAME | tee -a "$LOG_PATH"
@@ -113,13 +113,13 @@ swarm-build()
 			RUNNING=false
 		fi
 
-		if [[ "$STATUS" == *"No such image"* ]]; then
+		if [[ "$DSTATUS" == *"No such image"* ]]; then
 			echo "Service image failure."
 			docker service rm $UNIQUE_NAME
 			RUNNING=false
 		fi
 
-		if [[ "$STATUS" == *"invalid"* ]]; then
+		if [[ "$DSTATUS" == *"invalid"* ]]; then
 			echo "Service configuration failure."
 			docker service rm $UNIQUE_NAME
 			RUNNING=false
