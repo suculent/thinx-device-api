@@ -177,7 +177,11 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
         console.log('------------ GOT NOTIFICATION FOR DEVICE');
         console.log(msg);
 
-        if (msg.body == "build_completed") {
+        if (
+            msg.body == "Pulling repository"
+            || msg.body == "Building..."
+            || msg.body == "Completed"
+        ) {
 
           Thinx.deviceList().done(function(data) {
             $scope.$emit("updateDevices", data);
@@ -196,7 +200,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
     // determine what to do based on message type
     if (typeof(msg.type) !== "undefined") {
 
-      // show toast with dialog
+      // show toast with action dialog
       if (msg.type == "actionable") {
 
         // YES/NO
@@ -257,7 +261,9 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
           });
         }
 
-      // non-actionable status
+      
+      
+      // non-actionable status notification
       } else if (typeof(msg.body.status) !== 'undefined') {
 
         var msgTitle = "Device Status Update";
@@ -291,11 +297,11 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
         // non-actionable notification without status
       } else {
 
-        // Supported types
-        // error: 'error',
-        // info: 'info',
-        // success: 'success',
-        // warning: 'warning'
+        // Supported msg.types by Toastr
+        // "error"
+        // "info"
+        // "success"
+        // "warning"
         
         toastr[msg.type](
           JSON.stringify(msg.body),
