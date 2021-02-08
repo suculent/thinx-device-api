@@ -534,6 +534,10 @@ function init($rootScope, $scope) {
           updateRawTransformers($rootScope.profile.info.transformers);
 
           $scope.$apply();
+
+          console.log("Emitting initWebsocket with owner_id", profile.owner);
+
+          $scope.$emit("initWebsocket", profile.owner);
         } else {
           console.log('error', response);
         }

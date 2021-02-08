@@ -17,6 +17,14 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
   // not implemented yet
   //var actionNotifications = [];
 
+  if (typeof ($rootScope.initWebsocketListener) === "undefined") {
+    $rootScope.initWebsocketListener = $rootScope.$on('initWebsocket', function (event, owner_id) {
+      event.stopPropagation();
+      console.log("DEBUG owner_id initWebsocketListener", owner_id);
+      openSocket();
+    });
+  }
+
   function openSocket() {
     if ("WebSocket" in window) {
       if (typeof($rootScope.wss) === "undefined") {
@@ -143,33 +151,37 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
     var msgBody = JSON.parse(data);
     var msg = msgBody.notification;
 
+    if (typeof ($rootScope.meta.notifications) !== 'undefined') {
+      $rootScope.meta.notifications.push(msg);
+
+      // TODO: process specific build notifications
+
+      // MESSAGES
+      // fetching_git
+      // build_running
+      // build_completed
+
+      // ERRORS
+      // error_api_key_list_failed
+      // error_io_failed
+      // error_platform_unknown
+      // error_configuring_build
+      // error_starting_build
+
+      // $rootScope.meta.deviceStatus[msg.udid].push({
+      // });
+    }
+
     // perform device build notification updates
     if (typeof(msg.udid) !== "undefined") {
         console.log('------------ GOT NOTIFICATION FOR DEVICE');
         console.log(msg);
 
-        if (typeof($rootScope.meta.notifications) !== 'undefined') {
-            $rootScope.meta.notifications.push(msg);
-
-            // TODO: process specific build notifications
-
-            // MESSAGES
-            // fetching_git
-            // build_running
-            // build_completed
-
-            // ERRORS
-            // error_api_key_list_failed
-            // error_io_failed
-            // error_platform_unknown
-            // error_configuring_build
-            // error_starting_build
-
-            // $rootScope.meta.deviceStatus[msg.udid].push({
-            // });
-        }
-
-        if (msg.body == "build_completed") {
+        if (
+            msg.body == "Pulling repository"
+            || msg.body == "Building..."
+            || msg.body == "Completed"
+        ) {
 
           Thinx.deviceList().done(function(data) {
             $scope.$emit("updateDevices", data);
@@ -183,13 +195,12 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
           .fail(error => $scope.$emit("xhrFailed", error));
 
         }
-
     }
 
     // determine what to do based on message type
     if (typeof(msg.type) !== "undefined") {
 
-      // show toast with dialog
+      // show toast with action dialog
       if (msg.type == "actionable") {
 
         // YES/NO
@@ -250,7 +261,9 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
           });
         }
 
-      // non-actionable status
+      
+      
+      // non-actionable status notification
       } else if (typeof(msg.body.status) !== 'undefined') {
 
         var msgTitle = "Device Status Update";
@@ -260,11 +273,11 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
           JSON.stringify(msg.body),
           msgTitle,
           {
-            timeOut: 6000,
+            timeOut: 8000,
             tapToDismiss: true,
             closeButton: true,
             closeMethod: 'fadeOut',
-            closeDuration: 300,
+            closeDuration: 500,
             closeEasing: 'swing',
             progressBar: true
           }
@@ -272,12 +285,24 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
 
         Thinx.deviceList().done(function(data) {
           $scope.$emit("updateDevices", data);
-          //$scope.$apply();
         })
         .fail(error => $scope.$emit("xhrFailed", error));
 
+        Thinx.getBuildHistory()
+          .done(function (data) {
+            $scope.$emit("updateBuildHistory", data);
+          })
+          .fail(error => $scope.$emit("xhrFailed", error));
+
         // non-actionable notification without status
       } else {
+
+        // Supported msg.types by Toastr
+        // "error"
+        // "info"
+        // "success"
+        // "warning"
+        
         toastr[msg.type](
           JSON.stringify(msg.body),
           msg.title,
@@ -289,6 +314,10 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
             closeEasing: 'swing'
           });
       }
+
+    } else {
+
+      console.log('Skipping undefined message type...');
 
     }
   }

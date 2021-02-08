@@ -78,7 +78,7 @@ swarm-build()
 
 	$SERVICE_COMMAND
 
-	echo "» Monitoring build progress..."
+	echo "» Extracting Docker Service Log:"
 	INFO=$(docker service ls | grep $UNIQUE_NAME)
 	echo $INFO
 	ITERATIONS=0
@@ -806,13 +806,11 @@ case $PLATFORM in
 					if [ ! -f $THINX_FILE ]; then
 						echo "WTF THINX_FILE does not exist?"
 					else
-						echo "Will write ENV_HASH to ${THINX_FILE}"
+						echo "[arduino] Will write ENV_HASH to ${THINX_FILE}"
 						ENV_HASH=$(shasum -a 256 ${ENVOUT} | awk '{ print $1 }')
 						LINE="#define ENV_HASH \"${ENV_HASH}\""
-						echo "ENV_HASH: " $ENV_HASH
 						sed -i '/ENV_HASH/d' ${THINX_FILE}
 						echo -e ${LINE} >> ${THINX_FILE}
-						#cat ${THINX_FILE}
 					fi
 				fi
 			fi
@@ -831,10 +829,6 @@ case $PLATFORM in
 				set +o pipefail
 			else
 				swarm-build $WORKDIR suculent/arduino-docker-build $LOG_PATH
-				#echo "[worker] [build.sh] WORKDIR RESULT at $WORKDIR:"
-				#ls -la ${WORKDIR}
-				echo "[worker] [build.sh] DEPLOY RESULT at ${DEPLOYMENT_PATH}:"
-				ls -la ${DEPLOYMENT_PATH}
 			fi
 
 			echo "[arduino] Docker completed <<<" | tee -a "${LOG_PATH}"
@@ -917,13 +911,11 @@ case $PLATFORM in
 					if [ ! -f $THINX_FILE ]; then
 						echo "WTF THINX_FILE does not exist?"
 					else
-						echo "Will write ENV_HASH to ${THINX_FILE}"
+						echo "[pine64] Will write ENV_HASH to ${THINX_FILE}"
 						ENV_HASH=$(shasum -a 256 ${ENVOUT} | awk '{ print $1 }')
 						LINE="#define ENV_HASH \"${ENV_HASH}\""
-						echo "ENV_HASH: " $ENV_HASH
 						sed -i '/ENV_HASH/d' ${THINX_FILE}
 						echo -e ${LINE} >> ${THINX_FILE}
-						#cat ${THINX_FILE}
 					fi
 				fi
 			fi
@@ -1030,13 +1022,11 @@ case $PLATFORM in
 					if [ ! -f $THINX_FILE ]; then
 						echo "WTF THINX_FILE does not exist?"
 					else
-						echo "Will write ENV_HASH to ${THINX_FILE}"
+						echo "[platformio] Will write ENV_HASH to ${THINX_FILE}"
 						ENV_HASH=$(shasum -a 256 ${ENVOUT} | awk '{ print $1 }')
 						LINE="#define ENV_HASH \"${ENV_HASH}\""
-						echo "ENV_HASH: " $ENV_HASH
 						sed -i '/ENV_HASH/d' ${THINX_FILE}
 						echo -e ${LINE} >> ${THINX_FILE}
-						#cat ${THINX_FILE}
 					fi
 				fi
 			fi
@@ -1073,10 +1063,10 @@ case $PLATFORM in
 
 			echo "[platformio] Docker completed <<<"
 
-			echo "Current build folder contents after build:" | tee -a "${LOG_PATH}"
+			echo "Current .pio/build folder contents after build:" | tee -a "${LOG_PATH}"
 			ls ./.pio/build | tee -a "${LOG_PATH}"
 
-			OUTFILE=$(pwd)/$(find . -name "firmware.bin" | head -n 1)
+			OUTFILE=$(pwd)/$(find . -name "*.bin" | head -n 1)
 
 			if [ ! -f $OUTFILE ]; then
 				echo "$OUTFILE not found"
@@ -1086,11 +1076,12 @@ case $PLATFORM in
 			if [[ -f $OUTFILE ]]; then
 				BUILD_SUCCESS=true
 				STATUS='OK'
-				BIN_FILE=$( find $BUILD_PATH/$REPO_NAME -name "*.bin" | head -n 1)
-				echo "BIN_FILE: ${BIN_FILE}" | tee -a "${LOG_PATH}"
+				BIN_FILE=$OUTFILE
 
-				if [[ ! -f $BIN_FILE ]]; then
-					echo "BIN_FILE $BIN_FILE not found!"
+				echo "OUTFILE: ${OUTFILE}" | tee -a "${LOG_PATH}"
+
+				if [[ ! -f $OUTFILE ]]; then
+					echo "OUTFILE $OUTFILE not found!"
 					BUILD_SUCCESS=false
 					exit 1
 				fi
@@ -1103,7 +1094,15 @@ case $PLATFORM in
 				else
 					echo "Docker build succeeded." | tee -a "${LOG_PATH}"
 					echo "Zipping artifacts to ${BUILD_ID}.zip..." | tee -a "${LOG_PATH}"
+
 					zip -rq "${BUILD_PATH}/${BUILD_ID}.zip" ${BIN_FILE} ./build/**
+
+
+					echo "Copying deployment data..." | tee -a "${LOG_PATH}"
+
+					cp -vf "${BIN_FILE}" "$TARGET_PATH" | tee -a "${LOG_PATH}"
+					cp -vf "${BIN_FILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
+					cp -vf "${BUILD_PATH}/${BUILD_ID}.zip" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 				fi
 			else
 				echo "[arduino] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"

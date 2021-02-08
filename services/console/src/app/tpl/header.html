@@ -46,10 +46,10 @@
             </li>
             <li>
               <ul class="dropdown-menu-list scroller" style="height: 275px;" data-handle-color="#637283">
-                <li ng-repeat="(key, build) in $root.buildHistory | limitTo:10 track by key">
+                <li ng-repeat="(key, build) in $root.buildHistory | orderBy:'last_update':true | limitTo:10 track by key">
                   <a href="javascript:;" ng-click="$emit('showLogOverlay', build.build_id)" ng-if="$root.getDeviceByUdid(build.udid) != false">
                     <span class="details">
-                      <span class="header-build-date">{{build.timestamp | lastSeen:'false'}}</span>
+                      <span class="header-build-date">{{build.last_update | lastSeen:'false'}}</span>
                       <div>
                         {{getDeviceByUdid(build.udid).alias}}
                       </div>
