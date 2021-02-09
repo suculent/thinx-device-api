@@ -186,7 +186,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
           let nowTime = new Date().getTime();
 
           let buildRecord = {
-            build_id: "unknown",
+            build_id: msg.build_id,
             last_update: nowTime,
             start_time: nowTime,
             state: msg.type,
