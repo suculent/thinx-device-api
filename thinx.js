@@ -81,8 +81,6 @@ const hour = 3600 * 1000;
 // App
 //
 
-var _ws = null;
-
 var db = app_config.database_uri;
 
 var https = require("https");
@@ -383,7 +381,7 @@ app.use(express.urlencoded({
   limit: "1mb"
 }));
 
-let router = require('./lib/router.js')(app, _ws);
+let router = require('./lib/router.js')(app);
 
 /* Webhook Server (new impl.) */
 
@@ -481,10 +479,10 @@ const socketMap = new Map();
 
 server.on('upgrade', function (request, socket, head) {
 
-  const pathname = url.parse(request.url).pathname;
+  const owner = url.parse(request.url).pathname.replace("/", "");
 
-  if (typeof (socketMap.get(pathname)) === "undefined") {
-    console.log("Socket already mapped for", pathname);
+  if (typeof (socketMap.get(owner)) === "undefined") {
+    console.log("Socket already mapped for", owner);
     return;
   }
 
@@ -503,7 +501,7 @@ server.on('upgrade', function (request, socket, head) {
 
     console.log("---> Session is parsed, handling protocol upgrade...");
 
-    socketMap.set(pathname, socket);
+    socketMap.set(owner, socket);
     try {
       wss.handleUpgrade(request, socket, head, function (ws) {
         wss.emit('connection', ws, request);
@@ -550,7 +548,9 @@ wss.on("error", function(err) {
   return;
 });
 
-wss.on("connection", function(ws, req) {
+app._ws = []; // array of all owner websockets
+
+wss.on('connection', function(ws, req) {
 
   // May not exist while testing...
   if (typeof(ws) === "undefined" || ws === null) {
@@ -563,15 +563,10 @@ wss.on("connection", function(ws, req) {
     return;
   }
 
-  const pathname = url.parse(req.url).pathname;
+  // extract owner_id from pathname removing trailing slash
+  const owner = url.parse(req.url).pathname.replace("/", "");
   
   ws.isAlive = true;
-
-  // Should be done after validation
-  _ws = ws; // public websocket (!) does not at least fail
-  if (typeof(app) !== "undefined") {
-    app._ws = ws; // public websocket stored in app, needs to be set to builder/buildlog!
-  }
 
   var cookies = req.headers.cookie;
 
@@ -585,12 +580,15 @@ wss.on("connection", function(ws, req) {
     return;
   }
 
+  console.log("Owner socket", owner, "started... (TODO: socketMap.set)");
+  app._ws[owner] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
+  
+
   /* Returns specific build log for owner */
 
   // TODO: Extract with params (ws)
   app.post("/api/user/logs/tail", function(req2, res) {
     if (!(router.validateSecurePOSTRequest(req2) || router.validateSession(req2, res))) return;
-    var owner = req2.session.owner;
     if (typeof(req2.body.build_id) === "undefined") {
       router.respond(res, {
         success: false,
@@ -598,15 +596,8 @@ wss.on("connection", function(ws, req) {
       });
       return;
     }
-    var error_callback = function(err) {
-      console.log(err);
-      res.set("Connection", "close");
-      router.respond(res, err);
-    };
-    
     let safe_id = Sanitka.branch(req2.body.build_id);
     console.log("Tailing build log for " + safe_id);
-    blog.logtail(safe_id, owner, ws, error_callback);
   });
 
   // TODO: Extract with params (ws, messenger)
@@ -619,11 +610,11 @@ wss.on("connection", function(ws, req) {
       var build_id = object.logtail.build_id;
       var owner_id = object.logtail.owner_id;
       //console.log("Tailing build log for " + build_id);
-      blog.logtail(build_id, owner_id, _ws, logtail_callback);
+      blog.logtail(build_id, owner_id, app._ws[owner_id], logtail_callback);
     } else if (typeof(object.init) !== "undefined") {
       if (typeof(messenger) !== "undefined") {
         console.log("Initializing messenger in WS...");
-        messenger.initWithOwner(object.init, _ws, function(success, message_z) {
+        messenger.initWithOwner(object.init, app._ws[owner_id], function(success, message_z) {
           if (!success) {
             console.log("Messenger init on WS message with result " + success + ", with message: ", { message_z });
           }
@@ -643,7 +634,7 @@ wss.on("connection", function(ws, req) {
   ws.on('pong', heartbeat);
 
   ws.on('close', function () {
-    socketMap.delete(pathname);
+    socketMap.delete(owner);
   });
 
 }).on("error", function(err) {

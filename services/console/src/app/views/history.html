@@ -46,11 +46,11 @@
             <div class="scroller" style="height: 638px;" data-always-visible="1" data-rail-visible1="0" data-handle-color="#D7DCE2">
               <ul class="feeds">
                 <div ng-if="$root.buildHistory.length < 1">No builds in history...</div>
-                <li ng-repeat="build in $root.buildHistory | propsFilter:{'message': list.searchText} | orderBy:'date':true | limitTo:200 track by $index">
+                <li ng-repeat="build in $root.buildHistory | propsFilter:{'state': list.searchText} | orderBy:'last_update':true | limitTo:200 track by $index">
                   <div class="todo-tasklist-item todo-tasklist-item-border-green">
                     <!-- <img class="todo-userpic pull-left" src="../assets/thinx/img/default_avatar_sm.png" width="27px" height="27px" alt="Build Reporter"> -->
                     <div>
-                      {{build.message | limitTo:32}}
+                      {{build.state | limitTo:32}}
                       <a class="btn btn-circle btn-icon-only btn-default pull-right" ng-click="$emit('showLogOverlay', build.build_id)">
                         <i class="fa fa-eye"></i>
                       </a>
