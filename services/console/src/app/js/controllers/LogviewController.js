@@ -17,6 +17,14 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
   // not implemented yet
   //var actionNotifications = [];
 
+  if (typeof ($rootScope.initWebsocketListener) === "undefined") {
+    $rootScope.initWebsocketListener = $rootScope.$on('initWebsocket', function (event, owner_id) {
+      event.stopPropagation();
+      console.log("DEBUG owner_id initWebsocketListener", owner_id);
+      openSocket();
+    });
+  }
+
   function openSocket() {
     if ("WebSocket" in window) {
       if (typeof($rootScope.wss) === "undefined") {
@@ -169,7 +177,11 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
         console.log('------------ GOT NOTIFICATION FOR DEVICE');
         console.log(msg);
 
-        if (msg.body == "build_completed") {
+        if (
+            msg.body == "Pulling repository"
+            || msg.body == "Building..."
+            || msg.body == "Completed"
+        ) {
 
           Thinx.deviceList().done(function(data) {
             $scope.$emit("updateDevices", data);
@@ -188,7 +200,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
     // determine what to do based on message type
     if (typeof(msg.type) !== "undefined") {
 
-      // show toast with dialog
+      // show toast with action dialog
       if (msg.type == "actionable") {
 
         // YES/NO
@@ -249,7 +261,9 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
           });
         }
 
-      // non-actionable status
+      
+      
+      // non-actionable status notification
       } else if (typeof(msg.body.status) !== 'undefined') {
 
         var msgTitle = "Device Status Update";
@@ -283,11 +297,11 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
         // non-actionable notification without status
       } else {
 
-        // Supported types
-        // error: 'error',
-        // info: 'info',
-        // success: 'success',
-        // warning: 'warning'
+        // Supported msg.types by Toastr
+        // "error"
+        // "info"
+        // "success"
+        // "warning"
         
         toastr[msg.type](
           JSON.stringify(msg.body),
