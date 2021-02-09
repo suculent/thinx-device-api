@@ -183,6 +183,19 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
             || msg.body == "Completed"
         ) {
 
+          let nowTime = new Date().getTime();
+
+          let buildRecord = {
+            build_id: "unknown",
+            last_update: nowTime,
+            start_time: nowTime,
+            state: msg.type,
+            timestamp: nowTime
+          }
+
+          // prepare user metadata for particular device
+          $rootScope.meta.deviceBuilds[msg.udid].push(buildRecord);
+
           Thinx.deviceList().done(function(data) {
             $scope.$emit("updateDevices", data);
           })
@@ -191,6 +204,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
           Thinx.getBuildHistory()
           .done(function(data) {
             $scope.$emit("updateBuildHistory", data);
+            $scope.$apply();
           })
           .fail(error => $scope.$emit("xhrFailed", error));
 
