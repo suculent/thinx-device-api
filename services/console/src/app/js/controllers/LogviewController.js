@@ -195,16 +195,15 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
 
           // prepare user metadata for particular device
           $rootScope.meta.deviceBuilds[msg.udid].push(buildRecord);
+          $scope.$apply();
 
           Thinx.deviceList().done(function(data) {
             $scope.$emit("updateDevices", data);
           })
           .fail(error => $scope.$emit("xhrFailed", error));
 
-          Thinx.getBuildHistory()
-          .done(function(data) {
+          Thinx.getBuildHistory().done(function(data) {
             $scope.$emit("updateBuildHistory", data);
-            $scope.$apply();
           })
           .fail(error => $scope.$emit("xhrFailed", error));
 
@@ -302,11 +301,10 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
         })
         .fail(error => $scope.$emit("xhrFailed", error));
 
-        Thinx.getBuildHistory()
-          .done(function (data) {
-            $scope.$emit("updateBuildHistory", data);
-          })
-          .fail(error => $scope.$emit("xhrFailed", error));
+        Thinx.getBuildHistory().done(function (data) {
+          $scope.$emit("updateBuildHistory", data);
+        })
+        .fail(error => $scope.$emit("xhrFailed", error));
 
         // non-actionable notification without status
       } else {
