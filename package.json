@@ -128,7 +128,7 @@
     "nyc": "^15.1.0"
   },
   "engines": {
-    "node": "13.12.x"
+    "node": "15.x"
   },
   "preferGlobal": true,
   "snyk": true,
