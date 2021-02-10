@@ -121,8 +121,6 @@ RUN apt-get remove -y \
 
 RUN mkdir -p ./.nyc_output
 
-RUN codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d
-
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
