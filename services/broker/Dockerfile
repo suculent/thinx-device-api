@@ -33,7 +33,6 @@ COPY ./goauth ./
 RUN export PATH=$PATH:/usr/local/go/bin && \
     export CGO_CFLAGS="-I/usr/local/include -fPIC" && \
     export CGO_LDFLAGS="-shared" && \
-    cd mosquitto-1.6.10 && \
     pwd && \
     ls && \
     make
