@@ -379,7 +379,7 @@ VACATION DOWNTIME until 9/7/2017
 
 30/5/2017 - 0.5.1230: fixes in websocket, build-log and build-logger
 
-29/5/2017 - 0.5.1208: fixes UI in proxy, api keys and statistics
+29/5/2017 - 0.5.1208: fixes UI in proxy, API Keys and statistics
 
 26/5/2017 - 0.5.1180: fixes in UI, logging, builder, sockets, logout
 
