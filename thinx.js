@@ -428,7 +428,7 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   let caCert = read(app_config.ssl_ca, 'utf8');
   let ca = pki.certificateFromPem(caCert);
   let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
-  console.log("Loaded SSL certificate.");
+  console.log("» Loaded SSL certificate.");
   if (ca.verify(client)) {
     sslvalid = true;
   } else {
@@ -763,7 +763,7 @@ if (isMasterProcess()) {
   setInterval(log_aggregator, 86400 * 1000 / 2);
 
   // MQTT Messenger/listener
-  console.log("Initializing messenger...");
+  console.log("» Initializing messenger...");
   messenger.init();
 
   setTimeout(startup_quote, 10000); // wait for Slack init only once

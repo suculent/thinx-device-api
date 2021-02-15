@@ -31,7 +31,7 @@ describe('basic ui tests', function() {
     // fill input
     element(by.css('[name="apikeyAlias"]')).sendKeys(newApiAlias);
 
-    // create api key
+    // create API Key
     element(by.buttonText("Create")).click();
     browser.waitForAngular();
 
