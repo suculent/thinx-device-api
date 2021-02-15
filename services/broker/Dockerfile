@@ -35,7 +35,10 @@ RUN export PATH=$PATH:/usr/local/go/bin && \
     export CGO_LDFLAGS="-shared" && \
     pwd && \
     ls && \
-    make
+    make && \
+    cd mosquitto-${MOSQUITTO_VERSION} && \
+    ./configure && \
+    make all
 
 #Start from a new image.
 FROM debian:stable-slim
