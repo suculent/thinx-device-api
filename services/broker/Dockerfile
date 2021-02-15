@@ -30,7 +30,13 @@ RUN export GO_ARCH=$(uname -m | sed -es/x86_64/amd64/ -es/armv7l/armv6l/ -es/aar
 COPY ./goauth ./
 
 #Build the plugin.
-RUN export PATH=$PATH:/usr/local/go/bin && export CGO_CFLAGS="-I/usr/local/include -fPIC" && export CGO_LDFLAGS="-shared" && pwd && ls && make
+RUN export PATH=$PATH:/usr/local/go/bin && \
+    export CGO_CFLAGS="-I/usr/local/include -fPIC" && \
+    export CGO_LDFLAGS="-shared" && \
+    cd mosquitto-1.6.10 && \
+    pwd && \
+    ls && \
+    make
 
 #Start from a new image.
 FROM debian:stable-slim
