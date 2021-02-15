@@ -171,7 +171,10 @@ Use your favourite service and log-sender agent. Tested successfully with [Logz.
 
 **Suggested:**
 
-* Fully Qualified Domain Name (if you're testing on localhost, configure conf/config.json to set `debug: { allow_http_login: true }` )
+* FQDN – Fully Qualified Domain Names (if you're testing on localhost, configure conf/config.json to set `debug: { allow_http_login: true }` )
+	- api.yourdomain.com – THiNX API
+	- console.yourdomain.com – THiNX RTM Console
+
 * [Mailgun](https://mailgun.com) account (recently added)
 * [Rollbar](https://rollbar.com) integration
 

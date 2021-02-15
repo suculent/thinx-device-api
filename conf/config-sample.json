@@ -1,7 +1,8 @@
 {
   "type": "thinx_server_config",
   "version" : "1",
-  "public_url": "<enter-your-fqdn>",
+  "public_url": "<enter-your-console-fqdn>",
+  "api_url": "<enter-your-api-fqdn>",
   "mailgun": {
     "api_key": "<mailgun-api-key>",
     "base_url": "<mailgun-base-url>",
