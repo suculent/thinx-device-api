@@ -4,10 +4,10 @@ FROM debian:stable-slim as builder
 
 #Set mosquitto and plugin versions.
 #Change them for your needs.
-# Latest is mosquitto-2.0.7 (04-Feb-2021) - build fails with missing cJSON dependency, originally 1.6.10
+# Latest is mosquitto-2.0.7 (04-Feb-2021)
 ENV MOSQUITTO_VERSION=1.6.10
 ENV PLUGIN_VERSION=0.6.1
-ENV GO_VERSION=1.16
+ENV GO_VERSION=1.13.8
 
 WORKDIR /app
 
@@ -29,14 +29,11 @@ RUN export GO_ARCH=$(uname -m | sed -es/x86_64/amd64/ -es/armv7l/armv6l/ -es/aar
     go version && \
     rm go${GO_VERSION}.linux-${GO_ARCH}.tar.gz
 
-# Build the plugin from local source
-COPY ./goauth ./
+#Build the plugin from local source
+COPY ./ ./
 
-# Build the plugin.
-RUN export PATH=$PATH:/usr/local/go/bin && \
-    export CGO_CFLAGS="-I/usr/local/include -fPIC" && \
-    export CGO_LDFLAGS="-shared" && \
-    make
+#Build the plugin.
+RUN export PATH=$PATH:/usr/local/go/bin && export CGO_CFLAGS="-I/usr/local/include -fPIC" && export CGO_LDFLAGS="-shared" &&  make
 
 #Start from a new image.
 FROM debian:stable-slim
@@ -60,12 +57,12 @@ COPY --from=builder /usr/local/sbin/mosquitto /usr/sbin/mosquitto
 #Uncomment to copy your custom confs (change accordingly) directly when building the image.
 #Leave commented if you want to mount a volume for these (see docker-compose.yml).
 
-# COPY ./goauth/docker/conf/mosquitto.conf /etc/mosquitto/mosquitto.conf
-COPY ./goauth/docker/conf/conf.d/go-auth.conf /etc/mosquitto/conf.d/go-auth.conf
-#COPY ./goauth/docker/conf/auth/acls /etc/mosquitto/auth/acls
-#COPY ./goauth/docker/conf/auth/passwords /etc/mosquitto/auth/passwords
+# COPY ./docker/conf/mosquitto.conf /etc/mosquitto/mosquitto.conf
+# COPY ./docker/conf/conf.d/go-auth.conf /etc/mosquitto/conf.d/go-auth.conf
+# COPY ./docker/conf/auth/acls /etc/mosquitto/auth/acls
+# COPY ./docker/conf/auth/passwords /etc/mosquitto/auth/passwords
 
 #Expose tcp and websocket ports as defined at mosquitto.conf (change accordingly).
-EXPOSE 1883 8883 1884
+EXPOSE 1883 1884
 
 ENTRYPOINT ["sh", "-c", "/usr/sbin/mosquitto -c /etc/mosquitto/mosquitto.conf" ]
