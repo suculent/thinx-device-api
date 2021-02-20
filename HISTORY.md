@@ -2,6 +2,10 @@
 
 ## HISTORY
 
+20/2/2021 1.3.7577
+
+» Preparing migration to GoAuth plugin for Mosquitto (ACLs and authentication is stored in Redis instead of flatfiles)
+
 5/2/2021 1.3.7437
 
 » Build process fixes
