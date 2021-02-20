@@ -7,7 +7,11 @@ networks:
 services:
   mosquitto:
     env_file: .env
-    image: registry.keyguru.eu/thinx/mosquitto-go-auth:test
+    build:
+      context: ./services/broker
+      args:
+        - 'MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
+        - 'MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}'
     environment:
       - 'MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
       - 'MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}'
