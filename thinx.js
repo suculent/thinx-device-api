@@ -39,10 +39,6 @@ const crypto = require('crypto');
 const express = require("express");
 const session = require("express-session");
 
-const Auth = require('./lib/thinx/auth.js');
-const auth = new Auth();
-
-
 const pki = require('node-forge').pki;
 const fs = require("fs-extra");
 const url = require('url');
@@ -72,13 +68,16 @@ var rollbar = Globals.rollbar(); // lgtm [js/unused-local-variable]
 var redis_client = redis.createClient(Globals.redis_options());
 
 // Default ACLs and MQTT Password
+const Auth = require('./lib/thinx/auth.js');
 
+let auth = new Auth();
 auth.add_mqtt_credentials(app_config.mqtt.username, app_config.mqtt.password);
 
-var ACL = require('./acl');
-let acl = new ACL(app_config.mqtt.username)
+const ACL = require('./lib/thinx/acl.js');
+let acl = new ACL(app_config.mqtt.username);
+
 acl.load( () => {
-  acl.addTopic(app_config.mqtt.username, "readwrite", "/#")
+  acl.addTopic(app_config.mqtt.username, "readwrite", "#");
   acl.commit();
 });
 
