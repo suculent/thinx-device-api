@@ -23,11 +23,12 @@ jobs:
           dockerfile: services/broker/Dockerfile
           extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
           tag: 'goauth'
-      - docker/push:
-          digest-path: /tmp/digest.txt
-          image: thinx/mosquitto
-          registry: registry.thinx.cloud:5000
-          tag: 'goauth'
+      # prevents breaking production
+      # - docker/push:
+      #     digest-path: /tmp/digest.txt
+      #     image: thinx/mosquitto
+      #     registry: registry.thinx.cloud:5000
+      #     tag: 'goauth'
 
   build-redis-cloud:
     executor: docker/docker
