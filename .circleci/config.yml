@@ -348,7 +348,7 @@ workflows:
             branches:
               only:
                 - master
-                - features/mqtt-auth-plugin
+                - features/2501-mqtt-auth-plugin
 
       - build-api-cloud:
           context:
@@ -357,6 +357,7 @@ workflows:
             branches:
               only:
                 - thinx-swarm
+                - features/2501-mqtt-auth-plugin
 
       - build-console-cloud:
           context:
