@@ -170,12 +170,12 @@ jobs:
           docker-context: services/broker
           dockerfile: services/broker/Dockerfile
           extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
-          tag: '${COUNTRY}'
+          tag: 'swarm'
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/mosquitto
           registry: registry.keyguru.eu:5000
-          tag: '${COUNTRY}'
+          tag: 'swarm'
 
   # STAGING
 
