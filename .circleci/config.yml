@@ -894,17 +894,6 @@ workflows:
               only:
                 - keyguru-staging
 
-      # disabled for faster iterations      
-      # no need to rebuild on and on for staging
-      - build-mosquitto:
-          name: "mosquitto : kgr.cz"
-          context:
-            - thinx-staging-cz
-          filters:
-            branches:
-              only:
-                - keyguru-staging
-
       # disabled for faster iterations
       - build-redis:
           name: "redis : kgr.cz"
@@ -956,7 +945,7 @@ workflows:
                 - keyguru-production
       
       - build-mosquitto-production:
-          name: "mosquitto : kgr.cz"
+          name: "mosquitto : production"
           context:
             - thinx-production-cz
           filters:
