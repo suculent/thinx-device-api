@@ -5,8 +5,31 @@ orbs:
   slack: circleci/slack@4.1.3
 
 jobs:
-  
+
   build-mosquitto-cloud:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          command: |
+            rm -rf ./package-lock.json
+      - docker/check:
+          registry: registry.thinx.cloud:5000
+      - docker/build:
+          registry: registry.thinx.cloud:5000
+          image: thinx/mosquitto
+          docker-context: services/broker
+          dockerfile: services/broker/Dockerfile
+          extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
+          tag: 'swarm'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/mosquitto
+          registry: registry.thinx.cloud:5000
+          tag: 'swarm'
+  
+  test-mosquitto-cloud:
     executor: docker/docker
     steps:
       - setup_remote_docker
@@ -161,8 +184,8 @@ jobs:
     docker:
       - image: suculent/thinx-base-image:latest
         auth:
-          username: $DOCKER_USERNAME  # can specify string literal values
-          password: $DOCKER_PASSWORD  # or project environment variable reference
+          username: $DOCKERHUB_USERNAME  # can specify string literal values
+          password: $DOCKERHUB_PASSWORD  # or project environment variable reference
 
     working_directory: ~/suculent/thinx-device-api
 
@@ -177,6 +200,7 @@ jobs:
 
     steps:
 
+    # - docker/check
 
     - run:
         name: Install Docker Compose
@@ -326,6 +350,7 @@ workflows:
             branches:
               only:
                 - master
+                - features/2501-mqtt-auth-plugin
 
       - build-api-cloud:
           context:
@@ -334,14 +359,15 @@ workflows:
             branches:
               only:
                 - thinx-swarm
+                - features/2501-mqtt-auth-plugin
 
-      # - build-console-cloud:
-      #     context:
-      #       - thinx-docker-repo
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-swarm
+      - build-console-cloud:
+          context:
+            - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - thinx-swarm
 
       - build-mosquitto-cloud:
           context:
@@ -351,26 +377,34 @@ workflows:
               only:
                 - thinx-swarm
 
-      # - build-redis-cloud:
-      #     context:
-      #       - thinx-docker-repo
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-swarm
+      - test-mosquitto-cloud:
+          context:
+            - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - features/2501-mqtt-auth-plugin
 
-      # - build-transformer-cloud:
-      #     context:
-      #       - thinx-docker-repo
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-swarm
+      - build-redis-cloud:
+          context:
+            - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - thinx-swarm
 
-      # - build-worker-cloud:
-      #     context:
-      #       - thinx-docker-repo
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-swarm
+      - build-transformer-cloud:
+          context:
+            - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - thinx-swarm
+
+      - build-worker-cloud:
+          context:
+            - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - thinx-swarm
