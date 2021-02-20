@@ -61,9 +61,9 @@ COPY --from=builder /usr/local/sbin/mosquitto /usr/sbin/mosquitto
 #Leave commented if you want to mount a volume for these (see docker-compose.yml).
 
 # COPY ./docker/conf/mosquitto.conf /etc/mosquitto/mosquitto.conf
-# COPY ./docker/conf/conf.d/go-auth.conf /etc/mosquitto/conf.d/go-auth.conf
-# COPY ./docker/conf/auth/acls /etc/mosquitto/auth/acls
-# COPY ./docker/conf/auth/passwords /etc/mosquitto/auth/passwords
+COPY ./docker/conf/conf.d/go-auth.conf /etc/mosquitto/conf.d/go-auth.conf
+#COPY ./docker/conf/auth/acls /etc/mosquitto/auth/acls
+#COPY ./docker/conf/auth/passwords /etc/mosquitto/auth/passwords
 
 #Expose tcp and websocket ports as defined at mosquitto.conf (change accordingly).
 EXPOSE 1883 8883 1884

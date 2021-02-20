@@ -373,6 +373,8 @@ workflows:
                 - thinx-swarm
 
       - test-mosquitto-cloud:
+          context:
+            - thinx-docker-repo
           filters:
             branches:
               only:
