@@ -71,6 +71,18 @@ var prefix = Globals.prefix();
 var rollbar = Globals.rollbar(); // lgtm [js/unused-local-variable]
 var redis_client = redis.createClient(Globals.redis_options());
 
+// Default ACLs and MQTT Password
+
+auth.add_mqtt_credentials(app_config.mqtt.username, app_config.mqtt.password);
+
+var ACL = require('./acl');
+let acl = new ACL(app_config.mqtt.username)
+acl.load( () => {
+  acl.addTopic(app_config.mqtt.username, "readwrite", "/#")
+  acl.commit();
+});
+
+
 //
 // Shared Configuration
 //
