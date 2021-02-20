@@ -5,7 +5,7 @@ orbs:
   slack: circleci/slack@4.1.3
 
 jobs:
-
+  
   build-mosquitto-cloud:
     executor: docker/docker
     steps:
@@ -21,33 +21,12 @@ jobs:
           image: thinx/mosquitto
           docker-context: services/broker
           dockerfile: services/broker/Dockerfile
-          extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
-          tag: 'swarm'
+          tag: 'goauth'
       - docker/push:
-          digest-path: /tmp/digest.txt
-          image: thinx/mosquitto
           registry: registry.thinx.cloud:5000
-          tag: 'swarm'
-  
-  test-mosquitto-cloud:
-    executor: docker/docker
-    steps:
-      - setup_remote_docker
-      - checkout
-      - run:
-          command: |
-            rm -rf ./package-lock.json
-      - docker/check
-      - docker/build:
           image: thinx/mosquitto
-          docker-context: services/broker
-          dockerfile: services/broker/Dockerfile
-          extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
-          tag: 'test'
-      - docker/push:
           digest-path: /tmp/digest.txt
-          image: thinx/mosquitto
-          tag: 'test'
+          tag: 'goauth'
 
   build-redis-cloud:
     executor: docker/docker
@@ -198,6 +177,7 @@ jobs:
 
     steps:
 
+
     - run:
         name: Install Docker Compose
         command: |
@@ -346,7 +326,7 @@ workflows:
             branches:
               only:
                 - master
-                - features/mqtt-auth-plugin
+                - features/2501-mqtt-auth-plugin
 
       - build-api-cloud:
           context:
@@ -355,6 +335,7 @@ workflows:
             branches:
               only:
                 - thinx-swarm
+                - features/2501-mqtt-auth-plugin
 
       - build-console-cloud:
           context:
@@ -371,12 +352,6 @@ workflows:
             branches:
               only:
                 - thinx-swarm
-
-      - test-mosquitto-cloud:
-          filters:
-            branches:
-              only:
-                - features/mqtt-auth-plugin
 
       - build-redis-cloud:
           context:
