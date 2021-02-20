@@ -184,8 +184,8 @@ jobs:
     docker:
       - image: suculent/thinx-base-image:latest
         auth:
-          username: $DOCKER_USERNAME  # can specify string literal values
-          password: $DOCKER_PASSWORD  # or project environment variable reference
+          username: $DOCKERHUB_USERNAME  # can specify string literal values
+          password: $DOCKERHUB_PASSWORD  # or project environment variable reference
 
     working_directory: ~/suculent/thinx-device-api
 
