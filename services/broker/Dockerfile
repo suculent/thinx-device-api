@@ -4,8 +4,8 @@ FROM debian:stable-slim as builder
 
 #Set mosquitto and plugin versions.
 #Change them for your needs.
-# Latest is mosquitto-2.0.7 (04-Feb-2021), originally 1.6.10
-ENV MOSQUITTO_VERSION=2.0.7
+# Latest is mosquitto-2.0.7 (04-Feb-2021) - build fails with missing cJSON dependency, originally 1.6.10
+ENV MOSQUITTO_VERSION=1.6.10
 ENV PLUGIN_VERSION=0.6.1
 ENV GO_VERSION=1.16
 
