@@ -75,7 +75,7 @@ var redis_client = redis.createClient(Globals.redis_options());
 
 auth.add_mqtt_credentials(app_config.mqtt.username, app_config.mqtt.password);
 
-var ACL = require('./acl');
+var ACL = require('./lib/thinx/acl');
 let acl = new ACL(app_config.mqtt.username)
 acl.load( () => {
   acl.addTopic(app_config.mqtt.username, "readwrite", "/#")
