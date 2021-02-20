@@ -155,7 +155,7 @@ jobs:
           registry: registry.thinx.cloud:5000
           tag: 'swarm'
 
-  build-mosquitto:
+  build-mosquitto-go:
     executor: docker/docker
     steps:
       - setup_remote_docker
@@ -170,12 +170,12 @@ jobs:
           image: thinx/mosquitto-go
           docker-context: services/broker
           dockerfile: services/broker/Dockerfile
-          tag: '${COUNTRY}'
+          tag: 'latest'
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/mosquitto-go
           registry: registry.keyguru.eu:5000
-          tag: '${COUNTRY}'
+          tag: 'latest'
 
   # STAGING
 
@@ -873,8 +873,8 @@ workflows:
 
       # disabled for faster iterations, also prevents breaking production
       # no need to rebuild on and on for staging
-      - build-mosquitto:
-          name: "mosquitto : kgr.cz"
+      - build-mosquitto-go:
+          name: "mosquitto : goauth"
           context:
             - thinx-staging-cz
           filters:
