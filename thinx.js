@@ -73,7 +73,7 @@ const Auth = require('./lib/thinx/auth.js');
 let auth = new Auth();
 auth.add_mqtt_credentials(app_config.mqtt.username, app_config.mqtt.password);
 
-const ACL = require('./lib/thinx/acl.js')(app_config.mqtt.username);
+const ACL = require('./lib/thinx/acl.js');
 let acl = new ACL(app_config.mqtt.username);
 
 acl.load( () => {
