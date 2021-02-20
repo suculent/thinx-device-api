@@ -1034,7 +1034,7 @@ Finally, options for Redis are not mandatory and are the following:
 ```
 auth_opt_redis_host localhost
 auth_opt_redis_port 6379
-auth_opt_redis_db dbname
+auth_opt_redis_db 2
 auth_opt_redis_password pwd
 auth_opt_redis_disable_superuser true
 auth_opt_redis_mode cluster
