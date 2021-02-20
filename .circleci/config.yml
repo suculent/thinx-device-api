@@ -200,7 +200,7 @@ jobs:
 
     steps:
 
-    - docker/check
+    # - docker/check
 
     - run:
         name: Install Docker Compose
