@@ -37,16 +37,17 @@ jobs:
       - run:
           command: |
             rm -rf ./package-lock.json
-      - docker/check
+      - docker/check:
+          registry: registry.thinx.cloud:5000
       - docker/build:
           image: thinx/mosquitto
           docker-context: services/broker
           dockerfile: services/broker/Dockerfile
-          tag: 'test'
+          tag: 'goauth'
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/mosquitto
-          tag: 'test'
+          tag: 'goauth'
 
   build-redis-cloud:
     executor: docker/docker
