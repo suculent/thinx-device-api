@@ -28,29 +28,6 @@ jobs:
           image: thinx/mosquitto
           registry: registry.thinx.cloud:5000
           tag: 'swarm'
-  
-  build-mosquitto-production:
-    executor: docker/docker
-    steps:
-      - setup_remote_docker
-      - checkout
-      - run:
-          command: |
-            rm -rf ./package-lock.json
-      - docker/check:
-          registry: registry.thinx.cloud:5000
-      - docker/build:
-          registry: registry.thinx.cloud:5000
-          image: thinx/mosquitto
-          docker-context: services/broker
-          dockerfile: services/broker/Dockerfile
-          extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
-          tag: 'swarm'
-      - docker/push:
-          digest-path: /tmp/digest.txt
-          image: thinx/mosquitto
-          registry: registry.thinx.cloud:5000
-          tag: 'swarm'
 
   build-redis-cloud:
     executor: docker/docker
@@ -644,6 +621,29 @@ jobs:
               ]
             }
           event: pass
+
+  build-mosquitto-production:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          command: |
+            rm -rf ./package-lock.json
+      - docker/check:
+          registry: registry.keyguru.eu:5000
+      - docker/build:
+          registry: registry.keyguru.eu:5000
+          image: thinx/mosquitto
+          docker-context: services/broker
+          dockerfile: services/broker/Dockerfile
+          extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
+          tag: 'swarm'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/mosquitto
+          registry: registry.keyguru.eu:5000
+          tag: 'swarm'
 
 #
 # DEPRECATED BUILD, KEEPING FOR TEST PURPOSES LATER
