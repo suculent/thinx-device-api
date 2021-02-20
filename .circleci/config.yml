@@ -847,7 +847,7 @@ workflows:
   #
   
   keyguru-staging:
-    
+
     jobs:
 
       - build-api:
@@ -871,7 +871,7 @@ workflows:
               only:
                 - keyguru-staging
 
-      # disabled for faster iterations      
+      # disabled for faster iterations
       # no need to rebuild on and on for staging
       - build-mosquitto:
           name: "mosquitto : kgr.cz"

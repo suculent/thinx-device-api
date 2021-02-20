@@ -613,14 +613,13 @@ wss.on('connection', function(ws, req) {
       blog.logtail(build_id, owner_id, app._ws[owner_id], logtail_callback);
     } else if (typeof(object.init) !== "undefined") {
       if (typeof(messenger) !== "undefined") {
-        console.log("Initializing messenger in WS...");
-        messenger.initWithOwner(object.init, app._ws[owner_id], function(success, message_z) {
+        console.log("Initializing new messenger in WS...");
+        let socket = app._ws[owner_id];
+        messenger.initWithOwner(object.init, socket, function(success, message_z) {
           if (!success) {
             console.log("Messenger init on WS message with result " + success + ", with message: ", { message_z });
           }
         });
-      } else {
-        console.log("Messenger is not initialized and therefore could not be activated.");
       }
     } else {
       /* unknown message debug, must be removed */
