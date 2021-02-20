@@ -4,10 +4,10 @@ FROM debian:stable-slim as builder
 
 #Set mosquitto and plugin versions.
 #Change them for your needs.
-# Latest is mosquitto-2.0.7 (04-Feb-2021)
-ENV MOSQUITTO_VERSION=1.6.10
+# Latest is mosquitto-2.0.7 (04-Feb-2021), originally 1.6.10
+ENV MOSQUITTO_VERSION=2.0.7
 ENV PLUGIN_VERSION=0.6.1
-ENV GO_VERSION=1.13.8
+ENV GO_VERSION=1.16
 
 WORKDIR /app
 
