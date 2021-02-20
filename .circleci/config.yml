@@ -167,14 +167,13 @@ jobs:
           registry: registry.keyguru.eu:5000
       - docker/build:
           registry: registry.keyguru.eu:5000
-          image: thinx/mosquitto
+          image: thinx/mosquitto-go
           docker-context: services/broker
           dockerfile: services/broker/Dockerfile
-          extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
           tag: '${COUNTRY}'
       - docker/push:
           digest-path: /tmp/digest.txt
-          image: thinx/mosquitto
+          image: thinx/mosquitto-go
           registry: registry.keyguru.eu:5000
           tag: '${COUNTRY}'
 
@@ -862,17 +861,17 @@ workflows:
                 - keyguru-staging
 
       # disabled for faster iterations
-      - build-console:
-          name: "console : kgr.cz"
-          context:
-            - thinx-staging-cz
-            - slack
-          filters:
-            branches:
-              only:
-                - keyguru-staging
+      # - build-console:
+      #     name: "console : kgr.cz"
+      #     context:
+      #       - thinx-staging-cz
+      #       - slack
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-staging
 
-      # disabled for faster iterations      
+      # disabled for faster iterations, also prevents breaking production
       # no need to rebuild on and on for staging
       - build-mosquitto:
           name: "mosquitto : kgr.cz"
@@ -883,37 +882,37 @@ workflows:
               only:
                 - keyguru-staging
 
-      # disabled for faster iterations
-      - build-redis:
-          name: "redis : kgr.cz"
-          context:
-            - thinx-staging-cz
-          filters:
-            branches:
-              only:
-                - keyguru-staging
+      # # disabled for faster iterations
+      # - build-redis:
+      #     name: "redis : kgr.cz"
+      #     context:
+      #       - thinx-staging-cz
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-staging
 
       # disabled for faster iterations
       # using generic transformer
-      - build-transformer:
-          name: "transformer : kgr.cz"
-          context:
-            - thinx-staging-cz
-          filters:
-            branches:
-              only:
-                - keyguru-staging
+      # - build-transformer:
+      #     name: "transformer : kgr.cz"
+      #     context:
+      #       - thinx-staging-cz
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-staging
 
-      # disabled for faster iterations
-      - build-worker:
-          name: "worker : kgr.cz"
-          context:
-            - thinx-staging-cz
-            - slack
-          filters:
-            branches:
-              only:
-                - keyguru-staging
+      # # disabled for faster iterations
+      # - build-worker:
+      #     name: "worker : kgr.cz"
+      #     context:
+      #       - thinx-staging-cz
+      #       - slack
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-staging
 
   #
   # keyguru.cz PRODUCTION
@@ -954,15 +953,15 @@ workflows:
       #         only:
       #           - keyguru-production
 
-      - build-worker-production:
-          name: "worker : keyguru.cz"
-          context:
-            - thinx-production-cz
-            - slack
-          filters:
-            branches:
-              only:
-                - keyguru-production
+      # - build-worker-production:
+      #     name: "worker : keyguru.cz"
+      #     context:
+      #       - thinx-production-cz
+      #       - slack
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-production
 
       # keyguru.at (deprecated, would need update on reuse)
 
