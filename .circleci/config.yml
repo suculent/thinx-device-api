@@ -40,13 +40,15 @@ jobs:
       - docker/check:
           registry: registry.thinx.cloud:5000
       - docker/build:
+          registry: registry.thinx.cloud:5000
           image: thinx/mosquitto
           docker-context: services/broker
           dockerfile: services/broker/Dockerfile
           tag: 'goauth'
       - docker/push:
-          digest-path: /tmp/digest.txt
+          registry: registry.thinx.cloud:5000
           image: thinx/mosquitto
+          digest-path: /tmp/digest.txt
           tag: 'goauth'
 
   build-redis-cloud:
