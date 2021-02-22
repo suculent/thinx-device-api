@@ -361,50 +361,50 @@ workflows:
                 - thinx-swarm
                 - features/2501-mqtt-auth-plugin
 
-      - build-console-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
+      # - build-console-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
 
-      - build-mosquitto-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
+      # - build-mosquitto-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
 
-      - test-mosquitto-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - features/2501-mqtt-auth-plugin
+      # - test-mosquitto-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - features/2501-mqtt-auth-plugin
 
-      - build-redis-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
+      # - build-redis-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
 
-      - build-transformer-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
+      # - build-transformer-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
 
-      - build-worker-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
+      # - build-worker-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
