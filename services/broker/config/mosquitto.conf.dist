@@ -1,6 +1,6 @@
 user mosquitto
 persistence true
-persistence_location /mqtt/data
+persistence_location /mqtt/data/
 
 log_type all
 log_dest file /var/log/mosquitto.log
