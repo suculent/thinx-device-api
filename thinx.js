@@ -77,7 +77,7 @@ const ACL = require('./lib/thinx/acl.js');
 let acl = new ACL(app_config.mqtt.username);
 
 acl.load( () => {
-  acl.addTopic(app_config.mqtt.username, "readwrite", "#");
+  acl.addTopic(app_config.mqtt.username + ":su", "readwrite", "#");
   acl.commit();
 });
 
