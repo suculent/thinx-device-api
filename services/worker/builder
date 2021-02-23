@@ -446,6 +446,40 @@ echo "Running DevSec..." | tee -a "${LOG_PATH}"
 # (This header should not be placed in project root to prevent being auto-imported;
 # which causes duplicate definitions and linker error.)
 
+# Fetche SSID and PASS for DevSec
+ENVS=$(find $BUILD_PATH/$REPO_NAME -name "environment.json" | head -n 1)
+if [[ ! -f $ENVS ]]; then
+	echo "No environment.json found"
+else
+	if [ ! -f $THINX_FILE ]; then
+		echo "WTF THINX_FILE does not exist?"
+	else
+		# TODO: Use ENV_SSID and ENV_PASS to set arduino_devsec_ssid and arduino_devsec_pass 
+		if [[ ! -f $ENVS ]]; then
+			echo "No environment.json found"
+		else
+		echo "Overriding DevSec values from: ${ENVOUT}"
+		echo
+		
+		while IFS='' read -r keyname; do
+			
+			VAL=$(jq '.'$keyname $ENVFILE)
+
+			if [[ ${keyname} == "pass" ]]; then
+				${arduino_devsec_pass}="${VAL}"
+				echo "Overriding arduino_devsec_pass: ${arduino_devsec_pass}"
+			fi
+
+			if [[ ${keyname} == "ssid" ]]; then
+				${arduino_devsec_ssid}="${VAL}"
+				echo "Overriding arduino_devsec_ssid: ${arduino_devsec_ssid}"
+			fi
+
+		done < <(jq -r 'keys[]' $ENVFILE)
+		fi
+	fi
+fi
+
 # Fetches path and rebuilds the signature file if found and all required arguments are available...
 SIGNATURE_FILE=$(find . -maxdepth 3 -name "embedded_signature.h")
 if [[ ! -z $SIGNATURE_FILE ]]; then
@@ -1064,16 +1098,16 @@ case $PLATFORM in
 			echo "[platformio] Docker completed <<<"
 
 			echo "Current .pio/build folder contents after build:" | tee -a "${LOG_PATH}"
-			ls ./.pio/build | tee -a "${LOG_PATH}"
+			ls ./.pio/build/* | tee -a "${LOG_PATH}"
 
 			OUTFILE=$(pwd)/$(find . -name "*.bin" | head -n 1)
+			
+			echo "[platformio] OUTFILE ${OUTFILE}" | tee -a "${LOG_PATH}"
 
 			if [ ! -f $OUTFILE ]; then
-				echo "$OUTFILE not found"
+				echo "$OUTFILE not found" | tee -a "${LOG_PATH}"
 				BUILD_SUCCESS=false
-			fi
-
-			if [[ -f $OUTFILE ]]; then
+			else
 				BUILD_SUCCESS=true
 				STATUS='OK'
 				BIN_FILE=$OUTFILE
@@ -1081,7 +1115,7 @@ case $PLATFORM in
 				echo "OUTFILE: ${OUTFILE}" | tee -a "${LOG_PATH}"
 
 				if [[ ! -f $OUTFILE ]]; then
-					echo "OUTFILE $OUTFILE not found!"
+					echo "OUTFILE $OUTFILE not found!" | tee -a "${LOG_PATH}"
 					BUILD_SUCCESS=false
 					exit 1
 				fi
@@ -1105,7 +1139,7 @@ case $PLATFORM in
 					cp -vf "${BUILD_PATH}/${BUILD_ID}.zip" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 				fi
 			else
-				echo "[arduino] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
+				echo "[platformio] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
 			fi
 		;;
 	*)
@@ -1130,13 +1164,13 @@ if [[ ! -f "${OUTFILE}" ]]; then
 	REPLACE="\/mnt\/data\/thinx\/$COUNTRY\/deploy"
 	OUTFILE=$(echo "$OUTFILE" | sed "s/$FIND/$REPLACE/")
 	if [[ ! -f "${OUTFILE}" ]]; then
-		echo "Could not find outfile $OUTFILE anywhere..."
+		echo "Could not find outfile $OUTFILE anywhere..." | tee -a "${LOG_PATH}"
 		OUTFILE=""
 	fi
 fi
 
 if [[ "${OUTFILE}" != "" ]]; then
-	echo "Calculating checksum for $OUTFILE"
+	echo "Calculating checksum for $OUTFILE" | tee -a "${LOG_PATH}"
 	SHAX=$(shasum -a 256 $OUTFILE)
 	SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
 	MD5=$(md5sum "$OUTFILE" | cut -d ' ' -f 1)
@@ -1164,7 +1198,7 @@ if [ -z ${THINX_FIRMWARE_VERSION} ]; then
 	TAG_VERSION=$(git describe --abbrev=0 --tags)
 	popd
 	THINX_FIRMWARE_VERSION=${REPO_NAME}-${TAG_VERSION}
-	echo "[builder] No thinx_build.json file found, generating last-minute version: ${THINX_FIRMWARE_VERSION}"
+	echo "[builder] No thinx_build.json file found, generating last-minute version: ${THINX_FIRMWARE_VERSION}" | tee -a "${LOG_PATH}"
 fi
 
 if [[ -f "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ]]; then
