@@ -13,6 +13,7 @@ arduino:
     - unit-test.sh
 
   # Those lines MUST be masked out in ENV prints!
-  devsec_ckey: Enter some long safe key here.
-  devsec_ssid: SSID
-  devsec_pass: PASSWORD
+devsec:
+  ckey: Enter some long safe key here.
+  ssid: SSID
+  pass: PASSWORD
