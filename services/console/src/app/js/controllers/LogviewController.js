@@ -319,9 +319,9 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
           JSON.stringify(msg.body),
           msg.title,
           {
-            timeOut: 0,
+            timeOut: 20000,
             extendedTimeOut: 0,
-            progressBar: false,
+            progressBar: true,
             closeButton: true,
             closeMethod: 'fadeOut',
             closeDuration: 300,
@@ -337,3 +337,4 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
   }
 
 }]);
+x
