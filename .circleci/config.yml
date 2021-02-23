@@ -676,25 +676,25 @@ workflows:
                 - keyguru-staging
 
       # disabled for faster iterations
-      - build-redis:
-          name: "redis : kgr.cz"
-          context:
-            - thinx-staging-cz
-          filters:
-            branches:
-              only:
-                - keyguru-staging
+      # - build-redis:
+      #     name: "redis : kgr.cz"
+      #     context:
+      #       - thinx-staging-cz
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-staging
 
       # disabled for faster iterations
       # using generic transformer
-      - build-transformer:
-          name: "transformer : kgr.cz"
-          context:
-            - thinx-staging-cz
-          filters:
-            branches:
-              only:
-                - keyguru-staging
+      # - build-transformer:
+      #     name: "transformer : kgr.cz"
+      #     context:
+      #       - thinx-staging-cz
+      #     filters:
+      #       branches:
+      #         only:
+      #           - keyguru-staging
 
       # disabled for faster iterations
       - build-worker:
