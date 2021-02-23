@@ -232,7 +232,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
               tapToDismiss: false,
               closeButton: true,
               closeMethod: 'fadeOut',
-              closeDuration: 300,
+              closeDuration: 0, // 300,
               closeEasing: 'swing'
             }
           );
@@ -263,7 +263,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
               tapToDismiss: false,
               closeButton: true,
               closeMethod: 'fadeOut',
-              closeDuration: 300,
+              closeDuration: 0, // 300,
               closeEasing: 'swing'
             }
           );
@@ -290,7 +290,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
             tapToDismiss: true,
             closeButton: true,
             closeMethod: 'fadeOut',
-            closeDuration: 500,
+            closeDuration: 0, // 500,
             closeEasing: 'swing',
             progressBar: true
           }
@@ -322,7 +322,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
             progressBar: true,
             closeButton: true,
             closeMethod: 'fadeOut',
-            closeDuration: 300,
+            closeDuration: 0, // 300,
             closeEasing: 'swing'
           });
       }
