@@ -245,7 +245,7 @@
       <label class="control-label col-md-3">Build Status</label>
       <div class="col-md-9">
         <div ng-click="deviceForm.buildHistoryVisible ? deviceForm.buildHistoryVisible = false : deviceForm.buildHistoryVisible = true" class="device-build-status" ng-if="$root.meta.deviceBuilds[deviceForm.udid] != undefined && $root.meta.deviceBuilds[deviceForm.udid].length > 0">
-          <div class="row" ng-repeat="latestEntry in $root.meta.deviceBuilds[deviceForm.udid] | orderBy:'last_update':true  | limitTo:1'">
+          <div class="row" ng-repeat="latestEntry in $root.meta.deviceBuilds[deviceForm.udid] | orderBy:'last_update':true  | limitTo:1 | groupBy:'build_id'">
             <div class="col-xs-6 text-left">
               <i class="fa fa-cog"
                 ng-class="latestEntry.state == 'OK' || latestEntry.state == 'Success' || latestEntry.state == 'FAILED'  ? '' : 'fa-spin'"></i>  
