@@ -446,6 +446,40 @@ echo "Running DevSec..." | tee -a "${LOG_PATH}"
 # (This header should not be placed in project root to prevent being auto-imported;
 # which causes duplicate definitions and linker error.)
 
+# Fetche SSID and PASS for DevSec
+ENVS=$(find $BUILD_PATH/$REPO_NAME -name "environment.json" | head -n 1)
+if [[ ! -f $ENVS ]]; then
+	echo "No environment.json found"
+else
+	if [ ! -f $THINX_FILE ]; then
+		echo "WTF THINX_FILE does not exist?"
+	else
+		# TODO: Use ENV_SSID and ENV_PASS to set arduino_devsec_ssid and arduino_devsec_pass 
+		if [[ ! -f $ENVS ]]; then
+			echo "No environment.json found"
+		else
+		echo "Overriding DevSec values from: ${ENVOUT}"
+		echo
+		
+		while IFS='' read -r keyname; do
+			
+			VAL=$(jq '.'$keyname $ENVFILE)
+
+			if [[ ${keyname} == "pass" ]]; then
+				${arduino_devsec_pass}="${VAL}"
+				echo "Overriding arduino_devsec_pass: ${arduino_devsec_pass}"
+			fi
+
+			if [[ ${keyname} == "ssid" ]]; then
+				${arduino_devsec_ssid}="${VAL}"
+				echo "Overriding arduino_devsec_ssid: ${arduino_devsec_ssid}"
+			fi
+
+		done < <(jq -r 'keys[]' $ENVFILE)
+		fi
+	fi
+fi
+
 # Fetches path and rebuilds the signature file if found and all required arguments are available...
 SIGNATURE_FILE=$(find . -maxdepth 3 -name "embedded_signature.h")
 if [[ ! -z $SIGNATURE_FILE ]]; then
