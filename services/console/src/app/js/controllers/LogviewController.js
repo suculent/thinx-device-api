@@ -337,4 +337,3 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
   }
 
 }]);
-x
