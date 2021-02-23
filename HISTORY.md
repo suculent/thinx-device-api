@@ -2,6 +2,18 @@
 
 ## HISTORY
 
+20/2/2021 1.3.7577
+
+» Preparing migration to GoAuth plugin for Mosquitto (ACLs and authentication is stored in Redis instead of flatfiles)
+
+5/2/2021 1.3.7437
+
+» Build process fixes
+» Improved PlatformIO support (environments, targets)
+» Full HTTPS/MQTTS with THiNX firmware supported
+» Better support for external API control (device environment values)
+» Mesh support (specific comm channels for device groups)
+
 1/11/2020 1.1.5206
 
 Long time no see, just a quick summary:
@@ -371,7 +383,7 @@ VACATION DOWNTIME until 9/7/2017
 
 30/5/2017 - 0.5.1230: fixes in websocket, build-log and build-logger
 
-29/5/2017 - 0.5.1208: fixes UI in proxy, api keys and statistics
+29/5/2017 - 0.5.1208: fixes UI in proxy, API Keys and statistics
 
 26/5/2017 - 0.5.1180: fixes in UI, logging, builder, sockets, logout
 

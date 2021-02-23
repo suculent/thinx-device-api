@@ -31,7 +31,7 @@ describe('basic ui tests', function() {
     element(by.css('[name="enviroName"]')).sendKeys(enviroName);
     element(by.css('[name="enviroValue"]')).sendKeys(enviroValue);
 
-    // create api key
+    // create API Key
     element(by.buttonText("Submit")).click();
 
     // wait for modal close

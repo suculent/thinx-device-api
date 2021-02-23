@@ -42,7 +42,7 @@ _Feel free to submit proposals for adding more modules. Intention is to keep it 
 
 Instance should accept only local HTTP requests. Make sure neither port 7475 nor 7474 is exposed on host machine firewall.
 
-`docker run --user=transformer RollbarToken=<your-rollbar-token> -d -p 7475:7474 -v /var/logs:/logs -v /$(pwd):/app suculent/thinx-node-transformer`
+`docker run --user=transformer ROLLBAR_ACCESS_TOKEN=<your-rollbar-token> -d -p 7475:7474 -v /var/logs:/logs -v /$(pwd):/app suculent/thinx-node-transformer`
 
 ### Building the container
 

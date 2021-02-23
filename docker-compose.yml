@@ -7,36 +7,21 @@ networks:
 services:
   mosquitto:
     env_file: .env
-    build:
-      context: ./services/broker
-      args:
-        - 'MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
-        - 'MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}'
-    environment:
-      - 'MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
-      - 'MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}'
+    image: registry.thinx.cloud:5000/thinx/mosquitto:goauth
     ports:
-      - '1883:1883'
-      - '8883:8883'
+      - '1883:1883' # mqtt
+      - '1884:1883' # mqtts
+      - '8883:8883' # websocket
     restart: unless-stopped
     networks:
       - nat
       - internal
     volumes:
-      - '/mnt/data/mosquitto/config:/mqtt/config:rw'
-      - '/mnt/data/mosquitto/data:/mqtt/data:rw'
-      - '/mnt/data/mosquitto/log:/mqtt/log:rw'
+      - '/mnt/data/mosquitto/config:/etc/mosquitto/config:rw'
       - '/mnt/data/mosquitto/ssl:/mqtt/ssl:rw'
       - '/mnt/data/mosquitto/auth:/mqtt/auth:rw'
     labels:
       - traefik.backend.mosquitto.noexpose
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - 'mosquitto_sub -t "$SYS/#" -C 1 -i health-$(hostname) -u $MOSQUITTO_USERNAME -P $MOSQUITTO_PASSWORD | grep -v Error'
-      interval: 10s
-      timeout: 50s
-      retries: 5
   couchdb:
     env_file: .env
     image: 'couchdb:3.1.0'

@@ -36,7 +36,7 @@ describe('basic ui tests', function() {
     element(by.css('[name="rsakeyAlias"]')).sendKeys(rsakeyAlias);
     element(by.css('[name="rsakeyValue"]')).sendKeys(rsakeyValue);
 
-    // create api key
+    // create API Key
     element(by.buttonText("Submit")).click();
 
     browser.sleep(4000);

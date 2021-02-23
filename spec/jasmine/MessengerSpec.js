@@ -82,7 +82,7 @@ describe("Messenger", function() {
       owner,
       (success, object) => {
         if (success) {
-          //console.log("api key list: ", JSON.stringify(object));
+          //console.log("API Key list: ", JSON.stringify(object));
           expect(object).to.be.a('array');
         } else {
           console.log("[jasmine] Listing failed:" + object);
