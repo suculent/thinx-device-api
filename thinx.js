@@ -39,10 +39,6 @@ const crypto = require('crypto');
 const express = require("express");
 const session = require("express-session");
 
-const Auth = require('./lib/thinx/auth.js');
-const auth = new Auth();
-
-
 const pki = require('node-forge').pki;
 const fs = require("fs-extra");
 const url = require('url');
@@ -70,6 +66,21 @@ var app_config = Globals.app_config();
 var prefix = Globals.prefix();
 var rollbar = Globals.rollbar(); // lgtm [js/unused-local-variable]
 var redis_client = redis.createClient(Globals.redis_options());
+
+// Default ACLs and MQTT Password
+const Auth = require('./lib/thinx/auth.js');
+
+let auth = new Auth();
+auth.add_mqtt_credentials(app_config.mqtt.username, app_config.mqtt.password);
+
+const ACL = require('./lib/thinx/acl.js');
+let acl = new ACL(app_config.mqtt.username);
+
+acl.load( () => {
+  acl.addTopic(app_config.mqtt.username + ":su", "readwrite", "#");
+  acl.commit();
+});
+
 
 //
 // Shared Configuration
@@ -429,10 +440,11 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   let ca = pki.certificateFromPem(caCert);
   let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
   console.log("» Loaded SSL certificate.");
-  if (ca.verify(client)) {
-    sslvalid = true;
-  } else {
-    console.log("Certificate verification failed.");
+
+  try {
+    sslvalid = ca.verify(client)
+  } catch (err) {
+    console.log("Certificate verification failed: ", err);
   }
 
   if (sslvalid) {
@@ -613,14 +625,13 @@ wss.on('connection', function(ws, req) {
       blog.logtail(build_id, owner_id, app._ws[owner_id], logtail_callback);
     } else if (typeof(object.init) !== "undefined") {
       if (typeof(messenger) !== "undefined") {
-        console.log("Initializing messenger in WS...");
-        messenger.initWithOwner(object.init, app._ws[owner_id], function(success, message_z) {
+        console.log("Initializing new messenger in WS...");
+        let socket = app._ws[owner_id];
+        messenger.initWithOwner(object.init, socket, function(success, message_z) {
           if (!success) {
             console.log("Messenger init on WS message with result " + success + ", with message: ", { message_z });
           }
         });
-      } else {
-        console.log("Messenger is not initialized and therefore could not be activated.");
       }
     } else {
       /* unknown message debug, must be removed */

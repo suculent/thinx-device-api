@@ -1,10 +1,13 @@
+
+#Use debian:stable-slim as a builder and then copy everything.
 FROM debian:stable-slim as builder
 
 #Set mosquitto and plugin versions.
 #Change them for your needs.
+# Latest is mosquitto-2.0.7 (04-Feb-2021) - build fails with missing cJSON dependency, originally 1.6.10
 ENV MOSQUITTO_VERSION=1.6.10
 ENV PLUGIN_VERSION=0.6.1
-ENV GO_VERSION=1.13.8
+ENV GO_VERSION=1.16
 
 WORKDIR /app
 
@@ -29,25 +32,14 @@ RUN export GO_ARCH=$(uname -m | sed -es/x86_64/amd64/ -es/armv7l/armv6l/ -es/aar
 # Build the plugin from local source
 COPY ./goauth ./
 
-#Build the plugin.
+# Build the plugin.
 RUN export PATH=$PATH:/usr/local/go/bin && \
     export CGO_CFLAGS="-I/usr/local/include -fPIC" && \
     export CGO_LDFLAGS="-shared" && \
-    pwd && \
-    ls && \
-    make && \
-    cd mosquitto-${MOSQUITTO_VERSION} && \
-    ./configure && \
-    make all
+    make
 
 #Start from a new image.
 FROM debian:stable-slim
-
-ARG MOSQUITTO_PASSWORD
-ARG MOSQUITTO_USERNAME
-
-ENV MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}
-ENV MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}
 
 #Get mosquitto dependencies.
 RUN apt-get update && apt-get install -y libwebsockets8 libc-ares2 openssl uuid
@@ -68,24 +60,12 @@ COPY --from=builder /usr/local/sbin/mosquitto /usr/sbin/mosquitto
 #Uncomment to copy your custom confs (change accordingly) directly when building the image.
 #Leave commented if you want to mount a volume for these (see docker-compose.yml).
 
-# COPY ./docker/conf/mosquitto.conf /etc/mosquitto/mosquitto.conf
-# COPY ./docker/conf/conf.d/go-auth.conf /etc/mosquitto/conf.d/go-auth.conf
-# COPY ./docker/conf/auth/acls /etc/mosquitto/auth/acls
-# COPY ./docker/conf/auth/passwords /etc/mosquitto/auth/passwords
+# COPY ./goauth/docker/conf/mosquitto.conf /etc/mosquitto/mosquitto.conf
+COPY ./goauth/docker/conf/conf.d/go-auth.conf /etc/mosquitto/conf.d/go-auth.conf
+#COPY ./goauth/docker/conf/auth/acls /etc/mosquitto/auth/acls
+#COPY ./goauth/docker/conf/auth/passwords /etc/mosquitto/auth/passwords
+
+#Expose tcp and websocket ports as defined at mosquitto.conf (change accordingly).
+EXPOSE 1883 8883 1884
 
 ENTRYPOINT ["sh", "-c", "/usr/sbin/mosquitto -c /etc/mosquitto/mosquitto.conf" ]
-
-
-COPY ./config/mosquitto.conf /etc/mosquitto/conf.d/mosquitto.conf
-
-COPY ./mqtt_restart.sh /mqtt_restart.sh
-COPY ./docker-entrypoint.sh /docker-entrypoint.sh
-
-RUN echo "export MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}" > /mqtt_username
-RUN echo "export MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}" > /mqtt_password
-
-EXPOSE 1883 8883 9001
-
-RUN apt remove -y wget
-
-ENTRYPOINT [ "/docker-entrypoint.sh" ]
