@@ -449,33 +449,33 @@ echo "Running DevSec..." | tee -a "${LOG_PATH}"
 # Fetche SSID and PASS for DevSec
 ENVS=$(find $BUILD_PATH/$REPO_NAME -name "environment.json" | head -n 1)
 if [[ ! -f $ENVS ]]; then
-	echo "No environment.json found"
+	echo "No environment.json found" | tee -a "${LOG_PATH}"
 else
 	if [ ! -f $THINX_FILE ]; then
-		echo "WTF THINX_FILE does not exist?"
+		echo "WTF THINX_FILE does not exist?" | tee -a "${LOG_PATH}"
 	else
 		# TODO: Use ENV_SSID and ENV_PASS to set arduino_devsec_ssid and arduino_devsec_pass 
 		if [[ ! -f $ENVS ]]; then
-			echo "No environment.json found"
+			echo "No environment.json found" | tee -a "${LOG_PATH}"
 		else
-		echo "Overriding DevSec values from: ${ENVOUT}"
-		echo
-		
-		while IFS='' read -r keyname; do
+			echo "Overriding DevSec values from: ${ENVS}" | tee -a "${LOG_PATH}"
+			echo
 			
-			VAL=$(jq '.'$keyname $ENVFILE)
+			while IFS='' read -r keyname; do
+				
+				VAL=$(jq '.'$keyname $ENVS)
 
-			if [[ ${keyname} == "pass" ]]; then
-				${arduino_devsec_pass}="${VAL}"
-				echo "Overriding arduino_devsec_pass: ${arduino_devsec_pass}"
-			fi
+				if [[ ${keyname} == "pass" ]]; then
+					${arduino_devsec_pass}="${VAL}"
+					echo "Overriding arduino_devsec_pass: ${arduino_devsec_pass}" | tee -a "${LOG_PATH}"
+				fi
 
-			if [[ ${keyname} == "ssid" ]]; then
-				${arduino_devsec_ssid}="${VAL}"
-				echo "Overriding arduino_devsec_ssid: ${arduino_devsec_ssid}"
-			fi
+				if [[ ${keyname} == "ssid" ]]; then
+					${arduino_devsec_ssid}="${VAL}"
+					echo "Overriding arduino_devsec_ssid: ${arduino_devsec_ssid}" | tee -a "${LOG_PATH}"
+				fi
 
-		done < <(jq -r 'keys[]' $ENVFILE)
+			done < <(jq -r 'keys[]' $ENVS)
 		fi
 	fi
 fi
