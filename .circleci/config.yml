@@ -451,7 +451,7 @@ jobs:
             }
           event: pass
 
-  build-mosquitto-production:
+  build-mosquitto-global:
     executor: docker/docker
     steps:
       - setup_remote_docker
@@ -466,13 +466,12 @@ jobs:
           image: thinx/mosquitto
           docker-context: services/broker
           dockerfile: services/broker/Dockerfile
-          extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
-          tag: 'swarm'
+          tag: 'global'
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/mosquitto
           registry: registry.keyguru.eu:5000
-          tag: 'swarm'
+          tag: 'global'
 
 #
 # DEPRECATED BUILD, KEEPING FOR TEST PURPOSES LATER
@@ -725,14 +724,14 @@ workflows:
               only:
                 - keyguru-production
       
-      # - build-mosquitto-production:
-      #     name: "mosquitto : production"
-      #     context:
-      #       - thinx-production-cz
-      #     filters:
-      #       branches:
-      #         only:
-      #           - keyguru-production
+      - build-mosquitto-global:
+          name: "mosquitto : global"
+          context:
+            - thinx-production-cz
+          filters:
+            branches:
+              only:
+                - keyguru-production
 
       - build-console-production:
           name: "console : keyguru.cz"
