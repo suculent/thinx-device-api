@@ -10,6 +10,12 @@
   },
   "redis": {
     "host": "thinx-redis",
+    "db": 1,
+    "password": "<enter-redis-password>"
+  },
+  "redis_goauth": {
+    "host": "thinx-redis",
+    "db": 2,
     "password": "<enter-redis-password>"
   },
   "mqtt": {

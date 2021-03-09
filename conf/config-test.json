@@ -11,6 +11,12 @@
   "redis": {
     "host": "thinx-redis",
     "passnote": "when not required, probably a provisioning issue...",
+    "password": "changeme!",
+    "db": 1
+  },
+  "redis_goauth": {
+    "host": "thinx-redis",
+    "db": 2,
     "password": "changeme!"
   },
   "mqtt": {
