@@ -454,7 +454,11 @@ else
 	if [ ! -f $THINX_FILE ]; then
 		echo "WTF THINX_FILE does not exist?" | tee -a "${LOG_PATH}"
 	else
-		# TODO: Use ENV_SSID and ENV_PASS to set devsec_ssid and devsec_pass 
+		# DEPRECATED: Use ENV_SSID and ENV_PASS to set devsec_ssid and devsec_pass 
+		# Actually in latest code, credentials are transmitted and stored at rest in CouchDB encrypted using transfer_key.
+		# On build those are pushed to thinx.yml overwriting devsec.ssid and devsec.pass keys using ENVIRONMENT_CSSID and ENVIRONMENT_CPASS 
+		# From point of view, storing those values in environment.json is incorrect, because this file should not contain CSSID and CPASS (but only global SSID and PASS if any)
+
 		if [[ ! -f $ENVS ]]; then
 			echo "No environment.json found" | tee -a "${LOG_PATH}"
 		else
