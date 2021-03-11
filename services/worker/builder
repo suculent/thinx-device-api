@@ -446,18 +446,61 @@ echo "Running DevSec..." | tee -a "${LOG_PATH}"
 # (This header should not be placed in project root to prevent being auto-imported;
 # which causes duplicate definitions and linker error.)
 
+# Fetche SSID and PASS for DevSec
+ENVS=$(find $BUILD_PATH/$REPO_NAME -name "environment.json" | head -n 1)
+if [[ ! -f $ENVS ]]; then
+	echo "No environment.json found" | tee -a "${LOG_PATH}"
+else
+	if [ ! -f $THINX_FILE ]; then
+		echo "WTF THINX_FILE does not exist?" | tee -a "${LOG_PATH}"
+	else
+		# DEPRECATED: Use ENV_SSID and ENV_PASS to set devsec_ssid and devsec_pass 
+		# Actually in latest code, credentials are transmitted and stored at rest in CouchDB encrypted using transfer_key.
+		# On build those are pushed to thinx.yml overwriting devsec.ssid and devsec.pass keys using ENVIRONMENT_CSSID and ENVIRONMENT_CPASS 
+		# From point of view, storing those values in environment.json is incorrect, because this file should not contain CSSID and CPASS (but only global SSID and PASS if any)
+
+		if [[ ! -f $ENVS ]]; then
+			echo "No environment.json found" | tee -a "${LOG_PATH}"
+		else
+			echo "Overriding DevSec values from: ${ENVS}" | tee -a "${LOG_PATH}"
+			echo
+			
+			while IFS='' read -r keyname; do
+				
+				VAL=$(jq '.'$keyname $ENVS)
+
+				if [[ ${keyname} == "pass" ]]; then
+					devsec_pass="${VAL}"
+					echo "Overriding devsec_pass: ${devsec_pass}" | tee -a "${LOG_PATH}"
+				fi
+
+				if [[ ${keyname} == "ssid" ]]; then
+					devsec_ssid="${VAL}"
+					echo "Overriding devsec_ssid: ${devsec_ssid}" | tee -a "${LOG_PATH}"
+				fi
+
+				if [[ ${keyname} == "ckey" ]]; then
+					devsec_ckey="${VAL}"
+					echo "Overriding devsec_ckey: ${devsec_ckey}" | tee -a "${LOG_PATH}"
+				fi
+
+			done < <(jq -r 'keys[]' $ENVS)
+		fi
+	fi
+fi
+
 # Fetches path and rebuilds the signature file if found and all required arguments are available...
 SIGNATURE_FILE=$(find . -maxdepth 3 -name "embedded_signature.h")
 if [[ ! -z $SIGNATURE_FILE ]]; then
 	if [[ -f $SIGNATURE_FILE ]]; then
 		# TODO: Validate inputs before doing this... MAC length and FCID length must be exactly 6, etc. Should be implemented in signer.
-		if [[ ! -z $FCID && ! -z $MAC && ! -z ${arduino_devsec_ckey} ]]; then
+		if [[ ! -z $FCID && ! -z $MAC && ! -z ${devsec_ckey} ]]; then
 			echo "DevSec building signature into ${SIGNATURE_FILE}" | tee -a "${LOG_PATH}"
 			# This makes sure the -c "CKEY" argument does not fall apart due to spaces...
 			# in case the CKEY would contain + this needs to be changed to another character, but not \n like in many examples in the wild.
 			SAVED_IFS=$IFS
 			IFS='+'
-			DEVSEC_CONTENTS=$("$THINX_ROOT/devsec" -m ${MAC} -f ${FCID} -s ${arduino_devsec_ssid} -p ${arduino_devsec_pass} -c "${arduino_devsec_ckey}")
+			DEVSEC_CONTENTS=$("$THINX_ROOT/devsec" -m ${MAC} -f ${FCID} -s ${devsec_ssid} -p ${devsec_pass} -c "${devsec_ckey}")
 			DEVSEC_SUCCESS=$?
 			IFS=$SAVED_IFS
 			echo "$DEVSEC_CONTENTS" > "$(pwd)/$SIGNATURE_FILE"
@@ -470,7 +513,7 @@ if [[ ! -z $SIGNATURE_FILE ]]; then
 				exit 0
 			fi
 		else
-			echo "[DevSec] Skipping, configuration incomplete..." | tee -a "${LOG_PATH}"
+			echo "[DevSec] Skipping, configuration incomplete. FCID: $FCID, MAC: $MAC, CKEY: ${devsec_ckey} " | tee -a "${LOG_PATH}"
 		fi
 	else
 		echo "[DevSec] Signature file not found at $SIGNATURE_FILE in $(ls)" | tee -a "${LOG_PATH}"
@@ -856,7 +899,7 @@ case $PLATFORM in
 					zip -rq "${BUILD_PATH}/${BUILD_ID}.zip" ${BIN_FILE} ./build/**
 				fi
 			else
-				echo "[arduino] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
+				echo "[arduino] Docker build failed, no firmware.bin found." | tee -a "${LOG_PATH}"
 			fi
 
 			# Exit on dry run...
@@ -961,7 +1004,7 @@ case $PLATFORM in
 					zip -rq "${BUILD_PATH}/${BUILD_ID}.zip" ${BIN_FILE} ./build/**
 				fi
 			else
-				echo "[pine64] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
+				echo "[pine64] Docker build with result failed, no BUILD SUCCESSFUL message found in log." | tee -a "${LOG_PATH}"
 			fi
 
 			# Exit on dry run...
@@ -1009,6 +1052,8 @@ case $PLATFORM in
 
 			THINX_FILE=$( find . -name "thinx.h"  | head -n 1)
 
+			echo "[platformio] pio thinx.h check stage... $_THINX_FILE"
+
 			if [[ -z $THINX_FILE ]]; then
 				echo "[platformio] WARNING! No THiNX-File found! in $BUILD_PATH/$REPO_NAME: $THINX_FILE" | tee -a "${LOG_PATH}"
 				# exit 1 # will deprecate on modularization for more platforms
@@ -1031,6 +1076,8 @@ case $PLATFORM in
 				fi
 			fi
 
+			echo "[platformio] pio check stage..."
+
 			if [[ ! -f "./platformio.ini" ]]; then
 				PIO=$(find . -name "platformio.ini")
 				echo "PIO: $PIO" | tee -a "${LOG_PATH}"
@@ -1044,6 +1091,8 @@ case $PLATFORM in
 					BUILD_SUCCESS=false
 				fi
 		  	fi
+
+			echo "[platformio] build stage... swarm: $SWARM"
 
 			if [[ $SWARM == false ]]; then
 				echo "running Docker PIO >>>"
@@ -1061,19 +1110,19 @@ case $PLATFORM in
 				swarm-build $WORKDIR suculent/platformio-docker-build $LOG_PATH
 			fi
 
-			echo "[platformio] Docker completed <<<"
+			echo "[platformio] Docker completed <<<" | tee -a "${LOG_PATH}"
 
 			echo "Current .pio/build folder contents after build:" | tee -a "${LOG_PATH}"
-			ls ./.pio/build | tee -a "${LOG_PATH}"
+			ls ./.pio/build/* | tee -a "${LOG_PATH}"
 
 			OUTFILE=$(pwd)/$(find . -name "*.bin" | head -n 1)
+			
+			echo "[platformio] OUTFILE ${OUTFILE}" | tee -a "${LOG_PATH}"
 
 			if [ ! -f $OUTFILE ]; then
-				echo "$OUTFILE not found"
+				echo "$OUTFILE not found" | tee -a "${LOG_PATH}"
 				BUILD_SUCCESS=false
-			fi
-
-			if [[ -f $OUTFILE ]]; then
+			else
 				BUILD_SUCCESS=true
 				STATUS='OK'
 				BIN_FILE=$OUTFILE
@@ -1081,7 +1130,7 @@ case $PLATFORM in
 				echo "OUTFILE: ${OUTFILE}" | tee -a "${LOG_PATH}"
 
 				if [[ ! -f $OUTFILE ]]; then
-					echo "OUTFILE $OUTFILE not found!"
+					echo "OUTFILE $OUTFILE not found!" | tee -a "${LOG_PATH}"
 					BUILD_SUCCESS=false
 					exit 1
 				fi
@@ -1104,9 +1153,11 @@ case $PLATFORM in
 					cp -vf "${BIN_FILE}" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 					cp -vf "${BUILD_PATH}/${BUILD_ID}.zip" "$DEPLOYMENT_PATH" | tee -a "${LOG_PATH}"
 				fi
-			else
-				echo "[arduino] Docker build with result ${RESULT}" | tee -a "${LOG_PATH}"
+
 			fi
+			
+			echo "[platformio] Docker build completed with BUILD_SUCCESS ${BUILD_SUCCESS}" | tee -a "${LOG_PATH}"
+			
 		;;
 	*)
 		MSG="If you need to support your platform, file a ticket at https://github.com/suculent/thinx-device-api/issues"
@@ -1130,13 +1181,13 @@ if [[ ! -f "${OUTFILE}" ]]; then
 	REPLACE="\/mnt\/data\/thinx\/$COUNTRY\/deploy"
 	OUTFILE=$(echo "$OUTFILE" | sed "s/$FIND/$REPLACE/")
 	if [[ ! -f "${OUTFILE}" ]]; then
-		echo "Could not find outfile $OUTFILE anywhere..."
+		echo "Could not find outfile $OUTFILE anywhere..." | tee -a "${LOG_PATH}"
 		OUTFILE=""
 	fi
 fi
 
 if [[ "${OUTFILE}" != "" ]]; then
-	echo "Calculating checksum for $OUTFILE"
+	echo "Calculating checksum for $OUTFILE" | tee -a "${LOG_PATH}"
 	SHAX=$(shasum -a 256 $OUTFILE)
 	SHA="$(echo $SHAX | grep " " | cut -d" " -f1)"
 	MD5=$(md5sum "$OUTFILE" | cut -d ' ' -f 1)
@@ -1164,7 +1215,7 @@ if [ -z ${THINX_FIRMWARE_VERSION} ]; then
 	TAG_VERSION=$(git describe --abbrev=0 --tags)
 	popd
 	THINX_FIRMWARE_VERSION=${REPO_NAME}-${TAG_VERSION}
-	echo "[builder] No thinx_build.json file found, generating last-minute version: ${THINX_FIRMWARE_VERSION}"
+	echo "[builder] No thinx_build.json file found, generating last-minute version: ${THINX_FIRMWARE_VERSION}" | tee -a "${LOG_PATH}"
 fi
 
 if [[ -f "${DEPLOYMENT_PATH}/${BUILD_ID}.zip" ]]; then
