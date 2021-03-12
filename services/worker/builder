@@ -470,17 +470,17 @@ else
 				VAL=$(jq '.'$keyname $ENVS)
 
 				if [[ ${keyname} == "pass" ]]; then
-					devsec_pass=$(echo ${VAL} | tr -d '"') # TODO: should trim only leading/trailing '"'
+					devsec_pass=$(echo ${VAL} | sed 's/^"//;s/\"*$//') # trim leading/trailing '\"'
 					echo "Overriding devsec_pass: ${devsec_pass}" | tee -a "${LOG_PATH}"
 				fi
 
 				if [[ ${keyname} == "ssid" ]]; then
-					devsec_ssid=$(echo ${VAL} | tr -d '"') # TODO: should trim only leading/trailing '"'
+					devsec_ssid=$(echo ${VAL} | sed 's/^"//;s/\"*$//') # trim leading/trailing '\"'
 					echo "Overriding devsec_ssid: ${devsec_ssid}" | tee -a "${LOG_PATH}"
 				fi
 
 				if [[ ${keyname} == "ckey" ]]; then
-					devsec_ckey=$(echo ${VAL} | tr -d '"') # TODO: should trim only leading/trailing '"'
+					devsec_ckey=$(echo ${VAL} | sed 's/^"//;s/\"*$//') # trim leading/trailing '\"'
 					echo "Overriding devsec_ckey: ${devsec_ckey}" | tee -a "${LOG_PATH}"
 				fi
 
@@ -514,7 +514,8 @@ if [[ ! -z $SIGNATURE_FILE ]]; then
 			if [[ $DEVSEC_SUCCESS == 0 ]]; then
 				echo "$DEVSEC_CONTENTS" > "$(pwd)/$SIGNATURE_FILE"				
 				echo "DevSec Device Signature file generated..." | tee -a "${LOG_PATH}"
-				echo "[REM] DEVSEC_CONTENTS: \n$DEVSEC_CONTENTS" | tee -a "${LOG_PATH}"
+				echo "[REM] DEVSEC_CONTENTS:" | tee -a "${LOG_PATH}"
+				echo $DEVSEC_CONTENTS | tee -a "${LOG_PATH}"
 			else
 				echo "DevSec Failed, keeping signature file intact." | tee -a "${LOG_PATH}"
 				echo $RESULT | tee -a "${LOG_PATH}"
