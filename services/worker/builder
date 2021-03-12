@@ -1121,8 +1121,8 @@ case $PLATFORM in
 
 			echo "[platformio] Docker completed <<<" | tee -a "${LOG_PATH}"
 
-			echo "Current .pio/build folder contents after build:" | tee -a "${LOG_PATH}"
-			ls ./.pio/build/* | tee -a "${LOG_PATH}"
+			# echo "Current .pio/build folder contents after build:" | tee -a "${LOG_PATH}"
+			# ls ./.pio/build | tee -a "${LOG_PATH}"
 
 			OUTFILE=$(pwd)/$(find . -name "*.bin" | head -n 1)
 			
