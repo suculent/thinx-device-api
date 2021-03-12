@@ -470,17 +470,17 @@ else
 				VAL=$(jq '.'$keyname $ENVS)
 
 				if [[ ${keyname} == "pass" ]]; then
-					devsec_pass="${VAL}"
+					devsec_pass=$(echo ${VAL} | tr -d '"') # TODO: should trim only leading/trailing '"'
 					echo "Overriding devsec_pass: ${devsec_pass}" | tee -a "${LOG_PATH}"
 				fi
 
 				if [[ ${keyname} == "ssid" ]]; then
-					devsec_ssid="${VAL}"
+					devsec_ssid=$(echo ${VAL} | tr -d '"') # TODO: should trim only leading/trailing '"'
 					echo "Overriding devsec_ssid: ${devsec_ssid}" | tee -a "${LOG_PATH}"
 				fi
 
 				if [[ ${keyname} == "ckey" ]]; then
-					devsec_ckey="${VAL}"
+					devsec_ckey=$(echo ${VAL} | tr -d '"') # TODO: should trim only leading/trailing '"'
 					echo "Overriding devsec_ckey: ${devsec_ckey}" | tee -a "${LOG_PATH}"
 				fi
 
