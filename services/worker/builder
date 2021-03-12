@@ -12,7 +12,7 @@ export THINX_ROOT=/opt/thinx/thinx-device-api
 fi
 
 echo ""
-echo "-=[ ☢  THiNX IoT WORKER BUILDER v1.3.3 ☢  ]=-"
+echo "-=[ ☢  THiNX IoT WORKER BUILDER v1.3.4 ☢  ]=-"
 echo "."
 
 # do not exit when subsequent tools fail...
