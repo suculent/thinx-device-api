@@ -664,15 +664,15 @@ workflows:
                 - keyguru-staging
 
       # # disabled for faster iterations
-      # - build-console:
-      #     name: "console : kgr.cz"
-      #     context:
-      #       - thinx-staging-cz
-      #       - slack
-      #     filters:
-      #       branches:
-      #         only:
-      #           - keyguru-staging
+      - build-console:
+          name: "console : kgr.cz"
+          context:
+            - thinx-staging-cz
+            - slack
+          filters:
+            branches:
+              only:
+                - keyguru-staging
 
       # disabled for faster iterations
       # - build-redis:

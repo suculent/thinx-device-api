@@ -445,10 +445,10 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
             'Build created<br><br>Click to show log...',
             'THiNX Builder',
             {
-              timeOut:4000,
-              extendedTimeOut:5000,
-              tapToDismiss: false,
-              closeButton: false,
+              timeOut:15000,
+              extendedTimeOut:60000,
+              tapToDismiss: true,
+              closeButton: true,
               progressBar: true,
               onclick: function () {
                 $scope.$emit('showLogOverlay', response.build_id);
