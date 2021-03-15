@@ -12,7 +12,7 @@ export THINX_ROOT=/opt/thinx/thinx-device-api
 fi
 
 echo ""
-echo "-=[ ☢  THiNX IoT WORKER BUILDER v1.3.3 ☢  ]=-"
+echo "-=[ ☢  THiNX IoT WORKER BUILDER v1.3.4 ☢  ]=-"
 echo "."
 
 # do not exit when subsequent tools fail...
@@ -470,17 +470,17 @@ else
 				VAL=$(jq '.'$keyname $ENVS)
 
 				if [[ ${keyname} == "pass" ]]; then
-					devsec_pass="${VAL}"
+					devsec_pass=$(echo ${VAL} | sed 's/^"//;s/\"*$//') # trim leading/trailing '\"'
 					echo "Overriding devsec_pass: ${devsec_pass}" | tee -a "${LOG_PATH}"
 				fi
 
 				if [[ ${keyname} == "ssid" ]]; then
-					devsec_ssid="${VAL}"
+					devsec_ssid=$(echo ${VAL} | sed 's/^"//;s/\"*$//') # trim leading/trailing '\"'
 					echo "Overriding devsec_ssid: ${devsec_ssid}" | tee -a "${LOG_PATH}"
 				fi
 
 				if [[ ${keyname} == "ckey" ]]; then
-					devsec_ckey="${VAL}"
+					devsec_ckey=$(echo ${VAL} | sed 's/^"//;s/\"*$//') # trim leading/trailing '\"'
 					echo "Overriding devsec_ckey: ${devsec_ckey}" | tee -a "${LOG_PATH}"
 				fi
 
@@ -503,12 +503,15 @@ if [[ ! -z $SIGNATURE_FILE ]]; then
 			DEVSEC_CONTENTS=$("$THINX_ROOT/devsec" -m ${MAC} -f ${FCID} -s ${devsec_ssid} -p ${devsec_pass} -c "${devsec_ckey}")
 			DEVSEC_SUCCESS=$?
 			IFS=$SAVED_IFS
-			echo "$DEVSEC_CONTENTS" > "$(pwd)/$SIGNATURE_FILE"
+			
 			if [[ $DEVSEC_SUCCESS == 0 ]]; then
+				echo "$DEVSEC_CONTENTS" > "$(pwd)/$SIGNATURE_FILE"
 				echo "DevSec Device Signature file generated..." | tee -a "${LOG_PATH}"
-				#echo "\n$DEVSEC_CONTENTS" | tee -a "${LOG_PATH}"
+				echo "[REM] DEVSEC_CONTENTS:" | tee -a "${LOG_PATH}"
+				echo "$DEVSEC_CONTENTS" > "${LOG_PATH}"
+				echo "$DEVSEC_CONTENTS" | tee -a "${LOG_PATH}"
 			else
-				echo "DevSec Failed, keeping signature file unkept." | tee -a "${LOG_PATH}"
+				echo "DevSec Failed, keeping signature file intact." | tee -a "${LOG_PATH}"
 				echo $RESULT | tee -a "${LOG_PATH}"
 				exit 0
 			fi
@@ -1112,8 +1115,8 @@ case $PLATFORM in
 
 			echo "[platformio] Docker completed <<<" | tee -a "${LOG_PATH}"
 
-			echo "Current .pio/build folder contents after build:" | tee -a "${LOG_PATH}"
-			ls ./.pio/build/* | tee -a "${LOG_PATH}"
+			# echo "Current .pio/build folder contents after build:" | tee -a "${LOG_PATH}"
+			# ls ./.pio/build | tee -a "${LOG_PATH}"
 
 			OUTFILE=$(pwd)/$(find . -name "*.bin" | head -n 1)
 			
