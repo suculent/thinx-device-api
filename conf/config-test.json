@@ -12,7 +12,7 @@
     "host": "thinx-redis",
     "passnote": "when not required, probably a provisioning issue...",
     "password": "changeme!",
-    "db": 1
+    "db": 0
   },
   "redis_goauth": {
     "host": "thinx-redis",

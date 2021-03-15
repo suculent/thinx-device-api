@@ -10,7 +10,7 @@
   },
   "redis": {
     "host": "thinx-redis",
-    "db": 1,
+    "db": 0,
     "password": "<enter-redis-password>"
   },
   "redis_goauth": {
