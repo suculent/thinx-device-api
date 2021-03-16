@@ -498,6 +498,14 @@ if [[ ! -z $SIGNATURE_FILE ]]; then
 			echo "DevSec building signature into ${SIGNATURE_FILE}" | tee -a "${LOG_PATH}"
 			# This makes sure the -c "CKEY" argument does not fall apart due to spaces...
 			# in case the CKEY would contain + this needs to be changed to another character, but not \n like in many examples in the wild.
+
+			# WARNING! INSECURE DEBUG! Remove when not needed.
+			echo "[REM DevSec] MAC: ${MAC}" | tee -a "${LOG_PATH}"
+			echo "[REM DevSec] FCID: ${FCID}" | tee -a "${LOG_PATH}"
+			echo "[REM DevSec] devsec_ssid: ${devsec_ssid}" | tee -a "${LOG_PATH}"
+			echo "[REM DevSec] devsec_pass: ${devsec_pass}" | tee -a "${LOG_PATH}"
+			echo "[REM DevSec] devsec_ckey: ${devsec_ckey}" | tee -a "${LOG_PATH}"
+
 			SAVED_IFS=$IFS
 			IFS='+'
 			DEVSEC_CONTENTS=$("$THINX_ROOT/devsec" -m ${MAC} -f ${FCID} -s ${devsec_ssid} -p ${devsec_pass} -c "${devsec_ckey}")
