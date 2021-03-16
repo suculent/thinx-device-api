@@ -13,7 +13,7 @@ std::string DevSec::intToHexString(int intValue) {
 DevSec::DevSec() {
   this->dsig_created = false;
   this->dsig_valid = false;
-  this->debug = false;
+  this->debug = true;
 }
 
 void DevSec::setDebug(bool val) {
@@ -74,8 +74,10 @@ void DevSec::generate_signature(char *mac, char *ckey, char* fcid) {
     printf("Deriving in-memory key from CKEY and flash_chip_id:\n'");
   }
 
+  printf("Generated Device Specific KEY from CKEY and FCID...");
+
   for( int c = 0; c < strlen(ckey); c++) {
-    this->key[c] = ckey[c] ^ fcid[c%sizeof(fcid)];
+    this->key[c] = ckey[c] ^ fcid[c%strlen(fcid)];
     if (this->debug) { printf("0x"); printf("%s", intToHexString((int)this->key[c]).c_str()); }
     if (c < strlen(ckey) - 1) {
       if (this->debug) printf(", ");
