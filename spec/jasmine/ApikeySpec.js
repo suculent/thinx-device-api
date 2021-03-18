@@ -13,7 +13,7 @@ describe("API Key List", function() {
       owner,
       (success, object) => {
         if (success) {
-          //console.log("api key list(1): ", JSON.stringify(object));
+          //console.log("API Key list(1): ", JSON.stringify(object));
           expect(object).to.be.a('array');
         } else {
           console.log("[jasmine] Listing failed:" + object);
@@ -34,7 +34,7 @@ describe("API Key", function() {
       "sample-key",
       (success, object) => {
         let first = object;
-        //console.log("generated api key: ", {first}, {object}, {success});
+        //console.log("generated API Key: ", {first}, {object}, {success});
         if (success) {
           generated_key_hash = sha256(first.key);
           console.log("APIKey generated:", generated_key_hash);
@@ -96,7 +96,7 @@ describe("API Keys", function() {
       owner,
        (success, object) => {
         if (success) {
-          console.log("api key list(2): OK"); // , JSON.stringify(object)
+          console.log("API Key list(2): OK"); // , JSON.stringify(object)
           //expect(object).to.be.a('array');
         } else {
           console.log("[jasmine] Listing failed:" + object);

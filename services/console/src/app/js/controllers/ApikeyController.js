@@ -89,7 +89,7 @@ angular.module('RTM').controller('ApikeyController', ['$rootScope', '$scope', 's
   };
 
   function revokeApikeys(fingerprints) {
-    console.log('--deleting selected api keys ' + fingerprints.length +'--')
+    console.log('--deleting selected API Keys ' + fingerprints.length +'--')
 
     Thinx.revokeApikeys(fingerprints)
     .done(function(data) {

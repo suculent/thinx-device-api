@@ -409,16 +409,23 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     Thinx.build(deviceUdid, sourceId)
     .done(function(response) {
 
-      console.log(' --- response ---');
-      console.log(response);
+      let nowTime = new Date().getTime();
 
       if (typeof(response) !== "undefined") {
         if (response.success) {
-          console.log(' --- save last build id: ' + response.build_id + ' ---');
+
+          let buildRecord = {
+            build_id: response.build_id,
+            last_update: nowTime,
+            start_time: nowTime,
+            state: response.status,
+            timestamp: nowTime
+          }
 
           // prepare user metadata for particular device
-          $rootScope.meta.deviceBuilds[deviceUdid].push(response);
+          $rootScope.meta.deviceBuilds[deviceUdid].push(buildRecord);
 
+          // update build history
           Thinx.getBuildHistory()
           .done(function(data) {
             $scope.$emit("updateBuildHistory", data);
@@ -433,14 +440,15 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
             }
           }
 
+          // show notification to open log view
           toastr.info(
-            response.status + '<br><br>Click to show build log...',
+            'Build created<br><br>Click to show log...',
             'THiNX Builder',
             {
-              timeOut:3000,
-              extendedTimeOut:5000,
-              tapToDismiss: false,
-              closeButton: false,
+              timeOut:15000,
+              extendedTimeOut:60000,
+              tapToDismiss: true,
+              closeButton: true,
               progressBar: true,
               onclick: function () {
                 $scope.$emit('showLogOverlay', response.build_id);
@@ -450,12 +458,10 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
 
           $scope.$apply();
         } else {
-          console.log(response);
           toastr.error(response.status, '<ENV::loginPageTitle>', {timeOut: 5000});
         }
       } else {
-        console.log('error');
-        console.log(response);
+        toastr.error("Build Failed", '<ENV::loginPageTitle>', { timeOut: 5000 });
       }
 
     })

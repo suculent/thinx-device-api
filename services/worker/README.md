@@ -9,9 +9,7 @@ Builder connects to THiNX automatically using a websocket. In some cases, addres
 
 This container is mighty. It will perform any shell command submitted, after passing the validation (which is not a measure in open-source code).
 
-__Be careful and *NEVER EXPOSE THIS CONTAINER's PORT TO PUBLIC*.__ Worker has no authentication, because it is supposed to be placed on internal swarm network and called only from the THiNX Device API.
-
-Use the `WORKER_SECRET` variable on boths sides (API/Worker) to make sure worker or API cannot be called by unauthorized actor.
+Use the `WORKER_SECRET` variable on boths sides (API/Worker) to make sure worker cannot be used by unauthorized actor.
 
 
 ### Supported Environment Variables

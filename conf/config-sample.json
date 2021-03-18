@@ -1,5 +1,6 @@
 {
   "type": "thinx_server_config",
+  "transmit_key": "<Global transmit key for device environment submissions using API>",
   "version" : "1",
   "public_url": "<enter-your-fqdn>",
   "mailgun": {
@@ -9,6 +10,12 @@
   },
   "redis": {
     "host": "thinx-redis",
+    "db": 0,
+    "password": "<enter-redis-password>"
+  },
+  "redis_goauth": {
+    "host": "thinx-redis",
+    "db": 2,
     "password": "<enter-redis-password>"
   },
   "mqtt": {
@@ -17,7 +24,8 @@
     "passwords": "/mnt/data/mosquitto/auth/thinx.pw",
     "acl": "/mnt/data/mosquitto/auth/thinx.acl",
     "password": "mosquitto",
-    "username": "thinx"
+    "username": "thinx",
+    "use_plugin": true
   },
   "rollbar_token": "<enter-your-rollbar.com-token>",
   "database_uri": "http://rtmtest:rtmtest@couchdb:5984",

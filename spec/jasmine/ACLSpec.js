@@ -3,7 +3,7 @@ describe("ACL Manager", function() {
   // var expect = require('chai').expect; 
 
   var ACL = require('../../lib/thinx/acl');
-  var acl = new ACL();
+  var acl = new ACL("baecb3124695efa1672b7e8d62e5b89e44713968f45eae6faa52066e87795a78");
 
   // Mock
 

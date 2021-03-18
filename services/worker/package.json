@@ -1,6 +1,6 @@
 {
   "name": "build-worker",
-  "version": "1.0.12", 
+  "version": "1.3.5", 
   "description": "Swarm Build worker for offloading builds to another host",
   "main": "index.js",
   "scripts": {
