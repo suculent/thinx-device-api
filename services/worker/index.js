@@ -217,7 +217,7 @@ class Worker {
                 });
             }
 
-            const close_underlying_connection = false;
+            const close_underlying_connection = true; // should be true, having it false does not help failing builds
             socket.disconnect(close_underlying_connection);
             
 		}); // end shell on exit
