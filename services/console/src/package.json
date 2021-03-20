@@ -17,7 +17,7 @@
   },
   "license": "ISC",
   "dependencies": {
-    "qs": "6.9.6",
+    "qs": "6.10.0",
     "minimatch": "3.0.4",
     "negotiator": "0.6.2"
   },
