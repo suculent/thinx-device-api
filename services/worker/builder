@@ -103,6 +103,12 @@ swarm-build()
 			echo "Still running..."
 		fi
 
+		if grep -q "task: non-zero exit" <<< "$DSTATUS"; then
+			echo "Service task failure."
+			docker service rm $UNIQUE_NAME
+			RUNNING=false
+		fi
+
 		# if grep -q "replicated\t0/0" <<< "$DSTATUS"
 		if grep -q "0/0" <<< "$DSTATUS"; then
 			echo "Build completed."
