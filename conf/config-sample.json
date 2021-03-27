@@ -2,7 +2,8 @@
   "type": "thinx_server_config",
   "transmit_key": "<Global transmit key for device environment submissions using API>",
   "version" : "1",
-  "public_url": "<enter-your-fqdn>",
+  "public_url": "<enter-your-console-fqdn>",
+  "api_url": "<enter-your-api-fqdn>",
   "mailgun": {
     "api_key": "<mailgun-api-key>",
     "base_url": "<mailgun-base-url>",

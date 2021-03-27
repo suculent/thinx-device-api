@@ -1,1 +1,0 @@
-* * * * *   /mqtt_restart.sh && echo "Reloading config $(date)" >>/var/log/cron.log 2>&1
