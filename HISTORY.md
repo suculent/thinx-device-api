@@ -2,6 +2,12 @@
 
 ## HISTORY
 
+27/3/2021 1.3.7609
+
+» GoAuth Mosquitto support with separable Redis instance
+» UI and other fixes and improvements in build process
+» Fixes in DevSec and Firmware - signature calculation with proper FCID
+
 20/2/2021 1.3.7577
 
 » Preparing migration to GoAuth plugin for Mosquitto (ACLs and authentication is stored in Redis instead of flatfiles)
