@@ -36,8 +36,8 @@ The CircleCI build is limited and therefore returns mostly bad results. Closer l
 
 ## The Purpose
 
-
 * Update IoT device by pushing a code to a Git repository. We'll build it.
+* Secure per-device parametrization and reverse-engineering security controls.
 * Swap operating system for another over-the-air.
 * Migrate multiple devices at once between WiFi networks.
 * THiNX provides complete IoT infrastructure for your device (where the data storage and visualisation can be fully up to you).
@@ -91,6 +91,9 @@ Currently the platform supports building firmware for Arduino, PlatformIO (also 
 
 * Supports external changes to device Environment object using API/API-Key. Changes in Environment for a firmware build cause firmware update even if the version of firmware is same, allowing seamless change of WiFi credentials or device build attributes).
 
+* Mosquitto with GoAuth plugin for seamless device support for 100>10000 devices. Authentication backend can be split, or shared between multiple instances (production, staging, test, etc.).
+
+* Docker Container or Docker Swarm Service-based parallel distributed builds with controllable paralellism. Suggested is one worker per node, where the load is managed by Docker Swarm.
 
 ## Supported IoT Platforms
 
@@ -171,7 +174,10 @@ Use your favourite service and log-sender agent. Tested successfully with [Logz.
 
 **Suggested:**
 
-* Fully Qualified Domain Name (if you're testing on localhost, configure conf/config.json to set `debug: { allow_http_login: true }` )
+* FQDN – Fully Qualified Domain Names (if you're testing on localhost, configure conf/config.json to set `debug: { allow_http_login: true }` )
+	- api.yourdomain.com – THiNX API
+	- console.yourdomain.com – THiNX RTM Console
+
 * [Mailgun](https://mailgun.com) account (recently added)
 * [Rollbar](https://rollbar.com) integration
 

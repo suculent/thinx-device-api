@@ -18,7 +18,6 @@
     "test": "nyc jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls",
     "coverage": "npm run mocha",
     "mocha": "mocha spec/jasmine --delay=3000 --exit --timeout=5000; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls",
-    "prepare": "npm run snyk-protect",
     "version": "npm run npm-auto-version",
     "postpublish": "git push origin --tags",
     "preinstall": "if [ -f ./package_lock.json ]; then npx npm-force-resolutions; fi"
@@ -72,7 +71,7 @@
     "redis": "^2.8.0",
     "request": "^2.88.2",
     "rollbar": "^2.19.4",
-    "semver": "7.3.4",
+    "semver": "7.3.5",
     "sha256": "^0.2.0",
     "shell-escape": "^0.2.0",
     "sillyname": "^0.1.0",
