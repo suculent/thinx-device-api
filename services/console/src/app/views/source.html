@@ -99,10 +99,12 @@
                   </span>
                 </span>
                 <div class="row-item-title">{{source.alias}}</div>
-                <div><span class="source-label monospace-info">{{source.url}}</span></div>
+                <div>
+                  <span class="source-label monospace-info">{{source.url}}</span>
+                </div>
                 <div>
                   <span ng-if="source.branch.length > 0">
-                    <span class="source-origin">{{source.branch | split:"/":0}}</span> / <span class="source-branch">{{source.branch | split:"/":1}}</span>
+                    <i class="fa fa-code-fork font-weight-bold"></i> <span class="source-origin">{{source.branch}}</span>
                   </span>
                   <span ng-if="source.circle_key">
                       <img src="https://circleci.com/gh/{{source.url | split:'git@github.com:':1 | split:'.git':0 }}.svg?style=svg&circle-token={{source.circle_key}}" />

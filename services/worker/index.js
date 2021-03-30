@@ -217,7 +217,7 @@ class Worker {
                 });
             }
 
-            const close_underlying_connection = false;
+            const close_underlying_connection = true; // should be true, having it false does not help failing builds
             socket.disconnect(close_underlying_connection);
             
 		}); // end shell on exit
@@ -268,12 +268,12 @@ class Worker {
             if (typeof(data.mock) === "undefined" || data.mock !== true) {
                 this.client_id = data;
                 this.runJob(socket, data);
-                this.irunning = false;
+                this.running = false;
                 console.log(new Date().getTime(), "» Job synchronously completed.");
             } else {
                 console.log(new Date().getTime(), "» This is a MOCK job!");
                 this.runJob(socket, data);
-                this.irunning = false;
+                this.running = false;
             }
         });
     }

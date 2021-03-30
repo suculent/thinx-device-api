@@ -3,6 +3,7 @@ package backends
 import (
 	"database/sql"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/iegomez/mosquitto-go-auth/hashing"
@@ -28,6 +29,8 @@ type Postgres struct {
 	SSLKey         string
 	SSLRootCert    string
 	hasher         hashing.HashComparer
+
+	connectTries int
 }
 
 func NewPostgres(authOpts map[string]string, logLevel log.Level, hasher hashing.HashComparer) (Postgres, error) {
@@ -46,6 +49,7 @@ func NewPostgres(authOpts map[string]string, logLevel log.Level, hasher hashing.
 		SuperuserQuery: "",
 		AclQuery:       "",
 		hasher:         hasher,
+		connectTries:   -1,
 	}
 
 	if host, ok := authOpts["pg_host"]; ok {
@@ -134,8 +138,18 @@ func NewPostgres(authOpts map[string]string, logLevel log.Level, hasher hashing.
 		connStr = fmt.Sprintf("%s sslmode=disable", connStr)
 	}
 
+	if tries, ok := authOpts["pg_connect_tries"]; ok {
+		connectTries, err := strconv.Atoi(tries)
+
+		if err != nil {
+			log.Warnf("invalid postgres connect tries options: %s", err)
+		} else {
+			postgres.connectTries = connectTries
+		}
+	}
+
 	var err error
-	postgres.DB, err = OpenDatabase(connStr, "postgres")
+	postgres.DB, err = OpenDatabase(connStr, "postgres", postgres.connectTries)
 
 	if err != nil {
 		return postgres, errors.Errorf("PG backend error: couldn't open db: %s", err)
@@ -146,64 +160,74 @@ func NewPostgres(authOpts map[string]string, logLevel log.Level, hasher hashing.
 }
 
 //GetUser checks that the username exists and the given password hashes to the same password.
-func (o Postgres) GetUser(username, password, clientid string) bool {
+func (o Postgres) GetUser(username, password, clientid string) (bool, error) {
 
 	var pwHash sql.NullString
 	err := o.DB.Get(&pwHash, o.UserQuery, username)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			// avoid leaking the fact that user exists or not though error.
+			return false, nil
+		}
+
 		log.Debugf("PG get user error: %s", err)
-		return false
+		return false, err
 	}
 
 	if !pwHash.Valid {
 		log.Debugf("PG get user error: user %s not found", username)
-		return false
+		return false, err
 	}
 
 	if o.hasher.Compare(password, pwHash.String) {
-		return true
+		return true, nil
 	}
 
-	return false
+	return false, nil
 
 }
 
 //GetSuperuser checks that the username meets the superuser query.
-func (o Postgres) GetSuperuser(username string) bool {
+func (o Postgres) GetSuperuser(username string) (bool, error) {
 
 	//If there's no superuser query, return false.
 	if o.SuperuserQuery == "" {
-		return false
+		return false, nil
 	}
 
 	var count sql.NullInt64
 	err := o.DB.Get(&count, o.SuperuserQuery, username)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			// avoid leaking the fact that user exists or not though error.
+			return false, nil
+		}
+
 		log.Debugf("PG get superuser error: %s", err)
-		return false
+		return false, err
 	}
 
 	if !count.Valid {
 		log.Debugf("PG get superuser error: user %s not found", username)
-		return false
+		return false, nil
 	}
 
 	if count.Int64 > 0 {
-		return true
+		return true, nil
 	}
 
-	return false
+	return false, nil
 
 }
 
 //CheckAcl gets all acls for the username and tries to match against topic, acc, and username/clientid if needed.
-func (o Postgres) CheckAcl(username, topic, clientid string, acc int32) bool {
+func (o Postgres) CheckAcl(username, topic, clientid string, acc int32) (bool, error) {
 
 	//If there's no acl query, assume all privileges for all users.
 	if o.AclQuery == "" {
-		return true
+		return true, nil
 	}
 
 	var acls []string
@@ -212,18 +236,18 @@ func (o Postgres) CheckAcl(username, topic, clientid string, acc int32) bool {
 
 	if err != nil {
 		log.Debugf("PG check acl error: %s", err)
-		return false
+		return false, err
 	}
 
 	for _, acl := range acls {
 		aclTopic := strings.Replace(acl, "%c", clientid, -1)
 		aclTopic = strings.Replace(aclTopic, "%u", username, -1)
 		if TopicsMatch(aclTopic, topic) {
-			return true
+			return true, nil
 		}
 	}
 
-	return false
+	return false, nil
 
 }
 

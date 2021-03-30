@@ -245,45 +245,42 @@
       <label class="control-label col-md-3">Build Status</label>
       <div class="col-md-9">
         <div ng-click="deviceForm.buildHistoryVisible ? deviceForm.buildHistoryVisible = false : deviceForm.buildHistoryVisible = true" class="device-build-status" ng-if="$root.meta.deviceBuilds[deviceForm.udid] != undefined && $root.meta.deviceBuilds[deviceForm.udid].length > 0">
-          <div class="row">
-            <div class="col-xs-6 text-left">
-              <i class="fa fa-cog" ng-class="$root.meta.deviceBuilds[deviceForm.udid][0].state == 'OK' || $root.meta.deviceBuilds[deviceForm.udid][0].state == 'Success' || $root.meta.deviceBuilds[deviceForm.udid][0].state == 'FAILED'  ? '' : 'fa-spin'"></i>
-              
-              <span ng-if="$root.meta.deviceBuilds[deviceForm.udid][0].state != 'OK' && $root.meta.deviceBuilds[deviceForm.udid][0].state != 'Success' && $root.meta.deviceBuilds[deviceForm.udid][0].state != 'FAILED'"
-                class="badge">{{$root.meta.deviceBuilds[deviceForm.udid][0].state}}</span>
-              <span ng-if="$root.meta.deviceBuilds[deviceForm.udid][0].state == 'OK'"
-                class="badge badge-success">{{$root.meta.deviceBuilds[deviceForm.udid][0].state}}</span>
-              <span ng-if="$root.meta.deviceBuilds[deviceForm.udid][0].state == 'Success'"
-                class="badge badge-success-thinx">{{$root.meta.deviceBuilds[deviceForm.udid][0].state}}</span>
-              <span ng-if="$root.meta.deviceBuilds[deviceForm.udid][0].state == 'FAILED'" 
-                class="badge badge-danger">{{$root.meta.deviceBuilds[deviceForm.udid][0].state}}</span>
-
+          
+          <div
+            ng-repeat="(key, value) in $root.meta.deviceBuilds[deviceForm.udid] | orderBy:'last_update':true  | limitTo:1 | groupBy:'build_id'">
+            <div class="row" ng-repeat="buildEntry in value" ng-if="$first">
+              <div class="col-xs-4 text-left">
+                <i class="fa fa-cog"
+                  ng-class="buildEntry.state == 'OK' || buildEntry.state == 'Success' || buildEntry.state == 'FAILED'  ? '' : 'fa-spin'"></i>
+                <span class="badge badge-build-history"
+                  ng-class="{'badge-success': buildEntry.state == 'OK', 'badge-success-thinx': buildEntry.state == 'Success', 'badge-danger': buildEntry.state == 'FAILED' } ">
+                  {{buildEntry.state}}
+                </span>
+              </div>
+              <div class="col-xs-8 text-right">
+                <a ng-if="buildEntry.state == 'OK' || buildEntry.state == 'Success'" class="btn-build-download"
+                  ng-click="downloadArtifacts(deviceForm.udid, buildEntry.build_id)"><i class="fa fa-download"></i></a>
+                <span class="build-status-date" title="{{buildEntry.last_update}}">{{buildEntry.last_update | lastSeen:'true'}}</span>
+                <a ng-click="$emit('showLogOverlay', buildEntry.build_id); $event.stopPropagation()">
+                  <span class="device-build-id opacity-100"><i class="fa fa-eye"></i>{{buildEntry.build_id | limitTo:7}}</span>
+                </a>
+              </div>
             </div>
-            <div class="col-xs-6 text-right">
-              <a ng-if="$root.meta.deviceBuilds[deviceForm.udid][0].state == 'OK' || $root.meta.deviceBuilds[deviceForm.udid][0].state == 'Success'" class="btn-build-download" ng-click="downloadArtifacts(deviceForm.udid, $root.meta.deviceBuilds[deviceForm.udid][0].build_id)"><i class="fa fa-download"></i></a>
+          </div>  
 
-              <span class="build-status-date" title="{{$root.meta.deviceBuilds[deviceForm.udid][0].last_update}}">{{$root.meta.deviceBuilds[deviceForm.udid][0].timestamp | lastSeen:'true'}}</span>
-
-              <a ng-click="$emit('showLogOverlay', $root.meta.deviceBuilds[deviceForm.udid][0].build_id); $event.stopPropagation()">
-                <span class="device-build-id opacity-100"><i class="fa fa-eye"></i>{{$root.meta.deviceBuilds[deviceForm.udid][0].build_id | limitTo:7}}</span>
-              </a>
-            </div>
-          </div>
         </div>
 
         <div class="device-build-history" ng-if="deviceForm.buildHistoryVisible">
           <div ng-repeat="(key, value) in $root.meta.deviceBuilds[deviceForm.udid] | orderBy:'last_update':true  | limitTo:deviceForm.buildHistoryLimit | groupBy:'build_id'">
             <div class="row" ng-repeat="buildEntry in value" ng-if="$first">
               <div class="col-xs-4 text-left">
-                  <span ng-if="buildEntry.state != 'OK' && buildEntry.state != 'Success' && buildEntry.state != 'FAILED'"
-                    class="badge">{{buildEntry.state}}</span>
-                  <span ng-if="buildEntry.state == 'OK'" class="badge badge-success badge-build-history">{{buildEntry.state}}</span>
-                  <span ng-if="buildEntry.state == 'Success'"
-                    class="badge badge-success-thinx badge-build-history">{{buildEntry.state}}</span>
-                  <span ng-if="buildEntry.state == 'FAILED'" class="badge badge-danger badge-build-history">{{buildEntry.state}}</span>
+                <span class="badge badge-build-history"
+                  ng-class="{'badge-success': buildEntry.state == 'OK', 'badge-success-thinx': buildEntry.state == 'Success', 'badge-danger': buildEntry.state == 'FAILED' } ">
+                  {{buildEntry.state}}
+                </span>
               </div>
               <div class="col-xs-8 text-right">
-                <span class="build-status-date" title="{{buildEntry.last_update}}">{{buildEntry.timestamp | lastSeen:'false'}}</span>
+                <span class="build-status-date" title="{{buildEntry.last_update}}">{{buildEntry.last_update | lastSeen:'false'}}</span>
                 <a ng-click="$emit('showLogOverlay', buildEntry.build_id)">
                   <span class="device-build-id opacity-100"> {{buildEntry.build_id | limitTo:7}}</span>
                 </a>
