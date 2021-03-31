@@ -25,6 +25,7 @@ angular.module('RTM').controller('DevicesController', ['$rootScope', '$scope', '
 
     $scope.searchText = '';
     $scope.selectedItems = [];
+    $scope.buildrunning = false;
 
     $("#transferModal").on('shown.bs.modal', function(){
       angular.element('input[name=transferEmail]').focus();
@@ -80,6 +81,8 @@ angular.module('RTM').controller('DevicesController', ['$rootScope', '$scope', '
 
   $scope.build = function(deviceUdid, sourceId) {
     console.log('-- building firmware for ' + deviceUdid + '/' + $rootScope.getSourceById(sourceId).alias + ' --');
+
+    $scope.buildrunning = true;
 
     Thinx.build(deviceUdid, sourceId)
     .done(function(response) {

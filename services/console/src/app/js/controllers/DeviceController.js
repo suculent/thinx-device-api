@@ -62,6 +62,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
   $scope.deviceForm.timezone_utc = "Etc/GMT";
   $scope.deviceForm.environment = null;
 
+  $scope.buildrunning = false;
 
   $scope.showIcons = false;
 
@@ -405,6 +406,8 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     if (typeof($rootScope.meta.deviceBuilds[deviceUdid])=== "undefined") {
       $rootScope.meta.deviceBuilds[deviceUdid] = [];
     }
+
+    $scope.buildrunning = true;
 
     Thinx.build(deviceUdid, sourceId)
     .done(function(response) {

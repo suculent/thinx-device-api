@@ -166,7 +166,7 @@
                   </span>
                   <!-- buildable with progress circle -->
                   <span ng-if="$root.platforms[device.base_platform].build && hasSource(device)" ng-hide="hasBuildId(device.udid) == null">
-                    <a class="btn btn-circle btn-icon-only btn-default" href="#" ng-click="build(device.udid, device.source); $event.stopPropagation()" title="Build From Source">
+                    <a class="btn btn-circle btn-icon-only btn-default" href="#" ng-disabled="buildrunning" ng-dblclick="return false" ng-click="build(device.udid, device.source); $event.stopPropagation()" title="Build From Source">
                       <i class="icomoon-hammer_icon"></i>
                     </a>
                   </span>
@@ -242,7 +242,7 @@
                         </span>
                         <!-- buildable with progress circle -->
                         <span ng-if="$root.platforms[device.base_platform].build && hasSource(device)" ng-hide="hasBuildId(device.udid) == null">
-                          <a href="#"  ng-click="build(device.udid, device.source); $event.stopPropagation()" title="Build From Source">
+                          <a href="#" ng-dblclick="return false" ng-disabled="buildrunning" ng-click="build(device.udid, device.source); $event.stopPropagation()" title="Build From Source">
                             <i class="icomoon-hammer_icon"></i> Run build
                           </a>
                         </span>
