@@ -620,7 +620,7 @@ func AuthAclCheck(clientid, username, topic string, acc int) bool {
 		}
 	}
 
-	log.Debugf("Acl is %t for user %s", aclCheck, username)
+	log.Debugf("Acl is %t for user %s and topic %s", aclCheck, username, topic)
 	return aclCheck
 }
 
