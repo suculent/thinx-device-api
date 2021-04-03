@@ -13,7 +13,7 @@ RUN echo "REDIS_PASSWORD ON BUILD: ${REDIS_PASSWORD}"
 
 RUN apk update && apk add cron
 #RUN apt-get update -qq && apt-get upgrade -y && apt-get install -qq -y ca-certificates apt-transport-https cron && \
-    rm -rf /etc/apt/sources.list && apt-get update
+#    rm -rf /etc/apt/sources.list && apt-get update
 
 # adduser --system --disabled-password --shell /bin/bash redis
 
