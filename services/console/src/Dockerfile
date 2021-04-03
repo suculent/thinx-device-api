@@ -63,9 +63,8 @@ RUN apk del g++ gcc make
 # Deployment Image
 #
 
-#FROM nginx:1.19.2-alpine
-
-FROM nginx:alpine
+# needs to include gulp
+FROM nginx:1
 
 WORKDIR /usr/share/nginx/html
 COPY --from=0 /home/node/build/html .
