@@ -84,7 +84,7 @@ swarm-build()
 	ITERATIONS=0
 
 	# 15 seconds x 4 = 1 minute; 4 x 15 minutes (max build duration) = 60
-	MAX_ITERATIONS=30
+	MAX_ITERATIONS=60
 	RUNNING=true
 
 	# write logs in background; should be killed later
@@ -521,9 +521,7 @@ if [[ ! -z $SIGNATURE_FILE ]]; then
 			if [[ $DEVSEC_SUCCESS == 0 ]]; then
 				echo "$DEVSEC_CONTENTS" > "$(pwd)/$SIGNATURE_FILE"
 				echo "DevSec Device Signature file generated..." | tee -a "${LOG_PATH}"
-				echo "[REM] DEVSEC_CONTENTS:" | tee -a "${LOG_PATH}"
 				echo "$DEVSEC_CONTENTS" > "${LOG_PATH}"
-				echo "$DEVSEC_CONTENTS" | tee -a "${LOG_PATH}"
 			else
 				echo "DevSec Failed, keeping signature file intact." | tee -a "${LOG_PATH}"
 				echo $RESULT | tee -a "${LOG_PATH}"
