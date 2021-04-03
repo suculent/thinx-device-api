@@ -20,7 +20,7 @@ import (
 type Backend interface {
 	GetUser(username, password, clientid string) bool
 	GetSuperuser(username string) bool
-	CheckAcl(username, topic, clientId string, acc int32) bool
+	CheckAcl(username, topic, clientId string, acc int32) bool error
 	GetName() string
 	Halt()
 }
