@@ -7,7 +7,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
     // User profile has to be initialised first
     if (typeof($rootScope.profile.owner) !== "undefined") {
       console.log('##### websocket init');
-      openSocket();
+      openSocket("log");
     } else {
       console.log('##### websocket not initalised - missing owner profile');
     }
@@ -21,11 +21,11 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
     $rootScope.initWebsocketListener = $rootScope.$on('initWebsocket', function (event, owner_id) {
       event.stopPropagation();
       console.log("DEBUG owner_id initWebsocketListener", owner_id);
-      openSocket();
+      openSocket("log");
     });
   }
 
-  function openSocket() {
+  function openSocket(scope) {
     if ("WebSocket" in window) {
       if (typeof($rootScope.wss) === "undefined") {
         // open websocket
@@ -65,6 +65,36 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
         };
         $rootScope.wss.onclose = function() {
           console.log("## Websocket connection is closed... ##");
+        };
+
+        $rootScope.wsslog = new WebSocket('<ENV::wssUrl>/' + $rootScope.profile.owner + "/" + new Date().getTime());
+
+        $rootScope.wsslog.onopen = function () {
+          console.log("## Websocket connection estabilished ##");
+          $rootScope.wsstailLog($rootScope.modalBuildId);
+        };
+        $rootScope.wsslog.onmessage = function (message) {
+          // quick check before parsing
+          var msgType = message.data.substr(2, 12);
+
+          // save build data to build buffer
+          // - convert line endings
+          let adapted_data = message.data.replace(/\r\n|\n\t|\r|\n/g, "\n");
+          adapted_data = adapted_data.split(/\n/g);
+
+          // update currently observed logview
+          if (typeof ($rootScope.modalBuildId) !== "undefined") {
+            for (let i in adapted_data) {
+              $rootScope.logdata[$rootScope.modalBuildId] = $rootScope.logdata[$rootScope.modalBuildId] +
+                "\n" + adapted_data[i];
+            }
+          }
+          // unused
+          // $rootScope.logdata.buffer = $rootScope.logdata.buffer + "\n" + adapted_data.join("\n");
+
+        };
+        $rootScope.wsslog.onclose = function () {
+          console.log("## Log Websocket connection is closed... ##");
         };
       } else {
         // websocket already open
@@ -133,7 +163,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
       $rootScope.wsstailLog(build_id);
     } else {
       console.log('Socket not ready, trying to open it...');
-      openSocket();
+      openSocket("notification");
     }
   };
 
