@@ -84,7 +84,7 @@ swarm-build()
 	ITERATIONS=0
 
 	# 15 seconds x 4 = 1 minute; 4 x 15 minutes (max build duration) = 60
-	MAX_ITERATIONS=30
+	MAX_ITERATIONS=60
 	RUNNING=true
 
 	# write logs in background; should be killed later
