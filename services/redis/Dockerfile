@@ -11,6 +11,7 @@ ENV REDIS_DISABLE_COMMANDS=${REDIS_DISABLE_COMMANDS}
 
 RUN echo "REDIS_PASSWORD ON BUILD: ${REDIS_PASSWORD}"
 
+RUN apk add dcron
 # adduser --system --disabled-password --shell /bin/bash redis
 
 COPY ./bgsave-cron /bgsave-cron
