@@ -88,10 +88,9 @@ class Worker {
 
     runJob(sock, job) {
 
-        console.log("Setting worker to running...");
-        this.running = true;
-
         if (this.validateJob(sock, job)) {
+            console.log("Setting worker to running...");
+            this.running = true;
             this.runShell(job.cmd, job.owner, job.build_id, job.udid, job.path, sock);
         } else {
             console.log(new Date().getTime(), "« Job validation failed on this worker. Developer error, or attack attempt. No shell will be run.");
@@ -260,9 +259,9 @@ class Worker {
         });
 
         socket.on('job', (data) => { 
-            if (this.running = true) {
+            if (this.running == true) {
                 console.log("[!!!] This worker is already running... passing job", data);
-                // return;
+                return;
             }
             console.log(new Date().getTime(), `» Worker has new job:`, data);
             if (typeof(data.mock) === "undefined" || data.mock !== true) {
