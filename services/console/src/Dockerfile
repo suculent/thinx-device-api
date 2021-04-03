@@ -72,8 +72,7 @@ COPY --from=0 /home/node/build/html .
 
 # COPY default.conf /etc/nginx/conf.d/default.conf
 
-RUN apt-get update -qq \
- && apt-get upgrade -y
+RUN apk update && apk upgrade
 
 # Only for Alpine, but the nginx is somewhere else then?
 #COPY harden.sh .
