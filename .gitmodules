@@ -25,3 +25,8 @@
 [submodule "builders/platformio-docker-build"]
 	path = builders/platformio-docker-build
 	url = https://github.com/suculent/platformio-docker-build.git
+
+[submodule "spec/test_repositories/thinx-firmware-esp8266"]
+	path = spec/test_repositories/thinx-firmware-esp8266
+	url = git@github.com:suculent/thinx-firmware-esp8266.git
+
