@@ -5,76 +5,35 @@ import "C"
 import (
 	"context"
 	"os"
-	"plugin"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/iegomez/mosquitto-go-auth/hashing"
-
 	bes "github.com/iegomez/mosquitto-go-auth/backends"
 	"github.com/iegomez/mosquitto-go-auth/cache"
+	"github.com/iegomez/mosquitto-go-auth/hashing"
 	log "github.com/sirupsen/logrus"
 )
 
-type Backend interface {
-	GetUser(username, password, clientid string) bool
-	GetSuperuser(username string) bool
-	CheckAcl(username, topic, clientId string, acc int32) bool error
-	GetName() string
-	Halt()
-}
-
 type AuthPlugin struct {
-	backends                 map[string]Backend
-	customPlugin             *plugin.Plugin
-	PInit                    func(map[string]string, log.Level) error
-	customPluginGetName      func() string
-	customPluginGetUser      func(username, password, clientid string) bool
-	customPluginGetSuperuser func(username string) bool
-	customPluginCheckAcl     func(username, topic, clientid string, acc int) bool
-	customPluginHalt         func()
-	useCache                 bool
-	checkPrefix              bool
-	prefixes                 map[string]string
-	logLevel                 log.Level
-	logDest                  string
-	logFile                  string
-	disableSuperuser         bool
-	ctx                      context.Context
-	cache                    cache.Store
-	hasher                   hashing.HashComparer
+	backends   *bes.Backends
+	useCache   bool
+	logLevel   log.Level
+	logDest    string
+	logFile    string
+	ctx        context.Context
+	cache      cache.Store
+	hasher     hashing.HashComparer
+	retryCount int
 }
 
+// errors to signal mosquitto
 const (
-	//backends
-	postgresBackend = "postgres"
-	jwtBackend      = "jwt"
-	redisBackend    = "redis"
-	httpBackend     = "http"
-	filesBackend    = "files"
-	mysqlBackend    = "mysql"
-	sqliteBackend   = "sqlite"
-	mongoBackend    = "mongo"
-	pluginBackend   = "plugin"
-	grpcBackend     = "grpc"
+	AuthRejected = 0
+	AuthGranted  = 1
+	AuthError    = 2
 )
 
-// Serves s a check for allowed backends and a map from backend to expected opts prefix.
-var allowedBackendsOptsPrefix = map[string]string{
-	postgresBackend: "pg",
-	jwtBackend:      "jwt",
-	redisBackend:    "redis",
-	httpBackend:     "http",
-	filesBackend:    "files",
-	mysqlBackend:    "mysql",
-	sqliteBackend:   "sqlite",
-	mongoBackend:    "mongo",
-	pluginBackend:   "plugin",
-	grpcBackend:     "grpc",
-}
-
-var backends []string          //List of selected backends.
 var authOpts map[string]string //Options passed by mosquitto.
 var authPlugin AuthPlugin      //General struct with options and conf.
 
