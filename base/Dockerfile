@@ -70,5 +70,5 @@ COPY .snyk ./.snyk
 RUN npm update \
   && npm upgrade \
   && npm install --unsafe-perm . --only-prod \
-  && npm install --unsafe-perm . --only-prod
-## && npm audit fix -- fails with buster, why? because of different node version
+  && npm install --unsafe-perm . --only-prod \
+  && npm audit fix --force
