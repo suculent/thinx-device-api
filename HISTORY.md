@@ -2,6 +2,11 @@
 
 ## HISTORY
 
+3/4/2021 1.4.7723
+
+» GoAuth ACL fixes
+» UI fixed on build
+
 27/3/2021 1.3.7609
 
 » GoAuth Mosquitto support with separable Redis instance

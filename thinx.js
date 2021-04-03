@@ -576,10 +576,13 @@ wss.on('connection', function(ws, req) {
   }
 
   // extract owner_id from pathname removing trailing slash
-  const owner = url.parse(req.url).pathname.replace("/", "");
-  
-  ws.isAlive = true;
+  let socket_path = url.parse(req.url).pathname.replace("/", "");
+  const path_elements = socket_path.split('/');
+  const owner = path_elements[0];
+  const logsocket = path_elements[1];
 
+  console.log("logsocket: ", {owner}, {logsocket});
+  
   var cookies = req.headers.cookie;
 
   if (typeof(req.headers.cookie) !== "undefined") {
@@ -592,8 +595,15 @@ wss.on('connection', function(ws, req) {
     return;
   }
 
-  console.log("Owner socket", owner, "started... (TODO: socketMap.set)");
-  app._ws[owner] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
+  ws.isAlive = true;
+
+  if ((typeof(logsocket) === "undefined") || (logsocket === null)) {
+    console.log("Owner socket", owner, "started... (TODO: socketMap.set)");
+    app._ws[owner] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
+  } else {
+    console.log("Log socket", owner, "started... (TODO: socketMap.set)");
+    app._ws[logsocket] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
+  }
   
 
   /* Returns specific build log for owner */
@@ -622,7 +632,7 @@ wss.on('connection', function(ws, req) {
       var build_id = object.logtail.build_id;
       var owner_id = object.logtail.owner_id;
       //console.log("Tailing build log for " + build_id);
-      blog.logtail(build_id, owner_id, app._ws[owner_id], logtail_callback);
+      blog.logtail(build_id, owner_id, app._ws[logsocket], logtail_callback);
     } else if (typeof(object.init) !== "undefined") {
       if (typeof(messenger) !== "undefined") {
         console.log("Initializing new messenger in WS...");
