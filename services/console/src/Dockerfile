@@ -65,7 +65,7 @@ RUN apk del g++ gcc make
 
 #FROM nginx:1.19.2-alpine
 
-FROM nginx:1
+FROM nginx:alpine
 
 WORKDIR /usr/share/nginx/html
 COPY --from=0 /home/node/build/html .

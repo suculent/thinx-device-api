@@ -1,4 +1,4 @@
-FROM redis
+FROM redis:alpine
 
 ARG REDIS_PASSWORD
 ENV REDIS_PASSWORD=${REDIS_PASSWORD}
@@ -11,7 +11,8 @@ ENV REDIS_DISABLE_COMMANDS=${REDIS_DISABLE_COMMANDS}
 
 RUN echo "REDIS_PASSWORD ON BUILD: ${REDIS_PASSWORD}"
 
-RUN apt-get update -qq && apt-get upgrade -y && apt-get install -qq -y ca-certificates apt-transport-https cron && \
+RUN apk update && apk add cron
+#RUN apt-get update -qq && apt-get upgrade -y && apt-get install -qq -y ca-certificates apt-transport-https cron && \
     rm -rf /etc/apt/sources.list && apt-get update
 
 # adduser --system --disabled-password --shell /bin/bash redis
