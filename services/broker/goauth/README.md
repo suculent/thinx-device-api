@@ -1,11 +1,14 @@
 # Mosquitto Go Auth
 
 Mosquitto Go Auth is an authentication and authorization plugin for the Mosquitto MQTT broker.
-The name is terrible, I know, but it's too late to change it. And, you know: naming, cache invalidation, off-by-one errors and whatnot.
 
 # Current state
 
+I don't use Mosquitto or any other MQTT broker and haven't in a very long time, nor do I have a need for them or this plugin. 
+I do maintain it still and will try to keep doing so. This is the list of status, current work and priorities:
+
 - The plugin is up to date and is compatible with the recent [2.0 Mosquitto version](https://mosquitto.org/blog/2020/12/version-2-0-0-released/).
+- Delayed work on disabling superusers is not yet ready.
 - Bug reports will be attended as they appear and will take priority over any work in progress.
 - Reviewing ongoing PRs is my next priority.
 - Feature requests are the lowest priority. Unless they are a super easy win in importance and implementation effort, I'll accept contributions and review 
@@ -13,8 +16,7 @@ The name is terrible, I know, but it's too late to change it. And, you know: nam
 
 ### Intro
 
-This is an authentication and authorization plugin for [mosquitto](https://mosquitto.org/), a well known open source MQTT broker.  
-It's written (almost) entirely in Go: it uses `cgo` to expose mosquitto's auth plugin needed functions, but internally just calls Go to get everything done. 
+This is an authentication and authorization plugin for [mosquitto](https://mosquitto.org/), a well known open source MQTT broker. It's written (almost) entirely in Go: it uses `cgo` to expose mosquitto's auth plugin needed functions, but internally just calls Go to get everything done. 
 
 It is greatly inspired in [jpmens'](https://github.com/jpmens) [mosquitto-auth-plug](https://github.com/jpmens/mosquitto-auth-plug).
 
@@ -50,7 +52,6 @@ Please open an issue with the `feature` or `enhancement` tag to request new back
 	- [Log level](#log-level)
 	- [Prefixes](#prefixes)
 	- [Backend options](#backend-options)
-    - [Registering checks](#registering-checks)
 - [Files](#files)
 	- [Passwords file](#passwords-file)
 	- [ACL file](#acl-file)
@@ -254,14 +255,7 @@ auth_opt_cache_refresh true
 
 auth_opt_auth_cache_seconds 30
 auth_opt_acl_cache_seconds 30
-auth_opt_auth_jitter_seconds 3
-auth_opt_acl_jitter_seconds 3
 ```
-
-`auth_jitter_seconds` and `acl_jitter_seconds` options allow to randomize cache expiration time by a given offset
-The value used for expiring a cache record would then be `cache_seconds` +/- `jitter_seconds`. With above values (30 seconds for cache and 3 seconds for jitter), effective expiration would yield any value between 27 and 33 seconds. 
-Setting a `jitter` value is useful to reduce lookups storms that could occur every `auth/acl_cache_seconds` if lots of clients connected at the same time, e.g. after a server restart when all clients may reconnect immediately creating lots of entries expiring at the same time.
-You may omit or set jitter options to 0 to disable this feature.
 
 If `cache_reset` is set to false or omitted, cache won't be flushed upon service start.
 
@@ -340,7 +334,7 @@ auth_opt_pg_hasher_parallelism            # degree of parallelism (i.e. number o
 
 #### Logging
 
-You can set the log level with the `log_level` option. Valid values are: `debug`, `info`, `warn`, `error`, `fatal` and `panic`. If not set, default value is `info`.
+You can set the log level with the `log_level` option. Valid values are: debug, info, warn, error, fatal and panic. If not set, default value is `info`.
 
 ```
 auth_opt_log_level debug
@@ -354,25 +348,6 @@ auth_opt_log_file /var/log/mosquitto/mosquitto.log
 ```
 
 If `log_dest` or `log_file` are invalid, or if there's an error opening the file (e.g. no permissions), logging will default to `stderr`.
-
-**Do not, I repeat, do not set `log_level` to `debug` in production, it may leak sensitive information.**
-**Reason? When debugging it's quite useful to log actual passwords, hashes, etc. to check which backend or hasher is failing to do its job.**
-**This should be used only when debugging locally, I can't stress enough how log level should never, ever be set to `debug` in production.**
-
-**You've been warned.**
-
-#### Retry
-
-By default, if backend had an error (and no other backend granted access), an error is returned to Mosquitto.
-
-It's possible to enable retry, which will immediately retry all configured backends. This could be useful if the
-backend may be behind a load-balancer (like HTTP backend) and one instance may fail:
-
-```
-auth_opt_retry_count 2
-```
-
-The above example will do up to 2 retries (3 calls in total considering the original one) if the responsible backend had an error or was down while performing the check.
 
 #### Prefixes
 
@@ -447,21 +422,6 @@ You may run all tests (see Testing X for each backend's testing requirements) li
 ```
 make test
 ```
-
-### Registering checks
-
-Backends may register which checks they'll run, enabling the option to only check user auth through some backends, for example an HTTP one, while delegating ACL checks to another backend, e.g. Files.
-By default, when the option is not present, all checks for that backend will be enabled (unless `superuser` is globally disabled in the case of `superuser` checks).
-For `user` and `acl` checks, at least one backend needs to be registered, either explicitly or by default.
-
-You may register which checks a backend will perform with the option `auth_opt_backend_register` followed by comma separated values of the registered checks, e.g.:
-```
-auth_opt_http_register user
-auth_opt_files_register user, acl
-auth_opt_redis_register superuser
-```
-
-Possible values for checks are `user`, `superuser` and `acl`. Any other value will result in an error on plugin initialization.
 
 
 ### Files
@@ -1274,16 +1234,16 @@ func Init(authOpts map[string]string, logLevel log.Level) error {
 	return nil
 }
 
-func GetUser(username, password, clientid string) (bool, error) {
-	return false, nil
+func GetUser(username, password, clientid string) bool {
+	return false
 }
 
-func GetSuperuser(username string) (bool, error) {
-	return false, nil
+func GetSuperuser(username string) bool {
+	return false
 }
 
-func CheckAcl(username, topic, clientid string, acc int) (bool, error) {
-	return false, nil
+func CheckAcl(username, topic, clientid string, acc int) bool {
+	return false
 }
 
 func GetName() string {
@@ -1471,29 +1431,6 @@ This project provides example Dockerfiles for building a Docker container that c
 Please read the [documentation](./docker/README.md) in the [docker](/docker) directory for more information.
 
 Images are provided on Dockerhub under [iegomez/mosquitto-go-auth](https://hub.docker.com/r/iegomez/mosquitto-go-auth).
-
-### Testing using Docker
-
-Since tests require multiple backends (PostgreSQL, Mysql, Redis...), a Dockerfile.test provide
-and image with all required backend.
-To use it:
-```
-docker build -t mosquitto-go-auth.test -f Dockerfile.runtest .
-docker run --rm -ti mosquitto-go-auth.test sh ./run-test-in-docker.sh
-```
-
-Or using local source (avoid the need to rebuild image):
-```
-docker run -v $(pwd):/app --rm -ti mosquitto-go-auth.test sh ./run-test-in-docker.sh
-```
-
-You may even specify the command to run after backends are started, which allow
-to run only some tests or even get a shell inside the containers:
-```
-docker run -v $(pwd):/app --rm -ti mosquitto-go-auth.test sh ./run-test-in-docker.sh make test-backends
-
-docker run -v $(pwd):/app --rm -ti mosquitto-go-auth.test sh ./run-test-in-docker.sh bash
-```
 
 ### License
 
