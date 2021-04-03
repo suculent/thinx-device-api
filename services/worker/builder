@@ -521,9 +521,7 @@ if [[ ! -z $SIGNATURE_FILE ]]; then
 			if [[ $DEVSEC_SUCCESS == 0 ]]; then
 				echo "$DEVSEC_CONTENTS" > "$(pwd)/$SIGNATURE_FILE"
 				echo "DevSec Device Signature file generated..." | tee -a "${LOG_PATH}"
-				echo "[REM] DEVSEC_CONTENTS:" | tee -a "${LOG_PATH}"
 				echo "$DEVSEC_CONTENTS" > "${LOG_PATH}"
-				echo "$DEVSEC_CONTENTS" | tee -a "${LOG_PATH}"
 			else
 				echo "DevSec Failed, keeping signature file intact." | tee -a "${LOG_PATH}"
 				echo $RESULT | tee -a "${LOG_PATH}"
