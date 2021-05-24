@@ -20,7 +20,8 @@
     "mocha": "mocha spec/jasmine --delay=3000 --exit --timeout=5000; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls",
     "version": "npm run npm-auto-version",
     "postpublish": "git push origin --tags",
-    "preinstall": "if [ -f ./package_lock.json ]; then npx npm-force-resolutions; fi"
+    "preinstall": "if [ -f ./package_lock.json ]; then npx npm-force-resolutions; fi",
+    "prepare": "npm run snyk-protect"
   },
   "dependencies": {
     "@slack/rtm-api": "^5.0.5",
@@ -35,7 +36,7 @@
     "chmodr": "^1.2.0",
     "coap": "^0.24.0",
     "colors": "^1.4.0",
-    "connect-redis": "3.4.2",
+    "connect-redis": "^5.2.0",
     "connect-timeout": "^1.9.0",
     "cookie-parser": "^1.4.5",
     "crypto-js": "^4.0.0",
@@ -51,7 +52,7 @@
     "github-oauth": "^0.2.2",
     "helmet": "^4.2.0",
     "http-signature": "^1.3.5",
-    "mailgun-js": "^0.22.0",
+    "mailgun-js": "^0.17.0",
     "md5": "^2.3.0",
     "minimatch": "^3.0.4",
     "mkdirp": "^1.0.3",
@@ -68,7 +69,7 @@
     "path": "^0.12.7",
     "qs": "6.9.6",
     "querystring": "^0.2.0",
-    "redis": "^2.8.0",
+    "redis": "^3.1.2",
     "request": "^2.88.2",
     "rollbar": "^2.19.4",
     "semver": "7.3.5",
@@ -78,7 +79,7 @@
     "simple-oauth2": "^2.5.2",
     "slack-notify": "^0.1.7",
     "slackbots": "^1.2.0",
-    "snyk": "^1.437.2",
+    "snyk": "^1.606.0",
     "socket.io": "^3.0.4",
     "sqreen": "^1.57.1",
     "ssh-fingerprint": "0.0.1",
@@ -112,7 +113,7 @@
     "bl": "4.0.3"
   },
   "devDependencies": {
-    "codacy-coverage": "^3.4.0",
+    "codacy-coverage": "^3.2.0",
     "codecov": "^3.8.1",
     "coveralls": "^3.1.0",
     "eslint": "^6.8.0",
