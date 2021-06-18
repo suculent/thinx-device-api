@@ -37,19 +37,17 @@ jobs:
       - run:
           command: |
             rm -rf ./package-lock.json
-      - docker/check:
-          registry: registry.thinx.cloud:5000
+      - docker/check
       - docker/build:
-          registry: registry.thinx.cloud:5000
           image: thinx/mosquitto
           docker-context: services/broker
           dockerfile: services/broker/Dockerfile
-          tag: 'goauth'
+          extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
+          tag: 'test'
       - docker/push:
-          registry: registry.thinx.cloud:5000
-          image: thinx/mosquitto
           digest-path: /tmp/digest.txt
-          tag: 'goauth'
+          image: thinx/mosquitto
+          tag: 'test'
 
   build-redis-cloud:
     executor: docker/docker
@@ -184,8 +182,8 @@ jobs:
     docker:
       - image: suculent/thinx-base-image:latest
         auth:
-          username: $DOCKERHUB_USERNAME  # can specify string literal values
-          password: $DOCKERHUB_PASSWORD  # or project environment variable reference
+          username: $DOCKER_USERNAME  # can specify string literal values
+          password: $DOCKER_PASSWORD  # or project environment variable reference
 
     working_directory: ~/suculent/thinx-device-api
 
@@ -199,8 +197,6 @@ jobs:
       REDIS_URL: redis://localhost:6379
 
     steps:
-
-    # - docker/check
 
     - run:
         name: Install Docker Compose
@@ -350,6 +346,7 @@ workflows:
             branches:
               only:
                 - master
+                - features/mqtt-auth-plugin
 
       - build-api-cloud:
           context:
@@ -374,6 +371,12 @@ workflows:
             branches:
               only:
                 - thinx-swarm
+
+      - test-mosquitto-cloud:
+          filters:
+            branches:
+              only:
+                - features/mqtt-auth-plugin
 
       - build-redis-cloud:
           context:
