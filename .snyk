@@ -1,0 +1,49 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.19.0
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  SNYK-JS-101-1292345:
+    - parse-date > 101:
+        reason: none
+        expires: '2021-06-23T10:22:56.636Z'
+  SNYK-JS-GLOBPARENT-1016905:
+    - mqtt > help-me > glob-stream > glob-parent:
+        reason: none
+        expires: '2021-06-23T10:22:56.636Z'
+  SNYK-JS-NETMASK-1089716:
+    - mailgun-js > proxy-agent > pac-proxy-agent > pac-resolver > netmask:
+        reason: none
+        expires: '2021-06-23T10:22:56.636Z'
+  SNYK-JS-PATHPARSE-1077067:
+    - npm > read-package-json > normalize-package-data > resolve > path-parse:
+        reason: none
+        expires: '2021-06-23T10:22:56.636Z'
+    - npm > libnpmpublish > normalize-package-data > resolve > path-parse:
+        reason: None given
+        expires: '2021-06-23T10:22:56.636Z'
+    - npm > init-package-json > read-package-json > normalize-package-data > resolve > path-parse:
+        reason: None given
+        expires: '2021-06-23T10:22:56.636Z'
+  'npm:mime:20170907':
+    - github-oauth > request > mime:
+        reason: None given
+        expires: '2021-06-23T10:22:56.636Z'
+    - github-oauth > request > form-data > mime:
+        reason: None given
+        expires: '2021-06-23T10:22:56.636Z'
+  'npm:moment:20161019':
+    - fs-finder > moment:
+        reason: None given
+        expires: '2021-06-23T10:22:56.636Z'
+  'npm:moment:20170905':
+    - fs-finder > moment:
+        reason: None given
+        expires: '2021-06-23T10:22:56.636Z'
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  'npm:moment:20160126':
+    - fs-finder > moment:
+        patched: '2021-05-24T10:22:25.995Z'
+  'npm:request:20160119':
+    - github-oauth > request:
+        patched: '2021-05-24T10:22:25.995Z'
