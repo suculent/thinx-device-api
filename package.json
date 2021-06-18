@@ -105,6 +105,7 @@
     "mem": "4.0.0",
     "ajv": "6.12.3",
     "minimist": "1.2.3",
+    "minimatch": "3.0.4",
     "socket.io-parser": "4.0.4",
     "tunnel-agent": "0.6.0",
     "flat": "5.0.2",
