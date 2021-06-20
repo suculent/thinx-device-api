@@ -45,7 +45,7 @@ RUN apk update \
     && apk add ca-certificates \
     && update-ca-certificates \
     && apk --no-cache add --virtual native-deps \
-    && npm install node-gyp gulp eslint -g
+    && npm install node-gyp eslint -g
 
 # Create app directory
 WORKDIR /home/node/build
@@ -64,7 +64,7 @@ RUN apk del g++ gcc make
 #
 
 # needs to include gulp
-FROM nginx:1
+FROM nginx:stable
 
 WORKDIR /usr/share/nginx/html
 COPY --from=0 /home/node/build/html .
