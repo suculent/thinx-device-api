@@ -4,7 +4,7 @@ if (typeof(process.env.SQREEN_TOKEN) !== "undefined") {
 
 if (typeof(process.env.ROLLBAR_TOKEN) !== "undefined") {
     var Rollbar = require('rollbar');
-    new Rollbar({
+    const rb = new Rollbar({
         accessToken: process.env.ROLLBAR_TOKEN,
         handleUncaughtExceptions: true,
         handleUnhandledRejections: true
@@ -104,25 +104,15 @@ class Worker {
     }
 
     isArgumentSafe(CMD) {
-        var pattern = new RegExp("?!([;&]+)");
+        var pattern = new RegExp("(?![;&]+)");
         return pattern.test(CMD);
     }
 
     runShell(CMD, owner, build_id, udid, path, socket) {
 
-        let tomes = CMD.split(" ");
-        for (tome in tomes) {
-            if ((tome.indexOf("--git=" !== -1) || (tome.indexOf("--branch=") !== -1) {
-                if (!this.isArgumentSafe(tome)) {
-                    console.log("Tome", tome, "invalid, suspected command injection, exiting!");
-                    return;
-                }
-            }
-        }
-
         // Prevent injection through git, branch
 
-        CMD.replace("./builder", "/opt/thinx/thinx-device-api/builder");
+        CMD = CMD.replace("./builder", "/opt/thinx/thinx-device-api/builder");
 
         // Validate using whitelist regex to prevent command injection
         if (!isBuildIDValid(build_id)) {
@@ -139,7 +129,17 @@ class Worker {
 
         // preprocess
         let tomes = CMD.split(" ");
-        console.log(tomes);
+
+        for (let tome in tomes) {
+            if ( (tome.indexOf("--git=") !== -1) || (tome.indexOf("--branch=") !== -1)) {
+                if (!this.isArgumentSafe(tome)) {
+                    console.log("Tome", tome, "invalid, suspected command injection, exiting!");
+                    return;
+                }
+            }
+        }
+
+        console.log("runShell command:", tomes);
         let command = tomes.join(" ");
         
         let shell = exec.spawn(command, { shell: true });
@@ -153,7 +153,6 @@ class Worker {
 			logline = logline.replace(/\n\n/g, '');
 
 			if (logline.length > 1) {
-                //console.log("W [" + build_id + "] »» " + logline);
                 console.log(logline);
 
 				if (logline.indexOf("JOB-RESULT") !== -1) {
@@ -331,9 +330,9 @@ if (typeof(process.env.THINX_SERVER) !== "undefined") {
         srv = "http://" + srv;
     }
     console.log(new Date().getTime(), "» Starting build worker against", srv);
-    new Worker(srv);
+    const w = new Worker(srv);
 } else {
-    new Worker('http://localhost:3000'); // developer only, no authentication required
+    const w = new Worker('http://localhost:3000'); // developer only, no authentication required
     console.log(new Date().getTime(), "» Starting build worker without configuration.");
 }
 
