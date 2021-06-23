@@ -317,6 +317,7 @@ function fail_on_invalid_git_headers(req) {
 }
 
 const hook_server = express();
+hook_server.disable('x-powered-by');
 if (typeof(app_config.webhook_port) !== "undefined") {
   http.createServer(hook_server).listen(app_config.webhook_port, "0.0.0.0", function() {
     console.log("» Webhook API started on port", app_config.webhook_port);
@@ -340,6 +341,7 @@ if (typeof(app_config.webhook_port) !== "undefined") {
 
 // App
 const app = express();
+app.disable('x-powered-by');
 
 // DI
 app.builder = builder;
@@ -473,6 +475,7 @@ app.set('trust proxy', ['loopback', '127.0.0.1']);
  */
 
 var wsapp = express();
+wsapp.disable('x-powered-by');
 
 wsapp.use(session({
   secret: session_config.secret,

@@ -33,6 +33,7 @@ class Transformer {
   constructor() {
 
     this.app = express();
+    app.disable('x-powered-by');
 
     if (cluster.isMaster) {
       console.log(`[transformer] Master ${process.pid} is running`);

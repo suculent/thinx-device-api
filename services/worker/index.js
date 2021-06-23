@@ -97,9 +97,26 @@ class Worker {
         }
     }
 
+    isBuildIDValid(build_id) {
+        // build id may include [:alnum:] and - only
+        var pattern = new RegExp(/^([a-zA-Z0-9-]+)$/);
+        return (pattern.test(build_id));
+    }
+
     runShell(CMD, owner, build_id, udid, path, socket) {
 
-        CMD.replace("./builder", "/opt/thinx/thinx-device-api/builder"); // WTF?
+        CMD.replace("./builder", "/opt/thinx/thinx-device-api/builder");
+
+        // Validate using whitelist regex to prevent command injection
+        if (!isBuildIDValid(build_id)) {
+            console.log("[OID:" + owner + "] [BUILD_FAILED] Owner submitted invalid request...");
+            return;
+        }
+
+        // Sanitize against path traversal
+        build_id = build_id.replace(/\./g, '');
+        build_id = build_id.replace(/\\/g, '');
+        build_id = build_id.replace(/\//g, '');
 
         console.log("[OID:" + owner + "] [BUILD_STARTED] Worker started...");
 
@@ -171,8 +188,8 @@ class Worker {
                 if (err) {
                     console.log("» [ERROR] Log file could not be created.");
                 } else {
-                    fs.fchmodSync(fs.openSync(build_log_path), 0o777);
-                    chmodr(path + "/" + build_id, 0o777, (cherr) => {
+                    fs.fchmodSync(fs.openSync(build_log_path), 0o665);
+                    chmodr(path + "/" + build_id, 0o665, (cherr) => {
                         if (cherr) {
                             console.log('Failed to execute chmodr', cherr);
                         } else {
