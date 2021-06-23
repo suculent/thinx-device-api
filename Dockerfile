@@ -49,7 +49,8 @@ WORKDIR /opt/thinx/thinx-device-api
 # second npm install is using package_lock to fix pinned transient dependencies
 RUN npm update \
  && npm install --unsafe-perm . --only-prod \
- && npm audit fix --force
+ npm audit fix
+# && npm audit fix --force
 
 # THiNX Web & Device API (HTTP)
 EXPOSE 7442
