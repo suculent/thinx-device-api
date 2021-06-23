@@ -50,7 +50,7 @@ WORKDIR /opt/thinx/thinx-device-api
 RUN npm update \
  && npm install --unsafe-perm . --only-prod \
  npm audit fix
-# && npm audit fix --force
+# && npm audit fix --force # fails because of unfixable vulnerabilities
 
 # THiNX Web & Device API (HTTP)
 EXPOSE 7442
