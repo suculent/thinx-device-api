@@ -11,7 +11,7 @@ ENV ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
 
 RUN echo "ROLLBAR_ACCESS_TOKEN: ${ROLLBAR_ACCESS_TOKEN}"
 
-RUN apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python curl git jq
+RUN apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python3 curl git jq
 
 # remove offending node_modules from development environment (may not be compatible with alpine)
 RUN rm -rf ./node_modules
