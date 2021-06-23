@@ -103,7 +103,24 @@ class Worker {
         return (pattern.test(build_id));
     }
 
+    isArgumentSafe(CMD) {
+        var pattern = new RegExp("?!([;&]+)");
+        return pattern.test(CMD);
+    }
+
     runShell(CMD, owner, build_id, udid, path, socket) {
+
+        let tomes = CMD.split(" ");
+        for (tome in tomes) {
+            if ((tome.indexOf("--git=" !== -1) || (tome.indexOf("--branch=") !== -1) {
+                if (!this.isArgumentSafe(tome)) {
+                    console.log("Tome", tome, "invalid, suspected command injection, exiting!");
+                    return;
+                }
+            }
+        }
+
+        // Prevent injection through git, branch
 
         CMD.replace("./builder", "/opt/thinx/thinx-device-api/builder");
 
