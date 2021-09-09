@@ -1,6 +1,6 @@
 
-#Use debian:stable-slim as a builder and then copy everything.
-FROM debian:stable-slim as builder
+#Use debian:buster as a builder and then copy everything.
+FROM debian:buster as builder
 
 #Set mosquitto and plugin versions.
 #Change them for your needs.

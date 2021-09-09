@@ -5,7 +5,7 @@ This project utilizes two `Dockerfiles` to give the option of building the `mosq
 In both cases the resulting image contains a compiled and ready to run version of `mosquitto` with the `mosquitto-go-auth` plugin-in enabled.
 
 ### Base Image
-Since there are several issues with using `alpine` based images we are using `debian:stable-slim` for both our build and final image. The final image size is about 128 MB.
+Since there are several issues with using `alpine` based images we are using `debian:buster` for both our build and final image. The final image size is about 128 MB.
 
 Documented issues: 
 - https://github.com/iegomez/mosquitto-go-auth/issues/14

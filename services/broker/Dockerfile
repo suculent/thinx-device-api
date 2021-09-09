@@ -1,6 +1,6 @@
 
-#Use debian:stable-slim as a builder and then copy everything.
-FROM debian:stable-slim as builder
+#Use debian:buster as a builder and then copy everything.
+FROM debian:buster as builder
 
 #Set mosquitto and plugin versions.
 #Change them for your needs.
@@ -39,7 +39,7 @@ RUN export PATH=$PATH:/usr/local/go/bin && \
     make
 
 #Start from a new image.
-FROM debian:stable-slim
+FROM debian:buster
 
 #Get mosquitto dependencies.
 RUN apt-get update && apt-get install -y libwebsockets8 libc-ares2 openssl uuid
