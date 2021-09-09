@@ -64,5 +64,6 @@
     "port": 8086,
     "admin": "test",
     "password": "test"
-  }
+  },
+  "strict_gdpr": true
 }

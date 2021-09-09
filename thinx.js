@@ -43,6 +43,8 @@ const pki = require('node-forge').pki;
 const fs = require("fs-extra");
 const url = require('url');
 
+const schedule = require('node-schedule');
+
 // set up rate limiter
 const RateLimit = require('express-rate-limit');
 
@@ -50,8 +52,6 @@ let limiter = new RateLimit({
   windowMs: 1*60*1000, // 1 minute
   max: 500
 });
-
-// console.log(crypto.getCiphers()); // log supported ciphers to debug SSL IoT transport
 
 require("ssl-root-cas").inject();
 
@@ -135,11 +135,15 @@ var nano = require("nano")(db);
 
 function initDatabases(dbprefix) {
 
+  function null_cb(err, body, header) {
+    console.log(err); // only unexpected errors should be logged
+  };
+
   // only to fix bug in CouchDB 2.3.1 first-run
-  nano.db.create("_users", function(err, body, header) {});
-  nano.db.create("_stats", function(err, body, header) {});
-  nano.db.create("_replicator", function(err, body, header) {});
-  nano.db.create("_global_changes", function(err, body, header) {});
+  nano.db.create("_users", null_cb);
+  nano.db.create("_stats", null_cb);
+  nano.db.create("_replicator", null_cb);
+  nano.db.create("_global_changes", null_cb);
 
   nano.db.create(dbprefix + "managed_devices", function(err, body, header) {
     if (err) {
@@ -214,6 +218,99 @@ var Queue = require("./lib/thinx/queue");
 var queue = new Queue(builder);
 queue.cron(); // starts cron job for build queue from webhooks
 
+var Owner = require("./owner");
+
+// GDPR delete when account is expired (unused for 3 months)
+// WARNING: May purge old accounts, should be way to disable this.
+
+function purgeOldUsers() {
+  if ((typeof(app_config.strict_gdpr) !== "undefined") && app_config.strict_gdpr === false) {
+    console.log("Purge old users skipped. Enable with strict_gdpr = true in config.json");
+    return;
+  }
+  var d = new Date();
+  d.setMonth(d.getMonth() - 3);
+  let req = {
+    query: {
+      mindate: d
+    }
+  };
+  userlib.atomic("users", "delete_expired", req, function(error, response) {
+    if (error) {
+      console.log("Purge Old Error:", error);
+    } else {
+      console.log("Purged:", response);
+    }
+  });
+}
+
+function notify24(user) {
+  var d1 = new Date();
+  d1.setMonth(d1.getMonth() - 3);
+  d1.setDay(d1.getDay() - 1);
+  if (user.last_update == d1) {
+    if (typeof (user.notifiedBeforeGDPRRemoval24) === "undefined" || user.notifiedBeforeGDPRRemoval24 !== true) {
+      Owner.sendGDPRExpirationEmail24(user, user.email, function () {
+        userlib.atomic("users", "edit", owner, { notifiedBeforeGDPRRemoval24: true }, (uerror, abody) => {
+          console.log("sendGDPRExpirationEmail24", uerror, abody);
+        });
+      });
+    }
+  }
+}
+
+function notify168(user) {
+  var d2 = new Date();
+    d2.setMonth(d2.getMonth() - 3);
+    d2.setDay(d2.getDay() - 7);
+    if (user.last_update == d2) {
+      if (typeof (user.notifiedBeforeGDPRRemoval168) === "undefined" || user.notifiedBeforeGDPRRemoval168 !== true) {
+        Owner.sendGDPRExpirationEmail168(user, user.email, function () {
+          userlib.atomic("users", "edit", owner, { notifiedBeforeGDPRRemoval168: true }, (uerror, abody) => {
+            console.log("sendGDPRExpirationEmail168", uerror, abody);
+          });
+        });
+      }
+    }
+}
+
+function notifyOldUsers() {
+  // Should send an e-mail once a day
+  // Must parse all users, find users with expiration
+
+  if ((typeof(app_config.strict_gdpr) !== "undefined") && app_config.strict_gdpr === false) {
+    console.log("Notification for old users skipped. Enable with strict_gdpr = true in config.json");
+    return;
+  }
+
+  userlib.view("users", "owners_by_username", {
+    "key": username,
+    "include_docs": true
+  }, (err, user_view_body) => {
+
+    if (err) {
+      console.log(err);
+      return;
+    }
+
+    for (var index in user_view_body.rows) {
+      let user = user_view_body.rows[index];
+      notify24(user);
+      notify168(user);
+    }
+  });
+}
+
+var cron_rule_15_min = "*/15 * * * *";
+schedule.scheduleJob(cron_rule_15_min, () => {
+  purgeOldUsers();
+});
+
+var cron_rule_daily = "0 8 * * *"; // daily 8 am
+schedule.scheduleJob(cron_rule_daily, () => {
+  notifyOldUsers();
+});
+
 
 //
 // REFACTOR: Move to database.js
@@ -258,7 +355,6 @@ function injectDesign(couch, design, file) {
   console.log("» Inserting design document " + design + " from path", file);
   let design_doc = getDocument(file);
   if (design_doc != null) {
-    //console.log("Inserting design document", {design_doc});
     couch.insert(design_doc, "_design/" + design, function(err, body, header) {
       logCouchError(err, body, header, "init:design:"+design);
     });
@@ -271,7 +367,6 @@ function injectReplFilter(couch, file) {
   console.log("» Inserting filter document from path", file);
   let filter_doc = getDocument(file);
   if (filter_doc !== false) {
-    //console.log("Inserting filter document", {filter_doc});
     couch.insert(filter_doc, "_design/repl_filters", function(err, body, header) {
       logCouchError(err, body, header, "init:repl:"+filter_doc);
     });
@@ -444,7 +539,7 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   console.log("» Loaded SSL certificate.");
 
   try {
-    sslvalid = ca.verify(client)
+    sslvalid = ca.verify(client);
   } catch (err) {
     console.log("Certificate verification failed: ", err);
   }
@@ -457,7 +552,7 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
         NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
       };
       console.log("» Starting HTTPS server on " + app_config.secure_port + "...");
-      https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0", function() { } );
+      https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
   } else {
       console.log("» SSL certificate loading or verification FAILED! Check your configuration!");
   }
@@ -524,7 +619,6 @@ server.on('upgrade', function (request, socket, head) {
     } catch (upgradeException) {
       // fails on duplicate upgrade, why does it happen?
       console.log("Exception caught upgrading same socket twice.");
-      //console.log(upgradeException);
     }
   });
 });
@@ -540,7 +634,7 @@ setInterval(function ping() {
         console.log("[DBUG] Terminating websocket!");
         ws.terminate();
       } else {
-        ws.ping(()=>{});
+        ws.ping();
       }
     });
   }
@@ -560,10 +654,59 @@ var logtail_callback = function(err, result) {
 
 wss.on("error", function(err) {
   console.log("WSS REQ ERROR: " + err);
-  return;
 });
 
 app._ws = []; // array of all owner websockets
+
+function initLogTail(ws) {
+  app.post("/api/user/logs/tail", function(req2, res) {
+    if (!(router.validateSecurePOSTRequest(req2) || router.validateSession(req2, res))) return;
+    if (typeof(req2.body.build_id) === "undefined") {
+      router.respond(res, {
+        success: false,
+        status: "missing_build_id"
+      });
+      return;
+    }
+    let safe_id = Sanitka.branch(req2.body.build_id);
+    console.log("Tailing build log for " + safe_id);
+  });
+}
+
+function initSocket(ws, msgr) {
+  ws.on("message", (message) => {
+    console.log("WSS message", message);
+    if (message.indexOf("{}") == 0) return; // skip empty messages
+    var object = JSON.parse(message);
+    if (typeof(object.logtail) !== "undefined") {
+      var build_id = object.logtail.build_id;
+      var owner_id = object.logtail.owner_id;
+      blog.logtail(build_id, owner_id, app._ws[logsocket], logtail_callback);
+    } else if (typeof(object.init) !== "undefined") {
+      if (typeof(msgr) !== "undefined") {
+        console.log("Initializing new messenger in WS...");
+        let socket = app._ws[owner_id];
+        msgr.initWithOwner(object.init, socket, function(success, message_z) {
+          if (!success) {
+            console.log("Messenger init on WS message with result " + success + ", with message: ", { message_z });
+          }
+        });
+      }
+    } else {
+      /* unknown message debug, must be removed */
+      var m = JSON.stringify(message);
+      if ((m != "{}") || (typeof(message)=== "undefined")) {
+        console.log("» Websocket parser said: unknown message: " + m);
+      }
+    }
+  });
+
+  ws.on('pong', heartbeat);
+
+  ws.on('close', function () {
+    socketMap.delete(owner);
+  });
+}
 
 wss.on('connection', function(ws, req) {
 
@@ -608,58 +751,9 @@ wss.on('connection', function(ws, req) {
     app._ws[logsocket] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
   }
   
-
   /* Returns specific build log for owner */
-
-  // TODO: Extract with params (ws)
-  app.post("/api/user/logs/tail", function(req2, res) {
-    if (!(router.validateSecurePOSTRequest(req2) || router.validateSession(req2, res))) return;
-    if (typeof(req2.body.build_id) === "undefined") {
-      router.respond(res, {
-        success: false,
-        status: "missing_build_id"
-      });
-      return;
-    }
-    let safe_id = Sanitka.branch(req2.body.build_id);
-    console.log("Tailing build log for " + safe_id);
-  });
-
-  // TODO: Extract with params (ws, messenger)
-  ws.on("message", (message) => {
-    console.log("WSS message", message);
-    if (message.indexOf("{}") == 0) return; // skip empty messages
-    var object = JSON.parse(message);
-    if (typeof(object.logtail) !== "undefined") {
-      //console.log("Initializing WS logtail with object ", {object});
-      var build_id = object.logtail.build_id;
-      var owner_id = object.logtail.owner_id;
-      //console.log("Tailing build log for " + build_id);
-      blog.logtail(build_id, owner_id, app._ws[logsocket], logtail_callback);
-    } else if (typeof(object.init) !== "undefined") {
-      if (typeof(messenger) !== "undefined") {
-        console.log("Initializing new messenger in WS...");
-        let socket = app._ws[owner_id];
-        messenger.initWithOwner(object.init, socket, function(success, message_z) {
-          if (!success) {
-            console.log("Messenger init on WS message with result " + success + ", with message: ", { message_z });
-          }
-        });
-      }
-    } else {
-      /* unknown message debug, must be removed */
-      var m = JSON.stringify(message);
-      if ((m != "{}") || (typeof(message)=== "undefined")) {
-        console.log("» Websocket parser said: unknown message: " + m);
-      }
-    }
-  });
-
-  ws.on('pong', heartbeat);
-
-  ws.on('close', function () {
-    socketMap.delete(owner);
-  });
+  initLogTail(ws);
+  initSocket(ws, messenger);
 
 }).on("error", function(err) {
   console.log("WSS Connection Error: ", err);
@@ -683,6 +777,7 @@ function database_compactor() {
 // Log aggregator
 //
 
+// Warning, this is never called!
 function log_aggregator() {
   stats.aggregate();
   console.log("» Aggregation jobs completed.");
@@ -736,7 +831,6 @@ function restore_owner_credentials(owner_id, dmk_callback) {
         return;
       }
 
-      // console.log("RESTORING OWNER KEYS: "+JSON.stringify(json_array));
       for (var ai in json_array) {
         var item = json_array[ai];
         /* we would have to fetch whole owner doc to know this
