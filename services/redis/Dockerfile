@@ -1,4 +1,4 @@
-FROM redis:latest
+FROM redis:6.2-buster
 
 ARG REDIS_PASSWORD
 ENV REDIS_PASSWORD=${REDIS_PASSWORD}
