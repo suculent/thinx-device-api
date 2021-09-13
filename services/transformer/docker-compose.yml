@@ -22,8 +22,6 @@ services:
         - REVISION=1
     networks:
       - internal
-    ports:
-      - "7474:7474"
     networks:
       - internal
     restart: unless-stopped
