@@ -296,6 +296,11 @@ class Worker {
                 console.log("[!!!] This worker is already running... passing job", data);
                 return;
             }
+            // Prevent path traversal by rejecting insane values
+            if (typeof(job.path) !== "undefined" && job.path.indexOf("..") !== -1) {
+                console.log("Invalid path (no path traversal allowed).");
+                return;
+            }
             console.log(new Date().getTime(), `» Worker has new job:`, data);
             if (typeof(data.mock) === "undefined" || data.mock !== true) {
                 this.client_id = data;
