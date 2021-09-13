@@ -136,11 +136,11 @@ var nano = require("nano")(db);
 function initDatabases(dbprefix) {
 
   function null_cb(err, body, header) {
-    console.log(err); // only unexpected errors should be logged
+    // console.log(err); // only unexpected errors should be logged
   };
 
   // only to fix bug in CouchDB 2.3.1 first-run
-  nano.db.create("_users", null_cb);
+  nano.db.create("_users", (null_cb));
   nano.db.create("_stats", null_cb);
   nano.db.create("_replicator", null_cb);
   nano.db.create("_global_changes", null_cb);
@@ -218,7 +218,7 @@ var Queue = require("./lib/thinx/queue");
 var queue = new Queue(builder);
 queue.cron(); // starts cron job for build queue from webhooks
 
-var Owner = require("./owner");
+var Owner = require("./lib/owner");
 
 // GDPR delete when account is expired (unused for 3 months)
 // WARNING: May purge old accounts, should be way to disable this.
