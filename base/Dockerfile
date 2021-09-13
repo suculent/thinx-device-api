@@ -1,5 +1,5 @@
 # pinned to 13 until npm audit will be available for 15 and issue with gid will be solved
-FROM node:15-buster-slim
+FROM node:16.8.0-buster-slim
 
 RUN adduser --system --disabled-password --shell /bin/bash thinx
 
@@ -67,8 +67,4 @@ COPY ./package.json ./
 COPY .snyk ./.snyk
 
 # install with npx and audit fix
-RUN npm update \
-  && npm upgrade \
-  && npm install --unsafe-perm . --only-prod \
-  && npm install --unsafe-perm . --only-prod \
-  && npm audit fix --force
+RUN npm install --only-prod
