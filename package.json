@@ -38,6 +38,7 @@
     "colors": "^1.4.0",
     "connect-timeout": "^1.9.0",
     "cookie-parser": "^1.4.5",
+    "connect-redis": "*",
     "crypto-js": "^4.0.0",
     "csurf": "^1.11.0",
     "dateformat": "^3.0.3",
