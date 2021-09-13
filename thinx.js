@@ -66,6 +66,12 @@ var app_config = Globals.app_config();
 var prefix = Globals.prefix();
 var rollbar = Globals.rollbar(); // lgtm [js/unused-local-variable]
 var redis_client = redis.createClient(Globals.redis_options());
+try {
+  redis_client.bgsave();
+} catch (e) {
+  // may throw errro that BGSAVE is already enabled
+  console.log("thinx.js bgsave error:", e);
+}
 
 // Default ACLs and MQTT Password
 const Auth = require('./lib/thinx/auth.js');
@@ -218,7 +224,7 @@ var Queue = require("./lib/thinx/queue");
 var queue = new Queue(builder);
 queue.cron(); // starts cron job for build queue from webhooks
 
-var Owner = require("./lib/owner");
+var Owner = require("./lib/thinx/owner");
 
 // GDPR delete when account is expired (unused for 3 months)
 // WARNING: May purge old accounts, should be way to disable this.
