@@ -345,8 +345,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
-                - features/mqtt-auth-plugin
+                - update
 
       - build-api-cloud:
           context:
