@@ -29,9 +29,9 @@
 		"express-session": "^1.17.1",
 		"joi": "^14.3.1",
 		"parser": "^0.1.4",
-		"rollbar": "^2.19.4",
+		"rollbar": "^2.24.0",
 		"snyk": "^1.424.1",
-		"sqreen": "^1.55.0",
+		"sqreen": "^1.64.2",
 		"ssl-root-cas": "^1.2.5",
 		"typeof": "^1.0.0",
 		"uuid": "^8.3.1"
