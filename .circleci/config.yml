@@ -192,7 +192,7 @@ jobs:
             --build-arg REVISION=$(git describe --abbrev=0) \
           tag: 'swarm'
   
-
+  # this is deprecated (does not authenticate against docker.io for the base thinx image fetch)
   build:
 
     # In CircleCI 2.0 you can now specify your own image, or use one of our pre-configured images.
