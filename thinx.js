@@ -451,12 +451,7 @@ app.messenger = messenger;
 
 // Redis
 var RedisStore = require("connect-redis")(session);
-var sessionStore = new RedisStore({
-  host: app_config.redis.host,
-  port: app_config.redis.port,
-  pass: app_config.redis.password,
-  ttl : (60000 * 24 * 30)
-});
+var sessionStore = new RedisStore({client: redis_client});
 
 app.set("trust proxy", 1);
 
