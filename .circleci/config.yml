@@ -356,21 +356,21 @@ workflows:
 
     jobs:
     
-      - test-api-cloud:
-          context:
-              - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - update
+      # - test-api-cloud:
+      #     context:
+      #         - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - update
 
-      - build-api-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
+      # - build-api-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
 
       - build-console-cloud:
           context:
