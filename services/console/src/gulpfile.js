@@ -29,7 +29,7 @@ var env = {
   projectName: process.env.COMPOSE_PROJECT_NAME,
   loginPageTitle: 'THiNX Console',
   landingHostName: process.env.LANDING_HOSTNAME,
-  apiBaseUrl: process.env.API_BASEURL + '/api',
+  apiBaseUrl: process.env.API_BASEURL, // + '/api' /* removed because proxy adds this from path */
   apiDirectUrl: 'https://' + process.env.API_HOSTNAME,
   slackClientId: '233115403974.233317554391',
   wssUrl: 'wss://' + process.env.API_HOSTNAME, // moved to https server + ':7445' is expectedly exposed TCP/SSL service
