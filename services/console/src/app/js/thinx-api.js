@@ -197,6 +197,9 @@ function init($rootScope, $scope) {
       $rootScope.sources = [];
       $.each(response.sources, function(sourceId, value) {
         value.sourceId = sourceId;
+        if (typeof (value.platform) === "undefined") {
+          value.platform = "unknown";
+        }
         value.base_platform = value.platform.split(":")[0];
         $rootScope.sources.push(value);
       });
