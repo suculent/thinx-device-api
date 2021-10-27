@@ -662,7 +662,7 @@ wss.on("error", function(err) {
   console.log("WSS REQ ERROR: " + err);
 });
 
-app._ws = []; // array of all owner websockets
+app._ws = {}; // list of all owner websockets
 
 function initLogTail(ws) {
   app.post("/api/user/logs/tail", function(req2, res) {
