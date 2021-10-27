@@ -698,13 +698,7 @@ function initSocket(ws, msgr) {
           }
         });
       }
-    } else {
-      /* unknown message debug, must be removed */
-      var m = JSON.stringify(message);
-      if ((m != "{}") || (typeof(message)=== "undefined")) {
-        console.log("» Websocket parser said: unknown message: " + m);
-      }
-    }
+    } 
   });
 
   ws.on('pong', heartbeat);
