@@ -115,7 +115,7 @@ class Worker {
         CMD = CMD.replace("./builder", "/opt/thinx/thinx-device-api/builder");
 
         // Validate using whitelist regex to prevent command injection
-        if (!isBuildIDValid(build_id)) {
+        if (!this.isBuildIDValid(build_id)) {
             console.log("[OID:" + owner + "] [BUILD_FAILED] Owner submitted invalid request...");
             return;
         }

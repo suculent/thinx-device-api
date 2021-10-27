@@ -101,7 +101,7 @@ class Transformer {
       return;
     }
 
-    var ingress = req.body;
+    var ingress = {};
     try {
       ingress = JSON.parse(req.body);
     } catch (e) {
