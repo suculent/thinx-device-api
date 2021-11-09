@@ -1,5 +1,5 @@
 # pinned to 13 until npm audit will be available for 15 and issue with gid will be solved
-FROM node:16.8.0-buster-slim
+FROM node:16.13.0-buster-slim
 
 RUN adduser --system --disabled-password --shell /bin/bash thinx
 
