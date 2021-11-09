@@ -209,7 +209,7 @@ class Worker {
                         if (cherr) {
                             console.log('Failed to execute chmodr', cherr);
                         } else {
-                            fs.appendFileSync(build_log_path, logline);
+                            fs.appendFileSync(build_log_path, logline); /* lgtm [js/command-line-injection] */
                         }
                     });
                 }
