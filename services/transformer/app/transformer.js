@@ -94,10 +94,10 @@ class Transformer {
 
   process(req, res) {
     if (typeof(req.body) === "undefined") {
-      this.respond(res, {
+      res.end(JSON.stringify({
         success: false,
         error: "missing: body"
-      });
+      }));
       return;
     }
 
@@ -110,10 +110,10 @@ class Transformer {
 
     var jobs = ingress.jobs;
     if (typeof(ingress.jobs) === "undefined") {
-      this.respond(res, {
+      res.end(JSON.stringify({
         success: false,
         error: "missing: body.jobs"
-      });
+      }));
       return;
     }
 
@@ -159,30 +159,31 @@ class Transformer {
     return cleancode;
   }
 
-  respond(res, object) {
-    if (typeOf(object) == "buffer") {
-      res.header("Content-Type", "application/octet-stream");
-      res.send(object);
-    } else if (typeOf(object) == "string") {
-      res.end(object);
-    } else {
-      res.end(JSON.stringify(object));
-    }
-  }
-
   process_jobs(jobs, callback) {
     var input_raw = jobs[0].params.status;
     var status = input_raw;
     var error = null;
     for (var job_index in jobs) {
       const job = jobs[job_index];
+      // This is just a simple blacklist for dangerous functions.
+      // -> extract from here 
       const code = this.sanitize(job.code);
-      console.log(new Date().toString() + " job: " + JSON.stringify(job));
+      if (job.code.indexOf("child_process") !== -1) {
+        callback("child process not allowed", true);
+        return;
+      }
+      if (job.code.indexOf("transformer") === -1) {
+        callback("lambda function missing", true);
+        return;
+      }
+      // <- extract to here
+       // console.log(new Date().toString() + " job: " + JSON.stringify(job));
       try {
-        console.log("[transformer] Running code:\n" + code);
-        var transformer = function() {};
+        var transformer = function() {
+          // initially empty
+        };
         /* jshint -W061 */
-        eval(code); // expects transformer(status, device); function only; may provide API
+        eval(code); // expects `transformer(status, device)` function only
         /* jshint +W061 */
         status = transformer(status, job.params.device); // passthrough previous status
         console.log("[transformer] Docker Transformer will return status: '" + status + "'");
@@ -191,16 +192,15 @@ class Transformer {
         error = JSON.stringify(e);
       }
     }
-    callback(input_raw, status, error);
+    callback(status, error);
   }
 
   transform(jobs, res) {
-    this.process_jobs(jobs, (input_raw, status, error) => {
-      this.respond(res, {
-        input: input_raw,
+    this.process_jobs(jobs, (status, error) => {
+      res.end(JSON.stringify({
         output: status,
         error: error
-      });
+      }));
     });
   }
 

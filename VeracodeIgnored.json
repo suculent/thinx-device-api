@@ -76,5 +76,135 @@
         "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/lib/thinx/notifier.js"
       }
     }
+  },
+  {
+    "CWEId": "352",
+    "FlawMatch": {
+      "ProcedureHash": "3733702799",
+      "PrototypeHash": "2979569600",
+      "FlawHash": "1402053650",
+      "FlawHashCount": "1",
+      "FlawHashOrdinal": "1",
+      "CauseHash": "2275449179",
+      "CauseHashCount": "1",
+      "CauseHashOrdinal": "1",
+      "CauseHash2": "0",
+      "CauseHash2Ordinal": "0"
+    },
+    "Files": {
+      "SourceFile": {
+        "File": "transformer.js",
+        "Line": "35",
+        "FunctionName": "Transformer",
+        "QualifiedFunctionName": "Transformer.Transformer",
+        "FunctionPrototype": "Transformer(: ::Transformer, ...) : any",
+        "Scope": "^::Transformer",
+        "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/services/transformer/app/transformer.js"
+      }
+    }
+  },
+  {
+    "CWEId": "80",
+    "FlawMatch": {
+      "ProcedureHash": "2533048091",
+      "PrototypeHash": "4207853235",
+      "FlawHash": "3951266072",
+      "FlawHashCount": "1",
+      "FlawHashOrdinal": "1",
+      "CauseHash": "1725994837",
+      "CauseHashCount": "1",
+      "CauseHashOrdinal": "1",
+      "CauseHash2": "1176028798",
+      "CauseHash2Ordinal": "1"
+    },
+    "Files": {
+      "SourceFile": {
+        "File": "transformer.js",
+        "Line": "170",
+        "FunctionName": "respond",
+        "QualifiedFunctionName": "Transformer.respond",
+        "FunctionPrototype": "respond(: ::Transformer,  : any,  : any, ...) : any",
+        "Scope": "^::Transformer",
+        "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/services/transformer/app/transformer.js"
+      }
+    }
+  },
+  {
+    "CWEId": "80",
+    "FlawMatch": {
+      "ProcedureHash": "2533048091",
+      "PrototypeHash": "4207853235",
+      "FlawHash": "2560374387",
+      "FlawHashCount": "2",
+      "FlawHashOrdinal": "2",
+      "CauseHash": "61553967",
+      "CauseHashCount": "1",
+      "CauseHashOrdinal": "1",
+      "CauseHash2": "1522093433",
+      "CauseHash2Ordinal": "5"
+    },
+    "Files": {
+      "SourceFile": {
+        "File": "transformer.js",
+        "Line": "168",
+        "FunctionName": "respond",
+        "QualifiedFunctionName": "Transformer.respond",
+        "FunctionPrototype": "respond(: ::Transformer,  : any,  : any, ...) : any",
+        "Scope": "^::Transformer",
+        "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/services/transformer/app/transformer.js"
+      }
+    }
+  },
+  {
+    "CWEId": "352",
+    "FlawMatch": {
+      "ProcedureHash": "2768287928",
+      "PrototypeHash": "2979569600",
+      "FlawHash": "1402053650",
+      "FlawHashCount": "1",
+      "FlawHashOrdinal": "1",
+      "CauseHash": "2275449179",
+      "CauseHashCount": "1",
+      "CauseHashOrdinal": "1",
+      "CauseHash2": "0",
+      "CauseHash2Ordinal": "0"
+    },
+    "Files": {
+      "SourceFile": {
+        "File": "transformer.js",
+        "Line": "35",
+        "FunctionName": "Transformer",
+        "QualifiedFunctionName": "Transformer.Transformer",
+        "FunctionPrototype": "Transformer(: ::Transformer, ...) : any",
+        "Scope": "^::Transformer",
+        "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/services/transformer/app/transformer.js"
+      }
+    }
+  },
+  {
+    "CWEId": "95",
+    "FlawMatch": {
+      "ProcedureHash": "2290809184",
+      "PrototypeHash": "2583662532",
+      "FlawHash": "1817837575",
+      "FlawHashCount": "1",
+      "FlawHashOrdinal": "1",
+      "CauseHash": "584528949",
+      "CauseHashCount": "1",
+      "CauseHashOrdinal": "1",
+      "CauseHash2": "1522093433",
+      "CauseHash2Ordinal": "3"
+    },
+    "Files": {
+      "SourceFile": {
+        "File": "transformer.js",
+        "Line": "186",
+        "FunctionName": "process_jobs",
+        "QualifiedFunctionName": "Transformer.process_jobs",
+        "FunctionPrototype": "process_jobs(: ::Transformer,  : any,  : any, ...) : any",
+        "Scope": "^::Transformer",
+        "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/services/transformer/app/transformer.js"
+      }
+    }
   }
 ]
