@@ -169,7 +169,6 @@ jobs:
             --build-arg ENVIRONMENT=${ENVIRONMENT} \
             --build-arg REVISION=$(git describe --abbrev=0) \
           tag: 'swarm'
-      - sonarcloud/scan
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/api
@@ -336,6 +335,7 @@ jobs:
           date
           docker-compose stop
 #          codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d
+          # https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
 
     - run:
         name: Check running Docker containers
