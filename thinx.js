@@ -142,8 +142,8 @@ var nano = require("nano")(db);
 function initDatabases(dbprefix) {
 
   function null_cb(err, body, header) {
-    // console.log(err); // only unexpected errors should be logged
-  };
+    // only unexpected errors should be logged
+  }
 
   // only to fix bug in CouchDB 2.3.1 first-run
   nano.db.create("_users", (null_cb));
@@ -334,8 +334,7 @@ function getDocument(file) {
   }
   // Parser may fail
   try {
-    const filter_doc = JSON.parse(data);
-    return filter_doc;
+    return JSON.parse(data);
   } catch (e) {
     console.log("» Document File may not exist: "+e);
     return false;
@@ -784,7 +783,7 @@ function log_aggregator() {
 //
 
 function isMasterProcess() {
-  return true; // cluster.isMaster();
+  return true; // should be actually `cluster.isMaster();`
 }
 
 function reporter(success, default_mqtt_key) {
@@ -855,8 +854,7 @@ function setup_restore_owners_credentials(query) {
       console.log("DR ERR: "+err);
       return;
     }
-    for (var i = 0; i < body.rows.length; i++) {
-      var owner_doc = body.rows[i];
+    for (var owner_doc of body.rows) {
       var owner_id = owner_doc.id;
       if (owner_id.indexOf("design")) continue;
       console.log("Restoring credentials for owner "+owner_id);
@@ -866,7 +864,7 @@ function setup_restore_owners_credentials(query) {
 }
 
 function startup_quote() {
-  if (process.env.ENTERPRISE !== true) {
+  if ((typeof(process.env.ENTERPRISE) === "undefined") || (process.env.ENTERPRISE === false)) {
     messenger.sendRandomQuote();
   }
 }
