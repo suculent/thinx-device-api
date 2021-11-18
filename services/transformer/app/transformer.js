@@ -22,7 +22,6 @@ require('ssl-root-cas').inject();
 https.globalAgent.options.ca = require('ssl-root-cas');
 
 var parser = require("body-parser");
-var typeOf = require("typeof");
 var base64 = require("base-64");
 
 const cluster = require('cluster');
