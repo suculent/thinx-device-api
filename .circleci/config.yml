@@ -3,6 +3,7 @@ orbs:
   node: circleci/node@3.0.0
   docker: circleci/docker@1.5.0
   slack: circleci/slack@4.1.3
+  sonarcloud: sonarsource/sonarcloud@1.0.1
 
 jobs:
 
@@ -168,6 +169,7 @@ jobs:
             --build-arg ENVIRONMENT=${ENVIRONMENT} \
             --build-arg REVISION=$(git describe --abbrev=0) \
           tag: 'swarm'
+      - sonarcloud/scan
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/api
@@ -367,6 +369,7 @@ workflows:
       - build-api-cloud:
           context:
             - thinx-docker-repo
+            - SonarCloud
           filters:
             branches:
               only:
