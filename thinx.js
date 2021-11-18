@@ -686,8 +686,9 @@ function initSocket(ws, msgr) {
     } else if (typeof(object.init) !== "undefined") {
       if (typeof(msgr) !== "undefined") {
         console.log("Initializing new messenger in WS...");
-        let socket = app._ws[owner_id];
-        msgr.initWithOwner(object.init, socket, function(success, message_z) {
+        var owner = object.init;
+        let socket = app._ws[owner];
+        msgr.initWithOwner(owner, socket, function(success, message_z) {
           if (!success) {
             console.log("Messenger init on WS message with result " + success + ", with message: ", { message_z });
           }
