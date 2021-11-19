@@ -206,5 +206,83 @@
         "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/services/transformer/app/transformer.js"
       }
     }
+  },
+  {
+    "CWEId": "352",
+    "FlawMatch": {
+      "ProcedureHash": "1820246052",
+      "PrototypeHash": "211846691",
+      "FlawHash": "1867258100",
+      "FlawHashCount": "3",
+      "FlawHashOrdinal": "1",
+      "CauseHash": "2275449179",
+      "CauseHashCount": "1",
+      "CauseHashOrdinal": "1",
+      "CauseHash2": "0",
+      "CauseHash2Ordinal": "0"
+    },
+    "Files": {
+      "SourceFile": {
+        "File": "thinx.js",
+        "Line": "419",
+        "FunctionName": "!main",
+        "QualifiedFunctionName": "!main",
+        "FunctionPrototype": "!main() : void",
+        "Scope": "UNKNOWN",
+        "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/thinx.js"
+      }
+    }
+  },
+  {
+    "CWEId": "352",
+    "FlawMatch": {
+      "ProcedureHash": "1820246052",
+      "PrototypeHash": "211846691",
+      "FlawHash": "1867258100",
+      "FlawHashCount": "3",
+      "FlawHashOrdinal": "2",
+      "CauseHash": "2275449179",
+      "CauseHashCount": "1",
+      "CauseHashOrdinal": "1",
+      "CauseHash2": "0",
+      "CauseHash2Ordinal": "0"
+    },
+    "Files": {
+      "SourceFile": {
+        "File": "thinx.js",
+        "Line": "443",
+        "FunctionName": "!main",
+        "QualifiedFunctionName": "!main",
+        "FunctionPrototype": "!main() : void",
+        "Scope": "UNKNOWN",
+        "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/thinx.js"
+      }
+    }
+  },
+  {
+    "CWEId": "352",
+    "FlawMatch": {
+      "ProcedureHash": "1820246052",
+      "PrototypeHash": "211846691",
+      "FlawHash": "1867258100",
+      "FlawHashCount": "3",
+      "FlawHashOrdinal": "3",
+      "CauseHash": "2275449179",
+      "CauseHashCount": "1",
+      "CauseHashOrdinal": "1",
+      "CauseHash2": "0",
+      "CauseHash2Ordinal": "0"
+    },
+    "Files": {
+      "SourceFile": {
+        "File": "thinx.js",
+        "Line": "572",
+        "FunctionName": "!main",
+        "QualifiedFunctionName": "!main",
+        "FunctionPrototype": "!main() : void",
+        "Scope": "UNKNOWN",
+        "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/thinx.js"
+      }
+    }
   }
 ]

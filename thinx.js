@@ -461,7 +461,7 @@ require('path');
 const sessionParser = session({
   secret: session_config.secret,
   "cookie": {
-    "maxAge": 86400000,
+    "maxAge": 3600000,
     "secure": true,
     "httpOnly": true
   },
