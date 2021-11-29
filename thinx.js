@@ -864,7 +864,7 @@ function setup_restore_owners_credentials(query) {
 }
 
 function startup_quote() {
-  if ((typeof(process.env.ENTERPRISE) === "undefined") || (process.env.ENTERPRISE === false)) {
+  if ((typeof(process.env.ENTERPRISE) === "undefined") || (process.env.ENTERPRISE == false)) {
     messenger.sendRandomQuote();
   }
 }
