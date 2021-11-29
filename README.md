@@ -6,7 +6,7 @@ IoT Device Management Server running on node.js.
 
 | Component | Status |
 |:----------|:-------|
-| `thinx-device-api` | [![THiNX](https://circleci.com/gh/suculent/thinx-device-api.svg?style=svg)](https://circleci.com/gh/suculent/thinx-device-api) |
+| `thinx-device-api` | [![THiNX](https://circleci.com/gh/suculent/thinx-device-api.svg?style=svg)](https://circleci.com/gh/suculent/thinx-device-api/tree/master) |
 | `arduino-docker-build` | [![THiNX](https://circleci.com/gh/suculent/arduino-docker-build.svg?style=svg)](https://circleci.com/gh/suculent/arduino-docker-build) |
 | `platformio-docker-build` | [![THiNX](https://circleci.com/gh/suculent/platformio-docker-build.svg?style=svg)](https://circleci.com/gh/suculent/platformio-docker-build) |
 | `mongoose-docker-build` | [![THiNX](https://circleci.com/gh/suculent/mongoose-docker-build.svg?style=svg)](https://circleci.com/gh/suculent/mongoose-docker-build) |

@@ -7,7 +7,6 @@ describe("Build log", function() {
   var envi = require("../_envi.json");
   var owner = envi.oid;
   var udid = envi.udid;
-  var apikey = envi.ak;
 
   var build_id = envi.build_id; // "f168def0-597f-11e7-a932-014d5b00c004";
 
@@ -21,7 +20,6 @@ describe("Build log", function() {
 
   it("should be able to list build logs", function(done) {
     blog.list(owner, function(err, body) {
-      //console.log(err, body);
       expect(body).to.be.a('object');
       done();
     });
@@ -29,7 +27,6 @@ describe("Build log", function() {
 
   it("should be able to fetch specific build log", function(done) {
     blog.fetch(build_id, function(err, body) {
-      //console.log(err, body);
       expect(err).to.equal(false);
       done();
     });

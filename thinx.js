@@ -142,8 +142,8 @@ var nano = require("nano")(db);
 function initDatabases(dbprefix) {
 
   function null_cb(err, body, header) {
-    // console.log(err); // only unexpected errors should be logged
-  };
+    // only unexpected errors should be logged
+  }
 
   // only to fix bug in CouchDB 2.3.1 first-run
   nano.db.create("_users", (null_cb));
@@ -334,8 +334,7 @@ function getDocument(file) {
   }
   // Parser may fail
   try {
-    const filter_doc = JSON.parse(data);
-    return filter_doc;
+    return JSON.parse(data);
   } catch (e) {
     console.log("» Document File may not exist: "+e);
     return false;
@@ -462,7 +461,7 @@ require('path');
 const sessionParser = session({
   secret: session_config.secret,
   "cookie": {
-    "maxAge": 86400000,
+    "maxAge": 3600000,
     "secure": true,
     "httpOnly": true
   },
@@ -657,7 +656,7 @@ wss.on("error", function(err) {
   console.log("WSS REQ ERROR: " + err);
 });
 
-app._ws = []; // array of all owner websockets
+app._ws = {}; // list of all owner websockets
 
 function initLogTail(ws) {
   app.post("/api/user/logs/tail", function(req2, res) {
@@ -686,20 +685,15 @@ function initSocket(ws, msgr) {
     } else if (typeof(object.init) !== "undefined") {
       if (typeof(msgr) !== "undefined") {
         console.log("Initializing new messenger in WS...");
-        let socket = app._ws[owner_id];
-        msgr.initWithOwner(object.init, socket, function(success, message_z) {
+        var owner = object.init;
+        let socket = app._ws[owner];
+        msgr.initWithOwner(owner, socket, function(success, message_z) {
           if (!success) {
             console.log("Messenger init on WS message with result " + success + ", with message: ", { message_z });
           }
         });
       }
-    } else {
-      /* unknown message debug, must be removed */
-      var m = JSON.stringify(message);
-      if ((m != "{}") || (typeof(message)=== "undefined")) {
-        console.log("» Websocket parser said: unknown message: " + m);
-      }
-    }
+    } 
   });
 
   ws.on('pong', heartbeat);
@@ -789,7 +783,7 @@ function log_aggregator() {
 //
 
 function isMasterProcess() {
-  return true; // cluster.isMaster();
+  return true; // should be actually `cluster.isMaster();`
 }
 
 function reporter(success, default_mqtt_key) {
@@ -860,8 +854,7 @@ function setup_restore_owners_credentials(query) {
       console.log("DR ERR: "+err);
       return;
     }
-    for (var i = 0; i < body.rows.length; i++) {
-      var owner_doc = body.rows[i];
+    for (var owner_doc of body.rows) {
       var owner_id = owner_doc.id;
       if (owner_id.indexOf("design")) continue;
       console.log("Restoring credentials for owner "+owner_id);
@@ -871,7 +864,7 @@ function setup_restore_owners_credentials(query) {
 }
 
 function startup_quote() {
-  if (process.env.ENTERPRISE !== true) {
+  if ((typeof(process.env.ENTERPRISE) === "undefined") || (process.env.ENTERPRISE === false)) {
     messenger.sendRandomQuote();
   }
 }

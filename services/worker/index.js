@@ -115,7 +115,7 @@ class Worker {
         CMD = CMD.replace("./builder", "/opt/thinx/thinx-device-api/builder");
 
         // Validate using whitelist regex to prevent command injection
-        if (!isBuildIDValid(build_id)) {
+        if (!this.isBuildIDValid(build_id)) {
             console.log("[OID:" + owner + "] [BUILD_FAILED] Owner submitted invalid request...");
             return;
         }
@@ -199,17 +199,17 @@ class Worker {
             }
 
             // Something must write to build_path/build.log where the file is tailed from to websocket...
-            var build_log_path = path + "/" + build_id + "/build.log";
-            fs.ensureFile(build_log_path, function (err) {
+            var build_log_path = path + "/" + build_id + "/build.log"; // lgtm [js/path-injection]
+            fs.ensureFile(build_log_path, function (err) { // lgtm [js/path-injection]
                 if (err) {
                     console.log("» [ERROR] Log file could not be created.");
                 } else {
-                    fs.fchmodSync(fs.openSync(build_log_path), 0o665);
+                    fs.fchmodSync(fs.openSync(build_log_path), 0o665); // lgtm [js/path-injection]
                     chmodr(path + "/" + build_id, 0o665, (cherr) => {
                         if (cherr) {
                             console.log('Failed to execute chmodr', cherr);
                         } else {
-                            fs.appendFileSync(build_log_path, logline);
+                            fs.appendFileSync(build_log_path, logline); // lgtm [js/path-injection]
                         }
                     });
                 }
@@ -324,20 +324,18 @@ class Worker {
     }
 }
 
-if (typeof(process.env.THINX_SERVER) !== "undefined") {
-    let srv = process.env.THINX_SERVER;
-    if (typeof(srv) === "undefined" || srv === null) {
-        console.log("THINX_SERVER environment variable must be defined in order to build firmware with proper backend binding.");
-        process.exit(1);
-    }
+// Init phase off-class
+
+let srv = process.env.THINX_SERVER;
+
+if (typeof(srv) === "undefined" || srv === null) {
+    console.log("THINX_SERVER environment variable must be defined in order to build firmware with proper backend binding.");
+    process.exit(1);
+} else {
     // fix missing http if defined in env file just like api:3000
     if (srv.indexOf("http") == -1) {
         srv = "http://" + srv;
     }
     console.log(new Date().getTime(), "» Starting build worker against", srv);
-    const w = new Worker(srv);
-} else {
-    const w = new Worker('http://localhost:3000'); // developer only, no authentication required
-    console.log(new Date().getTime(), "» Starting build worker without configuration.");
+    const worker = new Worker(srv);
 }
-

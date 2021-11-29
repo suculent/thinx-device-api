@@ -110,7 +110,7 @@ func NewRemoteJWTChecker(authOpts map[string]string, options tokenOptions) (jwtC
 
 	if !checker.verifyPeer {
 		tr := &h.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
 		}
 		checker.client.Transport = tr
 	}

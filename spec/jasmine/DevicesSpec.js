@@ -2,8 +2,6 @@ describe("Devices", function() {
 
   var expect = require('chai').expect;
   
-  var generated_key_hash;
-
   var Messenger = require('../../lib/thinx/messenger');
   var messenger = new Messenger().getInstance();
 
@@ -16,25 +14,7 @@ describe("Devices", function() {
   var envi = require("../_envi.json");
   var owner = envi.oid;
   var source_id = envi.sid;
-  var udid = envi.udid;
   var ak = envi.ak;
-
-  var crypto = require("crypto");
-  var fake_mac = null;
-
-  function doFakeMac() {
-    crypto.randomBytes(6, (err, buffer) => {
-      var hexa = buffer.toString('hex');
-      this.fake_mac = hexa.charAt(0) +
-                hexa.charAt(1) + ":" +
-                hexa.charAt(2) +
-                hexa.charAt(3) + ":" +
-                hexa.charAt(4) +
-                hexa.charAt(5);
-    });
-  }
-
-  fake_mac = doFakeMac();
 
   // This UDID is to be deleted at the end of test.
   var TEST_DEVICE = {

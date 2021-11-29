@@ -1,6 +1,6 @@
 # docker build -t suculent/thinx-worker .
 
-FROM node:16-alpine
+FROM node:17-alpine
 
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
 
