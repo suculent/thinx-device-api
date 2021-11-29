@@ -155,7 +155,7 @@ Arduino, Plaform.io and MongooseOS are firmwares by nature.
 ## Prerequisites for running own THiNX Server
 
 * Linux Server (min. 2 GB RAM, 32GB SSD, Ubuntu)
-* Docker (docker-compose)
+* Docker (supports both docker-compose quick start or scalable Swarm deployment)
 
 ## Port mapping
 
