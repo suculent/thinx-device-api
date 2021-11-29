@@ -518,5 +518,83 @@
         "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/thinx.js"
       }
     }
+  },
+  {
+    "CWEId": "798",
+    "FlawMatch": {
+      "ProcedureHash": "2917410914",
+      "PrototypeHash": "3615466130",
+      "FlawHash": "4021851296",
+      "FlawHashCount": "3",
+      "FlawHashOrdinal": "1",
+      "CauseHash": "2899737921",
+      "CauseHashCount": "1",
+      "CauseHashOrdinal": "1",
+      "CauseHash2": "0",
+      "CauseHash2Ordinal": "0"
+    },
+    "Files": {
+      "SourceFile": {
+        "File": "notifier.js",
+        "Line": "31",
+        "FunctionName": "notificationObject",
+        "QualifiedFunctionName": "Notifier.notificationObject",
+        "FunctionPrototype": "notificationObject(: ::Notifier,  : any,  : any, ...) : any",
+        "Scope": "^::Notifier",
+        "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/lib/thinx/notifier.js"
+      }
+    }
+  },
+  {
+    "CWEId": "798",
+    "FlawMatch": {
+      "ProcedureHash": "2917410914",
+      "PrototypeHash": "3615466130",
+      "FlawHash": "4021851296",
+      "FlawHashCount": "3",
+      "FlawHashOrdinal": "2",
+      "CauseHash": "2899737921",
+      "CauseHashCount": "1",
+      "CauseHashOrdinal": "1",
+      "CauseHash2": "0",
+      "CauseHash2Ordinal": "0"
+    },
+    "Files": {
+      "SourceFile": {
+        "File": "notifier.js",
+        "Line": "37",
+        "FunctionName": "notificationObject",
+        "QualifiedFunctionName": "Notifier.notificationObject",
+        "FunctionPrototype": "notificationObject(: ::Notifier,  : any,  : any, ...) : any",
+        "Scope": "^::Notifier",
+        "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/lib/thinx/notifier.js"
+      }
+    }
+  },
+  {
+    "CWEId": "798",
+    "FlawMatch": {
+      "ProcedureHash": "2917410914",
+      "PrototypeHash": "3615466130",
+      "FlawHash": "4021851296",
+      "FlawHashCount": "3",
+      "FlawHashOrdinal": "3",
+      "CauseHash": "2899737921",
+      "CauseHashCount": "1",
+      "CauseHashOrdinal": "1",
+      "CauseHash2": "0",
+      "CauseHash2Ordinal": "0"
+    },
+    "Files": {
+      "SourceFile": {
+        "File": "notifier.js",
+        "Line": "44",
+        "FunctionName": "notificationObject",
+        "QualifiedFunctionName": "Notifier.notificationObject",
+        "FunctionPrototype": "notificationObject(: ::Notifier,  : any,  : any, ...) : any",
+        "Scope": "^::Notifier",
+        "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/lib/thinx/notifier.js"
+      }
+    }
   }
 ]
