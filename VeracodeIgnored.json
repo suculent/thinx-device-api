@@ -284,5 +284,161 @@
         "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/thinx.js"
       }
     }
+  },
+  {
+    "CWEId": "259",
+    "FlawMatch": {
+      "ProcedureHash": "3941692870",
+      "PrototypeHash": "3488787155",
+      "FlawHash": "99149388",
+      "FlawHashCount": "1",
+      "FlawHashOrdinal": "1",
+      "CauseHash": "1766390803",
+      "CauseHashCount": "1",
+      "CauseHashOrdinal": "1",
+      "CauseHash2": "0",
+      "CauseHash2Ordinal": "0"
+    },
+    "Files": {
+      "SourceFile": {
+        "File": "builder.js",
+        "Line": "216",
+        "FunctionName": "runRemoteShell",
+        "QualifiedFunctionName": "Builder.runRemoteShell",
+        "FunctionPrototype": "runRemoteShell(: ::Builder,  : any,  : any,  : any,  : any,  : any,  : any, ...) : any",
+        "Scope": "^::Builder",
+        "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/lib/thinx/builder.js"
+      }
+    }
+  },
+  {
+    "CWEId": "312",
+    "FlawMatch": {
+      "ProcedureHash": "3895835397",
+      "PrototypeHash": "1779859886",
+      "FlawHash": "1507913549",
+      "FlawHashCount": "1",
+      "FlawHashOrdinal": "1",
+      "CauseHash": "3216252040",
+      "CauseHashCount": "1",
+      "CauseHashOrdinal": "1",
+      "CauseHash2": "2417156287",
+      "CauseHash2Ordinal": "1"
+    },
+    "Files": {
+      "SourceFile": {
+        "File": "builder.js",
+        "Line": "324",
+        "FunctionName": "lambda_7",
+        "QualifiedFunctionName": "lambda_7",
+        "FunctionPrototype": "lambda_7(: any,  : any, ...) : any",
+        "Scope": "UNKNOWN",
+        "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/lib/thinx/builder.js"
+      }
+    }
+  },
+  {
+    "CWEId": "312",
+    "FlawMatch": {
+      "ProcedureHash": "1189886784",
+      "PrototypeHash": "3162515358",
+      "FlawHash": "1063855189",
+      "FlawHashCount": "1",
+      "FlawHashOrdinal": "1",
+      "CauseHash": "2634959527",
+      "CauseHashCount": "1",
+      "CauseHashOrdinal": "1",
+      "CauseHash2": "4079441678",
+      "CauseHash2Ordinal": "1"
+    },
+    "Files": {
+      "SourceFile": {
+        "File": "builder.js",
+        "Line": "1117",
+        "FunctionName": "supportedExtensions",
+        "QualifiedFunctionName": "Builder.supportedExtensions",
+        "FunctionPrototype": "supportedExtensions(: ::Builder, ...) : any",
+        "Scope": "^::Builder",
+        "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/lib/thinx/builder.js"
+      }
+    }
+  },
+  {
+    "CWEId": "312",
+    "FlawMatch": {
+      "ProcedureHash": "491980250",
+      "PrototypeHash": "3304940297",
+      "FlawHash": "2196429910",
+      "FlawHashCount": "1",
+      "FlawHashOrdinal": "1",
+      "CauseHash": "392404407",
+      "CauseHashCount": "1",
+      "CauseHashOrdinal": "1",
+      "CauseHash2": "512140099",
+      "CauseHash2Ordinal": "1"
+    },
+    "Files": {
+      "SourceFile": {
+        "File": "builder.js",
+        "Line": "835",
+        "FunctionName": "lambda_10",
+        "QualifiedFunctionName": "lambda_10",
+        "FunctionPrototype": "lambda_10(: any,  : any,  : any, ...) : any",
+        "Scope": "UNKNOWN",
+        "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/lib/thinx/builder.js"
+      }
+    }
+  },
+  {
+    "CWEId": "312",
+    "FlawMatch": {
+      "ProcedureHash": "491980250",
+      "PrototypeHash": "3304940297",
+      "FlawHash": "3264052188",
+      "FlawHashCount": "1",
+      "FlawHashOrdinal": "1",
+      "CauseHash": "928771264",
+      "CauseHashCount": "1",
+      "CauseHashOrdinal": "1",
+      "CauseHash2": "140846021",
+      "CauseHash2Ordinal": "1"
+    },
+    "Files": {
+      "SourceFile": {
+        "File": "builder.js",
+        "Line": "776",
+        "FunctionName": "lambda_10",
+        "QualifiedFunctionName": "lambda_10",
+        "FunctionPrototype": "lambda_10(: any,  : any,  : any, ...) : any",
+        "Scope": "UNKNOWN",
+        "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/lib/thinx/builder.js"
+      }
+    }
+  },
+  {
+    "CWEId": "312",
+    "FlawMatch": {
+      "ProcedureHash": "3759960493",
+      "PrototypeHash": "1017190842",
+      "FlawHash": "498265427",
+      "FlawHashCount": "1",
+      "FlawHashOrdinal": "1",
+      "CauseHash": "1968657312",
+      "CauseHashCount": "1",
+      "CauseHashOrdinal": "1",
+      "CauseHash2": "3149752661",
+      "CauseHash2Ordinal": "1"
+    },
+    "Files": {
+      "SourceFile": {
+        "File": "builder.js",
+        "Line": "628",
+        "FunctionName": "lambda_11",
+        "QualifiedFunctionName": "lambda_11",
+        "FunctionPrototype": "lambda_11(: any,  : any,  : any, ...) : any",
+        "Scope": "UNKNOWN",
+        "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/lib/thinx/builder.js"
+      }
+    }
   }
 ]
