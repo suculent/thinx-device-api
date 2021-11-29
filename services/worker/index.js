@@ -199,17 +199,17 @@ class Worker {
             }
 
             // Something must write to build_path/build.log where the file is tailed from to websocket...
-            var build_log_path = path + "/" + build_id + "/build.log";
-            fs.ensureFile(build_log_path, function (err) {
+            var build_log_path = path + "/" + build_id + "/build.log"; // lgtm [js/path-injection]
+            fs.ensureFile(build_log_path, function (err) { // lgtm [js/path-injection]
                 if (err) {
                     console.log("» [ERROR] Log file could not be created.");
                 } else {
-                    fs.fchmodSync(fs.openSync(build_log_path), 0o665);
+                    fs.fchmodSync(fs.openSync(build_log_path), 0o665); // lgtm [js/path-injection]
                     chmodr(path + "/" + build_id, 0o665, (cherr) => {
                         if (cherr) {
                             console.log('Failed to execute chmodr', cherr);
                         } else {
-                            fs.appendFileSync(build_log_path, logline); /* lgtm [js/command-line-injection] */
+                            fs.appendFileSync(build_log_path, logline); // lgtm [js/path-injection]
                         }
                     });
                 }
