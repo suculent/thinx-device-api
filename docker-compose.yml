@@ -49,7 +49,7 @@ services:
     volumes:
       - '/mnt/data/couchdb/data:/opt/couchdb/data'
       - './services/couchdb/etc:/opt/couchdb/etc'
-      - './services/couchdb/docker.ini:/opt/couchdb/etc/local.d/docker.ini'
+      - './services/couchdb/etc/local.d:/opt/couchdb/etc/local.d'
     labels:
       - traefik.backend.couchdb.noexpose
   thinx-redis:
