@@ -50,6 +50,8 @@ services:
       - '/mnt/data/couchdb:/var/lib/couchdb'
       - '/mnt/data/couchdb:/opt/couchdb/data'
       - './services/couchdb:/opt/couchdb/etc'
+      # - './services/couchdb:/opt/couchdb/etc' # /opt/couchdb/etc/local.d/docker.ini and vm.args
+      - './services/couchdb/local.d/docker.ini:/opt/couchdb/etc/local.d/docker.ini' # important!
     labels:
       - traefik.backend.couchdb.noexpose
   thinx-redis:
