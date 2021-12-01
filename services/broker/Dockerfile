@@ -60,7 +60,7 @@ COPY --from=builder /usr/local/sbin/mosquitto /usr/sbin/mosquitto
 #Uncomment to copy your custom confs (change accordingly) directly when building the image.
 #Leave commented if you want to mount a volume for these (see docker-compose.yml).
 
-# COPY ./goauth/docker/conf/mosquitto.conf /etc/mosquitto/mosquitto.conf
+COPY ./goauth/docker/conf/mosquitto.conf /etc/mosquitto/mosquitto.conf
 COPY ./goauth/docker/conf/conf.d/go-auth.conf /etc/mosquitto/conf.d/go-auth.conf
 #COPY ./goauth/docker/conf/auth/acls /etc/mosquitto/auth/acls
 #COPY ./goauth/docker/conf/auth/passwords /etc/mosquitto/auth/passwords
