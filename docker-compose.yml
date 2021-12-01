@@ -48,7 +48,6 @@ services:
       - internal
     volumes:
       - '/mnt/data/couchdb:/opt/couchdb/data'
-      - './services/couchdb:/opt/couchdb/etc'
       - './services/couchdb/vm.args:/opt/couchdb/etc/vm.args'
       - './services/couchdb/local.ini:/opt/couchdb/etc/default.d/99-nocluster.ini'
     labels:
