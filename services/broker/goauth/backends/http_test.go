@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	. "github.com/iegomez/mosquitto-go-auth/backends/constants"
 	log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -20,6 +21,8 @@ func TestHTTPAllJsonServer(t *testing.T) {
 	topic := "test/topic"
 	var acc = int64(1)
 	clientId := "test_client"
+
+	version := "2.0.0"
 
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -97,8 +100,23 @@ func TestHTTPAllJsonServer(t *testing.T) {
 	authOpts["http_timeout"] = "5"
 
 	Convey("Given correct options an http backend instance should be returned", t, func() {
-		hb, err := NewHTTP(authOpts, log.DebugLevel)
+		hb, err := NewHTTP(authOpts, log.DebugLevel, version)
 		So(err, ShouldBeNil)
+		So(hb.UserAgent, ShouldEqual, "mosquitto-2.0.0")
+
+		Convey("Given custom user agent, it should override default one", func() {
+			customAuthOpts := make(map[string]string)
+
+			for k, v := range authOpts {
+				customAuthOpts[k] = v
+			}
+
+			customAuthOpts["http_user_agent"] = "custom-user-agent"
+
+			customHb, err := NewHTTP(customAuthOpts, log.DebugLevel, version)
+			So(err, ShouldBeNil)
+			So(customHb.UserAgent, ShouldEqual, "custom-user-agent")
+		})
 
 		Convey("Given correct password/username, get user should return true", func() {
 
@@ -185,6 +203,8 @@ func TestHTTPJsonStatusOnlyServer(t *testing.T) {
 	var acc = int64(1)
 	clientId := "test_client"
 
+	version := "2.0.0"
+
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		var data interface{}
@@ -240,7 +260,7 @@ func TestHTTPJsonStatusOnlyServer(t *testing.T) {
 	authOpts["http_aclcheck_uri"] = "/acl"
 
 	Convey("Given correct options an http backend instance should be returned", t, func() {
-		hb, err := NewHTTP(authOpts, log.DebugLevel)
+		hb, err := NewHTTP(authOpts, log.DebugLevel, version)
 		So(err, ShouldBeNil)
 
 		Convey("Given correct password/username, get user should return true", func() {
@@ -328,6 +348,8 @@ func TestHTTPJsonTextResponseServer(t *testing.T) {
 	var acc = int64(1)
 	clientId := "test_client"
 
+	version := "2.0.0"
+
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		var data interface{}
@@ -387,7 +409,7 @@ func TestHTTPJsonTextResponseServer(t *testing.T) {
 	authOpts["http_aclcheck_uri"] = "/acl"
 
 	Convey("Given correct options an http backend instance should be returned", t, func() {
-		hb, err := NewHTTP(authOpts, log.DebugLevel)
+		hb, err := NewHTTP(authOpts, log.DebugLevel, version)
 		So(err, ShouldBeNil)
 
 		Convey("Given correct password/username, get user should return true", func() {
@@ -475,6 +497,8 @@ func TestHTTPFormJsonResponseServer(t *testing.T) {
 	var acc = int64(1)
 	clientId := "test_client"
 
+	version := "2.0.0"
+
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		httpResponse := &HTTPResponse{
@@ -543,7 +567,7 @@ func TestHTTPFormJsonResponseServer(t *testing.T) {
 	authOpts["http_aclcheck_uri"] = "/acl"
 
 	Convey("Given correct options an http backend instance should be returned", t, func() {
-		hb, err := NewHTTP(authOpts, log.DebugLevel)
+		hb, err := NewHTTP(authOpts, log.DebugLevel, version)
 		So(err, ShouldBeNil)
 
 		Convey("Given correct password/username, get user should return true", func() {
@@ -631,6 +655,8 @@ func TestHTTPFormStatusOnlyServer(t *testing.T) {
 	var acc = int64(1)
 	clientId := "test_client"
 
+	version := "2.0.0"
+
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		err := r.ParseForm()
@@ -677,7 +703,7 @@ func TestHTTPFormStatusOnlyServer(t *testing.T) {
 	authOpts["http_aclcheck_uri"] = "/acl"
 
 	Convey("Given correct options an http backend instance should be returned", t, func() {
-		hb, err := NewHTTP(authOpts, log.DebugLevel)
+		hb, err := NewHTTP(authOpts, log.DebugLevel, version)
 		So(err, ShouldBeNil)
 
 		Convey("Given correct password/username, get user should return true", func() {
@@ -765,6 +791,8 @@ func TestHTTPFormTextResponseServer(t *testing.T) {
 	var acc = int64(1)
 	clientId := "test_client"
 
+	version := "2.0.0"
+
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		w.WriteHeader(http.StatusOK)
@@ -816,7 +844,7 @@ func TestHTTPFormTextResponseServer(t *testing.T) {
 	authOpts["http_aclcheck_uri"] = "/acl"
 
 	Convey("Given correct options an http backend instance should be returned", t, func() {
-		hb, err := NewHTTP(authOpts, log.DebugLevel)
+		hb, err := NewHTTP(authOpts, log.DebugLevel, version)
 		So(err, ShouldBeNil)
 
 		Convey("Given correct password/username, get user should return true", func() {
