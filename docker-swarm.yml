@@ -79,8 +79,8 @@ services:
         target: /opt/couchdb/data
 
       - type: bind
-        source: /mnt/data/vm.args
-        target: /opt/couchdb/etc/vm.args
+        source: /mnt/data
+        target: /opt/couchdb/etc
 
       # probably deprecated
       - type: bind

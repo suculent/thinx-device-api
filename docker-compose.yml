@@ -49,7 +49,7 @@ services:
     volumes:
       - '/mnt/data/couchdb:/var/lib/couchdb'
       - '/mnt/data/couchdb:/opt/couchdb/data'
-      - './services/couchdb/vm.args:/opt/couchdb/etc/vm.args'
+      - './services/couchdb:/opt/couchdb/etc'
     labels:
       - traefik.backend.couchdb.noexpose
   thinx-redis:

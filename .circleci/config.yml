@@ -300,6 +300,7 @@ jobs:
           echo "Contents of /mnt/data/mosquitto/auth/thinx.acl"
           cat /mnt/data/mosquitto/auth/thinx.acl
           cp -vf ./services/broker/config/mosquitto.conf.dist /mnt/data/mosquitto/config/mosquitto.conf
+          cp -vf ./services/broker/config/mosquitto.conf.dist /etc/mosquitto/mosquitto.conf
           echo "Contents of /mnt/data/mosquitto/config/mosquitto.conf"
           cat /mnt/data/mosquitto/config/mosquitto.conf
           echo "Creating Docker Network (ID):"
