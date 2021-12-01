@@ -328,7 +328,6 @@ jobs:
           export ENVIRONMENT=test
           chmod -R 666 ./services/couchdb/*
           chown -R couchdb:couchdb ./services/couchdb/*
-          cp -R ./services/couchdb /mnt/data/couchdb
           docker-compose up -d couchdb
           echo "###### > Waiting at least 60 seconds for CouchDB to start up..."
           timeout 60 docker-compose logs -f --timestamp
