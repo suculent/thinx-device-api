@@ -89,3 +89,5 @@ results.kics.json
 
 # Coverity metadata
 cov-int/
+.dccache
+*.log
