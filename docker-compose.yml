@@ -48,7 +48,8 @@ services:
       - internal
     volumes:
       - '/mnt/data/couchdb/data:/opt/couchdb/data'
-      - './services/couchdb/etc:/opt/couchdb/etc'
+      - '/mnt/data/couchdb/etc/vm.args:/opt/couchdb/etc/vm.args'
+      - '/mnt/data/couchdb/etc/local.d/10-nocluster.ini:/opt/couchdb/etc/local.d/10-nocluster.ini'
     labels:
       - traefik.backend.couchdb.noexpose
   thinx-redis:
