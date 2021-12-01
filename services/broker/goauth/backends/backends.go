@@ -165,7 +165,7 @@ func (b *Backends) addBackends(authOpts map[string]string, logLevel log.Level, b
 				b.backends[mysqlBackend] = beIface.(Mysql)
 			}
 		case httpBackend:
-			beIface, err = NewHTTP(authOpts, logLevel, version)
+			beIface, err = NewHTTP(authOpts, logLevel)
 			if err != nil {
 				log.Fatalf("Backend register error: couldn't initialize %s backend with error %s.", bename, err)
 			} else {

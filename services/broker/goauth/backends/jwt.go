@@ -83,7 +83,7 @@ func NewJWT(authOpts map[string]string, logLevel log.Level, hasher hashing.HashC
 		checker, err = NewLocalJWTChecker(authOpts, logLevel, hasher, options)
 	case remoteMode:
 		jwt.mode = remoteMode
-		checker, err = NewRemoteJWTChecker(authOpts, options, version)
+		checker, err = NewRemoteJWTChecker(authOpts, options)
 	case filesMode:
 		jwt.mode = filesMode
 		checker, err = NewFilesJWTChecker(authOpts, logLevel, hasher, options)
