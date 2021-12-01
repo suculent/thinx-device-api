@@ -363,7 +363,7 @@ workflows:
 
       - build:
           context:
-              - thinx-docker-repo
+              - dockerhub
 #        branches:
 #          filters:
 #              only:
