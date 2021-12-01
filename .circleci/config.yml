@@ -185,7 +185,7 @@ jobs:
       - docker/build:
           registry: registry.thinx.cloud:5000
           image: thinx/api
-          dockerfile: ./Dockerfile
+          dockerfile: ./Dockerfile.test
           extra_build_args: |
             --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} \
             --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
@@ -200,8 +200,8 @@ jobs:
     docker:
       - image: suculent/thinx-base-image:latest
         auth:
-          username: $DOCKER_USERNAME  # can specify string literal values
-          password: $DOCKER_PASSWORD  # or project environment variable reference
+          username: $DOCKER_USERNAME  # from thinx-docker-repo, docker.io
+          password: $DOCKER_PUBLIC_PASSWORD  # or project environment variable reference
 
     working_directory: ~/suculent/thinx-device-api
 
@@ -300,6 +300,7 @@ jobs:
           echo "Contents of /mnt/data/mosquitto/auth/thinx.acl"
           cat /mnt/data/mosquitto/auth/thinx.acl
           cp -vf ./services/broker/config/mosquitto.conf.dist /mnt/data/mosquitto/config/mosquitto.conf
+          cp -vf ./services/broker/config/mosquitto.conf.dist /etc/mosquitto/mosquitto.conf
           echo "Contents of /mnt/data/mosquitto/config/mosquitto.conf"
           cat /mnt/data/mosquitto/config/mosquitto.conf
           echo "Creating Docker Network (ID):"
@@ -308,6 +309,7 @@ jobs:
     - run:
         name: Starting Mosquitto
         command: |
+          docker login --username $DOCKER_LOGIN --password $DOCKER_PASSWORD https://registry.thinx.cloud:5000
           docker-compose up -d --build mosquitto
 
     - run:
@@ -331,14 +333,18 @@ jobs:
           echo "###### > Tailing logs for ten minutes from now on:"
           date
           timeout 600 docker-compose logs -f --timestamp
-          echo "###### > Tailing completed, stopping test."
+          echo "###### > Tailing completed, stopping job."
           date
           docker-compose stop
-          codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d
-          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
+          curl https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip -o sonar-scanner-cli-4.6.2.2472-linux.zip
+          apt install -qq -y zip
           unzip ./sonar-scanner-cli-4.6.2.2472-linux.zip
           export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin/
           sonar-scanner
+          npm install -g codecov
+          rm -rf spec/test_repositories/**
+          codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d
+
 
     - run:
         name: Check running Docker containers
@@ -360,7 +366,16 @@ workflows:
   build-and-deploy:
 
     jobs:
-    
+
+      - build:
+          context:
+              - dockerhub
+              - thinx-docker-repo
+#        branches:
+#          filters:
+#              only:
+#                - update
+
       - test-api-cloud:
           context:
               - thinx-docker-repo
