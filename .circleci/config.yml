@@ -340,7 +340,8 @@ jobs:
           unzip ./sonar-scanner-cli-4.6.2.2472-linux.zip
           export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin/
           sonar-scanner
-          npm install codecov && codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d
+          npm install -g codecov
+          codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d
 
 
     - run:
