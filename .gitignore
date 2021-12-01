@@ -91,3 +91,4 @@ results.kics.json
 cov-int/
 .dccache
 *.log
+*.sarif

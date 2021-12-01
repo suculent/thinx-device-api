@@ -185,7 +185,7 @@ jobs:
       - docker/build:
           registry: registry.thinx.cloud:5000
           image: thinx/api
-          dockerfile: ./Dockerfile
+          dockerfile: ./Dockerfile.test
           extra_build_args: |
             --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} \
             --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
@@ -360,7 +360,15 @@ workflows:
   build-and-deploy:
 
     jobs:
-    
+
+      - build:
+          context:
+              - thinx-docker-repo
+#        branches:
+#          filters:
+#              only:
+#                - update
+
       - test-api-cloud:
           context:
               - thinx-docker-repo
