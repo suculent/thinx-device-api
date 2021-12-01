@@ -142,7 +142,7 @@ class Worker {
         console.log("runShell command:", tomes);
         let command = tomes.join(" ");
         
-        let shell = exec.spawn(command, { shell: true });
+        let shell = exec.spawn(command, { shell: true }); // lgtm [js/command-line-injection]
         let build_start = new Date().getTime();
 
 		shell.stdout.on("data", (data) => {
