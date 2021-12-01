@@ -194,7 +194,7 @@ jobs:
           tag: 'swarm'
   
   # this is deprecated (does not authenticate against docker.io for the base thinx image fetch)
-  build:
+  test:
 
     # In CircleCI 2.0 you can now specify your own image, or use one of our pre-configured images.
     docker:
@@ -367,7 +367,7 @@ workflows:
 
     jobs:
 
-      - build:
+      - test:
           context:
               - dockerhub
               - thinx-docker-repo

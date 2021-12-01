@@ -7,7 +7,7 @@ networks:
 services:
   mosquitto:
     env_file: .env
-    image: registry.thinx.cloud:5000/thinx/mosquitto:goauth
+    image: registry.thinx.cloud:5000/thinx/mosquitto:swarm
     ports:
       - '1883:1883' # mqtt
       - '1884:1883' # mqtts
@@ -48,7 +48,7 @@ services:
       - internal
     volumes:
       - '/mnt/data/couchdb:/opt/couchdb/data'
-      - './services/couchdb/vm.args:/opt/couchdb/etc/vm.args'
+      - './services/couchdb/etc:/opt/couchdb/etc'
       - './services/couchdb/local.ini:/opt/couchdb/etc/default.d/99-nocluster.ini'
     labels:
       - traefik.backend.couchdb.noexpose
