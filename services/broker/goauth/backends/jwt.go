@@ -1,7 +1,7 @@
 package backends
 
 import (
-	jwtGo "github.com/dgrijalva/jwt-go"
+	jwtGo "github.com/golang-jwt/jwt"
 	"github.com/iegomez/mosquitto-go-auth/hashing"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -39,9 +39,10 @@ const (
 	remoteMode = "remote"
 	localMode  = "local"
 	jsMode     = "js"
+	filesMode  = "files"
 )
 
-func NewJWT(authOpts map[string]string, logLevel log.Level, hasher hashing.HashComparer) (*JWT, error) {
+func NewJWT(authOpts map[string]string, logLevel log.Level, hasher hashing.HashComparer, version string) (*JWT, error) {
 	log.SetLevel(logLevel)
 
 	jwt := &JWT{}
@@ -83,6 +84,9 @@ func NewJWT(authOpts map[string]string, logLevel log.Level, hasher hashing.HashC
 	case remoteMode:
 		jwt.mode = remoteMode
 		checker, err = NewRemoteJWTChecker(authOpts, options)
+	case filesMode:
+		jwt.mode = filesMode
+		checker, err = NewFilesJWTChecker(authOpts, logLevel, hasher, options)
 	default:
 		err = errors.New("unknown JWT mode")
 	}
