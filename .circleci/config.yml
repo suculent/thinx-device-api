@@ -332,14 +332,16 @@ jobs:
           echo "###### > Tailing logs for ten minutes from now on:"
           date
           timeout 600 docker-compose logs -f --timestamp
-          echo "###### > Tailing completed, stopping test."
+          echo "###### > Tailing completed, stopping job."
           date
           docker-compose stop
-          codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d
-          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
+          curl https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip -o sonar-scanner-cli-4.6.2.2472-linux.zip
+          apt install -qq -y unzip
           unzip ./sonar-scanner-cli-4.6.2.2472-linux.zip
           export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin/
           sonar-scanner
+          npm install codecov && codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d
+
 
     - run:
         name: Check running Docker containers
