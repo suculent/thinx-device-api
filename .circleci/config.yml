@@ -334,7 +334,7 @@ jobs:
           echo "###### > Tailing completed, stopping test."
           date
           docker-compose stop
-#         codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d
+          codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d
           wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
           unzip ./sonar-scanner-cli-4.6.2.2472-linux.zip
           export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin/
