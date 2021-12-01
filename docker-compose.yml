@@ -24,7 +24,7 @@ services:
       - traefik.backend.mosquitto.noexpose
   couchdb:
     env_file: .env
-    image: 'couchdb:3.1.0'
+    image: 'couchdb:3.2.0'
     restart: unless-stopped
     healthcheck:
       test:
@@ -47,11 +47,10 @@ services:
       - nat
       - internal
     volumes:
-      - '/mnt/data/couchdb:/var/lib/couchdb'
       - '/mnt/data/couchdb:/opt/couchdb/data'
       - './services/couchdb:/opt/couchdb/etc'
-      # - './services/couchdb:/opt/couchdb/etc' # /opt/couchdb/etc/local.d/docker.ini and vm.args
-      - './services/couchdb/local.d/docker.ini:/opt/couchdb/etc/local.d/docker.ini' # important!
+      - './services/couchdb/vm.args:/opt/couchdb/etc/vm.args'
+      - './services/couchdb/local.ini:/opt/couchdb/etc/default.d/99-nocluster.ini'
     labels:
       - traefik.backend.couchdb.noexpose
   thinx-redis:
