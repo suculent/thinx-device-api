@@ -377,65 +377,65 @@ workflows:
 #              only:
 #                - update
 
-      - test-api-cloud:
-          context:
-              - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - update
-
-      - build-api-cloud:
-          context:
-            - thinx-docker-repo
-            - SonarCloud
-          filters:
-            branches:
-              only:
-                - thinx-swarm
-
-      - build-console-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
-
-      - build-mosquitto-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
-
+      # - test-api-cloud:
+      #     context:
+      #         - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - update
+      
       # - test-mosquitto-cloud:
       #     filters:
       #       branches:
       #         only:
       #           - features/mqtt-auth-plugin
 
-      - build-redis-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
+      # - build-api-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #       - SonarCloud
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
 
-      - build-transformer-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
+      # - build-console-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
 
-      - build-worker-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
+      # - build-mosquitto-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
+
+      # - build-redis-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
+
+      # - build-transformer-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
+
+      # - build-worker-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
