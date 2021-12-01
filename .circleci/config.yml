@@ -200,8 +200,8 @@ jobs:
     docker:
       - image: suculent/thinx-base-image:latest
         auth:
-          username: $DOCKER_USERNAME  # can specify string literal values
-          password: $DOCKER_PASSWORD  # or project environment variable reference
+          username: $DOCKER_USERNAME  # from thinx-docker-repo, docker.io
+          password: $DOCKER_PUBLIC_PASSWORD  # or project environment variable reference
 
     working_directory: ~/suculent/thinx-device-api
 
@@ -308,6 +308,7 @@ jobs:
     - run:
         name: Starting Mosquitto
         command: |
+          docker login --username $DOCKER_LOGIN --password $DOCKER_PASSWORD https://registry.thinx.cloud:5000
           docker-compose up -d --build mosquitto
 
     - run:
@@ -364,6 +365,7 @@ workflows:
       - build:
           context:
               - dockerhub
+              - thinx-docker-repo
 #        branches:
 #          filters:
 #              only:
