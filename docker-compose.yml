@@ -47,9 +47,8 @@ services:
       - nat
       - internal
     volumes:
-      - '/mnt/data/couchdb/data:/opt/couchdb/data'
-      - './services/couchdb/etc:/opt/couchdb/etc'
-      - './services/couchdb/etc/local.d:/opt/couchdb/etc/local.d'
+      - "/mnt/data/couchdb/data:/opt/couchdb/data"
+      - "./services/couchdb/etc:/opt/couchdb/etc"
     labels:
       - traefik.backend.couchdb.noexpose
   thinx-redis:
