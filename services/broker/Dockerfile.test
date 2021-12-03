@@ -5,7 +5,7 @@ COPY ./test/mosquitto /mosquitto
 COPY ./test/mosquitto/conf.d/mosquitto.conf /etc/mosquitto/mosquitto.conf
 COPY ./test/mosquitto/conf.d/mosquitto.conf /etc/mosquitto/conf.d/go-auth.conf
 
-RUN PASS=$(/mosquitto/pw -p mosquitto | tr -d 'PBKDF2') && \
+RUN PASS=$(/mosquitto/pw -p mosquitto) && \
     mkdir -p /etc/mosquitto/auth/ && \
     echo "thinx:$PASS" > /etc/mosquitto/auth/thinx.pw && \
     echo "Written thinx:$PASS to /etc/mosquitto/auth/thinx.pw"
