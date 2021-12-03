@@ -356,7 +356,7 @@ jobs:
           date
           docker-compose stop
           curl https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip -o sonar-scanner-cli-4.6.2.2472-linux.zip
-          apt install -qq -y zip
+          apt install -qq -y zip unzip
           unzip ./sonar-scanner-cli-4.6.2.2472-linux.zip
           export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin/
           sonar-scanner -Dsonar.login=${SONAR_TOKEN}
