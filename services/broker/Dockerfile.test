@@ -2,3 +2,4 @@ FROM registry.thinx.cloud:5000/thinx/mosquitto:swarm
 
 # mock directory structure for mosquitto data
 COPY ./test/mosquitto /mosquitto
+COPY ./test/mosquitto/conf.d/mosquitto.conf /etc/mosquitto/mosquitto.conf
