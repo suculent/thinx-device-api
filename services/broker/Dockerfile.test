@@ -1,0 +1,3 @@
+FROM registry.thinx.cloud:5000/thinx/mosquitto:swarm
+
+COPY /mnt /mnt

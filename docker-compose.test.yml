@@ -7,7 +7,7 @@ networks:
 services:
   mosquitto:
     env_file: .env
-    image: registry.thinx.cloud:5000/thinx/mosquitto:swarm
+    build: ./services/broker
     ports:
       - '1883:1883' # mqtt
       - '1884:1883' # mqtts
@@ -16,10 +16,6 @@ services:
     networks:
       - nat
       - internal
-    volumes:
-      - '/mnt/data/mosquitto/config:/etc/mosquitto/config:rw'
-      - '/mnt/data/mosquitto/ssl:/mqtt/ssl:rw'
-      - '/mnt/data/mosquitto/auth:/mqtt/auth:rw'
     labels:
       - traefik.backend.mosquitto.noexpose
   couchdb:
@@ -167,14 +163,6 @@ services:
       - '7443:7443'
       - '3000' # worker socket
     volumes:
-      - '/mnt/data/deploy:/mnt/data/deploy'
-      - '/mnt/data/mosquitto:/mnt/data/mosquitto'
-      - '/mnt/data/repos:/mnt/data/repos'
-      - '/mnt/data/ssl:/mnt/data/ssl'
-      - '/mnt/data/ssh_keys:/mnt/data/ssh_keys'
-      - '/mnt/data/conf:/mnt/data/conf'
-      - '/mnt/data/statistics:/mnt/data/statistics'
-      - '/mnt/data/test-reports:/mnt/data/test-reports'
       - '/var/run/docker.sock:/var/run/docker.sock'
       - '/var/lib/docker'
       - '/cache'

@@ -311,6 +311,8 @@ jobs:
           docker network create nat
           rm -rf ./docker-compose.yml
           mv ./docker-compose.test.yml ./docker-compose.yml
+          rm -rf ./services/broker/Dockerfile
+          mv ./services/broker/Dockerfile.test ./services/broker/Dockerfile
 
     - run:
         name: Starting Mosquitto
