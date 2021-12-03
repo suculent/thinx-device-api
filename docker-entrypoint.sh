@@ -58,13 +58,13 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   #./cc-test-reporter before-build
   npm run test # | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
   bash <(curl -Ls https://coverage.codacy.com/get.sh) report
-  pwd
-  ls -la
-  # chmod +x ./.codecov.sh
-  # ./.codecov.sh
-  cp -vf ./lcov.info /mnt/data/test-reports/lcov.info
-  cp -vfR ./.nyc_output /mnt/data/test-reports/.nyc_output
-  # ./cc-test-reporter after-build --coverage-input-type clover --exit-code $?
+  curl https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip -o sonar-scanner-cli-4.6.2.2472-linux.zip
+  7z x ./sonar-scanner-cli-4.6.2.2472-linux.zip
+  export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin/
+  sonar-scanner -Dsonar.login=${SONAR_TOKEN}
+  rm -rf spec/test_repositories/**
+  codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d
+
 else
   echo "[thinx-entrypoint] Starting in production mode..."
   node thinx.js | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log

@@ -4,7 +4,6 @@ orbs:
   docker: circleci/docker@2.0.1
   slack: circleci/slack@4.5.0
   sonarcloud: sonarsource/sonarcloud@1.0.2
-  openjdk-install: cloudesire/openjdk-install@1.2.3
 
 jobs:
 
@@ -296,8 +295,8 @@ jobs:
           ls -la ./conf
           echo "Contents of ./.env"
           cat ./.env
-          sed -i 's/changeme!/${REDIS_PASSWORD}' ./services/broker/test/mosquitto/conf.d/mosquitto.conf
-          sed -i 's/changeme!/${REDIS_PASSWORD}' ./spec/mnt/data/conf/config.json
+          sed -i 's/changeme!/${REDIS_PASSWORD}/g' ./services/broker/test/mosquitto/conf.d/mosquitto.conf
+          sed -i 's/changeme!/${REDIS_PASSWORD}/g' ./spec/mnt/data/conf/config.json
           echo "Creating Docker Network (ID):"
           docker network create nat
           rm -rf ./docker-compose.yml
@@ -346,14 +345,6 @@ jobs:
           echo "###### > Tailing completed, stopping job."
           date
           docker-compose stop
-          curl https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip -o sonar-scanner-cli-4.6.2.2472-linux.zip
-          apt install -y p7zip-full
-          7z x ./sonar-scanner-cli-4.6.2.2472-linux.zip
-          export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin/
-          sonar-scanner -Dsonar.login=${SONAR_TOKEN}
-          npm install -g codecov
-          rm -rf spec/test_repositories/**
-          codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d
 
 
     - run:
