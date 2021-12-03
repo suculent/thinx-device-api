@@ -10,7 +10,9 @@ jobs:
   build-mosquitto-cloud:
     executor: docker/docker
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 20.10.7
+          docker_layer_caching: true
       - checkout
       - run:
           command: |
@@ -218,10 +220,12 @@ jobs:
 
     - run:
         name: Install Docker Compose
+        environment:
+          COMPOSE_VERSION: '1.29.2'
         command: |
-          curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` > ~/docker-compose
+          curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o ~/docker-compose
           chmod +x ~/docker-compose
-          mv ~/docker-compose /usr/local/bin/docker-compose
+          sudo mv ~/docker-compose /usr/local/bin/docker-compose
 
     - setup_remote_docker
 
