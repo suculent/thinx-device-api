@@ -42,9 +42,6 @@ services:
     networks:
       - nat
       - internal
-    # volumes:
-      # - "/mnt/data/couchdb/data:/opt/couchdb/data"
-      # - "./services/couchdb/etc:/opt/couchdb/etc"
     labels:
       - traefik.backend.couchdb.noexpose
   thinx-redis:
@@ -70,8 +67,6 @@ services:
     restart: unless-stopped
     ports:
       - 6379
-    volumes:
-      - '/mnt/data/redis:/data'
     labels:
       - traefik.backend.thinx-redis
   transformer:
@@ -113,8 +108,6 @@ services:
     labels:
       - traefik.backend.worker.noexpose
     volumes:
-      - /mnt/data/repos:/mnt/data/repos
-      - /mnt/data/deploy:/mnt/data/deploy
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/docker
       - /cache

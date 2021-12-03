@@ -291,10 +291,6 @@ jobs:
           cp -vf ./.env ./services/couchdb/.env
           cp -vf ./.env ./services/redis/.env
           cp -vf ./.env ./services/transformer/.env
-          cp -vf ./conf/config-test.json ./conf/config.json
-          cp -vf ./conf/config-test.json ./spec/mnt/data/conf/config.json
-          cp -vf ./conf/github-oauth-test.json ./spec/mnt/data/conf/github-oauth-test.json
-          cp -vf ./conf/google-oauth-test.json ./spec/mnt/data/conf/google-oauth-test.json
           cp -vfR ./conf /mnt/data/
           echo "Contents of /mnt/data/conf"
           ls -la /mnt/data/conf
