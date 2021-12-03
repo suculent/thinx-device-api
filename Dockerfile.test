@@ -55,7 +55,9 @@ RUN adduser --system --disabled-password --shell /bin/bash thinx
 RUN sh -c "echo 'Dir::Ignore-Files-Silently:: \"(.save|.distupgrade)$\";' > /etc/apt/apt.conf.d/99ignoresave"
 
 # RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
-RUN add-apt-repository ppa:openjdk-r/ppa \
+RUN apt-get update -qq && \
+    apt install -y -qq software-properties-common && \
+    add-apt-repository ppa:openjdk-r/ppa \
     apt-get update -qq && \
     apt-get install -qq -y --fix-missing --no-install-recommends \
     apt-transport-https \
@@ -119,6 +121,7 @@ RUN apt-get remove -y \
 #RUN chmod +x microscanner && mkdir artifacts
 #RUN ./microscanner ${AQUA_SEC_TOKEN} --html --continue-on-failure > ./artifacts/microscanner.html \
 #    && cp ./artifacts/microscanner.html ./static/microscanner.html
+#RUN rm -rf ./microscanner
 
 RUN mkdir -p ./.nyc_output
 
