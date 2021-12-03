@@ -123,7 +123,7 @@ RUN mkdir -p ./.nyc_output
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
-# only for test mocking
+# only for test mocking (may not work, will need structure with mock data in repo)
 COPY /mnt /mnt
 
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
