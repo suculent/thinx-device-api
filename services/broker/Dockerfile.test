@@ -1,4 +1,4 @@
 FROM registry.thinx.cloud:5000/thinx/mosquitto:swarm
 
 # mock directory structure for mosquitto data
-COPY ./test/mnt /mnt
+COPY ./test/mosquitto /mosquitto
