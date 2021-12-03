@@ -4,3 +4,6 @@ FROM registry.thinx.cloud:5000/thinx/mosquitto:swarm
 COPY ./test/mosquitto /mosquitto
 COPY ./test/mosquitto/conf.d/mosquitto.conf /etc/mosquitto/mosquitto.conf
 COPY ./test/mosquitto/conf.d/mosquitto.conf /etc/mosquitto/conf.d/go-auth.conf
+
+RUN PASS=$(/mosquitto/pw -p mosquitto | tr -d 'PBKDF2') && \
+    echo "thinx:$PASS" > /etc/mosquitto/auth/thinx.pw
