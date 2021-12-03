@@ -292,22 +292,12 @@ jobs:
           cp -vf ./.env ./services/couchdb/.env
           cp -vf ./.env ./services/redis/.env
           cp -vf ./.env ./services/transformer/.env
-          cp -vfR ./conf /mnt/data/
-          echo "Contents of /mnt/data/conf"
-          ls -la /mnt/data/conf
           echo "Contents of ./conf"
           ls -la ./conf
           echo "Contents of ./.env"
           cat ./.env
-          echo "Contents of /mnt/data/mosquitto/**"
-          ls -la /mnt/data/mosquitto/**
-          cp -vf ./services/broker/config/thinx.acl.dist /mnt/data/mosquitto/auth/thinx.acl
-          echo "Contents of /mnt/data/mosquitto/auth/thinx.acl"
-          cat /mnt/data/mosquitto/auth/thinx.acl
-          cp -vf ./services/broker/config/mosquitto.conf.dist /mnt/data/mosquitto/config/mosquitto.conf
-          cp -vf ./services/broker/config/mosquitto.conf.dist /etc/mosquitto/mosquitto.conf
-          echo "Contents of /mnt/data/mosquitto/config/mosquitto.conf"
-          cat /mnt/data/mosquitto/config/mosquitto.conf
+          sed -i 's/changeme!/${REDIS_PASSWORD}' ./services/broker/test/mosquitto/conf.d/mosquitto.conf
+          sed -i 's/changeme!/${REDIS_PASSWORD}' ./spec/mnt/data/conf/config.json
           echo "Creating Docker Network (ID):"
           docker network create nat
           rm -rf ./docker-compose.yml
