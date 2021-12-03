@@ -82,9 +82,7 @@ RUN apt-get update -qq && \
 # Install app dependencies
 COPY package.json ./
 
-RUN openssl version \
- && node -v \
- && npm update \
+RUN npm update \
  && npm install .
 
 # Test modules

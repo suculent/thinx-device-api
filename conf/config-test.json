@@ -26,7 +26,8 @@
     "passwords": "/mnt/data/mosquitto/auth/thinx.pw",
     "acl": "/mnt/data/mosquitto/auth/thinx.acl",
     "password": "mosquitto",
-    "username": "thinx"
+    "username": "thinx",
+    "use_plugin": true
   },
   "rollbar_token": "<enter-your-rollbar.com-token>",
   "database_uri": "http://rtmtest:rtmtest@couchdb:5984",

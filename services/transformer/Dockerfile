@@ -24,22 +24,15 @@ RUN npm install -g node-gyp
 
 # Sqreen.io token is inside a JSON file /app/sqreen.json
 RUN mkdir -p /home/node/app
-RUN ls -la
+
 COPY ./app/* /home/node/app/
 
 WORKDIR /home/node/app
 
-# Running npm install for production purpose will not run dev dependencies.
-RUN ls -la && npm install . --only-prod
-
-# Create a user group 'thinx'
-RUN addgroup -S thinx
-
-# Create a user 'transformer' under 'thinx'
-RUN adduser -S -D -h /home/node/app transformer thinx
-
-# Chown all the files to the app user.
-RUN chown -R transformer:thinx /home/node/app
+RUN npm install . --only-prod && \
+    addgroup -S thinx && \
+    adduser -S -D -h /home/node/app transformer thinx && \
+    chown -R transformer:thinx /home/node/app
 
 # Switch to 'transformer' or 'node' user
 USER transformer
