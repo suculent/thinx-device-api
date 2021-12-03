@@ -363,7 +363,7 @@ jobs:
           apt install -qq -y zip
           unzip ./sonar-scanner-cli-4.6.2.2472-linux.zip
           export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin/
-          sonar-scanner
+          sonar-scanner -Dsonar.login=${SONAR_TOKEN}
           npm install -g codecov
           rm -rf spec/test_repositories/**
           codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d
