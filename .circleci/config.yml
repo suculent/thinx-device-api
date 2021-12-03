@@ -314,28 +314,38 @@ jobs:
         name: Starting Mosquitto
         command: |
           docker login --username $DOCKER_LOGIN --password $DOCKER_PASSWORD https://registry.thinx.cloud:5000
-          docker-compose up -d --build mosquitto
+          docker-compose up -f ./docker-compose.test.yml -d --build mosquitto
 
     - run:
         name: Starting Redis
         command: |
-          docker-compose up -d --build thinx-redis
+          docker-compose up -f ./docker-compose.test.yml -d --build thinx-redis
 
     - run:
         name: Starting Transformer
         command: |
-          docker-compose up -d --build transformer
+          docker-compose up -f ./docker-compose.test.yml -d --build transformer
+
+    # - run:
+    #     name: Prepare CouchDB Mount
+    #     command: |
+    #       # create a dummy container which will hold a volume with config
+    #       docker create -v /opt/couchdb/etc --name couchdb-etc alpine:3.4 /bin/true
+    #       # copy a config file into this volume
+    #       docker cp ./services/couchdb/etc configs:/opt/couchdb/etc
+    #       # start an application container using this volume
+    #       docker run --volumes-from configs app-image:1.2.3
 
     - run:
         name: Starting CouchDB and API Test
         command: |
           export ENVIRONMENT=test
           chmod -R 666 ./services/couchdb/*
-          chown -R couchdb:couchdb ./services/couchdb/*
-          docker-compose up -d couchdb
+          chown -R couchdb:couchdb ./services/couchdb/*w
+          docker-compose up -f ./docker-compose.test.yml -d --build couchdb
           echo "###### > Waiting at least 60 seconds for CouchDB to start up..."
           timeout 60 docker-compose logs -f --timestamp
-          docker-compose up -d --build api
+          docker-compose up -f ./docker-compose.test.yml -d --build api
           echo "###### > Tailing logs for ten minutes from now on:"
           date
           timeout 600 docker-compose logs -f --timestamp
