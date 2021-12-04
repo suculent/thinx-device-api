@@ -331,7 +331,7 @@ jobs:
           docker-compose up -d --build api
           echo "###### > Tailing logs for ten minutes from now on:"
           date
-          timeout 900 docker-compose logs -f --timestamp
+          timeout 1200 docker-compose logs -f --timestamp
           echo "###### > Tailing completed, stopping job."
           date
           docker-compose stop
