@@ -60,7 +60,6 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   echo "[thinx-entrypoint] TEST starting app..."
   node thinx.js &
   echo "[thinx-entrypoint] TEST waiting for app to boot..."
-  timeout 30 docker-compose logs -f --timestamp
   echo "[thinx-entrypoint] TEST running suites..."
   npm run test # | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
   # bash <(curl -Ls https://coverage.codacy.com/get.sh) report
