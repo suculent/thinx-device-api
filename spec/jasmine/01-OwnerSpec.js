@@ -89,7 +89,6 @@ describe("Owner", function() {
       });
     }, 10000);
 
- /*
   it("should be able to fetch owner profile", function(done) {
     User.profile(owner, function(success, response) {
       expect(response).to.be.a('string');
@@ -159,5 +158,5 @@ describe("Owner", function() {
     });
 
   });
-*/
+
 });
