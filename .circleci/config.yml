@@ -328,6 +328,7 @@ jobs:
           echo "###### > Waiting at least 60 seconds for CouchDB to start up..."
           timeout 60 docker-compose logs -f --timestamp
           docker-compose up --build api
+          timeout 600 docker-compose logs -f --timestamp
           echo "###### > Tailing completed, stopping job."
           date
           docker-compose stop

@@ -57,8 +57,8 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   chmod +x ./cc-test-reporter
   #./cc-test-reporter before-build
-  echo "[thinx-entrypoint] TEST starting app as first run (create DB and stuff)..."
-  timeout 60 node thinx.js
+  # echo "[thinx-entrypoint] TEST starting app as first run (create DB and stuff)..."
+  timeout 60 node thinx.js # container must wait much longer for test to complete
   echo "[thinx-entrypoint] TEST running suites..."
   npm run test # | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
   # bash <(curl -Ls https://coverage.codacy.com/get.sh) report
