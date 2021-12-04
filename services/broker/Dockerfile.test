@@ -6,6 +6,5 @@ COPY ./test/mosquitto/conf.d/mosquitto.conf /etc/mosquitto/mosquitto.conf
 COPY ./test/mosquitto/conf.d/mosquitto.conf /etc/mosquitto/conf.d/go-auth.conf
 
 RUN PASS=$(/mosquitto/pw -h bcrypt -c 10 -p mosquitto) && \
-    mkdir -p /etc/mosquitto/auth/ && \
-    echo "thinx:$PASS" > /etc/mosquitto/auth/thinx.pw && \
-    echo "Written thinx:$PASS to /etc/mosquitto/auth/thinx.pw"
+    echo "thinx:$PASS" > /mosquitto/auth/thinx.pw && \
+    echo "Written thinx:$PASS to /mosquitto/auth/thinx.pw"
