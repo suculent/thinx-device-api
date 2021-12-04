@@ -27,12 +27,13 @@ describe("Owner", function() {
       owner: "cimrman"
     };
     User.create(body, true, function(success, response) {
-      if (success == false && response.indexOf("username_already_exists")) {
+      console.log("username_already_exists response:", response);
+      if (success == false && typeof(response) == "string" && response.indexOf("username_already_exists")) {
         done();
         return;
       }
       console.log("create owner profile:", {success}, {response});
-      if (response.indexOf("username_already_exists") !== -1) {
+      if (typeof(response) == "string" && response.indexOf("username_already_exists") !== -1) {
         expect(success).to.equal(false);
         done();
         return;
