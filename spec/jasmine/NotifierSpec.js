@@ -34,7 +34,7 @@ describe("Notifier", function() {
     var platform = "platformio";
     var version = "thinx-firmware-version-1.0";
 
-    var CMD = "node " + __dirname + "/../../notifier.js " +
+    var CMD = "node " + __dirname + "/../../lib/thinx/notifier.js " +
       test_build_id + " " +
       test_commit_id + " " +
       test_version + " " +
