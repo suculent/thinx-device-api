@@ -147,6 +147,7 @@ services:
         - 'COUCHDB_USER=${COUCHDB_USER}'
         - 'COUCHDB_PASSWORD=${COUCHDB_PASSWORD}'
         - 'WORKER_SECRET=${WORKER_SECRET}'
+        - 'SONAR_TOKEN=${SONAR_TOKEN}'
     environment:
       - 'ENVIRONMENT=${ENVIRONMENT}'
       - 'COUCHDB_USER=${COUCHDB_USER}'

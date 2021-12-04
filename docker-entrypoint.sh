@@ -64,6 +64,7 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   sonar-scanner -Dsonar.login=${SONAR_TOKEN}
   rm -rf spec/test_repositories/**
   codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d
+  
 
 else
   echo "[thinx-entrypoint] Starting in production mode..."
