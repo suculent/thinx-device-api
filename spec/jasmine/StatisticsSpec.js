@@ -13,8 +13,8 @@ describe("Statistics", function() {
   });
 
   it("should be able to store results", function() {
-    var path = __dirname + "/../../statistics/" + owner + "/" + s.todayPathElement() + ".json";
-    s.write_stats(false, path, __dirname + "/../../statistics/", {
+    var path = "/mnt/data/statistics/" + owner + "/" + s.todayPathElement() + ".json";
+    s.write_stats(false, "/mnt/data/statistics/", {
       "message": "test"
     });
   });

@@ -115,12 +115,53 @@ describe("Owner", function() {
 
   // This expects activated account and e-mail fetch support
   it("should be able to activate owner", function(done) {
-    User.activate(owner, activation_key, function(success, response) {
-      expect(success).to.equal(true);
-      expect(response).to.be.a('string');
-      console.log(JSON.stringify(response));
-      done();
-    });
+    // activation_key requires User to be created first using User.create and take the key as (global?)
+    if (typeof(this.activation_key) === "undefined") {
+      // not available? mock it asap.
+      var body = {
+        first_name: "Jára",
+        last_name: "Cimrman",
+        email: email,
+        owner: "cimrman"
+      };
+      User.create(body, true, function(success, response) {
+        
+        if (success == false && typeof(response) == "string" && response.indexOf("username_already_exists")) {
+          // OK
+        }
+        console.log("(2) create owner profile:", {success}, {response});
+        if (typeof(response) == "string" && response.indexOf("username_already_exists") !== -1) {
+          console.log({response});
+        } else {
+          expect(success).to.equal(true);
+        }
+        expect(response.success).to.equal(true);
+        if (response.indexOf("username_already_exists" !== -1)) {
+          console.log({response});
+        }
+        if (response) {
+          console.log("Activation response: " + response);
+          this.activation_key = response; // store activation token for next step
+
+          User.activate(owner, this.activation_key, function(success, response) {
+            expect(success).to.equal(true);
+            expect(response).to.be.a('string');
+            console.log(JSON.stringify(response));
+            done();
+          });
+
+        }
+        
+      });
+    } else {
+      User.activate(owner, this.activation_key, function(success, response) {
+        expect(success).to.equal(true);
+        expect(response).to.be.a('string');
+        console.log(JSON.stringify(response));
+        done();
+      });
+    }
+    
   }, 10000);
 
   it("should be able to begin reset owner password", function(done) {

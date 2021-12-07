@@ -16,7 +16,7 @@ describe("API Key List", function() {
           //console.log("API Key list(1): ", JSON.stringify(object));
           expect(object).to.be.a('array');
         } else {
-          console.log("[jasmine] Listing failed:" + object);
+          console.log("[jasmine] API Key Listing failed:", {object}, {success});
         }
         done();
       });
@@ -99,7 +99,7 @@ describe("API Keys", function() {
         if (success) {
           expect(object).to.be.a('array');
         } else {
-          console.log("[jasmine] Listing failed:" + object);
+          console.log("[jasmine] API Key Listing failed:", {object});
         }
         if (done) done();
       });

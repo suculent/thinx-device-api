@@ -107,6 +107,8 @@ EXPOSE 9002
 # Copy app source code
 COPY . .
 
+RUN echo "Find GIT please..." && ls -la
+
 # Add git for analyzer SCM linking
 # COPY ./.git . # sorry, fails... fix later
 

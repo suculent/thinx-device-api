@@ -85,7 +85,7 @@ describe("Messenger", function() {
           //console.log("API Key list: ", JSON.stringify(object));
           expect(object).to.be.a('array');
         } else {
-          console.log("[jasmine] Listing failed:" + object);
+          console.log("[jasmine] Listing failed:", {object});
         }
         done();
       });
