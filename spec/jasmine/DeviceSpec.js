@@ -76,9 +76,9 @@ describe("Device", function() {
   }, 5000);
 
   it("should be able to register itself.", function(done) {
-    let req = {};
     let ws = {};
-    device.register(req, 
+    device.register(
+      {}, /* req */
       JRS,
       apikey,
       ws,
@@ -120,7 +120,9 @@ describe("Device", function() {
 
 
   it("should receive different response for registered device", function(done) {
-      device.register(JRS,
+      device.register(
+        {}, /* req */
+        JRS,
         apikey,
         null,
         function(success, response) {
@@ -194,6 +196,7 @@ describe("Device", function() {
     expect(JRS2).to.be.an('object');
     expect(apikey).to.be.a('string');
     device.register(
+      {}, /* req */
       JRS2,
       apikey,
       null,

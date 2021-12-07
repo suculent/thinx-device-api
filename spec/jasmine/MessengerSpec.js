@@ -30,6 +30,7 @@ describe("Messenger", function() {
     });
   }, 5000);
   
+  /* already happens in ApiKeySpec; causes duplicate default key later
   it("should be able to generate new API Keys", function(done) {
     console.log("generate key with owner", {owner});
     apikey.create(
@@ -47,7 +48,7 @@ describe("Messenger", function() {
         done();
       }
     );
-  });
+  }); */
 
   // getDevices: function(owner, callback)
   it("should be able to fetch devices for owner", function(done) {

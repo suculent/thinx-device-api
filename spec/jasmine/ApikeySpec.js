@@ -6,27 +6,9 @@ var envi = require("../_envi.json");
 var owner = envi.oid;
 var apikey = new APIKey();
 
-describe("API Key List", function() {
-  it("01 - should be able to list API Keys(1)", function(done) {
-    apikey.list(
-      owner,
-      (success, object) => {
-        if (success) {
-          console.log("API Key list(1): ", JSON.stringify(object));
-          expect(object).to.be.a('array');
-        } else {
-          console.log("[jasmine] API Key Listing failed:", {object}, {success});
-        }
-        done();
-      });
-  });
-});
-
 describe("API Key", function() {
-
   //create: function(owner, apikey_alias, callback)
-  it("02 - should be able to generate new API Key", function(done) {
-    expect(owner).to.be.a('string');
+  it("01 - should be able to generate new API Key", function(done) {
     apikey.create(
       owner,
       "sample-key",
@@ -44,6 +26,20 @@ describe("API Key", function() {
         done();
       }
     );
+  });
+
+  it("02 - should be able to list API Keys", function(done) {
+    apikey.list(
+      owner,
+      (success, object) => {
+        if (success) {
+          //console.log("API Key list(1): ", JSON.stringify(object));
+          expect(object).to.be.a('array');
+        } else {
+          console.log("[jasmine] API Key Listing failed:", {object}, {success});
+        }
+        done();
+      });
   });
 
   //verify: function(owner, apikey, callback)
@@ -90,6 +86,7 @@ describe("API Key", function() {
       (success, object) => {
         expect(success).to.be.true;
         if (success) {
+          console.log("list result:", object);
           expect(object).to.be.a('array');
         } else {
           console.log("[jasmine] API Key Listing failed:", {object});
