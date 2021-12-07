@@ -113,7 +113,7 @@ describe("Device", function() {
       }
 
       expect(success).to.be.true;
-      expect(response).to.be.a('string');
+      expect(response).to.be.an('object');
       done();
     });
   }, 5000);
@@ -154,13 +154,13 @@ describe("Device", function() {
   it("should be able to fetch OTT request", function(done) {
     device.storeOTT(JSON.stringify(JRS2), function(success, response) {
       console.log("• OTT Response: " , {response});
-      //expect(success).to.be.true;
+      expect(success).to.be.true;
       expect(response).to.be.an('object');
       expect(response.ott).to.be.a('string');
       ott = response.ott;
 
       device.fetchOTT(ott, function(success, response) {
-        console.log(response);
+        console.log("fetchOTT response:", response);
         expect(success).to.be.true;
         expect(response).to.be.a('string');
         done();
@@ -191,7 +191,7 @@ describe("Device", function() {
     }, 5000);
 
   it("should be able to register for revocation", function(done) {
-    expect(JRS2).to.be.a('string');
+    expect(JRS2).to.be.an('object');
     expect(apikey).to.be.a('string');
     device.register(
       JRS2,

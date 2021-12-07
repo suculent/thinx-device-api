@@ -82,7 +82,8 @@ describe("Devices", function() {
       udid: TEST_DEVICE.udid
     };
     console.log("Attach request...");
-    devices.attach(owner, body, (success, response) => {
+    devices.attach(owner, body, (res, success, response) => {
+      console.log("Attach response:", res, success, response);
       expect(success).to.be.true;
       expect(response).to.be.an('object');
       console.log("Attach response: " , {response});
@@ -95,8 +96,7 @@ describe("Devices", function() {
       udid: TEST_DEVICE.udid
     };
     devices.detach(owner, body, (res, success, response) => {
-      console.log("Detach success: " , {success});
-      console.log("Detach response: " , {response});
+      console.log("Detach response: ", res, success, response);
       expect(success).to.be.true;
       expect(response).to.be.an('object');
       done();

@@ -327,7 +327,7 @@ jobs:
           chmod -R 666 ./services/couchdb/*
           docker-compose up -d --build couchdb
           docker-compose up --build api
-          timeout 720 docker-compose logs -f --timestamp api
+          timeout 600 docker-compose logs -f --timestamp api
           echo "###### > Tailing completed, stopping job."
           date
           docker-compose stop
