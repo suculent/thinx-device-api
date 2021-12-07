@@ -45,7 +45,7 @@ describe("Devices", function() {
             return;
           }
         }
-        console.log("• DeviceSpec.js: Registration result: ", {response});
+        console.log("• DeviceSpec.js: Registration result(2): ", {response});
         expect(success).to.be.true;
         expect(TEST_DEVICE).to.be.an('object');
         expect(response.registration).to.be.an('object');

@@ -90,7 +90,7 @@ describe("Device", function() {
             return;
           }
         }
-        console.log("• DeviceSpec.js: Registration result: ", {response});
+        console.log("• DeviceSpec.js: Registration result(1): ", {response});
         JRS2.udid = response.registration.udid;
         expect(success).to.be.true;
         expect(JRS2.udid).to.be.a('string');
@@ -126,7 +126,7 @@ describe("Device", function() {
         apikey,
         null,
         function(success, response) {
-          expect(response).to.be.a('string');
+          expect(response).to.be.an('object');
           if (success === false) {
             console.log(
               "should receive different response for already-registered revice: " +
@@ -137,26 +137,14 @@ describe("Device", function() {
               return;
             }
           }
-          //console.log("• DeviceSpec.js: Re-registration result: ", {response});
           expect(success).to.be.true;
           done();
         });
     }, 5000);
 
-  it("should be able to store OTT request", function(done) {
+  it("should be able to store/fetch OTT request", function(done) {
     device.storeOTT(JSON.stringify(JRS2), function(success, response) {
       console.log("• OTT Response: " , {response});
-      expect(response).to.be.an('object');
-      expect(response.ott).to.be.a('string');
-      ott = response.ott;
-      done();
-    });
-  }, 5000);
-
-  it("should be able to fetch OTT request", function(done) {
-    device.storeOTT(JSON.stringify(JRS2), function(success, response) {
-      console.log("• OTT Response: " , {response});
-      expect(success).to.be.true;
       expect(response).to.be.an('object');
       expect(response.ott).to.be.a('string');
       ott = response.ott;
@@ -164,7 +152,7 @@ describe("Device", function() {
       device.fetchOTT(ott, function(success, response) {
         console.log("fetchOTT response:", response);
         expect(success).to.be.true;
-        expect(response).to.be.a('string');
+        expect(response).to.be.an('object');
         done();
       });
     });
