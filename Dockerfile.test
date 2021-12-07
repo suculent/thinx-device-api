@@ -108,7 +108,7 @@ EXPOSE 9002
 COPY . .
 
 # Add git for analyzer SCM linking
-COPY ./.git .
+# COPY ./.git . # sorry, fails... fix later
 
 # download test reporter as a static binary
 RUN curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
