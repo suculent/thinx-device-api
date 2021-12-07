@@ -76,10 +76,12 @@ describe("Device", function() {
   }, 5000);
 
   it("should be able to register itself.", function(done) {
-    device.register(
+    let req = {};
+    let ws = {};
+    device.register(req, 
       JRS,
       apikey,
-      null,
+      ws,
       function(success, response) {
         if (success === false) {
           console.log("registration error response:", response);
