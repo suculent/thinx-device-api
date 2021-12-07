@@ -24,6 +24,4 @@ EXPOSE 6379
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
-RUN echo "export REDIS_PASSWORD=${REDIS_PASSWORD}" > /redis-password
-
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
