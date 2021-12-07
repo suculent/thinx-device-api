@@ -13,22 +13,22 @@ describe("Statistics", function() {
   });
 
   it("should be able to store results", function() {
-    var path = "/mnt/data/statistics/" + owner + "/" + s.todayPathElement() + ".json";
-    s.write_stats(false, "/mnt/data/statistics/", {
-      "message": "test"
+    var path = "/mnt/data/statistics/";
+    var dirpath = this.STATS_PATH + owner_id;
+    s.write_stats(false, path, dirpath, {
+      "message": "example"
     });
   });
 
   it("should return today path element", function() {
     var result = s.todayPathElement();
-    //console.log(result);
     expect(result).to.be.a('string');
   });
 
   it("should be able to return today results for owner", function(done) {
     s.today(owner, function(success, result) {
-        // expect(success).to.be.true;
         console.log("daily stats: ", { result });
+        expect(success).to.be.true;
         expect(result).to.be.a('string');
         done();
       });
