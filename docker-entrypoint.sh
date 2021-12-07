@@ -70,7 +70,7 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   set -e
   
   if [[ -d ./.git ]]; then
-    codecov -t $CODECOV_TOKEN
+    codecov -t --disable-gcov $CODECOV_TOKEN
   fi
 
 else
