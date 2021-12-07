@@ -75,7 +75,7 @@ describe("Owner", function() {
       }
       */
       expect(success).to.be.true;
-      expect(apikey.key).to.be.an('object');
+      expect(apikey.key).to.be.a('string');
       if (success) {
         console.log("MQTT apikey: ", { apikey });
       } else {
