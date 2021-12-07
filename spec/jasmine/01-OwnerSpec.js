@@ -2,9 +2,9 @@ describe("Owner", function() {
 
   var expect = require('chai').expect;
   
-  var User = require("../lib/thinx/owner");
+  var User = require("../../lib/thinx/owner");
   var user = new User();
-  
+
   var envi = require("../_envi.json");
   
   var owner = envi.oid;

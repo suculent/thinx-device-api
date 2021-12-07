@@ -95,13 +95,10 @@ describe("Devices", function() {
       udid: TEST_DEVICE.udid
     };
     devices.detach(owner, body, (success, response) => {
-      expect(success).to.be.true;
-      expect(response).to.be.an('object');
       console.log("Detach success: " , {success});
       console.log("Detach response: " , {response});
-      if (success === false) {
-        console.log("Detach response: " , {response});
-      }
+      expect(success).to.be.true;
+      expect(response).to.be.an('object');
       done();
     });
   }, 30000);

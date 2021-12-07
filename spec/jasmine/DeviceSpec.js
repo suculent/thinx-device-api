@@ -82,16 +82,15 @@ describe("Device", function() {
       null,
       function(success, response) {
         if (success === false) {
-          console.log(response);
-          expect(response).to.be.a('string');
-          if (response === "owner_found_but_no_key") {
+          console.log("registration error response:", response);
+          if (response.indexOf("owner_found_but_no_key") !== -1) {
             done();
             return;
           }
         }
-        //console.log("• DeviceSpec.js: Registration result: ", {response});
-        expect(success).to.be.true;
+        console.log("• DeviceSpec.js: Registration result: ", {response});
         JRS2.udid = response.registration.udid;
+        expect(success).to.be.true;
         expect(JRS2.udid).to.be.a('string');
         console.log("• DeviceSpec.js: Received UDID: " + JRS2.udid);
         done();
@@ -143,8 +142,7 @@ describe("Device", function() {
   it("should be able to store OTT request", function(done) {
     device.storeOTT(JSON.stringify(JRS2), function(success, response) {
       console.log("• OTT Response: " , {response});
-      //expect(success).to.be.true; happens to be null?
-      expect(response).to.be.a('string');
+      expect(response).to.be.an('object');
       expect(response.ott).to.be.a('string');
       ott = response.ott;
       done();
@@ -155,16 +153,13 @@ describe("Device", function() {
     device.storeOTT(JSON.stringify(JRS2), function(success, response) {
       console.log("• OTT Response: " , {response});
       //expect(success).to.be.true;
-      expect(response).to.be.a('string');
+      expect(response).to.be.an('object');
       expect(response.ott).to.be.a('string');
       ott = response.ott;
 
-      device.fetchOTT(ott, function(success,
-        response) {
-        if (success === false) {
-          console.log(response);
-        }
-        //expect(success).to.be.true;
+      device.fetchOTT(ott, function(success, response) {
+        console.log(response);
+        expect(success).to.be.true;
         expect(response).to.be.a('string');
         done();
       });

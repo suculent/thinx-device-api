@@ -10,8 +10,8 @@ describe("ACL Manager", function() {
   const user = "test";
   const topic = "/baecb3124695efa1672b7e8d62e5b89e44713968f45eae6faa52066e87795a78/<mesh-id>/#";
   const topic_remain = "/baecb3124695efa1672b7e8d62e5b89e44713968f45eae6faa52066e87795a78/<mesh-id2>/#";
-  const input_test_file = __dirname + '/../test.acl';
-  const output_test_file = __dirname + '/../test.out.acl';
+  const input_test_file = '/mnt/data/mosquitto/auth/thinx.acl';
+  const output_test_file = '/mnt/data/mosquitto/auth/thinx.out.acl';
 
   it("should add/update user topic", function() {
     acl.addTopic(user, "readwrite", topic);
