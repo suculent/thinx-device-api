@@ -14,7 +14,7 @@ describe("Statistics", function() {
 
   it("should be able to store results", function() {
     var path = "/mnt/data/statistics/";
-    var dirpath = this.STATS_PATH + owner_id;
+    var dirpath = this.STATS_PATH + owner;
     s.write_stats(false, path, dirpath, {
       "message": "example"
     });

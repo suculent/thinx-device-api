@@ -2,11 +2,9 @@ describe("Owner", function() {
 
   var expect = require('chai').expect;
   
-  var generated_key_hash = null;
   var user = require('../../lib/thinx/owner');
-  var User = new user();
-
   var envi = require("../_envi.json");
+  
   var owner = envi.oid;
   var avatar_image = envi.test_avatar;
   var email = envi.email;
@@ -19,7 +17,7 @@ describe("Owner", function() {
 
   it("should be able to create owner profile", function(done) {
     
-    User.create(user_body, true, function(success, response) {
+    user.create(user_body, true, function(success, response) {
       console.log("username_already_exists response:", response);
       if (success === false && typeof(response) == "string" && response.indexOf("username_already_exists")) {
         done();
@@ -49,7 +47,7 @@ describe("Owner", function() {
   }, 10000);
 
   it("should be able to fetch MQTT Key for owner", function(done) {
-    User.mqtt_key(owner, function(success, apikey) {
+    user.mqtt_key(owner, function(success, apikey) {
       console.log({success}, {});
       console.log({success}, {apikey});
       //expect(success).to.be.true;
@@ -71,7 +69,7 @@ describe("Owner", function() {
           avatar: avatar_image
         }
       };
-      User.update(
+      user.update(
         owner,
         body,
         function(success, response) {
@@ -84,7 +82,7 @@ describe("Owner", function() {
     }, 10000);
 
   it("should be able to fetch owner profile", function(done) {
-    User.profile(owner, function(success, response) {
+    user.profile(owner, function(success, response) {
       expect(response).to.be.a('string');
       expect(success).to.be.true;
       if (success === false) {
@@ -98,7 +96,7 @@ describe("Owner", function() {
     var body = {
       info: test_info
     };
-    User.update(owner, body,
+    user.update(owner, body,
       function(success, response) {
         console.log(JSON.stringify(
           response));
@@ -111,17 +109,17 @@ describe("Owner", function() {
   it("should be able to activate owner", function (done) {
 
     function testActivation(owner, key, done) {
-      User.activate(owner, key, function (success, response) {
+      user.activate(owner, key, function (success, response) {
         expect(success).to.be.true;
         expect(response).to.be.a('string');
         console.log(JSON.stringify(response));
         done();
       });
     }
-    // activation_key requires User to be created first using User.create and take the key as (global?)
+    // activation_key requires User to be created first using user.create and take the key as (global?)
     if (typeof (this.activation_key) === "undefined") {
       
-      User.create(user_body, true, function (success, response) {
+      user.create(user_body, true, function (success, response) {
 
         if (success == false && typeof (response) == "string" && response.indexOf("username_already_exists")) {
           // OK)
@@ -150,7 +148,7 @@ describe("Owner", function() {
   }, 10000);
 
   it("should be able to begin reset owner password", function(done) {
-    User.password_reset_init(email, (success, response) => {
+    user.password_reset_init(email, (success, response) => {
       if (success === false) {
         console.log(response);
       }
@@ -165,7 +163,7 @@ describe("Owner", function() {
           owner: owner,
           reset_key: response
         };
-        User.set_password(body, function(sukec, reponde) {
+        user.set_password(body, function(sukec, reponde) {
           if (sukec === false) {
             console.log("Password set result: ", {reponde});
           }

@@ -35,7 +35,6 @@ if (Globals.use_sqreen()) {
  }
 }
 
-const crypto = require('crypto');
 const express = require("express");
 const session = require("express-session");
 
@@ -77,7 +76,6 @@ try {
 const Auth = require('./lib/thinx/auth.js');
 
 let auth = new Auth();
-console.log("SYS CREDS (object should contain key): ", app_config.mqtt.username, app_config.mqtt.password);
 auth.add_mqtt_credentials(app_config.mqtt.username, app_config.mqtt.password); // TODO: do this in Auth constructor
 
 const ACL = require('./lib/thinx/acl.js');
