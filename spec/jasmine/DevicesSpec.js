@@ -33,7 +33,7 @@ describe("Devices", function() {
     console.log("Test attempt to register device", {TEST_DEVICE}, "with ak", ak);
     device.register(
       {}, /* req */
-      TEST_DEVICE, /* reg */
+      { registration: TEST_DEVICE }, /* reg */
       ak,
       {}, /* ws */
       (success, response) => {
@@ -94,13 +94,13 @@ describe("Devices", function() {
     var body = {
       udid: TEST_DEVICE.udid
     };
-    devices.detach(owner, body, (success, response) => {
+    devices.detach(owner, body, (res, success, response) => {
       console.log("Detach success: " , {success});
       console.log("Detach response: " , {response});
       expect(success).to.be.true;
       expect(response).to.be.an('object');
       done();
-    });
+    }, {});
   }, 30000);
 
   // requires specific device registered for this test only (udid "d6ff2bb0-df34-11e7-b351-eb37822aa172")
@@ -109,11 +109,11 @@ describe("Devices", function() {
     var body = {
       udid: TEST_DEVICE.udid
     };
-    devices.revoke(owner, body, (success, response) => {
+    devices.revoke(owner, body, (res, success, response) => {
       expect(success);
       console.log("Revoke success: " , {success});
       console.log("Revoke response: " , {response});
       done();
-    });
+    }, {});
   }, 30000);
 });
