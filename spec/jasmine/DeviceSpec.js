@@ -65,7 +65,7 @@ describe("Device", function() {
   //create: function(owner, apikey_alias, callback)
   it("API keys are required to do this on new instance", function(done) {
     APIKey.create( owner, "sample-key", function(success, object) {
-      expect(success).to.equal(true);
+      expect(success).to.be.true;
       if (success) {
         apikey = sha256(object.key);
         console.log("Key ready: " + apikey);
@@ -90,7 +90,7 @@ describe("Device", function() {
           }
         }
         //console.log("• DeviceSpec.js: Registration result: ", {response});
-        expect(success).to.equal(true);
+        expect(success).to.be.true;
         JRS2.udid = response.registration.udid;
         expect(JRS2.udid).to.be.a('string');
         console.log("• DeviceSpec.js: Received UDID: " + JRS2.udid);
@@ -111,7 +111,7 @@ describe("Device", function() {
         // console.log("• DeviceSpec.js: Editing result: ", { response });
       }
 
-      expect(success).to.equal(true);
+      expect(success).to.be.true;
       expect(response).to.be.a('string');
       done();
     });
@@ -135,7 +135,7 @@ describe("Device", function() {
             }
           }
           //console.log("• DeviceSpec.js: Re-registration result: ", {response});
-          expect(success).to.equal(true);
+          expect(success).to.be.true;
           done();
         });
     }, 5000);
@@ -143,7 +143,7 @@ describe("Device", function() {
   it("should be able to store OTT request", function(done) {
     device.storeOTT(JSON.stringify(JRS2), function(success, response) {
       console.log("• OTT Response: " , {response});
-      //expect(success).to.equal(true); happens to be null?
+      //expect(success).to.be.true; happens to be null?
       expect(response).to.be.a('string');
       expect(response.ott).to.be.a('string');
       ott = response.ott;
@@ -154,7 +154,7 @@ describe("Device", function() {
   it("should be able to fetch OTT request", function(done) {
     device.storeOTT(JSON.stringify(JRS2), function(success, response) {
       console.log("• OTT Response: " , {response});
-      //expect(success).to.equal(true);
+      //expect(success).to.be.true;
       expect(response).to.be.a('string');
       expect(response.ott).to.be.a('string');
       ott = response.ott;
@@ -164,7 +164,7 @@ describe("Device", function() {
         if (success === false) {
           console.log(response);
         }
-        //expect(success).to.equal(true);
+        //expect(success).to.be.true;
         expect(response).to.be.a('string');
         done();
       });
@@ -203,7 +203,7 @@ describe("Device", function() {
         udid = response.registration.udid;
         JRS.udid = udid;
         console.log("• DeviceSpec.js: Received UDID: " + udid);
-        expect(success).to.equal(true);
+        expect(success).to.be.true;
         expect(udid).to.be.a('string');
         done();
       });
@@ -216,7 +216,7 @@ describe("Device", function() {
         function(success, response) {
           console.log("• DeviceSpec.js: Revocation result: ", { response });
           //expect(error.reason).to.equal("deleted");
-          expect(success).to.equal(true);
+          expect(success).to.be.true;
           if (success == false) {
             expect(response.status).to.equal("device_not_found");
           }

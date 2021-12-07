@@ -30,8 +30,8 @@ describe("API Env", function() {
         owner,
         "sample-var-name",
         function(success, response) {
-          expect(success).to.equal(true);
-          expect(response);
+          expect(success).to.be.true;
+          expect(response).to.be.an('object');
           done();
       });
     }, 3000);
@@ -60,7 +60,7 @@ describe("API Env", function() {
           owner,
           function(success, object) {
             if (success) {
-              expect(object);
+              expect(object).to.be.an('object');
             } else {
               console.log("[APIEnv] Listing failed:" + object);
             }

@@ -11,7 +11,7 @@ describe("Audit log", function() {
 
   it("should be able to log", function(done) {
     audit.log(owner, "Log test successful.", "info", function(result) {
-      expect(result);
+      expect(result).to.be.an('object');
       expect(result).not.to.equal(false);
       done();
     });

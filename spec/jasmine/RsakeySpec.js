@@ -22,14 +22,14 @@ describe("RSA Key", function() {
     function(success, response) {
       revoked_fingerprint = response;
       //console.log("RSA add result: " , {response});
-      expect(success);
+      expect(success).to.be.true;
       done();
     });
   }, 10000);
 
   it("should be able to list RSA Keys", function(done) {
     rsakey.list(owner, function(success, list) {
-      expect(success).to.equal(true);
+      expect(success).to.be.true;
       console.log("RSA list item count: " + list.length);
       done();
     });
@@ -39,7 +39,7 @@ describe("RSA Key", function() {
     rsakey.revoke(owner, invalid_fingerprints,
       function(success, message) {
         //console.log("RSA revocation result: " +JSON.stringify(message));
-        expect(success).to.equal(true); // succeds for more fingerprints if one is valid? maybe...
+        expect(success).to.be.true; // succeds for more fingerprints if one is valid? maybe...
         expect(message).to.be.a('array');
         done();
       });
@@ -50,7 +50,7 @@ describe("RSA Key", function() {
     function(success, response) {
       revoked_filenames.push(response.filename);
       //console.log("RSA add result: " , {response});
-      expect(success).to.equal(true);
+      expect(success).to.be.true;
       done();
     });
   }, 10000);
@@ -60,7 +60,7 @@ describe("RSA Key", function() {
     function(success, response) {
       revoked_filenames.push(response.filename);
       //console.log("RSA add result: " , {response});
-      expect(success).to.equal(true);
+      expect(success).to.be.true;
       done();
     });
   }, 10000);
@@ -70,7 +70,7 @@ describe("RSA Key", function() {
     rsakey.revoke(owner, revoked_filenames,
       function(success, message) {
         console.log("RSA revocation result: " + JSON.stringify(message));
-        expect(success).to.equal(true);
+        expect(success).to.be.true;
         expect(message).to.be.a('array'); // should be array of length of 2
         done();
       });

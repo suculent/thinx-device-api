@@ -27,8 +27,8 @@ describe("API Key", function() {
 
   //create: function(owner, apikey_alias, callback)
   it("02 - should be able to generate new API Key", function(done) {
-    //console.log("With owner:", owner);
-    expect(owner);
+    console.log("With owner:", owner);
+    expect(owner).to.be.a('string');
     apikey.create(
       owner,
       "sample-key",
@@ -41,8 +41,8 @@ describe("API Key", function() {
         } else {
           console.log("APIKey failed: ",{object});
         }
-        expect(success);
-        expect(first);
+        expect(success).to.be.true;
+        expect(first).to.be.an('object');
         done();
       }
     );
@@ -74,7 +74,7 @@ describe("API Keys", function() {
       generated_key_hash,
       ["sample-key-hash"],
       (success, result)  => {
-        expect(success);
+        expect(success).to.be.true;
         done();
       });
   });
@@ -95,7 +95,7 @@ describe("API Keys", function() {
     apikey.list(
       owner,
       (success, object) => {
-        expect(success).to.equal(true);
+        expect(success).to.be.true;
         if (success) {
           expect(object).to.be.a('array');
         } else {

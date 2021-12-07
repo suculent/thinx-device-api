@@ -23,8 +23,8 @@ describe("Sources", function() {
           console.log("Error adding source: " + response);
         }
         //console.log("Source Add Response: " , {response});
-        expect(success).to.equal(true);
-        expect(response);
+        expect(success).to.be.true;
+        expect(response).to.be.an('object');
         source_id = response.source_id;
         done();
       });
@@ -32,8 +32,8 @@ describe("Sources", function() {
 
   it("should be able to provide a list", function(done) {
     Sources.list(owner, function(success, response) {
-      expect(success).to.equal(true);
-      expect(response).to.be.a('object');
+      expect(success).to.be.true;
+      expect(response).to.be.an('object');
       //console.log("Source List Response: " , {response});
       done();
     });
@@ -55,15 +55,15 @@ describe("Sources", function() {
           console.log("Error adding source: " + response);
         }
         console.log("Source Add Response: " , {response});
-        //expect(success).to.equal(true);
-        expect(response);
+        //expect(success).to.be.true;
+        expect(response).to.be.an('object');
         source_id = response.source_id;
 
         Sources.remove(source.owner, [source_id], (rsuccess, rresponse) => {
           if (rsuccess === false) {
             console.log("Error removing source: " + rresponse);
           }
-          expect(rsuccess).to.equal(true);
+          expect(rsuccess).to.be.true;
           //expect(response).to.be.a('string');
           if (typeof(rresponse) !== "undefined") {
             console.log("Sources Removal Response: " , {rresponse});

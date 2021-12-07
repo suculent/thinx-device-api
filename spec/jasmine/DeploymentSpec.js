@@ -26,7 +26,7 @@ describe("Deployer", function() {
 
   it("should be able to init with device", function() {
     deploy.initWithDevice(device);
-    expect(true).to.equal(true);
+    expect(true).to.be.true;
   });
 
   it("should be able to return path for device", function() {

@@ -46,9 +46,9 @@ describe("Devices", function() {
           }
         }
         console.log("• DeviceSpec.js: Registration result: ", {response});
-        expect(success);
-        expect(TEST_DEVICE);
-        expect(response.registration);
+        expect(success).to.be.true;
+        expect(TEST_DEVICE).to.be.an('object');
+        expect(response.registration).to.be.an('object');
         TEST_DEVICE.udid = response.registration.udid;
         expect(TEST_DEVICE.udid).to.be.a('string');
         console.log("• DevicesSpec.js: Received UDID: " + TEST_DEVICE.udid);
@@ -60,7 +60,7 @@ describe("Devices", function() {
   
   it("should be able to list devices for owner", function(done) {
     devices.list(owner, (success, response) => {
-      expect(success).to.equal(true);
+      expect(success).to.be.true;
       expect(response).to.be.a('object');
       console.log("Device list: " , {response});
       done();
@@ -69,7 +69,7 @@ describe("Devices", function() {
 
   it("should not be able to list devices for empty owner", function(done) {
     devices.list("", (success, response) => {
-      expect(success).to.equal(true);
+      expect(success).to.be.true;
       expect(response).to.be.a('object');
       expect(response.devices).to.be.a('array');
       console.log("Should be empty Device list in: " , {response});
@@ -84,8 +84,8 @@ describe("Devices", function() {
     };
     console.log("Attach request...");
     devices.attach(owner, body, (success, response) => {
-      expect(success);
-      expect(response);
+      expect(success).to.be.true;
+      expect(response).to.be.an('object');
       console.log("Attach response: " , {response});
       done();
     });
@@ -96,8 +96,8 @@ describe("Devices", function() {
       udid: TEST_DEVICE.udid
     };
     devices.detach(owner, body, (success, response) => {
-      expect(success);
-      expect(response);
+      expect(success).to.be.true;
+      expect(response).to.be.an('object');
       console.log("Detach success: " , {success});
       console.log("Detach response: " , {response});
       if (success === false) {

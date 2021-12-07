@@ -24,7 +24,7 @@ describe("Messenger", function() {
   it("should be able to initialize on its own", function(done) {
     const mock_socket = {};
     messenger.initWithOwner(test_owner, mock_socket, (success, status) => {
-      expect(success).to.equal(true);
+      expect(success).to.be.true;
       //console.log("init status", {status}, {success});
       //expect(status).to.be.a('string'); // messenger_init_success
       console.log("devices: ", { success: success, status: status });
@@ -33,6 +33,7 @@ describe("Messenger", function() {
   }, 5000);
   
   it("should be able to generate new API Keys", function(done) {
+    console.log("generate key with owner", {owner});
     apikey.create(
       owner,
       "Test MQTT API Key",
@@ -45,7 +46,6 @@ describe("Messenger", function() {
         } else {
           console.log({success}, {first});
         }
-        expect(object);
         done();
       }
     );
@@ -54,7 +54,7 @@ describe("Messenger", function() {
   // getDevices: function(owner, callback)
   it("should be able to fetch devices for owner", function(/*done*/) {
     messenger.getDevices(test_owner, (success, devices) => {
-      expect(devices);
+      expect(devices).to.be.an('object');
       console.log("devices: ", { devices });
       //done();
     });
@@ -63,7 +63,7 @@ describe("Messenger", function() {
   /* why? this function is unused... dead code.
   it("should be able to get all owners", function(done) {
     Messenger.getAllOwners(function(success, status) {
-      expect(success).to.equal(true);
+      expect(success).to.be.true;
       console.log("owners: " + JSON.stringify(status));
       done();
     });

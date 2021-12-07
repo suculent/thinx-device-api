@@ -12,7 +12,7 @@ describe("Repository Watcher", function() {
 
   it("should be able to initialize", function() {
     watcher = new Repository();
-    expect(watcher);
+    expect(watcher).to.be.an('object');;
   });
 
   watcher.callback = function(err) {

@@ -25,7 +25,7 @@ describe("Transfer", function() {
 
     Transfer.request(this.owner, body, function(success, response) {
       console.log(response);
-      expect(success).to.equal(true);
+      expect(success).to.be.true;
       expect(response).to.be.a('string');
       dynamic_transfer_request_id = response;
       done();
@@ -51,7 +51,7 @@ describe("Transfer", function() {
   it("should be able to initiate device transfer for accept", function(done) {
     Transfer.request(this.owner, body, function(success, response) {
       console.log(response);
-      expect(success).to.equal(true);
+      expect(success).to.be.true;
       expect(response).to.be.a('string');
       dynamic_transfer_request_id = response;
       done();
@@ -59,14 +59,13 @@ describe("Transfer", function() {
   }, 10000);
 
   //accept: function(body, callback) {
-  it("should be able to accept transferred devices", function(
-    done) {
+  it("should be able to accept transferred devices", function(done) {
     var transfer_body = {
       transfer_id: dynamic_transfer_request_id,
       udids: [envi.udid]
     };
     Transfer.accept(transfer_body, function(success, response) {
-      expect(success).to.equal(true);
+      expect(success).to.be.true;
       expect(response).to.be.a('string');
       console.log("transfer accept response: " + JSON.stringify(
         response));

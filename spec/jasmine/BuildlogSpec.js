@@ -48,7 +48,7 @@ describe("Build log", function() {
         if (success !== true) {
           console.log(success); // error reason
         }
-        expect(success).to.equal(true);
+        expect(success).to.be.true;
       });
   });
 

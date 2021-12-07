@@ -27,7 +27,7 @@ describe("Statistics", function() {
 
   it("should be able to return today results for owner", function(done) {
     s.today(owner, function(success, result) {
-        // expect(success).to.equal(true);
+        // expect(success).to.be.true;
         console.log("daily stats: ", { result });
         expect(result).to.be.a('string');
         done();
@@ -36,7 +36,7 @@ describe("Statistics", function() {
 
   it("should be able to aggregate statistics", function(done) {
     s.aggregate(function(success, result) {
-      expect(success).to.equal(true);
+      expect(success).to.be.true;
       expect(result).to.be.a('string');
       done();
     });
@@ -45,7 +45,7 @@ describe("Statistics", function() {
   it("should be able to parse today statistics per owner", function(done) {
     s.today(owner, function(success, body) {
         console.log("Returned today stats: ", { success, body });
-        //expect(success).to.equal(true);
+        //expect(success).to.be.true;
         expect(body).to.be.a('string');
         done();
       });
@@ -54,7 +54,7 @@ describe("Statistics", function() {
   it("should be able to parse all statistics per owner", function(done) {
     s.parse(owner, function(success, body) {
         //console.log("Returned all stats: ");
-        expect(success).to.equal(true);
+        expect(success).to.be.true;
         if (success) {
           expect(body).to.be.a('object');
         }
@@ -64,7 +64,7 @@ describe("Statistics", function() {
 
   it("should be able to return weekly results for owner", function(done) {
     s.week(owner, function(success, result) {
-        //expect(success).to.equal(true);
+        //expect(success).to.be.true;
         //console.log("Returned weekly stats: ");
         //console.log({result});
         expect(result).to.be.a('object');

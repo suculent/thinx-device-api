@@ -12,7 +12,7 @@ describe("Validator", function() {
   const Validator = require('../../lib/thinx/validator');
 
   it("should return TRUE on valid JSON", function() {
-    expect(Validator.isJSON(mock)).to.equal(true);
+    expect(Validator.isJSON(mock)).to.be.true;
   });
 
   it("should return FALSE on invalid JSON", function() {
@@ -31,7 +31,7 @@ describe("Validator", function() {
     //console.log("result: ", result);
     //console.log("owner: ", owner);
     expect(result).to.be.a('string');
-    expect(result == owner).to.equal(true);
+    expect(result == owner).to.be.true;
   });
 
   it("should trim invalid udid", function() {
@@ -45,6 +45,6 @@ describe("Validator", function() {
     var result = Validator.udid(udid);
     //console.log(result);
     expect(result).to.be.a('string');
-    expect(result == udid).to.equal(true);
+    expect(result == udid).to.be.true;
   });
 });

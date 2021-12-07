@@ -171,8 +171,8 @@ function initDatabases(dbprefix) {
 
 initDatabases(prefix);
 
-var devicelib = require("nano")(db).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
-var userlib = require("nano")(db).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
+var devicelib = require("nano")(app_config.database_uri).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
+var userlib = require("nano")(app_config.database_uri).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
 
 console.log("Loaded module: Statistics");
 var Stats = require("./lib/thinx/statistics");

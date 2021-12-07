@@ -10,7 +10,7 @@ describe("Git", function() {
             "git pull --recurse-submodules", 
             __dirname);
         console.log("git fetch result", success);
-        expect(success); // may fail until <owner> is valid
+        expect(success).to.be.true; // may fail until <owner> is valid
         done();
     }, 10000);
 
