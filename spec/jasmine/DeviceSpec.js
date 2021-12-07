@@ -56,8 +56,6 @@ describe("Device", function() {
     udid: null
   };
 
-  var body = JRS; // JSON.parse(RS);
-
   //console.log("• DeviceSpec.js: Using test API_KEY: " + apikey);
   //console.log("• DeviceSpec.js: Using request: " + JSON.stringify(JRS));
 
@@ -66,8 +64,10 @@ describe("Device", function() {
   it("API keys are required to do this on new instance", function(done) {
     APIKey.create( owner, "sample-key", function(success, object) {
       expect(success).to.be.true;
+      console.log("Key object: ", object);
+      expect(object).to.be.an('array');
       if (success) {
-        apikey = sha256(object.key);
+        apikey = sha256(object[0].key);
         console.log("Key ready: " + apikey);
         expect(apikey).to.be.a('string');
       }
@@ -194,12 +194,14 @@ describe("Device", function() {
     }, 5000);
 
   it("should be able to register for revocation", function(done) {
+    expect(JRS2).to.be.a('string');
+    expect(apikey).to.be.a('string');
     device.register(
       JRS2,
       apikey,
       null,
       function(success, response) {
-        //console.log("Registration Response: ", response);
+        console.log("Registration Response: ", response);
         udid = response.registration.udid;
         JRS.udid = udid;
         console.log("• DeviceSpec.js: Received UDID: " + udid);

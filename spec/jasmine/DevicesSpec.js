@@ -72,7 +72,6 @@ describe("Devices", function() {
       expect(success).to.be.true;
       expect(response).to.be.a('object');
       expect(response.devices).to.be.a('array');
-      console.log("Should be empty Device list in: " , {response});
       done();
     });
   }, 5000);
