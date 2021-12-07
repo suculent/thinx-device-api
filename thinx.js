@@ -77,6 +77,7 @@ try {
 const Auth = require('./lib/thinx/auth.js');
 
 let auth = new Auth();
+console.log("SYS CREDS (object should contain key): ", app_config.mqtt.username, app_config.mqtt.password);
 auth.add_mqtt_credentials(app_config.mqtt.username, app_config.mqtt.password); // TODO: do this in Auth constructor
 
 const ACL = require('./lib/thinx/acl.js');
@@ -812,6 +813,7 @@ function restore_owner_credentials(owner_id, dmk_callback) {
           auth.add_mqtt_credentials(device._id, item.key);
         }
       }
+      console.log("DEFAULT CREDS: ", {owner_id}, {default_mqtt_key});
       auth.add_mqtt_credentials(owner_id, default_mqtt_key);
       dmk_callback(true, default_mqtt_key);
     });
