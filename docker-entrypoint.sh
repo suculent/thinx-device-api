@@ -66,11 +66,12 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin/
   sonar-scanner -Dsonar.login=${SONAR_TOKEN}
   rm -rf spec/test_repositories/**
+
+  set -e
   
   if [[ -d ./.git ]]; then
     codecov -t $CODECOV_TOKEN
   fi
-
 
 else
   echo "[thinx-entrypoint] Starting in production mode..."

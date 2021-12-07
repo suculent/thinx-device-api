@@ -17,7 +17,7 @@ describe("Owner", function() {
   // cimrman@thinx.cloud receives his activation token in response
   // and must not be used in production environment
 
-  it("should be able to create owner profile", function(done) {
+  it("should be able to create/update owner profile", function(done) {
     
     user.create(user_body, true, function(success, response) {
       console.log("username_already_exists response:", response);
@@ -40,9 +40,23 @@ describe("Owner", function() {
       if (response) {
         console.log("Activation response: " + response);
         this.activation_key = response; // store activation token for next step
-        activation_key = response;
       }
       console.log("Create response: ", { response });
+      var body = {
+        info: {
+          avatar: avatar_image
+        }
+      };
+      user.update(
+        owner,
+        body,
+        function(xuccess, xesponse) {
+        if (xuccess === false) {
+          console.log("avatar update response: " , {xesponse});
+        }
+        expect(xuccess).to.be.true;
+        done();
+      });
       done();
     });
 
@@ -63,25 +77,6 @@ describe("Owner", function() {
       done();
     });
   }, 5000);
-
-  it("should be able to update owner avatar",
-    function(done) {
-      var body = {
-        info: {
-          avatar: avatar_image
-        }
-      };
-      user.update(
-        owner,
-        body,
-        function(success, response) {
-        if (success === false) {
-          console.log("avatar update response: " , {response});
-        }
-        expect(success).to.be.true;
-        done();
-      });
-    }, 10000);
 
   it("should be able to fetch owner profile", function(done) {
     user.profile(owner, function(success, response) {

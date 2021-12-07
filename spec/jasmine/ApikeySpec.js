@@ -1,4 +1,3 @@
-//const { response } = require('express');
 var APIKey = require("../../lib/thinx/apikey");
 var expect = require('chai').expect;  
 var generated_key_hash = null;
@@ -13,7 +12,7 @@ describe("API Key List", function() {
       owner,
       (success, object) => {
         if (success) {
-          //console.log("API Key list(1): ", JSON.stringify(object));
+          console.log("API Key list(1): ", JSON.stringify(object));
           expect(object).to.be.a('array');
         } else {
           console.log("[jasmine] API Key Listing failed:", {object}, {success});
@@ -35,7 +34,7 @@ describe("API Key", function() {
         let first = object;
         console.log("generated API Key: ", {first}, {object}, {success}); // TODO: FIXME: generated_key_hash should be used for testing or not?
         if (success) {
-          generated_key_hash = sha256(first.key);
+          this.generated_key_hash = sha256(first.key);
           console.log("APIKey generated:", generated_key_hash);
         } else {
           console.log("APIKey failed: ",{object});
@@ -46,11 +45,6 @@ describe("API Key", function() {
       }
     );
   });
-
-  
-});
-
-describe("API Keys", function() {
 
   //verify: function(owner, apikey, callback)
   it("03 - should be able to verify invalid API Keys", function(done) {
@@ -68,7 +62,7 @@ describe("API Keys", function() {
 
   //revoke: function(owner, apikey_hash, callback)
   it("04 - should be able to revoke API Keys", function(done) {
-    console.log("Revoking valid key: " + generated_key_hash);
+    console.log("Revoking valid key: " + this.generated_key_hash);
     apikey.revoke(
       generated_key_hash,
       ["sample-key-hash"],
