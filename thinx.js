@@ -127,7 +127,7 @@ function initDatabases(dbprefix) {
       handleDatabaseErrors(err, "managed_devices");
     };
     
-    if (response.body !== "true") {
+    if (body !== "true") {
       throw new Error("Database for devices could not be created.");
     }
 
@@ -142,7 +142,7 @@ function initDatabases(dbprefix) {
       handleDatabaseErrors(err, "managed_builds");
     } 
     
-    if (response.body !== "true") {
+    if (body !== "true") {
       throw new Error("Database for builds could not be created.");
     }
 
@@ -157,7 +157,7 @@ function initDatabases(dbprefix) {
       handleDatabaseErrors(err, "managed_users");
     } 
 
-    if (response.body !== "true") {
+    if (body !== "true") {
       throw new Error("Database for users could not be created.");
     }
     
@@ -172,7 +172,7 @@ function initDatabases(dbprefix) {
       handleDatabaseErrors(err, "managed_logs");
     } 
     
-    if (response.body !== "true") {
+    if (body !== "true") {
       throw new Error("Database for logs could not be created.");
     }
 
