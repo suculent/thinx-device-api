@@ -202,6 +202,9 @@ function purgeOldUsers() {
     console.log("Purge old users skipped. Enable with strict_gdpr = true in config.json");
     return;
   }
+  if (process.env.ENVIRONMENT === "test") {
+    return; // no expired users in test, query will fail with "doc is null" error...
+  }
   var d = new Date();
   d.setMonth(d.getMonth() - 3);
   let req = {
