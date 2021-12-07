@@ -97,8 +97,7 @@ describe("API Keys", function() {
       (success, object) => {
         expect(success).to.equal(true);
         if (success) {
-          console.log("TODO: Add test to expect object", object, "to be an array");
-          //expect(object).to.be.a('array');
+          expect(object).to.be.a('array');
         } else {
           console.log("[jasmine] Listing failed:" + object);
         }
