@@ -50,10 +50,6 @@ touch /opt/thinx/.pm2/logs/index-out-1.log
 
 if [[ ${ENVIRONMENT} == "test" ]]; then
   echo "[thinx-entrypoint] Running in TEST MODE!"
-  export CODECOV_TOKEN="734bc9e7-5671-4020-a26e-e6141f02b53d"
-  export CODACY_PROJECT_TOKEN=9a7d084ad97e430ba12333f384b44255
-  export CC_TEST_REPORTED_ID="e181ad1424f8f92834a556089394b2faadf93e9b6c84b831cefebb7ea06a8328"
-  export CC_TEST_REPORTER_ID="e181ad1424f8f92834a556089394b2faadf93e9b6c84b831cefebb7ea06a8328"
   curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   chmod +x ./cc-test-reporter
   #./cc-test-reporter before-build
@@ -69,7 +65,7 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin/
   sonar-scanner -Dsonar.login=${SONAR_TOKEN}
   rm -rf spec/test_repositories/**
-  # codecov -t 734bc9e7-5671-4020-a26e-e6141f02b53d # fails wihout git rpeo
+  # codecov -t $CODECOV_TOKEN # fails wihout git rpeo
 
 
 else
