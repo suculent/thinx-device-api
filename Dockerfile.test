@@ -107,11 +107,6 @@ EXPOSE 9002
 # Copy app source code
 COPY . .
 
-RUN echo "Find GIT please..." && ls -la
-
-# Add git for analyzer SCM linking
-# COPY ./.git . # sorry, fails... fix later
-
 # download test reporter as a static binary
 RUN curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
 RUN chmod +x ./cc-test-reporter

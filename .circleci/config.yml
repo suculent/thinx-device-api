@@ -302,6 +302,7 @@ jobs:
           mv ./docker-compose.test.yml ./docker-compose.yml
           rm -rf ./services/broker/Dockerfile
           mv ./services/broker/Dockerfile.test ./services/broker/Dockerfile
+          sed -i "s/.git//g" .dockerignore
 
     - run:
         name: Starting Redis
