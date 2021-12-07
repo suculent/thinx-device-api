@@ -13,15 +13,6 @@ describe("ACL Manager", function() {
   const input_test_file = __dirname + '/../test.acl';
   const output_test_file = __dirname + '/../test.out.acl';
 
-  //
-
-  it("should be able load ACL file", function(done) {
-    acl.path = input_test_file;
-    acl.load(() => {
-      done();
-    });
-  });
-
   it("should add/update user topic", function() {
     acl.addTopic(user, "readwrite", topic);
     acl.addTopic(user, "readwrite", topic_remain);
@@ -41,6 +32,13 @@ describe("ACL Manager", function() {
 
   it("should be able to prune given topic", function(done) {
     acl.prune("mesh-id2", () => {
+      done();
+    });
+  });
+
+  it("should be able load ACL file", function(done) {
+    acl.path = input_test_file;
+    acl.load(() => {
       done();
     });
   });

@@ -126,10 +126,6 @@ function initDatabases(dbprefix) {
     if (err) {
       handleDatabaseErrors(err, "managed_devices");
     };
-    
-    if (body !== true) {
-      throw new Error("Database for devices could not be created.");
-    }
 
     console.log("» Device database creation completed.");
     var couch = nano.db.use(dbprefix + "managed_devices");
@@ -140,10 +136,6 @@ function initDatabases(dbprefix) {
   nano.db.create(dbprefix + "managed_builds", function(err, body, header) {
     if (err) {
       handleDatabaseErrors(err, "managed_builds");
-    } 
-    
-    if (body !== true) {
-      throw new Error("Database for builds could not be created.");
     }
 
     console.log("» Build database creation completed.");
@@ -155,10 +147,6 @@ function initDatabases(dbprefix) {
   nano.db.create(dbprefix + "managed_users", function(err, body, header) {
     if (err) {
       handleDatabaseErrors(err, "managed_users");
-    } 
-
-    if (body !== true) {
-      throw new Error("Database for users could not be created.");
     }
     
     console.log("» User database creation completed.");
@@ -170,10 +158,6 @@ function initDatabases(dbprefix) {
   nano.db.create(dbprefix + "managed_logs", function(err, body, header) {
     if (err) {
       handleDatabaseErrors(err, "managed_logs");
-    } 
-    
-    if (body !== true) {
-      throw new Error("Database for logs could not be created.");
     }
 
     console.log("» Log database creation completed.");

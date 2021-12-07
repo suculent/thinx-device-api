@@ -21,7 +21,7 @@ describe("Owner", function() {
     
     User.create(user_body, true, function(success, response) {
       console.log("username_already_exists response:", response);
-      if (success == false && typeof(response) == "string" && response.indexOf("username_already_exists")) {
+      if (success === false && typeof(response) == "string" && response.indexOf("username_already_exists")) {
         done();
         return;
       }

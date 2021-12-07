@@ -27,14 +27,13 @@ describe("API Key", function() {
 
   //create: function(owner, apikey_alias, callback)
   it("02 - should be able to generate new API Key", function(done) {
-    console.log("With owner:", owner);
     expect(owner).to.be.a('string');
     apikey.create(
       owner,
       "sample-key",
       (success, object) => {
         let first = object;
-        //console.log("generated API Key: ", {first}, {object}, {success});
+        console.log("generated API Key: ", {first}, {object}, {success}); // TODO: FIXME: generated_key_hash should be used for testing or not?
         if (success) {
           generated_key_hash = sha256(first.key);
           console.log("APIKey generated:", generated_key_hash);
