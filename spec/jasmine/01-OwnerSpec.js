@@ -64,10 +64,18 @@ describe("Owner", function() {
 
   it("should be able to fetch MQTT Key for owner", function(done) {
     user.mqtt_key(owner, function(success, apikey) {
-      console.log({success}, {});
-      console.log({success}, {apikey});
-      //expect(success).to.be.true;
-      //expect(apikey.key).to.be.a('string');
+      /*
+      { success: true } {
+        apikey: {
+          name: '******************************688bbed67710d991914066238f7ea415d7',
+          key: 'bdd072f5fcfc810255114a92d4c1a2688bbed67710d991914066238f7ea415d7',
+          hash: '202617b90348fc03f5215915e0f08d9ca8dbd0a2d6940e2bbba2276c981f658a',
+          alias: 'Default MQTT API Key'
+        }
+      }
+      */
+      expect(success).to.be.true;
+      expect(apikey.key).to.be.an('object');
       if (success) {
         console.log("MQTT apikey: ", { apikey });
       } else {

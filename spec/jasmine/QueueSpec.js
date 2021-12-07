@@ -13,7 +13,7 @@ describe("Queue", function() {
 
     // init
     it("Should initialize safely without running cron", function() {
-        let builder = null;
+        let builder = {};
         queue_with_cron = new Queue(builder);
         expect(queue_with_cron).to.be.a('object');
     });
