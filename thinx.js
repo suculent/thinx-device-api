@@ -125,48 +125,62 @@ function initDatabases(dbprefix) {
   nano.db.create(dbprefix + "managed_devices", function(err, body, header) {
     if (err) {
       handleDatabaseErrors(err, "managed_devices");
-    } else {
-      console.log("» Device database creation completed. Response: " +
-        JSON.stringify(body) + "\n");
-      var couch = nano.db.use(dbprefix + "managed_devices");
-      injectDesign(couch, "devicelib", "./design/design_deviceslib.json");
-      injectReplFilter(couch, "./design/filters_devices.json");
+    };
+    
+    if (response.body !== "true") {
+      throw new Error("Database for devices could not be created.");
     }
+
+    console.log("» Device database creation completed.");
+    var couch = nano.db.use(dbprefix + "managed_devices");
+    injectDesign(couch, "devicelib", "./design/design_deviceslib.json");
+    injectReplFilter(couch, "./design/filters_devices.json");
   });
 
   nano.db.create(dbprefix + "managed_builds", function(err, body, header) {
     if (err) {
       handleDatabaseErrors(err, "managed_builds");
-    } else {
-      console.log("» Build database creation completed. Response: " +
-        JSON.stringify(body) + "\n");
-      var couch = nano.db.use(dbprefix + "managed_builds");
-      injectDesign(couch, "builds", "./design/design_builds.json");
-      injectReplFilter(couch, "./design/filters_builds.json");
+    } 
+    
+    if (response.body !== "true") {
+      throw new Error("Database for builds could not be created.");
     }
+
+    console.log("» Build database creation completed.");
+    var couch = nano.db.use(dbprefix + "managed_builds");
+    injectDesign(couch, "builds", "./design/design_builds.json");
+    injectReplFilter(couch, "./design/filters_builds.json");
   });
 
   nano.db.create(dbprefix + "managed_users", function(err, body, header) {
     if (err) {
       handleDatabaseErrors(err, "managed_users");
-    } else {
-      console.log("» User database creation completed. Response: " +
-        JSON.stringify(body) + "\n");
-      var couch = nano.db.use(dbprefix + "managed_users");
-      injectDesign(couch, "users", "./design/design_users.json");
-      injectReplFilter(couch, "./design/filters_users.json");
+    } 
+
+    if (response.body !== "true") {
+      throw new Error("Database for users could not be created.");
     }
+    
+    console.log("» User database creation completed.");
+    var couch = nano.db.use(dbprefix + "managed_users");
+    injectDesign(couch, "users", "./design/design_users.json");
+    injectReplFilter(couch, "./design/filters_users.json");
   });
 
   nano.db.create(dbprefix + "managed_logs", function(err, body, header) {
     if (err) {
       handleDatabaseErrors(err, "managed_logs");
-    } else {
-      console.log("» Log database creation completed. Response: " + JSON.stringify(body) + "\n");
-      var couch = nano.db.use(dbprefix + "managed_logs");
-      injectDesign(couch, "logs", "./design/design_logs.json");
-      injectReplFilter(couch,  "./design/filters_logs.json");
+    } 
+    
+    if (response.body !== "true") {
+      throw new Error("Database for logs could not be created.");
     }
+
+    console.log("» Log database creation completed.");
+    var couch = nano.db.use(dbprefix + "managed_logs");
+    injectDesign(couch, "logs", "./design/design_logs.json");
+    injectReplFilter(couch,  "./design/filters_logs.json");
+  
   });
 }
 
