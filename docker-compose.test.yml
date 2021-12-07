@@ -113,7 +113,7 @@ services:
   api:
     privileged: true
     shm_size: 2048M
-    restart: never
+    restart: no # not in test
     depends_on:
       - transformer
       - thinx-redis
