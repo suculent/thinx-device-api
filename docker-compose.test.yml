@@ -38,12 +38,10 @@ services:
       - 'COUCHDB_COOKIE=${COUCHDB_COOKIE}'
       - 'COUCHDB_SECRET=${COUCHDB_SECRET}'
     ports:
-      - 5984
+      - 5984:5984
     networks:
       - nat
       - internal
-    labels:
-      - traefik.backend.couchdb.noexpose
   thinx-redis:
     env_file: .env
     networks:

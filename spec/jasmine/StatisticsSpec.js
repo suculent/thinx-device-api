@@ -1,12 +1,12 @@
+var expect = require('chai').expect;
+var Statistics = require('../../lib/thinx/statistics');
+var s = new Statistics();
+s.forceLogPath(__dirname + "/../../spec/test.log");
+
+var envi = require("../_envi.json");
+var owner = envi.oid;
+
 describe("Statistics", function() {
-
-  var expect = require('chai').expect;
-  var Statistics = require('../../lib/thinx/statistics');
-  var s = new Statistics();
-  s.forceLogPath(__dirname + "/../../spec/test.log");
-
-  var envi = require("../_envi.json");
-  var owner = envi.oid;
 
   it("should be able to initialize", function() {
     expect(s).to.be.a('object');

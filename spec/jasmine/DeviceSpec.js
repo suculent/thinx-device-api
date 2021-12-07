@@ -59,16 +59,16 @@ describe("Device", function() {
   //console.log("• DeviceSpec.js: Using test API_KEY: " + apikey);
   //console.log("• DeviceSpec.js: Using request: " + JSON.stringify(JRS));
 
-
+  /** TODO: Only when the sample-key has not been previously added by ApikeySpec */
   //create: function(owner, apikey_alias, callback)
-  it("API keys are required to do this on new instance", function(done) {
+  it("API keys are required to do this on new instance", function(done) {    
     APIKey.create( owner, "sample-key", function(success, object) {
       expect(success).to.be.true;
       console.log("Key object: ", object);
       expect(object).to.be.an('array');
       if (success) {
-        apikey = sha256(object[0].key);
-        console.log("Key ready: " + apikey);
+        apikey = object[0].hash;
+        console.log("Key hash ready: ", apikey);
         expect(apikey).to.be.a('string');
       }
       done();
