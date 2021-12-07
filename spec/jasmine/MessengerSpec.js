@@ -25,8 +25,6 @@ describe("Messenger", function() {
     const mock_socket = {};
     messenger.initWithOwner(test_owner, mock_socket, (success, status) => {
       expect(success).to.be.true;
-      //console.log("init status", {status}, {success});
-      //expect(status).to.be.a('string'); // messenger_init_success
       console.log("devices: ", { success: success, status: status });
       done();
     });
@@ -52,22 +50,13 @@ describe("Messenger", function() {
   });
 
   // getDevices: function(owner, callback)
-  it("should be able to fetch devices for owner", function(/*done*/) {
+  it("should be able to fetch devices for owner", function(done) {
     messenger.getDevices(test_owner, (success, devices) => {
-      expect(devices).to.be.an('object');
       console.log("devices: ", { devices });
-      //done();
-    });
-  });
-
-  /* why? this function is unused... dead code.
-  it("should be able to get all owners", function(done) {
-    Messenger.getAllOwners(function(success, status) {
-      expect(success).to.be.true;
-      console.log("owners: " + JSON.stringify(status));
+      expect(devices).to.be.an('array');
       done();
     });
-  }, 5000); */
+  });
 
   // publish: function(owner, udid, message); returns nothing
   it("should be able to publish upon connection", function(done) {

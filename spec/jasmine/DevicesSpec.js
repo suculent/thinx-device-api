@@ -26,7 +26,7 @@ describe("Devices", function() {
     alias: "virtual-test-device-3-dynamic",
     owner: owner,
     platform: "arduino",
-    udid: null
+    udid: envi.udid
   };
 
   it("should be able to register test device", function(done) {
