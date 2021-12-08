@@ -36,11 +36,11 @@ describe("Owner", function() {
         done();
       }
       if (response) {
-        console.log("Activation response stored as this.activation_key: " + response);
+        console.log("(01) Activation response stored as this.activation_key: " + response);
         this.activation_key = response; // store activation token for next step
         activation_k = response;
       }
-      console.log("Create response: ", { response });
+      console.log("(01) Create response: ", { response });
       expect(response).to.be.a('string');
       done();
     }, {});
