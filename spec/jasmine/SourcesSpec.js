@@ -9,7 +9,7 @@ describe("Sources", function() {
   var source_id;
   const source_name = "thinx-device-api-test";
 
-  it("should be able to be added", function(done) {
+  it("(01) should be able to be added", function(done) {
     const source = {
       name: source_name,
       owner: owner,
@@ -22,14 +22,14 @@ describe("Sources", function() {
         if (success === false) {
           console.log("Error adding source: " + response);
         }
-        expect(success).to.be.true;
+        expect(success).to.be.true; // git fetch must work for this
         expect(response).to.be.an('object');
         source_id = response.source_id;
         done();
       });
   }, 20000);
 
-  it("should be able to provide a list", function(done) {
+  it("(02) should be able to provide a list", function(done) {
     Sources.list(owner, function(success, response) {
       expect(success).to.be.true;
       expect(response).to.be.an('object');
@@ -38,7 +38,7 @@ describe("Sources", function() {
     });
   }, 10000);
 
-  it("should be able to be removed", function(done) {
+  it("(03) should be able to be removed", function(done) {
 
     const source = {
       owner: owner,
@@ -71,7 +71,7 @@ describe("Sources", function() {
       });
   }, 20000);
 
-  it("should be able to validate branch name", function() {
+  it("(04) should be able to validate branch name", function() {
     let source = {
       branch: "origin/master"
     };
@@ -82,7 +82,7 @@ describe("Sources", function() {
     
   });
 
-  it("should be able to validate url", function() {
+  it("(05) should be able to validate url", function() {
     let source = {
       url: "git@github.com/suculent/thinx-device-api"
     };
@@ -92,7 +92,7 @@ describe("Sources", function() {
     expect(result).to.equal("master");
   });
 
-  it("should be able to invalidate branch name", function() {
+  it("(06) should be able to invalidate branch name", function() {
     let source = {
       branch: "origin/mas'ter"
     };
@@ -102,7 +102,7 @@ describe("Sources", function() {
     expect(result).to.equal('mas\'ter');
   });
 
-  it("should be able to invalidate url", function() {
+  it("(07) should be able to invalidate url", function() {
     let source = {
       url: "git@github.com/;;suculent/thinx-device-api"
     };

@@ -322,7 +322,6 @@ function logCouchError(err, body, header, tag) {
 function injectDesign(couch, design, file) {
   if (typeof(design) === "undefined") return;
   let design_doc = getDocument(file);
-  console.log("» Updating design document", design_doc);
   if (design_doc != null) {
     couch.insert(design_doc, "_design/" + design, (err, body, header) => {
       if (err) {
@@ -336,7 +335,6 @@ function injectDesign(couch, design, file) {
 
 function injectReplFilter(couch, file) {
   let filter_doc = getDocument(file);
-  console.log("» Updating filter document", filter_doc);
   if (filter_doc !== false) {
     couch.insert(filter_doc, "_design/repl_filters", (err, body, header) => {
       if (err) {

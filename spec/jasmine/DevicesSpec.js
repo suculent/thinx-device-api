@@ -84,10 +84,9 @@ describe("Devices", function() {
     };
     console.log("Attach request...");
     devices.attach(owner, body, (res, success, response) => {
-      console.log("Attach response:", res, success, response);
+      console.log("Attach results:", res, success, response);
       expect(success).to.be.true;
-      expect(response).to.be.an('object');
-      console.log("Attach response: " , {response});
+      expect(response).to.be.a('string');
       done();
     });
   }, 30000);
