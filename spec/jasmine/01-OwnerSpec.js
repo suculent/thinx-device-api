@@ -19,7 +19,7 @@ describe("Owner", function() {
 
   it("should be able to create owner profile", function(done) {
     console.log("Creating user", user_body);
-    User.create(user_body, true, (success, response) => {
+    user.create(user_body, true, (success, response) => {
       console.log("username_already_exists response:", response);
       if (success === false && typeof(response) == "string" && response.indexOf("username_already_exists")) {
         done();
@@ -47,8 +47,8 @@ describe("Owner", function() {
 
   }, 10000);
 
-  xit("should be able to fetch MQTT Key for owner", function(done) {
-    User.mqtt_key(owner, function(success, apikey) {
+  it("should be able to fetch MQTT Key for owner", function(done) {
+    user.mqtt_key(owner, function(success, apikey) {
       console.log({success}, {});
       console.log({success}, {apikey});
       //expect(success).to.be.true;
