@@ -100,7 +100,8 @@ describe("Owner", function() {
           }
           expect(sukec).to.be.true;
           expect(reponde).to.be.an('object');
-          console.log({reponde}); // delete this when test passes
+          expect(reponde.status).to.be.a('string');
+          expect(reponde.status).to.equal('password_reset_successful');
           done();
         });
       }

@@ -13,16 +13,15 @@ describe("API Key", function() {
       owner,
       "sample-key",
       (success, object) => {
-        let first = object;
-        console.log("generated API Key: ", {first}, {object}, {success}); // TODO: FIXME: generated_key_hash should be used for testing or not?
+        console.log("generated API Key: ", {success}, {array_or_error});
         if (success) {
-          this.generated_key_hash = sha256(first.key);
+          generated_key_hash = sha256(array_or_error[0].key);
           console.log("APIKey generated:", generated_key_hash);
         } else {
-          console.log("APIKey failed: ",{object});
+          console.log("APIKey failed: ",{array_or_error});
         }
         expect(success).to.be.true;
-        expect(first).to.be.an('object');
+        expect(array_or_error[0].key).to.be.a('string');
         done();
       }
     );
@@ -58,10 +57,26 @@ describe("API Key", function() {
 
   //revoke: function(owner, apikey_hash, callback)
   it("04 - should be able to revoke API Keys", function(done) {
-    console.log("Revoking valid key: " + this.generated_key_hash);
+    apikey.create(
+      owner,
+      "delete-me-key",
+      (success, object) => {
+        console.log("[04] generated API Key: ", {success}, {array_or_error});
+        if (success) {
+          generated_key_hash = sha256(array_or_error[0].key);
+          console.log("[04] APIKey generated:", generated_key_hash);
+        } else {
+          console.log("[04] APIKey failed: ",{array_or_error});
+        }
+        expect(success).to.be.true;
+        expect(array_or_error[0].key).to.be.a('string');
+        done();
+      }
+    );
+    console.log("[04] Revoking valid key: " + generated_key_hash);
     apikey.revoke(
       generated_key_hash,
-      ["sample-key-hash"],
+      ["delete-me-key"],
       (success, result)  => {
         expect(success).to.be.true;
         done();
