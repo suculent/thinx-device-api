@@ -7,8 +7,8 @@ describe("Git", function() {
         let git = new Git();
         let success = git.fetch(
             "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c", // owner
-            "git pull --recurse-submodules", // command
-            __dirname + "../../test_repositories/thinx-firmware-esp32-ino" // local_path
+            "git clone https://github.com/suculent/thinx-firmware-esp32-ino", // command
+            __dirname + "../../test_repositories/git_test" // local_path
         );
         console.log("git fetch result:", success);
         // expect(success).to.be.true; // may fail, until local_path is valid git repo or a temp folder with different command
