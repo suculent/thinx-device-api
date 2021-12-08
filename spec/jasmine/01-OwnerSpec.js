@@ -54,7 +54,7 @@ describe("Owner", function() {
   it("(02) should be able to fetch MQTT Key for owner", function(done) {
     user.mqtt_key(owner, function(success, apikey) {
       expect(success).to.be.true;
-      expect(apikey.key).to.be.an('object');
+      expect(apikey.key).to.be.a('string');
       if (success) {
         console.log("02 MQTT apikey: ", { apikey });
       } else {
@@ -75,7 +75,7 @@ describe("Owner", function() {
     });
   }, 10000);
 
-  it("04 - should be able to update owner info", function(done) {
+  it("(04) should be able to update owner info", function(done) {
     var body = {
       info: test_info
     };
@@ -88,7 +88,7 @@ describe("Owner", function() {
       });
   }, 10000);
 
-  it("05 - should be able to begin reset owner password", function(done) {
+  it("(05) should be able to begin reset owner password", function(done) {
     user.password_reset_init(email, (success, response) => {
       console.log("password-reset-init response:", JSON.stringify(response));
       if (response) {
