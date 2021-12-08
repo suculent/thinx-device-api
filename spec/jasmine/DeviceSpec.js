@@ -195,23 +195,16 @@ describe("Device", function() {
         console.log("• DeviceSpec.js: Received UDID: " + udid);
         expect(success).to.be.true;
         expect(udid).to.be.a('string');
-        done();
+        
+        device.revoke(
+          JRS2.udid,
+          function(_success, _response) {
+            console.log("• DeviceSpec.js: Revocation result: ", { response });
+            expect(_success).to.be.true;
+            done();
+        });
+
       });
   }, 15000); // register for revocation
-
-  it("should be able to revoke a device", function(done) {
-      console.log("• DeviceSpec.js: Revoking UDID: " + udid);
-      device.revoke(
-        JRS2.udid,
-        function(success, response) {
-          console.log("• DeviceSpec.js: Revocation result: ", { response });
-          //expect(error.reason).to.equal("deleted");
-          expect(success).to.be.true;
-          if (success == false) {
-            expect(response.status).to.equal("device_not_found");
-          }
-          done();
-      });
-  }, 5000);
 
 });
