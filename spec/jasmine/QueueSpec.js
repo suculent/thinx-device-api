@@ -14,8 +14,7 @@ describe("Queue", function() {
     // init
     it("Should work", function(done) {
         // Should initialize safely without running cron
-        let builder = {};
-        queue_with_cron = new Queue(builder);
+        queue_with_cron = new Queue(null);
         expect(queue_with_cron).to.be.a('object');
 
         // Should be able to run cron when initialized

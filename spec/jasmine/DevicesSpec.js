@@ -29,8 +29,8 @@ describe("Devices", function() {
     udid: envi.udid
   };
 
-  it("should be able to register test device", function(done) {
-    console.log("Test attempt to register device", {TEST_DEVICE}, "with ak", ak);
+  it("(01) should be able to register sample device", function(done) {
+    console.log("Sample attempt to register a device", {TEST_DEVICE}, "with ak", ak);
     device.register(
       {}, /* req */
       { registration: TEST_DEVICE }, /* reg */
@@ -38,27 +38,28 @@ describe("Devices", function() {
       {}, /* ws */
       (success, response) => {
         if (success === false) {
-          console.log(response);
+          console.log("(01) registration response", response);
           expect(response).to.be.a('string');
           if (response === "owner_found_but_no_key") {
             done();
             return;
           }
         }
-        console.log("• DeviceSpec.js: Registration result(2): ", {response});
+        console.log("(01) Registration result(2): ", {response});
+        console.log("(01) Sample UDID: " + TEST_DEVICE.udid);
+        TEST_DEVICE.udid = response.registration.udid;
+        console.log("(01) Received UDID: " + TEST_DEVICE.udid);
         expect(success).to.be.true;
         expect(TEST_DEVICE).to.be.an('object');
         expect(response.registration).to.be.an('object');
-        TEST_DEVICE.udid = response.registration.udid;
         expect(TEST_DEVICE.udid).to.be.a('string');
-        console.log("• DevicesSpec.js: Received UDID: " + TEST_DEVICE.udid);
         done();
       });
   }, 15000); // register
 
   // All of this expects successful device registration to safely revoke!
   
-  it("should be able to list devices for owner", function(done) {
+  it("(02) should be able to list devices for owner", function(done) {
     devices.list(owner, (success, response) => {
       expect(success).to.be.true;
       expect(response).to.be.a('object');
@@ -67,7 +68,7 @@ describe("Devices", function() {
     });
   }, 5000);
 
-  it("should not be able to list devices for empty owner", function(done) {
+  it("(03) should not be able to list devices for empty owner", function(done) {
     devices.list("", (success, response) => {
       expect(success).to.be.true;
       expect(response).to.be.a('object');
@@ -76,7 +77,7 @@ describe("Devices", function() {
     });
   }, 5000);
 
-  it("should be able to attach a repository to device(s)", function(done) {
+  it("(04) should be able to attach a repository to device(s)", function(done) {
     var body = {
       source_id: source_id,
       udid: TEST_DEVICE.udid
@@ -91,7 +92,7 @@ describe("Devices", function() {
     });
   }, 30000);
 
-  it("should be able to detach a repository from device", function(done) {
+  it("(05) should be able to detach a repository from device", function(done) {
     var body = {
       udid: TEST_DEVICE.udid
     };
@@ -105,7 +106,7 @@ describe("Devices", function() {
 
   // requires specific device registered for this test only (udid "d6ff2bb0-df34-11e7-b351-eb37822aa172")
   // this device must be created using DeviceSpec.js test
-  it("should be able to revoke devices for owner", function(done) {
+  it("(06) should be able to revoke devices for owner", function(done) {
     var body = {
       udid: TEST_DEVICE.udid
     };

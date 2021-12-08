@@ -7,6 +7,7 @@ describe("Build log", function() {
   var envi = require("../_envi.json");
   var owner = envi.oid;
   var udid = envi.udid;
+  var build_id = envi.build_id;
 
   /*
    * WebSocket Server
