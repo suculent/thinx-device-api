@@ -104,9 +104,8 @@ describe("Device", function() {
       udid: JRS.udid // this device should not be deleted
     };
     device.edit(owner, changes, (success, response) => {
-      console.log("alias edit error reason: ", {success}, {response});
       expect(success).to.be.true;
-      //expect(response).to.be.an('object');
+      expect(response).to.be.an('object');
       done();
     });
   }, 5000);
