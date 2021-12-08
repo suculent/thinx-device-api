@@ -98,7 +98,7 @@ describe("Owner", function() {
     });
   }, 5000);
 
-  it("03 - should be able to fetch owner profile", function(done) {
+  xit("03 - should be able to fetch owner profile", function(done) {
     user.profile(owner, (success, response) => {
       if (success === false) {
         console.log("profile fetch response: " , {response});
@@ -109,7 +109,7 @@ describe("Owner", function() {
     });
   }, 10000);
 
-  it("04 - should be able to update owner info", function(done) {
+  xit("04 - should be able to update owner info", function(done) {
     var body = {
       info: test_info
     };
@@ -122,7 +122,7 @@ describe("Owner", function() {
       });
   }, 10000);
 
-  it("05 - should be able to begin reset owner password", function(done) {
+  xit("05 - should be able to begin reset owner password", function(done) {
     user.password_reset_init(email, (success, response) => {
       console.log("password-reset-init response:", JSON.stringify(response));
       if (response) {
