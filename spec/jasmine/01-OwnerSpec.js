@@ -18,7 +18,9 @@ describe("Owner", function() {
   // and must not be used in production environment
 
   it("should be able to create owner profile", function(done) {
+    
     console.log("Creating user", user_body);
+    
     user.create(user_body, true, (success, response) => {
       console.log("username_already_exists response:", response);
       if (success === false && typeof(response) == "string" && response.indexOf("username_already_exists")) {

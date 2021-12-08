@@ -306,7 +306,9 @@ function getDocument(file) {
 
 function logCouchError(err, body, header, tag) {
   if (err !== null) {
-    console.log("» Log Couch Insert error: ", err, body, header, tag);
+    if (err.toString().indexOf("conflict") === -1) {
+      console.log("» Log Couch Insert error: ", err, body, header, tag);
+    }
   } else {
     return;
   }
