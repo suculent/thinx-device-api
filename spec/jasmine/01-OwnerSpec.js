@@ -17,9 +17,9 @@ describe("Owner", function() {
   // cimrman@thinx.cloud receives his activation token in response
   // and must not be used in production environment
 
-  it("should be able to create/update owner profile", function(done) {
+  it("01 - should be able to create/update owner profile", function(done) {
     
-    user.create(user_body, true, function(success, response) {
+    user.create(user_body, true, (success, response) => {
       console.log("username_already_exists response:", response);
       if (success === false && typeof(response) == "string" && response.indexOf("username_already_exists")) {
         done();
@@ -65,7 +65,7 @@ describe("Owner", function() {
           });
         }
     
-          console.log("Testing Activation...");
+        console.log("Testing Activation...");
         testActivation(owner, this.activation_key, done);
 
       });
@@ -73,8 +73,8 @@ describe("Owner", function() {
 
   }, 10000);
 
-  it("should be able to fetch MQTT Key for owner", function(done) {
-    user.mqtt_key(owner, function(success, apikey) {
+  it("02 - should be able to fetch MQTT Key for owner", function(done) {
+    user.mqtt_key(owner, (success, apikey) => {
       /*
       { success: true } {
         apikey: {
@@ -97,8 +97,8 @@ describe("Owner", function() {
     });
   }, 5000);
 
-  it("should be able to fetch owner profile", function(done) {
-    user.profile(owner, function(success, response) {
+  it("03 - should be able to fetch owner profile", function(done) {
+    user.profile(owner, (success, response) => {
       if (success === false) {
         console.log("profile fetch response: " , {response});
         expect(success).to.be.true;
@@ -108,7 +108,7 @@ describe("Owner", function() {
     });
   }, 10000);
 
-  it("should be able to update owner info", function(done) {
+  it("04 - should be able to update owner info", function(done) {
     var body = {
       info: test_info
     };
@@ -121,7 +121,7 @@ describe("Owner", function() {
       });
   }, 10000);
 
-  it("should be able to begin reset owner password", function(done) {
+  it("05 - should be able to begin reset owner password", function(done) {
     user.password_reset_init(email, (success, response) => {
       if (success === false) {
         console.log(response);
@@ -136,7 +136,7 @@ describe("Owner", function() {
           owner: owner,
           reset_key: response
         };
-        user.set_password(body, function(sukec, reponde) {
+        user.set_password(body, (sukec, reponde) => {
           if (sukec === false) {
             console.log("Password set result: ", {reponde});
           }
