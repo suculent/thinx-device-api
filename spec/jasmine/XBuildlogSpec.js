@@ -8,41 +8,40 @@ describe("Build log", function() {
   var owner = envi.oid;
   var udid = envi.udid;
 
-  var build_id = envi.build_id; // "f168def0-597f-11e7-a932-014d5b00c004";
-
   /*
    * WebSocket Server
    */
 
-  it("should be able to initialize", function() {
+  it("(01) should be able to initialize", function() {
     expect(blog).to.be.a('object');
   });
 
-  it("should be able to list build logs", function(done) {
+  it("(02) should be able to list build logs", function(done) {
     blog.list(owner, function(err, body) {
+      console.log("build_logs", body);
       expect(body).to.be.a('object');
+      var build_id = body[0];
+      if (typeof(build_id) !== "undefined") {
+        blog.fetch(build_id, function(err, body) {
+          expect(err).to.equal(false);
+          done();
+        });
+      }
       done();
     });
   }, 15000);
 
-  it("should be able to fetch specific build log", function(done) {
-    blog.fetch(build_id, function(err, body) {
-      expect(err).to.equal(false);
-      done();
-    });
-  }, 10000);
-
-  it("should be able to log", function(done) {
+  it("(03) should be able to log", function(done) {
     blog.log(build_id, owner, udid, "Testing build log create...");
     done();
   });
 
-  it("should be able to append existing log", function(done) {
+  it("(04) should be able to append existing log", function(done) {
     blog.log(build_id, owner, udid, "Testing build log append...");
     done();
   });
 
-  it("should be able to tail log for build_id", function() {
+  it("(05) should be able to tail log for build_id", function() {
     const no_socket = null;
     blog.logtail(build_id, require("../_envi.json").oid, no_socket, function(success) {
         if (success !== true) {
@@ -52,10 +51,9 @@ describe("Build log", function() {
       });
   });
 
-  it("should provide path for device", function() {
+  it("(05) should provide path for device", function() {
     var path = blog.pathForDevice(owner, udid);
-    //console.log("path: "+path);
-    // valid is /mnt/thinx_volume/data/4f1122fa074af4dabab76a5205474882c82de33f50ecd962d25d3628cd0603be/d6ff2bb0-df34-11e7-b351-eb37822aa172
+    console.log("(05) path: ", path);
     expect(path).to.be.a('string');
   });
 
