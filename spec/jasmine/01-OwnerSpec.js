@@ -21,12 +21,10 @@ describe("Owner", function() {
   it("(01) should be able to create owner profile", function(done) {
     
     user.create(user_body, true, (res, success, response) => {
-      console.log("username_already_exists response:", response);
       if (success === false && typeof(response) == "string" && response.indexOf("username_already_exists")) {
         done();
         return;
       }
-      console.log("create owner profile:", {success}, {response});
       if (typeof(response) == "string" && response.indexOf("username_already_exists") !== -1) {
         expect(success).to.equal(false);
         done();

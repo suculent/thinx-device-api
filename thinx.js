@@ -76,7 +76,7 @@ try {
 const Auth = require('./lib/thinx/auth.js');
 
 let auth = new Auth();
-auth.add_mqtt_credentials(app_config.mqtt.username, app_config.mqtt.password); // TODO: do this in Auth constructor
+auth.add_mqtt_credentials(app_config.mqtt.username, app_config.mqtt.password); // TODO: do this in Auth constructor, but definitely before Messenger initialization...
 
 const ACL = require('./lib/thinx/acl.js');
 let acl = new ACL(app_config.mqtt.username);
@@ -170,7 +170,6 @@ var stats = new Stats();
 
 console.log("Loaded module: Messenger");
 var Messenger = require("./lib/thinx/messenger");
-var messenger = new Messenger().getInstance(); // take singleton to prevent double initialization
 
 console.log("Loaded module: Repository Watcher");
 var Repository = require("./lib/thinx/repository");
@@ -415,6 +414,8 @@ app.disable('x-powered-by');
 // DI
 app.builder = builder;
 app.queue = queue;
+
+const messenger = new Messenger().getInstance(); // take singleton to prevent double initialization
 app.messenger = messenger;
 
 // Redis
