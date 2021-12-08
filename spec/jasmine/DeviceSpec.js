@@ -195,13 +195,12 @@ describe("Device", function() {
         expect(udid).to.be.a('string');
         device.revoke(
           JRS2.udid,
-          function(error, response) {
-            console.log("• DeviceSpec.js: Revocation result: ", { response });
-            expect(error).to.be.false;
-            expect(response.registration.success).to.be.true;
+          function(_success, _response) {
+            console.log("• DeviceSpec.js: Revocation result: ", { _response });
+            expect(_success).to.be.true;
+            expect(_response.registration.success).to.be.true;
             done();
         });
-
       });
   }, 15000); // register for revocation
 
