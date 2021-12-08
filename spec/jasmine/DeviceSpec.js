@@ -61,7 +61,7 @@ describe("Device", function() {
 
   /** TODO: Only when the sample-key has not been previously added by ApikeySpec */
   //create: function(owner, apikey_alias, callback)
-  it("API keys are required to do this on new instance", function(done) {    
+  it("(01) API keys are required to do this on new instance", function(done) {    
     APIKey.create( owner, "sample-key", function(success, object) {
       expect(success).to.be.true;
       console.log("Key object: ", object);
@@ -75,7 +75,7 @@ describe("Device", function() {
     });
   }, 5000);
 
-  it("should be able to register itself.", function(done) {
+  it("(02) should be able to register itself.", function(done) {
     let ws = {};
     device.register(
       {}, /* req */
@@ -100,7 +100,7 @@ describe("Device", function() {
   }, 15000); // register
 
 
-  it("should be able to change its alias.", function(done) {
+  it("(03) should be able to change its alias.", function(done) {
     var changes = {
       alias: Date().toString(),
       udid: udid
@@ -119,7 +119,7 @@ describe("Device", function() {
   }, 5000);
 
 
-  it("should receive different response for registered device", function(done) {
+  it("(04) should receive different response for registered device", function(done) {
       device.register(
         {}, /* req */
         JRS,
@@ -142,9 +142,11 @@ describe("Device", function() {
         });
     }, 5000);
 
-  it("should be able to store/fetch OTT request", function(done) {
-    device.storeOTT(JSON.stringify(JRS2), function(success, response) {
-      console.log("• OTT Response: " , {response});
+  it("(05) should be able to store/fetch OTT request", function(done) {
+    device.storeOTT(
+      JRS2, 
+      function(success, response) {
+      console.log("• OTT Response: " , {success}, {response});
       ott = response.ott;
       expect(response).to.be.an('object');
       expect(response.ott).to.be.a('string');
@@ -156,13 +158,13 @@ describe("Device", function() {
     });
   }, 15000);
 
-  it("should be able to normalize a MAC address", function(done) {
+  it("(05) should be able to normalize a MAC address", function(done) {
     var nmac = device.normalizedMAC("123456789012");
     expect(nmac).to.be.a('string');
     done();
   }, 5000);
 
-  it("should be able to provide device firmware", function(firmware_done) {
+  it("(07) should be able to provide device firmware", function(firmware_done) {
       // Returns "OK" when current firmware is valid.
       var body = JRS;
       body.udid = udid;
@@ -172,13 +174,11 @@ describe("Device", function() {
         expect(success).to.equal(false);
         expect(response.success).to.equal(false);
         expect(response.status).to.equal("UPDATE_NOT_FOUND");
-        //expect(response).to.equal("device_not_found"); // maybe local only
-        console.log("firmware response: ", {response});
         firmware_done();
       });
     }, 5000);
 
-  it("should be able to register for revocation", function(done) {
+  it("(08) should be able to register for revocation", function(done) {
     expect(JRS2).to.be.an('object');
     expect(apikey).to.be.a('string');
     device.register(
@@ -195,9 +195,9 @@ describe("Device", function() {
         device.revoke(
           JRS2.udid,
           function(_success, _response) {
-            console.log("• DeviceSpec.js: Revocation result: ", { _response });
-            expect(_success).to.be.true;
-            expect(_response.registration.success).to.be.true;
+            console.log("• DeviceSpec.js: Revocation result: ", { _response }); // array of revoked keys
+            expect(_response.success).to.be.true;
+            expect(_response.status).to.equal('device_marked_deleted');
             done();
         });
       });

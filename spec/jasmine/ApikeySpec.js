@@ -85,7 +85,7 @@ describe("API Key", function() {
   });
 
   it("(05) should be able to fail on invalid API Key revocation (callback is not a function!)", function() {
-    console.log("Revoking invalid-owner key...");
+    console.log("(05) Revoking invalid-owner key...");
     apikey.revoke(
       "nonsense", ["sample-key-hash"],
       (success)  => {
@@ -102,10 +102,10 @@ describe("API Key", function() {
       (success, object) => {
         expect(success).to.be.true;
         if (success) {
-          console.log("list result:", object);
+          console.log("(06) list result:", object);
           expect(object).to.be.a('array');
         } else {
-          console.log("[jasmine] API Key Listing failed:", {object});
+          console.log("(06) API Key Listing failed:", {object});
         }
         if (done) done();
       });

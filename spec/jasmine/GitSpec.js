@@ -8,7 +8,7 @@ describe("Git", function() {
         let success = git.fetch(
             "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c", 
             "git pull --recurse-submodules", 
-            "~/thinx-device-api/spec/test_repositories/thinx-firmware-esp32-ino");
+            __dirname + "../../test_repositories/thinx-firmware-esp32-ino");
         console.log("git fetch result:", success);
         expect(success).to.be.true; // may fail until <owner> is valid
         done();
