@@ -1,4 +1,4 @@
-describe("Transfer", function() {
+describe("Transfer", function () {
 
   var expect = require('chai').expect;
   var envi = require("../_envi.json");
@@ -20,36 +20,31 @@ describe("Transfer", function() {
   // request: function(owner, body, callback) {
   // body should look like { "to":"some@email.com", "udids" : [ "some-udid", "another-udid" ] }
 
-  it("should be able to initiate device transfer for decline", function(
-    done) {
+  it("should be able to initiate device transfer for decline", function (done) {
 
-    Transfer.request(this.owner, body, function(success, response) {
+    Transfer.request(this.owner, body, function (success, response) {
       console.log(response);
       expect(success).to.be.true;
       expect(response).to.be.a('string');
       dynamic_transfer_request_id = response;
-      done();
+
+      const tbody = {
+        transfer_id: dynamic_transfer_request_id,
+        udids: [envi.udid]
+      };
+      Transfer.decline(tbody, function (_success, _response) {
+        expect(_success).to.equal(false);
+        expect(_response).to.be.a('string');
+        console.log("transfer decline response: ", { _response });
+        done();
+      });
 
     });
   }, 10000);
 
-  //decline: function(body, callback) {
-  it("should be able to decline device transfer", function(done) {
-    const tbody = {
-      transfer_id: dynamic_transfer_request_id,
-      udids: [envi.udid]
-    };
-    Transfer.decline(tbody, function(success, response) {
-      expect(success).to.equal(false);
-      expect(response).to.be.a('string');
-      console.log("transfer decline response: " + JSON.stringify(
-        response));
-      done();
-    });
-  }, 5000);
 
-  it("should be able to initiate device transfer for accept", function(done) {
-    Transfer.request(this.owner, body, function(success, response) {
+  it("should be able to initiate device transfer for accept", function (done) {
+    Transfer.request(this.owner, body, function (success, response) {
       console.log(response);
       expect(success).to.be.true;
       expect(response).to.be.a('string');
@@ -59,12 +54,12 @@ describe("Transfer", function() {
   }, 10000);
 
   //accept: function(body, callback) {
-  it("should be able to accept transferred devices", function(done) {
+  it("should be able to accept transferred devices", function (done) {
     var transfer_body = {
       transfer_id: dynamic_transfer_request_id,
       udids: [envi.udid]
     };
-    Transfer.accept(transfer_body, function(success, response) {
+    Transfer.accept(transfer_body, function (success, response) {
       expect(success).to.be.true;
       expect(response).to.be.a('string');
       console.log("transfer accept response: " + JSON.stringify(
