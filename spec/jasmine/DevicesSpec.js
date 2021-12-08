@@ -99,7 +99,8 @@ describe("Devices", function() {
     devices.detach(owner, body, (res, success, response) => {
       console.log("Detach response: ", res, success, response);
       expect(success).to.be.true;
-      expect(response).to.be.an('object');
+      expect(response).to.be.a('string');
+      expect(response).to.equal('detached');
       done();
     }, {});
   }, 30000);
