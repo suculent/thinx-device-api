@@ -35,7 +35,6 @@ if (Globals.use_sqreen()) {
  }
 }
 
-const crypto = require('crypto');
 const express = require("express");
 const session = require("express-session");
 
@@ -77,7 +76,6 @@ try {
 const Auth = require('./lib/thinx/auth.js');
 
 let auth = new Auth();
-console.log("SYS CREDS (object should contain key): ", app_config.mqtt.username, app_config.mqtt.password);
 auth.add_mqtt_credentials(app_config.mqtt.username, app_config.mqtt.password); // TODO: do this in Auth constructor
 
 const ACL = require('./lib/thinx/acl.js');
@@ -125,13 +123,7 @@ function initDatabases(dbprefix) {
   nano.db.create(dbprefix + "managed_devices", function(err, body, header) {
     if (err) {
       handleDatabaseErrors(err, "managed_devices");
-    };
-    
-    if (body !== "true") {
-      throw new Error("Database for devices could not be created.");
     }
-
-    console.log("» Device database creation completed.");
     var couch = nano.db.use(dbprefix + "managed_devices");
     injectDesign(couch, "devicelib", "./design/design_deviceslib.json");
     injectReplFilter(couch, "./design/filters_devices.json");
@@ -140,13 +132,7 @@ function initDatabases(dbprefix) {
   nano.db.create(dbprefix + "managed_builds", function(err, body, header) {
     if (err) {
       handleDatabaseErrors(err, "managed_builds");
-    } 
-    
-    if (body !== "true") {
-      throw new Error("Database for builds could not be created.");
     }
-
-    console.log("» Build database creation completed.");
     var couch = nano.db.use(dbprefix + "managed_builds");
     injectDesign(couch, "builds", "./design/design_builds.json");
     injectReplFilter(couch, "./design/filters_builds.json");
@@ -155,13 +141,7 @@ function initDatabases(dbprefix) {
   nano.db.create(dbprefix + "managed_users", function(err, body, header) {
     if (err) {
       handleDatabaseErrors(err, "managed_users");
-    } 
-
-    if (body !== "true") {
-      throw new Error("Database for users could not be created.");
     }
-    
-    console.log("» User database creation completed.");
     var couch = nano.db.use(dbprefix + "managed_users");
     injectDesign(couch, "users", "./design/design_users.json");
     injectReplFilter(couch, "./design/filters_users.json");
@@ -170,13 +150,7 @@ function initDatabases(dbprefix) {
   nano.db.create(dbprefix + "managed_logs", function(err, body, header) {
     if (err) {
       handleDatabaseErrors(err, "managed_logs");
-    } 
-    
-    if (body !== "true") {
-      throw new Error("Database for logs could not be created.");
     }
-
-    console.log("» Log database creation completed.");
     var couch = nano.db.use(dbprefix + "managed_logs");
     injectDesign(couch, "logs", "./design/design_logs.json");
     injectReplFilter(couch,  "./design/filters_logs.json");
@@ -192,6 +166,7 @@ var userlib = require("nano")(app_config.database_uri).use(prefix + "managed_use
 console.log("Loaded module: Statistics");
 var Stats = require("./lib/thinx/statistics");
 var stats = new Stats();
+//stats.get_all_owners();
 
 console.log("Loaded module: Messenger");
 var Messenger = require("./lib/thinx/messenger");
@@ -218,6 +193,9 @@ function purgeOldUsers() {
   if ((typeof(app_config.strict_gdpr) !== "undefined") && app_config.strict_gdpr === false) {
     console.log("Purge old users skipped. Enable with strict_gdpr = true in config.json");
     return;
+  }
+  if (process.env.ENVIRONMENT === "test") {
+    return; // no expired users in test, query will fail with "doc is null" error...
   }
   var d = new Date();
   d.setMonth(d.getMonth() - 3);
@@ -328,7 +306,7 @@ function getDocument(file) {
 
 function logCouchError(err, body, header, tag) {
   if (err !== null) {
-    console.log("» Log Couch Insert error: "+err);
+    console.log("» Log Couch Insert error: ", err, body, header, tag);
   } else {
     return;
   }
@@ -345,8 +323,10 @@ function injectDesign(couch, design, file) {
   console.log("» Inserting design document " + design + " from path", file);
   let design_doc = getDocument(file);
   if (design_doc != null) {
-    couch.insert(design_doc, "_design/" + design, function(err, body, header) {
-      logCouchError(err, body, header, "init:design:"+design);
+    couch.insert(design_doc, "_design/" + design, (err, body, header) => {
+      if (err) {
+        logCouchError(err, body, header, "init:design:"+JSON.stringify(design));
+      }
     });
   } else {
     console.log("» Design doc injection issue at "+file);
@@ -357,8 +337,10 @@ function injectReplFilter(couch, file) {
   console.log("» Inserting filter document from path", file);
   let filter_doc = getDocument(file);
   if (filter_doc !== false) {
-    couch.insert(filter_doc, "_design/repl_filters", function(err, body, header) {
-      logCouchError(err, body, header, "init:repl:"+filter_doc);
+    couch.insert(filter_doc, "_design/repl_filters", (err, body, header) => {
+      if (err) {
+        logCouchError(err, body, header, "init:repl:"+JSON.stringify(filter_doc));
+      }
     });
   } else {
     console.log("» Filter doc injection issue (no doc) at "+file);

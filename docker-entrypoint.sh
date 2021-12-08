@@ -61,12 +61,17 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   npm run test # | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
   # bash <(curl -Ls https://coverage.codacy.com/get.sh) report
   curl https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip -o sonar-scanner-cli-4.6.2.2472-linux.zip
+  rm -rf ./sonar-scanner-cli-4.6.2.2472-linux
   7z x ./sonar-scanner-cli-4.6.2.2472-linux.zip
   export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin/
   sonar-scanner -Dsonar.login=${SONAR_TOKEN}
   rm -rf spec/test_repositories/**
-  # codecov -t $CODECOV_TOKEN # fails wihout git rpeo
 
+  set -e
+  
+  if [[ -d ./.git ]]; then
+    codecov -t $CODECOV_TOKEN
+  fi
 
 else
   echo "[thinx-entrypoint] Starting in production mode..."

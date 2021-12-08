@@ -6,7 +6,7 @@ describe("Git", function() {
     it("should be able to fetch", function(done) {
         let git = new Git();
         let success = git.fetch(
-            "0fbe2e3d9326d4b318476c8a26b4ac93d38cf7da69b04204822a3bff102dc622", 
+            "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c", 
             "git pull --recurse-submodules", 
             __dirname);
         console.log("git fetch result", success);

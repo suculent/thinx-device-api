@@ -56,19 +56,19 @@ describe("Device", function() {
     udid: null
   };
 
-  var body = JRS; // JSON.parse(RS);
-
   //console.log("• DeviceSpec.js: Using test API_KEY: " + apikey);
   //console.log("• DeviceSpec.js: Using request: " + JSON.stringify(JRS));
 
-
+  /** TODO: Only when the sample-key has not been previously added by ApikeySpec */
   //create: function(owner, apikey_alias, callback)
-  it("API keys are required to do this on new instance", function(done) {
+  it("API keys are required to do this on new instance", function(done) {    
     APIKey.create( owner, "sample-key", function(success, object) {
       expect(success).to.be.true;
+      console.log("Key object: ", object);
+      expect(object).to.be.an('array');
       if (success) {
-        apikey = sha256(object.key);
-        console.log("Key ready: " + apikey);
+        apikey = object[0].hash;
+        console.log("Key hash ready: ", apikey);
         expect(apikey).to.be.a('string');
       }
       done();
@@ -76,22 +76,23 @@ describe("Device", function() {
   }, 5000);
 
   it("should be able to register itself.", function(done) {
+    let ws = {};
     device.register(
+      {}, /* req */
       JRS,
       apikey,
-      null,
+      ws,
       function(success, response) {
         if (success === false) {
-          console.log(response);
-          expect(response).to.be.a('string');
-          if (response === "owner_found_but_no_key") {
+          console.log("registration error response:", response);
+          if (response.indexOf("owner_found_but_no_key") !== -1) {
             done();
             return;
           }
         }
-        //console.log("• DeviceSpec.js: Registration result: ", {response});
-        expect(success).to.be.true;
+        console.log("• DeviceSpec.js: Registration result(1): ", {response});
         JRS2.udid = response.registration.udid;
+        expect(success).to.be.true;
         expect(JRS2.udid).to.be.a('string');
         console.log("• DeviceSpec.js: Received UDID: " + JRS2.udid);
         done();
@@ -112,18 +113,20 @@ describe("Device", function() {
       }
 
       expect(success).to.be.true;
-      expect(response).to.be.a('string');
+      expect(response).to.be.an('object');
       done();
     });
   }, 5000);
 
 
   it("should receive different response for registered device", function(done) {
-      device.register(JRS,
+      device.register(
+        {}, /* req */
+        JRS,
         apikey,
         null,
         function(success, response) {
-          expect(response).to.be.a('string');
+          expect(response).to.be.an('object');
           if (success === false) {
             console.log(
               "should receive different response for already-registered revice: " +
@@ -134,38 +137,22 @@ describe("Device", function() {
               return;
             }
           }
-          //console.log("• DeviceSpec.js: Re-registration result: ", {response});
           expect(success).to.be.true;
           done();
         });
     }, 5000);
 
-  it("should be able to store OTT request", function(done) {
+  it("should be able to store/fetch OTT request", function(done) {
     device.storeOTT(JSON.stringify(JRS2), function(success, response) {
       console.log("• OTT Response: " , {response});
-      //expect(success).to.be.true; happens to be null?
-      expect(response).to.be.a('string');
-      expect(response.ott).to.be.a('string');
-      ott = response.ott;
-      done();
-    });
-  }, 5000);
-
-  it("should be able to fetch OTT request", function(done) {
-    device.storeOTT(JSON.stringify(JRS2), function(success, response) {
-      console.log("• OTT Response: " , {response});
-      //expect(success).to.be.true;
-      expect(response).to.be.a('string');
+      expect(response).to.be.an('object');
       expect(response.ott).to.be.a('string');
       ott = response.ott;
 
-      device.fetchOTT(ott, function(success,
-        response) {
-        if (success === false) {
-          console.log(response);
-        }
-        //expect(success).to.be.true;
-        expect(response).to.be.a('string');
+      device.fetchOTT(ott, function(success, response) {
+        console.log("fetchOTT response:", response);
+        expect(success).to.be.true;
+        expect(response).to.be.an('object');
         done();
       });
     });
@@ -194,34 +181,28 @@ describe("Device", function() {
     }, 5000);
 
   it("should be able to register for revocation", function(done) {
+    expect(JRS2).to.be.an('object');
+    expect(apikey).to.be.a('string');
     device.register(
+      {}, /* req */
       JRS2,
       apikey,
       null,
       function(success, response) {
-        //console.log("Registration Response: ", response);
+        console.log("Registration Response: ", response);
         udid = response.registration.udid;
         JRS.udid = udid;
         console.log("• DeviceSpec.js: Received UDID: " + udid);
-        expect(success).to.be.true;
         expect(udid).to.be.a('string');
-        done();
+        device.revoke(
+          JRS2.udid,
+          function(_success, _response) {
+            console.log("• DeviceSpec.js: Revocation result: ", { response });
+            expect(_success).to.be.true;
+            done();
+        });
+
       });
   }, 15000); // register for revocation
-
-  it("should be able to revoke a device", function(done) {
-      console.log("• DeviceSpec.js: Revoking UDID: " + udid);
-      device.revoke(
-        JRS2.udid,
-        function(success, response) {
-          console.log("• DeviceSpec.js: Revocation result: ", { response });
-          //expect(error.reason).to.equal("deleted");
-          expect(success).to.be.true;
-          if (success == false) {
-            expect(response.status).to.equal("device_not_found");
-          }
-          done();
-      });
-  }, 5000);
 
 });

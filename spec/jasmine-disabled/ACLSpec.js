@@ -10,17 +10,8 @@ describe("ACL Manager", function() {
   const user = "test";
   const topic = "/baecb3124695efa1672b7e8d62e5b89e44713968f45eae6faa52066e87795a78/<mesh-id>/#";
   const topic_remain = "/baecb3124695efa1672b7e8d62e5b89e44713968f45eae6faa52066e87795a78/<mesh-id2>/#";
-  const input_test_file = __dirname + '/../test.acl';
-  const output_test_file = __dirname + '/../test.out.acl';
-
-  //
-
-  it("should be able load ACL file", function(done) {
-    acl.path = input_test_file;
-    acl.load(() => {
-      done();
-    });
-  });
+  const input_test_file = '/mnt/data/mosquitto/auth/thinx.acl';
+  const output_test_file = '/mnt/data/mosquitto/auth/thinx.out.acl';
 
   it("should add/update user topic", function() {
     acl.addTopic(user, "readwrite", topic);
@@ -41,6 +32,13 @@ describe("ACL Manager", function() {
 
   it("should be able to prune given topic", function(done) {
     acl.prune("mesh-id2", () => {
+      done();
+    });
+  });
+
+  it("should be able load ACL file", function(done) {
+    acl.path = input_test_file;
+    acl.load(() => {
       done();
     });
   });

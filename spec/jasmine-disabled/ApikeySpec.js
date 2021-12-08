@@ -1,4 +1,3 @@
-//const { response } = require('express');
 var APIKey = require("../../lib/thinx/apikey");
 var expect = require('chai').expect;  
 var generated_key_hash = null;
@@ -7,8 +6,29 @@ var envi = require("../_envi.json");
 var owner = envi.oid;
 var apikey = new APIKey();
 
-describe("API Key List", function() {
-  it("01 - should be able to list API Keys(1)", function(done) {
+describe("API Key", function() {
+  //create: function(owner, apikey_alias, callback)
+  it("01 - should be able to generate new API Key", function(done) {
+    apikey.create(
+      owner,
+      "sample-key",
+      (success, object) => {
+        let first = object;
+        console.log("generated API Key: ", {first}, {object}, {success}); // TODO: FIXME: generated_key_hash should be used for testing or not?
+        if (success) {
+          this.generated_key_hash = sha256(first.key);
+          console.log("APIKey generated:", generated_key_hash);
+        } else {
+          console.log("APIKey failed: ",{object});
+        }
+        expect(success).to.be.true;
+        expect(first).to.be.an('object');
+        done();
+      }
+    );
+  });
+
+  it("02 - should be able to list API Keys", function(done) {
     apikey.list(
       owner,
       (success, object) => {
@@ -21,37 +41,6 @@ describe("API Key List", function() {
         done();
       });
   });
-});
-
-describe("API Key", function() {
-
-  //create: function(owner, apikey_alias, callback)
-  it("02 - should be able to generate new API Key", function(done) {
-    console.log("With owner:", owner);
-    expect(owner).to.be.a('string');
-    apikey.create(
-      owner,
-      "sample-key",
-      (success, object) => {
-        let first = object;
-        //console.log("generated API Key: ", {first}, {object}, {success});
-        if (success) {
-          generated_key_hash = sha256(first.key);
-          console.log("APIKey generated:", generated_key_hash);
-        } else {
-          console.log("APIKey failed: ",{object});
-        }
-        expect(success).to.be.true;
-        expect(first).to.be.an('object');
-        done();
-      }
-    );
-  });
-
-  
-});
-
-describe("API Keys", function() {
 
   //verify: function(owner, apikey, callback)
   it("03 - should be able to verify invalid API Keys", function(done) {
@@ -69,7 +58,7 @@ describe("API Keys", function() {
 
   //revoke: function(owner, apikey_hash, callback)
   it("04 - should be able to revoke API Keys", function(done) {
-    console.log("Revoking valid key: " + generated_key_hash);
+    console.log("Revoking valid key: " + this.generated_key_hash);
     apikey.revoke(
       generated_key_hash,
       ["sample-key-hash"],
@@ -97,6 +86,7 @@ describe("API Keys", function() {
       (success, object) => {
         expect(success).to.be.true;
         if (success) {
+          console.log("list result:", object);
           expect(object).to.be.a('array');
         } else {
           console.log("[jasmine] API Key Listing failed:", {object});

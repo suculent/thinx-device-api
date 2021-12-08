@@ -2,11 +2,11 @@ describe("Owner", function() {
 
   var expect = require('chai').expect;
   
-  var generated_key_hash = null;
-  var user = require('../../lib/thinx/owner');
-  var User = new user();
+  var User = require("../../lib/thinx/owner");
+  var user = new User();
 
   var envi = require("../_envi.json");
+  
   var owner = envi.oid;
   var avatar_image = envi.test_avatar;
   var email = envi.email;
@@ -21,7 +21,7 @@ describe("Owner", function() {
     console.log("Creating user", user_body);
     User.create(user_body, true, (success, response) => {
       console.log("username_already_exists response:", response);
-      if (success == false && typeof(response) == "string" && response.indexOf("username_already_exists")) {
+      if (success === false && typeof(response) == "string" && response.indexOf("username_already_exists")) {
         done();
         return;
       }
@@ -40,7 +40,6 @@ describe("Owner", function() {
       if (response) {
         console.log("Activation response: " + response);
         this.activation_key = response; // store activation token for next step
-        activation_key = response;
       }
       console.log("Create response: ", { response });
       done();
@@ -55,7 +54,7 @@ describe("Owner", function() {
       //expect(success).to.be.true;
       //expect(apikey.key).to.be.a('string');
       if (success) {
-        console.log("MQTT apikey: ", { apikey });
+        console.log("02 MQTT apikey: ", { apikey });
       } else {
         console.log("MQTT error: ", { apikey });
       }
@@ -64,41 +63,22 @@ describe("Owner", function() {
     });
   }, 5000);
 
-  it("should be able to update owner avatar",
-    function(done) {
-      var body = {
-        info: {
-          avatar: avatar_image
-        }
-      };
-      User.update(
-        owner,
-        body,
-        function(success, response) {
-        if (success === false) {
-          console.log("avatar update response: " , {response});
-        }
-        expect(success).to.be.true;
-        done();
-      });
-    }, 10000);
-
-  it("should be able to fetch owner profile", function(done) {
-    User.profile(owner, function(success, response) {
-      expect(response).to.be.a('string');
-      expect(success).to.be.true;
+  xit("03 - should be able to fetch owner profile", function(done) {
+    user.profile(owner, (success, response) => {
       if (success === false) {
         console.log("profile fetch response: " , {response});
+        expect(success).to.be.true;
       }
+      expect(response).to.be.an('object');
       done();
     });
   }, 10000);
 
-  it("should be able to update owner info", function(done) {
+  xit("04 - should be able to update owner info", function(done) {
     var body = {
       info: test_info
     };
-    User.update(owner, body,
+    user.update(owner, body,
       function(success, response) {
         console.log(JSON.stringify(
           response));
@@ -107,67 +87,17 @@ describe("Owner", function() {
       });
   }, 10000);
 
-  // This expects activated account and e-mail fetch support
-  it("should be able to activate owner", function (done) {
-
-    function testActivation(owner, key, done) {
-      User.activate(owner, key, function (success, response) {
-        expect(success).to.be.true;
-        expect(response).to.be.a('string');
-        console.log(JSON.stringify(response));
-        done();
-      });
-    }
-    // activation_key requires User to be created first using User.create and take the key as (global?)
-    if (typeof (this.activation_key) === "undefined") {
-      user_body.email = "1_" + user_body.email;
-      user_body.username = "1_" + user_body.username;
-      console.log("Creating user", user_body);
-      User.create(user_body, true, function (success, response) {
-
-        if (success == false && typeof (response) == "string" && response.indexOf("username_already_exists")) {
-          // OK)
-        }
-        console.log("(2) create owner profile:", { success }, { response });
-        if (typeof (response) == "string" && response.indexOf("username_already_exists") !== -1) {
-          console.log({ response });
-        } else {
-          expect(success).to.be.true;
-        }
-        expect(response.success).to.be.true;
-        if (response.indexOf("username_already_exists" !== -1)) {
-          console.log({ response });
-        }
-        if (response) {
-          console.log("Activation response: " + response);
-          this.activation_key = response; // store activation token for next step
-          testActivation(owner, response, done);
-        }
-
-      }, {});
-    } else {
-      testActivation(owner, this.activation_key, done);
-    }
-
-  }, 10000);
-
-  it("should be able to begin reset owner password", function(done) {
-    User.password_reset_init(email, (success, response) => {
-      if (success === false) {
-        console.log(response);
-      }
-      expect(success).to.be.true;
-      expect(response).to.be.a('string');
-      console.log(JSON.stringify(response));
+  xit("05 - should be able to begin reset owner password", function(done) {
+    user.password_reset_init(email, (success, response) => {
+      console.log("password-reset-init response:", JSON.stringify(response));
       if (response) {
-        expect(response).to.be.a('string');
         var body = {
           password: "tset",
           rpassword: "tset",
           owner: owner,
           reset_key: response
         };
-        User.set_password(body, function(sukec, reponde) {
+        user.set_password(body, (sukec, reponde) => {
           if (sukec === false) {
             console.log("Password set result: ", {reponde});
           }
@@ -177,6 +107,7 @@ describe("Owner", function() {
           done();
         });
       }
+      expect(success).to.be.true;
     });
   }, 10000);
 
