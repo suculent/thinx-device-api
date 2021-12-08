@@ -13,7 +13,6 @@ describe("API Key", function() {
       owner,
       "sample-key",
       (success, array_or_error) => {
-        console.log("generated API Key: ", {success}, {array_or_error});
         if (success) {
           generated_key_hash = sha256(array_or_error[0].key);
           console.log("APIKey generated:", generated_key_hash);
@@ -61,7 +60,6 @@ describe("API Key", function() {
       owner,
       "sample-key",
       (success, array_or_error) => {
-        console.log("generated API Key: ", {success}, {array_or_error});
         if (success) {
           generated_key_hash = sha256(array_or_error[0].key);
           console.log("APIKey generated:", generated_key_hash);
