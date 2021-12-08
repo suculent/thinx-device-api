@@ -8,7 +8,7 @@ var apikey = new APIKey();
 
 describe("API Key", function() {
   //create: function(owner, apikey_alias, callback)
-  it("01 - should be able to generate new API Key", function(done) {
+  it("(01) should be able to generate new API Key", function(done) {
     apikey.create(
       owner,
       "sample-key",
@@ -27,7 +27,7 @@ describe("API Key", function() {
     );
   });
 
-  it("02 - should be able to list API Keys", function(done) {
+  it("(02) should be able to list API Keys", function(done) {
     apikey.list(
       owner,
       (success, object) => {
@@ -42,7 +42,7 @@ describe("API Key", function() {
   });
 
   //verify: function(owner, apikey, callback)
-  it("03 - should be able to verify invalid API Keys", function(done) {
+  it("(03) should be able to verify invalid API Keys", function(done) {
     let req = { ip: "0.0.0.0" };
     apikey.verify(
       owner,
@@ -59,31 +59,32 @@ describe("API Key", function() {
   it("04 - should be able to revoke API Keys", function(done) {
     apikey.create(
       owner,
-      "delete-me-key",
-      (success, object) => {
-        console.log("[04] generated API Key: ", {success}, {array_or_error});
+      "sample-key",
+      (success, array_or_error) => {
+        console.log("generated API Key: ", {success}, {array_or_error});
         if (success) {
           generated_key_hash = sha256(array_or_error[0].key);
-          console.log("[04] APIKey generated:", generated_key_hash);
+          console.log("APIKey generated:", generated_key_hash);
         } else {
-          console.log("[04] APIKey failed: ",{array_or_error});
+          console.log("APIKey failed: ",{array_or_error});
         }
         expect(success).to.be.true;
         expect(array_or_error[0].key).to.be.a('string');
-        done();
+
+        console.log("[04] Revoking valid key: " + generated_key_hash);
+        apikey.revoke(
+          owner,
+          [generated_key_hash],
+          (_success, result) => {
+            expect(_success).to.be.true;
+            console.log("API key revocation result:", result);
+            done();
+          });
       }
     );
-    console.log("[04] Revoking valid key: " + generated_key_hash);
-    apikey.revoke(
-      generated_key_hash,
-      ["delete-me-key"],
-      (success, result)  => {
-        expect(success).to.be.true;
-        done();
-      });
   });
 
-  it("05 - should be able to fail on invalid API Key revocation (callback is not a function!)", function() {
+  it("(05) should be able to fail on invalid API Key revocation (callback is not a function!)", function() {
     console.log("Revoking invalid-owner key...");
     apikey.revoke(
       "nonsense", ["sample-key-hash"],
@@ -95,7 +96,7 @@ describe("API Key", function() {
   });
 
   //list: function(owner, callback)
-  it("06 - should be able to list API Keys (2)", function (done) {
+  it("(06) should be able to list API Keys (2)", function (done) {
     apikey.list(
       owner,
       (success, object) => {

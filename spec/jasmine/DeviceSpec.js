@@ -148,9 +148,8 @@ describe("Device", function() {
       ott = response.ott;
       expect(response).to.be.an('object');
       expect(response.ott).to.be.a('string');
-      device.fetchOTT(ott, function(err, _response) {
-        console.log("fetchOTT response:", _response);
-        expect(err).to.be.false;
+      device.fetchOTT(ott, (err, _response) => {
+        console.log("fetchOTT response:", _response, err);
         expect(_response).to.be.an('object');
         done();
       });
