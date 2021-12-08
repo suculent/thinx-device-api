@@ -102,7 +102,6 @@ describe("API Key", function() {
       (success, object) => {
         expect(success).to.be.true;
         if (success) {
-          console.log("(06) list result:", object);
           expect(object).to.be.a('array');
         } else {
           console.log("(06) API Key Listing failed:", {object});

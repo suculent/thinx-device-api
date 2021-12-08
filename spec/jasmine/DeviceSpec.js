@@ -64,7 +64,6 @@ describe("Device", function() {
   it("(01) API keys are required to do this on new instance", function(done) {    
     APIKey.create( owner, "sample-key", function(success, object) {
       expect(success).to.be.true;
-      console.log("Key object: ", object);
       expect(object).to.be.an('array');
       if (success) {
         apikey = object[0].hash;
@@ -90,7 +89,6 @@ describe("Device", function() {
             return;
           }
         }
-        console.log("• DeviceSpec.js: Registration result(1): ", {response});
         JRS2.udid = response.registration.udid;
         expect(success).to.be.true;
         expect(JRS2.udid).to.be.a('string');
@@ -146,13 +144,14 @@ describe("Device", function() {
     device.storeOTT(
       JRS2, 
       function(success, response) {
-      console.log("• OTT Response: " , {success}, {response});
       ott = response.ott;
+      expect(success).to.be.true;
       expect(response).to.be.an('object');
       expect(response.ott).to.be.a('string');
-      device.fetchOTT(ott, (err, _response) => {
-        console.log("fetchOTT response:", _response, err);
-        expect(_response).to.be.an('object');
+      device.fetchOTT(ott, (err, ott_registration_request) => {
+        console.log("fetchOTT response:", ott_registration_request, err);
+        expect(ott_registration_request).to.be.a('string'); // returns registration request
+        expect(err).to.be.null;
         done();
       });
     });
