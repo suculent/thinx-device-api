@@ -18,8 +18,8 @@ describe("Owner", function() {
   // and must not be used in production environment
 
   it("should be able to create owner profile", function(done) {
-    
-    User.create(user_body, true, function(success, response) {
+    console.log("Creating user", user_body);
+    User.create(user_body, true, (success, response) => {
       console.log("username_already_exists response:", response);
       if (success == false && typeof(response) == "string" && response.indexOf("username_already_exists")) {
         done();
@@ -44,11 +44,11 @@ describe("Owner", function() {
       }
       console.log("Create response: ", { response });
       done();
-    });
+    }, {});
 
   }, 10000);
 
-  it("should be able to fetch MQTT Key for owner", function(done) {
+  xit("should be able to fetch MQTT Key for owner", function(done) {
     User.mqtt_key(owner, function(success, apikey) {
       console.log({success}, {});
       console.log({success}, {apikey});
@@ -120,7 +120,9 @@ describe("Owner", function() {
     }
     // activation_key requires User to be created first using User.create and take the key as (global?)
     if (typeof (this.activation_key) === "undefined") {
-      
+      user_body.email = "1_" + user_body.email;
+      user_body.username = "1_" + user_body.username;
+      console.log("Creating user", user_body);
       User.create(user_body, true, function (success, response) {
 
         if (success == false && typeof (response) == "string" && response.indexOf("username_already_exists")) {
@@ -142,7 +144,7 @@ describe("Owner", function() {
           testActivation(owner, response, done);
         }
 
-      });
+      }, {});
     } else {
       testActivation(owner, this.activation_key, done);
     }
