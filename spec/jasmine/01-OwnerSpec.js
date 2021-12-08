@@ -21,7 +21,7 @@ describe("Owner", function() {
     
     console.log("Creating user", user_body);
     
-    user.create(user_body, true, (success, response) => {
+    user.create(user_body, true, (res, success, response) => {
       console.log("username_already_exists response:", response);
       if (success === false && typeof(response) == "string" && response.indexOf("username_already_exists")) {
         done();
@@ -65,7 +65,7 @@ describe("Owner", function() {
     });
   }, 5000);
 
-  xit("03 - should be able to fetch owner profile", function(done) {
+  it("03 - should be able to fetch owner profile", function(done) {
     user.profile(owner, (success, response) => {
       if (success === false) {
         console.log("profile fetch response: " , {response});
@@ -76,7 +76,7 @@ describe("Owner", function() {
     });
   }, 10000);
 
-  xit("04 - should be able to update owner info", function(done) {
+  it("04 - should be able to update owner info", function(done) {
     var body = {
       info: test_info
     };
@@ -89,7 +89,7 @@ describe("Owner", function() {
       });
   }, 10000);
 
-  xit("05 - should be able to begin reset owner password", function(done) {
+  it("05 - should be able to begin reset owner password", function(done) {
     user.password_reset_init(email, (success, response) => {
       console.log("password-reset-init response:", JSON.stringify(response));
       if (response) {
