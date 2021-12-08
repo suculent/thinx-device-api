@@ -145,14 +145,13 @@ describe("Device", function() {
   it("should be able to store/fetch OTT request", function(done) {
     device.storeOTT(JSON.stringify(JRS2), function(success, response) {
       console.log("• OTT Response: " , {response});
+      ott = response.ott;
       expect(response).to.be.an('object');
       expect(response.ott).to.be.a('string');
-      ott = response.ott;
-
-      device.fetchOTT(ott, function(success, response) {
-        console.log("fetchOTT response:", response);
-        expect(success).to.be.true;
-        expect(response).to.be.an('object');
+      device.fetchOTT(ott, function(err, _response) {
+        console.log("fetchOTT response:", _response);
+        expect(err).to.be.false;
+        expect(_response).to.be.an('object');
         done();
       });
     });

@@ -12,7 +12,7 @@ describe("API Key", function() {
     apikey.create(
       owner,
       "sample-key",
-      (success, object) => {
+      (success, array_or_error) => {
         console.log("generated API Key: ", {success}, {array_or_error});
         if (success) {
           generated_key_hash = sha256(array_or_error[0].key);
