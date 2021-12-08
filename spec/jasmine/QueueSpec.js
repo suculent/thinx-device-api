@@ -12,7 +12,7 @@ describe("Queue", function() {
     let queue_with_cron;
 
     // init
-    it("Should work", function(done) {
+    it("Should not fail", function(done) {
         // Should initialize safely without running cron
         queue_with_cron = new Queue(null);
         expect(queue_with_cron).to.be.a('object');

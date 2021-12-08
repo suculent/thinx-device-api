@@ -22,12 +22,11 @@ describe("Transfer", function () {
 
   it("should be able to initiate device transfer for decline", function (done) {
 
-    Transfer.request(this.owner, body, function (success, response) {
-      console.log(response);
+    Transfer.request(owner, body, function (success, response) {
+      console.log("transfer decline request response", response);
       expect(success).to.be.true;
       expect(response).to.be.a('string');
       dynamic_transfer_request_id = response;
-
       const tbody = {
         transfer_id: dynamic_transfer_request_id,
         udids: [envi.udid]
@@ -44,8 +43,8 @@ describe("Transfer", function () {
 
 
   it("should be able to initiate device transfer for accept", function (done) {
-    Transfer.request(this.owner, body, function (success, response) {
-      console.log(response);
+    Transfer.request(owner, body, function (success, response) {
+      console.log("transfer accept request response", response);
       expect(success).to.be.true;
       expect(response).to.be.a('string');
       dynamic_transfer_request_id = response;
