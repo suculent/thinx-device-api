@@ -101,8 +101,8 @@ describe("Owner", function() {
             console.log("Password set result: ", {reponde});
           }
           expect(sukec).to.be.true;
-          expect(reponde).to.be.a('string');
-          console.log(JSON.stringify(reponde)); // delete this when test passes
+          expect(reponde).to.be.an('object');
+          console.log({reponde}); // delete this when test passes
           done();
         });
       }
