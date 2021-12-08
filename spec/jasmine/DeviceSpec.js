@@ -186,15 +186,12 @@ describe("Device", function() {
       apikey,
       null,
       function(success, response) {
-        console.log("Registration Response: ", response);
         udid = response.registration.udid;
         JRS.udid = udid;
-        console.log("• DeviceSpec.js: Received UDID: " + udid);
         expect(udid).to.be.a('string');
         device.revoke(
           JRS2.udid,
           function(_success, _response) {
-            console.log("• DeviceSpec.js: Revocation result: ", { _response }); // array of revoked keys
             expect(_response.success).to.be.true;
             expect(_response.status).to.equal('device_marked_deleted');
             done();
