@@ -65,6 +65,7 @@ describe("Owner", function() {
           });
         }
     
+          console.log("Testing Activation...");
         testActivation(owner, this.activation_key, done);
 
       });
@@ -98,11 +99,11 @@ describe("Owner", function() {
 
   it("should be able to fetch owner profile", function(done) {
     user.profile(owner, function(success, response) {
-      expect(response).to.be.a('string');
-      expect(success).to.be.true;
       if (success === false) {
         console.log("profile fetch response: " , {response});
+        expect(success).to.be.true;
       }
+      expect(response).to.be.an('object');
       done();
     });
   }, 10000);
@@ -125,11 +126,10 @@ describe("Owner", function() {
       if (success === false) {
         console.log(response);
       }
+      console.log(JSON.stringify(response));
       expect(success).to.be.true;
       expect(response).to.be.a('string');
-      console.log(JSON.stringify(response));
       if (response) {
-        expect(response).to.be.a('string');
         var body = {
           password: "tset",
           rpassword: "tset",

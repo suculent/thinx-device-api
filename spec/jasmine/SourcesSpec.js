@@ -22,13 +22,12 @@ describe("Sources", function() {
         if (success === false) {
           console.log("Error adding source: " + response);
         }
-        //console.log("Source Add Response: " , {response});
         expect(success).to.be.true;
         expect(response).to.be.an('object');
         source_id = response.source_id;
         done();
       });
-  }, 10000);
+  }, 20000);
 
   it("should be able to provide a list", function(done) {
     Sources.list(owner, function(success, response) {
