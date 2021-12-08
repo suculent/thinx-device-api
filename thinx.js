@@ -123,9 +123,7 @@ function initDatabases(dbprefix) {
   nano.db.create(dbprefix + "managed_devices", function(err, body, header) {
     if (err) {
       handleDatabaseErrors(err, "managed_devices");
-    };
-
-    console.log("» Device database creation completed.");
+    }
     var couch = nano.db.use(dbprefix + "managed_devices");
     injectDesign(couch, "devicelib", "./design/design_deviceslib.json");
     injectReplFilter(couch, "./design/filters_devices.json");
@@ -135,8 +133,6 @@ function initDatabases(dbprefix) {
     if (err) {
       handleDatabaseErrors(err, "managed_builds");
     }
-
-    console.log("» Build database creation completed.");
     var couch = nano.db.use(dbprefix + "managed_builds");
     injectDesign(couch, "builds", "./design/design_builds.json");
     injectReplFilter(couch, "./design/filters_builds.json");
@@ -146,8 +142,6 @@ function initDatabases(dbprefix) {
     if (err) {
       handleDatabaseErrors(err, "managed_users");
     }
-    
-    console.log("» User database creation completed.");
     var couch = nano.db.use(dbprefix + "managed_users");
     injectDesign(couch, "users", "./design/design_users.json");
     injectReplFilter(couch, "./design/filters_users.json");
@@ -157,8 +151,6 @@ function initDatabases(dbprefix) {
     if (err) {
       handleDatabaseErrors(err, "managed_logs");
     }
-
-    console.log("» Log database creation completed.");
     var couch = nano.db.use(dbprefix + "managed_logs");
     injectDesign(couch, "logs", "./design/design_logs.json");
     injectReplFilter(couch,  "./design/filters_logs.json");
@@ -314,7 +306,7 @@ function getDocument(file) {
 
 function logCouchError(err, body, header, tag) {
   if (err !== null) {
-    console.log("» Log Couch Insert error: "+err);
+    console.log("» Log Couch Insert error: ", err, body, header, tag);
   } else {
     return;
   }

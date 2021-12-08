@@ -55,9 +55,19 @@ describe("Owner", function() {
           console.log("avatar update response: " , {xesponse});
         }
         expect(xuccess).to.be.true;
-        done();
+        
+        function testActivation(anOwner, key, done) {
+          user.activate(anOwner, key, function (_success, _response) {
+            expect(_success).to.be.true;
+            expect(_response).to.be.a('string');
+            console.log({_response});
+            done();
+          });
+        }
+    
+        testActivation(owner, this.activation_key, done);
+
       });
-      done();
     });
 
   }, 10000);
@@ -108,48 +118,6 @@ describe("Owner", function() {
         expect(success).to.be.true;
         done();
       });
-  }, 10000);
-
-  // This expects activated account and e-mail fetch support
-  it("should be able to activate owner", function (done) {
-
-    function testActivation(owner, key, done) {
-      user.activate(owner, key, function (success, response) {
-        expect(success).to.be.true;
-        expect(response).to.be.a('string');
-        console.log(JSON.stringify(response));
-        done();
-      });
-    }
-    // activation_key requires User to be created first using user.create and take the key as (global?)
-    if (typeof (this.activation_key) === "undefined") {
-      
-      user.create(user_body, true, function (success, response) {
-
-        if (success == false && typeof (response) == "string" && response.indexOf("username_already_exists")) {
-          // OK)
-        }
-        console.log("(2) create owner profile:", { success }, { response });
-        if (typeof (response) == "string" && response.indexOf("username_already_exists") !== -1) {
-          console.log({ response });
-        } else {
-          expect(success).to.be.true;
-        }
-        expect(response.success).to.be.true;
-        if (response.indexOf("username_already_exists" !== -1)) {
-          console.log({ response });
-        }
-        if (response) {
-          console.log("Activation response: " + response);
-          this.activation_key = response; // store activation token for next step
-          testActivation(owner, response, done);
-        }
-
-      });
-    } else {
-      testActivation(owner, this.activation_key, done);
-    }
-
   }, 10000);
 
   it("should be able to begin reset owner password", function(done) {
