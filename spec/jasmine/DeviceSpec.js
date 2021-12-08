@@ -193,9 +193,7 @@ describe("Device", function() {
         udid = response.registration.udid;
         JRS.udid = udid;
         console.log("• DeviceSpec.js: Received UDID: " + udid);
-        expect(success).to.be.true;
         expect(udid).to.be.a('string');
-        
         device.revoke(
           JRS2.udid,
           function(_success, _response) {
