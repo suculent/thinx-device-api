@@ -12,12 +12,13 @@ describe("Owner", function() {
   var email = envi.email;
   var test_info = envi.test_info;
   const user_body = envi.test_info;
+  var activation_k; // global
 
   // activation key is provided by e-mail for security,
   // cimrman@thinx.cloud receives his activation token in response
   // and must not be used in production environment
 
-  it("should be able to create owner profile", function(done) {
+  it("(01) should be able to create owner profile", function(done) {
     
     console.log("Creating user", user_body);
     
@@ -35,42 +36,40 @@ describe("Owner", function() {
       } else {
         expect(success).to.be.true;
       }
-      expect(response.success).to.be.true;
       if (response.indexOf("username_already_exists" !== -1)) {
         done();
       }
       if (response) {
-        console.log("Activation response: " + response);
+        console.log("Activation response stored as this.activation_key: " + response);
         this.activation_key = response; // store activation token for next step
+        activation_k = response;
       }
       console.log("Create response: ", { response });
+      expect(response).to.be.a('string');
       done();
     }, {});
 
   }, 10000);
 
-  it("should be able to fetch MQTT Key for owner", function(done) {
+  it("(02) should be able to fetch MQTT Key for owner", function(done) {
     user.mqtt_key(owner, function(success, apikey) {
-      console.log({success}, {});
-      console.log({success}, {apikey});
-      //expect(success).to.be.true;
-      //expect(apikey.key).to.be.a('string');
+      expect(success).to.be.true;
+      expect(apikey.key).to.be.an('object');
       if (success) {
         console.log("02 MQTT apikey: ", { apikey });
       } else {
-        console.log("MQTT error: ", { apikey });
+        console.log("02 MQTT error: ", { apikey });
       }
-
       done();
     });
   }, 5000);
 
-  it("03 - should be able to fetch owner profile", function(done) {
+  it("(03) should be able to fetch owner profile", function(done) {
     user.profile(owner, (success, response) => {
       if (success === false) {
-        console.log("profile fetch response: " , {response});
-        expect(success).to.be.true;
+        console.log("profile fetch FAILURE response: " , {response});
       }
+      expect(success).to.be.true;
       expect(response).to.be.an('object');
       done();
     });
