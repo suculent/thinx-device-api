@@ -33,10 +33,8 @@ describe("Device", function() {
     mac: "11:11:11:11:11:11",
     firmware: "DeviceSpec.js",
     version: "1.0.0",
-    checksum: "xevim",
-    push: "forget",
-    alias: "virtual-test-device-1-delete",
-    owner: owner,
+    alias: "test-device-1-first",
+    owner: "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c",
     platform: "arduino",
     udid: "d6ff2bb0-df34-11e7-b351-eb37822aa172"
   };
@@ -48,16 +46,11 @@ describe("Device", function() {
     mac: fake_mac,
     firmware: "DeviceSpec.js",
     version: "1.0.0",
-    checksum: "alevim",
-    push: "forget",
-    alias: "virtual-test-device-2-static",
-    owner: owner,
+    alias: "test-device-2-deleteme",
+    owner: "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c",
     platform: "arduino",
     udid: null
   };
-
-  //console.log("• DeviceSpec.js: Using test API_KEY: " + apikey);
-  //console.log("• DeviceSpec.js: Using request: " + JSON.stringify(JRS));
 
   /** TODO: Only when the sample-key has not been previously added by ApikeySpec */
   //create: function(owner, apikey_alias, callback)
@@ -89,10 +82,10 @@ describe("Device", function() {
             return;
           }
         }
-        JRS2.udid = response.registration.udid;
+        JRS.udid = response.registration.udid;
         expect(success).to.be.true;
-        expect(JRS2.udid).to.be.a('string');
-        console.log("• DeviceSpec.js: Received UDID: " + JRS2.udid);
+        expect(JRS.udid).to.be.a('string');
+        console.log("• DeviceSpec.js: Received UDID: " + JRS.udid);
         done();
       });
   }, 15000); // register
@@ -136,7 +129,7 @@ describe("Device", function() {
 
   it("(05) should be able to store/fetch OTT request", function(done) {
     device.storeOTT(
-      JRS2, 
+      JRS, 
       function(success, response) {
       ott = response.ott;
       expect(success).to.be.true;
@@ -181,7 +174,7 @@ describe("Device", function() {
       null,
       function(success, response) {
         udid = response.registration.udid;
-        JRS.udid = udid;
+        JRS2.udid = udid;
         expect(udid).to.be.a('string');
         device.revoke(
           JRS2.udid,

@@ -88,7 +88,7 @@ describe("Devices", function() {
       expect(success).to.be.true;
       expect(response).to.be.a('string');
       done();
-    });
+    }, {});
   }, 30000);
 
   it("(05) should be able to detach a repository from device", function(done) {
