@@ -55,7 +55,7 @@ describe("Statistics", function () {
       console.log("Returned all stats: ", {success}, {body});
       expect(success).to.be.true;
       if (success) {
-        expect(body).to.be.a('string');
+        expect(body).to.be.an('object');
       }
       done();
     });
@@ -64,10 +64,7 @@ describe("Statistics", function () {
   it("(08) should be able to return weekly results for owner", function (done) {
     s.week(owner, function (success, result) {
       console.log("Returned weekly: ", {success}, {result});
-      //expect(success).to.be.true;
-      //console.log("Returned weekly stats: ");
-      //console.log({result});
-      expect(result).to.be.a('string');
+      expect(result).to.be.an('object');
       done();
     });
   }, 10000);
