@@ -33,7 +33,7 @@ describe("Queue", function() {
             console.log("(00) queue_with_cron.findNext exited with", next);
 
             // Should be able run next item
-            queue_with_cron.runNext(action);
+            queue_with_cron.runNext(next);
 
             console.log("(00) Queue calling findNext again async...");
 
