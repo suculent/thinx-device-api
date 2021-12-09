@@ -483,7 +483,7 @@ var ssl_options = null;
 
 // Legacy HTTP support for old devices without HTTPS proxy
 let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function() {
-  console.log("» Legacy API started on port", app_config.port);
+  console.log("» HTTP API started on port", app_config.port);
   let end_timestamp = new Date().getTime() - start_timestamp;
   let seconds = Math.ceil(end_timestamp / 1000);
   console.log("Startup phase took: ", seconds, "seconds");
@@ -526,7 +526,7 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   }
 
 } else {
-  console.log("» Skipping HTTPS server, SSL key or certificate not found.");
+  console.log("» Skipping HTTPS server, SSL key or certificate not found. This configuration is INSECURE! and will cause an error in Enterprise configurations in future.");
 }
 
 app.use('/static', express.static(path.join(__dirname, 'static')));
