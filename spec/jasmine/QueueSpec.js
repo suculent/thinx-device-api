@@ -12,7 +12,7 @@ describe("Queue", function() {
     let queue_with_cron;
 
     // init
-    it("Should not fail", function(done) {
+    it("should not fail or hang", function(done) {
         // Should initialize safely without running cron
         queue_with_cron = new Queue(null);
         expect(queue_with_cron).to.be.a('object');
@@ -32,21 +32,23 @@ describe("Queue", function() {
 
             console.log("queue_with_cron.findNext exited with", next);
 
-            expect(next).to.be.an('object');
-
             // Should be able run next item
             queue_with_cron.runNext(action);
 
+            console.log("Queue calling findNext again async...");
+
             // Should not be able to find anything while queue item is running
-            queue_with_cron.findNext(function(action) {
-                //expect(action).to.be.an('object');
-                console.log(action);
-            });
+            queue_with_cron.findNext((nextAction) => {
+            console.log(nextAction);
+                
+            console.log("Queue test calling loop...");
 
             // Should run loop safely
             for (let i = 0; i < 10; i++) {
                 queue_with_cron.loop();
             }
+
+            console.log("Queue test done.");
            
             done();
         });
