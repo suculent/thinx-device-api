@@ -55,10 +55,7 @@ describe("Devices", function() {
             return;
           }
         }
-        console.log("(01) Registration result(2): ", {response});
-        console.log("(01) Sample UDID: " + TEST_DEVICE.udid);
         TEST_DEVICE.udid = response.registration.udid;
-        console.log("(01) Received UDID: " + TEST_DEVICE.udid);
         expect(success).to.be.true;
         expect(TEST_DEVICE).to.be.an('object');
         expect(response.registration).to.be.an('object');
@@ -130,17 +127,14 @@ describe("Devices", function() {
             return;
           }
         }
-        console.log("(01) Registration result(2): ", {response});
         TEST_DEVICE4.udid = response.registration.udid;
-        console.log("(01) Received UDID: " + TEST_DEVICE4.udid);
         expect(success).to.be.true;
         var body = {
           udid: TEST_DEVICE4.udid
         };
         devices.revoke(owner, body, (res, _success, _response) => {
-          console.log("Revoke success: " , {_success});
-          console.log("Revoke response: " , {_response});
-          expect(success_).to.be.true;
+          expect(_success).to.be.true;
+          expect(_response).to.be.a('string');
           done();
         }, {});
       });
