@@ -42,7 +42,7 @@ describe("Statistics", function () {
     });
   }, 10000);
 
-  it("(07) should be able to parse today statistics per owner", function (done) {
+  it("(06) should be able to parse today statistics per owner", function (done) {
     s.today(owner, function (body) {
       console.log("Returned today stats: ", { body });
       expect(body).to.be.a('string'); // link to filename, maybe should return its contents but we don't now from this point
@@ -53,10 +53,10 @@ describe("Statistics", function () {
   it("(07) should be able to parse all statistics per owner", function (done) {
     s.parse(owner, function (success, body) {
       console.log("Returned all stats: ", {success}, {body});
-      expect(success).to.be.true;
       if (success) {
         expect(body).to.be.an('object');
       }
+      expect(success).to.be.true;
       done();
     });
   }, 60000);
