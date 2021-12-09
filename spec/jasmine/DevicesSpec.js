@@ -18,22 +18,32 @@ describe("Devices", function() {
 
   // This UDID is to be deleted at the end of test.
   var TEST_DEVICE = {
-    mac: "00:00:00:00:00:01",
-    firmware: "DeviceSpec.js",
+    mac: "AA:BB:CC:EE:00:03",
+    firmware: "DevicesSpec.js",
     version: "1.0.0",
     checksum: "alevim",
     push: "forget",
     alias: "virtual-test-device-3-dynamic",
-    owner: owner,
-    platform: "arduino",
-    udid: envi.udid
+    owner: "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c",
+    platform: "arduino"
+  };
+
+  var TEST_DEVICE4 = {
+    mac: "AA:BB:CC:DD:DD:DD",
+    firmware: "DevicesSpec.js",
+    version: "1.0.0",
+    checksum: "alevim",
+    push: "forget",
+    alias: "virtual-test-device-4-deleteme",
+    owner: "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c",
+    platform: "arduino"
   };
 
   it("(01) should be able to register sample device", function(done) {
     console.log("Sample attempt to register a device", {TEST_DEVICE}, "with ak", ak);
     device.register(
       {}, /* req */
-      { registration: TEST_DEVICE }, /* reg */
+      TEST_DEVICE, /* reg.registration */
       ak,
       {}, /* ws */
       (success, response) => {
@@ -104,17 +114,35 @@ describe("Devices", function() {
     }, {});
   }, 30000);
 
-  // requires specific device registered for this test only (udid "d6ff2bb0-df34-11e7-b351-eb37822aa172")
-  // this device must be created using DeviceSpec.js test
-  it("(06) should be able to revoke devices for owner", function(done) {
-    var body = {
-      udid: TEST_DEVICE.udid
-    };
-    devices.revoke(owner, body, (res, success, response) => {
-      expect(success);
-      console.log("Revoke success: " , {success});
-      console.log("Revoke response: " , {response});
-      done();
-    }, {});
-  }, 30000);
+  it("(06) should be able to revoke another sample device", function(done) {
+    console.log("Sample attempt to register a device", {TEST_DEVICE4}, "with ak", ak);
+    device.register(
+      {}, /* req */
+      TEST_DEVICE4, /* reg.registration */
+      ak,
+      {}, /* ws */
+      (success, response) => {
+        if (success === false) {
+          console.log("(01) registration response", response);
+          expect(response).to.be.a('string');
+          if (response === "owner_found_but_no_key") {
+            done();
+            return;
+          }
+        }
+        console.log("(01) Registration result(2): ", {response});
+        TEST_DEVICE4.udid = response.registration.udid;
+        console.log("(01) Received UDID: " + TEST_DEVICE4.udid);
+        expect(success).to.be.true;
+        var body = {
+          udid: TEST_DEVICE4.udid
+        };
+        devices.revoke(owner, body, (res, _success, _response) => {
+          console.log("Revoke success: " , {_success});
+          console.log("Revoke response: " , {_response});
+          expect(success_).to.be.true;
+          done();
+        }, {});
+      });
+  }, 15000); // register
 });
