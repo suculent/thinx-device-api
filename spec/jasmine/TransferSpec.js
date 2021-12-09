@@ -55,7 +55,7 @@ describe("Transfer", function () {
       };
       Transfer.accept(transfer_body, function (_success, _response) {
         console.log("transfer accept response: ", {_success}, {_response});
-        expect(success_).to.be.true;
+        expect(_success).to.be.true;
         expect(_response).to.be.a('string');
         done();
       });

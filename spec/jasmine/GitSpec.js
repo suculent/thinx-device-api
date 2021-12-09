@@ -11,7 +11,7 @@ describe("Git", function() {
             __dirname + "../../test_repositories/git_test" // local_path
         );
         console.log("git fetch result:", success);
-        // expect(success).to.be.true; // may fail, until local_path is valid git repo or a temp folder with different command
+        expect(success).to.be.true; // will fail, until local_path is valid git repo or a temp folder with different command; should use http:// in empty folder outside a git structure like /mnt/data/repos/
         done();
     }, 10000);
 

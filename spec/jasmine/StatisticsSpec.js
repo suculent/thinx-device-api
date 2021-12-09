@@ -43,10 +43,9 @@ describe("Statistics", function() {
   }, 10000);
 
   it("should be able to parse today statistics per owner", function(done) {
-    s.today(owner, function(success, body) {
-        console.log("Returned today stats: ", { success, body });
-        //expect(success).to.be.true;
-        expect(body).to.be.a('string');
+    s.today(owner, function(body) {
+        console.log("Returned today stats: ", { body });
+        expect(body).to.be.a('string'); // link to filename, maybe should return its contents but we don't now from this point
         done();
       });
   }, 60000);
