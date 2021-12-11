@@ -41,10 +41,11 @@ describe("Sources", function() {
   it("(03) should be able to be removed", function(done) {
 
     const source = {
+      name: source_name + "-2",
       owner: owner,
       branch: "origin/master",
       url: "https://github.com/suculent/thinx-firmware-esp8266",
-      platform: "nodejs"
+      platform: "arduino"
     };
 
     /// Add something to be removed
@@ -67,7 +68,6 @@ describe("Sources", function() {
           expect(rresponse).to.be.a('string');
           done();
         });
-
       });
   }, 20000);
 

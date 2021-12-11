@@ -10,8 +10,6 @@ describe("Transfer", function () {
   var transfer = require("../../lib/thinx/transfer");
   var Transfer = new transfer(messenger);
 
-  var dynamic_transfer_request_id = null;
-
   var body = {
     to: "cimrman@thinx.cloud",
     udids: [envi.udid]
@@ -23,12 +21,11 @@ describe("Transfer", function () {
   it("(01) should be able to initiate device transfer for decline", function (done) {
 
     Transfer.request(owner, body, function (success, response) {
-      console.log("transfer decline request response", response);
+      console.log("transfer decline request response", {success}, {response});
       expect(success).to.be.true;
       expect(response).to.be.a('string');
-      dynamic_transfer_request_id = response;
       const tbody = {
-        transfer_id: dynamic_transfer_request_id,
+        transfer_id: response,
         udids: [envi.udid]
       };
       Transfer.decline(tbody, function (_success, _response) {
@@ -44,17 +41,15 @@ describe("Transfer", function () {
 
   it("(02) should be able to initiate device transfer for accept and then accept transfer", function (done) {
     Transfer.request(owner, body, function (success, response) {
-      console.log("transfer accept request response", response);
+      console.log("(02) transfer request response", {success}, {response});
       expect(success).to.be.true;
-      expect(response).to.be.a('string'); // transfer_requested
-      dynamic_transfer_request_id = response;
-      
+      expect(response).to.be.a('string'); // transfer_requested      
       var transfer_body = {
-        transfer_id: dynamic_transfer_request_id,
+        transfer_id: response,
         udids: [envi.udid]
       };
       Transfer.accept(transfer_body, function (_success, _response) {
-        console.log("transfer accept response: ", {_success}, {_response});
+        console.log("(02) transfer accept response: ", {_success}, {_response});
         expect(_success).to.be.true;
         expect(_response).to.be.a('string');
         done();

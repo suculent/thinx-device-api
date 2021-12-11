@@ -39,7 +39,7 @@ describe("Queue", function() {
 
             // Should not be able to find anything while queue item is running
             queue_with_cron.findNext((nextAction) => {
-                expect(nextAction).to.be.null;
+                // can be null
             });
                 
             console.log("(00) Queue test calling loop...");
