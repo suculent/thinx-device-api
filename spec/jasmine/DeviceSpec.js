@@ -5,14 +5,11 @@ describe("Device", function() {
   var ApiKey = require("../../lib/thinx/apikey"); var APIKey = new ApiKey();
 
   var envi = require("../_envi.json");
-  var sha256 = require("sha256");
 
   var owner = envi.oid;
   var udid = envi.udid;
   var apikey = envi.ak;
   var ott = null;
-
-  var generated_key_hash = null;
 
   var crypto = require("crypto");
   var fake_mac = null;
@@ -26,8 +23,6 @@ describe("Device", function() {
                hexa.charAt(4) +
                hexa.charAt(5);
   });
-
-  // TODO: FIXME: owner is not being loaded from _envi.json in certain circumstances
 
   var JRS = {
     mac: "11:11:11:11:11:11",
