@@ -14,8 +14,8 @@ describe("Statistics", function () {
 
   it("(02) should be able to store results", function () {
     var path = "/mnt/data/statistics/";
-    var dirpath = path + owner;
-    s.write_stats(false, path, dirpath, {
+    var dirpath = path + owner + dateFormat(new Date(), "isoDate") + ".json";
+    s.write_stats(false, filepath, dirpath, {
       "message": "example"
     });
   });
