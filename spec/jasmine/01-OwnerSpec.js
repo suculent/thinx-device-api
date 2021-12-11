@@ -49,13 +49,11 @@ describe("Owner", function() {
 
   it("(02) should be able to fetch MQTT Key for owner", function(done) {
     user.mqtt_key(owner, function(success, apikey) {
-      expect(success).to.be.true;
-      expect(apikey.key).to.be.a('string');
-      if (success) {
-        console.log("02 MQTT apikey: ", { apikey });
-      } else {
+      if (!success) {
         console.log("02 MQTT error: ", { apikey });
       }
+      expect(success).to.be.true;
+      expect(apikey.key).to.be.a('string');
       done();
     });
   }, 5000);
