@@ -48,11 +48,9 @@ describe("Queue", function() {
             for (let i = 0; i < 10; i++) {
                 queue_with_cron.loop();
             }
-
+            
             console.log("(00) Queue test done.");
-           
             done();
-        
         });    
     });
 });
