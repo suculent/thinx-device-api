@@ -29,9 +29,9 @@ describe("Statistics", function () {
 
   it("(04) should be able to return today results for owner", function (done) {
     s.today(owner, function (success, result) {
-      console.log("daily stats: ", { result });
-      expect(success).to.be.true;
-      expect(result).to.be.a('string');
+      console.log("(04) returned daily stats: ", {success}, { result });
+      //expect(success).to.be.true;
+      //expect(result).to.be.a('string');
       done();
     });
   }, 10000);
@@ -45,18 +45,8 @@ describe("Statistics", function () {
     });
   }, 10000);
 
-  it("(06) should be able to parse today statistics per owner", function (done) {
-    s.today(owner, function (error, path) {
-      console.log("(06) Returned today stats: ", {error}, { path });
-      //expect(error).to.be.false;
-      //expect(path).to.be.a('string'); // link to filename, maybe should return its contents but we don't now from this point
-      done();
-    });
-  }, 60000);
-
-  it("(07) should be able to parse all statistics per owner", function (done) {
+  it("(06) should be able to parse all statistics per owner", function (done) {
     s.parse(owner, function (success, body) {
-      console.log("(07) Returned all stats: ", {success}, {body});
       if (success) {
         expect(body).to.be.an('object');
       }
@@ -65,9 +55,8 @@ describe("Statistics", function () {
     });
   }, 60000);
 
-  it("(08) should be able to return weekly results for owner", function (done) {
+  it("(07) should be able to return weekly results for owner", function (done) {
     s.week(owner, function (success, result) {
-      console.log("Returned weekly: ", {success}, {result});
       expect(result).to.be.an('object');
       done();
     });

@@ -65,7 +65,7 @@ describe("Sources", function() {
             console.log("Sources Removal Response: " , {rresponse});
           }
           expect(rsuccess).to.be.true;
-          expect(rresponse).to.be.a('string');
+          expect(rresponse).to.be.an('object');
           done();
         });
       });
