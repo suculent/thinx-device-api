@@ -9,7 +9,7 @@ describe("Transfer", function () {
   var Transfer = require("../../lib/thinx/transfer");
   var transfer = new Transfer(messenger);
 
-  it("(00) should be able to initiate device transfer, decline and accept another one", function () {
+  it("(00) should be able to initiate device transfer, decline and accept another one", function (done) {
 
     var body = {
       to: "cimrman@thinx.cloud",
@@ -52,7 +52,7 @@ describe("Transfer", function () {
             console.log("(00-3) transfer accept III response: ", {success3}, {response3});
             expect(success3).to.be.true; // returns false: transfer_id_not_found
             expect(response3).to.be.a('string');
-            //done();
+            done();
           });
         });
       });
