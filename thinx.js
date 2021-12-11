@@ -413,7 +413,8 @@ const messenger = new Messenger().getInstance(); // take singleton to prevent do
 app.messenger = messenger;
 
 // Redis
-var RedisStore = require("connect-redis")(session);
+let connect_redis = require("connect-redis");
+var RedisStore = connect_redis(session);
 var sessionStore = new RedisStore({client: redis_client});
 
 app.set("trust proxy", 1);
