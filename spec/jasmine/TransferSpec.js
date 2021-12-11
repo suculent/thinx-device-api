@@ -36,6 +36,7 @@ describe("Transfer", function () {
         expect(d_response).to.be.a('string');
 
         // 00-03 Request
+        body.udids = ["d6ff2bb0-df34-11e7-b351-eb37822aa173"];
         console.log("(00-2) transfer request B", {owner}, {body});
         transfer.request(owner, body, (b_success, b_response) => {
           console.log("(00-2) transfer request B response", {b_success}, {b_response});
@@ -44,7 +45,7 @@ describe("Transfer", function () {
 
           // 00-04 Accept
           var transfer_body = {
-            transfer_id: b_response,
+            transfer_id: b_response.replace("dt:", ""),
             udids: [envi.udid]
           };
           console.log("(00-3) transfer accept III", {transfer_body});
