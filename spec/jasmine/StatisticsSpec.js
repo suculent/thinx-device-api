@@ -6,6 +6,8 @@ s.forceLogPath(__dirname + "/../../spec/test.log");
 var envi = require("../_envi.json");
 var owner = envi.oid;
 
+var dateFormat = require("dateformat");
+
 describe("Statistics", function () {
 
   it("(01) should be able to initialize", function () {
@@ -13,10 +15,10 @@ describe("Statistics", function () {
   });
 
   it("(02) should be able to store results", function () {
-    var path = "/mnt/data/statistics/";
-    var dirpath = path + owner + dateFormat(new Date(), "isoDate") + ".json";
-    s.write_stats(false, filepath, dirpath, {
-      "message": "example"
+    var dirpath = "/mnt/data/statistics/"+owner;
+    var filepath = path + owner + "/" + dateFormat(new Date(), "isoDate") + ".json";
+    s.write_stats(dirpath, filepath, {
+      "owner-data": "example"
     });
   });
 
