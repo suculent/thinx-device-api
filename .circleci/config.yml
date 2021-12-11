@@ -361,12 +361,12 @@ workflows:
           context:
               - dockerhub
               - thinx-docker-repo
-        filters:
-          branches:
-            only:
-              - staging
-              - thinx-swarm
-              - master
+          filters:
+            branches:
+              only:
+                - staging
+                - thinx-swarm
+                - master
 
       # - test-api-cloud:
       #     context:
