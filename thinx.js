@@ -190,7 +190,7 @@ var Owner = require("./lib/thinx/owner");
 
 function purgeOldUsers() {
   if ((typeof(app_config.strict_gdpr) !== "undefined") && app_config.strict_gdpr === false) {
-    console.log("Purge old users skipped. Enable with strict_gdpr = true in config.json");
+    console.log("Not purging inactive users today.");
     return;
   }
   if (process.env.ENVIRONMENT === "test") {
