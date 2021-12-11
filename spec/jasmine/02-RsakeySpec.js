@@ -17,61 +17,50 @@ describe("RSA Key", function() {
 
   ];
 
-  it("should be able to add RSA Keys first", function(done) {
+  it("(00) should be able to add RSA Keys first", function(done) {
     rsakey.create(owner,
     function(success, response) {
       revoked_fingerprint = response;
-      //console.log("RSA add result: " , {response});
       expect(success).to.be.true;
       done();
     });
   }, 10000);
 
-  it("should be able to list RSA Keys", function(done) {
+  it("(01) should be able to list RSA Keys", function(done) {
     rsakey.list(owner, function(success, list) {
       expect(success).to.be.true;
-      console.log("RSA list item count: " + list.length);
+      expect(list.length).to.be.greaterThanOrEqual(1);
       done();
     });
   }, 10000);
 
-  it("should fail on invalid revocation", function(done) {
+  it("(02) should fail on invalid revocation", function(done) {
     rsakey.revoke(owner, invalid_fingerprints,
       function(success, message) {
-        //console.log("RSA revocation result: " +JSON.stringify(message));
         expect(success).to.be.true; // succeds for more fingerprints if one is valid? maybe...
-        expect(message).to.be.a('array');
+        expect(message).to.be.an('array');
         done();
       });
   }, 10000);
 
-  it("should be able to add RSA Key 2", function(done) {
-    rsakey.create(owner,
-    function(success, response) {
+  it("(03) should be able to add RSA Key 2/3", function(done) {
+    rsakey.create(owner, (success, response) => {
       revoked_filenames.push(response.filename);
-      //console.log("RSA add result: " , {response});
       expect(success).to.be.true;
-      done();
     });
-  }, 10000);
-
-  it("should be able to add RSA Key 3", function(done) {
-    rsakey.create(owner,
-    function(success, response) {
-      revoked_filenames.push(response.filename);
-      //console.log("RSA add result: " , {response});
-      expect(success).to.be.true;
-      done();
+    rsakey.create(owner, (success, response) => {
+        revoked_filenames.push(response.filename);
+        expect(success).to.be.true;
+        done();
     });
   }, 10000);
 
   it("should be able to revoke multiple RSA Keys at once", function(done) {
-    console.log({revoked_filenames});
     rsakey.revoke(owner, revoked_filenames,
       function(success, message) {
         console.log("RSA revocation result: " + JSON.stringify(message));
         expect(success).to.be.true;
-        expect(message).to.be.a('array'); // should be array of length of 2
+        expect(message).to.be.an('array'); // should be array of length of 2
         done();
       });
   }, 10000);

@@ -76,7 +76,7 @@ try {
 const Auth = require('./lib/thinx/auth.js');
 
 let auth = new Auth();
-auth.add_mqtt_credentials(app_config.mqtt.username, app_config.mqtt.password); // TODO: do this in Auth constructor
+auth.add_mqtt_credentials(app_config.mqtt.username, app_config.mqtt.password); // TODO: do this in Auth constructor, but definitely before Messenger initialization...
 
 const ACL = require('./lib/thinx/acl.js');
 let acl = new ACL(app_config.mqtt.username);
@@ -170,7 +170,6 @@ var stats = new Stats();
 
 console.log("Loaded module: Messenger");
 var Messenger = require("./lib/thinx/messenger");
-var messenger = new Messenger().getInstance(); // take singleton to prevent double initialization
 
 console.log("Loaded module: Repository Watcher");
 var Repository = require("./lib/thinx/repository");
@@ -191,7 +190,7 @@ var Owner = require("./lib/thinx/owner");
 
 function purgeOldUsers() {
   if ((typeof(app_config.strict_gdpr) !== "undefined") && app_config.strict_gdpr === false) {
-    console.log("Purge old users skipped. Enable with strict_gdpr = true in config.json");
+    console.log("Not purging inactive users today.");
     return;
   }
   if (process.env.ENVIRONMENT === "test") {
@@ -306,40 +305,40 @@ function getDocument(file) {
 
 function logCouchError(err, body, header, tag) {
   if (err !== null) {
-    console.log("» Log Couch Insert error: ", err, body, header, tag);
+    if (err.toString().indexOf("conflict") === -1) {
+      console.log("[error] Couch Init error: ", err, body, header, tag);
+    }
   } else {
     return;
   }
   if (typeof(body) !== "undefined") {
-    console.log("» Log Couch Insert body: "+body+" "+tag);
+    console.log("[error] Log Couch Insert body: "+body+" "+tag);
   }
   if (typeof(header) !== "undefined") {
-    console.log("» Log Couchd Insert header: "+header+" "+tag);
+    console.log("[error] Log Couchd Insert header: "+header+" "+tag);
   }
 }
 
 function injectDesign(couch, design, file) {
   if (typeof(design) === "undefined") return;
-  console.log("» Inserting design document " + design + " from path", file);
   let design_doc = getDocument(file);
   if (design_doc != null) {
-    couch.insert(design_doc, "_design/" + design, function(err, body, header) {
-      logCouchError(err, body, header, "init:design:"+design);
+    couch.insert(design_doc, "_design/" + design, (err, body, header) => {
+      logCouchError(err, body, header, "init:design:"+JSON.stringify(design)); // returns if no err
     });
   } else {
-    console.log("» Design doc injection issue at "+file);
+    console.log("[error] Design doc injection issue at "+file);
   }
 }
 
 function injectReplFilter(couch, file) {
-  console.log("» Inserting filter document from path", file);
   let filter_doc = getDocument(file);
   if (filter_doc !== false) {
-    couch.insert(filter_doc, "_design/repl_filters", function(err, body, header) {
-      logCouchError(err, body, header, "init:repl:"+filter_doc);
+    couch.insert(filter_doc, "_design/repl_filters", (err, body, header) => {
+      logCouchError(err, body, header, "init:repl:"+JSON.stringify(filter_doc)); // returns if no err
     });
   } else {
-    console.log("» Filter doc injection issue (no doc) at "+file);
+    console.log("[error] Filter doc injection issue (no doc) at "+file);
   }
 }
 
@@ -383,7 +382,7 @@ const hook_server = express();
 hook_server.disable('x-powered-by');
 if (typeof(app_config.webhook_port) !== "undefined") {
   http.createServer(hook_server).listen(app_config.webhook_port, "0.0.0.0", function() {
-    console.log("» Webhook API started on port", app_config.webhook_port);
+    console.log("[info] Webhook API started on port", app_config.webhook_port);
   });
   hook_server.use(express.json({
     limit: "2mb",
@@ -396,9 +395,9 @@ if (typeof(app_config.webhook_port) !== "undefined") {
     if (fail_on_invalid_git_headers(req)) return;
     // do not wait for response, may take ages
     res.status(200).end("Accepted");
-    console.log("Hook process started...");
+    console.log("[info] Hook process started...");
     watcher.process_hook(req.body);
-    console.log("Hook process completed.");
+    console.log("[info] Hook process completed.");
   }); // end of Legacy Webhook Server; will deprecate after reconfiguring all instances or if no webhook_port is defined
 }
 
@@ -409,6 +408,8 @@ app.disable('x-powered-by');
 // DI
 app.builder = builder;
 app.queue = queue;
+
+const messenger = new Messenger().getInstance(); // take singleton to prevent double initialization
 app.messenger = messenger;
 
 // Redis
@@ -478,10 +479,10 @@ var ssl_options = null;
 
 // Legacy HTTP support for old devices without HTTPS proxy
 let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function() {
-  console.log("» Legacy API started on port", app_config.port);
+  console.log("[info] HTTP API started on port", app_config.port);
   let end_timestamp = new Date().getTime() - start_timestamp;
   let seconds = Math.ceil(end_timestamp / 1000);
-  console.log("Startup phase took: ", seconds, "seconds");
+  console.log("[debug] Startup phase took: ", seconds, "seconds");
 });
 
 var read = require('fs').readFileSync;
@@ -521,7 +522,7 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   }
 
 } else {
-  console.log("» Skipping HTTPS server, SSL key or certificate not found.");
+  console.log("» [warning] Skipping HTTPS server, SSL key or certificate not found. This configuration is INSECURE! and will cause an error in Enterprise configurations in future.");
 }
 
 app.use('/static', express.static(path.join(__dirname, 'static')));
@@ -839,7 +840,7 @@ if (isMasterProcess()) {
   setInterval(log_aggregator, 86400 * 1000 / 2);
 
   // MQTT Messenger/listener
-  console.log("» Initializing messenger...");
+  console.log("[info] Initializing messenger...");
   messenger.init();
 
   setTimeout(startup_quote, 10000); // wait for Slack init only once

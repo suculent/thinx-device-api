@@ -6,70 +6,60 @@ s.forceLogPath(__dirname + "/../../spec/test.log");
 var envi = require("../_envi.json");
 var owner = envi.oid;
 
-describe("Statistics", function() {
+var dateFormat = require("dateformat");
 
-  it("should be able to initialize", function() {
+describe("Statistics", function () {
+
+  it("(01) should be able to initialize", function () {
     expect(s).to.be.a('object');
   });
 
-  it("should be able to store results", function() {
-    var path = "/mnt/data/statistics/";
-    var dirpath = path + owner;
-    s.write_stats(false, path, dirpath, {
-      "message": "example"
+  it("(02) should be able to store results", function () {
+    var dirpath = "/mnt/data/statistics/"+owner;
+    var filepath = dirpath + owner + "/" + dateFormat(new Date(), "isoDate") + ".json";
+    s.write_stats(dirpath, filepath, {
+      "owner-data": "example"
     });
   });
 
-  it("should return today path element", function() {
+  it("(03) should return today path element", function () {
     var result = s.todayPathElement();
     expect(result).to.be.a('string');
   });
 
-  it("should be able to return today results for owner", function(done) {
-    s.today(owner, function(success, result) {
-        console.log("daily stats: ", { result });
-        expect(success).to.be.true;
-        expect(result).to.be.a('string');
-        done();
-      });
+  it("(04) should be able to return today results for owner", function (done) {
+    s.today(owner, function (success, result) {
+      console.log("(04) returned daily stats: ", {success}, { result });
+      //expect(success).to.be.true;
+      //expect(result).to.be.a('string');
+      done();
+    });
   }, 10000);
 
-  it("should be able to aggregate statistics", function(done) {
-    s.aggregate(function(success, result) {
-      expect(success).to.be.true;
+  it("(05) should be able to aggregate statistics", function (done) {
+    s.aggregate(function (success, result) {
+      console.log("(05) Returned aggregated statistics: ", {success}, {result});
+      //expect(success).to.be.true;
       expect(result).to.be.a('string');
       done();
     });
   }, 10000);
 
-  it("should be able to parse today statistics per owner", function(done) {
-    s.today(owner, function(success, body) {
-        console.log("Returned today stats: ", { success, body });
-        //expect(success).to.be.true;
-        expect(body).to.be.a('string');
-        done();
-      });
+  it("(06) should be able to parse all statistics per owner", function (done) {
+    s.parse(owner, function (success, body) {
+      if (success) {
+        expect(body).to.be.an('object');
+      }
+      expect(success).to.be.true;
+      done();
+    });
   }, 60000);
 
-  it("should be able to parse all statistics per owner", function(done) {
-    s.parse(owner, function(success, body) {
-        //console.log("Returned all stats: ");
-        expect(success).to.be.true;
-        if (success) {
-          expect(body).to.be.a('object');
-        }
-        done();
-      });
-  }, 60000);
-
-  it("should be able to return weekly results for owner", function(done) {
-    s.week(owner, function(success, result) {
-        //expect(success).to.be.true;
-        //console.log("Returned weekly stats: ");
-        //console.log({result});
-        expect(result).to.be.a('object');
-        done();
-      });
+  it("(07) should be able to return weekly results for owner", function (done) {
+    s.week(owner, function (success, result) {
+      expect(result).to.be.an('object');
+      done();
+    });
   }, 10000);
 
 });

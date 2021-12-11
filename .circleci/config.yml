@@ -230,9 +230,12 @@ jobs:
 
     - checkout
 
-    # Spectralops.io integration
-    - run: curl -L "https://get.spectralops.io/api/download/get?dsn=$SPECTRAL_DSN" | sh
-    - run: spectral scan --ok # --ok allows passing build for now
+    # --ok allows passing build for now
+    - run:
+        name: Spectralops.io integration
+        command: |
+          curl -L "https://get.spectralops.io/api/download/get?dsn=$SPECTRAL_DSN" | sh
+          spectral scan --ok 
 
     # Restore the dependency cache
     - restore_cache:
@@ -358,10 +361,12 @@ workflows:
           context:
               - dockerhub
               - thinx-docker-repo
-#        branches:
-#          filters:
-#              only:
-#                - update
+       branches:
+         filters:
+             only:
+               - staging
+               - thinx-swarm
+               - master
 
       # - test-api-cloud:
       #     context:
@@ -369,59 +374,61 @@ workflows:
       #     filters:
       #       branches:
       #         only:
-      #           - update
+      #           - thinx-swarm
       
       # - test-mosquitto-cloud:
       #     filters:
       #       branches:
       #         only:
-      #           - features/mqtt-auth-plugin
-
-      # - build-api-cloud:
-      #     context:
-      #       - thinx-docker-repo
-      #       - SonarCloud
-      #     filters:
-      #       branches:
-      #         only:
       #           - thinx-swarm
 
-      # - build-console-cloud:
-      #     context:
-      #       - thinx-docker-repo
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-swarm
+      - build-console-cloud:
+          context:
+            - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - thinx-swarm
 
-      # - build-mosquitto-cloud:
-      #     context:
-      #       - thinx-docker-repo
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-swarm
+      - build-mosquitto-cloud:
+          context:
+            - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - thinx-swarm
 
-      # - build-redis-cloud:
-      #     context:
-      #       - thinx-docker-repo
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-swarm
+      - build-redis-cloud:
+          context:
+            - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - thinx-swarm
 
-      # - build-transformer-cloud:
-      #     context:
-      #       - thinx-docker-repo
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-swarm
+      - build-transformer-cloud:
+          context:
+            - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - thinx-swarm
 
-      # - build-worker-cloud:
-      #     context:
-      #       - thinx-docker-repo
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-swarm
+      - build-worker-cloud:
+          context:
+            - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - thinx-swarm
+
+      - build-api-cloud:
+          context:
+            - thinx-docker-repo
+            - SonarCloud
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - thinx-swarm

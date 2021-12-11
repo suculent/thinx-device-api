@@ -5,14 +5,11 @@ describe("Device", function() {
   var ApiKey = require("../../lib/thinx/apikey"); var APIKey = new ApiKey();
 
   var envi = require("../_envi.json");
-  var sha256 = require("sha256");
 
   var owner = envi.oid;
   var udid = envi.udid;
   var apikey = envi.ak;
   var ott = null;
-
-  var generated_key_hash = null;
 
   var crypto = require("crypto");
   var fake_mac = null;
@@ -27,16 +24,12 @@ describe("Device", function() {
                hexa.charAt(5);
   });
 
-  // TODO: FIXME: owner is not being loaded from _envi.json in certain circumstances
-
   var JRS = {
     mac: "11:11:11:11:11:11",
     firmware: "DeviceSpec.js",
     version: "1.0.0",
-    checksum: "xevim",
-    push: "forget",
-    alias: "virtual-test-device-1-delete",
-    owner: owner,
+    alias: "test-device-1-first",
+    owner: "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c",
     platform: "arduino",
     udid: "d6ff2bb0-df34-11e7-b351-eb37822aa172"
   };
@@ -48,23 +41,27 @@ describe("Device", function() {
     mac: fake_mac,
     firmware: "DeviceSpec.js",
     version: "1.0.0",
-    checksum: "alevim",
-    push: "forget",
-    alias: "virtual-test-device-2-static",
-    owner: owner,
+    alias: "test-device-2-deleteme",
+    owner: "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c",
     platform: "arduino",
     udid: null
   };
 
-  //console.log("• DeviceSpec.js: Using test API_KEY: " + apikey);
-  //console.log("• DeviceSpec.js: Using request: " + JSON.stringify(JRS));
+  var JRS3 = {
+    mac: "33:33:33:33:33:33",
+    firmware: "TransferSpec.js",
+    version: "1.0.0",
+    alias: "test-device-2-transfer",
+    owner: "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c",
+    platform: "arduino",
+    udid: "d6ff2bb0-df34-11e7-b351-eb37822aa173"
+  };
 
   /** TODO: Only when the sample-key has not been previously added by ApikeySpec */
   //create: function(owner, apikey_alias, callback)
-  it("API keys are required to do this on new instance", function(done) {    
+  it("(01) API keys are required to do this on new instance", function(done) {    
     APIKey.create( owner, "sample-key", function(success, object) {
       expect(success).to.be.true;
-      console.log("Key object: ", object);
       expect(object).to.be.an('array');
       if (success) {
         apikey = object[0].hash;
@@ -75,7 +72,7 @@ describe("Device", function() {
     });
   }, 5000);
 
-  it("should be able to register itself.", function(done) {
+  it("(02) should be able to register itself.", function(done) {
     let ws = {};
     device.register(
       {}, /* req */
@@ -90,28 +87,21 @@ describe("Device", function() {
             return;
           }
         }
-        console.log("• DeviceSpec.js: Registration result(1): ", {response});
-        JRS2.udid = response.registration.udid;
+        JRS.udid = response.registration.udid;
         expect(success).to.be.true;
-        expect(JRS2.udid).to.be.a('string');
-        console.log("• DeviceSpec.js: Received UDID: " + JRS2.udid);
+        expect(JRS.udid).to.be.a('string');
+        console.log("• DeviceSpec.js: Received UDID: " + JRS.udid);
         done();
       });
   }, 15000); // register
 
 
-  it("should be able to change its alias.", function(done) {
+  it("(03) should be able to change its alias.", function(done) {
     var changes = {
       alias: Date().toString(),
-      udid: udid
+      udid: JRS.udid // this device should not be deleted
     };
-    device.edit(owner, changes, function(success, response) {
-      if (success === false) {
-        console.log("alias edit error reason: ", response);
-      } else {
-        // console.log("• DeviceSpec.js: Editing result: ", { response });
-      }
-
+    device.edit(owner, changes, (success, response) => {
       expect(success).to.be.true;
       expect(response).to.be.an('object');
       done();
@@ -119,7 +109,7 @@ describe("Device", function() {
   }, 5000);
 
 
-  it("should receive different response for registered device", function(done) {
+  it("(04) should receive different response for registered device", function(done) {
       device.register(
         {}, /* req */
         JRS,
@@ -137,34 +127,35 @@ describe("Device", function() {
               return;
             }
           }
-          expect(success).to.be.true;
+          expect(success).to.be.true; // actually false, innit?
           done();
         });
     }, 5000);
 
-  it("should be able to store/fetch OTT request", function(done) {
-    device.storeOTT(JSON.stringify(JRS2), function(success, response) {
-      console.log("• OTT Response: " , {response});
+  it("(05) should be able to store/fetch OTT request", function(done) {
+    device.storeOTT(
+      JRS, 
+      function(success, response) {
+      ott = response.ott;
+      expect(success).to.be.true;
       expect(response).to.be.an('object');
       expect(response.ott).to.be.a('string');
-      ott = response.ott;
-
-      device.fetchOTT(ott, function(success, response) {
-        console.log("fetchOTT response:", response);
-        expect(success).to.be.true;
-        expect(response).to.be.an('object');
+      device.fetchOTT(ott, (err, ott_registration_request) => {
+        console.log("fetchOTT response:", ott_registration_request, err);
+        expect(ott_registration_request).to.be.a('string'); // returns registration request
+        expect(err).to.be.null;
         done();
       });
     });
   }, 15000);
 
-  it("should be able to normalize a MAC address", function(done) {
+  it("(05) should be able to normalize a MAC address", function(done) {
     var nmac = device.normalizedMAC("123456789012");
     expect(nmac).to.be.a('string');
     done();
   }, 5000);
 
-  it("should be able to provide device firmware", function(firmware_done) {
+  it("(07) should be able to provide device firmware", function(firmware_done) {
       // Returns "OK" when current firmware is valid.
       var body = JRS;
       body.udid = udid;
@@ -174,13 +165,11 @@ describe("Device", function() {
         expect(success).to.equal(false);
         expect(response.success).to.equal(false);
         expect(response.status).to.equal("UPDATE_NOT_FOUND");
-        //expect(response).to.equal("device_not_found"); // maybe local only
-        console.log("firmware response: ", {response});
         firmware_done();
       });
     }, 5000);
 
-  it("should be able to register for revocation", function(done) {
+  it("(08) should be able to register for revocation", function(done) {
     expect(JRS2).to.be.an('object');
     expect(apikey).to.be.a('string');
     device.register(
@@ -189,22 +178,38 @@ describe("Device", function() {
       apikey,
       null,
       function(success, response) {
-        console.log("Registration Response: ", response);
         udid = response.registration.udid;
-        JRS.udid = udid;
-        console.log("• DeviceSpec.js: Received UDID: " + udid);
-        expect(success).to.be.true;
+        JRS2.udid = udid;
         expect(udid).to.be.a('string');
-        
         device.revoke(
           JRS2.udid,
           function(_success, _response) {
-            console.log("• DeviceSpec.js: Revocation result: ", { response });
-            expect(_success).to.be.true;
+            expect(_response.success).to.be.true;
+            expect(_response.status).to.equal('device_marked_deleted');
             done();
         });
-
       });
   }, 15000); // register for revocation
+
+
+  it("(09) should be able to register second device for transfer", function(done) {
+    let ws = {};
+    device.register(
+      {}, /* req */
+      JRS3,
+      apikey,
+      ws,
+      function(success, response) {
+        if (success === false) {
+          console.log("registration error response:", response);
+          if (response.indexOf("owner_found_but_no_key") !== -1) {
+            done();
+            return;
+          }
+        }
+        console.log("• Transfer Device UDID = ", response.registration.udid);
+        done();
+      });
+  }, 15000); // register
 
 });

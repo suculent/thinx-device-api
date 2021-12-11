@@ -18,47 +18,55 @@ describe("Devices", function() {
 
   // This UDID is to be deleted at the end of test.
   var TEST_DEVICE = {
-    mac: "00:00:00:00:00:01",
-    firmware: "DeviceSpec.js",
+    mac: "AA:BB:CC:EE:00:03",
+    firmware: "DevicesSpec.js",
     version: "1.0.0",
     checksum: "alevim",
     push: "forget",
     alias: "virtual-test-device-3-dynamic",
-    owner: owner,
-    platform: "arduino",
-    udid: envi.udid
+    owner: "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c",
+    platform: "arduino"
   };
 
-  it("should be able to register test device", function(done) {
-    console.log("Test attempt to register device", {TEST_DEVICE}, "with ak", ak);
+  var TEST_DEVICE4 = {
+    mac: "AA:BB:CC:DD:DD:DD",
+    firmware: "DevicesSpec.js",
+    version: "1.0.0",
+    checksum: "alevim",
+    push: "forget",
+    alias: "virtual-test-device-4-deleteme",
+    owner: "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c",
+    platform: "arduino"
+  };
+
+  it("(01) should be able to register sample device", function(done) {
+    console.log("Sample attempt to register a device", {TEST_DEVICE}, "with ak", ak);
     device.register(
       {}, /* req */
-      { registration: TEST_DEVICE }, /* reg */
+      TEST_DEVICE, /* reg.registration */
       ak,
       {}, /* ws */
       (success, response) => {
         if (success === false) {
-          console.log(response);
+          console.log("(01) registration response", response);
           expect(response).to.be.a('string');
           if (response === "owner_found_but_no_key") {
             done();
             return;
           }
         }
-        console.log("• DeviceSpec.js: Registration result(2): ", {response});
+        TEST_DEVICE.udid = response.registration.udid;
         expect(success).to.be.true;
         expect(TEST_DEVICE).to.be.an('object');
         expect(response.registration).to.be.an('object');
-        TEST_DEVICE.udid = response.registration.udid;
         expect(TEST_DEVICE.udid).to.be.a('string');
-        console.log("• DevicesSpec.js: Received UDID: " + TEST_DEVICE.udid);
         done();
       });
   }, 15000); // register
 
   // All of this expects successful device registration to safely revoke!
   
-  it("should be able to list devices for owner", function(done) {
+  it("(02) should be able to list devices for owner", function(done) {
     devices.list(owner, (success, response) => {
       expect(success).to.be.true;
       expect(response).to.be.a('object');
@@ -67,7 +75,7 @@ describe("Devices", function() {
     });
   }, 5000);
 
-  it("should not be able to list devices for empty owner", function(done) {
+  it("(03) should not be able to list devices for empty owner", function(done) {
     devices.list("", (success, response) => {
       expect(success).to.be.true;
       expect(response).to.be.a('object');
@@ -76,44 +84,59 @@ describe("Devices", function() {
     });
   }, 5000);
 
-  it("should be able to attach a repository to device(s)", function(done) {
+  it("(04) should be able to attach a repository to device(s)", function(done) {
     var body = {
       source_id: source_id,
       udid: TEST_DEVICE.udid
     };
     console.log("Attach request...");
     devices.attach(owner, body, (res, success, response) => {
-      console.log("Attach response:", res, success, response);
+      console.log("Attach results:", res, success, response);
       expect(success).to.be.true;
-      expect(response).to.be.an('object');
-      console.log("Attach response: " , {response});
+      expect(response).to.be.a('string');
       done();
-    });
+    }, {});
   }, 30000);
 
-  it("should be able to detach a repository from device", function(done) {
+  it("(05) should be able to detach a repository from device", function(done) {
     var body = {
       udid: TEST_DEVICE.udid
     };
     devices.detach(owner, body, (res, success, response) => {
       console.log("Detach response: ", res, success, response);
       expect(success).to.be.true;
-      expect(response).to.be.an('object');
+      expect(response).to.be.a('string');
+      expect(response).to.equal('detached');
       done();
     }, {});
   }, 30000);
 
-  // requires specific device registered for this test only (udid "d6ff2bb0-df34-11e7-b351-eb37822aa172")
-  // this device must be created using DeviceSpec.js test
-  it("should be able to revoke devices for owner", function(done) {
-    var body = {
-      udid: TEST_DEVICE.udid
-    };
-    devices.revoke(owner, body, (res, success, response) => {
-      expect(success);
-      console.log("Revoke success: " , {success});
-      console.log("Revoke response: " , {response});
-      done();
-    }, {});
-  }, 30000);
+  it("(06) should be able to revoke another sample device", function(done) {
+    console.log("Sample attempt to register a device", {TEST_DEVICE4}, "with ak", ak);
+    device.register(
+      {}, /* req */
+      TEST_DEVICE4, /* reg.registration */
+      ak,
+      {}, /* ws */
+      (success, response) => {
+        if (success === false) {
+          console.log("(01) registration response", response);
+          expect(response).to.be.a('string');
+          if (response === "owner_found_but_no_key") {
+            done();
+            return;
+          }
+        }
+        TEST_DEVICE4.udid = response.registration.udid;
+        expect(success).to.be.true;
+        var body = {
+          udid: TEST_DEVICE4.udid
+        };
+        devices.revoke(owner, body, (res, _success, _response) => {
+          expect(_success).to.be.true;
+          expect(_response).to.be.a('string');
+          done();
+        }, {});
+      });
+  }, 15000); // register
 });

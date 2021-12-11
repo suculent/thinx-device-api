@@ -12,10 +12,9 @@ describe("Queue", function() {
     let queue_with_cron;
 
     // init
-    it("Should work", function(done) {
+    it("(00) should not fail or hang", function(done) {
         // Should initialize safely without running cron
-        let builder = {};
-        queue_with_cron = new Queue(builder);
+        queue_with_cron = new Queue(null);
         expect(queue_with_cron).to.be.a('object');
 
         // Should be able to run cron when initialized
@@ -26,25 +25,32 @@ describe("Queue", function() {
         queue_with_cron.add(mock_udid_2, mock_source_id);
         queue_with_cron.add(mock_udid_3, mock_source_id);
 
+        console.log("(00) Queue calling findNext...");
+
         // Should be able find next waiting item in queue
-        queue_with_cron.findNext(function(next) {
-            expect(next).to.be.an('object');
+        queue_with_cron.findNext((next) => {
+
+            console.log("(00) queue_with_cron.findNext exited with", next);
 
             // Should be able run next item
-            queue_with_cron.runNext(action);
+            queue_with_cron.runNext(next);
+
+            console.log("(00) Queue calling findNext again async...");
 
             // Should not be able to find anything while queue item is running
-            queue_with_cron.findNext(function(action) {
-                expect(action).to.be.an('object');
+            queue_with_cron.findNext((nextAction) => {
+                // can be null
             });
+                
+            console.log("(00) Queue test calling loop...");
 
             // Should run loop safely
             for (let i = 0; i < 10; i++) {
                 queue_with_cron.loop();
             }
-           
+            
+            console.log("(00) Queue test done.");
             done();
-        });
+        });    
     });
-
 });

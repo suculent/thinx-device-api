@@ -1,5 +1,4 @@
 {
-  "_id": "_design/repl_filters",
   "filters": {
     "no_deleted": "function(doc,req){return !doc._deleted;};",
     "del": "function(doc) {    return !doc._deleted;}"

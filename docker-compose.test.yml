@@ -150,6 +150,8 @@ services:
       - 'ENVIRONMENT=${ENVIRONMENT}'
       - 'COUCHDB_USER=${COUCHDB_USER}'
       - 'COUCHDB_PASSWORD=${COUCHDB_PASSWORD}'
+      - 'ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}'
+      - 'SONAR_TOKEN=${SONAR_TOKEN}'
     ports:
       - '7442:7442'
       - '7443:7443'
@@ -158,6 +160,7 @@ services:
       - '/var/run/docker.sock:/var/run/docker.sock'
       - '/var/lib/docker'
       - '/cache'
+      - '/mnt/data/statistics:/mnt/data/statistics'
     labels:
       - traefik.docker.network=nat
       - traefik.enable=true
