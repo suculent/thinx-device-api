@@ -66,6 +66,9 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin/
   sonar-scanner -Dsonar.login=${SONAR_TOKEN}
   rm -rf spec/test_repositories/**
+  curl -Os https://uploader.codecov.io/latest/linux/codecov 
+  chmod +x codecov
+  ./codecov -t ${CODECOV_TOKEN}
 
   set -e
   

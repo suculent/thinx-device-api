@@ -92,7 +92,7 @@ RUN npm update \
  && npm install .
 
 # Test modules
-RUN npm install nyc mocha jasmine mocha-lcov-reporter coveralls codacy-coverage codecov -g
+RUN npm install nyc mocha jasmine mocha-lcov-reporter coveralls codacy-coverage -g
 
 VOLUME /var/lib/docker
 
