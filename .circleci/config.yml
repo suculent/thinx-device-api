@@ -364,7 +364,7 @@ workflows:
 #        branches:
 #          filters:
 #              only:
-#                - update
+#                - staging
 
       # - test-api-cloud:
       #     context:
@@ -372,18 +372,9 @@ workflows:
       #     filters:
       #       branches:
       #         only:
-      #           - update
+      #           - thinx-swarm
       
       # - test-mosquitto-cloud:
-      #     filters:
-      #       branches:
-      #         only:
-      #           - features/mqtt-auth-plugin
-
-      # - build-api-cloud:
-      #     context:
-      #       - thinx-docker-repo
-      #       - SonarCloud
       #     filters:
       #       branches:
       #         only:
@@ -424,6 +415,17 @@ workflows:
       # - build-worker-cloud:
       #     context:
       #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
+
+      # - build-api-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #       - SonarCloud
+      #     requires:
+      #       - test
       #     filters:
       #       branches:
       #         only:
