@@ -20,7 +20,7 @@ describe("Sources", function() {
     Sources.add(source,
       (success, response) => {
         if (success === false) {
-          console.log("Error adding source: " + response);
+          console.log("(01) Error adding source: ", source, response);
         }
         expect(success).to.be.true; // git fetch must work for this
         expect(response).to.be.an('object');
@@ -51,7 +51,7 @@ describe("Sources", function() {
     Sources.add(source,
       (success, response) => {
         if (success === false) {
-          console.log("Error adding source: " + response);
+          console.log("(03) Error adding source: ", source, response);
         }
         console.log("Source Add Response: " , {response});
         expect(success).to.be.true;

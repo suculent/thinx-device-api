@@ -16,7 +16,7 @@ describe("Statistics", function () {
 
   it("(02) should be able to store results", function () {
     var dirpath = "/mnt/data/statistics/"+owner;
-    var filepath = path + owner + "/" + dateFormat(new Date(), "isoDate") + ".json";
+    var filepath = dirpath + owner + "/" + dateFormat(new Date(), "isoDate") + ".json";
     s.write_stats(dirpath, filepath, {
       "owner-data": "example"
     });
@@ -46,7 +46,7 @@ describe("Statistics", function () {
 
   it("(06) should be able to parse today statistics per owner", function (done) {
     s.today(owner, function (error, path) {
-      console.log("Returned today stats: ", { path });
+      console.log("(06) Returned today stats: ", {error}, { path });
       expect(error).to.be.false;
       expect(body).to.be.a('string'); // link to filename, maybe should return its contents but we don't now from this point
       done();
@@ -55,7 +55,7 @@ describe("Statistics", function () {
 
   it("(07) should be able to parse all statistics per owner", function (done) {
     s.parse(owner, function (success, body) {
-      console.log("Returned all stats: ", {success}, {body});
+      console.log("(07) Returned all stats: ", {success}, {body});
       if (success) {
         expect(body).to.be.an('object');
       }
