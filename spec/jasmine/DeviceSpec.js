@@ -52,6 +52,16 @@ describe("Device", function() {
     udid: null
   };
 
+  var JRS3 = {
+    mac: "33:33:33:33:33:33",
+    firmware: "TransferSpec.js",
+    version: "1.0.0",
+    alias: "test-device-2-transfer",
+    owner: "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c",
+    platform: "arduino",
+    udid: "d6ff2bb0-df34-11e7-b351-eb37822aa173"
+  };
+
   /** TODO: Only when the sample-key has not been previously added by ApikeySpec */
   //create: function(owner, apikey_alias, callback)
   it("(01) API keys are required to do this on new instance", function(done) {    
@@ -185,5 +195,26 @@ describe("Device", function() {
         });
       });
   }, 15000); // register for revocation
+
+
+  it("(09) should be able to register second device for transfer", function(done) {
+    let ws = {};
+    device.register(
+      {}, /* req */
+      JRS3,
+      apikey,
+      ws,
+      function(success, response) {
+        if (success === false) {
+          console.log("registration error response:", response);
+          if (response.indexOf("owner_found_but_no_key") !== -1) {
+            done();
+            return;
+          }
+        }
+        console.log("• Transfer Device UDID = ", response.registration.udid);
+        done();
+      });
+  }, 15000); // register
 
 });
