@@ -1,4 +1,4 @@
-FROM node:current-slim
+FROM node:17-buster-slim
 
 RUN adduser --system --disabled-password --shell /bin/bash thinx
 
@@ -22,6 +22,7 @@ RUN apt-get update -qq && \
     mercurial \
     pigz \
     python \
+    python-pip \
     ssh \
     xfsprogs \
     xz-utils \
