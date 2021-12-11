@@ -19,8 +19,10 @@ describe("Transfer", function () {
     var owner = envi.oid;
 
     // 00-01 Request
-    transfer.request(owner, body, (success, response) => {
-      expect(success).to.be.true;
+    console.log("(00-1) transfer request A", {owner}, {body});
+    transfer.request(owner, body, (t_success, response) => {
+      console.log("(00-1) transfer request 1 response", {t_success}, {response});
+      expect(t_success).to.be.true;
       expect(response).to.be.a('string');
       const tbody = {
         transfer_id: response.replace("dt:", ""),
@@ -28,27 +30,27 @@ describe("Transfer", function () {
       };
 
       // 00-02 Decline
-      transfer.decline(tbody, (_success, _response) => {
-        console.log("(00) transfer decline response: ", {_success}, { _response });
-        expect(_success).to.equal(true);
-        expect(_response).to.be.a('string');
+      transfer.decline(tbody, (d_success, d_response) => {
+        console.log("(00) transfer decline response: ", {d_success}, { d_response });
+        expect(d_success).to.equal(true);
+        expect(d_response).to.be.a('string');
 
         // 00-03 Request
-        console.log("(00-2) transfer request II", {owner}, {body});
-        transfer.request(owner, body, (success2, response2) => {
-          console.log("(00-2) transfer request II response", {success2}, {response2});
-          expect(success2).to.be.true;
-          expect(response2).to.be.a('string'); // transfer_requested      
+        console.log("(00-2) transfer request B", {owner}, {body});
+        transfer.request(owner, body, (b_success, b_response) => {
+          console.log("(00-2) transfer request B response", {b_success}, {b_response});
+          expect(b_success).to.be.true;
+          expect(b_response).to.be.a('string'); // transfer_requested      
 
           // 00-04 Accept
           var transfer_body = {
-            transfer_id: response2,
+            transfer_id: b_response,
             udids: [envi.udid]
           };
           console.log("(00-3) transfer accept III", {transfer_body});
           transfer.accept(transfer_body, (success3, response3) => {
             console.log("(00-3) transfer accept III response: ", {success3}, {response3});
-            // expect(success3).to.be.true; // returns false: transfer_id_not_found
+            expect(success3).to.be.true; // returns false: transfer_id_not_found
             expect(response3).to.be.a('string');
             done();
           });

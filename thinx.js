@@ -324,9 +324,7 @@ function injectDesign(couch, design, file) {
   let design_doc = getDocument(file);
   if (design_doc != null) {
     couch.insert(design_doc, "_design/" + design, (err, body, header) => {
-      if (err) {
-        logCouchError(err, body, header, "init:design:"+JSON.stringify(design));
-      }
+      logCouchError(err, body, header, "init:design:"+JSON.stringify(design)); // returns if no err
     });
   } else {
     console.log("» Design doc injection issue at "+file);
@@ -337,9 +335,7 @@ function injectReplFilter(couch, file) {
   let filter_doc = getDocument(file);
   if (filter_doc !== false) {
     couch.insert(filter_doc, "_design/repl_filters", (err, body, header) => {
-      if (err) {
-        logCouchError(err, body, header, "init:repl:"+JSON.stringify(filter_doc));
-      }
+      logCouchError(err, body, header, "init:repl:"+JSON.stringify(filter_doc)); // returns if no err
     });
   } else {
     console.log("» Filter doc injection issue (no doc) at "+file);

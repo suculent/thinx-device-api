@@ -70,6 +70,7 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   set -e
   
   if [[ -d ./.git ]]; then
+    # currently fails with invalid request parameters, maybe should be replaced by cc-test-reporter
     codecov -t $CODECOV_TOKEN
   fi
 
