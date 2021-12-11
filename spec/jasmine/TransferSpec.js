@@ -23,7 +23,7 @@ describe("Transfer", function () {
       expect(success).to.be.true;
       expect(response).to.be.a('string');
       const tbody = {
-        transfer_id: response,
+        transfer_id: response.replace("dt:", ""),
         udids: [envi.udid]
       };
 
@@ -34,7 +34,7 @@ describe("Transfer", function () {
         expect(_response).to.be.a('string');
 
         // 00-03 Request
-        console.log("(00) transfer request II", {owner}, {body});
+        console.log("(00-2) transfer request II", {owner}, {body});
         transfer.request(owner, body, (success2, response2) => {
           console.log("(00-2) transfer request II response", {success2}, {response2});
           expect(success2).to.be.true;
@@ -45,9 +45,9 @@ describe("Transfer", function () {
             transfer_id: response2,
             udids: [envi.udid]
           };
-          console.log("(00) transfer accept III", {transfer_body});
+          console.log("(00-3) transfer accept III", {transfer_body});
           transfer.accept(transfer_body, (success3, response3) => {
-            console.log("(00-2) transfer accept III response: ", {success3}, {response3});
+            console.log("(00-3) transfer accept III response: ", {success3}, {response3});
             // expect(success3).to.be.true; // returns false: transfer_id_not_found
             expect(response3).to.be.a('string');
             done();
