@@ -24,8 +24,8 @@ describe("Messenger", function() {
   it("should be able to initialize on its own", function(done) {
     const mock_socket = {};
     messenger.initWithOwner(test_owner, mock_socket, (success, status) => {
+      console.log("messenger initialized: ", { success: success, status: status });
       expect(success).to.be.true;
-      console.log("devices: ", { success: success, status: status });
       done();
     });
   }, 5000);
