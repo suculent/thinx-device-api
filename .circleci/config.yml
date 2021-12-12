@@ -364,16 +364,16 @@ workflows:
 
     jobs:
 
-      - test:
-          context:
-              - dockerhub
-              - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - staging
-                - thinx-swarm
-                - master
+      # - test:
+      #     context:
+      #         - dockerhub
+      #         - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - staging
+      #           - thinx-swarm
+      #           - master
 
       # - test-api-cloud:
       #     context:
@@ -397,44 +397,44 @@ workflows:
               only:
                 - thinx-swarm
 
-      - build-mosquitto-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
+      # - build-mosquitto-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
 
-      - build-redis-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
+      # - build-redis-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
 
-      - build-transformer-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
+      # - build-transformer-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
 
-      - build-worker-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
+      # - build-worker-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
 
       - build-api-cloud:
           context:
             - thinx-docker-repo
             - SonarCloud
-          requires:
-            - test
+#          requires:
+#            - test
           filters:
             branches:
               only:
