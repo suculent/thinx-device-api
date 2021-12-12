@@ -308,6 +308,10 @@ function logCouchError(err, body, header, tag) {
     if (err.toString().indexOf("conflict") === -1) {
       console.log("[error] Couch Init error: ", err, body, header, tag);
     }
+    if (err.toString().indexOf("ENOTFOUND") !== -1) {
+      console.log("Critical DB integration error, exiting.");
+      process.exit(1);
+    }
   } else {
     return;
   }
