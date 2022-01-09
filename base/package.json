@@ -59,7 +59,7 @@
     "mqtt": "^4.2.8",
     "nano": "^9.0.4",
     "nocache": "^3.0.1",
-    "node-forge": "^0.10.0",
+    "node-forge": "^1.0.0",
     "node-schedule": "^2.0.0",
     "npm": "^7.0.0",
     "npm-auto-version": "^1.0.0",
