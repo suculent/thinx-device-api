@@ -1,6 +1,6 @@
-# ./update.sh
-
 FROM suculent/thinx-base-image:latest
+
+LABEL maintainer="Matej Sychra <suculent@me.com>"
 
 ARG ROLLBAR_ENVIRONMENT
 ARG THINX_HOSTNAME

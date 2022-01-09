@@ -1,5 +1,7 @@
 FROM node:17-buster-slim
 
+LABEL maintainer="Matej Sychra <suculent@me.com>"
+
 RUN adduser --system --disabled-password --shell /bin/bash thinx
 
 # WHY? See blame.
