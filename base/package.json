@@ -65,7 +65,7 @@
     "npm-auto-version": "^1.0.0",
     "parse-date": "^1.1.0",
     "path": "^0.12.7",
-    "qs": "6.10.1",
+    "qs": "6.10.2",
     "querystring": "^0.2.0",
     "redis": "^3.1.1",
     "request": "^2.88.2",
