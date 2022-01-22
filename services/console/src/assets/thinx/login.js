@@ -51,7 +51,7 @@ var Login = function() {
         var data = {
           username: $('input[name=username]').val(),
           password: $('input[name=password]').val(),
-          remember: $('input[name=remember]').val()
+          remember: false
         };
 
         $.ajax({
@@ -59,9 +59,10 @@ var Login = function() {
           xhrFields: {
             withCredentials: urlBase.indexOf("localhost") !== -1 ? false : true
           },
-          data: data,
+          data: JSON.stringify(data),
           type: 'POST',
           datatype: 'json',
+          contentType: 'application/json',
           success: function(data, status, xhr) {
             console.log('-- login response --');
             var response = JSON.parse(data);

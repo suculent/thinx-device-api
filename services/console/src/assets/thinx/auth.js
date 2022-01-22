@@ -53,9 +53,10 @@ var Auth = function() {
 
           $.ajax({
             url: urlBase + '/gdpr',
-            data: data,
+            data: JSON.stringify(data),
             type: 'POST',
             datatype: 'json',
+            contentType: 'application/json',
             success: function(data) {
               console.log('--gdpr accept request success--');
 
@@ -113,9 +114,10 @@ var Auth = function() {
 
       $.ajax({
         url: urlBase + '/gdpr',
-        data: data,
+        data: JSON.stringify(data),
         type: 'POST',
         datatype: 'json',
+        contentType: 'application/json',
         success: function(data) {
           console.log('--gdpr reject request success--');
 
@@ -168,7 +170,7 @@ var Auth = function() {
         url: urlBase + '/login',
         type: 'POST',
         data: { token: $.getQuery('t') },
-        dataType: 'json',
+        datatype: 'json',
         xhrFields: {
           withCredentials: urlBase.indexOf("localhost") !== -1 ? false : true
         }
