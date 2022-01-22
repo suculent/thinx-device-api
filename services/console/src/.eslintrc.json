@@ -19,6 +19,15 @@
     },
     "rules": {
         "no-console": "off",
-        "no-unused-vars": "off"
+        "no-unused-vars": "off",
+        "quotes": "off",
+        "linebreak-style": "off",
+        "space-in-parens": "off",
+        "computed-property-spacing": "off",
+        "space-before-function-paren": "off",
+        "lines-around-comment": "off",
+        "object-curly-spacing": "off",
+        "array-bracket-spacing": "off",
+        "no-trailing-spaces": "off"
     }
 }

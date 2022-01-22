@@ -25,6 +25,7 @@ angular.module('RTM').controller('EditorController', ['$rootScope', '$scope', 's
     // check for transformer with same utid
     if (!$rootScope.getTransformerByUtid($scope.overlayEditor.utid)) {
       console.log('-- creating transformer ' + $scope.overlayEditor.utid + '--');
+      // eslint-disable-next-line  no-undef
       $rootScope.profile.info.transformers.push({
         'utid': $scope.overlayEditor.utid,
         'alias': $scope.overlayEditor.alias,
@@ -42,9 +43,10 @@ angular.module('RTM').controller('EditorController', ['$rootScope', '$scope', 's
   };
 
   $scope.resetEditor = function(utid) {
-    if (typeof(utid)=== "undefined") {
+    if (typeof(utid) === "undefined") {
       $scope.overlayEditor.utid = generateUtid();
       $scope.overlayEditor.alias = "<my-transformer-name>";
+      // eslint-disable-next-line  no-undef
       $scope.overlayEditor.body = base64converter('decode', $rootScope.thinx.defaults.defaultTransformerBodyBase64);
     } else {
       $scope.overlayEditor.utid = utid;

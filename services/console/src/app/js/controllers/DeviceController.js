@@ -312,6 +312,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
   $scope.updateTransformer = function(utid) {
     if ($rootScope.getRawTransformerByUtid(utid).changed == true) {
       console.log('-- updating transformer body ' + utid + '--');
+      // eslint-disable-next-line  no-undef
       $rootScope.getTransformerByUtid(utid).body = base64converter('encode', $rootScope.getRawTransformerByUtid(utid).body);
       $rootScope.getTransformerByUtid(utid).alias = $rootScope.getRawTransformerByUtid(utid).alias;
       $rootScope.getRawTransformerByUtid(utid).changed = false;
@@ -355,6 +356,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     if (typeof(transformer.value.utid) !== 'undefined') {
       // if transformer dowsnt exist yet, create it
       if (!$rootScope.getTransformerByUtid(transformer.value.utid)) {
+        // eslint-disable-next-line  no-undef
         $rootScope.profile.info.transformers.push({
           'utid': transformer.value.utid,
           'alias': transformer.value.alias,
@@ -378,6 +380,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
 
   $scope.tagTransform = function (transformerAlias) {
     console.log('transformer alias search:', transformerAlias);
+    // eslint-disable-next-line  no-undef
     var newTransformer = {
       value: {
         utid: generateUtid(),
@@ -403,7 +406,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
   $scope.build = function(deviceUdid, sourceId) {
     console.log('-- building firmware for ' + deviceUdid + '/' + $rootScope.getSourceById(sourceId).alias + ' --');
 
-    if (typeof($rootScope.meta.deviceBuilds[deviceUdid])=== "undefined") {
+    if (typeof($rootScope.meta.deviceBuilds[deviceUdid]) === "undefined") {
       $rootScope.meta.deviceBuilds[deviceUdid] = [];
     }
 

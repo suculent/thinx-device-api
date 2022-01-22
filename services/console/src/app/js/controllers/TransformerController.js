@@ -55,6 +55,7 @@ angular.module('RTM').controller('TransformerController', ['$rootScope', '$scope
     // check for transformer with same utid
     if (!$rootScope.getTransformerByUtid($scope.transformerForm.utid)) {
       console.log('-- creating transformer ' + utid + '--');
+      // eslint-disable-next-line  no-undef
       $rootScope.profile.info.transformers.push({
         'utid': $scope.transformerForm.utid,
         'alias': $scope.transformerForm.alias,
@@ -118,7 +119,7 @@ angular.module('RTM').controller('TransformerController', ['$rootScope', '$scope
   }
 
   $scope.resetModal = function(utid) {
-    if (typeof(utid)=== "undefined") {
+    if (typeof(utid) === "undefined") {
       $scope.transformerForm.utid = generateUtid();
       $scope.transformerForm.alias = null;
       $scope.transformerForm.body = null;
