@@ -474,7 +474,8 @@ function init($rootScope, $scope) {
         response_type: response_type,
         response: response
       }),
-      dataType: 'json'
+      dataType: 'json',
+      contentType: 'application/json'
     });
   }
 
@@ -582,7 +583,6 @@ function init($rootScope, $scope) {
   function updateAuditHistory(data) {
     var response = JSON.parse(data);
     console.log('/////// auditHistory response:');
-    //console.log(response);
 
     if (typeof(response.success) !== "undefined" && response.success) {
       $rootScope.auditlog = response.logs;
@@ -637,7 +637,6 @@ function init($rootScope, $scope) {
 
     console.log('//////// envelope:');
     console.log(data);
-    //console.log($rootScope.apikeys);
     console.log('refreshing view...');
     $rootScope.$apply()
   }
@@ -778,7 +777,7 @@ function deviceList() {
 }
 
 function submitDevice(deviceForm) {
-  var data = JSON.stringify({
+  var data = {
     changes: {
       udid: deviceForm.udid,
       alias: deviceForm.alias,
@@ -793,12 +792,13 @@ function submitDevice(deviceForm) {
       timezone_abbr: deviceForm.timezone_abbr,
       timezone_offset: deviceForm.timezone_offset
     }
-  });
+  };
   return $.ajax({
     url: urlBase + '/device/edit',
     type: 'POST',
-    data: data,
-    dataType: 'json'
+    data: JSON.stringify(data),
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -807,7 +807,8 @@ function revokeDevices(deviceUdids) {
     url: urlBase + '/device/revoke',
     type: 'POST',
     data: JSON.stringify({ udids: deviceUdids }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -821,7 +822,8 @@ function transferDevices(transferForm, deviceUdids) {
       mig_sources: transferForm.mig_sources,
       mig_apikeys: transferForm.mig_apikeys
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -840,7 +842,8 @@ function pushConfig(configForm, deviceUdids) {
       udids: deviceUdids,
       reset_devices: configForm.resetDevices
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -852,7 +855,8 @@ function attachSource(sourceId, deviceUdid) {
       source_id: sourceId,
       udid: deviceUdid
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -863,7 +867,8 @@ function detachSource(deviceUdid) {
     data: JSON.stringify({
       udid: deviceUdid
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -874,7 +879,8 @@ function getLatestFirmwareEnvelope(deviceUdid) {
     data: JSON.stringify({
       udid: deviceUdid
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -911,6 +917,7 @@ function submitSystemMessage(messageForm) {
       message: messageForm.text
     }),
     dataType: 'json',
+    contentType: 'application/json',
     success: function() {
       console.log('SUCCESS');
     },
@@ -929,7 +936,8 @@ function build(deviceUdid, sourceId) {
       source_id: sourceId,
       dryrun: false
     }}),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -952,7 +960,8 @@ function createApikey(apikeyAlias) {
     data: JSON.stringify({
       alias: apikeyAlias
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -961,7 +970,8 @@ function revokeApikeys(fingerprints) {
     url: urlBase + '/user/apikey/revoke',
     type: 'POST',
     data: JSON.stringify({ fingerprints: fingerprints }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -986,7 +996,8 @@ function addRsakey(rsakeyAlias, rsakeyValue) {
       alias: rsakeyAlias,
       key: rsakeyValue
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -995,7 +1006,8 @@ function revokeRsakeys(fingerprints) {
     url: urlBase + '/user/rsakey/revoke',
     type: 'POST',
     data: JSON.stringify({ fingerprints: fingerprints }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -1026,7 +1038,8 @@ function revokeDeploykeys(filenames) {
     url: urlBase + '/user/rsakey/revoke',
     type: 'POST',
     data: JSON.stringify({ filenames: filenames }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -1051,7 +1064,8 @@ function createChannel(mesh_id, alias, owner_id) {
       mesh_id: mesh_id,
       alias: alias
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -1063,7 +1077,8 @@ function revokeChannels(owner_id, mesh_ids) {
       owner_id: owner_id,
       mesh_ids: mesh_ids 
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -1075,7 +1090,8 @@ function attachChannel(meshId, deviceUdid) {
       mesh_id: meshId,
       udid: deviceUdid
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -1087,7 +1103,8 @@ function detachChannel(meshId, deviceUdid) {
       mesh_id: meshId,
       udid: deviceUdid
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -1111,7 +1128,8 @@ function addEnviro(enviroName, enviroValue) {
       key: enviroName,
       value: enviroValue
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -1120,7 +1138,8 @@ function revokeEnviros(enviroNames) {
     url: urlBase + '/user/env/revoke',
     type: 'POST',
     data: JSON.stringify({ names: enviroNames }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -1146,7 +1165,8 @@ function addSource(url, alias, branch, circleToken) {
       branch: branch,
       circleToken: circleToken
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -1155,7 +1175,8 @@ function revokeSources(sourceIds) {
     url: urlBase + '/user/source/revoke',
     type: 'POST',
     data: JSON.stringify({ source_ids: sourceIds }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -1194,7 +1215,8 @@ function submitProfile(profile) {
     data: JSON.stringify({
       info: info
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -1205,7 +1227,8 @@ function submitProfileAvatar(avatar) {
     data: JSON.stringify({
       avatar: avatar
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -1221,7 +1244,8 @@ function submitProfileChanges(changes, profile) {
     data: JSON.stringify({
       info: info
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -1233,7 +1257,8 @@ function userDelete(deleteForm) {
       username: deleteForm.username,
       owner: deleteForm.owner
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -1242,7 +1267,8 @@ function profileDownload() {
     url: urlBase + '/../gdpr/transfer',
     type: 'POST',
     data: {},
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -1267,7 +1293,8 @@ function getBuildLog(buildId) {
     data: JSON.stringify({
       build_id: buildId
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -1278,7 +1305,8 @@ function tailBuildLog(buildId) {
     data: JSON.stringify({
       build_id: buildId
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 
@@ -1289,7 +1317,8 @@ function checkToken(token) {
     data: JSON.stringify({
       token: token
     }),
-    dataType: 'json'
+    dataType: 'json',
+    contentType: 'application/json'
   });
 }
 

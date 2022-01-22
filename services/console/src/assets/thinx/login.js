@@ -61,7 +61,7 @@ var Login = function() {
           },
           data: JSON.stringify(data),
           type: 'POST',
-          datatype: 'json',
+          dataType: 'json',
           contentType: 'application/json',
           success: function(data, status, xhr) {
             console.log('-- login response --');
@@ -165,7 +165,7 @@ var Login = function() {
           url: urlBase + '/user/password/reset',
           data: { email: $('.forget-form input[name=email]').val() }, //parameters go here in object literal form
           type: 'POST',
-          datatype: 'json',
+          dataType: 'json',
           success: function(data) {
             console.log('--password reset request success--');
 
@@ -295,7 +295,7 @@ var Login = function() {
           }, //parameters go here in object literal form
 
           type: 'POST',
-          datatype: 'json',
+          dataType: 'json',
           success: function(data) {
             console.log('--user create response--');
 

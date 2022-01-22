@@ -72,9 +72,10 @@ var PasswordReset = function() {
 
         $.ajax({
           url: urlBase + '/user/password/set',
-          data: data,
+          data: JSON.stringify(data),
           type: 'POST',
-          datatype: 'json',
+          dataType: 'json',
+          contentType: 'application/json',
           success: function(data) {
             console.log('--password set request success--');
 
