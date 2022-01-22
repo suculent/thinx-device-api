@@ -28,6 +28,8 @@
         "lines-around-comment": "off",
         "object-curly-spacing": "off",
         "array-bracket-spacing": "off",
-        "no-trailing-spaces": "off"
+        "no-trailing-spaces": "off",
+        "max-len": "off",
+        "camelcase": "off"
     }
 }
