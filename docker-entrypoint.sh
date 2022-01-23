@@ -29,7 +29,7 @@ export DOCKER_HOST="tcp://docker:2375"
 export DOCKER_HOST="unix:///var/run/docker.sock"
 
 echo "[thinx-entrypoint] Adding host checking exception for github.com... TODO: fix missing DNS record to github.com?"
-ssh -tt -o "StrictHostKeyChecking=no" git@github.com
+ssh -T -o "StrictHostKeyChecking=no" git@github.com
 
 if [[ ! -z $ROLLBAR_ACCESS_TOKEN ]]; then
   LOCAL_USERNAME=$(whoami)
