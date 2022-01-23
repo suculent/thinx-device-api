@@ -30,6 +30,7 @@
         "max-len": "off",
         "camelcase": "off",
         "eqeqeq": "off",
-        "dot-notation": "off"
+        "dot-notation": "off",
+        "no-useless-escape": "off"
     }
 }
