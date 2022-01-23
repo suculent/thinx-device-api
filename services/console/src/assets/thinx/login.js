@@ -86,9 +86,9 @@ var Login = ( function() {
               }
             }
           },
-          error: function( data, status, xhr ) {
-            console.log( "--login or server failure--", data );
-            var response = data.responseJSON;
+          error: function( xdata, status, xhr ) {
+            console.log( "--login or server failure--", xdata );
+            var response = xdata.responseJSON;
             if ( response.status == "unauthorized" ) {
               $( "#login-error" ).text( "Username or password does not match" );
             } else if ( response.status == "user_not_found" ) {
@@ -101,7 +101,7 @@ var Login = ( function() {
               $( "#login-error" ).text( "Connection failed" );
             }
             $( "#login-error" ).show();
-            console.log( data );
+            console.log( xdata );
           }
         } );
       }
