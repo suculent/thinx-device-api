@@ -199,7 +199,7 @@ function init( $rootScope, $scope ) {
         if ( typeof( value.platform ) === "undefined" ) {
           value.platform = "unknown";
         }
-        value.base_platform = value.platform.split( ":" )[0];
+        value.base_platform = value.platform.split( ":" )[ 0 ];
         $rootScope.sources.push( value );
       } );
 
@@ -333,8 +333,8 @@ function init( $rootScope, $scope ) {
     $rootScope.devices = [];
     var devices = JSON.parse( data );
     for ( var d in devices.devices ) {
-      devices.devices[d].base_platform = devices.devices[d].platform.split( ":" )[0];
-      $rootScope.devices.push( devices.devices[d] );
+      devices.devices[ d ].base_platform = devices.devices[ d ].platform.split( ":" )[ 0 ];
+      $rootScope.devices.push( devices.devices[ d ] );
     }
     updateTags();
 
@@ -367,42 +367,42 @@ function init( $rootScope, $scope ) {
     var deviceTimeline = [];
 
     for ( var i in $rootScope.devices ) {
-      $rootScope.devices[i].lastseen = moment( $rootScope.devices[i].lastupdate ).fromNow( true );
+      $rootScope.devices[ i ].lastseen = moment( $rootScope.devices[ i ].lastupdate ).fromNow( true );
 
       // iterate all device transformers and put them to meta container organised by utid
-      if ( typeof( $rootScope.devices[i].transformers ) !== "undefined" && $rootScope.devices[i].transformers.length > 0 ) {
-        for ( var transformerIndex in $rootScope.devices[i].transformers ) {
-          var utid = $rootScope.devices[i].transformers[transformerIndex];
-          if ( typeof( $rootScope.meta.transformerDevices[utid] ) === "undefined" ) {
-            $rootScope.meta.transformerDevices[utid] = [];
+      if ( typeof( $rootScope.devices[ i ].transformers ) !== "undefined" && $rootScope.devices[ i ].transformers.length > 0 ) {
+        for ( var transformerIndex in $rootScope.devices[ i ].transformers ) {
+          var utid = $rootScope.devices[ i ].transformers[ transformerIndex ];
+          if ( typeof( $rootScope.meta.transformerDevices[ utid ] ) === "undefined" ) {
+            $rootScope.meta.transformerDevices[ utid ] = [];
           }
-          $rootScope.meta.transformerDevices[utid].push( $rootScope.devices[i].udid );
+          $rootScope.meta.transformerDevices[ utid ].push( $rootScope.devices[ i ].udid );
         }
       }
 
       // copy records to dashboard timeline
       deviceTimeline.push( {
-        date: moment( $rootScope.devices[i].lastupdate ).format( "YYYY-MM-DD" ),
-        alias: $rootScope.devices[i].alias,
-        icon: $rootScope.devices[i].icon,
-        udid: $rootScope.devices[i].udid,
-        category: $rootScope.devices[i].category
+        date: moment( $rootScope.devices[ i ].lastupdate ).format( "YYYY-MM-DD" ),
+        alias: $rootScope.devices[ i ].alias,
+        icon: $rootScope.devices[ i ].icon,
+        udid: $rootScope.devices[ i ].udid,
+        category: $rootScope.devices[ i ].category
       } );
 
       // generate list index of devices by attached apikey -> meta.apikeys
-      if ( $rootScope.getApikeyByHash( $rootScope.devices[i].keyhash ) != false ) {
-        if ( typeof( $rootScope.meta.apikeys[$rootScope.devices[i].keyhash] ) == "undefined" ) {
-          $rootScope.meta.apikeys[$rootScope.devices[i].keyhash] = [];
+      if ( $rootScope.getApikeyByHash( $rootScope.devices[ i ].keyhash ) != false ) {
+        if ( typeof( $rootScope.meta.apikeys[ $rootScope.devices[ i ].keyhash ] ) == "undefined" ) {
+          $rootScope.meta.apikeys[ $rootScope.devices[ i ].keyhash ] = [];
         }
-        $rootScope.meta.apikeys[$rootScope.devices[i].keyhash].push( $rootScope.devices[i] );
+        $rootScope.meta.apikeys[ $rootScope.devices[ i ].keyhash ].push( $rootScope.devices[ i ] );
       }
 
       // generate list index of devices by attached source -> meta.sources
-      if ( $rootScope.getSourceById( $rootScope.devices[i].source ) != false ) {
-        if ( typeof( $rootScope.meta.sources[$rootScope.devices[i].source] ) == "undefined" ) {
-          $rootScope.meta.sources[$rootScope.devices[i].source] = [];
+      if ( $rootScope.getSourceById( $rootScope.devices[ i ].source ) != false ) {
+        if ( typeof( $rootScope.meta.sources[ $rootScope.devices[ i ].source ] ) == "undefined" ) {
+          $rootScope.meta.sources[ $rootScope.devices[ i ].source ] = [];
         }
-        $rootScope.meta.sources[$rootScope.devices[i].source].push( $rootScope.devices[i] );
+        $rootScope.meta.sources[ $rootScope.devices[ i ].source ].push( $rootScope.devices[ i ] );
       }
 
     }
@@ -414,8 +414,8 @@ function init( $rootScope, $scope ) {
     console.log( "//////// deviceTimeline" );
     //console.log(deviceTimeline);
 
-    $rootScope.stats.timeline.MIN = deviceTimeline[0]["date"];
-    $rootScope.stats.timeline.MAX = deviceTimeline[deviceTimeline.length - 1]["date"];
+    $rootScope.stats.timeline.MIN = deviceTimeline[ 0 ][ "date" ];
+    $rootScope.stats.timeline.MAX = deviceTimeline[ deviceTimeline.length - 1 ][ "date" ];
     $rootScope.stats.timeline.COUNT = deviceTimeline.length - 1;
     $rootScope.stats.timeline.SPAN = moment( $rootScope.stats.timeline.MAX ).diff( moment( $rootScope.stats.timeline.MIN ), "days" );
     $rootScope.stats.timeline.ERRORS = [];
@@ -431,15 +431,15 @@ function init( $rootScope, $scope ) {
     console.log( "profile tags", $rootScope.profile.info.tags );
 
     for ( let index in $rootScope.devices ) {
-      var tagsArray = $rootScope.devices[index].tags;
+      var tagsArray = $rootScope.devices[ index ].tags;
       // console.log("device tags", tagsArray);
       if ( tagsArray !== null ) {
         for ( var tagIndex in tagsArray ) {
-          if ( $rootScope.profile.info.tags.includes( tagsArray[tagIndex] ) ) {
+          if ( $rootScope.profile.info.tags.includes( tagsArray[ tagIndex ] ) ) {
             // duplicate tag found, skipping
-            console.log( "duplicate tag found, skipping", tagsArray[tagIndex] );
+            console.log( "duplicate tag found, skipping", tagsArray[ tagIndex ] );
           } else {
-            $rootScope.profile.info.tags.push( tagsArray[tagIndex] );
+            $rootScope.profile.info.tags.push( tagsArray[ tagIndex ] );
           }
         }
       }
@@ -519,15 +519,15 @@ function init( $rootScope, $scope ) {
           }
           if ( typeof( profile.info.goals ) === "undefined" ) {
             console.log( "- goals not defined, retaining current -" );
-            profile.info["goals"] = $rootScope.profile.info.goals;
+            profile.info[ "goals" ] = $rootScope.profile.info.goals;
           }
           if ( typeof( profile.info.tags ) === "undefined" ) {
             console.log( "- tags not defined, creating -" );
-            profile.info["tags"] = $rootScope.profile.info.tags;
+            profile.info[ "tags" ] = $rootScope.profile.info.tags;
           }
           if ( typeof( profile.info.transformers ) === "undefined" ) {
             console.log( "- transformers not defined, creating -" );
-            profile.info["transformers"] = $rootScope.profile.info.transformers;
+            profile.info[ "transformers" ] = $rootScope.profile.info.transformers;
           }
           $rootScope.profile = profile;
 
@@ -555,12 +555,12 @@ function init( $rootScope, $scope ) {
     // decode all transformers
     console.log( "Decoding Transformers..." );
     for ( let index in transformers ) {
-      $rootScope.meta.transformers[transformers[index].utid] =
+      $rootScope.meta.transformers[ transformers[ index ].utid ] =
       {
-        "utid": transformers[index].utid,
-        "alias": transformers[index].alias,
+        "utid": transformers[ index ].utid,
+        "alias": transformers[ index ].alias,
         // eslint-disable-next-line  no-undef
-        "body": base64converter( "decode", transformers[index].body ),
+        "body": base64converter( "decode", transformers[ index ].body ),
         "changed": false
       };
     }
@@ -591,18 +591,18 @@ function init( $rootScope, $scope ) {
       var totalErrors = 0;
       var errorTimeline = {};
       for ( let index in $rootScope.auditlog ) {
-        if ( typeof( $rootScope.auditlog[index].message ) !== "undefined" ) {
-          if ( $rootScope.auditlog[index].message.match( warningStr ) !== null ) {
-            $rootScope.auditlog[index].flags.push( "warning" );
+        if ( typeof( $rootScope.auditlog[ index ].message ) !== "undefined" ) {
+          if ( $rootScope.auditlog[ index ].message.match( warningStr ) !== null ) {
+            $rootScope.auditlog[ index ].flags.push( "warning" );
           }
-          if ( $rootScope.auditlog[index].message.match( dangerStr ) !== null || $rootScope.auditlog[index].message.match( invalidStr ) !== null ) {
-            $rootScope.auditlog[index].flags.push( "danger" );
+          if ( $rootScope.auditlog[ index ].message.match( dangerStr ) !== null || $rootScope.auditlog[ index ].message.match( invalidStr ) !== null ) {
+            $rootScope.auditlog[ index ].flags.push( "danger" );
 
-            var errorDate = moment( $rootScope.auditlog[index].date ).format( "YYYY-MM-DD" );
-            if ( typeof( errorTimeline[errorDate] ) == "undefined" ) {
-              errorTimeline[errorDate] = 1;
+            var errorDate = moment( $rootScope.auditlog[ index ].date ).format( "YYYY-MM-DD" );
+            if ( typeof( errorTimeline[ errorDate ] ) == "undefined" ) {
+              errorTimeline[ errorDate ] = 1;
             } else {
-              errorTimeline[errorDate]++;
+              errorTimeline[ errorDate ]++;
             }
             totalErrors++;
           }
@@ -657,11 +657,11 @@ function init( $rootScope, $scope ) {
       for ( var prop in days ) {
         // console.log(prop, days[prop]);
         var propTotal = 0;
-        for ( var i = 0; i < days[prop].length; i++ ) {
-          propTotal = propTotal + parseInt( days[prop][i] );
+        for ( var i = 0; i < days[ prop ].length; i++ ) {
+          propTotal = propTotal + parseInt( days[ prop ][ i ] );
         }
-        $rootScope.stats.total[prop] = propTotal;
-        $rootScope.stats.daily[prop] = days[prop];
+        $rootScope.stats.total[ prop ] = propTotal;
+        $rootScope.stats.daily[ prop ] = days[ prop ];
       }
     }
   }
@@ -694,26 +694,26 @@ function init( $rootScope, $scope ) {
       console.log( "Grouping Build Entries..." );
       for ( let index in response.builds ) {
         // reset device build history
-        if ( typeof( $rootScope.meta.deviceBuilds[response.builds[index].udid] ) == "undefined" ) {
-          $rootScope.meta.deviceBuilds[response.builds[index].udid] = [];
+        if ( typeof( $rootScope.meta.deviceBuilds[ response.builds[ index ].udid ] ) == "undefined" ) {
+          $rootScope.meta.deviceBuilds[ response.builds[ index ].udid ] = [];
         }
-        $rootScope.meta.deviceBuilds[response.builds[index].udid].push( {
-          "build_id": response.builds[index].build_id,
-          "last_update": response.builds[index].last_update,
-          "timestamp": response.builds[index].timestamp,
-          "start_time": response.builds[index].start_time,
-          "state": response.builds[index].state
+        $rootScope.meta.deviceBuilds[ response.builds[ index ].udid ].push( {
+          "build_id": response.builds[ index ].build_id,
+          "last_update": response.builds[ index ].last_update,
+          "timestamp": response.builds[ index ].timestamp,
+          "start_time": response.builds[ index ].start_time,
+          "state": response.builds[ index ].state
         } );
 
-        if ( typeof( $rootScope.meta.builds[response.builds[index].build_id] ) == "undefined" ) {
-          $rootScope.meta.builds[response.builds[index].build_id] = [];
+        if ( typeof( $rootScope.meta.builds[ response.builds[ index ].build_id ] ) == "undefined" ) {
+          $rootScope.meta.builds[ response.builds[ index ].build_id ] = [];
         }
-        $rootScope.meta.builds[response.builds[index].build_id].push( response.builds[index] );
+        $rootScope.meta.builds[ response.builds[ index ].build_id ].push( response.builds[ index ] );
       }
 
       // sort device build entries by date
       for ( let index in $rootScope.meta.deviceBuilds ) {
-        $rootScope.meta.deviceBuilds[index].sort( sortByLastUpdate );
+        $rootScope.meta.deviceBuilds[ index ].sort( sortByLastUpdate );
       }
 
       console.log( "refreshing view..." );
@@ -828,7 +828,7 @@ function transferDevices( transferForm, deviceUdids ) {
 function pushConfig( configForm, deviceUdids ) {
   var enabledEnviros = [];
   for ( let index in configForm.enviros ) {
-    if ( configForm.enviros[index] ) {
+    if ( configForm.enviros[ index ] ) {
       enabledEnviros.push( index );
     }
   }
@@ -1231,7 +1231,7 @@ function submitProfileAvatar( avatar ) {
 function submitProfileChanges( changes, profile ) {
   var info = {};
   for ( var change in changes ) {
-    info[changes[change]] = profile.info[changes[change]];
+    info[ changes[ change ] ] = profile.info[ changes[ change ] ];
   }
 
   return $.ajax( {

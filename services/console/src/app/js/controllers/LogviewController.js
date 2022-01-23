@@ -55,8 +55,8 @@ angular.module( "RTM" ).controller( "LogviewController", [ "$rootScope", "$scope
             // update currently observed logview
             if ( typeof( $rootScope.modalBuildId ) !== "undefined" ) {
               for ( let i in adapted_data ) {
-                $rootScope.logdata[$rootScope.modalBuildId] = $rootScope.logdata[$rootScope.modalBuildId] +
-                "\n" + adapted_data[i];
+                $rootScope.logdata[ $rootScope.modalBuildId ] = $rootScope.logdata[ $rootScope.modalBuildId ] +
+                "\n" + adapted_data[ i ];
               }
             }
             // unused
@@ -85,8 +85,8 @@ angular.module( "RTM" ).controller( "LogviewController", [ "$rootScope", "$scope
           // update currently observed logview
           if ( typeof( $rootScope.modalBuildId ) !== "undefined" ) {
             for ( let i in adapted_data ) {
-              $rootScope.logdata[$rootScope.modalBuildId] = $rootScope.logdata[$rootScope.modalBuildId] +
-                "\n" + adapted_data[i];
+              $rootScope.logdata[ $rootScope.modalBuildId ] = $rootScope.logdata[ $rootScope.modalBuildId ] +
+                "\n" + adapted_data[ i ];
             }
           }
           // unused
@@ -122,7 +122,7 @@ angular.module( "RTM" ).controller( "LogviewController", [ "$rootScope", "$scope
       }
     };
     // $rootScope.logdata.buffer[$rootScope.modalBuildId] = "";
-    $rootScope.logdata[build_id] = "";
+    $rootScope.logdata[ build_id ] = "";
     $rootScope.modalBuildId = build_id;
     $rootScope.wss.send( JSON.stringify( message ) );
   };
@@ -138,8 +138,8 @@ angular.module( "RTM" ).controller( "LogviewController", [ "$rootScope", "$scope
   $rootScope.hideLogOverlay = function( build_id ) {
     console.log( "--- hiding log overlay --- " );
     $( ".log-view-overlay-conatiner" ).fadeOut();
-    console.log( $rootScope.logdata.watchers[build_id] );
-    clearInterval( $rootScope.logdata.watchers[build_id] );
+    console.log( $rootScope.logdata.watchers[ build_id ] );
+    clearInterval( $rootScope.logdata.watchers[ build_id ] );
   };
 
 
@@ -151,7 +151,7 @@ angular.module( "RTM" ).controller( "LogviewController", [ "$rootScope", "$scope
 
     // start auto refresh
     console.log( "--- starting refresh timer --- " );
-    $rootScope.logdata.watchers[build_id] = setInterval( function() {
+    $rootScope.logdata.watchers[ build_id ] = setInterval( function() {
       console.log( "Refreshing log view..." );
       $rootScope.$digest();
     }, 500 );
@@ -224,7 +224,7 @@ angular.module( "RTM" ).controller( "LogviewController", [ "$rootScope", "$scope
           };
 
           // prepare user metadata for particular device
-          $rootScope.meta.deviceBuilds[msg.udid].push( buildRecord );
+          $rootScope.meta.deviceBuilds[ msg.udid ].push( buildRecord );
           $scope.$apply();
 
           Thinx.deviceList().done( function( data ) {
@@ -248,7 +248,7 @@ angular.module( "RTM" ).controller( "LogviewController", [ "$rootScope", "$scope
 
         // YES/NO
         if ( msg.response_type == "bool" ) {
-          toastr["info"](
+          toastr[ "info" ](
             msg.body + "<br><br>" +
             msg.nid + "<br><br>" +
             "<div><button type=\"button\" id=\"okBtn-" + msg.nid +
@@ -280,7 +280,7 @@ angular.module( "RTM" ).controller( "LogviewController", [ "$rootScope", "$scope
 
         // INPUT string
         if ( msg.response_type == "string" ) {
-          toastr["warning"](
+          toastr[ "warning" ](
             msg.body + "<br><br>" +
             msg.nid + "<br><br>" +
             "<div><input class=\"toastr-input\" name=\"reply-" + msg.nid + "\" value=\"\"/></div><br>" +
@@ -311,7 +311,7 @@ angular.module( "RTM" ).controller( "LogviewController", [ "$rootScope", "$scope
         var msgTitle = "Device Status Update";
 
         // process status message
-        toastr[msg.type](
+        toastr[ msg.type ](
           JSON.stringify( msg.body ),
           msgTitle,
           {
@@ -344,7 +344,7 @@ angular.module( "RTM" ).controller( "LogviewController", [ "$rootScope", "$scope
         // "success"
         // "warning"
 
-        toastr[msg.type](
+        toastr[ msg.type ](
           JSON.stringify( msg.body ),
           msg.title,
           {

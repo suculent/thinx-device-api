@@ -81,7 +81,7 @@ angular.module( "RTM" ).controller( "DashboardController", [ "$rootScope", "$sco
     { prop: "platform", alias: "Platform", icon: "lightbulb-o" },
     { prop: "alias", alias: "Alias", icon: "sort-alpha-asc" }
   ];
-  $scope.list.orderBy = $scope.list.orderOptions[0];
+  $scope.list.orderBy = $scope.list.orderOptions[ 0 ];
   $scope.list.reverse = true;
 
   $scope.list.groupOptions = [
@@ -90,7 +90,7 @@ angular.module( "RTM" ).controller( "DashboardController", [ "$rootScope", "$sco
     { prop: "category", alias: "Category", icon: "sort-alpha-asc" },
     { prop: "icon", alias: "Icon", icon: "sort-alpha-asc" }
   ];
-  $scope.list.groupBy = $scope.list.groupOptions[0];
+  $scope.list.groupBy = $scope.list.groupOptions[ 0 ];
 
   $scope.chart = {};
   $scope.chart.range = 7;
@@ -116,10 +116,10 @@ angular.module( "RTM" ).controller( "DashboardController", [ "$rootScope", "$sco
     //console.log($rootScope.stats.timeline);
     var checkins = {};
     for ( var index in $rootScope.stats.timeline.CHECKINS ) {
-      if ( typeof( checkins[$rootScope.stats.timeline.CHECKINS[index].date] ) == "undefined" ) {
-        checkins[$rootScope.stats.timeline.CHECKINS[index].date] = 1;
+      if ( typeof( checkins[ $rootScope.stats.timeline.CHECKINS[ index ].date ] ) == "undefined" ) {
+        checkins[ $rootScope.stats.timeline.CHECKINS[ index ].date ] = 1;
       } else {
-        checkins[$rootScope.stats.timeline.CHECKINS[index].date]++;
+        checkins[ $rootScope.stats.timeline.CHECKINS[ index ].date ]++;
       }
     }
 
@@ -127,7 +127,7 @@ angular.module( "RTM" ).controller( "DashboardController", [ "$rootScope", "$sco
     //console.log(checkins);
     var checkinsByDate = {};
     for ( var checkinDate in checkins ) {
-      checkinsByDate[checkinDate] = checkins[checkinDate];
+      checkinsByDate[ checkinDate ] = checkins[ checkinDate ];
     }
     console.log( "//////// checkinsByDate" );
     //console.log(checkinsByDate);
@@ -141,19 +141,19 @@ angular.module( "RTM" ).controller( "DashboardController", [ "$rootScope", "$sco
     var chartData = [];
     var dateArr = dateRangeArray( $scope.chart.range );
     for ( var day in dateArr ) {
-      if ( typeof( dateArr[day] ) !== "undefined" ) {
+      if ( typeof( dateArr[ day ] ) !== "undefined" ) {
         var totalCheckins = 0;
         var totalErrors = 0;
-        if ( typeof( checkinsByDate[dateArr[day]] ) !== "undefined" ) {
-          totalCheckins = checkinsByDate[dateArr[day]];
+        if ( typeof( checkinsByDate[ dateArr[ day ] ] ) !== "undefined" ) {
+          totalCheckins = checkinsByDate[ dateArr[ day ] ];
           $rootScope.stats.total.RANGE_CHECKINS += totalCheckins;
         }
-        if ( typeof( errorsByDate[dateArr[day]] ) !== "undefined" ) {
-          totalErrors = errorsByDate[dateArr[day]];
+        if ( typeof( errorsByDate[ dateArr[ day ] ] ) !== "undefined" ) {
+          totalErrors = errorsByDate[ dateArr[ day ] ];
           $rootScope.stats.total.RANGE_ERRORS += totalErrors;
         }
         chartData.push( {
-          date: dateArr[day],
+          date: dateArr[ day ],
           checkins: totalCheckins,
           errors: totalErrors
         } );
@@ -269,13 +269,13 @@ angular.module( "RTM" ).controller( "DashboardController", [ "$rootScope", "$sco
   $scope.showDeviceLastBuild = function( deviceUdid, event ) {
     event.stopPropagation();
     console.log( "--- trying to show last build log for " + deviceUdid );
-    $rootScope.modalBuildId = $rootScope.meta.deviceBuilds[deviceUdid][0].build_id;
+    $rootScope.modalBuildId = $rootScope.meta.deviceBuilds[ deviceUdid ][ 0 ].build_id;
     $rootScope.showLog( $rootScope.modalBuildId );
   };
 
   $scope.hasBuildId = function( deviceUdid ) {
-    if ( typeof( $rootScope.meta.deviceBuilds[deviceUdid] ) !== "undefined" ) {
-      if ( $rootScope.meta.deviceBuilds[deviceUdid].length == 0 ) {
+    if ( typeof( $rootScope.meta.deviceBuilds[ deviceUdid ] ) !== "undefined" ) {
+      if ( $rootScope.meta.deviceBuilds[ deviceUdid ].length == 0 ) {
         return null;
       } else {
         return true;
@@ -299,7 +299,7 @@ angular.module( "RTM" ).controller( "DashboardController", [ "$rootScope", "$sco
     console.log( "### toggle item in selectedItems" );
     var index = $scope.selectedItems.indexOf( udid );
     if ( index > -1 ) {
-      console.log( "splicing on ", index, " value ", $scope.selectedItems[index] );
+      console.log( "splicing on ", index, " value ", $scope.selectedItems[ index ] );
       $scope.selectedItems.splice( index, 1 );
     } else {
       $scope.selectedItems.push( udid );

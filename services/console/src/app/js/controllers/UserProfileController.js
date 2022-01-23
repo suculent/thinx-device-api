@@ -78,7 +78,7 @@ angular.module( "RTM" ).controller( "UserProfileController", function( $rootScop
         }
         $scope.$apply();
       };
-      reader.readAsDataURL( $( "#newAvatarInput" ).prop( "files" )[0] );
+      reader.readAsDataURL( $( "#newAvatarInput" ).prop( "files" )[ 0 ] );
 
     } else {
       // no file selected

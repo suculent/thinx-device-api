@@ -86,12 +86,12 @@ angular.module( "RTM" ).controller( "DeviceController", [ "$rootScope", "$scope"
   function timezonesByUtc() {
     var timezones_by_utc = [];
     for ( var timezone_key in $scope.timezones ) {
-      for ( var utc_key in $scope.timezones[timezone_key].utc ) {
-        timezones_by_utc[$scope.timezones[timezone_key].utc[utc_key]] = {
-          "abbr": $scope.timezones[timezone_key].abbr,
-          "offset": $scope.timezones[timezone_key].offset,
-          "text": $scope.timezones[timezone_key].text,
-          "name": $scope.timezones[timezone_key].value
+      for ( var utc_key in $scope.timezones[ timezone_key ].utc ) {
+        timezones_by_utc[ $scope.timezones[ timezone_key ].utc[ utc_key ] ] = {
+          "abbr": $scope.timezones[ timezone_key ].abbr,
+          "offset": $scope.timezones[ timezone_key ].offset,
+          "text": $scope.timezones[ timezone_key ].text,
+          "name": $scope.timezones[ timezone_key ].value
         };
       }
     }
@@ -154,8 +154,8 @@ angular.module( "RTM" ).controller( "DeviceController", [ "$rootScope", "$scope"
         if ( response.success ) {
           console.log( response );
           for ( var index in $rootScope.devices ) {
-            if ( $rootScope.devices[index].udid == deviceUdid ) {
-              $rootScope.devices[index].source = undefined;
+            if ( $rootScope.devices[ index ].udid == deviceUdid ) {
+              $rootScope.devices[ index ].source = undefined;
             }
           }
           toastr.success( "Repository Detached.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
@@ -191,17 +191,17 @@ angular.module( "RTM" ).controller( "DeviceController", [ "$rootScope", "$scope"
     console.log( "-- changing device: " + $scope.deviceForm.udid + " (" + $scope.deviceForm.alias + ") --" );
 
     var updatedProps = { udid: $scope.deviceForm.udid };
-    updatedProps[prop] = $scope.deviceForm[prop];
+    updatedProps[ prop ] = $scope.deviceForm[ prop ];
 
     // if transformers was changed, use real device transformers instead of unsaved form data
     if ( prop == "transformers" ) {
-      updatedProps["transformers"] = $rootScope.getDeviceByUdid( $scope.deviceForm.udid ).transformers;
+      updatedProps[ "transformers" ] = $rootScope.getDeviceByUdid( $scope.deviceForm.udid ).transformers;
     }
 
     // if timezone was changed, add timezone_abbr to posted changes
     if ( prop == "timezone_offset" ) {
-      updatedProps["timezone_abbr"] = $scope.deviceForm.timezone_abbr;
-      updatedProps["timezone_utc"] = $scope.deviceForm.timezone_utc;
+      updatedProps[ "timezone_abbr" ] = $scope.deviceForm.timezone_abbr;
+      updatedProps[ "timezone_utc" ] = $scope.deviceForm.timezone_utc;
     }
 
     Thinx.submitDevice( updatedProps )
@@ -324,8 +324,8 @@ angular.module( "RTM" ).controller( "DeviceController", [ "$rootScope", "$scope"
 
     // remove from device
     for ( var index in $scope.deviceForm.transformers ) {
-      if ( $scope.deviceForm.transformers[index] == utid ) {
-        console.log( "device transformer to delete", $scope.deviceForm.transformers[index] );
+      if ( $scope.deviceForm.transformers[ index ] == utid ) {
+        console.log( "device transformer to delete", $scope.deviceForm.transformers[ index ] );
         $scope.deviceForm.transformers.splice( index, 1 );
       }
     }
@@ -333,15 +333,15 @@ angular.module( "RTM" ).controller( "DeviceController", [ "$rootScope", "$scope"
     $scope.submitDeviceFormChange( "transformers" );
 
     // remove from meta
-    console.log( "meta transformer to delete", $rootScope.meta.transformers[utid] );
-    delete( $rootScope.meta.transformers[utid] );
+    console.log( "meta transformer to delete", $rootScope.meta.transformers[ utid ] );
+    delete( $rootScope.meta.transformers[ utid ] );
     console.log( "meta", $rootScope.meta.transformers );
     // $scope.$emit("updateRawTransformers", $rootScope.profile.info.transformers);
 
     // remove from profile
     for ( var t in $rootScope.profile.info.transformers ) {
-      if ( $rootScope.profile.info.transformers[t].utid == utid ) {
-        console.log( "profile transformer to delete", $rootScope.profile.info.transformers[t] );
+      if ( $rootScope.profile.info.transformers[ t ].utid == utid ) {
+        console.log( "profile transformer to delete", $rootScope.profile.info.transformers[ t ] );
         $rootScope.profile.info.transformers.splice( t, 1 );
       }
     }
@@ -394,7 +394,7 @@ angular.module( "RTM" ).controller( "DeviceController", [ "$rootScope", "$scope"
     console.log( "### toggle transformer visibility" );
     var index = $scope.deviceForm.transformersVisible.indexOf( utid );
     if ( index > -1 ) {
-      console.log( "splicing on ", index, " value ", $scope.deviceForm.transformersVisible[index] );
+      console.log( "splicing on ", index, " value ", $scope.deviceForm.transformersVisible[ index ] );
       $scope.deviceForm.transformersVisible.splice( index, 1 );
     } else {
       $scope.deviceForm.transformersVisible.push( utid );
@@ -404,8 +404,8 @@ angular.module( "RTM" ).controller( "DeviceController", [ "$rootScope", "$scope"
   $scope.build = function( deviceUdid, sourceId ) {
     console.log( "-- building firmware for " + deviceUdid + "/" + $rootScope.getSourceById( sourceId ).alias + " --" );
 
-    if ( typeof( $rootScope.meta.deviceBuilds[deviceUdid] ) === "undefined" ) {
-      $rootScope.meta.deviceBuilds[deviceUdid] = [];
+    if ( typeof( $rootScope.meta.deviceBuilds[ deviceUdid ] ) === "undefined" ) {
+      $rootScope.meta.deviceBuilds[ deviceUdid ] = [];
     }
 
     $scope.buildrunning = true;
@@ -427,7 +427,7 @@ angular.module( "RTM" ).controller( "DeviceController", [ "$rootScope", "$scope"
           };
 
           // prepare user metadata for particular device
-          $rootScope.meta.deviceBuilds[deviceUdid].push( buildRecord );
+          $rootScope.meta.deviceBuilds[ deviceUdid ].push( buildRecord );
 
           // update build history
           Thinx.getBuildHistory()
@@ -478,7 +478,7 @@ angular.module( "RTM" ).controller( "DeviceController", [ "$rootScope", "$scope"
   $scope.showDeviceLastBuild = function( deviceUdid, event ) {
     event.stopPropagation();
     console.log( "--- trying to show last build log for " + deviceUdid );
-    $rootScope.modalBuildId = $rootScope.meta.deviceBuilds[deviceUdid][0].build_id;
+    $rootScope.modalBuildId = $rootScope.meta.deviceBuilds[ deviceUdid ][ 0 ].build_id;
     $rootScope.showLog( $rootScope.modalBuildId );
   };
 
@@ -496,8 +496,8 @@ angular.module( "RTM" ).controller( "DeviceController", [ "$rootScope", "$scope"
   };
 
   $scope.hasBuildId = function( deviceUdid ) {
-    if ( typeof( $rootScope.meta.deviceBuilds[deviceUdid] ) !== "undefined" ) {
-      if ( $rootScope.meta.deviceBuilds[deviceUdid].length == 0 ) {
+    if ( typeof( $rootScope.meta.deviceBuilds[ deviceUdid ] ) !== "undefined" ) {
+      if ( $rootScope.meta.deviceBuilds[ deviceUdid ].length == 0 ) {
         return null;
       } else {
         return true;
@@ -523,8 +523,8 @@ angular.module( "RTM" ).controller( "DeviceController", [ "$rootScope", "$scope"
       // TODO udid not set, return to dashboard
     } else {
       for ( var index in $rootScope.devices ) {
-        if ( $rootScope.devices[index].udid == $stateParams.udid ) {
-          device = $rootScope.devices[index];
+        if ( $rootScope.devices[ index ].udid == $stateParams.udid ) {
+          device = $rootScope.devices[ index ];
           console.log( "edited device", device );
         }
       }
@@ -538,7 +538,7 @@ angular.module( "RTM" ).controller( "DeviceController", [ "$rootScope", "$scope"
 
     if ( typeof( device.base_platform ) !== "undefined" ) {
       $scope.deviceForm.platform = device.platform;
-      $scope.deviceForm.base_platform = device.platform.split( ":" )[0];
+      $scope.deviceForm.base_platform = device.platform.split( ":" )[ 0 ];
     } else {
       $scope.deviceForm.platform = "unknown";
       $scope.deviceForm.base_platform = "unknown";

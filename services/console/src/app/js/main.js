@@ -347,7 +347,7 @@ function base64converter( type, string ) {
 RTM.filter( "split", function() {
   return function( input, splitChar, splitIndex ) {
     // do some bounds checking here to ensure it has that index
-    return input.split( splitChar )[splitIndex];
+    return input.split( splitChar )[ splitIndex ];
   };
 } );
 
@@ -364,7 +364,7 @@ RTM.filter( "objFilter", function() {
     angular.forEach( input, function( value, key ) {
       var actual = ( "" + value ).toLowerCase();
       if ( actual.indexOf( expected ) !== -1 ) {
-        result[key] = value;
+        result[ key ] = value;
       }
     } );
     return result;
@@ -385,14 +385,14 @@ angular.module( "RTM" ).filter( "propsFilter", function() {
       items.forEach( function( item ) {
         var itemMatches = false;
         for ( var i = 0; i < keys.length; i++ ) {
-          var prop = keys[i];
-          var text = props[prop].toLowerCase();
+          var prop = keys[ i ];
+          var text = props[ prop ].toLowerCase();
 
-          if ( typeof( prop ) === "undefined" || typeof( item ) === "undefined" || typeof( item[prop] ) === "undefined" ) {
+          if ( typeof( prop ) === "undefined" || typeof( item ) === "undefined" || typeof( item[ prop ] ) === "undefined" ) {
             console.log( "Parser ERROR on prop:", prop, item );
           }
 
-          if ( item[prop].toString().toLowerCase().indexOf( text ) !== -1 ) {
+          if ( item[ prop ].toString().toLowerCase().indexOf( text ) !== -1 ) {
             itemMatches = true;
             break;
           }
@@ -459,8 +459,8 @@ RTM.controller( "HeaderController", [ "$scope", "$rootScope", function( $scope, 
 
   $rootScope.getDeviceByUdid = function( deviceUdid ) {
     for ( var index in $rootScope.devices ) {
-      if ( $rootScope.devices[index].udid == deviceUdid ) {
-        return $rootScope.devices[index];
+      if ( $rootScope.devices[ index ].udid == deviceUdid ) {
+        return $rootScope.devices[ index ];
       }
     }
     return false;
@@ -468,8 +468,8 @@ RTM.controller( "HeaderController", [ "$scope", "$rootScope", function( $scope, 
 
   $rootScope.getApikeyByHash = function( keyhash ) {
     for ( var index in $rootScope.apikeys ) {
-      if ( $rootScope.apikeys[index].hash == keyhash ) {
-        return $rootScope.apikeys[index];
+      if ( $rootScope.apikeys[ index ].hash == keyhash ) {
+        return $rootScope.apikeys[ index ];
       }
     }
     return false;
@@ -477,8 +477,8 @@ RTM.controller( "HeaderController", [ "$scope", "$rootScope", function( $scope, 
 
   $rootScope.getSourceById = function( sourceId ) {
     for ( var index in $rootScope.sources ) {
-      if ( $rootScope.sources[index].sourceId == sourceId ) {
-        return $rootScope.sources[index];
+      if ( $rootScope.sources[ index ].sourceId == sourceId ) {
+        return $rootScope.sources[ index ];
       }
     }
     return false;
@@ -486,8 +486,8 @@ RTM.controller( "HeaderController", [ "$scope", "$rootScope", function( $scope, 
 
   $rootScope.getTransformerByUtid = function( transformerUtid ) {
     for ( var index in $rootScope.profile.info.transformers ) {
-      if ( $rootScope.profile.info.transformers[index].utid == transformerUtid ) {
-        return $rootScope.profile.info.transformers[index];
+      if ( $rootScope.profile.info.transformers[ index ].utid == transformerUtid ) {
+        return $rootScope.profile.info.transformers[ index ];
       }
     }
     return false;
@@ -495,8 +495,8 @@ RTM.controller( "HeaderController", [ "$scope", "$rootScope", function( $scope, 
 
   $rootScope.getRawTransformerByUtid = function( transformerUtid ) {
     for ( var index in $rootScope.meta.transformers ) {
-      if ( $rootScope.meta.transformers[index].utid == transformerUtid ) {
-        return $rootScope.meta.transformers[index];
+      if ( $rootScope.meta.transformers[ index ].utid == transformerUtid ) {
+        return $rootScope.meta.transformers[ index ];
       }
     }
     return false;
@@ -934,7 +934,7 @@ RTM.run( [ "$rootScope", "settings", "$state", function( $rootScope, settings, $
 
 RTM.run( function( editableOptions, editableThemes ) {
   editableOptions.theme = "default";
-  editableThemes["default"].submitTpl = "<button class=\"btn grey-mint btn-outline btn-circle btn-sm\" type=\"submit\"><i class=\"fa fa-check\"></i></button>";
-  editableThemes["default"].cancelTpl = "<button class=\"btn grey-mint btn-outline btn-circle btn-sm\" ng-click=\"$form.$cancel()\"><i class=\"fa fa-times\"></i></button>";
+  editableThemes[ "default" ].submitTpl = "<button class=\"btn grey-mint btn-outline btn-circle btn-sm\" type=\"submit\"><i class=\"fa fa-check\"></i></button>";
+  editableThemes[ "default" ].cancelTpl = "<button class=\"btn grey-mint btn-outline btn-circle btn-sm\" ng-click=\"$form.$cancel()\"><i class=\"fa fa-times\"></i></button>";
   // editableOptions.buttons = 'right';
 } );

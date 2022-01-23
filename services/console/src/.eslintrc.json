@@ -26,7 +26,6 @@
     "rules": {
         "no-console": "off",
         "no-unused-vars": "off",
-        "computed-property-spacing": "off",
         "lines-around-comment": "off",
         "max-len": "off",
         "camelcase": "off",

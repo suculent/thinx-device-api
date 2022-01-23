@@ -68,7 +68,7 @@ angular.module( "RTM" ).controller( "DevicesController", [ "$rootScope", "$scope
       { prop: "platform", alias: "Platform", icon: "lightbulb-o" },
       { prop: "alias", alias: "Alias", icon: "sort-alpha-asc" }
     ];
-    $scope.list.orderBy = $scope.list.orderOptions[0];
+    $scope.list.orderBy = $scope.list.orderOptions[ 0 ];
     $scope.list.reverse = true;
   }
 
@@ -95,10 +95,10 @@ angular.module( "RTM" ).controller( "DevicesController", [ "$rootScope", "$scope
           console.log( " --- save last build id: " + response.build_id + " ---" );
 
           // prepare user metadata for particular device
-          if ( typeof( $rootScope.meta.builds[response.build_id] ) == "undefined" ) {
-              $rootScope.meta.builds[response.build_id] = [];
+          if ( typeof( $rootScope.meta.builds[ response.build_id ] ) == "undefined" ) {
+              $rootScope.meta.builds[ response.build_id ] = [];
           }
-          $rootScope.meta.builds[response.build_id].push( response );
+          $rootScope.meta.builds[ response.build_id ].push( response );
 
           Thinx.getBuildHistory()
           .done( function( data ) {
@@ -149,13 +149,13 @@ angular.module( "RTM" ).controller( "DevicesController", [ "$rootScope", "$scope
   $scope.showDeviceLastBuild = function( deviceUdid, event ) {
     event.stopPropagation();
     console.log( "--- trying to show last build log for " + deviceUdid );
-    $rootScope.modalBuildId = $rootScope.meta.deviceBuilds[deviceUdid][0].build_id;
+    $rootScope.modalBuildId = $rootScope.meta.deviceBuilds[ deviceUdid ][ 0 ].build_id;
     $rootScope.showLog( $rootScope.modalBuildId );
   };
 
   $scope.hasBuildId = function( deviceUdid ) {
-    if ( typeof( $rootScope.meta.deviceBuilds[deviceUdid] ) !== "undefined" ) {
-      if ( $rootScope.meta.deviceBuilds[deviceUdid].length === 0 ) {
+    if ( typeof( $rootScope.meta.deviceBuilds[ deviceUdid ] ) !== "undefined" ) {
+      if ( $rootScope.meta.deviceBuilds[ deviceUdid ].length === 0 ) {
         return null;
       } else {
         return true;
@@ -257,7 +257,7 @@ angular.module( "RTM" ).controller( "DevicesController", [ "$rootScope", "$scope
     console.log( "### toggle item in selectedItems" );
     var index = $scope.selectedItems.indexOf( udid );
     if ( index > -1 ) {
-      console.log( "splicing on ", index, " value ", $scope.selectedItems[index] );
+      console.log( "splicing on ", index, " value ", $scope.selectedItems[ index ] );
       $scope.selectedItems.splice( index, 1 );
     } else {
       $scope.selectedItems.push( udid );
@@ -279,7 +279,7 @@ angular.module( "RTM" ).controller( "DevicesController", [ "$rootScope", "$scope
           defVal = true;
       }
       for ( var index in enviros.env_vars ) {
-          $scope.configForm.enviros[enviros.env_vars[index]] = defVal;
+          $scope.configForm.enviros[ enviros.env_vars[ index ] ] = defVal;
       }
 
       $scope.configForm.resetDevices = false;
@@ -346,13 +346,13 @@ angular.module( "RTM" ).controller( "DevicesController", [ "$rootScope", "$scope
     var deviceKeyhashes = [];
     var transferDeviceKeyhashes = [];
     for ( var index in $rootScope.devices ) {
-      if ( $scope.selectedItems.indexOf( $rootScope.devices[index].udid ) > -1 ) {
+      if ( $scope.selectedItems.indexOf( $rootScope.devices[ index ].udid ) > -1 ) {
         // this is selected device
-        transferDeviceKeyhashes.push( $rootScope.devices[index].udid );
+        transferDeviceKeyhashes.push( $rootScope.devices[ index ].udid );
       } else {
         // this is non selected
       }
-      deviceKeyhashes.push( $rootScope.devices[index].udid );
+      deviceKeyhashes.push( $rootScope.devices[ index ].udid );
     }
     console.log( "deviceKeyhashes", deviceKeyhashes );
     console.log( "transferDeviceKeyhashes", transferDeviceKeyhashes );

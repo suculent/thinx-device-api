@@ -33,9 +33,9 @@ angular.module( "RTM" ).controller( "RsakeyController", [ "$rootScope", "$scope"
 
     console.log( "-- testing for duplicates --" );
     for ( var rsakeyId in $rootScope.rsakeys ) {
-      console.log( "Looping rsakeys: alias/name", $rootScope.rsakeys[rsakeyId].name, "fingerprint", $rootScope.rsakeys[rsakeyId].fingerprint );
+      console.log( "Looping rsakeys: alias/name", $rootScope.rsakeys[ rsakeyId ].name, "fingerprint", $rootScope.rsakeys[ rsakeyId ].fingerprint );
 
-      if ( $rootScope.rsakeys[rsakeyId].name == $scope.rsakeyAlias ) {
+      if ( $rootScope.rsakeys[ rsakeyId ].name == $scope.rsakeyAlias ) {
         toastr.error( "Alias must be unique.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         return;
       }
@@ -123,7 +123,7 @@ angular.module( "RTM" ).controller( "RsakeyController", [ "$rootScope", "$scope"
     console.log( "### toggle item in selectedItems" );
     var index = $scope.selectedItems.indexOf( fingerprint );
     if ( index > -1 ) {
-      console.log( "splicing on ", index, " value ", $scope.selectedItems[index] );
+      console.log( "splicing on ", index, " value ", $scope.selectedItems[ index ] );
       $scope.selectedItems.splice( index, 1 );
     } else {
       $scope.selectedItems.push( fingerprint );

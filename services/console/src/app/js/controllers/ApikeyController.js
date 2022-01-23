@@ -37,9 +37,9 @@ angular.module( "RTM" ).controller( "ApikeyController", [ "$rootScope", "$scope"
 
     console.log( "-- testing for duplicates --" );
     for ( var apikeyId in $rootScope.apikeys ) {
-      console.log( "Looping apikeys: alias ", $rootScope.apikeys[apikeyId].alias );
+      console.log( "Looping apikeys: alias ", $rootScope.apikeys[ apikeyId ].alias );
 
-      if ( $rootScope.apikeys[apikeyId].alias === apikeyAlias ) {
+      if ( $rootScope.apikeys[ apikeyId ].alias === apikeyAlias ) {
         toastr.error( "Alias must be unique.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         return;
       }
@@ -132,7 +132,7 @@ angular.module( "RTM" ).controller( "ApikeyController", [ "$rootScope", "$scope"
     console.log( "### toggle item in selectedItems" );
     var index = $scope.selectedItems.indexOf( hash );
     if ( index > -1 ) {
-      console.log( "splicing on ", index, " value ", $scope.selectedItems[index] );
+      console.log( "splicing on ", index, " value ", $scope.selectedItems[ index ] );
       $scope.selectedItems.splice( index, 1 );
     } else {
       $scope.selectedItems.push( hash );

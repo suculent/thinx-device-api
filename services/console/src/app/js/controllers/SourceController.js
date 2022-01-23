@@ -49,9 +49,9 @@ angular.module( "RTM" ).controller( "SourceController", [ "$rootScope", "$scope"
 
     console.log( "-- testing for duplicates --" );
     for ( var sourceId in $rootScope.sources ) {
-      console.log( "Looping sources: alias ", $rootScope.sources[sourceId].alias, "url", $rootScope.sources[sourceId].url );
+      console.log( "Looping sources: alias ", $rootScope.sources[ sourceId ].alias, "url", $rootScope.sources[ sourceId ].url );
 
-      if ( $rootScope.sources[sourceId].alias == $scope.sourceAlias ) {
+      if ( $rootScope.sources[ sourceId ].alias == $scope.sourceAlias ) {
         toastr.error( "Alias must be unique.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         return;
       }
@@ -99,17 +99,17 @@ angular.module( "RTM" ).controller( "SourceController", [ "$rootScope", "$scope"
     if ( $scope.sourceUrl.length > 10 ) {
       try {
         var urlParts = $scope.sourceUrl.replace( /\/\s*$/, "" ).split( "/" );
-        console.log( urlParts[1] );
-        if ( typeof( urlParts[0] ) !== "undefined" && /git/.test( urlParts[0] ) ) {
-          var projectName = urlParts[1].split( ".", 1 );
+        console.log( urlParts[ 1 ] );
+        if ( typeof( urlParts[ 0 ] ) !== "undefined" && /git/.test( urlParts[ 0 ] ) ) {
+          var projectName = urlParts[ 1 ].split( ".", 1 );
           console.log( "detected projectname:" );
-          console.log( projectName[0] );
+          console.log( projectName[ 0 ] );
         }
       } catch ( e ) {
         console.log( e );
       }
       if ( ( typeof( projectName ) !== "undefined" ) && ( projectName.length > 0 ) && ( $scope.sourceAlias == null || $scope.sourceAlias == "" ) ) {
-        $scope.sourceAlias = projectName[0];
+        $scope.sourceAlias = projectName[ 0 ];
       }
     }
   };
@@ -156,7 +156,7 @@ angular.module( "RTM" ).controller( "SourceController", [ "$rootScope", "$scope"
     console.log( $scope.selectedItems );
     var index = $scope.selectedItems.indexOf( sourceId );
     if ( index > -1 ) {
-      console.log( "splicing on ", index, " value ", $scope.selectedItems[index] );
+      console.log( "splicing on ", index, " value ", $scope.selectedItems[ index ] );
       $scope.selectedItems.splice( index, 1 );
     } else {
       $scope.selectedItems.push( sourceId );

@@ -91,13 +91,13 @@ angular.module( "RTM" ).controller( "TransformerController", [ "$rootScope", "$s
 
   $scope.removeTransformer = function( utid ) {
     // remove from meta
-    console.log( "meta transformer to delete", $rootScope.meta.transformers[utid] );
-    delete( $rootScope.meta.transformers[utid] );
+    console.log( "meta transformer to delete", $rootScope.meta.transformers[ utid ] );
+    delete( $rootScope.meta.transformers[ utid ] );
 
     // remove from profile
     for ( var index in $rootScope.profile.info.transformers ) {
-      if ( $rootScope.profile.info.transformers[index].utid == utid ) {
-        console.log( "profile transformer to delete", $rootScope.profile.info.transformers[index] );
+      if ( $rootScope.profile.info.transformers[ index ].utid == utid ) {
+        console.log( "profile transformer to delete", $rootScope.profile.info.transformers[ index ] );
         $rootScope.profile.info.transformers.splice( index, 1 );
       }
     }
@@ -109,7 +109,7 @@ angular.module( "RTM" ).controller( "TransformerController", [ "$rootScope", "$s
     console.log( "### toggle item in selectedItems" );
     var index = $scope.selectedItems.indexOf( utid );
     if ( index > -1 ) {
-      console.log( "splicing on ", index, " value ", $scope.selectedItems[index] );
+      console.log( "splicing on ", index, " value ", $scope.selectedItems[ index ] );
       $scope.selectedItems.splice( index, 1 );
     } else {
       $scope.selectedItems.push( utid );

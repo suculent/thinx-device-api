@@ -42,9 +42,9 @@ angular.module( "RTM" ).controller( "EnviroController", [ "$rootScope", "$scope"
 
     console.log( "-- testing for duplicates --" );
     for ( var enviroId in $rootScope.enviros ) {
-      console.log( "Looping enviros: alias/name", $rootScope.enviros[enviroId] );
+      console.log( "Looping enviros: alias/name", $rootScope.enviros[ enviroId ] );
 
-      if ( $rootScope.enviros[enviroId] == $scope.enviroName ) {
+      if ( $rootScope.enviros[ enviroId ] == $scope.enviroName ) {
         toastr.error( "Name must be unique.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         return;
       }
@@ -132,7 +132,7 @@ angular.module( "RTM" ).controller( "EnviroController", [ "$rootScope", "$scope"
     console.log( "### toggle item in selectedItems" );
     var index = $scope.selectedItems.indexOf( fingerprint );
     if ( index > -1 ) {
-      console.log( "splicing on ", index, " value ", $scope.selectedItems[index] );
+      console.log( "splicing on ", index, " value ", $scope.selectedItems[ index ] );
       $scope.selectedItems.splice( index, 1 );
     } else {
       $scope.selectedItems.push( fingerprint );

@@ -108,7 +108,7 @@ angular.module( "RTM" ).controller( "DeploykeyController", [ "$rootScope", "$sco
     console.log( "### toggle item in selectedItems" );
     var index = $scope.selectedItems.indexOf( filename );
     if ( index > -1 ) {
-      console.log( "splicing on ", index, " value ", $scope.selectedItems[index] );
+      console.log( "splicing on ", index, " value ", $scope.selectedItems[ index ] );
       $scope.selectedItems.splice( index, 1 );
     } else {
       $scope.selectedItems.push( filename );
