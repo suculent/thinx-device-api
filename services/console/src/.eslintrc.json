@@ -27,7 +27,6 @@
         "no-console": "off",
         "no-unused-vars": "off",
         "quotes": "off",
-        "linebreak-style": "off",
         "computed-property-spacing": "off",
         "lines-around-comment": "off",
         "max-len": "off",
