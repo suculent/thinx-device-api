@@ -109,7 +109,7 @@ angular.module('RTM').controller('DashboardController', ['$rootScope', '$scope',
     $scope.chart.range = range;
     $scope.chart.computing = true;
     updateDashboardChart();
-  }
+  };
 
   function updateDashboardChart() {
     console.log("/////// timeline");
@@ -155,13 +155,14 @@ angular.module('RTM').controller('DashboardController', ['$rootScope', '$scope',
         chartData.push({
           date: dateArr[day],
           checkins: totalCheckins,
-          errors: totalErrors,
+          errors: totalErrors
         });
       }
     }
 
     console.log('//////// updating chart');
     //console.log(chartData);
+    // eslint-disable-next-line  no-undef
     Dashboard.init(chartData);
     $scope.chart.init = true;
     $scope.chart.computing = false;
@@ -181,7 +182,7 @@ angular.module('RTM').controller('DashboardController', ['$rootScope', '$scope',
     var end = new Date(nextDate);
 
     //Logic for getting rest of the dates between two dates("FromDate" to "EndDate")
-    while(start < end){
+    while (start < end) {
       dateArr.push(moment(start).format('YYYY-MM-DD'));
       var newDate = start.setDate(start.getDate() + 1);
       start = new Date(newDate);
@@ -231,7 +232,7 @@ angular.module('RTM').controller('DashboardController', ['$rootScope', '$scope',
       barColor: '#ffffff',
       negBarColor: '#ffffff',
       zeroAxis: false,
-      tooltipFormat: 'Daily - {{value}}',
+      tooltipFormat: 'Daily - {{value}}'
     });
 
     /*
@@ -270,7 +271,7 @@ angular.module('RTM').controller('DashboardController', ['$rootScope', '$scope',
     console.log('--- trying to show last build log for ' + deviceUdid);
     $rootScope.modalBuildId = $rootScope.meta.deviceBuilds[deviceUdid][0].build_id;
     $rootScope.showLog($rootScope.modalBuildId);
-  }
+  };
 
   $scope.hasBuildId = function(deviceUdid) {
     if (typeof($rootScope.meta.deviceBuilds[deviceUdid]) !== "undefined") {
@@ -281,18 +282,18 @@ angular.module('RTM').controller('DashboardController', ['$rootScope', '$scope',
       }
     }
     return false;
-  }
+  };
 
   $scope.hasSource = function(device) {
     if (typeof(device.source) !== "undefined" && device.source !== null) {
       return true;
     }
     return false;
-  }
+  };
 
   $scope.delimitByDate = function(date, interval) {
     // subtract interval from now and return true if date is earlier
-  }
+  };
 
   $scope.checkItem = function(udid) {
     console.log('### toggle item in selectedItems');
@@ -303,7 +304,7 @@ angular.module('RTM').controller('DashboardController', ['$rootScope', '$scope',
     } else {
       $scope.selectedItems.push(udid);
     }
-  }
+  };
 
   $scope.journeyClass = function(goal) {
     if ($rootScope.profile.info.goals.includes(goal)) {

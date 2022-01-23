@@ -20,7 +20,7 @@ angular.module('RTM').controller('TransformerController', ['$rootScope', '$scope
     $scope.searchText = '';
     $scope.resetModal();
 
-    $("#pageModal").on('shown.bs.modal', function(){
+    $("#pageModal").on('shown.bs.modal', function() {
       console.log("Refreshing codemirror...");
       $scope.codeEditor.refresh();
       angular.element('input[name=transformerAlias]').focus();
@@ -36,19 +36,15 @@ angular.module('RTM').controller('TransformerController', ['$rootScope', '$scope
   };
 
   $scope.editorOpts = {
-    lineWrapping : false,
+    lineWrapping: false,
     lineNumbers: true,
     mode: 'javascript',
     theme: 'material',
     autoRefresh: true
   };
 
-  $scope.codemirrorLoaded = function(_editor){
+  $scope.codemirrorLoaded = function(_editor) {
     $scope.codeEditor = _editor;
-    //_editor.focus();
-    // Events
-    // _editor.on("beforeChange", function(){ ... });
-    // _editor.on("change", function(){ ... });
   };
 
   $scope.updateTransformer = function(utid) {
@@ -59,21 +55,23 @@ angular.module('RTM').controller('TransformerController', ['$rootScope', '$scope
       $rootScope.profile.info.transformers.push({
         'utid': $scope.transformerForm.utid,
         'alias': $scope.transformerForm.alias,
+        // eslint-disable-next-line  no-undef
         'body': base64converter('decode', $rootScope.thinx.defaults.defaultTransformerBodyBase64)
       });
     } else {
       console.log('-- updating transformer ' + utid + '--');
+      // eslint-disable-next-line  no-undef
       $rootScope.getTransformerByUtid(utid).body = base64converter('encode', $scope.transformerForm.body);
       $rootScope.getTransformerByUtid(utid).alias = $scope.transformerForm.alias;
     }
 
-    $scope.$emit("saveProfileChanges", ["transformers"])
+    $scope.$emit("saveProfileChanges", ["transformers"]);
     $('#pageModal').modal('hide');
 
   };
 
   function revokeTransformers(utids) {
-    console.log('--deleting transformers ' + utids.length +'--')
+    console.log('--deleting transformers ' + utids.length + '--');
     // not implemented - transformers shouldn't be bulk removed
   }
 
@@ -86,7 +84,7 @@ angular.module('RTM').controller('TransformerController', ['$rootScope', '$scope
     if (selectedToRevoke.length > 0) {
       revokeTransformers(selectedToRevoke);
     } else {
-      toastr.warning('Nothing selected.', '<ENV::loginPageTitle>', {timeOut: 1000})
+      toastr.warning('Nothing selected.', '<ENV::loginPageTitle>', {timeOut: 1000});
     }
   };
 
@@ -94,13 +92,13 @@ angular.module('RTM').controller('TransformerController', ['$rootScope', '$scope
   $scope.removeTransformer = function(utid) {
     // remove from meta
     console.log("meta transformer to delete", $rootScope.meta.transformers[utid]);
-    delete($rootScope.meta.transformers[utid])
+    delete($rootScope.meta.transformers[utid]);
 
     // remove from profile
     for (var index in $rootScope.profile.info.transformers) {
       if ($rootScope.profile.info.transformers[index].utid == utid) {
         console.log("profile transformer to delete", $rootScope.profile.info.transformers[index]);
-        $rootScope.profile.info.transformers.splice(index,1);
+        $rootScope.profile.info.transformers.splice(index, 1);
       }
     }
     $scope.$emit("saveProfileChanges", ["transformers"]);
@@ -116,7 +114,7 @@ angular.module('RTM').controller('TransformerController', ['$rootScope', '$scope
     } else {
       $scope.selectedItems.push(utid);
     }
-  }
+  };
 
   $scope.resetModal = function(utid) {
     if (typeof(utid) === "undefined") {
@@ -130,11 +128,11 @@ angular.module('RTM').controller('TransformerController', ['$rootScope', '$scope
     }
     $scope.transformerForm.changed = false;
     $scope.selectedItems = [];
-  }
+  };
 
   function generateUtid() {
       if (typeof($rootScope.profile.info.transformers) !== 'undefined') {
-        return String(CryptoJS.SHA256($rootScope.profile.owner+new Date().getTime()));
+        return String(CryptoJS.SHA256($rootScope.profile.owner + new Date().getTime()));
       }
       return String(0);
   }

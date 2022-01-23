@@ -67,7 +67,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
   $scope.showIcons = false;
 
   $scope.editorOpts = {
-    lineWrapping : false,
+    lineWrapping: false,
     lineNumbers: true,
     mode: 'javascript',
     theme: 'material'
@@ -81,7 +81,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
   $scope.parseTimezoneText = function(timezoneText) {
     // TODO DONT
   //  return timezoneText.match(/^(?:Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])$/);
-  }
+  };
 
   function timezonesByUtc() {
     var timezones_by_utc = [];
@@ -103,7 +103,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
 
   function getUTCWithOffset() {
     var new_utc = new Date().getTime();
-    var utc_with_offset = new Date((new_utc * 1) - (( $scope.deviceForm.timezone_offset * 60 )*60*1000));
+    var utc_with_offset = new Date((new_utc * 1) - (( $scope.deviceForm.timezone_offset * 60 ) * 60 * 1000));
     console.log(new_utc + '<br>');
     console.log(utc_with_offset + '<br>');
     return utc_with_offset;
@@ -183,7 +183,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     $scope.deviceForm.timezone_utc = timezone_utc;
 
     // uúpdate device timezone offset and abbr
-    $scope.submitDeviceFormChange('timezone_offset')
+    $scope.submitDeviceFormChange('timezone_offset');
   };
 
   $scope.submitDeviceFormChange = function(prop) {
@@ -245,7 +245,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
 
   $scope.channelSelected = function (channel) {
     console.log('-- selecting channel --', channel);
-    if (typeof (channel.value.mesh_id) !== 'undefined') {
+    if (typeof(channel.value.mesh_id) !== 'undefined') {
       // attach channel to device
       $scope.attachChannel(channel.value.mesh_id, $scope.deviceForm.udid);
     } else {
@@ -270,7 +270,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     $scope.attachingChannel = true;
     Thinx.attachChannel(meshId, deviceUdid)
       .done(function (response) {
-        if (typeof (response) !== "undefined" && response.success) {
+        if (typeof(response) !== "undefined" && response.success) {
             console.log("-- attach success --");
             // update local data to avoid full update
             $rootScope.getDeviceByUdid(deviceUdid).mesh_ids = response.mesh_ids;
@@ -293,7 +293,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     console.log('-- detaching channel ' + channel.alias + ' from ' + deviceUdid + '--');
     Thinx.detachChannel(channel.mesh_id, deviceUdid)
       .done(function (response) {
-        if (typeof (response) !== "undefined" && response.success) {
+        if (typeof(response) !== "undefined" && response.success) {
           $rootScope.getDeviceByUdid(deviceUdid).mesh_ids = response.mesh_ids;
           toastr.success('Channel Detached.', '<ENV::loginPageTitle>', { timeOut: 5000 });
           $scope.deviceForm.mesh_ids = response.mesh_ids;
@@ -327,7 +327,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     for (var index in $scope.deviceForm.transformers) {
       if ($scope.deviceForm.transformers[index] == utid) {
         console.log("device transformer to delete", $scope.deviceForm.transformers[index]);
-        $scope.deviceForm.transformers.splice(index,1);
+        $scope.deviceForm.transformers.splice(index, 1);
       }
     }
     console.log('device', $scope.deviceForm.transformers);
@@ -343,7 +343,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     for (var t in $rootScope.profile.info.transformers) {
       if ($rootScope.profile.info.transformers[t].utid == utid) {
         console.log("profile transformer to delete", $rootScope.profile.info.transformers[t]);
-        $rootScope.profile.info.transformers.splice(t,1);
+        $rootScope.profile.info.transformers.splice(t, 1);
       }
     }
     $scope.$emit("saveProfileChanges", ["transformers"]);
@@ -356,10 +356,10 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     if (typeof(transformer.value.utid) !== 'undefined') {
       // if transformer dowsnt exist yet, create it
       if (!$rootScope.getTransformerByUtid(transformer.value.utid)) {
-        // eslint-disable-next-line  no-undef
         $rootScope.profile.info.transformers.push({
           'utid': transformer.value.utid,
           'alias': transformer.value.alias,
+          // eslint-disable-next-line  no-undef
           'body': base64converter('encode', transformer.value.body)
         });
         $scope.toggleTransformer(transformer.value.utid);
@@ -373,23 +373,22 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
 
   function generateUtid() {
     if (typeof($scope.deviceForm.transformers) !== 'undefined') {
-      return String(CryptoJS.SHA256($rootScope.profile.owner+new Date().getTime()));
+      return String(CryptoJS.SHA256($rootScope.profile.owner + new Date().getTime()));
     }
     return String(0);
   }
 
   $scope.tagTransform = function (transformerAlias) {
     console.log('transformer alias search:', transformerAlias);
-    // eslint-disable-next-line  no-undef
-    var newTransformer = {
+    return {
       value: {
         utid: generateUtid(),
         alias: transformerAlias,
+        // eslint-disable-next-line  no-undef
         body: base64converter('decode', $rootScope.thinx.defaults.defaultTransformerBodyBase64),
         changed: false
       }
     };
-    return newTransformer;
   };
 
   $scope.toggleTransformer = function(utid) {
@@ -426,7 +425,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
             start_time: nowTime,
             state: response.status,
             timestamp: nowTime
-          }
+          };
 
           // prepare user metadata for particular device
           $rootScope.meta.deviceBuilds[deviceUdid].push(buildRecord);
@@ -451,8 +450,8 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
             'Build created<br><br>Click to show log...',
             'THiNX Builder',
             {
-              timeOut:15000,
-              extendedTimeOut:60000,
+              timeOut: 15000,
+              extendedTimeOut: 60000,
               tapToDismiss: true,
               closeButton: true,
               progressBar: true,
@@ -489,6 +488,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
     Thinx.getArtifacts(deviceUdid, build_id)
     .then( blob => {
       console.log(blob, typeof blob);
+      // eslint-disable-next-line  no-undef
       saveBlob(blob, build_id + '.zip');
     })
     .catch( error => {
@@ -505,18 +505,18 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
       }
     }
     return false;
-  }
+  };
 
   $scope.hasSource = function(device) {
     if (typeof(device.source) !== "undefined" && device.source !== null) {
       return true;
     }
     return false;
-  }
+  };
 
   $scope.goBack = function() {
     window.history.back();
-  }
+  };
 
   $scope.initDeviceForm = function() {
     var device = {};
@@ -557,7 +557,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
       $scope.deviceForm.source = null;
     }
 
-    if (typeof (device.mesh_ids) !== "undefined") {
+    if (typeof(device.mesh_ids) !== "undefined") {
       $scope.deviceForm.mesh_ids = device.mesh_ids;
     } else {
       $scope.deviceForm.mesh_ids = [];
@@ -604,7 +604,7 @@ angular.module('RTM').controller('DeviceController', ['$rootScope', '$scope', '$
 
     $scope.showIcons = false;
 
-    if (typeof (device.environment) !== "undefined") {
+    if (typeof(device.environment) !== "undefined") {
       $scope.deviceForm.environment = device.environment;
     } else {
       $scope.deviceForm.environment = null;

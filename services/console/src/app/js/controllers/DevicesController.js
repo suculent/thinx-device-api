@@ -27,7 +27,7 @@ angular.module('RTM').controller('DevicesController', ['$rootScope', '$scope', '
     $scope.selectedItems = [];
     $scope.buildrunning = false;
 
-    $("#transferModal").on('shown.bs.modal', function(){
+    $("#transferModal").on('shown.bs.modal', function() {
       angular.element('input[name=transferEmail]').focus();
     });
   });
@@ -118,8 +118,8 @@ angular.module('RTM').controller('DevicesController', ['$rootScope', '$scope', '
             response.status + '<br><br>Click to show build log...',
             'THiNX Builder',
             {
-              timeOut:3000,
-              extendedTimeOut:5000,
+              timeOut: 3000,
+              extendedTimeOut: 5000,
               tapToDismiss: false,
               closeButton: false,
               progressBar: true,
@@ -151,25 +151,25 @@ angular.module('RTM').controller('DevicesController', ['$rootScope', '$scope', '
     console.log('--- trying to show last build log for ' + deviceUdid);
     $rootScope.modalBuildId = $rootScope.meta.deviceBuilds[deviceUdid][0].build_id;
     $rootScope.showLog($rootScope.modalBuildId);
-  }
+  };
 
   $scope.hasBuildId = function(deviceUdid) {
     if (typeof($rootScope.meta.deviceBuilds[deviceUdid]) !== "undefined") {
-      if ($rootScope.meta.deviceBuilds[deviceUdid].length == 0) {
+      if ($rootScope.meta.deviceBuilds[deviceUdid].length === 0) {
         return null;
       } else {
         return true;
       }
     }
     return false;
-  }
+  };
 
   $scope.hasSource = function(device) {
     if (typeof(device.source) !== "undefined" && device.source !== null) {
       return true;
     }
     return false;
-  }
+  };
 
   $scope.revokeSelected = function() {
     console.log('-- processing selected items --');
@@ -184,7 +184,7 @@ angular.module('RTM').controller('DevicesController', ['$rootScope', '$scope', '
   };
 
   function revokeDevices(deviceUdids) {
-    console.log('--revoking ' + deviceUdids.length + ' devices --')
+    console.log('--revoking ' + deviceUdids.length + ' devices --');
 
     Thinx.revokeDevices(deviceUdids)
     .done(function(revokeDeviceResponse) {
@@ -209,7 +209,7 @@ angular.module('RTM').controller('DevicesController', ['$rootScope', '$scope', '
 
 
   function transferDevices(transferForm, deviceUdids) {
-    console.log('--transferring devices ' + deviceUdids.length +'--')
+    console.log('--transferring devices ' + deviceUdids.length + '--');
 
     $scope.transferForm.submitDisabled = true;
 
@@ -262,7 +262,7 @@ angular.module('RTM').controller('DevicesController', ['$rootScope', '$scope', '
     } else {
       $scope.selectedItems.push(udid);
     }
-  }
+  };
 
   $scope.openConfigModal = function() {
     console.log('Resetting config form values...');
@@ -292,11 +292,11 @@ angular.module('RTM').controller('DevicesController', ['$rootScope', '$scope', '
     })
     .fail(error => console.log('Error:', error));
 
-  }
+  };
 
 
   function pushConfig(configForm, deviceUdids) {
-    console.log('--pushing config to devices ' + deviceUdids.length +'--')
+    console.log('--pushing config to devices ' + deviceUdids.length + '--');
 
     Thinx.pushConfig(configForm, deviceUdids)
     .done(function(data) {
@@ -338,7 +338,7 @@ angular.module('RTM').controller('DevicesController', ['$rootScope', '$scope', '
     $scope.transferForm.mig_apikeys = true;
 
     $('#transferModal').modal('show');
-  }
+  };
 
   $scope.isSharedKey = function() {
 
@@ -367,6 +367,6 @@ angular.module('RTM').controller('DevicesController', ['$rootScope', '$scope', '
     // });
     // console.log('uniqueArray', uniqueArray);
 
-  }
+  };
 
 }]);

@@ -26,7 +26,7 @@ angular.module('RTM').controller('DeploykeyController', ['$rootScope', '$scope',
 
   $scope.createDeploykey = function() {
 
-    console.log('--creating deploy key--')
+    console.log('--creating deploy key--');
 
     Thinx.createDeploykey()
     .done(function(response) {
@@ -60,7 +60,7 @@ angular.module('RTM').controller('DeploykeyController', ['$rootScope', '$scope',
     .fail(function(error) {
       $('.msg-warning').text(error);
       $('.msg-warning').show();
-      $scope.$emit("xhrFailed", error)
+      $scope.$emit("xhrFailed", error);
       toastr.error('Error.', '<ENV::loginPageTitle>', {timeOut: 5000});
     });
 
@@ -68,7 +68,7 @@ angular.module('RTM').controller('DeploykeyController', ['$rootScope', '$scope',
 
 
   function revokeDeploykeys(filenames) {
-    console.log('--deleting deploy keys ' + filenames.length +'--')
+    console.log('--deleting deploy keys ' + filenames.length + '--');
 
     Thinx.revokeDeploykeys(filenames)
     .done(function(data) {
@@ -113,12 +113,12 @@ angular.module('RTM').controller('DeploykeyController', ['$rootScope', '$scope',
     } else {
       $scope.selectedItems.push(filename);
     }
-  }
+  };
 
   $scope.resetModal = function() {
     $scope.deploykeyCreated = null;
     $scope.deploykeyValue = null;
     $scope.selectedItems = [];
-  }
+  };
 
 }]);

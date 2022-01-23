@@ -53,7 +53,7 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
     },
     assetsPath: '../assets',
     globalPath: '../assets/global',
-    layoutPath: '../assets/layouts/thinx',
+    layoutPath: '../assets/layouts/thinx'
   };
 
   $rootScope.settings = settings;
@@ -131,8 +131,8 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
   $rootScope.auditlog = [];
 
   $rootScope.logdata = {
-    buffer:{},
-    watchers:{}
+    buffer: {},
+    watchers: {}
   };
 
   $rootScope.platforms = {
@@ -154,7 +154,7 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
     'blue': {name: 'blue'},
     'green': {name: 'green'},
     'green-dark': {name: 'green-dark'},
-    'grey-mint': {name: 'grey-mint'},
+    'grey-mint': {name: 'grey-mint'}
   };
 
   $rootScope.thinx = {};
@@ -348,13 +348,17 @@ RTM.filter('split', function() {
   return function(input, splitChar, splitIndex) {
     // do some bounds checking here to ensure it has that index
     return input.split(splitChar)[splitIndex];
-  }
+  };
 });
 
 RTM.filter('objFilter', function() {
   return function(input, search) {
-    if (!input) return input;
-    if (!search) return input;
+    if (!input) { 
+      return input; 
+    } 
+    if (!search) { 
+      return input; 
+    }
     var expected = ('' + search).toLowerCase();
     var result = {};
     angular.forEach(input, function(value, key) {
@@ -364,7 +368,7 @@ RTM.filter('objFilter', function() {
       }
     });
     return result;
-  }
+  };
 });
 
 /**
@@ -384,7 +388,7 @@ angular.module('RTM').filter('propsFilter', function() {
           var prop = keys[i];
           var text = props[prop].toLowerCase();
 
-          if (typeof (prop) === "undefined" || typeof (item) === "undefined" || typeof (item[prop]) === "undefined") {
+          if (typeof(prop) === "undefined" || typeof(item) === "undefined" || typeof(item[prop]) === "undefined") {
             console.log("Parser ERROR on prop:", prop, item);
           }
 
@@ -434,10 +438,10 @@ function getCookie(name) {
   var begin = dc.indexOf("; " + prefix);
   if (begin == -1) {
     begin = dc.indexOf(prefix);
-    if (begin != 0) return null;
-  }
-  else
-  {
+    if (begin != 0) {
+      return null;
+    }
+  } else {
     begin += 2;
     var end = document.cookie.indexOf(";", begin);
     if (end == -1) {
@@ -460,7 +464,7 @@ RTM.controller('HeaderController', ['$scope', '$rootScope', function($scope, $ro
       }
     }
     return false;
-  }
+  };
 
   $rootScope.getApikeyByHash = function(keyhash) {
     for (var index in $rootScope.apikeys) {
@@ -469,7 +473,7 @@ RTM.controller('HeaderController', ['$scope', '$rootScope', function($scope, $ro
       }
     }
     return false;
-  }
+  };
 
   $rootScope.getSourceById = function(sourceId) {
     for (var index in $rootScope.sources) {
@@ -478,7 +482,7 @@ RTM.controller('HeaderController', ['$scope', '$rootScope', function($scope, $ro
       }
     }
     return false;
-  }
+  };
 
   $rootScope.getTransformerByUtid = function(transformerUtid) {
     for (var index in $rootScope.profile.info.transformers) {
@@ -487,7 +491,7 @@ RTM.controller('HeaderController', ['$scope', '$rootScope', function($scope, $ro
       }
     }
     return false;
-  }
+  };
 
   $rootScope.getRawTransformerByUtid = function(transformerUtid) {
     for (var index in $rootScope.meta.transformers) {
@@ -496,7 +500,7 @@ RTM.controller('HeaderController', ['$scope', '$rootScope', function($scope, $ro
       }
     }
     return false;
-  }
+  };
 
 }]);
 
@@ -521,20 +525,20 @@ RTM.controller('PageHeadController', ['$scope', function($scope) {
       $scope.socketStatus = 'WebSocket Connecting...';
     }
     $('.websocket-badge').fadeIn();
-    setTimeout(function(){
+    setTimeout(function() {
       console.log("timeout");
       $('.websocket-badge').fadeOut();
-    }, 2000)
-  }
+    }, 2000);
+  };
 
 }]);
 
 /* Setup Layout Part - Quick Sidebar */
 RTM.controller('QuickSidebarController', ['$scope', function($scope) {
   $scope.$on('$includeContentLoaded', function() {
-    setTimeout(function(){
+    setTimeout(function() {
       QuickSidebar.init(); // init quick sidebar
-    }, 2000)
+    }, 2000);
   });
 }]);
 
@@ -647,7 +651,7 @@ RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             'js/controllers/DeviceController.js',
             'js/controllers/EditorController.js',
             'js/controllers/LogviewController.js',
-            '../assets/thinx/js/plugins/crypto-js/sha256.js',
+            '../assets/thinx/js/plugins/crypto-js/sha256.js'
           ]
         });
       }]
@@ -918,7 +922,7 @@ RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
         });
       }]
     }
-  })
+  });
 
 }]);
 
@@ -928,7 +932,7 @@ RTM.run(["$rootScope", "settings", "$state", function($rootScope, settings, $sta
   $rootScope.$settings = settings;
 }]);
 
-RTM.run(function(editableOptions,editableThemes) {
+RTM.run(function(editableOptions, editableThemes) {
   editableOptions.theme = 'default';
   editableThemes['default'].submitTpl = '<button class="btn grey-mint btn-outline btn-circle btn-sm" type="submit"><i class="fa fa-check"></i></button>';
   editableThemes['default'].cancelTpl = '<button class="btn grey-mint btn-outline btn-circle btn-sm" ng-click="$form.$cancel()"><i class="fa fa-times"></i></button>';

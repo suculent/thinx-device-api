@@ -14,6 +14,7 @@ if (urlBase.indexOf("localhost") !== -1) {
   });
 }
 
+// eslint-disable-next-line  no-redeclare
 var Thinx = {
   // RSA
   apikeyList: function () {
@@ -160,16 +161,14 @@ var Thinx = {
   init: function ($rootScope, $scope) {
     return init($rootScope, $scope);
   }
-}
+};
 
 function init($rootScope, $scope) {
 
   console.log('THiNX API INIT');
-  //console.log('$rootScope', $rootScope);
-  //console.log('$scope', $scope);
 
   if (typeof($rootScope.xhrFailedListener) === "undefined") {
-    $rootScope.xhrFailedListener = $rootScope.$on('xhrFailed', function(event, error){
+    $rootScope.xhrFailedListener = $rootScope.$on('xhrFailed', function(event, error) {
       event.stopPropagation();
       xhrFailed(error);
     });
@@ -184,7 +183,7 @@ function init($rootScope, $scope) {
   }
 
   if (typeof($rootScope.updateSourcesListener) === "undefined") {
-    $rootScope.updateSourcesListener = $rootScope.$on('updateSources', function(event, data){
+    $rootScope.updateSourcesListener = $rootScope.$on('updateSources', function(event, data) {
       event.stopPropagation();
       updateSources(data);
     });
@@ -197,7 +196,7 @@ function init($rootScope, $scope) {
       $rootScope.sources = [];
       $.each(response.sources, function(sourceId, value) {
         value.sourceId = sourceId;
-        if (typeof (value.platform) === "undefined") {
+        if (typeof(value.platform) === "undefined") {
           value.platform = "unknown";
         }
         value.base_platform = value.platform.split(":")[0];
@@ -207,7 +206,7 @@ function init($rootScope, $scope) {
       console.log('/////// sources:');
       //console.log($rootScope.sources);
       console.log('refreshing view...');
-      $rootScope.$apply()
+      $rootScope.$apply();
 
       // save user-spcific goal achievement
       if ($rootScope.profile.info.goals.length > 0) {
@@ -217,12 +216,12 @@ function init($rootScope, $scope) {
         }
       }
     } else {
-      console.log('Sources fetch error.') ;
+      console.log('Sources fetch error.');
     }
   }
 
   if (typeof($rootScope.updateApikeysListener) === "undefined") {
-    $rootScope.updateApikeysListener = $rootScope.$on('updateApikeys', function(event, data){
+    $rootScope.updateApikeysListener = $rootScope.$on('updateApikeys', function(event, data) {
       event.stopPropagation();
       updateApikeys(data);
     });
@@ -235,11 +234,11 @@ function init($rootScope, $scope) {
     console.log('//////// apikeys:');
     //console.log($rootScope.apikeys);
     console.log('refreshing view...');
-    $rootScope.$apply()
+    $rootScope.$apply();
   }
 
   if (typeof($rootScope.updateRsakeysListener) === "undefined") {
-    $rootScope.updateRsakeysListener = $rootScope.$on('updateRsakeys', function(event, data){
+    $rootScope.updateRsakeysListener = $rootScope.$on('updateRsakeys', function(event, data) {
       event.stopPropagation();
       updateRsakeys(data);
     });
@@ -254,19 +253,18 @@ function init($rootScope, $scope) {
 
     // save user-spcific goal achievement
     if ($rootScope.profile.info.goals.length > 0) {
-      if (!$rootScope.profile.info.goals.includes('rsakey')
-      && $rootScope.rsakeys.length > 0) {
+      if (!$rootScope.profile.info.goals.includes('rsakey') && $rootScope.rsakeys.length > 0) {
         $rootScope.profile.info.goals.push('rsakey');
         $scope.$emit("saveProfileChanges", ["goals"]);
       }
     }
 
     console.log('refreshing view...');
-    $rootScope.$apply()
+    $rootScope.$apply();
   }
 
   if (typeof($rootScope.updateDeploykeysListener) === "undefined") {
-    $rootScope.updateDeploykeysListener = $rootScope.$on('updateDeploykeys', function(event, data){
+    $rootScope.updateDeploykeysListener = $rootScope.$on('updateDeploykeys', function(event, data) {
       event.stopPropagation();
       updateDeploykeys(data);
     });
@@ -282,18 +280,17 @@ function init($rootScope, $scope) {
 
     // save user-spcific goal achievement
     if ($rootScope.profile.info.goals.length > 0) {
-      if (!$rootScope.profile.info.goals.includes('deploykey')
-      && $rootScope.deploykeys.length > 0) {
+      if (!$rootScope.profile.info.goals.includes('deploykey') && $rootScope.deploykeys.length > 0) {
         $rootScope.profile.info.goals.push('deploykey');
         $scope.$emit("saveProfileChanges", ["goals"]);
       }
     }
 
     console.log('refreshing view...');
-    $rootScope.$apply()
+    $rootScope.$apply();
   }
 
-  if (typeof ($rootScope.updateChannelsListener) === "undefined") {
+  if (typeof($rootScope.updateChannelsListener) === "undefined") {
     $rootScope.updateChannelsListener = $rootScope.$on('updateChannels', function (event, data) {
       event.stopPropagation();
       updateChannels(data);
@@ -315,19 +312,18 @@ function init($rootScope, $scope) {
 
     // save user-spcific goal achievement
     if ($rootScope.profile.info.goals.length > 0) {
-      if (!$rootScope.profile.info.goals.includes('channel')
-        && $rootScope.channels.length > 0) {
+      if (!$rootScope.profile.info.goals.includes('channel') && $rootScope.channels.length > 0) {
         $rootScope.profile.info.goals.push('channel');
         $scope.$emit("saveProfileChanges", ["goals"]);
       }
     }
 
     console.log('refreshing view...');
-    $rootScope.$apply()
+    $rootScope.$apply();
   }
 
   if (typeof($rootScope.updateDevicesListener) === "undefined") {
-    $rootScope.updateDevicesListener = $rootScope.$on('updateDevices', function(event, data){
+    $rootScope.updateDevicesListener = $rootScope.$on('updateDevices', function(event, data) {
       event.stopPropagation();
       updateDevices(data);
     });
@@ -410,7 +406,7 @@ function init($rootScope, $scope) {
       }
 
     }
-    deviceTimeline.sort(function(a,b){
+    deviceTimeline.sort(function(a, b) {
       // Turn your strings into dates, and then subtract them
       // to get a value that is either negative, positive, or zero.
       return new Date(b.date) - new Date(a.date);
@@ -454,7 +450,7 @@ function init($rootScope, $scope) {
   }
 
   if (typeof($rootScope.submitNotificationResponseListener) === "undefined") {
-    $rootScope.submitNotificationResponseListener = $rootScope.$on('submitNotificationResponse', function(event, data){
+    $rootScope.submitNotificationResponseListener = $rootScope.$on('submitNotificationResponse', function(event, data) {
       event.stopPropagation();
       submitNotificationResponse(data);
     });
@@ -500,7 +496,7 @@ function init($rootScope, $scope) {
     }
   });
 
-  $scope.$on("updateProfile", function(event, data){
+  $scope.$on("updateProfile", function(event, data) {
     updateProfile(data);
   });
 
@@ -549,8 +545,8 @@ function init($rootScope, $scope) {
     }
   }
 
-  $scope.$on("updateRawTransformers", function(event, transformers){
-    $scope.$apply(function(){
+  $scope.$on("updateRawTransformers", function(event, transformers) {
+    $scope.$apply(function() {
       updateRawTransformers(transformers);
     });
   });
@@ -559,11 +555,11 @@ function init($rootScope, $scope) {
     // decode all transformers
     console.log('Decoding Transformers...');
     for (let index in transformers) {
-      // eslint-disable-next-line  no-undef
       $rootScope.meta.transformers[transformers[index].utid] =
       {
         "utid": transformers[index].utid,
         "alias": transformers[index].alias,
+        // eslint-disable-next-line  no-undef
         "body": base64converter('decode', transformers[index].body),
         "changed": false
       };
@@ -573,7 +569,7 @@ function init($rootScope, $scope) {
     //console.log($rootScope.meta.transformers);
   }
 
-  $scope.$on("updateAuditHistory", function(event, data){
+  $scope.$on("updateAuditHistory", function(event, data) {
     updateAuditHistory(data);
   });
 
@@ -625,11 +621,11 @@ function init($rootScope, $scope) {
       }
       $scope.$apply();
     } else {
-      console.log('auditHistory fetch error.') ;
+      console.log('auditHistory fetch error.');
     }
   }
 
-  $scope.$on("updateLatestFirmwareEnvelope", function(event, data){
+  $scope.$on("updateLatestFirmwareEnvelope", function(event, data) {
     updateLatestFirmwareEnvelope(data);
   });
 
@@ -639,11 +635,11 @@ function init($rootScope, $scope) {
     console.log('//////// envelope:');
     console.log(data);
     console.log('refreshing view...');
-    $rootScope.$apply()
+    $rootScope.$apply();
   }
 
 
-  $scope.$on("updateStats", function(event, data){
+  $scope.$on("updateStats", function(event, data) {
     updateStats(data);
   });
 
@@ -671,15 +667,17 @@ function init($rootScope, $scope) {
   }
 
 
-  $scope.$on("updateBuildHistory", function(event, data){
+  $scope.$on("updateBuildHistory", function(event, data) {
     updateBuildHistory(data);
   });
 
-  function sortByLastUpdate(b,a) {
-    if (a.last_update < b.last_update)
+  function sortByLastUpdate(b, a) {
+    if (a.last_update < b.last_update) {
       return -1;
-    if (a.last_update > b.last_update)
+    }
+    if (a.last_update > b.last_update) {
       return 1;
+    }
     return 0;
   }
 
@@ -700,7 +698,7 @@ function init($rootScope, $scope) {
           $rootScope.meta.deviceBuilds[response.builds[index].udid] = [];
         }
         $rootScope.meta.deviceBuilds[response.builds[index].udid].push({
-          "build_id":response.builds[index].build_id,
+          "build_id": response.builds[index].build_id,
           "last_update": response.builds[index].last_update,
           "timestamp": response.builds[index].timestamp,
           "start_time": response.builds[index].start_time,
@@ -721,7 +719,7 @@ function init($rootScope, $scope) {
       console.log('refreshing view...');
       $scope.$apply();
     } else {
-      console.log('buildHistory fetch error.') ;
+      console.log('buildHistory fetch error.');
     }
   }
 
@@ -762,7 +760,6 @@ function init($rootScope, $scope) {
   .fail(error => $scope.$emit("xhrFailed", error));
 
 }
-
 
 
 //////////////////////// end of init
@@ -978,7 +975,6 @@ function revokeApikeys(fingerprints) {
 
 
 // Rsakeys /user/rsakey
-//
 // createKey /
 // revokeKey [keyToRevoke] /
 // keyList /list
@@ -1110,7 +1106,6 @@ function detachChannel(meshId, deviceUdid) {
 }
 
 // Enviros /user/enviro
-//
 // createKey /
 // revokeKey [keyToRevoke] /
 // keyList /list
@@ -1208,7 +1203,7 @@ function submitProfile(profile) {
     transformers: profile.info.transformers,
     timezone_abbr: profile.timezone_abbr,
     timezone_offset: profile.timezone_offset
-  }
+  };
 
   return $.ajax({
     url: urlBase + '/user/profile',

@@ -28,7 +28,7 @@ angular.module('RTM').controller('SourceController', ['$rootScope', '$scope', 's
     $scope.searchText = '';
     $scope.addingSource = false;
 
-    $("#pageModal").on('shown.bs.modal', function(){
+    $("#pageModal").on('shown.bs.modal', function() {
       angular.element('input[name=sourceUrl]').focus();
     });
   });
@@ -98,14 +98,14 @@ angular.module('RTM').controller('SourceController', ['$rootScope', '$scope', 's
     console.log('procesing: ' + $scope.sourceUrl);
     if ($scope.sourceUrl.length > 10) {
       try {
-        var urlParts = $scope.sourceUrl.replace(/\/\s*$/,'').split('/');
+        var urlParts = $scope.sourceUrl.replace(/\/\s*$/, '').split('/');
         console.log(urlParts[1]);
         if (typeof(urlParts[0]) !== "undefined" && /git/.test(urlParts[0])) {
           var projectName = urlParts[1].split('.', 1);
           console.log('detected projectname:');
           console.log(projectName[0]);
         }
-      } catch(e) {
+      } catch (e) {
         console.log(e);
       }
       if ((typeof(projectName) !== "undefined") && (projectName.length > 0) && ($scope.sourceAlias == null || $scope.sourceAlias == '')) {
@@ -115,7 +115,7 @@ angular.module('RTM').controller('SourceController', ['$rootScope', '$scope', 's
   };
 
   function revokeSources(selectedItems) {
-    console.log('--deleting sources ' + selectedItems.length +'--')
+    console.log('--deleting sources ' + selectedItems.length + '--');
 
     Thinx.revokeSources(selectedItems)
     .done(function(data) {
@@ -137,7 +137,7 @@ angular.module('RTM').controller('SourceController', ['$rootScope', '$scope', 's
     })
     .fail(function (error) {
       // TODO throw error message
-      console.log('Error:', error)
+      console.log('Error:', error);
     });
   }
 

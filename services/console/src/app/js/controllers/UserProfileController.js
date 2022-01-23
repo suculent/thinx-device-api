@@ -62,7 +62,7 @@ angular.module('RTM').controller('UserProfileController', function($rootScope, $
 
     var avatarMaxSize = 500000;
     console.log('-- processing user avatar --');
-    console.log  ( $('#newAvatarInput').prop('files') );
+    console.log($('#newAvatarInput').prop('files'));
 
     if ($('#newAvatarInput').prop('files').length > 0) {
 
@@ -74,10 +74,10 @@ angular.module('RTM').controller('UserProfileController', function($rootScope, $
         if (e.total < avatarMaxSize) {
           $scope.newAvatar = e.target.result;
         } else {
-          toastr.error('Avatar size over limit 500kB (' + e.total/1000 + ' kB).', '<ENV::loginPageTitle>', {timeOut: 5000});
+          toastr.error('Avatar size over limit 500kB (' + e.total / 1000 + ' kB).', '<ENV::loginPageTitle>', {timeOut: 5000});
         }
         $scope.$apply();
-      }
+      };
       reader.readAsDataURL($('#newAvatarInput').prop('files')[0]);
 
     } else {
@@ -90,7 +90,6 @@ angular.module('RTM').controller('UserProfileController', function($rootScope, $
 
   $scope.submitAvatarForm = function() {
     console.log('-- changing user avatar --');
-    // console.log($scope.newAvatar);
 
     if ($scope.newAvatar == null) {
       console.log('no file selected');
@@ -139,7 +138,6 @@ angular.module('RTM').controller('UserProfileController', function($rootScope, $
   };
 
 
-
   $scope.removeTag = function(tagId) {
     console.log('-- current tags: ' + $rootScope.profile.info.tags);
     console.log('-- removing tag: ' + tagId);
@@ -158,12 +156,10 @@ angular.module('RTM').controller('UserProfileController', function($rootScope, $
     .done(function(response) {
       if (typeof(response) !== "undefined") {
         if (typeof(response.success) !== "undefined" && response.success) {
-
           var blob = new Blob([JSON.stringify(response.user_data)], {type: 'text/json'});
           if (window.navigator && window.navigator.msSaveOrOpenBlob) {
             window.navigator.msSaveOrOpenBlob(blob, filename);
-           }
-           else{
+           } else {
                var e = document.createEvent('MouseEvents'),
                    a = document.createElement('a');
 

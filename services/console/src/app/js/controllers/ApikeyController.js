@@ -26,7 +26,7 @@ angular.module('RTM').controller('ApikeyController', ['$rootScope', '$scope', 's
     $scope.resetModal();
     $scope.searchText = '';
 
-    $("#pageModal").on('shown.bs.modal', function(){
+    $("#pageModal").on('shown.bs.modal', function() {
       angular.element('input[name=apikeyAlias]').focus();
     });
   });
@@ -39,7 +39,7 @@ angular.module('RTM').controller('ApikeyController', ['$rootScope', '$scope', 's
     for (var apikeyId in $rootScope.apikeys) {
       console.log("Looping apikeys: alias ", $rootScope.apikeys[apikeyId].alias);
 
-      if ($rootScope.apikeys[apikeyId].alias == apikeyAlias) {
+      if ($rootScope.apikeys[apikeyId].alias === apikeyAlias) {
         toastr.error('Alias must be unique.', '<ENV::loginPageTitle>', {timeOut: 5000});
         return;
       }
@@ -89,7 +89,7 @@ angular.module('RTM').controller('ApikeyController', ['$rootScope', '$scope', 's
   };
 
   function revokeApikeys(fingerprints) {
-    console.log('--deleting selected API Keys ' + fingerprints.length +'--')
+    console.log('--deleting selected API Keys ' + fingerprints.length + '--');
 
     Thinx.revokeApikeys(fingerprints)
     .done(function(data) {
@@ -112,7 +112,7 @@ angular.module('RTM').controller('ApikeyController', ['$rootScope', '$scope', 's
     })
     .fail(function (error) {
       // TODO throw error message
-      console.log('Error:', error)
+      console.log('Error:', error);
     });
   }
 
@@ -124,7 +124,7 @@ angular.module('RTM').controller('ApikeyController', ['$rootScope', '$scope', 's
     if (selectedToRevoke.length > 0) {
       revokeApikeys(selectedToRevoke);
     } else {
-      toastr.info('Nothing selected.', '<ENV::loginPageTitle>', {timeOut: 1000})
+      toastr.info('Nothing selected.', '<ENV::loginPageTitle>', {timeOut: 1000});
     }
   };
 
@@ -137,13 +137,13 @@ angular.module('RTM').controller('ApikeyController', ['$rootScope', '$scope', 's
     } else {
       $scope.selectedItems.push(hash);
     }
-  }
+  };
 
   $scope.resetModal = function() {
     $scope.newApikey = null;
     $scope.apikeyAlias = null;
     $scope.createButtonVisible = true;
     $scope.selectedItems = [];
-  }
+  };
 
 }]);

@@ -11,6 +11,12 @@
         "moment": true,
         "angular": true,
         "Thinx": true,
+        "Morris":true,
+        "Layout": true,
+        "QuickSidebar": true,
+        "Theme": true,
+        "getTimezones": true,
+        "CryptoJS": true,
         "toastr": true,
         "App": true
     },
@@ -30,6 +36,8 @@
         "array-bracket-spacing": "off",
         "no-trailing-spaces": "off",
         "max-len": "off",
-        "camelcase": "off"
+        "camelcase": "off",
+        "eqeqeq": "off",
+        "dot-notation": "off"
     }
 }

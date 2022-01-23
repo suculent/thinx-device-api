@@ -21,7 +21,7 @@ angular.module('RTM').controller('RsakeyController', ['$rootScope', '$scope', 's
     $scope.resetModal();
     $scope.searchText = '';
 
-    $("#pageModal").on('shown.bs.modal', function(){
+    $("#pageModal").on('shown.bs.modal', function() {
       angular.element('input[name=rsakeyAlias]').focus();
     });
   });
@@ -41,7 +41,7 @@ angular.module('RTM').controller('RsakeyController', ['$rootScope', '$scope', 's
       }
     }
 
-    console.log('--adding rsa key ' + $scope.rsakeyAlias +'--')
+    console.log('--adding rsa key ' + $scope.rsakeyAlias + '--');
 
     Thinx.addRsakey($scope.rsakeyAlias, $scope.rsakeyValue)
     .done(function(response) {
@@ -76,14 +76,14 @@ angular.module('RTM').controller('RsakeyController', ['$rootScope', '$scope', 's
     .fail(function(error) {
       $('.msg-warning').text(error);
       $('.msg-warning').show();
-      $scope.$emit("xhrFailed", error)
+      $scope.$emit("xhrFailed", error);
       toastr.error('Error.', '<ENV::loginPageTitle>', {timeOut: 5000});
     });
 
   };
 
   function revokeRsakeys(fingerprints) {
-    console.log('--deleting rsa keys ' + fingerprints.length +'--')
+    console.log('--deleting rsa keys ' + fingerprints.length + '--');
 
     Thinx.revokeRsakeys(fingerprints)
     .done(function(data) {
@@ -128,12 +128,12 @@ angular.module('RTM').controller('RsakeyController', ['$rootScope', '$scope', 's
     } else {
       $scope.selectedItems.push(fingerprint);
     }
-  }
+  };
 
   $scope.resetModal = function() {
     $scope.rsakeyAlias = null;
     $scope.rsakeyValue = null;
     $scope.selectedItems = [];
-  }
+  };
 
 }]);

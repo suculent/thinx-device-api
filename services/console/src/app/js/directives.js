@@ -3,6 +3,7 @@ GLobal Directives
 ***/
 
 // Route State Load Spinner(used on page or content load)
+// eslint-disable-next-line  no-undef
 RTM.directive('ngSpinnerBar', ['$rootScope', '$state',
 function($rootScope, $state) {
   return {
@@ -42,9 +43,10 @@ function($rootScope, $state) {
     }
   };
 }
-])
+]);
 
 // Handle global LINK click
+// eslint-disable-next-line  no-undef
 RTM.directive('a', function() {
   return {
     restrict: 'E',
@@ -59,6 +61,7 @@ RTM.directive('a', function() {
 });
 
 // Handle Dropdown Hover Plugin Integration
+// eslint-disable-next-line  no-undef
 RTM.directive('dropdownMenuHover', function () {
   return {
     link: function (scope, elem) {
@@ -68,6 +71,7 @@ RTM.directive('dropdownMenuHover', function () {
 });
 
 // Handle ui-sref click events inside other clickable elements
+// eslint-disable-next-line  no-undef
 RTM.directive('stopEvent', function () {
   return {
     restrict: 'A',

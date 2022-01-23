@@ -28,7 +28,7 @@ angular.module('RTM').controller('HistoryController', ['$rootScope', '$scope', '
   });
 
   $scope.downloadArtifacts = function(build_id) {
-    toastr.warning('Not implemented.', '<ENV::loginPageTitle>', {timeOut: 2000})
+    toastr.warning('Not implemented.', '<ENV::loginPageTitle>', {timeOut: 2000});
   };
 
 }]);

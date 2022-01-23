@@ -1,4 +1,5 @@
-var Dashboard = function() {
+// eslint
+var Dashboard = (function() {
 
   var dashboardMainChart = null;
 
@@ -37,17 +38,16 @@ var Dashboard = function() {
     },
 
     init: function(data) {
-      // if (dashboardMainChart == null) {
-        console.log('================== initilizing charts ==================');
-        $('#device_statistics').empty();
-        this.initMorisCharts(data);
+      console.log('================== initilizing charts ==================');
+      $('#device_statistics').empty();
+      this.initMorisCharts(data);
     }
   };
 
-}();
+})();
 
 if (App.isAngularJsApp() === false) {
-  jQuery(document).ready(function() {
+  $(document).ready(function() {
     Dashboard.init(); 
   });
 }

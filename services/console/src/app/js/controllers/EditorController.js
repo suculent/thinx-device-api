@@ -1,7 +1,7 @@
 /* Setup blank page controller */
 angular.module('RTM').controller('EditorController', ['$rootScope', '$scope', 'settings', function($rootScope, $scope, settings) {
   $scope.$on('$viewContentLoaded', function() {
-    console.log('#### Editor Overlay init')
+    console.log('#### Editor Overlay init');
   });
 
   $scope.overlayEditor = {
@@ -13,26 +13,27 @@ angular.module('RTM').controller('EditorController', ['$rootScope', '$scope', 's
   $rootScope.hideEditorOverlay = function() {
     console.log('--- hiding editor --- ');
     $('.editor-overlay-conatiner').fadeOut(300);
-  }
+  };
 
   $rootScope.showEditorOverlay = function(utid) {
     console.log('--- opening editor for: ' + utid + ' ---');
     $scope.resetEditor(utid);
     $('.editor-overlay-conatiner').fadeIn(300);
-  }
+  };
 
   $scope.saveEditor = function() {
     // check for transformer with same utid
     if (!$rootScope.getTransformerByUtid($scope.overlayEditor.utid)) {
       console.log('-- creating transformer ' + $scope.overlayEditor.utid + '--');
-      // eslint-disable-next-line  no-undef
       $rootScope.profile.info.transformers.push({
         'utid': $scope.overlayEditor.utid,
         'alias': $scope.overlayEditor.alias,
+        // eslint-disable-next-line  no-undef
         'body': base64converter('encode', $scope.overlayEditor.body)
       });
     } else {
       console.log('-- updating transformer ' + $scope.overlayEditor.utid + '--');
+      // eslint-disable-next-line  no-undef
       $rootScope.getTransformerByUtid($scope.overlayEditor.utid).body = base64converter('encode', $scope.overlayEditor.body);
       $rootScope.getTransformerByUtid($scope.overlayEditor.utid).alias = $scope.overlayEditor.alias;
     }
@@ -55,11 +56,11 @@ angular.module('RTM').controller('EditorController', ['$rootScope', '$scope', 's
     }
     $scope.overlayEditor.changed = false;
     $scope.selectedItems = [];
-  }
+  };
 
   function generateUtid() {
       if (typeof($rootScope.profile.info.transformers) !== 'undefined') {
-        return String(CryptoJS.SHA256($rootScope.profile.owner+new Date().getTime()));
+        return String(CryptoJS.SHA256($rootScope.profile.owner + new Date().getTime()));
       }
       return String(0);
   }

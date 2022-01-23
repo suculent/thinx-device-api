@@ -1,7 +1,7 @@
 /* Setup blank page controller */
 angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', 'settings', function($rootScope, $scope, settings) {
   $scope.$on('$viewContentLoaded', function() {
-    console.log('#### Build Log Overlay init')
+    console.log('#### Build Log Overlay init');
 
     // Open websocket to for log & notifications transfer
     // User profile has to be initialised first
@@ -17,7 +17,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
   // not implemented yet
   //var actionNotifications = [];
 
-  if (typeof ($rootScope.initWebsocketListener) === "undefined") {
+  if (typeof($rootScope.initWebsocketListener) === "undefined") {
     $rootScope.initWebsocketListener = $rootScope.$on('initWebsocket', function (event, owner_id) {
       event.stopPropagation();
       console.log("DEBUG owner_id initWebsocketListener", owner_id);
@@ -83,7 +83,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
           adapted_data = adapted_data.split(/\n/g);
 
           // update currently observed logview
-          if (typeof ($rootScope.modalBuildId) !== "undefined") {
+          if (typeof($rootScope.modalBuildId) !== "undefined") {
             for (let i in adapted_data) {
               $rootScope.logdata[$rootScope.modalBuildId] = $rootScope.logdata[$rootScope.modalBuildId] +
                 "\n" + adapted_data[i];
@@ -107,7 +107,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
   }
 
   if (typeof($rootScope.showLogOverlayListener) === "undefined") {
-    $rootScope.showLogOverlayListener = $rootScope.$on('showLogOverlay', function(event, build_id){
+    $rootScope.showLogOverlayListener = $rootScope.$on('showLogOverlay', function(event, build_id) {
       event.stopPropagation();
       $rootScope.showLog(build_id);
     });
@@ -151,7 +151,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
 
     // start auto refresh
     console.log('--- starting refresh timer --- ');
-    $rootScope.logdata.watchers[build_id] = setInterval(function(){
+    $rootScope.logdata.watchers[build_id] = setInterval(function() {
       console.log('Refreshing log view...');
       $rootScope.$digest();
     }, 500);
@@ -181,7 +181,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
     var msgBody = JSON.parse(data);
     var msg = msgBody.notification;
 
-    if (typeof ($rootScope.meta.notifications) !== 'undefined') {
+    if (typeof($rootScope.meta.notifications) !== 'undefined') {
       $rootScope.meta.notifications.push(msg);
 
       // TODO: process specific build notifications
@@ -208,9 +208,9 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
         console.log(msg);
 
         if (
-            msg.body == "Pulling repository"
-            || msg.body == "Building..."
-            || msg.body == "Completed"
+            msg.body == "Pulling repository" || 
+            msg.body == "Building..." || 
+            msg.body == "Completed"
         ) {
 
           let nowTime = new Date().getTime();
@@ -221,7 +221,7 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
             start_time: nowTime,
             state: msg.type,
             timestamp: nowTime
-          }
+          };
 
           // prepare user metadata for particular device
           $rootScope.meta.deviceBuilds[msg.udid].push(buildRecord);
@@ -257,8 +257,8 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
             '" class="btn btn-danger toastr-cancel-btn" style="margin: 0 8px 0 8px">No</button></div>',
             msg.title,
             {
-              timeOut:0,
-              extendedTimeOut:0,
+              timeOut: 0,
+              extendedTimeOut: 0,
               tapToDismiss: false,
               closeButton: true,
               closeMethod: 'fadeOut',
@@ -267,12 +267,12 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
             }
           );
 
-          $('#okBtn-' + msg.nid).on("click", function(e){
+          $('#okBtn-' + msg.nid).on("click", function(e) {
             $(this).parent().slideToggle(500);
             $scope.$emit("submitNotificationResponse", true);
           });
 
-          $('#cancelBtn-' + msg.nid).on("click", function(e){
+          $('#cancelBtn-' + msg.nid).on("click", function(e) {
             $(this).parent().slideToggle(500);
             $scope.$emit("submitNotificationResponse", false);
           });
@@ -288,8 +288,8 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
             '" class="btn btn-success toastr-send-btn">Send</button></div>',
             msg.title,
             {
-              timeOut:0,
-              extendedTimeOut:0,
+              timeOut: 0,
+              extendedTimeOut: 0,
               tapToDismiss: false,
               closeButton: true,
               closeMethod: 'fadeOut',
@@ -298,13 +298,12 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
             }
           );
 
-          $('#sendBtn-' + msg.nid).on("click", function(e){
+          $('#sendBtn-' + msg.nid).on("click", function(e) {
             $(this).parent().slideToggle(500);
             $scope.$emit("submitNotificationResponse", $('input[name=reply-' + msg.nid + ']').val());
           });
         }
 
-      
       
       // non-actionable status notification
       } else if (typeof(msg.body.status) !== 'undefined') {

@@ -1,4 +1,4 @@
-var Auth = function() {
+var Auth = (function () {
 
   var urlBase = '<ENV::apiBaseUrl>';
 
@@ -107,7 +107,7 @@ var Auth = function() {
       }
     });
 
-    jQuery('#gdpr-reject-btn').click(function() {
+    $('#gdpr-reject-btn').click(function() {
 
       var token = $.getQuery('t');
       var data = { token: token, gdpr: false };
@@ -144,7 +144,7 @@ var Auth = function() {
       });
 
     });
-  }
+  };
 
   return {
     //main function to initiate the module
@@ -160,8 +160,7 @@ var Auth = function() {
         $('.gdpr-form').show();
         handleGdpr();
       }
-
-      $('.gdpr-form')
+      
     },
 
     login: function() {
@@ -178,26 +177,25 @@ var Auth = function() {
       })
       .done(function(response) {
         console.log('Authorized');
-        window.location = "/app/#/dashboard"
+        window.location = "/app/#/dashboard";
       })
       .fail(function(error) {
         console.error('Error:', error);
-        //  window.history.back();
       });
     }
 
   };
 
-}();
+})();
 
-jQuery(document).ready(function() {
-  (function($){
+$(document).ready(function() {
+  (function($) {
     $.getQuery = function( query ) {
       query = query.replace(/[\[]/g,"\\\[").replace(/[\]]/g,"\\\]");
       var expr = "[\\?&]"+query+"=([^&#]*)";
       var regex = new RegExp( expr );
       var results = regex.exec( window.location.href );
-      if( results !== null ) {
+      if ( results !== null ) {
         return results[1];
         // return decodeURIComponent(results[1].replace(/\+/g, " "));
       } else {

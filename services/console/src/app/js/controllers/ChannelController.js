@@ -26,21 +26,9 @@ angular.module('RTM').controller('ChannelController', ['$rootScope', '$scope', '
 
   $scope.createChannel = function (mesh_id, alias) {
 
-    /*
-    console.log('-- testing for duplicates --');
-    for (var apikeyId in $rootScope.apikeys) {
-      console.log("Looping apikeys: alias ", $rootScope.apikeys[apikeyId].alias);
-
-      if ($rootScope.apikeys[apikeyId].alias == apikeyAlias) {
-        toastr.error('Alias must be unique.', '<ENV::loginPageTitle>', { timeOut: 5000 });
-        return;
-      }
-    }
-    */
-
     Thinx.createChannel(mesh_id, alias, $rootScope.profile.owner)
       .done(function (response) {
-        if (typeof (response) !== "undefined") {
+        if (typeof(response) !== "undefined") {
           if (response.success) {
             console.log(response);
             Thinx.channelList()
@@ -69,7 +57,7 @@ angular.module('RTM').controller('ChannelController', ['$rootScope', '$scope', '
 
 
   function revokeChannels(mesh_ids) {
-    console.log('--revoking channals ' + mesh_ids.length +'--')
+    console.log('--revoking channals ' + mesh_ids.length + '--');
 
     Thinx.revokeChannels($rootScope.profile.owner, mesh_ids)
     .done(function(data) {
@@ -114,12 +102,12 @@ angular.module('RTM').controller('ChannelController', ['$rootScope', '$scope', '
     } else {
       $scope.selectedItems.push(filename);
     }
-  }
+  };
 
   $scope.resetModal = function() {
     $scope.meshAlias = null;
     $scope.meshId = null;
     $scope.selectedItems = [];
-  }
+  };
 
 }]);

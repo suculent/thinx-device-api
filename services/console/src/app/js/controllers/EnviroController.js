@@ -13,14 +13,14 @@ angular.module('RTM').controller('EnviroController', ['$rootScope', '$scope', 's
 
     Thinx.enviroList()
     .done( function(data) {
-      updateEnviros(data)
+      updateEnviros(data);
     })
     .fail(error => console.log('Error:', error));
 
     $scope.resetModal();
     $scope.searchText = '';
 
-    $("#pageModal").on('shown.bs.modal', function(){
+    $("#pageModal").on('shown.bs.modal', function() {
       angular.element('input[name=enviroName]').focus();
     });
   });
@@ -50,7 +50,7 @@ angular.module('RTM').controller('EnviroController', ['$rootScope', '$scope', 's
       }
     }
 
-    console.log('--adding enviro variable ' + $scope.enviroName +'--')
+    console.log('--adding enviro variable ' + $scope.enviroName + '--');
 
     Thinx.addEnviro($scope.enviroName, $scope.enviroValue)
     .done(function(response) {
@@ -62,7 +62,7 @@ angular.module('RTM').controller('EnviroController', ['$rootScope', '$scope', 's
 
           Thinx.enviroList()
           .done( function(data) {
-            updateEnviros(data)
+            updateEnviros(data);
           })
           .fail(error => console.log('Error:', error));
 
@@ -91,7 +91,7 @@ angular.module('RTM').controller('EnviroController', ['$rootScope', '$scope', 's
   };
 
   function revokeEnviros(fingerprints) {
-    console.log('--deleting enviro variables ' + fingerprints.length +'--')
+    console.log('--deleting enviro variables ' + fingerprints.length + '--');
 
     Thinx.revokeEnviros(fingerprints)
     .done(function(data) {
@@ -112,7 +112,7 @@ angular.module('RTM').controller('EnviroController', ['$rootScope', '$scope', 's
     })
     .fail(function (error) {
       // TODO throw error message
-      console.log('Error:', error)
+      console.log('Error:', error);
     });
   }
 
@@ -137,12 +137,12 @@ angular.module('RTM').controller('EnviroController', ['$rootScope', '$scope', 's
     } else {
       $scope.selectedItems.push(fingerprint);
     }
-  }
+  };
 
   $scope.resetModal = function() {
     $scope.enviroName = null;
     $scope.enviroValue = null;
     $scope.selectedItems = [];
-  }
+  };
 
 }]);
