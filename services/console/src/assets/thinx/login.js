@@ -63,10 +63,8 @@ var Login = ( function() {
           type: "POST",
           dataType: "json",
           contentType: "application/json",
-          success: function( data, status, xhr ) {
-            console.log( "-- login response --" );
-            var response = JSON.parse( data );
-            console.log( response );
+          success: function( response, status, xhr ) {
+            console.log( "-- login response --", {response});
             if ( typeof( response ) !== "undefined" ) {
               if ( typeof( response.redirectURL ) !== "undefined" ) {
                 console.log( "-- Succes! Redirecting to \"" + response.redirectURL + "\"--" );
