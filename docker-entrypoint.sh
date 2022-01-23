@@ -14,10 +14,11 @@ if [[ -f $MICROSCANNER_ARTIFACT ]]; then
   cp $MICROSCANNER_ARTIFACT /mnt/data/test-reports/microscanner.html
 fi
 
-echo "[thinx-entrypoint] Creating default DBs (TODO: only if does not exist)..."
 
 DEVNULL="/dev/null"
 
+# returns error in case the DB is already created (error is intentionally ignored, 
+# but should be more specific to fail safely in case the DB would not be available)
 curl -s -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_users > $DEVNULL
 curl -s -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_replicator > $DEVNULL
 curl -s -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_global_changes > $DEVNULL
