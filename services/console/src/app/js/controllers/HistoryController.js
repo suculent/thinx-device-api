@@ -1,6 +1,6 @@
 /* Setup blank page controller */
-angular.module('RTM').controller('HistoryController', ['$rootScope', '$scope', 'settings', '$stateParams', function($rootScope, $scope, settings, $stateParams) {
-  $scope.$on('$viewContentLoaded', function() {
+angular.module( 'RTM' ).controller( 'HistoryController', [ '$rootScope', '$scope', 'settings', '$stateParams', function( $rootScope, $scope, settings, $stateParams ) {
+  $scope.$on( '$viewContentLoaded', function() {
     // initialize core components
     App.initAjax();
 
@@ -9,26 +9,26 @@ angular.module('RTM').controller('HistoryController', ['$rootScope', '$scope', '
     $rootScope.settings.layout.pageBodySolid = false;
     $rootScope.settings.layout.pageSidebarClosed = false;
 
-    Thinx.init($rootScope, $scope);
+    Thinx.init( $rootScope, $scope );
 
     $scope.list = {
       searchText: ''
     };
 
     var tab = $stateParams.tab;
-    $('[data-target="#tab_' + tab + '"]').parent().addClass("active");
-    $('#tab_' + tab).addClass("active");
+    $( '[data-target="#tab_' + tab + '"]' ).parent().addClass( "active" );
+    $( '#tab_' + tab ).addClass( "active" );
 
     Thinx.getAuditHistory()
-    .done(function(data) {
-      $scope.$emit("updateAuditHistory", data);
-    })
-    .fail(error => $scope.$emit("xhrFailed", error));
+    .done( function( data ) {
+      $scope.$emit( "updateAuditHistory", data );
+    } )
+    .fail( error => $scope.$emit( "xhrFailed", error ) );
 
-  });
+  } );
 
-  $scope.downloadArtifacts = function(build_id) {
-    toastr.warning('Not implemented.', '<ENV::loginPageTitle>', {timeOut: 2000});
+  $scope.downloadArtifacts = function( build_id ) {
+    toastr.warning( 'Not implemented.', '<ENV::loginPageTitle>', { timeOut: 2000 } );
   };
 
-}]);
+} ] );

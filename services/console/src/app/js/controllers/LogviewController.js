@@ -1,60 +1,60 @@
 /* Setup blank page controller */
-angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', 'settings', function($rootScope, $scope, settings) {
-  $scope.$on('$viewContentLoaded', function() {
-    console.log('#### Build Log Overlay init');
+angular.module( 'RTM' ).controller( 'LogviewController', [ '$rootScope', '$scope', 'settings', function( $rootScope, $scope, settings ) {
+  $scope.$on( '$viewContentLoaded', function() {
+    console.log( '#### Build Log Overlay init' );
 
     // Open websocket to for log & notifications transfer
     // User profile has to be initialised first
-    if (typeof($rootScope.profile.owner) !== "undefined") {
-      console.log('##### websocket init');
-      openSocket("log");
+    if ( typeof( $rootScope.profile.owner ) !== "undefined" ) {
+      console.log( '##### websocket init' );
+      openSocket( "log" );
     } else {
-      console.log('##### websocket not initalised - missing owner profile');
+      console.log( '##### websocket not initalised - missing owner profile' );
     }
-    
-  });
+
+  } );
 
   // not implemented yet
   //var actionNotifications = [];
 
-  if (typeof($rootScope.initWebsocketListener) === "undefined") {
-    $rootScope.initWebsocketListener = $rootScope.$on('initWebsocket', function (event, owner_id) {
+  if ( typeof( $rootScope.initWebsocketListener ) === "undefined" ) {
+    $rootScope.initWebsocketListener = $rootScope.$on( 'initWebsocket', function( event, owner_id ) {
       event.stopPropagation();
-      console.log("DEBUG owner_id initWebsocketListener", owner_id);
-      openSocket("log");
-    });
+      console.log( "DEBUG owner_id initWebsocketListener", owner_id );
+      openSocket( "log" );
+    } );
   }
 
-  function openSocket(scope) {
-    if ("WebSocket" in window) {
-      if (typeof($rootScope.wss) === "undefined") {
+  function openSocket( scope ) {
+    if ( "WebSocket" in window ) {
+      if ( typeof( $rootScope.wss ) === "undefined" ) {
         // open websocket
-        console.log('## Opening websocket with credentials ##');
-        $rootScope.wss = new WebSocket('<ENV::wssUrl>/' + $rootScope.profile.owner);
+        console.log( '## Opening websocket with credentials ##' );
+        $rootScope.wss = new WebSocket( '<ENV::wssUrl>/' + $rootScope.profile.owner );
 
         $rootScope.wss.onopen = function() {
-          console.log("## Websocket connection estabilished ##");
+          console.log( "## Websocket connection estabilished ##" );
 
-          if (typeof($rootScope.modalBuildId) !== "undefined") {
-            $rootScope.wsstailLog($rootScope.modalBuildId);
+          if ( typeof( $rootScope.modalBuildId ) !== "undefined" ) {
+            $rootScope.wsstailLog( $rootScope.modalBuildId );
           } else {
             $rootScope.wssinit();
           }
         };
-        $rootScope.wss.onmessage = function (message) {
+        $rootScope.wss.onmessage = function( message ) {
           // quick check before parsing
-          var msgType = message.data.substr(2, 12);
-          if (msgType == "notification") {
-            parseNotification(message.data);
+          var msgType = message.data.substr( 2, 12 );
+          if ( msgType == "notification" ) {
+            parseNotification( message.data );
           } else {
             // save build data to build buffer
             // - convert line endings
-            let adapted_data = message.data.replace(/\r\n|\n\t|\r|\n/g, "\n");
-            adapted_data = adapted_data.split(/\n/g);
+            let adapted_data = message.data.replace( /\r\n|\n\t|\r|\n/g, "\n" );
+            adapted_data = adapted_data.split( /\n/g );
 
             // update currently observed logview
-            if (typeof($rootScope.modalBuildId) !== "undefined") {
-              for (let i in adapted_data) {
+            if ( typeof( $rootScope.modalBuildId ) !== "undefined" ) {
+              for ( let i in adapted_data ) {
                 $rootScope.logdata[$rootScope.modalBuildId] = $rootScope.logdata[$rootScope.modalBuildId] +
                 "\n" + adapted_data[i];
               }
@@ -64,27 +64,27 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
           }
         };
         $rootScope.wss.onclose = function() {
-          console.log("## Websocket connection is closed... ##");
+          console.log( "## Websocket connection is closed... ##" );
         };
 
-        $rootScope.wsslog = new WebSocket('<ENV::wssUrl>/' + $rootScope.profile.owner + "/" + new Date().getTime());
+        $rootScope.wsslog = new WebSocket( '<ENV::wssUrl>/' + $rootScope.profile.owner + "/" + new Date().getTime() );
 
-        $rootScope.wsslog.onopen = function () {
-          console.log("## Websocket connection estabilished ##");
-          $rootScope.wsstailLog($rootScope.modalBuildId);
+        $rootScope.wsslog.onopen = function() {
+          console.log( "## Websocket connection estabilished ##" );
+          $rootScope.wsstailLog( $rootScope.modalBuildId );
         };
-        $rootScope.wsslog.onmessage = function (message) {
+        $rootScope.wsslog.onmessage = function( message ) {
           // quick check before parsing
-          var msgType = message.data.substr(2, 12);
+          var msgType = message.data.substr( 2, 12 );
 
           // save build data to build buffer
           // - convert line endings
-          let adapted_data = message.data.replace(/\r\n|\n\t|\r|\n/g, "\n");
-          adapted_data = adapted_data.split(/\n/g);
+          let adapted_data = message.data.replace( /\r\n|\n\t|\r|\n/g, "\n" );
+          adapted_data = adapted_data.split( /\n/g );
 
           // update currently observed logview
-          if (typeof($rootScope.modalBuildId) !== "undefined") {
-            for (let i in adapted_data) {
+          if ( typeof( $rootScope.modalBuildId ) !== "undefined" ) {
+            for ( let i in adapted_data ) {
               $rootScope.logdata[$rootScope.modalBuildId] = $rootScope.logdata[$rootScope.modalBuildId] +
                 "\n" + adapted_data[i];
             }
@@ -93,28 +93,28 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
           // $rootScope.logdata.buffer = $rootScope.logdata.buffer + "\n" + adapted_data.join("\n");
 
         };
-        $rootScope.wsslog.onclose = function () {
-          console.log("## Log Websocket connection is closed... ##");
+        $rootScope.wsslog.onclose = function() {
+          console.log( "## Log Websocket connection is closed... ##" );
         };
       } else {
         // websocket already open
-        console.log("## Websocket status:", $rootScope.wss.readyState, " ##");
+        console.log( "## Websocket status:", $rootScope.wss.readyState, " ##" );
       }
     } else {
       // The browser doesn't support WebSocket
-      toastr.error("Error", "WebSocket NOT supported by your Browser!", {timeOut: 5000});
+      toastr.error( "Error", "WebSocket NOT supported by your Browser!", { timeOut: 5000 } );
     }
   }
 
-  if (typeof($rootScope.showLogOverlayListener) === "undefined") {
-    $rootScope.showLogOverlayListener = $rootScope.$on('showLogOverlay', function(event, build_id) {
+  if ( typeof( $rootScope.showLogOverlayListener ) === "undefined" ) {
+    $rootScope.showLogOverlayListener = $rootScope.$on( 'showLogOverlay', function( event, build_id ) {
       event.stopPropagation();
-      $rootScope.showLog(build_id);
-    });
+      $rootScope.showLog( build_id );
+    } );
   }
 
-  $rootScope.wsstailLog = function(build_id) {
-    console.log('-- refreshing log: ', build_id);
+  $rootScope.wsstailLog = function( build_id ) {
+    console.log( '-- refreshing log: ', build_id );
     var message = {
       logtail: {
         owner_id: $rootScope.profile.owner,
@@ -124,65 +124,65 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
     // $rootScope.logdata.buffer[$rootScope.modalBuildId] = "";
     $rootScope.logdata[build_id] = "";
     $rootScope.modalBuildId = build_id;
-    $rootScope.wss.send(JSON.stringify(message));
+    $rootScope.wss.send( JSON.stringify( message ) );
   };
 
   $rootScope.wssinit = function() {
-    console.log('-- initializing websocket ');
+    console.log( '-- initializing websocket ' );
     var message = {
       init: $rootScope.profile.owner
     };
-    $rootScope.wss.send(JSON.stringify(message));
+    $rootScope.wss.send( JSON.stringify( message ) );
   };
 
-  $rootScope.hideLogOverlay = function(build_id) {
-    console.log('--- hiding log overlay --- ');
-    $('.log-view-overlay-conatiner').fadeOut();
-    console.log($rootScope.logdata.watchers[build_id]);
-    clearInterval($rootScope.logdata.watchers[build_id]);
+  $rootScope.hideLogOverlay = function( build_id ) {
+    console.log( '--- hiding log overlay --- ' );
+    $( '.log-view-overlay-conatiner' ).fadeOut();
+    console.log( $rootScope.logdata.watchers[build_id] );
+    clearInterval( $rootScope.logdata.watchers[build_id] );
   };
 
 
-  $rootScope.showLog = function(build_id) {
-    console.log('--[ logdata ]-- ');
-    console.log($rootScope.logdata);
-    console.log('--- opening log for build_id: ' + build_id, ' ---');
-    $('.log-view-overlay-conatiner').fadeIn();
+  $rootScope.showLog = function( build_id ) {
+    console.log( '--[ logdata ]-- ' );
+    console.log( $rootScope.logdata );
+    console.log( '--- opening log for build_id: ' + build_id, ' ---' );
+    $( '.log-view-overlay-conatiner' ).fadeIn();
 
     // start auto refresh
-    console.log('--- starting refresh timer --- ');
-    $rootScope.logdata.watchers[build_id] = setInterval(function() {
-      console.log('Refreshing log view...');
+    console.log( '--- starting refresh timer --- ' );
+    $rootScope.logdata.watchers[build_id] = setInterval( function() {
+      console.log( 'Refreshing log view...' );
       $rootScope.$digest();
-    }, 500);
+    }, 500 );
 
     $rootScope.modalBuildId = build_id;
 
-    if (typeof($rootScope.wss) !== "undefined") {
-      console.log('Socket ready, tailing log...');
-      $rootScope.wsstailLog(build_id);
+    if ( typeof( $rootScope.wss ) !== "undefined" ) {
+      console.log( 'Socket ready, tailing log...' );
+      $rootScope.wsstailLog( build_id );
     } else {
-      console.log('Socket not ready, trying to open it...');
-      openSocket("notification");
+      console.log( 'Socket not ready, trying to open it...' );
+      openSocket( "notification" );
     }
   };
 
   $rootScope.switchWrap = function() {
-    console.log('--- toggle word-wrap --- ');
-    $('.log-view-body').toggleClass('force-word-wrap');
-    $('.icon-frame').toggleClass('overlay-highlight');
+    console.log( '--- toggle word-wrap --- ' );
+    $( '.log-view-body' ).toggleClass( 'force-word-wrap' );
+    $( '.icon-frame' ).toggleClass( 'overlay-highlight' );
   };
 
   $scope.toastrCancel = function() {
-    alert('test');
+    alert( 'test' );
   };
 
-  function parseNotification(data) {
-    var msgBody = JSON.parse(data);
+  function parseNotification( data ) {
+    var msgBody = JSON.parse( data );
     var msg = msgBody.notification;
 
-    if (typeof($rootScope.meta.notifications) !== 'undefined') {
-      $rootScope.meta.notifications.push(msg);
+    if ( typeof( $rootScope.meta.notifications ) !== 'undefined' ) {
+      $rootScope.meta.notifications.push( msg );
 
       // TODO: process specific build notifications
 
@@ -203,13 +203,13 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
     }
 
     // perform device build notification updates
-    if (typeof(msg.udid) !== "undefined") {
-        console.log('------------ GOT NOTIFICATION FOR DEVICE');
-        console.log(msg);
+    if ( typeof( msg.udid ) !== "undefined" ) {
+        console.log( '------------ GOT NOTIFICATION FOR DEVICE' );
+        console.log( msg );
 
         if (
-            msg.body == "Pulling repository" || 
-            msg.body == "Building..." || 
+            msg.body == "Pulling repository" ||
+            msg.body == "Building..." ||
             msg.body == "Completed"
         ) {
 
@@ -224,30 +224,30 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
           };
 
           // prepare user metadata for particular device
-          $rootScope.meta.deviceBuilds[msg.udid].push(buildRecord);
+          $rootScope.meta.deviceBuilds[msg.udid].push( buildRecord );
           $scope.$apply();
 
-          Thinx.deviceList().done(function(data) {
-            $scope.$emit("updateDevices", data);
-          })
-          .fail(error => $scope.$emit("xhrFailed", error));
+          Thinx.deviceList().done( function( data ) {
+            $scope.$emit( "updateDevices", data );
+          } )
+          .fail( error => $scope.$emit( "xhrFailed", error ) );
 
-          Thinx.getBuildHistory().done(function(data) {
-            $scope.$emit("updateBuildHistory", data);
-          })
-          .fail(error => $scope.$emit("xhrFailed", error));
+          Thinx.getBuildHistory().done( function( data ) {
+            $scope.$emit( "updateBuildHistory", data );
+          } )
+          .fail( error => $scope.$emit( "xhrFailed", error ) );
 
         }
     }
 
     // determine what to do based on message type
-    if (typeof(msg.type) !== "undefined") {
+    if ( typeof( msg.type ) !== "undefined" ) {
 
       // show toast with action dialog
-      if (msg.type == "actionable") {
+      if ( msg.type == "actionable" ) {
 
         // YES/NO
-        if (msg.response_type == 'bool') {
+        if ( msg.response_type == 'bool' ) {
           toastr['info'](
             msg.body + "<br><br>" +
             msg.nid + "<br><br>" +
@@ -267,19 +267,19 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
             }
           );
 
-          $('#okBtn-' + msg.nid).on("click", function(e) {
-            $(this).parent().slideToggle(500);
-            $scope.$emit("submitNotificationResponse", true);
-          });
+          $( '#okBtn-' + msg.nid ).on( "click", function( e ) {
+            $( this ).parent().slideToggle( 500 );
+            $scope.$emit( "submitNotificationResponse", true );
+          } );
 
-          $('#cancelBtn-' + msg.nid).on("click", function(e) {
-            $(this).parent().slideToggle(500);
-            $scope.$emit("submitNotificationResponse", false);
-          });
+          $( '#cancelBtn-' + msg.nid ).on( "click", function( e ) {
+            $( this ).parent().slideToggle( 500 );
+            $scope.$emit( "submitNotificationResponse", false );
+          } );
         }
 
         // INPUT string
-        if (msg.response_type == 'string') {
+        if ( msg.response_type == 'string' ) {
           toastr['warning'](
             msg.body + "<br><br>" +
             msg.nid + "<br><br>" +
@@ -298,21 +298,21 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
             }
           );
 
-          $('#sendBtn-' + msg.nid).on("click", function(e) {
-            $(this).parent().slideToggle(500);
-            $scope.$emit("submitNotificationResponse", $('input[name=reply-' + msg.nid + ']').val());
-          });
+          $( '#sendBtn-' + msg.nid ).on( "click", function( e ) {
+            $( this ).parent().slideToggle( 500 );
+            $scope.$emit( "submitNotificationResponse", $( 'input[name=reply-' + msg.nid + ']' ).val() );
+          } );
         }
 
-      
+
       // non-actionable status notification
-      } else if (typeof(msg.body.status) !== 'undefined') {
+      } else if ( typeof( msg.body.status ) !== 'undefined' ) {
 
         var msgTitle = "Device Status Update";
 
         // process status message
         toastr[msg.type](
-          JSON.stringify(msg.body),
+          JSON.stringify( msg.body ),
           msgTitle,
           {
             timeOut: 8000,
@@ -325,15 +325,15 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
           }
         );
 
-        Thinx.deviceList().done(function(data) {
-          $scope.$emit("updateDevices", data);
-        })
-        .fail(error => $scope.$emit("xhrFailed", error));
+        Thinx.deviceList().done( function( data ) {
+          $scope.$emit( "updateDevices", data );
+        } )
+        .fail( error => $scope.$emit( "xhrFailed", error ) );
 
-        Thinx.getBuildHistory().done(function (data) {
-          $scope.$emit("updateBuildHistory", data);
-        })
-        .fail(error => $scope.$emit("xhrFailed", error));
+        Thinx.getBuildHistory().done( function( data ) {
+          $scope.$emit( "updateBuildHistory", data );
+        } )
+        .fail( error => $scope.$emit( "xhrFailed", error ) );
 
         // non-actionable notification without status
       } else {
@@ -343,9 +343,9 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
         // "info"
         // "success"
         // "warning"
-        
+
         toastr[msg.type](
-          JSON.stringify(msg.body),
+          JSON.stringify( msg.body ),
           msg.title,
           {
             timeOut: 20000,
@@ -355,14 +355,14 @@ angular.module('RTM').controller('LogviewController', ['$rootScope', '$scope', '
             closeMethod: 'fadeOut',
             closeDuration: 300,
             closeEasing: 'swing'
-          });
+          } );
       }
 
     } else {
 
-      console.log('Skipping undefined message type...');
+      console.log( 'Skipping undefined message type...' );
 
     }
   }
 
-}]);
+} ] );

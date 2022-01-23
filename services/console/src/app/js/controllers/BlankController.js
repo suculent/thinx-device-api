@@ -1,6 +1,6 @@
 /* Setup blank page controller */
-angular.module('RTM').controller('BlankController', ['$rootScope', '$scope', 'settings', function($rootScope, $scope, settings) {
-  $scope.$on('$viewContentLoaded', function() {
+angular.module( 'RTM' ).controller( 'BlankController', [ '$rootScope', '$scope', 'settings', function( $rootScope, $scope, settings ) {
+  $scope.$on( '$viewContentLoaded', function() {
     // initialize core components
     App.initAjax();
 
@@ -8,5 +8,5 @@ angular.module('RTM').controller('BlankController', ['$rootScope', '$scope', 'se
     $rootScope.settings.layout.pageContentWhite = true;
     $rootScope.settings.layout.pageBodySolid = false;
     $rootScope.settings.layout.pageSidebarClosed = false;
-  });
-}]);
+  } );
+} ] );

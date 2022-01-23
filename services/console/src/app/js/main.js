@@ -5,7 +5,7 @@ THiNX Main Script
 */
 
 /* Init App */
-var RTM = angular.module("RTM", [
+var RTM = angular.module( "RTM", [
   "ui.router",
   "ui.bootstrap",
   "oc.lazyLoad",
@@ -17,32 +17,32 @@ var RTM = angular.module("RTM", [
   "xeditable",
   "ui.codemirror",
   "angular.filter"
-]);
+] );
 
-RTM.config(['RollbarProvider', function(RollbarProvider) {
-  RollbarProvider.init({
+RTM.config( [ 'RollbarProvider', function( RollbarProvider ) {
+  RollbarProvider.init( {
     accessToken: "<ENV::rollbarAccessToken>",
     captureUncaught: true,
     payload: {
       environment: 'development'
     }
-  });
-}]);
+  } );
+} ] );
 
 /* Configure ocLazyLoader(refer: https://github.com/ocombe/ocLazyLoad) */
-RTM.config(['$ocLazyLoadProvider', function($ocLazyLoadProvider) {
-  $ocLazyLoadProvider.config({
+RTM.config( [ '$ocLazyLoadProvider', function( $ocLazyLoadProvider ) {
+  $ocLazyLoadProvider.config( {
     // global configs go here
-  });
-}]);
+  } );
+} ] );
 
 //AngularJS v1.3.x workaround for old style controller declarition in HTML
-RTM.config(['$controllerProvider', function($controllerProvider) {
+RTM.config( [ '$controllerProvider', function( $controllerProvider ) {
   $controllerProvider.allowGlobals();
-}]);
+} ] );
 
 /* Setup global settings */
-RTM.factory('settings', ['$rootScope', function($rootScope) {
+RTM.factory( 'settings', [ '$rootScope', function( $rootScope ) {
   // supported languages
   var settings = {
     layout: {
@@ -58,11 +58,11 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
 
   $rootScope.settings = settings;
 
-  console.log(' === ROOT === ');
-  console.log($rootScope);
+  console.log( ' === ROOT === ' );
+  console.log( $rootScope );
 
   // UI temporary data, might be saved to localstorage
-  if (typeof($rootScope.meta) === "undefined") {
+  if ( typeof( $rootScope.meta ) === "undefined" ) {
     $rootScope.meta = {};
     $rootScope.meta.builds = []; // builds by build_id
     $rootScope.meta.transformers = {}; // decoded transformers
@@ -136,35 +136,35 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
   };
 
   $rootScope.platforms = {
-    'arduino': {name: 'Arduino', build: true},
-    'platformio': {name: 'Platform.io', build: true},
-    'nodemcu': {name: 'NodeMCU', build: true},
-    'pine64': {name: 'Pine64', build: true},
-    'micropython': {name: 'Micropython', build: true},
-    'mongoose': {name: 'MongooseOS', build: true},
-    'nodejs': {name: 'NodeJS', build: true},
-    'unknown': {name: 'Unknown', build: true},
-    'sigfox': {name: 'Sigfox', build: false}
+    'arduino': { name: 'Arduino', build: true },
+    'platformio': { name: 'Platform.io', build: true },
+    'nodemcu': { name: 'NodeMCU', build: true },
+    'pine64': { name: 'Pine64', build: true },
+    'micropython': { name: 'Micropython', build: true },
+    'mongoose': { name: 'MongooseOS', build: true },
+    'nodejs': { name: 'NodeJS', build: true },
+    'unknown': { name: 'Unknown', build: true },
+    'sigfox': { name: 'Sigfox', build: false }
   };
 
   $rootScope.categories = {
-    'yellow-crusta': {name: 'yellow-crusta'},
-    'red-intense': {name: 'red-intense'},
-    'purple-studio': {name: 'purple-studio'},
-    'blue': {name: 'blue'},
-    'green': {name: 'green'},
-    'green-dark': {name: 'green-dark'},
-    'grey-mint': {name: 'grey-mint'}
+    'yellow-crusta': { name: 'yellow-crusta' },
+    'red-intense': { name: 'red-intense' },
+    'purple-studio': { name: 'purple-studio' },
+    'blue': { name: 'blue' },
+    'green': { name: 'green' },
+    'green-dark': { name: 'green-dark' },
+    'grey-mint': { name: 'grey-mint' }
   };
 
   $rootScope.thinx = {};
 
   $rootScope.thinx.iotIcons = [];
-  for (var i = 1; i < 73; i++) {
-    $rootScope.thinx.iotIcons.push(i);
+  for ( var i = 1; i < 73; i++ ) {
+    $rootScope.thinx.iotIcons.push( i );
   }
 
-  $rootScope.thinx.defaults = {defaultTransformerBodyBase64: "Ly8gQ29weSAmIFBhc3RlIEphdmFzY3JpcHQgZnVuY3Rpb24gaGVyZS4uLgoKdmFyIHRyYW5zZm9ybWVyID0gZnVuY3Rpb24oc3RhdHVzLCBkZXZpY2UpIHsKICByZXR1cm4gc3RhdHVzOwp9"};
+  $rootScope.thinx.defaults = { defaultTransformerBodyBase64: "Ly8gQ29weSAmIFBhc3RlIEphdmFzY3JpcHQgZnVuY3Rpb24gaGVyZS4uLgoKdmFyIHRyYW5zZm9ybWVyID0gZnVuY3Rpb24oc3RhdHVzLCBkZXZpY2UpIHsKICByZXR1cm4gc3RhdHVzOwp9" };
 
   $rootScope.profile = {
     avatar: '/assets/thinx/img/default_avatar_sm.png',
@@ -191,44 +191,44 @@ RTM.factory('settings', ['$rootScope', function($rootScope) {
   };
 
   return settings;
-}]);
+} ] );
 
 
-RTM.filter('lastSeen', function() {
-  return function(date, suffix) {
-    if (typeof(date) === "number") {
+RTM.filter( 'lastSeen', function() {
+  return function( date, suffix ) {
+    if ( typeof( date ) === "number" ) {
       // e.g. 1410715640579 -	Unix ms timestamp
-      return moment(date, 'x').fromNow(suffix);
+      return moment( date, 'x' ).fromNow( suffix );
     } else {
       // e.g. 2013-03-07T07:00:00+08:00 - ISO8601
-      return moment(date).fromNow(suffix);
+      return moment( date ).fromNow( suffix );
     }
   };
-});
+} );
 
-RTM.filter('base64_decode', function() {
-  return function(base64_string) {
-    if (typeof(base64_string) == 'undefined' || base64_string.length < 1) {
+RTM.filter( 'base64_decode', function() {
+  return function( base64_string ) {
+    if ( typeof( base64_string ) == 'undefined' || base64_string.length < 1 ) {
       return;
     } else {
-      return base64converter('decode', base64_string);
+      return base64converter( 'decode', base64_string );
     }
   };
-});
+} );
 
-function base64converter(type, string) {
+function base64converter( type, string ) {
   /*! http://mths.be/base64 v0.1.0 by @mathias | MIT license */
 
   /*--------------------------------------------------------------------------*/
-  var InvalidCharacterError = function(message) {
+  var InvalidCharacterError = function( message ) {
     this.message = message;
   };
   InvalidCharacterError.prototype = new Error;
   InvalidCharacterError.prototype.name = 'InvalidCharacterError';
-  var error = function(message) {
+  var error = function( message ) {
     // Note: the error messages used throughout this file match those used by
     // the native `atob`/`btoa` implementation in Chromium.
-    throw new InvalidCharacterError(message);
+    throw new InvalidCharacterError( message );
   };
   var TABLE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
   // http://whatwg.org/html/common-microsyntaxes.html#space-character
@@ -237,18 +237,18 @@ function base64converter(type, string) {
   // HTML Standard. http://whatwg.org/html/webappapis.html#dom-windowbase64-atob
   // The optimized base64-decoding algorithm used is based on @atk's excellent
   // implementation. https://gist.github.com/atk/1020396
-  var decode = function(input) {
-    input = String(input)
-    .replace(REGEX_SPACE_CHARACTERS, '');
+  var decode = function( input ) {
+    input = String( input )
+    .replace( REGEX_SPACE_CHARACTERS, '' );
     var length = input.length;
-    if (length % 4 == 0) {
-      input = input.replace(/==?$/, '');
+    if ( length % 4 == 0 ) {
+      input = input.replace( /==?$/, '' );
       length = input.length;
     }
     if (
       length % 4 == 1 ||
       // http://whatwg.org/C#alphanumeric-ascii-characters
-      /[^+a-zA-Z0-9/]/.test(input)
+      /[^+a-zA-Z0-9/]/.test( input )
     ) {
       error(
         'Invalid character: the string to be decoded is not correctly encoded.'
@@ -259,14 +259,14 @@ function base64converter(type, string) {
     var buffer;
     var output = '';
     var position = -1;
-    while (++position < length) {
-      buffer = TABLE.indexOf(input.charAt(position));
+    while ( ++position < length ) {
+      buffer = TABLE.indexOf( input.charAt( position ) );
       bitStorage = bitCounter % 4 ? bitStorage * 64 + buffer : buffer;
       // Unless this is the first of a group of 4 characters…
-      if (bitCounter++ % 4) {
+      if ( bitCounter++ % 4 ) {
         // …convert the first 8 bits to a single ASCII character.
         output += String.fromCharCode(
-          0xFF & bitStorage >> (-2 * bitCounter & 6)
+          0xFF & bitStorage >> ( -2 * bitCounter & 6 )
         );
       }
     }
@@ -274,9 +274,9 @@ function base64converter(type, string) {
   };
   // `encode` is designed to be fully compatible with `btoa` as described in the
   // HTML Standard: http://whatwg.org/html/webappapis.html#dom-windowbase64-btoa
-  var encode = function(input) {
-    input = String(input);
-    if (/[^\0-\xFF]/.test(input)) {
+  var encode = function( input ) {
+    input = String( input );
+    if ( /[^\0-\xFF]/.test( input ) ) {
       // Note: no need to special-case astral symbols here, as surrogates are
       // matched, and the input is supposed to only contain ASCII anyway.
       error(
@@ -293,36 +293,36 @@ function base64converter(type, string) {
     var buffer;
     // Make sure any padding is handled outside of the loop.
     var length = input.length - padding;
-    while (++position < length) {
+    while ( ++position < length ) {
       // Read three bytes, i.e. 24 bits.
-      a = input.charCodeAt(position) << 16;
-      b = input.charCodeAt(++position) << 8;
-      c = input.charCodeAt(++position);
+      a = input.charCodeAt( position ) << 16;
+      b = input.charCodeAt( ++position ) << 8;
+      c = input.charCodeAt( ++position );
       buffer = a + b + c;
       // Turn the 24 bits into four chunks of 6 bits each, and append the
       // matching character for each of them to the output.
       output += (
-        TABLE.charAt(buffer >> 18 & 0x3F) +
-        TABLE.charAt(buffer >> 12 & 0x3F) +
-        TABLE.charAt(buffer >> 6 & 0x3F) +
-        TABLE.charAt(buffer & 0x3F)
+        TABLE.charAt( buffer >> 18 & 0x3F ) +
+        TABLE.charAt( buffer >> 12 & 0x3F ) +
+        TABLE.charAt( buffer >> 6 & 0x3F ) +
+        TABLE.charAt( buffer & 0x3F )
       );
     }
-    if (padding == 2) {
-      a = input.charCodeAt(position) << 8;
-      b = input.charCodeAt(++position);
+    if ( padding == 2 ) {
+      a = input.charCodeAt( position ) << 8;
+      b = input.charCodeAt( ++position );
       buffer = a + b;
       output += (
-        TABLE.charAt(buffer >> 10) +
-        TABLE.charAt((buffer >> 4) & 0x3F) +
-        TABLE.charAt((buffer << 2) & 0x3F) +
+        TABLE.charAt( buffer >> 10 ) +
+        TABLE.charAt( ( buffer >> 4 ) & 0x3F ) +
+        TABLE.charAt( ( buffer << 2 ) & 0x3F ) +
         '='
       );
-    } else if (padding == 1) {
-      buffer = input.charCodeAt(position);
+    } else if ( padding == 1 ) {
+      buffer = input.charCodeAt( position );
       output += (
-        TABLE.charAt(buffer >> 2) +
-        TABLE.charAt((buffer << 4) & 0x3F) +
+        TABLE.charAt( buffer >> 2 ) +
+        TABLE.charAt( ( buffer << 4 ) & 0x3F ) +
         '=='
       );
     }
@@ -335,41 +335,41 @@ function base64converter(type, string) {
   };
 
 
-  if (type == 'encode') {
-    return base64.encode(string);
+  if ( type == 'encode' ) {
+    return base64.encode( string );
   }
-  if (type == 'decode') {
-    return base64.decode(string);
+  if ( type == 'decode' ) {
+    return base64.decode( string );
   }
 
 }
 
-RTM.filter('split', function() {
-  return function(input, splitChar, splitIndex) {
+RTM.filter( 'split', function() {
+  return function( input, splitChar, splitIndex ) {
     // do some bounds checking here to ensure it has that index
-    return input.split(splitChar)[splitIndex];
+    return input.split( splitChar )[splitIndex];
   };
-});
+} );
 
-RTM.filter('objFilter', function() {
-  return function(input, search) {
-    if (!input) { 
-      return input; 
-    } 
-    if (!search) { 
-      return input; 
+RTM.filter( 'objFilter', function() {
+  return function( input, search ) {
+    if ( !input ) {
+      return input;
     }
-    var expected = ('' + search).toLowerCase();
+    if ( !search ) {
+      return input;
+    }
+    var expected = ( '' + search ).toLowerCase();
     var result = {};
-    angular.forEach(input, function(value, key) {
-      var actual = ('' + value).toLowerCase();
-      if (actual.indexOf(expected) !== -1) {
+    angular.forEach( input, function( value, key ) {
+      var actual = ( '' + value ).toLowerCase();
+      if ( actual.indexOf( expected ) !== -1 ) {
         result[key] = value;
       }
-    });
+    } );
     return result;
   };
-});
+} );
 
 /**
 * AngularJS default filter with the following expression:
@@ -377,195 +377,195 @@ RTM.filter('objFilter', function() {
 * performs a AND between 'name: $select.search' and 'age: $select.search'.
 * We want to perform a OR.
 */
-angular.module('RTM').filter('propsFilter', function() {
-  return function(items, props) {
+angular.module( 'RTM' ).filter( 'propsFilter', function() {
+  return function( items, props ) {
     var out = [];
-    if (angular.isArray(items)) {
-      var keys = Object.keys(props);
-      items.forEach(function(item) {
+    if ( angular.isArray( items ) ) {
+      var keys = Object.keys( props );
+      items.forEach( function( item ) {
         var itemMatches = false;
-        for (var i = 0; i < keys.length; i++) {
+        for ( var i = 0; i < keys.length; i++ ) {
           var prop = keys[i];
           var text = props[prop].toLowerCase();
 
-          if (typeof(prop) === "undefined" || typeof(item) === "undefined" || typeof(item[prop]) === "undefined") {
-            console.log("Parser ERROR on prop:", prop, item);
+          if ( typeof( prop ) === "undefined" || typeof( item ) === "undefined" || typeof( item[prop] ) === "undefined" ) {
+            console.log( "Parser ERROR on prop:", prop, item );
           }
 
-          if (item[prop].toString().toLowerCase().indexOf(text) !== -1) {
+          if ( item[prop].toString().toLowerCase().indexOf( text ) !== -1 ) {
             itemMatches = true;
             break;
           }
         }
-        if (itemMatches) {
-          out.push(item);
+        if ( itemMatches ) {
+          out.push( item );
         }
-      });
+      } );
     } else {
       // Let the output be the input untouched
       out = items;
     }
     return out;
   };
-});
+} );
 
 /* Filtering out control characters for status transformer icons */
-RTM.filter('removeControlChars', function() {
-  return function(str) {
+RTM.filter( 'removeControlChars', function() {
+  return function( str ) {
     var output = "";
-    if (typeof(str) !== "undefined" && str.length > 0) {
-      str = str.replace("#e", "");
-      str = str.replace("#w", "");
+    if ( typeof( str ) !== "undefined" && str.length > 0 ) {
+      str = str.replace( "#e", "" );
+      str = str.replace( "#w", "" );
       output = str;
     }
     return output;
   };
-});
+} );
 
 /* Main Controller */
-RTM.controller('AppController', ['$scope', '$rootScope', 'webNotification', 'Rollbar', function($scope, $rootScope, $webNotification, Rollbar) {
-  $scope.$on('$viewContentLoaded', function() {
-    console.log('checking user credentials...');
+RTM.controller( 'AppController', [ '$scope', '$rootScope', 'webNotification', 'Rollbar', function( $scope, $rootScope, $webNotification, Rollbar ) {
+  $scope.$on( '$viewContentLoaded', function() {
+    console.log( 'checking user credentials...' );
     console.log(
       document.cookie
     );
-  });
-}]);
+  } );
+} ] );
 
-function getCookie(name) {
+function getCookie( name ) {
   var dc = document.cookie;
   var prefix = name + "=";
-  var begin = dc.indexOf("; " + prefix);
-  if (begin == -1) {
-    begin = dc.indexOf(prefix);
-    if (begin != 0) {
+  var begin = dc.indexOf( "; " + prefix );
+  if ( begin == -1 ) {
+    begin = dc.indexOf( prefix );
+    if ( begin != 0 ) {
       return null;
     }
   } else {
     begin += 2;
-    var end = document.cookie.indexOf(";", begin);
-    if (end == -1) {
+    var end = document.cookie.indexOf( ";", begin );
+    if ( end == -1 ) {
       end = dc.length;
     }
   }
-  return decodeURI(dc.substring(begin + prefix.length, end));
+  return decodeURI( dc.substring( begin + prefix.length, end ) );
 }
 
 /* Header */
-RTM.controller('HeaderController', ['$scope', '$rootScope', function($scope, $rootScope) {
-  $scope.$on('$includeContentLoaded', function() {
+RTM.controller( 'HeaderController', [ '$scope', '$rootScope', function( $scope, $rootScope ) {
+  $scope.$on( '$includeContentLoaded', function() {
     Layout.initHeader();
-  });
+  } );
 
-  $rootScope.getDeviceByUdid = function(deviceUdid) {
-    for (var index in $rootScope.devices) {
-      if ($rootScope.devices[index].udid == deviceUdid) {
+  $rootScope.getDeviceByUdid = function( deviceUdid ) {
+    for ( var index in $rootScope.devices ) {
+      if ( $rootScope.devices[index].udid == deviceUdid ) {
         return $rootScope.devices[index];
       }
     }
     return false;
   };
 
-  $rootScope.getApikeyByHash = function(keyhash) {
-    for (var index in $rootScope.apikeys) {
-      if ($rootScope.apikeys[index].hash == keyhash) {
+  $rootScope.getApikeyByHash = function( keyhash ) {
+    for ( var index in $rootScope.apikeys ) {
+      if ( $rootScope.apikeys[index].hash == keyhash ) {
         return $rootScope.apikeys[index];
       }
     }
     return false;
   };
 
-  $rootScope.getSourceById = function(sourceId) {
-    for (var index in $rootScope.sources) {
-      if ($rootScope.sources[index].sourceId == sourceId) {
+  $rootScope.getSourceById = function( sourceId ) {
+    for ( var index in $rootScope.sources ) {
+      if ( $rootScope.sources[index].sourceId == sourceId ) {
         return $rootScope.sources[index];
       }
     }
     return false;
   };
 
-  $rootScope.getTransformerByUtid = function(transformerUtid) {
-    for (var index in $rootScope.profile.info.transformers) {
-      if ($rootScope.profile.info.transformers[index].utid == transformerUtid) {
+  $rootScope.getTransformerByUtid = function( transformerUtid ) {
+    for ( var index in $rootScope.profile.info.transformers ) {
+      if ( $rootScope.profile.info.transformers[index].utid == transformerUtid ) {
         return $rootScope.profile.info.transformers[index];
       }
     }
     return false;
   };
 
-  $rootScope.getRawTransformerByUtid = function(transformerUtid) {
-    for (var index in $rootScope.meta.transformers) {
-      if ($rootScope.meta.transformers[index].utid == transformerUtid) {
+  $rootScope.getRawTransformerByUtid = function( transformerUtid ) {
+    for ( var index in $rootScope.meta.transformers ) {
+      if ( $rootScope.meta.transformers[index].utid == transformerUtid ) {
         return $rootScope.meta.transformers[index];
       }
     }
     return false;
   };
 
-}]);
+} ] );
 
 /* Setup Layout Part - Sidebar */
-RTM.controller('SidebarController', ['$state', '$scope', function($state, $scope) {
-  $scope.$on('$includeContentLoaded', function() {
-    Layout.initSidebar($state); // init sidebar
-  });
-}]);
+RTM.controller( 'SidebarController', [ '$state', '$scope', function( $state, $scope ) {
+  $scope.$on( '$includeContentLoaded', function() {
+    Layout.initSidebar( $state ); // init sidebar
+  } );
+} ] );
 
 /* Setup Layout Part - Sidebar */
-RTM.controller('PageHeadController', ['$scope', function($scope) {
-  $scope.$on('$includeContentLoaded', function() {
+RTM.controller( 'PageHeadController', [ '$scope', function( $scope ) {
+  $scope.$on( '$includeContentLoaded', function() {
     Theme.init(); // init theme panel
     $scope.socketStatus = null;
-  });
+  } );
 
-  $scope.displaySocketStatus = function(status) {
-    if (status == 1) {
+  $scope.displaySocketStatus = function( status ) {
+    if ( status == 1 ) {
       $scope.socketStatus = 'WebSocket Connected';
-    } else if (status == 0) {
+    } else if ( status == 0 ) {
       $scope.socketStatus = 'WebSocket Connecting...';
     }
-    $('.websocket-badge').fadeIn();
-    setTimeout(function() {
-      console.log("timeout");
-      $('.websocket-badge').fadeOut();
-    }, 2000);
+    $( '.websocket-badge' ).fadeIn();
+    setTimeout( function() {
+      console.log( "timeout" );
+      $( '.websocket-badge' ).fadeOut();
+    }, 2000 );
   };
 
-}]);
+} ] );
 
 /* Setup Layout Part - Quick Sidebar */
-RTM.controller('QuickSidebarController', ['$scope', function($scope) {
-  $scope.$on('$includeContentLoaded', function() {
-    setTimeout(function() {
+RTM.controller( 'QuickSidebarController', [ '$scope', function( $scope ) {
+  $scope.$on( '$includeContentLoaded', function() {
+    setTimeout( function() {
       QuickSidebar.init(); // init quick sidebar
-    }, 2000);
-  });
-}]);
+    }, 2000 );
+  } );
+} ] );
 
 /* Setup Layout Part - Footer */
-RTM.controller('FooterController', ['$scope', function($scope) {
-  $scope.$on('$includeContentLoaded', function() {
+RTM.controller( 'FooterController', [ '$scope', function( $scope ) {
+  $scope.$on( '$includeContentLoaded', function() {
     Layout.initFooter(); // init footer
-  });
-}]);
+  } );
+} ] );
 
 
 /* Router */
-RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
+RTM.config( [ '$stateProvider', '$urlRouterProvider', function( $stateProvider, $urlRouterProvider ) {
   // Redirect any unmatched url
-  $urlRouterProvider.otherwise("/dashboard");
+  $urlRouterProvider.otherwise( "/dashboard" );
 
   $stateProvider
 
   // Dashboard
-  .state('dashboard', {
+  .state( 'dashboard', {
     url: "/dashboard",
     templateUrl: "views/dashboard.html",
-    data: {pageTitle: 'Dashboard'},
+    data: { pageTitle: 'Dashboard' },
     controller: "DashboardController",
     resolve: {
-      deps: ['$ocLazyLoad', function($ocLazyLoad) {
-        return $ocLazyLoad.load({
+      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+        return $ocLazyLoad.load( {
           name: 'RTM',
           insertBefore: '#ng_load_plugins_before',
           files: [
@@ -587,20 +587,20 @@ RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             'js/controllers/DashboardController.js',
             'js/controllers/LogviewController.js'
           ]
-        });
-      }]
+        } );
+      } ]
     }
-  })
+  } )
 
   // Devices
-  .state('devices', {
+  .state( 'devices', {
     url: "/devices",
     templateUrl: "views/devices.html",
-    data: {pageTitle: 'Devices'},
+    data: { pageTitle: 'Devices' },
     controller: "DevicesController",
     resolve: {
-      deps: ['$ocLazyLoad', function($ocLazyLoad) {
-        return $ocLazyLoad.load({
+      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+        return $ocLazyLoad.load( {
           name: 'RTM',
           insertBefore: '#ng_load_plugins_before',
           files: [
@@ -615,23 +615,23 @@ RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             'js/controllers/DevicesController.js',
             'js/controllers/LogviewController.js'
           ]
-        });
-      }]
+        } );
+      } ]
     }
-  })
+  } )
 
   // Device Detail
-  .state('device', {
+  .state( 'device', {
     url: "/device/:udid",
     params: {
       udid: null
     },
     templateUrl: "views/device.html",
-    data: {pageTitle: 'Device'},
+    data: { pageTitle: 'Device' },
     controller: "DeviceController",
     resolve: {
-      deps: ['$ocLazyLoad', function($ocLazyLoad) {
-        return $ocLazyLoad.load({
+      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+        return $ocLazyLoad.load( {
           name: 'RTM',
           insertBefore: '#ng_load_plugins_before',
           files: [
@@ -653,20 +653,20 @@ RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             'js/controllers/LogviewController.js',
             '../assets/thinx/js/plugins/crypto-js/sha256.js'
           ]
-        });
-      }]
+        } );
+      } ]
     }
-  })
+  } )
 
   // Apikey Page
-  .state('apikey', {
+  .state( 'apikey', {
     url: "/apikey",
     templateUrl: "views/apikey.html",
-    data: {pageTitle: 'API Key Management'},
+    data: { pageTitle: 'API Key Management' },
     controller: "ApikeyController",
     resolve: {
-      deps: ['$ocLazyLoad', function($ocLazyLoad) {
-        return $ocLazyLoad.load({
+      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+        return $ocLazyLoad.load( {
           name: 'RTM',
           insertBefore: '#ng_load_plugins_before',
           files: [
@@ -675,20 +675,20 @@ RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             'js/controllers/ApikeyController.js',
             'js/controllers/LogviewController.js'
           ]
-        });
-      }]
+        } );
+      } ]
     }
-  })
+  } )
 
   // Source Page
-  .state('source', {
+  .state( 'source', {
     url: "/source",
     templateUrl: "views/source.html",
-    data: {pageTitle: 'Application Management'},
+    data: { pageTitle: 'Application Management' },
     controller: "SourceController",
     resolve: {
-      deps: ['$ocLazyLoad', function($ocLazyLoad) {
-        return $ocLazyLoad.load({
+      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+        return $ocLazyLoad.load( {
           name: 'RTM',
           insertBefore: '#ng_load_plugins_before',
           files: [
@@ -696,10 +696,10 @@ RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             'js/controllers/SourceController.js',
             'js/controllers/LogviewController.js'
           ]
-        });
-      }]
+        } );
+      } ]
     }
-  })
+  } )
 
   // Rsakey Page
   /*
@@ -709,7 +709,7 @@ RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
     data: {pageTitle: 'RSA Key Management'},
     controller: "RsakeyController",
     resolve: {
-      deps: ['$ocLazyLoad', function($ocLazyLoad) {
+      deps: [ '$ocLazyLoad', function($ocLazyLoad) {
         return $ocLazyLoad.load({
           name: 'RTM',
           insertBefore: '#ng_load_plugins_before',
@@ -719,20 +719,20 @@ RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             'js/controllers/LogviewController.js'
           ]
         });
-      }]
+      } ]
     }
   })
   */
 
   // Deploy key Page
-  .state('deploykey', {
+  .state( 'deploykey', {
     url: "/deploykey",
     templateUrl: "views/deploykey.html",
-    data: {pageTitle: 'Deploy Key Management'},
+    data: { pageTitle: 'Deploy Key Management' },
     controller: "DeploykeyController",
     resolve: {
-      deps: ['$ocLazyLoad', function($ocLazyLoad) {
-        return $ocLazyLoad.load({
+      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+        return $ocLazyLoad.load( {
           name: 'RTM',
           insertBefore: '#ng_load_plugins_before',
           files: [
@@ -741,20 +741,20 @@ RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             'js/controllers/DeploykeyController.js',
             'js/controllers/LogviewController.js'
           ]
-        });
-      }]
+        } );
+      } ]
     }
-  })
+  } )
 
   // Mesh Channel Page
-  .state('channel', {
+  .state( 'channel', {
     url: "/channel",
     templateUrl: "views/channel.html",
     data: { pageTitle: 'Mesh Channel Management' },
     controller: "ChannelController",
     resolve: {
-      deps: ['$ocLazyLoad', function ($ocLazyLoad) {
-        return $ocLazyLoad.load({
+      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+        return $ocLazyLoad.load( {
           name: 'RTM',
           insertBefore: '#ng_load_plugins_before',
           files: [
@@ -763,20 +763,20 @@ RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             'js/controllers/ChannelController.js',
             'js/controllers/LogviewController.js'
           ]
-        });
-      }]
+        } );
+      } ]
     }
-  })
+  } )
 
   // Enviro Page
-  .state('enviro', {
+  .state( 'enviro', {
     url: "/enviro",
     templateUrl: "views/enviro.html",
-    data: {pageTitle: 'Environment Variables'},
+    data: { pageTitle: 'Environment Variables' },
     controller: "EnviroController",
     resolve: {
-      deps: ['$ocLazyLoad', function($ocLazyLoad) {
-        return $ocLazyLoad.load({
+      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+        return $ocLazyLoad.load( {
           name: 'RTM',
           insertBefore: '#ng_load_plugins_before',
           files: [
@@ -784,20 +784,20 @@ RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             'js/controllers/EnviroController.js',
             'js/controllers/LogviewController.js'
           ]
-        });
-      }]
+        } );
+      } ]
     }
-  })
+  } )
 
   // Transformer Page
-  .state('transformer', {
+  .state( 'transformer', {
     url: "/transformer",
     templateUrl: "views/transformer.html",
-    data: {pageTitle: 'Status Transformers'},
+    data: { pageTitle: 'Status Transformers' },
     controller: "TransformerController",
     resolve: {
-      deps: ['$ocLazyLoad', function($ocLazyLoad) {
-        return $ocLazyLoad.load({
+      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+        return $ocLazyLoad.load( {
           name: 'RTM',
           insertBefore: '#ng_load_plugins_before',
           files: [
@@ -807,13 +807,13 @@ RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             'js/controllers/LogviewController.js',
             '../assets/thinx/js/plugins/crypto-js/sha256.js'
           ]
-        });
-      }]
+        } );
+      } ]
     }
-  })
+  } )
 
   // History Page
-  .state('history', {
+  .state( 'history', {
     url: "/history/:tab",
     params: {
       tab: {
@@ -821,11 +821,11 @@ RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
       }
     },
     templateUrl: "views/history.html",
-    data: {pageTitle: 'History'},
+    data: { pageTitle: 'History' },
     controller: "HistoryController",
     resolve: {
-      deps: ['$ocLazyLoad', function($ocLazyLoad) {
-        return $ocLazyLoad.load({
+      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+        return $ocLazyLoad.load( {
           name: 'RTM',
           insertBefore: '#ng_load_plugins_before',
           files: [
@@ -835,20 +835,20 @@ RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             'js/controllers/HistoryController.js',
             'js/controllers/LogviewController.js'
           ]
-        });
-      }]
+        } );
+      } ]
     }
-  })
+  } )
 
   // User Profile
-  .state("profile", {
+  .state( "profile", {
     url: "/profile",
     templateUrl: "views/profile/main.html",
-    data: {pageTitle: 'User Profile'},
+    data: { pageTitle: 'User Profile' },
     controller: "UserProfileController",
     resolve: {
-      deps: ['$ocLazyLoad', function($ocLazyLoad) {
-        return $ocLazyLoad.load({
+      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+        return $ocLazyLoad.load( {
           name: 'RTM',
           insertBefore: '#ng_load_plugins_before',
           files: [
@@ -872,69 +872,69 @@ RTM.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             'js/controllers/UserProfileController.js',
             'js/controllers/LogviewController.js'
           ]
-        });
-      }]
+        } );
+      } ]
     }
-  })
+  } )
 
   // User Profile Dashboard
-  .state("profile.dashboard", {
+  .state( "profile.dashboard", {
     url: "/dashboard",
     templateUrl: "views/profile/dashboard.html",
-    data: {pageTitle: 'User Profile'}
-  })
+    data: { pageTitle: 'User Profile' }
+  } )
 
   // User Profile Account
-  .state("profile.account", {
+  .state( "profile.account", {
     url: "/account",
     templateUrl: "views/profile/account.html",
-    data: {pageTitle: 'Settings'}
-  })
+    data: { pageTitle: 'Settings' }
+  } )
 
   // User Profile Help
-  .state("profile.help", {
+  .state( "profile.help", {
     url: "/help",
     templateUrl: "views/profile/help.html",
-    data: {pageTitle: 'User Help'}
-  })
+    data: { pageTitle: 'User Help' }
+  } )
 
   // User Delete Profile
-  .state("profile.delete", {
+  .state( "profile.delete", {
     url: "/delete",
     templateUrl: "views/profile/delete.html",
-    data: {pageTitle: 'Delete Profile'}
-  })
+    data: { pageTitle: 'Delete Profile' }
+  } )
 
   // Blank Page
-  .state('blank', {
+  .state( 'blank', {
     url: "/blank",
     templateUrl: "views/blank.html",
-    data: {pageTitle: 'Blank Page Template'},
+    data: { pageTitle: 'Blank Page Template' },
     controller: "BlankController",
     resolve: {
-      deps: ['$ocLazyLoad', function($ocLazyLoad) {
-        return $ocLazyLoad.load({
+      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+        return $ocLazyLoad.load( {
           name: 'RTM',
           insertBefore: '#ng_load_plugins_before',
           files: [
             'js/controllers/BlankController.js'
           ]
-        });
-      }]
+        } );
+      } ]
     }
-  });
+  } );
 
-}]);
+} ] );
 
 /* Init global settings and run the app */
-RTM.run(["$rootScope", "settings", "$state", function($rootScope, settings, $state) {
+RTM.run( [ "$rootScope", "settings", "$state", function( $rootScope, settings, $state ) {
   $rootScope.$state = $state;
   $rootScope.$settings = settings;
-}]);
+} ] );
 
-RTM.run(function(editableOptions, editableThemes) {
+RTM.run( function( editableOptions, editableThemes ) {
   editableOptions.theme = 'default';
   editableThemes['default'].submitTpl = '<button class="btn grey-mint btn-outline btn-circle btn-sm" type="submit"><i class="fa fa-check"></i></button>';
   editableThemes['default'].cancelTpl = '<button class="btn grey-mint btn-outline btn-circle btn-sm" ng-click="$form.$cancel()"><i class="fa fa-times"></i></button>';
   // editableOptions.buttons = 'right';
-});
+} );
