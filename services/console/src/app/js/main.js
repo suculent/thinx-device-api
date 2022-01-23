@@ -19,30 +19,30 @@ var RTM = angular.module( "RTM", [
   "angular.filter"
 ] );
 
-RTM.config( [ 'RollbarProvider', function( RollbarProvider ) {
+RTM.config( [ "RollbarProvider", function( RollbarProvider ) {
   RollbarProvider.init( {
     accessToken: "<ENV::rollbarAccessToken>",
     captureUncaught: true,
     payload: {
-      environment: 'development'
+      environment: "development"
     }
   } );
 } ] );
 
 /* Configure ocLazyLoader(refer: https://github.com/ocombe/ocLazyLoad) */
-RTM.config( [ '$ocLazyLoadProvider', function( $ocLazyLoadProvider ) {
+RTM.config( [ "$ocLazyLoadProvider", function( $ocLazyLoadProvider ) {
   $ocLazyLoadProvider.config( {
     // global configs go here
   } );
 } ] );
 
 //AngularJS v1.3.x workaround for old style controller declarition in HTML
-RTM.config( [ '$controllerProvider', function( $controllerProvider ) {
+RTM.config( [ "$controllerProvider", function( $controllerProvider ) {
   $controllerProvider.allowGlobals();
 } ] );
 
 /* Setup global settings */
-RTM.factory( 'settings', [ '$rootScope', function( $rootScope ) {
+RTM.factory( "settings", [ "$rootScope", function( $rootScope ) {
   // supported languages
   var settings = {
     layout: {
@@ -51,14 +51,14 @@ RTM.factory( 'settings', [ '$rootScope', function( $rootScope ) {
       pageBodySolid: false, // solid body color state
       pageAutoScrollOnLoad: 1 // auto scroll to top on page load
     },
-    assetsPath: '../assets',
-    globalPath: '../assets/global',
-    layoutPath: '../assets/layouts/thinx'
+    assetsPath: "../assets",
+    globalPath: "../assets/global",
+    layoutPath: "../assets/layouts/thinx"
   };
 
   $rootScope.settings = settings;
 
-  console.log( ' === ROOT === ' );
+  console.log( " === ROOT === " );
   console.log( $rootScope );
 
   // UI temporary data, might be saved to localstorage
@@ -76,7 +76,7 @@ RTM.factory( 'settings', [ '$rootScope', function( $rootScope ) {
   }
 
   $rootScope.meta.version = {
-    ui: '1.0.7 (beta)'
+    ui: "1.0.7 (beta)"
   };
 
   // dashboard stats defaults
@@ -136,25 +136,25 @@ RTM.factory( 'settings', [ '$rootScope', function( $rootScope ) {
   };
 
   $rootScope.platforms = {
-    'arduino': { name: 'Arduino', build: true },
-    'platformio': { name: 'Platform.io', build: true },
-    'nodemcu': { name: 'NodeMCU', build: true },
-    'pine64': { name: 'Pine64', build: true },
-    'micropython': { name: 'Micropython', build: true },
-    'mongoose': { name: 'MongooseOS', build: true },
-    'nodejs': { name: 'NodeJS', build: true },
-    'unknown': { name: 'Unknown', build: true },
-    'sigfox': { name: 'Sigfox', build: false }
+    "arduino": { name: "Arduino", build: true },
+    "platformio": { name: "Platform.io", build: true },
+    "nodemcu": { name: "NodeMCU", build: true },
+    "pine64": { name: "Pine64", build: true },
+    "micropython": { name: "Micropython", build: true },
+    "mongoose": { name: "MongooseOS", build: true },
+    "nodejs": { name: "NodeJS", build: true },
+    "unknown": { name: "Unknown", build: true },
+    "sigfox": { name: "Sigfox", build: false }
   };
 
   $rootScope.categories = {
-    'yellow-crusta': { name: 'yellow-crusta' },
-    'red-intense': { name: 'red-intense' },
-    'purple-studio': { name: 'purple-studio' },
-    'blue': { name: 'blue' },
-    'green': { name: 'green' },
-    'green-dark': { name: 'green-dark' },
-    'grey-mint': { name: 'grey-mint' }
+    "yellow-crusta": { name: "yellow-crusta" },
+    "red-intense": { name: "red-intense" },
+    "purple-studio": { name: "purple-studio" },
+    "blue": { name: "blue" },
+    "green": { name: "green" },
+    "green-dark": { name: "green-dark" },
+    "grey-mint": { name: "grey-mint" }
   };
 
   $rootScope.thinx = {};
@@ -167,21 +167,21 @@ RTM.factory( 'settings', [ '$rootScope', function( $rootScope ) {
   $rootScope.thinx.defaults = { defaultTransformerBodyBase64: "Ly8gQ29weSAmIFBhc3RlIEphdmFzY3JpcHQgZnVuY3Rpb24gaGVyZS4uLgoKdmFyIHRyYW5zZm9ybWVyID0gZnVuY3Rpb24oc3RhdHVzLCBkZXZpY2UpIHsKICByZXR1cm4gc3RhdHVzOwp9" };
 
   $rootScope.profile = {
-    avatar: '/assets/thinx/img/default_avatar_sm.png',
+    avatar: "/assets/thinx/img/default_avatar_sm.png",
     info: {
-      first_name: '',
-      last_name: '',
-      mobile_phone: '',
-      git_webhook: '',
-      slack_token: '',
+      first_name: "",
+      last_name: "",
+      mobile_phone: "",
+      git_webhook: "",
+      slack_token: "",
       security: {
         "unique_api_keys": null,
         "global_push": null,
         "important_notifications": null
       },
       goals: [],
-      username: '',
-      owner: '',
+      username: "",
+      owner: "",
       tags: [],
       transformers: [],
       timezone_abbr: "UTC",
@@ -194,11 +194,11 @@ RTM.factory( 'settings', [ '$rootScope', function( $rootScope ) {
 } ] );
 
 
-RTM.filter( 'lastSeen', function() {
+RTM.filter( "lastSeen", function() {
   return function( date, suffix ) {
     if ( typeof( date ) === "number" ) {
       // e.g. 1410715640579 -	Unix ms timestamp
-      return moment( date, 'x' ).fromNow( suffix );
+      return moment( date, "x" ).fromNow( suffix );
     } else {
       // e.g. 2013-03-07T07:00:00+08:00 - ISO8601
       return moment( date ).fromNow( suffix );
@@ -206,12 +206,12 @@ RTM.filter( 'lastSeen', function() {
   };
 } );
 
-RTM.filter( 'base64_decode', function() {
+RTM.filter( "base64_decode", function() {
   return function( base64_string ) {
-    if ( typeof( base64_string ) == 'undefined' || base64_string.length < 1 ) {
+    if ( typeof( base64_string ) == "undefined" || base64_string.length < 1 ) {
       return;
     } else {
-      return base64converter( 'decode', base64_string );
+      return base64converter( "decode", base64_string );
     }
   };
 } );
@@ -224,13 +224,13 @@ function base64converter( type, string ) {
     this.message = message;
   };
   InvalidCharacterError.prototype = new Error;
-  InvalidCharacterError.prototype.name = 'InvalidCharacterError';
+  InvalidCharacterError.prototype.name = "InvalidCharacterError";
   var error = function( message ) {
     // Note: the error messages used throughout this file match those used by
     // the native `atob`/`btoa` implementation in Chromium.
     throw new InvalidCharacterError( message );
   };
-  var TABLE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  var TABLE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
   // http://whatwg.org/html/common-microsyntaxes.html#space-character
   var REGEX_SPACE_CHARACTERS = /[\t\n\f\r ]/g;
   // `decode` is designed to be fully compatible with `atob` as described in the
@@ -239,10 +239,10 @@ function base64converter( type, string ) {
   // implementation. https://gist.github.com/atk/1020396
   var decode = function( input ) {
     input = String( input )
-    .replace( REGEX_SPACE_CHARACTERS, '' );
+    .replace( REGEX_SPACE_CHARACTERS, "" );
     var length = input.length;
     if ( length % 4 == 0 ) {
-      input = input.replace( /==?$/, '' );
+      input = input.replace( /==?$/, "" );
       length = input.length;
     }
     if (
@@ -251,13 +251,13 @@ function base64converter( type, string ) {
       /[^+a-zA-Z0-9/]/.test( input )
     ) {
       error(
-        'Invalid character: the string to be decoded is not correctly encoded.'
+        "Invalid character: the string to be decoded is not correctly encoded."
       );
     }
     var bitCounter = 0;
     var bitStorage;
     var buffer;
-    var output = '';
+    var output = "";
     var position = -1;
     while ( ++position < length ) {
       buffer = TABLE.indexOf( input.charAt( position ) );
@@ -280,12 +280,12 @@ function base64converter( type, string ) {
       // Note: no need to special-case astral symbols here, as surrogates are
       // matched, and the input is supposed to only contain ASCII anyway.
       error(
-        'The string to be encoded contains characters outside of the ' +
-        'Latin1 range.'
+        "The string to be encoded contains characters outside of the " +
+        "Latin1 range."
       );
     }
     var padding = input.length % 3;
-    var output = '';
+    var output = "";
     var position = -1;
     var a;
     var b;
@@ -316,42 +316,42 @@ function base64converter( type, string ) {
         TABLE.charAt( buffer >> 10 ) +
         TABLE.charAt( ( buffer >> 4 ) & 0x3F ) +
         TABLE.charAt( ( buffer << 2 ) & 0x3F ) +
-        '='
+        "="
       );
     } else if ( padding == 1 ) {
       buffer = input.charCodeAt( position );
       output += (
         TABLE.charAt( buffer >> 2 ) +
         TABLE.charAt( ( buffer << 4 ) & 0x3F ) +
-        '=='
+        "=="
       );
     }
     return output;
   };
   var base64 = {
-    'encode': encode,
-    'decode': decode,
-    'version': '0.1.0'
+    "encode": encode,
+    "decode": decode,
+    "version": "0.1.0"
   };
 
 
-  if ( type == 'encode' ) {
+  if ( type == "encode" ) {
     return base64.encode( string );
   }
-  if ( type == 'decode' ) {
+  if ( type == "decode" ) {
     return base64.decode( string );
   }
 
 }
 
-RTM.filter( 'split', function() {
+RTM.filter( "split", function() {
   return function( input, splitChar, splitIndex ) {
     // do some bounds checking here to ensure it has that index
     return input.split( splitChar )[splitIndex];
   };
 } );
 
-RTM.filter( 'objFilter', function() {
+RTM.filter( "objFilter", function() {
   return function( input, search ) {
     if ( !input ) {
       return input;
@@ -359,10 +359,10 @@ RTM.filter( 'objFilter', function() {
     if ( !search ) {
       return input;
     }
-    var expected = ( '' + search ).toLowerCase();
+    var expected = ( "" + search ).toLowerCase();
     var result = {};
     angular.forEach( input, function( value, key ) {
-      var actual = ( '' + value ).toLowerCase();
+      var actual = ( "" + value ).toLowerCase();
       if ( actual.indexOf( expected ) !== -1 ) {
         result[key] = value;
       }
@@ -377,7 +377,7 @@ RTM.filter( 'objFilter', function() {
 * performs a AND between 'name: $select.search' and 'age: $select.search'.
 * We want to perform a OR.
 */
-angular.module( 'RTM' ).filter( 'propsFilter', function() {
+angular.module( "RTM" ).filter( "propsFilter", function() {
   return function( items, props ) {
     var out = [];
     if ( angular.isArray( items ) ) {
@@ -410,7 +410,7 @@ angular.module( 'RTM' ).filter( 'propsFilter', function() {
 } );
 
 /* Filtering out control characters for status transformer icons */
-RTM.filter( 'removeControlChars', function() {
+RTM.filter( "removeControlChars", function() {
   return function( str ) {
     var output = "";
     if ( typeof( str ) !== "undefined" && str.length > 0 ) {
@@ -423,9 +423,9 @@ RTM.filter( 'removeControlChars', function() {
 } );
 
 /* Main Controller */
-RTM.controller( 'AppController', [ '$scope', '$rootScope', 'webNotification', 'Rollbar', function( $scope, $rootScope, $webNotification, Rollbar ) {
-  $scope.$on( '$viewContentLoaded', function() {
-    console.log( 'checking user credentials...' );
+RTM.controller( "AppController", [ "$scope", "$rootScope", "webNotification", "Rollbar", function( $scope, $rootScope, $webNotification, Rollbar ) {
+  $scope.$on( "$viewContentLoaded", function() {
+    console.log( "checking user credentials..." );
     console.log(
       document.cookie
     );
@@ -452,8 +452,8 @@ function getCookie( name ) {
 }
 
 /* Header */
-RTM.controller( 'HeaderController', [ '$scope', '$rootScope', function( $scope, $rootScope ) {
-  $scope.$on( '$includeContentLoaded', function() {
+RTM.controller( "HeaderController", [ "$scope", "$rootScope", function( $scope, $rootScope ) {
+  $scope.$on( "$includeContentLoaded", function() {
     Layout.initHeader();
   } );
 
@@ -505,37 +505,37 @@ RTM.controller( 'HeaderController', [ '$scope', '$rootScope', function( $scope, 
 } ] );
 
 /* Setup Layout Part - Sidebar */
-RTM.controller( 'SidebarController', [ '$state', '$scope', function( $state, $scope ) {
-  $scope.$on( '$includeContentLoaded', function() {
+RTM.controller( "SidebarController", [ "$state", "$scope", function( $state, $scope ) {
+  $scope.$on( "$includeContentLoaded", function() {
     Layout.initSidebar( $state ); // init sidebar
   } );
 } ] );
 
 /* Setup Layout Part - Sidebar */
-RTM.controller( 'PageHeadController', [ '$scope', function( $scope ) {
-  $scope.$on( '$includeContentLoaded', function() {
+RTM.controller( "PageHeadController", [ "$scope", function( $scope ) {
+  $scope.$on( "$includeContentLoaded", function() {
     Theme.init(); // init theme panel
     $scope.socketStatus = null;
   } );
 
   $scope.displaySocketStatus = function( status ) {
     if ( status == 1 ) {
-      $scope.socketStatus = 'WebSocket Connected';
+      $scope.socketStatus = "WebSocket Connected";
     } else if ( status == 0 ) {
-      $scope.socketStatus = 'WebSocket Connecting...';
+      $scope.socketStatus = "WebSocket Connecting...";
     }
-    $( '.websocket-badge' ).fadeIn();
+    $( ".websocket-badge" ).fadeIn();
     setTimeout( function() {
       console.log( "timeout" );
-      $( '.websocket-badge' ).fadeOut();
+      $( ".websocket-badge" ).fadeOut();
     }, 2000 );
   };
 
 } ] );
 
 /* Setup Layout Part - Quick Sidebar */
-RTM.controller( 'QuickSidebarController', [ '$scope', function( $scope ) {
-  $scope.$on( '$includeContentLoaded', function() {
+RTM.controller( "QuickSidebarController", [ "$scope", function( $scope ) {
+  $scope.$on( "$includeContentLoaded", function() {
     setTimeout( function() {
       QuickSidebar.init(); // init quick sidebar
     }, 2000 );
@@ -543,49 +543,49 @@ RTM.controller( 'QuickSidebarController', [ '$scope', function( $scope ) {
 } ] );
 
 /* Setup Layout Part - Footer */
-RTM.controller( 'FooterController', [ '$scope', function( $scope ) {
-  $scope.$on( '$includeContentLoaded', function() {
+RTM.controller( "FooterController", [ "$scope", function( $scope ) {
+  $scope.$on( "$includeContentLoaded", function() {
     Layout.initFooter(); // init footer
   } );
 } ] );
 
 
 /* Router */
-RTM.config( [ '$stateProvider', '$urlRouterProvider', function( $stateProvider, $urlRouterProvider ) {
+RTM.config( [ "$stateProvider", "$urlRouterProvider", function( $stateProvider, $urlRouterProvider ) {
   // Redirect any unmatched url
   $urlRouterProvider.otherwise( "/dashboard" );
 
   $stateProvider
 
   // Dashboard
-  .state( 'dashboard', {
+  .state( "dashboard", {
     url: "/dashboard",
     templateUrl: "views/dashboard.html",
-    data: { pageTitle: 'Dashboard' },
+    data: { pageTitle: "Dashboard" },
     controller: "DashboardController",
     resolve: {
-      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+      deps: [ "$ocLazyLoad", function( $ocLazyLoad ) {
         return $ocLazyLoad.load( {
-          name: 'RTM',
-          insertBefore: '#ng_load_plugins_before',
+          name: "RTM",
+          insertBefore: "#ng_load_plugins_before",
           files: [
-            '../assets/global/plugins/morris/morris.css',
-            '../assets/global/plugins/morris/morris.min.js',
-            '../assets/global/plugins/raphael.min.js',
-            '../assets/global/plugins/jquery.sparkline.min.js',
+            "../assets/global/plugins/morris/morris.css",
+            "../assets/global/plugins/morris/morris.min.js",
+            "../assets/global/plugins/raphael.min.js",
+            "../assets/global/plugins/jquery.sparkline.min.js",
 
-            '../assets/thinx/js/plugins/ui-select/select.min.css',
-            '../assets/thinx/js/plugins/ui-select/select.min.js',
-            '../assets/global/plugins/clipboardjs/clipboard.min.js',
+            "../assets/thinx/js/plugins/ui-select/select.min.css",
+            "../assets/thinx/js/plugins/ui-select/select.min.js",
+            "../assets/global/plugins/clipboardjs/clipboard.min.js",
 
-            '../assets/global/plugins/typeahead/typeahead.css',
-            '../assets/global/plugins/typeahead/typeahead.bundle.min.js',
+            "../assets/global/plugins/typeahead/typeahead.css",
+            "../assets/global/plugins/typeahead/typeahead.bundle.min.js",
 
-            '../assets/thinx/js/dashboard.js',
+            "../assets/thinx/js/dashboard.js",
 
-            'js/thinx-api.js',
-            'js/controllers/DashboardController.js',
-            'js/controllers/LogviewController.js'
+            "js/thinx-api.js",
+            "js/controllers/DashboardController.js",
+            "js/controllers/LogviewController.js"
           ]
         } );
       } ]
@@ -593,27 +593,27 @@ RTM.config( [ '$stateProvider', '$urlRouterProvider', function( $stateProvider, 
   } )
 
   // Devices
-  .state( 'devices', {
+  .state( "devices", {
     url: "/devices",
     templateUrl: "views/devices.html",
-    data: { pageTitle: 'Devices' },
+    data: { pageTitle: "Devices" },
     controller: "DevicesController",
     resolve: {
-      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+      deps: [ "$ocLazyLoad", function( $ocLazyLoad ) {
         return $ocLazyLoad.load( {
-          name: 'RTM',
-          insertBefore: '#ng_load_plugins_before',
+          name: "RTM",
+          insertBefore: "#ng_load_plugins_before",
           files: [
-            '../assets/thinx/js/plugins/ui-select/select.min.css',
-            '../assets/thinx/js/plugins/ui-select/select.min.js',
-            '../assets/global/plugins/clipboardjs/clipboard.min.js',
+            "../assets/thinx/js/plugins/ui-select/select.min.css",
+            "../assets/thinx/js/plugins/ui-select/select.min.js",
+            "../assets/global/plugins/clipboardjs/clipboard.min.js",
 
-            '../assets/global/plugins/typeahead/typeahead.css',
-            '../assets/global/plugins/typeahead/typeahead.bundle.min.js',
+            "../assets/global/plugins/typeahead/typeahead.css",
+            "../assets/global/plugins/typeahead/typeahead.bundle.min.js",
 
-            'js/thinx-api.js',
-            'js/controllers/DevicesController.js',
-            'js/controllers/LogviewController.js'
+            "js/thinx-api.js",
+            "js/controllers/DevicesController.js",
+            "js/controllers/LogviewController.js"
           ]
         } );
       } ]
@@ -621,37 +621,37 @@ RTM.config( [ '$stateProvider', '$urlRouterProvider', function( $stateProvider, 
   } )
 
   // Device Detail
-  .state( 'device', {
+  .state( "device", {
     url: "/device/:udid",
     params: {
       udid: null
     },
     templateUrl: "views/device.html",
-    data: { pageTitle: 'Device' },
+    data: { pageTitle: "Device" },
     controller: "DeviceController",
     resolve: {
-      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+      deps: [ "$ocLazyLoad", function( $ocLazyLoad ) {
         return $ocLazyLoad.load( {
-          name: 'RTM',
-          insertBefore: '#ng_load_plugins_before',
+          name: "RTM",
+          insertBefore: "#ng_load_plugins_before",
           files: [
-            '../assets/thinx/js/plugins/ui-select/select.min.css',
-            '../assets/thinx/js/plugins/ui-select/select.min.js',
+            "../assets/thinx/js/plugins/ui-select/select.min.css",
+            "../assets/thinx/js/plugins/ui-select/select.min.js",
 
-            '../assets/global/plugins/clipboardjs/clipboard.min.js',
+            "../assets/global/plugins/clipboardjs/clipboard.min.js",
 
             // tags input dependency
-            '../assets/global/plugins/typeahead/typeahead.css',
-            '../assets/global/plugins/typeahead/typeahead.bundle.min.js',
+            "../assets/global/plugins/typeahead/typeahead.css",
+            "../assets/global/plugins/typeahead/typeahead.bundle.min.js",
 
-            '../assets/thinx/js/plugins/timezones/timezones.min.js',
+            "../assets/thinx/js/plugins/timezones/timezones.min.js",
 
-            'js/thinx-api.js',
+            "js/thinx-api.js",
 
-            'js/controllers/DeviceController.js',
-            'js/controllers/EditorController.js',
-            'js/controllers/LogviewController.js',
-            '../assets/thinx/js/plugins/crypto-js/sha256.js'
+            "js/controllers/DeviceController.js",
+            "js/controllers/EditorController.js",
+            "js/controllers/LogviewController.js",
+            "../assets/thinx/js/plugins/crypto-js/sha256.js"
           ]
         } );
       } ]
@@ -659,21 +659,21 @@ RTM.config( [ '$stateProvider', '$urlRouterProvider', function( $stateProvider, 
   } )
 
   // Apikey Page
-  .state( 'apikey', {
+  .state( "apikey", {
     url: "/apikey",
     templateUrl: "views/apikey.html",
-    data: { pageTitle: 'API Key Management' },
+    data: { pageTitle: "API Key Management" },
     controller: "ApikeyController",
     resolve: {
-      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+      deps: [ "$ocLazyLoad", function( $ocLazyLoad ) {
         return $ocLazyLoad.load( {
-          name: 'RTM',
-          insertBefore: '#ng_load_plugins_before',
+          name: "RTM",
+          insertBefore: "#ng_load_plugins_before",
           files: [
-            '../assets/global/plugins/clipboardjs/clipboard.min.js',
-            'js/thinx-api.js',
-            'js/controllers/ApikeyController.js',
-            'js/controllers/LogviewController.js'
+            "../assets/global/plugins/clipboardjs/clipboard.min.js",
+            "js/thinx-api.js",
+            "js/controllers/ApikeyController.js",
+            "js/controllers/LogviewController.js"
           ]
         } );
       } ]
@@ -681,20 +681,20 @@ RTM.config( [ '$stateProvider', '$urlRouterProvider', function( $stateProvider, 
   } )
 
   // Source Page
-  .state( 'source', {
+  .state( "source", {
     url: "/source",
     templateUrl: "views/source.html",
-    data: { pageTitle: 'Application Management' },
+    data: { pageTitle: "Application Management" },
     controller: "SourceController",
     resolve: {
-      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+      deps: [ "$ocLazyLoad", function( $ocLazyLoad ) {
         return $ocLazyLoad.load( {
-          name: 'RTM',
-          insertBefore: '#ng_load_plugins_before',
+          name: "RTM",
+          insertBefore: "#ng_load_plugins_before",
           files: [
-            'js/thinx-api.js',
-            'js/controllers/SourceController.js',
-            'js/controllers/LogviewController.js'
+            "js/thinx-api.js",
+            "js/controllers/SourceController.js",
+            "js/controllers/LogviewController.js"
           ]
         } );
       } ]
@@ -725,21 +725,21 @@ RTM.config( [ '$stateProvider', '$urlRouterProvider', function( $stateProvider, 
   */
 
   // Deploy key Page
-  .state( 'deploykey', {
+  .state( "deploykey", {
     url: "/deploykey",
     templateUrl: "views/deploykey.html",
-    data: { pageTitle: 'Deploy Key Management' },
+    data: { pageTitle: "Deploy Key Management" },
     controller: "DeploykeyController",
     resolve: {
-      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+      deps: [ "$ocLazyLoad", function( $ocLazyLoad ) {
         return $ocLazyLoad.load( {
-          name: 'RTM',
-          insertBefore: '#ng_load_plugins_before',
+          name: "RTM",
+          insertBefore: "#ng_load_plugins_before",
           files: [
-            '../assets/global/plugins/clipboardjs/clipboard.min.js',
-            'js/thinx-api.js',
-            'js/controllers/DeploykeyController.js',
-            'js/controllers/LogviewController.js'
+            "../assets/global/plugins/clipboardjs/clipboard.min.js",
+            "js/thinx-api.js",
+            "js/controllers/DeploykeyController.js",
+            "js/controllers/LogviewController.js"
           ]
         } );
       } ]
@@ -747,21 +747,21 @@ RTM.config( [ '$stateProvider', '$urlRouterProvider', function( $stateProvider, 
   } )
 
   // Mesh Channel Page
-  .state( 'channel', {
+  .state( "channel", {
     url: "/channel",
     templateUrl: "views/channel.html",
-    data: { pageTitle: 'Mesh Channel Management' },
+    data: { pageTitle: "Mesh Channel Management" },
     controller: "ChannelController",
     resolve: {
-      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+      deps: [ "$ocLazyLoad", function( $ocLazyLoad ) {
         return $ocLazyLoad.load( {
-          name: 'RTM',
-          insertBefore: '#ng_load_plugins_before',
+          name: "RTM",
+          insertBefore: "#ng_load_plugins_before",
           files: [
-            '../assets/global/plugins/clipboardjs/clipboard.min.js',
-            'js/thinx-api.js',
-            'js/controllers/ChannelController.js',
-            'js/controllers/LogviewController.js'
+            "../assets/global/plugins/clipboardjs/clipboard.min.js",
+            "js/thinx-api.js",
+            "js/controllers/ChannelController.js",
+            "js/controllers/LogviewController.js"
           ]
         } );
       } ]
@@ -769,20 +769,20 @@ RTM.config( [ '$stateProvider', '$urlRouterProvider', function( $stateProvider, 
   } )
 
   // Enviro Page
-  .state( 'enviro', {
+  .state( "enviro", {
     url: "/enviro",
     templateUrl: "views/enviro.html",
-    data: { pageTitle: 'Environment Variables' },
+    data: { pageTitle: "Environment Variables" },
     controller: "EnviroController",
     resolve: {
-      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+      deps: [ "$ocLazyLoad", function( $ocLazyLoad ) {
         return $ocLazyLoad.load( {
-          name: 'RTM',
-          insertBefore: '#ng_load_plugins_before',
+          name: "RTM",
+          insertBefore: "#ng_load_plugins_before",
           files: [
-            'js/thinx-api.js',
-            'js/controllers/EnviroController.js',
-            'js/controllers/LogviewController.js'
+            "js/thinx-api.js",
+            "js/controllers/EnviroController.js",
+            "js/controllers/LogviewController.js"
           ]
         } );
       } ]
@@ -790,22 +790,22 @@ RTM.config( [ '$stateProvider', '$urlRouterProvider', function( $stateProvider, 
   } )
 
   // Transformer Page
-  .state( 'transformer', {
+  .state( "transformer", {
     url: "/transformer",
     templateUrl: "views/transformer.html",
-    data: { pageTitle: 'Status Transformers' },
+    data: { pageTitle: "Status Transformers" },
     controller: "TransformerController",
     resolve: {
-      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+      deps: [ "$ocLazyLoad", function( $ocLazyLoad ) {
         return $ocLazyLoad.load( {
-          name: 'RTM',
-          insertBefore: '#ng_load_plugins_before',
+          name: "RTM",
+          insertBefore: "#ng_load_plugins_before",
           files: [
-            'js/thinx-api.js',
-            'js/controllers/TransformerController.js',
-            'js/controllers/EditorController.js',
-            'js/controllers/LogviewController.js',
-            '../assets/thinx/js/plugins/crypto-js/sha256.js'
+            "js/thinx-api.js",
+            "js/controllers/TransformerController.js",
+            "js/controllers/EditorController.js",
+            "js/controllers/LogviewController.js",
+            "../assets/thinx/js/plugins/crypto-js/sha256.js"
           ]
         } );
       } ]
@@ -813,27 +813,27 @@ RTM.config( [ '$stateProvider', '$urlRouterProvider', function( $stateProvider, 
   } )
 
   // History Page
-  .state( 'history', {
+  .state( "history", {
     url: "/history/:tab",
     params: {
       tab: {
-        value: 'auditlog'
+        value: "auditlog"
       }
     },
     templateUrl: "views/history.html",
-    data: { pageTitle: 'History' },
+    data: { pageTitle: "History" },
     controller: "HistoryController",
     resolve: {
-      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+      deps: [ "$ocLazyLoad", function( $ocLazyLoad ) {
         return $ocLazyLoad.load( {
-          name: 'RTM',
-          insertBefore: '#ng_load_plugins_before',
+          name: "RTM",
+          insertBefore: "#ng_load_plugins_before",
           files: [
-            '../assets/global/plugins/component-todo/css/todo.min.css',
-            '../assets/global/plugins/component-todo/scripts/todo.min.js',
-            'js/thinx-api.js',
-            'js/controllers/HistoryController.js',
-            'js/controllers/LogviewController.js'
+            "../assets/global/plugins/component-todo/css/todo.min.css",
+            "../assets/global/plugins/component-todo/scripts/todo.min.js",
+            "js/thinx-api.js",
+            "js/controllers/HistoryController.js",
+            "js/controllers/LogviewController.js"
           ]
         } );
       } ]
@@ -844,33 +844,33 @@ RTM.config( [ '$stateProvider', '$urlRouterProvider', function( $stateProvider, 
   .state( "profile", {
     url: "/profile",
     templateUrl: "views/profile/main.html",
-    data: { pageTitle: 'User Profile' },
+    data: { pageTitle: "User Profile" },
     controller: "UserProfileController",
     resolve: {
-      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+      deps: [ "$ocLazyLoad", function( $ocLazyLoad ) {
         return $ocLazyLoad.load( {
-          name: 'RTM',
-          insertBefore: '#ng_load_plugins_before',
+          name: "RTM",
+          insertBefore: "#ng_load_plugins_before",
           files: [
-            '../assets/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css',
-            '../assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css',
+            "../assets/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css",
+            "../assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css",
 
-            '../assets/thinx/css/profile.css',
+            "../assets/thinx/css/profile.css",
 
-            '../assets/global/plugins/jquery.sparkline.min.js',
-            '../assets/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js',
-            '../assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js',
-            '../assets/global/plugins/clipboardjs/clipboard.min.js',
+            "../assets/global/plugins/jquery.sparkline.min.js",
+            "../assets/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js",
+            "../assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js",
+            "../assets/global/plugins/clipboardjs/clipboard.min.js",
 
-            '../assets/thinx/js/plugins/ui-select/select.min.css',
-            '../assets/thinx/js/plugins/ui-select/select.min.js',
-            '../assets/thinx/js/plugins/timezones/timezones.min.js',
+            "../assets/thinx/js/plugins/ui-select/select.min.css",
+            "../assets/thinx/js/plugins/ui-select/select.min.js",
+            "../assets/thinx/js/plugins/timezones/timezones.min.js",
 
-            '../assets/thinx/js/profile.js',
+            "../assets/thinx/js/profile.js",
 
-            'js/thinx-api.js',
-            'js/controllers/UserProfileController.js',
-            'js/controllers/LogviewController.js'
+            "js/thinx-api.js",
+            "js/controllers/UserProfileController.js",
+            "js/controllers/LogviewController.js"
           ]
         } );
       } ]
@@ -881,43 +881,43 @@ RTM.config( [ '$stateProvider', '$urlRouterProvider', function( $stateProvider, 
   .state( "profile.dashboard", {
     url: "/dashboard",
     templateUrl: "views/profile/dashboard.html",
-    data: { pageTitle: 'User Profile' }
+    data: { pageTitle: "User Profile" }
   } )
 
   // User Profile Account
   .state( "profile.account", {
     url: "/account",
     templateUrl: "views/profile/account.html",
-    data: { pageTitle: 'Settings' }
+    data: { pageTitle: "Settings" }
   } )
 
   // User Profile Help
   .state( "profile.help", {
     url: "/help",
     templateUrl: "views/profile/help.html",
-    data: { pageTitle: 'User Help' }
+    data: { pageTitle: "User Help" }
   } )
 
   // User Delete Profile
   .state( "profile.delete", {
     url: "/delete",
     templateUrl: "views/profile/delete.html",
-    data: { pageTitle: 'Delete Profile' }
+    data: { pageTitle: "Delete Profile" }
   } )
 
   // Blank Page
-  .state( 'blank', {
+  .state( "blank", {
     url: "/blank",
     templateUrl: "views/blank.html",
-    data: { pageTitle: 'Blank Page Template' },
+    data: { pageTitle: "Blank Page Template" },
     controller: "BlankController",
     resolve: {
-      deps: [ '$ocLazyLoad', function( $ocLazyLoad ) {
+      deps: [ "$ocLazyLoad", function( $ocLazyLoad ) {
         return $ocLazyLoad.load( {
-          name: 'RTM',
-          insertBefore: '#ng_load_plugins_before',
+          name: "RTM",
+          insertBefore: "#ng_load_plugins_before",
           files: [
-            'js/controllers/BlankController.js'
+            "js/controllers/BlankController.js"
           ]
         } );
       } ]
@@ -933,8 +933,8 @@ RTM.run( [ "$rootScope", "settings", "$state", function( $rootScope, settings, $
 } ] );
 
 RTM.run( function( editableOptions, editableThemes ) {
-  editableOptions.theme = 'default';
-  editableThemes['default'].submitTpl = '<button class="btn grey-mint btn-outline btn-circle btn-sm" type="submit"><i class="fa fa-check"></i></button>';
-  editableThemes['default'].cancelTpl = '<button class="btn grey-mint btn-outline btn-circle btn-sm" ng-click="$form.$cancel()"><i class="fa fa-times"></i></button>';
+  editableOptions.theme = "default";
+  editableThemes["default"].submitTpl = "<button class=\"btn grey-mint btn-outline btn-circle btn-sm\" type=\"submit\"><i class=\"fa fa-check\"></i></button>";
+  editableThemes["default"].cancelTpl = "<button class=\"btn grey-mint btn-outline btn-circle btn-sm\" ng-click=\"$form.$cancel()\"><i class=\"fa fa-times\"></i></button>";
   // editableOptions.buttons = 'right';
 } );

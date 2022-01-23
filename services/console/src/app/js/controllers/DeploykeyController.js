@@ -1,6 +1,6 @@
 /* Setup blank page controller */
-angular.module( 'RTM' ).controller( 'DeploykeyController', [ '$rootScope', '$scope', 'settings', function( $rootScope, $scope, settings ) {
-  $scope.$on( '$viewContentLoaded', function() {
+angular.module( "RTM" ).controller( "DeploykeyController", [ "$rootScope", "$scope", "settings", function( $rootScope, $scope, settings ) {
+  $scope.$on( "$viewContentLoaded", function() {
     // initialize core components
     App.initAjax();
 
@@ -13,20 +13,20 @@ angular.module( 'RTM' ).controller( 'DeploykeyController', [ '$rootScope', '$sco
 
     Thinx.deploykeyList()
     .done( function( data ) {
-      console.log( '+++ updateDeploykeys ' );
+      console.log( "+++ updateDeploykeys " );
       $scope.$emit( "updateDeploykeys", data );
     } )
     .fail( error => $scope.$emit( "xhrFailed", error ) );
 
     $scope.resetModal();
-    $scope.searchText = '';
+    $scope.searchText = "";
   } );
 
-  $scope.searchText = '';
+  $scope.searchText = "";
 
   $scope.createDeploykey = function() {
 
-    console.log( '--creating deploy key--' );
+    console.log( "--creating deploy key--" );
 
     Thinx.createDeploykey()
     .done( function( response ) {
@@ -36,79 +36,79 @@ angular.module( 'RTM' ).controller( 'DeploykeyController', [ '$rootScope', '$sco
       if ( typeof( response ) !== "undefined" ) {
         if ( response.success ) {
           console.log( response );
-          toastr.success( 'Key created.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.success( "Key created.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
 
           $scope.deploykeyCreated = response.status.name;
           $scope.deploykeyValue = response.status.pubkey;
 
           Thinx.deploykeyList()
           .done( function( data ) {
-            console.log( '+++ updateDeploykeys ' );
+            console.log( "+++ updateDeploykeys " );
             $scope.$emit( "updateDeploykeys", data );
           } )
           .fail( error => $scope.$emit( "xhrFailed", error ) );
 
         } else {
           console.log( response.status );
-          toastr.error( 'Error.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.error( "Error.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         }
       } else {
-        console.log( 'error' );
+        console.log( "error" );
         console.log( response );
       }
     } )
     .fail( function( error ) {
-      $( '.msg-warning' ).text( error );
-      $( '.msg-warning' ).show();
+      $( ".msg-warning" ).text( error );
+      $( ".msg-warning" ).show();
       $scope.$emit( "xhrFailed", error );
-      toastr.error( 'Error.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+      toastr.error( "Error.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
     } );
 
   };
 
 
   function revokeDeploykeys( filenames ) {
-    console.log( '--deleting deploy keys ' + filenames.length + '--' );
+    console.log( "--deleting deploy keys " + filenames.length + "--" );
 
     Thinx.revokeDeploykeys( filenames )
     .done( function( data ) {
       if ( data.success ) {
-        console.log( 'Success:', data );
-        toastr.success( 'Deleted.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+        console.log( "Success:", data );
+        toastr.success( "Deleted.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
 
         $scope.selectedItems = [];
 
         Thinx.deploykeyList()
         .done( function( data ) {
-          console.log( '+++ updateDeploykeys ' );
+          console.log( "+++ updateDeploykeys " );
           $scope.$emit( "updateDeploykeys", data );
         } )
         .fail( error => $scope.$emit( "xhrFailed", error ) );
 
       } else {
-        toastr.error( 'Revocation failed.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+        toastr.error( "Revocation failed.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
       }
     } )
     .fail( error => $scope.$emit( "xhrFailed", error ) );
   }
 
   $scope.revokeDeploykeys = function() {
-    console.log( '-- processing selected items --' );
+    console.log( "-- processing selected items --" );
     console.log( $scope.selectedItems );
 
     var selectedToRevoke = $scope.selectedItems.slice();
     if ( selectedToRevoke.length > 0 ) {
       revokeDeploykeys( selectedToRevoke );
     } else {
-      toastr.warning( 'Nothing selected.', '<ENV::loginPageTitle>', { timeOut: 1000 } );
+      toastr.warning( "Nothing selected.", "<ENV::loginPageTitle>", { timeOut: 1000 } );
     }
   };
 
   $scope.checkItem = function( filename ) {
-    console.log( '### toggle item in selectedItems' );
+    console.log( "### toggle item in selectedItems" );
     var index = $scope.selectedItems.indexOf( filename );
     if ( index > -1 ) {
-      console.log( 'splicing on ', index, ' value ', $scope.selectedItems[index] );
+      console.log( "splicing on ", index, " value ", $scope.selectedItems[index] );
       $scope.selectedItems.splice( index, 1 );
     } else {
       $scope.selectedItems.push( filename );

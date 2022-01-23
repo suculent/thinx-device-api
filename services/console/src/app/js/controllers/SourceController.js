@@ -1,6 +1,6 @@
 /* Setup blank page controller */
-angular.module( 'RTM' ).controller( 'SourceController', [ '$rootScope', '$scope', 'settings', function( $rootScope, $scope, settings ) {
-  $scope.$on( '$viewContentLoaded', function() {
+angular.module( "RTM" ).controller( "SourceController", [ "$rootScope", "$scope", "settings", function( $rootScope, $scope, settings ) {
+  $scope.$on( "$viewContentLoaded", function() {
     // initialize core components
     App.initAjax();
 
@@ -13,7 +13,7 @@ angular.module( 'RTM' ).controller( 'SourceController', [ '$rootScope', '$scope'
 
     Thinx.sourceList()
     .done( function( data ) {
-      console.log( '+++ updateSources ' );
+      console.log( "+++ updateSources " );
       $scope.$emit( "updateSources", data );
 
       Thinx.deviceList()
@@ -22,22 +22,22 @@ angular.module( 'RTM' ).controller( 'SourceController', [ '$rootScope', '$scope'
       } )
       .fail( error => $scope.$emit( "xhrFailed", error ) );
     } )
-    .fail( error => console.log( 'Error:', error ) );
+    .fail( error => console.log( "Error:", error ) );
 
     $scope.resetModal();
-    $scope.searchText = '';
+    $scope.searchText = "";
     $scope.addingSource = false;
 
-    $( "#pageModal" ).on( 'shown.bs.modal', function() {
-      angular.element( 'input[name=sourceUrl]' ).focus();
+    $( "#pageModal" ).on( "shown.bs.modal", function() {
+      angular.element( "input[name=sourceUrl]" ).focus();
     } );
   } );
 
-  $scope.searchText = '';
+  $scope.searchText = "";
 
   $scope.addSource = function() {
 
-    console.log( '-- adding new source --' );
+    console.log( "-- adding new source --" );
 
     console.log( $scope.sourceUrl );
     console.log( $scope.sourceAlias );
@@ -47,12 +47,12 @@ angular.module( 'RTM' ).controller( 'SourceController', [ '$rootScope', '$scope'
     // disable submit button
     $scope.addingSource = true;
 
-    console.log( '-- testing for duplicates --' );
+    console.log( "-- testing for duplicates --" );
     for ( var sourceId in $rootScope.sources ) {
       console.log( "Looping sources: alias ", $rootScope.sources[sourceId].alias, "url", $rootScope.sources[sourceId].url );
 
       if ( $rootScope.sources[sourceId].alias == $scope.sourceAlias ) {
-        toastr.error( 'Alias must be unique.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+        toastr.error( "Alias must be unique.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         return;
       }
 
@@ -69,94 +69,94 @@ angular.module( 'RTM' ).controller( 'SourceController', [ '$rootScope', '$scope'
           .done( function( data ) {
             $scope.$emit( "updateSources", data );
           } )
-          .fail( error => console.log( 'Error:', error ) );
+          .fail( error => console.log( "Error:", error ) );
 
-          toastr.success( 'Source Added.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.success( "Source Added.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
 
-          $( '#pageModal' ).modal( 'hide' );
+          $( "#pageModal" ).modal( "hide" );
           $scope.addingSource = false;
 
         } else {
           console.log( response );
         }
       } else {
-        console.log( 'error' );
+        console.log( "error" );
         console.log( response );
-        toastr.error( 'Source Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+        toastr.error( "Source Failed.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
       }
     } )
     .fail( function( error ) {
-      $( '.msg-warning' ).text( error );
-      $( '.msg-warning' ).show();
-      console.log( 'Error:', error );
-      toastr.error( 'Source Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+      $( ".msg-warning" ).text( error );
+      $( ".msg-warning" ).show();
+      console.log( "Error:", error );
+      toastr.error( "Source Failed.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
     } );
 
   };
 
   $scope.getAliasFromUrl = function() {
-    console.log( 'procesing: ' + $scope.sourceUrl );
+    console.log( "procesing: " + $scope.sourceUrl );
     if ( $scope.sourceUrl.length > 10 ) {
       try {
-        var urlParts = $scope.sourceUrl.replace( /\/\s*$/, '' ).split( '/' );
+        var urlParts = $scope.sourceUrl.replace( /\/\s*$/, "" ).split( "/" );
         console.log( urlParts[1] );
         if ( typeof( urlParts[0] ) !== "undefined" && /git/.test( urlParts[0] ) ) {
-          var projectName = urlParts[1].split( '.', 1 );
-          console.log( 'detected projectname:' );
+          var projectName = urlParts[1].split( ".", 1 );
+          console.log( "detected projectname:" );
           console.log( projectName[0] );
         }
       } catch ( e ) {
         console.log( e );
       }
-      if ( ( typeof( projectName ) !== "undefined" ) && ( projectName.length > 0 ) && ( $scope.sourceAlias == null || $scope.sourceAlias == '' ) ) {
+      if ( ( typeof( projectName ) !== "undefined" ) && ( projectName.length > 0 ) && ( $scope.sourceAlias == null || $scope.sourceAlias == "" ) ) {
         $scope.sourceAlias = projectName[0];
       }
     }
   };
 
   function revokeSources( selectedItems ) {
-    console.log( '--deleting sources ' + selectedItems.length + '--' );
+    console.log( "--deleting sources " + selectedItems.length + "--" );
 
     Thinx.revokeSources( selectedItems )
     .done( function( data ) {
       if ( data.success ) {
-        console.log( 'Success:', data );
+        console.log( "Success:", data );
 
         $scope.selectedItems = [];
         Thinx.sourceList()
         .done( function( data ) {
           $scope.$emit( "updateSources", data );
-          toastr.success( 'Deleted.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.success( "Deleted.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         } )
-        .fail( error => console.log( 'Error:', error ) );
+        .fail( error => console.log( "Error:", error ) );
 
       } else {
-        toastr.error( 'Revocation failed.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+        toastr.error( "Revocation failed.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
       }
 
     } )
     .fail( function( error ) {
       // TODO throw error message
-      console.log( 'Error:', error );
+      console.log( "Error:", error );
     } );
   }
 
   $scope.revokeSources = function() {
-    console.log( '-- processing selected items --' );
+    console.log( "-- processing selected items --" );
     var selectedToRevoke = $scope.selectedItems.slice();
     if ( selectedToRevoke.length > 0 ) {
       revokeSources( selectedToRevoke );
     } else {
-      toastr.warning( 'Nothing selected.', '<ENV::loginPageTitle>', { timeOut: 1000 } );
+      toastr.warning( "Nothing selected.", "<ENV::loginPageTitle>", { timeOut: 1000 } );
     }
   };
 
   $scope.checkItem = function( sourceId ) {
-    console.log( '### toggle item in selectedItems' );
+    console.log( "### toggle item in selectedItems" );
     console.log( $scope.selectedItems );
     var index = $scope.selectedItems.indexOf( sourceId );
     if ( index > -1 ) {
-      console.log( 'splicing on ', index, ' value ', $scope.selectedItems[index] );
+      console.log( "splicing on ", index, " value ", $scope.selectedItems[index] );
       $scope.selectedItems.splice( index, 1 );
     } else {
       $scope.selectedItems.push( sourceId );

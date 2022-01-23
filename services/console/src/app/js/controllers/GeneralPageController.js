@@ -1,6 +1,6 @@
 /* Setup general page controller */
-angular.module( 'RTM' ).controller( 'GeneralPageController', [ '$rootScope', '$scope', 'settings', function( $rootScope, $scope, settings ) {
-  $scope.$on( '$viewContentLoaded', function() {
+angular.module( "RTM" ).controller( "GeneralPageController", [ "$rootScope", "$scope", "settings", function( $rootScope, $scope, settings ) {
+  $scope.$on( "$viewContentLoaded", function() {
     // initialize core components
     App.initAjax();
 

@@ -1,5 +1,5 @@
-angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope', '$stateParams', '$templateCache', function( $rootScope, $scope, $stateParams, $templateCache ) {
-  $scope.$on( '$viewContentLoaded', function() {
+angular.module( "RTM" ).controller( "DeviceController", [ "$rootScope", "$scope", "$stateParams", "$templateCache", function( $rootScope, $scope, $stateParams, $templateCache ) {
+  $scope.$on( "$viewContentLoaded", function() {
     // initialize core components
     App.initAjax();
 
@@ -12,21 +12,21 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
 
     Thinx.sourceList()
     .done( function( data ) {
-      console.log( '+++ updateSources ' );
+      console.log( "+++ updateSources " );
       $scope.$emit( "updateSources", data );
     } )
     .fail( error => $scope.$emit( "xhrFailed", error ) );
 
     Thinx.apikeyList()
     .done( function( data ) {
-      console.log( '+++ updateApikeys ' );
+      console.log( "+++ updateApikeys " );
       $scope.$emit( "updateApikeys", data );
     } )
     .fail( error => $scope.$emit( "xhrFailed", error ) );
 
     Thinx.channelList()
     .done( function( data ) {
-      console.log( '+++ updateChannels ' );
+      console.log( "+++ updateChannels " );
       $scope.$emit( "updateChannels", data );
     } )
     .fail( error => $scope.$emit( "xhrFailed", error ) );
@@ -45,7 +45,7 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
   $scope.deviceForm = {};
   $scope.deviceForm.udid = null;
   $scope.deviceForm.alias = null;
-  $scope.deviceForm.platform = 'unknown';
+  $scope.deviceForm.platform = "unknown";
   $scope.deviceForm.keyhash = null;
   $scope.deviceForm.source = null;
   $scope.deviceForm.mesh_ids = [];
@@ -69,8 +69,8 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
   $scope.editorOpts = {
     lineWrapping: false,
     lineNumbers: true,
-    mode: 'javascript',
-    theme: 'material'
+    mode: "javascript",
+    theme: "material"
   };
 
   // init timezone selector
@@ -104,8 +104,8 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
   function getUTCWithOffset() {
     var new_utc = new Date().getTime();
     var utc_with_offset = new Date( ( new_utc * 1 ) - ( ( $scope.deviceForm.timezone_offset * 60 ) * 60 * 1000 ) );
-    console.log( new_utc + '<br>' );
-    console.log( utc_with_offset + '<br>' );
+    console.log( new_utc + "<br>" );
+    console.log( utc_with_offset + "<br>" );
     return utc_with_offset;
   }
 
@@ -114,7 +114,7 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
   Thinx.init( $rootScope, $scope );
 
   $scope.attachSource = function( sourceId, deviceUdid ) {
-    console.log( '-- attaching ' + sourceId + ' to  ' + deviceUdid + '--' );
+    console.log( "-- attaching " + sourceId + " to  " + deviceUdid + "--" );
     $scope.attachingSource = true;
 
     Thinx.attachSource( sourceId, deviceUdid )
@@ -129,25 +129,25 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
           $scope.attachingSource = false;
           $scope.$apply();
 
-          toastr.success( 'Repository Attached.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.success( "Repository Attached.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         } else {
           console.log( response );
-          toastr.error( 'Attach Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.error( "Attach Failed.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         }
       } else {
-        console.log( 'error' );
+        console.log( "error" );
         console.log( response );
       }
     } )
     .fail( function( error ) {
-      console.error( 'Error:', error );
-      toastr.error( 'Attach Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+      console.error( "Error:", error );
+      toastr.error( "Attach Failed.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
     } );
 
   };
 
   $scope.detachSource = function( deviceUdid ) {
-    console.log( '-- detaching source from ' + deviceUdid + '--' );
+    console.log( "-- detaching source from " + deviceUdid + "--" );
     Thinx.detachSource( deviceUdid )
     .done( function( response ) {
       if ( typeof( response ) !== "undefined" ) {
@@ -158,21 +158,21 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
               $rootScope.devices[index].source = undefined;
             }
           }
-          toastr.success( 'Repository Detached.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.success( "Repository Detached.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
           $scope.deviceForm.source = null;
           $scope.$apply();
         } else {
           console.log( response );
-          toastr.error( 'Detach Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.error( "Detach Failed.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         }
       } else {
-        console.log( 'error' );
+        console.log( "error" );
         console.log( response );
       }
     } )
     .fail( function( error ) {
-      console.error( 'Error:', error );
-      toastr.error( 'Detach Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+      console.error( "Error:", error );
+      toastr.error( "Detach Failed.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
     } );
   };
 
@@ -183,12 +183,12 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
     $scope.deviceForm.timezone_utc = timezone_utc;
 
     // uúpdate device timezone offset and abbr
-    $scope.submitDeviceFormChange( 'timezone_offset' );
+    $scope.submitDeviceFormChange( "timezone_offset" );
   };
 
   $scope.submitDeviceFormChange = function( prop ) {
 
-    console.log( '-- changing device: ' + $scope.deviceForm.udid + ' (' + $scope.deviceForm.alias + ') --' );
+    console.log( "-- changing device: " + $scope.deviceForm.udid + " (" + $scope.deviceForm.alias + ") --" );
 
     var updatedProps = { udid: $scope.deviceForm.udid };
     updatedProps[prop] = $scope.deviceForm[prop];
@@ -210,9 +210,9 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
       if ( typeof( response ) !== "undefined" ) {
         if ( typeof( response.success ) !== "undefined" && response.success ) {
           console.log( response );
-          toastr.success( 'Device settings updated.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.success( "Device settings updated.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
 
-          console.log( '-- refreshing devices --' );
+          console.log( "-- refreshing devices --" );
 
           Thinx.deviceList()
           .done( function( data ) {
@@ -220,22 +220,22 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
             $scope.initDeviceForm();
           } )
           .fail( function( error ) {
-            console.log( 'Error:', error );
+            console.log( "Error:", error );
           } );
 
         } else {
           console.log( response );
-          toastr.error( 'Device settings updated failed.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.error( "Device settings updated failed.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         }
       } else {
-        console.log( 'error:' );
+        console.log( "error:" );
         console.log( response );
       }
 
     } )
     .fail( function( error ) {
-      console.error( 'Error:', error );
-      toastr.error( 'Device settings update failed badly.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+      console.error( "Error:", error );
+      toastr.error( "Device settings update failed badly.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
     } );
   };
 
@@ -244,8 +244,8 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
   };
 
   $scope.channelSelected = function( channel ) {
-    console.log( '-- selecting channel --', channel );
-    if ( typeof( channel.value.mesh_id ) !== 'undefined' ) {
+    console.log( "-- selecting channel --", channel );
+    if ( typeof( channel.value.mesh_id ) !== "undefined" ) {
       // attach channel to device
       $scope.attachChannel( channel.value.mesh_id, $scope.deviceForm.udid );
     } else {
@@ -254,7 +254,7 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
   };
 
   $scope.channelTransform = function( channelAlias ) {
-    console.log( 'channel alias search:', channelAlias );
+    console.log( "channel alias search:", channelAlias );
     return {
       value: {
         mesh_id: generateUtid(),
@@ -265,7 +265,7 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
   };
 
   $scope.attachChannel = function( meshId, deviceUdid ) {
-    console.log( '-- attaching ' + meshId + ' to  ' + deviceUdid + '--' );
+    console.log( "-- attaching " + meshId + " to  " + deviceUdid + "--" );
     $scope.attachingChannel = true;
     Thinx.attachChannel( meshId, deviceUdid )
       .done( function( response ) {
@@ -275,44 +275,44 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
             $rootScope.getDeviceByUdid( deviceUdid ).mesh_ids = response.mesh_ids;
             $scope.attachingChannel = false;
             $scope.$apply();
-            toastr.success( 'Channel Attached.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+            toastr.success( "Channel Attached.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         } else {
-          console.log( 'error', response );
-          toastr.error( 'Channel Attach Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          console.log( "error", response );
+          toastr.error( "Channel Attach Failed.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         }
       } )
       .fail( function( error ) {
-        console.error( 'Error:', error );
-        toastr.error( 'Channel Attach Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+        console.error( "Error:", error );
+        toastr.error( "Channel Attach Failed.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
       } );
   };
 
   $scope.detachChannel = function( channel ) {
     let deviceUdid = $scope.deviceForm.udid;
-    console.log( '-- detaching channel ' + channel.alias + ' from ' + deviceUdid + '--' );
+    console.log( "-- detaching channel " + channel.alias + " from " + deviceUdid + "--" );
     Thinx.detachChannel( channel.mesh_id, deviceUdid )
       .done( function( response ) {
         if ( typeof( response ) !== "undefined" && response.success ) {
           $rootScope.getDeviceByUdid( deviceUdid ).mesh_ids = response.mesh_ids;
-          toastr.success( 'Channel Detached.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.success( "Channel Detached.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
           $scope.deviceForm.mesh_ids = response.mesh_ids;
           $scope.$apply();
         } else {
-          console.log( 'response error', response );
-          toastr.error( 'Channel Detach Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          console.log( "response error", response );
+          toastr.error( "Channel Detach Failed.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         }
       } )
       .fail( function( error ) {
-        console.error( 'Error:', error );
-        toastr.error( 'Channel Detach Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+        console.error( "Error:", error );
+        toastr.error( "Channel Detach Failed.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
       } );
   };
 
   $scope.updateTransformer = function( utid ) {
     if ( $rootScope.getRawTransformerByUtid( utid ).changed == true ) {
-      console.log( '-- updating transformer body ' + utid + '--' );
+      console.log( "-- updating transformer body " + utid + "--" );
       // eslint-disable-next-line  no-undef
-      $rootScope.getTransformerByUtid( utid ).body = base64converter( 'encode', $rootScope.getRawTransformerByUtid( utid ).body );
+      $rootScope.getTransformerByUtid( utid ).body = base64converter( "encode", $rootScope.getRawTransformerByUtid( utid ).body );
       $rootScope.getTransformerByUtid( utid ).alias = $rootScope.getRawTransformerByUtid( utid ).alias;
       $rootScope.getRawTransformerByUtid( utid ).changed = false;
       $scope.$emit( "saveProfileChanges", [ "transformers" ] );
@@ -320,7 +320,7 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
   };
 
   $scope.removeTransformer = function( utid ) {
-    console.log( '-- removing transformer ' + utid + '--' );
+    console.log( "-- removing transformer " + utid + "--" );
 
     // remove from device
     for ( var index in $scope.deviceForm.transformers ) {
@@ -329,13 +329,13 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
         $scope.deviceForm.transformers.splice( index, 1 );
       }
     }
-    console.log( 'device', $scope.deviceForm.transformers );
-    $scope.submitDeviceFormChange( 'transformers' );
+    console.log( "device", $scope.deviceForm.transformers );
+    $scope.submitDeviceFormChange( "transformers" );
 
     // remove from meta
     console.log( "meta transformer to delete", $rootScope.meta.transformers[utid] );
     delete( $rootScope.meta.transformers[utid] );
-    console.log( 'meta', $rootScope.meta.transformers );
+    console.log( "meta", $rootScope.meta.transformers );
     // $scope.$emit("updateRawTransformers", $rootScope.profile.info.transformers);
 
     // remove from profile
@@ -346,20 +346,20 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
       }
     }
     $scope.$emit( "saveProfileChanges", [ "transformers" ] );
-    console.log( 'profile', $rootScope.profile.info.transformers );
+    console.log( "profile", $rootScope.profile.info.transformers );
   };
 
   $scope.transformerSelected = function( transformer ) {
-    console.log( '-- new transformer --', transformer );
+    console.log( "-- new transformer --", transformer );
 
-    if ( typeof( transformer.value.utid ) !== 'undefined' ) {
+    if ( typeof( transformer.value.utid ) !== "undefined" ) {
       // if transformer dowsnt exist yet, create it
       if ( !$rootScope.getTransformerByUtid( transformer.value.utid ) ) {
         $rootScope.profile.info.transformers.push( {
-          'utid': transformer.value.utid,
-          'alias': transformer.value.alias,
+          "utid": transformer.value.utid,
+          "alias": transformer.value.alias,
           // eslint-disable-next-line  no-undef
-          'body': base64converter( 'encode', transformer.value.body )
+          "body": base64converter( "encode", transformer.value.body )
         } );
         $scope.toggleTransformer( transformer.value.utid );
         $scope.$emit( "saveProfileChanges", [ "transformers" ] );
@@ -371,30 +371,30 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
 
 
   function generateUtid() {
-    if ( typeof( $scope.deviceForm.transformers ) !== 'undefined' ) {
+    if ( typeof( $scope.deviceForm.transformers ) !== "undefined" ) {
       return String( CryptoJS.SHA256( $rootScope.profile.owner + new Date().getTime() ) );
     }
     return String( 0 );
   }
 
   $scope.tagTransform = function( transformerAlias ) {
-    console.log( 'transformer alias search:', transformerAlias );
+    console.log( "transformer alias search:", transformerAlias );
     return {
       value: {
         utid: generateUtid(),
         alias: transformerAlias,
         // eslint-disable-next-line  no-undef
-        body: base64converter( 'decode', $rootScope.thinx.defaults.defaultTransformerBodyBase64 ),
+        body: base64converter( "decode", $rootScope.thinx.defaults.defaultTransformerBodyBase64 ),
         changed: false
       }
     };
   };
 
   $scope.toggleTransformer = function( utid ) {
-    console.log( '### toggle transformer visibility' );
+    console.log( "### toggle transformer visibility" );
     var index = $scope.deviceForm.transformersVisible.indexOf( utid );
     if ( index > -1 ) {
-      console.log( 'splicing on ', index, ' value ', $scope.deviceForm.transformersVisible[index] );
+      console.log( "splicing on ", index, " value ", $scope.deviceForm.transformersVisible[index] );
       $scope.deviceForm.transformersVisible.splice( index, 1 );
     } else {
       $scope.deviceForm.transformersVisible.push( utid );
@@ -402,7 +402,7 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
   };
 
   $scope.build = function( deviceUdid, sourceId ) {
-    console.log( '-- building firmware for ' + deviceUdid + '/' + $rootScope.getSourceById( sourceId ).alias + ' --' );
+    console.log( "-- building firmware for " + deviceUdid + "/" + $rootScope.getSourceById( sourceId ).alias + " --" );
 
     if ( typeof( $rootScope.meta.deviceBuilds[deviceUdid] ) === "undefined" ) {
       $rootScope.meta.deviceBuilds[deviceUdid] = [];
@@ -438,16 +438,16 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
 
           // save user-spcific goal achievement
           if ( $rootScope.profile.info.goals.length > 0 ) {
-            if ( !$rootScope.profile.info.goals.includes( 'build' ) ) {
-              $rootScope.profile.info.goals.push( 'build' );
+            if ( !$rootScope.profile.info.goals.includes( "build" ) ) {
+              $rootScope.profile.info.goals.push( "build" );
               $scope.$emit( "saveProfileChanges", [ "goals" ] );
             }
           }
 
           // show notification to open log view
           toastr.info(
-            'Build created<br><br>Click to show log...',
-            'THiNX Builder',
+            "Build created<br><br>Click to show log...",
+            "THiNX Builder",
             {
               timeOut: 15000,
               extendedTimeOut: 60000,
@@ -455,43 +455,43 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
               closeButton: true,
               progressBar: true,
               onclick: function() {
-                $scope.$emit( 'showLogOverlay', response.build_id );
+                $scope.$emit( "showLogOverlay", response.build_id );
               }
             }
           );
 
           $scope.$apply();
         } else {
-          toastr.error( response.status, '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.error( response.status, "<ENV::loginPageTitle>", { timeOut: 5000 } );
         }
       } else {
-        toastr.error( "Build Failed", '<ENV::loginPageTitle>', { timeOut: 5000 } );
+        toastr.error( "Build Failed", "<ENV::loginPageTitle>", { timeOut: 5000 } );
       }
 
     } )
     .fail( function( error ) {
-      console.error( 'Error:', error );
-      toastr.error( 'Build Failed Badly.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+      console.error( "Error:", error );
+      toastr.error( "Build Failed Badly.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
     } );
   };
 
   $scope.showDeviceLastBuild = function( deviceUdid, event ) {
     event.stopPropagation();
-    console.log( '--- trying to show last build log for ' + deviceUdid );
+    console.log( "--- trying to show last build log for " + deviceUdid );
     $rootScope.modalBuildId = $rootScope.meta.deviceBuilds[deviceUdid][0].build_id;
     $rootScope.showLog( $rootScope.modalBuildId );
   };
 
   $scope.downloadArtifacts = function( deviceUdid, build_id ) {
-    console.log( '--- trying to download artifacts for build id: ' + build_id );
+    console.log( "--- trying to download artifacts for build id: " + build_id );
     Thinx.getArtifacts( deviceUdid, build_id )
     .then( blob => {
       console.log( blob, typeof blob );
       // eslint-disable-next-line  no-undef
-      saveBlob( blob, build_id + '.zip' );
+      saveBlob( blob, build_id + ".zip" );
     } )
     .catch( error => {
-      toastr.error( error, '<ENV::loginPageTitle>', { timeOut: 5000 } );
+      toastr.error( error, "<ENV::loginPageTitle>", { timeOut: 5000 } );
     } );
   };
 
@@ -530,7 +530,7 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
       }
     }
 
-    console.log( 'Initializing form values...' );
+    console.log( "Initializing form values..." );
     // $scope.deviceForm.index = index;
     $scope.deviceForm.udid = device.udid;
     $scope.deviceForm.alias = device.alias;
@@ -540,8 +540,8 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
       $scope.deviceForm.platform = device.platform;
       $scope.deviceForm.base_platform = device.platform.split( ":" )[0];
     } else {
-      $scope.deviceForm.platform = 'unknown';
-      $scope.deviceForm.base_platform = 'unknown';
+      $scope.deviceForm.platform = "unknown";
+      $scope.deviceForm.base_platform = "unknown";
     }
 
     if ( typeof( device.keyhash ) !== "undefined" ) {
@@ -619,7 +619,7 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
     // refresh latest firmware envelope
     Thinx.getLatestFirmwareEnvelope( $scope.deviceForm.udid )
     .done( function( data ) {
-      console.log( '+++ updateLatestFirmwareEnvelope ' );
+      console.log( "+++ updateLatestFirmwareEnvelope " );
       $scope.$emit( "updateLatestFirmwareEnvelope", data );
     } )
     .fail( error => $scope.$emit( "xhrFailed", error ) );
@@ -636,51 +636,51 @@ angular.module( 'RTM' ).controller( 'DeviceController', [ '$rootScope', '$scope'
 
   $scope.submitIcon = function( icon ) {
     $scope.deviceForm.icon = icon;
-    $scope.submitDeviceFormChange( 'icon' );
+    $scope.submitDeviceFormChange( "icon" );
     $scope.showIcons = false;
   };
 
-  $templateCache.put( 'bootstrap/match-multiple.tpl.html',
-  '<span class="ui-select-match transformer-input-block">' +
-    '<span ng-repeat="$item in $select.selected track by $index">' +
-      '<span ng-if="$select.parserResult.itemName === \'transformer\'" ' +
-        'ng-click="showEditorOverlay($item.value.utid);"' +
-        'class="ui-select-match-item transformer-editor-btn btn btn-default btn-sm" ' +
-        'tabindex="-1" ' +
-        'type="button" ' +
-        'ng-disabled="$select.disabled" ' +
-        'ng-class="{\'btn-primary\':$selectMultiple.activeMatchIndex === $index, \'select-locked\':$select.isLocked(this, $index)}" ' +
-        'ui-select-sort="$select.selected">' +
-        '<i class="fa fa-pencil"></i>' +
-      '</span>' +
+  $templateCache.put( "bootstrap/match-multiple.tpl.html",
+  "<span class=\"ui-select-match transformer-input-block\">" +
+    "<span ng-repeat=\"$item in $select.selected track by $index\">" +
+      "<span ng-if=\"$select.parserResult.itemName === 'transformer'\" " +
+        "ng-click=\"showEditorOverlay($item.value.utid);\"" +
+        "class=\"ui-select-match-item transformer-editor-btn btn btn-default btn-sm\" " +
+        "tabindex=\"-1\" " +
+        "type=\"button\" " +
+        "ng-disabled=\"$select.disabled\" " +
+        "ng-class=\"{'btn-primary':$selectMultiple.activeMatchIndex === $index, 'select-locked':$select.isLocked(this, $index)}\" " +
+        "ui-select-sort=\"$select.selected\">" +
+        "<i class=\"fa fa-pencil\"></i>" +
+      "</span>" +
 
-      '<span ng-if="$select.parserResult.itemName === \'transformer\'" ' +
-        'ng-click="toggleTransformer($item.value.utid)"' +
-        'class="ui-select-match-item btn btn-default btn-sm" ' +
-        'tabindex="-1" ' +
-        'type="button" ' +
-        'ng-disabled="$select.disabled" ' +
-        'ng-class="{\'btn-primary\':$selectMultiple.activeMatchIndex === $index, \'select-locked\':$select.isLocked(this, $index)}" ' +
-        'ui-select-sort="$select.selected">' +
-          '<span class="close ui-select-match-close" ng-hide="$select.disabled" ng-click="$selectMultiple.removeChoice($index)">&nbsp;&times;</span>' +
-          '<i ng-if="$item.value !== undefined" ng-class="{\'fa fa-eye-slash\':deviceForm.transformersVisible.indexOf($item.value.utid) == -1, \'fa fa-eye\': deviceForm.transformersVisible.indexOf($item.value.utid) > -1}"></i>' +
-          '<span uis-transclude-append></span>' +
-      '</span>' +
+      "<span ng-if=\"$select.parserResult.itemName === 'transformer'\" " +
+        "ng-click=\"toggleTransformer($item.value.utid)\"" +
+        "class=\"ui-select-match-item btn btn-default btn-sm\" " +
+        "tabindex=\"-1\" " +
+        "type=\"button\" " +
+        "ng-disabled=\"$select.disabled\" " +
+        "ng-class=\"{'btn-primary':$selectMultiple.activeMatchIndex === $index, 'select-locked':$select.isLocked(this, $index)}\" " +
+        "ui-select-sort=\"$select.selected\">" +
+          "<span class=\"close ui-select-match-close\" ng-hide=\"$select.disabled\" ng-click=\"$selectMultiple.removeChoice($index)\">&nbsp;&times;</span>" +
+          "<i ng-if=\"$item.value !== undefined\" ng-class=\"{'fa fa-eye-slash':deviceForm.transformersVisible.indexOf($item.value.utid) == -1, 'fa fa-eye': deviceForm.transformersVisible.indexOf($item.value.utid) > -1}\"></i>" +
+          "<span uis-transclude-append></span>" +
+      "</span>" +
 
-      '<span ng-if="$select.parserResult.itemName !== \'transformer\'" ' +
-        'class="ui-select-match-item btn btn-default btn-sm" ' +
-        'tabindex="-1" ' +
-        'type="button" ' +
-        'ng-disabled="$select.disabled" ' +
-        'ng-class="{\'btn-primary\':$selectMultiple.activeMatchIndex === $index, \'select-locked\':$select.isLocked(this, $index)}" ' +
-        'ui-select-sort="$select.selected">' +
+      "<span ng-if=\"$select.parserResult.itemName !== 'transformer'\" " +
+        "class=\"ui-select-match-item btn btn-default btn-sm\" " +
+        "tabindex=\"-1\" " +
+        "type=\"button\" " +
+        "ng-disabled=\"$select.disabled\" " +
+        "ng-class=\"{'btn-primary':$selectMultiple.activeMatchIndex === $index, 'select-locked':$select.isLocked(this, $index)}\" " +
+        "ui-select-sort=\"$select.selected\">" +
           // 'ng-click="this.clickTag($index)" ' + // default value
-          '<span ng-if="$select.parserResult.itemName == \'channel\'" class="close ui-select-match-close" ng-hide="$select.disabled" ng-click="detachChannel($item.value);">&nbsp;&times;</span>' +
-          '<span ng-if="$select.parserResult.itemName == \'tag\'" class="close ui-select-match-close" ng-hide="$select.disabled" ng-click="$selectMultiple.removeChoice($index)">&nbsp;&times;</span>' +
-          '<span uis-transclude-append></span>' +
-      '</span>' +
+          "<span ng-if=\"$select.parserResult.itemName == 'channel'\" class=\"close ui-select-match-close\" ng-hide=\"$select.disabled\" ng-click=\"detachChannel($item.value);\">&nbsp;&times;</span>" +
+          "<span ng-if=\"$select.parserResult.itemName == 'tag'\" class=\"close ui-select-match-close\" ng-hide=\"$select.disabled\" ng-click=\"$selectMultiple.removeChoice($index)\">&nbsp;&times;</span>" +
+          "<span uis-transclude-append></span>" +
+      "</span>" +
 
-    '</span>' +
-  '</span>' );
+    "</span>" +
+  "</span>" );
 
 } ] );

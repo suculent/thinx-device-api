@@ -1,15 +1,15 @@
 /* Setup blank page controller */
-angular.module( 'RTM' ).controller( 'LogviewController', [ '$rootScope', '$scope', 'settings', function( $rootScope, $scope, settings ) {
-  $scope.$on( '$viewContentLoaded', function() {
-    console.log( '#### Build Log Overlay init' );
+angular.module( "RTM" ).controller( "LogviewController", [ "$rootScope", "$scope", "settings", function( $rootScope, $scope, settings ) {
+  $scope.$on( "$viewContentLoaded", function() {
+    console.log( "#### Build Log Overlay init" );
 
     // Open websocket to for log & notifications transfer
     // User profile has to be initialised first
     if ( typeof( $rootScope.profile.owner ) !== "undefined" ) {
-      console.log( '##### websocket init' );
+      console.log( "##### websocket init" );
       openSocket( "log" );
     } else {
-      console.log( '##### websocket not initalised - missing owner profile' );
+      console.log( "##### websocket not initalised - missing owner profile" );
     }
 
   } );
@@ -18,7 +18,7 @@ angular.module( 'RTM' ).controller( 'LogviewController', [ '$rootScope', '$scope
   //var actionNotifications = [];
 
   if ( typeof( $rootScope.initWebsocketListener ) === "undefined" ) {
-    $rootScope.initWebsocketListener = $rootScope.$on( 'initWebsocket', function( event, owner_id ) {
+    $rootScope.initWebsocketListener = $rootScope.$on( "initWebsocket", function( event, owner_id ) {
       event.stopPropagation();
       console.log( "DEBUG owner_id initWebsocketListener", owner_id );
       openSocket( "log" );
@@ -29,8 +29,8 @@ angular.module( 'RTM' ).controller( 'LogviewController', [ '$rootScope', '$scope
     if ( "WebSocket" in window ) {
       if ( typeof( $rootScope.wss ) === "undefined" ) {
         // open websocket
-        console.log( '## Opening websocket with credentials ##' );
-        $rootScope.wss = new WebSocket( '<ENV::wssUrl>/' + $rootScope.profile.owner );
+        console.log( "## Opening websocket with credentials ##" );
+        $rootScope.wss = new WebSocket( "<ENV::wssUrl>/" + $rootScope.profile.owner );
 
         $rootScope.wss.onopen = function() {
           console.log( "## Websocket connection estabilished ##" );
@@ -67,7 +67,7 @@ angular.module( 'RTM' ).controller( 'LogviewController', [ '$rootScope', '$scope
           console.log( "## Websocket connection is closed... ##" );
         };
 
-        $rootScope.wsslog = new WebSocket( '<ENV::wssUrl>/' + $rootScope.profile.owner + "/" + new Date().getTime() );
+        $rootScope.wsslog = new WebSocket( "<ENV::wssUrl>/" + $rootScope.profile.owner + "/" + new Date().getTime() );
 
         $rootScope.wsslog.onopen = function() {
           console.log( "## Websocket connection estabilished ##" );
@@ -107,14 +107,14 @@ angular.module( 'RTM' ).controller( 'LogviewController', [ '$rootScope', '$scope
   }
 
   if ( typeof( $rootScope.showLogOverlayListener ) === "undefined" ) {
-    $rootScope.showLogOverlayListener = $rootScope.$on( 'showLogOverlay', function( event, build_id ) {
+    $rootScope.showLogOverlayListener = $rootScope.$on( "showLogOverlay", function( event, build_id ) {
       event.stopPropagation();
       $rootScope.showLog( build_id );
     } );
   }
 
   $rootScope.wsstailLog = function( build_id ) {
-    console.log( '-- refreshing log: ', build_id );
+    console.log( "-- refreshing log: ", build_id );
     var message = {
       logtail: {
         owner_id: $rootScope.profile.owner,
@@ -128,7 +128,7 @@ angular.module( 'RTM' ).controller( 'LogviewController', [ '$rootScope', '$scope
   };
 
   $rootScope.wssinit = function() {
-    console.log( '-- initializing websocket ' );
+    console.log( "-- initializing websocket " );
     var message = {
       init: $rootScope.profile.owner
     };
@@ -136,52 +136,52 @@ angular.module( 'RTM' ).controller( 'LogviewController', [ '$rootScope', '$scope
   };
 
   $rootScope.hideLogOverlay = function( build_id ) {
-    console.log( '--- hiding log overlay --- ' );
-    $( '.log-view-overlay-conatiner' ).fadeOut();
+    console.log( "--- hiding log overlay --- " );
+    $( ".log-view-overlay-conatiner" ).fadeOut();
     console.log( $rootScope.logdata.watchers[build_id] );
     clearInterval( $rootScope.logdata.watchers[build_id] );
   };
 
 
   $rootScope.showLog = function( build_id ) {
-    console.log( '--[ logdata ]-- ' );
+    console.log( "--[ logdata ]-- " );
     console.log( $rootScope.logdata );
-    console.log( '--- opening log for build_id: ' + build_id, ' ---' );
-    $( '.log-view-overlay-conatiner' ).fadeIn();
+    console.log( "--- opening log for build_id: " + build_id, " ---" );
+    $( ".log-view-overlay-conatiner" ).fadeIn();
 
     // start auto refresh
-    console.log( '--- starting refresh timer --- ' );
+    console.log( "--- starting refresh timer --- " );
     $rootScope.logdata.watchers[build_id] = setInterval( function() {
-      console.log( 'Refreshing log view...' );
+      console.log( "Refreshing log view..." );
       $rootScope.$digest();
     }, 500 );
 
     $rootScope.modalBuildId = build_id;
 
     if ( typeof( $rootScope.wss ) !== "undefined" ) {
-      console.log( 'Socket ready, tailing log...' );
+      console.log( "Socket ready, tailing log..." );
       $rootScope.wsstailLog( build_id );
     } else {
-      console.log( 'Socket not ready, trying to open it...' );
+      console.log( "Socket not ready, trying to open it..." );
       openSocket( "notification" );
     }
   };
 
   $rootScope.switchWrap = function() {
-    console.log( '--- toggle word-wrap --- ' );
-    $( '.log-view-body' ).toggleClass( 'force-word-wrap' );
-    $( '.icon-frame' ).toggleClass( 'overlay-highlight' );
+    console.log( "--- toggle word-wrap --- " );
+    $( ".log-view-body" ).toggleClass( "force-word-wrap" );
+    $( ".icon-frame" ).toggleClass( "overlay-highlight" );
   };
 
   $scope.toastrCancel = function() {
-    alert( 'test' );
+    alert( "test" );
   };
 
   function parseNotification( data ) {
     var msgBody = JSON.parse( data );
     var msg = msgBody.notification;
 
-    if ( typeof( $rootScope.meta.notifications ) !== 'undefined' ) {
+    if ( typeof( $rootScope.meta.notifications ) !== "undefined" ) {
       $rootScope.meta.notifications.push( msg );
 
       // TODO: process specific build notifications
@@ -204,7 +204,7 @@ angular.module( 'RTM' ).controller( 'LogviewController', [ '$rootScope', '$scope
 
     // perform device build notification updates
     if ( typeof( msg.udid ) !== "undefined" ) {
-        console.log( '------------ GOT NOTIFICATION FOR DEVICE' );
+        console.log( "------------ GOT NOTIFICATION FOR DEVICE" );
         console.log( msg );
 
         if (
@@ -247,66 +247,66 @@ angular.module( 'RTM' ).controller( 'LogviewController', [ '$rootScope', '$scope
       if ( msg.type == "actionable" ) {
 
         // YES/NO
-        if ( msg.response_type == 'bool' ) {
-          toastr['info'](
+        if ( msg.response_type == "bool" ) {
+          toastr["info"](
             msg.body + "<br><br>" +
             msg.nid + "<br><br>" +
-            '<div><button type="button" id="okBtn-' + msg.nid +
-            '" class="btn btn-success toastr-ok-btn">Yes</button>' +
-            '<button type="button" id="cancelBtn-' + msg.nid +
-            '" class="btn btn-danger toastr-cancel-btn" style="margin: 0 8px 0 8px">No</button></div>',
+            "<div><button type=\"button\" id=\"okBtn-" + msg.nid +
+            "\" class=\"btn btn-success toastr-ok-btn\">Yes</button>" +
+            "<button type=\"button\" id=\"cancelBtn-" + msg.nid +
+            "\" class=\"btn btn-danger toastr-cancel-btn\" style=\"margin: 0 8px 0 8px\">No</button></div>",
             msg.title,
             {
               timeOut: 0,
               extendedTimeOut: 0,
               tapToDismiss: false,
               closeButton: true,
-              closeMethod: 'fadeOut',
+              closeMethod: "fadeOut",
               closeDuration: 300,
-              closeEasing: 'swing'
+              closeEasing: "swing"
             }
           );
 
-          $( '#okBtn-' + msg.nid ).on( "click", function( e ) {
+          $( "#okBtn-" + msg.nid ).on( "click", function( e ) {
             $( this ).parent().slideToggle( 500 );
             $scope.$emit( "submitNotificationResponse", true );
           } );
 
-          $( '#cancelBtn-' + msg.nid ).on( "click", function( e ) {
+          $( "#cancelBtn-" + msg.nid ).on( "click", function( e ) {
             $( this ).parent().slideToggle( 500 );
             $scope.$emit( "submitNotificationResponse", false );
           } );
         }
 
         // INPUT string
-        if ( msg.response_type == 'string' ) {
-          toastr['warning'](
+        if ( msg.response_type == "string" ) {
+          toastr["warning"](
             msg.body + "<br><br>" +
             msg.nid + "<br><br>" +
-            '<div><input class="toastr-input" name="reply-' + msg.nid + '" value=""/></div><br>' +
-            '<div><button type="button" id="sendBtn-' + msg.nid +
-            '" class="btn btn-success toastr-send-btn">Send</button></div>',
+            "<div><input class=\"toastr-input\" name=\"reply-" + msg.nid + "\" value=\"\"/></div><br>" +
+            "<div><button type=\"button\" id=\"sendBtn-" + msg.nid +
+            "\" class=\"btn btn-success toastr-send-btn\">Send</button></div>",
             msg.title,
             {
               timeOut: 0,
               extendedTimeOut: 0,
               tapToDismiss: false,
               closeButton: true,
-              closeMethod: 'fadeOut',
+              closeMethod: "fadeOut",
               closeDuration: 300,
-              closeEasing: 'swing'
+              closeEasing: "swing"
             }
           );
 
-          $( '#sendBtn-' + msg.nid ).on( "click", function( e ) {
+          $( "#sendBtn-" + msg.nid ).on( "click", function( e ) {
             $( this ).parent().slideToggle( 500 );
-            $scope.$emit( "submitNotificationResponse", $( 'input[name=reply-' + msg.nid + ']' ).val() );
+            $scope.$emit( "submitNotificationResponse", $( "input[name=reply-" + msg.nid + "]" ).val() );
           } );
         }
 
 
       // non-actionable status notification
-      } else if ( typeof( msg.body.status ) !== 'undefined' ) {
+      } else if ( typeof( msg.body.status ) !== "undefined" ) {
 
         var msgTitle = "Device Status Update";
 
@@ -318,9 +318,9 @@ angular.module( 'RTM' ).controller( 'LogviewController', [ '$rootScope', '$scope
             timeOut: 8000,
             tapToDismiss: true,
             closeButton: true,
-            closeMethod: 'fadeOut',
+            closeMethod: "fadeOut",
             closeDuration: 0, // 500,
-            closeEasing: 'swing',
+            closeEasing: "swing",
             progressBar: true
           }
         );
@@ -352,15 +352,15 @@ angular.module( 'RTM' ).controller( 'LogviewController', [ '$rootScope', '$scope
             extendedTimeOut: 0,
             progressBar: true,
             closeButton: true,
-            closeMethod: 'fadeOut',
+            closeMethod: "fadeOut",
             closeDuration: 300,
-            closeEasing: 'swing'
+            closeEasing: "swing"
           } );
       }
 
     } else {
 
-      console.log( 'Skipping undefined message type...' );
+      console.log( "Skipping undefined message type..." );
 
     }
   }

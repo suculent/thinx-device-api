@@ -1,7 +1,7 @@
 /* Setup blank page controller */
-angular.module( 'RTM' ).controller( 'EditorController', [ '$rootScope', '$scope', 'settings', function( $rootScope, $scope, settings ) {
-  $scope.$on( '$viewContentLoaded', function() {
-    console.log( '#### Editor Overlay init' );
+angular.module( "RTM" ).controller( "EditorController", [ "$rootScope", "$scope", "settings", function( $rootScope, $scope, settings ) {
+  $scope.$on( "$viewContentLoaded", function() {
+    console.log( "#### Editor Overlay init" );
   } );
 
   $scope.overlayEditor = {
@@ -11,30 +11,30 @@ angular.module( 'RTM' ).controller( 'EditorController', [ '$rootScope', '$scope'
   };
 
   $rootScope.hideEditorOverlay = function() {
-    console.log( '--- hiding editor --- ' );
-    $( '.editor-overlay-conatiner' ).fadeOut( 300 );
+    console.log( "--- hiding editor --- " );
+    $( ".editor-overlay-conatiner" ).fadeOut( 300 );
   };
 
   $rootScope.showEditorOverlay = function( utid ) {
-    console.log( '--- opening editor for: ' + utid + ' ---' );
+    console.log( "--- opening editor for: " + utid + " ---" );
     $scope.resetEditor( utid );
-    $( '.editor-overlay-conatiner' ).fadeIn( 300 );
+    $( ".editor-overlay-conatiner" ).fadeIn( 300 );
   };
 
   $scope.saveEditor = function() {
     // check for transformer with same utid
     if ( !$rootScope.getTransformerByUtid( $scope.overlayEditor.utid ) ) {
-      console.log( '-- creating transformer ' + $scope.overlayEditor.utid + '--' );
+      console.log( "-- creating transformer " + $scope.overlayEditor.utid + "--" );
       $rootScope.profile.info.transformers.push( {
-        'utid': $scope.overlayEditor.utid,
-        'alias': $scope.overlayEditor.alias,
+        "utid": $scope.overlayEditor.utid,
+        "alias": $scope.overlayEditor.alias,
         // eslint-disable-next-line  no-undef
-        'body': base64converter( 'encode', $scope.overlayEditor.body )
+        "body": base64converter( "encode", $scope.overlayEditor.body )
       } );
     } else {
-      console.log( '-- updating transformer ' + $scope.overlayEditor.utid + '--' );
+      console.log( "-- updating transformer " + $scope.overlayEditor.utid + "--" );
       // eslint-disable-next-line  no-undef
-      $rootScope.getTransformerByUtid( $scope.overlayEditor.utid ).body = base64converter( 'encode', $scope.overlayEditor.body );
+      $rootScope.getTransformerByUtid( $scope.overlayEditor.utid ).body = base64converter( "encode", $scope.overlayEditor.body );
       $rootScope.getTransformerByUtid( $scope.overlayEditor.utid ).alias = $scope.overlayEditor.alias;
     }
 
@@ -48,7 +48,7 @@ angular.module( 'RTM' ).controller( 'EditorController', [ '$rootScope', '$scope'
       $scope.overlayEditor.utid = generateUtid();
       $scope.overlayEditor.alias = "<my-transformer-name>";
       // eslint-disable-next-line  no-undef
-      $scope.overlayEditor.body = base64converter( 'decode', $rootScope.thinx.defaults.defaultTransformerBodyBase64 );
+      $scope.overlayEditor.body = base64converter( "decode", $rootScope.thinx.defaults.defaultTransformerBodyBase64 );
     } else {
       $scope.overlayEditor.utid = utid;
       $scope.overlayEditor.alias = $rootScope.getRawTransformerByUtid( utid ).alias;
@@ -59,7 +59,7 @@ angular.module( 'RTM' ).controller( 'EditorController', [ '$rootScope', '$scope'
   };
 
   function generateUtid() {
-      if ( typeof( $rootScope.profile.info.transformers ) !== 'undefined' ) {
+      if ( typeof( $rootScope.profile.info.transformers ) !== "undefined" ) {
         return String( CryptoJS.SHA256( $rootScope.profile.owner + new Date().getTime() ) );
       }
       return String( 0 );

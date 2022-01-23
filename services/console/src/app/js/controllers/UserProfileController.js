@@ -1,7 +1,7 @@
-angular.module( 'RTM' ).controller( 'UserProfileController', function( $rootScope, $scope, $http, $timeout, $state ) {
-  $scope.$on( '$viewContentLoaded', function() {
+angular.module( "RTM" ).controller( "UserProfileController", function( $rootScope, $scope, $http, $timeout, $state ) {
+  $scope.$on( "$viewContentLoaded", function() {
     App.initAjax(); // initialize core components
-    Layout.setAngularJsSidebarMenuActiveLink( 'set', $( '#sidebar_menu_link_profile' ), $state ); // set profile link active in sidebar menu
+    Layout.setAngularJsSidebarMenuActiveLink( "set", $( "#sidebar_menu_link_profile" ), $state ); // set profile link active in sidebar menu
 
     $scope.newAvatar = null;
     $scope.searchText = "";
@@ -26,59 +26,59 @@ angular.module( 'RTM' ).controller( 'UserProfileController', function( $rootScop
   $scope.timezones = getTimezones();
 
   $scope.submitProfileFormChanges = function( changedProps ) {
-    console.log( '-- submitting profile changes: ' + changedProps );
+    console.log( "-- submitting profile changes: " + changedProps );
 
     Thinx.submitProfileChanges( changedProps, $rootScope.profile )
     .done( function( response ) {
 
       if ( typeof( response ) !== "undefined" ) {
         if ( typeof( response.success ) !== "undefined" && response.success ) {
-          console.log( ' == Profile update success ==' );
+          console.log( " == Profile update success ==" );
           console.log( response );
 
           Thinx.getProfile().done( function( data ) {
             $scope.$emit( "updateProfile", data );
           } )
-          .fail( error => console.log( 'Error:', error ) );
+          .fail( error => console.log( "Error:", error ) );
 
-          toastr.success( 'Profile updated.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.success( "Profile updated.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         } else {
           console.log( response );
-          toastr.error( 'Profile Update Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.error( "Profile Update Failed.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         }
       } else {
-        console.log( 'error' );
+        console.log( "error" );
         console.log( response );
       }
 
     } )
     .fail( function( error ) {
-      console.error( 'Error:', error );
-      toastr.error( 'Profile Update Failed Badly.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+      console.error( "Error:", error );
+      toastr.error( "Profile Update Failed Badly.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
     } );
   };
 
   $scope.processAvatar = function() {
 
     var avatarMaxSize = 500000;
-    console.log( '-- processing user avatar --' );
-    console.log( $( '#newAvatarInput' ).prop( 'files' ) );
+    console.log( "-- processing user avatar --" );
+    console.log( $( "#newAvatarInput" ).prop( "files" ) );
 
-    if ( $( '#newAvatarInput' ).prop( 'files' ).length > 0 ) {
+    if ( $( "#newAvatarInput" ).prop( "files" ).length > 0 ) {
 
       var reader = new FileReader();
       reader.onloadend = function( e ) {
-        console.log( '-- file read --' );
+        console.log( "-- file read --" );
         console.log( e.total );
 
         if ( e.total < avatarMaxSize ) {
           $scope.newAvatar = e.target.result;
         } else {
-          toastr.error( 'Avatar size over limit 500kB (' + e.total / 1000 + ' kB).', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.error( "Avatar size over limit 500kB (" + e.total / 1000 + " kB).", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         }
         $scope.$apply();
       };
-      reader.readAsDataURL( $( '#newAvatarInput' ).prop( 'files' )[0] );
+      reader.readAsDataURL( $( "#newAvatarInput" ).prop( "files" )[0] );
 
     } else {
       // no file selected
@@ -89,10 +89,10 @@ angular.module( 'RTM' ).controller( 'UserProfileController', function( $rootScop
 
 
   $scope.submitAvatarForm = function() {
-    console.log( '-- changing user avatar --' );
+    console.log( "-- changing user avatar --" );
 
     if ( $scope.newAvatar == null ) {
-      console.log( 'no file selected' );
+      console.log( "no file selected" );
       return;
     }
 
@@ -103,33 +103,33 @@ angular.module( 'RTM' ).controller( 'UserProfileController', function( $rootScop
         if ( typeof( response.success ) !== "undefined" && response.success ) {
           console.log( response );
 
-          console.log( '-- avatar success, refreshing profile --' );
+          console.log( "-- avatar success, refreshing profile --" );
 
           Thinx.getProfile().done( function( data ) {
             $scope.$emit( "updateProfile", data );
           } )
-          .fail( error => console.log( 'Error:', error ) );
+          .fail( error => console.log( "Error:", error ) );
 
-          toastr.success( 'Avatar updated.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.success( "Avatar updated.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         } else {
           console.log( response );
-          toastr.error( 'Avatar Update Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.error( "Avatar Update Failed.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         }
       } else {
-        console.log( 'error' );
+        console.log( "error" );
         console.log( response );
       }
     } )
     .fail( function( error ) {
-      console.error( 'Error:', error );
-      toastr.error( 'Avatar Update Failed Badly.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+      console.error( "Error:", error );
+      toastr.error( "Avatar Update Failed Badly.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
     } );
 
   };
 
   $scope.removeGoal = function( goalId ) {
-    console.log( '-- current goals: ' + $rootScope.profile.info.goals );
-    console.log( '-- removing goal: ' + goalId );
+    console.log( "-- current goals: " + $rootScope.profile.info.goals );
+    console.log( "-- removing goal: " + goalId );
 
     var index = $rootScope.profile.info.goals.indexOf( goalId );
     if ( index > -1 ) {
@@ -139,8 +139,8 @@ angular.module( 'RTM' ).controller( 'UserProfileController', function( $rootScop
 
 
   $scope.removeTag = function( tagId ) {
-    console.log( '-- current tags: ' + $rootScope.profile.info.tags );
-    console.log( '-- removing tag: ' + tagId );
+    console.log( "-- current tags: " + $rootScope.profile.info.tags );
+    console.log( "-- removing tag: " + tagId );
 
     var index = $rootScope.profile.info.tags.indexOf( tagId );
     if ( index > -1 ) {
@@ -156,32 +156,32 @@ angular.module( 'RTM' ).controller( 'UserProfileController', function( $rootScop
     .done( function( response ) {
       if ( typeof( response ) !== "undefined" ) {
         if ( typeof( response.success ) !== "undefined" && response.success ) {
-          var blob = new Blob( [ JSON.stringify( response.user_data ) ], { type: 'text/json' } );
+          var blob = new Blob( [ JSON.stringify( response.user_data ) ], { type: "text/json" } );
           if ( window.navigator && window.navigator.msSaveOrOpenBlob ) {
             window.navigator.msSaveOrOpenBlob( blob, filename );
            } else {
-               var e = document.createEvent( 'MouseEvents' ),
-                   a = document.createElement( 'a' );
+               var e = document.createEvent( "MouseEvents" ),
+                   a = document.createElement( "a" );
 
                a.download = filename;
                a.href = window.URL.createObjectURL( blob );
-               a.dataset.downloadurl = [ 'text/json', a.download, a.href ].join( ':' );
-               e.initEvent( 'click', true, false, window,
+               a.dataset.downloadurl = [ "text/json", a.download, a.href ].join( ":" );
+               e.initEvent( "click", true, false, window,
                    0, 0, 0, 0, 0, false, false, false, false, 0, null );
                a.dispatchEvent( e );
            }
         } else {
           console.log( response );
-          toastr.error( 'Profile Download Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.error( "Profile Download Failed.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         }
       } else {
-        console.log( 'error' );
+        console.log( "error" );
         console.log( response );
       }
     } )
     .fail( function( error ) {
-      console.error( 'Error:', error );
-      toastr.error( 'Profile Download Failed Badly.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+      console.error( "Error:", error );
+      toastr.error( "Profile Download Failed Badly.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
     } );
   };
 
@@ -201,16 +201,16 @@ angular.module( 'RTM' ).controller( 'UserProfileController', function( $rootScop
           window.location = Thinx.baseUrl() + "/logout";
         } else {
           console.log( response );
-          toastr.error( 'User Delete Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.error( "User Delete Failed.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         }
       } else {
-        console.log( 'error' );
+        console.log( "error" );
         console.log( response );
       }
     } )
     .fail( function( error ) {
-      console.error( 'Error:', error );
-      toastr.error( 'User Delete Failed Badly.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+      console.error( "Error:", error );
+      toastr.error( "User Delete Failed Badly.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
     } );
   };
 
@@ -229,20 +229,20 @@ angular.module( 'RTM' ).controller( 'UserProfileController', function( $rootScop
       if ( typeof( response ) !== "undefined" ) {
         if ( typeof( response.success ) !== "undefined" && response.success ) {
           console.log( response );
-          toastr.success( 'Message sent.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.success( "Message sent.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
           $scope.messageForm.text = null;
         } else {
           console.log( response );
-          toastr.error( 'Message Submit Failed.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+          toastr.error( "Message Submit Failed.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
         }
       } else {
-        console.log( 'error' );
+        console.log( "error" );
         console.log( response );
       }
     } )
     .fail( function( error ) {
-      console.error( 'Error:', error );
-      toastr.error( 'Message Submit Failed Badly.', '<ENV::loginPageTitle>', { timeOut: 5000 } );
+      console.error( "Error:", error );
+      toastr.error( "Message Submit Failed Badly.", "<ENV::loginPageTitle>", { timeOut: 5000 } );
     } );
   };
 

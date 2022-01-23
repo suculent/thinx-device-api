@@ -1,6 +1,6 @@
 /* Setup Transformer page controller */
-angular.module( 'RTM' ).controller( 'TransformerController', [ '$rootScope', '$scope', 'settings', function( $rootScope, $scope, settings ) {
-  $scope.$on( '$viewContentLoaded', function() {
+angular.module( "RTM" ).controller( "TransformerController", [ "$rootScope", "$scope", "settings", function( $rootScope, $scope, settings ) {
+  $scope.$on( "$viewContentLoaded", function() {
     // initialize core components
     App.initAjax();
 
@@ -17,13 +17,13 @@ angular.module( 'RTM' ).controller( 'TransformerController', [ '$rootScope', '$s
     } )
     .fail( error => $scope.$emit( "xhrFailed", error ) );
 
-    $scope.searchText = '';
+    $scope.searchText = "";
     $scope.resetModal();
 
-    $( "#pageModal" ).on( 'shown.bs.modal', function() {
+    $( "#pageModal" ).on( "shown.bs.modal", function() {
       console.log( "Refreshing codemirror..." );
       $scope.codeEditor.refresh();
-      angular.element( 'input[name=transformerAlias]' ).focus();
+      angular.element( "input[name=transformerAlias]" ).focus();
     } );
 
   } );
@@ -38,8 +38,8 @@ angular.module( 'RTM' ).controller( 'TransformerController', [ '$rootScope', '$s
   $scope.editorOpts = {
     lineWrapping: false,
     lineNumbers: true,
-    mode: 'javascript',
-    theme: 'material',
+    mode: "javascript",
+    theme: "material",
     autoRefresh: true
   };
 
@@ -50,41 +50,41 @@ angular.module( 'RTM' ).controller( 'TransformerController', [ '$rootScope', '$s
   $scope.updateTransformer = function( utid ) {
     // check for transformer with same utid
     if ( !$rootScope.getTransformerByUtid( $scope.transformerForm.utid ) ) {
-      console.log( '-- creating transformer ' + utid + '--' );
+      console.log( "-- creating transformer " + utid + "--" );
       // eslint-disable-next-line  no-undef
       $rootScope.profile.info.transformers.push( {
-        'utid': $scope.transformerForm.utid,
-        'alias': $scope.transformerForm.alias,
+        "utid": $scope.transformerForm.utid,
+        "alias": $scope.transformerForm.alias,
         // eslint-disable-next-line  no-undef
-        'body': base64converter( 'decode', $rootScope.thinx.defaults.defaultTransformerBodyBase64 )
+        "body": base64converter( "decode", $rootScope.thinx.defaults.defaultTransformerBodyBase64 )
       } );
     } else {
-      console.log( '-- updating transformer ' + utid + '--' );
+      console.log( "-- updating transformer " + utid + "--" );
       // eslint-disable-next-line  no-undef
-      $rootScope.getTransformerByUtid( utid ).body = base64converter( 'encode', $scope.transformerForm.body );
+      $rootScope.getTransformerByUtid( utid ).body = base64converter( "encode", $scope.transformerForm.body );
       $rootScope.getTransformerByUtid( utid ).alias = $scope.transformerForm.alias;
     }
 
     $scope.$emit( "saveProfileChanges", [ "transformers" ] );
-    $( '#pageModal' ).modal( 'hide' );
+    $( "#pageModal" ).modal( "hide" );
 
   };
 
   function revokeTransformers( utids ) {
-    console.log( '--deleting transformers ' + utids.length + '--' );
+    console.log( "--deleting transformers " + utids.length + "--" );
     // not implemented - transformers shouldn't be bulk removed
   }
 
   $scope.revokeTransformers = function() {
     // not implemented - transformers shouldn't be bulk removed
-    console.log( '-- processing selected items --' );
+    console.log( "-- processing selected items --" );
     console.log( $scope.selectedItems );
 
     var selectedToRevoke = $scope.selectedItems.slice();
     if ( selectedToRevoke.length > 0 ) {
       revokeTransformers( selectedToRevoke );
     } else {
-      toastr.warning( 'Nothing selected.', '<ENV::loginPageTitle>', { timeOut: 1000 } );
+      toastr.warning( "Nothing selected.", "<ENV::loginPageTitle>", { timeOut: 1000 } );
     }
   };
 
@@ -106,10 +106,10 @@ angular.module( 'RTM' ).controller( 'TransformerController', [ '$rootScope', '$s
 
 
   $scope.checkItem = function( utid ) {
-    console.log( '### toggle item in selectedItems' );
+    console.log( "### toggle item in selectedItems" );
     var index = $scope.selectedItems.indexOf( utid );
     if ( index > -1 ) {
-      console.log( 'splicing on ', index, ' value ', $scope.selectedItems[index] );
+      console.log( "splicing on ", index, " value ", $scope.selectedItems[index] );
       $scope.selectedItems.splice( index, 1 );
     } else {
       $scope.selectedItems.push( utid );
@@ -131,7 +131,7 @@ angular.module( 'RTM' ).controller( 'TransformerController', [ '$rootScope', '$s
   };
 
   function generateUtid() {
-      if ( typeof( $rootScope.profile.info.transformers ) !== 'undefined' ) {
+      if ( typeof( $rootScope.profile.info.transformers ) !== "undefined" ) {
         return String( CryptoJS.SHA256( $rootScope.profile.owner + new Date().getTime() ) );
       }
       return String( 0 );
