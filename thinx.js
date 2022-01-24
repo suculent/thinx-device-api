@@ -254,18 +254,14 @@ function notifyOldUsers() {
   userlib.view("users", "owners_by_username", {
     "key": username,
     "include_docs": true
-  }, (err, user_view_body) => {
-
-    if (err) {
-      console.log(err);
-      return;
-    }
-
+  }).then((user_view_body) => {
     for (var index in user_view_body.rows) {
       let user = user_view_body.rows[index];
       notify24(user);
       notify168(user);
     }
+  }).catch((err) => {
+    console.log(err);
   });
 }
 
@@ -628,7 +624,7 @@ wss.on("error", function(err) {
 app._ws = {}; // list of all owner websockets
 
 function initLogTail(ws) {
-  app.post("/api/user/logs/tail", function(req2, res) {
+  app.post("/api/user/logs/tail", (req2, res) => {
     if (!(router.validateSecurePOSTRequest(req2) || router.validateSession(req2, res))) return;
     if (typeof(req2.body.build_id) === "undefined") {
       router.respond(res, {

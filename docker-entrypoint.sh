@@ -28,8 +28,9 @@ export SQREEN_DISABLE_STARTUP_WARNING=1
 export DOCKER_HOST="tcp://docker:2375"
 export DOCKER_HOST="unix:///var/run/docker.sock"
 
-echo "[thinx-entrypoint] Adding host checking exception for github.com... TODO: fix missing DNS record to github.com?"
-ssh -T -o "StrictHostKeyChecking=no" git@github.com
+echo "[thinx-entrypoint] Adding host checking exception for github.com... can fail for the first time."
+echo "140.82.121.3 github.com" >> /etc/hosts
+ssh -tt -o "StrictHostKeyChecking=no" git@github.com
 
 if [[ ! -z $ROLLBAR_ACCESS_TOKEN ]]; then
   LOCAL_USERNAME=$(whoami)
@@ -37,7 +38,8 @@ if [[ ! -z $ROLLBAR_ACCESS_TOKEN ]]; then
     -F access_token=$ROLLBAR_ACCESS_TOKEN \
     -F environment=$ROLLBAR_ENVIRONMENT \
     -F revision=$REVISION \
-    -F local_username=$LOCAL_USERNAME > /dev/null
+    -F local_username=$LOCAL_USERNAME 
+    # > /dev/null
   echo ""
 else
   echo "[thinx-entrypoint] Skipping Rollbar deployment, ROLLBAR_ACCESS_TOKEN not defined... [${ROLLBAR_ACCESS_TOKEN}]"
