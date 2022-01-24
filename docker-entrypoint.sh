@@ -29,7 +29,7 @@ export DOCKER_HOST="tcp://docker:2375"
 export DOCKER_HOST="unix:///var/run/docker.sock"
 
 echo "[thinx-entrypoint] Adding host checking exception for github.com... can fail for the first time."
-echo "140.82.121.3 github.com" > /etc/hosts
+echo "140.82.121.3 github.com" >> /etc/hosts
 ssh -tt -o "StrictHostKeyChecking=no" git@github.com
 
 if [[ ! -z $ROLLBAR_ACCESS_TOKEN ]]; then
