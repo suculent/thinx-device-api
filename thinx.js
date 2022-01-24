@@ -254,18 +254,14 @@ function notifyOldUsers() {
   userlib.view("users", "owners_by_username", {
     "key": username,
     "include_docs": true
-  }, (err, user_view_body) => {
-
-    if (err) {
-      console.log(err);
-      return;
-    }
-
+  }).then((user_view_body) => {
     for (var index in user_view_body.rows) {
       let user = user_view_body.rows[index];
       notify24(user);
       notify168(user);
     }
+  }).catch((err) => {
+    console.log(err);
   });
 }
 
