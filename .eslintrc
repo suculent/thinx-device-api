@@ -1,8 +1,22 @@
 {
-    "rules": {
-        "semi": [ "error", "always" ]
-    },
+    "extends": "eslint:recommended",
     "parserOptions": {
-       "ecmaVersion": 8
+        "ecmaVersion": 2018
+    },
+    "rules": {
+        "indent": "off",
+        "linebreak-style": "off",
+        "semi": "off",
+        "no-console": "off",
+        "lines-around-comment": "off",
+        "max-len": "off",
+        "camelcase": "off",
+        "eqeqeq": "off",
+        "dot-notation": "off",
+        "no-useless-escape": "off",
+        "no-undef": "off",
+        "space-in-parens": "off",
+        "quotes": "off",
+        "key-spacing": "off"
     }
 }
