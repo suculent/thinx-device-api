@@ -16,7 +16,7 @@
     "snyk": "snyk test",
     "snyk-protect": "snyk protect",
     "test": "nyc jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls",
-    "lint": "eslint --config ./.eslintrc.json --ignore-path ./.eslintignore ./",
+    "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./",
     "coverage": "npm run mocha",
     "mocha": "mocha spec/jasmine --delay=3000 --exit --timeout=5000; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls",
     "version": "npm run npm-auto-version",
