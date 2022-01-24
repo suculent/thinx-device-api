@@ -8,11 +8,9 @@ describe("Owner", function() {
   var envi = require("../_envi.json");
   
   var owner = envi.oid;
-  var avatar_image = envi.test_avatar;
   var email = envi.email;
   var test_info = envi.test_info;
   const user_body = envi.test_info;
-  var activation_k; // global
 
   // activation key is provided by e-mail for security,
   // cimrman@thinx.cloud receives his activation token in response
@@ -40,7 +38,6 @@ describe("Owner", function() {
       if (response) {
         console.log("(01) Activation response stored as this.activation_key: " + response);
         this.activation_key = response; // store activation token for next step
-        activation_k = response;
       }
       console.log("(01) Create response: ", { response });
       expect(response).to.be.a('string');
