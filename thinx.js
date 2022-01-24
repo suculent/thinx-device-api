@@ -623,7 +623,7 @@ wss.on("error", function(err) {
 app._ws = {}; // list of all owner websockets
 
 function initLogTail(ws) {
-  app.post("/api/user/logs/tail", function(req2, res) {
+  app.post("/api/user/logs/tail", (req2, res) => {
     if (!(router.validateSecurePOSTRequest(req2) || router.validateSession(req2, res))) return;
     if (typeof(req2.body.build_id) === "undefined") {
       router.respond(res, {
