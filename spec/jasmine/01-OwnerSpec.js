@@ -19,8 +19,10 @@ describe("Owner", function() {
   // and must not be used in production environment
 
   it("(01) should be able to create owner profile", function(done) {
+
+    let res_mock = {};
     
-    user.create(user_body, true, (res, success, response) => {
+    user.create(user_body, true, res_mock, (res, success, response) => {
       if (success === false && typeof(response) == "string" && response.indexOf("username_already_exists")) {
         done();
         return;
