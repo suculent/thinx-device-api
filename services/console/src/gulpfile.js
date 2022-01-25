@@ -1,28 +1,30 @@
 'use strict';
 
 // sass compile
-var gulp = require('gulp');
-var prettify = require('gulp-prettify');
-var minifyCss = require("gulp-minify-css");
-var rename = require("gulp-rename");
-let uglify = require('gulp-uglify-es').default;
-var noop = require('gulp-noop');
+const gulp = require('gulp');
+const prettify = require('gulp-prettify');
+const cleanCSS = require('gulp-clean-css');
+const rename = require("gulp-rename");
+const uglify = require('gulp-uglify-es').default;
+const noop = require('gulp-noop');
+const sourcemaps = require('gulp-sourcemaps');
+const debug = require('gulp-debug');
 
-var injectEnvs = require('gulp-inject-envs');
-var removeCode = require('gulp-remove-code');
-var merge = require('merge-stream');
-var concat = require('gulp-concat');
+const injectEnvs = require('gulp-inject-envs');
+const removeCode = require('gulp-remove-code');
+const merge = require('merge-stream');
+const concat = require('gulp-concat');
 
 // Cleartext logging of sensitive information, development only.
 //console.log('----------- gulp process.env ------------');
 //console.log(JSON.stringify(process.env, null, 4));
 //console.log('----------- ---------------- ------------');
 
-var isProduction = typeof(process.env.ENVIRONMENT) == 'undefined' || process.env.ENVIRONMENT !== 'production' ? false : true;
-var isEnterprise = typeof(process.env.ENTERPRISE) == 'undefined' || process.env.ENTERPRISE !== 'true' ? false : true;
-var makeBundle = false;
+let isProduction = typeof(process.env.ENVIRONMENT) == 'undefined' || process.env.ENVIRONMENT !== 'production' ? false : true;
+let isEnterprise = typeof(process.env.ENTERPRISE) == 'undefined' || process.env.ENTERPRISE !== 'true' ? false : true;
+let makeBundle = false;
 
-var env = {
+const env = {
   environment: isProduction ? 'production' : 'development',
   enterprise: isEnterprise,
   projectName: process.env.COMPOSE_PROJECT_NAME,
@@ -49,7 +51,6 @@ console.log('makeBundle: ' + makeBundle);
 console.log('----------- -------- ------------');
 */
 
-//*** Localhost server tast
 gulp.task('build', function() {
 
   /* TODO: debug */
@@ -75,13 +76,15 @@ gulp.task('build', function() {
       gulp.src(['public/**/*.js', '!public/**/*.min.js'], {base: '.'}),
       gulp.src(['app/**/*.js','!app/**/*.min.js'], {base: '.'})
     )
-    //.pipe(debug({minimal: true}))
+    .pipe(debug({minimal: true}))
     .pipe(removeCode(removeCodeVars))
     .pipe(injectEnvs(env))
-    .pipe( isProduction ? uglify().on('error',function(e){console.log(e);}) : noop() )
+    .pipe(sourcemaps.init())
+    .pipe( isProduction ? uglify().on('error', function (e) { console.log(e); }) : noop() )
     .pipe( isProduction ? rename({suffix: '.min'}) : noop() );
 
   compiled_all_js.pipe( makeBundle ? concat('bundle.js') : noop() )
+    .pipe(sourcemaps.write())
     .pipe(gulp.dest(target));
 
   // CSS
@@ -97,7 +100,7 @@ gulp.task('build', function() {
     //.pipe(debug({minimal: true}))
     .pipe(removeCode(removeCodeVars))
     .pipe(injectEnvs(env))
-    .pipe( isProduction ? minifyCss() : noop() )
+    .pipe(isProduction ? cleanCSS({ compatibility: 'ie8' }) : noop() )
     .pipe( isProduction ? rename({suffix: '.min'}) : noop() );
 
   compiled_all_css.pipe( makeBundle ? concat('bundle.css') : noop() )
@@ -154,24 +157,16 @@ gulp.task('build', function() {
   //.pipe(debug({minimal: true}))
   .pipe(gulp.dest(target));
 
-
-
 });
 
-gulp.task('noop', function() {
+gulp.task('noop', function() { /* no operation */ });
 
-
-});
-
-
-
-
-//*** Localhost server tast
+//*** Localhost server test
 gulp.task('buildPublic', function() {
 
   /* TODO: debug */
   isProduction = true;
-  //isEnterprise = true;
+  // isEnterprise = true;
   makeBundle = true;
   /* TODO: debug */
 
@@ -184,11 +179,6 @@ gulp.task('buildPublic', function() {
 
   var compiled_public_js,
       compiled_public_css;
-
- /*
-  var compiled_app_js,
-      compiled_app_css;
-  */
 
   // JS
   compiled_public_js = merge(
@@ -211,8 +201,8 @@ gulp.task('buildPublic', function() {
     .pipe(injectEnvs(env));
 
   compiled_public_js.pipe( makeBundle ? concat('bundle.js') : noop() )
-    .pipe( isProduction ? uglify().on('error',function(e){console.log(e);}) : noop() )
-    .pipe( isProduction ? rename({suffix: '.min'}) : noop() )
+    .pipe(isProduction ? uglify().on('error',function(e){console.log(e);}) : noop() )
+    .pipe(isProduction ? rename({suffix: '.min'}) : noop() )
     .pipe(gulp.dest(target + '/public'));
 
   // CSS
@@ -236,8 +226,8 @@ gulp.task('buildPublic', function() {
     .pipe(injectEnvs(env));
 
   compiled_public_css.pipe( makeBundle ? concat('bundle.css') : noop() )
-    .pipe( isProduction ? minifyCss() : noop() )
-    .pipe( isProduction ? rename({suffix: '.min'}) : noop() )
+    .pipe(isProduction ? cleanCSS({ compatibility: 'ie8' }) : noop() )
+    .pipe(isProduction ? rename({suffix: '.min'}) : noop() )
     .pipe(gulp.dest(target + '/public'));
 
   // HTML
@@ -265,10 +255,6 @@ gulp.task('buildPublic', function() {
 
 });
 
-
-
-
-//*** Localhost server tast
 gulp.task('buildApp', function() {
 
     /*

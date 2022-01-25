@@ -31,6 +31,7 @@
         "camelcase": "off",
         "eqeqeq": "off",
         "dot-notation": "off",
-        "no-useless-escape": "off"
+        "no-useless-escape": "off",
+        "quotes": ["single", "always"]
     }
 }
