@@ -110,7 +110,7 @@ var nano = require("nano")(app_config.database_uri);
 
 function initDatabases(dbprefix) {
 
-  function null_cb(err, body, header) {
+  function null_cb(/* err, body, header */) {
     // only unexpected errors should be logged
   }
 
@@ -120,7 +120,7 @@ function initDatabases(dbprefix) {
   nano.db.create("_replicator", null_cb);
   nano.db.create("_global_changes", null_cb);
 
-  nano.db.create(dbprefix + "managed_devices", function(err, body, header) {
+  nano.db.create(dbprefix + "managed_devices", function(err/* , body, header */) {
     if (err) {
       handleDatabaseErrors(err, "managed_devices");
     }
@@ -129,7 +129,7 @@ function initDatabases(dbprefix) {
     injectReplFilter(couch, "./design/filters_devices.json");
   });
 
-  nano.db.create(dbprefix + "managed_builds", function(err, body, header) {
+  nano.db.create(dbprefix + "managed_builds", function(err/* , body, header */) {
     if (err) {
       handleDatabaseErrors(err, "managed_builds");
     }
@@ -138,7 +138,7 @@ function initDatabases(dbprefix) {
     injectReplFilter(couch, "./design/filters_builds.json");
   });
 
-  nano.db.create(dbprefix + "managed_users", function(err, body, header) {
+  nano.db.create(dbprefix + "managed_users", function(err/* , body, header */) {
     if (err) {
       handleDatabaseErrors(err, "managed_users");
     }
@@ -147,7 +147,7 @@ function initDatabases(dbprefix) {
     injectReplFilter(couch, "./design/filters_users.json");
   });
 
-  nano.db.create(dbprefix + "managed_logs", function(err, body, header) {
+  nano.db.create(dbprefix + "managed_logs", function(err/* , body, header */) {
     if (err) {
       handleDatabaseErrors(err, "managed_logs");
     }
@@ -166,7 +166,7 @@ var userlib = require("nano")(app_config.database_uri).use(prefix + "managed_use
 console.log("Loaded module: Statistics");
 var Stats = require("./lib/thinx/statistics");
 var stats = new Stats();
-//stats.get_all_owners();
+//stats.get_all_owners(); FIXME: init all owners on boot... measure!
 
 console.log("Loaded module: Messenger");
 var Messenger = require("./lib/thinx/messenger");
@@ -623,7 +623,7 @@ wss.on("error", function(err) {
 
 app._ws = {}; // list of all owner websockets
 
-function initLogTail(ws) {
+function initLogTail() {
   app.post("/api/user/logs/tail", (req2, res) => {
     if (!(router.validateSecurePOSTRequest(req2) || router.validateSession(req2, res))) return;
     if (typeof(req2.body.build_id) === "undefined") {
@@ -712,7 +712,7 @@ wss.on('connection', function(ws, req) {
   }
   
   /* Returns specific build log for owner */
-  initLogTail(ws);
+  initLogTail();
   initSocket(ws, messenger);
 
 }).on("error", function(err) {
@@ -728,7 +728,7 @@ function database_compactor() {
   nano.db.compact("managed_logs");
   nano.db.compact("managed_builds");
   nano.db.compact("managed_devices");
-  nano.db.compact("managed_users", "owners_by_username", function(err) {
+  nano.db.compact("managed_users", "owners_by_username", function(/* err */) {
     console.log("» Database compact jobs completed.");
   });
 }
@@ -751,7 +751,7 @@ function isMasterProcess() {
   return true; // should be actually `cluster.isMaster();`
 }
 
-function reporter(success, default_mqtt_key) {
+function reporter(success, /* key - ignored, key is returned only for testing */) {
     if (success) {
       console.log("Restored Default MQTT Key...");
     }
@@ -830,7 +830,7 @@ function setup_restore_owners_credentials(query) {
 }
 
 function startup_quote() {
-  if ((typeof(process.env.ENTERPRISE) === "undefined") || (process.env.ENTERPRISE == false)) {
+  if ((typeof(process.env.ENTERPRISE) === "undefined") || (process.env.ENTERPRISE === false)) {
     messenger.sendRandomQuote();
   }
 }
