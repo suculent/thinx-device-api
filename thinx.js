@@ -423,21 +423,27 @@ require('path');
 
 // Bypassed LGTM, because it does not make sense on this API for all endpoints,
 // what is possible is covered by helmet and no-cache.
-const sessionParser = session({
+
+// allow disabling Secure/HTTPOnly cookies for HTTP-only mode (development, localhost)
+let enforceMaximumSecurity = app_config.debug.allow_http_login ? true : false;
+
+const sessionConfig = { 
   secret: session_config.secret,
-  "cookie": {
-    "maxAge": 3600000,
-    "secure": true,
-    "httpOnly": true
+  cookie: {
+    maxAge: 3600000,
+    secure: enforceMaximumSecurity,
+    httpOnly: enforceMaximumSecurity
   },
   store: sessionStore,
   name: "x-thx-session",
   resave: false, // was true
   rolling: false,
   saveUninitialized: false,
-});
+};
 
-app.use(sessionParser); // lgtm [js/missing-token-validation]
+const sessionParser = session(sessionConfig); // lgtm [js/missing-token-validation]
+
+app.use(sessionParser);
 
 // rolling was true; This resets the expiration date on the cookie to the given default.
 
@@ -541,7 +547,9 @@ wsapp.use(session({
   secret: session_config.secret,
   store: sessionStore,
   cookie: {
-    expires: hour
+    expires: hour,
+    secure: enforceMaximumSecurity,
+    httpOnly: enforceMaximumSecurity
   },
   name: "x-thx-ws-session",
   resave: false,

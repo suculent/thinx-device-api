@@ -19,4 +19,15 @@ describe("Sanitka", function () {
     expect(s.length).to.equal(0);
   });
 
+  it("should accept valid owner", function () {
+    let input = "31b1f6bf498d7cec463ff2588aca59a52df6f880e60e8d4d6bcda0d8e6e87823";
+    var result = sanitka.owner(input);
+    expect(result).to.equal(input);
+  });
+
+  it("should reject valid owner", function () {
+    var result = sanitka.owner("invalid-owner");
+    expect(result).to.equal(0);
+  });
+
 });
