@@ -33,3 +33,6 @@
 [submodule "services/worker"]
 	path = services/worker
 	url = git@github.com:thinx-cloud/worker.git
+[submodule "services/services/transformer"]
+	path = services/services/transformer
+	url = git@github.com:thinx-cloud/transformer.git
