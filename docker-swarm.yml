@@ -14,7 +14,7 @@ networks:
 services:
   mosquitto:
     env_file: .env
-    image: registry.thinx.cloud:5000/thinx/mosquitto:swarm
+    image: thinxcloud/mosquitto
     ports:
       - '1883:1883' # mqtt
       - '1884:1883' # mqtts
@@ -103,7 +103,7 @@ services:
     env_file: .env
     networks:
       - internal
-    image: registry.thinx.cloud:5000/thinx/redis
+    image: thinxcloud/redis
     command:
       - redis-server
       - '--requirepass'
@@ -132,7 +132,7 @@ services:
   transformer:
     env_file: .env
     user: transformer
-    image: registry.thinx.cloud:5000/thinx/transformer
+    image: thinxcloud/transformer
     environment:
       - "SQREEN_APP_NAME: ${SQREEN_APP_NAME}"
       - "SQREEN_TOKEN=${SQREEN_TOKEN}"

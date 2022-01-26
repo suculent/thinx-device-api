@@ -20,14 +20,14 @@ jobs:
           registry: registry.thinx.cloud:5000
       - docker/build:
           registry: registry.thinx.cloud:5000
-          image: thinx/mosquitto
+          image: thinxcloud/mosquitto
           docker-context: services/broker
           dockerfile: services/broker/Dockerfile
           extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
           tag: 'swarm'
       - docker/push:
           digest-path: /tmp/digest.txt
-          image: thinx/mosquitto
+          image: thinxcloud/mosquitto
           registry: registry.thinx.cloud:5000
           tag: 'swarm'
   
@@ -41,14 +41,14 @@ jobs:
             rm -rf ./package-lock.json
       - docker/check
       - docker/build:
-          image: thinx/mosquitto
+          image: thinxcloud/mosquitto
           docker-context: services/broker
           dockerfile: services/broker/Dockerfile
           extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
           tag: 'test'
       - docker/push:
           digest-path: /tmp/digest.txt
-          image: thinx/mosquitto
+          image: thinxcloud/mosquitto
           tag: 'test'
 
   build-redis-cloud:

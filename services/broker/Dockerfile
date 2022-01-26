@@ -43,31 +43,26 @@ FROM debian:buster
 
 LABEL name="thinxcloud/broker" version="1.4.8292"
 
-#Get mosquitto dependencies.
+# Get mosquitto dependencies.
 RUN apt-get update && apt-get install --no-install-recommends -y libwebsockets8 libc-ares2 openssl uuid
 
-#Setup mosquitto env.
+# Setup mosquitto env.
 RUN mkdir -p /var/lib/mosquitto /var/log/mosquitto 
 RUN groupadd mosquitto \
     && useradd -s /sbin/nologin mosquitto -g mosquitto -d /var/lib/mosquitto \
     && chown -R mosquitto:mosquitto /var/log/mosquitto/ \
     && chown -R mosquitto:mosquitto /var/lib/mosquitto/
 
-#Copy confs, plugin so and mosquitto binary.
+# Copy confs, plugin so and mosquitto binary.
 COPY --from=0 /app/mosquitto/ /mosquitto/
 COPY --from=0 /app/pw /mosquitto/pw
 COPY --from=0 /app/go-auth.so /mosquitto/go-auth.so
 COPY --from=0 /usr/local/sbin/mosquitto /usr/sbin/mosquitto
 
-#Uncomment to copy your custom confs (change accordingly) directly when building the image.
-#Leave commented if you want to mount a volume for these (see docker-compose.yml).
-
 COPY ./goauth/docker/conf/mosquitto.conf /etc/mosquitto/mosquitto.conf
 COPY ./goauth/docker/conf/conf.d/go-auth.conf /etc/mosquitto/conf.d/go-auth.conf
-#COPY ./goauth/docker/conf/auth/acls /etc/mosquitto/auth/acls
-#COPY ./goauth/docker/conf/auth/passwords /etc/mosquitto/auth/passwords
 
-#Expose tcp and websocket ports as defined at mosquitto.conf (change accordingly).
+# Expose tcp and websocket ports as defined at mosquitto.conf (change accordingly).
 EXPOSE 1883 8883 1884
 
 ENTRYPOINT ["sh", "-c", "/usr/sbin/mosquitto -c /etc/mosquitto/mosquitto.conf" ]

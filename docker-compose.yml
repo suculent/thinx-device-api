@@ -7,7 +7,7 @@ networks:
 services:
   mosquitto:
     env_file: .env
-    image: registry.thinx.cloud:5000/thinx/mosquitto:swarm
+    image: thinxcloud/mosquitto
     ports:
       - '1883:1883' # mqtt
       - '1884:1883' # mqtts
