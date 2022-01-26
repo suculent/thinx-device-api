@@ -1,9 +1,0 @@
-{
-  "name": "C/C++",
-  "extensions": ["c", "cpp", "ino"],
-  "DEFINE": "#define ",
-  "ASSIGN": " ",
-  "COMMENT": "//",
-  "STRINGSTOP": "\"",
-  "EOL": ""
-}
