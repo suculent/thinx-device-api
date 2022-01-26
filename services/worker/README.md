@@ -4,15 +4,13 @@ This component is responsible for communication with THiNX Build Server over web
 
 Builder connects to THiNX automatically using a websocket. In some cases, address of the main server should be given.
 
-
-### Security Precautions
+## Security Precautions
 
 This container is mighty. It will perform any shell command submitted, after passing the validation (which is not a measure in open-source code).
 
 Use the `WORKER_SECRET` variable on boths sides (API/Worker) to make sure worker cannot be used by unauthorized actor.
 
-
-### Supported Environment Variables
+## Supported Environment Variables
 
 | Name.                   | Usage.                                          |
 |:------------------------|:------------------------------------------------|
@@ -22,17 +20,18 @@ Use the `WORKER_SECRET` variable on boths sides (API/Worker) to make sure worker
 | `ROLLBAR_ENVIRONMENT`   | Enviroment for Rollbar (required if token set)  |
 | `WORKER_SECRET`         | If set, jobs will be validated for this secret. |
 
+## Building in Development
 
-### Building in Development
+```bash
 
-	docker build -t thinx/worker .
-	
-	docker run \
-		-e THINX_SERVER=<recommended> \
-		-e WORKER_SECRET=<recommended> \
-		-e SQREEN_TOKEN=<optional> \
-		-e ROLLBAR_ACCESS_TOKEN=<optional> \
-		-e ROLLBAR_ENVIRONMENT=development \
-		-ti thinx/worker
-	
-	
+ docker build -t thinxcloud/worker .
+ 
+ docker run \
+  -e THINX_SERVER=<required> \
+  -e WORKER_SECRET=<required> \
+  -e SQREEN_TOKEN=<optional> \
+  -e ROLLBAR_ACCESS_TOKEN=<optional> \
+  -e ROLLBAR_ENVIRONMENT=production \
+  -ti thinxcloud/worker
+
+```

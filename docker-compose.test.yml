@@ -94,7 +94,7 @@ services:
 
   worker:
     env_file: .env
-    image: registry.thinx.cloud:5000/thinx/worker:swarm
+    image: thinxcloud/worker
     environment:
       - "SQREEN_TOKEN=${SQREEN_TOKEN}"
       - "ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}"

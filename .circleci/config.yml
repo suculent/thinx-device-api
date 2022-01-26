@@ -106,21 +106,17 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
-      - docker/check:
-          registry: registry.thinx.cloud:5000
       - docker/build:
-          registry: registry.thinx.cloud:5000
           docker-context: services/worker
-          image: thinx/worker
+          image: thinxcloud/worker
           dockerfile: ./services/worker/Dockerfile
           extra_build_args: |
             --build-arg REVISION=$(git describe --abbrev=0) \
-          tag: 'swarm'
+          tag: 'latest'
       - docker/push:
           digest-path: /tmp/digest.txt
-          image: thinx/worker
-          registry: registry.thinx.cloud:5000
-          tag: 'swarm'
+          image: thinxcloud/worker
+          tag: 'latest'
 
   build-console-cloud:
     executor: docker/docker
@@ -421,13 +417,14 @@ workflows:
       #         only:
       #           - thinx-swarm
 
-      # - build-worker-cloud:
-      #     context:
-      #       - thinx-docker-repo
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-swarm
+      - build-worker-cloud:
+          context:
+            - dockerhub
+          filters:
+            branches:
+              only:
+                - thinx-swarm
+                - thinxcloud
 
       # - build-api-cloud:
       #     context:
