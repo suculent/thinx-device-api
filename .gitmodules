@@ -39,3 +39,6 @@
 [submodule "services/redis"]
 	path = services/redis
 	url = git@github.com:thinx-cloud/redis.git
+[submodule "services/couchdb"]
+	path = services/couchdb
+	url = git@github.com:thinx-cloud/couchdb.git
