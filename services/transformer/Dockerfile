@@ -1,6 +1,6 @@
 FROM node:17-alpine
 
-LABEL name="thinx/transformer" version="1.8.76"
+LABEL name="thinxcloud/transformer" version="1.8.76"
 
 ARG SQREEN_APP_NAME
 ARG SQREEN_TOKEN

@@ -1,6 +1,6 @@
 FROM redis:6.2-buster
 
-LABEL name="thinx/redis" version="1.4.8292"
+LABEL name="thinxcloud/redis" version="1.4.8292"
 
 ARG REDIS_PASSWORD
 ENV REDIS_PASSWORD=${REDIS_PASSWORD}

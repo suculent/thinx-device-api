@@ -41,7 +41,7 @@ RUN export PATH=$PATH:/usr/local/go/bin && \
 #Start from a new image.
 FROM debian:buster
 
-LABEL name="thinx/broker" version="1.4.8292"
+LABEL name="thinxcloud/broker" version="1.4.8292"
 
 #Get mosquitto dependencies.
 RUN apt-get update && apt-get install --no-install-recommends -y libwebsockets8 libc-ares2 openssl uuid
