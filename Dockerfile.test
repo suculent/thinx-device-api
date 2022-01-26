@@ -1,6 +1,7 @@
-FROM suculent/thinx-base-image:latest
+FROM thinxcloud/base
 
-# docker build -t suculent/thinx-device-api .
+LABEL maintainer="Matej Sychra <suculent@me.com>"
+LABEL name="THiNX API" version="1.8"
 
 ARG ROLLBAR_ENVIRONMENT
 ARG THINX_HOSTNAME

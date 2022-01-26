@@ -3,8 +3,8 @@
 # expected usage:
 # ./update.sh --owner suculent
 
-OWNER="suculent"
+export OWNER="thinxcloud"
 
-docker build -t $OWNER/thinx-base-image .
+docker build -t $OWNER/base .
 
-docker push $OWNER/thinx-base-image:latest
+docker push $OWNER/base
