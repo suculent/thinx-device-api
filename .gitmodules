@@ -42,3 +42,6 @@
 [submodule "services/couchdb"]
 	path = services/couchdb
 	url = git@github.com:thinx-cloud/couchdb.git
+[submodule "services/broker"]
+	path = services/broker
+	url = git@github.com:thinx-cloud/broker.git
