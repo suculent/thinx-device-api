@@ -1,5 +1,0 @@
-{
-  "name": "Micropython",
-  "language": "python",
-  "header": "boot.py"
-}
