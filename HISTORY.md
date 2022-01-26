@@ -2,7 +2,14 @@
 
 ## HISTORY
 
-3/4/2021 1.4.7723
+26/1/2021 1.4.8291
+
+» Major update
+» Internal fixes and improvements, refactoring
+» Separate CNAME for API is not required anymore
+» Breaking change in config file format (Slack block
+
+3/4/2021 1.3.7723
 
 » GoAuth ACL fixes
 » UI fixed on build

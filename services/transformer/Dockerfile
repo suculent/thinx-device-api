@@ -1,15 +1,18 @@
 FROM node:17-alpine
 
+LABEL name="suculent/transformer" version="1.8.76"
+
 ARG SQREEN_APP_NAME
 ARG SQREEN_TOKEN
 ARG ROLLBAR_ACCESS_TOKEN
 ARG ROLLBAR_ENVIRONMENT
-ARG REVISION=${REVISION}
+ARG REVISION
 
+ENV SQREEN_APP_NAME=${SQREEN_APP_NAME}
+ENV SQREEN_TOKEN=${SQREEN_TOKEN}
 ENV ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
 ENV ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
-
-RUN echo "ROLLBAR_ACCESS_TOKEN: ${ROLLBAR_ACCESS_TOKEN}"
+ENV REVISION=${REVISION}
 
 RUN apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python3 curl git jq
 
@@ -33,6 +36,8 @@ RUN npm install . --only-prod && \
     addgroup -S thinx && \
     adduser -S -D -h /home/node/app transformer thinx && \
     chown -R transformer:thinx /home/node/app
+
+RUN apk rm gcc g++ make python3 curl git jq
 
 # Switch to 'transformer' or 'node' user
 USER transformer

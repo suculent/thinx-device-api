@@ -1,7 +1,3 @@
-networks:
-  internal:
-    external: false
-
 version: '3'
 
 networks:
@@ -20,8 +16,6 @@ services:
         - SQREEN_APP_NAME=${SQREEN_APP_NAME}
         - SQREEN_TOKEN=${SQREEN_APP_NAME}
         - REVISION=1
-    networks:
-      - internal
     networks:
       - internal
     restart: unless-stopped
