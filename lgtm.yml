@@ -1,0 +1,4 @@
+path_classifiers:
+    design:
+        - design
+        - exclude: design
