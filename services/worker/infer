@@ -1,0 +1,275 @@
+#!/bin/bash
+
+# THiNX Builder Library Functions
+
+export THINX_ROOT=/opt/thinx/thinx-device-api
+
+function parse_yaml
+{
+    local prefix=$2
+    local s
+    local w
+    local fs
+    s='[[:space:]]*'
+    w='[a-zA-Z0-9_]*'
+    fs="$(echo @|tr @ '\034')"
+    sed -ne "s|^\($s\)\($w\)$s:$s\"\(.*\)\"$s\$|\1$fs\2$fs\3|p" \
+        -e "s|^\($s\)\($w\)$s[:-]$s\(.*\)$s\$|\1$fs\2$fs\3|p" "$1" |
+    awk -F"$fs" '{
+    indent = length($1)/2;
+    vname[indent] = $2;
+    for (i in vname) {if (i > indent) {delete vname[i]}}
+        if (length($3) > 0) {
+            vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
+            printf("%s%s%s=(\"%s\")\n", "'"$prefix"'",vn, $2, $3);
+        }
+    }' | sed 's/_=/+=/g'
+}
+
+function infer_platform
+{
+		local path=$1
+
+		#
+		# WARNING! This is a duplicate implementation. Platforms are inferred using JS as well.
+		# It will deprecate.
+		#
+
+		platform="unknown"
+		ALL=$(ls $path)
+
+		for XDIR in $ALL; do
+				if [[ -d $path/$XDIR ]]; then
+					FILES=$(ls $path/$XDIR | grep "\.ino")
+					for FILE in $FILES
+					do
+						if [[ -f $path/$XDIR/$FILE ]]; then
+							platform="arduino"
+						fi
+					done
+				fi
+		done
+
+		# Platform.io (will be overwritten with Arduino in case of ino files!)
+
+		if [[ -f $path/platformio.ini ]]; then
+			platform="platformio"
+    	fi
+
+		# NodeJS
+
+	  	if [[ $(find $path -maxdepth 1 -name "package.json") ]]; then
+			platform="nodejs"
+
+		elif [[ -f "$path/package.json" ]]; then
+			platform="nodejs"
+
+		# Arduino
+
+		elif [[ $(find $path -maxdepth 1 -name "*.ino") ]]; then
+			platform="arduino"
+
+		# NodeMCU (Lua)
+
+		elif [[ -f "$path/init.lua" ]]; then
+			platform="nodemcu"
+
+		# Pine64 (Makefile, will collide with other platforms later, like esp-idf)
+
+		elif [[ -f "$path/Makefile" ]]; then
+			platform="pine64"
+
+		# Micropython
+
+		elif [[ -f "$path/main.py" ]]; then
+			platform="micropython"
+
+		elif [[ -f "$path/boot.py" ]]; then
+			platform="micropython"
+
+		# Mongoose OS
+
+	  elif [[ -f "$path/mos.yml" ]]; then
+			platform="mongoose"
+		fi
+
+    	# Override from YAML
+		YMLFILE=$(find $path -name "thinx.yml" -maxdepth 1 | head -n 1)
+		if [[ -f "$YMLFILE" ]]; then
+		  eval $(parse_yaml "$YMLFILE" "")
+			if [[ ! -z $platformio ]]; then
+				platform = "platformio"
+			fi
+      		if [[ ! -z $arduino ]]; then
+				platform = "arduino"
+			fi
+			if [[ ! -z $microphython ]]; then
+				platform = "micropython"
+			fi
+			if [[ ! -z $mongoose ]]; then
+				platform = "mongoose"
+			fi
+			if [[ ! -z $nodejs ]]; then
+				platform = "nodejs"
+			fi
+		else
+			echo "thinx.yml not found at $YMLFILE"
+		fi
+
+		echo $platform
+}
+
+function output_file
+{
+		local DSC_PATH="$THINX_ROOT/platforms/$1/descriptor.json"
+		echo $(cat $DSC_PATH | jq .header | tr -d '"' 2> /dev/null )
+}
+
+function platform_name
+{
+		local DSC_PATH="$THINX_ROOT/platforms/$1/descriptor.json"
+		echo $(cat $DSC_PATH | jq .name | tr -d '"' 2> /dev/null )
+}
+
+function language_for_platform
+{
+		local DSC_PATH="$THINX_ROOT/platforms/$1/descriptor.json"
+		echo $(cat $DSC_PATH | jq .language | tr -d '"' 2> /dev/null )
+}
+
+function language_name
+{
+		local DSC_PATH="$THINX_ROOT/languages/$1/descriptor.json"
+		echo $(cat $DSC_PATH | jq .name | tr -d '"' 2> /dev/null )
+}
+
+function generate_thinx_file
+{
+	local WORKDIR=$1
+	local BUILDFILE=$2
+	PLATFORM=$(infer_platform $WORKDIR)
+	PLATFORM_NAME=$(platform_name $PLATFORM)
+	LANGUAGE=$(language_for_platform $PLATFORM)
+	LANGUAGE_NAME=$(language_name $LANGUAGE)
+
+  # echo "[infer] Inferred platform: ${PLATFORM}"
+
+	if [[ -z ${BUILDFILE} ]]; then
+		echo "BUILDFILE not specified."
+		exit 3
+	fi
+
+	if [[ -z ${LANGUAGE} ]]; then
+		echo "LANGUAGE not inferred correctly."
+		exit 3
+	fi
+
+	if [[ -z ${WORKDIR} ]]; then
+		echo "WORKDIR not specified."
+		exit 3
+	fi
+
+	thinx_file_from_json $BUILDFILE $LANGUAGE $WORKDIR
+}
+
+#
+# platform-agnostic header generator
+#
+
+function thinx_file_from_json
+{
+		local WORKDIR=$3
+		local LANG_PATH="$THINX_ROOT/languages/$2/descriptor.json"
+		local LANG=$(cat $LANG_PATH)
+		local LANGUAGE_NAME=$(echo $LANG | jq .name | tr -d '"' 2> /dev/null)
+		local DEFINE=$(echo $LANG | jq .DEFINE | tr -d '"' 2> /dev/null)
+		local ASSIGN=$(echo $LANG | jq .ASSIGN | tr -d '"' 2> /dev/null)
+		local COMMENT=$(echo $LANG | jq .COMMENT | tr -d '"' 2> /dev/null)
+		local EOL=$(echo $LANG | jq .EOL | tr -d '"' 2> /dev/null)
+
+		local STRINGSTOP=$(echo $LANG | jq .STRINGSTOP | tr -d '\\' 2> /dev/null)
+		STRINGSTOP=$(echo "${STRINGSTOP:1:${#STRINGSTOP}-2}")
+
+    if [ -z $PLATFORM ]; then
+      echo "Unknown platform."
+      exit 1
+    fi
+
+		OUTFILE=$(output_file $PLATFORM)
+		BUILDFILE="$(cat $1)"
+		PLATFORM=$(infer_platform $WORKDIR)
+
+		# for JavaScript will just provide the JSON as-is...
+		if [[ "$PLATFORM" == "mongoose" ]]; then
+			echo "Pre-building JSON for MongooseOS..."
+			VALUE2="${BUILDFILE/\%\%LANGUAGE_NAME\%\%/$LANGUAGE_NAME}"
+			VALUE2=${VALUE2/\%\%THINX_PLATFORM\%\%/$PLATFORM}
+			echo $VALUE2 > "$OUTFILE"
+			echo $VALUE2
+			cat $OUTFILE
+			exit 0
+		fi
+
+		# Micropython could use pre-build file but we'll go with JSON until
+		# the firmware will be wholy built. Then pre-built file makes sense
+		# from security point of view. Until then, makes no difference.
+		if [[ "$PLATFORM" == "micropython" ]]; then
+			echo "Pre-building JSON for Micropython..."
+			VALUE2="${BUILDFILE/\%\%LANGUAGE_NAME\%\%/$LANGUAGE_NAME}"
+			VALUE2=${VALUE2/\%\%THINX_PLATFORM\%\%/$PLATFORM}
+			echo $VALUE2 > "$OUTFILE"
+			echo $VALUE2
+			cat $OUTFILE
+			exit 0
+		fi
+
+		# other languages need special treatment...
+		ALL=$(ls $WORKDIR)
+		for XDIR in $ALL; do
+				if [[ -d $WORKDIR/$XDIR ]]; then
+					FILES=$(ls $WORKDIR/$XDIR | grep "\.ino")
+					for FILE in $FILES
+					do
+						if [[ -f $WORKDIR/$XDIR/$FILE ]]; then
+							# platform="arduino"
+							OUTFILE=$WORKDIR/$XDIR/$OUTFILE
+						fi
+					done
+				fi
+		done
+		# echo "[infer] Exporting Infer output to : $OUTFILE"
+
+		KEYS=$(echo $BUILDFILE | jq keys)
+		VARS=$(echo $BUILDFILE | jq .[])
+		FIRST=true
+		rm -rf "$OUTFILE"
+
+		for K in $KEYS; do
+			K=$(echo $K | tr -d '",')
+			if [[ "$K" == "[" ]]; then
+				echo > /dev/null # condition must not be empty
+			elif [[ "$K" == "]" ]]; then
+				echo > /dev/null # condition must not be empty
+			else
+				VALUE=$(echo $BUILDFILE | jq .$K | tr -d '"' 2> /dev/null)
+				if [[ "$K" == *"COMMENT"* ]]; then
+						VALUE=${VALUE/\%\%LANGUAGE_NAME\%\%/$LANGUAGE_NAME}
+						VALUE=${VALUE/\%\%THINX_PLATFORM\%\%/$PLATFORM}
+						echo "$COMMENT $VALUE" >> "$OUTFILE"
+				else
+					# Space between header comments and rest...
+					if [[ $FIRST == true ]]; then
+						FIRST=false
+						echo " " >> "$OUTFILE"
+					fi
+					if [[ $VALUE == "true" || $VALUE == false ]]; then
+						echo "$DEFINE$K$ASSIGN$VALUE$EOL" >> "$OUTFILE"
+					elif [[ ${VALUE} == ?(-)+([0-9]) ]]; then
+						echo "$DEFINE$K$ASSIGN$VALUE$EOL" >> "$OUTFILE"
+					else
+						echo "$DEFINE$K$ASSIGN$STRINGSTOP$VALUE$STRINGSTOP$EOL" >> "$OUTFILE"
+					fi
+				fi
+			fi
+		done
+}
