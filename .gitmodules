@@ -30,3 +30,6 @@
 	path = spec/test_repositories/thinx-firmware-esp8266
 	url = git@github.com:suculent/thinx-firmware-esp8266.git
 
+[submodule "services/worker"]
+	path = services/worker
+	url = git@github.com:thinx-cloud/worker.git
