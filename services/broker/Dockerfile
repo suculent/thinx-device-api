@@ -1,6 +1,6 @@
 
 #Use debian:buster as a builder and then copy everything.
-FROM debian:buster as builder
+FROM debian:buster
 
 #Set mosquitto and plugin versions.
 #Change them for your needs.
@@ -12,7 +12,7 @@ ENV GO_VERSION=1.16
 WORKDIR /app
 
 #Get mosquitto build dependencies.
-RUN apt-get update && apt-get install -y libwebsockets8 libwebsockets-dev libc-ares2 libc-ares-dev openssl uuid uuid-dev wget build-essential git
+RUN apt-get update && apt-get install --no-install-recommends  -y libwebsockets8 libwebsockets-dev libc-ares2 libc-ares-dev openssl uuid uuid-dev wget build-essential git
 RUN mkdir -p mosquitto/auth mosquitto/conf.d
 
 RUN wget http://mosquitto.org/files/source/mosquitto-${MOSQUITTO_VERSION}.tar.gz
@@ -41,8 +41,10 @@ RUN export PATH=$PATH:/usr/local/go/bin && \
 #Start from a new image.
 FROM debian:buster
 
+LABEL name="thinx/broker" version="1.4.8292"
+
 #Get mosquitto dependencies.
-RUN apt-get update && apt-get install -y libwebsockets8 libc-ares2 openssl uuid
+RUN apt-get update && apt-get install --no-install-recommends -y libwebsockets8 libc-ares2 openssl uuid
 
 #Setup mosquitto env.
 RUN mkdir -p /var/lib/mosquitto /var/log/mosquitto 
@@ -52,10 +54,10 @@ RUN groupadd mosquitto \
     && chown -R mosquitto:mosquitto /var/lib/mosquitto/
 
 #Copy confs, plugin so and mosquitto binary.
-COPY --from=builder /app/mosquitto/ /mosquitto/
-COPY --from=builder /app/pw /mosquitto/pw
-COPY --from=builder /app/go-auth.so /mosquitto/go-auth.so
-COPY --from=builder /usr/local/sbin/mosquitto /usr/sbin/mosquitto
+COPY --from=0 /app/mosquitto/ /mosquitto/
+COPY --from=0 /app/pw /mosquitto/pw
+COPY --from=0 /app/go-auth.so /mosquitto/go-auth.so
+COPY --from=0 /usr/local/sbin/mosquitto /usr/sbin/mosquitto
 
 #Uncomment to copy your custom confs (change accordingly) directly when building the image.
 #Leave commented if you want to mount a volume for these (see docker-compose.yml).
