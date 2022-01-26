@@ -36,3 +36,6 @@
 [submodule "services/transformer"]
 	path = services/transformer
 	url = git@github.com:thinx-cloud/transformer.git
+[submodule "services/redis"]
+	path = services/redis
+	url = git@github.com:thinx-cloud/redis.git
