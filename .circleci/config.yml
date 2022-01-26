@@ -364,16 +364,16 @@ workflows:
 
     jobs:
 
-      # - test:
-      #     context:
-      #         - dockerhub
-      #         - thinx-docker-repo
-      #     filters:
-      #       branches:
-      #         only:
-      #           - staging
-      #           - thinx-swarm
-      #           - master
+      - test:
+          context:
+              - dockerhub
+              - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - staging
+                - thinx-swarm
+                - master
 
       # - test-api-cloud:
       #     context:
@@ -389,13 +389,13 @@ workflows:
       #         only:
       #           - thinx-swarm
 
-      - build-console-cloud:
-          context:
-            - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
+      # - build-console-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
 
       # - build-mosquitto-cloud:
       #     context:
@@ -429,13 +429,13 @@ workflows:
       #         only:
       #           - thinx-swarm
 
-      - build-api-cloud:
-          context:
-            - thinx-docker-repo
-            - SonarCloud
-#          requires:
-#            - test
-          filters:
-            branches:
-              only:
-                - thinx-swarm
+      # - build-api-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #       - SonarCloud
+      #     requires:
+      #       - test
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
