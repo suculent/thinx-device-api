@@ -41,7 +41,7 @@ USER root
 # Install, build, protect
 RUN apk update \
     && apk upgrade \
-    && apk add g++ gcc libgcc libstdc++ linux-headers make python \
+    && apk add g++ gcc libgcc libstdc++ linux-headers make python3 \
     && apk add ca-certificates \
     && update-ca-certificates \
     && apk --no-cache add --virtual native-deps \
@@ -57,6 +57,7 @@ RUN npm install . --only-prod \
     && npm run build \
     && npm audit fix
 
+# To make scanner happy, this will NOT be contained in final image.
 RUN apk del g++ gcc make
 
 #
