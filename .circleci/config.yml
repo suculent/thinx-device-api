@@ -106,6 +106,9 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
+      - run:
+          command: |
+            git submodule update --init
       - docker/build:
           docker-context: services/worker
           image: thinxcloud/worker
