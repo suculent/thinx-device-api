@@ -166,9 +166,7 @@ var userlib = require("nano")(app_config.database_uri).use(prefix + "managed_use
 console.log("Loaded module: Statistics");
 var Stats = require("./lib/thinx/statistics");
 var stats = new Stats();
-
-console.log("Statitics module: Caching owners...");
-stats.get_all_owners(); 
+//stats.get_all_owners(); FIXME: init all owners on boot... measure!
 
 console.log("Loaded module: Messenger");
 var Messenger = require("./lib/thinx/messenger");
