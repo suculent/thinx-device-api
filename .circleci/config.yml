@@ -112,7 +112,7 @@ jobs:
           tag: 'latest'
       - docker/push:
           digest-path: /tmp/digest.txt
-          image: thinx/transformer
+          image: thinxcloud/transformer
           tag: 'latest'
 
   build-worker-cloud:
