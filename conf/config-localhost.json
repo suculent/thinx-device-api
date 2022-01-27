@@ -1,0 +1,66 @@
+{
+  "type": "thinx_server_config",
+  "version": "1",
+  "public_url": "http://localhost",
+  "api_url": "http://localhost:7443",
+  "acl_url": "http://localhost",
+  "mailgun": {
+    "api_key": "",
+    "base_url": "",
+    "domain": ""
+  },
+  "redis": {
+    "host": "thinx-redis",
+    "password": "changeme!"
+  },
+  "mqtt": {
+    "server": "mqtt://mosquitto",
+    "port": 1883,
+    "passwords": "/mnt/data/mosquitto/auth/thinx.pw",
+    "acl": "/mnt/data/mosquitto/auth/thinx.acl",
+    "password": "mosquitto",
+    "username": "thinx"
+  },
+  "rollbar_token": "",
+  "database_uri": "http://rtmtest:rtmtest@couchdb:5984",
+  "mqtt_port": 1883,
+  "port": 7442,
+  "secure_port": 7443,
+  "lambda": 7474,
+  "webhook_port": 9002,
+  "data_root": "/mnt/data",
+  "deploy_root": "/data",
+  "build_root": "/repositories",
+  "ssh_keys": "/mnt/data/ssh_keys",
+  "slack" : {
+    "client_id" : "",
+    "client_secret": "",
+    "webhook": "",
+    "bot_token": "",
+    "bot_topic": "thinx"
+  },
+  "fcm_auth": null,
+  "ssl_key": null,
+  "ssl_cert": null,
+  "client_user_agent": "THiNX-Client",
+  "builder": {
+    "concurrency": 2
+  },
+  "debug": {
+    "device": false,
+    "deployment": true,
+    "allow_http_login": true,
+    "ingress": true
+  },
+  "grafana": {
+    "port": 3004,
+    "admin": "test",
+    "password": "test"
+  },
+  "influx": {
+    "port": 8086,
+    "admin": "test",
+    "password": "test"
+  },
+  "strict_gdpr": false
+}

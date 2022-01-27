@@ -1,0 +1,185 @@
+<!-- BEGIN PAGE BREADCRUMB -->
+<ul class="page-breadcrumb breadcrumb">
+  <li>
+    <a ui-sref="dashboard">Home</a>
+    <i class="fa fa-circle"></i>
+  </li>
+  <li class="active"> Status Transformers </li>
+</ul>
+<!-- END PAGE BREADCRUMB -->
+<!-- BEGIN MAIN CONTENT -->
+<div class="row">
+  <div class="col-md-12">
+
+    <div class="note note-info" ng-hide="$root.profile.info.goals.includes('transformer-info')">
+      <h3>Transformer
+        <span class="close" data-close="note" ng-click="$root.profile.info.goals.push('transformer-info'); $emit('saveProfile');"></span>
+      </h3>
+      <p>
+        <b>Javascript function to transform device's status message</b><br><br>
+        Offload data processing from device to server with transformers. Transformers can also be stacked (*experimental*).
+      </p>
+    </div>
+
+    <!-- BEGIN QUICK NAV -->
+    <nav class="quick-nav" ng-show="selectedItems.length > 0">
+      <a class="quick-nav-trigger" href="#">
+        <span aria-hidden="true"></span>
+      </a>
+      <ul>
+        <li>
+          <a href="#" ng-click="revokeTransformers()">
+            <span>Revoke {{selectedItems.length}} Item{{selectedItems.length > 1 ? "s" : ""}}</span>
+            <i class="icon-trash"></i>
+          </a>
+        </li>
+        <li>
+          <a href="#" ng-click="selectedItems = [];">
+            <span>Deselect All</span>
+            <i class="icon-close"></i>
+          </a>
+        </li>
+      </ul>
+      <span aria-hidden="true" class="quick-nav-bg"></span>
+    </nav>
+    <div class="quick-nav-overlay"></div>
+    <!-- END QUICK NAV -->
+
+    <div class="portlet light bordered">
+      <div class="portlet-title">
+        <div class="caption font-green-sharp">
+          <i class="icon-puzzle font-green-sharp"></i>
+          <span class="caption-subject bold uppercase">Status Transformers</span>
+          <span class="caption-helper hide"></span>
+        </div>
+        <div class="actions hide">
+          <a class="btn btn-circle btn-icon-only btn-default" href="#">
+            <i class="icon-cloud-upload"></i>
+          </a>
+          <a class="btn btn-circle btn-icon-only btn-default" href="#">
+            <i class="icon-wrench"></i>
+          </a>
+        </div>
+      </div>
+      <div class="portlet-body">
+        <div class="row">
+          <div class="col-xs-6">
+            <!-- <a href="#" class="btn green-haze btn-outline" ng-click="resetModal()" data-target="#pageModal" data-toggle="modal">Create Transformer</a> -->
+            <a href="#" class="btn green-haze btn-outline" ng-click="showEditorOverlay()">Create Transformer</a>
+            <div class="btn-group btn-actions hide">
+              <a ng-show="selectedItems.length > 0" class="btn red btn-outline" href="javascript:;" data-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-bars"></i> Actions
+                <i class="fa fa-angle-down"></i>
+              </a>
+              <ul class="dropdown-menu pull-left">
+                <li><a href="javascript:;" ng-click="revokeTransformers()"><i class="icon-trash"></i> Revoke selected</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-xs-6 text-right">
+            <span class="input-icon right xtop-list-search">
+              <i class="icon-magnifier"></i>
+              <input type="text" class="form-control form-control-solid" ng-model="searchText" placeholder="Search...">
+            </span>
+          </div>
+        </div>
+        <div class="table-scrollable table-scrollable-borderless">
+          <table class="table table-hover table-light">
+<!-- ng-click="resetModal(transformer.utid)" data-target="#pageModal" data-toggle="modal" -->
+            <tr ng-repeat="transformer in $root.profile.info.transformers | filter:searchText track by $index"
+            ng-click="showEditorOverlay(transformer.utid)"
+            ng-class="selectedItems.indexOf(transformer) > -1 ? 'selected-row' : 'default-row'">
+              <td>
+                <span ng-repeat="deviceUdid in $root.meta.transformerDevices[transformer.utid]" style="float: right">
+                  <a ui-sref="device({udid: deviceUdid, origin: 'transformer'})" stop-event title="{{$root.getDeviceByUdid(deviceUdid).alias}}">
+                    <span class="device-icon bg-{{$root.getDeviceByUdid(deviceUdid).category}} device-icon-small">
+                      <img ng-src="../assets/thinx/img/ioticons/b_medium_{{('0' + $root.getDeviceByUdid(deviceUdid).icon).slice(-2)}}.png" alt="Device Icon" class="device-icon-symbol" />
+                    </span>
+                  </a>
+                </span>
+                <div class="row-item-title">{{transformer.alias}}</div>
+              </td>
+            </tr>
+
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- BEGIN FORM-->
+  <form ng-submit="addTransformer()" class="form-horizontal form-bordered" name="transformerModal">
+    <div id="pageModal" class="modal fade" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+            <h4 class="modal-title">Status Transformer</h4>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <div class="col-md-12">
+                <input type="text" name="transformerAlias" ng-model="transformerForm.alias" ng-change="transformerForm.changed = true;" class="form-control" placeholder="Transformer Alias" />
+              </div>
+            </div>
+            <div class="form-group last">
+              <div class="col-md-12">
+                <div id="editor-single" ng-change="transformerForm.changed = true;" ui-codemirror="{ onLoad: codemirrorLoaded }" ui-codemirror-opts="editorOpts" ng-model="transformerForm.body"></div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <a class="btn btn-danger" data-dismiss="modal" style="float: left"  ng-click="removeTransformer(transformerForm.utid)">Delete</a>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" ng-click="updateTransformer(transformerForm.utid)" ng-disabled="!transformerForm.changed || transformerForm.alias == null || transformerForm.alias.length < 1 || transformerForm.body == null || transformerForm.body.length < 1"><i class="fa fa-check"></i> Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+  <!-- END FORM-->
+</div>
+<!-- END MAIN CONTENT -->
+
+<!-- START PAGE LOG OVERLAY -->
+<div ng-controller="LogviewController" class="log-view-overlay-conatiner" style="display:none">
+  <div class="log-view-overlay-controls">
+    <a ng-click="wsstailLog($root.modalBuildId)" title="Refresh status"><i class="icon-refresh"></i></a>
+    <a ng-click="switchWrap()" title="Toggle Word Wrap"><i class="icon-frame"></i></a>
+    <a ng-click="hideLogOverlay($root.modalBuildId)" title="Close Log"><i class="icon-close"></i></a>
+  </div>
+  <div class="log-view-overlay log-view-body force-word-wrap" scroll-glue>
+    <div class="overlay-title">Build Log <span>{{$root.modalBuildId}}</span></div>
+    {{$root.logdata[$root.modalBuildId]}}
+  </div>
+</div>
+<!-- END PAGE LOG OVERLAY -->
+
+<!-- START PAGE LOG OVERLAY -->
+<div ng-controller="EditorController" class="editor-overlay-conatiner" style="display:none">
+
+  <div class="editor-header">
+    <div class="row">
+      <div class="col-xs-5 col-sm-6 text-left">
+        <span style="font-size: .8em;">CODE EDITOR</span><br>
+        <input type="text" name="overlayEditorAlias" ng-model="overlayEditor.alias" ng-change="overlayEditor.changed = true;" class="form-control editor-alias" placeholder="Transformer Alias" />
+      </div>
+      <div class="col-xs-7 col-sm-6 text-right">
+        <a href="#" class="btn red btn-outline" ng-click="hideEditorOverlay()" title="Close editor"><i class="icon-close"></i> Close</a>
+        <a href="#" class="btn green-haze btn-outline" ng-click="overlayEditor.changed === false || saveEditor(transformerForm.utid)" ng-disabled="!overlayEditor.changed || overlayEditor.alias == null || overlayEditor.alias.length < 1 || overlayEditor.body == null || overlayEditor.body.length < 1"><i class="icon-check"></i> Save & Close</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="editor-body">
+    <div id="editor-overlay" ng-change="overlayEditor.changed = true;" ui-codemirror="{ onLoad: codemirrorLoaded }" ui-codemirror-opts="editorOpts" ng-model="overlayEditor.body"></div>
+  </div>
+
+</div>
+<!-- END PAGE LOG OVERLAY -->
+
+
+<!-- BEGIN MAIN JS-->
+<script>
+QuickNav.init();
+</script>
+<!-- BEGIN MAIN JS -->

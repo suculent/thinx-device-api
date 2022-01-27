@@ -1,0 +1,497 @@
+version: 2.1
+orbs:
+  node: circleci/node@4.7.0
+  docker: circleci/docker@2.0.1
+  slack: circleci/slack@4.5.0
+
+jobs:
+
+  build-mosquitto-cloud:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker:
+          version: 20.10.7
+          docker_layer_caching: true
+      - checkout
+      - run:
+          command: |
+            git submodule update --init
+            rm -rf ./package-lock.json
+      - docker/check
+      - docker/build:
+          image: thinxcloud/mosquitto
+          docker-context: services/broker
+          dockerfile: services/broker/Dockerfile
+          extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
+          tag: 'latest'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinxcloud/mosquitto
+          tag: 'latest'
+  
+  test-mosquitto-cloud:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          command: |
+            git submodule update --init
+            rm -rf ./package-lock.json
+      - docker/check
+      - docker/build:
+          image: thinxcloud/mosquitto
+          docker-context: services/broker
+          dockerfile: services/broker/Dockerfile
+          extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
+          tag: 'test'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinxcloud/mosquitto
+          tag: 'test'
+
+  build-couchdb:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          command: |
+            git submodule update --init
+      - docker/check
+      - docker/build:
+          image: thinxcloud/couchdb
+          docker-context: services/couchdb
+          dockerfile: services/couchdb/Dockerfile
+          tag: 'latest'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinxcloud/couchdb
+          tag: 'latest'
+
+  build-redis-cloud:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          command: |
+            git submodule update --init
+            rm -rf ./package-lock.json
+      - docker/check
+      - docker/build:
+          image: thinxcloud/redis
+          docker-context: services/redis
+          dockerfile: services/redis/Dockerfile
+          extra_build_args: '--build-arg REDIS_PASSWORD=${REDIS_PASSWORD} --build-arg ALLOW_EMPTY_PASSWORD=no --build-arg REDIS_DISABLE_COMMANDS=FLUSHALL'
+          tag: 'latest'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinxcloud/redis
+          tag: 'latest'
+
+  build-transformer-cloud:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          command: |
+            git submodule update --init
+            rm -rf ./app/package-lock.json
+      - docker/check
+      - docker/build:
+          image: thinxcloud/transformer
+          docker-context: services/transformer
+          dockerfile: services/transformer/Dockerfile
+          extra_build_args: |
+            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
+            --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} \
+            --build-arg ROLLBAR_ENVIRONMENT=${ENVIRONMENT} \
+            --build-arg REVISION=$(git describe --abbrev=0) \
+          tag: 'latest'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinxcloud/transformer
+          tag: 'latest'
+
+  build-worker-cloud:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check
+      - run:
+          command: |
+            git submodule update --init
+      - docker/build:
+          docker-context: services/worker
+          image: thinxcloud/worker
+          dockerfile: ./services/worker/Dockerfile
+          extra_build_args: |
+            --build-arg REVISION=$(git describe --abbrev=0) \
+          tag: 'latest'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinxcloud/worker
+          tag: 'latest'
+
+  build-base:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check
+      - run:
+          command: |
+            cd base && rm -rf ./node_modules
+      - docker/build:
+          docker-context: base
+          image: thinxcloud/base
+          dockerfile: ./base/Dockerfile
+          extra_build_args: |
+            --build-arg REVISION=$(git describe --abbrev=0) \
+          tag: 'latest'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinxcloud/base
+          tag: 'latest'
+
+  build-console-cloud:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check:
+          registry: registry.thinx.cloud:5000
+      - docker/build:
+          registry: registry.thinx.cloud:5000
+          docker-context: services/console/src
+          image: thinx/console
+          dockerfile: services/console/src/Dockerfile
+          extra_build_args: |
+            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
+            --build-arg LANDING_HOSTNAME=${LANDING_HOSTNAME} \
+            --build-arg API_HOSTNAME=${API_HOSTNAME} \
+            --build-arg API_BASEURL=${API_BASEURL} \
+            --build-arg WEB_HOSTNAME=${WEB_HOSTNAME} \
+            --build-arg NGINX_HOST=${WEB_HOSTNAME} \
+            --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} \
+            --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
+            --build-arg NGINX_PORT=80 \
+            --build-arg ENTERPRISE=true \
+            --build-arg ENVIRONMENT=${ENVIRONMENT} \
+          tag: 'swarm'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/console
+          registry: registry.thinx.cloud:5000
+          tag: 'swarm'
+
+  build-api-cloud:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check
+      - docker/build:
+          image: thinxcloud/api
+          dockerfile: ./Dockerfile
+          extra_build_args: |
+            --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} \
+            --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
+            --build-arg ENVIRONMENT=${ENVIRONMENT} \
+            --build-arg REVISION=$(git describe --abbrev=0) \
+          tag: 'latest'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinxcloud/api
+          tag: 'latest'
+
+  test-api-cloud:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check:
+          registry: registry.thinx.cloud:5000
+      - docker/build:
+          registry: registry.thinx.cloud:5000
+          image: thinx/api
+          dockerfile: ./Dockerfile.test
+          extra_build_args: |
+            --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} \
+            --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
+            --build-arg ENVIRONMENT=${ENVIRONMENT} \
+            --build-arg REVISION=$(git describe --abbrev=0) \
+          tag: 'swarm'
+  
+  # this is deprecated (does not authenticate against docker.io for the base thinx image fetch)
+  test:
+
+    # In CircleCI 2.0 you can now specify your own image, or use one of our pre-configured images.
+    docker:
+      - image: suculent/thinx-base-image:latest
+        auth:
+          username: $DOCKER_USERNAME  # from thinx-docker-repo, docker.io
+          password: $DOCKER_PUBLIC_PASSWORD  # or project environment variable reference
+
+    working_directory: ~/suculent/thinx-device-api
+
+    parallelism: 1
+
+    shell: /bin/bash --login
+
+    environment:
+      CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
+      CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
+      REDIS_URL: redis://localhost:6379
+
+    steps:
+
+    - run:
+        name: Install Docker Compose
+        environment:
+          COMPOSE_VERSION: '1.29.2'
+        command: |
+          curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o ~/docker-compose
+          chmod +x ~/docker-compose
+          mv ~/docker-compose /usr/local/bin/docker-compose
+
+    - setup_remote_docker
+
+    - checkout
+
+    # --ok allows passing build for now
+    - run:
+        name: Spectralops.io integration
+        command: |
+          curl -L "https://get.spectralops.io/api/download/get?dsn=$SPECTRAL_DSN" | sh
+          spectral scan --ok 
+
+    # Restore the dependency cache
+    - restore_cache:
+        keys:
+          # This branch if available
+          - v1-dependencies-{{ checksum "package.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+    - run:
+        name: Fetch all submodules and tests
+        command: |
+          git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
+          cd spec/test_repositories && bash ./get-tests.sh
+
+    - run:
+        name: Create Circle CI Artifacts Folders
+        command: |
+          mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+          mkdir -p $CIRCLE_TEST_REPORTS/reports
+
+    - save_cache:
+        paths:
+          - node_modules
+        key: v1-dependencies-{{ checksum "package.json" }}
+
+#    - run: 
+#        name: Update base-image
+#        command: |
+#            cd base
+#            ./update.sh
+
+
+    - run:
+        name: Init filesystem
+        command: |
+            mkdir -p /mnt/data/
+            mkdir -p /mnt/data && cp -R ./conf /mnt/data
+            mkdir -p /mnt/data/ssh_keys
+            mkdir -p /mnt/data/mosquitto/auth
+            mkdir -p /mnt/data/mosquitto/config
+            mkdir -p /mnt/data/mosquitto/data
+            mkdir -p /mnt/data/mosquitto/log
+            mkdir -p /mnt/data/mosquitto/ssl
+            mkdir -p /mnt/data/couchdb
+            mkdir -p /mnt/data/deploy
+            mkdir -p /mnt/data/data
+            mkdir -p /mnt/data/redis
+            mkdir -p /mnt/data/repos
+            mkdir -p /mnt/data/ssl
+            mkdir -p /mnt/data/test-reports
+
+    - run:
+        name: Setup environment
+        command: |
+          rm -rf ./Dockerfile
+          mv ./Dockerfile.test ./Dockerfile
+          cp -vf ./.env.dist ./.env
+          cp -vf ./.env.dist ./spec/mnt/data/conf/.env
+          cp -vf ./.env ./services/broker/.env
+          cp -vf ./.env ./services/console/.env
+          cp -vf ./.env ./services/couchdb/.env
+          cp -vf ./.env ./services/redis/.env
+          cp -vf ./.env ./services/transformer/.env
+          echo "Contents of ./conf"
+          ls -la ./conf
+          echo "Contents of ./.env"
+          cat ./.env
+          sed -i "s/changeme!/${REDIS_PASSWORD}/g" ./services/broker/test/mosquitto/conf.d/mosquitto.conf
+          sed -i "s/changeme!/${REDIS_PASSWORD}/g" ./spec/mnt/data/conf/config.json
+          echo "Creating Docker Network (ID):"
+          docker network create nat
+          rm -rf ./docker-compose.yml
+          mv ./docker-compose.test.yml ./docker-compose.yml
+          rm -rf ./services/broker/Dockerfile
+          mv ./services/broker/Dockerfile.test ./services/broker/Dockerfile
+          sed -i "s/.git//g" .dockerignore
+
+    - run:
+        name: Starting Redis
+        command: |
+          docker-compose up -d --build thinx-redis
+
+    - run:
+        name: Starting Mosquitto
+        command: |
+          docker login --username $DOCKER_LOGIN --password $DOCKER_PASSWORD https://registry.thinx.cloud:5000
+          docker-compose up -d --build mosquitto
+
+    - run:
+        name: Starting Transformer
+        command: |
+          docker-compose up -d --build transformer
+
+    - run:
+        name: Starting CouchDB and API Test
+        command: |
+          export ENVIRONMENT=test
+          chmod -R 666 ./services/couchdb/*
+          docker-compose up -d --build couchdb
+          docker-compose up --build api
+          timeout 600 docker-compose logs -f --timestamp api
+          echo "###### > Tailing completed, stopping job."
+          date
+          docker-compose stop
+
+
+    - run:
+        name: Check running Docker containers
+        command: |
+            docker ps
+            docker network ls
+            docker network inspect bridge
+
+#
+# WORKFLOWS
+#
+
+workflows:
+
+  #
+  # public open-source site
+  #
+
+  build-and-deploy:
+
+    jobs:
+
+      - test:
+          context:
+              - dockerhub
+              - thinx-docker-repo
+          requires:
+            - build-base
+          filters:
+            branches:
+              only:
+                - staging
+                - thinx-swarm
+                - master
+                - thinxcloud
+
+      # - test-api-cloud:
+      #     context:
+      #         - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
+      
+      # - test-mosquitto-cloud:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
+
+      # - build-console-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
+
+      - build-base:
+          context:
+            - dockerhub
+          filters:
+            branches:
+              only:
+                - thinxcloud
+
+      - build-couchdb:
+          context:
+            - dockerhub
+          filters:
+            branches:
+              only:
+                - thinxcloud
+
+      - build-mosquitto-cloud:
+          context:
+            - dockerhub
+          filters:
+            branches:
+              only:
+                - thinx-swarm
+                - thinxcloud
+
+      - build-redis-cloud:
+          context:
+            - dockerhub
+          filters:
+            branches:
+              only:
+                - thinx-swarm
+                - thinxcloud
+
+      - build-transformer-cloud:
+          context:
+            - dockerhub
+          filters:
+            branches:
+              only:
+                - thinx-swarm
+                - thinxcloud
+
+      - build-worker-cloud:
+          context:
+            - dockerhub
+          filters:
+            branches:
+              only:
+                - thinx-swarm
+                - thinxcloud
+
+      - build-api-cloud:
+          context:
+            - dockerhub
+            - SonarCloud
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - thinx-swarm
+                - thinxcloud

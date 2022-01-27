@@ -1,0 +1,4 @@
+# ignores known and problematic files, per rule.
+# "problematic" files can be test files, mock data files and so on.
+DB007:
+    - services/broker/goauth/backends/.*.go

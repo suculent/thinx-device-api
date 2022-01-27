@@ -1,0 +1,47 @@
+[submodule "builders/arduino-docker-build"]
+	path = builders/arduino-docker-build
+	url = https://github.com/suculent/arduino-docker-build.git
+
+[submodule "builders/lua-inspect"]
+	path = builders/lua-inspect
+	url = https://github.com/davidm/lua-inspect.git
+
+[submodule "builders/micropython-docker-build"]
+	path = builders/micropython-docker-build
+	url = https://github.com/suculent/micropython-docker-build.git
+
+[submodule "builders/mongoose-docker-build"]
+	path = builders/mongoose-docker-build
+	url = https://github.com/suculent/mongoose-docker-build.git
+
+[submodule "builders/nodemcu-docker-build"]
+	path = builders/nodemcu-docker-build
+	url = https://github.com/suculent/nodemcu-docker-build.git
+
+[submodule "builders/nodemcu-firmware"]
+	path = builders/nodemcu-firmware
+	url = https://github.com/suculent/nodemcu-firmware.git
+
+[submodule "builders/platformio-docker-build"]
+	path = builders/platformio-docker-build
+	url = https://github.com/suculent/platformio-docker-build.git
+
+[submodule "spec/test_repositories/thinx-firmware-esp8266"]
+	path = spec/test_repositories/thinx-firmware-esp8266
+	url = git@github.com:suculent/thinx-firmware-esp8266.git
+
+[submodule "services/worker"]
+	path = services/worker
+	url = git@github.com:thinx-cloud/worker.git
+[submodule "services/transformer"]
+	path = services/transformer
+	url = git@github.com:thinx-cloud/transformer.git
+[submodule "services/redis"]
+	path = services/redis
+	url = git@github.com:thinx-cloud/redis.git
+[submodule "services/couchdb"]
+	path = services/couchdb
+	url = git@github.com:thinx-cloud/couchdb.git
+[submodule "services/broker"]
+	path = services/broker
+	url = git@github.com:thinx-cloud/broker.git

@@ -1,0 +1,94 @@
+# Binaries generated in container
+# devsec
+# embedded_signature.h
+
+# Docker Container Scanners
+clair-scanner
+clair.log
+aqua.sh
+
+# Environment and data
+.env
+.thx_prefix
+environment.json
+rollbar.json
+backup.rdb
+builder.thinx.json
+
+# Tests
+lcov.info
+test-private.sh
+
+# Sqreen.io configuration
+sqreen.json
+
+
+#**/package_lock.json
+#package_lock.json
+
+deploy-hook.log
+deploy.out
+mosquitto.lo*
+./mqtt_passwords
+"./mqtt_passwords "
+redis.log
+
+# System files
+.DS_Store
+node_modules/
+pid/
+vault
+
+# OS sdks
+repos/
+
+# Runtime data that are not to be stored from server back to repository
+sessions/**
+logs/**
+data/**
+repositories/
+avatars/*
+
+dhparams.pem
+dump.rdb
+
+cookies.jar
+nohup.out
+
+coverage/
+.nyc_output/
+
+# User secrets are required for testing
+conf/config-prod.json
+conf/config.json
+conf/thinx-cloud-firebase-adminsdk-wjhzo-9fd8c42211.json
+conf/google-oauth.json
+conf/twitter-oauth.json
+conf/github-oauth.json
+
+# Sonar
+.scannerwork/
+
+# Codacy
+.profile
+
+# Circle CI
+./package-lock.json
+
+# Mosquitto
+mosquitto.aclfile
+mqtt_passwords
+
+.coverity-submit.sh
+
+docker-compose.override.yml
+
+thinx.device.api.code-workspace
+test.out.acl
+results.kics.json
+
+# Coverity metadata
+cov-int/
+.dccache
+*.log
+*.sarif

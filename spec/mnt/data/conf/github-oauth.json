@@ -1,0 +1,6 @@
+{
+  "client_id": "<client_id>",
+  "client_secret": "<client_secret>",
+  "redirect_uris": ["https://thinx.cloud:7443/oauth/cb?type=github"],
+  "base_url": "https://rtm.thinx.cloud:7443"
+}

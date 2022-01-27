@@ -1,0 +1,6 @@
+{
+  "filters": {
+    "no_deleted": "function(doc,req){return !doc._deleted;};",
+    "del": "function(doc) {    return !doc._deleted;}"
+  }
+}

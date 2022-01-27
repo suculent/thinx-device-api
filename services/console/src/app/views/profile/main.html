@@ -1,0 +1,84 @@
+<!-- BEGIN PAGE BREADCRUMB -->
+<ul class="page-breadcrumb breadcrumb">
+  <li>
+    <a ui-sref="dashboard">Home</a>
+    <i class="fa fa-circle"></i>
+  </li>
+  <li class="active"> User Profile </li>
+</ul>
+<!-- END PAGE BREADCRUMB -->
+<!-- BEGIN PAGE CONTENT-->
+<div class="row">
+  <div class="col-md-12">
+    <!-- BEGIN PROFILE SIDEBAR -->
+    <div class="profile-sidebar">
+      <!-- PORTLET MAIN -->
+      <div class="portlet light profile-sidebar-portlet">
+        <!-- SIDEBAR USERPIC -->
+        <div class="profile-userpic">
+          <img ng-src="{{$root.profile['avatar']}}" class="img-responsive" alt="{{$root.profile.username}}">
+        </div>
+        <!-- END SIDEBAR USERPIC -->
+        <!-- SIDEBAR USER TITLE -->
+        <div class="profile-usertitle">
+          <div class="profile-usertitle-name"> {{$root.profile.info.first_name}} {{$root.profile.info.last_name}} </div>
+          <div class="profile-usertitle-job"> {{$root.profile.email}} </div>
+        </div>
+        <!-- END SIDEBAR USER TITLE -->
+        <!-- SIDEBAR BUTTONS -->
+        <div class="profile-userbuttons">
+          <!-- <button type="button" class="btn btn-circle green-haze btn-sm hide">Follow</button> -->
+          <!-- <button type="button" class="btn btn-circle btn-danger btn-sm">Message</button> -->
+        </div>
+        <!-- END SIDEBAR BUTTONS -->
+        <!-- SIDEBAR MENU -->
+        <div class="profile-usermenu">
+          <ul class="nav">
+            <li ng-class="{active: $state.includes('profile.dashboard')}">
+              <a ui-sref="profile.dashboard">
+                <i class="icon-home"></i> Overview
+              </a>
+            </li>
+            <li ng-class="{active: $state.includes('profile.account')}">
+              <a ui-sref="profile.account">
+                <i class="icon-settings"></i> Settings
+              </a>
+            </li>
+            <!-- <li ng-class="{active: $state.includes('profile.help')}"> -->
+              <!-- <a ui-sref="profile.help"> -->
+                <!-- <i class="icon-info"></i> Help -->
+              <!-- </a> -->
+            <!-- </li> -->
+            <li ng-class="{active: $state.includes('profile.delete')}">
+              <a ui-sref="profile.delete">
+                <i class="icon-trash"></i> Delete Profile
+              </a>
+            </li>
+          </ul>
+        </div>
+        <!-- END MENU -->
+      </div>
+      <!-- END PORTLET MAIN -->
+
+    </div>
+    <!-- END BEGIN PROFILE SIDEBAR -->
+    <!-- BEGIN PROFILE CONTENT -->
+    <div ui-view class="profile-content fade-in-up"> </div>
+    <!-- END PROFILE CONTENT -->
+  </div>
+</div>
+<!-- END PAGE CONTENT-->
+
+<!-- START PAGE LOG OVERLAY -->
+<div ng-controller="LogviewController" class="log-view-overlay-conatiner" style="display:none">
+  <div class="log-view-overlay-controls">
+    <a ng-click="wsstailLog($root.modalBuildId)" title="Refresh status"><i class="icon-refresh"></i></a>
+    <a ng-click="switchWrap()" title="Toggle Word Wrap"><i class="icon-frame"></i></a>
+    <a ng-click="hideLogOverlay($root.modalBuildId)" title="Close Log"><i class="icon-close"></i></a>
+  </div>
+  <div class="log-view-overlay log-view-body force-word-wrap" scroll-glue>
+    <div class="overlay-title">Build Log <span>{{$root.modalBuildId}}</span></div>
+    {{$root.logdata[$root.modalBuildId]}}
+  </div>
+</div>
+<!-- END PAGE LOG OVERLAY -->

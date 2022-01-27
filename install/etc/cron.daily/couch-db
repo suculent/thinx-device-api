@@ -1,0 +1,3 @@
+#!/bin/bash
+
+bash /opt/thinx-device-api/couch_cleanup.sh 

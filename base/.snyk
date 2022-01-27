@@ -1,0 +1,744 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.14.1
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  'npm:qs:20170213':
+    - nano > follow > request > qs:
+        reason: 'yes'
+        expires: '2017-06-23T20:24:03.076Z'
+    - codecov.io > request > qs:
+        reason: 'yes'
+        expires: '2017-06-23T20:24:03.076Z'
+    - codecov.io > request > qs:
+        reason: 'yes'
+        expires: '2017-07-23T21:05:53.502Z'
+    - nano > follow > request > qs:
+        reason: 'yes'
+        expires: '2017-07-23T21:05:53.502Z'
+    - codecov.io > request > qs:
+        reason: 'yes'
+        expires: '2017-10-15T10:15:04.980Z'
+    - nano > follow > request > qs:
+        reason: 'yes'
+        expires: '2017-10-15T10:15:04.980Z'
+    - login-with-github > request > qs:
+        reason: None given
+        expires: '2017-12-13T13:20:20.056Z'
+  'npm:http-signature:20150122':
+    - codecov.io > request > http-signature:
+        reason: no remediation at this time
+        expires: '2017-10-15T10:15:04.980Z'
+    - nano > follow > request > http-signature:
+        reason: None given
+        expires: '2017-10-15T10:15:04.980Z'
+    - login-with-github > request > http-signature:
+        reason: no patch available
+        expires: '2017-12-13T13:20:20.056Z'
+  'npm:moment:20161019':
+    - fs-finder > moment:
+        reason: no patch available
+        expires: '2021-02-18T18:06:22.104Z'
+  'npm:tunnel-agent:20170305':
+    - codecov.io > request > tunnel-agent:
+        reason: None given
+        expires: '2017-10-15T10:15:04.980Z'
+    - nano > follow > request > tunnel-agent:
+        reason: None given
+        expires: '2017-10-15T10:15:04.980Z'
+    - login-with-github > request > tunnel-agent:
+        reason: None given
+        expires: '2017-12-13T13:20:20.056Z'
+    - '@slack/client > request > tunnel-agent':
+        reason: None given
+        expires: '2018-01-14T16:29:03.751Z'
+    - '@slack/client > request > tunnel-agent':
+        reason: None given
+        expires: '2018-03-15T10:45:07.064Z'
+  'npm:mime:20170907':
+    - github-oauth > request > mime:
+        reason: None given
+        expires: '2019-07-02T21:19:54.883Z'
+    - github-oauth > request > form-data > mime:
+        reason: None given
+        expires: '2019-07-02T21:19:54.883Z'
+    - login-with-github > request > mime:
+        reason: None given
+        expires: '2017-12-13T13:20:20.056Z'
+    - login-with-github > request > form-data > mime:
+        reason: None given
+        expires: '2017-12-13T13:20:20.056Z'
+  'npm:debug:20170905':
+    - codacy-coverage > nock > debug:
+        reason: 'development, waiting for fix'
+        expires: '2018-05-13T09:14:25.222Z'
+  'npm:growl:20160721':
+    - codacy-coverage > growl:
+        reason: dev only
+        expires: '2018-05-13T09:14:25.223Z'
+    - codacy-coverage > mocha > growl:
+        reason: dev only
+        expires: '2018-05-13T09:14:25.223Z'
+  'npm:moment:20170905':
+    - fs-finder > moment:
+        reason: no patch available
+        expires: '2021-02-18T18:06:22.104Z'
+    - codacy-coverage > nsp > joi > moment:
+        reason: waiting for fix
+        expires: '2018-05-13T09:14:25.225Z'
+  'npm:shelljs:20140723':
+    - codacy-coverage > eslint > shelljs:
+        reason: None given
+        expires: '2018-05-13T09:14:25.225Z'
+    - codacy-coverage > nsp > eslint > shelljs:
+        reason: None given
+        expires: '2018-05-13T09:14:25.225Z'
+    - codacy-coverage > nsp > lab > eslint > shelljs:
+        reason: None given
+        expires: '2018-05-13T09:14:25.225Z'
+    - pm2 > shelljs:
+        reason: None given
+        expires: '2019-03-01T20:22:48.465Z'
+    - pm2 > shelljs:
+        reason: None given
+        expires: '2019-07-02T21:19:54.883Z'
+  'npm:braces:20180219':
+    - expect > jest-message-util > micromatch > braces:
+        reason: None given
+        expires: '2018-04-06T14:33:35.286Z'
+  'npm:hoek:20180212':
+    - '@slack/client > request > hawk > hoek':
+        reason: None given
+        expires: '2018-04-06T14:33:35.286Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > hoek:
+        reason: None given
+        expires: '2018-04-06T14:33:35.286Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > request > hawk > hoek:
+        reason: None given
+        expires: '2018-04-06T14:33:35.286Z'
+    - '@slack/client > request > hawk > boom > hoek':
+        reason: None given
+        expires: '2018-04-06T14:33:35.286Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > boom > hoek:
+        reason: None given
+        expires: '2018-04-06T14:33:35.286Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > request > hawk > boom > hoek:
+        reason: None given
+        expires: '2018-04-06T14:33:35.286Z'
+    - '@slack/client > request > hawk > cryptiles > boom > hoek':
+        reason: None given
+        expires: '2018-04-06T14:33:35.286Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > cryptiles > boom > hoek:
+        reason: None given
+        expires: '2018-04-06T14:33:35.286Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > request > hawk > cryptiles > boom > hoek:
+        reason: None given
+        expires: '2018-04-06T14:33:35.286Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > hawk > cryptiles > boom > hoek:
+        reason: None given
+        expires: '2018-04-06T14:33:35.286Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > hawk > cryptiles > boom > hoek:
+        reason: None given
+        expires: '2018-04-06T14:33:35.287Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > hawk > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > hawk > boom > hoek:
+        reason: None given
+        expires: '2018-04-06T14:33:35.288Z'
+    - '@slack/client > request > hawk > sntp > hoek':
+        reason: None given
+        expires: '2018-04-06T14:33:35.288Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > sntp > hoek:
+        reason: None given
+        expires: '2018-04-06T14:33:35.288Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > request > hawk > sntp > hoek:
+        reason: None given
+        expires: '2018-04-06T14:33:35.288Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > hawk > sntp > hoek:
+        reason: None given
+        expires: '2018-04-06T14:33:35.288Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > hawk > sntp > hoek:
+        reason: None given
+        expires: '2018-04-06T14:33:35.288Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > hawk > hoek:
+        reason: None given
+        expires: '2018-04-06T14:33:35.288Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > hawk > hoek:
+        reason: None given
+        expires: '2018-04-06T14:33:35.288Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > hawk > sntp > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > hawk > cryptiles > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > request > hawk > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > request > hawk > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > request > hawk > sntp > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > request > hawk > cryptiles > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > joi > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > joi > topo > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > request-promise > request > hawk > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > request-promise > request > hawk > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > request-promise > request > hawk > sntp > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > request-promise > request > hawk > cryptiles > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nsp > bossy > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nsp > code > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nsp > joi > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nsp > joi > topo > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nsp > wreck > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nsp > wreck > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nsp > lab > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nsp > lab > bossy > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - firebase-admin > jsonwebtoken > joi > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > jsonwebtoken > joi > topo > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > hawk > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > hawk > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > hawk > sntp > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > hawk > cryptiles > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > request > hawk > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > request > hawk > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > request > hawk > sntp > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > request > hawk > cryptiles > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > hawk > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > hawk > sntp > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > hawk > cryptiles > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > sntp > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > cryptiles > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > hawk > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > hawk > boom > hoek:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+  'npm:lodash:20180130':
+    - karma-coverage > lodash:
+        reason: None given
+        expires: '2018-04-06T14:33:35.288Z'
+    - gulp-repository-watch > lodash:
+        reason: None given
+        expires: '2018-04-06T14:33:35.288Z'
+    - slack-notify > lodash:
+        reason: None given
+        expires: '2018-04-06T14:33:35.288Z'
+    - codacy-coverage > eslint > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > eslint > inquirer > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > eslint > table > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nsp > eslint > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nsp > eslint > inquirer > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nsp > eslint > table > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - gulp-repository-watch > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - slack-notify > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - karma-coverage > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > request-promise > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nsp > nock > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nsp > eslint-plugin-hapi > no-shadow-relaxed > eslint > inquirer > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nsp > lab > eslint > inquirer > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nsp > lab > eslint-plugin-hapi > no-shadow-relaxed > eslint > inquirer > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nock > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - graphlib > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - inquirer > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > lodash:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+  'npm:node-forge:20180226':
+    - firebase-admin > node-forge:
+        reason: None given
+        expires: '2018-04-06T14:33:35.288Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common > google-auto-auth > google-auth-library > gtoken > google-p12-pem > node-forge:
+        reason: None given
+        expires: '2018-04-06T14:33:35.288Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > google-auto-auth > google-auth-library > gtoken > google-p12-pem > node-forge:
+        reason: None given
+        expires: '2018-04-06T14:33:35.288Z'
+    - firebase-admin > @google-cloud/storage > @google-cloud/common > google-auto-auth > google-auth-library > gtoken > google-p12-pem > node-forge:
+        reason: None given
+        expires: '2018-04-06T14:33:35.288Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > @google-cloud/common > google-auto-auth > google-auth-library > gtoken > google-p12-pem > node-forge:
+        reason: None given
+        expires: '2018-04-06T14:33:35.288Z'
+    - firebase-admin > @google-cloud/storage > gcs-resumable-upload > google-auto-auth > google-auth-library > gtoken > google-p12-pem > node-forge:
+        reason: None given
+        expires: '2018-04-06T14:33:35.288Z'
+  'npm:protobufjs:20180305':
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > protobufjs:
+        reason: None given
+        expires: '2018-04-06T14:33:35.288Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > protobufjs:
+        reason: None given
+        expires: '2018-04-06T14:33:35.288Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > protobufjs:
+        reason: None given
+        expires: '2018-05-13T09:14:25.225Z'
+    - firebase-admin > @google-cloud/firestore > grpc > protobufjs:
+        reason: None given
+        expires: '2018-05-13T09:14:25.225Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > protobufjs:
+        reason: None given
+        expires: '2018-05-13T09:14:25.225Z'
+  'npm:eslint:20180222':
+    - codacy-coverage > eslint:
+        reason: None given
+        expires: '2018-05-13T09:14:25.222Z'
+    - codacy-coverage > nsp > eslint:
+        reason: None given
+        expires: '2018-05-13T09:14:25.222Z'
+    - codacy-coverage > nsp > eslint-plugin-hapi > no-shadow-relaxed > eslint:
+        reason: None given
+        expires: '2018-05-13T09:14:25.222Z'
+    - codacy-coverage > nsp > lab > eslint-plugin-hapi > no-shadow-relaxed > eslint:
+        reason: None given
+        expires: '2018-05-13T09:14:25.222Z'
+    - codacy-coverage > nsp > lab > eslint:
+        reason: None given
+        expires: '2018-05-13T09:14:25.223Z'
+  'npm:https-proxy-agent:20180402':
+    - codacy-coverage > nsp > https-proxy-agent:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+  'npm:is-my-json-valid:20180214':
+    - codacy-coverage > eslint > is-my-json-valid:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nsp > eslint > is-my-json-valid:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nsp > eslint-plugin-hapi > no-shadow-relaxed > eslint > is-my-json-valid:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nsp > lab > eslint > is-my-json-valid:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+    - codacy-coverage > nsp > lab > eslint-plugin-hapi > no-shadow-relaxed > eslint > is-my-json-valid:
+        reason: None given
+        expires: '2018-05-13T09:14:25.224Z'
+  'npm:sshpk:20180409':
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > request > http-signature > sshpk:
+        reason: None given
+        expires: '2018-05-13T09:14:25.225Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > http-signature > sshpk:
+        reason: None given
+        expires: '2018-05-13T09:14:25.225Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > request > http-signature > sshpk:
+        reason: None given
+        expires: '2018-05-13T09:14:25.225Z'
+    - codacy-coverage > request-promise > request > http-signature > sshpk:
+        reason: None given
+        expires: '2018-05-13T09:14:25.225Z'
+  'npm:cli:20160615':
+    - satelize > maxmind-db-reader > ip-address > cli:
+        reason: no patch available
+        expires: '2019-07-02T21:19:54.883Z'
+  'npm:cryptiles:20180710':
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > hawk > cryptiles:
+        reason: no patch available
+        expires: '2018-09-19T08:50:40.323Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > request > hawk > cryptiles:
+        reason: no patch available
+        expires: '2018-09-19T08:50:40.323Z'
+  'npm:deep-extend:20180409':
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > rc > deep-extend:
+        reason: no patch available
+        expires: '2018-09-19T08:50:40.323Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > rc > deep-extend:
+        reason: no patch available
+        expires: '2018-09-19T08:50:40.323Z'
+  'npm:extend:20180424':
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > extend:
+        reason: no patch available
+        expires: '2018-09-19T08:50:40.323Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > request > extend:
+        reason: no patch available
+        expires: '2018-09-19T08:50:40.323Z'
+  'npm:chownr:20180731':
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > tar > chownr:
+        reason: None given
+        expires: '2019-03-01T20:22:48.465Z'
+  'npm:mem:20180117':
+    - npm > libnpx > yargs > os-locale > mem:
+        reason: None given
+        expires: '2019-07-02T21:19:54.883Z'
+  SNYK-JS-FSTREAM-174725:
+    - npm > node-gyp > fstream:
+        reason: None given
+        expires: '2019-07-02T21:19:54.882Z'
+    - npm > node-gyp > tar > fstream:
+        reason: None given
+        expires: '2019-07-02T21:19:54.882Z'
+    - npm > npm-lifecycle > node-gyp > fstream:
+        reason: None given
+        expires: '2019-07-02T21:19:54.882Z'
+    - npm > npm-lifecycle > node-gyp > tar > fstream:
+        reason: None given
+        expires: '2019-07-02T21:19:54.882Z'
+    - npm > libcipm > npm-lifecycle > node-gyp > fstream:
+        reason: None given
+        expires: '2019-07-02T21:19:54.882Z'
+    - npm > libnpm > npm-lifecycle > node-gyp > fstream:
+        reason: None given
+        expires: '2019-07-02T21:19:54.882Z'
+    - npm > libcipm > npm-lifecycle > node-gyp > tar > fstream:
+        reason: None given
+        expires: '2019-07-02T21:19:54.882Z'
+    - npm > libnpm > npm-lifecycle > node-gyp > tar > fstream:
+        reason: None given
+        expires: '2019-07-02T21:19:54.882Z'
+  SNYK-JS-LODASH-73638:
+    - gulp-repository-watch > lodash:
+        reason: None given
+        expires: '2019-07-02T21:19:54.882Z'
+  SNYK-JS-LODASH-73639:
+    - gulp-repository-watch > lodash:
+        reason: None given
+        expires: '2019-07-02T21:19:54.882Z'
+  SNYK-JS-LODASHMERGE-173732:
+    - firebase-admin > @google-cloud/firestore > lodash.merge:
+        reason: None given
+        expires: '2019-07-02T21:19:54.882Z'
+    - satelize > maxmind-db-reader > ip-address > lodash.merge:
+        reason: None given
+        expires: '2019-07-02T21:19:54.882Z'
+  SNYK-JS-LODASHMERGE-173733:
+    - firebase-admin > @google-cloud/firestore > lodash.merge:
+        reason: None given
+        expires: '2019-07-02T21:19:54.882Z'
+    - satelize > maxmind-db-reader > ip-address > lodash.merge:
+        reason: None given
+        expires: '2019-07-02T21:19:54.882Z'
+  SNYK-JS-TAR-174125:
+    - npm > node-gyp > tar:
+        reason: None given
+        expires: '2019-07-02T21:19:54.883Z'
+    - npm > npm-lifecycle > node-gyp > tar:
+        reason: None given
+        expires: '2019-07-02T21:19:54.883Z'
+    - npm > libcipm > npm-lifecycle > node-gyp > tar:
+        reason: None given
+        expires: '2019-07-02T21:19:54.883Z'
+    - npm > libnpm > npm-lifecycle > node-gyp > tar:
+        reason: None given
+        expires: '2019-07-02T21:19:54.883Z'
+  SNYK-JS-GLOBPARENT-1016905:
+    - mqtt > help-me > glob-stream > glob-parent:
+        reason: None given
+        expires: '2021-02-18T18:06:22.103Z'
+  SNYK-JS-PATHVAL-596926:
+    - chai > pathval:
+        reason: None given
+        expires: '2021-02-18T18:06:22.103Z'
+  SNYK-JS-Y18N-1021887:
+    - firebase-admin > @google-cloud/firestore > google-gax > @grpc/grpc-js > @grpc/proto-loader > yargs > y18n:
+        reason: None given
+        expires: '2021-02-18T18:06:22.104Z'
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  'npm:hawk:20160119':
+    - codecov.io > request > hawk:
+        patched: '2017-05-24T20:23:09.576Z'
+    - nano > follow > request > hawk:
+        patched: '2017-05-24T20:23:09.576Z'
+    - nano > follow > request > hawk:
+        patched: '2017-09-15T10:14:34.694Z'
+    - codecov.io > request > hawk:
+        patched: '2017-09-15T10:14:34.694Z'
+  'npm:ms:20170412':
+    - firebase-admin > jsonwebtoken > ms:
+        patched: '2017-09-15T10:14:34.694Z'
+    - rollbar > debug > ms:
+        patched: '2017-05-24T20:23:09.576Z'
+    - codacy-coverage > mocha > debug > ms:
+        patched: '2017-12-15T16:27:39.853Z'
+    - codacy-coverage > nsp > https-proxy-agent > debug > ms:
+        patched: '2017-12-15T16:27:39.853Z'
+    - codacy-coverage > nsp > subcommand > debug > ms:
+        patched: '2017-12-15T16:27:39.853Z'
+  'npm:request:20160119':
+    - codecov.io > request:
+        patched: '2017-05-24T20:23:09.576Z'
+    - nano > follow > request:
+        patched: '2017-05-24T20:23:09.576Z'
+    - nano > follow > request:
+        patched: '2017-09-15T10:14:34.694Z'
+    - codecov.io > request:
+        patched: '2017-09-15T10:14:34.694Z'
+    - login-with-github > request:
+        patched: '2017-11-10T10:27:57.594Z'
+    - login-with-github > request:
+        patched: '2017-11-13T13:18:45.910Z'
+    - github-oauth > request:
+        patched: '2017-11-13T13:18:45.910Z'
+    - github-oauth > request:
+        patched: '2017-11-15T09:01:49.621Z'
+    - github-oauth > request:
+        patched: '2018-08-20T08:49:18.325Z'
+    - github-oauth > request:
+        patched: '2019-07-03T18:50:11.408Z'
+    - github-oauth > request:
+        patched: '2020-12-20T16:51:43.537Z'
+  'npm:moment:20160126':
+    - fs-finder > moment:
+        patched: '2020-12-20T16:51:43.537Z'
+    - fs-finder > moment:
+        patched: '2017-11-15T09:01:49.621Z'
+  'npm:debug:20170905':
+    - rollbar > debug:
+        patched: '2017-09-27T22:45:09.600Z'
+    - codacy-coverage > debug:
+        patched: '2017-12-15T16:27:39.853Z'
+    - codacy-coverage > nsp > eslint > debug:
+        patched: '2017-12-15T16:27:39.853Z'
+    - codacy-coverage > nsp > eslint-plugin-hapi > no-shadow-relaxed > eslint > debug:
+        patched: '2017-12-15T16:27:39.853Z'
+    - codacy-coverage > nsp > lab > eslint > debug:
+        patched: '2017-12-15T16:27:39.853Z'
+    - codacy-coverage > nsp > lab > eslint-plugin-hapi > no-shadow-relaxed > eslint > debug:
+        patched: '2017-12-15T16:27:39.853Z'
+    - codacy-coverage > nsp > debug:
+        patched: '2017-12-15T16:27:39.853Z'
+    - codacy-coverage > nsp > nock > debug:
+        patched: '2017-12-15T16:27:39.853Z'
+    - codacy-coverage > mocha > debug:
+        patched: '2017-12-15T16:27:39.853Z'
+    - codacy-coverage > nsp > subcommand > debug:
+        patched: '2017-12-15T16:27:39.853Z'
+    - codacy-coverage > nsp > https-proxy-agent > debug:
+        patched: '2017-12-15T16:27:39.853Z'
+    - codacy-coverage > eslint > debug:
+        patched: '2017-12-15T16:27:39.853Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > tar-pack > debug:
+        patched: '2018-02-13T10:42:26.434Z'
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > tar-pack > debug:
+        patched: '2018-02-13T10:42:26.434Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > tar-pack > debug:
+        patched: '2018-02-13T10:42:26.434Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > tar-pack > debug:
+        patched: '2018-04-13T09:12:16.962Z'
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > tar-pack > debug:
+        patched: '2018-04-13T09:12:16.962Z'
+    - firebase-admin > @google-cloud/firestore > grpc > node-pre-gyp > tar-pack > debug:
+        patched: '2018-04-13T09:12:16.962Z'
+  'npm:minimatch:20160620':
+    - login-with-github > middler > minimatch:
+        patched: '2017-11-13T13:18:45.910Z'
+    - codacy-coverage > nsp > jslint > glob > minimatch:
+        patched: '2017-12-15T16:27:39.853Z'
+    - codacy-coverage > nsp > lab > eslint-plugin-hapi > no-shadow-relaxed > eslint > minimatch:
+        patched: '2017-12-15T16:27:39.853Z'
+    - codacy-coverage > nsp > eslint-plugin-hapi > no-shadow-relaxed > eslint > minimatch:
+        patched: '2017-12-15T16:27:39.853Z'
+    - codacy-coverage > nsp > lab > eslint > glob > minimatch:
+        patched: '2017-12-15T16:27:39.853Z'
+    - codacy-coverage > nsp > lab > eslint > minimatch:
+        patched: '2017-12-15T16:27:39.853Z'
+    - codacy-coverage > mocha > glob > minimatch:
+        patched: '2017-12-15T16:27:39.853Z'
+    - codacy-coverage > nsp > lab > jslint > glob > minimatch:
+        patched: '2017-12-15T16:27:39.853Z'
+    - satelize > maxmind-db-reader > ip-address > cli > glob > minimatch:
+        patched: '2018-04-23T08:36:14.990Z'
+    - satelize > maxmind-db-reader > ip-address > cli > glob > minimatch:
+        patched: '2018-08-20T08:49:18.325Z'
+    - satelize > maxmind-db-reader > ip-address > cli > glob > minimatch:
+        patched: '2019-06-02T21:15:06.744Z'
+  'npm:qs:20140806-1':
+    - login-with-github > request > qs:
+        patched: '2017-11-13T13:18:45.910Z'
+  'npm:qs:20140806':
+    - login-with-github > request > qs:
+        patched: '2017-11-13T13:18:45.910Z'
+  'npm:moment:20170905':
+    - codacy-coverage > joi > moment:
+        patched: '2017-12-15T16:27:39.853Z'
+  'npm:moment:20161019':
+    - codacy-coverage > nsp > joi > moment:
+        patched: '2017-12-15T16:27:39.853Z'
+  'npm:tough-cookie:20170905':
+    - codacy-coverage > request-promise > request > tough-cookie:
+        patched: '2017-12-15T16:27:39.853Z'
+  'npm:lodash:20180130':
+    - gulp-repository-watch > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - slack-notify > lodash:
+        patched: '2018-07-04T08:03:08.073Z'
+    - slack-notify > lodash:
+        patched: '2018-08-20T08:49:18.325Z'
+    - gulp-repository-watch > lodash:
+        patched: '2018-08-20T08:49:18.325Z'
+  'npm:stringstream:20180511':
+    - firebase-admin > @google-cloud/firestore > google-gax > grpc > node-pre-gyp > request > stringstream:
+        patched: '2018-08-20T08:49:18.325Z'
+    - firebase-admin > @google-cloud/firestore > @google-cloud/common-grpc > grpc > node-pre-gyp > request > stringstream:
+        patched: '2018-08-20T08:49:18.325Z'
+  'npm:mime:20170907':
+    - github-oauth > request > mime:
+        patched: '2019-01-30T20:20:40.236Z'
+    - github-oauth > request > form-data > mime:
+        patched: '2019-01-30T20:20:40.236Z'
+    - github-oauth > request > form-data > mime:
+        patched: '2020-12-20T16:51:43.537Z'
+    - github-oauth > request > mime:
+        patched: '2020-12-20T16:51:43.537Z'
+  SNYK-JS-LODASH-450202:
+    - codacy-coverage > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - gith > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - karma-coverage > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - slack-notify > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - slackbots > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - snyk > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - mailgun-js > async > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - pm2 > async > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - snyk > @snyk/dep-graph > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - snyk > inquirer > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - snyk > snyk-config > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - snyk > snyk-mvn-plugin > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - snyk > snyk-nodejs-lockfile-parser > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - snyk > snyk-nuget-plugin > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - codacy-coverage > request-promise > request-promise-core > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - get-random-quote > request-promise > request-promise-core > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - firebase-admin > @google-cloud/storage > async > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - pm2 > @pm2/agent > async > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - pm2 > @pm2/io > async > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - pm2 > @pm2/js-api > async > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - pm2 > pm2-deploy > async > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - pm2 > vizion > async > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - snyk > @snyk/dep-graph > graphlib > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - snyk > snyk-go-plugin > graphlib > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - snyk > snyk-nodejs-lockfile-parser > graphlib > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - snyk > snyk-php-plugin > @snyk/composer-lockfile-parser > lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+    - lodash:
+        patched: '2019-07-03T18:50:11.408Z'
+  'npm:ms:20151024':
+    - pm2-interface > pm2-axon > debug > ms:
+        patched: '2019-07-03T18:50:11.408Z'

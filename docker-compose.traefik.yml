@@ -1,0 +1,50 @@
+version: "3.2"
+
+networks:
+  nat:
+    external: true
+  internal:
+    external: false
+
+services:
+
+  reverse-proxy:
+    env_file:
+      - .env
+    image: traefik:v1.7.12-alpine
+    command:
+      - "--defaultentrypoints=http,https"
+      - "--entrypoints=Name:http Address::80 Redirect.EntryPoint:https"
+      - "--entrypoints=Name:https Address::443 Compress:true TLS"
+      - "--retry"
+      - "--api"
+      - "--docker"
+      - "--docker.domain=docker.localhost"
+      - "--docker.exposedbydefault=false"
+      - "--loglevel=DEBUG"
+      - "--acme=true"
+      - "--acme.acmelogging=true"
+      - "--acme.storage=/traefik/acme.json"
+      - "--acme.entryPoint=https"
+      - "--acme.httpchallenge"
+      - "--acme.httpchallenge.entryPoint=http"
+      - "--acme.onHostRule=true"
+      - "--acme.email=admin@example.com" # changeme!
+      - "--acme.caServer=https://acme-v02.api.letsencrypt.org/directory"
+      - "--acme.domains=${APP_HOSTNAME},${LANDING_HOSTNAME},${DEV_HOSTNAME},${CONSOLE_HOSTNAME}"
+    restart: unless-stopped
+    ports:
+      - "80:80"   # The HTTP port, should be 80 outside (does not collide on empty box)
+      - "443:443"  # The HTTPS port, ditto.
+      - "8080:8080" # Traefik port
+    networks:
+      - nat
+      - internal
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./services/traefik:/traefik # this is where traefik creates SSL certificate exportable using share.sh
+    labels:
+      - "traefik.port=8080"
+      - "traefik.backend=traefik"
+      # - "traefik.frontend.auth.basic.users=traefik:$$apr1$$JVrTyD7r$DwX82aghrfYFJXh.kFfbU."
+      - "traefik.frontend.rule=Host:${DEV_HOSTNAME}"

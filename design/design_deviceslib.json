@@ -1,0 +1,29 @@
+{
+  "_id": "_design/devicelib",
+  "language": "javascript",
+  "views": {
+    "devices_by_mac": {
+      "map": "function (doc) { if(doc.mac) { emit (doc.mac, doc); } }"
+    },
+    "devices_by_owner": {
+      "map": "function (doc) { if(doc.owner) { emit (doc.owner, doc); } }"
+    },
+    "devices_by_source": {
+      "map": "function (doc) { if(doc.source) { emit (doc.source, doc); } }"
+    },
+    "devices_by_id": {
+      "map": "function (doc) { if(doc.id) { emit (doc.id, doc); } }"
+    },
+    "watcher_view": {
+      "map": "function (doc) { if(doc.source != null) { emit (doc.owner, doc.udid, doc.source); } }"
+    },
+    "devices_by_udid": {
+      "map": "function (doc) { if(doc.udid) { emit (doc.udid, doc); } }"
+    }
+  },
+  "updates": {
+    "modify": "function (doc, req) { if (doc == null) return []; var fields = JSON.parse(req.body); for (var i in fields) { doc[i] = fields[i] }; delete doc._revisions; return [doc, toJSON(doc)]; }",
+    "modify-old": "function (doc, req) { if (doc == null) return []; var fields = JSON.parse(req.body); for (var i in fields) { doc[i] = fields[i] }; var resp = doc; delete resp._revisions; return [doc, toJSON(resp)]; }",
+    "attach": "function (doc, req) { var request = JSON.parse(req.body); doc.source = request.source_id; var resp = doc; delete resp._revisions; return [doc, toJSON(resp)]; }"
+  }
+}
