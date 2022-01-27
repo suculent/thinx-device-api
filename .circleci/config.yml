@@ -50,6 +50,25 @@ jobs:
           image: thinxcloud/mosquitto
           tag: 'test'
 
+  build-couchdb:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          command: |
+            git submodule update --init
+      - docker/check
+      - docker/build:
+          image: thinxcloud/couchdb
+          docker-context: services/couchdb
+          dockerfile: services/couchdb/Dockerfile
+          tag: 'latest'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinxcloud/couchdb
+          tag: 'latest'
+
   build-redis-cloud:
     executor: docker/docker
     steps:
@@ -61,14 +80,14 @@ jobs:
             rm -rf ./package-lock.json
       - docker/check
       - docker/build:
-          image: thinx/redis
+          image: thinxcloud/redis
           docker-context: services/redis
           dockerfile: services/redis/Dockerfile
           extra_build_args: '--build-arg REDIS_PASSWORD=${REDIS_PASSWORD} --build-arg ALLOW_EMPTY_PASSWORD=no --build-arg REDIS_DISABLE_COMMANDS=FLUSHALL'
           tag: 'latest'
       - docker/push:
           digest-path: /tmp/digest.txt
-          image: thinx/redis
+          image: thinxcloud/redis
           tag: 'latest'
 
   build-transformer-cloud:
@@ -82,7 +101,7 @@ jobs:
             rm -rf ./app/package-lock.json
       - docker/check
       - docker/build:
-          image: thinx/transformer
+          image: thinxcloud/transformer
           docker-context: services/transformer
           dockerfile: services/transformer/Dockerfile
           extra_build_args: |
@@ -115,6 +134,27 @@ jobs:
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinxcloud/worker
+          tag: 'latest'
+
+  build-base:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check
+      - run:
+          command: |
+            cd base && rm -rf ./node_modules
+      - docker/build:
+          docker-context: base
+          image: thinxcloud/base
+          dockerfile: ./base/Dockerfile
+          extra_build_args: |
+            --build-arg REVISION=$(git describe --abbrev=0) \
+          tag: 'latest'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinxcloud/base
           tag: 'latest'
 
   build-console-cloud:
@@ -153,23 +193,20 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
-      - docker/check:
-          registry: registry.thinx.cloud:5000
+      - docker/check
       - docker/build:
-          registry: registry.thinx.cloud:5000
-          image: thinx/api
+          image: thinxcloud/api
           dockerfile: ./Dockerfile
           extra_build_args: |
             --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} \
             --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
             --build-arg ENVIRONMENT=${ENVIRONMENT} \
             --build-arg REVISION=$(git describe --abbrev=0) \
-          tag: 'swarm'
+          tag: 'latest'
       - docker/push:
           digest-path: /tmp/digest.txt
-          image: thinx/api
-          registry: registry.thinx.cloud:5000
-          tag: 'swarm'
+          image: thinxcloud/api
+          tag: 'latest'
 
   test-api-cloud:
     executor: docker/docker
@@ -369,6 +406,7 @@ workflows:
                 - staging
                 - thinx-swarm
                 - master
+                - thinxcloud
 
       # - test-api-cloud:
       #     context:
@@ -391,6 +429,22 @@ workflows:
       #       branches:
       #         only:
       #           - thinx-swarm
+
+      - build-base:
+          context:
+            - dockerhub
+          filters:
+            branches:
+              only:
+                - thinxcloud
+
+      - build-couchdb:
+          context:
+            - dockerhub
+          filters:
+            branches:
+              only:
+                - thinxcloud
 
       - build-mosquitto-cloud:
           context:
@@ -428,13 +482,14 @@ workflows:
                 - thinx-swarm
                 - thinxcloud
 
-      # - build-api-cloud:
-      #     context:
-      #       - thinx-docker-repo
-      #       - SonarCloud
-      #     requires:
-      #       - test
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-swarm
+      - build-api-cloud:
+          context:
+            - dockerhub
+            - SonarCloud
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - thinx-swarm
+                - thinxcloud
