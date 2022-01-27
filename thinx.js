@@ -441,7 +441,7 @@ const sessionConfig = {
   saveUninitialized: false,
 };
 
-const sessionParser = session(sessionConfig); // lgtm [js/missing-token-validation]
+const sessionParser = session(sessionConfig); /* lgtm [js/missing-token-validation] lgtm [js/clear-text-cookie] lgtm [js/client-exposed-cookie] */
 
 app.use(sessionParser);
 
@@ -543,7 +543,7 @@ app.set('trust proxy', ['loopback', '127.0.0.1']);
 var wsapp = express();
 wsapp.disable('x-powered-by');
 
-wsapp.use(session({
+wsapp.use(session({ /* lgtm [js/client-exposed-cookie] */
   secret: session_config.secret,
   store: sessionStore,
   cookie: {
@@ -555,7 +555,7 @@ wsapp.use(session({
   resave: false,
   rolling: false,
   saveUninitialized: false,
-}));
+})); /* lgtm [js/client-exposed-cookie] */
 
 let wss = new WebSocket.Server({ server: server }); // or { noServer: true }
 const socketMap = new Map();
@@ -759,9 +759,11 @@ function isMasterProcess() {
   return true; // should be actually `cluster.isMaster();`
 }
 
-function reporter(success, /* key - ignored, key is returned only for testing */) {
+function reporter(success, key /* key is returned only for testing */) {
     if (success) {
       console.log("Restored Default MQTT Key...");
+    } else {
+      console.log("Error with key:", key);
     }
 }
 
