@@ -432,7 +432,7 @@ const sessionConfig = {
   cookie: {
     maxAge: 3600000,
     secure: enforceMaximumSecurity,
-    httpOnly: enforceMaximumSecurity
+    httpOnly: true
   },
   store: sessionStore,
   name: "x-thx-session",
@@ -549,7 +549,7 @@ wsapp.use(session({ /* lgtm [js/client-exposed-cookie] */
   cookie: {
     expires: hour,
     secure: enforceMaximumSecurity,
-    httpOnly: enforceMaximumSecurity
+    httpOnly: true
   },
   name: "x-thx-ws-session",
   resave: false,
