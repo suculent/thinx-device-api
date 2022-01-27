@@ -29,6 +29,13 @@
     "username": "thinx",
     "use_plugin": true
   },
+  "slack" : {
+    "client_id" : "000000000000.000000000000",
+    "client_secret": "<not-configured>",
+    "webhook": "https://hooks.slack.com/services/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",
+    "bot_token": "<not-configured>",
+    "bot_topic": "thinx"
+  },
   "rollbar_token": "<enter-your-rollbar.com-token>",
   "database_uri": "http://rtmtest:rtmtest@couchdb:5984",
   "webhook_port": 9002,
