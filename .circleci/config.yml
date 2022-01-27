@@ -106,6 +106,7 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
+      - docker/check
       - run:
           command: |
             git submodule update --init
