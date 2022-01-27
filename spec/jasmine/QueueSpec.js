@@ -1,18 +1,16 @@
-describe("Queue", function() {
+var expect = require('chai').expect;
+let Queue = require("../../lib/thinx/queue");
 
-    var expect = require('chai').expect;
-    let Queue = require("../../lib/thinx/queue");
-    
+describe("Queue", function () {
+
     let mock_udid_1 = "<mock-udid-1>";
     let mock_udid_2 = "<mock-udid-2>";
     let mock_udid_3 = "<mock-udid-3>";
-
     let mock_source_id = "<mock-source-id>";
-
     let queue_with_cron;
 
     // init
-    it("(00) should not fail or hang", function(done) {
+    it("should not fail or hang", function (done) {
         // Should initialize safely without running cron
         queue_with_cron = new Queue(null);
         expect(queue_with_cron).to.be.a('object');
@@ -38,19 +36,19 @@ describe("Queue", function() {
             console.log("(00) Queue calling findNext again async...");
 
             // Should not be able to find anything while queue item is running
-            queue_with_cron.findNext((nextAction) => {
+            queue_with_cron.findNext((/* nextAction */) => {
                 // can be null
-            });
-                
-            console.log("(00) Queue test calling loop...");
+                console.log("(00) Queue test calling loop...");
 
-            // Should run loop safely
-            for (let i = 0; i < 10; i++) {
-                queue_with_cron.loop();
-            }
-            
-            console.log("(00) Queue test done.");
-            done();
-        });    
+                // Should run loop safely
+                for (let i = 0; i < 10; i++) {
+                    queue_with_cron.loop();
+                }
+
+                console.log("(00) Queue test done.");
+                done();
+            });
+        });
     });
+
 });

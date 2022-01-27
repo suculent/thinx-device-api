@@ -2,7 +2,6 @@ describe("API Env", function () {
 
   var expect = require('chai').expect;
 
-  var generated_key_name = null;
   var envi = require("../_envi.json");
   var owner = envi.oid;
 
@@ -18,14 +17,12 @@ describe("API Env", function () {
       function (success, object) {
         expect(object).to.be.a('string');
         if (success) {
-          this.generated_key_name = "sample-var-name";
           done();
         }
       });
   }, 30000);
 
   it("should be able to fetch specific env var", function (done) {
-    //console.log("Fetching env var...");
     apienv.fetch(
       owner,
       "sample-var-name",
