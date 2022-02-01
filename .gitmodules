@@ -45,3 +45,6 @@
 [submodule "services/broker"]
 	path = services/broker
 	url = git@github.com:thinx-cloud/broker.git
+[submodule "services/console"]
+	path = services/console
+	url = git@github.com:thinx-cloud/console.git
