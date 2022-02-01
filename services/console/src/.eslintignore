@@ -1,7 +1,0 @@
-node_modules/
-**/*.min.js
-assets/global
-assets/layouts
-assets/thinx/js/plugins
-gulpfile.js
-test
