@@ -2,6 +2,10 @@
 
 ## HISTORY
 
+1/2/2022 1.5.6
+
+» Dependency update, major version bump
+
 26/1/2021 1.4.8291
 
 » Major update

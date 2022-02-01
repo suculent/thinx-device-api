@@ -1,4 +1,4 @@
-FROM node:17-buster-slim
+FROM node:current-slim
 
 LABEL maintainer="Matej Sychra <suculent@me.com>"
 

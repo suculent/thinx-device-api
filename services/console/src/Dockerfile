@@ -65,7 +65,7 @@ RUN apk del g++ gcc make
 #
 
 # needs to include gulp
-FROM nginx:1.21.4
+FROM nginx:latest
 
 WORKDIR /usr/share/nginx/html
 COPY --from=0 /home/node/build/html .
