@@ -3,138 +3,9 @@ orbs:
   node: circleci/node@4.7.0
   docker: circleci/docker@2.0.1
   slack: circleci/slack@4.5.0
+  ggshield: gitguardian/ggshield@1.1.0
 
 jobs:
-
-  build-mosquitto-cloud:
-    executor: docker/docker
-    steps:
-      - setup_remote_docker:
-          version: 20.10.7
-          docker_layer_caching: true
-      - checkout
-      - run:
-          command: |
-            git submodule update --init
-            rm -rf ./package-lock.json
-      - docker/check
-      - docker/build:
-          image: thinxcloud/mosquitto
-          docker-context: services/broker
-          dockerfile: services/broker/Dockerfile
-          extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
-          tag: 'latest'
-      - docker/push:
-          digest-path: /tmp/digest.txt
-          image: thinxcloud/mosquitto
-          tag: 'latest'
-  
-  test-mosquitto-cloud:
-    executor: docker/docker
-    steps:
-      - setup_remote_docker
-      - checkout
-      - run:
-          command: |
-            git submodule update --init
-            rm -rf ./package-lock.json
-      - docker/check
-      - docker/build:
-          image: thinxcloud/mosquitto
-          docker-context: services/broker
-          dockerfile: services/broker/Dockerfile
-          extra_build_args: '--build-arg MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME} --build-arg MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}'
-          tag: 'test'
-      - docker/push:
-          digest-path: /tmp/digest.txt
-          image: thinxcloud/mosquitto
-          tag: 'test'
-
-  build-couchdb:
-    executor: docker/docker
-    steps:
-      - setup_remote_docker
-      - checkout
-      - run:
-          command: |
-            git submodule update --init
-      - docker/check
-      - docker/build:
-          image: thinxcloud/couchdb
-          docker-context: services/couchdb
-          dockerfile: services/couchdb/Dockerfile
-          tag: 'latest'
-      - docker/push:
-          digest-path: /tmp/digest.txt
-          image: thinxcloud/couchdb
-          tag: 'latest'
-
-  build-redis-cloud:
-    executor: docker/docker
-    steps:
-      - setup_remote_docker
-      - checkout
-      - run:
-          command: |
-            git submodule update --init
-            rm -rf ./package-lock.json
-      - docker/check
-      - docker/build:
-          image: thinxcloud/redis
-          docker-context: services/redis
-          dockerfile: services/redis/Dockerfile
-          extra_build_args: '--build-arg REDIS_PASSWORD=${REDIS_PASSWORD} --build-arg ALLOW_EMPTY_PASSWORD=no --build-arg REDIS_DISABLE_COMMANDS=FLUSHALL'
-          tag: 'latest'
-      - docker/push:
-          digest-path: /tmp/digest.txt
-          image: thinxcloud/redis
-          tag: 'latest'
-
-  build-transformer-cloud:
-    executor: docker/docker
-    steps:
-      - setup_remote_docker
-      - checkout
-      - run:
-          command: |
-            git submodule update --init
-            rm -rf ./app/package-lock.json
-      - docker/check
-      - docker/build:
-          image: thinxcloud/transformer
-          docker-context: services/transformer
-          dockerfile: services/transformer/Dockerfile
-          extra_build_args: |
-            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
-            --build-arg SQREEN_TOKEN=${SQREEN_TOKEN} \
-            --build-arg ROLLBAR_ENVIRONMENT=${ENVIRONMENT} \
-            --build-arg REVISION=$(git describe --abbrev=0) \
-          tag: 'latest'
-      - docker/push:
-          digest-path: /tmp/digest.txt
-          image: thinxcloud/transformer
-          tag: 'latest'
-
-  build-worker-cloud:
-    executor: docker/docker
-    steps:
-      - setup_remote_docker
-      - checkout
-      - docker/check
-      - run:
-          command: |
-            git submodule update --init
-      - docker/build:
-          docker-context: services/worker
-          image: thinxcloud/worker
-          dockerfile: ./services/worker/Dockerfile
-          extra_build_args: |
-            --build-arg REVISION=$(git describe --abbrev=0) \
-          tag: 'latest'
-      - docker/push:
-          digest-path: /tmp/digest.txt
-          image: thinxcloud/worker
-          tag: 'latest'
 
   build-base:
     executor: docker/docker
@@ -142,6 +13,12 @@ jobs:
       - setup_remote_docker
       - checkout
       - docker/check
+      - ggshield/scan:
+          name: Scan using Gitguardian shield
+          base_revision: <<pipeline.git.base_revision>>
+          revision: <<pipeline.git.revision>>
+          context:
+            - gitguardian
       - run:
           command: |
             cd base && rm -rf ./node_modules
@@ -162,6 +39,12 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
+      - ggshield/scan:
+          name: Scan using Gitguardian shield
+          base_revision: <<pipeline.git.base_revision>>
+          revision: <<pipeline.git.revision>>
+          context:
+            - gitguardian
       - docker/check:
           registry: registry.thinx.cloud:5000
       - docker/build:
@@ -213,6 +96,12 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
+      - ggshield/scan:
+          name: Scan using Gitguardian shield
+          base_revision: <<pipeline.git.base_revision>>
+          revision: <<pipeline.git.revision>>
+          context:
+            - gitguardian
       - docker/check:
           registry: registry.thinx.cloud:5000
       - docker/build:
@@ -410,27 +299,21 @@ workflows:
                 - master
                 - thinxcloud
 
-      # - test-api-cloud:
-      #     context:
-      #         - thinx-docker-repo
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-swarm
+      - test-api-cloud:
+          context:
+              - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - thinx-swarm
       
-      # - test-mosquitto-cloud:
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-swarm
-
-      # - build-console-cloud:
-      #     context:
-      #       - thinx-docker-repo
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-swarm
+      - build-console-cloud:
+          context:
+            - thinx-docker-repo
+          filters:
+            branches:
+              only:
+                - thinx-swarm
 
       - build-base:
           context:
@@ -440,49 +323,6 @@ workflows:
               only:
                 - thinxcloud
 
-      - build-couchdb:
-          context:
-            - dockerhub
-          filters:
-            branches:
-              only:
-                - thinxcloud
-
-      - build-mosquitto-cloud:
-          context:
-            - dockerhub
-          filters:
-            branches:
-              only:
-                - thinx-swarm
-                - thinxcloud
-
-      - build-redis-cloud:
-          context:
-            - dockerhub
-          filters:
-            branches:
-              only:
-                - thinx-swarm
-                - thinxcloud
-
-      - build-transformer-cloud:
-          context:
-            - dockerhub
-          filters:
-            branches:
-              only:
-                - thinx-swarm
-                - thinxcloud
-
-      - build-worker-cloud:
-          context:
-            - dockerhub
-          filters:
-            branches:
-              only:
-                - thinx-swarm
-                - thinxcloud
 
       - build-api-cloud:
           context:
