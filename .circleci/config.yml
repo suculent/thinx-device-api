@@ -7,18 +7,23 @@ orbs:
 
 jobs:
 
-  build-base:
-    executor: docker/docker
+  scan:
+    executor: gitguardian/ggshield
     steps:
-      - setup_remote_docker
       - checkout
-      - docker/check
       - ggshield/scan:
           name: Scan using Gitguardian shield
           base_revision: <<pipeline.git.base_revision>>
           revision: <<pipeline.git.revision>>
           context:
             - gitguardian
+
+  build-base:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check
       - run:
           command: |
             cd base && rm -rf ./node_modules
@@ -39,12 +44,6 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
-      - ggshield/scan:
-          name: Scan using Gitguardian shield
-          base_revision: <<pipeline.git.base_revision>>
-          revision: <<pipeline.git.revision>>
-          context:
-            - gitguardian
       - docker/check:
           registry: registry.thinx.cloud:5000
       - docker/build:
@@ -96,12 +95,6 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
-      - ggshield/scan:
-          name: Scan using Gitguardian shield
-          base_revision: <<pipeline.git.base_revision>>
-          revision: <<pipeline.git.revision>>
-          context:
-            - gitguardian
       - docker/check:
           registry: registry.thinx.cloud:5000
       - docker/build:
@@ -284,6 +277,10 @@ workflows:
   build-and-deploy:
 
     jobs:
+
+      - scan:
+          context:
+            - gitguardian
 
       - test:
           context:
