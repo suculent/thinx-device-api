@@ -32,7 +32,7 @@
   "slack" : {
     "client_id" : "000000000000.000000000000",
     "client_secret": "<not-configured>",
-    "webhook": "https://hooks.slack.com/services/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",
+    "webhook": "<revoked>",
     "bot_token": "<not-configured>",
     "bot_topic": "thinx"
   },
