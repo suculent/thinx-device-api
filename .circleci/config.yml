@@ -2,13 +2,12 @@ version: 2.1
 orbs:
   node: circleci/node@4.7.0
   docker: circleci/docker@2.0.1
-  slack: circleci/slack@4.5.0
   ggshield: gitguardian/ggshield@1.1.0
+  slack: circleci/slack@4.5.0
 
 jobs:
 
   gscan:
-    executor: gitguardian/ggshield
     steps:
       - checkout
       - ggshield/scan:
