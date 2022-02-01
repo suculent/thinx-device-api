@@ -7,7 +7,7 @@ orbs:
 
 jobs:
 
-  scan:
+  gscan:
     executor: gitguardian/ggshield
     steps:
       - checkout
@@ -278,7 +278,7 @@ workflows:
 
     jobs:
 
-      - scan:
+      - gscan:
           context:
             - gitguardian
 
