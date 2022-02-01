@@ -8,8 +8,13 @@ orbs:
 jobs:
 
   gscan:
+    executor: gitguardian/ggshield
     steps:
       - checkout
+      - run:
+          name: Fetch all submodules
+          command: |
+            git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
       - ggshield/scan:
           name: Scan using Gitguardian shield
           base_revision: <<pipeline.git.base_revision>>
