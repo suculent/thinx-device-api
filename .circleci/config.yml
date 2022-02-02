@@ -277,9 +277,8 @@ workflows:
           filters:
             branches:
               only:
-                - staging
                 - thinx-swarm
-                - master
+                - main
                 - thinxcloud
 
       - test-api-cloud:
@@ -305,7 +304,6 @@ workflows:
             branches:
               only:
                 - thinxcloud
-
 
       - build-api-cloud:
           context:
