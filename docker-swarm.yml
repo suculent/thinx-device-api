@@ -269,8 +269,6 @@ services:
 #    logging:
 #      driver: none
     environment:
-      - "NGINX_PORT=80"
-      - "NGINX_HOST=${WEB_HOSTNAME}"
       - "LANDING_HOSTNAME=${LANDING_HOSTNAME}"
       - "WEB_HOSTNAME=${WEB_HOSTNAME}"
       - "API_HOSTNAME=${API_HOSTNAME}"
