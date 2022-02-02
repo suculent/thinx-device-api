@@ -32,6 +32,10 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
+      - run:
+          name: Fetch all dependencies (esp. console)
+          command: |
+            git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
       - docker/check:
           registry: registry.thinx.cloud:5000
       - docker/build:
