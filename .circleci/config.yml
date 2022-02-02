@@ -310,7 +310,7 @@ workflows:
             - dockerhub
             - SonarCloud
           requires:
-            - test
+            - test-api-cloud
           filters:
             branches:
               only:
