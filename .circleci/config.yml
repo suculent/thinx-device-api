@@ -2,25 +2,9 @@ version: 2.1
 orbs:
   node: circleci/node@4.7.0
   docker: circleci/docker@2.0.1
-  ggshield: gitguardian/ggshield@1.1.0
   slack: circleci/slack@4.5.0
 
 jobs:
-
-  gscan:
-    executor: gitguardian/ggshield
-    steps:
-      - checkout
-      - run:
-          name: Fetch all submodules
-          command: |
-            git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
-      - ggshield/scan:
-          name: Scan using Gitguardian shield
-          base_revision: <<pipeline.git.base_revision>>
-          revision: <<pipeline.git.revision>>
-          context:
-            - gitguardian
 
   build-base:
     executor: docker/docker
