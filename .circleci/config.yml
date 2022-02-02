@@ -266,10 +266,6 @@ workflows:
 
     jobs:
 
-      - gscan:
-          context:
-            - gitguardian
-
       - test:
           context:
               - dockerhub
