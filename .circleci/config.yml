@@ -297,6 +297,7 @@ workflows:
             branches:
               only:
                 - thinxcloud
+                - thinx-swarm
 
       - build-api-cloud:
           context:
