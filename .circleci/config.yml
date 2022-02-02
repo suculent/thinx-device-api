@@ -265,8 +265,8 @@ workflows:
           context:
               - dockerhub
               - thinx-docker-repo
-          requires:
-            - build-base
+          #requires:
+          #  - build-base
           filters:
             branches:
               only:
