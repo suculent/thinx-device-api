@@ -24,7 +24,6 @@ RUN apt-get update -qq && \
     mercurial \
     pigz \
     python \
-    python-pip \
     ssh \
     xfsprogs \
     xz-utils \
