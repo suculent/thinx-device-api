@@ -1,3 +1,5 @@
+// file deepcode ignore UseCsurfForExpress: API cannot use CSRF
+
 /*
  * This THiNX-RTM API module is responsible for responding to devices and build requests.
  */
@@ -378,6 +380,7 @@ function fail_on_invalid_git_headers(req) {
   return true; // fail
 }
 
+// file deepcode ignore UseCsurfForExpress: API cannot use CSRF
 const hook_server = express();
 hook_server.disable('x-powered-by');
 if (typeof(app_config.webhook_port) !== "undefined") {
