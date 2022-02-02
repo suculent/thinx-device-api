@@ -166,13 +166,6 @@ jobs:
           - node_modules
         key: v1-dependencies-{{ checksum "package.json" }}
 
-#    - run: 
-#        name: Update base-image
-#        command: |
-#            cd base
-#            ./update.sh
-
-
     - run:
         name: Init filesystem
         command: |
@@ -311,6 +304,7 @@ workflows:
             - SonarCloud
           requires:
             - test-api-cloud
+            - test
           filters:
             branches:
               only:
