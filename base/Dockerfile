@@ -33,7 +33,7 @@ RUN apt-get update -qq && \
     zip \
     && rm -rf /var/lib/apt/lists/*
 
-# Docker-in-docker
+# Docker
 
 ENV VER="20.10.12"
 RUN curl -sL -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz && \
@@ -41,23 +41,17 @@ RUN curl -sL -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/st
     rm -rf /tmp/docker-$VER.tgz && \
     mv /tmp/docker/* /usr/bin
 
-# https://github.com/docker/docker/tree/master/hack/dind is this really needed now?
-ENV DIND_COMMIT 37498f009d8bf25fbb6199e8ccd34bed84f2874b
-
-RUN set -eux; \
-	curl -o /usr/local/bin/dind "https://raw.githubusercontent.com/docker/docker/${DIND_COMMIT}/hack/dind"; \
-	chmod +x /usr/local/bin/dind
-
 VOLUME /var/lib/docker
 
 # Node.js app
 
 WORKDIR /opt/thinx/thinx-device-api
 
-# Install app dependencies
-# package.json should be link to ../package.json
+# App dependencies
+
 COPY ./package.json ./
 COPY .snyk ./.snyk
 
-# install with npx and audit fix
+# Install and fix
+
 RUN npm install --only-prod
