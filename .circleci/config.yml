@@ -297,8 +297,9 @@ workflows:
           filters:
             branches:
               only:
-                - thinxcloud
-                - thinx-swarm
+                - base
+                #- thinxcloud
+                #- thinx-swarm
 
       - build-api-cloud:
           context:
