@@ -13,6 +13,7 @@ jobs:
       - checkout
       - docker/check
       - run:
+          name: Clean up artifacts
           command: |
             cd base && rm -rf ./node_modules
       - docker/build:
