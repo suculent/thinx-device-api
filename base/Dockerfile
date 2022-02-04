@@ -24,7 +24,7 @@ RUN apt-get update -qq && \
     pigz \
     python \
     openssh-server \
-    ssh \
+    openssh-client \
     xfsprogs \
     xz-utils \
     net-tools \

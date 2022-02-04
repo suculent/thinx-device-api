@@ -134,13 +134,6 @@ jobs:
 
     - checkout
 
-    # deprecated, will be replaced by gitguardian; lost SPECTRAL_DSN value and the login fails
-    # - run:
-    #    name: Spectralops.io integration
-    #    command: |
-    #      curl -L "https://get.spectralops.io/api/download/get?dsn=$SPECTRAL_DSN" | sh
-    #      spectral scan --ok 
-
     # Restore the dependency cache
     - restore_cache:
         keys:
