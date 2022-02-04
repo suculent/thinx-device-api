@@ -21,7 +21,6 @@ RUN apt-get update -qq && \
     iptables \
     lxc \
     mosquitto \
-    mercurial \
     pigz \
     python \
     ssh \
