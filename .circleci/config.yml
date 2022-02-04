@@ -180,10 +180,21 @@ jobs:
             mkdir -p /mnt/data/test-reports
 
     - run:
-        name: Setup environment
+        name: Switch to Test Dockerfiles
         command: |
           rm -rf ./Dockerfile
           mv ./Dockerfile.test ./Dockerfile
+          rm -rf ./docker-compose.yml
+          mv ./docker-compose.test.yml ./docker-compose.yml
+          rm -rf ./services/broker/Dockerfile
+          mv ./services/broker/Dockerfile.test ./services/broker/Dockerfile
+          sed -i "s/.git//g" .dockerignore
+          echo "Creating Docker Network (ID):"
+          docker network create nat
+
+    - run:
+        name: Copy Environment variables for in-place building
+        command: |
           cp -vf ./.env.dist ./.env
           cp -vf ./.env.dist ./spec/mnt/data/conf/.env
           cp -vf ./.env ./services/broker/.env
@@ -191,19 +202,22 @@ jobs:
           cp -vf ./.env ./services/couchdb/.env
           cp -vf ./.env ./services/redis/.env
           cp -vf ./.env ./services/transformer/.env
+
+    - run:
+        name: Review configuration and environment
+        command: |
           echo "Contents of ./conf"
           ls -la ./conf
           echo "Contents of ./.env"
           cat ./.env
+
+    - run:
+        name: Inject password to configuration and broker
+        command: |
+          echo "Injecting secret: ${REDIS_PASSWORD}"
           sed -i "s/changeme!/${REDIS_PASSWORD}/g" ./services/broker/test/mosquitto/conf.d/mosquitto.conf
           sed -i "s/changeme!/${REDIS_PASSWORD}/g" ./spec/mnt/data/conf/config.json
-          echo "Creating Docker Network (ID):"
-          docker network create nat
-          rm -rf ./docker-compose.yml
-          mv ./docker-compose.test.yml ./docker-compose.yml
-          rm -rf ./services/broker/Dockerfile
-          mv ./services/broker/Dockerfile.test ./services/broker/Dockerfile
-          sed -i "s/.git//g" .dockerignore
+          cp ./spec/mnt/data/conf/config.json ./conf/config.json
 
     - run:
         name: Starting Redis
