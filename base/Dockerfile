@@ -23,7 +23,6 @@ RUN apt-get update -qq && \
     mosquitto \
     pigz \
     python \
-    openssh-server \
     openssh-client \
     xfsprogs \
     xz-utils \
