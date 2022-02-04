@@ -103,7 +103,7 @@ jobs:
 
     # In CircleCI 2.0 you can now specify your own image, or use one of our pre-configured images.
     docker:
-      - image: suculent/thinx-base-image:latest
+      - image: thinxcloud/base:latest
         auth:
           username: $DOCKER_USERNAME  # from thinx-docker-repo, docker.io
           password: $DOCKER_PUBLIC_PASSWORD  # or project environment variable reference
@@ -271,6 +271,7 @@ workflows:
           filters:
             branches:
               only:
+                - base
                 - thinx-swarm
                 - main
                 - thinxcloud
