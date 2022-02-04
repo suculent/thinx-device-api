@@ -35,7 +35,7 @@ RUN apt-get update -qq && \
 
 # Docker-in-docker
 
-ENV VER="20.10.1"
+ENV VER="20.10.12"
 RUN curl -sL -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz && \
     tar -xz -C /tmp -f /tmp/docker-$VER.tgz && \
     rm -rf /tmp/docker-$VER.tgz && \
