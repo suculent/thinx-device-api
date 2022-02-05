@@ -13,12 +13,8 @@
     "host": "thinx-redis",
     "passnote": "when not required, probably a provisioning issue...",
     "password": "changeme!",
-    "db": 0
-  },
-  "redis_goauth": {
-    "host": "thinx-redis",
-    "db": 2,
-    "password": "changeme!"
+    "db": 0,
+    "port": 6379
   },
   "mqtt": {
     "server": "mqtt://mosquitto",
@@ -50,7 +46,6 @@
   "slack_webhook": "",
   "slack_bot_token": "",
   "slack_bot_topic": "thinx",
-  "fcm_auth": "./conf/thinx-cloud-firebase.json",
   "ssl_key": "/mnt/data/ssl/privkey.pem",
   "ssl_cert": "/mnt/data/ssl/cert.pem",
   "client_user_agent": "THiNX-Client",

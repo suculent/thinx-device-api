@@ -39,7 +39,6 @@
     "bot_token": "",
     "bot_topic": "thinx"
   },
-  "fcm_auth": null,
   "ssl_key": null,
   "ssl_cert": null,
   "client_user_agent": "THiNX-Client",

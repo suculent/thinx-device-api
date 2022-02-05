@@ -46,7 +46,6 @@
     "bot_token": "",
     "bot_topic": "thinx"
   },
-  "fcm_auth": "./conf/thinx-cloud-firebase.json",
   "ssl_key": "/mnt/data/ssl/privkey.pem",
   "ssl_cert": "/mnt/data/ssl/cert.pem",
   "client_user_agent": "THiNX-Client",
