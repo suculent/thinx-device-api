@@ -87,8 +87,7 @@ RUN apt-get update -qq && \
 # Install app dependencies
 COPY package.json ./
 
-RUN npm update \
- && npm install .
+RUN npm install .
 
 # Test modules
 RUN npm install nyc mocha jasmine mocha-lcov-reporter coveralls -g
