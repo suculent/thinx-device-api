@@ -87,10 +87,10 @@ RUN apt-get update -qq && \
 # Install app dependencies
 COPY package.json ./
 
-RUN npm install .
-
 # Test modules
-RUN npm install nyc mocha jasmine mocha-lcov-reporter coveralls -g
+RUN npm install nyc mocha jasmine mocha-lcov-reporter coveralls npm@8.4.1 -g
+
+RUN npm install .
 
 VOLUME /var/lib/docker
 
