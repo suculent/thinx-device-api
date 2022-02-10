@@ -33,14 +33,18 @@ echo "140.82.121.3 github.com" >> /etc/hosts
 ssh -tt -o "StrictHostKeyChecking=no" git@github.com
 
 if [[ ! -z $ROLLBAR_ACCESS_TOKEN ]]; then
+  if [[ -z $ROLLBAR_ENVIRONMENT ]]; then
+    ROLLBAR_ENVIRONMENT="dev"
+  fi
   LOCAL_USERNAME=$(whoami)
+  echo "Starting Rollbar deploy..."
   curl --silent https://api.rollbar.com/api/1/deploy/ \
     -F access_token=$ROLLBAR_ACCESS_TOKEN \
     -F environment=$ROLLBAR_ENVIRONMENT \
     -F revision=$REVISION \
     -F local_username=$LOCAL_USERNAME 
     # > /dev/null
-  echo ""
+  # echo ""
 else
   echo "[thinx-entrypoint] Skipping Rollbar deployment, ROLLBAR_ACCESS_TOKEN not defined... [${ROLLBAR_ACCESS_TOKEN}]"
 fi
