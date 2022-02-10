@@ -62,7 +62,9 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   # ./cc-test-reporter before-build
   echo "[thinx-entrypoint] TEST starting app as first run (create DB and stuff)..."
   set +e # prevent exit on timeout
-  timeout 120 node thinx.js # container must wait much longer for test to complete
+  date
+  timeout 60 node thinx.js # container must wait much longer for test to complete
+  date
   set -e # exit immediately on error
   echo "[thinx-entrypoint] TEST running suites..."
   npm run test # | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
