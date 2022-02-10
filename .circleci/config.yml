@@ -229,6 +229,7 @@ jobs:
         command: |
           docker login --username $DOCKER_LOGIN --password $DOCKER_PASSWORD https://registry.thinx.cloud:5000
           docker-compose up -d --build mosquitto
+          timeout 10 docker-compose logs -f --timestamp mosquitto
 
     - run:
         name: Starting Transformer
