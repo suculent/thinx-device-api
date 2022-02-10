@@ -119,7 +119,6 @@
     "minimist": "1.2.3",
     "netmask": "2.0.2",
     "proxy-agent": "4.0.1",
-    "request": "2.88.2",
     "socket.io-parser": "4.0.4",
     "trim-newlines": "4.0.2",
     "tunnel-agent": "0.6.0",
