@@ -19,8 +19,7 @@
     "coverage": "npm run mocha",
     "mocha": "mocha spec/jasmine --delay=3000 --exit --timeout=5000; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls",
     "version": "npm run npm-auto-version",
-    "postpublish": "git push origin --tags",
-    "preinstall": "if [ -f ./package_lock.json ]; then npx npm-force-resolutions; fi"
+    "postpublish": "git push origin --tags"
   },
   "dependencies": {
     "@slack/rtm-api": "^6.0.0",
@@ -88,10 +87,9 @@
     "ws": "^8.2.2",
     "yaml": "^1.10.2"
   },
-  "resolutions": {
+  "overrides": {
     "lodash": "4.17.20",
     "ws": "7.3.1",
-    "moment": "2.29.1",
     "js-yaml": "3.14.0",
     "clean-css": "4.2.3",
     "cookie-signature": "1.1.0",

@@ -21,7 +21,6 @@
     "mocha": "mocha spec/jasmine --delay=3000 --exit --timeout=5000; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls",
     "version": "npm run npm-auto-version",
     "postpublish": "git push origin --tags",
-    "preinstall": "if [ -f ./package_lock.json ]; then npx npm-force-resolutions; fi",
     "prepare": "npm run snyk-protect"
   },
   "dependencies": {
@@ -118,7 +117,6 @@
     "mime": "2.5.2",
     "minimatch": "3.0.4",
     "minimist": "1.2.3",
-    "moment": "2.29.1",
     "netmask": "2.0.2",
     "proxy-agent": "4.0.1",
     "request": "2.88.2",
