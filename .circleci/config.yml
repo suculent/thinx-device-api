@@ -285,13 +285,13 @@ workflows:
                 - main
                 - thinxcloud
 
-      - test-api-cloud:
-          context:
-              - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
+      # - test-api-cloud:
+      #     context:
+      #         - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
       
       - build-console-cloud:
           context:
@@ -316,7 +316,7 @@ workflows:
             - dockerhub
             - SonarCloud
           requires:
-            - test-api-cloud
+            #- test-api-cloud
             - test
           filters:
             branches:
