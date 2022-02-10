@@ -120,7 +120,7 @@ function initDatabases(dbprefix) {
 
   function null_cb(err, body, header) {
     // only unexpected errors should be logged
-    if (process.env.ENVIRONMENT == "test") {
+    if (process.env.ENVIRONMENT === "test") {
       console.log(err, body, header);
     }
   }
