@@ -14,11 +14,6 @@
     "db": 0,
     "password": "<enter-redis-password>"
   },
-  "redis_goauth": {
-    "host": "thinx-redis",
-    "db": 2,
-    "password": "<enter-redis-password>"
-  },
   "mqtt": {
     "server": "mqtt://mosquitto",
     "port": 1883,
