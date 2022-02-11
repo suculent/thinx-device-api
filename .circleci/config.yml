@@ -296,6 +296,7 @@ workflows:
       - build-console-cloud:
           context:
             - thinx-docker-repo
+            - console
           filters:
             branches:
               only:
