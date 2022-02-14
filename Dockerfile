@@ -44,14 +44,12 @@ ENV AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}
 ARG SNYK_TOKEN
 ENV SNYK_TOKEN=${SNYK_TOKEN}
 
-# Create app directory
 WORKDIR /opt/thinx/thinx-device-api
 
-# second npm install is using package_lock to fix pinned transient dependencies
-RUN npm install -g npm@8.4.1 && \
-    npm install --unsafe-perm . --only-prod && \
-    npm audit fix
+RUN npm install -g npm@8.4.1 \
+    && npm install --unsafe-perm . --only-prod
 
+#    npm audit fix # fails because of unfixable vulnerabilities
 # && npm audit fix --force # fails because of unfixable vulnerabilities
 
 # THiNX Web & Device API (HTTP)
@@ -69,6 +67,8 @@ COPY . .
 RUN apt-get remove -y \
     && apt-get autoremove -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# TODO: Implement Snyk Container Scanning here in addition to DockerHub manual scans...
 
 #ADD https://get.aquasec.com/microscanner .
 #RUN chmod +x microscanner && mkdir artifacts

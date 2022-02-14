@@ -20,7 +20,6 @@ RUN apt-get update -qq && \
     gnutls-bin \
     iptables \
     lxc \
-    mosquitto \
     pigz \
     python \
     openssh-client \
