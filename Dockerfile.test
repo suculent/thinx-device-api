@@ -87,7 +87,7 @@ RUN apt-get update -qq && \
 COPY package.json ./
 
 # Test modules
-RUN npm install nyc mocha jasmine mocha-lcov-reporter coveralls npm@8.5.0 -g
+RUN npm install -g nyc mocha jasmine mocha-lcov-reporter coveralls npm@8.5.0
 
 RUN npm install .
 
