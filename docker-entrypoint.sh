@@ -44,7 +44,7 @@ if [[ ! -z $ROLLBAR_ACCESS_TOKEN ]]; then
     -F revision=$REVISION \
     -F local_username=$LOCAL_USERNAME 
     # > /dev/null
-  # echo ""
+  echo ""
 else
   echo "[thinx-entrypoint] Skipping Rollbar deployment, ROLLBAR_ACCESS_TOKEN not defined... [${ROLLBAR_ACCESS_TOKEN}]"
 fi
