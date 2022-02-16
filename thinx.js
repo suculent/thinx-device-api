@@ -38,6 +38,11 @@ if (Globals.use_sqreen()) {
 }
 
 const express = require("express");
+
+// App
+const app = express();
+app.disable('x-powered-by');
+
 const session = require("express-session");
 
 const pki = require('node-forge').pki;
@@ -88,6 +93,7 @@ if ((process.env.ENVIRONMENT === "test") || (process.env.ENVIRONMENT === "circle
 
 console.log("Initializing MQTT with password", serviceMQPassword); // intentional logging for administrative/testing purposes
 auth.add_mqtt_credentials(serviceMQAccount, serviceMQPassword, () => {
+  console.log("MQTT credentials refresh complete, initializing Messenger");
   app.messenger = new Messenger(serviceMQPassword).getInstance(serviceMQPassword); // take singleton to prevent double initialization
 });
 
@@ -420,10 +426,6 @@ if (typeof (app_config.webhook_port) !== "undefined") {
     console.log("[info] Hook process completed.");
   }); // end of Legacy Webhook Server; will deprecate after reconfiguring all instances or if no webhook_port is defined
 }
-
-// App
-const app = express();
-app.disable('x-powered-by');
 
 // DI
 app.builder = builder;
