@@ -244,7 +244,6 @@ jobs:
           timeout 600 docker-compose logs -f --timestamp api
           echo "###### > Tailing completed, stopping job."
           date
-          docker-compose stop
 
     - run:
         name: Allow inspecting MQTT logs after failed connections
@@ -267,6 +266,7 @@ jobs:
             docker ps
             docker network ls
             docker network inspect bridge
+            docker-compose stop
 
     - store_test_results:
         name: Collect test results

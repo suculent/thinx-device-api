@@ -46,8 +46,7 @@ ENV SNYK_TOKEN=${SNYK_TOKEN}
 
 WORKDIR /opt/thinx/thinx-device-api
 
-RUN npm install -g npm@8.4.1 \
-    && npm install --unsafe-perm . --only-prod
+RUN npm install --unsafe-perm . --only-prod
 
 #    npm audit fix # fails because of unfixable vulnerabilities
 # && npm audit fix --force # fails because of unfixable vulnerabilities
