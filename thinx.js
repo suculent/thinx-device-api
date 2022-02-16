@@ -83,7 +83,7 @@ let auth = new Auth();
 const serviceMQAccount = "thinx-api-mqtt-account";
 const serviceMQPassword = "thinx-api-mqtt-account"; // randomized password on each service restart
 auth.add_mqtt_credentials(serviceMQAccount, serviceMQPassword, () => {
-  app.messenger = Messenger().getInstance(serviceMQPassword); // take singleton to prevent double initialization
+  app.messenger = Messenger(serviceMQPassword).getInstance(); // take singleton to prevent double initialization
 });
 
 const ACL = require('./lib/thinx/acl.js');
