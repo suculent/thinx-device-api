@@ -790,7 +790,7 @@ if (isMasterProcess()) {
 
   // MQTT Messenger/listener
   console.log("[info] Initializing messenger...");
-  app.messenger.init();
+  app.messenger.init(serviceMQPassword); // this is intentionally delayed, do not integrate into getInstance()!
 
   setTimeout(startup_quote, 10000); // wait for Slack init only once
 }
