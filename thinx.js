@@ -94,7 +94,7 @@ if ((process.env.ENVIRONMENT === "test") || (process.env.ENVIRONMENT === "circle
 console.log("Initializing MQTT with password", serviceMQPassword); // intentional logging for administrative/testing purposes
 auth.add_mqtt_credentials(serviceMQAccount, serviceMQPassword, () => {
   console.log("MQTT credentials refresh complete, initializing Messenger");
-  app.messenger = new Messenger(serviceMQPassword).getInstance(serviceMQPassword); // take singleton to prevent double initialization
+  app.messenger = new Messenger(serviceMQPassword); // take singleton to prevent double initialization
 });
 
 const ACL = require('./lib/thinx/acl.js');
