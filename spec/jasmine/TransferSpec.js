@@ -4,7 +4,7 @@ describe("Transfer", function () {
   var envi = require("../_envi.json");
   
   var Messenger = require('../../lib/thinx/messenger');
-  var messenger = new Messenger().getInstance();
+  var messenger = new Messenger("mosquitto").getInstance("mosquitto");
 
   var Transfer = require("../../lib/thinx/transfer");
   var transfer = new Transfer(messenger);
