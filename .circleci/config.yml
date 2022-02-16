@@ -240,6 +240,7 @@ jobs:
           chmod -R 666 ./services/couchdb/*
           docker-compose up -d --build couchdb
           docker-compose up --build api
+          docker-compose logs --timestamp api
           timeout 600 docker-compose logs -f --timestamp api
           echo "###### > Tailing completed, stopping job."
           date
@@ -248,17 +249,17 @@ jobs:
     - run:
         name: Allow inspecting MQTT logs after failed connections
         command: |
-            docker-compose logs mosquitto
+            docker-compose logs --timestamp mosquitto
 
     - run:
         name: Allow inspecting CouchDB logs after failed connections
         command: |
-            docker-compose logs couchdb
+            docker-compose logs --timestamp couchdb
 
     - run:
         name: Allow inspecting Transformer logs after failed connections
         command: |
-            docker-compose logs transformer
+            docker-compose logs --timestamp transformer
 
     - run:
         name: Check running Docker containers

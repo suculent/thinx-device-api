@@ -80,8 +80,12 @@ console.log("[info] Loaded module: Messenger");
 const Messenger = require("./lib/thinx/messenger");
 const Auth = require('./lib/thinx/auth.js');
 let auth = new Auth();
-const serviceMQAccount = "thinx-api-mqtt-account";
-const serviceMQPassword = crypto.randomBytes(48).toString('base64url'); // randomized password on each service restart
+const serviceMQAccount = "thinx";
+let serviceMQPassword = crypto.randomBytes(48).toString('base64url'); // randomized password on each service restart
+if ((process.env.ENVIRONMENT === "test") || (process.env.ENVIRONMENT === "circleci")) {
+  serviceMQPassword = "changeme!"; // test purposes only; to align with REDIS_PASSWORD variable set on CCI
+}
+
 console.log("Initializing MQTT with password", serviceMQPassword); // intentional logging for administrative/testing purposes
 auth.add_mqtt_credentials(serviceMQAccount, serviceMQPassword, () => {
   app.messenger = Messenger(serviceMQPassword).getInstance(serviceMQPassword); // take singleton to prevent double initialization
