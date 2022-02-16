@@ -772,89 +772,9 @@ function isMasterProcess() {
   return true; // should be actually `cluster.isMaster();`
 }
 
-function reporter(success, key /* key is returned only for testing */) {
-  if (success) {
-    console.log("Restored Default MQTT Key...");
-  } else {
-    console.log("Error with key:", key);
-  }
-}
-
-function restore_owner_credentials(owner_id, dmk_callback) {
-  devicelib.view("devicelib", "devices_by_owner", {
-    "key": owner_id,
-    "include_docs": false
-  },
-    (err, device) => {
-      if (err) {
-        console.log("list error: " + err);
-        if ((err.toString().indexOf("Error: missing") !== -1) && typeof (callback) !== "undefined") {
-          dmk_callback(false, "none");
-        }
-        console.log("restore_owner_credentials: Error: " + err.toString());
-        return;
-      }
-
-      console.log("DEVICE: " + JSON.stringify(device, false, 2));
-
-      // Get source keys
-      const source_id = "ak:" + owner_id;
-      var default_mqtt_key = null;
-
-      redis_client.get(source_id, function (err1, json_keys) {
-        if (err1) {
-          console.log(err1);
-          dmk_callback(false, err1);
-          return;
-        }
-        var json_array = JSON.parse(json_keys);
-
-        if (json_array == null) {
-          console.log("No keys for? " + source_id);
-          return;
-        }
-
-        for (var ai in json_array) {
-          var item = json_array[ai];
-          /* we would have to fetch whole owner doc to know this
-          if (item.hash == last_key_hash) {
-            console.log("DR LK: "+JSON.stringify(item));
-            last_key = last_key_hash;
-          }*/
-          if (item.alias == "Default MQTT API Key") {
-            default_mqtt_key = item.key;
-            console.log("DR DK: " + JSON.stringify(item.hash));
-            auth.add_mqtt_credentials(device._id, item.key);
-          } else {
-            console.log("DR AK: " + JSON.stringify(item.hash));
-            auth.add_mqtt_credentials(device._id, item.key);
-          }
-        }
-        console.log("DEFAULT CREDS: ", { owner_id }, { default_mqtt_key });
-        auth.add_mqtt_credentials(owner_id, default_mqtt_key);
-        dmk_callback(true, default_mqtt_key);
-      });
-    });
-}
-
-function setup_restore_owners_credentials(query) {
-  userlib.get(query, (err, body) => {
-    if (err) {
-      console.log("DR ERR: " + err);
-      return;
-    }
-    for (var owner_doc of body.rows) {
-      var owner_id = owner_doc.id;
-      if (owner_id.indexOf("design")) continue;
-      console.log("Restoring credentials for owner " + owner_id);
-      restore_owner_credentials(owner_id, (reporter));
-    }
-  });
-}
-
 function startup_quote() {
   if ((typeof (process.env.ENTERPRISE) === "undefined") || (process.env.ENTERPRISE === false)) {
-    messenger.sendRandomQuote();
+    app.messenger.sendRandomQuote();
   }
 }
 
@@ -865,7 +785,7 @@ if (isMasterProcess()) {
 
   // MQTT Messenger/listener
   console.log("[info] Initializing messenger...");
-  messenger.init();
+  app.messenger.init();
 
   setTimeout(startup_quote, 10000); // wait for Slack init only once
 }
