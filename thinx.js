@@ -76,14 +76,15 @@ try {
 
 // Default ACLs and MQTT Password
 
-console.log("Loaded module: Messenger");
+console.log("[info] Loaded module: Messenger");
 const Messenger = require("./lib/thinx/messenger");
 const Auth = require('./lib/thinx/auth.js');
 let auth = new Auth();
 const serviceMQAccount = "thinx-api-mqtt-account";
-const serviceMQPassword = "thinx-api-mqtt-account"; // randomized password on each service restart
+const serviceMQPassword = crypto.randomBytes(48).toString('base64url'); // randomized password on each service restart
+console.log("Initializing MQTT with password", serviceMQPassword); // intentional logging for administrative/testing purposes
 auth.add_mqtt_credentials(serviceMQAccount, serviceMQPassword, () => {
-  app.messenger = Messenger(serviceMQPassword).getInstance(); // take singleton to prevent double initialization
+  app.messenger = Messenger(serviceMQPassword).getInstance(serviceMQPassword); // take singleton to prevent double initialization
 });
 
 const ACL = require('./lib/thinx/acl.js');
@@ -118,7 +119,7 @@ var nano = require("nano")(app_config.database_uri);
 
 function initDatabases(dbprefix) {
 
-  console.log("Initializing databases...");
+  console.log("[info] Initializing databases...");
 
   function null_cb(err, body, header) {
     // only unexpected errors should be logged
@@ -140,6 +141,7 @@ function initDatabases(dbprefix) {
     var couch = nano.db.use(dbprefix + "managed_devices");
     injectDesign(couch, "devicelib", "./design/design_deviceslib.json");
     injectReplFilter(couch, "./design/filters_devices.json");
+    console.log("[info] managed_devices db is ready now.");
   });
 
   nano.db.create(dbprefix + "managed_builds", function (err/* , body, header */) {
@@ -149,6 +151,7 @@ function initDatabases(dbprefix) {
     var couch = nano.db.use(dbprefix + "managed_builds");
     injectDesign(couch, "builds", "./design/design_builds.json");
     injectReplFilter(couch, "./design/filters_builds.json");
+    console.log("[info] managed_builds db is ready now.");
   });
 
   nano.db.create(dbprefix + "managed_users", function (err/* , body, header */) {
@@ -158,6 +161,7 @@ function initDatabases(dbprefix) {
     var couch = nano.db.use(dbprefix + "managed_users");
     injectDesign(couch, "users", "./design/design_users.json");
     injectReplFilter(couch, "./design/filters_users.json");
+    console.log("[info] managed_users db is ready now.");
   });
 
   nano.db.create(dbprefix + "managed_logs", function (err/* , body, header */) {
@@ -167,10 +171,9 @@ function initDatabases(dbprefix) {
     var couch = nano.db.use(dbprefix + "managed_logs");
     injectDesign(couch, "logs", "./design/design_logs.json");
     injectReplFilter(couch, "./design/filters_logs.json");
+    console.log("[info] managed_logs db is ready now.");
 
   });
-
-  console.log("Initializing databases almost completed, waiting for callbacks.");
 }
 
 initDatabases(prefix);
@@ -178,21 +181,19 @@ initDatabases(prefix);
 var devicelib = require("nano")(app_config.database_uri).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
 var userlib = require("nano")(app_config.database_uri).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
 
-console.log("Loaded module: Statistics");
+console.log("[info] Loaded module: Statistics");
 var Stats = require("./lib/thinx/statistics");
 var stats = new Stats();
 //stats.get_all_owners(); FIXME: init all owners on boot... measure!
 
-
-
-console.log("Loaded module: Repository Watcher");
+console.log("[info] Loaded module: Repository Watcher");
 var Repository = require("./lib/thinx/repository");
 
 var Builder = require("./lib/thinx/builder");
-console.log("Loaded module: BuildServer");
+console.log("[info] Loaded module: BuildServer");
 var builder = new Builder();
 
-console.log("Loaded module: Queue");
+console.log("[info] Loaded module: Queue");
 var Queue = require("./lib/thinx/queue");
 var queue = new Queue(builder);
 queue.cron(); // starts cron job for build queue from webhooks
@@ -204,7 +205,7 @@ var Owner = require("./lib/thinx/owner");
 
 function purgeOldUsers() {
   if ((typeof (app_config.strict_gdpr) !== "undefined") && app_config.strict_gdpr === false) {
-    console.log("Not purging inactive users today.");
+    console.log("[info] Not purging inactive users today.");
     return;
   }
   if (process.env.ENVIRONMENT === "test") {
@@ -502,7 +503,7 @@ let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function 
   console.log("[info] HTTP API started on port", app_config.port);
   let end_timestamp = new Date().getTime() - start_timestamp;
   let seconds = Math.ceil(end_timestamp / 1000);
-  console.log("[debug] Startup phase took: ", seconds, "seconds");
+  console.log("[debug] Startup phase took:", seconds, "seconds");
 });
 
 var read = require('fs').readFileSync;
@@ -512,7 +513,7 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   let sslvalid = false;
 
   if (!fs.existsSync(app_config.ssl_ca)) {
-    const message = "[WARNING] Did not find app_config.ssl_ca file, websocket logging will fail...";
+    const message = "[warning] Did not find app_config.ssl_ca file, websocket logging will fail...";
     rollbar.warn(message);
     console.log(message);
   }
@@ -520,12 +521,12 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
   let caCert = read(app_config.ssl_ca, 'utf8');
   let ca = pki.certificateFromPem(caCert);
   let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
-  console.log("» Loaded SSL certificate.");
+  console.log("[info] Loaded SSL certificate.");
 
   try {
     sslvalid = ca.verify(client);
   } catch (err) {
-    console.log("Certificate verification failed: ", err);
+    console.log("[error] Certificate verification failed: ", err);
   }
 
   if (sslvalid) {
@@ -535,10 +536,10 @@ if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert)))
       ca: read(app_config.ssl_ca, 'utf8'),
       NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
     };
-    console.log("» Starting HTTPS server on " + app_config.secure_port + "...");
+    console.log("[info] Starting HTTPS server on " + app_config.secure_port + "...");
     https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
   } else {
-    console.log("» SSL certificate loading or verification FAILED! Check your configuration!");
+    console.log("[error] SSL certificate loading or verification FAILED! Check your configuration!");
   }
 
 } else {
