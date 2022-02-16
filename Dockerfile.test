@@ -71,11 +71,8 @@ RUN apt-get update -qq && \
     gnutls-bin \
     iptables \
     lxc \
-    mosquitto \
-    mercurial \
     pigz \
     python \
-    python-pip \
     xfsprogs \
     xz-utils \
     net-tools \
@@ -89,11 +86,10 @@ RUN apt-get update -qq && \
 # Install app dependencies
 COPY package.json ./
 
-RUN npm update \
- && npm install .
-
 # Test modules
-RUN npm install nyc mocha jasmine mocha-lcov-reporter coveralls -g
+RUN npm install nyc mocha jasmine mocha-lcov-reporter coveralls npm@8.4.1 -g
+
+RUN npm install .
 
 VOLUME /var/lib/docker
 

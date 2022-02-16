@@ -33,14 +33,18 @@ echo "140.82.121.3 github.com" >> /etc/hosts
 ssh -tt -o "StrictHostKeyChecking=no" git@github.com
 
 if [[ ! -z $ROLLBAR_ACCESS_TOKEN ]]; then
+  if [[ -z $ROLLBAR_ENVIRONMENT ]]; then
+    ROLLBAR_ENVIRONMENT="dev"
+  fi
   LOCAL_USERNAME=$(whoami)
+  echo "Starting Rollbar deploy..."
   curl --silent https://api.rollbar.com/api/1/deploy/ \
     -F access_token=$ROLLBAR_ACCESS_TOKEN \
     -F environment=$ROLLBAR_ENVIRONMENT \
     -F revision=$REVISION \
     -F local_username=$LOCAL_USERNAME 
     # > /dev/null
-  echo ""
+  # echo ""
 else
   echo "[thinx-entrypoint] Skipping Rollbar deployment, ROLLBAR_ACCESS_TOKEN not defined... [${ROLLBAR_ACCESS_TOKEN}]"
 fi
@@ -56,9 +60,11 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   chmod +x ./cc-test-reporter
   # ./cc-test-reporter before-build
-  # echo "[thinx-entrypoint] TEST starting app as first run (create DB and stuff)..."
+  echo "[thinx-entrypoint] TEST starting app as first run (create DB and stuff)..."
   set +e # prevent exit on timeout
+  date
   timeout 60 node thinx.js # container must wait much longer for test to complete
+  date
   set -e # exit immediately on error
   echo "[thinx-entrypoint] TEST running suites..."
   npm run test # | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
@@ -82,5 +88,7 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
 
 else
   echo "[thinx-entrypoint] Starting in production mode..."
+  # tee is used to split pipe with application logs back to file which
+  # is observed by the app. this way the app can map own incidents in log-flow actively
   node thinx.js | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
 fi

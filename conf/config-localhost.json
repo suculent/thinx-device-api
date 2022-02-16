@@ -15,11 +15,7 @@
   },
   "mqtt": {
     "server": "mqtt://mosquitto",
-    "port": 1883,
-    "passwords": "/mnt/data/mosquitto/auth/thinx.pw",
-    "acl": "/mnt/data/mosquitto/auth/thinx.acl",
-    "password": "mosquitto",
-    "username": "thinx"
+    "port": 1883
   },
   "rollbar_token": "",
   "database_uri": "http://rtmtest:rtmtest@couchdb:5984",
@@ -39,7 +35,6 @@
     "bot_token": "",
     "bot_topic": "thinx"
   },
-  "fcm_auth": null,
   "ssl_key": null,
   "ssl_cert": null,
   "client_user_agent": "THiNX-Client",

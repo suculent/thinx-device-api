@@ -12,16 +12,12 @@
   "redis": {
     "host": "thinx-redis",
     "password": "changeme!",
-    "db": 0
+    "db": 0,
+    "port": 6379
   },
   "mqtt": {
     "server": "mqtt://mosquitto",
-    "port": 1883,
-    "passwords": "/mnt/data/mosquitto/auth/thinx.pw",
-    "acl": "/mnt/data/mosquitto/auth/thinx.acl",
-    "password": "mosquitto",
-    "username": "thinx",
-    "use_plugin": true
+    "port": 1883
   },
   "slack" : {
     "client_id" : "000000000000.000000000000",
@@ -44,7 +40,6 @@
   "slack_webhook": "",
   "slack_bot_token": "",
   "slack_bot_topic": "thinx",
-  "fcm_auth": "./conf/thinx-cloud-firebase.json",
   "ssl_key": "/mnt/data/ssl/privkey.pem",
   "ssl_cert": "/mnt/data/ssl/cert.pem",
   "client_user_agent": "THiNX-Client",

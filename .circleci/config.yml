@@ -13,6 +13,7 @@ jobs:
       - checkout
       - docker/check
       - run:
+          name: Clean up artifacts
           command: |
             cd base && rm -rf ./node_modules
       - docker/build:
@@ -103,7 +104,7 @@ jobs:
 
     # In CircleCI 2.0 you can now specify your own image, or use one of our pre-configured images.
     docker:
-      - image: suculent/thinx-base-image:latest
+      - image: thinxcloud/base:latest
         auth:
           username: $DOCKER_USERNAME  # from thinx-docker-repo, docker.io
           password: $DOCKER_PUBLIC_PASSWORD  # or project environment variable reference
@@ -134,13 +135,6 @@ jobs:
 
     - checkout
 
-    # --ok allows passing build for now
-    - run:
-        name: Spectralops.io integration
-        command: |
-          curl -L "https://get.spectralops.io/api/download/get?dsn=$SPECTRAL_DSN" | sh
-          spectral scan --ok 
-
     # Restore the dependency cache
     - restore_cache:
         keys:
@@ -166,13 +160,6 @@ jobs:
           - node_modules
         key: v1-dependencies-{{ checksum "package.json" }}
 
-#    - run: 
-#        name: Update base-image
-#        command: |
-#            cd base
-#            ./update.sh
-
-
     - run:
         name: Init filesystem
         command: |
@@ -193,10 +180,21 @@ jobs:
             mkdir -p /mnt/data/test-reports
 
     - run:
-        name: Setup environment
+        name: Switch to Test Dockerfiles
         command: |
           rm -rf ./Dockerfile
           mv ./Dockerfile.test ./Dockerfile
+          rm -rf ./docker-compose.yml
+          mv ./docker-compose.test.yml ./docker-compose.yml
+          rm -rf ./services/broker/Dockerfile
+          mv ./services/broker/Dockerfile.test ./services/broker/Dockerfile
+          sed -i "s/.git//g" .dockerignore
+          echo "Creating Docker Network (ID):"
+          docker network create nat
+
+    - run:
+        name: Copy Environment variables for in-place building
+        command: |
           cp -vf ./.env.dist ./.env
           cp -vf ./.env.dist ./spec/mnt/data/conf/.env
           cp -vf ./.env ./services/broker/.env
@@ -204,19 +202,22 @@ jobs:
           cp -vf ./.env ./services/couchdb/.env
           cp -vf ./.env ./services/redis/.env
           cp -vf ./.env ./services/transformer/.env
+
+    - run:
+        name: Review configuration and environment
+        command: |
           echo "Contents of ./conf"
           ls -la ./conf
           echo "Contents of ./.env"
           cat ./.env
-          sed -i "s/changeme!/${REDIS_PASSWORD}/g" ./services/broker/test/mosquitto/conf.d/mosquitto.conf
+
+    - run:
+        name: Inject password to configuration and broker
+        command: |
+          echo "Injecting secret: ${REDIS_PASSWORD}"
+          sed -i "s/changeme!/${REDIS_PASSWORD}/g" ./services/broker/test/mosquitto/mosquitto.conf
           sed -i "s/changeme!/${REDIS_PASSWORD}/g" ./spec/mnt/data/conf/config.json
-          echo "Creating Docker Network (ID):"
-          docker network create nat
-          rm -rf ./docker-compose.yml
-          mv ./docker-compose.test.yml ./docker-compose.yml
-          rm -rf ./services/broker/Dockerfile
-          mv ./services/broker/Dockerfile.test ./services/broker/Dockerfile
-          sed -i "s/.git//g" .dockerignore
+          cp ./spec/mnt/data/conf/config.json /mnt/data/conf/config.json
 
     - run:
         name: Starting Redis
@@ -228,6 +229,7 @@ jobs:
         command: |
           docker login --username $DOCKER_LOGIN --password $DOCKER_PASSWORD https://registry.thinx.cloud:5000
           docker-compose up -d --build mosquitto
+#          timeout 10 docker-compose logs -f --timestamp mosquitto
 
     - run:
         name: Starting Transformer
@@ -254,6 +256,19 @@ jobs:
             docker network ls
             docker network inspect bridge
 
+    - store_test_results:
+        name: Collect test results
+        path: ./src/coverage
+        # The `path` key is an absolute or relative path to your working_directory containing 
+        # subdirectories of JUnit XML or Cucumber JSON test metadata files,
+        # or the path of a single file containing all test results.
+        # Make sure that your path value is not a hidden folder (example: .my_hidden_directory would be an invalid format).
+
+    - store_artifacts:
+        name: Collect coverage data
+        path: ./coverage
+        destination: jest-coverage
+
 #
 # WORKFLOWS
 #
@@ -272,27 +287,29 @@ workflows:
           context:
               - dockerhub
               - thinx-docker-repo
-          requires:
-            - build-base
+              - thinx-test
+          #requires:
+          #  - build-base
           filters:
             branches:
               only:
-                - staging
+                - base
                 - thinx-swarm
-                - master
+                - main
                 - thinxcloud
 
-      - test-api-cloud:
-          context:
-              - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
+      # - test-api-cloud:
+      #     context:
+      #         - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
       
       - build-console-cloud:
           context:
             - thinx-docker-repo
+            - console
           filters:
             branches:
               only:
@@ -304,14 +321,16 @@ workflows:
           filters:
             branches:
               only:
-                - thinxcloud
-
+                - base
+                #- thinxcloud
+                #- thinx-swarm
 
       - build-api-cloud:
           context:
             - dockerhub
             - SonarCloud
           requires:
+            #- test-api-cloud
             - test
           filters:
             branches:
