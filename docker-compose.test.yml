@@ -20,15 +20,8 @@ services:
       - traefik.backend.mosquitto.noexpose
   couchdb:
     env_file: .env
-    build: ./services/couchdb
+    image: 'couchdb:3.1.0' # downgraded to currently running production
     restart: unless-stopped
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - 'curl -XGET http://localhost:5984'
-      interval: 10s
-      timeout: 50s
-      retries: 5
     environment:
       - 'NODENAME=${NODENAME}'
       - 'COUCHDB_USER=${COUCHDB_USER}'
@@ -46,12 +39,7 @@ services:
     env_file: .env
     networks:
       - internal
-    build:
-      context: ./services/redis
-      args:
-        - ALLOW_EMPTY_PASSWORD=no
-        - 'REDIS_PASSWORD=${REDIS_PASSWORD}'
-        - 'REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL'
+    image: thinxcloud/redis
     command:
       - redis-server
       - '--requirepass'
@@ -70,14 +58,7 @@ services:
   transformer:
     env_file: .env
     user: transformer
-    build:
-      context: ./services/transformer
-      args:
-        - 'SQREEN_APP_NAME=${SQREEN_APP_NAME}'
-        - 'SQREEN_TOKEN=${SQREEN_TOKEN}'
-        - 'ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}'
-        - 'ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}'
-        - REVISION=1
+    image: thinxcloud/transformer
     restart: unless-stopped
     environment:
       - 'SQREEN_APP_NAME=${SQREEN_APP_NAME}'

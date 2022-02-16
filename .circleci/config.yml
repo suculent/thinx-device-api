@@ -221,24 +221,33 @@ jobs:
         name: Starting Redis
         command: |
           docker-compose up -d --build thinx-redis
+          docker-compose logs --timestamp thinx-redis
 
     - run:
         name: Starting Mosquitto
         command: |
           docker login --username $DOCKER_LOGIN --password $DOCKER_PASSWORD https://registry.thinx.cloud:5000
           docker-compose up -d --build mosquitto
+          docker-compose logs --timestamp mosquitto
 
     - run:
         name: Starting Transformer
         command: |
           docker-compose up -d --build transformer
+          docker-compose logs --timestamp transformer
 
     - run:
-        name: Starting CouchDB and API Test
+        name: Starting CouchDB
         command: |
           export ENVIRONMENT=test
           chmod -R 666 ./services/couchdb/*
           docker-compose up -d --build couchdb
+          docker-compose logs --timestamp couchdb
+
+    - run:
+        name: Starting API Test
+        command: |
+          export ENVIRONMENT=test
           docker-compose up --build api
           docker-compose logs --timestamp api
           timeout 600 docker-compose logs -f --timestamp api
