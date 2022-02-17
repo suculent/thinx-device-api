@@ -8,7 +8,7 @@
 | alpine-gulp  | published | THiNX | OK
 | base         | published | THiNX | Tested 192 dependencies for known issues, found 165 issues.
 | broker       | published | OSS   | Tested 100 dependencies for known issues, found 73 issues in vendor base image.
-| console      | custom-built | User | needs custom build, prefixed using `thinx/` which is private namespace; currently fails on primordials
+| console      | custom-built | User | needs custom build, prefixed using `thinx/` which is private namespace
 | couchdb      | published | OSS   | Tested 134 dependencies for known issues, found 92 issues in vendor base image. 
 | redis        | published | OSS   | Tested 92 dependencies for known issues, found 69 issues in vendor base image.
 | transformer  | published | THiNX | OK
