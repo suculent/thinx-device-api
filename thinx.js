@@ -10,17 +10,18 @@ console.log("===================================================================
 console.log("                 CUT LOGS HERE >>> SERVICE RESTARTED ");
 console.log("========================================================================");
 
+// EXTRACT -->
 /*
  * Bootstrap banner section
  */
 
 var package_info = require("./package.json");
-var product = package_info.description;
-var version = package_info.version;
 
 console.log("");
-console.log("-=[ ☢ " + product + " v" + version + " ☢ ]=-");
+console.log("-=[ ☢ " + package_info.description + " v" + package_info.version + " ☢ ]=-");
 console.log("");
+
+// EXTRACT <--
 
 const Globals = require("./lib/thinx/globals.js"); // static only!
 const Sanitka = require("./lib/thinx/sanitka.js");
@@ -37,9 +38,9 @@ if (Globals.use_sqreen()) {
   }
 }
 
-const express = require("express");
 
 // App
+const express = require("express");
 const app = express();
 app.disable('x-powered-by');
 
@@ -71,6 +72,8 @@ var session_config = require(CONFIG_ROOT + "/node-session.json");
 var app_config = Globals.app_config();
 var prefix = Globals.prefix();
 var rollbar = Globals.rollbar(); // lgtm [js/unused-local-variable]
+
+// TODO: Reuse redis client for auth?
 var redis_client = redis.createClient(Globals.redis_options());
 try {
   redis_client.bgsave();
@@ -90,10 +93,12 @@ const Messenger = require("./lib/thinx/messenger");
 const Auth = require('./lib/thinx/auth.js');
 let auth = new Auth();
 if ((process.env.ENVIRONMENT === "test") || (process.env.ENVIRONMENT === "circleci")) {
-  serviceMQPassword = "changeme!"; // test purposes only; to align with REDIS_PASSWORD variable set on CCI
+  serviceMQPassword = "mosquitto"; // test purposes only; to align with REDIS_PASSWORD variable set on CCI
 }
 
 console.log("Initializing MQTT with password", serviceMQPassword); // intentional logging for administrative/testing purposes
+
+// everything depends on this... should throw exception and allow chaining using .then()
 auth.add_mqtt_credentials(serviceMQAccount, serviceMQPassword, () => {
   console.log("MQTT credentials refresh complete, initializing Messenger");
   app.messenger = new Messenger(serviceMQPassword).getInstance(serviceMQPassword); // take singleton to prevent double initialization
@@ -212,6 +217,8 @@ auth.add_mqtt_credentials(serviceMQAccount, serviceMQPassword, () => {
 
   var Owner = require("./lib/thinx/owner");
 
+  // EXTRACT GDPR FROM HERE --->
+
   // GDPR delete when account is expired (unused for 3 months)
   // WARNING: May purge old accounts, should be way to disable this.
 
@@ -302,6 +309,7 @@ auth.add_mqtt_credentials(serviceMQAccount, serviceMQPassword, () => {
     notifyOldUsers();
   });
 
+  // <-- EXTRACT GDPR TO HERE
 
   //
   // REFACTOR: Move to database.js
@@ -767,7 +775,7 @@ auth.add_mqtt_credentials(serviceMQAccount, serviceMQPassword, () => {
   // Log aggregator
   //
 
-  // Warning, this is never called!
+  // Warning, this is never called! (as well as aggregator and compactor and startup quote?)
   function log_aggregator() {
     stats.aggregate();
     console.log("» Aggregation jobs completed.");
