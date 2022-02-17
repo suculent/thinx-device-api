@@ -20,7 +20,6 @@ RUN apt-get update -qq && \
     gnutls-bin \
     iptables \
     lxc \
-    mosquitto \
     pigz \
     python \
     openssh-client \
@@ -51,6 +50,6 @@ WORKDIR /opt/thinx/thinx-device-api
 COPY ./package.json ./
 COPY .snyk ./.snyk
 
-# Install and fix
+# Install latest npm
 
-RUN npm install --only-prod
+RUN npm install -g npm@8.5.0

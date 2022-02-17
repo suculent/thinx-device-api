@@ -99,10 +99,8 @@ jobs:
             --build-arg REVISION=$(git describe --abbrev=0) \
           tag: 'swarm'
   
-  # this is deprecated (does not authenticate against docker.io for the base thinx image fetch)
   test:
 
-    # In CircleCI 2.0 you can now specify your own image, or use one of our pre-configured images.
     docker:
       - image: thinxcloud/base:latest
         auth:
@@ -215,7 +213,7 @@ jobs:
         name: Inject password to configuration and broker
         command: |
           echo "Injecting secret: ${REDIS_PASSWORD}"
-          sed -i "s/changeme!/${REDIS_PASSWORD}/g" ./services/broker/test/mosquitto/conf.d/mosquitto.conf
+          sed -i "s/changeme!/${REDIS_PASSWORD}/g" ./services/broker/test/mosquitto/mosquitto.conf
           sed -i "s/changeme!/${REDIS_PASSWORD}/g" ./spec/mnt/data/conf/config.json
           cp ./spec/mnt/data/conf/config.json /mnt/data/conf/config.json
 
@@ -223,30 +221,53 @@ jobs:
         name: Starting Redis
         command: |
           docker-compose up -d --build thinx-redis
+          docker-compose logs --timestamp thinx-redis
 
     - run:
         name: Starting Mosquitto
         command: |
           docker login --username $DOCKER_LOGIN --password $DOCKER_PASSWORD https://registry.thinx.cloud:5000
           docker-compose up -d --build mosquitto
+          docker-compose logs --timestamp mosquitto
 
     - run:
         name: Starting Transformer
         command: |
           docker-compose up -d --build transformer
+          docker-compose logs --timestamp transformer
 
     - run:
-        name: Starting CouchDB and API Test
+        name: Starting CouchDB
         command: |
           export ENVIRONMENT=test
           chmod -R 666 ./services/couchdb/*
           docker-compose up -d --build couchdb
+          docker-compose logs --timestamp couchdb
+
+    - run:
+        name: Starting API Test
+        command: |
+          export ENVIRONMENT=test
           docker-compose up --build api
+          docker-compose logs --timestamp api
           timeout 600 docker-compose logs -f --timestamp api
           echo "###### > Tailing completed, stopping job."
           date
-          docker-compose stop
 
+    - run:
+        name: Allow inspecting MQTT logs after failed connections
+        command: |
+            docker-compose logs --timestamp mosquitto
+
+    - run:
+        name: Allow inspecting CouchDB logs after failed connections
+        command: |
+            docker-compose logs --timestamp couchdb
+
+    - run:
+        name: Allow inspecting Transformer logs after failed connections
+        command: |
+            docker-compose logs --timestamp transformer
 
     - run:
         name: Check running Docker containers
@@ -254,6 +275,20 @@ jobs:
             docker ps
             docker network ls
             docker network inspect bridge
+            docker-compose stop
+
+    - store_test_results:
+        name: Collect test results
+        path: ./coverage
+        # The `path` key is an absolute or relative path to your working_directory containing 
+        # subdirectories of JUnit XML or Cucumber JSON test metadata files,
+        # or the path of a single file containing all test results.
+        # Make sure that your path value is not a hidden folder (example: .my_hidden_directory would be an invalid format).
+
+    - store_artifacts:
+        name: Collect coverage data
+        path: ./coverage
+        destination: jest-coverage
 
 #
 # WORKFLOWS
@@ -284,17 +319,18 @@ workflows:
                 - main
                 - thinxcloud
 
-      - test-api-cloud:
-          context:
-              - thinx-docker-repo
-          filters:
-            branches:
-              only:
-                - thinx-swarm
+      # - test-api-cloud:
+      #     context:
+      #         - thinx-docker-repo
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-swarm
       
       - build-console-cloud:
           context:
             - thinx-docker-repo
+            - console
           filters:
             branches:
               only:
@@ -315,7 +351,7 @@ workflows:
             - dockerhub
             - SonarCloud
           requires:
-            - test-api-cloud
+            #- test-api-cloud
             - test
           filters:
             branches:
