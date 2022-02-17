@@ -63,7 +63,7 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   echo "[thinx-entrypoint] TEST starting app as first run (create DB and stuff)..."
   #set +e # prevent exit on timeout - changed to make test fail when app is broken
   date
-  timeout 60 node thinx.js # container must wait much longer for test to complete
+  timeout 120 node thinx.js # container must wait much longer for test to complete
   date
   #set -e # exit immediately on error
   echo "[thinx-entrypoint] TEST running suites..." 

@@ -96,699 +96,701 @@ if ((process.env.ENVIRONMENT === "test") || (process.env.ENVIRONMENT === "circle
 console.log("Initializing MQTT with password", serviceMQPassword); // intentional logging for administrative/testing purposes
 auth.add_mqtt_credentials(serviceMQAccount, serviceMQPassword, () => {
   console.log("MQTT credentials refresh complete, initializing Messenger");
-  app.messenger = new Messenger(serviceMQPassword); // take singleton to prevent double initialization
-});
-
-const ACL = require('./lib/thinx/acl.js');
-let acl = new ACL(serviceMQAccount);
-
-acl.load(() => {
-  acl.addTopic(serviceMQAccount, "readwrite", "#");
-  acl.commit();
-});
+  app.messenger = new Messenger(serviceMQPassword).getInstance(serviceMQPassword); // take singleton to prevent double initialization
 
 
-//
-// Shared Configuration
-//
+  const ACL = require('./lib/thinx/acl.js');
+  let acl = new ACL(serviceMQAccount);
 
-const hour = 3600 * 1000;
+  acl.load(() => {
+    acl.addTopic(serviceMQAccount, "readwrite", "#");
+    acl.commit();
+  });
 
-//
-// App
-//
 
-var https = require("https");
-var WebSocket = require("ws");
+  //
+  // Shared Configuration
+  //
 
-// EXTRACT TO: db.js -->
+  const hour = 3600 * 1000;
 
-/*
- * Databases
- */
+  //
+  // App
+  //
 
-var nano = require("nano")(app_config.database_uri);
+  var https = require("https");
+  var WebSocket = require("ws");
 
-function initDatabases(dbprefix) {
+  // EXTRACT TO: db.js -->
 
-  console.log("[info] Initializing databases...");
+  /*
+   * Databases
+   */
 
-  function null_cb(err, body, header) {
-    // only unexpected errors should be logged
+  var nano = require("nano")(app_config.database_uri);
+
+  function initDatabases(dbprefix) {
+
+    console.log("[info] Initializing databases...");
+
+    function null_cb(err, body, header) {
+      // only unexpected errors should be logged
+      if (process.env.ENVIRONMENT === "test") {
+        console.log(err, body, header);
+      }
+    }
+
+    // only to fix bug in CouchDB 2.3.1 first-run
+    nano.db.create("_users", null_cb);
+    nano.db.create("_stats", null_cb);
+    nano.db.create("_replicator", null_cb);
+    nano.db.create("_global_changes", null_cb);
+
+    nano.db.create(dbprefix + "managed_devices", function (err/* , body, header */) {
+      if (err) {
+        handleDatabaseErrors(err, "managed_devices");
+      }
+      var couch = nano.db.use(dbprefix + "managed_devices");
+      injectDesign(couch, "devicelib", "./design/design_deviceslib.json");
+      injectReplFilter(couch, "./design/filters_devices.json");
+      console.log("[info] managed_devices db is ready now.");
+    });
+
+    nano.db.create(dbprefix + "managed_builds", function (err/* , body, header */) {
+      if (err) {
+        handleDatabaseErrors(err, "managed_builds");
+      }
+      var couch = nano.db.use(dbprefix + "managed_builds");
+      injectDesign(couch, "builds", "./design/design_builds.json");
+      injectReplFilter(couch, "./design/filters_builds.json");
+      console.log("[info] managed_builds db is ready now.");
+    });
+
+    nano.db.create(dbprefix + "managed_users", function (err/* , body, header */) {
+      if (err) {
+        handleDatabaseErrors(err, "managed_users");
+      }
+      var couch = nano.db.use(dbprefix + "managed_users");
+      injectDesign(couch, "users", "./design/design_users.json");
+      injectReplFilter(couch, "./design/filters_users.json");
+      console.log("[info] managed_users db is ready now.");
+    });
+
+    nano.db.create(dbprefix + "managed_logs", function (err/* , body, header */) {
+      if (err) {
+        handleDatabaseErrors(err, "managed_logs");
+      }
+      var couch = nano.db.use(dbprefix + "managed_logs");
+      injectDesign(couch, "logs", "./design/design_logs.json");
+      injectReplFilter(couch, "./design/filters_logs.json");
+      console.log("[info] managed_logs db is ready now.");
+
+    });
+  }
+
+  initDatabases(prefix);
+
+  // unused: var devicelib = require("nano")(app_config.database_uri).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
+  var userlib = require("nano")(app_config.database_uri).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
+
+  console.log("[info] Loaded module: Statistics");
+  var Stats = require("./lib/thinx/statistics");
+  var stats = new Stats();
+  //stats.get_all_owners(); FIXME: init all owners on boot... measure!
+
+  console.log("[info] Loaded module: Repository Watcher");
+  var Repository = require("./lib/thinx/repository");
+
+  var Builder = require("./lib/thinx/builder");
+  console.log("[info] Loaded module: BuildServer");
+  var builder = new Builder();
+
+  console.log("[info] Loaded module: Queue");
+  var Queue = require("./lib/thinx/queue");
+  var queue = new Queue(builder);
+  queue.cron(); // starts cron job for build queue from webhooks
+
+  var Owner = require("./lib/thinx/owner");
+
+  // GDPR delete when account is expired (unused for 3 months)
+  // WARNING: May purge old accounts, should be way to disable this.
+
+  function purgeOldUsers() {
+    if ((typeof (app_config.strict_gdpr) !== "undefined") && app_config.strict_gdpr === false) {
+      console.log("[info] Not purging inactive users today.");
+      return;
+    }
     if (process.env.ENVIRONMENT === "test") {
-      console.log(err, body, header);
+      return; // no expired users in test, query will fail with "doc is null" error...
+    }
+    var d = new Date();
+    d.setMonth(d.getMonth() - 3);
+    let req = {
+      query: {
+        mindate: d
+      }
+    };
+    userlib.atomic("users", "delete_expired", req, function (error, response) {
+      if (error) {
+        console.log("Purge Old Error:", error);
+      } else {
+        console.log("Purged:", response);
+      }
+    });
+  }
+
+  function notify24(user) {
+    var d1 = new Date();
+    d1.setMonth(d1.getMonth() - 3);
+    d1.setDay(d1.getDay() - 1);
+    if (user.last_update == d1) {
+      if (typeof (user.notifiedBeforeGDPRRemoval24) === "undefined" || user.notifiedBeforeGDPRRemoval24 !== true) {
+        Owner.sendGDPRExpirationEmail24(user, user.email, function () {
+          userlib.atomic("users", "edit", owner, { notifiedBeforeGDPRRemoval24: true }, (uerror, abody) => {
+            console.log("sendGDPRExpirationEmail24", uerror, abody);
+          });
+        });
+      }
     }
   }
 
-  // only to fix bug in CouchDB 2.3.1 first-run
-  nano.db.create("_users", null_cb);
-  nano.db.create("_stats", null_cb);
-  nano.db.create("_replicator", null_cb);
-  nano.db.create("_global_changes", null_cb);
-
-  nano.db.create(dbprefix + "managed_devices", function (err/* , body, header */) {
-    if (err) {
-      handleDatabaseErrors(err, "managed_devices");
+  function notify168(user) {
+    var d2 = new Date();
+    d2.setMonth(d2.getMonth() - 3);
+    d2.setDay(d2.getDay() - 7);
+    if (user.last_update == d2) {
+      if (typeof (user.notifiedBeforeGDPRRemoval168) === "undefined" || user.notifiedBeforeGDPRRemoval168 !== true) {
+        Owner.sendGDPRExpirationEmail168(user, user.email, function () {
+          userlib.atomic("users", "edit", owner, { notifiedBeforeGDPRRemoval168: true }, (uerror, abody) => {
+            console.log("sendGDPRExpirationEmail168", uerror, abody);
+          });
+        });
+      }
     }
-    var couch = nano.db.use(dbprefix + "managed_devices");
-    injectDesign(couch, "devicelib", "./design/design_deviceslib.json");
-    injectReplFilter(couch, "./design/filters_devices.json");
-    console.log("[info] managed_devices db is ready now.");
-  });
-
-  nano.db.create(dbprefix + "managed_builds", function (err/* , body, header */) {
-    if (err) {
-      handleDatabaseErrors(err, "managed_builds");
-    }
-    var couch = nano.db.use(dbprefix + "managed_builds");
-    injectDesign(couch, "builds", "./design/design_builds.json");
-    injectReplFilter(couch, "./design/filters_builds.json");
-    console.log("[info] managed_builds db is ready now.");
-  });
-
-  nano.db.create(dbprefix + "managed_users", function (err/* , body, header */) {
-    if (err) {
-      handleDatabaseErrors(err, "managed_users");
-    }
-    var couch = nano.db.use(dbprefix + "managed_users");
-    injectDesign(couch, "users", "./design/design_users.json");
-    injectReplFilter(couch, "./design/filters_users.json");
-    console.log("[info] managed_users db is ready now.");
-  });
-
-  nano.db.create(dbprefix + "managed_logs", function (err/* , body, header */) {
-    if (err) {
-      handleDatabaseErrors(err, "managed_logs");
-    }
-    var couch = nano.db.use(dbprefix + "managed_logs");
-    injectDesign(couch, "logs", "./design/design_logs.json");
-    injectReplFilter(couch, "./design/filters_logs.json");
-    console.log("[info] managed_logs db is ready now.");
-
-  });
-}
-
-initDatabases(prefix);
-
-var devicelib = require("nano")(app_config.database_uri).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
-var userlib = require("nano")(app_config.database_uri).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
-
-console.log("[info] Loaded module: Statistics");
-var Stats = require("./lib/thinx/statistics");
-var stats = new Stats();
-//stats.get_all_owners(); FIXME: init all owners on boot... measure!
-
-console.log("[info] Loaded module: Repository Watcher");
-var Repository = require("./lib/thinx/repository");
-
-var Builder = require("./lib/thinx/builder");
-console.log("[info] Loaded module: BuildServer");
-var builder = new Builder();
-
-console.log("[info] Loaded module: Queue");
-var Queue = require("./lib/thinx/queue");
-var queue = new Queue(builder);
-queue.cron(); // starts cron job for build queue from webhooks
-
-var Owner = require("./lib/thinx/owner");
-
-// GDPR delete when account is expired (unused for 3 months)
-// WARNING: May purge old accounts, should be way to disable this.
-
-function purgeOldUsers() {
-  if ((typeof (app_config.strict_gdpr) !== "undefined") && app_config.strict_gdpr === false) {
-    console.log("[info] Not purging inactive users today.");
-    return;
   }
-  if (process.env.ENVIRONMENT === "test") {
-    return; // no expired users in test, query will fail with "doc is null" error...
-  }
-  var d = new Date();
-  d.setMonth(d.getMonth() - 3);
-  let req = {
-    query: {
-      mindate: d
+
+  function notifyOldUsers() {
+    // Should send an e-mail once a day
+    // Must parse all users, find users with expiration
+
+    if ((typeof (app_config.strict_gdpr) !== "undefined") && app_config.strict_gdpr === false) {
+      console.log("Notification for old users skipped. Enable with strict_gdpr = true in config.json");
+      return;
     }
-  };
-  userlib.atomic("users", "delete_expired", req, function (error, response) {
-    if (error) {
-      console.log("Purge Old Error:", error);
+
+    userlib.view("users", "owners_by_username", {
+      "key": username,
+      "include_docs": true
+    }).then((user_view_body) => {
+      for (var index in user_view_body.rows) {
+        let user = user_view_body.rows[index];
+        notify24(user);
+        notify168(user);
+      }
+    }).catch((err) => {
+      console.log(err);
+    });
+  }
+
+  var cron_rule_15_min = "*/15 * * * *";
+  schedule.scheduleJob(cron_rule_15_min, () => {
+    purgeOldUsers();
+  });
+
+  var cron_rule_daily = "0 8 * * *"; // daily 8 am
+  schedule.scheduleJob(cron_rule_daily, () => {
+    notifyOldUsers();
+  });
+
+
+  //
+  // REFACTOR: Move to database.js
+  //
+
+  // Database preparation on first run
+  function getDocument(file) {
+    if (!fs.existsSync(file)) {
+      return false;
+    }
+    const data = fs.readFileSync(file);
+    if (typeof (data) === "undefined") {
+      console.log("» [getDocument] no data read.");
+      return false;
+    }
+    // Parser may fail
+    try {
+      return JSON.parse(data);
+    } catch (e) {
+      console.log("» Document File may not exist: " + e);
+      return false;
+    }
+  }
+
+  function logCouchError(err, body, header, tag) {
+    if (err !== null) {
+      if (err.toString().indexOf("conflict") === -1) {
+        console.log("[error] Couch Init error: ", err, body, header, tag);
+      }
+      if (err.toString().indexOf("ENOTFOUND") !== -1) {
+        console.log("Critical DB integration error, exiting.");
+        process.exit(1);
+      }
     } else {
-      console.log("Purged:", response);
+      return;
     }
-  });
-}
+    if (typeof (body) !== "undefined") {
+      console.log("[error] Log Couch Insert body: " + body + " " + tag);
+    }
+    if (typeof (header) !== "undefined") {
+      console.log("[error] Log Couchd Insert header: " + header + " " + tag);
+    }
+  }
 
-function notify24(user) {
-  var d1 = new Date();
-  d1.setMonth(d1.getMonth() - 3);
-  d1.setDay(d1.getDay() - 1);
-  if (user.last_update == d1) {
-    if (typeof (user.notifiedBeforeGDPRRemoval24) === "undefined" || user.notifiedBeforeGDPRRemoval24 !== true) {
-      Owner.sendGDPRExpirationEmail24(user, user.email, function () {
-        userlib.atomic("users", "edit", owner, { notifiedBeforeGDPRRemoval24: true }, (uerror, abody) => {
-          console.log("sendGDPRExpirationEmail24", uerror, abody);
-        });
+  function injectDesign(couch, design, file) {
+    if (typeof (design) === "undefined") return;
+    let design_doc = getDocument(file);
+    if (design_doc != null) {
+      couch.insert(design_doc, "_design/" + design, (err, body, header) => {
+        logCouchError(err, body, header, "init:design:" + JSON.stringify(design)); // returns if no err
       });
+    } else {
+      console.log("[error] Design doc injection issue at " + file);
     }
   }
-}
 
-function notify168(user) {
-  var d2 = new Date();
-  d2.setMonth(d2.getMonth() - 3);
-  d2.setDay(d2.getDay() - 7);
-  if (user.last_update == d2) {
-    if (typeof (user.notifiedBeforeGDPRRemoval168) === "undefined" || user.notifiedBeforeGDPRRemoval168 !== true) {
-      Owner.sendGDPRExpirationEmail168(user, user.email, function () {
-        userlib.atomic("users", "edit", owner, { notifiedBeforeGDPRRemoval168: true }, (uerror, abody) => {
-          console.log("sendGDPRExpirationEmail168", uerror, abody);
-        });
+  function injectReplFilter(couch, file) {
+    let filter_doc = getDocument(file);
+    if (filter_doc !== false) {
+      couch.insert(filter_doc, "_design/repl_filters", (err, body, header) => {
+        logCouchError(err, body, header, "init:repl:" + JSON.stringify(filter_doc)); // returns if no err
       });
+    } else {
+      console.log("[error] Filter doc injection issue (no doc) at " + file);
     }
   }
-}
 
-function notifyOldUsers() {
-  // Should send an e-mail once a day
-  // Must parse all users, find users with expiration
-
-  if ((typeof (app_config.strict_gdpr) !== "undefined") && app_config.strict_gdpr === false) {
-    console.log("Notification for old users skipped. Enable with strict_gdpr = true in config.json");
-    return;
-  }
-
-  userlib.view("users", "owners_by_username", {
-    "key": username,
-    "include_docs": true
-  }).then((user_view_body) => {
-    for (var index in user_view_body.rows) {
-      let user = user_view_body.rows[index];
-      notify24(user);
-      notify168(user);
+  function handleDatabaseErrors(err, name) {
+    if (err.toString().indexOf("the file already exists") !== -1) {
+      // silently fail, this is ok
+    } else if (err.toString().indexOf("error happened") !== -1) {
+      console.log("[CRITICAL] 🚫 Database connectivity issue. " + err.toString() + " URI: " + app_config.database_uri);
+      // give some time for DB to wake up until next try, also prevents too fast restarts...
+      setTimeout(function () {
+        process.exit(1);
+      }, 10000);
+    } else {
+      console.log("[CRITICAL] 🚫 Database " + name + " creation failed. " + err + " URI: " + app_config.database_uri);
+      setTimeout(function () {
+        process.exit(2);
+      }, 10000);
     }
-  }).catch((err) => {
-    console.log(err);
-  });
-}
-
-var cron_rule_15_min = "*/15 * * * *";
-schedule.scheduleJob(cron_rule_15_min, () => {
-  purgeOldUsers();
-});
-
-var cron_rule_daily = "0 8 * * *"; // daily 8 am
-schedule.scheduleJob(cron_rule_daily, () => {
-  notifyOldUsers();
-});
-
-
-//
-// REFACTOR: Move to database.js
-//
-
-// Database preparation on first run
-function getDocument(file) {
-  if (!fs.existsSync(file)) {
-    return false;
   }
-  const data = fs.readFileSync(file);
-  if (typeof (data) === "undefined") {
-    console.log("» [getDocument] no data read.");
-    return false;
-  }
-  // Parser may fail
-  try {
-    return JSON.parse(data);
-  } catch (e) {
-    console.log("» Document File may not exist: " + e);
-    return false;
-  }
-}
 
-function logCouchError(err, body, header, tag) {
-  if (err !== null) {
-    if (err.toString().indexOf("conflict") === -1) {
-      console.log("[error] Couch Init error: ", err, body, header, tag);
+  const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
+  const blog = new Buildlog();
+
+  // Starts Git Webhook Server
+  const watcher = new Repository(queue);
+
+  /* Legacy Webhook Server, kept for backwards compatibility, will deprecate. */
+  /* POST URL `http://<THINX_HOSTNAME>:9002/` changes to `https://<THINX_HOSTNAME>/githook` */
+
+  function fail_on_invalid_git_headers(req) {
+    if (typeof (req.headers["X-GitHub-Event"]) !== "undefined") {
+      if ((req.headers["X-GitHub-Event"] != "push")) {
+        res.status(200).end("Accepted");
+        return false; // do not fail
+      }
     }
-    if (err.toString().indexOf("ENOTFOUND") !== -1) {
-      console.log("Critical DB integration error, exiting.");
-      process.exit(1);
-    }
-  } else {
-    return;
+    return true; // fail
   }
-  if (typeof (body) !== "undefined") {
-    console.log("[error] Log Couch Insert body: " + body + " " + tag);
-  }
-  if (typeof (header) !== "undefined") {
-    console.log("[error] Log Couchd Insert header: " + header + " " + tag);
-  }
-}
 
-function injectDesign(couch, design, file) {
-  if (typeof (design) === "undefined") return;
-  let design_doc = getDocument(file);
-  if (design_doc != null) {
-    couch.insert(design_doc, "_design/" + design, (err, body, header) => {
-      logCouchError(err, body, header, "init:design:" + JSON.stringify(design)); // returns if no err
+  // file deepcode ignore UseCsurfForExpress: API cannot use CSRF
+  const hook_server = express();
+  hook_server.disable('x-powered-by');
+  if (typeof (app_config.webhook_port) !== "undefined") {
+    http.createServer(hook_server).listen(app_config.webhook_port, "0.0.0.0", function () {
+      console.log("[info] Webhook API started on port", app_config.webhook_port);
     });
-  } else {
-    console.log("[error] Design doc injection issue at " + file);
-  }
-}
+    hook_server.use(express.json({
+      limit: "2mb",
+      strict: false
+    }));
+    hook_server.use(express.urlencoded({ extended: false }));
 
-function injectReplFilter(couch, file) {
-  let filter_doc = getDocument(file);
-  if (filter_doc !== false) {
-    couch.insert(filter_doc, "_design/repl_filters", (err, body, header) => {
-      logCouchError(err, body, header, "init:repl:" + JSON.stringify(filter_doc)); // returns if no err
-    });
-  } else {
-    console.log("[error] Filter doc injection issue (no doc) at " + file);
-  }
-}
-
-function handleDatabaseErrors(err, name) {
-  if (err.toString().indexOf("the file already exists") !== -1) {
-    // silently fail, this is ok
-  } else if (err.toString().indexOf("error happened") !== -1) {
-    console.log("[CRITICAL] 🚫 Database connectivity issue. " + err.toString() + " URI: " + app_config.database_uri);
-    // give some time for DB to wake up until next try, also prevents too fast restarts...
-    setTimeout(function () {
-      process.exit(1);
-    }, 10000);
-  } else {
-    console.log("[CRITICAL] 🚫 Database " + name + " creation failed. " + err + " URI: " + app_config.database_uri);
-    setTimeout(function () {
-      process.exit(2);
-    }, 10000);
-  }
-}
-
-const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
-const blog = new Buildlog();
-
-// Starts Git Webhook Server
-const watcher = new Repository(queue);
-
-/* Legacy Webhook Server, kept for backwards compatibility, will deprecate. */
-/* POST URL `http://<THINX_HOSTNAME>:9002/` changes to `https://<THINX_HOSTNAME>/githook` */
-
-function fail_on_invalid_git_headers(req) {
-  if (typeof (req.headers["X-GitHub-Event"]) !== "undefined") {
-    if ((req.headers["X-GitHub-Event"] != "push")) {
+    hook_server.post("/", function (req, res) {
+      // From GitHub, exit on non-push events prematurely
+      if (fail_on_invalid_git_headers(req)) return;
+      // do not wait for response, may take ages
       res.status(200).end("Accepted");
-      return false; // do not fail
-    }
+      console.log("[info] Hook process started...");
+      watcher.process_hook(req.body);
+      console.log("[info] Hook process completed.");
+    }); // end of Legacy Webhook Server; will deprecate after reconfiguring all instances or if no webhook_port is defined
   }
-  return true; // fail
-}
 
-// file deepcode ignore UseCsurfForExpress: API cannot use CSRF
-const hook_server = express();
-hook_server.disable('x-powered-by');
-if (typeof (app_config.webhook_port) !== "undefined") {
-  http.createServer(hook_server).listen(app_config.webhook_port, "0.0.0.0", function () {
-    console.log("[info] Webhook API started on port", app_config.webhook_port);
-  });
-  hook_server.use(express.json({
+  // DI
+  app.builder = builder;
+  app.queue = queue;
+
+
+  // Redis
+  let connect_redis = require("connect-redis");
+  var RedisStore = connect_redis(session);
+  var sessionStore = new RedisStore({ client: redis_client });
+
+  app.set("trust proxy", 1);
+
+  require('path');
+
+  // Bypassed LGTM, because it does not make sense on this API for all endpoints,
+  // what is possible is covered by helmet and no-cache.
+
+  // allow disabling Secure/HTTPOnly cookies for HTTP-only mode (development, localhost)
+  let enforceMaximumSecurity = app_config.debug.allow_http_login ? true : false;
+
+  const sessionConfig = {
+    secret: session_config.secret,
+    cookie: {
+      maxAge: 3600000,
+      secure: enforceMaximumSecurity,
+      httpOnly: true
+    },
+    store: sessionStore,
+    name: "x-thx-session",
+    resave: false, // was true
+    rolling: false,
+    saveUninitialized: false,
+  };
+
+  const sessionParser = session(sessionConfig); /* lgtm [js/missing-token-validation] lgtm [js/clear-text-cookie] lgtm [js/client-exposed-cookie] */
+
+  app.use(sessionParser);
+
+  // rolling was true; This resets the expiration date on the cookie to the given default.
+
+  app.use(express.json({
     limit: "2mb",
     strict: false
   }));
-  hook_server.use(express.urlencoded({ extended: false }));
 
-  hook_server.post("/", function (req, res) {
+  app.use(limiter);
+
+  app.use(express.urlencoded({
+    extended: true,
+    parameterLimit: 1000,
+    limit: "1mb"
+  }));
+
+  let router = require('./lib/router.js')(app);
+
+  /* Webhook Server (new impl.) */
+
+  app.post("/githook", function (req, res) {
     // From GitHub, exit on non-push events prematurely
-    if (fail_on_invalid_git_headers(req)) return;
+    // if (fail_on_invalid_git_headers(req)) return;
+    // TODO: Validate and possibly reject invalid requests to prevent injection
+    // E.g. using git_secret_key from app_config
+
     // do not wait for response, may take ages
+    console.log("Webhook request accepted...");
     res.status(200).end("Accepted");
-    console.log("[info] Hook process started...");
+    console.log("Webhook process started...");
     watcher.process_hook(req.body);
-    console.log("[info] Hook process completed.");
-  }); // end of Legacy Webhook Server; will deprecate after reconfiguring all instances or if no webhook_port is defined
-}
+    console.log("Webhook process completed.");
+  }); // end of new Webhook Server
 
-// DI
-app.builder = builder;
-app.queue = queue;
+  /*
+   * HTTP/S Server
+   */
 
+  var ssl_options = null;
 
-// Redis
-let connect_redis = require("connect-redis");
-var RedisStore = connect_redis(session);
-var sessionStore = new RedisStore({ client: redis_client });
+  // Legacy HTTP support for old devices without HTTPS proxy
+  let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function () {
+    console.log("[info] HTTP API started on port", app_config.port);
+    let end_timestamp = new Date().getTime() - start_timestamp;
+    let seconds = Math.ceil(end_timestamp / 1000);
+    console.log("[debug] Startup phase took:", seconds, "seconds");
+  });
 
-app.set("trust proxy", 1);
+  var read = require('fs').readFileSync;
 
-require('path');
+  if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
 
-// Bypassed LGTM, because it does not make sense on this API for all endpoints,
-// what is possible is covered by helmet and no-cache.
+    let sslvalid = false;
 
-// allow disabling Secure/HTTPOnly cookies for HTTP-only mode (development, localhost)
-let enforceMaximumSecurity = app_config.debug.allow_http_login ? true : false;
+    if (!fs.existsSync(app_config.ssl_ca)) {
+      const message = "[warning] Did not find app_config.ssl_ca file, websocket logging will fail...";
+      rollbar.warn(message);
+      console.log(message);
+    }
 
-const sessionConfig = {
-  secret: session_config.secret,
-  cookie: {
-    maxAge: 3600000,
-    secure: enforceMaximumSecurity,
-    httpOnly: true
-  },
-  store: sessionStore,
-  name: "x-thx-session",
-  resave: false, // was true
-  rolling: false,
-  saveUninitialized: false,
-};
+    let caCert = read(app_config.ssl_ca, 'utf8');
+    let ca = pki.certificateFromPem(caCert);
+    let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
+    console.log("[info] Loaded SSL certificate.");
 
-const sessionParser = session(sessionConfig); /* lgtm [js/missing-token-validation] lgtm [js/clear-text-cookie] lgtm [js/client-exposed-cookie] */
+    try {
+      sslvalid = ca.verify(client);
+    } catch (err) {
+      console.log("[error] Certificate verification failed: ", err);
+    }
 
-app.use(sessionParser);
+    if (sslvalid) {
+      ssl_options = {
+        key: read(app_config.ssl_key, 'utf8'),
+        cert: read(app_config.ssl_cert, 'utf8'),
+        ca: read(app_config.ssl_ca, 'utf8'),
+        NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
+      };
+      console.log("[info] Starting HTTPS server on " + app_config.secure_port + "...");
+      https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
+    } else {
+      console.log("[error] SSL certificate loading or verification FAILED! Check your configuration!");
+    }
 
-// rolling was true; This resets the expiration date on the cookie to the given default.
-
-app.use(express.json({
-  limit: "2mb",
-  strict: false
-}));
-
-app.use(limiter);
-
-app.use(express.urlencoded({
-  extended: true,
-  parameterLimit: 1000,
-  limit: "1mb"
-}));
-
-let router = require('./lib/router.js')(app);
-
-/* Webhook Server (new impl.) */
-
-app.post("/githook", function (req, res) {
-  // From GitHub, exit on non-push events prematurely
-  // if (fail_on_invalid_git_headers(req)) return;
-  // TODO: Validate and possibly reject invalid requests to prevent injection
-  // E.g. using git_secret_key from app_config
-
-  // do not wait for response, may take ages
-  console.log("Webhook request accepted...");
-  res.status(200).end("Accepted");
-  console.log("Webhook process started...");
-  watcher.process_hook(req.body);
-  console.log("Webhook process completed.");
-}); // end of new Webhook Server
-
-/*
- * HTTP/S Server
- */
-
-var ssl_options = null;
-
-// Legacy HTTP support for old devices without HTTPS proxy
-let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function () {
-  console.log("[info] HTTP API started on port", app_config.port);
-  let end_timestamp = new Date().getTime() - start_timestamp;
-  let seconds = Math.ceil(end_timestamp / 1000);
-  console.log("[debug] Startup phase took:", seconds, "seconds");
-});
-
-var read = require('fs').readFileSync;
-
-if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
-
-  let sslvalid = false;
-
-  if (!fs.existsSync(app_config.ssl_ca)) {
-    const message = "[warning] Did not find app_config.ssl_ca file, websocket logging will fail...";
-    rollbar.warn(message);
-    console.log(message);
-  }
-
-  let caCert = read(app_config.ssl_ca, 'utf8');
-  let ca = pki.certificateFromPem(caCert);
-  let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
-  console.log("[info] Loaded SSL certificate.");
-
-  try {
-    sslvalid = ca.verify(client);
-  } catch (err) {
-    console.log("[error] Certificate verification failed: ", err);
-  }
-
-  if (sslvalid) {
-    ssl_options = {
-      key: read(app_config.ssl_key, 'utf8'),
-      cert: read(app_config.ssl_cert, 'utf8'),
-      ca: read(app_config.ssl_ca, 'utf8'),
-      NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
-    };
-    console.log("[info] Starting HTTPS server on " + app_config.secure_port + "...");
-    https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
   } else {
-    console.log("[error] SSL certificate loading or verification FAILED! Check your configuration!");
+    console.log("[warning] Skipping HTTPS server, SSL key or certificate not found. This configuration is INSECURE! and will cause an error in Enterprise configurations in future.");
   }
 
-} else {
-  console.log("[warning] Skipping HTTPS server, SSL key or certificate not found. This configuration is INSECURE! and will cause an error in Enterprise configurations in future.");
-}
-
-app.use('/static', express.static(path.join(__dirname, 'static')));
-app.set('trust proxy', ['loopback', '127.0.0.1']);
+  app.use('/static', express.static(path.join(__dirname, 'static')));
+  app.set('trust proxy', ['loopback', '127.0.0.1']);
 
 
-/*
- * WebSocket Server
- */
+  /*
+   * WebSocket Server
+   */
 
-var wsapp = express();
-wsapp.disable('x-powered-by');
+  var wsapp = express();
+  wsapp.disable('x-powered-by');
 
-wsapp.use(session({ /* lgtm [js/client-exposed-cookie] */
-  secret: session_config.secret,
-  store: sessionStore,
-  cookie: {
-    expires: hour,
-    secure: enforceMaximumSecurity,
-    httpOnly: true
-  },
-  name: "x-thx-ws-session",
-  resave: false,
-  rolling: false,
-  saveUninitialized: false,
-})); /* lgtm [js/client-exposed-cookie] */
+  wsapp.use(session({ /* lgtm [js/client-exposed-cookie] */
+    secret: session_config.secret,
+    store: sessionStore,
+    cookie: {
+      expires: hour,
+      secure: enforceMaximumSecurity,
+      httpOnly: true
+    },
+    name: "x-thx-ws-session",
+    resave: false,
+    rolling: false,
+    saveUninitialized: false,
+  })); /* lgtm [js/client-exposed-cookie] */
 
-let wss = new WebSocket.Server({ server: server }); // or { noServer: true }
-const socketMap = new Map();
+  let wss = new WebSocket.Server({ server: server }); // or { noServer: true }
+  const socketMap = new Map();
 
-server.on('upgrade', function (request, socket, head) {
+  server.on('upgrade', function (request, socket, head) {
 
-  const owner = url.parse(request.url).pathname.replace("/", "");
+    const owner = url.parse(request.url).pathname.replace("/", "");
 
-  if (typeof (socketMap.get(owner)) === "undefined") {
-    console.log("Socket already mapped for", owner);
-    return;
-  }
-
-  if (typeof (request.session) === "undefined") {
-    return;
-  }
-
-  sessionParser(request, {}, () => {
-
-    if ((typeof (request.session.owner) === "undefined") || (request.session.owner === null)) {
-      console.log("Should destroy socket, access unauthorized.");
-      socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
-      socket.destroy();
+    if (typeof (socketMap.get(owner)) === "undefined") {
+      console.log("Socket already mapped for", owner);
       return;
     }
 
-    console.log("---> Session is parsed, handling protocol upgrade...");
-
-    socketMap.set(owner, socket);
-    try {
-      wss.handleUpgrade(request, socket, head, function (ws) {
-        wss.emit('connection', ws, request);
-      });
-    } catch (upgradeException) {
-      // fails on duplicate upgrade, why does it happen?
-      console.log("Exception caught upgrading same socket twice.");
+    if (typeof (request.session) === "undefined") {
+      return;
     }
-  });
-});
 
-function heartbeat() {
-  this.isAlive = true;
-}
+    sessionParser(request, {}, () => {
 
-setInterval(function ping() {
-  if (typeof (wss.clients) !== "undefined") {
-    wss.clients.forEach(function each(ws) {
-      if (ws.isAlive === false) {
-        console.log("[DBUG] Terminating websocket!");
-        ws.terminate();
-      } else {
-        ws.ping();
+      if ((typeof (request.session.owner) === "undefined") || (request.session.owner === null)) {
+        console.log("Should destroy socket, access unauthorized.");
+        socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+        socket.destroy();
+        return;
+      }
+
+      console.log("---> Session is parsed, handling protocol upgrade...");
+
+      socketMap.set(owner, socket);
+      try {
+        wss.handleUpgrade(request, socket, head, function (ws) {
+          wss.emit('connection', ws, request);
+        });
+      } catch (upgradeException) {
+        // fails on duplicate upgrade, why does it happen?
+        console.log("Exception caught upgrading same socket twice.");
       }
     });
+  });
+
+  function heartbeat() {
+    this.isAlive = true;
   }
-}, 30000);
 
-//
-// Behaviour of new WSS connection (authenticate and add router paths that require websocket)
-//
-
-var logtail_callback = function (err, result) {
-  if (err) {
-    console.log("[thinx] logtail_callback error:", err, "message", result);
-  } else {
-    console.log("[thinx] logtail_callback result:", result);
-  }
-};
-
-wss.on("error", function (err) {
-  console.log("WSS REQ ERROR: " + err);
-});
-
-app._ws = {}; // list of all owner websockets
-
-function initLogTail() {
-  app.post("/api/user/logs/tail", (req2, res) => {
-    if (!(router.validateSecurePOSTRequest(req2) || router.validateSession(req2, res))) return;
-    if (typeof (req2.body.build_id) === "undefined") {
-      router.respond(res, {
-        success: false,
-        status: "missing_build_id"
+  setInterval(function ping() {
+    if (typeof (wss.clients) !== "undefined") {
+      wss.clients.forEach(function each(ws) {
+        if (ws.isAlive === false) {
+          console.log("[DBUG] Terminating websocket!");
+          ws.terminate();
+        } else {
+          ws.ping();
+        }
       });
-      return;
     }
-    let safe_id = Sanitka.branch(req2.body.build_id);
-    console.log("Tailing build log for " + safe_id);
-  });
-}
+  }, 30000);
 
-function initSocket(ws, msgr) {
-  ws.on("message", (message) => {
-    console.log("WSS message", message);
-    if (message.indexOf("{}") == 0) return; // skip empty messages
-    var object = JSON.parse(message);
-    if (typeof (object.logtail) !== "undefined") {
-      var build_id = object.logtail.build_id;
-      var owner_id = object.logtail.owner_id;
-      blog.logtail(build_id, owner_id, app._ws[logsocket], logtail_callback);
-    } else if (typeof (object.init) !== "undefined") {
-      if (typeof (msgr) !== "undefined") {
-        console.log("Initializing new messenger in WS...");
-        var owner = object.init;
-        let socket = app._ws[owner];
-        msgr.initWithOwner(owner, socket, function (success, message_z) {
-          if (!success) {
-            console.log("Messenger init on WS message with result " + success + ", with message: ", { message_z });
-          }
+  //
+  // Behaviour of new WSS connection (authenticate and add router paths that require websocket)
+  //
+
+  var logtail_callback = function (err, result) {
+    if (err) {
+      console.log("[thinx] logtail_callback error:", err, "message", result);
+    } else {
+      console.log("[thinx] logtail_callback result:", result);
+    }
+  };
+
+  wss.on("error", function (err) {
+    console.log("WSS REQ ERROR: " + err);
+  });
+
+  app._ws = {}; // list of all owner websockets
+
+  function initLogTail() {
+    app.post("/api/user/logs/tail", (req2, res) => {
+      if (!(router.validateSecurePOSTRequest(req2) || router.validateSession(req2, res))) return;
+      if (typeof (req2.body.build_id) === "undefined") {
+        router.respond(res, {
+          success: false,
+          status: "missing_build_id"
         });
+        return;
       }
-    }
-  });
-
-  ws.on('pong', heartbeat);
-
-  ws.on('close', function () {
-    socketMap.delete(owner);
-  });
-}
-
-wss.on('connection', function (ws, req) {
-
-  // May not exist while testing...
-  if (typeof (ws) === "undefined" || ws === null) {
-    console.log("Exiting WSS connecton, no WS defined!");
-    return;
+      let safe_id = Sanitka.branch(req2.body.build_id);
+      console.log("Tailing build log for " + safe_id);
+    });
   }
 
-  if (typeof (req) === "undefined") {
-    console.log("No request on wss.on");
-    return;
+  function initSocket(ws, msgr) {
+    ws.on("message", (message) => {
+      console.log("WSS message", message);
+      if (message.indexOf("{}") == 0) return; // skip empty messages
+      var object = JSON.parse(message);
+      if (typeof (object.logtail) !== "undefined") {
+        var build_id = object.logtail.build_id;
+        var owner_id = object.logtail.owner_id;
+        blog.logtail(build_id, owner_id, app._ws[logsocket], logtail_callback);
+      } else if (typeof (object.init) !== "undefined") {
+        if (typeof (msgr) !== "undefined") {
+          console.log("Initializing new messenger in WS...");
+          var owner = object.init;
+          let socket = app._ws[owner];
+          msgr.initWithOwner(owner, socket, function (success, message_z) {
+            if (!success) {
+              console.log("Messenger init on WS message with result " + success + ", with message: ", { message_z });
+            }
+          });
+        }
+      }
+    });
+
+    ws.on('pong', heartbeat);
+
+    ws.on('close', function () {
+      socketMap.delete(owner);
+    });
   }
 
-  // extract owner_id from pathname removing trailing slash
-  let socket_path = url.parse(req.url).pathname.replace("/", "");
-  const path_elements = socket_path.split('/');
-  const owner = path_elements[0];
-  const logsocket = path_elements[1];
+  wss.on('connection', function (ws, req) {
 
-  console.log("logsocket: ", { owner }, { logsocket });
-
-  var cookies = req.headers.cookie;
-
-  if (typeof (req.headers.cookie) !== "undefined") {
-    if (cookies.indexOf("thx-session") === -1) {
-      console.log("» ERROR! No thx-session found in WS: " + JSON.stringify(req.headers.cookie));
+    // May not exist while testing...
+    if (typeof (ws) === "undefined" || ws === null) {
+      console.log("Exiting WSS connecton, no WS defined!");
       return;
     }
-  } else {
-    console.log("» DEPRECATED WS has no cookie headers!");
-    return;
-  }
 
-  ws.isAlive = true;
+    if (typeof (req) === "undefined") {
+      console.log("No request on wss.on");
+      return;
+    }
 
-  if ((typeof (logsocket) === "undefined") || (logsocket === null)) {
-    console.log("Owner socket", owner, "started... (TODO: socketMap.set)");
-    app._ws[owner] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
-  } else {
-    console.log("Log socket", owner, "started... (TODO: socketMap.set)");
-    app._ws[logsocket] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
-  }
+    // extract owner_id from pathname removing trailing slash
+    let socket_path = url.parse(req.url).pathname.replace("/", "");
+    const path_elements = socket_path.split('/');
+    const owner = path_elements[0];
+    const logsocket = path_elements[1];
 
-  /* Returns specific build log for owner */
-  initLogTail();
-  initSocket(ws, messenger);
+    console.log("logsocket: ", { owner }, { logsocket });
 
-}).on("error", function (err) {
-  console.log("WSS Connection Error: ", err);
-});
+    var cookies = req.headers.cookie;
 
+    if (typeof (req.headers.cookie) !== "undefined") {
+      if (cookies.indexOf("thx-session") === -1) {
+        console.log("» ERROR! No thx-session found in WS: " + JSON.stringify(req.headers.cookie));
+        return;
+      }
+    } else {
+      console.log("» DEPRECATED WS has no cookie headers!");
+      return;
+    }
 
-//
-// Database compactor
-//
+    ws.isAlive = true;
 
-function database_compactor() {
-  nano.db.compact("managed_logs");
-  nano.db.compact("managed_builds");
-  nano.db.compact("managed_devices");
-  nano.db.compact("managed_users", "owners_by_username", function (/* err */) {
-    console.log("» Database compact jobs completed.");
+    if ((typeof (logsocket) === "undefined") || (logsocket === null)) {
+      console.log("Owner socket", owner, "started... (TODO: socketMap.set)");
+      app._ws[owner] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
+    } else {
+      console.log("Log socket", owner, "started... (TODO: socketMap.set)");
+      app._ws[logsocket] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
+    }
+
+    /* Returns specific build log for owner */
+    initLogTail();
+    initSocket(ws, messenger);
+
+  }).on("error", function (err) {
+    console.log("WSS Connection Error: ", err);
   });
-}
 
-//
-// Log aggregator
-//
 
-// Warning, this is never called!
-function log_aggregator() {
-  stats.aggregate();
-  console.log("» Aggregation jobs completed.");
-}
+  //
+  // Database compactor
+  //
 
-//
-// Master check in cluster mode
-//
-
-function isMasterProcess() {
-  return true; // should be actually `cluster.isMaster();`
-}
-
-function startup_quote() {
-  if ((typeof (process.env.ENTERPRISE) === "undefined") || (process.env.ENTERPRISE === false)) {
-    app.messenger.sendRandomQuote();
+  function database_compactor() {
+    nano.db.compact("managed_logs");
+    nano.db.compact("managed_builds");
+    nano.db.compact("managed_devices");
+    nano.db.compact("managed_users", "owners_by_username", function (/* err */) {
+      console.log("» Database compact jobs completed.");
+    });
   }
-}
 
-if (isMasterProcess()) {
-  setInterval(database_compactor, 3600 * 1000);
-  setInterval(log_aggregator, 86400 * 1000 / 2);
-  setTimeout(startup_quote, 10000); // wait for Slack init only once
-}
+  //
+  // Log aggregator
+  //
+
+  // Warning, this is never called!
+  function log_aggregator() {
+    stats.aggregate();
+    console.log("» Aggregation jobs completed.");
+  }
+
+  //
+  // Master check in cluster mode
+  //
+
+  function isMasterProcess() {
+    return true; // should be actually `cluster.isMaster();`
+  }
+
+  function startup_quote() {
+    if ((typeof (process.env.ENTERPRISE) === "undefined") || (process.env.ENTERPRISE === false)) {
+      app.messenger.sendRandomQuote();
+    }
+  }
+
+  if (isMasterProcess()) {
+    setInterval(database_compactor, 3600 * 1000);
+    setInterval(log_aggregator, 86400 * 1000 / 2);
+    setTimeout(startup_quote, 10000); // wait for Slack init only once
+  }
+
+});
