@@ -50,8 +50,6 @@ const pki = require('node-forge').pki;
 const fs = require("fs-extra");
 const url = require('url');
 
-const schedule = require('node-schedule');
-
 // set up rate limiter
 const RateLimit = require('express-rate-limit');
 
@@ -70,7 +68,6 @@ const CONFIG_ROOT = "/mnt/data/conf";
 var session_config = require(CONFIG_ROOT + "/node-session.json");
 
 var app_config = Globals.app_config();
-var prefix = Globals.prefix();
 var rollbar = Globals.rollbar(); // lgtm [js/unused-local-variable]
 
 // TODO: Reuse redis client for auth?
@@ -105,58 +102,6 @@ const hour = 3600 * 1000;
 var https = require("https");
 var WebSocket = require("ws");
 
-// EXTRACT TO: db.js -->
-
-/*
- * Databases
- */
-
-var nano = require("nano")(app_config.database_uri);
-
-function initDatabases(dbprefix) {
-
-  console.log("[info] Initializing databases...");
-
-  function null_cb(err, body, header) {
-    // only unexpected errors should be logged
-    if (process.env.ENVIRONMENT === "test") {
-      console.log(err, body, header);
-    }
-  }
-
-  // only to fix bug in CouchDB 2.3.1 first-run
-  nano.db.create("_users", null_cb);
-  nano.db.create("_stats", null_cb);
-  nano.db.create("_replicator", null_cb);
-  nano.db.create("_global_changes", null_cb);
-
-  const db_names = [
-    "devices", "builds", "users", "logs"
-  ];
-
-  db_names.forEach((name) => {
-    nano.db.create(dbprefix + "managed_" + name).then((body) => {
-      console.log(body);
-      var couch = nano.db.use(dbprefix + "managed_" + name);
-      injectDesign(couch, name, "./design/design_" + name + ".json");
-      injectReplFilter(couch, "./design/filters_" + name + ".json");
-      console.log("[info] managed_" + name + " db is ready now.");
-    }).catch((err) => {
-      handleDatabaseErrors(err, "managed_" + name);
-    });
-  });
- 
-}
-
-console.log("[info] Will init DBs...");
-
-initDatabases(prefix);
-
-console.log("[info] Will access DBs...");
-
-// unused: var devicelib = require("nano")(app_config.database_uri).use(prefix + "managed_devices"); // lgtm [js/unused-local-variable]
-var userlib = require("nano")(app_config.database_uri).use(prefix + "managed_users"); // lgtm [js/unused-local-variable]
-
 console.log("[info] Loaded module: Statistics");
 var Stats = require("./lib/thinx/statistics");
 var stats = new Stats();
@@ -174,184 +119,8 @@ var Queue = require("./lib/thinx/queue");
 var queue = new Queue(builder);
 queue.cron(); // starts cron job for build queue from webhooks
 
-var Owner = require("./lib/thinx/owner");
-
-// EXTRACT GDPR FROM HERE --->
-
-// GDPR delete when account is expired (unused for 3 months)
-// WARNING: May purge old accounts, should be way to disable this.
-
-function purgeOldUsers() {
-  if ((typeof (app_config.strict_gdpr) !== "undefined") && app_config.strict_gdpr === false) {
-    console.log("[info] Not purging inactive users today.");
-    return;
-  }
-  if (process.env.ENVIRONMENT === "test") {
-    return; // no expired users in test, query will fail with "doc is null" error...
-  }
-  var d = new Date();
-  d.setMonth(d.getMonth() - 3);
-  let req = {
-    query: {
-      mindate: d
-    }
-  };
-  userlib.atomic("users", "delete_expired", req, function (error, response) {
-    if (error) {
-      console.log("Purge Old Error:", error);
-    } else {
-      console.log("Purged:", response);
-    }
-  });
-}
-
-function notify24(user) {
-  var d1 = new Date();
-  d1.setMonth(d1.getMonth() - 3);
-  d1.setDay(d1.getDay() - 1);
-  if (user.last_update == d1) {
-    if (typeof (user.notifiedBeforeGDPRRemoval24) === "undefined" || user.notifiedBeforeGDPRRemoval24 !== true) {
-      Owner.sendGDPRExpirationEmail24(user, user.email, function () {
-        userlib.atomic("users", "edit", owner, { notifiedBeforeGDPRRemoval24: true }, (uerror, abody) => {
-          console.log("sendGDPRExpirationEmail24", uerror, abody);
-        });
-      });
-    }
-  }
-}
-
-function notify168(user) {
-  var d2 = new Date();
-  d2.setMonth(d2.getMonth() - 3);
-  d2.setDay(d2.getDay() - 7);
-  if (user.last_update == d2) {
-    if (typeof (user.notifiedBeforeGDPRRemoval168) === "undefined" || user.notifiedBeforeGDPRRemoval168 !== true) {
-      Owner.sendGDPRExpirationEmail168(user, user.email, function () {
-        userlib.atomic("users", "edit", owner, { notifiedBeforeGDPRRemoval168: true }, (uerror, abody) => {
-          console.log("sendGDPRExpirationEmail168", uerror, abody);
-        });
-      });
-    }
-  }
-}
-
-function notifyOldUsers() {
-  // Should send an e-mail once a day
-  // Must parse all users, find users with expiration
-
-  if ((typeof (app_config.strict_gdpr) !== "undefined") && app_config.strict_gdpr === false) {
-    console.log("Notification for old users skipped. Enable with strict_gdpr = true in config.json");
-    return;
-  }
-
-  userlib.view("users", "owners_by_username", {
-    "key": username,
-    "include_docs": true
-  }).then((user_view_body) => {
-    for (var index in user_view_body.rows) {
-      let user = user_view_body.rows[index];
-      notify24(user);
-      notify168(user);
-    }
-  }).catch((err) => {
-    console.log(err);
-  });
-}
-
-var cron_rule_15_min = "*/15 * * * *";
-schedule.scheduleJob(cron_rule_15_min, () => {
-  purgeOldUsers();
-});
-
-var cron_rule_daily = "0 8 * * *"; // daily 8 am
-schedule.scheduleJob(cron_rule_daily, () => {
-  notifyOldUsers();
-});
-
-// <-- EXTRACT GDPR TO HERE
-
-//
-// REFACTOR: Move to database.js
-//
-
-// Database preparation on first run
-function getDocument(file) {
-  if (!fs.existsSync(file)) {
-    return false;
-  }
-  const data = fs.readFileSync(file);
-  if (typeof (data) === "undefined") {
-    console.log("» [getDocument] no data read.");
-    return false;
-  }
-  // Parser may fail
-  try {
-    return JSON.parse(data);
-  } catch (e) {
-    console.log("» Document File may not exist: " + e);
-    return false;
-  }
-}
-
-function logCouchError(err, body, header, tag) {
-  if (err !== null) {
-    if (err.toString().indexOf("conflict") === -1) {
-      console.log("[error] Couch Init error: ", err, body, header, tag);
-    }
-    if (err.toString().indexOf("ENOTFOUND") !== -1) {
-      console.log("Critical DB integration error, exiting.");
-      process.exit(1);
-    }
-  } else {
-    return;
-  }
-  if (typeof (body) !== "undefined") {
-    console.log("[error] Log Couch Insert body: " + body + " " + tag);
-  }
-  if (typeof (header) !== "undefined") {
-    console.log("[error] Log Couchd Insert header: " + header + " " + tag);
-  }
-}
-
-function injectDesign(couch, design, file) {
-  if (typeof (design) === "undefined") return;
-  let design_doc = getDocument(file);
-  if (design_doc != null) {
-    couch.insert(design_doc, "_design/" + design, (err, body, header) => {
-      logCouchError(err, body, header, "init:design:" + JSON.stringify(design)); // returns if no err
-    });
-  } else {
-    console.log("[error] Design doc injection issue at " + file);
-  }
-}
-
-function injectReplFilter(couch, file) {
-  let filter_doc = getDocument(file);
-  if (filter_doc !== false) {
-    couch.insert(filter_doc, "_design/repl_filters", (err, body, header) => {
-      logCouchError(err, body, header, "init:repl:" + JSON.stringify(filter_doc)); // returns if no err
-    });
-  } else {
-    console.log("[error] Filter doc injection issue (no doc) at " + file);
-  }
-}
-
-function handleDatabaseErrors(err, name) {
-  if (err.toString().indexOf("the file already exists") !== -1) {
-    // silently fail, this is ok
-  } else if (err.toString().indexOf("error happened") !== -1) {
-    console.log("[CRITICAL] 🚫 Database connectivity issue. " + err.toString() + " URI: " + app_config.database_uri);
-    // give some time for DB to wake up until next try, also prevents too fast restarts...
-    setTimeout(function () {
-      process.exit(1);
-    }, 1000);
-  } else {
-    console.log("[CRITICAL] 🚫 Database " + name + " creation failed. " + err + " URI: " + app_config.database_uri);
-    setTimeout(function () {
-      process.exit(2);
-    }, 1000);
-  }
-}
+const GDPR = require("./lib/thinx/gdpr");
+new GDPR().guard();
 
 const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
 const blog = new Buildlog();
@@ -403,7 +172,6 @@ app.queue = queue;
 
 // Redis
 let connect_redis = require("connect-redis");
-const { callbackify } = require("util");
 var RedisStore = connect_redis(session);
 var sessionStore = new RedisStore({ client: redis_client });
 
