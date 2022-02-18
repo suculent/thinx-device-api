@@ -81,12 +81,12 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
 
   set -e
   
-  if [[ -d ./.git ]]; then
+  #if [[ -d ./.git ]]; then
     # currently fails with invalid request parameters, maybe should be replaced by cc-test-reporter
     #curl -Os https://uploader.codecov.io/latest/linux/codecov 
     #chmod +x codecov
     # codecov -t $CODECOV_TOKEN
-  fi
+  #fi
 
 else
   echo "[thinx-entrypoint] Starting in production mode..."
