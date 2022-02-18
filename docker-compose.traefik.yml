@@ -11,7 +11,7 @@ services:
   reverse-proxy:
     env_file:
       - .env
-    image: traefik:v1.7.12-alpine
+    image: traefik:v2.6.1
     command:
       - "--defaultentrypoints=http,https"
       - "--entrypoints=Name:http Address::80 Redirect.EntryPoint:https"
