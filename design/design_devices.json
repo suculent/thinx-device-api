@@ -1,5 +1,5 @@
 {
-  "_id": "_design/devicelib",
+  "_id": "_design/devices",
   "language": "javascript",
   "views": {
     "devices_by_mac": {
