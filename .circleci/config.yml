@@ -249,8 +249,6 @@ jobs:
         command: |
           export ENVIRONMENT=test
           docker-compose up --build api
-          docker-compose logs --timestamp api
-          timeout 600 docker-compose logs -f --timestamp api
           echo "###### > Tailing completed, stopping job."
           date
 

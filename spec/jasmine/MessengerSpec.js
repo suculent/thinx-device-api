@@ -2,7 +2,7 @@ var expect = require('chai').expect;
 
 var generated_key_hash;
 var Messenger = require('../../lib/thinx/messenger');
-var messenger = new Messenger().getInstance();
+var messenger = new Messenger("mosquitto").getInstance("mosquitto");
 
 var envi = require("../_envi.json");
 var test_owner = envi.oid;

@@ -3,7 +3,7 @@ describe("Devices", function() {
   var expect = require('chai').expect;
   
   var Messenger = require('../../lib/thinx/messenger');
-  var messenger = new Messenger().getInstance();
+  var messenger = new Messenger("mosquitto").getInstance("mosquitto");
 
   var Devices = require("../../lib/thinx/devices");
   var devices = new Devices(messenger);
