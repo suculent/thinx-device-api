@@ -85,32 +85,15 @@ try {
 // Default ACLs and MQTT Password
 
 console.log("[info] Loaded module: Messenger");
-const crypto = require("crypto");
-const serviceMQAccount = "thinx";
-let serviceMQPassword = crypto.randomBytes(48).toString('base64url'); // randomized password on each service restart
 
 const Messenger = require("./lib/thinx/messenger");
-const Auth = require('./lib/thinx/auth.js');
-let auth = new Auth();
+
 if ((process.env.ENVIRONMENT === "test") || (process.env.ENVIRONMENT === "circleci")) {
   serviceMQPassword = "mosquitto"; // test purposes only; to align with REDIS_PASSWORD variable set on CCI
 }
 
 console.log("Initializing MQTT with password", serviceMQPassword); // intentional logging for administrative/testing purposes
-
-// everything depends on this... should throw exception and allow chaining using .then()
-auth.add_mqtt_credentials(serviceMQAccount, serviceMQPassword, () => {
-  console.log("MQTT credentials refresh complete, initializing Messenger");
-  app.messenger = new Messenger(serviceMQPassword).getInstance(serviceMQPassword); // take singleton to prevent double initialization
-
-
-  const ACL = require('./lib/thinx/acl.js');
-  let acl = new ACL(serviceMQAccount);
-
-  acl.load(() => {
-    acl.addTopic(serviceMQAccount, "readwrite", "#");
-    acl.commit();
-  });
+app.messenger = new Messenger(serviceMQPassword).getInstance(serviceMQPassword); // take singleton to prevent double initialization
 
 
   //
@@ -800,5 +783,3 @@ auth.add_mqtt_credentials(serviceMQAccount, serviceMQPassword, () => {
     setInterval(log_aggregator, 86400 * 1000 / 2);
     setTimeout(startup_quote, 10000); // wait for Slack init only once
   }
-
-});
