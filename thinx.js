@@ -85,14 +85,11 @@ try {
 // Default ACLs and MQTT Password
 
 console.log("[info] Loaded module: Messenger");
-
 const Messenger = require("./lib/thinx/messenger");
-
+let serviceMQPassword = crypto.randomBytes(48).toString('base64url'); // randomized password on each service restart
 if ((process.env.ENVIRONMENT === "test") || (process.env.ENVIRONMENT === "circleci")) {
   serviceMQPassword = "mosquitto"; // test purposes only; to align with REDIS_PASSWORD variable set on CCI
 }
-
-console.log("Initializing MQTT with password", serviceMQPassword); // intentional logging for administrative/testing purposes
 app.messenger = new Messenger(serviceMQPassword).getInstance(serviceMQPassword); // take singleton to prevent double initialization
 
 
