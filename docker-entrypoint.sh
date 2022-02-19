@@ -76,9 +76,10 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   rm -rf ./sonar-scanner-cli-4.6.2.2472-linux
   7z x ./sonar-scanner-cli-4.6.2.2472-linux.zip
   export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin/
-  sonar-scanner -Dsonar.login=${SONAR_TOKEN}
+  rm -rf /opt/thinx/thinx-device-api/sonar-scanner-4.6.2.2472-linux/jre/legal/
   rm -rf spec/test_repositories/**
-
+  sonar-scanner -Dsonar.login=${SONAR_TOKEN}
+  
   set -e
   
   #if [[ -d ./.git ]]; then
