@@ -69,14 +69,6 @@ RUN apt-get remove -y \
 
 # TODO: Implement Snyk Container Scanning here in addition to DockerHub manual scans...
 
-#ADD https://get.aquasec.com/microscanner .
-#RUN chmod +x microscanner && mkdir artifacts
-#RUN ./microscanner ${AQUA_SEC_TOKEN} --html --continue-on-failure > ./artifacts/microscanner.html \
-#    && cp ./artifacts/microscanner.html ./static/microscanner.html
-#RUN rm -rf ./microscanner
-
-RUN mkdir -p ./.nyc_output
-
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
 ENTRYPOINT [ "/docker-entrypoint.sh" ]

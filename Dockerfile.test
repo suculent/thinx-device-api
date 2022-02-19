@@ -89,7 +89,7 @@ COPY package.json ./
 # Test modules
 RUN npm install -g nyc mocha jasmine mocha-lcov-reporter coveralls npm@8.5.0
 
-RUN npm install .
+RUN npm install --unsafe-perm .
 
 VOLUME /var/lib/docker
 
