@@ -1,4 +1,4 @@
-FROM node:current-slim
+FROM node:16-bullseye-slim
 
 LABEL maintainer="Matej Sychra <suculent@me.com>"
 
@@ -52,4 +52,4 @@ COPY .snyk ./.snyk
 
 # Install latest npm
 
-# RUN npm install -g npm@8.5.0
+RUN npm install -g npm@8.5.0
