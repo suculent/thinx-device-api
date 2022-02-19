@@ -52,4 +52,4 @@ COPY .snyk ./.snyk
 
 # Install latest npm
 
-RUN npm install -g npm@8.5.0
+# RUN npm install -g npm@8.5.0
