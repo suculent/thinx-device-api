@@ -44,12 +44,13 @@ ENV AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}
 ARG SNYK_TOKEN
 ENV SNYK_TOKEN=${SNYK_TOKEN}
 
+# Create app directory
 WORKDIR /opt/thinx/thinx-device-api
 
-RUN npm install --unsafe-perm . --only-prod
+# Install app dependencies
+COPY package.json ./
 
-#    npm audit fix # fails because of unfixable vulnerabilities
-# && npm audit fix --force # fails because of unfixable vulnerabilities
+RUN npm install --unsafe-perm . --only-prod
 
 # THiNX Web & Device API (HTTP)
 EXPOSE 7442
