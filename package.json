@@ -152,7 +152,8 @@
     "netmask": "2.0.2",
     "proxy-agent": "4.0.1",
     "request": "2.88.2",
-    "socket.io-parser": "4.0.4"
+    "socket.io-parser": "4.0.4",
+    "wide-align": "1.1.2"
   },
   "devDependencies": {
     "codacy-coverage": "^3.2.0",
