@@ -64,7 +64,9 @@ RUN apt-get update -qq && \
 # Install app dependencies
 COPY package.json ./
 
-RUN npm install .
+# Only test to see wtf?
+#RUN npm install .
+RUN npm install --unsafe-perm . --only-prod
 
 VOLUME /var/lib/docker
 
