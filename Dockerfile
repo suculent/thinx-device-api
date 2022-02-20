@@ -1,4 +1,4 @@
-FROM thinxcloud/base
+FROM thinxcloud/base:latest
 
 LABEL maintainer="Matej Sychra <suculent@me.com>"
 LABEL name="THiNX API" version="1.8"
@@ -50,7 +50,7 @@ WORKDIR /opt/thinx/thinx-device-api
 # Install app dependencies
 COPY package.json ./
 
-RUN npm install --unsafe-perm . --only-prod
+RUN npm install --unsafe-perm --only-prod .
 
 # THiNX Web & Device API (HTTP)
 EXPOSE 7442
