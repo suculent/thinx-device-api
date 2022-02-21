@@ -116,8 +116,8 @@ describe("Device", function() {
         apikey,
         null,
         function(success, response) {
-          console.log("Device 04 success/response", success, response);
           let obj = response;
+          expect(success).to.be(true);
           expect(obj).to.be.an('object');
           if (success === false) {
             console.log(
