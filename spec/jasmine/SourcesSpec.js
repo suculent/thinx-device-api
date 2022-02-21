@@ -69,12 +69,12 @@ describe("Sources", function() {
 
   it("(04) should be able to validate branch name", function() {
     let source = {
-      branch: "origin/master"
+      branch: "origin/main"
     };
-    let result = Sources.validateBranch(source, (error) => {
+    let result = Sources.normalizedBranch(source, (error) => {
       console.log(error);
     });
-    expect(result).to.equal("master");
+    expect(result).to.equal("main");
     
   });
 
@@ -82,20 +82,20 @@ describe("Sources", function() {
     let source = {
       url: "git@github.com/suculent/thinx-device-api"
     };
-    let result = Sources.validateBranch(source, (error) => {
+    let result = Sources.normalizedBranch(source, (error) => {
       console.log("validateBranch error:", error);            
     });
-    expect(result).to.equal("master");
+    expect(result).to.equal("main");
   });
 
   it("(06) should be able to invalidate branch name", function() {
     let source = {
       branch: "origin/mas'ter"
     };
-    let result = Sources.validateBranch(source, (error) => {
+    let result = Sources.normalizedBranch(source, (error) => {
       console.log(error);
     });
-    expect(result).to.equal('mas\'ter');
+    expect(result).to.equal(false);
   });
 
   it("(07) should be able to invalidate url", function() {
