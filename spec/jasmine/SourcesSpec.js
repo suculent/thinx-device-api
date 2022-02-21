@@ -105,7 +105,7 @@ describe("Sources", function() {
     let result = Sources.validateURL(source, function(error) {
       console.log(error);
     });
-    expect(result).to.equal(false);
+    expect(result).to.equal(null);
     
   });
 

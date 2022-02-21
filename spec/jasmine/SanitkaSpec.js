@@ -11,7 +11,7 @@ describe("Sanitka", function () {
 
   it("should sanitize branches (invalid &)", function () {
     var s = sanitka.url("origin/master&");
-    expect(s).to.equal(false);
+    expect(s).to.equal(null);
   });
 
   it("should de-escape (delete) dangerous shell characters \", \', ;", function () {
