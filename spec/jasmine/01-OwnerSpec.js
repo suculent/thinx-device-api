@@ -34,6 +34,7 @@ describe("Owner", function() {
       }
       if (response.indexOf("username_already_exists" !== -1)) {
         done();
+        return;
       }
       if (response) {
         console.log("(01) Activation response stored as this.activation_key: " + response);

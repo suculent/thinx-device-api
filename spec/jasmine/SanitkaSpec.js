@@ -6,7 +6,7 @@ describe("Sanitka", function () {
 
   it("should sanitize URLs", function () {
     var s = sanitka.url("https://github.com/suculent/thinx-device-api/ && ");
-    expect(s).to.equal("https://github.com/suculent/thinx-device-api/  ");
+    expect(s).to.equal(null);
   });
 
   it("should sanitize branches (removing &)", function () {
@@ -16,7 +16,8 @@ describe("Sanitka", function () {
 
   it("should de-escape (delete) dangerous shell characters \", \', ;", function () {
     var s = sanitka.deescape("\"\';;;\"");
-    expect(s.length).to.equal(null);
+    console.log("Sanitka 03 - s.length", s);
+    expect(s.length).to.equal("+0");
   });
 
   it("should accept valid owner", function () {
@@ -27,7 +28,7 @@ describe("Sanitka", function () {
 
   it("should reject invalid owner", function () {
     var result = sanitka.owner("invalid-owner");
-    expect(result).to.equal(null);
+    expect(result).to.equal(false);
   });
 
   it("should accept valid iOS push token", function () {
