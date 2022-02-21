@@ -22,8 +22,7 @@ describe("Validator", function() {
   it("should reject invalid owner", function() {
     var result = Validator.owner(owner+owner);
     console.log("reject invalid owner result: ", result);
-    expect(result).to.be.a('string');
-    expect(result == owner).to.equal(false);
+    expect(result).to.equal(false);
   });
 
   it("should return valid owner", function() {

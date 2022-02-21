@@ -17,7 +17,7 @@ describe("Sanitka", function () {
   it("should de-escape (delete) dangerous shell characters \", \', ;", function () {
     var s = sanitka.deescape("\"\';;;\"");
     console.log("Sanitka 03 - s.length", s);
-    expect(s).to.equal(null);
+    expect(s).to.equal('');
   });
 
   it("should accept valid owner", function () {
