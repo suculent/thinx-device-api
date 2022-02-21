@@ -16,7 +16,6 @@ describe("Sanitka", function () {
 
   it("should de-escape (delete) dangerous shell characters \", \', ;", function () {
     var s = sanitka.deescape("\"\';;;\"");
-    console.log("Sanitka 03 - s.length", s);
     expect(s).to.equal('');
   });
 
@@ -51,7 +50,7 @@ describe("Sanitka", function () {
     expect(result).to.equal(null);
   });
 
-  it("should rejec invalid GCM push token", function () {
+  it("should reject invalid GCM push token", function () {
     let input = "akO1'XdQYgk!APA91bHmgm_K500RVhexcxFVoczhp5RuMSKC07kOJB7T31xq2_a9tkUAFVGQNwtZ2JORj79lDRI0ow-nP17y82GD1zTWJTEnyjNMas_qNUKxBot1P-vM6v-BW7sqcISak8sXMK91WfmH";
     var result = sanitka.pushToken(input);
     expect(result).to.equal(null);
