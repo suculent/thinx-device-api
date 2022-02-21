@@ -414,7 +414,7 @@ db.init((db_err, dbs) => {
         });
         return;
       }
-      let safe_id = Sanitka.branch(req2.body.build_id);
+      let safe_id = Sanitka.udid(req2.body.build_id);
       console.log("Tailing build log for " + safe_id);
     });
   }
