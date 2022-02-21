@@ -31,10 +31,9 @@ describe("Validator", function() {
     expect(result == owner).to.be.true;
   });
 
-  it("should trim invalid udid", function() {
+  it("should reject udid", function() {
     var result = Validator.udid(udid+udid);
-    expect(result).to.be.a('string');
-    expect(result == udid).to.equal(false);
+    expect(result).to.equal(false);
   });
 
   it("should return valid udid", function() {
