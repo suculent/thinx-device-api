@@ -117,7 +117,6 @@ describe("Device", function() {
         null,
         function(success, response) {
           let obj = response;
-          expect(success).to.be(true);
           expect(obj).to.be.an('object');
           if (success === false) {
             console.log(
