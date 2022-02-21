@@ -81,7 +81,6 @@ try {
 
 // Default ACLs and MQTT Password
 
-console.log("[info] Loaded module: Messenger");
 const Messenger = require("./lib/thinx/messenger");
 let serviceMQPassword = require("crypto").randomBytes(48).toString('base64url');
 if (process.env.ENVIRONMENT === "test") {
@@ -89,7 +88,6 @@ if (process.env.ENVIRONMENT === "test") {
 }
 app.messenger = new Messenger(serviceMQPassword).getInstance(serviceMQPassword); // take singleton to prevent double initialization
 
-console.log("[info] Loaded module: Database");
 const Database = require("./lib/thinx/database");
 var db = new Database();
 db.init((db_err, dbs) => {
@@ -104,7 +102,6 @@ db.init((db_err, dbs) => {
 
   const Stats = require("./lib/thinx/statistics");
   var stats = new Stats();
-  console.log("[info] Loaded module: Statistics");
   stats.get_all_owners(); // FIXME: init all owners on boot... measure!
   setInterval(log_aggregator, 86400 * 1000 / 2);
 
@@ -129,14 +126,9 @@ db.init((db_err, dbs) => {
   var https = require("https");
   var WebSocket = require("ws");
 
-  console.log("[info] Loaded module: Repository Watcher");
-  var Repository = require("./lib/thinx/repository");
-
   var Builder = require("./lib/thinx/builder");
-  console.log("[info] Loaded module: BuildServer");
   var builder = new Builder();
 
-  console.log("[info] Loaded module: Queue");
   var Queue = require("./lib/thinx/queue");
   var queue = new Queue(builder);
   queue.cron(); // starts cron job for build queue from webhooks
@@ -148,6 +140,7 @@ db.init((db_err, dbs) => {
   const blog = new Buildlog();
 
   // Starts Git Webhook Server
+  var Repository = require("./lib/thinx/repository");
   const watcher = new Repository(queue);
 
   /* Legacy Webhook Server, kept for backwards compatibility, will deprecate. */
