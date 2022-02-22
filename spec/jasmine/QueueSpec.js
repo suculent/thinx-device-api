@@ -19,6 +19,9 @@ describe("Queue", function () {
         queue_with_cron.cron();
 
         // Should be able to add actions to the queue
+        console.log(
+            "adding mocks"
+        );
         queue_with_cron.add(mock_udid_1, mock_source_id);
         queue_with_cron.add(mock_udid_2, mock_source_id);
         queue_with_cron.add(mock_udid_3, mock_source_id);
@@ -26,29 +29,37 @@ describe("Queue", function () {
         console.log("(00) Queue calling findNext...");
 
         // Should be able find next waiting item in queue
-        queue_with_cron.findNext((next) => {
+        setTimeout(() => {
+            queue_with_cron.findNext((next) => {
 
-            console.log("(00) queue_with_cron.findNext exited with", next);
+                console.log("(00) queue_with_cron.findNext exited with", next); // expected to return null in test
 
-            // Should be able run next item
-            queue_with_cron.runNext(next);
-
-            console.log("(00) Queue calling findNext again async...");
-
-            // Should not be able to find anything while queue item is running
-            queue_with_cron.findNext((/* nextAction */) => {
-                // can be null
-                console.log("(00) Queue test calling loop...");
-
-                // Should run loop safely
-                for (let i = 0; i < 10; i++) {
-                    queue_with_cron.loop();
+                if (next === null) {
+                    done();
+                    return;
                 }
 
-                console.log("(00) Queue test done.");
-                done();
+                // Should be able run next item
+                queue_with_cron.runNext(next);
+
+                console.log("(00) Queue calling findNext again async...");
+
+                // Should not be able to find anything while queue item is running
+                queue_with_cron.findNext((/* nextAction */) => {
+                    // can be null
+                    console.log("(00) Queue test calling loop...");
+
+                    // Should run loop safely
+                    for (let i = 0; i < 10; i++) {
+                        queue_with_cron.loop();
+                    }
+
+                    console.log("(00) Queue test done.");
+                    done();
+                });
             });
-        });
+
+        }, 3000);
     });
 
 });
