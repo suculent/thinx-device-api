@@ -10,14 +10,15 @@ var udid = envi.udid;
 describe("Messenger", function() {
 
   // init
-  it("should be able to initialize on its own", function(done) {
+  it("should be able to initialize with owner", function(/* done */) {
     const mock_socket = {};
+    console.log("[test] Initializing messenger with owner", test_owner, "socket", mock_socket);
     messenger.initWithOwner(test_owner, mock_socket, (success, status) => {
-      console.log("messenger initialized: ", { success: success, status: status });
+      console.log("[test] messenger initialized: ", { success: success, status: status });
       expect(success).to.be(true);
-      done();
+      /* done(); */
     });
-  }, 5000);
+  }/* , 5000 */);
 
   // getDevices: function(owner, callback)
   it("should be able to fetch devices for owner", function(done) {
