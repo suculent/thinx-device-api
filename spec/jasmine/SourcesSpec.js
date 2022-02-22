@@ -1,4 +1,4 @@
-describe("Sources", function() {
+describe("Sources", function () {
 
   var expect = require('chai').expect;
   var sources = require('../../lib/thinx/sources');
@@ -9,7 +9,7 @@ describe("Sources", function() {
   var source_id;
   const source_name = "thinx-device-api-test";
 
-  it("(01) should be able to be added", function(done) {
+  it("(01) should be able to be added", function (done) {
     const source = {
       name: source_name,
       owner: owner,
@@ -29,8 +29,8 @@ describe("Sources", function() {
       });
   }, 20000);
 
-  it("(02) should be able to provide a list", function(done) {
-    Sources.list(owner, function(success, response) {
+  it("(02) should be able to provide a list", function (done) {
+    Sources.list(owner, function (success, response) {
       expect(success).to.be.true;
       expect(response).to.be.an('object');
       //console.log("Source List Response: " , {response});
@@ -38,7 +38,7 @@ describe("Sources", function() {
     });
   }, 10000);
 
-  it("(03) should be able to be removed", function(done) {
+  it("(03) should be able to be removed", function (done) {
 
     const source = {
       name: source_name + "-2",
@@ -67,7 +67,7 @@ describe("Sources", function() {
       });
   }, 20000);
 
-  it("(04) should be able to validate branch name", function(done) {
+  it("(04) should be able to validate branch name", function (done) {
     let source = {
       branch: "origin/main"
     };
@@ -78,18 +78,18 @@ describe("Sources", function() {
     done();
   });
 
-  it("(05) should be able to validate url", function(done) {
+  it("(05) should be able to validate url", function (done) {
     let source = {
       url: "git@github.com/suculent/thinx-device-api"
     };
     let result = Sources.normalizedBranch(source, (error, reason) => {
-      console.log("validateBranch error:", error, reason);            
+      console.log("validateBranch error:", error, reason);
     });
     expect(result).to.equal("main");
     done();
   });
 
-  it("(06) should be able to invalidate branch name", function(done) {
+  it("(06) should be able to invalidate branch name", function (done) {
     let source = {
       branch: "origin/mas'ter"
     };
@@ -97,17 +97,17 @@ describe("Sources", function() {
       console.log("normalizedBranch error", error, reason);
     });
     expect(result).to.equal(false);
-      done();
+    done();
   });
 
-  it("(07) should be able to invalidate url", function(done) {
+  it("(07) should be able to invalidate url", function (done) {
     let source = {
       url: "git@github.com/;;suculent/thinx-device-api"
     };
-    let result = Sources.validateURL(source, function(error, reason) {
+    let result = Sources.validateURL(source, function (error, reason) {
       console.log(error, reason);
     });
-    expect(result).to.equal(null);
+    expect(result).to.be.a("string"); // sourec_not_removed
     done();
   });
 
