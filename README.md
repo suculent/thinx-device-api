@@ -237,6 +237,22 @@ See 03-test.sh. There is no point of maintaining documentation for this at curre
 
 After upgrading from versions before `1.1.5200`, you may have issue with accessing CouchDB database. It's known issue, which can be fixed by editing the `/opt/couchdb/etc/vm.args` file inside the `couchdb` container. Just change the auto-generated domain on last line to `couchdb@localhost` and you should regain your access.
 
+## Development hints
+
+In case you don't need all the services running, you can start them as local containers and map them to compose service names using `/etc/hosts`.
+
+Redis
+
+```
+docker run -p 5984:5984 -e COUCHDB_USER=rtmtest -e COUCHDB_PASSWORD=rtmtest thinxcloud/redis:latest
+```
+
+CouchDB
+
+```
+docker run -p 5984:5984 -e COUCHDB_USER=rtmtest -e COUCHDB_PASSWORD=rtmtest couchdb:3.1.0
+```
+
 # Platforms State of Union
 
 ## Overall
