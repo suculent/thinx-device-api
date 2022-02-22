@@ -67,7 +67,7 @@ describe("Sources", function() {
       });
   }, 20000);
 
-  it("(04) should be able to validate branch name", function() {
+  it("(04) should be able to validate branch name", function(done) {
     let source = {
       branch: "origin/main"
     };
@@ -75,38 +75,40 @@ describe("Sources", function() {
       console.log(error);
     });
     expect(result).to.equal("main");
-    
+    done();
   });
 
-  it("(05) should be able to validate url", function() {
+  it("(05) should be able to validate url", function(done) {
     let source = {
       url: "git@github.com/suculent/thinx-device-api"
     };
-    let result = Sources.normalizedBranch(source, (error) => {
-      console.log("validateBranch error:", error);            
+    let result = Sources.normalizedBranch(source, (error, reason) => {
+      console.log("validateBranch error:", error, reason);            
     });
     expect(result).to.equal("main");
+    done();
   });
 
-  it("(06) should be able to invalidate branch name", function() {
+  it("(06) should be able to invalidate branch name", function(done) {
     let source = {
       branch: "origin/mas'ter"
     };
-    let result = Sources.normalizedBranch(source, (error) => {
-      console.log(error);
+    let result = Sources.normalizedBranch(source, (error, reason) => {
+      console.log("normalizedBranch error", error, reason);
     });
     expect(result).to.equal(false);
+      done();
   });
 
-  it("(07) should be able to invalidate url", function() {
+  it("(07) should be able to invalidate url", function(done) {
     let source = {
       url: "git@github.com/;;suculent/thinx-device-api"
     };
-    let result = Sources.validateURL(source, function(error) {
-      console.log(error);
+    let result = Sources.validateURL(source, function(error, reason) {
+      console.log(error, reason);
     });
     expect(result).to.equal(null);
-    
+    done();
   });
 
 });
