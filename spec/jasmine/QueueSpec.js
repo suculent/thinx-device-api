@@ -24,50 +24,47 @@ describe("Queue", function () {
         );
         queue_with_cron.add(mock_udid_1, mock_source_id);
         queue_with_cron.add(mock_udid_2, mock_source_id);
-        queue_with_cron.add(mock_udid_3, mock_source_id);
 
         console.log("(00) Queue calling findNext...");
 
         // Should be able find next waiting item in queue
-        setTimeout(() => {
-            queue_with_cron.findNext((next) => {
 
-                console.log("(00) queue_with_cron.findNext exited with", next); // expected to return null in test
+        queue_with_cron.findNext((next) => {
+
+            console.log("(00) queue_with_cron.findNext exited with", next); // expected to return null in test
+
+            if (next === null) {
+                done();
+                return;
+            }
+
+            // Should be able run next item
+            queue_with_cron.runNext(next);
+
+            console.log("(00) Queue calling findNext again async...");
+
+            // Should not be able to find anything while queue item is running
+            queue_with_cron.findNext((/* nextAction */) => {
+
+                console.log("(01) queue_with_cron.findNext exited with", next); // expected to return null in test
 
                 if (next === null) {
                     done();
                     return;
                 }
 
-                // Should be able run next item
-                queue_with_cron.runNext(next);
+                // can be null
+                console.log("(01) Queue test calling loop...");
 
-                console.log("(00) Queue calling findNext again async...");
+                // Should run loop safely
+                for (let i = 0; i < 10; i++) {
+                    queue_with_cron.loop();
+                }
 
-                // Should not be able to find anything while queue item is running
-                queue_with_cron.findNext((/* nextAction */) => {
-
-                    console.log("(01) queue_with_cron.findNext exited with", next); // expected to return null in test
-
-                    if (next === null) {
-                        done();
-                        return;
-                    }
-
-                    // can be null
-                    console.log("(01) Queue test calling loop...");
-
-                    // Should run loop safely
-                    for (let i = 0; i < 10; i++) {
-                        queue_with_cron.loop();
-                    }
-
-                    console.log("(00) Queue test done.");
-                    done();
-                });
+                console.log("(00) Queue test done.");
+                // done(); will be called later when next is null
             });
-
-        }, 3000);
+        });
     });
 
 });
