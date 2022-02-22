@@ -29,12 +29,17 @@ describe("Queue", function () {
 
         // Should be able find next waiting item in queue
 
+        let done_called = false;
+
         queue_with_cron.findNext((next) => {
 
             console.log("(00) queue_with_cron.findNext exited with", next); // expected to return null in test
 
             if (next === null) {
-                done();
+                if (done_called === false) {
+                    done_called = true;
+                    done();
+                }
                 return;
             }
 
@@ -49,7 +54,10 @@ describe("Queue", function () {
                 console.log("(01) queue_with_cron.findNext exited with", next); // expected to return null in test
 
                 if (next === null) {
-                    done();
+                    if (done_called === false) {
+                        done_called = true;
+                        done();
+                    }
                     return;
                 }
 
