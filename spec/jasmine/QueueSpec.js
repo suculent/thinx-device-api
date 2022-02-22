@@ -46,8 +46,16 @@ describe("Queue", function () {
 
                 // Should not be able to find anything while queue item is running
                 queue_with_cron.findNext((/* nextAction */) => {
+
+                    console.log("(01) queue_with_cron.findNext exited with", next); // expected to return null in test
+
+                    if (next === null) {
+                        done();
+                        return;
+                    }
+
                     // can be null
-                    console.log("(00) Queue test calling loop...");
+                    console.log("(01) Queue test calling loop...");
 
                     // Should run loop safely
                     for (let i = 0; i < 10; i++) {
