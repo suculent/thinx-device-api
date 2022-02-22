@@ -48,6 +48,3 @@
 [submodule "services/console"]
 	path = services/console
 	url = git@github.com:thinx-cloud/console.git
-[submodule "base"]
-	path = base
-	url = git@github.com:suculent/thinx-cloud-base.git

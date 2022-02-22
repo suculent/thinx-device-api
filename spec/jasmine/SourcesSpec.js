@@ -107,7 +107,7 @@ describe("Sources", function () {
     let result = Sources.validateURL(source, function (error, reason) {
       console.log(error, reason);
     });
-    expect(result).to.be.a("string"); // sourec_not_removed
+    expect(result).to.equal(null);
     done();
   });
 
