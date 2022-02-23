@@ -27,7 +27,6 @@ describe("Messenger", function() {
   // getDevices: function(owner, callback)
   it("should be able to fetch devices for owner", function(done) {
     messenger.getDevices(test_owner, (success, devices) => {
-      console.log("devices: ", { devices });
       expect(devices).to.be.an('array');
       done();
     });
@@ -36,7 +35,6 @@ describe("Messenger", function() {
   // publish: function(owner, udid, message); returns nothing
   it("should be able to publish upon connection", function(done) {
     messenger.publish(test_owner, udid, "test");
-    console.log("publishing: ", { test_owner, udid });
     done();
   }, 5000);
 });
