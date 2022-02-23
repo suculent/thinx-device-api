@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 
 var Messenger = require('../../lib/thinx/messenger');
-var messenger = new Messenger("mosquitto").getInstance("mosquitto"); // requires injecting test creds, not custom creds!
+var messenger;
 
 var envi = require("../_envi.json");
 var test_owner = envi.oid;
@@ -9,8 +9,12 @@ var udid = envi.udid;
 
 describe("Messenger", function() {
 
-  // init
-  it("should be able to initialize with owner", function(/* done */) {
+  it("should be able to initialize", function(/* done */) {
+    messenger = new Messenger("mosquitto").getInstance("mosquitto"); // requires injecting test creds, not custom creds!
+  });
+
+  // this requires having owner and devices registered in the DB, 
+  xit("should be able to initialize with owner", function(/* done */) {
     const mock_socket = {};
     console.log("[test] Initializing messenger with owner", test_owner, "socket", mock_socket);
     messenger.initWithOwner(test_owner, mock_socket, (success, status) => {
