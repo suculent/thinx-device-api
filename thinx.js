@@ -94,11 +94,7 @@ app.messenger = new Messenger(serviceMQPassword).getInstance(serviceMQPassword);
 
 const Database = require("./lib/thinx/database");
 var db = new Database();
-db.init((db_err, dbs) => {
-
-  console.log({db_err}, {dbs});
-
-  console.log("[debug] Database initialization complete."); // TODO: Move rest here(?)
+db.init((/* db_err, dbs */) => {
 
   //
   // Log aggregator (needs DB)
@@ -509,7 +505,7 @@ db.init((db_err, dbs) => {
     }
   }
 
-  console.log("Initializing timed tasks...");
+  console.log("[info] Initializing timed tasks...");
   setTimeout(startup_quote, 10000); // wait for Slack init only once
 
 });
