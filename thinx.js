@@ -107,15 +107,10 @@ db.init((db_err, dbs) => {
   const Stats = require("./lib/thinx/statistics");
   var stats = new Stats();
   stats.get_all_owners(); // TODO: measure!
-  setInterval(log_aggregator, 86400 * 1000 / 2);
-
-  // Warning, this is never called! (as well as aggregator and compactor and startup quote?)
-  function log_aggregator() {
+  setInterval(() => {
     stats.aggregate();
     console.log("» Aggregation jobs completed.");
-  }
-
-
+  }, 86400 * 1000 / 2);
 
   //
   // Shared Configuration
