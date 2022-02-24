@@ -64,7 +64,11 @@ var http = require('http');
 var redis = require('redis');
 var path = require('path');
 
-const CONFIG_ROOT = "/mnt/data/conf";
+let CONFIG_ROOT = "/mnt/data/conf";
+if (process.env.ENVIRONMENT == "development") {
+  CONFIG_ROOT = __dirname + "/spec/mnt/data/conf";
+}
+
 var session_config = require(CONFIG_ROOT + "/node-session.json");
 
 var app_config = Globals.app_config();

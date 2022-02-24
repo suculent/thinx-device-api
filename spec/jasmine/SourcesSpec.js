@@ -67,7 +67,7 @@ describe("Sources", function () {
       });
   }, 20000);
 
-  it("(04) should be able to validate branch name", function (done) {
+  it("(04) should be able to accept valid branch name", function (done) {
     let source = {
       branch: "origin/main"
     };
@@ -78,7 +78,7 @@ describe("Sources", function () {
     done();
   });
 
-  it("(05) should be able to validate url", function (done) {
+  it("(05) should be able to accept valida URL", function (done) {
     let source = {
       url: "git@github.com/suculent/thinx-device-api"
     };
@@ -89,7 +89,7 @@ describe("Sources", function () {
     done();
   });
 
-  it("(06) should be able to invalidate branch name", function (done) {
+  it("(06) should be able to reject invalid branch name", function (done) {
     let source = {
       branch: "origin/mas'ter"
     };
@@ -100,14 +100,14 @@ describe("Sources", function () {
     done();
   });
 
-  it("(07) should be able to invalidate url", function (done) {
+  it("(07) should be able to reject invalid URL", function (done) {
     let source = {
       url: "git@github.com/;;suculent/thinx-device-api"
     };
     let result = Sources.validateURL(source, function (error, reason) {
       console.log(error, reason);
     });
-    expect(result).to.be.a("string"); // sourec_not_removed
+    expect(result).to.equal(null);
     done();
   });
 
