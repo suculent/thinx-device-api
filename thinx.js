@@ -106,7 +106,7 @@ db.init((db_err, dbs) => {
 
   const Stats = require("./lib/thinx/statistics");
   var stats = new Stats();
-  stats.get_all_owners(); // FIXME: init all owners on boot... measure!
+  stats.get_all_owners(); // TODO: measure!
   setInterval(log_aggregator, 86400 * 1000 / 2);
 
   // Warning, this is never called! (as well as aggregator and compactor and startup quote?)
@@ -509,7 +509,7 @@ db.init((db_err, dbs) => {
   //
 
   function startup_quote() {
-    if ((typeof (process.env.ENTERPRISE) === "undefined") || (process.env.ENTERPRISE === false)) {
+    if ((typeof (process.env.ENTERPRISE) === "undefined") || (!process.env.ENTERPRISE)) {
       app.messenger.sendRandomQuote();
     }
   }

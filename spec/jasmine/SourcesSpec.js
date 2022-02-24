@@ -22,7 +22,7 @@ describe("Sources", function () {
         if (success === false) {
           console.log("(01) Error adding source: ", source, response);
         }
-        //expect(success).to.be.true; // git fetch must work for this
+        expect(success).to.be.true; // git fetch must work for this
         expect(response).to.be.an('object');
         source_id = response.source_id;
         done();
@@ -33,7 +33,6 @@ describe("Sources", function () {
     Sources.list(owner, function (success, response) {
       expect(success).to.be.true;
       expect(response).to.be.an('object');
-      //console.log("Source List Response: " , {response});
       done();
     });
   }, 10000);
@@ -54,13 +53,13 @@ describe("Sources", function () {
         if (success === false) {
           console.log("(03) Error adding source: ", source, response);
         }
-        //expect(success).to.be.true;
+        expect(success).to.be.true;
         source_id = response.source_id;
         Sources.remove(source.owner, [source_id], (rsuccess, rresponse) => {
           if (rsuccess === false) {
             console.log("Error removing source: " + rresponse);
           }
-          //expect(rsuccess).to.be.true;
+          expect(rsuccess).to.be.true;
           expect(rresponse).to.be.an('object');
           done();
         });

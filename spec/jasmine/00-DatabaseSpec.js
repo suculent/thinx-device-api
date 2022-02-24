@@ -13,7 +13,7 @@ describe("Database", function () {
   }, 5000);
 
   it("should run compactor", function (done) {
-    database.init((err, result) => {
+    database.init((/* err, result */) => {
       database.compactDatabases((success) => {
         console.log("[test] compactor callback success:", success);
         done();
