@@ -16,7 +16,7 @@ describe("Sanitka", function () {
 
   it("should de-escape (delete) dangerous shell characters \", \', ;", function () {
     var s = sanitka.deescape("\"\';;;\"");
-    expect(s).to.equal('');
+    expect(s).to.equal(null);
   });
 
   it("should accept valid owner", function () {
