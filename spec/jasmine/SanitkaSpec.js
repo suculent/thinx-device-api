@@ -73,9 +73,16 @@ describe("Sanitka", function () {
     var result = sanitka.username(input);
     expect(result).to.equal(input);
   });
+
   it("should reject invalid username", function () {
     let input = "@test";
     var result = sanitka.username(input);
+    expect(result).to.equal(null);
+  });
+
+  it("should reject invalid udid", function () {
+    let input = "@blamage";
+    var result = sanitka.udid(input);
     expect(result).to.equal(null);
   });
 
