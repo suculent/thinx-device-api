@@ -1,4 +1,4 @@
-FROM thinxcloud/base
+FROM thinxcloud/base:latest
 
 LABEL maintainer="Matej Sychra <suculent@me.com>"
 LABEL name="THiNX API" version="1.8"
@@ -44,12 +44,13 @@ ENV AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}
 ARG SNYK_TOKEN
 ENV SNYK_TOKEN=${SNYK_TOKEN}
 
+# Create app directory
 WORKDIR /opt/thinx/thinx-device-api
 
-RUN npm install --unsafe-perm . --only-prod
+# Install app dependencies
+COPY package.json ./
 
-#    npm audit fix # fails because of unfixable vulnerabilities
-# && npm audit fix --force # fails because of unfixable vulnerabilities
+RUN npm install --unsafe-perm --only-prod .
 
 # THiNX Web & Device API (HTTP)
 EXPOSE 7442
@@ -68,14 +69,6 @@ RUN apt-get remove -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # TODO: Implement Snyk Container Scanning here in addition to DockerHub manual scans...
-
-#ADD https://get.aquasec.com/microscanner .
-#RUN chmod +x microscanner && mkdir artifacts
-#RUN ./microscanner ${AQUA_SEC_TOKEN} --html --continue-on-failure > ./artifacts/microscanner.html \
-#    && cp ./artifacts/microscanner.html ./static/microscanner.html
-#RUN rm -rf ./microscanner
-
-RUN mkdir -p ./.nyc_output
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 

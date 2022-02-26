@@ -61,11 +61,11 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   chmod +x ./cc-test-reporter
   # ./cc-test-reporter before-build
   echo "[thinx-entrypoint] TEST starting app as first run (create DB and stuff)..."
-  #set +e # prevent exit on timeout - changed to make test fail when app is broken
+  set +e # prevent exit on timeout - changed to make test fail when app is broken
   date
-  timeout 120 node thinx.js # container must wait much longer for test to complete
+  timeout 60 node thinx.js # container must wait much longer for test to complete
   date
-  #set -e # exit immediately on error
+  set -e # exit immediately on error
   echo "[thinx-entrypoint] TEST running suites..." 
   npm run test # | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
 
@@ -76,18 +76,18 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   rm -rf ./sonar-scanner-cli-4.6.2.2472-linux
   7z x ./sonar-scanner-cli-4.6.2.2472-linux.zip
   export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin/
-  sonar-scanner -Dsonar.login=${SONAR_TOKEN}
+  rm -rf /opt/thinx/thinx-device-api/sonar-scanner-4.6.2.2472-linux/jre/legal/
   rm -rf spec/test_repositories/**
-  curl -Os https://uploader.codecov.io/latest/linux/codecov 
-  chmod +x codecov
-  ./codecov -t ${CODECOV_TOKEN}
-
+  sonar-scanner -Dsonar.login=${SONAR_TOKEN}
+  
   set -e
   
-  if [[ -d ./.git ]]; then
+  #if [[ -d ./.git ]]; then
     # currently fails with invalid request parameters, maybe should be replaced by cc-test-reporter
-    codecov -t $CODECOV_TOKEN
-  fi
+    #curl -Os https://uploader.codecov.io/latest/linux/codecov 
+    #chmod +x codecov
+    # codecov -t $CODECOV_TOKEN
+  #fi
 
 else
   echo "[thinx-entrypoint] Starting in production mode..."

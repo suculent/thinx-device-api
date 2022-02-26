@@ -19,16 +19,29 @@ describe("Queue", function () {
         queue_with_cron.cron();
 
         // Should be able to add actions to the queue
+        console.log(
+            "adding mocks"
+        );
         queue_with_cron.add(mock_udid_1, mock_source_id);
         queue_with_cron.add(mock_udid_2, mock_source_id);
-        queue_with_cron.add(mock_udid_3, mock_source_id);
 
         console.log("(00) Queue calling findNext...");
 
         // Should be able find next waiting item in queue
+
+        let done_called = false;
+
         queue_with_cron.findNext((next) => {
 
-            console.log("(00) queue_with_cron.findNext exited with", next);
+            console.log("(00) queue_with_cron.findNext exited with", next); // expected to return null in test
+
+            if (next === null) {
+                if (done_called === false) {
+                    done_called = true;
+                    done();
+                }
+                return;
+            }
 
             // Should be able run next item
             queue_with_cron.runNext(next);
@@ -37,8 +50,19 @@ describe("Queue", function () {
 
             // Should not be able to find anything while queue item is running
             queue_with_cron.findNext((/* nextAction */) => {
+
+                console.log("(01) queue_with_cron.findNext exited with", next); // expected to return null in test
+
+                if (next === null) {
+                    if (done_called === false) {
+                        done_called = true;
+                        done();
+                    }
+                    return;
+                }
+
                 // can be null
-                console.log("(00) Queue test calling loop...");
+                console.log("(01) Queue test calling loop...");
 
                 // Should run loop safely
                 for (let i = 0; i < 10; i++) {
@@ -46,7 +70,7 @@ describe("Queue", function () {
                 }
 
                 console.log("(00) Queue test done.");
-                done();
+                // done(); will be called later when next is null
             });
         });
     });

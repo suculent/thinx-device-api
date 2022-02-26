@@ -22,11 +22,11 @@ jobs:
           dockerfile: ./base/Dockerfile
           extra_build_args: |
             --build-arg REVISION=$(git describe --abbrev=0) \
-          tag: 'latest'
+          tag: latest
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinxcloud/base
-          tag: 'latest'
+          tag: latest
 
   build-console-cloud:
     executor: docker/docker
@@ -249,7 +249,6 @@ jobs:
         command: |
           export ENVIRONMENT=test
           docker-compose up --build api
-          echo "###### > Tailing completed, stopping job."
           date
 
     - run:

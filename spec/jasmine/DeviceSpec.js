@@ -116,7 +116,8 @@ describe("Device", function() {
         apikey,
         null,
         function(success, response) {
-          expect(response).to.be.an('object');
+          let obj = response;
+          expect(obj).to.be.an('object');
           if (success === false) {
             console.log(
               "should receive different response for already-registered revice: " +
@@ -127,6 +128,7 @@ describe("Device", function() {
               return;
             }
           }
+          
           expect(success).to.be.true; // actually false, innit?
           done();
         });

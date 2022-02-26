@@ -1,4 +1,4 @@
-FROM thinxcloud/base
+FROM thinxcloud/base:latest
 
 LABEL maintainer="Matej Sychra <suculent@me.com>"
 LABEL name="THiNX API" version="1.8"
@@ -54,31 +54,9 @@ ENV ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
 
-RUN adduser --system --disabled-password --shell /bin/bash thinx
-
-# WHY? See blame.
-RUN sh -c "echo 'Dir::Ignore-Files-Silently:: \"(.save|.distupgrade)$\";' > /etc/apt/apt.conf.d/99ignoresave"
-
-# RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list && \
+# Install test dependencies
 RUN apt-get update -qq && \
     apt-get install -qq -y --fix-missing --no-install-recommends \
-    apt-transport-https \
-    apt-utils \
-    btrfs-progs \
-    ca-certificates \
-    curl \
-    e2fsprogs \
-    gnutls-bin \
-    iptables \
-    lxc \
-    pigz \
-    python \
-    xfsprogs \
-    xz-utils \
-    net-tools \
-    git \
-    jq \
-    zip \
     p7zip-full \
     default-jre-headless \
     && rm -rf /var/lib/apt/lists/*
@@ -86,9 +64,8 @@ RUN apt-get update -qq && \
 # Install app dependencies
 COPY package.json ./
 
-# Test modules
-RUN npm install -g nyc mocha jasmine mocha-lcov-reporter coveralls npm@8.5.0
-
+# Only test to see wtf?
+#RUN npm install .
 RUN npm install .
 
 VOLUME /var/lib/docker
@@ -105,27 +82,26 @@ EXPOSE 9002
 # Copy app source code
 COPY . .
 
-# download test reporter as a static binary
-RUN curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-RUN chmod +x ./cc-test-reporter
-
 # those packages should not be required and pose HIGH security risks
 # g++ is a DevSec build-only dependency, imagemagick source is currently unknown but it is definitely not required
 RUN apt-get remove -y \
     && apt-get autoremove -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-#ADD https://get.aquasec.com/microscanner .
-#RUN chmod +x microscanner && mkdir artifacts
-#RUN ./microscanner ${AQUA_SEC_TOKEN} --html --continue-on-failure > ./artifacts/microscanner.html \
-#    && cp ./artifacts/microscanner.html ./static/microscanner.html
-#RUN rm -rf ./microscanner
-
 RUN mkdir -p ./.nyc_output
-
-COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
 # only for test mocking (may not work, will need structure with mock data in repo)
 COPY ./spec/mnt /mnt
+
+# download test reporter as a static binary
+RUN curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+RUN chmod +x ./cc-test-reporter
+
+# Test modules
+RUN npm install -g nyc mocha jasmine mocha-lcov-reporter coveralls
+
+# TODO: Implement Snyk Container Scanning here in addition to DockerHub manual scans...
+
+COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
 ENTRYPOINT [ "/docker-entrypoint.sh" ]

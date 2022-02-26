@@ -93,11 +93,11 @@
     "yaml": "^1.9.2"
   },
   "overrides": {
-    "ansi-regex": "^6.0.1",
+    "ansi-regex": "5.0.1",
     "json-schema": "^0.4.0",
     "jsprim": "1.4.2",
-    "string-width": "^5.1.0",
-    "strip-ansi": "^7.0.1",
+    "string-width": "4.2.3",
+    "strip-ansi": "6.0.1",
     "ajv": "6.12.3",
     "bl": "4.0.3",
     "bson": "1.1.4",
@@ -124,11 +124,11 @@
     "yargs-parser": "20.2.7"
   },
   "resolutions": {
-    "ansi-regex": "^6.0.1",
+    "ansi-regex": "5.0.1",
     "json-schema": "^0.4.0",
     "jsprim": "1.4.2",
-    "string-width": "^5.1.0",
-    "strip-ansi": "^7.0.1",
+    "string-width": "4.2.3",
+    "strip-ansi": "6.0.1",
     "ajv": "6.12.3",
     "bl": "4.0.3",
     "bson": "1.1.4",
@@ -152,7 +152,8 @@
     "netmask": "2.0.2",
     "proxy-agent": "4.0.1",
     "request": "2.88.2",
-    "socket.io-parser": "4.0.4"
+    "socket.io-parser": "4.0.4",
+    "wide-align": "1.1.2"
   },
   "devDependencies": {
     "codacy-coverage": "^3.2.0",

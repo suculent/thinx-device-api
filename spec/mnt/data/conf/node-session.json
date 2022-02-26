@@ -1,0 +1,9 @@
+{
+  "secret": "<some-session-secret>",
+  "driver": "file",
+  "lifetime": 300000,
+  "expireOnClose": false,
+  "files": "./sessions",
+  "cookie": "x-thx-session",
+  "path": "/"
+}
