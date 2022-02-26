@@ -302,7 +302,7 @@ workflows:
   # public open-source site
   #
 
-  build-and-deploy:
+  test-and-deploy:
 
     jobs:
 
