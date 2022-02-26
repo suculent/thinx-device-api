@@ -249,7 +249,7 @@ jobs:
         command: |
           export ENVIRONMENT=test
           docker-compose up --build api | tee -ipa ./test.log
-          if [[ ! $(cat ./test.log | grep " 0 failures,") ]]; then 
+          if [[ ! $(cat ./test.log | grep ", 0 failures,") ]]; then 
             echo "» TEST failed. Should not deploy this commit."
             cat ./test.log | grep "Failures:"
             exit 1
