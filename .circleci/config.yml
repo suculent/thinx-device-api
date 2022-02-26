@@ -248,7 +248,9 @@ jobs:
         name: Starting API Test
         command: |
           export ENVIRONMENT=test
-          docker-compose up --build api
+          docker-compose up --build api | tee -ipa ./test.log
+          echo "» ANY Failures?"
+          cat ./test.log | grep "Failures:"
           date
 
     - run:
