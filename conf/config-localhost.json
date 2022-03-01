@@ -26,7 +26,7 @@
   "webhook_port": 9002,
   "data_root": "/mnt/data",
   "deploy_root": "/data",
-  "build_root": "/repositories",
+  "build_root": "/repos",
   "ssh_keys": "/mnt/data/ssh_keys",
   "slack" : {
     "client_id" : "",
