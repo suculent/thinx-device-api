@@ -142,7 +142,7 @@ services:
       - '/var/run/docker.sock:/var/run/docker.sock'
       - '/var/lib/docker'
       - '/cache'
-      - '/mnt/data/statistics:/mnt/data/statistics'
+      - '/mnt/data:/mnt/data'
     labels:
       - traefik.docker.network=nat
       - traefik.enable=true
