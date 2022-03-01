@@ -25,12 +25,11 @@ console.log("");
 
 const Globals = require("./lib/thinx/globals.js"); // static only!
 const Sanitka = require("./lib/thinx/sanitka.js");
-let sqreen;
 
 if (Globals.use_sqreen()) {
   if ((typeof (process.env.SQREEN_APP_NAME) !== "undefined") && (typeof (process.env.SQREEN_TOKEN) !== "undefined")) {
     try {
-      sqreen = require('sqreen');
+      require('sqreen');
     } catch (bitch) {
       console.log(bitch);
     }
