@@ -25,12 +25,12 @@ describe("Repository Watcher", function() {
   });
 
   it("should be able to find all repositories", function() {
-    let result = Repository.findAllRepositoriesWithFullname();
+    let result = Repository.findAllRepositoriesWithFullname("esp");
     expect(result).to.be.an('array');
   });
 
   it("should be able to find all repositories with search query", function() {
-    let result = Repository.findAllRepositoriesWithFullname("esp8266");
+    let result = Repository.findAllRepositoriesWithFullname("32");
     expect(result).to.be.an('array');
   });
 
