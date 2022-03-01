@@ -36,8 +36,8 @@ describe("Repository Watcher", function() {
 
   it("should be able to purge old repos", function() {
     watcher = new Repository();
-    let repositories = "/device-folders-todo"
     let name = "esp";
+    let repositories = Repository.findAllRepositoriesWithFullname("32");
     watcher.purge_old_repos_with_full_name(repositories, name)
     expect(watcher).to.be.an('object');
   });
