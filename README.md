@@ -32,6 +32,8 @@ IoT Device Management Server running on node.js.
 
 [![Twitter: @thinxcloud](https://img.shields.io/badge/contact-%40thinxcloud-green.svg?style=flat)](https://twitter.com/thinxcloud)
 
+[![Demo Site Availability](https://api.ghostinspector.com/v1/tests/621e261b2fb8263ffaf4233b/status-badge)](https://api.ghostinspector.com/v1/tests/621e261b2fb8263ffaf4233b/status-badge)
+
 The CircleCI build is limited and therefore returns mostly bad results. Closer look may show better numbers.
 
 ## The Purpose
