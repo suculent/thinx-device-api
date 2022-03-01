@@ -193,13 +193,19 @@ db.init((/* db_err, dbs */) => {
   // what is possible is covered by helmet and no-cache.
 
   // allow disabling Secure/HTTPOnly cookies for HTTP-only mode (development, localhost)
-  let enforceMaximumSecurity = app_config.debug.allow_http_login ? true : false;
+  let enforceMaximumSecurity;
+  if ((process.env.ENVIRONMENT === "test") || (process.env.ENVIRONMENT === "development")) {
+    enforceMaximumSecurity = app_config.debug.allow_http_login ? true : false;
+  } else {
+    enforceMaximumSecurity = true;
+  }
 
   const sessionConfig = {
     secret: session_config.secret,
     cookie: {
       maxAge: 3600000,
-      secure: enforceMaximumSecurity,
+      // can be false in case of local development or testing; can be mitigated by generating self-signed certificates on install (if there are no certs already present; must be managed by startup shellscript reading from config.json using jq)
+      secure: enforceMaximumSecurity, /* lgtm [js/clear-text-cookie] */
       httpOnly: true
     },
     store: sessionStore,
