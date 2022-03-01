@@ -317,6 +317,13 @@ db.init((/* db_err, dbs */) => {
   var wsapp = express();
   wsapp.disable('x-powered-by');
 
+  if (!enforceMaximumSecurity) {
+    console.log("Websockets currently require full HTTPS even for development. Generate a certificate to use websockets in dev/test environment.");
+    enforceMaximumSecurity = true;
+  } else {
+    enforceMaximumSecurity = true;
+  }
+
   wsapp.use(session({ /* lgtm [js/client-exposed-cookie] */
     secret: session_config.secret,
     store: sessionStore,
