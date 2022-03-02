@@ -161,8 +161,11 @@ describe("Device", function() {
       // Returns "OK" when current firmware is valid.
       var body = JRS;
       body.udid = udid;
+      let req = {
+        owner: owner
+      };
       console.log("• DeviceSpec.js: Using UDID: " + udid);
-      device.firmware(body, apikey, function(success, response) {
+      device.firmware(body, apikey, req.owner, function(success, response) {
         console.log("• DeviceSpec.js: Firmware fetch result: ", {response});
         expect(success).to.equal(false);
         expect(response.success).to.equal(false);
