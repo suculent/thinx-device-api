@@ -30,11 +30,11 @@ if (Globals.use_sqreen()) {
   if ((typeof (process.env.SQREEN_APP_NAME) !== "undefined") && (typeof (process.env.SQREEN_TOKEN) !== "undefined")) {
     try {
       require('sqreen');
-    } catch (bitch) {
-      console.log(bitch);
+    } catch (error) {
+      console.log("Require Sqreen error", error);
     }
   } else {
-    console.log("Sqreen env vars not available");
+    console.log("Sqreen env vars not configured.");
   }
 }
 
