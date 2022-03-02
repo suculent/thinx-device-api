@@ -324,7 +324,7 @@ db.init((/* db_err, dbs */) => {
     enforceMaximumSecurity = true;
   }
 
-  wsapp.use(session({ /* lgtm [js/client-exposed-cookie] */
+  wsapp.use(session({ /* lgtm [js/clear-text-cookie] */
     secret: session_config.secret,
     store: sessionStore,
     cookie: {
