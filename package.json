@@ -92,7 +92,7 @@
     "yaml": "^1.9.2"
   },
   "overrides": {
-    "ansi-regex": "5.0.1",
+    "ansi-regex": "6.0.1",
     "json-schema": "^0.4.0",
     "jsprim": "1.4.2",
     "string-width": "4.2.3",
@@ -115,6 +115,7 @@
     "mime": "2.5.2",
     "minimatch": "3.0.4",
     "minimist": "1.2.3",
+    "moment": "2.29.1",
     "netmask": "2.0.2",
     "proxy-agent": "4.0.1",
     "socket.io-parser": "4.0.4",
@@ -123,7 +124,7 @@
     "yargs-parser": "20.2.7"
   },
   "resolutions": {
-    "ansi-regex": "5.0.1",
+    "ansi-regex": "6.0.1",
     "json-schema": "^0.4.0",
     "jsprim": "1.4.2",
     "string-width": "4.2.3",
