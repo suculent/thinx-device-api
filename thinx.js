@@ -25,17 +25,16 @@ console.log("");
 
 const Globals = require("./lib/thinx/globals.js"); // static only!
 const Sanitka = require("./lib/thinx/sanitka.js");
-let sqreen;
 
 if (Globals.use_sqreen()) {
   if ((typeof (process.env.SQREEN_APP_NAME) !== "undefined") && (typeof (process.env.SQREEN_TOKEN) !== "undefined")) {
     try {
-      sqreen = require('sqreen');
-    } catch (bitch) {
-      console.log(bitch);
+      require('sqreen');
+    } catch (error) {
+      console.log("Require Sqreen error", error);
     }
   } else {
-    console.log("Sqreen env vars not available");
+    console.log("Sqreen env vars not configured.");
   }
 }
 
@@ -194,13 +193,19 @@ db.init((/* db_err, dbs */) => {
   // what is possible is covered by helmet and no-cache.
 
   // allow disabling Secure/HTTPOnly cookies for HTTP-only mode (development, localhost)
-  let enforceMaximumSecurity = app_config.debug.allow_http_login ? true : false;
+  let enforceMaximumSecurity;
+  if ((process.env.ENVIRONMENT === "test") || (process.env.ENVIRONMENT === "development")) {
+    enforceMaximumSecurity = app_config.debug.allow_http_login ? true : false;
+  } else {
+    enforceMaximumSecurity = true;
+  }
 
   const sessionConfig = {
     secret: session_config.secret,
     cookie: {
       maxAge: 3600000,
-      secure: enforceMaximumSecurity,
+      // can be false in case of local development or testing; can be mitigated by generating self-signed certificates on install (if there are no certs already present; must be managed by startup shellscript reading from config.json using jq)
+      secure: enforceMaximumSecurity, /* lgtm [js/clear-text-cookie] */
       httpOnly: true
     },
     store: sessionStore,
@@ -312,7 +317,14 @@ db.init((/* db_err, dbs */) => {
   var wsapp = express();
   wsapp.disable('x-powered-by');
 
-  wsapp.use(session({ /* lgtm [js/client-exposed-cookie] */
+  if (!enforceMaximumSecurity) {
+    console.log("Websockets currently require full HTTPS even for development. Generate a certificate to use websockets in dev/test environment.");
+    enforceMaximumSecurity = true;
+  } else {
+    enforceMaximumSecurity = true;
+  }
+
+  wsapp.use(session({ /* lgtm [js/clear-text-cookie] */
     secret: session_config.secret,
     store: sessionStore,
     cookie: {

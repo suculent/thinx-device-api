@@ -1,4 +1,7 @@
 path_classifiers:
     design:
-        - design
+        - "./design"
         - exclude: design
+    filters:
+        - "./design"
+        - exclude: filters
