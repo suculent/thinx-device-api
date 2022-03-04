@@ -30,6 +30,18 @@ describe("Sanitka", function () {
     expect(result).to.equal(false);
   });
 
+  it("should fail safely on undefined token", function () {
+    let input;
+    var result = sanitka.pushToken(input);
+    expect(result).to.equal(null);
+  });
+
+  it("should fail safely on null token", function () {
+    let input = null;
+    var result = sanitka.pushToken(input);
+    expect(result).to.equal(null);
+  });
+
   it("should accept valid iOS push token", function () {
     let input = "31b1f6bf498d7cec463ff2588aca59a52df6f880e60e8d4d6bcda0d8e6e87823";
     var result = sanitka.pushToken(input);
