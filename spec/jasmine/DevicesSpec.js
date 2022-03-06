@@ -79,7 +79,6 @@ describe("Devices", function() {
     devices.list("", (success, response) => {
       expect(success).to.be.false;
       expect(response).to.be.a('object');
-      expect(response.devices).to.be.a('array');
       done();
     });
   }, 5000);

@@ -74,7 +74,7 @@ jobs:
             --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} \
             --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
             --build-arg ENVIRONMENT=${ENVIRONMENT} \
-            --build-arg REVISION=$(git describe --abbrev=0) \
+            --build-arg REVISION=$(git rev-list head --count) \
           tag: 'latest'
       - docker/push:
           digest-path: /tmp/digest.txt
@@ -96,7 +96,7 @@ jobs:
             --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} \
             --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
             --build-arg ENVIRONMENT=${ENVIRONMENT} \
-            --build-arg REVISION=$(git describe --abbrev=0) \
+            --build-arg REVISION=$(git rev-list head --count) \
           tag: 'swarm'
   
   test:

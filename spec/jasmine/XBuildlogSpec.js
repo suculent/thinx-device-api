@@ -19,8 +19,8 @@ describe("Build log", function() {
 
   it("(02) should be able to list build logs", function(done) {
     blog.list(owner, function(err, body) {
-      console.log("build_logs", body);
-      expect(body).to.be.a('object');
+      console.log("[test] build_logs", body);
+      expect(body).to.be.an('array');
       var build_id = body[0];
       if (typeof(build_id) !== "undefined") {
         blog.fetch(build_id, function(err, body) {

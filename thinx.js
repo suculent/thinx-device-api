@@ -303,7 +303,7 @@ db.init((/* db_err, dbs */) => {
     }
 
   } else {
-    console.log("[warning] Skipping HTTPS server, SSL key or certificate not found. This configuration is INSECURE! and will cause an error in Enterprise configurations in future.");
+    console.log("[warning] ⚠️ Skipping HTTPS server, SSL key or certificate not found. This configuration is INSECURE! and will cause an error in Enterprise configurations in future.");
   }
 
   app.use('/static', express.static(path.join(__dirname, 'static')));
