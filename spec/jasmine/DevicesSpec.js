@@ -101,6 +101,7 @@ describe("Devices", function() {
     var body = {
       udid: TEST_DEVICE.udid
     };
+    console.log("[test] Detaching owner %s", owner);
     devices.detach(owner, body, (res, success, response) => {
       expect(success).to.be.true;
       expect(response).to.be.a('string');
