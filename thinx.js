@@ -273,7 +273,7 @@ db.init((/* db_err, dbs */) => {
     let sslvalid = false;
 
     if (!fs.existsSync(app_config.ssl_ca)) {
-      const message = "[warning] Did not find app_config.ssl_ca file, websocket logging will fail...";
+      const message = "⚠️ [warning] Did not find app_config.ssl_ca file, websocket logging will fail...";
       rollbar.warn(message);
       console.log(message);
     }
@@ -302,7 +302,7 @@ db.init((/* db_err, dbs */) => {
     }
 
   } else {
-    console.log("[warning] ⚠️ Skipping HTTPS server, SSL key or certificate not found. This configuration is INSECURE! and will cause an error in Enterprise configurations in future.");
+    console.log("⚠️ [warning] Skipping HTTPS server, SSL key or certificate not found. This configuration is INSECURE! and will cause an error in Enterprise configurations in future.");
   }
 
   app.use('/static', express.static(path.join(__dirname, 'static')));
