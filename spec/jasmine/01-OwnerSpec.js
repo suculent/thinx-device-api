@@ -86,7 +86,6 @@ describe("Owner", function() {
 
   it("(05) should be able to begin reset owner password", function(done) {
     user.password_reset_init(email, (success, response) => {
-      console.log("password-reset-init response:", JSON.stringify(response));
       if (response) {
         var body = {
           password: "tset",

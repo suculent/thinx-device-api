@@ -102,7 +102,6 @@ describe("Devices", function() {
       udid: TEST_DEVICE.udid
     };
     devices.detach(owner, body, (res, success, response) => {
-      console.log("Detach response: ", res, success, response);
       expect(success).to.be.true;
       expect(response).to.be.a('string');
       expect(response).to.equal('detached');
