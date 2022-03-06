@@ -206,7 +206,7 @@ db.init((/* db_err, dbs */) => {
       maxAge: 3600000,
       // can be false in case of local development or testing; can be mitigated by generating self-signed certificates on install (if there are no certs already present; must be managed by startup shellscript reading from config.json using jq)
       secure: enforceMaximumSecurity, /* lgtm [js/clear-text-cookie] */
-      httpOnly: true
+      httpOnly: false
     },
     store: sessionStore,
     name: "x-thx-session",
@@ -329,7 +329,7 @@ db.init((/* db_err, dbs */) => {
     cookie: {
       expires: hour,
       secure: enforceMaximumSecurity,
-      httpOnly: true
+      httpOnly: false
     },
     name: "x-thx-ws-session",
     resave: false,
