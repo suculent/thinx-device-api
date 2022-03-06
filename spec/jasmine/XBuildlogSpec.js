@@ -19,7 +19,7 @@ describe("Build log", function() {
 
   it("(02) should be able to list build logs", function(done) {
     blog.list(owner, function(err, body) {
-      console.log("[test] [info] build_logs", body);
+      console.log("[test] ✅ [info] build_logs", body);
       // err should be null
       expect(body).to.be.an('object'); // { rows: [] } in case of empty; ahways has dows
       var last_build_id = body.rows[0];
