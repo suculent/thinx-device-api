@@ -156,7 +156,7 @@ db.init((/* db_err, dbs */) => {
   hook_server.disable('x-powered-by');
   if (typeof (app_config.webhook_port) !== "undefined") {
     http.createServer(hook_server).listen(app_config.webhook_port, "0.0.0.0", function () {
-      console.log("[info] 🪝 Webhook API started on port", app_config.webhook_port);
+      console.log("🪝 [info] Webhook API started on port", app_config.webhook_port);
     });
     hook_server.use(express.json({
       limit: "2mb",
@@ -169,9 +169,9 @@ db.init((/* db_err, dbs */) => {
       if (fail_on_invalid_git_headers(req)) return;
       // do not wait for response, may take ages
       res.status(200).end("Accepted");
-      console.log("[profiler] ⏱ Hook process started...");
+      console.log("⏱ [profiler] Hook process started...");
       watcher.process_hook(req.body);
-      console.log("[profiler] ⏱ Hook process completed.");
+      console.log("⏱ [profiler] Hook process completed.");
     }); // end of Legacy Webhook Server; will deprecate after reconfiguring all instances or if no webhook_port is defined
   }
 
@@ -260,10 +260,10 @@ db.init((/* db_err, dbs */) => {
 
   // Legacy HTTP support for old devices without HTTPS proxy
   let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function () {
-    console.log("[info] ℹ️ HTTP API started on port", app_config.port);
+    console.log("ℹ️ [info] HTTP API started on port", app_config.port);
     let end_timestamp = new Date().getTime() - start_timestamp;
     let seconds = Math.ceil(end_timestamp / 1000);
-    console.log("[profiler] ⏱ Startup phase took:", seconds, "seconds");
+    console.log("⏱ [profiler] Startup phase took:", seconds, "seconds");
   });
 
   var read = require('fs').readFileSync;
@@ -295,7 +295,7 @@ db.init((/* db_err, dbs */) => {
         ca: read(app_config.ssl_ca, 'utf8'),
         NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
       };
-      console.log("[info] ℹ️ Starting HTTPS server on " + app_config.secure_port + "...");
+      console.log("ℹ️ [info] Starting HTTPS server on " + app_config.secure_port + "...");
       https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
     } else {
       console.log("[error] ☣️ SSL certificate loading or verification FAILED! Check your configuration!");
