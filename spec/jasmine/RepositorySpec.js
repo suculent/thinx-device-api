@@ -17,7 +17,7 @@ describe("Repository Watcher", function() {
     console.log("Callback 2", err);
   };
 
-  console.log("[test] ⛔️  Watcher is using repo_path: "+repo_path);
+  console.log("[test] [info] Watcher is using repo_path: "+repo_path);
 
   it("should be able to initialize", function() {
     watcher = new Repository();
