@@ -283,7 +283,7 @@ db.init((/* db_err, dbs */) => {
     try {
       sslvalid = ca.verify(client);
     } catch (err) {
-      console.log("☣️  [error] Certificate verification failed: ", err);
+      console.log("☣️ [error] Certificate verification failed: ", err);
     }
 
     if (sslvalid) {
@@ -296,7 +296,7 @@ db.init((/* db_err, dbs */) => {
       console.log("ℹ️ [info] Starting HTTPS server on " + app_config.secure_port + "...");
       https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
     } else {
-      console.log("☣️  [error] SSL certificate loading or verification FAILED! Check your configuration!");
+      console.log("☣️ [error] SSL certificate loading or verification FAILED! Check your configuration!");
     }
 
   } else {
