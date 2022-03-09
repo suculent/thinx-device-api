@@ -192,14 +192,6 @@ db.init((/* db_err, dbs */) => {
   // Bypassed LGTM, because it does not make sense on this API for all endpoints,
   // what is possible is covered by helmet and no-cache.
 
-  // allow disabling Secure/HTTPOnly cookies for HTTP-only mode (development, localhost)
-  let enforceMaximumSecurity;
-  if ((process.env.ENVIRONMENT === "test") || (process.env.ENVIRONMENT === "development")) {
-    enforceMaximumSecurity = app_config.debug.allow_http_login ? true : false;
-  } else {
-    enforceMaximumSecurity = true;
-  }
-
   const sessionConfig = {
     secret: session_config.secret,
     cookie: {
@@ -215,7 +207,8 @@ db.init((/* db_err, dbs */) => {
     saveUninitialized: false
   };
 
-  const sessionParser = session(sessionConfig); /* lgtm [js/missing-token-validation] lgtm [js/clear-text-cookie] lgtm [js/client-exposed-cookie] */
+  // intentionally exposed cookie because there is no HTTPS between app and Traefik frontend
+  const sessionParser = session(sessionConfig); /* lgtm [js/client-exposed-cookie] */
 
   app.use(sessionParser);  
 
@@ -313,13 +306,6 @@ db.init((/* db_err, dbs */) => {
 
   var wsapp = express();
   wsapp.disable('x-powered-by');
-
-  if (!enforceMaximumSecurity) {
-    console.log("Websockets currently require full HTTPS even for development. Generate a certificate to use websockets in dev/test environment.");
-    enforceMaximumSecurity = true;
-  } else {
-    enforceMaximumSecurity = true;
-  }
 
   wsapp.use(session({ /* lgtm [js/clear-text-cookie] */
     secret: session_config.secret,
