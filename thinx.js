@@ -326,7 +326,7 @@ db.init((/* db_err, dbs */) => {
     store: sessionStore,
     cookie: {
       expires: hour,
-      secure: enforceMaximumSecurity,
+      secure: false,
       httpOnly: false
     },
     name: "x-thx-ws-session",
@@ -343,8 +343,7 @@ db.init((/* db_err, dbs */) => {
     const owner = url.parse(request.url).pathname.replace("/", "");
 
     if (typeof (socketMap.get(owner)) === "undefined") {
-      console.log("Socket already mapped for", owner);
-      return;
+      console.log("Socket already mapped for", owner, "reassigning...");
     }
 
     if (typeof (request.session) === "undefined") {
