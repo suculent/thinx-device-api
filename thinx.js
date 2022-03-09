@@ -205,14 +205,14 @@ db.init((/* db_err, dbs */) => {
     cookie: {
       maxAge: 3600000,
       // can be false in case of local development or testing; can be mitigated by generating self-signed certificates on install (if there are no certs already present; must be managed by startup shellscript reading from config.json using jq)
-      secure: enforceMaximumSecurity, /* lgtm [js/clear-text-cookie] */
+      secure: false, // enforceMaximumSecurity, /* lgtm [js/clear-text-cookie] */
       httpOnly: false
     },
     store: sessionStore,
     name: "x-thx-session",
-    resave: false, // was true
+    resave: true, // was true then false
     rolling: false,
-    saveUninitialized: false,
+    saveUninitialized: false
   };
 
   const sessionParser = session(sessionConfig); /* lgtm [js/missing-token-validation] lgtm [js/clear-text-cookie] lgtm [js/client-exposed-cookie] */
