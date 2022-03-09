@@ -162,10 +162,14 @@ describe("Device", function() {
       var body = JRS;
       body.udid = udid;
       let req = {
-        owner: owner
+        owner: owner,
+        body: body,
+        headers: {
+          "authentication": apikey
+        }
       };
       console.log("• DeviceSpec.js: Using UDID: " + udid);
-      device.firmware(body, apikey, req.owner, function(success, response) {
+      device.firmware(req, function(success, response) {
         console.log("• DeviceSpec.js: Firmware fetch result: ", {response});
         expect(success).to.equal(false);
         expect(response.success).to.equal(false);
