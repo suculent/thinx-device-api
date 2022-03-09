@@ -161,11 +161,11 @@ describe("Device", function() {
       // Returns "OK" when current firmware is valid.
       var body = JRS;
       body.udid = udid;
+      body.owner = owner;
       let req = {
-        owner: owner,
         body: body,
         headers: {
-          "authentication": apikey
+          authentication: apikey
         }
       };
       console.log("• DeviceSpec.js: Using UDID: " + udid);
