@@ -19,13 +19,13 @@ describe("Build log", function() {
 
   it("(02) should be able to list build logs", function(done) {
     blog.list(owner, function(err, body) {
-      console.log("[test] ✅ [info] build_logs", body);
+      console.log("[spec] [info] build_logs", body);
       // err should be null
       expect(body).to.be.an('object'); // { rows: [] } in case of empty; ahways has dows
       var last_build_id = body.rows[0];
       if ((typeof(last_build_id) !== "undefined") && (last_build_id !== null)) {
         blog.fetch(last_build_id, function(berr, bbody) {
-          console.log("[test] ✅ build log body:", bbody);
+          console.log("[spec] [info] build log body:", bbody);
           expect(berr).to.equal(false);
           done();
         });

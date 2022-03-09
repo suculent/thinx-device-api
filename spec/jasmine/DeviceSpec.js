@@ -65,7 +65,7 @@ describe("Device", function() {
       expect(object).to.be.an('array');
       if (success) {
         apikey = object[0].hash;
-        console.log("[test] ✅ Key hash ready: ", apikey);
+        console.log("✅ [spec] Key hash ready: ", apikey);
         expect(apikey).to.be.a('string');
       }
       done();
