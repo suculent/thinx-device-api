@@ -151,30 +151,6 @@ db.init((/* db_err, dbs */) => {
     return true; // fail
   }
 
-  // file deepcode ignore UseCsurfForExpress: API cannot use CSRF
-  const hook_server = express();
-  hook_server.disable('x-powered-by');
-  if (typeof (app_config.webhook_port) !== "undefined") {
-    http.createServer(hook_server).listen(app_config.webhook_port, "0.0.0.0", function () {
-      console.log("🪝 [info] Webhook API started on port", app_config.webhook_port);
-    });
-    hook_server.use(express.json({
-      limit: "2mb",
-      strict: false
-    }));
-    hook_server.use(express.urlencoded({ extended: false }));
-
-    hook_server.post("/", function (req, res) {
-      // From GitHub, exit on non-push events prematurely
-      if (fail_on_invalid_git_headers(req)) return;
-      // do not wait for response, may take ages
-      res.status(200).end("Accepted");
-      console.log("⏱ [profiler] Hook process started...");
-      watcher.process_hook(req.body);
-      console.log("⏱ [profiler] Hook process completed.");
-    }); // end of Legacy Webhook Server; will deprecate after reconfiguring all instances or if no webhook_port is defined
-  }
-
   // DI
   app.builder = builder;
   app.queue = queue;

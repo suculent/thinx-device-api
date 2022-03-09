@@ -20,7 +20,6 @@
   },
   "rollbar_token": "<enter-your-rollbar.com-token>",
   "database_uri": "http://rtmtest:rtmtest@couchdb:5984",
-  "webhook_port": 9002,
   "mqtt_port": 1883,
   "port": 7442,
   "secure_port": 7443,
