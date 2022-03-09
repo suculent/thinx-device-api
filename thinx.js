@@ -204,22 +204,20 @@ db.init((/* db_err, dbs */) => {
     secret: session_config.secret,
     cookie: {
       maxAge: 3600000,
-      // can be false in case of local development or testing; can be mitigated by generating self-signed certificates on install (if there are no certs already present; must be managed by startup shellscript reading from config.json using jq)
-      secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */
+      // can be false in case of local development or testing; mitigated by using Traefik router unwrapping HTTPS so the cookie travels securely where possible
+      secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/client-exposed-cookie] */
       httpOnly: false
     },
     store: sessionStore,
     name: "x-thx-session",
     resave: true, // was true then false
-    rolling: false,
+    rolling: false, // rolling was true; This resets the expiration date on the cookie to the given default.
     saveUninitialized: false
   };
 
   const sessionParser = session(sessionConfig); /* lgtm [js/missing-token-validation] lgtm [js/clear-text-cookie] lgtm [js/client-exposed-cookie] */
 
-  app.use(sessionParser);
-
-  // rolling was true; This resets the expiration date on the cookie to the given default.
+  app.use(sessionParser);  
 
   app.use(express.json({
     limit: "2mb",
@@ -260,7 +258,7 @@ db.init((/* db_err, dbs */) => {
 
   // Legacy HTTP support for old devices without HTTPS proxy
   let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function () {
-    console.log("ℹ️ [info] HTTP API started on port", app_config.port);
+    console.log("ℹ️  [info] HTTP API started on port", app_config.port);
     let end_timestamp = new Date().getTime() - start_timestamp;
     let seconds = Math.ceil(end_timestamp / 1000);
     console.log("⏱ [profiler] Startup phase took:", seconds, "seconds");
@@ -295,7 +293,7 @@ db.init((/* db_err, dbs */) => {
         ca: read(app_config.ssl_ca, 'utf8'),
         NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
       };
-      console.log("ℹ️ [info] Starting HTTPS server on " + app_config.secure_port + "...");
+      console.log("ℹ️  [info] Starting HTTPS server on " + app_config.secure_port + "...");
       https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
     } else {
       console.log("☣️ [error] SSL certificate loading or verification FAILED! Check your configuration!");
