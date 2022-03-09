@@ -163,12 +163,14 @@ describe("Device", function() {
       body.udid = udid;
       body.owner = owner;
       let req = {
-        body: body,
+        body: {
+          registration: body
+        },
         headers: {
           authentication: apikey
         }
       };
-      console.log("• DeviceSpec.js: Using UDID: " + udid);
+      console.log("• DeviceSpec.js: Using UDID: " + udid, "and req", {req});
       device.firmware(req, function(success, response) {
         console.log("• DeviceSpec.js: Firmware fetch result: ", {response});
         expect(success).to.equal(false);
