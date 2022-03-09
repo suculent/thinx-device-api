@@ -14,8 +14,7 @@ describe("Database", function () {
 
   it("should run compactor", function (done) {
     database.init((/* err, result */) => {
-      database.compactDatabases((success) => {
-        console.log("✅ [spec] compactor callback success:", success);
+      database.compactDatabases((/* success */) => {
         done();
       });
     });
