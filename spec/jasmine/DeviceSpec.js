@@ -159,12 +159,12 @@ describe("Device", function() {
 
   it("(07) should be able to provide device firmware", function(firmware_done) {
       // Returns "OK" when current firmware is valid.
-      var body = JRS;
-      body.udid = udid;
-      body.owner = owner;
+      var rbody = JRS;
+      rbody.udid = udid;
+      rbody.owner = owner;
       let req = {
         body: {
-          registration: body
+          registration: rbody
         },
         headers: {
           authentication: apikey
