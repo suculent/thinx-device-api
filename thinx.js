@@ -137,20 +137,7 @@ db.init((/* db_err, dbs */) => {
   // Starts Git Webhook Server
   var Repository = require("./lib/thinx/repository");
   const watcher = new Repository(queue);
-
-  /* Legacy Webhook Server, kept for backwards compatibility, will deprecate. */
-  /* POST URL `http://<THINX_HOSTNAME>:9002/` changes to `https://<THINX_HOSTNAME>/githook` */
-
-  function fail_on_invalid_git_headers(req) {
-    if (typeof (req.headers["X-GitHub-Event"]) !== "undefined") {
-      if ((req.headers["X-GitHub-Event"] != "push")) {
-        res.status(200).end("Accepted");
-        return false; // do not fail
-      }
-    }
-    return true; // fail
-  }
-
+  
   // DI
   app.builder = builder;
   app.queue = queue;
@@ -206,8 +193,7 @@ db.init((/* db_err, dbs */) => {
   /* Webhook Server (new impl.) */
 
   app.post("/githook", function (req, res) {
-    // From GitHub, exit on non-push events prematurely
-    // if (fail_on_invalid_git_headers(req)) return;
+    
     // TODO: Validate and possibly reject invalid requests to prevent injection
     // E.g. using git_secret_key from app_config
 
