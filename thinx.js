@@ -161,7 +161,7 @@ db.init((/* db_err, dbs */) => {
       maxAge: 3600000,
       // can be false in case of local development or testing; mitigated by using Traefik router unwrapping HTTPS so the cookie travels securely where possible
       secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/client-exposed-cookie] */
-      httpOnly: false
+      httpOnly: true
     },
     store: sessionStore,
     name: "x-thx-session",
@@ -275,7 +275,7 @@ db.init((/* db_err, dbs */) => {
     cookie: {
       expires: hour,
       secure: false,
-      httpOnly: false
+      httpOnly: true
     },
     name: "x-thx-ws-session",
     resave: false,
