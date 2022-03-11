@@ -160,7 +160,7 @@ db.init((/* db_err, dbs */) => {
     cookie: {
       maxAge: 3600000,
       // can be false in case of local development or testing; mitigated by using Traefik router unwrapping HTTPS so the cookie travels securely where possible
-      secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/client-exposed-cookie] */
+      secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
       httpOnly: true
     },
     store: sessionStore,
@@ -272,6 +272,7 @@ db.init((/* db_err, dbs */) => {
   wsapp.use(session({ /* lgtm [js/clear-text-cookie] */
     secret: session_config.secret,
     store: sessionStore,
+    // deepcode ignore WebCookieSecureDisabledExplicitly: <please specify a reason of ignoring this>
     cookie: {
       expires: hour,
       secure: false,
@@ -281,7 +282,7 @@ db.init((/* db_err, dbs */) => {
     resave: false,
     rolling: false,
     saveUninitialized: false,
-  })); /* lgtm [js/client-exposed-cookie] */
+  })); /* lgtm [js/clear-text-cookie] */
 
   let wss = new WebSocket.Server({ server: server }); // or { noServer: true }
   const socketMap = new Map();
