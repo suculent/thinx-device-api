@@ -421,13 +421,13 @@ db.init((/* db_err, dbs */) => {
     const owner = path_elements[0];
     const logsocket = path_elements[1];
 
-    console.log("logsocket: ", { owner }, { logsocket });
+    console.log("owner: ", { owner }, "logsocket", { logsocket }, "path_elements", {path_elements});
 
-    var cookies = req.headers.cookie;
+    var cookies = req.session.cookie;
 
-    if (typeof (req.headers.cookie) !== "undefined") {
+    if (typeof (cookies) !== "undefined") {
       if (cookies.indexOf("thx-session") === -1) {
-        console.log("» ERROR! No thx-session found in WS: " + JSON.stringify(req.headers.cookie));
+        console.log("» WSS VONNECTION ERROR! No thx-session found in WS: " + JSON.stringify(cookies));
         return;
       }
     } else {
