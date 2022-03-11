@@ -166,7 +166,7 @@ db.init((/* db_err, dbs */) => {
     store: sessionStore,
     name: "x-thx-session",
     resave: true, // was true then false
-    rolling: false, // rolling was true; This resets the expiration date on the cookie to the given default.
+    rolling: true, // This resets the expiration date on the cookie to the given default.
     saveUninitialized: false
   };
 
