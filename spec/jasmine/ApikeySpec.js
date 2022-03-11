@@ -47,7 +47,7 @@ describe("API Key", function() {
       owner,
       "invalid-api-key",
       req,
-      (success, result) => { // fixed (callback is not a function!)
+      (success /*, result */) => { // fixed (callback is not a function!)
         console.log("verify with invalid API Key, callback, done()");
         expect(success).to.equal(false);
         done();

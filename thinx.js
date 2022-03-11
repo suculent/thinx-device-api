@@ -137,44 +137,7 @@ db.init((/* db_err, dbs */) => {
   // Starts Git Webhook Server
   var Repository = require("./lib/thinx/repository");
   const watcher = new Repository(queue);
-
-  /* Legacy Webhook Server, kept for backwards compatibility, will deprecate. */
-  /* POST URL `http://<THINX_HOSTNAME>:9002/` changes to `https://<THINX_HOSTNAME>/githook` */
-
-  function fail_on_invalid_git_headers(req) {
-    if (typeof (req.headers["X-GitHub-Event"]) !== "undefined") {
-      if ((req.headers["X-GitHub-Event"] != "push")) {
-        res.status(200).end("Accepted");
-        return false; // do not fail
-      }
-    }
-    return true; // fail
-  }
-
-  // file deepcode ignore UseCsurfForExpress: API cannot use CSRF
-  const hook_server = express();
-  hook_server.disable('x-powered-by');
-  if (typeof (app_config.webhook_port) !== "undefined") {
-    http.createServer(hook_server).listen(app_config.webhook_port, "0.0.0.0", function () {
-      console.log("[info] Webhook API started on port", app_config.webhook_port);
-    });
-    hook_server.use(express.json({
-      limit: "2mb",
-      strict: false
-    }));
-    hook_server.use(express.urlencoded({ extended: false }));
-
-    hook_server.post("/", function (req, res) {
-      // From GitHub, exit on non-push events prematurely
-      if (fail_on_invalid_git_headers(req)) return;
-      // do not wait for response, may take ages
-      res.status(200).end("Accepted");
-      console.log("[info] Hook process started...");
-      watcher.process_hook(req.body);
-      console.log("[info] Hook process completed.");
-    }); // end of Legacy Webhook Server; will deprecate after reconfiguring all instances or if no webhook_port is defined
-  }
-
+  
   // DI
   app.builder = builder;
   app.queue = queue;
@@ -192,34 +155,25 @@ db.init((/* db_err, dbs */) => {
   // Bypassed LGTM, because it does not make sense on this API for all endpoints,
   // what is possible is covered by helmet and no-cache.
 
-  // allow disabling Secure/HTTPOnly cookies for HTTP-only mode (development, localhost)
-  let enforceMaximumSecurity;
-  if ((process.env.ENVIRONMENT === "test") || (process.env.ENVIRONMENT === "development")) {
-    enforceMaximumSecurity = app_config.debug.allow_http_login ? true : false;
-  } else {
-    enforceMaximumSecurity = true;
-  }
-
   const sessionConfig = {
     secret: session_config.secret,
     cookie: {
       maxAge: 3600000,
-      // can be false in case of local development or testing; can be mitigated by generating self-signed certificates on install (if there are no certs already present; must be managed by startup shellscript reading from config.json using jq)
-      secure: enforceMaximumSecurity, /* lgtm [js/clear-text-cookie] */
+      // can be false in case of local development or testing; mitigated by using Traefik router unwrapping HTTPS so the cookie travels securely where possible
+      secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
       httpOnly: true
     },
     store: sessionStore,
     name: "x-thx-session",
-    resave: false, // was true
-    rolling: false,
-    saveUninitialized: false,
+    resave: true, // was true then false
+    rolling: true, // This resets the expiration date on the cookie to the given default.
+    saveUninitialized: false
   };
 
-  const sessionParser = session(sessionConfig); /* lgtm [js/missing-token-validation] lgtm [js/clear-text-cookie] lgtm [js/client-exposed-cookie] */
+  // intentionally exposed cookie because there is no HTTPS between app and Traefik frontend
+  const sessionParser = session(sessionConfig); /* lgtm [js/client-exposed-cookie] */
 
-  app.use(sessionParser);
-
-  // rolling was true; This resets the expiration date on the cookie to the given default.
+  app.use(sessionParser);  
 
   app.use(express.json({
     limit: "2mb",
@@ -239,8 +193,7 @@ db.init((/* db_err, dbs */) => {
   /* Webhook Server (new impl.) */
 
   app.post("/githook", function (req, res) {
-    // From GitHub, exit on non-push events prematurely
-    // if (fail_on_invalid_git_headers(req)) return;
+    
     // TODO: Validate and possibly reject invalid requests to prevent injection
     // E.g. using git_secret_key from app_config
 
@@ -260,10 +213,10 @@ db.init((/* db_err, dbs */) => {
 
   // Legacy HTTP support for old devices without HTTPS proxy
   let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function () {
-    console.log("[info] HTTP API started on port", app_config.port);
+    console.log("ℹ️ [info] HTTP API started on port", app_config.port);
     let end_timestamp = new Date().getTime() - start_timestamp;
     let seconds = Math.ceil(end_timestamp / 1000);
-    console.log("[debug] Startup phase took:", seconds, "seconds");
+    console.log("⏱ [profiler] Startup phase took:", seconds, "seconds");
   });
 
   var read = require('fs').readFileSync;
@@ -273,7 +226,7 @@ db.init((/* db_err, dbs */) => {
     let sslvalid = false;
 
     if (!fs.existsSync(app_config.ssl_ca)) {
-      const message = "[warning] Did not find app_config.ssl_ca file, websocket logging will fail...";
+      const message = "⚠️ [warning] Did not find app_config.ssl_ca file, websocket logging will fail...";
       rollbar.warn(message);
       console.log(message);
     }
@@ -281,12 +234,11 @@ db.init((/* db_err, dbs */) => {
     let caCert = read(app_config.ssl_ca, 'utf8');
     let ca = pki.certificateFromPem(caCert);
     let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
-    console.log("[info] Loaded SSL certificate.");
 
     try {
       sslvalid = ca.verify(client);
     } catch (err) {
-      console.log("[error] Certificate verification failed: ", err);
+      console.log("☣️ [error] Certificate verification failed: ", err);
     }
 
     if (sslvalid) {
@@ -296,14 +248,14 @@ db.init((/* db_err, dbs */) => {
         ca: read(app_config.ssl_ca, 'utf8'),
         NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
       };
-      console.log("[info] Starting HTTPS server on " + app_config.secure_port + "...");
+      console.log("ℹ️ [info] Starting HTTPS server on " + app_config.secure_port + "...");
       https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
     } else {
-      console.log("[error] SSL certificate loading or verification FAILED! Check your configuration!");
+      console.log("☣️ [error] SSL certificate loading or verification FAILED! Check your configuration!");
     }
 
   } else {
-    console.log("[warning] Skipping HTTPS server, SSL key or certificate not found. This configuration is INSECURE! and will cause an error in Enterprise configurations in future.");
+    console.log("⚠️ [warning] Skipping HTTPS server, SSL key or certificate not found. This configuration is INSECURE! and will cause an error in Enterprise configurations in future.");
   }
 
   app.use('/static', express.static(path.join(__dirname, 'static')));
@@ -317,26 +269,20 @@ db.init((/* db_err, dbs */) => {
   var wsapp = express();
   wsapp.disable('x-powered-by');
 
-  if (!enforceMaximumSecurity) {
-    console.log("Websockets currently require full HTTPS even for development. Generate a certificate to use websockets in dev/test environment.");
-    enforceMaximumSecurity = true;
-  } else {
-    enforceMaximumSecurity = true;
-  }
-
   wsapp.use(session({ /* lgtm [js/clear-text-cookie] */
     secret: session_config.secret,
     store: sessionStore,
+    // deepcode ignore WebCookieSecureDisabledExplicitly: <please specify a reason of ignoring this>
     cookie: {
       expires: hour,
-      secure: enforceMaximumSecurity,
+      secure: false,
       httpOnly: true
     },
     name: "x-thx-ws-session",
     resave: false,
     rolling: false,
     saveUninitialized: false,
-  })); /* lgtm [js/client-exposed-cookie] */
+  })); /* lgtm [js/clear-text-cookie] */
 
   let wss = new WebSocket.Server({ server: server }); // or { noServer: true }
   const socketMap = new Map();
@@ -346,8 +292,7 @@ db.init((/* db_err, dbs */) => {
     const owner = url.parse(request.url).pathname.replace("/", "");
 
     if (typeof (socketMap.get(owner)) === "undefined") {
-      console.log("Socket already mapped for", owner);
-      return;
+      console.log("Socket already mapped for", owner, "reassigning...");
     }
 
     if (typeof (request.session) === "undefined") {
@@ -518,7 +463,6 @@ db.init((/* db_err, dbs */) => {
     }
   }
 
-  console.log("[info] Initializing timed tasks...");
   setTimeout(startup_quote, 10000); // wait for Slack init only once
 
 });

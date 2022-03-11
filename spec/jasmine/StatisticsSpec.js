@@ -29,17 +29,15 @@ describe("Statistics", function () {
 
   it("(04) should be able to return today results for owner", function (done) {
     s.today(owner, function (success, result) {
-      console.log("(04) returned daily stats: ", {success}, { result });
-      //expect(success).to.be.true;
-      //expect(result).to.be.a('string');
+      expect(success).to.be.true;
+      expect(result).to.be.a('string');
       done();
     });
   }, 10000);
 
   it("(05) should be able to aggregate statistics", function (done) {
     s.aggregate(function (success, result) {
-      console.log("(05) Returned aggregated statistics: ", {success}, {result});
-      //expect(success).to.be.true;
+      expect(success).to.be.true;
       expect(result).to.be.a('string');
       done();
     });

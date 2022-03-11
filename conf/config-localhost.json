@@ -23,7 +23,6 @@
   "port": 7442,
   "secure_port": 7443,
   "lambda": 7474,
-  "webhook_port": 9002,
   "data_root": "/mnt/data",
   "deploy_root": "/data",
   "build_root": "/repos",

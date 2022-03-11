@@ -1,7 +1,0 @@
-/var/logs/transformer.log {
-        daily
-        missingok
-        rotate 12
-        compress
-        notifempty
-}

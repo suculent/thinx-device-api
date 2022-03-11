@@ -77,9 +77,8 @@ describe("Devices", function() {
 
   it("(03) should not be able to list devices for empty owner", function(done) {
     devices.list("", (success, response) => {
-      expect(success).to.be.true;
+      expect(success).to.be.false;
       expect(response).to.be.a('object');
-      expect(response.devices).to.be.a('array');
       done();
     });
   }, 5000);
@@ -102,8 +101,8 @@ describe("Devices", function() {
     var body = {
       udid: TEST_DEVICE.udid
     };
+    console.log("✅ [spec]  Detaching owner %s", owner);
     devices.detach(owner, body, (res, success, response) => {
-      console.log("Detach response: ", res, success, response);
       expect(success).to.be.true;
       expect(response).to.be.a('string');
       expect(response).to.equal('detached');

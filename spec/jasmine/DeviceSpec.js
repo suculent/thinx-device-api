@@ -65,7 +65,7 @@ describe("Device", function() {
       expect(object).to.be.an('array');
       if (success) {
         apikey = object[0].hash;
-        console.log("Key hash ready: ", apikey);
+        console.log("✅ [spec] Key hash ready: ", apikey);
         expect(apikey).to.be.a('string');
       }
       done();
@@ -159,13 +159,19 @@ describe("Device", function() {
 
   it("(07) should be able to provide device firmware", function(firmware_done) {
       // Returns "OK" when current firmware is valid.
-      var body = JRS;
-      body.udid = udid;
+      var rbody = JRS;
+      rbody.udid = udid;
+      rbody.owner = owner;
       let req = {
-        owner: owner
+        body: {
+          registration: rbody
+        },
+        headers: {
+          authentication: apikey
+        }
       };
-      console.log("• DeviceSpec.js: Using UDID: " + udid);
-      device.firmware(body, apikey, req.owner, function(success, response) {
+      console.log("• DeviceSpec.js: Using UDID: " + udid, "and req", {req});
+      device.firmware(req, function(success, response) {
         console.log("• DeviceSpec.js: Firmware fetch result: ", {response});
         expect(success).to.equal(false);
         expect(response.success).to.equal(false);

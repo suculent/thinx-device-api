@@ -20,12 +20,12 @@ describe("Validator", function() {
   });
 
   it("should reject invalid owner", function() {
-    var result = Validator.owner(owner+owner);
+    var result = Validator.owner(owner+owner); // expect only boolean result
     expect(result).to.equal(false);
   });
 
   it("should return valid owner", function() {
-    var result = Validator.owner(owner);
+    var result = Validator.owner(owner); // TODO: FIXME: expect only boolean result!
     expect(result).to.be.a('string');
     expect(result == owner).to.be.true;
   });

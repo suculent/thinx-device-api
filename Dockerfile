@@ -1,7 +1,7 @@
-FROM thinxcloud/base:1.9
+FROM thinxcloud/base:1.7
 
 LABEL maintainer="Matej Sychra <suculent@me.com>"
-LABEL name="THiNX API" version="1.8"
+LABEL name="THiNX API" version="1.7"
 
 ARG ROLLBAR_ENVIRONMENT
 ARG THINX_HOSTNAME
