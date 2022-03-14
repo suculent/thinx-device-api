@@ -25,7 +25,7 @@ describe("Build log", function() {
       var last_build_id = body.rows[0];
       if ((typeof(last_build_id) !== "undefined") && (last_build_id !== null)) {
         blog.fetch(last_build_id, function(berr, bbody) {
-          console.log("[spec] [info] build log body:", bbody);
+          console.log("[spec] [info] fetched log body:", bbody);
           expect(berr).to.equal(false);
           done();
         });
@@ -56,7 +56,9 @@ describe("Build log", function() {
 
   it("(05) should provide path for device", function() {
     var path = blog.pathForDevice(owner, udid);
-    console.log("(05) path: ", path);
+    // e.g. /mnt/data/data/07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c/d6ff2bb0-df34-11e7-b351-eb37822aa172
+    // lastItem == typeof UDID
+    // lastItem-1 == typeof OWNER
     expect(path).to.be.a('string');
   });
 

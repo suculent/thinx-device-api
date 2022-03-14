@@ -18,11 +18,11 @@ describe("Sources", function () {
       platform: "arduino"
     };
     Sources.add(source,
-      (success, response) => {
-        if (success === false) {
+      (error, response) => {
+        if (error === true) {
           console.log("(01) Error adding source: ", source, response);
         }
-        expect(success).to.be.true; // git fetch must work for this
+        expect(error).to.be.false; // git fetch must work for this
         expect(response).to.be.an('object');
         source_id = response.source_id;
         done();
@@ -49,11 +49,11 @@ describe("Sources", function () {
 
     /// Add something to be removed
     Sources.add(source,
-      (success, response) => {
-        if (success === false) {
+      (error, response) => {
+        if (error === false) {
           console.log("(03) Error adding source: ", source, response);
         }
-        expect(success).to.be.true;
+        expect(error).to.be.false;
         source_id = response.source_id;
         Sources.remove(source.owner, [source_id], (rsuccess, rresponse) => {
           if (rsuccess === false) {
@@ -93,7 +93,9 @@ describe("Sources", function () {
       branch: "origin/mas'ter"
     };
     let result = Sources.normalizedBranch(source, (error, reason) => {
+      // normalizedBranch error false invalid branch name
       console.log("normalizedBranch error", error, reason);
+      expect(error).to.be.false;
     });
     expect(result).to.equal(false);
     done();
