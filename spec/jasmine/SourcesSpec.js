@@ -93,9 +93,9 @@ describe("Sources", function () {
       branch: "origin/mas'ter"
     };
     let result = Sources.normalizedBranch(source, (error, reason) => {
-      // normalizedBranch error false invalid branch name
       console.log("normalizedBranch error", error, reason);
-      expect(error).to.be.false;
+      expect(error).to.be.true;
+      expect(reason).to.equal('invalid_branch_name');
     });
     expect(result).to.equal(false);
     done();
