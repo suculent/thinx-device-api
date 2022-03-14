@@ -70,8 +70,6 @@ describe("Devices", function() {
     devices.list(owner, (success, response) => {
       expect(success).to.be.true;
       expect(response).to.be.a('object');
-      let devices = response.devices;
-      console.log("Device list: " , {devices});
       done();
     });
   }, 5000);

@@ -212,7 +212,7 @@ db.init((/* db_err, dbs */) => {
 
   // Legacy HTTP support for old devices without HTTPS proxy
   let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function () {
-    console.log("ℹ️ [info] HTTP API started on port", app_config.port);
+    console.log(`ℹ️ [info] HTTP API started on port ${app_config.port}`);
     let end_timestamp = new Date().getTime() - start_timestamp;
     let seconds = Math.ceil(end_timestamp / 1000);
     console.log("⏱ [profiler] Startup phase took:", seconds, "seconds");
