@@ -31,7 +31,7 @@ describe("Sanitka", function () {
   });
 
   it("should fail safely on undefined token", function () {
-    let input;
+    let input = undefined;
     var result = sanitka.pushToken(input);
     expect(result).to.equal(null);
   });
