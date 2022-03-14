@@ -3,6 +3,15 @@ describe("Database", function () {
   var Database = require("../../lib/thinx/database");
   var database = new Database();
 
+  it("should provide global URI", function (done) {
+    database.init((/* err, result */) => {
+      const uri = database.uri();
+      console.log("[spec] uri", uri);
+      expect(uri).toBe.be.a('string');
+      done();
+    });
+  }, 10000);
+
   it("should start and create initial DBs", function (done) {
     database.init((err, result) => {
       console.log("DB init test err, result", err, result); // remove after turning to expect
