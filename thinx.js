@@ -48,7 +48,6 @@ const session = require("express-session");
 
 const pki = require('node-forge').pki;
 const fs = require("fs-extra");
-const url = require('url');
 
 // set up rate limiter
 const RateLimit = require('express-rate-limit');
@@ -287,11 +286,15 @@ db.init((/* db_err, dbs */) => {
   let wss = new WebSocket.Server({ server: server }); // or { noServer: true }
   const socketMap = new Map();
 
+  const { URL } = require('url');
+  
+
   server.on('upgrade', function (request, socket, head) {
 
-    const owner = url.parse(request.url).pathname.replace("/", "");
+    const an_url = new URL(request.url);
+    const owner = an_url.pathname.replace(/\//g, "");
 
-    if (typeof (socketMap.get(owner)) === "undefined") {
+    if (typeof (socketMap.get(owner)) !== "undefined") {
       console.log("Socket already mapped for", owner, "reassigning...");
     }
 
@@ -416,7 +419,8 @@ db.init((/* db_err, dbs */) => {
     }
 
     // extract owner_id from pathname removing trailing slash
-    let socket_path = url.parse(req.url).pathname.replace("/", "");
+    let socket_url = new URL(req.url);
+    let socket_path = socket_url.pathname.replace(/\//g, "");
     const path_elements = socket_path.split('/');
     const owner = path_elements[0];
     const logsocket = path_elements[1];
