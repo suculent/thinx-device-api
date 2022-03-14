@@ -85,9 +85,6 @@ try {
 
 const Messenger = require("./lib/thinx/messenger");
 let serviceMQPassword = require("crypto").randomBytes(48).toString('base64url');
-if (process.env.ENVIRONMENT === "test") {
-  serviceMQPassword = "mosquitto"; // test purposes only; to align with REDIS_PASSWORD variable set on CCI; otherwise is always random for security purposes
-}
 app.messenger = new Messenger(serviceMQPassword).getInstance(serviceMQPassword); // take singleton to prevent double initialization
 
 const Database = require("./lib/thinx/database");
