@@ -5,7 +5,6 @@ describe("Queue", function () {
 
     let mock_udid_1 = "<mock-udid-1>";
     let mock_udid_2 = "<mock-udid-2>";
-    let mock_udid_3 = "<mock-udid-3>";
     let mock_source_id = "<mock-source-id>";
     let queue_with_cron;
 
