@@ -25,15 +25,11 @@ describe("Queue", function () {
         queue_with_cron.add(mock_udid_1, mock_source_id);
         queue_with_cron.add(mock_udid_2, mock_source_id);
 
-        console.log("(00) Queue calling findNext...");
-
         // Should be able find next waiting item in queue
 
         let done_called = false;
 
         queue_with_cron.findNext((next) => {
-
-            console.log("(00) queue_with_cron.findNext exited with", next); // expected to return null in test
 
             if (next === null) {
                 if (done_called === false) {
@@ -50,8 +46,6 @@ describe("Queue", function () {
 
             // Should not be able to find anything while queue item is running
             queue_with_cron.findNext((/* nextAction */) => {
-
-                console.log("(01) queue_with_cron.findNext exited with", next); // expected to return null in test
 
                 if (next === null) {
                     if (done_called === false) {
