@@ -10,14 +10,12 @@
     "domain": ""
   },
   "redis": {
-    "host": "thinx-redis",
-    "password": "changeme!"
+    "host": "thinx-redis"
   },
   "mqtt": {
     "server": "mqtt://mosquitto",
     "port": 1883
   },
-  "rollbar_token": "",
   "mqtt_port": 1883,
   "port": 7442,
   "secure_port": 7443,

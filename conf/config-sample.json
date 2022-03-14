@@ -11,15 +11,12 @@
   },
   "redis": {
     "host": "thinx-redis",
-    "db": 0,
-    "password": "<enter-redis-password>"
+    "db": 0
   },
   "mqtt": {
     "server": "mqtt://mosquitto",
     "port": 1883
   },
-  "rollbar_token": "<enter-your-rollbar.com-token>",
-  "database_uri": "http://rtmtest:rtmtest@couchdb:5984",
   "mqtt_port": 1883,
   "port": 7442,
   "secure_port": 7443,
