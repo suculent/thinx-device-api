@@ -73,10 +73,9 @@ var session_config = require(CONFIG_ROOT + "/node-session.json");
 var app_config = Globals.app_config();
 var rollbar = Globals.rollbar(); // lgtm [js/unused-local-variable]
 
-// TODO: Reuse redis client for auth?
-var redis_client = redis.createClient(Globals.redis_options());
+app.redis_client = redis.createClient(Globals.redis_options());
 try {
-  redis_client.bgsave();
+  app.redis_client.bgsave();
 } catch (e) {
   // may throw errro that BGSAVE is already enabled
   console.log("thinx.js bgsave error:", e);
@@ -101,7 +100,10 @@ db.init((/* db_err, dbs */) => {
 
   const Stats = require("./lib/thinx/statistics");
   var stats = new Stats();
+  let now = new Date();
   stats.get_all_owners(); // TODO: measure!
+  let then = new Date();
+  console.log("Difference = ", now - then);
   setInterval(() => {
     stats.aggregate();
     console.log("» Aggregation jobs completed.");
@@ -170,7 +172,7 @@ db.init((/* db_err, dbs */) => {
   };
 
   // intentionally exposed cookie because there is no HTTPS between app and Traefik frontend
-  const sessionParser = session(sessionConfig); /* lgtm [js/client-exposed-cookie] */
+  const sessionParser = session(sessionConfig); /* lgtm [js/missing-token-validation] */
 
   app.use(sessionParser);  
 
@@ -192,12 +194,16 @@ db.init((/* db_err, dbs */) => {
   /* Webhook Server (new impl.) */
 
   app.post("/githook", function (req, res) {
-    
-    // TODO: Validate and possibly reject invalid requests to prevent injection
-    // E.g. using git_secret_key from app_config
+
+    // TODO: Validate and possibly reject invalid requests to prevent injection causing rebuilding of existing stuff
+    // E.g. using git_secret_key from app_config and also by validating required params
 
     // do not wait for response, may take ages
     console.log("Webhook request accepted...");
+    if (typeof (req.body) === "undefined") {
+      res.status(400).end("Bad request");
+      return;
+    }
     res.status(200).end("Accepted");
     console.log("Webhook process started...");
     watcher.process_hook(req.body);
@@ -442,12 +448,14 @@ db.init((/* db_err, dbs */) => {
     ws.isAlive = true;
 
     if ((typeof (logsocket) === "undefined") || (logsocket === null)) {
-      console.log("Owner socket", owner, "started... (TODO: socketMap.set)");
-      app._ws[owner] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
+      console.log("[info] Owner socket", owner, "started...");
+      app._ws[owner] = ws; 
     } else {
-      console.log("Log socket", owner, "started... (TODO: socketMap.set)");
+      console.log("[info] Log socket", owner, "started...");
       app._ws[logsocket] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
     }
+
+    socketMap.set(owner, ws); // public websocket stored in app, needs to be set to builder/buildlog!
 
     /* Returns specific build log for owner */
     initLogTail();

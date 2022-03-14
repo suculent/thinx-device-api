@@ -112,4 +112,8 @@ describe("Sources", function () {
     done();
   });
 
+  it("(08) should be able to infer owner ID from path", function () {
+    let ownerIdFromPath = Sources.ownerIdFromPath("/mnt/data/data/" + owner + "/" + source_id);
+    expect(ownerIdFromPath).to.be.a('string');
+  });
 });
