@@ -23,8 +23,7 @@ describe("Database", function () {
   it("should provide global URI", function (done) {
     database.init((/* err, result */) => {
       let uri = database.uri();
-      console.log("[spec] [TODO] URI", uri);
-      //expect(uri).to.be.a('string');
+      expect(uri).to.be.a('string');
       done();
     });
   }, 10000);

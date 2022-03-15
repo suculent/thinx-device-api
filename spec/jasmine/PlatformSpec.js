@@ -21,7 +21,6 @@ describe("Platform", function() {
     it("should be able to infer platform from repository contents", function(done) {
         platform.getPlatform(path, function(success, result) {
           expect(result).to.be.a('string');
-          console.log("Platform: " + result);
           done();
         });
     }, 15000);

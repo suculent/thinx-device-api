@@ -40,7 +40,6 @@ describe("Devices", function() {
   };
 
   it("(01) should be able to register sample device", function(done) {
-    console.log("Sample attempt to register a device", {TEST_DEVICE}, "with ak", ak);
     device.register(
       {}, /* req */
       TEST_DEVICE, /* reg.registration */
@@ -107,7 +106,6 @@ describe("Devices", function() {
   }, 30000);
 
   it("(06) should be able to revoke another sample device", function(done) {
-    console.log("Sample attempt to register a device", {TEST_DEVICE4}, "with ak", ak);
     device.register(
       {}, /* req */
       TEST_DEVICE4, /* reg.registration */

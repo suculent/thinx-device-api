@@ -18,9 +18,6 @@ describe("Queue", function () {
         queue_with_cron.cron();
 
         // Should be able to add actions to the queue
-        console.log(
-            "adding mocks"
-        );
         queue_with_cron.add(mock_udid_1, mock_source_id);
         queue_with_cron.add(mock_udid_2, mock_source_id);
 
