@@ -20,14 +20,14 @@ services:
       - traefik.backend.mosquitto.noexpose
   couchdb:
     env_file: .env
-    image: 'couchdb:3.1.0' # downgraded to currently running production
+    image: 'couchdb:3.1.0'
     restart: unless-stopped
     environment:
       - 'NODENAME=${NODENAME}'
       - 'COUCHDB_USER=${COUCHDB_USER}'
-      - 'COUCHDB_PASSWORD=${COUCHDB_PASSWORD}'
+      - 'COUCHDB_PASSWORD=${COUCHDB_PASS}'
       - 'COUCHDB_ADMIN=${COUCHDB_USER}'
-      - 'COUCHDB_PASS=${COUCHDB_PASSWORD}'
+      - 'COUCHDB_PASS=${COUCHDB_PASS}'
       - 'COUCHDB_COOKIE=${COUCHDB_COOKIE}'
       - 'COUCHDB_SECRET=${COUCHDB_SECRET}'
     ports:
@@ -47,7 +47,7 @@ services:
       - '--port'
       - '6379'
     environment:
-      - ALLOW_EMPTY_PASSWORD=no
+      - 'ALLOW_EMPTY_PASSWORD=no'
       - 'REDIS_PASSWORD=${REDIS_PASSWORD}'
       - 'REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL'
     restart: unless-stopped
@@ -65,7 +65,7 @@ services:
       - 'SQREEN_TOKEN=${SQREEN_TOKEN}'
       - 'ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}'
       - 'ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}'
-      - REVISION=1
+      - 'REVISION=1'
     networks:
       - internal
     ports:
@@ -99,14 +99,6 @@ services:
       - transformer
       - thinx-redis
       - mosquitto
-#      couchdb:
-#        condition: service_started
-#      transformer:
-#        condition: service_started
-#      thinx-redis:
-#        condition: service_started
-#      mosquitto:
-#        condition: service_healthy
     networks:
       - nat
       - internal
@@ -115,7 +107,8 @@ services:
       context: .
       args:
         - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
-        - 'COUCHDB_PASSWORD=${COUCHDB_PASSWORD}'
+        - 'COUCHDB_PASSWORD=${COUCHDB_PASS}'
+        - 'COUCHDB_PASS=${COUCHDB_PASS}'
         - 'COUCHDB_USER=${COUCHDB_USER}'
         - 'ENVIRONMENT=${ENVIRONMENT}'
         - 'REDIS_PASSWORD=${REDIS_PASSWORD}'
@@ -129,7 +122,8 @@ services:
         - 'WORKER_SECRET=${WORKER_SECRET}'
     environment:
       - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
-      - 'COUCHDB_PASSWORD=${COUCHDB_PASSWORD}'
+      - 'COUCHDB_PASSWORD=${COUCHDB_PASS}'
+      - 'COUCHDB_PASS=${COUCHDB_PASS}'
       - 'COUCHDB_USER=${COUCHDB_USER}'
       - 'ENVIRONMENT=${ENVIRONMENT}'
       - 'REDIS_PASSWORD=${REDIS_PASSWORD}'
