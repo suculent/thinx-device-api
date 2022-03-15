@@ -73,13 +73,19 @@ var session_config = require(CONFIG_ROOT + "/node-session.json");
 var app_config = Globals.app_config();
 var rollbar = Globals.rollbar(); // lgtm [js/unused-local-variable]
 
+// Redis
 app.redis_client = redis.createClient(Globals.redis_options());
+let connect_redis = require("connect-redis");
+var RedisStore = connect_redis(session);
+var sessionStore = new RedisStore({ client: app.redis_client });
+
 try {
   app.redis_client.bgsave();
 } catch (e) {
   // may throw errro that BGSAVE is already enabled
   console.log("thinx.js bgsave error:", e);
 }
+
 
 // Default ACLs and MQTT Password
 
@@ -139,12 +145,6 @@ db.init((/* db_err, dbs */) => {
   // DI
   app.builder = builder;
   app.queue = queue;
-
-
-  // Redis
-  let connect_redis = require("connect-redis");
-  var RedisStore = connect_redis(session);
-  var sessionStore = new RedisStore({ client: app.redis_client });
 
   app.set("trust proxy", 1);
 
