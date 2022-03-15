@@ -131,14 +131,6 @@ services:
       - transformer
       - thinx-redis
       - mosquitto
-#      couchdb:
-#        condition: service_started
-#      transformer:
-#        condition: service_started
-#      thinx-redis:
-#        condition: service_started
-#      mosquitto:
-#        condition: service_healthy
     networks:
       - nat
       - internal
@@ -151,6 +143,7 @@ services:
         - 'REVISION=${REVISION}'
         - 'ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}'
         - 'ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}'
+        - 'SONAR_TOKEN=${SONAR_TOKEN}'
         - 'SQREEN_APP_NAME=${SQREEN_APP_NAME}'
         - 'SQREEN_TOKEN=${SQREEN_TOKEN}'
         - 'THINX_HOSTNAME=${THINX_HOSTNAME}'
@@ -165,6 +158,7 @@ services:
       - 'REVISION=${REVISION}'
       - 'ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}'
       - 'ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}'
+      - 'SONAR_TOKEN=${SONAR_TOKEN}'
       - 'SQREEN_APP_NAME=${SQREEN_APP_NAME}'
       - 'SQREEN_TOKEN=${SQREEN_TOKEN}'
       - 'THINX_HOSTNAME=${THINX_HOSTNAME}'

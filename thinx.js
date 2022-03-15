@@ -113,7 +113,7 @@ db.init((/* db_err, dbs */) => {
   let now = new Date();
   stats.get_all_owners();
   let then = new Date();
-  console.log(`ℹ️ [info] [core] get_all_owners took ${then - now} seconds.`);
+  console.log(`ℹ️  [info] [core] get_all_owners took ${then - now} seconds.`);
   setInterval(() => {
     stats.aggregate();
     console.log("✅  [info] Aggregation jobs completed.");
@@ -199,8 +199,9 @@ db.init((/* db_err, dbs */) => {
 
   app.post("/githook", function (req, res) {
 
-    // TODO: Validate and possibly reject invalid requests to prevent injection causing rebuilding of existing stuff
+    // TODO (1): Validate and possibly reject invalid requests to prevent injection causing rebuilding of existing stuff
     // E.g. using git_secret_key from app_config and also by validating required params
+    // https://github.com/suculent/thinx-device-api/issues/294
 
     // do not wait for response, may take ages
     console.log("Webhook request accepted...");
@@ -222,7 +223,7 @@ db.init((/* db_err, dbs */) => {
 
   // Legacy HTTP support for old devices without HTTPS proxy
   let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function () {
-    console.log(`ℹ️ [info] HTTP API started on port ${app_config.port}`);
+    console.log(`ℹ️  [info] HTTP API started on port ${app_config.port}`);
     let end_timestamp = new Date().getTime() - start_timestamp;
     let seconds = Math.ceil(end_timestamp / 1000);
     console.log("⏱ [profiler] Startup phase took:", seconds, "seconds");
@@ -257,7 +258,7 @@ db.init((/* db_err, dbs */) => {
         ca: read(app_config.ssl_ca, 'utf8'),
         NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
       };
-      console.log("ℹ️ [info] Starting HTTPS server on " + app_config.secure_port + "...");
+      console.log("ℹ️  [info] Starting HTTPS server on " + app_config.secure_port + "...");
       https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
     } else {
       console.log("☣️ [error] SSL certificate loading or verification FAILED! Check your configuration!");
@@ -435,7 +436,7 @@ db.init((/* db_err, dbs */) => {
     const owner = path_elements[0];
     const logsocket = path_elements[1];
 
-    console.log("ℹ️ [info] owner: ", { owner }, "logsocket", { logsocket }, "path_elements", {path_elements});
+    console.log("ℹ️  [info] owner: ", { owner }, "logsocket", { logsocket }, "path_elements", {path_elements});
 
     var cookies = req.session.cookie;
 
@@ -445,17 +446,17 @@ db.init((/* db_err, dbs */) => {
         return;
       }
     } else {
-      console.log("ℹ️ [info] DEPRECATED WS has no cookie headers!");
+      console.log("ℹ️  [info] DEPRECATED WS has no cookie headers!");
       return;
     }
 
     ws.isAlive = true;
 
     if ((typeof (logsocket) === "undefined") || (logsocket === null)) {
-      console.log("ℹ️ [info] Owner socket", owner, "started...");
+      console.log("ℹ️  [info] Owner socket", owner, "started...");
       app._ws[owner] = ws; 
     } else {
-      console.log("ℹ️ [info] Log socket", owner, "started...");
+      console.log("ℹ️  [info] Log socket", owner, "started...");
       app._ws[logsocket] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
     }
 
