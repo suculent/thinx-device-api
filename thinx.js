@@ -113,10 +113,10 @@ db.init((/* db_err, dbs */) => {
   let now = new Date();
   stats.get_all_owners();
   let then = new Date();
-  console.log(`[info] [core] get_all_owners took ${then - now} seconds.`);
+  console.log(`ℹ️ [info] [core] get_all_owners took ${then - now} seconds.`);
   setInterval(() => {
     stats.aggregate();
-    console.log("» Aggregation jobs completed.");
+    console.log("✅  [info] Aggregation jobs completed.");
   }, 86400 * 1000 / 2);
 
   //
@@ -435,7 +435,7 @@ db.init((/* db_err, dbs */) => {
     const owner = path_elements[0];
     const logsocket = path_elements[1];
 
-    console.log("owner: ", { owner }, "logsocket", { logsocket }, "path_elements", {path_elements});
+    console.log("ℹ️ [info] owner: ", { owner }, "logsocket", { logsocket }, "path_elements", {path_elements});
 
     var cookies = req.session.cookie;
 
@@ -445,17 +445,17 @@ db.init((/* db_err, dbs */) => {
         return;
       }
     } else {
-      console.log("» DEPRECATED WS has no cookie headers!");
+      console.log("ℹ️ [info] DEPRECATED WS has no cookie headers!");
       return;
     }
 
     ws.isAlive = true;
 
     if ((typeof (logsocket) === "undefined") || (logsocket === null)) {
-      console.log("[info] Owner socket", owner, "started...");
+      console.log("ℹ️ [info] Owner socket", owner, "started...");
       app._ws[owner] = ws; 
     } else {
-      console.log("[info] Log socket", owner, "started...");
+      console.log("ℹ️ [info] Log socket", owner, "started...");
       app._ws[logsocket] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
     }
 
@@ -466,7 +466,7 @@ db.init((/* db_err, dbs */) => {
     initSocket(ws, messenger);
 
   }).on("error", function (err) {
-    console.log("WSS Connection Error: ", err);
+    console.log(`☣️ [error] in WSS connection ${err}`);
   });
 
   //

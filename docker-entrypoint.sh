@@ -78,7 +78,7 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin/
   rm -rf /opt/thinx/thinx-device-api/sonar-scanner-4.6.2.2472-linux/jre/legal/
   rm -rf spec/test_repositories/**
-  sonar-scanner -Dsonar.login=${SONAR_TOKEN} > /dev/null
+  sonar-scanner -Dsonar.login=${SONAR_TOKEN}
   
   set -e
   
