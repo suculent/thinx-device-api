@@ -51,8 +51,6 @@ describe("Sanitka", function () {
   it("should accept valid GCM push token", function () {
     let input = "akO1-XdQYgk:APA91bHmgm_K500RVhexcxFVoczhp5RuMSKC07kOJB7T31xq2_a9tkUAFVGQNwtZ2JORj79lDRI0ow-nP17y82GD1zTWJTEnyjNMas_qNUKxBot1P-vM6v-BW7sqcISak8sXMK91WfmH";
     var result = sanitka.pushToken(input);
-    console.log("test INN:", input);
-    console.log("test OUT:", result);
     expect(result).to.equal(input);
   });
 

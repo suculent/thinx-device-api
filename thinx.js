@@ -258,7 +258,7 @@ db.init((/* db_err, dbs */) => {
         ca: read(app_config.ssl_ca, 'utf8'),
         NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
       };
-      console.log("ℹ️  [info] Starting HTTPS server on " + app_config.secure_port + "...");
+      console.log("ℹ️ [info] Starting HTTPS server on " + app_config.secure_port + "...");
       https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
     } else {
       console.log("☣️ [error] SSL certificate loading or verification FAILED! Check your configuration!");
@@ -436,7 +436,7 @@ db.init((/* db_err, dbs */) => {
     const owner = path_elements[0];
     const logsocket = path_elements[1];
 
-    console.log("ℹ️  [info] owner: ", { owner }, "logsocket", { logsocket }, "path_elements", {path_elements});
+    console.log("ℹ️ [info] owner: ", { owner }, "logsocket", { logsocket }, "path_elements", {path_elements});
 
     var cookies = req.session.cookie;
 
@@ -446,17 +446,17 @@ db.init((/* db_err, dbs */) => {
         return;
       }
     } else {
-      console.log("ℹ️  [info] DEPRECATED WS has no cookie headers!");
+      console.log("ℹ️ [info] DEPRECATED WS has no cookie headers!");
       return;
     }
 
     ws.isAlive = true;
 
     if ((typeof (logsocket) === "undefined") || (logsocket === null)) {
-      console.log("ℹ️  [info] Owner socket", owner, "started...");
+      console.log("ℹ️ [info] Owner socket", owner, "started...");
       app._ws[owner] = ws; 
     } else {
-      console.log("ℹ️  [info] Log socket", owner, "started...");
+      console.log("ℹ️ [info] Log socket", owner, "started...");
       app._ws[logsocket] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
     }
 
