@@ -1,7 +1,5 @@
 describe("RSA Key", function() {
 
-  let revoked_fingerprint;
-  
   var expect = require('chai').expect;
   var RSAKey = require("../../lib/thinx/rsakey");
   var rsakey = new RSAKey();
@@ -20,8 +18,8 @@ describe("RSA Key", function() {
   it("(00) should be able to add RSA Keys first", function(done) {
     rsakey.create(owner,
     function(success, response) {
-      revoked_fingerprint = response;
       expect(success).to.be.true;
+      expect(response).to.be.a('string');
       done();
     });
   }, 10000);
@@ -56,9 +54,7 @@ describe("RSA Key", function() {
   }, 10000);
 
   it("should be able to revoke multiple RSA Keys at once", function(done) {
-    rsakey.revoke(owner, revoked_filenames,
-      function(success, message) {
-        console.log("RSA revocation result: " + JSON.stringify(message));
+    rsakey.revoke(owner, revoked_filenames, function(success, message) {
         expect(success).to.be.true;
         expect(message).to.be.an('array'); // should be array of length of 2
         done();

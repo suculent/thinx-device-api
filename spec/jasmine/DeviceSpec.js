@@ -90,7 +90,6 @@ describe("Device", function() {
         JRS.udid = response.registration.udid;
         expect(success).to.be.true;
         expect(JRS.udid).to.be.a('string');
-        console.log("• DeviceSpec.js: Received UDID: " + JRS.udid);
         done();
       });
   }, 15000); // register
@@ -119,9 +118,7 @@ describe("Device", function() {
           let obj = response;
           expect(obj).to.be.an('object');
           if (success === false) {
-            console.log(
-              "should receive different response for already-registered revice: " +
-              response);
+            // console.log("should receive different response for already-registered revice: " + response);
             // this is also OK... on CircleCI there are no older API Keys in Redis
             if (response === "owner_found_but_no_key") {
               done();
@@ -143,7 +140,6 @@ describe("Device", function() {
       expect(response).to.be.an('object');
       expect(response.ott).to.be.a('string');
       device.fetchOTT(ott, (err, ott_registration_request) => {
-        console.log("fetchOTT response:", ott_registration_request, err);
         expect(ott_registration_request).to.be.a('string'); // returns registration request
         expect(err).to.be.null;
         done();
@@ -170,9 +166,7 @@ describe("Device", function() {
           authentication: apikey
         }
       };
-      console.log("• DeviceSpec.js: Using UDID: " + udid, "and req", {req});
       device.firmware(req, function(success, response) {
-        console.log("• DeviceSpec.js: Firmware fetch result: ", {response});
         expect(success).to.equal(false);
         expect(response.success).to.equal(false);
         expect(response.status).to.equal("UPDATE_NOT_FOUND");
@@ -218,7 +212,6 @@ describe("Device", function() {
             return;
           }
         }
-        console.log("• Transfer Device UDID = ", response.registration.udid);
         done();
       });
   }, 15000); // register
