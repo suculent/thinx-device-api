@@ -43,7 +43,8 @@
     "device" : false,
     "deployment": true,
     "allow_http_login": true,
-    "ingress": false
+    "ingress": false,
+    "secrets": false
   },
   "grafana": {
     "port": 3004,
