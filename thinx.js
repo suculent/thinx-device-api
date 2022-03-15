@@ -103,9 +103,9 @@ db.init((/* db_err, dbs */) => {
   const Stats = require("./lib/thinx/statistics");
   var stats = new Stats();
   let now = new Date();
-  stats.get_all_owners(); // TODO: measure!
+  stats.get_all_owners();
   let then = new Date();
-  console.log("Difference = ", now - then);
+  console.log(`[info] [core] get_all_owners took ${then - now} seconds.`);
   setInterval(() => {
     stats.aggregate();
     console.log("» Aggregation jobs completed.");
