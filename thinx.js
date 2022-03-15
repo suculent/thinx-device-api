@@ -144,7 +144,7 @@ db.init((/* db_err, dbs */) => {
   // Redis
   let connect_redis = require("connect-redis");
   var RedisStore = connect_redis(session);
-  var sessionStore = new RedisStore({ client: redis_client });
+  var sessionStore = new RedisStore({ client: app.redis_client });
 
   app.set("trust proxy", 1);
 
