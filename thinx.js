@@ -86,7 +86,6 @@ try {
   console.log("thinx.js bgsave error:", e);
 }
 
-
 // Default ACLs and MQTT Password
 
 const Messenger = require("./lib/thinx/messenger");

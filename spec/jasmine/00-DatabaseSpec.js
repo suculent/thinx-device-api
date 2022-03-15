@@ -5,7 +5,7 @@ describe("Database", function () {
 
   it("should provide global URI", function (done) {
     database.init((/* err, result */) => {
-      const uri = database.uri();
+      let uri = database.uri();
       expect(uri).toBe.be.a('string');
       done();
     });
