@@ -90,6 +90,14 @@ try {
 
 const Messenger = require("./lib/thinx/messenger");
 let serviceMQPassword = require("crypto").randomBytes(48).toString('base64url');
+
+if (process.env.ENVIRONMENT == "test") {
+  let env = process.env;
+  console.log({env});
+  // deepcode ignore NoHardcodedPasswords: <please specify a reason of ignoring this>
+  serviceMQPassword = "mosquitto"; // inject test password for thinx to make sure no random stuff is injected in test (until this constant shall be removed everywhere)
+}
+
 app.messenger = new Messenger(serviceMQPassword).getInstance(serviceMQPassword); // take singleton to prevent double initialization
 
 const Database = require("./lib/thinx/database");
