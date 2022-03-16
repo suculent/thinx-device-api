@@ -432,6 +432,11 @@ db.init((/* db_err, dbs */) => {
       return;
     }
 
+    if (typeof(req.session.cookie) === "undefined") {
+      console.log("[error] No cookie on wss connection! Should bear thx-session");
+      return;
+    }
+
     // extract socket id and owner_id from pathname, also removing slashes
     console.log("Request URL:", req.url);
     let path_elements = req.url.split('/');
