@@ -96,10 +96,6 @@ if (process.env.ENVIRONMENT == "test") {
   serviceMQPassword = "mosquitto"; // inject test password for thinx to make sure no random stuff is injected in test (until this constant shall be removed everywhere)
 }
 
-// Debug only, will be removed after OK in poroduction.
-let env = process.env;
-console.log({env});
-
 app.messenger = new Messenger(serviceMQPassword).getInstance(serviceMQPassword); // take singleton to prevent double initialization
 
 const Database = require("./lib/thinx/database");
