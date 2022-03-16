@@ -418,16 +418,21 @@ db.init((/* db_err, dbs */) => {
 
     // May not exist while testing...
     if (typeof (ws) === "undefined" || ws === null) {
-      console.log("Exiting WSS connecton, no WS defined!");
+      console.log("[error] Exiting WSS connecton, no WS defined!");
       return;
     }
 
     if (typeof (req) === "undefined") {
-      console.log("No request on wss.on");
+      console.log("[error] No request on wss.on");
       return;
     }
 
-    // extract owner_id from pathname removing trailing slash
+    if (typeof(req.session) === "undefined") {
+      console.log("[error] No session on wss connection! Should bear thx-session");
+      return;
+    }
+
+    // extract socket id and owner_id from pathname, also removing slashes
     console.log("Request URL:", req.url);
     let path_elements = req.url.split('/');
     console.log("path_elements", path_elements);
