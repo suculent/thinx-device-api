@@ -429,11 +429,10 @@ db.init((/* db_err, dbs */) => {
 
     // extract owner_id from pathname removing trailing slash
     console.log("Request URL:", req.url);
-    let socket_url = req.url;
-    let socket_path = socket_url.pathname.replace(/\//g, "");
-    let path_elements = socket_path.split('/');
-    let owner = path_elements[0];
-    let logsocket = path_elements[1];
+    let path_elements = req.url.split('/');
+    console.log("path_elements", path_elements);
+    let owner = path_elements[0].replace(/\//g, "");
+    let logsocket = path_elements[1].replace(/\//g, "");
 
     console.log("ℹ️ [info] owner: ", { owner }, "logsocket", { logsocket }, "path_elements", {path_elements});
 
