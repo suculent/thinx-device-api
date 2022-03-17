@@ -52,7 +52,7 @@ describe("Builder", function() {
     builder.build(
       owner, 
       build, 
-      notifiers,
+      [], // notifiers
       function(success, message, build_id2) {
         console.log("[spec] build dry", {success}, {message}, {build_id2});
         done();
@@ -76,7 +76,7 @@ describe("Builder", function() {
   it("should not fail on build", function(done) {
     let br = {};
     let transmit_key = "mock-transmit-key";
-      builder.run_build(br, notifiers, function(success, result) {
+      builder.run_build(br, [] /* notifiers */, function(success, result) {
         console.log("[spec] build TODO", {success}, {result});
         done();
       }, transmit_key);

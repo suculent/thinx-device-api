@@ -40,7 +40,6 @@ describe("Owner", function() {
         console.log("(01) Activation response stored as this.activation_key: " + response);
         this.activation_key = response; // store activation token for next step
       }
-      console.log("(01) Create response: ", { response });
       expect(response).to.be.a('string');
       done();
     }, {});
@@ -77,8 +76,6 @@ describe("Owner", function() {
     };
     user.update(owner, body,
       function(success, response) {
-        console.log(JSON.stringify(
-          response));
         expect(success).to.be.true;
         done();
       });
