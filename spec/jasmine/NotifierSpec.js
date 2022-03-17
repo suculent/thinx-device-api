@@ -1,21 +1,35 @@
-var Notifier require('../../lib/thinx/notifier');
-var exec = require("child_process");
+var Notifier = require('../../lib/thinx/notifier');
 
-describe("Notifier", function() {
+describe("Notifier", function () {
 
   var envi = require("../_envi.json");
-  
-  it("should be able to send a notification", function() {
-    // Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope
-    // (or stores into DB later)
+
+  it("should be able to send a notification", function () {
+
+    /* this is how job_status is generated inside the global build script:
+    # Inside Worker, we don't call notifier, but just post the results into shell... THiNX builder must then call the notifier itself (or integrate it later)
+    JSON=$(jo \
+    build_id=${BUILD_ID} \
+    commit=${COMMIT} \
+    thx_version=${THX_VERSION} \
+    git_repo=${GIT_REPO} \
+    outfile=$(basename ${OUTFILE}) \
+    udid=${UDID} \
+    sha=${SHA} \
+    owner=${OWNER_ID} \
+    status=${STATUS} \
+    platform=${PLATFORM} \
+    version=${THINX_FIRMWARE_VERSION} \
+    md5=${MD5} \
+    env_hash=${ENV_HASH} \
+    )
+    */
 
     // Hey, this should be JUST a notification, no destructives.
-    var test_build_id = "no_build_id";
-    var test_commit_id = "crime_commit_id";
-    var test_version = "v0.0";
-    var test_repo =
-      "https://github.com/suculent/thinx-firmware-esp8266-pio.git";
-    var test_binary = "nothing.bin";
+    var test_build_id = "mock_build_id";
+    var test_commit_id = "mock_commit_id";
+    var test_repo = "https://github.com/suculent/thinx-firmware-esp8266-pio.git";
+    var test_binary = "/tmp/nothing.bin";
     var test_udid = "d6ff2bb0-df34-11e7-b351-eb37822aa172";
     var sha = "one-sha-256-pls";
     var owner_id = envi.oid;
@@ -23,24 +37,23 @@ describe("Notifier", function() {
     var platform = "platformio";
     var version = "thinx-firmware-version-1.0";
 
-    var CMD = "node " + __dirname + "/../../lib/thinx/notifier.js " +
-      test_build_id + " " +
-      test_commit_id + " " +
-      test_version + " " +
-      test_repo + " " +
-      test_binary + " " +
-      test_udid + " " +
-      sha + " " +
-      owner_id + " " +
-      status + " " +
-      platform + " " +
-      version;
-    
+    let job_status = {
+      build_id: test_build_id,
+      commit: test_commit_id,
+      thx_version: "1.5.X",
+      git_repo: test_repo,
+      outfile: test_binary,
+      udid: test_udid,
+      sha: sha,
+      owner: owner_id,
+      status: status,
+      platform: platform,
+      version: version,
+      md5: "md5-mock-hash",
+      env_hash: "cafebabe"
+    };
+
     let notifier = new Notifier();
-
-    // TODO: Get sample job_status from somewhere to mock it
-
-    let job_status = {};
 
     notifier.process(job_status, (result) => {
       console.log("ℹ️ [info] Notifier's Processing result:", result);
