@@ -18,13 +18,17 @@ describe("Build log", function() {
   });
 
   it("(02) should be able to log", function(done) {
-    blog.log(build_id, owner, udid, "Testing build log create...");
-    done();
+    blog.log(build_id, owner, udid, "Testing build log create...", function(error, body) {
+      console.log("(02) error and body", {error}, {body});
+      done();
+    });
   });
 
   it("(03) should be able to append existing log", function(done) {
-    blog.log(build_id, owner, udid, "Testing build log append...");
-    done();
+    blog.log(build_id, owner, udid, "Testing build log append...", function(error, body) {
+      console.log("(02) error and body", {error}, {body});
+      done();
+    });
   });
 
   it("(04) should be able to list build logs", function(done) {
