@@ -236,6 +236,12 @@ jobs:
           docker-compose logs --timestamp transformer
 
     - run:
+        name: Starting Worker
+        command: |
+          docker-compose up -d worker
+          docker-compose logs --timestamp worker
+
+    - run:
         name: Starting CouchDB
         command: |
           export ENVIRONMENT=test

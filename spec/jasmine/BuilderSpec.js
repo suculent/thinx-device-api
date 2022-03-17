@@ -74,9 +74,20 @@ describe("Builder", function() {
   });
 
   it("should not fail on build", function(done) {
-    let br = {};
+
+    let build_request = {
+      worker: {
+        socket: null /* must be a real worker that connects to app; where do we get its ID? */
+      },
+      build_id: build_id,
+      owner: owner,
+      git: "https://github.com/suculent/thinx-firmware-esp8266-pio.git",
+      branch: "origin/master",
+      udid: "mock-udid-nevim"
+    };
+
     let transmit_key = "mock-transmit-key";
-      builder.run_build(br, [] /* notifiers */, function(success, result) {
+      builder.run_build(build_request, [] /* notifiers */, function(success, result) {
         console.log("[spec] build TODO", {success}, {result});
         done();
       }, transmit_key);
