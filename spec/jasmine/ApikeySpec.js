@@ -65,8 +65,6 @@ describe("API Key", function() {
         }
         expect(success).to.be.true;
         expect(array_or_error[0].key).to.be.a('string');
-
-        console.log("[04] Revoking valid key: " + generated_key_hash);
         apikey.revoke(
           owner,
           [generated_key_hash],
@@ -79,7 +77,6 @@ describe("API Key", function() {
   });
 
   it("(05) should be able to fail on invalid API Key revocation (callback is not a function!)", function() {
-    console.log("(05) Revoking invalid-owner key...");
     apikey.revoke(
       "nonsense", ["sample-key-hash"],
       (success)  => {
