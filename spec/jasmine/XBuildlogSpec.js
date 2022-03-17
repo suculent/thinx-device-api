@@ -33,7 +33,7 @@ describe("Build log", function() {
       // err should be null
       expect(body).to.be.an('object'); // { rows: [] } in case of empty; ahways has dows
       var last_build_id = body.rows[0];
-      console.log("(02) last_build_id", last_build_id, "shoudl not be null or undefined! build instead of mocking.");
+      console.log("(02) last_build_id", JSON.stringify(last_build_id), "should not be null or undefined! build instead of mocking. That's why this suite starts with X");
       if ((typeof(last_build_id) !== "undefined") && (last_build_id !== null)) {
         blog.fetch(last_build_id, function(berr, bbody) {
           console.log("[spec] [info] fetched log body:", bbody);

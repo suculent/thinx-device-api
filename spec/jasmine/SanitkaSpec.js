@@ -25,8 +25,13 @@ describe("Sanitka", function () {
     expect(result).to.equal(input);
   });
 
-  it("should reject invalid owner", function () {
+  it("should reject invalid owner length", function () {
     var result = sanitka.owner("invalid-owner");
+    expect(result).to.equal(false);
+  });
+
+  it("should reject invalid udid character", function () {
+    var result = sanitka.udid("d6ff2bb0-df34-11e7-b351-eb37822aa17z");
     expect(result).to.equal(false);
   });
 
@@ -38,6 +43,12 @@ describe("Sanitka", function () {
 
   it("should fail safely on null token", function () {
     let input = null;
+    var result = sanitka.pushToken(input);
+    expect(result).to.equal(null);
+  });
+
+  it("should fail safely on undefined token", function () {
+    let input;
     var result = sanitka.pushToken(input);
     expect(result).to.equal(null);
   });
