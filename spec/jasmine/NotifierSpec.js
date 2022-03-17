@@ -1,10 +1,8 @@
-var envi = require("../_envi.json");
-var owner = envi.oid;
 var exec = require("child_process");
 
 describe("Notifier", function() {
 
-  //var expect = require('chai').expect;
+  var envi = require("../_envi.json");
   
 
   // Well, this will be some fun. The notifier.js is being called on following circumstances:
@@ -29,7 +27,7 @@ describe("Notifier", function() {
     var test_binary = "nothing.bin";
     var test_udid = "d6ff2bb0-df34-11e7-b351-eb37822aa172";
     var sha = "one-sha-256-pls";
-    var owner_id = owner;
+    var owner_id = envi.oid;
     var status = "TESTING_NOTIFIER";
     var platform = "platformio";
     var version = "thinx-firmware-version-1.0";
@@ -48,12 +46,13 @@ describe("Notifier", function() {
       version;
 
     // CMD: "${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${BUILD_ID}.bin ${UDID} ${SHA} ${OWNER_ID} ${STATUS}";
-    console.log("Notifier command: " + CMD);
+    console.log("[info] Notifier command: " + CMD);
     try {
+      // TODO: Should be async pipe waiting for something and then calling done() in spec
       var error = exec.execSync(CMD).toString();
       console.log("Notifier result: ", {error});
     } catch (f) {
-      console.log(f);
+      console.log("[spec] exec failure",f);
     }
     //expect(error).not.to.be.a('string');
     //done();
