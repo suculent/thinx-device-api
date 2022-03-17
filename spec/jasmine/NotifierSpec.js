@@ -1,22 +1,13 @@
+var Notifier require('../../lib/thinx/notifier');
 var exec = require("child_process");
 
 describe("Notifier", function() {
 
   var envi = require("../_envi.json");
   
-
-  // Well, this will be some fun. The notifier.js is being called on following circumstances:
-  // node.js process exeutes the builder.sh (should do that in background, but initial test versions did this synchronously
-  // builder.sh calls the node.js with statically allocated parameters. and the damned feat hijak is cool and like edrush and better than those rappers.
-
-  // Test disabled, because this is being covered as a part of builds anyway
   it("should be able to send a notification", function() {
     // Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope
     // (or stores into DB later)
-
-    // CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION}"
-
-    // 22fd7ed0-e193-11e7-b6e6-1bece759073e 3ee7bb498a6cd6d28a1b91f605f533384490f45b 131 git@github.com:suculent/thinx-firmware-esp8266-pio.git <none> d6ff2bb0-df34-11e7-b351-eb37822aa172 0x00000000 4f1122fa074af4dabab76a5205474882c82de33f50ecd962d25d3628cd0603be OK platformio
 
     // Hey, this should be JUST a notification, no destructives.
     var test_build_id = "no_build_id";
@@ -44,18 +35,17 @@ describe("Notifier", function() {
       status + " " +
       platform + " " +
       version;
+    
+    let notifier = new Notifier();
 
-    // CMD: "${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${BUILD_ID}.bin ${UDID} ${SHA} ${OWNER_ID} ${STATUS}";
-    console.log("[info] Notifier command: " + CMD);
-    try {
-      // TODO: Should be async pipe waiting for something and then calling done() in spec
-      var error = exec.execSync(CMD).toString();
-      console.log("Notifier result: ", {error});
-    } catch (f) {
-      console.log("[spec] exec failure",f);
-    }
-    //expect(error).not.to.be.a('string');
-    //done();
+    // TODO: Get sample job_status from somewhere to mock it
+
+    let job_status = {};
+
+    notifier.process(job_status, (result) => {
+      console.log("ℹ️ [info] Notifier's Processing result:", result);
+      done();
+    });
   });
 
 });
