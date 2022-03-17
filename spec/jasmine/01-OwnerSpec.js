@@ -108,4 +108,25 @@ describe("Owner", function() {
     });
   }, 10000);
 
+  it("(06) should be able to create mesh", function (done) {
+    user.createMesh(owner, "mock-mesh-id", "mock-mesh-alias", (success, result) => {
+      expect(success).to.be.true;
+      done();
+    });
+  }, 10000);
+
+  it("(07) should be able to list meshes", function (done) {
+    user.listMeshes(owner, (success, result) => {
+      expect(success).to.be.true;
+      done();
+    });
+  }, 10000);
+
+  it("(08) should be able to delete meshes", function (done) {
+    user.deleteMeshes(owner, ["mock-mesh-id"], (success, result) => {
+      expect(success).to.be.true;
+      done();
+    });
+  }, 10000);
+
 });
