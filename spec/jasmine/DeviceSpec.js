@@ -65,7 +65,6 @@ describe("Device", function() {
       expect(object).to.be.an('array');
       if (success) {
         apikey = object[0].hash;
-        console.log("✅ [spec] Key hash ready: ", apikey);
         expect(apikey).to.be.a('string');
       }
       done();
@@ -81,7 +80,7 @@ describe("Device", function() {
       ws,
       function(success, response) {
         if (success === false) {
-          console.log("registration error response:", response);
+          console.log("[spec] registration error response:", response);
           if (response.indexOf("owner_found_but_no_key") !== -1) {
             done();
             return;
@@ -118,7 +117,6 @@ describe("Device", function() {
           let obj = response;
           expect(obj).to.be.an('object');
           if (success === false) {
-            // console.log("should receive different response for already-registered revice: " + response);
             // this is also OK... on CircleCI there are no older API Keys in Redis
             if (response === "owner_found_but_no_key") {
               done();
@@ -206,7 +204,7 @@ describe("Device", function() {
       ws,
       function(success, response) {
         if (success === false) {
-          console.log("registration error response:", response);
+          console.log("[spec] registration error response:", response);
           if (response.indexOf("owner_found_but_no_key") !== -1) {
             done();
             return;
