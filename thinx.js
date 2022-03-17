@@ -418,22 +418,22 @@ db.init((/* db_err, dbs */) => {
 
     // May not exist while testing...
     if (typeof (ws) === "undefined" || ws === null) {
-      console.log("[error] Exiting WSS connecton, no WS defined!");
+      console.log("☣️ [error] Exiting WSS connecton, no WS defined!");
       return;
     }
 
     if (typeof (req) === "undefined") {
-      console.log("[error] No request on wss.on");
+      console.log("☣️ [error] No request on wss.on");
       return;
     }
 
     if (typeof(req.session) === "undefined") {
-      console.log("[error] No session on wss connection! Should bear thx-session");
+      console.log("☣️ [error] No session on wss connection! Should bear thx-session");
       return;
     }
 
     if (typeof(req.session.cookie) === "undefined") {
-      console.log("[error] No cookie on wss connection! Should bear thx-session");
+      console.log("☣️ [error] No cookie on wss connection! Should bear thx-session");
       return;
     }
 
