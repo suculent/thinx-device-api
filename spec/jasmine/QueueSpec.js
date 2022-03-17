@@ -1,4 +1,5 @@
 var expect = require('chai').expect;
+const Builder = require('../../lib/thinx/builder');
 let Queue = require("../../lib/thinx/queue");
 
 describe("Queue", function () {
@@ -10,9 +11,15 @@ describe("Queue", function () {
 
     // init
     it("should not fail or hang", function (done) {
+
+        let builder = new Builder();
+
         // Should initialize safely without running cron
-        queue_with_cron = new Queue(null);
+        queue_with_cron = new Queue(builder);
         expect(queue_with_cron).to.be.a('object');
+
+        let workers = queue_with_cron.getWorkers();
+        expect(workers).to.be.a('array');
 
         // Should be able to run cron when initialized
         queue_with_cron.cron();

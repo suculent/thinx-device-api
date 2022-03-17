@@ -8,6 +8,9 @@ describe("Builder", function() {
   var Builder = require("../../lib/thinx/builder");
   var builder = new Builder();
 
+  var Queue = require("./lib/thinx/queue");
+  var queue = new Queue(builder);
+
   var envi = require("../_envi.json");
   var owner = envi.oid;
   var udid = envi.udid;
@@ -64,26 +67,22 @@ describe("Builder", function() {
   it("supports certain languages", function() {
     var languages = builder.supportedLanguages();
     expect(languages).to.be.a('array');
-    //console.log(JSON.stringify(languages));
   });
 
   it("supports certain extensions", function() {
     var extensions = builder.supportedExtensions();
     expect(extensions).to.be.a('array');
-    //console.log(JSON.stringify(extensions));
   });
 
   it("should not fail on build", function(done) {
 
     let build_request = {
-      worker: {
-        socket: null /* must be a real worker that connects to app; where do we get its ID? */
-      },
+      worker: queue.getWorkers()[0],
       build_id: build_id,
       owner: owner,
       git: "https://github.com/suculent/thinx-firmware-esp8266-pio.git",
       branch: "origin/master",
-      udid: "mock-udid-nevim"
+      udid: "mock-udid-nevim" // expected to exist – may need to fetch details
     };
 
     let transmit_key = "mock-transmit-key";
