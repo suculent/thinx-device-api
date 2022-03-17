@@ -4,7 +4,7 @@ describe("Notifier", function () {
 
   var envi = require("../_envi.json");
 
-  it("should be able to send a notification", function () {
+  it("should be able to send a notification", function (done) {
 
     /* this is how job_status is generated inside the global build script:
     # Inside Worker, we don't call notifier, but just post the results into shell... THiNX builder must then call the notifier itself (or integrate it later)

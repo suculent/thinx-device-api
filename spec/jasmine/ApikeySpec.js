@@ -32,7 +32,7 @@ describe("API Key", function() {
         if (success) {
           expect(object).to.be.a('array');
         } else {
-          console.log("[jasmine] API Key Listing failed:", {object}, {success});
+          console.log("[spec] API Key Listing failed:", {object}, {success});
         }
         done();
       });
@@ -46,7 +46,6 @@ describe("API Key", function() {
       "invalid-api-key",
       req,
       (success /*, result */) => { // fixed (callback is not a function!)
-        console.log("verify with invalid API Key, callback, done()");
         expect(success).to.equal(false);
         done();
       });
