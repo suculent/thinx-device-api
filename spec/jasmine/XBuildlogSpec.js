@@ -17,12 +17,23 @@ describe("Build log", function() {
     expect(blog).to.be.a('object');
   });
 
-  it("(02) should be able to list build logs", function(done) {
+  it("(02) should be able to log", function(done) {
+    blog.log(build_id, owner, udid, "Testing build log create...");
+    done();
+  });
+
+  it("(03) should be able to append existing log", function(done) {
+    blog.log(build_id, owner, udid, "Testing build log append...");
+    done();
+  });
+
+  it("(04) should be able to list build logs", function(done) {
     blog.list(owner, function(err, body) {
       console.log("[spec] [info] build_logs", body);
       // err should be null
       expect(body).to.be.an('object'); // { rows: [] } in case of empty; ahways has dows
       var last_build_id = body.rows[0];
+      console.log("(02) last_build_id", last_build_id, "shoudl not be null or undefined! build instead of mocking.");
       if ((typeof(last_build_id) !== "undefined") && (last_build_id !== null)) {
         blog.fetch(last_build_id, function(berr, bbody) {
           console.log("[spec] [info] fetched log body:", bbody);
@@ -33,16 +44,6 @@ describe("Build log", function() {
       done();
     });
   }, 15000);
-
-  it("(03) should be able to log", function(done) {
-    blog.log(build_id, owner, udid, "Testing build log create...");
-    done();
-  });
-
-  it("(04) should be able to append existing log", function(done) {
-    blog.log(build_id, owner, udid, "Testing build log append...");
-    done();
-  });
 
   it("(05) should be able to tail log for build_id", function() {
     const no_socket = null;
