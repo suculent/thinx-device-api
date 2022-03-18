@@ -45,8 +45,8 @@ describe("Messenger", function() {
         }
         TEST_DEVICE_6.udid = response.registration.udid;
         expect(success).to.equal(true);
-        expect(TEST_DEVICE_6).to.be.an('object');
-        expect(response.registration).to.be.an('object');
+        expect(TEST_DEVICE_6).to.be.a('object');
+        expect(response.registration).to.be.a('object');
         expect(TEST_DEVICE_6.udid).to.be.a('string');
         done();
       });
@@ -64,7 +64,7 @@ describe("Messenger", function() {
     console.log("✅ [spec]  Initializing messenger with owner", test_owner, "socket", mock_socket);
     messenger.initWithOwner(test_owner, mock_socket, (success, status) => {
       console.log("✅ [spec] messenger initialized: ", { success: success, status: status });
-      expect(success).to.be(true);
+      expect(success).to.equal(true);
       //done();
     });
   });
@@ -72,7 +72,7 @@ describe("Messenger", function() {
   // getDevices: function(owner, callback)
   it("should be able to fetch devices for owner", function(done) {
     messenger.getDevices(test_owner, (success, devices) => {
-      expect(devices).to.be.an('array');
+      expect(devices).to.be.a('array');
       done();
     });
   });
