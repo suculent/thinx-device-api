@@ -21,7 +21,7 @@ describe("Builder", function() {
   // This UDID is to be deleted at the end of test.
   var TEST_DEVICE_5 = {
     mac: "AA:BB:CC:EE:00:05",
-    firmware: "DevicesSpec.js",
+    firmware: "BuilderSpec.js",
     version: "1.0.0",
     checksum: "alevim",
     push: "forget",

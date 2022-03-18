@@ -49,7 +49,7 @@ describe("Device", function() {
 
   var JRS3 = {
     mac: "33:33:33:33:33:33",
-    firmware: "TransferSpec.js",
+    firmware: "DeviceSpec.js",
     version: "1.0.0",
     alias: "test-device-2-transfer",
     owner: "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c",
