@@ -86,13 +86,14 @@ describe("Messenger", function() {
 
   it("should be able to setup MQTT client", function(done) {
 
+    const Globals = require("../../lib/thinx/globals.js");
     var app_config = Globals.app_config();
 
     const mqtt_options = {
       host: app_config.mqtt.server,
       port: app_config.mqtt.port,
-      username: test_owner,
-      password: ak
+      username: "thinx",
+      password: "mosquitto" // because dynamic AK is not known in this test suite so far, needs generating user and fetching is default MQTT AK
     };
 
     messenger.setupMqttClient(test_owner, ak, mqtt_options, function(result) {
