@@ -9,7 +9,7 @@ describe("Transfer", function () {
   var Transfer = require("../../lib/thinx/transfer");
   var transfer = new Transfer(messenger);
 
-  it("(00) should be able to initiate device transfer, decline and accept another one", function (done) {
+  it("(00) should be able to initiate device transfer, decline and accept another one", function () {
 
     var body = {
       to: "cimrman@thinx.cloud",
@@ -54,11 +54,12 @@ describe("Transfer", function () {
             expect(success3).to.be.true; // returns false: transfer_id_not_found
             expect(response3).to.be.a('string');
             console.log("**************** »»»»»»»» CALLING DONE IN TRANSFERSPEC!");
-            done();
+
+            if (typeof(done) !== "undefined") done();
           });
         });
       });
     });
-  }, 20000); // it-00
+  }); // it-00
 
 }); // describe

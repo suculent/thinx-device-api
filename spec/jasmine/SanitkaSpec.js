@@ -27,7 +27,7 @@ describe("Sanitka", function () {
 
   it("should reject invalid owner length", function () {
     var result = sanitka.owner("invalid-owner");
-    expect(result).to.equal(false);
+    expect(result).to.equal(null);
   });
 
   it("should reject invalid udid character", function () {
