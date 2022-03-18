@@ -45,7 +45,7 @@ describe("Messenger", function() {
           }
         }
         TEST_DEVICE_6.udid = response.registration.udid;
-        expect(success).to.be.true;
+        expect(success).to.equal(true);
         expect(TEST_DEVICE_6).to.be.an('object');
         expect(response.registration).to.be.an('object');
         expect(TEST_DEVICE_6.udid).to.be.a('string');
@@ -89,28 +89,36 @@ describe("Messenger", function() {
     done();
   }, 5000);
 
-  it("should be able to setup MQTT client", function(done) {
+  it("[mm] should be able to setup MQTT client", function(done) {
 
     const Globals = require("../../lib/thinx/globals.js");
     var app_config = Globals.app_config();
 
+    console.log(`[spec] [mm] getting apikey with config ${app_config.mqtt}`);
+
     user.mqtt_key(owner, "mosquitto", (key_success, apikey) => {
 
-      const mqtt_options = {
+      expect(key_success).to.equal(true);
+      expect(apikey).to.be.a('string');
+
+      console.log(`[spec] [mm] fetched mqtt key? ${key_success} with apikey ${apikey}`);
+
+      let mqtt_options = {
         host: app_config.mqtt.server,
         port: app_config.mqtt.port,
         username: owner,
         password: apikey
       };
+
+      console.log(`[spec] [mm] setting up client for owner ${test_owner} with options ${mqtt_options}`);
   
-      messenger.setupMqttClient(test_owner, mqtt_options, function(result) {
-        console.log("[spec] setup mqtt result", result);
+      messenger.setupMqttClient(test_owner, mqtt_options, (result) => {
+        console.log(`[spec] [mm] [spec] setup mqtt result ${result}`);
+        expect(result).to.equal(true);
         done();
       });
 
     });
-
-    
 
   }, 5000);
 
