@@ -94,14 +94,14 @@ describe("Messenger", function() {
     const Globals = require("../../lib/thinx/globals.js");
     var app_config = Globals.app_config();
 
-    console.log(`[spec] [mm] getting apikey with config ${app_config.mqtt}`);
+    console.log(`[spec] [mm] [debug] getting apikey with config ${JSON.stringify(app_config.mqtt)}`); // TODO REMOVE
 
     user.mqtt_key(owner, "mosquitto", (key_success, apikey) => {
 
+      console.log(`[spec] [mm] fetched mqtt key? ${key_success} with apikey ${apikey}`);
+
       expect(key_success).to.equal(true);
       expect(apikey).to.be.a('string');
-
-      console.log(`[spec] [mm] fetched mqtt key? ${key_success} with apikey ${apikey}`);
 
       let mqtt_options = {
         host: app_config.mqtt.server,
