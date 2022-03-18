@@ -1,24 +1,18 @@
-const Notifier = require('../../lib/thinx/notifier');
+var Builder = require("../../lib/thinx/builder");
+var Queue = require("../../lib/thinx/queue");
 
 var expect = require('chai').expect;
 
 describe("Builder", function() {
 
-  //anything in here will apply to everything in each nested describe
-  var Builder = require("../../lib/thinx/builder");
   var builder = new Builder();
-
-  var Queue = require("./lib/thinx/queue");
   var queue = new Queue(builder);
 
   var envi = require("../_envi.json");
   var owner = envi.oid;
   var udid = envi.udid;
-  //var apikey = envi.ak;
   var build_id = envi.build_id; // "f168def0-597f-11e7-a932-014d5b00c004";
   var source_id = envi.sid;
-
-  //let notifiers = [ new Notifier() ];
 
   it("should be able to initialize", function() {
     expect(builder).to.be.a('object');
