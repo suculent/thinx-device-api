@@ -97,16 +97,16 @@ describe("Messenger", function() {
 
     user.mqtt_key(test_owner, "mosquitto", (key_success, apikey) => {
 
-      console.log(`[spec] [mm] fetched mqtt key? ${key_success} with apikey ${apikey}`);
+      console.log(`[spec] [mm] fetched mqtt key? ${key_success} with apikey ${JSON.stringify(apikey, null, '\t')}`);
 
       expect(key_success).to.equal(true);
-      expect(apikey).to.be.a('string');
+      expect(apikey).to.be.a('object');
 
       let mqtt_options = {
         host: app_config.mqtt.server,
         port: app_config.mqtt.port,
         username: test_owner,
-        password: apikey
+        password: apikey.key
       };
 
       console.log(`[spec] [mm] setting up client for owner ${test_owner} with options ${mqtt_options}`);
