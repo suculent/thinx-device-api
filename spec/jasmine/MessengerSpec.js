@@ -6,7 +6,6 @@ var messenger;
 var Device = require("../../lib/thinx/device"); var device = new Device();
 
 var envi = require("../_envi.json");
-const { owner } = require('../../lib/thinx/validator');
 var test_owner = envi.oid;
 var udid = envi.udid;
 
@@ -89,14 +88,14 @@ describe("Messenger", function() {
     done();
   }, 5000);
 
-  xit("[mm] should be able to setup MQTT client", function(done) {
+  it("[mm] should be able to setup MQTT client", function(done) {
 
     const Globals = require("../../lib/thinx/globals.js");
     var app_config = Globals.app_config();
 
     console.log(`[spec] [mm] [debug] getting apikey with config ${JSON.stringify(app_config.mqtt)}`); // TODO REMOVE
 
-    user.mqtt_key(owner, "mosquitto", (key_success, apikey) => {
+    user.mqtt_key(test_owner, "mosquitto", (key_success, apikey) => {
 
       console.log(`[spec] [mm] fetched mqtt key? ${key_success} with apikey ${apikey}`);
 
@@ -106,7 +105,7 @@ describe("Messenger", function() {
       let mqtt_options = {
         host: app_config.mqtt.server,
         port: app_config.mqtt.port,
-        username: owner,
+        username: test_owner,
         password: apikey
       };
 
