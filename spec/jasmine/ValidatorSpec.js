@@ -30,8 +30,18 @@ describe("Validator", function() {
     expect(result == owner).to.be.true;
   });
 
-  it("should reject udid", function() {
+  it("should reject long udid", function() {
     var result = Validator.udid(udid+udid);
+    expect(result).to.equal(false);
+  });
+
+  it("should reject undefined", function() {
+    var result = Validator.udid(undefined);
+    expect(result).to.equal(false);
+  });
+
+  it("should survive infinite loop with zero-width match", function() {
+    var result = Validator.udid("");
     expect(result).to.equal(false);
   });
 

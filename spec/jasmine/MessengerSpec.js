@@ -55,15 +55,15 @@ describe("Messenger", function() {
   });
 
   // this requires having owner and devices registered in the DB, 
-  it("should be able to initialize with owner", function(done) {
-    const mock_socket = {};
+  it("should be able to initialize with owner", function() {
+    const mock_socket = {}; // let socket = app._ws[owner];
     console.log("✅ [spec]  Initializing messenger with owner", test_owner, "socket", mock_socket);
     messenger.initWithOwner(test_owner, mock_socket, (success, status) => {
       console.log("✅ [spec] messenger initialized: ", { success: success, status: status });
       expect(success).to.be(true);
-      done();
+      //done();
     });
-  }, 5000);
+  });
 
   // getDevices: function(owner, callback)
   it("should be able to fetch devices for owner", function(done) {
