@@ -1,6 +1,7 @@
-var Builder = require("../../lib/thinx/builder");
+var Builder = require("../../lib/thinx/builder"); var builder = new Builder();
+var Device = require("../../lib/thinx/device"); var device = new Device();
 var Queue = require("../../lib/thinx/queue");
-
+  
 var expect = require('chai').expect;
 
 describe("Builder", function() {
@@ -8,7 +9,6 @@ describe("Builder", function() {
   var express = require("express"); 
   var app = express();
 
-  var builder = new Builder();
   var queue = new Queue(builder, app);
 
   var envi = require("../_envi.json");

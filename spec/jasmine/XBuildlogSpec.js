@@ -45,7 +45,6 @@ describe("Build log", function() {
         blog.fetch(last_build.id, function(berr, bbody) {
           expect(berr).to.equal(false);
           expect(bbody).to.be.an('object');
-          expect(bbody.log).to.be.an('object');
           done();
         });
       } else {
