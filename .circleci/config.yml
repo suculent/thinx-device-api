@@ -180,7 +180,7 @@ jobs:
     - run:
         name: Switch to Test Dockerfiles
         command: |
-          rm -rf ./Dockerfile
+          mv ./Dockerfile ./Dockerfile.prod
           mv ./Dockerfile.test ./Dockerfile
           rm -rf ./docker-compose.yml
           mv ./docker-compose.test.yml ./docker-compose.yml
@@ -260,6 +260,33 @@ jobs:
             exit 1
           fi
           date
+
+    - run:
+        name: Running API with tests
+        command: |
+          export ENVIRONMENT=test
+          docker-compose up --build api | tee -ipa ./test.log
+          if [[ ! $(cat ./test.log | grep "specs, 0 failures") ]]; then 
+            echo "» TEST failed. Should not deploy this commit."
+            cat ./test.log | grep "Failures:"
+            exit 1
+          fi
+          date
+
+    - run:
+        name: Starting API for UI tests
+        # start API in other than 'test' environment starts application instead of tests
+        command: |
+          export ENVIRONMENT=circle
+          docker-compose up -d api
+          docker-compose logs
+
+    - run:
+        name: Add UI testing here
+        command: |
+          cd ./services/console
+          echo "TODO RUN CYPRESS TESTS FROM HERE"
+          docker-compose logs --timestamp api
 
     - run:
         name: Allow inspecting MQTT logs after failed connections
@@ -366,3 +393,4 @@ workflows:
               only:
                 - thinx-swarm
                 - thinxcloud
+                - thinx-console
