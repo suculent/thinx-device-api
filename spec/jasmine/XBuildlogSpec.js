@@ -40,13 +40,12 @@ describe("Build log", function() {
       expect(err).to.be.false; // err should be null
       expect(body).to.be.an('object'); // { rows: [] }
       let rows = body.rows;
-      console.log("blog 04 body rows", {rows});
       var last_build = body.rows[0];
       if ((typeof(last_build) !== "undefined") && (last_build !== null)) {
         blog.fetch(last_build.id, function(berr, bbody) {
-          console.log("[spec] [info] fetched log body:", bbody);
           expect(berr).to.equal(false);
           expect(bbody).to.be.an('object');
+          expect(bbody.log).to.be.an('object');
           done();
         });
       } else {
