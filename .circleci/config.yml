@@ -353,6 +353,7 @@ workflows:
                 - thinx-swarm
                 - main
                 - thinxcloud
+                - thinx-console
 
       # - test-api-cloud:
       #     context:
