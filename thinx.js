@@ -134,7 +134,7 @@ db.init((/* db_err, dbs */) => {
   var builder = new Builder();
 
   var Queue = require("./lib/thinx/queue");
-  var queue = new Queue(builder);
+  var queue = new Queue(builder, app);
   queue.cron(); // starts cron job for build queue from webhooks
 
   const GDPR = require("./lib/thinx/gdpr");

@@ -5,8 +5,11 @@ var expect = require('chai').expect;
 
 describe("Builder", function() {
 
+  var express = require("express"); 
+  var app = express();
+
   var builder = new Builder();
-  var queue = new Queue(builder);
+  var queue = new Queue(builder, app);
 
   var envi = require("../_envi.json");
   var owner = envi.oid;

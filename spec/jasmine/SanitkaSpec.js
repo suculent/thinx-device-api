@@ -32,7 +32,7 @@ describe("Sanitka", function () {
 
   it("should reject invalid udid character", function () {
     var result = sanitka.udid("d6ff2bb0-df34-11e7-b351-eb37822aa17z");
-    expect(result).to.equal(false);
+    expect(result).to.equal(null);
   });
 
   it("should fail safely on undefined token", function () {
