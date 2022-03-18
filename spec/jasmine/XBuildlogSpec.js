@@ -18,14 +18,14 @@ describe("Build log", function() {
   });
 
   it("(02) should be able to log", function(done) {
-    blog.log(build_id, owner, udid, "Testing build log create...", function(error, body) {
+    blog.log(build_id, owner, udid, "Testing build log create...", contents, function(error, body) {
       console.log("(02) error and body", {error}, {body});
       done();
     });
   });
 
   it("(03) should be able to append existing log", function(done) {
-    blog.log(build_id, owner, udid, "Testing build log append...", function(error, body) {
+    blog.log(build_id, owner, udid, "Testing build log append...", contents, function(error, body) {
       console.log("(03) error and body", {error}, {body});
       done();
     });
@@ -33,7 +33,7 @@ describe("Build log", function() {
 
   it("(04) should be able to list build logs", function(done) {
     blog.list(owner, function(err, body) {
-      expect(err).to.be.null; // err should be null
+      expect(err).to.be.false; // err should be null
       expect(body).to.be.an('object'); // { rows: [] }
       var last_build_id = body.rows[0].id;
       if ((typeof(last_build_id) !== "undefined") && (last_build_id !== null)) {
