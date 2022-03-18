@@ -3,6 +3,8 @@ var expect = require('chai').expect;
 var Messenger = require('../../lib/thinx/messenger');
 var messenger;
 
+var Device = require("../../lib/thinx/device"); var device = new Device();
+
 var envi = require("../_envi.json");
 var test_owner = envi.oid;
 var udid = envi.udid;
@@ -76,4 +78,41 @@ describe("Messenger", function() {
     messenger.publish(test_owner, udid, "test");
     done();
   }, 5000);
+
+  it("should be able to send random quote", function(done) {
+    messenger.sendRandomQuote();
+    done();
+  }, 5000);
+
+  it("should be able to setup MQTT client", function(done) {
+
+    var app_config = Globals.app_config();
+
+    const mqtt_options = {
+      host: app_config.mqtt.server,
+      port: app_config.mqtt.port,
+      username: test_owner,
+      password: ak
+    };
+
+    messenger.setupMqttClient(test_owner, ak, mqtt_options, function(result) {
+      console.log("[spec] setup mqtt result", result);
+      done();
+    });
+
+  }, 5000);
+
+  // responder should not fail
+  it("should be able to respond to a message", function() {
+    let topic = "/owner/device/test";
+    let message = "Bare no-NID message";
+    messenger.messageResponder(topic, message);
+  });
+
+  // TODO COVER WITH TESTS:
+  // message_callback(...)
+  // get_result_or_callback(...)
+  // data(...)
+  // initWithOwner(...)
+  // slack(...)
 });

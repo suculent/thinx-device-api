@@ -41,6 +41,12 @@ describe("Sanitka", function () {
     expect(result).to.equal(null);
   });
 
+  it("should fail safely on undefined owner", function () {
+    let input = undefined;
+    var result = sanitka.owner(input);
+    expect(result).to.equal(null);
+  });
+
   it("should fail safely on null token", function () {
     let input = null;
     var result = sanitka.pushToken(input);
