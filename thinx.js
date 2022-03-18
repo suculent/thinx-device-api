@@ -133,10 +133,15 @@ db.init((/* db_err, dbs */) => {
   var Builder = require("./lib/thinx/builder");
   var builder = new Builder();
 
-  var Queue = require("./lib/thinx/queue");
-  var queue = new Queue(builder, app);
-  queue.cron(); // starts cron job for build queue from webhooks
+  let queue;
 
+  // TEST CASE WORKAROUND: attempt to fix duplicate initialization... if Queue is being tested, it's running as another instance and the port 3000 must stay free!
+  if (process.env.ENVIRONMENT !== "test") {
+    const Queue = require("./lib/thinx/queue");
+    queue = new Queue(builder, app);
+    queue.cron(); // starts cron job for build queue from webhooks
+  }
+  
   const GDPR = require("./lib/thinx/gdpr");
   new GDPR().guard();
 
