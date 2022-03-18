@@ -10,6 +10,9 @@ const { owner } = require('../../lib/thinx/validator');
 var test_owner = envi.oid;
 var udid = envi.udid;
 
+var User = require("../../lib/thinx/owner");
+var user = new User();
+
 describe("Messenger", function() {
 
   var ak = envi.ak;
@@ -91,7 +94,7 @@ describe("Messenger", function() {
     const Globals = require("../../lib/thinx/globals.js");
     var app_config = Globals.app_config();
 
-    this.user.mqtt_key(owner, this.password, (key_success, apikey) => {
+    user.mqtt_key(owner, this.password, (key_success, apikey) => {
 
       const mqtt_options = {
         host: app_config.mqtt.server,
