@@ -94,7 +94,7 @@ describe("Messenger", function() {
     const Globals = require("../../lib/thinx/globals.js");
     var app_config = Globals.app_config();
 
-    user.mqtt_key(owner, this.password, (key_success, apikey) => {
+    user.mqtt_key(owner, "mosquitto", (key_success, apikey) => {
 
       const mqtt_options = {
         host: app_config.mqtt.server,
