@@ -227,19 +227,19 @@ jobs:
         command: |
           docker login --username $DOCKER_LOGIN --password $DOCKER_PASSWORD https://registry.thinx.cloud:5000
           docker-compose up -d --build mosquitto
-          docker-compose logs --timestamp mosquitto
+          docker-compose logs --no-log-prefix --timestamp mosquitto
 
     - run:
         name: Starting Transformer
         command: |
           docker-compose up -d --build transformer
-          docker-compose logs --timestamp transformer
+          docker-compose logs --no-log-prefix --timestamp transformer
 
     - run:
         name: Starting Worker
         command: |
           docker-compose up -d worker
-          docker-compose logs --timestamp worker
+          docker-compose logs --no-log-prefix --timestamp worker
 
     - run:
         name: Starting CouchDB
@@ -247,13 +247,13 @@ jobs:
           export ENVIRONMENT=test
           chmod -R 666 ./services/couchdb/*
           docker-compose up -d --build couchdb
-          docker-compose logs --timestamp couchdb
+          docker-compose logs --no-log-prefix --timestamp couchdb
 
     - run:
         name: Starting API Test
         command: |
           export ENVIRONMENT=test
-          docker-compose up --build api | tee -ipa ./test.log
+          docker-compose up --build api | sed -u 's/^[^|]*[^ ]* //' | tee -ipa ./test.log
           if [[ ! $(cat ./test.log | grep "specs, 0 failures") ]]; then 
             echo "» TEST failed. Should not deploy this commit."
             cat ./test.log | grep "Failures:"
@@ -280,7 +280,7 @@ jobs:
           export ENVIRONMENT=circle
           docker-compose up -d api
           sleep 30 && echo "Giving app some time to start..."
-          docker-compose logs --timestamp api
+          docker-compose logs --no-log-prefix --timestamp api
 
     - run:
         name: Add UI testing here
@@ -296,22 +296,22 @@ jobs:
     - run:
         name: Allow inspecting API logs after failed UI tests
         command: |
-            docker-compose logs --timestamp api
+            docker-compose logs --no-log-prefix --timestamp api
 
     - run:
         name: Allow inspecting MQTT logs after failed connections
         command: |
-            docker-compose logs --timestamp mosquitto
+            docker-compose logs --no-log-prefix --timestamp mosquitto
 
     - run:
         name: Allow inspecting CouchDB logs after failed connections
         command: |
-            docker-compose logs --timestamp couchdb
+            docker-compose logs --no-log-prefix --timestamp couchdb
 
     - run:
         name: Allow inspecting Transformer logs after failed connections
         command: |
-            docker-compose logs --timestamp transformer
+            docker-compose logs --no-log-prefix --timestamp transformer
 
     - run:
         name: Check running Docker containers
