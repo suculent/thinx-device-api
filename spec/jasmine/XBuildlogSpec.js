@@ -26,22 +26,21 @@ describe("Build log", function() {
 
   it("(03) should be able to append existing log", function(done) {
     blog.log(build_id, owner, udid, "Testing build log append...", function(error, body) {
-      console.log("(02) error and body", {error}, {body});
+      console.log("(03) error and body", {error}, {body});
       done();
     });
   });
 
   it("(04) should be able to list build logs", function(done) {
     blog.list(owner, function(err, body) {
-      console.log("[spec] [info] build_logs", body);
-      // err should be null
-      expect(body).to.be.an('object'); // { rows: [] } in case of empty; ahways has dows
-      var last_build_id = body.rows[0];
-      console.log("(02) last_build_id", JSON.stringify(last_build_id), "should not be null or undefined! build instead of mocking. That's why this suite starts with X");
+      expect(err).to.be.null; // err should be null
+      expect(body).to.be.an('object'); // { rows: [] }
+      var last_build_id = body.rows[0].id;
       if ((typeof(last_build_id) !== "undefined") && (last_build_id !== null)) {
         blog.fetch(last_build_id, function(berr, bbody) {
           console.log("[spec] [info] fetched log body:", bbody);
           expect(berr).to.equal(false);
+          expect(bbody).to.be.an('object');
           done();
         });
       }
