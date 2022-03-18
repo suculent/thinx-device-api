@@ -109,7 +109,7 @@ describe("Messenger", function() {
         password: apikey.key
       };
 
-      console.log(`[spec] [mm] setting up client for owner ${test_owner} with options ${mqtt_options}`);
+      console.log(`[spec] [mm] setting up client for owner ${test_owner} with options ${JSON.stringify(mqtt_options)}`);
   
       messenger.setupMqttClient(test_owner, mqtt_options, (result) => {
         console.log(`[spec] [mm] [spec] setup mqtt result ${result}`);
