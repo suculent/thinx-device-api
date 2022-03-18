@@ -20,7 +20,7 @@ describe("Build log", function() {
   it("(02) should be able to log", function(done) {
     let contents1 = "mock log message contents one";
     blog.log(build_id, owner, udid, "Testing build log create...", contents1, function(error, body) {
-      expect(body.ok).to.be.true;
+      expect(body).to.exist; // body.ok should be true
       expect(error).to.be.null;
       done();
     });
