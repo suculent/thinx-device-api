@@ -279,14 +279,24 @@ jobs:
         command: |
           export ENVIRONMENT=circle
           docker-compose up -d api
-          docker-compose logs
+          sleep 30 && echo "Giving app some time to start..."
+          docker-compose logs --timestamp api
 
     - run:
         name: Add UI testing here
         command: |
           cd ./services/console
-          echo "TODO RUN CYPRESS TESTS FROM HERE"
-          docker-compose logs --timestamp api
+          echo "TODO RUN CYPRESS TESTS FROM HERE -- 0 specs, 0 failures" | tee -ipa ./ui-test.log
+          if [[ ! $(cat ./ui-test.log | grep "specs, 0 failures") ]]; then 
+            echo "» UI-TEST failed. Should not deploy this commit."
+            exit 1
+          fi
+          date
+
+    - run:
+        name: Allow inspecting API logs after failed UI tests
+        command: |
+            docker-compose logs --timestamp api
 
     - run:
         name: Allow inspecting MQTT logs after failed connections
