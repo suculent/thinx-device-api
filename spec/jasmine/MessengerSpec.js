@@ -89,7 +89,7 @@ describe("Messenger", function() {
     done();
   }, 5000);
 
-  it("[mm] should be able to setup MQTT client", function(done) {
+  xit("[mm] should be able to setup MQTT client", function(done) {
 
     const Globals = require("../../lib/thinx/globals.js");
     var app_config = Globals.app_config();

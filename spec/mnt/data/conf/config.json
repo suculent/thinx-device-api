@@ -34,7 +34,6 @@
   "build_root": "/repos",
   "ssh_keys": "/mnt/data/ssh_keys",
   "slack_webhook": "",
-  "slack_bot_token": "",
   "slack_bot_topic": "thinx",
   "ssl_key": "/mnt/data/ssl/privkey.pem",
   "ssl_cert": "/mnt/data/ssl/cert.pem",
