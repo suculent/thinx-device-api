@@ -6,6 +6,7 @@ var messenger;
 var Device = require("../../lib/thinx/device"); var device = new Device();
 
 var envi = require("../_envi.json");
+const { owner } = require('../../lib/thinx/validator');
 var test_owner = envi.oid;
 var udid = envi.udid;
 
@@ -50,13 +51,14 @@ describe("Messenger", function() {
   }, 15000); // register
 
 
-  it("should be able to initialize", function(/* done */) {
+  it("should be able to initialize", function (/* done */) {
     messenger = new Messenger("mosquitto").getInstance("mosquitto"); // requires injecting test creds, not custom creds!
   });
 
   // this requires having owner and devices registered in the DB, 
-  it("should be able to initialize with owner", function() {
-    const mock_socket = {}; // let socket = app._ws[owner];
+  it("should be able to initialize with owner", function () {
+
+    const mock_socket = {}; // let socket = app._ws[owner]; - websocket should be extracted to be instantiated on its own
     console.log("✅ [spec]  Initializing messenger with owner", test_owner, "socket", mock_socket);
     messenger.initWithOwner(test_owner, mock_socket, (success, status) => {
       console.log("✅ [spec] messenger initialized: ", { success: success, status: status });
@@ -89,17 +91,23 @@ describe("Messenger", function() {
     const Globals = require("../../lib/thinx/globals.js");
     var app_config = Globals.app_config();
 
-    const mqtt_options = {
-      host: app_config.mqtt.server,
-      port: app_config.mqtt.port,
-      username: "thinx",
-      password: "mosquitto" // because dynamic AK is not known in this test suite so far, needs generating user and fetching is default MQTT AK
-    };
+    this.user.mqtt_key(owner, this.password, (key_success, apikey) => {
 
-    messenger.setupMqttClient(test_owner, ak, mqtt_options, function(result) {
-      console.log("[spec] setup mqtt result", result);
-      done();
+      const mqtt_options = {
+        host: app_config.mqtt.server,
+        port: app_config.mqtt.port,
+        username: owner,
+        password: apikey
+      };
+  
+      messenger.setupMqttClient(test_owner, mqtt_options, function(result) {
+        console.log("[spec] setup mqtt result", result);
+        done();
+      });
+
     });
+
+    
 
   }, 5000);
 
