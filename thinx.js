@@ -448,7 +448,7 @@ db.init((/* db_err, dbs */) => {
 
     console.log("ℹ️ [info] owner: ", { owner }, "logsocket", { logsocket }, "path_elements", {path_elements});
 
-    var cookies = req.session.cookie;
+    var cookies = req.headers.cookie;
 
     if (typeof (cookies) !== "undefined") {
       if (cookies.indexOf("thx-session") === -1) {
