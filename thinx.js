@@ -437,8 +437,8 @@ db.init((/* db_err, dbs */) => {
     console.log("Request URL:", req.url);
     let path_elements = req.url.split('/');
     console.log("path_elements", path_elements);
-    let owner = path_elements[0].replace(/\//g, "");
-    let logsocket = path_elements[1].replace(/\//g, "");
+    let owner = path_elements[1];
+    let logsocket = path_elements[2] || null;
 
     console.log("ℹ️ [info] owner: ", { owner }, "logsocket", { logsocket }, "path_elements", {path_elements});
 
@@ -468,7 +468,7 @@ db.init((/* db_err, dbs */) => {
 
     /* Returns specific build log for owner */
     initLogTail();
-    initSocket(ws, messenger);
+    initSocket(ws, app.messenger);
 
   }).on("error", function (err) {
     console.log(`☣️ [error] in WSS connection ${err}`);
