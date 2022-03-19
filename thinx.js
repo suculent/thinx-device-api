@@ -385,7 +385,7 @@ db.init((/* db_err, dbs */) => {
     });
   }
 
-  function initSocket(ws, msgr) {
+  function initSocket(ws, msgr, logsocket) {
     ws.on("message", (message) => {
       console.log("WSS message", message);
       if (message.indexOf("{}") == 0) return; // skip empty messages
@@ -468,7 +468,7 @@ db.init((/* db_err, dbs */) => {
 
     /* Returns specific build log for owner */
     initLogTail();
-    initSocket(ws, app.messenger);
+    initSocket(ws, app.messenger, logsocket);
 
   }).on("error", function (err) {
     console.log(`☣️ [error] in WSS connection ${err}`);
