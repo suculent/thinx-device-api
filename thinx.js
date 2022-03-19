@@ -390,10 +390,18 @@ db.init((/* db_err, dbs */) => {
       console.log("WSS message", message);
       if (message.indexOf("{}") == 0) return; // skip empty messages
       var object = JSON.parse(message);
+
+      // logtail socket
       if (typeof (object.logtail) !== "undefined") {
         var build_id = object.logtail.build_id;
         var owner_id = object.logtail.owner_id;
-        blog.logtail(build_id, owner_id, app._ws[logsocket], logtail_callback);
+        if ((typeof(build_id) === "undefined") || (typeof(owner_id) === "undefined")) {
+          console.log("Missing params in ", {object});
+        } else {
+          blog.logtail(build_id, owner_id, app._ws[logsocket], logtail_callback);
+        }
+
+      // initial socket 
       } else if (typeof (object.init) !== "undefined") {
         if (typeof (msgr) !== "undefined") {
           console.log("Initializing new messenger in WS...");
