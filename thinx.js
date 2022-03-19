@@ -429,14 +429,9 @@ db.init((/* db_err, dbs */) => {
       return;
     }
 
-    if (typeof(req.session) === "undefined") {
-      console.log("☣️ [error] No session on wss connection! Should bear thx-session");
-      return;
-    }
-
     if (typeof(req.session.cookie) === "undefined") {
-      console.log("☣️ [error] No cookie on wss connection! Should bear thx-session");
-      return;
+      console.log("☣️ [error] No cookie on wss connection! Should bear thx-session until deprecated.");
+      //return;
     }
 
     // extract socket id and owner_id from pathname, also removing slashes
