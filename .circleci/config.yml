@@ -2,7 +2,7 @@ version: 2.1
 orbs:
   node: circleci/node@4.7.0
   docker: circleci/docker@2.0.1
-  slack: circleci/slack@4.5.0
+  slack: circleci/slack@4.8.3
 
 jobs:
 
@@ -60,6 +60,12 @@ jobs:
           image: thinx/console
           registry: registry.thinx.cloud:5000
           tag: 'swarm'
+      - slack/notify:
+          template: success_tagged_deploy_1
+          event: pass
+      - slack/notify:
+          template: basic_fail_1
+          event: fail
 
   build-api-cloud:
     executor: docker/docker
@@ -214,7 +220,6 @@ jobs:
         command: |
           echo "Injecting secret: ${REDIS_PASSWORD}"
           sed -i "s/changeme!/${REDIS_PASSWORD}/g" ./services/broker/test/mosquitto/mosquitto.conf
-          sed -i "s/changeme!/${REDIS_PASSWORD}/g" ./spec/mnt/data/conf/config.json
           cp ./spec/mnt/data/conf/config.json /mnt/data/conf/config.json
 
     - run:
@@ -237,6 +242,12 @@ jobs:
           docker-compose logs --timestamp transformer
 
     - run:
+        name: Starting Worker
+        command: |
+          docker-compose up -d worker
+          docker-compose logs --timestamp worker
+
+    - run:
         name: Starting CouchDB
         command: |
           export ENVIRONMENT=test
@@ -249,7 +260,7 @@ jobs:
         command: |
           export ENVIRONMENT=test
           docker-compose up --build api | tee -ipa ./test.log
-          if [[ ! $(cat ./test.log | grep "specs, 0 failures,") ]]; then 
+          if [[ ! $(cat ./test.log | grep "specs, 0 failures") ]]; then 
             echo "» TEST failed. Should not deploy this commit."
             cat ./test.log | grep "Failures:"
             exit 1
@@ -334,6 +345,7 @@ workflows:
           context:
             - thinx-docker-repo
             - console
+            - thinx-slack
           filters:
             branches:
               only:

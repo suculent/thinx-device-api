@@ -122,7 +122,6 @@ Long time no see, just a quick summary:
 23/03/2018 0.9.3128:
 
 » Static file provider
-» Status Transformer integration with Slack and Grafana
 » GDPR, content download provider
 » NodeJS client library
 

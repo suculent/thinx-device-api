@@ -49,7 +49,7 @@ describe("Device", function() {
 
   var JRS3 = {
     mac: "33:33:33:33:33:33",
-    firmware: "TransferSpec.js",
+    firmware: "DeviceSpec.js",
     version: "1.0.0",
     alias: "test-device-2-transfer",
     owner: "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c",
@@ -65,7 +65,6 @@ describe("Device", function() {
       expect(object).to.be.an('array');
       if (success) {
         apikey = object[0].hash;
-        console.log("✅ [spec] Key hash ready: ", apikey);
         expect(apikey).to.be.a('string');
       }
       done();
@@ -81,7 +80,7 @@ describe("Device", function() {
       ws,
       function(success, response) {
         if (success === false) {
-          console.log("registration error response:", response);
+          console.log("[spec] registration error response:", response);
           if (response.indexOf("owner_found_but_no_key") !== -1) {
             done();
             return;
@@ -90,7 +89,6 @@ describe("Device", function() {
         JRS.udid = response.registration.udid;
         expect(success).to.be.true;
         expect(JRS.udid).to.be.a('string');
-        console.log("• DeviceSpec.js: Received UDID: " + JRS.udid);
         done();
       });
   }, 15000); // register
@@ -119,9 +117,6 @@ describe("Device", function() {
           let obj = response;
           expect(obj).to.be.an('object');
           if (success === false) {
-            console.log(
-              "should receive different response for already-registered revice: " +
-              response);
             // this is also OK... on CircleCI there are no older API Keys in Redis
             if (response === "owner_found_but_no_key") {
               done();
@@ -143,7 +138,6 @@ describe("Device", function() {
       expect(response).to.be.an('object');
       expect(response.ott).to.be.a('string');
       device.fetchOTT(ott, (err, ott_registration_request) => {
-        console.log("fetchOTT response:", ott_registration_request, err);
         expect(ott_registration_request).to.be.a('string'); // returns registration request
         expect(err).to.be.null;
         done();
@@ -170,9 +164,7 @@ describe("Device", function() {
           authentication: apikey
         }
       };
-      console.log("• DeviceSpec.js: Using UDID: " + udid, "and req", {req});
       device.firmware(req, function(success, response) {
-        console.log("• DeviceSpec.js: Firmware fetch result: ", {response});
         expect(success).to.equal(false);
         expect(response.success).to.equal(false);
         expect(response.status).to.equal("UPDATE_NOT_FOUND");
@@ -212,13 +204,12 @@ describe("Device", function() {
       ws,
       function(success, response) {
         if (success === false) {
-          console.log("registration error response:", response);
+          console.log("[spec] registration error response:", response);
           if (response.indexOf("owner_found_but_no_key") !== -1) {
             done();
             return;
           }
         }
-        console.log("• Transfer Device UDID = ", response.registration.udid);
         done();
       });
   }, 15000); // register

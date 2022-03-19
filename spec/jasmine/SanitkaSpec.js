@@ -25,19 +25,36 @@ describe("Sanitka", function () {
     expect(result).to.equal(input);
   });
 
-  it("should reject invalid owner", function () {
+  it("should reject invalid owner length", function () {
     var result = sanitka.owner("invalid-owner");
-    expect(result).to.equal(false);
+    expect(result).to.equal(null);
+  });
+
+  it("should reject invalid udid character", function () {
+    var result = sanitka.udid("d6ff2bb0-df34-11e7-b351-eb37822aa17z");
+    expect(result).to.equal(null);
   });
 
   it("should fail safely on undefined token", function () {
-    let input;
+    let input = undefined;
     var result = sanitka.pushToken(input);
+    expect(result).to.equal(null);
+  });
+
+  it("should fail safely on undefined owner", function () {
+    let input = undefined;
+    var result = sanitka.owner(input);
     expect(result).to.equal(null);
   });
 
   it("should fail safely on null token", function () {
     let input = null;
+    var result = sanitka.pushToken(input);
+    expect(result).to.equal(null);
+  });
+
+  it("should fail safely on undefined token", function () {
+    let input;
     var result = sanitka.pushToken(input);
     expect(result).to.equal(null);
   });
@@ -51,8 +68,6 @@ describe("Sanitka", function () {
   it("should accept valid GCM push token", function () {
     let input = "akO1-XdQYgk:APA91bHmgm_K500RVhexcxFVoczhp5RuMSKC07kOJB7T31xq2_a9tkUAFVGQNwtZ2JORj79lDRI0ow-nP17y82GD1zTWJTEnyjNMas_qNUKxBot1P-vM6v-BW7sqcISak8sXMK91WfmH";
     var result = sanitka.pushToken(input);
-    console.log("test INN:", input);
-    console.log("test OUT:", result);
     expect(result).to.equal(input);
   });
 

@@ -60,10 +60,10 @@ services:
       retries: 5
     environment:
       - "NODENAME=${NODENAME}"
-      - "COUCHDB_USER=${COUCHDB_USER}"
-      - "COUCHDB_PASSWORD=${COUCHDB_PASSWORD}"
       - "COUCHDB_ADMIN=${COUCHDB_USER}"
-      - "COUCHDB_PASS=${COUCHDB_PASSWORD}"
+      - "COUCHDB_USER=${COUCHDB_USER}"
+      - "COUCHDB_PASS=${COUCHDB_PASS}"
+      - "COUCHDB_PASSWORD=${COUCHDB_PASS}"
       - "COUCHDB_COOKIE=${COUCHDB_COOKIE}"
       - "COUCHDB_SECRET=${COUCHDB_SECRET}"
     ports:
@@ -192,14 +192,6 @@ services:
       - transformer
       - thinx-redis
       - mosquitto
-#      couchdb:
-#        condition: service_started
-#      transformer:
-#        condition: service_started
-#      thinx-redis:
-#        condition: service_started
-#      mosquitto:
-#          condition: service_healthy
     networks:
       - traefik-public
       - internal
@@ -208,9 +200,7 @@ services:
     environment:
       - "ENVIRONMENT=${ENVIRONMENT}"
       - "COUCHDB_USER=${COUCHDB_USER}"
-      - "COUCHDB_PASSWORD=${COUCHDB_PASSWORD}"
-      - "MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}"
-      - "MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}"
+      - "COUCHDB_PASS=${COUCHDB_PASS}"
       - "WORKER_SECRET=${WORKER_SECRET}"
     ports:
       - '7442:7442'

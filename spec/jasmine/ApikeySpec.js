@@ -15,9 +15,8 @@ describe("API Key", function() {
       (success, array_or_error) => {
         if (success) {
           generated_key_hash = sha256(array_or_error[0].key);
-          console.log("APIKey generated:", generated_key_hash);
         } else {
-          console.log("APIKey failed: ",{array_or_error});
+          console.log("[spec] APIKey failed: ",{array_or_error});
         }
         expect(success).to.be.true;
         expect(array_or_error[0].key).to.be.a('string');
@@ -31,10 +30,9 @@ describe("API Key", function() {
       owner,
       (success, object) => {
         if (success) {
-          //console.log("API Key list(1): ", JSON.stringify(object));
           expect(object).to.be.a('array');
         } else {
-          console.log("[jasmine] API Key Listing failed:", {object}, {success});
+          console.log("[spec] API Key Listing failed:", {object}, {success});
         }
         done();
       });
@@ -48,7 +46,6 @@ describe("API Key", function() {
       "invalid-api-key",
       req,
       (success /*, result */) => { // fixed (callback is not a function!)
-        console.log("verify with invalid API Key, callback, done()");
         expect(success).to.equal(false);
         done();
       });
@@ -62,20 +59,16 @@ describe("API Key", function() {
       (success, array_or_error) => {
         if (success) {
           generated_key_hash = sha256(array_or_error[0].key);
-          console.log("APIKey generated:", generated_key_hash);
         } else {
-          console.log("APIKey failed: ",{array_or_error});
+          console.log("[spec] APIKey failed: ",{array_or_error});
         }
         expect(success).to.be.true;
         expect(array_or_error[0].key).to.be.a('string');
-
-        console.log("[04] Revoking valid key: " + generated_key_hash);
         apikey.revoke(
           owner,
           [generated_key_hash],
-          (_success, result) => {
+          (_success, /* result */) => {
             expect(_success).to.be.true;
-            console.log("API key revocation result:", result);
             done();
           });
       }
@@ -83,7 +76,6 @@ describe("API Key", function() {
   });
 
   it("(05) should be able to fail on invalid API Key revocation (callback is not a function!)", function() {
-    console.log("(05) Revoking invalid-owner key...");
     apikey.revoke(
       "nonsense", ["sample-key-hash"],
       (success)  => {
@@ -102,7 +94,7 @@ describe("API Key", function() {
         if (success) {
           expect(object).to.be.a('array');
         } else {
-          console.log("(06) API Key Listing failed:", {object});
+          console.log("[spec] (06) API Key Listing failed:", {object});
         }
         if (done) done();
       });

@@ -1,17 +1,34 @@
+var Builder = require("../../lib/thinx/builder"); var builder = new Builder();
+var Device = require("../../lib/thinx/device"); var device = new Device();
+var Queue = require("../../lib/thinx/queue");
+  
 var expect = require('chai').expect;
 
 describe("Builder", function() {
 
-  //anything in here will apply to everything in each nested describe
-  var Builder = require("../../lib/thinx/builder");
-  var builder = new Builder();
+  var express = require("express"); 
+  var app = express();
+
+  var queue = new Queue(builder, app);
 
   var envi = require("../_envi.json");
   var owner = envi.oid;
   var udid = envi.udid;
-  var apikey = envi.ak;
   var build_id = envi.build_id; // "f168def0-597f-11e7-a932-014d5b00c004";
   var source_id = envi.sid;
+  var ak = envi.ak;
+
+  // This UDID is to be deleted at the end of test.
+  var TEST_DEVICE_5 = {
+    mac: "AA:BB:CC:EE:00:05",
+    firmware: "BuilderSpec.js",
+    version: "1.0.0",
+    checksum: "alevim",
+    push: "forget",
+    alias: "virtual-test-device-5-build",
+    owner: "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c",
+    platform: "platformio"
+  };
 
   it("should be able to initialize", function() {
     expect(builder).to.be.a('object');
@@ -28,7 +45,8 @@ describe("Builder", function() {
       owner,
       build,
       [], // notifiers
-      function(success, message, build_id) {
+      function(success, message, xbuild_id) {
+        console.log("[spec] build dry", {success}, {message}, {xbuild_id});
         done();
       }, // callback
       worker
@@ -46,7 +64,8 @@ describe("Builder", function() {
       owner, 
       build, 
       [], // notifiers
-      function(success, message, build_id) {
+      function(success, message, build_id2) {
+        console.log("[spec] build dry", {success}, {message}, {build_id2});
         done();
       }, // callback
       worker
@@ -56,13 +75,52 @@ describe("Builder", function() {
   it("supports certain languages", function() {
     var languages = builder.supportedLanguages();
     expect(languages).to.be.a('array');
-    //console.log(JSON.stringify(languages));
   });
 
   it("supports certain extensions", function() {
     var extensions = builder.supportedExtensions();
     expect(extensions).to.be.a('array');
-    //console.log(JSON.stringify(extensions));
   });
 
+  it("requires to register sample build device", function(done) {
+    device.register(
+      {}, /* req */
+      TEST_DEVICE_5, /* reg.registration */
+      ak,
+      {}, /* ws */
+      (success, response) => {
+        if (success === false) {
+          console.log("(01) registration response", response);
+          expect(response).to.be.a('string');
+          if (response === "owner_found_but_no_key") {
+            done();
+            return;
+          }
+        }
+        TEST_DEVICE_5.udid = response.registration.udid;
+        expect(success).to.be.true;
+        expect(TEST_DEVICE_5).to.be.an('object');
+        expect(response.registration).to.be.an('object');
+        expect(TEST_DEVICE_5.udid).to.be.a('string');
+        done();
+      });
+  }, 15000); // register
+
+  it("should not fail on build", function(done) {
+
+    let build_request = {
+      worker: queue.getWorkers()[0],
+      build_id: build_id,
+      owner: owner,
+      git: "https://github.com/suculent/thinx-firmware-esp8266-pio.git",
+      branch: "origin/master",
+      udid: TEST_DEVICE_5.udid // expected to exist – may need to fetch details
+    };
+
+    let transmit_key = "mock-transmit-key";
+      builder.run_build(build_request, [] /* notifiers */, function(success, result) {
+        console.log("[spec] build TODO", {success}, {result});
+        done();
+      }, transmit_key);
+    });
 });

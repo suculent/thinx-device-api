@@ -48,7 +48,6 @@ const session = require("express-session");
 
 const pki = require('node-forge').pki;
 const fs = require("fs-extra");
-const url = require('url');
 
 // set up rate limiter
 const RateLimit = require('express-rate-limit');
@@ -74,10 +73,14 @@ var session_config = require(CONFIG_ROOT + "/node-session.json");
 var app_config = Globals.app_config();
 var rollbar = Globals.rollbar(); // lgtm [js/unused-local-variable]
 
-// TODO: Reuse redis client for auth?
-var redis_client = redis.createClient(Globals.redis_options());
+// Redis
+app.redis_client = redis.createClient(Globals.redis_options());
+let connect_redis = require("connect-redis");
+var RedisStore = connect_redis(session);
+var sessionStore = new RedisStore({ client: app.redis_client });
+
 try {
-  redis_client.bgsave();
+  app.redis_client.bgsave();
 } catch (e) {
   // may throw errro that BGSAVE is already enabled
   console.log("thinx.js bgsave error:", e);
@@ -87,9 +90,12 @@ try {
 
 const Messenger = require("./lib/thinx/messenger");
 let serviceMQPassword = require("crypto").randomBytes(48).toString('base64url');
-if (process.env.ENVIRONMENT === "test") {
-  serviceMQPassword = "mosquitto"; // test purposes only; to align with REDIS_PASSWORD variable set on CCI; otherwise is always random for security purposes
+
+if (process.env.ENVIRONMENT == "test") {
+  // deepcode ignore NoHardcodedPasswords: <please specify a reason of ignoring this>
+  serviceMQPassword = "mosquitto"; // inject test password for thinx to make sure no random stuff is injected in test (until this constant shall be removed everywhere)
 }
+
 app.messenger = new Messenger(serviceMQPassword).getInstance(serviceMQPassword); // take singleton to prevent double initialization
 
 const Database = require("./lib/thinx/database");
@@ -102,10 +108,13 @@ db.init((/* db_err, dbs */) => {
 
   const Stats = require("./lib/thinx/statistics");
   var stats = new Stats();
-  stats.get_all_owners(); // TODO: measure!
+  let now = new Date();
+  stats.get_all_owners();
+  let then = new Date();
+  console.log(`ℹ️ [info] [core] cached all owners in ${then - now} seconds.`);
   setInterval(() => {
     stats.aggregate();
-    console.log("» Aggregation jobs completed.");
+    console.log("✅ [info] Aggregation jobs completed.");
   }, 86400 * 1000 / 2);
 
   //
@@ -124,10 +133,16 @@ db.init((/* db_err, dbs */) => {
   var Builder = require("./lib/thinx/builder");
   var builder = new Builder();
 
-  var Queue = require("./lib/thinx/queue");
-  var queue = new Queue(builder);
-  queue.cron(); // starts cron job for build queue from webhooks
+  const Queue = require("./lib/thinx/queue");
+  
+  let queue;
 
+  // TEST CASE WORKAROUND: attempt to fix duplicate initialization... if Queue is being tested, it's running as another instance and the port 3000 must stay free!
+  if (process.env.ENVIRONMENT !== "test") {
+    queue = new Queue(builder, app);
+    queue.cron(); // starts cron job for build queue from webhooks
+  }
+  
   const GDPR = require("./lib/thinx/gdpr");
   new GDPR().guard();
 
@@ -141,12 +156,6 @@ db.init((/* db_err, dbs */) => {
   // DI
   app.builder = builder;
   app.queue = queue;
-
-
-  // Redis
-  let connect_redis = require("connect-redis");
-  var RedisStore = connect_redis(session);
-  var sessionStore = new RedisStore({ client: redis_client });
 
   app.set("trust proxy", 1);
 
@@ -171,7 +180,7 @@ db.init((/* db_err, dbs */) => {
   };
 
   // intentionally exposed cookie because there is no HTTPS between app and Traefik frontend
-  const sessionParser = session(sessionConfig); /* lgtm [js/client-exposed-cookie] */
+  const sessionParser = session(sessionConfig); /* lgtm [js/missing-token-validation] */
 
   app.use(sessionParser);  
 
@@ -193,12 +202,17 @@ db.init((/* db_err, dbs */) => {
   /* Webhook Server (new impl.) */
 
   app.post("/githook", function (req, res) {
-    
-    // TODO: Validate and possibly reject invalid requests to prevent injection
-    // E.g. using git_secret_key from app_config
+
+    // TODO (1): Validate and possibly reject invalid requests to prevent injection causing rebuilding of existing stuff
+    // E.g. using git_secret_key from app_config and also by validating required params
+    // https://github.com/suculent/thinx-device-api/issues/294
 
     // do not wait for response, may take ages
     console.log("Webhook request accepted...");
+    if (typeof (req.body) === "undefined") {
+      res.status(400).end("Bad request");
+      return;
+    }
     res.status(200).end("Accepted");
     console.log("Webhook process started...");
     watcher.process_hook(req.body);
@@ -213,7 +227,7 @@ db.init((/* db_err, dbs */) => {
 
   // Legacy HTTP support for old devices without HTTPS proxy
   let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function () {
-    console.log("ℹ️ [info] HTTP API started on port", app_config.port);
+    console.log(`ℹ️ [info] HTTP API started on port ${app_config.port}`);
     let end_timestamp = new Date().getTime() - start_timestamp;
     let seconds = Math.ceil(end_timestamp / 1000);
     console.log("⏱ [profiler] Startup phase took:", seconds, "seconds");
@@ -289,9 +303,9 @@ db.init((/* db_err, dbs */) => {
 
   server.on('upgrade', function (request, socket, head) {
 
-    const owner = url.parse(request.url).pathname.replace("/", "");
+    const owner = request.url.replace(/\//g, "");
 
-    if (typeof (socketMap.get(owner)) === "undefined") {
+    if (typeof (socketMap.get(owner)) !== "undefined") {
       console.log("Socket already mapped for", owner, "reassigning...");
     }
 
@@ -406,51 +420,64 @@ db.init((/* db_err, dbs */) => {
 
     // May not exist while testing...
     if (typeof (ws) === "undefined" || ws === null) {
-      console.log("Exiting WSS connecton, no WS defined!");
+      console.log("☣️ [error] Exiting WSS connecton, no WS defined!");
       return;
     }
 
     if (typeof (req) === "undefined") {
-      console.log("No request on wss.on");
+      console.log("☣️ [error] No request on wss.on");
       return;
     }
 
-    // extract owner_id from pathname removing trailing slash
-    let socket_path = url.parse(req.url).pathname.replace("/", "");
-    const path_elements = socket_path.split('/');
-    const owner = path_elements[0];
-    const logsocket = path_elements[1];
+    if (typeof(req.session) === "undefined") {
+      console.log("☣️ [error] No session on wss connection! Should bear thx-session");
+      return;
+    }
 
-    console.log("logsocket: ", { owner }, { logsocket });
+    if (typeof(req.session.cookie) === "undefined") {
+      console.log("☣️ [error] No cookie on wss connection! Should bear thx-session");
+      return;
+    }
 
-    var cookies = req.headers.cookie;
+    // extract socket id and owner_id from pathname, also removing slashes
+    console.log("Request URL:", req.url);
+    let path_elements = req.url.split('/');
+    console.log("path_elements", path_elements);
+    let owner = path_elements[0].replace(/\//g, "");
+    let logsocket = path_elements[1].replace(/\//g, "");
 
-    if (typeof (req.headers.cookie) !== "undefined") {
+    console.log("ℹ️ [info] owner: ", { owner }, "logsocket", { logsocket }, "path_elements", {path_elements});
+
+    var cookies = req.session.cookie;
+
+    if (typeof (cookies) !== "undefined") {
       if (cookies.indexOf("thx-session") === -1) {
-        console.log("» ERROR! No thx-session found in WS: " + JSON.stringify(req.headers.cookie));
-        return;
+        console.log("» WSS VONNECTION ERROR! No thx-session found in WS: " + JSON.stringify(cookies));
+        // return;
       }
     } else {
-      console.log("» DEPRECATED WS has no cookie headers!");
+      console.log("ℹ️ [info] DEPRECATED WS has no cookie headers!");
       return;
     }
 
     ws.isAlive = true;
 
     if ((typeof (logsocket) === "undefined") || (logsocket === null)) {
-      console.log("Owner socket", owner, "started... (TODO: socketMap.set)");
-      app._ws[owner] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
+      console.log("ℹ️ [info] Owner socket", owner, "started...");
+      app._ws[owner] = ws; 
     } else {
-      console.log("Log socket", owner, "started... (TODO: socketMap.set)");
+      console.log("ℹ️ [info] Log socket", owner, "started...");
       app._ws[logsocket] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
     }
+
+    socketMap.set(owner, ws); // public websocket stored in app, needs to be set to builder/buildlog!
 
     /* Returns specific build log for owner */
     initLogTail();
     initSocket(ws, messenger);
 
   }).on("error", function (err) {
-    console.log("WSS Connection Error: ", err);
+    console.log(`☣️ [error] in WSS connection ${err}`);
   });
 
   //

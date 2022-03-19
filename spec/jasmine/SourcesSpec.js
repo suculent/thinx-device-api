@@ -19,7 +19,7 @@ describe("Sources", function () {
     };
     Sources.add(source,
       (success, response) => {
-        if (success === false) {
+        if (success !== true) {
           console.log("(01) Error adding source: ", source, response);
         }
         expect(success).to.be.true; // git fetch must work for this
@@ -50,7 +50,7 @@ describe("Sources", function () {
     /// Add something to be removed
     Sources.add(source,
       (success, response) => {
-        if (success === false) {
+        if (success !== true) {
           console.log("(03) Error adding source: ", source, response);
         }
         expect(success).to.be.true;
@@ -93,7 +93,8 @@ describe("Sources", function () {
       branch: "origin/mas'ter"
     };
     let result = Sources.normalizedBranch(source, (error, reason) => {
-      console.log("normalizedBranch error", error, reason);
+      expect(error).to.be.true;
+      expect(reason).to.equal('invalid_branch_name');
     });
     expect(result).to.equal(false);
     done();
@@ -110,4 +111,8 @@ describe("Sources", function () {
     done();
   });
 
+  it("(08) should be able to infer owner ID from path", function () {
+    let ownerIdFromPath = Sources.ownerIdFromPath("/mnt/data/data/" + owner + "/" + source_id);
+    expect(ownerIdFromPath).to.be.a('string');
+  });
 });

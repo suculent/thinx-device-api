@@ -36,9 +36,9 @@ services:
     environment:
       - 'NODENAME=${NODENAME}'
       - 'COUCHDB_USER=${COUCHDB_USER}'
-      - 'COUCHDB_PASSWORD=${COUCHDB_PASSWORD}'
+      - 'COUCHDB_PASSWORD=${COUCHDB_PASS}'
       - 'COUCHDB_ADMIN=${COUCHDB_USER}'
-      - 'COUCHDB_PASS=${COUCHDB_PASSWORD}'
+      - 'COUCHDB_PASS=${COUCHDB_PASS}'
       - 'COUCHDB_COOKIE=${COUCHDB_COOKIE}'
       - 'COUCHDB_SECRET=${COUCHDB_SECRET}'
     ports:
@@ -131,14 +131,6 @@ services:
       - transformer
       - thinx-redis
       - mosquitto
-#      couchdb:
-#        condition: service_started
-#      transformer:
-#        condition: service_started
-#      thinx-redis:
-#        condition: service_started
-#      mosquitto:
-#        condition: service_healthy
     networks:
       - nat
       - internal
@@ -146,22 +138,32 @@ services:
     build:
       context: .
       args:
-        - 'THINX_HOSTNAME=${THINX_HOSTNAME}'
-        - 'THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}'
+        - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
+        - 'ENVIRONMENT=${ENVIRONMENT}'
         - 'REVISION=${REVISION}'
         - 'ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}'
         - 'ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}'
-        - 'SQREEN_TOKEN=${SQREEN_TOKEN}'
+        - 'SONAR_TOKEN=${SONAR_TOKEN}'
         - 'SQREEN_APP_NAME=${SQREEN_APP_NAME}'
-        - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
-        - 'ENVIRONMENT=${ENVIRONMENT}'
-        - 'COUCHDB_USER=${COUCHDB_USER}'
-        - 'COUCHDB_PASSWORD=${COUCHDB_PASSWORD}'
+        - 'SQREEN_TOKEN=${SQREEN_TOKEN}'
+        - 'THINX_HOSTNAME=${THINX_HOSTNAME}'
+        - 'THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}'
         - 'WORKER_SECRET=${WORKER_SECRET}'
     environment:
-      - 'ENVIRONMENT=${ENVIRONMENT}'
+      - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
+      - 'COUCHDB_PASS=${COUCHDB_PASS}'
       - 'COUCHDB_USER=${COUCHDB_USER}'
-      - 'COUCHDB_PASSWORD=${COUCHDB_PASSWORD}'
+      - 'ENVIRONMENT=${ENVIRONMENT}'
+      - 'REDIS_PASSWORD=${REDIS_PASSWORD}'
+      - 'REVISION=${REVISION}'
+      - 'ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}'
+      - 'ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}'
+      - 'SONAR_TOKEN=${SONAR_TOKEN}'
+      - 'SQREEN_APP_NAME=${SQREEN_APP_NAME}'
+      - 'SQREEN_TOKEN=${SQREEN_TOKEN}'
+      - 'THINX_HOSTNAME=${THINX_HOSTNAME}'
+      - 'THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}'
+      - 'WORKER_SECRET=${WORKER_SECRET}'
     ports:
       - '7442:7442'
       - '7443:7443'

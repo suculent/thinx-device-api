@@ -1,62 +1,64 @@
-var envi = require("../_envi.json");
-var owner = envi.oid;
-var exec = require("child_process");
+var Notifier = require('../../lib/thinx/notifier');
 
-describe("Notifier", function() {
+describe("Notifier", function () {
 
-  //var expect = require('chai').expect;
-  
+  var envi = require("../_envi.json");
 
-  // Well, this will be some fun. The notifier.js is being called on following circumstances:
-  // node.js process exeutes the builder.sh (should do that in background, but initial test versions did this synchronously
-  // builder.sh calls the node.js with statically allocated parameters. and the damned feat hijak is cool and like edrush and better than those rappers.
+  it("should be able to send a notification", function (done) {
 
-  // Test disabled, because this is being covered as a part of builds anyway
-  it("should be able to send a notification", function() {
-    // Calling notifier is a mandatory on successful builds, as it creates the JSON build envelope
-    // (or stores into DB later)
-
-    // CMD="${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${OUTFILE} ${UDID} ${SHA} ${OWNER_ID} ${STATUS} ${PLATFORM} ${THINX_FIRMWARE_VERSION}"
-
-    // 22fd7ed0-e193-11e7-b6e6-1bece759073e 3ee7bb498a6cd6d28a1b91f605f533384490f45b 131 git@github.com:suculent/thinx-firmware-esp8266-pio.git <none> d6ff2bb0-df34-11e7-b351-eb37822aa172 0x00000000 4f1122fa074af4dabab76a5205474882c82de33f50ecd962d25d3628cd0603be OK platformio
+    /* this is how job_status is generated inside the global build script:
+    # Inside Worker, we don't call notifier, but just post the results into shell... THiNX builder must then call the notifier itself (or integrate it later)
+    JSON=$(jo \
+    build_id=${BUILD_ID} \
+    commit=${COMMIT} \
+    thx_version=${THX_VERSION} \
+    git_repo=${GIT_REPO} \
+    outfile=$(basename ${OUTFILE}) \
+    udid=${UDID} \
+    sha=${SHA} \
+    owner=${OWNER_ID} \
+    status=${STATUS} \
+    platform=${PLATFORM} \
+    version=${THINX_FIRMWARE_VERSION} \
+    md5=${MD5} \
+    env_hash=${ENV_HASH} \
+    )
+    */
 
     // Hey, this should be JUST a notification, no destructives.
-    var test_build_id = "no_build_id";
-    var test_commit_id = "crime_commit_id";
-    var test_version = "v0.0";
-    var test_repo =
-      "https://github.com/suculent/thinx-firmware-esp8266-pio.git";
-    var test_binary = "nothing.bin";
-    var test_udid = "d6ff2bb0-df34-11e7-b351-eb37822aa172";
+    var test_build_id = "mock_build_id";
+    var test_commit_id = "mock_commit_id";
+    var test_repo = "https://github.com/suculent/thinx-firmware-esp8266-pio.git";
+    var test_binary = "/tmp/nothing.bin";
+    var test_udid = "745af760-a617-11ec-aa0e-231b40618f37"; // not attached to this firmware
     var sha = "one-sha-256-pls";
-    var owner_id = owner;
+    var owner_id = envi.oid;
     var status = "TESTING_NOTIFIER";
     var platform = "platformio";
     var version = "thinx-firmware-version-1.0";
 
-    var CMD = "node " + __dirname + "/../../lib/thinx/notifier.js " +
-      test_build_id + " " +
-      test_commit_id + " " +
-      test_version + " " +
-      test_repo + " " +
-      test_binary + " " +
-      test_udid + " " +
-      sha + " " +
-      owner_id + " " +
-      status + " " +
-      platform + " " +
-      version;
+    let job_status = {
+      build_id: test_build_id,
+      commit: test_commit_id,
+      thx_version: "1.5.X",
+      git_repo: test_repo,
+      outfile: test_binary,
+      udid: test_udid,
+      sha: sha,
+      owner: owner_id,
+      status: status,
+      platform: platform,
+      version: version,
+      md5: "md5-mock-hash",
+      env_hash: "cafebabe"
+    };
 
-    // CMD: "${BUILD_ID} ${COMMIT} ${VERSION} ${GIT_REPO} ${DEPLOYMENT_PATH}/${BUILD_ID}.bin ${UDID} ${SHA} ${OWNER_ID} ${STATUS}";
-    console.log("Notifier command: " + CMD);
-    try {
-      var error = exec.execSync(CMD).toString();
-      console.log("Notifier result: ", {error});
-    } catch (f) {
-      console.log(f);
-    }
-    //expect(error).not.to.be.a('string');
-    //done();
+    let notifier = new Notifier();
+
+    notifier.process(job_status, (result) => {
+      console.log("ℹ️ [info] Notifier's Processing result:", result);
+      done();
+    });
   });
 
 });

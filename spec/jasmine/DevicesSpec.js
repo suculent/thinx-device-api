@@ -40,7 +40,6 @@ describe("Devices", function() {
   };
 
   it("(01) should be able to register sample device", function(done) {
-    console.log("Sample attempt to register a device", {TEST_DEVICE}, "with ak", ak);
     device.register(
       {}, /* req */
       TEST_DEVICE, /* reg.registration */
@@ -70,7 +69,6 @@ describe("Devices", function() {
     devices.list(owner, (success, response) => {
       expect(success).to.be.true;
       expect(response).to.be.a('object');
-      console.log("Device list: " , {response});
       done();
     });
   }, 5000);
@@ -88,9 +86,7 @@ describe("Devices", function() {
       source_id: source_id,
       udid: TEST_DEVICE.udid
     };
-    console.log("Attach request...");
     devices.attach(owner, body, (res, success, response) => {
-      console.log("Attach results:", res, success, response);
       expect(success).to.be.true;
       expect(response).to.be.a('string');
       done();
@@ -101,7 +97,6 @@ describe("Devices", function() {
     var body = {
       udid: TEST_DEVICE.udid
     };
-    console.log("✅ [spec]  Detaching owner %s", owner);
     devices.detach(owner, body, (res, success, response) => {
       expect(success).to.be.true;
       expect(response).to.be.a('string');
@@ -111,7 +106,6 @@ describe("Devices", function() {
   }, 30000);
 
   it("(06) should be able to revoke another sample device", function(done) {
-    console.log("Sample attempt to register a device", {TEST_DEVICE4}, "with ak", ak);
     device.register(
       {}, /* req */
       TEST_DEVICE4, /* reg.registration */

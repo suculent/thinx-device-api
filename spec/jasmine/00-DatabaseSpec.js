@@ -5,9 +5,8 @@ describe("Database", function () {
 
   it("should start and create initial DBs", function (done) {
     database.init((err, result) => {
-      console.log("DB init test err, result", err, result); // remove after turning to expect
       //expect(err).to.be.null;
-      //expect(result.length).to.be(7);
+      //expect(result).to.be.a('array');
       done();
     });
   }, 5000);
@@ -17,6 +16,14 @@ describe("Database", function () {
       database.compactDatabases((/* success */) => {
         done();
       });
+    });
+  }, 10000);
+
+  it("should provide global URI", function (done) {
+    database.init((/* err, result */) => {
+      let uri = database.uri();
+      expect(uri);
+      done();
     });
   }, 10000);
 

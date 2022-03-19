@@ -11,7 +11,6 @@
   },
   "redis": {
     "host": "thinx-redis",
-    "password": "changeme!",
     "db": 0,
     "port": 6379
   },
@@ -26,9 +25,7 @@
     "bot_token": "<not-configured>",
     "bot_topic": "thinx"
   },
-  "rollbar_token": "<enter-your-rollbar.com-token>",
-  "database_uri": "http://rtmtest:rtmtest@couchdb:5984",
-  "mqtt_port": 1883,
+  "use_sqreen": true,
   "port": 7442,
   "secure_port": 7443,
   "lambda": 7475,
@@ -37,7 +34,6 @@
   "build_root": "/repos",
   "ssh_keys": "/mnt/data/ssh_keys",
   "slack_webhook": "",
-  "slack_bot_token": "",
   "slack_bot_topic": "thinx",
   "ssl_key": "/mnt/data/ssl/privkey.pem",
   "ssl_cert": "/mnt/data/ssl/cert.pem",
@@ -47,19 +43,10 @@
   },
   "debug": {
     "device" : false,
-    "deployment": true,
+    "deployment": false,
     "allow_http_login": true,
-    "ingress": true
-  },
-  "grafana": {
-    "port": 3004,
-    "admin": "test",
-    "password": "test"
-  },
-  "influx": {
-    "port": 8086,
-    "admin": "test",
-    "password": "test"
+    "ingress": false,
+    "secrets": false
   },
   "strict_gdpr": true
 }

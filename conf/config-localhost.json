@@ -11,15 +11,13 @@
   },
   "redis": {
     "host": "thinx-redis",
-    "password": "changeme!"
+    "db": 0,
+    "port": 6379
   },
   "mqtt": {
     "server": "mqtt://mosquitto",
     "port": 1883
   },
-  "rollbar_token": "",
-  "database_uri": "http://rtmtest:rtmtest@couchdb:5984",
-  "mqtt_port": 1883,
   "port": 7442,
   "secure_port": 7443,
   "lambda": 7474,
@@ -42,19 +40,10 @@
   },
   "debug": {
     "device": false,
-    "deployment": true,
+    "deployment": false,
     "allow_http_login": true,
-    "ingress": true
-  },
-  "grafana": {
-    "port": 3004,
-    "admin": "test",
-    "password": "test"
-  },
-  "influx": {
-    "port": 8086,
-    "admin": "test",
-    "password": "test"
+    "ingress": false,
+    "secrets": false
   },
   "strict_gdpr": false
 }

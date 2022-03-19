@@ -1,39 +1,38 @@
 var expect = require('chai').expect;
+const Builder = require('../../lib/thinx/builder');
 let Queue = require("../../lib/thinx/queue");
 
 describe("Queue", function () {
 
     let mock_udid_1 = "<mock-udid-1>";
     let mock_udid_2 = "<mock-udid-2>";
-    let mock_udid_3 = "<mock-udid-3>";
     let mock_source_id = "<mock-source-id>";
     let queue_with_cron;
 
     // init
     it("should not fail or hang", function (done) {
+
+        let builder = new Builder();
+
         // Should initialize safely without running cron
-        queue_with_cron = new Queue(null);
+        queue_with_cron = new Queue(builder);
         expect(queue_with_cron).to.be.a('object');
+
+        let workers = queue_with_cron.getWorkers();
+        expect(workers).to.be.a('array');
 
         // Should be able to run cron when initialized
         queue_with_cron.cron();
 
         // Should be able to add actions to the queue
-        console.log(
-            "adding mocks"
-        );
         queue_with_cron.add(mock_udid_1, mock_source_id);
         queue_with_cron.add(mock_udid_2, mock_source_id);
-
-        console.log("(00) Queue calling findNext...");
 
         // Should be able find next waiting item in queue
 
         let done_called = false;
 
         queue_with_cron.findNext((next) => {
-
-            console.log("(00) queue_with_cron.findNext exited with", next); // expected to return null in test
 
             if (next === null) {
                 if (done_called === false) {
@@ -50,8 +49,6 @@ describe("Queue", function () {
 
             // Should not be able to find anything while queue item is running
             queue_with_cron.findNext((/* nextAction */) => {
-
-                console.log("(01) queue_with_cron.findNext exited with", next); // expected to return null in test
 
                 if (next === null) {
                     if (done_called === false) {

@@ -15,8 +15,8 @@ describe("Statistics", function () {
   });
 
   it("(02) should be able to store results", function () {
-    var dirpath = "/mnt/data/statistics/"+owner;
-    var filepath = dirpath + owner + "/" + dateFormat(new Date(), "isoDate") + ".json";
+    const dirpath = "/mnt/data/statistics/"+owner;
+    const filepath = dirpath + owner + "/" + dateFormat(new Date(), "isoDate") + ".json";
     s.write_stats(dirpath, filepath, {
       "owner-data": "example"
     });
@@ -45,9 +45,7 @@ describe("Statistics", function () {
 
   it("(06) should be able to parse all statistics per owner", function (done) {
     s.parse(owner, function (success, body) {
-      if (success) {
-        expect(body).to.be.an('object');
-      }
+      expect(body).to.be.an('object');
       expect(success).to.be.true;
       done();
     });
