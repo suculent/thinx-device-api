@@ -1,10 +1,6 @@
 describe("Validator", function() {
 
   var expect = require('chai').expect;
-  var envi = require("../_envi.json");
-  var owner = envi.oid;
-  var udid = envi.udid;
-
   var mock = JSON.stringify({ mock: "mock" });
   var invalid_mock = JSON.stringify({ unmock: "mock" })+"€~^&*ż{}";
 
@@ -12,7 +8,7 @@ describe("Validator", function() {
   const Validator = require('../../lib/thinx/validator');
 
   it("should return TRUE on valid JSON", function() {
-    expect(Validator.isJSON(mock)).to.be.true;
+    expect(Validator.isJSON(mock)).to.equal(true);
   });
 
   it("should return FALSE on invalid JSON", function() {
