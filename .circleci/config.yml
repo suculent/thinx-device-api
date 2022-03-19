@@ -61,22 +61,11 @@ jobs:
           registry: registry.thinx.cloud:5000
           tag: 'swarm'
       - slack/notify:
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "plain_text",
-                      "text": "*New THiNX API have been pushed to Docker Registry*",
-                      "emoji": true
-                    }
-                  ]
-                }
-              ]
-            }
-          event: always
+          template: success_tagged_deploy_1
+          event: pass
+      - slack/notify:
+          template: basic_fail_1
+          event: fail
 
   build-api-cloud:
     executor: docker/docker
