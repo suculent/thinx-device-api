@@ -438,7 +438,7 @@ db.init((/* db_err, dbs */) => {
     let path_elements = req.url.split('/');
     console.log("path_elements", path_elements);
     let owner = path_elements[1];
-    let logsocket = path_elements[2] || null;
+    let logsocket = path_elements[2] || owner;
 
     console.log("ℹ️ [info] owner: ", { owner }, "logsocket", { logsocket }, "path_elements", {path_elements});
 
