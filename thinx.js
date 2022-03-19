@@ -301,13 +301,11 @@ db.init((/* db_err, dbs */) => {
   let wss = new WebSocket.Server({ server: server }); // or { noServer: true }
   const socketMap = new Map();
 
-  const { URL } = require('url');
-  
-
   server.on('upgrade', function (request, socket, head) {
 
-    const an_url = new URL(request.url);
-    const owner = an_url.pathname.replace(/\//g, "");
+    console.log("upgrading to wss with request", {request});
+
+    const owner = request.pathname.replace(/\//g, "");
 
     if (typeof (socketMap.get(owner)) !== "undefined") {
       console.log("Socket already mapped for", owner, "reassigning...");
@@ -457,7 +455,7 @@ db.init((/* db_err, dbs */) => {
     if (typeof (cookies) !== "undefined") {
       if (cookies.indexOf("thx-session") === -1) {
         console.log("» WSS VONNECTION ERROR! No thx-session found in WS: " + JSON.stringify(cookies));
-        return;
+        // return;
       }
     } else {
       console.log("ℹ️ [info] DEPRECATED WS has no cookie headers!");
