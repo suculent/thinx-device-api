@@ -24,7 +24,7 @@ console.log("");
 // EXTRACT <--
 
 const Globals = require("./lib/thinx/globals.js"); // static only!
-const Sanitka = require("./lib/thinx/sanitka.js");
+const var = require("./sanitka"); var sanitka = new Sanitka();
 
 if (Globals.use_sqreen()) {
   if ((typeof (process.env.SQREEN_APP_NAME) !== "undefined") && (typeof (process.env.SQREEN_TOKEN) !== "undefined")) {
@@ -381,8 +381,7 @@ db.init((/* db_err, dbs */) => {
         });
         return;
       }
-      let safe_id = Sanitka.udid(req2.body.build_id);
-      console.log("Tailing build log for " + safe_id);
+      console.log(`Tailing build log for ${sanitka.udid(req2.body.build_id)}`);
     });
   }
 
