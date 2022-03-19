@@ -24,7 +24,7 @@ console.log("");
 // EXTRACT <--
 
 const Globals = require("./lib/thinx/globals.js"); // static only!
-const Sanitka = require("./sanitka"); var sanitka = new Sanitka();
+const Sanitka = require("./lib/thinx/sanitka.js"); var sanitka = new Sanitka();
 
 if (Globals.use_sqreen()) {
   if ((typeof (process.env.SQREEN_APP_NAME) !== "undefined") && (typeof (process.env.SQREEN_TOKEN) !== "undefined")) {
