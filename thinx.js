@@ -303,9 +303,7 @@ db.init((/* db_err, dbs */) => {
 
   server.on('upgrade', function (request, socket, head) {
 
-    console.log("upgrading to wss with request", {request});
-
-    const owner = request.pathname.replace(/\//g, "");
+    const owner = request.url.replace(/\//g, "");
 
     if (typeof (socketMap.get(owner)) !== "undefined") {
       console.log("Socket already mapped for", owner, "reassigning...");

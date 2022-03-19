@@ -2,7 +2,7 @@ version: 2.1
 orbs:
   node: circleci/node@4.7.0
   docker: circleci/docker@2.0.1
-  slack: circleci/slack@4.5.0
+  slack: circleci/slack@4.8.3
 
 jobs:
 
@@ -60,6 +60,23 @@ jobs:
           image: thinx/console
           registry: registry.thinx.cloud:5000
           tag: 'swarm'
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "*New THiNX API have been pushed to Docker Registry*",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: always
 
   build-api-cloud:
     executor: docker/docker
@@ -339,6 +356,7 @@ workflows:
           context:
             - thinx-docker-repo
             - console
+            - thinx-slack
           filters:
             branches:
               only:
