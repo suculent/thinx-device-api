@@ -52,7 +52,7 @@ jobs:
             --build-arg WEB_HOSTNAME=${WEB_HOSTNAME} \
             --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} \
             --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
-            --build-arg ENTERPRISE=true \
+            --build-arg ENTERPRISE=${ENTERPRISE} \
             --build-arg ENVIRONMENT=${ENVIRONMENT} \
           tag: 'swarm'
       - docker/push:
