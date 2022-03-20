@@ -60,12 +60,6 @@ jobs:
           image: thinx/console
           registry: registry.thinx.cloud:5000
           tag: 'swarm'
-      - slack/notify:
-          template: success_tagged_deploy_1
-          event: pass
-      - slack/notify:
-          template: basic_fail_1
-          event: fail
 
   build-api-cloud:
     executor: docker/docker
@@ -86,6 +80,12 @@ jobs:
           digest-path: /tmp/digest.txt
           image: thinxcloud/api
           tag: 'latest'
+      - slack/notify:
+          template: success_tagged_deploy_1
+          event: pass
+      - slack/notify:
+          template: basic_fail_1
+          event: fail
 
   test-api-cloud:
     executor: docker/docker
