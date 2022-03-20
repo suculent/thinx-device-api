@@ -391,25 +391,25 @@ db.init((/* db_err, dbs */) => {
       if (message.indexOf("{}") == 0) return; // skip empty messages
       var object = JSON.parse(message);
 
-      // logtail socket
+      // Type: logtail socket
       if (typeof (object.logtail) !== "undefined") {
         var build_id = object.logtail.build_id;
         var owner_id = object.logtail.owner_id;
-        if ((typeof(build_id) === "undefined") || (typeof(owner_id) === "undefined")) {
-          console.log("Missing params in ", {object});
-        } else {
+        if ((typeof(build_id) !== "undefined") && (typeof(owner_id) !== "undefined")) {
           blog.logtail(build_id, owner_id, app._ws[logsocket], logtail_callback);
         }
 
-      // initial socket 
+      // Type: initial socket 
       } else if (typeof (object.init) !== "undefined") {
         if (typeof (msgr) !== "undefined") {
           console.log("Initializing new messenger in WS...");
           var owner = object.init;
           let socket = app._ws[owner];
-          msgr.initWithOwner(owner, socket, function (success, message_z) {
+          msgr.initWithOwner(owner, socket, (success, message_z) => {
             if (!success) {
               console.log("Messenger init on WS message with result " + success + ", with message: ", { message_z });
+            } else {
+              console.log(`[info] Messenger successfully initialized for ${owner}`);
             }
           });
         }
@@ -435,9 +435,7 @@ db.init((/* db_err, dbs */) => {
     }
 
     // extract socket id and owner_id from pathname, also removing slashes
-    console.log("Request URL:", req.url);
     let path_elements = req.url.split('/');
-    console.log("path_elements", path_elements);
     let owner = path_elements[1];
     let logsocket = path_elements[2] || null;
 
