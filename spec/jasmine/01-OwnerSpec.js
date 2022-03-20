@@ -48,8 +48,7 @@ describe("Owner", function() {
 
   it("(02) should be able to fetch MQTT Key for owner", function(done) {
     // deepcode ignore NoHardcodedPasswords: <please specify a reason of ignoring this>
-    const password = "mosquitto";
-    user.mqtt_key(owner, password, function(success, apikey) {
+    user.mqtt_key(owner, function(success, apikey) {
       if (!success) {
         console.log("02 MQTT error: ", { apikey });
       }

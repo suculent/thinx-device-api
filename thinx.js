@@ -24,7 +24,7 @@ console.log("");
 // EXTRACT <--
 
 const Globals = require("./lib/thinx/globals.js"); // static only!
-const Sanitka = require("./lib/thinx/sanitka.js");
+const Sanitka = require("./lib/thinx/sanitka.js"); var sanitka = new Sanitka();
 
 if (Globals.use_sqreen()) {
   if ((typeof (process.env.SQREEN_APP_NAME) !== "undefined") && (typeof (process.env.SQREEN_TOKEN) !== "undefined")) {
@@ -98,398 +98,402 @@ if (process.env.ENVIRONMENT == "test") {
 
 app.messenger = new Messenger(serviceMQPassword).getInstance(serviceMQPassword); // take singleton to prevent double initialization
 
-const Database = require("./lib/thinx/database");
-var db = new Database();
-db.init((/* db_err, dbs */) => {
+app.messenger.initSlack(() => {
 
-  //
-  // Log aggregator (needs DB)
-  //
+  console.log("Slack initialization complete...");
 
-  const Stats = require("./lib/thinx/statistics");
-  var stats = new Stats();
-  let now = new Date();
-  stats.get_all_owners();
-  let then = new Date();
-  console.log(`ℹ️ [info] [core] cached all owners in ${then - now} seconds.`);
-  setInterval(() => {
-    stats.aggregate();
-    console.log("✅ [info] Aggregation jobs completed.");
-  }, 86400 * 1000 / 2);
 
-  //
-  // Shared Configuration
-  //
+  const Database = require("./lib/thinx/database");
+  var db = new Database();
+  db.init((/* db_err, dbs */) => {
 
-  const hour = 3600 * 1000;
+    //
+    // Log aggregator (needs DB)
+    //
 
-  //
-  // App
-  //
+    const Stats = require("./lib/thinx/statistics");
+    var stats = new Stats();
+    let now = new Date();
+    stats.get_all_owners();
+    let then = new Date();
+    console.log(`ℹ️ [info] [core] cached all owners in ${then - now} seconds.`);
+    setInterval(() => {
+      stats.aggregate();
+      console.log("✅ [info] Aggregation jobs completed.");
+    }, 86400 * 1000 / 2);
 
-  var https = require("https");
-  var WebSocket = require("ws");
+    //
+    // Shared Configuration
+    //
 
-  var Builder = require("./lib/thinx/builder");
-  var builder = new Builder();
+    const hour = 3600 * 1000;
 
-  const Queue = require("./lib/thinx/queue");
-  
-  let queue;
+    //
+    // App
+    //
 
-  // TEST CASE WORKAROUND: attempt to fix duplicate initialization... if Queue is being tested, it's running as another instance and the port 3000 must stay free!
-  if (process.env.ENVIRONMENT !== "test") {
-    queue = new Queue(builder, app);
-    queue.cron(); // starts cron job for build queue from webhooks
-  }
-  
-  const GDPR = require("./lib/thinx/gdpr");
-  new GDPR().guard();
+    var https = require("https");
+    var WebSocket = require("ws");
 
-  const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
-  const blog = new Buildlog();
+    var Builder = require("./lib/thinx/builder");
+    var builder = new Builder();
 
-  // Starts Git Webhook Server
-  var Repository = require("./lib/thinx/repository");
-  const watcher = new Repository(queue);
-  
-  // DI
-  app.builder = builder;
-  app.queue = queue;
+    const Queue = require("./lib/thinx/queue");
 
-  app.set("trust proxy", 1);
+    let queue;
 
-  require('path');
-
-  // Bypassed LGTM, because it does not make sense on this API for all endpoints,
-  // what is possible is covered by helmet and no-cache.
-
-  const sessionConfig = {
-    secret: session_config.secret,
-    cookie: {
-      maxAge: 3600000,
-      // can be false in case of local development or testing; mitigated by using Traefik router unwrapping HTTPS so the cookie travels securely where possible
-      secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
-      httpOnly: true
-    },
-    store: sessionStore,
-    name: "x-thx-session",
-    resave: true, // was true then false
-    rolling: true, // This resets the expiration date on the cookie to the given default.
-    saveUninitialized: false
-  };
-
-  // intentionally exposed cookie because there is no HTTPS between app and Traefik frontend
-  const sessionParser = session(sessionConfig); /* lgtm [js/missing-token-validation] */
-
-  app.use(sessionParser);  
-
-  app.use(express.json({
-    limit: "2mb",
-    strict: false
-  }));
-
-  app.use(limiter);
-
-  app.use(express.urlencoded({
-    extended: true,
-    parameterLimit: 1000,
-    limit: "1mb"
-  }));
-
-  let router = require('./lib/router.js')(app);
-
-  /* Webhook Server (new impl.) */
-
-  app.post("/githook", function (req, res) {
-
-    // TODO (1): Validate and possibly reject invalid requests to prevent injection causing rebuilding of existing stuff
-    // E.g. using git_secret_key from app_config and also by validating required params
-    // https://github.com/suculent/thinx-device-api/issues/294
-
-    // do not wait for response, may take ages
-    console.log("Webhook request accepted...");
-    if (typeof (req.body) === "undefined") {
-      res.status(400).end("Bad request");
-      return;
-    }
-    res.status(200).end("Accepted");
-    console.log("Webhook process started...");
-    watcher.process_hook(req.body);
-    console.log("Webhook process completed.");
-  }); // end of new Webhook Server
-
-  /*
-   * HTTP/S Server
-   */
-
-  var ssl_options = null;
-
-  // Legacy HTTP support for old devices without HTTPS proxy
-  let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function () {
-    console.log(`ℹ️ [info] HTTP API started on port ${app_config.port}`);
-    let end_timestamp = new Date().getTime() - start_timestamp;
-    let seconds = Math.ceil(end_timestamp / 1000);
-    console.log("⏱ [profiler] Startup phase took:", seconds, "seconds");
-  });
-
-  var read = require('fs').readFileSync;
-
-  if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
-
-    let sslvalid = false;
-
-    if (!fs.existsSync(app_config.ssl_ca)) {
-      const message = "⚠️ [warning] Did not find app_config.ssl_ca file, websocket logging will fail...";
-      rollbar.warn(message);
-      console.log(message);
+    // TEST CASE WORKAROUND: attempt to fix duplicate initialization... if Queue is being tested, it's running as another instance and the port 3000 must stay free!
+    if (process.env.ENVIRONMENT !== "test") {
+      queue = new Queue(builder, app);
+      queue.cron(); // starts cron job for build queue from webhooks
     }
 
-    let caCert = read(app_config.ssl_ca, 'utf8');
-    let ca = pki.certificateFromPem(caCert);
-    let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
+    const GDPR = require("./lib/thinx/gdpr");
+    new GDPR().guard();
 
-    try {
-      sslvalid = ca.verify(client);
-    } catch (err) {
-      console.log("☣️ [error] Certificate verification failed: ", err);
-    }
+    const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
+    const blog = new Buildlog();
 
-    if (sslvalid) {
-      ssl_options = {
-        key: read(app_config.ssl_key, 'utf8'),
-        cert: read(app_config.ssl_cert, 'utf8'),
-        ca: read(app_config.ssl_ca, 'utf8'),
-        NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
-      };
-      console.log("ℹ️ [info] Starting HTTPS server on " + app_config.secure_port + "...");
-      https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
+    // Starts Git Webhook Server
+    var Repository = require("./lib/thinx/repository");
+    const watcher = new Repository(queue);
+
+    // DI
+    app.builder = builder;
+    app.queue = queue;
+
+    app.set("trust proxy", 1);
+
+    require('path');
+
+    // Bypassed LGTM, because it does not make sense on this API for all endpoints,
+    // what is possible is covered by helmet and no-cache.
+
+    const sessionConfig = {
+      secret: session_config.secret,
+      cookie: {
+        maxAge: 3600000,
+        // can be false in case of local development or testing; mitigated by using Traefik router unwrapping HTTPS so the cookie travels securely where possible
+        secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
+        httpOnly: true
+      },
+      store: sessionStore,
+      name: "x-thx-session",
+      resave: true, // was true then false
+      rolling: true, // This resets the expiration date on the cookie to the given default.
+      saveUninitialized: false
+    };
+
+    // intentionally exposed cookie because there is no HTTPS between app and Traefik frontend
+    const sessionParser = session(sessionConfig); /* lgtm [js/missing-token-validation] */
+
+    app.use(sessionParser);
+
+    app.use(express.json({
+      limit: "2mb",
+      strict: false
+    }));
+
+    app.use(limiter);
+
+    app.use(express.urlencoded({
+      extended: true,
+      parameterLimit: 1000,
+      limit: "1mb"
+    }));
+
+    let router = require('./lib/router.js')(app);
+
+    /* Webhook Server (new impl.) */
+
+    app.post("/githook", function (req, res) {
+
+      // TODO (1): Validate and possibly reject invalid requests to prevent injection causing rebuilding of existing stuff
+      // E.g. using git_secret_key from app_config and also by validating required params
+      // https://github.com/suculent/thinx-device-api/issues/294
+
+      // do not wait for response, may take ages
+      console.log("Webhook request accepted...");
+      if (typeof (req.body) === "undefined") {
+        res.status(400).end("Bad request");
+        return;
+      }
+      res.status(200).end("Accepted");
+      console.log("Webhook process started...");
+      watcher.process_hook(req.body);
+      console.log("Webhook process completed.");
+    }); // end of new Webhook Server
+
+    /*
+     * HTTP/S Server
+     */
+
+    var ssl_options = null;
+
+    // Legacy HTTP support for old devices without HTTPS proxy
+    let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function () {
+      console.log(`ℹ️ [info] HTTP API started on port ${app_config.port}`);
+      let end_timestamp = new Date().getTime() - start_timestamp;
+      let seconds = Math.ceil(end_timestamp / 1000);
+      console.log("⏱ [profiler] Startup phase took:", seconds, "seconds");
+    });
+
+    var read = require('fs').readFileSync;
+
+    if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
+
+      let sslvalid = false;
+
+      if (!fs.existsSync(app_config.ssl_ca)) {
+        const message = "⚠️ [warning] Did not find app_config.ssl_ca file, websocket logging will fail...";
+        rollbar.warn(message);
+        console.log(message);
+      }
+
+      let caCert = read(app_config.ssl_ca, 'utf8');
+      let ca = pki.certificateFromPem(caCert);
+      let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
+
+      try {
+        sslvalid = ca.verify(client);
+      } catch (err) {
+        console.log("☣️ [error] Certificate verification failed: ", err);
+      }
+
+      if (sslvalid) {
+        ssl_options = {
+          key: read(app_config.ssl_key, 'utf8'),
+          cert: read(app_config.ssl_cert, 'utf8'),
+          ca: read(app_config.ssl_ca, 'utf8'),
+          NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
+        };
+        console.log("ℹ️ [info] Starting HTTPS server on " + app_config.secure_port + "...");
+        https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
+      } else {
+        console.log("☣️ [error] SSL certificate loading or verification FAILED! Check your configuration!");
+      }
+
     } else {
-      console.log("☣️ [error] SSL certificate loading or verification FAILED! Check your configuration!");
+      console.log("⚠️ [warning] Skipping HTTPS server, SSL key or certificate not found. This configuration is INSECURE! and will cause an error in Enterprise configurations in future.");
     }
 
-  } else {
-    console.log("⚠️ [warning] Skipping HTTPS server, SSL key or certificate not found. This configuration is INSECURE! and will cause an error in Enterprise configurations in future.");
-  }
-
-  app.use('/static', express.static(path.join(__dirname, 'static')));
-  app.set('trust proxy', ['loopback', '127.0.0.1']);
+    app.use('/static', express.static(path.join(__dirname, 'static')));
+    app.set('trust proxy', ['loopback', '127.0.0.1']);
 
 
-  /*
-   * WebSocket Server
-   */
+    /*
+     * WebSocket Server
+     */
 
-  var wsapp = express();
-  wsapp.disable('x-powered-by');
+    var wsapp = express();
+    wsapp.disable('x-powered-by');
 
-  wsapp.use(session({ /* lgtm [js/clear-text-cookie] */
-    secret: session_config.secret,
-    store: sessionStore,
-    // deepcode ignore WebCookieSecureDisabledExplicitly: <please specify a reason of ignoring this>
-    cookie: {
-      expires: hour,
-      secure: false,
-      httpOnly: true
-    },
-    name: "x-thx-ws-session",
-    resave: false,
-    rolling: false,
-    saveUninitialized: false,
-  })); /* lgtm [js/clear-text-cookie] */
+    wsapp.use(session({ /* lgtm [js/clear-text-cookie] */
+      secret: session_config.secret,
+      store: sessionStore,
+      // deepcode ignore WebCookieSecureDisabledExplicitly: <please specify a reason of ignoring this>
+      cookie: {
+        expires: hour,
+        secure: false,
+        httpOnly: true
+      },
+      name: "x-thx-ws-session",
+      resave: false,
+      rolling: false,
+      saveUninitialized: false,
+    })); /* lgtm [js/clear-text-cookie] */
 
-  let wss = new WebSocket.Server({ server: server }); // or { noServer: true }
-  const socketMap = new Map();
+    let wss = new WebSocket.Server({ server: server }); // or { noServer: true }
+    const socketMap = new Map();
 
-  server.on('upgrade', function (request, socket, head) {
+    server.on('upgrade', function (request, socket, head) {
 
-    const owner = request.url.replace(/\//g, "");
+      const owner = request.url.replace(/\//g, "");
 
-    if (typeof (socketMap.get(owner)) !== "undefined") {
-      console.log("Socket already mapped for", owner, "reassigning...");
-    }
+      if (typeof (socketMap.get(owner)) !== "undefined") {
+        console.log("Socket already mapped for", owner, "reassigning...");
+      }
 
-    if (typeof (request.session) === "undefined") {
-      return;
-    }
-
-    sessionParser(request, {}, () => {
-
-      if ((typeof (request.session.owner) === "undefined") || (request.session.owner === null)) {
-        console.log("Should destroy socket, access unauthorized.");
-        socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
-        socket.destroy();
+      if (typeof (request.session) === "undefined") {
         return;
       }
 
-      console.log("---> Session is parsed, handling protocol upgrade...");
+      sessionParser(request, {}, () => {
 
-      socketMap.set(owner, socket);
-      try {
-        wss.handleUpgrade(request, socket, head, function (ws) {
-          wss.emit('connection', ws, request);
-        });
-      } catch (upgradeException) {
-        // fails on duplicate upgrade, why does it happen?
-        console.log("Exception caught upgrading same socket twice.");
-      }
-    });
-  });
+        if ((typeof (request.session.owner) === "undefined") || (request.session.owner === null)) {
+          console.log("Should destroy socket, access unauthorized.");
+          socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+          socket.destroy();
+          return;
+        }
 
-  function heartbeat() {
-    this.isAlive = true;
-  }
+        console.log("---> Session is parsed, handling protocol upgrade...");
 
-  setInterval(function ping() {
-    if (typeof (wss.clients) !== "undefined") {
-      wss.clients.forEach(function each(ws) {
-        if (ws.isAlive === false) {
-          console.log("[DBUG] Terminating websocket!");
-          ws.terminate();
-        } else {
-          ws.ping();
+        socketMap.set(owner, socket);
+        try {
+          wss.handleUpgrade(request, socket, head, function (ws) {
+            wss.emit('connection', ws, request);
+          });
+        } catch (upgradeException) {
+          // fails on duplicate upgrade, why does it happen?
+          console.log("Exception caught upgrading same socket twice.");
         }
       });
+    });
+
+    function heartbeat() {
+      this.isAlive = true;
     }
-  }, 30000);
 
-  //
-  // Behaviour of new WSS connection (authenticate and add router paths that require websocket)
-  //
-
-  var logtail_callback = function (err, result) {
-    if (err) {
-      console.log("[thinx] logtail_callback error:", err, "message", result);
-    } else {
-      console.log("[thinx] logtail_callback result:", result);
-    }
-  };
-
-  wss.on("error", function (err) {
-    console.log("WSS REQ ERROR: " + err);
-  });
-
-  app._ws = {}; // list of all owner websockets
-
-  function initLogTail() {
-    app.post("/api/user/logs/tail", (req2, res) => {
-      if (!(router.validateSecurePOSTRequest(req2) || router.validateSession(req2, res))) return;
-      if (typeof (req2.body.build_id) === "undefined") {
-        router.respond(res, {
-          success: false,
-          status: "missing_build_id"
+    setInterval(function ping() {
+      if (typeof (wss.clients) !== "undefined") {
+        wss.clients.forEach(function each(ws) {
+          if (ws.isAlive === false) {
+            console.log("[DBUG] Terminating websocket!");
+            ws.terminate();
+          } else {
+            ws.ping();
+          }
         });
+      }
+    }, 30000);
+
+    //
+    // Behaviour of new WSS connection (authenticate and add router paths that require websocket)
+    //
+
+    var logtail_callback = function (err, result) {
+      if (err) {
+        console.log("[thinx] logtail_callback error:", err, "message", result);
+      } else {
+        console.log("[thinx] logtail_callback result:", result);
+      }
+    };
+
+    wss.on("error", function (err) {
+      console.log("WSS REQ ERROR: " + err);
+    });
+
+    app._ws = {}; // list of all owner websockets
+
+    function initLogTail() {
+      app.post("/api/user/logs/tail", (req2, res) => {
+        if (!(router.validateSecurePOSTRequest(req2) || router.validateSession(req2, res))) return;
+        if (typeof (req2.body.build_id) === "undefined") {
+          router.respond(res, {
+            success: false,
+            status: "missing_build_id"
+          });
+          return;
+        }
+        console.log(`Tailing build log for ${sanitka.udid(req2.body.build_id)}`);
+      });
+    }
+
+    function initSocket(ws, msgr, logsocket) {
+      ws.on("message", (message) => {
+        console.log("WSS message", message);
+        if (message.indexOf("{}") == 0) return; // skip empty messages
+        var object = JSON.parse(message);
+
+        // Type: logtail socket
+        if (typeof (object.logtail) !== "undefined") {
+          var build_id = object.logtail.build_id;
+          var owner_id = object.logtail.owner_id;
+          if ((typeof (build_id) !== "undefined") && (typeof (owner_id) !== "undefined")) {
+            blog.logtail(build_id, owner_id, app._ws[logsocket], logtail_callback);
+          }
+
+          // Type: initial socket 
+        } else if (typeof (object.init) !== "undefined") {
+          if (typeof (msgr) !== "undefined") {
+            console.log("Initializing new messenger in WS...");
+            var owner = object.init;
+            let socket = app._ws[owner];
+            msgr.initWithOwner(owner, socket, (success, message_z) => {
+              if (!success) {
+                console.log("Messenger init on WS message with result " + success + ", with message: ", { message_z });
+              } else {
+                console.log(`[info] Messenger successfully initialized for ${owner}`);
+              }
+            });
+          }
+        }
+      });
+
+      ws.on('pong', heartbeat);
+
+      ws.on('close', () => { 
+        socketMap.delete(ws.owner);
+      });
+    }
+
+    wss.on('connection', function (ws, req) {
+
+      // May not exist while testing...
+      if (typeof (ws) === "undefined" || ws === null) {
+        console.log("☣️ [error] Exiting WSS connecton, no WS defined!");
         return;
       }
-      let safe_id = Sanitka.udid(req2.body.build_id);
-      console.log("Tailing build log for " + safe_id);
-    });
-  }
 
-  function initSocket(ws, msgr) {
-    ws.on("message", (message) => {
-      console.log("WSS message", message);
-      if (message.indexOf("{}") == 0) return; // skip empty messages
-      var object = JSON.parse(message);
-      if (typeof (object.logtail) !== "undefined") {
-        var build_id = object.logtail.build_id;
-        var owner_id = object.logtail.owner_id;
-        blog.logtail(build_id, owner_id, app._ws[logsocket], logtail_callback);
-      } else if (typeof (object.init) !== "undefined") {
-        if (typeof (msgr) !== "undefined") {
-          console.log("Initializing new messenger in WS...");
-          var owner = object.init;
-          let socket = app._ws[owner];
-          msgr.initWithOwner(owner, socket, function (success, message_z) {
-            if (!success) {
-              console.log("Messenger init on WS message with result " + success + ", with message: ", { message_z });
-            }
-          });
+      if (typeof (req) === "undefined") {
+        console.log("☣️ [error] No request on wss.on");
+        return;
+      }
+
+      // extract socket id and owner_id from pathname, also removing slashes
+      let path_elements = req.url.split('/');
+      let owner = path_elements[1];
+      let logsocket = path_elements[2] || null;
+
+      console.log("ℹ️ [info] wss conn with path_elements", { path_elements });
+
+      var cookies = req.headers.cookie;
+
+      if (typeof (cookies) !== "undefined") {
+        if (cookies.indexOf("thx-session") === -1) {
+          console.log("» WSS VONNECTION ERROR! No thx-session found in WS: " + JSON.stringify(cookies));
+          // return;
         }
+      } else {
+        console.log("ℹ️ [info] DEPRECATED WS has no cookie headers!");
+        return;
       }
+
+      ws.isAlive = true;
+
+      ws.owner = owner;
+
+      if ((typeof (logsocket) === "undefined") || (logsocket === null)) {
+        console.log("ℹ️ [info] Owner socket", owner, "started...");
+        app._ws[owner] = ws;
+      } else {
+        console.log("ℹ️ [info] Log socket", owner, "started...");
+        app._ws[logsocket] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
+      }
+
+      socketMap.set(owner, ws); // public websocket stored in app, needs to be set to builder/buildlog!
+
+      /* Returns specific build log for owner */
+      initLogTail();
+      initSocket(ws, app.messenger, logsocket);
+
+    }).on("error", function (err) {
+      console.log(`☣️ [error] in WSS connection ${err}`);
     });
 
-    ws.on('pong', heartbeat);
+    //
+    // Master check in cluster mode
+    //
 
-    ws.on('close', function () {
-      socketMap.delete(owner);
-    });
-  }
-
-  wss.on('connection', function (ws, req) {
-
-    // May not exist while testing...
-    if (typeof (ws) === "undefined" || ws === null) {
-      console.log("☣️ [error] Exiting WSS connecton, no WS defined!");
-      return;
-    }
-
-    if (typeof (req) === "undefined") {
-      console.log("☣️ [error] No request on wss.on");
-      return;
-    }
-
-    if (typeof(req.session) === "undefined") {
-      console.log("☣️ [error] No session on wss connection! Should bear thx-session");
-      return;
-    }
-
-    if (typeof(req.session.cookie) === "undefined") {
-      console.log("☣️ [error] No cookie on wss connection! Should bear thx-session");
-      return;
-    }
-
-    // extract socket id and owner_id from pathname, also removing slashes
-    console.log("Request URL:", req.url);
-    let path_elements = req.url.split('/');
-    console.log("path_elements", path_elements);
-    let owner = path_elements[0].replace(/\//g, "");
-    let logsocket = path_elements[1].replace(/\//g, "");
-
-    console.log("ℹ️ [info] owner: ", { owner }, "logsocket", { logsocket }, "path_elements", {path_elements});
-
-    var cookies = req.headers.cookie;
-
-    if (typeof (cookies) !== "undefined") {
-      if (cookies.indexOf("thx-session") === -1) {
-        console.log("» WSS VONNECTION ERROR! No thx-session found in WS: " + JSON.stringify(cookies));
-        // return;
+    function startup_quote() {
+      if ((typeof (process.env.ENTERPRISE) === "undefined") || (!process.env.ENTERPRISE)) {
+        app.messenger.sendRandomQuote();
       }
-    } else {
-      console.log("ℹ️ [info] DEPRECATED WS has no cookie headers!");
-      return;
     }
 
-    ws.isAlive = true;
+    setTimeout(startup_quote, 10000); // wait for Slack init only once
 
-    if ((typeof (logsocket) === "undefined") || (logsocket === null)) {
-      console.log("ℹ️ [info] Owner socket", owner, "started...");
-      app._ws[owner] = ws; 
-    } else {
-      console.log("ℹ️ [info] Log socket", owner, "started...");
-      app._ws[logsocket] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
-    }
+  }); // DB
 
-    socketMap.set(owner, ws); // public websocket stored in app, needs to be set to builder/buildlog!
-
-    /* Returns specific build log for owner */
-    initLogTail();
-    initSocket(ws, messenger);
-
-  }).on("error", function (err) {
-    console.log(`☣️ [error] in WSS connection ${err}`);
-  });
-
-  //
-  // Master check in cluster mode
-  //
-
-  function startup_quote() {
-    if ((typeof (process.env.ENTERPRISE) === "undefined") || (!process.env.ENTERPRISE)) {
-      app.messenger.sendRandomQuote();
-    }
-  }
-
-  setTimeout(startup_quote, 10000); // wait for Slack init only once
-
-});
+}); // Slack
