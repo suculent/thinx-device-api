@@ -202,6 +202,8 @@ services:
       - "COUCHDB_USER=${COUCHDB_USER}"
       - "COUCHDB_PASS=${COUCHDB_PASS}"
       - "WORKER_SECRET=${WORKER_SECRET}"
+      - "GOOGLE_OAUTH_ID=${GOOGLE_OAUTH_ID}"
+      - "GOOGLE_OAUTH_SECRET=${GOOGLE_OAUTH_SECRET}"
     ports:
       - '7442:7442'
       - '7443:7443'
