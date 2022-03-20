@@ -206,8 +206,7 @@ app.messenger.initSlack(() => {
 
     /* Webhook Server (new impl.) */
 
-    app.post("/githook", function (req, res) {
-
+    function gitHook(req, res) {
       // TODO (1): Validate and possibly reject invalid requests to prevent injection causing rebuilding of existing stuff
       // E.g. using git_secret_key from app_config and also by validating required params
       // https://github.com/suculent/thinx-device-api/issues/294
@@ -222,6 +221,14 @@ app.messenger.initSlack(() => {
       console.log("Webhook process started...");
       watcher.process_hook(req.body);
       console.log("Webhook process completed.");
+    }
+
+    app.post("/githook", function (req, res) {
+      gitHook(req, res);
+    }); // end of legacy Webhook Server
+
+    app.post("/api/githook", function (req, res) {
+      gitHook(req, res);
     }); // end of new Webhook Server
 
     /*
