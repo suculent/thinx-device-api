@@ -417,7 +417,7 @@ db.init((/* db_err, dbs */) => {
     });
 
     ws.on('pong', heartbeat);
-    
+
     // ws.on('close', () => { /* socketMap.delete(owner); */ });
   }
 
@@ -434,19 +434,14 @@ db.init((/* db_err, dbs */) => {
       return;
     }
 
-    //if (typeof(req.session.cookie) === "undefined") {
-    //  console.log("☣️ [error] No cookie on wss connection! Should bear thx-session until deprecated.");
-      //return;
-   // }
-
     // extract socket id and owner_id from pathname, also removing slashes
     console.log("Request URL:", req.url);
     let path_elements = req.url.split('/');
     console.log("path_elements", path_elements);
     let owner = path_elements[1];
-    let logsocket = path_elements[2] || owner;
+    let logsocket = path_elements[2] || null;
 
-    console.log("ℹ️ [info] owner: ", { owner }, "logsocket", { logsocket }, "path_elements", {path_elements});
+    console.log("ℹ️ [info] wss conn with path_elements", {path_elements});
 
     var cookies = req.headers.cookie;
 
