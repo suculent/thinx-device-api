@@ -423,7 +423,9 @@ app.messenger.initSlack(() => {
 
       ws.on('pong', heartbeat);
 
-      // ws.on('close', () => { /* socketMap.delete(owner); */ });
+      ws.on('close', () => { 
+        socketMap.delete(ws.owner);
+      });
     }
 
     wss.on('connection', function (ws, req) {
@@ -459,6 +461,8 @@ app.messenger.initSlack(() => {
       }
 
       ws.isAlive = true;
+
+      ws.owner = owner;
 
       if ((typeof (logsocket) === "undefined") || (logsocket === null)) {
         console.log("ℹ️ [info] Owner socket", owner, "started...");
