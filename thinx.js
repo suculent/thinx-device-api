@@ -219,7 +219,7 @@ app.messenger.initSlack(() => {
       }
       res.status(200).end("Accepted");
       console.log("Webhook process started...");
-      watcher.process_hook(req.body);
+      watcher.process_hook(req);
       console.log("Webhook process completed.");
     }
 
