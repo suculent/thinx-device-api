@@ -311,7 +311,7 @@ app.messenger.initSlack(() => {
       const owner = request.url.replace(/\//g, "");
 
       if (typeof (socketMap.get(owner)) !== "undefined") {
-        console.log("Socket already mapped for", owner, "reassigning...");
+        console.log(`[info] Socket already mapped for ${owner} reassigning...`);
       }
 
       if (typeof (request.session) === "undefined") {
@@ -392,7 +392,7 @@ app.messenger.initSlack(() => {
 
     function initSocket(ws, msgr, logsocket) {
       ws.on("message", (message) => {
-        console.log("WSS message", message);
+        console.log(`[info] [ws] incoming message: ${message}`);
         if (message.indexOf("{}") == 0) return; // skip empty messages
         var object = JSON.parse(message);
 
@@ -407,12 +407,12 @@ app.messenger.initSlack(() => {
           // Type: initial socket 
         } else if (typeof (object.init) !== "undefined") {
           if (typeof (msgr) !== "undefined") {
-            console.log("Initializing new messenger in WS...");
+            console.log(`[info] [ws] Initializing new messenger in WS...`);
             var owner = object.init;
             let socket = app._ws[owner];
             msgr.initWithOwner(owner, socket, (success, message_z) => {
               if (!success) {
-                console.log("Messenger init on WS message with result " + success + ", with message: ", { message_z });
+                console.log(`[info] [ws] Messenger init on WS message with result ${success} with message ${message_z}`);
               } else {
                 console.log(`[info] Messenger successfully initialized for ${owner}`);
               }
@@ -441,18 +441,16 @@ app.messenger.initSlack(() => {
         return;
       }
 
-      // extract socket id and owner_id from pathname, also removing slashes
+      // extract socket id and owner_id from pathname, also removing slashes (path element 0 is caused by the leading slash)
       let path_elements = req.url.split('/');
       let owner = path_elements[1];
       let logsocket = path_elements[2] || null;
-
-      console.log("ℹ️ [info] wss conn with path_elements", { path_elements });
 
       var cookies = req.headers.cookie;
 
       if (typeof (cookies) !== "undefined") {
         if (cookies.indexOf("thx-session") === -1) {
-          console.log("» WSS VONNECTION ERROR! No thx-session found in WS: " + JSON.stringify(cookies));
+          console.log(`[critical] No thx-session found in WS: ${JSON.stringify(cookies)}`);
           // return;
         }
       } else {
