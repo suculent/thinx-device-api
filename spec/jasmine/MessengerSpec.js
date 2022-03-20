@@ -96,7 +96,7 @@ describe("Messenger", function() {
 
     console.log(`[spec] [mm] [debug] getting apikey with config ${JSON.stringify(app_config.mqtt)}`); // TODO REMOVE
 
-    user.mqtt_key(test_owner, "mosquitto", (key_success, apikey) => {
+    user.mqtt_key(test_owner, (key_success, apikey) => {
 
       console.log(`[spec] [mm] fetched mqtt key? ${key_success} with apikey ${JSON.stringify(apikey, null, '\t')}`);
 
