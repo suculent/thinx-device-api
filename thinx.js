@@ -417,10 +417,8 @@ db.init((/* db_err, dbs */) => {
     });
 
     ws.on('pong', heartbeat);
-
-    ws.on('close', function () {
-      socketMap.delete(owner);
-    });
+    
+    // ws.on('close', () => { /* socketMap.delete(owner); */ });
   }
 
   wss.on('connection', function (ws, req) {
