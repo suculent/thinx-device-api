@@ -345,7 +345,6 @@ workflows:
           context:
             - thinx-docker-repo
             - console
-            - thinx-slack
           filters:
             branches:
               only:
@@ -365,6 +364,7 @@ workflows:
           context:
             - dockerhub
             - SonarCloud
+            - thinx-slack
           requires:
             #- test-api-cloud
             - test
