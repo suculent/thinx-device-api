@@ -322,7 +322,9 @@ app.messenger.initSlack(() => {
       }
 
       if (typeof (request.session) === "undefined") {
-        console.log("[critical] Request has no session!!!", JSON.stringify(request.body), {head});
+        let txt = Buffer.from(head, 'utf8').toString();
+        let headers = request.headers;
+        console.log("[critical] Request has no session!!!", JSON.stringify(request.body), {txt}, {headers});
       }
 
       sessionParser(request, {}, () => {
@@ -340,6 +342,7 @@ app.messenger.initSlack(() => {
 
         try {
           wss.handleUpgrade(request, socket, head, function (ws) {
+            console.log("---> Session upgrade...");
             wss.emit('connection', ws, request);
           });
         } catch (upgradeException) {
