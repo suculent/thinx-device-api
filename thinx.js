@@ -175,7 +175,7 @@ app.messenger.initSlack(() => {
         maxAge: 3600000,
         // can be false in case of local development or testing; mitigated by using Traefik router unwrapping HTTPS so the cookie travels securely where possible
         secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
-        httpOnly: true
+        httpOnly: false // because this is used by socket
       },
       store: sessionStore,
       name: "x-thx-session",
@@ -302,9 +302,9 @@ app.messenger.initSlack(() => {
       cookie: {
         expires: hour,
         secure: false,
-        httpOnly: true
+        httpOnly: false
       },
-      name: "x-thx-ws-session",
+      name: "x-thx-session",
       resave: false,
       rolling: false,
       saveUninitialized: false,
@@ -322,7 +322,7 @@ app.messenger.initSlack(() => {
       }
 
       if (typeof (request.session) === "undefined") {
-        return;
+        console.log("[critical] Request has no session!!!", JSON.stringify(request.body), {head});
       }
 
       sessionParser(request, {}, () => {
@@ -337,6 +337,7 @@ app.messenger.initSlack(() => {
         console.log("---> Session is parsed, handling protocol upgrade...");
 
         socketMap.set(owner, socket);
+
         try {
           wss.handleUpgrade(request, socket, head, function (ws) {
             wss.emit('connection', ws, request);
