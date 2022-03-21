@@ -339,16 +339,22 @@ app.messenger.initSlack(() => {
 
         console.log("---> Session is parsed, handling protocol upgrade...");
 
-        socketMap.set(owner, socket);
+        if (typeof(socketMap.get(owner)) === "undefined") {
 
-        try {
-          wss.handleUpgrade(request, socket, head, function (ws) {
-            console.log("---> Session upgrade...");
-            wss.emit('connection', ws, request);
-          });
-        } catch (upgradeException) {
-          // fails on duplicate upgrade, why does it happen?
-          console.log("Exception caught upgrading same socket twice.");
+          socketMap.set(owner, socket);
+
+          try {
+            wss.handleUpgrade(request, socket, head, function (ws) {
+              console.log("---> Session upgrade...");
+              wss.emit('connection', ws, request);
+            });
+          } catch (upgradeException) {
+            // fails on duplicate upgrade, why does it happen?
+            console.log("Exception caught upgrading same socket twice.");
+          }
+
+        } else {
+          console.log("Skipping socket, already upgraded...", {request});
         }
       });
     });
