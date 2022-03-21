@@ -124,6 +124,7 @@ describe("Sources", function () {
 
   it("(09) should update repo privacy prefetch state", function (done) {
     Sources.updatePrivate(owner, source_id, true, (success, error) => {
+      if (!success) console.log("[09] error", error);
       expect(success).to.equal(true);
       done();
     });
@@ -131,6 +132,7 @@ describe("Sources", function () {
 
   it("(10) should update repo platform", function (done) {
     Sources.updatePlatform(owner, source_id, "arduino", (success, error) => {
+      if (!success) console.log("[09] error", error);
       expect(success).to.equal(true);
       done();
     });
