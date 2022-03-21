@@ -39,7 +39,7 @@ describe("Sources", function () {
       done();
     });
   }, 10000);
-
+  
   it("(03) should be able to be removed", function (done) {
 
     const source = {
@@ -83,7 +83,7 @@ describe("Sources", function () {
     done();
   });
 
-  it("(05) should be able to accept valida URL", function (done) {
+  it("(05) should be able to accept valid URL", function (done) {
     let source = {
       url: "git@github.com/suculent/thinx-device-api"
     };
@@ -121,4 +121,19 @@ describe("Sources", function () {
     let ownerIdFromPath = Sources.ownerIdFromPath("/mnt/data/data/" + owner + "/" + source_id);
     expect(ownerIdFromPath).to.be.a('string');
   });
+
+  it("(09) should update repo privacy prefetch state", function (done) {
+    Sources.updatePrivate(owner, source_id, true, (success, error) => {
+      expect(success).to.equal(true);
+      done();
+    });
+  });
+
+  it("(10) should update repo platform", function (done) {
+    Sources.updatePlatform(owner, source_id, "arduino", (success, error) => {
+      expect(success).to.equal(true);
+      done();
+    });
+  });
+
 });

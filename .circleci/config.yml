@@ -353,6 +353,7 @@ workflows:
             branches:
               only:
                 - thinx-console
+                - thinx-swarm
 
       - build-base:
           context:
