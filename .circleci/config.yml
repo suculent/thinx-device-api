@@ -2,7 +2,7 @@ version: 2.1
 orbs:
   node: circleci/node@4.7.0
   docker: circleci/docker@2.0.1
-  slack: circleci/slack@4.5.0
+  slack: circleci/slack@4.8.3
 
 jobs:
 
@@ -31,7 +31,8 @@ jobs:
   build-console-cloud:
     executor: docker/docker
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
@@ -52,7 +53,7 @@ jobs:
             --build-arg WEB_HOSTNAME=${WEB_HOSTNAME} \
             --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} \
             --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
-            --build-arg ENTERPRISE=true \
+            --build-arg ENTERPRISE=${ENTERPRISE} \
             --build-arg ENVIRONMENT=${ENVIRONMENT} \
           tag: 'swarm'
       - docker/push:
@@ -64,7 +65,8 @@ jobs:
   build-api-cloud:
     executor: docker/docker
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
       - checkout
       - docker/check
       - docker/build:
@@ -80,11 +82,18 @@ jobs:
           digest-path: /tmp/digest.txt
           image: thinxcloud/api
           tag: 'latest'
+      - slack/notify:
+          template: success_tagged_deploy_1
+          event: pass
+      - slack/notify:
+          template: basic_fail_1
+          event: fail
 
   test-api-cloud:
     executor: docker/docker
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
       - checkout
       - docker/check:
           registry: registry.thinx.cloud:5000
@@ -129,7 +138,8 @@ jobs:
           chmod +x ~/docker-compose
           mv ~/docker-compose /usr/local/bin/docker-compose
 
-    - setup_remote_docker
+    - setup_remote_docker:
+        docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
 
     - checkout
 
@@ -380,7 +390,7 @@ workflows:
           filters:
             branches:
               only:
-                - thinx-swarm
+                - thinx-console
 
       - build-base:
           context:
@@ -396,6 +406,7 @@ workflows:
           context:
             - dockerhub
             - SonarCloud
+            - thinx-slack
           requires:
             #- test-api-cloud
             - test
