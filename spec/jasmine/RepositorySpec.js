@@ -45,7 +45,11 @@ describe("Repository Watcher", function() {
   it("should be able to respond to githook", function() {
     watcher = new Repository();
     let mock_git_message = require("../mock-git-response.json");
-    let response = watcher.process_hook(mock_git_message);
+    let mock_git_request = {
+      headers: [],
+      body: mock_git_message
+    }
+    let response = watcher.process_hook(mock_git_request);
     expect(response).to.be.false; // fix later
   });
 

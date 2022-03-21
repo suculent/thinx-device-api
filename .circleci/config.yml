@@ -31,7 +31,8 @@ jobs:
   build-console-cloud:
     executor: docker/docker
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
@@ -52,7 +53,7 @@ jobs:
             --build-arg WEB_HOSTNAME=${WEB_HOSTNAME} \
             --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} \
             --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
-            --build-arg ENTERPRISE=true \
+            --build-arg ENTERPRISE=${ENTERPRISE} \
             --build-arg ENVIRONMENT=${ENVIRONMENT} \
           tag: 'swarm'
       - docker/push:
@@ -64,7 +65,8 @@ jobs:
   build-api-cloud:
     executor: docker/docker
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
       - checkout
       - docker/check
       - docker/build:
@@ -90,7 +92,8 @@ jobs:
   test-api-cloud:
     executor: docker/docker
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
       - checkout
       - docker/check:
           registry: registry.thinx.cloud:5000
@@ -135,7 +138,8 @@ jobs:
           chmod +x ~/docker-compose
           mv ~/docker-compose /usr/local/bin/docker-compose
 
-    - setup_remote_docker
+    - setup_remote_docker:
+        docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
 
     - checkout
 

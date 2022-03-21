@@ -1,8 +1,7 @@
 describe("Sanitka", function () {
 
   var expect = require('chai').expect;
-  var Sanitka = require('../../lib/thinx/sanitka');
-  var sanitka = new Sanitka();
+  var Sanitka = require('../../lib/thinx/sanitka'); var sanitka = new Sanitka();
 
   it("should sanitize URLs", function () {
     var s = sanitka.url("https://github.com/suculent/thinx-device-api/ && ");
