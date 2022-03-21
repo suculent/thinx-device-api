@@ -15,7 +15,10 @@ describe("Sources", function () {
       owner: owner,
       branch: "origin/master",
       url: "https://github.com/suculent/thinx-firmware-esp8266-pio",
-      platform: "arduino"
+      platform: "arduino",
+      secret: "<github-secret>",
+      circle_key: "<circleci-project-key>",
+      is_private: false
     };
     Sources.add(source,
       (success, response) => {
@@ -44,7 +47,10 @@ describe("Sources", function () {
       owner: owner,
       branch: "origin/master",
       url: "https://github.com/suculent/thinx-firmware-esp8266",
-      platform: "arduino"
+      platform: "arduino",
+      secret: "<github-secret>",
+      circle_key: "<circleci-project-key>",
+      is_private: false
     };
 
     /// Add something to be removed

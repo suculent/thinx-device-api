@@ -304,10 +304,10 @@ app.messenger.initSlack(() => {
         secure: false,
         httpOnly: false
       },
-      name: "x-thx-session",
-      resave: false,
-      rolling: false,
-      saveUninitialized: false,
+      name: "x-thx-ws-session",
+      resave: true,
+      rolling: true,
+      saveUninitialized: true
     })); /* lgtm [js/clear-text-cookie] */
 
     let wss = new WebSocket.Server({ server: server }); // or { noServer: true }
@@ -322,19 +322,20 @@ app.messenger.initSlack(() => {
       }
 
       if (typeof (request.session) === "undefined") {
-        let txt = Buffer.from(head, 'utf8').toString();
         let headers = request.headers;
-        console.log("[critical] Request has no session!!!", JSON.stringify(request.body), {txt}, {headers});
+        console.log("[critical] Request headers missing session/cookie on upgrade", {headers});
       }
 
       sessionParser(request, {}, () => {
 
+        /*
         if ((typeof (request.session.owner) === "undefined") || (request.session.owner === null)) {
           console.log("Should destroy socket, access unauthorized.");
           socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
           socket.destroy();
           return;
         }
+        */
 
         console.log("---> Session is parsed, handling protocol upgrade...");
 
