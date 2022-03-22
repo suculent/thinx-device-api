@@ -131,11 +131,31 @@ describe("Sources", function () {
   });
 
   it("(10) should update repo platform", function (done) {
-    Sources.updatePlatform(owner, source_id, "arduino", (success, error) => {
-      if (!success) console.log("[09] error", error);
-      expect(success).to.equal(true);
-      done();
-    });
+    const source = {
+      name: source_name + "-2",
+      owner: owner,
+      branch: "origin/master",
+      url: "https://github.com/suculent/thinx-firmware-esp8266",
+      platform: "arduino",
+      secret: "<github-secret>",
+      circle_key: "<circleci-project-key>",
+      is_private: false
+    };
+
+    /// Add something to be removed
+    Sources.add(source,
+      (success, response) => {
+        if (success !== true) {
+          console.log("(03) Error adding source: ", source, response);
+        }
+        expect(success).to.be.true;
+        source_id = response.source_id;
+        Sources.updatePlatform(owner, source_id, "arduino", (success2, error2) => {
+          if (!success2) console.log("[09] error", error2);
+          expect(success2).to.equal(true);
+          done();
+        });
+      });
   });
 
 });
