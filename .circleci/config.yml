@@ -352,6 +352,7 @@ workflows:
           filters:
             branches:
               only:
+                - thinx-console
                 - thinx-swarm
 
       - build-base:

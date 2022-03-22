@@ -100,8 +100,7 @@ app.messenger = new Messenger(serviceMQPassword).getInstance(serviceMQPassword);
 
 app.messenger.initSlack(() => {
 
-  console.log("Slack initialization complete...");
-
+  console.log("[info] Slack initialization complete...");
 
   const Database = require("./lib/thinx/database");
   var db = new Database();
@@ -175,7 +174,7 @@ app.messenger.initSlack(() => {
         maxAge: 3600000,
         // can be false in case of local development or testing; mitigated by using Traefik router unwrapping HTTPS so the cookie travels securely where possible
         secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
-        httpOnly: true
+        httpOnly: false // because this is used by socket
       },
       store: sessionStore,
       name: "x-thx-session",
@@ -302,12 +301,12 @@ app.messenger.initSlack(() => {
       cookie: {
         expires: hour,
         secure: false,
-        httpOnly: true
+        httpOnly: false
       },
       name: "x-thx-ws-session",
-      resave: false,
-      rolling: false,
-      saveUninitialized: false,
+      resave: true,
+      rolling: true,
+      saveUninitialized: true
     })); /* lgtm [js/clear-text-cookie] */
 
     let wss = new WebSocket.Server({ server: server }); // or { noServer: true }
@@ -315,35 +314,46 @@ app.messenger.initSlack(() => {
 
     server.on('upgrade', function (request, socket, head) {
 
-      const owner = request.url.replace(/\//g, "");
+      let owner = request.url.replace(/\//g, "");
 
       if (typeof (socketMap.get(owner)) !== "undefined") {
-        console.log(`[info] Socket already mapped for ${owner} reassigning...`);
+        console.log(`ℹ️ [info] Socket already mapped for ${owner} reassigning...`);
       }
 
       if (typeof (request.session) === "undefined") {
-        return;
+        let headers = request.headers;
+        console.log("🚫  [critical] Request session missing thx session/cookie on upgrade", {headers});
       }
 
       sessionParser(request, {}, () => {
 
+        /*
         if ((typeof (request.session.owner) === "undefined") || (request.session.owner === null)) {
           console.log("Should destroy socket, access unauthorized.");
           socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
           socket.destroy();
           return;
         }
+        */
 
         console.log("---> Session is parsed, handling protocol upgrade...");
 
-        socketMap.set(owner, socket);
-        try {
-          wss.handleUpgrade(request, socket, head, function (ws) {
-            wss.emit('connection', ws, request);
-          });
-        } catch (upgradeException) {
-          // fails on duplicate upgrade, why does it happen?
-          console.log("Exception caught upgrading same socket twice.");
+        if (typeof(socketMap.get(owner)) === "undefined") {
+
+          socketMap.set(owner, socket);
+
+          try {
+            wss.handleUpgrade(request, socket, head, function (ws) {
+              console.log("---> Session upgrade...");
+              wss.emit('connection', ws, request);
+            });
+          } catch (upgradeException) {
+            // fails on duplicate upgrade, why does it happen?
+            console.log("Exception caught upgrading same socket twice.");
+          }
+
+        } else {
+          console.log("Skipping socket, already upgraded...", {request});
         }
       });
     });
@@ -399,7 +409,7 @@ app.messenger.initSlack(() => {
 
     function initSocket(ws, msgr, logsocket) {
       ws.on("message", (message) => {
-        console.log(`[info] [ws] incoming message: ${message}`);
+        console.log(`ℹ️ [info] [ws] incoming message: ${message}`);
         if (message.indexOf("{}") == 0) return; // skip empty messages
         var object = JSON.parse(message);
 
@@ -414,14 +424,14 @@ app.messenger.initSlack(() => {
           // Type: initial socket 
         } else if (typeof (object.init) !== "undefined") {
           if (typeof (msgr) !== "undefined") {
-            console.log(`[info] [ws] Initializing new messenger in WS...`);
+            console.log(`ℹ️ [info] [ws] Initializing new messenger in WS...`);
             var owner = object.init;
             let socket = app._ws[owner];
             msgr.initWithOwner(owner, socket, (success, message_z) => {
               if (!success) {
-                console.log(`[info] [ws] Messenger init on WS message with result ${success} with message ${message_z}`);
+                console.log(`ℹ️ [info] [ws] Messenger init on WS message with result ${success} with message ${message_z}`);
               } else {
-                console.log(`[info] Messenger successfully initialized for ${owner}`);
+                console.log(`ℹ️ [info] Messenger successfully initialized for ${owner}`);
               }
             });
           }
@@ -457,7 +467,7 @@ app.messenger.initSlack(() => {
 
       if (typeof (cookies) !== "undefined") {
         if (cookies.indexOf("thx-session") === -1) {
-          console.log(`[critical] No thx-session found in WS: ${JSON.stringify(cookies)}`);
+          console.log(`🚫  [critical] No thx-session found in WS: ${JSON.stringify(cookies)}`);
           // return;
         }
       } else {

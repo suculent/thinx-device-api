@@ -15,7 +15,10 @@ describe("Sources", function () {
       owner: owner,
       branch: "origin/master",
       url: "https://github.com/suculent/thinx-firmware-esp8266-pio",
-      platform: "arduino"
+      platform: "arduino",
+      secret: "<github-secret>",
+      circle_key: "<circleci-project-key>",
+      is_private: false
     };
     Sources.add(source,
       (success, response) => {
@@ -36,7 +39,7 @@ describe("Sources", function () {
       done();
     });
   }, 10000);
-
+  
   it("(03) should be able to be removed", function (done) {
 
     const source = {
@@ -44,7 +47,10 @@ describe("Sources", function () {
       owner: owner,
       branch: "origin/master",
       url: "https://github.com/suculent/thinx-firmware-esp8266",
-      platform: "arduino"
+      platform: "arduino",
+      secret: "<github-secret>",
+      circle_key: "<circleci-project-key>",
+      is_private: false
     };
 
     /// Add something to be removed
@@ -77,7 +83,7 @@ describe("Sources", function () {
     done();
   });
 
-  it("(05) should be able to accept valida URL", function (done) {
+  it("(05) should be able to accept valid URL", function (done) {
     let source = {
       url: "git@github.com/suculent/thinx-device-api"
     };
@@ -115,4 +121,42 @@ describe("Sources", function () {
     let ownerIdFromPath = Sources.ownerIdFromPath("/mnt/data/data/" + owner + "/" + source_id);
     expect(ownerIdFromPath).to.be.a('string');
   });
+
+  it("(09) should update repo privacy prefetch state", function (done) {
+    let source_id = "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f3";
+    Sources.updatePrivate(owner, source_id, true, (success, error) => {
+      if (!success) console.log("[09] error", error);
+      expect(success).to.equal(true);
+      done();
+    });
+  });
+
+  it("(10) should update repo platform", function (done) {
+    const source = {
+      name: source_name + "-2",
+      owner: owner,
+      branch: "origin/master",
+      url: "https://github.com/suculent/thinx-firmware-esp8266",
+      platform: "arduino",
+      secret: "<github-secret>",
+      circle_key: "<circleci-project-key>",
+      is_private: false
+    };
+
+    /// Add something to be removed
+    Sources.add(source,
+      (success, response) => {
+        if (success !== true) {
+          console.log("(03) Error adding source: ", source, response);
+        }
+        expect(success).to.be.true;
+        source_id = response.source_id;
+        Sources.updatePlatform(owner, source_id, "arduino", (success2, error2) => {
+          if (!success2) console.log("[09] error", error2);
+          expect(success2).to.equal(true);
+          done();
+        });
+      });
+  });
+
 });
