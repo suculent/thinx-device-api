@@ -166,6 +166,11 @@ app.messenger.initSlack(() => {
     // Bypassed LGTM, because it does not make sense on this API for all endpoints,
     // what is possible is covered by helmet and no-cache.
 
+    let full_domain = app_config.api_url;
+    let full_domain_array = full_domain.split(".");
+    delete full_domain_array[0];
+    let short_domain = "." + full_domain_array.join('.');
+
     const sessionConfig = {
       secret: session_config.secret,
       cookie: {
@@ -173,9 +178,10 @@ app.messenger.initSlack(() => {
         // can be false in case of local development or testing; mitigated by using Traefik router unwrapping HTTPS so the cookie travels securely where possible
         secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
         httpOnly: false // because this is used by socket
+        domain: short_domain
       },
       store: sessionStore,
-      name: "x-thx-session",
+      name: "x-thx-core",
       resave: true, // was true then false
       rolling: true, // This resets the expiration date on the cookie to the given default.
       saveUninitialized: false
@@ -292,6 +298,11 @@ app.messenger.initSlack(() => {
     var wsapp = express();
     wsapp.disable('x-powered-by');
 
+    let full_domain = app_config.api_url;
+    let full_domain_array = full_domain.split(".");
+    delete full_domain_array[0];
+    let short_domain = "." + full_domain_array.join('.');
+
     wsapp.use(session({ /* lgtm [js/clear-text-cookie] */
       secret: session_config.secret,
       store: sessionStore,
@@ -299,7 +310,8 @@ app.messenger.initSlack(() => {
       cookie: {
         expires: hour,
         secure: false,
-        httpOnly: false
+        httpOnly: false,
+        domain: short_domain
       },
       name: "x-thx-ws-session",
       resave: true,
