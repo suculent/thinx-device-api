@@ -40,11 +40,10 @@ describe("API Key", function() {
 
   //verify: function(owner, apikey, callback)
   it("(03) should be able to verify invalid API Keys", function(done) {
-    let req = { ip: "0.0.0.0" };
     apikey.verify(
       owner,
       "invalid-api-key",
-      req,
+      true,
       (success /*, result */) => { // fixed (callback is not a function!)
         expect(success).to.equal(false);
         done();
