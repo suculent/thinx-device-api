@@ -314,7 +314,7 @@ app.messenger.initSlack(() => {
 
     server.on('upgrade', function (request, socket, head) {
 
-      const owner = request.url.replace(/\//g, "");
+      let owner = request.url.replace(/\//g, "");
 
       if (typeof (socketMap.get(owner)) !== "undefined") {
         console.log(`ℹ️ [info] Socket already mapped for ${owner} reassigning...`);
@@ -322,7 +322,7 @@ app.messenger.initSlack(() => {
 
       if (typeof (request.session) === "undefined") {
         let headers = request.headers;
-        console.log("🚫  [critical] Request headers missing session/cookie on upgrade", {headers});
+        console.log("🚫  [critical] Request session missing thx session/cookie on upgrade", {headers});
       }
 
       sessionParser(request, {}, () => {
