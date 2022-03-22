@@ -123,6 +123,7 @@ describe("Sources", function () {
   });
 
   it("(09) should update repo privacy prefetch state", function (done) {
+    let source_id = "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f3";
     Sources.updatePrivate(owner, source_id, true, (success, error) => {
       if (!success) console.log("[09] error", error);
       expect(success).to.equal(true);
