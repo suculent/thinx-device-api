@@ -100,8 +100,6 @@ app.messenger = new Messenger(serviceMQPassword).getInstance(serviceMQPassword);
 
 app.messenger.initSlack(() => {
 
-  console.log("[info] Slack initialization complete...");
-
   const Database = require("./lib/thinx/database");
   var db = new Database();
   db.init((/* db_err, dbs */) => {
