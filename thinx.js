@@ -297,11 +297,6 @@ app.messenger.initSlack(() => {
     var wsapp = express();
     wsapp.disable('x-powered-by');
 
-    let full_domain = app_config.api_url;
-    let full_domain_array = full_domain.split(".");
-    delete full_domain_array[0];
-    let short_domain = "." + full_domain_array.join('.');
-
     wsapp.use(session({ /* lgtm [js/clear-text-cookie] */
       secret: session_config.secret,
       store: sessionStore,
@@ -331,7 +326,7 @@ app.messenger.initSlack(() => {
 
       if (typeof (request.session) === "undefined") {
         let headers = request.headers;
-        console.log("🚫  [critical] Request session missing thx session/cookie on upgrade", {headers});
+        console.log("🚫  [critical] Request session missing thx session/cookie on upgrade", { headers });
       }
 
       sessionParser(request, {}, () => {
@@ -347,7 +342,7 @@ app.messenger.initSlack(() => {
 
         console.log("---> Session is parsed, handling protocol upgrade...");
 
-        if (typeof(socketMap.get(owner)) === "undefined") {
+        if (typeof (socketMap.get(owner)) === "undefined") {
 
           socketMap.set(owner, socket);
 
@@ -362,7 +357,7 @@ app.messenger.initSlack(() => {
           }
 
         } else {
-          console.log("Skipping socket, already upgraded...", {request});
+          console.log("Skipping socket, already upgraded...", { request });
         }
       });
     });
@@ -449,7 +444,7 @@ app.messenger.initSlack(() => {
 
       ws.on('pong', heartbeat);
 
-      ws.on('close', () => { 
+      ws.on('close', () => {
         socketMap.delete(ws.owner);
       });
     }
