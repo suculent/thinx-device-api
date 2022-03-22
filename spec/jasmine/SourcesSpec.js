@@ -131,7 +131,16 @@ describe("Sources", function () {
     });
   });
 
-  it("(10) should update repo platform", function (done) {
+  it("(10) should update last build version", function (done) {
+    let source_id = "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f3";
+    Sources.updateLastBuild(owner, source_id, "1.1.1", (success, error) => {
+      if (!success) console.log("[10] error", error);
+      expect(success).to.equal(true);
+      done();
+    });
+  });
+
+  it("(11) should update repo platform", function (done) {
     const source = {
       name: source_name + "-2",
       owner: owner,
