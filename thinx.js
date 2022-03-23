@@ -173,7 +173,7 @@ app.messenger.initSlack(() => {
       console.log("⚠️ [warning] Skipping HTTPS server, SSL key or certificate not found. This configuration is INSECURE! and will cause an error in Enterprise configurations in future.");
     }
 
-    
+
     var WebSocket = require("ws");
 
     var Builder = require("./lib/thinx/builder");
@@ -331,12 +331,10 @@ app.messenger.initSlack(() => {
 
       sessionParser(request, {}, () => {
 
-        let coo = request.headers.cookie;
-        let ur = request.url;
-        console.log("🔨 [debug] Request session cookies on upgrade", { coo }, { ur });
-        if ((typeof (coo) === "undefined") || (coo === null)) {
+        let cookies = request.headers.cookie;
+        if ((typeof (cookies) === "undefined") || (cookies === null)) {
           // other x-thx cookies are now deprecated and can be removed
-          if (coo.indexOf("x-thx-core") === -1) {
+          if (cookies.indexOf("x-thx-core") === -1) {
             console.log("Should destroy socket, access unauthorized.");
             socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
             socket.destroy();
@@ -435,7 +433,7 @@ app.messenger.initSlack(() => {
             let socket = app._ws[owner];
             msgr.initWithOwner(owner, socket, (success, message_z) => {
               if (!success) {
-                console.log(`ℹ️ [info] [ws] Messenger init on WS message with result ${success} with message ${message_z}`);
+                console.log(`ℹ️ [error] [ws] Messenger init on WS message failed: ${message_z}`);
               } else {
                 console.log(`ℹ️ [info] Messenger successfully initialized for ${owner}`);
               }
