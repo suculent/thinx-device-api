@@ -172,8 +172,6 @@ app.messenger.initSlack(() => {
     delete full_domain_array[0];
     let short_domain = full_domain_array.join('.');
 
-    console.log(`[debug] [#318] starting with short_domain ${short_domain}`);
-
     const sessionConfig = {
       secret: session_config.secret,
       cookie: {
