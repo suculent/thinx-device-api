@@ -330,7 +330,8 @@ app.messenger.initSlack(() => {
       sessionParser(request, {}, () => {
 
         let coo = request.headers.cookie;
-        console.log("[debug] Request session cookies on upgrade", { coo });
+        let ur = request.url;
+        console.log("[debug] Request session cookies on upgrade", { coo }, { ur });
         if ((typeof (coo) === "undefined") || (coo === null)) {
           // other x-thx cookies are now deprecated and can be removed
           if (coo.indexOf("x-thx-core") === -1) {
