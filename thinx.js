@@ -359,7 +359,7 @@ app.messenger.initSlack(() => {
           }
 
         } else {
-          console.log("Skipping socket, already upgraded...", { request });
+          console.log("Skipping socket, already upgraded...");
         }
       });
     });
