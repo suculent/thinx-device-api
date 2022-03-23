@@ -99,6 +99,8 @@ app.messenger = new Messenger(serviceMQPassword).getInstance(serviceMQPassword);
 
 app.messenger.initSlack(() => {
 
+  console.log("[info] Slack initialization complete...");
+
   const Database = require("./lib/thinx/database");
   var db = new Database();
   db.init((/* db_err, dbs */) => {
@@ -169,6 +171,8 @@ app.messenger.initSlack(() => {
     let full_domain_array = full_domain.split(".");
     delete full_domain_array[0];
     let short_domain = "." + full_domain_array.join('.');
+
+    console.log(`[info] starting with short_domain ${short_domain}`);
 
     const sessionConfig = {
       secret: session_config.secret,
@@ -307,7 +311,7 @@ app.messenger.initSlack(() => {
         httpOnly: false,
         domain: short_domain
       },
-      name: "x-thx-ws-session",
+      name: "x-thx-session",
       resave: true,
       rolling: true,
       saveUninitialized: true
