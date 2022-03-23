@@ -55,6 +55,7 @@ jobs:
             --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
             --build-arg ENTERPRISE=${ENTERPRISE} \
             --build-arg ENVIRONMENT=${ENVIRONMENT} \
+            --build-arg COMMIT_ID=$(git rev-parse HEAD) \
           tag: 'swarm'
       - docker/push:
           digest-path: /tmp/digest.txt

@@ -12,7 +12,7 @@ describe("Builder", function () {
   var app = express();
   app.disable('x-powered-by');
 
-  var queue = new Queue(builder, app, {});
+  var queue = new Queue(builder, app, null);
 
   var envi = require("../_envi.json");
   var owner = envi.oid;
