@@ -86,7 +86,7 @@ describe("Devices", function() {
       source_id: source_id,
       udid: TEST_DEVICE.udid
     };
-    devices.attach(body, (res, success, response) => {
+    devices.attach(owner, body, (res, success, response) => {
       expect(success).to.be.true;
       expect(response).to.be.a('string');
       done();
@@ -97,7 +97,7 @@ describe("Devices", function() {
     var body = {
       udid: TEST_DEVICE.udid
     };
-    devices.detach(owner, body, (res, success, response) => {
+    devices.detach(body, (res, success, response) => {
       expect(success).to.be.true;
       expect(response).to.be.a('string');
       expect(response).to.equal('detached');
