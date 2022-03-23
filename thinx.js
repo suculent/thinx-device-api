@@ -328,21 +328,19 @@ app.messenger.initSlack(() => {
         console.log(`ℹ️ [info] Socket already mapped for ${owner} reassigning...`);
       }
 
-      if (typeof (request.session) === "undefined") {
-        let headers = request.headers;
-        console.log("🚫  [critical] Request session missing thx session/cookie on upgrade", { headers });
-      }
-
       sessionParser(request, {}, () => {
 
-        /*
-        if ((typeof (request.session.owner) === "undefined") || (request.session.owner === null)) {
-          console.log("Should destroy socket, access unauthorized.");
-          socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
-          socket.destroy();
-          return;
+        let coo = request.headers.cookie;
+        console.log("[info] Request session cookies on upgrade", { coo });
+
+        if ((typeof (coo) === "undefined") || (coo === null)) {
+          if (coo.indexOf("x-thx") === -1) {
+            console.log("Should destroy socket, access unauthorized.");
+            socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+            socket.destroy();
+            return;
+          }
         }
-        */
 
         console.log("---> Session is parsed, handling protocol upgrade...");
 
@@ -474,12 +472,12 @@ app.messenger.initSlack(() => {
       var cookies = req.headers.cookie;
 
       if (typeof (cookies) !== "undefined") {
-        if (cookies.indexOf("thx-session") === -1) {
+        if (cookies.indexOf("x-thx") === -1) {
           console.log(`🚫  [critical] No thx-session found in WS: ${JSON.stringify(cookies)}`);
-          // return;
+          return;
         }
       } else {
-        console.log("ℹ️ [info] DEPRECATED WS has no cookie headers!");
+        console.log("ℹ️ [info] DEPRECATED WS has no cookie headers, exiting!");
         return;
       }
 
