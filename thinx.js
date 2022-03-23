@@ -140,6 +140,11 @@ app.messenger.initSlack(() => {
 
     let queue;
 
+    // TEST CASE WORKAROUND: attempt to fix duplicate initialization... if Queue is being tested, it's running as another instance and the port 3000 must stay free!
+    if (process.env.ENVIRONMENT !== "test") {
+      queue = new Queue(builder, app, ssl_options);
+      queue.cron(); // starts cron job for build queue from webhooks
+    }
 
     const GDPR = require("./lib/thinx/gdpr");
     new GDPR().guard();
@@ -286,12 +291,6 @@ app.messenger.initSlack(() => {
 
     app.use('/static', express.static(path.join(__dirname, 'static')));
     app.set('trust proxy', ['loopback', '127.0.0.1']);
-
-    // TEST CASE WORKAROUND: attempt to fix duplicate initialization... if Queue is being tested, it's running as another instance and the port 3000 must stay free!
-    if (process.env.ENVIRONMENT !== "test") {
-      queue = new Queue(builder, app, ssl_options);
-      queue.cron(); // starts cron job for build queue from webhooks
-    }
 
     /*
      * WebSocket Server
