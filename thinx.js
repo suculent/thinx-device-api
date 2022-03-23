@@ -99,7 +99,7 @@ app.messenger = new Messenger(serviceMQPassword).getInstance(serviceMQPassword);
 
 app.messenger.initSlack(() => {
 
-  console.log("[info] Slack initialization complete...");
+  console.log("ℹ️ [info] Slack initialization complete...");
 
   const Database = require("./lib/thinx/database");
   var db = new Database();
@@ -331,7 +331,7 @@ app.messenger.initSlack(() => {
 
         let coo = request.headers.cookie;
         let ur = request.url;
-        console.log("[debug] Request session cookies on upgrade", { coo }, { ur });
+        console.log("🔨 [debug] Request session cookies on upgrade", { coo }, { ur });
         if ((typeof (coo) === "undefined") || (coo === null)) {
           // other x-thx cookies are now deprecated and can be removed
           if (coo.indexOf("x-thx-core") === -1) {
@@ -350,12 +350,12 @@ app.messenger.initSlack(() => {
 
           try {
             wss.handleUpgrade(request, socket, head, function (ws) {
-              console.log("[info] WS Session upgrade...");
+              console.log("ℹ️ [info] WS Session upgrade...");
               wss.emit('connection', ws, request);
             });
           } catch (upgradeException) {
             // fails on duplicate upgrade, why does it happen?
-            console.log("[error] Exception caught upgrading same socket twice.");
+            console.log("☣️ [error] Exception caught upgrading same socket twice.");
           }
 
         }
@@ -370,7 +370,7 @@ app.messenger.initSlack(() => {
       if (typeof (wss.clients) !== "undefined") {
         wss.clients.forEach(function each(ws) {
           if (ws.isAlive === false) {
-            console.log("[debug] Terminating websocket!");
+            console.log("🔨 [debug] Terminating websocket!");
             ws.terminate();
           } else {
             ws.ping();
@@ -385,14 +385,14 @@ app.messenger.initSlack(() => {
 
     var logtail_callback = function (err, result) {
       if (err) {
-        console.log("[error] logtail_callback error:", err, "message", result);
+        console.log("☣️ [error] logtail_callback error:", err, "message", result);
       } else {
-        console.log("[info] logtail_callback result:", result);
+        console.log("ℹ️ [info] logtail_callback result:", result);
       }
     };
 
     wss.on("error", function (err) {
-      console.log("[error] websocket " + err.toString());
+      console.log("☣️ [error] websocket " + err.toString());
     });
 
     app._ws = {}; // list of all owner websockets
