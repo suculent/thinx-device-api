@@ -329,10 +329,10 @@ app.messenger.initSlack(() => {
       sessionParser(request, {}, () => {
 
         let coo = request.headers.cookie;
-        console.log("[info] Request session cookies on upgrade", { coo });
-
+        console.log("[debug] Request session cookies on upgrade", { coo });
         if ((typeof (coo) === "undefined") || (coo === null)) {
-          if (coo.indexOf("x-thx") === -1) {
+          // other x-thx cookies are now deprecated and can be removed
+          if (coo.indexOf("x-thx-core") === -1) {
             console.log("Should destroy socket, access unauthorized.");
             socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
             socket.destroy();
@@ -340,7 +340,7 @@ app.messenger.initSlack(() => {
           }
         }
 
-        console.log("---> Session is parsed, handling protocol upgrade...");
+        console.log("ℹ️ [info] WS Session is parsed, handling protocol upgrade...");
 
         if (typeof (socketMap.get(owner)) === "undefined") {
 
@@ -348,16 +348,14 @@ app.messenger.initSlack(() => {
 
           try {
             wss.handleUpgrade(request, socket, head, function (ws) {
-              console.log("---> Session upgrade...");
+              console.log("[info] WS Session upgrade...");
               wss.emit('connection', ws, request);
             });
           } catch (upgradeException) {
             // fails on duplicate upgrade, why does it happen?
-            console.log("Exception caught upgrading same socket twice.");
+            console.log("[error] Exception caught upgrading same socket twice.");
           }
 
-        } else {
-          console.log("Skipping socket, already upgraded...");
         }
       });
     });
@@ -370,7 +368,7 @@ app.messenger.initSlack(() => {
       if (typeof (wss.clients) !== "undefined") {
         wss.clients.forEach(function each(ws) {
           if (ws.isAlive === false) {
-            console.log("[DBUG] Terminating websocket!");
+            console.log("[debug] Terminating websocket!");
             ws.terminate();
           } else {
             ws.ping();
@@ -385,14 +383,14 @@ app.messenger.initSlack(() => {
 
     var logtail_callback = function (err, result) {
       if (err) {
-        console.log("[thinx] logtail_callback error:", err, "message", result);
+        console.log("[error] logtail_callback error:", err, "message", result);
       } else {
-        console.log("[thinx] logtail_callback result:", result);
+        console.log("[info] logtail_callback result:", result);
       }
     };
 
     wss.on("error", function (err) {
-      console.log("WSS REQ ERROR: " + err);
+      console.log("[error] websocket " + err.toString());
     });
 
     app._ws = {}; // list of all owner websockets
