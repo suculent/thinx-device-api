@@ -131,6 +131,49 @@ app.messenger.initSlack(() => {
     //
 
     var https = require("https");
+
+    var read = require('fs').readFileSync;
+
+    var ssl_options = null;
+
+    if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
+
+      let sslvalid = false;
+
+      if (!fs.existsSync(app_config.ssl_ca)) {
+        const message = "⚠️ [warning] Did not find app_config.ssl_ca file, websocket logging will fail...";
+        rollbar.warn(message);
+        console.log(message);
+      }
+
+      let caCert = read(app_config.ssl_ca, 'utf8');
+      let ca = pki.certificateFromPem(caCert);
+      let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
+
+      try {
+        sslvalid = ca.verify(client);
+      } catch (err) {
+        console.log("☣️ [error] Certificate verification failed: ", err);
+      }
+
+      if (sslvalid) {
+        ssl_options = {
+          key: read(app_config.ssl_key, 'utf8'),
+          cert: read(app_config.ssl_cert, 'utf8'),
+          ca: read(app_config.ssl_ca, 'utf8'),
+          NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
+        };
+        console.log("ℹ️ [info] Starting HTTPS server on " + app_config.secure_port + "...");
+        https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
+      } else {
+        console.log("☣️ [error] SSL certificate loading or verification FAILED! Check your configuration!");
+      }
+
+    } else {
+      console.log("⚠️ [warning] Skipping HTTPS server, SSL key or certificate not found. This configuration is INSECURE! and will cause an error in Enterprise configurations in future.");
+    }
+
+    
     var WebSocket = require("ws");
 
     var Builder = require("./lib/thinx/builder");
@@ -248,47 +291,7 @@ app.messenger.initSlack(() => {
       console.log("⏱ [profiler] Startup phase took:", seconds, "seconds");
     });
 
-    var read = require('fs').readFileSync;
-
-    var ssl_options = null;
-
-    if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
-
-      let sslvalid = false;
-
-      if (!fs.existsSync(app_config.ssl_ca)) {
-        const message = "⚠️ [warning] Did not find app_config.ssl_ca file, websocket logging will fail...";
-        rollbar.warn(message);
-        console.log(message);
-      }
-
-      let caCert = read(app_config.ssl_ca, 'utf8');
-      let ca = pki.certificateFromPem(caCert);
-      let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
-
-      try {
-        sslvalid = ca.verify(client);
-      } catch (err) {
-        console.log("☣️ [error] Certificate verification failed: ", err);
-      }
-
-      if (sslvalid) {
-        ssl_options = {
-          key: read(app_config.ssl_key, 'utf8'),
-          cert: read(app_config.ssl_cert, 'utf8'),
-          ca: read(app_config.ssl_ca, 'utf8'),
-          NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
-        };
-        console.log("ℹ️ [info] Starting HTTPS server on " + app_config.secure_port + "...");
-        https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
-      } else {
-        console.log("☣️ [error] SSL certificate loading or verification FAILED! Check your configuration!");
-      }
-
-    } else {
-      console.log("⚠️ [warning] Skipping HTTPS server, SSL key or certificate not found. This configuration is INSECURE! and will cause an error in Enterprise configurations in future.");
-    }
-
+    
     app.use('/static', express.static(path.join(__dirname, 'static')));
     app.set('trust proxy', ['loopback', '127.0.0.1']);
 
