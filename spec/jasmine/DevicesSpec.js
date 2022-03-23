@@ -86,7 +86,7 @@ describe("Devices", function() {
       source_id: source_id,
       udid: TEST_DEVICE.udid
     };
-    devices.attach(owner, body, (res, success, response) => {
+    devices.attach(body, (res, success, response) => {
       expect(success).to.be.true;
       expect(response).to.be.a('string');
       done();
