@@ -9,7 +9,7 @@ describe("Builder", function() {
   var express = require("express"); 
   var app = express();
 
-  var queue = new Queue(builder, app);
+  var queue = new Queue(builder, app, {});
 
   var envi = require("../_envi.json");
   var owner = envi.oid;

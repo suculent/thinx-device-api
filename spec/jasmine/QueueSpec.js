@@ -15,7 +15,9 @@ describe("Queue", function () {
         let builder = new Builder();
 
         // Should initialize safely without running cron
-        queue_with_cron = new Queue(builder);
+        let app = {};
+        let ssl_options = {};
+        queue_with_cron = new Queue(builder, app, ssl_options);
         expect(queue_with_cron).to.be.a('object');
 
         let workers = queue_with_cron.getWorkers();
