@@ -8,6 +8,7 @@ describe("Builder", function() {
 
   var express = require("express"); 
   var app = express();
+  app.disable('x-powered-by');
 
   var queue = new Queue(builder, app, {});
 
