@@ -25,11 +25,6 @@ describe("Repository Watcher", function() {
 
   console.log("✅ [spec] [info] Watcher is using repo_path: "+repo_path);
 
-  it("should be able to initialize", function() {
-    watcher = new Repository(mock_queue);
-    expect(watcher).to.be.an('object');
-  });
-
   it("should be able to find all repositories", function() {
     let result = Repository.findAllRepositoriesWithFullname("esp");
     expect(result).to.be.an('array');
@@ -45,6 +40,11 @@ describe("Repository Watcher", function() {
     let name = "esp";
     let repositories = Repository.findAllRepositoriesWithFullname("32");
     watcher.purge_old_repos_with_full_name(repositories, name);
+    expect(watcher).to.be.an('object');
+  });
+
+  it("should be able to initialize", function() {
+    watcher = new Repository(mock_queue);
     expect(watcher).to.be.an('object');
   });
 
