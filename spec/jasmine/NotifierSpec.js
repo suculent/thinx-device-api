@@ -30,7 +30,7 @@ describe("Notifier", function () {
     var test_commit_id = "mock_commit_id";
     var test_repo = "https://github.com/suculent/thinx-firmware-esp8266-pio.git";
     var test_binary = "/tmp/nothing.bin";
-    var test_udid = "745af760-a617-11ec-aa0e-231b40618f37"; // not attached to this firmware
+    var test_udid = envi.udid; // "745af760-a617-11ec-aa0e-231b40618f37"; // not attached to this firmware
     var sha = "one-sha-256-pls";
     var owner_id = envi.oid;
     var status = "TESTING_NOTIFIER";

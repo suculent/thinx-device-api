@@ -1,12 +1,14 @@
 var Builder = require("../../lib/thinx/builder"); var builder = new Builder();
 var Device = require("../../lib/thinx/device"); var device = new Device();
 var Queue = require("../../lib/thinx/queue");
-  
+
 var expect = require('chai').expect;
 
-describe("Builder", function() {
+var Notifier = require('../../lib/thinx/notifier');
 
-  var express = require("express"); 
+describe("Builder", function () {
+
+  var express = require("express");
   var app = express();
   app.disable('x-powered-by');
 
@@ -31,11 +33,11 @@ describe("Builder", function() {
     platform: "platformio"
   };
 
-  it("should be able to initialize", function() {
+  it("should be able to initialize", function () {
     expect(builder).to.be.a('object');
   });
 
-  it("should be able to dry-run", function(done) {
+  it("should be able to dry-run", function (done) {
     var build = {
       udid: udid,
       source_id: source_id,
@@ -46,15 +48,15 @@ describe("Builder", function() {
       owner,
       build,
       [], // notifiers
-      function(success, message, xbuild_id) {
-        console.log("[spec] build dry", {success}, {message}, {xbuild_id});
+      function (success, message, xbuild_id) {
+        console.log("[spec] build dry", { success }, { message }, { xbuild_id });
         done();
       }, // callback
       worker
     );
   }, 120000);
 
-  it("should be able to run", function(done) {
+  it("should be able to run", function (done) {
     var build = {
       udid: udid,
       source_id: source_id,
@@ -62,28 +64,28 @@ describe("Builder", function() {
     };
     let worker = null;
     builder.build(
-      owner, 
-      build, 
+      owner,
+      build,
       [], // notifiers
-      function(success, message, build_id2) {
-        console.log("[spec] build dry", {success}, {message}, {build_id2});
+      function (success, message, build_id2) {
+        console.log("[spec] build dry", { success }, { message }, { build_id2 });
         done();
       }, // callback
       worker
     );
   }, 120000);
 
-  it("supports certain languages", function() {
+  it("supports certain languages", function () {
     var languages = builder.supportedLanguages();
     expect(languages).to.be.a('array');
   });
 
-  it("supports certain extensions", function() {
+  it("supports certain extensions", function () {
     var extensions = builder.supportedExtensions();
     expect(extensions).to.be.a('array');
   });
 
-  it("requires to register sample build device", function(done) {
+  it("requires to register sample build device", function (done) {
     device.register(
       {}, /* req */
       TEST_DEVICE_5, /* reg.registration */
@@ -99,7 +101,7 @@ describe("Builder", function() {
           }
         }
         TEST_DEVICE_5.udid = response.registration.udid;
-        expect(success).to.be.true;
+        expect(success).to.equal(true);
         expect(TEST_DEVICE_5).to.be.an('object');
         expect(response.registration).to.be.an('object');
         expect(TEST_DEVICE_5.udid).to.be.a('string');
@@ -107,7 +109,7 @@ describe("Builder", function() {
       });
   }, 15000); // register
 
-  it("should not fail on build", function(done) {
+  it("should not fail on build", function (done) {
 
     let build_request = {
       worker: queue.getWorkers()[0],
@@ -119,9 +121,67 @@ describe("Builder", function() {
     };
 
     let transmit_key = "mock-transmit-key";
-      builder.run_build(build_request, [] /* notifiers */, function(success, result) {
-        console.log("[spec] build TODO", {success}, {result});
-        done();
-      }, transmit_key);
+    builder.run_build(build_request, [] /* notifiers */, function (success, result) {
+      console.log("[spec] build TODO", { success }, { result });
+      done();
+    }, transmit_key);
+  });
+
+  it("should be able to send a notification", function (done) {
+
+    /* this is how job_status is generated inside the global build script:
+    # Inside Worker, we don't call notifier, but just post the results into shell... THiNX builder must then call the notifier itself (or integrate it later)
+    JSON=$(jo \
+    build_id=${BUILD_ID} \
+    commit=${COMMIT} \
+    thx_version=${THX_VERSION} \
+    git_repo=${GIT_REPO} \
+    outfile=$(basename ${OUTFILE}) \
+    udid=${UDID} \
+    sha=${SHA} \
+    owner=${OWNER_ID} \
+    status=${STATUS} \
+    platform=${PLATFORM} \
+    version=${THINX_FIRMWARE_VERSION} \
+    md5=${MD5} \
+    env_hash=${ENV_HASH} \
+    )
+    */
+
+    // Hey, this should be JUST a notification, no destructives.
+    var test_build_id = "mock_build_id";
+    var test_commit_id = "mock_commit_id";
+    var test_repo = "https://github.com/suculent/thinx-firmware-esp8266-pio.git";
+    var test_binary = "/tmp/nothing.bin";
+    var test_udid = TEST_DEVICE_5.udid;
+    var sha = "one-sha-256-pls";
+    var owner_id = envi.oid;
+    var status = "TESTING_NOTIFIER";
+    var platform = "platformio";
+    var version = "thinx-firmware-version-1.0";
+
+    let job_status = {
+      build_id: test_build_id,
+      commit: test_commit_id,
+      thx_version: "1.5.X",
+      git_repo: test_repo,
+      outfile: test_binary,
+      udid: test_udid,
+      sha: sha,
+      owner: owner_id,
+      status: status,
+      platform: platform,
+      version: version,
+      md5: "md5-mock-hash",
+      env_hash: "cafebabe"
+    };
+
+    let notifier = new Notifier();
+
+    notifier.process(job_status, (result) => {
+      console.log("ℹ️ [info] Notifier's Processing result:", result);
+      done();
     });
+  });
+
 });
