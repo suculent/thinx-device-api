@@ -81,7 +81,7 @@ describe("Messenger", function() {
   }, 5000);
 
   // disabled, communication for owner does not work, probably some issue with setting default key?
-  xit("[mm] should be able to setup MQTT client", function(done) {
+  it("[mm] should be able to setup MQTT client", function(done) {
 
     const Globals = require("../../lib/thinx/globals.js");
     var app_config = Globals.app_config();

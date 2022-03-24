@@ -21,26 +21,17 @@ describe("Owner", function() {
     let res_mock = {};
     
     user.create(user_body, true, res_mock, (res, success, response) => {
-      if (success === false && typeof(response) == "string" && response.indexOf("username_already_exists")) {
-        done();
-        return;
-      }
+      // valid case is existing user as well
       if (typeof(response) == "string" && response.indexOf("username_already_exists") !== -1) {
         expect(success).to.equal(false);
         done();
         return;
-      } else {
-        expect(success).to.be.true;
       }
-      if (response.indexOf("username_already_exists" !== -1)) {
-        done();
-        return;
-      }
-      if (response) {
-        console.log("(01) Activation response stored as this.activation_key: " + response);
-        this.activation_key = response; // store activation token for next step
-      }
+
+      // initial valid case
       expect(response).to.be.a('string');
+      expect(success).to.equal(true);
+      this.activation_key = response; // store activation token for next step
       done();
     }, {});
 
@@ -48,23 +39,17 @@ describe("Owner", function() {
 
   it("(02) should be able to fetch MQTT Key for owner", function(done) {
     // deepcode ignore NoHardcodedPasswords: <please specify a reason of ignoring this>
-    user.mqtt_key(owner, function(success, apikey) {
-      if (!success) {
-        console.log("02 MQTT error: ", { apikey });
-      }
-      expect(success).to.be.true;
+    user.mqtt_key(owner, (success, apikey) => {
       expect(apikey.key).to.be.a('string');
+      expect(success).to.equal(true);
       done();
     });
   }, 5000);
 
   it("(03) should be able to fetch owner profile", function(done) {
     user.profile(owner, (success, response) => {
-      if (success === false) {
-        console.log("profile fetch FAILURE response: " , {response});
-      }
-      expect(success).to.be.true;
       expect(response).to.be.an('object');
+      expect(success).to.equal(true);
       done();
     });
   }, 10000);
@@ -73,54 +58,53 @@ describe("Owner", function() {
     var body = {
       info: test_info
     };
-    user.update(owner, body,
-      function(success, response) {
-        expect(success).to.be.true;
+    user.update(owner, body, (success, response) => {
+        expect(response).to.be.an('object');
+        expect(success).to.equal(true);
         done();
       });
   }, 10000);
 
   it("(05) should be able to begin reset owner password", function(done) {
     user.password_reset_init(email, (success, response) => {
-      if (response) {
-        var body = {
-          password: "tset",
-          rpassword: "tset",
-          owner: owner,
-          reset_key: response
-        };
-        user.set_password(body, (sukec, reponde) => {
-          if (sukec === false) {
-            console.log("Password set result: ", {reponde});
-          }
-          expect(sukec).to.be.true;
-          expect(reponde).to.be.an('object');
-          expect(reponde.status).to.be.a('string');
-          expect(reponde.status).to.equal('password_reset_successful');
-          done();
-        });
-      }
-      expect(success).to.be.true;
+      expect(response).to.be.an('object');
+      expect(success).to.equal(true);
+      var body = {
+        password: "tset",
+        rpassword: "tset",
+        owner: owner,
+        reset_key: response
+      };
+      user.set_password(body, (sukec, reponde) => {
+        expect(reponde).to.be.an('object');
+        expect(reponde.status).to.be.a('string');
+        expect(reponde.status).to.equal('password_reset_successful');
+        expect(sukec).to.equal(true);
+        done();
+      });
     });
   }, 10000);
 
   it("(06) should be able to create mesh", function (done) {
     user.createMesh(owner, "mock-mesh-id", "mock-mesh-alias", (success, result) => {
-      expect(success).to.be.true;
+      expect(result).to.be.an('object');
+      expect(success).to.equal(true);
       done();
     });
   }, 10000);
 
   it("(07) should be able to list meshes", function (done) {
     user.listMeshes(owner, (success, result) => {
-      expect(success).to.be.true;
+      expect(result).to.be.an('object');
+      expect(success).to.equal(true);
       done();
     });
   }, 10000);
 
   it("(08) should be able to delete meshes", function (done) {
     user.deleteMeshes(owner, ["mock-mesh-id"], (success, result) => {
-      expect(success).to.be.true;
+      expect(result).to.be.an('object');
+      expect(success).to.equal(true);
       done();
     });
   }, 10000);
