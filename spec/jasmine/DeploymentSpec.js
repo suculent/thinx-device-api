@@ -48,7 +48,7 @@ describe("Deployer", function() {
 
   it("should be able to return update support for platform", function() {
     var result = deploy.platformSupportsUpdate(device);
-    expect(result).to.equal(true);
+    expect(result).to.equal(false);
   });
 
   it("should be able to validate if device has update available", function() {
