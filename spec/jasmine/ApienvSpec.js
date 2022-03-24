@@ -87,7 +87,7 @@ describe("API Env", function () {
       undefined_owner,
       "sample-var-name",
       function (success, response) {
-        expect(success).to.equal(true);
+        expect(success).to.equal(false);
         expect(response).to.be.an('object');
         done();
       });

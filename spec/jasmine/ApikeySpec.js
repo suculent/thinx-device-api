@@ -106,7 +106,7 @@ describe("API Key", function() {
       (success, object) => {
         expect(success).to.equal(true);
         if (success) {
-          expect(object).to.be.an('object');
+          expect(object).to.be.a('string');
         } else {
           console.log("[spec] (07) API Key Listing failed:", {object});
         }
