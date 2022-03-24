@@ -13,7 +13,7 @@ describe("API Key", function() {
     apikey.list(
       "dummy",
       (success, object) => {
-        expect(success).to.equal(true);
+        expect(success).to.equal(false);
         if (success) {
           expect(object).to.be.a('array');
         } else {
@@ -21,17 +21,6 @@ describe("API Key", function() {
         }
         if (done) done();
       });
-  });
-
-  //validateOwner: function(invalid-owner)
-  it("(00) should be able to reject invalid owner (feature envy)", function () {
-    expect(apikey.validateOwner("dummy")).to.equal(true);
-    expect(apikey.validateOwner("dum-my")).to.equal(false);
-    expect(apikey.validateOwner("dum my")).to.equal(false);
-    expect(apikey.validateOwner("dum&my")).to.equal(false);
-    expect(apikey.validateOwner("dum;my")).to.equal(false);
-    expect(apikey.validateOwner("dum\;my")).to.equal(false);
-    expect(apikey.validateOwner("dum\&nbsp;my")).to.equal(false);
   });
 
   //create: function(owner, apikey_alias, callback)

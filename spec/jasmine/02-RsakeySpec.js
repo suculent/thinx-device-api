@@ -18,8 +18,8 @@ describe("RSA Key", function() {
   it("(00) should be able to add RSA Keys first", function(done) {
     rsakey.create(owner,
     function(success, response) {
-      expect(success).to.be.true;
-      // expect(response).to.be.a('object'); 
+      expect(success).to.equal(true);
+      expect(response).to.be.a('object'); 
       done();
     });
   }, 10000);
@@ -54,11 +54,23 @@ describe("RSA Key", function() {
   }, 10000);
 
   it("should be able to revoke multiple RSA Keys at once", function(done) {
-    rsakey.revoke(owner, revoked_filenames, function(success, message) {
-        expect(success).to.be.true;
-        expect(message).to.be.an('array'); // should be array of length of 2
+    rsakey.revoke(owner, revoked_filenames, function(succ, mess) {
+        expect(succ).to.equal(true);
+        expect(mess).to.be.an('array'); // should be array of length of 2
         done();
       });
   }, 10000);
+
+
+  //validateOwner: function(invalid-owner)
+  it("(00) should be able to reject invalid owner (feature envy)", function () {
+    expect(rsakey.validateOwner("dummy")).to.equal(true);
+    expect(rsakey.validateOwner("dum-my")).to.equal(false);
+    expect(rsakey.validateOwner("dum my")).to.equal(false);
+    expect(rsakey.validateOwner("dum&my")).to.equal(false);
+    expect(rsakey.validateOwner("dum;my")).to.equal(false);
+    expect(rsakey.validateOwner("dum\;my")).to.equal(false);
+    expect(rsakey.validateOwner("dum\&nbsp;my")).to.equal(false);
+  });
 
 });
