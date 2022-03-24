@@ -4,6 +4,6 @@
   "lifetime": 300000,
   "expireOnClose": false,
   "files": "./sessions",
-  "cookie": "x-thx-session",
+  "cookie": "x-thx-core",
   "path": "/"
 }

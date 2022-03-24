@@ -46,14 +46,6 @@ describe("Devices", function() {
       ak,
       {}, /* ws */
       (success, response) => {
-        if (success === false) {
-          console.log("(01) registration response", response);
-          expect(response).to.be.a('string');
-          if (response === "owner_found_but_no_key") {
-            done();
-            return;
-          }
-        }
         TEST_DEVICE.udid = response.registration.udid;
         expect(success).to.be.true;
         expect(TEST_DEVICE).to.be.an('object');
@@ -81,7 +73,7 @@ describe("Devices", function() {
     });
   }, 5000);
 
-  it("(04) should be able to attach a repository to device(s)", function(done) {
+  it("(04) should be able to attach repository to device(s)", function(done) {
     var body = {
       source_id: source_id,
       udid: TEST_DEVICE.udid
@@ -93,11 +85,11 @@ describe("Devices", function() {
     }, {});
   }, 30000);
 
-  it("(05) should be able to detach a repository from device", function(done) {
+  it("(05) should be able to detach repository from device", function(done) {
     var body = {
       udid: TEST_DEVICE.udid
     };
-    devices.detach(owner, body, (res, success, response) => {
+    devices.detach(body, (res, success, response) => {
       expect(success).to.be.true;
       expect(response).to.be.a('string');
       expect(response).to.equal('detached');
@@ -112,14 +104,6 @@ describe("Devices", function() {
       ak,
       {}, /* ws */
       (success, response) => {
-        if (success === false) {
-          console.log("(01) registration response", response);
-          expect(response).to.be.a('string');
-          if (response === "owner_found_but_no_key") {
-            done();
-            return;
-          }
-        }
         TEST_DEVICE4.udid = response.registration.udid;
         expect(success).to.be.true;
         var body = {

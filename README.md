@@ -67,7 +67,7 @@ Currently the platform supports building firmware for Arduino, PlatformIO (also 
 
 * Device registration endpoint while storing device data using CouchDB server and Redis session-store.
 
-* API is a back-end data provider (security agent) for RTM Admin Console Application.
+* API is a back-end data provider (security agent) for Management Console Application.
 
 * Provides control to a dockerized build servers and pushes new firmware versions to client applications (FCM push) and devices (MQTT).
 
@@ -175,7 +175,7 @@ Use your favourite service and log-sender agent. Tested successfully with [Logz.
 
 * FQDN – Fully Qualified Domain Names (if you're testing on localhost, configure conf/config.json to set `debug: { allow_http_login: true }` )
   * api.yourdomain.com – THiNX API
-  * console.yourdomain.com – THiNX RTM Console
+  * console.yourdomain.com – THiNX Management Console
 
 * [Mailgun](https://mailgun.com) account (recently added)
 * [Rollbar](https://rollbar.com) integration
@@ -187,7 +187,7 @@ Use your favourite service and log-sender agent. Tested successfully with [Logz.
 * [Slack](https://slack.com) integration
 * [Crisp.chat](https://crisp.chat) integration
 
-# Remote THiNX Management (RTM) Console
+# Management Console
 
 You need to **BUILD YOUR OWN CONSOLE** Docker image, because the build injects various static variables specific for your environment (e.g. API Keys) into HTML on build (see .circleci/config.yml for list of required build-args until this is documented).
 
@@ -229,7 +229,7 @@ It's perfectly possible to run multiple instances of THiNX in Swarm. Just keep i
 
 ## GitHub Webhook support
 
-You can direct your GitHub web-hooks to <https://thinx.cloud:9001/> after adding a valid deploy key from GitHub to THiNX RTM.
+You can direct your GitHub web-hooks to <https://thinx.cloud:9001/> after adding a valid deploy key from GitHub to THiNX.
 
 ## Endpoints
 

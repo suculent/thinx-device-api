@@ -1,7 +1,7 @@
 // file deepcode ignore UseCsurfForExpress: API cannot use CSRF
 
 /*
- * This THiNX-RTM API module is responsible for responding to devices and build requests.
+ * This THiNX Device Management API module is responsible for responding to devices and build requests.
  */
 
 let start_timestamp = new Date().getTime();
@@ -38,11 +38,13 @@ if (Globals.use_sqreen()) {
   }
 }
 
-
 // App
 const express = require("express");
 const app = express();
 app.disable('x-powered-by');
+
+const helmet = require('helmet');
+app.use(helmet.frameguard());
 
 const session = require("express-session");
 
@@ -100,8 +102,7 @@ app.messenger = new Messenger(serviceMQPassword).getInstance(serviceMQPassword);
 
 app.messenger.initSlack(() => {
 
-  console.log("Slack initialization complete...");
-
+  console.log("ℹ️ [info] Slack initialization complete...");
 
   const Database = require("./lib/thinx/database");
   var db = new Database();
@@ -133,6 +134,49 @@ app.messenger.initSlack(() => {
     //
 
     var https = require("https");
+
+    var read = require('fs').readFileSync;
+
+    var ssl_options = null;
+
+    if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
+
+      let sslvalid = false;
+
+      if (!fs.existsSync(app_config.ssl_ca)) {
+        const message = "⚠️ [warning] Did not find app_config.ssl_ca file, websocket logging will fail...";
+        rollbar.warn(message);
+        console.log(message);
+      }
+
+      let caCert = read(app_config.ssl_ca, 'utf8');
+      let ca = pki.certificateFromPem(caCert);
+      let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
+
+      try {
+        sslvalid = ca.verify(client);
+      } catch (err) {
+        console.log("☣️ [error] Certificate verification failed: ", err);
+      }
+
+      if (sslvalid) {
+        ssl_options = {
+          key: read(app_config.ssl_key, 'utf8'),
+          cert: read(app_config.ssl_cert, 'utf8'),
+          ca: read(app_config.ssl_ca, 'utf8'),
+          NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
+        };
+        console.log("ℹ️ [info] Starting HTTPS server on " + app_config.secure_port + "...");
+        https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
+      } else {
+        console.log("☣️ [error] SSL certificate loading or verification FAILED! Check your configuration!");
+      }
+
+    } else {
+      console.log("⚠️ [warning] Skipping HTTPS server, SSL key or certificate not found. This configuration is INSECURE! and will cause an error in Enterprise configurations in future.");
+    }
+
+
     var WebSocket = require("ws");
 
     var Builder = require("./lib/thinx/builder");
@@ -144,7 +188,7 @@ app.messenger.initSlack(() => {
 
     // TEST CASE WORKAROUND: attempt to fix duplicate initialization... if Queue is being tested, it's running as another instance and the port 3000 must stay free!
     if (process.env.ENVIRONMENT !== "test") {
-      queue = new Queue(builder, app);
+      queue = new Queue(builder, app, ssl_options);
       queue.cron(); // starts cron job for build queue from webhooks
     }
 
@@ -169,16 +213,22 @@ app.messenger.initSlack(() => {
     // Bypassed LGTM, because it does not make sense on this API for all endpoints,
     // what is possible is covered by helmet and no-cache.
 
+    let full_domain = app_config.api_url;
+    let full_domain_array = full_domain.split(".");
+    delete full_domain_array[0];
+    let short_domain = full_domain_array.join('.');
+
     const sessionConfig = {
       secret: session_config.secret,
       cookie: {
         maxAge: 3600000,
         // can be false in case of local development or testing; mitigated by using Traefik router unwrapping HTTPS so the cookie travels securely where possible
         secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
-        httpOnly: false // because this is used by socket
+        httpOnly: true,
+        domain: short_domain
       },
       store: sessionStore,
-      name: "x-thx-session",
+      name: "x-thx-core",
       resave: true, // was true then false
       rolling: true, // This resets the expiration date on the cookie to the given default.
       saveUninitialized: false
@@ -235,8 +285,7 @@ app.messenger.initSlack(() => {
      * HTTP/S Server
      */
 
-    var ssl_options = null;
-
+    
     // Legacy HTTP support for old devices without HTTPS proxy
     let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function () {
       console.log(`ℹ️ [info] HTTP API started on port ${app_config.port}`);
@@ -245,48 +294,9 @@ app.messenger.initSlack(() => {
       console.log("⏱ [profiler] Startup phase took:", seconds, "seconds");
     });
 
-    var read = require('fs').readFileSync;
-
-    if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
-
-      let sslvalid = false;
-
-      if (!fs.existsSync(app_config.ssl_ca)) {
-        const message = "⚠️ [warning] Did not find app_config.ssl_ca file, websocket logging will fail...";
-        rollbar.warn(message);
-        console.log(message);
-      }
-
-      let caCert = read(app_config.ssl_ca, 'utf8');
-      let ca = pki.certificateFromPem(caCert);
-      let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
-
-      try {
-        sslvalid = ca.verify(client);
-      } catch (err) {
-        console.log("☣️ [error] Certificate verification failed: ", err);
-      }
-
-      if (sslvalid) {
-        ssl_options = {
-          key: read(app_config.ssl_key, 'utf8'),
-          cert: read(app_config.ssl_cert, 'utf8'),
-          ca: read(app_config.ssl_ca, 'utf8'),
-          NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
-        };
-        console.log("ℹ️ [info] Starting HTTPS server on " + app_config.secure_port + "...");
-        https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
-      } else {
-        console.log("☣️ [error] SSL certificate loading or verification FAILED! Check your configuration!");
-      }
-
-    } else {
-      console.log("⚠️ [warning] Skipping HTTPS server, SSL key or certificate not found. This configuration is INSECURE! and will cause an error in Enterprise configurations in future.");
-    }
-
+    
     app.use('/static', express.static(path.join(__dirname, 'static')));
     app.set('trust proxy', ['loopback', '127.0.0.1']);
-
 
     /*
      * WebSocket Server
@@ -294,6 +304,7 @@ app.messenger.initSlack(() => {
 
     var wsapp = express();
     wsapp.disable('x-powered-by');
+    wsapp.use(helmet.frameguard());
 
     wsapp.use(session({ /* lgtm [js/clear-text-cookie] */
       secret: session_config.secret,
@@ -302,9 +313,10 @@ app.messenger.initSlack(() => {
       cookie: {
         expires: hour,
         secure: false,
-        httpOnly: false
+        httpOnly: true,
+        domain: short_domain
       },
-      name: "x-thx-ws-session",
+      name: "x-thx-core",
       resave: true,
       rolling: true,
       saveUninitialized: true
@@ -315,40 +327,41 @@ app.messenger.initSlack(() => {
 
     server.on('upgrade', function (request, socket, head) {
 
-      const owner = request.url.replace(/\//g, "");
+      let owner = request.url.replace(/\//g, "");
 
       if (typeof (socketMap.get(owner)) !== "undefined") {
         console.log(`ℹ️ [info] Socket already mapped for ${owner} reassigning...`);
       }
 
-      if (typeof (request.session) === "undefined") {
-        let headers = request.headers;
-        console.log("🚫  [critical] Request headers missing session/cookie on upgrade", {headers});
-      }
-
       sessionParser(request, {}, () => {
 
-        /*
-        if ((typeof (request.session.owner) === "undefined") || (request.session.owner === null)) {
-          console.log("Should destroy socket, access unauthorized.");
-          socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
-          socket.destroy();
-          return;
+        let cookies = request.headers.cookie;
+        if ((typeof (cookies) === "undefined") || (cookies === null)) {
+          // other x-thx cookies are now deprecated and can be removed
+          if (cookies.indexOf("x-thx-core") === -1) {
+            console.log("Should destroy socket, access unauthorized.");
+            socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+            socket.destroy();
+            return;
+          }
         }
-        */
 
-        console.log("---> Session is parsed, handling protocol upgrade...");
+        console.log("ℹ️ [info] WS Session is parsed, handling protocol upgrade...");
 
-        socketMap.set(owner, socket);
+        if (typeof (socketMap.get(owner)) === "undefined") {
 
-        try {
-          wss.handleUpgrade(request, socket, head, function (ws) {
-            console.log("---> Session upgrade...");
-            wss.emit('connection', ws, request);
-          });
-        } catch (upgradeException) {
-          // fails on duplicate upgrade, why does it happen?
-          console.log("Exception caught upgrading same socket twice.");
+          socketMap.set(owner, socket);
+
+          try {
+            wss.handleUpgrade(request, socket, head, function (ws) {
+              console.log("ℹ️ [info] WS Session upgrade...");
+              wss.emit('connection', ws, request);
+            });
+          } catch (upgradeException) {
+            // fails on duplicate upgrade, why does it happen?
+            console.log("☣️ [error] Exception caught upgrading same socket twice.");
+          }
+
         }
       });
     });
@@ -361,7 +374,7 @@ app.messenger.initSlack(() => {
       if (typeof (wss.clients) !== "undefined") {
         wss.clients.forEach(function each(ws) {
           if (ws.isAlive === false) {
-            console.log("[DBUG] Terminating websocket!");
+            console.log("🔨 [debug] Terminating websocket!");
             ws.terminate();
           } else {
             ws.ping();
@@ -376,14 +389,14 @@ app.messenger.initSlack(() => {
 
     var logtail_callback = function (err, result) {
       if (err) {
-        console.log("[thinx] logtail_callback error:", err, "message", result);
+        console.log("☣️ [error] logtail_callback error:", err, "message", result);
       } else {
-        console.log("[thinx] logtail_callback result:", result);
+        console.log("ℹ️ [info] logtail_callback result:", result);
       }
     };
 
     wss.on("error", function (err) {
-      console.log("WSS REQ ERROR: " + err);
+      console.log("☣️ [error] websocket " + err.toString());
     });
 
     app._ws = {}; // list of all owner websockets
@@ -424,7 +437,7 @@ app.messenger.initSlack(() => {
             let socket = app._ws[owner];
             msgr.initWithOwner(owner, socket, (success, message_z) => {
               if (!success) {
-                console.log(`ℹ️ [info] [ws] Messenger init on WS message with result ${success} with message ${message_z}`);
+                console.log(`ℹ️ [error] [ws] Messenger init on WS message failed: ${message_z}`);
               } else {
                 console.log(`ℹ️ [info] Messenger successfully initialized for ${owner}`);
               }
@@ -435,7 +448,7 @@ app.messenger.initSlack(() => {
 
       ws.on('pong', heartbeat);
 
-      ws.on('close', () => { 
+      ws.on('close', () => {
         socketMap.delete(ws.owner);
       });
     }
@@ -461,12 +474,12 @@ app.messenger.initSlack(() => {
       var cookies = req.headers.cookie;
 
       if (typeof (cookies) !== "undefined") {
-        if (cookies.indexOf("thx-session") === -1) {
+        if (cookies.indexOf("x-thx") === -1) {
           console.log(`🚫  [critical] No thx-session found in WS: ${JSON.stringify(cookies)}`);
-          // return;
+          return;
         }
       } else {
-        console.log("ℹ️ [info] DEPRECATED WS has no cookie headers!");
+        console.log("ℹ️ [info] DEPRECATED WS has no cookie headers, exiting!");
         return;
       }
 

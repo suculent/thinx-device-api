@@ -1,0 +1,8 @@
+{
+  "arduino": "./plugins/arduino/plugin.js",
+  "python": "./plugins/micropython/plugin.js",
+  "mongoose": "./plugins/mongoose/plugin.js",
+  "nodejs": "./plugins/nodejs/plugin.js",
+  "nodemcu": "./plugins/nodemcu/plugin.js",
+  "platformio": "./plugins/platformio/plugin.js"
+}

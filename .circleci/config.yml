@@ -1,7 +1,7 @@
 version: 2.1
 orbs:
-  node: circleci/node@4.7.0
-  docker: circleci/docker@2.0.1
+  node: circleci/node@5.0.1
+  docker: circleci/docker@2.0.3
   slack: circleci/slack@4.8.3
 
 jobs:
@@ -55,6 +55,7 @@ jobs:
             --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
             --build-arg ENTERPRISE=${ENTERPRISE} \
             --build-arg ENVIRONMENT=${ENVIRONMENT} \
+            --build-arg COMMIT_ID=$CIRCLE_SHA1 \
           tag: 'swarm'
       - docker/push:
           digest-path: /tmp/digest.txt
@@ -155,7 +156,9 @@ jobs:
         name: Fetch all submodules and tests
         command: |
           git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
-          cd spec/test_repositories && bash ./get-tests.sh
+          cd spec/test_repositories
+          pwd
+          bash ./get-tests.sh
 
     - run:
         name: Create Circle CI Artifacts Folders
@@ -391,6 +394,7 @@ workflows:
             branches:
               only:
                 - thinx-console
+                - thinx-swarm
 
       - build-base:
           context:

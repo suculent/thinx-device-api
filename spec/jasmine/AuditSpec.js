@@ -16,6 +16,14 @@ describe("Audit log", function() {
     });
   }, 5000);
 
+  it("should survive invalid log message", function(done) {
+    let message; // intentionally undefined
+    audit.log(owner, message, "info", function(result) {
+      expect(result).to.be.true;
+      done();
+    });
+  }, 5000);
+
   it("should be able to fetch audit log", function(done) {
     audit.fetch(
       owner,
@@ -26,5 +34,17 @@ describe("Audit log", function() {
       }
     );
   }, 15000);
+
+  it("should return error on invalid audit log request", function(done) {
+    audit.fetch(
+      "invalid-owner-id",
+      function(err, body) {
+        expect(body).to.be.a('array');
+        expect(err).to.equal(false);
+        done();
+      }
+    );
+  }, 15000);
+
 
 });
