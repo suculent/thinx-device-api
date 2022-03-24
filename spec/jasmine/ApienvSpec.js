@@ -27,11 +27,13 @@ describe("API Env", function () {
       owner,
       "sample-var-name",
       function (success, response) {
-        expect(success).to.be.true;
+        expect(success).to.equal(true);
         expect(response).to.be.an('object');
         done();
       });
   }, 3000);
+
+
 
   // list: function(owner, callback)
   it("should be able to list environment variables", function (done) {
@@ -78,5 +80,17 @@ describe("API Env", function () {
         done();
       });
   }, 5000);
+
+  it("should be able survive invalid input", function (done) {
+    let undefined_owner; // undefined
+    apienv.fetch(
+      undefined_owner,
+      "sample-var-name",
+      function (success, response) {
+        expect(success).to.equal(true);
+        expect(response).to.be.an('object');
+        done();
+      });
+  }, 3000);
 
 });
