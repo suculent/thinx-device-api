@@ -147,7 +147,7 @@ describe("Sources", function () {
       branch: "origin/master",
       url: "https://github.com/suculent/thinx-firmware-esp8266",
       platform: "arduino",
-      secret: "<github-secret>",
+      secret: process.env.GITHUB_SECRET,
       circle_key: "<circleci-project-key>",
       is_private: false
     };
@@ -156,12 +156,12 @@ describe("Sources", function () {
     Sources.add(source,
       (success, response) => {
         if (success !== true) {
-          console.log("(03) Error adding source: ", source, response);
+          console.log("(11) Error adding source: ", source, response);
         }
         expect(success).to.be.true;
         source_id = response.source_id;
         Sources.updatePlatform(owner, source_id, "arduino", (success2, error2) => {
-          if (!success2) console.log("[09] error", error2);
+          if (!success2) console.log("(11) error", error2);
           expect(success2).to.equal(true);
           done();
         });

@@ -45,8 +45,6 @@ describe("Queue", function () {
             // Should be able run next item
             queue_with_cron.runNext(next);
 
-            console.log("(00) Queue calling findNext again async...");
-
             // Should not be able to find anything while queue item is running
             queue_with_cron.findNext((/* nextAction */) => {
 
@@ -58,16 +56,10 @@ describe("Queue", function () {
                     return;
                 }
 
-                // can be null
-                console.log("(01) Queue test calling loop...");
-
                 // Should run loop safely
                 for (let i = 0; i < 10; i++) {
                     queue_with_cron.loop();
                 }
-
-                console.log("(00) Queue test done.");
-                // done(); will be called later when next is null
             });
         });
     });
