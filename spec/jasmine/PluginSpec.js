@@ -19,23 +19,44 @@ describe("Plugins", function () {
         let manager = new Plugins(this);
         await manager.loadFromConfig(config);
         
-        let path = "../test_repositories/arduino";
-        let result = manager.plugins['sample'].check(path);
-        expect(result).to.equal('sample');
-
-        path = "../test_repositories/thinx-firmware-js";
-        result = manager.plugins['sample'].check(path);
+        let path = "./spec/test_repositories/thinx-firmware-js";
+        let result = manager.plugins['arduino'].check(path);
         expect(result).to.equal(false);
     });
-
     
     it("should be able to use all plugins at once", async function () {
         let manager = new Plugins(this);
         await manager.loadFromConfig(config);
         
-        let path = "../test_repositories/arduino";
+        let path = "./spec/test_repositories/arduino";
         let result = await manager.use(path);
-        expect(result).to.equal('sample');
+        expect(result).to.equal('arduino');
+
+        path = "./spec/test_repositories/thinx-firmware-esp8266-pio";
+        result = await manager.use(path);
+        expect(result).to.equal('platformio');
+
+        path = "./spec/test_repositories/thinx-firmware-esp8266-pio";
+        result = await manager.use(path);
+        expect(result).to.equal('platformio');
+
+        path = "./spec/test_repositories/thinx-firmware-esp8266-upy";
+        result = await manager.use(path);
+        expect(result).to.equal('python');
+
+        path = "./spec/test_repositories/thinx-firmware-esp8266-mos";
+        result = await manager.use(path);
+        expect(result).to.equal('mongoose');
+
+        path = "./spec/test_repositories/thinx-firmware-js";
+        result = await manager.use(path);
+        expect(result).to.equal('nodejs');
+
+        path = "./spec/test_repositories/thinx-firmware-esp8266-lua";
+        result = await manager.use(path);
+        expect(result).to.equal('nodemcu');
+
+        
     });
 
 });
