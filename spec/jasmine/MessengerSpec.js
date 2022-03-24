@@ -35,14 +35,6 @@ describe("Messenger", function() {
       ak,
       {}, /* ws */
       (success, response) => {
-        if (success === false) {
-          console.log("(01) registration response", response);
-          expect(response).to.be.a('string');
-          if (response === "owner_found_but_no_key") {
-            done();
-            return;
-          }
-        }
         TEST_DEVICE_6.udid = response.registration.udid;
         expect(success).to.equal(true);
         expect(TEST_DEVICE_6).to.be.a('object');
@@ -88,8 +80,8 @@ describe("Messenger", function() {
     done();
   }, 5000);
 
-  // disabled, communication for owner does not work, probably some issue with setting default key?
-  xit("[mm] should be able to setup MQTT client", function(done) {
+  // may be disabled in case of last test left hanging
+  it("[mm] should be able to setup MQTT client", function(done) {
 
     const Globals = require("../../lib/thinx/globals.js");
     var app_config = Globals.app_config();

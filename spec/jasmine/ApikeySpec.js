@@ -7,6 +7,22 @@ var owner = envi.oid;
 var apikey = new APIKey();
 
 describe("API Key", function() {
+
+   //list: function(invalid-owner, callback)
+   it("(00) should be able to list empty API Keys", function (done) {
+    apikey.list(
+      "dummy",
+      (success, object) => {
+        expect(success).to.equal(false);
+        if (success) {
+          expect(object).to.be.a('array');
+        } else {
+          console.log("[spec] (06) API Key Listing failed:", {object});
+        }
+        if (done) done();
+      });
+  });
+
   //create: function(owner, apikey_alias, callback)
   it("(01) should be able to generate new API Key", function(done) {
     apikey.create(

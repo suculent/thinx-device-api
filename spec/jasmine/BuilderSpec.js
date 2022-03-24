@@ -184,4 +184,12 @@ describe("Builder", function () {
     });
   });
 
+  it("should fetch last apikey", function (done) {
+    builder.getLastAPIKey("nonexistent", udid, function (success, result) {
+      expect(success).to.equal(false);
+      console.log("apikey fetch result: ", result);
+      done();
+    });
+  });
+
 });

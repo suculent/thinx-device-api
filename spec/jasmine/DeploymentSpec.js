@@ -15,10 +15,6 @@ describe("Deployer", function() {
     udid: envi.udid
   };
 
-  beforeEach(function() {
-    //deploy = new Deploy();
-  });
-
   it("should be able to initialize", function() {
     deploy.initWithOwner(owner);
     expect(deploy).to.be.a('object');
@@ -26,7 +22,7 @@ describe("Deployer", function() {
 
   it("should be able to init with device", function() {
     deploy.initWithDevice(device);
-    expect(true).to.be.true;
+    expect(true).to.equal(true);
   });
 
   it("should be able to return path for device", function() {
@@ -36,18 +32,28 @@ describe("Deployer", function() {
 
   it("should be able to return latest firmware path", function() {
     var firmwarePath = deploy.latestFirmwarePath(device.owner);
-    expect(firmwarePath).to.be.false;
+    expect(firmwarePath).to.equal(false);
   });
 
   it("should be able to tell whether update is available for device",
     function() {
       var result = deploy.hasUpdateAvailable(device);
-      expect(result).to.be.false;
+      expect(result).to.equal(false);
   });
 
   it("should be able to return latest firmware envelope", function() {
     var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(device.owner, device.udid);
     expect(firmwareUpdateDescriptor).to.equal(false);
+  });
+
+  it("should be able to return update support for platform", function() {
+    var result = deploy.platformSupportsUpdate(device);
+    expect(result).to.equal(false);
+  });
+
+  it("should be able to validate if device has update available", function() {
+    var result = deploy.validateHasUpdateAvailable(device);
+    expect(result).to.equal(false);
   });
 
 });

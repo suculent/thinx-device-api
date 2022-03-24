@@ -6,6 +6,8 @@ describe("Platform", function() {
     let path_lua = "./spec/test_repositories/thinx-firmware-esp8266-lua/";
     let path_pio = "./spec/test_repositories/thinx-firmware-esp8266-pio/";
     let path_upy = "./spec/test_repositories/thinx-firmware-esp8266-upy/";
+    let path_mos = "./spec/test_repositories/thinx-firmware-esp8266-upy/";
+    let path_js = "./spec/test_repositories/thinx-firmware-js/";
     
     var expect = require('chai').expect;
 
@@ -68,5 +70,21 @@ describe("Platform", function() {
           done();
         });
     }, 15000);
+
+    it("should detect mongoose os", function(done) {
+      Platform.getPlatform(path_mos, function(success, result) {
+        expect(success).to.equal(true);
+        console.log("platform detection result:", result);
+        done();
+      });
+  }, 15000);
+
+  it("should detect monjavascriptgoose os", function(done) {
+    Platform.getPlatform(path_js, function(success, result) {
+      expect(success).to.equal(true);
+      console.log("platform detection result:", result);
+      done();
+    });
+}, 15000);
 
 });
