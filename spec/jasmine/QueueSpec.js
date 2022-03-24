@@ -36,21 +36,8 @@ describe("Queue", function () {
 
         let done_called = false;
 
-        queue_with_cron.findNext((next) => {
-
-            if (next === null) {
-                if (done_called === false) {
-                    done_called = true;
-                    done();
-                }
-                return;
-            }
-
-            // Should be able run next item
-            queue_with_cron.runNext(next);
-
-            // Should not be able to find anything while queue item is running
-            queue_with_cron.findNext((/* nextAction */) => {
+        setTimeout(() => {
+            queue_with_cron.findNext((next) => {
 
                 if (next === null) {
                     if (done_called === false) {
@@ -59,13 +46,28 @@ describe("Queue", function () {
                     }
                     return;
                 }
-
-                // Should run loop safely
-                for (let i = 0; i < 10; i++) {
-                    queue_with_cron.loop();
-                }
+    
+                // Should be able run next item
+                queue_with_cron.runNext(next);
+    
+                // Should not be able to find anything while queue item is running
+                queue_with_cron.findNext((/* nextAction */) => {
+    
+                    if (next === null) {
+                        if (done_called === false) {
+                            done_called = true;
+                            done();
+                        }
+                        return;
+                    }
+    
+                    // Should run loop safely
+                    for (let i = 0; i < 10; i++) {
+                        queue_with_cron.loop();
+                    }
+                });
             });
         });
-    });
+        }, 1000);
 
 });
