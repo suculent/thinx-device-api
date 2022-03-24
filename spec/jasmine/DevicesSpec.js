@@ -46,14 +46,6 @@ describe("Devices", function() {
       ak,
       {}, /* ws */
       (success, response) => {
-        if (success === false) {
-          console.log("(01) registration response", response);
-          expect(response).to.be.a('string');
-          if (response === "owner_found_but_no_key") {
-            done();
-            return;
-          }
-        }
         TEST_DEVICE.udid = response.registration.udid;
         expect(success).to.be.true;
         expect(TEST_DEVICE).to.be.an('object');
@@ -112,14 +104,6 @@ describe("Devices", function() {
       ak,
       {}, /* ws */
       (success, response) => {
-        if (success === false) {
-          console.log("(01) registration response", response);
-          expect(response).to.be.a('string');
-          if (response === "owner_found_but_no_key") {
-            done();
-            return;
-          }
-        }
         TEST_DEVICE4.udid = response.registration.udid;
         expect(success).to.be.true;
         var body = {

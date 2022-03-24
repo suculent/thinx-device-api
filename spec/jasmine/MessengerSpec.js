@@ -35,14 +35,6 @@ describe("Messenger", function() {
       ak,
       {}, /* ws */
       (success, response) => {
-        if (success === false) {
-          console.log("(01) registration response", response);
-          expect(response).to.be.a('string');
-          if (response === "owner_found_but_no_key") {
-            done();
-            return;
-          }
-        }
         TEST_DEVICE_6.udid = response.registration.udid;
         expect(success).to.equal(true);
         expect(TEST_DEVICE_6).to.be.a('object');
