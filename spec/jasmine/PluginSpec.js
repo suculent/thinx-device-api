@@ -21,7 +21,7 @@ describe("Plugins", function () {
         
         let path = "../test_repositories/arduino";
         let result = manager.plugins['sample'].check(path);
-        expect(result).to.equal('arduino');
+        expect(result).to.equal('sample');
 
         path = "../test_repositories/thinx-firmware-js";
         result = manager.plugins['sample'].check(path);
@@ -35,7 +35,7 @@ describe("Plugins", function () {
         
         let path = "../test_repositories/arduino";
         let result = await manager.use(path);
-        expect(result).to.equal('arduino');
+        expect(result).to.equal('sample');
     });
 
 });
