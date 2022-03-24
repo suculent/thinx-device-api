@@ -80,7 +80,7 @@ describe("Messenger", function() {
     done();
   }, 5000);
 
-  // disabled, communication for owner does not work, probably some issue with setting default key?
+  // may be disabled in case of last test left hanging
   it("[mm] should be able to setup MQTT client", function(done) {
 
     const Globals = require("../../lib/thinx/globals.js");
