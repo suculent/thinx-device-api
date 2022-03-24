@@ -1,7 +1,7 @@
 {
   "name": "thinx",
   "version": "1.5.743",
-  "description": "THiNX IoT RTM API",
+  "description": "THiNX IoT Device Management API",
   "bugs": {
     "url": "https://github.com/suculent/thinx-device-api/issues"
   },

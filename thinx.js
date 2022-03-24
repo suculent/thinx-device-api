@@ -1,7 +1,7 @@
 // file deepcode ignore UseCsurfForExpress: API cannot use CSRF
 
 /*
- * This THiNX-RTM API module is responsible for responding to devices and build requests.
+ * This THiNX Device Management API module is responsible for responding to devices and build requests.
  */
 
 let start_timestamp = new Date().getTime();
