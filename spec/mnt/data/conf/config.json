@@ -42,11 +42,11 @@
     "concurrency" : 2
   },
   "debug": {
-    "device" : false,
-    "deployment": false,
+    "device" : true,
+    "deployment": true,
     "allow_http_login": true,
-    "ingress": false,
-    "secrets": false
+    "ingress": true,
+    "secrets": true
   },
   "strict_gdpr": true
 }
