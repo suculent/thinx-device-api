@@ -3,9 +3,9 @@ describe("Platform", function() {
     let Platform = require("../../lib/thinx/platform");
     let path = "./spec/test_repositories/arduino/";
     let path_ino = "./spec/test_repositories/thinx-firmware-esp32-ino/";
-    let path_lua = "./spec/test_repositories/thinx-firmware-esp32-lua/";
-    let path_pio = "./spec/test_repositories/thinx-firmware-esp32-pio/";
-    let path_upy = "./spec/test_repositories/thinx-firmware-esp32-upy/";
+    let path_lua = "./spec/test_repositories/thinx-firmware-esp8266-lua/";
+    let path_pio = "./spec/test_repositories/thinx-firmware-esp8266-pio/";
+    let path_upy = "./spec/test_repositories/thinx-firmware-esp8266-upy/";
     
     var expect = require('chai').expect;
 
@@ -31,7 +31,7 @@ describe("Platform", function() {
     it("should not fail on invalid local path", function(done) {
         let undefined_path;
         Platform.getPlatform(undefined_path, function(success, result) {
-          expect(success).to.equal('false');
+          expect(success).to.equal(false);
           console.log("platform detection result on invalid path:", result);
           done();
         });
@@ -39,7 +39,7 @@ describe("Platform", function() {
 
     it("should detect arduino", function(done) {
         Platform.getPlatform(path_ino, function(success, result) {
-          expect(success).to.equal('true');
+          expect(success).to.equal(true);
           console.log("platform detection result:", result);
           done();
         });
@@ -47,7 +47,7 @@ describe("Platform", function() {
 
     it("should detect lua", function(done) {
         Platform.getPlatform(path_lua, function(success, result) {
-          expect(success).to.equal('true');
+          expect(success).to.equal(true);
           console.log("platform detection result:", result);
           done();
         });
@@ -55,7 +55,7 @@ describe("Platform", function() {
 
     it("should detect pio", function(done) {
         Platform.getPlatform(path_pio, function(success, result) {
-          expect(success).to.equal('true');
+          expect(success).to.equal(true);
           console.log("platform detection result:", result);
           done();
         });
@@ -63,7 +63,7 @@ describe("Platform", function() {
 
     it("should detect micropython", function(done) {
         Platform.getPlatform(path_upy, function(success, result) {
-          expect(success).to.equal('true');
+          expect(success).to.equal(true);
           console.log("platform detection result:", result);
           done();
         });

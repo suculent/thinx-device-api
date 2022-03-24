@@ -88,7 +88,7 @@ describe("API Env", function () {
       "sample-var-name",
       function (success, response) {
         expect(success).to.equal(false);
-        expect(response).to.be.an('object');
+        expect(response).to.be.a('string'); // key_not_found
         done();
       });
   }, 3000);
