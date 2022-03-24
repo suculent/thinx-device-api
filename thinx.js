@@ -221,7 +221,7 @@ app.messenger.initSlack(() => {
         maxAge: 3600000,
         // can be false in case of local development or testing; mitigated by using Traefik router unwrapping HTTPS so the cookie travels securely where possible
         secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
-        httpOnly: true, // because this is used by socket
+        httpOnly: false, // because this is used by socket
         domain: short_domain
       },
       store: sessionStore,
