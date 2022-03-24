@@ -39,7 +39,7 @@ describe("Sources", function () {
       done();
     });
   }, 10000);
-  
+
   it("(03) should be able to be removed", function (done) {
 
     const source = {
@@ -166,6 +166,10 @@ describe("Sources", function () {
           done();
         });
       });
+  });
+
+  it("(12) should be able to remove sources from owner", function () {
+    Sources.removeSourcesFromOwner(owner, [source_id]);
   });
 
 });

@@ -22,6 +22,19 @@ describe("API Env", function () {
       });
   }, 30000);
 
+  it("should be able to store completely new environment variable", function (done) {
+    apienv.create(
+      "nonexistent-owner",
+      "sample-var-name",
+      "sample-var-value",
+      function (success, object) {
+        expect(object).to.be.a('string');
+        if (success) {
+          done();
+        }
+      });
+  }, 30000);
+
   it("should be able to fetch specific env var", function (done) {
     apienv.fetch(
       owner,

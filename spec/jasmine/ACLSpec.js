@@ -20,7 +20,7 @@ describe("ACL Manager", function () {
 
   it("should be remove all user topics by name", function () {
     var acl = new ACL("baecb3124695efa1672b7e8d62e5b89e44713968f45eae6faa52066e87795a78");
-    acl.removeTopic(user, topic);
+    acl.removeTopic(user, topic_remain);
   });
 
   it("should be able export ACL file", function (done) {
