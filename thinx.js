@@ -43,6 +43,9 @@ const express = require("express");
 const app = express();
 app.disable('x-powered-by');
 
+const helmet = require('helmet');
+app.use(helmet.frameguard());
+
 const session = require("express-session");
 
 const pki = require('node-forge').pki;
@@ -301,6 +304,7 @@ app.messenger.initSlack(() => {
 
     var wsapp = express();
     wsapp.disable('x-powered-by');
+    wsapp.use(helmet.frameguard());
 
     wsapp.use(session({ /* lgtm [js/clear-text-cookie] */
       secret: session_config.secret,
