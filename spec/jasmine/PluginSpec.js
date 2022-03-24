@@ -20,7 +20,7 @@ describe("Plugins", function () {
         await manager.loadFromConfig(config);
         
         let path = "./spec/test_repositories/thinx-firmware-js";
-        let result = manager.plugins['arduino'].check(path);
+        let result = manager.plugins.arduino.check(path);
         expect(result).to.equal(false);
     });
     
