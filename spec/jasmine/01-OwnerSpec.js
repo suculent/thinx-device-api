@@ -95,7 +95,7 @@ describe("Owner", function() {
 
   it("(07) should be able to list meshes", function (done) {
     user.listMeshes(owner, (success, result) => {
-      expect(result).to.be.an('object');
+      expect(result).to.be.an('array');
       expect(success).to.equal(true);
       done();
     });
@@ -103,7 +103,7 @@ describe("Owner", function() {
 
   it("(08) should be able to delete meshes", function (done) {
     user.deleteMeshes(owner, ["mock-mesh-id"], (success, result) => {
-      expect(result).to.be.an('object');
+      expect(result).to.be.an('array');
       expect(success).to.equal(true);
       done();
     });
