@@ -56,6 +56,19 @@ describe("Queue Action", function() {
         action.save();
     });
 
+    it("should be able report action state when running", function() {
+        action.isRunning();
+    });
+
+    it("should be able report action state when waiting", function() {
+        action.isWaiting();
+    });
+
+    it("should fail safely on invalid source", function() {
+        delete action.source;
+        action.toString();
+    });
+
     // delete
     it("should be able to delete the action", function() {
         action.delete();
