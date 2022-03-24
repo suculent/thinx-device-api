@@ -1,7 +1,7 @@
 version: 2.1
 orbs:
-  node: circleci/node@4.7.0
-  docker: circleci/docker@2.0.1
+  node: circleci/node@5.0.1
+  docker: circleci/docker@2.0.3
   slack: circleci/slack@4.8.3
 
 jobs:
