@@ -188,7 +188,7 @@ app.messenger.initSlack(() => {
 
     // TEST CASE WORKAROUND: attempt to fix duplicate initialization... if Queue is being tested, it's running as another instance and the port 3000 must stay free!
     if (process.env.ENVIRONMENT !== "test") {
-      queue = new Queue(builder, app, ssl_options);
+      queue = new Queue(builder, app, null /* ssl_options */);
       queue.cron(); // starts cron job for build queue from webhooks
     }
 
