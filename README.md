@@ -229,7 +229,9 @@ It's perfectly possible to run multiple instances of THiNX in Swarm. Just keep i
 
 ## GitHub Webhook support
 
-You can direct your GitHub web-hooks to <https://thinx.cloud:9001/> after adding a valid deploy key from GitHub to THiNX.
+You can direct your GitHub web-hooks to <https://rtm.thinx.cloud/api/githook> after adding a valid deploy key from GitHub to THiNX.
+
+When adding Source, you can enter GitHub Secret to make sure incoming webhooks will be signed and validated. 
 
 ## Endpoints
 
