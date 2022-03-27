@@ -193,7 +193,7 @@ jobs:
     - run:
         name: Switch to Test Dockerfiles
         command: |
-          mv ./Dockerfile ./Dockerfile.prod
+          rm -rf ./Dockerfile
           mv ./Dockerfile.test ./Dockerfile
           rm -rf ./docker-compose.yml
           mv ./docker-compose.test.yml ./docker-compose.yml
@@ -240,19 +240,19 @@ jobs:
         command: |
           docker login --username $DOCKER_LOGIN --password $DOCKER_PASSWORD https://registry.thinx.cloud:5000
           docker-compose up -d --build mosquitto
-          docker-compose logs --no-log-prefix --timestamp mosquitto
+          docker-compose logs --timestamp mosquitto
 
     - run:
         name: Starting Transformer
         command: |
           docker-compose up -d --build transformer
-          docker-compose logs --no-log-prefix --timestamp transformer
+          docker-compose logs --timestamp transformer
 
     - run:
         name: Starting Worker
         command: |
           docker-compose up -d worker
-          docker-compose logs --no-log-prefix --timestamp worker
+          docker-compose logs --timestamp worker
 
     - run:
         name: Starting CouchDB
@@ -260,22 +260,10 @@ jobs:
           export ENVIRONMENT=test
           chmod -R 666 ./services/couchdb/*
           docker-compose up -d --build couchdb
-          docker-compose logs --no-log-prefix --timestamp couchdb
+          docker-compose logs --timestamp couchdb
 
     - run:
         name: Starting API Test
-        command: |
-          export ENVIRONMENT=test
-          docker-compose up --build api | sed -u 's/^[^|]*[^ ]* //' | tee -ipa ./test.log
-          if [[ ! $(cat ./test.log | grep "specs, 0 failures") ]]; then 
-            echo "» TEST failed. Should not deploy this commit."
-            cat ./test.log | grep "Failures:"
-            exit 1
-          fi
-          date
-
-    - run:
-        name: Running API with tests
         command: |
           export ENVIRONMENT=test
           docker-compose up --build api | tee -ipa ./test.log
@@ -287,44 +275,19 @@ jobs:
           date
 
     - run:
-        name: Starting API for UI tests
-        # start API in other than 'test' environment starts application instead of tests
-        command: |
-          export ENVIRONMENT=circle
-          docker-compose up -d api
-          sleep 30 && echo "Giving app some time to start..."
-          docker-compose logs --no-log-prefix --timestamp api
-
-    - run:
-        name: Add UI testing here
-        command: |
-          cd ./services/console
-          echo "TODO RUN CYPRESS TESTS FROM HERE -- 0 specs, 0 failures" | tee -ipa ./ui-test.log
-          if [[ ! $(cat ./ui-test.log | grep "specs, 0 failures") ]]; then 
-            echo "» UI-TEST failed. Should not deploy this commit."
-            exit 1
-          fi
-          date
-
-    - run:
-        name: Allow inspecting API logs after failed UI tests
-        command: |
-            docker-compose logs --no-log-prefix --timestamp api
-
-    - run:
         name: Allow inspecting MQTT logs after failed connections
         command: |
-            docker-compose logs --no-log-prefix --timestamp mosquitto
+            docker-compose logs --timestamp mosquitto
 
     - run:
         name: Allow inspecting CouchDB logs after failed connections
         command: |
-            docker-compose logs --no-log-prefix --timestamp couchdb
+            docker-compose logs --timestamp couchdb
 
     - run:
         name: Allow inspecting Transformer logs after failed connections
         command: |
-            docker-compose logs --no-log-prefix --timestamp transformer
+            docker-compose logs --timestamp transformer
 
     - run:
         name: Check running Docker containers
@@ -375,8 +338,7 @@ workflows:
                 - base
                 - thinx-swarm
                 - main
-                - thinxcloud
-                - thinx-console
+                - api-jwt-login
 
       # - test-api-cloud:
       #     context:
@@ -418,4 +380,4 @@ workflows:
             branches:
               only:
                 - thinx-swarm
-                - thinxcloud
+                - api-jwt-login
