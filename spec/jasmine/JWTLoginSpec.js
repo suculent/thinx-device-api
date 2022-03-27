@@ -1,14 +1,15 @@
 var JWTLogin = require("../../lib/thinx/jwtlogin");
 var expect = require('chai').expect;
 
-var envi = require("../_envi.json");
-var owner = envi.oid;
-var username = envi.username;
+const Globals = require("../../lib/thinx/globals.js");
+const envi = require("../_envi.json");
+const owner = envi.oid;
+const username = envi.username;
 
-let redis_client = require('redis');
-let redis = redis_client.createClient(Globals.redis_options());
+const redis_client = require('redis');
+const redis = redis_client.createClient(Globals.redis_options());
 
-let login = new JWTLogin(redis);
+const login = new JWTLogin(redis);
 
 describe("JWT Login", function () {
 
