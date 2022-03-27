@@ -24,7 +24,7 @@ describe("JWT Login", function () {
     }, 5000);
 
     it("should reuse secret in order to sign another request and verify", function (done) {
-        login.sign(username, owner_id, (response) => {
+        login.sign(username, owner, (response) => {
             console.log("JWT sign response:", { response });
             expect(response).to.be.an('object');
             let mock_req = {
