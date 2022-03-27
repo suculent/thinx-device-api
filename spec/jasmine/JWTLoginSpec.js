@@ -17,7 +17,6 @@ describe("JWT Login", function () {
         login.init((key) => {
             expect(key).to.be.a('string');
             login.sign(username, owner, (response) => {
-                console.log("JWT sign response:", { response });
                 expect(response).to.be.a('string');
                 done();
             });
@@ -32,9 +31,9 @@ describe("JWT Login", function () {
                     "Authentication" : 'Bearer ' + response
                 }
             };
-            console.log("Secret verification mock_req:", {mock_req});
             login.verify(mock_req, (result) => {
                 console.log("Secret verification result:", {result});
+                expect(result).to.equal(true);
                 done();
             });
         });
