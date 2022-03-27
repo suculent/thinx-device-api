@@ -28,7 +28,7 @@ describe("JWT Login", function () {
             expect(response).to.be.a('string');
             let mock_req = {
                 "headers" : {
-                    "Authentication" : 'Bearer ' + response
+                    "Authorization" : 'Bearer ' + response
                 }
             };
             login.verify(mock_req, (result) => {
