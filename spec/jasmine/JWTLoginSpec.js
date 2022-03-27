@@ -14,7 +14,8 @@ const login = new JWTLogin(redis);
 describe("JWT Login", function () {
 
     it("should generate secret in order to sign first request", function (done) {
-        login.init(() => {
+        login.init((key) => {
+            expect(key).to.be.a('string');
             login.sign(username, owner, (response) => {
                 console.log("JWT sign response:", { response });
                 expect(response).to.be.an('object');
@@ -25,13 +26,13 @@ describe("JWT Login", function () {
 
     it("should sign and verify", function (done) {
         login.sign(username, owner, (response) => {
-            console.log("JWT sign response:", { response });
-            expect(response).to.be.an('object');
+            expect(response).to.be.a('string');
             let mock_req = {
                 "headers" : {
-                    "Authentication" : response
+                    "Authentication" : 'Bearer ' + response
                 }
             };
+            console.log("Secret verification mock_req:", {mock_req});
             login.verify(mock_req, (result) => {
                 console.log("Secret verification result:", {result});
                 done();
