@@ -32,7 +32,7 @@ describe("JWT Login", function () {
                 }
             };
             login.verify(mock_req, (result) => {
-                console.log("Secret verification result:", {result});
+                console.log("JWT Secret verification result:", {result});
                 expect(result).to.equal(true);
                 done();
             });
