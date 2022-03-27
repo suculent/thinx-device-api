@@ -18,7 +18,7 @@ describe("JWT Login", function () {
             expect(key).to.be.a('string');
             login.sign(username, owner, (response) => {
                 console.log("JWT sign response:", { response });
-                expect(response).to.be.an('object');
+                expect(response).to.be.a('string');
                 done();
             });
         });
