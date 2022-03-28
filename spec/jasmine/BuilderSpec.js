@@ -110,7 +110,7 @@ describe("Builder", function () {
 
         let attach_body = {
           udid: TEST_DEVICE_5.udid,
-          source_id: source_id;
+          source_id: source_id
         };
 
         let res = { mock: true };
