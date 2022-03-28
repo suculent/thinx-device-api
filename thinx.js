@@ -257,10 +257,6 @@ app.messenger.initSlack(() => {
     /* Webhook Server (new impl.) */
 
     function gitHook(req, res) {
-      // TODO (1): Validate and possibly reject invalid requests to prevent injection causing rebuilding of existing stuff
-      // E.g. using git_secret_key from app_config and also by validating required params
-      // https://github.com/suculent/thinx-device-api/issues/294
-
       // do not wait for response, may take ages
       console.log("Webhook request accepted...");
       if (typeof (req.body) === "undefined") {
