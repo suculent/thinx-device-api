@@ -179,7 +179,7 @@ describe("Builder", function () {
       done();
       
     }, transmit_key);
-  });
+  }, 15000);
 
   it("should fetch last apikey", function (done) {
     builder.getLastAPIKey("nonexistent", udid, function (success, result) {
@@ -187,6 +187,6 @@ describe("Builder", function () {
       console.log("apikey fetch result: ", result);
       done();
     });
-  });
+  }, 10000);
 
 });
