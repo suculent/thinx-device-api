@@ -136,9 +136,9 @@ describe("Builder", function () {
     };
 
     let transmit_key = "mock-transmit-key";
-    builder.run_build(build_request, [] /* notifiers */, function (success, result) {
+    builder.run_build(build_request, [] /* notifiers */, (success, result) => {
       expect(success).to.equal(true);
-      //expect(result).to.equal('build_started');
+
       console.log("[spec] run_build result:", {result});
       spec_build_id = result.build_id;
       // result contains build_id for notification...
