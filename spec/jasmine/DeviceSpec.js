@@ -151,7 +151,7 @@ describe("Device", function() {
     done();
   }, 5000);
 
-  it("(07) should be able to provide device firmware", function(firmware_done) {
+  it("(07) should be able to provide device firmware", function(done) {
       // Returns "OK" when current firmware is valid.
       var rbody = JRS;
       rbody.udid = udid;
@@ -164,11 +164,13 @@ describe("Device", function() {
           authentication: apikey
         }
       };
+      console.log("(07) requesting firmware");
       device.firmware(req, function(success, response) {
+        console.log("(07) requesting firmware result", {success}, {response});
         expect(success).to.equal(false);
         expect(response.success).to.equal(false);
         expect(response.status).to.equal("UPDATE_NOT_FOUND");
-        firmware_done();
+        done();
       });
     }, 5000);
 
