@@ -115,7 +115,7 @@ describe("Builder", function () {
 
         let res = { mock: true };
 
-        devices.attach(TEST_DEVICE_5.owner, body, (res, error, body) => {
+        devices.attach(TEST_DEVICE_5.owner, attach_body, (res, error, body) => {
           console.log("[spec] attach result", {res}, {error}, {body});
           done();
         }, res);
