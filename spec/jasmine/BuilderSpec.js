@@ -177,7 +177,6 @@ describe("Builder", function () {
         done();
       });
       
-      done();
     }, transmit_key);
   });
 

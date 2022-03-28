@@ -4,7 +4,8 @@ describe("Notifier", function () {
 
   it("should be able to initialize", function () {
 
-    let notifier = new Notifier();
+    const notifier = new Notifier();
+    expect(notifier).to.be.an('object');
 
   });
 
