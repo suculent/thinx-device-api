@@ -44,7 +44,6 @@ describe("Builder", function () {
       source_id: source_id,
       dryrun: true
     };
-    let worker = null;
     builder.build(
       owner,
       build,
@@ -53,7 +52,7 @@ describe("Builder", function () {
         console.log("[spec] build dry", { success }, { message }, { xbuild_id });
         done();
       }, // callback
-      worker
+      queue.nextAvailableWorker()
     );
   }, 120000);
 
@@ -64,7 +63,6 @@ describe("Builder", function () {
       source_id: source_id,
       dryrun: false
     };
-    let worker = null;
     builder.build(
       owner,
       build,
@@ -73,7 +71,7 @@ describe("Builder", function () {
         console.log("[spec] build dry", { success }, { message }, { build_id2 });
         done();
       }, // callback
-      worker
+      queue.nextAvailableWorker()
     );
   }, 120000);
 
