@@ -90,7 +90,7 @@ describe("Messenger", function() {
 
     user.mqtt_key(test_owner, (key_success, apikey) => {
 
-      console.log(`[spec] [mm] fetched mqtt key? ${key_success} with apikey ${JSON.stringify(apikey, null, '\t')}`);
+      // to debug Default MQTT API Key creation: console.log(`[spec] [mm] fetched mqtt key? ${key_success} with apikey ${JSON.stringify(apikey, null, '\t')}`);
 
       expect(key_success).to.equal(true);
       expect(apikey).to.be.a('object');

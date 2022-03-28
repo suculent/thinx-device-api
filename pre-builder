@@ -57,9 +57,9 @@ generate_thinx_file ${WORKDIR} ${JSON}
 echo
 
 PLATFORM=$(infer_platform $WORKDIR)
-echo "[pre-builder] platform: ${PLATFORM}"
+#echo "[pre-builder] platform: ${PLATFORM}"
 PLATFORM_LANG=$(language_for_platform $PLATFORM)
-echo "[pre-builder] language: ${PLATFORM_LANG}"
+#echo "[pre-builder] language: ${PLATFORM_LANG}"
 
 # This enables the ./linter which is not really used since the beginning, may deprecate
 # bash $THINX_ROOT/linter --language=${PLATFORM_LANG} --workdir=${WORKDIR}

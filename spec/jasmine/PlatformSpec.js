@@ -34,7 +34,8 @@ describe("Platform", function() {
         let undefined_path;
         Platform.getPlatform(undefined_path, function(success, result) {
           expect(success).to.equal(false);
-          console.log("platform detection result on invalid path:", result);
+          expect(result).to.equal('local_path not defined');
+          //console.log("platform detection result on intentionally invalid path:", result);
           done();
         });
     }, 15000);

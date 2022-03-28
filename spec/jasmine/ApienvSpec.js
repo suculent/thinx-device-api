@@ -14,7 +14,20 @@ describe("API Env", function () {
       owner,
       "sample-var-name",
       "sample-var-value",
-      function (success, object) {
+      (success, object) => {
+        expect(object).to.be.a('string');
+        if (success) {
+          done();
+        }
+      });
+  }, 30000);
+
+  it("should be able to add environment variable", function (done) {
+    apienv.create(
+      owner,
+      "sample-var-name-2",
+      "sample-var-value-2",
+      (success, object) => {
         expect(object).to.be.a('string');
         if (success) {
           done();
