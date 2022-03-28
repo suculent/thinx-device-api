@@ -1,5 +1,6 @@
 var Builder = require("../../lib/thinx/builder"); var builder = new Builder();
 var Device = require("../../lib/thinx/device"); var device = new Device();
+var Devices = require("../../lib/thinx/devices"); var devices = new Devices();
 var Queue = require("../../lib/thinx/queue");
 
 var expect = require('chai').expect;
@@ -56,6 +57,7 @@ describe("Builder", function () {
     );
   }, 120000);
 
+  // TODO: Source_id must be attached to device; or the notifier fails
   it("should be able to run", function (done) {
     var build = {
       udid: udid,
@@ -85,7 +87,7 @@ describe("Builder", function () {
     expect(extensions).to.be.a('array');
   });
 
-  it("requires to register sample build device", function (done) {
+  it("requires to register sample build device and attach source", function (done) {
     device.register(
       {}, /* req */
       TEST_DEVICE_5, /* reg.registration */
@@ -105,7 +107,20 @@ describe("Builder", function () {
         expect(TEST_DEVICE_5).to.be.an('object');
         expect(response.registration).to.be.an('object');
         expect(TEST_DEVICE_5.udid).to.be.a('string');
-        done();
+
+        let attach_body = {
+          udid: TEST_DEVICE_5.udid,
+          source_id: source_id;
+        };
+
+        let res = { mock: true };
+
+        devices.attach(TEST_DEVICE_5.owner, body, (res, error, body) => {
+          console.log("[spec] attach result", {res}, {error}, {body});
+          done();
+        }, res);
+
+        
       });
   }, 15000); // register
 
@@ -123,6 +138,7 @@ describe("Builder", function () {
     let transmit_key = "mock-transmit-key";
     builder.run_build(build_request, [] /* notifiers */, function (success, result) {
       console.log("[spec] build TODO", { success }, { result });
+      expect(success).to.equal(true);
       done();
     }, transmit_key);
   });
