@@ -174,6 +174,7 @@ describe("Builder", function () {
 
       notifier.process(job_status, (result) => {
         console.log("[spec] Notifier's Processing result:", result);
+        // keeps hanging when done(); here...
       });
 
       done();

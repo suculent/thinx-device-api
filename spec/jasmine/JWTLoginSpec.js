@@ -12,6 +12,15 @@ const login = new JWTLogin(redis);
 
 describe("JWT Login", function () {
 
+    it("should fetch key even when deleted", function (done) {
+        login.revokeSecretKey(() => {
+            login.fetchOrCreateSecretKey((result) => {
+                expect(result).to.be.a('string');
+                done();
+            });
+        });
+    }, 10000);
+
     it("should generate secret in order to generate JWT", function (done) {
         login.init((key) => {
             expect(key).to.be.a('string');
