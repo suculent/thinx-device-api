@@ -173,9 +173,10 @@ describe("Builder", function () {
       let notifier = new Notifier();
 
       notifier.process(job_status, (result) => {
-        console.log("ℹ️ [info] Notifier's Processing result:", result);
-        done();
+        console.log("[spec] Notifier's Processing result:", result);
       });
+
+      done();
       
     }, transmit_key);
   });
