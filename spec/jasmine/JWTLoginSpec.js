@@ -38,4 +38,11 @@ describe("JWT Login", function () {
             });
         });
     }, 10000);
+
+    it("should reset secret key", function (done) {
+        login.resetSecretKey((result) => {
+            expect(result).to.be.a('string');
+            done();
+        });
+    }, 10000);
 });
