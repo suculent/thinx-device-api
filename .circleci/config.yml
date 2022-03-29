@@ -338,7 +338,7 @@ workflows:
                 - base
                 - thinx-swarm
                 - main
-                - api-jwt-login
+                - thinx-class
 
       # - test-api-cloud:
       #     context:
@@ -380,4 +380,4 @@ workflows:
             branches:
               only:
                 - thinx-swarm
-                - api-jwt-login
+                - thinx-class
