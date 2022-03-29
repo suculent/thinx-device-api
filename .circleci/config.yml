@@ -318,8 +318,9 @@ workflows:
               only:
                 - base
                 - thinx-staging
-                - main
                 - thinx-class
+                - main
+                - master
       
       - build-console-cloud:
           context:
@@ -330,6 +331,8 @@ workflows:
               only:
                 - thinx-console
                 - thinx-staging
+                - thinx-class
+                - master
 
       - build-base:
           context:
@@ -350,3 +353,5 @@ workflows:
             branches:
               only:
                 - thinx-staging
+                - thinx-class
+                - master
