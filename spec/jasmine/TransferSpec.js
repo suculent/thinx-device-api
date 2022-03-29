@@ -47,6 +47,7 @@ describe("Transfer", function () {
           };
           console.log("(00-3) transfer accept III", {transfer_body});
 
+          // asyncCall
           transfer.accept(transfer_body, (success3, response3) => {
             // FIXME: accept callback never called here, why is that?
             console.log("(00-3) transfer accept III response: ", {success3}, {response3});
