@@ -11,6 +11,8 @@ describe("Transfer", function () {
 
   it("(00) should be able to initiate device transfer, decline and accept another one", function (done) {
 
+    let accepted = false;
+
     var body = {
       to: "cimrman@thinx.cloud",
       udids: [envi.udid]
@@ -20,6 +22,7 @@ describe("Transfer", function () {
 
     // 00-01 Request
     console.log("(00-1) transfer request A", {owner}, {body});
+
     transfer.request(owner, body, (t_success, response) => {
       expect(t_success).to.equal(true);
       expect(response).to.be.a('string');
@@ -43,12 +46,16 @@ describe("Transfer", function () {
             udids: [envi.udid]
           };
           console.log("(00-3) transfer accept III", {transfer_body});
+
           transfer.accept(transfer_body, (success3, response3) => {
-            // FIXME: accept callback never called here, why is taht?
+            // FIXME: accept callback never called here, why is that?
             console.log("(00-3) transfer accept III response: ", {success3}, {response3});
             expect(success3).to.equal(true);
             expect(response3).to.be.a('string');
-            done();
+            if (!accepted) {
+              accepted = true;
+              done();
+            }
           });
         });
       });
