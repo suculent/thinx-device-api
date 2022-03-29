@@ -43,8 +43,7 @@ describe("Device", function() {
     version: "1.0.0",
     alias: "test-device-2-deleteme",
     owner: "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c",
-    platform: "arduino",
-    udid: null
+    platform: "arduino"
   };
 
   var JRS3 = {
@@ -107,26 +106,22 @@ describe("Device", function() {
   }, 5000);
 
 
-  it("(04) should receive different response for registered device", function(done) {
-      device.register(
-        {}, /* req */
-        JRS,
-        apikey,
-        null,
-        function(success, response) {
-          let obj = response;
-          expect(obj).to.be.an('object');
-          if (success === false) {
-            // this is also OK... on CircleCI there are no older API Keys in Redis
-            if (response === "owner_found_but_no_key") {
-              done();
-              return;
-            }
-          }
-          
-          expect(success).to.be.true; // actually false, innit?
-          done();
-        });
+  it("(04) should receive different response for registered device", function (done) {
+    device.register(
+      {}, /* req */
+      JRS,
+      apikey,
+      null,
+      function (success, response) {
+        let obj = response;
+        expect(obj).to.be.an('object');
+        if (success === false) {
+          expect(success).to.equal(false);
+        } else {
+          expect(success).to.equal(true);
+        }
+        done();
+      });
     }, 5000);
 
   it("(05) should be able to store/fetch OTT request", function(done) {
