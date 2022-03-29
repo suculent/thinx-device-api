@@ -1,12 +1,14 @@
 class THiNX {
 
   constructor() {
-    // fn
+
+    console.log("========================================================================");
+    console.log("                 CUT LOGS HERE >>> SERVICE RESTARTED ");
+    console.log("========================================================================");
+
   }
 
   init(init_complete_callback) {
-
-
 
     /*
      * This THiNX Device Management API module is responsible for responding to devices and build requests.
@@ -14,10 +16,7 @@ class THiNX {
 
     let start_timestamp = new Date().getTime();
 
-    console.log("========================================================================");
-    console.log("                 CUT LOGS HERE >>> SERVICE RESTARTED ");
-    console.log("========================================================================");
-
+    
     // EXTRACT -->
     /*
      * Bootstrap banner section
@@ -48,7 +47,11 @@ class THiNX {
 
     // App
     const express = require("express");
+
+    // extract into app ->>>>> anything with app...
+
     const app = express();
+
     app.disable('x-powered-by');
 
     const helmet = require('helmet');
@@ -145,6 +148,7 @@ class THiNX {
 
         var read = require('fs').readFileSync;
 
+        // -> extract into ssl_options
         var ssl_options = null;
 
         if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
@@ -183,7 +187,7 @@ class THiNX {
         } else {
           console.log("⚠️ [warning] Skipping HTTPS server, SSL key or certificate not found. This configuration is INSECURE! and will cause an error in Enterprise configurations in future.");
         }
-
+        // <- extract into ssl_options
 
         var WebSocket = require("ws");
 
