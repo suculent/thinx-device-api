@@ -67,7 +67,7 @@ describe("Owner", function() {
 
   it("(05) should be able to begin reset owner password", function(done) {
     user.password_reset_init(email, (success, response) => {
-      if (response.indexOf("user_not_found") !== -1) {
+      if ((typeof(response) == "string") && (response.indexOf("user_not_found") !== -1)) {
         expect(success).to.equal(false);
         done();
         return;
