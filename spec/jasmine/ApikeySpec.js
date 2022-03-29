@@ -97,7 +97,6 @@ describe("API Key", function() {
     apikey.list(
       owner,
       (object) => {
-        expect(success).to.equal(true);
         expect(object).to.be.a('array');
         done();
       });

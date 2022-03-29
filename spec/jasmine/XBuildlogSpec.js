@@ -37,7 +37,7 @@ describe("Build log", function() {
 
   it("(04) should be able to list build logs", function(done) {
     blog.list(owner, function(err, body) {
-      expect(err).to.be.false; // err should be null
+      expect(err).to.equal(false); 
       expect(body).to.be.an('object'); // { rows: [] }
       let rows = body.rows;
       var last_build = rows[0];
@@ -47,21 +47,16 @@ describe("Build log", function() {
           expect(bbody).to.be.an('object');
           done();
         });
-      } else {
-        // logs may be empty
-        done();
       }
     });
   }, 15000);
 
-  it("(05) should be able to tail log for build_id", function() {
+  it("(05) should be able to tail log for build_id", function(done) {
     const no_socket = null;
     blog.logtail(build_id, require("../_envi.json").oid, no_socket, function(success) {
-        if (success !== true) {
-          console.log(success); // error reason
-        }
         expect(success).to.equal(true);
-      });
+        done();
+    });
   });
 
   it("(05) should provide path for device", function() {
