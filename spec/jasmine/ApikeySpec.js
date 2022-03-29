@@ -12,13 +12,8 @@ describe("API Key", function() {
    it("(00) should be able to list empty API Keys", function (done) {
     apikey.list(
       "dummy",
-      (success, object) => {
-        expect(success).to.equal(false);
-        if (success) {
-          expect(object).to.be.a('array');
-        } else {
-          console.log("[spec] (06) API Key Listing failed:", {object});
-        }
+      (object) => {
+        expect(object).to.be.a('array');
         if (done) done();
       });
   });
@@ -44,12 +39,8 @@ describe("API Key", function() {
   it("(02) should be able to list API Keys", function(done) {
     apikey.list(
       owner,
-      (success, object) => {
-        if (success) {
-          expect(object).to.be.a('array');
-        } else {
-          console.log("[spec] API Key Listing failed:", {object}, {success});
-        }
+      (object) => {
+        expect(object).to.be.a('array');
         done();
       });
   });
@@ -105,14 +96,10 @@ describe("API Key", function() {
   it("(06) should be able to list API Keys (2)", function (done) {
     apikey.list(
       owner,
-      (success, object) => {
+      (object) => {
         expect(success).to.equal(true);
-        if (success) {
-          expect(object).to.be.a('array');
-        } else {
-          console.log("[spec] (06) API Key Listing failed:", {object});
-        }
-        if (done) done();
+        expect(object).to.be.a('array');
+        done();
       });
   });
 
