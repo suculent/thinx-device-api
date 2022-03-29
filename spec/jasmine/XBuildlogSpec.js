@@ -19,17 +19,17 @@ describe("Build log", function() {
 
   it("(02) should be able to log", function(done) {
     let contents1 = "mock log message contents one";
-    blog.log(build_id, owner, udid, "Testing build log create...", contents1, function(error, body) {
+    blog.log(build_id, owner, udid, "Testing build log create...", contents1, (error, body) => {
       expect(body).to.exist; // body.ok should be true
-      expect(error).to.be.null;
+      expect(error).to.equal(null);
       done();
     });
   });
 
   it("(03) should be able to append existing log", function(done) {
   let contents2 = "mock log message contents one";
-    blog.log(build_id, owner, udid, "Testing build log append...", contents2, function(error, body) {
-      expect(error).to.be.null;
+    blog.log(build_id, owner, udid, "Testing build log append...", contents2, (error, body) => {
+      expect(error).to.equal(null);
       expect(body).to.be.a('object');
       done();
     });
@@ -40,7 +40,7 @@ describe("Build log", function() {
       expect(err).to.be.false; // err should be null
       expect(body).to.be.an('object'); // { rows: [] }
       let rows = body.rows;
-      var last_build = body.rows[0];
+      var last_build = rows[0];
       if ((typeof(last_build) !== "undefined") && (last_build !== null)) {
         blog.fetch(last_build.id, function(berr, bbody) {
           expect(berr).to.equal(false);
@@ -60,7 +60,7 @@ describe("Build log", function() {
         if (success !== true) {
           console.log(success); // error reason
         }
-        expect(success).to.be.true;
+        expect(success).to.equal(true);
       });
   });
 
