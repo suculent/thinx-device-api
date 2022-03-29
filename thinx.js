@@ -1,7 +1,7 @@
-module.exports = class THiNX {
+class THiNX {
 
   constructor() {
-
+    // fn
   }
 
   init(init_complete_callback) {
@@ -521,15 +521,15 @@ module.exports = class THiNX {
 
         setTimeout(startup_quote, 10000); // wait for Slack init only once
 
-        init_complete_callback(); 
+        init_complete_callback();
 
       }); // DB
-
     }); // Slack
-
   }
-
-};
+}
 
 const thx = THiNX();
-thx.init(() => console.log("init complete"));
+
+thx.init(() => {
+  console.log("init complete");
+});
