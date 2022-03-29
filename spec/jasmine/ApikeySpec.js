@@ -105,6 +105,7 @@ describe("API Key", function() {
 
   // currently fails, no key is being fetched
   it("(07) should be able to get first API Key", function (done) {
+    console.log("[spec] (07) get_first_apikey for owner:", owner);
     apikey.get_first_apikey(
       owner,
       (success, object) => {
