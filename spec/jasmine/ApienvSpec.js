@@ -72,6 +72,16 @@ describe("API Env", function () {
       });
   }, 5000);
 
+  it("should fail safely for invalid owner in list", function (done) {
+    apienv.list(
+      "invalid-owner",
+      function (success, object) {
+        expect(success).to.equal(true);
+        expect(object).to.be.an('array');
+        done();
+      });
+  }, 5000);
+
   it("should be able to revoke environment variables",
     function (done) {
       const changes = [

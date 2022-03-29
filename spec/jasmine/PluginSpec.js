@@ -55,8 +55,13 @@ describe("Plugins", function () {
         path = "./spec/test_repositories/thinx-firmware-esp8266-lua";
         result = await manager.use(path);
         expect(result).to.equal('nodemcu');
+    });
 
-        
+    it("should be able to aggregate all supported extensions", async function () {
+        let manager = new Plugins(this);
+        await manager.loadFromConfig(config);
+        let result = manager.extensions();
+        expect(result).to.be.an('array');
     });
 
 });

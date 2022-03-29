@@ -43,8 +43,7 @@ describe("Device", function() {
     version: "1.0.0",
     alias: "test-device-2-deleteme",
     owner: "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c",
-    platform: "arduino",
-    udid: null
+    platform: "arduino"
   };
 
   var JRS3 = {
@@ -107,26 +106,22 @@ describe("Device", function() {
   }, 5000);
 
 
-  it("(04) should receive different response for registered device", function(done) {
-      device.register(
-        {}, /* req */
-        JRS,
-        apikey,
-        null,
-        function(success, response) {
-          let obj = response;
-          expect(obj).to.be.an('object');
-          if (success === false) {
-            // this is also OK... on CircleCI there are no older API Keys in Redis
-            if (response === "owner_found_but_no_key") {
-              done();
-              return;
-            }
-          }
-          
-          expect(success).to.be.true; // actually false, innit?
-          done();
-        });
+  it("(04) should receive different response for registered device", function (done) {
+    device.register(
+      {}, /* req */
+      JRS,
+      apikey,
+      null,
+      function (success, response) {
+        let obj = response;
+        expect(obj).to.be.an('object');
+        if (success === false) {
+          expect(success).to.equal(false);
+        } else {
+          expect(success).to.equal(true);
+        }
+        done();
+      });
     }, 5000);
 
   it("(05) should be able to store/fetch OTT request", function(done) {
@@ -151,7 +146,7 @@ describe("Device", function() {
     done();
   }, 5000);
 
-  it("(07) should be able to provide device firmware", function(firmware_done) {
+  it("(07) should be able to provide device firmware", function(done) {
       // Returns "OK" when current firmware is valid.
       var rbody = JRS;
       rbody.udid = udid;
@@ -164,11 +159,13 @@ describe("Device", function() {
           authentication: apikey
         }
       };
+      console.log("(07) requesting firmware");
       device.firmware(req, function(success, response) {
+        console.log("(07) requesting firmware result", {success}, {response});
         expect(success).to.equal(false);
         expect(response.success).to.equal(false);
         expect(response.status).to.equal("UPDATE_NOT_FOUND");
-        firmware_done();
+        done();
       });
     }, 5000);
 

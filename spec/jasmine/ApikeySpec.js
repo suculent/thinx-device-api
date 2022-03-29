@@ -12,13 +12,8 @@ describe("API Key", function() {
    it("(00) should be able to list empty API Keys", function (done) {
     apikey.list(
       "dummy",
-      (success, object) => {
-        expect(success).to.equal(false);
-        if (success) {
-          expect(object).to.be.a('array');
-        } else {
-          console.log("[spec] (06) API Key Listing failed:", {object});
-        }
+      (object) => {
+        expect(object).to.be.a('array');
         if (done) done();
       });
   });
@@ -44,12 +39,8 @@ describe("API Key", function() {
   it("(02) should be able to list API Keys", function(done) {
     apikey.list(
       owner,
-      (success, object) => {
-        if (success) {
-          expect(object).to.be.a('array');
-        } else {
-          console.log("[spec] API Key Listing failed:", {object}, {success});
-        }
+      (object) => {
+        expect(object).to.be.a('array');
         done();
       });
   });
@@ -74,6 +65,7 @@ describe("API Key", function() {
       (success, array_or_error) => {
         if (success) {
           generated_key_hash = sha256(array_or_error[0].key);
+          expect(generated_key_hash).to.be.a('string');
         } else {
           console.log("[spec] APIKey failed: ",{array_or_error});
         }
@@ -81,7 +73,7 @@ describe("API Key", function() {
         expect(array_or_error[0].key).to.be.a('string');
         apikey.revoke(
           owner,
-          [generated_key_hash],
+          ["sample-key"],
           (_success, /* result */) => {
             expect(_success).to.equal(true);
             done();
@@ -93,7 +85,7 @@ describe("API Key", function() {
   it("(05) should be able to fail on invalid API Key revocation (callback is not a function!)", function(done) {
     apikey.revoke(
       "nonsense",
-      ["sample-key-hash"],
+      ["sample-key-hash"], // WTF?
       (success)  => {
         expect(success).to.equal(false);
         done();
@@ -105,18 +97,16 @@ describe("API Key", function() {
   it("(06) should be able to list API Keys (2)", function (done) {
     apikey.list(
       owner,
-      (success, object) => {
-        expect(success).to.equal(true);
-        if (success) {
-          expect(object).to.be.a('array');
-        } else {
-          console.log("[spec] (06) API Key Listing failed:", {object});
-        }
-        if (done) done();
+      (object) => {
+        expect(object).to.be.a('array');
+        console.log("[spec] 06 apikeys", object);
+        done();
       });
   });
 
+  // currently fails, no key is being fetched
   it("(07) should be able to get first API Key", function (done) {
+    console.log("[spec] (07) get_first_apikey for owner:", owner);
     apikey.get_first_apikey(
       owner,
       (success, object) => {

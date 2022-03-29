@@ -1,5 +1,3 @@
-// file deepcode ignore UseCsurfForExpress: API cannot use CSRF
-
 /*
  * This THiNX Device Management API module is responsible for responding to devices and build requests.
  */
@@ -257,10 +255,6 @@ app.messenger.initSlack(() => {
     /* Webhook Server (new impl.) */
 
     function gitHook(req, res) {
-      // TODO (1): Validate and possibly reject invalid requests to prevent injection causing rebuilding of existing stuff
-      // E.g. using git_secret_key from app_config and also by validating required params
-      // https://github.com/suculent/thinx-device-api/issues/294
-
       // do not wait for response, may take ages
       console.log("Webhook request accepted...");
       if (typeof (req.body) === "undefined") {
@@ -285,7 +279,7 @@ app.messenger.initSlack(() => {
      * HTTP/S Server
      */
 
-    
+
     // Legacy HTTP support for old devices without HTTPS proxy
     let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function () {
       console.log(`ℹ️ [info] HTTP API started on port ${app_config.port}`);
@@ -294,7 +288,7 @@ app.messenger.initSlack(() => {
       console.log("⏱ [profiler] Startup phase took:", seconds, "seconds");
     });
 
-    
+
     app.use('/static', express.static(path.join(__dirname, 'static')));
     app.set('trust proxy', ['loopback', '127.0.0.1']);
 
