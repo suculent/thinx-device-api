@@ -9,7 +9,7 @@ describe("Transfer", function () {
   var Transfer = require("../../lib/thinx/transfer");
   var transfer = new Transfer(messenger);
 
-  it("(00) should be able to initiate device transfer, decline and accept another one", function () {
+  it("(00) should be able to initiate device transfer, decline and accept another one", function (done) {
 
     var body = {
       to: "cimrman@thinx.cloud",

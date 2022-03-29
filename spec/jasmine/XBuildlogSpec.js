@@ -26,8 +26,8 @@ describe("Build log", function() {
     });
   });
 
-  it("(03) should be able to append existing log", function(done) {
-  let contents2 = "mock log message contents one";
+  it("(03) should be able to append existing log", function (done) {
+    let contents2 = "mock log message contents one";
     blog.log(build_id, owner, udid, "Testing build log append...", contents2, (error, body) => {
       expect(error).to.equal(null);
       expect(body).to.be.a('object');
