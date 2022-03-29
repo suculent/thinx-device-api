@@ -50,14 +50,14 @@ describe("Messenger", function() {
   });
 
   // this requires having owner and devices registered in the DB, 
-  it("should be able to initialize with owner", function () {
+  it("should be able to initialize with owner", function (done) {
 
     const mock_socket = {}; // let socket = app._ws[owner]; - websocket should be extracted to be instantiated on its own
-    console.log("✅ [spec]  Initializing messenger with owner", test_owner, "socket", mock_socket);
+    //console.log("✅ [spec]  Initializing messenger with owner", test_owner, "socket", mock_socket);
     messenger.initWithOwner(test_owner, mock_socket, (success, status) => {
-      console.log("✅ [spec] messenger initialized: ", { success: success, status: status });
+      //console.log("✅ [spec] messenger initialized: ", { success: success, status: status });
       expect(success).to.equal(true);
-      //done();
+      done();
     });
   });
 
