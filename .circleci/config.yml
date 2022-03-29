@@ -89,25 +89,6 @@ jobs:
       - slack/notify:
           template: basic_fail_1
           event: fail
-
-  test-api-cloud:
-    executor: docker/docker
-    steps:
-      - setup_remote_docker:
-          docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
-      - checkout
-      - docker/check:
-          registry: registry.thinx.cloud:5000
-      - docker/build:
-          registry: registry.thinx.cloud:5000
-          image: thinx/api
-          dockerfile: ./Dockerfile.test
-          extra_build_args: |
-            --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} \
-            --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
-            --build-arg ENVIRONMENT=${ENVIRONMENT} \
-            --build-arg REVISION=$(git describe --abbrev=0) \
-          tag: 'swarm'
   
   test:
 
@@ -336,17 +317,9 @@ workflows:
             branches:
               only:
                 - base
-                - thinx-swarm
+                - thinx-staging
                 - main
-                - api-jwt-login
-
-      # - test-api-cloud:
-      #     context:
-      #         - thinx-docker-repo
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-swarm
+                - thinx-class
       
       - build-console-cloud:
           context:
@@ -356,7 +329,7 @@ workflows:
             branches:
               only:
                 - thinx-console
-                - thinx-swarm
+                - thinx-staging
 
       - build-base:
           context:
@@ -365,8 +338,6 @@ workflows:
             branches:
               only:
                 - base
-                #- thinxcloud
-                #- thinx-swarm
 
       - build-api-cloud:
           context:
@@ -374,10 +345,8 @@ workflows:
             - SonarCloud
             - thinx-slack
           requires:
-            #- test-api-cloud
             - test
           filters:
             branches:
               only:
-                - thinx-swarm
-                - api-jwt-login
+                - thinx-staging
