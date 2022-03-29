@@ -65,6 +65,7 @@ describe("API Key", function() {
       (success, array_or_error) => {
         if (success) {
           generated_key_hash = sha256(array_or_error[0].key);
+          expect(generated_key_hash).to.be.a('string');
         } else {
           console.log("[spec] APIKey failed: ",{array_or_error});
         }
@@ -72,7 +73,7 @@ describe("API Key", function() {
         expect(array_or_error[0].key).to.be.a('string');
         apikey.revoke(
           owner,
-          [generated_key_hash],
+          ["sample-key"],
           (_success, /* result */) => {
             expect(_success).to.equal(true);
             done();
