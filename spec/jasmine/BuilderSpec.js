@@ -183,7 +183,7 @@ describe("Builder", function () {
   }, 15000);
 
   it("should fetch last apikey", function (done) {
-    builder.getLastAPIKey("nonexistent", function (success, result) {
+    builder.getLastAPIKey("nonexistent", function (success/* , result */) {
       expect(success).to.equal(false);
       done();
     });
