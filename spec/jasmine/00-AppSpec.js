@@ -1,8 +1,12 @@
-describe("App", function() {
+const THiNX = require("../../thinx-core.js");
 
-  it("App start should not fail.", function(done) {
-    require('../../thinx.js');
-    done();
+describe("App", function () {
+
+  it("App start should not fail.", function (done) {
+    let thx = new THiNX();
+    thx.init(() => {
+      done();
+    });
   }, 20000);
 
 });
