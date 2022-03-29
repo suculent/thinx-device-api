@@ -98,6 +98,7 @@ describe("API Key", function() {
       owner,
       (object) => {
         expect(object).to.be.a('array');
+        console.log("[spec] 06 apikeys", object);
         done();
       });
   });
