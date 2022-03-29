@@ -85,7 +85,7 @@ describe("API Key", function() {
   it("(05) should be able to fail on invalid API Key revocation (callback is not a function!)", function(done) {
     apikey.revoke(
       "nonsense",
-      ["sample-key-hash"],
+      ["sample-key-hash"], // WTF?
       (success)  => {
         expect(success).to.equal(false);
         done();
