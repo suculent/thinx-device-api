@@ -33,8 +33,6 @@ describe("Transfer", function () {
         expect(d_success).to.equal(true);
         expect(d_response).to.be.a('string');
 
-        // 00-03 Request
-        body.udids = ["d6ff2bb0-df34-11e7-b351-eb37822aa173"];
         transfer.request(owner, body, (b_success, b_response) => {
           expect(b_success).to.equal(true);
           expect(b_response).to.be.a('string'); // transfer_requested      
