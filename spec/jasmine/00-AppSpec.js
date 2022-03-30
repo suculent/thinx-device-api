@@ -4,33 +4,22 @@ let chai = require('chai');
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
-let thx;
-let app;
-
 describe("App", function () {
 
-  it("App start should not fail.", function() {
-    require('../../thinx.js');
-  });
-
-  it("App class should not fail and provide router.", function (done) {
-    thx = new THiNX();
+  it("App class should not fail and provide router with healthcheck", function (done) {
+    let thx = new THiNX();
     thx.init(() => {
-      app = thx.app;
-
-      it("App GET / [healthcheck]", function (done) {
-        chai.request(app)
-          .get('/')
-          .set('Accept', 'application/json')
-          .expect('Content-Type', /json/)
-          .expect(200, done)
-          .expect(response.body).toEqual('{ healthcheck: true }')
-          .end((err, res) => {
-            if (err) return done(err);
-            console.log("Response: ", res);
-            return done();
-          });
-      });
+      chai.request(thx.app)
+        .get('/')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200, done)
+        .expect(response.body).toEqual('{ healthcheck: true }')
+        .end((err, res) => {
+          if (err) return done(err);
+          console.log("Response: ", res);
+          return done();
+        });
     });
   }, 20000);
 
@@ -39,7 +28,6 @@ describe("App", function () {
   // App POST /githook
   // App POST /api/githook
   // App POST /api/user/logs/tail
-
 });
 
 describe("Session Management", function () {
