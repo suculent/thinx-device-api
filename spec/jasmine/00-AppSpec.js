@@ -10,16 +10,14 @@ describe("App", function () {
     let thx = new THiNX();
     thx.init(() => {
       chai.request(thx.app)
-        .get('/')
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(200, done)
-        .expect(response.body).toEqual('{ healthcheck: true }')
-        .end((err, res) => {
-          if (err) return done(err);
-          console.log("Response: ", res);
-          return done();
-        });
+      .get('/')
+      .end((err, res) => {
+            console.log("chai res", res);
+            res.should.have.status(200);
+            res.body.should.be.an('object');
+            res.body.healthcheck.eql(true);
+        done();
+      });
     });
   }, 20000);
 
