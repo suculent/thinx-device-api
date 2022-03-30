@@ -20,13 +20,13 @@ describe("App", function () {
     });
   }, 20000);
 
-  it("Router should respond to / (healthcheck)", function (done) {
+  it("GET / [healthcheck]", function (done) {
     request(app)
       .get('/')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200, done)
-      .expect(response.body).toEqual('{ healthcheck: true }');
+      .expect(response.body).toEqual('{ healthcheck: true }')
       .end(function(err, res) {
         if (err) return done(err);
         console.log("Response: ", res);
