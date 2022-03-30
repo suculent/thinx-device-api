@@ -108,7 +108,7 @@ RUN chmod +x ./cc-test-reporter
 # Test modules
 RUN npm install -g nyc mocha jasmine mocha-lcov-reporter coveralls
 
-RUN npm install supertest
+RUN npm install --save-dev supertest
 
 # TODO: Implement Snyk Container Scanning here in addition to DockerHub manual scans...
 

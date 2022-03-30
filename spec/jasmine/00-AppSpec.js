@@ -1,6 +1,6 @@
 const THiNX = require("../../thinx-core.js");
 
-const request = require('supertest');
+require('supertest');
 
 let thx;
 let app;
