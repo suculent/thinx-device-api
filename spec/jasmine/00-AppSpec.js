@@ -13,9 +13,9 @@ describe("App", function () {
       .get('/')
       .end((err, res) => {
             console.log("chai res", res);
-            expect(res.status).toBe(200);
-            expect(res.body).toBe.an('object');
-            expect(res.body.healthcheck).toBe.eql(true);
+            expect(res.status).to.eql(200);
+            expect(res.body).to.be.an('object');
+            expect(res.body.healthcheck).to.eql(true);
         done();
       });
     });
