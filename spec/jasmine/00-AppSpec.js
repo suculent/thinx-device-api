@@ -15,8 +15,8 @@ describe("App", function () {
       .end((err, res) => {
             console.log("chai res", res);
             expect(res.status).to.equal(200);
-            expect(res.body).to.be.an('object');
-            expect(res.body.healthcheck).to.equal(true);
+            expect(res.text).to.be.a('string');
+            expect(JSON.parse(res.body).healthcheck).to.equal(true);
         done();
       });
     });
