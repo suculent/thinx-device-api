@@ -1,7 +1,7 @@
 const THiNX = require("../../thinx-core.js");
 
 const request = require('supertest');
-const assert = require('assert');
+// const assert = require('assert');
 
 describe("App", function () {
 
@@ -172,3 +172,6 @@ describe("App", function () {
   /* Device Configuration */
 
   // POST /api/device/push [push device configuration over MQTT]
+
+
+});
