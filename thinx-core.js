@@ -6,6 +6,8 @@ module.exports = class THiNX {
     console.log("                 CUT LOGS HERE >>> SERVICE RESTARTED ");
     console.log("========================================================================");
 
+    this.app = null;
+
   }
 
   init(init_complete_callback) {
@@ -51,6 +53,8 @@ module.exports = class THiNX {
     // extract into app ->>>>> anything with app...
 
     const app = express();
+
+    this.app = app;
 
     app.disable('x-powered-by');
 
