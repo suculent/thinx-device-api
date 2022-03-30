@@ -1,12 +1,11 @@
 const THiNX = require("../../thinx-core.js");
 
 const request = require('supertest');
-// const assert = require('assert');
+
+let thx;
+let app;
 
 describe("App", function () {
-
-  let thx;
-  let app;
 
   it("App start should not fail.", function() {
     require('../../thinx.js');
@@ -16,34 +15,37 @@ describe("App", function () {
     thx = new THiNX();
     thx.init(() => {
       app = thx.app;
-      done();
+
+      it("App GET / [healthcheck]", function (done) {
+        request(app)
+          .get('/')
+          .set('Accept', 'application/json')
+          .expect('Content-Type', /json/)
+          .expect(200, done)
+          .expect(response.body).toEqual('{ healthcheck: true }')
+          .end(function(err, res) {
+            if (err) return done(err);
+            console.log("Response: ", res);
+            return done();
+          });
+      });
     });
   }, 20000);
+
+  
 
   // App POST /githook
   // App POST /api/githook
   // App POST /api/user/logs/tail
 
-  // Router
+});
 
-  it("App GET / [healthcheck]", function (done) {
-    request(app)
-      .get('/')
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(200, done)
-      .expect(response.body).toEqual('{ healthcheck: true }')
-      .end(function(err, res) {
-        if (err) return done(err);
-        console.log("Response: ", res);
-        return done();
-      });
-  });
-
-  /* Authentication */
-
+describe("Session Management", function () {
   // POST /api/login
   // GET /api/logout
+});
+
+describe("OAuth", function () {
 
   /* Slack OAuth Integration */
 
@@ -60,78 +62,79 @@ describe("App", function () {
   // GET /api/oauth/google
   // GET /api/oauth/google/callback
 
-  /* GDPR */
+});
 
+describe("GDPR", function () {
   // POST /api/gdpr
   // POST /api/gdpr/transfer [GDPR user data transfer]
   // POST /api/gdpr/revoke
+});
 
-  /* User Lifecycle */
-
+describe("User Lifecycle", function () {
   // POST /api/user/create
   // POST /api/user/delete
   // POST /api/user/password/reset
   // GET /api/user/password/reset
   // POST /api/user/password/set
   // GET /api/user/activate
+});
 
-  /* User Profile */
-
+describe("User Profile", function () {
   // POST /api/user/profile
   // GET /api/user/profile
+});
 
-   /* Logs */
-
+describe("User Logs", function () {
   // GET /api/user/logs/audit
   // GET /api/user/logs/build/list
   // POST /api/user/logs/build [fetch specific build log]
+});
 
-  /* Statistics */
-
+describe("User Statistics", function () {
   // GET /api/user/stats
+});
 
+describe("User Support (2nd level)", function () {
   /* Slack Chat */
-
   // POST /api/user/chat
+});
 
-  /* Devices */
-
+describe("Devices", function () {
   // GET /api/user/devices
   // POST /api/device/attach
   // POST /api/device/detach
   // POST /api/device/mesh/attach
   // POST /api/device/mesh/detach
-
   // GET /api/device/data/:udid
   // POST /api/device/data
   // POST /api/device/revoke
+});
 
-  /* API Keys */
-
+describe("API Keys", function () {
   // POST /api/user/apikey [create]
   // POST /api/user/apikey/revoke
   // GET /api/user/apikey/list
+});
 
-  /* ENV Vars */
-
+describe("ENV Vars", function () {
   // POST /api/user/env/add
   // POST /api/user/env/revoke
   // GET /api/user/env/list
+});
 
-  /* Sources (repositories) */
-
+describe("Sources (repositories)", function () {
   // GET /api/user/sources/list
   // POST /api/user/source
   // POST /api/user/source/revoke
+});
 
-  /* RSA Keys */
-
+describe("RSA Keys", function () {
   // GET /api/user/rsakey/create
   // GET /api/user/rsakey/list
   // POST /api/user/rsakey/revoke
+});
 
-  /* Device API */
-
+describe("Device API", function () {
   // POST /device/register
   // POST /device/firmware
   // GET /device/firmware
@@ -139,39 +142,37 @@ describe("App", function () {
   // POST /api/device/envs
   // POST /api/device/detail
   // POST /api/device/edit
+});
 
-  /* Transformer */
-
+describe("Transformer", function () {
   // POST /api/transformer/run
+});
 
-  /* Meshes */
-
+describe("Meshes", function () {
   // GET /api/mesh/list [cookie auth]
   // POST /api/mesh/list [owner/apikey auth]
   // POST /api/mesh/create
   // POST /api/mesh/delete
+});
 
-  /* Builder */
-
+describe("Builder", function () {
   // POST /api/build [run build manually]
   // POST /api/device/envelope [latest firmware envelope]
   // POST /api/device/artifacts [get build artifacts]
+});
 
-  /* Device Ownership Transfer */
-
+describe("Device Ownership Transfer", function () {
   // POST /api/transfer/request
   // GET /api/transfer/decline [all]
   // POST /api/transfer/decline [selective]
   // GET /api/transfer/accept [all]
   // POST /api/transfer/accept [selective]
+});
 
-  /* Actionable Notifications */
-
+describe("Actionable Notifications", function () {
   // POST /api/device/notification
+});
 
-  /* Device Configuration */
-
+describe("Device Configuration", function () {
   // POST /api/device/push [push device configuration over MQTT]
-
-
 });
