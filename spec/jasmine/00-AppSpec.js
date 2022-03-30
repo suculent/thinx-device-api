@@ -1,6 +1,8 @@
 const THiNX = require("../../thinx-core.js");
 
-require('supertest');
+let chai = require('chai');
+let chaiHttp = require('chai-http');
+chai.use(chaiHttp);
 
 let thx;
 let app;
@@ -17,13 +19,13 @@ describe("App", function () {
       app = thx.app;
 
       it("App GET / [healthcheck]", function (done) {
-        request(app)
+        chai.request(app)
           .get('/')
           .set('Accept', 'application/json')
           .expect('Content-Type', /json/)
           .expect(200, done)
           .expect(response.body).toEqual('{ healthcheck: true }')
-          .end(function(err, res) {
+          .end((err, res) => {
             if (err) return done(err);
             console.log("Response: ", res);
             return done();
