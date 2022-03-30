@@ -5,15 +5,15 @@ var expect = require('chai').expect;
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
-describe("App", function () {
+describe("App should support", function () {
 
-  it("App class should not fail and provide router with healthcheck", function (done) {
+  it("GET / [healthcheck]", function (done) {
     let thx = new THiNX();
     thx.init(() => {
       chai.request(thx.app)
       .get('/')
       .end((err, res) => {
-            console.log("chai text+body:", res.text, res.body);
+            console.log("[chai] response:", res.text);
             expect(res.status).to.equal(200);
             expect(res.text).to.be.a('string');
             expect(JSON.parse(res.text).healthcheck).to.equal(true);
@@ -22,9 +22,57 @@ describe("App", function () {
     });
   }, 20000);
 
-  // App POST /githook
-  // App POST /api/githook
-  // App POST /api/user/logs/tail
+  it("POST /githook", function (done) {
+    let thx = new THiNX();
+    thx.init(() => {
+      chai.request(thx.app)
+      .post('/githook')
+      .send({
+        'body': 'nonsense'
+      })
+      .end((err, res) => {
+            console.log("[chai] response:", res.text);
+            expect(res.status).to.equal(200);
+            expect(res.text).to.be.a('string');
+        done();
+      });
+    });
+  }, 20000);
+
+  it("POST /api/githook", function (done) {
+    let thx = new THiNX();
+    thx.init(() => {
+      chai.request(thx.app)
+      .post('/githook')
+      .send({
+        'body': 'nonsense'
+      })
+      .end((err, res) => {
+            console.log("[chai] response:", res.text);
+            expect(res.status).to.equal(200);
+            expect(res.text).to.be.a('string');
+        done();
+      });
+    });
+  }, 20000);
+
+  it("POST /api/user/logs/tail", function (done) {
+    let thx = new THiNX();
+    thx.init(() => {
+      chai.request(thx.app)
+      .post('/githook')
+      .send({
+        'body': 'nonsense'
+      })
+      .end((err, res) => {
+            console.log("[chai] response:", res.text);
+            expect(res.status).to.equal(200);
+            expect(res.text).to.be.a('string');
+        done();
+      });
+    });
+  }, 20000);
+
 });
 
 /*
