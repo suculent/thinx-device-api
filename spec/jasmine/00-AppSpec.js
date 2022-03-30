@@ -20,7 +20,13 @@ describe("App", function () {
     });
   }, 20000);
 
-  it("GET / [healthcheck]", function (done) {
+  // App POST /githook
+  // App POST /api/githook
+  // App POST /api/user/logs/tail
+
+  // Router
+
+  it("App GET / [healthcheck]", function (done) {
     request(app)
       .get('/')
       .set('Accept', 'application/json')
@@ -33,5 +39,119 @@ describe("App", function () {
         return done();
       });
   });
+
+  /* Devices */
+
+  // GET /api/user/devices
+  // POST /api/device/attach
+  // POST /api/device/detach
+  // POST /api/device/mesh/attach
+  // POST /api/device/mesh/detach
+
+  // GET /api/device/data/:udid
+  // POST /api/device/data
+  // POST /api/device/revoke
+
+  /* Transformer */
+
+  // POST /api/transformer/run
+
+  /* API Keys */
+
+  // POST /api/user/apikey [create]
+  // POST /api/user/apikey/revoke
+  // GET /api/user/apikey/list
+
+  /* ENV Vars */
+
+  // POST /api/user/env/add
+  // POST /api/user/env/revoke
+  // GET /api/user/env/list
+
+  /* Sources (repositories) */
+
+  // GET /api/user/sources/list
+  // POST /api/user/source
+  // POST /api/user/source/revoke
+
+  /* RSA Keys */
+
+  // GET /api/user/rsakey/create
+  // GET /api/user/rsakey/list
+  // POST /api/user/rsakey/revoke
+
+  /* User Lifecycle */
+
+  // POST /api/user/create
+  // POST /api/user/delete
+  // POST /api/user/password/reset
+  // GET /api/user/password/reset
+  // POST /api/user/password/set
+  // GET /api/user/activate
+
+  /* User Profile */
+
+  // POST /api/user/profile
+  // GET /api/user/profile
+
+  /* Device API */
+
+  // POST /device/register
+  // POST /device/firmware
+  // GET /device/firmware
+  // POST /device/addpush
+  // POST /api/device/envs
+  // POST /api/device/detail
+  // POST /api/device/edit
+
+  /* Meshes */
+
+  // GET /api/mesh/list [cookie auth]
+  // POST /api/mesh/list [owner/apikey auth]
+  // POST /api/mesh/create
+  // POST /api/mesh/delete
+
+  /* Builder */
+
+  // POST /api/build [run build manually]
+  // POST /api/device/envelope [latest firmware envelope]
+  // POST /api/device/artifacts [get build artifacts]
+
+  /* Logs */
+
+  // GET /api/user/logs/audit
+  // GET /api/user/logs/build/list
+  // POST /api/user/logs/build [fetch specific build log]
+
+  /* Device Ownership Transfer */
+
+  // POST /api/transfer/request
+  // GET /api/transfer/decline [all]
+  // POST /api/transfer/decline [selective]
+  // GET /api/transfer/accept [all]
+  // POST /api/transfer/accept [selective]
+
+  /* Authentication, Authorization and GDPR */
+
+  // POST /api/login
+  // GET /api/logout
+
+  /* Statistics */
+
+  // GET /api/user/stats
+
+  /* Slack Chat */
+
+  // POST /api/user/message
+
+
+
+
+
+  
+
+
+
+
 
 });
