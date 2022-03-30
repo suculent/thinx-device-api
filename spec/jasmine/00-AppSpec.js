@@ -30,6 +30,8 @@ describe("App", function () {
   // App POST /api/user/logs/tail
 });
 
+/*
+
 describe("Session Management", function () {
   // POST /api/login
   // GET /api/logout
@@ -37,17 +39,17 @@ describe("Session Management", function () {
 
 describe("OAuth", function () {
 
-  /* Slack OAuth Integration */
+  // Slack OAuth Integration
 
   // POST /api/slack/direct_install
   // GET /api/slack/redirect
   
-  /* Github OAuth */
+  // Github OAuth
 
   // GET /api/oauth/github
   // GET /api/oauth/github/callback
 
-  /* Google OAuth */
+  // Google OAuth
 
   // GET /api/oauth/google
   // GET /api/oauth/google/callback
@@ -85,8 +87,7 @@ describe("User Statistics", function () {
 });
 
 describe("User Support (2nd level)", function () {
-  /* Slack Chat */
-  // POST /api/user/chat
+  // POST /api/user/chat [slack]
 });
 
 describe("Devices", function () {
@@ -166,3 +167,5 @@ describe("Actionable Notifications", function () {
 describe("Device Configuration", function () {
   // POST /api/device/push [push device configuration over MQTT]
 });
+
+*/
