@@ -11,14 +11,13 @@ describe("App should support", function () {
     let thx = new THiNX();
     thx.init(() => {
       chai.request(thx.app)
-      .get('/')
-      .end((err, res) => {
-            console.log("[chai] response:", res.text);
-            expect(res.status).to.equal(200);
-            expect(res.text).to.be.a('string');
-            expect(JSON.parse(res.text).healthcheck).to.equal(true);
-        done();
-      });
+        .get('/')
+        .end((err, res) => {
+          expect(res.status).to.equal(200);
+          expect(res.text).to.be.a('string');
+          expect(JSON.parse(res.text).healthcheck).to.equal(true);
+          done();
+        });
     });
   }, 20000);
 
@@ -26,16 +25,16 @@ describe("App should support", function () {
     let thx = new THiNX();
     thx.init(() => {
       chai.request(thx.app)
-      .post('/githook')
-      .send({
-        'body': 'nonsense'
-      })
-      .end((err, res) => {
-            console.log("[chai] response:", res.text);
-            expect(res.status).to.equal(200);
-            expect(res.text).to.be.a('string');
-        done();
-      });
+        .post('/githook')
+        .send({
+          'body': 'nonsense'
+        })
+        .end((err, res) => {
+          expect(res.status).to.equal(200);
+          expect(res.text).to.be.a('string');
+          expect(res.text).to.equal('Accepted');
+          done();
+        });
     });
   }, 20000);
 
@@ -43,16 +42,16 @@ describe("App should support", function () {
     let thx = new THiNX();
     thx.init(() => {
       chai.request(thx.app)
-      .post('/githook')
-      .send({
-        'body': 'nonsense'
-      })
-      .end((err, res) => {
-            console.log("[chai] response:", res.text);
-            expect(res.status).to.equal(200);
-            expect(res.text).to.be.a('string');
-        done();
-      });
+        .post('/api/githook')
+        .send({
+          'body': 'nonsense'
+        })
+        .end((err, res) => {
+          expect(res.status).to.equal(200);
+          expect(res.text).to.be.a('string');
+          expect(res.text).to.equal('Accepted');
+          done();
+        });
     });
   }, 20000);
 
@@ -60,27 +59,62 @@ describe("App should support", function () {
     let thx = new THiNX();
     thx.init(() => {
       chai.request(thx.app)
-      .post('/githook')
-      .send({
-        'body': 'nonsense'
-      })
-      .end((err, res) => {
-            console.log("[chai] response:", res.text);
-            expect(res.status).to.equal(200);
-            expect(res.text).to.be.a('string');
-        done();
-      });
+        .post('/api/user/logs/tail')
+        .send({
+          'body': 'nonsense'
+        })
+        .end((err, res) => {
+          console.log("[chai] response:", res.text);
+          expect(res.status).to.equal(200);
+          expect(res.text).to.be.a('string');
+          done();
+        });
+    });
+  }, 20000);
+
+});
+
+
+
+describe("Session Management", function () {
+
+  it("POST /api/login (invalid)", function (done) {
+    let thx = new THiNX();
+    thx.init(() => {
+      chai.request(thx.app)
+        .post('/api/login')
+        .send({
+          'username': 'test',
+          'password': 'test',
+          remember: false
+        })
+        .end((err, res) => {
+          console.log("[chai] response:", res.text, " status:", res.status);
+          //expect(res.status).to.equal(200);
+          //expect(res.text).to.be.a('string');
+          done();
+        });
+    });
+  }, 20000);
+
+  it("/api/logout (without session)", function (done) {
+    let thx = new THiNX();
+    thx.init(() => {
+      chai.request(thx.app)
+        .get('/api/logout')
+        .end((err, res) => {
+          console.log("[chai] response:", res.text, " status:", res.status);
+          expect(res.status).to.equal(200);
+          //expect(res.text).to.be.a('string');
+          //expect(JSON.parse(res.text).healthcheck).to.equal(true);
+          done();
+        });
     });
   }, 20000);
 
 });
 
 /*
-
-describe("Session Management", function () {
-  // POST /api/login
-  // GET /api/logout
-});
 
 describe("OAuth", function () {
 
