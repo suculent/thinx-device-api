@@ -1,6 +1,7 @@
 const THiNX = require("../../thinx-core.js");
 
 let chai = require('chai');
+var expect = require('chai').expect;
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
