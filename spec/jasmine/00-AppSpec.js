@@ -13,10 +13,10 @@ describe("App", function () {
       chai.request(thx.app)
       .get('/')
       .end((err, res) => {
-            console.log("chai res", res);
+            console.log("chai text+body:", res.text, res.body);
             expect(res.status).to.equal(200);
             expect(res.text).to.be.a('string');
-            expect(JSON.parse(res.body).healthcheck).to.equal(true);
+            expect(JSON.parse(res.text).healthcheck).to.equal(true);
         done();
       });
     });
