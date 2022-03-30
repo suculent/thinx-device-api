@@ -14,15 +14,13 @@ describe("App", function () {
       .get('/')
       .end((err, res) => {
             console.log("chai res", res);
-            expect(res.status).to.eql(200);
+            expect(res.status).to.equal(200);
             expect(res.body).to.be.an('object');
-            expect(res.body.healthcheck).to.eql(true);
+            expect(res.body.healthcheck).to.equal(true);
         done();
       });
     });
   }, 20000);
-
-  
 
   // App POST /githook
   // App POST /api/githook
