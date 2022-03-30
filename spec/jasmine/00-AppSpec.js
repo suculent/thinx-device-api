@@ -40,6 +40,60 @@ describe("App", function () {
       });
   });
 
+  /* Authentication */
+
+  // POST /api/login
+  // GET /api/logout
+
+  /* Slack OAuth Integration */
+
+  // POST /api/slack/direct_install
+  // GET /api/slack/redirect
+  
+  /* Github OAuth */
+
+  // GET /api/oauth/github
+  // GET /api/oauth/github/callback
+
+  /* Google OAuth */
+
+  // GET /api/oauth/google
+  // GET /api/oauth/google/callback
+
+  /* GDPR */
+
+  // POST /api/gdpr
+  // POST /api/gdpr/transfer [GDPR user data transfer]
+  // POST /api/gdpr/revoke
+
+  /* User Lifecycle */
+
+  // POST /api/user/create
+  // POST /api/user/delete
+  // POST /api/user/password/reset
+  // GET /api/user/password/reset
+  // POST /api/user/password/set
+  // GET /api/user/activate
+
+  /* User Profile */
+
+  // POST /api/user/profile
+  // GET /api/user/profile
+
+   /* Logs */
+
+  // GET /api/user/logs/audit
+  // GET /api/user/logs/build/list
+  // POST /api/user/logs/build [fetch specific build log]
+
+  /* Statistics */
+
+  // GET /api/user/stats
+
+  /* Slack Chat */
+
+  // POST /api/user/chat
+
   /* Devices */
 
   // GET /api/user/devices
@@ -51,10 +105,6 @@ describe("App", function () {
   // GET /api/device/data/:udid
   // POST /api/device/data
   // POST /api/device/revoke
-
-  /* Transformer */
-
-  // POST /api/transformer/run
 
   /* API Keys */
 
@@ -80,20 +130,6 @@ describe("App", function () {
   // GET /api/user/rsakey/list
   // POST /api/user/rsakey/revoke
 
-  /* User Lifecycle */
-
-  // POST /api/user/create
-  // POST /api/user/delete
-  // POST /api/user/password/reset
-  // GET /api/user/password/reset
-  // POST /api/user/password/set
-  // GET /api/user/activate
-
-  /* User Profile */
-
-  // POST /api/user/profile
-  // GET /api/user/profile
-
   /* Device API */
 
   // POST /device/register
@@ -103,6 +139,10 @@ describe("App", function () {
   // POST /api/device/envs
   // POST /api/device/detail
   // POST /api/device/edit
+
+  /* Transformer */
+
+  // POST /api/transformer/run
 
   /* Meshes */
 
@@ -117,12 +157,6 @@ describe("App", function () {
   // POST /api/device/envelope [latest firmware envelope]
   // POST /api/device/artifacts [get build artifacts]
 
-  /* Logs */
-
-  // GET /api/user/logs/audit
-  // GET /api/user/logs/build/list
-  // POST /api/user/logs/build [fetch specific build log]
-
   /* Device Ownership Transfer */
 
   // POST /api/transfer/request
@@ -131,27 +165,10 @@ describe("App", function () {
   // GET /api/transfer/accept [all]
   // POST /api/transfer/accept [selective]
 
-  /* Authentication, Authorization and GDPR */
+  /* Actionable Notifications */
 
-  // POST /api/login
-  // GET /api/logout
+  // POST /api/device/notification
 
-  /* Statistics */
+  /* Device Configuration */
 
-  // GET /api/user/stats
-
-  /* Slack Chat */
-
-  // POST /api/user/message
-
-
-
-
-
-  
-
-
-
-
-
-});
+  // POST /api/device/push [push device configuration over MQTT]

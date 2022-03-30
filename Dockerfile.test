@@ -108,7 +108,7 @@ RUN curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest
 RUN chmod +x ./cc-test-reporter
 
 # Test modules
-RUN npm install -g nyc mocha jasmine mocha-lcov-reporter coveralls
+RUN npm install -g nyc mocha jasmine mocha-lcov-reporter coveralls supertest
 
 # TODO: Implement Snyk Container Scanning here in addition to DockerHub manual scans...
 
