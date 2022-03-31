@@ -1,3 +1,4 @@
+
 module.exports = class THiNX {
 
   constructor() {
@@ -408,7 +409,11 @@ module.exports = class THiNX {
         };
 
         wss.on("error", function (err) {
-          console.log("☣️ [error] websocket " + err.toString());
+          let e = err.toString();
+          console.log("☣️ [error] websocket ", {e});
+          if (e.indexOf("EADDRINUSE") !== -1) {
+            throw new Error("[critical] websocket same port init failure (test edge case only; fix carefully)");
+          }
         });
 
         app._ws = {}; // list of all owner websockets
