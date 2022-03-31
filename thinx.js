@@ -4,5 +4,5 @@ let thx = new THiNX();
 
 // todo: could just await and thus allow using async anywhere
 thx.init(() => {
-  console.log("[info] THiNX Core Initialization complete.");
+  console.log("ℹ️ [info] THiNX Core Initialization complete.");
 });

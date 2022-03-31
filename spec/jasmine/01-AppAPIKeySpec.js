@@ -46,12 +46,11 @@ describe("API Keys", function () {
     }, 20000);
 
     // list
-    it("POST /api/user/apikey/list", function (done) {
+    it("GET /api/user/apikey/list", function (done) {
         let thx = new THiNX();
         thx.init(() => {
             chai.request(thx.app)
-                .post('/api/user/apikey/list')
-                .send({})
+                .get('/api/user/apikey/list')
                 .end((err, res) => {
                     console.log("[chai] response:", res.text, " status:", res.status);
                     //expect(res.status).to.equal(200);

@@ -274,15 +274,15 @@ module.exports = class THiNX {
 
         function gitHook(req, res) {
           // do not wait for response, may take ages
-          console.log("[info] Webhook request accepted...");
+          console.log("ℹ️ [info] Webhook request accepted...");
           if (typeof (req.body) === "undefined") {
             res.status(400).end("Bad request");
             return;
           }
           res.status(200).end("Accepted");
-          console.log("[info] Webhook process started...");
+          console.log("ℹ️ [info] Webhook process started...");
           watcher.process_hook(req);
-          console.log("[info] Webhook process completed.");
+          console.log("ℹ️ [info] Webhook process completed.");
         }
 
         app.post("/githook", function (req, res) {

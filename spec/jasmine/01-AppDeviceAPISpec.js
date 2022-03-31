@@ -29,8 +29,8 @@ describe("Device API", function () {
         let thx = new THiNX();
         thx.init(() => {
             chai.request(thx.app)
-                .post('/api/device/register')
-                .send({ registration: {}})
+                .post('/device/firmware')
+                .send({})
                 .end((err, res) => {
                     console.log("[chai] response:", res.text, " status:", res.status);
                     //expect(res.status).to.equal(200);
@@ -105,7 +105,7 @@ describe("Device API", function () {
         let thx = new THiNX();
         thx.init(() => {
             chai.request(thx.app)
-                .get('/device/firmware')
+                .get('/device/firmware?ott=foo')
                 .end((err, res) => {
                     console.log("[chai] response:", res.text, " status:", res.status);
                     //expect(res.status).to.equal(200);
