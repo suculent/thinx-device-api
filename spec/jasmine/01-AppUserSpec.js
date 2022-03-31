@@ -33,7 +33,7 @@ describe("GDPR", function () {
             .post('/api/gdpr/transfer')
             .send({})
             .end((err, res) => {
-              console.log("[chai] response:", res.text, " status:", res.status);
+              console.log("[chai] response /api/gdpr/transfer:", res.text, " status:", res.status);
               //expect(res.status).to.equal(200);
               //expect(res.text).to.be.a('string');
               done();
@@ -48,7 +48,7 @@ describe("GDPR", function () {
             .post('/api/gdpr/revoke')
             .send({})
             .end((err, res) => {
-              console.log("[chai] response:", res.text, " status:", res.status);
+              console.log("[chai] response /api/gdpr/revoke:", res.text, " status:", res.status);
               //expect(res.status).to.equal(200);
               //expect(res.text).to.be.a('string');
               done();
@@ -125,7 +125,7 @@ describe("User Lifecycle", function () {
             .post('/api/user/password/set')
             .send({})
             .end((err, res) => {
-              console.log("[chai] response:", res.text, " status:", res.status);
+              console.log("[chai] response /api/user/password/set:", res.text, " status:", res.status);
               //expect(res.status).to.equal(200);
               //expect(res.text).to.be.a('string');
               done();
@@ -144,7 +144,7 @@ describe("User Profile", function () {
           chai.request(thx.app)
             .get('/api/user/profile')
             .end((err, res) => {
-              console.log("[chai] response:", res.text, " status:", res.status);
+              console.log("[chai] response /api/user/profile status:", res.status);
               //expect(res.status).to.equal(200);
               //expect(res.text).to.be.a('string');
               done();
@@ -159,7 +159,7 @@ describe("User Profile", function () {
             .post('/api/user/profile')
             .send({})
             .end((err, res) => {
-              console.log("[chai] response:", res.text, " status:", res.status);
+              console.log("[chai] response /api/user/profile:", res.text, " status:", res.status);
               //expect(res.status).to.equal(200);
               //expect(res.text).to.be.a('string');
               done();
@@ -238,7 +238,7 @@ describe("User Support (2nd level)", function () {
             .post('/api/user/chat')
             .send({})
             .end((err, res) => {
-              console.log("[chai] response:", res.text, " status:", res.status);
+              console.log("[chai] response /api/user/chat:", res.text, " status:", res.status);
               //expect(res.status).to.equal(200);
               //expect(res.text).to.be.a('string');
               done();

@@ -106,7 +106,7 @@ describe("Devices", function () {
         .post('/api/device/data')
         .send({ udid: envi.oid })
         .end((err, res) => {
-          console.log("[chai] response:", res.text, " status:", res.status);
+          console.log("[chai] response /api/device/data:", res.text, " status:", res.status);
           //expect(res.status).to.equal(200);
           //expect(res.text).to.be.a('string');
           done();
