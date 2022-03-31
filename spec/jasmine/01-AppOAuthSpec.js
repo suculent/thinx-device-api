@@ -30,10 +30,10 @@ describe("OAuth", function () {
         let thx = new THiNX();
         thx.init(() => {
             chai.request(thx.app)
-                .get('/api/slack/redirect')
+                .get('/api/slack/redirect?code=A&state=B')
                 .end((err, res) => {
                     console.log("[chai] response:", res.text, " status:", res.status);
-                    //expect(res.status).to.equal(200);
+                    //expect(res.status).to.equal(200); 302
                     //expect(res.text).to.be.a('string');
                     done();
                 });

@@ -28,11 +28,11 @@ describe("API Keys", function () {
     }, 20000);
 
     // revoke
-    it("POST /api/user/revoke", function (done) {
+    it("POST /api/user/apikey/revoke", function (done) {
         let thx = new THiNX();
         thx.init(() => {
             chai.request(thx.app)
-                .post('/api/user/revoke')
+                .post('/api/user/apikey/revoke')
                 .send({
                     'alias': 'mock-apikey-alias'
                 })
