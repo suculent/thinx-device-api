@@ -19,7 +19,7 @@ describe("API Keys", function () {
                     'alias': 'mock-apikey-alias'
                 })
                 .end((err, res) => {
-                    console.log("[chai] response:", res.text, " status:", res.status);
+                    console.log("[chai] response /api/user/apikey:", res.text, " status:", res.status);
                     //expect(res.status).to.equal(200);
                     //expect(res.text).to.be.a('string');
                     done();
@@ -37,7 +37,7 @@ describe("API Keys", function () {
                     'alias': 'mock-apikey-alias'
                 })
                 .end((err, res) => {
-                    console.log("[chai] response:", res.text, " status:", res.status);
+                    console.log("[chai] response /api/user/apikey/revoke:", res.text, " status:", res.status);
                     //expect(res.status).to.equal(200);
                     //expect(res.text).to.be.a('string');
                     done();
@@ -52,7 +52,7 @@ describe("API Keys", function () {
             chai.request(thx.app)
                 .get('/api/user/apikey/list')
                 .end((err, res) => {
-                    console.log("[chai] response:", res.text, " status:", res.status);
+                    console.log("[chai] response /api/user/apikey/list:", res.text, " status:", res.status);
                     //expect(res.status).to.equal(200);
                     //expect(res.text).to.be.a('string');
                     done();

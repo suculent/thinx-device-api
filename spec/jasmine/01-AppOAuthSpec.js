@@ -32,7 +32,7 @@ describe("OAuth", function () {
             chai.request(thx.app)
                 .get('/api/slack/redirect?code=A&state=B')
                 .end((err, res) => {
-                    console.log("[chai] response /api/slack/redirect status:", res.status);
+                    console.log("[chai] response /api/slack/redirect status:", {res});
                     //expect(res.status).to.equal(200); 302
                     //expect(res.text).to.be.a('string');
                     done();

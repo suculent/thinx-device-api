@@ -121,6 +121,7 @@ describe("User Lifecycle", function () {
     it("POST /api/user/password/set", function (done) {
         let thx = new THiNX();
         thx.init(() => {
+          console.log("[chai] request /api/user/password/");
           chai.request(thx.app)
             .post('/api/user/password/set')
             .send({})
@@ -155,6 +156,7 @@ describe("User Profile", function () {
     it("POST /api/user/profile", function (done) {
         let thx = new THiNX();
         thx.init(() => {
+          console.log("[chai] response /api/user/profile");
           chai.request(thx.app)
             .post('/api/user/profile')
             .send({})
@@ -234,6 +236,7 @@ describe("User Support (2nd level)", function () {
     it("POST /api/user/chat", function (done) {
         let thx = new THiNX();
         thx.init(() => {
+          console.log("[chai] response /api/user/chat");
           chai.request(thx.app)
             .post('/api/user/chat')
             .send({})
