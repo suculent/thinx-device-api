@@ -17,7 +17,7 @@ describe("Builder", function () {
                 .post('/api/build')
                 .send({})
                 .end((err, res) => {
-                    console.log("[chai] response:", res.text, " status:", res.status);
+                    console.log("[chai] response /api/build:", res.text, " status:", res.status);
                     //expect(res.status).to.equal(200);
                     //expect(res.text).to.be.a('string');
                     done();
@@ -33,7 +33,7 @@ describe("Builder", function () {
                 .post('/api/device/envelope')
                 .send({})
                 .end((err, res) => {
-                    console.log("[chai] response:", res.text, " status:", res.status);
+                    console.log("[chai] response /api/device/envelope:", res.text, " status:", res.status);
                     //expect(res.status).to.equal(200);
                     //expect(res.text).to.be.a('string');
                     done();
@@ -49,7 +49,7 @@ describe("Builder", function () {
                 .post('/api/device/artifacts')
                 .send({})
                 .end((err, res) => {
-                    console.log("[chai] response:", res.text, " status:", res.status);
+                    console.log("[chai] response /api/device/artifacts:", res.text, " status:", res.status);
                     //expect(res.status).to.equal(200);
                     //expect(res.text).to.be.a('string');
                     done();

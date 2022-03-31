@@ -66,7 +66,6 @@ describe("App should support", function () {
           'body': 'nonsense'
         })
         .end((err, res) => {
-          //console.log("[chai] response:", res.text);
           expect(res.status).to.equal(404); // not implemented at this stage
           done();
         });
@@ -90,7 +89,6 @@ describe("Session Management", function () {
           remember: false
         })
         .end((err, res) => {
-          //console.log("[chai] response:", res.text, " status:", res.status);
           expect(res.status).to.equal(403);
           expect(res.text).to.be.a('string');
           expect(res.text).to.equal('{"success":false,"status":"invalid_credentials"}');
@@ -105,7 +103,6 @@ describe("Session Management", function () {
       chai.request(thx.app)
         .get('/api/logout')
         .end((err, res) => {
-          //console.log("[chai] response:", res.text, " status:", res.status);
           expect(res.status).to.equal(200);
           expect(res.text).to.be.a('string'); // html...
           done();
