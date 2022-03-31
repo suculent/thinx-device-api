@@ -102,6 +102,7 @@ describe("Devices", function () {
   it("POST /api/device/data", function (done) {
     let thx = new THiNX();
     thx.init(() => {
+      console.log("[chai] request /api/device/data");
       chai.request(thx.app)
         .post('/api/device/data')
         .send({ udid: envi.oid })

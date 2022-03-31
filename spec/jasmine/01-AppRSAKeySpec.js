@@ -28,6 +28,7 @@ describe("RSA Keys", function () {
     it("GET /api/user/rsakey/list", function (done) {
         let thx = new THiNX();
         thx.init(() => {
+            console.log("[chai] request /api/user/rsakey/list");
             chai.request(thx.app)
                 .get('/api/user/rsakey/list')
                 .end((err, res) => {

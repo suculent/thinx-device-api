@@ -59,6 +59,7 @@ describe("OAuth", function () {
     it("GET /api/oauth/github/callback", function (done) {
         let thx = new THiNX();
         thx.init(() => {
+            console.log("[chai] response /api/oauth/github/callback");
             chai.request(thx.app)
                 .get('/api/oauth/github/callback')
                 .end((err, res) => {
@@ -90,6 +91,7 @@ describe("OAuth", function () {
     it("GET /api/oauth/google/callback", function (done) {
         let thx = new THiNX();
         thx.init(() => {
+            console.log("[chai] response /api/oauth/google/callback");
             chai.request(thx.app)
                 .get('/api/oauth/google/callback')
                 .end((err, res) => {
