@@ -426,7 +426,7 @@ module.exports = class THiNX {
 
         function initLogTail() {
           app.post("/api/user/logs/tail", (req2, res) => {
-            if (!(router.validateSecurePOSTRequest(req2) || router.validateSession(req2, res))) return;
+            if (!(router.validateSession(req2, res))) return;
             if (typeof (req2.body.build_id) === "undefined") {
               router.respond(res, {
                 success: false,
