@@ -94,7 +94,7 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  it("POST /api/user/create (valid body)", function (done) {
+  it("POST /api/user/create (valid body) and activate (set password)", function (done) {
     console.log("[chai] POST /api/user/create (valid body)");
     chai.request(thx.app)
       .post('/api/user/create')
@@ -108,7 +108,29 @@ describe("User Routes", function () {
         dynamic_activation_code = body.status;
         expect(body.status).to.be.a('string'); // check length
         expect(body.status.length == 64);
-        done();
+        
+        console.log("[chai] GET /api/user/activate (valid body) request");
+        chai.request(thx.app)
+          .get('/api/user/activate?owner='+dynamic_owner_id+'&activation='+dynamic_activation_code)
+          .end((err, res) => {
+            //console.log("[chai] GET /api/user/activate (valid body) response:", res.text, " status:", res.status);
+            expect(res.status).to.equal(200);
+            expect(res.text).to.be.a('string'); // <html>
+            expect(res).to.be.html;
+    
+            console.log("[chai] POST /api/user/password/set (after activation)");
+            chai.request(thx.app)
+              .post('/api/user/password/set')
+              .send({ password: 'tset', rpassword: 'tset', activation: dynamic_activation_code})
+              .end((err, res) => {
+                console.log("[chai] POST /api/user/password/set (after activation) response:", res.text, " status:", res.status);
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":true,"status":"password_reset_successful"}');
+                done();
+              });
+          });
+
       });
   }, 20000);
 
@@ -118,30 +140,6 @@ describe("User Routes", function () {
       .end((err, res) => {
         expect(res.status).to.equal(403);
         done();
-      });
-  }, 20000);
-
-  it("GET /api/user/activate (valid body)", function (done) {
-    console.log("[chai] GET /api/user/activate (valid body) request");
-    chai.request(thx.app)
-      .get('/api/user/activate?owner='+dynamic_owner_id+'&activation='+dynamic_activation_code)
-      .end((err, res) => {
-        //console.log("[chai] GET /api/user/activate (valid body) response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(200);
-        expect(res.text).to.be.a('string'); // <html>
-        expect(res).to.be.html;
-
-        console.log("[chai] POST /api/user/password/set (after activation)");
-        chai.request(thx.app)
-          .post('/api/user/password/set')
-          .send({ password: 'tset', rpassword: 'tset', activation: dynamic_activation_code})
-          .end((err, res) => {
-            console.log("[chai] POST /api/user/password/set (after activation) response:", res.text, " status:", res.status);
-            expect(res.status).to.equal(200);
-            expect(res.text).to.be.a('string');
-            expect(res.text).to.equal('{"success":true,"status":"password_reset_successful"}');
-            done();
-          });
       });
   }, 20000);
 
@@ -222,7 +220,7 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  it("POST /api/login (valid)", function (done) {
+  it("POST /api/login (valid) and GET /api/user/profile (auth)", function (done) {
     agent
       .post('/api/login')
       .send({ username: 'cimrman', password: 'tset', remember: false })
@@ -237,26 +235,17 @@ describe("User Routes", function () {
           "redirectURL":"https://rtm.thinx.cloud/auth.html?t=33ed0c670113f6e8b1095a1b1857d5dc6e9db77c37122d76c45ffacef2484701&g=true"
         } */
         let body = JSON.parse(res.text);
-        jwt = body.access_token;
-        done();
-        /*
-        // The `agent` now has the sessionid cookie saved, and will send it
-        // back to the server in the next request:
-        return agent.get('/user/me')
-          .then(function (res) {
-            expect(res).to.have.status(200);*/
-      });
-  }, 20000);
-
-  it("GET /api/user/profile (cookie-auth)", function (done) {
-    console.log("[chai] GET /api/user/profile (auth) request ");
-    agent
-      .get('/api/user/profile')
-      .end((err, res) => {
-        console.log("[chai] GET /api/user/profile (auth) response status:", res.status);
-        expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
-        done();
+        jwt = 'Bearer ' + body.access_token;
+        
+        console.log("[chai] GET /api/user/profile (auth) request ");
+        agent
+          .get('/api/user/profile')
+          .end((err, res) => {
+            console.log("[chai] GET /api/user/profile (auth) response status:", res.status);
+            expect(res.status).to.equal(200);
+            //expect(res.text).to.be.a('string');
+            done();
+          });
       });
   }, 20000);
 
@@ -352,7 +341,7 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  it("GET /api/user/stats", function (done) {
+  it("GET /api/user/stats (jwt)", function (done) {
     console.log("[chai] GET /api/user/stats (jwt)");
     agent
       .get('/api/user/stats')
