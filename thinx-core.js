@@ -335,7 +335,15 @@ module.exports = class THiNX {
           saveUninitialized: true
         })); /* lgtm [js/clear-text-cookie] */
 
-        let wss = new WebSocket.Server({ server: server }); // or { noServer: true }
+        let wss;
+        
+        if (process.env.ENVIRONMENT == "test") {
+          wss = new WebSocket.Server({ noServer: true }); // or { noServer: true }
+        } else {
+          wss = new WebSocket.Server({ server: server }); // or { noServer: true }
+        }
+        
+
         const socketMap = new Map();
 
         server.on('upgrade', function (request, socket, head) {
