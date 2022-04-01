@@ -23,7 +23,7 @@ describe("ENV Vars", function () {
       .post('/api/user/env/add')
       .send({ udid: envi.oid })
       .end((err, res) => {
-        console.log("[chai] response:", res.text, " status:", res.status);
+        console.log("[chai] POST /api/user/env/add response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
@@ -35,7 +35,7 @@ describe("ENV Vars", function () {
       .post('/api/user/env/revoke')
       .send({ udid: envi.oid })
       .end((err, res) => {
-        console.log("[chai] response:", res.text, " status:", res.status);
+        console.log("[chai] POST /api/user/env/revoke response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
@@ -46,7 +46,7 @@ describe("ENV Vars", function () {
     chai.request(thx.app)
       .get('/api/user/env/list')
       .end((err, res) => {
-        console.log("[chai] response:", res.text, " status:", res.status);
+        console.log("[chai] GET /api/user/env/list response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();

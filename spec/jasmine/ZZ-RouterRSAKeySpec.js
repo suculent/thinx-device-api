@@ -24,7 +24,7 @@ describe("RSA Keys", function () {
         chai.request(thx.app)
             .get('/api/user/rsakey/list')
             .end((err, res) => {
-                console.log("[chai] response:", res.text, " status:", res.status);
+                console.log("[chai] GET /api/user/rsakey/create response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -36,7 +36,7 @@ describe("RSA Keys", function () {
         chai.request(thx.app)
             .get('/api/user/rsakey/list')
             .end((err, res) => {
-                console.log("[chai] response:", res.text, " status:", res.status);
+                console.log("[chai] GET /api/user/rsakey/list response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -48,7 +48,7 @@ describe("RSA Keys", function () {
             .post('/api/user/rsakey/revoke')
             .send()
             .end((err, res) => {
-                console.log("[chai] response:", res.text, " status:", res.status);
+                console.log("[chai] POST /api/user/rsakey/revoke response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();

@@ -22,7 +22,7 @@ describe("Meshes", function () {
         chai.request(thx.app)
             .get('/api/mesh/list')
             .end((err, res) => {
-                console.log("[chai] response:", res.text, " status:", res.status);
+                console.log("[chai] GET /api/mesh/list response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -34,7 +34,7 @@ describe("Meshes", function () {
             .post('/api/mesh/list')
             .send({ owner_id: "mock-owner-id", apikey: "mock-api-key", alias: "mock-mesh-alias" })
             .end((err, res) => {
-                console.log("[chai] response:", res.text, " status:", res.status);
+                console.log("[chai] POST /api/mesh/list response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -46,7 +46,7 @@ describe("Meshes", function () {
             .post('/api/mesh/create')
             .send({ alias: "mock-mesh-alias" })
             .end((err, res) => {
-                console.log("[chai] response:", res.text, " status:", res.status);
+                console.log("[chai] POST /api/mesh/create response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -58,7 +58,7 @@ describe("Meshes", function () {
             .post('/api/mesh/delete')
             .send('{meshid:null}')
             .end((err, res) => {
-                console.log("[chai] response:", res.text, " status:", res.status);
+                console.log("[chai] POST /api/mesh/delete response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();

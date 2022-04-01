@@ -23,7 +23,7 @@ describe("Device Ownership Transfer", function () {
             .get('/api/transfer/request')
             .send({})
             .end((err, res) => {
-                console.log("[chai] response:", res.text, " status:", res.status);
+                console.log("[chai] POST /api/transfer/request response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -34,7 +34,7 @@ describe("Device Ownership Transfer", function () {
         chai.request(thx.app)
             .get('/api/transfer/decline')
             .end((err, res) => {
-                console.log("[chai] response:", res.text, " status:", res.status);
+                console.log("[chai] GET /api/transfer/decline response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -46,7 +46,7 @@ describe("Device Ownership Transfer", function () {
             .get('/api/transfer/decline')
             .send({})
             .end((err, res) => {
-                console.log("[chai] response:", res.text, " status:", res.status);
+                console.log("[chai] POST /api/transfer/decline response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -57,7 +57,7 @@ describe("Device Ownership Transfer", function () {
         chai.request(thx.app)
             .get('/api/transfer/accept')
             .end((err, res) => {
-                console.log("[chai] response:", res.text, " status:", res.status);
+                console.log("[chai] GET /api/transfer/accept response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -69,7 +69,7 @@ describe("Device Ownership Transfer", function () {
             .get('/api/transfer/accept')
             .send({})
             .end((err, res) => {
-                console.log("[chai] response:", res.text, " status:", res.status);
+                console.log("[chai] POST /api/transfer/accept response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();

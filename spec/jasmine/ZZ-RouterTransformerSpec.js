@@ -15,7 +15,7 @@ describe("Transformer", function () {
         .post('/api/transformer/run')
         .send({})
         .end((err, res) => {
-          console.log("[chai] response:", res.text, " status:", res.status);
+          console.log("[chai] POST /api/transformer/run response:", res.text, " status:", res.status);
           //expect(res.status).to.equal(200);
           //expect(res.text).to.be.a('string');
           done();

@@ -24,7 +24,7 @@ describe("OAuth", function () {
         chai.request(thx.app)
             .get('/api/slack/direct_install')
             .end((err, res) => {
-                console.log("[chai] response:", res.text, " status:", res.status);
+                console.log("[chai] GET /api/slack/direct_install response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();

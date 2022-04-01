@@ -24,7 +24,7 @@ describe("Sources (repositories)", function () {
         chai.request(thx.app)
             .get('/api/user/sources/list')
             .end((err, res) => {
-                console.log("[chai] response:", res.text, " status:", res.status);
+                console.log("[chai] GET /api/user/sources/list response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -36,7 +36,7 @@ describe("Sources (repositories)", function () {
             .post('/api/user/source')
             .send({})
             .end((err, res) => {
-                console.log("[chai] response:", res.text, " status:", res.status);
+                console.log("[chai] POST /api/user/source response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -48,7 +48,7 @@ describe("Sources (repositories)", function () {
             .post('/api/user/source/revoke')
             .send({ key_id: null })
             .end((err, res) => {
-                console.log("[chai] response:", res.text, " status:", res.status);
+                console.log("[chai] POST /api/user/source/revoke response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();

@@ -20,11 +20,11 @@ describe("Devices", function () {
   });
 
   it("GET /api/user/devices (noauth)", function (done) {
-    console.log("GET /api/user/devices");
+    console.log("[chai] GET /api/user/devices (noauth)");
     chai.request(thx.app)
       .get('/api/user/devices')
       .end((err, res) => {
-        console.log("[chai] response:", res.text, " status:", res.status);
+        console.log("[chai] GET /api/user/devices (noauth) response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
@@ -32,12 +32,12 @@ describe("Devices", function () {
   }, 20000);
 
   it("GET /api/user/devices (cookie)", function (done) {
-    console.log("GET /api/user/devices");
+    console.log("[chai] GET /api/user/devices (cookie)");
     chai.request(thx.app)
       .get('/api/user/devices')
       .set('Cookie', 'thx-session-cookie=something;owner='+envi.oid)
       .end((err, res) => {
-        console.log("[chai] response:", res.text, " status:", res.status);
+        console.log("[chai] GET /api/user/devices (cookie) response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
@@ -61,7 +61,7 @@ describe("Devices", function () {
       .post('/api/device/edit')
       .send({ changes: { alias: "edited-alias" } })
       .end((err, res) => {
-        console.log("[chai] response:", res.text, " status:", res.status);
+        console.log("[chai] POST /api/device/edit response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
@@ -74,7 +74,7 @@ describe("Devices", function () {
       .post('/api/device/detach')
       .send({ udid: envi.oid })
       .end((err, res) => {
-        console.log("[chai] response:", res.text, " status:", res.status);
+        console.log("[chai] POST /api/device/detach response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
@@ -87,7 +87,7 @@ describe("Devices", function () {
       .post('/api/device/mesh/attach')
       .send({ udid: envi.oid })
       .end((err, res) => {
-        console.log("[chai] response:", res.text, " status:", res.status);
+        console.log("[chai] POST /api/device/mesh/attach response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
@@ -101,7 +101,7 @@ describe("Devices", function () {
       .post('/api/device/mesh/detach')
       .send({ udid: envi.oid })
       .end((err, res) => {
-        console.log("[chai] response:", res.text, " status:", res.status);
+        console.log("[chai] POST /api/device/mesh/detach response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
@@ -127,7 +127,7 @@ describe("Devices", function () {
       .post('/api/device/revoke')
       .send({ udid: envi.oid })
       .end((err, res) => {
-        console.log("[chai] response:", res.text, " status:", res.status);
+        console.log("[chai] POST /api/device/revoke response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
@@ -145,7 +145,7 @@ describe("Devices", function () {
       .post('/api/device/push')
       .send({ key: "value" })
       .end((err, res) => {
-        console.log("[chai] response:", res.text, " status:", res.status);
+        console.log("[chai] POST /api/device/push response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();

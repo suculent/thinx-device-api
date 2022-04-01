@@ -59,7 +59,7 @@ describe("Device API", function () {
                 .post('/api/device/envs')
                 .send({})
                 .end((err, res) => {
-                    console.log("[chai] response:", res.text, " status:", res.status);
+                    console.log("[chai] POST /api/device/envs response:", res.text, " status:", res.status);
                     //expect(res.status).to.equal(200);
                     //expect(res.text).to.be.a('string');
                     done();
@@ -71,7 +71,7 @@ describe("Device API", function () {
                 .post('/api/device/detail')
                 .send({})
                 .end((err, res) => {
-                    console.log("[chai] response:", res.text, " status:", res.status);
+                    console.log("[chai] POST /api/device/detail response:", res.text, " status:", res.status);
                     //expect(res.status).to.equal(200);
                     //expect(res.text).to.be.a('string');
                     done();
@@ -83,7 +83,7 @@ describe("Device API", function () {
                 .post('/api/device/edit')
                 .send({changes: { alias: "edited-alias"}})
                 .end((err, res) => {
-                    console.log("[chai] response:", res.text, " status:", res.status);
+                    console.log("[chai] POST /api/device/edit response:", res.text, " status:", res.status);
                     //expect(res.status).to.equal(200);
                     //expect(res.text).to.be.a('string');
                     done();
