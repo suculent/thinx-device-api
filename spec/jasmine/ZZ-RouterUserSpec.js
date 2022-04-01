@@ -138,7 +138,7 @@ describe("User Lifecycle", function () {
         //console.log("[chai] GET /api/user/activate (valid body) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string'); // <html>
-        expect(res.text).to.be.html;
+        expect(res).to.be.html;
 
         console.log("[chai] POST /api/user/password/set (after activation)");
         chai.request(thx.app)
@@ -269,7 +269,6 @@ describe("User Profile", function () {
   it("GET /api/user/profile (cookie-auth)", function (done) {
     console.log("[chai] GET /api/user/profile (auth) request ");
     agent
-      .request(thx.app)
       .get('/api/user/profile')
       .end((err, res) => {
         console.log("[chai] GET /api/user/profile (auth) response status:", res.status);
@@ -287,7 +286,7 @@ describe("User Profile", function () {
       .get('/api/user/profile')
       .set('Authorization', jwt)
       .end((err, res) => {
-        console.log("[chai] GET /api/user/profile (auth) response status:", res.status);
+        console.log("[chai] GET /api/user/profile (auth) response ", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
@@ -297,7 +296,6 @@ describe("User Profile", function () {
   it("POST /api/user/profile (auth)", function (done) {
     console.log("[chai] POST /api/user/profile (auth) request");
     agent
-      .request(thx.app)
       .post('/api/user/profile')
       .send({})
       .end((err, res) => {
