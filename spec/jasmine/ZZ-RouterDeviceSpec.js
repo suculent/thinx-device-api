@@ -19,10 +19,23 @@ describe("Devices", function () {
     });
   });
 
-  it("GET /api/user/devices", function (done) {
+  it("GET /api/user/devices (noauth)", function (done) {
     console.log("GET /api/user/devices");
     chai.request(thx.app)
       .get('/api/user/devices')
+      .end((err, res) => {
+        console.log("[chai] response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("GET /api/user/devices (cookie)", function (done) {
+    console.log("GET /api/user/devices");
+    chai.request(thx.app)
+      .get('/api/user/devices')
+      .set('Cookie', 'thx-session-cookie=something;owner='+envi.oid)
       .end((err, res) => {
         console.log("[chai] response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
