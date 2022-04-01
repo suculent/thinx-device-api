@@ -3,10 +3,13 @@
 const THiNX = require("../../thinx-core.js");
 
 let chai = require('chai');
+var expect = require('chai').expect;
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
-describe("API Keys", function () {
+var envi = require("../_envi.json");
+
+describe("RSA Keys", function () {
 
     let thx;
 
@@ -17,45 +20,35 @@ describe("API Keys", function () {
         });
     });
 
-    // create
-    it("POST /api/user/apikey", function (done) {
-        console.log("[chai] request /api/user/apikey");
+    it("GET /api/user/rsakey/create", function (done) {
         chai.request(thx.app)
-            .post('/api/user/apikey')
-            .send({
-                'alias': 'mock-apikey-alias'
-            })
+            .get('/api/user/rsakey/list')
             .end((err, res) => {
-                console.log("[chai] response /api/user/apikey:", res.text, " status:", res.status);
+                console.log("[chai] response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
             });
     }, 20000);
 
-    // revoke
-    it("POST /api/user/apikey/revoke", function (done) {
-        console.log("[chai] request /api/user/apikey/revoke");
+    it("GET /api/user/rsakey/list", function (done) {
+        console.log("[chai] request /api/user/rsakey/list");
         chai.request(thx.app)
-            .post('/api/user/apikey/revoke')
-            .send({
-                'alias': 'mock-apikey-alias'
-            })
+            .get('/api/user/rsakey/list')
             .end((err, res) => {
-                console.log("[chai] response /api/user/apikey/revoke:", res.text, " status:", res.status);
+                console.log("[chai] response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
             });
     }, 20000);
 
-    // list
-    it("GET /api/user/apikey/list", function (done) {
-        console.log("[chai] request GET /api/user/apikey/list");
+    it("POST /api/user/rsakey/revoke", function (done) {
         chai.request(thx.app)
-            .get('/api/user/apikey/list')
+            .get('/api/user/rsakey/revoke')
+            .send({ key_id: null })
             .end((err, res) => {
-                console.log("[chai] response /api/user/apikey/list:", res.text, " status:", res.status);
+                console.log("[chai] response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();

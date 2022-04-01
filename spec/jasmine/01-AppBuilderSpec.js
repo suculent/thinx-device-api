@@ -6,7 +6,7 @@ let chai = require('chai');
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
-describe("API Keys", function () {
+describe("Builder", function () {
 
     let thx;
 
@@ -17,45 +17,39 @@ describe("API Keys", function () {
         });
     });
 
-    // create
-    it("POST /api/user/apikey", function (done) {
-        console.log("[chai] request /api/user/apikey");
+    // run build manually
+    it("POST /api/build", function (done) {
         chai.request(thx.app)
-            .post('/api/user/apikey')
-            .send({
-                'alias': 'mock-apikey-alias'
-            })
+            .post('/api/build')
+            .send({})
             .end((err, res) => {
-                console.log("[chai] response /api/user/apikey:", res.text, " status:", res.status);
+                console.log("[chai] response /api/build:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
             });
     }, 20000);
 
-    // revoke
-    it("POST /api/user/apikey/revoke", function (done) {
-        console.log("[chai] request /api/user/apikey/revoke");
+    // latest firmware envelope
+    it("POST /api/device/envelope", function (done) {
         chai.request(thx.app)
-            .post('/api/user/apikey/revoke')
-            .send({
-                'alias': 'mock-apikey-alias'
-            })
+            .post('/api/device/envelope')
+            .send({})
             .end((err, res) => {
-                console.log("[chai] response /api/user/apikey/revoke:", res.text, " status:", res.status);
+                console.log("[chai] response /api/device/envelope:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
             });
     }, 20000);
 
-    // list
-    it("GET /api/user/apikey/list", function (done) {
-        console.log("[chai] request GET /api/user/apikey/list");
+    // get build artifacts
+    it("POST /api/device/artifacts", function (done) {
         chai.request(thx.app)
-            .get('/api/user/apikey/list')
+            .post('/api/device/artifacts')
+            .send({})
             .end((err, res) => {
-                console.log("[chai] response /api/user/apikey/list:", res.text, " status:", res.status);
+                console.log("[chai] response /api/device/artifacts:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
