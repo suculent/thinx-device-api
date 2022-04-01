@@ -67,6 +67,17 @@ describe("OAuth", function () {
             });
     }, 20000);
 
+    it("GET /api/oauth/github/callback?code=B", function (done) {
+        console.log("[chai] response /api/oauth/github/callback");
+        chai.request(thx.app)
+            .get('/api/oauth/github/callback?code=B')
+            .end((err, res) => {
+                console.log("[chai] response /api/oauth/github/callback?code=B status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
 
     // Google OAuth
 

@@ -45,8 +45,8 @@ describe("RSA Keys", function () {
 
     it("POST /api/user/rsakey/revoke", function (done) {
         chai.request(thx.app)
-            .get('/api/user/rsakey/revoke')
-            .send({ key_id: null })
+            .post('/api/user/rsakey/revoke')
+            .send()
             .end((err, res) => {
                 console.log("[chai] response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);

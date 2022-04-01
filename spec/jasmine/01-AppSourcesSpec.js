@@ -33,7 +33,7 @@ describe("Sources (repositories)", function () {
 
     it("POST /api/user/source", function (done) {
         chai.request(thx.app)
-            .get('/api/user/source')
+            .post('/api/user/source')
             .send({})
             .end((err, res) => {
                 console.log("[chai] response:", res.text, " status:", res.status);
@@ -45,7 +45,7 @@ describe("Sources (repositories)", function () {
 
     it("POST /api/user/source/revoke", function (done) {
         chai.request(thx.app)
-            .get('/api/user/source/revoke')
+            .post('/api/user/source/revoke')
             .send({ key_id: null })
             .end((err, res) => {
                 console.log("[chai] response:", res.text, " status:", res.status);
