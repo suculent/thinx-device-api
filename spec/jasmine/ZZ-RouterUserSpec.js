@@ -85,7 +85,7 @@ describe("User Routes", function () {
   it("POST /api/user/create (invalid body)", function (done) {
     chai.request(thx.app)
       .post('/api/user/create')
-      .send({ })
+      .send({})
       .end((err, res) => {
         console.log("[chai] POST /api/user/create (invalid body) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
@@ -108,20 +108,20 @@ describe("User Routes", function () {
         dynamic_activation_code = body.status;
         expect(body.status).to.be.a('string'); // check length
         expect(body.status.length == 64);
-        
+
         console.log("[chai] GET /api/user/activate (valid body) request");
         chai.request(thx.app)
-          .get('/api/user/activate?owner='+dynamic_owner_id+'&activation='+dynamic_activation_code)
+          .get('/api/user/activate?owner=' + dynamic_owner_id + '&activation=' + dynamic_activation_code)
           .end((err, res) => {
             //console.log("[chai] GET /api/user/activate (valid body) response:", res.text, " status:", res.status);
             expect(res.status).to.equal(200);
             expect(res.text).to.be.a('string'); // <html>
             expect(res).to.be.html;
-    
+
             console.log("[chai] POST /api/user/password/set (after activation)");
             chai.request(thx.app)
               .post('/api/user/password/set')
-              .send({ password: 'tset', rpassword: 'tset', activation: dynamic_activation_code})
+              .send({ password: 'tset', rpassword: 'tset', activation: dynamic_activation_code })
               .end((err, res) => {
                 console.log("[chai] POST /api/user/password/set (after activation) response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
@@ -190,7 +190,7 @@ describe("User Routes", function () {
         done();
       });
   }, 20000);
-  
+
   //
   // User Profile
   //
@@ -236,15 +236,28 @@ describe("User Routes", function () {
         } */
         let body = JSON.parse(res.text);
         jwt = 'Bearer ' + body.access_token;
-        
-        console.log("[chai] GET /api/user/profile (auth) request ");
+
+        // Old UI does this
+        let token = body.redirectURL.replace("https://rtm.thinx.cloud/auth.html?t=", "").replace("&g=true", "");
+
+        // Otherwise it's just calling the login endpoint again with the legacy login token...
         agent
-          .get('/api/user/profile')
+          .post('/api/login')
+          .send({ token: token })
           .end((err, res) => {
-            console.log("[chai] GET /api/user/profile (auth) response status:", res.status);
+            console.log("[chai] /api/login (+token) response status:", res.status);
             expect(res.status).to.equal(200);
             //expect(res.text).to.be.a('string');
-            done();
+
+            console.log("[chai] GET /api/user/profile (auth) request ");
+            agent
+              .get('/api/user/profile')
+              .end((err, res) => {
+                console.log("[chai] GET /api/user/profile (auth) response status:", res.status);
+                expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+              });
           });
       });
   }, 20000);
@@ -277,11 +290,11 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  
+
   //
   // User Logs
   //
-  
+
   it("GET /api/user/logs/audit", function (done) {
     chai.request(thx.app)
       .get('/api/user/logs/audit')
@@ -295,13 +308,13 @@ describe("User Routes", function () {
 
   it("GET /api/user/logs/build/list", function (done) {
     chai.request(thx.app)
-        .get('/api/user/logs/build/list')
-        .end((err, res) => {
-          console.log("[chai] GET /api/user/logs/build/list response:", res.text, " status:", res.status);
-          expect(res.status).to.equal(403);
-          //expect(res.text).to.be.a('string');
-          done();
-        });
+      .get('/api/user/logs/build/list')
+      .end((err, res) => {
+        console.log("[chai] GET /api/user/logs/build/list response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(403);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
   }, 20000);
 
   it("POST /api/user/logs/build", function (done) {

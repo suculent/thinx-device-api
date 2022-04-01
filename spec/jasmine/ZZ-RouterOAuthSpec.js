@@ -24,7 +24,6 @@ describe("OAuth", function () {
         chai.request(thx.app)
             .get('/api/slack/direct_install')
             .end((err, res) => {
-                //console.log("[chai] GET /api/slack/direct_install response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res).to.be.html;
                 done();
@@ -34,11 +33,9 @@ describe("OAuth", function () {
     it("GET /api/slack/redirect", function (done) {
         chai.request(thx.app)
             .get('/api/slack/redirect?code=A&state=B')
-            .end((err, res) => {
+            .end((err/* , res */) => {
                 console.log("[chai] response /api/slack/redirect err (status undefined):", { err });
                 expect(err.code == 'ECONNREFUSED');
-                //expect(res.status).to.equal(200); 302
-                //expect(res.text).to.be.a('string');
                 done();
             });
     }, 20000);
@@ -46,6 +43,7 @@ describe("OAuth", function () {
     // Github OAuth
 
     it("GET /api/oauth/github", function (done) {
+        console.log("[chai] GET /api/oauth/github request");
         chai.request(thx.app)
             .get('/api/oauth/github')
             .end((err, res) => {
