@@ -243,21 +243,22 @@ describe("User Routes", function () {
         let token = body.redirectURL.replace("https://rtm.thinx.cloud/auth.html?t=", "").replace("&g=true", "");
 
         // Otherwise it's just calling the login endpoint again with the legacy login token...
+        console.log("[chai] GET /api/login with token", jwt);
         agent
           .post('/api/login')
           .send({ token: token })
           .end((err, res) => {
-            console.log("[chai] /api/login (auth+) response ", res.text, " status:", res.status);
+            console.log("[chai] /api/login (auth+) response '", res.text, "' status:", res.status);
             expect(res.status).to.equal(200);
             //expect(res.text).to.be.a('string');
 
             // TODO: FIXME: This login does not work but it should by the docs (or with added JWT token at lease)
-            console.log("[chai] GET /api/user/profile (jwt) request ");
+            console.log("[chai] GET /api/user/profile (jwt) request with token", jwt);
             return agent
               .get('/api/user/profile')
               .set('Authorization', jwt)
               .end((err, res) => {
-                console.log("[chai] GET /api/user/profile (jwt) response ", res.text, " status:", res.status);
+                console.log("[chai] GET /api/user/profile (jwt) response '", res.text, "' status:", res.status);
                 expect(res.status).to.equal(403);
                 //expect(res.text).to.be.a('string');
                 done();
