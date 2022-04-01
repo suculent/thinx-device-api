@@ -13,6 +13,7 @@ describe("API Keys", function () {
     it("POST /api/user/apikey", function (done) {
         let thx = new THiNX();
         thx.init(() => {
+            console.log("[chai] request /api/user/apikey");
             chai.request(thx.app)
                 .post('/api/user/apikey')
                 .send({
@@ -31,6 +32,7 @@ describe("API Keys", function () {
     it("POST /api/user/apikey/revoke", function (done) {
         let thx = new THiNX();
         thx.init(() => {
+            console.log("[chai] request /api/user/apikey/revoke");
             chai.request(thx.app)
                 .post('/api/user/apikey/revoke')
                 .send({
@@ -49,6 +51,7 @@ describe("API Keys", function () {
     it("GET /api/user/apikey/list", function (done) {
         let thx = new THiNX();
         thx.init(() => {
+            console.log("[chai] request GET /api/user/apikey/list");
             chai.request(thx.app)
                 .get('/api/user/apikey/list')
                 .end((err, res) => {
