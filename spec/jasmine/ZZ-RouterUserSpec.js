@@ -65,10 +65,34 @@ describe("GDPR", function () {
 
 describe("User Lifecycle", function () {
 
-  it("POST /api/user/create", function (done) {
+  let user_info = {
+    first_name: "Dynamic",
+    last_name: "User",
+    email: "dynamic@example.com",
+    username: "dynamic"
+  };
+
+  let dynamic_activation_code = null;
+
+  let dynamic_owner_id = null;
+
+  it("POST /api/user/create (invalid body)", function (done) {
     chai.request(thx.app)
       .post('/api/user/create')
-      .send({})
+      .send({ })
+      .end((err, res) => {
+        console.log("[chai] POST /api/user/create response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(403);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/user/create (valid body)", function (done) {
+    console.log("[chai] POST /api/user/create (valid body)");
+    chai.request(thx.app)
+      .post('/api/user/create')
+      .send(user_info)
       .end((err, res) => {
         console.log("[chai] POST /api/user/create response:", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
@@ -126,6 +150,7 @@ describe("User Lifecycle", function () {
   }, 20000);
 
   it("GET /api/user/activate", function (done) {
+    console.log("[chai] GET /api/user/activate request");
     chai.request(thx.app)
       .get('/api/user/activate')
       .end((err, res) => {

@@ -34,9 +34,8 @@ describe("Device Ownership Transfer", function () {
         chai.request(thx.app)
             .get('/api/transfer/decline')
             .end((err, res) => {
-                console.log("[chai] GET /api/transfer/decline response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string'); // <html>
                 done();
             });
     }, 20000);
