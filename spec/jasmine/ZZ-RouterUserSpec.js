@@ -24,7 +24,7 @@ let thx = new THiNX();
 let agent;
 let jwt = null;
 
-describe("GDPR", function () {
+describe("User Routes", function () {
 
   beforeAll((done) => {
     thx.init(() => {
@@ -77,19 +77,10 @@ describe("GDPR", function () {
         done();
       });
   }, 20000);
-});
 
-describe("User Lifecycle", function () {
-
-  beforeAll((done) => {
-    agent = chai.request.agent(thx.app);
-    done();
-  });
-
-  afterAll((done) => {
-    agent.close();
-    done();
-  });
+  //
+  // User Lifecycle
+  //
 
   it("POST /api/user/create (invalid body)", function (done) {
     chai.request(thx.app)
@@ -201,19 +192,10 @@ describe("User Lifecycle", function () {
         done();
       });
   }, 20000);
-});
-
-describe("User Profile", function () {
-
-  beforeAll((done) => {
-    agent = chai.request.agent(thx.app);
-    done();
-  });
-
-  afterAll((done) => {
-    agent.close();
-    done();
-  });
+  
+  //
+  // User Profile
+  //
 
   it("GET /api/user/profile (noauth)", function (done) {
     console.log("[chai] GET /api/user/profile (noauth) request ");
@@ -307,19 +289,9 @@ describe("User Profile", function () {
   }, 20000);
 
   
-});
-
-describe("User Logs", function () {
-
-  beforeAll((done) => {
-    agent = chai.request.agent(thx.app);
-    done();
-  });
-
-  afterAll((done) => {
-    agent.close();
-    done();
-  });
+  //
+  // User Logs
+  //
   
   it("GET /api/user/logs/audit", function (done) {
     chai.request(thx.app)
@@ -354,9 +326,10 @@ describe("User Logs", function () {
         done();
       });
   }, 20000);
-});
 
-describe("User Statistics", function () {
+  //
+  // User Statistics
+  //
 
   beforeAll((done) => {
     agent = chai.request.agent(thx.app);
@@ -378,9 +351,24 @@ describe("User Statistics", function () {
         done();
       });
   }, 20000);
-});
 
-describe("User Support (2nd level)", function () {
+  it("GET /api/user/stats", function (done) {
+    console.log("[chai] GET /api/user/stats (jwt)");
+    agent
+      .get('/api/user/stats')
+      .set('Authorization', jwt)
+      .end((err, res) => {
+        console.log("[chai] GET /api/user/stats (jwt) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  //
+  // User Support (2nd level)
+  //
+
   // [error] websocket Error: listen EADDRINUSE: address already in use 0.0.0.0:7442
   it("POST /api/user/chat", function (done) {
     console.log("[chai] POST /api/user/chat request");
