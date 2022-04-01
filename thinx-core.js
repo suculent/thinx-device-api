@@ -447,6 +447,7 @@ module.exports = class THiNX {
         }
 
         function initSocket(ws, msgr, logsocket) {
+
           ws.on("message", (message) => {
             console.log(`ℹ️ [info] [ws] incoming message: ${message}`);
             if (message.indexOf("{}") == 0) return; // skip empty messages
@@ -533,7 +534,15 @@ module.exports = class THiNX {
           initSocket(ws, app.messenger, logsocket);
 
         }).on("error", function (err) {
-          console.log(`☣️ [error] in WSS connection ${err}`);
+          
+          // EADDRINUSE happens in test only; othewise should be reported
+          if (process.env.ENVIRONMENT == "test") {
+            if (err.toString().indexOf("EADDRINUSE") == -1) {
+              console.log(`☣️ [error] in WSS connection ${err}, ${req.url}`);
+            }
+          } else {
+            console.log(`☣️ [error] in WSS connection ${err}, ${req.url}`);
+          }
         });
 
         //

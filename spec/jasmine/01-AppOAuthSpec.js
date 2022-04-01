@@ -31,7 +31,7 @@ describe("OAuth", function () {
             chai.request(thx.app)
                 .get('/api/slack/redirect?code=A&state=B')
                 .end((err, res) => {
-                    console.log("[chai] response /api/slack/redirect status:", {res});
+                    console.log("[chai] response /api/slack/redirect err (status undefined):", {err});
                     //expect(res.status).to.equal(200); 302
                     //expect(res.text).to.be.a('string');
                     done();
