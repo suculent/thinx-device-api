@@ -132,10 +132,11 @@ describe("User Lifecycle", function () {
 describe("User Profile", function () {
 
   it("GET /api/user/profile", function (done) {
+    console.log("[chai] request GET /api/user/profile");
     chai.request(thx.app)
       .get('/api/user/profile')
       .end((err, res) => {
-        console.log("[chai] response /api/user/profile status:", res.status);
+        console.log("[chai] response GET /api/user/profile status:", res.status);
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
@@ -143,12 +144,12 @@ describe("User Profile", function () {
   }, 20000);
 
   it("POST /api/user/profile", function (done) {
-    console.log("[chai] response /api/user/profile");
+    console.log("[chai] request POST /api/user/profile");
     chai.request(thx.app)
       .post('/api/user/profile')
       .send({})
       .end((err, res) => {
-        console.log("[chai] response /api/user/profile:", res.text, " status:", res.status);
+        console.log("[chai] response POST /api/user/profile:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();

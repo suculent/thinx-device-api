@@ -36,6 +36,7 @@ describe("OAuth", function () {
             .get('/api/slack/redirect?code=A&state=B')
             .end((err, res) => {
                 console.log("[chai] response /api/slack/redirect err (status undefined):", { err });
+                expect(err.code == 'ECONNREFUSED');
                 //expect(res.status).to.equal(200); 302
                 //expect(res.text).to.be.a('string');
                 done();
@@ -56,7 +57,7 @@ describe("OAuth", function () {
     }, 20000);
 
     it("GET /api/oauth/github/callback", function (done) {
-        console.log("[chai] response /api/oauth/github/callback");
+        console.log("[chai] request /api/oauth/github/callback");
         chai.request(thx.app)
             .get('/api/oauth/github/callback')
             .end((err, res) => {
@@ -68,7 +69,7 @@ describe("OAuth", function () {
     }, 20000);
 
     it("GET /api/oauth/github/callback?code=B", function (done) {
-        console.log("[chai] response /api/oauth/github/callback");
+        console.log("[chai] request /api/oauth/github/callback");
         chai.request(thx.app)
             .get('/api/oauth/github/callback?code=B')
             .end((err, res) => {

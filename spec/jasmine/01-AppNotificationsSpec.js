@@ -10,6 +10,7 @@ chai.use(chaiHttp);
 describe("Actionable Notifications", function () {
 
     it("POST /api/device/notification", function (done) {
+        console.log("[chai] POST /api/device/notification");
         let thx = new THiNX();
         thx.init(() => {
             chai.request(thx.app)
