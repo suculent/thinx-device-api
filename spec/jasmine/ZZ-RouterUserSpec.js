@@ -109,9 +109,10 @@ describe("User Routes", function () {
         expect(body.status).to.be.a('string'); // check length
         expect(body.status.length == 64);
 
-        console.log("[chai] GET /api/user/activate (valid body) request");
+        let rurl = '/api/user/activate?owner=' + dynamic_owner_id + '&activation=' + dynamic_activation_code;
+        console.log("[chai] GET /api/user/activate (valid body) request:", rurl);
         chai.request(thx.app)
-          .get('/api/user/activate?owner=' + dynamic_owner_id + '&activation=' + dynamic_activation_code)
+          .get(rurl)
           .end((err, res) => {
             //console.log("[chai] GET /api/user/activate (valid body) response:", res.text, " status:", res.status);
             expect(res.status).to.equal(200);
@@ -134,7 +135,7 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  it("GET /api/user/activate", function (done) {
+  it("GET /api/user/activate (noauth)", function (done) {
     chai.request(thx.app)
       .get('/api/user/activate')
       .end((err, res) => {
@@ -143,7 +144,7 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  it("POST /api/user/delete", function (done) {
+  it("POST /api/user/delete (noauth)", function (done) {
     chai.request(thx.app)
       .post('/api/user/delete')
       .send({})
@@ -155,7 +156,7 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  it("POST /api/user/password/reset", function (done) {
+  it("POST /api/user/password/reset (noauth)", function (done) {
     chai.request(thx.app)
       .post('/api/user/password/reset')
       .send({})
@@ -220,7 +221,7 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  it("POST /api/login (valid) and GET /api/user/profile (auth)", function (done) {
+  it("POST /api/login (valid) and GET /api/user/profile (auth+)", function (done) {
     agent
       .post('/api/login')
       .send({ username: 'cimrman', password: 'tset', remember: false })
@@ -245,15 +246,15 @@ describe("User Routes", function () {
           .post('/api/login')
           .send({ token: token })
           .end((err, res) => {
-            console.log("[chai] /api/login (+token) response status:", res.status);
+            console.log("[chai] /api/login (auth+) response status:", res.status);
             expect(res.status).to.equal(200);
             //expect(res.text).to.be.a('string');
 
-            console.log("[chai] GET /api/user/profile (auth) request ");
+            console.log("[chai] GET /api/user/profile (auth+) request ");
             agent
               .get('/api/user/profile')
               .end((err, res) => {
-                console.log("[chai] GET /api/user/profile (auth) response status:", res.status);
+                console.log("[chai] GET /api/user/profile (auth+) response status:", res.status);
                 expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -263,7 +264,7 @@ describe("User Routes", function () {
   }, 20000);
 
   it("GET /api/user/profile (jwt.auth)", function (done) {
-    console.log("[chai] GET /api/user/profile (auth) request ");
+    console.log("[chai] GET /api/user/profile (auth) request");
     expect(jwt).not.to.be.undefined;
     chai
       .request(thx.app)
@@ -277,8 +278,8 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  it("POST /api/user/profile (auth)", function (done) {
-    console.log("[chai] POST /api/user/profile (auth) request");
+  it("POST /api/user/profile (invalid)", function (done) {
+    console.log("[chai] POST /api/user/profile (invalid) request");
     agent
       .post('/api/user/profile')
       .send({})
@@ -332,16 +333,6 @@ describe("User Routes", function () {
   //
   // User Statistics
   //
-
-  beforeAll((done) => {
-    agent = chai.request.agent(thx.app);
-    done();
-  });
-
-  afterAll((done) => {
-    agent.close();
-    done();
-  });
 
   it("GET /api/user/stats", function (done) {
     chai.request(thx.app)
