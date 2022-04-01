@@ -57,7 +57,7 @@ describe("App should support", function () {
       });
   }, 20000);
 
-  it("POST /api/user/logs/tail", function (done) {
+  it("POST /api/user/logs/tail (should not exist before login)", function (done) {
     chai.request(thx.app)
       .post('/api/user/logs/tail')
       .send({
@@ -71,20 +71,13 @@ describe("App should support", function () {
 
 });
 
-var agent;
-
 describe("Session Management", function () {
 
   beforeAll((done) => {
     thx = new THiNX();
     thx.init(() => {
-      agent = chai.request.agent(thx.app);
       done();
     });
-  });
-
-  afterAll(() => {
-    agent.close();
   });
 
   it("POST /api/login (invalid)", function (done) {
@@ -109,35 +102,6 @@ describe("Session Management", function () {
       .end((err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string'); // html...
-        done();
-      });
-  }, 20000);
-
-  it("POST /api/login (valid)", function (done) {
-    agent
-      .post('/api/login')
-      .send({ username: 'cimrman', password: 'test' })
-      .then(function (res) {
-        console.log(`[chai] POST /api/login (valid) response: ${res.text} status: ${res.status}`);
-        expect(res).to.have.cookie('x-thx-core');
-        done();
-        /*
-        // The `agent` now has the sessionid cookie saved, and will send it
-        // back to the server in the next request:
-        return agent.get('/user/me')
-          .then(function (res) {
-            expect(res).to.have.status(200);*/
-      });
-  }, 20000);
-
-  it("POST /api/user/logs/tail (with session)", function (done) {
-    agent
-      .post('/api/user/logs/tail')
-      .send({
-        'body': 'nonsense'
-      })
-      .end((err, res) => {
-        expect(res.status).to.equal(200); // not implemented at this stage
         done();
       });
   }, 20000);

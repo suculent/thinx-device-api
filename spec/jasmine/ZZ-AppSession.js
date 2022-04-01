@@ -68,4 +68,17 @@ describe("Session Management", function () {
       });
   }, 20000);
 
+  it("POST /api/user/logs/tail (with session)", function (done) {
+    agent
+      .post('/api/user/logs/tail')
+      .send({
+        'body': 'nonsense'
+      })
+      .end((err, res) => {
+        expect(res.status).to.equal(200); // not implemented at this stage
+        done();
+      });
+  }, 20000);
+
+
 });
