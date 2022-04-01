@@ -9,18 +9,30 @@ chai.use(chaiHttp);
 
 //var envi = require("../_envi.json");
 
-let thx;
+const dynamic_owner_id = "bab692f8c9c78cf64f579406bdf6c6cd2c4d00b3c0c8390387d051495dd95247";
+
+const user_info = {
+  first_name: "Dynamic",
+  last_name: "User",
+  email: "dynamic@example.com",
+  username: "dynamic"
+};
+
+let dynamic_activation_code = null;
+
+let thx = new THiNX();
+let agent;
 
 describe("GDPR", function () {
 
   beforeAll((done) => {
-    thx = new THiNX();
     thx.init(() => {
       done();
     });
   });
 
   it("POST /api/gdpr (unauthenticated)", function (done) {
+    //console.log("[chai] POST /api/gdpr (unauthenticated) request");
     chai.request(thx.app)
       .post('/api/gdpr')
       .send({})
@@ -34,19 +46,16 @@ describe("GDPR", function () {
   }, 20000);
 
   it("POST /api/gdpr/transfer", function (done) {
-    let thx = new THiNX();
-    thx.init(() => {
-      console.log("[chai] request /api/gdpr/transfer");
-      chai.request(thx.app)
-        .post('/api/gdpr/transfer')
-        .send({})
-        .end((err, res) => {
-          console.log("[chai] response /api/gdpr/transfer:", res.text, " status:", res.status);
-          expect(res.status).to.equal(403);
-          //expect(res.text).to.be.a('string');
-          done();
-        });
-    });
+    console.log("[chai] request /api/gdpr/transfer");
+    chai.request(thx.app)
+      .post('/api/gdpr/transfer')
+      .send({})
+      .end((err, res) => {
+        console.log("[chai] response /api/gdpr/transfer:", res.text, " status:", res.status);
+        expect(res.status).to.equal(403);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
   }, 20000);
 
   it("POST /api/gdpr/revoke", function (done) {
@@ -65,25 +74,24 @@ describe("GDPR", function () {
 
 describe("User Lifecycle", function () {
 
-  const dynamic_owner_id = "bab692f8c9c78cf64f579406bdf6c6cd2c4d00b3c0c8390387d051495dd95247";
+  beforeAll((done) => {
+    agent = chai.request.agent(thx.app);
+    done();
+  });
 
-  const user_info = {
-    first_name: "Dynamic",
-    last_name: "User",
-    email: "dynamic@example.com",
-    username: "dynamic"
-  };
-
-  let dynamic_activation_code = null;
+  afterAll((done) => {
+    agent.close();
+    done();
+  });
 
   it("POST /api/user/create (invalid body)", function (done) {
     chai.request(thx.app)
       .post('/api/user/create')
       .send({ })
       .end((err, res) => {
-        console.log("[chai] POST /api/user/create response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(403);
-        //expect(res.text).to.be.a('string');
+        console.log("[chai] POST /api/user/create (invalid body) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string'); // returns '{"success":false,"status":"email required"}
         done();
       });
   }, 20000);
@@ -94,7 +102,7 @@ describe("User Lifecycle", function () {
       .post('/api/user/create')
       .send(user_info)
       .end((err, res) => {
-        console.log("[chai] POST /api/user/create response:", res.text, " status:", res.status);
+        console.log("[chai] POST /api/user/create (valid body) response:", res.text, " status:", res.status);
         // {"success":true,"status":"6975d3c5849fc130e689f2cae0abe51a8fd24f496810bee3c0bcf531dd53be0c"}
         expect(res.text).to.be.a('string');
         expect(res.status).to.equal(200);
@@ -123,7 +131,7 @@ describe("User Lifecycle", function () {
     chai.request(thx.app)
       .get('/api/user/activate?owner='+dynamic_owner_id+'&activation='+dynamic_activation_code)
       .end((err, res) => {
-        console.log("[chai] GET /api/user/activate response:", res.text, " status:", res.status);
+        console.log("[chai] GET /api/user/activate (valid body) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string'); // <html>
 
@@ -134,7 +142,8 @@ describe("User Lifecycle", function () {
           .end((err, res) => {
             console.log("[chai] POST /api/user/password/set (after activation) response:", res.text, " status:", res.status);
             expect(res.status).to.equal(200);
-            expect(res.text).to.be.a('string'); // <html>
+            expect(res.text).to.be.a('string');
+            expect(res.text).to.equal('{"success":true,"status":"password_reset_successful"}');
             done();
           });
       });
@@ -187,41 +196,103 @@ describe("User Lifecycle", function () {
         done();
       });
   }, 20000);
-
- 
-
-  // GET 
 });
 
 describe("User Profile", function () {
 
-  it("GET /api/user/profile", function (done) {
-    console.log("[chai] GET /api/user/profile request ");
+  beforeAll((done) => {
+    agent = chai.request.agent(thx.app);
+    done();
+  });
+
+  afterAll((done) => {
+    agent.close();
+    done();
+  });
+
+  it("GET /api/user/profile (noauth)", function (done) {
+    console.log("[chai] GET /api/user/profile (noauth) request ");
     chai.request(thx.app)
       .get('/api/user/profile')
       .end((err, res) => {
-        console.log("[chai] GET /api/user/profile response status:", res.status);
+        console.log("[chai] GET /api/user/profile (noauth) response status:", res.status);
         expect(res.status).to.equal(403);
         //expect(res.text).to.be.a('string');
         done();
       });
   }, 20000);
 
-  it("POST /api/user/profile", function (done) {
-    console.log("[chai] POST /api/user/profile request");
+  it("POST /api/user/profile (noauth)", function (done) {
+    console.log("[chai] POST /api/user/profile (noauth) request");
     chai.request(thx.app)
       .post('/api/user/profile')
       .send({})
       .end((err, res) => {
-        console.log("[chai] POST /api/user/profile response:", res.text, " status:", res.status);
+        console.log("[chai] POST /api/user/profile (noauth) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
         //expect(res.text).to.be.a('string');
         done();
       });
   }, 20000);
+
+  it("POST /api/login (valid)", function (done) {
+    agent
+      .post('/api/login')
+      .send({ username: 'cimrman', password: 'tset', remember: false })
+      .then(function (res) {
+        console.log(`[chai] POST /api/login (valid)response: ${res.text} status: ${res.status}`);
+        expect(res).to.have.cookie('x-thx-core');
+        done();
+        /*
+        // The `agent` now has the sessionid cookie saved, and will send it
+        // back to the server in the next request:
+        return agent.get('/user/me')
+          .then(function (res) {
+            expect(res).to.have.status(200);*/
+      });
+  }, 20000);
+
+  it("GET /api/user/profile (auth)", function (done) {
+    console.log("[chai] GET /api/user/profile (auth) request ");
+    agent
+      .request(thx.app)
+      .get('/api/user/profile')
+      .end((err, res) => {
+        console.log("[chai] GET /api/user/profile (auth) response status:", res.status);
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/user/profile (auth)", function (done) {
+    console.log("[chai] POST /api/user/profile (auth) request");
+    agent
+      .request(thx.app)
+      .post('/api/user/profile')
+      .send({})
+      .end((err, res) => {
+        console.log("[chai] POST /api/user/profile (auth) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  
 });
 
 describe("User Logs", function () {
+
+  beforeAll((done) => {
+    agent = chai.request.agent(thx.app);
+    done();
+  });
+
+  afterAll((done) => {
+    agent.close();
+    done();
+  });
   
   it("GET /api/user/logs/audit", function (done) {
     chai.request(thx.app)
@@ -262,6 +333,17 @@ describe("User Logs", function () {
 });
 
 describe("User Statistics", function () {
+
+  beforeAll((done) => {
+    agent = chai.request.agent(thx.app);
+    done();
+  });
+
+  afterAll((done) => {
+    agent.close();
+    done();
+  });
+  
   it("GET /api/user/stats", function (done) {
     chai.request(thx.app)
       .get('/api/user/stats')

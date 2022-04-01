@@ -73,13 +73,6 @@ describe("App should support", function () {
 
 describe("Session Management", function () {
 
-  beforeAll((done) => {
-    thx = new THiNX();
-    thx.init(() => {
-      done();
-    });
-  });
-
   it("POST /api/login (invalid)", function (done) {
     chai.request(thx.app)
       .post('/api/login')
