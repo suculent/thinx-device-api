@@ -65,7 +65,9 @@ describe("GDPR", function () {
 
 describe("User Lifecycle", function () {
 
-  let user_info = {
+  const dynamic_owner_id = "bab692f8c9c78cf64f579406bdf6c6cd2c4d00b3c0c8390387d051495dd95247";
+
+  const user_info = {
     first_name: "Dynamic",
     last_name: "User",
     email: "dynamic@example.com",
@@ -73,8 +75,6 @@ describe("User Lifecycle", function () {
   };
 
   let dynamic_activation_code = null;
-
-  let dynamic_owner_id = null;
 
   it("POST /api/user/create (invalid body)", function (done) {
     chai.request(thx.app)
@@ -95,6 +95,33 @@ describe("User Lifecycle", function () {
       .send(user_info)
       .end((err, res) => {
         console.log("[chai] POST /api/user/create response:", res.text, " status:", res.status);
+        // {"success":true,"status":"6975d3c5849fc130e689f2cae0abe51a8fd24f496810bee3c0bcf531dd53be0c"}
+        expect(res.text).to.be.a('string');
+        expect(res.status).to.equal(200);
+        let body = JSON.parse(res.text);
+        dynamic_activation_code = body.status;
+        done();
+      });
+  }, 20000);
+
+  it("GET /api/user/activate", function (done) {
+    console.log("[chai] GET /api/user/activate request");
+    chai.request(thx.app)
+      .get('/api/user/activate')
+      .end((err, res) => {
+        console.log("[chai] GET /api/user/activate response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(403);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("GET /api/user/activate (valid body)", function (done) {
+    console.log("[chai] GET /api/user/activate request");
+    chai.request(thx.app)
+      .get('/api/user/activate?owner=fillme&activation='+dynamic_activation_code)
+      .end((err, res) => {
+        console.log("[chai] GET /api/user/activate response:", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
         //expect(res.text).to.be.a('string');
         done();
@@ -149,17 +176,7 @@ describe("User Lifecycle", function () {
       });
   }, 20000);
 
-  it("GET /api/user/activate", function (done) {
-    console.log("[chai] GET /api/user/activate request");
-    chai.request(thx.app)
-      .get('/api/user/activate')
-      .end((err, res) => {
-        console.log("[chai] GET /api/user/activate response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(403);
-        //expect(res.text).to.be.a('string');
-        done();
-      });
-  }, 20000);
+ 
 
   // GET 
 });
