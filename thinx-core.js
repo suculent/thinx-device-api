@@ -1,11 +1,23 @@
+
 module.exports = class THiNX {
 
   constructor() {
+
+    /*
+     * Bootstrap banner section
+     */
 
     console.log("========================================================================");
     console.log("                 CUT LOGS HERE >>> SERVICE RESTARTED ");
     console.log("========================================================================");
 
+    const package_info = require("./package.json");
+
+    console.log("");
+    console.log("-=[ ☢ " + package_info.description + " v" + package_info.version + " ☢ ]=-");
+    console.log("");
+
+    this.app = null;
   }
 
   init(init_complete_callback) {
@@ -15,21 +27,7 @@ module.exports = class THiNX {
      */
 
     let start_timestamp = new Date().getTime();
-
     
-    // EXTRACT -->
-    /*
-     * Bootstrap banner section
-     */
-
-    var package_info = require("./package.json");
-
-    console.log("");
-    console.log("-=[ ☢ " + package_info.description + " v" + package_info.version + " ☢ ]=-");
-    console.log("");
-
-    // EXTRACT <--
-
     const Globals = require("./lib/thinx/globals.js"); // static only!
     const Sanitka = require("./lib/thinx/sanitka.js"); var sanitka = new Sanitka();
 
@@ -51,6 +49,8 @@ module.exports = class THiNX {
     // extract into app ->>>>> anything with app...
 
     const app = express();
+
+    this.app = app;
 
     app.disable('x-powered-by');
 
@@ -92,11 +92,13 @@ module.exports = class THiNX {
     var RedisStore = connect_redis(session);
     var sessionStore = new RedisStore({ client: app.redis_client });
 
-    try {
-      app.redis_client.bgsave();
-    } catch (e) {
-      // may throw errro that BGSAVE is already enabled
-      console.log("thinx.js bgsave error:", e);
+    if (process.env.ENVIRONMENT !== "test") {
+      try {
+        app.redis_client.bgsave();
+      } catch (e) {
+        // may throw errro that BGSAVE is already enabled
+        console.log("thinx.js bgsave error:", e);
+      }
     }
 
     // Default ACLs and MQTT Password
@@ -270,15 +272,15 @@ module.exports = class THiNX {
 
         function gitHook(req, res) {
           // do not wait for response, may take ages
-          console.log("Webhook request accepted...");
+          console.log("ℹ️ [info] Webhook request accepted...");
           if (typeof (req.body) === "undefined") {
             res.status(400).end("Bad request");
             return;
           }
           res.status(200).end("Accepted");
-          console.log("Webhook process started...");
+          console.log("ℹ️ [info] Webhook process started...");
           watcher.process_hook(req);
-          console.log("Webhook process completed.");
+          console.log("ℹ️ [info] Webhook process completed.");
         }
 
         app.post("/githook", function (req, res) {
@@ -330,7 +332,15 @@ module.exports = class THiNX {
           saveUninitialized: true
         })); /* lgtm [js/clear-text-cookie] */
 
-        let wss = new WebSocket.Server({ server: server }); // or { noServer: true }
+        let wss;
+        
+        try {
+          wss = new WebSocket.Server({ server: server });
+        } catch (e){
+          console.log("[warning] Cannot init WSS server...");
+          return;
+        }
+
         const socketMap = new Map();
 
         server.on('upgrade', function (request, socket, head) {
@@ -404,14 +414,24 @@ module.exports = class THiNX {
         };
 
         wss.on("error", function (err) {
-          console.log("☣️ [error] websocket " + err.toString());
+          let e = err.toString();
+
+          // TODO: FIXME: Ignored for now.
+          if (process.env.ENVIRONMENT == "test") {
+            return;
+          }
+          if (e.indexOf("EADDRINUSE") !== -1) {
+            // throw new Error("[critical] websocket same port init failure (test edge case only; fix carefully)");
+          } else {
+            console.log("☣️ [error] websocket ", {e});
+          }
         });
 
         app._ws = {}; // list of all owner websockets
 
         function initLogTail() {
           app.post("/api/user/logs/tail", (req2, res) => {
-            if (!(router.validateSecurePOSTRequest(req2) || router.validateSession(req2, res))) return;
+            if (!(router.validateSession(req2, res))) return;
             if (typeof (req2.body.build_id) === "undefined") {
               router.respond(res, {
                 success: false,
@@ -424,6 +444,7 @@ module.exports = class THiNX {
         }
 
         function initSocket(ws, msgr, logsocket) {
+
           ws.on("message", (message) => {
             console.log(`ℹ️ [info] [ws] incoming message: ${message}`);
             if (message.indexOf("{}") == 0) return; // skip empty messages
@@ -510,7 +531,15 @@ module.exports = class THiNX {
           initSocket(ws, app.messenger, logsocket);
 
         }).on("error", function (err) {
-          console.log(`☣️ [error] in WSS connection ${err}`);
+          
+          // EADDRINUSE happens in test only; othewise should be reported
+          if (process.env.ENVIRONMENT == "test") {
+            if (err.toString().indexOf("EADDRINUSE") == -1) {
+              console.log(`☣️ [error] in WSS connection ${err}, ${req.url}`);
+            }
+          } else {
+            console.log(`☣️ [error] in WSS connection ${err}, ${req.url}`);
+          }
         });
 
         //
