@@ -100,6 +100,8 @@ describe("User Lifecycle", function () {
         expect(res.status).to.equal(200);
         let body = JSON.parse(res.text);
         dynamic_activation_code = body.status;
+        expect(body.status).to.be.a('string'); // check length
+        expect(body.status.length == 64);
         done();
       });
   }, 20000);
@@ -119,12 +121,22 @@ describe("User Lifecycle", function () {
   it("GET /api/user/activate (valid body)", function (done) {
     console.log("[chai] GET /api/user/activate request");
     chai.request(thx.app)
-      .get('/api/user/activate?owner=fillme&activation='+dynamic_activation_code)
+      .get('/api/user/activate?owner='+dynamic_owner_id+'&activation='+dynamic_activation_code)
       .end((err, res) => {
         console.log("[chai] GET /api/user/activate response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(403);
-        //expect(res.text).to.be.a('string');
-        done();
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string'); // <html>
+
+        console.log("[chai] POST /api/user/password/set (after activation)");
+        chai.request(thx.app)
+          .post('/api/user/password/set')
+          .send({ password: 'tset', rpassword: 'tset', activation: dynamic_activation_code})
+          .end((err, res) => {
+            console.log("[chai] POST /api/user/password/set (after activation) response:", res.text, " status:", res.status);
+            expect(res.status).to.equal(200);
+            expect(res.text).to.be.a('string'); // <html>
+            done();
+          });
       });
   }, 20000);
 
