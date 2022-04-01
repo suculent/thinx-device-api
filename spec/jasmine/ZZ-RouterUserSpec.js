@@ -281,6 +281,23 @@ describe("User Routes", function () {
       });
   }, 20000);
 
+  it("POST /api/login (valid)", function (done) {
+    agent
+      .post('/api/login')
+      .send({ username: 'cimrman', password: 'tset', remember: false })
+      .then(function (res) {
+        console.log(`[chai] POST /api/login (valid) response: ${res.text} status: ${res.status}`);
+        // expect(res).to.have.cookie('x-thx-core');
+        done();
+        /*
+        // The `agent` now has the sessionid cookie saved, and will send it
+        // back to the server in the next request:
+        return agent.get('/user/me')
+          .then(function (res) {
+            expect(res).to.have.status(200);*/
+      });
+  }, 20000);
+
   it("POST /api/user/profile (invalid)", function (done) {
     console.log("[chai] POST /api/user/profile (invalid) request");
     agent

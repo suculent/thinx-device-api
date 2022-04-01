@@ -31,14 +31,14 @@ describe("Repository Watcher", function() {
   });
 
   it("should be able to find all repositories with search query", function() {
-    let result = Repository.findAllRepositoriesWithFullname("32");
+    let result = Repository.findAllRepositoriesWithFullname("esp8266");
     expect(result).to.be.an('array');
   });
 
   it("should be able to purge old repos", function() {
     watcher = new Repository();
     let name = "esp";
-    let repositories = Repository.findAllRepositoriesWithFullname("32");
+    let repositories = Repository.findAllRepositoriesWithFullname("esp8266");
     watcher.purge_old_repos_with_full_name(repositories, name);
     expect(watcher).to.be.an('object');
   });
