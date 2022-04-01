@@ -30,8 +30,7 @@ describe("Devices", function () {
       chai.request(thx.app)
         .get('/api/user/device/data/' + envi.oid)
         .end((err, res) => {
-          console.log("[chai] response:", res.text, " status:", res.status);
-          //expect(res.status).to.equal(200);
+          expect(res.status).to.equal(404);
           //expect(res.text).to.be.a('string');
           done();
         });

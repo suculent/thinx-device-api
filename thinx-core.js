@@ -337,12 +337,12 @@ module.exports = class THiNX {
 
         let wss;
         
-        if (process.env.ENVIRONMENT == "test") {
-          wss = new WebSocket.Server({ noServer: true }); // or { noServer: true }
-        } else {
-          wss = new WebSocket.Server({ server: server }); // or { noServer: true }
+        try {
+          wss = new WebSocket.Server({ server: server });
+        } catch (e){
+          console.log("[warning] Cannot init WSS server...");
+          return;
         }
-        
 
         const socketMap = new Map();
 

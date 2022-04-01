@@ -11,12 +11,11 @@ describe("OAuth", function () {
 
     // Slack OAuth Integration
 
-    it("POST /api/slack/direct_install", function (done) {
+    it("GET /api/slack/direct_install", function (done) {
         let thx = new THiNX();
         thx.init(() => {
             chai.request(thx.app)
-                .post('/api/slack/direct_install')
-                .send({})
+                .get('/api/slack/direct_install')
                 .end((err, res) => {
                     console.log("[chai] response:", res.text, " status:", res.status);
                     //expect(res.status).to.equal(200);
