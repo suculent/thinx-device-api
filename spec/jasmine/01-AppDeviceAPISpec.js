@@ -16,8 +16,7 @@ describe("Device API", function () {
                 .post('/api/device/register')
                 .send({ registration: {}})
                 .end((err, res) => {
-                    console.log("[chai] response:", res.text, " status:", res.status);
-                    //expect(res.status).to.equal(200);
+                    expect(res.status).to.equal(404);
                     //expect(res.text).to.be.a('string');
                     done();
                 });
@@ -32,9 +31,9 @@ describe("Device API", function () {
                 .post('/device/firmware')
                 .send({})
                 .end((err, res) => {
-                    console.log("[chai] response:", res.text, " status:", res.status);
-                    //expect(res.status).to.equal(200);
-                    //expect(res.text).to.be.a('string');
+                    expect(res.status).to.equal(200);
+                    expect(res.text).to.be.a('string');
+                    //{"success":false,"status":"missing_mac"}
                     done();
                 });
         });
@@ -47,8 +46,7 @@ describe("Device API", function () {
                 .post('/api/device/addpush')
                 .send({})
                 .end((err, res) => {
-                    console.log("[chai] response:", res.text, " status:", res.status);
-                    //expect(res.status).to.equal(200);
+                    expect(res.status).to.equal(404);
                     //expect(res.text).to.be.a('string');
                     done();
                 });
