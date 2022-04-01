@@ -69,7 +69,7 @@ describe("OAuth", function () {
     }, 20000);
 
     it("GET /api/oauth/github/callback?code=B", function (done) {
-        console.log("[chai] request /api/oauth/github/callback");
+        console.log("[chai] request /api/oauth/github/callback?code=B");
         chai.request(thx.app)
             .get('/api/oauth/github/callback?code=B')
             .end((err, res) => {
