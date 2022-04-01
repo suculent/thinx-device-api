@@ -3,12 +3,21 @@ module.exports = class THiNX {
 
   constructor() {
 
+    /*
+     * Bootstrap banner section
+     */
+
     console.log("========================================================================");
     console.log("                 CUT LOGS HERE >>> SERVICE RESTARTED ");
     console.log("========================================================================");
 
-    this.app = null;
+    const package_info = require("./package.json");
 
+    console.log("");
+    console.log("-=[ ☢ " + package_info.description + " v" + package_info.version + " ☢ ]=-");
+    console.log("");
+
+    this.app = null;
   }
 
   init(init_complete_callback) {
@@ -18,21 +27,7 @@ module.exports = class THiNX {
      */
 
     let start_timestamp = new Date().getTime();
-
     
-    // EXTRACT -->
-    /*
-     * Bootstrap banner section
-     */
-
-    var package_info = require("./package.json");
-
-    console.log("");
-    console.log("-=[ ☢ " + package_info.description + " v" + package_info.version + " ☢ ]=-");
-    console.log("");
-
-    // EXTRACT <--
-
     const Globals = require("./lib/thinx/globals.js"); // static only!
     const Sanitka = require("./lib/thinx/sanitka.js"); var sanitka = new Sanitka();
 
@@ -97,11 +92,13 @@ module.exports = class THiNX {
     var RedisStore = connect_redis(session);
     var sessionStore = new RedisStore({ client: app.redis_client });
 
-    try {
-      app.redis_client.bgsave();
-    } catch (e) {
-      // may throw errro that BGSAVE is already enabled
-      console.log("thinx.js bgsave error:", e);
+    if (process.env.ENVIRONMENT !== "test") {
+      try {
+        app.redis_client.bgsave();
+      } catch (e) {
+        // may throw errro that BGSAVE is already enabled
+        console.log("thinx.js bgsave error:", e);
+      }
     }
 
     // Default ACLs and MQTT Password
