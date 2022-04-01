@@ -10,31 +10,34 @@ chai.use(chaiHttp);
 
 describe("Devices", function () {
 
-  it("GET /api/user/devices", function (done) {
-    let thx = new THiNX();
+  let thx;
+
+  beforeAll((done) => {
+    thx = new THiNX();
     thx.init(() => {
-      chai.request(thx.app)
-        .get('/api/user/devices')
-        .end((err, res) => {
-          console.log("[chai] response:", res.text, " status:", res.status);
-          //expect(res.status).to.equal(200);
-          //expect(res.text).to.be.a('string');
-          done();
-        });
+      done();
     });
+  });
+
+  it("GET /api/user/devices", function (done) {
+    chai.request(thx.app)
+      .get('/api/user/devices')
+      .end((err, res) => {
+        console.log("[chai] response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
   }, 20000);
 
   it("GET /api/device/data/" + envi.oid, function (done) {
-    let thx = new THiNX();
-    thx.init(() => {
-      chai.request(thx.app)
-        .get('/api/user/device/data/' + envi.oid)
-        .end((err, res) => {
-          expect(res.status).to.equal(404);
-          //expect(res.text).to.be.a('string');
-          done();
-        });
-    });
+    chai.request(thx.app)
+      .get('/api/user/device/data/' + envi.oid)
+      .end((err, res) => {
+        expect(res.status).to.equal(404);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
   }, 20000);
 
   it("POST /api/device/edit", function (done) {
