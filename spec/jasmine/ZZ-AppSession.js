@@ -54,9 +54,9 @@ describe("Session Management", function () {
   it("POST /api/login (valid)", function (done) {
     agent
       .post('/api/login')
-      .send({ username: 'cimrman', password: 'test' })
+      .send({ username: 'cimrman', password: 'test', remember: false })
       .then(function (res) {
-        expect(res).to.have.cookie('x-thx-session');
+        expect(res).to.have.cookie('x-thx-core');
         done();
         /*
         // The `agent` now has the sessionid cookie saved, and will send it
