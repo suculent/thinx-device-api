@@ -54,8 +54,9 @@ describe("Session Management", function () {
   it("POST /api/login (valid)", function (done) {
     agent
       .post('/api/login')
-      .send({ username: 'cimrman', password: 'test', remember: false })
+      .send({ username: 'cimrman', password: 'tset', remember: false })
       .then(function (res) {
+        console.log(`[chai] $POST /api/login (valid)response: ${res.text}`);
         expect(res).to.have.cookie('x-thx-core');
         done();
         /*
