@@ -126,7 +126,6 @@ describe("API Keys (JWT)", function () {
                 'alias': 'mock-apikey-alias-2'
             })
             .end((err, res) => {
-                //  {"success":true,"api_key":"9b7bd4f4eacf63d8453b32dbe982eea1fb8bbc4fc8e3bcccf2fc998f96138629","hash":"0a920b2e99a917a04d7961a28b49d05524d10cd8bdc2356c026cfc1c280ca22c"}
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
@@ -148,11 +147,11 @@ describe("API Keys (JWT)", function () {
             })
             .end((err, res) => {
                 console.log("[chai] response /api/user/apikey/revoke (JWT):", res.text, " status:", res.status);
-                // {"revoked":[],"success":true}
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
-                expect(res.status).to.equal(200);
+                expect(j.revoked).to.be.an('array');
+                expect(j.revoked.length).to.equal(1);
                 done();
             });
     }, 20000);
@@ -167,12 +166,12 @@ describe("API Keys (JWT)", function () {
             })
             .end((err, res) => {
                 console.log("[chai] response /api/user/apikey/revoke (JWT):", res.text, " status:", res.status);
-                // {"revoked":[],"success":true}
-                //expect(res.text).to.be.a('string');
+                //  {"revoked":["7663ca65a23d759485fa158641727597256fd7eac960941fbb861ab433ab056f"],"success":true}
+                expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
-                expect(res.status).to.equal(200);
-                // todo: expect(j.revoked.count > 0);
+                expect(j.revoked).to.be.an('array');
+                expect(j.revoked.length).to.equal(1);
                 done();
             });
     }, 20000);
@@ -185,8 +184,11 @@ describe("API Keys (JWT)", function () {
             .set('Authorization', jwt)
             .end((err, res) => {
                 console.log("[chai] response /api/user/apikey/list (JWT):", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
+                let j = JSON.parse(res.text);
+                expect(j.success).to.equal(true);
+                expect(j.api_keys).to.be.an('array');
+                expect(j.api_keys.length).to.equal(1);
                 done();
             });
     }, 20000);
