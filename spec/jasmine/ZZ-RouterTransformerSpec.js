@@ -9,7 +9,7 @@ chai.use(chaiHttp);
 
 var envi = require("../_envi.json");
 
-describe("Transformer", function () {
+describe("Transformer (noauth)", function () {
   it("POST /api/transformer/run", function (done) {
     let thx = new THiNX();
     thx.init(() => {

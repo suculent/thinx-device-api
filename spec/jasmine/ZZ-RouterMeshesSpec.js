@@ -6,7 +6,7 @@ let chai = require('chai');
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
-describe("Meshes", function () {
+describe("Meshes (noauth)", function () {
 
     let thx;
 
@@ -66,3 +66,34 @@ describe("Meshes", function () {
     }, 20000);
 });
 
+describe("Meshes (JWT)", function () {
+
+    let thx = new THiNX();
+    let agent;
+    let jwt;
+  
+    beforeAll((done) => {
+        thx.init(() => {
+            agent = chai.request.agent(thx.app);
+            agent
+                .post('/api/login')
+                .send({ username: 'dynamic', password: 'dynamic', remember: false })
+                .then(function (res) {
+                    // console.log(`[chai] Transformer (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
+                    expect(res).to.have.cookie('x-thx-core');
+                    let body = JSON.parse(res.text);
+                    jwt = 'Bearer ' + body.access_token;
+                    done();
+                });
+        });
+    });
+  
+    afterAll((done) => {
+        agent.close();
+        done();
+    });
+
+    xit("unfinished", function (done) {
+        done();
+    }, 20000);
+});
