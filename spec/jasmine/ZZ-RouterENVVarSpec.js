@@ -7,9 +7,9 @@ let chaiHttp = require('chai-http');
 var envi = require("../_envi.json");
 chai.use(chaiHttp);
 
-describe("ENV Vars (noauth)", function () {
+let thx;
 
-  let thx;
+describe("ENV Vars (noauth)", function () {
 
   beforeAll((done) => {
     thx = new THiNX();
@@ -80,24 +80,21 @@ describe("ENV Vars (noauth)", function () {
 
 describe("ENV Vars (JWT)", function () {
 
-  let thx = new THiNX();
   let agent;
   let jwt;
 
   beforeAll((done) => {
-      thx.init(() => {
-          agent = chai.request.agent(thx.app);
-          agent
-              .post('/api/login')
-              .send({ username: 'dynamic', password: 'dynamic', remember: false })
-              .then(function (res) {
-                  // console.log(`[chai] Transformer (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
-                  expect(res).to.have.cookie('x-thx-core');
-                  let body = JSON.parse(res.text);
-                  jwt = 'Bearer ' + body.access_token;
-                  done();
-              });
-      });
+    agent = chai.request.agent(thx.app);
+        agent
+            .post('/api/login')
+            .send({ username: 'dynamic', password: 'dynamic', remember: false })
+            .then(function (res) {
+                console.log(`[chai] ENV Vars (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
+                expect(res).to.have.cookie('x-thx-core');
+                let body = JSON.parse(res.text);
+                jwt = 'Bearer ' + body.access_token;
+                done();
+            });
   });
 
   afterAll((done) => {
