@@ -227,7 +227,6 @@ describe("User Routes", function () {
       .post('/api/login')
       .send({ username: 'dynamic', password: 'dynamic', remember: false })
       .then(function (res) {
-        console.log(`[chai] POST /api/login (valid) response: ${JSON.stringify(res)}`);
         expect(res).to.have.cookie('x-thx-core');
         /* response example:
         {
@@ -242,23 +241,16 @@ describe("User Routes", function () {
         // Old UI does this
         let token = body.redirectURL.replace("https://rtm.thinx.cloud/auth.html?t=", "").replace("&g=true", "");
 
-        // Otherwise it's just calling the login endpoint again with the legacy login token...
-        console.log("[chai] GET /api/login with token", jwt);
         agent
           .post('/api/login')
           .send({ token: token })
           .end((err, res) => {
-            console.log("[chai] /api/login (auth+) response '", JSON.stringify(res), "' status:", res.status);
             expect(res.status).to.equal(200);
-            //expect(res.text).to.be.a('string');
 
-            // TODO: FIXME: This login does not work but it should by the docs (or with added JWT token at lease)
-            console.log("[chai] GET /api/user/profile (jwt) request with token", jwt);
             return agent
               .get('/api/user/profile')
               .set('Authorization', jwt)
               .end((err, res2) => {
-                console.log("[chai] GET /api/user/profile (jwt) response\n", JSON.stringify(res2, null, 4), "'\nstatus:", res2.status);
                 expect(res2.status).to.equal(200);
                 expect(res2.text).to.be.a('string');
                 let owner_data = JSON.parse(res2.text);
