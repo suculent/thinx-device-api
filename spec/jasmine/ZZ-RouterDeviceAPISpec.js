@@ -70,7 +70,7 @@ describe("Device API (noauth)", function () {
             .post('/api/device/envs')
             .send({})
             .end((err, res) => {
-                console.log("[chai] POST /api/device/envs response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/device/envs response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -82,7 +82,7 @@ describe("Device API (noauth)", function () {
             .post('/api/device/detail')
             .send({})
             .end((err, res) => {
-                console.log("[chai] POST /api/device/detail response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/device/detail response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -94,7 +94,7 @@ describe("Device API (noauth)", function () {
             .post('/api/device/edit')
             .send({ changes: { alias: "edited-alias" } })
             .end((err, res) => {
-                console.log("[chai] POST /api/device/edit response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/device/edit response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -145,7 +145,7 @@ describe("Device + API (JWT+Key)", function () {
                         })
                         .end((err, res) => {
                             //  {"success":true,"api_key":"9b7bd4f4eacf63d8453b32dbe982eea1fb8bbc4fc8e3bcccf2fc998f96138629","hash":"0a920b2e99a917a04d7961a28b49d05524d10cd8bdc2356c026cfc1c280ca22c"}
-                            console.log("[chai] POST /api/user/apikey (authenticated), response...");
+                            console.log("🚸 [chai] POST /api/user/apikey (authenticated), response...");
                             expect(res.status).to.equal(200);
                             let j = JSON.parse(res.text);
                             expect(j.success).to.equal(true);
@@ -170,7 +170,7 @@ describe("Device + API (JWT+Key)", function () {
             .set('Authentication', ak)
             .send({ registration: {} })
             .end((err, res) => {
-                console.log("[chai] POST /device/register (jwt, invalid) response:", res.text);
+                console.log("🚸 [chai] POST /device/register (jwt, invalid) response:", res.text);
                 expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -234,7 +234,7 @@ describe("Device + API (JWT+Key)", function () {
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
-                console.log("[chai] POST /api/device/envs (jwt, invalid) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/device/envs (jwt, invalid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -247,7 +247,7 @@ describe("Device + API (JWT+Key)", function () {
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
-                console.log("[chai] POST /api/device/detail (jwt, invalid) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/device/detail (jwt, invalid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -260,7 +260,7 @@ describe("Device + API (JWT+Key)", function () {
             .set('Authentication', ak)
             .send({ changes: { alias: "edited-alias" } })
             .end((err, res) => {
-                console.log("[chai] POST /api/device/edit (jwt, valid) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/device/edit (jwt, valid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -276,7 +276,7 @@ describe("Device + API (JWT+Key)", function () {
             .post('/api/device/envs')
             .send({})
             .end((err, res) => {
-                console.log("[chai] POST /api/device/envs (session, invalid) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/device/envs (session, invalid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -288,7 +288,7 @@ describe("Device + API (JWT+Key)", function () {
             .post('/api/device/detail')
             .send({})
             .end((err, res) => {
-                console.log("[chai] POST /api/device/detail (session, invalid) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/device/detail (session, invalid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -300,7 +300,7 @@ describe("Device + API (JWT+Key)", function () {
             .post('/api/device/edit')
             .send({ changes: { alias: "edited-alias" } })
             .end((err, res) => {
-                console.log("[chai] POST /api/device/edit (session, valid) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/device/edit (session, valid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();

@@ -17,7 +17,7 @@ describe("Transformer (noauth)", function () {
         .post('/api/transformer/run')
         .send({})
         .end((err, res) => {
-          console.log("[chai] POST /api/transformer/run response:", res.text, " status:", res.status);
+          console.log("🚸 [chai] POST /api/transformer/run response:", res.text, " status:", res.status);
           //expect(res.status).to.equal(200);
           //expect(res.text).to.be.a('string');
           done();
@@ -64,7 +64,7 @@ describe("Transformer (JWT)", function () {
         .set('Authorization', jwt)
         .send({})
         .end((err, res) => {
-          console.log("[chai] POST /api/transformer/run (JWT, invalid) response:", res.text, " status:", res.status);
+          console.log("🚸 [chai] POST /api/transformer/run (JWT, invalid) response:", res.text, " status:", res.status);
           //{"success":false,"status":"udid_not_found"}  status: 200
           //expect(res.text).to.equal('{"success":false,"status":"udid_not_found"}'); but rather use valid udid
           expect(res.status).to.equal(200);

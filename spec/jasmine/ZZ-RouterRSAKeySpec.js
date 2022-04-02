@@ -24,7 +24,7 @@ describe("RSA Keys (noauth)", function () {
         chai.request(thx.app)
             .get('/api/user/rsakey/create')
             .end((err, res) => {
-                console.log("[chai] GET /api/user/rsakey/create response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] GET /api/user/rsakey/create response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -32,11 +32,11 @@ describe("RSA Keys (noauth)", function () {
     }, 20000);
 
     it("GET /api/user/rsakey/list", function (done) {
-        console.log("[chai] request /api/user/rsakey/list");
+        console.log("🚸 [chai] request /api/user/rsakey/list");
         chai.request(thx.app)
             .get('/api/user/rsakey/list')
             .end((err, res) => {
-                console.log("[chai] GET /api/user/rsakey/list response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] GET /api/user/rsakey/list response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -48,7 +48,7 @@ describe("RSA Keys (noauth)", function () {
             .post('/api/user/rsakey/revoke')
             .send()
             .end((err, res) => {
-                console.log("[chai] POST /api/user/rsakey/revoke (noauth, invalid) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/user/rsakey/revoke (noauth, invalid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -91,7 +91,7 @@ describe("RSA Keys (JWT)", function () {
             .get('/api/user/rsakey/create')
             .set('Authorization', jwt)
             .end((err, res) => {
-                console.log("[chai] GET /api/user/rsakey/create response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] GET /api/user/rsakey/create response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -99,12 +99,12 @@ describe("RSA Keys (JWT)", function () {
     }, 20000);
 
     it("GET /api/user/rsakey/list", function (done) {
-        console.log("[chai] request /api/user/rsakey/list");
+        console.log("🚸 [chai] request /api/user/rsakey/list");
         chai.request(thx.app)
             .get('/api/user/rsakey/list')
             .set('Authorization', jwt)
             .end((err, res) => {
-                console.log("[chai] GET /api/user/rsakey/list response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] GET /api/user/rsakey/list response:", res.text, " status:", res.status);
                 /*
                 { "success":true,
                     "rsa_keys":[
@@ -125,7 +125,7 @@ describe("RSA Keys (JWT)", function () {
             .set('Authorization', jwt)
             .send()
             .end((err, res) => {
-                console.log("[chai] POST /api/user/rsakey/revoke (jwt, undefined) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/user/rsakey/revoke (jwt, undefined) response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('{"success":false,"status":"invalid_query"}');
@@ -133,13 +133,13 @@ describe("RSA Keys (JWT)", function () {
             });
     }, 20000);
 
-    xit("POST /api/user/rsakey/revoke (valid)", function (done) {
+    it("POST /api/user/rsakey/revoke (valid)", function (done) {
         chai.request(thx.app)
             .post('/api/user/rsakey/revoke')
             .set('Authorization', jwt)
             .send({ filenames: [key_id]})
             .end((err, res) => {
-                console.log("[chai] POST /api/user/rsakey/revoke (valid) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/user/rsakey/revoke (valid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();

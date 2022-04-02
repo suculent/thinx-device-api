@@ -22,7 +22,7 @@ describe("Meshes (noauth)", function () {
         chai.request(thx.app)
             .get('/api/mesh/list')
             .end((err, res) => {
-                console.log("[chai] GET /api/mesh/list (noauth) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] GET /api/mesh/list (noauth) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -34,7 +34,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/list')
             .send({})
             .end((err, res) => {
-                console.log("[chai] POST /api/mesh/list (noauth, invalid) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/mesh/list (noauth, invalid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -46,7 +46,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/list')
             .send({ owner_id: "mock-owner-id", apikey: "mock-api-key", alias: "mock-mesh-alias" })
             .end((err, res) => {
-                console.log("[chai] POST /api/mesh/list (noauth, valid) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/mesh/list (noauth, valid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -58,7 +58,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/create')
             .send({})
             .end((err, res) => {
-                console.log("[chai] POST /api/mesh/create (noauth, invalid) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/mesh/create (noauth, invalid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -70,7 +70,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/create')
             .send({ alias: "mock-mesh-alias" })
             .end((err, res) => {
-                console.log("[chai] POST /api/mesh/create (noauth, valid) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/mesh/create (noauth, valid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -82,7 +82,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/delete')
             .send({})
             .end((err, res) => {
-                console.log("[chai] POST /api/mesh/delete (noauth, invalid) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/mesh/delete (noauth, invalid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -94,7 +94,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/delete')
             .send('{meshid:null}')
             .end((err, res) => {
-                console.log("[chai] POST /api/mesh/delete (noauth, null) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/mesh/delete (noauth, null) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -106,7 +106,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/delete')
             .send('{"meshid":undefined}')
             .end((err, res) => {
-                console.log("[chai] POST /api/mesh/delete (noauth, null) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/mesh/delete (noauth, null) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -148,7 +148,7 @@ describe("Meshes (JWT)", function () {
             .get('/api/mesh/list')
             .set('Authorization', jwt)
             .end((err, res) => {
-                console.log("[chai] GET /api/mesh/list (jwt, invalid) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] GET /api/mesh/list (jwt, invalid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -161,7 +161,7 @@ describe("Meshes (JWT)", function () {
             .set('Authorization', jwt)
             .send({ owner_id: "mock-owner-id", apikey: "mock-api-key", alias: "mock-mesh-alias" })
             .end((err, res) => {
-                console.log("[chai] POST /api/mesh/list (jwt, invalid) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/mesh/list (jwt, invalid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -174,7 +174,7 @@ describe("Meshes (JWT)", function () {
             .set('Authorization', jwt)
             .send({ alias: "mock-mesh-alias" })
             .end((err, res) => {
-                console.log("[chai] POST /api/mesh/create (jwt, valid) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/mesh/create (jwt, valid) response:", res.text, " status:", res.status);
                 let r = JSON.parse(res.text);
                 mesh_id = r.mesh_id;
                 /// mesh_id = ...
@@ -189,7 +189,7 @@ describe("Meshes (JWT)", function () {
             .post('/api/mesh/delete')
             .send('{meshid:null}')
             .end((err, res) => {
-                console.log("[chai] POST /api/mesh/delete (jwt, invalid) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/mesh/delete (jwt, invalid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -202,7 +202,7 @@ describe("Meshes (JWT)", function () {
             .post('/api/mesh/delete')
             .send('{"meshid":"'+mesh_id+'"}')
             .end((err, res) => {
-                console.log("[chai] POST /api/mesh/delete (jwt, invalid) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/mesh/delete (jwt, invalid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
