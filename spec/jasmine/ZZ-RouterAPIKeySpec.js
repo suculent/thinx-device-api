@@ -6,6 +6,7 @@ let chai = require('chai');
 var expect = require('chai').expect;
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
+
 //
 // Unauthenticated
 //
@@ -90,10 +91,6 @@ describe("API Keys (JWT)", function () {
         agent.close();
         done();
     });
-
-    //
-    // Unauthenticated
-    //
 
     var created_api_key = null;
     var created_api_key_2 = null;
