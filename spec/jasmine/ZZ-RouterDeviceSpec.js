@@ -68,6 +68,19 @@ describe("Devices", function () {
       });
   }, 20000);
 
+  it("POST /api/device/attach", function (done) {
+    console.log("[chai] POST /api/device/attach");
+    chai.request(thx.app)
+      .post('/api/device/attach')
+      .send({ udid: envi.oid })
+      .end((err, res) => {
+        console.log("[chai] POST /api/device/attach response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
   it("POST /api/device/detach", function (done) {
     console.log("[chai] POST /api/device/detach");
     chai.request(thx.app)
