@@ -24,7 +24,7 @@ describe("Device Ownership Transfer", function () {
             .send({})
             .end((err, res) => {
                 console.log("[chai] POST /api/transfer/request response:", res.text, " status:", res.status);
-                expect(res.status).to.equal(404);
+                expect(res.status).to.equal(403);
                 expect(res).to.be.html;
                 done();
             });

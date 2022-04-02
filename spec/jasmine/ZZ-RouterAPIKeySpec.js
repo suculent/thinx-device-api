@@ -52,7 +52,6 @@ describe("API Keys (noauth)", function () {
         chai.request(thx.app)
             .get('/api/user/apikey/list')
             .end((err, res) => {
-                console.log("[chai] response /api/user/apikey/list:", res.text, " status:", res.status);
                 expect(res.status).to.equal(403);
                 done();
             });
@@ -135,7 +134,6 @@ describe("API Keys (JWT)", function () {
 
     // revoke
     it("POST /api/user/apikey/revoke (single)", function (done) {
-        console.log("[chai] request /api/user/apikey/revoke (JWT)");
         chai.request(thx.app)
             .post('/api/user/apikey/revoke')
             .set('Authorization', jwt)
@@ -143,18 +141,16 @@ describe("API Keys (JWT)", function () {
                 'fingerprint': created_api_key
             })
             .end((err, res) => {
-                console.log("[chai] response /api/user/apikey/revoke (JWT):", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
                 expect(j.revoked).to.be.an('array');
-                expect(j.revoked.length).to.equal(1);
+                expect(j.revoked.length).to.equal(2);
                 done();
             });
     }, 20000);
 
     it("POST /api/user/apikey/revoke (multiple)", function (done) {
-        console.log("[chai] request /api/user/apikey/revoke (JWT)");
         chai.request(thx.app)
             .post('/api/user/apikey/revoke')
             .set('Authorization', jwt)
@@ -162,8 +158,8 @@ describe("API Keys (JWT)", function () {
                 'fingerprints': created_api_key_2
             })
             .end((err, res) => {
-                console.log("[chai] response /api/user/apikey/revoke (JWT):", res.text, " status:", res.status);
                 //  {"revoked":["7663ca65a23d759485fa158641727597256fd7eac960941fbb861ab433ab056f"],"success":true}
+                console.log(`[chai] POST /api/user/apikey/revoke (multiple) response: ${res.text}, status ${res.status}`);
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
@@ -175,12 +171,10 @@ describe("API Keys (JWT)", function () {
 
     // list
     it("GET /api/user/apikey/list", function (done) {
-        console.log("[chai] request GET /api/user/apikey/list (JWT)");
         chai.request(thx.app)
             .get('/api/user/apikey/list')
             .set('Authorization', jwt)
             .end((err, res) => {
-                console.log("[chai] response /api/user/apikey/list (JWT):", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
