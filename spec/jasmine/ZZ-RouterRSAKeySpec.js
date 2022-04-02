@@ -7,7 +7,7 @@ var expect = require('chai').expect;
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
-var envi = require("../_envi.json");
+//var envi = require("../_envi.json");
 
 describe("RSA Keys (noauth)", function () {
 

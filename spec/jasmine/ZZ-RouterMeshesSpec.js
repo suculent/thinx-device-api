@@ -4,7 +4,6 @@ const THiNX = require("../../thinx-core.js");
 
 let chai = require('chai');
 let chaiHttp = require('chai-http');
-const assert = require("assert");
 chai.use(chaiHttp);
 
 describe("Meshes (noauth)", function () {

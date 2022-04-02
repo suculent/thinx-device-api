@@ -93,7 +93,7 @@ describe("Sources (JWT)", function () {
         secret: process.env.GITHUB_SECRET
       };
 
-    t("GET /api/user/sources/list", function (done) {
+    it("GET /api/user/sources/list", function (done) {
         chai.request(thx.app)
             .get('/api/user/sources/list')
             .set('Authorization', jwt)
