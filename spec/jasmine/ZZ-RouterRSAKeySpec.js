@@ -22,7 +22,7 @@ describe("RSA Keys (noauth)", function () {
 
     it("GET /api/user/rsakey/create", function (done) {
         chai.request(thx.app)
-            .get('/api/user/rsakey/list')
+            .get('/api/user/rsakey/create')
             .end((err, res) => {
                 console.log("[chai] GET /api/user/rsakey/create response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
@@ -43,12 +43,12 @@ describe("RSA Keys (noauth)", function () {
             });
     }, 20000);
 
-    it("POST /api/user/rsakey/revoke", function (done) {
+    it("POST /api/user/rsakey/revoke (invalid)", function (done) {
         chai.request(thx.app)
             .post('/api/user/rsakey/revoke')
             .send()
             .end((err, res) => {
-                console.log("[chai] POST /api/user/rsakey/revoke response:", res.text, " status:", res.status);
+                console.log("[chai] POST /api/user/rsakey/revoke (invalid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -84,7 +84,57 @@ describe("RSA Keys (JWT)", function () {
         done();
     });
 
-    xit("unfinished", function (done) {
-        done();
+    let key_id = null;
+
+    it("GET /api/user/rsakey/create", function (done) {
+        chai.request(thx.app)
+            .get('/api/user/rsakey/create')
+            .set('Authorization', jwt)
+            .end((err, res) => {
+                console.log("[chai] GET /api/user/rsakey/create response:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    it("GET /api/user/rsakey/list", function (done) {
+        console.log("[chai] request /api/user/rsakey/list");
+        chai.request(thx.app)
+            .get('/api/user/rsakey/list')
+            .set('Authorization', jwt)
+            .end((err, res) => {
+                console.log("[chai] GET /api/user/rsakey/list response:", res.text, " status:", res.status);
+                // key_id =
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/user/rsakey/revoke (invalid)", function (done) {
+        chai.request(thx.app)
+            .post('/api/user/rsakey/revoke')
+            .set('Authorization', jwt)
+            .send()
+            .end((err, res) => {
+                console.log("[chai] POST /api/user/rsakey/revoke (invalid) response:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    xit("POST /api/user/rsakey/revoke (valid)", function (done) {
+        chai.request(thx.app)
+            .post('/api/user/rsakey/revoke')
+            .set('Authorization', jwt)
+            .send({ filenames: [key_id]})
+            .end((err, res) => {
+                console.log("[chai] POST /api/user/rsakey/revoke (valid) response:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
     }, 20000);
 });

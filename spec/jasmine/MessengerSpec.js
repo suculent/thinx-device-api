@@ -42,7 +42,7 @@ describe("Messenger", function() {
         expect(TEST_DEVICE_6.udid).to.be.a('string');
         done();
       });
-  }, 15000); // register
+  }, 20000); // register
 
 
   it("should be able to initialize", function (/* done */) {
@@ -58,7 +58,7 @@ describe("Messenger", function() {
       expect(success).to.equal(true);
       done();
     });
-  });
+  }, 20000);
 
   // getDevices: function(owner, callback)
   it("should be able to fetch devices for owner", function(done) {
