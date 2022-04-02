@@ -15,8 +15,6 @@ let thx;
 
 describe("Builder (noauth)", function () {
 
-    let thx;
-
     beforeAll((done) => {
         thx = new THiNX();
         thx.init(() => {
@@ -74,20 +72,17 @@ describe("Builder (JWT)", function () {
     let jwt;
 
     beforeAll((done) => {
-        thx.init(() => {
-            agent = chai.request.agent(thx.app);
-
-            agent
-                .post('/api/login')
-                .send({ username: 'dynamic', password: 'dynamic', remember: false })
-                .then(function (res) {
-                    console.log(`[chai] beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
-                    expect(res).to.have.cookie('x-thx-core');
-                    let body = JSON.parse(res.text);
-                    jwt = 'Bearer ' + body.access_token;
-                    done();
-                });
-        });
+        agent = chai.request.agent(thx.app);
+        agent
+            .post('/api/login')
+            .send({ username: 'dynamic', password: 'dynamic', remember: false })
+            .then(function (res) {
+                console.log(`[chai] beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
+                expect(res).to.have.cookie('x-thx-core');
+                let body = JSON.parse(res.text);
+                jwt = 'Bearer ' + body.access_token;
+                done();
+            });
     });
 
     afterAll((done) => {
