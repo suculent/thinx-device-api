@@ -54,7 +54,7 @@ describe("Session Management", function () {
   it("POST /api/login (valid)", function (done) {
     agent
       .post('/api/login')
-      .send({ username: 'cimrman', password: 'tset', remember: false })
+      .send({ username: 'dynamic', password: 'dynamic', remember: false })
       .then(function (res) {
         console.log(`[chai] POST /api/login (valid)response: ${res.text} status: ${res.status}`);
         // expect(res).to.have.cookie('x-thx-core');
