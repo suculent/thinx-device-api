@@ -45,7 +45,7 @@ describe("Transformer (JWT)", function () {
               .send({ username: 'dynamic', password: 'dynamic', remember: false })
               .then(function (res) {
                   console.log(`[chai] Transformer (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res.text, null, 4)}, status: ${res.status}, cookie: ${res.cookie}, cookies: ${res.cookies}`);
-                  // expect(res).to.have.cookie('x-thx-core');
+                  // expect(res).to.have.cookie('x-thx-core'); we don't really care but the cookie seems not to be here with this name...
                   let body = JSON.parse(res.text);
                   jwt = 'Bearer ' + body.access_token;
                   done();

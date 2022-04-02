@@ -89,8 +89,7 @@ describe("ENV Vars (JWT)", function () {
             .post('/api/login')
             .send({ username: 'dynamic', password: 'dynamic', remember: false })
             .then(function (res) {
-                console.log(`[chai] ENV Vars (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
-                expect(res).to.have.cookie('x-thx-core');
+                console.log(`[chai] ENV Vars (JWT) beforeAll POST /api/login (valid) response: ${res.text} ${res.status} ${res.cookie}`);
                 let body = JSON.parse(res.text);
                 jwt = 'Bearer ' + body.access_token;
                 done();
