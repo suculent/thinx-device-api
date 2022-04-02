@@ -83,7 +83,82 @@ describe("Sources (JWT)", function () {
         done();
     });
 
-    xit("unfinished", function (done) {
-        done();
+    let source_for_revocation = null;
+
+    let mock_source = {
+        owner: envi.oid,
+        alias: "mock-source",
+        url: "https://github.com/suculent/thinx-firmware-esp8266-pio",
+        branch: "origin/master",
+        secret: process.env.GITHUB_SECRET
+      };
+
+    t("GET /api/user/sources/list", function (done) {
+        chai.request(thx.app)
+            .get('/api/user/sources/list')
+            .set('Authorization', jwt)
+            .end((err, res) => {
+                console.log("[chai] GET /api/user/sources/list response:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/user/source (invalid)", function (done) {
+        chai.request(thx.app)
+            .post('/api/user/source')
+            .set('Authorization', jwt)
+            .send({})
+            .end((err, res) => {
+                console.log("[chai] POST /api/user/source response:", res.text, " status:", res.status);
+                // TODO: store source_id to source_for_revocation, must be valid
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/user/source (valid)", function (done) {
+        chai.request(thx.app)
+            .post('/api/user/source')
+            .set('Authorization', jwt)
+            .send(mock_source)
+            .end((err, res) => {
+                console.log("[chai] POST /api/user/source response:", res.text, " status:", res.status);
+                expect(res.text).to.be.a('string');
+                let r = JSON.parse(res.text);
+                source_for_revocation = r.source_id;
+                // TODO: store source_id to source_for_revocation, must be valid
+                expect(res.status).to.equal(200);
+                expect(r.success).to.equal(true);
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/user/source/revoke", function (done) {
+        chai.request(thx.app)
+            .post('/api/user/source/revoke')
+            .set('Authorization', jwt)
+            .send({ source_id: null })
+            .end((err, res) => {
+                console.log("[chai] POST /api/user/source/revoke response:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/user/source/revoke (valid)", function (done) {
+        chai.request(thx.app)
+            .post('/api/user/source/revoke')
+            .set('Authorization', jwt)
+            .send({ source_id: source_for_revocation })
+            .end((err, res) => {
+                console.log("[chai] POST /api/user/source/revoke (valid) response:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
     }, 20000);
 });
