@@ -7,9 +7,9 @@ var expect = require('chai').expect;
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
-describe("Device API (noauth)", function () {
+let thx;
 
-    let thx;
+describe("Device API (noauth)", function () {
 
     beforeAll((done) => {
         thx = new THiNX();
@@ -119,7 +119,6 @@ describe("Device API (noauth)", function () {
 
 describe("Device + API (JWT+Key)", function () {
 
-    let thx = new THiNX();
     let agent;
     let jwt = null;
     let ak = null;

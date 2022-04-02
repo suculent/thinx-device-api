@@ -6,9 +6,9 @@ let chai = require('chai');
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
-describe("Meshes (noauth)", function () {
+let thx;
 
-    let thx;
+describe("Meshes (noauth)", function () {
 
     beforeAll((done) => {
         thx = new THiNX();
@@ -116,7 +116,6 @@ describe("Meshes (noauth)", function () {
 
 describe("Meshes (JWT)", function () {
 
-    let thx = new THiNX();
     let agent;
     let jwt;
 

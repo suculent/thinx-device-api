@@ -11,6 +11,8 @@ chai.use(chaiHttp);
 // Unauthenticated
 //
 
+let thx;
+
 describe("Builder (noauth)", function () {
 
     let thx;
@@ -68,7 +70,6 @@ describe("Builder (noauth)", function () {
 
 describe("Builder (JWT)", function () {
 
-    let thx = new THiNX();
     let agent;
     let jwt;
 

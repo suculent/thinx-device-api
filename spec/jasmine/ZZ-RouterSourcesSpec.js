@@ -9,6 +9,8 @@ chai.use(chaiHttp);
 
 var envi = require("../_envi.json");
 
+let thx;
+
 describe("Sources (noauth)", function () {
 
     let thx;
@@ -58,7 +60,6 @@ describe("Sources (noauth)", function () {
 
 describe("Sources (JWT)", function () {
 
-    let thx = new THiNX();
     let agent;
     let jwt;
   

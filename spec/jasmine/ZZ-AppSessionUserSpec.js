@@ -20,13 +20,14 @@ const user_info = {
 
 let dynamic_activation_code = null;
 
-let thx = new THiNX();
+let thx;
 let agent;
 let jwt = null;
 
 describe("User Routes", function () {
 
   beforeAll((done) => {
+    thx = new THiNX();
     thx.init(() => {
       agent = chai.request.agent(thx.app);
       done();

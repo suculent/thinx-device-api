@@ -9,9 +9,11 @@ chai.use(chaiHttp);
 
 var envi = require("../_envi.json");
 
+let thx;
+
 describe("Transformer (noauth)", function () {
   it("POST /api/transformer/run", function (done) {
-    let thx = new THiNX();
+    thx = new THiNX();
     thx.init(() => {
       chai.request(thx.app)
         .post('/api/transformer/run')
@@ -33,7 +35,6 @@ describe("Transformer (noauth)", function () {
 
 describe("Transformer (JWT)", function () {
 
-  let thx = new THiNX();
   let agent;
   let jwt;
 

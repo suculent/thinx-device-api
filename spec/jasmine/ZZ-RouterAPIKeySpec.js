@@ -11,13 +11,14 @@ chai.use(chaiHttp);
 // Unauthenticated
 //
 
-let thx = new THiNX();
+let thx;
 let agent;
 let jwt;
 
 describe("API Keys (noauth)", function () {
 
     beforeAll((done) => {
+        thx = new THiNX();
         thx.init(() => {
             agent = chai.request.agent(thx.app);
             agent

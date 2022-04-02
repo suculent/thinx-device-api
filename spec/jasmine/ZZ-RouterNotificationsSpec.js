@@ -9,11 +9,13 @@ chai.use(chaiHttp);
 
 var envi = require("../_envi.json");
 
+let thx;
+
 describe("Actionable Notification (noauth)", function () {
 
     it("POST /api/device/notification", function (done) {
         console.log("🚸 [chai] POST /api/device/notification");
-        let thx = new THiNX();
+        thx = new THiNX();
         thx.init(() => {
             chai.request(thx.app)
                 .post('/api/device/notification')
@@ -31,24 +33,21 @@ describe("Actionable Notification (noauth)", function () {
 
 describe("Actionable Notification (JWT)", function () {
 
-    let thx = new THiNX();
     let agent;
     let jwt;
   
     beforeAll((done) => {
-        thx.init(() => {
-            agent = chai.request.agent(thx.app);
-            agent
-                .post('/api/login')
-                .send({ username: 'dynamic', password: 'dynamic', remember: false })
-                .then(function (res) {
-                    // console.log(`[chai] Transformer (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
-                    expect(res).to.have.cookie('x-thx-core');
-                    let body = JSON.parse(res.text);
-                    jwt = 'Bearer ' + body.access_token;
-                    done();
-                });
-        });
+        agent = chai.request.agent(thx.app);
+        agent
+            .post('/api/login')
+            .send({ username: 'dynamic', password: 'dynamic', remember: false })
+            .then(function (res) {
+                // console.log(`[chai] Transformer (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
+                expect(res).to.have.cookie('x-thx-core');
+                let body = JSON.parse(res.text);
+                jwt = 'Bearer ' + body.access_token;
+                done();
+            });
     });
   
     afterAll((done) => {

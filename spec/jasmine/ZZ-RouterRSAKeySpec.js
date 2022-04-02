@@ -9,6 +9,8 @@ chai.use(chaiHttp);
 
 //var envi = require("../_envi.json");
 
+let thx;
+
 describe("RSA Keys (noauth)", function () {
 
     let thx;
@@ -59,7 +61,6 @@ describe("RSA Keys (noauth)", function () {
 
 describe("RSA Keys (JWT)", function () {
 
-    let thx = new THiNX();
     let agent;
     let jwt;
   

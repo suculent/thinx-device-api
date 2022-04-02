@@ -7,6 +7,8 @@ var expect = require('chai').expect;
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
+let thx;
+
 //var envi = require("../_envi.json");
 
 describe("Device Ownership Transfer (noauth)", function () {
@@ -79,7 +81,6 @@ describe("Device Ownership Transfer (noauth)", function () {
 
 describe("Transfer (JWT)", function () {
 
-    let thx = new THiNX();
     let agent;
     let jwt;
   
