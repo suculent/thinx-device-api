@@ -67,7 +67,7 @@ describe("Actionable Notification (JWT)", function () {
                     //console.log("[chai] POST /api/device/notification (jwt, invalid) response:", res.text, " status:", res.status);
                     expect(res.status).to.equal(200);
                     expect(res.text).to.be.a('string');
-                    expect(res.text).to.equal('{"success":false,"status":"missing_reply"}');
+                    expect(res.text).to.equal('{"success":false,"status":"missing_udid"}');
                     done();
                 });
     }, 20000);
