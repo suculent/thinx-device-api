@@ -122,7 +122,7 @@ describe("User Routes", function () {
             console.log("[chai] POST /api/user/password/set (after activation)");
             chai.request(thx.app)
               .post('/api/user/password/set')
-              .send({ password: 'tset', rpassword: 'tset', activation: dynamic_activation_code })
+              .send({ password: 'dynamic', rpassword: 'dynamic', activation: dynamic_activation_code })
               .end((err, res) => {
                 console.log("[chai] POST /api/user/password/set (after activation) response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
@@ -224,9 +224,8 @@ describe("User Routes", function () {
 
   it("POST /api/login (valid) and GET /api/user/profile (auth+jwt)", function (done) {
     agent
-      .catch((e) => console.log("/api/login (valid) e:", e))
       .post('/api/login')
-      .send({ username: 'cimrman', password: 'tset', remember: false })
+      .send({ username: 'dynamic', password: 'dynamic', remember: false })
       .then(function (res) {
         console.log(`[chai] POST /api/login (valid) response: ${JSON.stringify(res)}`);
         expect(res).to.have.cookie('x-thx-core');
