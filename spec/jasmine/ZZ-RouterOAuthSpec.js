@@ -24,9 +24,8 @@ describe("OAuth", function () {
         chai.request(thx.app)
             .get('/api/slack/direct_install')
             .end((err, res) => {
-                console.log("[chai] response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
+                expect(res).to.be.html;
                 done();
             });
     }, 20000);
@@ -34,11 +33,9 @@ describe("OAuth", function () {
     it("GET /api/slack/redirect", function (done) {
         chai.request(thx.app)
             .get('/api/slack/redirect?code=A&state=B')
-            .end((err, res) => {
-                console.log("[chai] response /api/slack/redirect err (status undefined):", { err });
+            .end((err/* , res */) => {
+                console.log("🚸 [chai] response /api/slack/redirect err (status undefined):", { err });
                 expect(err.code == 'ECONNREFUSED');
-                //expect(res.status).to.equal(200); 302
-                //expect(res.text).to.be.a('string');
                 done();
             });
     }, 20000);
@@ -46,10 +43,11 @@ describe("OAuth", function () {
     // Github OAuth
 
     it("GET /api/oauth/github", function (done) {
+        console.log("🚸 [chai] GET /api/oauth/github request");
         chai.request(thx.app)
             .get('/api/oauth/github')
             .end((err, res) => {
-                console.log("[chai] response /api/oauth/github status:", res.status);
+                console.log("🚸 [chai] response /api/oauth/github status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -57,11 +55,11 @@ describe("OAuth", function () {
     }, 20000);
 
     it("GET /api/oauth/github/callback", function (done) {
-        console.log("[chai] request /api/oauth/github/callback");
+        console.log("🚸 [chai] request /api/oauth/github/callback");
         chai.request(thx.app)
             .get('/api/oauth/github/callback')
             .end((err, res) => {
-                console.log("[chai] response /api/oauth/github/callback status:", res.status);
+                console.log("🚸 [chai] response /api/oauth/github/callback status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -69,11 +67,11 @@ describe("OAuth", function () {
     }, 20000);
 
     it("GET /api/oauth/github/callback?code=B", function (done) {
-        console.log("[chai] request /api/oauth/github/callback?code=B");
+        console.log("🚸 [chai] request /api/oauth/github/callback?code=B");
         chai.request(thx.app)
             .get('/api/oauth/github/callback?code=B')
             .end((err, res) => {
-                console.log("[chai] response /api/oauth/github/callback?code=B status:", res.status);
+                console.log("🚸 [chai] response /api/oauth/github/callback?code=B status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -86,7 +84,7 @@ describe("OAuth", function () {
         chai.request(thx.app)
             .get('/api/oauth/google')
             .end((err, res) => {
-                console.log("[chai] response /api/oauth/google status:", res.status);
+                console.log("🚸 [chai] response /api/oauth/google status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -94,11 +92,11 @@ describe("OAuth", function () {
     }, 20000);
 
     it("GET /api/oauth/google/callback", function (done) {
-        console.log("[chai] response /api/oauth/google/callback");
+        console.log("🚸 [chai] response /api/oauth/google/callback");
         chai.request(thx.app)
             .get('/api/oauth/google/callback')
             .end((err, res) => {
-                console.log("[chai] response /api/oauth/google/callback status:", res.status);
+                console.log("🚸 [chai] response /api/oauth/google/callback status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();

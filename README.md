@@ -25,7 +25,7 @@ IoT Device Management Server running on node.js.
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/18787/badge.svg"/>
 </a>
-[![Coverage Status](https://coveralls.io/repos/github/suculent/thinx-device-api/badge.svg?branch=thinx-swarm)](https://coveralls.io/github/suculent/thinx-device-api?branch=thinx-swarm)
+[![Coverage Status](https://coveralls.io/repos/github/suculent/thinx-device-api/badge.svg?branch=thinx-staging)](https://coveralls.io/github/suculent/thinx-device-api?branch=thinx-staging)
 [![License](https://img.shields.io/badge/license-ISC-green.svg?style=flat)](https://github.com/suculent/fastlane-plugin-apprepo/blob/master/LICENSE)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsuculent%2Fthinx-device-api.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsuculent%2Fthinx-device-api?ref=badge_shield)
 [![Demo Site Availability](https://api.ghostinspector.com/v1/suites/59351b18dad52f0ceb532cf5/status-badge)](https://api.ghostinspector.com/v1/suites/59351b18dad52f0ceb532cf5/status-badge)
@@ -253,7 +253,7 @@ docker run -ti -p 6379:6379 -e REDIS_PASSWORD=changeme! thinxcloud/redis:latest
 CouchDB
 
 ``` bash
-docker run -p 5984:5984 -e COUCHDB_USER=rtmtest -e COUCHDB_PASS=rtmtest couchdb:3.1.0
+docker run -p 5984:5984 -e COUCHDB_USER=rtmtest -e COUCHDB_PASSWORD=rtmtest couchdb:3.1.0
 ```
 
 # Platforms State of Union

@@ -11,15 +11,14 @@ describe("Audit log", function() {
 
   it("should be able to log", function(done) {
     audit.log(owner, "Log test successful.", "info", function(result) {
-      expect(result).to.be.true;
+      expect(result).to.equal(true);
       done();
     });
   }, 5000);
 
   it("should survive invalid log message", function(done) {
-    let message; // intentionally undefined
-    audit.log(owner, message, "info", function(result) {
-      expect(result).to.be.true;
+    audit.log(owner, undefined, "info", function(result) {
+      expect(result).to.equal(true);
       done();
     });
   }, 5000);
@@ -40,6 +39,7 @@ describe("Audit log", function() {
       "invalid-owner-id",
       function(err, body) {
         expect(body).to.be.a('array');
+        console.log("[spec] TODO: add expect on length of", {body});
         expect(err).to.equal(false);
         done();
       }

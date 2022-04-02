@@ -535,10 +535,10 @@ module.exports = class THiNX {
           // EADDRINUSE happens in test only; othewise should be reported
           if (process.env.ENVIRONMENT == "test") {
             if (err.toString().indexOf("EADDRINUSE") == -1) {
-              console.log(`☣️ [error] in WSS connection ${err}, ${req.url}`);
+              console.log(`☣️ [error] in WSS connection ${err}`);
             }
           } else {
-            console.log(`☣️ [error] in WSS connection ${err}, ${req.url}`);
+            console.log(`☣️ [error] in WSS connection ${err}`);
           }
         });
 

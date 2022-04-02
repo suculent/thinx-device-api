@@ -95,7 +95,7 @@ describe("Sanitka", function () {
   });
 
   it("should accept valid username", function () {
-    let input = "test";
+    let input = "cimrman";
     var result = sanitka.username(input);
     expect(result).to.equal(input);
   });

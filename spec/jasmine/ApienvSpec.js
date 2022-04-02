@@ -29,9 +29,9 @@ describe("API Env", function () {
       "sample-var-value-2",
       (success, object) => {
         expect(object).to.be.a('string');
-        if (success) {
-          done();
-        }
+        expect(success).to.equal(true);
+        console.log("[spec] TODO add expect on contents of", {object});
+        done();
       });
   }, 30000);
 
@@ -42,6 +42,7 @@ describe("API Env", function () {
       "sample-var-value",
       function (success, object) {
         expect(object).to.be.a('string');
+        console.log("[spec] TODO add expect on contents of", {object});
         if (success) {
           done();
         }
@@ -78,6 +79,7 @@ describe("API Env", function () {
       function (success, object) {
         expect(success).to.equal(true);
         expect(object).to.be.an('array');
+        console.log("[spec] TODO add expect on length of", {object}, object.length);
         done();
       });
   }, 5000);
@@ -112,9 +114,8 @@ describe("API Env", function () {
   }, 5000);
 
   it("should be able survive invalid input", function (done) {
-    let undefined_owner; // undefined
     apienv.fetch(
-      undefined_owner,
+      undefined,
       "sample-var-name",
       function (success, response) {
         expect(success).to.equal(false);
