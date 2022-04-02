@@ -47,7 +47,7 @@ describe("User Routes", function () {
         // console.log("[chai] POST /api/gdpr response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"unauthorized"}');
+        expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
         done();
       });
   }, 20000);
@@ -264,6 +264,7 @@ describe("User Routes", function () {
                 let owner_data = JSON.parse(res2.text);
                 expect(owner_data).to.be.an('object');
                 console.log("[chai] expected profile: ", JSON.stringify(owner_data, null, 2));
+                expect(owner_data).success.to.equal(true);
                 done();
               });
           });
