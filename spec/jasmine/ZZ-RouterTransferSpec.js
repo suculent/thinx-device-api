@@ -20,7 +20,7 @@ describe("Device Ownership Transfer", function () {
 
     it("POST /api/transfer/request", function (done) {
         chai.request(thx.app)
-            .get('/api/transfer/request')
+            .post('/api/transfer/request')
             .send({})
             .end((err, res) => {
                 console.log("[chai] POST /api/transfer/request response:", res.text, " status:", res.status);

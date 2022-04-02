@@ -95,7 +95,7 @@ describe("Builder (JWT)", function () {
     });
 
     // run build manually
-    it("POST /api/build", function (done) {
+    it("POST /api/build (JWT, invalid)", function (done) {
         agent
             .post('/api/build')
             .set('Authorization', jwt)
@@ -109,29 +109,31 @@ describe("Builder (JWT)", function () {
     }, 20000);
 
     // latest firmware envelope
-    it("POST /api/device/envelope", function (done) {
+    it("POST /api/device/envelope (JWT, invalid)", function (done) {
         agent
             .post('/api/device/envelope')
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
                 console.log("[chai] response /api/device/envelope (JWT, invalid):", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('false');
                 done();
             });
     }, 20000);
 
     // get build artifacts
-    it("POST /api/device/artifacts", function (done) {
+    it("POST /api/device/artifacts (JWT, invalid)", function (done) {
         agent
             .post('/api/device/artifacts')
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
                 console.log("[chai] response /api/device/artifacts (JWT, invalid):", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"status":"missing_udid"}');
                 done();
             });
     }, 20000);

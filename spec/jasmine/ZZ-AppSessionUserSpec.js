@@ -272,16 +272,13 @@ describe("User Routes", function () {
   }, 20000);
 
   it("GET /api/user/profile (jwt)", function (done) {
-    console.log("[chai] GET /api/user/profile (jwt) request with token", jwt);
     expect(jwt).not.to.be.null;
     chai
       .request(thx.app)
       .get('/api/user/profile')
       .set('Authorization', jwt)
       .end((err, res) => {
-        console.log("[chai] GET /api/user/profile (jwt) response ", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
         done();
       });
   }, 20000);
@@ -311,7 +308,7 @@ describe("User Routes", function () {
       .end((err, res) => {
         console.log("[chai] POST /api/user/profile (invalid) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
-        //expect(res.text).to.be.a('string');
+        expect(res).to.have.status(403);
         done();
       });
   }, 20000);
