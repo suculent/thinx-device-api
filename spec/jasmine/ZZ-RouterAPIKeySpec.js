@@ -134,6 +134,7 @@ describe("API Keys (JWT)", function () {
 
     // revoke
     it("POST /api/user/apikey/revoke (single)", function (done) {
+        expect(created_api_key).not.to.be.null;
         chai.request(thx.app)
             .post('/api/user/apikey/revoke')
             .set('Authorization', jwt)
@@ -150,12 +151,33 @@ describe("API Keys (JWT)", function () {
             });
     }, 20000);
 
-    it("POST /api/user/apikey/revoke (multiple)", function (done) {
+    it("POST /api/user/apikey/revoke (multiple, fault)", function (done) {
+        expect(created_api_key_2).not.to.be.null;
         chai.request(thx.app)
             .post('/api/user/apikey/revoke')
             .set('Authorization', jwt)
             .send({
                 'fingerprints': created_api_key_2
+            })
+            .end((err, res) => {
+                //  {"revoked":["7663ca65a23d759485fa158641727597256fd7eac960941fbb861ab433ab056f"],"success":true}
+                console.log(`[chai] POST /api/user/apikey/revoke (multiple) response: ${res.text}, status ${res.status}`);
+                expect(res.status).to.equal(200);
+                let j = JSON.parse(res.text);
+                expect(j.success).to.equal(true);
+                expect(j.revoked).to.be.an('array');
+                expect(j.revoked.length).to.equal(0);
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/user/apikey/revoke (multiple)", function (done) {
+        expect(created_api_key_2).not.to.be.null;
+        chai.request(thx.app)
+            .post('/api/user/apikey/revoke')
+            .set('Authorization', jwt)
+            .send({
+                'fingerprints': [created_api_key_2]
             })
             .end((err, res) => {
                 //  {"revoked":["7663ca65a23d759485fa158641727597256fd7eac960941fbb861ab433ab056f"],"success":true}
