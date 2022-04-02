@@ -18,7 +18,31 @@ describe("ENV Vars (noauth)", function () {
     });
   });
 
-  it("POST /api/user/env/add", function (done) {
+  it("POST /api/user/env/revoke (noauth, invalid)", function (done) {
+    chai.request(thx.app)
+      .post('/api/user/env/revoke')
+      .send()
+      .end((err, res) => {
+        console.log("[chai] POST /api/user/env/revoke response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/user/env/add (noauth, invalid)", function (done) {
+    chai.request(thx.app)
+      .post('/api/user/env/add')
+      .send()
+      .end((err, res) => {
+        console.log("[chai] POST /api/user/env/add response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/user/env/add (noauth, semi-valid)", function (done) {
     chai.request(thx.app)
       .post('/api/user/env/add')
       .send({ udid: envi.oid })
@@ -30,7 +54,7 @@ describe("ENV Vars (noauth)", function () {
       });
   }, 20000);
 
-  it("POST /api/user/env/revoke", function (done) {
+  it("POST /api/user/env/revoke (noauth, semi-valid)", function (done) {
     chai.request(thx.app)
       .post('/api/user/env/revoke')
       .send({ udid: envi.oid })
@@ -42,7 +66,7 @@ describe("ENV Vars (noauth)", function () {
       });
   }, 20000);
 
-  it("GET /api/user/env/list", function (done) {
+  it("GET /api/user/env/list (noauth)", function (done) {
     chai.request(thx.app)
       .get('/api/user/env/list')
       .end((err, res) => {
@@ -81,7 +105,67 @@ describe("ENV Vars (JWT)", function () {
       done();
   });
 
-  xit("unfinished", function (done) {
-    done();
-}, 20000);
+  it("POST /api/user/env/revoke (JWT, invalid)", function (done) {
+    chai.request(thx.app)
+      .post('/api/user/env/revoke')
+      .set('Authorization', jwt)
+      .send()
+      .end((err, res) => {
+        console.log("[chai] POST /api/user/env/revoke (JWT, invalid) response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/user/env/add (JWT, invalid)", function (done) {
+    chai.request(thx.app)
+      .post('/api/user/env/add')
+      .set('Authorization', jwt)
+      .send()
+      .end((err, res) => {
+        console.log("[chai] POST /api/user/env/add (JWT, invalid) response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/user/env/add (JWT, semi-valid)", function (done) {
+    chai.request(thx.app)
+      .post('/api/user/env/add')
+      .set('Authorization', jwt)
+      .send({ udid: envi.oid })
+      .end((err, res) => {
+        console.log("[chai] POST /api/user/env/add (JWT, semi-valid) response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/user/env/revoke (JWT, semi-valid)", function (done) {
+    chai.request(thx.app)
+      .post('/api/user/env/revoke')
+      .set('Authorization', jwt)
+      .send({ udid: envi.oid })
+      .end((err, res) => {
+        console.log("[chai] POST /api/user/env/revoke (JWT, semi-valid) response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("GET /api/user/env/list (JWT)", function (done) {
+    chai.request(thx.app)
+      .get('/api/user/env/list')
+      .set('Authorization', jwt)
+      .end((err, res) => {
+        console.log("[chai] GET /api/user/env/list (JWT) response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
 });
