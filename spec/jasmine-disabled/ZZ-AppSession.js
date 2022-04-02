@@ -65,7 +65,8 @@ describe("Session Management", function () {
         return agent.get('/user/me')
           .then(function (res) {
             expect(res).to.have.status(200);*/
-      });
+      })
+      .catch((e) => console.log("/api/login (valid) e:", e));
   }, 20000);
 
   it("POST /api/user/logs/tail (with session)", function (done) {

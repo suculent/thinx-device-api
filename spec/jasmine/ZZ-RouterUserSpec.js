@@ -224,6 +224,7 @@ describe("User Routes", function () {
 
   it("POST /api/login (valid) and GET /api/user/profile (auth+jwt)", function (done) {
     agent
+      .catch((e) => console.log("/api/login (valid) e:", e))
       .post('/api/login')
       .send({ username: 'cimrman', password: 'tset', remember: false })
       .then(function (res) {
