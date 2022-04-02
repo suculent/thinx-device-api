@@ -45,7 +45,7 @@ describe("User Routes", function () {
       .send({})
       .end((err, res) => {
         // console.log("[chai] POST /api/gdpr response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"unauthorized"}');
         done();
@@ -260,7 +260,10 @@ describe("User Routes", function () {
               .end((err, res2) => {
                 console.log("[chai] GET /api/user/profile (jwt) response\n", JSON.stringify(res2, null, 4), "'\nstatus:", res2.status);
                 expect(res2.status).to.equal(200);
-                expect(res).to.be.json;
+                expect(res2.text).to.be.a('string');
+                let owner_data = JSON.parse(res2.text);
+                expect(owner_data).to.be.an('object');
+                console.log("[chai] expected profile: ", JSON.stringify(owner_data, null, 2));
                 done();
               });
           });
@@ -366,7 +369,7 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  xit("GET /api/user/stats (jwt)", function (done) {
+  it("GET /api/user/stats (jwt)", function (done) {
     console.log("[chai] GET /api/user/stats (jwt)");
     agent
       .get('/api/user/stats')
