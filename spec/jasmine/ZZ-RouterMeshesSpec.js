@@ -103,7 +103,6 @@ describe("Meshes (noauth)", function () {
     }, 20000);
 
     it("POST /api/mesh/delete (noauth, undefined)", function (done) {
-        assert(mesh_id !== null);
         chai.request(thx.app)
             .post('/api/mesh/delete')
             .send('{"meshid":undefined}')

@@ -63,9 +63,11 @@ describe("Actionable Notification (JWT)", function () {
                 .set('Authorization', jwt)
                 .send({})
                 .end((err, res) => {
-                    console.log("[chai] POST /api/device/notification (jwt, invalid) response:", res.text, " status:", res.status);
-                    //expect(res.status).to.equal(200);
-                    //expect(res.text).to.be.a('string');
+                    //{"success":false,"status":"missing_reply"}
+                    //console.log("[chai] POST /api/device/notification (jwt, invalid) response:", res.text, " status:", res.status);
+                    expect(res.status).to.equal(200);
+                    expect(res.text).to.be.a('string');
+                    expect(res.text).to.equal('{"success":false,"status":"missing_reply"}');
                     done();
                 });
     }, 20000);
