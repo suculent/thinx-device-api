@@ -73,7 +73,7 @@ describe("API Key", function() {
         expect(array_or_error[0].key).to.be.a('string');
         apikey.revoke(
           owner,
-          ["sample-key"],
+          [generated_key_hash],
           (_success, /* result */) => {
             expect(_success).to.equal(true);
             done();

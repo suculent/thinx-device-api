@@ -102,11 +102,11 @@ describe("Meshes (noauth)", function () {
             });
     }, 20000);
 
-    it("POST /api/mesh/delete (noauth, valid)", function (done) {
-        assert(created_mesh_id !== null);
+    it("POST /api/mesh/delete (noauth, undefined)", function (done) {
+        assert(mesh_id !== null);
         chai.request(thx.app)
             .post('/api/mesh/delete')
-            .send('{"meshid":"'+created_mesh_id+'"}')
+            .send('{"meshid":undefined}')
             .end((err, res) => {
                 console.log("[chai] POST /api/mesh/delete (noauth, null) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
@@ -132,7 +132,6 @@ describe("Meshes (JWT)", function () {
                 .send({ username: 'dynamic', password: 'dynamic', remember: false })
                 .then(function (res) {
                     // console.log(`[chai] Transformer (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
-                    expect(res).to.have.cookie('x-thx-core');
                     let body = JSON.parse(res.text);
                     jwt = 'Bearer ' + body.access_token;
                     done();

@@ -21,9 +21,20 @@ describe("Device API (noauth)", function () {
     it("POST /device/register", function (done) {
         chai.request(thx.app)
             .post('/device/register')
+            .send()
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    it("POST /device/register", function (done) {
+        chai.request(thx.app)
+            .post('/device/register')
             .send({ registration: {} })
             .end((err, res) => {
-                expect(res.status).to.equal(404);
+                expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
             });
