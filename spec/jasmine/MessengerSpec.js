@@ -58,7 +58,7 @@ describe("Messenger", function() {
       expect(success).to.equal(true);
       done();
     });
-  }, 20000);
+  }, 60000);
 
   // getDevices: function(owner, callback)
   it("should be able to fetch devices for owner", function(done) {

@@ -148,7 +148,7 @@ describe("API Keys (JWT)", function () {
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
                 expect(j.revoked).to.be.an('array');
-                expect(j.revoked.length).to.equal(2);
+                expect(j.revoked.length).to.equal(1);
                 done();
             });
     }, 20000);
@@ -203,7 +203,7 @@ describe("API Keys (JWT)", function () {
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
                 expect(j.api_keys).to.be.an('array');
-                expect(j.api_keys.length).to.equal(1);
+                expect(j.api_keys.length).to.equal(2);
                 done();
             });
     }, 20000);

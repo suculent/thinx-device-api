@@ -40,7 +40,7 @@ describe("JWT Login", function () {
                 }
             };
             login.verify(mock_req, (error, payload) => {
-                console.log("JWT Secret verification results:", {error}, {payload});
+                console.log("[spec] JWT Secret verification results:", {error}, {payload});
                 expect(error).to.equal(null);
                 expect(payload).to.be.a('object');
                 done();

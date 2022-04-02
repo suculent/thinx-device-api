@@ -7,7 +7,7 @@ var expect = require('chai').expect;
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
-var envi = require("../_envi.json");
+//var envi = require("../_envi.json");
 
 describe("Device Ownership Transfer (noauth)", function () {
 
@@ -104,8 +104,8 @@ describe("Transfer (JWT)", function () {
         done();
     });
 
-    let trid_1 = null;
-    let trid_2 = null;
+    //let trid_1 = null;
+    //let trid_2 = null;
 
     // TODO: save trid for accept and decline, create valid version of this; needs at least two owners and one device
     it("POST /api/transfer/request (jwt, invalid)", function (done) {

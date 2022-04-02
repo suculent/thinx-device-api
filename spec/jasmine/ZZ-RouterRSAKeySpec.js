@@ -112,7 +112,7 @@ describe("RSA Keys (JWT)", function () {
                     ]}*/
                 let r = JSON.parse(res.text);
                 expect(r.success).to.equal(true);
-                key_id = rsa_keys[0].filename;
+                key_id = r.rsa_keys[0].filename;
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 done();
