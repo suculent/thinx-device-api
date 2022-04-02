@@ -7,6 +7,8 @@ var expect = require('chai').expect;
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
+var envi = require("../_envi.json");
+
 describe("Device Ownership Transfer", function () {
 
     let thx;

@@ -7,6 +7,8 @@ var expect = require('chai').expect;
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
+var envi = require("../_envi.json");
+
 describe("Transformer", function () {
   it("POST /api/transformer/run", function (done) {
     let thx = new THiNX();
@@ -25,3 +27,68 @@ describe("Transformer", function () {
 
 });
 
+//
+// Authenticated
+//
+
+describe("Transformer (JWT)", function () {
+
+  let thx = new THiNX();
+  let agent;
+  let jwt;
+
+  beforeAll((done) => {
+      thx.init(() => {
+          agent = chai.request.agent(thx.app);
+
+          agent
+              .post('/api/login')
+              .send({ username: 'dynamic', password: 'dynamic', remember: false })
+              .then(function (res) {
+                  // console.log(`[chai] Transformer (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
+                  expect(res).to.have.cookie('x-thx-core');
+                  let body = JSON.parse(res.text);
+                  jwt = 'Bearer ' + body.access_token;
+                  done();
+              });
+      });
+  });
+
+  afterAll((done) => {
+      agent.close();
+      done();
+  });
+
+  it("POST /api/transformer/run (JWT, invalid)", function (done) {
+    let thx = new THiNX();
+    thx.init(() => {
+      chai.request(thx.app)
+        .post('/api/transformer/run')
+        .set('Authorization', jwt)
+        .send({})
+        .end((err, res) => {
+          console.log("[chai] POST /api/transformer/run (JWT, invalid) response:", res.text, " status:", res.status);
+          //expect(res.status).to.equal(200);
+          //expect(res.text).to.be.a('string');
+          done();
+        });
+    });
+  }, 20000);
+
+  it("POST /api/transformer/run (JWT, semi-valid)", function (done) {
+    let thx = new THiNX();
+    thx.init(() => {
+      chai.request(thx.app)
+        .post('/api/transformer/run')
+        .set('Authorization', jwt)
+        .send({ device_id: envi.udid })
+        .end((err, res) => {
+          console.log("[chai] POST /api/transformer/run (JWT, semi-valid) response:", res.text, " status:", res.status);
+          //expect(res.status).to.equal(200);
+          //expect(res.text).to.be.a('string');
+          done();
+        });
+    });
+  }, 20000);
+
+});
