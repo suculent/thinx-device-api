@@ -85,20 +85,20 @@ describe("ENV Vars (JWT)", function () {
 
   beforeAll((done) => {
     agent = chai.request.agent(thx.app);
-        agent
-            .post('/api/login')
-            .send({ username: 'dynamic', password: 'dynamic', remember: false })
-            .then(function (res) {
-                console.log(`[chai] ENV Vars (JWT) beforeAll POST /api/login (valid) response: ${res.text} ${res.status} ${res.cookie}`);
-                let body = JSON.parse(res.text);
-                jwt = 'Bearer ' + body.access_token;
-                done();
-            });
+    agent
+      .post('/api/login')
+      .send({ username: 'dynamic', password: 'dynamic', remember: false })
+      .then(function (res) {
+        console.log(`[chai] ENV Vars (JWT) beforeAll POST /api/login (valid) response: ${res.text} ${res.status} ${res.cookie}`);
+        let body = JSON.parse(res.text);
+        jwt = 'Bearer ' + body.access_token;
+        done();
+      });
   });
 
   afterAll((done) => {
-      agent.close();
-      done();
+    agent.close();
+    done();
   });
 
   it("POST /api/user/env/revoke (JWT, invalid)", function (done) {

@@ -56,8 +56,7 @@ describe("Session Management", function () {
       .post('/api/login')
       .send({ username: 'dynamic', password: 'dynamic', remember: false })
       .then(function (res) {
-        console.log(`[chai] POST /api/login (valid)response: ${res.text} status: ${res.status}`);
-        // expect(res).to.have.cookie('x-thx-core');
+        console.log(`[chai] POST /api/login (valid)response: ${res.text} status: ${res.status} with cookie ${res.cookie}`);
         done();
         /*
         // The `agent` now has the sessionid cookie saved, and will send it
