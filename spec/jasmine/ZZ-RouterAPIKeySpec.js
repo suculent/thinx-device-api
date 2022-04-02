@@ -3,9 +3,9 @@
 const THiNX = require("../../thinx-core.js");
 
 let chai = require('chai');
+var expect = require('chai').expect;
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
-
 //
 // Unauthenticated
 //
@@ -104,7 +104,7 @@ describe("API Keys (JWT)", function () {
     //
 
     // create
-    it("POST /api/user/apikey (JWT)", function (done) {
+    it("POST /api/user/apikey", function (done) {
         console.log("[chai] request /api/user/apikey (JWT)");
         chai.request(thx.app)
             .post('/api/user/apikey')
@@ -121,7 +121,7 @@ describe("API Keys (JWT)", function () {
     }, 20000);
 
     // revoke
-    it("POST /api/user/apikey/revoke (JWT)", function (done) {
+    it("POST /api/user/apikey/revoke", function (done) {
         console.log("[chai] request /api/user/apikey/revoke (JWT)");
         chai.request(thx.app)
             .post('/api/user/apikey/revoke')
@@ -138,7 +138,7 @@ describe("API Keys (JWT)", function () {
     }, 20000);
 
     // list
-    it("GET /api/user/apikey/list (JWT)", function (done) {
+    it("GET /api/user/apikey/list", function (done) {
         console.log("[chai] request GET /api/user/apikey/list (JWT)");
         chai.request(thx.app)
             .get('/api/user/apikey/list')
