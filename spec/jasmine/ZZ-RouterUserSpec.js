@@ -227,7 +227,7 @@ describe("User Routes", function () {
       .post('/api/login')
       .send({ username: 'cimrman', password: 'tset', remember: false })
       .then(function (res) {
-        console.log(`[chai] POST /api/login (valid)response: ${res} status: ${res.status}`);
+        console.log(`[chai] POST /api/login (valid) response: ${JSON.stringify(res)}`);
         expect(res).to.have.cookie('x-thx-core');
         /* response example:
         {
@@ -256,6 +256,7 @@ describe("User Routes", function () {
             console.log("[chai] GET /api/user/profile (jwt) request with token", jwt);
             return agent
               .get('/api/user/profile')
+              .set('Authorization', jwt)
               .end((err, res2) => {
                 console.log("[chai] GET /api/user/profile (jwt) response '", JSON.stringify(res2), "' status:", res2.status);
                 //expect(res2.status).to.equal(403);

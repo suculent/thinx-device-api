@@ -166,7 +166,7 @@ describe("Sources", function () {
           done();
         });
       });
-  });
+  }, 20000);
 
   it("(12) should be able to remove sources from owner", function () {
     Sources.removeSourcesFromOwner(owner, [source_id]);
