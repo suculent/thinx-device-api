@@ -20,7 +20,7 @@ describe("Device API (noauth)", function () {
 
     it("POST /device/register", function (done) {
         chai.request(thx.app)
-            .post('/api/device/register')
+            .post('/device/register')
             .send({ registration: {} })
             .end((err, res) => {
                 expect(res.status).to.equal(404);
@@ -153,10 +153,10 @@ describe("Device + API (JWT+Key)", function () {
         done();
     });
 
-    it("POST /device/register", function (done) {
+    it("POST /device/register (invalid)", function (done) {
         chai.request(thx.app)
-            .post('/api/device/register')
-            .set('Authorization', ak)
+            .post('/device/register')
+            .set('Authentication', ak)
             .send({ registration: {} })
             .end((err, res) => {
                 expect(res.status).to.equal(404);
@@ -169,7 +169,7 @@ describe("Device + API (JWT+Key)", function () {
     it("POST /device/firmware", function (done) {
         chai.request(thx.app)
             .post('/device/firmware')
-            .set('Authorization', ak)
+            .set('Authentication', ak)
             .send({})
             .end((err, res) => {
                 expect(res.status).to.equal(200);
@@ -182,7 +182,7 @@ describe("Device + API (JWT+Key)", function () {
     it("POST /device/addpush", function (done) {
         chai.request(thx.app)
             .post('/api/device/addpush')
-            .set('Authorization', ak)
+            .set('Authentication', ak)
             .send({})
             .end((err, res) => {
                 expect(res.status).to.equal(404);
@@ -206,7 +206,7 @@ describe("Device + API (JWT+Key)", function () {
     it("POST /api/device/envs", function (done) {
         agent
             .post('/api/device/envs')
-            .set('Authorization', ak)
+            .set('Authentication', ak)
             .send({})
             .end((err, res) => {
                 console.log("[chai] POST /api/device/envs response:", res.text, " status:", res.status);
@@ -219,7 +219,7 @@ describe("Device + API (JWT+Key)", function () {
     it("POST /api/device/detail", function (done) {
         chai.request(thx.app)
             .post('/api/device/detail')
-            .set('Authorization', ak)
+            .set('Authentication', ak)
             .send({})
             .end((err, res) => {
                 console.log("[chai] POST /api/device/detail response:", res.text, " status:", res.status);
@@ -232,7 +232,7 @@ describe("Device + API (JWT+Key)", function () {
     it("POST /api/device/edit", function (done) {
         chai.request(thx.app)
             .post('/api/device/edit')
-            .set('Authorization', ak)
+            .set('Authentication', ak)
             .send({ changes: { alias: "edited-alias" } })
             .end((err, res) => {
                 console.log("[chai] POST /api/device/edit response:", res.text, " status:", res.status);
