@@ -153,20 +153,21 @@ describe("Device + API (JWT+Key)", function () {
         done();
     });
 
-    it("POST /device/register (invalid)", function (done) {
+    it("POST /device/register (jwt, invalid)", function (done) {
         chai.request(thx.app)
             .post('/device/register')
             .set('Authentication', ak)
             .send({ registration: {} })
             .end((err, res) => {
-                expect(res.status).to.equal(404);
+                console.log("[chai] POST /device/register (jwt, invalid) response:", res.text);
+                expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
             });
     }, 20000);
 
     // must be fully mocked or run after build completes
-    it("POST /device/firmware", function (done) {
+    it("POST /device/firmware (jwt, invalid)", function (done) {
         chai.request(thx.app)
             .post('/device/firmware')
             .set('Authentication', ak)
@@ -179,7 +180,7 @@ describe("Device + API (JWT+Key)", function () {
             });
     }, 20000);
 
-    it("POST /device/addpush", function (done) {
+    it("POST /device/addpush (jwt, invalid)", function (done) {
         chai.request(thx.app)
             .post('/api/device/addpush')
             .set('Authentication', ak)
@@ -191,7 +192,7 @@ describe("Device + API (JWT+Key)", function () {
             });
     }, 20000);
 
-    it("GET /device/firmware", function (done) {
+    it("GET /device/firmware (ak, invalid)", function (done) {
         chai.request(thx.app)
             .get('/device/firmware?ott=foo')
             .end((err, res) => {
@@ -202,44 +203,98 @@ describe("Device + API (JWT+Key)", function () {
             });
     }, 20000);
 
-    // POST /api/device/envs
-    it("POST /api/device/envs", function (done) {
-        agent
-            .post('/api/device/envs')
+    it("GET /device/firmware (ak, valid)", function (done) {
+        chai.request(thx.app)
+            .get('/device/firmware?ott=foo')
             .set('Authentication', ak)
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('OTT_INFO_NOT_FOUND');
+                done();
+            });
+    }, 20000);
+
+    // Device Control API
+
+    it("POST /api/device/envs (jwt, invalid)", function (done) {
+        chai.request(thx.app)
+            .post('/api/device/envs')
+            .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
-                console.log("[chai] POST /api/device/envs response:", res.text, " status:", res.status);
+                console.log("[chai] POST /api/device/envs (jwt, invalid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
             });
     }, 20000);
 
-    it("POST /api/device/detail", function (done) {
+    it("POST /api/device/detail (jwt, invalid)", function (done) {
         chai.request(thx.app)
             .post('/api/device/detail')
-            .set('Authentication', ak)
+            .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
-                console.log("[chai] POST /api/device/detail response:", res.text, " status:", res.status);
+                console.log("[chai] POST /api/device/detail (jwt, invalid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
             });
     }, 20000);
 
-    it("POST /api/device/edit", function (done) {
+    it("POST /api/device/edit (jwt, valid)", function (done) {
         chai.request(thx.app)
             .post('/api/device/edit')
             .set('Authentication', ak)
             .send({ changes: { alias: "edited-alias" } })
             .end((err, res) => {
-                console.log("[chai] POST /api/device/edit response:", res.text, " status:", res.status);
+                console.log("[chai] POST /api/device/edit (jwt, valid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
             });
     }, 20000);
+
+    //
+    // Authenticated (Session)
+    //
+
+    it("POST /api/device/envs (session, invalid)", function (done) {
+        agent
+            .post('/api/device/envs')
+            .send({})
+            .end((err, res) => {
+                console.log("[chai] POST /api/device/envs (session, invalid) response:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/device/detail (session, invalid)", function (done) {
+        agent
+            .post('/api/device/detail')
+            .send({})
+            .end((err, res) => {
+                console.log("[chai] POST /api/device/detail (session, invalid) response:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/device/edit (session, valid)", function (done) {
+        agent
+            .post('/api/device/edit')
+            .send({ changes: { alias: "edited-alias" } })
+            .end((err, res) => {
+                console.log("[chai] POST /api/device/edit (session, valid) response:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
 
 });

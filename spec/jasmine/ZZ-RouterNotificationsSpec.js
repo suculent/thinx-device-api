@@ -54,7 +54,31 @@ describe("Actionable Notification (JWT)", function () {
         done();
     });
 
-    xit("unfinished", function (done) {
-        done();
+    it("POST /api/device/notification (jwt, invalid)", function (done) {
+        console.log("[chai] POST /api/device/notification");
+        chai.request(thx.app)
+                .post('/api/device/notification')
+                .set('Authorization', jwt)
+                .send({})
+                .end((err, res) => {
+                    console.log("[chai] POST /api/device/notification (jwt, invalid) response:", res.text, " status:", res.status);
+                    //expect(res.status).to.equal(200);
+                    //expect(res.text).to.be.a('string');
+                    done();
+                });
+    }, 20000);
+
+    xit("POST /api/device/notification (jwt, valid)", function (done) {
+        console.log("[chai] POST /api/device/notification");
+        chai.request(thx.app)
+                .post('/api/device/notification')
+                .set('Authorization', jwt)
+                .send({})
+                .end((err, res) => {
+                    console.log("[chai] POST /api/device/notification (jwt, valid) response:", res.text, " status:", res.status);
+                    //expect(res.status).to.equal(200);
+                    //expect(res.text).to.be.a('string');
+                    done();
+                });
     }, 20000);
 });
