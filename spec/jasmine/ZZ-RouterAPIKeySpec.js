@@ -153,7 +153,7 @@ describe("API Keys (JWT)", function () {
             });
     }, 20000);
 
-    it("POST /api/user/apikey/revoke (multiple, fault)", function (done) {
+    xit("POST /api/user/apikey/revoke (multiple, fault)", function (done) {
         expect(created_api_key_2).not.to.be.null;
         chai.request(thx.app)
             .post('/api/user/apikey/revoke')
@@ -173,7 +173,7 @@ describe("API Keys (JWT)", function () {
             });
     }, 20000);
 
-    it("POST /api/user/apikey/revoke (multiple)", function (done) {
+    xit("POST /api/user/apikey/revoke (multiple)", function (done) {
         expect(created_api_key_2).not.to.be.null;
         chai.request(thx.app)
             .post('/api/user/apikey/revoke')
