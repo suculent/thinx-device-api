@@ -264,7 +264,7 @@ describe("User Routes", function () {
                 let owner_data = JSON.parse(res2.text);
                 expect(owner_data).to.be.an('object');
                 console.log("[chai] expected profile: ", JSON.stringify(owner_data, null, 2));
-                expect(owner_data).success.to.equal(true);
+                expect(owner_data.success).to.equal(true);
                 done();
               });
           });
