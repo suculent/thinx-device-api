@@ -258,16 +258,16 @@ describe("User Routes", function () {
               .get('/api/user/profile')
               .set('Authorization', jwt)
               .end((err, res2) => {
-                console.log("[chai] GET /api/user/profile (jwt) response '", JSON.stringify(res2), "' status:", res2.status);
-                //expect(res2.status).to.equal(403);
-                //expect(res.text).to.be.a('string');
+                console.log("[chai] GET /api/user/profile (jwt) response\n", JSON.stringify(res2, null, 4), "'\nstatus:", res2.status);
+                expect(res2.status).to.equal(200);
+                expect(res).to.be.json;
                 done();
               });
           });
       });
   }, 20000);
 
-  xit("GET /api/user/profile (jwt)", function (done) {
+  it("GET /api/user/profile (jwt)", function (done) {
     console.log("[chai] GET /api/user/profile (jwt) request with token", jwt);
     expect(jwt).not.to.be.null;
     chai
@@ -285,10 +285,10 @@ describe("User Routes", function () {
   it("POST /api/login (valid)", function (done) {
     agent
       .post('/api/login')
-      .send({ username: 'cimrman', password: 'tset', remember: false })
+      .send({ username: 'dynamic', password: 'dynamic', remember: false })
       .then(function (res) {
-        console.log(`[chai] POST /api/login (valid) response: ${res.text} status: ${res.status}`);
-        // expect(res).to.have.cookie('x-thx-core');
+        console.log(`[chai] POST /api/login (valid) response: \n ${res.text} \n status: ${res.status} \n cookie: ${res.cookie}, ${res.cookies}`);
+        expect(res).to.have.cookie('x-thx-core');
         done();
         /*
         // The `agent` now has the sessionid cookie saved, and will send it
