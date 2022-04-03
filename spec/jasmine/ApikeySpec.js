@@ -122,12 +122,12 @@ describe("API Key", function() {
   });
 
   // currently fails, no key is being fetched
-  it("(07) should be able to get first API Keyif exists)", function (done) {
+  it("(07) should be able to get first API Key (if exists)", function (done) {
     console.log(`[spec] (07) get_first_apikey for owner: ${owner}`);
     apikey.get_first_apikey(
       owner,
       (success, object) => {
-        console.log(`[chai] (07) ${succsess} ${object}`);
+        console.log(`[chai] (07) ${success} ${object}`);
         expect(success).to.equal(true);
         if (success) {
           expect(object).to.be.a('string');
