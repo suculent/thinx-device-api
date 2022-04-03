@@ -55,7 +55,7 @@ describe("Messenger", function() {
     console.log("✅ [spec]  Initializing messenger with owner", test_owner, "mock_socket", null);
     messenger.initWithOwner(test_owner, null, (success, status) => {
       console.log("✅ [spec] messenger initialized: ", { success: success, status: status });
-      expect(success).to.equal(false);
+      expect(success).to.equal(true);
       done();
     });
   }, 60000);
