@@ -1,7 +1,7 @@
-FROM thinxcloud/base:1.14
+FROM thinxcloud/base:1.20
 
 LABEL maintainer="Matej Sychra <suculent@me.com>"
-LABEL name="THiNX API" version="1.5.915"
+LABEL name="THiNX API" version="1.5.1070"
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -74,8 +74,6 @@ RUN apt-get update -qq && \
 # Install app dependencies
 COPY package.json ./
 
-# Only test to see wtf?
-#RUN npm install .
 RUN npm install .
 
 VOLUME /var/lib/docker

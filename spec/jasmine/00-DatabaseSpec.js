@@ -5,7 +5,8 @@ describe("Database", function () {
 
   it("should start and create initial DBs", function (done) {
     database.init((err, result) => {
-      //expect(err).to.be.null;
+      console.log("[spec] DB result - TODO: make this an expect", {err}, {result});
+      //expect(err).to.be.equal(null);
       //expect(result).to.be.a('array');
       done();
     });

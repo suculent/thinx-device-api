@@ -1,6 +1,6 @@
 {
   "name": "thinx",
-  "version": "1.5.915",
+  "version": "1.5.1070",
   "description": "THiNX IoT Device Management API",
   "bugs": {
     "url": "https://github.com/suculent/thinx-device-api/issues"
@@ -32,7 +32,8 @@
     "bluebird": "^3.7.2",
     "body-parser": "^1.19.0",
     "brace-expansion": "1.1.11",
-    "chai": "^4.3.5",
+    "chai": "^4.3.6",
+    "chai-http": "^4.3.0",
     "chalk": "^4.1.0",
     "chmodr": "^1.2.0",
     "coap": "^0.26.0",
@@ -124,6 +125,7 @@
     "yargs-parser": "20.2.7"
   },
   "devDependencies": {
+    "assert": "^2.0.0",
     "codacy-coverage": "^3.2.0",
     "codecov": "^3.8.1",
     "coveralls": "^3.1.0",

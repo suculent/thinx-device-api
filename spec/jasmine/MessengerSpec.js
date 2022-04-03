@@ -42,7 +42,7 @@ describe("Messenger", function() {
         expect(TEST_DEVICE_6.udid).to.be.a('string');
         done();
       });
-  }, 15000); // register
+  }, 20000); // register
 
 
   it("should be able to initialize", function (/* done */) {
@@ -51,14 +51,14 @@ describe("Messenger", function() {
 
   // this requires having owner and devices registered in the DB, 
   it("should be able to initialize with owner", function (done) {
-    const mock_socket = {}; // let socket = app._ws[owner]; - websocket should be extracted to be instantiated on its own
-    //console.log("✅ [spec]  Initializing messenger with owner", test_owner, "socket", mock_socket);
-    messenger.initWithOwner(test_owner, mock_socket, (success, status) => {
+    // const mock_socket = {}; let socket = app._ws[owner]; - websocket should be extracted to be instantiated on its own
+    console.log("✅ [spec]  Initializing messenger with owner", test_owner, "mock_socket", null);
+    messenger.initWithOwner(test_owner, null, (success, status) => {
       console.log("✅ [spec] messenger initialized: ", { success: success, status: status });
       expect(success).to.equal(true);
       done();
     });
-  });
+  }, 60000);
 
   // getDevices: function(owner, callback)
   it("should be able to fetch devices for owner", function(done) {
@@ -85,11 +85,14 @@ describe("Messenger", function() {
     const Globals = require("../../lib/thinx/globals.js");
     var app_config = Globals.app_config();
 
-    console.log(`[spec] [mm] [debug] getting apikey with config ${JSON.stringify(app_config.mqtt)}`); // TODO REMOVE
+    // TODO REMOVE; config is `{"server":"mqtt://mosquitto","port":1883}`
+    console.log(`[spec] [mm] [debug] getting apikey with config ${JSON.stringify(app_config.mqtt)} for ${test_owner}`); 
 
     user.mqtt_key(test_owner, (key_success, apikey) => {
 
-      // to debug Default MQTT API Key creation: console.log(`[spec] [mm] fetched mqtt key? ${key_success} with apikey ${JSON.stringify(apikey, null, '\t')}`);
+      // to debug Default MQTT API Key creation: 
+      
+      console.log(`[spec] [mm] fetched mqtt key? ${key_success} with apikey ${JSON.stringify(apikey, null, '\t')}`);
 
       expect(key_success).to.equal(true);
       expect(apikey).to.be.a('object');
