@@ -111,9 +111,10 @@ describe("Transfer (JWT)", function () {
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/transfer/request (jwt, invalid) response headers: ", res.header, " should contain Content-type: text/html");
+                //console.log("🚸 [chai] POST /api/transfer/request (jwt, invalid) response headers: ", res.header, " should contain Content-type: text/html");
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string'); // <html> - headers incorrect!
+                expect(res).to.be.html;
                 done();
             });
     }, 20000);
