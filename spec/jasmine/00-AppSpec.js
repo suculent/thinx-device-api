@@ -71,7 +71,7 @@ describe("App should support", function () {
 
 });
 
-describe("Session Management", function () {
+describe("AppSpec Session Management", function () {
 
   it("POST /api/login (invalid)", function (done) {
     chai.request(thx.app)
