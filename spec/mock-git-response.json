@@ -86,8 +86,8 @@
       "repo": {
         "id": 87699143,
         "node_id": "MDEwOlJlcG9zaXRvcnk4NzY5OTE0Mw==",
-        "name": "thinx-device-api",
-        "full_name": "suculent/thinx-device-api",
+        "name": "thinx-firmware-esp8266-pio",
+        "full_name": "suculent/thinx-firmware-esp8266-pio",
         "private": false,
         "owner": {
           "login": "suculent",
