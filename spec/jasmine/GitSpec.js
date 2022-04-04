@@ -38,8 +38,8 @@ describe("Git", function() {
 
     it("should survive invalid input", function() {
         let git = new Git();
-        let success = git.tryShellOp("ls", "~");        
-        expect(success).to.be.true;
+        let success = git.tryShellOp(";", "&&");        
+        expect(success).to.be.false;
     });
 
 });

@@ -22,8 +22,7 @@ describe("Notifier", function () {
   it("should be able to create notification object for valid build", function() {
     let newStatus = "OK";
     let obj = not.notificationObject(newStatus, buildEnvelope);
-    console.log("[chai] notification object for valid build", obj);
-    expect(obj.text).to.contain('sucessfully completed');
+    expect(obj.text).to.contain('successfully completed');
   });
 
   it("should be able to create notification object for dry-run build", function() {
