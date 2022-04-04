@@ -6,8 +6,21 @@ describe("Transfer", function () {
   var Messenger = require('../../lib/thinx/messenger');
   var messenger = new Messenger("mosquitto").getInstance("mosquitto");
 
+  var Devices = require("../../lib/thinx/devices");
+  var devices = new Devices(messenger);
+
   var Transfer = require("../../lib/thinx/transfer");
   var transfer = new Transfer(messenger);
+
+  beforeAll((done) => {
+    devices.list(envi.oid, (success, response) => {
+      expect(success).to.be.true;
+      expect(response).to.be.a('object');
+      console.log("[spec] [transfer] BEFORE device list:", JSON.stringify(response, null, 2));
+      done();
+    });
+    done();
+  });
 
   it("(00) should be able to initiate device transfer, decline and accept another one", function (done) {
 
