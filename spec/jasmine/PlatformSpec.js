@@ -31,59 +31,57 @@ describe("Platform", function() {
     }, 15000);
 
     it("should not fail on invalid local path", function(done) {
-        let undefined_path;
-        Platform.getPlatform(undefined_path, function(success, result) {
+        Platform.getPlatform(undefined, function(success, result) {
           expect(success).to.equal(false);
           expect(result).to.equal('local_path not defined');
-          //console.log("platform detection result on intentionally invalid path:", result);
           done();
         });
     }, 15000);
 
-    it("should detect arduino", function(done) {
+    it("should detect arduino", (done) => {
         Platform.getPlatform(path_ino, function(success, result) {
           expect(success).to.equal(true);
-          console.log("platform detection result:", result);
+          console.log("arduino detection result:", result);
           done();
         });
     }, 15000);
 
     it("should detect lua", function(done) {
-        Platform.getPlatform(path_lua, function(success, result) {
+        Platform.getPlatform(path_lua, (success, result) => {
           expect(success).to.equal(true);
-          console.log("platform detection result:", result);
+          console.log("lua detection result:", result);
           done();
         });
     }, 15000);
 
     it("should detect pio", function(done) {
-        Platform.getPlatform(path_pio, function(success, result) {
+        Platform.getPlatform(path_pio, (success, result) => {
           expect(success).to.equal(true);
-          console.log("platform detection result:", result);
+          console.log("pio detection result:", result);
           done();
         });
     }, 15000);
 
     it("should detect micropython", function(done) {
-        Platform.getPlatform(path_upy, function(success, result) {
+        Platform.getPlatform(path_upy, (success, result)  => {
           expect(success).to.equal(true);
-          console.log("platform detection result:", result);
+          console.log("micropython detection result:", result);
           done();
         });
     }, 15000);
 
     it("should detect mongoose os", function(done) {
-      Platform.getPlatform(path_mos, function(success, result) {
+      Platform.getPlatform(path_mos, (success, result)  => {
         expect(success).to.equal(true);
-        console.log("platform detection result:", result);
+        console.log("mongoose detection result:", result);
         done();
       });
   }, 15000);
 
-  it("should detect monjavascriptgoose os", function(done) {
-    Platform.getPlatform(path_js, function(success, result) {
+  it("should detect javascript os", function(done) {
+    Platform.getPlatform(path_js, (success, result) => {
       expect(success).to.equal(true);
-      console.log("platform detection result:", result);
+      console.log("javascript detection result:", result);
       done();
     });
 }, 15000);

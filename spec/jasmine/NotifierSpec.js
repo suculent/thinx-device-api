@@ -37,30 +37,33 @@ describe("Notifier", function () {
     expect(obj.text).to.contain('has failed');
   });
 
-  it ("should return if outfile is undefined"), function(done) {
+  it ("should return if outfile is undefined", function(done) {
     let job_status = {};
     not.process_job(job_status, (success) => {
       expect(success).to.be(false);
+      done();
     });
-  });
+  }, 5000);
 
-  it ("should return if no doc with such udid "), function(done) {
+  it ("should return if no doc with such udid ", function(done) {
     let job_status = {
       udid: "d6ff2bb0-df34-11e7-b351-eb37822aa170"
     };
     not.process_job(job_status, (success) => {
       expect(success).to.be(false);
+      done();
     });
-  });
+  }, 5000);
 
-  it ("should return if udid doc is valid but has no source"), function(done) {
+  it ("should return if udid doc is valid but has no source", function(done) {
     let job_status = {
       udid: "d6ff2bb0-df34-11e7-b351-eb37822aa172"
     };
     not.process_job(job_status, (success, response) => {
       expect(success).to.be(false);
       console.log("[spec] response:", response);
+      done();
     });
-  });
+  }, 5000);
 
 });

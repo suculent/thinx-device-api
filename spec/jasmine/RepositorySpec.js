@@ -59,4 +59,9 @@ describe("Repository Watcher", function() {
     expect(response).to.be.false; // fix later
   });
 
+  it ("should be able to verify body signature", () => {
+    let result = validateSignature("sha256=null", "{ body: false }", "secret");
+    expect(result).to.be('false');
+  });
+
 });
