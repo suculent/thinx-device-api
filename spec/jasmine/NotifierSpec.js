@@ -22,6 +22,7 @@ describe("Notifier", function () {
   it("should be able to create notification object for valid build", function() {
     let newStatus = "OK";
     let obj = not.notificationObject(newStatus, buildEnvelope);
+    console.log("[chai] notification object for valid build", obj);
     expect(obj.text).to.contain('sucessfully completed');
   });
 
@@ -39,7 +40,7 @@ describe("Notifier", function () {
 
   it ("should return if outfile is undefined", function(done) {
     let job_status = {};
-    not.process_job(job_status, (success) => {
+    not.process(job_status, (success) => {
       expect(success).to.be(false);
       done();
     });
@@ -49,7 +50,7 @@ describe("Notifier", function () {
     let job_status = {
       udid: "d6ff2bb0-df34-11e7-b351-eb37822aa170"
     };
-    not.process_job(job_status, (success) => {
+    not.process(job_status, (success) => {
       expect(success).to.be(false);
       done();
     });
@@ -59,7 +60,7 @@ describe("Notifier", function () {
     let job_status = {
       udid: "d6ff2bb0-df34-11e7-b351-eb37822aa172"
     };
-    not.process_job(job_status, (success, response) => {
+    not.process(job_status, (success, response) => {
       expect(success).to.be(false);
       console.log("[spec] response:", response);
       done();
