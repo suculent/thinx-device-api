@@ -8,7 +8,7 @@ describe("Git", function() {
         let success = git.fetch(
             "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c", // owner
             "git clone https://github.com/suculent/thinx-firmware-esp8266-pio", // command
-            __dirname + "/A" // local_path
+            __dirname // local_path
         );
         expect(success).to.be.true;
         done();
@@ -19,7 +19,7 @@ describe("Git", function() {
         let success = git.fetch(
             "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c", // owner
             "git clone https://github.com/suculent/thinx-firmware-esp32-pio", // command
-            __dirname + "/B" // local_path
+            __dirname // local_path
         );
         expect(success).to.be.true;
         done();
