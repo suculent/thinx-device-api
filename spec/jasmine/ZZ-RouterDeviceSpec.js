@@ -12,8 +12,6 @@ let thx;
 
 describe("Devices", function () {
 
-
-
   beforeAll((done) => {
     thx = new THiNX();
     thx.init(() => {
@@ -37,7 +35,7 @@ describe("Devices", function () {
     console.log("🚸 [chai] GET /api/user/devices (cookie)");
     chai.request(thx.app)
       .get('/api/user/devices')
-      .set('Cookie', 'thx-session-cookie=something;owner='+envi.oid)
+      .set('Cookie', 'thx-session-cookie=something;owner=' + envi.oid)
       .end((err, res) => {
         console.log("🚸 [chai] GET /api/user/devices (cookie) response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
@@ -170,23 +168,22 @@ describe("Devices", function () {
 
 describe("Devices (JWT)", function () {
 
-let agent;
-let jwt;
+  let agent;
+  let jwt;
 
-beforeAll((done) => {
+  beforeAll((done) => {
     agent = chai.request.agent(thx.app);
     agent
-        .post('/api/login')
-        .set('Authorization', jwt)
-        .send({ username: 'cimrman', password: 'tset', remember: false })
-        .then(function (res) {
-            console.log(`[chai] DeviceSpec (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
-            expect(res).to.have.cookie('x-thx-core');
-            let body = JSON.parse(res.text);
-            jwt = 'Bearer ' + body.access_token;
-            done();
-        });
-});
+      .post('/api/login')
+      .send({ username: 'dynamic', password: 'dynamic', remember: false })
+      .then(function (res) {
+        console.log(`[chai] DeviceSpec (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
+        expect(res).to.have.cookie('x-thx-core');
+        let body = JSON.parse(res.text);
+        jwt = 'Bearer ' + body.access_token;
+        done();
+      });
+  });
 
   it("GET /api/user/devices (JWT)", function (done) {
     console.log("🚸 [chai] GET /api/user/devices (JWT)");

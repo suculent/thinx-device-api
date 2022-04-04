@@ -266,7 +266,7 @@ describe("User Routes", function () {
 
   it("GET /api/user/profile (jwt)", function (done) {
     expect(jwt).not.to.be.null;
-    chai
+    agent
       .request(thx.app)
       .get('/api/user/profile')
       .set('Authorization', jwt)
