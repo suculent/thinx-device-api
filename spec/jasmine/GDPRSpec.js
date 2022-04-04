@@ -34,6 +34,10 @@ describe("GDPR", function() {
     };
 
     it("should notify 24 hours before deletion", function(done) {
+        var d1 = new Date();
+        d1.setMonth(d1.getMonth() - 3);
+        d1.setDate(d1.getDay() - 1);
+        mock_user.last_update = d1;
         let gdpr = new GDPR();
         gdpr.notify24(mock_user, (error) => {
             console.log("[spec] 24 hours before deletion", error);
@@ -43,6 +47,10 @@ describe("GDPR", function() {
 
     it("should notify 168 hours before deletion", function(done) {
         let gdpr = new GDPR();
+        var d2 = new Date();
+        d2.setMonth(d2.getMonth() - 3);
+        d2.setDate(d2.getDay() - 7);
+        mock_user.last_update = d2;
         gdpr.notify168(mock_user, (error) => {
             console.log("[spec] 168 hours before deletion", error);
             done();
