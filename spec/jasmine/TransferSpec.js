@@ -19,7 +19,6 @@ describe("Transfer", function () {
       console.log("[spec] [transfer] BEFORE device list:", JSON.stringify(response, null, 2));
       done();
     });
-    done();
   });
 
   it("(00) should be able to initiate device transfer, decline and accept another one", function (done) {
