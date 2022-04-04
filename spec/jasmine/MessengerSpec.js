@@ -81,7 +81,7 @@ describe("Messenger", function() {
   }, 5000);
 
   it("should be able to post random quote", function(done) {
-    messenger.postRandomQuote(() => {
+    messenger.postRandomQuote("quote", () => {
       done();
     });
     

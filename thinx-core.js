@@ -549,7 +549,7 @@ module.exports = class THiNX {
         function startup_quote() {
           if ((typeof (process.env.ENTERPRISE) === "undefined") || (!process.env.ENTERPRISE)) {
             app.messenger.sendRandomQuote();
-            app.messenger.postRandomQuote();
+            app.messenger.postRandomQuote("quote");
           }
         }
 
