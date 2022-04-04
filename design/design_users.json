@@ -24,7 +24,7 @@
       "map": "function (doc) { emit (doc.owner, doc.rsa_keys); }"
     },
     "transformers_by_owner": {
-      "map": "function(doc) { if (doc._id) emit(doc.email, doc.info.transformers); } }"
+      "map": "function(doc) { if (doc._id) emit(doc.email, doc.info.transformers); }"
     }
   },
   "filters": {

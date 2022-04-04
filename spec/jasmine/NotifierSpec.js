@@ -47,7 +47,7 @@ describe("Notifier", function () {
 
   it ("should return if no doc with such udid ", function(done) {
     let job_status = {
-      udid: "d6ff2bb0-df34-11e7-b351-eb37822aa170"
+      udid: ""
     };
     not.process(job_status, (success) => {
       expect(success).to.be.false;
@@ -57,7 +57,7 @@ describe("Notifier", function () {
 
   it ("should return if udid doc is valid but has no source", function(done) {
     let job_status = {
-      udid: "d6ff2bb0-df34-11e7-b351-eb37822aa172"
+      udid: "d6ff2bb0-df34-11e7-b351-eb37822aa173"
     };
     not.process(job_status, (success, response) => {
       expect(success).to.be.false;
