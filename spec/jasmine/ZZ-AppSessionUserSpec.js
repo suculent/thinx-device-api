@@ -7,9 +7,9 @@ var expect = require('chai').expect;
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
-//var envi = require("../_envi.json");
+var envi = require("../_envi.json");
 
-const dynamic_owner_id = "bab692f8c9c78cf64f579406bdf6c6cd2c4d00b3c0c8390387d051495dd95247";
+const dynamic_owner_id = envi.dynamic.owner;
 
 const user_info = {
   first_name: "Dynamic",
@@ -267,7 +267,6 @@ describe("User Routes", function () {
   it("GET /api/user/profile (jwt)", function (done) {
     expect(jwt).not.to.be.null;
     agent
-      .request(thx.app)
       .get('/api/user/profile')
       .set('Authorization', jwt)
       .end((err, res) => {
