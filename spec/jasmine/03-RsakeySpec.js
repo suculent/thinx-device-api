@@ -73,4 +73,10 @@ describe("RSA Key", function() {
     expect(rsakey.validateOwner("dum\&nbsp;my")).to.equal(false);
   });
 
+  it("(03) should be able to add RSA Key 2/3", function(done) {
+    rsakey.create(envi.dynamic.owner, (success, response) => {
+      expect(success).to.be.true;
+    });
+  }, 10000);
+
 });
