@@ -1,7 +1,10 @@
+const EventEmitter = require('events');
 
-module.exports = class THiNX {
+module.exports = class THiNX extends EventEmitter {
 
   constructor() {
+
+    super()
 
     /*
      * Bootstrap banner section
@@ -202,7 +205,7 @@ module.exports = class THiNX {
 
         // TEST CASE WORKAROUND: attempt to fix duplicate initialization... if Queue is being tested, it's running as another instance and the port 3000 must stay free!
         if (process.env.ENVIRONMENT !== "test") {
-          queue = new Queue(builder, app, null /* ssl_options */);
+          queue = new Queue(builder, app, null /* ssl_options */, this);
           queue.cron(); // starts cron job for build queue from webhooks
         }
 

@@ -279,8 +279,8 @@ jobs:
             docker-compose stop
 
     - store_test_results:
-        name: Collect test results
-        path: ./coverage
+        name: Collect test data
+        path: /mnt/data
         # The `path` key is an absolute or relative path to your working_directory containing 
         # subdirectories of JUnit XML or Cucumber JSON test metadata files,
         # or the path of a single file containing all test results.
