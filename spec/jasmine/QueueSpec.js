@@ -45,7 +45,7 @@ describe("Queue", function () {
                         }
 
                         // Should be able run next item
-                        queue_with_cron.runNext(next);
+                        queue_with_cron.runNext(next, workers[0]);
 
                         // Should not be able to find anything while queue item is running
                         queue_with_cron.findNext((/* nextAction */) => {

@@ -40,7 +40,7 @@ describe("Git", function () {
 
     it("should survive invalid input", function () {
         let git = new Git();
-        let success = git.tryShellOp(";", "&&");
+        let success = git.tryShellOp("export", "&&");
         expect(success === false);
     });
 
