@@ -19,11 +19,12 @@ describe("Builder (noauth)", function () {
         thx = new THiNX();
         thx.on('workerReady', () => {
             console.log("[spec] [emit] worker ready!"); // should allow waiting for worker beforeAll
-        });
-        thx.init(() => {
             done();
         });
-    });
+        thx.init(() => {
+            // 
+        });
+    }, 10000);
 
     // run build manually
     it("POST /api/build", function (done) {
