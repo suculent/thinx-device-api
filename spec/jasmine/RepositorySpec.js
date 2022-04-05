@@ -44,12 +44,12 @@ describe("Repository Watcher", function() {
   });
 
   it("should be able to initialize", function() {
-    watcher = new Repository(mock_queue);
+    watcher = new Repository(/* mock_queue */);
     expect(watcher).to.be.an('object');
   });
 
   it("should be able to respond to githook", function() {
-    watcher = new Repository(mock_queue);
+    watcher = new Repository(/* mock_queue */);
     let mock_git_message = require("../mock-git-response.json");
     let mock_git_request = {
       headers: [],
