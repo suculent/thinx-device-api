@@ -297,6 +297,15 @@ jobs:
             docker network inspect bridge
             docker-compose stop
 
+    - run:
+        name: Starting API for UI Test
+        command: |
+          export ENVIRONMENT=test
+          docker-compose up -d api
+          docker-compose logs --timestamp api
+          sleep 20
+          
+
     - store_test_results:
         name: Collect test results
         path: ./coverage
