@@ -5,8 +5,8 @@
   "repository": {
     "id": 95132905,
     "node_id": "MDEwOlJlcG9zaXRvcnk5NTEzMjkwNQ==",
-    "name": "thinx-firmware-esp8266-pio",
-    "full_name": "suculent/thinx-firmware-esp8266-pio",
+    "name": "thinx-firmware-esp8266-ino",
+    "full_name": "suculent/thinx-firmware-esp8266-ino",
     "private": false,
     "owner": {
       "name": "suculent",
