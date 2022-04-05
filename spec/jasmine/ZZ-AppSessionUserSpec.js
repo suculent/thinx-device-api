@@ -261,7 +261,8 @@ describe("User Routes", function () {
                 done();
               });
           });
-      });
+      })
+      .catch((e) => { console.log(e); });
   }, 20000);
 
   it("GET /api/user/profile (jwt)", function (done) {
@@ -282,7 +283,8 @@ describe("User Routes", function () {
       .then(function (res) {
         expect(res).to.have.cookie('x-thx-core');
         done();
-      });
+      })
+      .catch((e) => { console.log(e); });
   }, 20000);
 
   it("POST /api/user/profile (invalid)", function (done) {

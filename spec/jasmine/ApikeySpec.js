@@ -103,7 +103,7 @@ describe("API Key", function() {
   it("(05) should be able to fail on invalid API Key revocation", function(done) {
     apikey.revoke(
       owner,
-      ["sample-key-hash"], // intentionaly invalid
+      ["sample-key-hax"], // intentionaly invalid
       (success)  => {
         expect(success).to.equal(false);
         done();

@@ -182,7 +182,8 @@ describe("Devices (JWT)", function () {
         let body = JSON.parse(res.text);
         jwt = 'Bearer ' + body.access_token;
         done();
-      });
+      })
+      .catch((e) => { console.log(e); });
   });
 
   it("GET /api/user/devices (JWT)", function (done) {

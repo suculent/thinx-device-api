@@ -22,9 +22,9 @@ describe("Builder (noauth)", function () {
             done();
         });
         thx.init(() => {
-            // 
+            done();
         });
-    }, 10000);
+    }, 30000);
 
     // run build manually
     it("POST /api/build", function (done) {
@@ -86,7 +86,8 @@ describe("Builder (JWT)", function () {
                 let body = JSON.parse(res.text);
                 jwt = 'Bearer ' + body.access_token;
                 done();
-            });
+            })
+            .catch((e) => { console.log(e); });
     });
 
     afterAll((done) => {
