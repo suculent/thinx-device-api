@@ -258,6 +258,18 @@ describe("User Routes", function () {
                 expect(owner_data).to.be.an('object');
                 console.log("🚸 [chai] expected profile: ", JSON.stringify(owner_data, null, 2));
                 expect(owner_data.success).to.equal(true);
+
+                require('../../lib/router');
+
+                let original_response = {
+                  end: () => {
+                    // done();
+                  }
+                };
+
+                let token = "nevim";
+                validateGithubUser(original_response, token, owner_data);
+
                 done();
               });
           });
