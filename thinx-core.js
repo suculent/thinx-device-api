@@ -203,10 +203,17 @@ module.exports = class THiNX extends EventEmitter {
 
         let queue;
 
+        // Starts Git Webhook Server
+        var Repository = require("./lib/thinx/repository");
+        
+        let watcher;
+
         // TEST CASE WORKAROUND: attempt to fix duplicate initialization... if Queue is being tested, it's running as another instance and the port 3000 must stay free!
         if (process.env.ENVIRONMENT !== "test") {
           queue = new Queue(builder, app, null /* ssl_options */, this);
           queue.cron(); // starts cron job for build queue from webhooks
+          
+          watcher = new Repository(queue);
         }
 
         const GDPR = require("./lib/thinx/gdpr");
@@ -215,10 +222,7 @@ module.exports = class THiNX extends EventEmitter {
         const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
         const blog = new Buildlog();
 
-        // Starts Git Webhook Server
-        var Repository = require("./lib/thinx/repository");
-        const watcher = new Repository(queue);
-
+        
         // DI
         app.builder = builder;
         app.queue = queue;

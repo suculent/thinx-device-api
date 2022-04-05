@@ -62,14 +62,7 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   
   # ./cc-test-reporter before-build
   
-  # echo "[thinx-entrypoint] TEST starting app as first run (create DB and stuff)..."
-  # set +e # prevent exit on timeout - changed to make test fail when app is broken
-  # date
-  # timeout 60 node thinx.js # container must wait much longer for test to complete
-  # date
-  # set -e # exit immediately on error
-  
-  npm run test # | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
+  npm run test
 
   # this is broken
   # bash <(curl -Ls https://coverage.codacy.com/get.sh) report --project-token ${CODACY_PROJECT_TOKEN}
