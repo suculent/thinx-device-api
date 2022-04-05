@@ -259,7 +259,7 @@ describe("User Routes", function () {
                 console.log("🚸 [chai] expected profile: ", JSON.stringify(owner_data, null, 2));
                 expect(owner_data.success).to.equal(true);
 
-                require('../../lib/router')(thx.app);
+                let router = require('../../lib/router')(thx.app);
 
                 let original_response = {
                   end: () => {
@@ -268,7 +268,7 @@ describe("User Routes", function () {
                 };
 
                 let token = "nevim";
-                validateGithubUser(original_response, token, owner_data);
+                router.validateGithubUser(original_response, token, owner_data);
 
                 done();
               });
