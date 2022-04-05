@@ -2,6 +2,7 @@ describe("Git", function () {
 
     var expect = require('chai').expect;
     let Git = require("../../lib/thinx/git");
+    var Deployment = require('../../lib/thinx/deployment'); var deploy = new Deployment();
 
     var envi = require("../_envi.json");
     var device_path = deploy.pathForDevice(envi.oid, envi.udid);
