@@ -122,7 +122,7 @@ describe("Owner", function () {
   it("(10) should support sendMail", function (done) {
 
     var email = {
-      from: 'THiNX API <api@' + app_config.mailgun.domain + '>',
+      from: 'THiNX API <api@thinx.cloud>',
       to: "cimrman@thinx.cloud",
       subject: "Your data will be deleted",
       text: "Hello Jara Cimrman" +
