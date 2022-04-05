@@ -6,7 +6,7 @@ describe("Git", function () {
 
     var envi = require("../_envi.json");
     var device_path = deploy.pathForDevice(envi.oid, envi.udid);
-    var dyn_device_path = deploy.pathForDevice(envi.dynamic.owner, envi.udid);
+    var dyn_device_path = deploy.pathForDevice(envi.dynamic.owner, envi.dynamic.udid);
 
     it("should be able to fetch one repo", function () {
         let git = new Git();

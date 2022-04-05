@@ -56,6 +56,16 @@ describe("Device", function() {
     udid: "d6ff2bb0-df34-11e7-b351-eb37822aa173"
   };
 
+  var JRS4 = {
+    mac: "44:44:44:44:44:44",
+    firmware: "DeviceSpec.js",
+    version: "1.0.0",
+    alias: "test-device-4-dynamic",
+    owner: envi.dynamic.owner,
+    platform: "arduino",
+    udid: "d6ff2bb0-df34-11e7-b351-eb37822aa174"
+  };
+
   /** TODO: Only when the sample-key has not been previously added by ApikeySpec */
   //create: function(owner, apikey_alias, callback)
   it("(01) API keys are required to do this on new instance", function(done) {    
@@ -197,6 +207,25 @@ describe("Device", function() {
     device.register(
       {}, /* req */
       JRS3,
+      apikey,
+      ws,
+      function(success, response) {
+        if (success === false) {
+          console.log("[spec] registration error response:", response);
+          if (response.indexOf("owner_found_but_no_key") !== -1) {
+            done();
+            return;
+          }
+        }
+        done();
+      });
+  }, 15000); // register
+
+  it("(10) should be able to register another device for different owner", function(done) {
+    let ws = {};
+    device.register(
+      {}, /* req */
+      JRS4,
       apikey,
       ws,
       function(success, response) {
