@@ -100,12 +100,12 @@ describe("API Key", function() {
     );
   });
 
-  it("(05) should be able to fail on invalid API Key revocation", function(done) {
+  it("(05) should return empty array  on invalid API Key revocation", function(done) {
     apikey.revoke(
       owner,
       ["sample-key-hax"], // intentionaly invalid
       (success)  => {
-        expect(success).to.equal(false);
+        expect(success).to.equal(true);
         done();
       }
     );

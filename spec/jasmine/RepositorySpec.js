@@ -12,7 +12,7 @@ describe("Repository Watcher", function() {
     }
   };
 
-  var watcher = new Repository(mock_queue);
+  var watcher = new Repository(/* mock_queue */);
 
   watcher.callback = function(err) {
     // watcher exit_callback
