@@ -190,7 +190,8 @@ describe("Builder (JWT)", function () {
                         git: "https://github.com/suculent/thinx-firmware-esp8266-pio",
                         branch: "origin/master",
                         udid: envi.dynamic.udid,
-                        source_id: "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f4"
+                        source_id: "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f4",
+                        build_id: envi.dynamic.udid
                     })
                     .end((err, res) => {
                         console.log("🚸 [chai] response /api/build (JWT, invalid) V:", res.text, " status:", res.status);
