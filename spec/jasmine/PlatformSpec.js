@@ -13,6 +13,7 @@ describe("Platform", function() {
 
     it("Should fetch platform from repository with callback", (done) => {
         Platform.getPlatform(path, function(success, result) {
+          expect(success).to.equal(true);
             expect(result).equal('arduino:esp8266');
             done();
         });
@@ -25,6 +26,7 @@ describe("Platform", function() {
 
     it("should be able to infer platform from repository contents", function(done) {
         Platform.getPlatform(path, function(success, result) {
+          expect(success).to.equal(true);
           expect(result).to.be.a('string');
           done();
         });
@@ -41,7 +43,7 @@ describe("Platform", function() {
     it("should detect arduino", (done) => {
         Platform.getPlatform(path_ino, function(success, result) {
           expect(success).to.equal(true);
-          console.log("[spec] arduino detection result:", result);
+          expect(result).to.equal('arduino');
           done();
         });
     }, 15000);
@@ -73,7 +75,6 @@ describe("Platform", function() {
     it("should detect mongoose os", function(done) {
       Platform.getPlatform(path_mos, (success, result)  => {
         expect(success).to.equal(true);
-        console.log("[spec] mongoose detection result:", result);
         expect(result).to.equal('mongoose');
         done();
       });
