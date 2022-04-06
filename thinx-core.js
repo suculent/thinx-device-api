@@ -286,7 +286,12 @@ module.exports = class THiNX extends EventEmitter {
           }
           res.status(200).end("Accepted");
           console.log("ℹ️ [info] Webhook process started...");
-          watcher.process_hook(req);
+          if (typeof(watcher) !== "undefined") {
+            watcher.process_hook(req);
+          } else {
+            console.log("[warning] Cannot proces hook, no repository watcher in this environment.");
+          }
+          
           console.log("ℹ️ [info] Webhook process completed.");
         }
 
