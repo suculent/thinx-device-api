@@ -7,6 +7,11 @@ var expect = require('chai').expect;
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
+var envi = require("../_envi.json");
+
+const dynamic_owner_id = envi.dynamic.owner;
+
+
 //
 // Unauthenticated
 //
@@ -96,17 +101,106 @@ describe("Builder (JWT)", function () {
     });
 
     // run build manually
-    it("POST /api/build (JWT, invalid)", function (done) {
+    it("POST /api/build (JWT, invalid) I", function (done) {
         agent
             .post('/api/build')
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
-                console.log("🚸 [chai] response /api/build (JWT, invalid):", res.text, " status:", res.status);
+                console.log("🚸 [chai] response /api/build (JWT, invalid) I:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
             });
+    }, 20000);
+    
+    // covering buildGuards
+
+    it("POST /api/build (JWT, invalid) II", function (done) {
+        agent
+            .post('/api/build')
+            .set('Authorization', jwt)
+            .send({ owner: dynamic_owner_id, git: "something", branch: "origin/master" })
+            .end((err, res) => {
+                console.log("🚸 [chai] response /api/build (JWT, invalid) II:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/build (JWT, invalid) III", function (done) {
+        agent
+            .post('/api/build')
+            .set('Authorization', jwt)
+            .send({ git: "something", branch: "origin/master" })
+            .end((err, res) => {
+                console.log("🚸 [chai] response /api/build (JWT, invalid) III:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/build (JWT, invalid) IV", function (done) {
+        agent
+            .post('/api/build')
+            .set('Authorization', jwt)
+            .send({ owner: dynamic_owner_id, branch: "origin/master" })
+            .end((err, res) => {
+                console.log("🚸 [chai] response /api/build (JWT, invalid) IV:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/build (JWT, invalid) V", function (done) {
+        agent
+            .post('/api/build')
+            .set('Authorization', jwt)
+            .send({ owner: dynamic_owner_id, git: "origin/master" })
+            .end((err, res) => {
+                console.log("🚸 [chai] response /api/build (JWT, invalid) V:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/build (JWT, valid) VI", function (done) {
+
+        agent
+            .post('/api/device/attach')
+            .set('Authorization', jwt)
+            .send({ 
+                udid: envi.dynamic.udid, 
+                source_id: "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f4" 
+            })
+            .end((err, res) => {
+                console.log("🚸 [chai] POST /api/device/attach response:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+
+                agent
+                    .post('/api/build')
+                    .set('Authorization', jwt)
+                    .send({
+                        owner: dynamic_owner_id,
+                        git: "https://github.com/suculent/thinx-firmware-esp8266-pio",
+                        branch: "origin/master",
+                        udid: envi.dynamic.udid,
+                        source_id: "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f4"
+                    })
+                    .end((err, res) => {
+                        console.log("🚸 [chai] response /api/build (JWT, invalid) V:", res.text, " status:", res.status);
+                        //expect(res.status).to.equal(200);
+                        //expect(res.text).to.be.a('string');
+                        done();
+                    });
+            });
+
+        
     }, 20000);
 
     // latest firmware envelope
