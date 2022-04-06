@@ -131,8 +131,19 @@ describe("Messenger", function() {
     messenger.messageResponder(topic, message);
   });
 
-  // TODO COVER WITH TESTS:
   // message_callback(...)
+  it("should be able to survive message_callback call", function() {
+    messenger.message_callback("/owner/device/test", "Bare no-NID message");
+  });
+
+  it("should be able to survive message_callback call", function() {
+    //messenger.get_result_or_callback("/owner/device/test", "Bare no-NID message");
+    messenger.data(test_owner, udid, (error, data) => {
+      expect(error).to.equal(true);
+      expect(data).to.be.an('array');
+    });
+  });
+  
   // get_result_or_callback(...)
   // data(...)
   // initWithOwner(...)
