@@ -93,7 +93,6 @@ describe("Messenger", function() {
     const Globals = require("../../lib/thinx/globals.js");
     var app_config = Globals.app_config();
 
-    // TODO REMOVE; config is `{"server":"mqtt://mosquitto","port":1883}`
     console.log(`[spec] [mm] [debug] getting apikey with config ${JSON.stringify(app_config.mqtt)} for ${test_owner}`); 
 
     user.mqtt_key(test_owner, (key_success, apikey) => {

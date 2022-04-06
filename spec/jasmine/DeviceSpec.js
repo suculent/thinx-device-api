@@ -66,8 +66,6 @@ describe("Device", function() {
     udid: "d6ff2bb0-df34-11e7-b351-eb37822aa174"
   };
 
-  /** TODO: Only when the sample-key has not been previously added by ApikeySpec */
-  //create: function(owner, apikey_alias, callback)
   it("(01) API keys are required to do this on new instance", function(done) {    
     APIKey.create( owner, "sample-key", function(success, object) {
       expect(success).to.be.true;
