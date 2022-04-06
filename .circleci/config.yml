@@ -256,19 +256,24 @@ jobs:
           date
 
     - run:
-        name: Allow inspecting MQTT logs after failed connections
+        name: Allow inspecting MQTT logs
         command: |
             docker-compose logs --timestamp mosquitto
 
     - run:
-        name: Allow inspecting CouchDB logs after failed connections
+        name: Allow inspecting CouchDB logs
         command: |
             docker-compose logs --timestamp couchdb
 
     - run:
-        name: Allow inspecting Transformer logs after failed connections
+        name: Allow inspecting Transformer logs
         command: |
             docker-compose logs --timestamp transformer
+
+    - run:
+        name: Allow inspecting Worker logs logs
+        command: |
+            docker-compose logs --timestamp worker
 
     - run:
         name: Check running Docker containers
