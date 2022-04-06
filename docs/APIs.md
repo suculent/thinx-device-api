@@ -1,12 +1,4 @@
-const THiNX = require("../../thinx-core.js");
-
-let chai = require('chai');
-var expect = require('chai').expect;
-let chaiHttp = require('chai-http');
-chai.use(chaiHttp);
-
-
-// Slack OAuth Integration
+/*
 
 // POST /api/slack/direct_install
 // GET /api/slack/redirect
@@ -21,81 +13,13 @@ chai.use(chaiHttp);
 // GET /api/oauth/google
 // GET /api/oauth/google/callback
 
-
-describe("OAuth", function () {
-
-    /* todo - samples only:
-
-  it("GET / [healthcheck]", function (done) {
-    let thx = new THiNX();
-    thx.init(() => {
-      chai.request(thx.app)
-        .get('/')
-        .end((err, res) => {
-          expect(res.status).to.equal(200);
-          expect(res.text).to.be.a('string');
-          expect(JSON.parse(res.text).healthcheck).to.equal(true);
-          done();
-        });
-    });
-  }, 20000);
-
-  it("POST /githook", function (done) {
-    let thx = new THiNX();
-    thx.init(() => {
-      chai.request(thx.app)
-        .post('/githook')
-        .send({
-          'body': 'nonsense'
-        })
-        .end((err, res) => {
-          expect(res.status).to.equal(200);
-          expect(res.text).to.be.a('string');
-          expect(res.text).to.equal('Accepted');
-          done();
-        });
-    });
-  }, 20000);
-
-  it("POST /api/githook", function (done) {
-    let thx = new THiNX();
-    thx.init(() => {
-      chai.request(thx.app)
-        .post('/api/githook')
-        .send({
-          'body': 'nonsense'
-        })
-        .end((err, res) => {
-          expect(res.status).to.equal(200);
-          expect(res.text).to.be.a('string');
-          expect(res.text).to.equal('Accepted');
-          done();
-        });
-    });
-  }, 20000);
-
-  it("POST /api/user/logs/tail", function (done) {
-    let thx = new THiNX();
-    thx.init(() => {
-      chai.request(thx.app)
-        .post('/api/user/logs/tail')
-        .send({
-          'body': 'nonsense'
-        })
-        .end((err, res) => {
-          //console.log("[chai] response:", res.text);
-          expect(res.status).to.equal(404); // not implemented at this stage
-          done();
-        });
-    });
-  }, 20000);
-  */
-
-});
+GET / [healthcheck]
+POST /githook
+POST /api/githook
 
 
 
-/*
+
 
 00-AppUserSpec.js
 

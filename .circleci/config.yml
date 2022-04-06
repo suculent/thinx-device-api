@@ -78,6 +78,7 @@ jobs:
             --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
             --build-arg ENVIRONMENT=${ENVIRONMENT} \
             --build-arg REVISION=$(git describe --abbrev=0) \
+            --build-arg ENTERPRISE=${ENTERPRISE}
           tag: 'latest'
       - docker/push:
           digest-path: /tmp/digest.txt
