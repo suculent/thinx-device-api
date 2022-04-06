@@ -1,7 +1,6 @@
-var envi = require("../_envi.json");
-
 describe("GDPR", function() {
 
+    var envi = require("../_envi.json");
     var expect = require('chai').expect;
     let GDPR = require("../../lib/thinx/gdpr");
 
