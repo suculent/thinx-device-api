@@ -32,6 +32,7 @@ describe("Transfer", function () {
   
     var owner = envi.oid;
 
+    // TODO: Turn this into async
     transfer.request(owner, body, (t_success, response) => {
       expect(t_success).to.equal(true);
       expect(response).to.be.a('string');
@@ -45,6 +46,7 @@ describe("Transfer", function () {
         expect(d_success).to.equal(true);
         expect(d_response).to.be.a('string');
 
+        // TODO: Turn this into async
         transfer.request(owner, body, (b_success, b_response) => {
           expect(b_success).to.equal(true);
           expect(b_response).to.be.a('string'); // transfer_requested      
