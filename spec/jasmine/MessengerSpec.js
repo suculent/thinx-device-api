@@ -64,6 +64,7 @@ describe("Messenger", function() {
   it("should be able to fetch devices for owner", function(done) {
     messenger.getDevices(test_owner, (success, devices) => {
       expect(devices).to.be.a('array');
+      expect(success).to.equal(true);
       done();
     });
   });
@@ -139,13 +140,12 @@ describe("Messenger", function() {
     //messenger.get_result_or_callback("/owner/device/test", "Bare no-NID message");
     messenger.data(test_owner, udid, (error, data) => {
       expect(error).to.equal(false);
-      expect(data).to.be.an('array');
+      expect(data).to.be.a('string');
       done();
     });
   });
   
   // get_result_or_callback(...)
-  // data(...)
   // initWithOwner(...)
   // slack(...)
 });
