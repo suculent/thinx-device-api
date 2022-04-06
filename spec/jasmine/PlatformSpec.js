@@ -41,7 +41,7 @@ describe("Platform", function() {
     it("should detect arduino", (done) => {
         Platform.getPlatform(path_ino, function(success, result) {
           expect(success).to.equal(true);
-          console.log("arduino detection result:", result);
+          console.log("[spec] arduino detection result:", result);
           done();
         });
     }, 15000);
@@ -49,7 +49,7 @@ describe("Platform", function() {
     it("should detect lua", function(done) {
         Platform.getPlatform(path_lua, (success, result) => {
           expect(success).to.equal(true);
-          console.log("lua detection result:", result);
+          expect(result).to.equal('nodemcu');
           done();
         });
     }, 15000);
@@ -57,7 +57,7 @@ describe("Platform", function() {
     it("should detect pio", function(done) {
         Platform.getPlatform(path_pio, (success, result) => {
           expect(success).to.equal(true);
-          console.log("pio detection result:", result);
+          expect(result).to.equal('platformio');
           done();
         });
     }, 15000);
@@ -65,7 +65,7 @@ describe("Platform", function() {
     it("should detect micropython", function(done) {
         Platform.getPlatform(path_upy, (success, result)  => {
           expect(success).to.equal(true);
-          console.log("micropython detection result:", result);
+          expect(result).to.equal('micropython');
           done();
         });
     }, 15000);
@@ -73,7 +73,8 @@ describe("Platform", function() {
     it("should detect mongoose os", function(done) {
       Platform.getPlatform(path_mos, (success, result)  => {
         expect(success).to.equal(true);
-        console.log("mongoose detection result:", result);
+        console.log("[spec] mongoose detection result:", result);
+        expect(result).to.equal('mongoose');
         done();
       });
   }, 15000);
@@ -81,7 +82,7 @@ describe("Platform", function() {
   it("should detect javascript os", function(done) {
     Platform.getPlatform(path_js, (success, result) => {
       expect(success).to.equal(true);
-      console.log("javascript detection result:", result);
+      expect(result).to.equal('javascript');
       done();
     });
 }, 15000);
