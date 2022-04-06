@@ -36,13 +36,9 @@ module.exports = class THiNX extends EventEmitter {
 
     if (Globals.use_sqreen()) {
       if ((typeof (process.env.SQREEN_APP_NAME) !== "undefined") && (typeof (process.env.SQREEN_TOKEN) !== "undefined")) {
-        try {
-          require('sqreen');
-        } catch (error) {
-          console.log("Require Sqreen error", error);
-        }
+        require('sqreen');
       } else {
-        console.log("Sqreen env vars not configured.");
+        console.log("[info] Sqreen env vars not configured.");
       }
     }
 

@@ -47,7 +47,17 @@ describe("Git", function () {
     it("should be able to fetch first repo for dynamic owner", function () {
         let git = new Git();
         let success = git.fetch(
-            "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c", // owner
+            envi.dynamic.owner, // owner
+            "git clone https://github.com/suculent/thinx-firmware-esp8266-ino", // command
+            dyn_device_path
+        );
+        expect(success === true);
+    });
+
+    it("should be able to fetch first repo for dynamic owner", function () {
+        let git = new Git();
+        let success = git.fetch(
+            envi.dynamic.owner, // owner
             "git clone https://github.com/suculent/thinx-firmware-esp8266-pio", // command
             dyn_device_path
         );
@@ -57,7 +67,7 @@ describe("Git", function () {
     it("should be able to fetch another repo for dynamic owner", function () {
         let git = new Git();
         let success = git.fetch(
-            "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c", // owner
+            envi.dynamic.owner, // owner
             "git clone https://github.com/suculent/thinx-firmware-esp32-pio", // command
             dyn_device_path
         );
