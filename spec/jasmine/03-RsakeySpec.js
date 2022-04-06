@@ -64,7 +64,7 @@ describe("RSA Key", function() {
 
   //validateOwner: function(invalid-owner)
   it("(05) should be able to reject invalid owner (feature envy)", function () {
-    expect(rsakey.validateOwner("dummy")).to.equal(true);
+    expect(rsakey.validateOwner("dummy")).to.equal(false);
     expect(rsakey.validateOwner("dum-my")).to.equal(false);
     expect(rsakey.validateOwner("dum my")).to.equal(false);
     expect(rsakey.validateOwner("dum&my")).to.equal(false);

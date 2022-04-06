@@ -397,7 +397,7 @@ module.exports = class THiNX extends EventEmitter {
         });
 
         function heartbeat() {
-          this.isAlive = true;
+          this.lastAlive = new Date(); // currently unused
         }
 
         setInterval(function ping() {
