@@ -40,10 +40,10 @@ describe("Platform", function() {
         });
     }, 15000);
 
-    it("should detect arduino", (done) => {
+    it("should detect arduino:esp32", (done) => {
         Platform.getPlatform(path_ino, function(success, result) {
           expect(success).to.equal(true);
-          expect(result).to.equal('arduino');
+          expect(result).to.equal('arduino:esp32');
           done();
         });
     }, 15000);
