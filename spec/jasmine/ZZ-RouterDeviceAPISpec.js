@@ -153,7 +153,8 @@ describe("Device + API (JWT+Key)", function () {
                         console.log("[spec] saving apikey's hash (3) for device testing", j.hash);
                         done();
                     });
-            });
+            })
+            .catch((e) => { console.log(e); });
     });
 
     afterAll((done) => {

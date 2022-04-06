@@ -73,7 +73,8 @@ describe("RSA Keys (JWT)", function () {
                 let body = JSON.parse(res.text);
                 jwt = 'Bearer ' + body.access_token;
                 done();
-            });
+            })
+            .catch((e) => { console.log(e); });
     });
   
     afterAll((done) => {

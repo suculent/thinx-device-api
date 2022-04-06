@@ -10,7 +10,7 @@ chai.use(chaiHttp);
 let thx;
 var agent;
 
-describe("Session Management", function () {
+describe("ZZ-AppSession Session Management", function () {
 
   beforeAll((done) => {
     thx = new THiNX();

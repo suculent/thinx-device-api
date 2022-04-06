@@ -66,6 +66,7 @@ describe("Sources (JWT)", function () {
         agent
             .post('/api/login')
             .send({ username: 'dynamic', password: 'dynamic', remember: false })
+            .catch((e) => { console.log(e); })
             .then(function (res) {
                 // console.log(`[chai] Transformer (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
                 expect(res).to.have.cookie('x-thx-core');

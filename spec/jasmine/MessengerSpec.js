@@ -64,6 +64,7 @@ describe("Messenger", function() {
   it("should be able to fetch devices for owner", function(done) {
     messenger.getDevices(test_owner, (success, devices) => {
       expect(devices).to.be.a('array');
+      expect(success).to.equal(true);
       done();
     });
   });
@@ -74,9 +75,17 @@ describe("Messenger", function() {
     done();
   }, 5000);
 
-  it("should be able to send random quote", function(done) {
-    messenger.sendRandomQuote();
-    done();
+  it("should be able to send random quote", function (done) {
+    messenger.sendRandomQuote(() => {
+      done();
+    });
+  }, 5000);
+
+  it("should be able to post random quote", function(done) {
+    messenger.postRandomQuote("quote", () => {
+      done();
+    });
+    
   }, 5000);
 
   // may be disabled in case of last test left hanging
@@ -85,7 +94,6 @@ describe("Messenger", function() {
     const Globals = require("../../lib/thinx/globals.js");
     var app_config = Globals.app_config();
 
-    // TODO REMOVE; config is `{"server":"mqtt://mosquitto","port":1883}`
     console.log(`[spec] [mm] [debug] getting apikey with config ${JSON.stringify(app_config.mqtt)} for ${test_owner}`); 
 
     user.mqtt_key(test_owner, (key_success, apikey) => {
@@ -123,10 +131,21 @@ describe("Messenger", function() {
     messenger.messageResponder(topic, message);
   });
 
-  // TODO COVER WITH TESTS:
   // message_callback(...)
+  it("should be able to survive message_callback call", function() {
+    messenger.message_callback("/owner/device/test", "Bare no-NID message");
+  });
+
+  it("should be able to survive message_callback call", function(done) {
+    //messenger.get_result_or_callback("/owner/device/test", "Bare no-NID message");
+    messenger.data(test_owner, udid, (error, data) => {
+      expect(error).to.equal(false);
+      expect(data).to.be.a('string');
+      done();
+    });
+  });
+  
   // get_result_or_callback(...)
-  // data(...)
   // initWithOwner(...)
   // slack(...)
 });

@@ -78,6 +78,7 @@ jobs:
             --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
             --build-arg ENVIRONMENT=${ENVIRONMENT} \
             --build-arg REVISION=$(git describe --abbrev=0) \
+            --build-arg ENTERPRISE=${ENTERPRISE} \
           tag: 'latest'
       - docker/push:
           digest-path: /tmp/digest.txt
@@ -256,19 +257,24 @@ jobs:
           date
 
     - run:
-        name: Allow inspecting MQTT logs after failed connections
+        name: Allow inspecting MQTT logs
         command: |
             docker-compose logs --timestamp mosquitto
 
     - run:
-        name: Allow inspecting CouchDB logs after failed connections
+        name: Allow inspecting CouchDB logs
         command: |
             docker-compose logs --timestamp couchdb
 
     - run:
-        name: Allow inspecting Transformer logs after failed connections
+        name: Allow inspecting Transformer logs
         command: |
             docker-compose logs --timestamp transformer
+
+    - run:
+        name: Allow inspecting Worker logs logs
+        command: |
+            docker-compose logs --timestamp worker
 
     - run:
         name: Check running Docker containers
@@ -279,8 +285,8 @@ jobs:
             docker-compose stop
 
     - store_test_results:
-        name: Collect test results
-        path: ./coverage
+        name: Collect test data
+        path: /mnt/data
         # The `path` key is an absolute or relative path to your working_directory containing 
         # subdirectories of JUnit XML or Cucumber JSON test metadata files,
         # or the path of a single file containing all test results.

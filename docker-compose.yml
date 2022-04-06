@@ -154,6 +154,7 @@ services:
       - 'COUCHDB_PASS=${COUCHDB_PASS}'
       - 'COUCHDB_USER=${COUCHDB_USER}'
       - 'ENVIRONMENT=${ENVIRONMENT}'
+      - 'ENTERPRISE=${ENTERPRISE}'
       - 'GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}'
       - 'GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}'
       - 'GOOGLE_OAUTH_ID=${GOOGLE_OAUTH_ID}'
@@ -172,7 +173,7 @@ services:
     ports:
       - '7442:7442'
       - '7443:7443'
-      - '3000' # worker socket
+      - '4000' # worker socket
     volumes:
       - '/mnt/data/deploy:/mnt/data/deploy'
       - '/mnt/data/mosquitto:/mnt/data/mosquitto'

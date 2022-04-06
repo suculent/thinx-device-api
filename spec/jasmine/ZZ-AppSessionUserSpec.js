@@ -7,9 +7,9 @@ var expect = require('chai').expect;
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
-//var envi = require("../_envi.json");
+var envi = require("../_envi.json");
 
-const dynamic_owner_id = "bab692f8c9c78cf64f579406bdf6c6cd2c4d00b3c0c8390387d051495dd95247";
+const dynamic_owner_id = envi.dynamic.owner;
 
 const user_info = {
   first_name: "Dynamic",
@@ -258,16 +258,29 @@ describe("User Routes", function () {
                 expect(owner_data).to.be.an('object');
                 console.log("🚸 [chai] expected profile: ", JSON.stringify(owner_data, null, 2));
                 expect(owner_data.success).to.equal(true);
+
+                let router = require('../../lib/router')(thx.app);
+
+                let original_response = {
+                  end: () => {
+                    // done();
+                  }
+                };
+
+                let token = "nevim";
+                // Cannot read properties of undefined (reading 'validateGithubUser')
+                //router.validateGithubUser(original_response, token, owner_data);
+
                 done();
               });
           });
-      });
+      })
+      .catch((e) => { console.log(e); });
   }, 20000);
 
   it("GET /api/user/profile (jwt)", function (done) {
     expect(jwt).not.to.be.null;
-    chai
-      .request(thx.app)
+    agent
       .get('/api/user/profile')
       .set('Authorization', jwt)
       .end((err, res) => {
@@ -283,7 +296,8 @@ describe("User Routes", function () {
       .then(function (res) {
         expect(res).to.have.cookie('x-thx-core');
         done();
-      });
+      })
+      .catch((e) => { console.log(e); });
   }, 20000);
 
   it("POST /api/user/profile (invalid)", function (done) {

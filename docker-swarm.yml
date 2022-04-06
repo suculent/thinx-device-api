@@ -163,13 +163,13 @@ services:
       - "SQREEN_TOKEN=${SQREEN_TOKEN}"
       - "ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}"
       - "ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}"
-      - "THINX_SERVER=http://api:3000"
+      - "THINX_SERVER=http://api:4000"
       - "WORKER_SECRET=${WORKER_SECRET}"
       - "THINX_HOSTNAME=${THINX_HOSTNAME}"
     networks:
       - internal
     ports:
-      - 3000
+      - 4000
     labels:
       - traefik.backend.worker.noexpose
     volumes:
@@ -209,7 +209,7 @@ services:
     ports:
       - '7442:7442'
       - '7443:7443'
-      - '3000'
+      - '4000'
     volumes:
       - '/mnt/data/thinx/eu/statistics:/opt/thinx/thinx-device-api/statistics'
       - '/mnt/data/thinx/eu/deploy:/mnt/data/deploy'

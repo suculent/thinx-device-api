@@ -1,7 +1,7 @@
 FROM thinxcloud/base:1.20
 
 LABEL maintainer="Matej Sychra <suculent@me.com>"
-LABEL name="THiNX API" version="1.5.1070"
+LABEL name="THiNX API" version="1.5.1160"
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -57,6 +57,12 @@ ENV GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
 
 ARG SLACK_BOT_TOKEN
 ENV SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
+
+ARG ENTERPRISE
+ENV ENTERPRISE=${ENTERPRISE}
+
+ARG WORKER_SECRET
+ENV WORKER_SECRET=${WORKER_SECRET}
 
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api

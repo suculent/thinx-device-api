@@ -81,6 +81,7 @@ describe("API Key", function() {
       "sample-key",
       (success, array_or_error) => {
         if (success) {
+          console.log("[spec] APIKey revoking: ", JSON.stringify(array_or_error[0]));
           generated_key_hash = sha256(array_or_error[0].key);
           expect(generated_key_hash).to.be.a('string');
         } else {
@@ -99,12 +100,12 @@ describe("API Key", function() {
     );
   });
 
-  it("(05) should be able to fail on invalid API Key revocation (callback is not a function!)", function(done) {
+  it("(05) should return empty array  on invalid API Key revocation", function(done) {
     apikey.revoke(
-      "nonsense",
-      ["sample-key-hash"], // WTF?
+      owner,
+      ["sample-key-hax"], // intentionaly invalid
       (success)  => {
-        expect(success).to.equal(false);
+        expect(success).to.equal(true);
         done();
       }
     );
@@ -116,7 +117,7 @@ describe("API Key", function() {
       owner,
       (object) => {
         expect(object).to.be.a('array');
-        console.log("[spec] 06 apikeys", object);
+        console.log("[spec] 06 apikeys (2)", object);
         done();
       });
   });

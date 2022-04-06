@@ -39,8 +39,8 @@ describe("Audit log", function() {
       "invalid-owner-id",
       function(err, body) {
         expect(body).to.be.a('array');
-        console.log("[spec] TODO: add expect on length of", {body});
         expect(err).to.equal(false);
+        expect(body.length == 0);
         done();
       }
     );
