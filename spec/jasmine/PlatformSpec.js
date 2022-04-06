@@ -82,7 +82,7 @@ describe("Platform", function() {
   it("should detect javascript os", function(done) {
     Platform.getPlatform(path_js, (success, result) => {
       expect(success).to.equal(true);
-      expect(result).to.equal('javascript');
+      expect(result).to.equal('nodejs');
       done();
     });
 }, 15000);
