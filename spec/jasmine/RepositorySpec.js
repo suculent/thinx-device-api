@@ -6,12 +6,6 @@ var repo_path = __dirname;
 
 describe("Repository Watcher", function() {
 
-  var mock_queue = {
-    add: function(a1,a2,a3) {
-      console.log(`[spec] mock queue add: ${a1} ${a2} ${a3}`);
-    }
-  };
-
   var watcher = new Repository(/* mock_queue */);
 
   watcher.callback = function(err) {
@@ -55,6 +49,18 @@ describe("Repository Watcher", function() {
       headers: [],
       body: mock_git_message
     };
+    let response = watcher.process_hook(mock_git_request);
+    expect(response).to.be.false; // fix later
+  });
+
+  it("should be able to respond to githook (invalid)", function() {
+    watcher = new Repository(/* mock_queue */);
+    let mock_git_message = require("../mock-git-response.json");
+    let mock_git_request = {
+      headers: [],
+      body: mock_git_message
+    };
+    delete mock_git_request.body.repository;
     let response = watcher.process_hook(mock_git_request);
     expect(response).to.be.false; // fix later
   });
