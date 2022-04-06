@@ -93,7 +93,6 @@ describe("Messenger", function() {
     const Globals = require("../../lib/thinx/globals.js");
     var app_config = Globals.app_config();
 
-    // TODO REMOVE; config is `{"server":"mqtt://mosquitto","port":1883}`
     console.log(`[spec] [mm] [debug] getting apikey with config ${JSON.stringify(app_config.mqtt)} for ${test_owner}`); 
 
     user.mqtt_key(test_owner, (key_success, apikey) => {
@@ -131,8 +130,19 @@ describe("Messenger", function() {
     messenger.messageResponder(topic, message);
   });
 
-  // TODO COVER WITH TESTS:
   // message_callback(...)
+  it("should be able to survive message_callback call", function() {
+    messenger.message_callback("/owner/device/test", "Bare no-NID message");
+  });
+
+  it("should be able to survive message_callback call", function() {
+    //messenger.get_result_or_callback("/owner/device/test", "Bare no-NID message");
+    messenger.data(test_owner, udid, (error, data) => {
+      expect(error).to.equal(true);
+      expect(data).to.be.an('array');
+    });
+  });
+  
   // get_result_or_callback(...)
   // data(...)
   // initWithOwner(...)

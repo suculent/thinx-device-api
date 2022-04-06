@@ -105,7 +105,7 @@ describe("Transfer (JWT)", function () {
     //let trid_1 = null;
     //let trid_2 = null;
 
-    // TODO: save trid for accept and decline, create valid version of this; needs at least two owners and one device
+    // save trid for accept and decline, create valid version of this; needs at least two owners and one device
     it("POST /api/transfer/request (jwt, invalid)", function (done) {
         chai.request(thx.app)
             .post('/api/transfer/request')
