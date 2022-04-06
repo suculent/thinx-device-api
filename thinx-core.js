@@ -1,7 +1,10 @@
+const EventEmitter = require('events');
 
-module.exports = class THiNX {
+module.exports = class THiNX extends EventEmitter {
 
   constructor() {
+
+    super()
 
     /*
      * Bootstrap banner section
@@ -33,13 +36,9 @@ module.exports = class THiNX {
 
     if (Globals.use_sqreen()) {
       if ((typeof (process.env.SQREEN_APP_NAME) !== "undefined") && (typeof (process.env.SQREEN_TOKEN) !== "undefined")) {
-        try {
-          require('sqreen');
-        } catch (error) {
-          console.log("Require Sqreen error", error);
-        }
+        require('sqreen');
       } else {
-        console.log("Sqreen env vars not configured.");
+        console.log("[info] Sqreen env vars not configured.");
       }
     }
 
@@ -200,10 +199,17 @@ module.exports = class THiNX {
 
         let queue;
 
+        // Starts Git Webhook Server
+        var Repository = require("./lib/thinx/repository");
+        
+        let watcher;
+
         // TEST CASE WORKAROUND: attempt to fix duplicate initialization... if Queue is being tested, it's running as another instance and the port 3000 must stay free!
         if (process.env.ENVIRONMENT !== "test") {
-          queue = new Queue(builder, app, null /* ssl_options */);
+          queue = new Queue(builder, app, null /* ssl_options */, this);
           queue.cron(); // starts cron job for build queue from webhooks
+          
+          watcher = new Repository(queue);
         }
 
         const GDPR = require("./lib/thinx/gdpr");
@@ -212,10 +218,7 @@ module.exports = class THiNX {
         const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
         const blog = new Buildlog();
 
-        // Starts Git Webhook Server
-        var Repository = require("./lib/thinx/repository");
-        const watcher = new Repository(queue);
-
+        
         // DI
         app.builder = builder;
         app.queue = queue;
@@ -279,7 +282,12 @@ module.exports = class THiNX {
           }
           res.status(200).end("Accepted");
           console.log("ℹ️ [info] Webhook process started...");
-          watcher.process_hook(req);
+          if (typeof(watcher) !== "undefined") {
+            watcher.process_hook(req);
+          } else {
+            console.log("[warning] Cannot proces hook, no repository watcher in this environment.");
+          }
+          
           console.log("ℹ️ [info] Webhook process completed.");
         }
 
@@ -385,7 +393,7 @@ module.exports = class THiNX {
         });
 
         function heartbeat() {
-          this.isAlive = true;
+          this.lastAlive = new Date(); // currently unused
         }
 
         setInterval(function ping() {
@@ -415,11 +423,6 @@ module.exports = class THiNX {
 
         wss.on("error", function (err) {
           let e = err.toString();
-
-          // TODO: FIXME: Ignored for now.
-          if (process.env.ENVIRONMENT == "test") {
-            return;
-          }
           if (e.indexOf("EADDRINUSE") !== -1) {
             // throw new Error("[critical] websocket same port init failure (test edge case only; fix carefully)");
           } else {
@@ -549,6 +552,7 @@ module.exports = class THiNX {
         function startup_quote() {
           if ((typeof (process.env.ENTERPRISE) === "undefined") || (!process.env.ENTERPRISE)) {
             app.messenger.sendRandomQuote();
+            app.messenger.postRandomQuote("quote");
           }
         }
 

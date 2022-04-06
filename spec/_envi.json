@@ -25,5 +25,18 @@
       "body": "var transformer = function(status, device) { return status };"
     }]
   },
-  "test_avatar": "<no-image>"
+  "test_avatar": "<no-image>",
+  "dynamic": {
+    "first_name": "Dynamic",
+    "last_name": "User",
+    "email": "dynamic@example.com",
+    "username": "dynamic",
+    "udid": "d6ff2bb0-df34-11e7-b351-eb37822aa174",
+    "owner": "bab692f8c9c78cf64f579406bdf6c6cd2c4d00b3c0c8390387d051495dd95247",
+    "transformers": [{
+      "ufid": "vt:b688d51871191b9f645678b10ce70ec23704ef5c549019b8beeaec9939401756",
+      "alias": "Empty",
+      "body": "var transformer = function(status, device) { return status };"
+    }]
+  }
 }

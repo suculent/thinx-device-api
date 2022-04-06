@@ -53,7 +53,7 @@ describe("RSA Key", function() {
     });
   }, 10000);
 
-  it("should be able to revoke multiple RSA Keys at once", function(done) {
+  it("(04) should be able to revoke multiple RSA Keys at once", function(done) {
     rsakey.revoke(owner, revoked_filenames, function(succ, mess) {
         expect(succ).to.equal(true);
         expect(mess).to.be.an('array'); // should be array of length of 2
@@ -63,8 +63,8 @@ describe("RSA Key", function() {
 
 
   //validateOwner: function(invalid-owner)
-  it("(00) should be able to reject invalid owner (feature envy)", function () {
-    expect(rsakey.validateOwner("dummy")).to.equal(true);
+  it("(05) should be able to reject invalid owner (feature envy)", function () {
+    expect(rsakey.validateOwner("dummy")).to.equal(false);
     expect(rsakey.validateOwner("dum-my")).to.equal(false);
     expect(rsakey.validateOwner("dum my")).to.equal(false);
     expect(rsakey.validateOwner("dum&my")).to.equal(false);
@@ -72,5 +72,12 @@ describe("RSA Key", function() {
     expect(rsakey.validateOwner("dum\;my")).to.equal(false);
     expect(rsakey.validateOwner("dum\&nbsp;my")).to.equal(false);
   });
+
+  it("(06) should be able to add RSA Key 2/3", function(done) {
+    rsakey.create(envi.dynamic.owner, (success, response) => {
+      expect(success).to.be.true;
+      done();
+    });
+  }, 10000);
 
 });

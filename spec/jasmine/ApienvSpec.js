@@ -30,7 +30,7 @@ describe("API Env", function () {
       (success, object) => {
         expect(object).to.be.a('string');
         expect(success).to.equal(true);
-        console.log("[spec] TODO add expect on contents of", {object});
+        expect(object).to.equal('sample-var-name-2');
         done();
       });
   }, 30000);
@@ -42,7 +42,7 @@ describe("API Env", function () {
       "sample-var-value",
       function (success, object) {
         expect(object).to.be.a('string');
-        console.log("[spec] TODO add expect on contents of", {object});
+        expect(object).to.equal('sample-var-name');
         if (success) {
           done();
         }
@@ -79,7 +79,7 @@ describe("API Env", function () {
       function (success, object) {
         expect(success).to.equal(true);
         expect(object).to.be.an('array');
-        console.log("[spec] TODO add expect on length of", {object}, object.length);
+        expect(object.length).to.equal(0);
         done();
       });
   }, 5000);

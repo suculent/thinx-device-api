@@ -6,8 +6,8 @@
   "acl_url": "https://rtm.thinx.cloud",
   "mailgun": {
     "api_key": "<api-key>",
-    "base_url": "https://api.mailgun.net/v3/<your-domain>",
-    "domain": "<your-domain>"
+    "base_url": "https://api.mailgun.net/v3/thinx.cloud",
+    "domain": "thinx.cloud"
   },
   "redis": {
     "host": "thinx-redis",

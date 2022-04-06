@@ -87,13 +87,14 @@ describe("Transfer (JWT)", function () {
         agent
             .post('/api/login')
             .send({ username: 'dynamic', password: 'dynamic', remember: false })
+            .catch((e) => { console.log(e); })
             .then(function (res) {
                 // console.log(`[chai] Transformer (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
                 expect(res).to.have.cookie('x-thx-core');
                 let body = JSON.parse(res.text);
                 jwt = 'Bearer ' + body.access_token;
                 done();
-            });
+            })
     });
   
     afterAll((done) => {
@@ -104,16 +105,17 @@ describe("Transfer (JWT)", function () {
     //let trid_1 = null;
     //let trid_2 = null;
 
-    // TODO: save trid for accept and decline, create valid version of this; needs at least two owners and one device
+    // save trid for accept and decline, create valid version of this; needs at least two owners and one device
     it("POST /api/transfer/request (jwt, invalid)", function (done) {
         chai.request(thx.app)
             .post('/api/transfer/request')
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/transfer/request (jwt, invalid) response headers: ", res.header, " should contain Content-type: text/html");
+                //console.log("🚸 [chai] POST /api/transfer/request (jwt, invalid) response headers: ", res.header, " should contain Content-type: text/html");
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string'); // <html> - headers incorrect!
+                expect(res).to.be.html;
                 done();
             });
     }, 20000);
