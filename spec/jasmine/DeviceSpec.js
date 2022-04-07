@@ -220,7 +220,7 @@ describe("Device", function() {
       });
   }, 15000); // register
 
-  it("(10) should be able to register another device for different owner", function(done) {
+  it("(10) should NOT be able to register another device for different owner with this owner's apikey", function(done) {
     let ws = {};
     device.register(
       {}, /* req */
@@ -228,15 +228,13 @@ describe("Device", function() {
       apikey,
       ws,
       function(success, response) {
-        JRS4.udid = response.registration.udid;
-        if (success === false) {
-          console.log("[spec] registration error response:", response);
-          if (response.indexOf("owner_found_but_no_key") !== -1) {
-            done();
-            return;
-          }
+        console.log("[spec] registration response:", response);
+        expect(success).to.equal(false);        
+        if (response.indexOf("owner_found_but_no_key") !== -1) {
+          done();
+        } else {
+          expect(false);
         }
-        done();
       });
   }, 15000); // register
 

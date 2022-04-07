@@ -226,7 +226,7 @@ describe("Devices (JWT)", function () {
         expect(res.status).to.equal(200);
         let r = JSON.parse(res.text);
         console.log("🚸 [chai response", JSON.stringify(r));
-        JRS5.udid = response.registration.udid;
+        JRS5.udid = r.registration.udid;
         // TODO: Store UDID!
         expect(res.text).to.be.a('string');
         done();
