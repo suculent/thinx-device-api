@@ -171,6 +171,15 @@ describe("Devices (JWT)", function () {
   let agent;
   let jwt;
 
+  var JRS5 = {
+    mac: "55:55:55:55:55:55",
+    firmware: "ZZ-RouterDeviceSpec.js",
+    version: "1.0.0",
+    alias: "test-device-5-dynamic",
+    owner: envi.dynamic.owner,
+    platform: "arduino"
+  };
+
   beforeAll((done) => {
     agent = chai.request.agent(thx.app);
     agent
@@ -206,18 +215,7 @@ describe("Devices (JWT)", function () {
       });
   }, 20000);
 
-  let udid;
-
   it("POST /device/register (jwt, valid)", function (done) {
-
-    var JRS5 = {
-      mac: "55:55:55:55:55:55",
-      firmware: "ZZ-RouterDeviceSpec.js",
-      version: "1.0.0",
-      alias: "test-device-5-dynamic",
-      owner: envi.dynamic.owner,
-      platform: "arduino"
-    };
 
     chai.request(thx.app)
       .post('/device/register')
