@@ -45,8 +45,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/list')
             .send({ owner_id: "mock-owner-id", apikey: "mock-api-key", alias: "mock-mesh-alias" })
             .end((err, res) => {
-                expect(res.status).to.equal(200); 
-                expect(res.text).to.equal('{"success":false,"reason":"OWNER_INVALID"}');
+                expect(res.status).to.equal(403); 
                 done();
             });
     }, 20000);
