@@ -6,6 +6,8 @@ let chai = require('chai');
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
+var envi = require("../_envi.json");
+
 let thx;
 
 describe("Meshes (noauth)", function () {
@@ -23,8 +25,9 @@ describe("Meshes (noauth)", function () {
             .get('/api/mesh/list')
             .end((err, res) => {
                 console.log("🚸 [chai] GET /api/mesh/list (noauth) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"reason":"OWNER_MISSING"}');
                 done();
             });
     }, 20000);
@@ -35,20 +38,34 @@ describe("Meshes (noauth)", function () {
             .send({})
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/mesh/list (noauth, invalid) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"reason":"OWNER_INVALID"}');
                 done();
             });
     }, 20000);
 
-    it("POST /api/mesh/list (noauth, valid)", function (done) {
+    it("POST /api/mesh/list (noauth, semi-valid)", function (done) {
         chai.request(thx.app)
             .post('/api/mesh/list')
             .send({ owner_id: "mock-owner-id", apikey: "mock-api-key", alias: "mock-mesh-alias" })
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/mesh/list (noauth, valid) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                console.log("🚸 [chai] POST /api/mesh/list (noauth, semi-valid) response:", res.text, " status:", res.status);
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"reason":"OWNER_INVALID"}');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/mesh/list (noauth, semi-valid 2)", function (done) {
+        chai.request(thx.app)
+            .post('/api/mesh/list')
+            .send({ owner_id: envi.oid, apikey: "mock-api-key", alias: "mock-mesh-alias" })
+            .end((err, res) => {
+                console.log("🚸 [chai] POST /api/mesh/list (noauth, semi-valid 2) response:", res.text, " status:", res.status);
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
                 done();
             });
     }, 20000);
@@ -58,9 +75,30 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/create')
             .send({})
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/mesh/create (noauth, invalid) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal('{"success":false,"status":"Owner ID missing in request body."} ');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/mesh/create (noauth, invalid)", function (done) {
+        chai.request(thx.app)
+            .post('/api/mesh/create')
+            .send({ owner_id: envi.dynamic.owner })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal('{"success":false,"status":"Owner ID missing in request body."} ');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/mesh/create (noauth, semi-valid)", function (done) {
+        chai.request(thx.app)
+            .post('/api/mesh/create')
+            .send({ alias: "mock-mesh-alias" })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal(' {"success":false,"status":"Owner ID missing in request body."}');
                 done();
             });
     }, 20000);
@@ -68,11 +106,10 @@ describe("Meshes (noauth)", function () {
     it("POST /api/mesh/create (noauth, valid)", function (done) {
         chai.request(thx.app)
             .post('/api/mesh/create')
-            .send({ alias: "mock-mesh-alias" })
+            .send({ alias: "mock-mesh-alias", owner_id: envi.dynamic.owner })
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/mesh/create (noauth, valid) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
                 done();
             });
     }, 20000);
@@ -82,9 +119,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/delete')
             .send({})
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/mesh/delete (noauth, invalid) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(403);
                 done();
             });
     }, 20000);
@@ -94,9 +129,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/delete')
             .send('{meshid:null}')
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/mesh/delete (noauth, null) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(403);
                 done();
             });
     }, 20000);
@@ -106,9 +139,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/delete')
             .send('{"meshid":undefined}')
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/mesh/delete (noauth, null) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(403);
                 done();
             });
     }, 20000);
@@ -127,7 +158,6 @@ describe("Meshes (JWT)", function () {
             .post('/api/login')
             .send({ username: 'dynamic', password: 'dynamic', remember: false })
             .then(function (res) {
-                // console.log(`[chai] Transformer (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
                 let body = JSON.parse(res.text);
                 jwt = 'Bearer ' + body.access_token;
                 done();
@@ -146,9 +176,8 @@ describe("Meshes (JWT)", function () {
             .get('/api/mesh/list')
             .set('Authorization', jwt)
             .end((err, res) => {
-                console.log("🚸 [chai] GET /api/mesh/list (jwt, invalid) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal('{"success":true,"mesh_ids":[]}');
                 done();
             });
     }, 20000);
@@ -159,9 +188,22 @@ describe("Meshes (JWT)", function () {
             .set('Authorization', jwt)
             .send({ owner_id: "mock-owner-id", apikey: "mock-api-key", alias: "mock-mesh-alias" })
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/mesh/list (jwt, invalid) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal('{"success":false,"reason":"OWNER_INVALID"}');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/mesh/create (jwt, semi-valid)", function (done) {
+        agent
+            .post('/api/mesh/create')
+            .set('Authorization', jwt)
+            .send({ alias: "mock-mesh-alias" })
+            .end((err, res) => {
+                let r = JSON.parse(res.text);
+                mesh_id = r.mesh_id;
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal('{"success":false,"status":"Owner ID missing in request body."}');
                 done();
             });
     }, 20000);
@@ -170,13 +212,14 @@ describe("Meshes (JWT)", function () {
         agent
             .post('/api/mesh/create')
             .set('Authorization', jwt)
-            .send({ alias: "mock-mesh-alias" })
+            .send({ alias: "mock-mesh-alias", owner_id: envi.dynamic.owner })
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/mesh/create (jwt, valid) response:", res.text, " status:", res.status);
                 let r = JSON.parse(res.text);
                 mesh_id = r.mesh_id;
                 /// mesh_id = ...
-                //expect(res.status).to.equal(200);
+                expect(res.status).to.equal(200);
+                //{"success":false,"status":"Owner ID missing in request body."}
                 //expect(res.text).to.be.a('string');
                 done();
             });
@@ -187,9 +230,19 @@ describe("Meshes (JWT)", function () {
             .post('/api/mesh/delete')
             .send('{meshid:null}')
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/mesh/delete (jwt, invalid) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(403);
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/mesh/delete (jwt, semi-valid)", function (done) {
+        expect(mesh_id !== null);
+        agent
+            .post('/api/mesh/delete')
+            .send('{"meshid":"'+mesh_id+'"}')
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal('{"success":false,"status":"Owner ID missing in request body."}');
                 done();
             });
     }, 20000);
@@ -198,11 +251,10 @@ describe("Meshes (JWT)", function () {
         expect(mesh_id !== null);
         agent
             .post('/api/mesh/delete')
-            .send('{"meshid":"'+mesh_id+'"}')
+            .send('{"meshid":"'+mesh_id+'", "owner_id":"'+envi.dynamic.owner+'"}')
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/mesh/delete (jwt, invalid) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
                 done();
             });
     }, 20000);

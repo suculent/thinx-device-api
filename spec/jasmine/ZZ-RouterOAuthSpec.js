@@ -47,9 +47,7 @@ describe("OAuth", function () {
         chai.request(thx.app)
             .get('/api/oauth/github')
             .end((err, res) => {
-                console.log("🚸 [chai] response /api/oauth/github status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
                 done();
             });
     }, 20000);
@@ -84,21 +82,16 @@ describe("OAuth", function () {
         chai.request(thx.app)
             .get('/api/oauth/google')
             .end((err, res) => {
-                console.log("🚸 [chai] response /api/oauth/google status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
                 done();
             });
     }, 20000);
 
     it("GET /api/oauth/google/callback", function (done) {
-        console.log("🚸 [chai] response /api/oauth/google/callback");
         chai.request(thx.app)
             .get('/api/oauth/google/callback')
             .end((err, res) => {
-                console.log("🚸 [chai] response /api/oauth/google/callback status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
                 done();
             });
     }, 20000);
