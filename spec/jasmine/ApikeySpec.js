@@ -140,13 +140,9 @@ describe("API Key", function() {
     apikey.get_first_apikey(
       owner,
       (success, object) => {
-        console.log(`[chai] (07) ${success} ${object}`);
+        //console.log(`[chai] (07) success ${success} first apikey ${object}`);
         expect(success).to.equal(true);
-        if (success) {
-          expect(object).to.be.a('string');
-        } else {
-          console.log("[spec] (07) API Key Listing failed:", {object});
-        }
+        expect(object).to.be.a('string');
         done();
       });
   });

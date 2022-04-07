@@ -64,12 +64,12 @@ describe("User Routes", function () {
   }, 20000);
 
   it("POST /api/gdpr/transfer", function (done) {
-    console.log("🚸 [chai] request /api/gdpr/transfer");
+    console.log("🚸 [chai] request /api/gdpr/transfer (noauth, invalid)");
     chai.request(thx.app)
       .post('/api/gdpr/transfer')
       .send({})
       .end((err, res) => {
-        console.log("🚸 [chai] response /api/gdpr/transfer:", res.text, " status:", res.status);
+        console.log("🚸 [chai] response /api/gdpr/transfer (noauth, invalid):", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
         //expect(res.text).to.be.a('string');
         done();
@@ -188,32 +188,6 @@ describe("User Routes", function () {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
-        done();
-      });
-  }, 20000);
-
-  it("POST /api/gdpr/transfer", function (done) {
-    console.log("🚸 [chai] request /api/gdpr/transfer");
-    chai.request(thx.app)
-      .post('/api/gdpr/transfer')
-      .send({})
-      .end((err, res) => {
-        console.log("🚸 [chai] response /api/gdpr/transfer:", res.text, " status:", res.status);
-        expect(res.status).to.equal(403);
-        //expect(res.text).to.be.a('string');
-        done();
-      });
-  }, 20000);
-
-  it("POST /api/gdpr/revoke", function (done) {
-    console.log("🚸 [chai] POST /api/gdpr/revoke request");
-    chai.request(thx.app)
-      .post('/api/gdpr/revoke')
-      .send({})
-      .end((err, res) => {
-        console.log("🚸 [chai] POST /api/gdpr/revoke response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(403);
-        //expect(res.text).to.be.a('string');
         done();
       });
   }, 20000);
@@ -348,6 +322,36 @@ describe("User Routes", function () {
           });
       })
       .catch((e) => { console.log(e); });
+  }, 20000);
+
+   // there is no login here, so JWT for this is missing
+   it("POST /api/gdpr/transfer", function (done) {
+    console.log("🚸 [chai] request /api/gdpr/transfer (jwt, invalid)");
+    chai.request(thx.app)
+      .post('/api/gdpr/transfer')
+      .send({})
+      .end((err, res) => {
+        console.log("🚸 [chai] response /api/gdpr/transfer (jwt, invalid):", res.text, " status:", res.status);
+        expect(res.status).to.equal(403);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  // there is no login here, so JWT for this is missing
+  it("POST /api/gdpr/revoke", function 
+  (done) {
+    console.log("🚸 [chai] POST /api/gdpr/revoke (jwt, invalid) request");
+    chai.request(thx.app)
+      .post('/api/gdpr/revoke')
+      .post('/api/gdpr/transfer')
+      .send({})
+      .end((err, res) => {
+        console.log("🚸 [chai] POST /api/gdpr/revoke (jwt, invalid) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(403);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
   }, 20000);
 
 
