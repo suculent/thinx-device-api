@@ -208,6 +208,7 @@ describe("Device", function() {
       apikey,
       ws,
       function(success, response) {
+        JRS3.udid = response.registration.udid;
         if (success === false) {
           console.log("[spec] registration error response:", response);
           if (response.indexOf("owner_found_but_no_key") !== -1) {
@@ -227,6 +228,7 @@ describe("Device", function() {
       apikey,
       ws,
       function(success, response) {
+        JRS4.udid = response.registration.udid;
         if (success === false) {
           console.log("[spec] registration error response:", response);
           if (response.indexOf("owner_found_but_no_key") !== -1) {

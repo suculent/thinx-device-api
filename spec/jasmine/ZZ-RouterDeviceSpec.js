@@ -12,20 +12,10 @@ let thx;
 
 describe("Devices", function () {
 
-  var JRS5 = {
-    mac: "55:55:55:55:55:55",
-    firmware: "DeviceSpec.js",
-    version: "1.0.0",
-    alias: "test-device-5-dynamic",
-    owner: envi.dynamic.owner,
-    platform: "arduino",
-    udid: "d6ff2bb0-df34-11e7-b351-eb37822aa175"
-  };
-
   beforeAll((done) => {
     thx = new THiNX();
     thx.init(() => {
-       done();
+      done();
     });
   });
 
@@ -196,43 +186,54 @@ describe("Devices (JWT)", function () {
       .catch((e) => { console.log(e); });
   });
 
-it("POST /api/user/apikey (X)", function (done) {
-  chai.request(thx.app)
+  it("POST /api/user/apikey (X)", function (done) {
+    chai.request(thx.app)
       .post('/api/user/apikey')
       .set('Authorization', jwt)
       .send({
-          'alias': 'mock-apikey-alias'
+        'alias': 'mock-apikey-alias'
       })
       .end((err, res) => {
-          //  {"success":true,"api_key":"9b7bd4f4eacf63d8453b32dbe982eea1fb8bbc4fc8e3bcccf2fc998f96138629","hash":"0a920b2e99a917a04d7961a28b49d05524d10cd8bdc2356c026cfc1c280ca22c"}
-          expect(res.status).to.equal(200);
-          let j = JSON.parse(res.text);
-          expect(j.success).to.equal(true);
-          expect(j.api_key).to.be.a('string');
-          expect(j.hash).to.be.a('string');
-          created_api_key = j.hash;
-          console.log("[spec] saving apikey (1)", j.api_key);
-          done();
+        //  {"success":true,"api_key":"9b7bd4f4eacf63d8453b32dbe982eea1fb8bbc4fc8e3bcccf2fc998f96138629","hash":"0a920b2e99a917a04d7961a28b49d05524d10cd8bdc2356c026cfc1c280ca22c"}
+        expect(res.status).to.equal(200);
+        let j = JSON.parse(res.text);
+        expect(j.success).to.equal(true);
+        expect(j.api_key).to.be.a('string');
+        expect(j.hash).to.be.a('string');
+        created_api_key = j.hash;
+        console.log("[spec] saving apikey (1)", j.api_key);
+        done();
       });
-}, 20000);
+  }, 20000);
 
-let udid;
+  let udid;
 
-it("POST /device/register (jwt, valid)", function (done) {
-  chai.request(thx.app)
+  it("POST /device/register (jwt, valid)", function (done) {
+
+    var JRS5 = {
+      mac: "55:55:55:55:55:55",
+      firmware: "ZZ-RouterDeviceSpec.js",
+      version: "1.0.0",
+      alias: "test-device-5-dynamic",
+      owner: envi.dynamic.owner,
+      platform: "arduino"
+    };
+
+    chai.request(thx.app)
       .post('/device/register')
       .set('Authentication', created_api_key)
       .send({ registration: JRS5 })
       .end((err, res) => {
-          console.log("🚸 [chai] POST /device/register (jwt, valid) response:", res.text);
-          expect(res.status).to.equal(200);
-          let r = JSON.parse(res.text);
-          console.log("🚸 [chai response", JSON.stringify(r));
-          // TODO: Store UDID!
-          //expect(res.text).to.be.a('string');
-          done();
+        console.log("🚸 [chai] POST /device/register (jwt, valid) response:", res.text);
+        expect(res.status).to.equal(200);
+        let r = JSON.parse(res.text);
+        console.log("🚸 [chai response", JSON.stringify(r));
+        JRS5.udid = response.registration.udid;
+        // TODO: Store UDID!
+        expect(res.text).to.be.a('string');
+        done();
       });
-}, 20000);
+  }, 20000);
 
   it("GET /api/user/devices (JWT)", function (done) {
     console.log("🚸 [chai] GET /api/user/devices (JWT)");
@@ -288,6 +289,20 @@ it("POST /device/register (jwt, valid)", function (done) {
       });
   }, 20000);
 
+  it("POST /api/device/attach", function (done) {
+    console.log("🚸 [chai] POST /api/device/attach (JWT) 2");
+    agent
+      .post('/api/device/attach')
+      .set('Authorization', jwt)
+      .send({ udid: JRS5.udid })
+      .end((err, res) => {
+        console.log("🚸 [chai] POST /api/device/attach (JWT) 2 response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
   it("POST /api/device/detach", function (done) {
     console.log("🚸 [chai] POST /api/device/detach  (JWT)");
     agent
@@ -302,22 +317,36 @@ it("POST /device/register (jwt, valid)", function (done) {
       });
   }, 20000);
 
+  it("POST /api/device/detach", function (done) {
+    console.log("🚸 [chai] POST /api/device/detach  (JWT) 2");
+    agent
+      .post('/api/device/detach')
+      .set('Authorization', jwt)
+      .send({ udid: JRS5.udid })
+      .end((err, res) => {
+        console.log("🚸 [chai] POST /api/device/detach  (JWT) 2 response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
   let mesh_id;
 
   it("POST /api/mesh/create (jwt, valid)", function (done) {
     agent
-        .post('/api/mesh/create')
-        .set('Authorization', jwt)
-        .send({ alias: "device-mesh-alias", owner_id: envi.dynamic.owner, mesh_id: 'device-mesh-id' })
-        .end((err, res) => {
-            let r = JSON.parse(res.text);
-            mesh_id = r.mesh_id;
-            expect(res.status).to.equal(200);
-            expect(res.text).to.be.a('string');
-            expect(res.text).to.equal('{"success":true,"mesh_ids":{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}}');
-            done();
-        });
-}, 20000);
+      .post('/api/mesh/create')
+      .set('Authorization', jwt)
+      .send({ alias: "device-mesh-alias", owner_id: envi.dynamic.owner, mesh_id: 'device-mesh-id' })
+      .end((err, res) => {
+        let r = JSON.parse(res.text);
+        mesh_id = r.mesh_id;
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('{"success":true,"mesh_ids":{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}}');
+        done();
+      });
+  }, 20000);
 
   it("POST /api/device/mesh/attach", function (done) {
     console.log("🚸 [chai] POST /api/device/mesh/attach (JWT)");
@@ -327,6 +356,20 @@ it("POST /device/register (jwt, valid)", function (done) {
       .send({ udid: envi.dynamic.udid, mesh_id: mesh_id })
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/mesh/attach (JWT) response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/device/mesh/attach", function (done) {
+    console.log("🚸 [chai] POST /api/device/mesh/attach (JWT) 2");
+    agent
+      .post('/api/device/mesh/attach')
+      .set('Authorization', jwt)
+      .send({ udid: JRS5.udid, mesh_id: mesh_id })
+      .end((err, res) => {
+        console.log("🚸 [chai] POST /api/device/mesh/attach (JWT) 2 response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
@@ -348,6 +391,20 @@ it("POST /device/register (jwt, valid)", function (done) {
       });
   }, 20000);
 
+  it("POST /api/device/mesh/detach", function (done) {
+    console.log("🚸 [chai] POST /api/device/mesh/detach (JWT) 2");
+    agent
+      .post('/api/device/mesh/detach')
+      .set('Authorization', jwt)
+      .send({ udid: JRS5.udid, mesh_id: mesh_id })
+      .end((err, res) => {
+        console.log("🚸 [chai] POST /api/device/mesh/detach (JWT) 2 response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
   it("POST /api/device/data", function (done) {
     console.log("🚸 [chai] POST /api/device/data (JWT)");
     agent
@@ -356,6 +413,20 @@ it("POST /device/register (jwt, valid)", function (done) {
       .send({ udid: envi.oid })
       .end((err, res) => {
         console.log("🚸 [chai] response /api/device/data (JWT):", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/device/data", function (done) {
+    console.log("🚸 [chai] POST /api/device/data (JWT) 2");
+    agent
+      .post('/api/device/data')
+      .set('Authorization', jwt)
+      .send({ udid: JRS5.udid })
+      .end((err, res) => {
+        console.log("🚸 [chai] response /api/device/data (JWT) 2:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
@@ -390,6 +461,20 @@ it("POST /device/register (jwt, valid)", function (done) {
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/push (JWT) response:", res.text, " status:", res.status);
         // no messenger, will fail here...
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/device/revoke", function (done) {
+    console.log("🚸 [chai] POST /api/device/revoke (JWT) 2");
+    agent
+      .post('/api/device/revoke')
+      .set('Authorization', jwt)
+      .send({ udid: JRS5.udid })
+      .end((err, res) => {
+        console.log("🚸 [chai] POST /api/device/revoke (JWT) 2 response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
