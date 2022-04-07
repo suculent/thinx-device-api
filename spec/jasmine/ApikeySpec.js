@@ -78,11 +78,12 @@ describe("API Key", function() {
   it("04 - should be able to revoke API Keys", function(done) {
     apikey.create(
       owner,
-      "sample-key",
+      "sample-key-for-revocation",
       (success, array_or_error) => {
         if (success) {
           console.log("[spec] APIKey revoking: ", JSON.stringify(array_or_error[0]));
-          generated_key_hash = sha256(array_or_error[0].key);
+          expect(array_or_error[0].alias).to.equal("sample-key-for-revocation");
+          generated_key_hash = sha256(array_or_error[1].key);
           expect(generated_key_hash).to.be.a('string');
         } else {
           console.log("[spec] APIKey failed: ",{array_or_error});
