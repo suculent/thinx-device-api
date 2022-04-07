@@ -242,41 +242,53 @@ describe("User Routes", function () {
         // Old UI does this
         let token = body.redirectURL.replace("https://rtm.thinx.cloud/auth.html?t=", "").replace("&g=true", "");
 
+        // just test-added
         agent
-          .post('/api/login')
-          .send({ token: token })
+          .post('/api/gdpr')
+          .send({ gdpr_consent: true, token: token })
           .end((err, res) => {
+            console.log("🚸 [chai] POST /api/gdpr (token) response:", res.text, " status:", res.status);
             expect(res.status).to.equal(200);
+            expect(res.text).to.be.a('string');
+            //expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
 
-            return agent
-              .get('/api/user/profile')
-              .set('Authorization', jwt)
-              .end((err, res2) => {
-                expect(res2.status).to.equal(200);
-                expect(res2.text).to.be.a('string');
-                let owner_data = JSON.parse(res2.text);
-                expect(owner_data).to.be.an('object');
-                console.log("🚸 [chai] expected profile: ", JSON.stringify(owner_data, null, 2));
-                expect(owner_data.success).to.equal(true);
+            agent
+              .post('/api/login')
+              .send({ token: token })
+              .end((err, res) => {
+                expect(res.status).to.equal(200);
 
-                let router = require('../../lib/router')(thx.app);
+                return agent
+                  .get('/api/user/profile')
+                  .set('Authorization', jwt)
+                  .end((err, res2) => {
+                    expect(res2.status).to.equal(200);
+                    expect(res2.text).to.be.a('string');
+                    let owner_data = JSON.parse(res2.text);
+                    expect(owner_data).to.be.an('object');
+                    console.log("🚸 [chai] expected profile: ", JSON.stringify(owner_data, null, 2));
+                    expect(owner_data.success).to.equal(true);
 
-                let original_response = {
-                  end: () => {
-                    // done();
-                  }
-                };
+                    let router = require('../../lib/router')(thx.app);
 
-                let token = "nevim";
-                // Cannot read properties of undefined (reading 'validateGithubUser')
-                //router.validateGithubUser(original_response, token, owner_data);
+                    let original_response = {
+                      end: () => {
+                        // done();
+                      }
+                    };
 
-                done();
+                    let token = "nevim";
+                    // Cannot read properties of undefined (reading 'validateGithubUser')
+                    //router.validateGithubUser(original_response, token, owner_data);
+
+                    done();
+                  });
               });
           });
       })
       .catch((e) => { console.log(e); });
   }, 20000);
+
 
   it("GET /api/user/profile (jwt)", function (done) {
     expect(jwt).not.to.be.null;
