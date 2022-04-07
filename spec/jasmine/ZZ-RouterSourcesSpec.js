@@ -79,7 +79,7 @@ describe("Sources (JWT)", function () {
     let mock_source = {
         owner: envi.oid,
         alias: "mock-source",
-        url: "https://github.com/suculent/thinx-firmware-esp8266-pio",
+        url: "https://github.com/suculent/thinx-firmware-esp8266-pio.git",
         branch: "origin/master",
         secret: process.env.GITHUB_SECRET
       };
@@ -118,6 +118,7 @@ describe("Sources (JWT)", function () {
             .end((err, res) => {
                 expect(res.text).to.be.a('string');
                 console.log("[spec] POST /api/user/source (valid) response:", res.text);
+                // expect(res.text).to.equal('Git fetch failed.'); /// for now, will be fixed later?
                 let r = JSON.parse(res.text);
                 source_for_revocation = r.source_id;
                 expect(res.status).to.equal(200);
