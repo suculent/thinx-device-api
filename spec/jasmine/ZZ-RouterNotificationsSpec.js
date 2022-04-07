@@ -84,7 +84,7 @@ describe("Actionable Notification (JWT)", function () {
         chai.request(thx.app)
                 .post('/api/device/notification')
                 .set('Authorization', jwt)
-                .send({ udid: envi.udid, reply: "reply"})
+                .send({ udid: envi.udid, reply: "reply"} )
                 .end((err, res) => {
                     console.log("🚸 [chai] POST /api/device/notification (jwt, valid) response:", res.text, " status:", res.status);
                     expect(res.status).to.equal(200);

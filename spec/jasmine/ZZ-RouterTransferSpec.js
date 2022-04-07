@@ -143,14 +143,14 @@ describe("Transfer (JWT)", function () {
             });
     }, 20000);
 
-    it("GET /api/transfer/accept (jwt, invalid)", function (done) {
+    it("GET /api/transfer/accept (noauth, invalid)", function (done) {
         chai.request(thx.app)
             .get('/api/transfer/accept')
-            .set('Authorization', jwt)
             .end((err, res) => {
                 console.log("🚸 [chai] GET /api/transfer/accept (noauth, invalid) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(403);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
                 done();
             });
     }, 20000);
@@ -161,9 +161,9 @@ describe("Transfer (JWT)", function () {
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/transfer/accept (jwt, invalid) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
                 done();
             });
     }, 20000);
@@ -174,9 +174,9 @@ describe("Transfer (JWT)", function () {
             .set('Authorization', jwt)
             .send({ owner: null, transfer_id: null, udid: null})
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/transfer/accept (noauth, null) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
                 done();
             });
     }, 20000);

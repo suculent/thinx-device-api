@@ -36,9 +36,7 @@ describe("Sources (noauth)", function () {
             .post('/api/user/source')
             .send({})
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/user/source response:", res.text, " status:", res.status);
-                expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":true,"source_id":"ebd8311b0546b20fbff526df87b6853e502036d51eee3aefc7d8a4d2a4391ce5"}');
+                expect(res.status).to.equal(403);
                 done();
             });
     }, 20000);
@@ -48,7 +46,6 @@ describe("Sources (noauth)", function () {
             .post('/api/user/source/revoke')
             .send({ key_id: null })
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/user/source/revoke response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(403);
                 done();
             });
@@ -95,9 +92,11 @@ describe("Sources (JWT)", function () {
             .get('/api/user/sources/list')
             .set('Authorization', jwt)
             .end((err, res) => {
-                console.log("🚸 [chai] GET /api/user/sources/list (valid) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                // {"success":true,"sources":{"7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f3":{"alias":"THiNX Vanilla ESP8266 Arduino","url":"https://github.com/********/*****-firmware-esp8266-ino.git","branch":"origin/master","platform":"arduino"},"7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f4":{"alias":"THiNX Vanilla ESP8266 Platform.io","url":"https://github.com/********/*****-firmware-esp8266-pio.git","branch":"origin/master","platform":"platformio"},"7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f5":{"alias":"THiNX Vanilla ESP8266 Lua","url":"https://github.com/********/*****-firmware-esp8266-lua.git","branch":"origin/master","platform":"nodemcu"},"7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f6":{"alias":"THiNX Vanilla ESP8266 Micropython","url":"https://github.com/********/*****-firmware-esp8266-upy.git","branch":"origin/master","platform":"micropython"},"7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f7":{"alias":"THiNX Vanilla ESP8266 MongooseOS","url":"https://github.com/********/*****-firmware-esp8266-mos.git","branch":"origin/master","platform":"mongoose"}}}
+                expect(res.status).to.equal(200);
+                let j = JSON.parse(res.text);
+                expect(j.success).to.equal(true);
+                expect(h.sources).to.be.an('object');
                 done();
             });
     }, 20000);
@@ -108,7 +107,6 @@ describe("Sources (JWT)", function () {
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/user/source response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.equal('{"success":false,"status":"missing_source_alias"}');
                 done();
@@ -136,7 +134,6 @@ describe("Sources (JWT)", function () {
             .set('Authorization', jwt)
             .send({ source_id: null })
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/user/source/revoke response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.equal('{"success":false,"status":"missing_source_ids"}');
                 done();
@@ -149,8 +146,8 @@ describe("Sources (JWT)", function () {
             .set('Authorization', jwt)
             .send({ source_ids: source_for_revocation })
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/user/source/revoke (valid) response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
+                expect(res.text).to.equal('{"success":true,"source_ids":[]}');
                 done();
             });
     }, 20000);

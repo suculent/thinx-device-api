@@ -125,7 +125,7 @@ describe("RSA Keys (JWT)", function () {
             .send({ filenames: [key_id]})
             .end((err, res) => {
                 expect(res.status).to.equal(200);
-                let j = JSON.parse(rex.text);
+                let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
                 expect(j.status).to.be.an('array');
                 done();

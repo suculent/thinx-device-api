@@ -22,10 +22,8 @@ describe("ENV Vars (noauth)", function () {
     chai.request(thx.app)
       .post('/api/user/env/revoke')
       .send()
-      .end((err, res) => {
-        console.log("🚸 [chai] POST /api/user/env/revoke response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+      .end((_err, res) => {
+        expect(res.status).to.equal(403);
         done();
       });
   }, 20000);
@@ -34,10 +32,8 @@ describe("ENV Vars (noauth)", function () {
     chai.request(thx.app)
       .post('/api/user/env/add')
       .send()
-      .end((err, res) => {
-        console.log("🚸 [chai] POST /api/user/env/add response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+      .end((_err, res) => {
+        expect(res.status).to.equal(403);
         done();
       });
   }, 20000);
@@ -46,10 +42,8 @@ describe("ENV Vars (noauth)", function () {
     chai.request(thx.app)
       .post('/api/user/env/add')
       .send({ udid: envi.oid })
-      .end((err, res) => {
-        console.log("🚸 [chai] POST /api/user/env/add response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+      .end((_err, res) => {
+        expect(res.status).to.equal(403);
         done();
       });
   }, 20000);
@@ -58,10 +52,8 @@ describe("ENV Vars (noauth)", function () {
     chai.request(thx.app)
       .post('/api/user/env/revoke')
       .send({ udid: envi.oid })
-      .end((err, res) => {
-        console.log("🚸 [chai] POST /api/user/env/revoke response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+      .end((_err, res) => {
+        expect(res.status).to.equal(403);
         done();
       });
   }, 20000);
@@ -69,10 +61,8 @@ describe("ENV Vars (noauth)", function () {
   it("GET /api/user/env/list (noauth)", function (done) {
     chai.request(thx.app)
       .get('/api/user/env/list')
-      .end((err, res) => {
-        console.log("🚸 [chai] GET /api/user/env/list response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+      .end((_err, res) => {
+        expect(res.status).to.equal(403);
         done();
       });
   }, 20000);
@@ -87,9 +77,12 @@ describe("ENV Vars (JWT)", function () {
     agent = chai.request.agent(thx.app);
     agent
       .post('/api/login')
-      .send({ username: 'dynamic', password: 'dynamic', remember: false })
+      .send({ 
+        username: envi.dynamic.username,
+        password: envi.dynamic.username, 
+        remember: false }
+      )
       .then(function (res) {
-        console.log(`[chai] ENV Vars (JWT) beforeAll POST /api/login (valid) response: ${res.text} ${res.status} ${res.cookie}`);
         let body = JSON.parse(res.text);
         jwt = 'Bearer ' + body.access_token;
         done();
@@ -108,9 +101,9 @@ describe("ENV Vars (JWT)", function () {
       .set('Authorization', jwt)
       .send()
       .end((err, res) => {
-        console.log("🚸 [chai] POST /api/user/env/revoke (JWT, invalid) response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('{"success":false,"status":"no_names_given"}');
         done();
       });
   }, 20000);
@@ -121,9 +114,9 @@ describe("ENV Vars (JWT)", function () {
       .set('Authorization', jwt)
       .send()
       .end((err, res) => {
-        console.log("🚸 [chai] POST /api/user/env/add (JWT, invalid) response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('{"success":false,"status":"missing_key"}');
         done();
       });
   }, 20000);
@@ -134,9 +127,9 @@ describe("ENV Vars (JWT)", function () {
       .set('Authorization', jwt)
       .send({ udid: envi.oid })
       .end((err, res) => {
-        console.log("🚸 [chai] POST /api/user/env/add (JWT, semi-valid) response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('{"success":false,"status":"missing_key"}');
         done();
       });
   }, 20000);
@@ -147,9 +140,9 @@ describe("ENV Vars (JWT)", function () {
       .set('Authorization', jwt)
       .send({ udid: envi.oid })
       .end((err, res) => {
-        console.log("🚸 [chai] POST /api/user/env/revoke (JWT, semi-valid) response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('{"success":false,"status":"no_names_given"}');
         done();
       });
   }, 20000);
@@ -160,8 +153,9 @@ describe("ENV Vars (JWT)", function () {
       .set('Authorization', jwt)
       .end((err, res) => {
         console.log("🚸 [chai] GET /api/user/env/list (JWT) response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('{"env_vars":[]}');
         done();
       });
   }, 20000);
