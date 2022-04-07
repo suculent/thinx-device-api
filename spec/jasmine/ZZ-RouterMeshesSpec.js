@@ -271,7 +271,7 @@ describe("Meshes (JWT)", function () {
         agent
             .post('/api/mesh/delete')
             .set('Authorization', jwt)
-            .send('{"meshid":"'+mesh_id+'"}')
+            .send('{"mesh_ids":"'+mesh_id+'"}')
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.equal('{"success":false,"status":"Parameter owner_id missing."}');
@@ -281,10 +281,14 @@ describe("Meshes (JWT)", function () {
 
     it("POST /api/mesh/delete (jwt, valid)", function (done) {
         expect(mesh_id !== null);
+        let ro = {
+            mesh_ids: [mesh_id],
+            owner_id: envi.dynamic.owner
+        };
         agent
             .post('/api/mesh/delete')
             .set('Authorization', jwt)
-            .send('{"meshid":"'+mesh_id+'", "owner_id":"'+envi.dynamic.owner+'"}')
+            .send(JSON.stringify(ro))
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/mesh/delete (jwt, valid) response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
@@ -294,10 +298,14 @@ describe("Meshes (JWT)", function () {
 
     it("POST /api/mesh/delete (jwt, already deleted)", function (done) {
         expect(mesh_id !== null);
+        let ro = {
+            mesh_ids: [mesh_id],
+            owner_id: envi.dynamic.owner
+        };
         agent
             .post('/api/mesh/delete')
             .set('Authorization', jwt)
-            .send('{"meshid":"'+mesh_id+'", "owner_id":"'+envi.dynamic.owner+'"}')
+            .send(JSON.stringgify(ro))
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/mesh/delete (jwt, already deleted) response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
