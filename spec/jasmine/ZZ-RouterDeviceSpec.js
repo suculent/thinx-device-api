@@ -253,12 +253,30 @@ describe("Devices (JWT)", function () {
       });
   }, 20000);
 
+  let mesh_id;
+
+  it("POST /api/mesh/create (jwt, valid)", function (done) {
+    agent
+        .post('/api/mesh/create')
+        .set('Authorization', jwt)
+        .send({ alias: "device-mesh-alias", owner_id: envi.dynamic.owner, mesh_id: 'device-mesh-id' })
+        .end((err, res) => {
+            console.log("🚸 [chai] POST /api/mesh/create (jwt, valid) response:", res.text, " status:", res.status);
+            let r = JSON.parse(res.text);
+            mesh_id = r.mesh_id;
+            //expect(r.mesh_id).to.exist;
+            expect(res.status).to.equal(200);
+            expect(res.text).to.be.a('string');
+            done();
+        });
+}, 20000);
+
   it("POST /api/device/mesh/attach", function (done) {
     console.log("🚸 [chai] POST /api/device/mesh/attach (JWT)");
     agent
       .post('/api/device/mesh/attach')
       .set('Authorization', jwt)
-      .send({ udid: envi.oid })
+      .send({ udid: envi.dynamic.udid, mesh_id: mesh_id })
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/mesh/attach (JWT) response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
@@ -273,7 +291,7 @@ describe("Devices (JWT)", function () {
     agent
       .post('/api/device/mesh/detach')
       .set('Authorization', jwt)
-      .send({ udid: envi.oid })
+      .send({ udid: envi.dynamic.udid, mesh_id: mesh_id })
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/mesh/detach (JWT) response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
@@ -323,6 +341,7 @@ describe("Devices (JWT)", function () {
       .send({ key: "value" })
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/push (JWT) response:", res.text, " status:", res.status);
+        // no messenger, will fail here...
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
