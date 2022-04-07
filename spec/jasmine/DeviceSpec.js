@@ -67,7 +67,7 @@ describe("Device", function() {
   };
 
   it("(01) API keys are required to do this on new instance", function(done) {    
-    APIKey.create( owner, "sample-key", function(success, object) {
+    APIKey.create( owner, "sample-device-key", function(success, object) {
       expect(success).to.be.true;
       expect(object).to.be.an('array');
       if (success) {
