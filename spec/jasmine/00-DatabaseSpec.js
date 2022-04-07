@@ -2,10 +2,12 @@ describe("Database", function () {
 
   var Database = require("../../lib/thinx/database");
   var database = new Database();
+  var expect = require('chai').expect;
 
   it("should start and create initial DBs", function (done) {
     database.init((err, result) => {
         console.log("[spec] database init", {err}, {result});
+        expect(err).to.equal(null);
         expect(result).to.be.an('array');
         expect(result.length).to.equal(7);
       done();

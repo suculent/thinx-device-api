@@ -96,7 +96,7 @@ describe("Sources (JWT)", function () {
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
-                expect(h.sources).to.be.an('object');
+                expect(j.sources).to.be.an('object');
                 done();
             });
     }, 20000);
