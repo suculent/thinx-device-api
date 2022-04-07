@@ -331,7 +331,7 @@ describe("Devices (JWT)", function () {
 
   let mesh_id;
 
-  it("POST /api/mesh/create (jwt, valid)", function (done) {
+  it("POST /api/mesh/create (jwt, valid)", (done) => {
     agent
       .post('/api/mesh/create')
       .set('Authorization', jwt)
@@ -351,7 +351,7 @@ describe("Devices (JWT)", function () {
     agent
       .post('/api/device/mesh/attach')
       .set('Authorization', jwt)
-      .send({ udid: envi.dynamic.udid, mesh_id: mesh_id })
+      .send({ udid: envi.dynamic.udid, mesh_id: "device-mesh-id" })
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/mesh/attach (JWT) response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
@@ -380,7 +380,7 @@ describe("Devices (JWT)", function () {
     agent
       .post('/api/device/mesh/detach')
       .set('Authorization', jwt)
-      .send({ udid: envi.dynamic.udid, mesh_id: mesh_id })
+      .send({ udid: envi.dynamic.udid, mesh_id: "device-mesh-id" })
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/mesh/detach (JWT) response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
