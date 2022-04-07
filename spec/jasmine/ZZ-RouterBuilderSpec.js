@@ -107,9 +107,7 @@ describe("Builder (JWT)", function () {
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
-                console.log("🚸 [chai] response /api/build (JWT, invalid) I:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(400);
                 done();
             });
     }, 20000);
@@ -122,9 +120,7 @@ describe("Builder (JWT)", function () {
             .set('Authorization', jwt)
             .send({ owner: dynamic_owner_id, git: "something", branch: "origin/master" })
             .end((err, res) => {
-                console.log("🚸 [chai] response /api/build (JWT, invalid) II:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(400);
                 done();
             });
     }, 20000);
@@ -135,9 +131,7 @@ describe("Builder (JWT)", function () {
             .set('Authorization', jwt)
             .send({ git: "something", branch: "origin/master" })
             .end((err, res) => {
-                console.log("🚸 [chai] response /api/build (JWT, invalid) III:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(400);
                 done();
             });
     }, 20000);
@@ -148,9 +142,7 @@ describe("Builder (JWT)", function () {
             .set('Authorization', jwt)
             .send({ owner: dynamic_owner_id, branch: "origin/master" })
             .end((err, res) => {
-                console.log("🚸 [chai] response /api/build (JWT, invalid) IV:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(400);
                 done();
             });
     }, 20000);
@@ -161,9 +153,7 @@ describe("Builder (JWT)", function () {
             .set('Authorization', jwt)
             .send({ owner: dynamic_owner_id, git: "origin/master" })
             .end((err, res) => {
-                console.log("🚸 [chai] response /api/build (JWT, invalid) V:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(400);
                 done();
             });
     }, 20000);
