@@ -86,15 +86,8 @@ describe("Device", function() {
       apikey,
       ws,
       function(success, response) {
-        if (success === false) {
-          console.log("[spec] registration error response:", response);
-          if (response.indexOf("owner_found_but_no_key") !== -1) {
-            done();
-            return;
-          }
-        }
+        expect(success).to.equal(true);
         JRS.udid = response.registration.udid;
-        expect(success).to.be.true;
         expect(JRS.udid).to.be.a('string');
         done();
       });
@@ -209,13 +202,7 @@ describe("Device", function() {
       ws,
       function(success, response) {
         JRS3.udid = response.registration.udid;
-        if (success === false) {
-          console.log("[spec] registration error response:", response);
-          if (response.indexOf("owner_found_but_no_key") !== -1) {
-            done();
-            return;
-          }
-        }
+        expect(success).to.equal(true);
         done();
       });
   }, 15000); // register
