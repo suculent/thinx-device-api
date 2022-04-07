@@ -305,7 +305,7 @@ describe("Meshes (JWT)", function () {
         agent
             .post('/api/mesh/delete')
             .set('Authorization', jwt)
-            .send(JSON.stringgify(ro))
+            .send(JSON.stringify(ro))
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/mesh/delete (jwt, already deleted) response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
