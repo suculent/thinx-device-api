@@ -107,7 +107,6 @@ services:
       context: .
       args:
         - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
-        - 'COUCHDB_PASSWORD=${COUCHDB_PASS}'
         - 'COUCHDB_PASS=${COUCHDB_PASS}'
         - 'COUCHDB_USER=${COUCHDB_USER}'
         - 'ENVIRONMENT=${ENVIRONMENT}'
@@ -125,7 +124,6 @@ services:
     environment:
       - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
       - 'COUCHDB_PASS=${COUCHDB_PASS}'
-      - 'COUCHDB_PASSWORD=${COUCHDB_PASS}'
       - 'COUCHDB_USER=${COUCHDB_USER}'
       - 'ENVIRONMENT=${ENVIRONMENT}'
       - 'ENTERPRISE=${ENTERPRISE}'

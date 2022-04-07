@@ -48,7 +48,7 @@ describe("Owner", function () {
 
   it("(03) should be able to fetch owner profile", function (done) {
     user.profile(owner, (success, response) => {
-      console.log("[spec] (03) user profile:", JSON.stringify(response, null, 4));
+      //console.log("[spec] (03) user profile:", JSON.stringify(response, null, 4));
       expect(response).to.be.an('object');
       expect(success).to.equal(true);
       done();
