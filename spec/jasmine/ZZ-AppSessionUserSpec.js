@@ -40,12 +40,22 @@ describe("User Routes", function () {
   });
 
   it("POST /api/gdpr (unauthenticated)", function (done) {
-    //console.log("🚸 [chai] POST /api/gdpr (unauthenticated) request");
     chai.request(thx.app)
       .post('/api/gdpr')
       .send({})
       .end((err, res) => {
-        // console.log("🚸 [chai] POST /api/gdpr response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/gdpr (unauthenticated)", function (done) {
+    chai.request(thx.app)
+      .post('/api/gdpr')
+      .send({ gdpr: true })
+      .end((err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
@@ -245,12 +255,13 @@ describe("User Routes", function () {
         // just test-added
         agent
           .post('/api/gdpr')
-          .send({ gdpr_consent: true, token: token })
+          .send({ gdpr: true, token: token })
           .end((err, res) => {
             console.log("🚸 [chai] POST /api/gdpr (token) response:", res.text, " status:", res.status);
             expect(res.status).to.equal(200);
             expect(res.text).to.be.a('string');
-            //expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
+            // {"success":false,"status":"invalid_protocol_update_key_missing"} // WTF?
+            
 
             agent
               .post('/api/login')
