@@ -170,7 +170,8 @@ describe("ENV Vars (JWT)", function () {
         console.log("[chai] POST /api/user/env/list (JWT, valid) response:", res.text, res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        //expect(res.text).to.equal('{"env_vars":[]}');
+        // {"env_vars":[]} - add failed
+        // {"env_vars":["env-name","env-name"]} - add failed, missing value!
         done();
       });
   }, 20000);
