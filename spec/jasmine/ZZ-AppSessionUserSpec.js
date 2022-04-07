@@ -339,12 +339,11 @@ describe("User Routes", function () {
   }, 20000);
 
   // there is no login here, so JWT for this is missing
-  it("POST /api/gdpr/revoke", function 
-  (done) {
+  it("POST /api/gdpr/revoke", function  (done) {
     console.log("🚸 [chai] POST /api/gdpr/revoke (jwt, invalid) request");
     chai.request(thx.app)
       .post('/api/gdpr/revoke')
-      .post('/api/gdpr/transfer')
+      .set('Authorization', jwt)
       .send({})
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/gdpr/revoke (jwt, invalid) response:", res.text, " status:", res.status);

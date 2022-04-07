@@ -117,6 +117,7 @@ describe("Sources (JWT)", function () {
             .send(mock_source)
             .end((err, res) => {
                 expect(res.text).to.be.a('string');
+                console.log("[spec] POST /api/user/source (valid) response:", res.text);
                 let r = JSON.parse(res.text);
                 source_for_revocation = r.source_id;
                 expect(res.status).to.equal(200);
@@ -126,6 +127,7 @@ describe("Sources (JWT)", function () {
     }, 20000);
 
     it("POST /api/user/source/revoke", function (done) {
+        expect(source_for_revocation !== 0);
         chai.request(thx.app)
             .post('/api/user/source/revoke')
             .set('Authorization', jwt)
