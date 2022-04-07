@@ -216,12 +216,9 @@ describe("Device", function() {
       ws,
       function(success, response) {
         console.log("[spec] registration response:", response);
+        expect(response).to.equal('apikey_not_found');
         expect(success).to.equal(false);        
-        if (response.indexOf("owner_found_but_no_key") !== -1) {
-          done();
-        } else {
-          expect(false);
-        }
+        done();
       });
   }, 15000); // register
 
