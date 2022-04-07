@@ -168,6 +168,56 @@ describe("User Routes", function () {
       });
   }, 20000);
 
+  it("POST /api/gdpr (unauthenticated)", function (done) {
+    chai.request(thx.app)
+      .post('/api/gdpr')
+      .send({})
+      .end((err, res) => {
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/gdpr (unauthenticated)", function (done) {
+    chai.request(thx.app)
+      .post('/api/gdpr')
+      .send({ gdpr: true })
+      .end((err, res) => {
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/gdpr/transfer", function (done) {
+    console.log("🚸 [chai] request /api/gdpr/transfer");
+    chai.request(thx.app)
+      .post('/api/gdpr/transfer')
+      .send({})
+      .end((err, res) => {
+        console.log("🚸 [chai] response /api/gdpr/transfer:", res.text, " status:", res.status);
+        expect(res.status).to.equal(403);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/gdpr/revoke", function (done) {
+    console.log("🚸 [chai] POST /api/gdpr/revoke request");
+    chai.request(thx.app)
+      .post('/api/gdpr/revoke')
+      .send({})
+      .end((err, res) => {
+        console.log("🚸 [chai] POST /api/gdpr/revoke response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(403);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
   it("POST /api/user/password/reset (noauth)", function (done) {
     chai.request(thx.app)
       .post('/api/user/password/reset')
