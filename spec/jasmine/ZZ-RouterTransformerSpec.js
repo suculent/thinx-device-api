@@ -84,15 +84,15 @@ describe("Transformer (JWT)", function () {
       });
   }, 20000);
 
-  it("POST /api/transformer/run (JWT, valid)", function (done) {
+  it("POST /api/transformer/run (JWT, valid, trans)", function (done) {
 
     agent
       .get('/api/user/devices')
       .set('Authorization', jwt)
       .end((err, res) => {
-        console.log("🚸 [chai] GET /api/user/devices (JWT) response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] GET /api/user/devices (JWT, valid, trans) response:", res.text, " status:", res.status);
         let r = JSON.parse(res.text);
-        let udid = r[0].udid;
+        let udid = r.devices[0].udid;
         // TODO: Store UDID!
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
