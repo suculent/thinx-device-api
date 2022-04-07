@@ -261,12 +261,11 @@ describe("Devices (JWT)", function () {
         .set('Authorization', jwt)
         .send({ alias: "device-mesh-alias", owner_id: envi.dynamic.owner, mesh_id: 'device-mesh-id' })
         .end((err, res) => {
-            console.log("🚸 [chai] POST /api/mesh/create (jwt, valid) response:", res.text, " status:", res.status);
             let r = JSON.parse(res.text);
             mesh_id = r.mesh_id;
-            //expect(r.mesh_id).to.exist;
             expect(res.status).to.equal(200);
             expect(res.text).to.be.a('string');
+            expect(res.text).to.equal('{"success":true,"mesh_ids":{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}}');
             done();
         });
 }, 20000);

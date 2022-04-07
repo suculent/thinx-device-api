@@ -213,12 +213,12 @@ describe("Meshes (JWT)", function () {
             .set('Authorization', jwt)
             .send({ alias: "mock-mesh-alias", owner_id: envi.dynamic.owner, mesh_id: 'mock-mesh-id' })
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/mesh/create (jwt, valid) response:", res.text, " status:", res.status);
                 let r = JSON.parse(res.text);
                 mesh_id = r.mesh_id;
                 //expect(r.mesh_id).to.exist;
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":true,"mesh_ids":{"mesh_id":"mock-mesh-id","alias":"mock-mesh-alias"}}');
                 done();
             });
     }, 20000);
@@ -229,25 +229,26 @@ describe("Meshes (JWT)", function () {
             .set('Authorization', jwt)
             .send({ alias: "mock-mesh-alias", owner_id: envi.dynamic.owner, mesh_id: 'mock-mesh-id' })
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/mesh/create (jwt, valid, already exists) response:", res.text, " status:", res.status);
+                //console.log("🚸 [chai] POST /api/mesh/create (jwt, valid, already exists) response:", res.text, " status:", res.status);
                 let r = JSON.parse(res.text);
-                mesh_id = r.mesh_id;
-                //expect(r.mesh_id).to.exist;
+                mesh_id = r.mesh_ids.mesh_id;
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":true,"mesh_ids":{"mesh_id":"mock-mesh-id","alias":"mock-mesh-alias"}}');                
                 done();
             });
     }, 20000);
 
+    // does not guard against already existing!
     it("POST /api/mesh/create (jwt, valid 2)", function (done) {
         agent
             .post('/api/mesh/create')
             .set('Authorization', jwt)
-            .send({ alias: "mock-mesh-alias-2", owner_id: envi.dynamic.owner, mesh_id: 'mock-mesh-id' })
+            .send({ alias: "mock-mesh-alias-2", owner_id: envi.dynamic.owner, mesh_id: 'mock-mesh-id-2' })
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/mesh/create (jwt, valid 2) response:", res.text, " status:", res.status);
                 let r = JSON.parse(res.text);
-                mesh_id = r.mesh_id;
+                mesh_id = r.mesh_ids.mesh_id;
                 //expect(r.mesh_id).to.exist;
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
@@ -279,7 +280,7 @@ describe("Meshes (JWT)", function () {
             });
     }, 20000);
 
-    it("POST /api/mesh/delete (jwt, valid)", function (done) {
+    it("POST /api/mesh/delete (jwt, invalid)", function (done) {
         expect(mesh_id !== null);
         let ro = {
             mesh_ids: [mesh_id],
@@ -296,7 +297,7 @@ describe("Meshes (JWT)", function () {
             });
     }, 20000);
 
-    it("POST /api/mesh/delete (jwt, already deleted)", function (done) {
+    it("POST /api/mesh/delete (jwt, invalid, already deleted)", function (done) {
         expect(mesh_id !== null);
         let ro = {
             mesh_ids: [mesh_id],
@@ -306,6 +307,40 @@ describe("Meshes (JWT)", function () {
             .post('/api/mesh/delete')
             .set('Authorization', jwt)
             .send(JSON.stringify(ro))
+            .end((err, res) => {
+                console.log("🚸 [chai] POST /api/mesh/delete (jwt, already deleted) response:", res.text, " status:", res.status);
+                expect(res.status).to.equal(200);
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/mesh/delete (jwt, valid)", function (done) {
+        expect(mesh_id !== null);
+        let ro = {
+            mesh_ids: [mesh_id],
+            owner_id: envi.dynamic.owner
+        };
+        agent
+            .post('/api/mesh/delete')
+            .set('Authorization', jwt)
+            .send(ro)
+            .end((err, res) => {
+                console.log("🚸 [chai] POST /api/mesh/delete (jwt, valid) response:", res.text, " status:", res.status);
+                expect(res.status).to.equal(200);
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/mesh/delete (jwt, already deleted)", function (done) {
+        expect(mesh_id !== null);
+        let ro = {
+            mesh_ids: [mesh_id],
+            owner_id: envi.dynamic.owner
+        };
+        agent
+            .post('/api/mesh/delete')
+            .set('Authorization', jwt)
+            .send(ro)
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/mesh/delete (jwt, already deleted) response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
