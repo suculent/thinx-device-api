@@ -66,13 +66,11 @@ describe("Actionable Notification (JWT)", function () {
     }, 20000);
 
     it("POST /api/device/notification (jwt, undefined)", function (done) {
-        console.log("🚸 [chai] POST /api/device/notification");
         chai.request(thx.app)
                 .post('/api/device/notification')
                 .set('Authorization', jwt)
                 .send({ udid: undefined, reply: undefined})
                 .end((err, res) => {
-                    console.log("🚸 [chai] POST /api/device/notification (jwt, undefined udid and reply) response:", res.text, " status:", res.status);
                     expect(res.status).to.equal(200);
                     expect(res.text).to.equal('{"success":false,"status":"missing_udid"}');
                     done();
@@ -80,15 +78,14 @@ describe("Actionable Notification (JWT)", function () {
     }, 20000);
 
     it("POST /api/device/notification (jwt, valid)", function (done) {
-        console.log("🚸 [chai] POST /api/device/notification");
         chai.request(thx.app)
                 .post('/api/device/notification')
                 .set('Authorization', jwt)
                 .send({ udid: envi.udid, reply: "reply"} )
                 .end((err, res) => {
-                    console.log("🚸 [chai] POST /api/device/notification (jwt, valid) response:", res.text, " status:", res.status);
                     expect(res.status).to.equal(200);
-                    //expect(res.text).to.be.a('string');
+                    expect(res.text).to.be.a('string');
+                    expect(res.text).to.equal('{"success":true,"status":"published"}');
                     done();
                 });
     }, 20000);

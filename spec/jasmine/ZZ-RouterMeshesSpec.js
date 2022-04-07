@@ -157,7 +157,6 @@ describe("Meshes (JWT)", function () {
         done();
     });
 
-    // GET /api/mesh/list [cookie auth]
     it("GET /api/mesh/list (jwt, invalid)", function (done) {
         agent
             .get('/api/mesh/list')
@@ -165,8 +164,6 @@ describe("Meshes (JWT)", function () {
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.equal('{"success":true,"mesh_ids":[]}');
-                //expect(res.text).to.be.a('string');
-                //expect(res.text).to.equal('{"success":false,"reason":"OWNER_MISSING"}');
                 done();
             });
     }, 20000);
@@ -197,19 +194,31 @@ describe("Meshes (JWT)", function () {
             });
     }, 20000);
 
-    it("POST /api/mesh/create (jwt, valid)", function (done) {
+    it("POST /api/mesh/create (jwt, semi-valid)", function (done) {
         agent
             .post('/api/mesh/create')
             .set('Authorization', jwt)
             .send({ alias: "mock-mesh-alias", owner_id: envi.dynamic.owner })
             .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"status":"Mesh ID missing in request body."}');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/mesh/create (jwt, valid)", function (done) {
+        agent
+            .post('/api/mesh/create')
+            .set('Authorization', jwt)
+            .send({ alias: "mock-mesh-alias", owner_id: envi.dynamic.owner, mesh_id: 'mock-mesh-id' })
+            .end((err, res) => {
                 console.log("🚸 [chai] POST /api/mesh/create (jwt, valid) response:", res.text, " status:", res.status);
                 let r = JSON.parse(res.text);
                 mesh_id = r.mesh_id;
-                /// mesh_id = ...
+                //expect(r.mesh_id).to.exist;
                 expect(res.status).to.equal(200);
-                //{"success":false,"status":"Owner ID missing in request body."}
-                //expect(res.text).to.be.a('string');
+                expect(res.text).to.be.a('string');
                 done();
             });
     }, 20000);
