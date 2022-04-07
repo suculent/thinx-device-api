@@ -36,6 +36,18 @@ describe("API Key", function() {
     );
   });
 
+  it("(01b) should be able to generate another API Key", function(done) {
+    apikey.create(
+      owner,
+      "sample-key-2",
+      (success, array_or_error) => {
+        expect(success).to.equal(true);
+        expect(array_or_error[0].key).to.be.a('string');
+        done();
+      }
+    );
+  });
+
   it("(01b) should be able to generate Default MQTT API Key", function(done) {
     apikey.create(
       owner,
