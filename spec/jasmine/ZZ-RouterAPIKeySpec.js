@@ -158,7 +158,7 @@ describe("API Keys (JWT)", function () {
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
                 expect(j.revoked).to.be.an('array');
-                console.log(`[chai] API Keys in revocation:", ${j.api_keys} from res ${res.text}`);
+                console.log(`[chai] API Keys in revocation:", ${JSON.stringify(j)} from res ${res.text}`);
                 //expect(aks.length >= 1);
                 done();
             });
