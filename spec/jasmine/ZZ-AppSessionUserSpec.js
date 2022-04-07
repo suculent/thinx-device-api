@@ -329,12 +329,36 @@ describe("User Routes", function () {
       });
   }, 20000);
 
+  it("GET /api/user/logs/audit (jwt)", function (done) {
+    chai.request(thx.app)
+      .get('/api/user/logs/audit')
+      .set('Authorization', jwt)
+      .end((err, res) => {
+        console.log("🚸 [chai] GET /api/user/logs/audit (jwt) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
   it("GET /api/user/logs/build/list", function (done) {
     chai.request(thx.app)
       .get('/api/user/logs/build/list')
       .end((err, res) => {
         console.log("🚸 [chai] GET /api/user/logs/build/list response:", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("GET /api/user/logs/build/list (jwt)", function (done) {
+    chai.request(thx.app)
+      .get('/api/user/logs/build/list')
+      .set('Authorization', jwt)
+      .end((err, res) => {
+        console.log("🚸 [chai] GET /api/user/logs/build/list (jwt) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
       });
@@ -347,6 +371,19 @@ describe("User Routes", function () {
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/user/logs/build response:", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/user/logs/build (jwt)", function (done) {
+    chai.request(thx.app)
+      .post('/api/user/logs/build')
+      .set('Authorization', jwt)
+      .send({})
+      .end((err, res) => {
+        console.log("🚸 [chai] POST /api/user/logs/build (jwt) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
       });
@@ -393,6 +430,20 @@ describe("User Routes", function () {
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/user/chat response:", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/user/chat", function (done) {
+    console.log("🚸 [chai] POST /api/user/chat request");
+    chai.request(thx.app)
+      .post('/api/user/chat')
+      .set('Authorization', jwt)
+      .send({})
+      .end((err, res) => {
+        console.log("🚸 [chai] POST /api/user/chat response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
       });
