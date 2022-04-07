@@ -64,9 +64,8 @@ describe("Transformer (JWT)", function () {
       .set('Authorization', jwt)
       .send({})
       .end((err, res) => {
-        console.log("🚸 [chai] POST /api/transformer/run (JWT, invalid) response:", res.text, " status:", res.status);
-        //{"success":false,"status":"udid_not_found"}  status: 200
-        //expect(res.text).to.equal('{"success":false,"status":"udid_not_found"}'); but rather use valid udid
+        //console.log("🚸 [chai] POST /api/transformer/run (JWT, invalid) response:", res.text, " status:", res.status);
+        expect(res.text).to.equal('{"success":false,"status":"udid_not_found"}'); 
         expect(res.status).to.equal(200);
         done();
       });
@@ -83,6 +82,33 @@ describe("Transformer (JWT)", function () {
         expect(res.text).to.equal('{"success":false,"status":"no_such_device"}');
         done();
       });
+  }, 20000);
+
+  it("POST /api/transformer/run (JWT, valid)", function (done) {
+
+    agent
+      .get('/api/user/devices')
+      .set('Authorization', jwt)
+      .end((err, res) => {
+        console.log("🚸 [chai] GET /api/user/devices (JWT) response:", res.text, " status:", res.status);
+        let r = JSON.parse(res.text);
+        let udid = r[0].udid;
+        // TODO: Store UDID!
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        agent
+          .post('/api/transformer/run')
+          .set('Authorization', jwt)
+          .send({ device_id: udid })
+          .end((err, res) => {
+            console.log("🚸 [chai] POST /api/transformer/run (JWT, invalid) response:", res.text, " status:", res.status);
+            expect(res.text).to.equal('{"success":false,"status":"udid_not_found"}');
+            expect(res.status).to.equal(200);
+            done();
+          });
+      });
+
+
   }, 20000);
 
 });
