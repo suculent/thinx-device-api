@@ -127,6 +127,23 @@ describe("API Keys (JWT)", function () {
             });
     }, 20000);
 
+    it("POST /api/user/apikey (3)", function (done) {
+        chai.request(thx.app)
+            .post('/api/user/apikey')
+            .set('Authorization', jwt)
+            .send({
+                'alias': 'mock-apikey-alias-3'
+            })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                let j = JSON.parse(res.text);
+                expect(j.success).to.equal(true);
+                expect(j.api_key).to.be.a('string');
+                expect(j.hash).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
     // revoke
     it("POST /api/user/apikey/revoke (single)", function (done) {
         expect(created_api_key).not.to.be.null;
