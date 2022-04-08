@@ -185,7 +185,7 @@ describe("Builder (JWT)", function () {
                     })
                     .end((err, res) => {
                         console.log("🚸 [chai] response /api/build (JWT, invalid) V:", res.text, " status:", res.status);
-                        //expect(res.status).to.equal(200);
+                        expect(res.status).to.equal(400);
                         //expect(res.text).to.be.a('string');
                         done();
                     });
@@ -201,7 +201,7 @@ describe("Builder (JWT)", function () {
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
-                console.log("🚸 [chai] response /api/device/envelope (JWT, invalid):", res.text, " status:", res.status);
+                //console.log("🚸 [chai] response /api/device/envelope (JWT, invalid):", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('false');
@@ -215,6 +215,20 @@ describe("Builder (JWT)", function () {
             .post('/api/device/artifacts')
             .set('Authorization', jwt)
             .send({})
+            .end((err, res) => {
+                console.log("🚸 [chai] response /api/device/artifacts (JWT, invalid):", res.text, " status:", res.status);
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"status":"missing_udid"}');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/device/artifacts (JWT, valid)", function (done) {
+        agent
+            .post('/api/device/artifacts')
+            .set('Authorization', jwt)
+            .send({ udid: envi.dynamic.udid })
             .end((err, res) => {
                 console.log("🚸 [chai] response /api/device/artifacts (JWT, invalid):", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
