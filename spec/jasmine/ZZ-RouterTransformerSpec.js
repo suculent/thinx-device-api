@@ -19,9 +19,8 @@ describe("Transformer (noauth)", function () {
         .post('/api/transformer/run')
         .send({})
         .end((_err, res) => {
-          console.log("🚸 [chai] POST /api/transformer/run response:", res.text, " status:", res.status);
-          //expect(res.status).to.equal(200);
-          //expect(res.text).to.be.a('string');
+          //console.log("🚸 [chai] POST /api/transformer/run response:", res.text, " status:", res.status);
+          expect(res.status).to.equal(403);
           done();
         });
     });
@@ -43,13 +42,8 @@ describe("Transformer (JWT)", function () {
       .post('/api/login')
       .send({ username: 'dynamic', password: 'dynamic', remember: false })
       .then(function (res) {
-        console.log(`[chai] Transformer (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res.text, null, 4)}, status: ${res.status}, cookie: ${res.cookie}, cookies: ${res.cookies}`);
-        // expect(res).to.have.cookie('x-thx-core'); we don't really care but the cookie seems not to be here with this name...
         let body = JSON.parse(res.text);
         jwt = 'Bearer ' + body.access_token;
-
-        // TODO: Edit user to add transformer...
-
         done();
       })
       .catch((e) => { console.log(e); });
@@ -87,7 +81,7 @@ describe("Transformer (JWT)", function () {
         expect(j.api_key).to.be.a('string');
         expect(j.hash).to.be.a('string');
         created_api_key = j.hash;
-        console.log("[spec] saving apikey (T1)", j.api_key);
+        console.log("🚸 [chai] saving apikey (T1)", j.api_key);
         done();
       });
   }, 20000);
@@ -99,10 +93,8 @@ describe("Transformer (JWT)", function () {
       .set('Authentication', created_api_key)
       .send({ registration: JRS7 })
       .end((_err, res) => {
-        console.log("🚸 [chai] POST /device/register (jwt, valid) response:", res.text);
         expect(res.status).to.equal(200);
         let r = JSON.parse(res.text);
-        console.log("🚸 [chai response", JSON.stringify(r));
         JRS7.udid = r.registration.udid;
         // TODO: Store UDID!
         expect(res.text).to.be.a('string');
@@ -111,29 +103,30 @@ describe("Transformer (JWT)", function () {
   }, 20000);
 
   it("POST /api/device/edit", function (done) {
-    console.log("🚸 [chai] POST /api/device/edit (JWT + trans, udid undefined)");
     agent
       .post('/api/device/edit')
       .set('Authorization', jwt)
       .send({ changes: { transformers: envi.dynamic.transformers } })
       .end((_err, res) => {
-        console.log("🚸 [chai] POST /api/device/edit (JWT + trans, udid undefined) response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('{"success":false,"message":"changes.udid_undefined"}');
         done();
       });
   }, 20000);
 
   it("POST /api/device/edit", function (done) {
-    console.log("🚸 [chai] POST /api/device/edit (JWT + trans)");
     agent
       .post('/api/device/edit')
       .set('Authorization', jwt)
-      .send({ changes: { transformers: envi.dynamic.transformers, udid: JRS7.udid } })
+      .send({ changes: { info: { transformers: envi.dynamic.transformers }, udid: JRS7.udid } })
       .end((_err, res) => {
-        console.log("🚸 [chai] POST /api/device/edit (JWT + trans) response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        let j = JSON.parse(res.text);
+        expect(j.success).to.equal(true);
+        console.log("🚸 [chai] POST /api/device/edit response", JSON.stringify(j, null, 2));
+        // {"success":true,"message":{"success":true,"change":{"transformers":[{"ufid":"vt:b688d51871191b9f645678b10ce70ec23704ef5c549019b8beeaec9939401756","alias":"Empty","body":"var transformer = function(status, device) { return status };"}],"udid":"64984150-b771-11ec-bf10-f505ba97f5e2","doc":null,"value":null}}} 
         done();
       });
   }, 20000);
@@ -144,7 +137,6 @@ describe("Transformer (JWT)", function () {
       .set('Authorization', jwt)
       .send({})
       .end((_err, res) => {
-        //console.log("🚸 [chai] POST /api/transformer/run (JWT, invalid) response:", res.text, " status:", res.status);
         expect(res.text).to.equal('{"success":false,"status":"udid_not_found"}');
         expect(res.status).to.equal(200);
         done();
@@ -170,7 +162,6 @@ describe("Transformer (JWT)", function () {
       .get('/api/user/devices')
       .set('Authorization', jwt)
       .end((_err, res) => {
-        console.log("🚸 [chai] GET /api/user/devices (JWT, valid, trans) response:", res.text, " status:", res.status);
         let r = JSON.parse(res.text);
 
         /* {
@@ -211,12 +202,8 @@ describe("Transformer (JWT)", function () {
           */
 
         // skip run until device is available; coverage will grow but it should not fail
-        if (r.devices.length == 0) {
-          done();
-          return;
-        }
+        if (r.devices.length == 0) return done();
 
-        // expect(r.devices.length > 0); // Why is there no device registered at this point?
         let udid = r.devices[0].udid; // or JRS7.udid
 
         expect(res.status).to.equal(200);
@@ -227,7 +214,7 @@ describe("Transformer (JWT)", function () {
           .set('Authorization', jwt)
           .send({ device_id: udid })
           .end((__err, __res) => {
-            console.log("🚸 [chai] POST /api/transformer/run (JWT, semi-valid) response:", __res.text, " status:", __res.status);
+            // console.log("🚸 [chai] POST /api/transformer/run (JWT, semi-valid) response:", __res.text, " status:", __res.status);
             /* Responds:
             {
               "success": true,
