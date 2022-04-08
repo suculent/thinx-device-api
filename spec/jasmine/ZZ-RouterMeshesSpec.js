@@ -291,6 +291,7 @@ describe("Meshes (JWT)", function () {
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/mesh/delete (jwt, invalid) response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
+                // {"success":false,"status":"Parameter owner_id missing."}
                 done();
             });
     }, 20000);
@@ -306,8 +307,10 @@ describe("Meshes (JWT)", function () {
             .set('Authorization', jwt)
             .send(JSON.stringify(ro))
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/mesh/delete (jwt, already deleted) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/mesh/delete (jwt, already deleted) response:", res.text, " status:", res.status, "request:", ro);
                 expect(res.status).to.equal(200);
+                //expect(res.text).to.equal();
+                //{"success":false,"status":"Parameter owner_id missing."}
                 done();
             });
     }, 20000);
@@ -342,6 +345,7 @@ describe("Meshes (JWT)", function () {
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.equal('{"success":false,"status":[]}');
+                
                 done();
             });
     }, 20000);

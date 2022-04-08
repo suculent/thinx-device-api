@@ -210,10 +210,10 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .get('/api/user/password/reset')
       .end((err, res) => {
-        console.log("🚸 [chai] GET /api/user/password/reset (noauth, no-email) response:", res.text, " status:", res.status);
+        //console.log("🚸 [chai] GET /api/user/password/reset (noauth, no-email) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"email_not_found"}');
+        expect(res.text).to.equal('{"success":false,"status":"missing_reset_key"}');
         done();
       });
   }, 20000);
