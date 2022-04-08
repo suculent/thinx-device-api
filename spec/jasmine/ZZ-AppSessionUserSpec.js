@@ -266,7 +266,7 @@ describe("User Routes", function () {
       .end((err, res) => {
         console.log("🚸 [chai] GET /api/user/password/reset (noauth, invalid) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
-        expect(res.text).to.be.a('string');
+        expect(res.text).to.be.a('string'); // this is a password set form
         //expect(res.text).to.equal('');
         done();
       });
@@ -279,6 +279,48 @@ describe("User Routes", function () {
       .send({})
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/user/password/set response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('{"success":false,"status":"password_mismatch"}');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/user/password/set (2)", function (done) {
+    console.log("🚸 [chai] POST /api/user/password/set (2) request");
+    chai.request(thx.app)
+      .post('/api/user/password/set')
+      .send({ password: "A", rpassword: "B"})
+      .end((err, res) => {
+        console.log("🚸 [chai] POST /api/user/password/set (2) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('{"success":false,"status":"password_mismatch"}');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/user/password/set (3)", function (done) {
+    console.log("🚸 [chai] POST /api/user/password/set (3) request");
+    chai.request(thx.app)
+      .post('/api/user/password/set')
+      .send({ password: "A", rpassword: "B", reset_key: reset_key})
+      .end((err, res) => {
+        console.log("🚸 [chai] POST /api/user/password/set (3) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('{"success":false,"status":"password_mismatch"}');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/user/password/set (3)", function (done) {
+    console.log("🚸 [chai] POST /api/user/password/set (4) request");
+    chai.request(thx.app)
+      .post('/api/user/password/set')
+      .send({ password: "dynamic", rpassword: "dynamic", reset_key: reset_key})
+      .end((err, res) => {
+        console.log("🚸 [chai] POST /api/user/password/set (4) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"password_mismatch"}');
