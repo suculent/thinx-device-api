@@ -242,4 +242,16 @@ describe("Transformer (JWT)", function () {
 
   }, 20000);
 
+  it("POST /api/user/delete (jwt, last action)", function (done) {
+    chai.request(thx.app)
+      .post('/api/user/delete')
+      .set('Authorization', jwt)
+      .send({ owner: envi.dynamic.owner })
+      .end((_err, res) => {
+        console.log("[chai] POST /api/user/delete (jwt, last action) response:", res.text, "status:", res.status);
+        expect(res.status).to.equal(200);
+        done();
+      });
+  }, 20000);
+
 });
