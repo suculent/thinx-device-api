@@ -62,11 +62,11 @@ describe("Transformer (JWT)", function () {
 
   var created_api_key = null;
 
-  var JRS5 = {
-    mac: "55:55:55:55:55:55",
+  var JRS7 = {
+    mac: "77:77:77:77:77:77",
     firmware: "ZZ-RouterDeviceSpec.js",
     version: "1.0.0",
-    alias: "test-device-5-dynamic",
+    alias: "test-device-7-dynamic",
     owner: envi.dynamic.owner,
     platform: "arduino"
   };
@@ -97,15 +97,29 @@ describe("Transformer (JWT)", function () {
     chai.request(thx.app)
       .post('/device/register')
       .set('Authentication', created_api_key)
-      .send({ registration: JRS5 })
+      .send({ registration: JRS7 })
       .end((err, res) => {
         console.log("🚸 [chai] POST /device/register (jwt, valid) response:", res.text);
         expect(res.status).to.equal(200);
         let r = JSON.parse(res.text);
         console.log("🚸 [chai response", JSON.stringify(r));
-        JRS5.udid = r.registration.udid;
+        JRS7.udid = r.registration.udid;
         // TODO: Store UDID!
         expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/device/edit", function (done) {
+    console.log("🚸 [chai] POST /api/device/edit (JWT + trans)");
+    agent
+      .post('/api/device/edit')
+      .set('Authorization', jwt)
+      .send({ changes: { transformers: envi.dynamic.transformers } })
+      .end((err, res) => {
+        console.log("🚸 [chai] POST /api/device/edit (JWT + trans) response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
         done();
       });
   }, 20000);
@@ -189,7 +203,7 @@ describe("Transformer (JWT)", function () {
         }
 
         // expect(r.devices.length > 0); // Why is there no device registered at this point?
-        let udid = r.devices[0].udid; // or JRS5.udid
+        let udid = r.devices[0].udid; // or JRS7.udid
 
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
