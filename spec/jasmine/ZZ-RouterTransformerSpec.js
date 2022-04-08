@@ -106,7 +106,7 @@ describe("Transformer (JWT)", function () {
     agent
       .post('/api/device/edit')
       .set('Authorization', jwt)
-      .send({ changes: { transformers: envi.dynamic.transformers } })
+      .send({ changes: { info: { transformers: envi.dynamic.transformers } } })
       .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
