@@ -202,6 +202,20 @@ describe("User Routes", function () {
         console.log("🚸 [chai] POST /api/user/password/reset (noauth, no-data) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
+        // {"success":false,"status":"email_not_found"}
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/user/password/reset (noauth, email)", function (done) {
+    chai.request(thx.app)
+      .post('/api/user/password/reset')
+      .send({ email: envi.dynamic.email })
+      .end((err, res) => {
+        console.log("🚸 [chai] POST /api/user/password/reset (noauth, email) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        // {"success":false,"status":"email_not_found"}
         done();
       });
   }, 20000);
@@ -210,7 +224,19 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .get('/api/user/password/reset')
       .end((err, res) => {
-        //console.log("🚸 [chai] GET /api/user/password/reset (noauth, no-email) response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] GET /api/user/password/reset (noauth, no-email) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('{"success":false,"status":"missing_reset_key"}');
+        done();
+      });
+  }, 20000);
+
+  it("GET /api/user/password/reset (noauth, invalid)", function (done) {
+    chai.request(thx.app)
+      .get('/api/user/password/reset?reset_key=invalid')
+      .end((err, res) => {
+        console.log("🚸 [chai] GET /api/user/password/reset (noauth, invalid) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"missing_reset_key"}');

@@ -253,6 +253,7 @@ describe("Builder (JWT)", function () {
     }, 20000);
 
     it("POST /api/device/artifacts (JWT, semi-valid)", function (done) {
+        console.log("🚸 [chai] POST /api/device/artifacts (JWT, semi-valid)");
         agent
             .post('/api/device/artifacts')
             .set('Authorization', jwt)
