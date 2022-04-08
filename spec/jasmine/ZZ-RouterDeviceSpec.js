@@ -436,7 +436,7 @@ describe("Devices (JWT)", function () {
     agent
       .post('/api/device/mesh/detach')
       .set('Authorization', jwt)
-      .send({ udid: JRS5.udid, mesh_id: mesh_id })
+      .send({ udid: JRS5.udid, mesh_id: "device-mesh-id" })
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/mesh/detach (JWT) 2 response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
