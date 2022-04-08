@@ -347,7 +347,8 @@ describe("User Routes", function () {
   it("POST /api/user/profile (noauth)", function (done) {
     //console.log("🚸 [chai] POST /api/user/profile (noauth) request");
     chai.request(thx.app)
-      .post('/api/user/profile')
+      
+    
       .send({})
       .end((err, res) => {
         //console.log("🚸 [chai] POST /api/user/profile (noauth) response:", res.text, " status:", res.status);
@@ -473,6 +474,20 @@ describe("User Routes", function () {
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/user/profile (invalid) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
+        expect(res).to.have.status(403);
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/user/profile (transformer)", function (done) {
+    let changes = { transformers: envi.dynamic.transformers };
+    console.log("🚸 [chai] POST /api/user/profile (transformer) request");
+    agent
+      .post('/api/user/profile')
+      .set('Authorization', jwt)
+      .send(changes)
+      .end((err, res) => {
+        console.log("🚸 [chai] POST /api/user/profile (transformer) response:", res.text, " status:", res.status);
         expect(res).to.have.status(403);
         done();
       });

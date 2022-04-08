@@ -86,7 +86,7 @@ describe("Builder (JWT)", function () {
             .post('/api/login')
             .send({ username: 'dynamic', password: 'dynamic', remember: false })
             .then(function (res) {
-                console.log(`[chai] beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
+                console.log(`[chai] beforeAll POST /api/login (valid) response: ${res}`);
                 expect(res).to.have.cookie('x-thx-core');
                 let body = JSON.parse(res.text);
                 jwt = 'Bearer ' + body.access_token;

@@ -48,6 +48,9 @@ describe("Transformer (JWT)", function () {
         // expect(res).to.have.cookie('x-thx-core'); we don't really care but the cookie seems not to be here with this name...
         let body = JSON.parse(res.text);
         jwt = 'Bearer ' + body.access_token;
+
+        // TODO: Edit user to add transformer...
+        
         done();
       })
       .catch((e) => { console.log(e); });
@@ -143,6 +146,43 @@ describe("Transformer (JWT)", function () {
         console.log("🚸 [chai] GET /api/user/devices (JWT, valid, trans) response:", res.text, " status:", res.status);
         let r = JSON.parse(res.text);
 
+        /* {
+            "success": true,
+            "devices": [
+              {
+                "alias": "****-device-5-dynamic",
+                "auto_update": false,
+                "category": "grey-mint",
+                "checksum": null,
+                "commit": "Unknown",
+                "description": "new device",
+                "environment": {},
+                "env_hash": null,
+                "firmware": "ZZ-RouterDeviceSpec.js",
+                "icon": "01",
+                "lastupdate": "2022-04-08T15:05:22.153Z",
+                "lat": 0,
+                "lon": 0,
+                "mac": "55:55:55:55:55:55",
+                "mesh_ids": [],
+                "owner": "bab692f8c9c78cf64f579406bdf6c6cd2c4d00b3c0c8390387d051495dd95247",
+                "platform": "arduino",
+                "rssi": " ",
+                "snr": " ",
+                "source": null,
+                "station": " ",
+                "status": " ",
+                "tags": [],
+                "timezone_abbr": "UTC",
+                "timezone_offset": 0,
+                "transformers": [],
+                "udid": "4fd4e580-b74d-11ec-9ecb-3f8befeb85e6",
+                "version": "1.0.0"
+              }
+            ]
+          }
+          */
+
         // skip run until device is available; coverage will grow but it should not fail
         if (r.devices.length == 0) {
           done();
@@ -152,16 +192,36 @@ describe("Transformer (JWT)", function () {
         // expect(r.devices.length > 0); // Why is there no device registered at this point?
         let udid = r.devices[0].udid;
         // TODO: Store UDID!
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+
         agent
           .post('/api/transformer/run')
           .set('Authorization', jwt)
           .send({ device_id: udid })
           .end((err, res) => {
             console.log("🚸 [chai] POST /api/transformer/run (JWT, invalid) response FIXME FAILS:", res.text, " status:", res.status);
-            //expect(res.text).to.equal('{"success":false,"status":"udid_not_found"}');
-            //expect(res.status).to.equal(200);
+            /* Responds:
+            {
+              "success": true,
+              "status": {
+                "registration": {
+                  "success": true,
+                  "status": "OK",
+                  "auto_update": false,
+                  "owner": "bab692f8c9c78cf64f579406bdf6c6cd2c4d00b3c0c8390387d051495dd95247",
+                  "alias": "****-device-5-dynamic",
+                  "mesh_ids": [],
+                  "udid": "4fd4e580-b74d-11ec-9ecb-3f8befeb85e6",
+                  "timestamp": 1649430322
+                }
+              }
+            }
+            */
+           let j = JSON.parse(res.text);
+           expect(j.success).to.equal(true);
+           expect(res.status).to.equal(200);
+            //
             done();
           });
       });
