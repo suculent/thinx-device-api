@@ -99,7 +99,7 @@ describe("Device", function() {
       alias: Date().toString(),
       udid: JRS.udid // this device should not be deleted
     };
-    device.edit(owner, changes, (success, response) => {
+    device.edit(changes, (success, response) => {
       expect(success).to.be.true;
       expect(response).to.be.an('object');
       done();
