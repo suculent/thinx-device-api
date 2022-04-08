@@ -18,7 +18,7 @@ describe("Transformer (noauth)", function () {
       chai.request(thx.app)
         .post('/api/transformer/run')
         .send({})
-        .end((err, res) => {
+        .end((_err, res) => {
           console.log("🚸 [chai] POST /api/transformer/run response:", res.text, " status:", res.status);
           //expect(res.status).to.equal(200);
           //expect(res.text).to.be.a('string');
@@ -79,7 +79,7 @@ describe("Transformer (JWT)", function () {
       .send({
         'alias': 'transformer-apikey-alias'
       })
-      .end((err, res) => {
+      .end((_err, res) => {
         //  {"success":true,"api_key":"9b7bd4f4eacf63d8453b32dbe982eea1fb8bbc4fc8e3bcccf2fc998f96138629","hash":"0a920b2e99a917a04d7961a28b49d05524d10cd8bdc2356c026cfc1c280ca22c"}
         expect(res.status).to.equal(200);
         let j = JSON.parse(res.text);
@@ -98,7 +98,7 @@ describe("Transformer (JWT)", function () {
       .post('/device/register')
       .set('Authentication', created_api_key)
       .send({ registration: JRS7 })
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] POST /device/register (jwt, valid) response:", res.text);
         expect(res.status).to.equal(200);
         let r = JSON.parse(res.text);
@@ -111,12 +111,26 @@ describe("Transformer (JWT)", function () {
   }, 20000);
 
   it("POST /api/device/edit", function (done) {
-    console.log("🚸 [chai] POST /api/device/edit (JWT + trans)");
+    console.log("🚸 [chai] POST /api/device/edit (JWT + trans, udid undefined)");
     agent
       .post('/api/device/edit')
       .set('Authorization', jwt)
       .send({ changes: { transformers: envi.dynamic.transformers } })
-      .end((err, res) => {
+      .end((_err, res) => {
+        console.log("🚸 [chai] POST /api/device/edit (JWT + trans, udid undefined) response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/device/edit", function (done) {
+    console.log("🚸 [chai] POST /api/device/edit (JWT + trans)");
+    agent
+      .post('/api/device/edit')
+      .set('Authorization', jwt)
+      .send({ changes: { transformers: envi.dynamic.transformers, udid: JRS7.udid } })
+      .end((_err, res) => {
         console.log("🚸 [chai] POST /api/device/edit (JWT + trans) response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
@@ -129,7 +143,7 @@ describe("Transformer (JWT)", function () {
       .post('/api/transformer/run')
       .set('Authorization', jwt)
       .send({})
-      .end((err, res) => {
+      .end((_err, res) => {
         //console.log("🚸 [chai] POST /api/transformer/run (JWT, invalid) response:", res.text, " status:", res.status);
         expect(res.text).to.equal('{"success":false,"status":"udid_not_found"}');
         expect(res.status).to.equal(200);
@@ -142,7 +156,7 @@ describe("Transformer (JWT)", function () {
       .post('/api/transformer/run')
       .set('Authorization', jwt)
       .send({ device_id: envi.dynamic.udid })
-      .end((err, res) => {
+      .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"no_such_device"}');
@@ -155,7 +169,7 @@ describe("Transformer (JWT)", function () {
     agent
       .get('/api/user/devices')
       .set('Authorization', jwt)
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/devices (JWT, valid, trans) response:", res.text, " status:", res.status);
         let r = JSON.parse(res.text);
 
@@ -212,8 +226,8 @@ describe("Transformer (JWT)", function () {
           .post('/api/transformer/run')
           .set('Authorization', jwt)
           .send({ device_id: udid })
-          .end((err, res) => {
-            console.log("🚸 [chai] POST /api/transformer/run (JWT, semi-valid) response:", res.text, " status:", res.status);
+          .end((__err, __res) => {
+            console.log("🚸 [chai] POST /api/transformer/run (JWT, semi-valid) response:", __res.text, " status:", __res.status);
             /* Responds:
             {
               "success": true,
@@ -231,9 +245,9 @@ describe("Transformer (JWT)", function () {
               }
             }
             */
-            let j = JSON.parse(res.text);
+            let j = JSON.parse(__res.text);
             expect(j.success).to.equal(true);
-            expect(res.status).to.equal(200);
+            expect(__res.status).to.equal(200);
             //
             done();
           });
