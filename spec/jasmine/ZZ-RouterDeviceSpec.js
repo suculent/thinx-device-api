@@ -121,19 +121,6 @@ describe("Devices", function () {
       });
   }, 20000);
 
-  it("POST /api/device/mesh/detach", function (done) {
-    console.log("🚸 [chai] POST /api/device/mesh/detach (noudid)");
-    chai.request(thx.app)
-      .post('/api/device/mesh/detach')
-      .send({ mesh_id: mesh_id })
-      .end((err, res) => {
-        console.log("🚸 [chai] POST /api/device/mesh/detach (noudid) response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
-        done();
-      });
-  }, 20000);
-
   it("POST /api/device/data", function (done) {
     console.log("🚸 [chai] POST /api/device/data");
     chai.request(thx.app)
@@ -410,6 +397,19 @@ describe("Devices (JWT)", function () {
       .send({ udid: envi.dynamic.udid, mesh_id: mesh_id })
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/mesh/attach (JWT) 4 response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/device/mesh/detach", function (done) {
+    console.log("🚸 [chai] POST /api/device/mesh/detach (noudid)");
+    chai.request(thx.app)
+      .post('/api/device/mesh/detach')
+      .send({ mesh_id: mesh_id })
+      .end((err, res) => {
+        console.log("🚸 [chai] POST /api/device/mesh/detach (noudid) response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
