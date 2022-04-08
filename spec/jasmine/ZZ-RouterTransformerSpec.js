@@ -26,7 +26,6 @@ describe("Transformer (noauth)", function () {
         });
     });
   }, 20000);
-
 });
 
 //
@@ -50,7 +49,7 @@ describe("Transformer (JWT)", function () {
         jwt = 'Bearer ' + body.access_token;
 
         // TODO: Edit user to add transformer...
-        
+
         done();
       })
       .catch((e) => { console.log(e); });
@@ -190,8 +189,8 @@ describe("Transformer (JWT)", function () {
         }
 
         // expect(r.devices.length > 0); // Why is there no device registered at this point?
-        let udid = r.devices[0].udid;
-        // TODO: Store UDID!
+        let udid = r.devices[0].udid; // or JRS5.udid
+
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
 
@@ -200,7 +199,7 @@ describe("Transformer (JWT)", function () {
           .set('Authorization', jwt)
           .send({ device_id: udid })
           .end((err, res) => {
-            console.log("🚸 [chai] POST /api/transformer/run (JWT, invalid) response FIXME FAILS:", res.text, " status:", res.status);
+            console.log("🚸 [chai] POST /api/transformer/run (JWT, semi-valid) response:", res.text, " status:", res.status);
             /* Responds:
             {
               "success": true,
@@ -218,14 +217,13 @@ describe("Transformer (JWT)", function () {
               }
             }
             */
-           let j = JSON.parse(res.text);
-           expect(j.success).to.equal(true);
-           expect(res.status).to.equal(200);
+            let j = JSON.parse(res.text);
+            expect(j.success).to.equal(true);
+            expect(res.status).to.equal(200);
             //
             done();
           });
       });
-
 
   }, 20000);
 

@@ -347,8 +347,7 @@ describe("User Routes", function () {
   it("POST /api/user/profile (noauth)", function (done) {
     //console.log("🚸 [chai] POST /api/user/profile (noauth) request");
     chai.request(thx.app)
-      
-    
+      .post('/api/user/profile')
       .send({})
       .end((err, res) => {
         //console.log("🚸 [chai] POST /api/user/profile (noauth) response:", res.text, " status:", res.status);
@@ -488,7 +487,7 @@ describe("User Routes", function () {
       .send(changes)
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/user/profile (transformer) response:", res.text, " status:", res.status);
-        expect(res).to.have.status(403);
+        expect(res).to.have.status(200);
         done();
       });
   }, 20000);
