@@ -58,6 +58,56 @@ describe("Transformer (JWT)", function () {
     done();
   });
 
+  var created_api_key = null;
+
+  var JRS5 = {
+    mac: "55:55:55:55:55:55",
+    firmware: "ZZ-RouterDeviceSpec.js",
+    version: "1.0.0",
+    alias: "test-device-5-dynamic",
+    owner: envi.dynamic.owner,
+    platform: "arduino"
+  };
+
+  // create
+  it("POST /api/user/apikey (T1)", function (done) {
+    chai.request(thx.app)
+      .post('/api/user/apikey')
+      .set('Authorization', jwt)
+      .send({
+        'alias': 'transformer-apikey-alias'
+      })
+      .end((err, res) => {
+        //  {"success":true,"api_key":"9b7bd4f4eacf63d8453b32dbe982eea1fb8bbc4fc8e3bcccf2fc998f96138629","hash":"0a920b2e99a917a04d7961a28b49d05524d10cd8bdc2356c026cfc1c280ca22c"}
+        expect(res.status).to.equal(200);
+        let j = JSON.parse(res.text);
+        expect(j.success).to.equal(true);
+        expect(j.api_key).to.be.a('string');
+        expect(j.hash).to.be.a('string');
+        created_api_key = j.hash;
+        console.log("[spec] saving apikey (T1)", j.api_key);
+        done();
+      });
+  }, 20000);
+
+  it("POST /device/register (jwt, valid)", function (done) {
+
+    chai.request(thx.app)
+      .post('/device/register')
+      .set('Authentication', created_api_key)
+      .send({ registration: JRS5 })
+      .end((err, res) => {
+        console.log("🚸 [chai] POST /device/register (jwt, valid) response:", res.text);
+        expect(res.status).to.equal(200);
+        let r = JSON.parse(res.text);
+        console.log("🚸 [chai response", JSON.stringify(r));
+        JRS5.udid = r.registration.udid;
+        // TODO: Store UDID!
+        expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
   it("POST /api/transformer/run (JWT, invalid)", function (done) {
     agent
       .post('/api/transformer/run')
@@ -65,7 +115,7 @@ describe("Transformer (JWT)", function () {
       .send({})
       .end((err, res) => {
         //console.log("🚸 [chai] POST /api/transformer/run (JWT, invalid) response:", res.text, " status:", res.status);
-        expect(res.text).to.equal('{"success":false,"status":"udid_not_found"}'); 
+        expect(res.text).to.equal('{"success":false,"status":"udid_not_found"}');
         expect(res.status).to.equal(200);
         done();
       });

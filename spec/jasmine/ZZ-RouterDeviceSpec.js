@@ -180,6 +180,8 @@ describe("Devices (JWT)", function () {
     platform: "arduino"
   };
 
+  let created_api_key = null;
+
   beforeAll((done) => {
     agent = chai.request.agent(thx.app);
     agent
@@ -195,12 +197,12 @@ describe("Devices (JWT)", function () {
       .catch((e) => { console.log(e); });
   });
 
-  it("POST /api/user/apikey (X)", function (done) {
+  it("POST /api/user/apikey (D)", function (done) {
     chai.request(thx.app)
       .post('/api/user/apikey')
       .set('Authorization', jwt)
       .send({
-        'alias': 'mock-apikey-alias'
+        'alias': 'device-apikey-alias'
       })
       .end((err, res) => {
         //  {"success":true,"api_key":"9b7bd4f4eacf63d8453b32dbe982eea1fb8bbc4fc8e3bcccf2fc998f96138629","hash":"0a920b2e99a917a04d7961a28b49d05524d10cd8bdc2356c026cfc1c280ca22c"}
@@ -210,24 +212,23 @@ describe("Devices (JWT)", function () {
         expect(j.api_key).to.be.a('string');
         expect(j.hash).to.be.a('string');
         created_api_key = j.hash;
-        console.log("[spec] saving apikey (1)", j.api_key);
+        console.log("[spec] saving apikey (D)", j.api_key);
         done();
       });
   }, 20000);
 
-  it("POST /device/register (jwt, valid)", function (done) {
+  it("POST /device/register (jwt, valid) D", function (done) {
 
     chai.request(thx.app)
       .post('/device/register')
       .set('Authentication', created_api_key)
       .send({ registration: JRS5 })
       .end((err, res) => {
-        console.log("🚸 [chai] POST /device/register (jwt, valid) response:", res.text);
+        console.log("🚸 [chai] POST /device/register (jwt, valid) D response:", res.text);
         expect(res.status).to.equal(200);
         let r = JSON.parse(res.text);
-        console.log("🚸 [chai response", JSON.stringify(r));
+        console.log("🚸 [chai] POST /device/register (jwt, valid) D response:", JSON.stringify(r));
         JRS5.udid = r.registration.udid;
-        // TODO: Store UDID!
         expect(res.text).to.be.a('string');
         done();
       });
