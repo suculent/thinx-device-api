@@ -16,6 +16,7 @@ describe("Meshes (noauth)", function () {
     beforeAll((done) => {
         thx = new THiNX();
         thx.init(() => {
+            console.log("🚸 [chai] Initialized Meshes (noauth)...");
             done();
         });
     });
@@ -146,6 +147,7 @@ describe("Meshes (JWT)", function () {
             .then(function (res) {
                 let body = JSON.parse(res.text);
                 jwt = 'Bearer ' + body.access_token;
+                console.log("🚸 [chai] Initialized Meshes (JWT)...");
                 done();
             })
             .catch((e) => { console.log(e); });
