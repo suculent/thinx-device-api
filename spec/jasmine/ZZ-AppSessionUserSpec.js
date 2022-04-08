@@ -45,7 +45,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .post('/api/gdpr')
       .send({})
-      .end((err, res) => {
+      .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
@@ -57,7 +57,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .post('/api/gdpr')
       .send({ gdpr: true })
-      .end((err, res) => {
+      .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
@@ -70,7 +70,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .post('/api/gdpr/transfer')
       .send({})
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] response /api/gdpr/transfer (noauth, invalid):", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
         //expect(res.text).to.be.a('string');
@@ -83,7 +83,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .post('/api/gdpr/revoke')
       .send({})
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] POST /api/gdpr/revoke response:", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
         //expect(res.text).to.be.a('string');
@@ -99,7 +99,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .post('/api/user/create')
       .send({})
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] POST /api/user/create (missing e-mail) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
@@ -113,7 +113,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .post('/api/user/create')
       .send(user_info)
-      .end((err, res) => {
+      .end((_err, res) => {
         //console.log("🚸 [chai] POST /api/user/create (valid body) response:", res.text, " status:", res.status);
         // {"success":true,"status":"6975d3c5849fc130e689f2cae0abe51a8fd24f496810bee3c0bcf531dd53be0c"}
         expect(res.text).to.be.a('string');
@@ -127,21 +127,21 @@ describe("User Routes", function () {
         //console.log("🚸 [chai] GET /api/user/activate (valid body) request:", rurl);
         chai.request(thx.app)
           .get(rurl)
-          .end((err, res) => {
+          .end((__err, __res) => {
             //console.log("🚸 [chai] GET /api/user/activate (valid body) response:", res.text, " status:", res.status);
-            expect(res.status).to.equal(200);
-            expect(res.text).to.be.a('string'); // <html>
-            expect(res).to.be.html;
+            expect(__res.status).to.equal(200);
+            expect(__res.text).to.be.a('string'); // <html>
+            expect(__res).to.be.html;
 
             console.log("🚸 [chai] POST /api/user/password/set (after activation)");
             chai.request(thx.app)
               .post('/api/user/password/set')
               .send({ password: 'dynamic', rpassword: 'dynamic', activation: dynamic_activation_code })
-              .end((err, res) => {
+              .end((___err, ___res) => {
                 //console.log("🚸 [chai] POST /api/user/password/set (after activation) response:", res.text, " status:", res.status);
-                expect(res.status).to.equal(200);
-                expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":true,"status":"password_reset_successful"}');
+                expect(___res.status).to.equal(200);
+                expect(___res.text).to.be.a('string');
+                expect(___res.text).to.equal('{"success":true,"status":"password_reset_successful"}');
                 done();
               });
           });
@@ -152,7 +152,7 @@ describe("User Routes", function () {
   it("GET /api/user/activate (noauth)", function (done) {
     chai.request(thx.app)
       .get('/api/user/activate')
-      .end((err, res) => {
+      .end((_err, res) => {
         // console.log("🚸 [chai] POST /api/user/activate (missing key) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.equal('{"success":false,"status":"activation_key_missing"}');
@@ -164,7 +164,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .post('/api/user/delete')
       .send({})
-      .end((err, res) => {
+      .end((_err, res) => {
         //console.log("🚸 [chai] POST /api/user/delete response:", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
         //expect(res.text).to.be.a('string');
@@ -176,7 +176,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .post('/api/gdpr')
       .send({})
-      .end((err, res) => {
+      .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
@@ -188,7 +188,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .post('/api/gdpr')
       .send({ gdpr: true })
-      .end((err, res) => {
+      .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
@@ -200,7 +200,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .post('/api/user/password/reset')
       .send({})
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] POST /api/user/password/reset (noauth, no-data) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
@@ -213,7 +213,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .post('/api/user/password/reset')
       .send({ email: envi.dynamic.email })
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] POST /api/user/password/reset (noauth, email) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         let j = JSON.parse(res.text);
@@ -227,7 +227,7 @@ describe("User Routes", function () {
   it("GET /api/user/password/reset (noauth, no-email)", function (done) {
     chai.request(thx.app)
       .get('/api/user/password/reset')
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/password/reset (noauth, no-email) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
@@ -239,7 +239,7 @@ describe("User Routes", function () {
   it("GET /api/user/password/reset (noauth, invalid)", function (done) {
     chai.request(thx.app)
       .get('/api/user/password/reset?reset_key=invalid')
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/password/reset (noauth, invalid) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
@@ -251,7 +251,7 @@ describe("User Routes", function () {
   it("GET /api/user/password/reset (noauth, invalid)", function (done) {
     chai.request(thx.app)
       .get('/api/user/password/reset?reset_key=invalid?owner='+envi.dynamic.owner)
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/password/reset (noauth, invalid) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
@@ -263,7 +263,7 @@ describe("User Routes", function () {
   it("GET /api/user/password/reset (noauth, invalid)", function (done) {
     chai.request(thx.app)
       .get('/api/user/password/reset?reset_key='+reset_key+'&owner='+envi.dynamic.owner)
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/password/reset (noauth, invalid) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string'); // this is a password set form
@@ -277,7 +277,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .post('/api/user/password/set')
       .send({})
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] POST /api/user/password/set response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
@@ -291,7 +291,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .post('/api/user/password/set')
       .send({ password: "A", rpassword: "B"})
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] POST /api/user/password/set (2) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
@@ -305,7 +305,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .post('/api/user/password/set')
       .send({ password: "A", rpassword: "B", reset_key: reset_key})
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] POST /api/user/password/set (3) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
@@ -319,7 +319,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .post('/api/user/password/set')
       .send({ password: "dynamic", rpassword: "dynamic", reset_key: reset_key})
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] POST /api/user/password/set (4) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
@@ -336,7 +336,7 @@ describe("User Routes", function () {
     //console.log("🚸 [chai] GET /api/user/profile (noauth) request ");
     chai.request(thx.app)
       .get('/api/user/profile')
-      .end((err, res) => {
+      .end((_err, res) => {
         //console.log("🚸 [chai] GET /api/user/profile (noauth) response status:", res.status);
         expect(res.status).to.equal(403);
         //expect(res.text).to.be.a('string');
@@ -349,7 +349,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .post('/api/user/profile')
       .send({})
-      .end((err, res) => {
+      .end((_err, res) => {
         //console.log("🚸 [chai] POST /api/user/profile (noauth) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
         //expect(res.text).to.be.a('string');
@@ -380,22 +380,22 @@ describe("User Routes", function () {
         agent
           .post('/api/gdpr')
           .send({ gdpr: true, token: token })
-          .end((err, res) => {
-            console.log("🚸 [chai] POST /api/gdpr (token) response:", res.text, " status:", res.status);
-            expect(res.status).to.equal(200);
-            expect(res.text).to.be.a('string');
+          .end((_err, _res) => {
+            console.log("🚸 [chai] POST /api/gdpr (token) response:", _res.text, " status:", _res.status);
+            expect(_res.status).to.equal(200);
+            expect(_res.text).to.be.a('string');
             // {"success":false,"status":"invalid_protocol_update_key_missing"} // WTF?
 
             agent
               .post('/api/login')
               .send({ token: token })
-              .end((err, res) => {
-                expect(res.status).to.equal(200);
+              .end((_err1, res1) => {
+                expect(res1.status).to.equal(200);
 
                 return agent
                   .get('/api/user/profile')
                   .set('Authorization', jwt)
-                  .end((err, res2) => {
+                  .end((__err, res2) => {
                     expect(res2.status).to.equal(200);
                     expect(res2.text).to.be.a('string');
                     let owner_data = JSON.parse(res2.text);
@@ -419,7 +419,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .post('/api/gdpr/transfer')
       .send({})
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] response /api/gdpr/transfer (jwt, invalid):", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
         //expect(res.text).to.be.a('string');
@@ -434,7 +434,7 @@ describe("User Routes", function () {
       .post('/api/gdpr/revoke')
       .set('Authorization', jwt)
       .send({})
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] POST /api/gdpr/revoke (jwt, invalid) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
@@ -448,7 +448,7 @@ describe("User Routes", function () {
     agent
       .get('/api/user/profile')
       .set('Authorization', jwt)
-      .end((err, res) => {
+      .end((_err, res) => {
         expect(res.status).to.equal(200);
         done();
       });
@@ -470,7 +470,7 @@ describe("User Routes", function () {
     agent
       .post('/api/user/profile')
       .send({})
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] POST /api/user/profile (invalid) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
         expect(res).to.have.status(403);
@@ -485,7 +485,7 @@ describe("User Routes", function () {
       .post('/api/user/profile')
       .set('Authorization', jwt)
       .send(changes)
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] POST /api/user/profile (transformer) response:", res.text, " status:", res.status);
         expect(res).to.have.status(200);
         done();
@@ -500,7 +500,7 @@ describe("User Routes", function () {
   it("GET /api/user/logs/audit", function (done) {
     chai.request(thx.app)
       .get('/api/user/logs/audit')
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/logs/audit response:", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
         //expect(res.text).to.be.a('string');
@@ -512,7 +512,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .get('/api/user/logs/audit')
       .set('Authorization', jwt)
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/logs/audit (jwt) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
@@ -523,7 +523,7 @@ describe("User Routes", function () {
   it("GET /api/user/logs/build/list", function (done) {
     chai.request(thx.app)
       .get('/api/user/logs/build/list')
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/logs/build/list response:", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
         //expect(res.text).to.be.a('string');
@@ -535,7 +535,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .get('/api/user/logs/build/list')
       .set('Authorization', jwt)
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/logs/build/list (jwt) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
@@ -547,7 +547,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .post('/api/user/logs/build')
       .send({})
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] POST /api/user/logs/build response:", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
         //expect(res.text).to.be.a('string');
@@ -560,7 +560,7 @@ describe("User Routes", function () {
       .post('/api/user/logs/build')
       .set('Authorization', jwt)
       .send({})
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] POST /api/user/logs/build (jwt) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
@@ -575,7 +575,7 @@ describe("User Routes", function () {
   it("GET /api/user/stats", function (done) {
     chai.request(thx.app)
       .get('/api/user/stats')
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/stats response:", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
         //expect(res.text).to.be.a('string');
@@ -588,7 +588,7 @@ describe("User Routes", function () {
     agent
       .get('/api/user/stats')
       .set('Authorization', jwt)
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/stats (jwt) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
@@ -606,7 +606,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .post('/api/user/chat')
       .send({})
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] POST /api/user/chat response:", res.text, " status:", res.status);
         expect(res.status).to.equal(403);
         //expect(res.text).to.be.a('string');
@@ -620,7 +620,7 @@ describe("User Routes", function () {
       .post('/api/user/chat')
       .set('Authorization', jwt)
       .send({})
-      .end((err, res) => {
+      .end((_err, res) => {
         console.log("🚸 [chai] POST /api/user/chat response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
