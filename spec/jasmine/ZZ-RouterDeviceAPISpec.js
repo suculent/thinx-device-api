@@ -5,6 +5,7 @@ const THiNX = require("../../thinx-core.js");
 let chai = require('chai');
 var expect = require('chai').expect;
 let chaiHttp = require('chai-http');
+var envi = require("../_envi.json");
 chai.use(chaiHttp);
 
 let thx;
@@ -281,12 +282,60 @@ describe("Device + API (JWT+Key)", function () {
             });
     }, 20000);
 
-    it("POST /api/device/detail (session, invalid)", function (done) {
+    it("POST /api/device/envs (session, valid)", function (done) {
+        agent
+            .post('/api/device/envs')
+            .send({ udid: envi.udid })
+            .end((err, res) => {
+                console.log("🚸 [chai] POST /api/device/envs (session, valid) response:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/device/envs (session, valid) 2", function (done) {
+        agent
+            .post('/api/device/envs')
+            .send({ udid: envi.dynamic.udid })
+            .end((err, res) => {
+                console.log("🚸 [chai] POST /api/device/envs (session, valid) 2 response:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/device/detail (session, valid)", function (done) {
         agent
             .post('/api/device/detail')
             .send({})
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/device/detail (session, invalid) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/device/detail (session, valid) response:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/device/detail (session, dynamic)", function (done) {
+        agent
+            .post('/api/device/detail')
+            .send({ udid: envi.dynamic.udid })
+            .end((err, res) => {
+                console.log("🚸 [chai] POST /api/device/detail (session, dynamic) response:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/device/detail (session, udid) 2", function (done) {
+        agent
+            .post('/api/device/detail')
+            .send({ udid: envi.udid })
+            .end((err, res) => {
+                console.log("🚸 [chai] POST /api/device/detail (session, udid) 2 response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
