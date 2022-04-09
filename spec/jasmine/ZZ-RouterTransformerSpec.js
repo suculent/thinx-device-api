@@ -248,8 +248,8 @@ describe("Transformer (JWT)", function () {
       .set('Authorization', jwt)
       .send({ owner: envi.dynamic.owner })
       .end((_err, res) => {
-        console.log("[chai] POST /api/user/delete (jwt, last action) response:", res.text, "status:", res.status);
         expect(res.status).to.equal(200);
+        expect(res.text).to.equal('{"success":true,"status":"deleted"}');
         done();
       });
   }, 20000);
