@@ -124,7 +124,7 @@ describe("AppSpec Session Management", function () {
     chai.request(thx.app)
       .post('/api/login')
       .send({
-        'username': 'test'
+        'username': 'test',
         remember: false
       })
       .end((err, res) => {
