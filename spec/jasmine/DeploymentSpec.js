@@ -1,11 +1,11 @@
 describe("Deployer", function () {
 
   beforeAll(() => {
-    console.log(`🚸 [chai] running Deployment spec`);
+    console.log(`🚸 [chai] >>> running Deployment spec`);
   });
 
   afterAll(() => {
-    console.log(`🚸 [chai] completed Deployment spec`);
+    console.log(`🚸 [chai] <<< completed Deployment spec`);
   });
 
 

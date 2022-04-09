@@ -1,11 +1,11 @@
 describe("Database", function () {
 
   beforeAll(() => {
-    console.log(`🚸 [chai] running Database spec`);
+    console.log(`🚸 [chai] >>> running Database spec`);
   });
 
   afterAll(() => {
-    console.log(`🚸 [chai] completed Database spec`);
+    console.log(`🚸 [chai] <<< completed Database spec`);
   });
 
 

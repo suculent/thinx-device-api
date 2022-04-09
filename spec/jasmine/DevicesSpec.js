@@ -1,11 +1,11 @@
 describe("Devices", function() {
 
   beforeAll(() => {
-    console.log(`🚸 [chai] running Devices spec`);
+    console.log(`🚸 [chai] >>> running Devices spec`);
   });
 
   afterAll(() => {
-    console.log(`🚸 [chai] completed Devices spec`);
+    console.log(`🚸 [chai] <<< completed Devices spec`);
   });
 
 

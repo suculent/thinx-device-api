@@ -18,7 +18,7 @@ let jwt;
 describe("API Keys (noauth)", function () {
 
     beforeAll((done) => {
-        console.log(`🚸 [chai] running API Keys (noauth) spec`);
+        console.log(`🚸 [chai] >>> running API Keys (noauth) spec`);
         thx = new THiNX();
         thx.init(() => {
             agent = chai.request.agent(thx.app);
@@ -84,7 +84,7 @@ describe("API Keys (JWT)", function () {
 
     afterAll((done) => {
         agent.close();
-        console.log(`🚸 [chai] completed API Keys (noauth) spec`);
+        console.log(`🚸 [chai] <<< completed API Keys (noauth) spec`);
         done();
     });
 

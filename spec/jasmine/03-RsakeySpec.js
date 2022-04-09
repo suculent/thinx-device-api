@@ -1,11 +1,11 @@
 describe("RSA Key", function() {
 
   beforeAll(() => {
-    console.log(`🚸 [chai] running RSA spec`);
+    console.log(`🚸 [chai] >>> running RSA spec`);
   });
 
   afterAll(() => {
-    console.log(`🚸 [chai] completed RSA spec`);
+    console.log(`🚸 [chai] <<< completed RSA spec`);
   });
 
 

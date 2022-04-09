@@ -1,11 +1,11 @@
 describe("Platform", function () {
 
   beforeAll(() => {
-    console.log(`🚸 [chai] running Platform spec`);
+    console.log(`🚸 [chai] >>> running Platform spec`);
   });
 
   afterAll(() => {
-    console.log(`🚸 [chai] completed Platforkm spec`);
+    console.log(`🚸 [chai] <<< completed Platforkm spec`);
   });
 
   let Platform = require("../../lib/thinx/platform");

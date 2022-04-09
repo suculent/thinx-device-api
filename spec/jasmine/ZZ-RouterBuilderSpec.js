@@ -21,7 +21,7 @@ let thx;
 describe("Builder (noauth)", function () {
 
     beforeAll((done) => {
-        console.log(`🚸 [chai] running Builder (noauth) spec`);
+        console.log(`🚸 [chai] >>> running Builder (noauth) spec`);
         thx = new THiNX();
         thx.on('workerReady', () => {
             console.log("[spec] [emit] worker ready!"); // should allow waiting for worker beforeAll
@@ -71,7 +71,7 @@ describe("Builder (noauth)", function () {
     }, 20000);
 
     afterAll(() => {
-        console.log(`🚸 [chai] completed Builder (noauth) spec`);
+        console.log(`🚸 [chai] <<< completed Builder (noauth) spec`);
       });
 
 });
@@ -103,7 +103,7 @@ describe("Builder (JWT)", function () {
 
     afterAll((done) => {
         agent.close();
-        console.log(`🚸 [chai] completed Builder (JWT) spec`);
+        console.log(`🚸 [chai] <<< completed Builder (JWT) spec`);
         done();
     });
 

@@ -1,11 +1,11 @@
 describe("Validator", function() {
 
   beforeAll(() => {
-    console.log(`🚸 [chai] running Validator spec`);
+    console.log(`🚸 [chai] >>> running Validator spec`);
   });
 
   afterAll(() => {
-    console.log(`🚸 [chai] completed Validator spec`);
+    console.log(`🚸 [chai] <<< completed Validator spec`);
   });
 
   var expect = require('chai').expect;

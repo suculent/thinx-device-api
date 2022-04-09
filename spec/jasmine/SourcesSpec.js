@@ -1,11 +1,11 @@
 describe("Sources", function () {
 
   beforeAll(() => {
-    console.log(`🚸 [chai] running Sources spec`);
+    console.log(`🚸 [chai] >>> running Sources spec`);
   });
 
   afterAll(() => {
-    console.log(`🚸 [chai] completed Sources spec`);
+    console.log(`🚸 [chai] <<< completed Sources spec`);
   });
 
   var expect = require('chai').expect;

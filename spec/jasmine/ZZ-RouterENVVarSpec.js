@@ -13,7 +13,7 @@ let thx;
 describe("ENV Vars (noauth)", function () {
 
   beforeAll((done) => {
-    console.log(`🚸 [chai] running ENV Vars (noauth) spec`);
+    console.log(`🚸 [chai] >>> running ENV Vars (noauth) spec`);
     thx = new THiNX();
     thx.init(() => {
       done();
@@ -21,7 +21,7 @@ describe("ENV Vars (noauth)", function () {
   });
 
   afterAll(() => {
-    console.log(`🚸 [chai] completedENV Vars (noauth)) spec`);
+    console.log(`🚸 [chai] <<< completed ENV Vars (noauth)) spec`);
   });
 
   it("POST /api/user/env/revoke (noauth, invalid)", function (done) {
@@ -80,7 +80,7 @@ describe("ENV Vars (JWT)", function () {
   let jwt;
 
   beforeAll((done) => {
-    console.log(`🚸 [chai] running ENV Vars (JWT) spec`);
+    console.log(`🚸 [chai] >>> running ENV Vars (JWT) spec`);
     agent = chai.request.agent(thx.app);
     agent
       .post('/api/login')
@@ -99,7 +99,7 @@ describe("ENV Vars (JWT)", function () {
 
   afterAll((done) => {
     agent.close();
-    console.log(`🚸 [chai] completed ENV Vars (JWT) spec`);
+    console.log(`🚸 [chai] <<< completed ENV Vars (JWT) spec`);
     done();
   });
 

@@ -10,11 +10,11 @@ var Notifier = require('../../lib/thinx/notifier');
 describe("Builder", function () {
 
   beforeAll(() => {
-    console.log(`🚸 [chai] running Builder spec`);
+    console.log(`🚸 [chai] >>> running Builder spec`);
   });
 
   afterAll(() => {
-    console.log(`🚸 [chai] completed Builder spec`);
+    console.log(`🚸 [chai] <<< completed Builder spec`);
   });
 
   var express = require("express");

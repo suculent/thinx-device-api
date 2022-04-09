@@ -13,7 +13,7 @@ let thx;
 describe("Devices", function () {
 
   beforeAll((done) => {
-    console.log(`🚸 [chai] running Devices spec`);
+    console.log(`🚸 [chai] >>> running Devices spec`);
     thx = new THiNX();
     thx.init(() => {
       done();
@@ -21,7 +21,7 @@ describe("Devices", function () {
   });
 
   afterAll(() => {
-    console.log(`🚸 [chai] completed Devices spec`);
+    console.log(`🚸 [chai] <<< completed Devices spec`);
   });
 
   it("GET /api/user/devices (noauth)", function (done) {
@@ -188,7 +188,7 @@ describe("Devices (JWT)", function () {
   let created_api_key = null;
 
   beforeAll((done) => {
-    console.log(`🚸 [chai] running Devices (JWT) spec`);
+    console.log(`🚸 [chai] >>> running Devices (JWT) spec`);
     agent = chai.request.agent(thx.app);
     agent
       .post('/api/login')
@@ -204,7 +204,7 @@ describe("Devices (JWT)", function () {
   });
 
   afterAll(() => {
-    console.log(`🚸 [chai] completed Devices (JWT) spec`);
+    console.log(`🚸 [chai] <<< completed Devices (JWT) spec`);
     agent.close();
   });
 

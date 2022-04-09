@@ -10,11 +10,11 @@ describe("Build log", function() {
   var build_id = envi.build_id;
 
   beforeAll(() => {
-    console.log(`🚸 [chai] running Build log spec`);
+    console.log(`🚸 [chai] >>> running Build log spec`);
   });
 
   afterAll(() => {
-    console.log(`🚸 [chai] completed Build log spec`);
+    console.log(`🚸 [chai] <<< completed Build log spec`);
   });
 
   /*

@@ -14,7 +14,7 @@ let thx;
 describe("Device Ownership Transfer (noauth)", function () {
 
     beforeAll((done) => {
-        console.log(`🚸 [chai] running Transfer (noauth) spec`);
+        console.log(`🚸 [chai] >>> running Transfer (noauth) spec`);
         thx = new THiNX();
         thx.init(() => {
             done();
@@ -22,7 +22,7 @@ describe("Device Ownership Transfer (noauth)", function () {
     });
 
     afterAll(() => {
-        console.log(`🚸 [chai] completed Transfer (noauth) spec`);
+        console.log(`🚸 [chai] <<< completed Transfer (noauth) spec`);
     });
 
     it("POST /api/transfer/request (noauth, invalid)", function (done) {
@@ -89,7 +89,7 @@ describe("Transfer (JWT)", function () {
     let jwt;
   
     beforeAll((done) => {
-        console.log(`🚸 [chai] running Transfer (JWT) spec`);
+        console.log(`🚸 [chai] >>> running Transfer (JWT) spec`);
         agent = chai.request.agent(thx.app);
         agent
             .post('/api/login')
@@ -104,7 +104,7 @@ describe("Transfer (JWT)", function () {
     });
 
     afterAll(() => {
-        console.log(`🚸 [chai] completed Transfer (JWT) spec`);
+        console.log(`🚸 [chai] <<< completed Transfer (JWT) spec`);
     });
 
     // save trid for accept and decline, create valid version of this; needs at least two owners and one device

@@ -1,11 +1,11 @@
 describe("Git", function () {
 
     beforeAll(() => {
-        console.log(`🚸 [chai] running Git spec`);
+        console.log(`🚸 [chai] >>> running Git spec`);
     });
 
     afterAll(() => {
-        console.log(`🚸 [chai] completed Git spec`);
+        console.log(`🚸 [chai] <<< completed Git spec`);
     });
 
 

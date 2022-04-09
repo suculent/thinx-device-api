@@ -17,40 +17,31 @@ let thx;
 
 describe("Transformer (JWT)", function () {
 
-  it("POST /api/transformer/run (noauth)", function (done) {
-    thx = new THiNX();
-    thx.init(() => {
-      chai.request(thx.app)
-        .post('/api/transformer/run')
-        .send({})
-        .end((_err, res) => {
-          //console.log("🚸 [chai] POST /api/transformer/run response:", res.text, " status:", res.status);
-          expect(res.status).to.equal(403);
-          done();
-        });
-    });
-  }, 20000);
-
   let agent;
   let jwt;
 
   beforeAll((done) => {
-    console.log(`🚸 [chai] running Transformer (JWT) spec`);
-    agent = chai.request.agent(thx.app);
-    agent
-      .post('/api/login')
-      .send({ username: 'dynamic', password: 'dynamic', remember: false })
-      .then(function (res) {
-        let body = JSON.parse(res.text);
-        jwt = 'Bearer ' + body.access_token;
-        done();
-      })
-      .catch((e) => { console.log(e); });
+    console.log(`🚸 [chai] >>> running Transformer (JWT) spec`);
+
+    thx = new THiNX();
+    thx.init(() => {
+      agent = chai.request.agent(thx.app);
+      agent
+        .post('/api/login')
+        .send({ username: 'dynamic', password: 'dynamic', remember: false })
+        .then(function (res) {
+          let body = JSON.parse(res.text);
+          jwt = 'Bearer ' + body.access_token;
+          done();
+        })
+        .catch((e) => { console.log(e); });
+      done();
+    });
   });
 
   afterAll((done) => {
     agent.close();
-    console.log(`🚸 [chai] completed Transfer (JWT) spec`);
+    console.log(`🚸 [chai] <<< completed Transfer (JWT) spec`);
     done();
   });
 
@@ -65,8 +56,19 @@ describe("Transformer (JWT)", function () {
     platform: "arduino"
   };
 
+   it("POST /api/transformer/run (noauth)", function (done) {
+    chai.request(thx.app)
+      .post('/api/transformer/run')
+      .send({})
+      .end((_err, res) => {
+        //console.log("🚸 [chai] POST /api/transformer/run response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(403);
+        done();
+      });
+  }, 20000);
+
   // create
-  it("POST /api/user/apikey (T1)", function (done) {
+  it("POST /api/user/apikey (JWT T1)", function (done) {
     chai.request(thx.app)
       .post('/api/user/apikey')
       .set('Authorization', jwt)
@@ -81,7 +83,6 @@ describe("Transformer (JWT)", function () {
         expect(j.api_key).to.be.a('string');
         expect(j.hash).to.be.a('string');
         created_api_key = j.hash;
-        console.log("🚸 [chai] saving apikey (T1)", j.api_key);
         done();
       });
   }, 20000);

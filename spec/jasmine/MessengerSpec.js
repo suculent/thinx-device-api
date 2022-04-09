@@ -15,11 +15,11 @@ var user = new User();
 describe("Messenger", function() {
 
   beforeAll(() => {
-    console.log(`🚸 [chai] running Messenger spec`);
+    console.log(`🚸 [chai] >>> running Messenger spec`);
   });
 
   afterAll(() => {
-    console.log(`🚸 [chai] completed Messenger spec`);
+    console.log(`🚸 [chai] <<< completed Messenger spec`);
   });
 
 

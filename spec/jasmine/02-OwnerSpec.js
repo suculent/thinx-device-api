@@ -1,11 +1,11 @@
 describe("Owner", function () {
 
   beforeAll(() => {
-    console.log(`🚸 [chai] running Owner spec`);
+    console.log(`🚸 [chai] >>> running Owner spec`);
   });
 
   afterAll(() => {
-    console.log(`🚸 [chai] completed Owner spec`);
+    console.log(`🚸 [chai] <<< completed Owner spec`);
   });
 
 

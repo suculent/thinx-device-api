@@ -1,11 +1,11 @@
 describe("API Env", function () {
 
   beforeAll(() => {
-    console.log(`🚸 [chai] running APIEnv spec`);
+    console.log(`🚸 [chai] >>> running APIEnv spec`);
   });
 
   afterAll(() => {
-    console.log(`🚸 [chai] completed APIEnv spec`);
+    console.log(`🚸 [chai] <<< completed APIEnv spec`);
   });
 
 

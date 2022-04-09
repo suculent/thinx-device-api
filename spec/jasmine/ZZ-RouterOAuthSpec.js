@@ -12,7 +12,7 @@ describe("OAuth", function () {
     let thx;
 
     beforeAll((done) => {
-        console.log(`🚸 [chai] running OAuth spec`);
+        console.log(`🚸 [chai] >>> running OAuth spec`);
         thx = new THiNX();
         thx.init(() => {
             done();
@@ -20,7 +20,7 @@ describe("OAuth", function () {
     });
     
     afterAll(() => {
-        console.log(`🚸 [chai] completed OAuth spec`);
+        console.log(`🚸 [chai] <<< completed OAuth spec`);
     });
 
     // Slack OAuth Integration

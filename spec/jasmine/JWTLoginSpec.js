@@ -13,11 +13,11 @@ const login = new JWTLogin(redis);
 describe("JWT Login", function () {
 
     beforeAll(() => {
-        console.log(`🚸 [chai] running JWT spec`);
+        console.log(`🚸 [chai] >>> running JWT spec`);
       });
     
       afterAll(() => {
-        console.log(`🚸 [chai] completed JWT spec`);
+        console.log(`🚸 [chai] <<< completed JWT spec`);
       });
     
 

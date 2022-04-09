@@ -14,7 +14,7 @@ let thx;
 describe("Meshes (noauth)", function () {
 
     beforeAll((done) => {
-        console.log(`🚸 [chai] running Meshes (noauth) spec`);
+        console.log(`🚸 [chai] >>> running Meshes (noauth) spec`);
         thx = new THiNX();
         thx.init(() => {
             console.log("🚸 [chai] Initialized Meshes (noauth)...");
@@ -23,7 +23,7 @@ describe("Meshes (noauth)", function () {
     });
 
     afterAll(() => {
-        console.log(`🚸 [chai] completed Meshes (noauth) spec`);
+        console.log(`🚸 [chai] <<< completed Meshes (noauth) spec`);
     });
 
     // GET /api/mesh/list [cookie auth]
@@ -145,7 +145,7 @@ describe("Meshes (JWT)", function () {
     let mesh_id = null;
   
     beforeAll((done) => {
-        console.log(`🚸 [chai] running Meshes (JWT) spec`);
+        console.log(`🚸 [chai] >>> running Meshes (JWT) spec`);
         agent = chai.request.agent(thx.app);
         agent
             .post('/api/login')
@@ -161,7 +161,7 @@ describe("Meshes (JWT)", function () {
   
     afterAll((done) => {
         agent.close();
-        console.log(`🚸 [chai] completed Meshes (JWT) spec`);
+        console.log(`🚸 [chai] <<< completed Meshes (JWT) spec`);
         done();
     });
 

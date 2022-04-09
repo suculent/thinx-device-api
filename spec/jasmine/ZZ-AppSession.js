@@ -16,14 +16,14 @@ describe("ZZ-AppSession Session Management", function () {
     thx = new THiNX();
     thx.init(() => {
       agent = chai.request.agent(thx.app);
-      console.log(`🚸 [chai] running AppSession spec`);
+      console.log(`🚸 [chai] >>> running AppSession spec`);
       done();
     });
   });
 
   afterAll((done) => {
     agent.close();
-    console.log(`🚸 [chai] completed AppSession spec`);
+    console.log(`🚸 [chai] <<< completed AppSession spec`);
     done();
   });
 

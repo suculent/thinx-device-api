@@ -12,7 +12,7 @@ let thx;
 describe("App should support", function () {
 
   beforeAll((done) => {
-    console.log(`🚸 [chai] running App spec`);
+    console.log(`🚸 [chai] >>> running App spec`);
     thx = new THiNX();
     thx.init(() => {
       done();
@@ -20,7 +20,7 @@ describe("App should support", function () {
   });
 
   afterAll(() => {
-    console.log(`🚸 [chai] completed App spec`);
+    console.log(`🚸 [chai] <<< completed App spec`);
   });
 
 

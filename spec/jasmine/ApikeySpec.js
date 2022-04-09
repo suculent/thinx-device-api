@@ -9,11 +9,11 @@ var apikey = new APIKey();
 describe("API Key", function() {
 
   beforeAll(() => {
-    console.log(`🚸 [chai] running API Key spec`);
+    console.log(`🚸 [chai] >>> running API Key spec`);
   });
 
   afterAll(() => {
-    console.log(`🚸 [chai] completed API Key spec`);
+    console.log(`🚸 [chai] <<< completed API Key spec`);
   });
 
    //list: function(invalid-owner, callback)

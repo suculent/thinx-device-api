@@ -1,11 +1,11 @@
 describe("GDPR", function () {
 
     beforeAll(() => {
-        console.log(`🚸 [chai] running GDPR spec`);
+        console.log(`🚸 [chai] >>> running GDPR spec`);
       });
     
       afterAll(() => {
-        console.log(`🚸 [chai] completed GDPR spec`);
+        console.log(`🚸 [chai] <<< completed GDPR spec`);
       });
     
 

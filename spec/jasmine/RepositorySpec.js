@@ -7,11 +7,11 @@ var repo_path = __dirname;
 describe("Repository", function() {
 
   beforeAll(() => {
-    console.log(`🚸 [chai] running Repository spec`);
+    console.log(`🚸 [chai] >>> running Repository spec`);
   });
 
   afterAll(() => {
-    console.log(`🚸 [chai] completed Repository spec`);
+    console.log(`🚸 [chai] <<< completed Repository spec`);
   });
 
   var watcher = new Repository(/* mock_queue */);
