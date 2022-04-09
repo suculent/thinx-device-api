@@ -298,7 +298,7 @@ describe("User Routes", function () {
       .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}');
+        expect(res.text).to.equal('{"success":false,"status":"password_reset_successful"}');
         done();
       });
   }, 20000);
