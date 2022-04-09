@@ -12,11 +12,17 @@ let thx;
 describe("App should support", function () {
 
   beforeAll((done) => {
+    console.log(`🚸 [chai] running App spec`);
     thx = new THiNX();
     thx.init(() => {
       done();
     });
   });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] completed App spec`);
+  });
+
 
   it("GET / [healthcheck]", function (done) {
     chai.request(thx.app)

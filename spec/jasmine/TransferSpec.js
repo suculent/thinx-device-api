@@ -13,12 +13,17 @@ describe("Transfer", function () {
   var transfer = new Transfer(messenger);
 
   beforeAll((done) => {
+    console.log(`🚸 [chai] running Transfer spec`);
     devices.list(envi.oid, (success, response) => {
       expect(success).to.be.true;
       expect(response).to.be.a('object');
       console.log("[spec] [transfer] BEFORE device list:", JSON.stringify(response, null, 2));
       done();
     });
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] completed Transfer spec`);
   });
 
   it("(00) should be able to initiate device transfer, decline and accept another one", function (done) {

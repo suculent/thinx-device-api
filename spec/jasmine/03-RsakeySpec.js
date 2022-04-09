@@ -1,5 +1,14 @@
 describe("RSA Key", function() {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] running RSA spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] completed RSA spec`);
+  });
+
+
   var expect = require('chai').expect;
   var RSAKey = require("../../lib/thinx/rsakey");
   var rsakey = new RSAKey();

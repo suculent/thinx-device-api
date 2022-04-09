@@ -14,6 +14,15 @@ var user = new User();
 
 describe("Messenger", function() {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] running Messenger spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] completed Messenger spec`);
+  });
+
+
   var ak = envi.ak;
 
   // This UDID is to be deleted at the end of test.

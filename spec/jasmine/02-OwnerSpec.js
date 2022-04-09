@@ -1,5 +1,14 @@
 describe("Owner", function () {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] running Owner spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] completed Owner spec`);
+  });
+
+
   var expect = require('chai').expect;
 
   var User = require("../../lib/thinx/owner");

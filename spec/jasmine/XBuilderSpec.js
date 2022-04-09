@@ -9,6 +9,14 @@ var Notifier = require('../../lib/thinx/notifier');
 
 describe("Builder", function () {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] running Builder spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] completed Builder spec`);
+  });
+
   var express = require("express");
   var app = express();
   app.disable('x-powered-by');

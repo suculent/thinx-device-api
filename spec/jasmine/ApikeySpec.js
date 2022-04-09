@@ -8,6 +8,14 @@ var apikey = new APIKey();
 
 describe("API Key", function() {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] running API Key spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] completed API Key spec`);
+  });
+
    //list: function(invalid-owner, callback)
    it("(00) should be able to list empty API Keys", function (done) {
     apikey.list(
@@ -140,7 +148,7 @@ describe("API Key", function() {
     apikey.get_first_apikey(
       owner,
       (success, object) => {
-        //console.log(`[chai] (07) success ${success} first apikey ${object}`);
+        console.log(`🚸 [chai] (07) success ${success} first apikey ${object}`);
         expect(success).to.equal(true);
         expect(object).to.be.a('string');
         done();

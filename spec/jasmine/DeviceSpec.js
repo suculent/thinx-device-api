@@ -1,5 +1,14 @@
 describe("Device", function() {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] running Device spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] completed Device spec`);
+  });
+
+
   var expect = require('chai').expect;
   var Device = require("../../lib/thinx/device"); var device = new Device();
   var ApiKey = require("../../lib/thinx/apikey"); var APIKey = new ApiKey();

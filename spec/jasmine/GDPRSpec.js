@@ -1,5 +1,14 @@
 describe("GDPR", function () {
 
+    beforeAll(() => {
+        console.log(`🚸 [chai] running GDPR spec`);
+      });
+    
+      afterAll(() => {
+        console.log(`🚸 [chai] completed GDPR spec`);
+      });
+    
+
     var envi = require("../_envi.json");
     var expect = require('chai').expect;
     let GDPR = require("../../lib/thinx/gdpr");

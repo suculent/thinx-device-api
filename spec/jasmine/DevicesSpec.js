@@ -1,5 +1,14 @@
 describe("Devices", function() {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] running Devices spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] completed Devices spec`);
+  });
+
+
   var expect = require('chai').expect;
   
   var Messenger = require('../../lib/thinx/messenger');

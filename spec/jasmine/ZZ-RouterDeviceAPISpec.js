@@ -13,6 +13,7 @@ let thx;
 describe("Device API (noauth)", function () {
 
     beforeAll((done) => {
+        console.log(`🚸 [chai] running Device API (noauth) spec`);
         thx = new THiNX();
         thx.init(() => {
             done();
@@ -123,6 +124,7 @@ describe("Device + API (JWT+Key)", function () {
     let ak = null;
 
     beforeAll((done) => {
+        console.log(`🚸 [chai] running Device + API (JWT+Key) spec`);
         agent = chai.request.agent(thx.app);
         agent
             .post('/api/login')
@@ -158,6 +160,7 @@ describe("Device + API (JWT+Key)", function () {
 
     afterAll((done) => {
         agent.close();
+        console.log(`🚸 [chai] completed Device + API (JWT+Key) spec`);
         done();
     });
 

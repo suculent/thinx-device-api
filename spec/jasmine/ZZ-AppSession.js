@@ -16,12 +16,14 @@ describe("ZZ-AppSession Session Management", function () {
     thx = new THiNX();
     thx.init(() => {
       agent = chai.request.agent(thx.app);
+      console.log(`🚸 [chai] running AppSession spec`);
       done();
     });
   });
 
   afterAll((done) => {
     agent.close();
+    console.log(`🚸 [chai] completed AppSession spec`);
     done();
   });
 
@@ -56,7 +58,7 @@ describe("ZZ-AppSession Session Management", function () {
       .post('/api/login')
       .send({ username: 'dynamic', password: 'dynamic', remember: false })
       .then(function (res) {
-        console.log(`[chai] POST /api/login (valid)response: ${res.text} status: ${res.status} with cookie ${res.cookie}`);
+        console.log(`🚸 [chai] POST /api/login (valid)response: ${res.text} status: ${res.status} with cookie ${res.cookie}`);
         done();
         /*
         // The `agent` now has the sessionid cookie saved, and will send it

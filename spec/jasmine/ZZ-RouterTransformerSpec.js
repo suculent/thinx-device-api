@@ -11,8 +11,13 @@ var envi = require("../_envi.json");
 
 let thx;
 
-describe("Transformer (noauth)", function () {
-  it("POST /api/transformer/run", function (done) {
+//
+// Authenticated
+//
+
+describe("Transformer (JWT)", function () {
+
+  it("POST /api/transformer/run (noauth)", function (done) {
     thx = new THiNX();
     thx.init(() => {
       chai.request(thx.app)
@@ -25,18 +30,12 @@ describe("Transformer (noauth)", function () {
         });
     });
   }, 20000);
-});
-
-//
-// Authenticated
-//
-
-describe("Transformer (JWT)", function () {
 
   let agent;
   let jwt;
 
   beforeAll((done) => {
+    console.log(`🚸 [chai] running Transformer (JWT) spec`);
     agent = chai.request.agent(thx.app);
     agent
       .post('/api/login')
@@ -51,6 +50,7 @@ describe("Transformer (JWT)", function () {
 
   afterAll((done) => {
     agent.close();
+    console.log(`🚸 [chai] completed Transfer (JWT) spec`);
     done();
   });
 

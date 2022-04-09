@@ -13,10 +13,15 @@ let thx;
 describe("Devices", function () {
 
   beforeAll((done) => {
+    console.log(`🚸 [chai] running Devices spec`);
     thx = new THiNX();
     thx.init(() => {
       done();
     });
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] completed Devices spec`);
   });
 
   it("GET /api/user/devices (noauth)", function (done) {
@@ -183,18 +188,24 @@ describe("Devices (JWT)", function () {
   let created_api_key = null;
 
   beforeAll((done) => {
+    console.log(`🚸 [chai] running Devices (JWT) spec`);
     agent = chai.request.agent(thx.app);
     agent
       .post('/api/login')
       .send({ username: 'dynamic', password: 'dynamic', remember: false })
       .then(function (res) {
-        console.log(`[chai] DeviceSpec (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
+        console.log(`🚸 [chai] DeviceSpec (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
         expect(res).to.have.cookie('x-thx-core');
         let body = JSON.parse(res.text);
         jwt = 'Bearer ' + body.access_token;
         done();
       })
       .catch((e) => { console.log(e); });
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] completed Devices (JWT) spec`);
+    agent.close();
   });
 
   it("POST /api/user/apikey (D)", function (done) {

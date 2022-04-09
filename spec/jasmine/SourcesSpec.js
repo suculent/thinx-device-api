@@ -1,5 +1,13 @@
 describe("Sources", function () {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] running Sources spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] completed Sources spec`);
+  });
+
   var expect = require('chai').expect;
   var sources = require('../../lib/thinx/sources');
   var Sources = new sources();

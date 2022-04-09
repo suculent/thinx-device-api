@@ -1,5 +1,13 @@
 describe("Audit log", function() {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] running Autod spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] completed Audit spec`);
+  });
+
   var expect = require('chai').expect;
 
   var envi = require("../_envi.json");

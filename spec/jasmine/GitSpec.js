@@ -1,5 +1,14 @@
 describe("Git", function () {
 
+    beforeAll(() => {
+        console.log(`🚸 [chai] running Git spec`);
+    });
+
+    afterAll(() => {
+        console.log(`🚸 [chai] completed Git spec`);
+    });
+
+
     var expect = require('chai').expect;
     let Git = require("../../lib/thinx/git");
     var Deployment = require('../../lib/thinx/deployment'); var deploy = new Deployment();

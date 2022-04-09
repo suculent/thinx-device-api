@@ -18,6 +18,7 @@ let jwt;
 describe("API Keys (noauth)", function () {
 
     beforeAll((done) => {
+        console.log(`🚸 [chai] running API Keys (noauth) spec`);
         thx = new THiNX();
         thx.init(() => {
             agent = chai.request.agent(thx.app);
@@ -26,7 +27,7 @@ describe("API Keys (noauth)", function () {
                 .send({ username: 'dynamic', password: 'dynamic', remember: false })
                 .catch((e) => { console.log(e); })
                 .then(function (res) {
-                    console.log(`[chai] beforeAll POST /api/login (valid) response: ${res}`);
+                    console.log(`🚸 [chai] beforeAll POST /api/login (valid) response: ${res}`);
                     expect(res).to.have.cookie('x-thx-core');
                     let body = JSON.parse(res.text);
                     jwt = 'Bearer ' + body.access_token;
@@ -34,6 +35,8 @@ describe("API Keys (noauth)", function () {
                 });
         });
     });
+
+   
 
     // create
     it("POST /api/user/apikey", function (done) {
@@ -81,6 +84,7 @@ describe("API Keys (JWT)", function () {
 
     afterAll((done) => {
         agent.close();
+        console.log(`🚸 [chai] completed API Keys (noauth) spec`);
         done();
     });
 
@@ -158,7 +162,7 @@ describe("API Keys (JWT)", function () {
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
                 expect(j.revoked).to.be.an('array');
-                console.log(`[chai] API Keys in revocation:", ${JSON.stringify(j)} from res ${res.text}`);
+                console.log(`🚸 [chai] API Keys in revocation:", ${JSON.stringify(j)} from res ${res.text}`);
                 //expect(aks.length >= 1);
                 done();
             });
@@ -174,7 +178,7 @@ describe("API Keys (JWT)", function () {
             })
             .end((err, res) => {
                 //  {"revoked":["7663ca65a23d759485fa158641727597256fd7eac960941fbb861ab433ab056f"],"success":true}
-                console.log(`[chai] POST /api/user/apikey/revoke (multiple) response: ${res.text}, status ${res.status}`);
+                console.log(`🚸 [chai] POST /api/user/apikey/revoke (multiple) response: ${res.text}, status ${res.status}`);
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
@@ -194,7 +198,7 @@ describe("API Keys (JWT)", function () {
             })
             .end((err, res) => {
                 //  {"revoked":["7663ca65a23d759485fa158641727597256fd7eac960941fbb861ab433ab056f"],"success":true}
-                console.log(`[chai] POST /api/user/apikey/revoke (multiple) response: ${res.text}, status ${res.status}`);
+                console.log(`🚸 [chai] POST /api/user/apikey/revoke (multiple) response: ${res.text}, status ${res.status}`);
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);

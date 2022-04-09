@@ -14,10 +14,15 @@ let thx;
 describe("Device Ownership Transfer (noauth)", function () {
 
     beforeAll((done) => {
+        console.log(`🚸 [chai] running Transfer (noauth) spec`);
         thx = new THiNX();
         thx.init(() => {
             done();
         });
+    });
+
+    afterAll(() => {
+        console.log(`🚸 [chai] completed Transfer (noauth) spec`);
     });
 
     it("POST /api/transfer/request (noauth, invalid)", function (done) {
@@ -84,27 +89,23 @@ describe("Transfer (JWT)", function () {
     let jwt;
   
     beforeAll((done) => {
+        console.log(`🚸 [chai] running Transfer (JWT) spec`);
         agent = chai.request.agent(thx.app);
         agent
             .post('/api/login')
             .send({ username: 'dynamic', password: 'dynamic', remember: false })
             .catch((e) => { console.log(e); })
             .then(function (res) {
-                // console.log(`[chai] Transformer (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
                 expect(res).to.have.cookie('x-thx-core');
                 let body = JSON.parse(res.text);
                 jwt = 'Bearer ' + body.access_token;
                 done();
-            })
-    });
-  
-    afterAll((done) => {
-        agent.close();
-        done();
+            });
     });
 
-    //let trid_1 = null;
-    //let trid_2 = null;
+    afterAll(() => {
+        console.log(`🚸 [chai] completed Transfer (JWT) spec`);
+    });
 
     // save trid for accept and decline, create valid version of this; needs at least two owners and one device
     it("POST /api/transfer/request (jwt, invalid)", function (done) {

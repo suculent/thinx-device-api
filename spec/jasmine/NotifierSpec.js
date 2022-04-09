@@ -11,7 +11,12 @@ describe("Notifier", function () {
   };
 
   beforeAll(() => {
+    console.log(`🚸 [chai] running Notifier spec`);
     not = new Notifier();
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] completed Notifier spec`);
   });
 
   it("should be able to initialize", function () {

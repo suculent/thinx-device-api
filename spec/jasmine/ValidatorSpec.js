@@ -1,5 +1,13 @@
 describe("Validator", function() {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] running Validator spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] completed Validator spec`);
+  });
+
   var expect = require('chai').expect;
   var mock = JSON.stringify({ mock: "mock" });
   var invalid_mock = JSON.stringify({ unmock: "mock" })+"€~^&*ż{}";

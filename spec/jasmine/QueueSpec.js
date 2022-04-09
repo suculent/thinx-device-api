@@ -6,6 +6,14 @@ var envi = require("../_envi.json");
 
 describe("Queue", function () {
 
+    beforeAll(() => {
+        console.log(`🚸 [chai] running Queue spec`);
+      });
+    
+      afterAll(() => {
+        console.log(`🚸 [chai] completed Queue spec`);
+      });
+
     let mock_udid_1 = "<mock-udid-1>";
     let mock_udid_2 = "<mock-udid-2>";
     let mock_udid_3 = envi.udid;

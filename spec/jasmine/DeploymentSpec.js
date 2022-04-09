@@ -1,5 +1,14 @@
 describe("Deployer", function () {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] running Deployment spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] completed Deployment spec`);
+  });
+
+
   var expect = require('chai').expect;
   var Deployment = require('../../lib/thinx/deployment');
   var deploy = new Deployment();

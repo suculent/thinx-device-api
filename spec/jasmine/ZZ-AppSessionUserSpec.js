@@ -32,12 +32,14 @@ describe("User Routes", function () {
     thx = new THiNX();
     thx.init(() => {
       agent = chai.request.agent(thx.app);
+      console.log(`🚸 [chai] running User Routes spec`);
       done();
     });
   });
 
   afterAll((done) => {
     agent.close();
+    console.log(`🚸 [chai] completed User Routes spec`);
     done();
   });
 

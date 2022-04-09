@@ -2,6 +2,14 @@ describe("ACL Manager", function () {
 
   var ACL = require('../../lib/thinx/acl');
   
+  beforeAll(() => {
+    console.log(`🚸 [chai] running ACL spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] completed ACL spec`);
+  });
+
 
   // Mock
 
