@@ -291,14 +291,15 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  it("POST /api/user/password/set (3)", function (done) {
+  it("POST /api/user/password/set (4)", function (done) {
     chai.request(thx.app)
       .post('/api/user/password/set')
       .send({ password: "dynamic", rpassword: "dynamic", reset_key: reset_key })
       .end((_err, res) => {
+        console.log("🚸 [chai] POST /api/user/password/set (4) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"password_reset_successful"}');
+        expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}');
         done();
       });
   }, 20000);
