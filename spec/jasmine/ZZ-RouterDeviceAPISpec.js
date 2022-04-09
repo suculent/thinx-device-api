@@ -163,6 +163,15 @@ describe("Device + API (JWT+Key)", function () {
         done();
     });
 
+    var JRS6 = {
+        mac: "66:66:66:66:66:66",
+        firmware: "ZZ-RouterDeviceApiSpec.js",
+        version: "1.0.0",
+        alias: "test-device-6-dynamic",
+        owner: envi.dynamic.owner,
+        platform: "arduino"
+      };
+
     it("POST /device/register (jwt, invalid)", function (done) {
         chai.request(thx.app)
             .post('/device/register')
@@ -175,6 +184,23 @@ describe("Device + API (JWT+Key)", function () {
                 done();
             });
     }, 20000);
+
+    it("POST /device/register (jwt, valid) 6", function (done) {
+
+        chai.request(thx.app)
+          .post('/device/register')
+          .set('Authentication', created_api_key)
+          .send({ registration: JRS6 })
+          .end((err, res) => {
+            console.log("🚸 [chai] POST /device/register (jwt, valid) 6 response:", res.text);
+            expect(res.status).to.equal(200);
+            let r = JSON.parse(res.text);
+            console.log("🚸 [chai] POST /device/register (jwt, valid) 6 response:", JSON.stringify(r));
+            JRS6.udid = r.registration.udid;
+            expect(res.text).to.be.a('string');
+            done();
+          });
+      }, 20000);
 
     // must be fully mocked or run after build completes
     it("POST /device/firmware (jwt, invalid)", function (done) {
@@ -240,6 +266,19 @@ describe("Device + API (JWT+Key)", function () {
             });
     }, 20000);
 
+    it("POST /api/device/envs (jwt, valid)", function (done) {
+        chai.request(thx.app)
+            .post('/api/device/envs')
+            .set('Authorization', jwt)
+            .send({ udid: JRS6.udid })
+            .end((err, res) => {
+                console.log("🚸 [chai] POST /api/device/envs (jwt, valid) response:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
     it("POST /api/device/detail (jwt, invalid)", function (done) {
         chai.request(thx.app)
             .post('/api/device/detail')
@@ -253,11 +292,37 @@ describe("Device + API (JWT+Key)", function () {
             });
     }, 20000);
 
-    it("POST /api/device/edit (jwt, valid)", function (done) {
+    it("POST /api/device/detail (jwt, valid)", function (done) {
+        chai.request(thx.app)
+            .post('/api/device/detail')
+            .set('Authorization', jwt)
+            .send({ udid: JRS6.udid })
+            .end((err, res) => {
+                console.log("🚸 [chai] POST /api/device/detail (jwt, invalid) response:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/device/edit (jwt, invalid)", function (done) {
         chai.request(thx.app)
             .post('/api/device/edit')
             .set('Authentication', ak)
             .send({ changes: { alias: "edited-alias" } })
+            .end((err, res) => {
+                console.log("🚸 [chai] POST /api/device/edit (jwt, invalid) response:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/device/edit (jwt, valid)", function (done) {
+        chai.request(thx.app)
+            .post('/api/device/edit')
+            .set('Authentication', ak)
+            .send({ changes: { alias: "edited-alias" }, udid: JRS6.udid })
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/device/edit (jwt, valid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
