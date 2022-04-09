@@ -71,9 +71,9 @@ describe("Device API (noauth)", function () {
             .post('/api/device/envs')
             .send({})
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/device/envs response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('getenv_device_id_invalid');
                 done();
             });
     }, 20000);
@@ -83,9 +83,9 @@ describe("Device API (noauth)", function () {
             .post('/api/device/detail')
             .send({})
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/device/detail response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('detail_device_id_invalid');
                 done();
             });
     }, 20000);
@@ -95,9 +95,7 @@ describe("Device API (noauth)", function () {
             .post('/api/device/edit')
             .send({ changes: { alias: "edited-alias" } })
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/device/edit response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(403);
                 done();
             });
     }, 20000);
@@ -172,15 +170,15 @@ describe("Device + API (JWT+Key)", function () {
         platform: "arduino"
       };
 
-    it("POST /device/register (jwt, invalid)", function (done) {
+    it("POST /device/register (jwt, invalid owner)", function (done) {
         chai.request(thx.app)
             .post('/device/register')
             .set('Authentication', ak)
             .send({ registration: {} })
             .end((err, res) => {
-                console.log("🚸 [chai] POST /device/register (jwt, invalid) response:", res.text);
                 expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"registration":{"success":false,"error":"invalid owner"}}');
                 done();
             });
     }, 20000);
@@ -189,7 +187,7 @@ describe("Device + API (JWT+Key)", function () {
 
         chai.request(thx.app)
           .post('/device/register')
-          .set('Authentication', created_api_key)
+          .set('Authentication', ak)
           .send({ registration: JRS6 })
           .end((err, res) => {
             console.log("🚸 [chai] POST /device/register (jwt, valid) 6 response:", res.text);
@@ -388,9 +386,9 @@ describe("Device + API (JWT+Key)", function () {
             .post('/api/device/detail')
             .send({ udid: envi.dynamic.udid })
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/device/detail (session, dynamic) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('detail_device_not_found'); // change response to json here and there!
                 done();
             });
     }, 20000);
@@ -401,6 +399,20 @@ describe("Device + API (JWT+Key)", function () {
             .send({ udid: envi.udid })
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/device/detail (session, udid) 2 response:", res.text, " status:", res.status);
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                let j = JSON.parse(res.text);
+                console.log("[spec] [chai] detail:", JSON.stringify(j, null, 2));
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/device/edit (session, invalid)", function (done) {
+        agent
+            .post('/api/device/edit')
+            .send({ changes: { alias: "edited-alias" } })
+            .end((err, res) => {
+                console.log("🚸 [chai] POST /api/device/edit (session, invalid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -410,7 +422,7 @@ describe("Device + API (JWT+Key)", function () {
     it("POST /api/device/edit (session, valid)", function (done) {
         agent
             .post('/api/device/edit')
-            .send({ changes: { alias: "edited-alias" } })
+            .send({ changes: { alias: "edited-alias" }, udid: JRS6.udid })
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/device/edit (session, valid) response:", res.text, " status:", res.status);
                 //expect(res.status).to.equal(200);
