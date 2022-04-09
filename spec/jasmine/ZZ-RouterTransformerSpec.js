@@ -22,7 +22,6 @@ describe("Transformer (JWT)", function () {
 
   beforeAll((done) => {
     console.log(`🚸 [chai] >>> running Transformer (JWT) spec`);
-
     thx = new THiNX();
     thx.init(() => {
       agent = chai.request.agent(thx.app);
@@ -35,7 +34,6 @@ describe("Transformer (JWT)", function () {
           done();
         })
         .catch((e) => { console.log(e); });
-      done();
     });
   });
 
