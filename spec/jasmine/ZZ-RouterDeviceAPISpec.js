@@ -360,7 +360,7 @@ describe("Device + API (JWT+Key)", function () {
             });
     }, 20000);
 
-    it("POST /api/device/envs (session, valid) 2", function (done) {
+    it("POST /api/device/envs (session, valid, no-such-device) 2", function (done) {
         agent
             .post('/api/device/envs')
             .send({ udid: envi.dynamic.udid })
