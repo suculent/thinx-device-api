@@ -75,7 +75,7 @@ services:
 
   worker:
     env_file: .env
-    image: thinxcloud/worker
+    image: thinxcloud/worker:latest
     environment:
       - "SQREEN_TOKEN=${SQREEN_TOKEN}"
       - "ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}"
