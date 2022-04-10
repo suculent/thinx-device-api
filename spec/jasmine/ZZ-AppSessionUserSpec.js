@@ -246,10 +246,9 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .get('/api/user/password/reset?reset_key=' + reset_key + '&owner=' + envi.dynamic.owner)
       .end((_err, res) => {
-        console.log("🚸 [chai] GET /api/user/password/reset (noauth, invalid) 3 response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
-        expect(res.text).to.be.a('string'); // this is a password set form
-        //expect(res.text).to.equal('');
+        expect(res.text).to.be.a('string'); 
+        //expect(res.text).to.equal(''); // this is a password set form
         done();
       });
   }, 20000);
