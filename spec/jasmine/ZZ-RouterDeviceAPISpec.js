@@ -72,9 +72,7 @@ describe("Device API (noauth)", function () {
             .post('/api/device/envs')
             .send({})
             .end((err, res) => {
-                expect(res.status).to.equal(200);
-                expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('getenv_device_id_invalid');
+                expect(res.status).to.equal(404);
                 done();
             });
     }, 20000);
@@ -84,9 +82,7 @@ describe("Device API (noauth)", function () {
             .post('/api/device/detail')
             .send({})
             .end((err, res) => {
-                expect(res.status).to.equal(200);
-                expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('detail_device_id_invalid');
+                expect(res.status).to.equal(404);
                 done();
             });
     }, 20000);

@@ -81,7 +81,7 @@
     "sillyname": "^0.1.0",
     "simple-oauth2": "^2.5.2",
     "slack-notify": "^0.1.7",
-    "snyk": "^1.842.0",
+    "@snyk/protect": "^1.657.0",
     "socket.io": "^3.0.4",
     "socket.io-client": "^4.4.1",
     "sqreen": "^1.64.2",
