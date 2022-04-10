@@ -14,10 +14,15 @@ let thx;
 describe("Sources (noauth)", function () {
 
     beforeAll((done) => {
+        console.log(`🚸 [chai] >>> running Sources (noauth) spec`);
         thx = new THiNX();
         thx.init(() => {
             done();
         });
+    });
+
+    afterAll(() => {
+        console.log(`🚸 [chai] <<< completed Sources (noauth) spec`);
     });
 
     it("GET /api/user/sources/list", function (done) {
@@ -56,6 +61,7 @@ describe("Sources (JWT)", function () {
     let jwt;
   
     beforeAll((done) => {
+        console.log(`🚸 [chai] >>> running Sources (JWT) spec`);
         agent = chai.request.agent(thx.app);
         agent
             .post('/api/login')
@@ -71,6 +77,7 @@ describe("Sources (JWT)", function () {
   
     afterAll((done) => {
         agent.close();
+        console.log(`🚸 [chai] <<< completed Sources (JWT) spec`);
         done();
     });
 
@@ -117,12 +124,9 @@ describe("Sources (JWT)", function () {
             .send(mock_source)
             .end((err, res) => {
                 expect(res.text).to.be.a('string');
-                console.log("[spec] POST /api/user/source (semi-valid, does not fetch) response:", res.text);
-                // expect(res.text).to.equal('Git fetch failed.'); /// for now, will be fixed later?
-                //let r = JSON.parse(res.text);
-                //source_for_revocation = r.source_id;
+                let r = JSON.parse(res.text);
                 expect(res.status).to.equal(200);
-                //expect(r.success).to.equal(true);
+                expect(r.success).to.equal(true);
                 done();
             });
     }, 20000);
