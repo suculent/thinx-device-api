@@ -14,7 +14,7 @@
   "scripts": {
     "sonar": "./scripts/99-sonar.sh",
     "snyk": "snyk test",
-    "snyk-protect": "snyk protect",
+    "snyk-protect": "snyk-protect",
     "test": "nyc jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./",
     "coverage": "npm run mocha",
