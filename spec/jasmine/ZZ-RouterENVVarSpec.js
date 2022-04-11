@@ -109,10 +109,9 @@ describe("ENV Vars (JWT)", function () {
       .set('Authorization', jwt)
       .send({ key: "env-name", value: "env-value"})
       .end((err, res) => {
-        console.log("🚸 [chai] POST /api/user/env/add (JWT, valid) response:", res.text, res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        //expect(res.text).to.equal('{"success":false,"status":"missing_key"}');
+        expect(res.text).to.equal('{"success":true,"key":"env-name","value":"env-value","object":"env-name"}');
         done();
       });
   }, 20000);
@@ -174,11 +173,9 @@ describe("ENV Vars (JWT)", function () {
       .get('/api/user/env/list')
       .set('Authorization', jwt)
       .end((err, res) => {
-        console.log("🚸 [chai] POST /api/user/env/list (JWT, valid) response:", res.text, res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        // {"env_vars":[]} - add failed
-        // {"env_vars":["env-name","env-name"]} - add failed, missing value!
+        expect(res.text).to.equal('{"env_vars":["env-name"]}'); // does not return values, this is a one-way
         done();
       });
   }, 20000);
