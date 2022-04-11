@@ -163,7 +163,7 @@ describe("Transformer (JWT)", function () {
       .end((_err, res) => {
         let r = JSON.parse(res.text);
 
-        console.log("[spec] devices:", JSON.stringify(r.devices, null, 2));
+        // console.log("[spec] devices:", JSON.stringify(r.devices, null, 2));
 
         /* {
             "success": true,
