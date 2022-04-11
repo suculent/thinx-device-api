@@ -270,6 +270,7 @@ module.exports = class THiNX extends EventEmitter {
           limit: "1mb"
         }));
 
+        // API v1 global all-in-one router
         let router = require('./lib/router.js')(app);
 
         /* Webhook Server (new impl.) */
