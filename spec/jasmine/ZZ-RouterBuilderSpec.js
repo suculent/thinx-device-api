@@ -24,7 +24,7 @@ describe("Builder (noauth)", function () {
         console.log(`🚸 [chai] >>> running Builder (noauth) spec`);
         thx = new THiNX();
         thx.on('workerReady', () => {
-            console.log("[spec] [emit] worker ready!"); // should allow waiting for worker beforeAll
+            console.log("🚸🚸🚸 [spec] [emit] worker ready! 🚸🚸🚸"); // should allow waiting for worker beforeAll
             done();
         });
         thx.init(() => {

@@ -21,6 +21,7 @@ module.exports = class THiNX extends EventEmitter {
     console.log("");
 
     this.app = null;
+    this.clazz = this;
   }
 
   init(init_complete_callback) {
@@ -205,12 +206,12 @@ module.exports = class THiNX extends EventEmitter {
         let watcher;
 
         // TEST CASE WORKAROUND: attempt to fix duplicate initialization... if Queue is being tested, it's running as another instance and the port 3000 must stay free!
-        if (process.env.ENVIRONMENT !== "test") {
-          queue = new Queue(builder, app, null /* ssl_options */, this);
+        //if (process.env.ENVIRONMENT !== "test") {
+          queue = new Queue(builder, app, null /* ssl_options */, this.clazz);
           queue.cron(); // starts cron job for build queue from webhooks
           
           watcher = new Repository(queue);
-        }
+        //}
 
         const GDPR = require("./lib/thinx/gdpr");
         new GDPR().guard();
