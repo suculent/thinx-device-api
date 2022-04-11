@@ -243,11 +243,11 @@ services:
 #      - traefik.frontend.headers.STSPreload=true
 
   influx:
-    image: influxdb:1.7
+    image: influxdb:1.8
     volumes:
       - /mnt/data/influx:/var/lib/influxdb
     networks:
-      - net
+      - nat
       - internal
     deploy:
       resources:
