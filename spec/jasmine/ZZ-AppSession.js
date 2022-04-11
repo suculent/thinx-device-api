@@ -36,7 +36,7 @@ describe("ZZ-AppSession Session Management", function () {
         remember: false
       })
       .end((err, res) => {
-        expect(res.status).to.equal(401);
+        expect(res.status).to.equal(403);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"invalid_credentials"}');
         done();

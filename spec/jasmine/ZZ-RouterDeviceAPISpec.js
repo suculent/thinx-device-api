@@ -92,7 +92,7 @@ describe("Device API (noauth)", function () {
             .post('/api/device/edit')
             .send({ changes: { alias: "edited-alias" } })
             .end((err, res) => {
-                expect(res.status).to.equal(401);
+                expect(res.status).to.equal(403);
                 done();
             });
     }, 20000);

@@ -39,7 +39,7 @@ describe("Builder (noauth)", function () {
             .send({})
             .end((err, res) => {
                 console.log("🚸 [chai] response /api/build:", res.text, " status:", res.status);
-                expect(res.status).to.equal(401);
+                expect(res.status).to.equal(403);
                 //expect(res.text).to.be.a('string');
                 done();
             });

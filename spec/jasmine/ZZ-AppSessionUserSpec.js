@@ -153,7 +153,7 @@ describe("User Routes", function () {
       .post('/api/user/delete')
       .send({})
       .end((_err, res) => {
-        expect(res.status).to.equal(401);
+        expect(res.status).to.equal(403);
         done();
       });
   }, 20000);
@@ -433,7 +433,7 @@ describe("User Routes", function () {
       .post('/api/user/profile')
       .send({})
       .end((_err, res) => {
-        expect(res).to.have.status(403);
+        expect(res).to.have.status(401);
         done();
       });
   }, 20000);
