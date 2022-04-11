@@ -271,7 +271,10 @@ module.exports = class THiNX extends EventEmitter {
         }));
 
         // API v1 global all-in-one router
-        let router = require('./lib/router.js')(app);
+        const router = require('./lib/router.js')(app); // only validateSession and initLogTail is used here. is this feature envy?
+
+        // API v2 partial routers with new calls (needs additional coverage)
+        const v2_device_router = require('./lib/device.router.js')(app);
 
         /* Webhook Server (new impl.) */
 
