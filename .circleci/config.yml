@@ -183,8 +183,6 @@ jobs:
           rm -rf ./services/broker/Dockerfile
           mv ./services/broker/Dockerfile.test ./services/broker/Dockerfile
           sed -i "s/.git//g" .dockerignore
-          echo "Creating Docker Network (ID):"
-          docker network create nat
 
     - run:
         name: Copy Environment variables for in-place building
