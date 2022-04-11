@@ -72,7 +72,7 @@ describe("User Routes", function () {
       .post('/api/gdpr/transfer')
       .send({})
       .end((_err, res) => {
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -82,7 +82,7 @@ describe("User Routes", function () {
       .post('/api/gdpr/revoke')
       .send({})
       .end((_err, res) => {
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -153,7 +153,7 @@ describe("User Routes", function () {
       .post('/api/user/delete')
       .send({})
       .end((_err, res) => {
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -313,7 +313,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .get('/api/user/profile')
       .end((_err, res) => {
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -323,7 +323,7 @@ describe("User Routes", function () {
       .post('/api/user/profile')
       .send({})
       .end((_err, res) => {
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -385,7 +385,7 @@ describe("User Routes", function () {
       .post('/api/gdpr/transfer')
       .send({})
       .end((_err, res) => {
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -460,7 +460,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .get('/api/user/logs/audit')
       .end((_err, res) => {
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -481,7 +481,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .get('/api/user/logs/build/list')
       .end((_err, res) => {
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -503,7 +503,7 @@ describe("User Routes", function () {
       .post('/api/user/logs/build')
       .send({})
       .end((_err, res) => {
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -529,7 +529,7 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .get('/api/user/stats')
       .end((_err, res) => {
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(401);
         //expect(res.text).to.be.a('string');
         done();
       });
@@ -558,7 +558,7 @@ describe("User Routes", function () {
       .post('/api/user/chat')
       .send({})
       .end((_err, res) => {
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(401);
         //expect(res.text).to.be.a('string');
         done();
       });

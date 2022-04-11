@@ -93,7 +93,7 @@ describe("Devices", function () {
       .send({ udid: envi.oid })
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/detach response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(401);
         //expect(res.text).to.be.a('string');
         done();
       });

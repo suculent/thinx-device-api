@@ -31,7 +31,7 @@ describe("Device Ownership Transfer (noauth)", function () {
             .send({})
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/transfer/request (noauth, invalid) response:", res.text, " status:", res.status);
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 //expect(res).to.be.html; // headers incorrect!
                 done();
             });

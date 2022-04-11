@@ -60,7 +60,7 @@ describe("Transformer (JWT)", function () {
       .send({})
       .end((_err, res) => {
         //console.log("🚸 [chai] POST /api/transformer/run response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
