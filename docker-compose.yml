@@ -241,3 +241,19 @@ services:
 #      - traefik.frontend.headers.STSSeconds=315360000
 #      - traefik.frontend.headers.STSIncludeSubdomains=true
 #      - traefik.frontend.headers.STSPreload=true
+
+  influx:
+    image: influxdb:1.7
+    volumes:
+      - /mnt/data/influx:/var/lib/influxdb
+    networks:
+      - net
+      - internal
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.2'
+          memory: 128M
+        limits:
+          cpus: '0.3'
+          memory: 512M
