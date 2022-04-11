@@ -1,3 +1,7 @@
+var Database = require("../../lib/thinx/database");
+var database = new Database();
+var expect = require('chai').expect;
+
 describe("Database", function () {
 
   beforeAll(() => {
@@ -7,11 +11,6 @@ describe("Database", function () {
   afterAll(() => {
     console.log(`🚸 [chai] <<< completed Database spec`);
   });
-
-
-  var Database = require("../../lib/thinx/database");
-  var database = new Database();
-  var expect = require('chai').expect;
 
   it("should start and create initial DBs", function (done) {
     database.init((err, result) => {

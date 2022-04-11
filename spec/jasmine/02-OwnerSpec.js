@@ -1,15 +1,4 @@
-var expect = require('chai').expect;
-var envi = require("../_envi.json");
-
 describe("Owner", function () {
-
-  var User = require("../../lib/thinx/owner");
-  var user = new User();
-
-  var owner = envi.oid;
-  var email = envi.email;
-  var test_info = envi.test_info;
-  const user_body = envi.test_info;
 
   beforeAll(() => {
     console.log(`🚸 [chai] >>> running Owner spec`);
@@ -19,6 +8,19 @@ describe("Owner", function () {
     console.log(`🚸 [chai] <<< completed Owner spec`);
   });
 
+
+  var expect = require('chai').expect;
+
+  var User = require("../../lib/thinx/owner");
+  var user = new User();
+
+  var envi = require("../_envi.json");
+
+  var owner = envi.oid;
+  var email = envi.email;
+  var test_info = envi.test_info;
+  const user_body = envi.test_info;
+
   // activation key is provided by e-mail for security,
   // cimrman@thinx.cloud receives his activation token in response
   // and must not be used in production environment
@@ -27,7 +29,7 @@ describe("Owner", function () {
 
     let res_mock = {};
 
-    user.create(user_body, true, res_mock, (_res, success, response) => {
+    user.create(user_body, true, res_mock, (res, success, response) => {
       // valid case is existing user as well
       if (typeof (response) == "string" && response.indexOf("username_already_exists") !== -1) {
         expect(success).to.equal(false);
