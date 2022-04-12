@@ -276,6 +276,9 @@ module.exports = class THiNX extends EventEmitter {
         // API v2 partial routers with new calls (needs additional coverage)
         require('./lib/router.device.js')(app);
 
+        // API v2+v1 GDPR routes
+        require('./lib/router.gdpr.js')(app);
+
         /* Webhook Server (new impl.) */
 
         function gitHook(req, res) {
@@ -398,7 +401,7 @@ module.exports = class THiNX extends EventEmitter {
         });
 
         function heartbeat() {
-          this.lastAlive = new Date(); // currently unused
+          console.log("[Socket] heartbeat."); // better store this.lastAlive = new Date(); in redis
         }
 
         setInterval(function ping() {
@@ -429,7 +432,7 @@ module.exports = class THiNX extends EventEmitter {
         wss.on("error", function (err) {
           let e = err.toString();
           if (e.indexOf("EADDRINUSE") !== -1) {
-            // throw new Error("[critical] websocket same port init failure (test edge case only; fix carefully)");
+            console.log("[critical] websocket same port init failure (test edge case only; fix carefully)");
           } else {
             console.log("☣️ [error] websocket ", {e});
           }
@@ -568,4 +571,4 @@ module.exports = class THiNX extends EventEmitter {
       }); // DB
     }); // Slack
   }
-}
+};
