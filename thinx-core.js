@@ -279,6 +279,17 @@ module.exports = class THiNX extends EventEmitter {
         // API v2+v1 GDPR routes
         require('./lib/router.gdpr.js')(app);
 
+        // API v2 routes
+        require('./lib/router.mesh.js')(app);
+        require('./lib/router.env.js')(app);
+        require('./lib/router.source.js')(app);
+        require('./lib/router.profile.js')(app);
+        require('./lib/router.apikey.js')(app);
+        require('./lib/router.rsakey.js')(app);
+        require('./lib/router.user.js')(app);
+        require('./lib/router.build.js')(app);
+        require('./lib/router.logs.js')(app);
+
         /* Webhook Server (new impl.) */
 
         function gitHook(req, res) {
