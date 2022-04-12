@@ -247,7 +247,7 @@ describe("User Routes", function () {
       .get('/api/user/password/reset?reset_key=' + reset_key + '&owner=' + envi.dynamic.owner)
       .end((_err, res) => {
         expect(res.status).to.equal(200);
-        expect(res.text).to.be.a('string');
+        expect(res.text).to.be.a('string'); 
         //expect(res.text).to.equal(''); // this is a password set form
         done();
       });
@@ -473,8 +473,8 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  // there is no login here, so JWT for this is missing
-  it("POST /api/v2/gdpr", function (done) {
+   // there is no login here, so JWT for this is missing
+   it("POST /api/v2/gdpr", function (done) {
     chai.request(thx.app)
       .post('/api/v2/gdpr')
       .send({})
@@ -484,23 +484,23 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  // there is no login here, so JWT for this is missing
-  it("PUT /api/v2/gdpr", function (done) {
-    chai.request(thx.app)
-      .put('/api/v2/gdpr')
-      .send({})
-      .end((_err, res) => {
-        console.log("[chai] PUT /api/v2/gdpr response:", JSON.stringify(res, null, 2));
-        expect(res.status).to.equal(400); // should return 400 consent missing¨
-        done();
-      });
-  }, 20000);
+     // there is no login here, so JWT for this is missing
+     it("PUT /api/v2/gdpr", function (done) {
+      chai.request(thx.app)
+        .put('/api/v2/gdpr')
+        .send({})
+        .end((_err, res) => {
+          console.log("[chai] PUT /api/v2/gdpr response:", JSON.stringify(res, null, 2));
+          expect(res.status).to.equal(401); // should return 401 without proper token
+          done();
+        });
+    }, 20000);
 
-
+  
   //
   // User Profile
   //
-
+  
   it("GET /api/user/profile (jwt)", function (done) {
     expect(jwt).not.to.be.null;
     agent
