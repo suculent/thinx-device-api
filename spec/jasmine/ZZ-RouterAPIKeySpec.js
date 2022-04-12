@@ -46,7 +46,7 @@ describe("API Keys (noauth)", function () {
                 'alias': 'mock-apikey-alias'
             })
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -59,7 +59,7 @@ describe("API Keys (noauth)", function () {
                 'alias': 'mock-apikey-alias'
             })
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -69,7 +69,7 @@ describe("API Keys (noauth)", function () {
         chai.request(thx.app)
             .get('/api/user/apikey/list')
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);

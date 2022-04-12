@@ -29,7 +29,7 @@ describe("ENV Vars (noauth)", function () {
       .post('/api/user/env/revoke')
       .send()
       .end((_err, res) => {
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -39,7 +39,7 @@ describe("ENV Vars (noauth)", function () {
       .post('/api/user/env/add')
       .send()
       .end((_err, res) => {
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -49,7 +49,7 @@ describe("ENV Vars (noauth)", function () {
       .post('/api/user/env/add')
       .send({ udid: envi.oid })
       .end((_err, res) => {
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -59,7 +59,7 @@ describe("ENV Vars (noauth)", function () {
       .post('/api/user/env/revoke')
       .send({ udid: envi.oid })
       .end((_err, res) => {
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -68,7 +68,7 @@ describe("ENV Vars (noauth)", function () {
     chai.request(thx.app)
       .get('/api/user/env/list')
       .end((_err, res) => {
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);

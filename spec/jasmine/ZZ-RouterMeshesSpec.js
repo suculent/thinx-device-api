@@ -31,7 +31,7 @@ describe("Meshes (noauth)", function () {
         chai.request(thx.app)
             .get('/api/mesh/list')
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -41,7 +41,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/list')
             .send({})
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -51,7 +51,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/list')
             .send({ owner_id: "mock-owner-id", apikey: "mock-api-key", alias: "mock-mesh-alias" })
             .end((err, res) => {
-                expect(res.status).to.equal(403); 
+                expect(res.status).to.equal(401); 
                 done();
             });
     }, 20000);
@@ -61,7 +61,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/list')
             .send({ owner_id: envi.oid, apikey: "mock-api-key", alias: "mock-mesh-alias" })
             .end((err, res) => {
-                expect(res.status).to.equal(403); 
+                expect(res.status).to.equal(401); 
                 done();
             });
     }, 20000);
@@ -71,7 +71,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/create')
             .send({})
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -81,7 +81,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/create')
             .send({ owner_id: envi.dynamic.owner })
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -91,7 +91,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/create')
             .send({ alias: "mock-mesh-alias" })
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -101,7 +101,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/create')
             .send({ alias: "mock-mesh-alias", owner_id: envi.dynamic.owner })
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -111,7 +111,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/delete')
             .send({})
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -121,7 +121,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/delete')
             .send('{meshid:null}')
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -131,7 +131,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/delete')
             .send('{"meshid":undefined}')
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);

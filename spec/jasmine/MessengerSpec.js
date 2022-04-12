@@ -146,7 +146,6 @@ describe("Messenger", function() {
   });
 
   it("should be able to survive message_callback call", function(done) {
-    //messenger.get_result_or_callback("/owner/device/test", "Bare no-NID message");
     messenger.data(test_owner, udid, (error, data) => {
       expect(error).to.equal(false);
       expect(data).to.be.a('string');

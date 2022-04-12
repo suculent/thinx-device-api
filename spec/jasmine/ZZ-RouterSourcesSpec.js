@@ -29,7 +29,7 @@ describe("Sources (noauth)", function () {
         chai.request(thx.app)
             .get('/api/user/sources/list')
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -39,7 +39,7 @@ describe("Sources (noauth)", function () {
             .post('/api/user/source')
             .send({})
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -49,7 +49,7 @@ describe("Sources (noauth)", function () {
             .post('/api/user/source/revoke')
             .send({ key_id: null })
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);

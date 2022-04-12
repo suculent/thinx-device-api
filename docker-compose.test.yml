@@ -209,3 +209,23 @@ services:
 #      - traefik.frontend.headers.STSSeconds=315360000
 #      - traefik.frontend.headers.STSIncludeSubdomains=true
 #      - traefik.frontend.headers.STSPreload=true
+  influx:
+    image: influxdb:1.8
+    volumes:
+      - /mnt/data/influx:/var/lib/influxdb
+    networks:
+      - internal
+    environment:
+      - 'DOCKER_INFLUXDB_INIT_USERNAME=${COUCHDB_USER}'
+      - 'DOCKER_INFLUXDB_INIT_PASSWORD=${COUCHDB_PASS}'
+      - 'DOCKER_INFLUXDB_INIT_ORG=${COUCHDB_USER}'
+      - 'DOCKER_INFLUXDB_INIT_BUCKET=${COUCHDB_USER}'
+      # this is mock only, will contain separate/autogen passwords in production
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.2'
+          memory: 128M
+        limits:
+          cpus: '0.3'
+          memory: 512M

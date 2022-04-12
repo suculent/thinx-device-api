@@ -9,7 +9,8 @@ jobs:
   build-base:
     executor: docker/docker
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true
       - checkout
       - docker/check
       - run:
@@ -182,8 +183,6 @@ jobs:
           rm -rf ./services/broker/Dockerfile
           mv ./services/broker/Dockerfile.test ./services/broker/Dockerfile
           sed -i "s/.git//g" .dockerignore
-          echo "Creating Docker Network (ID):"
-          docker network create nat
 
     - run:
         name: Copy Environment variables for in-place building

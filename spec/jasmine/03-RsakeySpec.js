@@ -43,11 +43,11 @@ describe("RSA Key", function() {
 
   it("(02) should fail on invalid revocation", function(done) {
     rsakey.revoke(owner, invalid_fingerprints,
-      function(success, message) {
+      function(res, success, message) {
         expect(success).to.be.true; // succeds for more fingerprints if one is valid? maybe...
         expect(message).to.be.an('array');
         done();
-      });
+      }, {});
   }, 10000);
 
   it("(03) should be able to add RSA Key 2/3", function(done) {
@@ -63,11 +63,11 @@ describe("RSA Key", function() {
   }, 10000);
 
   it("(04) should be able to revoke multiple RSA Keys at once", function(done) {
-    rsakey.revoke(owner, revoked_filenames, function(succ, mess) {
+    rsakey.revoke(owner, revoked_filenames, function(res, succ, mess) {
         expect(succ).to.equal(true);
         expect(mess).to.be.an('array'); // should be array of length of 2
         done();
-      });
+      }, {});
   }, 10000);
 
 

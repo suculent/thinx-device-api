@@ -20,7 +20,7 @@ describe("Actionable Notification (noauth)", function () {
                 .post('/api/device/notification')
                 .send({})
                 .end((err, res) => {
-                    expect(res.status).to.equal(403);
+                    expect(res.status).to.equal(401);
                     done();
                 });
         });

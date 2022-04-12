@@ -22,7 +22,7 @@ describe("RSA Keys (noauth)", function () {
         chai.request(thx.app)
             .get('/api/user/rsakey/create')
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -31,7 +31,7 @@ describe("RSA Keys (noauth)", function () {
         chai.request(thx.app)
             .get('/api/user/rsakey/list')
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -41,7 +41,7 @@ describe("RSA Keys (noauth)", function () {
             .post('/api/user/rsakey/revoke')
             .send()
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -119,11 +119,13 @@ describe("RSA Keys (JWT)", function () {
     }, 20000);
 
     it("POST /api/user/rsakey/revoke (valid)", function (done) {
+        console.log("[chai] POST /api/user/rsakey/revoke (valid)");
         chai.request(thx.app)
             .post('/api/user/rsakey/revoke')
             .set('Authorization', jwt)
             .send({ filenames: [key_id]})
             .end((err, res) => {
+                console.log("[chai] POST /api/user/rsakey/revoke response:", JSON.stringify(res.text), res.status);
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
