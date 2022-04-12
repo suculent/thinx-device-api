@@ -43,7 +43,7 @@ describe("Util", function () {
         Util.responder(res, true, "message");
     });
 
-    it("should validate session with request", function () {
+    it("should validate session with JWT request", function (/* done */) {
         let req = {
             headers: {
                 'Authorization': envi.dynamic.owner
@@ -55,8 +55,42 @@ describe("Util", function () {
                 owner: envi.dynamic.owner
             }
         };
+        req.destroy = () => {
+            console.log(`🚸 [chai] validateSession destroy called...`);
+            /* done(); */
+        };
         let result = Util.validateSession(req);
-        console.log(`🚸 [chai] validateSession: ${result}`);
+        console.log(`🚸 [chai] validateSession with JWT: ${result}`);
+        expect(result).to.equal(true);
+    });
+
+    it("should validate session with session", function () {
+        let req = {
+            headers: { },
+            session: {
+                owner: envi.dynamic.owner
+            },
+            body: {
+                owner: envi.dynamic.owner,
+                api_key: envi.dynamic.api_key
+            }
+        };
+        let result = Util.validateSession(req);
+        console.log(`🚸 [chai] validateSession with session: ${result}`);
+        expect(result).to.equal(true);
+    });
+
+    it("should validate session with body", function () {
+        let req = {
+            headers: { },
+            session: { },
+            body: {
+                owner: envi.dynamic.owner,
+                api_key: envi.dynamic.api_key
+            }
+        };
+        let result = Util.validateSession(req);
+        console.log(`🚸 [chai] validateSession with session: ${result}`);
         expect(result).to.equal(true);
     });
 });
