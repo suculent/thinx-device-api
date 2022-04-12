@@ -282,19 +282,21 @@ module.exports = class THiNX extends EventEmitter {
         require('./lib/router.gdpr.js')(app);
 
         // API v2 routes
-        require('./lib/router.mesh.js')(app);
-        require('./lib/router.env.js')(app);
-        require('./lib/router.source.js')(app);
-        require('./lib/router.profile.js')(app);
         require('./lib/router.apikey.js')(app);
-        require('./lib/router.rsakey.js')(app);
-        require('./lib/router.user.js')(app);
+        require('./lib/router.auth.js')(app);
         require('./lib/router.build.js')(app);
-        require('./lib/router.logs.js')(app);
-
-        require('./lib/router.slack.js')(app);
+        require('./lib/router.deviceapi.js')(app);
+        require('./lib/router.env.js')(app);
         require('./lib/router.github.js')(app);
         require('./lib/router.google.js')(app);
+        require('./lib/router.logs.js')(app);
+        require('./lib/router.mesh.js')(app);
+        require('./lib/router.profile.js')(app);
+        require('./lib/router.rsakey.js')(app);
+        require('./lib/router.slack.js')(app);
+        require('./lib/router.source.js')(app);
+        require('./lib/router.transfer.js')(app);
+        require('./lib/router.user.js')(app);
 
         /* Webhook Server (new impl.) */
 
