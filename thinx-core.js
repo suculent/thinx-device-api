@@ -1,6 +1,6 @@
 const EventEmitter = require('events');
 
-const JWTLogin = require("./thinx/jwtlogin");  
+const JWTLogin = require("./lib/thinx/jwtlogin");  
 module.exports = class THiNX extends EventEmitter {
 
   constructor(sqreen) {
