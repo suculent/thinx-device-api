@@ -2,7 +2,9 @@ const EventEmitter = require('events');
 
 module.exports = class THiNX extends EventEmitter {
 
-  constructor() {
+  constructor(sqreen) {
+
+    this.sqreen = sqreen;
 
     super();
 
