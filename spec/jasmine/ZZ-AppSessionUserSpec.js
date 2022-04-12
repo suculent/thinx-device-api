@@ -60,7 +60,7 @@ describe("User Routes", function () {
       .post('/api/gdpr')
       .send({ gdpr: true })
       .end((_err, res) => {
-        expect(res.status).to.equal(400);
+        expect(res.status).to.equal(401);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
         done();
@@ -163,19 +163,7 @@ describe("User Routes", function () {
       .post('/api/gdpr')
       .send({})
       .end((_err, res) => {
-        expect(res.status).to.equal(400);
-        expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
-        done();
-      });
-  }, 20000);
-
-  it("POST /api/gdpr (unauthenticated, gdpr)", function (done) {
-    chai.request(thx.app)
-      .post('/api/gdpr')
-      .send({ gdpr: true })
-      .end((_err, res) => {
-        expect(res.status).to.equal(400);
+        expect(res.status).to.equal(401);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
         done();
