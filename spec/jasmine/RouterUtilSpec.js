@@ -55,7 +55,7 @@ describe("Util", function () {
                 owner: envi.dynamic.owner
             }
         };
-        req.destroy = () => {
+        req.session.destroy = () => {
             console.log(`🚸 [chai] validateSession destroy called...`);
             /* done(); */
         };
