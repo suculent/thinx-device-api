@@ -48,7 +48,7 @@ describe("User Routes", function () {
       .post('/api/gdpr')
       .send({})
       .end((_err, res) => {
-        expect(res.status).to.equal(200);
+        expect(res.status).to.equal(400);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
         done();
@@ -60,7 +60,7 @@ describe("User Routes", function () {
       .post('/api/gdpr')
       .send({ gdpr: true })
       .end((_err, res) => {
-        expect(res.status).to.equal(200);
+        expect(res.status).to.equal(400);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
         done();
@@ -163,7 +163,7 @@ describe("User Routes", function () {
       .post('/api/gdpr')
       .send({})
       .end((_err, res) => {
-        expect(res.status).to.equal(200);
+        expect(res.status).to.equal(400);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
         done();
@@ -175,7 +175,7 @@ describe("User Routes", function () {
       .post('/api/gdpr')
       .send({ gdpr: true })
       .end((_err, res) => {
-        expect(res.status).to.equal(200);
+        expect(res.status).to.equal(400);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
         done();
@@ -352,6 +352,7 @@ describe("User Routes", function () {
           .post('/api/gdpr')
           .send({ gdpr: true, token: token })
           .end((_err, _res) => {
+            console.log("[chai] POST /api/gdpr response:", _res.text, "status", _res.status);
             expect(_res.status).to.equal(200);
             expect(_res.text).to.be.a('string');
             // {"success":false,"status":"invalid_protocol_update_key_missing"} // WTF?
