@@ -101,8 +101,8 @@ describe("Util", function () {
             headers: { },
             session: { },
             body: {
-                owner_id: envi.dynamic.owner,
-                api_key: envi.dynamic.api_key
+                owner_id: envi.oid,
+                api_key: envi.ak
             }
         };
         req.session.destroy = () => {
