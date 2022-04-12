@@ -379,6 +379,57 @@ describe("User Routes", function () {
       .catch((e) => { console.log(e); });
   }, 20000);
 
+  it("POST /api/login (valid) with GDPR v2", function (done) {
+    agent
+      .post('/api/login')
+      .send({ username: 'dynamic', password: 'dynamic', remember: false })
+      .then(function (res) {
+        expect(res).to.have.cookie('x-thx-core');
+        /* response example:
+        {
+          "status":"OK",
+          "success":true,
+          "access_token":"eyJh...",
+          "redirectURL":"https://rtm.thinx.cloud/auth.html?t=33ed0c670113f6e8b1095a1b1857d5dc6e9db77c37122d76c45ffacef2484701&g=true"
+        } */
+        let body = JSON.parse(res.text);
+        jwt = 'Bearer ' + body.access_token;
+
+        // Old UI does this
+        let token = body.redirectURL.replace("https://rtm.thinx.cloud/auth.html?t=", "").replace("&g=true", "");
+
+        // just test-added
+        agent
+          .put('/api/v2/gdpr')
+          .send({ gdpr: true, token: token })
+          .end((_err, _res) => {
+            expect(_res.status).to.equal(200);
+            expect(_res.text).to.be.a('string');
+            // {"success":false,"status":"invalid_protocol_update_key_missing"} // WTF?
+
+            agent
+              .post('/api/login')
+              .send({ token: token })
+              .end((_err1, res1) => {
+                expect(res1.status).to.equal(200);
+
+                return agent
+                  .get('/api/user/profile')
+                  .set('Authorization', jwt)
+                  .end((__err, res2) => {
+                    expect(res2.status).to.equal(200);
+                    expect(res2.text).to.be.a('string');
+                    let owner_data = JSON.parse(res2.text);
+                    expect(owner_data).to.be.an('object');
+                    expect(owner_data.success).to.equal(true);
+                    done();
+                  });
+              });
+          });
+      })
+      .catch((e) => { console.log(e); });
+  }, 20000);
+
   // there is no login here, so JWT for this is missing
   it("POST /api/gdpr/transfer", function (done) {
     chai.request(thx.app)
@@ -405,7 +456,50 @@ describe("User Routes", function () {
       });
   }, 20000);
 
+  // GDPR API v2
 
+  // there is no login here, so JWT for this is missing
+  it("DELETE /api/v2/gdpr", function (done) {
+    console.log("🚸 [chai] DELETE /api/v2/gdpr (jwt, invalid) request");
+    chai.request(thx.app)
+      .delete('/api/v2/gdpr')
+      .set('Authorization', jwt)
+      .send({})
+      .end((_err, res) => {
+        console.log("🚸 [chai] DELETE /api/v2/gdpr (jwt, invalid) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+   // there is no login here, so JWT for this is missing
+   it("POST /api/v2/gdpr", function (done) {
+    chai.request(thx.app)
+      .post('/api/v2/gdpr')
+      .send({})
+      .end((_err, res) => {
+        expect(res.status).to.equal(401);
+        done();
+      });
+  }, 20000);
+
+     // there is no login here, so JWT for this is missing
+     it("PUT /api/v2/gdpr", function (done) {
+      chai.request(thx.app)
+        .put('/api/v2/gdpr')
+        .send({})
+        .end((_err, res) => {
+          expect(res.status).to.equal(401);
+          done();
+        });
+    }, 20000);
+
+  
+  //
+  // User Profile
+  //
+  
   it("GET /api/user/profile (jwt)", function (done) {
     expect(jwt).not.to.be.null;
     agent
