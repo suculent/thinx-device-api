@@ -80,7 +80,7 @@ describe("Util", function () {
         expect(result).to.equal(true);
     });
 
-    it("should validate session with body", function () {
+    it("should invalidate session with invalid body", function (done) {
         let req = {
             headers: { },
             session: { },
@@ -91,7 +91,21 @@ describe("Util", function () {
         };
         req.session.destroy = () => {
             console.log(`🚸 [chai] validateSession destroy called...`);
-            /* done(); */
+            done();
+        };
+        let result = Util.validateSession(req);
+        console.log(`🚸 [chai] validateSession with session: ${result}`);
+        expect(result).to.equal(false);
+    });
+
+    it("should validate session with valid body", function () {
+        let req = {
+            headers: { },
+            session: { },
+            body: {
+                owner_ud: envi.dynamic.owner,
+                api_key: envi.dynamic.api_key
+            }
         };
         let result = Util.validateSession(req);
         console.log(`🚸 [chai] validateSession with session: ${result}`);
