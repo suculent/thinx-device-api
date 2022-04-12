@@ -379,7 +379,7 @@ describe("User Routes", function () {
       .catch((e) => { console.log(e); });
   }, 20000);
 
-  it("POST /api/login (valid) with GDPR v2", function (done) {
+  xit("POST /api/login (valid) with GDPR v2", function (done) {
     agent
       .post('/api/login')
       .send({ username: 'dynamic', password: 'dynamic', remember: false })
@@ -393,7 +393,7 @@ describe("User Routes", function () {
           "redirectURL":"https://rtm.thinx.cloud/auth.html?t=33ed0c670113f6e8b1095a1b1857d5dc6e9db77c37122d76c45ffacef2484701&g=true"
         } */
         let body = JSON.parse(res.text);
-        jwt = 'Bearer ' + body.access_token;
+        // jwt = 'Bearer ' + body.access_token; we already have one
 
         // Old UI does this
         let token = body.redirectURL.replace("https://rtm.thinx.cloud/auth.html?t=", "").replace("&g=true", "");
