@@ -550,8 +550,78 @@ describe("Devices (JWT)", function () {
       });
   }, 20000);
 
+  // PUT /api/v2/source/attach
+  it("PUT /api/v2/source/attach", function (done) {
+    console.log("🚸 [chai] PUT /api/v2/source/attach (JWT)");
+    agent
+      .put('/api/v2/source/attach')
+      .set('Authorization', jwt)
+      .send({ udid: JRS5.udid })
+      .end((err, res) => {
+        console.log("🚸 [chai] PUT /api/v2/source/attach response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+  
   // PUT /api/v2/source/detach
+  it("PUT /api/v2/source/detach", function (done) {
+    console.log("🚸 [chai] PUT /api/v2/source/detach (JWT)");
+    agent
+      .put('/api/v2/source/detach')
+      .set('Authorization', jwt)
+      .send({ udid: envi.oid })
+      .end((err, res) => {
+        console.log("🚸 [chai] PUT /api/v2/source/detach (JWT) response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
   // PUT /api/v2/mesh/attach
+  it("PUT /api/v2/mesh/attach", function (done) {
+    console.log("🚸 [chai] PUT /api/v2/mesh/attach");
+    agent
+      .put('/api/v2/mesh/attach')
+      .set('Authorization', jwt)
+      .send({ udid: envi.dynamic.udid, mesh_id: mesh_id })
+      .end((err, res) => {
+        console.log("🚸 [chai] PUT /api/v2/mesh/attach response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
   // PUT /api/v2/mesh/detach
+  it("PUT /api/v2/mesh/detach", function (done) {
+    console.log("🚸 [chai] PUT /api/v2/mesh/detach");
+    agent
+      .put('/api/v2/mesh/detach')
+      .set('Authorization', jwt)
+      .send({ udid: envi.dynamic.udid, mesh_id: "device-mesh-id" })
+      .end((err, res) => {
+        console.log("🚸 [chai] PUT /api/v2/mesh/detach response:", res.text, " status:", res.status);
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
   // DELETE /api/v2/device
+  it("DELETE /api/v2/device (JWT)", function (done) {
+    console.log("🚸 [chai] GET /api/v2/device (JWT)");
+    agent
+      .delete('/api/v2/device')
+      .send({})
+      .set('Authorization', jwt)
+      .end((err, res) => {
+        console.log("🚸 [chai] GET /api/v2/device (JWT) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
 });
