@@ -99,6 +99,7 @@ describe("Util", function () {
     it("should validate session with valid body", function () {
         let req = {
             headers: { },
+            session: { },
             body: {
                 owner_id: envi.dynamic.owner,
                 api_key: envi.dynamic.api_key
