@@ -290,6 +290,10 @@ module.exports = class THiNX extends EventEmitter {
         require('./lib/router.build.js')(app);
         require('./lib/router.logs.js')(app);
 
+        require('./lib/router.slack.js')(app);
+        require('./lib/router.github.js')(app);
+        require('./lib/router.google.js')(app);
+
         /* Webhook Server (new impl.) */
 
         function gitHook(req, res) {

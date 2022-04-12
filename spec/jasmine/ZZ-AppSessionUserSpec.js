@@ -490,7 +490,8 @@ describe("User Routes", function () {
         .put('/api/v2/gdpr')
         .send({})
         .end((_err, res) => {
-          expect(res.status).to.equal(401);
+          console.log("[chai] PUT /api/v2/gdpr response:", JSON.stringify(res, null, 2));
+          expect(res.status).to.equal(401); // should return 401 without proper token
           done();
         });
     }, 20000);
