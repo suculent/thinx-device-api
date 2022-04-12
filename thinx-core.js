@@ -1,5 +1,6 @@
 const EventEmitter = require('events');
 
+const JWTLogin = require("./thinx/jwtlogin");  
 module.exports = class THiNX extends EventEmitter {
 
   constructor(sqreen) {
@@ -102,6 +103,11 @@ module.exports = class THiNX extends EventEmitter {
         console.log("thinx.js bgsave error:", e);
       }
     }
+
+    app.login = new JWTLogin(app.redis_client);
+    app.login.init(() => {
+        console.log("ℹ️ [info] JWT Login Secret Init Complete. Login is now possible.");
+    });
 
     // Default ACLs and MQTT Password
 
