@@ -67,7 +67,7 @@ describe("RSA Key", function() {
         expect(succ).to.equal(true);
         expect(mess).to.be.an('array'); // should be array of length of 2
         done();
-      });
+      }, {});
   }, 10000);
 
 
