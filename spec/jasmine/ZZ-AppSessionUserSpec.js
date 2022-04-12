@@ -469,7 +469,7 @@ describe("User Routes", function () {
         console.log("🚸 [chai] DELETE /api/v2/gdpr (jwt, invalid) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"deletion_not_confirmed"}');¨
+        expect(res.text).to.equal('{"success":false,"status":"deletion_not_confirmed"}');
         // {"success":false,"status":"deletion_not_confirmed"} 
         done();
       });
