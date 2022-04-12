@@ -288,7 +288,7 @@ describe("User Routes", function () {
         console.log("🚸 [chai] POST /api/user/password/set (valid) X response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}');
+        expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
         done();
       });
   }, 20000);
