@@ -43,7 +43,7 @@ describe("User Routes", function () {
     done();
   });
 
-  it("POST /api/gdpr (unauthenticated)", function (done) {
+  it("POST /api/gdpr (unauthenticated, invalid)", function (done) {
     chai.request(thx.app)
       .post('/api/gdpr')
       .send({})
@@ -55,7 +55,7 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  it("POST /api/gdpr (unauthenticated)", function (done) {
+  it("POST /api/gdpr (unauthenticated, gdpr)", function (done) {
     chai.request(thx.app)
       .post('/api/gdpr')
       .send({ gdpr: true })
@@ -158,7 +158,7 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  it("POST /api/gdpr (unauthenticated)", function (done) {
+  it("POST /api/gdpr (unauthenticated, empty)", function (done) {
     chai.request(thx.app)
       .post('/api/gdpr')
       .send({})
@@ -170,7 +170,7 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  it("POST /api/gdpr (unauthenticated)", function (done) {
+  it("POST /api/gdpr (unauthenticated, gdpr)", function (done) {
     chai.request(thx.app)
       .post('/api/gdpr')
       .send({ gdpr: true })
@@ -469,7 +469,7 @@ describe("User Routes", function () {
         console.log("🚸 [chai] DELETE /api/v2/gdpr (jwt, invalid) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"deletion_not_confirmed"}');
+        expect(res.text).to.equal('{"success":false,"status":"deletion_not_confirmed"}');¨
         // {"success":false,"status":"deletion_not_confirmed"} 
         done();
       });
