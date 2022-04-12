@@ -89,6 +89,10 @@ describe("Util", function () {
                 api_key: envi.dynamic.api_key
             }
         };
+        req.session.destroy = () => {
+            console.log(`🚸 [chai] validateSession destroy called...`);
+            /* done(); */
+        };
         let result = Util.validateSession(req);
         console.log(`🚸 [chai] validateSession with session: ${result}`);
         expect(result).to.equal(true);
