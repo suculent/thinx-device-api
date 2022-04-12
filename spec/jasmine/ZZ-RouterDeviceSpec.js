@@ -531,4 +531,27 @@ describe("Devices (JWT)", function () {
         done();
       });
   }, 20000);
+
+  //
+  // API v2 specs for device.router.js
+  //
+
+  // GET /api/v2/device
+  it("GET /api/v2/device (JWT)", function (done) {
+    console.log("🚸 [chai] GET /api/v2/device (JWT)");
+    agent
+      .get('/api/v2/device')
+      .set('Authorization', jwt)
+      .end((err, res) => {
+        console.log("🚸 [chai] GET /api/v2/device (JWT) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  // PUT /api/v2/source/detach
+  // PUT /api/v2/mesh/attach
+  // PUT /api/v2/mesh/detach
+  // DELETE /api/v2/device
 });
