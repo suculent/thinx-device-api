@@ -62,7 +62,7 @@ describe("User Routes", function () {
       .end((_err, res) => {
         expect(res.status).to.equal(401);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
+        expect(res.text).to.equal('{"success":false,"status":"token_missing"}');
         done();
       });
   }, 20000);
@@ -163,7 +163,7 @@ describe("User Routes", function () {
       .post('/api/gdpr')
       .send({})
       .end((_err, res) => {
-        expect(res.status).to.equal(401);
+        expect(res.status).to.equal(400);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
         done();
