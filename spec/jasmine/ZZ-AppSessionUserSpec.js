@@ -491,7 +491,7 @@ describe("User Routes", function () {
         .send({})
         .end((_err, res) => {
           console.log("[chai] PUT /api/v2/gdpr response:", JSON.stringify(res, null, 2));
-          expect(res.status).to.equal(401); // should return 401 without proper token
+          expect(res.status).to.equal(400); // should return 400 consent missing
           done();
         });
     }, 20000);
