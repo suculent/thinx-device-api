@@ -4,9 +4,9 @@ module.exports = class THiNX extends EventEmitter {
 
   constructor(sqreen) {
 
-    this.sqreen = sqreen;
-
     super();
+
+    this.sqreen = sqreen;
 
     /*
      * Bootstrap banner section
