@@ -43,8 +43,22 @@ describe("Util", function () {
             console.log(`🚸 [chai] res header: ${arg1} ${arg2}`);
             // res.header("Content-Type", "application/json; charset=utf-8");
         };
-        let result = Util.ownerFromRequest(req);
+        let result = Util.responder(res, true, "message");
         console.log(`🚸 [chai] ownerFromRequest: ${result}`);
         expect(result).to.be.a('string');
+    });
+
+    it("should validate session with request", function () {
+        let req = {
+            session: {
+                owner: envi.dynamic.owner
+            },
+            body: {
+                owner: envi.dynamic.owner
+            }
+        };
+        let result = Util.validateSession(req);
+        console.log(`🚸 [chai] validateSession: ${result}`);
+        expect(result).to.equal(true);
     });
 });
