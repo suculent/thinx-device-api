@@ -380,7 +380,7 @@ describe("User Routes", function () {
       .catch((e) => { console.log(e); });
   }, 20000);
 
-  xit("POST /api/login (valid) with GDPR v2", function (done) {
+  it("POST /api/login (valid) with GDPR v2", function (done) {
     agent
       .post('/api/login')
       .send({ username: 'dynamic', password: 'dynamic', remember: false })
