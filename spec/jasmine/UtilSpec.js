@@ -42,9 +42,6 @@ describe("Util", function () {
             expect(arg1).to.equal('Content-Type');
             expect(arg2).to.equal('application/json; charset=utf-8');
         };
-        req.session.destroy = () => {
-            console.log(`🚸 [chai] validateSession destroy called (2)...`);
-        };
         Util.responder(res, true, "message");
     });
 
@@ -107,7 +104,7 @@ describe("Util", function () {
             headers: { },
             session: { },
             body: {
-                owner_ud: envi.dynamic.owner,
+                owner_id: envi.dynamic.owner,
                 api_key: envi.dynamic.api_key
             }
         };
