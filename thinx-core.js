@@ -466,17 +466,21 @@ module.exports = class THiNX extends EventEmitter {
         app._ws = {}; // list of all owner websockets
 
         function initLogTail() {
-          app.post("/api/user/logs/tail", (req2, res) => {
+
+          function logTailImpl(req2, res) {
             if (!(router.validateSession(req2, res))) return;
-            if (typeof (req2.body.build_id) === "undefined") {
-              router.respond(res, {
-                success: false,
-                status: "missing_build_id"
-              });
-              return;
-            }
+            if (typeof (req2.body.build_id) === "undefined") return router.respond(res, false, "missing_build_id");
             console.log(`Tailing build log for ${sanitka.udid(req2.body.build_id)}`);
+          }
+
+          app.post("/api/user/logs/tail", (req2, res) => {
+            logTailImpl(req2, res);
           });
+
+          app.post("/api/v2/logs/tail", (req2, res) => {
+            logTailImpl(req2, res);
+          });
+
         }
 
         function initSocket(ws, msgr, logsocket) {
