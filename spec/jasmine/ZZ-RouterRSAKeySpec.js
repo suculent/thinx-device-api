@@ -96,6 +96,7 @@ describe("RSA Keys (JWT)", function () {
             .get('/api/user/rsakey/list')
             .set('Authorization', jwt)
             .end((err, res) => {
+                console.log("RSA Key list result", res.text);
                 let r = JSON.parse(res.text);
                 expect(r.success).to.equal(true);
                 key_id = r.rsa_keys[0].filename;

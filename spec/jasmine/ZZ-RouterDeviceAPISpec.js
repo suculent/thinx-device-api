@@ -72,7 +72,7 @@ describe("Device API (noauth)", function () {
             .post('/api/device/envs')
             .send({})
             .end((err, res) => {
-                expect(res.status).to.equal(404);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -82,7 +82,7 @@ describe("Device API (noauth)", function () {
             .post('/api/device/detail')
             .send({})
             .end((err, res) => {
-                expect(res.status).to.equal(404);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -385,9 +385,8 @@ describe("Device + API (JWT+Key)", function () {
             .post('/api/device/detail')
             .send({ udid: envi.dynamic.udid })
             .end((err, res) => {
-                expect(res.status).to.equal(200);
+                expect(res.status).to.equal(401);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('detail_device_not_found'); // change response to json here and there!
                 done();
             });
     }, 20000);
