@@ -1,6 +1,6 @@
 {
   "name": "thinx",
-  "version": "1.5.1160",
+  "version": "1.6.1430",
   "description": "THiNX IoT Device Management API",
   "bugs": {
     "url": "https://github.com/suculent/thinx-device-api/issues"
@@ -14,13 +14,14 @@
   "scripts": {
     "sonar": "./scripts/99-sonar.sh",
     "snyk": "snyk test",
-    "snyk-protect": "snyk protect",
+    "snyk-protect": "snyk-protect",
     "test": "nyc jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./",
     "coverage": "npm run mocha",
     "mocha": "mocha spec/jasmine --delay=3000 --exit --timeout=5000; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls",
     "version": "npm run npm-auto-version",
     "postpublish": "git push origin --tags",
+    "split-tests": "if [[ $CIRCLE_NODE_INDEX == 1 ]]; then rm -rf ./spec/jasmine/ZZ*.js fi; if [[ $CIRCLE_NODE_INDEX == 2 ]]; then rm -rf ./spec/jasmine/0*.js fi",
     "prepare": "npm run snyk-protect"
   },
   "dependencies": {
@@ -81,7 +82,7 @@
     "sillyname": "^0.1.0",
     "simple-oauth2": "^2.5.2",
     "slack-notify": "^0.1.7",
-    "snyk": "^1.842.0",
+    "@snyk/protect": "^1.657.0",
     "socket.io": "^3.0.4",
     "socket.io-client": "^4.4.1",
     "sqreen": "^1.64.2",

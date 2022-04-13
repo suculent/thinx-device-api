@@ -5,6 +5,14 @@ let empty = __dirname + "/../empty.json";
 
 describe("Plugins", function () {
 
+    beforeAll(() => {
+        console.log(`🚸 [chai] >>> running Plugin spec`);
+      });
+    
+      afterAll(() => {
+        console.log(`🚸 [chai] <<< completed Plugin spec`);
+      });
+
     it("should not fail", async function () {
         let manager = new Plugins(this);
         await manager.loadFromConfig(config);

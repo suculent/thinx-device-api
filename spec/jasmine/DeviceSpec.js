@@ -1,5 +1,14 @@
 describe("Device", function() {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] >>> running Device spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] <<< completed Device spec`);
+  });
+
+
   var expect = require('chai').expect;
   var Device = require("../../lib/thinx/device"); var device = new Device();
   var ApiKey = require("../../lib/thinx/apikey"); var APIKey = new ApiKey();
@@ -14,7 +23,7 @@ describe("Device", function() {
   var crypto = require("crypto");
   var fake_mac = null;
 
-  crypto.randomBytes(6, function(err, buffer) {
+  crypto.randomBytes(6, function(_err, buffer) {
     var hexa = buffer.toString('hex');
     fake_mac = hexa.charAt(0) +
                hexa.charAt(1) + ":" +
@@ -66,9 +75,11 @@ describe("Device", function() {
     udid: "d6ff2bb0-df34-11e7-b351-eb37822aa174"
   };
 
+  let res = {};
+
   it("(01) API keys are required to do this on new instance", function(done) {    
-    APIKey.create( owner, "sample-key", function(success, object) {
-      expect(success).to.be.true;
+    APIKey.create( owner, "sample-device-key", function(success, object) {
+      expect(success).to.equal(true);
       expect(object).to.be.an('array');
       if (success) {
         apikey = object[0].hash;
@@ -79,22 +90,16 @@ describe("Device", function() {
   }, 5000);
 
   it("(02) should be able to register itself.", function(done) {
-    let ws = {};
+    res.end = () => {
+      //done(;)
+    };
     device.register(
-      {}, /* req */
       JRS,
       apikey,
-      ws,
-      function(success, response) {
-        if (success === false) {
-          console.log("[spec] registration error response:", response);
-          if (response.indexOf("owner_found_but_no_key") !== -1) {
-            done();
-            return;
-          }
-        }
+      res,
+      function(r, success, response) {
+        expect(success).to.equal(true);
         JRS.udid = response.registration.udid;
-        expect(success).to.be.true;
         expect(JRS.udid).to.be.a('string');
         done();
       });
@@ -106,8 +111,8 @@ describe("Device", function() {
       alias: Date().toString(),
       udid: JRS.udid // this device should not be deleted
     };
-    device.edit(owner, changes, (success, response) => {
-      expect(success).to.be.true;
+    device.edit(changes, (success, response) => {
+      expect(success).to.equal(true);
       expect(response).to.be.an('object');
       done();
     });
@@ -115,19 +120,19 @@ describe("Device", function() {
 
 
   it("(04) should receive different response for registered device", function (done) {
+    res.end = () => {
+      console.log("[chai] D(04) res end called...");
+      //done();
+    };
     device.register(
-      {}, /* req */
       JRS,
       apikey,
-      null,
-      function (success, response) {
+      res,
+      function (r, success, response) {
+        console.log("Device (04) response text:", {res}, {success}, {response});
         let obj = response;
         expect(obj).to.be.an('object');
-        if (success === false) {
-          expect(success).to.equal(false);
-        } else {
-          expect(success).to.equal(true);
-        }
+        expect(success).to.equal(true);
         done();
       });
     }, 5000);
@@ -137,12 +142,12 @@ describe("Device", function() {
       JRS, 
       function(success, response) {
       ott = response.ott;
-      expect(success).to.be.true;
+      expect(success).to.equal(true);
       expect(response).to.be.an('object');
       expect(response.ott).to.be.a('string');
       device.fetchOTT(ott, (err, ott_registration_request) => {
         expect(ott_registration_request).to.be.a('string'); // returns registration request
-        expect(err).to.be.null;
+        expect(err).to.be.a('null');
         done();
       });
     });
@@ -181,18 +186,17 @@ describe("Device", function() {
     expect(JRS2).to.be.an('object');
     expect(apikey).to.be.a('string');
     device.register(
-      {}, /* req */
       JRS2,
       apikey,
-      null,
-      function(success, response) {
+      res,
+      function(r, __success, response) {
         udid = response.registration.udid;
         JRS2.udid = udid;
         expect(udid).to.be.a('string');
         device.revoke(
           JRS2.udid,
           function(_success, _response) {
-            expect(_response.success).to.be.true;
+            expect(_response.success).to.equal(true);
             expect(_response.status).to.equal('device_marked_deleted');
             done();
         });
@@ -201,39 +205,26 @@ describe("Device", function() {
 
 
   it("(09) should be able to register second device for transfer", function(done) {
-    let ws = {};
     device.register(
-      {}, /* req */
       JRS3,
       apikey,
-      ws,
-      function(success, response) {
-        if (success === false) {
-          console.log("[spec] registration error response:", response);
-          if (response.indexOf("owner_found_but_no_key") !== -1) {
-            done();
-            return;
-          }
-        }
+      res,
+      function(r, success, response) {
+        JRS3.udid = response.registration.udid;
+        expect(success).to.equal(true);
         done();
       });
   }, 15000); // register
 
-  it("(10) should be able to register another device for different owner", function(done) {
-    let ws = {};
+  it("(10) should NOT be able to register another device for different owner with this owner's apikey", function(done) {
     device.register(
-      {}, /* req */
       JRS4,
       apikey,
-      ws,
-      function(success, response) {
-        if (success === false) {
-          console.log("[spec] registration error response:", response);
-          if (response.indexOf("owner_found_but_no_key") !== -1) {
-            done();
-            return;
-          }
-        }
+      res,
+      function(r, success, response) {
+        console.log("[spec] registration response:", response);
+        expect(response).to.equal('apikey_not_found');
+        expect(success).to.equal(false);        
         done();
       });
   }, 15000); // register

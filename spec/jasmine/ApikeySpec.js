@@ -8,6 +8,14 @@ var apikey = new APIKey();
 
 describe("API Key", function() {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] >>> running API Key spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] <<< completed API Key spec`);
+  });
+
    //list: function(invalid-owner, callback)
    it("(00) should be able to list empty API Keys", function (done) {
     apikey.list(
@@ -29,6 +37,18 @@ describe("API Key", function() {
         } else {
           console.log("[spec] APIKey failed: ",{array_or_error});
         }
+        expect(success).to.equal(true);
+        expect(array_or_error[0].key).to.be.a('string');
+        done();
+      }
+    );
+  });
+
+  it("(01b) should be able to generate another API Key", function(done) {
+    apikey.create(
+      owner,
+      "sample-key-2",
+      (success, array_or_error) => {
         expect(success).to.equal(true);
         expect(array_or_error[0].key).to.be.a('string');
         done();
@@ -78,16 +98,16 @@ describe("API Key", function() {
   it("04 - should be able to revoke API Keys", function(done) {
     apikey.create(
       owner,
-      "sample-key",
+      "sample-key-for-revocation",
       (success, array_or_error) => {
-        if (success) {
-          console.log("[spec] APIKey revoking: ", JSON.stringify(array_or_error[0]));
-          generated_key_hash = sha256(array_or_error[0].key);
-          expect(generated_key_hash).to.be.a('string');
-        } else {
-          console.log("[spec] APIKey failed: ",{array_or_error});
-        }
+
         expect(success).to.equal(true);
+      
+        console.log("[spec] APIKey revoking: ", JSON.stringify(array_or_error[0]));
+        expect(array_or_error[0].alias).to.equal("sample-key-for-revocation");
+        generated_key_hash = sha256(array_or_error[0].key);
+        expect(generated_key_hash).to.be.a('string');
+      
         expect(array_or_error[0].key).to.be.a('string');
         apikey.revoke(
           owner,
@@ -128,13 +148,9 @@ describe("API Key", function() {
     apikey.get_first_apikey(
       owner,
       (success, object) => {
-        console.log(`[chai] (07) ${success} ${object}`);
+        console.log(`🚸 [chai] (07) success ${success} first apikey ${object}`);
         expect(success).to.equal(true);
-        if (success) {
-          expect(object).to.be.a('string');
-        } else {
-          console.log("[spec] (07) API Key Listing failed:", {object});
-        }
+        expect(object).to.be.a('string');
         done();
       });
   });

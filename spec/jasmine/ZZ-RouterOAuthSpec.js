@@ -12,10 +12,15 @@ describe("OAuth", function () {
     let thx;
 
     beforeAll((done) => {
+        console.log(`🚸 [chai] >>> running OAuth spec`);
         thx = new THiNX();
         thx.init(() => {
             done();
         });
+    });
+    
+    afterAll(() => {
+        console.log(`🚸 [chai] <<< completed OAuth spec`);
     });
 
     // Slack OAuth Integration
@@ -43,37 +48,29 @@ describe("OAuth", function () {
     // Github OAuth
 
     it("GET /api/oauth/github", function (done) {
-        console.log("🚸 [chai] GET /api/oauth/github request");
         chai.request(thx.app)
             .get('/api/oauth/github')
             .end((err, res) => {
-                console.log("🚸 [chai] response /api/oauth/github status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
                 done();
             });
     }, 20000);
 
     it("GET /api/oauth/github/callback", function (done) {
-        console.log("🚸 [chai] request /api/oauth/github/callback");
         chai.request(thx.app)
             .get('/api/oauth/github/callback')
             .end((err, res) => {
                 console.log("🚸 [chai] response /api/oauth/github/callback status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(401); // only in test now because of unset event listeners!
                 done();
             });
     }, 20000);
 
     it("GET /api/oauth/github/callback?code=B", function (done) {
-        console.log("🚸 [chai] request /api/oauth/github/callback?code=B");
         chai.request(thx.app)
             .get('/api/oauth/github/callback?code=B')
             .end((err, res) => {
-                console.log("🚸 [chai] response /api/oauth/github/callback?code=B status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(401); // only in test now because of unset event listeners!
                 done();
             });
     }, 20000);
@@ -84,21 +81,16 @@ describe("OAuth", function () {
         chai.request(thx.app)
             .get('/api/oauth/google')
             .end((err, res) => {
-                console.log("🚸 [chai] response /api/oauth/google status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
                 done();
             });
     }, 20000);
 
     it("GET /api/oauth/google/callback", function (done) {
-        console.log("🚸 [chai] response /api/oauth/google/callback");
         chai.request(thx.app)
             .get('/api/oauth/google/callback')
             .end((err, res) => {
-                console.log("🚸 [chai] response /api/oauth/google/callback status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
                 done();
             });
     }, 20000);

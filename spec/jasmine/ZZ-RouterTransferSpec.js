@@ -14,10 +14,15 @@ let thx;
 describe("Device Ownership Transfer (noauth)", function () {
 
     beforeAll((done) => {
+        console.log(`🚸 [chai] >>> running Transfer (noauth) spec`);
         thx = new THiNX();
         thx.init(() => {
             done();
         });
+    });
+
+    afterAll(() => {
+        console.log(`🚸 [chai] <<< completed Transfer (noauth) spec`);
     });
 
     it("POST /api/transfer/request (noauth, invalid)", function (done) {
@@ -26,7 +31,7 @@ describe("Device Ownership Transfer (noauth)", function () {
             .send({})
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/transfer/request (noauth, invalid) response:", res.text, " status:", res.status);
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 //expect(res).to.be.html; // headers incorrect!
                 done();
             });
@@ -58,8 +63,9 @@ describe("Device Ownership Transfer (noauth)", function () {
             .get('/api/transfer/accept')
             .end((err, res) => {
                 console.log("🚸 [chai] GET /api/transfer/accept (noauth, invalid) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
                 done();
             });
     }, 20000);
@@ -83,27 +89,23 @@ describe("Transfer (JWT)", function () {
     let jwt;
   
     beforeAll((done) => {
+        console.log(`🚸 [chai] >>> running Transfer (JWT) spec`);
         agent = chai.request.agent(thx.app);
         agent
             .post('/api/login')
             .send({ username: 'dynamic', password: 'dynamic', remember: false })
             .catch((e) => { console.log(e); })
             .then(function (res) {
-                // console.log(`[chai] Transformer (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
                 expect(res).to.have.cookie('x-thx-core');
                 let body = JSON.parse(res.text);
                 jwt = 'Bearer ' + body.access_token;
                 done();
-            })
-    });
-  
-    afterAll((done) => {
-        agent.close();
-        done();
+            });
     });
 
-    //let trid_1 = null;
-    //let trid_2 = null;
+    afterAll(() => {
+        console.log(`🚸 [chai] <<< completed Transfer (JWT) spec`);
+    });
 
     // save trid for accept and decline, create valid version of this; needs at least two owners and one device
     it("POST /api/transfer/request (jwt, invalid)", function (done) {
@@ -148,9 +150,10 @@ describe("Transfer (JWT)", function () {
             .get('/api/transfer/accept')
             .set('Authorization', jwt)
             .end((err, res) => {
-                console.log("🚸 [chai] GET /api/transfer/accept (noauth, invalid) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                console.log("🚸 [chai] GET /api/transfer/accept (jwt, invalid) response:", res.text, " status:", res.status);
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
                 done();
             });
     }, 20000);
@@ -161,9 +164,9 @@ describe("Transfer (JWT)", function () {
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/transfer/accept (jwt, invalid) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
                 done();
             });
     }, 20000);
@@ -174,9 +177,9 @@ describe("Transfer (JWT)", function () {
             .set('Authorization', jwt)
             .send({ owner: null, transfer_id: null, udid: null})
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/transfer/accept (noauth, null) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
                 done();
             });
     }, 20000);

@@ -4,7 +4,15 @@ var Repository = require('../../lib/thinx/repository');
 // tests are run from ROOT
 var repo_path = __dirname;
 
-describe("Repository Watcher", function() {
+describe("Repository", function() {
+
+  beforeAll(() => {
+    console.log(`🚸 [chai] >>> running Repository spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] <<< completed Repository spec`);
+  });
 
   var watcher = new Repository(/* mock_queue */);
 

@@ -1,5 +1,14 @@
 describe("GDPR", function () {
 
+    beforeAll(() => {
+        console.log(`🚸 [chai] >>> running GDPR spec`);
+      });
+    
+      afterAll(() => {
+        console.log(`🚸 [chai] <<< completed GDPR spec`);
+      });
+    
+
     var envi = require("../_envi.json");
     var expect = require('chai').expect;
     let GDPR = require("../../lib/thinx/gdpr");
@@ -44,7 +53,7 @@ describe("GDPR", function () {
         let gdpr = new GDPR();
         console.log("[spec] 3 months - 24 hours before deletion");
         gdpr.notify24(user, (error) => {
-            console.log("[spec] 24 hours before deletion ERROR:", error);
+            if (error) console.log("[spec] 24 hours before deletion ERROR:", error);
             done();
         });
     }, 10000);
@@ -59,7 +68,7 @@ describe("GDPR", function () {
         user.last_update = d2;
         console.log("[spec] 168  hours before deletion");
         gdpr.notify168(user, (error) => {
-            console.log("[spec] 168 hours before deletion ERROR", error);
+            if (error) console.log("[spec] 168 hours before deletion ERROR", error);
             done();
         });
     }, 10000);

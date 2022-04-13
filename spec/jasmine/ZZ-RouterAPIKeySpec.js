@@ -18,6 +18,7 @@ let jwt;
 describe("API Keys (noauth)", function () {
 
     beforeAll((done) => {
+        console.log(`🚸 [chai] >>> running API Keys (noauth) spec`);
         thx = new THiNX();
         thx.init(() => {
             agent = chai.request.agent(thx.app);
@@ -26,7 +27,7 @@ describe("API Keys (noauth)", function () {
                 .send({ username: 'dynamic', password: 'dynamic', remember: false })
                 .catch((e) => { console.log(e); })
                 .then(function (res) {
-                    console.log(`[chai] beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
+                    console.log(`🚸 [chai] beforeAll POST /api/login (valid) response: ${res}`);
                     expect(res).to.have.cookie('x-thx-core');
                     let body = JSON.parse(res.text);
                     jwt = 'Bearer ' + body.access_token;
@@ -34,6 +35,8 @@ describe("API Keys (noauth)", function () {
                 });
         });
     });
+
+   
 
     // create
     it("POST /api/user/apikey", function (done) {
@@ -43,7 +46,7 @@ describe("API Keys (noauth)", function () {
                 'alias': 'mock-apikey-alias'
             })
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -56,7 +59,7 @@ describe("API Keys (noauth)", function () {
                 'alias': 'mock-apikey-alias'
             })
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -66,7 +69,7 @@ describe("API Keys (noauth)", function () {
         chai.request(thx.app)
             .get('/api/user/apikey/list')
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -81,6 +84,7 @@ describe("API Keys (JWT)", function () {
 
     afterAll((done) => {
         agent.close();
+        console.log(`🚸 [chai] <<< completed API Keys (noauth) spec`);
         done();
     });
 
@@ -127,6 +131,23 @@ describe("API Keys (JWT)", function () {
             });
     }, 20000);
 
+    it("POST /api/user/apikey (3)", function (done) {
+        chai.request(thx.app)
+            .post('/api/user/apikey')
+            .set('Authorization', jwt)
+            .send({
+                'alias': 'mock-apikey-alias-3'
+            })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                let j = JSON.parse(res.text);
+                expect(j.success).to.equal(true);
+                expect(j.api_key).to.be.a('string');
+                expect(j.hash).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
     // revoke
     it("POST /api/user/apikey/revoke (single)", function (done) {
         expect(created_api_key).not.to.be.null;
@@ -141,7 +162,7 @@ describe("API Keys (JWT)", function () {
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
                 expect(j.revoked).to.be.an('array');
-                console.log(`[chai] API Keys in revocation:", ${j.api_keys} from res ${res.text}`);
+                console.log(`🚸 [chai] API Keys in revocation:", ${JSON.stringify(j)} from res ${res.text}`);
                 //expect(aks.length >= 1);
                 done();
             });
@@ -157,7 +178,7 @@ describe("API Keys (JWT)", function () {
             })
             .end((err, res) => {
                 //  {"revoked":["7663ca65a23d759485fa158641727597256fd7eac960941fbb861ab433ab056f"],"success":true}
-                console.log(`[chai] POST /api/user/apikey/revoke (multiple) response: ${res.text}, status ${res.status}`);
+                console.log(`🚸 [chai] POST /api/user/apikey/revoke (multiple) response: ${res.text}, status ${res.status}`);
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
@@ -177,7 +198,7 @@ describe("API Keys (JWT)", function () {
             })
             .end((err, res) => {
                 //  {"revoked":["7663ca65a23d759485fa158641727597256fd7eac960941fbb861ab433ab056f"],"success":true}
-                console.log(`[chai] POST /api/user/apikey/revoke (multiple) response: ${res.text}, status ${res.status}`);
+                console.log(`🚸 [chai] POST /api/user/apikey/revoke (multiple) response: ${res.text}, status ${res.status}`);
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);

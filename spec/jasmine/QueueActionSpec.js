@@ -1,5 +1,13 @@
 describe("Queue Action", function() {
 
+    beforeAll(() => {
+        console.log(`🚸 [chai] >>> running Queue Action spec`);
+      });
+    
+      afterAll(() => {
+        console.log(`🚸 [chai] <<< completed Queue Action spec`);
+      });
+
     var expect = require('chai').expect;
 
     var Action = require("../../lib/thinx/queue_action");

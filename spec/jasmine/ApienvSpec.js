@@ -1,5 +1,14 @@
 describe("API Env", function () {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] >>> running APIEnv spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] <<< completed APIEnv spec`);
+  });
+
+
   var expect = require('chai').expect;
 
   var envi = require("../_envi.json");

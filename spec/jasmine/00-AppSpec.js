@@ -12,11 +12,17 @@ let thx;
 describe("App should support", function () {
 
   beforeAll((done) => {
+    console.log(`🚸 [chai] >>> running App spec`);
     thx = new THiNX();
     thx.init(() => {
       done();
     });
   });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] <<< completed App spec`);
+  });
+
 
   it("GET / [healthcheck]", function (done) {
     chai.request(thx.app)
@@ -79,6 +85,52 @@ describe("AppSpec Session Management", function () {
       .send({
         'username': 'test',
         'password': 'test',
+        remember: false
+      })
+      .end((err, res) => {
+        expect(res.status).to.equal(403);
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('{"success":false,"status":"invalid_credentials"}');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/login (invalid) 2", function (done) {
+    chai.request(thx.app)
+      .post('/api/login')
+      .send({
+        'username': 'test',
+        'password': 'tset',
+        remember: false
+      })
+      .end((err, res) => {
+        expect(res.status).to.equal(403);
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('{"success":false,"status":"invalid_credentials"}');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/login (invalid) 3", function (done) {
+    chai.request(thx.app)
+      .post('/api/login')
+      .send({
+        'password': 'tset',
+        remember: false
+      })
+      .end((err, res) => {
+        expect(res.status).to.equal(403);
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('{"success":false,"status":"invalid_credentials"}');
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/login (invalid) 4", function (done) {
+    chai.request(thx.app)
+      .post('/api/login')
+      .send({
+        'username': 'test',
         remember: false
       })
       .end((err, res) => {

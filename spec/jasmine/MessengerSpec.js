@@ -14,6 +14,15 @@ var user = new User();
 
 describe("Messenger", function() {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] >>> running Messenger spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] <<< completed Messenger spec`);
+  });
+
+
   var ak = envi.ak;
 
   // This UDID is to be deleted at the end of test.
@@ -29,12 +38,12 @@ describe("Messenger", function() {
   };
 
   it("requires to register sample build device", function(done) {
+    let res = {};
     device.register(
-      {}, /* req */
       TEST_DEVICE_6, /* reg.registration */
       ak,
-      {}, /* ws */
-      (success, response) => {
+      res,
+      (r, success, response) => {
         TEST_DEVICE_6.udid = response.registration.udid;
         expect(success).to.equal(true);
         expect(TEST_DEVICE_6).to.be.a('object');
@@ -137,7 +146,6 @@ describe("Messenger", function() {
   });
 
   it("should be able to survive message_callback call", function(done) {
-    //messenger.get_result_or_callback("/owner/device/test", "Bare no-NID message");
     messenger.data(test_owner, udid, (error, data) => {
       expect(error).to.equal(false);
       expect(data).to.be.a('string');

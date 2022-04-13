@@ -1,16 +1,21 @@
+var expect = require('chai').expect;
+var User = require("../../lib/thinx/owner");
+var user = new User();
+var envi = require("../_envi.json");
+var owner = envi.oid;
+var email = envi.email;
+var test_info = envi.test_info;
+const user_body = envi.test_info;
+
 describe("Owner", function () {
 
-  var expect = require('chai').expect;
+  beforeAll(() => {
+    console.log(`🚸 [chai] >>> running Owner spec`);
+  });
 
-  var User = require("../../lib/thinx/owner");
-  var user = new User();
-
-  var envi = require("../_envi.json");
-
-  var owner = envi.oid;
-  var email = envi.email;
-  var test_info = envi.test_info;
-  const user_body = envi.test_info;
+  afterAll(() => {
+    console.log(`🚸 [chai] <<< completed Owner spec`);
+  });
 
   // activation key is provided by e-mail for security,
   // cimrman@thinx.cloud receives his activation token in response
@@ -48,7 +53,6 @@ describe("Owner", function () {
 
   it("(03) should be able to fetch owner profile", function (done) {
     user.profile(owner, (success, response) => {
-      console.log("[spec] (03) user profile:", JSON.stringify(response, null, 4));
       expect(response).to.be.an('object');
       expect(success).to.equal(true);
       done();
@@ -114,14 +118,14 @@ describe("Owner", function () {
 
   it("(09) should support stringToBoolean", function () {
     let t = user.stringToBoolean('true');
-    expect(t).to.be.true;
+    expect(t).to.equal(true);
     let f = user.stringToBoolean('false');
     expect(f).to.be.false;
   });
 
   it("(10) should support sendMail", function (done) {
 
-    var email = {
+    var theEmail = {
       from: 'THiNX API <api@thinx.cloud>',
       to: "cimrman@thinx.cloud",
       subject: "Your data will be deleted",
@@ -132,7 +136,7 @@ describe("Owner", function () {
         "</p><p>This e-mail was sent automatically. Please do not reply.</p>Sincerely your THiNX</p>"
     };
 
-    user.sendMail(email, "mail_24", (result) => {
+    user.sendMail(theEmail, "mail_24", (result) => {
       expect(result).to.be.false;
       done();
     });

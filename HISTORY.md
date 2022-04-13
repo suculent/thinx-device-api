@@ -2,6 +2,12 @@
 
 ## HISTORY
 
+13/4/2022 1.6.1430
+
+» This version is really close to be a final THiNX version for 1.x roadmap. Internals are already refactored to provide API v2 for newly prepared UI, along with lots of inside refactoring and optimizations, that (thanks to unit and integration test) should have no impact on usability or reverse-compatibility (unless depending on error codes that have been precisioned in both API versions).
+
+» In pursuit of the test coverage, this version is about 25% more testable and maintainable than 1.5 branch. At current 67% of test coverage, it aims to go over 80% on all classes where such integration testing is possible (except for e.g. Google and GitHub OAuth login and Slack integration after account activation).
+
 1/2/2022 1.5.6
 
 » Dependency update, major version bump

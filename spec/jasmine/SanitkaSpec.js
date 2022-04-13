@@ -1,5 +1,13 @@
 describe("Sanitka", function () {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] >>> running Sanitka spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] <<< completed Sanitka spec`);
+  });
+
   var expect = require('chai').expect;
   var Sanitka = require('../../lib/thinx/sanitka'); var sanitka = new Sanitka();
 
