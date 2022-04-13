@@ -177,8 +177,8 @@ describe("Device + API (JWT+Key)", function () {
             .set('Authentication', ak)
             .send({ registration: {} })
             .end((err, res) => {
-                console.log("[chai] POST /device/register (jwt, invalid body) response", res.text, res.status);
-                expect(res.status).to.equal(200);
+                //console.log("[chai] POST /device/register (jwt, invalid body) response", res.text, res.status);
+                expect(res.status).to.equal(400);
                 expect(res.text).to.be.a('string');
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(false);
