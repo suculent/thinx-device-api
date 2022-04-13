@@ -165,14 +165,14 @@ describe("Meshes (JWT)", function () {
         done();
     });
 
-    it("GET /api/mesh/list (jwt, invalid)", function (done) {
+    it("GET /api/mesh/list (jwt, valid)", function (done) {
         agent
             .get('/api/mesh/list')
             .set('Authorization', jwt)
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
-                expect(j.status).to.equal(true);
+                expect(j.success).to.equal(true);
                 //expect(res.text).to.equal('{"success":true,"mesh_ids":[{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}]}');
                 done();
             });

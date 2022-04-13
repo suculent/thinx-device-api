@@ -397,7 +397,7 @@ describe("Device + API (JWT+Key)", function () {
             .send({ udid: envi.udid })
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/device/detail (session, udid) 2 response:", res.text, " status:", res.status);
-                expect(res.status).to.equal(200);
+                expect(res.status).to.equal(401);
                 expect(res.text).to.be.a('string');
                 let j = JSON.parse(res.text);
                 console.log("[spec] [chai] detail:", JSON.stringify(j, null, 2));

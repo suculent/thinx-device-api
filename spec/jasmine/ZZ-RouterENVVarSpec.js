@@ -111,7 +111,7 @@ describe("ENV Vars (JWT)", function () {
       .end((err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":true,"key":"env-name","value":"env-value","object":"env-name"}');
+        expect(res.text).to.equal('{"success":true,"status":"env-name"}');
         done();
       });
   }, 20000);
