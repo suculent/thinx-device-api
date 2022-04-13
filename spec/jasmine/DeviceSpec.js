@@ -1,3 +1,5 @@
+const { CONSOLE_APPENDER } = require('karma/lib/constants');
+
 describe("Device", function() {
 
   beforeAll(() => {
@@ -121,14 +123,15 @@ describe("Device", function() {
 
   it("(04) should receive different response for registered device", function (done) {
     res.end = () => {
+      console.log("[chai] D(04) res end called...");
       //done();
     };
     device.register(
       JRS,
       apikey,
       res,
-      function (success, response) {
-        console.log("Device (04) response text:", {success}, {response});
+      function (success, response, arg3) {
+        console.log("Device (04) response text:", {success}, {response}, {arg3});
         let obj = response;
         expect(obj).to.be.an('object');
         expect(success).to.equal(true);
@@ -141,7 +144,7 @@ describe("Device", function() {
       JRS, 
       function(success, response) {
       ott = response.ott;
-      expect(success).to.equal('true');
+      expect(success).to.equal(true);
       expect(response).to.be.an('object');
       expect(response.ott).to.be.a('string');
       device.fetchOTT(ott, (err, ott_registration_request) => {

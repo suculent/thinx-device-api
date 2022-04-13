@@ -20,7 +20,7 @@ describe("Device API (noauth)", function () {
         });
     });
 
-    it("POST /device/register", function (done) {
+    it("POST /device/register A", function (done) {
         chai.request(thx.app)
             .post('/device/register')
             .send()
@@ -31,12 +31,12 @@ describe("Device API (noauth)", function () {
             });
     }, 20000);
 
-    it("POST /device/register", function (done) {
+    it("POST /device/register B", function (done) {
         chai.request(thx.app)
             .post('/device/register')
             .send({ registration: {} })
             .end((err, res) => {
-                expect(res.status).to.equal(200);
+                expect(res.status).to.equal(400);
                 //expect(res.text).to.be.a('string');
                 done();
             });
@@ -309,6 +309,7 @@ describe("Device + API (JWT+Key)", function () {
             .set('Authentication', ak)
             .send({ changes: { alias: "edited-alias" } })
             .end((err, res) => {
+                console.log("[chai] POST /api/device/edit (jwt, invalid) response:", res.text, "status", res.status);
                 //expect(res.status).to.equal(401);
                 done();
             });

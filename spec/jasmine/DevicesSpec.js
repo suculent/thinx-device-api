@@ -48,7 +48,7 @@ describe("Devices", function() {
     platform: "arduino"
   };
 
-  let res = {};
+  let res = { info: "mock" };
 
   it("(01) should be able to register sample device", function(done) {
     device.register(
@@ -122,7 +122,7 @@ describe("Devices", function() {
           expect(_success).to.equal(true);
           expect(_response).to.be.a('string');
           done();
-        }, {});
+        }, res);
       });
   }, 15000); // register
 });
