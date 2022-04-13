@@ -48,12 +48,13 @@ describe("Devices", function() {
     platform: "arduino"
   };
 
+  let res = {};
+
   it("(01) should be able to register sample device", function(done) {
     device.register(
-      {}, /* req */
       TEST_DEVICE, /* reg.registration */
       ak,
-      {}, /* ws */
+      res,
       (success, response) => {
         TEST_DEVICE.udid = response.registration.udid;
         expect(success).to.be.true;
@@ -108,10 +109,9 @@ describe("Devices", function() {
 
   it("(06) should be able to revoke another sample device", function(done) {
     device.register(
-      {}, /* req */
       TEST_DEVICE4, /* reg.registration */
       ak,
-      {}, /* ws */
+      res,
       (success, response) => {
         TEST_DEVICE4.udid = response.registration.udid;
         expect(success).to.be.true;

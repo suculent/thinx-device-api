@@ -75,6 +75,8 @@ describe("Device", function() {
     udid: "d6ff2bb0-df34-11e7-b351-eb37822aa174"
   };
 
+  let res = {};
+
   it("(01) API keys are required to do this on new instance", function(done) {    
     APIKey.create( owner, "sample-device-key", function(success, object) {
       expect(success).to.be.true;
@@ -88,12 +90,13 @@ describe("Device", function() {
   }, 5000);
 
   it("(02) should be able to register itself.", function(done) {
-    let ws = {};
+    res.end = () => {
+      //done(;)
+    };
     device.register(
-      {}, /* req */
       JRS,
       apikey,
-      ws,
+      res,
       function(success, response) {
         expect(success).to.equal(true);
         JRS.udid = response.registration.udid;
@@ -117,11 +120,13 @@ describe("Device", function() {
 
 
   it("(04) should receive different response for registered device", function (done) {
+    res.end = () => {
+      //done(;)
+    };
     device.register(
-      {}, /* req */
       JRS,
       apikey,
-      null,
+      res,
       function (success, response) {
         console.log("Device (04) response text:", {success}, {response});
         let obj = response;
@@ -180,10 +185,9 @@ describe("Device", function() {
     expect(JRS2).to.be.an('object');
     expect(apikey).to.be.a('string');
     device.register(
-      {}, /* req */
       JRS2,
       apikey,
-      null,
+      res,
       function(success, response) {
         udid = response.registration.udid;
         JRS2.udid = udid;
@@ -202,10 +206,9 @@ describe("Device", function() {
   it("(09) should be able to register second device for transfer", function(done) {
     let ws = {};
     device.register(
-      {}, /* req */
       JRS3,
       apikey,
-      ws,
+      res,
       function(success, response) {
         JRS3.udid = response.registration.udid;
         expect(success).to.equal(true);
@@ -216,10 +219,9 @@ describe("Device", function() {
   it("(10) should NOT be able to register another device for different owner with this owner's apikey", function(done) {
     let ws = {};
     device.register(
-      {}, /* req */
       JRS4,
       apikey,
-      ws,
+      res,
       function(success, response) {
         console.log("[spec] registration response:", response);
         expect(response).to.equal('apikey_not_found');

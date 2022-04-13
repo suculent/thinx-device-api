@@ -96,11 +96,11 @@ describe("Builder", function () {
   });
 
   it("requires to register sample build device and attach source", function (done) {
+    let res = {};
     device.register(
-      {}, /* req */
       TEST_DEVICE_5, /* reg.registration */
       ak,
-      {}, /* ws */
+      res,
       (success, response) => {
         if (success === false) {
           console.log("(01) registration response", response);

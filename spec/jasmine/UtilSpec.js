@@ -111,4 +111,32 @@ describe("Util", function () {
         let result = Util.validateSession(req);
         expect(result).to.equal(true);
     });
+
+    it("should respond with buffer", function (done) {
+        let res = { object: true };
+        res.end = (body) => {
+            expect(body).to.be.a('string');
+            done();
+        };
+        res.header = (arg1, arg2) => {
+            expect(arg1).to.equal('Content-Type');
+            console.log("should 'responder' with buffer", arg2);
+            // expect(arg2).to.equal('application/json; charset=utf-8');
+        };
+        Util.respond(res, new Buffer("message"));
+    });
+
+    it("should support responder with buffer", function (done) {
+        let res = { object: true };
+        res.end = (body) => {
+            expect(body).to.be.a('string');
+            done();
+        };
+        res.header = (arg1, arg2) => {
+            expect(arg1).to.equal('Content-Type');
+            console.log("should 'respond' with buffer", arg2);
+            // expect(arg2).to.equal('application/json; charset=utf-8');
+        };
+        Util.responder(res, true, new Buffer("message"));
+    });
 });

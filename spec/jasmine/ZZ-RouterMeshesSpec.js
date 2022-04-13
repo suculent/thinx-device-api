@@ -185,7 +185,7 @@ describe("Meshes (JWT)", function () {
             .send({ owner_id: "mock-owner-id", apikey: "mock-api-key", alias: "mock-mesh-alias" })
             .end((err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"reason":"OWNER_INVALID"}');
+                expect(res.text).to.equal('{"success":false,"status":"owner_invalid"}');
                 done();
             });
     }, 20000);
@@ -199,7 +199,7 @@ describe("Meshes (JWT)", function () {
                 let r = JSON.parse(res.text);
                 mesh_id = r.mesh_id;
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"status":"Owner ID missing in request body."}');
+                expect(res.text).to.equal('{"success":false,"status":"owner_id_missing"}');
                 done();
             });
     }, 20000);
@@ -212,7 +212,7 @@ describe("Meshes (JWT)", function () {
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"Mesh ID missing in request body."}');
+                expect(res.text).to.equal('{"success":false,"status":"mesh_id_missing"}');
                 done();
             });
     }, 20000);
@@ -371,6 +371,7 @@ describe("Meshes (JWT)", function () {
             .set('Authorization', jwt)
             .send({ alias: "mock-mesh-alias-3", owner_id: envi.dynamic.owner, mesh_id: 'mock-mesh-id-3' })
             .end((err, res) => {
+                console.log("[chai] PUT /api/v2/mesh response:", res.status, res.text);
                 let r = JSON.parse(res.text);
                 mesh_id = r.mesh_ids.mesh_id;
                 expect(res.status).to.equal(200);
