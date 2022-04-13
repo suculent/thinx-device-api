@@ -15,7 +15,7 @@ describe("Transfer", function () {
   beforeAll((done) => {
     console.log(`🚸 [chai] >>> running Transfer spec`);
     devices.list(envi.oid, (success, response) => {
-      expect(success).to.be.true;
+      expect(success).to.equal(true);
       expect(response).to.be.a('object');
       console.log("[spec] [transfer] BEFORE device list:", JSON.stringify(response, null, 2));
       done();

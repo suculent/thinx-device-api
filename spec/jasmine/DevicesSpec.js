@@ -57,7 +57,7 @@ describe("Devices", function() {
       res,
       (success, response) => {
         TEST_DEVICE.udid = response.registration.udid;
-        expect(success).to.be.true;
+        expect(success).to.equal(true);
         expect(TEST_DEVICE).to.be.an('object');
         expect(response.registration).to.be.an('object');
         expect(TEST_DEVICE.udid).to.be.a('string');
@@ -69,7 +69,7 @@ describe("Devices", function() {
   
   it("(02) should be able to list devices for owner", function(done) {
     devices.list(owner, (success, response) => {
-      expect(success).to.be.true;
+      expect(success).to.equal(true);
       expect(response).to.be.a('object');
       done();
     });
@@ -89,7 +89,7 @@ describe("Devices", function() {
       udid: TEST_DEVICE.udid
     };
     devices.attach(owner, body, (res, success, response) => {
-      expect(success).to.be.true;
+      expect(success).to.equal(true);
       expect(response).to.be.a('string');
       done();
     }, {});
@@ -100,7 +100,7 @@ describe("Devices", function() {
       udid: TEST_DEVICE.udid
     };
     devices.detach(body, (res, success, response) => {
-      expect(success).to.be.true;
+      expect(success).to.equal(true);
       expect(response).to.be.a('string');
       expect(response).to.equal('detached');
       done();
@@ -114,12 +114,12 @@ describe("Devices", function() {
       res,
       (success, response) => {
         TEST_DEVICE4.udid = response.registration.udid;
-        expect(success).to.be.true;
+        expect(success).to.equal(true);
         var body = {
           udid: TEST_DEVICE4.udid
         };
         devices.revoke(owner, body, (res, _success, _response) => {
-          expect(_success).to.be.true;
+          expect(_success).to.equal(true);
           expect(_response).to.be.a('string');
           done();
         }, {});

@@ -23,7 +23,7 @@ describe("Device", function() {
   var crypto = require("crypto");
   var fake_mac = null;
 
-  crypto.randomBytes(6, function(err, buffer) {
+  crypto.randomBytes(6, function(_err, buffer) {
     var hexa = buffer.toString('hex');
     fake_mac = hexa.charAt(0) +
                hexa.charAt(1) + ":" +
@@ -79,7 +79,7 @@ describe("Device", function() {
 
   it("(01) API keys are required to do this on new instance", function(done) {    
     APIKey.create( owner, "sample-device-key", function(success, object) {
-      expect(success).to.be.true;
+      expect(success).to.equal(true);
       expect(object).to.be.an('array');
       if (success) {
         apikey = object[0].hash;
@@ -112,7 +112,7 @@ describe("Device", function() {
       udid: JRS.udid // this device should not be deleted
     };
     device.edit(changes, (success, response) => {
-      expect(success).to.be.true;
+      expect(success).to.equal(true);
       expect(response).to.be.an('object');
       done();
     });
@@ -141,12 +141,12 @@ describe("Device", function() {
       JRS, 
       function(success, response) {
       ott = response.ott;
-      expect(success).to.be.true;
+      expect(success).to.be.a('true');
       expect(response).to.be.an('object');
       expect(response.ott).to.be.a('string');
       device.fetchOTT(ott, (err, ott_registration_request) => {
         expect(ott_registration_request).to.be.a('string'); // returns registration request
-        expect(err).to.be.null;
+        expect(err).to.be.a('null');
         done();
       });
     });
@@ -188,14 +188,14 @@ describe("Device", function() {
       JRS2,
       apikey,
       res,
-      function(success, response) {
+      function(__success, response) {
         udid = response.registration.udid;
         JRS2.udid = udid;
         expect(udid).to.be.a('string');
         device.revoke(
           JRS2.udid,
           function(_success, _response) {
-            expect(_response.success).to.be.true;
+            expect(_response.success).to.equal(true);
             expect(_response.status).to.equal('device_marked_deleted');
             done();
         });
@@ -204,7 +204,6 @@ describe("Device", function() {
 
 
   it("(09) should be able to register second device for transfer", function(done) {
-    let ws = {};
     device.register(
       JRS3,
       apikey,
@@ -217,7 +216,6 @@ describe("Device", function() {
   }, 15000); // register
 
   it("(10) should NOT be able to register another device for different owner with this owner's apikey", function(done) {
-    let ws = {};
     device.register(
       JRS4,
       apikey,

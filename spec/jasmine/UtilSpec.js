@@ -40,7 +40,7 @@ describe("Util", function () {
         };
         res.header = (arg1, arg2) => {
             expect(arg1).to.equal('Content-Type');
-            // expect(arg2).to.equal('application/json; charset=utf-8');
+            expect(arg2).to.equal('application/json; charset=utf-8');
         };
         Util.responder(res, true, "message");
     });
@@ -115,14 +115,12 @@ describe("Util", function () {
     it("should respond with buffer", function (done) {
         let res = { object: true };
         res.end = (body) => {
-            console.log("body type A:", typeof(body));
-            expect(body).to.be.an('ArrayBuffer');
+            expect(body).to.be.an('object');
             done();
         };
         res.header = (arg1, arg2) => {
             expect(arg1).to.equal('Content-Type');
-            console.log("should 'responder' with buffer", arg2);
-            // expect(arg2).to.equal('application/json; charset=utf-8');
+            expect(arg2).to.equal('application/octet-stream');
         };
         Util.respond(res, new Buffer("message"));
     });
@@ -130,14 +128,12 @@ describe("Util", function () {
     it("should support responder with buffer", function (done) {
         let res = { object: true };
         res.end = (body) => {
-            console.log("body type B:", typeof(body));
-            expect(body).to.be.an('ArrayBuffer');
+            expect(body).to.be.an('object');
             done();
         };
         res.header = (arg1, arg2) => {
             expect(arg1).to.equal('Content-Type');
-            console.log("should 'respond' with buffer", arg2);
-            // expect(arg2).to.equal('application/json; charset=utf-8');
+            expect(arg2).to.equal('application/octet-stream');
         };
         Util.responder(res, true, new Buffer("message"));
     });
