@@ -662,4 +662,31 @@ describe("User Routes", function () {
         done();
       });
   }, 20000);
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // API v2 Tests
+
+  it("GET /api/v2/profile", function (done) {
+    agent
+      .get('/api/v2/profile')
+      .set('Authorization', jwt)
+      .end((_err, res) => {
+        expect(res).to.have.status(200);
+        done();
+      });
+  }, 20000);
+
+  it("POST /api/v2/profile", function (done) {
+    let changes = { transformers: envi.dynamic.transformers };
+    agent
+      .post('/api/v2/profile')
+      .set('Authorization', jwt)
+      .send(changes)
+      .end((_err, res) => {
+        console.log("🚸 [chai] POST /api/v2/profile (transformer) response:", res.text, " status:", res.status);
+        expect(res).to.have.status(200);
+        done();
+      });
+  }, 20000);
+
 });
