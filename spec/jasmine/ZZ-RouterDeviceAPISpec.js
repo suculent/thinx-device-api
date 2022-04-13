@@ -175,6 +175,7 @@ describe("Device + API (JWT+Key)", function () {
             .set('Authentication', ak)
             .send({ registration: {} })
             .end((err, res) => {
+                console.log("[chai] POST /device/register (jwt, invalid owner) response", res.text, res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('{"registration":{"success":false,"error":"invalid owner"}}');
