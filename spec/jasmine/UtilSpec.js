@@ -115,7 +115,8 @@ describe("Util", function () {
     it("should respond with buffer", function (done) {
         let res = { object: true };
         res.end = (body) => {
-            expect(body).to.be.a('buffer');
+            console.log("body type A:", typeof(body));
+            expect(body).to.be.an('ArrayBuffer');
             done();
         };
         res.header = (arg1, arg2) => {
@@ -129,7 +130,8 @@ describe("Util", function () {
     it("should support responder with buffer", function (done) {
         let res = { object: true };
         res.end = (body) => {
-            expect(body).to.be.a('buffer');
+            console.log("body type B:", typeof(body));
+            expect(body).to.be.an('ArrayBuffer');
             done();
         };
         res.header = (arg1, arg2) => {
