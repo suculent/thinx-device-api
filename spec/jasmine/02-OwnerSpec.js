@@ -118,7 +118,7 @@ describe("Owner", function () {
 
   it("(09) should support stringToBoolean", function () {
     let t = user.stringToBoolean('true');
-    expect(t).to.be.true;
+    expect(t).to.equal(true);
     let f = user.stringToBoolean('false');
     expect(f).to.be.false;
   });

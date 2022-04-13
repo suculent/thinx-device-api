@@ -96,9 +96,9 @@ describe("RSA Keys (JWT)", function () {
             .get('/api/user/rsakey/list')
             .set('Authorization', jwt)
             .end((err, res) => {
+                console.log("[chai] GET /api/user/rsakey/list response:", res.text, res.status);
                 let r = JSON.parse(res.text);
-                expect(r.success).to.equal(true);
-                key_id = r.rsa_keys[0].filename;
+                key_id = r[0].filename;
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 done();
@@ -125,7 +125,7 @@ describe("RSA Keys (JWT)", function () {
             .set('Authorization', jwt)
             .send({ filenames: [key_id]})
             .end((err, res) => {
-                console.log("[chai] POST /api/user/rsakey/revoke response:", JSON.stringify(res.text), res.status);
+                console.log("[chai] POST /api/user/rsakey/revoke (valid) response:", JSON.stringify(res.text), res.status);
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);

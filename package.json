@@ -1,6 +1,6 @@
 {
   "name": "thinx",
-  "version": "1.5.1398",
+  "version": "1.6.1423",
   "description": "THiNX IoT Device Management API",
   "bugs": {
     "url": "https://github.com/suculent/thinx-device-api/issues"
@@ -21,6 +21,7 @@
     "mocha": "mocha spec/jasmine --delay=3000 --exit --timeout=5000; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls",
     "version": "npm run npm-auto-version",
     "postpublish": "git push origin --tags",
+    "split-tests": "if [[ $CIRCLE_NODE_INDEX == 1 ]]; then rm -rf ./spec/jasmine/ZZ*.js fi; if [[ $CIRCLE_NODE_INDEX == 2 ]]; then rm -rf ./spec/jasmine/0*.js fi",
     "prepare": "npm run snyk-protect"
   },
   "dependencies": {

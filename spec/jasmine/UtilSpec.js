@@ -40,7 +40,7 @@ describe("Util", function () {
         };
         res.header = (arg1, arg2) => {
             expect(arg1).to.equal('Content-Type');
-            // expect(arg2).to.equal('application/json; charset=utf-8');
+            expect(arg2).to.equal('text/plain; charset=utf-8');
         };
         Util.responder(res, true, "message");
     });
@@ -110,5 +110,31 @@ describe("Util", function () {
         };
         let result = Util.validateSession(req);
         expect(result).to.equal(true);
+    });
+
+    it("should respond with buffer", function (done) {
+        let res = { object: true };
+        res.end = (body) => {
+            expect(typeof(body)).to.equal('object');
+            done();
+        };
+        res.header = (arg1, arg2) => {
+            expect(arg1).to.equal('Content-Type');
+            expect(arg2).to.equal('application/octet-stream');
+        };
+        Util.respond(res, new Buffer("message"));
+    });
+
+    it("should support responder with buffer", function (done) {
+        let res = { object: true };
+        res.end = (body) => {
+            expect(typeof(body)).to.equal('object');
+            done();
+        };
+        res.header = (arg1, arg2) => {
+            expect(arg1).to.equal('Content-Type');
+            expect(arg2).to.equal('application/octet-stream');
+        };
+        Util.responder(res, true, new Buffer("message"));
     });
 });

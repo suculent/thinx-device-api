@@ -33,7 +33,7 @@ describe("Sources", function () {
         if (success !== true) {
           console.log("(01) Error adding source: ", source, response);
         }
-        expect(success).to.be.true; // git fetch must work for this
+        expect(success).to.equal(true); // git fetch must work for this
         expect(response).to.be.an('object');
         source_id = response.source_id;
         done();
@@ -42,7 +42,7 @@ describe("Sources", function () {
 
   it("(02) should be able to provide a list", function (done) {
     Sources.list(owner, function (success, response) {
-      expect(success).to.be.true;
+      expect(success).to.equal(true);
       expect(response).to.be.an('object');
       done();
     });
@@ -67,13 +67,13 @@ describe("Sources", function () {
         if (success !== true) {
           console.log("(03) Error adding source: ", source, response);
         }
-        expect(success).to.be.true;
+        expect(success).to.equal(true);
         source_id = response.source_id;
         Sources.remove(source.owner, [source_id], (rsuccess, rresponse) => {
           if (rsuccess === false) {
             console.log("Error removing source: " + rresponse);
           }
-          expect(rsuccess).to.be.true;
+          expect(rsuccess).to.equal(true);
           expect(rresponse).to.be.an('object');
           done();
         });
@@ -107,7 +107,7 @@ describe("Sources", function () {
       branch: "origin/mas'ter"
     };
     let result = Sources.normalizedBranch(source, (error, reason) => {
-      expect(error).to.be.true;
+      expect(error).to.equal(true);
       expect(reason).to.equal('invalid_branch_name');
     });
     expect(result).to.equal(false);
@@ -166,7 +166,7 @@ describe("Sources", function () {
         if (success !== true) {
           console.log("(11) Error adding source: ", source, response);
         }
-        expect(success).to.be.true;
+        expect(success).to.equal(true);
         source_id = response.source_id;
         Sources.updatePlatform(owner, source_id, "arduino", (success2, error2) => {
           if (!success2) console.log("(11) error", error2);
