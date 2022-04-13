@@ -25,7 +25,8 @@ describe("Device API (noauth)", function () {
             .post('/device/register')
             .send()
             .end((err, res) => {
-                expect(res.status).to.equal(200);
+                console.log("[chai] POST /device/register A response:", res.text);
+                expect(res.status).to.equal(400);
                 //expect(res.text).to.be.a('string');
                 done();
             });
@@ -36,7 +37,8 @@ describe("Device API (noauth)", function () {
             .post('/device/register')
             .send({ registration: {} })
             .end((err, res) => {
-                expect(res.status).to.equal(400);
+                console.log("[chai] POST /device/register B response:", res.text);
+                expect(res.status).to.equal(200);
                 //expect(res.text).to.be.a('string');
                 done();
             });
