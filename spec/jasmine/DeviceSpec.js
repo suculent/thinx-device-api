@@ -123,7 +123,7 @@ describe("Device", function() {
       apikey,
       null,
       function (success, response) {
-        console.log("Device (04) response text:", response.text);
+        console.log("Device (04) response text:", response);
         let obj = response;
         expect(obj).to.be.an('object');
         if (success === false) {

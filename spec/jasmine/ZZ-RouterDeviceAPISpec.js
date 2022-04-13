@@ -178,7 +178,8 @@ describe("Device + API (JWT+Key)", function () {
                 console.log("[chai] POST /device/register (jwt, invalid body) response", res.text, res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"registration":{"success":false,"error":"invalid owner"}}');
+                let j = JSON.parse(res.text);
+                expect(j.success).to.equal(false);
                 done();
             });
     }, 20000);
