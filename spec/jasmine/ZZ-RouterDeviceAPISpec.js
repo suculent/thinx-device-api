@@ -169,13 +169,13 @@ describe("Device + API (JWT+Key)", function () {
         platform: "arduino"
       };
 
-    it("POST /device/register (jwt, invalid owner)", function (done) {
+    it("POST /device/register (jwt, invalid body)", function (done) {
         chai.request(thx.app)
             .post('/device/register')
             .set('Authentication', ak)
             .send({ registration: {} })
             .end((err, res) => {
-                console.log("[chai] POST /device/register (jwt, invalid owner) response", res.text, res.status);
+                console.log("[chai] POST /device/register (jwt, invalid body) response", res.text, res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('{"registration":{"success":false,"error":"invalid owner"}}');
