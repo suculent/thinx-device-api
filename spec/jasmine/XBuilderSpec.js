@@ -101,7 +101,7 @@ describe("Builder", function () {
       TEST_DEVICE_5, /* reg.registration */
       ak,
       res,
-      (success, response) => {
+      (r, success, response) => {
         if (success === false) {
           console.log("(01) registration response", response);
           expect(response).to.be.a('string');

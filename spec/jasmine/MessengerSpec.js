@@ -43,7 +43,7 @@ describe("Messenger", function() {
       TEST_DEVICE_6, /* reg.registration */
       ak,
       res,
-      (success, response) => {
+      (r, success, response) => {
         TEST_DEVICE_6.udid = response.registration.udid;
         expect(success).to.equal(true);
         expect(TEST_DEVICE_6).to.be.a('object');

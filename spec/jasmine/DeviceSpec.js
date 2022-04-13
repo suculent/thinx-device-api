@@ -97,7 +97,7 @@ describe("Device", function() {
       JRS,
       apikey,
       res,
-      function(success, response) {
+      function(r, success, response) {
         expect(success).to.equal(true);
         JRS.udid = response.registration.udid;
         expect(JRS.udid).to.be.a('string');
@@ -128,8 +128,8 @@ describe("Device", function() {
       JRS,
       apikey,
       res,
-      function (success, response, arg3) {
-        console.log("Device (04) response text:", {success}, {response}, {arg3});
+      function (r, success, response) {
+        console.log("Device (04) response text:", {res}, {success}, {response});
         let obj = response;
         expect(obj).to.be.an('object');
         expect(success).to.equal(true);
@@ -189,7 +189,7 @@ describe("Device", function() {
       JRS2,
       apikey,
       res,
-      function(__success, response) {
+      function(r, __success, response) {
         udid = response.registration.udid;
         JRS2.udid = udid;
         expect(udid).to.be.a('string');
@@ -209,7 +209,7 @@ describe("Device", function() {
       JRS3,
       apikey,
       res,
-      function(success, response) {
+      function(r, success, response) {
         JRS3.udid = response.registration.udid;
         expect(success).to.equal(true);
         done();
@@ -221,7 +221,7 @@ describe("Device", function() {
       JRS4,
       apikey,
       res,
-      function(success, response) {
+      function(r, success, response) {
         console.log("[spec] registration response:", response);
         expect(response).to.equal('apikey_not_found');
         expect(success).to.equal(false);        

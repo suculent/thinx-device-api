@@ -55,7 +55,7 @@ describe("Devices", function() {
       TEST_DEVICE, /* reg.registration */
       ak,
       res,
-      (success, response) => {
+      (r, success, response) => {
         TEST_DEVICE.udid = response.registration.udid;
         expect(success).to.equal(true);
         expect(TEST_DEVICE).to.be.an('object');
@@ -112,7 +112,7 @@ describe("Devices", function() {
       TEST_DEVICE4, /* reg.registration */
       ak,
       res,
-      (success, response) => {
+      (r, success, response) => {
         TEST_DEVICE4.udid = response.registration.udid;
         expect(success).to.equal(true);
         var body = {
