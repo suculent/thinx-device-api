@@ -40,7 +40,7 @@ describe("Util", function () {
         };
         res.header = (arg1, arg2) => {
             expect(arg1).to.equal('Content-Type');
-            expect(arg2).to.equal('application/json; charset=utf-8');
+            expect(arg2).to.equal('text/plain; charset=utf-8');
         };
         Util.responder(res, true, "message");
     });
@@ -115,7 +115,7 @@ describe("Util", function () {
     it("should respond with buffer", function (done) {
         let res = { object: true };
         res.end = (body) => {
-            expect(body).to.be.an('object');
+            expect(typeof(body)).to.equal('object');
             done();
         };
         res.header = (arg1, arg2) => {
@@ -128,7 +128,7 @@ describe("Util", function () {
     it("should support responder with buffer", function (done) {
         let res = { object: true };
         res.end = (body) => {
-            expect(body).to.be.an('object');
+            expect(typeof(body)).to.equal('object');
             done();
         };
         res.header = (arg1, arg2) => {

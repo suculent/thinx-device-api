@@ -121,7 +121,7 @@ describe("Device", function() {
 
   it("(04) should receive different response for registered device", function (done) {
     res.end = () => {
-      //done(;)
+      //done();
     };
     device.register(
       JRS,
@@ -141,7 +141,7 @@ describe("Device", function() {
       JRS, 
       function(success, response) {
       ott = response.ott;
-      expect(success).to.be.a('true');
+      expect(success).to.equal('true');
       expect(response).to.be.an('object');
       expect(response.ott).to.be.a('string');
       device.fetchOTT(ott, (err, ott_registration_request) => {
