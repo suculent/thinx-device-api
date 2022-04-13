@@ -367,7 +367,7 @@ describe("Meshes (JWT)", function () {
 
     it("PUT /api/v2/mesh", function (done) {
         agent
-            .post('/api/v2/mesh')
+            .put('/api/v2/mesh')
             .set('Authorization', jwt)
             .send({ alias: "mock-mesh-alias-3", owner_id: envi.dynamic.owner, mesh_id: 'mock-mesh-id-3' })
             .end((err, res) => {
