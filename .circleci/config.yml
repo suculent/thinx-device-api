@@ -220,10 +220,7 @@ jobs:
           rm -rf ./services/broker/Dockerfile
           mv ./services/broker/Dockerfile.test ./services/broker/Dockerfile
           sed -i "s/.git//g" .dockerignore
-          NAT=$(docker network inspect traefik-public)
-          if [[ $NAT == '[]' ]]; then docker network create traefik-public; fi
-          docker network create traefik-public
-
+          
     - run:
         name: Copy Environment variables for in-place building
         command: |
