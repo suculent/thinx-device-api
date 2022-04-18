@@ -253,7 +253,8 @@ jobs:
     - run:
         name: Starting Influx
         command: |
-          docker network create traefik-public
+          NET=$(docker network inspect traefik-public)
+          if [[ $NET == '[]' ]]; then docker network create traefik-public; fi
           docker-compose up -d influxdb
           docker-compose logs --timestamp influxdb
 
