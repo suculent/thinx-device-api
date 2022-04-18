@@ -33,6 +33,43 @@ jobs:
     steps:
       - setup_remote_docker:
           docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
+          version: 19.03.13
+      - checkout
+      - run:
+          name: Fetch all dependencies (esp. console)
+          command: |
+            git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
+      - docker/check:
+          registry: registry.thinx.cloud:5000
+      - docker/build:
+          registry: registry.thinx.cloud:5000
+          docker-context: services/console/vue
+          image: thinx/console
+          dockerfile: services/console/vue/Dockerfile
+          extra_build_args: |
+            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
+            --build-arg LANDING_HOSTNAME=${LANDING_HOSTNAME} \
+            --build-arg API_HOSTNAME=${API_HOSTNAME} \
+            --build-arg API_BASEURL=${API_BASEURL} \
+            --build-arg WEB_HOSTNAME=${WEB_HOSTNAME} \
+            --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} \
+            --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
+            --build-arg ENTERPRISE=${ENTERPRISE} \
+            --build-arg ENVIRONMENT=${ENVIRONMENT} \
+            --build-arg COMMIT_ID=$CIRCLE_SHA1 \
+          tag: 'vue'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/console
+          registry: registry.thinx.cloud:5000
+          tag: 'vue'
+
+  build-console-legacy:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
+          version: 19.03.13
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
@@ -212,6 +249,12 @@ jobs:
           cp ./spec/mnt/data/conf/config.json /mnt/data/conf/config.json
 
     - run:
+        name: Starting Influx
+        command: |
+          docker-compose up -d influxdb
+          docker-compose logs --timestamp influxdb
+
+    - run:
         name: Starting Redis
         command: |
           docker-compose up -d --build thinx-redis
@@ -284,6 +327,15 @@ jobs:
             docker network inspect bridge
             docker-compose stop
 
+    - run:
+        name: Starting API for UI Test
+        command: |
+          export ENVIRONMENT=test
+          docker-compose up -d api
+          docker-compose logs --timestamp api
+          sleep 20
+          
+
     - store_test_results:
         name: Collect test data
         path: /mnt/data
@@ -330,6 +382,8 @@ workflows:
       
       - build-console-cloud:
           context:
+            - dockerhub
+            - SonarCloud
             - thinx-docker-repo
             - console
           filters:
