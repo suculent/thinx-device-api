@@ -216,7 +216,6 @@ services:
       - '8086:8086'
     networks:
       - internal
-      - traefik-public
     volumes:
       - '/mnt/gluster/thinx/influx:/var/lib/influxdb'
     environment:
