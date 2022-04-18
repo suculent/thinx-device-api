@@ -253,6 +253,7 @@ jobs:
     - run:
         name: Starting Influx
         command: |
+          docker network create traefik-public
           docker-compose up -d influxdb
           docker-compose logs --timestamp influxdb
 
