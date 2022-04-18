@@ -220,7 +220,7 @@ jobs:
           rm -rf ./services/broker/Dockerfile
           mv ./services/broker/Dockerfile.test ./services/broker/Dockerfile
           sed -i "s/.git//g" .dockerignore
-          
+
     - run:
         name: Copy Environment variables for in-place building
         command: |
@@ -250,6 +250,10 @@ jobs:
     - run:
         name: Starting Influx
         command: |
+          NAT=$(docker network inspect traefik-public)
+          if [[ $NAT == '[]' ]]; then docker network create traefik-public; fi
+          docker network create traefik-public
+
           docker-compose up -d influxdb
           docker-compose logs --timestamp influxdb
 
