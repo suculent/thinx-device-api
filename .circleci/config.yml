@@ -253,7 +253,7 @@ jobs:
           NAT=$(docker network inspect traefik-public)
           if [[ $NAT == '[]' ]]; then docker network create traefik-public; fi
           docker network create traefik-public
-          docker network create traefik-nat
+          docker network create traefik-natG
           docker-compose up -d influxdb
           docker-compose logs --timestamp influxdb
 
@@ -294,6 +294,7 @@ jobs:
         name: Starting API Test
         command: |
           export ENVIRONMENT=test
+          docker network create nat
           docker-compose up --build api | tee -ipa ./test.log
           if [[ ! $(cat ./test.log | grep "specs, 0 failures") ]]; then 
             echo "» TEST failed. Should not deploy this commit."
