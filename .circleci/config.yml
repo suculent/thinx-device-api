@@ -33,6 +33,7 @@ jobs:
     steps:
       - setup_remote_docker:
           docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
+          version: 19.03.13
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
