@@ -1,10 +1,13 @@
 const EventEmitter = require('events');
 
+const JWTLogin = require("./lib/thinx/jwtlogin");  
 module.exports = class THiNX extends EventEmitter {
 
-  constructor() {
+  constructor(sqreen) {
 
     super();
+
+    this.sqreen = sqreen;
 
     /*
      * Bootstrap banner section
@@ -21,6 +24,7 @@ module.exports = class THiNX extends EventEmitter {
     console.log("");
 
     this.app = null;
+    this.clazz = this;
   }
 
   init(init_complete_callback) {
@@ -99,6 +103,11 @@ module.exports = class THiNX extends EventEmitter {
         console.log("thinx.js bgsave error:", e);
       }
     }
+
+    app.login = new JWTLogin(app.redis_client);
+    app.login.init(() => {
+        console.log("ℹ️ [info] JWT Login Secret Init Complete. Login is now possible.");
+    });
 
     // Default ACLs and MQTT Password
 
@@ -205,12 +214,12 @@ module.exports = class THiNX extends EventEmitter {
         let watcher;
 
         // TEST CASE WORKAROUND: attempt to fix duplicate initialization... if Queue is being tested, it's running as another instance and the port 3000 must stay free!
-        if (process.env.ENVIRONMENT !== "test") {
-          queue = new Queue(builder, app, null /* ssl_options */, this);
+        //if (process.env.ENVIRONMENT !== "test") {
+          queue = new Queue(builder, app, null /* ssl_options */, this.clazz);
           queue.cron(); // starts cron job for build queue from webhooks
           
           watcher = new Repository(queue);
-        }
+        //}
 
         const GDPR = require("./lib/thinx/gdpr");
         new GDPR().guard();
@@ -269,7 +278,31 @@ module.exports = class THiNX extends EventEmitter {
           limit: "1mb"
         }));
 
-        let router = require('./lib/router.js')(app);
+        // API v1 global all-in-one router
+        const router = require('./lib/router.js')(app); // only validateSession and initLogTail is used here. is this feature envy?
+
+        // API v2 partial routers with new calls (needs additional coverage)
+        require('./lib/router.device.js')(app);
+
+        // API v2+v1 GDPR routes
+        require('./lib/router.gdpr.js')(app);
+
+        // API v2 routes
+        require('./lib/router.apikey.js')(app);
+        require('./lib/router.auth.js')(app);
+        require('./lib/router.build.js')(app);
+        require('./lib/router.deviceapi.js')(app);
+        require('./lib/router.env.js')(app);
+        require('./lib/router.github.js')(app);
+        require('./lib/router.google.js')(app);
+        require('./lib/router.logs.js')(app);
+        require('./lib/router.mesh.js')(app);
+        require('./lib/router.profile.js')(app);
+        require('./lib/router.rsakey.js')(app);
+        require('./lib/router.slack.js')(app);
+        require('./lib/router.source.js')(app);
+        require('./lib/router.transfer.js')(app);
+        require('./lib/router.user.js')(app);
 
         /* Webhook Server (new impl.) */
 
@@ -393,7 +426,7 @@ module.exports = class THiNX extends EventEmitter {
         });
 
         function heartbeat() {
-          this.lastAlive = new Date(); // currently unused
+          console.log("[Socket] heartbeat."); // better store this.lastAlive = new Date(); in redis
         }
 
         setInterval(function ping() {
@@ -424,7 +457,7 @@ module.exports = class THiNX extends EventEmitter {
         wss.on("error", function (err) {
           let e = err.toString();
           if (e.indexOf("EADDRINUSE") !== -1) {
-            // throw new Error("[critical] websocket same port init failure (test edge case only; fix carefully)");
+            console.log("[critical] websocket same port init failure (test edge case only; fix carefully)");
           } else {
             console.log("☣️ [error] websocket ", {e});
           }
@@ -433,17 +466,21 @@ module.exports = class THiNX extends EventEmitter {
         app._ws = {}; // list of all owner websockets
 
         function initLogTail() {
-          app.post("/api/user/logs/tail", (req2, res) => {
+
+          function logTailImpl(req2, res) {
             if (!(router.validateSession(req2, res))) return;
-            if (typeof (req2.body.build_id) === "undefined") {
-              router.respond(res, {
-                success: false,
-                status: "missing_build_id"
-              });
-              return;
-            }
+            if (typeof (req2.body.build_id) === "undefined") return router.respond(res, false, "missing_build_id");
             console.log(`Tailing build log for ${sanitka.udid(req2.body.build_id)}`);
+          }
+
+          app.post("/api/user/logs/tail", (req2, res) => {
+            logTailImpl(req2, res);
           });
+
+          app.post("/api/v2/logs/tail", (req2, res) => {
+            logTailImpl(req2, res);
+          });
+
         }
 
         function initSocket(ws, msgr, logsocket) {
@@ -563,4 +600,4 @@ module.exports = class THiNX extends EventEmitter {
       }); // DB
     }); // Slack
   }
-}
+};

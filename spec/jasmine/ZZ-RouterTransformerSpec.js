@@ -60,7 +60,7 @@ describe("Transformer (JWT)", function () {
       .send({})
       .end((_err, res) => {
         //console.log("🚸 [chai] POST /api/transformer/run response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(403);
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -161,7 +161,10 @@ describe("Transformer (JWT)", function () {
       .get('/api/user/devices')
       .set('Authorization', jwt)
       .end((_err, res) => {
+        console.log("POST /api/transformer/run (JWT, valid, trans) response", res.text, res.success);
         let r = JSON.parse(res.text);
+
+        // console.log("[spec] devices:", JSON.stringify(r.devices, null, 2));
 
         /* {
             "success": true,
@@ -204,6 +207,8 @@ describe("Transformer (JWT)", function () {
         if (r.devices.length == 0) return done();
 
         let udid = r.devices[0].udid; // or JRS7.udid
+
+        console.log("Running transformer with device", udid);
 
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');

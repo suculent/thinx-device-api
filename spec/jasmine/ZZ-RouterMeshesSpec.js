@@ -31,7 +31,7 @@ describe("Meshes (noauth)", function () {
         chai.request(thx.app)
             .get('/api/mesh/list')
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -41,7 +41,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/list')
             .send({})
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -51,7 +51,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/list')
             .send({ owner_id: "mock-owner-id", apikey: "mock-api-key", alias: "mock-mesh-alias" })
             .end((err, res) => {
-                expect(res.status).to.equal(403); 
+                expect(res.status).to.equal(401); 
                 done();
             });
     }, 20000);
@@ -61,7 +61,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/list')
             .send({ owner_id: envi.oid, apikey: "mock-api-key", alias: "mock-mesh-alias" })
             .end((err, res) => {
-                expect(res.status).to.equal(403); 
+                expect(res.status).to.equal(401); 
                 done();
             });
     }, 20000);
@@ -71,7 +71,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/create')
             .send({})
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -81,7 +81,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/create')
             .send({ owner_id: envi.dynamic.owner })
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -91,7 +91,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/create')
             .send({ alias: "mock-mesh-alias" })
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -101,7 +101,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/create')
             .send({ alias: "mock-mesh-alias", owner_id: envi.dynamic.owner })
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -111,7 +111,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/delete')
             .send({})
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -121,7 +121,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/delete')
             .send('{meshid:null}')
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -131,7 +131,7 @@ describe("Meshes (noauth)", function () {
             .post('/api/mesh/delete')
             .send('{"meshid":undefined}')
             .end((err, res) => {
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -165,13 +165,15 @@ describe("Meshes (JWT)", function () {
         done();
     });
 
-    it("GET /api/mesh/list (jwt, invalid)", function (done) {
+    it("GET /api/mesh/list (jwt, valid)", function (done) {
         agent
             .get('/api/mesh/list')
             .set('Authorization', jwt)
             .end((err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":true,"mesh_ids":[{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}]}');
+                let j = JSON.parse(res.text);
+                expect(j.success).to.equal(true);
+                //expect(res.text).to.equal('{"success":true,"mesh_ids":[{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}]}');
                 done();
             });
     }, 20000);
@@ -183,7 +185,7 @@ describe("Meshes (JWT)", function () {
             .send({ owner_id: "mock-owner-id", apikey: "mock-api-key", alias: "mock-mesh-alias" })
             .end((err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"reason":"OWNER_INVALID"}');
+                expect(res.text).to.equal('{"success":false,"status":"owner_invalid"}');
                 done();
             });
     }, 20000);
@@ -197,7 +199,7 @@ describe("Meshes (JWT)", function () {
                 let r = JSON.parse(res.text);
                 mesh_id = r.mesh_id;
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"status":"Owner ID missing in request body."}');
+                expect(res.text).to.equal('{"success":false,"status":"owner_id_missing"}');
                 done();
             });
     }, 20000);
@@ -210,7 +212,7 @@ describe("Meshes (JWT)", function () {
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"Mesh ID missing in request body."}');
+                expect(res.text).to.equal('{"success":false,"status":"mesh_id_missing"}');
                 done();
             });
     }, 20000);
@@ -358,4 +360,55 @@ describe("Meshes (JWT)", function () {
                 done();
             });
     }, 20000);
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // API v2 Specs
+
+    it("PUT /api/v2/mesh", function (done) {
+        agent
+            .put('/api/v2/mesh')
+            .set('Authorization', jwt)
+            .send({ alias: "mock-mesh-alias-3", owner_id: envi.dynamic.owner, mesh_id: 'mock-mesh-id-3' })
+            .end((err, res) => {
+                console.log("[chai] PUT /api/v2/mesh response:", res.status, res.text);
+                let r = JSON.parse(res.text);
+                mesh_id = r.mesh_ids.mesh_id;
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                //expect(res.text).to.equal('{"success":true,"mesh_ids":{"mesh_id":"mock-mesh-id-2","alias":"mock-mesh-alias-2"}}');
+                done();
+            });
+    }, 20000);
+
+    it("GET /api/v2/mesh", function (done) {
+        agent
+            .get('/api/v2/mesh')
+            .set('Authorization', jwt)
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                let j = JSON.parse(res.text);
+                expect(j.success).to.equal(true);
+                //expect(res.text).to.equal('{"success":true,"mesh_ids":[{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}]}');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/mesh/delete", function (done) {
+        expect(mesh_id !== null);
+        let ro = {
+            mesh_ids: [mesh_id],
+            owner_id: envi.dynamic.owner
+        };
+        agent
+            .delete('/api/v2/mesh')
+            .set('Authorization', jwt)
+            .send(ro)
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                done();
+            });
+    }, 20000);
+
+
 });

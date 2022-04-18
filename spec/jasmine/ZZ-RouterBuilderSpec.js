@@ -24,7 +24,7 @@ describe("Builder (noauth)", function () {
         console.log(`🚸 [chai] >>> running Builder (noauth) spec`);
         thx = new THiNX();
         thx.on('workerReady', () => {
-            console.log("[spec] [emit] worker ready!"); // should allow waiting for worker beforeAll
+            console.log("🚸🚸🚸 [spec] [emit] worker ready! 🚸🚸🚸"); // should allow waiting for worker beforeAll
             done();
         });
         thx.init(() => {
@@ -39,7 +39,7 @@ describe("Builder (noauth)", function () {
             .send({})
             .end((err, res) => {
                 console.log("🚸 [chai] response /api/build:", res.text, " status:", res.status);
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 //expect(res.text).to.be.a('string');
                 done();
             });
@@ -65,7 +65,7 @@ describe("Builder (noauth)", function () {
             .send({})
             .end((err, res) => {
                 console.log("🚸 [chai] response /api/device/artifacts:", res.text, " status:", res.status);
-                expect(res.status).to.equal(403);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);

@@ -4,7 +4,6 @@ var expect = require('chai').expect;
 
 describe("Database", function () {
 
-  /*
   beforeAll(() => {
     console.log(`🚸 [chai] >>> running Database spec`);
   });
@@ -12,7 +11,6 @@ describe("Database", function () {
   afterAll(() => {
     console.log(`🚸 [chai] <<< completed Database spec`);
   });
-  */
 
   it("should start and create initial DBs", function (done) {
     database.init((err, result) => {

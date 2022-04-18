@@ -35,7 +35,7 @@ describe("RSA Key", function() {
 
   it("(01) should be able to list RSA Keys", function(done) {
     rsakey.list(owner, function(success, list) {
-      expect(success).to.be.true;
+      expect(success).to.equal(true);
       expect(list.length).to.be.greaterThanOrEqual(1);
       done();
     });
@@ -43,31 +43,31 @@ describe("RSA Key", function() {
 
   it("(02) should fail on invalid revocation", function(done) {
     rsakey.revoke(owner, invalid_fingerprints,
-      function(success, message) {
-        expect(success).to.be.true; // succeds for more fingerprints if one is valid? maybe...
+      function(res, success, message) {
+        expect(success).to.equal(true); // succeds for more fingerprints if one is valid? maybe...
         expect(message).to.be.an('array');
         done();
-      });
+      }, {});
   }, 10000);
 
   it("(03) should be able to add RSA Key 2/3", function(done) {
     rsakey.create(owner, (success, response) => {
       revoked_filenames.push(response.filename);
-      expect(success).to.be.true;
+      expect(success).to.equal(true);
     });
     rsakey.create(owner, (success, response) => {
         revoked_filenames.push(response.filename);
-        expect(success).to.be.true;
+        expect(success).to.equal(true);
         done();
     });
   }, 10000);
 
   it("(04) should be able to revoke multiple RSA Keys at once", function(done) {
-    rsakey.revoke(owner, revoked_filenames, function(succ, mess) {
+    rsakey.revoke(owner, revoked_filenames, function(res, succ, mess) {
         expect(succ).to.equal(true);
         expect(mess).to.be.an('array'); // should be array of length of 2
         done();
-      });
+      }, {});
   }, 10000);
 
 
@@ -84,7 +84,7 @@ describe("RSA Key", function() {
 
   it("(06) should be able to add RSA Key 2/3", function(done) {
     rsakey.create(envi.dynamic.owner, (success, response) => {
-      expect(success).to.be.true;
+      expect(success).to.equal(true);
       done();
     });
   }, 10000);
