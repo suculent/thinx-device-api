@@ -209,18 +209,20 @@ services:
 #      - traefik.frontend.headers.STSSeconds=315360000
 #      - traefik.frontend.headers.STSIncludeSubdomains=true
 #      - traefik.frontend.headers.STSPreload=true
-  influx:
+
+  influxdb:
     image: influxdb:1.8
-    volumes:
-      - /mnt/data/influx:/var/lib/influxdb
+    ports:
+      - '8086:8086'
     networks:
       - internal
+      - traefik-public
+    volumes:
+      - '/mnt/gluster/thinx/influx:/var/lib/influxdb'
     environment:
-      - 'DOCKER_INFLUXDB_INIT_USERNAME=${COUCHDB_USER}'
-      - 'DOCKER_INFLUXDB_INIT_PASSWORD=${COUCHDB_PASS}'
-      - 'DOCKER_INFLUXDB_INIT_ORG=${COUCHDB_USER}'
-      - 'DOCKER_INFLUXDB_INIT_BUCKET=${COUCHDB_USER}'
-      # this is mock only, will contain separate/autogen passwords in production
+      - INFLUXDB_DB=db0
+      - INFLUXDB_ADMIN_USER=${INFLUXDB_USERNAME}
+      - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_PASSWORD}
     deploy:
       resources:
         reservations:
@@ -229,3 +231,22 @@ services:
         limits:
           cpus: '0.3'
           memory: 512M
+      labels:
+        - "traefik.http.services.thinx-influx.loadbalancer.server.port=8086"
+        - "traefik.enable=true"
+        - "traefik.docker.network=traefik-public"
+        - "traefik.constraint-label=traefik-public"
+
+        - "traefik.http.routers.thinx-influx-http.rule=Host(`${INFLUX_HOSTNAME}`)"
+        - "traefik.http.routers.thinx-influx-http.entrypoints=http"
+        - "traefik.http.routers.thinx-influx-http.middlewares=https-redirect"
+
+        - "traefik.http.routers.thinx-influx-https.rule=Host(`${INFLUX_HOSTNAME}`)"
+        - "traefik.http.routers.thinx-influx-https.entrypoints=https"
+        - "traefik.http.routers.thinx-influx-https.tls=true"
+        - "traefik.http.routers.thinx-influx-https.tls.certresolver=le"
+
+        - swarmpit.service.deployment.autoredeploy=true
+
+        - traefik.http.routers.thinx-influx-https.middlewares=error-pages-middleware
+        - traefik.http.routers.thinx-influx-http.middlewares=error-pages-middleware
