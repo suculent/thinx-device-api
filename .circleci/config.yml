@@ -43,9 +43,9 @@ jobs:
           registry: registry.thinx.cloud:5000
       - docker/build:
           registry: registry.thinx.cloud:5000
-          docker-context: services/console/src
+          docker-context: services/console/vue
           image: thinx/console
-          dockerfile: services/console/src/Dockerfile
+          dockerfile: services/console/vue/Dockerfile
           extra_build_args: |
             --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
             --build-arg LANDING_HOSTNAME=${LANDING_HOSTNAME} \
@@ -63,6 +63,42 @@ jobs:
           image: thinx/console
           registry: registry.thinx.cloud:5000
           tag: 'vue'
+
+  build-console-legacy:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
+          version: 19.03.13
+      - checkout
+      - run:
+          name: Fetch all dependencies (esp. console)
+          command: |
+            git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
+      - docker/check:
+          registry: registry.thinx.cloud:5000
+      - docker/build:
+          registry: registry.thinx.cloud:5000
+          docker-context: services/console/src
+          image: thinx/console
+          dockerfile: services/console/src/Dockerfile
+          extra_build_args: |
+            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
+            --build-arg LANDING_HOSTNAME=${LANDING_HOSTNAME} \
+            --build-arg API_HOSTNAME=${API_HOSTNAME} \
+            --build-arg API_BASEURL=${API_BASEURL} \
+            --build-arg WEB_HOSTNAME=${WEB_HOSTNAME} \
+            --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} \
+            --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
+            --build-arg ENTERPRISE=${ENTERPRISE} \
+            --build-arg ENVIRONMENT=${ENVIRONMENT} \
+            --build-arg COMMIT_ID=$CIRCLE_SHA1 \
+          tag: 'swarm'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/console
+          registry: registry.thinx.cloud:5000
+          tag: 'swarm'
 
   build-api-cloud:
     executor: docker/docker
