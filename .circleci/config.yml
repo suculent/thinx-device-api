@@ -220,8 +220,8 @@ jobs:
           rm -rf ./services/broker/Dockerfile
           mv ./services/broker/Dockerfile.test ./services/broker/Dockerfile
           sed -i "s/.git//g" .dockerignore
-          NET=$(docker network inspect nat)
-          if [[ $NET == '[]' ]]; then docker network create nat; fi
+          NAT=$(docker network inspect traefik-public)
+          if [[ $NAT == '[]' ]]; then docker network create traefik-public; fi
           docker network create traefik-public
 
     - run:
@@ -253,8 +253,6 @@ jobs:
     - run:
         name: Starting Influx
         command: |
-          NET=$(docker network inspect traefik-public)
-          if [[ $NET == '[]' ]]; then docker network create traefik-public; fi
           docker-compose up -d influxdb
           docker-compose logs --timestamp influxdb
 
