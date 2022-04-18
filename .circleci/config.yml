@@ -267,6 +267,12 @@ jobs:
           cp ./spec/mnt/data/conf/config.json /mnt/data/conf/config.json
 
     - run:
+        name: Starting Influx
+        command: |
+          docker-compose up -d influxdb
+          docker-compose logs --timestamp influxdb
+
+    - run:
         name: Starting Redis
         command: |
           docker-compose up -d --build thinx-redis
