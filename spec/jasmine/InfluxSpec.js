@@ -35,9 +35,10 @@ describe("InfluxDB", function () {
         let point = {
             measurement: 'LOGIN_INVALID',
             tags: { owner_id: "test" },
-            fields: { 1.0 },
+            fields: { value: 1.0 },
         }
-        InfluxConnector.write(data, (result) => {
+        InfluxConnector.write(point, (result) => {
+            console.log("InfluxDB result", result);
             done();
         });
     });
@@ -50,6 +51,7 @@ describe("InfluxDB", function () {
             value: 1.0
         }
         InfluxConnector.write(data, (result) => {
+            console.log("InfluxDB result", result);
             done();
         });
     });
