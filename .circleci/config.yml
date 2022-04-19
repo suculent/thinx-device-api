@@ -250,10 +250,10 @@ jobs:
     - run:
         name: Starting Influx
         command: |
-          NAT=$(docker network inspect traefik-public)
-          if [[ $NAT == '[]' ]]; then docker network create traefik-public; fi
-          docker network create traefik-public
-          docker network create traefik-natG
+          PUB=$(docker network inspect traefik-public)
+          if [[ $PUB == '[]' ]]; then docker network create traefik-public; fi
+          NAT=$(docker network inspect nat)
+          if [[ $NAT == '[]' ]]; then docker network create nat ; fi
           docker-compose up -d influxdb
           docker-compose logs --timestamp influxdb
 
