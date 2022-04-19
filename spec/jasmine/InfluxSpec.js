@@ -1,5 +1,3 @@
-const expect = require('chai').expect;
-const { doesNotMatch } = require('assert');
 const InfluxConnector = require('../../lib/thinx/influx');
 
 describe("InfluxDB", function () {
