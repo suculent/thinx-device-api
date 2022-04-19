@@ -246,6 +246,14 @@ describe("InfluxDB", function () {
             done();
         });
     });
+
+    it("should query owner", function (done) {
+        influx.queryOwner('BUILD_FAIL', owner, (result) => {
+            console.log("InfluxDB result BUILD_FAIL with owner:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
+            done();
+        });
+    });
     
 
 });
