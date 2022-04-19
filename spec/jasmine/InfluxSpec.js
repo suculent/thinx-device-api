@@ -24,27 +24,29 @@ describe("InfluxDB", function () {
 
     */
 
-    it("should write with owner_id without udid", function (done) {
-        let point = {
-            measurement: 'LOGIN_INVALID',
-            tags: { owner_id: "test" },
-            fields: { value: 1.0 },
-        }
-        InfluxConnector.write(point, (result) => {
-            console.log("InfluxDB result", result);
-            done();
+    it("(3) should work as class with specific db", function (done) {
+
+        InfluxConnector.createDB('stats', () => {
+
+            let influx = new InfluxConnector('stats');
+
+            let point = {
+                measurement: 'CHECKIN',
+                tags: { owner_id: "test", udid: "udid" },
+                fields: { value: 1 },
+            }
+
+            influx.writePoint(point, (result) => {
+                console.log("InfluxDB result (3)", JSON.stringify(result, null, 2));
+                done();
+            });
+
         });
     });
 
-    it("should write with owner_id and udid", function (done) {
-        let point = {
-            measurement: 'CHECKIN',
-            tags: { owner_id: "test", udid: "udid" },
-            fields: { value: 1 },
-        }
-        InfluxConnector.write(point, (result) => {
-            console.log("InfluxDB result", result);
+    it("(4) should be able to create users", function (done) {
+        InfluxConnector.createUser('test', 'test', () => {
             done();
-        });
+        }, true);
     });
 });
