@@ -34,6 +34,43 @@ jobs:
     steps:
       - setup_remote_docker:
           docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
+          version: 19.03.13
+      - checkout
+      - run:
+          name: Fetch all dependencies (esp. console)
+          command: |
+            git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
+      - docker/check:
+          registry: registry.thinx.cloud:5000
+      - docker/build:
+          registry: registry.thinx.cloud:5000
+          docker-context: services/console/vue
+          image: thinx/console
+          dockerfile: services/console/vue/Dockerfile
+          extra_build_args: |
+            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
+            --build-arg LANDING_HOSTNAME=${LANDING_HOSTNAME} \
+            --build-arg API_HOSTNAME=${API_HOSTNAME} \
+            --build-arg API_BASEURL=${API_BASEURL} \
+            --build-arg WEB_HOSTNAME=${WEB_HOSTNAME} \
+            --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} \
+            --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
+            --build-arg ENTERPRISE=${ENTERPRISE} \
+            --build-arg ENVIRONMENT=${ENVIRONMENT} \
+            --build-arg COMMIT_ID=$CIRCLE_SHA1 \
+          tag: 'swarm'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/console
+          registry: registry.thinx.cloud:5000
+          tag: 'swarm'
+
+  build-console-legacy:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
+          version: 19.03.13
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
@@ -183,8 +220,6 @@ jobs:
           rm -rf ./services/broker/Dockerfile
           mv ./services/broker/Dockerfile.test ./services/broker/Dockerfile
           sed -i "s/.git//g" .dockerignore
-          NET=$(docker network inspect nat)
-          if [[ $NET == '[]' ]]; then docker network create nat; fi
 
     - run:
         name: Copy Environment variables for in-place building
@@ -211,6 +246,16 @@ jobs:
           echo "Injecting secret: ${REDIS_PASSWORD}"
           sed -i "s/changeme!/${REDIS_PASSWORD}/g" ./services/broker/test/mosquitto/mosquitto.conf
           cp ./spec/mnt/data/conf/config.json /mnt/data/conf/config.json
+
+    - run:
+        name: Starting Influx
+        command: |
+          PUB=$(docker network inspect traefik-public)
+          if [[ $PUB == '[]' ]]; then docker network create traefik-public; fi
+          NAT=$(docker network inspect nat)
+          if [[ $NAT == '[]' ]]; then docker network create nat ; fi
+          docker-compose up -d influxdb
+          docker-compose logs --timestamp influxdb
 
     - run:
         name: Starting Redis
@@ -249,6 +294,7 @@ jobs:
         name: Starting API Test
         command: |
           export ENVIRONMENT=test
+          docker network create nat
           docker-compose up --build api | tee -ipa ./test.log
           if [[ ! $(cat ./test.log | grep "specs, 0 failures") ]]; then 
             echo "» TEST failed. Should not deploy this commit."

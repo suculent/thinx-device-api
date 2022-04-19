@@ -54,6 +54,7 @@
     "get-random-quote": "^1.1.3",
     "helmet": "^4.6.0",
     "http-signature": "^1.3.5",
+    "influx": "^5.9.3",
     "jshint": "^2.13.4",
     "json-schema": "^0.4.0",
     "jsonwebtoken": "^8.5.1",

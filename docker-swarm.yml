@@ -248,8 +248,7 @@ services:
         - "traefik.http.routers.thinx-api-https.tls.certresolver=le"
 
         - "swarmpit.service.deployment.autoredeploy=true"
-
-
+        
   console:
     depends_on:
       - api
