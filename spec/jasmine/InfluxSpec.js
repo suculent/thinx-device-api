@@ -20,20 +20,6 @@ describe("InfluxDB", function () {
         }, true);
     });
 
-    it("should track device checkins", function (done) {
-
-        let point = {
-            measurement: 'CHECKIN',
-            tags: { owner_id: owner, udid: udid },
-            fields: { value: 1 },
-        }
-
-        influx.writePoint(point, (result) => {
-            console.log("InfluxDB result (3)", JSON.stringify(result, null, 2));
-            done();
-        });
-    });
-
     it("should track owner event APIKEY_INVALID", function (done) {
 
         let point = {
@@ -43,7 +29,7 @@ describe("InfluxDB", function () {
         }
 
         influx.writePoint(point, (result) => {
-            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
             done();
         });
     });
@@ -57,7 +43,7 @@ describe("InfluxDB", function () {
         }
 
         influx.writePoint(point, (result) => {
-            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
             done();
         });
     });
@@ -71,7 +57,7 @@ describe("InfluxDB", function () {
         }
 
         influx.writePoint(point, (result) => {
-            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
             done();
         });
     });
@@ -85,7 +71,7 @@ describe("InfluxDB", function () {
         }
 
         influx.writePoint(point, (result) => {
-            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
             done();
         });
     });
@@ -99,7 +85,7 @@ describe("InfluxDB", function () {
         }
 
         influx.writePoint(point, (result) => {
-            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
             done();
         });
     });
@@ -113,7 +99,7 @@ describe("InfluxDB", function () {
         }
 
         influx.writePoint(point, (result) => {
-            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
             done();
         });
     });
@@ -127,7 +113,7 @@ describe("InfluxDB", function () {
         }
 
         influx.writePoint(point, (result) => {
-            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
             done();
         });
     });
@@ -141,7 +127,7 @@ describe("InfluxDB", function () {
         }
 
         influx.writePoint(point, (result) => {
-            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
             done();
         });
     });
@@ -155,7 +141,7 @@ describe("InfluxDB", function () {
         }
 
         influx.writePoint(point, (result) => {
-            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
             done();
         });
     });
@@ -169,7 +155,94 @@ describe("InfluxDB", function () {
         }
 
         influx.writePoint(point, (result) => {
-            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
+            done();
+        });
+    });
+
+    ///
+
+
+    it("should query APIKEY_INVALID", function (done) {
+        influx.query('APIKEY_INVALID', (result) => {
+            console.log("InfluxDB result APIKEY_INVALID:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
+            done();
+        });
+    });
+
+    it("should query LOGIN_INVALID", function (done) {
+        influx.query('LOGIN_INVALID', (result) => {
+            console.log("InfluxDB result CHECKIN:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
+            done();
+        });
+    });
+
+    it("should query APIKEY_MISUSE", function (done) {
+        influx.query('APIKEY_MISUSE', (result) => {
+            console.log("InfluxDB result APIKEY_MISUSE:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
+            done();
+        });
+    });
+
+    it("should query APIKEY_REVOKED", function (done) {
+        influx.query('APIKEY_REVOKED', (result) => {
+            console.log("InfluxDB result APIKEY_REVOKED:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
+            done();
+        });
+    });
+
+
+    it("should query DEVICE_NEW", function (done) {
+        influx.query('DEVICE_NEW', (result) => {
+            console.log("InfluxDB result DEVICE_NEW:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
+            done();
+        });
+    });
+
+    it("should query DEVICE_CHECKIN", function (done) {
+        influx.query('DEVICE_CHECKIN', (result) => {
+            console.log("InfluxDB result DEVICE_CHECKIN:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
+            done();
+        });
+    });
+
+    it("should query DEVICE_REVOCATION", function (done) {
+        influx.query('DEVICE_REVOCATION', (result) => {
+            console.log("InfluxDB result DEVICE_REVOCATION:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
+            done();
+        });
+    });
+
+
+    it("should query BUILD_STARTED", function (done) {
+        influx.query('BUILD_STARTED', (result) => {
+            console.log("InfluxDB result BUILD_STARTED:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
+            done();
+        });
+    });
+
+
+    it("should query BUILD_SUCCESS", function (done) {
+        influx.query('BUILD_SUCCESS', (result) => {
+            console.log("InfluxDB result BUILD_SUCCESS:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
+            done();
+        });
+    });
+
+
+    it("should query BUILD_FAIL", function (done) {
+        influx.query('BUILD_FAIL', (result) => {
+            console.log("InfluxDB result BUILD_FAIL:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
             done();
         });
     });
