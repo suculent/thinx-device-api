@@ -27,11 +27,6 @@ describe("InfluxDB", function () {
     */
 
     it("should write with owner_id without udid", function (done) {
-        let data = {
-            owner_id: "test",
-            event: "LOGIN_INVALID",
-            value: 1.0
-        }
         let point = {
             measurement: 'LOGIN_INVALID',
             tags: { owner_id: "test" },
@@ -44,13 +39,12 @@ describe("InfluxDB", function () {
     });
 
     it("should write with owner_id and udid", function (done) {
-        let data = {
-            owner_id: "test",
-            udid: "test",
-            event: "checkin",
-            value: 1.0
+        let point = {
+            measurement: 'CHECKIN',
+            tags: { owner_id: "test", udid: "udid" },
+            fields: { value: 1 },
         }
-        InfluxConnector.write(data, (result) => {
+        InfluxConnector.write(point, (result) => {
             console.log("InfluxDB result", result);
             done();
         });
