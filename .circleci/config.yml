@@ -58,12 +58,12 @@ jobs:
             --build-arg ENTERPRISE=${ENTERPRISE} \
             --build-arg ENVIRONMENT=${ENVIRONMENT} \
             --build-arg COMMIT_ID=$CIRCLE_SHA1 \
-          tag: 'swarm'
+          tag: 'vue'
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/console
           registry: registry.thinx.cloud:5000
-          tag: 'swarm'
+          tag: 'vue'
 
   build-console-legacy:
     executor: docker/docker
