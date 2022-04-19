@@ -1,52 +1,178 @@
 const InfluxConnector = require('../../lib/thinx/influx');
+const envi = require("../_envi.json");
+const owner = envi.oid;
+const udid = envi.udid;
 
 describe("InfluxDB", function () {
 
-    /*
+    let influx;
 
-    static get_owner_template() {
-        // Defines data model and also lists known tracked keys
-        return {
-            APIKEY_INVALID: [0],
-            LOGIN_INVALID: [0],
-            APIKEY_MISUSE: [0],
-            APIKEY_REVOKED: [0],
-            DEVICE_NEW: [0],
-            DEVICE_CHECKIN: [0],
-            DEVICE_UPDATE_OK: [0], // TODO (22): not implemented
-            DEVICE_UPDATE_FAIL: [0], // TODO (22): not implemented
-            DEVICE_REVOCATION: [0],
-            BUILD_STARTED: [0],
-            BUILD_SUCCESS: [0],
-            BUILD_FAIL: [0]
-        };
-    }
-
-    */
-
-    it("(3) should work as class with specific db", function (done) {
-
+    beforeAll((done) => {
         InfluxConnector.createDB('stats', () => {
-
-            let influx = new InfluxConnector('stats');
-
-            let point = {
-                measurement: 'CHECKIN',
-                tags: { owner_id: "test", udid: "udid" },
-                fields: { value: 1 },
-            }
-
-            influx.writePoint(point, (result) => {
-                console.log("InfluxDB result (3)", JSON.stringify(result, null, 2));
-                done();
-            });
-
+            influx = new InfluxConnector('stats');
+            done();
         });
     });
 
-    it("(4) should be able to create users", function (done) {
+    it("static should create user", function (done) {
         InfluxConnector.createUser('test', 'test', () => {
             done();
         }, true);
     });
+
+    it("should track device checkins", function (done) {
+
+        let point = {
+            measurement: 'CHECKIN',
+            tags: { owner_id: owner, udid: udid },
+            fields: { value: 1 },
+        }
+
+        influx.writePoint(point, (result) => {
+            console.log("InfluxDB result (3)", JSON.stringify(result, null, 2));
+            done();
+        });
+    });
+
+    it("should track owner event APIKEY_INVALID", function (done) {
+
+        let point = {
+            measurement: 'APIKEY_INVALID',
+            tags: { owner_id: owner },
+            fields: { value: 1 },
+        }
+
+        influx.writePoint(point, (result) => {
+            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            done();
+        });
+    });
+
+    it("should track owner event LOGIN_INVALID", function (done) {
+
+        let point = {
+            measurement: 'LOGIN_INVALID',
+            tags: { owner_id: owner },
+            fields: { value: 1 },
+        }
+
+        influx.writePoint(point, (result) => {
+            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            done();
+        });
+    });
+
+    it("should track owner event APIKEY_MISUSE", function (done) {
+
+        let point = {
+            measurement: 'APIKEY_MISUSE',
+            tags: { owner_id: owner, hash: "keyhash" },
+            fields: { value: 1 },
+        }
+
+        influx.writePoint(point, (result) => {
+            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            done();
+        });
+    });
+
+    it("should track owner event APIKEY_REVOKED", function (done) {
+
+        let point = {
+            measurement: 'APIKEY_REVOKED',
+            tags: { owner_id: owner, hash: "keyhash" },
+            fields: { value: 1 },
+        }
+
+        influx.writePoint(point, (result) => {
+            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            done();
+        });
+    });
+
+    it("should track owner event DEVICE_NEW", function (done) {
+
+        let point = {
+            measurement: 'DEVICE_NEW',
+            tags: { owner_id: owner, udid: udid },
+            fields: { value: 1 },
+        }
+
+        influx.writePoint(point, (result) => {
+            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            done();
+        });
+    });
+
+    it("should track owner event DEVICE_CHECKIN", function (done) {
+
+        let point = {
+            measurement: 'DEVICE_CHECKIN',
+            tags: { owner_id: owner, udid: udid },
+            fields: { value: 1 },
+        }
+
+        influx.writePoint(point, (result) => {
+            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            done();
+        });
+    });
+
+    it("should track owner event DEVICE_REVOCATION", function (done) {
+
+        let point = {
+            measurement: 'DEVICE_REVOCATION',
+            tags: { owner_id: owner, udid: udid },
+            fields: { value: 1 },
+        }
+
+        influx.writePoint(point, (result) => {
+            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            done();
+        });
+    });
+
+    it("should track owner event BUILD_STARTED", function (done) {
+
+        let point = {
+            measurement: 'BUILD_STARTED',
+            tags: { owner_id: owner, build_id: "build_id" },
+            fields: { value: 1 },
+        }
+
+        influx.writePoint(point, (result) => {
+            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            done();
+        });
+    });
+
+    it("should track owner event BUILD_SUCCESS", function (done) {
+
+        let point = {
+            measurement: 'BUILD_SUCCESS',
+            tags: { owner_id: owner, build_id: "build_id" },
+            fields: { value: 1 },
+        }
+
+        influx.writePoint(point, (result) => {
+            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            done();
+        });
+    });
+
+    it("should track owner event BUILD_FAIL", function (done) {
+
+        let point = {
+            measurement: 'BUILD_FAIL',
+            tags: { owner_id: owner, build_id: "build_id" },
+            fields: { value: 1 },
+        }
+
+        influx.writePoint(point, (result) => {
+            console.log("InfluxDB result:", JSON.stringify(result, null, 2));
+            done();
+        });
+    });
+    
+
 });
