@@ -98,7 +98,7 @@ describe("RSA Keys (JWT)", function () {
             .end((err, res) => {
                 console.log("[chai] GET /api/user/rsakey/list response:", res.text, res.status);
                 let r = JSON.parse(res.text);
-                key_id = r[0].filename;
+                key_id = r.rsakeys[0].filename;
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 done();
@@ -129,7 +129,7 @@ describe("RSA Keys (JWT)", function () {
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
-                expect(j.status).to.be.an('array');
+                expect(j.data).to.be.an('array');
                 done();
             });
     }, 20000);
