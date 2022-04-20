@@ -1,6 +1,8 @@
 const EventEmitter = require('events');
 
 const JWTLogin = require("./lib/thinx/jwtlogin");  
+const InfluxConnector = require('./lib/thinx/influx');
+
 module.exports = class THiNX extends EventEmitter {
 
   constructor(sqreen) {
@@ -128,6 +130,8 @@ module.exports = class THiNX extends EventEmitter {
       const Database = require("./lib/thinx/database");
       var db = new Database();
       db.init((/* db_err, dbs */) => {
+
+        InfluxConnector.createDB('stats');
 
         //
         // Log aggregator (needs DB)

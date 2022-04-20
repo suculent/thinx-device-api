@@ -338,7 +338,7 @@ describe("Meshes (JWT)", function () {
             .send(ro)
             .end((err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":true,"status":["mock-mesh-id-2"]}');
+                expect(res.text).to.equal('{"success":true,"data":["mock-mesh-id-2"]}');
                 done();
             });
     }, 20000);
@@ -355,8 +355,7 @@ describe("Meshes (JWT)", function () {
             .send(ro)
             .end((err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"status":[]}');
-                
+                expect(res.text).to.equal('{"success":false,"data":[]}');
                 done();
             });
     }, 20000);
