@@ -634,6 +634,19 @@ describe("User Routes", function () {
       });
   }, 20000);
 
+  it("GET /api/v2/stats (jwt)", function (done) {
+    console.log("🚸 [chai] GET /api/v2/stats (jwt)");
+    agent
+      .get('/api/user/stats')
+      .set('Authorization', jwt)
+      .end((_err, res) => {
+        console.log("🚸 [chai] GET /api/v2/stats (jwt) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
   //
   // User Support (2nd level)
   //

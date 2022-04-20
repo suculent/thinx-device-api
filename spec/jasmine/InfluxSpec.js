@@ -254,6 +254,22 @@ describe("InfluxDB", function () {
             done();
         });
     });
+
+    it("should query owner weekly", function (done) {
+        influx.week(owner, (result) => {
+            console.log("InfluxDB result BUILD_FAIL with:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
+            done();
+        });
+    });
+
+    it("should query owner daily", function (done) {
+        influx.today(owner, (result) => {
+            console.log("InfluxDB result BUILD_FAIL with:", JSON.stringify(result, null, 2));
+            expect(result.length > 0);
+            done();
+        });
+    });
     
 
 });
