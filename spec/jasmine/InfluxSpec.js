@@ -255,19 +255,17 @@ describe("InfluxDB", function () {
         });
     });
 
-    it("should query owner weekly", async function (done) {
+    it("should query owner weekly", async function () {
         await influx.week(owner, (result) => {
             console.log("InfluxDB result owner weekly with:", JSON.stringify(result, null, 2));
             expect(result.length > 0);
-            done();
         });
     });
 
-    it("should query owner daily", async function (done) {
+    it("should query owner daily", async function () {
         await influx.today(owner, (result) => {
             console.log("InfluxDB result owner daily with:", JSON.stringify(result, null, 2));
             expect(result.length > 0);
-            done();
         });
     });
     
