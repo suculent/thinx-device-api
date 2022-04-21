@@ -64,6 +64,7 @@ describe("Owner", function () {
       info: test_info
     };
     user.update(owner, body, (success, response) => {
+      console.log("(04) [chai] owner info result", success, response);
       expect(response).to.be.an('object');
       expect(success).to.equal(true);
       done();
