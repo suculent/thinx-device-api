@@ -26,7 +26,7 @@ describe("InfluxDB", function () {
             measurement: 'APIKEY_INVALID',
             tags: { owner_id: owner },
             fields: { value: 1 },
-        }
+        };
 
         influx.writePoint(point, (result) => {
             expect(result.length > 0);
@@ -40,7 +40,7 @@ describe("InfluxDB", function () {
             measurement: 'LOGIN_INVALID',
             tags: { owner_id: owner },
             fields: { value: 1 },
-        }
+        };
 
         influx.writePoint(point, (result) => {
             expect(result.length > 0);
@@ -54,7 +54,7 @@ describe("InfluxDB", function () {
             measurement: 'APIKEY_MISUSE',
             tags: { owner_id: owner, hash: "keyhash" },
             fields: { value: 1 },
-        }
+        };
 
         influx.writePoint(point, (result) => {
             expect(result.length > 0);
@@ -68,7 +68,7 @@ describe("InfluxDB", function () {
             measurement: 'APIKEY_REVOKED',
             tags: { owner_id: owner, hash: "keyhash" },
             fields: { value: 1 },
-        }
+        };
 
         influx.writePoint(point, (result) => {
             expect(result.length > 0);
@@ -82,7 +82,7 @@ describe("InfluxDB", function () {
             measurement: 'DEVICE_NEW',
             tags: { owner_id: owner, udid: udid },
             fields: { value: 1 },
-        }
+        };
 
         influx.writePoint(point, (result) => {
             expect(result.length > 0);
@@ -96,7 +96,7 @@ describe("InfluxDB", function () {
             measurement: 'DEVICE_CHECKIN',
             tags: { owner_id: owner, udid: udid },
             fields: { value: 1 },
-        }
+        };
 
         influx.writePoint(point, (result) => {
             expect(result.length > 0);
@@ -110,7 +110,7 @@ describe("InfluxDB", function () {
             measurement: 'DEVICE_REVOCATION',
             tags: { owner_id: owner, udid: udid },
             fields: { value: 1 },
-        }
+        };
 
         influx.writePoint(point, (result) => {
             expect(result.length > 0);
@@ -124,7 +124,7 @@ describe("InfluxDB", function () {
             measurement: 'BUILD_STARTED',
             tags: { owner_id: owner, build_id: "build_id" },
             fields: { value: 1 },
-        }
+        };
 
         influx.writePoint(point, (result) => {
             expect(result.length > 0);
@@ -138,7 +138,7 @@ describe("InfluxDB", function () {
             measurement: 'BUILD_SUCCESS',
             tags: { owner_id: owner, build_id: "build_id" },
             fields: { value: 1 },
-        }
+        };
 
         influx.writePoint(point, (result) => {
             expect(result.length > 0);
@@ -152,7 +152,7 @@ describe("InfluxDB", function () {
             measurement: 'BUILD_FAIL',
             tags: { owner_id: owner, build_id: "build_id" },
             fields: { value: 1 },
-        }
+        };
 
         influx.writePoint(point, (result) => {
             expect(result.length > 0);
@@ -255,17 +255,17 @@ describe("InfluxDB", function () {
         });
     });
 
-    it("should query owner weekly", function (done) {
-        influx.week(owner, (result) => {
-            console.log("InfluxDB result BUILD_FAIL with:", JSON.stringify(result, null, 2));
+    it("should query owner weekly", async function (done) {
+        await influx.week(owner, (result) => {
+            console.log("InfluxDB result owner weekly with:", JSON.stringify(result, null, 2));
             expect(result.length > 0);
             done();
         });
     });
 
-    it("should query owner daily", function (done) {
-        influx.today(owner, (result) => {
-            console.log("InfluxDB result BUILD_FAIL with:", JSON.stringify(result, null, 2));
+    it("should query owner daily", async function (done) {
+        await influx.today(owner, (result) => {
+            console.log("InfluxDB result owner daily with:", JSON.stringify(result, null, 2));
             expect(result.length > 0);
             done();
         });
