@@ -259,7 +259,7 @@ describe("API Keys (JWT)", function () {
     it("DELETE /api/v2/apikey", function (done) {
         expect(created_api_key).not.to.be.null;
         chai.request(thx.app)
-            .deůete('/api/v2/apikey')
+            .delete('/api/v2/apikey')
             .set('Authorization', jwt)
             .send({
                 'fingerprint': 'mock-apikey-alias-4'
