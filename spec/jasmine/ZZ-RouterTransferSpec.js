@@ -139,7 +139,7 @@ describe("Transfer (JWT)", function () {
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
-                expect(res.status).to.equal(200);
+                expect(res.status).to.equal(401);
                 expect(res).to.be.html;
                 done();
             });
@@ -217,7 +217,7 @@ describe("Transfer (JWT)", function () {
             .set('Authorization', jwt)
             .send({ udid: null})
             .end((err, res) => {
-                expect(res.status).to.equal(200);
+                expect(res.status).to.equal(401);
                 expect(res).to.be.html;
                 done();
             });
