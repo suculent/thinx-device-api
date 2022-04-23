@@ -59,14 +59,17 @@ describe("Device API (noauth)", function () {
 
     it("POST /device/addpush", function (done) {
         chai.request(thx.app)
-            .post('/api/device/addpush')
-            .send({})
+            .post('/device/addpush')
+            .send({ push: "31b1f6bf498d7cec463ff2588aca59a52df6f880e60e8d4d6bcda0d8e6e87823" })
             .end((err, res) => {
+                console.log("[chai] device add Push registration", res.text, res.status);
                 expect(res.status).to.equal(404);
                 //expect(res.text).to.be.a('string');
                 done();
             });
     }, 20000);
+
+
 
     // POST /api/device/envs
     it("POST /api/device/envs", function (done) {
@@ -429,6 +432,8 @@ describe("Device + API (JWT+Key)", function () {
                 done();
             });
     }, 20000);
+
+    
 
 
 });
