@@ -311,7 +311,7 @@ describe("User Routes", function () {
       .post('/api/user/profile')
       .send({})
       .end((_err, res) => {
-        console.log("[chai] POST /api/user/profile (noauth) response:", res.text);
+        console.log("🚸 [chai] POST /api/user/profile (noauth) response:", res.text);
         expect(res.status).to.equal(401);
         done();
       });
@@ -341,7 +341,7 @@ describe("User Routes", function () {
           .post('/api/gdpr')
           .send({ gdpr: true, token: token })
           .end((_err, _res) => {
-            console.log("[chai] POST /api/gdpr response:", _res.text, "status", _res.status);
+            console.log("🚸 [chai] POST /api/gdpr response:", _res.text, "status", _res.status);
             expect(_res.status).to.equal(200);
             expect(_res.text).to.be.a('string');
             // {"success":false,"status":"invalid_protocol_update_key_missing"} // WTF?
@@ -482,7 +482,7 @@ describe("User Routes", function () {
       .put('/api/v2/gdpr')
       .send({})
       .end((_err, res) => {
-        console.log("[chai] PUT /api/v2/gdpr response:", JSON.stringify(res, null, 2)); // consent missing
+        console.log("🚸 [chai] PUT /api/v2/gdpr response:", JSON.stringify(res, null, 2)); // consent missing
         expect(res.status).to.equal(400); // should return 401 without proper token, or 400 consent missing ¨
         done();
       });

@@ -121,7 +121,7 @@ describe("Device", function() {
 
   it("(04) should receive different response for registered device", function (done) {
     res.end = () => {
-      console.log("[chai] D(04) res end called...");
+      console.log("🚸 [chai] D(04) res end called...");
       //done();
     };
     device.register(

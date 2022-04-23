@@ -191,7 +191,7 @@ describe("Sources (JWT)", function () {
             .set('Authorization', jwt)
             .send({ source_ids: source_for_revocation })
             .end((err, res) => {
-                console.log("[chai] DELETE /api/v2/source response:", res.text, res.status);
+                console.log("🚸 [chai] DELETE /api/v2/source response:", res.text, res.status);
                 expect(res.status).to.equal(200);
                 // expect(res.text).to.equal('{"success":true,"source_ids":[]}'); already deleted
                 done();

@@ -370,7 +370,7 @@ describe("Meshes (JWT)", function () {
             .set('Authorization', jwt)
             .send({ alias: "mock-mesh-alias-3", owner_id: envi.dynamic.owner, mesh_id: 'mock-mesh-id-3' })
             .end((err, res) => {
-                console.log("[chai] PUT /api/v2/mesh response:", res.status, res.text);
+                console.log("🚸 [chai] PUT /api/v2/mesh response:", res.status, res.text);
                 let r = JSON.parse(res.text);
                 mesh_id = r.mesh_ids.mesh_id;
                 expect(res.status).to.equal(200);

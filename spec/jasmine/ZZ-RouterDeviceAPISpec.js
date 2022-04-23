@@ -25,7 +25,7 @@ describe("Device API (noauth)", function () {
             .post('/device/register')
             .send()
             .end((err, res) => {
-                console.log("[chai] POST /device/register A response:", res.text);
+                console.log("🚸 [chai] POST /device/register A response:", res.text);
                 expect(res.status).to.equal(400);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -37,7 +37,7 @@ describe("Device API (noauth)", function () {
             .post('/device/register')
             .send({ registration: {} })
             .end((err, res) => {
-                console.log("[chai] POST /device/register B response:", res.text);
+                console.log("🚸 [chai] POST /device/register B response:", res.text);
                 expect(res.status).to.equal(400);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -57,12 +57,25 @@ describe("Device API (noauth)", function () {
             });
     }, 20000);
 
+    it("POST /device/firmware OTT request", function (done) {
+        chai.request(thx.app)
+            .post('/device/firmware')
+            .send({ use: "ott"})
+            .end((err, res) => {
+                console.log("🚸 [chai] POST /device/firmware OTT request", res.text, res.status);
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                //{"success":false,"status":"missing_mac"}
+                done();
+            });
+    }, 20000);
+
     it("POST /device/addpush", function (done) {
         chai.request(thx.app)
             .post('/device/addpush')
             .send({ push: "31b1f6bf498d7cec463ff2588aca59a52df6f880e60e8d4d6bcda0d8e6e87823" })
             .end((err, res) => {
-                console.log("[chai] device add Push registration", res.text, res.status);
+                console.log("🚸 [chai] device add Push registration", res.text, res.status);
                 expect(res.status).to.equal(403);
                 //expect(res.text).to.be.a('string');
                 done();
@@ -180,7 +193,7 @@ describe("Device + API (JWT+Key)", function () {
             .set('Authentication', ak)
             .send({ registration: {} })
             .end((err, res) => {
-                //console.log("[chai] POST /device/register (jwt, invalid body) response", res.text, res.status);
+                //console.log("🚸 [chai] POST /device/register (jwt, invalid body) response", res.text, res.status);
                 expect(res.status).to.equal(400);
                 expect(res.text).to.be.a('string');
                 let j = JSON.parse(res.text);
@@ -238,7 +251,7 @@ describe("Device + API (JWT+Key)", function () {
             .set('Authentication', ak)
             .send({ push: "31b1f6bf498d7cec463ff2588aca59a52df6f880e60e8d4d6bcda0d8e6e87823", udid: envi.udid })
             .end((err, res) => {
-                console.log("[chai] POST /device/addpush (jwt, valid)", res.status, res.text);
+                console.log("🚸 [chai] POST /device/addpush (jwt, valid)", res.status, res.text);
                 expect(res.status).to.equal(200);
                 //expect(res.text).to.equal('false'); // in case of no error
                 done();
@@ -252,6 +265,18 @@ describe("Device + API (JWT+Key)", function () {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('OTT_INFO_NOT_FOUND');
+                done();
+            });
+    }, 20000);
+
+    it("GET /device/firmware (ak, none)", function (done) {
+        chai.request(thx.app)
+            .get('/device/firmware')
+            .set('Authentication', ak)
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('OTT_MISSING');
                 done();
             });
     }, 20000);
@@ -327,7 +352,7 @@ describe("Device + API (JWT+Key)", function () {
             .set('Authentication', ak)
             .send({ changes: { alias: "edited-alias" } })
             .end((err, res) => {
-                console.log("[chai] POST /api/device/edit (jwt, invalid) response:", res.text, "status", res.status);
+                console.log("🚸 [chai] POST /api/device/edit (jwt, invalid) response:", res.text, "status", res.status);
                 //expect(res.status).to.equal(401);
                 done();
             });
