@@ -139,8 +139,8 @@ describe("Transfer (JWT)", function () {
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
+                console.log("🚸 [chai] POST /api/transfer/decline (jwt, invalid) response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(401);
-                expect(res).to.be.html;
                 done();
             });
     }, 20000);
@@ -188,7 +188,7 @@ describe("Transfer (JWT)", function () {
 
     it("POST /api/v2/transfer/request (jwt, invalid)", function (done) {
         chai.request(thx.app)
-            .post('/api/transfer/request')
+            .post('/api/v2/transfer/request')
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
@@ -202,7 +202,7 @@ describe("Transfer (JWT)", function () {
 
     it("GET /api/v2/transfer/decline (jwt, invalid)", function (done) {
         chai.request(thx.app)
-            .get('/api/transfer/decline')
+            .get('/api/v2/transfer/decline')
             .set('Authorization', jwt)
             .end((err, res) => {
                 expect(res.status).to.equal(200);
@@ -213,19 +213,19 @@ describe("Transfer (JWT)", function () {
 
     it("POST /api/v2/transfer/decline (jwt, invalid)", function (done) {
         chai.request(thx.app)
-            .post('/api/transfer/decline')
+            .post('/api/v2/transfer/decline')
             .set('Authorization', jwt)
             .send({ udid: null})
             .end((err, res) => {
+                console.log("🚸 [chai] POST /api/v2/transfer/decline (jwt, invalid)response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(401);
-                expect(res).to.be.html;
                 done();
             });
     }, 20000);
 
     it("GET /api/v2/transfer/accept (jwt, invalid)", function (done) {
         chai.request(thx.app)
-            .get('/api/transfer/accept')
+            .get('/api/v2/transfer/accept')
             .set('Authorization', jwt)
             .end((err, res) => {
                 console.log("🚸 [chai] GET /api/transfer/accept (jwt, invalid) response:", res.text, " status:", res.status);
@@ -238,7 +238,7 @@ describe("Transfer (JWT)", function () {
 
     it("POST /api/v2/transfer/accept (jwt, invalid)", function (done) {
         chai.request(thx.app)
-            .post('/api/transfer/accept')
+            .post('/api/v2/transfer/accept')
             .set('Authorization', jwt)
             .send({ udid: null })
             .end((err, res) => {
@@ -251,7 +251,7 @@ describe("Transfer (JWT)", function () {
 
     it("POST /api/v2/transfer/accept (noauth, null)", function (done) {
         chai.request(thx.app)
-            .get('/api/transfer/accept')
+            .get('/api/v2/transfer/accept')
             .set('Authorization', jwt)
             .send({ owner: null, transfer_id: null, udid: null})
             .end((err, res) => {
