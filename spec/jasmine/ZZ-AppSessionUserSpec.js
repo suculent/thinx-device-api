@@ -311,6 +311,7 @@ describe("User Routes", function () {
       .post('/api/user/profile')
       .send({})
       .end((_err, res) => {
+        console.log("[chai] POST /api/user/profile (noauth) response:", res.text);
         expect(res.status).to.equal(401);
         done();
       });
@@ -613,7 +614,7 @@ describe("User Routes", function () {
       .set('Authorization', jwt)
       .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/logs/build/:id (jwt) response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(200);
+        expect(res.status).to.equal(404);
         //expect(res.text).to.be.a('string');
         done();
       });
