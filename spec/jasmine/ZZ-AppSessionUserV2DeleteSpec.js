@@ -207,12 +207,13 @@ describe("User Routes V2", function () {
   //
 
   it("DELETE /api/v2/user", function (done) {
+    console.log("🚸 [chai] V2 DELETE /api/v2/user");
     chai.request(thx.app)
       .delete('/api/v2/user')
       .set('Authorization', jwt)
       .send({ owner: dynamic_owner_id })
       .end((_err, res) => {
-        console.log("🚸 [chai] V2 DELETE /api/v2/use response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] V2 DELETE /api/v2/user response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
