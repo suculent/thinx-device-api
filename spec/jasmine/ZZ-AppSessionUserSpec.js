@@ -610,7 +610,7 @@ describe("User Routes", function () {
 
   it("GET /api/user/logs/build/"+envi.build_id, function (done) {
     chai.request(thx.app)
-      .get('/api/user/logs/build')
+      .get('/api/user/logs/build/'+envi.build_id)
       .set('Authorization', jwt)
       .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/logs/build/:id (jwt) response:", res.text, " status:", res.status);
@@ -620,12 +620,12 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  it("GET /api/v2/logs/build/?id="+envi.build_id, function (done) {
+  it("GET /api/v2/logs/build/:id="+envi.build_id, function (done) {
     chai.request(thx.app)
-      .get('/api/v2/logs/build')
+      .get('/api/v2/logs/build/'+envi.build_id)
       .set('Authorization', jwt)
       .end((_err, res) => {
-        console.log("🚸 [chai] GET /api/v2/logs/build/:id (jwt) response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] GET /api/v2/logs/build/:id (jwt) response:", JSON.stringify(res.text, null, 2), " status:", res.status);
         expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
@@ -634,10 +634,10 @@ describe("User Routes", function () {
 
   it("GET /api/v2/logs/build?id=", function (done) {
     chai.request(thx.app)
-      .get('/api/v2/logs/build')
+      .get('/api/v2/logs/build/?id='+envi.build_id)
       .set('Authorization', jwt)
       .end((_err, res) => {
-        console.log("🚸 [chai] GET /api/v2/logs/build/:id (jwt) response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] GET /api/v2/logs/build/?id= (jwt) response:", JSON.stringify(res.text, null, 2), " status:", res.status);
         expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
