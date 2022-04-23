@@ -47,9 +47,9 @@ describe("User Routes V2", function () {
   // User Lifecycle
   //
 
-  it("POST /api/v2/user/create (valid body) and activate (set password)", function (done) {
+  it("POST /api/v2/user (valid body) and activate (set password)", function (done) {
     chai.request(thx.app)
-      .post('/api/v2/user/create')
+      .post('/api/v2/user')
       .send(user_info)
       .end((_err, res) => {
         // {"success":true,"status":"6975d3c5849fc130e689f2cae0abe51a8fd24f496810bee3c0bcf531dd53be0c"}
