@@ -279,7 +279,7 @@ describe("Devices (JWT)", function () {
     agent
       .post('/api/device/edit')
       .set('Authorization', jwt)
-      .send({ changes: { alias: "edited-alias", udid: dynamic_devices[0].udid } })
+      .send({ changes: { alias: "edited-alias", udid: dynamic_devices[1].udid } })
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/edit (JWT)response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
@@ -293,7 +293,7 @@ describe("Devices (JWT)", function () {
     agent
       .post('/api/device/attach')
       .set('Authorization', jwt)
-      .send({ udid: dynamic_devices[0].udid })
+      .send({ udid: dynamic_devices[1].udid })
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/attach (JWT) response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
@@ -321,7 +321,7 @@ describe("Devices (JWT)", function () {
     agent
       .post('/api/device/detach')
       .set('Authorization', jwt)
-      .send({ udid: dynamic_devices[0].udid })
+      .send({ udid: dynamic_devices[1].udid })
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/detach  (JWT) response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
