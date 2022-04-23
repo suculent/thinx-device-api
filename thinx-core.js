@@ -192,8 +192,10 @@ module.exports = class THiNX extends EventEmitter {
               ca: read(app_config.ssl_ca, 'utf8'),
               NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
             };
-            console.log("ℹ️ [info] Starting HTTPS server on " + app_config.secure_port + "...");
-            https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
+            if (process.env.ENVIRONMENT !== "test") {
+              console.log("ℹ️ [info] Starting HTTPS server on " + app_config.secure_port + "...");
+              https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
+            }
           } else {
             console.log("☣️ [error] SSL certificate loading or verification FAILED! Check your configuration!");
           }
