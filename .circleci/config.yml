@@ -248,6 +248,15 @@ jobs:
           cp ./spec/mnt/data/conf/config.json /mnt/data/conf/config.json
 
     - run:
+        name: Mock self-signed CA and SSL certificates
+        command: |
+          cd spec/mnt/data/ssl
+          ./_generate-ca-root-csr-and-sign-cert.sh
+          cp ./testRoot.crt /usr/local/share/ca-certificates
+          update-ca-certificates
+
+
+    - run:
         name: Starting Influx
         command: |
           PUB=$(docker network inspect traefik-public)
