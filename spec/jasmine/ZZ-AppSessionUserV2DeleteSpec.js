@@ -71,7 +71,7 @@ describe("User Routes V2", function () {
 
             chai.request(thx.app)
               .post('/api/v2/password/set')
-              .send({ password: envi.dynamic.username, rpassword: envi.dynamic.username, activation: dynamic_activation_code })
+              .send({ password: "dynamic2", rpassword: "dynamic2", activation: dynamic_activation_code })
               .end((___err, ___res) => {
                 expect(___res.status).to.equal(200);
                 expect(___res.text).to.be.a('string');
@@ -90,7 +90,7 @@ describe("User Routes V2", function () {
       .post('/api/v2/password/reset')
       .send({ email: envi.dynamic2.email })
       .end((_err, res) => {
-        console.log("🚸 [chai] POST /api/v2/password/reset (1) response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] V2 POST /api/v2/password/reset (1) response:", res.text, " status:", res.status);
         let j = JSON.parse(res.text);
         reset_key = j.status;
         expect(res.status).to.equal(200);
@@ -104,7 +104,7 @@ describe("User Routes V2", function () {
     chai.request(thx.app)
       .get('/api/v2/password/reset?owner_id='+envi.dynamic2.owner+'&reset_key='+reset_key)
       .end((_err, res) => {
-        console.log("🚸 [chai] GET /api/v2/password/reset (2) response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] V2 GET /api/v2/password/reset (2) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
@@ -117,7 +117,7 @@ describe("User Routes V2", function () {
       .post('/api/v2/password/set')
       .send({ password: "dynamic2", rpassword: "dynamic2", reset_key: reset_key })
       .end((_err, res) => {
-        console.log("🚸 [chai] POST /api/v2/password/set (3) response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] V2 POST /api/v2/password/set (3) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
@@ -143,7 +143,7 @@ describe("User Routes V2", function () {
           "access_token":"eyJh...",
           "redirectURL":"https://rtm.thinx.cloud/auth.html?t=33ed0c670113f6e8b1095a1b1857d5dc6e9db77c37122d76c45ffacef2484701&g=true"
         } */
-        console.log("[chai] POST /api/login response", res.text);
+        console.log("[chai] V2 POST /api/login response", res.text);
         let body = JSON.parse(res.text);
         jwt = 'Bearer ' + body.access_token;
 
@@ -155,7 +155,7 @@ describe("User Routes V2", function () {
           .post('/api/v2/gdpr')
           .send({ gdpr: true, token: token })
           .end((_err, _res) => {
-            console.log("[chai] POST /api/gdpr response:", _res.text, "status", _res.status);
+            console.log("[chai] V2 POST /api/gdpr response:", _res.text, "status", _res.status);
             expect(_res.status).to.equal(200);
             expect(_res.text).to.be.a('string');
             // {"success":false,"status":"invalid_protocol_update_key_missing"} // WTF?
@@ -181,7 +181,7 @@ describe("User Routes V2", function () {
       .get('/api/v2/stats')
       .set('Authorization', jwt)
       .end((_err, res) => {
-        console.log("[chai] GET /api/v2/stats response", res.text);
+        console.log("[chai] V2 GET /api/v2/stats response", res.text);
         expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
@@ -194,7 +194,7 @@ describe("User Routes V2", function () {
       .set('Authorization', jwt)
       .send({})
       .end((_err, res) => {
-        console.log("🚸 [chai] POST /api/v2/chat response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] V2 POST /api/v2/chat response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
@@ -211,7 +211,7 @@ describe("User Routes V2", function () {
       .set('Authorization', jwt)
       .send({ owner: dynamic_owner_id })
       .end((_err, res) => {
-        console.log("🚸 [chai] DELETE /api/v2/use response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] V2 DELETE /api/v2/use response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
