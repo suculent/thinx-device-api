@@ -91,6 +91,8 @@ describe("User Routes V2", function () {
       .send({ email: envi.dynamic2.email })
       .end((_err, res) => {
         console.log("🚸 [chai] POST /api/v2/password/reset (1) response:", res.text, " status:", res.status);
+        let j = JSON.parse(res.text);
+        reset_key = j.status;
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
@@ -100,11 +102,9 @@ describe("User Routes V2", function () {
 
   it("GET /api/v2/password/reset", function (done) {
     chai.request(thx.app)
-      .get('/api/v2/password/reset?owner_id='+envi.dynamic2.owner+'&reset_key='+)
+      .get('/api/v2/password/reset?owner_id='+envi.dynamic2.owner+'&reset_key='+reset_key);
       .end((_err, res) => {
         console.log("🚸 [chai] GET /api/v2/password/reset (2) response:", res.text, " status:", res.status);
-        let j = JSON.parse(res.text);
-        reset_key = j.status;
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
