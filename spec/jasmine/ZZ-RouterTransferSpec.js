@@ -50,11 +50,11 @@ describe("Device Ownership Transfer (noauth)", function () {
 
     it("POST /api/transfer/decline (noauth, invalid)", function (done) {
         chai.request(thx.app)
-            .get('/api/transfer/decline')
+            .post('/api/transfer/decline')
             .send({})
             .end((err, res) => {
+                console.log("🚸 [chai] POST /api/transfer/decline (noauth, invalid)", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
-                expect(res).to.be.html;
                 done();
             });
     }, 20000);
@@ -117,8 +117,8 @@ describe("Transfer (JWT)", function () {
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/transfer/request (jwt, invalid) response headers: ", res.header, " should contain Content-type: text/html");
                 expect(res.status).to.equal(200);
-                expect(res.text).to.be.a('string'); // <html> - headers incorrect!
-                expect(res).to.be.html;
+                expect(res.text).to.be.a('string'); 
+                expect(res.text).to.equal('{"success":false,"status":"missing_recipient"}');
                 done();
             });
     }, 20000);
@@ -195,8 +195,8 @@ describe("Transfer (JWT)", function () {
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/transfer/request (jwt, invalid) response:", res.text);
                 expect(res.status).to.equal(200);
-                expect(res.text).to.be.a('string'); // <html> - headers incorrect!
-                expect(res).to.be.html;
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"status":"missing_recipient"}');
                 done();
             });
     }, 20000);
