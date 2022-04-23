@@ -252,7 +252,9 @@ describe("Devices (JWT)", function () {
       .set('Authorization', jwt)
       .end((err, res) => {
         console.log("🚸 [chai] GET /api/user/devices (JWT) response:", res.text, " status:", res.status);
-        // TODO: Store UDID!
+        let j = JSON.parse(res.text);
+        console.log("🚸 [chai] TODO PARSE GET /api/user/devices data", JSON.stringify(j, null, 2));
+        // TODO get list of devices and use them for verious operations, like attach/detach
         //expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
