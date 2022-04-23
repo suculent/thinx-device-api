@@ -702,4 +702,26 @@ describe("User Routes", function () {
       });
   }, 20000);
 
+  it("GET /api/v2/stats/today", function (done) {
+    chai.request(thx.app)
+      .get('/api/v2/stats/today')
+      .set('Authorization', jwt)
+      .end((_err, res) => {
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("GET /api/v2/stats/week", function (done) {
+    chai.request(thx.app)
+      .get('/api/v2/stats/week')
+      .set('Authorization', jwt)
+      .end((_err, res) => {
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
 });

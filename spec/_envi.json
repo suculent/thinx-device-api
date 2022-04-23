@@ -38,5 +38,10 @@
       "alias": "Empty",
       "body": "var transformer = function(status, device) { return status };"
     }]
+  },
+  "dynamic2": {
+    "owner": "40e8a98eee1855695bea07f83726fc474ad5681b003610fc38d9ff8b891e9b42",
+    "email": "dynamic2@example.com"
   }
+
 }

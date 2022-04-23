@@ -143,8 +143,8 @@ describe("Owner", function () {
   });
 
   it("(11) should update avatar", function (done) {
-    user.saveAvatar(envi.oid, "<avatar-mock>", (/* result */) => {
-      //expect(result).to.be.false;
+    user.saveAvatar(envi.oid, "<avatar-mock>", (result) => {
+      expect(result).to.be.true;
       done();
     });
   });
