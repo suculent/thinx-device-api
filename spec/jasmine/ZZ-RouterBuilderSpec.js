@@ -201,6 +201,42 @@ describe("Builder (JWT)", function () {
         
     }, 20000);
 
+    it("POST /api/v2/build (JWT, valid) VI", function (done) {
+
+        agent
+            .post('/api/device/attach')
+            .set('Authorization', jwt)
+            .send({ 
+                udid: envi.dynamic.udid, 
+                source_id: "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f4" 
+            })
+            .end((err, res) => {
+                console.log("🚸 [chai] POST /api/device/attach response:", res.text, " status:", res.status);
+                //expect(res.status).to.equal(200);
+                //expect(res.text).to.be.a('string');
+
+                agent
+                    .post('/api/v2/build')
+                    .set('Authorization', jwt)
+                    .send({
+                        owner: dynamic_owner_id,
+                        git: "https://github.com/suculent/thinx-firmware-esp8266-pio",
+                        branch: "origin/master",
+                        udid: envi.dynamic.udid,
+                        source_id: "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f4",
+                        build: envi.dynamic.udid
+                    })
+                    .end((err, res) => {
+                        console.log("🚸 [chai] response /api/v2/build (JWT, invalid) V:", res.text, " status:", res.status);
+                        expect(res.status).to.equal(400);
+                        //expect(res.text).to.be.a('string');
+                        done();
+                    });
+            });
+
+        
+    }, 20000);
+
     // latest firmware envelope
     it("POST /api/device/envelope (JWT, invalid)", function (done) {
         agent
@@ -209,6 +245,20 @@ describe("Builder (JWT)", function () {
             .send({})
             .end((err, res) => {
                 //console.log("🚸 [chai] response /api/device/envelope (JWT, invalid):", res.text, " status:", res.status);
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('false');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/v2/device/lastbuild (JWT, invalid)", function (done) {
+        agent
+            .post('/api/v2/device/lastbuild')
+            .set('Authorization', jwt)
+            .send({})
+            .end((err, res) => {
+                console.log("🚸 [chai] response /api/v2/device/lastbuild (JWT, invalid):", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('false');
@@ -267,6 +317,21 @@ describe("Builder (JWT)", function () {
             .send({ udid: envi.dynamic.udid, build_id: envi.dynamic.udid  })
             .end((err, res) => {
                 console.log("🚸 [chai] response /api/device/artifacts (JWT, semi-valid):", res.text, " status:", res.status);
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                //expect(res.text).to.equal('{"success":false,"status":"missing_udid"}');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/v2/device/artifacts (JWT, semi-valid)", function (done) {
+        console.log("🚸 [chai] POST /api/device/artifacts (JWT, semi-valid)");
+        agent
+            .post('/api/v2/device/artifacts')
+            .set('Authorization', jwt)
+            .send({ udid: envi.dynamic.udid, build_id: envi.dynamic.udid  })
+            .end((err, res) => {
+                console.log("🚸 [chai] response /api/v2/device/artifacts (JWT, semi-valid):", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 //expect(res.text).to.equal('{"success":false,"status":"missing_udid"}');
