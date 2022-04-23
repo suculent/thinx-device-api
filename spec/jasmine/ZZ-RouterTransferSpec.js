@@ -8,6 +8,7 @@ let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
 let thx;
+let transfer_id;
 
 //var envi = require("../_envi.json");
 
@@ -114,7 +115,7 @@ describe("Transfer (JWT)", function () {
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
-                //console.log("🚸 [chai] POST /api/transfer/request (jwt, invalid) response headers: ", res.header, " should contain Content-type: text/html");
+                console.log("🚸 [chai] POST /api/transfer/request (jwt, invalid) response headers: ", res.header, " should contain Content-type: text/html");
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string'); // <html> - headers incorrect!
                 expect(res).to.be.html;
@@ -192,7 +193,7 @@ describe("Transfer (JWT)", function () {
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
-                //console.log("🚸 [chai] POST /api/transfer/request (jwt, invalid) response headers: ", res.header, " should contain Content-type: text/html");
+                console.log("🚸 [chai] POST /api/transfer/request (jwt, invalid) response:", res.text);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string'); // <html> - headers incorrect!
                 expect(res).to.be.html;
@@ -240,7 +241,7 @@ describe("Transfer (JWT)", function () {
         chai.request(thx.app)
             .post('/api/v2/transfer/accept')
             .set('Authorization', jwt)
-            .send({ udid: null })
+            .send({ udid: null, transfer_id: transfer_id })
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
