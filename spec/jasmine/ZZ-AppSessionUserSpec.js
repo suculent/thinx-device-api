@@ -634,28 +634,6 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  it("GET /api/v2/stats/today", function (done) {
-    chai.request(thx.app)
-      .get('/api/v2/stats/today')
-      .set('Authorization', jwt)
-      .end((_err, res) => {
-        expect(res.status).to.equal(401);
-        //expect(res.text).to.be.a('string');
-        done();
-      });
-  }, 20000);
-
-  it("GET /api/v2/stats/week", function (done) {
-    chai.request(thx.app)
-      .get('/api/v2/stats/week')
-      .set('Authorization', jwt)
-      .end((_err, res) => {
-        expect(res.status).to.equal(401);
-        //expect(res.text).to.be.a('string');
-        done();
-      });
-  }, 20000);
-
   it("GET /api/v2/stats (jwt)", function (done) {
     console.log("🚸 [chai] GET /api/v2/stats (jwt)");
     agent
@@ -720,6 +698,28 @@ describe("User Routes", function () {
       .end((_err, res) => {
         console.log("🚸 [chai] POST /api/v2/profile (transformer) response:", res.text, " status:", res.status);
         expect(res).to.have.status(200);
+        done();
+      });
+  }, 20000);
+
+  it("GET /api/v2/stats/today", function (done) {
+    chai.request(thx.app)
+      .get('/api/v2/stats/today')
+      .set('Authorization', jwt)
+      .end((_err, res) => {
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("GET /api/v2/stats/week", function (done) {
+    chai.request(thx.app)
+      .get('/api/v2/stats/week')
+      .set('Authorization', jwt)
+      .end((_err, res) => {
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
         done();
       });
   }, 20000);
