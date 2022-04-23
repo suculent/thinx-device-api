@@ -49,10 +49,11 @@ describe("User Routes V2", function () {
 
   it("POST /api/v2/user/create (valid body) and activate (set password)", function (done) {
     chai.request(thx.app)
-      .post('/api/v2/user')
+      .post('/api/v2/user/create')
       .send(user_info)
       .end((_err, res) => {
         // {"success":true,"status":"6975d3c5849fc130e689f2cae0abe51a8fd24f496810bee3c0bcf531dd53be0c"}
+        console.log("[chai] IMPORTANT", res.text);
         expect(res.text).to.be.a('string');
         expect(res.status).to.equal(200);
         let body = JSON.parse(res.text);
@@ -196,5 +197,18 @@ describe("User Routes V2", function () {
   //
   // Removal
   //
+
+  it("DELETE /api/v2/user", function (done) {
+    chai.request(thx.app)
+      .delete('/api/v2/user')
+      .set('Authorization', jwt)
+      .send({ owner: dynamic_owner_id })
+      .end((_err, res) => {
+        console.log("🚸 [chai] DELETE /api/v2/use response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
 
 });

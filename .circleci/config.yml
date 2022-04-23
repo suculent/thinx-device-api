@@ -354,7 +354,7 @@ workflows:
   # public open-source site
   #
 
-  test-and-deploy:
+  main:
 
     jobs:
 
