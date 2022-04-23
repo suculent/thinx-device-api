@@ -177,6 +177,18 @@ describe("User Routes V2", function () {
   // User Statistics
   //
 
+  // should create LOGIN_INVALID Passwotd mismatch tag
+  it("POST /api/login", function (done) {
+    chai.request(thx.app)
+      .post('/api/login')
+      .send({ username: "dynamic2", password: "dynamic3" })
+      .end((_err1, res1) => {
+        console.log("🚸 [chai] POST /api/login response:", res1.text, "status", res1.status);
+        expect(res1.status).to.equal(200);
+        done();
+      });
+  }, 20000);
+
   it("GET /api/v2/stats", function (done) {
     chai.request(thx.app)
       .get('/api/v2/stats')
