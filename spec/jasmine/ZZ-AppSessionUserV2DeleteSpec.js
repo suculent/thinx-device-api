@@ -32,14 +32,14 @@ describe("User Routes V2", function () {
     thx = new THiNX();
     thx.init(() => {
       agent = chai.request.agent(thx.app);
-      console.log(`🚸 [chai] >>> running User Routes spec`);
+      console.log(`🚸 [chai] >>> running User Routes V2 spec`);
       done();
     });
   });
 
   afterAll((done) => {
     agent.close();
-    console.log(`🚸 [chai] <<< completed User Routes spec`);
+    console.log(`🚸 [chai] <<< completed User Routes V2 spec`);
     done();
   });
 
@@ -88,7 +88,7 @@ describe("User Routes V2", function () {
       .post('/api/v2/password/set')
       .send({ password: "dynamic", rpassword: "dynamic", reset_key: reset_key })
       .end((_err, res) => {
-        console.log("🚸 [chai] POST /api/user/password/set (valid) X response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] POST /api/v2/password/set (valid) X response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
