@@ -35,9 +35,8 @@
   "ssh_keys": "/mnt/data/ssh_keys",
   "slack_webhook": "",
   "slack_bot_topic": "thinx",
-  "ssl_key": "/mnt/data/ssl/thinx.test.key_",
-  "ssl_cert": "/mnt/data/ssl/thinx.test.out.crt_",
-  "ssl_ca": "/mnt/data/ssl/testRoot.crt_",
+  "ssl_key": "/mnt/data/ssl/privkey.pem",
+  "ssl_cert": "/mnt/data/ssl/cert.pem",
   "client_user_agent": "THiNX-Client",
   "builder" : {
     "concurrency" : 2

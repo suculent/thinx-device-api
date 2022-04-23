@@ -105,7 +105,6 @@ describe("Transfer (JWT)", function () {
 
     afterAll(() => {
         console.log(`🚸 [chai] <<< completed Transfer (JWT) spec`);
-        thx.stop();
     });
 
     // save trid for accept and decline, create valid version of this; needs at least two owners and one device

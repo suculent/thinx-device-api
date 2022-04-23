@@ -69,7 +69,6 @@ describe("RSA Keys (JWT)", function () {
   
     afterAll((done) => {
         agent.close();
-        thx.stop();
         done();
     });
 

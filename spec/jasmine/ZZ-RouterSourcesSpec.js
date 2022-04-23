@@ -78,7 +78,6 @@ describe("Sources (JWT)", function () {
     afterAll((done) => {
         agent.close();
         console.log(`🚸 [chai] <<< completed Sources (JWT) spec`);
-        thx.stop();
         done();
     });
 

@@ -206,7 +206,6 @@ describe("Devices (JWT)", function () {
   afterAll(() => {
     console.log(`🚸 [chai] <<< completed Devices (JWT) spec`);
     agent.close();
-    thx.stop();
   });
 
   it("POST /api/user/apikey (D)", function (done) {

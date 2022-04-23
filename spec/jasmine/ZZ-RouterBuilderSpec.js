@@ -103,7 +103,6 @@ describe("Builder (JWT)", function () {
 
     afterAll((done) => {
         agent.close();
-        thx.stop();
         console.log(`🚸 [chai] <<< completed Builder (JWT) spec`);
         done();
     });
