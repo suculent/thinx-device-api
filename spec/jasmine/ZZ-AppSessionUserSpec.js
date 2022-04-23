@@ -420,10 +420,10 @@ describe("User Routes", function () {
       .catch((e) => { console.log(e); });
   }, 20000);
 
-  // there is no login here, so JWT for this is missing
   it("POST /api/gdpr/transfer", function (done) {
     chai.request(thx.app)
       .post('/api/gdpr/transfer')
+      .set('Authorization', jwt)
       .send({})
       .end((_err, res) => {
         expect(res.status).to.equal(401);
@@ -448,18 +448,33 @@ describe("User Routes", function () {
 
   // GDPR API v2
 
-  // there is no login here, so JWT for this is missing
+  // there is no login here, so JWT for this should be missing
   it("DELETE /api/v2/gdpr", function (done) {
     console.log("🚸 [chai] DELETE /api/v2/gdpr (jwt, invalid) request");
     chai.request(thx.app)
       .delete('/api/v2/gdpr')
       .set('Authorization', jwt)
-      .send({})
+      .send({ owner_id: dynamic_owner_id})
       .end((_err, res) => {
         console.log("🚸 [chai] DELETE /api/v2/gdpr (jwt, invalid) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"deletion_not_confirmed"}');
+        done();
+      });
+  }, 20000);
+
+  // there is no login here, so JWT for this should be missing
+  it("DELETE /api/v2/gdpr (valid)", function (done) {
+    console.log("🚸 [chai] DELETE /api/v2/gdpr (jwt, valid) request");
+    chai.request(thx.app)
+      .delete('/api/v2/gdpr')
+      .set('Authorization', jwt)
+      .send({ owner: dynamic_owner_id})
+      .end((_err, res) => {
+        console.log("🚸 [chai] DELETE /api/v2/gdpr (jwt, valid) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
         // {"success":false,"status":"deletion_not_confirmed"} 
         done();
       });
