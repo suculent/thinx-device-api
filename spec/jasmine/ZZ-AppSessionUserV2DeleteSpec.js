@@ -102,7 +102,7 @@ describe("User Routes V2", function () {
 
   it("GET /api/v2/password/reset", function (done) {
     chai.request(thx.app)
-      .get('/api/v2/password/reset?owner_id='+envi.dynamic2.owner+'&reset_key='+reset_key);
+      .get('/api/v2/password/reset?owner_id='+envi.dynamic2.owner+'&reset_key='+reset_key)
       .end((_err, res) => {
         console.log("🚸 [chai] GET /api/v2/password/reset (2) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
