@@ -464,22 +464,6 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  // there is no login here, so JWT for this should be missing
-  it("DELETE /api/v2/gdpr (valid)", function (done) {
-    console.log("🚸 [chai] DELETE /api/v2/gdpr (jwt, valid) request");
-    chai.request(thx.app)
-      .delete('/api/v2/gdpr')
-      .set('Authorization', jwt)
-      .send({ owner: dynamic_owner_id})
-      .end((_err, res) => {
-        console.log("🚸 [chai] DELETE /api/v2/gdpr (jwt, valid) response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(200);
-        expect(res.text).to.be.a('string');
-        // {"success":false,"status":"deletion_not_confirmed"} 
-        done();
-      });
-  }, 20000);
-
   // there is no login here, so JWT for this is missing
   it("POST /api/v2/gdpr", function (done) {
     chai.request(thx.app)
