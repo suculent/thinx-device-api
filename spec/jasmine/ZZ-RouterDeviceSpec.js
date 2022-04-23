@@ -245,6 +245,8 @@ describe("Devices (JWT)", function () {
       });
   }, 20000);
 
+  let dynamic_devices = [];
+
   it("GET /api/user/devices (JWT)", function (done) {
     console.log("🚸 [chai] GET /api/user/devices (JWT)");
     agent
@@ -253,10 +255,9 @@ describe("Devices (JWT)", function () {
       .end((err, res) => {
         console.log("🚸 [chai] GET /api/user/devices (JWT) response:", res.text, " status:", res.status);
         let j = JSON.parse(res.text);
-        console.log("🚸 [chai] TODO PARSE GET /api/user/devices data", JSON.stringify(j, null, 2));
-        // TODO get list of devices and use them for verious operations, like attach/detach
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        dynamic_devices = j.devices;
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
         done();
       });
   }, 20000);
@@ -278,7 +279,7 @@ describe("Devices (JWT)", function () {
     agent
       .post('/api/device/edit')
       .set('Authorization', jwt)
-      .send({ changes: { alias: "edited-alias" } })
+      .send({ changes: { alias: "edited-alias", udid: dynamic_devices[0].udid } })
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/edit (JWT)response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
@@ -292,7 +293,7 @@ describe("Devices (JWT)", function () {
     agent
       .post('/api/device/attach')
       .set('Authorization', jwt)
-      .send({ udid: envi.oid })
+      .send({ udid: dynamic_devices[0].udid })
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/attach (JWT) response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
@@ -320,7 +321,7 @@ describe("Devices (JWT)", function () {
     agent
       .post('/api/device/detach')
       .set('Authorization', jwt)
-      .send({ udid: envi.oid })
+      .send({ udid: dynamic_devices[0].udid })
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/detach  (JWT) response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
