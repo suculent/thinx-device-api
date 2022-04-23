@@ -620,7 +620,7 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  it("GET /api/v2/logs/build/"+envi.build_id, function (done) {
+  it("GET /api/v2/logs/build/?id="+envi.build_id, function (done) {
     chai.request(thx.app)
       .get('/api/v2/logs/build')
       .set('Authorization', jwt)
@@ -632,7 +632,7 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  it("GET /api/v2/logs/build", function (done) {
+  it("GET /api/v2/logs/build?id=", function (done) {
     chai.request(thx.app)
       .get('/api/v2/logs/build')
       .set('Authorization', jwt)
