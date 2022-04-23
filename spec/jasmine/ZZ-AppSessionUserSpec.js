@@ -607,6 +607,54 @@ describe("User Routes", function () {
       });
   }, 20000);
 
+  it("GET /api/user/logs/build/"+envi.build_id, function (done) {
+    chai.request(thx.app)
+      .get('/api/user/logs/build')
+      .set('Authorization', jwt)
+      .end((_err, res) => {
+        console.log("🚸 [chai] GET /api/user/logs/build/:id (jwt) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("GET /api/v2/logs/build/"+envi.build_id, function (done) {
+    chai.request(thx.app)
+      .get('/api/v2/logs/build')
+      .set('Authorization', jwt)
+      .end((_err, res) => {
+        console.log("🚸 [chai] GET /api/v2/logs/build/:id (jwt) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("GET /api/v2/logs/build", function (done) {
+    chai.request(thx.app)
+      .get('/api/v2/logs/build')
+      .set('Authorization', jwt)
+      .end((_err, res) => {
+        console.log("🚸 [chai] GET /api/v2/logs/build/:id (jwt) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("GET /api/v2/logs/audit", function (done) {
+    chai.request(thx.app)
+      .get('/api/v2/logs/audit')
+      .set('Authorization', jwt)
+      .end((_err, res) => {
+        console.log("🚸 [chai] GET /api/v2/logs/audit (jwt) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
   //
   // User Statistics
   //
