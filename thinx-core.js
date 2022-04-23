@@ -37,6 +37,7 @@ module.exports = class THiNX extends EventEmitter {
     if (typeof(this.https_server) !== "undefined") this.https_server.stop();
     if (typeof(this.http_server) !== "undefined") this.http_server.stop();
     if (typeof(this.wss_server) !== "undefined") this.wss_server.stop();
+    console.log("[info] All server stopped. Goodbye.");
   }
 
   init(init_complete_callback) {
