@@ -608,6 +608,23 @@ describe("User Routes", function () {
       });
   }, 20000);
 
+  let real_build_id;
+
+  // fetch logs
+  it("GET /api/v2/logs/build", function (done) {
+    chai.request(thx.app)
+      .get('/api/v2/logs/build')
+      .set('Authorization', jwt)
+      .end((_err, res) => {
+        console.log("🚸 [chai] GET /api/user/logs/build (jwt) response:", res.text, " status:", res.status);
+        let j = JSON.parse(res.text);
+        real_build_id = j.builds[0]._id;
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
   it("GET /api/user/logs/build/"+envi.build_id, function (done) {
     chai.request(thx.app)
       .get('/api/user/logs/build/'+envi.build_id)
@@ -620,9 +637,9 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  it("GET /api/v2/logs/build/"+envi.build_id, function (done) {
+  it("GET /api/v2/logs/build/"+real_build_id, function (done) {
     chai.request(thx.app)
-      .get('/api/v2/logs/build/'+envi.build_id)
+      .get('/api/v2/logs/build/'+real_build_id)
       .set('Authorization', jwt)
       .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/logs/build/:id (jwt) response:", res.text, " status:", res.status);
