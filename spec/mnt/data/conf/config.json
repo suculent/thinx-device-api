@@ -31,7 +31,7 @@
   "lambda": 7475,
   "data_root": "/mnt/data",
   "deploy_root": "/deploy",
-  "build_root": "/repos",
+  "build_root": "/deploy",
   "ssh_keys": "/mnt/data/ssh_keys",
   "slack_webhook": "",
   "slack_bot_topic": "thinx",
