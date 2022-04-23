@@ -10,6 +10,8 @@ chai.use(chaiHttp);
 let thx;
 let transfer_id;
 
+var envi = require("../_envi.json");
+
 //var envi = require("../_envi.json");
 
 describe("Device Ownership Transfer (noauth)", function () {
@@ -54,7 +56,7 @@ describe("Device Ownership Transfer (noauth)", function () {
             .send({})
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/transfer/decline (noauth, invalid)", res.text, " status:", res.status);
-                expect(res.status).to.equal(200);
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 20000);
@@ -119,6 +121,19 @@ describe("Transfer (JWT)", function () {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string'); 
                 expect(res.text).to.equal('{"success":false,"status":"missing_recipient"}');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/transfer/request (jwt, invalid)", function (done) {
+        chai.request(thx.app)
+            .post('/api/transfer/request')
+            .set('Authorization', jwt)
+            .send({ to: envi.dynamic.owner, udids: [envi.udid], mig_sources: true, mig_apikeys: true })
+            .end((err, res) => {
+                console.log("🚸 [chai] POST /api/transfer/request (jwt, invalid) response headers: ", res.header, " should contain Content-type: text/html");
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string'); 
                 done();
             });
     }, 20000);
