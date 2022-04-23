@@ -262,6 +262,7 @@ describe("Device + API (JWT+Key)", function () {
         chai.request(thx.app)
             .get('/device/firmware?ott=foo')
             .end((err, res) => {
+                console.log("🚸 [chai] GET /device/firmware (ak, invalid)", res.status, res.text);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('OTT_INFO_NOT_FOUND');
@@ -274,9 +275,10 @@ describe("Device + API (JWT+Key)", function () {
             .get('/device/firmware')
             .set('Authentication', ak)
             .end((err, res) => {
+                console.log("🚸 [chai] GET /device/firmware (ak, none)", res.status, res.text);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('OTT_MISSING');
+                expect(res.text).to.equal('{"success":false,"status":"OTT_MISSING"}');
                 done();
             });
     }, 20000);
@@ -286,6 +288,7 @@ describe("Device + API (JWT+Key)", function () {
             .get('/device/firmware?ott=foo')
             .set('Authentication', ak)
             .end((err, res) => {
+                console.log("🚸 [chai] GET /device/firmware (ak, valid)", res.status, res.text);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('OTT_INFO_NOT_FOUND');
