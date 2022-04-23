@@ -133,7 +133,7 @@ describe("User Routes V2", function () {
   it("POST /api/login + /api/v2/gdpr", function (done) {
     agent
       .post('/api/login')
-      .send({ username: 'dynamic2', password: 'dynamic', remember: false })
+      .send({ username: 'dynamic2', password: 'dynamic2', remember: false })
       .then(function (res) {
         expect(res).to.have.cookie('x-thx-core');
         /* response example:
@@ -143,6 +143,7 @@ describe("User Routes V2", function () {
           "access_token":"eyJh...",
           "redirectURL":"https://rtm.thinx.cloud/auth.html?t=33ed0c670113f6e8b1095a1b1857d5dc6e9db77c37122d76c45ffacef2484701&g=true"
         } */
+        console.log("[chai] POST /api/login response", res.text);
         let body = JSON.parse(res.text);
         jwt = 'Bearer ' + body.access_token;
 
@@ -180,7 +181,8 @@ describe("User Routes V2", function () {
       .get('/api/v2/stats')
       .set('Authorization', jwt)
       .end((_err, res) => {
-        expect(res.status).to.equal(401);
+        console.log("[chai] GET /api/v2/stats response", res.text);
+        expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
       });
