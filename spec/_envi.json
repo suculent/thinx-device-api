@@ -38,5 +38,9 @@
       "alias": "Empty",
       "body": "var transformer = function(status, device) { return status };"
     }]
+  },
+  "dynamic2": {
+    "owner": "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f4"
   }
+
 }
