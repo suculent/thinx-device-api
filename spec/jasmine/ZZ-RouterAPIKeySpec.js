@@ -84,6 +84,7 @@ describe("API Keys (JWT)", function () {
 
     afterAll((done) => {
         agent.close();
+        thx.stop();
         console.log(`🚸 [chai] <<< completed API Keys (noauth) spec`);
         done();
     });
