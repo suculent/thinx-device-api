@@ -61,7 +61,7 @@ describe("User Routes V2", function () {
         expect(body.status).to.be.a('string'); // check length
         expect(body.status.length == 64);
 
-        let rurl = '/api/v2/user/activate?owner=' + dynamic_owner_id + '&activation=' + dynamic_activation_code;
+        let rurl = '/api/v2/activate?owner=' + dynamic_owner_id + '&activation=' + dynamic_activation_code;
         chai.request(thx.app)
           .get(rurl)
           .end((__err, __res) => {
