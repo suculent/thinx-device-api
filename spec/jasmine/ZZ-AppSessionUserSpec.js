@@ -426,7 +426,7 @@ describe("User Routes", function () {
       .set('Authorization', jwt)
       .send({})
       .end((_err, res) => {
-        expect(res.status).to.equal(401);
+        expect(res.status).to.equal(200);
         done();
       });
   }, 20000);
