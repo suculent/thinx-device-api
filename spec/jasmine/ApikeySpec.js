@@ -137,18 +137,15 @@ describe("API Key", function() {
       owner,
       (object) => {
         expect(object).to.be.a('array');
-        console.log("[spec] 06 apikeys (2)", object);
         done();
       });
   });
 
   // currently fails, no key is being fetched
   it("(07) should be able to get first API Key (if exists)", function (done) {
-    console.log(`[spec] (07) get_first_apikey for owner: ${owner}`);
     apikey.get_first_apikey(
       owner,
       (success, object) => {
-        console.log(`🚸 [chai] (07) success ${success} first apikey ${object}`);
         expect(success).to.equal(true);
         expect(object).to.be.a('string');
         done();

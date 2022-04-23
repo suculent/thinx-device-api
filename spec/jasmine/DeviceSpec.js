@@ -129,7 +129,6 @@ describe("Device", function() {
       apikey,
       res,
       function (r, success, response) {
-        console.log("Device (04) response text:", {res}, {success}, {response});
         let obj = response;
         expect(obj).to.be.an('object');
         expect(success).to.equal(true);
