@@ -83,12 +83,14 @@ describe("User Routes V2", function () {
       });
   }, 20000);
 
-  it("POST /api/v2/password/set", function (done) {
+  // 1
+
+  it("POST /api/v2/password/reset", function (done) {
     chai.request(thx.app)
-      .post('/api/v2/password/set')
-      .send({ password: "dynamic", rpassword: "dynamic", reset_key: reset_key })
+      .post('/api/v2/password/reset')
+      .send({ email: envi.dynamic2.email })
       .end((_err, res) => {
-        console.log("🚸 [chai] POST /api/v2/password/set (valid) X response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] POST /api/v2/password/reset (1) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
@@ -98,9 +100,11 @@ describe("User Routes V2", function () {
 
   it("GET /api/v2/password/reset", function (done) {
     chai.request(thx.app)
-      .get('/api/v2/password/reset')
+      .get('/api/v2/password/reset?owner_id='+envi.dynamic2.owner+'&reset_key='+)
       .end((_err, res) => {
-        console.log("🚸 [chai] GET /api/v2/password/reset response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] GET /api/v2/password/reset (2) response:", res.text, " status:", res.status);
+        let j = JSON.parse(res.text);
+        reset_key = j.status;
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
@@ -108,18 +112,19 @@ describe("User Routes V2", function () {
       });
   }, 20000);
 
-  it("POST /api/v2/password/reset", function (done) {
+  it("POST /api/v2/password/set", function (done) {
     chai.request(thx.app)
-      .post('/api/v2/password/reset')
-      .send({ password: "dynamic", rpassword: "dynamic", reset_key: reset_key })
+      .post('/api/v2/password/set')
+      .send({ password: "dynamic2", rpassword: "dynamic2", reset_key: reset_key })
       .end((_err, res) => {
-        console.log("🚸 [chai] POST /api/v2/password/reset response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] POST /api/v2/password/set (3) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
         done();
       });
   }, 20000);
+
 
   //
   // User Profile
