@@ -135,7 +135,7 @@ describe("Transfer (JWT)", function () {
 
     it("POST /api/transfer/decline (jwt, invalid)", function (done) {
         chai.request(thx.app)
-            .get('/api/transfer/decline')
+            .post('/api/transfer/decline')
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
@@ -160,7 +160,7 @@ describe("Transfer (JWT)", function () {
 
     it("POST /api/transfer/accept (jwt, invalid)", function (done) {
         chai.request(thx.app)
-            .get('/api/transfer/accept')
+            .post('/api/transfer/accept')
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
@@ -172,6 +172,84 @@ describe("Transfer (JWT)", function () {
     }, 20000);
 
     it("POST /api/transfer/accept (noauth, null)", function (done) {
+        chai.request(thx.app)
+            .get('/api/transfer/accept')
+            .set('Authorization', jwt)
+            .send({ owner: null, transfer_id: null, udid: null})
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
+                done();
+            });
+    }, 20000);
+
+    // v2
+
+    it("POST /api/v2/transfer/request (jwt, invalid)", function (done) {
+        chai.request(thx.app)
+            .post('/api/transfer/request')
+            .set('Authorization', jwt)
+            .send({})
+            .end((err, res) => {
+                //console.log("🚸 [chai] POST /api/transfer/request (jwt, invalid) response headers: ", res.header, " should contain Content-type: text/html");
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string'); // <html> - headers incorrect!
+                expect(res).to.be.html;
+                done();
+            });
+    }, 20000);
+
+    it("GET /api/v2/transfer/decline (jwt, invalid)", function (done) {
+        chai.request(thx.app)
+            .get('/api/transfer/decline')
+            .set('Authorization', jwt)
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string'); // <html>
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/v2/transfer/decline (jwt, invalid)", function (done) {
+        chai.request(thx.app)
+            .post('/api/transfer/decline')
+            .set('Authorization', jwt)
+            .send({ udid: null})
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res).to.be.html;
+                done();
+            });
+    }, 20000);
+
+    it("GET /api/v2/transfer/accept (jwt, invalid)", function (done) {
+        chai.request(thx.app)
+            .get('/api/transfer/accept')
+            .set('Authorization', jwt)
+            .end((err, res) => {
+                console.log("🚸 [chai] GET /api/transfer/accept (jwt, invalid) response:", res.text, " status:", res.status);
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/v2/transfer/accept (jwt, invalid)", function (done) {
+        chai.request(thx.app)
+            .post('/api/transfer/accept')
+            .set('Authorization', jwt)
+            .send({ udid: null })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/v2/transfer/accept (noauth, null)", function (done) {
         chai.request(thx.app)
             .get('/api/transfer/accept')
             .set('Authorization', jwt)

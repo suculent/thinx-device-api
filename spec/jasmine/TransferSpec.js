@@ -76,4 +76,6 @@ describe("Transfer", function () {
     });
   }); // it-00
 
+  // TODO: Fetch real device-id and do the same thing as specific transfer, then do it over v2 again with two new devices or another owner
+
 }); // describe
