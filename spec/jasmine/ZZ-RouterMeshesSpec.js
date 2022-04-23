@@ -161,6 +161,7 @@ describe("Meshes (JWT)", function () {
   
     afterAll((done) => {
         agent.close();
+        thx.stop();
         console.log(`🚸 [chai] <<< completed Meshes (JWT) spec`);
         done();
     });

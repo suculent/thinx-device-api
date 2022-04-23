@@ -49,6 +49,7 @@ describe("Actionable Notification (JWT)", function () {
   
     afterAll((done) => {
         agent.close();
+        thx.stop();
         done();
     });
 

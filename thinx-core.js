@@ -27,6 +27,17 @@ module.exports = class THiNX extends EventEmitter {
 
     this.app = null;
     this.clazz = this;
+
+    this.https_server;
+    this.http_server;
+    this.wss_server;
+  }
+
+  stop() {
+    if (typeof(this.https_server) !== "undefined") this.https_server.stop();
+    if (typeof(this.http_server) !== "undefined") this.http_server.stop();
+    if (typeof(this.wss_server) !== "undefined") this.wss_server.stop();
+    console.log("[info] All server stopped. Goodbye.");
   }
 
   init(init_complete_callback) {
@@ -193,7 +204,12 @@ module.exports = class THiNX extends EventEmitter {
               NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
             };
             console.log("ℹ️ [info] Starting HTTPS server on " + app_config.secure_port + "...");
-            https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
+            try {
+              this.https_server = https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
+            } catch (e) {
+              console.log("Create server failed", e);
+            }
+            
           } else {
             console.log("☣️ [error] SSL certificate loading or verification FAILED! Check your configuration!");
           }
@@ -342,7 +358,7 @@ module.exports = class THiNX extends EventEmitter {
 
 
         // Legacy HTTP support for old devices without HTTPS proxy
-        let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function () {
+        this.http_server = http.createServer(app).listen(app_config.port, "0.0.0.0", function () {
           console.log(`ℹ️ [info] HTTP API started on port ${app_config.port}`);
           let end_timestamp = new Date().getTime() - start_timestamp;
           let seconds = Math.ceil(end_timestamp / 1000);
@@ -380,7 +396,7 @@ module.exports = class THiNX extends EventEmitter {
         let wss;
         
         try {
-          wss = new WebSocket.Server({ server: server });
+          wss = new WebSocket.Server({ server: this.https_server });
         } catch (e){
           console.log("[warning] Cannot init WSS server...");
           return;

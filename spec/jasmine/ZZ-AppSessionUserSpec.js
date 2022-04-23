@@ -39,6 +39,7 @@ describe("User Routes", function () {
 
   afterAll((done) => {
     agent.close();
+    thx.stop();
     console.log(`🚸 [chai] <<< completed User Routes spec`);
     done();
   });
