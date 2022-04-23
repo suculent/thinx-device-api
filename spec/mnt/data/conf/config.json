@@ -37,6 +37,7 @@
   "slack_bot_topic": "thinx",
   "ssl_key": "/mnt/data/ssl/thinx.test.key",
   "ssl_cert": "/mnt/data/ssl/thinx.test.out.crt",
+  "ssl_ca": "/mnt/data/ssl/testRoot.crt",
   "client_user_agent": "THiNX-Client",
   "builder" : {
     "concurrency" : 2
