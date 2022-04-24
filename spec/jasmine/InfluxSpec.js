@@ -20,6 +20,10 @@ describe("InfluxDB", function () {
         }, true);
     });
 
+    it ("static should write immediately", function() {
+        InfluxConnector.statsLog(owner, "LOGIN_INVALID", owner);
+    });
+
     it("should track owner event APIKEY_INVALID", function (done) {
 
         let point = {
