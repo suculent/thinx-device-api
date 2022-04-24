@@ -110,20 +110,6 @@ describe("Transfer (JWT)", function () {
         console.log(`🚸 [chai] <<< completed Transfer (JWT) spec`);
     });
 
-    it("GET /api/transfer/request (jwt, invalid)", function (done) {
-        chai.request(thx.app)
-            .get('/api/transfer/request')
-            .set('Authorization', jwt)
-            .send({})
-            .end((err, res) => {
-                console.log("🚸 [chai] GET /api/transfer/request (jwt, invalid) response headers: ", res.header, " should contain Content-type: text/html");
-                expect(res.status).to.equal(200);
-                expect(res.text).to.be.a('string'); 
-                //expect(res.text).to.equal('{"success":false,"status":"missing_recipient"}');
-                done();
-            });
-    }, 20000);
-
     // save trid for accept and decline, create valid version of this; needs at least two owners and one device
     it("POST /api/transfer/request (jwt, invalid)", function (done) {
         chai.request(thx.app)
@@ -170,7 +156,7 @@ describe("Transfer (JWT)", function () {
             .send({})
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/transfer/decline (jwt, invalid) response:", res.text, " status:", res.status);
-                expect(res.status).to.equal(401);
+                expect(res.status).to.equal(200);
                 done();
             });
     }, 20000);
@@ -248,7 +234,7 @@ describe("Transfer (JWT)", function () {
             .send({ udid: null})
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/v2/transfer/decline (jwt, invalid)response:", res.text, " status:", res.status);
-                expect(res.status).to.equal(401);
+                expect(res.status).to.equal(200);
                 done();
             });
     }, 20000);
