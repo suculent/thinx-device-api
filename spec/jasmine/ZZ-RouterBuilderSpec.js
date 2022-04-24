@@ -165,6 +165,28 @@ describe("Builder (JWT)", function () {
             });
     }, 20000);
 
+    it("POST /api/build (JWT, invalid) VI", function (done) {
+        agent
+            .post('/api/build')
+            .set('Authorization', jwt)
+            .send({ owner: dynamic_owner_id, git: "origin/master", udid: null })
+            .end((err, res) => {
+                expect(res.status).to.equal(400);
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/build (JWT, invalid) VII", function (done) {
+        agent
+            .post('/api/build')
+            .set('Authorization', jwt)
+            .send({ owner: dynamic_owner_id, git: "origin/master", source_id: null })
+            .end((err, res) => {
+                expect(res.status).to.equal(400);
+                done();
+            });
+    }, 20000);
+
     it("POST /api/build (JWT, valid) VI", function (done) {
 
         agent
