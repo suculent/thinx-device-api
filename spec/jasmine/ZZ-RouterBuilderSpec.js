@@ -201,7 +201,7 @@ describe("Builder (JWT)", function () {
         
     }, 20000);
 
-    it("POST /api/v2/build (JWT, invalid) V", function (done) {
+    it("POST /api/v2/build (JWT, valid) V", function (done) {
 
         agent
             .post('/api/device/attach')
@@ -210,10 +210,10 @@ describe("Builder (JWT)", function () {
                 udid: envi.dynamic.udid, 
                 source_id: "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f4" 
             })
-            .end((err, res) => {
-                console.log("🚸 [chai] POST /api/device/attach response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
+            .end((_err, res) => {
+                //console.log("🚸 [chai] POST /api/device/attach (JWT, valid) V response:", res.text, " status:", res.status);
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
 
                 agent
                     .post('/api/v2/build')
@@ -228,9 +228,9 @@ describe("Builder (JWT)", function () {
                         }
                     })
                     .end((err, res) => {
-                        console.log("🚸 [chai] response /api/v2/build (JWT, invalid) V:", res.text, " status:", res.status);
+                        //console.log("🚸 [chai] response /api/v2/build (JWT, valid) V:", res.text, " status:", res.status);
                         expect(res.status).to.equal(304);
-                        //expect(res.text).to.be.a('string');
+                        expect(res.text).to.equal('{"status":true,"result":"queued"}');
                         done();
                     });
             });
