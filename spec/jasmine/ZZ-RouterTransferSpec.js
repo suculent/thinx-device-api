@@ -8,11 +8,8 @@ let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
 let thx;
-let transfer_id;
 
 var envi = require("../_envi.json");
-
-//var envi = require("../_envi.json");
 
 describe("Device Ownership Transfer (noauth)", function () {
 
@@ -32,7 +29,7 @@ describe("Device Ownership Transfer (noauth)", function () {
         chai.request(thx.app)
             .post('/api/transfer/request')
             .send({})
-            .end((err, res) => {
+            .end((_err, res) => {
                 expect(res.status).to.equal(401);
                 done();
             });
@@ -41,7 +38,7 @@ describe("Device Ownership Transfer (noauth)", function () {
     it("GET /api/transfer/decline (noauth, invalid)", function (done) {
         chai.request(thx.app)
             .get('/api/transfer/decline')
-            .end((err, res) => {
+            .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string'); // <html>
                 done();
@@ -52,7 +49,7 @@ describe("Device Ownership Transfer (noauth)", function () {
         chai.request(thx.app)
             .post('/api/transfer/decline')
             .send({})
-            .end((err, res) => {
+            .end((_err, res) => {
                 expect(res.status).to.equal(401);
                 done();
             });
@@ -61,7 +58,7 @@ describe("Device Ownership Transfer (noauth)", function () {
     it("GET /api/transfer/accept (noauth, invalid)", function (done) {
         chai.request(thx.app)
             .get('/api/transfer/accept')
-            .end((err, res) => {
+            .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
@@ -73,7 +70,7 @@ describe("Device Ownership Transfer (noauth)", function () {
         chai.request(thx.app)
             .get('/api/transfer/accept')
             .send({})
-            .end((err, res) => {
+            .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
                 done();
@@ -112,7 +109,7 @@ describe("Transfer (JWT)", function () {
             .post('/api/transfer/request')
             .set('Authorization', jwt)
             .send({})
-            .end((err, res) => {
+            .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string'); 
                 expect(res.text).to.equal('{"success":false,"status":"missing_recipient"}');
@@ -126,7 +123,7 @@ describe("Transfer (JWT)", function () {
             .post('/api/transfer/request')
             .set('Authorization', jwt)
             .send({ to: envi.dynamic.owner, udids: [envi.udid], mig_sources: true, mig_apikeys: true })
-            .end((err, res) => {
+            .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string'); 
                 expect(res.text).to.equal('{"success":false,"status":"recipient_unknown"}');
@@ -140,7 +137,7 @@ describe("Transfer (JWT)", function () {
             .post('/api/transfer/request')
             .set('Authorization', jwt)
             .send({ to: "cimrman@thinx.cloud", udids: [envi.udid], mig_sources: false, mig_apikeys: false })
-            .end((err, res) => {
+            .end((_err, res) => {
                 console.log("🚸 [chai] POST /api/transfer/request (jwt, valid) response: ", res.text);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string'); 
@@ -155,7 +152,7 @@ describe("Transfer (JWT)", function () {
         chai.request(thx.app)
             .get('/api/transfer/decline')
             .set('Authorization', jwt)
-            .end((err, res) => {
+            .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string'); // <html>
                 done();
@@ -167,7 +164,7 @@ describe("Transfer (JWT)", function () {
             .post('/api/transfer/decline')
             .set('Authorization', jwt)
             .send({})
-            .end((err, res) => {
+            .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
                 done();
@@ -178,7 +175,7 @@ describe("Transfer (JWT)", function () {
         chai.request(thx.app)
             .get('/api/transfer/accept')
             .set('Authorization', jwt)
-            .end((err, res) => {
+            .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
@@ -191,7 +188,7 @@ describe("Transfer (JWT)", function () {
             .post('/api/transfer/accept')
             .set('Authorization', jwt)
             .send({})
-            .end((err, res) => {
+            .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
@@ -204,7 +201,7 @@ describe("Transfer (JWT)", function () {
             .get('/api/transfer/accept')
             .set('Authorization', jwt)
             .send({ owner: null, transfer_id: null, udid: null})
-            .end((err, res) => {
+            .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
@@ -219,7 +216,7 @@ describe("Transfer (JWT)", function () {
             .post('/api/v2/transfer/request')
             .set('Authorization', jwt)
             .send({})
-            .end((err, res) => {
+            .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('{"success":false,"status":"missing_recipient"}');
@@ -231,7 +228,7 @@ describe("Transfer (JWT)", function () {
         chai.request(thx.app)
             .get('/api/v2/transfer/decline')
             .set('Authorization', jwt)
-            .end((err, res) => {
+            .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string'); // <html>
                 done();
@@ -243,7 +240,7 @@ describe("Transfer (JWT)", function () {
             .post('/api/v2/transfer/decline')
             .set('Authorization', jwt)
             .send({ udid: null})
-            .end((err, res) => {
+            .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
                 done();
@@ -254,8 +251,7 @@ describe("Transfer (JWT)", function () {
         chai.request(thx.app)
             .get('/api/v2/transfer/accept')
             .set('Authorization', jwt)
-            .end((err, res) => {
-                //console.log("🚸 [chai] GET /api/transfer/accept (jwt, invalid) response:", res.text, " status:", res.status);
+            .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
@@ -268,7 +264,7 @@ describe("Transfer (JWT)", function () {
             .post('/api/v2/transfer/accept')
             .set('Authorization', jwt)
             .send({ udid: null, transfer_id: transfer_id })
-            .end((err, res) => {
+            .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('{"success":false,"status":"owner_missing"}');
@@ -281,10 +277,23 @@ describe("Transfer (JWT)", function () {
             .post('/api/v2/transfer/accept')
             .set('Authorization', jwt)
             .send({ udid: null, transfer_id: transfer_id, owner: envi.dynamic.owner })
-            .end((err, res) => {
+            .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"owner_missing"}');
+                expect(res.text).to.equal('{"success":false,"status":"udids_missing"}');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/v2/transfer/accept (jwt, invalid) 3", function (done) {
+        chai.request(thx.app)
+            .post('/api/v2/transfer/accept')
+            .set('Authorization', jwt)
+            .send({ udid: [envi.dynamic.udid], transfer_id: transfer_id, owner: envi.dynamic.owner }) // will probably need real device using GET /api/device
+            .end((_err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"status":""}'); // intentionally failing string expect
                 done();
             });
     }, 20000);
@@ -294,11 +303,14 @@ describe("Transfer (JWT)", function () {
             .get('/api/v2/transfer/accept')
             .set('Authorization', jwt)
             .send({ owner: null, transfer_id: null, udid: null})
-            .end((err, res) => {
+            .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
                 done();
             });
     }, 20000);
+
+    //console.log("🚸 [chai] GET /api/transfer/accept (jwt, invalid) response:", res.text, " status:", res.status);
+                
 });
