@@ -218,13 +218,14 @@ describe("Builder (JWT)", function () {
                 agent
                     .post('/api/v2/build')
                     .set('Authorization', jwt)
-                    .send({
-                        owner: dynamic_owner_id,
-                        git: "https://github.com/suculent/thinx-firmware-esp8266-pio",
-                        branch: "origin/master",
-                        udid: envi.dynamic.udid,
-                        source_id: "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f4",
-                        build: envi.dynamic.udid
+                    .send({ build: {
+                            owner: dynamic_owner_id,
+                            git: "https://github.com/suculent/thinx-firmware-esp8266-pio",
+                            branch: "origin/master",
+                            udid: envi.dynamic.udid,
+                            source_id: "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f4",
+                            build: envi.dynamic.udid
+                        }
                     })
                     .end((err, res) => {
                         console.log("🚸 [chai] response /api/v2/build (JWT, invalid) V:", res.text, " status:", res.status);
