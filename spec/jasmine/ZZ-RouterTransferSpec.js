@@ -119,13 +119,28 @@ describe("Transfer (JWT)", function () {
             });
     }, 20000);
 
-    it("POST /api/transfer/request (jwt, sami-valid)", function (done) {
+    // migrate using invalid data (owner_id instead of e-mail)
+    it("POST /api/transfer/request (jwt, semi-valid)", function (done) {
         chai.request(thx.app)
             .post('/api/transfer/request')
             .set('Authorization', jwt)
             .send({ to: envi.dynamic.owner, udids: [envi.udid], mig_sources: true, mig_apikeys: true })
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/transfer/request (jwt, sami-valid) response: ", res.text);
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string'); 
+                expect(res.text).to.equal('{"success":false,"status":"recipient_unknown"}');
+                done();
+            });
+    }, 20000);
+
+    // migrate from dynamic owner to cimrman
+    it("POST /api/transfer/request (jwt, valid)", function (done) {
+        chai.request(thx.app)
+            .post('/api/transfer/request')
+            .set('Authorization', jwt)
+            .send({ to: "cimrman@thinx.cloud", udids: [envi.udid], mig_sources: false, mig_apikeys: false })
+            .end((err, res) => {
+                console.log("🚸 [chai] POST /api/transfer/request (jwt, valid) response: ", res.text);
                 // TODO: Parse transfer_id here!
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string'); 
