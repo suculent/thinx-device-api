@@ -188,7 +188,7 @@ describe("Builder", function () {
       done();
       
     }, transmit_key);
-  }, 15000);
+  }, 30000);
 
   it("should fetch last apikey", function (done) {
     builder.getLastAPIKey("nonexistent", function (success/* , result */) {
