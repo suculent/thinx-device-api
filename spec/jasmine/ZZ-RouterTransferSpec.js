@@ -125,13 +125,14 @@ describe("Transfer (JWT)", function () {
             });
     }, 20000);
 
-    it("POST /api/transfer/request (jwt, invalid)", function (done) {
+    it("POST /api/transfer/request (jwt, sami-valid)", function (done) {
         chai.request(thx.app)
             .post('/api/transfer/request')
             .set('Authorization', jwt)
             .send({ to: envi.dynamic.owner, udids: [envi.udid], mig_sources: true, mig_apikeys: true })
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/transfer/request (jwt, invalid) response headers: ", res.header, " should contain Content-type: text/html");
+                console.log("🚸 [chai] POST /api/transfer/request (jwt, sami-valid) response: ", res.text);
+                // TODO: Parse transfer_id here!
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string'); 
                 done();
