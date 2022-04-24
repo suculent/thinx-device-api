@@ -85,6 +85,7 @@ describe("Transfer (JWT)", function () {
 
     let agent;
     let jwt;
+    let transfer_id;
   
     beforeAll((done) => {
         console.log(`🚸 [chai] >>> running Transfer (JWT) spec`);
@@ -141,9 +142,11 @@ describe("Transfer (JWT)", function () {
             .send({ to: "cimrman@thinx.cloud", udids: [envi.udid], mig_sources: false, mig_apikeys: false })
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/transfer/request (jwt, valid) response: ", res.text);
-                // TODO: Parse transfer_id here!
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string'); 
+                let j = JSON.parse(res.text);
+                transfer_id = j.status;
+                expect(j.success).to.equal(true);
                 done();
             });
     }, 20000);
