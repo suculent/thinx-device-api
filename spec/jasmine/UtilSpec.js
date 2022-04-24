@@ -137,4 +137,13 @@ describe("Util", function () {
         };
         Util.responder(res, true, new Buffer("message"));
     });
+
+    it("should provide convenience method for undefined objects", function() {
+        let i = undefined;
+        expect(Util.isDefined(i)).to.equal(false);
+        let j = null;
+        expect(Util.isDefined(j)).to.equal(false);
+        let k = "something";
+        expect(Util.isDefined(k)).to.equal(true);
+    }
 });
