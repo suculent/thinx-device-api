@@ -180,14 +180,13 @@ describe("Meshes (JWT)", function () {
             });
     }, 20000);
 
-    it("POST /api/mesh/list (jwt, invalid)", function (done) {
+    it("POST /api/mesh/list (jwt, valid)", function (done) {
         agent
             .post('/api/mesh/list')
             .set('Authorization', jwt)
-            .send({ owner_id: "mock-owner-id", apikey: "mock-api-key", alias: "mock-mesh-alias" })
             .end((err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"status":"owner_invalid"}');
+                expect(res.text).to.equal('{"success":true,"mesh_ids":[{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}]}');
                 done();
             });
     }, 20000);
@@ -201,7 +200,7 @@ describe("Meshes (JWT)", function () {
                 let r = JSON.parse(res.text);
                 mesh_id = r.mesh_id;
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"status":"owner_invalid"}');
+                expect(res.text).to.equal('{"success":false,"status":"mesh_id_missing"}');
                 done();
             });
     }, 20000);
@@ -214,7 +213,7 @@ describe("Meshes (JWT)", function () {
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"owner_invalid"}');
+                expect(res.text).to.equal('{"success":false,"status":"mesh_id_missing"}');
                 done();
             });
     }, 20000);
@@ -287,7 +286,7 @@ describe("Meshes (JWT)", function () {
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/mesh/delete (jwt, semi-valid) response:", res.status, res.text);
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"status":"owner_invalid"}');
+                expect(res.text).to.equal('{"success":false,"status":"mesh_ids_missing"}');
                 done();
             });
     }, 20000);
