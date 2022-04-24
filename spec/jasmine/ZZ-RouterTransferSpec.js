@@ -271,7 +271,20 @@ describe("Transfer (JWT)", function () {
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
+                expect(res.text).to.equal('{"success":false,"status":"owner_missing"}');
+                done();
+            });
+    }, 20000);
+
+    it("POST /api/v2/transfer/accept (jwt, invalid) 2", function (done) {
+        chai.request(thx.app)
+            .post('/api/v2/transfer/accept')
+            .set('Authorization', jwt)
+            .send({ udid: null, transfer_id: transfer_id, owner: envi.dynamic.owner })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"status":"owner_missing"}');
                 done();
             });
     }, 20000);
