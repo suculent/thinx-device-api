@@ -2,6 +2,7 @@ const EventEmitter = require('events');
 
 const JWTLogin = require("./lib/thinx/jwtlogin");  
 const InfluxConnector = require('./lib/thinx/influx');
+const Util = require('./lib/thinx/util');
 
 module.exports = class THiNX extends EventEmitter {
 
@@ -401,7 +402,8 @@ module.exports = class THiNX extends EventEmitter {
           sessionParser(request, {}, () => {
 
             let cookies = request.headers.cookie;
-            if ((typeof (cookies) === "undefined") || (cookies === null)) {
+            
+            if (!Util.isDefined(cookies)) {
               // other x-thx cookies are now deprecated and can be removed
               if (cookies.indexOf("x-thx-core") === -1) {
                 console.log("Should destroy socket, access unauthorized.");

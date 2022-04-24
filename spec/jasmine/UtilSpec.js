@@ -145,5 +145,5 @@ describe("Util", function () {
         expect(Util.isDefined(j)).to.equal(false);
         let k = "something";
         expect(Util.isDefined(k)).to.equal(true);
-    }
+    });
 });
