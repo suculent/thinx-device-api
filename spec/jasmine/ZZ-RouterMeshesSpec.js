@@ -172,7 +172,7 @@ describe("Meshes (JWT)", function () {
             .set('Authorization', jwt)
             .end((err, res) => {
                 expect(res.status).to.equal(200);
-                console.log("🚸 [chai] GET /api/mesh/list (jwt, valid) response:", res.text);
+                console.log("🚸 [chai] GET /api/mesh/list (jwt, valid) response:", res.text); // owner invalid
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
                 //expect(res.text).to.equal('{"success":true,"mesh_ids":[{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}]}');
@@ -285,6 +285,7 @@ describe("Meshes (JWT)", function () {
             .set('Authorization', jwt)
             .send('{"mesh_ids":"'+mesh_id+'"}')
             .end((err, res) => {
+                console.log("🚸 [chai] POST /api/mesh/delete (jwt, semi-valid) response:", res.status, res.text);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.equal('{"success":false,"status":"owner_invalid"}');
                 done();
@@ -386,6 +387,7 @@ describe("Meshes (JWT)", function () {
             .get('/api/v2/mesh')
             .set('Authorization', jwt)
             .end((err, res) => {
+                console.log("🚸 [chai] GET /api/v2/mesh response:", res.status, res.text);
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
