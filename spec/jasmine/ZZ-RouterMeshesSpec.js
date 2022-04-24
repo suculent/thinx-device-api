@@ -166,11 +166,13 @@ describe("Meshes (JWT)", function () {
     });
 
     it("GET /api/mesh/list (jwt, valid)", function (done) {
+        console.log("🚸 [chai] GET /api/mesh/list (jwt, valid)");
         agent
             .get('/api/mesh/list')
             .set('Authorization', jwt)
             .end((err, res) => {
                 expect(res.status).to.equal(200);
+                console.log("🚸 [chai] GET /api/mesh/list (jwt, valid) response:", res.text);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
                 //expect(res.text).to.equal('{"success":true,"mesh_ids":[{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}]}');
@@ -199,7 +201,7 @@ describe("Meshes (JWT)", function () {
                 let r = JSON.parse(res.text);
                 mesh_id = r.mesh_id;
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"status":"owner_id_missing"}');
+                expect(res.text).to.equal('{"success":false,"status":"owner_invalid"}');
                 done();
             });
     }, 20000);
@@ -212,7 +214,7 @@ describe("Meshes (JWT)", function () {
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"mesh_id_missing"}');
+                expect(res.text).to.equal('{"success":false,"status":"owner_invalid"}');
                 done();
             });
     }, 20000);
@@ -284,7 +286,7 @@ describe("Meshes (JWT)", function () {
             .send('{"mesh_ids":"'+mesh_id+'"}')
             .end((err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"status":"Parameter owner_id missing."}');
+                expect(res.text).to.equal('{"success":false,"status":"owner_invalid"}');
                 done();
             });
     }, 20000);

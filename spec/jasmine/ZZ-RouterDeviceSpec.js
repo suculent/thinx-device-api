@@ -546,7 +546,7 @@ describe("Devices (JWT)", function () {
       .get('/api/v2/device')
       .set('Authorization', jwt)
       .end((err, res) => {
-        console.log("🚸 [chai] GET /api/v2/device (JWT) response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] GET /api/v2/device (JWT) response 1:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         done();
@@ -561,7 +561,7 @@ describe("Devices (JWT)", function () {
       .set('Authorization', jwt)
       .send({ changes: { alias: "changed" }})
       .end((err, res) => {
-        console.log("🚸 [chai] PUT /api/v2/device (JWT) response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] PUT /api/v2/device (JWT) response 2:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         done();
@@ -636,7 +636,7 @@ describe("Devices (JWT)", function () {
       .send({})
       .set('Authorization', jwt)
       .end((err, res) => {
-        console.log("🚸 [chai] GET /api/v2/device (JWT) response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] GET /api/v2/device (JWT) response 3:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         done();
