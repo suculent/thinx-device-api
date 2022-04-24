@@ -178,7 +178,7 @@ describe("User Routes V2", function () {
   //
 
   // should create LOGIN_INVALID Passwotd mismatch tag
-  it("POST /api/login", function (done) {
+  it("POST /api/v2/login", function (done) {
     chai.request(thx.app)
       .post('/api/login')
       .send({ username: "dynamic2", password: "dynamic3" })
@@ -231,6 +231,18 @@ describe("User Routes V2", function () {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         // {"success":false,"status":"deletion_not_confirmed"} 
+        done();
+      });
+  }, 20000);
+
+  it("GET /api/v2/logout", function (done) {
+    chai.request(thx.app)
+      .get('/api/v2/logout')
+      .set('Authorization', jwt)
+      .end((_err, res) => {
+        console.log("🚸 [chai] V2 GET /api/v2/logout response", res.text); // expect redirect
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
         done();
       });
   }, 20000);
