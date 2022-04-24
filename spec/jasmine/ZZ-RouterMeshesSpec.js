@@ -292,7 +292,6 @@ describe("Meshes (JWT)", function () {
     }, 20000);
 
     it("POST /api/mesh/delete (jwt, invalid)", function (done) {
-        expect(mesh_id !== null);
         let ro = {
             mesh_ids: [mesh_id],
             owner_id: envi.dynamic.owner
@@ -313,7 +312,7 @@ describe("Meshes (JWT)", function () {
         expect(mesh_id !== null);
         let ro = {
             mesh_ids: [mesh_id],
-            owner_id: envi.dynamic.owner
+            owner: envi.dynamic.owner
         };
         agent
             .post('/api/mesh/delete')
