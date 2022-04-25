@@ -136,7 +136,7 @@ describe("Transformer (JWT)", function () {
       .set('Authorization', jwt)
       .send({})
       .end((_err, res) => {
-        expect(res.text).to.equal('{"success":false,"status":"udid_not_found"}');
+        expect(res.text).to.equal('{"success":false,"response":"udid_not_found"}');
         expect(res.status).to.equal(200);
         done();
       });
@@ -150,7 +150,7 @@ describe("Transformer (JWT)", function () {
       .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"no_such_device"}');
+        expect(res.text).to.equal('{"success":false,"response":"no_such_device"}');
         done();
       });
   }, 20000);
