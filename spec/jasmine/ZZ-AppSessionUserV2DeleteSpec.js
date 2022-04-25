@@ -130,7 +130,7 @@ describe("User Routes V2", function () {
   // User Profile
   //
 
-  it("POST /api/login + /api/v2/gdpr", function (done) {
+  it("POST /api/login + /api/gdpr", function (done) {
     agent
       .post('/api/login')
       .send({ username: 'dynamic2', password: 'dynamic2', remember: false })
@@ -152,7 +152,7 @@ describe("User Routes V2", function () {
 
         // just test-added
         agent
-          .post('/api/v2/gdpr')
+          .post('/api/gdpr')
           .send({ gdpr: true, token: token })
           .end((_err, _res) => {
             console.log("🚸 [chai] V2 POST /api/gdpr response:", _res.text, "status", _res.status);

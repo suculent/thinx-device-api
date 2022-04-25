@@ -109,6 +109,7 @@ describe("User Routes", function () {
       .send(user_info)
       .end((_err, res) => {
         // {"success":true,"status":"6975d3c5849fc130e689f2cae0abe51a8fd24f496810bee3c0bcf531dd53be0c"}
+        console.log("[chai] POST /api/user/create (valid body) and activate (set password): ", res.text);
         expect(res.text).to.be.a('string');
         expect(res.status).to.equal(200);
         let body = JSON.parse(res.text);
@@ -311,7 +312,7 @@ describe("User Routes", function () {
       .post('/api/user/profile')
       .send({})
       .end((_err, res) => {
-        console.log("🚸 [chai] POST /api/user/profile (noauth) response:", res.text);
+        //console.log("🚸 [chai] POST /api/user/profile (noauth) response:", res.text);
         expect(res.status).to.equal(401);
         done();
       });
