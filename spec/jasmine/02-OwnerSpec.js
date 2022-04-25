@@ -75,7 +75,7 @@ describe("Owner", function () {
 
       console.log("[spec] user.password_reset_init response:", success, result)
       expect(success).to.equal(true);
-      expect(resut).to.be.a('string');
+      expect(result).to.be.a('string');
       var body = {
         password: "tset",
         rpassword: "tset",
