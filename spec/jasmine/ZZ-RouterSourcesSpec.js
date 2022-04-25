@@ -127,7 +127,7 @@ describe("Sources (JWT)", function () {
             .send({})
             .end((err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"response":"missing_source_alias"}');
+                expect(res.text).to.equal('{"success":false,"status":"missing_source_alias"}');
                 done();
             });
     }, 20000);
@@ -168,7 +168,7 @@ describe("Sources (JWT)", function () {
             .send({ source_id: null })
             .end((err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"response":"missing_source_ids"}');
+                expect(res.text).to.equal('{"success":false,"status":"missing_source_ids"}');
                 done();
             });
     }, 20000);

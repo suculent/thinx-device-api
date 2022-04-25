@@ -299,7 +299,7 @@ describe("Builder (JWT)", function () {
                 console.log("🚸 [chai] response /api/device/artifacts (JWT, invalid):", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"response":"missing_udid"}');
+                expect(res.text).to.equal('{"success":false,"status":"missing_udid"}');
                 done();
             });
     }, 20000);
@@ -313,7 +313,7 @@ describe("Builder (JWT)", function () {
                 console.log("🚸 [chai] response /api/device/artifacts (JWT, semi-valid 1):", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"response":"missing_build_id"}');
+                expect(res.text).to.equal('{"success":false,"status":"missing_build_id"}');
                 done();
             });
     }, 20000);
@@ -327,7 +327,7 @@ describe("Builder (JWT)", function () {
                 console.log("🚸 [chai] response /api/device/artifacts (JWT, semi-valid 2):", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"response":"missing_udid"}');
+                expect(res.text).to.equal('{"success":false,"status":"missing_udid"}');
                 done();
             });
     }, 20000);
@@ -342,7 +342,7 @@ describe("Builder (JWT)", function () {
                 console.log("🚸 [chai] response /api/device/artifacts (JWT, semi-valid):", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                //expect(res.text).to.equal('{"success":false,"response":"missing_udid"}');
+                //expect(res.text).to.equal('{"success":false,"status":"missing_udid"}');
                 done();
             });
     }, 20000);
@@ -357,7 +357,7 @@ describe("Builder (JWT)", function () {
                 console.log("🚸 [chai] response /api/v2/build/artifacts (JWT, semi-valid):", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                //expect(res.text).to.equal('{"success":false,"response":"missing_udid"}');
+                //expect(res.text).to.equal('{"success":false,"status":"missing_udid"}');
                 done();
             });
     }, 20000);

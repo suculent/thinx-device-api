@@ -200,7 +200,7 @@ describe("Meshes (JWT)", function () {
                 let r = JSON.parse(res.text);
                 mesh_id = r.mesh_id;
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"response":"mesh_id_missing"}');
+                expect(res.text).to.equal('{"success":false,"status":"mesh_id_missing"}');
                 done();
             });
     }, 20000);
@@ -213,7 +213,7 @@ describe("Meshes (JWT)", function () {
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"response":"mesh_id_missing"}');
+                expect(res.text).to.equal('{"success":false,"status":"mesh_id_missing"}');
                 done();
             });
     }, 20000);
@@ -286,7 +286,7 @@ describe("Meshes (JWT)", function () {
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/mesh/delete (jwt, semi-valid) response:", res.status, res.text);
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"response":"mesh_ids_missing"}');
+                expect(res.text).to.equal('{"success":false,"status":"mesh_ids_missing"}');
                 done();
             });
     }, 20000);
@@ -303,7 +303,7 @@ describe("Meshes (JWT)", function () {
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/mesh/delete (jwt, invalid) response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
-                // {"success":false,"response":"Parameter owner_id missing."}
+                // {"success":false,"status":"Parameter owner_id missing."}
                 done();
             });
     }, 20000);
@@ -322,7 +322,7 @@ describe("Meshes (JWT)", function () {
                 console.log("🚸 [chai] POST /api/mesh/delete (jwt, already deleted) response:", res.text, " status:", res.status, "request:", ro);
                 expect(res.status).to.equal(200);
                 //expect(res.text).to.equal();
-                //{"success":false,"response":"Parameter owner_id missing."}
+                //{"success":false,"status":"Parameter owner_id missing."}
                 done();
             });
     }, 20000);

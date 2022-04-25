@@ -41,14 +41,6 @@ describe("RSA Key", function() {
     });
   }, 10000);
 
-  it("(01) should be able to list RSA Keys", function(done) {
-    rsakey.list(owner, function(success, list) {
-      expect(success).to.equal(true);
-      expect(list.length).to.be.greaterThanOrEqual(1);
-      done();
-    });
-  }, 10000);
-
   it("(02) should fail on invalid revocation", function(done) {
     rsakey.revoke(owner, invalid_fingerprints,
       function(res, success, message) {
