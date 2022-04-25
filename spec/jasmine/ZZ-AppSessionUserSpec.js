@@ -184,13 +184,14 @@ describe("User Routes", function () {
   }, 20000);
 
   it("POST /api/user/password/reset (noauth, email)", function (done) {
-    chai.request(thx.app)
+    chai.request(thx.app)    
       .post('/api/user/password/reset')
       .send({ email: envi.dynamic.email })
       .end((_err, res) => {
+        console.log("[chai] POST /api/user/password/reset (noauth, email) response", res.text);
         expect(res.status).to.equal(200);
         let j = JSON.parse(res.text);
-        reset_key = j.status;
+        reset_key = j.response;
         expect(j.note).to.equal('reset_key');
         //{"success":true,"status":"24247cbdb8a83c72e8d12e5db8e877be8f5e229b536ebf1a676f20dfa965e631","note":"reset_key"}
         done();
