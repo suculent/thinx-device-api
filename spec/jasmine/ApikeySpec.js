@@ -73,11 +73,22 @@ describe("API Key", function() {
     );
   });
 
-  it("(02) should be able to list API Keys", function(done) {
+  it("(02a) should be able to list API Keys (public)", function(done) {
     apikey.list(
       owner,
       (object) => {
-        expect(object).to.be.a('array');
+        console.log("[spec] (02a) apikey.list:", JSON.stringify(object, null, 2));
+        expect(object).to.be.a('array'); // TODO: expect 'key' not to exist
+        done();
+      });
+  });
+
+  it("(02b) should be able to list API Keys (private)", function(done) {
+    apikey.list(
+      owner,
+      (object) => {
+        console.log("[spec] (02b) apikey.list:", JSON.stringify(object, null, 2));
+        expect(object).to.be.a('array'); // TODO: expect 'key' to exist
         done();
       });
   });
