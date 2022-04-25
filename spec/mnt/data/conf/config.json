@@ -43,10 +43,10 @@
     "concurrency" : 2
   },
   "debug": {
-    "device" : true,
+    "device" : false,
     "deployment": true,
     "allow_http_login": true,
-    "secrets": true
+    "secrets": false
   },
   "strict_gdpr": true
 }
