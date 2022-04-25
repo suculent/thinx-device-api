@@ -277,21 +277,6 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  // reset key not valid at this moment
-  xit("POST /api/user/password/set (valid) X", function (done) {
-    console.log("🚸 [chai] POST /api/user/password/set (valid) X");
-    chai.request(thx.app)
-      .post('/api/user/password/set')
-      .send({ password: "dynamic", rpassword: "dynamic", reset_key: reset_key })
-      .end((_err, res) => {
-        console.log("🚸 [chai] POST /api/user/password/set (valid) X response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(200);
-        expect(res.text).to.be.a('string');
-        //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
-        done();
-      });
-  }, 20000);
-
   //
   // User Profile
   //
