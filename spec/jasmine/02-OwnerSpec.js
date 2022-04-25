@@ -83,9 +83,8 @@ describe("Owner", function () {
         reset_key: response
       };
       user.set_password(body, (sukec, reponde) => {
-        expect(reponde).to.be.an('object');
-        expect(reponde.status).to.be.a('string');
-        expect(reponde.status).to.equal('password_reset_successful');
+        expect(reponde).to.be.a('string');
+        expect(reponde).to.equal('password_reset_successful');
         expect(sukec).to.equal(true);
         done();
       });
