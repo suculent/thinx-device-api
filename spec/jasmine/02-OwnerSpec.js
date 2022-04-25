@@ -72,8 +72,7 @@ describe("Owner", function () {
 
   it("(05) should be able to begin reset owner password", function (done) {
     user.password_reset_init(email, (success, result) => {
-
-      console.log("[spec] user.password_reset_init response:", success, result)
+      console.log("[spec] user.password_reset_init success:", success, "reset_key", result);
       expect(success).to.equal(true);
       expect(result).to.be.a('string');
       var body = {
@@ -83,6 +82,7 @@ describe("Owner", function () {
         reset_key: result
       };
       user.set_password(body, (sukec, reponde) => {
+        console.log("[spec] user.set_password reponde:", sukec, reponde);
         expect(sukec).to.equal(true);
         done();
       });
