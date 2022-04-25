@@ -2,11 +2,23 @@ var expect = require('chai').expect;
 const Builder = require('../../lib/thinx/builder');
 let Queue = require("../../lib/thinx/queue");
 
+var envi = require("../_envi.json");
+
 describe("Queue", function () {
+
+    beforeAll(() => {
+        console.log(`🚸 [chai] >>> running Queue spec`);
+      });
+    
+      afterAll(() => {
+        console.log(`🚸 [chai] <<< completed Queue spec`);
+      });
 
     let mock_udid_1 = "<mock-udid-1>";
     let mock_udid_2 = "<mock-udid-2>";
+    let mock_udid_3 = envi.udid;
     let mock_source_id = "<mock-source-id>";
+    let mock_owner_id = envi.oid;
     let queue_with_cron;
 
     // init
@@ -15,7 +27,7 @@ describe("Queue", function () {
         let builder = new Builder();
 
         // Should initialize safely without running cron
-        queue_with_cron = new Queue(builder);
+        queue_with_cron = new Queue(builder, null, null);
         expect(queue_with_cron).to.be.a('object');
 
         let workers = queue_with_cron.getWorkers();
@@ -24,52 +36,46 @@ describe("Queue", function () {
         // Should be able to run cron when initialized
         queue_with_cron.cron();
 
-        // Should be able to add actions to the queue
-        queue_with_cron.add(mock_udid_1, mock_source_id);
-        queue_with_cron.add(mock_udid_2, mock_source_id);
-
-        // Should be able find next waiting item in queue
-
         let done_called = false;
 
-        queue_with_cron.findNext((next) => {
+        // Should be able to add actions to the queue
+        queue_with_cron.add(mock_udid_1, mock_source_id, mock_owner_id, () => {
+            queue_with_cron.add(mock_udid_2, mock_source_id, mock_owner_id, () => {
+                queue_with_cron.add(mock_udid_3, mock_source_id, mock_owner_id, () => {
+                    queue_with_cron.findNext((next) => {
 
-            if (next === null) {
-                if (done_called === false) {
-                    done_called = true;
-                    done();
-                }
-                return;
-            }
+                        if (next === null) {
+                            if (done_called === false) {
+                                done_called = true;
+                                done();
+                            }
+                            return;
+                        }
 
-            // Should be able run next item
-            queue_with_cron.runNext(next);
+                        // Should be able run next item
+                        queue_with_cron.runNext(next, workers[0]);
 
-            console.log("(00) Queue calling findNext again async...");
+                        // Should not be able to find anything while queue item is running
+                        queue_with_cron.findNext((/* nextAction */) => {
 
-            // Should not be able to find anything while queue item is running
-            queue_with_cron.findNext((/* nextAction */) => {
+                            if (next === null) {
+                                if (done_called === false) {
+                                    done_called = true;
+                                    done();
+                                }
+                                return;
+                            }
 
-                if (next === null) {
-                    if (done_called === false) {
-                        done_called = true;
-                        done();
-                    }
-                    return;
-                }
-
-                // can be null
-                console.log("(01) Queue test calling loop...");
-
-                // Should run loop safely
-                for (let i = 0; i < 10; i++) {
-                    queue_with_cron.loop();
-                }
-
-                console.log("(00) Queue test done.");
-                // done(); will be called later when next is null
+                            // Should run loop safely
+                            for (let i = 0; i < 10; i++) {
+                                queue_with_cron.loop();
+                            }
+                        });
+                    });
+                });
             });
         });
-    });
+
+    }, 5000);
 
 });

@@ -9,13 +9,12 @@ IoT Device Management Server running on node.js.
 | Component | Status |
 |:----------|:-------|
 | `thinx-device-api` | [![THiNX](https://circleci.com/gh/suculent/thinx-device-api.svg?style=svg)](https://circleci.com/gh/suculent/thinx-device-api/tree/master) |
-| `arduino-docker-build` | [![THiNX](https://circleci.com/gh/suculent/arduino-docker-build.svg?style=svg)](https://circleci.com/gh/suculent/arduino-docker-build) |
+| `arduino-docker-build` | [![THiNX](https://circleci.com/gh/suculent/arduino-docker-build/tree/master.svg?style=svg)](https://circleci.com/gh/suculent/arduino-docker-build/tree/master) |
 | `platformio-docker-build` | [![THiNX](https://circleci.com/gh/suculent/platformio-docker-build.svg?style=svg)](https://circleci.com/gh/suculent/platformio-docker-build) |
 | `mongoose-docker-build` | [![THiNX](https://circleci.com/gh/suculent/mongoose-docker-build.svg?style=svg)](https://circleci.com/gh/suculent/mongoose-docker-build) |
 | `micropython-docker-build` | [![THiNX](https://circleci.com/gh/suculent/micropython-docker-build.svg?style=svg)](https://circleci.com/gh/suculent/nodemcu-docker-build) |
 | `nodemcu-docker-build` | [![THiNX](https://circleci.com/gh/suculent/nodemcu-docker-build.svg?style=svg)](https://circleci.com/gh/suculent/nodemcu-docker-build) |
 
-### Other badges
 
 [![CodeFactor](https://www.codefactor.io/repository/github/suculent/thinx-device-api/badge)](https://www.codefactor.io/repository/github/suculent/thinx-device-api)
 [![codebeat badge](https://codebeat.co/badges/a3b416b1-b53b-4bc5-ae6e-8a2b9ca31880)](https://codebeat.co/projects/github-com-suculent-thinx-device-api-master)
@@ -26,13 +25,13 @@ IoT Device Management Server running on node.js.
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/18787/badge.svg"/>
 </a>
-[![Coverage Status](https://coveralls.io/repos/github/suculent/thinx-device-api/badge.svg?branch=thinx-swarm)](https://coveralls.io/github/suculent/thinx-device-api?branch=thinx-swarm)
+[![Coverage Status](https://coveralls.io/repos/github/suculent/thinx-device-api/badge.svg?branch=thinx-staging)](https://coveralls.io/github/suculent/thinx-device-api?branch=thinx-staging)
 [![License](https://img.shields.io/badge/license-ISC-green.svg?style=flat)](https://github.com/suculent/fastlane-plugin-apprepo/blob/master/LICENSE)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsuculent%2Fthinx-device-api.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsuculent%2Fthinx-device-api?ref=badge_shield)
-
+[![Demo Site Availability](https://api.ghostinspector.com/v1/suites/59351b18dad52f0ceb532cf5/status-badge)](https://api.ghostinspector.com/v1/suites/59351b18dad52f0ceb532cf5/status-badge)
 [![Twitter: @thinxcloud](https://img.shields.io/badge/contact-%40thinxcloud-green.svg?style=flat)](https://twitter.com/thinxcloud)
 
-[![Demo Site Availability](https://api.ghostinspector.com/v1/tests/621e261b2fb8263ffaf4233b/status-badge)](https://api.ghostinspector.com/v1/tests/621e261b2fb8263ffaf4233b/status-badge)
+
 
 The CircleCI build is limited and therefore returns mostly bad results. Closer look may show better numbers.
 
@@ -67,7 +66,7 @@ Currently the platform supports building firmware for Arduino, PlatformIO (also 
 
 * Device registration endpoint while storing device data using CouchDB server and Redis session-store.
 
-* API is a back-end data provider (security agent) for RTM Admin Console Application.
+* API is a back-end data provider (security agent) for Management Console Application.
 
 * Provides control to a dockerized build servers and pushes new firmware versions to client applications (FCM push) and devices (MQTT).
 
@@ -175,7 +174,7 @@ Use your favourite service and log-sender agent. Tested successfully with [Logz.
 
 * FQDN – Fully Qualified Domain Names (if you're testing on localhost, configure conf/config.json to set `debug: { allow_http_login: true }` )
   * api.yourdomain.com – THiNX API
-  * console.yourdomain.com – THiNX RTM Console
+  * console.yourdomain.com – THiNX Management Console
 
 * [Mailgun](https://mailgun.com) account (recently added)
 * [Rollbar](https://rollbar.com) integration
@@ -187,7 +186,7 @@ Use your favourite service and log-sender agent. Tested successfully with [Logz.
 * [Slack](https://slack.com) integration
 * [Crisp.chat](https://crisp.chat) integration
 
-# Remote THiNX Management (RTM) Console
+# Management Console
 
 You need to **BUILD YOUR OWN CONSOLE** Docker image, because the build injects various static variables specific for your environment (e.g. API Keys) into HTML on build (see .circleci/config.yml for list of required build-args until this is documented).
 
@@ -229,7 +228,9 @@ It's perfectly possible to run multiple instances of THiNX in Swarm. Just keep i
 
 ## GitHub Webhook support
 
-You can direct your GitHub web-hooks to <https://thinx.cloud:9001/> after adding a valid deploy key from GitHub to THiNX RTM.
+You can direct your GitHub web-hooks to <https://rtm.thinx.cloud/api/githook> after adding a valid deploy key from GitHub to THiNX.
+
+When adding Source, you can enter GitHub Secret to make sure incoming webhooks will be signed and validated. 
 
 ## Endpoints
 
@@ -252,7 +253,7 @@ docker run -ti -p 6379:6379 -e REDIS_PASSWORD=changeme! thinxcloud/redis:latest
 CouchDB
 
 ``` bash
-docker run -p 5984:5984 -e COUCHDB_USER=rtmtest -e COUCHDB_PASS=rtmtest couchdb:3.1.0
+docker run -p 5984:5984 -e COUCHDB_USER=rtmtest -e COUCHDB_PASSWORD=rtmtest couchdb:3.1.0
 ```
 
 # Platforms State of Union
@@ -303,3 +304,4 @@ ssl/ # shared SSL certificates, may be generated by Traefik/ACME/Letsencrypt
 ## License
 
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsuculent%2Fthinx-device-api.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsuculent%2Fthinx-device-api?ref=badge_large)
+1. 

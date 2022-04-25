@@ -92,3 +92,6 @@ cov-int/
 .dccache
 *.log
 *.sarif
+
+chronograf/
+influx/

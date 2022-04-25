@@ -1,7 +1,7 @@
 version: 2.1
 orbs:
-  node: circleci/node@4.7.0
-  docker: circleci/docker@2.0.1
+  node: circleci/node@5.0.1
+  docker: circleci/docker@2.0.3
   slack: circleci/slack@4.8.3
 
 jobs:
@@ -9,7 +9,8 @@ jobs:
   build-base:
     executor: docker/docker
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true
       - checkout
       - docker/check
       - run:
@@ -31,7 +32,52 @@ jobs:
   build-console-cloud:
     executor: docker/docker
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
+          version: 19.03.13
+      - checkout
+      - run:
+          name: Fetch all dependencies (esp. console)
+          command: |
+            git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
+      - docker/check:
+          registry: registry.thinx.cloud:5000
+      - docker/build:
+          registry: registry.thinx.cloud:5000
+          docker-context: services/console/vue
+          image: thinx/console
+          dockerfile: services/console/vue/Dockerfile
+          extra_build_args: |
+            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
+            --build-arg LANDING_HOSTNAME=${LANDING_HOSTNAME} \
+            --build-arg API_HOSTNAME=${API_HOSTNAME} \
+            --build-arg API_BASEURL=${API_BASEURL} \
+            --build-arg WEB_HOSTNAME=${WEB_HOSTNAME} \
+            --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} \
+            --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
+            --build-arg ENTERPRISE=${ENTERPRISE} \
+            --build-arg ENVIRONMENT=${ENVIRONMENT} \
+            --build-arg COMMIT_ID=$CIRCLE_SHA1 \
+            --build-arg VUE_APP_CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
+            --build-arg VUE_APP_API_HOSTNAME=${API_HOSTNAME} \
+            --build-arg VUE_APP_ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
+            --build-arg VUE_APP_LANDING_HOSTNAME=${LANDING_HOSTNAME} \
+            --build-arg VUE_APP_GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} \
+            --build-arg VUE_APP_GOOGLE_MAPS_APIKEY=${GOOGLE_MAPS_APIKEY} \
+            --build-arg VUE_APP_CONSOLE_HOSTNAME=${WEB_HOSTNAME} \
+          tag: 'vue'
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: thinx/console
+          registry: registry.thinx.cloud:5000
+          tag: 'vue'
+
+  build-console-legacy:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
+          version: 19.03.13
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
@@ -52,25 +98,21 @@ jobs:
             --build-arg WEB_HOSTNAME=${WEB_HOSTNAME} \
             --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} \
             --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
-            --build-arg ENTERPRISE=true \
+            --build-arg ENTERPRISE=${ENTERPRISE} \
             --build-arg ENVIRONMENT=${ENVIRONMENT} \
+            --build-arg COMMIT_ID=$CIRCLE_SHA1 \
           tag: 'swarm'
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinx/console
           registry: registry.thinx.cloud:5000
           tag: 'swarm'
-      - slack/notify:
-          template: success_tagged_deploy_1
-          event: pass
-      - slack/notify:
-          template: basic_fail_1
-          event: fail
 
   build-api-cloud:
     executor: docker/docker
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
       - checkout
       - docker/check
       - docker/build:
@@ -81,29 +123,18 @@ jobs:
             --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
             --build-arg ENVIRONMENT=${ENVIRONMENT} \
             --build-arg REVISION=$(git describe --abbrev=0) \
+            --build-arg ENTERPRISE=${ENTERPRISE} \
           tag: 'latest'
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinxcloud/api
           tag: 'latest'
-
-  test-api-cloud:
-    executor: docker/docker
-    steps:
-      - setup_remote_docker
-      - checkout
-      - docker/check:
-          registry: registry.thinx.cloud:5000
-      - docker/build:
-          registry: registry.thinx.cloud:5000
-          image: thinx/api
-          dockerfile: ./Dockerfile.test
-          extra_build_args: |
-            --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} \
-            --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
-            --build-arg ENVIRONMENT=${ENVIRONMENT} \
-            --build-arg REVISION=$(git describe --abbrev=0) \
-          tag: 'swarm'
+      - slack/notify:
+          template: success_tagged_deploy_1
+          event: pass
+      - slack/notify:
+          template: basic_fail_1
+          event: fail
   
   test:
 
@@ -135,7 +166,8 @@ jobs:
           chmod +x ~/docker-compose
           mv ~/docker-compose /usr/local/bin/docker-compose
 
-    - setup_remote_docker
+    - setup_remote_docker:
+        docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
 
     - checkout
 
@@ -151,7 +183,9 @@ jobs:
         name: Fetch all submodules and tests
         command: |
           git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
-          cd spec/test_repositories && bash ./get-tests.sh
+          cd spec/test_repositories
+          pwd
+          bash ./get-tests.sh
 
     - run:
         name: Create Circle CI Artifacts Folders
@@ -193,8 +227,6 @@ jobs:
           rm -rf ./services/broker/Dockerfile
           mv ./services/broker/Dockerfile.test ./services/broker/Dockerfile
           sed -i "s/.git//g" .dockerignore
-          echo "Creating Docker Network (ID):"
-          docker network create nat
 
     - run:
         name: Copy Environment variables for in-place building
@@ -221,6 +253,25 @@ jobs:
           echo "Injecting secret: ${REDIS_PASSWORD}"
           sed -i "s/changeme!/${REDIS_PASSWORD}/g" ./services/broker/test/mosquitto/mosquitto.conf
           cp ./spec/mnt/data/conf/config.json /mnt/data/conf/config.json
+
+    - run:
+        name: Mock self-signed CA and SSL certificates
+        command: |
+          cd spec/mnt/data/ssl
+          ./_generate-ca-root-csr-and-sign-cert.sh
+          cp ./testRoot.crt /usr/local/share/ca-certificates
+          update-ca-certificates
+
+
+    - run:
+        name: Starting Influx
+        command: |
+          PUB=$(docker network inspect traefik-public)
+          if [[ $PUB == '[]' ]]; then docker network create traefik-public; fi
+          NAT=$(docker network inspect nat)
+          if [[ $NAT == '[]' ]]; then docker network create nat ; fi
+          docker-compose up -d influxdb
+          docker-compose logs --timestamp influxdb
 
     - run:
         name: Starting Redis
@@ -259,6 +310,7 @@ jobs:
         name: Starting API Test
         command: |
           export ENVIRONMENT=test
+          docker network create nat
           docker-compose up --build api | tee -ipa ./test.log
           if [[ ! $(cat ./test.log | grep "specs, 0 failures") ]]; then 
             echo "» TEST failed. Should not deploy this commit."
@@ -268,19 +320,24 @@ jobs:
           date
 
     - run:
-        name: Allow inspecting MQTT logs after failed connections
+        name: Allow inspecting MQTT logs
         command: |
             docker-compose logs --timestamp mosquitto
 
     - run:
-        name: Allow inspecting CouchDB logs after failed connections
+        name: Allow inspecting CouchDB logs
         command: |
             docker-compose logs --timestamp couchdb
 
     - run:
-        name: Allow inspecting Transformer logs after failed connections
+        name: Allow inspecting Transformer logs
         command: |
             docker-compose logs --timestamp transformer
+
+    - run:
+        name: Allow inspecting Worker logs logs
+        command: |
+            docker-compose logs --timestamp worker
 
     - run:
         name: Check running Docker containers
@@ -291,8 +348,8 @@ jobs:
             docker-compose stop
 
     - store_test_results:
-        name: Collect test results
-        path: ./coverage
+        name: Collect test data
+        path: /mnt/data
         # The `path` key is an absolute or relative path to your working_directory containing 
         # subdirectories of JUnit XML or Cucumber JSON test metadata files,
         # or the path of a single file containing all test results.
@@ -313,7 +370,7 @@ workflows:
   # public open-source site
   #
 
-  test-and-deploy:
+  main:
 
     jobs:
 
@@ -329,27 +386,21 @@ workflows:
             branches:
               only:
                 - base
-                - thinx-swarm
+                - thinx-staging
+                - thinx-class
                 - main
-                - thinxcloud
-
-      # - test-api-cloud:
-      #     context:
-      #         - thinx-docker-repo
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-swarm
+                - master
       
       - build-console-cloud:
           context:
             - thinx-docker-repo
             - console
-            - thinx-slack
           filters:
             branches:
               only:
-                - thinx-swarm
+                - thinx-console
+                - thinx-staging
+                - master
 
       - build-base:
           context:
@@ -358,18 +409,16 @@ workflows:
             branches:
               only:
                 - base
-                #- thinxcloud
-                #- thinx-swarm
 
       - build-api-cloud:
           context:
             - dockerhub
             - SonarCloud
+            - thinx-slack
           requires:
-            #- test-api-cloud
             - test
           filters:
             branches:
               only:
-                - thinx-swarm
-                - thinxcloud
+                - thinx-staging
+                - master

@@ -2,63 +2,73 @@ var Notifier = require('../../lib/thinx/notifier');
 
 describe("Notifier", function () {
 
-  var envi = require("../_envi.json");
+  var expect = require('chai').expect;
 
-  it("should be able to send a notification", function (done) {
+  let not;
 
-    /* this is how job_status is generated inside the global build script:
-    # Inside Worker, we don't call notifier, but just post the results into shell... THiNX builder must then call the notifier itself (or integrate it later)
-    JSON=$(jo \
-    build_id=${BUILD_ID} \
-    commit=${COMMIT} \
-    thx_version=${THX_VERSION} \
-    git_repo=${GIT_REPO} \
-    outfile=$(basename ${OUTFILE}) \
-    udid=${UDID} \
-    sha=${SHA} \
-    owner=${OWNER_ID} \
-    status=${STATUS} \
-    platform=${PLATFORM} \
-    version=${THINX_FIRMWARE_VERSION} \
-    md5=${MD5} \
-    env_hash=${ENV_HASH} \
-    )
-    */
+  let buildEnvelope = {
+    mock: true
+  };
 
-    // Hey, this should be JUST a notification, no destructives.
-    var test_build_id = "mock_build_id";
-    var test_commit_id = "mock_commit_id";
-    var test_repo = "https://github.com/suculent/thinx-firmware-esp8266-pio.git";
-    var test_binary = "/tmp/nothing.bin";
-    var test_udid = "745af760-a617-11ec-aa0e-231b40618f37"; // not attached to this firmware
-    var sha = "one-sha-256-pls";
-    var owner_id = envi.oid;
-    var status = "TESTING_NOTIFIER";
-    var platform = "platformio";
-    var version = "thinx-firmware-version-1.0";
+  beforeAll(() => {
+    console.log(`🚸 [chai] >>> running Notifier spec`);
+    not = new Notifier();
+  });
 
-    let job_status = {
-      build_id: test_build_id,
-      commit: test_commit_id,
-      thx_version: "1.5.X",
-      git_repo: test_repo,
-      outfile: test_binary,
-      udid: test_udid,
-      sha: sha,
-      owner: owner_id,
-      status: status,
-      platform: platform,
-      version: version,
-      md5: "md5-mock-hash",
-      env_hash: "cafebabe"
-    };
+  afterAll(() => {
+    console.log(`🚸 [chai] <<< completed Notifier spec`);
+  });
 
-    let notifier = new Notifier();
+  it("should be able to initialize", function () {
+    const notifier = new Notifier();
+    expect(notifier).to.be.an('object');
+  });
 
-    notifier.process(job_status, (result) => {
-      console.log("ℹ️ [info] Notifier's Processing result:", result);
+  it("should be able to create notification object for valid build", function() {
+    let newStatus = "OK";
+    let obj = not.notificationObject(newStatus, buildEnvelope);
+    expect(obj.text).to.contain('successfully completed');
+  });
+
+  it("should be able to create notification object for dry-run build", function() {
+    let newStatus = "DRY_RUN_OK";
+    let obj = not.notificationObject(newStatus, buildEnvelope);
+    expect(obj.text).to.contain('left undeployed');
+  });
+
+  it("should be able to create notification object for dry-run build", function() {
+    let newStatus = "UNKNOWN";
+    let obj = not.notificationObject(newStatus, buildEnvelope);
+    expect(obj.text).to.contain('has failed');
+  });
+
+  it ("should return if outfile is undefined", function(done) {
+    let job_status = {};
+    not.process(job_status, (success) => {
+      expect(success).to.be.false;
       done();
     });
-  });
+  }, 5000);
+
+  it ("should return if no doc with such udid ", function(done) {
+    let job_status = {
+      udid: ""
+    };
+    not.process(job_status, (success) => {
+      expect(success).to.be.false;
+      done();
+    });
+  }, 5000);
+
+  it ("should return if udid doc is valid but has no source", function(done) {
+    let job_status = {
+      udid: "d6ff2bb0-df34-11e7-b351-eb37822aa173"
+    };
+    not.process(job_status, (success, response) => {
+      expect(success).to.be.false;
+      console.log("[spec] response:", response);
+      done();
+    });
+  }, 5000);
 
 });

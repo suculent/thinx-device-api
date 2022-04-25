@@ -1,5 +1,13 @@
 describe("Queue Action", function() {
 
+    beforeAll(() => {
+        console.log(`🚸 [chai] >>> running Queue Action spec`);
+      });
+    
+      afterAll(() => {
+        console.log(`🚸 [chai] <<< completed Queue Action spec`);
+      });
+
     var expect = require('chai').expect;
 
     var Action = require("../../lib/thinx/queue_action");
@@ -54,6 +62,19 @@ describe("Queue Action", function() {
     // save
     it("should be able to save action", function() {
         action.save();
+    });
+
+    it("should be able report action state when running", function() {
+        action.isRunning();
+    });
+
+    it("should be able report action state when waiting", function() {
+        action.isWaiting();
+    });
+
+    it("should fail safely on invalid source", function() {
+        delete action.source;
+        action.toString();
     });
 
     // delete

@@ -42,7 +42,6 @@
     "device" : false,
     "deployment": false,
     "allow_http_login": true,
-    "ingress": false,
     "secrets": false
   },
   "strict_gdpr": true
