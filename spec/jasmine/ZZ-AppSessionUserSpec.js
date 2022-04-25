@@ -130,7 +130,7 @@ describe("User Routes", function () {
               .end((___err, ___res) => {
                 expect(___res.status).to.equal(200);
                 expect(___res.text).to.be.a('string');
-                expect(___res.text).to.equal('{"success":true,"status":"password_reset_request_accepted"}');
+                expect(___res.text).to.equal('{"success":true,"status":"activation_successful"}');
                 done();
               });
           });
