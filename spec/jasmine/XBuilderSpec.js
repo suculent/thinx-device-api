@@ -79,9 +79,7 @@ describe("Builder", function () {
       [], // notifiers
       function (success, message) {
         console.log("[spec] build dry", { success }, { message });
-        let m = JSON.parse(message);
-        expect(m.build_id).to.exist;
-        // TODO: expect message.build_id 
+        expect(message.build_id).to.exist;
         done();
       }, // callback
       queue.nextAvailableWorker()
