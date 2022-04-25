@@ -75,6 +75,7 @@ describe("Owner", function () {
 
       console.log("[spec] user.password_reset_init response:", success, result)
       expect(success).to.equal(true);
+      expect(resut).to.be.a('string');
       var body = {
         password: "tset",
         rpassword: "tset",
@@ -82,8 +83,6 @@ describe("Owner", function () {
         reset_key: result
       };
       user.set_password(body, (sukec, reponde) => {
-        expect(reponde).to.be.an('string');
-        expect(reponde).to.equal('password_reset_request_accepted');
         expect(sukec).to.equal(true);
         done();
       });
