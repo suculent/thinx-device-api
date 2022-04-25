@@ -83,7 +83,7 @@ describe("Owner", function () {
       };
       user.set_password(body, (sukec, reponde) => {
         expect(reponde).to.be.an('string');
-        expect(reponde).to.equal('password_reset_successful');
+        expect(reponde).to.equal('password_reset_request_accepted');
         expect(sukec).to.equal(true);
         done();
       });

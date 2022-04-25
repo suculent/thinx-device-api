@@ -95,7 +95,6 @@ describe("User Routes V2", function () {
         reset_key = j.response;
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).not.to.be('true');
         //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
         done();
       });
