@@ -240,9 +240,9 @@ describe("User Routes V2", function () {
       .get('/api/v2/logout')
       .set('Authorization', jwt)
       .end((_err, res) => {
-        console.log("🚸 [chai] V2 GET /api/v2/logout response", res.text); // expect redirect
+        //console.log("🚸 [chai] V2 GET /api/v2/logout response", res.text); // expect redirect
         expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        expect(res).to.be.html;
         done();
       });
   }, 20000);

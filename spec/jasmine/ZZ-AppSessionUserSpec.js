@@ -188,7 +188,7 @@ describe("User Routes", function () {
       .post('/api/user/password/reset')
       .send({ email: envi.dynamic.email })
       .end((_err, res) => {
-        console.log("[chai] POST /api/user/password/reset (noauth, email) response", res.text);
+        console.log("[chai] POST /api/user/password/reset (noauth, email) response:", res.text);
         expect(res.status).to.equal(200);
         let j = JSON.parse(res.text);
         reset_key = j.response;
