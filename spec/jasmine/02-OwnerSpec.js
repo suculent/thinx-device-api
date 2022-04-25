@@ -71,16 +71,15 @@ describe("Owner", function () {
   }, 10000);
 
   it("(05) should be able to begin reset owner password", function (done) {
-    user.password_reset_init(email, (success, response) => {
+    user.password_reset_init(email, (success, result) => {
 
-      expect(response).to.be.a('string');
+      console.log("[spec] user.password_reset_init response:", success, result)
       expect(success).to.equal(true);
-
       var body = {
         password: "tset",
         rpassword: "tset",
         owner: owner,
-        reset_key: response
+        reset_key: result
       };
       user.set_password(body, (sukec, reponde) => {
         expect(reponde).to.be.a('string');
