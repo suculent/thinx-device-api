@@ -175,10 +175,9 @@ describe("User Routes", function () {
       .post('/api/user/password/reset')
       .send({})
       .end((_err, res) => {
-        console.log("🚸 [chai] POST /api/user/password/reset (noauth, no-data) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
-        // {"success":false,"status":"email_not_found"}
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('false');
         done();
       });
   }, 20000);
@@ -190,10 +189,7 @@ describe("User Routes", function () {
       .end((_err, res) => {
         console.log("[chai] POST /api/user/password/reset (noauth, email) response:", res.text);
         expect(res.status).to.equal(200);
-        let j = JSON.parse(res.text);
-        reset_key = j.response;
-        //expect(j.note).to.equal('reset_key');
-        //{"success":true,"status":"24247cbdb8a83c72e8d12e5db8e877be8f5e229b536ebf1a676f20dfa965e631","note":"reset_key"}
+        expect(res.text).to.equal('true');
         done();
       });
   }, 20000);
