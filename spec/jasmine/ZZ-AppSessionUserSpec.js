@@ -282,6 +282,7 @@ describe("User Routes", function () {
   }, 20000);
 
   it("POST /api/user/password/set (valid) X", function (done) {
+    console.log("🚸 [chai] POST /api/user/password/set (valid) X");
     chai.request(thx.app)
       .post('/api/user/password/set')
       .send({ password: "dynamic", rpassword: "dynamic", reset_key: reset_key })
