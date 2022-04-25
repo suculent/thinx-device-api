@@ -130,7 +130,7 @@ describe("User Routes", function () {
               .end((___err, ___res) => {
                 expect(___res.status).to.equal(200);
                 expect(___res.text).to.be.a('string');
-                expect(___res.text).to.equal('{"success":true,"status":"password_reset_successful"}');
+                expect(___res.text).to.equal('{"success":true,"status":"activation_successful"}');
                 done();
               });
           });
@@ -175,24 +175,21 @@ describe("User Routes", function () {
       .post('/api/user/password/reset')
       .send({})
       .end((_err, res) => {
-        console.log("🚸 [chai] POST /api/user/password/reset (noauth, no-data) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
-        // {"success":false,"status":"email_not_found"}
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('false');
         done();
       });
   }, 20000);
 
   it("POST /api/user/password/reset (noauth, email)", function (done) {
-    chai.request(thx.app)
+    chai.request(thx.app)    
       .post('/api/user/password/reset')
       .send({ email: envi.dynamic.email })
       .end((_err, res) => {
+        console.log("[chai] POST /api/user/password/reset (noauth, email) response:", res.text);
         expect(res.status).to.equal(200);
-        let j = JSON.parse(res.text);
-        reset_key = j.status;
-        expect(j.note).to.equal('reset_key');
-        //{"success":true,"status":"24247cbdb8a83c72e8d12e5db8e877be8f5e229b536ebf1a676f20dfa965e631","note":"reset_key"}
+        expect(res.text).to.equal('true');
         done();
       });
   }, 20000);
@@ -280,19 +277,6 @@ describe("User Routes", function () {
       });
   }, 20000);
 
-  it("POST /api/user/password/set (valid) X", function (done) {
-    chai.request(thx.app)
-      .post('/api/user/password/set')
-      .send({ password: "dynamic", rpassword: "dynamic", reset_key: reset_key })
-      .end((_err, res) => {
-        console.log("🚸 [chai] POST /api/user/password/set (valid) X response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(200);
-        expect(res.text).to.be.a('string');
-        //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
-        done();
-      });
-  }, 20000);
-
   //
   // User Profile
   //
@@ -311,6 +295,7 @@ describe("User Routes", function () {
       .post('/api/user/profile')
       .send({})
       .end((_err, res) => {
+        console.log("🚸 [chai] POST /api/user/profile (noauth) response:", res.text);
         expect(res.status).to.equal(401);
         done();
       });
@@ -340,7 +325,7 @@ describe("User Routes", function () {
           .post('/api/gdpr')
           .send({ gdpr: true, token: token })
           .end((_err, _res) => {
-            console.log("[chai] POST /api/gdpr response:", _res.text, "status", _res.status);
+            console.log("🚸 [chai] POST /api/gdpr response:", _res.text, "status", _res.status);
             expect(_res.status).to.equal(200);
             expect(_res.text).to.be.a('string');
             // {"success":false,"status":"invalid_protocol_update_key_missing"} // WTF?
@@ -419,13 +404,13 @@ describe("User Routes", function () {
       .catch((e) => { console.log(e); });
   }, 20000);
 
-  // there is no login here, so JWT for this is missing
   it("POST /api/gdpr/transfer", function (done) {
     chai.request(thx.app)
       .post('/api/gdpr/transfer')
+      .set('Authorization', jwt)
       .send({})
       .end((_err, res) => {
-        expect(res.status).to.equal(401);
+        expect(res.status).to.equal(200);
         done();
       });
   }, 20000);
@@ -447,19 +432,18 @@ describe("User Routes", function () {
 
   // GDPR API v2
 
-  // there is no login here, so JWT for this is missing
+  // there is no login here, so JWT for this should be missing
   it("DELETE /api/v2/gdpr", function (done) {
     console.log("🚸 [chai] DELETE /api/v2/gdpr (jwt, invalid) request");
     chai.request(thx.app)
       .delete('/api/v2/gdpr')
       .set('Authorization', jwt)
-      .send({})
+      .send({ owner_id: dynamic_owner_id})
       .end((_err, res) => {
         console.log("🚸 [chai] DELETE /api/v2/gdpr (jwt, invalid) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"deletion_not_confirmed"}');
-        // {"success":false,"status":"deletion_not_confirmed"} 
         done();
       });
   }, 20000);
@@ -481,8 +465,9 @@ describe("User Routes", function () {
       .put('/api/v2/gdpr')
       .send({})
       .end((_err, res) => {
-        console.log("[chai] PUT /api/v2/gdpr response:", JSON.stringify(res, null, 2)); // consent missing
+        console.log("🚸 [chai] PUT /api/v2/gdpr response:", res.text); // consent missing, turn into expect
         expect(res.status).to.equal(400); // should return 401 without proper token, or 400 consent missing ¨
+
         done();
       });
   }, 20000);
@@ -607,6 +592,59 @@ describe("User Routes", function () {
       });
   }, 20000);
 
+  let real_build_id;
+
+  // fetch logs
+  it("GET /api/v2/logs/build", function (done) {
+    chai.request(thx.app)
+      .get('/api/v2/logs/build')
+      .set('Authorization', jwt)
+      .end((_err, res) => {
+        console.log("🚸 [chai] GET /api/user/logs/build (jwt) response:", res.text, " status:", res.status);
+        let j = JSON.parse(res.text);
+        real_build_id = j.builds[0]._id;
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("GET /api/user/logs/build/"+envi.build_id, function (done) {
+    chai.request(thx.app)
+      .get('/api/user/logs/build/'+envi.build_id)
+      .set('Authorization', jwt)
+      .end((_err, res) => {
+        console.log("🚸 [chai] GET /api/user/logs/build/:id (jwt) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("GET /api/v2/logs/build/"+real_build_id, function (done) {
+    chai.request(thx.app)
+      .get('/api/v2/logs/build/'+real_build_id)
+      .set('Authorization', jwt)
+      .end((_err, res) => {
+        console.log("🚸 [chai] GET /api/user/logs/build/:id (jwt) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("GET /api/v2/logs/audit", function (done) {
+    chai.request(thx.app)
+      .get('/api/v2/logs/audit')
+      .set('Authorization', jwt)
+      .end((_err, res) => {
+        console.log("🚸 [chai] GET /api/v2/logs/audit (jwt) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
   //
   // User Statistics
   //
@@ -628,6 +666,19 @@ describe("User Routes", function () {
       .set('Authorization', jwt)
       .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/stats (jwt) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("GET /api/v2/stats (jwt)", function (done) {
+    console.log("🚸 [chai] GET /api/v2/stats (jwt)");
+    agent
+      .get('/api/user/stats')
+      .set('Authorization', jwt)
+      .end((_err, res) => {
+        console.log("🚸 [chai] GET /api/v2/stats (jwt) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
@@ -685,6 +736,28 @@ describe("User Routes", function () {
       .end((_err, res) => {
         console.log("🚸 [chai] POST /api/v2/profile (transformer) response:", res.text, " status:", res.status);
         expect(res).to.have.status(200);
+        done();
+      });
+  }, 20000);
+
+  it("GET /api/v2/stats/today", function (done) {
+    chai.request(thx.app)
+      .get('/api/v2/stats/today')
+      .set('Authorization', jwt)
+      .end((_err, res) => {
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  it("GET /api/v2/stats/week", function (done) {
+    chai.request(thx.app)
+      .get('/api/v2/stats/week')
+      .set('Authorization', jwt)
+      .end((_err, res) => {
+        expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
         done();
       });
   }, 20000);

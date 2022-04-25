@@ -2,7 +2,7 @@
 
 ## HISTORY
 
-13/4/2022 1.6.1430
+13/4/2022 1.6.1604
 
 » This version is really close to be a final THiNX version for 1.x roadmap. Internals are already refactored to provide API v2 for newly prepared UI, along with lots of inside refactoring and optimizations, that (thanks to unit and integration test) should have no impact on usability or reverse-compatibility (unless depending on error codes that have been precisioned in both API versions).
 

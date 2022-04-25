@@ -132,7 +132,7 @@ describe("Sources", function () {
 
   it("(09) should update repo privacy prefetch state", function (done) {
     let source_id = "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f3";
-    Sources.updatePrivate(owner, source_id, true, (success, error) => {
+    Sources.update(owner, source_id, "is_private", true, (success, error) => {
       if (!success) console.log("[09] error", error);
       expect(success).to.equal(true);
       done();
@@ -141,7 +141,7 @@ describe("Sources", function () {
 
   it("(10) should update last build version", function (done) {
     let source_id = "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f3";
-    Sources.updateLastBuild(owner, source_id, "1.1.1", (success, error) => {
+    Sources.update(owner, source_id, "last_build", "1.1.1", (success, error) => {
       if (!success) console.log("[10] error", error);
       expect(success).to.equal(true);
       done();

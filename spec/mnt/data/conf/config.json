@@ -31,21 +31,22 @@
   "lambda": 7475,
   "data_root": "/mnt/data",
   "deploy_root": "/deploy",
-  "build_root": "/repos",
+  "build_root": "/deploy",
   "ssh_keys": "/mnt/data/ssh_keys",
   "slack_webhook": "",
   "slack_bot_topic": "thinx",
-  "ssl_key": "/mnt/data/ssl/privkey.pem",
-  "ssl_cert": "/mnt/data/ssl/cert.pem",
+  "ssl_key": "/mnt/data/ssl/thinx.test.key",
+  "ssl_cert": "/mnt/data/ssl/thinx.test.out.crt",
+  "ssl_ca": "/mnt/data/ssl/testRoot.crt",
   "client_user_agent": "THiNX-Client",
   "builder" : {
     "concurrency" : 2
   },
   "debug": {
-    "device" : true,
+    "device" : false,
     "deployment": true,
     "allow_http_login": true,
-    "secrets": true
+    "secrets": false
   },
   "strict_gdpr": true
 }

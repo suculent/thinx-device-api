@@ -121,7 +121,7 @@ describe("Device", function() {
 
   it("(04) should receive different response for registered device", function (done) {
     res.end = () => {
-      console.log("[chai] D(04) res end called...");
+      console.log("🚸 [chai] D(04) res end called...");
       //done();
     };
     device.register(
@@ -129,7 +129,6 @@ describe("Device", function() {
       apikey,
       res,
       function (r, success, response) {
-        console.log("Device (04) response text:", {res}, {success}, {response});
         let obj = response;
         expect(obj).to.be.an('object');
         expect(success).to.equal(true);

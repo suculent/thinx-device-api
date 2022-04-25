@@ -58,7 +58,7 @@ describe("ZZ-AppSession Session Management", function () {
       .post('/api/login')
       .send({ username: 'dynamic', password: 'dynamic', remember: false })
       .then(function (res) {
-        console.log(`🚸 [chai] POST /api/login (valid)response: ${res.text} status: ${res.status} with cookie ${res.cookie}`);
+        console.log(`🚸 [chai] POST /api/login (valid)response: ${JSON.stringify(res.text, null, 2)} status: ${res.status} with cookie ${res.cookie}`);
         done();
         /*
         // The `agent` now has the sessionid cookie saved, and will send it

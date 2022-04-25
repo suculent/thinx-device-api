@@ -29,9 +29,7 @@ describe("Devices", function () {
     chai.request(thx.app)
       .get('/api/user/devices')
       .end((err, res) => {
-        console.log("🚸 [chai] GET /api/user/devices (noauth) response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -42,9 +40,7 @@ describe("Devices", function () {
       .get('/api/user/devices')
       .set('Cookie', 'thx-session-cookie=something;owner=' + envi.oid)
       .end((err, res) => {
-        console.log("🚸 [chai] GET /api/user/devices (cookie) response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -55,7 +51,6 @@ describe("Devices", function () {
       .get('/api/user/device/data/' + envi.oid)
       .end((err, res) => {
         expect(res.status).to.equal(404);
-        //expect(res.text).to.be.a('string');
         done();
       });
   }, 20000);
@@ -66,9 +61,7 @@ describe("Devices", function () {
       .post('/api/device/edit')
       .send({ changes: { alias: "edited-alias" } })
       .end((err, res) => {
-        console.log("🚸 [chai] POST /api/device/edit response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -79,9 +72,7 @@ describe("Devices", function () {
       .post('/api/device/attach')
       .send({ udid: envi.oid })
       .end((err, res) => {
-        console.log("🚸 [chai] POST /api/device/attach response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -92,9 +83,7 @@ describe("Devices", function () {
       .post('/api/device/detach')
       .send({ udid: envi.oid })
       .end((err, res) => {
-        console.log("🚸 [chai] POST /api/device/detach response:", res.text, " status:", res.status);
         expect(res.status).to.equal(401);
-        //expect(res.text).to.be.a('string');
         done();
       });
   }, 20000);
@@ -105,9 +94,7 @@ describe("Devices", function () {
       .post('/api/device/mesh/attach')
       .send({ udid: envi.oid })
       .end((err, res) => {
-        console.log("🚸 [chai] POST /api/device/mesh/attach response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -119,9 +106,7 @@ describe("Devices", function () {
       .post('/api/device/mesh/detach')
       .send({ udid: envi.oid })
       .end((err, res) => {
-        console.log("🚸 [chai] POST /api/device/mesh/detach response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -133,8 +118,7 @@ describe("Devices", function () {
       .send({ udid: envi.oid })
       .end((err, res) => {
         console.log("🚸 [chai] response /api/device/data:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -145,9 +129,7 @@ describe("Devices", function () {
       .post('/api/device/revoke')
       .send({ udid: envi.oid })
       .end((err, res) => {
-        console.log("🚸 [chai] POST /api/device/revoke response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -163,9 +145,7 @@ describe("Devices", function () {
       .post('/api/device/push')
       .send({ key: "value" })
       .end((err, res) => {
-        console.log("🚸 [chai] POST /api/device/push response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        expect(res.status).to.equal(401);
         done();
       });
   }, 20000);
@@ -245,6 +225,8 @@ describe("Devices (JWT)", function () {
       });
   }, 20000);
 
+  let dynamic_devices = [];
+
   it("GET /api/user/devices (JWT)", function (done) {
     console.log("🚸 [chai] GET /api/user/devices (JWT)");
     agent
@@ -252,9 +234,10 @@ describe("Devices (JWT)", function () {
       .set('Authorization', jwt)
       .end((err, res) => {
         console.log("🚸 [chai] GET /api/user/devices (JWT) response:", res.text, " status:", res.status);
-        // TODO: Store UDID!
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        let j = JSON.parse(res.text);
+        dynamic_devices = j.devices;
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
         done();
       });
   }, 20000);
@@ -276,7 +259,7 @@ describe("Devices (JWT)", function () {
     agent
       .post('/api/device/edit')
       .set('Authorization', jwt)
-      .send({ changes: { alias: "edited-alias" } })
+      .send({ changes: { alias: "edited-alias", udid: dynamic_devices[1].udid } })
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/edit (JWT)response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
@@ -290,7 +273,7 @@ describe("Devices (JWT)", function () {
     agent
       .post('/api/device/attach')
       .set('Authorization', jwt)
-      .send({ udid: envi.oid })
+      .send({ udid: dynamic_devices[1].udid })
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/attach (JWT) response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
@@ -318,7 +301,7 @@ describe("Devices (JWT)", function () {
     agent
       .post('/api/device/detach')
       .set('Authorization', jwt)
-      .send({ udid: envi.oid })
+      .send({ udid: dynamic_devices[1].udid })
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/detach  (JWT) response:", res.text, " status:", res.status);
         //expect(res.status).to.equal(200);
@@ -543,7 +526,7 @@ describe("Devices (JWT)", function () {
       .get('/api/v2/device')
       .set('Authorization', jwt)
       .end((err, res) => {
-        console.log("🚸 [chai] GET /api/v2/device (JWT) response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] GET /api/v2/device (JWT) response 1:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         done();
@@ -558,7 +541,7 @@ describe("Devices (JWT)", function () {
       .set('Authorization', jwt)
       .send({ changes: { alias: "changed" }})
       .end((err, res) => {
-        console.log("🚸 [chai] PUT /api/v2/device (JWT) response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] PUT /api/v2/device (JWT) response 2:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         done();
@@ -633,7 +616,7 @@ describe("Devices (JWT)", function () {
       .send({})
       .set('Authorization', jwt)
       .end((err, res) => {
-        console.log("🚸 [chai] GET /api/v2/device (JWT) response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] GET /api/v2/device (JWT) response 3:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         done();

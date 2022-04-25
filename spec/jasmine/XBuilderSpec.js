@@ -77,8 +77,9 @@ describe("Builder", function () {
       owner,
       build,
       [], // notifiers
-      function (success, message, build_id2) {
-        console.log("[spec] build dry", { success }, { message }, { build_id2 });
+      function (success, message) {
+        console.log("[spec] build dry", { success }, { message });
+        expect(message.build_id).to.exist;
         done();
       }, // callback
       queue.nextAvailableWorker()
@@ -188,7 +189,7 @@ describe("Builder", function () {
       done();
       
     }, transmit_key);
-  }, 15000);
+  }, 30000);
 
   it("should fetch last apikey", function (done) {
     builder.getLastAPIKey("nonexistent", function (success/* , result */) {

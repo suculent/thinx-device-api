@@ -28,7 +28,7 @@ describe("Build log", function() {
   it("(02) should be able to log", function(done) {
     let contents1 = "mock log message contents one";
     blog.log(build_id, owner, udid, "Testing build log create...", contents1, (error, body) => {
-      console.log("[chai] Build log (02) body", body, "error", error);
+      console.log("🚸 [chai] Build log (02) body", body, "error", error);
       // will fail until stable...
       // expect(body).to.exist; // body.ok should be true
       //expect(error).to.equal(null);

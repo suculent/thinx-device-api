@@ -166,11 +166,13 @@ describe("Meshes (JWT)", function () {
     });
 
     it("GET /api/mesh/list (jwt, valid)", function (done) {
+        console.log("🚸 [chai] GET /api/mesh/list (jwt, valid)");
         agent
             .get('/api/mesh/list')
             .set('Authorization', jwt)
             .end((err, res) => {
                 expect(res.status).to.equal(200);
+                console.log("🚸 [chai] GET /api/mesh/list (jwt, valid) response:", res.text); // owner invalid
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
                 //expect(res.text).to.equal('{"success":true,"mesh_ids":[{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}]}');
@@ -178,14 +180,13 @@ describe("Meshes (JWT)", function () {
             });
     }, 20000);
 
-    it("POST /api/mesh/list (jwt, invalid)", function (done) {
+    it("POST /api/mesh/list (jwt, valid)", function (done) {
         agent
             .post('/api/mesh/list')
             .set('Authorization', jwt)
-            .send({ owner_id: "mock-owner-id", apikey: "mock-api-key", alias: "mock-mesh-alias" })
             .end((err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"status":"owner_invalid"}');
+                expect(res.text).to.equal('{"success":true,"mesh_ids":[{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}]}');
                 done();
             });
     }, 20000);
@@ -199,7 +200,7 @@ describe("Meshes (JWT)", function () {
                 let r = JSON.parse(res.text);
                 mesh_id = r.mesh_id;
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"status":"owner_id_missing"}');
+                expect(res.text).to.equal('{"success":false,"status":"mesh_id_missing"}');
                 done();
             });
     }, 20000);
@@ -283,14 +284,14 @@ describe("Meshes (JWT)", function () {
             .set('Authorization', jwt)
             .send('{"mesh_ids":"'+mesh_id+'"}')
             .end((err, res) => {
+                console.log("🚸 [chai] POST /api/mesh/delete (jwt, semi-valid) response:", res.status, res.text);
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"status":"Parameter owner_id missing."}');
+                expect(res.text).to.equal('{"success":false,"status":"mesh_ids_missing"}');
                 done();
             });
     }, 20000);
 
     it("POST /api/mesh/delete (jwt, invalid)", function (done) {
-        expect(mesh_id !== null);
         let ro = {
             mesh_ids: [mesh_id],
             owner_id: envi.dynamic.owner
@@ -311,7 +312,7 @@ describe("Meshes (JWT)", function () {
         expect(mesh_id !== null);
         let ro = {
             mesh_ids: [mesh_id],
-            owner_id: envi.dynamic.owner
+            owner: envi.dynamic.owner
         };
         agent
             .post('/api/mesh/delete')
@@ -338,7 +339,7 @@ describe("Meshes (JWT)", function () {
             .send(ro)
             .end((err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":true,"status":["mock-mesh-id-2"]}');
+                expect(res.text).to.equal('{"success":true,"response":["mock-mesh-id-2"]}');
                 done();
             });
     }, 20000);
@@ -355,8 +356,7 @@ describe("Meshes (JWT)", function () {
             .send(ro)
             .end((err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"status":[]}');
-                
+                expect(res.text).to.equal('{"success":false,"response":[]}');
                 done();
             });
     }, 20000);
@@ -371,7 +371,7 @@ describe("Meshes (JWT)", function () {
             .set('Authorization', jwt)
             .send({ alias: "mock-mesh-alias-3", owner_id: envi.dynamic.owner, mesh_id: 'mock-mesh-id-3' })
             .end((err, res) => {
-                console.log("[chai] PUT /api/v2/mesh response:", res.status, res.text);
+                console.log("🚸 [chai] PUT /api/v2/mesh response:", res.status, res.text);
                 let r = JSON.parse(res.text);
                 mesh_id = r.mesh_ids.mesh_id;
                 expect(res.status).to.equal(200);
@@ -386,6 +386,7 @@ describe("Meshes (JWT)", function () {
             .get('/api/v2/mesh')
             .set('Authorization', jwt)
             .end((err, res) => {
+                console.log("🚸 [chai] GET /api/v2/mesh response:", res.status, res.text);
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);

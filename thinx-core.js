@@ -1,6 +1,9 @@
 const EventEmitter = require('events');
 
 const JWTLogin = require("./lib/thinx/jwtlogin");  
+const InfluxConnector = require('./lib/thinx/influx');
+const Util = require('./lib/thinx/util');
+
 module.exports = class THiNX extends EventEmitter {
 
   constructor(sqreen) {
@@ -59,6 +62,9 @@ module.exports = class THiNX extends EventEmitter {
 
     const helmet = require('helmet');
     app.use(helmet.frameguard());
+
+    const morgan = require('morgan');
+    app.use(morgan('tiny'));
 
     const session = require("express-session");
 
@@ -129,6 +135,8 @@ module.exports = class THiNX extends EventEmitter {
       var db = new Database();
       db.init((/* db_err, dbs */) => {
 
+        InfluxConnector.createDB('stats');
+
         //
         // Log aggregator (needs DB)
         //
@@ -188,8 +196,10 @@ module.exports = class THiNX extends EventEmitter {
               ca: read(app_config.ssl_ca, 'utf8'),
               NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
             };
-            console.log("ℹ️ [info] Starting HTTPS server on " + app_config.secure_port + "...");
-            https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
+            if (process.env.ENVIRONMENT !== "test") {
+              console.log("ℹ️ [info] Starting HTTPS server on " + app_config.secure_port + "...");
+              https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
+            }
           } else {
             console.log("☣️ [error] SSL certificate loading or verification FAILED! Check your configuration!");
           }
@@ -395,7 +405,8 @@ module.exports = class THiNX extends EventEmitter {
           sessionParser(request, {}, () => {
 
             let cookies = request.headers.cookie;
-            if ((typeof (cookies) === "undefined") || (cookies === null)) {
+            
+            if (!Util.isDefined(cookies)) {
               // other x-thx cookies are now deprecated and can be removed
               if (cookies.indexOf("x-thx-core") === -1) {
                 console.log("Should destroy socket, access unauthorized.");

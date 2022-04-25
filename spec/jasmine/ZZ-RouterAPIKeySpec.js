@@ -36,7 +36,7 @@ describe("API Keys (noauth)", function () {
         });
     });
 
-   
+
 
     // create
     it("POST /api/user/apikey", function (done) {
@@ -222,4 +222,57 @@ describe("API Keys (JWT)", function () {
                 done();
             });
     }, 20000);
+
+    // API v2
+
+    it("POST /api/v2/apikey", function (done) {
+        chai.request(thx.app)
+            .post('/api/v2/apikey')
+            .set('Authorization', jwt)
+            .send({
+                'alias': 'mock-apikey-alias-4'
+            })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                let j = JSON.parse(res.text);
+                expect(j.success).to.equal(true);
+                expect(j.api_key).to.be.a('string');
+                expect(j.hash).to.be.a('string');
+                done();
+            });
+    }, 20000);
+
+    it("GET /api/v2/apikey", function (done) {
+        chai.request(thx.app)
+            .get('/api/v2/apikey')
+            .set('Authorization', jwt)
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                let j = JSON.parse(res.text);
+                expect(j.success).to.equal(true);
+                expect(j.api_keys).to.be.an('array');
+                expect(j.api_keys.length >= 1);
+                done();
+            });
+    }, 20000);
+
+    it("DELETE /api/v2/apikey", function (done) {
+        expect(created_api_key).not.to.be.null;
+        chai.request(thx.app)
+            .delete('/api/v2/apikey')
+            .set('Authorization', jwt)
+            .send({
+                'fingerprint': 'mock-apikey-alias-4'
+            })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                let j = JSON.parse(res.text);
+                expect(j.success).to.equal(true);
+                expect(j.revoked).to.be.an('array');
+                console.log(`🚸 [chai] API Keys in V2 revocation:", ${JSON.stringify(j)} from res ${res.text}`);
+                //expect(aks.length >= 1);
+                done();
+            });
+    }, 20000);
+
 });
