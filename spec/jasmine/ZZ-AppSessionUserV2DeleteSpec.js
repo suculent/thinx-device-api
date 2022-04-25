@@ -75,7 +75,7 @@ describe("User Routes V2", function () {
               .end((___err, ___res) => {
                 expect(___res.status).to.equal(200);
                 expect(___res.text).to.be.a('string');
-                expect(___res.text).to.equal('{"success":true,"status":"password_reset_successful"}');
+                expect(___res.text).to.equal('{"success":true,"status":"activation_successful"}');
                 done();
               });
           });
@@ -90,9 +90,9 @@ describe("User Routes V2", function () {
       .post('/api/v2/password/reset')
       .send({ email: envi.dynamic2.email })
       .end((_err, res) => {
-        console.log("🚸 [chai] V2 POST /api/v2/password/reset (1) response:", res.text, " status:", res.status);
+        console.log("🚸 [chai] V2 POST /api/v2/password/reset (1) response:", res.text, " status:", res.status); // true!
         let j = JSON.parse(res.text);
-        reset_key = j.status;
+        reset_key = j.response;
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
@@ -104,7 +104,7 @@ describe("User Routes V2", function () {
     chai.request(thx.app)
       .get('/api/v2/password/reset?owner_id='+envi.dynamic2.owner+'&reset_key='+reset_key)
       .end((_err, res) => {
-        //console.log("🚸 [chai] V2 GET /api/v2/password/reset (2) response:", res.text, " status:", res.status); is long HTML
+        console.log("🚸 [chai] V2 GET /api/v2/password/reset (2) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
@@ -112,7 +112,9 @@ describe("User Routes V2", function () {
       });
   }, 20000);
 
+  // has no response, maybe reset_key is already used...
   it("POST /api/v2/password/set", function (done) {
+    console.log("🚸 [chai] V2 POST /api/v2/password/set (3)");
     chai.request(thx.app)
       .post('/api/v2/password/set')
       .send({ password: "dynamic2", rpassword: "dynamic2", reset_key: reset_key })
@@ -240,9 +242,9 @@ describe("User Routes V2", function () {
       .get('/api/v2/logout')
       .set('Authorization', jwt)
       .end((_err, res) => {
-        console.log("🚸 [chai] V2 GET /api/v2/logout response", res.text); // expect redirect
+        //console.log("🚸 [chai] V2 GET /api/v2/logout response", res.text); // expect redirect
         expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        expect(res).to.be.html;
         done();
       });
   }, 20000);

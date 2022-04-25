@@ -130,7 +130,7 @@ describe("User Routes", function () {
               .end((___err, ___res) => {
                 expect(___res.status).to.equal(200);
                 expect(___res.text).to.be.a('string');
-                expect(___res.text).to.equal('{"success":true,"status":"password_reset_successful"}');
+                expect(___res.text).to.equal('{"success":true,"status":"activation_successful"}');
                 done();
               });
           });
@@ -175,24 +175,21 @@ describe("User Routes", function () {
       .post('/api/user/password/reset')
       .send({})
       .end((_err, res) => {
-        console.log("🚸 [chai] POST /api/user/password/reset (noauth, no-data) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
-        // {"success":false,"status":"email_not_found"}
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('false');
         done();
       });
   }, 20000);
 
   it("POST /api/user/password/reset (noauth, email)", function (done) {
-    chai.request(thx.app)
+    chai.request(thx.app)    
       .post('/api/user/password/reset')
       .send({ email: envi.dynamic.email })
       .end((_err, res) => {
+        console.log("[chai] POST /api/user/password/reset (noauth, email) response:", res.text);
         expect(res.status).to.equal(200);
-        let j = JSON.parse(res.text);
-        reset_key = j.status;
-        expect(j.note).to.equal('reset_key');
-        //{"success":true,"status":"24247cbdb8a83c72e8d12e5db8e877be8f5e229b536ebf1a676f20dfa965e631","note":"reset_key"}
+        expect(res.text).to.equal('true');
         done();
       });
   }, 20000);
@@ -276,19 +273,6 @@ describe("User Routes", function () {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"status":"password_mismatch"}');
-        done();
-      });
-  }, 20000);
-
-  it("POST /api/user/password/set (valid) X", function (done) {
-    chai.request(thx.app)
-      .post('/api/user/password/set')
-      .send({ password: "dynamic", rpassword: "dynamic", reset_key: reset_key })
-      .end((_err, res) => {
-        console.log("🚸 [chai] POST /api/user/password/set (valid) X response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(200);
-        expect(res.text).to.be.a('string');
-        //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
         done();
       });
   }, 20000);
@@ -481,8 +465,9 @@ describe("User Routes", function () {
       .put('/api/v2/gdpr')
       .send({})
       .end((_err, res) => {
-        console.log("🚸 [chai] PUT /api/v2/gdpr response:", JSON.stringify(res, null, 2)); // consent missing
+        console.log("🚸 [chai] PUT /api/v2/gdpr response:", res.text); // consent missing, turn into expect
         expect(res.status).to.equal(400); // should return 401 without proper token, or 400 consent missing ¨
+
         done();
       });
   }, 20000);
