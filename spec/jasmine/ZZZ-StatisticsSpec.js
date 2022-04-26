@@ -29,7 +29,7 @@ describe("Statistics", function () {
 
   it("(04) should not be able to return today results for owner before aggregation", function (done) {
     s.today(owner, function (success, result) {
-      console.log("(04)", success, result)
+      console.log("(04)", success, result);
       expect(success).to.equal(false); // should return stats_not_found before aggregation
       expect(result).to.be.a('string');
       done();
@@ -38,15 +38,6 @@ describe("Statistics", function () {
 
   it("(05) should be able to aggregate statistics", function (done) {
     s.aggregate(function (success, result) {
-      expect(success).to.equal(true);
-      expect(result).to.be.a('string');
-      done();
-    });
-  }, 10000);
-
-  it("(05b) should be able to return today results for owner after aggregation", function (done) {
-    s.today(owner, function (success, result) {
-      console.log("(04)", success, result)
       expect(success).to.equal(true);
       expect(result).to.be.a('string');
       done();
@@ -64,6 +55,15 @@ describe("Statistics", function () {
   it("(07) should be able to return weekly results for owner", function (done) {
     s.week(owner, function (success, result) {
       expect(result).to.be.an('object');
+      done();
+    });
+  }, 10000);
+
+  it("(08) should be able to return today results for owner after aggregation", function (done) {
+    s.today(owner, function (success, result) {
+      console.log("(08)", success, result);
+      expect(success).to.equal(true);
+      expect(result).to.be.a('string');
       done();
     });
   }, 10000);
