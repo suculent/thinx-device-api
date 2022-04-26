@@ -54,7 +54,7 @@ describe("Statistics", function () {
 
   it("(07) should be able to return weekly results for owner", function (done) {
     s.week(owner, function (success, result) {
-      expect(success).to.be(true);
+      expect(success).to.equal(true);
       expect(result).to.be.an('object');
       done();
     });
