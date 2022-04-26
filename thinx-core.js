@@ -63,8 +63,8 @@ module.exports = class THiNX extends EventEmitter {
     const helmet = require('helmet');
     app.use(helmet.frameguard());
 
-    const morgan = require('morgan');
-    app.use(morgan('tiny'));
+    //const morgan = require('morgan');
+    //app.use(morgan('tiny'));
 
     const session = require("express-session");
 

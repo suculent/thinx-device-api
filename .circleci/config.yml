@@ -387,6 +387,7 @@ workflows:
               only:
                 - base
                 - thinx-staging
+                - thinx-staging-fixes
                 - thinx-class
                 - main
                 - master
@@ -400,6 +401,7 @@ workflows:
               only:
                 - thinx-console
                 - thinx-staging
+                - thinx-staging-fixes
                 - master
 
       - build-base:
@@ -421,4 +423,5 @@ workflows:
             branches:
               only:
                 - thinx-staging
+                - thinx-staging-fixes
                 - master
