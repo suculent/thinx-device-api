@@ -30,7 +30,7 @@ describe("Statistics", function () {
   it("(04) should not be able to return today results for owner before aggregation", function (done) {
     s.today(owner, function (success, result) {
       console.log("(04)", success, result)
-      expect(success).to.equal(false);
+      expect(success).to.equal(false); // should return stats_not_found before aggregation
       expect(result).to.be.a('string');
       done();
     });
