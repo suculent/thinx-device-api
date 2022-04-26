@@ -42,10 +42,10 @@ describe("Queue", function () {
         queue_with_cron.add(mock_udid_1, mock_source_id, mock_owner_id, () => {
             queue_with_cron.add(mock_udid_2, mock_source_id, mock_owner_id, () => {
                 queue_with_cron.add(mock_udid_3, mock_source_id, mock_owner_id, () => {
-                    
-                    queue_with_cron.findNext((success, next) => {
 
-                        if (next === null) {
+                    queue_with_cron.findNext((success, next) => {                        
+
+                        if ((next === null) || (success === false)) {
                             if (done_called === false) {
                                 done_called = true;
                                 done();
