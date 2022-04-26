@@ -147,6 +147,9 @@ module.exports = class THiNX extends EventEmitter {
         stats.get_all_owners();
         let then = new Date();
         console.log(`ℹ️ [info] [core] cached all owners in ${then - now} seconds.`);
+        
+        stats.aggregate();
+
         setInterval(() => {
           stats.aggregate();
           console.log("✅ [info] Aggregation jobs completed.");
