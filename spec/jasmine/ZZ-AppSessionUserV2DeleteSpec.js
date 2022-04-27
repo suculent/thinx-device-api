@@ -57,9 +57,9 @@ describe("User Routes V2", function () {
         expect(res.text).to.be.a('string');
         expect(res.status).to.equal(200);
         let body = JSON.parse(res.text);
-        dynamic_activation_code = body.status;
-        expect(body.status).to.be.a('string'); // check length
-        expect(body.status.length == 64);
+        dynamic_activation_code = body.response;
+        expect(body.response).to.be.a('string'); // check length
+        expect(body.response.length == 64);
 
         let rurl = '/api/v2/activate?owner=' + dynamic_owner_id + '&activation=' + dynamic_activation_code;
         chai.request(thx.app)
