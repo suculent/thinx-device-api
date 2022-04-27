@@ -109,12 +109,13 @@ describe("User Routes", function () {
       .send(user_info)
       .end((_err, res) => {
         // {"success":true,"status":"6975d3c5849fc130e689f2cae0abe51a8fd24f496810bee3c0bcf531dd53be0c"}
+        console.log("[chai] POST /api/user/create (valid body) and activate (set password)", res.text);
         expect(res.text).to.be.a('string');
         expect(res.status).to.equal(200);
         let body = JSON.parse(res.text);
-        dynamic_activation_code = body.status;
-        expect(body.status).to.be.a('string'); // check length
-        expect(body.status.length == 64);
+        dynamic_activation_code = body.response;
+        expect(body.response).to.be.a('string'); // check length
+        expect(body.response.length == 64);
 
         let rurl = '/api/user/activate?owner=' + dynamic_owner_id + '&activation=' + dynamic_activation_code;
         chai.request(thx.app)

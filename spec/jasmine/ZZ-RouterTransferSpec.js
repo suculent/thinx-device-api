@@ -142,7 +142,7 @@ describe("Transfer (JWT)", function () {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string'); 
                 let j = JSON.parse(res.text);
-                transfer_id = j.status;
+                transfer_id = j.response;
                 expect(j.success).to.equal(true);
                 done();
             });
