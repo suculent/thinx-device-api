@@ -171,6 +171,7 @@ module.exports = class THiNX extends EventEmitter {
 
         // -> extract into ssl_options
         var ssl_options = null;
+        let ssl_server = null;
 
         if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
 
@@ -201,7 +202,7 @@ module.exports = class THiNX extends EventEmitter {
             };
             if (process.env.ENVIRONMENT !== "test") {
               console.log("ℹ️ [info] Starting HTTPS server on " + app_config.secure_port + "...");
-              https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
+              ssl_server = https.createServer(ssl_options, app).listen(app_config.secure_port, "0.0.0.0");
             }
           } else {
             console.log("☣️ [error] SSL certificate loading or verification FAILED! Check your configuration!");
