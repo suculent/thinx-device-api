@@ -109,7 +109,7 @@ describe("Transformer (JWT)", function () {
       .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"message":"changes.udid_undefined"}');
+        expect(res.text).to.equal('{"success":false,"response":"changes.udid_undefined"}');
         done();
       });
   }, 20000);
