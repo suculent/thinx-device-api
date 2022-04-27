@@ -61,7 +61,7 @@ describe("Device Ownership Transfer (noauth)", function () {
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
+                expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
     }, 20000);
@@ -72,7 +72,7 @@ describe("Device Ownership Transfer (noauth)", function () {
             .send({})
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
+                expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
     }, 20000);
@@ -112,7 +112,7 @@ describe("Transfer (JWT)", function () {
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string'); 
-                expect(res.text).to.equal('{"success":false,"status":"missing_recipient"}');
+                expect(res.text).to.equal('{"success":false,"response":"missing_recipient"}');
                 done();
             });
     }, 20000);
@@ -126,7 +126,7 @@ describe("Transfer (JWT)", function () {
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string'); 
-                expect(res.text).to.equal('{"success":false,"status":"recipient_unknown"}');
+                expect(res.text).to.equal('{"success":false,"response":"recipient_unknown"}');
                 done();
             });
     }, 20000);
@@ -166,7 +166,7 @@ describe("Transfer (JWT)", function () {
             .send({})
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
+                expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
     }, 20000);
@@ -178,7 +178,7 @@ describe("Transfer (JWT)", function () {
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
+                expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
     }, 20000);
@@ -191,7 +191,7 @@ describe("Transfer (JWT)", function () {
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
+                expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
     }, 20000);
@@ -204,7 +204,7 @@ describe("Transfer (JWT)", function () {
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
+                expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
     }, 20000);
@@ -219,7 +219,7 @@ describe("Transfer (JWT)", function () {
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"missing_recipient"}');
+                expect(res.text).to.equal('{"success":false,"response":"missing_recipient"}');
                 done();
             });
     }, 20000);
@@ -242,7 +242,7 @@ describe("Transfer (JWT)", function () {
             .send({ udid: null})
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
+                expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
     }, 20000);
@@ -255,7 +255,7 @@ describe("Transfer (JWT)", function () {
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"owner_missing"}');
+                expect(res.text).to.equal('{"success":false,"response":"owner_missing"}');
                 done();
             });
     }, 20000);
@@ -268,7 +268,7 @@ describe("Transfer (JWT)", function () {
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"udids_missing"}');
+                expect(res.text).to.equal('{"success":false,"response":"udids_missing"}');
                 done();
             });
     }, 20000);
@@ -281,7 +281,7 @@ describe("Transfer (JWT)", function () {
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
+                expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
     }, 20000);
@@ -293,7 +293,7 @@ describe("Transfer (JWT)", function () {
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
+                expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
     }, 20000);
@@ -306,7 +306,7 @@ describe("Transfer (JWT)", function () {
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"owner_missing"}');
+                expect(res.text).to.equal('{"success":false,"response":"owner_missing"}');
                 done();
             });
     }, 20000);
@@ -319,7 +319,7 @@ describe("Transfer (JWT)", function () {
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"udids_missing"}');
+                expect(res.text).to.equal('{"success":false,"response":"udids_missing"}');
                 done();
             });
     }, 20000);
@@ -374,7 +374,7 @@ describe("Transfer (JWT)", function () {
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"transfer_id_missing"}');
+                expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
     }, 20000);

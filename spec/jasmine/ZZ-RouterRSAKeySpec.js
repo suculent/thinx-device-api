@@ -113,7 +113,7 @@ describe("RSA Keys (JWT)", function () {
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"invalid_query"}');
+                expect(res.text).to.equal('{"success":false,"response":"invalid_query"}');
                 done();
             });
     }, 20000);

@@ -60,7 +60,7 @@ describe("Actionable Notification (JWT)", function () {
                 .end((err, res) => {
                     expect(res.status).to.equal(200);
                     expect(res.text).to.be.a('string');
-                    expect(res.text).to.equal('{"success":false,"status":"missing_udid"}');
+                    expect(res.text).to.equal('{"success":false,"response":"missing_udid"}');
                     done();
                 });
     }, 20000);
@@ -72,7 +72,7 @@ describe("Actionable Notification (JWT)", function () {
                 .send({ udid: undefined, reply: undefined})
                 .end((err, res) => {
                     expect(res.status).to.equal(200);
-                    expect(res.text).to.equal('{"success":false,"status":"missing_udid"}');
+                    expect(res.text).to.equal('{"success":false,"response":"missing_udid"}');
                     done();
                 });
     }, 20000);

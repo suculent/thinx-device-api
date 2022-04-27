@@ -52,7 +52,7 @@ describe("Device API (noauth)", function () {
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                //{"success":false,"status":"missing_mac"}
+                //{"success":false,"response":"missing_mac"}
                 done();
             });
     }, 20000);
@@ -65,7 +65,7 @@ describe("Device API (noauth)", function () {
                 console.log("🚸 [chai] POST /device/firmware OTT request", res.text, res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                //{"success":false,"status":"missing_mac"}
+                //{"success":false,"response":"missing_mac"}
                 done();
             });
     }, 20000);
@@ -228,7 +228,7 @@ describe("Device + API (JWT+Key)", function () {
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                //{"success":false,"status":"missing_mac"}
+                //{"success":false,"response":"missing_mac"}
                 done();
             });
     }, 20000);
@@ -278,7 +278,7 @@ describe("Device + API (JWT+Key)", function () {
                 console.log("🚸 [chai] GET /device/firmware (ak, none)", res.status, res.text);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"OTT_MISSING"}');
+                expect(res.text).to.equal('{"success":false,"response":"OTT_MISSING"}');
                 done();
             });
     }, 20000);

@@ -95,7 +95,7 @@ describe("User Routes V2", function () {
         reset_key = j.response;
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
+        //expect(res.text).to.equal('{"success":false,"response":"password_reset_failed"}'); // somehow not deterministic
         done();
       });
   }, 20000);
@@ -107,7 +107,7 @@ describe("User Routes V2", function () {
         console.log("🚸 [chai] V2 GET /api/v2/password/reset (2) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
+        //expect(res.text).to.equal('{"success":false,"response":"password_reset_failed"}'); // somehow not deterministic
         done();
       });
   }, 20000);
@@ -122,7 +122,7 @@ describe("User Routes V2", function () {
         console.log("🚸 [chai] V2 POST /api/v2/password/set (3) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
+        //expect(res.text).to.equal('{"success":false,"response":"password_reset_failed"}'); // somehow not deterministic
         done();
       });
   }, 20000);
@@ -160,7 +160,7 @@ describe("User Routes V2", function () {
             console.log("🚸 [chai] V2 POST /api/gdpr response:", _res.text, "status", _res.status);
             //expect(_res.status).to.equal(200);
             //expect(_res.text).to.be.a('string');
-            // {"success":false,"status":"invalid_protocol_update_key_missing"} // WTF?
+            // {"success":false,"response":"invalid_protocol_update_key_missing"} // WTF?
 
             return agent
               .post('/api/login')
@@ -232,7 +232,7 @@ describe("User Routes V2", function () {
         console.log("🚸 [chai] DELETE /api/v2/gdpr (jwt, valid) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        // {"success":false,"status":"deletion_not_confirmed"} 
+        // {"success":false,"response":"deletion_not_confirmed"} 
         done();
       });
   }, 20000);
