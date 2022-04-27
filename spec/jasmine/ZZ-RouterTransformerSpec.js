@@ -78,9 +78,9 @@ describe("Transformer (JWT)", function () {
         expect(res.status).to.equal(200);
         let j = JSON.parse(res.text);
         expect(j.success).to.equal(true);
-        expect(j.api_key).to.be.a('string');
-        expect(j.hash).to.be.a('string');
-        created_api_key = j.hash;
+        expect(j.response.api_key).to.be.a('string');
+        expect(j.response.hash).to.be.a('string');
+        created_api_key = j.response.hash;
         done();
       });
   }, 20000);
