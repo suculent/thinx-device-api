@@ -337,7 +337,7 @@ describe("Devices (JWT)", function () {
         mesh_id = r.mesh_id;
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":true,"mesh_ids":{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}}');
+        expect(res.text).to.equal('{"success":true,"response":{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}}');
         done();
       });
   }, 20000);
