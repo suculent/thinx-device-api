@@ -52,7 +52,7 @@ describe("User Routes V2", function () {
       .post('/api/v2/user')
       .send(user_info)
       .end((_err, res) => {
-        // {"success":true,"status":"6975d3c5849fc130e689f2cae0abe51a8fd24f496810bee3c0bcf531dd53be0c"}
+        // {"success":true,"response":"6975d3c5849fc130e689f2cae0abe51a8fd24f496810bee3c0bcf531dd53be0c"}
         console.log("🚸 [chai] IMPORTANT", res.text);
         expect(res.text).to.be.a('string');
         expect(res.status).to.equal(200);
@@ -75,7 +75,7 @@ describe("User Routes V2", function () {
               .end((___err, ___res) => {
                 expect(___res.status).to.equal(200);
                 expect(___res.text).to.be.a('string');
-                expect(___res.text).to.equal('{"success":true,"status":"activation_successful"}');
+                expect(___res.text).to.equal('{"success":true,"response":"activation_successful"}');
                 done();
               });
           });

@@ -253,7 +253,7 @@ describe("Transformer (JWT)", function () {
       .send({ owner: envi.dynamic.owner })
       .end((_err, res) => {
         expect(res.status).to.equal(200);
-        expect(res.text).to.equal('{"success":true,"status":"deleted"}');
+        expect(res.text).to.equal('{"success":true,"response":"deleted"}');
         done();
       });
   }, 20000);

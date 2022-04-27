@@ -148,7 +148,7 @@ module.exports = class THiNX extends EventEmitter {
         let then = new Date();
         console.log(`ℹ️ [info] [core] cached all owners in ${then - now} seconds.`);
         
-        stats.aggregate();
+        if (process.env.ENVIRONMENT !== "test") stats.aggregate();
 
         setInterval(() => {
           stats.aggregate();

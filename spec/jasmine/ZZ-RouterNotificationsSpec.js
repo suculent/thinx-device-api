@@ -85,7 +85,7 @@ describe("Actionable Notification (JWT)", function () {
                 .end((err, res) => {
                     expect(res.status).to.equal(200);
                     expect(res.text).to.be.a('string');
-                    expect(res.text).to.equal('{"success":true,"status":"published"}');
+                    expect(res.text).to.equal('{"success":true,"response":"published"}');
                     done();
                 });
     }, 20000);
