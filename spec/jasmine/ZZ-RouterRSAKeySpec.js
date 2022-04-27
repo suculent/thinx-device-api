@@ -98,7 +98,7 @@ describe("RSA Keys (JWT)", function () {
             .end((err, res) => {
                 console.log("🚸 [chai] GET /api/user/rsakey/list response:", res.text, res.status);
                 let r = JSON.parse(res.text);
-                key_id = r.rsakeys[0].filename;
+                key_id = r.response[0].filename;
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 done();

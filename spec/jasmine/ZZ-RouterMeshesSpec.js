@@ -240,9 +240,9 @@ describe("Meshes (JWT)", function () {
             .set('Authorization', jwt)
             .send({ alias: "mock-mesh-alias", owner_id: envi.dynamic.owner, mesh_id: 'mock-mesh-id' })
             .end((err, res) => {
-                //console.log("🚸 [chai] POST /api/mesh/create (jwt, valid, already exists) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/mesh/create (jwt, valid, already exists) response:", res.text, " status:", res.status);
                 let r = JSON.parse(res.text);
-                mesh_id = r.mesh_ids.mesh_id;
+                mesh_id = r.response.mesh_id;
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('{"success":true,"response":{"mesh_id":"mock-mesh-id","alias":"mock-mesh-alias"}}');
@@ -258,7 +258,7 @@ describe("Meshes (JWT)", function () {
             .send({ alias: "mock-mesh-alias-2", owner_id: envi.dynamic.owner, mesh_id: 'mock-mesh-id-2' })
             .end((err, res) => {
                 let r = JSON.parse(res.text);
-                mesh_id = r.mesh_ids.mesh_id;
+                mesh_id = r.response.mesh_id;
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('{"success":true,"response":{"mesh_id":"mock-mesh-id-2","alias":"mock-mesh-alias-2"}}');
