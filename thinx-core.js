@@ -472,7 +472,7 @@ module.exports = class THiNX extends EventEmitter {
         wss.on("error", function (err) {
           let e = err.toString();
           if (e.indexOf("EADDRINUSE") !== -1) {
-            console.log("[critical] websocket same port init failure (test edge case only; fix carefully)");
+            console.log("☣️ [error] websocket same port init failure (test edge case only; fix carefully)");
           } else {
             console.log("☣️ [error] websocket ", {e});
           }

@@ -178,7 +178,7 @@ describe("User Routes", function () {
       .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('false');
+        expect(res.text).to.equal('{"success":false,"response":"email_not_found"}');
         done();
       });
   }, 20000);
@@ -190,7 +190,9 @@ describe("User Routes", function () {
       .end((_err, res) => {
         console.log("[chai] POST /api/user/password/reset (noauth, email) response:", res.text);
         expect(res.status).to.equal(200);
-        expect(res.text).to.equal('true');
+        let j = JSON.parse(res.text);
+        expect(j.status).to.equal(true);
+        expect(j.response).to.be.a('string'); // reset_key
         done();
       });
   }, 20000);
@@ -603,7 +605,7 @@ describe("User Routes", function () {
       .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/logs/build (jwt) response:", res.text, " status:", res.status);
         let j = JSON.parse(res.text);
-        real_build_id = j.builds[0]._id;
+        real_build_id = j.response[0]._id;
         expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
