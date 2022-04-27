@@ -252,7 +252,7 @@ describe("Builder (JWT)", function () {
                     .end((err, res) => {
                         //console.log("🚸 [chai] response /api/v2/build (JWT, valid) V:", res.text, " status:", res.status);
                         expect(res.status).to.equal(200);
-                        expect(res.text).to.equal('{"status":true,"result":"queued"}');
+                        expect(res.text).to.equal('{"status":true,"response":"queued"}');
                         done();
                     });
             });
