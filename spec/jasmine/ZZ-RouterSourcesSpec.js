@@ -114,7 +114,7 @@ describe("Sources (JWT)", function () {
                 console.log("[chai] GET /api/v2/source", res.text);
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
-                expect(j.response.success).to.equal(true);
+                expect(j.success).to.equal(true);
                 expect(j.response).to.be.an('object');
                 done();
             });
