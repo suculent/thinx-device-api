@@ -82,7 +82,7 @@ describe("RSA Keys (JWT)", function () {
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
-                let k = j.status;
+                let k = j.response;
                 expect(k).to.be.an('object');
                 expect(k.name).to.be.a('number');
                 expect(k.pubkey).to.be.a('string');
