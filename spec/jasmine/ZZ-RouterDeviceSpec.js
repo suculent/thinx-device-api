@@ -320,7 +320,7 @@ describe("Devices (JWT)", function () {
         //console.log("🚸 [chai] POST /api/device/detach  (JWT) 2 response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal(' {"success":true,"response":"detached"}');
+        expect(res.text).to.equal('{"success":true,"response":"detached"}');
         done();
       });
   }, 20000);
