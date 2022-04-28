@@ -27,9 +27,9 @@ describe("Statistics", function () {
     expect(result).to.be.a('string');
   });
 
-  it("(04) should be able to return today results for owner", function (done) {
+  it("(04) should not be able to return today results for owner before aggregation", function (done) {
     s.today(owner, function (success, result) {
-      expect(success).to.equal(true);
+      expect(success).to.equal(true); 
       expect(result).to.be.a('string');
       done();
     });
@@ -53,7 +53,17 @@ describe("Statistics", function () {
 
   it("(07) should be able to return weekly results for owner", function (done) {
     s.week(owner, function (success, result) {
+      expect(success).to.equal(true);
       expect(result).to.be.an('object');
+      done();
+    });
+  }, 10000);
+
+  it("(08) should be able to return today results for owner after aggregation", function (done) {
+    s.today(owner, function (success, result) {
+      console.log("(08)", success, result);
+      expect(success).to.equal(true);
+      expect(result).to.be.a('string');
       done();
     });
   }, 10000);

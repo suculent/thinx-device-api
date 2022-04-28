@@ -50,7 +50,7 @@ describe("User Routes", function () {
       .end((_err, res) => {
         expect(res.status).to.equal(400);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
+        expect(res.text).to.equal('{"success":false,"response":"consent_missing"}');
         done();
       });
   }, 20000);
@@ -62,7 +62,7 @@ describe("User Routes", function () {
       .end((_err, res) => {
         expect(res.status).to.equal(401);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"token_missing"}');
+        expect(res.text).to.equal('{"success":false,"response":"token_missing"}');
         done();
       });
   }, 20000);
@@ -98,7 +98,7 @@ describe("User Routes", function () {
       .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"email_required"}');
+        expect(res.text).to.equal('{"success":false,"response":"email_required"}');
         done();
       });
   }, 20000);
@@ -108,13 +108,14 @@ describe("User Routes", function () {
       .post('/api/user/create')
       .send(user_info)
       .end((_err, res) => {
-        // {"success":true,"status":"6975d3c5849fc130e689f2cae0abe51a8fd24f496810bee3c0bcf531dd53be0c"}
+        // {"success":true,"response":"6975d3c5849fc130e689f2cae0abe51a8fd24f496810bee3c0bcf531dd53be0c"}
+        console.log("[chai] POST /api/user/create (valid body) and activate (set password)", res.text);
         expect(res.text).to.be.a('string');
         expect(res.status).to.equal(200);
         let body = JSON.parse(res.text);
-        dynamic_activation_code = body.status;
-        expect(body.status).to.be.a('string'); // check length
-        expect(body.status.length == 64);
+        dynamic_activation_code = body.response;
+        expect(body.response).to.be.a('string'); // check length
+        expect(body.response.length == 64);
 
         let rurl = '/api/user/activate?owner=' + dynamic_owner_id + '&activation=' + dynamic_activation_code;
         chai.request(thx.app)
@@ -130,7 +131,7 @@ describe("User Routes", function () {
               .end((___err, ___res) => {
                 expect(___res.status).to.equal(200);
                 expect(___res.text).to.be.a('string');
-                expect(___res.text).to.equal('{"success":true,"status":"activation_successful"}');
+                expect(___res.text).to.equal('{"success":true,"response":"activation_successful"}');
                 done();
               });
           });
@@ -143,7 +144,7 @@ describe("User Routes", function () {
       .get('/api/user/activate')
       .end((_err, res) => {
         expect(res.status).to.equal(200);
-        expect(res.text).to.equal('{"success":false,"status":"activation_key_missing"}');
+        expect(res.text).to.equal('{"success":false,"response":"activation_key_missing"}');
         done();
       });
   }, 20000);
@@ -165,7 +166,7 @@ describe("User Routes", function () {
       .end((_err, res) => {
         expect(res.status).to.equal(400);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"consent_missing"}');
+        expect(res.text).to.equal('{"success":false,"response":"consent_missing"}');
         done();
       });
   }, 20000);
@@ -177,7 +178,7 @@ describe("User Routes", function () {
       .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('false');
+        expect(res.text).to.equal('{"success":false,"response":"email_not_found"}');
         done();
       });
   }, 20000);
@@ -189,7 +190,9 @@ describe("User Routes", function () {
       .end((_err, res) => {
         console.log("[chai] POST /api/user/password/reset (noauth, email) response:", res.text);
         expect(res.status).to.equal(200);
-        expect(res.text).to.equal('true');
+        let j = JSON.parse(res.text);
+        expect(j.success).to.equal(true);
+        expect(j.response).to.be.a('string'); // reset_key
         done();
       });
   }, 20000);
@@ -200,7 +203,7 @@ describe("User Routes", function () {
       .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"missing_reset_key"}');
+        expect(res.text).to.equal('{"success":false,"response":"missing_reset_key"}');
         done();
       });
   }, 20000);
@@ -211,7 +214,7 @@ describe("User Routes", function () {
       .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"user_not_found"}'); // because this is nov calid reset_key
+        expect(res.text).to.equal('{"success":false,"response":"user_not_found"}'); // because this is nov calid reset_key
         done();
       });
   }, 20000);
@@ -222,7 +225,7 @@ describe("User Routes", function () {
       .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"user_not_found"}'); // because this is nov calid reset_key generated by posting valid e-mail to password reset
+        expect(res.text).to.equal('{"success":false,"response":"user_not_found"}'); // because this is nov calid reset_key generated by posting valid e-mail to password reset
         done();
       });
   }, 20000);
@@ -246,7 +249,7 @@ describe("User Routes", function () {
       .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"password_mismatch"}');
+        expect(res.text).to.equal('{"success":false,"response":"password_mismatch"}');
         done();
       });
   }, 20000);
@@ -259,7 +262,7 @@ describe("User Routes", function () {
       .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"password_mismatch"}');
+        expect(res.text).to.equal('{"success":false,"response":"password_mismatch"}');
         done();
       });
   }, 20000);
@@ -272,7 +275,7 @@ describe("User Routes", function () {
       .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"password_mismatch"}');
+        expect(res.text).to.equal('{"success":false,"response":"password_mismatch"}');
         done();
       });
   }, 20000);
@@ -328,7 +331,7 @@ describe("User Routes", function () {
             console.log("🚸 [chai] POST /api/gdpr response:", _res.text, "status", _res.status);
             expect(_res.status).to.equal(200);
             expect(_res.text).to.be.a('string');
-            // {"success":false,"status":"invalid_protocol_update_key_missing"} // WTF?
+            // {"success":false,"response":"invalid_protocol_update_key_missing"} // WTF?
 
             agent
               .post('/api/login')
@@ -379,7 +382,7 @@ describe("User Routes", function () {
           .end((_err, _res) => {
             expect(_res.status).to.equal(200);
             expect(_res.text).to.be.a('string');
-            // {"success":false,"status":"invalid_protocol_update_key_missing"} // WTF?
+            // {"success":false,"response":"invalid_protocol_update_key_missing"} // WTF?
 
             agent
               .post('/api/login')
@@ -443,7 +446,7 @@ describe("User Routes", function () {
         console.log("🚸 [chai] DELETE /api/v2/gdpr (jwt, invalid) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"deletion_not_confirmed"}');
+        expect(res.text).to.equal('{"success":false,"response":"deletion_not_confirmed"}');
         done();
       });
   }, 20000);
@@ -602,7 +605,7 @@ describe("User Routes", function () {
       .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/logs/build (jwt) response:", res.text, " status:", res.status);
         let j = JSON.parse(res.text);
-        real_build_id = j.builds[0]._id;
+        real_build_id = j.response[0]._id;
         expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();

@@ -78,9 +78,9 @@ describe("Transformer (JWT)", function () {
         expect(res.status).to.equal(200);
         let j = JSON.parse(res.text);
         expect(j.success).to.equal(true);
-        expect(j.api_key).to.be.a('string');
-        expect(j.hash).to.be.a('string');
-        created_api_key = j.hash;
+        expect(j.response.api_key).to.be.a('string');
+        expect(j.response.hash).to.be.a('string');
+        created_api_key = j.response.hash;
         done();
       });
   }, 20000);
@@ -109,7 +109,7 @@ describe("Transformer (JWT)", function () {
       .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"message":"changes.udid_undefined"}');
+        expect(res.text).to.equal('{"success":false,"response":"changes.udid_undefined"}');
         done();
       });
   }, 20000);
@@ -136,7 +136,7 @@ describe("Transformer (JWT)", function () {
       .set('Authorization', jwt)
       .send({})
       .end((_err, res) => {
-        expect(res.text).to.equal('{"success":false,"status":"udid_not_found"}');
+        expect(res.text).to.equal('{"success":false,"response":"udid_not_found"}');
         expect(res.status).to.equal(200);
         done();
       });
@@ -150,7 +150,7 @@ describe("Transformer (JWT)", function () {
       .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"no_such_device"}');
+        expect(res.text).to.equal('{"success":false,"response":"no_such_device"}');
         done();
       });
   }, 20000);
@@ -204,9 +204,9 @@ describe("Transformer (JWT)", function () {
           */
 
         // skip run until device is available; coverage will grow but it should not fail
-        if (r.devices.length == 0) return done();
+        if (r.response.length == 0) return done();
 
-        let udid = r.devices[0].udid; // or JRS7.udid
+        let udid = r.response[0].udid; // or JRS7.udid
 
         console.log("Running transformer with device", udid);
 
@@ -218,24 +218,7 @@ describe("Transformer (JWT)", function () {
           .set('Authorization', jwt)
           .send({ device_id: udid })
           .end((__err, __res) => {
-            // console.log("🚸 [chai] POST /api/transformer/run (JWT, semi-valid) response:", __res.text, " status:", __res.status);
-            /* Responds:
-            {
-              "success": true,
-              "status": {
-                "registration": {
-                  "success": true,
-                  "status": "OK",
-                  "auto_update": false,
-                  "owner": "bab692f8c9c78cf64f579406bdf6c6cd2c4d00b3c0c8390387d051495dd95247",
-                  "alias": "****-device-5-dynamic",
-                  "mesh_ids": [],
-                  "udid": "4fd4e580-b74d-11ec-9ecb-3f8befeb85e6",
-                  "timestamp": 1649430322
-                }
-              }
-            }
-            */
+            console.log("🚸 [chai] POST /api/transformer/run (JWT, semi-valid) response:", __res.text, " status:", __res.status);
             let j = JSON.parse(__res.text);
             expect(j.success).to.equal(true);
             expect(__res.status).to.equal(200);
@@ -253,7 +236,7 @@ describe("Transformer (JWT)", function () {
       .send({ owner: envi.dynamic.owner })
       .end((_err, res) => {
         expect(res.status).to.equal(200);
-        expect(res.text).to.equal('{"success":true,"status":"deleted"}');
+        expect(res.text).to.equal('{"success":true,"response":"deleted"}');
         done();
       });
   }, 20000);

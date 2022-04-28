@@ -111,7 +111,7 @@ describe("ENV Vars (JWT)", function () {
       .end((err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":true,"status":"env-name"}');
+        expect(res.text).to.equal('{"success":true,"response":"env-name"}');
         done();
       });
   }, 20000);
@@ -124,7 +124,7 @@ describe("ENV Vars (JWT)", function () {
       .end((err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"no_names_given"}');
+        expect(res.text).to.equal('{"success":false,"response":"no_names_given"}');
         done();
       });
   }, 20000);
@@ -137,7 +137,7 @@ describe("ENV Vars (JWT)", function () {
       .end((err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"missing_key"}');
+        expect(res.text).to.equal('{"success":false,"response":"missing_key"}');
         done();
       });
   }, 20000);
@@ -150,7 +150,7 @@ describe("ENV Vars (JWT)", function () {
       .end((err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"missing_key"}');
+        expect(res.text).to.equal('{"success":false,"response":"missing_key"}');
         done();
       });
   }, 20000);
@@ -163,7 +163,7 @@ describe("ENV Vars (JWT)", function () {
       .end((err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"no_names_given"}');
+        expect(res.text).to.equal('{"success":false,"response":"no_names_given"}');
         done();
       });
   }, 20000);

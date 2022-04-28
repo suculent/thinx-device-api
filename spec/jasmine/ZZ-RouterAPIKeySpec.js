@@ -104,10 +104,10 @@ describe("API Keys (JWT)", function () {
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
-                expect(j.api_key).to.be.a('string');
-                expect(j.hash).to.be.a('string');
-                created_api_key = j.hash;
-                console.log("[spec] saving apikey (1)", j.api_key);
+                expect(j.response.api_key).to.be.a('string');
+                expect(j.response.hash).to.be.a('string');
+                created_api_key = j.response.hash;
+                console.log("[spec] saving apikey (1)", j.response.api_key);
                 done();
             });
     }, 20000);
@@ -123,8 +123,8 @@ describe("API Keys (JWT)", function () {
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
-                expect(j.api_key).to.be.a('string');
-                expect(j.hash).to.be.a('string');
+                expect(j.response.api_key).to.be.a('string');
+                expect(j.response.hash).to.be.a('string');
                 console.log("[spec] saving apikey (2)", j.hash);
                 created_api_key_2 = j.hash;
                 done();
@@ -142,8 +142,8 @@ describe("API Keys (JWT)", function () {
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
-                expect(j.api_key).to.be.a('string');
-                expect(j.hash).to.be.a('string');
+                expect(j.response.api_key).to.be.a('string');
+                expect(j.response.hash).to.be.a('string');
                 done();
             });
     }, 20000);
@@ -161,7 +161,7 @@ describe("API Keys (JWT)", function () {
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
-                expect(j.revoked).to.be.an('array');
+                expect(j.response).to.be.an('array');
                 console.log(`🚸 [chai] API Keys in revocation:", ${JSON.stringify(j)} from res ${res.text}`);
                 //expect(aks.length >= 1);
                 done();
@@ -182,8 +182,8 @@ describe("API Keys (JWT)", function () {
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
-                expect(j.revoked).to.be.an('array');
-                expect(j.revoked.length).to.equal(0);
+                expect(j.response).to.be.an('array');
+                expect(j.response.length).to.equal(0);
                 done();
             });
     }, 20000);
@@ -202,7 +202,7 @@ describe("API Keys (JWT)", function () {
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
-                expect(j.revoked).to.be.an('array');
+                expect(j.response).to.be.an('array');
                 // TODO: fixme: does not delete anything... expect(j.revoked.length).to.equal(1);
                 done();
             });
@@ -217,8 +217,8 @@ describe("API Keys (JWT)", function () {
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
-                expect(j.api_keys).to.be.an('array');
-                expect(j.api_keys.length >= 1);
+                expect(j.response).to.be.an('array');
+                expect(j.response.length >= 1);
                 done();
             });
     }, 20000);
@@ -236,8 +236,8 @@ describe("API Keys (JWT)", function () {
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
-                expect(j.api_key).to.be.a('string');
-                expect(j.hash).to.be.a('string');
+                expect(j.response.api_key).to.be.a('string');
+                expect(j.response.hash).to.be.a('string');
                 done();
             });
     }, 20000);
@@ -250,8 +250,8 @@ describe("API Keys (JWT)", function () {
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
-                expect(j.api_keys).to.be.an('array');
-                expect(j.api_keys.length >= 1);
+                expect(j.response).to.be.an('array');
+                expect(j.response.length >= 1);
                 done();
             });
     }, 20000);
@@ -268,7 +268,7 @@ describe("API Keys (JWT)", function () {
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
-                expect(j.revoked).to.be.an('array');
+                expect(j.response).to.be.an('array');
                 console.log(`🚸 [chai] API Keys in V2 revocation:", ${JSON.stringify(j)} from res ${res.text}`);
                 //expect(aks.length >= 1);
                 done();

@@ -63,8 +63,8 @@ module.exports = class THiNX extends EventEmitter {
     const helmet = require('helmet');
     app.use(helmet.frameguard());
 
-    const morgan = require('morgan');
-    app.use(morgan('tiny'));
+    //const morgan = require('morgan');
+    //app.use(morgan('tiny'));
 
     const session = require("express-session");
 
@@ -147,6 +147,9 @@ module.exports = class THiNX extends EventEmitter {
         stats.get_all_owners();
         let then = new Date();
         console.log(`ℹ️ [info] [core] cached all owners in ${then - now} seconds.`);
+        
+        if (process.env.ENVIRONMENT !== "test") stats.aggregate();
+
         setInterval(() => {
           stats.aggregate();
           console.log("✅ [info] Aggregation jobs completed.");
@@ -468,7 +471,7 @@ module.exports = class THiNX extends EventEmitter {
         wss.on("error", function (err) {
           let e = err.toString();
           if (e.indexOf("EADDRINUSE") !== -1) {
-            console.log("[critical] websocket same port init failure (test edge case only; fix carefully)");
+            console.log("☣️ [error] websocket same port init failure (test edge case only; fix carefully)");
           } else {
             console.log("☣️ [error] websocket ", {e});
           }

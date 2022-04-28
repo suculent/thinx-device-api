@@ -139,7 +139,7 @@ describe("Util", function () {
     });
 
     it("should provide convenience method for undefined objects", function() {
-        let i = undefined;
+        let i;
         expect(Util.isDefined(i)).to.equal(false);
         let j = null;
         expect(Util.isDefined(j)).to.equal(false);
