@@ -72,7 +72,7 @@ jobs:
           registry: registry.thinx.cloud:5000
           tag: 'vue'
 
-  build-console-legacy:
+  build-console-classic:
     executor: docker/docker
     steps:
       - setup_remote_docker:
@@ -392,6 +392,16 @@ workflows:
                 - main
                 - master
       
+      - build-console-classic:
+          context:
+            - thinx-docker-repo
+            - console
+          filters:
+            branches:
+              only:
+                - thinx-staging
+                - master
+
       - build-console-cloud:
           context:
             - thinx-docker-repo
