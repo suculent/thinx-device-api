@@ -235,7 +235,7 @@ describe("Devices (JWT)", function () {
       .end((err, res) => {
         console.log("🚸 [chai] GET /api/user/devices (JWT) response:", res.text, " status:", res.status);
         let j = JSON.parse(res.text);
-        dynamic_devices = j.devices;
+        dynamic_devices = j.response;
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         done();
