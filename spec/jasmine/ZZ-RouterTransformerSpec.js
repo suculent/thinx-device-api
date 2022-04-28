@@ -218,24 +218,7 @@ describe("Transformer (JWT)", function () {
           .set('Authorization', jwt)
           .send({ device_id: udid })
           .end((__err, __res) => {
-            // console.log("🚸 [chai] POST /api/transformer/run (JWT, semi-valid) response:", __res.text, " status:", __res.status);
-            /* Responds:
-            {
-              "success": true,
-              "status": {
-                "registration": {
-                  "success": true,
-                  "status": "OK",
-                  "auto_update": false,
-                  "owner": "bab692f8c9c78cf64f579406bdf6c6cd2c4d00b3c0c8390387d051495dd95247",
-                  "alias": "****-device-5-dynamic",
-                  "mesh_ids": [],
-                  "udid": "4fd4e580-b74d-11ec-9ecb-3f8befeb85e6",
-                  "timestamp": 1649430322
-                }
-              }
-            }
-            */
+            console.log("🚸 [chai] POST /api/transformer/run (JWT, semi-valid) response:", __res.text, " status:", __res.status);
             let j = JSON.parse(__res.text);
             expect(j.success).to.equal(true);
             expect(__res.status).to.equal(200);
