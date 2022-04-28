@@ -440,7 +440,7 @@ module.exports = class THiNX extends EventEmitter {
         });
 
         function heartbeat() {
-          console.log("[Socket] heartbeat."); // better store this.lastAlive = new Date(); in redis
+          // console.log("[Socket] heartbeat."); // better store this.lastAlive = new Date(); in InfluxDB
         }
 
         setInterval(function ping() {
