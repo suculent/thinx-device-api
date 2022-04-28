@@ -204,9 +204,9 @@ describe("Transformer (JWT)", function () {
           */
 
         // skip run until device is available; coverage will grow but it should not fail
-        if (r.devices.length == 0) return done();
+        if (r.response.length == 0) return done();
 
-        let udid = r.devices[0].udid; // or JRS7.udid
+        let udid = r.response[0].udid; // or JRS7.udid
 
         console.log("Running transformer with device", udid);
 
