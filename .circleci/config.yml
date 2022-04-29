@@ -162,9 +162,11 @@ jobs:
         environment:
           COMPOSE_VERSION: '1.29.2'
         command: |
-          curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o ~/docker-compose
-          chmod +x ~/docker-compose
-          mv ~/docker-compose /usr/local/bin/docker-compose
+          DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+          mkdir -p $DOCKER_CONFIG/cli-plugins
+          curl -SL https://github.com/docker/compose/releases/download/v2.4.1/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose
+          chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+          docker compose version
 
     - setup_remote_docker:
         docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
@@ -267,9 +269,9 @@ jobs:
         name: Starting Influx
         command: |
           PUB=$(docker network inspect traefik-public)
-          if [ $PUB == '[]' ]; then docker network create traefik-public; fi
+          if [ "$PUB" == '[]' ]; then docker network create traefik-public; fi
           NAT=$(docker network inspect nat)
-          if [ $NAT == '[]' ]; then docker network create nat ; fi
+          if [ "$NAT" == '[]' ]; then docker network create nat ; fi
           docker-compose up -d influxdb
           docker-compose logs --timestamp influxdb
 
