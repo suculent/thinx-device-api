@@ -148,7 +148,7 @@ module.exports = class THiNX extends EventEmitter {
         let then = new Date();
         console.log(`ℹ️ [info] [core] cached all owners in ${then - now} seconds.`);
         
-        if (process.env.ENVIRONMENT !== "test") stats.aggregate();
+        //if (process.env.ENVIRONMENT !== "test") stats.aggregate();
 
         setInterval(() => {
           stats.aggregate();
@@ -440,7 +440,7 @@ module.exports = class THiNX extends EventEmitter {
         });
 
         function heartbeat() {
-          console.log("[Socket] heartbeat."); // better store this.lastAlive = new Date(); in redis
+          // console.log("[Socket] heartbeat."); // better store this.lastAlive = new Date(); in InfluxDB
         }
 
         setInterval(function ping() {
