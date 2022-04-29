@@ -36,13 +36,13 @@ if [[ ! -d "${WORKDIR}" ]]; then
 	exit 1
 fi
 
-if [[ ! -f $JSON ]]; then
+if [[ ! -f "$JSON" ]]; then
 	echo "--json= must be set"
 	exit 1
 fi
 
 # cleanup mess
-if [[ -f ${WORKDIR}/.development ]]; then
+if [[ -f "${WORKDIR}/.development" ]]; then
   rm -rf ${WORKDIR}/.development
 fi
 
