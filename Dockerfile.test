@@ -1,4 +1,4 @@
-FROM thinxcloud/base:1.28
+FROM thinxcloud/base:alpine
 
 LABEL maintainer="Matej Sychra <suculent@me.com>"
 LABEL name="THiNX API" version="1.7.1726"
@@ -77,11 +77,7 @@ ENV CIRCLE_NODE_INDEX=${CIRCLE_NODE_INDEX}
 WORKDIR /opt/thinx/thinx-device-api
 
 # Install test dependencies
-RUN apt-get update -qq && \
-    apt-get install -qq -y --fix-missing --no-install-recommends \
-    p7zip-full \
-    default-jre-headless \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add openjdk8-jre p7zip
 
 # Install app dependencies
 COPY package.json ./
