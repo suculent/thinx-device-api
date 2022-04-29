@@ -84,10 +84,6 @@ EXPOSE 9002
 # Copy app source code
 COPY . .
 
-RUN apt-get remove -y \
-    && apt-get autoremove -y \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
 # TODO: Implement Snyk Container Scanning here in addition to DockerHub manual scans...
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
