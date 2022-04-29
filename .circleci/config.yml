@@ -113,6 +113,7 @@ jobs:
     steps:
       - setup_remote_docker:
           docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
+          version: 20.10.14
       - checkout
       - docker/check
       - docker/build:
