@@ -185,7 +185,7 @@ jobs:
           git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
           cd spec/test_repositories
           pwd
-          bash ./get-tests.sh
+          sh ./get-tests.sh
 
     - run:
         name: Create Circle CI Artifacts Folders
