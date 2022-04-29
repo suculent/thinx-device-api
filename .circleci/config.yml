@@ -272,48 +272,48 @@ jobs:
           if [ "$PUB" == '[]' ]; then docker network create traefik-public; fi
           NAT=$(docker network inspect nat)
           if [ "$NAT" == '[]' ]; then docker network create nat ; fi
-          docker-compose up -d influxdb
-          docker-compose logs --timestamp influxdb
+          docker compose up -d influxdb
+          docker compose logs --timestamp influxdb
 
     - run:
         name: Starting Redis
         command: |
-          docker-compose up -d --build thinx-redis
-          docker-compose logs --timestamp thinx-redis
+          docker compose up -d --build thinx-redis
+          docker compose logs --timestamp thinx-redis
 
     - run:
         name: Starting Mosquitto
         command: |
           docker login --username $DOCKER_LOGIN --password $DOCKER_PASSWORD https://registry.thinx.cloud:5000
-          docker-compose up -d --build mosquitto
-          docker-compose logs --timestamp mosquitto
+          docker compose up -d --build mosquitto
+          docker compose logs --timestamp mosquitto
 
     - run:
         name: Starting Transformer
         command: |
-          docker-compose up -d --build transformer
-          docker-compose logs --timestamp transformer
+          docker compose up -d --build transformer
+          docker compose logs --timestamp transformer
 
     - run:
         name: Starting Worker
         command: |
-          docker-compose up -d worker
-          docker-compose logs --timestamp worker
+          docker compose up -d worker
+          docker compose logs --timestamp worker
 
     - run:
         name: Starting CouchDB
         command: |
           export ENVIRONMENT=test
           chmod -R 666 ./services/couchdb/*
-          docker-compose up -d --build couchdb
-          docker-compose logs --timestamp couchdb
+          docker compose up -d --build couchdb
+          docker compose logs --timestamp couchdb
 
     - run:
         name: Starting API Test
         command: |
           export ENVIRONMENT=test
           docker network create nat
-          docker-compose up --build api | tee -ipa ./test.log
+          docker compose up --build api | tee -ipa ./test.log
           if [ ! $(cat ./test.log | grep "specs, 0 failures") ]; then 
             echo "» TEST failed. Should not deploy this commit."
             cat ./test.log | grep "Failures:"
@@ -324,22 +324,22 @@ jobs:
     - run:
         name: Allow inspecting MQTT logs
         command: |
-            docker-compose logs --timestamp mosquitto
+            docker compose logs --timestamp mosquitto
 
     - run:
         name: Allow inspecting CouchDB logs
         command: |
-            docker-compose logs --timestamp couchdb
+            docker compose logs --timestamp couchdb
 
     - run:
         name: Allow inspecting Transformer logs
         command: |
-            docker-compose logs --timestamp transformer
+            docker compose logs --timestamp transformer
 
     - run:
         name: Allow inspecting Worker logs logs
         command: |
-            docker-compose logs --timestamp worker
+            docker compose logs --timestamp worker
 
     - run:
         name: Check running Docker containers
@@ -347,7 +347,7 @@ jobs:
             docker ps
             docker network ls
             docker network inspect bridge
-            docker-compose stop
+            docker compose stop
 
     - store_test_results:
         name: Collect test data

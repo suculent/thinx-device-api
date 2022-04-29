@@ -76,9 +76,6 @@ ENV CIRCLE_NODE_INDEX=${CIRCLE_NODE_INDEX}
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
 
-# Install missing dependencies (move this to base image)
-RUN apk add openssh
-
 # Install test dependencies
 RUN apk add openjdk8-jre p7zip
 
