@@ -312,8 +312,7 @@ jobs:
         name: Starting API Test
         command: |
           export ENVIRONMENT=test
-          docker network create nat
-          docker compose up --build api | tee -ipa ./test.log
+          docker compose up --build api | tee -ia ./test.log
           if [ ! $(cat ./test.log | grep "specs, 0 failures") ]; then 
             echo "» TEST failed. Should not deploy this commit."
             cat ./test.log | grep "Failures:"
