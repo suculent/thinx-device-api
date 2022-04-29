@@ -1,9 +1,5 @@
 #!/bin/sh
 
-#
-# Section: Docker-in-Docker
-#
-
 # +e = prevents exit immediately if a command exits with a non-zero status (like StrictHostKeyChecking without a key...).
 
 set +e
@@ -51,10 +47,6 @@ fi
 
 set -e
 
-# workaround for log aggregator until solved using event database
-mkdir -p /opt/thinx/.pm2/logs/
-touch /opt/thinx/.pm2/logs/index-out-1.log
-
 if [[ ${ENVIRONMENT} == "test" ]]; then
   echo "[thinx-entrypoint] Running in TEST MODE!"
   curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
@@ -88,5 +80,5 @@ else
   echo "[thinx-entrypoint] Starting in production mode..."
   # tee is used to split pipe with application logs back to file which
   # is observed by the app. this way the app can map own incidents in log-flow actively
-  node thinx.js | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
+  node thinx.js
 fi
