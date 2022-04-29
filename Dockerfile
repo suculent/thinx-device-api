@@ -1,4 +1,4 @@
-FROM thinxcloud/base:1.28
+FROM thinxcloud/base:alpine
 
 LABEL maintainer="Matej Sychra <suculent@me.com>"
 LABEL name="THiNX API" version="1.7.1726"
