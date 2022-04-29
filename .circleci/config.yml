@@ -403,7 +403,6 @@ workflows:
           filters:
             branches:
               only:
-                - thinx-staging
                 - master
 
       - build-console-cloud:
@@ -414,8 +413,6 @@ workflows:
             branches:
               only:
                 - thinx-console
-                - thinx-staging
-                - thinx-staging-fixes
                 - master
 
       - build-base:
@@ -437,5 +434,4 @@ workflows:
             branches:
               only:
                 - thinx-staging
-                - thinx-staging-fixes
                 - master
