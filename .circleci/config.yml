@@ -139,7 +139,7 @@ jobs:
   test:
 
     docker:
-      - image: thinxcloud/base:latest
+      - image: thinxcloud/base:alpine
         auth:
           username: $DOCKER_USERNAME  # from thinx-docker-repo, docker.io
           password: $DOCKER_PUBLIC_PASSWORD  # or project environment variable reference
