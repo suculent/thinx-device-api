@@ -80,5 +80,5 @@ else
   echo "[thinx-entrypoint] Starting in production mode..."
   # tee is used to split pipe with application logs back to file which
   # is observed by the app. this way the app can map own incidents in log-flow actively
-  node thinx.js
+  node --trace-warnings thinx.js
 fi
