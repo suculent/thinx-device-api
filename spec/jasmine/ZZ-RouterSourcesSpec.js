@@ -138,6 +138,7 @@ describe("Sources (JWT)", function () {
             .set('Authorization', jwt)
             .send(mock_source)
             .end((err, res) => {
+                console.log("[chai] POST /api/user/source (semi-valid, does not fetch) response:", res.text);
                 expect(res.text).to.be.a('string');
                 let r = JSON.parse(res.text);
                 expect(res.status).to.equal(200);
@@ -152,6 +153,7 @@ describe("Sources (JWT)", function () {
             .set('Authorization', jwt)
             .send(mock_source)
             .end((err, res) => {
+                console.log("[chai] PUT /api/v2/source (semi-valid, does not fetch) response:", res.text);
                 expect(res.text).to.be.a('string');
                 let r = JSON.parse(res.text);
                 expect(res.status).to.equal(200);

@@ -330,10 +330,9 @@ describe("Transfer (JWT)", function () {
             .set('Authorization', jwt)
             .send({ udids: [envi.dynamic.udid], transfer_id: transfer_id, owner: envi.dynamic.owner }) // will probably need real device using GET /api/device
             .end((_err, res) => {
-                console.log(`🚸 [chai] POST /api/v2/transfer/accept III response: ${res.text}`);
+                //console.log(`🚸 [chai] POST /api/v2/transfer/accept III response: ${res.text}`); // returns HTML
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                // returns HTML
                 done();
             });
     }, 20000);

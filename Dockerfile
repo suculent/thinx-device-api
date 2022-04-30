@@ -1,4 +1,4 @@
-FROM thinxcloud/base:1.28
+FROM thinxcloud/base:alpine
 
 LABEL maintainer="Matej Sychra <suculent@me.com>"
 LABEL name="THiNX API" version="1.7.1726"
@@ -83,10 +83,6 @@ EXPOSE 9002
 
 # Copy app source code
 COPY . .
-
-RUN apt-get remove -y \
-    && apt-get autoremove -y \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # TODO: Implement Snyk Container Scanning here in addition to DockerHub manual scans...
 

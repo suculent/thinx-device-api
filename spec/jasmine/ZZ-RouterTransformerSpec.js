@@ -168,7 +168,7 @@ describe("Transformer (JWT)", function () {
 
         /* {
             "success": true,
-            "devices": [
+            "response": [
               {
                 "alias": "****-device-5-dynamic",
                 "auto_update": false,
