@@ -303,7 +303,7 @@ jobs:
     - run:
         name: Starting Worker
         command: |
-          docker compose up -d worker
+          docker compose up -d --build worker
           docker compose logs worker
 
     - run:
