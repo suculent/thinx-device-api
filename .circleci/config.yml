@@ -342,7 +342,7 @@ jobs:
             docker compose logs transformer
 
     - run:
-        name: Allow inspecting Worker logs logs
+        name: Allow inspecting Worker logs
         command: |
             docker compose logs worker
 
