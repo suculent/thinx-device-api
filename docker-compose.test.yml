@@ -78,7 +78,6 @@ services:
     image: thinxcloud/worker:latest
     restart: unless-stopped
     environment:
-      - "SQREEN_TOKEN=${SQREEN_TOKEN}"
       - "ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}"
       - "ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}"
       - "THINX_SERVER=${THINX_SERVER}"
