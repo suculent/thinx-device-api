@@ -140,11 +140,11 @@ jobs:
   
   test:
 
-    docker:
-      - image: thinxcloud/base:alpine
-        auth:
-          username: $DOCKER_USERNAME  # from thinx-docker-repo, docker.io
-          password: $DOCKER_PUBLIC_PASSWORD  # or project environment variable reference
+    machine:
+      image: ubuntu-2004:current # thinxcloud/base:alpine
+#        auth:
+#          username: $DOCKER_USERNAME  # from thinx-docker-repo, docker.io
+#          password: $DOCKER_PUBLIC_PASSWORD  # or project environment variable reference
     
     # because the tests do not consume much of RAM or CPU, this probably won't cause any more slowdown
     resource_class: small
