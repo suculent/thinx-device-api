@@ -70,9 +70,8 @@ WORKDIR /opt/thinx/thinx-device-api
 # Install app dependencies
 COPY package.json ./
 
-RUN npm install -g npm@8.6.0
-
-RUN npm install --unsafe-perm --only-prod .
+RUN npm install -g npm@8.6.0 \
+ && npm install --unsafe-perm --only-prod .
 
 # THiNX Web & Device API (HTTP)
 EXPOSE 7442
