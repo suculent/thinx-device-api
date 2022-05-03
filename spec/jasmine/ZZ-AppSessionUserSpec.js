@@ -191,6 +191,7 @@ describe("User Routes", function () {
         console.log("[chai] POST /api/user/password/reset (noauth, email) response:", res.text);
         expect(res.status).to.equal(200);
         let j = JSON.parse(res.text);
+        reset_key = j.response;
         expect(j.success).to.equal(true);
         expect(j.response).to.be.a('string'); // reset_key
         done();
