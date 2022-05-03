@@ -116,6 +116,10 @@ jobs:
           docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
           version: 20.10.12
       - checkout
+      - run:
+          name: Clean package-lock
+          command: |
+            rm -rf ./package-lock.json
       - docker/check
       - docker/build:
           image: thinxcloud/api
@@ -190,6 +194,7 @@ jobs:
     - run:
         name: Fetch all submodules and tests
         command: |
+          rm -rf ./package-lock.json
           git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
           cd spec/test_repositories
           pwd
