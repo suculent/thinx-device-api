@@ -367,6 +367,20 @@ jobs:
         path: ./coverage
         destination: jest-coverage
 
+  sysdig:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
+          version: 20.10.12
+      - checkout
+      - docker/check
+      - run:
+          name: Install Sysdig Scanner
+          command: |
+            curl -LO "https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/$(curl -L -s https://download.sysdig.com/scanning/sysdig-cli-scanner/latest_version.txt)/linux/amd64/sysdig-cli-scanner"
+            chmod +x ./sysdig-cli-scanner
+            SECURE_API_TOKEN=${SECURE_API_TOKEN} ./sysdig-cli-scanner --apiurl https://eu1.app.sysdig.com docker://thinxcloud/console --policy DefaultPolicy
 #
 # WORKFLOWS
 #
@@ -380,6 +394,19 @@ workflows:
   main:
 
     jobs:
+
+      - sysdig:
+          context:
+              - dockerhub
+              - thinx-docker-repo
+              - thinx-test
+              - sysdig
+          #requires:
+          #  - build-base
+          filters:
+            branches:
+              only:
+                - thinx-class
 
       - test:
           context:
