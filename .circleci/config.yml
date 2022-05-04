@@ -406,7 +406,7 @@ workflows:
           filters:
             branches:
               only:
-                - thinx-class
+                - sysdig
 
       - test:
           context:
