@@ -122,6 +122,7 @@ describe("User Routes", function () {
           .get(rurl)
           .end((__err, __res) => {
             expect(__res.status).to.equal(200);
+            console.log("[chai] GET /api/user/activate?owner= response:", __res.text);
             expect(__res.text).to.be.a('string'); // <html>
             expect(__res).to.be.html;
 
@@ -129,6 +130,7 @@ describe("User Routes", function () {
               .post('/api/user/password/set')
               .send({ password: envi.dynamic.username, rpassword: envi.dynamic.username, activation: dynamic_activation_code })
               .end((___err, ___res) => {
+                console.log("[chai] POST /api/user/password/set response:", ___res.text);
                 expect(___res.status).to.equal(200);
                 expect(___res.text).to.be.a('string');
                 expect(___res.text).to.equal('{"success":true,"response":"activation_successful"}');
@@ -236,7 +238,8 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .get('/api/user/password/reset?reset_key=' + reset_key + '&owner=' + envi.dynamic.owner)
       .end((_err, res) => {
-        expect(res.status).to.equal(200);
+        console.log("[chai] GET /api/user/password/reset (noauth, invalid) 3", {res});
+        expect(res.status).to.equal(404);
         expect(res.text).to.be.a('string');
         //expect(res.text).to.equal(''); // this is a password set form
         done();
