@@ -80,6 +80,9 @@ describe("Builder", function () {
       function (success, message) {
         console.log("[spec] build dry", { success }, { message });
         expect(message.build_id).to.exist;
+
+        // TODO: loop and wait until build completes, check using build log...
+
         done();
       }, // callback
       queue.nextAvailableWorker()
@@ -144,7 +147,7 @@ describe("Builder", function () {
       udid: TEST_DEVICE_5.udid // expected to exist – may need to fetch details
     };
 
-    let transmit_key = "mock-transmit-key";
+    let transmit_key = "";
     builder.run_build(build_request, [] /* notifiers */, (success, result) => {
       expect(success).to.equal(true);
 
