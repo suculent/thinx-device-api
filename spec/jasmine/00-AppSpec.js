@@ -145,6 +145,7 @@ describe("AppSpec Session Management", function () {
     chai.request(thx.app)
       .get('/api/logout')
       .end((err, res) => {
+        console.log("GET /api/logout (without session)", err, res);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string'); // html...
         done();

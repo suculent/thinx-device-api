@@ -147,7 +147,7 @@ jobs:
           password: $DOCKER_PUBLIC_PASSWORD  # or project environment variable reference
     
     # because the tests do not consume much of RAM or CPU, this probably won't cause any more slowdown
-    resource_class: small
+    resource_class: medium
 
     working_directory: ~/suculent/thinx-device-api
 
