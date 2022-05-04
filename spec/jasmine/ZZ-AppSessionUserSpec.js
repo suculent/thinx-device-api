@@ -24,9 +24,9 @@ let thx;
 let agent;
 let jwt = null;
 
-let reset_key = null;
-
 describe("User Routes", function () {
+
+  let reset_key = null;
 
   beforeAll((done) => {
     thx = new THiNX();
@@ -191,6 +191,8 @@ describe("User Routes", function () {
         console.log("[chai] POST /api/user/password/reset (noauth, email) response:", res.text);
         expect(res.status).to.equal(200);
         let j = JSON.parse(res.text);
+        reset_key = j.response;
+        expect(reset_key).to.be.a('string');
         expect(j.success).to.equal(true);
         expect(j.response).to.be.a('string'); // reset_key
         done();
