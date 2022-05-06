@@ -175,7 +175,7 @@ describe("Meshes (JWT)", function () {
                 console.log("🚸 [chai] GET /api/mesh/list (jwt, valid) response:", res.text); // owner invalid
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
-                //expect(res.text).to.equal('{"success":true,"mesh_ids":[{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}]}');
+                //expect(res.text).to.equal('{"success":true,"response":[{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}]}');
                 done();
             });
     }, 20000);
@@ -186,7 +186,7 @@ describe("Meshes (JWT)", function () {
             .set('Authorization', jwt)
             .end((err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":true,"mesh_ids":[{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}]}');
+                expect(res.text).to.equal('{"success":true,"response":[{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}]}');
                 done();
             });
     }, 20000);
@@ -200,7 +200,7 @@ describe("Meshes (JWT)", function () {
                 let r = JSON.parse(res.text);
                 mesh_id = r.mesh_id;
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"status":"mesh_id_missing"}');
+                expect(res.text).to.equal('{"success":false,"response":"mesh_id_missing"}');
                 done();
             });
     }, 20000);
@@ -213,7 +213,7 @@ describe("Meshes (JWT)", function () {
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"mesh_id_missing"}');
+                expect(res.text).to.equal('{"success":false,"response":"mesh_id_missing"}');
                 done();
             });
     }, 20000);
@@ -229,7 +229,7 @@ describe("Meshes (JWT)", function () {
                 //expect(r.mesh_id).to.exist;
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":true,"mesh_ids":{"mesh_id":"mock-mesh-id","alias":"mock-mesh-alias"}}');
+                expect(res.text).to.equal('{"success":true,"response":{"mesh_id":"mock-mesh-id","alias":"mock-mesh-alias"}}');
                 done();
             });
     }, 20000);
@@ -240,12 +240,12 @@ describe("Meshes (JWT)", function () {
             .set('Authorization', jwt)
             .send({ alias: "mock-mesh-alias", owner_id: envi.dynamic.owner, mesh_id: 'mock-mesh-id' })
             .end((err, res) => {
-                //console.log("🚸 [chai] POST /api/mesh/create (jwt, valid, already exists) response:", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/mesh/create (jwt, valid, already exists) response:", res.text, " status:", res.status);
                 let r = JSON.parse(res.text);
-                mesh_id = r.mesh_ids.mesh_id;
+                mesh_id = r.response.mesh_id;
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":true,"mesh_ids":{"mesh_id":"mock-mesh-id","alias":"mock-mesh-alias"}}');                
+                expect(res.text).to.equal('{"success":true,"response":{"mesh_id":"mock-mesh-id","alias":"mock-mesh-alias"}}');
                 done();
             });
     }, 20000);
@@ -258,10 +258,10 @@ describe("Meshes (JWT)", function () {
             .send({ alias: "mock-mesh-alias-2", owner_id: envi.dynamic.owner, mesh_id: 'mock-mesh-id-2' })
             .end((err, res) => {
                 let r = JSON.parse(res.text);
-                mesh_id = r.mesh_ids.mesh_id;
+                mesh_id = r.response.mesh_id;
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":true,"mesh_ids":{"mesh_id":"mock-mesh-id-2","alias":"mock-mesh-alias-2"}}');
+                expect(res.text).to.equal('{"success":true,"response":{"mesh_id":"mock-mesh-id-2","alias":"mock-mesh-alias-2"}}');
                 done();
             });
     }, 20000);
@@ -286,7 +286,7 @@ describe("Meshes (JWT)", function () {
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/mesh/delete (jwt, semi-valid) response:", res.status, res.text);
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal('{"success":false,"status":"mesh_ids_missing"}');
+                expect(res.text).to.equal('{"success":false,"response":"mesh_ids_missing"}');
                 done();
             });
     }, 20000);
@@ -303,7 +303,7 @@ describe("Meshes (JWT)", function () {
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/mesh/delete (jwt, invalid) response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
-                // {"success":false,"status":"Parameter owner_id missing."}
+                // {"success":false,"response":"Parameter owner_id missing."}
                 done();
             });
     }, 20000);
@@ -322,7 +322,7 @@ describe("Meshes (JWT)", function () {
                 console.log("🚸 [chai] POST /api/mesh/delete (jwt, already deleted) response:", res.text, " status:", res.status, "request:", ro);
                 expect(res.status).to.equal(200);
                 //expect(res.text).to.equal();
-                //{"success":false,"status":"Parameter owner_id missing."}
+                //{"success":false,"response":"Parameter owner_id missing."}
                 done();
             });
     }, 20000);
@@ -373,10 +373,10 @@ describe("Meshes (JWT)", function () {
             .end((err, res) => {
                 console.log("🚸 [chai] PUT /api/v2/mesh response:", res.status, res.text);
                 let r = JSON.parse(res.text);
-                mesh_id = r.mesh_ids.mesh_id;
+                mesh_id = r.response.mesh_id;
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                //expect(res.text).to.equal('{"success":true,"mesh_ids":{"mesh_id":"mock-mesh-id-2","alias":"mock-mesh-alias-2"}}');
+                //expect(res.text).to.equal('{"success":true,"response":{"mesh_id":"mock-mesh-id-2","alias":"mock-mesh-alias-2"}}');
                 done();
             });
     }, 20000);
@@ -390,7 +390,7 @@ describe("Meshes (JWT)", function () {
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
-                //expect(res.text).to.equal('{"success":true,"mesh_ids":[{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}]}');
+                //expect(res.text).to.equal('{"success":true,"response":[{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}]}');
                 done();
             });
     }, 20000);

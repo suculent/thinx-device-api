@@ -200,10 +200,10 @@ describe("Devices (JWT)", function () {
         expect(res.status).to.equal(200);
         let j = JSON.parse(res.text);
         expect(j.success).to.equal(true);
-        expect(j.api_key).to.be.a('string');
-        expect(j.hash).to.be.a('string');
-        created_api_key = j.hash;
-        console.log("[spec] saving apikey (D)", j.api_key);
+        expect(j.response.api_key).to.be.a('string');
+        expect(j.response.hash).to.be.a('string');
+        created_api_key = j.response.hash;
+        console.log("[spec] saving apikey (D)", j.response.api_key);
         done();
       });
   }, 20000);
@@ -235,7 +235,7 @@ describe("Devices (JWT)", function () {
       .end((err, res) => {
         console.log("🚸 [chai] GET /api/user/devices (JWT) response:", res.text, " status:", res.status);
         let j = JSON.parse(res.text);
-        dynamic_devices = j.devices;
+        dynamic_devices = j.response;
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         done();
@@ -317,9 +317,10 @@ describe("Devices (JWT)", function () {
       .set('Authorization', jwt)
       .send({ udid: JRS5.udid })
       .end((_err, res) => {
-        console.log("🚸 [chai] POST /api/device/detach  (JWT) 2 response:", res.text, " status:", res.status);
-        //expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
+        //console.log("🚸 [chai] POST /api/device/detach  (JWT) 2 response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        expect(res.text).to.equal('{"success":true,"response":"detached"}');
         done();
       });
   }, 20000);
@@ -336,7 +337,7 @@ describe("Devices (JWT)", function () {
         mesh_id = r.mesh_id;
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":true,"mesh_ids":{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}}');
+        expect(res.text).to.equal('{"success":true,"response":{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}}');
         done();
       });
   }, 20000);

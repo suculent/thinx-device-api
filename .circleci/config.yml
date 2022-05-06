@@ -11,6 +11,7 @@ jobs:
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
+          version: 20.10.12
       - checkout
       - docker/check
       - run:
@@ -34,7 +35,7 @@ jobs:
     steps:
       - setup_remote_docker:
           docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
-          version: 19.03.13
+          version: 20.10.12
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
@@ -72,12 +73,12 @@ jobs:
           registry: registry.thinx.cloud:5000
           tag: 'vue'
 
-  build-console-legacy:
+  build-console-classic:
     executor: docker/docker
     steps:
       - setup_remote_docker:
           docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
-          version: 19.03.13
+          version: 20.10.12
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
@@ -113,7 +114,12 @@ jobs:
     steps:
       - setup_remote_docker:
           docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
+          version: 20.10.12
       - checkout
+      - run:
+          name: Clean package-lock
+          command: |
+            rm -rf ./package-lock.json
       - docker/check
       - docker/build:
           image: thinxcloud/api
@@ -139,16 +145,19 @@ jobs:
   test:
 
     docker:
-      - image: thinxcloud/base:latest
+      - image: thinxcloud/base:alpine
         auth:
           username: $DOCKER_USERNAME  # from thinx-docker-repo, docker.io
           password: $DOCKER_PUBLIC_PASSWORD  # or project environment variable reference
+    
+    # because the tests do not consume much of RAM or CPU, this probably won't cause any more slowdown
+    resource_class: medium
 
     working_directory: ~/suculent/thinx-device-api
 
     parallelism: 1
 
-    shell: /bin/bash --login
+    shell: /bin/sh --login
 
     environment:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
@@ -162,12 +171,15 @@ jobs:
         environment:
           COMPOSE_VERSION: '1.29.2'
         command: |
-          curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o ~/docker-compose
-          chmod +x ~/docker-compose
-          mv ~/docker-compose /usr/local/bin/docker-compose
+          DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+          mkdir -p $DOCKER_CONFIG/cli-plugins
+          curl -SL https://github.com/docker/compose/releases/download/v2.4.1/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose
+          chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+          docker compose version
 
     - setup_remote_docker:
         docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
+        version: 20.10.12
 
     - checkout
 
@@ -182,10 +194,11 @@ jobs:
     - run:
         name: Fetch all submodules and tests
         command: |
+          rm -rf ./package-lock.json
           git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
           cd spec/test_repositories
           pwd
-          bash ./get-tests.sh
+          sh ./get-tests.sh
 
     - run:
         name: Create Circle CI Artifacts Folders
@@ -267,52 +280,51 @@ jobs:
         name: Starting Influx
         command: |
           PUB=$(docker network inspect traefik-public)
-          if [[ $PUB == '[]' ]]; then docker network create traefik-public; fi
+          if [ "$PUB" == '[]' ]; then docker network create traefik-public; fi
           NAT=$(docker network inspect nat)
-          if [[ $NAT == '[]' ]]; then docker network create nat ; fi
-          docker-compose up -d influxdb
-          docker-compose logs --timestamp influxdb
+          if [ "$NAT" == '[]' ]; then docker network create nat ; fi
+          docker compose up -d influxdb
+          docker compose logs influxdb
 
     - run:
         name: Starting Redis
         command: |
-          docker-compose up -d --build thinx-redis
-          docker-compose logs --timestamp thinx-redis
+          docker compose up -d --build thinx-redis
+          docker compose logs thinx-redis
 
     - run:
         name: Starting Mosquitto
         command: |
           docker login --username $DOCKER_LOGIN --password $DOCKER_PASSWORD https://registry.thinx.cloud:5000
-          docker-compose up -d --build mosquitto
-          docker-compose logs --timestamp mosquitto
+          docker compose up -d --build mosquitto
+          docker compose logs mosquitto
 
     - run:
         name: Starting Transformer
         command: |
-          docker-compose up -d --build transformer
-          docker-compose logs --timestamp transformer
+          docker compose up -d --build transformer
+          docker compose logs transformer
 
     - run:
         name: Starting Worker
         command: |
-          docker-compose up -d worker
-          docker-compose logs --timestamp worker
+          docker compose up -d --build worker
+          docker compose logs worker
 
     - run:
         name: Starting CouchDB
         command: |
           export ENVIRONMENT=test
           chmod -R 666 ./services/couchdb/*
-          docker-compose up -d --build couchdb
-          docker-compose logs --timestamp couchdb
+          docker compose up -d --build couchdb
+          docker compose logs couchdb
 
     - run:
         name: Starting API Test
         command: |
           export ENVIRONMENT=test
-          docker network create nat
-          docker-compose up --build api | tee -ipa ./test.log
-          if [[ ! $(cat ./test.log | grep "specs, 0 failures") ]]; then 
+          docker compose up --build api | tee -ia ./test.log
+          if [ ! $(cat ./test.log | grep "specs, 0 failures") ]; then 
             echo "» TEST failed. Should not deploy this commit."
             cat ./test.log | grep "Failures:"
             exit 1
@@ -322,22 +334,22 @@ jobs:
     - run:
         name: Allow inspecting MQTT logs
         command: |
-            docker-compose logs --timestamp mosquitto
+            docker compose logs mosquitto
 
     - run:
         name: Allow inspecting CouchDB logs
         command: |
-            docker-compose logs --timestamp couchdb
+            docker compose logs couchdb
 
     - run:
         name: Allow inspecting Transformer logs
         command: |
-            docker-compose logs --timestamp transformer
+            docker compose logs transformer
 
     - run:
-        name: Allow inspecting Worker logs logs
+        name: Allow inspecting Worker logs
         command: |
-            docker-compose logs --timestamp worker
+            docker compose logs worker
 
     - run:
         name: Check running Docker containers
@@ -345,7 +357,7 @@ jobs:
             docker ps
             docker network ls
             docker network inspect bridge
-            docker-compose stop
+            docker compose stop
 
     - store_test_results:
         name: Collect test data
@@ -360,6 +372,20 @@ jobs:
         path: ./coverage
         destination: jest-coverage
 
+  sysdig:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
+          version: 20.10.12
+      - checkout
+      - docker/check
+      - run:
+          name: Install Sysdig Scanner
+          command: |
+            curl -LO "https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/$(curl -L -s https://download.sysdig.com/scanning/sysdig-cli-scanner/latest_version.txt)/linux/amd64/sysdig-cli-scanner"
+            chmod +x ./sysdig-cli-scanner
+            SECURE_API_TOKEN=${SECURE_API_TOKEN} ./sysdig-cli-scanner --apiurl https://eu1.app.sysdig.com docker://thinxcloud/console --policy DefaultPolicy
 #
 # WORKFLOWS
 #
@@ -374,6 +400,19 @@ workflows:
 
     jobs:
 
+      - sysdig:
+          context:
+              - dockerhub
+              - thinx-docker-repo
+              - thinx-test
+              - sysdig
+          #requires:
+          #  - build-base
+          filters:
+            branches:
+              only:
+                - sysdig
+
       - test:
           context:
               - dockerhub
@@ -387,10 +426,20 @@ workflows:
               only:
                 - base
                 - thinx-staging
+                - thinx-staging-fixes
                 - thinx-class
                 - main
                 - master
       
+      - build-console-classic:
+          context:
+            - thinx-docker-repo
+            - console
+          filters:
+            branches:
+              only:
+                - master
+
       - build-console-cloud:
           context:
             - thinx-docker-repo
@@ -399,7 +448,6 @@ workflows:
             branches:
               only:
                 - thinx-console
-                - thinx-staging
                 - master
 
       - build-base:

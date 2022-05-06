@@ -196,7 +196,7 @@ describe("Device", function() {
           JRS2.udid,
           function(_success, _response) {
             expect(_response.success).to.equal(true);
-            expect(_response.status).to.equal('device_marked_deleted');
+            expect(_response.response).to.equal('device_marked_deleted');
             done();
         });
       });

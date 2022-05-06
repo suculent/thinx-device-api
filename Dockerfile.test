@@ -1,9 +1,13 @@
-FROM thinxcloud/base:1.20
+FROM thinxcloud/base:alpine
 
 LABEL maintainer="Matej Sychra <suculent@me.com>"
-LABEL name="THiNX API" version="1.6.1604"
+LABEL name="THiNX API" version="1.7.1849"
 
 ARG DEBIAN_FRONTEND=noninteractive
+
+# For test-env node-18
+ENV NODE_TLS_REJECT_UNAUTHORIZED=0
+ENV NODE_EXTRA_CA_CERTS=/opt/thinx/thinx-device-api/spec/mnt/data/ssl/testRoot.crt
 
 ARG THINX_HOSTNAME
 ENV THINX_HOSTNAME=${THINX_HOSTNAME}
@@ -77,16 +81,13 @@ ENV CIRCLE_NODE_INDEX=${CIRCLE_NODE_INDEX}
 WORKDIR /opt/thinx/thinx-device-api
 
 # Install test dependencies
-RUN apt-get update -qq && \
-    apt-get install -qq -y --fix-missing --no-install-recommends \
-    p7zip-full \
-    default-jre-headless \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add openjdk8-jre p7zip
 
 # Install app dependencies
 COPY package.json ./
 
-RUN npm install .
+RUN npm install -g npm@8.6.0 \
+    && npm install .
 
 VOLUME /var/lib/docker
 
@@ -101,12 +102,6 @@ EXPOSE 9002
 
 # Copy app source code
 COPY . .
-
-# those packages should not be required and pose HIGH security risks
-# g++ is a DevSec build-only dependency, imagemagick source is currently unknown but it is definitely not required
-RUN apt-get remove -y \
-    && apt-get autoremove -y \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN mkdir -p ./.nyc_output
 

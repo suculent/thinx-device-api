@@ -42,9 +42,10 @@ describe("Queue", function () {
         queue_with_cron.add(mock_udid_1, mock_source_id, mock_owner_id, () => {
             queue_with_cron.add(mock_udid_2, mock_source_id, mock_owner_id, () => {
                 queue_with_cron.add(mock_udid_3, mock_source_id, mock_owner_id, () => {
-                    queue_with_cron.findNext((next) => {
 
-                        if (next === null) {
+                    queue_with_cron.findNext((success, next) => {                        
+
+                        if ((next === null) || (success === false)) {
                             if (done_called === false) {
                                 done_called = true;
                                 done();
@@ -56,7 +57,7 @@ describe("Queue", function () {
                         queue_with_cron.runNext(next, workers[0]);
 
                         // Should not be able to find anything while queue item is running
-                        queue_with_cron.findNext((/* nextAction */) => {
+                        queue_with_cron.findNext((success, next) => {
 
                             if (next === null) {
                                 if (done_called === false) {
