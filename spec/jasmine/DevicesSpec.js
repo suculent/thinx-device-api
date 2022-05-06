@@ -55,7 +55,7 @@ describe("Devices", function() {
       TEST_DEVICE, /* reg.registration */
       ak,
       res,
-      (r, success, response) => {
+      (_r, success, response) => {
         TEST_DEVICE.udid = response.registration.udid;
         expect(success).to.equal(true);
         expect(TEST_DEVICE).to.be.an('object');
@@ -88,7 +88,7 @@ describe("Devices", function() {
       source_id: source_id,
       udid: TEST_DEVICE.udid
     };
-    devices.attach(owner, body, (res, success, response) => {
+    devices.attach(owner, body, (_res, success, response) => {
       expect(success).to.equal(true);
       expect(response).to.be.a('string');
       done();
@@ -99,7 +99,7 @@ describe("Devices", function() {
     var body = {
       udid: TEST_DEVICE.udid
     };
-    devices.detach(body, (res, success, response) => {
+    devices.detach(body, (_res, success, response) => {
       expect(success).to.equal(true);
       expect(response).to.be.a('string');
       expect(response).to.equal('detached');
@@ -112,13 +112,13 @@ describe("Devices", function() {
       TEST_DEVICE4, /* reg.registration */
       ak,
       res,
-      (r, success, response) => {
+      (_r, success, response) => {
         TEST_DEVICE4.udid = response.registration.udid;
         expect(success).to.equal(true);
         var body = {
           udid: TEST_DEVICE4.udid
         };
-        devices.revoke(owner, body, (res, _success, _response) => {
+        devices.revoke(owner, body, (_res, _success, _response) => {
           expect(_success).to.equal(true);
           expect(_response).to.be.a('string');
           done();
