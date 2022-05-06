@@ -109,7 +109,8 @@ describe("Device", function () {
   it("(03) should be able to change its alias.", function (done) {
     var changes = {
       alias: Date().toString(),
-      udid: JRS.udid // this device should not be deleted
+      udid: JRS.udid, // this device should not be deleted,
+      auto_update: true
     };
     device.edit(changes, (success, response) => {
       expect(success).to.equal(true);
@@ -172,10 +173,9 @@ describe("Device", function () {
       }
     };
     device.firmware(req, function (success, response) {
-      console.log("(07) should not provide invalid device firmware result", { success }, { response });
+      //console.log("(07) should not provide invalid device firmware result", { success }, { response });
       expect(success).to.equal(false);
-      expect(response.success).to.equal(false);
-      expect(response.status).to.equal("UPDATE_NOT_FOUND");
+      expect(response).to.equal("no_such_device");
       done();
     });
   }, 5000);
@@ -231,7 +231,7 @@ describe("Device", function () {
   it("(11) should be able to provide valid device firmware", function (done) {
     // Returns "OK" when current firmware is valid.
     var rbody = JRS;
-    rbody.udid = udid;
+    rbody.udid = envi.udid;
     rbody.owner = owner;
     let req = {
       body: {
@@ -245,8 +245,7 @@ describe("Device", function () {
     device.firmware(req, function (success, response) {
       console.log("(11) requesting firmware result", { success }, { response });
       expect(success).to.equal(false);
-      expect(response.success).to.equal(false);
-      expect(response.status).to.equal("OK");
+      expect(response).to.equal("no_such_device");
       done();
     });
   }, 5000);

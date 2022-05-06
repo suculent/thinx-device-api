@@ -10,6 +10,7 @@
     "domain": "thinx.cloud"
   },
   "redis": {
+    "url": "redis://thinx-redis:6379/0",
     "host": "thinx-redis",
     "db": 0,
     "port": 6379
