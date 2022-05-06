@@ -426,6 +426,7 @@ workflows:
               only:
                 - base
                 - thinx-unit
+                - thinx-staging
                 - main
                 - master
       
