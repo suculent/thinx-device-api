@@ -171,9 +171,8 @@ describe("Device", function () {
         authentication: apikey
       }
     };
-    console.log("(07) requesting firmware");
     device.firmware(req, function (success, response) {
-      console.log("(07) requesting firmware result", { success }, { response });
+      console.log("(07) should not provide invalid device firmware result", { success }, { response });
       expect(success).to.equal(false);
       expect(response.success).to.equal(false);
       expect(response.status).to.equal("UPDATE_NOT_FOUND");
