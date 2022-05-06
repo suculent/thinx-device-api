@@ -425,9 +425,7 @@ workflows:
             branches:
               only:
                 - base
-                - thinx-staging
-                - thinx-staging-fixes
-                - thinx-class
+                - thinx-unit
                 - main
                 - master
       
