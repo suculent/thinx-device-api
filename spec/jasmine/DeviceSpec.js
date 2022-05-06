@@ -173,7 +173,7 @@ describe("Device", function () {
       }
     };
     device.firmware(req, function (success, response) {
-      //console.log("(07) should not provide invalid device firmware result", { success }, { response });
+      console.log("(07) should not provide invalid device firmware result", { success }, { response });
       expect(success).to.equal(false);
       expect(response).to.equal("no_such_device");
       done();
