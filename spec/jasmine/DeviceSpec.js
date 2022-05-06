@@ -158,28 +158,29 @@ describe("Device", function() {
     done();
   }, 5000);
 
-  it("(07) should be able to provide device firmware", function(done) {
-      // Returns "OK" when current firmware is valid.
-      var rbody = JRS;
-      rbody.udid = udid;
-      rbody.owner = owner;
-      let req = {
-        body: {
-          registration: rbody
-        },
-        headers: {
-          authentication: apikey
-        }
-      };
-      console.log("(07) requesting firmware");
-      device.firmware(req, function(success, response) {
-        console.log("(07) requesting firmware result", {success}, {response});
-        expect(success).to.equal(false);
-        expect(response.success).to.equal(false);
-        expect(response.status).to.equal("UPDATE_NOT_FOUND");
-        done();
-      });
-    }, 5000);
+
+  it("(07) should not provide invalid device firmware", function(done) {
+    // Returns "OK" when current firmware is valid.
+    var rbody = JRS;
+    rbody.udid = "c6ff2bb0-df34-11e7-b351-eb37822aa172";
+    rbody.owner = owner;
+    let req = {
+      body: {
+        registration: rbody
+      },
+      headers: {
+        authentication: apikey
+      }
+    };
+    console.log("(07) requesting firmware");
+    device.firmware(req, function(success, response) {
+      console.log("(07) requesting firmware result", {success}, {response});
+      expect(success).to.equal(false);
+      expect(response.success).to.equal(false);
+      expect(response.status).to.equal("UPDATE_NOT_FOUND");
+      done();
+    });
+  }, 5000);
 
   it("(08) should be able to register for revocation", function(done) {
     expect(JRS2).to.be.an('object');
@@ -196,7 +197,7 @@ describe("Device", function() {
           JRS2.udid,
           function(_success, _response) {
             expect(_response.success).to.equal(true);
-            expect(_response.status).to.equal('device_marked_deleted');
+            expect(_response.response).to.equal('device_marked_deleted');
             done();
         });
       });
@@ -227,5 +228,28 @@ describe("Device", function() {
         done();
       });
   }, 15000); // register
+
+  it("(11) should be able to provide valid device firmware", function(done) {
+    // Returns "OK" when current firmware is valid.
+    var rbody = JRS;
+    rbody.udid = udid;
+    rbody.owner = owner;
+    let req = {
+      body: {
+        registration: rbody
+      },
+      headers: {
+        authentication: apikey
+      }
+    };
+    console.log("(11) requesting firmware");
+    device.firmware(req, function(success, response) {
+      console.log("(11) requesting firmware result", {success}, {response});
+      expect(success).to.equal(false);
+      expect(response.success).to.equal(false);
+      expect(response.status).to.equal("OK");
+      done();
+    });
+  }, 5000);
 
 });

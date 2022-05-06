@@ -90,7 +90,7 @@ describe("AppSpec Session Management", function () {
       .end((err, res) => {
         expect(res.status).to.equal(403);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"invalid_credentials"}');
+        expect(res.text).to.equal('{"success":false,"response":"invalid_credentials"}');
         done();
       });
   }, 20000);
@@ -106,7 +106,7 @@ describe("AppSpec Session Management", function () {
       .end((err, res) => {
         expect(res.status).to.equal(403);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"invalid_credentials"}');
+        expect(res.text).to.equal('{"success":false,"response":"invalid_credentials"}');
         done();
       });
   }, 20000);
@@ -121,7 +121,7 @@ describe("AppSpec Session Management", function () {
       .end((err, res) => {
         expect(res.status).to.equal(403);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"invalid_credentials"}');
+        expect(res.text).to.equal('{"success":false,"response":"invalid_credentials"}');
         done();
       });
   }, 20000);
@@ -136,7 +136,7 @@ describe("AppSpec Session Management", function () {
       .end((err, res) => {
         expect(res.status).to.equal(403);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"status":"invalid_credentials"}');
+        expect(res.text).to.equal('{"success":false,"response":"invalid_credentials"}');
         done();
       });
   }, 20000);
@@ -145,6 +145,7 @@ describe("AppSpec Session Management", function () {
     chai.request(thx.app)
       .get('/api/logout')
       .end((err, res) => {
+        console.log("GET /api/logout (without session)", err, res);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string'); // html...
         done();

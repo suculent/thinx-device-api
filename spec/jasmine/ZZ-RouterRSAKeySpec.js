@@ -82,7 +82,7 @@ describe("RSA Keys (JWT)", function () {
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
-                let k = j.status;
+                let k = j.response;
                 expect(k).to.be.an('object');
                 expect(k.name).to.be.a('number');
                 expect(k.pubkey).to.be.a('string');
@@ -98,7 +98,7 @@ describe("RSA Keys (JWT)", function () {
             .end((err, res) => {
                 console.log("🚸 [chai] GET /api/user/rsakey/list response:", res.text, res.status);
                 let r = JSON.parse(res.text);
-                key_id = r.rsakeys[0].filename;
+                key_id = r.response[0].filename;
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 done();
@@ -113,7 +113,7 @@ describe("RSA Keys (JWT)", function () {
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"status":"invalid_query"}');
+                expect(res.text).to.equal('{"success":false,"response":"invalid_query"}');
                 done();
             });
     }, 20000);
@@ -125,7 +125,7 @@ describe("RSA Keys (JWT)", function () {
             .set('Authorization', jwt)
             .send({ filenames: [key_id]})
             .end((err, res) => {
-                console.log("🚸 [chai] POST /api/user/rsakey/revoke (valid) response:", JSON.stringify(res.text), res.status);
+                console.log("🚸 [chai] POST /api/user/rsakey/revoke (valid) response:", res.text, res.status);
                 expect(res.status).to.equal(200);
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);

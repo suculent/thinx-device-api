@@ -52,14 +52,14 @@ describe("User Routes V2", function () {
       .post('/api/v2/user')
       .send(user_info)
       .end((_err, res) => {
-        // {"success":true,"status":"6975d3c5849fc130e689f2cae0abe51a8fd24f496810bee3c0bcf531dd53be0c"}
+        // {"success":true,"response":"6975d3c5849fc130e689f2cae0abe51a8fd24f496810bee3c0bcf531dd53be0c"}
         console.log("🚸 [chai] IMPORTANT", res.text);
         expect(res.text).to.be.a('string');
         expect(res.status).to.equal(200);
         let body = JSON.parse(res.text);
-        dynamic_activation_code = body.status;
-        expect(body.status).to.be.a('string'); // check length
-        expect(body.status.length == 64);
+        dynamic_activation_code = body.response;
+        expect(body.response).to.be.a('string'); // check length
+        expect(body.response.length == 64);
 
         let rurl = '/api/v2/activate?owner=' + dynamic_owner_id + '&activation=' + dynamic_activation_code;
         chai.request(thx.app)
@@ -75,7 +75,7 @@ describe("User Routes V2", function () {
               .end((___err, ___res) => {
                 expect(___res.status).to.equal(200);
                 expect(___res.text).to.be.a('string');
-                expect(___res.text).to.equal('{"success":true,"status":"activation_successful"}');
+                expect(___res.text).to.equal('{"success":true,"response":"activation_successful"}');
                 done();
               });
           });
@@ -90,12 +90,11 @@ describe("User Routes V2", function () {
       .post('/api/v2/password/reset')
       .send({ email: envi.dynamic2.email })
       .end((_err, res) => {
-        console.log("🚸 [chai] V2 POST /api/v2/password/reset (1) response:", res.text, " status:", res.status); // true!
         let j = JSON.parse(res.text);
         reset_key = j.response;
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
+        expect(reset_key).be.a('string');
         done();
       });
   }, 20000);
@@ -104,10 +103,8 @@ describe("User Routes V2", function () {
     chai.request(thx.app)
       .get('/api/v2/password/reset?owner_id='+envi.dynamic2.owner+'&reset_key='+reset_key)
       .end((_err, res) => {
-        console.log("🚸 [chai] V2 GET /api/v2/password/reset (2) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
         done();
       });
   }, 20000);
@@ -122,7 +119,7 @@ describe("User Routes V2", function () {
         console.log("🚸 [chai] V2 POST /api/v2/password/set (3) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        //expect(res.text).to.equal('{"success":false,"status":"password_reset_failed"}'); // somehow not deterministic
+        //expect(res.text).to.equal('{"success":false,"response":"password_reset_failed"}'); // somehow not deterministic
         done();
       });
   }, 20000);
@@ -160,7 +157,7 @@ describe("User Routes V2", function () {
             console.log("🚸 [chai] V2 POST /api/gdpr response:", _res.text, "status", _res.status);
             //expect(_res.status).to.equal(200);
             //expect(_res.text).to.be.a('string');
-            // {"success":false,"status":"invalid_protocol_update_key_missing"} // WTF?
+            // {"success":false,"response":"invalid_protocol_update_key_missing"} // WTF?
 
             return agent
               .post('/api/login')
@@ -187,7 +184,7 @@ describe("User Routes V2", function () {
       .end((_err1, res1) => {
         console.log("🚸 [chai] POST /api/login response:", res1.text, "status", res1.status);
         expect(res1.status).to.equal(200);
-        expect(res1.text).to.equal('{"status":"password_mismatch","success":false}');
+        expect(res1.text).to.equal('{"success":false,"response":"password_mismatch"}');
         done();
       });
   }, 20000);
@@ -232,7 +229,7 @@ describe("User Routes V2", function () {
         console.log("🚸 [chai] DELETE /api/v2/gdpr (jwt, valid) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        // {"success":false,"status":"deletion_not_confirmed"} 
+        // {"success":false,"response":"deletion_not_confirmed"} 
         done();
       });
   }, 20000);
