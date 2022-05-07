@@ -611,16 +611,32 @@ describe("Devices (JWT)", function () {
 
   // DELETE /api/v2/device
   it("DELETE /api/v2/device (JWT)", function (done) {
-    console.log("🚸 [chai] GET /api/v2/device (JWT)");
+    console.log("🚸 [chai] DELETE /api/v2/device (JWT, invalid)");
     agent
       .delete('/api/v2/device')
       .send({})
       .set('Authorization', jwt)
       .end((err, res) => {
-        console.log("🚸 [chai] GET /api/v2/device (JWT) response 3:", res.text, " status:", res.status);
+        console.log("🚸 [chai] DELETE /api/v2/device (JWT, invalid) response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         done();
       });
   }, 20000);
+
+  it("DELETE /api/v2/device (JWT)", function (done) {
+    console.log("🚸 [chai] DELETE /api/v2/device (JWT, multi)");
+    agent
+      .delete('/api/v2/device')
+      .send({ udids: dynamic_devices })
+      .set('Authorization', jwt)
+      .end((err, res) => {
+        console.log("🚸 [chai] GET /api/v2/device (JWT, multi) response:", res.text, " status:", res.status);
+        expect(res.status).to.equal(200);
+        expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 20000);
+
+  
 });
