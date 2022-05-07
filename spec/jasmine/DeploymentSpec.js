@@ -39,9 +39,9 @@ describe("Deployer", function () {
     expect(repo_path).to.be.a('string');
   });
 
-  it("should not be able to return latest firmware path for nonexistend device", function (done) {
+  it("should not be able to return latest firmware path for nonexistent device", function (done) {
     deploy.latestFirmwarePath(device.owner, "c6ff2bb0-df34-11e7-b351-eb37822aa172", (path) => {
-      expect(path).to.be(false);
+      expect(path).to.equal(false);
       done();
     });
   });
