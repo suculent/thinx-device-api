@@ -118,6 +118,23 @@ describe("Device", function() {
     });
   }, 5000);
 
+  it("(03b) should be able to change its environment.", function(done) {
+    var changes = {
+      environment: {
+        "THINX_ENV_SSID" : "THiNX-IoT",
+        "THINX_ENV_PASS" : "<enter-your-ssid-password>",
+        "ENVIRONMENT" : "circle"
+      },
+      udid: JRS.udid // this device should not be deleted
+    };
+    device.edit(changes, (success, response) => {
+      expect(success).to.equal(true);
+      expect(response).to.be.an('object');
+      console.log("(03b) response", JSON.stringify(response, 2, null));
+      done();
+    });
+  }, 5000);
+
 
   it("(04) should receive different response for registered device", function (done) {
     res.end = () => {
