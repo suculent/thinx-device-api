@@ -343,9 +343,9 @@ describe("Transfer (JWT)", function () {
             .set('Authorization', jwt)
             .send({ udids: [envi.dynamic.udid], transfer_id: transfer_id, owner: envi.dynamic.owner }) // will probably need real device using GET /api/device
             .end((_err, res) => {
-                console.log(`🚸 [chai] POST /api/v2/transfer/decline IV response: ${res.text}`);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"response":"decline_complete_no_such_dtid"}');
                 // returns HTML
                 done();
             });
@@ -357,9 +357,9 @@ describe("Transfer (JWT)", function () {
             .set('Authorization', jwt)
             .send({ udids: [envi.dynamic.udid], transfer_id: transfer_id, owner: envi.dynamic.owner }) // will probably need real device using GET /api/device
             .end((_err, res) => {
-                console.log(`🚸 [chai] GET /api/v2/transfer/decline V response: ${res.text}`);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"response":"missing_transfer_id"}');
                 // returns HTML
                 done();
             });
