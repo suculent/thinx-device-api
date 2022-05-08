@@ -4,15 +4,17 @@ var Repository = require('../../lib/thinx/repository');
 // tests are run from ROOT
 var repo_path = __dirname;
 
-describe("Repository Watcher", function() {
+describe("Repository", function() {
 
-  var mock_queue = {
-    add: function(a1,a2,a3) {
-      console.log(`[spec] mock queue add: ${a1} ${a2} ${a3}`);
-    }
-  };
+  beforeAll(() => {
+    console.log(`🚸 [chai] >>> running Repository spec`);
+  });
 
-  var watcher = new Repository(mock_queue);
+  afterAll(() => {
+    console.log(`🚸 [chai] <<< completed Repository spec`);
+  });
+
+  var watcher = new Repository(/* mock_queue */);
 
   watcher.callback = function(err) {
     // watcher exit_callback
@@ -31,25 +33,25 @@ describe("Repository Watcher", function() {
   });
 
   it("should be able to find all repositories with search query", function() {
-    let result = Repository.findAllRepositoriesWithFullname("32");
+    let result = Repository.findAllRepositoriesWithFullname("esp8266");
     expect(result).to.be.an('array');
   });
 
   it("should be able to purge old repos", function() {
     watcher = new Repository();
     let name = "esp";
-    let repositories = Repository.findAllRepositoriesWithFullname("32");
+    let repositories = Repository.findAllRepositoriesWithFullname("esp8266");
     watcher.purge_old_repos_with_full_name(repositories, name);
     expect(watcher).to.be.an('object');
   });
 
   it("should be able to initialize", function() {
-    watcher = new Repository(mock_queue);
+    watcher = new Repository(/* mock_queue */);
     expect(watcher).to.be.an('object');
   });
 
   it("should be able to respond to githook", function() {
-    watcher = new Repository(mock_queue);
+    watcher = new Repository(/* mock_queue */);
     let mock_git_message = require("../mock-git-response.json");
     let mock_git_request = {
       headers: [],
@@ -57,6 +59,23 @@ describe("Repository Watcher", function() {
     };
     let response = watcher.process_hook(mock_git_request);
     expect(response).to.be.false; // fix later
+  });
+
+  it("should be able to respond to githook (invalid)", function() {
+    watcher = new Repository(/* mock_queue */);
+    let mock_git_message = require("../mock-git-response.json");
+    let mock_git_request = {
+      headers: [],
+      body: mock_git_message
+    };
+    delete mock_git_request.body.repository;
+    let response = watcher.process_hook(mock_git_request);
+    expect(response).to.be.false; // fix later
+  });
+
+  it ("should be able to verify body signature", () => {
+    let result = watcher.validateSignature("sha256=null", "{ body: false }", "secret");
+    expect(result).to.be.false;
   });
 
 });

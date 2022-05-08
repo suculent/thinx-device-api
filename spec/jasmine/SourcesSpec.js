@@ -1,5 +1,13 @@
 describe("Sources", function () {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] >>> running Sources spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] <<< completed Sources spec`);
+  });
+
   var expect = require('chai').expect;
   var sources = require('../../lib/thinx/sources');
   var Sources = new sources();
@@ -25,7 +33,7 @@ describe("Sources", function () {
         if (success !== true) {
           console.log("(01) Error adding source: ", source, response);
         }
-        expect(success).to.be.true; // git fetch must work for this
+        expect(success).to.equal(true); // git fetch must work for this
         expect(response).to.be.an('object');
         source_id = response.source_id;
         done();
@@ -34,7 +42,7 @@ describe("Sources", function () {
 
   it("(02) should be able to provide a list", function (done) {
     Sources.list(owner, function (success, response) {
-      expect(success).to.be.true;
+      expect(success).to.equal(true);
       expect(response).to.be.an('object');
       done();
     });
@@ -59,13 +67,13 @@ describe("Sources", function () {
         if (success !== true) {
           console.log("(03) Error adding source: ", source, response);
         }
-        expect(success).to.be.true;
+        expect(success).to.equal(true);
         source_id = response.source_id;
         Sources.remove(source.owner, [source_id], (rsuccess, rresponse) => {
           if (rsuccess === false) {
             console.log("Error removing source: " + rresponse);
           }
-          expect(rsuccess).to.be.true;
+          expect(rsuccess).to.equal(true);
           expect(rresponse).to.be.an('object');
           done();
         });
@@ -99,7 +107,7 @@ describe("Sources", function () {
       branch: "origin/mas'ter"
     };
     let result = Sources.normalizedBranch(source, (error, reason) => {
-      expect(error).to.be.true;
+      expect(error).to.equal(true);
       expect(reason).to.equal('invalid_branch_name');
     });
     expect(result).to.equal(false);
@@ -118,13 +126,13 @@ describe("Sources", function () {
   });
 
   it("(08) should be able to infer owner ID from path", function () {
-    let ownerIdFromPath = Sources.ownerIdFromPath("/mnt/data/data/" + owner + "/" + source_id);
+    let ownerIdFromPath = Sources.ownerIdFromPath("/mnt/data/repos/" + owner + "/" + source_id);
     expect(ownerIdFromPath).to.be.a('string');
   });
 
   it("(09) should update repo privacy prefetch state", function (done) {
     let source_id = "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f3";
-    Sources.updatePrivate(owner, source_id, true, (success, error) => {
+    Sources.update(owner, source_id, "is_private", true, (success, error) => {
       if (!success) console.log("[09] error", error);
       expect(success).to.equal(true);
       done();
@@ -133,7 +141,7 @@ describe("Sources", function () {
 
   it("(10) should update last build version", function (done) {
     let source_id = "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f3";
-    Sources.updateLastBuild(owner, source_id, "1.1.1", (success, error) => {
+    Sources.update(owner, source_id, "last_build", "1.1.1", (success, error) => {
       if (!success) console.log("[10] error", error);
       expect(success).to.equal(true);
       done();
@@ -158,7 +166,7 @@ describe("Sources", function () {
         if (success !== true) {
           console.log("(11) Error adding source: ", source, response);
         }
-        expect(success).to.be.true;
+        expect(success).to.equal(true);
         source_id = response.source_id;
         Sources.updatePlatform(owner, source_id, "arduino", (success2, error2) => {
           if (!success2) console.log("(11) error", error2);
@@ -166,7 +174,7 @@ describe("Sources", function () {
           done();
         });
       });
-  });
+  }, 20000);
 
   it("(12) should be able to remove sources from owner", function () {
     Sources.removeSourcesFromOwner(owner, [source_id]);

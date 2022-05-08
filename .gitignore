@@ -73,7 +73,7 @@ conf/github-oauth.json
 .profile
 
 # Circle CI
-./package-lock.json
+#./package-lock.json
 
 # Mosquitto
 mosquitto.aclfile
@@ -92,3 +92,6 @@ cov-int/
 .dccache
 *.log
 *.sarif
+
+chronograf/
+influx/

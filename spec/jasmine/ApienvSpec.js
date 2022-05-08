@@ -1,5 +1,14 @@
 describe("API Env", function () {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] >>> running APIEnv spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] <<< completed APIEnv spec`);
+  });
+
+
   var expect = require('chai').expect;
 
   var envi = require("../_envi.json");
@@ -14,11 +23,24 @@ describe("API Env", function () {
       owner,
       "sample-var-name",
       "sample-var-value",
-      function (success, object) {
+      (success, object) => {
         expect(object).to.be.a('string');
         if (success) {
           done();
         }
+      });
+  }, 30000);
+
+  it("should be able to add environment variable", function (done) {
+    apienv.create(
+      owner,
+      "sample-var-name-2",
+      "sample-var-value-2",
+      (success, object) => {
+        expect(object).to.be.a('string');
+        expect(success).to.equal(true);
+        expect(object).to.equal('sample-var-name-2');
+        done();
       });
   }, 30000);
 
@@ -29,6 +51,7 @@ describe("API Env", function () {
       "sample-var-value",
       function (success, object) {
         expect(object).to.be.a('string');
+        expect(object).to.equal('sample-var-name');
         if (success) {
           done();
         }
@@ -55,6 +78,17 @@ describe("API Env", function () {
       function (success, object) {
         expect(success).to.equal(true);
         expect(object).to.be.an('array');
+        done();
+      });
+  }, 5000);
+
+  it("should fail safely for invalid owner in list", function (done) {
+    apienv.list(
+      "invalid-owner",
+      function (success, object) {
+        expect(success).to.equal(true);
+        expect(object).to.be.an('array');
+        expect(object.length).to.equal(0);
         done();
       });
   }, 5000);
@@ -89,9 +123,8 @@ describe("API Env", function () {
   }, 5000);
 
   it("should be able survive invalid input", function (done) {
-    let undefined_owner; // undefined
     apienv.fetch(
-      undefined_owner,
+      undefined,
       "sample-var-name",
       function (success, response) {
         expect(success).to.equal(false);

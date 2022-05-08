@@ -1,7 +1,7 @@
-FROM thinxcloud/base:1.14
+FROM thinxcloud/base:alpine
 
 LABEL maintainer="Matej Sychra <suculent@me.com>"
-LABEL name="THiNX API" version="1.5.839"
+LABEL name="THiNX API" version="1.7.1859"
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -58,13 +58,20 @@ ENV GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
 ARG SLACK_BOT_TOKEN
 ENV SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
 
+ARG ENTERPRISE
+ENV ENTERPRISE=${ENTERPRISE}
+
+ARG WORKER_SECRET
+ENV WORKER_SECRET=${WORKER_SECRET}
+
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
 
 # Install app dependencies
 COPY package.json ./
 
-RUN npm install --unsafe-perm --only-prod .
+RUN npm install -g npm@8.6.0 \
+ && npm install --unsafe-perm --only-prod .
 
 # THiNX Web & Device API (HTTP)
 EXPOSE 7442
@@ -77,10 +84,6 @@ EXPOSE 9002
 
 # Copy app source code
 COPY . .
-
-RUN apt-get remove -y \
-    && apt-get autoremove -y \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # TODO: Implement Snyk Container Scanning here in addition to DockerHub manual scans...
 

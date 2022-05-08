@@ -105,9 +105,8 @@ services:
 
   worker:
     env_file: .env
-    image: thinxcloud/worker
+    image: thinxcloud/worker:latest
     environment:
-      - "SQREEN_TOKEN=${SQREEN_TOKEN}"
       - "ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}"
       - "ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}"
       - "THINX_SERVER=${THINX_SERVER}"
@@ -154,6 +153,7 @@ services:
       - 'COUCHDB_PASS=${COUCHDB_PASS}'
       - 'COUCHDB_USER=${COUCHDB_USER}'
       - 'ENVIRONMENT=${ENVIRONMENT}'
+      - 'ENTERPRISE=${ENTERPRISE}'
       - 'GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}'
       - 'GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}'
       - 'GOOGLE_OAUTH_ID=${GOOGLE_OAUTH_ID}'
@@ -172,7 +172,7 @@ services:
     ports:
       - '7442:7442'
       - '7443:7443'
-      - '3000' # worker socket
+      - '4000' # worker socket
     volumes:
       - '/mnt/data/deploy:/mnt/data/deploy'
       - '/mnt/data/mosquitto:/mnt/data/mosquitto'
@@ -240,3 +240,35 @@ services:
 #      - traefik.frontend.headers.STSSeconds=315360000
 #      - traefik.frontend.headers.STSIncludeSubdomains=true
 #      - traefik.frontend.headers.STSPreload=true
+
+  # currently for development only(!) mind the volume path
+  influxdb:
+    image: influxdb:1.8
+    ports:
+      - '8086:8086'
+    networks:
+      - internal
+    volumes:
+      - '/mnt/gluster/thinx/influx:/var/lib/influxdb'
+      #- './influx:/var/lib/influxdb'
+    environment:
+      - INFLUXDB_DB=db0
+      - INFLUXDB_ADMIN_USER=${INFLUXDB_USERNAME}
+      - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_PASSWORD}
+
+  chronograf:
+    image: chronograf:1.9
+    ports:
+      - '8888:8888'
+    networks:
+      - internal
+      - traefik-public
+    volumes:
+      - '/mnt/gluster/thinx/chronograf:/var/lib/chronograf'
+      #- './chronograf:/var/lib/chronograf'
+    depends_on:
+      - influxdb
+    environment:
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_USERNAME=${INFLUXDB_USERNAME}
+      - INFLUXDB_PASSWORD=${INFLUXDB_PASSWORD}
