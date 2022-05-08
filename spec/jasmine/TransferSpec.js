@@ -22,7 +22,7 @@ describe("Transfer", function () {
     });
   });
 
-  afterAll(() => {
+  afterAll((done) => {
     devices.list(envi.oid, (success, response) => {
       expect(success).to.equal(true);
       expect(response).to.be.a('object');
