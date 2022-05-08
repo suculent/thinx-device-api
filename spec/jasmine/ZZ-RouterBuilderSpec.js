@@ -354,8 +354,21 @@ describe("Builder (JWT)", function () {
             });
     }, 20000);
 
+    it("POST /api/v2/build/artifacts (JWT, still-invalid)", function (done) {
+        console.log("🚸 [chai] POST /api/build/artifacts (JWT, should-be-valid)");
+        agent
+            .post('/api/v2/build/artifacts')
+            .set('Authorization', jwt)
+            .send({ udid: envi.dynamic.udid, build_id: envi.dynamic.owner, owner: envi.dynamic.owner  })
+            .end((err, res) => {
+                console.log("🚸 [chai] response /api/v2/build/artifacts (JWT, should-be-valid):", res.text, " status:", res.status);
+                expect(res.status).to.equal(200);
+                done();
+            });
+    }, 20000);
+
     // the artifact is mocked at mnt/data/deploy/<owner-id>/<udid>/<build_id>/<build_id>.zip
-    it("POST /api/v2/build/artifacts (JWT, should-be-valid)", function (done) {
+    it("POST /api/v2/build/artifacts (JWT, valid)", function (done) {
         console.log("🚸 [chai] POST /api/build/artifacts (JWT, should-be-valid)");
         agent
             .post('/api/v2/build/artifacts')
