@@ -151,6 +151,7 @@ describe("Util", function () {
         let a = [
             "x",
             undefined,
+            null,
             "y"
         ];
         expect(Util.isUndefinedOf(a)).to.equal(true);
