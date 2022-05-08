@@ -267,7 +267,7 @@ describe("Builder (JWT)", function () {
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('false');
+                expect(res.text).to.equal('{}');
                 done();
             });
     }, 20000);
@@ -280,7 +280,7 @@ describe("Builder (JWT)", function () {
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('false');
+                expect(res.text).to.equal('{}');
                 done();
             });
     }, 20000);
