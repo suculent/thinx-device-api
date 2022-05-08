@@ -146,4 +146,22 @@ describe("Util", function () {
         let k = "something";
         expect(Util.isDefined(k)).to.equal(true);
     });
+
+    it("should should tell one is undefined", function() {
+        let a = [
+            "x",
+            undefined,
+            "y"
+        ];
+        expect(Util.isUndefinedOf(a)).to.equal(true);
+    });
+
+    it("should should tell none is undefined", function() {
+        let a = [
+            "x",
+            "undefined",
+            "y"
+        ];
+        expect(Util.isUndefinedOf(a)).to.equal(false);
+    });
 });
