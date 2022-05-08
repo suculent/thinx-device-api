@@ -60,7 +60,7 @@ jobs:
             --build-arg ENVIRONMENT=${ENVIRONMENT} \
             --build-arg COMMIT_ID=$CIRCLE_SHA1 \
             --build-arg VUE_APP_CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
-            --build-arg VUE_APP_API_HOSTNAME=${API_HOSTNAME} \
+            --build-arg VUE_APP_API_HOSTNAME=${VUE_APP_API_HOSTNAME} \
             --build-arg VUE_APP_ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
             --build-arg VUE_APP_LANDING_HOSTNAME=${LANDING_HOSTNAME} \
             --build-arg VUE_APP_GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} \

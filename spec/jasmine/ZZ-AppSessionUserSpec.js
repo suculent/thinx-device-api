@@ -108,8 +108,6 @@ describe("User Routes", function () {
       .post('/api/user/create')
       .send(user_info)
       .end((_err, res) => {
-        // {"success":true,"response":"6975d3c5849fc130e689f2cae0abe51a8fd24f496810bee3c0bcf531dd53be0c"}
-        console.log("[chai] POST /api/user/create (valid body) and activate (set password)", res.text);
         expect(res.text).to.be.a('string');
         expect(res.status).to.equal(200);
         let body = JSON.parse(res.text);
@@ -122,7 +120,6 @@ describe("User Routes", function () {
           .get(rurl)
           .end((__err, __res) => {
             expect(__res.status).to.equal(200);
-            console.log("[chai] GET /api/user/activate?owner= response:", __res.text);
             expect(__res.text).to.be.a('string'); // <html>
             expect(__res).to.be.html;
 
@@ -130,7 +127,6 @@ describe("User Routes", function () {
               .post('/api/user/password/set')
               .send({ password: envi.dynamic.username, rpassword: envi.dynamic.username, activation: dynamic_activation_code })
               .end((___err, ___res) => {
-                console.log("[chai] POST /api/user/password/set response:", ___res.text);
                 expect(___res.status).to.equal(200);
                 expect(___res.text).to.be.a('string');
                 expect(___res.text).to.equal('{"success":true,"response":"activation_successful"}');
@@ -238,10 +234,8 @@ describe("User Routes", function () {
     chai.request(thx.app)
       .get('/api/user/password/reset?reset_key=' + reset_key + '&owner=' + envi.dynamic.owner)
       .end((_err, res) => {
-        //console.log("[chai] GET /api/user/password/reset (noauth, invalid) 3", {res});
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        //expect(res.text).to.equal(''); // this is a password set form
         done();
       });
   }, 20000);
@@ -281,7 +275,6 @@ describe("User Routes", function () {
         console.log("🚸 [chai] POST /api/user/password/set (3) response", res.text);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        //expect(res.text).to.equal('{"success":false,"response":"password_mismatch"}');
         done();
       });
   }, 20000);

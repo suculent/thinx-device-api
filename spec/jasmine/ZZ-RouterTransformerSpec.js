@@ -59,7 +59,6 @@ describe("Transformer (JWT)", function () {
       .post('/api/transformer/run')
       .send({})
       .end((_err, res) => {
-        //console.log("🚸 [chai] POST /api/transformer/run response:", res.text, " status:", res.status);
         expect(res.status).to.equal(401);
         done();
       });
@@ -161,10 +160,7 @@ describe("Transformer (JWT)", function () {
       .get('/api/user/devices')
       .set('Authorization', jwt)
       .end((_err, res) => {
-        console.log("POST /api/transformer/run (JWT, valid, trans) response", res.text, res.success);
         let r = JSON.parse(res.text);
-
-        // console.log("[spec] devices:", JSON.stringify(r.devices, null, 2));
 
         /* {
             "success": true,
@@ -218,10 +214,10 @@ describe("Transformer (JWT)", function () {
           .set('Authorization', jwt)
           .send({ device_id: udid })
           .end((__err, __res) => {
-            console.log("🚸 [chai] POST /api/transformer/run (JWT, semi-valid) response:", __res.text, " status:", __res.status);
             let j = JSON.parse(__res.text);
             expect(j.success).to.equal(true);
             expect(__res.status).to.equal(200);
+            // {"success":true,"response":{"registration":{"success":true,"status":"OK","auto_update":false,"owner":"bab692f8c9c78cf64f579406bdf6c6cd2c4d00b3c0c8390387d051495dd95247","alias":"****-device-6-dynamic","mesh_ids":[],"udid":"2cca5eb0-cee7-11ec-bf6e-6f0d4bd71a6a","timestamp":1652025293}}}
             //
             done();
           });

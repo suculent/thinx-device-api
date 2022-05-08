@@ -15,7 +15,6 @@ describe("Deployer", function () {
 
   var envi = require("../_envi.json");
   var owner = envi.oid;
-  var udid = envi.udid;
 
   var device = {
     mac: envi.mac,
@@ -32,11 +31,6 @@ describe("Deployer", function () {
   it("should be able to init with device", function () {
     deploy.initWithDevice(device);
     expect(true).to.equal(true);
-  });
-
-  it("should be able to return path for device", function () {
-    var repo_path = deploy.pathForDevice(owner, udid);
-    expect(repo_path).to.be.a('string');
   });
 
   it("should not be able to return latest firmware path for nonexistent device", function (done) {
