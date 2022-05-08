@@ -345,7 +345,7 @@ describe("Transfer (JWT)", function () {
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"response":"decline_complete_no_such_dtid"}');
+                expect(res.text).to.equal('{"success":true,"response":"decline_complete_no_such_dtid"}');
                 // returns HTML
                 done();
             });
