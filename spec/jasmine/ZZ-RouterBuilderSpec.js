@@ -364,8 +364,6 @@ describe("Builder (JWT)", function () {
             .end((err, res) => {
                 console.log("🚸 [chai] response /api/v2/build/artifacts (JWT, should-be-valid):", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
-                expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"response":"artifact_not_found"}');
                 done();
             });
     }, 20000);
