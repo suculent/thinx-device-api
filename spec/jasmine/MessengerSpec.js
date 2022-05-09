@@ -134,7 +134,13 @@ describe("Messenger", function() {
   }, 5000);
 
   // responder should not fail
-  it("should be able to respond to a message", function() {
+  it("should be able to respond to a nonsense message", function() {
+    let topic = "/owner/device/test";
+    let message = "Bare no-NID message";
+    messenger.messageResponder(topic, message);
+  });
+
+  it("should be able to respond to specific message", function() {
     let topic = "/owner/device/test";
     let message = "Bare no-NID message";
     messenger.messageResponder(topic, message);
