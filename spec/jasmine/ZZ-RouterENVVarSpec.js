@@ -32,7 +32,7 @@ describe("ENV Vars (noauth)", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/env/add (noauth, invalid)", function (done) {
     chai.request(thx.app)
@@ -42,7 +42,7 @@ describe("ENV Vars (noauth)", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/env/add (noauth, semi-valid)", function (done) {
     chai.request(thx.app)
@@ -52,7 +52,7 @@ describe("ENV Vars (noauth)", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/env/revoke (noauth, semi-valid)", function (done) {
     chai.request(thx.app)
@@ -62,7 +62,7 @@ describe("ENV Vars (noauth)", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/user/env/list (noauth)", function (done) {
     chai.request(thx.app)
@@ -71,7 +71,7 @@ describe("ENV Vars (noauth)", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 });
 
 describe("ENV Vars (JWT)", function () {
@@ -114,7 +114,7 @@ describe("ENV Vars (JWT)", function () {
         expect(res.text).to.equal('{"success":true,"response":"env-name"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/env/revoke (JWT, invalid)", function (done) {
     chai.request(thx.app)
@@ -127,7 +127,7 @@ describe("ENV Vars (JWT)", function () {
         expect(res.text).to.equal('{"success":false,"response":"no_names_given"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/env/add (JWT, invalid)", function (done) {
     chai.request(thx.app)
@@ -140,7 +140,7 @@ describe("ENV Vars (JWT)", function () {
         expect(res.text).to.equal('{"success":false,"response":"missing_key"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/env/add (JWT, semi-valid)", function (done) {
     chai.request(thx.app)
@@ -153,7 +153,7 @@ describe("ENV Vars (JWT)", function () {
         expect(res.text).to.equal('{"success":false,"response":"missing_key"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/env/revoke (JWT, semi-valid)", function (done) {
     chai.request(thx.app)
@@ -166,7 +166,7 @@ describe("ENV Vars (JWT)", function () {
         expect(res.text).to.equal('{"success":false,"response":"no_names_given"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/user/env/list (JWT)", function (done) {
     chai.request(thx.app)
@@ -178,5 +178,5 @@ describe("ENV Vars (JWT)", function () {
         //expect(res.text).to.equal('{"env_vars":["env-name"]}'); // does not return values, this is a one-way
         done();
       });
-  }, 20000);
+  }, 30000);
 });

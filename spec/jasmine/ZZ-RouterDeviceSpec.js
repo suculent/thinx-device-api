@@ -32,7 +32,7 @@ describe("Devices", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/user/devices (cookie)", function (done) {
     console.log("🚸 [chai] GET /api/user/devices (cookie)");
@@ -43,7 +43,7 @@ describe("Devices", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/user/device/data/:udid" + envi.oid, function (done) {
     console.log("🚸 [chai] GET /api/user/device/data/:udid");
@@ -53,7 +53,7 @@ describe("Devices", function () {
         expect(res.status).to.equal(404);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/edit", function (done) {
     console.log("🚸 [chai] POST /api/device/edit");
@@ -64,7 +64,7 @@ describe("Devices", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/attach", function (done) {
     console.log("🚸 [chai] POST /api/device/attach");
@@ -75,7 +75,7 @@ describe("Devices", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/detach", function (done) {
     console.log("🚸 [chai] POST /api/device/detach");
@@ -86,7 +86,7 @@ describe("Devices", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/mesh/attach", function (done) {
     console.log("🚸 [chai] POST /api/device/mesh/attach");
@@ -97,7 +97,7 @@ describe("Devices", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   // POST /api/device/mesh/detach
   it("POST /api/device/mesh/detach", function (done) {
@@ -109,7 +109,7 @@ describe("Devices", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/data", function (done) {
     console.log("🚸 [chai] POST /api/device/data");
@@ -121,7 +121,7 @@ describe("Devices", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/revoke", function (done) {
     console.log("🚸 [chai] POST /api/device/revoke");
@@ -132,7 +132,7 @@ describe("Devices", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   //
   // Device Configuration
@@ -148,7 +148,7 @@ describe("Devices", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 });
 
 describe("Devices (JWT)", function () {
@@ -206,7 +206,7 @@ describe("Devices (JWT)", function () {
         console.log("[spec] saving apikey (D)", j.response.api_key);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /device/register (jwt, valid) D", function (done) {
 
@@ -223,7 +223,7 @@ describe("Devices (JWT)", function () {
         expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   let dynamic_devices = [];
 
@@ -240,7 +240,7 @@ describe("Devices (JWT)", function () {
         expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/user/device/data/:udid" + envi.oid, function (done) {
     console.log("🚸 [chai] GET /api/user/device/data/:udid");
@@ -252,7 +252,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/edit", function (done) {
     console.log("🚸 [chai] POST /api/device/edit (JWT)");
@@ -266,7 +266,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/attach", function (done) {
     console.log("🚸 [chai] POST /api/device/attach (JWT)");
@@ -280,7 +280,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/attach", function (done) {
     console.log("🚸 [chai] POST /api/device/attach (JWT) 2");
@@ -294,7 +294,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/detach", function (done) {
     console.log("🚸 [chai] POST /api/device/detach  (JWT)");
@@ -308,7 +308,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/detach", function (done) {
     console.log("🚸 [chai] POST /api/device/detach  (JWT) 2");
@@ -323,7 +323,7 @@ describe("Devices (JWT)", function () {
         expect(res.text).to.equal('{"success":true,"response":"detached"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   let mesh_id;
 
@@ -340,7 +340,7 @@ describe("Devices (JWT)", function () {
         expect(res.text).to.equal('{"success":true,"response":{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/mesh/attach", function (done) {
     console.log("🚸 [chai] POST /api/device/mesh/attach (JWT)");
@@ -354,7 +354,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/mesh/attach", function (done) {
     console.log("🚸 [chai] POST /api/device/mesh/attach (JWT) 2");
@@ -368,7 +368,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/mesh/attach", function (done) {
     console.log("🚸 [chai] POST /api/device/mesh/attach (JWT) 3");
@@ -382,7 +382,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/mesh/attach", function (done) {
     console.log("🚸 [chai] POST /api/device/mesh/attach (JWT) 4");
@@ -396,7 +396,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/mesh/detach", function (done) {
     console.log("🚸 [chai] POST /api/device/mesh/detach (noudid)");
@@ -409,7 +409,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   // POST /api/device/mesh/detach
   it("POST /api/device/mesh/detach", function (done) {
@@ -424,7 +424,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/mesh/detach", function (done) {
     console.log("🚸 [chai] POST /api/device/mesh/detach (JWT) 2");
@@ -438,7 +438,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/data", function (done) {
     console.log("🚸 [chai] POST /api/device/data (JWT)");
@@ -452,7 +452,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/data", function (done) {
     console.log("🚸 [chai] POST /api/device/data (JWT) 2");
@@ -466,7 +466,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/revoke", function (done) {
     console.log("🚸 [chai] POST /api/device/revoke (JWT)");
@@ -480,7 +480,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   //
   // Device Configuration
@@ -500,7 +500,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/revoke", function (done) {
     console.log("🚸 [chai] POST /api/device/revoke (JWT) 2");
@@ -514,7 +514,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   //
   // API v2 specs for device.router.js
@@ -532,7 +532,7 @@ describe("Devices (JWT)", function () {
         expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   // PUT /api/v2/device
   it("PUT /api/v2/device (JWT)", function (done) {
@@ -547,7 +547,7 @@ describe("Devices (JWT)", function () {
         expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   // PUT /api/v2/source/attach
   it("PUT /api/v2/source/attach", function (done) {
@@ -562,7 +562,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
   
   // PUT /api/v2/source/detach
   it("PUT /api/v2/source/detach", function (done) {
@@ -577,7 +577,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   // PUT /api/v2/mesh/attach
   it("PUT /api/v2/mesh/attach", function (done) {
@@ -592,7 +592,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   // PUT /api/v2/mesh/detach
   it("PUT /api/v2/mesh/detach", function (done) {
@@ -607,7 +607,7 @@ describe("Devices (JWT)", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   // DELETE /api/v2/device
   it("DELETE /api/v2/device (JWT)", function (done) {
@@ -622,7 +622,7 @@ describe("Devices (JWT)", function () {
         expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("DELETE /api/v2/device (JWT)", function (done) {
     console.log("🚸 [chai] DELETE /api/v2/device (JWT, multi)");
@@ -636,7 +636,7 @@ describe("Devices (JWT)", function () {
         expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   
 });

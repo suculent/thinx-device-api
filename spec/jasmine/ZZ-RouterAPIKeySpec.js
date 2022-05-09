@@ -49,7 +49,7 @@ describe("API Keys (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // revoke
     it("POST /api/user/apikey/revoke", function (done) {
@@ -62,7 +62,7 @@ describe("API Keys (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // list
     it("GET /api/user/apikey/list", function (done) {
@@ -72,7 +72,7 @@ describe("API Keys (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 });
 
 //
@@ -110,7 +110,7 @@ describe("API Keys (JWT)", function () {
                 console.log("[spec] saving apikey (1)", j.response.api_key);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/user/apikey (2)", function (done) {
         chai.request(thx.app)
@@ -129,7 +129,7 @@ describe("API Keys (JWT)", function () {
                 created_api_key_2 = j.hash;
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/user/apikey (3)", function (done) {
         chai.request(thx.app)
@@ -146,7 +146,7 @@ describe("API Keys (JWT)", function () {
                 expect(j.response.hash).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // revoke
     it("POST /api/user/apikey/revoke (single)", function (done) {
@@ -166,7 +166,7 @@ describe("API Keys (JWT)", function () {
                 //expect(aks.length >= 1);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/user/apikey/revoke (multiple, fault)", function (done) {
         expect(created_api_key_2).not.to.be.null;
@@ -186,7 +186,7 @@ describe("API Keys (JWT)", function () {
                 expect(j.response.length).to.equal(0);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/user/apikey/revoke (multiple)", function (done) {
         expect(created_api_key_2).not.to.be.null;
@@ -206,7 +206,7 @@ describe("API Keys (JWT)", function () {
                 // TODO: fixme: does not delete anything... expect(j.revoked.length).to.equal(1);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // list
     it("GET /api/user/apikey/list", function (done) {
@@ -221,7 +221,7 @@ describe("API Keys (JWT)", function () {
                 expect(j.response.length >= 1);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // API v2
 
@@ -240,7 +240,7 @@ describe("API Keys (JWT)", function () {
                 expect(j.response.hash).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /api/v2/apikey", function (done) {
         chai.request(thx.app)
@@ -254,7 +254,7 @@ describe("API Keys (JWT)", function () {
                 expect(j.response.length >= 1);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("DELETE /api/v2/apikey", function (done) {
         expect(created_api_key).not.to.be.null;
@@ -273,6 +273,6 @@ describe("API Keys (JWT)", function () {
                 //expect(aks.length >= 1);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
 });

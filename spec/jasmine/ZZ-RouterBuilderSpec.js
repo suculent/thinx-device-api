@@ -43,7 +43,7 @@ describe("Builder (noauth)", function () {
                 //expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // latest firmware envelope
     it("POST /api/device/envelope", function (done) {
@@ -56,7 +56,7 @@ describe("Builder (noauth)", function () {
                 expect(res.text).to.be.a('string'); // false
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // get build artifacts
     it("POST /api/device/artifacts", function (done) {
@@ -68,7 +68,7 @@ describe("Builder (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     afterAll(() => {
         console.log(`🚸 [chai] <<< completed Builder (noauth) spec`);
@@ -117,7 +117,7 @@ describe("Builder (JWT)", function () {
                 expect(res.status).to.equal(400);
                 done();
             });
-    }, 20000);
+    }, 30000);
     
     // covering buildGuards
 
@@ -130,7 +130,7 @@ describe("Builder (JWT)", function () {
                 expect(res.status).to.equal(400);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/build (JWT, invalid) III", function (done) {
         agent
@@ -141,7 +141,7 @@ describe("Builder (JWT)", function () {
                 expect(res.status).to.equal(400);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/build (JWT, invalid) IV", function (done) {
         agent
@@ -152,7 +152,7 @@ describe("Builder (JWT)", function () {
                 expect(res.status).to.equal(400);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/build (JWT, invalid) V", function (done) {
         agent
@@ -163,7 +163,7 @@ describe("Builder (JWT)", function () {
                 expect(res.status).to.equal(400);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/build (JWT, invalid) VI", function (done) {
         agent
@@ -174,7 +174,7 @@ describe("Builder (JWT)", function () {
                 expect(res.status).to.equal(400);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/build (JWT, invalid) VII", function (done) {
         agent
@@ -185,7 +185,7 @@ describe("Builder (JWT)", function () {
                 expect(res.status).to.equal(400);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/build (JWT, valid) VI", function (done) {
 
@@ -221,7 +221,7 @@ describe("Builder (JWT)", function () {
             });
 
         
-    }, 20000);
+    }, 30000);
 
     it("POST /api/v2/build (JWT, valid) V", function (done) {
 
@@ -256,7 +256,7 @@ describe("Builder (JWT)", function () {
             });
 
         
-    }, 20000);
+    }, 30000);
 
     // latest firmware envelope
     it("POST /api/device/envelope (JWT, invalid)", function (done) {
@@ -270,7 +270,7 @@ describe("Builder (JWT)", function () {
                 expect(res.text).to.equal('{}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/v2/device/lastbuild (JWT, invalid)", function (done) {
         agent
@@ -283,7 +283,7 @@ describe("Builder (JWT)", function () {
                 expect(res.text).to.equal('{}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // get build artifacts
     it("POST /api/device/artifacts (JWT, invalid)", function (done) {
@@ -298,7 +298,7 @@ describe("Builder (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"missing_owner"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/artifacts (JWT, semi-valid 1)", function (done) {
         agent
@@ -311,7 +311,7 @@ describe("Builder (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"missing_owner"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/artifacts (JWT, semi-valid 2)", function (done) {
         agent
@@ -324,7 +324,7 @@ describe("Builder (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"missing_owner"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/artifacts (JWT, semi-valid)", function (done) {
         //console.log("🚸 [chai] POST /api/device/artifacts (JWT, semi-valid)");
@@ -338,7 +338,7 @@ describe("Builder (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"missing_owner"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/v2/build/artifacts (JWT, semi-valid)", function (done) {
         //console.log("🚸 [chai] POST /api/build/artifacts (JWT, semi-valid)");
@@ -352,7 +352,7 @@ describe("Builder (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"missing_owner"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/v2/build/artifacts (JWT, still-invalid)", function (done) {
         console.log("🚸 [chai] POST /api/build/artifacts (JWT, should-be-valid)");
@@ -365,7 +365,7 @@ describe("Builder (JWT)", function () {
                 expect(res.status).to.equal(200);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // the artifact is mocked at mnt/data/deploy/<owner-id>/<udid>/<build_id>/<build_id>.zip
     it("POST /api/v2/build/artifacts (JWT, valid)", function (done) {
@@ -379,6 +379,6 @@ describe("Builder (JWT)", function () {
                 expect(res.status).to.equal(200);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
 });

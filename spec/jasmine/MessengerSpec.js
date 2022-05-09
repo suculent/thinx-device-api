@@ -51,7 +51,7 @@ describe("Messenger", function() {
         expect(TEST_DEVICE_6.udid).to.be.a('string');
         done();
       });
-  }, 20000); // register
+  }, 30000); // register
 
 
   it("should be able to initialize", function (/* done */) {

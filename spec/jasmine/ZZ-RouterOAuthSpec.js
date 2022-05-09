@@ -33,7 +33,7 @@ describe("OAuth", function () {
                 expect(res).to.be.html;
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /api/slack/redirect", function (done) {
         chai.request(thx.app)
@@ -43,7 +43,7 @@ describe("OAuth", function () {
                 expect(err.code == 'ECONNREFUSED');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // Github OAuth
 
@@ -54,7 +54,7 @@ describe("OAuth", function () {
                 expect(res.status).to.equal(200);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /api/oauth/github/callback", function (done) {
         chai.request(thx.app)
@@ -64,7 +64,7 @@ describe("OAuth", function () {
                 expect(res.status).to.equal(401); // only in test now because of unset event listeners!
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /api/oauth/github/callback?code=B", function (done) {
         chai.request(thx.app)
@@ -73,7 +73,7 @@ describe("OAuth", function () {
                 expect(res.status).to.equal(401); // only in test now because of unset event listeners!
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // Google OAuth
 
@@ -84,7 +84,7 @@ describe("OAuth", function () {
                 expect(res.status).to.equal(200);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /api/oauth/google/callback", function (done) {
         chai.request(thx.app)
@@ -93,5 +93,5 @@ describe("OAuth", function () {
                 expect(res.status).to.equal(200);
                 done();
             });
-    }, 20000);
+    }, 30000);
 });

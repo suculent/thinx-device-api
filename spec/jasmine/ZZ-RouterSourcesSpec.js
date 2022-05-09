@@ -32,7 +32,7 @@ describe("Sources (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/user/source", function (done) {
         chai.request(thx.app)
@@ -42,7 +42,7 @@ describe("Sources (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/user/source/revoke (invalid)", function (done) {
         chai.request(thx.app)
@@ -52,7 +52,7 @@ describe("Sources (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 });
 
 describe("Sources (JWT)", function () {
@@ -103,7 +103,7 @@ describe("Sources (JWT)", function () {
                 expect(j.response).to.be.an('object');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
 
     it("GET /api/v2/source", function (done) {
@@ -118,7 +118,7 @@ describe("Sources (JWT)", function () {
                 expect(j.response).to.be.an('object');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/user/source (invalid)", function (done) {
         chai.request(thx.app)
@@ -130,7 +130,7 @@ describe("Sources (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"missing_source_alias"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/user/source (semi-valid, does not fetch)", function (done) {
         chai.request(thx.app)
@@ -145,7 +145,7 @@ describe("Sources (JWT)", function () {
                 expect(r.success).to.equal(true);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("PUT /api/v2/source (semi-valid, does not fetch)", function (done) {
         chai.request(thx.app)
@@ -160,7 +160,7 @@ describe("Sources (JWT)", function () {
                 expect(r.success).to.equal(true);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/user/source/revoke", function (done) {
         expect(source_for_revocation !== 0);
@@ -173,7 +173,7 @@ describe("Sources (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"missing_source_ids"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/user/source/revoke (valid)", function (done) {
         chai.request(thx.app)
@@ -185,7 +185,7 @@ describe("Sources (JWT)", function () {
                 expect(res.text).to.equal('{"success":true,"source_ids":[]}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("DELETE /api/user/source/revoke (valid)", function (done) {
         chai.request(thx.app)
@@ -198,5 +198,5 @@ describe("Sources (JWT)", function () {
                 // expect(res.text).to.equal('{"success":true,"source_ids":[]}'); already deleted
                 done();
             });
-    }, 20000);
+    }, 30000);
 });

@@ -62,7 +62,7 @@ describe("Transformer (JWT)", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   // create
   it("POST /api/user/apikey (JWT T1)", function (done) {
@@ -82,7 +82,7 @@ describe("Transformer (JWT)", function () {
         created_api_key = j.response.hash;
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /device/register (jwt, valid)", function (done) {
 
@@ -98,7 +98,7 @@ describe("Transformer (JWT)", function () {
         expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/edit", function (done) {
     agent
@@ -111,7 +111,7 @@ describe("Transformer (JWT)", function () {
         expect(res.text).to.equal('{"success":false,"response":"changes.udid_undefined"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/edit", function (done) {
     agent
@@ -127,7 +127,7 @@ describe("Transformer (JWT)", function () {
         // {"success":true,"message":{"success":true,"change":{"transformers":[{"ufid":"vt:b688d51871191b9f645678b10ce70ec23704ef5c549019b8beeaec9939401756","alias":"Empty","body":"var transformer = function(status, device) { return status };"}],"udid":"64984150-b771-11ec-bf10-f505ba97f5e2","doc":null,"value":null}}} 
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/transformer/run (JWT, invalid)", function (done) {
     agent
@@ -139,7 +139,7 @@ describe("Transformer (JWT)", function () {
         expect(res.status).to.equal(200);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/transformer/run (JWT, semi-valid)", function (done) {
     agent
@@ -152,7 +152,7 @@ describe("Transformer (JWT)", function () {
         expect(res.text).to.equal('{"success":false,"response":"no_such_device"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/transformer/run (JWT, valid, trans)", function (done) {
 
@@ -223,7 +223,7 @@ describe("Transformer (JWT)", function () {
           });
       });
 
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/delete (jwt, last action)", function (done) {
     chai.request(thx.app)
@@ -235,6 +235,6 @@ describe("Transformer (JWT)", function () {
         expect(res.text).to.equal('{"success":true,"response":"deleted"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
 });
