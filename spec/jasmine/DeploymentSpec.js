@@ -15,7 +15,6 @@ describe("Deployer", function () {
 
   var envi = require("../_envi.json");
   var owner = envi.oid;
-  var udid = envi.udid;
 
   var device = {
     mac: envi.mac,
@@ -34,14 +33,16 @@ describe("Deployer", function () {
     expect(true).to.equal(true);
   });
 
-  it("should be able to return path for device", function () {
-    var repo_path = deploy.pathForDevice(owner, udid);
-    expect(repo_path).to.be.a('string');
+  it("should not be able to return latest firmware path for nonexistent device", function (done) {
+    deploy.latestFirmwarePath(device.owner, "c6ff2bb0-df34-11e7-b351-eb37822aa172", (path) => {
+      expect(path).to.equal(false);
+      done();
+    });
   });
 
   it("should be able to return latest firmware path", function (done) {
     deploy.latestFirmwarePath(device.owner, envi.udid, (path) => {
-      expect(path).to.equal(false);
+      expect(path).to.be.a('string');
       done();
     });
   });
@@ -53,7 +54,7 @@ describe("Deployer", function () {
 
   it("should be able to return latest firmware envelope", function () {
     var firmwareUpdateDescriptor = deploy.latestFirmwareEnvelope(device.owner, device.udid);
-    expect(firmwareUpdateDescriptor).to.equal(false);
+    expect(firmwareUpdateDescriptor).to.be.an('object');
   });
 
   it("should be able to return update support for platform", function () {

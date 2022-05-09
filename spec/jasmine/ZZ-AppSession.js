@@ -41,7 +41,7 @@ describe("ZZ-AppSession Session Management", function () {
         expect(res.text).to.equal('{"success":false,"response":"invalid_credentials"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("/api/logout (without session)", function (done) {
     chai.request(thx.app)
@@ -51,7 +51,7 @@ describe("ZZ-AppSession Session Management", function () {
         expect(res.text).to.be.a('string'); // html...
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/login (valid)", function (done) {
     agent
@@ -68,7 +68,7 @@ describe("ZZ-AppSession Session Management", function () {
             expect(res).to.have.status(200);*/
       })
       .catch((e) => console.log("/api/login (valid) e:", e));
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/logs/tail (with session)", function (done) {
     agent
@@ -80,7 +80,7 @@ describe("ZZ-AppSession Session Management", function () {
         expect(res.status).to.equal(200); // not implemented at this stage
         done();
       });
-  }, 20000);
+  }, 30000);
 
 
 });

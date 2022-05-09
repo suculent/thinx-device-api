@@ -59,11 +59,10 @@ describe("Transformer (JWT)", function () {
       .post('/api/transformer/run')
       .send({})
       .end((_err, res) => {
-        //console.log("🚸 [chai] POST /api/transformer/run response:", res.text, " status:", res.status);
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   // create
   it("POST /api/user/apikey (JWT T1)", function (done) {
@@ -83,7 +82,7 @@ describe("Transformer (JWT)", function () {
         created_api_key = j.response.hash;
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /device/register (jwt, valid)", function (done) {
 
@@ -99,7 +98,7 @@ describe("Transformer (JWT)", function () {
         expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/edit", function (done) {
     agent
@@ -112,7 +111,7 @@ describe("Transformer (JWT)", function () {
         expect(res.text).to.equal('{"success":false,"response":"changes.udid_undefined"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/device/edit", function (done) {
     agent
@@ -128,7 +127,7 @@ describe("Transformer (JWT)", function () {
         // {"success":true,"message":{"success":true,"change":{"transformers":[{"ufid":"vt:b688d51871191b9f645678b10ce70ec23704ef5c549019b8beeaec9939401756","alias":"Empty","body":"var transformer = function(status, device) { return status };"}],"udid":"64984150-b771-11ec-bf10-f505ba97f5e2","doc":null,"value":null}}} 
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/transformer/run (JWT, invalid)", function (done) {
     agent
@@ -140,7 +139,7 @@ describe("Transformer (JWT)", function () {
         expect(res.status).to.equal(200);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/transformer/run (JWT, semi-valid)", function (done) {
     agent
@@ -153,7 +152,7 @@ describe("Transformer (JWT)", function () {
         expect(res.text).to.equal('{"success":false,"response":"no_such_device"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/transformer/run (JWT, valid, trans)", function (done) {
 
@@ -161,10 +160,7 @@ describe("Transformer (JWT)", function () {
       .get('/api/user/devices')
       .set('Authorization', jwt)
       .end((_err, res) => {
-        console.log("POST /api/transformer/run (JWT, valid, trans) response", res.text, res.success);
         let r = JSON.parse(res.text);
-
-        // console.log("[spec] devices:", JSON.stringify(r.devices, null, 2));
 
         /* {
             "success": true,
@@ -218,16 +214,16 @@ describe("Transformer (JWT)", function () {
           .set('Authorization', jwt)
           .send({ device_id: udid })
           .end((__err, __res) => {
-            console.log("🚸 [chai] POST /api/transformer/run (JWT, semi-valid) response:", __res.text, " status:", __res.status);
             let j = JSON.parse(__res.text);
             expect(j.success).to.equal(true);
             expect(__res.status).to.equal(200);
+            // {"success":true,"response":{"registration":{"success":true,"status":"OK","auto_update":false,"owner":"bab692f8c9c78cf64f579406bdf6c6cd2c4d00b3c0c8390387d051495dd95247","alias":"****-device-6-dynamic","mesh_ids":[],"udid":"2cca5eb0-cee7-11ec-bf6e-6f0d4bd71a6a","timestamp":1652025293}}}
             //
             done();
           });
       });
 
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/delete (jwt, last action)", function (done) {
     chai.request(thx.app)
@@ -239,6 +235,6 @@ describe("Transformer (JWT)", function () {
         expect(res.text).to.equal('{"success":true,"response":"deleted"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
 });

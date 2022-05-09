@@ -81,7 +81,7 @@ describe("User Routes V2", function () {
           });
 
       });
-  }, 20000);
+  }, 30000);
 
   // 1
 
@@ -97,7 +97,7 @@ describe("User Routes V2", function () {
         expect(reset_key).be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/v2/password/reset", function (done) {
     chai.request(thx.app)
@@ -107,7 +107,7 @@ describe("User Routes V2", function () {
         expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   // has no response, maybe reset_key is already used...
   it("POST /api/v2/password/set", function (done) {
@@ -122,7 +122,7 @@ describe("User Routes V2", function () {
         //expect(res.text).to.equal('{"success":false,"response":"password_reset_failed"}'); // somehow not deterministic
         done();
       });
-  }, 20000);
+  }, 30000);
 
 
   //
@@ -170,7 +170,7 @@ describe("User Routes V2", function () {
           });
       })
       .catch((e) => { console.log(e); });
-  }, 20000);
+  }, 30000);
 
   //
   // User Statistics
@@ -187,7 +187,7 @@ describe("User Routes V2", function () {
         expect(res1.text).to.equal('{"success":false,"response":"password_mismatch"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/v2/stats", function (done) {
     chai.request(thx.app)
@@ -199,7 +199,7 @@ describe("User Routes V2", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/v2/chat", function (done) {
     chai.request(thx.app)
@@ -212,7 +212,7 @@ describe("User Routes V2", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   //
   // Removal
@@ -232,7 +232,7 @@ describe("User Routes V2", function () {
         // {"success":false,"response":"deletion_not_confirmed"} 
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/v2/logout", function (done) {
     chai.request(thx.app)
@@ -244,7 +244,7 @@ describe("User Routes V2", function () {
         expect(res).to.be.html;
         done();
       });
-  }, 20000);
+  }, 30000);
 
   /* done by the GDPR revocation, would need other user */
   xit("DELETE /api/v2/user", function (done) {
@@ -259,7 +259,7 @@ describe("User Routes V2", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
   
 
 });

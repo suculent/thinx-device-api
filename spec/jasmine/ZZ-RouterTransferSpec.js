@@ -33,7 +33,7 @@ describe("Device Ownership Transfer (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /api/transfer/decline (noauth, invalid)", function (done) {
         chai.request(thx.app)
@@ -43,7 +43,7 @@ describe("Device Ownership Transfer (noauth)", function () {
                 expect(res.text).to.be.a('string'); // <html>
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/transfer/decline (noauth, invalid)", function (done) {
         chai.request(thx.app)
@@ -53,7 +53,7 @@ describe("Device Ownership Transfer (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /api/transfer/accept (noauth, invalid)", function (done) {
         chai.request(thx.app)
@@ -64,7 +64,7 @@ describe("Device Ownership Transfer (noauth)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/transfer/accept (noauth, invalid)", function (done) {
         chai.request(thx.app)
@@ -75,7 +75,7 @@ describe("Device Ownership Transfer (noauth)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 });
 
 describe("Transfer (JWT)", function () {
@@ -115,7 +115,7 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"missing_recipient"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // migrate using invalid data (owner_id instead of e-mail)
     it("POST /api/transfer/request (jwt, semi-valid)", function (done) {
@@ -129,7 +129,7 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"recipient_unknown"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // migrate from dynamic owner to cimrman
     it("POST /api/transfer/request (jwt, valid)", function (done) {
@@ -146,7 +146,7 @@ describe("Transfer (JWT)", function () {
                 expect(j.success).to.equal(true);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /api/transfer/decline (jwt, invalid)", function (done) {
         chai.request(thx.app)
@@ -157,7 +157,7 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.be.a('string'); // <html>
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/transfer/decline (jwt, invalid)", function (done) {
         chai.request(thx.app)
@@ -169,7 +169,7 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /api/transfer/accept (jwt, invalid)", function (done) {
         chai.request(thx.app)
@@ -181,7 +181,7 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/transfer/accept (jwt, invalid)", function (done) {
         chai.request(thx.app)
@@ -194,7 +194,7 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/transfer/accept (noauth, null)", function (done) {
         chai.request(thx.app)
@@ -207,7 +207,7 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // v2
 
@@ -222,7 +222,7 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"missing_recipient"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /api/v2/transfer/decline (jwt, invalid)", function (done) {
         chai.request(thx.app)
@@ -233,7 +233,7 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.be.a('string'); // <html>
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/v2/transfer/decline (jwt, invalid)", function (done) {
         chai.request(thx.app)
@@ -245,7 +245,7 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/v2/transfer/decline (jwt, invalid)", function (done) {
         chai.request(thx.app)
@@ -258,7 +258,7 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"owner_missing"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/v2/transfer/decline (jwt, invalid) 2", function (done) {
         chai.request(thx.app)
@@ -271,7 +271,7 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"udids_missing"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /api/v2/transfer/decline (jwt, invalid) 2", function (done) {
         chai.request(thx.app)
@@ -284,7 +284,7 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /api/v2/transfer/accept (jwt, invalid)", function (done) {
         chai.request(thx.app)
@@ -296,7 +296,7 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/v2/transfer/accept (jwt, invalid)", function (done) {
         chai.request(thx.app)
@@ -309,7 +309,7 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"owner_missing"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/v2/transfer/accept (jwt, invalid) 2", function (done) {
         chai.request(thx.app)
@@ -322,7 +322,7 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"udids_missing"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/v2/transfer/accept III", function (done) {
         chai.request(thx.app)
@@ -335,7 +335,7 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/v2/transfer/decline IV", function (done) {
         chai.request(thx.app)
@@ -343,13 +343,13 @@ describe("Transfer (JWT)", function () {
             .set('Authorization', jwt)
             .send({ udids: [envi.dynamic.udid], transfer_id: transfer_id, owner: envi.dynamic.owner }) // will probably need real device using GET /api/device
             .end((_err, res) => {
-                console.log(`🚸 [chai] POST /api/v2/transfer/decline IV response: ${res.text}`);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":true,"response":"decline_complete_no_such_dtid"}');
                 // returns HTML
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /api/v2/transfer/decline V", function (done) {
         chai.request(thx.app)
@@ -357,13 +357,13 @@ describe("Transfer (JWT)", function () {
             .set('Authorization', jwt)
             .send({ udids: [envi.dynamic.udid], transfer_id: transfer_id, owner: envi.dynamic.owner }) // will probably need real device using GET /api/device
             .end((_err, res) => {
-                console.log(`🚸 [chai] GET /api/v2/transfer/decline V response: ${res.text}`);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":false,"response":"missing_transfer_id"}');
                 // returns HTML
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/v2/transfer/accept (jwt, null)", function (done) {
         chai.request(thx.app)
@@ -376,7 +376,7 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /api/v2/transfer/accept (jwt, null)", function (done) {
         chai.request(thx.app)
@@ -387,6 +387,6 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
                 
 });

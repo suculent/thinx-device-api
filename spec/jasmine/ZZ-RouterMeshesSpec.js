@@ -34,7 +34,7 @@ describe("Meshes (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/list (noauth, invalid)", function (done) {
         chai.request(thx.app)
@@ -44,7 +44,7 @@ describe("Meshes (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/list (APIKey, semi-valid)", function (done) {
         chai.request(thx.app)
@@ -54,7 +54,7 @@ describe("Meshes (noauth)", function () {
                 expect(res.status).to.equal(401); 
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/list (APIKey, semi-valid 2)", function (done) {
         chai.request(thx.app)
@@ -64,7 +64,7 @@ describe("Meshes (noauth)", function () {
                 expect(res.status).to.equal(401); 
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/create (noauth, invalid)", function (done) {
         chai.request(thx.app)
@@ -74,7 +74,7 @@ describe("Meshes (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/create (noauth, invalid)", function (done) {
         chai.request(thx.app)
@@ -84,7 +84,7 @@ describe("Meshes (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/create (noauth, semi-valid)", function (done) {
         chai.request(thx.app)
@@ -94,7 +94,7 @@ describe("Meshes (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/create (noauth, valid)", function (done) {
         chai.request(thx.app)
@@ -104,7 +104,7 @@ describe("Meshes (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/delete (noauth, invalid)", function (done) {
         chai.request(thx.app)
@@ -114,7 +114,7 @@ describe("Meshes (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/delete (noauth, null)", function (done) {
         chai.request(thx.app)
@@ -124,7 +124,7 @@ describe("Meshes (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/delete (noauth, undefined)", function (done) {
         chai.request(thx.app)
@@ -134,7 +134,7 @@ describe("Meshes (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 });
 
 describe("Meshes (JWT)", function () {
@@ -178,7 +178,7 @@ describe("Meshes (JWT)", function () {
                 //expect(res.text).to.equal('{"success":true,"response":[{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}]}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/list (jwt, valid)", function (done) {
         agent
@@ -189,7 +189,7 @@ describe("Meshes (JWT)", function () {
                 expect(res.text).to.equal('{"success":true,"response":[{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}]}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/create (jwt, semi-valid)", function (done) {
         agent
@@ -203,7 +203,7 @@ describe("Meshes (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"mesh_id_missing"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/create (jwt, semi-valid)", function (done) {
         agent
@@ -216,7 +216,7 @@ describe("Meshes (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"mesh_id_missing"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/create (jwt, valid)", function (done) {
         agent
@@ -232,7 +232,7 @@ describe("Meshes (JWT)", function () {
                 expect(res.text).to.equal('{"success":true,"response":{"mesh_id":"mock-mesh-id","alias":"mock-mesh-alias"}}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/create (jwt, valid, already exists)", function (done) {
         agent
@@ -248,7 +248,7 @@ describe("Meshes (JWT)", function () {
                 expect(res.text).to.equal('{"success":true,"response":{"mesh_id":"mock-mesh-id","alias":"mock-mesh-alias"}}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // does not guard against already existing!
     it("POST /api/mesh/create (jwt, valid 2)", function (done) {
@@ -264,7 +264,7 @@ describe("Meshes (JWT)", function () {
                 expect(res.text).to.equal('{"success":true,"response":{"mesh_id":"mock-mesh-id-2","alias":"mock-mesh-alias-2"}}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/delete (jwt, invalid)", function (done) {
         agent
@@ -275,7 +275,7 @@ describe("Meshes (JWT)", function () {
                 expect(res.status).to.equal(200);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/delete (jwt, semi-valid)", function (done) {
         expect(mesh_id !== null);
@@ -289,7 +289,7 @@ describe("Meshes (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"mesh_ids_missing"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/delete (jwt, invalid)", function (done) {
         let ro = {
@@ -306,7 +306,7 @@ describe("Meshes (JWT)", function () {
                 // {"success":false,"response":"Parameter owner_id missing."}
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/delete (jwt, invalid, already deleted)", function (done) {
         expect(mesh_id !== null);
@@ -325,7 +325,7 @@ describe("Meshes (JWT)", function () {
                 //{"success":false,"response":"Parameter owner_id missing."}
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/delete (jwt, valid)", function (done) {
         expect(mesh_id !== null);
@@ -342,7 +342,7 @@ describe("Meshes (JWT)", function () {
                 expect(res.text).to.equal('{"success":true,"response":["mock-mesh-id-2"]}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/delete (jwt, already deleted)", function (done) {
         expect(mesh_id !== null);
@@ -359,7 +359,7 @@ describe("Meshes (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":[]}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -379,7 +379,7 @@ describe("Meshes (JWT)", function () {
                 //expect(res.text).to.equal('{"success":true,"response":{"mesh_id":"mock-mesh-id-2","alias":"mock-mesh-alias-2"}}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /api/v2/mesh", function (done) {
         agent
@@ -393,7 +393,7 @@ describe("Meshes (JWT)", function () {
                 //expect(res.text).to.equal('{"success":true,"response":[{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}]}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/mesh/delete", function (done) {
         expect(mesh_id !== null);
@@ -409,7 +409,7 @@ describe("Meshes (JWT)", function () {
                 expect(res.status).to.equal(200);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
 
 });

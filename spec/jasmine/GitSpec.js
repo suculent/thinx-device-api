@@ -11,11 +11,11 @@ describe("Git", function () {
 
     var expect = require('chai').expect;
     let Git = require("../../lib/thinx/git");
-    var Deployment = require('../../lib/thinx/deployment'); var deploy = new Deployment();
+    let Filez = require("../../lib/thinx/files");
 
     var envi = require("../_envi.json");
-    var device_path = deploy.pathForDevice(envi.oid, envi.udid);
-    var dyn_device_path = deploy.pathForDevice(envi.dynamic.owner, envi.dynamic.udid);
+    var device_path = Filez.deployPathForDevice(envi.oid, envi.udid);
+    var dyn_device_path = Filez.deployPathForDevice(envi.dynamic.owner, envi.dynamic.udid);
 
     it("should be able to fetch one repo", function () {
         let git = new Git();

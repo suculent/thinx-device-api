@@ -53,7 +53,7 @@ describe("User Routes", function () {
         expect(res.text).to.equal('{"success":false,"response":"consent_missing"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/gdpr (unauthenticated, gdpr)", function (done) {
     chai.request(thx.app)
@@ -65,7 +65,7 @@ describe("User Routes", function () {
         expect(res.text).to.equal('{"success":false,"response":"token_missing"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/gdpr/transfer (unauthenticated)", function (done) {
     chai.request(thx.app)
@@ -75,7 +75,7 @@ describe("User Routes", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/gdpr/revoke (unauthenticated)", function (done) {
     chai.request(thx.app)
@@ -85,7 +85,7 @@ describe("User Routes", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   //
   // User Lifecycle
@@ -101,15 +101,13 @@ describe("User Routes", function () {
         expect(res.text).to.equal('{"success":false,"response":"email_required"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/create (valid body) and activate (set password)", function (done) {
     chai.request(thx.app)
       .post('/api/user/create')
       .send(user_info)
       .end((_err, res) => {
-        // {"success":true,"response":"6975d3c5849fc130e689f2cae0abe51a8fd24f496810bee3c0bcf531dd53be0c"}
-        console.log("[chai] POST /api/user/create (valid body) and activate (set password)", res.text);
         expect(res.text).to.be.a('string');
         expect(res.status).to.equal(200);
         let body = JSON.parse(res.text);
@@ -122,7 +120,6 @@ describe("User Routes", function () {
           .get(rurl)
           .end((__err, __res) => {
             expect(__res.status).to.equal(200);
-            console.log("[chai] GET /api/user/activate?owner= response:", __res.text);
             expect(__res.text).to.be.a('string'); // <html>
             expect(__res).to.be.html;
 
@@ -130,7 +127,6 @@ describe("User Routes", function () {
               .post('/api/user/password/set')
               .send({ password: envi.dynamic.username, rpassword: envi.dynamic.username, activation: dynamic_activation_code })
               .end((___err, ___res) => {
-                console.log("[chai] POST /api/user/password/set response:", ___res.text);
                 expect(___res.status).to.equal(200);
                 expect(___res.text).to.be.a('string');
                 expect(___res.text).to.equal('{"success":true,"response":"activation_successful"}');
@@ -139,7 +135,7 @@ describe("User Routes", function () {
           });
 
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/user/activate (noauth)", function (done) {
     chai.request(thx.app)
@@ -149,7 +145,7 @@ describe("User Routes", function () {
         expect(res.text).to.equal('{"success":false,"response":"activation_key_missing"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/delete (unauthenticated)", function (done) {
     chai.request(thx.app)
@@ -159,7 +155,7 @@ describe("User Routes", function () {
         expect(res.status).to.equal(403);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/gdpr (unauthenticated, empty)", function (done) {
     chai.request(thx.app)
@@ -171,7 +167,7 @@ describe("User Routes", function () {
         expect(res.text).to.equal('{"success":false,"response":"consent_missing"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/password/reset (noauth, no-data)", function (done) {
     chai.request(thx.app)
@@ -183,7 +179,7 @@ describe("User Routes", function () {
         expect(res.text).to.equal('{"success":false,"response":"email_not_found"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/password/reset (noauth, email)", function (done) {
     chai.request(thx.app)    
@@ -199,7 +195,7 @@ describe("User Routes", function () {
         expect(j.response).to.be.a('string'); // reset_key
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/user/password/reset (noauth, no-email)", function (done) {
     chai.request(thx.app)
@@ -210,7 +206,7 @@ describe("User Routes", function () {
         expect(res.text).to.equal('{"success":false,"response":"missing_reset_key"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/user/password/reset (noauth, invalid) 1", function (done) {
     chai.request(thx.app)
@@ -221,7 +217,7 @@ describe("User Routes", function () {
         expect(res.text).to.equal('{"success":false,"response":"user_not_found"}'); // because this is nov calid reset_key
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/user/password/reset (noauth, invalid) 2", function (done) {
     chai.request(thx.app)
@@ -232,19 +228,17 @@ describe("User Routes", function () {
         expect(res.text).to.equal('{"success":false,"response":"user_not_found"}'); // because this is nov calid reset_key generated by posting valid e-mail to password reset
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/user/password/reset (noauth, invalid) 3", function (done) {
     chai.request(thx.app)
       .get('/api/user/password/reset?reset_key=' + reset_key + '&owner=' + envi.dynamic.owner)
       .end((_err, res) => {
-        //console.log("[chai] GET /api/user/password/reset (noauth, invalid) 3", {res});
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        //expect(res.text).to.equal(''); // this is a password set form
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/password/set", function (done) {
     console.log("🚸 [chai] POST /api/user/password/set request");
@@ -257,7 +251,7 @@ describe("User Routes", function () {
         expect(res.text).to.equal('{"success":false,"response":"password_mismatch"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/password/set (2)", function (done) {
     console.log("🚸 [chai] POST /api/user/password/set (2) request");
@@ -270,7 +264,7 @@ describe("User Routes", function () {
         expect(res.text).to.equal('{"success":false,"response":"password_mismatch"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/password/set (3)", function (done) {
     console.log("🚸 [chai] POST /api/user/password/set (3) request");
@@ -281,10 +275,9 @@ describe("User Routes", function () {
         console.log("🚸 [chai] POST /api/user/password/set (3) response", res.text);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        //expect(res.text).to.equal('{"success":false,"response":"password_mismatch"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   //
   // User Profile
@@ -297,7 +290,7 @@ describe("User Routes", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/profile (noauth)", function (done) {
     chai.request(thx.app)
@@ -308,7 +301,7 @@ describe("User Routes", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/login (valid) and GET /api/user/profile (auth+jwt)", function (done) {
     agent
@@ -363,7 +356,7 @@ describe("User Routes", function () {
           });
       })
       .catch((e) => { console.log(e); });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/login (valid) with GDPR v2", function (done) {
     agent
@@ -414,7 +407,7 @@ describe("User Routes", function () {
           });
       })
       .catch((e) => { console.log(e); });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/gdpr/transfer", function (done) {
     chai.request(thx.app)
@@ -425,7 +418,7 @@ describe("User Routes", function () {
         expect(res.status).to.equal(200);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   // there is no login here, so JWT for this is missing
   it("POST /api/gdpr/revoke", function (done) {
@@ -440,7 +433,7 @@ describe("User Routes", function () {
         expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   // GDPR API v2
 
@@ -458,7 +451,7 @@ describe("User Routes", function () {
         expect(res.text).to.equal('{"success":false,"response":"deletion_not_confirmed"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   // there is no login here, so JWT for this is missing
   it("POST /api/v2/gdpr", function (done) {
@@ -469,7 +462,7 @@ describe("User Routes", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   // there is no login here, so JWT for this is missing
   it("PUT /api/v2/gdpr", function (done) {
@@ -482,7 +475,7 @@ describe("User Routes", function () {
 
         done();
       });
-  }, 20000);
+  }, 30000);
 
 
   //
@@ -498,7 +491,7 @@ describe("User Routes", function () {
         expect(res.status).to.equal(200);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/login (valid)", function (done) {
     agent
@@ -509,7 +502,7 @@ describe("User Routes", function () {
         done();
       })
       .catch((e) => { console.log(e); });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/profile (invalid)", function (done) {
     agent
@@ -519,7 +512,7 @@ describe("User Routes", function () {
         expect(res).to.have.status(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/profile (transformer)", function (done) {
     let changes = { transformers: envi.dynamic.transformers };
@@ -532,7 +525,7 @@ describe("User Routes", function () {
         expect(res).to.have.status(200);
         done();
       });
-  }, 20000);
+  }, 30000);
 
 
   //
@@ -546,7 +539,7 @@ describe("User Routes", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/user/logs/audit (jwt)", function (done) {
     chai.request(thx.app)
@@ -558,7 +551,7 @@ describe("User Routes", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/user/logs/build/list", function (done) {
     chai.request(thx.app)
@@ -567,7 +560,7 @@ describe("User Routes", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/user/logs/build/list (jwt)", function (done) {
     chai.request(thx.app)
@@ -579,7 +572,7 @@ describe("User Routes", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/logs/build", function (done) {
     chai.request(thx.app)
@@ -589,7 +582,7 @@ describe("User Routes", function () {
         expect(res.status).to.equal(401);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/logs/build (jwt)", function (done) {
     chai.request(thx.app)
@@ -602,7 +595,7 @@ describe("User Routes", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   let real_build_id;
 
@@ -619,7 +612,7 @@ describe("User Routes", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/user/logs/build/"+envi.build_id, function (done) {
     chai.request(thx.app)
@@ -631,7 +624,7 @@ describe("User Routes", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/v2/logs/build/"+real_build_id, function (done) {
     chai.request(thx.app)
@@ -643,7 +636,7 @@ describe("User Routes", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/v2/logs/audit", function (done) {
     chai.request(thx.app)
@@ -655,7 +648,7 @@ describe("User Routes", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   //
   // User Statistics
@@ -669,7 +662,7 @@ describe("User Routes", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/user/stats (jwt)", function (done) {
     console.log("🚸 [chai] GET /api/user/stats (jwt)");
@@ -682,7 +675,7 @@ describe("User Routes", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/v2/stats (jwt)", function (done) {
     console.log("🚸 [chai] GET /api/v2/stats (jwt)");
@@ -695,7 +688,7 @@ describe("User Routes", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   //
   // User Support (2nd level)
@@ -711,7 +704,7 @@ describe("User Routes", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/chat", function (done) {
     chai.request(thx.app)
@@ -724,7 +717,7 @@ describe("User Routes", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // API v2 Tests
@@ -737,7 +730,7 @@ describe("User Routes", function () {
         expect(res).to.have.status(200);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/v2/profile", function (done) {
     let changes = { transformers: envi.dynamic.transformers };
@@ -750,7 +743,7 @@ describe("User Routes", function () {
         expect(res).to.have.status(200);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/v2/stats/today", function (done) {
     chai.request(thx.app)
@@ -761,7 +754,7 @@ describe("User Routes", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("GET /api/v2/stats/week", function (done) {
     chai.request(thx.app)
@@ -772,6 +765,6 @@ describe("User Routes", function () {
         //expect(res.text).to.be.a('string');
         done();
       });
-  }, 20000);
+  }, 30000);
 
 });

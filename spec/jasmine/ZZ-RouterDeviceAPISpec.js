@@ -30,7 +30,7 @@ describe("Device API (noauth)", function () {
                 //expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /device/register B", function (done) {
         chai.request(thx.app)
@@ -42,7 +42,7 @@ describe("Device API (noauth)", function () {
                 //expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // must be fully mocked or run after build completes
     it("POST /device/firmware", function (done) {
@@ -55,7 +55,7 @@ describe("Device API (noauth)", function () {
                 //{"success":false,"response":"missing_mac"}
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /device/firmware OTT request", function (done) {
         chai.request(thx.app)
@@ -68,7 +68,7 @@ describe("Device API (noauth)", function () {
                 //{"success":false,"response":"missing_mac"}
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /device/addpush", function (done) {
         chai.request(thx.app)
@@ -80,7 +80,7 @@ describe("Device API (noauth)", function () {
                 //expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
 
 
@@ -93,7 +93,7 @@ describe("Device API (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/detail", function (done) {
         chai.request(thx.app)
@@ -103,7 +103,7 @@ describe("Device API (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/edit", function (done) {
         chai.request(thx.app)
@@ -113,7 +113,7 @@ describe("Device API (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /device/firmware", function (done) {
         chai.request(thx.app)
@@ -124,7 +124,7 @@ describe("Device API (noauth)", function () {
                 expect(res.text).to.equal('OTT_INFO_NOT_FOUND');
                 done();
             });
-    }, 20000);
+    }, 30000);
 });
 
 //
@@ -200,7 +200,7 @@ describe("Device + API (JWT+Key)", function () {
                 expect(j.success).to.equal(false);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /device/register (jwt, valid) 6", function (done) {
 
@@ -217,7 +217,7 @@ describe("Device + API (JWT+Key)", function () {
             expect(res.text).to.be.a('string');
             done();
           });
-      }, 20000);
+      }, 30000);
 
     // must be fully mocked or run after build completes
     it("POST /device/firmware (jwt, invalid)", function (done) {
@@ -231,7 +231,7 @@ describe("Device + API (JWT+Key)", function () {
                 //{"success":false,"response":"missing_mac"}
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /device/addpush (jwt, invalid)", function (done) {
         chai.request(thx.app)
@@ -243,7 +243,7 @@ describe("Device + API (JWT+Key)", function () {
                 //expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /device/addpush (jwt, valid)", function (done) {
         chai.request(thx.app)
@@ -256,7 +256,7 @@ describe("Device + API (JWT+Key)", function () {
                 //expect(res.text).to.equal('false'); // in case of no error
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /device/firmware (ak, invalid)", function (done) {
         chai.request(thx.app)
@@ -268,7 +268,7 @@ describe("Device + API (JWT+Key)", function () {
                 expect(res.text).to.equal('OTT_INFO_NOT_FOUND');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /device/firmware (ak, none)", function (done) {
         chai.request(thx.app)
@@ -281,7 +281,7 @@ describe("Device + API (JWT+Key)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"OTT_MISSING"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /device/firmware (ak, valid)", function (done) {
         chai.request(thx.app)
@@ -294,7 +294,7 @@ describe("Device + API (JWT+Key)", function () {
                 expect(res.text).to.equal('OTT_INFO_NOT_FOUND');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // Device Control API
 
@@ -309,7 +309,7 @@ describe("Device + API (JWT+Key)", function () {
                 //expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/envs (jwt, valid)", function (done) {
         chai.request(thx.app)
@@ -322,7 +322,7 @@ describe("Device + API (JWT+Key)", function () {
                 //expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/detail (jwt, invalid)", function (done) {
         chai.request(thx.app)
@@ -334,7 +334,7 @@ describe("Device + API (JWT+Key)", function () {
                 //expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/detail (jwt, valid)", function (done) {
         chai.request(thx.app)
@@ -347,7 +347,7 @@ describe("Device + API (JWT+Key)", function () {
                 expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/edit (jwt, invalid)", function (done) {
         chai.request(thx.app)
@@ -359,7 +359,7 @@ describe("Device + API (JWT+Key)", function () {
                 //expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/edit (jwt, valid)", function (done) {
         chai.request(thx.app)
@@ -372,7 +372,7 @@ describe("Device + API (JWT+Key)", function () {
                 //expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     //
     // Authenticated (Session)
@@ -387,7 +387,7 @@ describe("Device + API (JWT+Key)", function () {
                 //expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/envs (session, valid)", function (done) {
         agent
@@ -399,7 +399,7 @@ describe("Device + API (JWT+Key)", function () {
                 //expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/envs (session, valid, no-such-device) 2", function (done) {
         agent
@@ -411,7 +411,7 @@ describe("Device + API (JWT+Key)", function () {
                 //expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/detail (session, valid)", function (done) {
         agent
@@ -423,7 +423,7 @@ describe("Device + API (JWT+Key)", function () {
                 //expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/detail (session, dynamic)", function (done) {
         agent
@@ -434,7 +434,7 @@ describe("Device + API (JWT+Key)", function () {
                 expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/detail (session, udid) 2", function (done) {
         agent
@@ -448,7 +448,7 @@ describe("Device + API (JWT+Key)", function () {
                 //console.log("[spec] [chai] detail:", JSON.stringify(j, null, 2));
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/edit (session, invalid)", function (done) {
         agent
@@ -460,7 +460,7 @@ describe("Device + API (JWT+Key)", function () {
                 //expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/edit (session, valid)", function (done) {
         agent
@@ -472,7 +472,7 @@ describe("Device + API (JWT+Key)", function () {
                 //expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     
 

@@ -51,7 +51,7 @@ describe("Messenger", function() {
         expect(TEST_DEVICE_6.udid).to.be.a('string');
         done();
       });
-  }, 20000); // register
+  }, 30000); // register
 
 
   it("should be able to initialize", function (/* done */) {
@@ -134,7 +134,13 @@ describe("Messenger", function() {
   }, 5000);
 
   // responder should not fail
-  it("should be able to respond to a message", function() {
+  it("should be able to respond to a nonsense message", function() {
+    let topic = "/owner/device/test";
+    let message = "Bare no-NID message";
+    messenger.messageResponder(topic, message);
+  });
+
+  it("should be able to respond to specific message", function() {
     let topic = "/owner/device/test";
     let message = "Bare no-NID message";
     messenger.messageResponder(topic, message);

@@ -38,7 +38,7 @@ describe("Sources", function () {
         source_id = response.source_id;
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("(02) should be able to provide a list", function (done) {
     Sources.list(owner, function (success, response) {
@@ -78,7 +78,7 @@ describe("Sources", function () {
           done();
         });
       });
-  }, 20000);
+  }, 30000);
 
   it("(04) should be able to accept valid branch name", function (done) {
     let source = {
@@ -174,7 +174,7 @@ describe("Sources", function () {
           done();
         });
       });
-  }, 20000);
+  }, 30000);
 
   it("(12) should be able to remove sources from owner", function () {
     Sources.removeSourcesFromOwner(owner, [source_id]);

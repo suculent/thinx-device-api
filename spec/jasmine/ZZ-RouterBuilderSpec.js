@@ -43,7 +43,7 @@ describe("Builder (noauth)", function () {
                 //expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // latest firmware envelope
     it("POST /api/device/envelope", function (done) {
@@ -56,7 +56,7 @@ describe("Builder (noauth)", function () {
                 expect(res.text).to.be.a('string'); // false
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // get build artifacts
     it("POST /api/device/artifacts", function (done) {
@@ -68,7 +68,7 @@ describe("Builder (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     afterAll(() => {
         console.log(`🚸 [chai] <<< completed Builder (noauth) spec`);
@@ -117,7 +117,7 @@ describe("Builder (JWT)", function () {
                 expect(res.status).to.equal(400);
                 done();
             });
-    }, 20000);
+    }, 30000);
     
     // covering buildGuards
 
@@ -130,7 +130,7 @@ describe("Builder (JWT)", function () {
                 expect(res.status).to.equal(400);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/build (JWT, invalid) III", function (done) {
         agent
@@ -141,7 +141,7 @@ describe("Builder (JWT)", function () {
                 expect(res.status).to.equal(400);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/build (JWT, invalid) IV", function (done) {
         agent
@@ -152,7 +152,7 @@ describe("Builder (JWT)", function () {
                 expect(res.status).to.equal(400);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/build (JWT, invalid) V", function (done) {
         agent
@@ -163,7 +163,7 @@ describe("Builder (JWT)", function () {
                 expect(res.status).to.equal(400);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/build (JWT, invalid) VI", function (done) {
         agent
@@ -174,7 +174,7 @@ describe("Builder (JWT)", function () {
                 expect(res.status).to.equal(400);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/build (JWT, invalid) VII", function (done) {
         agent
@@ -185,7 +185,7 @@ describe("Builder (JWT)", function () {
                 expect(res.status).to.equal(400);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/build (JWT, valid) VI", function (done) {
 
@@ -221,7 +221,7 @@ describe("Builder (JWT)", function () {
             });
 
         
-    }, 20000);
+    }, 30000);
 
     it("POST /api/v2/build (JWT, valid) V", function (done) {
 
@@ -233,7 +233,6 @@ describe("Builder (JWT)", function () {
                 source_id: "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f4" 
             })
             .end((_err, res) => {
-                //console.log("🚸 [chai] POST /api/device/attach (JWT, valid) V response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
 
@@ -250,7 +249,6 @@ describe("Builder (JWT)", function () {
                         }
                     })
                     .end((err, res) => {
-                        //console.log("🚸 [chai] response /api/v2/build (JWT, valid) V:", res.text, " status:", res.status);
                         expect(res.status).to.equal(200);
                         expect(res.text).to.equal('{"success":true,"response":"queued"}');
                         done();
@@ -258,7 +256,7 @@ describe("Builder (JWT)", function () {
             });
 
         
-    }, 20000);
+    }, 30000);
 
     // latest firmware envelope
     it("POST /api/device/envelope (JWT, invalid)", function (done) {
@@ -267,13 +265,12 @@ describe("Builder (JWT)", function () {
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
-                //console.log("🚸 [chai] response /api/device/envelope (JWT, invalid):", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('false');
+                expect(res.text).to.equal('{}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/v2/device/lastbuild (JWT, invalid)", function (done) {
         agent
@@ -281,13 +278,12 @@ describe("Builder (JWT)", function () {
             .set('Authorization', jwt)
             .send({})
             .end((err, res) => {
-                console.log("🚸 [chai] response /api/v2/device/lastbuild (JWT, invalid):", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('false');
+                expect(res.text).to.equal('{}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     // get build artifacts
     it("POST /api/device/artifacts (JWT, invalid)", function (done) {
@@ -299,10 +295,10 @@ describe("Builder (JWT)", function () {
                 console.log("🚸 [chai] response /api/device/artifacts (JWT, invalid):", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"response":"missing_udid"}');
+                expect(res.text).to.equal('{"success":false,"response":"missing_owner"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/artifacts (JWT, semi-valid 1)", function (done) {
         agent
@@ -310,13 +306,13 @@ describe("Builder (JWT)", function () {
             .set('Authorization', jwt)
             .send({ udid: envi.dynamic.udid })
             .end((err, res) => {
-                console.log("🚸 [chai] response /api/device/artifacts (JWT, semi-valid 1):", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/device/artifacts (JWT, semi-valid 1) response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"response":"missing_build_id"}');
+                expect(res.text).to.equal('{"success":false,"response":"missing_owner"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/artifacts (JWT, semi-valid 2)", function (done) {
         agent
@@ -324,42 +320,69 @@ describe("Builder (JWT)", function () {
             .set('Authorization', jwt)
             .send({ build_id: envi.dynamic.udid })
             .end((err, res) => {
-                console.log("🚸 [chai] response /api/device/artifacts (JWT, semi-valid 2):", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/device/artifacts (JWT, semi-valid 2) response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"response":"missing_udid"}');
+                expect(res.text).to.equal('{"success":false,"response":"missing_owner"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
-    it("POST /api/device/artifacts (JWT, semi-valid)", function (done) {
-        console.log("🚸 [chai] POST /api/device/artifacts (JWT, semi-valid)");
+    it("POST /api/device/artifacts (JWT, semi-valid 3)", function (done) {
+        //console.log("🚸 [chai] POST /api/device/artifacts (JWT, semi-valid)");
         agent
             .post('/api/device/artifacts')
             .set('Authorization', jwt)
             .send({ udid: envi.dynamic.udid, build_id: envi.dynamic.udid  })
             .end((err, res) => {
-                console.log("🚸 [chai] response /api/device/artifacts (JWT, semi-valid):", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/device/artifacts (JWT, semi-valid 3) response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                //expect(res.text).to.equal('{"success":false,"response":"missing_udid"}');
+                expect(res.text).to.equal('{"success":false,"response":"missing_owner"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
-    it("POST /api/v2/build/artifacts (JWT, semi-valid)", function (done) {
-        console.log("🚸 [chai] POST /api/build/artifacts (JWT, semi-valid)");
+    it("POST /api/v2/build/artifacts (JWT, semi-valid 4)", function (done) {
+        //console.log("🚸 [chai] POST /api/build/artifacts (JWT, semi-valid)");
         agent
             .post('/api/v2/build/artifacts')
             .set('Authorization', jwt)
             .send({ udid: envi.dynamic.udid, build_id: envi.dynamic.udid  })
             .end((err, res) => {
-                console.log("🚸 [chai] response /api/v2/build/artifacts (JWT, semi-valid):", res.text, " status:", res.status);
+                console.log("🚸 [chai] POST /api/device/artifacts (JWT, semi-valid 4) response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                //expect(res.text).to.equal('{"success":false,"response":"missing_udid"}');
+                expect(res.text).to.equal('{"success":false,"response":"missing_owner"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
+
+    it("POST /api/v2/build/artifacts (JWT, still-invalid)", function (done) {
+        console.log("🚸 [chai] POST /api/build/artifacts (JWT, should-be-valid)");
+        agent
+            .post('/api/v2/build/artifacts')
+            .set('Authorization', jwt)
+            .send({ udid: envi.dynamic.udid, build_id: envi.dynamic.owner, owner: envi.dynamic.owner  })
+            .end((err, res) => {
+                console.log("🚸 [chai] response /api/v2/build/artifacts (JWT, still-invalid):", res.text, " status:", res.status);
+                expect(res.status).to.equal(200);
+                done();
+            });
+    }, 30000);
+
+    // the artifact is mocked at mnt/data/deploy/<owner-id>/<udid>/<build_id>/<build_id>.zip
+    it("POST /api/v2/build/artifacts (JWT, valid)", function (done) {
+        console.log("🚸 [chai] POST /api/build/artifacts (JWT, should-be-valid)");
+        agent
+            .post('/api/v2/build/artifacts')
+            .set('Authorization', jwt)
+            .send({ udid: envi.dynamic.udid, build_id: envi.build_id, owner: envi.dynamic.owner  })
+            .end((err, res) => {
+                console.log("🚸 [chai] response /api/v2/build/artifacts (JWT, should-be-valid):", res.text, " status:", res.status);
+                expect(res.status).to.equal(200);
+                done();
+            });
+    }, 30000);
 
 });

@@ -24,7 +24,7 @@ describe("Actionable Notification (noauth)", function () {
                     done();
                 });
         });
-    }, 20000);
+    }, 30000);
     
 });
 
@@ -63,7 +63,7 @@ describe("Actionable Notification (JWT)", function () {
                     expect(res.text).to.equal('{"success":false,"response":"missing_udid"}');
                     done();
                 });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/notification (jwt, undefined)", function (done) {
         chai.request(thx.app)
@@ -75,7 +75,7 @@ describe("Actionable Notification (JWT)", function () {
                     expect(res.text).to.equal('{"success":false,"response":"missing_udid"}');
                     done();
                 });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/device/notification (jwt, valid)", function (done) {
         chai.request(thx.app)
@@ -88,5 +88,5 @@ describe("Actionable Notification (JWT)", function () {
                     expect(res.text).to.equal('{"success":true,"response":"published"}');
                     done();
                 });
-    }, 20000);
+    }, 30000);
 });

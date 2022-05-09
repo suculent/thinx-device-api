@@ -25,7 +25,7 @@ describe("RSA Keys (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /api/user/rsakey/list", function (done) {
         chai.request(thx.app)
@@ -34,7 +34,7 @@ describe("RSA Keys (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/user/rsakey/revoke (noauth, invalid)", function (done) {
         chai.request(thx.app)
@@ -44,7 +44,7 @@ describe("RSA Keys (noauth)", function () {
                 expect(res.status).to.equal(401);
                 done();
             });
-    }, 20000);
+    }, 30000);
 
 });
 
@@ -89,7 +89,7 @@ describe("RSA Keys (JWT)", function () {
                 
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("GET /api/user/rsakey/list", function (done) {
         chai.request(thx.app)
@@ -103,7 +103,7 @@ describe("RSA Keys (JWT)", function () {
                 expect(res.text).to.be.a('string');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/user/rsakey/revoke (jwt, undefined)", function (done) {
         chai.request(thx.app)
@@ -116,7 +116,7 @@ describe("RSA Keys (JWT)", function () {
                 expect(res.text).to.equal('{"success":false,"response":"invalid_query"}');
                 done();
             });
-    }, 20000);
+    }, 30000);
 
     it("POST /api/user/rsakey/revoke (valid)", function (done) {
         console.log("🚸 [chai] POST /api/user/rsakey/revoke (valid)");
@@ -132,5 +132,5 @@ describe("RSA Keys (JWT)", function () {
                 expect(j.response).to.be.an('array');
                 done();
             });
-    }, 20000);
+    }, 30000);
 });

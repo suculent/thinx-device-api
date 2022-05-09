@@ -33,7 +33,7 @@ describe("App should support", function () {
         expect(JSON.parse(res.text).healthcheck).to.equal(true);
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /githook", function (done) {
     chai.request(thx.app)
@@ -47,7 +47,7 @@ describe("App should support", function () {
         expect(res.text).to.equal('Accepted');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/githook", function (done) {
     chai.request(thx.app)
@@ -61,7 +61,7 @@ describe("App should support", function () {
         expect(res.text).to.equal('Accepted');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/user/logs/tail (should not exist before login)", function (done) {
     chai.request(thx.app)
@@ -73,7 +73,7 @@ describe("App should support", function () {
         expect(res.status).to.equal(404); // not implemented at this stage
         done();
       });
-  }, 20000);
+  }, 30000);
 
 });
 
@@ -93,7 +93,7 @@ describe("AppSpec Session Management", function () {
         expect(res.text).to.equal('{"success":false,"response":"invalid_credentials"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/login (invalid) 2", function (done) {
     chai.request(thx.app)
@@ -109,7 +109,7 @@ describe("AppSpec Session Management", function () {
         expect(res.text).to.equal('{"success":false,"response":"invalid_credentials"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/login (invalid) 3", function (done) {
     chai.request(thx.app)
@@ -124,7 +124,7 @@ describe("AppSpec Session Management", function () {
         expect(res.text).to.equal('{"success":false,"response":"invalid_credentials"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("POST /api/login (invalid) 4", function (done) {
     chai.request(thx.app)
@@ -139,17 +139,16 @@ describe("AppSpec Session Management", function () {
         expect(res.text).to.equal('{"success":false,"response":"invalid_credentials"}');
         done();
       });
-  }, 20000);
+  }, 30000);
 
   it("/api/logout (without session)", function (done) {
     chai.request(thx.app)
       .get('/api/logout')
       .end((err, res) => {
-        console.log("GET /api/logout (without session)", err, res);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string'); // html...
         done();
       });
-  }, 20000);
+  }, 30000);
 
 });
