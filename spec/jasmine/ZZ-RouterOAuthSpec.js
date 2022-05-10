@@ -61,7 +61,7 @@ describe("OAuth", function () {
             .get('/api/oauth/github/callback')
             .end((err, res) => {
                 console.log("🚸 [chai] response /api/oauth/github/callback status:", res.status);
-                expect(res.status).to.equal(401); // only in test now because of unset event listeners!
+                expect(res.status).to.equal(200); 
                 done();
             });
     }, 30000);
