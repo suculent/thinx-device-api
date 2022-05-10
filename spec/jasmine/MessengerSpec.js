@@ -140,10 +140,59 @@ describe("Messenger", function() {
     messenger.messageResponder(topic, message);
   });
 
-  it("should be able to respond to specific message", function() {
-    let topic = "/owner/device/test";
-    let message = "Bare no-NID message";
+  it("should be able to process status connected message", function() {
+    let topic = "/07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c/d6ff2bb0-df34-11e7-b351-eb37822aa172/status";
+    let message = {
+      status: "connected"
+    };
     messenger.messageResponder(topic, message);
+  });
+
+  it("should be able to process status disconnected message", function() {
+    let topic = "/07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c/d6ff2bb0-df34-11e7-b351-eb37822aa172/status";
+    let message = {
+      status: "disconnected"
+    };
+    messenger.messageResponder(topic, message);
+  });
+
+  it("should be able to process connection message", function() {
+    let topic = "/07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c/d6ff2bb0-df34-11e7-b351-eb37822aa172/status";
+    let message = {
+      connected: true
+    };
+    messenger.messageResponder(topic, message);
+  });
+
+  it("should be able to process disconnection message", function() {
+    let topic = "/07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c/d6ff2bb0-df34-11e7-b351-eb37822aa172/status";
+    let message = {
+      connected: false
+    };
+    messenger.messageResponder(topic, message);
+  });
+
+  it("should be able to process actionable notification", function() {
+    let topic = "/07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c/d6ff2bb0-df34-11e7-b351-eb37822aa172/status";
+    let message = {
+      notification: {
+        response: false,
+        nid: "nid-0000"
+      }
+    };
+    messenger.messageResponder(topic, message);
+});
+
+    it("should be able to process actionable notification from device", function() {
+      let topic = "/07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c/d6ff2bb0-df34-11e7-b351-eb37822aa172/status";
+      let message = {
+        notification: {
+          response: true,
+          body: "Notification Response",
+          response_type: "string"
+        }
+      };
+      messenger.messageResponder(topic, message);
   });
 
   // message_callback(...)
