@@ -29,7 +29,7 @@ describe("GDPR", function () {
     it("should not fail while purging", function (done) {
         let gdpr = new GDPR();
         gdpr.purgeOldUsers((result) => {
-            console.log("[spec] while purging", result);
+            expect(result).to.equal(true);
             done();
         });
     }, 10000);
@@ -37,7 +37,7 @@ describe("GDPR", function () {
     it("should not fail while notifying", function (done) {
         let gdpr = new GDPR();
         gdpr.notifyOldUsers((result) => {
-            console.log("[spec] while notifying", result);
+            expect(result).to.equal(true);
             done();
         });
     }, 10000);
@@ -51,7 +51,6 @@ describe("GDPR", function () {
         let user = mock_user;
         user.last_update = d1;
         let gdpr = new GDPR();
-        console.log("[spec] 3 months - 24 hours before deletion");
         gdpr.notify24(user, (error) => {
             if (error) console.log("[spec] 24 hours before deletion ERROR:", error);
             done();
@@ -66,7 +65,6 @@ describe("GDPR", function () {
         d2.setHours(0, 0, 0, 0);
         let user = mock_user;
         user.last_update = d2;
-        console.log("[spec] 168  hours before deletion");
         gdpr.notify168(user, (error) => {
             if (error) console.log("[spec] 168 hours before deletion ERROR", error);
             done();
