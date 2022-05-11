@@ -195,7 +195,7 @@ describe("User Routes V2", function () {
       .set('Authorization', jwt)
       .end((_err, res) => {
         console.log("🚸 [chai] V2 GET /api/v2/stats response", res.text);
-        expect(res.status).to.equal(400);
+        expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
       });
