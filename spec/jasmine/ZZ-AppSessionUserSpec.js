@@ -246,7 +246,7 @@ describe("User Routes", function () {
       .post('/api/user/password/set')
       .send({})
       .end((_err, res) => {
-        expect(res.status).to.equal(200);
+        expect(res.status).to.equal(401);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"response":"password_mismatch"}');
         done();
@@ -259,7 +259,7 @@ describe("User Routes", function () {
       .post('/api/user/password/set')
       .send({ password: "A", rpassword: "B" })
       .end((_err, res) => {
-        expect(res.status).to.equal(200);
+        expect(res.status).to.equal(401);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"response":"password_mismatch"}');
         done();
