@@ -195,7 +195,7 @@ describe("User Routes V2", function () {
       .set('Authorization', jwt)
       .end((_err, res) => {
         console.log("🚸 [chai] V2 GET /api/v2/stats response", res.text);
-        expect(res.status).to.equal(200);
+        expect(res.status).to.equal(400);
         //expect(res.text).to.be.a('string');
         done();
       });
@@ -208,7 +208,7 @@ describe("User Routes V2", function () {
       .send({})
       .end((_err, res) => {
         console.log("🚸 [chai] V2 POST /api/v2/chat response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(200);
+        expect(res.status).to.equal(400);
         //expect(res.text).to.be.a('string');
         done();
       });
