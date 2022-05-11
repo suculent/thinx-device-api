@@ -66,11 +66,11 @@ describe("OAuth", function () {
             });
     }, 30000);
 
-    xit("GET /api/oauth/github/callback?code=B", function (done) {
+    it("GET /api/oauth/github/callback?code=B", function (done) {
         chai.request(thx.app)
             .get('/api/oauth/github/callback?code=B')
             .end((err, res) => {
-                expect(res.status).to.equal(401); // only in test now because of unset event listeners!
+                expect(res.status).to.equal(401);
                 done();
             });
     }, 30000);

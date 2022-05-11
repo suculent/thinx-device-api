@@ -183,7 +183,7 @@ describe("User Routes V2", function () {
       .send({ username: "dynamic2", password: "dynamic3" })
       .end((_err1, res1) => {
         console.log("🚸 [chai] POST /api/login response:", res1.text, "status", res1.status);
-        expect(res1.status).to.equal(200);
+        expect(res1.status).to.equal(401);
         expect(res1.text).to.equal('{"success":false,"response":"password_mismatch"}');
         done();
       });
@@ -208,7 +208,7 @@ describe("User Routes V2", function () {
       .send({})
       .end((_err, res) => {
         console.log("🚸 [chai] V2 POST /api/v2/chat response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(200);
+        expect(res.status).to.equal(400);
         //expect(res.text).to.be.a('string');
         done();
       });
