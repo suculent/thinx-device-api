@@ -409,7 +409,7 @@ module.exports = class THiNX extends EventEmitter {
 
             let cookies = request.headers.cookie;
             
-            if (!Util.isDefined(cookies)) {
+            if (Util.isDefined(cookies)) {
               // other x-thx cookies are now deprecated and can be removed
               if (cookies.indexOf("x-thx-core") === -1) {
                 console.log("Should destroy socket, access unauthorized.");
