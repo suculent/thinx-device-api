@@ -140,14 +140,17 @@ jobs:
   
   test:
 
+    machine: true
+    resource_class: suculent/local
+
+    # because the tests do not consume much of RAM or CPU, this probably won't cause any more slowdown
+    # resource_class: medium
+    
     docker:
       - image: thinxcloud/base:alpine
         auth:
           username: $DOCKER_USERNAME  # from thinx-docker-repo, docker.io
           password: $DOCKER_PUBLIC_PASSWORD  # or project environment variable reference
-    
-    # because the tests do not consume much of RAM or CPU, this probably won't cause any more slowdown
-    resource_class: medium
 
     working_directory: ~/suculent/thinx-device-api
 
