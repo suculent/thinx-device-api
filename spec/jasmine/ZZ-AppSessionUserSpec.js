@@ -767,4 +767,17 @@ describe("User Routes", function () {
       });
   }, 30000);
 
+  it("POST /api/v2/device/lastbuild (JWT)", function (done) {
+    agent
+        .post('/api/v2/device/lastbuild')
+        .set('Authorization', jwt)
+        .send({ udid: envi.dynamic.udid /* from session – owner: envi.dynamic.owner } */)
+        .end((_err, res) => {
+            expect(res.status).to.equal(200);
+            expect(res.text).to.be.a('string');
+            expect(res.text).to.equal('{}');
+            done();
+        });
+}, 30000);
+
 });
