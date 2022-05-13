@@ -140,9 +140,6 @@ jobs:
   
   test:
 
-    machine: true
-    resource_class: suculent/macbook
-
     docker:
       - image: thinxcloud/base:alpine
         auth:
@@ -150,13 +147,13 @@ jobs:
           password: $DOCKER_PUBLIC_PASSWORD  # or project environment variable reference
     
     # because the tests do not consume much of RAM or CPU, this probably won't cause any more slowdown
-    #resource_class: medium
+    resource_class: medium
 
     working_directory: ~/suculent/thinx-device-api
 
-    # parallelism: 1
+    parallelism: 1
 
-    # shell: /bin/sh --login
+    shell: /bin/sh --login
 
     environment:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
