@@ -1,3 +1,5 @@
+var envi = require("../_envi.json");
+
 describe("Queue Action", function() {
 
     beforeAll(() => {
@@ -12,8 +14,9 @@ describe("Queue Action", function() {
 
     var Action = require("../../lib/thinx/queue_action");
 
+    let owner_id = envi.oid;
     let mock_udid_4 = "<mock-udid-4>";
-    let mock_source_id = "<mock-source-id>";
+    let mock_source_id = envi.sid;
     let action;
     let string_temp;
 
@@ -24,8 +27,10 @@ describe("Queue Action", function() {
     });
 
     // queueWithSource
-    it("should be able start queue with source", function() {
-        action.queueWithSource(mock_source_id);
+    it("should be able start queue with source", function(done) {
+        action.queueWithSource(mock_source_id, owner_id, () => {
+            done();
+        });
     });
 
     // setStarted
@@ -50,13 +55,19 @@ describe("Queue Action", function() {
     });
 
     // isRunning
-    it("should be able tell whether action is running", function() {
-        action.queueWithSource(mock_source_id);
+    it("should be able tell whether action is running", function(done) {
+        action.queueWithSource(mock_source_id, owner_id, (result) => {
+            console.log("[spec] tell whether action is running", result);
+            done();
+        });
     });
 
     // isWaiting
-    it("should be able tell whether action is waiting", function() {
-        action.queueWithSource(mock_source_id);
+    it("should be able tell whether action is waiting", function(done) {
+        action.queueWithSource(mock_source_id, owner_id, (result) => {
+            console.log("[spec] tell whether action is waiting", result);
+            done();
+        });
     });
 
     // save
