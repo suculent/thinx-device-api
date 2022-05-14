@@ -293,7 +293,7 @@ describe("Builder (JWT)", function () {
             .send({})
             .end((err, res) => {
                 console.log("🚸 [chai] response /api/device/artifacts (JWT, invalid):", res.text, " status:", res.status);
-                expect(res.status).to.equal(200);
+                expect(res.status).to.equal(400);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('{"success":false,"response":"missing_owner"}');
                 done();
@@ -307,7 +307,7 @@ describe("Builder (JWT)", function () {
             .send({ udid: envi.dynamic.udid })
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/device/artifacts (JWT, semi-valid 1) response:", res.text, " status:", res.status);
-                expect(res.status).to.equal(200);
+                expect(res.status).to.equal(400);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('{"success":false,"response":"missing_owner"}');
                 done();
@@ -321,7 +321,7 @@ describe("Builder (JWT)", function () {
             .send({ build_id: envi.dynamic.udid })
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/device/artifacts (JWT, semi-valid 2) response:", res.text, " status:", res.status);
-                expect(res.status).to.equal(200);
+                expect(res.status).to.equal(400);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('{"success":false,"response":"missing_owner"}');
                 done();
@@ -336,7 +336,7 @@ describe("Builder (JWT)", function () {
             .send({ udid: envi.dynamic.udid, build_id: envi.dynamic.udid  })
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/device/artifacts (JWT, semi-valid 3) response:", res.text, " status:", res.status);
-                expect(res.status).to.equal(200);
+                expect(res.status).to.equal(400);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('{"success":false,"response":"missing_owner"}');
                 done();
@@ -351,7 +351,7 @@ describe("Builder (JWT)", function () {
             .send({ udid: envi.dynamic.udid, build_id: envi.dynamic.udid  })
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/device/artifacts (JWT, semi-valid 4) response:", res.text, " status:", res.status);
-                expect(res.status).to.equal(200);
+                expect(res.status).to.equal(400);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('{"success":false,"response":"missing_owner"}');
                 done();
@@ -366,7 +366,7 @@ describe("Builder (JWT)", function () {
             .send({ udid: envi.dynamic.udid, build_id: envi.dynamic.owner, owner: envi.dynamic.owner  })
             .end((err, res) => {
                 console.log("🚸 [chai] response /api/v2/build/artifacts (JWT, still-invalid):", res.text, " status:", res.status);
-                expect(res.status).to.equal(200);
+                expect(res.status).to.equal(400);
                 done();
             });
     }, 30000);
@@ -380,7 +380,7 @@ describe("Builder (JWT)", function () {
             .send({ build_id: envi.build_id, owner: envi.dynamic.owner  })
             .end((err, res) => {
                 console.log("🚸 [chai] response /api/v2/build/artifacts (JWT, no-udid):", res.text, " status:", res.status);
-                expect(res.status).to.equal(200);
+                expect(res.status).to.equal(400);
                 done();
             });
     }, 30000);
@@ -393,7 +393,7 @@ describe("Builder (JWT)", function () {
             .send({ udid: envi.dynamic.udid, build_id: envi.build_id  })
             .end((err, res) => {
                 console.log("🚸 [chai] response /api/v2/build/artifacts (JWT, no-owner):", res.text, " status:", res.status);
-                expect(res.status).to.equal(200);
+                expect(res.status).to.equal(400);
                 done();
             });
     }, 30000);
