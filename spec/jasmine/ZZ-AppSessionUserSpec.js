@@ -775,7 +775,9 @@ describe("User Routes", function () {
         .end((_err, res) => {
             expect(res.status).to.equal(200);
             expect(res.text).to.be.a('string');
-            expect(res.text).to.equal('{}');
+            let j = JSON.parse(res.text);
+            expect(j).to.be.an('object');
+            console.log("[spec] user lastbuild", JSON.stringify(j, null, 2));
             done();
         });
 }, 30000);
