@@ -26,6 +26,11 @@ describe("GitHub", function () {
     it("should be able to add (any) RSA Key to GitHub", function (done) {
         rsakey.list(owner, (success, list) => {
             console.log("rsakey success:", success);
+            if (list.length == 0) {
+                console.log("No keys to add from", list);
+                expect(false);
+                done();
+            }
             let key = list[0];
             let pubkey = key.pubkey;
             console.log("rsakey key:", pubkey);
