@@ -85,7 +85,7 @@
     "slack-notify": "^0.1.7",
     "socket.io": "^3.0.4",
     "socket.io-client": "^4.4.1",
-    "sqreen": "^1.64.2",
+    "sqreen": "^2.0.0",
     "ssh-fingerprint": "0.0.1",
     "ssl-root-cas": "^1.3.1",
     "tail": "^2.0.4",
