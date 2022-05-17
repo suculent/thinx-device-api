@@ -58,7 +58,7 @@
     "influx": "^5.9.3",
     "jshint": "^2.13.4",
     "jsonwebtoken": "^8.5.1",
-    "mailgun.js": "^3.7.0",
+    "mailgun.js": "^3.7.3",
     "md5": "^2.3.0",
     "mime": "^1.6.0",
     "mkdirp": "^1.0.3",
