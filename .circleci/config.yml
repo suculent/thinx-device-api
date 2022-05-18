@@ -10,7 +10,6 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          docker_layer_caching: true
           version: 20.10.12
       - checkout
       - docker/check
@@ -34,7 +33,6 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
           version: 20.10.12
       - checkout
       - run:
@@ -77,7 +75,6 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
           version: 20.10.12
       - checkout
       - run:
@@ -113,7 +110,6 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
           version: 20.10.12
       - checkout
       - run:
@@ -178,7 +174,6 @@ jobs:
           docker compose version
 
     - setup_remote_docker:
-        docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
         version: 20.10.12
 
     - checkout
@@ -376,7 +371,6 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          docker_layer_caching: true # DLC will explicitly cache layers here and try to avoid rebuilding.
           version: 20.10.12
       - checkout
       - docker/check
