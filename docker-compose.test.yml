@@ -75,8 +75,8 @@ services:
 
   worker:
     env_file: .env
-#    image: thinxcloud/worker:latest
-    build: ./services/worker
+    image: thinxcloud/worker:latest
+#    build: ./services/worker
     restart: unless-stopped
     environment:
       - "ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}"
