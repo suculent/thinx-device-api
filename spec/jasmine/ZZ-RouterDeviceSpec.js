@@ -488,11 +488,41 @@ describe("Devices (JWT)", function () {
 
   // push device configuration over MQTT
   it("POST /api/device/push", function (done) {
-    console.log("🚸 [chai] POST /api/device/push (JWT)");
+    console.log("🚸 [chai] POST /api/device/push (JWT+udid)");
     agent
       .post('/api/device/push')
       .set('Authorization', jwt)
       .send({ key: "value" })
+      .end((err, res) => {
+        console.log("🚸 [chai] POST /api/device/push (JWT+udid) response:", res.text, " status:", res.status);
+        // no messenger, will fail here...
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 30000);
+
+  it("POST /api/device/push", function (done) {
+    console.log("🚸 [chai] POST /api/device/push (JWT+udid)");
+    agent
+      .post('/api/device/push')
+      .set('Authorization', jwt)
+      .send({ udid: JRS5.udid, key: "value" })
+      .end((err, res) => {
+        console.log("🚸 [chai] POST /api/device/push (JWT) response:", res.text, " status:", res.status);
+        // no messenger, will fail here...
+        //expect(res.status).to.equal(200);
+        //expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 30000);
+
+  it("POST /api/device/push", function (done) {
+    console.log("🚸 [chai] POST /api/device/push (JWT+udid)");
+    agent
+      .post('/api/device/push')
+      .set('Authorization', jwt)
+      .send({ udids: [JRS5.udid], key: "value" })
       .end((err, res) => {
         console.log("🚸 [chai] POST /api/device/push (JWT) response:", res.text, " status:", res.status);
         // no messenger, will fail here...
