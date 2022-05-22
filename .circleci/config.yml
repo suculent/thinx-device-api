@@ -284,26 +284,26 @@ jobs:
     - run:
         name: Starting Redis
         command: |
-          docker compose up -d --build thinx-redis
+          docker compose up -d thinx-redis
           docker compose logs thinx-redis
 
     - run:
         name: Starting Mosquitto
         command: |
           docker login --username $DOCKER_LOGIN --password $DOCKER_PASSWORD https://registry.thinx.cloud:5000
-          docker compose up -d --build mosquitto
+          docker compose up -d mosquitto
           docker compose logs mosquitto
 
     - run:
         name: Starting Transformer
         command: |
-          docker compose up -d --build transformer
+          docker compose up -d transformer
           docker compose logs transformer
 
     - run:
         name: Starting Worker
         command: |
-          docker compose up -d --build worker
+          docker compose up -d worker
           docker compose logs worker
 
     - run:

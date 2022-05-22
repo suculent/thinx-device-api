@@ -713,7 +713,7 @@ describe("User Routes", function () {
       .send({})
       .end((_err, res) => {
         console.log("🚸 [chai] POST /api/user/chat response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(400);
+        expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
       });
