@@ -19,10 +19,6 @@ builder.thinx.json
 lcov.info
 test-private.sh
 
-# Sqreen.io configuration
-sqreen.json
-
-
 #**/package_lock.json
 #package_lock.json
 

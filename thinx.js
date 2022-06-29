@@ -1,17 +1,8 @@
-let Sqreen;
-
 const Globals = require("./lib/thinx/globals.js"); // static only!
-if (Globals.use_sqreen()) {
-  try {
-    Sqreen = require('sqreen');
-  } catch (s) {
-    console.log(s);
-  }
-}
 
 const THiNX = require("./thinx-core.js");
 
-let thx = new THiNX(Sqreen);
+let thx = new THiNX();
 
 thx.on('workerReady', () => {
   console.log('workerReady event occurred!');

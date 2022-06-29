@@ -6,11 +6,9 @@ const Util = require('./lib/thinx/util');
 
 module.exports = class THiNX extends EventEmitter {
 
-  constructor(sqreen) {
+  constructor() {
 
     super();
-
-    this.sqreen = sqreen;
 
     /*
      * Bootstrap banner section
@@ -40,14 +38,6 @@ module.exports = class THiNX extends EventEmitter {
     
     const Globals = require("./lib/thinx/globals.js"); // static only!
     const Sanitka = require("./lib/thinx/sanitka.js"); var sanitka = new Sanitka();
-
-    if (Globals.use_sqreen()) {
-      if ((typeof (process.env.SQREEN_APP_NAME) !== "undefined") && (typeof (process.env.SQREEN_TOKEN) !== "undefined")) {
-        require('sqreen');
-      } else {
-        console.log("[info] Sqreen env vars not configured.");
-      }
-    }
 
     // App
     const express = require("express");

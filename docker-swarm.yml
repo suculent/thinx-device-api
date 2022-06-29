@@ -134,8 +134,6 @@ services:
     user: transformer
     image: thinxcloud/transformer
     environment:
-      - "SQREEN_APP_NAME: ${SQREEN_APP_NAME}"
-      - "SQREEN_TOKEN=${SQREEN_TOKEN}"
       - "ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}"
       - "ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}"
       - "REVISION=2"

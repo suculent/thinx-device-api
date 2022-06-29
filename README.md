@@ -84,7 +84,7 @@ Currently the platform supports building firmware for Arduino, PlatformIO (also 
 
 * Supports LoRaWan server integration.
 
-* Supports [Rollbar](https://rollbar.com), [Sqreen](https://www.sqreen.com) and [Crisp.chat](https://crisp.chat) integrations.
+* Supports [Rollbar](https://rollbar.com) and [Crisp.chat](https://crisp.chat) integrations.
 
 * Message-queue integration using single broker across many instances.
 
@@ -182,7 +182,6 @@ Use your favourite service and log-sender agent. Tested successfully with [Logz.
 **Optional:**
 
 * [Google Analytics](https://analytics.google.com) integration
-* [Sqreen](https://sqreen.com) integration
 * [Slack](https://slack.com) integration
 * [Crisp.chat](https://crisp.chat) integration
 

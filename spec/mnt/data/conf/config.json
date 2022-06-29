@@ -26,7 +26,6 @@
     "bot_token": "<not-configured>",
     "bot_topic": "thinx"
   },
-  "use_sqreen": true,
   "port": 7442,
   "secure_port": 7443,
   "lambda": 7475,
