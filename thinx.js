@@ -1,5 +1,3 @@
-const Globals = require("./lib/thinx/globals.js"); // static only!
-
 const THiNX = require("./thinx-core.js");
 
 let thx = new THiNX();
