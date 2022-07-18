@@ -120,7 +120,7 @@
     "mem": "4.0.0",
     "minimatch": "3.0.4",
     "minimist": "1.2.6",
-    "moment": "2.29.3",
+    "moment": "2.29.4",
     "netmask": "2.0.2",
     "proxy-agent": "4.0.1",
     "socket.io-parser": "4.0.4",
