@@ -1,6 +1,6 @@
 {
   "name": "thinx",
-  "version": "1.7.2056",
+  "version": "1.7.2061",
   "description": "THiNX IoT Device Management API",
   "bugs": {
     "url": "https://github.com/suculent/thinx-device-api/issues"
@@ -62,7 +62,7 @@
     "md5": "^2.3.0",
     "mime": "^1.6.0",
     "mkdirp": "^1.0.3",
-    "moment-timezone": "^0.5.34",
+    "moment-timezone": "^0.5.37",
     "morgan": "^1.10.0",
     "mqtt": "^4.2.6",
     "nano": "^8.2.3",
@@ -72,7 +72,6 @@
     "npm": "^8.11.0",
     "npm-auto-version": "^1.0.0",
     "path": "^0.12.7",
-    "protobufjs": "6.11.3",
     "qs": "6.10.3",
     "querystring": "^0.2.0",
     "redis": "^3.1.2",
@@ -123,6 +122,7 @@
     "moment": "2.29.4",
     "netmask": "2.0.2",
     "proxy-agent": "4.0.1",
+    "protobufjs": "7.1.1",
     "socket.io-parser": "4.0.4",
     "trim-newlines": "4.0.2",
     "tunnel-agent": "0.6.0",
