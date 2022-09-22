@@ -435,16 +435,16 @@ workflows:
                 - thinx-staging
                 - master
 
-      # - build-console-cloud:
-      #     context:
-      #       - thinx-docker-repo
-      #       - console
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-console
-      #           - thinx-staging
-      #           - master
+      - build-console-cloud:
+          context:
+            - thinx-docker-repo
+            - console
+          filters:
+            branches:
+              only:
+                - thinx-console
+                - thinx-staging
+                - master
 
       - build-base:
           context:
