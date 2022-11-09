@@ -1,5 +1,14 @@
 describe("RSA Key", function() {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] >>> running RSA spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] <<< completed RSA spec`);
+  });
+
+
   var expect = require('chai').expect;
   var RSAKey = require("../../lib/thinx/rsakey");
   var rsakey = new RSAKey();
@@ -26,7 +35,7 @@ describe("RSA Key", function() {
 
   it("(01) should be able to list RSA Keys", function(done) {
     rsakey.list(owner, function(success, list) {
-      expect(success).to.be.true;
+      expect(success).to.equal(true);
       expect(list.length).to.be.greaterThanOrEqual(1);
       done();
     });
@@ -34,37 +43,37 @@ describe("RSA Key", function() {
 
   it("(02) should fail on invalid revocation", function(done) {
     rsakey.revoke(owner, invalid_fingerprints,
-      function(success, message) {
-        expect(success).to.be.true; // succeds for more fingerprints if one is valid? maybe...
+      function(res, success, message) {
+        expect(success).to.equal(true); // succeds for more fingerprints if one is valid? maybe...
         expect(message).to.be.an('array');
         done();
-      });
+      }, {});
   }, 10000);
 
   it("(03) should be able to add RSA Key 2/3", function(done) {
     rsakey.create(owner, (success, response) => {
       revoked_filenames.push(response.filename);
-      expect(success).to.be.true;
+      expect(success).to.equal(true);
     });
     rsakey.create(owner, (success, response) => {
         revoked_filenames.push(response.filename);
-        expect(success).to.be.true;
+        expect(success).to.equal(true);
         done();
     });
   }, 10000);
 
-  it("should be able to revoke multiple RSA Keys at once", function(done) {
-    rsakey.revoke(owner, revoked_filenames, function(succ, mess) {
+  it("(04) should be able to revoke multiple RSA Keys at once", function(done) {
+    rsakey.revoke(owner, revoked_filenames, function(res, succ, mess) {
         expect(succ).to.equal(true);
         expect(mess).to.be.an('array'); // should be array of length of 2
         done();
-      });
+      }, {});
   }, 10000);
 
 
   //validateOwner: function(invalid-owner)
-  it("(00) should be able to reject invalid owner (feature envy)", function () {
-    expect(rsakey.validateOwner("dummy")).to.equal(true);
+  it("(05) should be able to reject invalid owner (feature envy)", function () {
+    expect(rsakey.validateOwner("dummy")).to.equal(false);
     expect(rsakey.validateOwner("dum-my")).to.equal(false);
     expect(rsakey.validateOwner("dum my")).to.equal(false);
     expect(rsakey.validateOwner("dum&my")).to.equal(false);
@@ -72,5 +81,12 @@ describe("RSA Key", function() {
     expect(rsakey.validateOwner("dum\;my")).to.equal(false);
     expect(rsakey.validateOwner("dum\&nbsp;my")).to.equal(false);
   });
+
+  it("(06) should be able to add RSA Key 2/3", function(done) {
+    rsakey.create(envi.dynamic.owner, (success, response) => {
+      expect(success).to.equal(true);
+      done();
+    });
+  }, 10000);
 
 });
