@@ -1,5 +1,14 @@
 describe("Devices", function() {
 
+  beforeAll(() => {
+    console.log(`🚸 [chai] >>> running Devices spec`);
+  });
+
+  afterAll(() => {
+    console.log(`🚸 [chai] <<< completed Devices spec`);
+  });
+
+
   var expect = require('chai').expect;
   
   var Messenger = require('../../lib/thinx/messenger');
@@ -39,23 +48,16 @@ describe("Devices", function() {
     platform: "arduino"
   };
 
+  let res = { info: "mock" };
+
   it("(01) should be able to register sample device", function(done) {
     device.register(
-      {}, /* req */
       TEST_DEVICE, /* reg.registration */
       ak,
-      {}, /* ws */
-      (success, response) => {
-        if (success === false) {
-          console.log("(01) registration response", response);
-          expect(response).to.be.a('string');
-          if (response === "owner_found_but_no_key") {
-            done();
-            return;
-          }
-        }
+      res,
+      (_r, success, response) => {
         TEST_DEVICE.udid = response.registration.udid;
-        expect(success).to.be.true;
+        expect(success).to.equal(true);
         expect(TEST_DEVICE).to.be.an('object');
         expect(response.registration).to.be.an('object');
         expect(TEST_DEVICE.udid).to.be.a('string');
@@ -67,7 +69,7 @@ describe("Devices", function() {
   
   it("(02) should be able to list devices for owner", function(done) {
     devices.list(owner, (success, response) => {
-      expect(success).to.be.true;
+      expect(success).to.equal(true);
       expect(response).to.be.a('object');
       done();
     });
@@ -81,24 +83,24 @@ describe("Devices", function() {
     });
   }, 5000);
 
-  it("(04) should be able to attach a repository to device(s)", function(done) {
+  it("(04) should be able to attach repository to device(s)", function(done) {
     var body = {
       source_id: source_id,
       udid: TEST_DEVICE.udid
     };
-    devices.attach(owner, body, (res, success, response) => {
-      expect(success).to.be.true;
+    devices.attach(owner, body, (_res, success, response) => {
+      expect(success).to.equal(true);
       expect(response).to.be.a('string');
       done();
     }, {});
   }, 30000);
 
-  it("(05) should be able to detach a repository from device", function(done) {
+  it("(05) should be able to detach repository from device", function(done) {
     var body = {
       udid: TEST_DEVICE.udid
     };
-    devices.detach(owner, body, (res, success, response) => {
-      expect(success).to.be.true;
+    devices.detach(body, (_res, success, response) => {
+      expect(success).to.equal(true);
       expect(response).to.be.a('string');
       expect(response).to.equal('detached');
       done();
@@ -107,29 +109,20 @@ describe("Devices", function() {
 
   it("(06) should be able to revoke another sample device", function(done) {
     device.register(
-      {}, /* req */
       TEST_DEVICE4, /* reg.registration */
       ak,
-      {}, /* ws */
-      (success, response) => {
-        if (success === false) {
-          console.log("(01) registration response", response);
-          expect(response).to.be.a('string');
-          if (response === "owner_found_but_no_key") {
-            done();
-            return;
-          }
-        }
+      res,
+      (_r, success, response) => {
         TEST_DEVICE4.udid = response.registration.udid;
-        expect(success).to.be.true;
+        expect(success).to.equal(true);
         var body = {
           udid: TEST_DEVICE4.udid
         };
-        devices.revoke(owner, body, (res, _success, _response) => {
-          expect(_success).to.be.true;
+        devices.revoke(owner, body, (_res, _success, _response) => {
+          expect(_success).to.equal(true);
           expect(_response).to.be.a('string');
           done();
-        }, {});
+        }, res);
       });
   }, 15000); // register
 });

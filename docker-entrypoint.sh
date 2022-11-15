@@ -1,8 +1,4 @@
-#!/bin/bash
-
-#
-# Section: Docker-in-Docker
-#
+#!/bin/sh
 
 # +e = prevents exit immediately if a command exits with a non-zero status (like StrictHostKeyChecking without a key...).
 
@@ -51,33 +47,23 @@ fi
 
 set -e
 
-# workaround for log aggregator until solved using event database
-mkdir -p /opt/thinx/.pm2/logs/
-touch /opt/thinx/.pm2/logs/index-out-1.log
-
 if [[ ${ENVIRONMENT} == "test" ]]; then
-  echo "[thinx-entrypoint] Running in TEST MODE!"
   curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   chmod +x ./cc-test-reporter
+  
   # ./cc-test-reporter before-build
-  echo "[thinx-entrypoint] TEST starting app as first run (create DB and stuff)..."
-  set +e # prevent exit on timeout - changed to make test fail when app is broken
-  date
-  timeout 60 node thinx.js # container must wait much longer for test to complete
-  date
-  set -e # exit immediately on error
-  echo "[thinx-entrypoint] TEST running suites..." 
-  npm run test # | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
+  
+  npm run test
 
   # this is broken
   # bash <(curl -Ls https://coverage.codacy.com/get.sh) report --project-token ${CODACY_PROJECT_TOKEN}
   
   curl https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip -o sonar-scanner-cli-4.6.2.2472-linux.zip
   rm -rf ./sonar-scanner-cli-4.6.2.2472-linux
-  7z x ./sonar-scanner-cli-4.6.2.2472-linux.zip > /dev/null
-  export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin/
+  7z x ./sonar-scanner-cli-4.6.2.2472-linux.zip
+  export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin
   rm -rf /opt/thinx/thinx-device-api/sonar-scanner-4.6.2.2472-linux/jre/legal/
-  rm -rf spec/test_repositories/**
+  rm -rf /opt/thinx/thinx-device-api/spec/test_repositories/**
   sonar-scanner -Dsonar.login=${SONAR_TOKEN}
   
   set -e
@@ -93,5 +79,5 @@ else
   echo "[thinx-entrypoint] Starting in production mode..."
   # tee is used to split pipe with application logs back to file which
   # is observed by the app. this way the app can map own incidents in log-flow actively
-  node thinx.js | tee -ipa /opt/thinx/.pm2/logs/index-out-1.log
+  node --trace-warnings thinx.js
 fi

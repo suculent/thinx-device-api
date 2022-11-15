@@ -1,0 +1,53 @@
+{
+    "success": true,
+    "data": {
+        "APIKEY_INVALID": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "LOGIN_INVALID": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "DEVICE_NEW": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "DEVICE_CHECKIN": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "DEVICE_REVOCATION": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "BUILD_STARTED": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "BUILD_SUCCESS": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "BUILD_FAILED": [
+            0,
+            0,
+            0,
+            0
+        ]
+    }
+}

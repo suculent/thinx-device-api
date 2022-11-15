@@ -19,10 +19,6 @@ builder.thinx.json
 lcov.info
 test-private.sh
 
-# Sqreen.io configuration
-sqreen.json
-
-
 #**/package_lock.json
 #package_lock.json
 
@@ -73,7 +69,7 @@ conf/github-oauth.json
 .profile
 
 # Circle CI
-./package-lock.json
+#./package-lock.json
 
 # Mosquitto
 mosquitto.aclfile
@@ -92,3 +88,6 @@ cov-int/
 .dccache
 *.log
 *.sarif
+
+chronograf/
+influx/

@@ -61,8 +61,6 @@ services:
     image: thinxcloud/transformer
     restart: unless-stopped
     environment:
-      - 'SQREEN_APP_NAME=${SQREEN_APP_NAME}'
-      - 'SQREEN_TOKEN=${SQREEN_TOKEN}'
       - 'ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}'
       - 'ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}'
       - 'REVISION=1'
@@ -75,9 +73,10 @@ services:
 
   worker:
     env_file: .env
-    image: thinxcloud/worker
+    image: thinxcloud/worker:latest
+#    build: ./services/worker
+    restart: unless-stopped
     environment:
-      - "SQREEN_TOKEN=${SQREEN_TOKEN}"
       - "ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}"
       - "ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}"
       - "THINX_SERVER=${THINX_SERVER}"
@@ -107,36 +106,39 @@ services:
       context: .
       args:
         - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
-        - 'COUCHDB_PASSWORD=${COUCHDB_PASS}'
         - 'COUCHDB_PASS=${COUCHDB_PASS}'
         - 'COUCHDB_USER=${COUCHDB_USER}'
         - 'ENVIRONMENT=${ENVIRONMENT}'
+        - 'ENTERPRISE=${ENTERPRISE}'
         - 'REDIS_PASSWORD=${REDIS_PASSWORD}'
         - 'REVISION=${REVISION}'
         - 'ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}'
         - 'ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}'
         - 'SONAR_TOKEN=${SONAR_TOKEN}'
-        - 'SQREEN_APP_NAME=${SQREEN_APP_NAME}'
-        - 'SQREEN_TOKEN=${SQREEN_TOKEN}'
         - 'THINX_HOSTNAME=${THINX_HOSTNAME}'
         - 'THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}'
         - 'WORKER_SECRET=${WORKER_SECRET}'
     environment:
       - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
-      - 'COUCHDB_PASSWORD=${COUCHDB_PASS}'
       - 'COUCHDB_PASS=${COUCHDB_PASS}'
       - 'COUCHDB_USER=${COUCHDB_USER}'
       - 'ENVIRONMENT=${ENVIRONMENT}'
+      - 'ENTERPRISE=${ENTERPRISE}'
+      - 'GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}'
+      - 'GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}'
+      - 'GITHUB_SECRET=${GITHUB_SECRET}'
+      - 'GOOGLE_OAUTH_ID=${GOOGLE_OAUTH_ID}'
+      - 'GOOGLE_OAUTH_SECRET=${GOOGLE_OAUTH_SECRET}'
       - 'REDIS_PASSWORD=${REDIS_PASSWORD}'
       - 'REVISION=${REVISION}'
       - 'ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}'
       - 'ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}'
+      - 'SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}'
       - 'SONAR_TOKEN=${SONAR_TOKEN}'
-      - 'SQREEN_APP_NAME=${SQREEN_APP_NAME}'
-      - 'SQREEN_TOKEN=${SQREEN_TOKEN}'
       - 'THINX_HOSTNAME=${THINX_HOSTNAME}'
       - 'THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}'
       - 'WORKER_SECRET=${WORKER_SECRET}'   
+      - 'GITHUB_ACCESS_TOKEN=${GITHUB_ACCESS_TOKEN}'
     ports:
       - '7442:7442'
       - '7443:7443'
@@ -202,3 +204,16 @@ services:
 #      - traefik.frontend.headers.STSSeconds=315360000
 #      - traefik.frontend.headers.STSIncludeSubdomains=true
 #      - traefik.frontend.headers.STSPreload=true
+
+  influxdb:
+    image: influxdb:1.8
+    ports:
+      - '8086:8086'
+    networks:
+      - internal
+    volumes:
+      - '/mnt/gluster/thinx/influx:/var/lib/influxdb'
+    environment:
+      - INFLUXDB_DB=db0
+      - INFLUXDB_ADMIN_USER=${INFLUXDB_USERNAME}
+      - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_PASSWORD}

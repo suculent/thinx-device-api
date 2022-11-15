@@ -27,9 +27,9 @@ describe("Statistics", function () {
     expect(result).to.be.a('string');
   });
 
-  it("(04) should be able to return today results for owner", function (done) {
+  it("(04) should not be able to return today results for owner before aggregation", function (done) {
     s.today(owner, function (success, result) {
-      expect(success).to.be.true;
+      expect(success).to.equal(true); 
       expect(result).to.be.a('string');
       done();
     });
@@ -37,7 +37,7 @@ describe("Statistics", function () {
 
   it("(05) should be able to aggregate statistics", function (done) {
     s.aggregate(function (success, result) {
-      expect(success).to.be.true;
+      expect(success).to.equal(true);
       expect(result).to.be.a('string');
       done();
     });
@@ -46,14 +46,24 @@ describe("Statistics", function () {
   it("(06) should be able to parse all statistics per owner", function (done) {
     s.parse(owner, function (success, body) {
       expect(body).to.be.an('object');
-      expect(success).to.be.true;
+      expect(success).to.equal(true);
       done();
     });
   }, 60000);
 
   it("(07) should be able to return weekly results for owner", function (done) {
     s.week(owner, function (success, result) {
+      expect(success).to.equal(true);
       expect(result).to.be.an('object');
+      done();
+    });
+  }, 10000);
+
+  it("(08) should be able to return today results for owner after aggregation", function (done) {
+    s.today(owner, function (success, result) {
+      console.log("(08)", success, result);
+      expect(success).to.equal(true);
+      expect(result).to.be.a('string');
       done();
     });
   }, 10000);

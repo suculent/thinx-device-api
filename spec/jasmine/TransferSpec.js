@@ -6,10 +6,35 @@ describe("Transfer", function () {
   var Messenger = require('../../lib/thinx/messenger');
   var messenger = new Messenger("mosquitto").getInstance("mosquitto");
 
+  var Devices = require("../../lib/thinx/devices");
+  var devices = new Devices(messenger);
+
   var Transfer = require("../../lib/thinx/transfer");
   var transfer = new Transfer(messenger);
 
-  it("(00) should be able to initiate device transfer, decline and accept another one", function () {
+  beforeAll((done) => {
+    console.log(`🚸 [chai] >>> running Transfer spec`);
+    devices.list(envi.oid, (success, response) => {
+      expect(success).to.equal(true);
+      expect(response).to.be.a('object');
+      console.log("[spec] [transfer] BEFORE device list:", JSON.stringify(response, null, 2));
+      done();
+    });
+  });
+
+  afterAll((done) => {
+    devices.list(envi.oid, (success, response) => {
+      expect(success).to.equal(true);
+      expect(response).to.be.a('object');
+      console.log("[spec] [transfer] AFTER device list:", JSON.stringify(response, null, 2));
+      done();
+    });
+    console.log(`🚸 [chai] <<< completed Transfer spec`);
+  });
+
+  it("(00) should be able to initiate device transfer, decline and accept another one", function (done) {
+
+    let accepted = false;
 
     var body = {
       to: "cimrman@thinx.cloud",
@@ -18,11 +43,9 @@ describe("Transfer", function () {
   
     var owner = envi.oid;
 
-    // 00-01 Request
-    console.log("(00-1) transfer request A", {owner}, {body});
+    // TODO: Turn this into async
     transfer.request(owner, body, (t_success, response) => {
-      //console.log("(00-1) transfer request 1 response", {t_success}, {response});
-      expect(t_success).to.be.true;
+      expect(t_success).to.equal(true);
       expect(response).to.be.a('string');
       const tbody = {
         transfer_id: response.replace("dt:", ""),
@@ -31,16 +54,12 @@ describe("Transfer", function () {
 
       // 00-02 Decline
       transfer.decline(tbody, (d_success, d_response) => {
-        //console.log("(00-2) transfer decline response: ", {d_success}, { d_response });
         expect(d_success).to.equal(true);
         expect(d_response).to.be.a('string');
 
-        // 00-03 Request
-        body.udids = ["d6ff2bb0-df34-11e7-b351-eb37822aa173"];
-        //console.log("(00-2) transfer request B", {owner}, {body});
+        // TODO: Turn this into async
         transfer.request(owner, body, (b_success, b_response) => {
-          //console.log("(00-2) transfer request B response", {b_success}, {b_response});
-          expect(b_success).to.be.true;
+          expect(b_success).to.equal(true);
           expect(b_response).to.be.a('string'); // transfer_requested      
 
           // 00-04 Accept
@@ -48,18 +67,21 @@ describe("Transfer", function () {
             transfer_id: b_response.replace("dt:", ""),
             udids: [envi.udid]
           };
-          //console.log("(00-3) transfer accept III", {transfer_body});
-          transfer.accept(transfer_body, (success3, response3) => {
-            console.log("(00-3) transfer accept III response: ", {success3}, {response3});
-            expect(success3).to.be.true; // returns false: transfer_id_not_found
-            expect(response3).to.be.a('string');
-            console.log("**************** »»»»»»»» CALLING DONE IN TRANSFERSPEC!");
 
-            if (typeof(done) !== "undefined") done();
+          // asyncCall
+          transfer.accept(transfer_body, (success3, response3) => {
+            expect(success3).to.equal(true);
+            expect(response3).to.be.a('string');
+            if (!accepted) {
+              accepted = true;
+              done();
+            }
           });
         });
       });
     });
   }); // it-00
+
+  // TODO: Fetch real device-id and do the same thing as specific transfer, then do it over v2 again with two new devices or another owner
 
 }); // describe
