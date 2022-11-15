@@ -48,33 +48,11 @@ fi
 set -e
 
 if [[ ${ENVIRONMENT} == "test" ]]; then
-  curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-  chmod +x ./cc-test-reporter
-  
+  # curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  # chmod +x ./cc-test-reporter  
   # ./cc-test-reporter before-build
-  
   npm run test
-
-  # this is broken
-  # bash <(curl -Ls https://coverage.codacy.com/get.sh) report --project-token ${CODACY_PROJECT_TOKEN}
-  
-  curl https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip -o sonar-scanner-cli-4.6.2.2472-linux.zip
-  rm -rf ./sonar-scanner-cli-4.6.2.2472-linux
-  7z x ./sonar-scanner-cli-4.6.2.2472-linux.zip
-  export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin
-  rm -rf /opt/thinx/thinx-device-api/sonar-scanner-4.6.2.2472-linux/jre/legal/
-  rm -rf /opt/thinx/thinx-device-api/spec/test_repositories/**
-  sonar-scanner -Dsonar.login=${SONAR_TOKEN}
-  
   set -e
-  
-  #if [[ -d ./.git ]]; then
-    # currently fails with invalid request parameters, maybe should be replaced by cc-test-reporter
-    #curl -Os https://uploader.codecov.io/latest/linux/codecov 
-    #chmod +x codecov
-    # codecov -t $CODECOV_TOKEN
-  #fi
-
 else
   echo "[thinx-entrypoint] Starting in production mode..."
   # tee is used to split pipe with application logs back to file which
