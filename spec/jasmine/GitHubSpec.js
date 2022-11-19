@@ -17,7 +17,7 @@ describe("GitHub", function () {
         console.log(`🚸 [chai] <<< completed GitHub spec`);
     });
 
-    it("(00) should be able to add RSA Keys first", function(done) {
+    it("(000) should be able to add RSA Keys first", function(done) {
         rsakey.create(owner,
         function(success, response) {
           expect(success).to.equal(true);

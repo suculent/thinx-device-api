@@ -24,7 +24,7 @@ describe("RSA Key", function() {
 
   ];
 
-  it("(00) should be able to add RSA Keys first", function(done) {
+  it("(300) should be able to add RSA Keys first", function(done) {
     rsakey.create(owner,
     function(success, response) {
       expect(success).to.equal(true);
