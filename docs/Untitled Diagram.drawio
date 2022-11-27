@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2022-11-27T18:37:53.703Z" agent="5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15" version="20.6.0" etag="ZurKXGUwi5RsuVxszxK2" type="github">
+<mxfile host="app.diagrams.net" modified="2022-11-27T18:46:01.724Z" agent="5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15" version="20.6.0" etag="GkbG3u6qkdxm_Ddkki6B" type="github">
   <diagram id="r4VjCqL_lPk8LwniEGfx" name="Page-1">
     <mxGraphModel dx="1226" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -64,6 +64,9 @@
         </mxCell>
         <mxCell id="kssWVyb8Yw60K7yibJ3D-19" value="&lt;font color=&quot;#000000&quot;&gt;In case of attacker intruding this&lt;br&gt;instance, it would be possible to&lt;br&gt;monitor/spoof http communication&lt;br&gt;causing Remote Code Execution.&lt;br&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontColor=#FF3333;fontStyle=2" vertex="1" parent="1">
           <mxGeometry x="180" y="430" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="kssWVyb8Yw60K7yibJ3D-20" value="Notes:&lt;br&gt;&lt;br&gt;Historically, this is supposed to be external container mainly for workload offloading.&lt;br&gt;&lt;br&gt;The container is expected to be called in asynchronous manner, where the client (api) waits for response before storing device data processed in the request. This should be rewritten (&lt;b&gt;TASK!&lt;/b&gt;) to synchronous call of async series using IIFE (immediately-invoked function expression).&lt;br&gt;&lt;br&gt;As a result of that, architecture can be changed from HTTP to SSL Socket." style="text;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="440" y="430" width="360" height="205" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
