@@ -773,6 +773,7 @@ describe("User Routes", function () {
         .set('Authorization', jwt)
         .send({ udid: envi.dynamic.udid /* from session – owner: envi.dynamic.owner */ } )
         .end((_err, res) => {
+            console.log("[spec] user lastbuild", res.text);
             expect(res.status).to.equal(200);
             expect(res.text).to.be.a('string');
             let j = JSON.parse(res.text);

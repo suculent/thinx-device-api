@@ -53,14 +53,14 @@ describe("User Routes V2", function () {
       .send(user_info)
       .end((_err, res) => {
         // {"success":true,"response":"6975d3c5849fc130e689f2cae0abe51a8fd24f496810bee3c0bcf531dd53be0c"}
-        console.log("🚸 [chai] IMPORTANT(1)", res.text);
+        console.log("🚸 [chai] IMPORTANT(1)", res.text); // {"success":true,"response":"434a00db99903150d90f1c74c9fee117044d5fab62e7671bf06f910e6d7353ee"}
         expect(res.text).to.be.a('string');
         expect(res.status).to.equal(200);
         let body = JSON.parse(res.text);
-        expect(body.succress).to.equal(true);
         dynamic_activation_code = body.response;
         expect(body.response).to.be.a('string'); // check length
         expect(body.response.length == 64);
+        expect(body.success).to.equal(true); // this is weird; for some reason does not work in main branch tests (only some?)
 
         let rurl = '/api/v2/activate?owner=' + dynamic_owner_id + '&activation=' + dynamic_activation_code;
         chai.request(thx.app)

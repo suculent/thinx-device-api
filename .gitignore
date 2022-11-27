@@ -19,9 +19,6 @@ builder.thinx.json
 lcov.info
 test-private.sh
 
-#**/package_lock.json
-#package_lock.json
-
 deploy-hook.log
 deploy.out
 mosquitto.lo*
@@ -67,9 +64,6 @@ conf/github-oauth.json
 
 # Codacy
 .profile
-
-# Circle CI
-#./package-lock.json
 
 # Mosquitto
 mosquitto.aclfile
