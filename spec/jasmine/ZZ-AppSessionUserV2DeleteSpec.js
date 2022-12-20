@@ -53,13 +53,14 @@ describe("User Routes V2", function () {
       .send(user_info)
       .end((_err, res) => {
         // {"success":true,"response":"6975d3c5849fc130e689f2cae0abe51a8fd24f496810bee3c0bcf531dd53be0c"}
-        console.log("🚸 [chai] IMPORTANT", res.text);
+        console.log("🚸 [chai] IMPORTANT(1)", res.text); // {"success":true,"response":"434a00db99903150d90f1c74c9fee117044d5fab62e7671bf06f910e6d7353ee"}
         expect(res.text).to.be.a('string');
         expect(res.status).to.equal(200);
         let body = JSON.parse(res.text);
         dynamic_activation_code = body.response;
         expect(body.response).to.be.a('string'); // check length
         expect(body.response.length == 64);
+        expect(body.success).to.equal(true); // this is weird; for some reason does not work in main branch tests (only some?)
 
         let rurl = '/api/v2/activate?owner=' + dynamic_owner_id + '&activation=' + dynamic_activation_code;
         chai.request(thx.app)
@@ -68,6 +69,7 @@ describe("User Routes V2", function () {
             expect(__res.status).to.equal(200);
             expect(__res.text).to.be.a('string'); // <html>
             expect(__res).to.be.html;
+            console.log("🚸 [chai] IMPORTANT(2)", __res.text);
 
             chai.request(thx.app)
               .post('/api/v2/password/set')
@@ -76,6 +78,7 @@ describe("User Routes V2", function () {
                 expect(___res.status).to.equal(200);
                 expect(___res.text).to.be.a('string');
                 expect(___res.text).to.equal('{"success":true,"response":"activation_successful"}');
+                console.log("🚸 [chai] IMPORTANT(3)", ___res.text);
                 done();
               });
           });
@@ -104,6 +107,7 @@ describe("User Routes V2", function () {
       .get('/api/v2/password/reset?owner_id='+envi.dynamic2.owner+'&reset_key='+reset_key)
       .end((_err, res) => {
         expect(res.status).to.equal(200);
+        console.log("GET /api/v2/password/reset res text", res.text);
         expect(res.text).to.be.a('string');
         done();
       });
