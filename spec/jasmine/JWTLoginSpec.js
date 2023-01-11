@@ -6,14 +6,18 @@ const envi = require("../_envi.json");
 const owner = envi.oid;
 
 const redis_client = require('redis');
-const redis = redis_client.createClient(Globals.redis_options());
 
 const login = new JWTLogin(redis);
 
 describe("JWT Login", function () {
 
-    beforeAll(() => {
+    let redis;
+
+    beforeAll(async () => {
         console.log(`🚸 [chai] >>> running JWT spec`);
+        // Initialize Redis
+        redis = redis_client.createClient(Globals.redis_options());
+        await redis.connect();
       });
     
       afterAll(() => {

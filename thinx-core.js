@@ -82,7 +82,7 @@ module.exports = class THiNX extends EventEmitter {
     var app_config = Globals.app_config();
     var rollbar = Globals.rollbar(); // lgtm [js/unused-local-variable]
 
-    // Redis
+    // Initialize Redis
     app.redis_client = redis.createClient(Globals.redis_options());
 
     console.log("Connecting redis...");

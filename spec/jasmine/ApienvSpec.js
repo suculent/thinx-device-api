@@ -1,16 +1,19 @@
+const redis_client = require('redis');
+
 describe("API Env", function () {
 
   let redis;
 
-  beforeAll(() => {
-    console.log(`🚸 [chai] >>> running APIEnv spec`);
-    // TODO: INIT REDIS ASYNC!
+  beforeAll( async () => {
+    console.log(`🚸 [chai] >>> running APIEnv spec`);    
+    // Initialize Redis
+    redis = redis_client.createClient(Globals.redis_options());
+    await redis.connect();
   });
 
   afterAll(() => {
     console.log(`🚸 [chai] <<< completed APIEnv spec`);
   });
-
 
   var expect = require('chai').expect;
 

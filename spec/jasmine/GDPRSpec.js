@@ -7,6 +7,7 @@ describe("GDPR", function () {
 
     beforeAll(async () => {
         console.log(`🚸 [chai] >>> running GDPR spec`);
+        // Initialize Redis
         redis = Redis.createClient(Globals.redis_options());
         await redis.connect();
       });
