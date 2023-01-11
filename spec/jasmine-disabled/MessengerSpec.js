@@ -3,25 +3,26 @@ var expect = require('chai').expect;
 var Messenger = require('../../lib/thinx/messenger');
 var messenger;
 
-var Device = require("../../lib/thinx/device"); var device = new Device();
+var Device = require("../../lib/thinx/device"); var device = new Device(redis);
 
 var envi = require("../_envi.json");
 var test_owner = envi.oid;
 var udid = envi.udid;
 
 var User = require("../../lib/thinx/owner");
-var user = new User();
 
 describe("Messenger", function() {
 
+  var user;
+
   beforeAll(() => {
     console.log(`🚸 [chai] >>> running Messenger spec`);
+    user = new User(connected_redis);
   });
 
   afterAll(() => {
     console.log(`🚸 [chai] <<< completed Messenger spec`);
   });
-
 
   var ak = envi.ak;
 

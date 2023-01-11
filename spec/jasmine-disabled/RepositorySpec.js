@@ -14,7 +14,7 @@ describe("Repository", function() {
     console.log(`🚸 [chai] <<< completed Repository spec`);
   });
 
-  var watcher = new Repository(/* mock_queue */);
+  var watcher = new Repository(messenger, redis, /* mock_queue */);
 
   watcher.callback = function(err) {
     // watcher exit_callback
@@ -38,7 +38,7 @@ describe("Repository", function() {
   });
 
   it("should be able to purge old repos", function() {
-    watcher = new Repository();
+    watcher = new Repository(messenger, redis, queue);
     let name = "esp";
     let repositories = Repository.findAllRepositoriesWithFullname("esp8266");
     watcher.purge_old_repos_with_full_name(repositories, name);
@@ -46,12 +46,12 @@ describe("Repository", function() {
   });
 
   it("should be able to initialize", function() {
-    watcher = new Repository(/* mock_queue */);
+    watcher = new Repository(messenger, redis, /* mock_queue */);
     expect(watcher).to.be.an('object');
   });
 
   it("should be able to respond to githook", function() {
-    watcher = new Repository(/* mock_queue */);
+    watcher = new Repository(messenger, redis, /* mock_queue */);
     let mock_git_message = require("../mock-git-response.json");
     let mock_git_request = {
       headers: [],
@@ -62,7 +62,7 @@ describe("Repository", function() {
   });
 
   it("should be able to respond to githook (invalid)", function() {
-    watcher = new Repository(/* mock_queue */);
+    watcher = new Repository(messenger, redis, /* mock_queue */);
     let mock_git_message = require("../mock-git-response.json");
     let mock_git_request = {
       headers: [],

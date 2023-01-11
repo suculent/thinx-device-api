@@ -1,5 +1,5 @@
 var Builder = require("../../lib/thinx/builder"); var builder = new Builder();
-var Device = require("../../lib/thinx/device"); var device = new Device();
+var Device = require("../../lib/thinx/device");
 var Devices = require("../../lib/thinx/devices"); var devices = new Devices();
 var Queue = require("../../lib/thinx/queue");
 
@@ -22,6 +22,8 @@ describe("Builder", function () {
   app.disable('x-powered-by');
 
   var queue = new Queue(builder, app, null);
+
+  var device = new Device(redis);
 
   var envi = require("../_envi.json");
   var owner = envi.oid;

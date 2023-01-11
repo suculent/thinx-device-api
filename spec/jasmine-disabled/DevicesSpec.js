@@ -18,7 +18,7 @@ describe("Devices", function() {
   var devices = new Devices(messenger);
 
   var Device = require("../../lib/thinx/device");
-  var device = new Device();
+  var device = new Device(redis);
 
   var envi = require("../_envi.json");
   var owner = envi.oid;

@@ -10,7 +10,7 @@ describe("Device", function () {
 
 
   var expect = require('chai').expect;
-  var Device = require("../../lib/thinx/device"); var device = new Device();
+  var Device = require("../../lib/thinx/device"); var device = new Device(connected_redis);
   var ApiKey = require("../../lib/thinx/apikey"); var APIKey = new ApiKey();
 
   var envi = require("../_envi.json");

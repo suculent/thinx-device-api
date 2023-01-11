@@ -98,7 +98,7 @@ module.exports = class THiNX extends EventEmitter {
 
       if (process.env.ENVIRONMENT !== "test") {
         try {
-          // app.redis_client.bgsave();  not a function
+          // app.redis_client.bgsave();  not a function anymore
         } catch (e) {
           // may throw errro that BGSAVE is already enabled
           console.log("thinx.js bgsave error:", e);
@@ -127,7 +127,7 @@ module.exports = class THiNX extends EventEmitter {
 
       console.log("ℹ️ [info] app will init messenger...");
 
-      app.messenger = new Messenger(serviceMQPassword).getInstance(app.redis_client, serviceMQPassword); // take singleton to prevent double initialization
+      app.messenger = new Messenger(app.redis_client,serviceMQPassword).getInstance(app.redis_client, serviceMQPassword); // take singleton to prevent double initialization
 
       // Section that requires initialized Slack
       app.messenger.initSlack(() => {
@@ -234,11 +234,18 @@ module.exports = class THiNX extends EventEmitter {
           queue = new Queue(builder, app, null /* ssl_options */, this.clazz);
           queue.cron(); // starts cron job for build queue from webhooks
 
-          watcher = new Repository(queue);
+          console.log("Initializing Watcher (requires redis_client)...");
+
+          if ((typeof(app.redis_client) === "undefined") || (app.redis_client === null)) {
+            console.log(app);
+            throw new Error("Redis client missing in thinx-core.js:240");
+          }
+
+          watcher = new Repository(app.messenger, app.redis_client, queue);
           //}
 
           const GDPR = require("./lib/thinx/gdpr");
-          new GDPR().guard();
+          new GDPR(app.redis_client).guard();
 
           const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
           const blog = new Buildlog();

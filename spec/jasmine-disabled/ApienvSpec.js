@@ -1,7 +1,10 @@
 describe("API Env", function () {
 
+  let redis;
+
   beforeAll(() => {
     console.log(`🚸 [chai] >>> running APIEnv spec`);
+    // TODO: INIT REDIS ASYNC!
   });
 
   afterAll(() => {
@@ -15,7 +18,7 @@ describe("API Env", function () {
   var owner = envi.oid;
 
   var APIEnv = require('../../lib/thinx/apienv');
-  var apienv = new APIEnv();
+  var apienv = new APIEnv(redis);
 
   // create: function(owner, name, value, callback)
   it("should be able to store new environment variable", function (done) {
