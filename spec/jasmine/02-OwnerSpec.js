@@ -6,7 +6,7 @@ var email = envi.email;
 var test_info = envi.test_info;
 const user_body = envi.test_info;
 
-let Globals = require('globals.js');
+let Globals = require('../../lib/thinx/globals');
 const redis_client = require('redis');
 
 describe("Owner", function () {

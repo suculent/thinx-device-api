@@ -10,12 +10,12 @@
     "domain": ""
   },
   "redis": {
-    "host": "thinx-redis",
+    "host": "localhost",
     "db": 0,
     "port": 6379
   },
   "mqtt": {
-    "server": "mqtt://mosquitto",
+    "server": "mqtt://localhost",
     "port": 1883
   },
   "port": 7442,
