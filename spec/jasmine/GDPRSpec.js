@@ -1,5 +1,5 @@
 let Redis = require('redis');
-let Glovals = require('globals.js');
+let Globals = require('globals.js');
 
 describe("GDPR", function () {
 
