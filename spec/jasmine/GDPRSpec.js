@@ -1,5 +1,5 @@
 let Redis = require('redis');
-let Globals = require('globals.js');
+let Globals = require('../../lib/thinx/globals');
 
 describe("GDPR", function () {
 
