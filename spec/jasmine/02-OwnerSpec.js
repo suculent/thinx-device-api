@@ -14,7 +14,7 @@ describe("Owner", function () {
   let user;
   let redis;
 
-  beforeAll( async () => {
+  beforeAll(async () => {
     console.log(`🚸 [chai] >>> running Owner spec`);
     redis = redis_client.createClient(Globals.redis_options());
     await redis.connect();

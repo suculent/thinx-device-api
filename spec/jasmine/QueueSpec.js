@@ -11,7 +11,7 @@ describe("Queue", function () {
 
     let redis;
 
-    beforeAll(() => {
+    beforeAll(async() => {
         console.log(`🚸 [chai] >>> running Queue spec`);
         // Initialize Redis
         redis = redis_client.createClient(Globals.redis_options());
