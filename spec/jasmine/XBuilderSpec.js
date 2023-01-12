@@ -1,16 +1,28 @@
-var Builder = require("../../lib/thinx/builder"); var builder = new Builder();
-var Device = require("../../lib/thinx/device");
-var Devices = require("../../lib/thinx/devices"); var devices = new Devices();
-var Queue = require("../../lib/thinx/queue");
+const Builder = require("../../lib/thinx/builder");
+const Device = require("../../lib/thinx/device");
+const Devices = require("../../lib/thinx/devices");
+const Queue = require("../../lib/thinx/queue");
 
 var expect = require('chai').expect;
 
 var Notifier = require('../../lib/thinx/notifier');
 
+const Globals = require("../../lib/thinx/globals.js");
+const redis_client = require('redis');
+
 describe("Builder", function () {
 
-  beforeAll(() => {
+  let redis;
+  let builder;
+  let devices;
+
+  beforeAll(async() => {
     console.log(`🚸 [chai] >>> running Builder spec`);
+    // Initialize Redis
+    redis = redis_client.createClient(Globals.redis_options());
+    await redis.connect();
+    builder = new Builder(redis);
+    devices = new Devices(messenger, redis);
   });
 
   afterAll(() => {

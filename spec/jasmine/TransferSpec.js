@@ -1,19 +1,30 @@
+const Globals = require("../../lib/thinx/globals.js");
+const redis_client = require('redis');
+
+const expect = require('chai').expect;
+const envi = require("../_envi.json");
+
+const Devices = require("../../lib/thinx/devices");
+const Transfer = require("../../lib/thinx/transfer");  
+const Messenger = require('../../lib/thinx/messenger');
+
 describe("Transfer", function () {
 
-  var expect = require('chai').expect;
-  var envi = require("../_envi.json");
-  
-  var Messenger = require('../../lib/thinx/messenger');
-  var messenger = new Messenger("mosquitto").getInstance("mosquitto");
+  let messenger = new Messenger("mosquitto").getInstance("mosquitto");
+  let transfer = new Transfer(messenger);
 
-  var Devices = require("../../lib/thinx/devices");
-  var devices = new Devices(messenger);
+  let redis;
+  let devices;
 
-  var Transfer = require("../../lib/thinx/transfer");
-  var transfer = new Transfer(messenger);
-
-  beforeAll((done) => {
+  beforeAll(async(done) => {
     console.log(`🚸 [chai] >>> running Transfer spec`);
+
+    // Initialize Redis
+    redis = redis_client.createClient(Globals.redis_options());
+    await redis.connect();
+
+    devices = new Devices(messenger, redis);
+
     devices.list(envi.oid, (success, response) => {
       expect(success).to.equal(true);
       expect(response).to.be.a('object');

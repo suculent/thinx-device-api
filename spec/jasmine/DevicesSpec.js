@@ -1,29 +1,38 @@
+const Globals = require("../../lib/thinx/globals.js");
+const redis_client = require('redis');
+
+const expect = require('chai').expect;
+  
+const Messenger = require('../../lib/thinx/messenger');
+
+const Devices = require("../../lib/thinx/devices");
+const Device = require("../../lib/thinx/device");
+
+const envi = require("../_envi.json");
+const owner = envi.oid;
+const source_id = envi.sid;
+const ak = envi.ak;
+
 describe("Devices", function() {
 
-  beforeAll(() => {
+  let messenger = new Messenger("mosquitto").getInstance("mosquitto");
+  
+  let redis;
+  let devices;
+  let device;
+
+  beforeAll(async() => {
     console.log(`🚸 [chai] >>> running Devices spec`);
+    // Initialize Redis
+    redis = redis_client.createClient(Globals.redis_options());
+    await redis.connect();
+    devices = new Devices(messenger, redis);
+    device = new Device(redis);
   });
 
   afterAll(() => {
     console.log(`🚸 [chai] <<< completed Devices spec`);
   });
-
-
-  var expect = require('chai').expect;
-  
-  var Messenger = require('../../lib/thinx/messenger');
-  var messenger = new Messenger("mosquitto").getInstance("mosquitto");
-
-  var Devices = require("../../lib/thinx/devices");
-  var devices = new Devices(messenger);
-
-  var Device = require("../../lib/thinx/device");
-  var device = new Device(redis);
-
-  var envi = require("../_envi.json");
-  var owner = envi.oid;
-  var source_id = envi.sid;
-  var ak = envi.ak;
 
   // This UDID is to be deleted at the end of test.
   var TEST_DEVICE = {

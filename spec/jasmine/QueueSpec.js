@@ -4,15 +4,23 @@ let Queue = require("../../lib/thinx/queue");
 
 var envi = require("../_envi.json");
 
+const Globals = require("../../lib/thinx/globals.js");
+const redis_client = require('redis');
+
 describe("Queue", function () {
+
+    let redis;
 
     beforeAll(() => {
         console.log(`🚸 [chai] >>> running Queue spec`);
-      });
-    
-      afterAll(() => {
+        // Initialize Redis
+        redis = redis_client.createClient(Globals.redis_options());
+        await redis.connect();
+    });
+
+    afterAll(() => {
         console.log(`🚸 [chai] <<< completed Queue spec`);
-      });
+    });
 
     let mock_udid_1 = "<mock-udid-1>";
     let mock_udid_2 = "<mock-udid-2>";
@@ -24,7 +32,7 @@ describe("Queue", function () {
     // init
     it("should not fail or hang", function (done) {
 
-        let builder = new Builder();
+        let builder = new Builder(redis);
 
         // Should initialize safely without running cron
         queue_with_cron = new Queue(builder, null, null);
@@ -43,7 +51,7 @@ describe("Queue", function () {
             queue_with_cron.add(mock_udid_2, mock_source_id, mock_owner_id, () => {
                 queue_with_cron.add(mock_udid_3, mock_source_id, mock_owner_id, () => {
 
-                    queue_with_cron.findNext((success, next) => {                        
+                    queue_with_cron.findNext((success, next) => {
 
                         if ((next === null) || (success === false)) {
                             if (done_called === false) {
