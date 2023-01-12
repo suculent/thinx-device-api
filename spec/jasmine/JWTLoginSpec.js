@@ -1,5 +1,5 @@
-var JWTLogin = require("../../lib/thinx/jwtlogin");
-var expect = require('chai').expect;
+const JWTLogin = require("../../lib/thinx/jwtlogin");
+const expect = require('chai').expect;
 
 const Globals = require("../../lib/thinx/globals.js");
 const envi = require("../_envi.json");

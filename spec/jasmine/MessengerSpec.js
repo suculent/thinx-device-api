@@ -1,33 +1,42 @@
-var expect = require('chai').expect;
+const expect = require('chai').expect;
 
-var Messenger = require('../../lib/thinx/messenger');
-var messenger;
+const Messenger = require('../../lib/thinx/messenger');
+let messenger;
 
-var Device = require("../../lib/thinx/device"); var device = new Device(redis);
+const Device = require("../../lib/thinx/device"); 
 
-var envi = require("../_envi.json");
-var test_owner = envi.oid;
-var udid = envi.udid;
+const envi = require("../_envi.json");
+let test_owner = envi.oid;
+let udid = envi.udid;
 
-var User = require("../../lib/thinx/owner");
+let User = require("../../lib/thinx/owner");
+
+const Globals = require("../../lib/thinx/globals.js");
+const redis_client = require('redis');
 
 describe("Messenger", function() {
 
-  var user;
+  let user;
+  let device;
+  let redis;
 
-  beforeAll(() => {
+  beforeAll( async () => {
     console.log(`🚸 [chai] >>> running Messenger spec`);
-    user = new User(connected_redis);
+    // Initialize Redis
+    redis = redis_client.createClient(Globals.redis_options());
+    await redis.connect();
+    user = new User(redis);
+    device = new Device(redis);
   });
 
   afterAll(() => {
     console.log(`🚸 [chai] <<< completed Messenger spec`);
   });
 
-  var ak = envi.ak;
+  let ak = envi.ak;
 
   // This UDID is to be deleted at the end of test.
-  var TEST_DEVICE_6 = {
+  let TEST_DEVICE_6 = {
     mac: "AA:BB:CC:EE:00:06",
     firmware: "MessengerSpec.js",
     version: "1.0.0",
@@ -102,7 +111,7 @@ describe("Messenger", function() {
   it("[mm] should be able to setup MQTT client", function(done) {
 
     const Globals = require("../../lib/thinx/globals.js");
-    var app_config = Globals.app_config();
+    const app_config = Globals.app_config();
 
     console.log(`[spec] [mm] [debug] getting apikey with config ${JSON.stringify(app_config.mqtt)} for ${test_owner}`); 
 
