@@ -10,8 +10,7 @@ const Messenger = require('../../lib/thinx/messenger');
 
 describe("Transfer", function () {
 
-  let messenger = new Messenger("mosquitto").getInstance("mosquitto");
-
+  let messenger;
   let transfer;
   let redis;
   let devices;
@@ -26,6 +25,8 @@ describe("Transfer", function () {
     transfer = new Transfer(messenger, redis);
 
     devices = new Devices(messenger, redis);
+
+    messenger = new Messenger(redis, "mosquitto").getInstance(redis, "mosquitto");
 
     devices.list(envi.oid, (success, response) => {
       expect(success).to.equal(true);

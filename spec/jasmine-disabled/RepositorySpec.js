@@ -10,7 +10,7 @@ let repo_path = __dirname;
 
 describe("Repository", function() {
 
-  let messenger = new Messenger("mosquitto").getInstance("mosquitto");
+  let messenger;
   let watcher;
   let redis;
 
@@ -19,6 +19,7 @@ describe("Repository", function() {
     redis = redis_client.createClient(Globals.redis_options());
     await redis.connect();
     watcher = new Repository(messenger, redis, /* mock_queue */);
+    messenger = new Messenger(redis, "mosquitto").getInstance(redis, "mosquitto");
   });
 
   afterAll(() => {

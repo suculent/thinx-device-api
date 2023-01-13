@@ -15,8 +15,7 @@ const ak = envi.ak;
 
 describe("Devices", function() {
 
-  let messenger = new Messenger("mosquitto").getInstance("mosquitto");
-  
+  let messenger;
   let redis;
   let devices;
   let device;
@@ -28,6 +27,7 @@ describe("Devices", function() {
     await redis.connect();
     devices = new Devices(messenger, redis);
     device = new Device(redis);
+    messenger = new Messenger(redis, "mosquitto").getInstance(redis, "mosquitto");
   });
 
   afterAll(() => {
