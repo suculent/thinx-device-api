@@ -1,8 +1,8 @@
-var expect = require('chai').expect;
+const expect = require('chai').expect;
 const Builder = require('../../lib/thinx/builder');
-let Queue = require("../../lib/thinx/queue");
+const Queue = require("../../lib/thinx/queue");
 
-var envi = require("../_envi.json");
+const envi = require("../_envi.json");
 
 const Globals = require("../../lib/thinx/globals.js");
 const redis_client = require('redis');
@@ -35,7 +35,7 @@ describe("Queue", function () {
         let builder = new Builder(redis);
 
         // Should initialize safely without running cron
-        queue_with_cron = new Queue(builder, null, null);
+        queue_with_cron = new Queue(redis, builder, null, null, null);
         expect(queue_with_cron).to.be.a('object');
 
         let workers = queue_with_cron.getWorkers();

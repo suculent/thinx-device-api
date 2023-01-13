@@ -3,9 +3,10 @@ const Device = require("../../lib/thinx/device");
 const Devices = require("../../lib/thinx/devices");
 const Queue = require("../../lib/thinx/queue");
 
-var expect = require('chai').expect;
+const expect = require('chai').expect;
 
-var Notifier = require('../../lib/thinx/notifier');
+const Notifier = require('../../lib/thinx/notifier');
+const Messenger = require('../../lib/thinx/messenger');
 
 const Globals = require("../../lib/thinx/globals.js");
 const redis_client = require('redis');
@@ -17,9 +18,10 @@ describe("Builder", function () {
   let devices;
   let device;
   let queue;
+  let messenger = new Messenger("mosquitto").getInstance("mosquitto"); // requires injecting test creds, not custom creds!
 
-  var express = require("express");
-  var app = express();
+  let express = require("express");
+  let app = express();
   app.disable('x-powered-by');
 
   beforeAll(async() => {
@@ -30,7 +32,7 @@ describe("Builder", function () {
     builder = new Builder(redis);
     devices = new Devices(messenger, redis);
     device = new Device(redis);
-    queue = new Queue(builder, app, null);
+    queue = new Queue(redis, builder, app, null, null);
   });
 
   afterAll(() => {
