@@ -4,12 +4,20 @@ var generated_key_hash = null;
 var sha256 = require("sha256");
 var envi = require("../_envi.json");
 var owner = envi.oid;
-var apikey = new APIKey();
+
+let Globals = require('../../lib/thinx/globals');
+const redis_client = require('redis');
 
 describe("API Key", function() {
 
-  beforeAll(() => {
+  let apikey;
+
+  beforeAll(async() => {
     console.log(`🚸 [chai] >>> running API Key spec`);
+    // Initialize Redis
+    redis = redis_client.createClient(Globals.redis_options());
+    await redis.connect();
+    apikey = new APIKey(redis);
   });
 
   afterAll(() => {

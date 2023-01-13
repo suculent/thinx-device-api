@@ -273,7 +273,7 @@ module.exports = class THiNX extends EventEmitter {
               maxAge: 3600000,
               // can be false in case of local development or testing; mitigated by using Traefik router unwrapping HTTPS so the cookie travels securely where possible
               secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
-              httpOnly: true,
+              httpOnly: false, // TEMPORARY ONLY!
               domain: short_domain
             },
             store: sessionStore,
@@ -282,6 +282,8 @@ module.exports = class THiNX extends EventEmitter {
             rolling: true, // This resets the expiration date on the cookie to the given default.
             saveUninitialized: false
           };
+
+          console.log("Running core with sessionConfig", sessionConfig)
 
           // intentionally exposed cookie because there is no HTTPS between app and Traefik frontend
           const sessionParser = session(sessionConfig); /* lgtm [js/missing-token-validation] */

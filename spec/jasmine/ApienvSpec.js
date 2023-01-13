@@ -1,3 +1,4 @@
+let Globals = require('../../lib/thinx/globals');
 const redis_client = require('redis');
 
 describe("API Env", function () {

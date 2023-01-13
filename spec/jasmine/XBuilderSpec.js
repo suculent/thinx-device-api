@@ -15,6 +15,12 @@ describe("Builder", function () {
   let redis;
   let builder;
   let devices;
+  let device;
+  let queue;
+
+  var express = require("express");
+  var app = express();
+  app.disable('x-powered-by');
 
   beforeAll(async() => {
     console.log(`🚸 [chai] >>> running Builder spec`);
@@ -23,19 +29,13 @@ describe("Builder", function () {
     await redis.connect();
     builder = new Builder(redis);
     devices = new Devices(messenger, redis);
+    device = new Device(redis);
+    queue = new Queue(builder, app, null);
   });
 
   afterAll(() => {
     console.log(`🚸 [chai] <<< completed Builder spec`);
   });
-
-  var express = require("express");
-  var app = express();
-  app.disable('x-powered-by');
-
-  var queue = new Queue(builder, app, null);
-
-  var device = new Device(redis);
 
   var envi = require("../_envi.json");
   var owner = envi.oid;
