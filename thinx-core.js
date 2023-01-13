@@ -284,7 +284,7 @@ module.exports = class THiNX extends EventEmitter {
             saveUninitialized: false
           };
 
-          console.log("Running core with sessionConfig", sessionConfig)
+          //console.log("Running core with sessionConfig", sessionConfig)
 
           // intentionally exposed cookie because there is no HTTPS between app and Traefik frontend
           const sessionParser = session(sessionConfig); /* lgtm [js/missing-token-validation] */

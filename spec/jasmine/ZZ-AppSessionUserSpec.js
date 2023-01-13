@@ -308,7 +308,7 @@ describe("User Routes", function () {
       .post('/api/login')
       .send({ username: 'dynamic', password: 'dynamic', remember: false })
       .then(function (res) {
-        console.log("POST /api/login (valid) and GET /api/user/profile (auth+jwt) response", res.text);
+        console.log("POST /api/login (valid) and GET /api/user/profile (auth+jwt) response", res.text, res.cookie);
         expect(res).to.have.cookie('x-thx-core');
         /* response example:
         {
