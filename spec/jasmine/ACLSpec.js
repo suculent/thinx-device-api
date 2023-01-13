@@ -1,9 +1,16 @@
 describe("ACL Manager", function () {
 
   var ACL = require('../../lib/thinx/acl');
-  
-  beforeAll(() => {
+  let Globals = require('../../lib/thinx/globals');
+  const redis_client = require('redis');
+
+  let redis;
+
+  beforeAll(async() => {
     console.log(`🚸 [chai] >>> running ACL spec`);
+    // Initialize Redis
+    redis = redis_client.createClient(Globals.redis_options());
+    await redis.connect();
   });
 
   afterAll(() => {
@@ -32,7 +39,7 @@ describe("ACL Manager", function () {
   });
 
   it("should be remove user topic by name", function (done) {
-    var acl = new ACL("baecb3124695efa1672b7e8d62e5b89e44713968f45eae6faa52066e87795a78");
+    var acl = new ACL(redis, "baecb3124695efa1672b7e8d62e5b89e44713968f45eae6faa52066e87795a78");
     acl.load(() => {
       acl.addTopic(user, "readwrite", topic_remain);
       acl.removeTopic(user, topic_remain);
@@ -42,7 +49,7 @@ describe("ACL Manager", function () {
   });
 
   it("should be able export ACL file", function (done) {
-    var acl = new ACL("baecb3124695efa1672b7e8d62e5b89e44713968f45eae6faa52066e87795a78");
+    var acl = new ACL(redis, "baecb3124695efa1672b7e8d62e5b89e44713968f45eae6faa52066e87795a78");
     acl.path = output_test_file;
     acl.commit(() => {
       done();
@@ -50,14 +57,14 @@ describe("ACL Manager", function () {
   });
 
   it("should be able to prune given topic", function (done) {
-    var acl = new ACL("baecb3124695efa1672b7e8d62e5b89e44713968f45eae6faa52066e87795a78");
+    var acl = new ACL(redis, "baecb3124695efa1672b7e8d62e5b89e44713968f45eae6faa52066e87795a78");
     acl.prune("mesh-id2", () => {
       done();
     });
   });
 
   it("should be able load ACL file", function (done) {
-    var acl = new ACL("baecb3124695efa1672b7e8d62e5b89e44713968f45eae6faa52066e87795a78");
+    var acl = new ACL(redis, "baecb3124695efa1672b7e8d62e5b89e44713968f45eae6faa52066e87795a78");
     acl.path = input_test_file;
     acl.load(() => {
       done();
@@ -65,7 +72,7 @@ describe("ACL Manager", function () {
   });
 
   it("should be able load ACL file", function (done) {
-    var acl = new ACL("baecb3124695efa1672b7e8d62e5b89e44713968f45eae6faa52066e87795a78");
+    var acl = new ACL(redis, "baecb3124695efa1672b7e8d62e5b89e44713968f45eae6faa52066e87795a78");
     acl.path = input_test_file;
     acl.load(() => {
       acl.addTopic(user, "read", topic);
@@ -78,7 +85,7 @@ describe("ACL Manager", function () {
   });
 
   it("should survive start with null/invalidated user", function (done) {
-    var acl = new ACL(null);
+    var acl = new ACL(redis, null);
     acl.path = input_test_file;
     acl.load(() => {
       done();

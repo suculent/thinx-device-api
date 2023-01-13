@@ -16,7 +16,7 @@ describe("Transfer", function () {
   let redis;
   let devices;
 
-  beforeAll(async(done) => {
+  beforeAll(async() => {
     console.log(`🚸 [chai] >>> running Transfer spec`);
 
     // Initialize Redis
@@ -31,7 +31,6 @@ describe("Transfer", function () {
       expect(success).to.equal(true);
       expect(response).to.be.a('object');
       console.log("[spec] [transfer] BEFORE device list:", JSON.stringify(response, null, 2));
-      done();
     });
   });
 
