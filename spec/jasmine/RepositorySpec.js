@@ -1,20 +1,29 @@
-var expect = require('chai').expect;
-var Repository = require('../../lib/thinx/repository');
+const expect = require('chai').expect;
+const Repository = require('../../lib/thinx/repository');
+const Messenger = require('../../lib/thinx/messenger');
+
+const Globals = require("../../lib/thinx/globals.js");
+const redis_client = require('redis');
 
 // tests are run from ROOT
-var repo_path = __dirname;
+let repo_path = __dirname;
 
 describe("Repository", function() {
 
-  beforeAll(() => {
+  let messenger = new Messenger("mosquitto").getInstance("mosquitto");
+  let watcher;
+  let redis;
+
+  beforeAll(async() => {
     console.log(`🚸 [chai] >>> running Repository spec`);
+    redis = redis_client.createClient(Globals.redis_options());
+    await redis.connect();
+    watcher = new Repository(messenger, redis, /* mock_queue */);
   });
 
   afterAll(() => {
     console.log(`🚸 [chai] <<< completed Repository spec`);
   });
-
-  var watcher = new Repository(messenger, redis, /* mock_queue */);
 
   watcher.callback = function(err) {
     // watcher exit_callback

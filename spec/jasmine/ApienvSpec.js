@@ -1,28 +1,27 @@
 let Globals = require('../../lib/thinx/globals');
 const redis_client = require('redis');
+const APIEnv = require('../../lib/thinx/apienv');
+
+var expect = require('chai').expect;
+var envi = require("../_envi.json");
+var owner = envi.oid;
 
 describe("API Env", function () {
 
   let redis;
+  let apienv;
 
   beforeAll(async () => {
     console.log(`🚸 [chai] >>> running APIEnv spec`);
     // Initialize Redis
     redis = redis_client.createClient(Globals.redis_options());
     await redis.connect();
+    apienv = new APIEnv(redis);
   });
 
   afterAll(() => {
     console.log(`🚸 [chai] <<< completed APIEnv spec`);
   });
-
-  var expect = require('chai').expect;
-
-  var envi = require("../_envi.json");
-  var owner = envi.oid;
-
-  var APIEnv = require('../../lib/thinx/apienv');
-  var apienv = new APIEnv(redis);
 
   // create: function(owner, name, value, callback)
   it("should be able to store new environment variable", function (done) {

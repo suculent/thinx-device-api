@@ -11,8 +11,8 @@ const Messenger = require('../../lib/thinx/messenger');
 describe("Transfer", function () {
 
   let messenger = new Messenger("mosquitto").getInstance("mosquitto");
-  let transfer = new Transfer(messenger);
 
+  let transfer;
   let redis;
   let devices;
 
@@ -22,6 +22,8 @@ describe("Transfer", function () {
     // Initialize Redis
     redis = redis_client.createClient(Globals.redis_options());
     await redis.connect();
+
+    transfer = new Transfer(messenger, redis);
 
     devices = new Devices(messenger, redis);
 
