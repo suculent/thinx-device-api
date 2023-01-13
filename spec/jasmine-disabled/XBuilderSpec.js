@@ -18,7 +18,7 @@ describe("Builder", function () {
   let devices;
   let device;
   let queue;
-  let messenger = new Messenger("mosquitto").getInstance("mosquitto"); // requires injecting test creds, not custom creds!
+  let messenger;
 
   let express = require("express");
   let app = express();
@@ -33,23 +33,24 @@ describe("Builder", function () {
     devices = new Devices(messenger, redis);
     device = new Device(redis);
     queue = new Queue(redis, builder, app, null, null);
+    messenger = new Messenger(redis, "mosquitto").getInstance(redis, "mosquitto");
   });
 
   afterAll(() => {
     console.log(`🚸 [chai] <<< completed Builder spec`);
   });
 
-  var envi = require("../_envi.json");
-  var owner = envi.oid;
-  var udid = envi.udid;
-  var build_id = envi.build_id; // "f168def0-597f-11e7-a932-014d5b00c004";
-  var source_id = envi.sid;
-  var ak = envi.ak;
+  const envi = require("../_envi.json");
+  let owner = envi.oid;
+  let udid = envi.udid;
+  let build_id = envi.build_id; // "f168def0-597f-11e7-a932-014d5b00c004";
+  let source_id = envi.sid;
+  let ak = envi.ak;
 
-  var spec_build_id = null;
+  let spec_build_id = null;
 
   // This UDID is to be deleted at the end of test.
-  var TEST_DEVICE_5 = {
+  let TEST_DEVICE_5 = {
     mac: "AA:BB:CC:EE:00:05",
     firmware: "BuilderSpec.js",
     version: "1.0.0",
@@ -65,7 +66,7 @@ describe("Builder", function () {
   });
 
   it("should be able to dry-run", function (done) {
-    var build = {
+    const build = {
       udid: udid,
       source_id: source_id,
       dryrun: true

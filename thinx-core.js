@@ -37,7 +37,7 @@ module.exports = class THiNX extends EventEmitter {
     let start_timestamp = new Date().getTime();
 
     const Globals = require("./lib/thinx/globals.js"); // static only!
-    const Sanitka = require("./lib/thinx/sanitka.js"); var sanitka = new Sanitka();
+    const Sanitka = require("./lib/thinx/sanitka.js"); let sanitka = new Sanitka();
 
     // App
     const express = require("express");
@@ -68,9 +68,9 @@ module.exports = class THiNX extends EventEmitter {
 
     require("ssl-root-cas").inject();
 
-    var http = require('http');
-    var redis = require('redis');
-    var path = require('path');
+    const http = require('http');
+    const redis = require('redis');
+    const path = require('path');
 
     let CONFIG_ROOT = "/mnt/data/conf";
     if (process.env.ENVIRONMENT == "development") {
@@ -93,8 +93,8 @@ module.exports = class THiNX extends EventEmitter {
       console.log("Redis connected...");
 
       let connect_redis = require("connect-redis");
-      var RedisStore = connect_redis(session);
-      var sessionStore = new RedisStore({ client: app.redis_client });
+      let RedisStore = connect_redis(session);
+      let sessionStore = new RedisStore({ client: app.redis_client });
 
       if (process.env.ENVIRONMENT !== "test") {
         try {
@@ -127,7 +127,7 @@ module.exports = class THiNX extends EventEmitter {
 
       console.log("ℹ️ [info] app will init messenger...");
 
-      app.messenger = new Messenger(app.redis_client,serviceMQPassword).getInstance(app.redis_client, serviceMQPassword); // take singleton to prevent double initialization
+      app.messenger = new Messenger(app.redis_client, serviceMQPassword).getInstance(app.redis_client, serviceMQPassword); // take singleton to prevent double initialization
 
       // Section that requires initialized Slack
       app.messenger.initSlack(() => {
@@ -145,7 +145,7 @@ module.exports = class THiNX extends EventEmitter {
           //
 
           const Stats = require("./lib/thinx/statistics");
-          var stats = new Stats();
+          let stats = new Stats();
           let now = new Date();
           stats.get_all_owners();
           let then = new Date();
@@ -235,15 +235,7 @@ module.exports = class THiNX extends EventEmitter {
           //constructor(redis, builder, di_app, ssl_options, opt_thx)
           queue.cron(); // starts cron job for build queue from webhooks
 
-          console.log("Initializing Watcher (requires redis_client)...");
-
-          if ((typeof(app.redis_client) === "undefined") || (app.redis_client === null)) {
-            console.log(app);
-            throw new Error("Redis client missing in thinx-core.js:240");
-          }
-
           watcher = new Repository(app.messenger, app.redis_client, queue);
-          //}
 
           const GDPR = require("./lib/thinx/gdpr");
           new GDPR(app.redis_client).guard();

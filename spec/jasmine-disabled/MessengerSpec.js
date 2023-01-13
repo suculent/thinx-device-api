@@ -65,7 +65,7 @@ describe("Messenger", function () {
 
 
   it("should be able to initialize", function (/* done */) {
-    messenger = new Messenger("mosquitto").getInstance("mosquitto"); // requires injecting test creds, not custom creds!
+    messenger = new Messenger(redis, "mosquitto").getInstance(redis, "mosquitto");
   });
 
   // this requires having owner and devices registered in the DB, 
