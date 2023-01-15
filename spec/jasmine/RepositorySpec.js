@@ -1,6 +1,7 @@
 const expect = require('chai').expect;
 const Repository = require('../../lib/thinx/repository');
 const Messenger = require('../../lib/thinx/messenger');
+const Queue = require("../../lib/thinx/queue");
 
 const Globals = require("../../lib/thinx/globals.js");
 const redis_client = require('redis');
@@ -8,11 +9,14 @@ const redis_client = require('redis');
 // tests are run from ROOT
 let repo_path = __dirname;
 
+
 describe("Repository", function() {
 
   let messenger;
   let watcher;
   let redis;
+  let queue_with_cron;
+  let builder;
 
   beforeAll(async() => {
     console.log(`🚸 [chai] >>> running Repository spec`);
@@ -20,6 +24,9 @@ describe("Repository", function() {
     await redis.connect();
     watcher = new Repository(messenger, redis, /* mock_queue */);
     messenger = new Messenger(redis, "mosquitto").getInstance(redis, "mosquitto");
+    builder = new Builder(redis);
+    // Should initialize safely without running cron
+    queue_with_cron = new Queue(redis, builder, null, null, null);
   });
 
   afterAll(() => {
@@ -47,23 +54,23 @@ describe("Repository", function() {
   });
 
   it("should be able to initialize", function() {
-    watcher = new Repository(messenger, redis, /* mock_queue */);
+    watcher = new Repository(messenger, redis, queue_with_cron);
     expect(watcher).to.be.an('object');
   });
 
   it("should be able to respond to githook", function() {
-    watcher = new Repository(messenger, redis, /* mock_queue */);
+    watcher = new Repository(messenger, redis, queue_with_cron);
     let mock_git_message = require("../mock-git-response.json");
     let mock_git_request = {
       headers: [],
       body: mock_git_message
     };
     let response = watcher.process_hook(mock_git_request);
-    expect(response).to.be.false; // fix later
+    expect(response).to.eq(false); // fix later
   });
 
   it("should be able to respond to githook (invalid)", function() {
-    watcher = new Repository(messenger, redis, /* mock_queue */);
+    watcher = new Repository(messenger, redis, queue_with_cron);
     let mock_git_message = require("../mock-git-response.json");
     let mock_git_request = {
       headers: [],
@@ -71,12 +78,12 @@ describe("Repository", function() {
     };
     delete mock_git_request.body.repository;
     let response = watcher.process_hook(mock_git_request);
-    expect(response).to.be.false; // fix later
+    expect(response).to.eq(false); // fix later
   });
 
   it ("should be able to verify body signature", () => {
     let result = watcher.validateSignature("sha256=null", "{ body: false }", "secret");
-    expect(result).to.be.false;
+    expect(result).to.eq(false);
   });
 
 });

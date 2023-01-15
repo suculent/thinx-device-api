@@ -4,12 +4,14 @@ let Globals = require('../../lib/thinx/globals');
 describe("GDPR", function () {
 
     var redis = null;
+    let app = {};
 
     beforeAll(async () => {
         console.log(`🚸 [chai] >>> running GDPR spec`);
         // Initialize Redis
         redis = Redis.createClient(Globals.redis_options());
         await redis.connect();
+        app.redis_client = redis;
       });
     
       afterAll(() => {
@@ -30,12 +32,12 @@ describe("GDPR", function () {
     };
 
     it("should not fail while scheduling guards", function () {
-        let gdpr = new GDPR(redis);
+        let gdpr = new GDPR(app);
         expect(gdpr.guard()).to.equal(true);
     }, 10000);
 
     it("should not fail while purging", function (done) {
-        let gdpr = new GDPR(redis);
+        let gdpr = new GDPR(app);
         gdpr.purgeOldUsers((result) => {
             expect(result).to.equal(true);
             done();
@@ -43,7 +45,7 @@ describe("GDPR", function () {
     }, 10000);
 
     it("should not fail while notifying", function (done) {
-        let gdpr = new GDPR(redis);
+        let gdpr = new GDPR(app);
         gdpr.notifyOldUsers((result) => {
             expect(result).to.equal(true);
             done();
@@ -58,7 +60,7 @@ describe("GDPR", function () {
         d1.setHours(0, 0, 0, 0);
         let user = mock_user;
         user.last_update = d1;
-        let gdpr = new GDPR(redis);
+        let gdpr = new GDPR(app);
         gdpr.notify24(user, (error) => {
             if (error) console.log("[spec] 24 hours before deletion ERROR:", error);
             done();
@@ -66,7 +68,7 @@ describe("GDPR", function () {
     }, 10000);
 
     it("should notify 3 months - 168 hours before deletion", function (done) {
-        let gdpr = new GDPR(redis);
+        let gdpr = new GDPR(app);
         var d2 = new Date();
         d2.setMonth(d2.getMonth() - 4);
         d2.setDate(d2.getDay() - 8);

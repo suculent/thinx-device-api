@@ -241,7 +241,7 @@ module.exports = class THiNX extends EventEmitter {
           watcher = new Repository(app.messenger, app.redis_client, queue);
 
           const GDPR = require("./lib/thinx/gdpr");
-          new GDPR(app.redis_client).guard();
+          new GDPR(app).guard();
 
           const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
           const blog = new Buildlog();
