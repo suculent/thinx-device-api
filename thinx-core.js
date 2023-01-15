@@ -3,6 +3,7 @@ const EventEmitter = require('events');
 const JWTLogin = require("./lib/thinx/jwtlogin");
 const InfluxConnector = require('./lib/thinx/influx');
 const Util = require('./lib/thinx/util');
+const Owner = require('./lib/thinx/owner');
 
 module.exports = class THiNX extends EventEmitter {
 
@@ -90,7 +91,7 @@ module.exports = class THiNX extends EventEmitter {
     // Section that requires initialized Redis
     app.redis_client.connect().then(() => {
 
-      app.owner = app.owner;
+      app.owner = new Owner(app.redis_client);
 
       console.log("Redis connected...");
 
@@ -309,7 +310,7 @@ module.exports = class THiNX extends EventEmitter {
 
           // API v2 routes
           require('./lib/router.apikey.js')(app);
-          require('./lib/router.auth.js')(app);
+          require('./lib/router.auth.js')(app); // requires initialized Owner/Redis!
           require('./lib/router.build.js')(app);
           require('./lib/router.deviceapi.js')(app);
           require('./lib/router.env.js')(app);
