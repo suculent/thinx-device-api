@@ -66,7 +66,6 @@ describe("Owner", function () {
 
   it("(03) should be able to fetch owner profile", function (done) {
     user.profile(owner, (success, response) => {
-      console.log("(03) user.profile response should be an object, actual:", response);
       expect(response).to.be.an('object');
       expect(success).to.equal(true);
       done();
