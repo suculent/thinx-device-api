@@ -9,7 +9,7 @@ const envi = require("../_envi.json");
 let test_owner = envi.oid;
 let udid = envi.udid;
 
-let User = require("../../lib/thinx/owner");
+let Owner = require("../../lib/thinx/owner");
 
 const Globals = require("../../lib/thinx/globals.js");
 const redis_client = require('redis');
@@ -25,7 +25,7 @@ describe("Messenger", function () {
     // Initialize Redis
     redis = redis_client.createClient(Globals.redis_options());
     await redis.connect();
-    user = new User(redis);
+    user = new Owner(redis);
     device = new Device(redis);
   });
 

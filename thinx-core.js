@@ -90,6 +90,8 @@ module.exports = class THiNX extends EventEmitter {
     // Section that requires initialized Redis
     app.redis_client.connect().then(() => {
 
+      app.owner = app.owner;
+
       console.log("Redis connected...");
 
       let connect_redis = require("connect-redis");

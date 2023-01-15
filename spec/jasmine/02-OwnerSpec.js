@@ -37,7 +37,7 @@ describe("Owner", function () {
 
     user.create(user_body, true, res_mock, (_res, success, response) => {
 
-      console.log("[DEBUG] user.create response", { _res}, {_success}, {_response});
+      console.log("[DEBUG] user.create response", { _res}, {success}, {response});
       
       // valid case is existing user as well
       if (typeof (response) == "string" && response.indexOf("username_already_exists") !== -1) {
