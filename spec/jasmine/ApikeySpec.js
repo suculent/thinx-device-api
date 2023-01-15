@@ -111,7 +111,8 @@ describe("API Key", function() {
 
         expect(success).to.equal(true);
       
-        console.log("[spec] APIKey revoking: ", JSON.stringify(array_or_error[0]));
+        console.log("[spec] APIKey revoking: ", JSON.stringify(array_or_error[0]), "from", { array_or_error });
+        
         expect(array_or_error[0].alias).to.equal("sample-key-for-revocation");
         generated_key_hash = sha256(array_or_error[0].key);
         expect(generated_key_hash).to.be.a('string');

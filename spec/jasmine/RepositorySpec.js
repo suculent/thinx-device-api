@@ -47,7 +47,7 @@ describe("Repository", function() {
   });
 
   it("should be able to purge old repos", function() {
-    watcher = new Repository(messenger, redis, queue);
+    watcher = new Repository(messenger, redis, queue_with_cron);
     let name = "esp";
     let repositories = Repository.findAllRepositoriesWithFullname("esp8266");
     watcher.purge_old_repos_with_full_name(repositories, name);
