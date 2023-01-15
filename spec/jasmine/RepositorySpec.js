@@ -2,6 +2,7 @@ const expect = require('chai').expect;
 const Repository = require('../../lib/thinx/repository');
 const Messenger = require('../../lib/thinx/messenger');
 const Queue = require("../../lib/thinx/queue");
+const Builder = require('../../lib/thinx/builder');
 
 const Globals = require("../../lib/thinx/globals.js");
 const redis_client = require('redis');

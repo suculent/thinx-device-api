@@ -4,6 +4,7 @@ const JWTLogin = require("./lib/thinx/jwtlogin");
 const InfluxConnector = require('./lib/thinx/influx');
 const Util = require('./lib/thinx/util');
 const Owner = require('./lib/thinx/owner');
+const Device = require('./lib/thinx/device');
 
 module.exports = class THiNX extends EventEmitter {
 
@@ -92,6 +93,7 @@ module.exports = class THiNX extends EventEmitter {
     app.redis_client.connect().then(() => {
 
       app.owner = new Owner(app.redis_client);
+      app.device = new Device(app.redis_client); // TODO: Share in Devices, Messenger and Transfer, can be mocked
 
       console.log("Redis connected...");
 
