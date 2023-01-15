@@ -34,6 +34,8 @@ describe("Owner", function () {
     let res_mock = {};
 
     user.create(user_body, true, res_mock, (_res, success, response) => {
+
+      console.log("[DEBUG] user.create response", { _res}, {_success}, {_response});
       // valid case is existing user as well
       if (typeof (response) == "string" && response.indexOf("username_already_exists") !== -1) {
         expect(success).to.equal(false);
@@ -61,6 +63,7 @@ describe("Owner", function () {
 
   it("(03) should be able to fetch owner profile", function (done) {
     user.profile(owner, (success, response) => {
+      console.log("03 user.profile response should be an object, actual:", response);
       expect(response).to.be.an('object');
       expect(success).to.equal(true);
       done();
