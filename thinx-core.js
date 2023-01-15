@@ -231,7 +231,7 @@ module.exports = class THiNX extends EventEmitter {
 
           // TEST CASE WORKAROUND: attempt to fix duplicate initialization... if Queue is being tested, it's running as another instance and the port 3000 must stay free!
           //if (process.env.ENVIRONMENT !== "test") {
-          queue = new Queue(redis, builder, app, null /* ssl_options */, this.clazz);
+          queue = new Queue(app.redis_client, builder, app, null /* ssl_options */, this.clazz);
           //constructor(redis, builder, di_app, ssl_options, opt_thx)
           queue.cron(); // starts cron job for build queue from webhooks
 
