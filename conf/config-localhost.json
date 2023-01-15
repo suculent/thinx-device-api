@@ -5,7 +5,6 @@
   "public_url": "http://localhost",
   "api_url": "http://localhost:7443",
   "mailgun": {
-    "api_key": "",
     "base_url": "",
     "domain": ""
   },
