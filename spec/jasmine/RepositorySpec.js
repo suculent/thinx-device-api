@@ -26,15 +26,6 @@ describe("Repository", function() {
     console.log(`🚸 [chai] <<< completed Repository spec`);
   });
 
-  watcher.callback = function(err) {
-    // watcher exit_callback
-    console.log("Callback 1", err);
-  };
-  watcher.exit_callback = function(err) {
-    // watcher exit_callback
-    console.log("Callback 2", err);
-  };
-
   console.log("✅ [spec] [info] Watcher is using repo_path: "+repo_path);
 
   it("should be able to find all repositories", function() {
