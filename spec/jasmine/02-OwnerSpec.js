@@ -1,5 +1,5 @@
 var expect = require('chai').expect;
-var User = require("../../lib/thinx/owner");
+var Owner = require("../../lib/thinx/owner");
 var envi = require("../_envi.json");
 var owner = envi.oid;
 var email = envi.email;
@@ -18,7 +18,7 @@ describe("Owner", function () {
     console.log(`🚸 [chai] >>> running Owner spec`);
     redis = redis_client.createClient(Globals.redis_options());
     await redis.connect();
-    user = new User(redis);
+    user = new Owner(redis);
   });
 
   afterAll(() => {
