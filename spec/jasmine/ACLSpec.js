@@ -29,7 +29,7 @@ describe("ACL Manager", function () {
   const output_test_file = '/mnt/data/mosquitto/auth/thinx.out.acl';
 
   it("should add/update user topic", function (done) {
-    var acl = new ACL("baecb3124695efa1672b7e8d62e5b89e44713968f45eae6faa52066e87795a78");
+    var acl = new ACL(redis, "baecb3124695efa1672b7e8d62e5b89e44713968f45eae6faa52066e87795a78");
     acl.load(() => {
       acl.addTopic(user, "readwrite", topic);
       acl.addTopic(user, "readwrite", topic_remain);
