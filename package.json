@@ -16,7 +16,7 @@
     "snyk": "snyk test",
     "snyk-protect": "snyk-protect",
     "jasmine": "nyc jasmine",
-    "test": "nyc jasmine; echo 'TEST COMPLETE'; nyc report --reporter=text-lcov > coverage/lcov.info; coveralls < coverage/lcov.info; node ./node_modules/coveralls/bin/coveralls.js < coverage/lcov.info; echo 'SUBMMISSION COMPLETE';",
+    "test": "mkdir coverage; nyc jasmine; echo 'TEST COMPLETE'; nyc report --reporter=text-lcov > coverage/lcov.info; echo 'REPORT GENERATED'; cat coverage/lcov.info; coveralls < coverage/lcov.info; node ./node_modules/coveralls/bin/coveralls.js < coverage/lcov.info; echo 'SUBMMISSION COMPLETE';",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./",
     "coverage": "npm run mocha",
     "mocha": "mocha spec/jasmine --delay=3000 --exit --timeout=5000; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | node node_modules/coveralls/bin/coveralls.js",
