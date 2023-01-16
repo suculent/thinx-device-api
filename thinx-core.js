@@ -92,6 +92,8 @@ module.exports = class THiNX extends EventEmitter {
 
     app.redis_legacy_client = redis.createClient(legacyOptions);
 
+    app.redis_legacy_client.connect().then(() => {});
+
     console.log("Connecting redis...");
 
     // Section that requires initialized Redis
