@@ -320,7 +320,8 @@ jobs:
         command: |
           export ENVIRONMENT=test
           docker compose up --build api | tee -ia ./test.log
-          if [ ! $(cat ./test.log | grep "specs, 0 failures") ]; then 
+          echo "Docker test complete."
+          if [[ ! $(grep "specs, 0 failures" ./test.log) ]]; then 
             echo "» TEST failed. Should not deploy this commit."
             cat ./test.log | grep "Failures:"
             exit 1
