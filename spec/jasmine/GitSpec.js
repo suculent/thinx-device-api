@@ -21,7 +21,7 @@ describe("Git", function () {
         let git = new Git();
         let success = git.fetch(
             "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c", // owner
-            "git clone https://github.com/suculent/thinx-firmware-esp8266-pio", // command
+            "git clone https://github.com/suculent/thinx-firmware-esp8266-pio < echo thinx", // command
             device_path
         );
         expect(success === true);
@@ -31,7 +31,7 @@ describe("Git", function () {
         let git = new Git();
         let success = git.fetch(
             "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c", // owner
-            "git clone https://github.com/suculent/thinx-firmware-esp32-pio", // command
+            "git clone https://github.com/suculent/thinx-firmware-esp32-pio < echo thinx", // command
             device_path
         );
         expect(success === true);
@@ -57,7 +57,7 @@ describe("Git", function () {
         let git = new Git();
         let success = git.fetch(
             envi.dynamic.owner, // owner
-            "git clone https://github.com/suculent/thinx-firmware-esp8266-ino", // command
+            "git clone https://github.com/suculent/thinx-firmware-esp8266-ino < echo thinx", // command
             dyn_device_path
         );
         expect(success === true);
@@ -67,7 +67,7 @@ describe("Git", function () {
         let git = new Git();
         let success = git.fetch(
             envi.dynamic.owner, // owner
-            "git clone https://github.com/suculent/thinx-firmware-esp8266-pio", // command
+            "git clone https://github.com/suculent/thinx-firmware-esp8266-pio < echo thinx", // command
             dyn_device_path
         );
         expect(success === true);
@@ -77,7 +77,7 @@ describe("Git", function () {
         let git = new Git();
         let success = git.fetch(
             envi.dynamic.owner, // owner
-            "git clone https://github.com/suculent/thinx-firmware-esp32-pio", // command
+            "git clone https://github.com/suculent/thinx-firmware-esp32-pio < echo thinx", // command
             dyn_device_path
         );
         expect(success === true);
