@@ -52,7 +52,6 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   # chmod +x ./cc-test-reporter  
   # ./cc-test-reporter before-build
   npm run test
-  set -e
 else
   echo "[thinx-entrypoint] Starting in production mode..."
   # tee is used to split pipe with application logs back to file which
