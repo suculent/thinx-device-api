@@ -16,7 +16,7 @@
     "snyk": "snyk test",
     "snyk-protect": "snyk-protect",
     "jasmine": "nyc jasmine",
-    "test": "nyc jasmine; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls",
+    "test": "nyc jasmine; echo 'TEST COMPLETE'; nyc report --reporter=text-lcov > lcov.info; cat lcov.info | coveralls",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./",
     "coverage": "npm run mocha",
     "mocha": "mocha spec/jasmine --delay=3000 --exit --timeout=5000; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | coveralls",
@@ -129,7 +129,7 @@
   "devDependencies": {
     "assert": "^2.0.0",
     "codecov": "^3.8.1",
-    "coveralls": "^3.1.0",
+    "coveralls": "^3.1.1",
     "eslint": "^8.7.0",
     "eslint-config-jquery": "^3.0.0",
     "expect": "^25.5.0",
