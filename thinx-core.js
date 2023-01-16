@@ -125,14 +125,14 @@ module.exports = class THiNX extends EventEmitter {
         serviceMQPassword = "changeme!"; // inject test password for thinx to make sure no random stuff is injected in test (until this constant shall be removed everywhere)
       }
 
-      console.log("ℹ️ [info] app will init messenger...");
+      console.log("ℹ️ [info] Initializing MQ/Notification subsystem...");
 
       app.messenger = new Messenger(app.redis_client, serviceMQPassword).getInstance(app.redis_client, serviceMQPassword); // take singleton to prevent double initialization
 
       // Section that requires initialized Slack
       app.messenger.initSlack(() => {
 
-        console.log("ℹ️ [info] app running initSlack...");
+        console.log("ℹ️ [info] Initialized Slack bot...");
 
         const Database = require("./lib/thinx/database");
         var db = new Database();
@@ -360,7 +360,7 @@ module.exports = class THiNX extends EventEmitter {
             console.log(`ℹ️ [info] HTTP API started on port ${app_config.port}`);
             let end_timestamp = new Date().getTime() - start_timestamp;
             let seconds = Math.ceil(end_timestamp / 1000);
-            console.log("⏱ [profiler] Startup phase took:", seconds, "seconds");
+            console.log("ℹ️ [profiler] ⏱ Startup phase took:", seconds, "seconds");
           });
 
 
