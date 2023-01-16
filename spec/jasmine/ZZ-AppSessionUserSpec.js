@@ -2,9 +2,9 @@
 
 const THiNX = require("../../thinx-core.js");
 
-let chai = require('chai');
-var expect = require('chai').expect;
-let chaiHttp = require('chai-http');
+const chai = require('chai');
+const expect = require('chai').expect;
+const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
 var envi = require("../_envi.json");
@@ -483,7 +483,7 @@ describe("User Routes", function () {
   //
 
   it("GET /api/user/profile (jwt)", function (done) {
-    expect(jwt).not.to.be.null;
+    expect(jwt).not.to.eq(null);
     agent
       .get('/api/user/profile')
       .set('Authorization', jwt)

@@ -86,7 +86,7 @@ describe("Devices", function() {
 
   it("(03) should not be able to list devices for empty owner", function(done) {
     devices.list("", (success, response) => {
-      expect(success).to.be.false;
+      expect(success).to.equal(false);
       expect(response).to.be.a('object');
       done();
     });

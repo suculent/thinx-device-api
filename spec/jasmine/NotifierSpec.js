@@ -64,7 +64,7 @@ describe("Notifier", function () {
     let job_status = {
       udid: "d6ff2bb0-df34-11e7-b351-eb37822aa173"
     };
-    not.process(job_status, (success, response) => {
+    not.process(job_status, (success, /*response*/) => {
       expect(success).to.eq(false);
       done();
     });
