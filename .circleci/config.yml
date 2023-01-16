@@ -224,7 +224,7 @@ jobs:
             mkdir -p /mnt/data/redis
             mkdir -p /mnt/data/repos
             mkdir -p /mnt/data/ssl
-            mkdir -p /mnt/data/ssh_keys
+            mkdir -p /mnt/data/ssh_keys && cp -R ./spec/mnt/data/ssh_keys /mnt/data/ssh_keys
             mkdir -p /mnt/data/test-reports
 
     - run:
@@ -324,10 +324,9 @@ jobs:
           echo "Docker test complete."
           if [[ ! $(grep "specs, 0 failures" ./test.log) ]]; then 
             echo "» TEST failed. Should not deploy this commit."
-            cat ./test.log | grep "Failures:"
+            grep "Failures:" ./test.log
             exit 1
           fi
-          date
 
     - run:
         name: Allow inspecting MQTT logs
