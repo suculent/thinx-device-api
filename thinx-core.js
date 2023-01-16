@@ -87,13 +87,6 @@ module.exports = class THiNX extends EventEmitter {
     // Initialize Redis
     app.redis_client = redis.createClient(Globals.redis_options());
 
-    let legacyOptions = Globals.redis_options();
-    legacyOptions.legacyMode = true;
-
-    app.redis_legacy_client = redis.createClient(legacyOptions);
-
-    app.redis_legacy_client.connect().then(() => {});
-
     // Section that requires initialized Redis
     app.redis_client.connect().then(() => {
 
@@ -101,7 +94,7 @@ module.exports = class THiNX extends EventEmitter {
       app.device = new Device(app.redis_client); // TODO: Share in Devices, Messenger and Transfer, can be mocked
 
       let RedisStore = connect_redis(session);
-      let sessionStore = new RedisStore({ client: app.redis_legacy_client });
+      let sessionStore = new RedisStore({ client: app.redis_client });
 
       if (process.env.ENVIRONMENT !== "test") {
         try {

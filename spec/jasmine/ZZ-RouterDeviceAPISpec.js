@@ -121,7 +121,7 @@ describe("Device API (noauth)", function () {
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('OTT_INFO_NOT_FOUND');
+                expect(res.text).to.equal('OTT_UPDATE_NOT_FOUND');
                 done();
             });
     }, 30000);
@@ -265,7 +265,7 @@ describe("Device + API (JWT+Key)", function () {
                 console.log("🚸 [chai] GET /device/firmware (ak, invalid)", res.status, res.text);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('OTT_INFO_NOT_FOUND');
+                expect(res.text).to.equal('OTT_UPDATE_NOT_FOUND');
                 done();
             });
     }, 30000);
@@ -291,7 +291,7 @@ describe("Device + API (JWT+Key)", function () {
                 console.log("🚸 [chai] GET /device/firmware (ak, valid)", res.status, res.text);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('OTT_INFO_NOT_FOUND');
+                expect(res.text).to.equal('OTT_UPDATE_NOT_FOUND');
                 done();
             });
     }, 30000);

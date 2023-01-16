@@ -123,7 +123,7 @@ describe("Transformer (JWT)", function () {
         expect(res.text).to.be.a('string');
         let j = JSON.parse(res.text);
         expect(j.success).to.equal(true);
-        console.log("🚸 [chai] POST /api/device/edit response", JSON.stringify(j, null, 2));
+        console.log("🚸 [chai] POST /api/device/edit response", JSON.stringify(j));
         // {"success":true,"message":{"success":true,"change":{"transformers":[{"ufid":"vt:b688d51871191b9f645678b10ce70ec23704ef5c549019b8beeaec9939401756","alias":"Empty","body":"var transformer = function(status, device) { return status };"}],"udid":"64984150-b771-11ec-bf10-f505ba97f5e2","doc":null,"value":null}}} 
         done();
       });
