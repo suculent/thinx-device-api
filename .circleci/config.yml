@@ -224,6 +224,7 @@ jobs:
             mkdir -p /mnt/data/redis
             mkdir -p /mnt/data/repos
             mkdir -p /mnt/data/ssl
+            mkdir -p /mnt/data/ssh_keys
             mkdir -p /mnt/data/test-reports
 
     - run:
