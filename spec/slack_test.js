@@ -60,7 +60,7 @@ rtm.on('ready', (rtmStartData) => {
             }
         }
         console.log("☣️ [error] [slack:rtm::ready] No Slack conversation ID in channels, taking first from:", response.channels);
-        this.channels = response.channels[0].id;
+        this.channel = response.channels[0].id;
     })
     .catch((error) => {
         // Error :/
