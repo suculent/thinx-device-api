@@ -6,6 +6,8 @@ const Util = require('./lib/thinx/util');
 const Owner = require('./lib/thinx/owner');
 const Device = require('./lib/thinx/device');
 
+const connect_redis = require("connect-redis");
+const session = require("express-session");
 module.exports = class THiNX extends EventEmitter {
 
   constructor() {
@@ -55,8 +57,6 @@ module.exports = class THiNX extends EventEmitter {
     const helmet = require('helmet');
     app.use(helmet.frameguard());
 
-    const session = require("express-session");
-
     const pki = require('node-forge').pki;
     const fs = require("fs-extra");
 
@@ -87,6 +87,11 @@ module.exports = class THiNX extends EventEmitter {
     // Initialize Redis
     app.redis_client = redis.createClient(Globals.redis_options());
 
+    let legacyOptions = Globals.redis_options();
+    legacyOptions.legacyMode = true;
+
+    app.redis_legacy_client = redis.createClient(legacyOptions);
+
     console.log("Connecting redis...");
 
     // Section that requires initialized Redis
@@ -97,9 +102,8 @@ module.exports = class THiNX extends EventEmitter {
 
       console.log("Redis connected...");
 
-      let connect_redis = require("connect-redis");
       let RedisStore = connect_redis(session);
-      let sessionStore = new RedisStore({ client: app.redis_client });
+      let sessionStore = new RedisStore({ client: app.redis_legacy_client });
 
       if (process.env.ENVIRONMENT !== "test") {
         try {
