@@ -45,7 +45,7 @@ describe("Notifier", function () {
   it ("should return if outfile is undefined", function(done) {
     let job_status = {};
     not.process(job_status, (success) => {
-      expect(success).to.be.false;
+      expect(success).to.be(false);
       done();
     });
   }, 5000);
@@ -55,7 +55,7 @@ describe("Notifier", function () {
       udid: ""
     };
     not.process(job_status, (success) => {
-      expect(success).to.be.false;
+      expect(success).to.be(false);
       done();
     });
   }, 5000);
