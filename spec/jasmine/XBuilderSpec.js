@@ -1,39 +1,56 @@
-var Builder = require("../../lib/thinx/builder"); var builder = new Builder();
-var Device = require("../../lib/thinx/device"); var device = new Device();
-var Devices = require("../../lib/thinx/devices"); var devices = new Devices();
-var Queue = require("../../lib/thinx/queue");
+const Builder = require("../../lib/thinx/builder");
+const Device = require("../../lib/thinx/device");
+const Devices = require("../../lib/thinx/devices");
+const Queue = require("../../lib/thinx/queue");
 
-var expect = require('chai').expect;
+const expect = require('chai').expect;
 
-var Notifier = require('../../lib/thinx/notifier');
+const Notifier = require('../../lib/thinx/notifier');
+const Messenger = require('../../lib/thinx/messenger');
+
+const Globals = require("../../lib/thinx/globals.js");
+const redis_client = require('redis');
 
 describe("Builder", function () {
 
-  beforeAll(() => {
+  let redis;
+  let builder;
+  let devices;
+  let device;
+  let queue;
+  let messenger;
+
+  let express = require("express");
+  let app = express();
+  app.disable('x-powered-by');
+
+  beforeAll(async() => {
     console.log(`🚸 [chai] >>> running Builder spec`);
+    // Initialize Redis
+    redis = redis_client.createClient(Globals.redis_options());
+    await redis.connect();
+    builder = new Builder(redis);
+    devices = new Devices(messenger, redis);
+    device = new Device(redis);
+    queue = new Queue(redis, builder, app, null, null);
+    messenger = new Messenger(redis, "mosquitto").getInstance(redis, "mosquitto");
   });
 
   afterAll(() => {
     console.log(`🚸 [chai] <<< completed Builder spec`);
   });
 
-  var express = require("express");
-  var app = express();
-  app.disable('x-powered-by');
+  const envi = require("../_envi.json");
+  let owner = envi.oid;
+  let udid = envi.udid;
+  let build_id = envi.build_id; // "f168def0-597f-11e7-a932-014d5b00c004";
+  let source_id = envi.sid;
+  let ak = envi.ak;
 
-  var queue = new Queue(builder, app, null);
-
-  var envi = require("../_envi.json");
-  var owner = envi.oid;
-  var udid = envi.udid;
-  var build_id = envi.build_id; // "f168def0-597f-11e7-a932-014d5b00c004";
-  var source_id = envi.sid;
-  var ak = envi.ak;
-
-  var spec_build_id = null;
+  let spec_build_id = null;
 
   // This UDID is to be deleted at the end of test.
-  var TEST_DEVICE_5 = {
+  let TEST_DEVICE_5 = {
     mac: "AA:BB:CC:EE:00:05",
     firmware: "BuilderSpec.js",
     version: "1.0.0",
@@ -49,7 +66,7 @@ describe("Builder", function () {
   });
 
   it("should be able to dry-run", function (done) {
-    var build = {
+    const build = {
       udid: udid,
       source_id: source_id,
       dryrun: true

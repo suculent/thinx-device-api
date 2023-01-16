@@ -2,6 +2,12 @@
 
 ## HISTORY
 
+16/1/2023 1.8.2247
+
+» Security fixes due to Circle CI leak (moved Mailgun API key to env var)
+» Refactoring and optimizations
+» Security improvements (RSA Keygen with password-protected private keys)
+
 28/4/2022 1.6.1726
 
 » This version is really close to be a final THiNX version for 1.x roadmap. Internals are already refactored to provide API v2 for newly prepared UI, along with lots of inside refactoring and optimizations, that (thanks to unit and integration test) should have no impact on usability or reverse-compatibility (unless depending on error codes that have been precisioned in both API versions).

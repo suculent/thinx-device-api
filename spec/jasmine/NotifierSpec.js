@@ -45,7 +45,7 @@ describe("Notifier", function () {
   it ("should return if outfile is undefined", function(done) {
     let job_status = {};
     not.process(job_status, (success) => {
-      expect(success).to.be.false;
+      expect(success).to.eq(false);
       done();
     });
   }, 5000);
@@ -55,7 +55,7 @@ describe("Notifier", function () {
       udid: ""
     };
     not.process(job_status, (success) => {
-      expect(success).to.be.false;
+      expect(success).to.eq(false);
       done();
     });
   }, 5000);
@@ -64,9 +64,8 @@ describe("Notifier", function () {
     let job_status = {
       udid: "d6ff2bb0-df34-11e7-b351-eb37822aa173"
     };
-    not.process(job_status, (success, response) => {
-      expect(success).to.be.false;
-      console.log("[spec] response:", response);
+    not.process(job_status, (success, /*response*/) => {
+      expect(success).to.eq(false);
       done();
     });
   }, 5000);

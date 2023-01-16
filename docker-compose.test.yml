@@ -117,6 +117,7 @@ services:
         - 'THINX_HOSTNAME=${THINX_HOSTNAME}'
         - 'THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}'
         - 'WORKER_SECRET=${WORKER_SECRET}'
+        - 'MAILGUN_API_KEY=${MAILGUN_API_KEY}'
     environment:
       - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
       - 'COUCHDB_PASS=${COUCHDB_PASS}'
@@ -137,6 +138,7 @@ services:
       - 'THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}'
       - 'WORKER_SECRET=${WORKER_SECRET}'   
       - 'GITHUB_ACCESS_TOKEN=${GITHUB_ACCESS_TOKEN}'
+      - 'MAILGUN_API_KEY=${MAILGUN_API_KEY}'
     ports:
       - '7442:7442'
       - '7443:7443'

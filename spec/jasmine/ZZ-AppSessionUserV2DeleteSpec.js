@@ -2,13 +2,12 @@
 
 const THiNX = require("../../thinx-core.js");
 
-let chai = require('chai');
-var expect = require('chai').expect;
-let chaiHttp = require('chai-http');
+const chai = require('chai');
+const expect = require('chai').expect;
+const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
-var envi = require("../_envi.json");
-
+const envi = require("../_envi.json");
 const dynamic_owner_id = envi.dynamic2.owner;
 
 const user_info = {
@@ -23,7 +22,6 @@ let dynamic_activation_code = null;
 let thx;
 let agent;
 let jwt = null;
-
 let reset_key = null;
 
 describe("User Routes V2", function () {

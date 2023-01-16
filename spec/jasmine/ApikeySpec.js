@@ -1,23 +1,30 @@
 var APIKey = require("../../lib/thinx/apikey");
-var expect = require('chai').expect;  
-var generated_key_hash = null;
+var expect = require('chai').expect;
 var sha256 = require("sha256");
 var envi = require("../_envi.json");
 var owner = envi.oid;
-var apikey = new APIKey();
 
-describe("API Key", function() {
+let Globals = require('../../lib/thinx/globals');
+const redis_client = require('redis');
 
-  beforeAll(() => {
+describe("API Key", function () {
+
+  let apikey;
+
+  beforeAll(async () => {
     console.log(`🚸 [chai] >>> running API Key spec`);
+    // Initialize Redis
+    redis = redis_client.createClient(Globals.redis_options());
+    await redis.connect();
+    apikey = new APIKey(redis);
   });
 
   afterAll(() => {
     console.log(`🚸 [chai] <<< completed API Key spec`);
   });
 
-   //list: function(invalid-owner, callback)
-   it("(00) should be able to list empty API Keys", function (done) {
+  //list: function(invalid-owner, callback)
+  it("(00) should be able to list empty API Keys", function (done) {
     apikey.list(
       "dummy",
       (object) => {
@@ -27,7 +34,7 @@ describe("API Key", function() {
   });
 
   //create: function(owner, apikey_alias, callback)
-  it("(01) should be able to generate new API Key", function(done) {
+  it("(01) should be able to generate new API Key", function (done) {
     apikey.create(
       owner,
       "sample-key",
@@ -35,7 +42,7 @@ describe("API Key", function() {
         if (success) {
           generated_key_hash = sha256(array_or_error[0].key);
         } else {
-          console.log("[spec] APIKey failed: ",{array_or_error});
+          console.log("[spec] APIKey failed: ", { array_or_error });
         }
         expect(success).to.equal(true);
         expect(array_or_error[0].key).to.be.a('string');
@@ -44,7 +51,7 @@ describe("API Key", function() {
     );
   });
 
-  it("(01b) should be able to generate another API Key", function(done) {
+  it("(01b) should be able to generate another API Key", function (done) {
     apikey.create(
       owner,
       "sample-key-2",
@@ -56,7 +63,7 @@ describe("API Key", function() {
     );
   });
 
-  it("(01b) should be able to generate Default MQTT API Key", function(done) {
+  it("(01b) should be able to generate Default MQTT API Key", function (done) {
     apikey.create(
       owner,
       "Default MQTT API Key",
@@ -64,7 +71,7 @@ describe("API Key", function() {
         if (success) {
           generated_key_hash = sha256(array_or_error[0].key);
         } else {
-          console.log("[spec] APIKey failed: ",{array_or_error});
+          console.log("[spec] APIKey failed: ", { array_or_error });
         }
         expect(success).to.equal(true);
         expect(array_or_error[0].key).to.be.a('string');
@@ -73,7 +80,7 @@ describe("API Key", function() {
     );
   });
 
-  it("(02) should be able to list API Keys", function(done) {
+  it("(02) should be able to list API Keys", function (done) {
     apikey.list(
       owner,
       (object) => {
@@ -83,7 +90,7 @@ describe("API Key", function() {
   });
 
   //verify: function(owner, apikey, callback)
-  it("(03) should be able to verify invalid API Keys", function(done) {
+  it("(03) should be able to verify invalid API Keys", function (done) {
     apikey.verify(
       owner,
       "invalid-api-key",
@@ -95,36 +102,34 @@ describe("API Key", function() {
   });
 
   //revoke: function(owner, apikey_hash, callback)
-  it("04 - should be able to revoke API Keys", function(done) {
+  it("04 - should be able to revoke API Keys", function (done) {
     apikey.create(
       owner,
       "sample-key-for-revocation",
       (success, array_or_error) => {
-
         expect(success).to.equal(true);
-      
-        console.log("[spec] APIKey revoking: ", JSON.stringify(array_or_error[0]));
-        expect(array_or_error[0].alias).to.equal("sample-key-for-revocation");
-        generated_key_hash = sha256(array_or_error[0].key);
-        expect(generated_key_hash).to.be.a('string');
-      
-        expect(array_or_error[0].key).to.be.a('string');
-        apikey.revoke(
-          owner,
-          [generated_key_hash],
-          (_success, /* result */) => {
-            expect(_success).to.equal(true);
-            done();
-          });
+        console.log("[spec] APIKey revoking: sample-key-for-revocation from", { array_or_error });
+        for (let index in array_or_error) {
+          let item = array_or_error[index];
+          if (item.alias.indexOf("sample-key-for-revocation") !== -1) {
+            apikey.revoke(
+              owner,
+              [item.hash],
+              (_success, /* result */) => {
+                expect(_success).to.equal(true);
+                done();
+              });
+          }
+        }
       }
     );
   });
 
-  it("(05) should return empty array  on invalid API Key revocation", function(done) {
+  it("(05) should return empty array  on invalid API Key revocation", function (done) {
     apikey.revoke(
       owner,
       ["sample-key-hax"], // intentionaly invalid
-      (success)  => {
+      (success) => {
         expect(success).to.equal(true);
         done();
       }

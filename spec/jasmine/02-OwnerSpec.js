@@ -1,16 +1,24 @@
 var expect = require('chai').expect;
-var User = require("../../lib/thinx/owner");
-var user = new User();
+var Owner = require("../../lib/thinx/owner");
 var envi = require("../_envi.json");
 var owner = envi.oid;
 var email = envi.email;
 var test_info = envi.test_info;
 const user_body = envi.test_info;
 
+let Globals = require('../../lib/thinx/globals');
+const redis_client = require('redis');
+
 describe("Owner", function () {
 
-  beforeAll(() => {
+  let user;
+  let redis;
+
+  beforeAll(async () => {
     console.log(`🚸 [chai] >>> running Owner spec`);
+    redis = redis_client.createClient(Globals.redis_options());
+    await redis.connect();
+    user = new Owner(redis);
   });
 
   afterAll(() => {
@@ -25,7 +33,12 @@ describe("Owner", function () {
 
     let res_mock = {};
 
+    console.log("(01) Creating user", user_body);
+
     user.create(user_body, true, res_mock, (_res, success, response) => {
+
+      console.log("[DEBUG] user.create response", { _res}, {success}, {response});
+      
       // valid case is existing user as well
       if (typeof (response) == "string" && response.indexOf("username_already_exists") !== -1) {
         expect(success).to.equal(false);

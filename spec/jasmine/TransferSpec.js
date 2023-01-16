@@ -1,24 +1,37 @@
+const Globals = require("../../lib/thinx/globals.js");
+const redis_client = require('redis');
+
+const expect = require('chai').expect;
+const envi = require("../_envi.json");
+
+const Devices = require("../../lib/thinx/devices");
+const Transfer = require("../../lib/thinx/transfer");  
+const Messenger = require('../../lib/thinx/messenger');
+
 describe("Transfer", function () {
 
-  var expect = require('chai').expect;
-  var envi = require("../_envi.json");
-  
-  var Messenger = require('../../lib/thinx/messenger');
-  var messenger = new Messenger("mosquitto").getInstance("mosquitto");
+  let messenger;
+  let transfer;
+  let redis;
+  let devices;
 
-  var Devices = require("../../lib/thinx/devices");
-  var devices = new Devices(messenger);
-
-  var Transfer = require("../../lib/thinx/transfer");
-  var transfer = new Transfer(messenger);
-
-  beforeAll((done) => {
+  beforeAll(async() => {
     console.log(`🚸 [chai] >>> running Transfer spec`);
+
+    // Initialize Redis
+    redis = redis_client.createClient(Globals.redis_options());
+    await redis.connect();
+
+    transfer = new Transfer(messenger, redis);
+
+    devices = new Devices(messenger, redis);
+
+    messenger = new Messenger(redis, "mosquitto").getInstance(redis, "mosquitto");
+
     devices.list(envi.oid, (success, response) => {
       expect(success).to.equal(true);
       expect(response).to.be.a('object');
       console.log("[spec] [transfer] BEFORE device list:", JSON.stringify(response, null, 2));
-      done();
     });
   });
 

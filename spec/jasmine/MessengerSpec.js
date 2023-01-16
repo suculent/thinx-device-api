@@ -1,32 +1,42 @@
-var expect = require('chai').expect;
+const expect = require('chai').expect;
 
-var Messenger = require('../../lib/thinx/messenger');
-var messenger;
+const Messenger = require('../../lib/thinx/messenger');
+let messenger;
 
-var Device = require("../../lib/thinx/device"); var device = new Device();
+const Device = require("../../lib/thinx/device");
 
-var envi = require("../_envi.json");
-var test_owner = envi.oid;
-var udid = envi.udid;
+const envi = require("../_envi.json");
+let test_owner = envi.oid;
+let udid = envi.udid;
 
-var User = require("../../lib/thinx/owner");
-var user = new User();
+let Owner = require("../../lib/thinx/owner");
 
-describe("Messenger", function() {
+const Globals = require("../../lib/thinx/globals.js");
+const redis_client = require('redis');
 
-  beforeAll(() => {
+describe("Messenger", function () {
+
+  let user;
+  let device;
+  let redis;
+
+  beforeAll(async () => {
     console.log(`🚸 [chai] >>> running Messenger spec`);
+    // Initialize Redis
+    redis = redis_client.createClient(Globals.redis_options());
+    await redis.connect();
+    user = new Owner(redis);
+    device = new Device(redis);
   });
 
   afterAll(() => {
     console.log(`🚸 [chai] <<< completed Messenger spec`);
   });
 
-
-  var ak = envi.ak;
+  let ak = envi.ak;
 
   // This UDID is to be deleted at the end of test.
-  var TEST_DEVICE_6 = {
+  let TEST_DEVICE_6 = {
     mac: "AA:BB:CC:EE:00:06",
     firmware: "MessengerSpec.js",
     version: "1.0.0",
@@ -37,7 +47,7 @@ describe("Messenger", function() {
     platform: "platformio"
   };
 
-  it("requires to register sample build device", function(done) {
+  it("requires to register sample build device", function (done) {
     let res = {};
     device.register(
       TEST_DEVICE_6, /* reg.registration */
@@ -55,7 +65,7 @@ describe("Messenger", function() {
 
 
   it("should be able to initialize", function (/* done */) {
-    messenger = new Messenger("mosquitto").getInstance("mosquitto"); // requires injecting test creds, not custom creds!
+    messenger = new Messenger(redis, "mosquitto").getInstance(redis, "mosquitto");
   });
 
   // this requires having owner and devices registered in the DB, 
@@ -70,7 +80,7 @@ describe("Messenger", function() {
   }, 60000);
 
   // getDevices: function(owner, callback)
-  it("should be able to fetch devices for owner", function(done) {
+  it("should be able to fetch devices for owner", function (done) {
     messenger.getDevices(test_owner, (success, devices) => {
       expect(devices).to.be.a('array');
       expect(success).to.equal(true);
@@ -79,7 +89,7 @@ describe("Messenger", function() {
   });
 
   // publish: function(owner, udid, message); returns nothing
-  it("should be able to publish upon connection", function(done) {
+  it("should be able to publish upon connection", function (done) {
     messenger.publish(test_owner, udid, "test");
     done();
   }, 5000);
@@ -90,25 +100,25 @@ describe("Messenger", function() {
     });
   }, 5000);
 
-  it("should be able to post random quote", function(done) {
+  it("should be able to post random quote", function (done) {
     messenger.postRandomQuote("quote", () => {
       done();
     });
-    
+
   }, 5000);
 
   // may be disabled in case of last test left hanging
-  it("[mm] should be able to setup MQTT client", function(done) {
+  it("[mm] should be able to setup MQTT client", function (done) {
 
     const Globals = require("../../lib/thinx/globals.js");
-    var app_config = Globals.app_config();
+    const app_config = Globals.app_config();
 
-    console.log(`[spec] [mm] [debug] getting apikey with config ${JSON.stringify(app_config.mqtt)} for ${test_owner}`); 
+    console.log(`[spec] [mm] [debug] getting apikey with config ${JSON.stringify(app_config.mqtt)} for ${test_owner}`);
 
     user.mqtt_key(test_owner, (key_success, apikey) => {
 
       // to debug Default MQTT API Key creation: 
-      
+
       console.log(`[spec] [mm] fetched mqtt key? ${key_success} with apikey ${JSON.stringify(apikey, null, '\t')}`);
 
       expect(key_success).to.equal(true);
@@ -122,7 +132,7 @@ describe("Messenger", function() {
       };
 
       console.log(`[spec] [mm] setting up client for owner ${test_owner} with options ${JSON.stringify(mqtt_options)}`);
-  
+
       messenger.setupMqttClient(test_owner, mqtt_options, (result) => {
         console.log(`[spec] [mm] [spec] setup mqtt result ${result}`);
         expect(result).to.equal(true);
@@ -134,13 +144,13 @@ describe("Messenger", function() {
   }, 5000);
 
   // responder should not fail
-  it("should be able to respond to a nonsense message", function() {
+  it("should be able to respond to a nonsense message", function () {
     let topic = "/owner/device/test";
     let message = "Bare no-NID message";
     messenger.messageResponder(topic, message);
   });
 
-  it("should be able to process status connected message", function() {
+  it("should be able to process status connected message", function () {
     let topic = "/07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c/d6ff2bb0-df34-11e7-b351-eb37822aa172/status";
     let message = {
       status: "connected"
@@ -148,7 +158,7 @@ describe("Messenger", function() {
     messenger.messageResponder(topic, message);
   });
 
-  it("should be able to process status disconnected message", function() {
+  it("should be able to process status disconnected message", function () {
     let topic = "/07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c/d6ff2bb0-df34-11e7-b351-eb37822aa172/status";
     let message = {
       status: "disconnected"
@@ -156,7 +166,7 @@ describe("Messenger", function() {
     messenger.messageResponder(topic, message);
   });
 
-  it("should be able to process connection message", function() {
+  it("should be able to process connection message", function () {
     let topic = "/07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c/d6ff2bb0-df34-11e7-b351-eb37822aa172/status";
     let message = {
       connected: true
@@ -164,7 +174,7 @@ describe("Messenger", function() {
     messenger.messageResponder(topic, message);
   });
 
-  it("should be able to process disconnection message", function() {
+  it("should be able to process disconnection message", function () {
     let topic = "/07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c/d6ff2bb0-df34-11e7-b351-eb37822aa172/status";
     let message = {
       connected: false
@@ -172,7 +182,7 @@ describe("Messenger", function() {
     messenger.messageResponder(topic, message);
   });
 
-  it("should be able to process actionable notification", function() {
+  it("should be able to process actionable notification", function () {
     let topic = "/07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c/d6ff2bb0-df34-11e7-b351-eb37822aa172/status";
     let message = {
       notification: {
@@ -181,33 +191,33 @@ describe("Messenger", function() {
       }
     };
     messenger.messageResponder(topic, message);
-});
+  });
 
-    it("should be able to process actionable notification from device", function() {
-      let topic = "/07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c/d6ff2bb0-df34-11e7-b351-eb37822aa172/status";
-      let message = {
-        notification: {
-          response: true,
-          body: "Notification Response",
-          response_type: "string"
-        }
-      };
-      messenger.messageResponder(topic, message);
+  it("should be able to process actionable notification from device", function () {
+    let topic = "/07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c/d6ff2bb0-df34-11e7-b351-eb37822aa172/status";
+    let message = {
+      notification: {
+        response: true,
+        body: "Notification Response",
+        response_type: "string"
+      }
+    };
+    messenger.messageResponder(topic, message);
   });
 
   // message_callback(...)
-  it("should be able to survive message_callback call", function() {
+  it("should be able to survive message_callback call", function () {
     messenger.message_callback("/owner/device/test", "Bare no-NID message");
   });
 
-  it("should be able to survive message_callback call", function(done) {
+  it("should be able to survive message_callback call", function (done) {
     messenger.data(test_owner, udid, (error, data) => {
       expect(error).to.equal(false);
       expect(data).to.be.a('string');
       done();
     });
   });
-  
+
   // get_result_or_callback(...)
   // initWithOwner(...)
   // slack(...)

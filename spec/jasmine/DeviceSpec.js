@@ -1,7 +1,22 @@
+const Globals = require("../../lib/thinx/globals.js");
+const redis_client = require('redis');
+
+const expect = require('chai').expect;
+const Device = require("../../lib/thinx/device");
+const ApiKey = require("../../lib/thinx/apikey"); 
+
 describe("Device", function () {
 
-  beforeAll(() => {
+  let redis;
+  let device;
+  let APIKey;
+
+  beforeAll(async() => {
     console.log(`🚸 [chai] >>> running Device spec`);
+    redis = redis_client.createClient(Globals.redis_options());
+    await redis.connect();
+    device = new Device(redis);
+    APIKey = new ApiKey(redis);
   });
 
   afterAll(() => {
@@ -9,9 +24,7 @@ describe("Device", function () {
   });
 
 
-  var expect = require('chai').expect;
-  var Device = require("../../lib/thinx/device"); var device = new Device();
-  var ApiKey = require("../../lib/thinx/apikey"); var APIKey = new ApiKey();
+  
 
   var envi = require("../_envi.json");
 

@@ -1,0 +1,74 @@
+<mxfile host="app.diagrams.net" modified="2022-11-27T18:46:01.724Z" agent="5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15" version="20.6.0" etag="GkbG3u6qkdxm_Ddkki6B" type="github">
+  <diagram id="r4VjCqL_lPk8LwniEGfx" name="Page-1">
+    <mxGraphModel dx="1226" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="kssWVyb8Yw60K7yibJ3D-4" value="Transformer" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="520" y="200" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="kssWVyb8Yw60K7yibJ3D-6" value="VM" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="640" y="200" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="kssWVyb8Yw60K7yibJ3D-5" value="VM" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="654" y="210" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="kssWVyb8Yw60K7yibJ3D-7" value="VM" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="664" y="220" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="kssWVyb8Yw60K7yibJ3D-8" value="Docker Container" style="swimlane;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="140" width="260" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="kssWVyb8Yw60K7yibJ3D-9" value="Docker Container" style="swimlane;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="130" y="140" width="200" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="kssWVyb8Yw60K7yibJ3D-3" value="App" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="kssWVyb8Yw60K7yibJ3D-9">
+          <mxGeometry x="60" y="60" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="kssWVyb8Yw60K7yibJ3D-11" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="kssWVyb8Yw60K7yibJ3D-3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="380" as="sourcePoint" />
+            <mxPoint x="520" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kssWVyb8Yw60K7yibJ3D-12" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="kssWVyb8Yw60K7yibJ3D-4" target="kssWVyb8Yw60K7yibJ3D-6">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="610" y="250" as="sourcePoint" />
+            <mxPoint x="440" y="330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kssWVyb8Yw60K7yibJ3D-13" value="&amp;lt;&amp;lt; JS code &amp;gt;&amp;gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="370" y="210" width="96" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="kssWVyb8Yw60K7yibJ3D-14" value="&lt;font color=&quot;#ff3333&quot;&gt;http&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="370" y="240" width="96" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="kssWVyb8Yw60K7yibJ3D-15" value="" style="swimlane;startSize=0;dashed=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="80" y="80" width="720" height="290" as="geometry" />
+        </mxCell>
+        <mxCell id="kssWVyb8Yw60K7yibJ3D-16" value="&lt;font color=&quot;#ff3333&quot;&gt;private docker network&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="kssWVyb8Yw60K7yibJ3D-15">
+          <mxGeometry x="264" width="148" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="kssWVyb8Yw60K7yibJ3D-17" value="" style="curved=1;endArrow=classic;html=1;rounded=0;fontColor=#FF3333;exitX=1.017;exitY=0.043;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="kssWVyb8Yw60K7yibJ3D-18" target="kssWVyb8Yw60K7yibJ3D-14">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="370" y="440" as="sourcePoint" />
+            <mxPoint x="420" y="390" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="420" y="440" />
+              <mxPoint x="370" y="390" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kssWVyb8Yw60K7yibJ3D-18" value="TODO: STRIDE, etc." style="swimlane;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="180" y="510" width="200" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="kssWVyb8Yw60K7yibJ3D-19" value="&lt;font color=&quot;#000000&quot;&gt;In case of attacker intruding this&lt;br&gt;instance, it would be possible to&lt;br&gt;monitor/spoof http communication&lt;br&gt;causing Remote Code Execution.&lt;br&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontColor=#FF3333;fontStyle=2" vertex="1" parent="1">
+          <mxGeometry x="180" y="430" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="kssWVyb8Yw60K7yibJ3D-20" value="Notes:&lt;br&gt;&lt;br&gt;Historically, this is supposed to be external container mainly for workload offloading.&lt;br&gt;&lt;br&gt;The container is expected to be called in asynchronous manner, where the client (api) waits for response before storing device data processed in the request. This should be rewritten (&lt;b&gt;TASK!&lt;/b&gt;) to synchronous call of async series using IIFE (immediately-invoked function expression).&lt;br&gt;&lt;br&gt;As a result of that, architecture can be changed from HTTP to SSL Socket." style="text;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="440" y="430" width="360" height="205" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
