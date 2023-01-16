@@ -66,7 +66,6 @@ describe("Notifier", function () {
     };
     not.process(job_status, (success, response) => {
       expect(success).to.eq(false);
-      console.log("[spec] response:", response);
       done();
     });
   }, 5000);
