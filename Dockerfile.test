@@ -82,7 +82,7 @@ RUN apk add openjdk8-jre p7zip
 # Install app dependencies
 COPY package.json ./
 
-RUN npm install -g npm@8.6.0 \
+RUN npm install -g npm@8.19.2 \
     && npm install .
 
 VOLUME /var/lib/docker
