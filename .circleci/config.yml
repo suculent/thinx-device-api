@@ -212,7 +212,7 @@ jobs:
         command: |
             mkdir -p /mnt/data/
             mkdir -p /mnt/data && cp -R ./conf /mnt/data
-            mkdir -p /mnt/data/ssh_keys
+            mkdir -p /mnt/data/ssh_keys && cp -R ./spec/mnt/data/ssh_keys /mnt/data
             mkdir -p /mnt/data/mosquitto/auth
             mkdir -p /mnt/data/mosquitto/config
             mkdir -p /mnt/data/mosquitto/data
@@ -320,12 +320,12 @@ jobs:
         command: |
           export ENVIRONMENT=test
           docker compose up --build api | tee -ia ./test.log
-          if [ ! $(cat ./test.log | grep "specs, 0 failures") ]; then 
+          echo "Docker test complete."
+          if [[ ! $(grep "specs, 0 failures" ./test.log) ]]; then 
             echo "» TEST failed. Should not deploy this commit."
-            cat ./test.log | grep "Failures:"
+            grep "Failures:" ./test.log
             exit 1
           fi
-          date
 
     - run:
         name: Allow inspecting MQTT logs

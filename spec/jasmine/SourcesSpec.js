@@ -1,6 +1,6 @@
 const expect = require('chai').expect;
-const sources = require('../../lib/thinx/sources');
-let Sources = new sources();
+const Sources = require('../../lib/thinx/sources');
+let sources = new Sources();
 
 const envi = require("../_envi.json");
 const source_name = "thinx-device-api-test";
@@ -29,7 +29,7 @@ describe("Sources", function () {
       circle_key: "<circleci-project-key>",
       is_private: false
     };
-    Sources.add(source,
+    sources.add(source,
       (success, response) => {
         if (success !== true) {
           console.log("(01) Error adding source: ", source, response);
@@ -42,7 +42,7 @@ describe("Sources", function () {
   }, 30000);
 
   it("(02) should be able to provide a list", function (done) {
-    Sources.list(owner, function (success, response) {
+    sources.list(owner, function (success, response) {
       expect(success).to.equal(true);
       expect(response).to.be.an('object');
       done();
@@ -63,14 +63,14 @@ describe("Sources", function () {
     };
 
     /// Add something to be removed
-    Sources.add(source,
+    sources.add(source,
       (success, response) => {
         if (success !== true) {
           console.log("(03) Error adding source: ", source, response);
         }
         expect(success).to.equal(true);
         source_id = response.source_id;
-        Sources.remove(source.owner, [source_id], (rsuccess, rresponse) => {
+        sources.remove(source.owner, [source_id], (rsuccess, rresponse) => {
           if (rsuccess === false) {
             console.log("Error removing source: " + rresponse);
           }
@@ -85,7 +85,7 @@ describe("Sources", function () {
     let source = {
       branch: "origin/main"
     };
-    let result = Sources.normalizedBranch(source, (error) => {
+    let result = sources.normalizedBranch(source, (error) => {
       console.log(error);
     });
     expect(result).to.equal("main");
@@ -96,7 +96,7 @@ describe("Sources", function () {
     let source = {
       url: "git@github.com/suculent/thinx-device-api"
     };
-    let result = Sources.normalizedBranch(source, (error, reason) => {
+    let result = sources.normalizedBranch(source, (error, reason) => {
       console.log("validateBranch error:", error, reason);
     });
     expect(result).to.equal("main");
@@ -107,7 +107,7 @@ describe("Sources", function () {
     let source = {
       branch: "origin/mas'ter"
     };
-    let result = Sources.normalizedBranch(source, (error, reason) => {
+    let result = sources.normalizedBranch(source, (error, reason) => {
       expect(error).to.equal(true);
       expect(reason).to.equal('invalid_branch_name');
     });
@@ -119,7 +119,7 @@ describe("Sources", function () {
     let source = {
       url: "git@github.com/;;suculent/thinx-device-api"
     };
-    let result = Sources.validateURL(source, function (error, reason) {
+    let result = sources.validateURL(source, function (error, reason) {
       console.log(error, reason);
     });
     expect(result).to.equal(null);
@@ -127,13 +127,13 @@ describe("Sources", function () {
   });
 
   it("(08) should be able to infer owner ID from path", function () {
-    let ownerIdFromPath = Sources.ownerIdFromPath("/mnt/data/repos/" + owner + "/" + source_id);
+    let ownerIdFromPath = sources.ownerIdFromPath("/mnt/data/repos/" + owner + "/" + source_id);
     expect(ownerIdFromPath).to.be.a('string');
   });
 
   it("(09) should update repo privacy prefetch state", function (done) {
     let source_id = "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f3";
-    Sources.update(owner, source_id, "is_private", true, (success, error) => {
+    sources.update(owner, source_id, "is_private", true, (success, error) => {
       if (!success) console.log("[09] error", error);
       expect(success).to.equal(true);
       done();
@@ -142,7 +142,7 @@ describe("Sources", function () {
 
   it("(10) should update last build version", function (done) {
     let source_id = "7038e0500a8690a8bf70d8470f46365458798011e8f46ff012f12cbcf898b2f3";
-    Sources.update(owner, source_id, "last_build", "1.1.1", (success, error) => {
+    sources.update(owner, source_id, "last_build", "1.1.1", (success, error) => {
       if (!success) console.log("[10] error", error);
       expect(success).to.equal(true);
       done();
@@ -162,14 +162,14 @@ describe("Sources", function () {
     };
 
     /// Add something to be removed
-    Sources.add(source,
+    sources.add(source,
       (success, response) => {
         if (success !== true) {
           console.log("(11) Error adding source: ", source, response);
         }
         expect(success).to.equal(true);
         source_id = response.source_id;
-        Sources.updatePlatform(owner, source_id, "arduino", (success2, error2) => {
+        sources.updatePlatform(owner, source_id, "arduino", (success2, error2) => {
           if (!success2) console.log("(11) error", error2);
           expect(success2).to.equal(true);
           done();
@@ -178,7 +178,7 @@ describe("Sources", function () {
   }, 30000);
 
   it("(12) should be able to remove sources from owner", function () {
-    Sources.removeSourcesFromOwner(owner, [source_id]);
+    sources.removeSourcesFromOwner(owner, [source_id]);
   });
 
 });
