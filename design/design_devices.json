@@ -6,7 +6,7 @@
       "map": "function (doc) { if(doc.mac) { emit (doc.mac, doc); } }"
     },
     "devices_by_owner": {
-      "map": "function (doc) { emit (doc.owner, doc); }"
+      "map": "function (doc) { if (doc && doc.owner) { emit (doc.owner, doc); } }"
     },
     "devices_by_source": {
       "map": "function (doc) { if(doc.source) { emit (doc.source, doc); } }"
