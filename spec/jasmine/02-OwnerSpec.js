@@ -1,9 +1,9 @@
-var expect = require('chai').expect;
-var Owner = require("../../lib/thinx/owner");
-var envi = require("../_envi.json");
-var owner = envi.oid;
-var email = envi.email;
-var test_info = envi.test_info;
+let expect = require('chai').expect;
+let Owner = require("../../lib/thinx/owner");
+let envi = require("../_envi.json");
+let owner = envi.oid;
+let email = envi.email;
+let test_info = envi.test_info;
 const user_body = envi.test_info;
 
 let Globals = require('../../lib/thinx/globals');
@@ -37,7 +37,7 @@ describe("Owner", function () {
 
     user.create(user_body, true, res_mock, (_res, success, response) => {
 
-      console.log("[DEBUG] user.create response", { _res}, {success}, {response});
+      //console.log("[DEBUG] user.create response", { _res}, {success}, {response});
       
       // valid case is existing user as well
       if (typeof (response) == "string" && response.indexOf("username_already_exists") !== -1) {
@@ -73,7 +73,7 @@ describe("Owner", function () {
   }, 10000);
 
   it("(04) should be able to update owner info", function (done) {
-    var body = {
+    const body = {
       info: test_info
     };
     user.update(owner, body, (success, response) => {
@@ -88,7 +88,7 @@ describe("Owner", function () {
       console.log("[spec] user.password_reset_init success:", success, "reset_key", result);
       expect(success).to.equal(true);
       expect(result).to.be.a('string');
-      var body = {
+      let body = {
         password: "tset",
         rpassword: "tset",
         owner: owner,
@@ -135,7 +135,7 @@ describe("Owner", function () {
 
   it("(10) should support sendMail", function (done) {
 
-    var theEmail = {
+    let theEmail = {
       from: 'THiNX API <api@thinx.cloud>',
       to: "cimrman@thinx.cloud",
       subject: "Your data will be deleted",

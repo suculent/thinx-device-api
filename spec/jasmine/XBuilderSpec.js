@@ -85,7 +85,7 @@ describe("Builder", function () {
 
   // TODO: Source_id must be attached to device; or the notifier fails
   it("should be able to run", function (done) {
-    var build = {
+    let build = {
       udid: udid,
       source_id: source_id,
       dryrun: false
@@ -106,12 +106,12 @@ describe("Builder", function () {
   }, 120000);
 
   it("supports certain languages", function () {
-    var languages = builder.supportedLanguages();
+    let languages = builder.supportedLanguages();
     expect(languages).to.be.a('array');
   });
 
   it("supports certain extensions", function () {
-    var extensions = builder.supportedExtensions();
+    let extensions = builder.supportedExtensions();
     expect(extensions).to.be.a('array');
   });
 
@@ -171,16 +171,16 @@ describe("Builder", function () {
       spec_build_id = result.build_id;
       // result contains build_id for notification...
 
-      var test_build_id = spec_build_id;
-      var test_commit_id = "mock_commit_id";
-      var test_repo = "https://github.com/suculent/thinx-firmware-esp8266-pio.git";
-      var test_binary = "/tmp/nothing.bin";
-      var test_udid = TEST_DEVICE_5.udid;
-      var sha = "one-sha-256-pls";
-      var owner_id = envi.oid;
-      var status = "TESTING_NOTIFIER";
-      var platform = "platformio";
-      var version = "thinx-firmware-version-1.0";
+      let test_build_id = spec_build_id;
+      let test_commit_id = "mock_commit_id";
+      let test_repo = "https://github.com/suculent/thinx-firmware-esp8266-pio.git";
+      let test_binary = "/tmp/nothing.bin";
+      let test_udid = TEST_DEVICE_5.udid;
+      let sha = "one-sha-256-pls";
+      let owner_id = envi.oid;
+      let status = "OK";
+      let platform = "platformio";
+      let version = "thinx-firmware-version-1.0";
 
       let job_status = {
         build_id: test_build_id,

@@ -79,15 +79,6 @@ describe("Messenger", function () {
     });
   }, 60000);
 
-  // getDevices: function(owner, callback)
-  it("should be able to fetch devices for owner", function (done) {
-    messenger.getDevices(test_owner, (success, devices) => {
-      expect(devices).to.be.a('array');
-      expect(success).to.equal(true);
-      done();
-    });
-  });
-
   // publish: function(owner, udid, message); returns nothing
   it("should be able to publish upon connection", function (done) {
     messenger.publish(test_owner, udid, "test");

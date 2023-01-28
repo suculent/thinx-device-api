@@ -2,6 +2,10 @@
 
 ## HISTORY
 
+28/1/2023 1.8.2343
+
+» Refactoring fixes, optimizations, dependency updates and cleanup, production fix
+
 16/1/2023 1.8.2247
 
 » Security fixes due to Circle CI leak (moved Mailgun API key to env var)

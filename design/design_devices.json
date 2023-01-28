@@ -6,13 +6,10 @@
       "map": "function (doc) { if(doc.mac) { emit (doc.mac, doc); } }"
     },
     "devices_by_owner": {
-      "map": "function (doc) { if(doc.owner) { emit (doc.owner, doc); } }"
+      "map": "function (doc) { if (doc && doc.owner) { emit (doc.owner, doc); } }"
     },
     "devices_by_source": {
       "map": "function (doc) { if(doc.source) { emit (doc.source, doc); } }"
-    },
-    "devices_by_id": {
-      "map": "function (doc) { if(doc.id) { emit (doc.id, doc); } }"
     },
     "watcher_view": {
       "map": "function (doc) { if(doc.source != null) { emit (doc.owner, doc.udid, doc.source); } }"

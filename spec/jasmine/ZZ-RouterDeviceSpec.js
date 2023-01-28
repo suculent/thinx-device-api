@@ -67,7 +67,7 @@ describe("Devices", function () {
   }, 30000);
 
   it("POST /api/device/attach", function (done) {
-    console.log("🚸 [chai] POST /api/device/attach");
+    console.log("🚸 [chai] POST /api/device/attach (invalid)");
     chai.request(thx.app)
       .post('/api/device/attach')
       .send({ udid: envi.oid })
@@ -78,7 +78,7 @@ describe("Devices", function () {
   }, 30000);
 
   it("POST /api/device/detach", function (done) {
-    console.log("🚸 [chai] POST /api/device/detach");
+    console.log("🚸 [chai] POST /api/device/detach (invalid)");
     chai.request(thx.app)
       .post('/api/device/detach')
       .send({ udid: envi.oid })
@@ -92,8 +92,9 @@ describe("Devices", function () {
     console.log("🚸 [chai] POST /api/device/mesh/attach");
     chai.request(thx.app)
       .post('/api/device/mesh/attach')
-      .send({ udid: envi.oid })
+      .send({ udid: envi.udid })
       .end((err, res) => {
+        if (err) console.log("🚸 [chai] ERR", err);
         expect(res.status).to.equal(401);
         done();
       });
@@ -104,8 +105,9 @@ describe("Devices", function () {
     console.log("🚸 [chai] POST /api/device/mesh/detach");
     chai.request(thx.app)
       .post('/api/device/mesh/detach')
-      .send({ udid: envi.oid })
+      .send({ udid: envi.udid })
       .end((err, res) => {
+        if (err) console.log("🚸 [chai] ERR", err);
         expect(res.status).to.equal(401);
         done();
       });

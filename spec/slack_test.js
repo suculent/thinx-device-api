@@ -55,7 +55,6 @@ rtm.on('ready', (rtmStartData) => {
             if (conversation.name == app_config.slack.bot_topic) {
                 console.log("🔨 [debug] [slack] Conversation found...");
                 this.channel = conversation.id;
-                this.redis.v4.set("slack-conversation-id", conversation.id);
                 return;
             }
         }

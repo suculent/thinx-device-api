@@ -1,6 +1,6 @@
 {
   "name": "thinx",
-  "version": "1.8.2247",
+  "version": "1.8.2343",
   "description": "THiNX IoT Device Management API",
   "bugs": {
     "url": "https://github.com/suculent/thinx-device-api/issues"
@@ -17,6 +17,7 @@
     "snyk-protect": "snyk-protect",
     "jasmine": "nyc jasmine",
     "test": "mkdir coverage; nyc jasmine; nyc report --reporter=text-lcov > coverage/lcov.info; coveralls < coverage/lcov.info",
+    "dev": "source ./.env && echo $ENVIRONMENT && nyc jasmine; nyc report --reporter=text-lcov > coverage/lcov.info; coveralls < coverage/lcov.info",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./",
     "coverage": "npm run mocha",
     "mocha": "mocha spec/jasmine --delay=3000 --exit --timeout=5000; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | node node_modules/coveralls/bin/coveralls.js",
@@ -43,7 +44,6 @@
     "connect-timeout": "^1.9.0",
     "cookie-parser": "^1.4.5",
     "crypto-js": "^4.0.0",
-    "csurf": "^1.11.0",
     "dateformat": "^3.0.3",
     "express": "^4.17.1",
     "express-rate-limit": "^5.2.3",
@@ -63,7 +63,7 @@
     "moment-timezone": "^0.5.37",
     "morgan": "^1.10.0",
     "mqtt": "^4.2.6",
-    "nano": "^8.2.3",
+    "nano": "^10.1.1",
     "nocache": "^2.1.0",
     "node-forge": "^1.3.0",
     "node-schedule": "^1.3.2",
@@ -71,7 +71,7 @@
     "path": "^0.12.7",
     "qs": "6.10.3",
     "querystring": "^0.2.0",
-    "redis": "^4.5.1",
+    "redis": "^4.6.1",
     "request": "^2.88.2",
     "rollbar": "^2.25.2",
     "semver": "7.3.7",
@@ -103,7 +103,6 @@
     "bson": "1.1.4",
     "clean-css": "4.2.3",
     "colors": "1.4.0",
-    "cookie-signature": "1.1.0",
     "cookie": "0.5.0",
     "coveralls": "^3.1.1",
     "cryptiles": "4.1.3",
@@ -129,7 +128,6 @@
   },
   "devDependencies": {
     "assert": "^2.0.0",
-    "codecov": "^3.8.1",
     "eslint": "^8.7.0",
     "eslint-config-jquery": "^3.0.0",
     "expect": "^25.5.0",

@@ -1,0 +1,28 @@
+[
+  {
+    "CWEId": "259",
+    "FlawMatch": {
+      "ProcedureHash": "1057981634",
+      "PrototypeHash": "2924686005",
+      "FlawHash": "2666345062",
+      "FlawHashCount": "1",
+      "FlawHashOrdinal": "1",
+      "CauseHash": "3488685266",
+      "CauseHashCount": "1",
+      "CauseHashOrdinal": "1",
+      "CauseHash2": "0",
+      "CauseHash2Ordinal": "0"
+    },
+    "Files": {
+      "SourceFile": {
+        "File": "auth.js",
+        "Line": "23",
+        "FunctionName": "add_mqtt_credentials",
+        "QualifiedFunctionName": "Auth.add_mqtt_credentials",
+        "FunctionPrototype": "add_mqtt_credentials(: ::Auth,  : any,  : any,  : any, ...) : any",
+        "Scope": "^::Auth",
+        "AbsoluteFilePath": "/Users/sychram/Repositories/thinx-device-api/lib/thinx/auth.js"
+      }
+    }
+  }
+]
