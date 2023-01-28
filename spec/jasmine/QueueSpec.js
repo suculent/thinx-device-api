@@ -53,7 +53,7 @@ describe("Queue", function () {
 
                     let next = await queue_with_cron.findNext();
 
-                    if ((next === null) || (success === false)) {
+                    if (next === null) {
                         if (done_called === false) {
                             done_called = true;
                             done();
