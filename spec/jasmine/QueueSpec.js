@@ -30,7 +30,7 @@ describe("Queue", function () {
     let queue_with_cron;
 
     // init
-    it("should not fail or hang", async (done) => {
+    it("should not fail or hang", async () => {
 
         let builder = new Builder(redis);
 
@@ -44,8 +44,6 @@ describe("Queue", function () {
         // Should be able to run cron when initialized
         queue_with_cron.cron();
 
-        let done_called = false;
-
         // Should be able to add actions to the queue
         queue_with_cron.add(mock_udid_1, mock_source_id, mock_owner_id, () => {
             queue_with_cron.add(mock_udid_2, mock_source_id, mock_owner_id, () => {
@@ -53,13 +51,7 @@ describe("Queue", function () {
 
                     let next = await queue_with_cron.findNext();
 
-                    if (next === null) {
-                        if (done_called === false) {
-                            done_called = true;
-                            done();
-                        }
-                        return;
-                    }
+                    if (next === null) return;
 
                     // Should be able run next item
                     queue_with_cron.runNext(next, workers[0]);
@@ -67,17 +59,10 @@ describe("Queue", function () {
                     // Should not be able to find anything while queue item is running
                     next = await queue_with_cron.findNext();
 
-                    if (next === null) {
-                        if (done_called === false) {
-                            done_called = true;
-                            done();
-                        }
-                        return;
-                    }
+                    if (next === null) return;
 
                     // Should run loop safely
                     for (let i = 0; i < 10; i++) queue_with_cron.loop();
-
                 });
             });
         });
