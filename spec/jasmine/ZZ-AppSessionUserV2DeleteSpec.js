@@ -67,7 +67,7 @@ describe("User Routes V2", function () {
             expect(__res.status).to.equal(200);
             expect(__res.text).to.be.a('string'); // <html>
             expect(__res).to.be.html;
-            console.log("🚸 [chai] IMPORTANT(2)", __res.text);
+            //console.log("🚸 [chai] IMPORTANT(2)", __res.text);
 
             chai.request(thx.app)
               .post('/api/v2/password/set')
@@ -76,7 +76,7 @@ describe("User Routes V2", function () {
                 expect(___res.status).to.equal(200);
                 expect(___res.text).to.be.a('string');
                 expect(___res.text).to.equal('{"success":true,"response":"activation_successful"}');
-                console.log("🚸 [chai] IMPORTANT(3)", ___res.text);
+                //console.log("🚸 [chai] IMPORTANT(3)", ___res.text);
                 done();
               });
           });

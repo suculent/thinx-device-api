@@ -178,7 +178,7 @@ describe("Builder", function () {
       let test_udid = TEST_DEVICE_5.udid;
       let sha = "one-sha-256-pls";
       let owner_id = envi.oid;
-      let status = "TESTING_NOTIFIER";
+      let status = "OK";
       let platform = "platformio";
       let version = "thinx-firmware-version-1.0";
 
