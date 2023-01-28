@@ -184,7 +184,7 @@ module.exports = class THiNX extends EventEmitter {
               if (!fs.existsSync(app_config.ssl_ca)) {
                 const message = "⚠️ [warning] Did not find app_config.ssl_ca file, websocket logging will fail...";
                 rollbar.warn(message);
-                console.log(message);
+                console.log("SSL CA error", message);
               }
 
               let caCert = read(app_config.ssl_ca, 'utf8');
