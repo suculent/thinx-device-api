@@ -105,7 +105,8 @@ describe("User Routes V2", function () {
       .get('/api/v2/password/reset?owner_id='+envi.dynamic2.owner+'&reset_key='+reset_key)
       .end((_err, res) => {
         expect(res.status).to.equal(200);
-        console.log("GET /api/v2/password/reset res text", res.text);
+        //console.log("GET /api/v2/password/reset res text", res.text);
+        // should include "Enter your new password"
         expect(res.text).to.be.a('string');
         done();
       });
