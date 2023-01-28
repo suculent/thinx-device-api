@@ -42,8 +42,7 @@ describe("Notifier", function () {
     expect(obj.text).to.contain('has failed');
   });
 
-  // let's solve this later
-  xit ("should return if outfile is undefined", function(done) {
+  it ("should return if outfile is undefined", function(done) {
     let job_status = {};
     not.process(job_status, (success) => {
       expect(success).to.eq(false);
