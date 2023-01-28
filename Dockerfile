@@ -1,7 +1,7 @@
 FROM thinxcloud/base:alpine
 
 LABEL maintainer="Matej Sychra <suculent@me.com>"
-LABEL name="THiNX API" version="1.8.2247"
+LABEL name="THiNX API" version="1.8.2343"
 
 ARG DEBIAN_FRONTEND=noninteractive
 
