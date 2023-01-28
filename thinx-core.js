@@ -87,6 +87,8 @@ module.exports = class THiNX extends EventEmitter {
     // Initialize Redis
     app.redis_client = redis.createClient(Globals.redis_options());
 
+    app.redis_client.on('error', err => console.log('Redis Client Error', err));
+
     // Section that requires initialized Redis
     app.redis_client.connect().then(() => {
 
