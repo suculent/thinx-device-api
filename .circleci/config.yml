@@ -10,7 +10,7 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          version: 20.10.12
+          version: 20.10.21
       - checkout
       - docker/check
       - run:
@@ -33,7 +33,7 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          version: 20.10.12
+          version: 20.10.21
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
@@ -75,7 +75,7 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          version: 20.10.12
+          version: 20.10.21
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
@@ -111,7 +111,7 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          version: 20.10.12
+          version: 20.10.21
       - checkout
       - run:
           name: Clean package-lock
@@ -175,7 +175,7 @@ jobs:
           docker compose version
 
     - setup_remote_docker:
-        version: 20.10.12
+        version: 20.10.21
 
     - checkout
 
@@ -319,6 +319,7 @@ jobs:
         name: Starting API Test
         command: |
           export ENVIRONMENT=test
+          pwd
           docker compose up --build api | tee -ia ./test.log
           echo "Docker test complete."
           if [[ ! $(grep "specs, 0 failures" ./test.log) ]]; then 
@@ -372,7 +373,7 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          version: 20.10.12
+          version: 20.10.21
       - checkout
       - docker/check
       - run:
