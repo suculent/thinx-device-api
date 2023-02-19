@@ -252,7 +252,7 @@ services:
       - '8888:8888'
     networks:
       - internal
-      - traefik-public
+      #- traefik-public
     volumes:
       - '/mnt/gluster/thinx/chronograf:/var/lib/chronograf'
       #- './chronograf:/var/lib/chronograf'
