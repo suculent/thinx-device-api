@@ -104,6 +104,7 @@ services:
     env_file: .env
     build:
       context: .
+      dockerfile: ./Dockerfile
       args:
         - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
         - 'COUCHDB_PASS=${COUCHDB_PASS}'
