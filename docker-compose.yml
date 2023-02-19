@@ -132,6 +132,7 @@ services:
     env_file: .env
     build:
       context: .
+      dockerfile: ./Dockerfile
       args:
         - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
         - 'ENVIRONMENT=${ENVIRONMENT}'
