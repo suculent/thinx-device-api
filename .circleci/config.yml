@@ -10,7 +10,7 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          version: 20.10.14
+          version: 20.10.18
       - checkout
       - docker/check
       - run:
@@ -33,7 +33,7 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          version: 20.10.14
+          version: 20.10.18
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
@@ -75,7 +75,7 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          version: 20.10.14
+          version: 20.10.18
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
@@ -111,7 +111,7 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          version: 20.10.14
+          version: 20.10.18
       - checkout
       - run:
           name: Clean package-lock
@@ -175,7 +175,7 @@ jobs:
           docker compose version
 
     - setup_remote_docker:
-        version: 20.10.14
+        version: 20.10.18
 
     - checkout
 
@@ -373,7 +373,7 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          version: 20.10.14
+          version: 20.10.18
       - checkout
       - docker/check
       - run:
