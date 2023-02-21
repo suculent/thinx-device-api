@@ -2,10 +2,6 @@
 	path = builders/arduino-docker-build
 	url = https://github.com/suculent/arduino-docker-build.git
 
-[submodule "builders/lua-inspect"]
-	path = builders/lua-inspect
-	url = https://github.com/davidm/lua-inspect.git
-
 [submodule "builders/micropython-docker-build"]
 	path = builders/micropython-docker-build
 	url = https://github.com/suculent/micropython-docker-build.git
@@ -17,10 +13,6 @@
 [submodule "builders/nodemcu-docker-build"]
 	path = builders/nodemcu-docker-build
 	url = https://github.com/suculent/nodemcu-docker-build.git
-
-[submodule "builders/nodemcu-firmware"]
-	path = builders/nodemcu-firmware
-	url = https://github.com/suculent/nodemcu-firmware.git
 
 [submodule "builders/platformio-docker-build"]
 	path = builders/platformio-docker-build
