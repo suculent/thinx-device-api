@@ -1,0 +1,28 @@
+name: "Checkmarx"
+
+on:
+  push:
+    branches: [master, thinx-staging, main]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [master, thinx-staging, main]
+  schedule:
+    - cron: '0 18 * * 5'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Override automatic language detection by changing the below list
+        # Supported options are ['csharp', 'cpp', 'go', 'java', 'javascript', 'python']
+        language: ['javascript']
+        # Learn more...
+        # https://docs.github.com/en/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#overriding-automatic-language-detection
+
+    steps:
+    - name: Checkmarx AST Github Action
+      uses: Checkmarx/ast-github-action@2.0.14
