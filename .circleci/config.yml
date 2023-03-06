@@ -427,15 +427,15 @@ workflows:
                 - main
                 - master
       
-      # - build-console-classic:
-      #     context:
-      #       - thinx-docker-repo
-      #       - console
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-staging
-      #           - master
+      - build-console-classic:
+          context:
+            - thinx-docker-repo
+            - console
+          filters:
+            branches:
+              only:
+                - thinx-staging
+                - master
 
       # - build-console-cloud:
       #     context:
