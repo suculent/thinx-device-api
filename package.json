@@ -59,7 +59,7 @@
     "jsonwebtoken": "^9.0.0",
     "mailgun.js": "^8.0.2",
     "md5": "^2.3.0",
-    "mime": "^1.6.0",
+    "mime": "^3.0.0",
     "mkdirp": "^1.0.3",
     "moment-timezone": "0.5.40",
     "morgan": "^1.10.0",
