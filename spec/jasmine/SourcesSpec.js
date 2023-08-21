@@ -1,3 +1,13 @@
+const expect = require('chai').expect;
+const sources = require('../../lib/thinx/sources');
+let Sources = new sources();
+
+const envi = require("../_envi.json");
+const source_name = "thinx-device-api-test";
+
+let owner = envi.oid;
+let source_id;
+
 describe("Sources", function () {
 
   beforeAll(() => {
@@ -7,15 +17,6 @@ describe("Sources", function () {
   afterAll(() => {
     console.log(`🚸 [chai] <<< completed Sources spec`);
   });
-
-  var expect = require('chai').expect;
-  var sources = require('../../lib/thinx/sources');
-  var Sources = new sources();
-
-  var envi = require("../_envi.json");
-  var owner = envi.oid;
-  var source_id;
-  const source_name = "thinx-device-api-test";
 
   it("(01) should be able to be added", function (done) {
     const source = {

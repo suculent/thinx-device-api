@@ -1,29 +1,38 @@
-var expect = require('chai').expect;
-var Repository = require('../../lib/thinx/repository');
+const expect = require('chai').expect;
+const Repository = require('../../lib/thinx/repository');
+const Messenger = require('../../lib/thinx/messenger');
+const Queue = require("../../lib/thinx/queue");
+const Builder = require('../../lib/thinx/builder');
+
+const Globals = require("../../lib/thinx/globals.js");
+const redis_client = require('redis');
 
 // tests are run from ROOT
-var repo_path = __dirname;
+let repo_path = __dirname;
+
 
 describe("Repository", function() {
 
-  beforeAll(() => {
+  let messenger;
+  let watcher;
+  let redis;
+  let queue_with_cron;
+  let builder;
+
+  beforeAll(async() => {
     console.log(`🚸 [chai] >>> running Repository spec`);
+    redis = redis_client.createClient(Globals.redis_options());
+    await redis.connect();
+    watcher = new Repository(messenger, redis, /* mock_queue */);
+    messenger = new Messenger(redis, "mosquitto").getInstance(redis, "mosquitto");
+    builder = new Builder(redis);
+    // Should initialize safely without running cron
+    queue_with_cron = new Queue(redis, builder, null, null, null);
   });
 
   afterAll(() => {
     console.log(`🚸 [chai] <<< completed Repository spec`);
   });
-
-  var watcher = new Repository(/* mock_queue */);
-
-  watcher.callback = function(err) {
-    // watcher exit_callback
-    console.log("Callback 1", err);
-  };
-  watcher.exit_callback = function(err) {
-    // watcher exit_callback
-    console.log("Callback 2", err);
-  };
 
   console.log("✅ [spec] [info] Watcher is using repo_path: "+repo_path);
 
@@ -38,7 +47,7 @@ describe("Repository", function() {
   });
 
   it("should be able to purge old repos", function() {
-    watcher = new Repository();
+    watcher = new Repository(messenger, redis, queue_with_cron);
     let name = "esp";
     let repositories = Repository.findAllRepositoriesWithFullname("esp8266");
     watcher.purge_old_repos_with_full_name(repositories, name);
@@ -46,23 +55,23 @@ describe("Repository", function() {
   });
 
   it("should be able to initialize", function() {
-    watcher = new Repository(/* mock_queue */);
+    watcher = new Repository(messenger, redis, queue_with_cron);
     expect(watcher).to.be.an('object');
   });
 
   it("should be able to respond to githook", function() {
-    watcher = new Repository(/* mock_queue */);
+    watcher = new Repository(messenger, redis, queue_with_cron);
     let mock_git_message = require("../mock-git-response.json");
     let mock_git_request = {
       headers: [],
       body: mock_git_message
     };
     let response = watcher.process_hook(mock_git_request);
-    expect(response).to.be.false; // fix later
+    expect(response).to.eq(false); // fix later
   });
 
   it("should be able to respond to githook (invalid)", function() {
-    watcher = new Repository(/* mock_queue */);
+    watcher = new Repository(messenger, redis, queue_with_cron);
     let mock_git_message = require("../mock-git-response.json");
     let mock_git_request = {
       headers: [],
@@ -70,12 +79,12 @@ describe("Repository", function() {
     };
     delete mock_git_request.body.repository;
     let response = watcher.process_hook(mock_git_request);
-    expect(response).to.be.false; // fix later
+    expect(response).to.eq(false); // fix later
   });
 
   it ("should be able to verify body signature", () => {
     let result = watcher.validateSignature("sha256=null", "{ body: false }", "secret");
-    expect(result).to.be.false;
+    expect(result).to.eq(false);
   });
 
 });

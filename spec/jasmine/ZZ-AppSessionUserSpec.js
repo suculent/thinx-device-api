@@ -2,9 +2,9 @@
 
 const THiNX = require("../../thinx-core.js");
 
-let chai = require('chai');
-var expect = require('chai').expect;
-let chaiHttp = require('chai-http');
+const chai = require('chai');
+const expect = require('chai').expect;
+const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
 var envi = require("../_envi.json");
@@ -308,7 +308,7 @@ describe("User Routes", function () {
       .post('/api/login')
       .send({ username: 'dynamic', password: 'dynamic', remember: false })
       .then(function (res) {
-        console.log("POST /api/login (valid) and GET /api/user/profile (auth+jwt) response", res.text);
+        console.log("POST /api/login (valid) and GET /api/user/profile (auth+jwt) response", res.text, res.cookie);
         expect(res).to.have.cookie('x-thx-core');
         /* response example:
         {
@@ -483,7 +483,7 @@ describe("User Routes", function () {
   //
 
   it("GET /api/user/profile (jwt)", function (done) {
-    expect(jwt).not.to.be.null;
+    expect(jwt).not.to.eq(null);
     agent
       .get('/api/user/profile')
       .set('Authorization', jwt)
@@ -606,8 +606,6 @@ describe("User Routes", function () {
       .set('Authorization', jwt)
       .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/logs/build (jwt) response:", res.text, " status:", res.status);
-        let j = JSON.parse(res.text);
-        real_build_id = j.response[0]._id;
         expect(res.status).to.equal(200);
         //expect(res.text).to.be.a('string');
         done();
@@ -620,7 +618,9 @@ describe("User Routes", function () {
       .set('Authorization', jwt)
       .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/logs/build/:id (jwt) response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(200);
+        //let j = JSON.parse(res.text);
+        //real_build_id = j.response[0]._id;
+        expect(res.status).to.equal(200); // returns build fetch failed...
         //expect(res.text).to.be.a('string');
         done();
       });

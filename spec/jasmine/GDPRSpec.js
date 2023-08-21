@@ -1,18 +1,30 @@
+let Redis = require('redis');
+let Globals = require('../../lib/thinx/globals');
+var Owner = require("../../lib/thinx/owner");
+let GDPR = require("../../lib/thinx/gdpr");
+
+var envi = require("../_envi.json");
+var expect = require('chai').expect;
+
 describe("GDPR", function () {
 
-    beforeAll(() => {
+    var redis = null;
+    let app = {};
+    let gdpr;
+
+    beforeAll(async () => {
         console.log(`🚸 [chai] >>> running GDPR spec`);
-      });
-    
-      afterAll(() => {
+        // Initialize Redis
+        redis = Redis.createClient(Globals.redis_options());
+        await redis.connect();
+        app.redis_client = redis;
+        app.owner = new Owner(redis);
+        gdpr = new GDPR(app); // needs app.owner!
+    });
+
+    afterAll(() => {
         console.log(`🚸 [chai] <<< completed GDPR spec`);
-      });
-    
-
-    var envi = require("../_envi.json");
-    var expect = require('chai').expect;
-    let GDPR = require("../../lib/thinx/gdpr");
-
+    });
 
     let mock_user = {
         last_update: 1649088795,
@@ -22,12 +34,10 @@ describe("GDPR", function () {
     };
 
     it("should not fail while scheduling guards", function () {
-        let gdpr = new GDPR();
         expect(gdpr.guard()).to.equal(true);
     }, 10000);
 
     it("should not fail while purging", function (done) {
-        let gdpr = new GDPR();
         gdpr.purgeOldUsers((result) => {
             expect(result).to.equal(true);
             done();
@@ -35,7 +45,6 @@ describe("GDPR", function () {
     }, 10000);
 
     it("should not fail while notifying", function (done) {
-        let gdpr = new GDPR();
         gdpr.notifyOldUsers((result) => {
             expect(result).to.equal(true);
             done();
@@ -50,7 +59,6 @@ describe("GDPR", function () {
         d1.setHours(0, 0, 0, 0);
         let user = mock_user;
         user.last_update = d1;
-        let gdpr = new GDPR();
         gdpr.notify24(user, (error) => {
             if (error) console.log("[spec] 24 hours before deletion ERROR:", error);
             done();
@@ -58,7 +66,6 @@ describe("GDPR", function () {
     }, 10000);
 
     it("should notify 3 months - 168 hours before deletion", function (done) {
-        let gdpr = new GDPR();
         var d2 = new Date();
         d2.setMonth(d2.getMonth() - 4);
         d2.setDate(d2.getDay() - 8);

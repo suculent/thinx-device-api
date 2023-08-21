@@ -99,6 +99,7 @@ jobs:
             --build-arg ENTERPRISE=${ENTERPRISE} \
             --build-arg ENVIRONMENT=${ENVIRONMENT} \
             --build-arg COMMIT_ID=$CIRCLE_SHA1 \
+            --build-arg VERSION_CODE=$(echo $CIRCLE_SHA1 | cut -c -7) \
           tag: 'swarm'
       - docker/push:
           digest-path: /tmp/digest.txt
@@ -425,26 +426,26 @@ workflows:
                 - main
                 - master
       
-      - build-console-classic:
-          context:
-            - thinx-docker-repo
-            - console
-          filters:
-            branches:
-              only:
-                - thinx-staging
-                - master
+      # - build-console-classic:
+      #     context:
+      #       - thinx-docker-repo
+      #       - console
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-staging
+      #           - master
 
-      - build-console-cloud:
-          context:
-            - thinx-docker-repo
-            - console
-          filters:
-            branches:
-              only:
-                - thinx-console
-                - thinx-staging
-                - master
+      # - build-console-cloud:
+      #     context:
+      #       - thinx-docker-repo
+      #       - console
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-console
+      #           - thinx-staging
+      #           - master
 
       - build-base:
           context:
