@@ -81,7 +81,11 @@
     "sillyname": "^0.1.0",
     "simple-oauth2": "^2.5.2",
     "slack-notify": "^0.1.7",
+<<<<<<< HEAD
     "socket.io": "^4.6.1",
+=======
+    "socket.io": "^4.6.0",
+>>>>>>> bce5468a8d8596fa2487344b6a05aec5a74c4181
     "socket.io-client": "^4.5.4",
     "ssh-fingerprint": "0.0.1",
     "ssl-root-cas": "^1.3.1",
