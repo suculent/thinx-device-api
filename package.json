@@ -27,6 +27,7 @@
     "prepare": "npm run snyk-protect"
   },
   "dependencies": {
+    "@hapi/hoek": "9.0.3",
     "@slack/rtm-api": "^6.0.0",
     "@slack/web-api": "^6.8.0",
     "@snyk/protect": "^1.657.0",
@@ -52,7 +53,6 @@
     "fs-finder": "github:suculent/Node-FsFinder#master",
     "get-random-quote": "^1.1.3",
     "helmet": "^4.6.0",
-    "@hapi/hoek": "9.0.3",
     "http-signature": "^1.3.5",
     "influx": "^5.9.3",
     "jshint": "^2.13.4",
@@ -75,12 +75,12 @@
     "redis": "^4.6.1",
     "request": "^2.88.2",
     "rollbar": "^2.25.2",
-    "semver": "7.3.7",
+    "semver": "7.5.2",
     "sha256": "^0.2.0",
     "shell-escape": "^0.2.0",
     "sillyname": "^0.1.0",
     "simple-oauth2": "^2.5.2",
-    "slack-notify": "^0.1.7",
+    "slack-notify": "^2.0.6",
     "socket.io": "^4.6.1",
     "socket.io-client": "^4.5.4",
     "ssh-fingerprint": "0.0.1",
@@ -143,7 +143,7 @@
     "mocha": "^9.1.3",
     "mocha-lcov-reporter": "^1.3.0",
     "nyc": "^15.1.0",
-    "socket.io-parser": "4.2.1"
+    "socket.io-parser": "^4.2.4"
   },
   "engines": {
     "node": ">=15.x"
