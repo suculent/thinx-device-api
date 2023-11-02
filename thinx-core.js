@@ -603,19 +603,6 @@ module.exports = class THiNX extends EventEmitter {
               }
             });
 
-            //
-            // Master check in cluster mode
-            //
-
-            function startup_quote() {
-              if ((typeof (process.env.ENTERPRISE) === "undefined") || (!process.env.ENTERPRISE)) {
-                app.messenger.sendRandomQuote();
-                app.messenger.postRandomQuote("quote");
-              }
-            }
-
-            setTimeout(startup_quote, 10000); // wait for Slack init only once
-
             init_complete_callback();
 
           }); // DB
