@@ -1,7 +1,7 @@
 # for ArduinoCore-based ESP8266 builds with SPIFFS
 
 arduino:
-  platform: espressif
+  platform: esp8266
   arch: esp8266
   board: d1_mini_pro
   flash_ld: eagle.flash.4m1m.ld
