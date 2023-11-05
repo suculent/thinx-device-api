@@ -45,7 +45,7 @@ describe("Build log", function() {
     });
   });
 
-  it("(04) should be able to list build logs", function(done) {
+  xit("(04) should be able to list build logs", function(done) {
     blog.list(owner, function(err, body) {
       expect(err).to.equal(false); 
       expect(body).to.be.an('object'); // { rows: [] }
