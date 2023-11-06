@@ -74,7 +74,7 @@
     "querystring": "^0.2.0",
     "redis": "^4.6.1",
     "rollbar": "^2.25.2",
-    "semver": "7.5.2",
+    "semver": "7.5.3",
     "sha256": "^0.2.0",
     "shell-escape": "^0.2.0",
     "sillyname": "^0.1.0",
