@@ -74,7 +74,7 @@ WORKDIR /opt/thinx/thinx-device-api
 # Install app dependencies
 COPY package.json ./
 
-RUN npm install -g npm@9.5.0 \
+RUN npm install -g npm@10.2.3 \
  && npm install --only-prod .
 
 # THiNX Web & Device API (HTTP)
