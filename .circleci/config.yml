@@ -316,7 +316,7 @@ jobs:
           docker compose logs couchdb
 
     - run:
-        name: Starting API Test
+        name: Running Unit and Integration Tests 
         command: |
           export ENVIRONMENT=test
           pwd
