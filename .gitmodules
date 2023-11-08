@@ -2,10 +2,6 @@
 	path = builders/arduino-docker-build
 	url = https://github.com/suculent/arduino-docker-build.git
 
-[submodule "builders/lua-inspect"]
-	path = builders/lua-inspect
-	url = https://github.com/davidm/lua-inspect.git
-
 [submodule "builders/micropython-docker-build"]
 	path = builders/micropython-docker-build
 	url = https://github.com/suculent/micropython-docker-build.git
