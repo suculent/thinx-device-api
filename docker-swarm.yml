@@ -204,6 +204,7 @@ services:
       - "GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}"
       - "GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}"
       - 'MAILGUN_API_KEY=${MAILGUN_API_KEY}'
+      - 'SLACK_WEBHOOK=${SLACK_WEBHOOK}'
     ports:
       - '7442:7442'
       - '7443:7443'

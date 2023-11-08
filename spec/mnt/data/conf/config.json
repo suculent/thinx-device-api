@@ -22,7 +22,6 @@
   "slack" : {
     "client_id" : "000000000000.000000000000",
     "client_secret": "<not-configured>",
-    "webhook": "<revoked>",
     "bot_token": "<not-configured>",
     "bot_topic": "thinx"
   },
@@ -33,7 +32,6 @@
   "deploy_root": "/deploy",
   "build_root": "/repos",
   "ssh_keys": "/mnt/data/ssh_keys",
-  "slack_webhook": "",
   "slack_bot_topic": "thinx",
   "ssl_key": "/mnt/data/ssl/thinx.test.key",
   "ssl_cert": "/mnt/data/ssl/thinx.test.out.crt",

@@ -278,8 +278,6 @@ module.exports = class THiNX extends EventEmitter {
               saveUninitialized: false
             };
 
-            //console.log("Running core with sessionConfig", sessionConfig)
-
             // intentionally exposed cookie because there is no HTTPS between app and Traefik frontend
             const sessionParser = session(sessionConfig); /* lgtm [js/missing-token-validation] */
 
@@ -426,8 +424,6 @@ module.exports = class THiNX extends EventEmitter {
                   }
                 }
 
-                console.log("ℹ️ [info] WS Session is parsed, handling protocol upgrade...");
-
                 if (typeof (socketMap.get(owner)) === "undefined") {
 
                   socketMap.set(owner, socket);
@@ -445,10 +441,6 @@ module.exports = class THiNX extends EventEmitter {
                 }
               });
             });
-
-            function heartbeat() {
-              // console.log("[Socket] heartbeat."); // better store this.lastAlive = new Date(); in InfluxDB
-            }
 
             setInterval(function ping() {
               if (typeof (wss.clients) !== "undefined") {
@@ -522,7 +514,6 @@ module.exports = class THiNX extends EventEmitter {
                   // Type: initial socket 
                 } else if (typeof (object.init) !== "undefined") {
                   if (typeof (msgr) !== "undefined") {
-                    console.log(`ℹ️ [info] [ws] Initializing new messenger in WS...`);
                     var owner = object.init;
                     let socket = app._ws[owner];
                     msgr.initWithOwner(owner, socket, (success, message_z) => {
@@ -602,19 +593,6 @@ module.exports = class THiNX extends EventEmitter {
                 console.log(`☣️ [error] in WSS connection ${err}`);
               }
             });
-
-            //
-            // Master check in cluster mode
-            //
-
-            function startup_quote() {
-              if ((typeof (process.env.ENTERPRISE) === "undefined") || (!process.env.ENTERPRISE)) {
-                app.messenger.sendRandomQuote();
-                app.messenger.postRandomQuote("quote");
-              }
-            }
-
-            setTimeout(startup_quote, 10000); // wait for Slack init only once
 
             init_complete_callback();
 

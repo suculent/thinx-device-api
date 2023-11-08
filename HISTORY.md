@@ -2,6 +2,12 @@
 
 ## HISTORY
 
+6/11/2023 1.9.2451
+
+» Updating vulnerable components
+» Improving security configuration
+» Cleaning vulnerable/unnecessary parts of code
+
 28/1/2023 1.8.2343
 
 » Refactoring fixes, optimizations, dependency updates and cleanup, production fix

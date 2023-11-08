@@ -85,19 +85,6 @@ describe("Messenger", function () {
     done();
   }, 5000);
 
-  it("should be able to send random quote", function (done) {
-    messenger.sendRandomQuote(() => {
-      done();
-    });
-  }, 5000);
-
-  it("should be able to post random quote", function (done) {
-    messenger.postRandomQuote("quote", () => {
-      done();
-    });
-
-  }, 5000);
-
   // may be disabled in case of last test left hanging
   it("[mm] should be able to setup MQTT client", function (done) {
 
