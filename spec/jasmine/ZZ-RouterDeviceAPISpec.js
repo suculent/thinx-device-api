@@ -144,7 +144,6 @@ describe("Device + API (JWT+Key)", function () {
             .post('/api/login')
             .send({ username: 'dynamic', password: 'dynamic', remember: false })
             .then(function (res) {
-                // console.log(`[chai] Transformer (JWT) beforeAll POST /api/login (valid) response: ${JSON.stringify(res)}`);
                 expect(res).to.have.cookie('x-thx-core');
                 let body = JSON.parse(res.text);
                 jwt = 'Bearer ' + body.access_token;
@@ -193,7 +192,6 @@ describe("Device + API (JWT+Key)", function () {
             .set('Authentication', ak)
             .send({ registration: {} })
             .end((err, res) => {
-                //console.log("🚸 [chai] POST /device/register (jwt, invalid body) response", res.text, res.status);
                 expect(res.status).to.equal(400);
                 expect(res.text).to.be.a('string');
                 let j = JSON.parse(res.text);
@@ -342,7 +340,6 @@ describe("Device + API (JWT+Key)", function () {
             .set('Authorization', jwt)
             .send({ udid: JRS6.udid })
             .end((err, res) => {
-                // console.log("🚸 [chai] POST /api/device/detail (jwt, valid) response:", res.text, " status:", res.status);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
                 done();
@@ -442,10 +439,6 @@ describe("Device + API (JWT+Key)", function () {
             .send({ udid: envi.udid })
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/device/detail (session, udid) 2 response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(401);
-                //expect(res.text).to.be.a('string');
-                //let j = JSON.parse(res.text);
-                //console.log("[spec] [chai] detail:", JSON.stringify(j, null, 2));
                 done();
             });
     }, 30000);
@@ -456,8 +449,6 @@ describe("Device + API (JWT+Key)", function () {
             .send({ changes: { alias: "edited-alias" } })
             .end((err, res) => {
                 console.log("🚸 [chai] POST /api/device/edit (session, invalid) response:", res.text, " status:", res.status);
-                //expect(res.status).to.equal(200);
-                //expect(res.text).to.be.a('string');
                 done();
             });
     }, 30000);

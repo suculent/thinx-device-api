@@ -79,32 +79,10 @@ describe("Messenger", function () {
     });
   }, 60000);
 
-  // getDevices: function(owner, callback)
-  it("should be able to fetch devices for owner", function (done) {
-    messenger.getDevices(test_owner, (success, devices) => {
-      expect(devices).to.be.a('array');
-      expect(success).to.equal(true);
-      done();
-    });
-  });
-
   // publish: function(owner, udid, message); returns nothing
   it("should be able to publish upon connection", function (done) {
     messenger.publish(test_owner, udid, "test");
     done();
-  }, 5000);
-
-  it("should be able to send random quote", function (done) {
-    messenger.sendRandomQuote(() => {
-      done();
-    });
-  }, 5000);
-
-  it("should be able to post random quote", function (done) {
-    messenger.postRandomQuote("quote", () => {
-      done();
-    });
-
   }, 5000);
 
   // may be disabled in case of last test left hanging

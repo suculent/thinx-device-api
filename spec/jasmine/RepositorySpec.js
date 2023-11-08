@@ -23,11 +23,10 @@ describe("Repository", function() {
     console.log(`🚸 [chai] >>> running Repository spec`);
     redis = redis_client.createClient(Globals.redis_options());
     await redis.connect();
-    watcher = new Repository(messenger, redis, /* mock_queue */);
-    messenger = new Messenger(redis, "mosquitto").getInstance(redis, "mosquitto");
     builder = new Builder(redis);
-    // Should initialize safely without running cron
     queue_with_cron = new Queue(redis, builder, null, null, null);
+    watcher = new Repository(messenger, redis, queue_with_cron);
+    messenger = new Messenger(redis, "mosquitto").getInstance(redis, "mosquitto");
   });
 
   afterAll(() => {

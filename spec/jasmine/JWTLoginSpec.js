@@ -18,12 +18,11 @@ describe("JWT Login", function () {
         redis = redis_client.createClient(Globals.redis_options());
         await redis.connect();
         login = new JWTLogin(redis);
-      });
-    
-      afterAll(() => {
+    });
+
+    afterAll(() => {
         console.log(`🚸 [chai] <<< completed JWT spec`);
-      });
-    
+    });
 
     it("should fetch key even when deleted", function (done) {
         login.revokeSecretKey(() => {
@@ -48,8 +47,8 @@ describe("JWT Login", function () {
         login.sign(owner, (response) => {
             expect(response).to.be.a('string');
             let mock_req = {
-                "headers" : {
-                    "Authorization" : 'Bearer ' + response
+                "headers": {
+                    "Authorization": 'Bearer ' + response
                 }
             };
             login.verify(mock_req, (error, payload) => {
@@ -65,8 +64,8 @@ describe("JWT Login", function () {
             expect(access).to.be.a('string');
             expect(refresh).to.be.a('string');
             let mock_req = {
-                "headers" : {
-                    "Authorization" : 'Bearer ' + access
+                "headers": {
+                    "Authorization": 'Bearer ' + access
                 }
             };
             login.verify(mock_req, (error, payload) => {
@@ -74,8 +73,8 @@ describe("JWT Login", function () {
                 expect(payload).to.be.a('object');
 
                 let mock_req2 = {
-                    "headers" : {
-                        "Authorization" : 'Bearer ' + refresh
+                    "headers": {
+                        "Authorization": 'Bearer ' + refresh
                     }
                 };
                 login.verify(mock_req2, (error, payload) => {

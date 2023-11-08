@@ -1,7 +1,7 @@
 FROM thinxcloud/base:alpine
 
 LABEL maintainer="Matej Sychra <suculent@me.com>"
-LABEL name="THiNX API" version="1.8.2247"
+LABEL name="THiNX API" version="1.9.2451"
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -47,9 +47,17 @@ ARG GITHUB_CLIENT_ID
 ENV GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
 ARG GITHUB_CLIENT_SECRET
 ENV GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+ARG GITHUB_ACCESS_TOKEN
+ENV GITHUB_ACCESS_TOKEN={GITHUB_ACCESS_TOKEN}
 
 ARG SLACK_BOT_TOKEN
 ENV SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
+ARG SLACK_CLIENT_ID
+ENV SLACK_CLIENT_ID=${SLACK_CLIENT_ID}
+ARG SLACK_CLIENT_SECRET
+ENV SLACK_CLIENT_SECRET=${SLACK_CLIENT_SECRET}
+ARG SLACK_WEBHOOK
+ENV SLACK_WEBHOOK=${SLACK_WEBHOOK}
 
 ARG ENTERPRISE
 ENV ENTERPRISE=${ENTERPRISE}
@@ -66,8 +74,8 @@ WORKDIR /opt/thinx/thinx-device-api
 # Install app dependencies
 COPY package.json ./
 
-RUN npm install -g npm@8.6.0 \
- && npm install --unsafe-perm --only-prod .
+RUN npm install -g npm@10.2.3 \
+ && npm install --only-prod .
 
 # THiNX Web & Device API (HTTP)
 EXPOSE 7442

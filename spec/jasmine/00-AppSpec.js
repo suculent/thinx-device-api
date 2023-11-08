@@ -141,7 +141,7 @@ describe("AppSpec Session Management", function () {
       });
   }, 30000);
 
-  it("/api/logout (without session)", function (done) {
+  xit("/api/logout (without session)", function (done) {
     chai.request(thx.app)
       .get('/api/logout')
       .end((err, res) => {

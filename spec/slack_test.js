@@ -5,7 +5,13 @@ let bot_token = process.env.SLACK_BOT_TOKEN;
 
 console.log(`Logging in with token '${bot_token}'`);
 
-let rtm = new RTMClient(bot_token, { logLevel: LogLevel.DEBUG });
+let rtm = new RTMClient(bot_token,
+    {
+        logLevel: LogLevel.DEBUG,
+        retryConfig: retryPolicies.tenRetriesInAboutThirtyMinutes,
+        rejectRateLimitedCalls: true
+    }
+);
 
 /*
 (async () => {
@@ -34,7 +40,7 @@ rtm.on('message', (data) => {
     }
 });
 
-rtm.start().then( () => {
+rtm.start().then(() => {
     console.log("✅ [info] Slack RTM started SUCCESSFULLY...");
 }).catch(s => {
     console.log("!!! initSlack error", s);
@@ -43,31 +49,30 @@ rtm.start().then( () => {
 
 rtm.on('ready', (rtmStartData) => {
     console.log("RTM Ready with data: ", rtmStartData);
-    
+
     let web = new WebClient(bot_token, {
         rejectRateLimitedCalls: true
     });
-    
-    web.conversations.list({ limit: 20 })
-    .then((response) => {
-        for (var c in response.channels) {
-            const conversation = response.channels[c];
-            if (conversation.name == app_config.slack.bot_topic) {
-                console.log("🔨 [debug] [slack] Conversation found...");
-                this.channel = conversation.id;
-                this.redis.v4.set("slack-conversation-id", conversation.id);
-                return;
-            }
-        }
-        console.log("☣️ [error] [slack:rtm::ready] No Slack conversation ID in channels, taking first from:", response.channels);
-        this.channel = response.channels[0].id;
-    })
-    .catch((error) => {
-        // Error :/
-        console.log('☣️ [error] [slack:rtm::ready] Conversations list error:');
-        console.log(error);
-    });
 
-    
+    web.conversations.list({ limit: 20 })
+        .then((response) => {
+            for (var c in response.channels) {
+                const conversation = response.channels[c];
+                if (conversation.name == app_config.slack.bot_topic) {
+                    console.log("🔨 [debug] [slack] Conversation found...");
+                    this.channel = conversation.id;
+                    return;
+                }
+            }
+            console.log("☣️ [error] [slack:rtm::ready] No Slack conversation ID in channels, taking first from:", response.channels);
+            this.channel = response.channels[0].id;
+        })
+        .catch((error) => {
+            // Error :/
+            console.log('☣️ [error] [slack:rtm::ready] Conversations list error:');
+            console.log(error);
+        });
+
+
 });
 

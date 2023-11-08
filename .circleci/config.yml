@@ -10,7 +10,7 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          version: 20.10.12
+          version: 20.10.18
       - checkout
       - docker/check
       - run:
@@ -33,7 +33,7 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          version: 20.10.12
+          version: 20.10.18
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
@@ -75,7 +75,7 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          version: 20.10.12
+          version: 20.10.18
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
@@ -111,7 +111,7 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          version: 20.10.12
+          version: 20.10.18
       - checkout
       - run:
           name: Clean package-lock
@@ -175,7 +175,7 @@ jobs:
           docker compose version
 
     - setup_remote_docker:
-        version: 20.10.12
+        version: 20.10.18
 
     - checkout
 
@@ -212,7 +212,7 @@ jobs:
         command: |
             mkdir -p /mnt/data/
             mkdir -p /mnt/data && cp -R ./conf /mnt/data
-            mkdir -p /mnt/data/ssh_keys
+            mkdir -p /mnt/data/ssh_keys && cp -R ./spec/mnt/data/ssh_keys /mnt/data
             mkdir -p /mnt/data/mosquitto/auth
             mkdir -p /mnt/data/mosquitto/config
             mkdir -p /mnt/data/mosquitto/data
@@ -316,16 +316,17 @@ jobs:
           docker compose logs couchdb
 
     - run:
-        name: Starting API Test
+        name: Running Unit and Integration Tests 
         command: |
           export ENVIRONMENT=test
+          pwd
           docker compose up --build api | tee -ia ./test.log
-          if [ ! $(cat ./test.log | grep "specs, 0 failures") ]; then 
+          echo "Docker test complete."
+          if [[ ! $(grep "specs, 0 failures" ./test.log) ]]; then 
             echo "» TEST failed. Should not deploy this commit."
-            cat ./test.log | grep "Failures:"
+            grep "Failures:" ./test.log
             exit 1
           fi
-          date
 
     - run:
         name: Allow inspecting MQTT logs
@@ -372,7 +373,7 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          version: 20.10.12
+          version: 20.10.18
       - checkout
       - docker/check
       - run:
@@ -426,15 +427,15 @@ workflows:
                 - main
                 - master
       
-      # - build-console-classic:
-      #     context:
-      #       - thinx-docker-repo
-      #       - console
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-staging
-      #           - master
+      - build-console-classic:
+          context:
+            - thinx-docker-repo
+            - console
+          filters:
+            branches:
+              only:
+                - thinx-staging
+                - master
 
       # - build-console-cloud:
       #     context:

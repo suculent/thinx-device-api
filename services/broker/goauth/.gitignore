@@ -1,0 +1,30 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+*.o
+*.so
+*.a
+pw
+go-auth.h
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# dependencies
+vendor
+
+# ides and editors
+.idea/
+.vscode/
+
+# generated test certificates, keys and CSRs
+test-files/certificates/**/*.csr
+test-files/certificates/**/*.pem
+
+# todo
+TODO

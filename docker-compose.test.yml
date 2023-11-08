@@ -104,6 +104,7 @@ services:
     env_file: .env
     build:
       context: .
+      dockerfile: ./Dockerfile
       args:
         - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
         - 'COUCHDB_PASS=${COUCHDB_PASS}'
@@ -134,9 +135,12 @@ services:
       - 'ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}'
       - 'ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}'
       - 'SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}'
+      - 'SLACK_CLIENT_ID=${SLACK_CLIENT_ID}'
+      - 'SLACK_CLIENT_SECRET=${SLACK_CLIENT_SECRET}'
+      - 'SLACK_WEBHOOK=${SLACK_WEBHOOK}'
       - 'THINX_HOSTNAME=${THINX_HOSTNAME}'
       - 'THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}'
-      - 'WORKER_SECRET=${WORKER_SECRET}'   
+      - 'WORKER_SECRET=${WORKER_SECRET}'
       - 'GITHUB_ACCESS_TOKEN=${GITHUB_ACCESS_TOKEN}'
       - 'MAILGUN_API_KEY=${MAILGUN_API_KEY}'
     ports:

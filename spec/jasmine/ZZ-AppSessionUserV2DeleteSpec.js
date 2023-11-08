@@ -67,7 +67,6 @@ describe("User Routes V2", function () {
             expect(__res.status).to.equal(200);
             expect(__res.text).to.be.a('string'); // <html>
             expect(__res).to.be.html;
-            console.log("🚸 [chai] IMPORTANT(2)", __res.text);
 
             chai.request(thx.app)
               .post('/api/v2/password/set')
@@ -76,7 +75,6 @@ describe("User Routes V2", function () {
                 expect(___res.status).to.equal(200);
                 expect(___res.text).to.be.a('string');
                 expect(___res.text).to.equal('{"success":true,"response":"activation_successful"}');
-                console.log("🚸 [chai] IMPORTANT(3)", ___res.text);
                 done();
               });
           });
@@ -105,7 +103,7 @@ describe("User Routes V2", function () {
       .get('/api/v2/password/reset?owner_id='+envi.dynamic2.owner+'&reset_key='+reset_key)
       .end((_err, res) => {
         expect(res.status).to.equal(200);
-        console.log("GET /api/v2/password/reset res text", res.text);
+        // should include "Enter your new password"
         expect(res.text).to.be.a('string');
         done();
       });
@@ -184,7 +182,6 @@ describe("User Routes V2", function () {
       .post('/api/login')
       .send({ username: "dynamic2", password: "dynamic3" })
       .end((_err1, res1) => {
-        //console.log("🚸 [chai] POST /api/login response:", res1.text, "status", res1.status);
         expect(res1.status).to.equal(401);
         expect(res1.text).to.equal('{"success":false,"response":"password_mismatch"}');
         done();
@@ -196,7 +193,6 @@ describe("User Routes V2", function () {
       .get('/api/v2/stats')
       .set('Authorization', jwt)
       .end((_err, res) => {
-        //console.log("🚸 [chai] V2 GET /api/v2/stats response", res.text);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":false,"response":"no_results"}');
@@ -210,7 +206,6 @@ describe("User Routes V2", function () {
       .set('Authorization', jwt)
       .send({})
       .end((_err, res) => {
-        //console.log("🚸 [chai] V2 POST /api/v2/chat response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":true,"response":"no_slack_channel"}');
@@ -243,7 +238,6 @@ describe("User Routes V2", function () {
       .get('/api/v2/logout')
       .set('Authorization', jwt)
       .end((_err, res) => {
-        //console.log("🚸 [chai] V2 GET /api/v2/logout response", res.text); // expect redirect
         expect(res.status).to.equal(200);
         expect(res).to.be.html;
         done();
@@ -260,7 +254,6 @@ describe("User Routes V2", function () {
       .end((_err, res) => {
         console.log("🚸 [chai] V2 DELETE /api/v2/user response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
-        //expect(res.text).to.be.a('string');
         done();
       });
   }, 30000);
