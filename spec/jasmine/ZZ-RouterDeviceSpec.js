@@ -319,7 +319,6 @@ describe("Devices (JWT)", function () {
       .set('Authorization', jwt)
       .send({ udid: JRS5.udid })
       .end((_err, res) => {
-        //console.log("🚸 [chai] POST /api/device/detach  (JWT) 2 response:", res.text, " status:", res.status);
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
         expect(res.text).to.equal('{"success":true,"response":"detached"}');

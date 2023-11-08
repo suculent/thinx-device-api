@@ -31,7 +31,6 @@ describe("Transfer", function () {
     devices.list(envi.oid, (success, response) => {
       expect(success).to.equal(true);
       expect(response).to.be.a('object');
-      //console.log("[spec] [transfer] BEFORE device list:", JSON.stringify(response, null, 2));
     });
   });
 
@@ -39,7 +38,6 @@ describe("Transfer", function () {
     devices.list(envi.oid, (success, response) => {
       expect(success).to.equal(true);
       expect(response).to.be.a('object');
-      //console.log("[spec] [transfer] AFTER device list:", JSON.stringify(response, null, 2));
       done();
     });
     console.log(`🚸 [chai] <<< completed Transfer spec`);

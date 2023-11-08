@@ -380,7 +380,6 @@ describe("Builder (JWT)", function () {
             .set('Authorization', jwt)
             .send({ udid: envi.dynamic.udid, build_id: envi.build_id  })
             .end((err, res) => {
-                //console.log("🚸 [chai] response /api/v2/build/artifacts (JWT, no-owner):", res.text, " status:", res.status);
                 expect(res.status).to.equal(400);
                 done();
             });
