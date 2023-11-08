@@ -2,7 +2,7 @@
 
 ## HISTORY
 
-6/11/2023 1.9.2429
+6/11/2023 1.9.2451
 
 » Updating vulnerable components
 » Improving security configuration
