@@ -290,7 +290,10 @@ module.exports = class THiNX extends EventEmitter {
               strict: false
             }));
 
-            app.use(limiter);
+            // While testing, the rate-limiter is disabled in order to prevent blocking.
+            if (process.env.ENVIRONMENT != "test") {
+              app.use(limiter);
+            }
 
             app.use(express.urlencoded({
               extended: true,
