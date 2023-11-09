@@ -61,11 +61,13 @@ module.exports = class THiNX extends EventEmitter {
     const fs = require("fs-extra");
 
     // set up rate limiter
-    const RateLimit = require('express-rate-limit');
+    const { RateLimit } = require('express-rate-limit');
 
-    let limiter = new RateLimit({
+    const limiter = rateLimit({
       windowMs: 1 * 60 * 1000, // 1 minute
-      max: 500
+      max: 500,
+      standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+      legacyHeaders: false // Disable the `X-RateLimit-*` headers
     });
 
     require("ssl-root-cas").inject();
