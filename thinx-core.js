@@ -532,8 +532,6 @@ module.exports = class THiNX extends EventEmitter {
                 }
               });
 
-              ws.on('pong', heartbeat);
-
               ws.on('close', () => {
                 socketMap.delete(ws.owner);
               });
