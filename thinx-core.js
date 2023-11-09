@@ -61,7 +61,7 @@ module.exports = class THiNX extends EventEmitter {
     const fs = require("fs-extra");
 
     // set up rate limiter
-    const { RateLimit } = require('express-rate-limit');
+    const { rateLimit } = require('express-rate-limit');
 
     const limiter = rateLimit({
       windowMs: 1 * 60 * 1000, // 1 minute
