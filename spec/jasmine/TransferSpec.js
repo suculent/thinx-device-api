@@ -43,7 +43,7 @@ describe("Transfer", function () {
     console.log(`🚸 [chai] <<< completed Transfer spec`);
   });
 
-  it("(00) should be able to initiate device transfer, decline and accept another one", function (done) {
+  it("(00) should be able to initiate device transfer, decline and accept another one", async function (done) {
 
     let accepted = false;
 
@@ -55,7 +55,7 @@ describe("Transfer", function () {
     var owner = envi.oid;
 
     // TODO: Turn this into async
-    transfer.request(owner, body, (t_success, response) => {
+    await transfer.request(owner, body, (t_success, response) => {
       expect(t_success).to.equal(true);
       expect(response).to.be.a('string');
       const tbody = {
@@ -64,14 +64,14 @@ describe("Transfer", function () {
       };
 
       // 00-02 Decline
-      transfer.decline(tbody, (d_success, d_response) => {
+      transfer.decline(tbody, async (d_success, d_response) => {
         expect(d_success).to.equal(true);
         expect(d_response).to.be.a('string');
 
         // TODO: Turn this into async
-        transfer.request(owner, body, (b_success, b_response) => {
+        await transfer.request(owner, body, (b_success, b_response) => {
           expect(b_success).to.equal(true);
-          expect(b_response).to.be.a('string'); // transfer_requested      
+          expect(b_response).to.be.a('string'); // transfer_requested
 
           // 00-04 Accept
           var transfer_body = {
