@@ -52,7 +52,10 @@ describe("Transfer", function () {
   
     var owner = envi.oid;
 
+    // create transfer request
     let response = await transfer.request(owner, body);
+
+    console.log("transfer init response:", response);
       
     expect(response).to.be.a('string');
     
@@ -62,7 +65,10 @@ describe("Transfer", function () {
     };
 
     // 00-02 Decline
-    const d_response = await transfer.decline(tbody);
+    const d_response = await transfer.decline(tbody).catch((e) => {
+      // may throw various exceptions, like invalid_device_transfer_identifier
+      console.log(e);
+    });
     expect(d_response).to.be.a('string');
 
     let b_response = await transfer.request(owner, body);
