@@ -54,10 +54,8 @@ describe("Transfer", function () {
 
     // create transfer request
     let response = await transfer.request(owner, body);
-
-    console.log("transfer init response:", response);
       
-    expect(response).to.be.a('string');
+    expect(response).to.be.a('string'); // DTID
     
     let tbody = {
       transfer_id: response.replace("dt:", ""),
@@ -72,7 +70,6 @@ describe("Transfer", function () {
     expect(d_response).to.be.a('string');
 
     let b_response = await transfer.request(owner, body);
-    expect(b_success).to.equal(true);
     expect(b_response).to.be.a('string'); // transfer_requested
 
     // 00-04 Accept

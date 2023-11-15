@@ -327,7 +327,7 @@ describe("Transfer (JWT)", function () {
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
-                expect(res.text).to.equal('{"success":false,"response":"udids_missing"}');
+                expect(res.text).to.equal('{"success":false,"response":"transfer_id_missing"}');
                 done();
             });
     }, 30000);
