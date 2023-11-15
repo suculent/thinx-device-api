@@ -89,11 +89,10 @@ describe("Util", function () {
             }
         };
         req.session.destroy = () => {
-            console.log(`🚸 [chai] validateSession destroy called (5)...`);
+            let result = Util.validateSession(req);
+            expect(result).to.equal(false);
             done();
         };
-        let result = Util.validateSession(req);
-        expect(result).to.equal(false);
     });
 
     it("should validate session with valid body", function () {
