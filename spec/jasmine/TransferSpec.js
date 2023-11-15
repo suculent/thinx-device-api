@@ -54,6 +54,8 @@ describe("Transfer", function () {
 
     // create transfer request
     let response = await transfer.request(owner, body);
+
+    console.log("[spec] CHECKME! transfer request response:", response);
       
     expect(response).to.be.a('string'); // DTID
     
