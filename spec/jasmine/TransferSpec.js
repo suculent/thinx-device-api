@@ -43,9 +43,7 @@ describe("Transfer", function () {
     console.log(`🚸 [chai] <<< completed Transfer spec`);
   });
 
-  it("(00) should be able to initiate device transfer, decline and accept another one", async function (done) {
-
-    let accepted = false;
+  it("(00) should be able to initiate device transfer, decline and accept another one", async function () {
 
     var body = {
       to: "cimrman@thinx.cloud",
@@ -54,43 +52,30 @@ describe("Transfer", function () {
   
     var owner = envi.oid;
 
-    // TODO: Turn this into async
-    await transfer.request(owner, body, (t_success, response) => {
-      expect(t_success).to.equal(true);
-      expect(response).to.be.a('string');
-      const tbody = {
-        transfer_id: response.replace("dt:", ""),
-        udids: [envi.udid]
-      };
+    let response = await transfer.request(owner, body);
+      
+    expect(response).to.be.a('string');
+    const tbody = {
+      transfer_id: response.replace("dt:", ""),
+      udids: [envi.udid]
+    };
 
-      // 00-02 Decline
-      transfer.decline(tbody, async (d_success, d_response) => {
-        expect(d_success).to.equal(true);
-        expect(d_response).to.be.a('string');
+    // 00-02 Decline
+    const d_response = await transfer.decline(tbody);
+    expect(d_response).to.be.a('string');
 
-        // TODO: Turn this into async
-        await transfer.request(owner, body, (b_success, b_response) => {
-          expect(b_success).to.equal(true);
-          expect(b_response).to.be.a('string'); // transfer_requested
+    let b_response = await transfer.request(owner, body);
+    expect(b_success).to.equal(true);
+    expect(b_response).to.be.a('string'); // transfer_requested
 
-          // 00-04 Accept
-          var transfer_body = {
-            transfer_id: b_response.replace("dt:", ""),
-            udids: [envi.udid]
-          };
+    // 00-04 Accept
+    var transfer_body = {
+      transfer_id: b_response.replace("dt:", ""),
+      udids: [envi.udid]
+    };
 
-          // asyncCall
-          transfer.accept(transfer_body, (success3, response3) => {
-            expect(success3).to.equal(true);
-            expect(response3).to.be.a('string');
-            if (!accepted) {
-              accepted = true;
-              done();
-            }
-          });
-        });
-      });
-    });
+    const response3 = await transfer.accept(transfer_body);
+    expect(response3).to.be.a('string');
   }); // it-00
 
   // TODO: Fetch real device-id and do the same thing as specific transfer, then do it over v2 again with two new devices or another owner
