@@ -55,7 +55,8 @@ describe("Transfer", function () {
     let response = await transfer.request(owner, body);
       
     expect(response).to.be.a('string');
-    const tbody = {
+    
+    let tbody = {
       transfer_id: response.replace("dt:", ""),
       udids: [envi.udid]
     };
