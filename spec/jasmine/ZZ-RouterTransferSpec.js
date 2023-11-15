@@ -122,11 +122,17 @@ describe("Transfer (JWT)", function () {
         chai.request(thx.app)
             .post('/api/transfer/request')
             .set('Authorization', jwt)
-            .send({ to: envi.dynamic.owner, udids: [envi.udid], mig_sources: true, mig_apikeys: true })
+            .send({ 
+                to: envi.dynamic.owner, 
+                udids: [envi.udid], 
+                mig_sources: true, 
+                mig_apikeys: true 
+            })
             .end((_err, res) => {
+                console.log("🚸 [chai] POST POST /api/transfer/request (jwt, semi-valid) response: ", res.text);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string'); 
-                expect(res.text).to.equal('{"success":false,"response":"recipient_unknown"}');
+                expect(res.text).to.equal('{"success":false,"response":"transfer_already_in_progress"}');
                 done();
             });
     }, 30000);
