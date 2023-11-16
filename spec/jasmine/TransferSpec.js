@@ -67,7 +67,7 @@ describe("Transfer", function () {
     // 00-02 Decline
     await transfer.decline(tbody).catch((e) => {
       // may throw various exceptions, like `invalid_device_transfer_identifier`
-      expect(e.indexOf("invalid_device_transfer_identifier") !== -1);
+      expect(String(e).indexOf("invalid_device_transfer_identifier") !== -1);
       console.log("[spec] CHECKME! exception", e); 
     });
     //expect(d_response).to.be.a('string');

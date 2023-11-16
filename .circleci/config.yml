@@ -289,31 +289,12 @@ jobs:
           docker compose logs thinx-redis
 
     - run:
-        name: Starting Mosquitto
-        command: |
-          docker login --username $DOCKER_LOGIN --password $DOCKER_PASSWORD https://registry.thinx.cloud:5000
-          docker compose up -d mosquitto
-          docker compose logs mosquitto
-
-    - run:
-        name: Starting Transformer
-        command: |
-          docker compose up -d transformer
-          docker compose logs transformer
-
-    - run:
-        name: Starting Worker
-        command: |
-          docker compose up -d worker
-          docker compose logs worker
-
-    - run:
-        name: Starting CouchDB
+        name: Starting Support Services
         command: |
           export ENVIRONMENT=test
           chmod -R 666 ./services/couchdb/*
-          docker compose up -d --build couchdb
-          docker compose logs couchdb
+          docker login --username $DOCKER_LOGIN --password $DOCKER_PASSWORD https://registry.thinx.cloud:5000
+          docker compose up -d mosquitto transformer worker couchdb
 
     - run:
         name: Running Unit and Integration Tests 
@@ -327,26 +308,6 @@ jobs:
             grep "Failures:" ./test.log
             exit 1
           fi
-
-    - run:
-        name: Allow inspecting MQTT logs
-        command: |
-            docker compose logs mosquitto
-
-    - run:
-        name: Allow inspecting CouchDB logs
-        command: |
-            docker compose logs couchdb
-
-    - run:
-        name: Allow inspecting Transformer logs
-        command: |
-            docker compose logs transformer
-
-    - run:
-        name: Allow inspecting Worker logs
-        command: |
-            docker compose logs worker
 
     - run:
         name: Check running Docker containers
