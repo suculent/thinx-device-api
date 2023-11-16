@@ -81,7 +81,10 @@ describe("Transfer", function () {
       udids: [envi.udid]
     };
 
-    const response3 = await transfer.accept(transfer_body);
+    const response3 = await transfer.accept(transfer_body).catch((e) => {
+      console.log("[spec] transfer.accept throws:", e);
+    });
+    console.log("[spec] transfer.accept response3:", response3);
     expect(response3).to.be.a('string');
   }); // it-00
 
