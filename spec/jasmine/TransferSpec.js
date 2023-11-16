@@ -52,12 +52,10 @@ describe("Transfer", function () {
   
     var owner = envi.oid;
 
-    // create transfer request
+    // 00-00 Initiate transfer request
     let response = await transfer.request(owner, body); // should return transfer_id without prefix
 
     console.log("[spec] CHECKME! transfer request response:", response);
-      
-    expect(response).to.be.a('string'); // DTID
     
     let tbody = {
       transfer_id: response.replace("dt:", ""),
@@ -73,8 +71,7 @@ describe("Transfer", function () {
     //expect(d_response).to.be.a('string');
 
     let b_response = await transfer.request(owner, body);
-    expect(b_response).to.be.a('string'); // transfer_requested
-
+    
     // 00-04 Accept
     var transfer_body = {
       transfer_id: b_response.replace("dt:", ""),
@@ -85,7 +82,11 @@ describe("Transfer", function () {
       console.log("[spec] transfer.accept throws:", e);
     });
     console.log("[spec] transfer.accept response3:", response3);
+
+    expect(response).to.be.a('string'); // DTID
+    expect(b_response).to.be.a('string'); // transfer_requested
     expect(response3).to.be.a('string');
+
   }); // it-00
 
   // TODO: Fetch real device-id and do the same thing as specific transfer, then do it over v2 again with two new devices or another owner
