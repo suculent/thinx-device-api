@@ -73,7 +73,7 @@ describe("Transfer", function () {
 
     let b_response = await transfer.request(owner, body);
 
-    console.log("[spec] CHECKME! transfer request b_response:", b_response);
+    console.log("[spec] transfer request b_response:", b_response); // DTID
     
     // 00-04 Accept
     var transfer_body = {
