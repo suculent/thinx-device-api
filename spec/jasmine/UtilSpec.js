@@ -80,6 +80,8 @@ describe("Util", function () {
     });
 
     it("should invalidate session with invalid body", function (done) {
+
+        // this case has defined headers and session, but using an empty object
         let req = {
             headers: { },
             session: { },
