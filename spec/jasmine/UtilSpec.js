@@ -80,8 +80,6 @@ describe("Util", function () {
     });
 
     it("should invalidate session with invalid body", function (done) {
-
-        // this case has defined headers and session, but using an empty object
         let req = {
             headers: { },
             session: { },
@@ -91,10 +89,11 @@ describe("Util", function () {
             }
         };
         req.session.destroy = () => {
-            let result = Util.validateSession(req);
-            expect(result).to.equal(false);
+            console.log(`🚸 [chai] validateSession destroy called (5)...`);
             done();
         };
+        let result = Util.validateSession(req);
+        expect(result).to.equal(false);
     });
 
     it("should validate session with valid body", function () {

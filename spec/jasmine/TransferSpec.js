@@ -43,7 +43,9 @@ describe("Transfer", function () {
     console.log(`🚸 [chai] <<< completed Transfer spec`);
   });
 
-  it("(00) should be able to initiate device transfer, decline and accept another one", async function () {
+  it("(00) should be able to initiate device transfer, decline and accept another one", function (done) {
+
+    let accepted = false;
 
     var body = {
       to: "cimrman@thinx.cloud",
@@ -52,44 +54,43 @@ describe("Transfer", function () {
   
     var owner = envi.oid;
 
-    // 00-00 Initiate transfer request
-    let response = await transfer.request(owner, body); // should return transfer_id without prefix
+    // TODO: Turn this into async
+    transfer.request(owner, body, (t_success, response) => {
+      expect(t_success).to.equal(true);
+      expect(response).to.be.a('string');
+      const tbody = {
+        transfer_id: response.replace("dt:", ""),
+        udids: [envi.udid]
+      };
 
-    console.log("[spec] CHECKME! transfer request response:", response);
-    
-    let tbody = {
-      transfer_id: response.replace("dt:", ""),
-      udids: [envi.udid]
-    };
+      // 00-02 Decline
+      transfer.decline(tbody, (d_success, d_response) => {
+        expect(d_success).to.equal(true);
+        expect(d_response).to.be.a('string');
 
-    // 00-02 Decline
-    await transfer.decline(tbody).catch((e) => {
-      // may throw various exceptions, like `invalid_device_transfer_identifier`
-      let message = e.message;
-      expect(message.indexOf("invalid_device_transfer_identifier") !== -1);
-      console.log("[spec] CHECKME! exception", e, "in tbody", tbody); // e.g. `invalid_device_transfer_identifier`
+        // TODO: Turn this into async
+        transfer.request(owner, body, (b_success, b_response) => {
+          expect(b_success).to.equal(true);
+          expect(b_response).to.be.a('string'); // transfer_requested      
+
+          // 00-04 Accept
+          var transfer_body = {
+            transfer_id: b_response.replace("dt:", ""),
+            udids: [envi.udid]
+          };
+
+          // asyncCall
+          transfer.accept(transfer_body, (success3, response3) => {
+            expect(success3).to.equal(true);
+            expect(response3).to.be.a('string');
+            if (!accepted) {
+              accepted = true;
+              done();
+            }
+          });
+        });
+      });
     });
-    //expect(d_response).to.be.a('string');
-
-    let b_response = await transfer.request(owner, body);
-
-    console.log("[spec] transfer request b_response:", b_response); // DTID
-    
-    // 00-04 Accept
-    var transfer_body = {
-      transfer_id: b_response.replace("dt:", ""),
-      udids: [envi.udid]
-    };
-
-    const response3 = await transfer.accept(transfer_body).catch((e) => {
-      console.log("[spec] transfer.accept throws:", e);
-    });
-    console.log("[spec] transfer.accept response3:", response3);
-
-    expect(response).to.be.a('string'); // DTID
-    expect(b_response).to.be.a('string'); // transfer_requested
-    //expect(response3).to.be.a('string'); // undefined?
-
   }); // it-00
 
   // TODO: Fetch real device-id and do the same thing as specific transfer, then do it over v2 again with two new devices or another owner

@@ -49,7 +49,7 @@ describe("Repository", function() {
     watcher = new Repository(messenger, redis, queue_with_cron);
     let name = "esp";
     let repositories = Repository.findAllRepositoriesWithFullname("esp8266");
-    watcher.purgeRepositoriesWithFullName(repositories, name);
+    watcher.purge_old_repos_with_full_name(repositories, name);
     expect(watcher).to.be.an('object');
   });
 
