@@ -390,7 +390,7 @@ module.exports = class THiNX extends EventEmitter {
                 httpOnly: true,
                 domain: short_domain
               },
-              name: "x-thx-core",
+              name: "x-thx-wscore",
               resave: true,
               rolling: true,
               saveUninitialized: true
