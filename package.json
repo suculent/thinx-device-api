@@ -77,7 +77,7 @@
     "sha256": "^0.2.0",
     "shell-escape": "^0.2.0",
     "sillyname": "^0.1.0",
-    "simple-oauth2": "^5.0.0",
+    "simple-oauth2": "^4.3.0",
     "slack-notify": "^2.0.6",
     "socket.io": "^4.7.2",
     "socket.io-client": "^4.7.2",
