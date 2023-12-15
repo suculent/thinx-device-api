@@ -31,7 +31,7 @@
     "@slack/rtm-api": "^6.1.1",
     "@slack/web-api": "^6.9.1",
     "@snyk/protect": "^1.1242.0",
-    "axios": "^1.6.0",
+    "axios": "1.6.2",
     "base-64": "^0.1.0",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
@@ -93,6 +93,7 @@
   },
   "overrides": {
     "async": "2.6.4",
+    "axios": "1.6.2",
     "json-schema": "0.4.0",
     "ansi-regex": "5.0.1",
     "jsprim": "1.4.2",
