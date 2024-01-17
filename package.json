@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@hapi/hoek": "9.0.3",
-    "@slack/rtm-api": "^6.1.1",
+    "@slack/rtm-api": "^6.2.1",
     "@slack/web-api": "^6.9.1",
     "@snyk/protect": "^1.657.0",
     "axios": "^1.6.0",
