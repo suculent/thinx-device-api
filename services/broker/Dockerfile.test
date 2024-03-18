@@ -1,19 +1,18 @@
 FROM thinxcloud/mosquitto
 
-LABEL name="thinxcloud/mosquitto" version="1.5.8"
-
-RUN apt-get update --fix-missing \
-    && apt-get install -y software-properties-common
+LABEL name="thinxcloud/mosquitto" version="2.0.15"
 
 # for early testing
-RUN wget http://repo.mosquitto.org/debian/mosquitto-repo.gpg.key \
-    && apt-key add mosquitto-repo.gpg.key \
-    && cd /etc/apt/sources.list.d/ && wget http://repo.mosquitto.org/debian/mosquitto-buster.list \
-    && apt-add-repository ppa:mosquitto-dev/mosquitto-ppa \
-    && apt-get update \
-    && apt-get install mosquitto-clients \
-    && apt clean
+RUN apt install -y mosquitto-clients
 
 # mock directory structure for mosquitto data
 COPY ./test/mosquitto/mosquitto.conf /etc/mosquitto/mosquitto.conf
+
+# this must happen in the run-script!!! othervise env-var can not be externalized; happens only in test of files backend
+#RUN mkdir -p /mqtt/auth && \
+#    PASS=$(/mosquitto/pw -h bcrypt -c 10 -p mosquitto) && \
+#    echo "thinx:${PASS}" > /mqtt/auth/thinx.pw && \
+#    echo "Written thinx:${PASS} to /mqtt/auth/thinx.pw" && \
+#    cat /mqtt/auth/thinx.pw
+
 COPY ./test/mosquitto/auth/thinx.acl /mqtt/auth/thinx.acl
