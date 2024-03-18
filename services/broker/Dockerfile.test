@@ -1,9 +1,13 @@
 FROM thinxcloud/mosquitto
 
-LABEL name="thinxcloud/mosquitto" version="1.5.7"
+LABEL name="thinxcloud/mosquitto" version="1.5.8"
 
 # for early testing
-RUN apt install -y mosquitto-clients
+RUN apt-add-repository ppa:mosquitto-dev/mosquitto-ppa \
+    && apt-get update \
+    && apt-get install mosquitto \
+    && apt-get install mosquitto-clients \
+    && apt clean
 
 # mock directory structure for mosquitto data
 COPY ./test/mosquitto/mosquitto.conf /etc/mosquitto/mosquitto.conf
