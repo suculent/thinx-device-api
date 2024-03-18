@@ -2,7 +2,7 @@ FROM thinxcloud/mosquitto
 
 LABEL name="thinxcloud/mosquitto" version="1.5.8"
 
-RUN RUN apt-get update --fix-missing \
+RUN apt-get update --fix-missing \
     && apt-get install -y software-properties-common
 
 # for early testing
