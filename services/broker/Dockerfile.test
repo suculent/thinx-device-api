@@ -2,9 +2,13 @@ FROM thinxcloud/mosquitto
 
 LABEL name="thinxcloud/mosquitto" version="1.5.8"
 
+RUN RUN apt-get update --fix-missing \
+    && apt-get install -y software-properties-common
+
 # for early testing
-RUN apt-get update --fix-missing \
-    && apt-get install -y software-properties-common \
+RUN wget http://repo.mosquitto.org/debian/mosquitto-repo.gpg.key \
+    && apt-key add mosquitto-repo.gpg.key \
+    && cd /etc/apt/sources.list.d/ && wget http://repo.mosquitto.org/debian/mosquitto-buster.list \
     && apt-add-repository ppa:mosquitto-dev/mosquitto-ppa \
     && apt-get update \
     && apt-get install mosquitto-clients \
