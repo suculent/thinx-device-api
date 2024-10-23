@@ -3,9 +3,15 @@ FROM thinxcloud/mosquitto
 LABEL name="thinxcloud/mosquitto" version="2.0.15"
 
 # for early testing
-RUN apt-get update && apt-get install -y software-properties-common \
- && apt-add-repository ppa:mosquitto-dev/mosquitto-ppa \
- && apt-get update && apt install -y mosquitto-clients
+#RUN apt-get update && apt-get install -y software-properties-common \
+# && apt-add-repository ppa:mosquitto-dev/mosquitto-ppa \
+# && apt-get update && apt install -y mosquitto-clients
+
+RUN wget http://repo.mosquitto.org/debian/mosquitto-repo.gpg.key \
+    && apt-key add mosquitto-repo.gpg.key \
+    && cd /etc/apt/sources.list.d/ \
+    && sudo wget http://repo.mosquitto.org/debian/mosquitto-jessie.list \
+    && apt install -y mosquitto-clients
 
 # mock directory structure for mosquitto data
 COPY ./test/mosquitto/mosquitto.conf /etc/mosquitto/mosquitto.conf
