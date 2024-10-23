@@ -9,8 +9,7 @@ jobs:
   build-base:
     executor: docker/docker
     steps:
-      - setup_remote_docker:
-          version: 20.10.18
+      - setup_remote_docker
       - checkout
       - docker/check
       - run:
