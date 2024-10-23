@@ -47,7 +47,7 @@
     "crypto-js": "^4.2.0",
     "dateformat": "^3.0.3",
     "express": "^4.19.2",
-    "express-rate-limit": "^7.1.4",
+    "express-rate-limit": "^5.2.3",
     "express-session": "^1.17.2",
     "fs-extra": "^11.2.0",
     "fs-finder": "github:suculent/Node-FsFinder#master",
