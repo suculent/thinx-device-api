@@ -3,7 +3,7 @@ networks:
   nat:
     external: true
   internal:
-    external: false
+    external: true
 services:
   mosquitto:
     env_file: .env

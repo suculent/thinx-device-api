@@ -1,7 +1,7 @@
 version: 2.1
 orbs:
   node: circleci/node@6.3.0
-  docker: circleci/docker@2.0.3
+  docker: circleci/docker@2.7.1
   slack: circleci/slack@5.0.0
 
 jobs:
@@ -9,7 +9,8 @@ jobs:
   build-base:
     executor: docker/docker
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: previous
       - checkout
       - docker/check
       - run:
@@ -31,8 +32,8 @@ jobs:
   build-console-cloud:
     executor: docker/docker
     steps:
-      - setup_remote_docker
-#          version: 20.10.18
+      - setup_remote_docker:
+          version: previous
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
@@ -73,8 +74,8 @@ jobs:
   build-console-classic:
     executor: docker/docker
     steps:
-      - setup_remote_docker
-#          version: 20.10.18
+      - setup_remote_docker:
+          version: previous
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
@@ -109,8 +110,8 @@ jobs:
   build-api-cloud:
     executor: docker/docker
     steps:
-      - setup_remote_docker
-#          version: 20.10.18
+      - setup_remote_docker:
+          version: previous
       - checkout
       - run:
           name: Clean package-lock
@@ -173,8 +174,8 @@ jobs:
           chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
           docker compose version
 
-    - setup_remote_docker
-#        version: 20.10.18
+    - setup_remote_docker:
+          version: previous
 
     - checkout
 
@@ -332,8 +333,8 @@ jobs:
   sysdig:
     executor: docker/docker
     steps:
-      - setup_remote_docker
-#          version: 20.10.18
+      - setup_remote_docker:
+          version: previous
       - checkout
       - docker/check
       - run:
