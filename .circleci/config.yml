@@ -75,7 +75,7 @@ jobs:
     executor: docker/docker
     steps:
       - setup_remote_docker:
-          version: previous
+          version: 20.10.24
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
