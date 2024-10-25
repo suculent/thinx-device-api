@@ -1,9 +1,9 @@
 version: '2.2'
 networks:
   nat:
-    external: true
+    external: false
   internal:
-    external: true
+    external: false
 services:
   mosquitto:
     env_file: .env
