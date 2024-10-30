@@ -60,7 +60,7 @@
     "md5": "^2.3.0",
     "mime": "^3.0.0",
     "mkdirp": "^1.0.3",
-    "moment-timezone": "0.5.40",
+    "moment-timezone": "0.5.46",
     "morgan": "^1.10.0",
     "mqtt": "^5.7.2",
     "nano": "^10.1.4",
