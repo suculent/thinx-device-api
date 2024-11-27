@@ -1,16 +1,15 @@
 version: 2.1
 orbs:
-  node: circleci/node@5.0.1
+  node: circleci/node@6.3.0
   docker: circleci/docker@2.0.3
-  slack: circleci/slack@4.8.3
+  slack: circleci/slack@5.0.0
 
 jobs:
 
   build-base:
     executor: docker/docker
     steps:
-      - setup_remote_docker:
-          version: 20.10.18
+      - setup_remote_docker
       - checkout
       - docker/check
       - run:
@@ -32,8 +31,8 @@ jobs:
   build-console-cloud:
     executor: docker/docker
     steps:
-      - setup_remote_docker:
-          version: 20.10.18
+      - setup_remote_docker
+#          version: 20.10.18
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
@@ -74,8 +73,8 @@ jobs:
   build-console-classic:
     executor: docker/docker
     steps:
-      - setup_remote_docker:
-          version: 20.10.18
+      - setup_remote_docker
+#          version: 20.10.18
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
@@ -110,8 +109,8 @@ jobs:
   build-api-cloud:
     executor: docker/docker
     steps:
-      - setup_remote_docker:
-          version: 20.10.18
+      - setup_remote_docker
+#          version: 20.10.18
       - checkout
       - run:
           name: Clean package-lock
@@ -148,7 +147,7 @@ jobs:
           password: $DOCKER_PUBLIC_PASSWORD  # or project environment variable reference
     
     # because the tests do not consume much of RAM or CPU, this probably won't cause any more slowdown
-    resource_class: medium
+    resource_class: large
 
     working_directory: ~/suculent/thinx-device-api
 
@@ -174,8 +173,8 @@ jobs:
           chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
           docker compose version
 
-    - setup_remote_docker:
-        version: 20.10.18
+    - setup_remote_docker
+#        version: 20.10.18
 
     - checkout
 
@@ -289,31 +288,12 @@ jobs:
           docker compose logs thinx-redis
 
     - run:
-        name: Starting Mosquitto
-        command: |
-          docker login --username $DOCKER_LOGIN --password $DOCKER_PASSWORD https://registry.thinx.cloud:5000
-          docker compose up -d mosquitto
-          docker compose logs mosquitto
-
-    - run:
-        name: Starting Transformer
-        command: |
-          docker compose up -d transformer
-          docker compose logs transformer
-
-    - run:
-        name: Starting Worker
-        command: |
-          docker compose up -d worker
-          docker compose logs worker
-
-    - run:
-        name: Starting CouchDB
+        name: Starting Support Services
         command: |
           export ENVIRONMENT=test
           chmod -R 666 ./services/couchdb/*
-          docker compose up -d --build couchdb
-          docker compose logs couchdb
+          docker login --username $DOCKER_LOGIN --password $DOCKER_PASSWORD https://registry.thinx.cloud:5000
+          docker compose up -d mosquitto transformer worker couchdb
 
     - run:
         name: Running Unit and Integration Tests 
@@ -327,26 +307,6 @@ jobs:
             grep "Failures:" ./test.log
             exit 1
           fi
-
-    - run:
-        name: Allow inspecting MQTT logs
-        command: |
-            docker compose logs mosquitto
-
-    - run:
-        name: Allow inspecting CouchDB logs
-        command: |
-            docker compose logs couchdb
-
-    - run:
-        name: Allow inspecting Transformer logs
-        command: |
-            docker compose logs transformer
-
-    - run:
-        name: Allow inspecting Worker logs
-        command: |
-            docker compose logs worker
 
     - run:
         name: Check running Docker containers
@@ -372,8 +332,8 @@ jobs:
   sysdig:
     executor: docker/docker
     steps:
-      - setup_remote_docker:
-          version: 20.10.18
+      - setup_remote_docker
+#          version: 20.10.18
       - checkout
       - docker/check
       - run:
@@ -425,7 +385,6 @@ workflows:
                 - thinx-class
                 - thinx-staging
                 - main
-                - master
       
       - build-console-classic:
           context:
@@ -435,7 +394,7 @@ workflows:
             branches:
               only:
                 - thinx-staging
-                - master
+                - main
 
       # - build-console-cloud:
       #     context:
@@ -446,7 +405,7 @@ workflows:
       #         only:
       #           - thinx-console
       #           - thinx-staging
-      #           - master
+      #           - main
 
       - build-base:
           context:
@@ -467,4 +426,4 @@ workflows:
             branches:
               only:
                 - thinx-staging
-                - master
+                - main

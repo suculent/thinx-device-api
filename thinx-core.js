@@ -61,11 +61,13 @@ module.exports = class THiNX extends EventEmitter {
     const fs = require("fs-extra");
 
     // set up rate limiter
-    const RateLimit = require('express-rate-limit');
+    const { rateLimit } = require('express-rate-limit');
 
-    let limiter = new RateLimit({
+    const limiter = rateLimit({
       windowMs: 1 * 60 * 1000, // 1 minute
-      max: 500
+      max: 500,
+      standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+      legacyHeaders: false // Disable the `X-RateLimit-*` headers
     });
 
     require("ssl-root-cas").inject();
@@ -288,7 +290,10 @@ module.exports = class THiNX extends EventEmitter {
               strict: false
             }));
 
-            app.use(limiter);
+            // While testing, the rate-limiter is disabled in order to prevent blocking.
+            if (process.env.ENVIRONMENT != "test") {
+              app.use(limiter);
+            }
 
             app.use(express.urlencoded({
               extended: true,
@@ -385,7 +390,7 @@ module.exports = class THiNX extends EventEmitter {
                 httpOnly: true,
                 domain: short_domain
               },
-              name: "x-thx-core",
+              name: "x-thx-wscore",
               resave: true,
               rolling: true,
               saveUninitialized: true

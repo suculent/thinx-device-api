@@ -2,6 +2,11 @@
 
 ## HISTORY
 
+19/12/2092 1.9.2578
+
+» Dependency security updates
+» Updated Google OAuth2 implementation
+
 6/11/2023 1.9.2451
 
 » Updating vulnerable components
