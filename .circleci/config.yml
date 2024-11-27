@@ -1,7 +1,7 @@
 version: 2.1
 orbs:
   node: circleci/node@6.3.0
-  docker: circleci/docker@2.0.3
+  docker: circleci/docker@2.7.1
   slack: circleci/slack@5.0.0
 
 jobs:
@@ -9,7 +9,8 @@ jobs:
   build-base:
     executor: docker/docker
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: previous
       - checkout
       - docker/check
       - run:
@@ -31,8 +32,8 @@ jobs:
   build-console-cloud:
     executor: docker/docker
     steps:
-      - setup_remote_docker
-#          version: 20.10.18
+      - setup_remote_docker:
+          version: previous
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
@@ -73,8 +74,8 @@ jobs:
   build-console-classic:
     executor: docker/docker
     steps:
-      - setup_remote_docker
-#          version: 20.10.18
+      - setup_remote_docker:
+          version: 20.10.24
       - checkout
       - run:
           name: Fetch all dependencies (esp. console)
@@ -87,18 +88,7 @@ jobs:
           docker-context: services/console/src
           image: thinx/console
           dockerfile: services/console/src/Dockerfile
-          extra_build_args: |
-            --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
-            --build-arg LANDING_HOSTNAME=${LANDING_HOSTNAME} \
-            --build-arg API_HOSTNAME=${API_HOSTNAME} \
-            --build-arg API_BASEURL=${API_BASEURL} \
-            --build-arg WEB_HOSTNAME=${WEB_HOSTNAME} \
-            --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} \
-            --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
-            --build-arg ENTERPRISE=${ENTERPRISE} \
-            --build-arg ENVIRONMENT=${ENVIRONMENT} \
-            --build-arg COMMIT_ID=$CIRCLE_SHA1 \
-            --build-arg VERSION_CODE=$(echo $CIRCLE_SHA1 | cut -c -7) \
+          extra_build_args: '--build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} --build-arg LANDING_HOSTNAME=${LANDING_HOSTNAME} --build-arg API_HOSTNAME=${API_HOSTNAME} --build-arg API_BASEURL=${API_BASEURL} --build-arg WEB_HOSTNAME=${WEB_HOSTNAME} --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} --build-arg ENTERPRISE=${ENTERPRISE} --build-arg ENVIRONMENT=${ENVIRONMENT} --build-arg COMMIT_ID=$CIRCLE_SHA1 --build-arg VERSION_CODE=$(echo $CIRCLE_SHA1 | cut -c -7)'
           tag: 'swarm'
       - docker/push:
           digest-path: /tmp/digest.txt
@@ -109,8 +99,8 @@ jobs:
   build-api-cloud:
     executor: docker/docker
     steps:
-      - setup_remote_docker
-#          version: 20.10.18
+      - setup_remote_docker:
+          version: previous
       - checkout
       - run:
           name: Clean package-lock
@@ -120,12 +110,7 @@ jobs:
       - docker/build:
           image: thinxcloud/api
           dockerfile: ./Dockerfile
-          extra_build_args: |
-            --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} \
-            --build-arg SNYK_TOKEN=${SNYK_TOKEN} \
-            --build-arg ENVIRONMENT=${ENVIRONMENT} \
-            --build-arg REVISION=$(git describe --abbrev=0) \
-            --build-arg ENTERPRISE=${ENTERPRISE} \
+          extra_build_args: '--build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} --build-arg SNYK_TOKEN=${SNYK_TOKEN} --build-arg ENVIRONMENT=${ENVIRONMENT} --build-arg REVISION=$(git describe --abbrev=0) --build-arg ENTERPRISE=${ENTERPRISE}'
           tag: 'latest'
       - docker/push:
           digest-path: /tmp/digest.txt
@@ -173,8 +158,8 @@ jobs:
           chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
           docker compose version
 
-    - setup_remote_docker
-#        version: 20.10.18
+    - setup_remote_docker:
+          version: previous
 
     - checkout
 
@@ -332,8 +317,8 @@ jobs:
   sysdig:
     executor: docker/docker
     steps:
-      - setup_remote_docker
-#          version: 20.10.18
+      - setup_remote_docker:
+          version: previous
       - checkout
       - docker/check
       - run:
