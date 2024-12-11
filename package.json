@@ -30,7 +30,7 @@
     "@hapi/hoek": "11.0.2",
     "@slack/rtm-api": "^7.0.1",
     "@slack/web-api": "^6.12.1",
-    "@snyk/protect": "^1.1258.0",
+    "@snyk/protect": "^1.1294.2",
     "axios": "^1.7.8",
     "base-64": "^0.1.0",
     "bcrypt": "^5.0.0",
