@@ -1,0 +1,1252 @@
+openapi: 3.0.3
+info:
+  title: THiNX Device Management API
+  description: |
+    THiNX Device Management API provides functionality for managing IoT devices,
+    firmware updates, and related services. The API supports both v1 and v2 endpoints.
+  version: 2.0.0
+  contact:
+    name: THiNX Support
+    url: https://thinx.cloud
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+    
+servers:
+  - url: https://rtm.thinx.cloud/api
+    description: Legacy API (v1)
+  - url: https://rtm.thinx.cloud/api/v2
+    description: Current API (v2)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from login endpoint
+    
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: x-thx-core
+      description: Session cookie obtained after login
+    
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authentication
+      description: API key for device authentication
+    
+    ownerApiKeyAuth:
+      type: object
+      description: Owner ID and API key in request body
+      properties:
+        owner:
+          type: string
+          description: Owner ID
+        api_key:
+          type: string
+          description: API key
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        status:
+          type: string
+          description: Error message
+
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: User's username or email
+        password:
+          type: string
+          description: User's password
+        remember:
+          type: integer
+          description: Set to 1 to extend session duration
+          enum: [0, 1]
+          default: 0
+
+    TokenLoginRequest:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: OAuth token
+
+    LoginResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "OK"
+        success:
+          type: boolean
+          example: true
+        access_token:
+          type: string
+          description: JWT access token
+        refresh_token:
+          type: string
+          description: JWT refresh token
+        redirectURL:
+          type: string
+          description: URL to redirect to after login
+
+    DeviceListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        devices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Device'
+
+    Device:
+      type: object
+      properties:
+        udid:
+          type: string
+          description: Unique device identifier
+        alias:
+          type: string
+          description: Human-readable device name
+        owner:
+          type: string
+          description: Owner identifier
+        status:
+          type: string
+          enum: [online, offline, unknown]
+        lastupdate:
+          type: string
+          format: date-time
+        firmware:
+          type: string
+          description: Current firmware version
+        mac:
+          type: string
+          description: MAC address
+        platform:
+          type: string
+          description: Device platform
+        keyhash:
+          type: string
+          description: Device key hash
+        source:
+          type: string
+          description: Source code identifier
+        auto_update:
+          type: boolean
+          description: Whether device auto-updates
+        mesh_ids:
+          type: array
+          items:
+            type: string
+          description: Mesh networks the device belongs to
+        transformers:
+          type: array
+          items:
+            type: string
+          description: Transformers applied to the device
+        environment:
+          type: object
+          additionalProperties: true
+          description: Environment variables
+
+    DeviceDetailRequest:
+      type: object
+      required:
+        - udid
+      properties:
+        udid:
+          type: string
+          description: Unique device identifier
+
+    DeviceEditRequest:
+      type: object
+      required:
+        - changes
+      properties:
+        changes:
+          type: object
+          properties:
+            udid:
+              type: string
+              description: Unique device identifier
+            alias:
+              type: string
+              description: Human-readable device name
+            auto_update:
+              type: boolean
+              description: Whether device auto-updates
+            transformers:
+              type: array
+              items:
+                type: string
+              description: Transformers applied to the device
+            environment:
+              type: object
+              additionalProperties: true
+              description: Environment variables
+
+    DeviceRegistrationRequest:
+      type: object
+      required:
+        - registration
+      properties:
+        registration:
+          type: object
+          required:
+            - mac
+            - firmware
+            - version
+            - checksum
+            - push
+          properties:
+            mac:
+              type: string
+              description: MAC address
+            firmware:
+              type: string
+              description: Firmware identifier
+            version:
+              type: string
+              description: Firmware version
+            checksum:
+              type: string
+              description: Firmware checksum
+            push:
+              type: string
+              description: Push notification token
+            alias:
+              type: string
+              description: Human-readable device name
+            owner:
+              type: string
+              description: Owner identifier
+            udid:
+              type: string
+              description: Unique device identifier (if already registered)
+
+    DeviceRegistrationResponse:
+      type: object
+      properties:
+        registration:
+          type: object
+          properties:
+            success:
+              type: boolean
+              example: true
+            status:
+              type: string
+              example: "OK"
+            udid:
+              type: string
+              description: Unique device identifier
+            timestamp:
+              type: integer
+              description: Registration timestamp
+
+    FirmwareRequest:
+      type: object
+      required:
+        - mac
+        - owner
+        - udid
+      properties:
+        mac:
+          type: string
+          description: MAC address
+        owner:
+          type: string
+          description: Owner identifier
+        udid:
+          type: string
+          description: Unique device identifier
+        version:
+          type: string
+          description: Current firmware version
+        checksum:
+          type: string
+          description: Current firmware checksum
+        use:
+          type: string
+          enum: [ott]
+          description: Use one-time token for firmware update
+
+    FirmwareResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        status:
+          type: string
+          example: "OK"
+        url:
+          type: string
+          description: URL to download firmware
+        ott:
+          type: string
+          description: One-time token for firmware download
+
+    ApiKeyRequest:
+      type: object
+      required:
+        - alias
+      properties:
+        alias:
+          type: string
+          description: Human-readable API key name
+
+    ApiKeyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        api_key:
+          type: string
+          description: API key
+        hash:
+          type: string
+          description: API key hash
+
+    ApiKeyListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        keys:
+          type: array
+          items:
+            type: object
+            properties:
+              alias:
+                type: string
+                description: Human-readable API key name
+              hash:
+                type: string
+                description: API key hash
+              short:
+                type: string
+                description: Short version of API key hash
+
+    ApiKeyRevokeRequest:
+      type: object
+      properties:
+        fingerprint:
+          type: string
+          description: API key hash to revoke
+        fingerprints:
+          type: array
+          items:
+            type: string
+          description: Multiple API key hashes to revoke
+
+    SourceAttachRequest:
+      type: object
+      required:
+        - udid
+        - source_id
+      properties:
+        udid:
+          type: string
+          description: Unique device identifier
+        source_id:
+          type: string
+          description: Source code identifier
+
+    SourceDetachRequest:
+      type: object
+      required:
+        - udid
+      properties:
+        udid:
+          type: string
+          description: Unique device identifier
+
+    MeshAttachRequest:
+      type: object
+      required:
+        - udid
+        - mesh_id
+      properties:
+        udid:
+          type: string
+          description: Unique device identifier
+        mesh_id:
+          type: string
+          description: Mesh network identifier
+
+    MeshDetachRequest:
+      type: object
+      required:
+        - udid
+        - mesh_id
+      properties:
+        udid:
+          type: string
+          description: Unique device identifier
+        mesh_id:
+          type: string
+          description: Mesh network identifier
+
+    NotificationRequest:
+      type: object
+      required:
+        - udid
+        - reply
+      properties:
+        udid:
+          type: string
+          description: Unique device identifier
+        reply:
+          type: string
+          description: Notification message
+
+    PushConfigurationRequest:
+      type: object
+      required:
+        - udid
+        - envs
+      properties:
+        udid:
+          type: string
+          description: Unique device identifier
+        envs:
+          type: object
+          additionalProperties: true
+          description: Environment variables to push
+
+    TransformerRunRequest:
+      type: object
+      required:
+        - device_id
+      properties:
+        device_id:
+          type: string
+          description: Unique device identifier
+          
+    BuildRequest:
+      type: object
+      required:
+        - build
+      properties:
+        build:
+          type: object
+          required:
+            - udid
+            - source_id
+          properties:
+            udid:
+              type: string
+              description: Unique device identifier
+            source_id:
+              type: string
+              description: Source code identifier
+            dryrun:
+              type: boolean
+              description: If true, only validate the build without actually building
+              default: false
+              
+    BuildArtifactsRequest:
+      type: object
+      required:
+        - udid
+        - build_id
+        - owner
+      properties:
+        udid:
+          type: string
+          description: Unique device identifier
+        build_id:
+          type: string
+          description: Build identifier
+        owner:
+          type: string
+          description: Owner identifier
+          
+    LastBuildRequest:
+      type: object
+      required:
+        - udid
+      properties:
+        udid:
+          type: string
+          description: Unique device identifier
+          
+    EnvVariableRequest:
+      type: object
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+          description: Environment variable name
+        value:
+          type: string
+          description: Environment variable value
+          
+    EnvVariableDeleteRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Environment variable name to delete
+        names:
+          type: array
+          items:
+            type: string
+          description: Multiple environment variable names to delete
+
+paths:
+  # Authentication endpoints
+  /login:
+    post:
+      summary: User login
+      description: Authenticate a user with username and password or OAuth token
+      tags:
+        - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/LoginRequest'
+                - $ref: '#/components/schemas/TokenLoginRequest'
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '403':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /logout:
+    get:
+      summary: User logout
+      description: Destroy user session
+      tags:
+        - Authentication
+      security:
+        - sessionCookie: []
+      responses:
+        '302':
+          description: Redirect to login page
+
+  # Device endpoints
+  /device:
+    get:
+      summary: List devices
+      description: List all devices for the authenticated user
+      tags:
+        - Devices
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      responses:
+        '200':
+          description: List of devices
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceListResponse'
+        '401':
+          description: Unauthorized
+    
+    post:
+      summary: Get device details
+      description: Get detailed information about a specific device
+      tags:
+        - Devices
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceDetailRequest'
+      responses:
+        '200':
+          description: Device details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '401':
+          description: Unauthorized
+        '400':
+          description: Bad request
+    
+    put:
+      summary: Edit device
+      description: Update device information
+      tags:
+        - Devices
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceEditRequest'
+      responses:
+        '200':
+          description: Device updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: string
+                    example: "OK"
+        '401':
+          description: Unauthorized
+        '400':
+          description: Bad request
+    
+    delete:
+      summary: Delete device
+      description: Revoke a device
+      tags:
+        - Devices
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceDetailRequest'
+      responses:
+        '200':
+          description: Device deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: string
+                    example: "OK"
+        '401':
+          description: Unauthorized
+
+  /device/configuration:
+    post:
+      summary: Push configuration
+      description: Push configuration to a device
+      tags:
+        - Devices
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushConfigurationRequest'
+      responses:
+        '200':
+          description: Configuration pushed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: string
+                    example: "OK"
+        '401':
+          description: Unauthorized
+
+  /device/notification:
+    post:
+      summary: Send notification
+      description: Send a notification to a device
+      tags:
+        - Devices
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+      responses:
+        '200':
+          description: Notification sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: string
+                    example: "published"
+        '401':
+          description: Unauthorized
+
+  # Source endpoints
+  /source/attach:
+    put:
+      summary: Attach source
+      description: Attach a source code repository to a device
+      tags:
+        - Sources
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SourceAttachRequest'
+      responses:
+        '200':
+          description: Source attached
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: string
+                    example: "OK"
+        '401':
+          description: Unauthorized
+
+  /source/detach:
+    put:
+      summary: Detach source
+      description: Detach a source code repository from a device
+      tags:
+        - Sources
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SourceDetachRequest'
+      responses:
+        '200':
+          description: Source detached
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: string
+                    example: "OK"
+        '401':
+          description: Unauthorized
+
+  # Mesh endpoints
+  /mesh/attach:
+    put:
+      summary: Attach to mesh
+      description: Attach a device to a mesh network
+      tags:
+        - Mesh
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeshAttachRequest'
+      responses:
+        '200':
+          description: Device attached to mesh
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: string
+                    example: "OK"
+        '401':
+          description: Unauthorized
+
+  /mesh/detach:
+    put:
+      summary: Detach from mesh
+      description: Detach a device from a mesh network
+      tags:
+        - Mesh
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeshDetachRequest'
+      responses:
+        '200':
+          description: Device detached from mesh
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: string
+                    example: "OK"
+        '401':
+          description: Unauthorized
+
+  # API Key endpoints
+  /apikey:
+    get:
+      summary: List API keys
+      description: List all API keys for the authenticated user
+      tags:
+        - API Keys
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      responses:
+        '200':
+          description: List of API keys
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyListResponse'
+        '401':
+          description: Unauthorized
+    
+    post:
+      summary: Create API key
+      description: Create a new API key
+      tags:
+        - API Keys
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiKeyRequest'
+      responses:
+        '200':
+          description: API key created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyResponse'
+        '401':
+          description: Unauthorized
+    
+    delete:
+      summary: Revoke API key
+      description: Revoke one or more API keys
+      tags:
+        - API Keys
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiKeyRevokeRequest'
+      responses:
+        '200':
+          description: API key(s) revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: array
+                    items:
+                      type: string
+                    description: List of revoked API key hashes
+        '401':
+          description: Unauthorized
+
+  # Transformer endpoints
+  /transformer/run:
+    post:
+      summary: Run transformer
+      description: Run a transformer on a device
+      tags:
+        - Transformers
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransformerRunRequest'
+      responses:
+        '200':
+          description: Transformer executed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: string
+                    example: "OK"
+        '401':
+          description: Unauthorized
+          
+  # Build endpoints
+  /build:
+    post:
+      summary: Trigger build
+      description: Trigger a build for a device
+      tags:
+        - Builds
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuildRequest'
+      responses:
+        '200':
+          description: Build triggered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: string
+                    example: "OK"
+        '401':
+          description: Unauthorized
+        '400':
+          description: Bad request
+          
+  /build/artifacts:
+    post:
+      summary: Get build artifacts
+      description: Get artifacts for a specific build
+      tags:
+        - Builds
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuildArtifactsRequest'
+      responses:
+        '200':
+          description: Build artifacts
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Unauthorized
+        '400':
+          description: Bad request
+          
+  /device/lastbuild:
+    post:
+      summary: Get last build envelope
+      description: Get the last build envelope for a device
+      tags:
+        - Builds
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LastBuildRequest'
+      responses:
+        '200':
+          description: Last build envelope
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  envelope:
+                    type: object
+                    description: Build envelope information
+        '401':
+          description: Unauthorized
+        '400':
+          description: Bad request
+          
+  # Environment variable endpoints
+  /env:
+    get:
+      summary: List environment variables
+      description: List all environment variables for the authenticated user
+      tags:
+        - Environment Variables
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      responses:
+        '200':
+          description: List of environment variables
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  variables:
+                    type: object
+                    additionalProperties:
+                      type: string
+                    description: Environment variables
+        '401':
+          description: Unauthorized
+          
+    put:
+      summary: Add environment variable
+      description: Add a new environment variable
+      tags:
+        - Environment Variables
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnvVariableRequest'
+      responses:
+        '200':
+          description: Environment variable added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: string
+                    example: "OK"
+        '401':
+          description: Unauthorized
+        '400':
+          description: Bad request
+          
+    delete:
+      summary: Delete environment variable
+      description: Delete one or more environment variables
+      tags:
+        - Environment Variables
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnvVariableDeleteRequest'
+      responses:
+        '200':
+          description: Environment variable(s) deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: string
+                    example: "OK"
+        '401':
+          description: Unauthorized
+        '400':
+          description: Bad request
+
+  # Device API endpoints (not requiring user authentication)
+  /device/register:
+    post:
+      summary: Register device
+      description: Register a new device or update an existing one
+      tags:
+        - Device API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceRegistrationRequest'
+      responses:
+        '200':
+          description: Device registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceRegistrationResponse'
+        '400':
+          description: Bad request
+
+  /device/firmware:
+    post:
+      summary: Request firmware update
+      description: Request a firmware update for a device
+      tags:
+        - Device API
+      security:
+        - apiKeyAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FirmwareRequest'
+      responses:
+        '200':
+          description: Firmware update information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FirmwareResponse'
+        '403':
+          description: Unauthorized
+    
+    get:
+      summary: Download firmware
+      description: Download firmware using a one-time token
+      tags:
+        - Device API
+      parameters:
+        - name: ott
+          in: query
+          required: true
+          schema:
+            type: string
+          description: One-time token for firmware download
+      responses:
+        '200':
+          description: Firmware binary
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Invalid token
+
+  /device/addpush:
+    post:
+      summary: Add push notification token
+      description: Add or update a push notification token for a device
+      tags:
+        - Device API
+      security:
+        - apiKeyAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - push
+              properties:
+                push:
+                  type: string
+                  description: Push notification token
+      responses:
+        '200':
+          description: Push token added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: string
+                    example: "OK"
+        '403':
+          description: Unauthorized
