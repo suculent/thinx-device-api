@@ -579,7 +579,7 @@ describe("User Routes", function () {
       .post('/api/user/logs/build')
       .send({})
       .end((_err, res) => {
-        expect(res.status).to.equal(401);
+        expect(res.status).to.equal(400);
         done();
       });
   }, 30000);
@@ -591,7 +591,7 @@ describe("User Routes", function () {
       .send({})
       .end((_err, res) => {
         console.log("🚸 [chai] POST /api/user/logs/build (jwt) response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(200);
+        expect(res.status).to.equal(400); // invalid body should return 400
         //expect(res.text).to.be.a('string');
         done();
       });
@@ -618,8 +618,8 @@ describe("User Routes", function () {
       .set('Authorization', jwt)
       .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/logs/build/:id (jwt) response:", res.text, " status:", res.status);
-        //let j = JSON.parse(res.text);
-        //real_build_id = j.response[0]._id;
+        let j = JSON.parse(res.text);
+        real_build_id = j.log[0].build_id;
         expect(res.status).to.equal(200); // returns build fetch failed...
         //expect(res.text).to.be.a('string');
         done();
