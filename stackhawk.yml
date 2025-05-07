@@ -1,0 +1,61 @@
+# -- stackhawk configuration for  --
+app:
+  # -- An applicationId obtained from the StackHawk platform. --
+  applicationId: aaa45cc6-9cad-4dc8-b39f-ae5e5facbcac # (required)
+  # -- The environment for the applicationId defined in the StackHawk platform. --
+  env: Production # (required)
+  # -- The url of your application to scan --
+  host: https://rtm.thinx.cloud # (required)
+  
+  openApiConf:
+    # Specify the path relative to the host
+    filePath: "./thinx-api-openapi.yaml"
+
+  authentication:
+    # A username/password based authentication scheme
+    usernamePassword:
+      # The Content-Type expected by the loginPath FORM = application/x-www-form-urlencoded
+      type: FORM
+      # The path to POST username/password credentials.
+      loginPath: /
+      # The path that will return the html form of your login form.
+      # This is optional and the response should contain the csrf token if applicable.
+      loginPagePath: /auth.html
+      # The path to POST username/password credentials to.
+      usernameField: session[username]
+      # The name of the password field
+      passwordField: session[password]
+      # The value of the username field
+      scanUsername: "test"
+      # The value of the password field
+      scanPassword: ${SCAN_PASSWORD:tset}
+      # Extra fields and their values to be included in the POST data to loginPath
+      # in addition to the username/password.
+      otherParams:
+        - name: utf8
+          val: "&#x2713;"
+        - name: "session[remember_me]"
+          val: "0"
+    # Cookie based authorization. If you application maintains its session state on the server
+    # a common way to identify the user is via a cookie that is sent back with the authentication.
+    # This method supports managing the lifecycle of the cookie.
+    cookieAuthorization:
+      # The name of the cookie(s) that will be maintained for authenticated requests.
+      cookieNames:
+        - "x-thx-core"
+    loggedInIndicator: "\\QLog out\\E"
+    loggedOutIndicator: "\\QLogin\\E"
+    # The testPath configuration is used to confirm scanning as an authenticated user is configured successfully.
+    testPath:
+      # The type is either HEADER or BODY and informs the success or fail regex of what part of the response to match against.
+      type: HEADER
+      # A path to validate that authentication was successful. This path should be only accessible to authenticated users.
+      path: /api/user/profile
+      # Fail criteria regex pattern.
+      # A successful match indicates that the response from the path specified was not successful
+      fail: ".*302.*Location.*/login.*"
+
+# -- Help Section --
+  # Docs: https://docs.stackhawk.com/
+  # Contact Support: support@stackhawk.com
+
