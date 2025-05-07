@@ -122,7 +122,6 @@
     "netmask": "2.0.2",
     "proxy-agent": "4.0.1",
     "protobufjs": "7.1.1",
-    "superagent": "^10.0.0",
     "trim-newlines": "4.0.2",
     "tunnel-agent": "0.6.0",
     "yargs-parser": "20.2.7"
