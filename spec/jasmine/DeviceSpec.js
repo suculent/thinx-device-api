@@ -235,7 +235,7 @@ describe("Device", function () {
 
   it("(09) should be able to register second device for transfer", function (done) {
     device.register(
-      JRS3,
+      JRS4,
       apikey,
       res,
       function (_r, success, response) {
@@ -247,7 +247,7 @@ describe("Device", function () {
 
   it("(10) should NOT be able to register another device for different owner with this owner's apikey", function (done) {
     device.register(
-      JRS4,
+      JRS3,
       apikey,
       res,
       function (_r, success, response) {

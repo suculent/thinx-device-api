@@ -111,7 +111,7 @@ describe("RSA Keys (JWT)", function () {
             .set('Authorization', jwt)
             .send()
             .end((err, res) => {
-                expect(res.status).to.equal(200);
+                expect(res.status).to.equal(400);
                 expect(res.text).to.be.a('string');
                 expect(res.text).to.equal('{"success":false,"response":"invalid_query"}');
                 done();
