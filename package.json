@@ -44,7 +44,7 @@
     "connect-timeout": "^1.9.0",
     "cookie-parser": "^1.4.7",
     "crypto-js": "^4.2.0",
-    "dateformat": "^4.6.3",
+    "dateformat": "^4.6.3", // pinned to <5 for compatibility
     "express": "^5.1.0",
     "express-rate-limit": "^7.1.4",
     "express-session": "^1.18.1",
