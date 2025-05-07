@@ -2,7 +2,7 @@
 
 ## HISTORY
 
-19/12/2092 1.9.2578
+19/12/2092 1.9.2696
 
 » Dependency security updates
 » Updated Google OAuth2 implementation
