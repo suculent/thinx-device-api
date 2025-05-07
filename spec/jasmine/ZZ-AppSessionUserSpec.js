@@ -618,8 +618,8 @@ describe("User Routes", function () {
       .set('Authorization', jwt)
       .end((_err, res) => {
         console.log("🚸 [chai] GET /api/user/logs/build/:id (jwt) response:", res.text, " status:", res.status);
-        //let j = JSON.parse(res.text);
-        //real_build_id = j.response[0]._id;
+        let j = JSON.parse(res.text);
+        real_build_id = j.response.build_id;
         expect(res.status).to.equal(200); // returns build fetch failed...
         //expect(res.text).to.be.a('string');
         done();
