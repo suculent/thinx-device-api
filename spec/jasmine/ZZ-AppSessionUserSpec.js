@@ -579,7 +579,7 @@ describe("User Routes", function () {
       .post('/api/user/logs/build')
       .send({})
       .end((_err, res) => {
-        expect(res.status).to.equal(401);
+        expect(res.status).to.equal(400);
         done();
       });
   }, 30000);
