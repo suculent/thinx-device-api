@@ -185,6 +185,7 @@ describe("Meshes (JWT)", function () {
             .post('/api/mesh/list')
             .set('Authorization', jwt)
             .end((err, res) => {
+                console.log("🚸 [chai] POST /api/mesh/list (jwt, valid) response:", res.text);
                 expect(res.status).to.equal(200);
                 expect(res.text).to.equal('{"success":true,"response":[{"mesh_id":"device-mesh-id","alias":"device-mesh-alias"}]}');
                 done();
