@@ -591,7 +591,7 @@ describe("User Routes", function () {
       .send({})
       .end((_err, res) => {
         console.log("🚸 [chai] POST /api/user/logs/build (jwt) response:", res.text, " status:", res.status);
-        expect(res.status).to.equal(200);
+        expect(res.status).to.equal(400); // invalid body should return 400
         //expect(res.text).to.be.a('string');
         done();
       });
