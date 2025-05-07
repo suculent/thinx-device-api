@@ -124,7 +124,7 @@ describe("ENV Vars (JWT)", function () {
       .end((err, res) => {
         expect(res.status).to.equal(400);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"response":"no_names_given"}');
+        expect(res.text).to.equal('{"success":false,"response":"missing_body"}');
         done();
       });
   }, 30000);
@@ -137,7 +137,7 @@ describe("ENV Vars (JWT)", function () {
       .end((err, res) => {
         expect(res.status).to.equal(400);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"response":"missing_key"}');
+        expect(res.text).to.equal('{"success":false,"response":"missing_body"}');
         done();
       });
   }, 30000);
