@@ -400,7 +400,7 @@ module.exports = class THiNX extends EventEmitter {
 
             try {
               wss = new WebSocket.Server({ server: server });
-              console.log("[info] WSS server started:", {server});
+              console.log("[info] WSS server started...");
             } catch (e) {
               console.log("[warning] Cannot init WSS server...");
               return;
@@ -409,8 +409,6 @@ module.exports = class THiNX extends EventEmitter {
             const socketMap = new Map();
 
             server.on('upgrade', function (request, socket, head) {
-
-              console.log(`ℹ️ [info] WSS upgrade requested witgh ${request}`);
 
               let owner = request.url.replace(/\//g, "");
 
