@@ -21,7 +21,7 @@ jobs:
           docker-context: base
           image: thinxcloud/base
           dockerfile: ./base/Dockerfile
-          extra_build_args: '--build-arg REVISION=$(git describe --abbrev=0)''
+          extra_build_args: '--build-arg REVISION=$(git describe --abbrev=0)'
           tag: latest
       - docker/push:
           digest-path: /tmp/digest.txt
