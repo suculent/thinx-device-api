@@ -36,6 +36,26 @@ jobs:
           version: previous
       - checkout
       - run:
+          name: "Check Required Environment Variables"
+          command: |
+            required_vars=(
+              API_BASEURL API_HOSTNAME APP_HOSTNAME ROLLBAR_ACCESS_TOKEN 
+              LANDING_HOSTNAME GOOGLE_ANALYTICS_ID CRISP_WEBSITE_ID ENTERPRISE 
+              ENVIRONMENT VUE_APP_CRISP_WEBSITE_ID VUE_APP_API_HOSTNAME 
+              VUE_APP_ROLLBAR_ACCESS_TOKEN VUE_APP_LANDING_HOSTNAME 
+              VUE_APP_GOOGLE_ANALYTICS_ID VUE_APP_GOOGLE_MAPS_APIKEY 
+              VUE_APP_CONSOLE_HOSTNAME
+            )
+
+            for var in "${required_vars[@]}"; do
+              if [ -z "${!var}" ]; then
+                echo "Environment variable $var is missing or empty."
+                exit 1
+              fi
+            done
+
+            echo "All required environment variables are present."
+      - run:
           name: Fetch all dependencies (esp. console)
           command: |
             git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
