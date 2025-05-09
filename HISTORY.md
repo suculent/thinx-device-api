@@ -2,7 +2,12 @@
 
 ## HISTORY
 
-7/5/2025 1.9.2705
+9/5/2025 1.9.2718
+
+» fixed audit log (when too long)
+» fixed wss by improving Traefik configuration
+
+7/5/2025 1.9.2700
 
 » Dependency security updates
 » Updated Google OAuth2 implementation
