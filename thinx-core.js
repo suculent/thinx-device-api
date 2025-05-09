@@ -268,9 +268,9 @@ module.exports = class THiNX extends EventEmitter {
               secret: session_config.secret,
               cookie: {
                 maxAge: 3600000,
-                // can be false in case of local development or testing; mitigated by using Traefik router unwrapping HTTPS so the cookie travels securely where possible
+                // deepcode ignore WebCookieSecureDisabledExplicitly: not secure because HTTPS unwrapping happens outside this app
                 secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
-                httpOnly: false, // TEMPORARY ONLY!
+                httpOnly: true,
                 domain: short_domain
               },
               store: sessionStore,
@@ -383,10 +383,10 @@ module.exports = class THiNX extends EventEmitter {
             wsapp.use(session({ /* lgtm [js/clear-text-cookie] */
               secret: session_config.secret,
               store: sessionStore,
-              // deepcode ignore WebCookieSecureDisabledExplicitly: <please specify a reason of ignoring this>
+              // deepcode ignore WebCookieSecureDisabledExplicitly: not secure because HTTPS unwrapping happens outside this app
               cookie: {
                 expires: hour,
-                secure: false,
+                secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
                 httpOnly: true,
                 domain: short_domain
               },

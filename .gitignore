@@ -85,3 +85,4 @@ cov-int/
 
 chronograf/
 influx/
+settings.json

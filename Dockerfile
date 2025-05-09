@@ -75,7 +75,7 @@ WORKDIR /opt/thinx/thinx-device-api
 COPY package.json ./
 
 RUN npm install -g npm@10.2.3 \
- && npm install --only-prod .
+ && npm install --omit=dev .
 
 # THiNX Web & Device API (HTTP)
 EXPOSE 7442
