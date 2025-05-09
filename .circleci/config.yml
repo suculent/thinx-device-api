@@ -371,15 +371,15 @@ workflows:
                 - thinx-staging
                 - main
       
-      - build-console-classic:
-          context:
-            - thinx-docker-repo
-            - console
-          filters:
-            branches:
-              only:
-                - thinx-staging
-                - main
+      # - build-console-classic:
+      #     context:
+      #       - thinx-docker-repo
+      #       - console
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-staging
+      #           - main
 
       - build-vue-console:
           context:
