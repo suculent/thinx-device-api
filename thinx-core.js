@@ -536,7 +536,9 @@ module.exports = class THiNX extends EventEmitter {
               });
 
               function heartbeat() {
-                console.log(`pong ${this.clientId}`);
+                if (typeof(this.clientId) !== "undefined") {
+                  console.log(`pong client ${this.clientId}`);
+                }
                 this.isAlive = true;
               }
 
