@@ -32,8 +32,7 @@ jobs:
   build-vue-console:
     executor: docker/docker
     steps:
-      - setup_remote_docker:
-          version: previous
+      - setup_remote_docker
       - checkout
       - run:
           name: "Check Required Environment Variables"
@@ -41,7 +40,7 @@ jobs:
             required_vars=(
               API_BASEURL API_HOSTNAME APP_HOSTNAME ROLLBAR_ACCESS_TOKEN 
               LANDING_HOSTNAME GOOGLE_ANALYTICS_ID CRISP_WEBSITE_ID ENTERPRISE 
-              ENVIRONMENT VUE_APP_CRISP_WEBSITE_ID VUE_APP_API_HOSTNAME 
+              ENVIRONMENT VUE_APP_API_HOSTNAME GOOGLE_MAPS_APIKEY
               VUE_APP_ROLLBAR_ACCESS_TOKEN VUE_APP_LANDING_HOSTNAME 
               WEB_HOSTNAME
             )
@@ -83,7 +82,7 @@ jobs:
             --build-arg VUE_APP_LANDING_HOSTNAME=${VUE_APP_LANDING_HOSTNAME} \
             --build-arg VUE_APP_GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} \
             --build-arg VUE_APP_GOOGLE_MAPS_APIKEY=${GOOGLE_MAPS_APIKEY} \
-            --build-arg VUE_APP_CONSOLE_HOSTNAME=${WEB_HOSTNAME}
+            --build-arg VUE_APP_CONSOLE_HOSTNAME=${WEB_HOSTNAME} \
           tag: 'vue'
       - docker/push:
           digest-path: /tmp/digest.txt
