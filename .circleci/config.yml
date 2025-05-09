@@ -1,7 +1,7 @@
 version: 2.1
 orbs:
   node: circleci/node@6.3.0
-  docker: circleci/docker@2.7.1
+  docker: circleci/docker@2.0.3 # pinned or the buildx build with fail with multiline build args
   slack: circleci/slack@5.0.0
 
 jobs:
