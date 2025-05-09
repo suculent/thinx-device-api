@@ -532,6 +532,11 @@ module.exports = class THiNX extends EventEmitter {
                 }
               });
 
+              function heartbeat() {
+                console.log(`pong ${this.clientId}`)
+                this.isAlive = true;
+              }
+
               ws.on('pong', heartbeat);
 
               ws.on('close', () => {
