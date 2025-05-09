@@ -43,8 +43,7 @@ jobs:
               LANDING_HOSTNAME GOOGLE_ANALYTICS_ID CRISP_WEBSITE_ID ENTERPRISE 
               ENVIRONMENT VUE_APP_CRISP_WEBSITE_ID VUE_APP_API_HOSTNAME 
               VUE_APP_ROLLBAR_ACCESS_TOKEN VUE_APP_LANDING_HOSTNAME 
-              VUE_APP_GOOGLE_ANALYTICS_ID VUE_APP_GOOGLE_MAPS_APIKEY 
-              VUE_APP_CONSOLE_HOSTNAME
+              WEB_HOSTNAME
             )
 
             for var in "${required_vars[@]}"; do
@@ -80,8 +79,8 @@ jobs:
             --build-arg VERSION_CODE=$(echo $CIRCLE_SHA1 | cut -c -7) \
             --build-arg VUE_APP_CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} \
             --build-arg VUE_APP_API_HOSTNAME=${VUE_APP_API_HOSTNAME} \
-            --build-arg VUE_APP_ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} \
-            --build-arg VUE_APP_LANDING_HOSTNAME=${LANDING_HOSTNAME} \
+            --build-arg VUE_APP_ROLLBAR_ACCESS_TOKEN=${VUE_APP_ROLLBAR_ACCESS_TOKEN} \
+            --build-arg VUE_APP_LANDING_HOSTNAME=${VUE_APP_LANDING_HOSTNAME} \
             --build-arg VUE_APP_GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} \
             --build-arg VUE_APP_GOOGLE_MAPS_APIKEY=${GOOGLE_MAPS_APIKEY} \
             --build-arg VUE_APP_CONSOLE_HOSTNAME=${WEB_HOSTNAME}
@@ -335,19 +334,6 @@ jobs:
         path: ./coverage
         destination: jest-coverage
 
-  sysdig:
-    executor: docker/docker
-    steps:
-      - setup_remote_docker:
-          version: previous
-      - checkout
-      - docker/check
-      - run:
-          name: Install Sysdig Scanner
-          command: |
-            curl -LO "https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/$(curl -L -s https://download.sysdig.com/scanning/sysdig-cli-scanner/latest_version.txt)/linux/amd64/sysdig-cli-scanner"
-            chmod +x ./sysdig-cli-scanner
-            SECURE_API_TOKEN=${SECURE_API_TOKEN} ./sysdig-cli-scanner --apiurl https://eu1.app.sysdig.com docker://thinxcloud/console --policy DefaultPolicy
 #
 # WORKFLOWS
 #
@@ -391,6 +377,7 @@ workflows:
 
       - build-vue-console:
           context:
+            - dockerhub
             - thinx-docker-repo
             - console
           filters:
