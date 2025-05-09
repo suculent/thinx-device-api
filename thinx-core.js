@@ -270,7 +270,7 @@ module.exports = class THiNX extends EventEmitter {
                 maxAge: 3600000,
                 // deepcode ignore WebCookieSecureDisabledExplicitly: not secure because HTTPS unwrapping happens outside this app
                 secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
-                httpOnly: true,
+                httpOnly: false, // temporarily disabled due to websocket debugging
                 domain: short_domain
               },
               store: sessionStore,
@@ -400,6 +400,7 @@ module.exports = class THiNX extends EventEmitter {
 
             try {
               wss = new WebSocket.Server({ server: server });
+              console.log("[info] WSS server started:", {server});
             } catch (e) {
               console.log("[warning] Cannot init WSS server...");
               return;
@@ -408,6 +409,8 @@ module.exports = class THiNX extends EventEmitter {
             const socketMap = new Map();
 
             server.on('upgrade', function (request, socket, head) {
+
+              console.log(`ℹ️ [info] WSS upgrade requested witgh ${request}`);
 
               let owner = request.url.replace(/\//g, "");
 
@@ -533,7 +536,7 @@ module.exports = class THiNX extends EventEmitter {
               });
 
               function heartbeat() {
-                console.log(`pong ${this.clientId}`)
+                console.log(`pong ${this.clientId}`);
                 this.isAlive = true;
               }
 
