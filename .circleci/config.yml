@@ -328,22 +328,22 @@ workflows:
 
     jobs:
 
-      # - test:
-      #     context:
-      #         - dockerhub
-      #         - thinx-docker-repo
-      #         - thinx-test
-      #         - sonarcloud
-      #     #requires:
-      #     #  - build-base
-      #     filters:
-      #       branches:
-      #         only:
-      #           - base
-      #           - thinx-unit
-      #           - thinx-class
-      #           - thinx-staging
-      #           - main
+      - test:
+          context:
+              - dockerhub
+              - thinx-docker-repo
+              - thinx-test
+              - sonarcloud
+          #requires:
+          #  - build-base
+          filters:
+            branches:
+              only:
+                - base
+                - thinx-unit
+                - thinx-class
+                - thinx-staging
+                - main
       
       # - build-console-classic:
       #     context:
@@ -355,35 +355,35 @@ workflows:
       #           - thinx-staging
       #           - main
 
-      - build-vue-console:
+      # - build-vue-console:
+      #     context:
+      #       - dockerhub
+      #       - thinx-docker-repo
+      #       - console
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-console
+      #           - thinx-staging
+      #           - main
+
+      - build-base:
           context:
             - dockerhub
-            - thinx-docker-repo
-            - console
           filters:
             branches:
               only:
-                - thinx-console
+                - base
+
+      - build-api-cloud:
+          context:
+            - dockerhub
+            - SonarCloud
+            - thinx-slack
+          requires:
+            - test
+          filters:
+            branches:
+              only:
                 - thinx-staging
                 - main
-
-      # - build-base:
-      #     context:
-      #       - dockerhub
-      #     filters:
-      #       branches:
-      #         only:
-      #           - base
-
-      # - build-api-cloud:
-      #     context:
-      #       - dockerhub
-      #       - SonarCloud
-      #       - thinx-slack
-      #     requires:
-      #       - test
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-staging
-      #           - main
