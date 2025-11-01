@@ -2,6 +2,10 @@
 
 ## HISTORY
 
+1/11/2025 1.9.2739
+
+» updated to Node v25
+
 9/5/2025 1.9.2718
 
 » fixed audit log (when too long)
