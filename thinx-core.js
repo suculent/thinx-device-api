@@ -49,13 +49,10 @@ module.exports = class THiNX extends EventEmitter {
     // extract into app ->>>>> anything with app...
 
     const app = express();
-
-    this.app = app;
-
-    app.disable('x-powered-by');
-
     const helmet = require('helmet');
     app.use(helmet.frameguard());
+    app.disable('x-powered-by');
+    this.app = app;
 
     const pki = require('node-forge').pki;
     const fs = require("fs-extra");
