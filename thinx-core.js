@@ -51,6 +51,7 @@ module.exports = class THiNX extends EventEmitter {
     const app = express();
     const helmet = require('helmet');
     app.use(helmet.frameguard());
+    // app.use(helmet()); TODO: test if this does not break something
     app.disable('x-powered-by');
     this.app = app;
 
