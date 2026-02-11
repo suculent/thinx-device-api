@@ -10,7 +10,7 @@ chai.use(chaiHttp);
 
 let thx;
 
-describe("Devices", function () {
+describe("Router Devices", function () {
 
   beforeAll((done) => {
     console.log(`🚸 [chai] >>> running Devices spec`);
