@@ -22,7 +22,7 @@ let mock_json_template = {
     "THINX_PLATFORM": "%%THINX_PLATFORM%%"
   };
 
-describe("API Key", function() {
+describe("JSON2H API Key", function() {
 
   beforeAll(() => {
     console.log(`🚸 [chai] >>> running JSON2H Key spec`);
