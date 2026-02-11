@@ -1,3 +1,7 @@
+# Runtime configs
+traefik/
+traefik.yml
+
 # Binaries generated in container
 # devsec
 # embedded_signature.h
