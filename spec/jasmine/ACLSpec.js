@@ -63,7 +63,7 @@ describe("ACL Manager", function () {
     });
   });
 
-  it("should be able load ACL file", function (done) {
+  it("should be able load ACL file and commit changes", function (done) {
     var acl = new ACL(redis, "baecb3124695efa1672b7e8d62e5b89e44713968f45eae6faa52066e87795a78");
     acl.path = input_test_file;
     acl.load(() => {

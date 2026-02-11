@@ -66,7 +66,7 @@ describe("Router Devices", function () {
       });
   }, 30000);
 
-  it("POST /api/device/attach", function (done) {
+  it("POST /api/device/attach (noauth, invalid)", function (done) {
     console.log("🚸 [chai] POST /api/device/attach (invalid)");
     chai.request(thx.app)
       .post('/api/device/attach')
@@ -270,7 +270,7 @@ describe("Devices (JWT)", function () {
       });
   }, 30000);
 
-  it("POST /api/device/attach", function (done) {
+  it("POST /api/device/attach (jwt, dynamic udid)", function (done) {
     console.log("🚸 [chai] POST /api/device/attach (JWT)");
     agent
       .post('/api/device/attach')
@@ -284,7 +284,7 @@ describe("Devices (JWT)", function () {
       });
   }, 30000);
 
-  it("POST /api/device/attach", function (done) {
+  it("POST /api/device/attach (jwt, registered udid)", function (done) {
     console.log("🚸 [chai] POST /api/device/attach (JWT) 2");
     agent
       .post('/api/device/attach')
@@ -298,7 +298,7 @@ describe("Devices (JWT)", function () {
       });
   }, 30000);
 
-  it("POST /api/device/detach", function (done) {
+  it("POST /api/device/detach (jwt, dynamic udid)", function (done) {
     console.log("🚸 [chai] POST /api/device/detach  (JWT)");
     agent
       .post('/api/device/detach')
@@ -312,7 +312,7 @@ describe("Devices (JWT)", function () {
       });
   }, 30000);
 
-  it("POST /api/device/detach", function (done) {
+  it("POST /api/device/detach (jwt, registered udid)", function (done) {
     console.log("🚸 [chai] POST /api/device/detach  (JWT) 2");
     agent
       .post('/api/device/detach')
@@ -343,7 +343,7 @@ describe("Devices (JWT)", function () {
       });
   }, 30000);
 
-  it("POST /api/device/mesh/attach", function (done) {
+  it("POST /api/device/mesh/attach (jwt, fixed mesh id)", function (done) {
     console.log("🚸 [chai] POST /api/device/mesh/attach (JWT)");
     agent
       .post('/api/device/mesh/attach')
@@ -357,7 +357,7 @@ describe("Devices (JWT)", function () {
       });
   }, 30000);
 
-  it("POST /api/device/mesh/attach", function (done) {
+  it("POST /api/device/mesh/attach (jwt, JRS5 udid)", function (done) {
     console.log("🚸 [chai] POST /api/device/mesh/attach (JWT) 2");
     agent
       .post('/api/device/mesh/attach')
@@ -371,7 +371,7 @@ describe("Devices (JWT)", function () {
       });
   }, 30000);
 
-  it("POST /api/device/mesh/attach", function (done) {
+  it("POST /api/device/mesh/attach (jwt, missing udid)", function (done) {
     console.log("🚸 [chai] POST /api/device/mesh/attach (JWT) 3");
     agent
       .post('/api/device/mesh/attach')
@@ -385,7 +385,7 @@ describe("Devices (JWT)", function () {
       });
   }, 30000);
 
-  it("POST /api/device/mesh/attach", function (done) {
+  it("POST /api/device/mesh/attach (jwt, dynamic udid)", function (done) {
     console.log("🚸 [chai] POST /api/device/mesh/attach (JWT) 4");
     agent
       .post('/api/device/mesh/attach')
@@ -399,7 +399,7 @@ describe("Devices (JWT)", function () {
       });
   }, 30000);
 
-  it("POST /api/device/mesh/detach", function (done) {
+  it("POST /api/device/mesh/detach (missing udid)", function (done) {
     console.log("🚸 [chai] POST /api/device/mesh/detach (noudid)");
     chai.request(thx.app)
       .post('/api/device/mesh/detach')
@@ -413,7 +413,7 @@ describe("Devices (JWT)", function () {
   }, 30000);
 
   // POST /api/device/mesh/detach
-  it("POST /api/device/mesh/detach", function (done) {
+  it("POST /api/device/mesh/detach (jwt, dynamic udid)", function (done) {
     console.log("🚸 [chai] POST /api/device/mesh/detach (JWT)");
     agent
       .post('/api/device/mesh/detach')
@@ -427,7 +427,7 @@ describe("Devices (JWT)", function () {
       });
   }, 30000);
 
-  it("POST /api/device/mesh/detach", function (done) {
+  it("POST /api/device/mesh/detach (jwt, JRS5 udid)", function (done) {
     console.log("🚸 [chai] POST /api/device/mesh/detach (JWT) 2");
     agent
       .post('/api/device/mesh/detach')
@@ -441,7 +441,7 @@ describe("Devices (JWT)", function () {
       });
   }, 30000);
 
-  it("POST /api/device/data", function (done) {
+  it("POST /api/device/data (jwt, owner lookup)", function (done) {
     console.log("🚸 [chai] POST /api/device/data (JWT)");
     agent
       .post('/api/device/data')
@@ -455,7 +455,7 @@ describe("Devices (JWT)", function () {
       });
   }, 30000);
 
-  it("POST /api/device/data", function (done) {
+  it("POST /api/device/data (jwt, JRS5 udid)", function (done) {
     console.log("🚸 [chai] POST /api/device/data (JWT) 2");
     agent
       .post('/api/device/data')
@@ -469,7 +469,7 @@ describe("Devices (JWT)", function () {
       });
   }, 30000);
 
-  it("POST /api/device/revoke", function (done) {
+  it("POST /api/device/revoke (jwt, owner lookup)", function (done) {
     console.log("🚸 [chai] POST /api/device/revoke (JWT)");
     agent
       .post('/api/device/revoke')
@@ -488,7 +488,7 @@ describe("Devices (JWT)", function () {
   //
 
   // push device configuration over MQTT
-  it("POST /api/device/push", function (done) {
+  it("POST /api/device/push (jwt, missing target)", function (done) {
     console.log("🚸 [chai] POST /api/device/push (JWT+udid)");
     agent
       .post('/api/device/push')
@@ -503,7 +503,7 @@ describe("Devices (JWT)", function () {
       });
   }, 30000);
 
-  it("POST /api/device/push", function (done) {
+  it("POST /api/device/push (jwt, single udid)", function (done) {
     console.log("🚸 [chai] POST /api/device/push (JWT+udid)");
     agent
       .post('/api/device/push')
@@ -518,7 +518,7 @@ describe("Devices (JWT)", function () {
       });
   }, 30000);
 
-  it("POST /api/device/push", function (done) {
+  it("POST /api/device/push (jwt, udids array)", function (done) {
     console.log("🚸 [chai] POST /api/device/push (JWT+udid)");
     agent
       .post('/api/device/push')
@@ -533,7 +533,7 @@ describe("Devices (JWT)", function () {
       });
   }, 30000);
 
-  it("POST /api/device/revoke", function (done) {
+  it("POST /api/device/revoke (jwt, JRS5 udid)", function (done) {
     console.log("🚸 [chai] POST /api/device/revoke (JWT) 2");
     agent
       .post('/api/device/revoke')
@@ -641,7 +641,7 @@ describe("Devices (JWT)", function () {
   }, 30000);
 
   // DELETE /api/v2/device
-  it("DELETE /api/v2/device (JWT)", function (done) {
+  it("DELETE /api/v2/device (jwt, invalid)", function (done) {
     console.log("🚸 [chai] DELETE /api/v2/device (JWT, invalid)");
     agent
       .delete('/api/v2/device')
@@ -655,7 +655,7 @@ describe("Devices (JWT)", function () {
       });
   }, 30000);
 
-  it("DELETE /api/v2/device (JWT)", function (done) {
+  it("DELETE /api/v2/device (jwt, multi)", function (done) {
     console.log("🚸 [chai] DELETE /api/v2/device (JWT, multi)");
     agent
       .delete('/api/v2/device')

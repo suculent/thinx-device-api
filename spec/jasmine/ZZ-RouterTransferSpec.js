@@ -235,7 +235,7 @@ describe("Transfer (JWT)", function () {
             });
     }, 30000);
 
-    it("POST /api/v2/transfer/decline (jwt, invalid)", function (done) {
+    it("POST /api/v2/transfer/decline (jwt, missing transfer_id)", function (done) {
         chai.request(thx.app)
             .post('/api/v2/transfer/decline')
             .set('Authorization', jwt)
@@ -247,7 +247,7 @@ describe("Transfer (JWT)", function () {
             });
     }, 30000);
 
-    it("POST /api/v2/transfer/decline (jwt, invalid)", function (done) {
+    it("POST /api/v2/transfer/decline (jwt, missing owner)", function (done) {
         chai.request(thx.app)
             .post('/api/v2/transfer/decline')
             .set('Authorization', jwt)

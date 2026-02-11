@@ -53,7 +53,7 @@ describe("Git", function () {
         expect(success === false);
     });
 
-    it("should be able to fetch first repo for dynamic owner", function () {
+    it("should be able to fetch first repo for dynamic owner (esp8266-ino)", function () {
         let git = new Git();
         let success = git.fetch(
             envi.dynamic.owner, // owner
@@ -63,7 +63,7 @@ describe("Git", function () {
         expect(success === true);
     });
 
-    it("should be able to fetch first repo for dynamic owner", function () {
+    it("should be able to fetch second repo for dynamic owner (esp8266-pio)", function () {
         let git = new Git();
         let success = git.fetch(
             envi.dynamic.owner, // owner

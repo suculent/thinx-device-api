@@ -36,7 +36,7 @@ describe("Notifier", function () {
     expect(obj.text).to.contain('left undeployed');
   });
 
-  it("should be able to create notification object for dry-run build", function() {
+  it("should be able to create notification object for unknown build status", function() {
     let newStatus = "UNKNOWN";
     let obj = not.notificationObject(newStatus, buildEnvelope);
     expect(obj.text).to.contain('has failed');

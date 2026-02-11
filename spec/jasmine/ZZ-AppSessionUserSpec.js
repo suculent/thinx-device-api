@@ -695,7 +695,7 @@ describe("User Routes", function () {
   //
 
   // [error] websocket Error: listen EADDRINUSE: address already in use 0.0.0.0:7442
-  it("POST /api/user/chat", function (done) {
+  it("POST /api/user/chat (unauthorized)", function (done) {
     chai.request(thx.app)
       .post('/api/user/chat')
       .send({})
@@ -706,7 +706,7 @@ describe("User Routes", function () {
       });
   }, 30000);
 
-  it("POST /api/user/chat", function (done) {
+  it("POST /api/user/chat (jwt)", function (done) {
     chai.request(thx.app)
       .post('/api/user/chat')
       .set('Authorization', jwt)

@@ -42,7 +42,7 @@ describe("Sanitka", function () {
     expect(result).to.equal(null);
   });
 
-  it("should fail safely on undefined token", function () {
+  it("should fail safely on explicit undefined token", function () {
     let input = undefined;
     var result = sanitka.pushToken(input);
     expect(result).to.equal(null);
@@ -60,7 +60,7 @@ describe("Sanitka", function () {
     expect(result).to.equal(null);
   });
 
-  it("should fail safely on undefined token", function () {
+  it("should fail safely on implicit undefined token", function () {
     let input;
     var result = sanitka.pushToken(input);
     expect(result).to.equal(null);

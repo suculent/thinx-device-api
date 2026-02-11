@@ -66,7 +66,7 @@ describe("Meshes (noauth)", function () {
             });
     }, 30000);
 
-    it("POST /api/mesh/create (noauth, invalid)", function (done) {
+    it("POST /api/mesh/create (noauth, empty body)", function (done) {
         chai.request(thx.app)
             .post('/api/mesh/create')
             .send({})
@@ -76,7 +76,7 @@ describe("Meshes (noauth)", function () {
             });
     }, 30000);
 
-    it("POST /api/mesh/create (noauth, invalid)", function (done) {
+    it("POST /api/mesh/create (noauth, owner only)", function (done) {
         chai.request(thx.app)
             .post('/api/mesh/create')
             .send({ owner_id: envi.dynamic.owner })
@@ -192,7 +192,7 @@ describe("Meshes (JWT)", function () {
             });
     }, 30000);
 
-    it("POST /api/mesh/create (jwt, semi-valid)", function (done) {
+    it("POST /api/mesh/create (jwt, alias only)", function (done) {
         agent
             .post('/api/mesh/create')
             .set('Authorization', jwt)
@@ -206,7 +206,7 @@ describe("Meshes (JWT)", function () {
             });
     }, 30000);
 
-    it("POST /api/mesh/create (jwt, semi-valid)", function (done) {
+    it("POST /api/mesh/create (jwt, missing mesh_id)", function (done) {
         agent
             .post('/api/mesh/create')
             .set('Authorization', jwt)
@@ -267,7 +267,7 @@ describe("Meshes (JWT)", function () {
             });
     }, 30000);
 
-    it("POST /api/mesh/delete (jwt, invalid)", function (done) {
+    it("POST /api/mesh/delete (jwt, malformed meshid)", function (done) {
         agent
             .post('/api/mesh/delete')
             .set('Authorization', jwt)
@@ -292,7 +292,7 @@ describe("Meshes (JWT)", function () {
             });
     }, 30000);
 
-    it("POST /api/mesh/delete (jwt, invalid)", function (done) {
+    it("POST /api/mesh/delete (jwt, wrong owner key)", function (done) {
         let ro = {
             mesh_ids: [mesh_id],
             owner_id: envi.dynamic.owner
