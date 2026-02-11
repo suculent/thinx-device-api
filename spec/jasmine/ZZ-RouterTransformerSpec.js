@@ -100,7 +100,7 @@ describe("Transformer (JWT)", function () {
       });
   }, 30000);
 
-  it("POST /api/device/edit", function (done) {
+  it("Transformer POST /api/device/edit no UDID", function (done) {
     agent
       .post('/api/device/edit')
       .set('Authorization', jwt)
@@ -113,7 +113,7 @@ describe("Transformer (JWT)", function () {
       });
   }, 30000);
 
-  it("POST /api/device/edit", function (done) {
+  it("Transformer POST /api/device/edit JRS7", function (done) {
     agent
       .post('/api/device/edit')
       .set('Authorization', jwt)

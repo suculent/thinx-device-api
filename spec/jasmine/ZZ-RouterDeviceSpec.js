@@ -55,7 +55,7 @@ describe("Router Devices", function () {
       });
   }, 30000);
 
-  it("POST /api/device/edit", function (done) {
+  it("Router POST /api/device/edit (alias)", function (done) {
     console.log("🚸 [chai] POST /api/device/edit");
     chai.request(thx.app)
       .post('/api/device/edit')
@@ -256,7 +256,7 @@ describe("Devices (JWT)", function () {
       });
   }, 30000);
 
-  it("POST /api/device/edit", function (done) {
+  it("Router POST /api/device/edit (JWT)", function (done) {
     console.log("🚸 [chai] POST /api/device/edit (JWT)");
     agent
       .post('/api/device/edit')
