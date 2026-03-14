@@ -248,6 +248,7 @@ jobs:
         name: Mock self-signed CA and SSL certificates
         command: |
           cd spec/mnt/data/ssl
+          apk add --no-cache bash ca-certificates openssl
           ./_generate-ca-root-csr-and-sign-cert.sh
           cp ./testRoot.crt /usr/local/share/ca-certificates
           update-ca-certificates
