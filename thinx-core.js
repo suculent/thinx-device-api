@@ -85,7 +85,6 @@ module.exports = class THiNX extends EventEmitter {
 
     const Globals = require("./lib/thinx/globals.js"); // static only!
     const Sanitka = require("./lib/thinx/sanitka.js"); let sanitka = new Sanitka();
-    const sha256 = require("sha256");
 
     // App
     const express = require("express");
@@ -98,57 +97,6 @@ module.exports = class THiNX extends EventEmitter {
     app.use(helmet());
     app.disable('x-powered-by');
     this.app = app;
-
-    const ensureTestSessionUser = (callback) => {
-      if (process.env.ENVIRONMENT !== "test") {
-        callback();
-        return;
-      }
-
-      const testEnvi = require("./spec/_envi.json");
-      const dynamicUser = testEnvi.dynamic;
-      const dynamicUserBody = {
-        first_name: dynamicUser.first_name,
-        last_name: dynamicUser.last_name,
-        email: dynamicUser.email,
-        username: dynamicUser.username
-      };
-      const passwordHash = sha256(Globals.prefix() + dynamicUser.username);
-
-      const ensurePassword = () => {
-        app.owner.apply_update(dynamicUser.owner, "password", passwordHash, () => {
-          callback();
-        });
-      };
-
-      app.owner.profile(dynamicUser.owner, (success) => {
-        if (success) {
-          ensurePassword();
-          return;
-        }
-
-        app.owner.create(dynamicUserBody, true, {}, (_res, createSuccess, response) => {
-          if (createSuccess && typeof (response) === "string" && response.length === 64) {
-            app.owner.set_password({
-              password: dynamicUser.username,
-              rpassword: dynamicUser.username,
-              activation: response
-            }, () => {
-              callback();
-            });
-            return;
-          }
-
-          if (response === "email_already_exists" || response === "username_already_exists") {
-            ensurePassword();
-            return;
-          }
-
-          console.log(`⚠️ [warning] Failed to prepare dynamic test user: ${response}`);
-          callback();
-        });
-      });
-    };
 
     const pki = require('node-forge').pki;
     const fs = require("fs-extra");
@@ -746,9 +694,7 @@ module.exports = class THiNX extends EventEmitter {
               }
             });
 
-            ensureTestSessionUser(() => {
-              finishInit();
-            });
+            finishInit();
 
           })); // DB
         }));
