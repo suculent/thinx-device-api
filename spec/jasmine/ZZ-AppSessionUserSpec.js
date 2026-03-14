@@ -242,7 +242,6 @@ describe("User Routes", function () {
   }, 30000);
 
   it("POST /api/user/password/set", function (done) {
-    console.log("🚸 [chai] POST /api/user/password/set request");
     chai.request(thx.app)
       .post('/api/user/password/set')
       .send({})
@@ -255,7 +254,6 @@ describe("User Routes", function () {
   }, 30000);
 
   it("POST /api/user/password/set (2)", function (done) {
-    console.log("🚸 [chai] POST /api/user/password/set (2) request");
     chai.request(thx.app)
       .post('/api/user/password/set')
       .send({ password: "A", rpassword: "B" })
@@ -268,7 +266,6 @@ describe("User Routes", function () {
   }, 30000);
 
   it("POST /api/user/password/set (3)", function (done) {
-    console.log("🚸 [chai] POST /api/user/password/set (3) request");
     chai.request(thx.app)
       .post('/api/user/password/set')
       .send({ password: "dynamic", rpassword: "dynamic", reset_key: reset_key })
@@ -423,7 +420,6 @@ describe("User Routes", function () {
 
   // there is no login here, so JWT for this is missing
   it("POST /api/gdpr/revoke", function (done) {
-    console.log("🚸 [chai] POST /api/gdpr/revoke (jwt, invalid) request");
     chai.request(thx.app)
       .post('/api/gdpr/revoke')
       .set('Authorization', jwt)
@@ -440,7 +436,6 @@ describe("User Routes", function () {
 
   // there is no login here, so JWT for this should be missing
   it("DELETE /api/v2/gdpr", function (done) {
-    console.log("🚸 [chai] DELETE /api/v2/gdpr (jwt, invalid) request");
     chai.request(thx.app)
       .delete('/api/v2/gdpr')
       .set('Authorization', jwt)
@@ -666,7 +661,6 @@ describe("User Routes", function () {
   }, 30000);
 
   it("GET /api/user/stats (jwt)", function (done) {
-    console.log("🚸 [chai] GET /api/user/stats (jwt)");
     agent
       .get('/api/user/stats')
       .set('Authorization', jwt)
@@ -679,7 +673,6 @@ describe("User Routes", function () {
   }, 30000);
 
   it("GET /api/v2/stats (jwt)", function (done) {
-    console.log("🚸 [chai] GET /api/v2/stats (jwt)");
     agent
       .get('/api/user/stats')
       .set('Authorization', jwt)

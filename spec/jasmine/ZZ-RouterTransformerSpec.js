@@ -205,7 +205,6 @@ describe("Transformer (JWT)", function () {
 
         let udid = r.response[0].udid; // or JRS7.udid
 
-        console.log("Running transformer with device", udid);
 
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');

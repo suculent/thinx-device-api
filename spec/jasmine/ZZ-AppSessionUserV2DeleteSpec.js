@@ -112,7 +112,6 @@ describe("User Routes V2", function () {
 
   // has no response, maybe reset_key is already used...
   it("POST /api/v2/password/set", function (done) {
-    console.log("🚸 [chai] V2 POST /api/v2/password/set (3)");
     chai.request(thx.app)
       .post('/api/v2/password/set')
       .send({ password: "dynamic2", rpassword: "dynamic2", reset_key: reset_key })
@@ -220,7 +219,6 @@ describe("User Routes V2", function () {
 
   // there is no login here, so JWT for this should be missing
   it("DELETE /api/v2/gdpr (valid)", function (done) {
-    console.log("🚸 [chai] DELETE /api/v2/gdpr (jwt, valid) request");
     chai.request(thx.app)
       .delete('/api/v2/gdpr')
       .set('Authorization', jwt)
@@ -247,7 +245,6 @@ describe("User Routes V2", function () {
 
   /* done by the GDPR revocation, would need other user */
   xit("DELETE /api/v2/user", function (done) {
-    console.log("🚸 [chai] V2 DELETE /api/v2/user");
     chai.request(thx.app)
       .delete('/api/v2/user')
       .set('Authorization', jwt)

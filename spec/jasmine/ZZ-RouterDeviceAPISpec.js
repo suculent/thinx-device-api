@@ -157,7 +157,6 @@ describe("Device + API (JWT+Key)", function () {
                     })
                     .end((err, res) => {
                         //  {"success":true,"api_key":"9b7bd4f4eacf63d8453b32dbe982eea1fb8bbc4fc8e3bcccf2fc998f96138629","hash":"0a920b2e99a917a04d7961a28b49d05524d10cd8bdc2356c026cfc1c280ca22c"}
-                        console.log("🚸 [chai] POST /api/user/apikey (authenticated), response...");
                         expect(res.status).to.equal(200);
                         let j = JSON.parse(res.text);
                         expect(j.success).to.equal(true);

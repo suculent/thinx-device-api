@@ -120,7 +120,6 @@ describe("RSA Keys (JWT)", function () {
     }, 30000);
 
     it("POST /api/user/rsakey/revoke (valid)", function (done) {
-        console.log("🚸 [chai] POST /api/user/rsakey/revoke (valid)");
         chai.request(thx.app)
             .post('/api/user/rsakey/revoke')
             .set('Authorization', jwt)
