@@ -16,7 +16,7 @@
     "snyk": "snyk test",
     "snyk-protect": "snyk-protect",
     "jasmine": "nyc jasmine",
-    "test": "mkdir -p coverage; nyc jasmine; nyc report --reporter=text-lcov > coverage/lcov.info; [ -n \"$COVERALLS_REPO_TOKEN\" ] && coveralls < coverage/lcov.info || true",
+    "test": "mkdir -p coverage; jasmine; [ -n \"$COVERALLS_REPO_TOKEN\" ] && nyc report --reporter=text-lcov > coverage/lcov.info && coveralls < coverage/lcov.info || true",
     "dev": "source ./.env && echo $ENVIRONMENT && nyc jasmine; nyc report --reporter=text-lcov > coverage/lcov.info; coveralls < coverage/lcov.info",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./",
     "coverage": "npm run mocha",
