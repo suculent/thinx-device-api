@@ -1,6 +1,6 @@
 /* Router integration test only; does not have to cover full unit functionality. */
 
-const THiNX = require("../../thinx-core.js");
+const bootstrap = require('../helpers/bootstrap');
 
 const chai = require('chai');
 const expect = require('chai').expect;
@@ -29,17 +29,14 @@ describe("User Routes", function () {
   let reset_key = null;
 
   beforeAll((done) => {
-    thx = new THiNX();
-    thx.init(() => {
-      agent = chai.request.agent(thx.app);
-      console.log(`🚸 [chai] >>> running User Routes spec`);
-      done();
-    });
+    thx = bootstrap.thx;
+    agent = chai.request.agent(thx.app);
+    console.log(`🚸 [chai] >>> running User Routes spec`);
+    done();
   });
 
   afterAll((done) => {
     agent.close();
-    if (thx && thx.server) thx.server.close();
     console.log(`🚸 [chai] <<< completed User Routes spec`);
     done();
   });

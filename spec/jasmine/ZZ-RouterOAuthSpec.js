@@ -1,6 +1,6 @@
 /* Router integration test only; does not have to cover full unit functionality. */
 
-const THiNX = require("../../thinx-core.js");
+const bootstrap = require('../helpers/bootstrap');
 
 let chai = require('chai');
 var expect = require('chai').expect;
@@ -13,14 +13,11 @@ describe("OAuth", function () {
 
     beforeAll((done) => {
         console.log(`🚸 [chai] >>> running OAuth spec`);
-        thx = new THiNX();
-        thx.init(() => {
-            done();
-        });
+        thx = bootstrap.thx;
+        done();
     });
-    
+
     afterAll((done) => {
-        if (thx && thx.server) thx.server.close();
         console.log(`🚸 [chai] <<< completed OAuth spec`);
         done();
     });

@@ -1,6 +1,6 @@
 /* Router integration test only; does not have to cover full unit functionality. */
 
-const THiNX = require("../../thinx-core.js");
+const bootstrap = require('../helpers/bootstrap');
 
 let chai = require('chai');
 var expect = require('chai').expect;
@@ -13,19 +13,21 @@ let thx;
 
 describe("Actionable Notification (noauth)", function () {
 
+    beforeAll((done) => {
+        thx = bootstrap.thx;
+        done();
+    });
+
     it("POST /api/device/notification", function (done) {
-        thx = new THiNX();
-        thx.init(() => {
-            chai.request(thx.app)
-                .post('/api/device/notification')
-                .send({})
-                .end((err, res) => {
-                    expect(res.status).to.equal(401);
-                    done();
-                });
-        });
+        chai.request(thx.app)
+            .post('/api/device/notification')
+            .send({})
+            .end((err, res) => {
+                expect(res.status).to.equal(401);
+                done();
+            });
     }, 30000);
-    
+
 });
 
 describe("Actionable Notification (JWT)", function () {
@@ -49,7 +51,6 @@ describe("Actionable Notification (JWT)", function () {
   
     afterAll((done) => {
         agent.close();
-        if (thx && thx.server) thx.server.close();
         done();
     });
 

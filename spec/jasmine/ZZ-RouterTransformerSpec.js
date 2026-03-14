@@ -1,6 +1,6 @@
 /* Router integration test only; does not have to cover full unit functionality. */
 
-const THiNX = require("../../thinx-core.js");
+const bootstrap = require('../helpers/bootstrap');
 
 let chai = require('chai');
 var expect = require('chai').expect;
@@ -22,24 +22,21 @@ describe("Transformer (JWT)", function () {
 
   beforeAll((done) => {
     console.log(`🚸 [chai] >>> running Transformer (JWT) spec`);
-    thx = new THiNX();
-    thx.init(() => {
-      agent = chai.request.agent(thx.app);
-      agent
-        .post('/api/login')
-        .send({ username: 'dynamic', password: 'dynamic', remember: false })
-        .then(function (res) {
-          let body = JSON.parse(res.text);
-          jwt = 'Bearer ' + body.access_token;
-          done();
-        })
-        .catch((e) => { console.log(e); });
-    });
+    thx = bootstrap.thx;
+    agent = chai.request.agent(thx.app);
+    agent
+      .post('/api/login')
+      .send({ username: 'dynamic', password: 'dynamic', remember: false })
+      .then(function (res) {
+        let body = JSON.parse(res.text);
+        jwt = 'Bearer ' + body.access_token;
+        done();
+      })
+      .catch((e) => { console.log(e); });
   });
 
   afterAll((done) => {
     agent.close();
-    if (thx && thx.server) thx.server.close();
     console.log(`🚸 [chai] <<< completed Transformer (JWT) spec`);
     done();
   });

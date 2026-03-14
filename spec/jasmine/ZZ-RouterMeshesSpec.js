@@ -1,6 +1,6 @@
 /* Router integration test only; does not have to cover full unit functionality. */
 
-const THiNX = require("../../thinx-core.js");
+const bootstrap = require('../helpers/bootstrap');
 
 let chai = require('chai');
 let chaiHttp = require('chai-http');
@@ -15,11 +15,8 @@ describe("Meshes (noauth)", function () {
 
     beforeAll((done) => {
         console.log(`🚸 [chai] >>> running Meshes (noauth) spec`);
-        thx = new THiNX();
-        thx.init(() => {
-            console.log("🚸 [chai] Initialized Meshes (noauth)...");
-            done();
-        });
+        thx = bootstrap.thx;
+        done();
     });
 
     afterAll(() => {
@@ -161,7 +158,6 @@ describe("Meshes (JWT)", function () {
   
     afterAll((done) => {
         agent.close();
-        if (thx && thx.server) thx.server.close();
         console.log(`🚸 [chai] <<< completed Meshes (JWT) spec`);
         done();
     });
