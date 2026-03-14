@@ -137,7 +137,7 @@ jobs:
 
     working_directory: ~/suculent/thinx-device-api
 
-    parallelism: 2
+    parallelism: 1
 
     shell: /bin/sh --login
 
