@@ -388,9 +388,12 @@ module.exports = class THiNX extends EventEmitter {
              */
 
 
-            // Legacy HTTP support for old devices without HTTPS proxy
-            let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function () {
-              console.log(`ℹ️ [info] HTTP API started on port ${app_config.port}`);
+            // Legacy HTTP support for old devices without HTTPS proxy.
+            // In tests, use an ephemeral port so repeated suite bootstrap does not collide on 7442.
+            const listenPort = process.env.ENVIRONMENT === "test" ? 0 : app_config.port;
+            this.server = http.createServer(app).listen(listenPort, "0.0.0.0", function () {
+              const actualPort = this.address() && this.address().port ? this.address().port : listenPort;
+              console.log(`ℹ️ [info] HTTP API started on port ${actualPort}`);
               let end_timestamp = new Date().getTime() - start_timestamp;
               let seconds = Math.ceil(end_timestamp / 1000);
               console.log("ℹ️ [profiler] ⏱ Startup phase took:", seconds, "seconds");

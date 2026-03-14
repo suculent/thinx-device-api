@@ -173,6 +173,7 @@ describe("Device + API (JWT+Key)", function () {
 
     afterAll((done) => {
         agent.close();
+        if (thx && thx.server) thx.server.close();
         console.log(`🚸 [chai] <<< completed Device + API (JWT+Key) spec`);
         done();
     });

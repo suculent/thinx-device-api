@@ -99,8 +99,11 @@ describe("Transfer (JWT)", function () {
             });
     });
 
-    afterAll(() => {
+    afterAll((done) => {
+        agent.close();
+        if (thx && thx.server) thx.server.close();
         console.log(`🚸 [chai] <<< completed Transfer (JWT) spec`);
+        done();
     });
 
     // save trid for accept and decline, create valid version of this; needs at least two owners and one device

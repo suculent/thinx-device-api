@@ -39,7 +39,8 @@ describe("Transformer (JWT)", function () {
 
   afterAll((done) => {
     agent.close();
-    console.log(`🚸 [chai] <<< completed Transfer (JWT) spec`);
+    if (thx && thx.server) thx.server.close();
+    console.log(`🚸 [chai] <<< completed Transformer (JWT) spec`);
     done();
   });
 

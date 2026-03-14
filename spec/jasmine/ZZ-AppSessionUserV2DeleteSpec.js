@@ -37,6 +37,7 @@ describe("User Routes V2", function () {
 
   afterAll((done) => {
     agent.close();
+    if (thx && thx.server) thx.server.close();
     console.log(`🚸 [chai] <<< completed User Routes V2 spec`);
     done();
   });

@@ -19,8 +19,10 @@ describe("OAuth", function () {
         });
     });
     
-    afterAll(() => {
+    afterAll((done) => {
+        if (thx && thx.server) thx.server.close();
         console.log(`🚸 [chai] <<< completed OAuth spec`);
+        done();
     });
 
     // Slack OAuth Integration

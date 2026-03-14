@@ -99,6 +99,7 @@ describe("ENV Vars (JWT)", function () {
 
   afterAll((done) => {
     agent.close();
+    if (thx && thx.server) thx.server.close();
     console.log(`🚸 [chai] <<< completed ENV Vars (JWT) spec`);
     done();
   });
