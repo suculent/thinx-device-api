@@ -439,7 +439,7 @@ module.exports = class THiNX extends EventEmitter {
 
             const socketMap = new Map();
 
-            server.on('upgrade', function (request, socket, head) {
+            this.server.on('upgrade', function (request, socket, head) {
 
               let socketKey = request.url.replace(/^\/+/, "");
 
