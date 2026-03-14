@@ -102,6 +102,7 @@ jobs:
     steps:
       - setup_remote_docker:
           version: previous
+          docker_layer_caching: true
       - checkout
       - run:
           name: Clean package-lock
