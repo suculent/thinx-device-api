@@ -30,58 +30,15 @@ module.exports = class THiNX extends EventEmitter {
 
     this.app = null;
     this.clazz = this;
-    this.server = null;
-    this._initState = "idle";
-    this._initCallbacks = [];
   }
 
   init(init_complete_callback) {
-
-    if (typeof (init_complete_callback) === "function") {
-      if (this._initState === "ready") {
-        process.nextTick(init_complete_callback);
-        return;
-      }
-
-      this._initCallbacks.push(init_complete_callback);
-    }
-
-    if (this._initState === "initializing") {
-      return;
-    }
-
-    this._initState = "initializing";
 
     /*
      * This THiNX Device Management API module is responsible for responding to devices and build requests.
      */
 
     let start_timestamp = new Date().getTime();
-    let initFinished = false;
-
-    const once = (label, callback) => {
-      let called = false;
-      return (...args) => {
-        if (called) {
-          console.log(`⚠️ [warning] Duplicate ${label} callback ignored.`);
-          return;
-        }
-        called = true;
-        callback(...args);
-      };
-    };
-
-    const finishInit = once("THiNX.init completion", () => {
-      this._initState = "ready";
-      const callbacks = this._initCallbacks.splice(0);
-      callbacks.forEach((callback) => {
-        try {
-          callback();
-        } catch (callbackError) {
-          console.log("☣️ [error] THiNX init callback error:", callbackError);
-        }
-      });
-    });
 
     const Globals = require("./lib/thinx/globals.js"); // static only!
     const Sanitka = require("./lib/thinx/sanitka.js"); let sanitka = new Sanitka();
@@ -138,9 +95,13 @@ module.exports = class THiNX extends EventEmitter {
     var app_config = Globals.app_config();
     var rollbar = Globals.rollbar(); // lgtm [js/unused-local-variable]
 
-    const initializeWithRedis = (redisClient) => {
+    // Initialize Redis
+    app.redis_client = redis.createClient(Globals.redis_options());
 
-      app.redis_client = redisClient;
+    app.redis_client.on('error', err => console.log('Redis Client Error', err));
+
+    // Section that requires initialized Redis
+    app.redis_client.connect().then(() => {
 
       app.owner = new Owner(app.redis_client);
       app.device = new Device(app.redis_client); // TODO: Share in Devices, Messenger and Transfer, can be mocked
@@ -158,7 +119,7 @@ module.exports = class THiNX extends EventEmitter {
       }
 
       app.login = new JWTLogin(app.redis_client);
-      app.login.init(once("JWT login init", () => {
+      app.login.init(() => {
         console.log("ℹ️ [info] JWT Login Secret Init Complete. Login is now possible.");
 
 
@@ -182,24 +143,15 @@ module.exports = class THiNX extends EventEmitter {
         app.messenger = new Messenger(app.redis_client, serviceMQPassword).getInstance(app.redis_client, serviceMQPassword); // take singleton to prevent double initialization
 
         // Section that requires initialized Slack
-        app.messenger.initSlack(once("Messenger initSlack", () => {
+        app.messenger.initSlack(() => {
 
           console.log("ℹ️ [info] Initialized Slack bot...");
 
           const Database = require("./lib/thinx/database");
           var db = new Database();
-          db.init(once("Database init", (/* db_err, dbs */) => {
+          db.init((/* db_err, dbs */) => {
 
-            if (initFinished) {
-              console.log("⚠️ [warning] Duplicate THiNX bootstrap phase ignored.");
-              return;
-            }
-
-            initFinished = true;
-
-            if (process.env.ENVIRONMENT !== "test") {
-              InfluxConnector.createDB('stats');
-            }
+            InfluxConnector.createDB('stats');
 
             //
             // Log aggregator (needs DB)
@@ -207,21 +159,17 @@ module.exports = class THiNX extends EventEmitter {
 
             const Stats = require("./lib/thinx/statistics");
             let stats = new Stats();
-            if (process.env.ENVIRONMENT !== "test") {
-              let now = new Date();
-              stats.get_all_owners();
-              let then = new Date();
-              console.log(`ℹ️ [info] [core] cached all owners in ${then - now} seconds.`);
-            }
+            let now = new Date();
+            stats.get_all_owners();
+            let then = new Date();
+            console.log(`ℹ️ [info] [core] cached all owners in ${then - now} seconds.`);
 
             //if (process.env.ENVIRONMENT !== "test") stats.aggregate();
 
-            if (process.env.ENVIRONMENT !== "test") {
-              setInterval(() => {
-                stats.aggregate();
-                console.log("✅ [info] Aggregation jobs completed.");
-              }, 86400 * 1000 / 2);
-            }
+            setInterval(() => {
+              stats.aggregate();
+              console.log("✅ [info] Aggregation jobs completed.");
+            }, 86400 * 1000 / 2);
 
             //
             // Shared Configuration
@@ -317,9 +265,7 @@ module.exports = class THiNX extends EventEmitter {
             //if (process.env.ENVIRONMENT !== "test") {
             queue = new Queue(app.redis_client, builder, app, null /* ssl_options */, this.clazz);
             //constructor(redis, builder, di_app, ssl_options, opt_thx)
-            if (process.env.ENVIRONMENT !== "test") {
-              queue.cron(); // starts cron job for build queue from webhooks
-            }
+            queue.cron(); // starts cron job for build queue from webhooks
 
             watcher = new Repository(app.messenger, app.redis_client, queue);
 
@@ -537,20 +483,18 @@ module.exports = class THiNX extends EventEmitter {
               });
             });
 
-            if (process.env.ENVIRONMENT !== "test") {
-              setInterval(function ping() {
-                if (typeof (wss.clients) !== "undefined") {
-                  wss.clients.forEach(function each(ws) {
-                    if (ws.isAlive === false) {
-                      console.log("🔨 [debug] Terminating websocket!");
-                      ws.terminate();
-                    } else {
-                      ws.ping();
-                    }
-                  });
-                }
-              }, 30000);
-            }
+            setInterval(function ping() {
+              if (typeof (wss.clients) !== "undefined") {
+                wss.clients.forEach(function each(ws) {
+                  if (ws.isAlive === false) {
+                    console.log("🔨 [debug] Terminating websocket!");
+                    ws.terminate();
+                  } else {
+                    ws.ping();
+                  }
+                });
+              }
+            }, 30000);
 
             //
             // Behaviour of new WSS connection (authenticate and add router paths that require websocket)
@@ -700,51 +644,11 @@ module.exports = class THiNX extends EventEmitter {
               }
             });
 
-            finishInit();
+            init_complete_callback();
 
-          })); // DB
-        }));
-      }));
-    };
-
-    const useSharedTestRedisClient = process.env.ENVIRONMENT === "test";
-
-    if (useSharedTestRedisClient) {
-      if (THiNX._sharedTestRedisClient && THiNX._sharedTestRedisClient.isOpen) {
-        initializeWithRedis(THiNX._sharedTestRedisClient);
-      } else {
-        if (!THiNX._sharedTestRedisClientPromise) {
-          THiNX._sharedTestRedisClient = redis.createClient(Globals.redis_options());
-          THiNX._sharedTestRedisClient.on('error', err => console.log('Redis Client Error', err));
-          THiNX._sharedTestRedisClientPromise = THiNX._sharedTestRedisClient.connect()
-            .then(() => THiNX._sharedTestRedisClient)
-            .catch((err) => {
-              THiNX._sharedTestRedisClient = null;
-              THiNX._sharedTestRedisClientPromise = null;
-              throw err;
-            });
-        }
-
-        THiNX._sharedTestRedisClientPromise
-          .then((redisClient) => {
-            THiNX._sharedTestRedisClient = redisClient;
-            initializeWithRedis(redisClient);
-          })
-          .catch((err) => {
-            console.log("☣️ [error] Redis Client connect failure", err);
-          });
-      }
-    } else {
-      // Initialize Redis
-      app.redis_client = redis.createClient(Globals.redis_options());
-      app.redis_client.on('error', err => console.log('Redis Client Error', err));
-
-      // Section that requires initialized Redis
-      app.redis_client.connect().then(() => {
-        initializeWithRedis(app.redis_client);
-      }).catch((err) => {
-        console.log("☣️ [error] Redis Client connect failure", err);
+          }); // DB
+        });
       });
-    }
+    });
   }
 };
