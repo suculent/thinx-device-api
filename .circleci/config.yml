@@ -147,29 +147,31 @@ jobs:
 
     steps:
 
+    - restore_cache:
+        keys:
+          - v1-docker-compose-v2.4.1
+
     - run:
         name: Install Docker Compose
-        environment:
-          COMPOSE_VERSION: '1.29.2'
         command: |
           DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
           mkdir -p $DOCKER_CONFIG/cli-plugins
-          curl -SL https://github.com/docker/compose/releases/download/v2.4.1/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose
-          chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+          if [ ! -f "$DOCKER_CONFIG/cli-plugins/docker-compose" ]; then
+            curl -SL https://github.com/docker/compose/releases/download/v2.4.1/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose
+            chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+          fi
           docker compose version
+
+    - save_cache:
+        paths:
+          - ~/.docker/cli-plugins/docker-compose
+        key: v1-docker-compose-v2.4.1
 
     - setup_remote_docker:
           version: previous
+          docker_layer_caching: true
 
     - checkout
-
-    # Restore the dependency cache
-    - restore_cache:
-        keys:
-          # This branch if available
-          - v1-dependencies-{{ checksum "package.json" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
 
     - run:
         name: Fetch all submodules and tests
@@ -185,11 +187,6 @@ jobs:
         command: |
           mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
           mkdir -p $CIRCLE_TEST_REPORTS/reports
-
-    - save_cache:
-        paths:
-          - node_modules
-        key: v1-dependencies-{{ checksum "package.json" }}
 
     - run:
         name: Init filesystem
@@ -251,7 +248,6 @@ jobs:
         name: Mock self-signed CA and SSL certificates
         command: |
           cd spec/mnt/data/ssl
-          apk add --no-cache bash ca-certificates openssl
           ./_generate-ca-root-csr-and-sign-cert.sh
           cp ./testRoot.crt /usr/local/share/ca-certificates
           update-ca-certificates

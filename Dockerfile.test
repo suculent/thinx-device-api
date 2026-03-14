@@ -89,6 +89,14 @@ COPY package.json ./
 RUN npm install -g npm@10.2.3 \
     && npm install .
 
+# Install test globals before COPY . . so these layers are cached by Docker
+# Layer Caching and only rebuilt when package.json changes, not every commit
+RUN npm install -g nyc mocha jasmine mocha-lcov-reporter coveralls
+
+# Download test reporter before COPY . . for the same reason
+RUN curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter \
+    && chmod +x ./cc-test-reporter
+
 VOLUME /var/lib/docker
 
 # THiNX Web & Device API (HTTP)
@@ -97,7 +105,7 @@ EXPOSE 7442
 # THiNX Device API (HTTPS)
 EXPOSE 7443
 
-# GitLab Webbook
+# GitLab Webbook
 EXPOSE 9002
 
 # Copy app source code
@@ -107,15 +115,6 @@ RUN mkdir -p ./.nyc_output
 
 # only for test mocking (may not work, will need structure with mock data in repo)
 COPY ./spec/mnt /mnt
-
-# download test reporter as a static binary
-RUN curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-RUN chmod +x ./cc-test-reporter
-
-# Test modules
-RUN npm install -g nyc mocha jasmine mocha-lcov-reporter coveralls
-
-# TODO: Implement Snyk Container Scanning here in addition to DockerHub manual scans...
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
