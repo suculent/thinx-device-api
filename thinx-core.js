@@ -30,15 +30,58 @@ module.exports = class THiNX extends EventEmitter {
 
     this.app = null;
     this.clazz = this;
+    this.server = null;
+    this._initState = "idle";
+    this._initCallbacks = [];
   }
 
   init(init_complete_callback) {
+
+    if (typeof (init_complete_callback) === "function") {
+      if (this._initState === "ready") {
+        process.nextTick(init_complete_callback);
+        return;
+      }
+
+      this._initCallbacks.push(init_complete_callback);
+    }
+
+    if (this._initState === "initializing") {
+      return;
+    }
+
+    this._initState = "initializing";
 
     /*
      * This THiNX Device Management API module is responsible for responding to devices and build requests.
      */
 
     let start_timestamp = new Date().getTime();
+    let initFinished = false;
+
+    const once = (label, callback) => {
+      let called = false;
+      return (...args) => {
+        if (called) {
+          console.log(`⚠️ [warning] Duplicate ${label} callback ignored.`);
+          return;
+        }
+        called = true;
+        callback(...args);
+      };
+    };
+
+    const finishInit = once("THiNX.init completion", () => {
+      this._initState = "ready";
+      const callbacks = this._initCallbacks.splice(0);
+      callbacks.forEach((callback) => {
+        try {
+          callback();
+        } catch (callbackError) {
+          console.log("☣️ [error] THiNX init callback error:", callbackError);
+        }
+      });
+    });
 
     const Globals = require("./lib/thinx/globals.js"); // static only!
     const Sanitka = require("./lib/thinx/sanitka.js"); let sanitka = new Sanitka();
@@ -119,7 +162,7 @@ module.exports = class THiNX extends EventEmitter {
       }
 
       app.login = new JWTLogin(app.redis_client);
-      app.login.init(() => {
+      app.login.init(once("JWT login init", () => {
         console.log("ℹ️ [info] JWT Login Secret Init Complete. Login is now possible.");
 
 
@@ -143,13 +186,20 @@ module.exports = class THiNX extends EventEmitter {
         app.messenger = new Messenger(app.redis_client, serviceMQPassword).getInstance(app.redis_client, serviceMQPassword); // take singleton to prevent double initialization
 
         // Section that requires initialized Slack
-        app.messenger.initSlack(() => {
+        app.messenger.initSlack(once("Messenger initSlack", () => {
 
           console.log("ℹ️ [info] Initialized Slack bot...");
 
           const Database = require("./lib/thinx/database");
           var db = new Database();
-          db.init((/* db_err, dbs */) => {
+          db.init(once("Database init", (/* db_err, dbs */) => {
+
+            if (initFinished) {
+              console.log("⚠️ [warning] Duplicate THiNX bootstrap phase ignored.");
+              return;
+            }
+
+            initFinished = true;
 
             InfluxConnector.createDB('stats');
 
@@ -644,11 +694,11 @@ module.exports = class THiNX extends EventEmitter {
               }
             });
 
-            init_complete_callback();
+            finishInit();
 
-          }); // DB
-        });
-      });
+          })); // DB
+        }));
+      }));
     });
   }
 };
