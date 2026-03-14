@@ -23,7 +23,7 @@
     "mocha": "mocha spec/jasmine --delay=3000 --exit --timeout=5000; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | node node_modules/coveralls/bin/coveralls.js",
     "version": "npm run npm-auto-version",
     "postpublish": "git push origin --tags",
-    "split-tests": "if [[ $CIRCLE_NODE_INDEX == 1 ]]; then rm -rf ./spec/jasmine/ZZ*.js fi; if [[ $CIRCLE_NODE_INDEX == 2 ]]; then rm -rf ./spec/jasmine/0*.js fi",
+    "split-tests": "if [ \"$CIRCLE_NODE_INDEX\" = \"0\" ]; then rm -f ./spec/jasmine/ZZ*.js; fi; if [ \"$CIRCLE_NODE_INDEX\" = \"1\" ]; then ls ./spec/jasmine/*.js | grep -v 'ZZ' | xargs rm -f; fi",
     "prepare": "npm run snyk-protect"
   },
   "dependencies": {

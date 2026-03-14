@@ -50,9 +50,7 @@ fi
 set -e
 
 if [[ ${ENVIRONMENT} == "test" ]]; then
-  # curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-  # chmod +x ./cc-test-reporter  
-  # ./cc-test-reporter before-build
+  npm run split-tests
   npm run test
 else
   echo "[thinx-entrypoint] Starting in production mode..."
