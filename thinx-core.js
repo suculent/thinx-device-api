@@ -197,7 +197,9 @@ module.exports = class THiNX extends EventEmitter {
 
             initFinished = true;
 
-            InfluxConnector.createDB('stats');
+            if (process.env.ENVIRONMENT !== "test") {
+              InfluxConnector.createDB('stats');
+            }
 
             //
             // Log aggregator (needs DB)
@@ -205,10 +207,12 @@ module.exports = class THiNX extends EventEmitter {
 
             const Stats = require("./lib/thinx/statistics");
             let stats = new Stats();
-            let now = new Date();
-            stats.get_all_owners();
-            let then = new Date();
-            console.log(`ℹ️ [info] [core] cached all owners in ${then - now} seconds.`);
+            if (process.env.ENVIRONMENT !== "test") {
+              let now = new Date();
+              stats.get_all_owners();
+              let then = new Date();
+              console.log(`ℹ️ [info] [core] cached all owners in ${then - now} seconds.`);
+            }
 
             //if (process.env.ENVIRONMENT !== "test") stats.aggregate();
 
