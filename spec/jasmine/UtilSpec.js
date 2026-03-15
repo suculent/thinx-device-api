@@ -38,7 +38,7 @@ describe("Util", function () {
             expect(body).to.be.a('string');
             done();
         };
-        res.header = (arg1, arg2) => {
+        res.header = (arg1, _arg2) => {
             expect(arg1).to.equal('Content-Type');
             //expect(arg2).to.equal('text/plain; charset=utf-8');
         };

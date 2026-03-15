@@ -83,7 +83,7 @@ describe("RSA Key", function() {
   });
 
   it("(06) should be able to add RSA Key 2/3", function(done) {
-    rsakey.create(envi.dynamic.owner, (success, response) => {
+    rsakey.create(envi.dynamic.owner, (success, _response) => {
       expect(success).to.equal(true);
       done();
     });
