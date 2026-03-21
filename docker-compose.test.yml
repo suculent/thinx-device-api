@@ -119,6 +119,7 @@ services:
         - 'THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}'
         - 'WORKER_SECRET=${WORKER_SECRET}'
         - 'MAILGUN_API_KEY=${MAILGUN_API_KEY}'
+        - 'GIT_KEY_PASSPHRASE=${GIT_KEY_PASSPHRASE} || thinx'
     environment:
       - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
       - 'COUCHDB_PASS=${COUCHDB_PASS}'
