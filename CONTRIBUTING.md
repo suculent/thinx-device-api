@@ -1,5 +1,39 @@
 # Contributing
 
+## Commit Message Format
+
+All commits must follow the [Conventional Commits](https://www.conventionalcommits.org/) specification. This is enforced via `commitlint` on every commit.
+
+### Format
+
+```
+type(scope): subject
+```
+
+- **type** — one of: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `revert`
+- **scope** — optional, describes the area of change (e.g. `auth`, `mqtt`, `api`)
+- **subject** — short description in present tense, no period at the end
+
+### Examples
+
+```
+feat(auth): add JWT refresh token support
+fix(mqtt): handle reconnect on broker disconnect
+docs: update API endpoint documentation
+chore: add commitlint config to enforce conventional commits
+ci: add nightly build pipeline
+```
+
+### Validation
+
+The `commit-msg` git hook runs automatically. You can also validate manually:
+
+```sh
+npm run lint:commit
+```
+
+---
+
 ## 1. Purpose
 
 A primary goal of THiNX is to be inclusive to the largest number of contributors, with the most varied and diverse backgrounds possible. As such, we are committed to providing a friendly, safe and welcoming environment for all, regardless of gender, sexual orientation, ability, ethnicity, socioeconomic status, and religion (and especially lack thereof).
