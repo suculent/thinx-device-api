@@ -71,9 +71,6 @@ ENV WORKER_SECRET=${WORKER_SECRET}
 ARG NODE_COVERALLS_DEBUG
 ENV NODE_COVERALLS_DEBUG=0
 
-ARG GIT_KEY_PASSPHRASE
-ENV GIT_KEY_PASSPHRASE=${GIT_KEY_PASSPHRASE}
-
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
 
@@ -93,6 +90,9 @@ RUN npm install -g nyc mocha jasmine mocha-lcov-reporter coveralls
 # Download test reporter before COPY . . for the same reason
 RUN curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter \
     && chmod +x ./cc-test-reporter
+
+ARG GIT_KEY_PASSPHRASE
+ENV GIT_KEY_PASSPHRASE=${GIT_KEY_PASSPHRASE}
 
 VOLUME /var/lib/docker
 
