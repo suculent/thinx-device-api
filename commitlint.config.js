@@ -15,6 +15,7 @@ module.exports = {
         'chore',
         'ci',
         'revert',
+        'audit',
       ],
     ],
     'subject-case': [0],

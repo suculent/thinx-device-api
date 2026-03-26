@@ -21,6 +21,7 @@
     "metrics-coverage": "node scripts/metrics-coverage.js",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./",
     "lint:commit": "commitlint --from HEAD~1 --to HEAD --verbose",
+    "setup:hooks": "git config core.hooksPath .githooks",
     "coverage": "npm run mocha",
     "mocha": "mocha spec/jasmine --delay=3000 --exit --timeout=5000; nyc report --reporter=text-lcov > lcov.info && cat lcov.info | node node_modules/coveralls/bin/coveralls.js",
     "version": "npm run npm-auto-version",
