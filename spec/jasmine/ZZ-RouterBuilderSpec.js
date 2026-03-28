@@ -1,6 +1,6 @@
 /* Router integration test only; does not have to cover full unit functionality. */
 
-const THiNX = require("../../thinx-core.js");
+const bootstrap = require('../helpers/bootstrap');
 
 let chai = require('chai');
 var expect = require('chai').expect;
@@ -22,15 +22,9 @@ describe("Builder (noauth)", function () {
 
     beforeAll((done) => {
         console.log(`🚸 [chai] >>> running Builder (noauth) spec`);
-        thx = new THiNX();
-        thx.on('workerReady', () => {
-            console.log("🚸🚸🚸 [spec] [emit] worker ready! 🚸🚸🚸"); // should allow waiting for worker beforeAll
-            done();
-        });
-        thx.init(() => {
-            done();
-        });
-    }, 30000);
+        thx = bootstrap.thx;
+        done();
+    });
 
     // run build manually
     it("POST /api/build", function (done) {

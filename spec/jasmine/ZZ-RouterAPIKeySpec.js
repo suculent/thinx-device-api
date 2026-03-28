@@ -1,6 +1,6 @@
 /* Router integration test only; does not have to cover full unit functionality. */
 
-const THiNX = require("../../thinx-core.js");
+const bootstrap = require('../helpers/bootstrap');
 
 let chai = require('chai');
 var expect = require('chai').expect;
@@ -19,21 +19,19 @@ describe("API Keys (noauth)", function () {
 
     beforeAll((done) => {
         console.log(`🚸 [chai] >>> running API Keys (noauth) spec`);
-        thx = new THiNX();
-        thx.init(() => {
-            agent = chai.request.agent(thx.app);
-            agent
-                .post('/api/login')
-                .send({ username: 'dynamic', password: 'dynamic', remember: false })
-                .catch((e) => { console.log(e); })
-                .then(function (res) {
-                    console.log(`🚸 [chai] beforeAll POST /api/login (valid) response: ${res}`);
-                    expect(res).to.have.cookie('x-thx-core');
-                    let body = JSON.parse(res.text);
-                    jwt = 'Bearer ' + body.access_token;
-                    done();
-                });
-        });
+        thx = bootstrap.thx;
+        agent = chai.request.agent(thx.app);
+        agent
+            .post('/api/login')
+            .send({ username: 'dynamic', password: 'dynamic', remember: false })
+            .catch((e) => { console.log(e); })
+            .then(function (res) {
+                console.log(`🚸 [chai] beforeAll POST /api/login (valid) response: ${res}`);
+                expect(res).to.have.cookie('x-thx-core');
+                let body = JSON.parse(res.text);
+                jwt = 'Bearer ' + body.access_token;
+                done();
+            });
     });
 
 
@@ -84,7 +82,7 @@ describe("API Keys (JWT)", function () {
 
     afterAll((done) => {
         agent.close();
-        console.log(`🚸 [chai] <<< completed API Keys (noauth) spec`);
+        console.log(`🚸 [chai] <<< completed API Keys (JWT) spec`);
         done();
     });
 

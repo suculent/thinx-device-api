@@ -1,6 +1,6 @@
 /* Router integration test only; does not have to cover full unit functionality. */
 
-const THiNX = require("../../thinx-core.js");
+const bootstrap = require('../helpers/bootstrap');
 
 let chai = require('chai');
 var expect = require('chai').expect;
@@ -14,10 +14,8 @@ describe("Router Devices", function () {
 
   beforeAll((done) => {
     console.log(`🚸 [chai] >>> running Devices spec`);
-    thx = new THiNX();
-    thx.init(() => {
-      done();
-    });
+    thx = bootstrap.thx;
+    done();
   });
 
   afterAll(() => {
@@ -25,7 +23,6 @@ describe("Router Devices", function () {
   });
 
   it("GET /api/user/devices (noauth)", function (done) {
-    console.log("🚸 [chai] GET /api/user/devices (noauth)");
     chai.request(thx.app)
       .get('/api/user/devices')
       .end((err, res) => {
@@ -35,7 +32,6 @@ describe("Router Devices", function () {
   }, 30000);
 
   it("GET /api/user/devices (cookie)", function (done) {
-    console.log("🚸 [chai] GET /api/user/devices (cookie)");
     chai.request(thx.app)
       .get('/api/user/devices')
       .set('Cookie', 'thx-session-cookie=something;owner=' + envi.oid)
@@ -46,7 +42,6 @@ describe("Router Devices", function () {
   }, 30000);
 
   it("GET /api/user/device/data/:udid" + envi.oid, function (done) {
-    console.log("🚸 [chai] GET /api/user/device/data/:udid");
     chai.request(thx.app)
       .get('/api/user/device/data/' + envi.oid)
       .end((err, res) => {
@@ -56,7 +51,6 @@ describe("Router Devices", function () {
   }, 30000);
 
   it("Router POST /api/device/edit (alias)", function (done) {
-    console.log("🚸 [chai] POST /api/device/edit");
     chai.request(thx.app)
       .post('/api/device/edit')
       .send({ changes: { alias: "edited-alias" } })
@@ -67,7 +61,6 @@ describe("Router Devices", function () {
   }, 30000);
 
   it("POST /api/device/attach (noauth, invalid)", function (done) {
-    console.log("🚸 [chai] POST /api/device/attach (invalid)");
     chai.request(thx.app)
       .post('/api/device/attach')
       .send({ udid: envi.oid })
@@ -78,7 +71,6 @@ describe("Router Devices", function () {
   }, 30000);
 
   it("POST /api/device/detach", function (done) {
-    console.log("🚸 [chai] POST /api/device/detach (invalid)");
     chai.request(thx.app)
       .post('/api/device/detach')
       .send({ udid: envi.oid })
@@ -89,7 +81,6 @@ describe("Router Devices", function () {
   }, 30000);
 
   it("POST /api/device/mesh/attach", function (done) {
-    console.log("🚸 [chai] POST /api/device/mesh/attach");
     chai.request(thx.app)
       .post('/api/device/mesh/attach')
       .send({ udid: envi.udid })
@@ -102,7 +93,6 @@ describe("Router Devices", function () {
 
   // POST /api/device/mesh/detach
   it("POST /api/device/mesh/detach", function (done) {
-    console.log("🚸 [chai] POST /api/device/mesh/detach");
     chai.request(thx.app)
       .post('/api/device/mesh/detach')
       .send({ udid: envi.udid })
@@ -114,7 +104,6 @@ describe("Router Devices", function () {
   }, 30000);
 
   it("POST /api/device/data", function (done) {
-    console.log("🚸 [chai] POST /api/device/data");
     chai.request(thx.app)
       .post('/api/device/data')
       .send({ udid: envi.oid })
@@ -126,7 +115,6 @@ describe("Router Devices", function () {
   }, 30000);
 
   it("POST /api/device/revoke", function (done) {
-    console.log("🚸 [chai] POST /api/device/revoke");
     chai.request(thx.app)
       .post('/api/device/revoke')
       .send({ udid: envi.oid })
@@ -142,7 +130,6 @@ describe("Router Devices", function () {
 
   // push device configuration over MQTT
   it("POST /api/device/push", function (done) {
-    console.log("🚸 [chai] POST /api/device/push");
     chai.request(thx.app)
       .post('/api/device/push')
       .send({ key: "value" })

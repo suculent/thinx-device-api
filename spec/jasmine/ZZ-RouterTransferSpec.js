@@ -1,6 +1,6 @@
 /* Router integration test only; does not have to cover full unit functionality. */
 
-const THiNX = require("../../thinx-core.js");
+const bootstrap = require('../helpers/bootstrap');
 
 let chai = require('chai');
 var expect = require('chai').expect;
@@ -15,10 +15,8 @@ describe("Device Ownership Transfer (noauth)", function () {
 
     beforeAll((done) => {
         console.log(`🚸 [chai] >>> running Transfer (noauth) spec`);
-        thx = new THiNX();
-        thx.init(() => {
-            done();
-        });
+        thx = bootstrap.thx;
+        done();
     });
 
     afterAll(() => {
@@ -99,8 +97,10 @@ describe("Transfer (JWT)", function () {
             });
     });
 
-    afterAll(() => {
+    afterAll((done) => {
+        agent.close();
         console.log(`🚸 [chai] <<< completed Transfer (JWT) spec`);
+        done();
     });
 
     // save trid for accept and decline, create valid version of this; needs at least two owners and one device

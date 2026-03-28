@@ -1,6 +1,6 @@
 /* Router integration test only; does not have to cover full unit functionality. */
 
-const THiNX = require("../../thinx-core.js");
+const bootstrap = require('../helpers/bootstrap');
 
 let chai = require('chai');
 var expect = require('chai').expect;
@@ -14,10 +14,8 @@ describe("Device API (noauth)", function () {
 
     beforeAll((done) => {
         console.log(`🚸 [chai] >>> running Device API (noauth) spec`);
-        thx = new THiNX();
-        thx.init(() => {
-            done();
-        });
+        thx = bootstrap.thx;
+        done();
     });
 
     it("POST /device/register A", function (done) {
@@ -157,7 +155,6 @@ describe("Device + API (JWT+Key)", function () {
                     })
                     .end((err, res) => {
                         //  {"success":true,"api_key":"9b7bd4f4eacf63d8453b32dbe982eea1fb8bbc4fc8e3bcccf2fc998f96138629","hash":"0a920b2e99a917a04d7961a28b49d05524d10cd8bdc2356c026cfc1c280ca22c"}
-                        console.log("🚸 [chai] POST /api/user/apikey (authenticated), response...");
                         expect(res.status).to.equal(200);
                         let j = JSON.parse(res.text);
                         expect(j.success).to.equal(true);

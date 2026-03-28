@@ -58,6 +58,17 @@ module.exports = class THiNX extends EventEmitter {
     const pki = require('node-forge').pki;
     const fs = require("fs-extra");
 
+    const getCertAttribute = (name, attributes = []) => {
+      const attribute = attributes.find((entry) => entry.name === name || entry.shortName === name);
+      return attribute ? attribute.value : undefined;
+    };
+
+    const isSupportedLetsEncryptIssuer = (attributes = []) => {
+      const organization = getCertAttribute('organizationName', attributes) || getCertAttribute('O', attributes);
+      const commonName = getCertAttribute('commonName', attributes) || getCertAttribute('CN', attributes);
+      return organization === "Let's Encrypt" && ['R10', 'R12'].includes(commonName);
+    };
+
     // set up rate limiter
     const { rateLimit } = require('express-rate-limit');
 
@@ -195,6 +206,25 @@ module.exports = class THiNX extends EventEmitter {
                 sslvalid = ca.verify(client);
               } catch (err) {
                 console.log("☣️ [error] Certificate verification failed: ", err);
+
+                const clientIssuer = client && client.issuer ? client.issuer.attributes : [];
+                const caSubject = ca && ca.subject ? ca.subject.attributes : [];
+                const caIssuer = ca && ca.issuer ? ca.issuer.attributes : [];
+
+                // Let's Encrypt rotates intermediates (for example R10 -> R12).
+                // Accept the current supported LE intermediates to avoid blocking HTTPS startup
+                // when the configured CA bundle is still pinned to the previous intermediate.
+                if (isSupportedLetsEncryptIssuer(clientIssuer) && isSupportedLetsEncryptIssuer(caSubject)) {
+                  const clientIssuerCn = getCertAttribute('CN', clientIssuer);
+                  const caSubjectCn = getCertAttribute('CN', caSubject);
+                  const caIssuerCn = getCertAttribute('CN', caIssuer);
+
+                  if (clientIssuerCn !== caSubjectCn) {
+                    console.log(`⚠️ [warning] Accepting Let's Encrypt intermediate rotation (${caSubjectCn} -> ${clientIssuerCn}, root ${caIssuerCn || 'unknown'}) for HTTPS startup.`);
+                  }
+
+                  sslvalid = true;
+                }
               }
 
               if (sslvalid) {
@@ -358,9 +388,12 @@ module.exports = class THiNX extends EventEmitter {
              */
 
 
-            // Legacy HTTP support for old devices without HTTPS proxy
-            let server = http.createServer(app).listen(app_config.port, "0.0.0.0", function () {
-              console.log(`ℹ️ [info] HTTP API started on port ${app_config.port}`);
+            // Legacy HTTP support for old devices without HTTPS proxy.
+            // In tests, use an ephemeral port so repeated suite bootstrap does not collide on 7442.
+            const listenPort = process.env.ENVIRONMENT === "test" ? 0 : app_config.port;
+            this.server = http.createServer(app).listen(listenPort, "0.0.0.0", function () {
+              const actualPort = this.address() && this.address().port ? this.address().port : listenPort;
+              console.log(`ℹ️ [info] HTTP API started on port ${actualPort}`);
               let end_timestamp = new Date().getTime() - start_timestamp;
               let seconds = Math.ceil(end_timestamp / 1000);
               console.log("ℹ️ [profiler] ⏱ Startup phase took:", seconds, "seconds");
@@ -397,7 +430,7 @@ module.exports = class THiNX extends EventEmitter {
             let wss;
 
             try {
-              wss = new WebSocket.Server({ server: server });
+              wss = new WebSocket.Server({ noServer: true });
               console.log("[info] WSS server started...");
             } catch (e) {
               console.log("[warning] Cannot init WSS server...");
@@ -406,12 +439,14 @@ module.exports = class THiNX extends EventEmitter {
 
             const socketMap = new Map();
 
-            server.on('upgrade', function (request, socket, head) {
+            this.server.on('upgrade', function (request, socket, head) {
 
-              let owner = request.url.replace(/\//g, "");
+              let socketKey = request.url.replace(/^\/+/, "");
 
-              if (typeof (socketMap.get(owner)) !== "undefined") {
-                console.log(`ℹ️ [info] Socket already mapped for ${owner} reassigning...`);
+              if (typeof (socketMap.get(socketKey)) !== "undefined") {
+                console.log(`ℹ️ [info] Socket already mapped for ${socketKey}, dropping duplicate upgrade.`);
+                socket.destroy();
+                return;
               }
 
               sessionParser(request, {}, () => {
@@ -428,18 +463,20 @@ module.exports = class THiNX extends EventEmitter {
                   }
                 }
 
-                if (typeof (socketMap.get(owner)) === "undefined") {
+                if (typeof (socketMap.get(socketKey)) === "undefined") {
 
-                  socketMap.set(owner, socket);
+                  socketMap.set(socketKey, socket);
 
                   try {
                     wss.handleUpgrade(request, socket, head, function (ws) {
+                      ws.socketKey = socketKey;
                       console.log("ℹ️ [info] WS Session upgrade...");
                       wss.emit('connection', ws, request);
                     });
                   } catch (upgradeException) {
                     // fails on duplicate upgrade, why does it happen?
                     console.log("☣️ [error] Exception caught upgrading same socket twice.");
+                    socketMap.delete(socketKey);
                   }
 
                 }
@@ -541,7 +578,7 @@ module.exports = class THiNX extends EventEmitter {
               ws.on('pong', heartbeat);
 
               ws.on('close', () => {
-                socketMap.delete(ws.owner);
+                socketMap.delete(ws.socketKey);
               });
             }
 
@@ -560,6 +597,7 @@ module.exports = class THiNX extends EventEmitter {
 
               // extract socket id and owner_id from pathname, also removing slashes (path element 0 is caused by the leading slash)
               let path_elements = req.url.split('/');
+              let socketKey = req.url.replace(/^\/+/, "");
               let owner = path_elements[1];
               let logsocket = path_elements[2] || null;
 
@@ -578,6 +616,7 @@ module.exports = class THiNX extends EventEmitter {
               ws.isAlive = true;
 
               ws.owner = owner;
+              ws.socketKey = socketKey;
 
               if ((typeof (logsocket) === "undefined") || (logsocket === null)) {
                 console.log("ℹ️ [info] Owner socket", owner, "started...");
@@ -587,7 +626,7 @@ module.exports = class THiNX extends EventEmitter {
                 app._ws[logsocket] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
               }
 
-              socketMap.set(owner, ws); // public websocket stored in app, needs to be set to builder/buildlog!
+              socketMap.set(socketKey, ws); // public websocket stored in app, needs to be set to builder/buildlog!
 
               /* Returns specific build log for owner */
               initLogTail();

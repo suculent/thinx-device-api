@@ -23,6 +23,7 @@ describe("ZZ-AppSession Session Management", function () {
 
   afterAll((done) => {
     agent.close();
+    if (thx && thx.server) thx.server.close();
     console.log(`🚸 [chai] <<< completed AppSession spec`);
     done();
   });

@@ -1,6 +1,6 @@
 /* Router integration test only; does not have to cover full unit functionality. */
 
-const THiNX = require("../../thinx-core.js");
+const bootstrap = require('../helpers/bootstrap');
 
 let chai = require('chai');
 var expect = require('chai').expect;
@@ -12,10 +12,8 @@ let thx;
 describe("RSA Keys (noauth)", function () {
 
     beforeAll((done) => {
-        thx = new THiNX();
-        thx.init(() => {
-            done();
-        });
+        thx = bootstrap.thx;
+        done();
     });
 
     it("GET /api/user/rsakey/create", function (done) {
@@ -119,7 +117,6 @@ describe("RSA Keys (JWT)", function () {
     }, 30000);
 
     it("POST /api/user/rsakey/revoke (valid)", function (done) {
-        console.log("🚸 [chai] POST /api/user/rsakey/revoke (valid)");
         chai.request(thx.app)
             .post('/api/user/rsakey/revoke')
             .set('Authorization', jwt)

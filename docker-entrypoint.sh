@@ -24,9 +24,11 @@ export SQREEN_DISABLE_STARTUP_WARNING=1
 export DOCKER_HOST="tcp://docker:2375"
 export DOCKER_HOST="unix:///var/run/docker.sock"
 
-echo "[thinx-entrypoint] Adding host checking exception for github.com... can fail for the first time."
-echo "140.82.121.3 github.com" >> /etc/hosts
-ssh -tt -o "StrictHostKeyChecking=no" git@github.com
+if [ -f ~/.ssh/id_rsa ]; then
+  echo "[thinx-entrypoint] Adding host checking exception for github.com..."
+  echo "140.82.121.3 github.com" >> /etc/hosts
+  ssh -T -o "StrictHostKeyChecking=no" git@github.com || true
+fi
 
 if [[ ! -z $ROLLBAR_ACCESS_TOKEN ]]; then
   if [[ -z $ROLLBAR_ENVIRONMENT ]]; then
@@ -48,9 +50,7 @@ fi
 set -e
 
 if [[ ${ENVIRONMENT} == "test" ]]; then
-  # curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-  # chmod +x ./cc-test-reporter  
-  # ./cc-test-reporter before-build
+  npm run split-tests
   npm run test
 else
   echo "[thinx-entrypoint] Starting in production mode..."

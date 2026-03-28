@@ -1,7 +1,7 @@
 FROM thinxcloud/base:alpine
 
 LABEL maintainer="Matej Sychra <suculent@me.com>"
-LABEL name="THiNX API" version="1.9.2739"
+LABEL name="THiNX API" version="1.9.2866"
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -67,6 +67,9 @@ ENV WORKER_SECRET=${WORKER_SECRET}
 
 ARG MAILGUN_API_KEY
 ENV MAILGUN_API_KEY=${MAILGUN_API_KEY}
+
+ARG GIT_KEY_PASSPHRASE
+ENV GIT_KEY_PASSPHRASE=${GIT_KEY_PASSPHRASE}
 
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api

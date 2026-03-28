@@ -16,6 +16,7 @@ module.exports = {
         "dot-notation": 0,
         "no-useless-escape": 0,
         "no-undef": 0,
+        "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
         "space-in-parens": 0,
         quotes: 0,
         "key-spacing": 0
