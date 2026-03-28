@@ -356,17 +356,17 @@ workflows:
                 - thinx-staging
                 - main
 
-      # - build-vue-console:
-      #     context:
-      #       - dockerhub
-      #       - thinx-docker-repo
-      #       - console
-      #     filters:
-      #       branches:
-      #         only:
-      #           - thinx-console
-      #           - thinx-staging
-      #           - main
+      - build-vue-console:
+          context:
+            - dockerhub
+            - thinx-docker-repo
+            - console
+          filters:
+            branches:
+              only:
+                - thinx-console
+                - thinx-staging
+                - main
 
       - build-base:
           context:
