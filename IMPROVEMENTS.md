@@ -1,7 +1,7 @@
 # Planned Improvements Backlog
 
 This document tracks prioritized improvement ideas for the `thinx-device-api` Node.js IoT backend.
-Analysis performed on the current codebase (~11K LOC across 62+ library files, 48 Jasmine test specs).
+Analysis performed on the current codebase (~11K LOC across 62+ library files, 55 Jasmine test specs).
 
 ---
 
@@ -77,18 +77,35 @@ Use `util.promisify` for Node core callbacks and wrap CouchDB (`nano`) calls wit
 ### 5. Strengthen Error Handling
 **Effort:** Medium (2–3 days)
 
-There are only **50 `try` blocks** and **73 `catch` blocks** across the entire `lib/thinx/` directory. Many async operations (CouchDB queries, Redis calls, file operations) lack proper error handling, leading to unhandled promise rejections or silent failures.
+There are only **58 `try` blocks** and **81 `catch` blocks** across the entire `lib/thinx/` directory. Many async operations (CouchDB queries, Redis calls, file operations) lack proper error handling, leading to unhandled promise rejections or silent failures. Neither `thinx.js` nor `thinx-core.js` register global process-level error handlers, so unhandled rejections crash or silently disappear.
 
 **Recommendation:**
 - Add a centralized Express error-handling middleware (e.g., in `thinx-core.js`) that catches unhandled errors and returns consistent JSON error responses
-- Add `process.on('unhandledRejection', ...)` and `process.on('uncaughtException', ...)` handlers in entry point
+- Add `process.on('unhandledRejection', ...)` and `process.on('uncaughtException', ...)` handlers in `thinx.js` entry point — wire them to the existing Rollbar integration in `lib/thinx/globals.js`
 - Wrap all external I/O calls in `try/catch` blocks systematically
+
+---
+
+### 6. Resolve Hardcoded RSA Key Passphrase
+**Effort:** Small (half day)
+
+`lib/thinx/rsakey.js:130` contains a hardcoded passphrase `'thinx'` for RSA key encryption with a TODO comment acknowledging the issue:
+```js
+passphrase: 'thinx' // TODO: once we'll have Secure Storage (e.g. Vault), keys can be encrypted...
+```
+
+**Recommendation:**
+- Read the passphrase from an environment variable (e.g., `process.env.RSA_KEY_PASSPHRASE`) with a documented fallback strategy
+- Consider integrating with HashiCorp Vault or AWS Secrets Manager for secret management (already referenced in the TODO)
+- Rotate any keys encrypted with the current hardcoded passphrase after the fix
+
+**Risks if unaddressed:** Anyone with read access to the source code can decrypt private RSA keys stored on disk.
 
 ---
 
 ## Medium Priority
 
-### 6. Reduce Unrealistic 99% Test Coverage Threshold
+### 7. Reduce Unrealistic 99% Test Coverage Threshold
 **Effort:** Small (1 hour)
 
 `package.json` (nyc config) sets coverage thresholds at **99% for lines, statements, functions, and branches** per-file. This is essentially unachievable in practice and causes CI to fail on legitimate code additions.
@@ -115,7 +132,7 @@ There are only **50 `try` blocks** and **73 `catch` blocks** across the entire `
 
 ---
 
-### 7. Enable Stricter ESLint Rules Incrementally
+### 8. Enable Stricter ESLint Rules Incrementally
 **Effort:** Small–Medium (1–2 days)
 
 The current `.eslintrc.js` disables nearly all rules, including critical ones:
@@ -131,7 +148,36 @@ The current `.eslintrc.js` disables nearly all rules, including critical ones:
 
 ---
 
-### 8. Add JSDoc Type Annotations to Public APIs
+### 9. Add OpenAPI/Swagger Specification
+**Effort:** Medium (3–5 days)
+
+The API has no machine-readable specification. There are ~15 router files defining dozens of endpoints with no OpenAPI/Swagger documentation, making it difficult for API consumers to integrate, generate client SDKs, or run automated contract tests.
+
+**Recommendation:**
+- Adopt [`swagger-jsdoc`](https://github.com/Surnet/swagger-jsdoc) with JSDoc annotations on route handlers, or define a central `openapi.yaml`
+- Expose the spec at `GET /api/v2/spec` and optionally host Swagger UI at `/api/docs`
+- Start with the highest-traffic routes: device registration, firmware update, and API key management
+
+**Benefits:**
+- Auto-generated client SDKs in multiple languages
+- Contract testing via tools like Dredd or Prism
+- Self-service documentation for integrators
+
+---
+
+### 10. Per-Endpoint Rate Limiting for Auth Routes
+**Effort:** Small (half day)
+
+`thinx-core.js` applies a single global rate limiter (500 req/min) to all routes, but only in non-test environments. Sensitive authentication endpoints (`/api/login`, `/api/register`, `/api/password`) need significantly tighter limits to prevent brute-force and credential-stuffing attacks.
+
+**Recommendation:**
+- Apply a strict secondary limiter (e.g., 10 req/min) specifically to auth, password-reset, and registration routes before the global limiter
+- Consider `express-slow-down` for a softer degradation approach on login attempts
+- Ensure rate limiting is tested (currently skipped in the test environment)
+
+---
+
+### 11. Add JSDoc Type Annotations to Public APIs
 **Effort:** Medium (3–5 days)
 
 The codebase has **fewer than 60 JSDoc annotations** across all `lib/thinx/` files. Public-facing module methods (especially in `device.js`, `owner.js`, `builder.js`) have no type documentation.
@@ -149,7 +195,7 @@ The codebase has **fewer than 60 JSDoc annotations** across all `lib/thinx/` fil
 
 ## Low Priority
 
-### 9. Eliminate Hardcoded Test Credentials
+### 12. Eliminate Hardcoded Test Credentials
 **Effort:** Small (half day)
 
 `spec/_envi.json` contains hardcoded owner IDs, API keys, session IDs, and email addresses. While these appear to be test fixtures, they establish a pattern that can bleed into actual credential leakage in CI logs or accidental commits.
@@ -161,7 +207,7 @@ The codebase has **fewer than 60 JSDoc annotations** across all `lib/thinx/` fil
 
 ---
 
-### 10. Add Pre-Commit Hooks via Husky
+### 13. Add Pre-Commit Hooks via Husky
 **Effort:** Small (2–4 hours)
 
 There are no pre-commit hooks configured. Developers can commit code that fails linting or tests without any friction point.
@@ -189,6 +235,55 @@ And `package.json`:
 
 ---
 
+### 14. Parallelize Jasmine Test Suite
+**Effort:** Small–Medium (1 day)
+
+`spec/support/jasmine.json` runs all 55 test files sequentially (`"random": false`, `"timeout": 10000`). With many integration-style tests that await I/O (CouchDB, Redis, MQTT), sequential execution significantly inflates total CI run time.
+
+**Recommendation:**
+- Evaluate [`jasmine-parallel`](https://www.npmjs.com/package/jasmine-parallel) or switch to [Jest](https://jestjs.io/) which has native worker-based parallelism
+- Group tests by dependency (unit tests in one worker, integration tests in another) to avoid port conflicts
+- Set `"random": true` to detect hidden test-order dependencies before parallelizing
+
+---
+
+### 15. Pin and Upgrade Docker Base Image
+**Effort:** Small (2–4 hours)
+
+`Dockerfile` uses `FROM thinxcloud/base:alpine` with no version pin. This means the build is non-reproducible and could silently pull a different base in CI or production. Additionally, `docker-compose.yml` uses Compose file format `version: '2.2'` which is deprecated.
+
+**Recommendation:**
+- Pin the base image to a specific digest or tag (e.g., `thinxcloud/base:alpine-1.2.3@sha256:...`)
+- Add a health check for the main API service in `docker-compose.yml` (currently only `couchdb` has one):
+  ```yaml
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:7442/api/v2/status"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+  ```
+- Upgrade `docker-compose.yml` to Compose V2 format (remove the `version:` key)
+
+---
+
+### 16. Resolve TODO/FIXME Debt
+**Effort:** Medium (2–3 days)
+
+There are **17 `TODO`/`FIXME` comments** in `lib/`, several with security or correctness implications:
+
+| File | Issue |
+|---|---|
+| `lib/thinx/notifier.js:29,37,45` | Slack channel `#thinx` hardcoded instead of from config |
+| `lib/thinx/rsakey.js:130` | Hardcoded passphrase (see improvement #6) |
+| `lib/thinx/transfer.js:278` | Transfer code not using promises — may silently fail |
+| `lib/thinx/queue.js:170` | External variable `limit` usage described as "ugly and wrong" |
+| `lib/router.js:109` | `403` should be `401` for unauthenticated requests |
+| `lib/router.slack.js:27` | Slack OAuth code not validated before use |
+
+**Recommendation:** Triage each TODO into a tracked issue or fix it. At minimum, address the security-relevant items (`notifier.js` channel config, `transfer.js` promise conversion, Slack code validation) in one pass.
+
+---
+
 ## Summary Table
 
 | # | Improvement | Priority | Effort | Impact |
@@ -197,9 +292,15 @@ And `package.json`:
 | 2 | Fix command injection in builder.js | High | Small | Security |
 | 3 | Update outdated dependencies | High | Medium | Security/Stability |
 | 4 | Migrate callbacks to async/await | High | Large | Maintainability |
-| 5 | Strengthen error handling | High | Medium | Reliability |
-| 6 | Reduce 99% coverage threshold | Medium | Small | Developer Experience |
-| 7 | Enable stricter ESLint rules | Medium | Medium | Code Quality |
-| 8 | Add JSDoc type annotations | Medium | Medium | Maintainability |
-| 9 | Eliminate hardcoded test credentials | Low | Small | Security hygiene |
-| 10 | Add pre-commit hooks (husky) | Low | Small | Developer Experience |
+| 5 | Strengthen error handling + process handlers | High | Medium | Reliability |
+| 6 | Resolve hardcoded RSA key passphrase | High | Small | Security |
+| 7 | Reduce 99% coverage threshold | Medium | Small | Developer Experience |
+| 8 | Enable stricter ESLint rules | Medium | Medium | Code Quality |
+| 9 | Add OpenAPI/Swagger specification | Medium | Medium | DX/Integrations |
+| 10 | Per-endpoint rate limiting for auth routes | Medium | Small | Security |
+| 11 | Add JSDoc type annotations | Medium | Medium | Maintainability |
+| 12 | Eliminate hardcoded test credentials | Low | Small | Security hygiene |
+| 13 | Add pre-commit hooks (husky) | Low | Small | Developer Experience |
+| 14 | Parallelize Jasmine test suite | Low | Small | Developer Experience |
+| 15 | Pin/upgrade Docker base image + healthcheck | Low | Small | DevOps/Reliability |
+| 16 | Resolve TODO/FIXME debt | Low | Medium | Code Quality |
