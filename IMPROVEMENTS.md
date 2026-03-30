@@ -148,20 +148,11 @@ The current `.eslintrc.js` disables nearly all rules, including critical ones:
 
 ---
 
-### 9. Add OpenAPI/Swagger Specification
-**Effort:** Medium (3–5 days)
+### 9. ~~Add OpenAPI/Swagger Specification~~ ✅ Implemented
 
-The API has no machine-readable specification. There are ~15 router files defining dozens of endpoints with no OpenAPI/Swagger documentation, making it difficult for API consumers to integrate, generate client SDKs, or run automated contract tests.
+**Implemented:** `thinx-api-openapi.yaml` created with 45 endpoints covering all v2 API routes (devices, auth, users, GDPR, mesh, RSA keys, logs, sources, transfer, OAuth, Slack). Served at `GET /api/v2/spec` via `lib/router.js`.
 
-**Recommendation:**
-- Adopt [`swagger-jsdoc`](https://github.com/Surnet/swagger-jsdoc) with JSDoc annotations on route handlers, or define a central `openapi.yaml`
-- Expose the spec at `GET /api/v2/spec` and optionally host Swagger UI at `/api/docs`
-- Start with the highest-traffic routes: device registration, firmware update, and API key management
-
-**Benefits:**
-- Auto-generated client SDKs in multiple languages
-- Contract testing via tools like Dredd or Prism
-- Self-service documentation for integrators
+**Remaining (optional):** Host Swagger UI at `/api/docs` (e.g. via `swagger-ui-express`) for browser-based exploration.
 
 ---
 
@@ -296,7 +287,7 @@ There are **17 `TODO`/`FIXME` comments** in `lib/`, several with security or cor
 | 6 | Resolve hardcoded RSA key passphrase | High | Small | Security |
 | 7 | Reduce 99% coverage threshold | Medium | Small | Developer Experience |
 | 8 | Enable stricter ESLint rules | Medium | Medium | Code Quality |
-| 9 | Add OpenAPI/Swagger specification | Medium | Medium | DX/Integrations |
+| 9 | ~~Add OpenAPI/Swagger specification~~ ✅ | ~~Medium~~ | ~~Medium~~ | Done |
 | 10 | Per-endpoint rate limiting for auth routes | Medium | Small | Security |
 | 11 | Add JSDoc type annotations | Medium | Medium | Maintainability |
 | 12 | Eliminate hardcoded test credentials | Low | Small | Security hygiene |
