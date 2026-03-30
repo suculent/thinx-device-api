@@ -9,8 +9,9 @@ describe("ACL Manager", function () {
   beforeAll(async() => {
     console.log(`🚸 [chai] >>> running ACL spec`);
     // Initialize Redis
-    redis = redis_client.createClient(Globals.redis_options());
-    await redis.connect();
+    const redis_base = redis_client.createClient(Globals.redis_options());
+    await redis_base.connect();
+    redis = redis_base.legacy();
   });
 
   afterAll(() => {

@@ -15,8 +15,9 @@ describe("GDPR", function () {
     beforeAll(async () => {
         console.log(`🚸 [chai] >>> running GDPR spec`);
         // Initialize Redis
-        redis = Redis.createClient(Globals.redis_options());
-        await redis.connect();
+        const redis_base = Redis.createClient(Globals.redis_options());
+        await redis_base.connect();
+        redis = redis_base.legacy();
         app.redis_client = redis;
         app.owner = new Owner(redis);
         gdpr = new GDPR(app); // needs app.owner!

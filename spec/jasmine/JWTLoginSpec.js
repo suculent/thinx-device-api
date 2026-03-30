@@ -15,8 +15,9 @@ describe("JWT Login", function () {
     beforeAll(async () => {
         console.log(`🚸 [chai] >>> running JWT spec`);
         // Initialize Redis
-        redis = redis_client.createClient(Globals.redis_options());
-        await redis.connect();
+        const redis_base = redis_client.createClient(Globals.redis_options());
+        await redis_base.connect();
+        redis = redis_base.legacy();
         login = new JWTLogin(redis);
     });
 

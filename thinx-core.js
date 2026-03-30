@@ -95,18 +95,21 @@ module.exports = class THiNX extends EventEmitter {
     var app_config = Globals.app_config();
     var rollbar = Globals.rollbar(); // lgtm [js/unused-local-variable]
 
-    // Initialize Redis
-    app.redis_client = redis.createClient(Globals.redis_options());
+    // Redis v5 keeps promise APIs on the base client; the app still uses callback-style commands.
+    app.redis_store_client = redis.createClient(Globals.redis_options());
+    app.redis_client = app.redis_store_client.legacy();
 
-    app.redis_client.on('error', err => console.log('Redis Client Error', err));
+    app.redis_store_client.on('error', err => console.log('Redis Client Error', err));
 
     // Section that requires initialized Redis
-    app.redis_client.connect().then(() => {
+    console.log("ℹ️ [info] Connecting Redis client...");
+    app.redis_store_client.connect().then(() => {
+      console.log("ℹ️ [info] Redis client connected.");
 
       app.owner = new Owner(app.redis_client);
       app.device = new Device(app.redis_client); // TODO: Share in Devices, Messenger and Transfer, can be mocked
 
-      let sessionStore = new RedisStore({ client: app.redis_client });
+      let sessionStore = new RedisStore({ client: app.redis_store_client });
 
       if (process.env.ENVIRONMENT !== "test") {
         try {
@@ -648,6 +651,8 @@ module.exports = class THiNX extends EventEmitter {
           }); // DB
         });
       });
+    }).catch((error) => {
+      console.log("☣️ [error] Redis bootstrap failed:", error);
     });
   }
 };

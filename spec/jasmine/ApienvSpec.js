@@ -14,8 +14,9 @@ describe("API Env", function () {
   beforeAll(async () => {
     console.log(`🚸 [chai] >>> running APIEnv spec`);
     // Initialize Redis
-    redis = redis_client.createClient(Globals.redis_options());
-    await redis.connect();
+    const redis_base = redis_client.createClient(Globals.redis_options());
+    await redis_base.connect();
+    redis = redis_base.legacy();
     apienv = new APIEnv(redis);
   });
 

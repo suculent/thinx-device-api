@@ -27,8 +27,9 @@ describe("Builder", function () {
   beforeAll(async() => {
     console.log(`🚸 [chai] >>> running Builder spec`);
     // Initialize Redis
-    redis = redis_client.createClient(Globals.redis_options());
-    await redis.connect();
+    const redis_base = redis_client.createClient(Globals.redis_options());
+    await redis_base.connect();
+    redis = redis_base.legacy();
     builder = new Builder(redis);
     devices = new Devices(messenger, redis);
     device = new Device(redis);
