@@ -37,21 +37,16 @@ The codebase contains **792 `console.log` calls** across **49 files** in `lib/`.
 
 ### 3. Update Critical Outdated Dependencies
 **Effort:** Medium (1–2 days per major update)
+**Status:** Completed for the Redis 5 / safe dependency refresh; remaining major upgrades remain separate follow-ups.
 
-Several dependencies are significantly behind their latest versions, with potential security implications:
+Several dependencies were significantly behind their latest versions, with potential security implications. The repo now includes the Redis 5 / `connect-redis@9` refresh and the other safe updates. The Redis migration was validated by CircleCI pipeline `5136` on `thinx-staging`, with `test`, `build-vue-console`, `build-console-classic`, and `build-api-cloud` all passing. The remaining major upgrades are intentionally deferred:
 
 | Package | Current | Latest | Gap |
 |---|---|---|---|
-| `axios` | 1.7.7 | 1.13.6 | Minor, but requested |
-| `@slack/web-api` | 6.13.0 | 7.15.0 | Major (breaking changes) |
-| `connect-redis` | 6.1.3 | 9.0.0 | Major (breaking changes) |
-| `eslint` | 8.57.1 | 10.1.0 | Major (new flat config) |
 | `bcrypt` | 5.1.1 | 6.0.0 | Major |
 | `base-64` | 0.1.0 | 1.0.0 | Major |
-| `body-parser` | 1.20.3 | 2.2.2 | Major |
-| `chai` | 4.5.0 | 6.2.2 | Major |
 
-**Recommendation:** Update `axios` first (low risk). For major updates (`connect-redis`, `@slack/web-api`), create isolated PRs with test validation. Use `npm audit` regularly.
+**Recommendation:** Keep the Redis 5 refresh and the completed safe updates in place. Handle the remaining major upgrades in isolated PRs with CircleCI validation. `chai` should stay pinned at `4.5.0` unless the test suite is migrated to the newer API. Use `npm audit` regularly.
 
 ---
 
