@@ -1250,3 +1250,1128 @@ paths:
                     example: "OK"
         '403':
           description: Unauthorized
+
+  # Spec endpoint
+  /spec:
+    get:
+      summary: OpenAPI specification
+      description: Returns this OpenAPI specification in YAML format
+      tags:
+        - Meta
+      responses:
+        '200':
+          description: OpenAPI specification
+          content:
+            application/yaml:
+              schema:
+                type: string
+
+  # User management
+  /user:
+    post:
+      summary: Create user
+      description: Register a new user account
+      tags:
+        - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: User created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: string
+                    example: "registered"
+        '400':
+          description: Bad request
+
+    delete:
+      summary: Delete user
+      description: Delete the authenticated user account
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      responses:
+        '200':
+          description: User deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: string
+                    example: "deleted"
+        '401':
+          description: Unauthorized
+
+  /activate:
+    get:
+      summary: Activate user account
+      description: Activate a user account via email confirmation link
+      tags:
+        - Users
+      parameters:
+        - name: owner
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Owner ID
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Activation token
+      responses:
+        '200':
+          description: Account activated
+        '400':
+          description: Invalid or expired token
+
+  /password/reset:
+    post:
+      summary: Initiate password reset
+      description: Send a password reset email to the user
+      tags:
+        - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Password reset email sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '400':
+          description: Bad request
+
+    get:
+      summary: Process password reset
+      description: Process a password reset via email link
+      tags:
+        - Users
+      parameters:
+        - name: owner
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: reset_key
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to set-password page
+        '400':
+          description: Invalid or expired token
+
+  /password/set:
+    post:
+      summary: Set new password
+      description: Set a new password using a reset key
+      tags:
+        - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - password
+                - reset_key
+                - owner
+              properties:
+                password:
+                  type: string
+                  format: password
+                reset_key:
+                  type: string
+                owner:
+                  type: string
+      responses:
+        '200':
+          description: Password set successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '400':
+          description: Bad request or invalid token
+
+  /stats:
+    get:
+      summary: Get statistics
+      description: Get weekly statistics for the authenticated user
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  week:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Unauthorized
+
+  /stats/week:
+    get:
+      summary: Get weekly statistics
+      description: Get weekly statistics for the authenticated user
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Weekly statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  week:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Unauthorized
+
+  /stats/today:
+    get:
+      summary: Get today's statistics
+      description: Get today's statistics for the authenticated user
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Today's statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  today:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Unauthorized
+
+  /chat:
+    post:
+      summary: Post chat message
+      description: Post a chat message to support
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+      responses:
+        '200':
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          description: Unauthorized
+
+  # Profile endpoints
+  /profile:
+    get:
+      summary: Get user profile
+      description: Get the authenticated user's profile
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  profile:
+                    type: object
+                    properties:
+                      info:
+                        type: object
+                        additionalProperties: true
+                      avatar:
+                        type: string
+        '401':
+          description: Unauthorized
+
+    post:
+      summary: Update user profile
+      description: Update the authenticated user's profile
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                info:
+                  type: object
+                  additionalProperties: true
+                avatar:
+                  type: string
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: string
+                    example: "OK"
+        '401':
+          description: Unauthorized
+
+  # GDPR endpoints
+  /gdpr:
+    put:
+      summary: Set GDPR consent
+      description: Set or update GDPR consent for the authenticated user
+      tags:
+        - GDPR
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                gdpr_consent:
+                  type: boolean
+      responses:
+        '200':
+          description: Consent updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          description: Unauthorized
+
+    post:
+      summary: Transfer user data (GDPR)
+      description: Request a data transfer package in compliance with GDPR
+      tags:
+        - GDPR
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Data transfer initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: string
+        '401':
+          description: Unauthorized
+
+    delete:
+      summary: Revoke user data (GDPR)
+      description: Request deletion of all user data in compliance with GDPR
+      tags:
+        - GDPR
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Data deletion initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          description: Unauthorized
+
+  # Mesh management
+  /mesh:
+    get:
+      summary: List meshes
+      description: List all mesh networks for the authenticated user
+      tags:
+        - Mesh
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      responses:
+        '200':
+          description: List of mesh networks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  meshes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        mesh_id:
+                          type: string
+                        alias:
+                          type: string
+        '401':
+          description: Unauthorized
+
+    put:
+      summary: Create mesh
+      description: Create a new mesh network
+      tags:
+        - Mesh
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - alias
+              properties:
+                alias:
+                  type: string
+      responses:
+        '200':
+          description: Mesh created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  mesh_id:
+                    type: string
+        '401':
+          description: Unauthorized
+
+    delete:
+      summary: Delete mesh
+      description: Delete a mesh network
+      tags:
+        - Mesh
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - mesh_id
+              properties:
+                mesh_id:
+                  type: string
+      responses:
+        '200':
+          description: Mesh deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          description: Unauthorized
+
+  # RSA Key endpoints
+  /rsakey:
+    get:
+      summary: List RSA keys
+      description: List all RSA keys for the authenticated user
+      tags:
+        - RSA Keys
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      responses:
+        '200':
+          description: List of RSA keys
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  keys:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        fingerprint:
+                          type: string
+                        alias:
+                          type: string
+                        pubkey:
+                          type: string
+        '401':
+          description: Unauthorized
+
+    put:
+      summary: Create RSA key
+      description: Generate a new RSA key pair
+      tags:
+        - RSA Keys
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      responses:
+        '200':
+          description: RSA key created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  fingerprint:
+                    type: string
+                  pubkey:
+                    type: string
+        '401':
+          description: Unauthorized
+
+    delete:
+      summary: Delete RSA key
+      description: Delete one or more RSA keys by fingerprint
+      tags:
+        - RSA Keys
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filenames:
+                  type: array
+                  items:
+                    type: string
+                  description: RSA key fingerprints to delete
+      responses:
+        '200':
+          description: RSA key(s) deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          description: Unauthorized
+
+  # Logs endpoints
+  /logs/audit:
+    get:
+      summary: Get audit log
+      description: Get the audit log for the authenticated user
+      tags:
+        - Logs
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Audit log entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  logs:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        '401':
+          description: Unauthorized
+
+  /logs/build:
+    get:
+      summary: List build logs
+      description: Get all build logs for the authenticated user
+      tags:
+        - Logs
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Build log list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  logs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        build_id:
+                          type: string
+                        udid:
+                          type: string
+                        date:
+                          type: string
+                          format: date-time
+        '401':
+          description: Unauthorized
+
+  /logs/build/{bid}:
+    get:
+      summary: Get build log
+      description: Get a specific build log by ID
+      tags:
+        - Logs
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      parameters:
+        - name: bid
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Build ID
+      responses:
+        '200':
+          description: Build log content
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  log:
+                    type: string
+        '401':
+          description: Unauthorized
+        '404':
+          description: Build log not found
+
+  # Source management
+  /source:
+    get:
+      summary: List sources
+      description: List all GIT source repositories for the authenticated user
+      tags:
+        - Sources
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      responses:
+        '200':
+          description: List of sources
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  sources:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        source_id:
+                          type: string
+                        alias:
+                          type: string
+                        url:
+                          type: string
+                        branch:
+                          type: string
+        '401':
+          description: Unauthorized
+
+    put:
+      summary: Add source
+      description: Add a new GIT source repository
+      tags:
+        - Sources
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - alias
+                - url
+              properties:
+                alias:
+                  type: string
+                url:
+                  type: string
+                branch:
+                  type: string
+                  default: main
+                circleToken:
+                  type: string
+                secret:
+                  type: string
+                is_private:
+                  type: boolean
+      responses:
+        '200':
+          description: Source added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  source_id:
+                    type: string
+        '401':
+          description: Unauthorized
+
+    delete:
+      summary: Delete source
+      description: Delete one or more GIT source repositories
+      tags:
+        - Sources
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                source_ids:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Source(s) deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          description: Unauthorized
+
+  # Transfer endpoints
+  /transfer/request:
+    post:
+      summary: Request device transfer
+      description: Initiate a transfer of one or more devices to another owner
+      tags:
+        - Transfer
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - udids
+                - owner
+              properties:
+                udids:
+                  type: array
+                  items:
+                    type: string
+                owner:
+                  type: string
+      responses:
+        '200':
+          description: Transfer requested
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  transfer_id:
+                    type: string
+        '401':
+          description: Unauthorized
+
+  /transfer/accept:
+    get:
+      summary: Accept device transfer (via link)
+      description: Accept a device transfer via email confirmation link
+      tags:
+        - Transfer
+      parameters:
+        - name: transfer_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Transfer accepted
+        '400':
+          description: Invalid or expired transfer ID
+
+    post:
+      summary: Accept selective device transfer
+      description: Accept specific devices from a transfer request
+      tags:
+        - Transfer
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - transfer_id
+              properties:
+                transfer_id:
+                  type: string
+                udids:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Transfer accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          description: Unauthorized
+
+  /transfer/decline:
+    get:
+      summary: Decline device transfer (via link)
+      description: Decline a device transfer via email confirmation link
+      tags:
+        - Transfer
+      parameters:
+        - name: transfer_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Transfer declined
+        '400':
+          description: Invalid or expired transfer ID
+
+    post:
+      summary: Decline selective device transfer
+      description: Decline specific devices from a transfer request
+      tags:
+        - Transfer
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - transfer_id
+              properties:
+                transfer_id:
+                  type: string
+                udids:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Transfer declined
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          description: Unauthorized
+
+  # OAuth endpoints
+  /oauth/github:
+    get:
+      summary: GitHub OAuth initiation
+      description: Redirect to GitHub for OAuth authorization
+      tags:
+        - OAuth
+      responses:
+        '302':
+          description: Redirect to GitHub
+
+  /oauth/github/callback:
+    get:
+      summary: GitHub OAuth callback
+      description: Handle OAuth callback from GitHub
+      tags:
+        - OAuth
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect after OAuth flow
+
+  /oauth/google:
+    get:
+      summary: Google OAuth initiation
+      description: Redirect to Google for OAuth authorization
+      tags:
+        - OAuth
+      responses:
+        '302':
+          description: Redirect to Google
+
+  /oauth/google/callback:
+    get:
+      summary: Google OAuth callback
+      description: Handle OAuth callback from Google
+      tags:
+        - OAuth
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect after OAuth flow
+
+  /github/token:
+    post:
+      summary: Add GitHub public key
+      description: Add a public key to the authenticated user's GitHub account
+      tags:
+        - OAuth
+      security:
+        - bearerAuth: []
+        - sessionCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+      responses:
+        '200':
+          description: Key added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          description: Unauthorized
+
+  /slack/direct_install:
+    get:
+      summary: Slack direct install
+      description: Redirect to Slack for app installation
+      tags:
+        - Slack
+      responses:
+        '302':
+          description: Redirect to Slack
+
+  /slack/redirect:
+    get:
+      summary: Slack OAuth callback
+      description: Handle OAuth callback from Slack
+      tags:
+        - Slack
+      parameters:
+        - name: code
+          in: query
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect after OAuth flow
