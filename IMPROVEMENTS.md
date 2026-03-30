@@ -21,17 +21,15 @@ The codebase contains **792 `console.log` calls** across **49 files** in `lib/`.
 
 ---
 
-### 2. Fix Potential Command Injection in `builder.js`
+### 2. ~~Fix Potential Command Injection in `builder.js`~~ ✅ Implemented
 **Effort:** Small (1 day)
+**Status:** Completed.
 
-`lib/thinx/builder.js` builds shell commands by directly string-concatenating user-supplied values (e.g., `stringVars`, paths) into `CMD` strings that are passed to `exec.spawn(..., { shell: true })`. The codebase itself contains a suppression comment: `// lgtm [js/command-line-injection]`.
+The risky shell construction in [lib/thinx/builder.js](/Users/igraczech/Repositories/thinx-device-api/lib/thinx/builder.js) has been reduced substantially. Local builder execution now uses `spawn(cmd, args)` without `{ shell: true }`, Git metadata lookups use `execFileSync("git", args, { cwd })`, and public source prefetch now runs structured Git commands instead of interpolated shell strings. The remaining worker-side command string is built through `shell-escape`, and invalid sanitized Git URL or branch values now fail early instead of being passed through to shell execution.
 
-**Recommendation:**
-- Use `shell-escape` (already a dependency) consistently for all user-controlled values inserted into shell commands
-- Prefer `exec.spawn(cmd, args[])` over `{ shell: true }` with interpolated strings where possible
-- Audit `exec.execSync` calls at lines 385, 412, 741, 742 for unsanitized path interpolation
+**Validation:** CircleCI pipeline `5142` on `thinx-staging` passed with `test`, `build-vue-console`, `build-console-classic`, and `build-api-cloud` all green.
 
-**Risks if unaddressed:** Remote code execution if any build parameter originates from user input without sanitization.
+**Recommendation:** Keep new builder command execution on argument arrays by default, and treat any future `{ shell: true }` usage in build or deployment paths as a security review trigger.
 
 ---
 
@@ -265,7 +263,7 @@ There are **17 `TODO`/`FIXME` comments** in `lib/`, several with security or cor
 | # | Improvement | Priority | Effort | Impact |
 |---|---|---|---|---|
 | 1 | Structured logging (replace console.log) | High | Medium | Observability |
-| 2 | Fix command injection in builder.js | High | Small | Security |
+| 2 | ~~Fix command injection in builder.js~~ ✅ | ~~High~~ | ~~Small~~ | Done |
 | 3 | ~~Update outdated dependencies~~ ✅ | ~~High~~ | ~~Medium~~ | Done |
 | 4 | Migrate callbacks to async/await | High | Large | Maintainability |
 | 5 | Strengthen error handling + process handlers | High | Medium | Reliability |
