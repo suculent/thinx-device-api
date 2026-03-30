@@ -95,30 +95,25 @@ passphrase: 'thinx' // TODO: once we'll have Secure Storage (e.g. Vault), keys c
 
 ## Medium Priority
 
-### 7. Reduce Unrealistic 99% Test Coverage Threshold
+### 7. ~~Reduce Unrealistic 99% Test Coverage Threshold~~ ✅ Implemented
 **Effort:** Small (1 hour)
+**Status:** Completed.
 
-`package.json` (nyc config) sets coverage thresholds at **99% for lines, statements, functions, and branches** per-file. This is essentially unachievable in practice and causes CI to fail on legitimate code additions.
+The nyc config in [`.nycrc`](/Users/igraczech/Repositories/thinx-device-api/.nycrc) previously enforced **99% for lines, statements, functions, and branches** on a per-file basis. That is effectively a regression trap for normal maintenance work, so it has been replaced with an overall threshold that is still meaningful but realistic.
 
-**Current config:**
+**Implemented config:**
 ```json
-"nyc": {
+{
   "check-coverage": true,
-  "per-file": true,
-  "lines": 99,
-  "statements": 99,
-  "functions": 99,
-  "branches": 99
+  "per-file": false,
+  "lines": 80,
+  "statements": 80,
+  "functions": 80,
+  "branches": 75
 }
 ```
 
-**Recommendation:** Lower thresholds to 80–85% overall (not per-file), which is an industry-standard target that still incentivizes good coverage without blocking development:
-```json
-"lines": 80,
-"statements": 80,
-"functions": 80,
-"branches": 75
-```
+**Recommendation:** Keep the lower overall thresholds in place unless the suite is restructured into clearer unit/integration boundaries with separate coverage gates.
 
 ---
 
@@ -271,11 +266,11 @@ There are **17 `TODO`/`FIXME` comments** in `lib/`, several with security or cor
 |---|---|---|---|---|
 | 1 | Structured logging (replace console.log) | High | Medium | Observability |
 | 2 | Fix command injection in builder.js | High | Small | Security |
-| 3 | Update outdated dependencies | High | Medium | Security/Stability |
+| 3 | ~~Update outdated dependencies~~ ✅ | ~~High~~ | ~~Medium~~ | Done |
 | 4 | Migrate callbacks to async/await | High | Large | Maintainability |
 | 5 | Strengthen error handling + process handlers | High | Medium | Reliability |
 | 6 | Resolve hardcoded RSA key passphrase | High | Small | Security |
-| 7 | Reduce 99% coverage threshold | Medium | Small | Developer Experience |
+| 7 | ~~Reduce 99% coverage threshold~~ ✅ | ~~Medium~~ | ~~Small~~ | Done |
 | 8 | Enable stricter ESLint rules | Medium | Medium | Code Quality |
 | 9 | ~~Add OpenAPI/Swagger specification~~ ✅ | ~~Medium~~ | ~~Medium~~ | Done |
 | 10 | Per-endpoint rate limiting for auth routes | Medium | Small | Security |
