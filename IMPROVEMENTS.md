@@ -37,16 +37,11 @@ The codebase contains **792 `console.log` calls** across **49 files** in `lib/`.
 
 ### 3. Update Critical Outdated Dependencies
 **Effort:** Medium (1–2 days per major update)
-**Status:** Completed for the Redis 5 / safe dependency refresh; remaining major upgrades remain separate follow-ups.
+**Status:** Completed.
 
-Several dependencies were significantly behind their latest versions, with potential security implications. The repo now includes the Redis 5 / `connect-redis@9` refresh and the other safe updates. The Redis migration was validated by CircleCI pipeline `5136` on `thinx-staging`, with `test`, `build-vue-console`, `build-console-classic`, and `build-api-cloud` all passing. The remaining major upgrades are intentionally deferred:
+Several dependencies were significantly behind their latest versions, with potential security implications. The repo now includes the Redis 5 / `connect-redis@9` refresh, `bcrypt@^6.0.0`, `base-64@^1.0.0`, and the other safe updates in both the root manifest and the `base` image manifest. The Redis migration was validated by CircleCI pipeline `5136` on `thinx-staging`, with `test`, `build-vue-console`, `build-console-classic`, and `build-api-cloud` all passing.
 
-| Package | Current | Latest | Gap |
-|---|---|---|---|
-| `bcrypt` | 5.1.1 | 6.0.0 | Major |
-| `base-64` | 0.1.0 | 1.0.0 | Major |
-
-**Recommendation:** Keep the Redis 5 refresh and the completed safe updates in place. Handle the remaining major upgrades in isolated PRs with CircleCI validation. `chai` should stay pinned at `4.5.0` unless the test suite is migrated to the newer API. Use `npm audit` regularly.
+**Recommendation:** Keep the completed dependency refresh in place, continue to pin `chai` at `4.5.0` until the test suite is migrated to the newer API, and use `npm audit` regularly.
 
 ---
 
