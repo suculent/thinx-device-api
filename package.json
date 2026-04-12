@@ -34,7 +34,7 @@
     "@slack/rtm-api": "^7.0.4",
     "@slack/web-api": "^7.15.0",
     "@snyk/protect": "^1.1300.2",
-    "axios": "^1.13.6",
+    "axios": "^1.15.0",
     "base-64": "^1.0.0",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.2",
