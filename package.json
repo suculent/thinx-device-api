@@ -34,7 +34,7 @@
     "@slack/rtm-api": "^7.0.4",
     "@slack/web-api": "^7.15.0",
     "@snyk/protect": "^1.1300.2",
-    "axios": "^1.13.6",
+    "axios": "^1.15.0",
     "base-64": "^1.0.0",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.2",
@@ -49,7 +49,7 @@
     "crypto-js": "^4.2.0",
     "dateformat": "^4.6.3",
     "express": "^5.2.1",
-    "express-rate-limit": "^8.3.2",
+    "express-rate-limit": "^8.2.2",
     "express-session": "^1.19.0",
     "fs-extra": "^11.3.3",
     "fs-finder": "github:suculent/Node-FsFinder#master",
@@ -73,7 +73,7 @@
     "path": "^0.12.7",
     "qs": "^6.15.0",
     "querystring": "^0.2.0",
-    "redis": "^5.8.2",
+    "redis": "^4.6.15",
     "rollbar": "^2.26.5",
     "semver": "7.7.3",
     "sha256": "^0.2.0",
@@ -90,7 +90,6 @@
     "typeof": "^1.0.0",
     "utf-8": "^3.0.0",
     "uuid": "^13.0.0",
-    "winston": "^3.17.0",
     "ws": "^8.18.3",
     "yaml": "2.8.3"
   },
@@ -99,7 +98,6 @@
     "@commitlint/config-validator": {
       "ajv": "^8.0.0"
     },
-    "path-to-regexp": "8.4.2",
     "ansi-regex": "5.0.1",
     "async": "2.6.4",
     "bl": "4.0.3",
