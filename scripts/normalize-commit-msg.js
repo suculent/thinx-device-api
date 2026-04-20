@@ -15,13 +15,13 @@
 const fs = require('fs');
 const path = require('path');
 
-const CONVENTIONAL_TYPES = [
+const _CONVENTIONAL_TYPES = [
   'feat', 'fix', 'docs', 'style', 'refactor',
   'perf', 'test', 'chore', 'ci', 'revert', 'audit',
 ];
 
 // Regex: matches "type(scope): subject" or "type: subject"
-const CONVENTIONAL_PATTERN = /^([a-z]+)(\([^)]*\))?!?:\s+.+/;
+const _CONVENTIONAL_PATTERN = /^([a-z]+)(\([^)]*\))?!?:\s+.+/;
 
 // Keyword map for inferring type from free-form messages
 const KEYWORD_TYPE_MAP = [

@@ -434,7 +434,7 @@ module.exports = class THiNX extends EventEmitter {
             try {
               wss = new WebSocket.Server({ noServer: true });
               console.log("[info] WSS server started...");
-            } catch (e) {
+            } catch (_e) {
               console.log("[warning] Cannot init WSS server...");
               return;
             }
@@ -475,7 +475,7 @@ module.exports = class THiNX extends EventEmitter {
                       console.log("ℹ️ [info] WS Session upgrade...");
                       wss.emit('connection', ws, request);
                     });
-                  } catch (upgradeException) {
+                  } catch (_upgradeException) {
                     // fails on duplicate upgrade, why does it happen?
                     console.log("☣️ [error] Exception caught upgrading same socket twice.");
                     socketMap.delete(socketKey);

@@ -19,7 +19,7 @@
     "test": "mkdir -p coverage; jasmine; [ -n \"$COVERALLS_REPO_TOKEN\" ] && nyc report --reporter=text-lcov > coverage/lcov.info && coveralls < coverage/lcov.info || true",
     "dev": "source ./.env && echo $ENVIRONMENT && nyc jasmine; nyc report --reporter=text-lcov > coverage/lcov.info; coveralls < coverage/lcov.info",
     "metrics-coverage": "node scripts/metrics-coverage.js",
-    "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./",
+    "lint": "eslint ./",
     "lint:commit": "commitlint --from HEAD~1 --to HEAD --verbose",
     "setup:hooks": "git config core.hooksPath .githooks",
     "coverage": "npm run mocha",
