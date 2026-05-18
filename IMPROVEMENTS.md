@@ -9,6 +9,10 @@ Analysis performed on the current codebase (~11K LOC across 62+ library files, 5
 
 ### 1. Replace `console.log` with a Structured Logger
 **Effort:** Medium (2–3 days)
+**Owner:** THiNX backend maintainers
+**Status:** Open
+**Next action:** Choose Pino or Winston, then migrate one backend module as the
+first reviewable slice.
 
 The codebase contains **792 `console.log` calls** across **49 files** in `lib/`. This makes it impossible to control log levels in production, route logs to aggregation services (e.g., Loki, Datadog), or filter noise from signal.
 
@@ -53,7 +57,10 @@ The codebase contains **792 `console.log` calls** across **49 files** in `lib/`.
 
 ### 2. ~~Fix Potential Command Injection in `builder.js`~~ ✅ Implemented
 **Effort:** Small (1 day)
+**Owner:** THiNX backend maintainers
 **Status:** Completed.
+**Next action:** Keep argument-array execution as the default and require
+security review for any future shell execution in build paths.
 
 The risky shell construction in [lib/thinx/builder.js](/Users/igraczech/Repositories/thinx-device-api/lib/thinx/builder.js) has been reduced substantially. Local builder execution now uses `spawn(cmd, args)` without `{ shell: true }`, Git metadata lookups use `execFileSync("git", args, { cwd })`, and public source prefetch now runs structured Git commands instead of interpolated shell strings. The remaining worker-side command string is built through `shell-escape`, and invalid sanitized Git URL or branch values now fail early instead of being passed through to shell execution.
 
@@ -65,7 +72,10 @@ The risky shell construction in [lib/thinx/builder.js](/Users/igraczech/Reposito
 
 ### 3. Update Critical Outdated Dependencies
 **Effort:** Medium (1–2 days per major update)
+**Owner:** THiNX backend maintainers
 **Status:** Completed.
+**Next action:** Continue routine dependency review and keep the documented
+`chai` version lock until the test suite is migrated.
 
 Several dependencies were significantly behind their latest versions, with potential security implications. The repo now includes the Redis 5 / `connect-redis@9` refresh, `bcrypt@^6.0.0`, `base-64@^1.0.0`, and the other safe updates in both the root manifest and the `base` image manifest. The Redis migration was validated by CircleCI pipeline `5136` on `thinx-staging`, with `test`, `build-vue-console`, `build-console-classic`, and `build-api-cloud` all passing.
 
@@ -75,6 +85,10 @@ Several dependencies were significantly behind their latest versions, with poten
 
 ### 4. Migrate from Callback-Heavy Code to Async/Await
 **Effort:** Large (1–2 weeks)
+**Owner:** THiNX backend maintainers
+**Status:** Open
+**Next action:** Convert `lib/thinx/apikey.js` first while preserving the
+current CommonJS exports and callback-compatible caller behavior.
 
 The codebase has **742 callback usages** (`callback`, `cb)`) but only ~39 `async` function declarations. The `.then()` pattern appears in 29 places, and the predominant style is nested callback chains, making error handling fragile and code hard to follow.
 
@@ -120,6 +134,10 @@ Use `util.promisify` for Node core callbacks and wrap CouchDB (`nano`) calls wit
 
 ### 5. Strengthen Error Handling
 **Effort:** Medium (2–3 days)
+**Owner:** THiNX backend maintainers
+**Status:** Open
+**Next action:** Define the shared JSON error envelope, then add Express error
+middleware and process-level rejection reporting in a focused PR.
 
 There are only **58 `try` blocks** and **81 `catch` blocks** across the entire `lib/thinx/` directory. Many async operations (CouchDB queries, Redis calls, file operations) lack proper error handling, leading to unhandled promise rejections or silent failures. Neither `thinx.js` nor `thinx-core.js` register global process-level error handlers, so unhandled rejections crash or silently disappear.
 
@@ -161,6 +179,10 @@ There are only **58 `try` blocks** and **81 `catch` blocks** across the entire `
 
 ### 6. Resolve Hardcoded RSA Key Passphrase
 **Effort:** Small (half day)
+**Owner:** THiNX security/backend maintainers
+**Status:** Open
+**Next action:** Define the runtime configuration key, production fallback
+policy, and existing-key migration or rotation plan before changing code.
 
 `lib/thinx/rsakey.js:130` contains a hardcoded passphrase `'thinx'` for RSA key encryption and an inline note that key encryption should move to secure storage:
 ```js
@@ -206,7 +228,10 @@ passphrase: 'thinx'
 
 ### 7. ~~Reduce Unrealistic 99% Test Coverage Threshold~~ ✅ Implemented
 **Effort:** Small (1 hour)
+**Owner:** THiNX backend maintainers
 **Status:** Completed.
+**Next action:** Keep the overall thresholds unless test boundaries are split
+into separate unit and integration gates.
 
 The nyc config in [`.nycrc`](/Users/igraczech/Repositories/thinx-device-api/.nycrc) previously enforced **99% for lines, statements, functions, and branches** on a per-file basis. That is effectively a regression trap for normal maintenance work, so it has been replaced with an overall threshold that is still meaningful but realistic.
 
@@ -228,6 +253,10 @@ The nyc config in [`.nycrc`](/Users/igraczech/Repositories/thinx-device-api/.nyc
 
 ### 8. Enable Stricter ESLint Rules Incrementally
 **Effort:** Small–Medium (1–2 days)
+**Owner:** THiNX backend maintainers
+**Status:** Open
+**Next action:** Enable `eqeqeq` for backend files first and submit the
+mechanical fixes separately from behavior changes.
 
 The current `.eslintrc.js` disables nearly all rules, including critical ones:
 - `"eqeqeq": 0` — allows `==` instead of `===` (type coercion bugs)
@@ -266,6 +295,11 @@ The current `.eslintrc.js` disables nearly all rules, including critical ones:
 ---
 
 ### 9. ~~Add OpenAPI/Swagger Specification~~ ✅ Implemented
+**Effort:** Completed
+**Owner:** THiNX API maintainers
+**Status:** Completed with optional follow-up
+**Next action:** Decide whether the optional Swagger UI route is worth adding
+for browser-based API exploration.
 
 **Implemented:** `thinx-api-openapi.yaml` created with 45 endpoints covering all v2 API routes (devices, auth, users, GDPR, mesh, RSA keys, logs, sources, transfer, OAuth, Slack). Served at `GET /api/v2/spec` via `lib/router.js`.
 
@@ -275,6 +309,10 @@ The current `.eslintrc.js` disables nearly all rules, including critical ones:
 
 ### 10. Per-Endpoint Rate Limiting for Auth Routes
 **Effort:** Small (half day)
+**Owner:** THiNX security/backend maintainers
+**Status:** Open
+**Next action:** Define strict limits for login, registration, password reset,
+and token exchange routes, including proxy-aware keying behavior.
 
 `thinx-core.js` applies a single global rate limiter (500 req/min) to all routes, but only in non-test environments. Sensitive authentication endpoints (`/api/login`, `/api/register`, `/api/password`) need significantly tighter limits to prevent brute-force and credential-stuffing attacks.
 
@@ -313,6 +351,10 @@ The current `.eslintrc.js` disables nearly all rules, including critical ones:
 
 ### 11. Add JSDoc Type Annotations to Public APIs
 **Effort:** Medium (3–5 days)
+**Owner:** THiNX backend maintainers
+**Status:** Open
+**Next action:** Pick the first large module and derive typedefs from existing
+specs and observed CouchDB document shapes.
 
 The codebase has **fewer than 60 JSDoc annotations** across all `lib/thinx/` files. Public-facing module methods (especially in `device.js`, `owner.js`, `builder.js`) have no type documentation.
 
@@ -355,6 +397,10 @@ The codebase has **fewer than 60 JSDoc annotations** across all `lib/thinx/` fil
 
 ### 12. Eliminate Hardcoded Test Credentials
 **Effort:** Small (half day)
+**Owner:** THiNX backend/QA maintainers
+**Status:** Open
+**Next action:** Move real-looking fixture values into documented local test
+configuration and add a safe example fixture.
 
 `spec/_envi.json` contains hardcoded owner IDs, API keys, session IDs, and email addresses. While these appear to be test fixtures, they establish a pattern that can bleed into actual credential leakage in CI logs or accidental commits.
 
@@ -393,6 +439,10 @@ The codebase has **fewer than 60 JSDoc annotations** across all `lib/thinx/` fil
 
 ### 13. Add Pre-Commit Hooks via Husky
 **Effort:** Small (2–4 hours)
+**Owner:** THiNX developer experience maintainers
+**Status:** Open
+**Next action:** Choose Husky or the repository's existing hook convention,
+then wire `lint-staged` for staged JavaScript files only.
 
 There are no pre-commit hooks configured. Developers can commit code that fails linting or tests without any friction point.
 
@@ -446,6 +496,10 @@ And `package.json`:
 
 ### 14. Parallelize Jasmine Test Suite
 **Effort:** Small–Medium (1 day)
+**Owner:** THiNX backend/QA maintainers
+**Status:** Open
+**Next action:** Capture the current CI duration baseline and classify specs by
+shared dependency before changing runner topology.
 
 `spec/support/jasmine.json` runs all 55 test files sequentially (`"random": false`, `"timeout": 10000`). With many integration-style tests that await I/O (CouchDB, Redis, MQTT), sequential execution significantly inflates total CI run time.
 
@@ -483,6 +537,10 @@ And `package.json`:
 
 ### 15. Pin and Upgrade Docker Base Image
 **Effort:** Small (2–4 hours)
+**Owner:** THiNX DevOps maintainers
+**Status:** Open
+**Next action:** Choose the base image tag or digest policy, then validate the
+API image before expanding the change to worker and builder images.
 
 `Dockerfile` uses `FROM thinxcloud/base:alpine` with no version pin. This means the build is non-reproducible and could silently pull a different base in CI or production. Additionally, `docker-compose.yml` uses Compose file format `version: '2.2'` which is deprecated.
 
@@ -526,6 +584,10 @@ And `package.json`:
 
 ### 16. Resolve Source Comment Debt
 **Effort:** Medium (2–3 days)
+**Owner:** THiNX backend/security maintainers
+**Status:** Open
+**Next action:** Triage the security-relevant source comments first and convert
+each one into either a fix PR or a tracked issue with acceptance criteria.
 
 There are **17 unresolved debt-marker comments** in `lib/`, several with security or correctness implications:
 
@@ -570,21 +632,21 @@ At minimum, address the security-relevant items (`notifier.js` channel config,
 
 ## Summary Table
 
-| # | Improvement | Priority | Effort | Impact |
-|---|---|---|---|---|
-| 1 | Structured logging (replace console.log) | High | Medium | Observability |
-| 2 | ~~Fix command injection in builder.js~~ ✅ | ~~High~~ | ~~Small~~ | Done |
-| 3 | ~~Update outdated dependencies~~ ✅ | ~~High~~ | ~~Medium~~ | Done |
-| 4 | Migrate callbacks to async/await | High | Large | Maintainability |
-| 5 | Strengthen error handling + process handlers | High | Medium | Reliability |
-| 6 | Resolve hardcoded RSA key passphrase | High | Small | Security |
-| 7 | ~~Reduce 99% coverage threshold~~ ✅ | ~~Medium~~ | ~~Small~~ | Done |
-| 8 | Enable stricter ESLint rules | Medium | Medium | Code Quality |
-| 9 | ~~Add OpenAPI/Swagger specification~~ ✅ | ~~Medium~~ | ~~Medium~~ | Done |
-| 10 | Per-endpoint rate limiting for auth routes | Medium | Small | Security |
-| 11 | Add JSDoc type annotations | Medium | Medium | Maintainability |
-| 12 | Eliminate hardcoded test credentials | Low | Small | Security hygiene |
-| 13 | Add pre-commit hooks (husky) | Low | Small | Developer Experience |
-| 14 | Parallelize Jasmine test suite | Low | Small | Developer Experience |
-| 15 | Pin/upgrade Docker base image + healthcheck | Low | Small | DevOps/Reliability |
-| 16 | Resolve source comment debt | Low | Medium | Code Quality |
+| # | Improvement | Priority | Owner | Status | Next action |
+|---|---|---|---|---|---|
+| 1 | Structured logging | High | THiNX backend | Open | Choose logger and migrate one backend module first. |
+| 2 | ~~Fix command injection in builder.js~~ ✅ | ~~High~~ | THiNX backend | Completed | Keep shell execution under security review. |
+| 3 | ~~Update outdated dependencies~~ ✅ | ~~High~~ | THiNX backend | Completed | Continue routine dependency review and keep the `chai` lock. |
+| 4 | Migrate callbacks to async/await | High | THiNX backend | Open | Convert `lib/thinx/apikey.js` first with compatible callers. |
+| 5 | Strengthen error handling + process handlers | High | THiNX backend | Open | Define JSON error envelope and central middleware. |
+| 6 | Resolve hardcoded RSA key passphrase | High | THiNX security/backend | Open | Define config, fallback policy, and key migration plan. |
+| 7 | ~~Reduce 99% coverage threshold~~ ✅ | ~~Medium~~ | THiNX backend | Completed | Keep thresholds unless test gates are split. |
+| 8 | Enable stricter ESLint rules | Medium | THiNX backend | Open | Enable `eqeqeq` for backend files first. |
+| 9 | ~~Add OpenAPI/Swagger specification~~ ✅ | ~~Medium~~ | THiNX API | Completed with optional follow-up | Decide on Swagger UI route. |
+| 10 | Per-endpoint rate limiting for auth routes | Medium | THiNX security/backend | Open | Define route limits and proxy-aware keys. |
+| 11 | Add JSDoc type annotations | Medium | THiNX backend | Open | Pick first large module and derive typedefs from specs. |
+| 12 | Eliminate hardcoded test credentials | Low | THiNX backend/QA | Open | Move fixture values to documented local test configuration. |
+| 13 | Add pre-commit hooks | Low | THiNX developer experience | Open | Choose hook convention and wire staged JS linting. |
+| 14 | Parallelize Jasmine test suite | Low | THiNX backend/QA | Open | Capture CI baseline and classify specs by dependency. |
+| 15 | Pin/upgrade Docker base image + healthcheck | Low | THiNX DevOps | Open | Choose base image tag or digest policy. |
+| 16 | Resolve source comment debt | Low | THiNX backend/security | Open | Triage security-relevant comments into fixes or tracked issues. |

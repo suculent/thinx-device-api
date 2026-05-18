@@ -4,6 +4,14 @@
 
 Describe the problem or task in one or two sentences.
 
+## Task Metadata
+
+- Owner:
+- Status:
+- Next action:
+- Priority:
+- Target branch or environment:
+
 ## Context
 
 - Affected service, module, route, or document:
@@ -18,16 +26,18 @@ Describe the desired end state from the user's or operator's point of view.
 ## Scope
 
 In scope:
-- Add specific included work here.
+- Included work:
 
 Out of scope:
-- Add known exclusions here.
+- Excluded work:
 
 ## Acceptance Criteria
 
-- [ ] The requested behavior or documentation change is implemented.
+- [ ] Owner, status, and next action are set before implementation starts.
+- [ ] Expected outcome is met for the affected service, module, route, or document.
+- [ ] Scope exclusions are documented so deferred work is visible.
 - [ ] Edge cases and failure modes are covered or explicitly deferred.
-- [ ] Security, privacy, and operational impacts have been reviewed.
+- [ ] Security, privacy, and operational impacts are reviewed.
 - [ ] User-facing or operator-facing documentation is updated when needed.
 
 ## Validation
@@ -35,10 +45,10 @@ Out of scope:
 - Command or manual check:
 - Expected result:
 - Environment used:
+- Evidence link, log excerpt, or screenshot:
 
 ## Deployment Notes
 
-- Target branch or environment:
 - Required configuration or secret changes:
 - Rollback plan:
 - Monitoring or smoke checks after deployment:
