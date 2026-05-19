@@ -10,7 +10,7 @@ THiNX Device API is a Node.js IoT device management backend (v1.9.2866) built on
 
 **Environment:**
 - Node.js `>=19.x` (required by `engines` field in `package.json`)
-- Base Docker image: `node:25-alpine3.21` (defined in `base/Dockerfile`)
+- Base Docker image: `node:25.9.0-alpine3.23` (defined in `base/Dockerfile`)
 - Production image: `thinxcloud/base:alpine` (defined in `Dockerfile`)
 
 **Node Environment Variable:**

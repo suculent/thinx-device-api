@@ -1,269 +1,325 @@
 # Codebase Structure
-*Generated: 2026-05-18 | Focus: arch | Scope: services/console (Vue SPA frontend)*
-> Note: This document covers the `services/console/` Vue 2 SPA directory structure. The main backend structure is not yet mapped.
+> Last updated: 2026-05-19 | Focus: arch | Scope: main backend API (thinx-device-api) | Mapper: gsd-codebase-mapper
+
+## Summary
+
+The repository root is the main Express/Node.js backend. The `lib/` directory holds all application code split into router modules and domain classes. External subservices (worker, transformer, console) live under `services/`. Tests are Jasmine-based under `spec/jasmine/`. Runtime data mounts are at `/mnt/data/` in production and `spec/mnt/data/` in test/development.
+
+---
 
 ## Directory Layout
 
 ```
-console/                          # Service root
-├── .planning/                    # GSD planning documents
-│   └── codebase/                 # Generated architecture maps
-├── .circleci/                    # CI pipeline configuration
-├── dev/                          # Dev helper scripts/configs
-├── src/                          # LEGACY AngularJS 1.x app (deprecated)
-│   ├── app/
-│   │   ├── js/
-│   │   │   ├── main.js           # AngularJS app bootstrap (module "RTM")
-│   │   │   ├── thinx-api.js      # Legacy API client
-│   │   │   ├── directives.js     # AngularJS directives
-│   │   │   └── controllers/      # AngularJS controllers (one per page)
-│   │   ├── tpl/                  # HTML partial templates (sidebar, header, etc.)
-│   │   └── views/                # Full-page HTML views
-│   ├── assets/
-│   │   ├── global/               # Third-party CSS, plugins (jQuery, moment, etc.)
-│   │   └── thinx/               # Auth/login JS, custom dashboard JS
-│   ├── html/                     # Duplicate of src/ (built/deployed output copy)
-│   ├── cypress/                  # Legacy E2E test suite for AngularJS app
-│   └── gulpfile.js               # Legacy build pipeline
-└── vue/                          # ACTIVE Vue 2 SPA
-    ├── src/                      # Application source (primary development target)
-    │   ├── main.js               # Vue app entry point, plugin registration
-    │   ├── App.vue               # Root component, auth guard
-    │   ├── Routes.js             # Vue Router configuration
-    │   ├── config.js             # Static color palette config
-    │   ├── core/
-    │   │   ├── api.js            # ThinxApi HTTP client class
-    │   │   └── screenHelper.js   # Responsive breakpoint utility
-    │   ├── mixins/
-    │   │   ├── layout.js         # Global mixin: appConfig.colors, decodeHtml
-    │   │   └── hostnames.js      # Hostname resolution from env vars
-    │   ├── store/
-    │   │   ├── index.js          # Vuex store root, module assembly
-    │   │   ├── auth.js           # Auth tokens, JWT validation
-    │   │   ├── layout.js         # Sidebar open/close state
-    │   │   ├── devices.js        # Device list, CRUD, build, transfer
-    │   │   ├── profile.js        # User profile fetch/update
-    │   │   ├── repositories.js   # Source repository CRUD
-    │   │   ├── apikeys.js        # API key management
-    │   │   ├── rsakeys.js        # RSA deploy key management
-    │   │   ├── enviros.js        # Environment global variables
-    │   │   ├── channels.js       # Mesh channel management
-    │   │   ├── transformers.js   # Status transformer CRUD
-    │   │   ├── buildlog.js       # Build log fetch + normalization
-    │   │   ├── auditlog.js       # Audit event log
-    │   │   └── stats.js          # Dashboard statistics
-    │   ├── components/           # Shared UI components
-    │   │   ├── Layout/
-    │   │   │   └── Layout.vue    # Authenticated shell (Sidebar + Header + router-view)
-    │   │   ├── Sidebar/
-    │   │   │   ├── Sidebar.vue   # Nav menu
-    │   │   │   └── NavLink/
-    │   │   │       └── NavLink.vue
-    │   │   ├── Header/
-    │   │   │   └── Header.vue    # Top bar, logout, profile avatar
-    │   │   ├── Helper/
-    │   │   │   └── Helper.vue    # Contextual help widget
-    │   │   ├── Notifications/
-    │   │   │   └── Notifications.vue
-    │   │   ├── Widget/
-    │   │   │   └── Widget.vue    # Generic card wrapper
-    │   │   ├── List/
-    │   │   │   └── List.vue      # Generic table/list component
-    │   │   ├── Form/
-    │   │   │   └── Form.vue      # Generic form wrapper
-    │   │   ├── Loader/
-    │   │   │   └── Loader.vue    # Loading spinner
-    │   │   └── Sparklines/
-    │   │       └── Sparklines.vue
-    │   ├── pages/                # Route-level page components
-    │   │   ├── Login/
-    │   │   │   └── Login.vue     # Username/password + OAuth login
-    │   │   ├── Error/
-    │   │   │   └── Error.vue     # 404 / error fallback
-    │   │   ├── Visits/
-    │   │   │   ├── Visits.vue    # Dashboard: stat cards, audit log, build log
-    │   │   │   └── components/   # Dashboard sub-components (AreaChart, Calendar, Map)
-    │   │   ├── Devices/
-    │   │   │   ├── Devices.vue   # Device list, revoke/transfer/push config actions
-    │   │   │   └── DeviceDetail.vue  # Single device metadata + edit form
-    │   │   ├── Repositories/
-    │   │   │   └── Repositories.vue
-    │   │   ├── Apikeys/
-    │   │   │   └── Apikeys.vue
-    │   │   ├── Rsakeys/
-    │   │   │   └── Rsakeys.vue
-    │   │   ├── Enviros/
-    │   │   │   └── Enviros.vue
-    │   │   ├── Channels/
-    │   │   │   └── Channels.vue
-    │   │   ├── Transformers/
-    │   │   │   ├── Transformers.vue       # Transformer list
-    │   │   │   └── TransformerEditor.vue  # CodeMirror editor for transformer JS body
-    │   │   ├── History/
-    │   │   │   └── History.vue   # Build + audit log combined view
-    │   │   └── Profile/
-    │   │       └── Profile.vue   # User profile editing
-    │   ├── styles/               # Global SCSS
-    │   │   ├── theme.scss        # Main style entry (imported by App.vue)
-    │   │   ├── _variables.scss   # SCSS variable definitions
-    │   │   ├── _mixins.scss      # SCSS mixins
-    │   │   ├── _base.scss        # Base element styles
-    │   │   ├── _auth.scss        # Login page styles
-    │   │   ├── _general.scss     # General layout styles
-    │   │   ├── _icons.scss       # Icon font styles
-    │   │   ├── _overrides.scss   # BootstrapVue overrides
-    │   │   └── _utils.scss       # Utility classes
-    │   ├── assets/               # Static assets
-    │   │   ├── thinx/            # Brand images (avatars, logos)
-    │   │   ├── icons/            # Icon font files
-    │   │   └── people/           # Placeholder avatar images
-    │   └── fonts/                # Web font files
-    ├── public/                   # Static HTML template (index.html with #app mount)
-    ├── cypress/                  # Vue app E2E test suite
-    │   ├── integration/          # Test specs
-    │   ├── plugins/              # Cypress plugin config (TypeScript)
-    │   └── support/              # Custom commands (TypeScript)
-    ├── vue.config.js             # Vue CLI config; dev proxy to console.thinx.cloud
-    ├── babel.config.js           # Babel preset (@vue/app)
-    ├── cypress.json              # Cypress configuration
-    ├── server.js                 # Express static server for production dist
-    ├── Dockerfile                # Container build for Vue app
-    └── yarn.lock                 # Dependency lockfile
+thinx-device-api/
+├── thinx.js                   # Process entry point — instantiates THiNX and calls init()
+├── thinx-core.js              # THiNX class — full bootstrap, middleware, route wiring
+├── package.json               # v1.9.x, test runner: nyc jasmine
+├── thinx-api-openapi.yaml     # OpenAPI spec served at GET /api/v2/spec
+├── _envi.json                 # Test environment owner/device IDs (committed test fixture)
+│
+├── lib/                       # All application code
+│   ├── router.js              # Global middleware + healthcheck + OpenAPI spec route
+│   ├── router.auth.js         # POST /api(/v2)/login, GET /api(/v2)/logout
+│   ├── router.apikey.js       # API key CRUD — /api/v2/apikey, /api/user/apikey
+│   ├── router.build.js        # Build triggers — /api/v2/build, /api/build
+│   ├── router.device.js       # Device management — /api/v2/device, mesh, source attach
+│   ├── router.deviceapi.js    # Device-facing API — /device/register, /device/firmware
+│   ├── router.env.js          # Env vars — /api/v2/env, /api/user/env
+│   ├── router.gdpr.js         # GDPR consent — /api/v2/gdpr, /api/gdpr
+│   ├── router.github.js       # GitHub OAuth — /api/oauth/github
+│   ├── router.google.js       # Google OAuth — /api/oauth/google
+│   ├── router.logs.js         # Build + audit logs — /api/v2/logs, /api/user/logs
+│   ├── router.mesh.js         # Mesh management — /api/v2/mesh
+│   ├── router.profile.js      # User profile — /api/v2/profile, /api/user/profile
+│   ├── router.rsakey.js       # RSA key management — /api/v2/rsakey
+│   ├── router.slack.js        # Slack OAuth — /api/slack
+│   ├── router.source.js       # Code sources — /api/v2/source, /api/user/sources
+│   ├── router.transfer.js     # Device transfer — /api/v2/transfer
+│   ├── router.user.js         # User CRUD + stats — /api/v2/user, /api/user
+│   │
+│   └── thinx/                 # Domain classes (33 modules)
+│       ├── acl.js             # MQTT ACL management (Redis SMEMBERS)
+│       ├── apienv.js          # Per-device environment variables
+│       ├── apikey.js          # API key create/verify/revoke (Redis ak:<owner>)
+│       ├── audit.js           # Audit log writes to CouchDB managed_builds
+│       ├── auth.js            # MQTT credential management (bcrypt → Redis)
+│       ├── builder.js         # Firmware build orchestration (Docker invocation)
+│       ├── buildlog.js        # Build log streaming (CouchDB + WebSocket tail)
+│       ├── coap.js            # CoAP stub (MQTT forwarding not implemented)
+│       ├── database.js        # CouchDB connection + database init
+│       ├── deployment.js      # Firmware deployment path resolution + envelope reading
+│       ├── device.js          # Core device logic: register, firmware, OTT, edit
+│       ├── devices.js         # Collection-level device ops: list, revoke, push, attach
+│       ├── files.js           # Filesystem path helpers (appRoot, deployPath, etc.)
+│       ├── gdpr.js            # GDPR consent guard + cron-based user purge
+│       ├── git.js             # Git operations (clone, pull, checkout)
+│       ├── github.js          # GitHub API client (repo listing, webhook management)
+│       ├── globals.js         # Singleton config loader (config.json → cached _app_config)
+│       ├── influx.js          # InfluxDB client — static statsLog() + writePoint()
+│       ├── json2h.js          # JSON-to-C-header converter (Arduino/PlatformIO)
+│       ├── jwtlogin.js        # JWT HS512 sign/verify (secret stored in Redis)
+│       ├── logger.js          # Shared Winston logger (console + file transports)
+│       ├── messenger.js       # MQTT singleton + Slack RTM integration
+│       ├── notifier.js        # Build result Slack notifications
+│       ├── oauth-github.js    # GitHub OAuth2 flow helper
+│       ├── owner.js           # User/owner CRUD, password, MQTT key, meshes (Mailgun)
+│       ├── platform.js        # Platform detection + descriptor loading
+│       ├── plugins.js         # Platform plugin loader (plugins/ subdirectory)
+│       ├── plugins/           # Per-platform build plugins
+│       │   ├── arduino/plugin.js
+│       │   ├── mongoose/plugin.js
+│       │   ├── nodejs/plugin.js
+│       │   ├── nodemcu/plugin.js
+│       │   ├── pine64/plugin.js
+│       │   ├── platformio/plugin.js
+│       │   ├── python/plugin.js
+│       │   ├── sample/plugin.js
+│       │   └── plugins.json   # Plugin registry
+│       ├── queue.js           # Build queue (Socket.IO server :4000, worker dispatch)
+│       ├── queue_action.js    # Individual build job action wrapper
+│       ├── repository.js      # Git webhook processing + repository scanning
+│       ├── rsakey.js          # RSA keypair generate/list/revoke (filesystem)
+│       ├── sanitka.js         # Input sanitization (owner, udid, url, branch, apiKey)
+│       ├── sources.js         # Code source CRUD (CouchDB managed_users + managed_devices)
+│       ├── statistics.js      # Daily stat aggregation (log file parse → InfluxDB)
+│       ├── transfer.js        # Device ownership transfer (Mailgun notifications)
+│       ├── util.js            # Shared route helpers (responder, validateSession, etc.)
+│       └── validator.js       # Input validators (email, username length, etc.)
+│
+├── spec/                      # Test suite (Jasmine)
+│   ├── jasmine/               # All test specs (44 files)
+│   │   ├── 00-AppSpec.js      # Full app bootstrap integration test
+│   │   ├── 00-DatabaseSpec.js # CouchDB connection test
+│   │   ├── ZZ-Router*.js      # HTTP endpoint integration tests (require running app)
+│   │   └── *Spec.js           # Unit tests per domain class
+│   ├── helpers/
+│   │   └── bootstrap.js       # Test bootstrap (sets ENVIRONMENT=test, starts app)
+│   ├── support/
+│   │   └── jasmine.json       # Jasmine config: spec_dir=spec, spec_files=jasmine/*Spec.js
+│   ├── mnt/data/conf/         # Test config files (mirrors /mnt/data/conf/ for dev/test)
+│   └── _envi.json             # Test owner ID + device UDID fixture
+│
+├── services/
+│   ├── worker/                # Build worker service (separate Node process/Docker image)
+│   │   ├── worker.js          # Entry — connects to THINX_SERVER via Socket.IO
+│   │   ├── class.js           # Worker class — receives jobs, runs builders
+│   │   ├── builder*           # Builder executables
+│   │   └── platforms/         # Platform-specific build logic
+│   ├── transformer/           # Data transformer service (separate Express + isolated-vm)
+│   │   ├── transformer.js     # Entry — clustered Express, executes user JS in sandbox
+│   │   └── trans.js           # Transform execution helper
+│   ├── console/               # Vue 2 SPA frontend (separate build, see separate arch doc)
+│   ├── broker/                # Mosquitto broker config/scripts
+│   ├── couchdb/               # CouchDB config (etc/)
+│   ├── redis/                 # Redis Dockerfile with password baking
+│   └── traefik/               # Traefik reverse proxy config
+│
+├── builders/                  # Docker build image definitions
+│   ├── arduino-docker-build/
+│   ├── platformio-docker-build/
+│   ├── micropython-docker-build/
+│   ├── mongoose-docker-build/
+│   ├── nodemcu-docker-build/
+│   └── lua-inspect/
+│
+├── platforms/                 # Platform descriptor JSON files
+│   ├── arduino/descriptor.json
+│   ├── platformio/descriptor.json
+│   ├── micropython/descriptor.json
+│   └── ...
+│
+├── languages/                 # Language-specific file extension descriptors
+│   ├── c/, javascript/, lua/, python/
+│
+├── conf/                      # Sample/development config files
+│   ├── config-sample.json     # Template for /mnt/data/conf/config.json
+│   ├── config-localhost.json  # Local dev config
+│   ├── node-session.json      # Session secret (committed sample only)
+│   └── *-oauth-sample.json    # GitHub/Google/Twitter OAuth sample configs
+│
+├── static/                    # Static files served at /static/*
+├── scripts/                   # Utility scripts (sonar, metrics-coverage)
+├── design/                    # CouchDB design document JSON files
+├── docs/                      # API documentation
+├── .planning/codebase/        # Codebase analysis documents (this file)
+├── docker-compose.yml         # Full stack service definition
+└── thinx-api-openapi.yaml     # OpenAPI 3 specification
 ```
-
-## Directory Purposes
-
-**`vue/src/` (primary development target):**
-- Purpose: All Vue 2 application source code
-- Everything new belongs here
-
-**`vue/src/store/` (business logic layer):**
-- Purpose: Vuex modules — one file per domain entity
-- Contains: Async API calls, state normalization, reactive data
-- Key files: `index.js` assembles all modules and attaches `$api`
-
-**`vue/src/pages/` (view layer):**
-- Purpose: One directory per route; each contains the top-level Vue component for that page
-- Contains: Template markup, local component state, Vuex wiring via `mapGetters`/`mapActions`
-- Subdirectories with `components/` are page-local sub-components (e.g., `Visits/components/`)
-
-**`vue/src/components/` (shared UI layer):**
-- Purpose: Reusable components used across multiple pages
-- Contains: Layout shell, navigation, generic Widget/List/Form wrappers
-- Each component is in its own directory alongside its SCSS file
-
-**`vue/src/core/` (infrastructure):**
-- Purpose: Framework-agnostic utilities
-- Contains: `api.js` (HTTP client), `screenHelper.js` (breakpoint detection)
-
-**`vue/src/mixins/` (cross-cutting behavior):**
-- Purpose: Vue mixins applied globally or selectively to components
-- Contains: `layout.js` (colors config, injected globally via `Vue.mixin`), `hostnames.js` (env-var hostname resolution, applied selectively)
-
-**`vue/src/styles/` (global styles):**
-- Purpose: Application-wide SCSS, imported as a single entrypoint from `App.vue`
-- Contains: Variables, mixins, base reset, auth styles, BootstrapVue overrides
-
-**`vue/cypress/` (E2E tests):**
-- Purpose: Browser-level integration tests for the Vue app
-- Contains: Integration specs (JavaScript), support commands and plugin config (TypeScript)
-
-**`src/` (legacy — do not add new code here):**
-- Purpose: Original AngularJS 1.x admin console, superseded by the Vue app
-- Contains: Controllers, HTML templates, assets, legacy Gulp build, legacy Cypress suite
-
-## Key File Locations
-
-**Entry Points:**
-- `vue/src/main.js`: Vue app bootstrap — registers plugins, creates `ThinxApi`, mounts `#app`
-- `vue/src/App.vue`: Root component — auth guard, initial route redirect
-- `vue/src/Routes.js`: All route definitions
-
-**Configuration:**
-- `vue/vue.config.js`: Vue CLI / webpack config; dev proxy
-- `vue/babel.config.js`: Babel preset
-- `vue/cypress.json`: Cypress E2E settings
-- `vue/src/config.js`: Application color palette (static)
-
-**Core Logic:**
-- `vue/src/core/api.js`: HTTP client — all backend communication flows through here
-- `vue/src/store/index.js`: Vuex root — module assembly and `$api` attachment
-- `vue/src/store/auth.js`: Token management and JWT validation
-
-**Testing:**
-- `vue/cypress/integration/login.spec.js`: Login E2E test
-- `vue/cypress/support/commands.ts`: Custom Cypress commands
-
-**Production Server:**
-- `vue/server.js`: Simple Express server to serve `vue/dist/` static files
-
-## Naming Conventions
-
-**Files:**
-- Vue components: PascalCase matching the component name (`Devices.vue`, `DeviceDetail.vue`, `NavLink.vue`)
-- Store modules: camelCase domain noun (`devices.js`, `apikeys.js`, `buildlog.js`)
-- Utilities and mixins: camelCase (`api.js`, `screenHelper.js`, `hostnames.js`)
-- SCSS partials: `_camelCase.scss` or `_kebab-case.scss` with underscore prefix
-
-**Directories:**
-- Pages: PascalCase matching route name (`Devices/`, `Transformers/`, `Visits/`)
-- Components: PascalCase matching component name (`Layout/`, `Sidebar/`, `NavLink/`)
-- Store: flat, no subdirectories
-
-## Where to Add New Code
-
-**New page / route:**
-1. Create `vue/src/pages/<PageName>/<PageName>.vue`
-2. Create `vue/src/store/<domainName>.js` if new data domain needed
-3. Register store module in `vue/src/store/index.js`
-4. Add route entry in `vue/src/Routes.js` as a child of the `/app` Layout route
-5. Add `NavLink` entry in `vue/src/components/Sidebar/Sidebar.vue`
-
-**New shared component:**
-- Implementation: `vue/src/components/<ComponentName>/<ComponentName>.vue`
-- Styles (if any): `vue/src/components/<ComponentName>/<ComponentName>.scss`
-
-**New store module (data domain):**
-- Implementation: `vue/src/store/<domainName>.js`
-- Follow the pattern in `vue/src/store/devices.js`:
-  - `namespaced: true`
-  - `state: { items: [], headers: [] }`
-  - `mutations`: normalize API response into flat array
-  - `actions`: call `this.$api.$get/post/put/delete()`, commit results
-  - `getters`: `getItems`, `getHeaders`, and any lookup getters
-- Register in `vue/src/store/index.js`
-
-**New API endpoint call:**
-- Add the action to the relevant store module
-- Use `this.$api.$get('/path')` / `this.$api.$post('/path', JSON.stringify(payload))`
-- No changes to `ThinxApi` needed for standard CRUD
-
-**Utilities:**
-- Pure JS helpers with no Vue dependency: `vue/src/core/<utility>.js`
-- Vue-specific cross-cutting behavior: `vue/src/mixins/<name>.js`
-
-## Special Directories
-
-**`vue/dist/`:**
-- Purpose: Production build output
-- Generated: Yes (by `vue-cli-service build`)
-- Committed: No
-
-**`vue/node_modules/`:**
-- Purpose: npm dependencies
-- Generated: Yes
-- Committed: No
-
-**`src/html/`:**
-- Purpose: Appears to be a deployed/built copy of the legacy `src/` app
-- Generated: Likely yes (Gulp pipeline)
-- Committed: Yes (current state of repo includes it)
-
-**`.planning/`:**
-- Purpose: GSD architecture and planning documents
-- Generated: Yes (by GSD mapping commands)
-- Committed: Yes
 
 ---
 
-*Structure analysis: 2026-05-18*
+## Key File Locations
+
+### Entry Points
+- `thinx.js` — Process entry, 12 lines. Instantiates `THiNX` and calls `thx.init()`
+- `thinx-core.js` — Full application class. Bootstrap, middleware, all route wiring (~530 lines)
+
+### Configuration
+- `/mnt/data/conf/config.json` — Production runtime config (not committed; loaded by `lib/thinx/globals.js`)
+- `conf/config-sample.json` — Template showing all required config keys
+- `spec/mnt/data/conf/config.json` — Test config (auto-selected when `ENVIRONMENT=test` or `development`)
+- `/mnt/data/conf/node-session.json` — Express session secret
+
+### Core Routing
+- `lib/router.js` — Global middleware (auth, CORS, CSP) + health + OpenAPI routes
+- `lib/router.deviceapi.js` — Device-facing endpoints (`/device/register`, `/device/firmware`) — NO session required
+- `lib/router.device.js` — Management endpoints for devices (`/api/v2/device/*`) — session required
+
+### Domain Logic
+- `lib/thinx/device.js` — Single device operations (register, firmware, OTT, edit, push) ~800+ lines
+- `lib/thinx/devices.js` — Collection device operations (list, revoke, attach, detach mesh/source)
+- `lib/thinx/owner.js` — User account management (create, activate, password reset, meshes, MQTT key)
+- `lib/thinx/builder.js` — Firmware build logic (decrypt WiFi creds, clone repo, invoke Docker)
+- `lib/thinx/queue.js` — Build queue with Socket.IO worker pool
+- `lib/thinx/messenger.js` — MQTT singleton + Slack integration
+
+### Infrastructure
+- `lib/thinx/globals.js` — Singleton config loader, returns cached `app_config`, `redis_options`, OAuth configs
+- `lib/thinx/database.js` — CouchDB URI builder + database init (creates all `managed_*` DBs)
+- `lib/thinx/sanitka.js` — All input sanitization (called before every domain operation)
+- `lib/thinx/util.js` — `responder()`, `validateSession()`, `ownerFromRequest()` used in every router
+
+### Testing
+- `spec/jasmine/00-AppSpec.js` — Integration smoke test (boots full app)
+- `spec/jasmine/ZZ-Router*.js` — HTTP-level route tests (run after app bootstrap, prefixed ZZ for order)
+- `spec/helpers/bootstrap.js` — Sets `ENVIRONMENT=test`, starts THiNX app before all specs
+- `spec/support/jasmine.json` — Jasmine config
+
+---
+
+## Naming Conventions
+
+### Files
+- Router files: `router.<domain>.js` in `lib/` (e.g., `router.device.js`, `router.auth.js`)
+- Domain classes: `<domain>.js` in `lib/thinx/` (e.g., `device.js`, `owner.js`, `apikey.js`)
+- Test specs: `<Domain>Spec.js` or `ZZ-Router<Domain>Spec.js` in `spec/jasmine/`
+
+### Domain Classes
+- All exported as ES6 classes via `module.exports = class ClassName {...}`
+- Constructor always accepts `redis` as first parameter where Redis is needed
+- Instance methods are camelCase verbs: `device.register()`, `owner.create()`, `apikey.verify()`
+- Static utility methods in `Util` and `Sanitka` are `static` class methods callable without instantiation
+
+### Router Functions
+- Internal handler functions are named verb+Noun: `editDevice`, `listDevices`, `deleteDevice`, `getDeviceDetail`
+- All router modules export a single factory function `module.exports = function(app) {...}`
+
+---
+
+## Module Organization — Domain Classes (`lib/thinx/`)
+
+### Infrastructure / Cross-cutting (no business logic)
+- `globals.js` — config singleton
+- `database.js` — CouchDB connection
+- `sanitka.js` — input sanitation
+- `util.js` — HTTP response helpers
+- `validator.js` — field validators
+- `logger.js` — Winston logger
+- `influx.js` — metrics logging
+- `files.js` — filesystem path helpers
+
+### Authentication / Security
+- `auth.js` — MQTT bcrypt credentials
+- `apikey.js` — REST API keys (Redis)
+- `jwtlogin.js` — JWT HS512 (Redis-backed secret)
+- `acl.js` — Mosquitto ACL management
+- `oauth-github.js` — GitHub OAuth helper
+- `rsakey.js` — SSH keypair management
+
+### Device Management
+- `device.js` — single device operations
+- `devices.js` — collection device operations
+- `deployment.js` — firmware deployment paths + envelopes
+- `transfer.js` — ownership transfer
+
+### User Management
+- `owner.js` — user CRUD, activation, password, meshes
+- `gdpr.js` — consent + scheduled purge
+- `audit.js` — audit log
+
+### Build Pipeline
+- `builder.js` — build orchestration
+- `queue.js` — worker pool (Socket.IO)
+- `queue_action.js` — job wrapper
+- `buildlog.js` — log streaming
+- `repository.js` — webhook processing + repo scanning
+- `git.js` — Git operations
+- `github.js` — GitHub API client
+- `notifier.js` — Slack build notifications
+- `sources.js` — code source CRUD
+- `platform.js` — platform detection
+- `plugins.js` — platform plugin loader
+- `plugins/<platform>/plugin.js` — per-platform build plugin
+
+### Communication
+- `messenger.js` — MQTT singleton + Slack RTM
+- `coap.js` — CoAP stub (not functional)
+
+### Utilities
+- `statistics.js` — log-file-based daily stat aggregation
+- `json2h.js` — JSON to C header file conversion
+- `apienv.js` — per-device environment variable management
+
+---
+
+## Where to Add New Code
+
+### New REST endpoint (v2)
+1. Create `lib/router.<domain>.js` with `module.exports = function(app) {...}`
+2. Register it in `thinx-core.js` after the existing `require('./lib/router.*.js')(app)` calls (around line 358)
+3. Guard every handler with `if (!Util.validateSession(req)) return res.status(401).end()`
+4. Sanitize all inputs via `sanitka.*()` before passing to domain classes
+5. Return responses via `Util.responder(res, success, message)` or `Util.respond(res, object)`
+
+### New domain class
+1. Create `lib/thinx/<domain>.js` as `module.exports = class DomainName {...}`
+2. Accept `redis` in constructor; do not create Redis clients internally
+3. Do NOT create CouchDB clients at module scope — accept via constructor or create inside methods after init
+4. Add spec file at `spec/jasmine/<Domain>Spec.js`
+
+### New device-facing endpoint (no auth)
+- Add to `lib/router.deviceapi.js` — this router intentionally has no session checks for device calls
+- Device auth uses `req.headers.authentication` (API key) not sessions
+
+### New build platform
+1. Add platform plugin at `lib/thinx/plugins/<platform>/plugin.js`
+2. Register in `lib/thinx/plugins/plugins.json`
+3. Add Docker build image definition in `builders/<platform>-docker-build/`
+4. Add platform descriptor in `platforms/<platform>/descriptor.json`
+
+### New test
+- Unit tests for domain classes: `spec/jasmine/<Domain>Spec.js` (numbered prefix if order matters: `02-`, etc.)
+- Route integration tests: `spec/jasmine/ZZ-Router<Domain>Spec.js` (ZZ prefix ensures they run after app bootstrap)
+
+---
+
+## Runtime Data Paths
+
+In production (`/mnt/data/`), in test/dev (`spec/mnt/data/`):
+
+| Path | Contents |
+|---|---|
+| `conf/config.json` | Main app config (loaded by `globals.js`) |
+| `conf/node-session.json` | Express session secret |
+| `deploy/<owner>/<udid>/` | Built firmware + `build.json` |
+| `repos/` | Cloned git repositories |
+| `ssh_keys/` | RSA keypairs (filenames include owner ID) |
+| `statistics/latest.log` | Winston log file parsed by `statistics.js` |
+| `mosquitto/auth/` | Mosquitto auth config written by `auth.js` |
+
+---
+
+## Service Topology (docker-compose.yml)
+
+| Service | Image / Build | Port | Purpose |
+|---|---|---|---|
+| `mosquitto` | `thinxcloud/mosquitto` | 1883, 8883 | MQTT broker |
+| `couchdb` | `couchdb:3.2.0` | 5984 (internal) | Primary database |
+| `thinx-redis` | `./services/redis` | 6379 (internal) | Cache + session + MQTT creds |
+| `api` | `./` (this repo) | 7442 | Main backend API |
+| `worker` | `thinxcloud/worker:latest` | 4000 (Socket.IO, internal) | Build worker |
+| `transformer` | `./services/transformer` | 7474 (internal) | JS data transformer |
+| `console` | `./services/console/src` | 8000 | Vue 2 SPA frontend |
+| `influxdb` | `influxdb:1.8` | 8086 (internal) | Time-series metrics |
+| `chronograf` | `chronograf:1.9` | 8888 (internal) | InfluxDB UI |
+| `traefik` | `./services/traefik` | 80, 443 | Reverse proxy / TLS |
