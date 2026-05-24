@@ -71,7 +71,7 @@
     "node-schedule": "^2.1.1",
     "npm-auto-version": "^1.0.0",
     "path": "^0.12.7",
-    "qs": "^6.15.0",
+    "qs": "^6.15.2",
     "querystring": "^0.2.0",
     "redis": "^5.8.2",
     "rollbar": "^2.26.5",
