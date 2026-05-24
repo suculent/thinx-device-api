@@ -112,15 +112,16 @@ jobs:
       - docker/build:
           image: thinxcloud/api
           dockerfile: ./Dockerfile
-          extra_build_args: --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} --build-arg SNYK_TOKEN=${SNYK_TOKEN} --build-arg ENVIRONMENT=${ENVIRONMENT} --build-arg REVISION=$(git describe --abbrev=0) --build-arg ENTERPRISE=${ENTERPRISE}
+          extra_build_args: --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} --build-arg SNYK_TOKEN=${SNYK_TOKEN} --build-arg ENVIRONMENT=${ENVIRONMENT} --build-arg REVISION=$(git describe --abbrev=0) --build-arg COMMIT_SHA=$CIRCLE_SHA1 --build-arg ENTERPRISE=${ENTERPRISE}
           tag: 'latest'
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinxcloud/api
           tag: 'latest'
-      - slack/notify:
-          template: success_tagged_deploy_1
-          event: pass
+      # Pass-notification removed (was misleading — fires before the swarm
+      # actually pulls the new image). App-start Slack notification is now
+      # sent from inside the API at init time via Notifier.notifyAppStart()
+      # in thinx.js (see lib/thinx/notifier.js).
       - slack/notify:
           template: basic_fail_1
           event: fail
