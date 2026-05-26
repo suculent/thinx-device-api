@@ -96,11 +96,14 @@ Five separate issues surfaced during the Vue console UAT walk. None are caused b
 
 User confirmed at close-out walk that login accepts both `username/test_password` and `owner_id` credentials. Not actually a regression. Withdrawn from the v2 backlog.
 
-### E. Legacy console profile page shows `john@doe.com` placeholder
+### E. Legacy console profile page shows `john@doe.com` placeholder ✓ FIXED 2026-05-26
 
-- **Symptom:** Legacy AngularJS console at `rtm.thinx.cloud` profile page shows `john@doe.com` instead of the user's actual email.
-- **Caused by Phase 1?** **No.** Legacy console UI bug, owned by `services/console/src/` (the AngularJS half), not the Vue console.
-- **Triage:** **WON'T FIX in v1.** Legacy console is on the deprecation path; the Vue console is the v1.0 GA frontend. Documented for completeness only. Removed from v2/deferred candidates.
+- **Symptom:** Legacy AngularJS console at `rtm.thinx.cloud` profile page shows `john@doe.com` (HTML placeholder text) instead of the user's actual email.
+- **Initial triage (CORRECTED):** Originally documented as "WON'T FIX in v1 — legacy console is on the deprecation path." User explicitly overrode this 2026-05-26: the legacy console must stay in a working state until the Vue console is feature-complete and released as THiNX v2.0.x. Legacy bugs are real bugs, not deprecation-deferrable. See memory `legacy-console-supported-until-v2`.
+- **Root cause:** `Owner.profile()` at `lib/thinx/owner.js:296-322` returned `{first_name, last_name, username, owner, avatar, info, admin}` — all top-level — but `email` was buried under `info.email`. The legacy console's `services/console/src/app/views/profile/account.html:55` binds to `{{$root.profile.email}}` (top-level), which resolved to `undefined`, so the HTML placeholder text `john@doe.com` showed.
+- **Fix (commit `bcd6e83f`, hotfix, NOT part of Phase 1 plan):** Backend `Owner.profile()` now also flattens `email` to the top level of the response. Prefers `body.email`, falls back to `body.info.email` for older user docs that may only have it nested. Vue console treats this as additive (extra field ignored).
+- **Why backend not frontend:** The legacy console fix would have been a one-character HTML edit (`$root.profile.email` → `$root.profile.info.email`), but that's legacy-only and doesn't benefit other clients. Backend fix is symmetric with how every other field flattens; consistent and reusable.
+- **Deploy:** Verified live on `rtm.thinx.cloud` post-`bcd6e83f` deploy (image SHA captured in the Issue E follow-up commit).
 
 ## Phase exit gates
 
