@@ -35,7 +35,9 @@
   3. Response is identical (status + body shape) for both a registered email and an unregistered one (no enumeration leak).
   4. A regression spec under `spec/jasmine/ZZ-*` asserts the unauthenticated 2xx path against `POST /api/v2/password/reset` for a non-existent email.
   5. Root cause is documented (Express middleware vs. Traefik label vs. nginx) in the phase close-out, with a reversion plan if the fix touches edge config.
-**Plans:** TBD
+**Plans:** 2 plans (W1: backend fixes, W2: regression spec + deploy + UAT)
+  - [ ] 01-01-PLAN.md — Bearer-null guard in lib/router.js + no-enumeration normalization in lib/router.user.js (+ assertion update in ZZ-AppSessionUserSpec.js)
+  - [ ] 01-02-PLAN.md — New regression spec ZZ-RouterPasswordResetSpec.js + push/CI/stack-deploy + rtm curl + Vue UAT + close-out SUMMARY
 **Notes:** Pre-investigation seed already exists at `.planning/G8-INVESTIGATION.md` (filed 2026-05-26). Suspected culprits ranked in `.planning/codebase/CONCERNS.md` — top candidates are CORS allowlist on rtm, the JWT-verify 403 short-circuit at `lib/router.js:132`, or Traefik/nginx edge config. Cross-ref: console submodule Phase 11 Wave 1.
 
 ### Phase 2: PII Logging Scrub
