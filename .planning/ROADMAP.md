@@ -20,7 +20,7 @@
 - [x] **Phase 1: AUTH API — Password Reset** — ✓ **Verified 2026-05-26** (live rtm UAT against image `0a0e6b32`; AUTH-API-01 closed end-to-end)
 - [x] **Phase 2: PII Logging Scrub** — ✓ **Verified 2026-05-26** (deployed-container + CI evidence against image `3a461b3d`; SEC-PII-01 closed; 12 sites swept)
 - [x] **Phase 3: Swarm Auto-Pull** — ✓ **Verified 2026-05-26** (push-observe SLA test PASS via Rung 1 — `docker service update --force swarmpit_app`; delta=63s; OPS-01 closed; zero source-code commits)
-- [ ] **Phase 4: Dependency Triage** — Classify all 29 Dependabot findings (11 high / 17 moderate / 1 low) as v1-blocker or v1.x-deferred, fix the blockers, and merge-up to default branches
+- [~] **Phase 4: Dependency Triage** — Classify all 29 Dependabot findings (11 high / 17 moderate / 1 low) as v1-blocker or v1.x-deferred; blocker fixes shipped on `thinx-staging` in commit `d8e3176c` (runtime-tree `npm audit --omit=dev` high=9→0 = PRIMARY METRIC); post-fix baseline captured + dep-triage.md Section 3 populated; Slice 4 merge-up PRs to default branches outstanding before Verified
 
 ## Phase Details
 
@@ -78,12 +78,12 @@
   2. Every "blocker" verdict in the table has a corresponding fix landed (`package.json` direct bump, `overrides` block pin, or code-level mitigation) — and the resulting GitHub Security tab high-severity count drops to the documented "deferred-with-rationale" baseline (zero unaddressed high-severity advisories).
   3. The `chai-http` v4 lock and any other AGENTS.md-documented dependency locks are respected — no upgrade attempted in this phase for items in the lock list, and any locked item that appears in the Dependabot list is explicitly tagged "v1.x-deferred — locked per AGENTS.md".
   4. The `npm audit` post-fix output is captured in `.planning/dep-triage.md` as the new baseline; future Dependabot alerts have a documented starting point to diff against.
-**Plans:** 2/4 plans executed
+**Plans:** 4 plans (Slice 1: baseline + triage; Slice 2: blocker fixes; Slice 3: post-fix baseline + close-out; Slice 4: merge-up PRs to master + main) — 3/4 complete
 
   Plans:
-  - [x] 04-01-baseline-and-triage-table-PLAN.md — pre-fix audit baselines (full tree + runtime tree + Dependabot snapshot) + populated triage table at .planning/dep-triage.md (29 alerts classified per research preclassification)
-  - [x] 04-02-blocker-fixes-PLAN.md — 4 surgical override edits in package.json (-follow-redirects, lodash 4.17.23->4.18.1, minimatch 5.1.0->5.1.9, +ws 8.20.1); single npm install regenerates lockfile; npm test green; push to thinx-staging; CI green; Swarmpit autoredeploy; Phase 1 contract preserved
-  - [ ] 04-03-post-fix-baseline-and-closeout-PLAN.md — post-fix audit baselines + dep-triage Section 3 populated + REFACTOR-05 + SEC-DEP-02 filed as v1.x backlog + STATE/ROADMAP/REQUIREMENTS updates + 04-SUMMARY.md close-out
+  - [x] 04-01-baseline-and-triage-table-PLAN.md — pre-fix audit baselines (full tree + runtime tree + Dependabot snapshot) + populated triage table at .planning/dep-triage.md (29 alerts classified per research preclassification) (commit `f074139a`/`0c8cbfb3`/`740f0bff`)
+  - [x] 04-02-blocker-fixes-PLAN.md — 4 surgical override edits in package.json (-follow-redirects, lodash 4.17.23->4.18.1, minimatch 5.1.0->5.1.9, +ws "$ws" self-ref resolving to 8.21.0); single npm install regenerates lockfile; CircleCI green first try (3 builds PASS); push to thinx-staging; Swarmpit autoredeploy delta=49s; Phase 1 + 2 contracts preserved on image `sha256:4d3fb789` (commit `d8e3176c` + fix-log row `e75fd810`)
+  - [x] 04-03-post-fix-baseline-and-closeout-PLAN.md — post-fix audit baselines (full 8 = 1H + 7M devDep-only residue; runtime-tree 0 = primary metric ✓) + dep-triage.md Section 3 populated with pre/post metric snapshot + 3-bucket classification (7 auto-close-imminent / 19 deferred-stale / 3 deferred-dev-only); operator decision 2026-05-27 Option C (manual UI walk skipped, 22 non-blocker alerts left to age out); REFACTOR-05 + SEC-DEP-02 filed in REQUIREMENTS.md; STATE/ROADMAP updated; 04-SUMMARY.md close-out
   - [ ] 04-04-merge-up-to-default-branches-PLAN.md — open PRs thinx-staging->master + thinx-staging->main on parent suculent/thinx-device-api (so cloud scanners see the fix on default branches); gated services/console PR if non-empty diff; operator approves + merges via GitHub UI; flip SEC-DEP-01 + Phase 4 to Verified
 **Notes:** Surfaced 2026-05-26 via GitHub Security tab. The `package.json` `overrides` block (L97-136 — 38 pins) is the expected fix vector for transitive CVEs. First action: `gh api repos/suculent/thinx-device-api/dependabot/alerts` to enumerate. Cross-ref: `.planning/codebase/CONCERNS.md` "Security Considerations".
 
@@ -94,7 +94,7 @@
 | 1 | AUTH API — Password Reset | Restore unauth `POST /api/v2/password/reset` 200 on rtm | AUTH-API-01 | 5 |
 | 2 | PII Logging Scrub | Redact PII/secrets in `lib/thinx/owner.js` logs | SEC-PII-01 | 4 |
 | 3 | Swarm Auto-Pull | Restore swarm-side auto-redeploy | OPS-01 | 4 |
-| 4 | Dependency Triage | 2/4 | In Progress|  |
+| 4 | Dependency Triage | Triage 29 Dependabot alerts; fix v1-blockers; merge-up to default branches | SEC-DEP-01 | 4 |
 
 ## Requirement Coverage
 
@@ -116,7 +116,7 @@
 | 1. AUTH API — Password Reset | 2/2 | Verified | 2026-05-26 |
 | 2. PII Logging Scrub | 1/1 | Verified | 2026-05-26 |
 | 3. Swarm Auto-Pull | 1/1 | Verified | 2026-05-26 |
-| 4. Dependency Triage | 0/0 | Not started | - |
+| 4. Dependency Triage | 3/4 | code-shipped — pending Slice 4 merge-up | - |
 
 ## Dependencies (visual)
 
@@ -138,4 +138,4 @@ Phase 3 is functionally independent of 1, 2, 4 and could execute in parallel wit
 
 ---
 *Roadmap created: 2026-05-26*
-*Last updated: 2026-05-26 — Phase 3 (Swarm Auto-Pull) ✓ Verified via Rung 1 (force-restart swarmpit_app); push-observe SLA test PASS (delta=63s); OPS-01 closed; OPS-02 (stale node) + OPS-03 (malformed image tags) filed as v1.x deferred*
+*Last updated: 2026-05-27 — Phase 4 Slice 3 (post-fix baseline + close-out) shipped on `thinx-staging`. Slices 1–3 of 4 complete; runtime-tree `npm audit --omit=dev` high=9→0 (PRIMARY METRIC ✓); 7 GHSAs closed via 4 surgical override edits in commit `d8e3176c`. Slice 4 (merge-up PRs `thinx-staging → master` + `thinx-staging → main`) outstanding before Phase 4 / SEC-DEP-01 flips to Verified. Two new v1.x backlog items filed: REFACTOR-05 (jshint + fs-finder runtime-deps misclassification) + SEC-DEP-02 (services/console has 15 open Dependabot alerts of its own).*

@@ -50,25 +50,86 @@ Scope: All open Dependabot alerts against `suculent/thinx-device-api` as of slic
 
 ### Captured at
 
-_(filled in by Slice 3)_
+2026-05-26T22:50:37Z (Slice 3 close-out timestamp). Lockfile provenance: `package.json` + `package-lock.json` last touched in commit `d8e3176c` (Slice 2 — `chore(deps): SEC-DEP-01 - resolve 7 active alerts via overrides`). `npm audit` re-run is read-only against that lockfile; no `npm install` performed in Slice 3.
+
+**Operator decision 2026-05-27: Option C — proceed with documentation now; document rescan-pending residual (29 open Dependabot alerts; expected auto-resolution within ~24h; runtime-tree npm audit high=0 is the authoritative primary metric).** Skipped the manual Dependabot UI dismissal walk; the 7 blocker alerts (#168, #167, #146, #145, #144, #171, #193) will auto-close on next GitHub rescan (typical latency 1–6h after lockfile change on `thinx-staging`; upper bound ~24h). The 22 non-blocker alerts (19 deferred-stale + 3 deferred-dev-only from Slice 1's triage) are LEFT OPEN per the operator's decision — they may be dismissed in a follow-up pass or left to age out via natural Dependabot lifecycle. Phase 4 close-out does not gate on the Dependabot UI count reaching 0; the primary metric is the runtime-tree audit (verified high=0).
 
 ### Metric snapshot
 
-| Metric | Value |
-|--------|-------|
+| Metric | Pre-fix | Post-fix | Delta |
+|--------|---------|----------|-------|
+| Runtime tree (`npm audit --omit=dev`) — high | 9 | **0** | **-9** ← Phase 4 primary success metric |
+| Runtime tree — moderate | 6 | 0 | -6 |
+| Runtime tree — low | 0 | 0 | 0 |
+| Runtime tree — total | 15 | 0 | -15 |
+| Full tree (`npm audit`) — high | 23 | 1 | -22 |
+| Full tree — moderate | 11 | 7 | -4 |
+| Full tree — low | 0 | 0 | 0 |
+| Full tree — total | 34 | 8 | -26 |
+| Dependabot open alerts — total | 29 | 29 | 0 (rescan pending; see note) |
+| Dependabot open — high severity | 11 | 11 | 0 (rescan pending; see note) |
+| Dependabot open — medium severity | 17 | 17 | 0 (rescan pending; see note) |
+| Dependabot open — low severity | 1 | 1 | 0 (rescan pending; see note) |
+
+**Note on the 8-row full-tree residual (1H + 7M):** these are devDep-only carriers (chains rooted in mocha / nyc / jest-junit / ajv — all stripped by `Dockerfile` L86 `npm install --omit=dev`). They do NOT reach the production image and do NOT contribute to the runtime-tree count. Slice 1's `dev-only-scope` rationale class covers them.
+
+**Note on the Dependabot delta = 0:** GitHub Dependabot rescans the repository after a lockfile change on default branches; `thinx-staging` is not currently the default branch (`master` is), so the rescan is anchored to the next default-branch surface. Slice 4 (merge-up PR `thinx-staging → master`) is the event that propagates the lockfile change into Dependabot's rescan input. The 7 blocker alerts (see "Auto-close-imminent" bucket below) will close on that rescan; the 22 non-blocker alerts remain per operator decision.
+
+### Open-alert bucket classification (29 alerts)
+
+Per the operator's Option C decision, the 29 open alerts are classified into three buckets — none were manually dismissed in this slice.
+
+#### Bucket A — Auto-close-imminent (7 alerts) — Slice 2's fix shipped; rescan pending
+
+These 7 alerts map 1:1 to Slice 1's `blocker`-verdict triage rows. The lockfile shipped in commit `d8e3176c` resolves each — verified via runtime-tree `npm audit --omit=dev` returning high=0 + total=0 against the deployed lockfile. They are expected to auto-close on the next GitHub Dependabot rescan (typical latency 1–6h after lockfile reaches default branch; upper bound ~24h). Slice 4 (merge-up PR) is the event that exposes the new lockfile to the rescan.
+
+- **#168** GHSA-r5fr-rjxr-66jc lodash high → resolved by lodash 4.17.23 → 4.18.1 override (resolves at all 6 instances)
+- **#167** GHSA-f23m-r3pf-42rh lodash medium → resolved by same lodash override
+- **#146** GHSA-7r86-cg39-jmmj minimatch high → resolved by minimatch 5.1.0 → 5.1.9 override
+- **#145** GHSA-23c5-xmqv-rm74 minimatch high → resolved by same minimatch override
+- **#144** GHSA-3ppc-4f35-3m26 minimatch high → resolved by same minimatch override
+- **#171** GHSA-r4q5-vmmm-2653 follow-redirects medium → resolved by removing the `follow-redirects` pin (axios@1.16.1's own `^1.16.0` declaration resolves to 1.16.0, past the patched range)
+- **#193** GHSA-58qx-3vcg-4xpx ws medium → resolved by `ws: "$ws"` self-reference override (resolves to 8.21.0 at all 6 instances; past the 8.20.0 patched-line start)
+
+#### Bucket B — Dismissable-with-notes (19 alerts) — `deferred-stale` (installed past vuln range)
+
+These alerts target package ranges that the live `package-lock.json` already resolves PAST (Slice 1's `deferred-stale` rationale). The advisories are stale relative to the deployed state; they will auto-clear on Dependabot rescan, OR can be manually dismissed via the UI with reason "Fixed in newer version". Per operator Option C decision, no manual dismissal performed this slice — alerts left to age out.
+
+axios (15 alerts; runtime; installed 1.16.1 past all listed `<= 1.15.x` ranges):
+- **#185** GHSA-pf86-5x62-jrwf high; **#184** GHSA-6chq-wfr3-2hj9 high; **#181** GHSA-pmwg-cvhr-8vh7 high; **#179** GHSA-q8qp-cvcw-x6jj high
+- **#173** GHSA-3p68-rc4w-qgx5 medium; **#180** GHSA-3w6x-2g7m-8v23 medium; **#190** GHSA-445q-vr5w-6q77 medium; **#187** GHSA-5c9x-8gcm-mpgx medium; **#188** GHSA-62hf-57xw-28j9 medium; **#172** GHSA-fvcv-3m26-pcqx medium; **#189** GHSA-m7pr-hjqh-92cm medium; **#186** GHSA-vf2m-468p-8v99 medium; **#182** GHSA-w9j2-pvgh-6h63 medium; **#183** GHSA-xx6v-rp6x-q39c medium
+- **#178** GHSA-xhjh-pmcv-23jw low
+
+fast-uri (2 alerts; development; installed 3.1.2 past `<= 3.1.1` range):
+- **#192** GHSA-v39h-62p7-jpjc high; **#191** GHSA-q3j6-qgpj-74h6 high (scope is `development` per gh api; carried via ajv chain)
+
+ip-address (1 alert; runtime; installed 10.2.0 past `<= 10.1.0` range):
+- **#177** GHSA-v2v4-37r5-5v8g medium
+
+uuid (1 alert; runtime; installed 14.0.0 past `< 13.0.1` range):
+- **#176** GHSA-w5hq-g745-h8pq medium
+
+#### Bucket C — Dev-only-deferred (3 alerts) — `deferred-dev-only` (production image strips)
+
+These alerts target devDependencies that are stripped from the production image by `Dockerfile` L86 (`npm install --omit=dev`). They never reach the production runtime path. Trigger to revisit: if mocha / nyc usage moves into a runtime code path (none planned for v1).
+
+- **#147** GHSA-5c6j-r48x-rmvq serialize-javascript high (via mocha)
+- **#195** GHSA-qj8w-gfj5-8c6v serialize-javascript medium (via mocha)
+- **#194** GHSA-w5hq-g745-h8pq uuid medium (development scope — via nyc > istanbul-lib-processinfo and via jest-junit; same GHSA as #176 but a different alert because the chain is dev-only here)
 
 ### Deferred alerts (open by design)
 
-_(filled in by Slice 3 — list of GHSA IDs that remain open with rationale class)_
+Per operator Option C decision, NO alerts were manually dismissed in this slice. All 29 alerts remain open in the GitHub Security tab; the 7 in Bucket A will auto-close on rescan, the 22 in Buckets B + C are left open by design with the rationale class noted above (Bucket B = `stale-alert`; Bucket C = `dev-only-scope`). Cross-reference for each alert's verdict / rationale / future-trigger: Section 1 (Triage table) row for that GHSA.
 
 ### Artifact references
 
 - `.planning/phases/04-dependency-triage/04-AUDIT-PRE.json` (pre-fix full tree)
 - `.planning/phases/04-dependency-triage/04-AUDIT-PRE-PROD.json` (pre-fix runtime tree)
-- `.planning/phases/04-dependency-triage/04-DEPENDABOT-PRE.json` (pre-fix Dependabot enumeration)
-- `.planning/phases/04-dependency-triage/04-AUDIT-POST.json` (placeholder — filled by Slice 3)
-- `.planning/phases/04-dependency-triage/04-AUDIT-POST-PROD.json` (placeholder)
-- `.planning/phases/04-dependency-triage/04-DEPENDABOT-POST.json` (placeholder)
+- `.planning/phases/04-dependency-triage/04-DEPENDABOT-PRE.json` (pre-fix Dependabot enumeration; 29 alerts)
+- `.planning/phases/04-dependency-triage/04-AUDIT-POST.json` (post-fix full tree; 8 = 1H + 7M devDep-only residue)
+- `.planning/phases/04-dependency-triage/04-AUDIT-POST-PROD.json` (post-fix runtime tree; 0 = primary metric ✓)
+- `.planning/phases/04-dependency-triage/04-DEPENDABOT-POST.json` (post-fix Dependabot enumeration; 29 alerts — rescan pending)
+- Provisional capture artifacts from Slice 2 (`04-AUDIT-POST-PROVISIONAL.json`, `04-AUDIT-POST-PROD-PROVISIONAL.json`) were verified byte-equivalent to the authoritative captures above (`jq -S .metadata.vulnerabilities` diff returned empty for both pairs); they have been removed in this slice to keep the repo clean per plan's read-first guidance — the authoritative `*POST*.json` files supersede them.
 
 ## Rationale taxonomy (closed set)
 
