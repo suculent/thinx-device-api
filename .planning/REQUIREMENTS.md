@@ -13,7 +13,7 @@ Requirements for closing v1.0 GA from the backend side. Each maps to exactly one
 
 ### Operations
 
-- [ ] **OPS-01**: Swarm-side auto-pull on `188.166.23.244` resumes working. Pushing an updated image tag (e.g., a parent submodule bump triggering the Vue rebuild) results in the swarm task picking up the new image without requiring manual `./scripts/stack-deploy`. Target SLA: rolling task within 5 minutes of push completion. Validated by: (a) root-cause documented (Traefik label, swarm cronjob, registry auth, manifest mismatch, etc.), (b) a controlled push-and-observe verification on rtm, (c) reversion plan documented if the fix introduces regression. Cross-ref: console `v1.x-backlog.md` (OPS-swarmpull), incident 2026-05-25 14:44 CET.
+- [x] **OPS-01** ✓ Verified 2026-05-26 (Phase 3 — see `phases/03-swarm-auto-pull/03-SUMMARY.md`): Swarm-side auto-pull on `188.166.23.244` restored. Pushing an updated image tag (a no-op commit triggering CircleCI build-api-cloud) results in the swarm task picking up the new image without requiring manual `./restart.sh` workaround. Observed SLA: t2 − t0 = **63 seconds** (target ≤ 300s; 237s under budget). Validated by: (a) ✓ root cause documented — Swarmpit 1.9 watcher process entered a silent degraded state (container Running but app deadlocked, HTTP 502 via Traefik, zero logs for 30+ hours, zero autoredeploy emits); (b) ✓ controlled push-and-observe verification — commit `8a09d42f` triggered CI image `sha256:81b22f1f...`, watcher logged `autoredeploy fired! DIGEST: [ 950043b4 ] -> [ 81b22f1f ]` at 16:29:36 UTC, new swarm task Running at 16:29:39 UTC; (c) ✓ reversion plan documented (rollback via `docker service rollback swarmpit_app`; runbook line in `AGENTS.md` § "Swarm Auto-Pull Recovery"). Fix: `ssh ... "docker service update --force swarmpit_app"` (Rung 1 of 4-rung ladder; Rungs 2/3/4 NOT exercised). Zero source-code commits this phase — operational fix only. Cross-ref: console `v1.x-backlog.md` (OPS-swarmpull), incident 2026-05-25 14:44 CET.
 
 ### Security & Compliance
 
@@ -40,6 +40,11 @@ Requirements for closing v1.0 GA from the backend side. Each maps to exactly one
 ### Audit Log Retention (surfaced 2026-05-26 in Phase 2 verification)
 
 - **SEC-PII-02**: Historic entries in the CouchDB `managed_logs` database (`thinx_couchdb` on swarm host `188.166.23.244`, ~658,808 docs as of 2026-05-26) still contain raw 64-character reset_keys from before Phase 2's fix landed. Sample evidence: lines like `Attempt to set password with: 53d97b305c88081c744e764ddc7c52dc7b98b74cd503c0f96ae799624014b644`. Phase 2's `SEC-PII-01` fix prevents the leak from continuing; cleanup of the historic data is a separate concern. Defer to v1.x/v2. Possible remediation: (a) one-time `_bulk_docs` UPDATE with redacted message strings, (b) bulk delete of audit entries older than a retention window, (c) introduce an `audit_log` TTL going forward. GDPR-adjacent.
+
+### Operations (surfaced 2026-05-26 in Phase 3 verification)
+
+- **OPS-02**: Stale swarm membership entry `b356ad8e1d60` / `10.133.0.4` remains in dockerd's memberlist gossip layer, causing Push/Pull timeouts (10+ events 2026-05-25 15:25-15:57 UTC). Not in `docker node ls`. Rung 1's success in Phase 3 made cleanup deferrable — the silent watcher was unrelated to fabric churn. Cleanup procedure is the Rung 3 protocol in `phases/03-swarm-auto-pull/03-PLAN.md` Task 5 (currently checkpoint-gated and inactive). Defer to v1.x: (a) not causal to OPS-01; (b) cleanup carries swarm-fabric risk, best done on a low-traffic window; (c) the timeouts are tolerable noise, not service-affecting. Trigger to re-evaluate: if memberlist timeouts re-correlate with another swarmpit_app silence event, OR if a new node joins the cluster and gossip churn elevates.
+- **OPS-03**: Pre-existing autoredeploy-failed services with malformed image-tag specs (trailing `@` with no digest) — surfaced in watcher logs 2026-05-26 16:23-16:24 UTC. Affected services: `thinx_chronograf` (`chronograf:1.9@`), `thinx_couchdb` (`couchdb:3@`), `thinx_influxdb` (`influxdb:1.8@`), `thinx_worker` (`thinxcloud/worker:latest@`). Each fails autoredeploy with HTTP 400 `InvalidArgument: ContainerSpec: "<tag>@" is not a valid repository/tag`. Unrelated to OPS-01 (running tasks unaffected; only autoredeploy is broken on these specific services). NOT v1 GA-blocking. Worth fixing as v1.x hygiene — particularly `thinx_couchdb` because broken autoredeploy means manual `./restart.sh` is the only path to bump CouchDB. Investigate before any future CouchDB version bump. Cleanup: edit `/mnt/gluster/deployment/swarm/*.yml` to remove the trailing `@` from each image spec (or pin to a real digest), then `docker stack deploy`.
 
 ### Auth & Account Lifecycle (surfaced 2026-05-26 in Phase 1 UAT)
 
@@ -75,16 +80,16 @@ Explicitly excluded from v1 GA. Documented to prevent scope creep.
 |-------------|-------|--------|
 | AUTH-API-01 | Phase 1 | **Verified (2026-05-26)** |
 | SEC-PII-01 | Phase 2 | **Verified (2026-05-26)** |
-| OPS-01 | Phase 3 | Pending |
+| OPS-01 | Phase 3 | **Verified (2026-05-26)** |
 | SEC-DEP-01 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 4 total
 - Mapped to phases: 4 ✓
-- Verified: 2 (AUTH-API-01, SEC-PII-01)
-- Pending: 2 (OPS-01, SEC-DEP-01)
+- Verified: 3 (AUTH-API-01, SEC-PII-01, OPS-01)
+- Pending: 1 (SEC-DEP-01)
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-26*
-*Last updated: 2026-05-26 — SEC-PII-01 verified via deployed-container + CI evidence; new v1.x/v2 deferred item SEC-PII-02 (historic managed_logs cleanup) added from Phase 2 verification finding*
+*Last updated: 2026-05-26 — OPS-01 verified via push-observe SLA test (delta=63s, Rung 1 PASS, zero source-code commits); two new v1.x deferred items OPS-02 (stale swarm node) + OPS-03 (malformed autoredeploy image tags) added from Phase 3 verification findings*

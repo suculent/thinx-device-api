@@ -19,7 +19,7 @@
 
 - [x] **Phase 1: AUTH API — Password Reset** — ✓ **Verified 2026-05-26** (live rtm UAT against image `0a0e6b32`; AUTH-API-01 closed end-to-end)
 - [x] **Phase 2: PII Logging Scrub** — ✓ **Verified 2026-05-26** (deployed-container + CI evidence against image `3a461b3d`; SEC-PII-01 closed; 12 sites swept)
-- [ ] **Phase 3: Swarm Auto-Pull** — Diagnose and restore swarm-side auto-redeploy after registry push
+- [x] **Phase 3: Swarm Auto-Pull** — ✓ **Verified 2026-05-26** (push-observe SLA test PASS via Rung 1 — `docker service update --force swarmpit_app`; delta=63s; OPS-01 closed; zero source-code commits)
 - [ ] **Phase 4: Dependency Triage** — Classify all 28 Dependabot findings (11 high / 17 moderate) as v1-blocker or v1.x-deferred and fix the blockers
 
 ## Phase Details
@@ -64,8 +64,8 @@
   2. A controlled push-and-observe verification on rtm: pushing an updated image tag results in the swarm task transitioning to the new image within 5 minutes, without invoking `./scripts/stack-deploy`.
   3. A reversion plan is documented in the phase close-out: if the fix introduces regression, what to revert (config file, env var, label change, Swarmpit version) and how.
   4. The manual `./scripts/stack-deploy` workaround remains functional as a fallback (do not break the escape hatch).
-**Plans:** 1 plan (single coarse rung-by-rung plan; Rung 1 autonomous, Rungs 2-4 checkpoint-gated)
-  - [ ] 03-PLAN.md — SSH-driven 4-rung investigation (Rung 1 swarmpit_app restart → Rung 2 swarmpit_db rebuild → Rung 3 stale-node cleanup → Rung 4 Swarmpit upgrade) + push-and-observe SLA test + 03-SUMMARY.md close-out with root cause + reversion plan + AGENTS.md runbook line
+**Plans:** 1 plan (single coarse rung-by-rung plan; Rung 1 autonomous, Rungs 2-4 checkpoint-gated) — ✓ complete via Rung 1
+  - [x] 03-PLAN.md — SSH-driven Rung 1 (force-restart swarmpit_app) PASSED on first attempt; push-and-observe SLA test PASS (delta=63s, 237s under target); 03-SUMMARY.md filed with root cause + reversion plan + AGENTS.md runbook line ✓ Verified 2026-05-26. Rungs 2-4 NOT exercised; remain locked behind checkpoint:human-verify gates for any future recurrence.
 **Notes:** Incident date 2026-05-25 14:44 CET. `docker-swarm.yml` already carries `swarmpit.service.deployment.autoredeploy=true` labels — the failure is downstream of config. Pre-investigation (2026-05-26 ~17:00 UTC) identified `swarmpit_app` as DEGRADED (Bad Gateway via Traefik + zero application logs for 2+ hours + zero autoredeploy log lines for 30 hours), narrowing the diagnostic ladder from "5+ suspects" to a concrete 4-rung escalation. Live findings + locked rung order documented in `phases/03-swarm-auto-pull/03-CONTEXT.md`. Recon steps in `.planning/codebase/CONCERNS.md` ("Operations Concerns") are now superseded by the CONTEXT live findings. Cross-ref: console `v1.x-backlog.md` OPS-swarmpull entry. Phase shape note: this is an OPERATIONAL phase — primary deliverable is a documented root cause + reversion plan + runbook line, NOT a source-code diff in this monorepo (Rung 1 outcome expected to produce zero code commits).
 
 ### Phase 4: Dependency Triage
@@ -95,8 +95,8 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | AUTH-API-01 | Phase 1 | Verified |
-| SEC-PII-01 | Phase 2 | Planned |
-| OPS-01 | Phase 3 | Pending |
+| SEC-PII-01 | Phase 2 | Verified |
+| OPS-01 | Phase 3 | Verified |
 | SEC-DEP-01 | Phase 4 | Pending |
 
 **Coverage:** 4/4 v1 requirements mapped ✓
@@ -108,8 +108,8 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. AUTH API — Password Reset | 2/2 | Verified | 2026-05-26 |
-| 2. PII Logging Scrub | 0/1 | Planned | - |
-| 3. Swarm Auto-Pull | 0/1 | Planned | - |
+| 2. PII Logging Scrub | 1/1 | Verified | 2026-05-26 |
+| 3. Swarm Auto-Pull | 1/1 | Verified | 2026-05-26 |
 | 4. Dependency Triage | 0/0 | Not started | - |
 
 ## Dependencies (visual)
@@ -132,4 +132,4 @@ Phase 3 is functionally independent of 1, 2, 4 and could execute in parallel wit
 
 ---
 *Roadmap created: 2026-05-26*
-*Last updated: 2026-05-26 — Phase 3 (Swarm Auto-Pull) planned: 1 coarse rung-by-rung plan in `phases/03-swarm-auto-pull/03-PLAN.md`*
+*Last updated: 2026-05-26 — Phase 3 (Swarm Auto-Pull) ✓ Verified via Rung 1 (force-restart swarmpit_app); push-observe SLA test PASS (delta=63s); OPS-01 closed; OPS-02 (stale node) + OPS-03 (malformed image tags) filed as v1.x deferred*
