@@ -194,3 +194,22 @@ These are pre-existing config issues in `/mnt/gluster/deployment/swarm/*.yml` fi
 *Phase: 03-swarm-auto-pull*
 *Verified: 2026-05-26 (Rung 1 PASS; SLA delta 63s; 237s under target)*
 *Author: Claude (executor) + matej.sychra@corpus.cz (operator)*
+
+## Self-Check: PASSED
+
+Files claimed in SUMMARY frontmatter all present:
+- ✓ `.planning/phases/03-swarm-auto-pull/03-SUMMARY.md`
+- ✓ `.planning/phases/03-swarm-auto-pull/03-BASELINE.txt`
+- ✓ `.planning/phases/03-swarm-auto-pull/03-PUSH-OBSERVE.txt`
+- ✓ `.planning/runbooks/swarm.md` (NEW — canonical runbook)
+- ✓ `.planning/STATE.md` (Phase 3 Verified, Phase 4 next)
+- ✓ `.planning/ROADMAP.md` (Phase 3 [x] Verified)
+- ✓ `.planning/REQUIREMENTS.md` (OPS-01 Verified; OPS-02/OPS-03 filed)
+
+Commits claimed all present in git log:
+- ✓ `f4fb8464` docs(phase-03): seed CONTEXT.md (pre-execution planning)
+- ✓ `4e3f7fc7` docs(phase-03): OPS-01 plan (pre-execution planning)
+- ✓ `8a09d42f` chore(ops-01): push-observe SLA test marker (Task 3 no-op trigger)
+- ✓ `6607c809` docs(phase-03): close out — OPS-01 verified (Task 7 close-out)
+
+Cross-file consistency: STATE.md, ROADMAP.md, REQUIREMENTS.md all agree OPS-01 = Verified (2026-05-26).
