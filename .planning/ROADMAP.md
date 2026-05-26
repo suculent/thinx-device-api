@@ -50,8 +50,9 @@
   2. The replacement pattern is consistent: emails hashed or last-4-chars + length, reset/activation keys as first-4-chars + ellipsis, Mailgun errors as `err.message` + `err.statusCode` only (never the full error object).
   3. At least one Jasmine spec exercises an error path (e.g., reset attempt for unknown email) and asserts the redacted log format — no raw email or token appears in the log line.
   4. Audit-log entries written via `alog.log` (L451, L583) are likewise redacted — the CouchDB audit doc no longer stores plaintext reset keys.
-**Plans:** TBD
-**Notes:** Site list and replacement-pattern recommendations are pre-staged in `.planning/codebase/CONCERNS.md` ("Privacy / Logging Exposure"). Targeted, mechanical fix — should be the fastest phase to close.
+**Plans:** 1 plan (single coarse plan covering helpers + sweep + spec + deploy + close-out)
+  - [ ] 02-PLAN.md — Util.redactEmail/redactToken helpers + sweep of all 12 leak sites in lib/thinx/owner.js + new ZZ-OwnerLogRedactionSpec.js + push/CI/restart.sh deploy + rtm log-tail UAT (Probes A–E) + close-out SUMMARY
+**Notes:** Site list and replacement-pattern recommendations are pre-staged in `.planning/codebase/CONCERNS.md` ("Privacy / Logging Exposure") and finalized in `phases/02-pii-logging-scrub/02-CONTEXT.md` (12 sites total — 7 from CONCERNS + 5 surfaced by planner grep). Single coarse plan per project granularity setting; all 12 sites share the same redactor pattern, splitting would create double review overhead. Deploy path uses `./restart.sh` on swarm host per memory `swarm-deploy-script-name` (NOT `./scripts/stack-deploy`).
 
 ### Phase 3: Swarm Auto-Pull
 **Goal:** Restore swarm-side auto-redeploy on `188.166.23.244` so that a parent-monorepo push triggering a registry image build results in a rolling task update without operator intervention.
@@ -92,8 +93,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-API-01 | Phase 1 | Pending |
-| SEC-PII-01 | Phase 2 | Pending |
+| AUTH-API-01 | Phase 1 | Verified |
+| SEC-PII-01 | Phase 2 | Planned |
 | OPS-01 | Phase 3 | Pending |
 | SEC-DEP-01 | Phase 4 | Pending |
 
@@ -105,8 +106,8 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. AUTH API — Password Reset | 0/0 | Not started | - |
-| 2. PII Logging Scrub | 0/0 | Not started | - |
+| 1. AUTH API — Password Reset | 2/2 | Verified | 2026-05-26 |
+| 2. PII Logging Scrub | 0/1 | Planned | - |
 | 3. Swarm Auto-Pull | 0/0 | Not started | - |
 | 4. Dependency Triage | 0/0 | Not started | - |
 
@@ -130,4 +131,4 @@ Phase 3 is functionally independent of 1, 2, 4 and could execute in parallel wit
 
 ---
 *Roadmap created: 2026-05-26*
-*Last updated: 2026-05-26*
+*Last updated: 2026-05-26 — Phase 2 (PII Logging Scrub) planned: 1 coarse plan in `phases/02-pii-logging-scrub/02-PLAN.md`*
