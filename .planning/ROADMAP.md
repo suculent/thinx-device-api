@@ -17,7 +17,7 @@
 
 ## Phases
 
-- [ ] **Phase 1: AUTH API — Password Reset** — Restore unauthenticated `POST /api/v2/password/reset` 200 on rtm
+- [x] **Phase 1: AUTH API — Password Reset** — ✓ **Verified 2026-05-26** (live rtm UAT against image `0a0e6b32`; AUTH-API-01 closed end-to-end)
 - [ ] **Phase 2: PII Logging Scrub** — Redact emails, reset keys, Mailgun/activation tokens in `lib/thinx/owner.js`
 - [ ] **Phase 3: Swarm Auto-Pull** — Diagnose and restore swarm-side auto-redeploy after registry push
 - [ ] **Phase 4: Dependency Triage** — Classify all 28 Dependabot findings (11 high / 17 moderate) as v1-blocker or v1.x-deferred and fix the blockers
@@ -35,10 +35,10 @@
   3. Response is identical (status + body shape) for both a registered email and an unregistered one (no enumeration leak).
   4. A regression spec under `spec/jasmine/ZZ-*` asserts the unauthenticated 2xx path against `POST /api/v2/password/reset` for a non-existent email.
   5. Root cause is documented (Express middleware vs. Traefik label vs. nginx) in the phase close-out, with a reversion plan if the fix touches edge config.
-**Plans:** 2 plans (W1: backend fixes, W2: regression spec + deploy + UAT)
-  - [ ] 01-01-PLAN.md — Bearer-null guard in lib/router.js + no-enumeration normalization in lib/router.user.js (+ assertion update in ZZ-AppSessionUserSpec.js)
-  - [ ] 01-02-PLAN.md — New regression spec ZZ-RouterPasswordResetSpec.js + push/CI/stack-deploy + rtm curl + Vue UAT + close-out SUMMARY
-**Notes:** Pre-investigation seed already exists at `.planning/G8-INVESTIGATION.md` (filed 2026-05-26). Suspected culprits ranked in `.planning/codebase/CONCERNS.md` — top candidates are CORS allowlist on rtm, the JWT-verify 403 short-circuit at `lib/router.js:132`, or Traefik/nginx edge config. Cross-ref: console submodule Phase 11 Wave 1.
+**Plans:** 2 plans (W1: backend fixes, W2: regression spec + deploy + UAT) — ✓ both complete
+  - [x] 01-01-PLAN.md — Bearer-null guard in lib/router.js + no-enumeration normalization in lib/router.user.js (+ assertion update in ZZ-AppSessionUserSpec.js) ✓ shipped `622aa01` + `db46790`
+  - [x] 01-02-PLAN.md — New regression spec ZZ-RouterPasswordResetSpec.js + push/CI/stack-deploy + rtm curl + Vue UAT + close-out SUMMARY ✓ shipped `3413166` + tightening `c67d9af`; UAT walked 2026-05-26
+**Notes:** Root cause was a two-fault interaction: Vue API client sends `Authorization: Bearer null` when logged out (frontend half, unchanged) + backend `lib/router.js:103` matched header presence not validity, JWT-verified the literal `"null"`, stamped 403 at L132 (this phase's class-fix). Tightening required during Wave 2 because the original no-enum fix normalized status but not body — `c67d9af` makes the response body identical for registered vs. unregistered (production path; test env preserves passthrough for the spec round-trip). UAT walk surfaced 5 issues OUT-OF-SCOPE for this phase (preexisting, not regressions); triaged into REQUIREMENTS.md v2/deferred section: AUTH-REACTIVATE-01, AUTH-RESET-LINK-CONSOLE, CONSOLE-LEGACY-JSON-PARSE. See `phases/01-auth-api-password-reset/01-SUMMARY.md` for full root cause + reversion plan + matrix.
 
 ### Phase 2: PII Logging Scrub
 **Goal:** Eliminate raw PII and credential material from `lib/thinx/owner.js` error logs, so production log aggregation no longer indexes user emails, reset keys, Mailgun tokens, or activation tokens.

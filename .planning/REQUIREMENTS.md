@@ -9,7 +9,7 @@ Requirements for closing v1.0 GA from the backend side. Each maps to exactly one
 
 ### Authentication API (Backend)
 
-- [ ] **AUTH-API-01**: Unauthenticated `POST /api/v2/password/reset` returns 200 with the standard success body for a well-formed `{email: string}` JSON payload from a browser origin, restoring legacy-console behavior. Behavior must match for both registered and unregistered emails (no enumeration). Validated by: (a) `curl -X POST https://rtm.thinx.cloud/api/v2/password/reset -H 'Content-Type: application/json' -d '{"email":"x@y"}'` returns 200, (b) Vue console "Forgot password?" flow on rtm completes the full email → reset_key → set-password round-trip, (c) regression spec under `spec/jasmine/ZZ-*` covering the unauthenticated 200 path. Cross-ref: `.planning/G8-INVESTIGATION.md`, console Phase 11 Wave 1.
+- [x] **AUTH-API-01** ✓ Verified 2026-05-26 (Phase 1 — see `phases/01-auth-api-password-reset/01-SUMMARY.md`): Unauthenticated `POST /api/v2/password/reset` returns 200 with the standard success body for a well-formed `{email: string}` JSON payload from a browser origin, restoring legacy-console behavior. Behavior must match for both registered and unregistered emails (no enumeration). Validated by: (a) ✓ `curl -X POST https://rtm.thinx.cloud/api/v2/password/reset` returns 200 + identical body for registered vs. unregistered, (b) ✓ Vue console "Forgot password?" round-trip completes end-to-end on rtm against image `0a0e6b32`, (c) ✓ regression spec at `spec/jasmine/ZZ-RouterPasswordResetSpec.js` covers the unauthenticated 200 path including `Authorization: Bearer null`. Root cause: Vue API client unconditionally sets `Authorization: Bearer null` when logged out; `lib/router.js:103` matched on header presence (not validity), failed JWT verify on literal `"null"`, stamped 403 at L132. Fixes: class-fix in `lib/router.js` (Bearer-null guard, commit `622aa01`) + no-enum body normalization in `lib/router.user.js` (commits `db46790` + tightening `c67d9af`). Cross-ref: `.planning/G8-INVESTIGATION.md`, console Phase 11 Wave 1.
 
 ### Operations
 
@@ -37,6 +37,15 @@ Requirements for closing v1.0 GA from the backend side. Each maps to exactly one
 - **SEC-COOKIE-01**: Session cookie at `thinx-core.js:303` currently sets `httpOnly: false` ("temporarily disabled for websocket debugging" per stale comment). Re-evaluate whether `httpOnly: true` is feasible with the current WebSocket flow — defer to v1.x; flipping this without a WebSocket regression test is risky.
 - **SEC-WS-01**: WebSocket handshake risk on `rtm.thinx.cloud` (AGENTS.md L96-97: "Websocket handshake may still return 404 even with corrected frontend bundle") — defer to v1.x unless v1 UAT surfaces a regression.
 
+### Auth & Account Lifecycle (surfaced 2026-05-26 in Phase 1 UAT)
+
+- **AUTH-REACTIVATE-01**: No user-facing flow to reactivate an account that was soft-deleted (`user.deleted = true` via `Owner.delete()` at `lib/thinx/owner.js:660-682`). Once `deleted:true` is set, the user is locked out by `lib/router.auth.js:189-191` and the only recovery is direct CouchDB mutation (a session admin had to do this manually 2026-05-26 to unblock the Phase 1 UAT). Options: (a) admin-only reactivation endpoint, (b) self-serve via a separate "restore my account" email link, (c) revert the GDPR delete-after-N-days semantics so soft-delete auto-purges on schedule and there's never a "stuck deleted:true" state. Defer triage to v1.x; not a regression, just a missing recovery path.
+- **AUTH-RESET-LINK-CONSOLE**: Password-reset email link from `lib/thinx/owner.js:147` uses `app_config.api_url` (rtm.thinx.cloud), so users land on the LEGACY AngularJS console's password-set page, not the Vue console. Fix: either (a) introduce `app_config.console_url` for the email link, OR (b) make the GET handler on the API redirect to the Vue console after reset_key validation. Defer to v1.x; needs coordination with the console submodule's password-set route.
+
+### Frontend (legacy console — services/console/src/, deprecation path)
+
+- **CONSOLE-LEGACY-JSON-PARSE**: Legacy AngularJS console at `services/console/src/` shows `SyntaxError: JSON Parse error: Unexpected identifier "object"` on the success branches of `login.js:173` and `password.js:87` — `JSON.parse(...)` being called on a value that's already a JS object (coerces to `"[object Object]"` and fails). Long-standing bug surfaced during Phase 1 UAT 2026-05-26. Lives in the legacy AngularJS console codebase, NOT the Vue console. Low priority because legacy console is being deprecated for v1 GA in favor of Vue.
+
 ### Testing
 
 - **TEST-CHAI-01**: Migrate `spec/jasmine/ZZ-*` (16 spec files, ~200 `chai.request(thx.app)` calls) from chai-http v4 to v5 ESM API — deferred per `AGENTS.md:82-92` until a Snyk/Dependabot CVE in `superagent` v3 forces the upgrade.
@@ -60,7 +69,7 @@ Explicitly excluded from v1 GA. Documented to prevent scope creep.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-API-01 | Phase 1 | Pending |
+| AUTH-API-01 | Phase 1 | **Verified (2026-05-26)** |
 | OPS-01 | Phase 3 | Pending |
 | SEC-DEP-01 | Phase 4 | Pending |
 | SEC-PII-01 | Phase 2 | Pending |
@@ -68,8 +77,10 @@ Explicitly excluded from v1 GA. Documented to prevent scope creep.
 **Coverage:**
 - v1 requirements: 4 total
 - Mapped to phases: 4 ✓
+- Verified: 1 (AUTH-API-01)
+- Pending: 3
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-26*
-*Last updated: 2026-05-26 — traceability filled by roadmapper*
+*Last updated: 2026-05-26 — AUTH-API-01 verified via live rtm UAT; 3 new v2/deferred items added from Phase 1 UAT findings (AUTH-REACTIVATE-01, AUTH-RESET-LINK-CONSOLE, CONSOLE-LEGACY-JSON-PARSE)*
