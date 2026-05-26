@@ -1,0 +1,768 @@
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "@eslint/config-array": {
+      "name": "@eslint/config-array",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        "minimatch"
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/@eslint/config-array"
+      ],
+      "fixAvailable": true
+    },
+    "ajv": {
+      "name": "ajv",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1113714,
+          "name": "ajv",
+          "dependency": "ajv",
+          "title": "ajv has ReDoS when using `$data` option",
+          "url": "https://github.com/advisories/GHSA-2g4f-4pwh-qvx6",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-400",
+            "CWE-1333"
+          ],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<6.14.0"
+        }
+      ],
+      "effects": [
+        "eslint"
+      ],
+      "range": "<6.14.0",
+      "nodes": [
+        "node_modules/ajv"
+      ],
+      "fixAvailable": true
+    },
+    "async": {
+      "name": "async",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        "lodash"
+      ],
+      "effects": [
+        "fs-finder",
+        "grunt-legacy-util",
+        "rollbar",
+        "winston"
+      ],
+      "range": "",
+      "nodes": [
+        "node_modules/async"
+      ],
+      "fixAvailable": false
+    },
+    "axios": {
+      "name": "axios",
+      "severity": "moderate",
+      "isDirect": true,
+      "via": [
+        "follow-redirects"
+      ],
+      "effects": [],
+      "range": "0.8.0 - 0.16.0 || 0.18.1 - 0.19.2",
+      "nodes": [
+        "node_modules/axios"
+      ],
+      "fixAvailable": true
+    },
+    "cli": {
+      "name": "cli",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        "glob"
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/cli"
+      ],
+      "fixAvailable": true
+    },
+    "engine.io": {
+      "name": "engine.io",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "ws"
+      ],
+      "effects": [],
+      "range": "0.7.8 - 0.7.9 || 6.0.0 - 6.6.7",
+      "nodes": [
+        "node_modules/engine.io"
+      ],
+      "fixAvailable": true
+    },
+    "engine.io-client": {
+      "name": "engine.io-client",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "ws"
+      ],
+      "effects": [],
+      "range": "0.7.0 || 0.7.8 - 0.7.9 || 6.0.0 - 6.6.4",
+      "nodes": [
+        "node_modules/engine.io-client"
+      ],
+      "fixAvailable": true
+    },
+    "eslint": {
+      "name": "eslint",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        "ajv",
+        "minimatch"
+      ],
+      "effects": [],
+      "range": "4.2.0 - 5.0.0-rc.0",
+      "nodes": [
+        "node_modules/eslint"
+      ],
+      "fixAvailable": true
+    },
+    "follow-redirects": {
+      "name": "follow-redirects",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1116560,
+          "name": "follow-redirects",
+          "dependency": "follow-redirects",
+          "title": "follow-redirects leaks Custom Authentication Headers to Cross-Domain Redirect Targets",
+          "url": "https://github.com/advisories/GHSA-r4q5-vmmm-2653",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-200"
+          ],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<=1.15.11"
+        }
+      ],
+      "effects": [
+        "axios",
+        "http-proxy"
+      ],
+      "range": "<=1.15.11",
+      "nodes": [
+        "node_modules/follow-redirects"
+      ],
+      "fixAvailable": true
+    },
+    "fs-finder": {
+      "name": "fs-finder",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        "async"
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/fs-finder"
+      ],
+      "fixAvailable": false
+    },
+    "glob": {
+      "name": "glob",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        "minimatch"
+      ],
+      "effects": [
+        "cli",
+        "jasmine",
+        "mocha",
+        "nyc",
+        "rimraf"
+      ],
+      "range": "",
+      "nodes": [
+        "node_modules/glob"
+      ],
+      "fixAvailable": {
+        "name": "nyc",
+        "version": "14.1.1",
+        "isSemVerMajor": true
+      }
+    },
+    "grunt": {
+      "name": "grunt",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        "glob",
+        "minimatch"
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/grunt"
+      ],
+      "fixAvailable": true
+    },
+    "grunt-legacy-log": {
+      "name": "grunt-legacy-log",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        "lodash"
+      ],
+      "effects": [],
+      "range": "1.0.1 - 3.0.0",
+      "nodes": [
+        "node_modules/grunt-legacy-log"
+      ],
+      "fixAvailable": true
+    },
+    "grunt-legacy-log-utils": {
+      "name": "grunt-legacy-log-utils",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        "lodash"
+      ],
+      "effects": [],
+      "range": "1.0.0 - 2.1.0",
+      "nodes": [
+        "node_modules/grunt-legacy-log-utils"
+      ],
+      "fixAvailable": true
+    },
+    "grunt-legacy-util": {
+      "name": "grunt-legacy-util",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        "async",
+        "lodash"
+      ],
+      "effects": [],
+      "range": "1.0.0-rc1 - 2.0.1",
+      "nodes": [
+        "node_modules/grunt-legacy-util"
+      ],
+      "fixAvailable": true
+    },
+    "http-proxy": {
+      "name": "http-proxy",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "follow-redirects"
+      ],
+      "effects": [
+        "karma"
+      ],
+      "range": "",
+      "nodes": [
+        "node_modules/http-proxy"
+      ],
+      "fixAvailable": true
+    },
+    "istanbul-lib-processinfo": {
+      "name": "istanbul-lib-processinfo",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "uuid"
+      ],
+      "effects": [
+        "nyc"
+      ],
+      "range": "*",
+      "nodes": [
+        "node_modules/istanbul-lib-processinfo"
+      ],
+      "fixAvailable": {
+        "name": "nyc",
+        "version": "14.1.1",
+        "isSemVerMajor": true
+      }
+    },
+    "jasmine": {
+      "name": "jasmine",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        "glob"
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/jasmine"
+      ],
+      "fixAvailable": true
+    },
+    "jest-junit": {
+      "name": "jest-junit",
+      "severity": "moderate",
+      "isDirect": true,
+      "via": [
+        "uuid"
+      ],
+      "effects": [],
+      "range": "9.0.0 - 16.0.0",
+      "nodes": [
+        "node_modules/jest-junit"
+      ],
+      "fixAvailable": {
+        "name": "jest-junit",
+        "version": "17.0.0",
+        "isSemVerMajor": true
+      }
+    },
+    "jshint": {
+      "name": "jshint",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        "lodash",
+        "minimatch"
+      ],
+      "effects": [],
+      "range": ">=2.9.6 || 0.5.0",
+      "nodes": [
+        "node_modules/jshint"
+      ],
+      "fixAvailable": {
+        "name": "jshint",
+        "version": "2.9.5",
+        "isSemVerMajor": true
+      }
+    },
+    "karma": {
+      "name": "karma",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        "glob",
+        "http-proxy",
+        "lodash",
+        "minimatch",
+        "rimraf"
+      ],
+      "effects": [],
+      "range": ">=5.0.6",
+      "nodes": [
+        "node_modules/karma"
+      ],
+      "fixAvailable": true
+    },
+    "karma-coverage": {
+      "name": "karma-coverage",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        "minimatch"
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/karma-coverage"
+      ],
+      "fixAvailable": true
+    },
+    "lodash": {
+      "name": "lodash",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1115806,
+          "name": "lodash",
+          "dependency": "lodash",
+          "title": "lodash vulnerable to Code Injection via `_.template` imports key names",
+          "url": "https://github.com/advisories/GHSA-r5fr-rjxr-66jc",
+          "severity": "high",
+          "cwe": [
+            "CWE-94"
+          ],
+          "cvss": {
+            "score": 8.1,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H"
+          },
+          "range": ">=4.0.0 <=4.17.23"
+        },
+        {
+          "source": 1115810,
+          "name": "lodash",
+          "dependency": "lodash",
+          "title": "lodash vulnerable to Prototype Pollution via array path bypass in `_.unset` and `_.omit`",
+          "url": "https://github.com/advisories/GHSA-f23m-r3pf-42rh",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-1321"
+          ],
+          "cvss": {
+            "score": 6.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:L"
+          },
+          "range": "<=4.17.23"
+        }
+      ],
+      "effects": [
+        "async",
+        "grunt-legacy-log",
+        "grunt-legacy-log-utils",
+        "grunt-legacy-util",
+        "jshint",
+        "karma"
+      ],
+      "range": "<=4.17.23",
+      "nodes": [
+        "node_modules/lodash"
+      ],
+      "fixAvailable": false
+    },
+    "minimatch": {
+      "name": "minimatch",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1113461,
+          "name": "minimatch",
+          "dependency": "minimatch",
+          "title": "minimatch has a ReDoS via repeated wildcards with non-matching literal in pattern",
+          "url": "https://github.com/advisories/GHSA-3ppc-4f35-3m26",
+          "severity": "high",
+          "cwe": [
+            "CWE-1333"
+          ],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=5.0.0 <5.1.7"
+        },
+        {
+          "source": 1113540,
+          "name": "minimatch",
+          "dependency": "minimatch",
+          "title": "minimatch has ReDoS: matchOne() combinatorial backtracking via multiple non-adjacent GLOBSTAR segments",
+          "url": "https://github.com/advisories/GHSA-7r86-cg39-jmmj",
+          "severity": "high",
+          "cwe": [
+            "CWE-407"
+          ],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+          },
+          "range": ">=5.0.0 <5.1.8"
+        },
+        {
+          "source": 1113548,
+          "name": "minimatch",
+          "dependency": "minimatch",
+          "title": "minimatch ReDoS: nested *() extglobs generate catastrophically backtracking regular expressions",
+          "url": "https://github.com/advisories/GHSA-23c5-xmqv-rm74",
+          "severity": "high",
+          "cwe": [
+            "CWE-1333"
+          ],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+          },
+          "range": ">=5.0.0 <5.1.8"
+        }
+      ],
+      "effects": [
+        "@eslint/config-array",
+        "eslint",
+        "glob",
+        "grunt",
+        "jshint",
+        "karma-coverage",
+        "mocha",
+        "test-exclude"
+      ],
+      "range": "5.0.0 - 5.1.7",
+      "nodes": [
+        "node_modules/minimatch"
+      ],
+      "fixAvailable": {
+        "name": "jshint",
+        "version": "2.9.5",
+        "isSemVerMajor": true
+      }
+    },
+    "mocha": {
+      "name": "mocha",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        "glob",
+        "minimatch",
+        "serialize-javascript"
+      ],
+      "effects": [],
+      "range": "8.2.0 - 12.0.0-beta-2",
+      "nodes": [
+        "node_modules/mocha"
+      ],
+      "fixAvailable": true
+    },
+    "nyc": {
+      "name": "nyc",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        "glob",
+        "istanbul-lib-processinfo",
+        "test-exclude"
+      ],
+      "effects": [],
+      "range": ">=15.0.0-alpha.0",
+      "nodes": [
+        "node_modules/nyc"
+      ],
+      "fixAvailable": {
+        "name": "nyc",
+        "version": "14.1.1",
+        "isSemVerMajor": true
+      }
+    },
+    "rimraf": {
+      "name": "rimraf",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        "glob"
+      ],
+      "effects": [
+        "karma"
+      ],
+      "range": "",
+      "nodes": [
+        "node_modules/rimraf"
+      ],
+      "fixAvailable": true
+    },
+    "rollbar": {
+      "name": "rollbar",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        "async"
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/rollbar"
+      ],
+      "fixAvailable": true
+    },
+    "serialize-javascript": {
+      "name": "serialize-javascript",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1113686,
+          "name": "serialize-javascript",
+          "dependency": "serialize-javascript",
+          "title": "Serialize JavaScript is Vulnerable to RCE via RegExp.flags and Date.prototype.toISOString()",
+          "url": "https://github.com/advisories/GHSA-5c6j-r48x-rmvq",
+          "severity": "high",
+          "cwe": [
+            "CWE-96"
+          ],
+          "cvss": {
+            "score": 8.1,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H"
+          },
+          "range": "<=7.0.2"
+        },
+        {
+          "source": 1119440,
+          "name": "serialize-javascript",
+          "dependency": "serialize-javascript",
+          "title": "Serialize JavaScript has CPU Exhaustion Denial of Service via crafted array-like objects",
+          "url": "https://github.com/advisories/GHSA-qj8w-gfj5-8c6v",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-400",
+            "CWE-834"
+          ],
+          "cvss": {
+            "score": 5.9,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+          },
+          "range": ">=5.0.0 <7.0.5"
+        }
+      ],
+      "effects": [
+        "mocha"
+      ],
+      "range": "<=7.0.4",
+      "nodes": [
+        "node_modules/serialize-javascript"
+      ],
+      "fixAvailable": true
+    },
+    "socket.io-adapter": {
+      "name": "socket.io-adapter",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "ws"
+      ],
+      "effects": [],
+      "range": "2.5.2 - 2.5.6",
+      "nodes": [
+        "node_modules/socket.io-adapter"
+      ],
+      "fixAvailable": true
+    },
+    "test-exclude": {
+      "name": "test-exclude",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        "glob",
+        "minimatch"
+      ],
+      "effects": [
+        "nyc"
+      ],
+      "range": "",
+      "nodes": [
+        "node_modules/test-exclude"
+      ],
+      "fixAvailable": {
+        "name": "nyc",
+        "version": "14.1.1",
+        "isSemVerMajor": true
+      }
+    },
+    "uuid": {
+      "name": "uuid",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1119441,
+          "name": "uuid",
+          "dependency": "uuid",
+          "title": "uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided",
+          "url": "https://github.com/advisories/GHSA-w5hq-g745-h8pq",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-787",
+            "CWE-1285"
+          ],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+          },
+          "range": "<11.1.1"
+        }
+      ],
+      "effects": [
+        "istanbul-lib-processinfo",
+        "jest-junit"
+      ],
+      "range": "<11.1.1",
+      "nodes": [
+        "node_modules/istanbul-lib-processinfo/node_modules/uuid",
+        "node_modules/jest-junit/node_modules/uuid"
+      ],
+      "fixAvailable": {
+        "name": "jest-junit",
+        "version": "17.0.0",
+        "isSemVerMajor": true
+      }
+    },
+    "winston": {
+      "name": "winston",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        "async"
+      ],
+      "effects": [],
+      "range": "2.4.7",
+      "nodes": [
+        "node_modules/winston"
+      ],
+      "fixAvailable": true
+    },
+    "ws": {
+      "name": "ws",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1119108,
+          "name": "ws",
+          "dependency": "ws",
+          "title": "ws: Uninitialized memory disclosure",
+          "url": "https://github.com/advisories/GHSA-58qx-3vcg-4xpx",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-908"
+          ],
+          "cvss": {
+            "score": 4.4,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:H/I:N/A:N"
+          },
+          "range": ">=8.0.0 <8.20.1"
+        }
+      ],
+      "effects": [
+        "engine.io",
+        "engine.io-client",
+        "socket.io-adapter"
+      ],
+      "range": "8.0.0 - 8.20.0",
+      "nodes": [
+        "node_modules/engine.io-client/node_modules/ws",
+        "node_modules/engine.io/node_modules/ws",
+        "node_modules/socket.io-adapter/node_modules/ws"
+      ],
+      "fixAvailable": true
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 11,
+      "high": 23,
+      "critical": 0,
+      "total": 34
+    },
+    "dependencies": {
+      "prod": 423,
+      "dev": 501,
+      "optional": 1,
+      "peer": 1,
+      "peerOptional": 0,
+      "total": 923
+    }
+  }
+}
