@@ -44,6 +44,7 @@ Scope: All open Dependabot alerts against `suculent/thinx-device-api` as of slic
 
 | Commit SHA | Files changed | Override delta | Alerts closed (GHSA IDs) | Verification |
 |------------|---------------|----------------|---------------------------|--------------|
+| d8e3176c | package.json, package-lock.json | -follow-redirects: 1.15.6; lodash: 4.17.23 -> 4.18.1; minimatch: 5.1.0 -> 5.1.9; +ws: "$ws" (self-ref; resolves to 8.21.0 at all 6 instances; deviation A from plan's bare "8.20.1" because ws is also a direct dep — npm EOVERRIDE) | GHSA-r5fr-rjxr-66jc, GHSA-f23m-r3pf-42rh, GHSA-7r86-cg39-jmmj, GHSA-23c5-xmqv-rm74, GHSA-3ppc-4f35-3m26, GHSA-r4q5-vmmm-2653, GHSA-58qx-3vcg-4xpx | CI green on d8e3176c (build 13852 `test` PASS + 13853 `build-api-cloud` PASS + 13851 `build-vue-console` PASS); rtm `Bearer null` -> 200 (`password_reset_request_accepted`); runtime-tree high=0 per 04-AUDIT-POST-PROD-PROVISIONAL.json (was 9 pre-fix); autoredeploy delta=49s (image publish 22:35:05Z -> task Running 22:35:54Z; Phase 3 baseline 63s); new image sha256:4d3fb789 |
 
 ## Post-fix baseline
 
