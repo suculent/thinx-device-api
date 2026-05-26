@@ -19,7 +19,7 @@ Requirements for closing v1.0 GA from the backend side. Each maps to exactly one
 
 - [ ] **SEC-DEP-01**: All 11 high-severity (and a triage pass over the 17 moderate) GitHub dependabot findings against the `suculent/thinx-device-api` default branch are classified as either v1-blocker (fixed before milestone close) or v1.x-deferred (moved to a backlog file with rationale and trigger condition for future action). Validated by: (a) a `.planning/dep-triage.md` table of all 28 findings with verdicts, (b) blocker count on GitHub Security tab drops to the documented "deferred-with-rationale" baseline.
 
-- [ ] **SEC-PII-01**: `lib/thinx/owner.js` error logs no longer emit raw PII at the 6 sites surfaced in `.planning/codebase/CONCERNS.md`: emails at L499 (`password_reset_init` not-found path); reset_keys at L451/L474/L583/L647; Mailgun token at L95; activation token at L228. Replacement pattern: hashed/redacted email fingerprints (e.g., last 4 chars + length), token length-only or first-4-chars + ellipsis, never the full value. Validated by: (a) `grep -nE '(email|reset_key|mailgun_token|activation_token)' lib/thinx/owner.js | grep console.log` shows no remaining raw-value emissions, (b) at least one spec exercises an error path and asserts the redaction format.
+- [x] **SEC-PII-01** ✓ Verified 2026-05-26 (Phase 2 — see `phases/02-pii-logging-scrub/02-SUMMARY.md`): `lib/thinx/owner.js` no longer emits raw PII or credential material at any of the 12 (originally 6, surfaced 6 more during execution) sites: emails redacted via `Util.redactEmail` (`m***@domain` pattern); reset_keys/activation tokens redacted via `Util.redactToken` (first-6 + U+2026 ellipsis); Mailgun `err` scoped to `err.message` + `err.statusCode` only. Test-env passthrough at L165-167 preserves the callback's raw value (only the log line is redacted) so the chai-http round-trip spec at `ZZ-AppSessionUserSpec.js:191-198` continues to work. Validated by: (a) ✓ 5 static grep gates PASS (zero raw-value emissions); (b) ✓ `spec/jasmine/UtilSpec.js` 8 new `it()` blocks cover the helpers; (c) ✓ `spec/jasmine/ZZ-OwnerLogRedactionSpec.js` 4 it-blocks exercise error path + success path + audit log + Mailgun source-shape gate; (d) ✓ CI green on `daccf732` (3 builds); (e) ✓ live container code on rtm image `3a461b3d` confirmed to wrap all 12 sites with the redactors. Fixes: helpers `0de30806` + sweep `0314c9a0` + spec `daccf732`.
 
 ## v2 Requirements
 
@@ -36,6 +36,10 @@ Requirements for closing v1.0 GA from the backend side. Each maps to exactly one
 
 - **SEC-COOKIE-01**: Session cookie at `thinx-core.js:303` currently sets `httpOnly: false` ("temporarily disabled for websocket debugging" per stale comment). Re-evaluate whether `httpOnly: true` is feasible with the current WebSocket flow — defer to v1.x; flipping this without a WebSocket regression test is risky.
 - **SEC-WS-01**: WebSocket handshake risk on `rtm.thinx.cloud` (AGENTS.md L96-97: "Websocket handshake may still return 404 even with corrected frontend bundle") — defer to v1.x unless v1 UAT surfaces a regression.
+
+### Audit Log Retention (surfaced 2026-05-26 in Phase 2 verification)
+
+- **SEC-PII-02**: Historic entries in the CouchDB `managed_logs` database (`thinx_couchdb` on swarm host `188.166.23.244`, ~658,808 docs as of 2026-05-26) still contain raw 64-character reset_keys from before Phase 2's fix landed. Sample evidence: lines like `Attempt to set password with: 53d97b305c88081c744e764ddc7c52dc7b98b74cd503c0f96ae799624014b644`. Phase 2's `SEC-PII-01` fix prevents the leak from continuing; cleanup of the historic data is a separate concern. Defer to v1.x/v2. Possible remediation: (a) one-time `_bulk_docs` UPDATE with redacted message strings, (b) bulk delete of audit entries older than a retention window, (c) introduce an `audit_log` TTL going forward. GDPR-adjacent.
 
 ### Auth & Account Lifecycle (surfaced 2026-05-26 in Phase 1 UAT)
 
@@ -70,17 +74,17 @@ Explicitly excluded from v1 GA. Documented to prevent scope creep.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | AUTH-API-01 | Phase 1 | **Verified (2026-05-26)** |
+| SEC-PII-01 | Phase 2 | **Verified (2026-05-26)** |
 | OPS-01 | Phase 3 | Pending |
 | SEC-DEP-01 | Phase 4 | Pending |
-| SEC-PII-01 | Phase 2 | Pending |
 
 **Coverage:**
 - v1 requirements: 4 total
 - Mapped to phases: 4 ✓
-- Verified: 1 (AUTH-API-01)
-- Pending: 3
+- Verified: 2 (AUTH-API-01, SEC-PII-01)
+- Pending: 2 (OPS-01, SEC-DEP-01)
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-26*
-*Last updated: 2026-05-26 — AUTH-API-01 verified via live rtm UAT; 3 new v2/deferred items added from Phase 1 UAT findings (AUTH-REACTIVATE-01, AUTH-RESET-LINK-CONSOLE, CONSOLE-LEGACY-JSON-PARSE)*
+*Last updated: 2026-05-26 — SEC-PII-01 verified via deployed-container + CI evidence; new v1.x/v2 deferred item SEC-PII-02 (historic managed_logs cleanup) added from Phase 2 verification finding*

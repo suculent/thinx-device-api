@@ -18,7 +18,7 @@
 ## Phases
 
 - [x] **Phase 1: AUTH API — Password Reset** — ✓ **Verified 2026-05-26** (live rtm UAT against image `0a0e6b32`; AUTH-API-01 closed end-to-end)
-- [ ] **Phase 2: PII Logging Scrub** — Redact emails, reset keys, Mailgun/activation tokens in `lib/thinx/owner.js`
+- [x] **Phase 2: PII Logging Scrub** — ✓ **Verified 2026-05-26** (deployed-container + CI evidence against image `3a461b3d`; SEC-PII-01 closed; 12 sites swept)
 - [ ] **Phase 3: Swarm Auto-Pull** — Diagnose and restore swarm-side auto-redeploy after registry push
 - [ ] **Phase 4: Dependency Triage** — Classify all 28 Dependabot findings (11 high / 17 moderate) as v1-blocker or v1.x-deferred and fix the blockers
 
@@ -50,9 +50,9 @@
   2. The replacement pattern is consistent: emails hashed or last-4-chars + length, reset/activation keys as first-4-chars + ellipsis, Mailgun errors as `err.message` + `err.statusCode` only (never the full error object).
   3. At least one Jasmine spec exercises an error path (e.g., reset attempt for unknown email) and asserts the redacted log format — no raw email or token appears in the log line.
   4. Audit-log entries written via `alog.log` (L451, L583) are likewise redacted — the CouchDB audit doc no longer stores plaintext reset keys.
-**Plans:** 1 plan (single coarse plan covering helpers + sweep + spec + deploy + close-out)
-  - [ ] 02-PLAN.md — Util.redactEmail/redactToken helpers + sweep of all 12 leak sites in lib/thinx/owner.js + new ZZ-OwnerLogRedactionSpec.js + push/CI/restart.sh deploy + rtm log-tail UAT (Probes A–E) + close-out SUMMARY
-**Notes:** Site list and replacement-pattern recommendations are pre-staged in `.planning/codebase/CONCERNS.md` ("Privacy / Logging Exposure") and finalized in `phases/02-pii-logging-scrub/02-CONTEXT.md` (12 sites total — 7 from CONCERNS + 5 surfaced by planner grep). Single coarse plan per project granularity setting; all 12 sites share the same redactor pattern, splitting would create double review overhead. Deploy path uses `./restart.sh` on swarm host per memory `swarm-deploy-script-name` (NOT `./scripts/stack-deploy`).
+**Plans:** 1 plan (single coarse plan covering helpers + sweep + spec + deploy + close-out) — ✓ complete
+  - [x] 02-PLAN.md — Util.redactEmail/redactToken helpers + sweep of all 12 leak sites in lib/thinx/owner.js + new ZZ-OwnerLogRedactionSpec.js + push/CI/restart.sh deploy + rtm log-tail UAT (Probes A–E) + close-out SUMMARY ✓ shipped `0de30806` + `0314c9a0` + `daccf732`; deployed to image `3a461b3d`; Probes A/E PASS by automation, B/D SKIP-acceptable per operator, C PASS by container-code evidence
+**Notes:** 12 sites swept (7 from CONCERNS + 5 surfaced during planning + opportunistic 13th `body` envelope fix at L510 surfaced during execution). Critical guardrail preserved: L165-167 test-env passthrough log redacted while callback value stays raw (chai-http round-trip spec at ZZ-AppSessionUserSpec.js:191-198 chain intact). Verification finding: historic CouchDB `managed_logs` entries (~658k docs) still contain raw reset_keys from before today's deploy — separate concern filed as `SEC-PII-02` v1.x/v2 deferred. Deploy path: `./restart.sh` on swarm host per memory `swarm-deploy-script-name`.
 
 ### Phase 3: Swarm Auto-Pull
 **Goal:** Restore swarm-side auto-redeploy on `188.166.23.244` so that a parent-monorepo push triggering a registry image build results in a rolling task update without operator intervention.

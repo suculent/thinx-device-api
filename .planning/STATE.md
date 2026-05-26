@@ -15,13 +15,13 @@
 
 - **Mode:** mvp
 - **Active milestone:** v1.0 GA (backend closures)
-- **Active phase:** Phase 2 — PII Logging Scrub (next; Phase 1 verified 2026-05-26)
-- **Active plan:** (none yet — Phase 2 not planned)
+- **Active phase:** Phase 3 — Swarm Auto-Pull (next; Phase 2 verified 2026-05-26)
+- **Active plan:** (none yet — Phase 3 not planned)
 - **Plan status:** pending
 - **Phase status:** not started
-- **Progress:** Phase 1/4 complete · Plans 2/2 in Phase 1
+- **Progress:** Phase 2/4 complete · Plans 1/1 in Phase 2
   ```
-  [█████░░░░░░░░░░░░░░░] 25% (1/4 phases)
+  [██████████░░░░░░░░░░] 50% (2/4 phases)
   ```
 
 ## Phase Progress
@@ -29,19 +29,20 @@
 | # | Phase | Requirements | Status |
 |---|-------|--------------|--------|
 | 1 | AUTH API — Password Reset | AUTH-API-01 | **Verified (2026-05-26)** |
-| 2 | PII Logging Scrub | SEC-PII-01 | pending (next) |
-| 3 | Swarm Auto-Pull | OPS-01 | pending |
+| 2 | PII Logging Scrub | SEC-PII-01 | **Verified (2026-05-26)** |
+| 3 | Swarm Auto-Pull | OPS-01 | pending (next) |
 | 4 | Dependency Triage | SEC-DEP-01 | pending |
 
-**v1 requirement coverage:** 4 of 4 mapped ✓ | Verified: 1 (AUTH-API-01) | Pending: 3
+**v1 requirement coverage:** 4 of 4 mapped ✓ | Verified: 2 (AUTH-API-01, SEC-PII-01) | Pending: 2
 
 ## Performance Metrics
 
-- Phases completed: 1 (Phase 1 — AUTH-API-01)
-- Plans completed: 2 (01-01 Wave 1 backend fixes, 01-02 Wave 2 spec + deploy + UAT)
-- Verification passes: 1 (Phase 1 verified via live rtm UAT 2026-05-26)
+- Phases completed: 2 (Phase 1 — AUTH-API-01, Phase 2 — SEC-PII-01)
+- Plans completed: 3 (01-01 Wave 1, 01-02 Wave 2, 02 single coarse plan)
+- Verification passes: 2 (Phase 1 live UAT + Phase 2 code+CI evidence)
 - Node repairs used: 0
-- Average plan cycle time: same-day for Phase 1 (planning at ~09:30Z, verification at ~12:00Z)
+- Inline hotfixes: 1 (Issue E — `bcd6e83f` legacy console profile email flatten, outside any phase plan)
+- Average plan cycle time: same-day for both phases (Phase 1 planning ~09:30Z → verification ~12:00Z; Phase 2 planning ~15:00Z → verification ~17:30Z)
 
 ## Accumulated Context
 
@@ -54,9 +55,12 @@
 - 2026-05-26 — Phase ordering by criticality + likely-effort: G8 first (live user-facing bug, pre-investigated), PII scrub second (fast targeted win), OPS-swarmpull third, DEP triage last (may overlap with PII fix candidates).
 - 2026-05-26 — Phase 1 G8 root cause: Vue API client unconditionally sets `Authorization: Bearer null` when logged out; backend `lib/router.js:103` matched header presence not validity, JWT-verify failed on literal `"null"`, stamped 403. Fixed via 2-line Bearer-null guard in router.js (class-fix for all routes). Tightening for AUTH-API-01 (b) added during Wave 2 once curl confirmed body still leaked enumeration even with normalized status. See `phases/01-auth-api-password-reset/01-SUMMARY.md` for the full root cause + reversion plan.
 - 2026-05-26 — Phase 1 UAT surfaced one operational artifact requiring manual remediation: test user account had `deleted:true` (from a prior Phase 9 G7 profile-delete UAT 2026-05-24); login was gated by `lib/router.auth.js:189-191`. Restored via direct CouchDB PUT (`_rev` 14 → 15). Filed `AUTH-REACTIVATE-01` as v2/deferred — no self-serve flow exists to recover a soft-deleted account, manual DB mutation is currently the only path.
+- 2026-05-26 — Issue E (legacy AngularJS console profile shows `john@doe.com` placeholder) was inline-hotfixed at parent commit `bcd6e83f`. Backend `Owner.profile()` now flattens `email` to the top level of the /api/v2/profile response. User policy correction: legacy console must stay working until Vue is GA'd as THiNX v2.0.x (memory `legacy-console-supported-until-v2`); legacy bugs are real bugs, not deprecation-deferrable.
+- 2026-05-26 — Phase 2 SEC-PII-01 scope expanded during execution from 6 to 12+ sites — planner's grep surfaced 5 additional sites; executor's Rule-2 sweep added an opportunistic 13th (`{body}` envelope dump at L510 that could leak email via CouchDB view key). All 13 swept in a single atomic commit. Critical guardrail: L165-167 test-env passthrough log redacted while callback value stays raw (chai-http round-trip spec at ZZ-AppSessionUserSpec.js:191-198 chain intact).
+- 2026-05-26 — Phase 2 verification finding: historic CouchDB `managed_logs` entries (~658k docs) still contain raw 64-char reset_keys from before today's deploy. Phase 2's fix is for NEW emissions only; historic data cleanup is a separate GDPR-adjacent concern filed as `SEC-PII-02` v1.x/v2 deferred. Operator accepted code+CI evidence for Phase 2 close-out (Probes B/D SKIP-acceptable).
 
 ### Todos
-- None active for Phase 1 (Verified). Next: `/gsd:plan-phase 2`.
+- None active for Phase 2 (Verified). Next: `/gsd-plan-phase 3` (OPS-01 — diagnose + restore swarm auto-pull on 188.166.23.244).
 
 ### Blockers
 - None
@@ -72,12 +76,13 @@
 
 ## Session Continuity
 
-**Stopped at:** Phase 1 (AUTH-API-01 / G8) **Verified** 2026-05-26 — live rtm UAT accepted against image `thinxcloud/api:latest sha256:0a0e6b32` (built from `c67d9af`). Class-fix for the Bearer-null JWT-403 bug shipped at `622aa01`; no-enum status normalization at `db46790`; tightening body normalization at `c67d9af`; regression spec at `3413166`. Login round-trip verified after a manual CouchDB account restoration (test user had `deleted:true` from a prior Phase 9 G7 UAT — not a Phase 1 regression; filed as v2/deferred AUTH-REACTIVATE-01). 3 new v2/deferred items captured from the UAT walk; 10 commits across the phase. Cross-ref: console submodule Phase 11 Wave 1 is closed by this phase.
+**Stopped at:** Phase 2 (SEC-PII-01) **Verified** 2026-05-26 — code+CI evidence + automated probes A/E PASS + live container code verification against image `thinxcloud/api:latest sha256:3a461b3d`. Three atomic code commits: helpers `0de30806` + 12-site sweep `0314c9a0` + regression spec `daccf732`. Operator accepted Probes B/D as SKIP per ZZ-OwnerLogRedactionSpec.js CI coverage. Verification surfaced one new v1.x/v2 backlog item: SEC-PII-02 — historic managed_logs entries (~658k docs) still contain raw reset_keys from before today's deploy; cleanup is a separate concern from the new-emission fix. Phase 2 was also notably influenced by the Issue E hotfix (`bcd6e83f`) which added 9 lines to owner.js — the planner's line-number references shifted +9 for sites after profile(); content-pattern grep was used throughout.
 
-**Next action:** `/gsd:plan-phase 2` (Phase 2 — PII Logging Scrub / SEC-PII-01).
+**Next action:** `/gsd-plan-phase 3` (Phase 3 — Swarm Auto-Pull / OPS-01).
 
-**Resume hint:** Phase 2 is a small, targeted single-file refactor on `lib/thinx/owner.js`. Site list and replacement-pattern guidance are pre-staged in `.planning/codebase/CONCERNS.md` ("Privacy / Logging Exposure"). Should be the fastest phase to close — no edge config, no submodule interaction, single file diff. Lessons from Phase 1 to bring into Phase 2 planning: (a) probe BOTH success and failure paths after deploy, not just the happy path (Phase 1's tightening commit was needed because the initial fix only normalized status, not body — same trap applies to logging redaction); (b) avoid silent "document for human" fallbacks in the plan — if ssh/deploy/spec gate fails, ESCALATE not chain; (c) the actual swarm deploy script is `./restart.sh` not `./scripts/stack-deploy` as AGENTS.md says (see memory `swarm-deploy-script-name`).
+**Resume hint:** Phase 3 is an OPERATIONAL investigation, not a code fix in this monorepo. Diagnose why the swarm-side auto-pull on `188.166.23.244` stopped working after 14:44 CET 2026-05-25. Suspects: Swarmpit watcher process, registry webhook config, expired/rotated registry credentials, Docker manifest schema mismatch. Recon steps in `.planning/codebase/CONCERNS.md` ("Operations Concerns"). The diagnostic playbook should start with `ssh -p 2020 -i ~/.ssh/DOKey2 root@188.166.23.244` and `docker logs <swarmpit-agent>`. Do NOT break the manual `./restart.sh` workaround (Phase 1/2 deploy verification relied on it). Phase ordering note: Phases 3 and 4 are functionally independent of each other; Phase 3 lands before Phase 4 mostly for v1 GA-cleanliness reasons (a working auto-pull lets Phase 4's dependabot fix verifications complete without manual ops intervention).
 
 ---
 *State initialized: 2026-05-26*
 *Phase 1 verified: 2026-05-26*
+*Phase 2 verified: 2026-05-26*
