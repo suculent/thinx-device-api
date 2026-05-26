@@ -165,4 +165,45 @@ describe("Util", function () {
         ];
         expect(Util.isUndefinedOf(a)).to.equal(false);
     });
+
+    // SEC-PII-01 — redactEmail / redactToken helpers
+    it("should redact a typical email (redactEmail)", function () {
+        expect(Util.redactEmail("matej.sychra@tmcoy.cz")).to.equal("m***@tmcoy.cz");
+    });
+
+    it("should redact a single-char-local email (redactEmail)", function () {
+        expect(Util.redactEmail("a@b.cz")).to.equal("a***@b.cz");
+    });
+
+    it("should handle empty/null/undefined email defensively (redactEmail)", function () {
+        expect(Util.redactEmail("")).to.equal("<empty>");
+        expect(Util.redactEmail(null)).to.equal("<null>");
+        expect(Util.redactEmail(undefined)).to.equal("<undefined>");
+    });
+
+    it("should redact a malformed email (no @) (redactEmail)", function () {
+        expect(Util.redactEmail("nodomain")).to.equal("<malformed>");
+    });
+
+    it("should redact a 64-char hex token with 6-char prefix + Unicode ellipsis (redactToken)", function () {
+        let tok = "a1b2c3d4e5f6789012345678901234567890123456789012345678901234abcd";
+        expect(tok.length).to.equal(64);
+        expect(Util.redactToken(tok)).to.equal("a1b2c3…");
+    });
+
+    it("should redact a short token (length < prefix) without padding (redactToken)", function () {
+        expect(Util.redactToken("abc", 6)).to.equal("abc…");
+    });
+
+    it("should handle empty/null/undefined token defensively (redactToken)", function () {
+        expect(Util.redactToken("")).to.equal("<empty>");
+        expect(Util.redactToken(null)).to.equal("<null>");
+        expect(Util.redactToken(undefined)).to.equal("<undefined>");
+    });
+
+    it("should be deterministic — same input → same output (redactEmail/redactToken)", function () {
+        expect(Util.redactEmail("matej.sychra@tmcoy.cz")).to.equal(Util.redactEmail("matej.sychra@tmcoy.cz"));
+        let tok = "deadbeefcafebabe1234567890abcdef";
+        expect(Util.redactToken(tok)).to.equal(Util.redactToken(tok));
+    });
 });
