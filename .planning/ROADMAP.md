@@ -64,8 +64,9 @@
   2. A controlled push-and-observe verification on rtm: pushing an updated image tag results in the swarm task transitioning to the new image within 5 minutes, without invoking `./scripts/stack-deploy`.
   3. A reversion plan is documented in the phase close-out: if the fix introduces regression, what to revert (config file, env var, label change, Swarmpit version) and how.
   4. The manual `./scripts/stack-deploy` workaround remains functional as a fallback (do not break the escape hatch).
-**Plans:** TBD
-**Notes:** Incident date 2026-05-25 14:44 CET. `docker-swarm.yml` already carries `swarmpit.service.deployment.autoredeploy=true` labels — the failure is downstream of config. Recon steps in `.planning/codebase/CONCERNS.md` ("Operations Concerns"). Cross-ref: console `v1.x-backlog.md` OPS-swarmpull entry.
+**Plans:** 1 plan (single coarse rung-by-rung plan; Rung 1 autonomous, Rungs 2-4 checkpoint-gated)
+  - [ ] 03-PLAN.md — SSH-driven 4-rung investigation (Rung 1 swarmpit_app restart → Rung 2 swarmpit_db rebuild → Rung 3 stale-node cleanup → Rung 4 Swarmpit upgrade) + push-and-observe SLA test + 03-SUMMARY.md close-out with root cause + reversion plan + AGENTS.md runbook line
+**Notes:** Incident date 2026-05-25 14:44 CET. `docker-swarm.yml` already carries `swarmpit.service.deployment.autoredeploy=true` labels — the failure is downstream of config. Pre-investigation (2026-05-26 ~17:00 UTC) identified `swarmpit_app` as DEGRADED (Bad Gateway via Traefik + zero application logs for 2+ hours + zero autoredeploy log lines for 30 hours), narrowing the diagnostic ladder from "5+ suspects" to a concrete 4-rung escalation. Live findings + locked rung order documented in `phases/03-swarm-auto-pull/03-CONTEXT.md`. Recon steps in `.planning/codebase/CONCERNS.md` ("Operations Concerns") are now superseded by the CONTEXT live findings. Cross-ref: console `v1.x-backlog.md` OPS-swarmpull entry. Phase shape note: this is an OPERATIONAL phase — primary deliverable is a documented root cause + reversion plan + runbook line, NOT a source-code diff in this monorepo (Rung 1 outcome expected to produce zero code commits).
 
 ### Phase 4: Dependency Triage
 **Goal:** Classify all 28 GitHub Dependabot findings against `suculent/thinx-device-api` (11 high + 17 moderate) as either v1-blocker (fixed before v1 GA) or v1.x-deferred (with documented rationale and a future trigger condition), and ship the blocker fixes.
@@ -108,7 +109,7 @@
 |-------|----------------|--------|-----------|
 | 1. AUTH API — Password Reset | 2/2 | Verified | 2026-05-26 |
 | 2. PII Logging Scrub | 0/1 | Planned | - |
-| 3. Swarm Auto-Pull | 0/0 | Not started | - |
+| 3. Swarm Auto-Pull | 0/1 | Planned | - |
 | 4. Dependency Triage | 0/0 | Not started | - |
 
 ## Dependencies (visual)
@@ -131,4 +132,4 @@ Phase 3 is functionally independent of 1, 2, 4 and could execute in parallel wit
 
 ---
 *Roadmap created: 2026-05-26*
-*Last updated: 2026-05-26 — Phase 2 (PII Logging Scrub) planned: 1 coarse plan in `phases/02-pii-logging-scrub/02-PLAN.md`*
+*Last updated: 2026-05-26 — Phase 3 (Swarm Auto-Pull) planned: 1 coarse rung-by-rung plan in `phases/03-swarm-auto-pull/03-PLAN.md`*
