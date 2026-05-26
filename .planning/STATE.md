@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verified
-stopped_at: "Phase 4 (SEC-DEP-01) Verified 2026-05-27 via Slice 4 merge-up. PR #539 (thinx-staging→master, mergeCommit `465b73c2592467d0586682ceca70a5f7dedf4ddf`) merged 2026-05-26T23:09:34Z and PR #540 (thinx-staging→main, mergeCommit `c05305711af27205f71bf06164266d62b02ccc63`) merged 2026-05-26T23:09:55Z by operator suculent via GitHub UI. **v1 GA backend closures complete: 4/4 v1 requirements Verified (AUTH-API-01, SEC-PII-01, OPS-01, SEC-DEP-01).** Slice 2 commit `d8e3176c` shipped 4 surgical package.json override edits (-follow-redirects pin, lodash 4.17.23→4.18.1, minimatch 5.1.0→5.1.9, +ws `$ws` self-reference resolving to 8.21.0) which now live on both default branches. Runtime-tree `npm audit --omit=dev` high=0 (PRIMARY METRIC ✓; was 9 pre-fix). services/console merge-up deferred per operator Option B 2026-05-27 (sibling-project scope; SEC-DEP-02 v1.x backlog already tracks console-side dependency triage). Next milestone: v1.0 GA release tag coordination."
-last_updated: "2026-05-27T00:00:00Z"
+status: milestone_complete
+stopped_at: Milestone complete (Phase 04 was final phase)
+last_updated: 2026-05-26T23:33:25.307Z
 progress:
   total_phases: 4
   completed_phases: 4
@@ -23,13 +23,13 @@ progress:
 - **Roadmap:** `.planning/ROADMAP.md`
 - **Requirements:** `.planning/REQUIREMENTS.md`
 - **Core value:** The IoT device API stays available and trustworthy through v1.0 GA — every legacy-console capability the Vue console depends on must continue to work end-to-end, with no v1.x backlog item promoted into the v1 release.
-- **Current focus:** v1 GA backend closures complete; next milestone = v1.0 GA release tag (cross-project coordination with services/console v1.0 frontend)
+- **Current focus:** Milestone complete
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace. 10 phases shipped (v1.0 frontend), Phase 11 (v1 GA gap-closures) in flight in parallel. Backend v1 GA + frontend v1 GA land together as v1.0.
 
 ## Current Position
 
-Phase: (v1 GA backend closures complete)
-Plan: (none — v1 GA shipped)
+Phase: 04
+Plan: Not started
 
 - **Mode:** mvp
 - **Active milestone:** v1.0 GA — backend Verified; awaiting v1.0 release tag coordination
