@@ -29,7 +29,7 @@ The IoT device API stays available and trustworthy through v1.0 GA — every leg
 
 - [ ] **G8** — Restore `POST /api/v2/password/reset` 200 response for unauthenticated callers on rtm. Seed: `.planning/G8-INVESTIGATION.md`. Cross-ref: console ROADMAP Phase 11 Wave 1.
 - [ ] **OPS-swarmpull** — Diagnose and restore swarm-side auto-pull on `188.166.23.244` (broke 14:44 CET 2026-05-25). Manual `./scripts/stack-deploy` is the current workaround. Cross-ref: console `v1.x-backlog.md` (OPS-swarmpull).
-- [ ] **DEP-triage** — Sort the 11 high / 17 moderate dependabot findings (surfaced 2026-05-26): mark each as v1 GA blocker (fix now) or v1.x deferred (with rationale). Address the v1 blockers.
+- [x] **DEP-triage** — ✓ Validated in Phase 4: Dependency Triage (SEC-DEP-01, 2026-05-27). 29 alerts classified (7 blocker / 19 deferred-stale / 3 deferred-dev-only); 4 override-block edits shipped via commit `d8e3176c`; `npm audit --omit=dev` runtime-tree high 9→0; merged to master (#539) + main (#540) 2026-05-26T23:09Z.
 - [ ] **SEC-pii-logs** — Scrub PII from error logs in `lib/thinx/owner.js` (emails at L499; reset keys at L451/L474/L583/L647; Mailgun token at L95; activation token at L228). Surfaced by today's CONCERNS map.
 
 ### Out of Scope
@@ -84,4 +84,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-26 after initialization*
+*Last updated: 2026-05-27 after Phase 4 completion (SEC-DEP-01 Verified; v1 GA backend closures complete — 4/4 requirements verified)*
