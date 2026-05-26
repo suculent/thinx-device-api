@@ -78,11 +78,11 @@
   2. Every "blocker" verdict in the table has a corresponding fix landed (`package.json` direct bump, `overrides` block pin, or code-level mitigation) — and the resulting GitHub Security tab high-severity count drops to the documented "deferred-with-rationale" baseline (zero unaddressed high-severity advisories).
   3. The `chai-http` v4 lock and any other AGENTS.md-documented dependency locks are respected — no upgrade attempted in this phase for items in the lock list, and any locked item that appears in the Dependabot list is explicitly tagged "v1.x-deferred — locked per AGENTS.md".
   4. The `npm audit` post-fix output is captured in `.planning/dep-triage.md` as the new baseline; future Dependabot alerts have a documented starting point to diff against.
-**Plans:** 1/4 plans executed
+**Plans:** 2/4 plans executed
 
   Plans:
   - [x] 04-01-baseline-and-triage-table-PLAN.md — pre-fix audit baselines (full tree + runtime tree + Dependabot snapshot) + populated triage table at .planning/dep-triage.md (29 alerts classified per research preclassification)
-  - [ ] 04-02-blocker-fixes-PLAN.md — 4 surgical override edits in package.json (-follow-redirects, lodash 4.17.23->4.18.1, minimatch 5.1.0->5.1.9, +ws 8.20.1); single npm install regenerates lockfile; npm test green; push to thinx-staging; CI green; Swarmpit autoredeploy; Phase 1 contract preserved
+  - [x] 04-02-blocker-fixes-PLAN.md — 4 surgical override edits in package.json (-follow-redirects, lodash 4.17.23->4.18.1, minimatch 5.1.0->5.1.9, +ws 8.20.1); single npm install regenerates lockfile; npm test green; push to thinx-staging; CI green; Swarmpit autoredeploy; Phase 1 contract preserved
   - [ ] 04-03-post-fix-baseline-and-closeout-PLAN.md — post-fix audit baselines + dep-triage Section 3 populated + REFACTOR-05 + SEC-DEP-02 filed as v1.x backlog + STATE/ROADMAP/REQUIREMENTS updates + 04-SUMMARY.md close-out
   - [ ] 04-04-merge-up-to-default-branches-PLAN.md — open PRs thinx-staging->master + thinx-staging->main on parent suculent/thinx-device-api (so cloud scanners see the fix on default branches); gated services/console PR if non-empty diff; operator approves + merges via GitHub UI; flip SEC-DEP-01 + Phase 4 to Verified
 **Notes:** Surfaced 2026-05-26 via GitHub Security tab. The `package.json` `overrides` block (L97-136 — 38 pins) is the expected fix vector for transitive CVEs. First action: `gh api repos/suculent/thinx-device-api/dependabot/alerts` to enumerate. Cross-ref: `.planning/codebase/CONCERNS.md` "Security Considerations".
@@ -94,7 +94,7 @@
 | 1 | AUTH API — Password Reset | Restore unauth `POST /api/v2/password/reset` 200 on rtm | AUTH-API-01 | 5 |
 | 2 | PII Logging Scrub | Redact PII/secrets in `lib/thinx/owner.js` logs | SEC-PII-01 | 4 |
 | 3 | Swarm Auto-Pull | Restore swarm-side auto-redeploy | OPS-01 | 4 |
-| 4 | Dependency Triage | 1/4 | In Progress|  |
+| 4 | Dependency Triage | 2/4 | In Progress|  |
 
 ## Requirement Coverage
 
