@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-stopped_at: "Phase 4 (SEC-DEP-01) Slice 3 closed 2026-05-27 — code-shipped on thinx-staging; Verified contingent on Slice 4. Slice 2 commit `d8e3176c` shipped 4 surgical package.json override edits (-follow-redirects pin, lodash 4.17.23→4.18.1, minimatch 5.1.0→5.1.9, +ws `$ws` self-reference resolving to 8.21.0). Closed 7 GHSAs. Runtime-tree `npm audit --omit=dev` high=0 (THE primary success metric; was 9 pre-fix). Full tree 34→8 (1H + 7M is devDep-only residue stripped by Dockerfile L86). CI green first try; Swarmpit autoredeploy delta=49s; Phase 1 + 2 contracts preserved on new image `sha256:4d3fb789`. Slice 3 captured post-fix baselines (04-AUDIT-POST.json, 04-AUDIT-POST-PROD.json, 04-DEPENDABOT-POST.json), populated dep-triage.md Section 3 with the pre/post metric snapshot + 3-bucket classification of the 29 still-open Dependabot alerts (Bucket A: 7 auto-close-imminent blocker-mapped alerts pending rescan; Bucket B: 19 deferred-stale `installed past vuln range`; Bucket C: 3 deferred-dev-only). Operator decision 2026-05-27 Option C: documentation-now path; manual Dependabot UI dismissal walk skipped; 22 non-blocker alerts left to age out via natural Dependabot lifecycle. Two new v1.x backlog items filed: REFACTOR-05 (jshint + fs-finder misclassified as runtime deps) + SEC-DEP-02 (services/console has 15 open Dependabot alerts; sibling project)."
-last_updated: "2026-05-26T22:50:37Z"
+status: verified
+stopped_at: "Phase 4 (SEC-DEP-01) Verified 2026-05-27 via Slice 4 merge-up. PR #539 (thinx-staging→master, mergeCommit `465b73c2592467d0586682ceca70a5f7dedf4ddf`) merged 2026-05-26T23:09:34Z and PR #540 (thinx-staging→main, mergeCommit `c05305711af27205f71bf06164266d62b02ccc63`) merged 2026-05-26T23:09:55Z by operator suculent via GitHub UI. **v1 GA backend closures complete: 4/4 v1 requirements Verified (AUTH-API-01, SEC-PII-01, OPS-01, SEC-DEP-01).** Slice 2 commit `d8e3176c` shipped 4 surgical package.json override edits (-follow-redirects pin, lodash 4.17.23→4.18.1, minimatch 5.1.0→5.1.9, +ws `$ws` self-reference resolving to 8.21.0) which now live on both default branches. Runtime-tree `npm audit --omit=dev` high=0 (PRIMARY METRIC ✓; was 9 pre-fix). services/console merge-up deferred per operator Option B 2026-05-27 (sibling-project scope; SEC-DEP-02 v1.x backlog already tracks console-side dependency triage). Next milestone: v1.0 GA release tag coordination."
+last_updated: "2026-05-27T00:00:00Z"
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 8
-  completed_plans: 7
-  percent: 88
+  completed_plans: 8
+  percent: 100
 ---
 
 # STATE — THiNX Device API v1 GA Backend Closures
 
-**Last updated:** 2026-05-27 (Phase 4 Slice 3 — post-fix baseline + close-out — committed; Slice 4 merge-up to default branches outstanding)
+**Last updated:** 2026-05-27 (Phase 4 / SEC-DEP-01 Verified via Slice 4 merge-up to default branches; v1 GA backend closures complete 4/4)
 
 ## Project Reference
 
@@ -23,23 +23,23 @@ progress:
 - **Roadmap:** `.planning/ROADMAP.md`
 - **Requirements:** `.planning/REQUIREMENTS.md`
 - **Core value:** The IoT device API stays available and trustworthy through v1.0 GA — every legacy-console capability the Vue console depends on must continue to work end-to-end, with no v1.x backlog item promoted into the v1 release.
-- **Current focus:** Phase 04 — dependency-triage (Slice 4 — merge-up PRs)
+- **Current focus:** v1 GA backend closures complete; next milestone = v1.0 GA release tag (cross-project coordination with services/console v1.0 frontend)
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace. 10 phases shipped (v1.0 frontend), Phase 11 (v1 GA gap-closures) in flight in parallel. Backend v1 GA + frontend v1 GA land together as v1.0.
 
 ## Current Position
 
-Phase: 04 (dependency-triage) — EXECUTING (Slice 3 closed; Slice 4 outstanding)
-Plan: 3 of 4 complete
+Phase: (v1 GA backend closures complete)
+Plan: (none — v1 GA shipped)
 
 - **Mode:** mvp
-- **Active milestone:** v1.0 GA (backend closures)
-- **Active phase:** Phase 4 — Dependency Triage (Slice 4 — merge-up to default branches outstanding)
-- **Active plan:** `04-04-merge-up-to-default-branches-PLAN.md`
-- **Plan status:** pending
-- **Phase status:** code-shipped on thinx-staging (Slices 1–3 complete; commit `d8e3176c` ships the lockfile fix; runtime-tree `npm audit --omit=dev` high=0); Verified contingent on Slice 4 PRs landing on master + main on parent suculent/thinx-device-api
-- **Progress:** Phase 3/4 verified · Phase 4 Slices 3/4
+- **Active milestone:** v1.0 GA — backend Verified; awaiting v1.0 release tag coordination
+- **Active phase:** (v1 GA backend closures complete)
+- **Active plan:** (none — v1 GA shipped)
+- **Plan status:** n/a
+- **Phase status:** verified — Phase 4 / SEC-DEP-01 closed 2026-05-27 via Slice 4 merge-up (PR #539 master + PR #540 main merged 2026-05-26T23:09Z); 4/4 v1 requirements Verified
+- **Progress:** 4/4 phases Verified
   ```
-  [████████████████░░░░] 80% (3/4 phases + 3/4 Phase 4 slices)
+  [████████████████████] 100% (4/4 phases)
   ```
 
 ## Phase Progress
@@ -49,19 +49,20 @@ Plan: 3 of 4 complete
 | 1 | AUTH API — Password Reset | AUTH-API-01 | **Verified (2026-05-26)** |
 | 2 | PII Logging Scrub | SEC-PII-01 | **Verified (2026-05-26)** |
 | 3 | Swarm Auto-Pull | OPS-01 | **Verified (2026-05-26)** |
-| 4 | Dependency Triage | SEC-DEP-01 | code-shipped — pending Slice 4 merge-up |
+| 4 | Dependency Triage | SEC-DEP-01 | **Verified (2026-05-27)** |
 
-**v1 requirement coverage:** 4 of 4 mapped ✓ | Verified: 3 (AUTH-API-01, SEC-PII-01, OPS-01) | Pending: 1
+**v1 requirement coverage:** 4 of 4 mapped ✓ | Verified: 4 (AUTH-API-01, SEC-PII-01, OPS-01, SEC-DEP-01) | Pending: 0
 
 ## Performance Metrics
 
-- Phases completed: 3 (Phase 1 — AUTH-API-01, Phase 2 — SEC-PII-01, Phase 3 — OPS-01)
-- Plans completed: 4 (01-01 Wave 1, 01-02 Wave 2, 02 single coarse plan, 03 single coarse plan via Rung 1)
-- Verification passes: 3 (Phase 1 live UAT + Phase 2 code+CI evidence + Phase 3 push-observe SLA test)
+- Phases completed: 4 (Phase 1 — AUTH-API-01, Phase 2 — SEC-PII-01, Phase 3 — OPS-01, Phase 4 — SEC-DEP-01)
+- Plans completed: 8 (01-01 Wave 1, 01-02 Wave 2, 02 single coarse plan, 03 single coarse plan via Rung 1, 04-01 baseline + triage, 04-02 blocker fixes, 04-03 post-fix baseline + close-out, 04-04 merge-up to default branches)
+- Verification passes: 4 (Phase 1 live UAT + Phase 2 code+CI evidence + Phase 3 push-observe SLA test + Phase 4 default-branch merge confirmation via `gh pr view`)
 - Node repairs used: 0
 - Inline hotfixes: 1 (Issue E — `bcd6e83f` legacy console profile email flatten, outside any phase plan)
-- Average plan cycle time: same-day for all three phases (Phase 1 ~09:30Z → ~12:00Z; Phase 2 ~15:00Z → ~17:30Z; Phase 3 ~18:00Z → ~18:31Z — fastest cycle, ~12 min execution due to Rung 1 PASS on first attempt)
-- Source-code commits by phase: Phase 1 = 4, Phase 2 = 3, Phase 3 = 0 (operational fix, zero code changes)
+- Average plan cycle time: same-day for Phases 1–3 (Phase 1 ~09:30Z → ~12:00Z; Phase 2 ~15:00Z → ~17:30Z; Phase 3 ~18:00Z → ~18:31Z — fastest cycle, ~12 min execution due to Rung 1 PASS on first attempt); Phase 4 wall-clock ~25h (2026-05-26 ~21:46Z → 2026-05-27 close — most of that is autoredeploy + operator UI-merge wait windows; active work ~30 min across 4 slices)
+- Source-code commits by phase: Phase 1 = 4, Phase 2 = 3, Phase 3 = 0 (operational fix), Phase 4 = 1 (commit `d8e3176c` — atomic package.json + package-lock.json override edits; zero src/ touches)
+- Phase 4 Slice 4 merge-up: PR #539 (master) +24,814/−536 across 122 files, mergeCommit `465b73c2`; PR #540 (main) +21,683/−1,785 across 81 files, mergeCommit `c0530571`. Both green on CircleCI (test #13866 + build-api-cloud #13867 + build-vue-console #13868), Snyk ×2 PASS, GitGuardian PASS. Merged 2026-05-26T23:09Z by operator suculent.
 
 ## Accumulated Context
 
@@ -82,10 +83,13 @@ Plan: 3 of 4 complete
 - 2026-05-26 — Phase 4 SEC-DEP-01 Slice 2 shipped 4 override edits as commit `d8e3176c`: REMOVE follow-redirects pin (let axios@1.16.1 resolve naturally to 1.16.0), lodash 4.17.23 → 4.18.1, minimatch 5.1.0 → 5.1.9, +ws "$ws" self-reference (resolves to 8.21.0; deviation A from plan's bare "8.20.1" because ws is also a direct dep — npm EOVERRIDE). Closed 7 GHSAs (GHSA-r5fr-rjxr-66jc + GHSA-f23m-r3pf-42rh lodash; GHSA-7r86-cg39-jmmj + GHSA-23c5-xmqv-rm74 + GHSA-3ppc-4f35-3m26 minimatch; GHSA-r4q5-vmmm-2653 follow-redirects; GHSA-58qx-3vcg-4xpx ws). Runtime-tree npm audit high count: 9 → 0 (THE primary success metric). Full tree: 34 → 8 (1H + 7M residue is devDep-only, stripped by Dockerfile L86). CI green first try; Swarmpit autoredeploy delta=49s (beats Phase 3 baseline 63s); Phase 1 + 2 contracts preserved on new image `sha256:4d3fb789`. Slice 3 documented the post-fix baseline (this commit); Slice 4 opens the merge-up PRs to master + main on parent suculent/thinx-device-api so cloud scanners attached to default branches see the fix.
 - 2026-05-26 — Phase 4 Slice 3 operator decision Option C (2026-05-27): proceed with documentation now; document rescan-pending residual (29 open Dependabot alerts; expected auto-resolution of the 7 blocker alerts within ~24h on GitHub Dependabot rescan; runtime-tree npm audit high=0 is the authoritative primary metric). Manual UI dismissal walk skipped — the 22 non-blocker alerts (19 deferred-stale + 3 deferred-dev-only) are left open by design to age out via natural Dependabot lifecycle.
 - 2026-05-26 — Two new v1.x backlog items filed during Phase 4 triage: REFACTOR-05 (jshint + fs-finder misclassified as runtime deps; their nested deps carried 3 of 4 Phase 4 blocker fixes) and SEC-DEP-02 (services/console has 15 open Dependabot alerts of its own — 2 high + 13 medium; sibling project; coordinate via `services/console/.planning/ROADMAP.md`).
+- 2026-05-27 — Phase 4 Slice 4 merge-up complete. PR #539 (https://github.com/suculent/thinx-device-api/pull/539 — thinx-staging→master) merged 2026-05-26T23:09:34Z by operator suculent; mergeCommit `465b73c2592467d0586682ceca70a5f7dedf4ddf`. PR #540 (https://github.com/suculent/thinx-device-api/pull/540 — thinx-staging→main) merged 2026-05-26T23:09:55Z by operator suculent; mergeCommit `c05305711af27205f71bf06164266d62b02ccc63`. Both PRs green on CircleCI (test #13866 + build-api-cloud #13867 + build-vue-console #13868), Snyk ×2 PASS, GitGuardian PASS. SEC-DEP-01 closed on default branches; cloud scanners (GitHub Security tab, Snyk Cloud, Dependabot) will reflect the fix on next default-branch rescan (allow up to 24h). 7 Bucket-A blocker-mapped alerts will auto-close on rescan.
+- 2026-05-27 — **Operator decision Option B — skip the services/console PR.** Verbatim: *"services/console: merge-up deferred to a separate cross-project coordination effort. Phase 4 closes Verified on the parent-PR side. SEC-DEP-02 already tracks console scope."* services/console diff (`main..thinx-staging` = 194 commits — recent v1 GA gap-closure stack atop a deep history divergence) is sibling-project scope and will be handled in a dedicated cross-project sync, not within Phase 4 of this project.
+- 2026-05-27 — **v1 GA backend closures complete: 4/4 v1 requirements Verified (AUTH-API-01, SEC-PII-01, OPS-01, SEC-DEP-01).** Next milestone = v1.0 GA release tag (cross-project coordination via `.planning/PROJECT.md` and `services/console/.planning/`).
 
 ### Todos
 
-- Next: execute `/gsd:execute-phase 4 --slice 4` (or `/gsd:execute-plan 4-4`) to open merge-up PRs `thinx-staging → master` and `thinx-staging → main` on parent `suculent/thinx-device-api`. After the PRs are approved and merged via the GitHub UI, flip SEC-DEP-01 + Phase 4 to Verified in STATE/ROADMAP/REQUIREMENTS.
+- v1 GA backend closures complete (4/4 v1 requirements Verified). Next: v1.0 release tag coordination across parent + console.
 
 ### Blockers
 
@@ -103,15 +107,16 @@ Plan: 3 of 4 complete
 
 ## Session Continuity
 
-**Stopped at:** Phase 4 (SEC-DEP-01) Slice 3 closed 2026-05-27 — code-shipped on thinx-staging; Verified contingent on Slice 4 (merge-up PRs to default branches). Slice 2 commit `d8e3176c` (`chore(deps): SEC-DEP-01 - resolve 7 active alerts via overrides`) shipped 4 surgical package.json override edits — REMOVE follow-redirects pin (let axios@1.16.1 resolve naturally to follow-redirects 1.16.0, past GHSA-r4q5-vmmm-2653 patched range); lodash 4.17.23 → 4.18.1 override (closes GHSA-r5fr-rjxr-66jc + GHSA-f23m-r3pf-42rh); minimatch 5.1.0 → 5.1.9 override (closes GHSA-7r86-cg39-jmmj + GHSA-23c5-xmqv-rm74 + GHSA-3ppc-4f35-3m26); +ws `"$ws"` self-reference override resolving to 8.21.0 at all 6 instances (closes GHSA-58qx-3vcg-4xpx; deviation from plan's bare "8.20.1" because ws is also a direct dep — npm EOVERRIDE). CI green first try; Swarmpit autoredeploy delta=49s (beats Phase 3 baseline 63s by 14s); Phase 1 (Bearer-null → 200) + Phase 2 (PII redaction `x***@y`) contracts preserved on new image `sha256:4d3fb789c915b6dbed268f6e55ddbb8214255e1bfcd9614eb7ca53925059bd01`. Slice 3 captured authoritative post-fix baselines (`04-AUDIT-POST.json` full-tree 8 = 1H + 7M devDep-only residue; `04-AUDIT-POST-PROD.json` runtime-tree **0** ← PRIMARY METRIC; `04-DEPENDABOT-POST.json` 29 alerts — rescan pending), populated `.planning/dep-triage.md` Section 3 with pre/post metric snapshot + 3-bucket classification (A: 7 auto-close-imminent blocker-mapped, B: 19 deferred-stale, C: 3 deferred-dev-only). Operator decision 2026-05-27 Option C: documentation-now; manual Dependabot UI dismissal walk skipped; 22 non-blocker alerts left to age out via natural Dependabot lifecycle. Two new v1.x backlog items filed: REFACTOR-05 (jshint + fs-finder misclassified as runtime deps) + SEC-DEP-02 (services/console has 15 open Dependabot alerts).
+**Stopped at:** Phase 4 (SEC-DEP-01) **Verified 2026-05-27** via Slice 4 merge-up. PR #539 (https://github.com/suculent/thinx-device-api/pull/539 — thinx-staging→master, +24,814/−536 across 122 files) merged 2026-05-26T23:09:34Z by operator suculent; mergeCommit `465b73c2592467d0586682ceca70a5f7dedf4ddf`. PR #540 (https://github.com/suculent/thinx-device-api/pull/540 — thinx-staging→main, +21,683/−1,785 across 81 files) merged 2026-05-26T23:09:55Z by operator suculent; mergeCommit `c05305711af27205f71bf06164266d62b02ccc63`. Both PRs CI-green (CircleCI test #13866 + build-api-cloud #13867 + build-vue-console #13868; Snyk ×2 PASS; GitGuardian PASS) prior to merge. Operator decision Option B 2026-05-27: services/console merge-up deferred to separate cross-project coordination effort (sibling-project scope; SEC-DEP-02 v1.x backlog already tracks console-side dependency triage; the 194-commit services/console divergence is owned by the console GSD project). **v1 GA backend closures complete: 4/4 v1 requirements Verified (AUTH-API-01, SEC-PII-01, OPS-01, SEC-DEP-01).** Cloud scanners (GitHub Security tab, Snyk Cloud, Dependabot) will reflect the fix on next default-branch rescan (allow up to 24h); the 7 Bucket-A blocker-mapped alerts will auto-close on rescan.
 
-**Next action:** `/gsd:execute-plan 4-4` (Slice 4 — open merge-up PRs `thinx-staging → master` and `thinx-staging → main` on parent `suculent/thinx-device-api`). After both PRs are approved + merged via the GitHub UI, flip SEC-DEP-01 + Phase 4 to Verified in STATE/ROADMAP/REQUIREMENTS.
+**Next action:** v1.0 GA release tag coordination (cross-project coordination via `.planning/PROJECT.md` + `services/console/.planning/`). Backend is ready; the console submodule's v1.0 frontend was already shipped (10 phases of services/console GSD complete per init context). Action: align on the release-tag SHA across parent + console and cut `v1.0.0` once both sides ack.
 
-**Resume hint:** Slice 4 is documentation + GitHub-UI orchestration only — no further code/package changes. The fix is already on `thinx-staging` (commit `d8e3176c`) and confirmed deploying via autoredeploy. Slice 4 opens 2 PRs (`thinx-staging → master` and `thinx-staging → main`) so the cloud scanners attached to default branches see the lockfile change and Dependabot rescans the closed alerts. The 7 auto-close-imminent alerts (Bucket A in dep-triage.md Section 3) will close on that rescan; the 22 non-blocker alerts (Buckets B + C) remain open by design per operator Option C. The `04-04-merge-up-to-default-branches-PLAN.md` plan in `.planning/phases/04-dependency-triage/` is the executable spec.
+**Resume hint:** Phase 4 closed. The fix is live on master + main (parent suculent/thinx-device-api). The pending services/console pointer drift in `git status` (`M services/console`) is intentional per operator Option B — addressed separately, NOT in any Phase 4 commit. SEC-DEP-02 (v1.x backlog) is the canonical tracking marker for follow-up console-side dependency triage. No outstanding GSD work in this project; next gsd-level activity is the v1.0 release tag once cross-project sync lands.
 
 ---
 *State initialized: 2026-05-26*
 *Phase 1 verified: 2026-05-26*
 *Phase 2 verified: 2026-05-26*
 *Phase 3 verified: 2026-05-26*
-*Phase 4 Slice 3 code-shipped on thinx-staging: 2026-05-27*
+*Phase 4 verified: 2026-05-27 (Slice 4 — parent PRs #539 + #540 merged to master + main; services/console deferred per Option B)*
+*v1 GA backend closures complete: 2026-05-27 (4/4 v1 requirements Verified)*

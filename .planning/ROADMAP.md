@@ -20,7 +20,7 @@
 - [x] **Phase 1: AUTH API — Password Reset** — ✓ **Verified 2026-05-26** (live rtm UAT against image `0a0e6b32`; AUTH-API-01 closed end-to-end)
 - [x] **Phase 2: PII Logging Scrub** — ✓ **Verified 2026-05-26** (deployed-container + CI evidence against image `3a461b3d`; SEC-PII-01 closed; 12 sites swept)
 - [x] **Phase 3: Swarm Auto-Pull** — ✓ **Verified 2026-05-26** (push-observe SLA test PASS via Rung 1 — `docker service update --force swarmpit_app`; delta=63s; OPS-01 closed; zero source-code commits)
-- [~] **Phase 4: Dependency Triage** — Classify all 29 Dependabot findings (11 high / 17 moderate / 1 low) as v1-blocker or v1.x-deferred; blocker fixes shipped on `thinx-staging` in commit `d8e3176c` (runtime-tree `npm audit --omit=dev` high=9→0 = PRIMARY METRIC); post-fix baseline captured + dep-triage.md Section 3 populated; Slice 4 merge-up PRs to default branches outstanding before Verified
+- [x] **Phase 4: Dependency Triage** — ✓ **Verified 2026-05-27** (parent PRs https://github.com/suculent/thinx-device-api/pull/539 (master, merge commit `465b73c2`) + https://github.com/suculent/thinx-device-api/pull/540 (main, merge commit `c0530571`) merged 2026-05-26T23:09Z; 7 GHSAs closed via 4 override edits; runtime-tree `npm audit --omit=dev` high=9→0; SEC-DEP-01 closed)
 
 ## Phase Details
 
@@ -84,7 +84,7 @@
   - [x] 04-01-baseline-and-triage-table-PLAN.md — pre-fix audit baselines (full tree + runtime tree + Dependabot snapshot) + populated triage table at .planning/dep-triage.md (29 alerts classified per research preclassification) (commit `f074139a`/`0c8cbfb3`/`740f0bff`)
   - [x] 04-02-blocker-fixes-PLAN.md — 4 surgical override edits in package.json (-follow-redirects, lodash 4.17.23->4.18.1, minimatch 5.1.0->5.1.9, +ws "$ws" self-ref resolving to 8.21.0); single npm install regenerates lockfile; CircleCI green first try (3 builds PASS); push to thinx-staging; Swarmpit autoredeploy delta=49s; Phase 1 + 2 contracts preserved on image `sha256:4d3fb789` (commit `d8e3176c` + fix-log row `e75fd810`)
   - [x] 04-03-post-fix-baseline-and-closeout-PLAN.md — post-fix audit baselines (full 8 = 1H + 7M devDep-only residue; runtime-tree 0 = primary metric ✓) + dep-triage.md Section 3 populated with pre/post metric snapshot + 3-bucket classification (7 auto-close-imminent / 19 deferred-stale / 3 deferred-dev-only); operator decision 2026-05-27 Option C (manual UI walk skipped, 22 non-blocker alerts left to age out); REFACTOR-05 + SEC-DEP-02 filed in REQUIREMENTS.md; STATE/ROADMAP updated; 04-SUMMARY.md close-out
-  - [x] 04-04-merge-up-to-default-branches-PLAN.md — open PRs thinx-staging->master + thinx-staging->main on parent suculent/thinx-device-api (so cloud scanners see the fix on default branches); gated services/console PR if non-empty diff; operator approves + merges via GitHub UI; flip SEC-DEP-01 + Phase 4 to Verified
+  - [x] 04-04-merge-up-to-default-branches-PLAN.md — PRs https://github.com/suculent/thinx-device-api/pull/539 (master, mergeCommit `465b73c2`) + https://github.com/suculent/thinx-device-api/pull/540 (main, mergeCommit `c0530571`) merged 2026-05-26T23:09Z by suculent via GitHub UI; SEC-DEP-01 + Phase 4 flipped to Verified. services/console PR deferred per operator Option B 2026-05-27 (sibling-project merge-up handled separately; SEC-DEP-02 already tracks console-side dependency triage).
 **Notes:** Surfaced 2026-05-26 via GitHub Security tab. The `package.json` `overrides` block (L97-136 — 38 pins) is the expected fix vector for transitive CVEs. First action: `gh api repos/suculent/thinx-device-api/dependabot/alerts` to enumerate. Cross-ref: `.planning/codebase/CONCERNS.md` "Security Considerations".
 
 ## Phase Summary
@@ -94,7 +94,7 @@
 | 1 | AUTH API — Password Reset | Restore unauth `POST /api/v2/password/reset` 200 on rtm | AUTH-API-01 | 5 |
 | 2 | PII Logging Scrub | Redact PII/secrets in `lib/thinx/owner.js` logs | SEC-PII-01 | 4 |
 | 3 | Swarm Auto-Pull | Restore swarm-side auto-redeploy | OPS-01 | 4 |
-| 4 | Dependency Triage | 3/4 | In Progress|  |
+| 4 | Dependency Triage | Classify 29 Dependabot findings + ship blocker fixes; merge-up to default branches | SEC-DEP-01 | 4 |
 
 ## Requirement Coverage
 
@@ -103,7 +103,7 @@
 | AUTH-API-01 | Phase 1 | Verified |
 | SEC-PII-01 | Phase 2 | Verified |
 | OPS-01 | Phase 3 | Verified |
-| SEC-DEP-01 | Phase 4 | Pending |
+| SEC-DEP-01 | Phase 4 | Verified |
 
 **Coverage:** 4/4 v1 requirements mapped ✓
 **Orphans:** none
@@ -116,7 +116,7 @@
 | 1. AUTH API — Password Reset | 2/2 | Verified | 2026-05-26 |
 | 2. PII Logging Scrub | 1/1 | Verified | 2026-05-26 |
 | 3. Swarm Auto-Pull | 1/1 | Verified | 2026-05-26 |
-| 4. Dependency Triage | 3/4 | code-shipped — pending Slice 4 merge-up | - |
+| 4. Dependency Triage | 4/4 | Verified — merged to master + main | 2026-05-27 |
 
 ## Dependencies (visual)
 
@@ -138,4 +138,4 @@ Phase 3 is functionally independent of 1, 2, 4 and could execute in parallel wit
 
 ---
 *Roadmap created: 2026-05-26*
-*Last updated: 2026-05-27 — Phase 4 Slice 3 (post-fix baseline + close-out) shipped on `thinx-staging`. Slices 1–3 of 4 complete; runtime-tree `npm audit --omit=dev` high=9→0 (PRIMARY METRIC ✓); 7 GHSAs closed via 4 surgical override edits in commit `d8e3176c`. Slice 4 (merge-up PRs `thinx-staging → master` + `thinx-staging → main`) outstanding before Phase 4 / SEC-DEP-01 flips to Verified. Two new v1.x backlog items filed: REFACTOR-05 (jshint + fs-finder runtime-deps misclassification) + SEC-DEP-02 (services/console has 15 open Dependabot alerts of its own).*
+*Last updated: 2026-05-27 — Phase 4 / SEC-DEP-01 Verified via Slice 4 merge-up. PR #539 (thinx-staging→master, mergeCommit `465b73c2`) + PR #540 (thinx-staging→main, mergeCommit `c0530571`) merged 2026-05-26T23:09Z by operator suculent. **v1 GA backend closures complete: 4/4 v1 requirements Verified (AUTH-API-01, SEC-PII-01, OPS-01, SEC-DEP-01).** services/console merge-up deferred to separate cross-project coordination effort per operator Option B (sibling-project scope; SEC-DEP-02 v1.x backlog already tracks console-side dependency triage). Next milestone: v1.0 GA release tag (cross-project coordination via `.planning/PROJECT.md` + `services/console/.planning/`).*
