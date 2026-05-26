@@ -71,9 +71,9 @@
     "node-schedule": "^2.1.1",
     "npm-auto-version": "^1.0.0",
     "path": "^0.12.7",
-    "qs": "^6.15.0",
+    "qs": "^6.15.2",
     "querystring": "^0.2.0",
-    "redis": "^4.6.15",
+    "redis": "^5.8.2",
     "rollbar": "^2.26.5",
     "semver": "7.7.3",
     "sha256": "^0.2.0",
@@ -90,6 +90,7 @@
     "typeof": "^1.0.0",
     "utf-8": "^3.0.0",
     "uuid": "^14.0.0",
+    "winston": "^3.19.0",
     "ws": "^8.20.1",
     "yaml": "2.8.3"
   },
@@ -111,16 +112,15 @@
     "dot-prop": "5.1.1",
     "fileset": "2.0.3",
     "flat": "5.0.2",
-    "follow-redirects": "1.15.6",
     "glob": "11.1.0",
     "ip": "2.0.1",
     "jose": "4.11.2",
     "js-yaml": "4.1.1",
     "json-schema": "0.4.0",
     "jsprim": "1.4.2",
-    "lodash": "4.17.23",
+    "lodash": "4.18.1",
     "mem": "4.0.0",
-    "minimatch": "5.1.0",
+    "minimatch": "5.1.9",
     "minimist": "1.2.6",
     "moment": "2.29.4",
     "netmask": "2.0.2",
@@ -131,6 +131,7 @@
     "strip-ansi": "6.0.1",
     "trim-newlines": "4.0.2",
     "tunnel-agent": "0.6.0",
+    "ws": "$ws",
     "yargs-parser": "20.2.7"
   },
   "devDependencies": {
@@ -165,5 +166,6 @@
     "lib": "lib",
     "test": "tests"
   },
-  "keywords": []
+  "keywords": [],
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

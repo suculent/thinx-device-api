@@ -1,0 +1,124 @@
+DRIFT: none — all 8 probe outputs match 03-CONTEXT.md <live_findings> snapshot taken ~2026-05-26 17:00 UTC. No material drift; Rung 1 hypothesis remains applicable.
+
+# Phase 3 Baseline — Pre-Rung-1 State Snapshot
+# Captured: 2026-05-26 ~16:19 UTC (Task 1)
+# Probe host: ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244
+
+## Probe 1 — Wall-clock anchor (`date -u`)
+Tue May 26 16:19:48 UTC 2026
+
+## Probe 2 — Swarmpit services (`docker service ls --filter name=swarmpit`)
+ID             NAME                MODE         REPLICAS   IMAGE                   PORTS
+fohs498wk4p4   swarmpit_agent      global       2/2        swarmpit/agent:latest
+84ewd6lih8cp   swarmpit_app        replicated   1/1        swarmpit/swarmpit:1.9
+nmr7wmmhisbm   swarmpit_db         replicated   1/1        couchdb:2.3.0
+43cqiewxd9c0   swarmpit_influxdb   replicated   1/1        influxdb:1.7
+# All 4 swarmpit_* services RUNNING; replica counts match desired state.
+
+## Probe 3 — Currently-deployed thinx_api image SHA (`docker service inspect thinx_api`)
+thinxcloud/api:latest@sha256:3a461b3d6e3690e1be65740702559edda533b7c5b29e70ca8926fe8a4f565d94
+# Matches CONTEXT baseline (Phase 2's deploy image).
+
+## Probe 4 — Docker Hub current digest for thinxcloud/api:latest
+# `docker pull -q` returned only the image ref line (no Digest line because image already present locally).
+# Re-probed via `docker inspect` to get the local copy's RepoDigest, which reflects the most recently pulled remote digest:
+thinxcloud/api@sha256:950043b4d40ef24673030cbf2fde2677bab2b6d433788d7b452223cbe6fde211
+# Re-probed via full `docker pull` to confirm Docker Hub still serves this digest as :latest:
+#   Digest: sha256:950043b4d40ef24673030cbf2fde2677bab2b6d433788d7b452223cbe6fde211
+#   Status: Image is up to date for thinxcloud/api:latest
+# CONCLUSION: Hub's `latest` IS NEWER than deployed (3a461b3d → 950043b4 differential = proof autoredeploy is broken).
+# No new CI builds since CONTEXT snapshot (~17:00 UTC 2026-05-25); the differential is the same image we saw yesterday.
+
+## Probe 5 — swarmpit_app log volume in last 2h (`docker service logs swarmpit_app --since 2h --tail 100 | wc -l`)
+0
+# Confirmed: watcher process emits zero log lines. Container running but app deadlocked / silently broken.
+
+## Probe 6 — swarmpit.thinx.cloud HTTP status (`curl -s -o /dev/null -w '%{http_code}\n' https://swarmpit.thinx.cloud`)
+502
+# Confirmed: Bad Gateway via Traefik. Backend swarmpit_app refuses connection on internal HTTP port.
+
+## Probe 7 — `./restart.sh` escape hatch (`ls -la /mnt/gluster/deployment/swarm/restart.sh`)
+-rwxr-xr-x 1 root root 225 May 13  2022 /mnt/gluster/deployment/swarm/restart.sh
+# Present, executable, unchanged since 2022. Manual workaround intact.
+
+## Probe 8 — Swarm topology (`docker node ls`)
+ID                            HOSTNAME   STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+u8v1l5d4zkoc0ceexkyr33dxu     core       Ready     Active         Reachable        29.4.2
+02keahicu8drkpx5pb1gtml26 *   micro      Ready     Active         Leader           29.4.2
+# 2-node topology, both Ready+Active. Engine 29.4.2 on both. micro = Leader (matches CONTEXT).
+
+## Drift Summary
+| Field                     | CONTEXT (17:00 UTC 2026-05-25) | Task 1 (16:19 UTC 2026-05-26) | Drift     |
+|---------------------------|---------------------------------|---------------------------------|-----------|
+| Swarm topology            | 2 nodes (micro L + core R)      | 2 nodes (micro L + core R)      | none      |
+| swarmpit_app replicas     | 1/1 RUNNING, Up 24+h            | 1/1 RUNNING                     | none      |
+| Deployed thinx_api SHA    | 3a461b3d...                     | 3a461b3d...                     | none      |
+| Hub :latest SHA           | 950043b4...                     | 950043b4...                     | none      |
+| swarmpit_app log volume   | empty (2h)                      | 0 lines (2h)                    | none      |
+| swarmpit.thinx.cloud HTTP | Bad Gateway                     | 502                             | none      |
+| restart.sh                | present                         | present, x-bit set              | none      |
+
+DRIFT VERDICT: **none — material**. Rung 1 hypothesis remains the locked first move.
+Proceeding to Task 2 (Rung 1 application).
+
+## Rung 1 Application — Force-restart swarmpit_app
+# Executed: 2026-05-26 16:20:50 UTC (Task 2)
+
+### Step 1 — Pre-restart task ID capture
+Time: 2026-05-26 16:20:45 UTC
+Pre-restart Running task: qxpu1z0dxabwujkakc2jy431c (Up 24 hours)
+Old shutdown/failed tasks for context:
+  qj8cnrt4nfxfry89qvf4hqt4g Shutdown 25 hours ago
+  859wiyiehiq7tbgbl5h9u2tvb Shutdown 2 days ago
+  65uav2ktcznt7mkcigb4zeetm Failed 9 days ago
+  z4mzcns92hi73yoykzc130z3m Failed 2 weeks ago
+
+### Step 2 — Trigger restart (`docker service update --force swarmpit_app`)
+Time: 2026-05-26 16:20:50 UTC
+Command: ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "docker service update --force swarmpit_app"
+Result: "verify: Service swarmpit_app converged" — Docker's built-in 4s × 5-cycle stability check passed.
+
+### Step 3 — Wait for new task Running (poll every 10s, ≤90s budget)
+Time observed: 2026-05-26 16:21:08 UTC (~18s post-trigger)
+NEW task ID: bmdtgobwjmxcn2wn3zc2dtv67 — Running, 11 seconds ago
+Old task: qxpu1z0dxabwujkakc2jy431c — Shutdown, 12 seconds ago
+PASS — new task ID differs from pre-restart task ID, in Running state. (well under 90s budget)
+
+### Step 4 — Verify HTTP responds (`curl swarmpit.thinx.cloud`)
+Poll progression (every ~10s, starting ~T+18s post-restart):
+  t+1s   HTTP=502
+  t+12s  HTTP=502
+  t+22s  HTTP=502
+  t+33s  HTTP=502
+  t+43s  HTTP=502
+  t+54s  HTTP=502
+  t+65s  HTTP=502
+  t+76s  HTTP=200  ← recovery moment
+Final HTTP probe (T+~110s post-restart): 200
+PASS — anything but 5xx (Swarmpit 1.9 JVM + CouchDB + InfluxDB boot takes ~75-90s).
+
+### Step 5 — Verify watcher is alive (`docker service logs swarmpit_app --since 3m`)
+Result: NON-EMPTY. Full startup banner captured at 16:22:31 — 16:22:37 UTC:
+  "Swarmpit is starting..."
+  "Waiting for CouchDB ... ... connected after 0 sec"
+  "Waiting for InfluxDB ... ... connected after 0 sec"
+  "InfluxDB RP: #{autogen an_hour a_day}"
+  "Swarmpit running on port 8080"
+  "Docker API: 1.44"
+  "Docker ENGINE: 29.4.2"
+  "Docker SOCK: /var/run/docker.sock"
+PASS — watcher process is alive, all backing services (CouchDB, InfluxDB, Docker socket) connected, no errors, no panic, no connection-refused.
+
+### Rung 1 verdict
+**PASS** — swarmpit_app force-restart succeeded cleanly. Service is back to HTTP 200 + logging normally + connected to all dependencies. Watcher should now be in active autoredeploy-polling state. No reversion needed.
+
+Side-effect check:
+- swarmpit_agent (2/2 RUNNING global): not touched, status unchanged.
+- swarmpit_db / swarmpit_influxdb: re-handshook cleanly per app logs, no errors.
+- thinx_api: NOT touched (per guardrail). Production traffic unaffected.
+
+Proceeding to Task 3 (push-and-observe SLA test).
+
+<!-- OPS-01 push-observe test marker 2026-05-26 -->
+
+

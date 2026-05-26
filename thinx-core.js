@@ -356,6 +356,7 @@ module.exports = class THiNX extends EventEmitter {
             require('./lib/router.source.js')(app);
             require('./lib/router.transfer.js')(app);
             require('./lib/router.user.js')(app);
+            require('./lib/router.admin.js')(app);
 
             /* Webhook Server (new impl.) */
 

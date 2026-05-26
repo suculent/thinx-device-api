@@ -7,6 +7,10 @@ Analysis performed on the current codebase (~11K LOC across 62+ library files, 5
 
 ## High Priority
 
+### 0. Pinned dependencies
+
+Never update "chai-http" to newer version, this would require significant rewrite for whole test suite.
+
 ### 1. Replace `console.log` with a Structured Logger
 **Effort:** Medium (2–3 days)
 **Owner:** THiNX backend maintainers

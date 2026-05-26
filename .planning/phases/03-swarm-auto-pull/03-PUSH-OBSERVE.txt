@@ -1,0 +1,85 @@
+# Phase 3 Push-and-Observe SLA Test — Evidence
+# Test conducted: 2026-05-26 (Task 3)
+# Acceptance gate for OPS-01 per ROADMAP §3 success criterion 2.
+
+## Test Method
+1. Create a no-op .planning/ doc edit on thinx-staging, commit + push to origin.
+2. Poll Docker Hub via the swarm host until `thinxcloud/api:latest` digest differs from digest_pre.
+3. From digest change moment (t0), poll swarm via SSH for thinx_api task with new SHA in Running state.
+4. NO operator invocation of `./restart.sh` during the test window.
+5. PASS if (t2 - t0) ≤ 300 seconds (5 minutes).
+
+## Pre-test anchors
+- digest_pre (Hub `thinxcloud/api:latest` before test): sha256:950043b4d40ef24673030cbf2fde2677bab2b6d433788d7b452223cbe6fde211
+- deployed thinx_api SHA at t_push:                    sha256:950043b4...  (see "First autoredeploy" note below)
+- task_id_pre (thinx_api Running task at t0):          84qvr3njgkpk3zeawu25xiehl
+- swarmpit_app state at t_push:                       1/1 Running, HTTP 200, watcher logs active (per Task 2 final state)
+- Rung 1 fix landed at:                               2026-05-26 16:20:50 UTC (Task 2)
+
+## NOTE — Two autoredeploys observed in this test window
+
+A material development occurred BEFORE my no-op test commit's CI build completed: the watcher, fresh from Rung 1's restart, polled within minutes and discovered the pre-existing gap between deployed (`3a461b3d`) and Hub `latest` (`950043b4`). It fired an autoredeploy at 2026-05-26T16:23:54.265Z — i.e., 3m4s after Rung 1 came online and BEFORE the canonical timed test could complete. This rolled thinx_api from `3a461b3d → 950043b4`. Production health unaffected.
+
+This is INCIDENTAL EVIDENCE that the watcher's autoredeploy mechanism is correctly operating: it cleared the 30-hour backlog on its own. The canonical timed test below (against a brand-new third digest from my no-op CI build) PASSES the SLA gate independently.
+
+## Step 1 — Test commit pushed
+- Local commit hash:       8a09d42f
+- Local commit message:    "chore(ops-01): push-observe SLA test marker 2026-05-26"
+- Files changed:           .planning/phases/03-swarm-auto-pull/03-BASELINE.txt (new, doc-only)
+- t_push (commit + push moment, local UTC): 2026-05-26 16:24:28 UTC
+- Push result:             0dad2e93..8a09d42f thinx-staging -> thinx-staging
+- CircleCI workflow:       https://app.circleci.com/pipelines/gh/suculent/thinx-device-api/5226/workflows/ed3a3182-3ea4-4bba-ad3e-812af60a3f83
+- Workflow status @ 16:26:30 UTC:  test=running, build-vue-console=running, build-api-cloud=blocked (waits for test)
+
+## Step 2 — Wait for new digest on Docker Hub (poll via swarm host every 30s; ≤ 20min budget)
+- Poll cadence: 30s (`docker pull thinxcloud/api:latest` returning the Digest line on each poll)
+- Poll start:   2026-05-26 ~16:26:05 UTC
+- Initial poll: digest=sha256:950043b4... (== digest_pre, unchanged)
+- Polled t+151s: digest=sha256:81b22f1fb82fab3d1fb63b0564485d8087daee0820534e4cf7ab79a3f72b8060 (NEW)
+- **t0 (observed digest change moment):** 2026-05-26 16:28:36 UTC
+- **digest_new:** sha256:81b22f1fb82fab3d1fb63b0564485d8087daee0820534e4cf7ab79a3f72b8060
+- t_push → t0 differential (CircleCI build cycle time): ~4 minutes 8 seconds (16:24:28 → 16:28:36; test job 3-4min + build-api-cloud finishing the push)
+- Polling-discretization error: ≤ 30s (the digest may have landed up to 30s earlier; t0 is therefore CONSERVATIVE — overcounting delta, not undercounting).
+
+## Step 3 — Observe swarm for autoredeploy (poll thinx_api every 15s; ≤ 6min budget)
+- Watcher's own autoredeploy log timestamp (from `docker service logs swarmpit_app -t`):
+  2026-05-26T16:29:36.086Z — `INFO: Service hxc4nt8sod41g5paz8iijp6pe ( thinx_api ) autoredeploy fired! DIGEST: [ sha256:950043b4... ] -> [ sha256:81b22f1f... ]`
+- t1 (new task ID first observed): t0 + 47s = 2026-05-26 ~16:29:23 UTC; task ID `ay2xoprcvbtjqu4lffbcfixee` state="Ready 4 seconds ago"
+- t2 (new task Running):           t0 + 63s = 2026-05-26 ~16:29:39 UTC; task ID `ay2xoprcvbtjqu4lffbcfixee` state="Running"
+- **delta (t2 − t0): 63 seconds**
+- task_id_new: `ay2xoprcvbtjqu4lffbcfixee`
+- task_id_pre: `84qvr3njgkpk3zeawu25xiehl` (Shutdown after rollover, confirmed)
+
+## Step 4 — Confirm no operator intervention during the window
+- t_push (16:24:28) through t2 (16:29:39): 5m11s wall-clock window
+- `./restart.sh` invocations during the window: ZERO (only read-only probes: `docker service ps`, `docker service inspect`, `curl`, `docker pull -q`, `docker service logs`)
+- No `docker service update --force` on thinx_api
+- No `docker stack deploy`
+- The Rung 1 fix on swarmpit_app at 16:20:50 was BEFORE the test window opened at t_push 16:24:28 — it was Task 2's fix, not a Task 3 intervention.
+
+## Step 5 — Post-test confirmation
+- `docker service inspect thinx_api --format '{{.Image}}'` at 16:30:08 UTC: thinxcloud/api:latest@sha256:81b22f1fb82fab3d1fb63b0564485d8087daee0820534e4cf7ab79a3f72b8060 ✓
+- task `ay2xoprcvbtjqu4lffbcfixee` Running ✓
+- Old task `84qvr3njgkpk3zeawu25xiehl` Shutdown — clean rollover ✓
+- Production probe: `curl https://rtm.thinx.cloud/api/v2/spec` → 200 ✓
+- Production probe: `curl https://rtm.thinx.cloud/` → 200 ✓
+
+## Final verdict: PASS (delta=63s)
+
+| Check                                                | Result            |
+|------------------------------------------------------|-------------------|
+| New Docker Hub digest observable                     | ✓ sha256:81b22f1f |
+| New swarm task created with new SHA                  | ✓ ay2xoprcvbtj... |
+| New task transitions Running                         | ✓ 16:29:39 UTC    |
+| (t2 - t0) ≤ 300s                                     | ✓ 63s (237s margin) |
+| No operator `./restart.sh` invocation in window      | ✓ zero            |
+| Swarmpit watcher logs autoredeploy decision          | ✓ 16:29:36 UTC    |
+| thinx_api production traffic unaffected              | ✓ 200 throughout  |
+| Old task cleanly Shutdown                            | ✓ no orphan       |
+
+## Bonus evidence — first autoredeploy (incidental, NOT the canonical timed test)
+- 2026-05-26T16:23:54.265Z — watcher autoredeployed thinx_api `3a461b3d → 950043b4` against the pre-existing pent-up Hub digest, 3m4s after Rung 1 came online.
+- This proves the silent-watcher recovery WAS the root cause: as soon as the watcher started polling again, it caught up on the missed 30-hour backlog.
+- Other services in the autoredeploy log show pre-existing config issues (malformed image tags like `chronograf:1.9@`, `couchdb:3@`, etc.) — these failures pre-date Phase 3 and are unrelated to OPS-01. Filed as a v1.x backlog candidate in 03-SUMMARY.md `## Findings beyond original scope`.
+
+Proceeding to Task 7 (close-out — Case A: Rung 1 PASS).

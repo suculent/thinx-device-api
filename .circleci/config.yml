@@ -64,7 +64,7 @@ jobs:
           docker-context: services/console/vue
           image: thinx/console
           dockerfile: services/console/vue/Dockerfile
-          extra_build_args: --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} --build-arg LANDING_HOSTNAME=${LANDING_HOSTNAME} --build-arg API_HOSTNAME=${API_HOSTNAME} --build-arg API_BASEURL=${API_BASEURL} --build-arg WEB_HOSTNAME=${WEB_HOSTNAME} --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} --build-arg ENTERPRISE=${ENTERPRISE} --build-arg ENVIRONMENT=${ENVIRONMENT} --build-arg COMMIT_ID=$CIRCLE_SHA1 --build-arg VERSION_CODE=$(echo $CIRCLE_SHA1 | cut -c -7) --build-arg VUE_APP_CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} --build-arg VUE_APP_API_HOSTNAME=${VUE_APP_API_HOSTNAME} --build-arg VUE_APP_ROLLBAR_ACCESS_TOKEN=${VUE_APP_ROLLBAR_ACCESS_TOKEN} --build-arg VUE_APP_LANDING_HOSTNAME=${VUE_APP_LANDING_HOSTNAME} --build-arg VUE_APP_GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} --build-arg VUE_APP_GOOGLE_MAPS_APIKEY=${GOOGLE_MAPS_APIKEY} --build-arg VUE_APP_CONSOLE_HOSTNAME=${WEB_HOSTNAME}
+          extra_build_args: --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} --build-arg LANDING_HOSTNAME=${LANDING_HOSTNAME} --build-arg API_HOSTNAME=${API_HOSTNAME} --build-arg API_BASEURL=${API_BASEURL} --build-arg WEB_HOSTNAME=${WEB_HOSTNAME} --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} --build-arg ENTERPRISE=${ENTERPRISE} --build-arg ENVIRONMENT=${ENVIRONMENT} --build-arg COMMIT_ID=$CIRCLE_SHA1 --build-arg VERSION_CODE=$(echo $CIRCLE_SHA1 | cut -c -7) --build-arg VUE_APP_CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} --build-arg VUE_APP_API_HOSTNAME=${VUE_APP_API_HOSTNAME} --build-arg VUE_APP_ROLLBAR_ACCESS_TOKEN=${VUE_APP_ROLLBAR_ACCESS_TOKEN} --build-arg VUE_APP_LANDING_HOSTNAME=${VUE_APP_LANDING_HOSTNAME} --build-arg VUE_APP_GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} --build-arg VUE_APP_GOOGLE_MAPS_APIKEY=${GOOGLE_MAPS_APIKEY} --build-arg VUE_APP_CONSOLE_HOSTNAME=${WEB_HOSTNAME} --build-arg VUE_APP_BUILD_HASH=$(echo $CIRCLE_SHA1 | cut -c -7)
           tag: 'vue'
       - docker/push:
           digest-path: /tmp/digest.txt
@@ -112,15 +112,16 @@ jobs:
       - docker/build:
           image: thinxcloud/api
           dockerfile: ./Dockerfile
-          extra_build_args: --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} --build-arg SNYK_TOKEN=${SNYK_TOKEN} --build-arg ENVIRONMENT=${ENVIRONMENT} --build-arg REVISION=$(git describe --abbrev=0) --build-arg ENTERPRISE=${ENTERPRISE}
+          extra_build_args: --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} --build-arg SNYK_TOKEN=${SNYK_TOKEN} --build-arg ENVIRONMENT=${ENVIRONMENT} --build-arg REVISION=$(git describe --abbrev=0) --build-arg COMMIT_SHA=$CIRCLE_SHA1 --build-arg ENTERPRISE=${ENTERPRISE}
           tag: 'latest'
       - docker/push:
           digest-path: /tmp/digest.txt
           image: thinxcloud/api
           tag: 'latest'
-      - slack/notify:
-          template: success_tagged_deploy_1
-          event: pass
+      # Pass-notification removed (was misleading — fires before the swarm
+      # actually pulls the new image). App-start Slack notification is now
+      # sent from inside the API at init time via Notifier.notifyAppStart()
+      # in thinx.js (see lib/thinx/notifier.js).
       - slack/notify:
           template: basic_fail_1
           event: fail
@@ -345,15 +346,15 @@ workflows:
                 - thinx-staging
                 - main
       
-      - build-console-classic:
-          context:
-            - thinx-docker-repo
-            - console
-          filters:
-            branches:
-              only:
-                - thinx-staging
-                - main
+      # - build-console-classic:
+      #     context:
+      #       - thinx-docker-repo
+      #       - console
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-staging
+      #           - main
 
       - build-vue-console:
           context:
