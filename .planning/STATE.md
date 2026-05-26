@@ -1,3 +1,18 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: unknown
+stopped_at: "Phase 3 (OPS-01) **Verified** 2026-05-26 — Rung 1 PASSED on first attempt via `docker service update --force swarmpit_app` against the live swarm host `188.166.23.244`. Push-and-observe SLA test PASS: t0 (Hub digest change) 2026-05-26 16:28:36 UTC → t2 (new swarm task Running) 2026-05-26 16:29:39 UTC, **delta=63s** (target ≤300s; 237s under budget). Watcher logged the autoredeploy decision at 2026-05-26T16:29:36.086Z: `INFO: Service hxc4nt8sod41g5paz8iijp6pe ( thinx_api ) autoredeploy fired! DIGEST: [ 950043b4 ] -> [ 81b22f1f ]`. Zero source-code commits this phase. Two operational commits: `8a09d42f` (no-op SLA test marker) + close-out (this commit). Production unaffected throughout: rtm.thinx.cloud 200 before and after each rolling update; Phase 1 contract (`Bearer null` → 200) preserved on new image `81b22f1f`. AGENTS.md gained `## Swarm Auto-Pull Recovery` runbook line. Rungs 2/3/4 NOT exercised; remain locked behind checkpoint:human-verify gates for any future recurrence. Two new v1.x deferred items filed: OPS-02 (stale swarm membership entry b356ad8e1d60) + OPS-03 (pre-existing malformed image tags on thinx_chronograf/thinx_couchdb/thinx_influxdb/thinx_worker)."
+last_updated: "2026-05-26T21:44:10.726Z"
+progress:
+  total_phases: 4
+  completed_phases: 3
+  total_plans: 8
+  completed_plans: 5
+  percent: 63
+---
+
 # STATE — THiNX Device API v1 GA Backend Closures
 
 **Last updated:** 2026-05-26
@@ -8,10 +23,13 @@
 - **Roadmap:** `.planning/ROADMAP.md`
 - **Requirements:** `.planning/REQUIREMENTS.md`
 - **Core value:** The IoT device API stays available and trustworthy through v1.0 GA — every legacy-console capability the Vue console depends on must continue to work end-to-end, with no v1.x backlog item promoted into the v1 release.
-- **Current focus:** Phase 4 — Dependency Triage (SEC-DEP-01). Phases 1-3 Verified 2026-05-26.
+- **Current focus:** Phase 04 — dependency-triage
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace. 10 phases shipped (v1.0 frontend), Phase 11 (v1 GA gap-closures) in flight in parallel. Backend v1 GA + frontend v1 GA land together as v1.0.
 
 ## Current Position
+
+Phase: 04 (dependency-triage) — EXECUTING
+Plan: 1 of 4
 
 - **Mode:** mvp
 - **Active milestone:** v1.0 GA (backend closures)
@@ -48,6 +66,7 @@
 ## Accumulated Context
 
 ### Decisions
+
 - 2026-05-26 — Scope = v1 GA gap closures + ops (not "backend at large"). Mirrors the console submodule's v1.0 milestone framing. (`PROJECT.md` Key Decisions row 1)
 - 2026-05-26 — Refresh codebase map before drafting REQUIREMENTS — surfaced PII-in-logs sites and duplicate `trust proxy` that weren't in the May-19 map. (`PROJECT.md` Key Decisions row 2)
 - 2026-05-26 — Treat `services/*` as external subservices; do not deep-scan the console submodule from here. The console has its own GSD project. (`PROJECT.md` Key Decisions row 4)
@@ -62,12 +81,15 @@
 - 2026-05-26 — Phase 3 OPS-01 closed via Rung 1 (`docker service update --force swarmpit_app`) — smallest possible fix succeeded on first attempt. Root cause: Swarmpit 1.9 watcher entered silent-degraded state (container Running, app deadlocked, zero logs/HTTP for 30+ hours). Push-observe SLA test PASS with delta=63s (target ≤300s; 237s margin). Zero source-code commits — purely operational fix. Phase 3 verification surfaced two new v1.x deferred items: OPS-02 (stale swarm membership entry `b356ad8e1d60` / `10.133.0.4`) and OPS-03 (pre-existing malformed image-tag autoredeploy failures on `thinx_chronograf`/`thinx_couchdb`/`thinx_influxdb`/`thinx_worker`). AGENTS.md gained a new `## Swarm Auto-Pull Recovery` runbook section with the rung-1 recovery command for next recurrence.
 
 ### Todos
+
 - None active for Phase 3 (Verified). Next: `/gsd-plan-phase 4` (SEC-DEP-01 — Dependency Triage; classify 11 high + 17 moderate Dependabot findings as v1-blocker or v1.x-deferred, ship blocker fixes).
 
 ### Blockers
+
 - None
 
 ### Open Questions
+
 - None
 
 ## Cross-Project Touchpoints
