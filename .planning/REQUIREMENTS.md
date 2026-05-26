@@ -56,20 +56,20 @@ Explicitly excluded from v1 GA. Documented to prevent scope creep.
 
 ## Traceability
 
-<!-- Filled by /gsd:plan-phase or by the roadmapper agent at initialization. -->
+<!-- Filled by the roadmapper at initialization (2026-05-26). -->
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-API-01 | TBD | Pending |
-| OPS-01 | TBD | Pending |
-| SEC-DEP-01 | TBD | Pending |
-| SEC-PII-01 | TBD | Pending |
+| AUTH-API-01 | Phase 1 | Pending |
+| OPS-01 | Phase 3 | Pending |
+| SEC-DEP-01 | Phase 4 | Pending |
+| SEC-PII-01 | Phase 2 | Pending |
 
 **Coverage:**
 - v1 requirements: 4 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 4 ⚠️ (resolved after `/gsd:new-project` Step 8 — roadmap creation)
+- Mapped to phases: 4 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-26*
-*Last updated: 2026-05-26 after initialization*
+*Last updated: 2026-05-26 — traceability filled by roadmapper*
