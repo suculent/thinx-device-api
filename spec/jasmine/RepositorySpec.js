@@ -21,8 +21,9 @@ describe("Repository", function() {
 
   beforeAll(async() => {
     console.log(`🚸 [chai] >>> running Repository spec`);
-    redis = redis_client.createClient(Globals.redis_options());
-    await redis.connect();
+    const redis_base = redis_client.createClient(Globals.redis_options());
+    await redis_base.connect();
+    redis = redis_base.legacy();
     builder = new Builder(redis);
     queue_with_cron = new Queue(redis, builder, null, null, null);
     watcher = new Repository(messenger, redis, queue_with_cron);

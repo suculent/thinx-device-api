@@ -13,8 +13,9 @@ describe("Device", function () {
 
   beforeAll(async() => {
     console.log(`🚸 [chai] >>> running Device spec`);
-    redis = redis_client.createClient(Globals.redis_options());
-    await redis.connect();
+    const redis_base = redis_client.createClient(Globals.redis_options());
+    await redis_base.connect();
+    redis = redis_base.legacy();
     device = new Device(redis);
     APIKey = new ApiKey(redis);
   });

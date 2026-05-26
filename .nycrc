@@ -1,23 +1,20 @@
 {
-  "description": "These are just examples for demonstration, nothing prescriptive",
-  "nyc": {
-    "check-coverage": true,
-    "per-file": true,
-    "lines": 99,
-    "statements": 99,
-    "functions": 99,
-    "branches": 99,
-    "include": [
-      "lib/**/*.js"
-    ],
-    "exclude": [
-      "spec/**/*.js"
-    ],
-    "reporter": [
-      "lcov",
-      "text-summary"
-    ],
-    "cache": true,
-    "all": true
-  }
+  "check-coverage": true,
+  "per-file": false,
+  "lines": 80,
+  "statements": 80,
+  "functions": 80,
+  "branches": 75,
+  "include": [
+    "lib/**/*.js"
+  ],
+  "exclude": [
+    "spec/**/*.js"
+  ],
+  "reporter": [
+    "lcov",
+    "text-summary"
+  ],
+  "cache": true,
+  "all": true
 }

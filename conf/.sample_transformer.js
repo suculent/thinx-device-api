@@ -4,7 +4,7 @@
 // (You may decide on your own tag length or structure, this is just an example.)
 //
 
-var transformer = function(status, device) {
+var _transformer = function(status, _device) {
 
   //
   // Convenience functions

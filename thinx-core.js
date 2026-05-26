@@ -6,7 +6,7 @@ const Util = require('./lib/thinx/util');
 const Owner = require('./lib/thinx/owner');
 const Device = require('./lib/thinx/device');
 
-const connect_redis = require("connect-redis");
+const { RedisStore } = require("connect-redis");
 const session = require("express-session");
 module.exports = class THiNX extends EventEmitter {
 
@@ -95,19 +95,21 @@ module.exports = class THiNX extends EventEmitter {
     var app_config = Globals.app_config();
     var rollbar = Globals.rollbar(); // lgtm [js/unused-local-variable]
 
-    // Initialize Redis
-    app.redis_client = redis.createClient(Globals.redis_options());
+    // Redis v5 keeps promise APIs on the base client; the app still uses callback-style commands.
+    app.redis_store_client = redis.createClient(Globals.redis_options());
+    app.redis_client = app.redis_store_client.legacy();
 
-    app.redis_client.on('error', err => console.log('Redis Client Error', err));
+    app.redis_store_client.on('error', err => console.log('Redis Client Error', err));
 
     // Section that requires initialized Redis
-    app.redis_client.connect().then(() => {
+    console.log("ℹ️ [info] Connecting Redis client...");
+    app.redis_store_client.connect().then(() => {
+      console.log("ℹ️ [info] Redis client connected.");
 
       app.owner = new Owner(app.redis_client);
       app.device = new Device(app.redis_client); // TODO: Share in Devices, Messenger and Transfer, can be mocked
 
-      let RedisStore = connect_redis(session);
-      let sessionStore = new RedisStore({ client: app.redis_client });
+      let sessionStore = new RedisStore({ client: app.redis_store_client });
 
       if (process.env.ENVIRONMENT !== "test") {
         try {
@@ -354,6 +356,7 @@ module.exports = class THiNX extends EventEmitter {
             require('./lib/router.source.js')(app);
             require('./lib/router.transfer.js')(app);
             require('./lib/router.user.js')(app);
+            require('./lib/router.admin.js')(app);
 
             /* Webhook Server (new impl.) */
 
@@ -432,7 +435,7 @@ module.exports = class THiNX extends EventEmitter {
             try {
               wss = new WebSocket.Server({ noServer: true });
               console.log("[info] WSS server started...");
-            } catch (e) {
+            } catch (_e) {
               console.log("[warning] Cannot init WSS server...");
               return;
             }
@@ -473,7 +476,7 @@ module.exports = class THiNX extends EventEmitter {
                       console.log("ℹ️ [info] WS Session upgrade...");
                       wss.emit('connection', ws, request);
                     });
-                  } catch (upgradeException) {
+                  } catch (_upgradeException) {
                     // fails on duplicate upgrade, why does it happen?
                     console.log("☣️ [error] Exception caught upgrading same socket twice.");
                     socketMap.delete(socketKey);
@@ -649,6 +652,8 @@ module.exports = class THiNX extends EventEmitter {
           }); // DB
         });
       });
+    }).catch((error) => {
+      console.log("☣️ [error] Redis bootstrap failed:", error);
     });
   }
 };

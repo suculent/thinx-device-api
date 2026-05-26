@@ -38,6 +38,11 @@ ENV NODE_ENV=${NODE_ENV}
 ARG REVISION
 ENV REVISION=${REVISION}
 
+# Full CI-commit SHA — Notifier.notifyAppStart() reads last 8 chars for the
+# app-start Slack message so we can confirm which build is live.
+ARG COMMIT_SHA
+ENV COMMIT_SHA=${COMMIT_SHA}
+
 ARG GOOGLE_OAUTH_ID
 ENV GOOGLE_OAUTH_ID=${GOOGLE_OAUTH_ID}
 ARG GOOGLE_OAUTH_SECRET

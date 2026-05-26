@@ -14,8 +14,9 @@ describe("Queue", function () {
     beforeAll(async() => {
         console.log(`🚸 [chai] >>> running Queue spec`);
         // Initialize Redis
-        redis = redis_client.createClient(Globals.redis_options());
-        await redis.connect();
+        const redis_base = redis_client.createClient(Globals.redis_options());
+        await redis_base.connect();
+        redis = redis_base.legacy();
     });
 
     afterAll(() => {
