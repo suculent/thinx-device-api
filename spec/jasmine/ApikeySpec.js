@@ -11,6 +11,21 @@ describe("API Key", function () {
 
   let apikey;
 
+  // Build a stub redis client that simulates a closed/disconnected connection.
+  // get(): always returns a ClientClosedError-like error.
+  // set(): records calls so tests can assert it is NEVER invoked when the
+  //        connection is reported as closed.
+  // del(): no-op.
+  function makeClosedStub() {
+    const setCalls = [];
+    return {
+      get: (_key, cb) => cb(Object.assign(new Error('The client is closed'), { name: 'ClientClosedError' })),
+      set: (_key, _val, cb) => { setCalls.push({ key: _key, val: _val }); if (typeof cb === 'function') cb(null, "OK"); },
+      del: () => { /* no-op */ },
+      _setCalls: setCalls
+    };
+  }
+
   beforeAll(async () => {
     console.log(`🚸 [chai] >>> running API Key spec`);
     // Initialize Redis
@@ -156,6 +171,70 @@ describe("API Key", function () {
         expect(object).to.be.a('string');
         done();
       });
+  });
+
+  // --- Redis-closed / circuit-breaker hardening (Quick task 260531-n72) -----
+
+  it("(R1) treats ClientClosedError on get as redis_unavailable", function (done) {
+    const stub = makeClosedStub();
+    const ak = new APIKey(stub);
+    // Reset the per-owner backoff map so the breaker does not kick in for this
+    // isolated test (uses a unique owner key as well).
+    if (APIKey._lastDefaultKeyAttempt && typeof APIKey._lastDefaultKeyAttempt.delete === 'function') {
+      APIKey._lastDefaultKeyAttempt.delete('owner-R1');
+    }
+    ak.create('owner-R1', 'some-non-default-alias', (success, reason) => {
+      expect(success).to.equal(false);
+      expect(reason).to.equal('redis_unavailable');
+      // Critical: set() must NOT have been invoked — the bug was that the
+      // get-error branch fell through to save_apikeys.
+      expect(stub._setCalls.length).to.equal(0);
+      done();
+    });
+  });
+
+  it("(R2) circuit-breaker suppresses repeat default-key attempts within 60s", function (done) {
+    const stub = makeClosedStub();
+    const ak = new APIKey(stub);
+    if (APIKey._lastDefaultKeyAttempt && typeof APIKey._lastDefaultKeyAttempt.delete === 'function') {
+      APIKey._lastDefaultKeyAttempt.delete('owner-R2');
+    }
+    // Wrap stub.get to count invocations.
+    let getCalls = 0;
+    const origGet = stub.get;
+    stub.get = function (k, cb) { getCalls += 1; return origGet(k, cb); };
+
+    ak.create('owner-R2', 'Default MQTT API Key', (success1, reason1) => {
+      expect(success1).to.equal(false);
+      expect(reason1).to.equal('redis_unavailable');
+      expect(getCalls).to.equal(1);
+
+      ak.create('owner-R2', 'Default MQTT API Key', (success2, reason2) => {
+        expect(success2).to.equal(false);
+        expect(reason2).to.equal('redis_unavailable_backoff');
+        // Breaker open — get() must NOT have been touched a second time.
+        expect(getCalls).to.equal(1);
+        done();
+      });
+    });
+  });
+
+  it("(R3) save_apikeys does not double-call callback on set error", function (done) {
+    const stub = {
+      get: () => { throw new Error('not used in this test'); },
+      set: (_k, _v, cb) => cb(new Error('boom')),
+      del: () => {}
+    };
+    const ak = new APIKey(stub);
+    let cbCount = 0;
+    ak.save_apikeys('owner-R3', [{ key: 'k', hash: 'h', alias: 'a' }], (_ok, _payload) => {
+      cbCount += 1;
+    });
+    // Give the synchronous stub.set callback a tick to settle.
+    setImmediate(() => {
+      expect(cbCount).to.equal(1);
+      done();
+    });
   });
 
 });
