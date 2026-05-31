@@ -67,7 +67,7 @@ module.exports = class THiNX extends EventEmitter {
     const isSupportedLetsEncryptIssuer = (attributes = []) => {
       const organization = getCertAttribute('organizationName', attributes) || getCertAttribute('O', attributes);
       const commonName = getCertAttribute('commonName', attributes) || getCertAttribute('CN', attributes);
-      return organization === "Let's Encrypt" && ['R10', 'R12'].includes(commonName);
+      return organization === "Let's Encrypt" && ['R10', 'R11', 'R12', 'R13', 'R14'].includes(commonName);
     };
 
     // set up rate limiter
@@ -221,9 +221,16 @@ module.exports = class THiNX extends EventEmitter {
                 const caSubject = ca && ca.subject ? ca.subject.attributes : [];
                 const caIssuer = ca && ca.issuer ? ca.issuer.attributes : [];
 
-                // Let's Encrypt rotates intermediates (for example R10 -> R12).
-                // Accept the current supported LE intermediates to avoid blocking HTTPS startup
-                // when the configured CA bundle is still pinned to the previous intermediate.
+                // Let's Encrypt rotates RSA intermediates periodically (R3 -> R10 -> R11/R12 -> R13/R14, ISRG-signed).
+                // Accept any of the currently active LE RSA intermediates (R10, R11, R12, R13, R14) so HTTPS startup
+                // is not blocked when the bundled /mnt/data/ssl/chain.pem is still pinned to a previous intermediate
+                // (e.g. chain.pem pins R10 while the leaf is issued by R13 — today's production state).
+                // WORKAROUND, NOT A FIX: the correct remediation is for the operator to refresh
+                // /mnt/data/ssl/chain.pem so it matches the leaf's actual issuer chain. This allowlist exists
+                // only so a stale bundle does not silently break the boot sequence between rotations.
+                // Allowlist last refreshed: 2026-05-31 (R13 active leaf issuer in production; R11/R14 added
+                // prophylactically for the next two rotations). ECDSA intermediates (E1/E2) are intentionally
+                // omitted — THiNX certs are RSA.
                 if (isSupportedLetsEncryptIssuer(clientIssuer) && isSupportedLetsEncryptIssuer(caSubject)) {
                   const clientIssuerCn = getCertAttribute('CN', clientIssuer);
                   const caSubjectCn = getCertAttribute('CN', caSubject);
