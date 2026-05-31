@@ -4,8 +4,8 @@ milestone: null
 milestone_name: null
 status: awaiting_next_milestone
 stopped_at: "v1.0 milestone shipped + archived 2026-05-27 (4/4 v1 requirements Verified; tagged v1.0)"
-last_updated: "2026-05-31T14:50:00.000Z"
-last_activity: "2026-05-31 — Completed quick task 260531-n72: Redis client hardening + Slack outage notifier (incident response to today's thinx_api OOM)"
+last_updated: "2026-05-31T16:25:00.000Z"
+last_activity: "2026-05-31 — Completed quick task 260531-pdi: refresh Let's Encrypt intermediate allowlist (R10..R14) so SSL verification stops failing at startup"
 progress:
   total_phases: 0
   completed_phases: 0
@@ -16,7 +16,7 @@ progress:
 
 # STATE — THiNX Device API
 
-**Last updated:** 2026-05-31 (quick task 260531-n72 — incident-response hardening)
+**Last updated:** 2026-05-31 (quick tasks 260531-n72 + 260531-pdi — incident-response hardening + LE allowlist refresh)
 
 ## Project Reference
 
@@ -31,8 +31,8 @@ See: `.planning/PROJECT.md` (updated 2026-05-27)
 
 Phase: — (no active phase)
 Plan: —
-Status: Awaiting next milestone (quick task 260531-n72 shipped mid-cycle)
-Last activity: 2026-05-31 — Completed quick task 260531-n72: Redis client hardening + Slack outage notifier (incident response to today's thinx_api OOM)
+Status: Awaiting next milestone (2 quick tasks shipped mid-cycle today)
+Last activity: 2026-05-31 — Completed quick task 260531-pdi: refresh Let's Encrypt intermediate allowlist (R10..R14)
 
 ## Milestones
 
@@ -63,6 +63,7 @@ Last activity: 2026-05-31 — Completed quick task 260531-n72: Redis client hard
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260531-n72 | Fix latent bugs in apikey.js + harden node-redis client + Slack outage notifier (incident response to 2026-05-31 14:19 UTC thinx_api OOM) | 2026-05-31 | fae0efbd | [260531-n72-fix-the-latent-bugs-in-apikey-js-and-har](./quick/260531-n72-fix-the-latent-bugs-in-apikey-js-and-har/) |
+| 260531-pdi | Refresh LE intermediate allowlist (R10..R14) in thinx-core.js cert rotation-tolerance branch — silences startup SSL verification error caused by R13-issued leaf vs R10-pinned chain | 2026-05-31 | 08e4dbd7 | [260531-pdi-fix-the-let-s-encrypt-r10-r13-cross-sign](./quick/260531-pdi-fix-the-let-s-encrypt-r10-r13-cross-sign/) |
 
 ## Cross-Project Touchpoints
 
