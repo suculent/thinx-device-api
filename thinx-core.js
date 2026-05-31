@@ -5,6 +5,7 @@ const InfluxConnector = require('./lib/thinx/influx');
 const Util = require('./lib/thinx/util');
 const Owner = require('./lib/thinx/owner');
 const Device = require('./lib/thinx/device');
+const RedisHealth = require('./lib/thinx/redis-health');
 
 const { RedisStore } = require("connect-redis");
 const session = require("express-session");
@@ -100,6 +101,13 @@ module.exports = class THiNX extends EventEmitter {
     app.redis_client = app.redis_store_client.legacy();
 
     app.redis_store_client.on('error', err => console.log('Redis Client Error', err));
+
+    // Slack-debounced Redis health notifier (quick task 260531-n72).
+    // Kept ALONGSIDE the legacy console.log handler above: the console log
+    // is the noisy per-error trace operators still rely on, RedisHealth is
+    // the throttled signal that posts to Slack. Attached BEFORE .connect()
+    // so the very first connection failure is captured.
+    RedisHealth.attach(app.redis_store_client);
 
     // Section that requires initialized Redis
     console.log("ℹ️ [info] Connecting Redis client...");
