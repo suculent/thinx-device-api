@@ -40,9 +40,13 @@
 **Success Criteria** (what must be TRUE):
   1. `grep -n "trust proxy" thinx-core.js` returns exactly one canonical call, and existing Jasmine session/auth specs remain green.
   2. `grep -nE '!=|==' lib/thinx/owner.js` shows zero non-strict comparisons inside `password_reset` (and the reset_key flow stays identical for all currently-valid inputs).
-  3. `jshint` and `fs-finder` are declared in `devDependencies`, the production Docker image still builds + reaches the `Server up at` log line, and no `require('jshint')` / `require('fs-finder')` remains in `lib/` or `thinx-core.js`.
+  3. `jshint` is declared in `devDependencies` (scope-amended 2026-06-02: `fs-finder` stays in `dependencies` because of 5 active runtime call sites in `lib/`; full removal deferred to v1.10 — see REQUIREMENTS.md REFACTOR-05 annotation and STATE.md decisions). The production Docker image still builds + reaches the `Server up at` log line, and no `require('jshint')` remains in `lib/` or `thinx-core.js`.
   4. CircleCI green on the merge to `thinx-staging`; Swarmpit autoredeploy completes within the 5-minute SLA.
-**Plans:** TBD
+**Plans:** 4 plans (3 Wave 1 parallel + 1 Wave 2 doc-update)
+  - [ ] 05-01-PLAN.md — REFACTOR-01: trust-proxy dedup in `thinx-core.js` (delete `:300`, keep `:422` allowlist form)
+  - [ ] 05-02-PLAN.md — REFACTOR-02: strict equality in `Owner.password_reset` (`!=` → `!==` at `lib/thinx/owner.js:492`) + new unit covering string/number coercion case
+  - [ ] 05-03-PLAN.md — REFACTOR-05 (scope-amended): move `jshint` to `devDependencies` (fs-finder stays — deferred to v1.10); includes blocking-human Docker smoke checkpoint
+  - [ ] 05-04-PLAN.md — Wave 2 doc-update: record REFACTOR-05 scope amendment in ROADMAP.md, REQUIREMENTS.md, STATE.md (so phase-closeout verifier doesn't reject criterion 3 on literal-text grounds)
 
 ### Phase 6: WebSocket Surface Hardening
 **Goal:** Make the WebSocket lifecycle deterministic and the handshake surface defensible — close the resource-cleanup gap, document or fix the rtm handshake risk, and resolve the `httpOnly: false` session-cookie debt left over from a stale debugging note.
@@ -152,7 +156,7 @@
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 5. Backend Hygiene — Cheap Sweeps | v1.9 | 0/? | Not started | — |
+| 5. Backend Hygiene — Cheap Sweeps | v1.9 | 0/4 | Planned | — |
 | 6. WebSocket Surface Hardening | v1.9 | 0/? | Not started | — |
 | 7. owner.js Async/Await Sweep | v1.9 | 0/? | Not started | — |
 | 8. Auth & Account Lifecycle Closures | v1.9 | 0/? | Not started | — |
@@ -189,6 +193,8 @@ Phase 5 sequences before 6 (REFACTOR-01 trust-proxy is adjacent to the WS block 
 - **GPG-sign default:** All v1.9 commits are GPG-signed unless an explicit per-session unsigned authorization is granted.
 - **Phase numbering:** v1.9 continues from v1.0's last phase (Phase 4). Integer phases 5–11 represent v1.9 work; any urgent insertions during execution use decimal phases (e.g., 5.1, 7.2).
 - **Deferred from v1.9 scope:** OPS-02, OPS-03 (pure swarm-side OPS), TEST-CHAI-01 (chai-http v5 lock), CONSOLE-LEGACY-JSON-PARSE (sibling-project scope). See `.planning/REQUIREMENTS.md` § "Future Requirements".
+- **Phase 5 scope amendment (2026-06-02):** REFACTOR-05 reduced to `jshint`-only reclassification; `fs-finder` removal sweep deferred to a proposed v1.10 phase (see STATE.md decisions + REQUIREMENTS.md REFACTOR-05 annotation). Plan 05-04 (Wave 2) records the amendment across ROADMAP.md, REQUIREMENTS.md, and STATE.md so the phase-closeout verifier sees a consistent story.
 
 ---
 *Roadmap created: 2026-06-02 — v1.9 Backend Hygiene & Posture milestone planning. 7 phases (5–11) covering 13 requirements. Granularity: coarse (let natural delivery boundaries stand; risk-clustered work surfaced 7 phases rather than artificially compressing to 5).*
+*Phase 5 planned: 2026-06-02 — 4 plans (3 Wave 1 parallel + 1 Wave 2 doc-update); REFACTOR-05 scope reduced to jshint-only per CONTEXT.md.*
