@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: — Backend Hygiene & Posture
 status: completed
-stopped_at: Phase 5 context gathered
-last_updated: "2026-06-02T20:26:32.020Z"
+stopped_at: Phase 6 context gathered (SEC-WS-01 root cause reproduced as edge-nginx routing gap)
+last_updated: "2026-06-02T21:13:23.584Z"
 last_activity: 2026-06-02 -- Phase 5 marked complete
 progress:
   total_phases: 7
@@ -81,7 +81,7 @@ Last activity: 2026-06-02 -- Phase 5 marked complete
 
 ## Session Continuity
 
-**Stopped at:** Phase 5 context gathered
+**Stopped at:** Phase 6 context gathered (SEC-WS-01 root cause reproduced as edge-nginx routing gap)
 
 **Next action:** Run `/gsd:plan-phase 5` to start Phase 5 (Backend Hygiene — Cheap Sweeps: REFACTOR-01, REFACTOR-02, REFACTOR-05).
 
