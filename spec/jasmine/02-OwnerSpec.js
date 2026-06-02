@@ -221,5 +221,21 @@ describe("Owner", function () {
     }, res_mock);
   }, 10000);
 
+  // REFACTOR-04 (Phase 7 Plan 04): Owner.update callback contract lock.
+  // The synchronous `undefined_owner` guard at lib/thinx/owner.js (Owner.update
+  // first statement) fires BEFORE any process_update / apply_update / saveAvatar
+  // delegation, so this test is safe to run without DB/Redis dependencies and
+  // survives the local test-env config-missing ACCEPT scenario. Asserts the
+  // public callback tuple shape `(false, "undefined_owner")` and the parameter
+  // order — both callers (router.profile.js:33, router.gdpr.js:135) depend on
+  // this contract.
+  it("(15) REFACTOR-04 (07-4): Owner.update callback contract preserved for undefined_owner guard", function (done) {
+    user.update(undefined, { /* body */ }, (cb_success, cb_response) => {
+      expect(cb_success).to.equal(false);
+      expect(cb_response).to.equal("undefined_owner");
+      done();
+    });
+  }, 5000);
+
 
 });
