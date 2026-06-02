@@ -67,30 +67,29 @@ Explicitly excluded from v1.9. Documented to prevent scope creep.
 
 ## Traceability
 
-<!-- Filled by the roadmapper at initialization. -->
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REFACTOR-01 | — | Pending |
-| REFACTOR-02 | — | Pending |
-| REFACTOR-03 | — | Pending |
-| REFACTOR-04 | — | Pending |
-| REFACTOR-05 | — | Pending |
-| SEC-COOKIE-01 | — | Pending |
-| SEC-WS-01 | — | Pending |
-| SEC-DEP-02 | — | Pending |
-| SEC-PII-02 | — | Pending |
-| THINX-CERT-CHECK-01 | — | Pending |
-| AUTH-REACTIVATE-01 | — | Pending |
-| AUTH-RESET-LINK-CONSOLE | — | Pending |
-| BASE-IMG-01 | — | Pending |
+| REFACTOR-01 | Phase 5 | Pending |
+| REFACTOR-02 | Phase 5 | Pending |
+| REFACTOR-05 | Phase 5 | Pending |
+| REFACTOR-03 | Phase 6 | Pending |
+| SEC-WS-01 | Phase 6 | Pending |
+| SEC-COOKIE-01 | Phase 6 | Pending |
+| REFACTOR-04 | Phase 7 | Pending |
+| AUTH-REACTIVATE-01 | Phase 8 | Pending |
+| AUTH-RESET-LINK-CONSOLE | Phase 8 | Pending |
+| SEC-PII-02 | Phase 9 | Pending |
+| SEC-DEP-02 | Phase 10 | Pending |
+| BASE-IMG-01 | Phase 11 | Pending |
+| THINX-CERT-CHECK-01 | Phase 11 | Pending |
 
 **Coverage:**
 - v1.9 requirements: 13 total
-- Mapped to phases: 0 (roadmapper pending)
+- Mapped to phases: 13 ✓
 - Verified: 0
 - Pending: 13
-- Unmapped: 13
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-06-02 (milestone start)*
+*Traceability filled: 2026-06-02 — v1.9 roadmap created with 7 phases (Phases 5–11, continuing from v1.0's Phase 4). 13/13 requirements mapped, no orphans, no duplicates.*

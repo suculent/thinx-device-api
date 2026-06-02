@@ -6,7 +6,7 @@ status: planning
 last_updated: "2026-06-02T17:52:40.546Z"
 last_activity: 2026-06-02
 progress:
-  total_phases: 0
+  total_phases: 7
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -15,39 +15,42 @@ progress:
 
 # STATE — THiNX Device API
 
-**Last updated:** 2026-05-31 (quick tasks 260531-n72 + 260531-pdi — incident-response hardening + LE allowlist refresh)
+**Last updated:** 2026-06-02 (v1.9 roadmap created — 7 phases, 13 requirements mapped)
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-05-27)
+See: `.planning/PROJECT.md` (updated 2026-06-02)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** Planning next milestone (v1.x backlog candidates surfaced during v1.0)
-- **Latest production image:** `thinxcloud/api:latest sha256:4d3fb789` (Phase 4 deploy 2026-05-26T22:35:54Z)
-- **Sibling project:** `services/console/.planning/` — Vue console GSD workspace (v1.0 frontend shipped; SEC-DEP-02 console-side dep triage owed)
+- **Current focus:** v1.9 Backend Hygiene & Posture — Phase 5 ready to plan
+- **Latest production image:** `thinxcloud/api:latest sha256:4d3fb789` (v1.0 Phase 4 deploy 2026-05-26T22:35:54Z); v1.9 base bumped to `1.9.3054` 2026-06-02 via `304b09d1`
+- **Sibling project:** `services/console/.planning/` — Vue console GSD workspace (v1.0 frontend shipped; SEC-DEP-02 console-side dep triage scheduled for Phase 10)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Not started (roadmap created; ready for `/gsd:plan-phase 5`)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-06-02 — Milestone v1.9 started
+Status: Planning — roadmap created
+Last activity: 2026-06-02 — v1.9 roadmap created (Phases 5–11)
 
 ## Milestones
 
 - ✅ **v1.0 — v1 GA Backend Closures** (shipped 2026-05-27) — see `.planning/MILESTONES.md`
+- 🚧 **v1.9 — Backend Hygiene & Posture** (in planning) — Phases 5–11; see `.planning/ROADMAP.md`
 
 ## Accumulated Context
 
 ### Decisions (current — full v1.0 decision log in `.planning/MILESTONES.md` + PROJECT.md Key Decisions)
 
-- 2026-05-27 — v1.0 shipped; project transitioned from "v1 GA gap closures" narrow scope to long-lived backend lifecycle (hygiene + v1.x backlog + eventual v2 multi-tenant revamp)
-- 2026-05-27 — Operator decision Option B (Phase 4 Slice 4): services/console merge-up deferred to separate cross-project coordination effort; tracked via SEC-DEP-02 in v1.x backlog
-- 2026-05-27 — Verification artifact gap (Phases 1-3 lack structured `*-VERIFICATION.md`) accepted as process-debt; functional verification IS present in SUMMARY.md `verification:` blocks + supporting `.txt` files
+- 2026-06-02 — v1.9 milestone started with 13 requirements across 7 phases (Phases 5–11). Phase numbering continues from v1.0's last phase (Phase 4) — orchestrator did NOT pass `--reset-phase-numbers`.
+- 2026-06-02 — Phase clustering: low-risk REFACTOR sweeps (Phase 5) → WS-surface (Phase 6) → owner.js async/await (Phase 7) → auth lifecycle (Phase 8, sequenced after 7) → independent: managed_logs PII (Phase 9), services/console SEC-DEP-02 coordination (Phase 10), base/update.sh + ca.pem probe (Phase 11).
+- 2026-05-27 — v1.0 shipped; project transitioned from "v1 GA gap closures" narrow scope to long-lived backend lifecycle.
+- 2026-05-27 — Operator decision Option B (v1.0 Phase 4 Slice 4): services/console merge-up deferred; tracked via SEC-DEP-02 (now scheduled as Phase 10 of v1.9).
+- 2026-05-27 — Verification artifact gap (v1.0 Phases 1-3 lack structured `*-VERIFICATION.md`) accepted as process-debt.
 
 ### Todos
 
-- Start next milestone via `/gsd:new-milestone` — define v1.x scope from surfaced backlog (REFACTOR-01..05, SEC-COOKIE-01, SEC-WS-01, SEC-DEP-02, SEC-PII-02, OPS-02, OPS-03, AUTH-REACTIVATE-01, AUTH-RESET-LINK-CONSOLE, CONSOLE-LEGACY-JSON-PARSE)
+- Run `/gsd:plan-phase 5` to start v1.9 Phase 5 (Backend Hygiene — Cheap Sweeps: REFACTOR-01, REFACTOR-02, REFACTOR-05).
 
 ### Blockers
 
@@ -66,15 +69,16 @@ Last activity: 2026-06-02 — Milestone v1.9 started
 
 ## Cross-Project Touchpoints
 
-- **`services/console/.planning/`** — Vue console GSD workspace (sibling project); coordinate v1.x scope (SEC-DEP-02 console-side dep triage owed)
-- **`AGENTS.md`** (parent root) — ssh details, deploy flow, dependency locks (chai-http v4 hold). Consult before any phase touches deploy config or `package.json`.
-- **`.planning/runbooks/swarm.md`** — canonical swarm autoredeploy recovery runbook (persisted in Phase 3)
+- **`services/console/.planning/`** — Vue console GSD workspace (sibling project); Phase 10 of v1.9 schedules + rolls up the parallel SEC-DEP-02 phase there. Phase 8 (AUTH-RESET-LINK-CONSOLE) coordinates with the console's password-set route.
+- **`AGENTS.md`** (parent root) — ssh details, deploy flow, dependency locks (chai-http v4 hold). Consult before any phase touches deploy config or `package.json`. TEST-CHAI-01 stays deferred from v1.9 per the lock.
+- **`.planning/runbooks/swarm.md`** — canonical swarm autoredeploy recovery runbook (v1.0 Phase 3). Phase 9 of v1.9 will extend the runbooks set with a GDPR-posture note for the historic managed_logs cleanup; Phase 6 may extend with a WS handshake runbook.
 
 ## Session Continuity
 
-**Stopped at:** Milestone v1.0 complete and archived. Tag `v1.0` created. Next gsd-level activity is `/gsd:new-milestone` to scope v1.x.
+**Stopped at:** v1.9 roadmap created (2026-06-02). 7 phases (5–11) mapping all 13 v1.9 requirements. STATE.md updated with `total_phases: 7`; `total_plans` will be set as each phase's plan is drafted.
 
-**Next action:** Run `/gsd:new-milestone` to start v1.x planning. Candidate themes already surfaced in `.planning/PROJECT.md` § "Next Milestone Goals" and detailed in `.planning/milestones/v1.0-REQUIREMENTS.md` § "v2 Requirements".
+**Next action:** Run `/gsd:plan-phase 5` to start Phase 5 (Backend Hygiene — Cheap Sweeps: REFACTOR-01, REFACTOR-02, REFACTOR-05).
 
 ---
 *v1.0 GA backend closures shipped and archived: 2026-05-27 (4/4 v1 requirements Verified — AUTH-API-01, SEC-PII-01, OPS-01, SEC-DEP-01)*
+*v1.9 roadmap created: 2026-06-02 — 7 phases (5–11), 13 requirements mapped, coverage 100%*
