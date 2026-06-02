@@ -1,11 +1,10 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: awaiting_next_milestone
-stopped_at: "v1.0 milestone shipped + archived 2026-05-27 (4/4 v1 requirements Verified; tagged v1.0)"
-last_updated: "2026-05-31T16:25:00.000Z"
-last_activity: "2026-05-31 — Completed quick task 260531-pdi: refresh Let's Encrypt intermediate allowlist (R10..R14) so SSL verification stops failing at startup"
+milestone: v1.9
+milestone_name: Backend Hygiene & Posture
+status: planning
+last_updated: "2026-06-02T17:52:40.546Z"
+last_activity: 2026-06-02
 progress:
   total_phases: 0
   completed_phases: 0
@@ -29,10 +28,10 @@ See: `.planning/PROJECT.md` (updated 2026-05-27)
 
 ## Current Position
 
-Phase: — (no active phase)
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone (2 quick tasks shipped mid-cycle today)
-Last activity: 2026-05-31 — Completed quick task 260531-pdi: refresh Let's Encrypt intermediate allowlist (R10..R14)
+Status: Defining requirements
+Last activity: 2026-06-02 — Milestone v1.9 started
 
 ## Milestones
 

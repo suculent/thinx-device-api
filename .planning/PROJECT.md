@@ -23,16 +23,22 @@ Default branches `master` + `main` updated via PR #539 + #540 (2026-05-26T23:09Z
 
 **Companion project:** `services/console` submodule has its own GSD workspace; v1.0 frontend is parallel-tracked there. Cross-project coordination owed: SEC-DEP-02 console dependency triage + console-side merge-up (deferred per operator Option B 2026-05-27).
 
-## Next Milestone Goals
+## Current Milestone: v1.9 Backend Hygiene & Posture
 
-To be defined via `/gsd:new-milestone`. Candidate themes surfaced during v1.0 (see `.planning/milestones/v1.0-REQUIREMENTS.md` § "v2 Requirements"):
+**Goal:** Pay down the v1.x backlog the v1.0 GA deferred — clean up structural hygiene, lift the security posture, and close auth/account lifecycle gaps — without breaking any legacy-console-compatible route.
 
-- **Backend hygiene refactors** (REFACTOR-01..05) — trust-proxy dedup, weak-equality cleanup, WebSocket close handlers, callback→async, jshint/fs-finder devDep reclassification
-- **Security posture** (SEC-COOKIE-01, SEC-WS-01, SEC-DEP-02, SEC-PII-02) — httpOnly cookie review, WebSocket handshake hardening, console-side dep triage, historic CouchDB audit-log redaction (GDPR-adjacent)
+**Version:** v1.9 — chosen to align the milestone tag with the live `package.json` `version` series (currently `1.9.3054`, bumped 2026-06-02 via commit `304b09d1` during base image rebuild).
+
+**Target features:**
+- **Backend hygiene refactors** (REFACTOR-01..05) — trust-proxy dedup, weak-equality cleanup in `password_reset`, WebSocket close handlers, callback→async sweep in `owner.js`, jshint/fs-finder devDep reclassification
+- **Security posture** (SEC-COOKIE-01, SEC-WS-01, SEC-DEP-02, SEC-PII-02) — httpOnly cookie review, WebSocket handshake hardening, services/console dep triage coordination, historic CouchDB audit-log redaction (GDPR-adjacent)
 - **Auth/account lifecycle** (AUTH-REACTIVATE-01, AUTH-RESET-LINK-CONSOLE) — soft-deleted account reactivation flow, reset-email landing on Vue console
-- **Operations** (OPS-02, OPS-03) — stale swarm memberlist cleanup, malformed `<image>@` autoredeploy specs
-- **Test infra** (TEST-CHAI-01) — chai-http v5 ESM migration (locked per AGENTS.md until forced by superagent v3 CVE)
-- **Legacy console deprecation** (CONSOLE-LEGACY-JSON-PARSE) — coordinate Vue cutover; sunset legacy AngularJS console
+- **Surfaced 2026-06-02** (BASE-IMG-01, THINX-CERT-CHECK-01) — `base/update.sh` hardening (version handling, tag pinning, error handling); startup probe that warns on stale ca.pem vs leaf cert (codebase angle on the LE intermediate rotation gap)
+
+**Deferred to later milestones (out of v1.9 scope):**
+- **Operations** (OPS-02, OPS-03) — pure swarm-side OPS, not codebase
+- **Test infra** (TEST-CHAI-01) — chai-http v5 ESM migration locked per AGENTS.md
+- **Legacy console deprecation** (CONSOLE-LEGACY-JSON-PARSE) — sibling-project scope
 
 ## Validated Requirements (Historical)
 
@@ -119,4 +125,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-05-27 after v1.0 GA milestone completion (4/4 v1 requirements Verified; project transitioned from "v1 GA gap closures" scope to long-lived backend lifecycle)*
+*Last updated: 2026-06-02 — v1.9 Backend Hygiene & Posture milestone started (3 backlog clusters + 2 today-surfaced items; phase numbering continues from v1.0 last phase = 4)*
