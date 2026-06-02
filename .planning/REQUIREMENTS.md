@@ -9,15 +9,15 @@ Requirements scoped to v1.9. Each maps to exactly one roadmap phase. Numbering f
 
 ### Backend Hygiene
 
-- [ ] **REFACTOR-01**: Single source of truth for `app.set('trust proxy', ...)`. The duplicate calls at `thinx-core.js:285` and `:407` collapse to one canonical site with explicit intent commented. No change to observed IP-derivation behavior in session middleware (assert via existing session specs). Validated by: (a) grep returns exactly one `trust proxy` call in `thinx-core.js`, (b) Jasmine session/auth specs unchanged & green, (c) production smoke (login + device API call from a known-IP browser) still resolves the correct `req.ip`.
+- [x] **REFACTOR-01**: Single source of truth for `app.set('trust proxy', ...)`. The duplicate calls at `thinx-core.js:285` and `:407` collapse to one canonical site with explicit intent commented. No change to observed IP-derivation behavior in session middleware (assert via existing session specs). Validated by: (a) grep returns exactly one `trust proxy` call in `thinx-core.js`, (b) Jasmine session/auth specs unchanged & green, (c) production smoke (login + device API call from a known-IP browser) still resolves the correct `req.ip`.
 
-- [ ] **REFACTOR-02**: Strict equality in `Owner.password_reset`. Replace `!=` at `lib/thinx/owner.js:476` with `!==`. Behavior for the legacy reset_key path stays identical for all currently-valid inputs. Validated by: (a) grep `lib/thinx/owner.js` shows zero `!=`/`==` non-strict comparisons in the touched function, (b) existing `ZZ-AppSessionUserSpec.js` reset_key flow green, (c) added unit covers reset_key string vs. number coercion (the exact case `!=` was masking).
+- [x] **REFACTOR-02**: Strict equality in `Owner.password_reset`. Replace `!=` at `lib/thinx/owner.js:476` with `!==`. Behavior for the legacy reset_key path stays identical for all currently-valid inputs. Validated by: (a) grep `lib/thinx/owner.js` shows zero `!=`/`==` non-strict comparisons in the touched function, (b) existing `ZZ-AppSessionUserSpec.js` reset_key flow green, (c) added unit covers reset_key string vs. number coercion (the exact case `!=` was masking).
 
 - [ ] **REFACTOR-03**: WebSocket socket-close cleanup. Add `socket.on('close')` handlers to the WS lifecycle in `thinx-core.js:445-487` so per-connection resources are released deterministically (not at next GC). Validated by: (a) the close handler is invoked for both client-initiated close and server shutdown paths, (b) a new spec asserts the cleanup runs (e.g., counter / map entry removed), (c) no regression in MQTT/WebSocket round-trip specs.
 
 - [ ] **REFACTOR-04**: `lib/thinx/owner.js` callback → async/await sweep. Convert the ~73 callback patterns identified in v1.0 codebase mapping to `async/await` without changing public method signatures or observable behavior. Public callers (router.user.js, router.profile.js, etc.) still receive identical resolved values / errors. Validated by: (a) zero behavioral changes — full Jasmine `ZZ-*` suite green, (b) `node --check` clean, (c) lint passes, (d) call-graph spot-check on top 5 highest-fanout methods (`create`, `delete`, `update`, `password_reset`, `password_set`).
 
-- [ ] **REFACTOR-05**: Reclassify `jshint` and `fs-finder` from `dependencies` to `devDependencies` in `package.json`. Confirm production Docker image still builds (`Dockerfile:86 npm install --omit=dev`) and starts; no runtime require of either module from app code. Validated by: (a) `grep -rE "require\\(['\"]jshint['\"]\\)|require\\(['\"]fs-finder['\"]\\)" lib/ thinx-core.js` returns zero hits, (b) production image builds locally and `docker run` reaches the `Server up at` log line, (c) build pipeline (CircleCI) green.
+- [x] **REFACTOR-05**: Reclassify `jshint` and `fs-finder` from `dependencies` to `devDependencies` in `package.json`. Confirm production Docker image still builds (`Dockerfile:86 npm install --omit=dev`) and starts; no runtime require of either module from app code. Validated by: (a) `grep -rE "require\\(['\"]jshint['\"]\\)|require\\(['\"]fs-finder['\"]\\)" lib/ thinx-core.js` returns zero hits, (b) production image builds locally and `docker run` reaches the `Server up at` log line, (c) build pipeline (CircleCI) green.
   - **Scope amendment (2026-06-02, Phase 5):** Closed for `jshint` (moved to `devDependencies`); `fs-finder` portion deferred — fork is internally owned (`github:suculent/Node-FsFinder#master`) and has 5 active runtime call sites in `lib/` (`builder.js`, `deployment.js`, `platform.js`, `repository.js`, `plugins/arduino/plugin.js`), so reclassification would break production. Full `fs-finder` removal (replace with `fs-extra` glob helpers or native `fs.promises.readdir` recursion) deferred to a proposed v1.10 phase. See `.planning/phases/05-backend-hygiene-cheap-sweeps/05-CONTEXT.md` (REFACTOR-05 decision block) and `.planning/STATE.md` (v1.10 backlog) for details.
 
 ### Security & Compliance
@@ -70,9 +70,9 @@ Explicitly excluded from v1.9. Documented to prevent scope creep.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REFACTOR-01 | Phase 5 | Pending |
-| REFACTOR-02 | Phase 5 | Pending |
-| REFACTOR-05 | Phase 5 | Pending |
+| REFACTOR-01 | Phase 5 | Complete |
+| REFACTOR-02 | Phase 5 | Complete |
+| REFACTOR-05 | Phase 5 | Complete |
 | REFACTOR-03 | Phase 6 | Pending |
 | SEC-WS-01 | Phase 6 | Pending |
 | SEC-COOKIE-01 | Phase 6 | Pending |

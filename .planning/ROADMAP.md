@@ -23,7 +23,7 @@
 
 ## Phases
 
-- [ ] **Phase 5: Backend Hygiene — Cheap Sweeps** — Low-risk, isolated cleanups across `thinx-core.js`, `owner.js`, and `package.json` (trust-proxy dedup, strict equality, devDep reclassification).
+- [x] **Phase 5: Backend Hygiene — Cheap Sweeps** ✅ — Low-risk, isolated cleanups across `thinx-core.js`, `owner.js`, and `package.json` (trust-proxy dedup, strict equality, devDep reclassification). Verified 2026-06-02 (REFACTOR-05 scope-amended: jshint moved to devDeps; fs-finder deferred to v1.10).
 - [ ] **Phase 6: WebSocket Surface Hardening** — Tighten the WS lifecycle and handshake surface (close handlers, handshake reproducibility, session-cookie httpOnly re-evaluation).
 - [ ] **Phase 7: owner.js Async/Await Sweep** — Convert ~73 callback patterns in `lib/thinx/owner.js` to async/await with zero observable behavior change.
 - [ ] **Phase 8: Auth & Account Lifecycle Closures** — Soft-deleted reactivation flow + reset-email lands on the Vue console (not legacy AngularJS).
