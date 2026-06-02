@@ -13,7 +13,7 @@ Requirements scoped to v1.9. Each maps to exactly one roadmap phase. Numbering f
 
 - [x] **REFACTOR-02**: Strict equality in `Owner.password_reset`. Replace `!=` at `lib/thinx/owner.js:476` with `!==`. Behavior for the legacy reset_key path stays identical for all currently-valid inputs. Validated by: (a) grep `lib/thinx/owner.js` shows zero `!=`/`==` non-strict comparisons in the touched function, (b) existing `ZZ-AppSessionUserSpec.js` reset_key flow green, (c) added unit covers reset_key string vs. number coercion (the exact case `!=` was masking).
 
-- [ ] **REFACTOR-03**: WebSocket socket-close cleanup. Add `socket.on('close')` handlers to the WS lifecycle in `thinx-core.js:445-487` so per-connection resources are released deterministically (not at next GC). Validated by: (a) the close handler is invoked for both client-initiated close and server shutdown paths, (b) a new spec asserts the cleanup runs (e.g., counter / map entry removed), (c) no regression in MQTT/WebSocket round-trip specs.
+- [x] **REFACTOR-03**: WebSocket socket-close cleanup. Add `socket.on('close')` handlers to the WS lifecycle in `thinx-core.js:445-487` so per-connection resources are released deterministically (not at next GC). Validated by: (a) the close handler is invoked for both client-initiated close and server shutdown paths, (b) a new spec asserts the cleanup runs (e.g., counter / map entry removed), (c) no regression in MQTT/WebSocket round-trip specs.
 
 - [ ] **REFACTOR-04**: `lib/thinx/owner.js` callback → async/await sweep. Convert the ~73 callback patterns identified in v1.0 codebase mapping to `async/await` without changing public method signatures or observable behavior. Public callers (router.user.js, router.profile.js, etc.) still receive identical resolved values / errors. Validated by: (a) zero behavioral changes — full Jasmine `ZZ-*` suite green, (b) `node --check` clean, (c) lint passes, (d) call-graph spot-check on top 5 highest-fanout methods (`create`, `delete`, `update`, `password_reset`, `password_set`).
 
@@ -22,9 +22,9 @@ Requirements scoped to v1.9. Each maps to exactly one roadmap phase. Numbering f
 
 ### Security & Compliance
 
-- [ ] **SEC-COOKIE-01**: Re-evaluate `httpOnly: true` on the session cookie at `thinx-core.js:303`. Either re-enable `httpOnly: true` (preferred) with the WebSocket flow still working, OR document why it must stay `false` with a dated note + ticket. Validated by: (a) session cookie attribute confirmed via `curl -i` against a deployed image, (b) Vue console login + WebSocket subscribe round-trip works against rtm, (c) new regression spec covers cookie attribute presence.
+- [x] **SEC-COOKIE-01**: Re-evaluate `httpOnly: true` on the session cookie at `thinx-core.js:303`. Either re-enable `httpOnly: true` (preferred) with the WebSocket flow still working, OR document why it must stay `false` with a dated note + ticket. Validated by: (a) session cookie attribute confirmed via `curl -i` against a deployed image, (b) Vue console login + WebSocket subscribe round-trip works against rtm, (c) new regression spec covers cookie attribute presence.
 
-- [ ] **SEC-WS-01**: WebSocket handshake hardening on `rtm.thinx.cloud`. Either reproduce + fix the latent 404-on-handshake risk flagged in `AGENTS.md:96-97`, OR document the upstream-Traefik condition that triggers it with reproduction steps and a deferred-to-edge-redesign tag. Validated by: (a) `wscat` handshake from a fresh Vue session returns `101 Switching Protocols` against rtm, (b) a regression spec or runbook documents the failure mode if it can't be code-fixed here.
+- [x] **SEC-WS-01**: WebSocket handshake hardening on `rtm.thinx.cloud`. Either reproduce + fix the latent 404-on-handshake risk flagged in `AGENTS.md:96-97`, OR document the upstream-Traefik condition that triggers it with reproduction steps and a deferred-to-edge-redesign tag. Validated by: (a) `wscat` handshake from a fresh Vue session returns `101 Switching Protocols` against rtm, (b) a regression spec or runbook documents the failure mode if it can't be code-fixed here.
 
 - [ ] **SEC-DEP-02**: services/console dependency triage **coordination** from this repo. Scope inside `thinx-device-api`: schedule the parallel SEC-DEP-02 phase in `services/console/.planning/ROADMAP.md` (cross-project coordination), capture the 2 high-severity console alerts' runtime-vs-build classification once the console-side triage runs, and merge any resulting submodule pointer bump cleanly into `thinx-staging`/`master`/`main`. Deep work lives in the console submodule's GSD project. Validated by: (a) console-side phase exists in `services/console/.planning/ROADMAP.md`, (b) submodule pointer is up to date on `thinx-staging` after console triage merges, (c) `.planning/dep-triage.md` annexed with cross-project verdict roll-up.
 
@@ -73,9 +73,9 @@ Explicitly excluded from v1.9. Documented to prevent scope creep.
 | REFACTOR-01 | Phase 5 | Complete |
 | REFACTOR-02 | Phase 5 | Complete |
 | REFACTOR-05 | Phase 5 | Complete |
-| REFACTOR-03 | Phase 6 | Pending |
-| SEC-WS-01 | Phase 6 | Pending |
-| SEC-COOKIE-01 | Phase 6 | Pending |
+| REFACTOR-03 | Phase 6 | Complete |
+| SEC-WS-01 | Phase 6 | Complete |
+| SEC-COOKIE-01 | Phase 6 | Complete |
 | REFACTOR-04 | Phase 7 | Pending |
 | AUTH-REACTIVATE-01 | Phase 8 | Pending |
 | AUTH-RESET-LINK-CONSOLE | Phase 8 | Pending |

@@ -24,7 +24,7 @@
 ## Phases
 
 - [x] **Phase 5: Backend Hygiene — Cheap Sweeps** ✅ — Low-risk, isolated cleanups across `thinx-core.js`, `owner.js`, and `package.json` (trust-proxy dedup, strict equality, devDep reclassification). Verified 2026-06-02 (REFACTOR-05 scope-amended: jshint moved to devDeps; fs-finder deferred to v1.10).
-- [ ] **Phase 6: WebSocket Surface Hardening** — Tighten the WS lifecycle and handshake surface (close handlers, handshake reproducibility, session-cookie httpOnly re-evaluation).
+- [x] **Phase 6: WebSocket Surface Hardening** ✅ — Tighten the WS lifecycle and handshake surface (close handlers, handshake reproducibility, session-cookie httpOnly re-evaluation). Verified 2026-06-02 (SEC-WS-01 root cause REPRODUCED as edge-nginx routing gap → operator-side runbook; SEC-COOKIE-01 httpOnly:true with <5min rollback path).
 - [ ] **Phase 7: owner.js Async/Await Sweep** — Convert ~73 callback patterns in `lib/thinx/owner.js` to async/await with zero observable behavior change.
 - [ ] **Phase 8: Auth & Account Lifecycle Closures** — Soft-deleted reactivation flow + reset-email lands on the Vue console (not legacy AngularJS).
 - [ ] **Phase 9: Historic PII Redaction (managed_logs)** — Remediate pre-v1.0 raw reset_keys in CouchDB `managed_logs` (~658k docs, GDPR-adjacent).
