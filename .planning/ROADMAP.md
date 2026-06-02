@@ -50,15 +50,18 @@
 
 ### Phase 6: WebSocket Surface Hardening
 **Goal:** Make the WebSocket lifecycle deterministic and the handshake surface defensible — close the resource-cleanup gap, document or fix the rtm handshake risk, and resolve the `httpOnly: false` session-cookie debt left over from a stale debugging note.
-**Depends on:** Phase 5 (sequenced after — REFACTOR-01's trust-proxy work is adjacent to the same `thinx-core.js` block)
+**Depends on:** Phase 5 (sequenced after — REFACTOR-01's trust-proxy work is adjacent to the same `thinx-core.js` block; Phase 5 landed at commit `b0aef15b`)
 **Requirements:** REFACTOR-03, SEC-WS-01, SEC-COOKIE-01
 **Success Criteria** (what must be TRUE):
-  1. A `socket.on('close')` handler runs for both client-initiated close and server-shutdown paths in the WS lifecycle at `thinx-core.js:445-487`, asserted by a new spec that counts/verifies per-connection cleanup.
-  2. `wscat` handshake from a fresh Vue session against `rtm.thinx.cloud` returns `101 Switching Protocols`; if not code-fixable from this repo, a runbook documents the upstream-Traefik condition with reproduction steps.
-  3. Session cookie `x-thx-core` either ships with `httpOnly: true` (preferred) and the Vue console login + WebSocket subscribe still round-trip cleanly, OR a dated note + ticket explains why it must stay `false`.
+  1. A `socket.on('close')` handler runs for both client-initiated close and server-shutdown paths in the WS lifecycle at `thinx-core.js:459-501` (post-Phase-5 line numbers), asserted by a new spec that counts/verifies per-connection cleanup.
+  2. `wscat` handshake from a fresh Vue session against `rtm.thinx.cloud` returns `101 Switching Protocols`; if not code-fixable from this repo, a runbook documents the upstream-Traefik condition with reproduction steps. **(CONTEXT.md confirms NOT code-fixable from this repo — Plan 06-03 produces the runbook with the 7-row reproduction evidence and the operator-side nginx fix.)**
+  3. Session cookie `x-thx-core` either ships with `httpOnly: true` (preferred) and the Vue console login + WebSocket subscribe still round-trip cleanly, OR a dated note + ticket explains why it must stay `false`. **(CONTEXT.md decision: flip to `httpOnly: true` with a < 5min documented rollback path in the runbook.)**
   4. A regression spec covers the chosen cookie-attribute decision (presence/absence of `httpOnly` flag on the Set-Cookie header).
-  5. No regression in existing MQTT/WebSocket round-trip specs.
-**Plans:** TBD
+  5. No regression in existing MQTT/WebSocket round-trip specs (CI-side Jasmine is the canonical green-gate; local `npm test` ACCEPT pattern per Phase 5).
+**Plans:** 3 plans (Wave 1: 06-01 + 06-03 parallel-safe; Wave 2: 06-02 depends on both)
+  - [ ] 06-01-PLAN.md — REFACTOR-03: raw-socket close handler in WS upgrade flow at `thinx-core.js:~486` + new spec `ZZ-WebSocketLifecycleSpec.js` asserting cleanup on aborted mid-flight upgrade
+  - [ ] 06-02-PLAN.md — SEC-COOKIE-01: flip `thinx-core.js:316` to `httpOnly: true` + remove stale debug comment + new spec `ZZ-CookieAttributeSpec.js` + APPEND rollback procedure to the runbook
+  - [ ] 06-03-PLAN.md — SEC-WS-01: CREATE `.planning/runbooks/websocket-handshake.md` with the 7-row reproduction table from CONTEXT.md, operator-side `nginx -T` + `location` block action, `deferred to edge-redesign` tag, and post-fix verification recipe (NO code change for this requirement)
 
 ### Phase 7: owner.js Async/Await Sweep
 **Goal:** Convert the ~73 callback patterns in `lib/thinx/owner.js` to async/await, preserving every public method signature and observable behavior the legacy-console-compatible routes depend on.
@@ -157,7 +160,7 @@
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 5. Backend Hygiene — Cheap Sweeps | v1.9 | 0/4 | Planned | — |
-| 6. WebSocket Surface Hardening | v1.9 | 0/? | Not started | — |
+| 6. WebSocket Surface Hardening | v1.9 | 0/3 | Planned | — |
 | 7. owner.js Async/Await Sweep | v1.9 | 0/? | Not started | — |
 | 8. Auth & Account Lifecycle Closures | v1.9 | 0/? | Not started | — |
 | 9. Historic PII Redaction (managed_logs) | v1.9 | 0/? | Not started | — |
@@ -185,7 +188,7 @@ Phase 5 sequences before 6 (REFACTOR-01 trust-proxy is adjacent to the WS block 
   - `AUTH-RESET-LINK-CONSOLE` requires coordination with the console's password-set route
 - **AGENTS.md** (parent root) — ops/deploy reference + dependency lock rationale
   - `chai-http v4` lock: TEST-CHAI-01 deferred from v1.9 per AGENTS.md:82-92
-- **`.planning/runbooks/`** — canonical operational runbooks; Phase 9 will extend with GDPR-posture note; Phase 6 may extend with WS handshake runbook
+- **`.planning/runbooks/`** — canonical operational runbooks; Phase 9 will extend with GDPR-posture note; Phase 6 extends with `websocket-handshake.md` (Plan 06-03 creates it; Plan 06-02 appends a SEC-COOKIE-01 rollback section)
 
 ## Notes
 
@@ -194,7 +197,9 @@ Phase 5 sequences before 6 (REFACTOR-01 trust-proxy is adjacent to the WS block 
 - **Phase numbering:** v1.9 continues from v1.0's last phase (Phase 4). Integer phases 5–11 represent v1.9 work; any urgent insertions during execution use decimal phases (e.g., 5.1, 7.2).
 - **Deferred from v1.9 scope:** OPS-02, OPS-03 (pure swarm-side OPS), TEST-CHAI-01 (chai-http v5 lock), CONSOLE-LEGACY-JSON-PARSE (sibling-project scope). See `.planning/REQUIREMENTS.md` § "Future Requirements".
 - **Phase 5 scope amendment (2026-06-02):** REFACTOR-05 reduced to `jshint`-only reclassification; `fs-finder` removal sweep deferred to a proposed v1.10 phase (see STATE.md decisions + REQUIREMENTS.md REFACTOR-05 annotation). Plan 05-04 (Wave 2) records the amendment across ROADMAP.md, REQUIREMENTS.md, and STATE.md so the phase-closeout verifier sees a consistent story.
+- **Phase 6 plan-set (2026-06-02):** 3 atomic plans, one per requirement. Plan 06-01 (REFACTOR-03) and Plan 06-03 (SEC-WS-01) are Wave 1 parallel-safe (no file overlap — 06-01 touches `thinx-core.js` + a new spec, 06-03 touches only `.planning/runbooks/websocket-handshake.md`). Plan 06-02 (SEC-COOKIE-01) is Wave 2 — depends on both 06-01 (also touches `thinx-core.js`, at a different line) and 06-03 (also touches the runbook, appending vs creating). Each plan lands one atomic GPG-signed commit. The SEC-WS-01 fix lives on the swarm host (operator-side nginx config) and is OUT OF this repo — Plan 06-03 produces only the runbook.
 
 ---
 *Roadmap created: 2026-06-02 — v1.9 Backend Hygiene & Posture milestone planning. 7 phases (5–11) covering 13 requirements. Granularity: coarse (let natural delivery boundaries stand; risk-clustered work surfaced 7 phases rather than artificially compressing to 5).*
 *Phase 5 planned: 2026-06-02 — 4 plans (3 Wave 1 parallel + 1 Wave 2 doc-update); REFACTOR-05 scope reduced to jshint-only per CONTEXT.md.*
+*Phase 6 planned: 2026-06-02 — 3 atomic plans (2 Wave 1 parallel + 1 Wave 2); SEC-WS-01 is runbook-only per CONTEXT.md (root cause: rtm edge-nginx routing gap, deferred to edge-redesign).*
