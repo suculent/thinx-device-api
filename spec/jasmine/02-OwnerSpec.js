@@ -181,5 +181,21 @@ describe("Owner", function () {
     });
   });
 
+  // REFACTOR-04 (Phase 7 Plan 02): Owner.create callback contract lock.
+  // The synchronous `email_required` guard (lib/thinx/owner.js inside Owner.create
+  // before any userlib/redis/couchdb call) returns `(res, false, "email_required")`
+  // when body has no email. This branch fires BEFORE the async/await conversion's
+  // affected code, so the test passes both before and after Plan 07-2. Its value is
+  // locking the public callback-tuple shape so a future signature drift (e.g.
+  // accidental reordering of the (res, success, reason) tuple) is caught by CircleCI.
+  it("(13) REFACTOR-04 (07-2): Owner.create callback contract preserved for missing-email error path", function (done) {
+    const res_mock = {};
+    user.create({ /* no email */ }, true, res_mock, (cb_res, cb_success, cb_reason) => {
+      expect(cb_success).to.equal(false);
+      expect(cb_reason).to.equal("email_required");
+      done();
+    });
+  }, 5000);
+
 
 });
