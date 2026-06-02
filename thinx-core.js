@@ -484,6 +484,11 @@ module.exports = class THiNX extends EventEmitter {
 
                   socketMap.set(socketKey, socket);
 
+                  // REFACTOR-03: raw-socket close handler — releases the socketMap entry deterministically when the upgrade aborts mid-flight (before wss-level ws.on('close') at :597 gets a chance to attach). Map.delete is idempotent so double-firing with the wss-level handler is safe.
+                  socket.on('close', () => {
+                    socketMap.delete(socketKey);
+                  });
+
                   try {
                     wss.handleUpgrade(request, socket, head, function (ws) {
                       ws.socketKey = socketKey;
