@@ -313,7 +313,7 @@ module.exports = class THiNX extends EventEmitter {
                 maxAge: 3600000,
                 // deepcode ignore WebCookieSecureDisabledExplicitly: not secure because HTTPS unwrapping happens outside this app
                 secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
-                httpOnly: false, // temporarily disabled due to websocket debugging
+                httpOnly: true,
                 domain: short_domain
               },
               store: sessionStore,

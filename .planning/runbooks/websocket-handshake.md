@@ -137,4 +137,75 @@ Compare the `Server:` header and the presence/absence of helmet `Content-Securit
 
 ---
 
+## SEC-COOKIE-01 Rollback Procedure
+
+Operator-side rollback for the `httpOnly: true` flip on the main session cookie `x-thx-core` (per Plan 06-02 / `thinx-core.js:316`). SLA: < 5 min, end-to-end.
+
+### When to roll back
+
+If the Vue console login or WebSocket subscribe regresses on `rtm.thinx.cloud` after the SEC-COOKIE-01 deploy lands, AND the regression grep-traces to JS-side `document.cookie` reads of `x-thx-core`, roll back.
+
+Otherwise the regression is likely the SEC-WS-01 edge-nginx routing gap (see the preceding section) — the rollback below is NOT the correct response for that failure mode. Confirm the SEC-WS-01 edge fix is in place before attributing a console regression to SEC-COOKIE-01.
+
+Diagnosis check before rolling back:
+
+```bash
+# A successful login response should now carry HttpOnly on x-thx-core.
+curl -sI -c /tmp/thx-cookies.txt -X POST https://rtm.thinx.cloud/api/login \
+  -H "Content-Type: application/json" \
+  --data '{"username":"...","password":"...","remember":false}' \
+| grep -i "set-cookie: x-thx-core"
+# Expect the response line to contain `HttpOnly`. If it does AND the console still
+# fails on a JS-side cookie read, proceed with rollback.
+```
+
+### Rollback steps (< 5 min, operator-side)
+
+1. **SSH to a developer workstation** with the `thinx-device-api` repo checked out (or use the GitHub web UI for a direct file edit on `thinx-staging`).
+
+2. **Edit `thinx-core.js`.** Find the `sessionConfig.cookie` block at approximately line 316. Change:
+
+   ```js
+   httpOnly: true,
+   ```
+
+   back to:
+
+   ```js
+   httpOnly: false,
+   ```
+
+   Do NOT re-add the stale `// temporarily disabled due to websocket debugging` comment — keep the line bare. The intent at rollback time is operationally clean, not a re-introduction of the original debt note.
+
+3. **Commit on `thinx-staging`** with the canonical rollback subject template:
+
+   ```
+   revert(SEC-COOKIE-01): restore httpOnly: false pending WS investigation
+   ```
+
+   Commit body MUST name (a) the observed regression symptom (e.g., "Vue console login succeeds but WS subscribe fails immediately with cookie-undefined console error"), and (b) link to the SEC-COOKIE-01 SUMMARY at `.planning/phases/06-websocket-surface-hardening/06-02-SUMMARY.md` for context.
+
+4. **Push to `thinx-staging`.** CircleCI builds and pushes `thinxcloud/api:latest`; Swarmpit autoredeploy rolls the new image to the swarm host `188.166.23.244` within ~5 minutes (per the canonical autoredeploy SLA in `.planning/runbooks/swarm.md`).
+
+5. **Verify the regression is resolved** by reloading the Vue console at `https://rtm.thinx.cloud/app` in a fresh browser session, logging in, and confirming the WS subscribe round-trip completes (DevTools Network tab, filter on WS, status `101 Switching Protocols`).
+
+### Post-rollback follow-up
+
+File a quick-task or v1.10 candidate documenting why `httpOnly: true` could not stand. Specifically capture:
+
+- The exact JS-side `document.cookie` read that needed `x-thx-core` readable (file, line, call-site).
+- Whether the read is in the Vue console bundle (`services/console/src/...`) or in a third-party library bundled into the console.
+- A target patch that removes the JS-side dependency on `x-thx-core` (the cookie is for server-side session bookkeeping; the console should not need it on the JS side — that's the SEC-COOKIE-01 invariant).
+
+Update this runbook section with the discovered root cause and the next-attempt plan (e.g., "patch the console at services/console/src/foo.js:N to use the server-supplied session-id from /api/me instead of reading document.cookie, then re-attempt SEC-COOKIE-01").
+
+### Why this matters
+
+The post-OAuth-login override at `lib/router.auth.js:106` (`req.session.cookie.httpOnly = true;`) upgrades the session cookie to httpOnly AFTER the OAuth callback fires. So even with this rollback applied, OAuth-authenticated sessions REMAIN httpOnly — only the local-credentials login flow would re-expose the cookie to JS. The rollback narrows blast radius rather than fully restoring the pre-Phase-6 surface.
+
+The new regression spec at `spec/jasmine/ZZ-CookieAttributeSpec.js` will FAIL on CI after the rollback (it asserts `HttpOnly` is present). That failure is EXPECTED and acceptable during a rollback window — leave the spec in place as the canonical signal that SEC-COOKIE-01 needs a re-attempt. Do NOT delete or skip the spec.
+
+---
+
 *Runbook initialized: 2026-06-02 (Phase 6 / SEC-WS-01 close-out — documentation-only, fix deferred to edge-redesign).*
+*SEC-COOKIE-01 rollback section appended: 2026-06-02 (Phase 6 / Plan 06-02 close-out).*
