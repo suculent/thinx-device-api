@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: — Backend Hygiene & Posture
-status: executing
+status: completed
 stopped_at: Phase 7 context gathered (two-phase granularity + strict-eq fold decided)
-last_updated: "2026-06-02T22:23:44.267Z"
-last_activity: 2026-06-02 -- Phase 7 planning complete
+last_updated: "2026-06-02T23:03:41.175Z"
+last_activity: 2026-06-02 -- Phase 7 marked complete
 progress:
   total_phases: 7
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 13
-  completed_plans: 7
-  percent: 29
+  completed_plans: 13
+  percent: 43
 ---
 
 # STATE — THiNX Device API
@@ -23,16 +23,16 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-06-02)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** Phase 5 — Backend Hygiene — Cheap Sweeps
+- **Current focus:** Phase 7 — owner.js Async/Await Sweep
 - **Latest production image:** `thinxcloud/api:latest sha256:4d3fb789` (v1.0 Phase 4 deploy 2026-05-26T22:35:54Z); v1.9 base bumped to `1.9.3054` 2026-06-02 via `304b09d1`
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace (v1.0 frontend shipped; SEC-DEP-02 console-side dep triage scheduled for Phase 10)
 
 ## Current Position
 
-Phase: 6 — COMPLETE
-Plan: 1 of 4
-Status: Ready to execute
-Last activity: 2026-06-02 -- Phase 7 planning complete
+Phase: 7 — COMPLETE
+Plan: 1 of 6
+Status: Phase 7 complete
+Last activity: 2026-06-02 -- Phase 7 marked complete
 
 ## Milestones
 

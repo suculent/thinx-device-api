@@ -15,7 +15,7 @@ Requirements scoped to v1.9. Each maps to exactly one roadmap phase. Numbering f
 
 - [x] **REFACTOR-03**: WebSocket socket-close cleanup. Add `socket.on('close')` handlers to the WS lifecycle in `thinx-core.js:445-487` so per-connection resources are released deterministically (not at next GC). Validated by: (a) the close handler is invoked for both client-initiated close and server shutdown paths, (b) a new spec asserts the cleanup runs (e.g., counter / map entry removed), (c) no regression in MQTT/WebSocket round-trip specs.
 
-- [ ] **REFACTOR-04**: `lib/thinx/owner.js` callback → async/await sweep. Convert the ~73 callback patterns identified in v1.0 codebase mapping to `async/await` without changing public method signatures or observable behavior. Public callers (router.user.js, router.profile.js, etc.) still receive identical resolved values / errors. Validated by: (a) zero behavioral changes — full Jasmine `ZZ-*` suite green, (b) `node --check` clean, (c) lint passes, (d) call-graph spot-check on top 5 highest-fanout methods (`create`, `delete`, `update`, `password_reset`, `password_set`).
+- [x] **REFACTOR-04**: `lib/thinx/owner.js` callback → async/await sweep. Convert the ~73 callback patterns identified in v1.0 codebase mapping to `async/await` without changing public method signatures or observable behavior. Public callers (router.user.js, router.profile.js, etc.) still receive identical resolved values / errors. Validated by: (a) zero behavioral changes — full Jasmine `ZZ-*` suite green, (b) `node --check` clean, (c) lint passes, (d) call-graph spot-check on top 5 highest-fanout methods (`create`, `delete`, `update`, `password_reset`, `password_set`).
 
 - [x] **REFACTOR-05**: Reclassify `jshint` and `fs-finder` from `dependencies` to `devDependencies` in `package.json`. Confirm production Docker image still builds (`Dockerfile:86 npm install --omit=dev`) and starts; no runtime require of either module from app code. Validated by: (a) `grep -rE "require\\(['\"]jshint['\"]\\)|require\\(['\"]fs-finder['\"]\\)" lib/ thinx-core.js` returns zero hits, (b) production image builds locally and `docker run` reaches the `Server up at` log line, (c) build pipeline (CircleCI) green.
   - **Scope amendment (2026-06-02, Phase 5):** Closed for `jshint` (moved to `devDependencies`); `fs-finder` portion deferred — fork is internally owned (`github:suculent/Node-FsFinder#master`) and has 5 active runtime call sites in `lib/` (`builder.js`, `deployment.js`, `platform.js`, `repository.js`, `plugins/arduino/plugin.js`), so reclassification would break production. Full `fs-finder` removal (replace with `fs-extra` glob helpers or native `fs.promises.readdir` recursion) deferred to a proposed v1.10 phase. See `.planning/phases/05-backend-hygiene-cheap-sweeps/05-CONTEXT.md` (REFACTOR-05 decision block) and `.planning/STATE.md` (v1.10 backlog) for details.
@@ -76,7 +76,7 @@ Explicitly excluded from v1.9. Documented to prevent scope creep.
 | REFACTOR-03 | Phase 6 | Complete |
 | SEC-WS-01 | Phase 6 | Complete |
 | SEC-COOKIE-01 | Phase 6 | Complete |
-| REFACTOR-04 | Phase 7 | Pending |
+| REFACTOR-04 | Phase 7 | Complete |
 | AUTH-REACTIVATE-01 | Phase 8 | Pending |
 | AUTH-RESET-LINK-CONSOLE | Phase 8 | Pending |
 | SEC-PII-02 | Phase 9 | Pending |
