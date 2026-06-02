@@ -297,8 +297,6 @@ module.exports = class THiNX extends EventEmitter {
             app.builder = builder;
             app.queue = queue;
 
-            app.set("trust proxy", 1);
-
             require('path');
 
             // Bypassed LGTM, because it does not make sense on this API for all endpoints,
@@ -419,6 +417,7 @@ module.exports = class THiNX extends EventEmitter {
 
 
             app.use('/static', express.static(path.join(__dirname, 'static')));
+            // REFACTOR-01: single source of truth for trust-proxy; allowlist form chosen because Traefik fronts the app on loopback in the swarm topology.
             app.set('trust proxy', ['loopback', '127.0.0.1']);
 
             /*
