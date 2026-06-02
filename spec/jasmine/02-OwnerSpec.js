@@ -158,5 +158,28 @@ describe("Owner", function () {
     });
   });
 
+  // REFACTOR-02: strict equality in Owner.password_reset
+  // Regression for the string-vs-number reset_key coercion case that the
+  // legacy `!=` compare at lib/thinx/owner.js:492 was silently accepting.
+  // Under `!==`, a candidate string `"123"` MUST NOT match a stored numeric
+  // `user_reset_key` of `123` — the callback MUST resolve with
+  // (false, "invalid_reset_key"). The userlib.view layer is monkey-patched
+  // for this single test (the spec file otherwise hits a live CouchDB), and
+  // is restored in done() so subsequent specs are unaffected.
+  it("(12) REFACTOR-02: password_reset rejects string reset_key when stored value is a number (strict equality)", function (done) {
+    const original_view = user.userlib.view;
+    user.userlib.view = function (_design, _viewname, _opts, cb) {
+      // Simulate a CouchDB view row whose stored reset_key is numeric.
+      cb(null, { rows: [{ doc: { reset_key: 123 } }] });
+    };
+    user.password_reset(owner, "123", (success, message) => {
+      // Restore before assertions so a thrown expect cannot leak the patch.
+      user.userlib.view = original_view;
+      expect(success).to.equal(false);
+      expect(message).to.equal("invalid_reset_key");
+      done();
+    });
+  });
+
 
 });
