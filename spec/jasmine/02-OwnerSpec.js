@@ -266,5 +266,26 @@ describe("Owner", function () {
     });
   }, 5000);
 
+  // REFACTOR-04 (Phase 7 Plan 06 — PHASE 7 CLOSE-OUT): Owner.set_password callback contract lock.
+  // Owner.set_password is an orchestrator with no userlib calls of its own — it validates
+  // rbody and delegates to set_password_reset (when reset_key is defined) or
+  // set_password_activation (when activation is defined). The synchronous password_mismatch
+  // guard fires BEFORE either delegate, so this test is safe to run without DB/Redis
+  // dependencies and survives the local test-env config-missing ACCEPT scenario. Asserts the
+  // public callback tuple shape `(false, "password_mismatch")` when rbody.password !==
+  // rbody.rpassword. The single caller router.user.js:57 depends on this contract.
+  //
+  // This test does NOT exercise the delegation branches (reset_key / activation) directly;
+  // those paths are exercised by the existing ZZ-RouterPasswordResetSpec.js suite in CI.
+  // The post-commit grep gates (Plan 07-6 Task 4) confirm both Util.redactToken SEC-PII-01
+  // sites and the strict-equality `!==` survive the async/await conversion.
+  it("(17) REFACTOR-04 (07-6): Owner.set_password callback contract preserved for password_mismatch", function (done) {
+    user.set_password({ password: "abc", rpassword: "xyz" }, (cb_success, cb_response) => {
+      expect(cb_success).to.equal(false);
+      expect(cb_response).to.equal("password_mismatch");
+      done();
+    });
+  }, 5000);
+
 
 });
