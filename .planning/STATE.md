@@ -4,8 +4,8 @@ milestone: v1.9
 milestone_name: Backend Hygiene & Posture
 status: executing
 stopped_at: Phase 5 context gathered
-last_updated: "2026-06-02T19:03:58.626Z"
-last_activity: 2026-06-02 -- Phase 5 planning complete
+last_updated: "2026-06-02T19:04:53.114Z"
+last_activity: 2026-06-02 — Phase 5 scope amendment recorded (REFACTOR-05 fs-finder deferral)
 progress:
   total_phases: 7
   completed_phases: 0
@@ -23,16 +23,16 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-06-02)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** v1.9 Backend Hygiene & Posture — Phase 5 ready to plan
+- **Current focus:** Phase 5 — Backend Hygiene — Cheap Sweeps
 - **Latest production image:** `thinxcloud/api:latest sha256:4d3fb789` (v1.0 Phase 4 deploy 2026-05-26T22:35:54Z); v1.9 base bumped to `1.9.3054` 2026-06-02 via `304b09d1`
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace (v1.0 frontend shipped; SEC-DEP-02 console-side dep triage scheduled for Phase 10)
 
 ## Current Position
 
-Phase: Not started (roadmap created; ready for `/gsd:plan-phase 5`)
-Plan: —
-Status: Ready to execute
-Last activity: 2026-06-02 -- Phase 5 planning complete
+Phase: 5 (Backend Hygiene — Cheap Sweeps) — EXECUTING
+Plan: 1 of 4
+Status: Executing Phase 5
+Last activity: 2026-06-02 -- Phase 5 execution started
 
 ## Milestones
 
@@ -45,6 +45,7 @@ Last activity: 2026-06-02 -- Phase 5 planning complete
 
 - 2026-06-02 — v1.9 milestone started with 13 requirements across 7 phases (Phases 5–11). Phase numbering continues from v1.0's last phase (Phase 4) — orchestrator did NOT pass `--reset-phase-numbers`.
 - 2026-06-02 — Phase clustering: low-risk REFACTOR sweeps (Phase 5) → WS-surface (Phase 6) → owner.js async/await (Phase 7) → auth lifecycle (Phase 8, sequenced after 7) → independent: managed_logs PII (Phase 9), services/console SEC-DEP-02 coordination (Phase 10), base/update.sh + ca.pem probe (Phase 11).
+- 2026-06-02 — Phase 5 scope amendment: REFACTOR-05 reduced to `jshint`-only reclassification (moved to `devDependencies`); `fs-finder` STAYS in `dependencies` because the internally-owned fork (`github:suculent/Node-FsFinder#master`) has 5 active runtime call sites in `lib/`. Full `fs-finder` removal sweep deferred to a proposed v1.10 phase. Amendment recorded in ROADMAP.md (Phase 5 success criterion 3 + Notes) and REQUIREMENTS.md (REFACTOR-05 sub-bullet); rationale in `.planning/phases/05-backend-hygiene-cheap-sweeps/05-CONTEXT.md` REFACTOR-05 decision block.
 - 2026-05-27 — v1.0 shipped; project transitioned from "v1 GA gap closures" narrow scope to long-lived backend lifecycle.
 - 2026-05-27 — Operator decision Option B (v1.0 Phase 4 Slice 4): services/console merge-up deferred; tracked via SEC-DEP-02 (now scheduled as Phase 10 of v1.9).
 - 2026-05-27 — Verification artifact gap (v1.0 Phases 1-3 lack structured `*-VERIFICATION.md`) accepted as process-debt.
@@ -52,6 +53,10 @@ Last activity: 2026-06-02 -- Phase 5 planning complete
 ### Todos
 
 - Run `/gsd:plan-phase 5` to start v1.9 Phase 5 (Backend Hygiene — Cheap Sweeps: REFACTOR-01, REFACTOR-02, REFACTOR-05).
+
+### v1.10 Candidates
+
+- **fs-finder removal sweep** (v1.10 candidate, deferred from v1.9 Phase 5 REFACTOR-05): replace `finder.from()` / `finder.in()` / `finder.findFiles()` calls in 5 modules (`lib/thinx/builder.js`, `lib/thinx/deployment.js`, `lib/thinx/platform.js`, `lib/thinx/repository.js`, `lib/thinx/plugins/arduino/plugin.js`) with `fs-extra` glob helpers (already a dep) OR native `fs.promises.readdir` recursion. After the sweep lands, `fs-finder` can be removed from `package.json` entirely. Estimated touch surface: ~10 call sites across ~5 files. Sequenced after v1.9 ships.
 
 ### Blockers
 
