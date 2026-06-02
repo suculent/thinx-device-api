@@ -166,11 +166,19 @@ describe("Owner", function () {
   // (false, "invalid_reset_key"). The userlib.view layer is monkey-patched
   // for this single test (the spec file otherwise hits a live CouchDB), and
   // is restored in done() so subsequent specs are unaffected.
+  //
+  // Phase 7 Plan 07-5 note: Owner.password_reset's internals were converted
+  // to async/await (nano 10 native Promise API). The monkey-patch below now
+  // returns a resolved Promise instead of invoking a callback — the test's
+  // BEHAVIORAL contract (string "123" vs numeric 123 → invalid_reset_key) is
+  // unchanged; only the mocking style adapts to the new internal Promise
+  // contract with the userlib.view layer. The (false, "invalid_reset_key")
+  // public callback tuple assertion is verbatim from the Phase 5 fix.
   it("(12) REFACTOR-02: password_reset rejects string reset_key when stored value is a number (strict equality)", function (done) {
     const original_view = user.userlib.view;
-    user.userlib.view = function (_design, _viewname, _opts, cb) {
+    user.userlib.view = function (_design, _viewname, _opts) {
       // Simulate a CouchDB view row whose stored reset_key is numeric.
-      cb(null, { rows: [{ doc: { reset_key: 123 } }] });
+      return Promise.resolve({ rows: [{ doc: { reset_key: 123 } }] });
     };
     user.password_reset(owner, "123", (success, message) => {
       // Restore before assertions so a thrown expect cannot leak the patch.
@@ -233,6 +241,27 @@ describe("Owner", function () {
     user.update(undefined, { /* body */ }, (cb_success, cb_response) => {
       expect(cb_success).to.equal(false);
       expect(cb_response).to.equal("undefined_owner");
+      done();
+    });
+  }, 5000);
+
+  // REFACTOR-04 (Phase 7 Plan 05): Owner.password_reset callback contract lock.
+  // The synchronous `missing_reset_key` guard at lib/thinx/owner.js (Owner.password_reset
+  // first statement) fires BEFORE the alog.log SEC-PII-01 audit call and BEFORE the
+  // awaited userlib.view, so this test is safe to run without DB/Redis dependencies
+  // and survives the local test-env config-missing ACCEPT scenario. Asserts the
+  // public callback tuple shape `(false, "missing_reset_key")` and locks the
+  // 3-argument (owner, reset_key, callback) signature. The single caller
+  // router.user.js:27 depends on this contract.
+  //
+  // This test does NOT exercise the Phase 5 REFACTOR-02 `!==` comparison directly
+  // (that requires a CouchDB doc; test (12) above mocks that path). The strict-
+  // equality survival across the async/await conversion is enforced by the
+  // post-commit grep gate (Plan 07-5 Task 4 step 2) AND by test (12) above.
+  it("(16) REFACTOR-04 (07-5): Owner.password_reset callback contract preserved for missing_reset_key guard", function (done) {
+    user.password_reset("any_owner_id", undefined, (cb_success, cb_response) => {
+      expect(cb_success).to.equal(false);
+      expect(cb_response).to.equal("missing_reset_key");
       done();
     });
   }, 5000);
