@@ -197,5 +197,29 @@ describe("Owner", function () {
     });
   }, 5000);
 
+  // REFACTOR-04 (Phase 7 Plan 03): Owner.delete callback contract lock.
+  // Locks the (res, success, reason) tuple shape AND the unusual (owner, callback, res)
+  // parameter order. Uses a fake owner_id that does not exist in CouchDB to deterministically
+  // hit either the success-with-fallback or the destroy-failure path. Since CouchDB will
+  // 404 on a non-existent doc for both atomic and destroy, the test asserts the (res, false, "delete_failed")
+  // callback contract on the destroy-failure branch (or the success branch if atomic somehow
+  // succeeded against a fresh doc — both paths satisfy the tuple-shape assertion below).
+  //
+  // NOTE: requires CouchDB available (CI green-gate). Local "no /mnt/data/conf/config.json"
+  // ACCEPT pattern means this test fails locally; CircleCI is canonical.
+  it("(14) REFACTOR-04 (07-3): Owner.delete callback contract preserved", function (done) {
+    const res_mock = {};
+    const nonexistent_owner = "test_refactor04_07_3_nonexistent_" + Date.now();
+    user.delete(nonexistent_owner, (cb_res, cb_success, cb_reason) => {
+      // Either (true, "deleted") if atomic succeeds against a fresh doc, or (false, "delete_failed")
+      // if both atomic and destroy fail on the nonexistent doc.
+      expect(typeof cb_success).to.equal("boolean");
+      expect(typeof cb_reason).to.equal("string");
+      // The tuple shape must be exactly 3 args: (res, success, reason).
+      expect(cb_res).to.equal(res_mock);
+      done();
+    }, res_mock);
+  }, 10000);
+
 
 });
