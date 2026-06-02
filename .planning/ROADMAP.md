@@ -72,7 +72,13 @@
   2. `node --check lib/thinx/owner.js` clean; lint passes; no callback-style chain remains in the touched code paths.
   3. Top-5 highest-fanout methods (`create`, `delete`, `update`, `password_reset`, `password_set`) pass a call-graph spot-check — they still resolve identical values / surface identical errors to their callers.
   4. Production Docker image builds, deploys, and serves a Vue-console login round-trip on rtm with no signature break.
-**Plans:** TBD
+**Plans:** 6 plans (all Wave 1, sequential — every plan touches `lib/thinx/owner.js`; sequential single-branch execution avoids merge conflicts. CONTEXT.md two-phase granularity decision: non-top-5 internals first as one bisect-friendly commit, then top-5 methods individually for surgical revertability. Strict-equality fold (lines 277, 515, 572, 646, 790, 930, 1002) lands across 07-1 (6 fixes) and 07-2 (line 930 inside Owner.create). 5 behavior-locking unit tests in `spec/jasmine/02-OwnerSpec.js` (one per top-5 plan).)
+  - [ ] 07-01-PLAN.md — Convert non-top-5 methods (~15-19 methods: mqtt_key, profile, apply_update, validate, password_reset_init, activate, atomic, set_password_reset, set_password_activation, create_default_acl, create_mqtt_access, create_default_mqtt_apikey, createMesh, deleteMeshes, listMeshes, trackUserLogin, updateLastSeen, addGitHubAccessToken) + 6 strict-equality fixes (lines 277, 515, 572, 646, 790, 1002)
+  - [ ] 07-02-PLAN.md — Convert `Owner.create` (4 callers: router.auth.js:70, router.google.js:59, router.github.js:90, router.user.js:133) + final strict-equality fix (line 930 `statusCode == 409` → `===`) + behavior-locking unit test
+  - [ ] 07-03-PLAN.md — Convert `Owner.delete` (1 caller: router.user.js:126; destructive-fallback path preserved) + behavior-locking unit test
+  - [ ] 07-04-PLAN.md — Convert `Owner.update` (2 callers: router.profile.js:33, router.gdpr.js:135; orchestrator — delegates to process_update + apply_update) + behavior-locking unit test
+  - [ ] 07-05-PLAN.md — Convert `Owner.password_reset` (1 caller: router.user.js:27; **CRITICAL**: preserves Phase 5 REFACTOR-02 strict-equality fix `reset_key !== user_reset_key` + both SEC-PII-01 Util.redactToken sites) + behavior-locking unit test
+  - [ ] 07-06-PLAN.md — Convert `Owner.set_password` (orchestrator — delegates to set_password_reset/set_password_activation; both SEC-PII-01 Util.redactToken sites preserved) + behavior-locking unit test; PHASE 7 CLOSE-OUT COMMIT
 
 ### Phase 8: Auth & Account Lifecycle Closures
 **Goal:** Close the two account-lifecycle gaps the v1.0 UAT surfaced — give soft-deleted users a recovery path and land password-reset emails on the Vue console instead of the deprecated AngularJS one.
@@ -161,7 +167,7 @@
 |-------|-----------|----------------|--------|-----------|
 | 5. Backend Hygiene — Cheap Sweeps | v1.9 | 0/4 | Planned | — |
 | 6. WebSocket Surface Hardening | v1.9 | 0/3 | Planned | — |
-| 7. owner.js Async/Await Sweep | v1.9 | 0/? | Not started | — |
+| 7. owner.js Async/Await Sweep | v1.9 | 0/6 | Planned | — |
 | 8. Auth & Account Lifecycle Closures | v1.9 | 0/? | Not started | — |
 | 9. Historic PII Redaction (managed_logs) | v1.9 | 0/? | Not started | — |
 | 10. Cross-Project Dependency Coordination | v1.9 | 0/? | Not started | — |
@@ -198,8 +204,10 @@ Phase 5 sequences before 6 (REFACTOR-01 trust-proxy is adjacent to the WS block 
 - **Deferred from v1.9 scope:** OPS-02, OPS-03 (pure swarm-side OPS), TEST-CHAI-01 (chai-http v5 lock), CONSOLE-LEGACY-JSON-PARSE (sibling-project scope). See `.planning/REQUIREMENTS.md` § "Future Requirements".
 - **Phase 5 scope amendment (2026-06-02):** REFACTOR-05 reduced to `jshint`-only reclassification; `fs-finder` removal sweep deferred to a proposed v1.10 phase (see STATE.md decisions + REQUIREMENTS.md REFACTOR-05 annotation). Plan 05-04 (Wave 2) records the amendment across ROADMAP.md, REQUIREMENTS.md, and STATE.md so the phase-closeout verifier sees a consistent story.
 - **Phase 6 plan-set (2026-06-02):** 3 atomic plans, one per requirement. Plan 06-01 (REFACTOR-03) and Plan 06-03 (SEC-WS-01) are Wave 1 parallel-safe (no file overlap — 06-01 touches `thinx-core.js` + a new spec, 06-03 touches only `.planning/runbooks/websocket-handshake.md`). Plan 06-02 (SEC-COOKIE-01) is Wave 2 — depends on both 06-01 (also touches `thinx-core.js`, at a different line) and 06-03 (also touches the runbook, appending vs creating). Each plan lands one atomic GPG-signed commit. The SEC-WS-01 fix lives on the swarm host (operator-side nginx config) and is OUT OF this repo — Plan 06-03 produces only the runbook.
+- **Phase 7 plan-set (2026-06-03):** 6 atomic plans, ALL Wave 1, SEQUENTIAL execution (not parallel). Every plan touches `lib/thinx/owner.js`; parallel worktree execution would create merge conflicts on every plan. Sequential single-branch execution avoids the conflict surface entirely. Plans 07-2 through 07-6 declare `depends_on: [07-01]` (07-3 also depends on 07-2, 07-4 on 07-3, etc., enforcing the order). Plan 07-1 converts ~15-19 non-top-5 methods + folds 6 of 7 strict-equality fixes. Plans 07-2..07-6 each convert one top-5 method (`create`, `delete`, `update`, `password_reset`, `set_password`) and add one behavior-locking unit test to `spec/jasmine/02-OwnerSpec.js`. Plan 07-2 folds the 7th strict-equality fix (line 930 inside `Owner.create`). Plan 07-5 has a CRITICAL Phase 5 REFACTOR-02 anti-regression gate (the `!=`→`!==` fix at line 492 MUST survive the conversion). Plan 07-6 is the phase close-out commit. 6 atomic GPG-signed commits expected on `thinx-staging`. Test-env ACCEPT pattern from Phases 5/6 carries forward (CircleCI Jasmine ZZ-* inside Docker test image is the canonical green-gate).
 
 ---
 *Roadmap created: 2026-06-02 — v1.9 Backend Hygiene & Posture milestone planning. 7 phases (5–11) covering 13 requirements. Granularity: coarse (let natural delivery boundaries stand; risk-clustered work surfaced 7 phases rather than artificially compressing to 5).*
 *Phase 5 planned: 2026-06-02 — 4 plans (3 Wave 1 parallel + 1 Wave 2 doc-update); REFACTOR-05 scope reduced to jshint-only per CONTEXT.md.*
 *Phase 6 planned: 2026-06-02 — 3 atomic plans (2 Wave 1 parallel + 1 Wave 2); SEC-WS-01 is runbook-only per CONTEXT.md (root cause: rtm edge-nginx routing gap, deferred to edge-redesign).*
+*Phase 7 planned: 2026-06-03 — 6 atomic plans (all Wave 1 sequential — same file `lib/thinx/owner.js`); two-phase granularity per CONTEXT.md (non-top-5 internals first, top-5 individually); REFACTOR-04 covers all + folds the deferred owner.js strict-equality sweep from Phase 5 (6 fixes in 07-1, 1 fix in 07-2); 5 behavior-locking unit tests in 02-OwnerSpec.js (one per top-5 plan); Plan 07-5 has CRITICAL Phase 5 REFACTOR-02 anti-regression gate.*
