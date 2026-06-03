@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: — Backend Hygiene & Posture
-status: completed
+status: executing
 stopped_at: Phase 11 context gathered (FINAL v1.9 phase)
-last_updated: "2026-06-03T12:55:32.067Z"
-last_activity: 2026-06-03 -- Phase 10 marked complete
+last_updated: "2026-06-03T13:03:28.122Z"
+last_activity: 2026-06-03 -- Phase 11 execution started
 progress:
   total_phases: 7
   completed_phases: 6
-  total_plans: 21
+  total_plans: 23
   completed_plans: 21
   percent: 86
 ---
@@ -23,16 +23,16 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-06-02)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** Phase 10 — Cross-Project Dependency Coordination (services/console)
+- **Current focus:** Phase 11 — Build & Cert Hygiene
 - **Latest production image:** `thinxcloud/api:latest sha256:4d3fb789` (v1.0 Phase 4 deploy 2026-05-26T22:35:54Z); v1.9 base bumped to `1.9.3054` 2026-06-02 via `304b09d1`
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace (v1.0 frontend shipped; SEC-DEP-02 console-side dep triage scheduled for Phase 10)
 
 ## Current Position
 
-Phase: 10 — COMPLETE
-Plan: 3 of 3
-Status: Phase 10 complete
-Last activity: 2026-06-03 -- Phase 10 marked complete
+Phase: 11 (Build & Cert Hygiene) — EXECUTING
+Plan: 1 of 2
+Status: Executing Phase 11
+Last activity: 2026-06-03 -- Phase 11 execution started
 
 ## Milestones
 
