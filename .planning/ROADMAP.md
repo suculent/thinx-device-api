@@ -26,7 +26,7 @@
 - [x] **Phase 5: Backend Hygiene — Cheap Sweeps** ✅ — Low-risk, isolated cleanups across `thinx-core.js`, `owner.js`, and `package.json` (trust-proxy dedup, strict equality, devDep reclassification). Verified 2026-06-02 (REFACTOR-05 scope-amended: jshint moved to devDeps; fs-finder deferred to v1.10).
 - [x] **Phase 6: WebSocket Surface Hardening** ✅ — Tighten the WS lifecycle and handshake surface (close handlers, handshake reproducibility, session-cookie httpOnly re-evaluation). Verified 2026-06-02 (SEC-WS-01 root cause REPRODUCED as edge-nginx routing gap → operator-side runbook; SEC-COOKIE-01 httpOnly:true with <5min rollback path).
 - [x] **Phase 7: owner.js Async/Await Sweep** ✅ — Convert ~73 callback patterns in `lib/thinx/owner.js` to async/await with zero observable behavior change. Verified 2026-06-03 (6 atomic commits 1aa92fe5→f4345711; 18 non-top-5 methods + 5 top-5 methods converted; strict-eq sweep CLOSED; Phase 5 REFACTOR-02 preserved; SEC-PII-01 redactions intact; CI green-gate deferred to operator push).
-- [ ] **Phase 8: Auth & Account Lifecycle Closures** — Soft-deleted reactivation flow + reset-email lands on the Vue console (not legacy AngularJS).
+- [x] **Phase 8: Auth & Account Lifecycle Closures** ✅ — Soft-deleted reactivation flow + reset-email lands on the Vue console (not legacy AngularJS). Verified 2026-06-03 (admin endpoint POST /api/v2/admin/user/:id/reactivate; reset URL `/password.html?` → `/password-reset?`; Phase 5 REFACTOR-02 + SEC-PII-01 preserved).
 - [ ] **Phase 9: Historic PII Redaction (managed_logs)** — Remediate pre-v1.0 raw reset_keys in CouchDB `managed_logs` (~658k docs, GDPR-adjacent).
 - [ ] **Phase 10: Cross-Project Dependency Coordination (services/console)** — Schedule + roll up the parallel SEC-DEP-02 phase in the console submodule; land a clean submodule pointer bump.
 - [ ] **Phase 11: Build & Cert Hygiene** — `base/update.sh` hardening + startup `ca.pem` freshness probe.
@@ -81,16 +81,18 @@
   - [ ] 07-06-PLAN.md — Convert `Owner.set_password` (orchestrator — delegates to set_password_reset/set_password_activation; both SEC-PII-01 Util.redactToken sites preserved) + behavior-locking unit test; PHASE 7 CLOSE-OUT COMMIT
 
 ### Phase 8: Auth & Account Lifecycle Closures
-**Goal:** Close the two account-lifecycle gaps the v1.0 UAT surfaced — give soft-deleted users a recovery path and land password-reset emails on the Vue console instead of the deprecated AngularJS one.
+**Goal:** Close the two account-lifecycle gaps the v1.0 UAT surfaced — give soft-deleted users a recovery path (admin endpoint) and land password-reset emails on the Vue console instead of the deprecated AngularJS one.
 **Depends on:** Phase 7 (lands on top of the async/await-cleaned `owner.js`)
 **Requirements:** AUTH-REACTIVATE-01, AUTH-RESET-LINK-CONSOLE
 **Success Criteria** (what must be TRUE):
-  1. A soft-deleted user (`user.deleted = true`) can be reactivated via the chosen path (admin endpoint OR self-serve token), and the next login succeeds without direct CouchDB mutation.
-  2. The reactivation route enforces the correct auth gate (admin role OR signed reactivation token), covered by a regression spec.
-  3. A freshly generated password-reset email links to the Vue console reset-password page (not legacy `/static/`), and the reset_key → set-password round-trip completes end-to-end through Vue.
+  1. A soft-deleted user (`user.deleted = true`) can be reactivated via the admin endpoint `POST /api/v2/admin/user/:id/reactivate` (per CONTEXT.md D-01 admin-only decision), and the next login succeeds without direct CouchDB mutation.
+  2. The reactivation route enforces the admin role auth gate (via existing `requireAdmin` middleware), covered by a regression spec.
+  3. A freshly generated password-reset email links to the Vue console reset-password page `/password-reset` (not legacy `/password.html`), and the reset_key → set-password round-trip completes end-to-end through Vue.
   4. The lockout at `lib/router.auth.js:189-191` still blocks genuinely-deleted accounts (reactivation does not weaken the soft-delete gate).
   5. No signature break on any other public route the legacy AngularJS console relied on.
-**Plans:** TBD
+**Plans:** 2 plans (both Wave 1, parallel-safe — 08-01 touches `lib/router.admin.js` + new spec; 08-02 touches `lib/thinx/owner.js` + extends `ZZ-RouterPasswordResetSpec.js`. Zero file overlap.)
+  - [ ] 08-01-PLAN.md — AUTH-REACTIVATE-01: admin endpoint `POST /api/v2/admin/user/:id/reactivate` (admin-gated via `requireAdmin`; writes `{ deleted: false }` via `userlib.atomic`) + new regression spec `ZZ-RouterAdminReactivateSpec.js` covering 401/403/200 paths + post-reactivation login + soft-delete gate intact
+  - [ ] 08-02-PLAN.md — AUTH-RESET-LINK-CONSOLE: one-line URL change in `Owner.password_reset` success branch (`owner.js:506` `/password.html?...` → `/password-reset?...`; NO new config field per D-02) + extend `ZZ-RouterPasswordResetSpec.js` with redirect-URL regression locking the Vue console path
 
 ### Phase 9: Historic PII Redaction (managed_logs)
 **Goal:** Remediate the ~658k pre-Phase-2 CouchDB `managed_logs` documents that still carry raw reset_keys (and other PII), closing the GDPR-adjacent residue SEC-PII-01 prevented from continuing but did not retroactively clean.
@@ -168,7 +170,7 @@
 | 5. Backend Hygiene — Cheap Sweeps | v1.9 | 0/4 | Planned | — |
 | 6. WebSocket Surface Hardening | v1.9 | 0/3 | Planned | — |
 | 7. owner.js Async/Await Sweep | v1.9 | 0/6 | Planned | — |
-| 8. Auth & Account Lifecycle Closures | v1.9 | 0/? | Not started | — |
+| 8. Auth & Account Lifecycle Closures | v1.9 | 0/2 | Planned | — |
 | 9. Historic PII Redaction (managed_logs) | v1.9 | 0/? | Not started | — |
 | 10. Cross-Project Dependency Coordination | v1.9 | 0/? | Not started | — |
 | 11. Build & Cert Hygiene | v1.9 | 0/? | Not started | — |
@@ -205,9 +207,11 @@ Phase 5 sequences before 6 (REFACTOR-01 trust-proxy is adjacent to the WS block 
 - **Phase 5 scope amendment (2026-06-02):** REFACTOR-05 reduced to `jshint`-only reclassification; `fs-finder` removal sweep deferred to a proposed v1.10 phase (see STATE.md decisions + REQUIREMENTS.md REFACTOR-05 annotation). Plan 05-04 (Wave 2) records the amendment across ROADMAP.md, REQUIREMENTS.md, and STATE.md so the phase-closeout verifier sees a consistent story.
 - **Phase 6 plan-set (2026-06-02):** 3 atomic plans, one per requirement. Plan 06-01 (REFACTOR-03) and Plan 06-03 (SEC-WS-01) are Wave 1 parallel-safe (no file overlap — 06-01 touches `thinx-core.js` + a new spec, 06-03 touches only `.planning/runbooks/websocket-handshake.md`). Plan 06-02 (SEC-COOKIE-01) is Wave 2 — depends on both 06-01 (also touches `thinx-core.js`, at a different line) and 06-03 (also touches the runbook, appending vs creating). Each plan lands one atomic GPG-signed commit. The SEC-WS-01 fix lives on the swarm host (operator-side nginx config) and is OUT OF this repo — Plan 06-03 produces only the runbook.
 - **Phase 7 plan-set (2026-06-03):** 6 atomic plans, ALL Wave 1, SEQUENTIAL execution (not parallel). Every plan touches `lib/thinx/owner.js`; parallel worktree execution would create merge conflicts on every plan. Sequential single-branch execution avoids the conflict surface entirely. Plans 07-2 through 07-6 declare `depends_on: [07-01]` (07-3 also depends on 07-2, 07-4 on 07-3, etc., enforcing the order). Plan 07-1 converts ~15-19 non-top-5 methods + folds 6 of 7 strict-equality fixes. Plans 07-2..07-6 each convert one top-5 method (`create`, `delete`, `update`, `password_reset`, `set_password`) and add one behavior-locking unit test to `spec/jasmine/02-OwnerSpec.js`. Plan 07-2 folds the 7th strict-equality fix (line 930 inside `Owner.create`). Plan 07-5 has a CRITICAL Phase 5 REFACTOR-02 anti-regression gate (the `!=`→`!==` fix at line 492 MUST survive the conversion). Plan 07-6 is the phase close-out commit. 6 atomic GPG-signed commits expected on `thinx-staging`. Test-env ACCEPT pattern from Phases 5/6 carries forward (CircleCI Jasmine ZZ-* inside Docker test image is the canonical green-gate).
+- **Phase 8 plan-set (2026-06-03):** 2 atomic plans, BOTH Wave 1, PARALLEL-SAFE (zero file overlap). Plan 08-01 (AUTH-REACTIVATE-01) touches `lib/router.admin.js` + new spec `ZZ-RouterAdminReactivateSpec.js`. Plan 08-02 (AUTH-RESET-LINK-CONSOLE) touches `lib/thinx/owner.js` (line ~506 redirect URL, one-line change) + extends `spec/jasmine/ZZ-RouterPasswordResetSpec.js`. Per CONTEXT.md D-01: admin endpoint (NOT self-serve email-link); reuses existing `requireAdmin` middleware. Per CONTEXT.md D-02: redirect URL change ONLY (no new `app_config.console_url` field — Vue console + API share host in production). Both plans preserve the soft-delete login lockout at `router.auth.js:189-191` and the Phase 5 REFACTOR-02 + SEC-PII-01 invariants in `Owner.password_reset` (Plan 08-02 strictly limits its diff to a single URL string). 2 atomic GPG-signed commits expected on `thinx-staging`. Test-env ACCEPT pattern carries forward.
 
 ---
 *Roadmap created: 2026-06-02 — v1.9 Backend Hygiene & Posture milestone planning. 7 phases (5–11) covering 13 requirements. Granularity: coarse (let natural delivery boundaries stand; risk-clustered work surfaced 7 phases rather than artificially compressing to 5).*
 *Phase 5 planned: 2026-06-02 — 4 plans (3 Wave 1 parallel + 1 Wave 2 doc-update); REFACTOR-05 scope reduced to jshint-only per CONTEXT.md.*
 *Phase 6 planned: 2026-06-02 — 3 atomic plans (2 Wave 1 parallel + 1 Wave 2); SEC-WS-01 is runbook-only per CONTEXT.md (root cause: rtm edge-nginx routing gap, deferred to edge-redesign).*
 *Phase 7 planned: 2026-06-03 — 6 atomic plans (all Wave 1 sequential — same file `lib/thinx/owner.js`); two-phase granularity per CONTEXT.md (non-top-5 internals first, top-5 individually); REFACTOR-04 covers all + folds the deferred owner.js strict-equality sweep from Phase 5 (6 fixes in 07-1, 1 fix in 07-2); 5 behavior-locking unit tests in 02-OwnerSpec.js (one per top-5 plan); Plan 07-5 has CRITICAL Phase 5 REFACTOR-02 anti-regression gate.*
+*Phase 8 planned: 2026-06-03 — 2 atomic plans (both Wave 1, parallel-safe — zero file overlap); AUTH-REACTIVATE-01 admin-only endpoint per CONTEXT.md D-01 (self-serve flow deferred); AUTH-RESET-LINK-CONSOLE one-line URL change in owner.js per CONTEXT.md D-02 (no new config field — Vue console + API share host in production); both plans preserve the soft-delete login lockout at router.auth.js:189-191 and the Phase 5 REFACTOR-02 + SEC-PII-01 invariants in Owner.password_reset.*

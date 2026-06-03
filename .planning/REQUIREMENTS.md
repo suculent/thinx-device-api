@@ -34,9 +34,9 @@ Requirements scoped to v1.9. Each maps to exactly one roadmap phase. Numbering f
 
 ### Auth & Account Lifecycle
 
-- [ ] **AUTH-REACTIVATE-01**: Self-serve or admin reactivation for soft-deleted users. Implement ONE of: (a) admin-only `POST /api/v2/admin/user/:id/reactivate` that clears `user.deleted = true`, (b) a self-serve email-link flow that lets a soft-deleted user request reactivation. Whichever path ships, the lockout at `lib/router.auth.js:189-191` must respect a re-activated account on the next login. Validated by: (a) curl/round-trip flow demonstrates a soft-deleted → reactivated user can log in again, (b) the route requires the appropriate auth gate (admin or signed reactivation token), (c) regression spec covers the reactivation path.
+- [x] **AUTH-REACTIVATE-01**: Self-serve or admin reactivation for soft-deleted users. Implement ONE of: (a) admin-only `POST /api/v2/admin/user/:id/reactivate` that clears `user.deleted = true`, (b) a self-serve email-link flow that lets a soft-deleted user request reactivation. Whichever path ships, the lockout at `lib/router.auth.js:189-191` must respect a re-activated account on the next login. Validated by: (a) curl/round-trip flow demonstrates a soft-deleted → reactivated user can log in again, (b) the route requires the appropriate auth gate (admin or signed reactivation token), (c) regression spec covers the reactivation path.
 
-- [ ] **AUTH-RESET-LINK-CONSOLE**: Password-reset email lands on the Vue console, not the legacy AngularJS console. Implement ONE of: (a) introduce `app_config.console_url` (separate from `api_url`) and use it for the reset-email template in `lib/thinx/owner.js:147`, (b) keep the link pointing at the API and have the API GET handler redirect to the Vue console after reset_key validation. Coordinated with the console submodule's password-set route. Validated by: (a) a generated reset email link resolves to the Vue console reset-password page, (b) the reset_key flow completes end-to-end through Vue, (c) regression spec covers the new link shape.
+- [x] **AUTH-RESET-LINK-CONSOLE**: Password-reset email lands on the Vue console, not the legacy AngularJS console. Implement ONE of: (a) introduce `app_config.console_url` (separate from `api_url`) and use it for the reset-email template in `lib/thinx/owner.js:147`, (b) keep the link pointing at the API and have the API GET handler redirect to the Vue console after reset_key validation. Coordinated with the console submodule's password-set route. Validated by: (a) a generated reset email link resolves to the Vue console reset-password page, (b) the reset_key flow completes end-to-end through Vue, (c) regression spec covers the new link shape.
 
 ### Build & Release Hygiene
 
@@ -77,8 +77,8 @@ Explicitly excluded from v1.9. Documented to prevent scope creep.
 | SEC-WS-01 | Phase 6 | Complete |
 | SEC-COOKIE-01 | Phase 6 | Complete |
 | REFACTOR-04 | Phase 7 | Complete |
-| AUTH-REACTIVATE-01 | Phase 8 | Pending |
-| AUTH-RESET-LINK-CONSOLE | Phase 8 | Pending |
+| AUTH-REACTIVATE-01 | Phase 8 | Complete |
+| AUTH-RESET-LINK-CONSOLE | Phase 8 | Complete |
 | SEC-PII-02 | Phase 9 | Pending |
 | SEC-DEP-02 | Phase 10 | Pending |
 | BASE-IMG-01 | Phase 11 | Pending |
