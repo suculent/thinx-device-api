@@ -30,7 +30,7 @@ Requirements scoped to v1.9. Each maps to exactly one roadmap phase. Numbering f
 
 - [x] **SEC-PII-02**: Historic CouchDB `managed_logs` redaction. Remediate pre-Phase-2 raw `reset_key` (and any other PII) in the `managed_logs` database (~658,808 docs as of 2026-05-26). Pick ONE of: (a) one-shot `_bulk_docs` redaction overlaying the leaky fields, (b) age-based bulk delete with a documented retention window, (c) introduce a forward-going TTL on audit entries. Validated by: (a) sampling N=1000 random recent + N=1000 random old docs shows zero raw 64-char hex reset_keys, (b) retention/TTL behavior (if chosen) covered by a runbook, (c) GDPR-posture note appended to `.planning/runbooks/` documenting the historic cleanup.
 
-- [ ] **THINX-CERT-CHECK-01**: Startup ca.pem freshness probe. Add a code-side check at server start that compares the chain in `ca.pem` against the leaf cert's issuer and emits a clear startup WARN (and metric/log) when `ca.pem` is older than the leaf or doesn't contain a matching intermediate. The probe does NOT mutate certs — it only detects the gap (cert rotation itself is OPS / outside this repo). Validated by: (a) startup with a fresh leaf and an R10-era `ca.pem` (the actual 2026-06-02 condition) emits the WARN, (b) startup with leaf + matching intermediate emits no warning, (c) unit test covers the matcher logic against fixture PEM bundles.
+- [x] **THINX-CERT-CHECK-01**: Startup ca.pem freshness probe. Add a code-side check at server start that compares the chain in `ca.pem` against the leaf cert's issuer and emits a clear startup WARN (and metric/log) when `ca.pem` is older than the leaf or doesn't contain a matching intermediate. The probe does NOT mutate certs — it only detects the gap (cert rotation itself is OPS / outside this repo). Validated by: (a) startup with a fresh leaf and an R10-era `ca.pem` (the actual 2026-06-02 condition) emits the WARN, (b) startup with leaf + matching intermediate emits no warning, (c) unit test covers the matcher logic against fixture PEM bundles.
 
 ### Auth & Account Lifecycle
 
@@ -82,7 +82,7 @@ Explicitly excluded from v1.9. Documented to prevent scope creep.
 | SEC-PII-02 | Phase 9 | In Progress (09-1 redaction script done, 09-2 audit TTL done; 09-3 runbook + GDPR-posture note pending) |
 | SEC-DEP-02 | Phase 10 | Complete |
 | BASE-IMG-01 | Phase 11 | Complete |
-| THINX-CERT-CHECK-01 | Phase 11 | Pending |
+| THINX-CERT-CHECK-01 | Phase 11 | Complete |
 
 **Coverage:**
 - v1.9 requirements: 13 total
