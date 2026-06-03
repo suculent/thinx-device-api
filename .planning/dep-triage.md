@@ -150,3 +150,31 @@ Per operator Option C decision, NO alerts were manually dismissed in this slice.
 - `deferred-low-sev`
 
 Note: Every row in Section 1 MUST have its Verdict column drawn from this set, and every `deferred-*` row MUST cite exactly one class from Section 4 (Rationale taxonomy) in its Rationale column.
+
+## Phase 10 / SEC-DEP-02 (services/console) — Cross-Project Roll-up
+
+This annex captures the cross-project dependency-triage outcome for the parallel SEC-DEP-02 phase landing in the `services/console` GSD workspace (sibling project, separate Git repo: `git@github.com:thinx-cloud/console.git`). The Phase 4 / SEC-DEP-01 baseline above is the parent-project (`thinx-device-api`) triage record and is **NOT** modified by Phase 10 — this section is appended only. The 2 alerts classified below were enumerated via `gh api repos/thinx-cloud/console/dependabot/alerts?state=open&severity=high` on 2026-06-03. The actual remediation (delete the vendored `package.json` or dismiss both alerts in the Dependabot UI) is **OUT OF SCOPE** for Phase 10 — it lives in the `services/console` GSD workspace and is scheduled there by Plan 10-02 of this milestone phase.
+
+| Alert URL | Package | GHSA ID | Severity | Scope | Direct/Transitive | Vuln range / installed | Verdict | Rationale | Future trigger |
+|-----------|---------|---------|----------|-------|-------------------|------------------------|---------|-----------|----------------|
+| https://github.com/thinx-cloud/console/security/dependabot/54 | grunt | GHSA-rm36-94g8-835r | high | development | direct | `< 1.5.3` / vendored in `jquery-validation-1.19.5/package.json` | deferred-vendored-asset | vendored-asset (grunt referenced only as the build tool for the vendored plugin's original source; not invoked by services/console build; not in production runtime; TOCTOU race in `file.copy` is unreachable — effective exposure ZERO) | Re-classify if a future services/console build step invokes grunt against the vendored plugin's `package.json` OR the vendored plugin is replaced with a bundle that runs grunt in-build. |
+| https://github.com/thinx-cloud/console/security/dependabot/52 | grunt | GHSA-m5pj-vjjf-4m3h | high | development | direct | `< 1.3.0` / vendored in `jquery-validation-1.19.5/package.json` | deferred-vendored-asset | vendored-asset (same vendored bundle as Alert 54; CVE in `grunt.file.readYAML` default `load()` is unreachable because services/console never invokes grunt during its own build — effective exposure ZERO) | Same future trigger as Alert 54. |
+
+### Disposition legend — new for Phase 10
+
+`deferred-vendored-asset` is a **NEW** rationale class introduced by Phase 10 / SEC-DEP-02. It joins the Phase 4 closed-set rationale taxonomy at line 134 of this file as a sibling to `dev-only-scope` and `stale-alert`, and it serves as both the rationale class AND the verdict string for affected rows (matching how Phase 4 uses `deferred-stale` / `deferred-dev-only` as paired verdict+rationale strings).
+
+**Definition:** Package vulnerability lives in a vendored static-asset bundle's `package.json` metadata. The vulnerable package is referenced only because the vendored plugin's original authoring used it as a build tool; the consuming project (services/console here) does **NOT** invoke the vulnerable package against the vendored manifest during its own build, and the vulnerable code paths are never reached in production runtime. Effective exposure is ZERO. Re-classify if a future build step starts invoking the vulnerable tool against the vendored manifest, OR if the vendored bundle is replaced with one that runs the tool in-build.
+
+### Recommended remediation
+
+The remediation lands in the `services/console` GSD workspace (NOT in this repo) and is scheduled as a new phase entry by Plan 10-02 of this Phase 10 milestone phase. Two acceptable options:
+
+- **Preferred:** delete the vendored plugin's `package.json` at `services/console/src/assets/global/plugins/jquery-validation-1.19.5/package.json`. It is metadata only — the compiled JS/CSS in the same directory is what actually loads at runtime. Deletion removes both alerts entirely (no Dependabot UI action required).
+- **Acceptable:** dismiss both alerts via the Dependabot UI on `thinx-cloud/console` with rationale "vendored asset; grunt not in services/console build path". The vulnerability still appears in the lockfile but is marked dismissed.
+
+### Coordination note
+
+This annex is part of Phase 10 / SEC-DEP-02 in the parent `thinx-device-api` v1.9 "Backend Hygiene & Posture" milestone (see `.planning/ROADMAP.md` Phase 10 entry and `.planning/REQUIREMENTS.md` SEC-DEP-02). The parallel phase in `services/console/.planning/ROADMAP.md` is scheduled by Plan 10-02 of this phase. The cross-project workflow itself — including how the `services/console` submodule pointer bump in this repo lands AFTER the console-side phase merges — is documented in the runbook at `.planning/runbooks/cross-project-dependency-coordination.md` (created by Plan 10-03 of this phase).
+
+*Total rows (Phase 10 annex): 2 (both `deferred-vendored-asset`). Phase 4 baseline rows above remain at 29 (7 blocker / 19 deferred-stale / 3 deferred-dev-only) — unchanged.*
