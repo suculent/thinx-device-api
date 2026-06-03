@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: — Backend Hygiene & Posture
-status: completed
+status: executing
 stopped_at: Phase 9 context gathered
-last_updated: "2026-06-03T10:45:49.652Z"
-last_activity: 2026-06-03 -- Phase 8 marked complete
+last_updated: "2026-06-03T10:55:18.359Z"
+last_activity: 2026-06-03 -- Phase 9 execution started
 progress:
   total_phases: 7
   completed_phases: 4
-  total_plans: 15
+  total_plans: 18
   completed_plans: 15
   percent: 57
 ---
@@ -23,16 +23,16 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-06-02)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** Phase 8 — Auth & Account Lifecycle Closures
+- **Current focus:** Phase 9 — Historic PII Redaction (managed_logs)
 - **Latest production image:** `thinxcloud/api:latest sha256:4d3fb789` (v1.0 Phase 4 deploy 2026-05-26T22:35:54Z); v1.9 base bumped to `1.9.3054` 2026-06-02 via `304b09d1`
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace (v1.0 frontend shipped; SEC-DEP-02 console-side dep triage scheduled for Phase 10)
 
 ## Current Position
 
-Phase: 8 — COMPLETE
-Plan: 1 of 2
-Status: Phase 8 complete
-Last activity: 2026-06-03 -- Phase 8 marked complete
+Phase: 9 (Historic PII Redaction (managed_logs)) — EXECUTING
+Plan: 1 of 3
+Status: Executing Phase 9
+Last activity: 2026-06-03 -- Phase 9 execution started
 
 ## Milestones
 
