@@ -3,20 +3,20 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: — Backend Hygiene & Posture
 status: executing
-stopped_at: Phase 11 context gathered (FINAL v1.9 phase)
-last_updated: "2026-06-03T13:03:28.122Z"
-last_activity: 2026-06-03 -- Phase 11 execution started
+stopped_at: Completed 11-01-PLAN.md (BASE-IMG-01)
+last_updated: "2026-06-03T13:11:19.874Z"
+last_activity: 2026-06-03
 progress:
   total_phases: 7
   completed_phases: 6
   total_plans: 23
-  completed_plans: 21
+  completed_plans: 22
   percent: 86
 ---
 
 # STATE — THiNX Device API
 
-**Last updated:** 2026-06-03 (Phase 9 Plan 09-2 SEC-PII-02 audit TTL landed; commit `9a16a620`)
+**Last updated:** 2026-06-03 (Phase 11 Plan 11-1 BASE-IMG-01 landed; submodule commit `base/8db56b1f`)
 
 ## Project Reference
 
@@ -30,9 +30,9 @@ See: `.planning/PROJECT.md` (updated 2026-06-02)
 ## Current Position
 
 Phase: 11 (Build & Cert Hygiene) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 11
-Last activity: 2026-06-03 -- Phase 11 execution started
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-06-03
 
 ## Milestones
 
@@ -43,6 +43,7 @@ Last activity: 2026-06-03 -- Phase 11 execution started
 
 ### Decisions (current — full v1.0 decision log in `.planning/MILESTONES.md` + PROJECT.md Key Decisions)
 
+- 2026-06-03 — Phase 11 Plan 11-1 (BASE-IMG-01): rewrote `base/update.sh` from 18 lines (no error handling, no args, no commit) to 179 lines hardened with `set -euo pipefail`, full CLI (`--tag`, `--owner`, `--dry-run`, `--help`/`-h`), auto patch-version bump via `npm version patch --no-git-tag-version` (per D-01 over `npm-auto-version` script — keeps commit boundary script-owned), pre/post docker image digest logging, single atomic GPG-signed `chore: base version bump` commit. shellcheck 0.11.0 clean. Auto-fixed Rule-1 stray-newline bug in `docker image inspect` capture (missing-image path emitted a blank line — fixed via `tr -d '[:space:]'` + empty-check fallback). Submodule commit `base/8db56b1f` on `thinx-staging` (advanced from `30044b2c` via fast-forward).
 - 2026-06-03 — Phase 9 Plan 09-2 (SEC-PII-02 audit TTL): chose helper-export approach (`_buildRecord` + `_retentionDays`) over `require.cache` nano-stub for testability; `expire_at` anchored to `mtime.getTime()` (not `Date.now()`) for deterministic 90-day diff; `try/catch` around `Globals.app_config()` so audit writes never fail on config-load throw; added a 5th spec block to lock T-09-08 bad-config coercion mitigation (NaN/negative/0/string/null → 90-day fallback). `log(owner, message, flag, callback)` arity preserved at 4; SEC-PII-01 callers in `owner.js` (12+1 sites) untouched and not regressed. Commit `9a16a620`.
 - 2026-06-02 — v1.9 milestone started with 13 requirements across 7 phases (Phases 5–11). Phase numbering continues from v1.0's last phase (Phase 4) — orchestrator did NOT pass `--reset-phase-numbers`.
 - 2026-06-02 — Phase clustering: low-risk REFACTOR sweeps (Phase 5) → WS-surface (Phase 6) → owner.js async/await (Phase 7) → auth lifecycle (Phase 8, sequenced after 7) → independent: managed_logs PII (Phase 9), services/console SEC-DEP-02 coordination (Phase 10), base/update.sh + ca.pem probe (Phase 11).
@@ -82,9 +83,9 @@ Last activity: 2026-06-03 -- Phase 11 execution started
 
 ## Session Continuity
 
-**Stopped at:** Phase 11 context gathered (FINAL v1.9 phase)
+**Stopped at:** Completed 11-01-PLAN.md (BASE-IMG-01)
 
-**Next action:** Execute Plan 09-3 (`09-03-PLAN.md`) — SEC-PII-02 operator runbook + GDPR-posture note (`.planning/runbooks/managed-logs-redaction.md`): full procedure (snapshot → dry-run → review → apply → sample → compact); forward-TTL cron recipe (keys off `expire_at` field landed in 09-2); GDPR-posture note (scope, method, sampling evidence template, residual risk); rollback-from-snapshot instructions.
+**Next action:** Execute Plan 11-2 (`11-02-PLAN.md`) — THINX-CERT-CHECK-01: startup `ca.pem` freshness probe (new `lib/thinx/cert-probe.js`), hooked into `thinx-core.js` near the SSL load path (line 211), with unit tests covering R10/R13 issuer matches + mismatches. DETECT-only (no cert mutation). Closes the final v1.9 requirement and ends the milestone.
 
 ---
 *v1.0 GA backend closures shipped and archived: 2026-05-27 (4/4 v1 requirements Verified — AUTH-API-01, SEC-PII-01, OPS-01, SEC-DEP-01)*

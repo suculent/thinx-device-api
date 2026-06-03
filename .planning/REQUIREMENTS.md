@@ -40,7 +40,7 @@ Requirements scoped to v1.9. Each maps to exactly one roadmap phase. Numbering f
 
 ### Build & Release Hygiene
 
-- [ ] **BASE-IMG-01**: `base/update.sh` hardening. The current script (commit `304b09d1` triggered today's manual `1.9.2866 → 1.9.3054` bump) is a fire-and-forget rebuild with no failure handling, no tag pinning beyond `alpine`, and no automatic patch-level version bump. Add: (a) `set -euo pipefail`, (b) optional `--tag <tag>` arg to pin a specific base image tag, (c) auto-bump of `package.json` `version` patch level (matching the current `1.9.X` rolling pattern) before `docker buildx build`, (d) clear log of pre/post image digest. Validated by: (a) running `base/update.sh` end-to-end on a clean clone produces an image and a single `chore: base version bump` commit (or surfaces a documented failure), (b) shellcheck clean, (c) the script no longer needs an out-of-band manual `git commit` step.
+- [x] **BASE-IMG-01**: `base/update.sh` hardening. The current script (commit `304b09d1` triggered today's manual `1.9.2866 → 1.9.3054` bump) is a fire-and-forget rebuild with no failure handling, no tag pinning beyond `alpine`, and no automatic patch-level version bump. Add: (a) `set -euo pipefail`, (b) optional `--tag <tag>` arg to pin a specific base image tag, (c) auto-bump of `package.json` `version` patch level (matching the current `1.9.X` rolling pattern) before `docker buildx build`, (d) clear log of pre/post image digest. Validated by: (a) running `base/update.sh` end-to-end on a clean clone produces an image and a single `chore: base version bump` commit (or surfaces a documented failure), (b) shellcheck clean, (c) the script no longer needs an out-of-band manual `git commit` step.
 
 ## Future Requirements
 
@@ -81,7 +81,7 @@ Explicitly excluded from v1.9. Documented to prevent scope creep.
 | AUTH-RESET-LINK-CONSOLE | Phase 8 | Complete |
 | SEC-PII-02 | Phase 9 | In Progress (09-1 redaction script done, 09-2 audit TTL done; 09-3 runbook + GDPR-posture note pending) |
 | SEC-DEP-02 | Phase 10 | Complete |
-| BASE-IMG-01 | Phase 11 | Pending |
+| BASE-IMG-01 | Phase 11 | Complete |
 | THINX-CERT-CHECK-01 | Phase 11 | Pending |
 
 **Coverage:**

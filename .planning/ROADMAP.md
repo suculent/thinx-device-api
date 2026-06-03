@@ -133,8 +133,8 @@
   3. `shellcheck base/update.sh` is clean.
   4. Server startup with a fresh Let's Encrypt leaf and a stale (R10-era) `ca.pem` emits a clear startup WARN naming the issuer mismatch; startup with a matching intermediate emits no warning.
   5. A unit test covers the matcher logic against fixture PEM bundles (R10 leaf vs. R13 ca, R13 leaf vs. R13 ca, R13 leaf vs. R10 ca).
-**Plans:** 2 plans (both Wave 1, parallel-safe — zero file overlap)
-  - [ ] 11-01-PLAN.md — BASE-IMG-01: rewrite `base/update.sh` with `set -euo pipefail` + `--tag`/`--owner` args + auto `npm version patch --no-git-tag-version` + pre/post image digest logging + single atomic `chore: base version bump` commit; shellcheck-clean
+**Plans:** 1/2 plans executed
+  - [x] 11-01-PLAN.md — BASE-IMG-01: rewrite `base/update.sh` with `set -euo pipefail` + `--tag`/`--owner` args + auto `npm version patch --no-git-tag-version` + pre/post image digest logging + single atomic `chore: base version bump` commit; shellcheck-clean
   - [ ] 11-02-PLAN.md — THINX-CERT-CHECK-01: new `lib/thinx/cert-probe.js` (DETECT-only) + 5-line additive call site in `thinx-core.js` near line 211 + `spec/jasmine/ZZ-CertProbeSpec.js` (6 it blocks) + 4 fixture PEMs (R10/R13 × leaf/ca) + `generate.sh` regenerate helper
 
 ## Phase Summary
@@ -147,7 +147,7 @@
 | 8 | Auth & Account Lifecycle Closures | Reactivation + reset-email → Vue console | AUTH-REACTIVATE-01, AUTH-RESET-LINK-CONSOLE | 5 |
 | 9 | Historic PII Redaction (managed_logs) | Clean ~658k pre-fix audit-log docs + forward TTL (2/3 plans done — runbook pending) | SEC-PII-02 | 5 |
 | 10 | Cross-Project Dependency Coordination | 2/3 | In Progress|  |
-| 11 | Build & Cert Hygiene | `base/update.sh` hardening + ca.pem startup probe | BASE-IMG-01, THINX-CERT-CHECK-01 | 5 |
+| 11 | Build & Cert Hygiene | 1/2 | In Progress|  |
 
 ## Requirement Coverage
 
