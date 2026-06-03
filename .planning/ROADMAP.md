@@ -104,7 +104,10 @@
   3. If a retention/TTL behavior is introduced, it is captured in a runbook under `.planning/runbooks/`.
   4. A GDPR-posture note documenting the historic cleanup (scope, method, sampling evidence, residual risk) is appended to the runbooks set.
   5. The remediation operation is reversible OR the irreversibility is explicitly accepted in the runbook (since redaction is destructive of audit-log content).
-**Plans:** TBD
+**Plans:** 3 plans (all Wave 1, parallel-safe — 09-01 touches `scripts/redact-managed-logs.js` + new `spec/jasmine/ZZ-RedactionScriptSpec.js`; 09-02 touches `lib/thinx/audit.js` + new `spec/jasmine/ZZ-AuditTTLSpec.js`; 09-03 touches `.planning/runbooks/managed-logs-redaction.md`. Zero file overlap.)
+  - [ ] 09-01-PLAN.md — SEC-PII-02 redaction script (`scripts/redact-managed-logs.js`): streams `managed_logs` in pages of 1000, overlays `[REDACTED-RESET_KEY]` / `[REDACTED-EMAIL]` via `_bulk_docs`; default dry-run; `--apply` gated behind mandatory `--snapshot-to <path>` JSONL forensic dump; `--sample N` verification subcommand; idempotent (re-runs produce zero edits); fixture-based unit spec (no live CouchDB)
+  - [ ] 09-02-PLAN.md — SEC-PII-02 forward-TTL: `lib/thinx/audit.js` `Audit.log` writes `expire_at` field on every record (90-day default, parameterized via `app_config.audit_retention_days`); signature-stable change preserves SEC-PII-01 caller pattern in `owner.js`; new `ZZ-AuditTTLSpec.js` regression spec
+  - [ ] 09-03-PLAN.md — SEC-PII-02 operator runbook + GDPR-posture note (`.planning/runbooks/managed-logs-redaction.md`): full procedure (snapshot → dry-run → review → apply → sample → compact); forward-TTL cron recipe; GDPR-posture note (scope, method, sampling evidence template, residual risk); rollback-from-snapshot instructions
 
 ### Phase 10: Cross-Project Dependency Coordination (services/console)
 **Goal:** Coordinate the parallel `SEC-DEP-02` phase in the `services/console` GSD project, classify the 2 high-severity console alerts by runtime-vs-build exposure, and land any resulting submodule pointer bump cleanly in `thinx-device-api`.
