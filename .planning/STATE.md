@@ -3,20 +3,20 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: — Backend Hygiene & Posture
 status: executing
-stopped_at: Phase 9 context gathered
-last_updated: "2026-06-03T10:55:18.359Z"
-last_activity: 2026-06-03 -- Phase 9 execution started
+stopped_at: Phase 9 Plan 09-2 complete (audit TTL) — next 09-3 (operator runbook + GDPR-posture note)
+last_updated: "2026-06-03T11:09:54.362Z"
+last_activity: 2026-06-03
 progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 18
-  completed_plans: 15
+  completed_plans: 17
   percent: 57
 ---
 
 # STATE — THiNX Device API
 
-**Last updated:** 2026-06-02 (v1.9 roadmap created — 7 phases, 13 requirements mapped)
+**Last updated:** 2026-06-03 (Phase 9 Plan 09-2 SEC-PII-02 audit TTL landed; commit `9a16a620`)
 
 ## Project Reference
 
@@ -30,9 +30,9 @@ See: `.planning/PROJECT.md` (updated 2026-06-02)
 ## Current Position
 
 Phase: 9 (Historic PII Redaction (managed_logs)) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 9
-Last activity: 2026-06-03 -- Phase 9 execution started
+Plan: 3 of 3
+Status: Ready to execute
+Last activity: 2026-06-03
 
 ## Milestones
 
@@ -43,6 +43,7 @@ Last activity: 2026-06-03 -- Phase 9 execution started
 
 ### Decisions (current — full v1.0 decision log in `.planning/MILESTONES.md` + PROJECT.md Key Decisions)
 
+- 2026-06-03 — Phase 9 Plan 09-2 (SEC-PII-02 audit TTL): chose helper-export approach (`_buildRecord` + `_retentionDays`) over `require.cache` nano-stub for testability; `expire_at` anchored to `mtime.getTime()` (not `Date.now()`) for deterministic 90-day diff; `try/catch` around `Globals.app_config()` so audit writes never fail on config-load throw; added a 5th spec block to lock T-09-08 bad-config coercion mitigation (NaN/negative/0/string/null → 90-day fallback). `log(owner, message, flag, callback)` arity preserved at 4; SEC-PII-01 callers in `owner.js` (12+1 sites) untouched and not regressed. Commit `9a16a620`.
 - 2026-06-02 — v1.9 milestone started with 13 requirements across 7 phases (Phases 5–11). Phase numbering continues from v1.0's last phase (Phase 4) — orchestrator did NOT pass `--reset-phase-numbers`.
 - 2026-06-02 — Phase clustering: low-risk REFACTOR sweeps (Phase 5) → WS-surface (Phase 6) → owner.js async/await (Phase 7) → auth lifecycle (Phase 8, sequenced after 7) → independent: managed_logs PII (Phase 9), services/console SEC-DEP-02 coordination (Phase 10), base/update.sh + ca.pem probe (Phase 11).
 - 2026-06-02 — Phase 5 scope amendment: REFACTOR-05 reduced to `jshint`-only reclassification (moved to `devDependencies`); `fs-finder` STAYS in `dependencies` because the internally-owned fork (`github:suculent/Node-FsFinder#master`) has 5 active runtime call sites in `lib/`. Full `fs-finder` removal sweep deferred to a proposed v1.10 phase. Amendment recorded in ROADMAP.md (Phase 5 success criterion 3 + Notes) and REQUIREMENTS.md (REFACTOR-05 sub-bullet); rationale in `.planning/phases/05-backend-hygiene-cheap-sweeps/05-CONTEXT.md` REFACTOR-05 decision block.
@@ -81,9 +82,9 @@ Last activity: 2026-06-03 -- Phase 9 execution started
 
 ## Session Continuity
 
-**Stopped at:** Phase 9 context gathered
+**Stopped at:** Phase 9 Plan 09-2 complete (forward-going audit TTL `expire_at` field; 90-day default; SEC-PII-01 caller pattern preserved). Next: 09-3 (operator runbook + GDPR-posture note in `.planning/runbooks/managed-logs-redaction.md`).
 
-**Next action:** Run `/gsd:plan-phase 5` to start Phase 5 (Backend Hygiene — Cheap Sweeps: REFACTOR-01, REFACTOR-02, REFACTOR-05).
+**Next action:** Execute Plan 09-3 (`09-03-PLAN.md`) — SEC-PII-02 operator runbook + GDPR-posture note (`.planning/runbooks/managed-logs-redaction.md`): full procedure (snapshot → dry-run → review → apply → sample → compact); forward-TTL cron recipe (keys off `expire_at` field landed in 09-2); GDPR-posture note (scope, method, sampling evidence template, residual risk); rollback-from-snapshot instructions.
 
 ---
 *v1.0 GA backend closures shipped and archived: 2026-05-27 (4/4 v1 requirements Verified — AUTH-API-01, SEC-PII-01, OPS-01, SEC-DEP-01)*

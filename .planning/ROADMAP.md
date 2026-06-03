@@ -104,9 +104,9 @@
   3. If a retention/TTL behavior is introduced, it is captured in a runbook under `.planning/runbooks/`.
   4. A GDPR-posture note documenting the historic cleanup (scope, method, sampling evidence, residual risk) is appended to the runbooks set.
   5. The remediation operation is reversible OR the irreversibility is explicitly accepted in the runbook (since redaction is destructive of audit-log content).
-**Plans:** 3 plans (all Wave 1, parallel-safe — 09-01 touches `scripts/redact-managed-logs.js` + new `spec/jasmine/ZZ-RedactionScriptSpec.js`; 09-02 touches `lib/thinx/audit.js` + new `spec/jasmine/ZZ-AuditTTLSpec.js`; 09-03 touches `.planning/runbooks/managed-logs-redaction.md`. Zero file overlap.)
-  - [ ] 09-01-PLAN.md — SEC-PII-02 redaction script (`scripts/redact-managed-logs.js`): streams `managed_logs` in pages of 1000, overlays `[REDACTED-RESET_KEY]` / `[REDACTED-EMAIL]` via `_bulk_docs`; default dry-run; `--apply` gated behind mandatory `--snapshot-to <path>` JSONL forensic dump; `--sample N` verification subcommand; idempotent (re-runs produce zero edits); fixture-based unit spec (no live CouchDB)
-  - [ ] 09-02-PLAN.md — SEC-PII-02 forward-TTL: `lib/thinx/audit.js` `Audit.log` writes `expire_at` field on every record (90-day default, parameterized via `app_config.audit_retention_days`); signature-stable change preserves SEC-PII-01 caller pattern in `owner.js`; new `ZZ-AuditTTLSpec.js` regression spec
+**Plans:** 2/3 plans executed
+  - [x] 09-01-PLAN.md — SEC-PII-02 redaction script (`scripts/redact-managed-logs.js`): streams `managed_logs` in pages of 1000, overlays `[REDACTED-RESET_KEY]` / `[REDACTED-EMAIL]` via `_bulk_docs`; default dry-run; `--apply` gated behind mandatory `--snapshot-to <path>` JSONL forensic dump; `--sample N` verification subcommand; idempotent (re-runs produce zero edits); fixture-based unit spec (no live CouchDB)
+  - [x] 09-02-PLAN.md — SEC-PII-02 forward-TTL: `lib/thinx/audit.js` `Audit.log` writes `expire_at` field on every record (90-day default, parameterized via `app_config.audit_retention_days`); signature-stable change preserves SEC-PII-01 caller pattern in `owner.js`; new `ZZ-AuditTTLSpec.js` regression spec
   - [ ] 09-03-PLAN.md — SEC-PII-02 operator runbook + GDPR-posture note (`.planning/runbooks/managed-logs-redaction.md`): full procedure (snapshot → dry-run → review → apply → sample → compact); forward-TTL cron recipe; GDPR-posture note (scope, method, sampling evidence template, residual risk); rollback-from-snapshot instructions
 
 ### Phase 10: Cross-Project Dependency Coordination (services/console)
@@ -140,7 +140,7 @@
 | 6 | WebSocket Surface Hardening | Deterministic WS lifecycle + handshake + cookie debt | REFACTOR-03, SEC-WS-01, SEC-COOKIE-01 | 5 |
 | 7 | owner.js Async/Await Sweep | Callback → async/await with zero behavior change | REFACTOR-04 | 4 |
 | 8 | Auth & Account Lifecycle Closures | Reactivation + reset-email → Vue console | AUTH-REACTIVATE-01, AUTH-RESET-LINK-CONSOLE | 5 |
-| 9 | Historic PII Redaction (managed_logs) | Clean ~658k pre-fix audit-log docs | SEC-PII-02 | 5 |
+| 9 | Historic PII Redaction (managed_logs) | Clean ~658k pre-fix audit-log docs + forward TTL (2/3 plans done — runbook pending) | SEC-PII-02 | 5 |
 | 10 | Cross-Project Dependency Coordination | Console-side SEC-DEP-02 schedule + roll-up | SEC-DEP-02 | 4 |
 | 11 | Build & Cert Hygiene | `base/update.sh` hardening + ca.pem startup probe | BASE-IMG-01, THINX-CERT-CHECK-01 | 5 |
 

@@ -79,7 +79,7 @@ Explicitly excluded from v1.9. Documented to prevent scope creep.
 | REFACTOR-04 | Phase 7 | Complete |
 | AUTH-REACTIVATE-01 | Phase 8 | Complete |
 | AUTH-RESET-LINK-CONSOLE | Phase 8 | Complete |
-| SEC-PII-02 | Phase 9 | Pending |
+| SEC-PII-02 | Phase 9 | In Progress (09-1 redaction script done, 09-2 audit TTL done; 09-3 runbook + GDPR-posture note pending) |
 | SEC-DEP-02 | Phase 10 | Pending |
 | BASE-IMG-01 | Phase 11 | Pending |
 | THINX-CERT-CHECK-01 | Phase 11 | Pending |
