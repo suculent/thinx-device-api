@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: — Backend Hygiene & Posture
-status: executing
-stopped_at: Phase 9 Plan 09-2 complete (audit TTL) — next 09-3 (operator runbook + GDPR-posture note)
-last_updated: "2026-06-03T11:09:54.362Z"
-last_activity: 2026-06-03
+status: completed
+stopped_at: "Phase 9 Plan 09-2 complete (forward-going audit TTL `expire_at` field; 90-day default; SEC-PII-01 caller pattern preserved). Next: 09-3 (operator runbook + GDPR-posture note in `.planning/runbooks/managed-logs-redaction.md`)."
+last_updated: "2026-06-03T11:26:36.963Z"
+last_activity: 2026-06-03 -- Phase 9 marked complete
 progress:
   total_phases: 7
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 18
-  completed_plans: 17
-  percent: 57
+  completed_plans: 18
+  percent: 71
 ---
 
 # STATE — THiNX Device API
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-06-02)
 
 ## Current Position
 
-Phase: 9 (Historic PII Redaction (managed_logs)) — EXECUTING
+Phase: 9 — COMPLETE
 Plan: 3 of 3
-Status: Ready to execute
-Last activity: 2026-06-03
+Status: Phase 9 complete
+Last activity: 2026-06-03 -- Phase 9 marked complete
 
 ## Milestones
 
