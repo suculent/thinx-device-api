@@ -133,7 +133,9 @@
   3. `shellcheck base/update.sh` is clean.
   4. Server startup with a fresh Let's Encrypt leaf and a stale (R10-era) `ca.pem` emits a clear startup WARN naming the issuer mismatch; startup with a matching intermediate emits no warning.
   5. A unit test covers the matcher logic against fixture PEM bundles (R10 leaf vs. R13 ca, R13 leaf vs. R13 ca, R13 leaf vs. R10 ca).
-**Plans:** TBD
+**Plans:** 2 plans (both Wave 1, parallel-safe — zero file overlap)
+  - [ ] 11-01-PLAN.md — BASE-IMG-01: rewrite `base/update.sh` with `set -euo pipefail` + `--tag`/`--owner` args + auto `npm version patch --no-git-tag-version` + pre/post image digest logging + single atomic `chore: base version bump` commit; shellcheck-clean
+  - [ ] 11-02-PLAN.md — THINX-CERT-CHECK-01: new `lib/thinx/cert-probe.js` (DETECT-only) + 5-line additive call site in `thinx-core.js` near line 211 + `spec/jasmine/ZZ-CertProbeSpec.js` (6 it blocks) + 4 fixture PEMs (R10/R13 × leaf/ca) + `generate.sh` regenerate helper
 
 ## Phase Summary
 
@@ -179,7 +181,7 @@
 | 8. Auth & Account Lifecycle Closures | v1.9 | 0/2 | Planned | — |
 | 9. Historic PII Redaction (managed_logs) | v1.9 | 0/? | Not started | — |
 | 10. Cross-Project Dependency Coordination | v1.9 | 0/3 | Planned | — |
-| 11. Build & Cert Hygiene | v1.9 | 0/? | Not started | — |
+| 11. Build & Cert Hygiene | v1.9 | 0/2 | Planned | — |
 
 ## Dependencies (visual)
 
@@ -223,3 +225,4 @@ Phase 5 sequences before 6 (REFACTOR-01 trust-proxy is adjacent to the WS block 
 *Phase 7 planned: 2026-06-03 — 6 atomic plans (all Wave 1 sequential — same file `lib/thinx/owner.js`); two-phase granularity per CONTEXT.md (non-top-5 internals first, top-5 individually); REFACTOR-04 covers all + folds the deferred owner.js strict-equality sweep from Phase 5 (6 fixes in 07-1, 1 fix in 07-2); 5 behavior-locking unit tests in 02-OwnerSpec.js (one per top-5 plan); Plan 07-5 has CRITICAL Phase 5 REFACTOR-02 anti-regression gate.*
 *Phase 10 planned: 2026-06-03 — 3 atomic plans (all Wave 1, sequential — 10-01 → 10-02 → 10-03); SEC-DEP-02 cross-project coordination per CONTEXT.md (2 console alerts at vendored jquery-validation-1.19.5/package.json classified `deferred-vendored-asset` — NEW rationale class; actual remediation deferred to services/console GSD workspace); 10-02 is a TWO-REPO atomic edit (submodule ROADMAP + parent pointer bump); 4 atomic GPG-signed commits total expected (1 in submodule, 3 in parent).*
 *Phase 8 planned: 2026-06-03 — 2 atomic plans (both Wave 1, parallel-safe — zero file overlap); AUTH-REACTIVATE-01 admin-only endpoint per CONTEXT.md D-01 (self-serve flow deferred); AUTH-RESET-LINK-CONSOLE one-line URL change in owner.js per CONTEXT.md D-02 (no new config field — Vue console + API share host in production); both plans preserve the soft-delete login lockout at router.auth.js:189-191 and the Phase 5 REFACTOR-02 + SEC-PII-01 invariants in Owner.password_reset.*
+*Phase 11 planned: 2026-06-03 — 2 atomic plans (both Wave 1, parallel-safe — zero file overlap); BASE-IMG-01 rewrites `base/update.sh` per CONTEXT.md D-01 (set -euo pipefail + `--tag`/`--owner` args + auto `npm version patch --no-git-tag-version` + pre/post digest logging + single atomic `chore: base version bump` commit + shellcheck-clean); THINX-CERT-CHECK-01 adds DETECT-only `lib/thinx/cert-probe.js` + 5-line additive call site in `thinx-core.js` near line 211 + 4 fixture PEMs (R10/R13 × leaf/ca) + `ZZ-CertProbeSpec.js` (6 it blocks including fixture-mtime DETECT-only invariant) per CONTEXT.md D-02; FINAL v1.9 phase — closes out the milestone; 2 atomic GPG-signed commits expected on `thinx-staging`. Test-env ACCEPT pattern carries: cert-probe spec is pure (no live SSL, no live network, no _envi.json) so it runs cleanly under both local Jasmine and CircleCI canonical green-gate.*
