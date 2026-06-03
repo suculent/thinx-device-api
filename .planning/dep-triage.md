@@ -177,4 +177,13 @@ The remediation lands in the `services/console` GSD workspace (NOT in this repo)
 
 This annex is part of Phase 10 / SEC-DEP-02 in the parent `thinx-device-api` v1.9 "Backend Hygiene & Posture" milestone (see `.planning/ROADMAP.md` Phase 10 entry and `.planning/REQUIREMENTS.md` SEC-DEP-02). The parallel phase in `services/console/.planning/ROADMAP.md` is scheduled by Plan 10-02 of this phase. The cross-project workflow itself — including how the `services/console` submodule pointer bump in this repo lands AFTER the console-side phase merges — is documented in the runbook at `.planning/runbooks/cross-project-dependency-coordination.md` (created by Plan 10-03 of this phase).
 
-*Total rows (Phase 10 annex): 2 (both `deferred-vendored-asset`). Phase 4 baseline rows above remain at 29 (7 blocker / 19 deferred-stale / 3 deferred-dev-only) — unchanged.*
+### Resolution (2026-06-03 — autonomously executed post-Phase-10)
+
+**Both alerts CLOSED.** The vendored `services/console/src/assets/global/plugins/jquery-validation-1.19.5/package.json` was removed via the preferred-remediation path:
+
+- services/console commit `ab10a02`: `feat(SEC-DEP-02): remove vendored jquery-validation package.json (closes 2 high-severity grunt alerts)` (1 file changed, 63 deletions)
+- thinx-device-api commit `28a4add4`: `chore: bump services/console submodule for SEC-DEP-02 remediation` — submodule pointer advanced `240fe09 → ab10a02`
+
+Both alerts (`54`, `52`) will be auto-closed by Dependabot after its next rescan of `thinx-cloud/console` (typically within hours). No manual UI dismissal required.
+
+*Total rows (Phase 10 annex): 2 (both `deferred-vendored-asset` → **RESOLVED 2026-06-03**). Phase 4 baseline rows above remain at 29 (7 blocker / 19 deferred-stale / 3 deferred-dev-only) — unchanged.*
