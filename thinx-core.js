@@ -208,6 +208,13 @@ module.exports = class THiNX extends EventEmitter {
                 console.log("SSL CA error", message);
               }
 
+              // THINX-CERT-CHECK-01: DETECT-only probe — emits a WARN when ca.pem does not contain the leaf's LE intermediate issuer.
+              const certProbe = require('./lib/thinx/cert-probe');
+              const probeResult = certProbe.probeCaFreshness(app_config.ssl_cert, app_config.ssl_ca);
+              if (!probeResult.ok) {
+                console.log(`⚠️ [warning] ${probeResult.message}`);
+              }
+
               let caCert = read(app_config.ssl_ca, 'utf8');
               let ca = pki.certificateFromPem(caCert);
               let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
