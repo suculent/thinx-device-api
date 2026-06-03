@@ -29,7 +29,7 @@
 - [x] **Phase 8: Auth & Account Lifecycle Closures** ✅ — Soft-deleted reactivation flow + reset-email lands on the Vue console (not legacy AngularJS). Verified 2026-06-03 (admin endpoint POST /api/v2/admin/user/:id/reactivate; reset URL `/password.html?` → `/password-reset?`; Phase 5 REFACTOR-02 + SEC-PII-01 preserved).
 - [x] **Phase 9: Historic PII Redaction (managed_logs)** ✅ — Remediate pre-v1.0 raw reset_keys in CouchDB `managed_logs` (~658k docs, GDPR-adjacent). Verified 2026-06-03 (redaction script with snapshot+sample modes; audit.js expire_at TTL field 90-day default; operator runbook + GDPR-posture note; production execution deferred to operator).
 - [x] **Phase 10: Cross-Project Dependency Coordination (services/console)** ✅ — Schedule + roll up the parallel SEC-DEP-02 phase in the console submodule; land a clean submodule pointer bump. Verified 2026-06-03 (2 high-sev grunt alerts classified `deferred-vendored-asset`; SEC-DEP-02 phase scheduled in services/console submodule; pointer bumped 27758ebd→240fe095; cross-project coordination runbook).
-- [ ] **Phase 11: Build & Cert Hygiene** — `base/update.sh` hardening + startup `ca.pem` freshness probe.
+- [x] **Phase 11: Build & Cert Hygiene** ✅ — `base/update.sh` hardening + startup `ca.pem` freshness probe. Verified 2026-06-03 (set -euo pipefail + tag/owner args + npm version patch + digest logging + shellcheck-clean; DETECT-only probeCaFreshness with R10..R14 chain check + 6 unit specs + 4 fixture PEMs). **🏁 v1.9 milestone COMPLETE: 13/13 requirements verified.**
 
 ## Phase Details
 
