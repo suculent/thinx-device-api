@@ -26,7 +26,7 @@ Requirements scoped to v1.9. Each maps to exactly one roadmap phase. Numbering f
 
 - [x] **SEC-WS-01**: WebSocket handshake hardening on `rtm.thinx.cloud`. Either reproduce + fix the latent 404-on-handshake risk flagged in `AGENTS.md:96-97`, OR document the upstream-Traefik condition that triggers it with reproduction steps and a deferred-to-edge-redesign tag. Validated by: (a) `wscat` handshake from a fresh Vue session returns `101 Switching Protocols` against rtm, (b) a regression spec or runbook documents the failure mode if it can't be code-fixed here.
 
-- [ ] **SEC-DEP-02**: services/console dependency triage **coordination** from this repo. Scope inside `thinx-device-api`: schedule the parallel SEC-DEP-02 phase in `services/console/.planning/ROADMAP.md` (cross-project coordination), capture the 2 high-severity console alerts' runtime-vs-build classification once the console-side triage runs, and merge any resulting submodule pointer bump cleanly into `thinx-staging`/`master`/`main`. Deep work lives in the console submodule's GSD project. Validated by: (a) console-side phase exists in `services/console/.planning/ROADMAP.md`, (b) submodule pointer is up to date on `thinx-staging` after console triage merges, (c) `.planning/dep-triage.md` annexed with cross-project verdict roll-up.
+- [x] **SEC-DEP-02**: services/console dependency triage **coordination** from this repo. Scope inside `thinx-device-api`: schedule the parallel SEC-DEP-02 phase in `services/console/.planning/ROADMAP.md` (cross-project coordination), capture the 2 high-severity console alerts' runtime-vs-build classification once the console-side triage runs, and merge any resulting submodule pointer bump cleanly into `thinx-staging`/`master`/`main`. Deep work lives in the console submodule's GSD project. Validated by: (a) console-side phase exists in `services/console/.planning/ROADMAP.md`, (b) submodule pointer is up to date on `thinx-staging` after console triage merges, (c) `.planning/dep-triage.md` annexed with cross-project verdict roll-up.
 
 - [x] **SEC-PII-02**: Historic CouchDB `managed_logs` redaction. Remediate pre-Phase-2 raw `reset_key` (and any other PII) in the `managed_logs` database (~658,808 docs as of 2026-05-26). Pick ONE of: (a) one-shot `_bulk_docs` redaction overlaying the leaky fields, (b) age-based bulk delete with a documented retention window, (c) introduce a forward-going TTL on audit entries. Validated by: (a) sampling N=1000 random recent + N=1000 random old docs shows zero raw 64-char hex reset_keys, (b) retention/TTL behavior (if chosen) covered by a runbook, (c) GDPR-posture note appended to `.planning/runbooks/` documenting the historic cleanup.
 
@@ -80,7 +80,7 @@ Explicitly excluded from v1.9. Documented to prevent scope creep.
 | AUTH-REACTIVATE-01 | Phase 8 | Complete |
 | AUTH-RESET-LINK-CONSOLE | Phase 8 | Complete |
 | SEC-PII-02 | Phase 9 | In Progress (09-1 redaction script done, 09-2 audit TTL done; 09-3 runbook + GDPR-posture note pending) |
-| SEC-DEP-02 | Phase 10 | Pending |
+| SEC-DEP-02 | Phase 10 | Complete |
 | BASE-IMG-01 | Phase 11 | Pending |
 | THINX-CERT-CHECK-01 | Phase 11 | Pending |
 

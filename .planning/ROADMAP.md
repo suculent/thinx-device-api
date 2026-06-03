@@ -118,9 +118,9 @@
   2. The 2 high-severity console Dependabot alerts are classified (runtime vs. build) with the verdict recorded in `.planning/dep-triage.md` (annexed roll-up section).
   3. After the console-side triage merges, the `services/console` submodule pointer in `thinx-device-api` is updated cleanly on `thinx-staging` (and rolled to `master` + `main` via PR if the console triage produces a pointer bump).
   4. CircleCI remains green across the submodule bump; the production image still serves the Vue console without regression.
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
   - [x] 10-01-PLAN.md — Annex `.planning/dep-triage.md` with Phase 10 / SEC-DEP-02 cross-project roll-up section (2 alerts, `deferred-vendored-asset` verdict, Disposition legend, Recommended remediation)
-  - [ ] 10-02-PLAN.md — Schedule SEC-DEP-02 phase in `services/console/.planning/ROADMAP.md` under a new `v1.x Operational Hygiene` milestone (submodule edit commit) + bump submodule pointer in this repo from `27758ebda8a17` to the new SHA (parent commit)
+  - [x] 10-02-PLAN.md — Schedule SEC-DEP-02 phase in `services/console/.planning/ROADMAP.md` under a new `v1.x Operational Hygiene` milestone (submodule edit commit) + bump submodule pointer in this repo from `27758ebda8a17` to the new SHA (parent commit)
   - [ ] 10-03-PLAN.md — Create cross-project coordination runbook at `.planning/runbooks/cross-project-dependency-coordination.md` (5 sections: when-to-use, gh api recipe, classification verdict glossary, submodule edit + pointer bump workflow, post-merge verification checklist)
 
 ### Phase 11: Build & Cert Hygiene
@@ -144,7 +144,7 @@
 | 7 | owner.js Async/Await Sweep | Callback → async/await with zero behavior change | REFACTOR-04 | 4 |
 | 8 | Auth & Account Lifecycle Closures | Reactivation + reset-email → Vue console | AUTH-REACTIVATE-01, AUTH-RESET-LINK-CONSOLE | 5 |
 | 9 | Historic PII Redaction (managed_logs) | Clean ~658k pre-fix audit-log docs + forward TTL (2/3 plans done — runbook pending) | SEC-PII-02 | 5 |
-| 10 | Cross-Project Dependency Coordination | Console-side SEC-DEP-02 schedule + roll-up (1/3 plans done) | SEC-DEP-02 | 4 |
+| 10 | Cross-Project Dependency Coordination | 2/3 | In Progress|  |
 | 11 | Build & Cert Hygiene | `base/update.sh` hardening + ca.pem startup probe | BASE-IMG-01, THINX-CERT-CHECK-01 | 5 |
 
 ## Requirement Coverage
