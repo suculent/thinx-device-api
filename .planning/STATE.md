@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.10
-milestone_name: Operational Closures
-status: executing
+milestone_name: — Operational Closures
+status: completed
 stopped_at: Phase 12 context gathered
-last_updated: "2026-06-04T17:35:49.719Z"
-last_activity: 2026-06-04 -- Phase 12 planning complete
+last_updated: "2026-06-04T18:20:30.132Z"
+last_activity: 2026-06-04 -- Phase 12 marked complete
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 0
-  percent: 0
+  completed_plans: 3
+  percent: 33
 ---
 
 # STATE — THiNX Device API
@@ -23,16 +23,16 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-06-04 after v1.9 milestone close)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** v1.10 Operational Closures — ROADMAP created. 3 phases (12–14) covering 5 requirements: Phase 12 ships 3 code-side helpers (TEST-WS-01, OBS-01, OBS-02), Phase 13 executes the SEC-WS-01 swarm-host nginx fix (OPS-EXEC-01), Phase 14 executes the SEC-PII-02 production managed_logs sweep (OPS-EXEC-02). Granularity: coarse.
+- **Current focus:** Phase 12 — Code-side Closure Helpers
 - **Latest production image:** `thinxcloud/api:latest sha256:4d3fb789` (v1.0 Phase 4 deploy 2026-05-26T22:35:54Z); v1.9 base bumped to `1.9.3054` 2026-06-02 via `304b09d1`; v1.9 backend changes deployed via operator push when ready (CI green-gate on `thinx-staging`)
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace; SEC-DEP-02 scheduled there under a new `v1.x Operational Hygiene` milestone (Phase 10 of v1.9 landed the parent-side coordination). No coordination required for v1.10.
 
 ## Current Position
 
-Phase: Not started (roadmap created; phase planning pending)
-Plan: —
-Status: Ready to execute
-Last activity: 2026-06-04 -- Phase 12 planning complete
+Phase: 12 — COMPLETE
+Plan: 1 of 3
+Status: Phase 12 complete
+Last activity: 2026-06-04 -- Phase 12 marked complete
 
 ## Milestones
 

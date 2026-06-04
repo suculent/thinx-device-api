@@ -24,7 +24,7 @@
 
 ## Phases
 
-- [ ] **Phase 12: Code-side Closure Helpers** — Ship the 3 in-codebase helpers FIRST so the operator-runbook executions can lean on them: WS handshake CI smoke spec (TEST-WS-01), `managed_logs` cleanup Slack notification (OBS-01), audit-log TTL eviction monitor (OBS-02). DETECT-only posture for OBS-02 mirrors v1.9 Phase 11 THINX-CERT-CHECK-01.
+- [x] **Phase 12: Code-side Closure Helpers** ✅ — Shipped the 3 in-codebase helpers (TEST-WS-01 spec, OBS-01 Slack notification + SLACK_WEBHOOK drift fix, OBS-02 audit-TTL eviction probe). Verified 2026-06-04 (3/3 reqs verified via goal-backward checks; 3 plans Wave 1 parallel; 7 atomic GPG-signed commits + 3 merge commits on `thinx-staging`).
 - [ ] **Phase 13: SEC-WS-01 Edge Handshake Closure (OPS-EXEC-01)** — Single-session swarm-host execution of the `.planning/runbooks/websocket-handshake.md` operator action: pre-fix probe → nginx `location` block edit → `nginx -t` + reload → post-fix probe → runbook execution annex. Persist the config-change trail in version control under `.planning/runbooks/`.
 - [ ] **Phase 14: SEC-PII-02 Production managed_logs Sweep Closure (OPS-EXEC-02)** — Single-session production sweep per `.planning/runbooks/managed-logs-redaction.md`: pre-flight checklist → dry-run scan → snapshot + `--apply` → `--sample 1000` zero-leak gate → CouchDB compaction → runbook execution annex. Leans on the OBS-01 Slack notification shipped in Phase 12 to deliver the closure receipt.
 
