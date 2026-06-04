@@ -58,7 +58,8 @@
   3. `nginx -T | grep -A5 '^[[:space:]]*location ~ \^/'` on the swarm host shows the new `location ~ ^/[^/]+(/[0-9]+)?$` block ordered AFTER the more-specific `/api/` and `/static/` blocks but BEFORE the catch-all `location /` block; `nginx -t` returned `test is successful` before reload.
   4. `.planning/runbooks/websocket-handshake.md` is updated with an execution annex: execution-timestamp (UTC), the captured pre-fix probe output (bare `Server: nginx` 404), the captured post-fix probe output (101 / 401 with helmet headers), and the operator initials. Annex is committed on `thinx-staging` with a GPG-signed commit.
   5. The swarm-host nginx config snippet is persisted under `.planning/runbooks/` (or wherever swarm configs live in this repo's ops trail) so the change has a version-controlled trail — not just a runbook prose annex.
-**Plans:** TBD
+**Plans:** 1 plan
+  - [ ] 13-01-PLAN.md — Author probe script, establish swarm-configs/ convention, append rollback procedure, CHECKPOINT for operator SSH session, on resume append Execution Annex + flip OPS-EXEC-01 to Verified
 **Phase notes:**
   - **Single-session execution preferred** (per requirements scoping): pre-fix probe → nginx edit → `nginx -t` → `systemctl reload nginx` → post-fix probe → runbook annex → commit. All in one focused operator window.
   - **Adjacent to `deferred-to-edge-redesign` tag:** the runbook still carries the `deferred to edge-redesign` tag on the SEC-WS-01 origin; Phase 13's execution annex DOES NOT remove that tag — it CLOSES the OPS-EXEC-01 execution-debt while leaving the broader edge-redesign open (Traefik labels, nginx rewrites beyond G8 needs are out-of-scope per REQUIREMENTS.md "Out of Scope").
@@ -115,7 +116,7 @@
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 12. Code-side Closure Helpers | v1.10 | 0/? | Planned | — |
-| 13. SEC-WS-01 Edge Handshake Closure | v1.10 | 0/? | Planned | — |
+| 13. SEC-WS-01 Edge Handshake Closure | v1.10 | 0/1 | Planned | — |
 | 14. SEC-PII-02 managed_logs Sweep Closure | v1.10 | 0/? | Planned | — |
 
 ## Dependencies (visual)
