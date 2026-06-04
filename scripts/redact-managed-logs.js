@@ -47,7 +47,9 @@
 
 const fs = require("fs");
 const path = require("path");
+const os = require("os");
 const Util = require("../lib/thinx/util.js");
+const SlackNotify = require("slack-notify");
 
 // ---------------------------------------------------------------------------
 // Leak-shape regexes (module-level constants — single-source-of-truth for the
@@ -188,6 +190,71 @@ function _redactString(s) {
 }
 
 // ---------------------------------------------------------------------------
+// OBS-01 — Slack closure-receipt helper.
+//
+// SYNCHRONOUS by design (fire-and-forget per D-24). Never `await`s,
+// never re-throws. Handles BOTH sync-throw AND async-reject paths from
+// `slack-notify` (v2.0.7 `.send()` returns a Promise — see
+// node_modules/slack-notify/src/cjs/index.js).
+//
+// Triggers per D-17:
+//   kind === "success"   — `--apply` success path
+//   kind === "failure"   — `--apply` failure path (outer catch, single site)
+//   kind === "discovery" — `--sample` raw-PII discovery
+//
+// Missing-webhook handling per D-23: log info and return; never crash.
+// ---------------------------------------------------------------------------
+function postSlackSummary(kind, payload) {
+  const webhook = process.env.SLACK_WEBHOOK;
+  if (!webhook) {
+    console.log("ℹ️ [info] SLACK_WEBHOOK not set — skipping closure notification");
+    return;
+  }
+  const hostShort = os.hostname().split('.')[0];
+  let msg;
+  if (kind === "success") {
+    msg = {
+      text: "✅ managed_logs redaction complete — " + payload.docs_scanned + " scanned / " + payload.docs_redacted + " redacted / sample " + payload.sample_verdict + " in " + payload.runtime_ms + "ms on " + hostShort,
+      username: "redact-managed-logs",
+      icon_emoji: ":broom:",
+      channel: "#thinx"
+    };
+  } else if (kind === "failure") {
+    msg = {
+      text: "❌ managed_logs redaction FAILED — " + payload.stage_reached + " on " + hostShort + ": " + String(payload.error_message || "").slice(0, 200),
+      username: "redact-managed-logs",
+      icon_emoji: ":broom:",
+      channel: "#thinx",
+      fields: {
+        docs_scanned: payload.docs_scanned,
+        docs_redacted: payload.docs_redacted,
+        stage_reached: payload.stage_reached,
+        snapshot_path: payload.snapshot_path || "<none>",
+        sample_ids: (payload.sample_ids || []).slice(0, 5).map((id) => (typeof id === 'string' && id.length > 0 ? id.slice(0, 8) + "..." : "<missing>"))
+      }
+    };
+  } else if (kind === "discovery") {
+    msg = {
+      text: "⚠️ managed_logs sample discovered raw PII — " + payload.leaks + " of " + payload.checked + " sampled docs contain raw " + payload.pii_kind + " on " + hostShort + " — operator review required (do NOT --apply blindly)",
+      username: "redact-managed-logs",
+      icon_emoji: ":broom:",
+      channel: "#thinx"
+    };
+  } else {
+    return;
+  }
+  try {
+    const sendResult = SlackNotify(webhook).send(msg);
+    if (sendResult && typeof sendResult["catch"] === 'function') {
+      sendResult.catch((_e) => console.log("[redact] Slack send failed (async): " + (_e && _e.message ? _e.message : _e)));
+    }
+  } catch (_e) {
+    console.log("[redact] Slack send failed (sync): " + (_e && _e.message ? _e.message : _e));
+  }
+  return;
+}
+
+// ---------------------------------------------------------------------------
 // Module exports — pure helpers ONLY. The CLI runs in the
 // `if (require.main === module)` block below.
 // ---------------------------------------------------------------------------
@@ -206,6 +273,7 @@ module.exports = {
   EXIT_NO_CREDS,
   EXIT_BAD_SNAPSHOT_PATH,
   EXIT_RUNTIME_ERROR,
+  postSlackSummary,
 };
 
 // ---------------------------------------------------------------------------
@@ -445,6 +513,7 @@ async function runApply(db, opts) {
       }
     } catch (err) {
       console.log(`${tsPrefix(mode)} _bulk_docs ERROR: ${err && err.message ? err.message : err}`);
+      if (err && typeof err === 'object') { err.stage = "bulk_docs"; }
       throw err;
     }
     buffer.length = 0;
@@ -477,6 +546,7 @@ async function runApply(db, opts) {
   await flushBatch();
   await new Promise((resolve) => snapshotStream.end(resolve));
   console.log(`${tsPrefix(mode)} done touched=${touched} conflicts=${conflicts}`);
+  postSlackSummary("success", { docs_scanned: touched + conflicts, docs_redacted: touched, sample_verdict: "deferred", runtime_ms: Date.now() - opts.start_ms });
   return EXIT_OK;
 }
 
@@ -513,6 +583,8 @@ async function runSample(db, opts) {
   if (leaks > 0) {
     console.log(`${tsPrefix(mode)} LEAK-BEARING doc _ids (raw matches NOT logged):`);
     for (const id of leakIds) console.log(`${tsPrefix(mode)}   _id=${id}`);
+    const piiKind = "reset_key|email";
+    postSlackSummary("discovery", { checked: picks.length, leaks: leaks, pii_kind: piiKind });
     return EXIT_LEAK_DETECTED;
   }
   console.log(`${tsPrefix(mode)} PASS: zero raw 64-char hex reset_keys and zero raw emails across ${picks.length} sampled docs.`);
@@ -573,7 +645,7 @@ async function main() {
     return await runSample(db, { ...args, dbName });
   }
   if (args.apply) {
-    return await runApply(db, { ...args, dbName });
+    return await runApply(db, { ...args, dbName, start_ms: Date.now() });
   }
   // Default fallthrough — scan.
   return await runScan(db, { ...args, dbName });
@@ -584,6 +656,7 @@ if (require.main === module) {
     .then((code) => process.exit(code))
     .catch((err) => {
       console.error("fatal:", err && err.stack ? err.stack : err);
+      try { postSlackSummary("failure", { docs_scanned: 0, docs_redacted: 0, stage_reached: (err && err.stage) ? err.stage : "unknown", snapshot_path: "<unknown>", sample_ids: [], error_message: err && err.message ? err.message : String(err) }); } catch (_e) { /* swallow — never block the exit */ }
       process.exit(EXIT_RUNTIME_ERROR);
     });
 }
