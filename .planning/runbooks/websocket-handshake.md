@@ -207,5 +207,87 @@ The new regression spec at `spec/jasmine/ZZ-CookieAttributeSpec.js` will FAIL on
 
 ---
 
+## SEC-WS-01 Rollback Procedure
+
+Operator-side rollback for the SEC-WS-01 edge nginx `location` block added on `rtm.thinx.cloud` (per Phase 13 / Plan 13-01 / OPS-EXEC-01). The fix is ADDITIVE — a new `location ~ ^/[^/]+(/[0-9]+)?$` (or owner-shape equivalent) block routes the previously-404'd WebSocket-upgrade path to the Express upstream. Rollback REMOVES that block, returning to the pre-fix surface where the edge nginx returns a bare 404 on owner-shaped paths. SLA: < 5 min, end-to-end.
+
+### When to roll back
+
+Three trigger conditions, in order of likelihood:
+
+1. **`nginx -t` failed AFTER the edit** (config already rejected, reload did not happen). Restore is safety-cleanup, not recovery — but persisting the pre-fix snapshot back into the live config eliminates any partial-edit residue.
+2. **`systemctl reload nginx` succeeded but the new `location` block intercepts an unintended route.** Example: a future `/health` endpoint that should not be proxied to Express, or a static-asset path-shape that now misroutes. The owner-shape regex `^/[^/]+(/[0-9]+)?$` is intentionally narrow but neighbor blocks may surface ordering issues.
+3. **Vue console regresses on a flow that worked pre-fix.** Unlikely given the additive nature of the change (the route previously returned 404 — nothing relied on that surface), but documented for completeness.
+
+If a console regression appears AFTER both SEC-WS-01 and SEC-COOKIE-01 are deployed and you can't immediately tell which one is at fault, use the diagnosis check below to attribute first, then pick the corresponding rollback section (this one for SEC-WS-01, the preceding section for SEC-COOKIE-01).
+
+### Diagnosis check before rolling back
+
+Re-run the canonical 7-row probe and compare against the captured pre-fix baseline:
+
+```bash
+./scripts/probe-rtm-handshake.sh > /tmp/probe-current.txt
+diff -u .planning/phases/13-sec-ws-01-edge-handshake-closure-ops-exec-01/probe-pre-fix.txt /tmp/probe-current.txt
+```
+
+- **If the failure mode matches the pre-fix table** (bare `Server: nginx` 404 on rows 4-7 with NO helmet `Content-Security-Policy:` header) — the regression IS SEC-WS-01-class. Rollback is appropriate.
+- **If the failure mode is different** (e.g., 500 errors WITH helmet headers — Express IS being reached but the app is failing internally) — DO NOT roll back this nginx edit. That is a different incident class; investigate the app layer or other infra surfaces.
+
+This diagnosis check distinguishes "SEC-WS-01 caused this" from an unrelated regression and avoids rolling back a working fix in response to an unrelated symptom.
+
+### Rollback recipe (< 5 min, operator-side)
+
+1. **SSH to the swarm host** (verbatim per `AGENTS.md:18`):
+
+   ```bash
+   ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020
+   ```
+
+2. **Restore the pre-fix nginx server block from the persisted snapshot.** Locate the `rtm.thinx.cloud` server block in `/etc/nginx/sites-enabled/` (or wherever this swarm host's nginx layout places it — confirm via `nginx -T 2>&1 | grep -B2 'server_name rtm.thinx.cloud'`). Replace the current server block with the contents of `.planning/runbooks/swarm-configs/rtm.thinx.cloud-server.pre.nginx` (transferred to the swarm host via `scp` from a developer workstation or `git pull` of the `thinx-device-api` repo's `thinx-staging` branch).
+
+   Per D-14, the restore source is the persisted `.planning/runbooks/swarm-configs/rtm.thinx.cloud-server.pre.nginx` snapshot — NOT a manual reconstruction. Manual reconstruction introduces drift; the persisted snapshot is bit-exact what was live before the SEC-WS-01 edit landed.
+
+3. **Test the config without applying** (typo gate — same gate the original edit went through):
+
+   ```bash
+   nginx -t
+   ```
+
+   MUST return `nginx: configuration file ... test is successful` before proceeding to reload. If non-zero, ABORT — do not reload a broken config.
+
+4. **Reload nginx:**
+
+   ```bash
+   systemctl reload nginx
+   ```
+
+   (Or `nginx -s reload` if the host does not use systemd.)
+
+### Post-rollback verification
+
+Re-run the probe from the operator workstation and confirm the output now matches the pre-fix baseline:
+
+```bash
+./scripts/probe-rtm-handshake.sh > /tmp/probe-post-rollback.txt
+diff -u .planning/phases/13-sec-ws-01-edge-handshake-closure-ops-exec-01/probe-pre-fix.txt /tmp/probe-post-rollback.txt
+```
+
+The diff should be empty (or only differ in the timestamp banner). Per D-18, the trade-off is explicit: **we are RESTORING the broken state — that is the safety floor.** WebSocket subscribe will be broken again post-rollback (the Vue console handshake returns to a bare nginx 404 on the owner-shape path), BUT the swarm host is in a known-good config state that `nginx -t` accepted and `systemctl reload nginx` applied cleanly.
+
+After confirming the rollback landed, file a quick-task or v1.x candidate documenting (a) which trigger condition prompted the rollback, (b) what neighbor-block interaction or unintended-intercept surfaced, and (c) a target re-attempt plan (typically a narrower regex or an explicit allow-list of owner paths instead of the broad `^/[^/]+(/[0-9]+)?$` shape).
+
+### SLA
+
+< 5 minutes end-to-end (SSH → restore the persisted `pre.nginx` over the live config → `nginx -t` → `systemctl reload nginx` → probe verification). Matches the SEC-COOKIE-01 rollback < 5 min SLA already documented in the preceding section.
+
+### Why this matters
+
+The SEC-WS-01 closure is an ADDITIVE nginx `location` block — it makes a previously-404'd path-shape route to Express. Rollback REMOVES that route, returning to the pre-fix surface. The post-rollback state is functionally equivalent to "Phase 6 SEC-WS-01 closed via runbook authorship; live fix deferred to edge-redesign" — exactly where the codebase was between Phase 6 close (2026-06-02) and the Phase 13 swarm-host edit.
+
+The Phase 12 TEST-WS-01 in-process CI spec (`spec/jasmine/ZZ-WebSocketHandshakeRtmSpec.js`) continues to pass either way — that spec tests the in-process Express WebSocket upgrade handler at `thinx-core.js:466`, not the swarm-host nginx edge routing. The rollback does NOT affect CI signal; CI stays green regardless.
+
+---
+
 *Runbook initialized: 2026-06-02 (Phase 6 / SEC-WS-01 close-out — documentation-only, fix deferred to edge-redesign).*
 *SEC-COOKIE-01 rollback section appended: 2026-06-02 (Phase 6 / Plan 06-02 close-out).*
+*SEC-WS-01 rollback section appended: 2026-06-04 (Phase 13 / Plan 13-01 prep).*
