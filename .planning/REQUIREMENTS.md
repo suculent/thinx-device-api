@@ -51,18 +51,18 @@ Explicitly excluded from v1.10. Documented to prevent scope creep.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| OPS-EXEC-01 | TBD | Pending |
-| OPS-EXEC-02 | TBD | Pending |
-| TEST-WS-01 | TBD | Pending |
-| OBS-01 | TBD | Pending |
-| OBS-02 | TBD | Pending |
+| TEST-WS-01 | Phase 12 | Pending |
+| OBS-01 | Phase 12 | Pending |
+| OBS-02 | Phase 12 | Pending |
+| OPS-EXEC-01 | Phase 13 | Pending |
+| OPS-EXEC-02 | Phase 14 | Pending |
 
 **Coverage:**
 - v1.10 requirements: 5 total
-- Mapped to phases: 0 (pending roadmap)
+- Mapped to phases: 5/5 ✓
 - Verified: 0
 - Pending: 5
-- Unmapped: 5 (until roadmap creation)
+- Unmapped: 0
 
 ---
-*Requirements defined: 2026-06-04 (milestone start). Roadmap and phase mapping to follow.*
+*Requirements defined: 2026-06-04 (milestone start). Roadmap mapped 2026-06-04 — 3 phases (12–14), 5/5 requirements covered. See `.planning/ROADMAP.md`.*
