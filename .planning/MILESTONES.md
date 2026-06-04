@@ -1,10 +1,50 @@
 # Milestones
 
+## v1.9 — Backend Hygiene & Posture (Shipped: 2026-06-04)
+
+**Delivered:** Paid down the v1.x backlog the v1.0 GA explicitly deferred — structural hygiene, security posture, auth/account lifecycle, and operational guardrails — without breaking any legacy-console-compatible route the Vue console inherited. 13/13 v1.9 requirements verified.
+
+**Stats:**
+
+- Phases: 7 (Phases 5–11) | Plans: 23 | Phase summaries: 23
+- Timeline: 2026-06-02 → 2026-06-04 (~3 days)
+- Git range: `eebdb47d` (milestone start) → `40c755e0` (worker submodule sync close-out) — 78 commits on `thinx-staging`
+- Changes: 97 files modified, +17,658 / −529 LOC (code: 23 files / +2,632 / −468; planning + runbooks + submodules: 74 files / +15,026 / −61)
+- Audit status: per-phase VERIFICATION.md present across all 7 phases (Phase 5–11); no separate milestone-level audit (deferred — per-phase verification covered 13/13 requirements)
+
+**Key accomplishments:**
+
+1. **Phase 5 — Backend hygiene cheap sweeps** (REFACTOR-01, REFACTOR-02, REFACTOR-05): collapsed duplicate `app.set('trust proxy', …)` calls in `thinx-core.js` to one canonical allowlist-form site with a `// REFACTOR-NN:` rationale comment; fixed the latent `!=`→`!==` in `Owner.password_reset` with a string-vs-number coercion regression test; moved `jshint` to `devDependencies` (REFACTOR-05 scope-amended: `fs-finder` deferred to v1.10 because of 5 active runtime call sites in `lib/`).
+2. **Phase 6 — WebSocket surface hardening** (REFACTOR-03, SEC-WS-01, SEC-COOKIE-01): registered a raw-socket `close` handler in the WS upgrade flow so per-connection map entries are released deterministically on mid-flight aborts; flipped session cookie `x-thx-core` to `httpOnly: true` with a sub-5-min rollback path documented in `.planning/runbooks/websocket-handshake.md`; produced operator-side runbook for the rtm edge-nginx routing gap (SEC-WS-01 not code-fixable from this repo, tagged `deferred to edge-redesign`).
+3. **Phase 7 — `owner.js` async/await sweep** (REFACTOR-04): converted ~73 callback patterns in `lib/thinx/owner.js` to async/await across 6 atomic commits (`1aa92fe5`→`f4345711`) — 18 non-top-5 methods in 07-1, then the top-5 (`create`, `delete`, `update`, `password_reset`, `set_password`) one per commit with one behavior-locking spec each in `spec/jasmine/02-OwnerSpec.js`; folded all 7 deferred strict-equality fixes; preserved Phase 5 REFACTOR-02 (`!==` at line 492) and SEC-PII-01 (`Util.redactToken`) invariants verbatim.
+4. **Phase 8 — Auth & account lifecycle closures** (AUTH-REACTIVATE-01, AUTH-RESET-LINK-CONSOLE): admin-only `POST /api/v2/admin/user/:id/reactivate` endpoint behind existing `requireAdmin` middleware (clears `user.deleted = true` via `userlib.atomic`) with `ZZ-RouterAdminReactivateSpec.js` covering the 401/403/200 paths + soft-delete gate intact; one-line redirect URL change in `Owner.password_reset` (`/password.html?` → `/password-reset?`) so reset emails land on the Vue console, locked with a regression spec extension.
+5. **Phase 9 — Historic PII redaction (managed_logs)** (SEC-PII-02): `scripts/redact-managed-logs.js` operator CLI that streams `managed_logs` in pages of 1000 and overlays `[REDACTED-RESET_KEY]` / `[REDACTED-EMAIL]` via `_bulk_docs` (default dry-run; `--apply` gated behind mandatory `--snapshot-to` JSONL forensic dump; `--sample N` verification subcommand); forward-going TTL via `lib/thinx/audit.js` `expire_at` field (90-day default, parameterized via `app_config.audit_retention_days`); operator runbook + GDPR-posture note in `.planning/runbooks/managed-logs-redaction.md`. Production execution deferred to operator under the runbook.
+6. **Phase 10 — Cross-project dependency coordination** (SEC-DEP-02): 2 high-severity `services/console` Dependabot alerts classified as `deferred-vendored-asset` (vendored `jquery-validation-1.19.5/package.json`, never invoked in build) — a new disposition class introduced by this phase; SEC-DEP-02 scheduled inside the `services/console` GSD project under a new `v1.x Operational Hygiene` milestone; submodule pointer bumped `27758ebda`→`240fe095` then again to capture the resolution; cross-project coordination runbook at `.planning/runbooks/cross-project-dependency-coordination.md`.
+7. **Phase 11 — Build & cert hygiene** (BASE-IMG-01, THINX-CERT-CHECK-01): rewrote `base/update.sh` from 18 lines of fire-and-forget into a 179-line hardened build tool — `set -euo pipefail`, `--tag`/`--owner`/`--dry-run`/`--help` CLI, auto `npm version patch --no-git-tag-version`, pre/post docker image digest logging, single atomic GPG-signed `chore: base version bump` commit, shellcheck 0.11.0 clean; added DETECT-only `lib/thinx/cert-probe.js` startup probe wired into `thinx-core.js:~211` that WARNs when the leaf cert's issuer is not represented in `ca.pem` (R10..R14 chain check), backed by `ZZ-CertProbeSpec.js` (6 it blocks) and 4 fixture PEMs.
+
+**Tech debt carried into v1.10 backlog:**
+
+- **fs-finder removal sweep** (deferred from Phase 5 REFACTOR-05): ~10 call sites across 5 modules (`lib/thinx/builder.js`, `deployment.js`, `platform.js`, `repository.js`, `plugins/arduino/plugin.js`) need replacement with `fs-extra` glob helpers or native `fs.promises.readdir` recursion before `fs-finder` can leave `package.json`.
+- **SEC-WS-01 edge fix** (runbook-only resolution): the actual swarm-host nginx `location` block edit for `rtm.thinx.cloud` lives outside this codebase; runbook is authored, operator-side execution outstanding.
+- **SEC-PII-02 production execution** (runbook-only resolution): the redaction script + audit TTL ship in code; production sweep against ~658k `managed_logs` docs is operator-run and deferred to a scheduled maintenance window per the runbook.
+- **Carry-over from v1.0:** TEST-CHAI-01 (chai-http v5 ESM migration still locked per AGENTS.md), OPS-02 / OPS-03 (pure swarm-side OPS, deferred), CONSOLE-LEGACY-JSON-PARSE (sibling-project scope).
+
+**Companion project:** `services/console` submodule advanced through SEC-DEP-02 in the parallel GSD workspace; pointer landed in this repo via Phase 10 (commit `28a4add4`). v1.9 backend tag should coordinate with whatever the console submodule ships next.
+
+**Archives:**
+
+- Roadmap: `.planning/milestones/v1.9-ROADMAP.md`
+- Requirements: `.planning/milestones/v1.9-REQUIREMENTS.md`
+- Audit: (none — per-phase VERIFICATION.md was the gate; milestone-level audit deferred)
+
+---
+
 ## v1.0 — v1 GA Backend Closures (Shipped: 2026-05-27)
 
 **Delivered:** Every legacy-console capability the Vue console depends on (auth, profile, devices, transformers, builds) continues to work end-to-end through v1.0 GA — 4/4 v1 backend requirements verified.
 
 **Stats:**
+
 - Phases: 4 | Plans: 8
 - Timeline: 2026-05-26 → 2026-05-27 (~2 days)
 - Git range: `6d0af4dd` (roadmap creation) → `71fab68b` (milestone audit)
@@ -27,6 +67,7 @@
 **Companion project:** `services/console` submodule has its own GSD workspace (10 phases shipped + Phase 11 in flight). SEC-DEP-02 trigger + Slice 4 merge-up coordination owed are tracked in `services/console/.planning/v1.x-backlog.md`. Parent-project v1.0 GA tag should coordinate with the console's v1.0 tag.
 
 **Archives:**
+
 - Roadmap: `.planning/milestones/v1.0-ROADMAP.md`
 - Requirements: `.planning/milestones/v1.0-REQUIREMENTS.md`
 - Audit: `.planning/milestones/v1.0-MILESTONE-AUDIT.md`

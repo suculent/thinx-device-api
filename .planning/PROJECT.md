@@ -12,35 +12,48 @@ The IoT device API stays available and trustworthy across release cycles — eve
 
 ## Current State
 
-**Shipped:** v1.0 GA Backend Closures (2026-05-27) — 4/4 v1 requirements Verified.
+**Shipped:** v1.9 Backend Hygiene & Posture (2026-06-04) — 13/13 v1.9 requirements verified across 7 phases (Phases 5–11), 23 plans, 78 commits on `thinx-staging`. See `.planning/MILESTONES.md` and `.planning/milestones/v1.9-ROADMAP.md`.
 
-- AUTH-API-01 (Phase 1) — unauthenticated `POST /api/v2/password/reset` → 200 restored
-- SEC-PII-01 (Phase 2) — PII/credentials scrubbed from `lib/thinx/owner.js` logs (12+1 sites)
-- OPS-01 (Phase 3) — swarm-side autoredeploy restored on `188.166.23.244`
-- SEC-DEP-01 (Phase 4) — 29 Dependabot alerts triaged + blocker fixes merged to master+main
+Previously: v1.0 GA Backend Closures (2026-05-27) — 4/4 v1 requirements; default branches `master` + `main` updated via PR #539 + #540; production image at `sha256:4d3fb789` (Phase 4 deploy).
 
-Default branches `master` + `main` updated via PR #539 + #540 (2026-05-26T23:09Z). Production at image `sha256:4d3fb789` (Phase 4 deploy). See `.planning/MILESTONES.md` for full v1.0 summary.
+**Codebase posture after v1.9:**
+- `lib/thinx/owner.js` is fully async/await (~73 callback patterns swept; 5 behavior-locking specs added) with strict equality throughout and SEC-PII-01 + Phase 5 REFACTOR-02 invariants preserved.
+- WebSocket lifecycle is deterministic (raw-socket `close` handler), session cookie is `httpOnly: true` with documented sub-5-min rollback, edge-handshake gap captured in an operator runbook.
+- Account lifecycle: admin `POST /api/v2/admin/user/:id/reactivate` exists for soft-deleted users; password-reset emails land on the Vue console (`/password-reset?`).
+- Operational guardrails: `base/update.sh` is shellcheck-clean with a single atomic commit per run; startup `ca.pem` freshness probe (DETECT-only, R10..R14) WARNs on issuer-mismatch before a 2026-05-31-style SSL incident reappears.
+- Historic PII residue: `scripts/redact-managed-logs.js` + audit-log forward-TTL ship in code; production sweep against ~658k `managed_logs` docs is operator-run per runbook.
 
-**Companion project:** `services/console` submodule has its own GSD workspace; v1.0 frontend is parallel-tracked there. Cross-project coordination owed: SEC-DEP-02 console dependency triage + console-side merge-up (deferred per operator Option B 2026-05-27).
+**Companion project:** `services/console` submodule shipped its SEC-DEP-02 phase under a new `v1.x Operational Hygiene` milestone; pointer landed in this repo via Phase 10 commit `28a4add4`.
 
-## Current Milestone: v1.9 Backend Hygiene & Posture
+## Current Milestone: (none — v1.10 to be planned)
 
-**Goal:** Pay down the v1.x backlog the v1.0 GA deferred — clean up structural hygiene, lift the security posture, and close auth/account lifecycle gaps — without breaking any legacy-console-compatible route.
+Run `/gsd:new-milestone` to define v1.10 scope. Carried tech-debt candidates already surfaced:
 
-**Version:** v1.9 — chosen to align the milestone tag with the live `package.json` `version` series (currently `1.9.3054`, bumped 2026-06-02 via commit `304b09d1` during base image rebuild).
-
-**Target features:**
-- **Backend hygiene refactors** (REFACTOR-01..05) — trust-proxy dedup, weak-equality cleanup in `password_reset`, WebSocket close handlers, callback→async sweep in `owner.js`, jshint/fs-finder devDep reclassification
-- **Security posture** (SEC-COOKIE-01, SEC-WS-01, SEC-DEP-02, SEC-PII-02) — httpOnly cookie review, WebSocket handshake hardening, services/console dep triage coordination, historic CouchDB audit-log redaction (GDPR-adjacent)
-- **Auth/account lifecycle** (AUTH-REACTIVATE-01, AUTH-RESET-LINK-CONSOLE) — soft-deleted account reactivation flow, reset-email landing on Vue console
-- **Surfaced 2026-06-02** (BASE-IMG-01, THINX-CERT-CHECK-01) — `base/update.sh` hardening (version handling, tag pinning, error handling); startup probe that warns on stale ca.pem vs leaf cert (codebase angle on the LE intermediate rotation gap)
-
-**Deferred to later milestones (out of v1.9 scope):**
-- **Operations** (OPS-02, OPS-03) — pure swarm-side OPS, not codebase
-- **Test infra** (TEST-CHAI-01) — chai-http v5 ESM migration locked per AGENTS.md
-- **Legacy console deprecation** (CONSOLE-LEGACY-JSON-PARSE) — sibling-project scope
+- **fs-finder removal sweep** — deferred from v1.9 Phase 5 REFACTOR-05 (5 active runtime call sites in `lib/`). Replace with `fs-extra` globs or native `fs.promises.readdir`, then drop the dep.
+- **SEC-WS-01 operator-side edge fix** — swarm-host nginx `location` block edit for `rtm.thinx.cloud`. Runbook authored in v1.9 Phase 6; execution outstanding.
+- **SEC-PII-02 production execution** — operator sweep against the ~658k `managed_logs` docs using the script shipped in v1.9 Phase 9. Snapshot → dry-run → apply → sample per runbook.
+- **Carry-over from v1.0** — TEST-CHAI-01 (chai-http v5 ESM migration, locked per AGENTS.md), OPS-02 / OPS-03 (pure swarm-side OPS), CONSOLE-LEGACY-JSON-PARSE (sibling-project scope).
 
 ## Validated Requirements (Historical)
+
+<details>
+<summary>v1.9 Backend Hygiene & Posture (shipped 2026-06-04)</summary>
+
+- ✓ **REFACTOR-01** — v1.9 (Phase 5) — Single canonical `app.set('trust proxy', ['loopback', '127.0.0.1'])` site in `thinx-core.js` with rationale comment; duplicate call deleted.
+- ✓ **REFACTOR-02** — v1.9 (Phase 5) — `!=` → `!==` in `Owner.password_reset` (line 492) + regression test for string-vs-number coercion case.
+- ✓ **REFACTOR-05** — v1.9 (Phase 5) — `jshint` moved to `devDependencies`. (`fs-finder` scope-amended: deferred to v1.10 because of 5 active runtime call sites in `lib/`.)
+- ✓ **REFACTOR-03** — v1.9 (Phase 6) — Raw-socket `close` handler in WS upgrade flow; per-connection map entries released deterministically on mid-flight aborts.
+- ✓ **SEC-WS-01** — v1.9 (Phase 6) — Root cause reproduced as `rtm.thinx.cloud` edge-nginx routing gap; runbook authored in `.planning/runbooks/websocket-handshake.md` with the 7-row reproduction table + operator-side fix. NOT code-fixable from this repo.
+- ✓ **SEC-COOKIE-01** — v1.9 (Phase 6) — Session cookie `x-thx-core` flipped to `httpOnly: true`; sub-5-min rollback path documented; regression spec covers attribute presence.
+- ✓ **REFACTOR-04** — v1.9 (Phase 7) — ~73 callback patterns in `lib/thinx/owner.js` converted to async/await across 6 atomic commits (`1aa92fe5`→`f4345711`); 5 behavior-locking specs added; SEC-PII-01 + Phase 5 REFACTOR-02 invariants preserved.
+- ✓ **AUTH-REACTIVATE-01** — v1.9 (Phase 8) — Admin endpoint `POST /api/v2/admin/user/:id/reactivate` behind `requireAdmin`; `ZZ-RouterAdminReactivateSpec.js` covers 401/403/200 paths + soft-delete gate intact.
+- ✓ **AUTH-RESET-LINK-CONSOLE** — v1.9 (Phase 8) — Reset URL changed from legacy `/password.html?` to Vue console `/password-reset?` in `Owner.password_reset`; regression spec extension locks the redirect.
+- ✓ **SEC-PII-02** — v1.9 (Phase 9) — `scripts/redact-managed-logs.js` (snapshot-gated `_bulk_docs` overlay + `--sample N` verification) + `lib/thinx/audit.js` 90-day `expire_at` forward TTL + operator runbook + GDPR-posture note. Production execution deferred to operator window.
+- ✓ **SEC-DEP-02** — v1.9 (Phase 10) — 2 console alerts classified `deferred-vendored-asset` (vendored `jquery-validation-1.19.5`, never invoked); SEC-DEP-02 scheduled in `services/console` GSD project; submodule pointer landed in this repo. Cross-project coordination runbook authored.
+- ✓ **BASE-IMG-01** — v1.9 (Phase 11) — `base/update.sh` rewritten (18 → 179 lines): `set -euo pipefail`, `--tag`/`--owner`/`--dry-run`/`--help`, auto `npm version patch`, pre/post digest logging, single atomic GPG-signed commit, shellcheck 0.11.0 clean.
+- ✓ **THINX-CERT-CHECK-01** — v1.9 (Phase 11) — DETECT-only `lib/thinx/cert-probe.js` startup probe wired into `thinx-core.js:~211`; WARNs on R10..R14 issuer-mismatch between leaf and `ca.pem`; `ZZ-CertProbeSpec.js` (6 it blocks) + 4 fixture PEMs.
+
+</details>
 
 <details>
 <summary>v1.0 GA Backend Closures (shipped 2026-05-27)</summary>
@@ -105,6 +118,13 @@ Default branches `master` + `main` updated via PR #539 + #540 (2026-05-26T23:09Z
 | Phase 4 Slice 3 Option C: skip manual Dependabot UI walk for 22 non-blocker alerts | Operator decision 2026-05-27; runtime-tree primary metric already 9→0; non-blocker alerts expected to age out via natural Dependabot lifecycle | ✓ Good — post-merge rescan confirmed 29 → 3 (1H + 2M) on default branches |
 | Phase 4 Slice 4 Option B: defer `services/console` merge-up to separate cross-project coordination | Operator decision 2026-05-27; 194-commit submodule diff (Vue v1.0 rewrite era) is sibling-project scope; SEC-DEP-02 v1.x backlog already tracks console-side dependency triage | — Pending — track via SEC-DEP-02 |
 | Verification artifact accepted in SUMMARY.md `verification:` blocks for Phases 1-3 (not separate `*-VERIFICATION.md`) | Verifier agent was not retroactively run; functional verification IS present in SUMMARYs + supporting `.txt` files; process-debt, not functional-debt | ⚠️ Revisit — if any future audit requires structured `*-VERIFICATION.md` per phase for traceability tooling, re-run `gsd-verifier` against the 3 SUMMARYs (low cost; no re-verification needed) |
+| v1.9 phase numbering continues from v1.0's Phase 4 (no `--reset-phase-numbers`) | Linear monorepo history preserves traceability across milestones; downstream tools that map requirement → phase don't need a milestone-disambiguation key | ✓ Good — Phases 5–11 mapped 1:1 to v1.9 with no ambiguity |
+| Phase 7 (owner.js sweep) executed as 6 sequential atomic commits on a single branch (not parallel worktrees) | Every plan touched `lib/thinx/owner.js`; parallel execution would have produced merge conflicts on every plan; sequential single-branch execution gave bisect-friendly history | ✓ Good — landed `1aa92fe5`→`f4345711` with zero behavior regressions and each top-5 method individually revertable |
+| SEC-WS-01 closed via operator runbook (not code change) | Root cause is rtm edge-nginx routing gap — outside this repo's control; capturing it as a runbook with a verbatim reproduction table is the highest-value action available from here | ✓ Good — operator-side fix recipe is documented and `deferred to edge-redesign` tag prevents accidental re-scoping |
+| SEC-PII-02 ships code + leaves production execution to operator window | Redaction is destructive of audit-log content; a snapshot-gated `--apply` flow with a documented rollback path makes execution a scheduled-maintenance decision, not a CI side-effect | ✓ Good — script, audit TTL, runbook, and GDPR-posture note all shipped; execution outstanding (see v1.10 backlog) |
+| THINX-CERT-CHECK-01 is DETECT-only (not auto-mutate) | Cert rotation lives on the swarm host (cron + ACME client) — the codebase angle is to surface drift, not to take over rotation | ✓ Good — startup WARN gives 5-min visibility on R10→R13 / R10→R14 drift before SSL incidents trigger |
+| REFACTOR-05 scope-amended mid-phase to jshint-only (fs-finder deferred to v1.10) | 5 active runtime call sites discovered during execution made `fs-finder` reclassification a breaking change disguised as a "cheap sweep" | ✓ Good — single-flag amendment surfaced in ROADMAP.md, REQUIREMENTS.md, STATE.md, and a v1.10 backlog entry; literal text gap closed by `89669fc4` |
+| v1.9 milestone closed without a separate milestone-level audit | Per-phase VERIFICATION.md ran for all 7 phases and covered 13/13 requirements; running another audit pass would mostly re-read those VERIFICATION reports | ⚠️ Revisit — if v1.10 audit tooling requires a v1.x-MILESTONE-AUDIT.md trail across all milestones, retrofit one against the 7 v1.9 VERIFICATION.md reports |
 
 ## Evolution
 
@@ -125,4 +145,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-06-02 — v1.9 Backend Hygiene & Posture milestone started (3 backlog clusters + 2 today-surfaced items; phase numbering continues from v1.0 last phase = 4)*
+*Last updated: 2026-06-04 — v1.9 Backend Hygiene & Posture milestone shipped (7 phases, 23 plans, 13/13 requirements verified). v1.10 to be planned via `/gsd:new-milestone`.*

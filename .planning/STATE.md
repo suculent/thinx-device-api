@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: — Backend Hygiene & Posture
-status: completed
+status: Awaiting next milestone
 stopped_at: Completed 11-01-PLAN.md (BASE-IMG-01)
-last_updated: "2026-06-03T13:25:42.586Z"
-last_activity: 2026-06-03 -- Phase 11 marked complete
+last_updated: "2026-06-04T11:27:20.396Z"
+last_activity: 2026-06-04 — Milestone v1.9 completed and archived
 progress:
   total_phases: 7
   completed_phases: 7
@@ -16,28 +16,29 @@ progress:
 
 # STATE — THiNX Device API
 
-**Last updated:** 2026-06-03 (Phase 11 Plan 11-1 BASE-IMG-01 landed; submodule commit `base/8db56b1f`)
+**Last updated:** 2026-06-04 (v1.9 Backend Hygiene & Posture shipped — 13/13 requirements verified, archived to `.planning/milestones/v1.9-*`)
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-06-02)
+See: `.planning/PROJECT.md` (updated 2026-06-04 after v1.9 milestone close)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** Phase 11 — Build & Cert Hygiene
-- **Latest production image:** `thinxcloud/api:latest sha256:4d3fb789` (v1.0 Phase 4 deploy 2026-05-26T22:35:54Z); v1.9 base bumped to `1.9.3054` 2026-06-02 via `304b09d1`
-- **Sibling project:** `services/console/.planning/` — Vue console GSD workspace (v1.0 frontend shipped; SEC-DEP-02 console-side dep triage scheduled for Phase 10)
+- **Current focus:** Planning next milestone (v1.10) via `/gsd:new-milestone`
+- **Latest production image:** `thinxcloud/api:latest sha256:4d3fb789` (v1.0 Phase 4 deploy 2026-05-26T22:35:54Z); v1.9 base bumped to `1.9.3054` 2026-06-02 via `304b09d1`; v1.9 backend changes deployed via operator push when ready (CI green-gate on `thinx-staging`)
+- **Sibling project:** `services/console/.planning/` — Vue console GSD workspace; SEC-DEP-02 scheduled there under a new `v1.x Operational Hygiene` milestone (Phase 10 of v1.9 landed the parent-side coordination)
 
 ## Current Position
 
-Phase: 11 — COMPLETE
-Plan: 2 of 2
-Status: Phase 11 complete
-Last activity: 2026-06-03 -- Phase 11 marked complete
+Phase: (none — between milestones)
+Plan: —
+Status: Awaiting next milestone — run `/gsd:new-milestone`
+Last activity: 2026-06-04 — Milestone v1.9 completed and archived
 
 ## Milestones
 
 - ✅ **v1.0 — v1 GA Backend Closures** (shipped 2026-05-27) — see `.planning/MILESTONES.md`
-- 🚧 **v1.9 — Backend Hygiene & Posture** (in planning) — Phases 5–11; see `.planning/ROADMAP.md`
+- ✅ **v1.9 — Backend Hygiene & Posture** (shipped 2026-06-04) — Phases 5–11; see `.planning/MILESTONES.md` + `.planning/milestones/v1.9-ROADMAP.md`
+- 📋 **v1.10 — TBD** — to be planned via `/gsd:new-milestone`
 
 ## Accumulated Context
 
@@ -54,11 +55,33 @@ Last activity: 2026-06-03 -- Phase 11 marked complete
 
 ### Todos
 
-- Run `/gsd:plan-phase 5` to start v1.9 Phase 5 (Backend Hygiene — Cheap Sweeps: REFACTOR-01, REFACTOR-02, REFACTOR-05).
+- Run `/gsd:new-milestone` to start v1.10 scope/requirements/roadmap.
 
 ### v1.10 Candidates
 
-- **fs-finder removal sweep** (v1.10 candidate, deferred from v1.9 Phase 5 REFACTOR-05): replace `finder.from()` / `finder.in()` / `finder.findFiles()` calls in 5 modules (`lib/thinx/builder.js`, `lib/thinx/deployment.js`, `lib/thinx/platform.js`, `lib/thinx/repository.js`, `lib/thinx/plugins/arduino/plugin.js`) with `fs-extra` glob helpers (already a dep) OR native `fs.promises.readdir` recursion. After the sweep lands, `fs-finder` can be removed from `package.json` entirely. Estimated touch surface: ~10 call sites across ~5 files. Sequenced after v1.9 ships.
+- **fs-finder removal sweep** (deferred from v1.9 Phase 5 REFACTOR-05): replace `finder.from()` / `finder.in()` / `finder.findFiles()` calls in 5 modules (`lib/thinx/builder.js`, `lib/thinx/deployment.js`, `lib/thinx/platform.js`, `lib/thinx/repository.js`, `lib/thinx/plugins/arduino/plugin.js`) with `fs-extra` glob helpers (already a dep) OR native `fs.promises.readdir` recursion. After the sweep lands, `fs-finder` can be removed from `package.json` entirely. Estimated touch surface: ~10 call sites across ~5 files.
+- **SEC-WS-01 operator-side edge fix** (runbook authored in v1.9 Phase 6): swarm-host nginx `location` block edit for `rtm.thinx.cloud` — adds `location ~ ^/[^/]+(/[0-9]+)?$` upgrade headers. NOT a code change in this repo; consider whether to schedule the operator-side execution as a v1.10 phase or leave it tagged `deferred to edge-redesign`.
+- **SEC-PII-02 production execution** (runbook authored in v1.9 Phase 9): operator sweep against ~658k `managed_logs` docs using `scripts/redact-managed-logs.js` (snapshot → dry-run → review → apply → sample → compact). Carries scheduled-maintenance risk; sequence after a CouchDB compaction window.
+- **TEST-CHAI-01** (chai-http v5 ESM migration, locked per AGENTS.md): still locked. Trigger to reconsider is a Snyk/Dependabot CVE in superagent v3. Third milestone of deferral — v1.10 planning should make a deliberate keep/drop call.
+- **OPS-02 / OPS-03** (swarm-side OPS): stale memberlist + malformed autoredeploy specs. Pure OPS edits; not codebase. Third milestone of deferral — same keep/drop call as TEST-CHAI-01.
+- **CONSOLE-LEGACY-JSON-PARSE**: sibling-project scope (`services/console/.planning/`); not a parent-repo requirement. Third milestone of deferral — consider closing out at the parent level if the sibling project doesn't pick it up.
+
+### Deferred at v1.9 Close
+
+Items surfaced by `gsd-sdk query audit-open` at close that were acknowledged and deferred rather than resolved inline:
+
+| Category | Item | Status |
+|----------|------|--------|
+| quick_task | 260531-n72-fix-the-latent-bugs-in-apikey-js-and-har | manifest-missing (work completed via commit `fae0efbd`; quick-task scanner can't locate manifest) |
+| quick_task | 260531-pdi-fix-the-let-s-encrypt-r10-r13-cross-sign | manifest-missing (work completed via commit `08e4dbd7`; quick-task scanner can't locate manifest) |
+| context_question | Phase 05 — REFACTOR-05 scope-amendment placement | resolved in execution (single-commit document sync `89669fc4`); CONTEXT.md question text remained as stale artifact |
+| context_question | Phase 05 — atomic commit boundary for trust-proxy/!=/devDep | resolved in execution (3 atomic commits — one per requirement); CONTEXT.md question text remained as stale artifact |
+| context_question | Phase 06 — REFACTOR-03 spec helper for mid-upgrade aborts | resolved in execution (in-process WS server pattern in `ZZ-WebSocketLifecycleSpec.js`); CONTEXT.md question text remained as stale artifact |
+| context_question | Phase 06 — SEC-COOKIE-01 flip vs runbook commit boundary | resolved in execution (one commit for flip + runbook bundled); CONTEXT.md question text remained as stale artifact |
+| context_question | Phase 06 — SEC-WS-01 runbook location | resolved in execution (`.planning/runbooks/websocket-handshake.md`); CONTEXT.md question text remained as stale artifact |
+| context_question | Phase 07 (3 questions) | resolved in execution (sequential single-branch, 6 atomic commits, behavior-locking specs); CONTEXT.md question text remained as stale artifact |
+
+All items are non-blocking. The two quick-tasks shipped under `/gsd-quick` per user-preferred incident-response workflow and the work itself is in the git history; the scanner reports them because the quick-task directories don't carry the manifest format the scanner expects. The 7 context_questions were planner-discovered ambiguities resolved during execution but never deleted from the CONTEXT.md files; they're stale artifact, not open work.
 
 ### Blockers
 
@@ -83,10 +106,15 @@ Last activity: 2026-06-03 -- Phase 11 marked complete
 
 ## Session Continuity
 
-**Stopped at:** Completed 11-01-PLAN.md (BASE-IMG-01)
+**Stopped at:** v1.9 milestone complete and archived (Phase 11 closed `06894d6a`; archive landed via SDK `milestone.complete`).
 
-**Next action:** Execute Plan 11-2 (`11-02-PLAN.md`) — THINX-CERT-CHECK-01: startup `ca.pem` freshness probe (new `lib/thinx/cert-probe.js`), hooked into `thinx-core.js` near the SSL load path (line 211), with unit tests covering R10/R13 issuer matches + mismatches. DETECT-only (no cert mutation). Closes the final v1.9 requirement and ends the milestone.
+**Next action:** Run `/gsd:new-milestone` to start v1.10 — define scope, requirements, and roadmap. v1.10 candidates already surfaced above (`### v1.10 Candidates`).
 
 ---
 *v1.0 GA backend closures shipped and archived: 2026-05-27 (4/4 v1 requirements Verified — AUTH-API-01, SEC-PII-01, OPS-01, SEC-DEP-01)*
-*v1.9 roadmap created: 2026-06-02 — 7 phases (5–11), 13 requirements mapped, coverage 100%*
+*v1.9 Backend Hygiene & Posture shipped and archived: 2026-06-04 (13/13 v1.9 requirements Verified across 7 phases)*
+
+## Operator Next Steps
+
+- Start v1.10 with `/gsd:new-milestone`
+- Decide on push timing for the v1.9 tag (manual `git push origin v1.9` once the tag lands locally)
