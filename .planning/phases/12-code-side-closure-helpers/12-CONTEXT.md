@@ -80,15 +80,15 @@ Land 3 small, additive, code-side helpers in this repo BEFORE Phases 13–14 exe
 
 ### Plan Boundaries + Parallelization
 
-- **D-38:** 3 plans, ONE per requirement (parallel-safe — zero file overlap among the 3 per the verified file-touch matrix):
+- **D-38 [informational]:** 3 plans, ONE per requirement (parallel-safe — zero file overlap among the 3 per the verified file-touch matrix). Enforced via plan frontmatter (one plan per `requirements_addressed`).
   - **12-01-PLAN.md** — TEST-WS-01 (new spec file only)
   - **12-02-PLAN.md** — OBS-01 (extend `scripts/redact-managed-logs.js` + new `RedactSlackSpec.js`)
   - **12-03-PLAN.md** — OBS-02 (new `lib/thinx/audit-ttl-probe.js` + 5-line additive in `thinx-core.js` near :216 + new `ZZ-AuditTTLEvictionSpec.js` + new `spec/fixtures/audit-ttl/`)
-- **D-39:** Execution = **Wave 1 parallel** (3 worktrees, 3 atomic GPG-signed commits land on `thinx-staging`). Matches Phase 5 / Phase 8 file-disjoint precedent. Conflict-free per the verified file-touch matrix. User explicitly chose Wave 1 parallel over single-branch sequential.
+- **D-39 [informational]:** Execution = **Wave 1 parallel** (3 worktrees, 3 atomic GPG-signed commits land on `thinx-staging`). Matches Phase 5 / Phase 8 file-disjoint precedent. Conflict-free per the verified file-touch matrix. User explicitly chose Wave 1 parallel over single-branch sequential. Enforced via plan frontmatter (`wave: 1`, `depends_on: []`).
 - **D-40:** No Wave 2 doc-update plan needed (REQUIREMENTS.md `SLACK_WEBHOOK_URL` drift fix is folded into Plan 12-02's commit scope — it ships alongside the OBS-01 implementation, not as a separate doc-update commit).
-- **D-41:** Test-env ACCEPT pattern carries forward from Phase 5+: local `npm test` aborts on missing `/mnt/data/conf/config.json`; canonical green-gate is CI-side Jasmine inside the Docker test image. Local gates per plan are static (file exists + `node --check` clean + `shellcheck` for any shell artifact).
-- **D-42:** All commits GPG-signed (matches the v1.9 default; current `commit.gpgsign=true` confirmed).
-- **D-43:** Compatibility constraint (carries forward): every public route the legacy AngularJS console relied on (which Vue inherited) must keep working — no signature breaks. All 3 helpers are additive and do not touch any router or session surface.
+- **D-41 [informational]:** Test-env ACCEPT pattern carries forward from Phase 5+: local `npm test` aborts on missing `/mnt/data/conf/config.json`; canonical green-gate is CI-side Jasmine inside the Docker test image. Local gates per plan are static (file exists + `node --check` clean + `shellcheck` for any shell artifact). Operational pattern, not plan-cited.
+- **D-42 [informational]:** All commits GPG-signed (matches the v1.9 default; current `commit.gpgsign=true` confirmed). Enforced via git config, not plan citation.
+- **D-43 [informational]:** Compatibility constraint (carries forward): every public route the legacy AngularJS console relied on (which Vue inherited) must keep working — no signature breaks. All 3 helpers are additive and do not touch any router or session surface. Enforced via verify-phase compatibility audit.
 
 ### Claude's Discretion
 
