@@ -215,6 +215,13 @@ module.exports = class THiNX extends EventEmitter {
                 console.log(`⚠️ [warning] ${probeResult.message}`);
               }
 
+              // OBS-02: DETECT-only probe — emits a WARN when the oldest live managed_logs doc is stale-expired beyond GRACE_MS (default 7 days).
+              const auditTtlProbe = require('./lib/thinx/audit-ttl-probe');
+              const _Database_obs02 = require('./lib/thinx/database');
+              const _graceDays = (app_config && typeof app_config.audit_ttl_grace_days === 'number' && app_config.audit_ttl_grace_days > 0) ? app_config.audit_ttl_grace_days : 7;
+              auditTtlProbe.probeTtlEviction({ couchdbUri: new _Database_obs02().uri(), dbName: Globals.prefix() + 'managed_logs', graceMs: _graceDays * 24 * 60 * 60 * 1000 }).then(r => { if (r.ok === false) console.log('⚠️ [warning] ' + r.message); }).catch(_e => { /* non-fatal */ });
+
+
               let caCert = read(app_config.ssl_ca, 'utf8');
               let ca = pki.certificateFromPem(caCert);
               let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
