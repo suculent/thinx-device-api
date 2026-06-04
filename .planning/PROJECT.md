@@ -25,14 +25,27 @@ Previously: v1.0 GA Backend Closures (2026-05-27) — 4/4 v1 requirements; defau
 
 **Companion project:** `services/console` submodule shipped its SEC-DEP-02 phase under a new `v1.x Operational Hygiene` milestone; pointer landed in this repo via Phase 10 commit `28a4add4`.
 
-## Current Milestone: (none — v1.10 to be planned)
+## Current Milestone: v1.10 Operational Closures
 
-Run `/gsd:new-milestone` to define v1.10 scope. Carried tech-debt candidates already surfaced:
+**Goal:** Ship the two deferred operator-runbook executions from v1.9 (SEC-WS-01 edge handshake fix on `rtm.thinx.cloud` + SEC-PII-02 `managed_logs` production sweep) in a single focused session, alongside small code-side helpers that make the executions safer and the closures observable.
 
-- **fs-finder removal sweep** — deferred from v1.9 Phase 5 REFACTOR-05 (5 active runtime call sites in `lib/`). Replace with `fs-extra` globs or native `fs.promises.readdir`, then drop the dep.
-- **SEC-WS-01 operator-side edge fix** — swarm-host nginx `location` block edit for `rtm.thinx.cloud`. Runbook authored in v1.9 Phase 6; execution outstanding.
-- **SEC-PII-02 production execution** — operator sweep against the ~658k `managed_logs` docs using the script shipped in v1.9 Phase 9. Snapshot → dry-run → apply → sample per runbook.
-- **Carry-over from v1.0** — TEST-CHAI-01 (chai-http v5 ESM migration, locked per AGENTS.md), OPS-02 / OPS-03 (pure swarm-side OPS), CONSOLE-LEGACY-JSON-PARSE (sibling-project scope).
+**Target features:**
+
+Operator-runbook executions (the two carry-overs):
+- **SEC-WS-01 closure** — apply the swarm-host nginx `location` block per `.planning/runbooks/websocket-handshake.md`, verify `wscat` returns 101 from a fresh Vue session against rtm, persist the config change with a version-controlled trail.
+- **SEC-PII-02 closure** — execute the staged redaction sweep (snapshot → dry-run → apply → sample → compact) per `.planning/runbooks/managed-logs-redaction.md`; sample-verify ~658k docs show zero raw reset_keys.
+
+Code-side helpers for runbook closures:
+- **WS handshake CI smoke probe** — a `ZZ-*` regression spec that probes the rtm-style `/<owner>(/<timestamp>)?` path so any future regression of the SEC-WS-01 fix is caught at CI, not at user-report.
+- **`managed_logs` cleanup Slack notification** — `scripts/redact-managed-logs.js` posts a completion summary (docs scanned, redacted, sample result) to the existing Slack outage notifier so the operator gets a closure receipt.
+- **Audit-log TTL eviction monitor** — startup probe (or short scheduled job) that asserts CouchDB is actually evicting `expire_at`-stamped docs at the 90-day boundary, so the forward-TTL guarantee from v1.9 Phase 9 keeps holding.
+
+**Execution model:** OPS + opportunistic in-flight code adds — if production reveals an in-script issue (e.g., a CouchDB conflict retry pattern), the fix lands inside this milestone rather than spawning a separate cycle.
+
+**Deferred to later milestones (out of v1.10 scope):**
+- **fs-finder removal sweep** — still v1.x candidate; deferred from v1.9 Phase 5 REFACTOR-05 and sequenced after v1.10 closes the ops loop.
+- **Fresh Dependabot triage** — 5 new alerts (2H/3M) surfaced on default branch during v1.9 push; triage deferred to v1.11 or a quick-task incident response window.
+- **Carry-over from v1.0** — TEST-CHAI-01 (chai-http v5 ESM, locked per AGENTS.md), OPS-02 / OPS-03 (pure swarm-side OPS), CONSOLE-LEGACY-JSON-PARSE (sibling-project scope). Third milestone of deferral — v1.11 planning should make a deliberate keep/drop call rather than auto-carrying again.
 
 ## Validated Requirements (Historical)
 
@@ -145,4 +158,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-06-04 — v1.9 Backend Hygiene & Posture milestone shipped (7 phases, 23 plans, 13/13 requirements verified). v1.10 to be planned via `/gsd:new-milestone`.*
+*Last updated: 2026-06-04 — v1.10 Operational Closures milestone started (theme: ship SEC-WS-01 + SEC-PII-02 operator runbook executions + 3 code helpers). Continues phase numbering from v1.9 (next phase = 12).*

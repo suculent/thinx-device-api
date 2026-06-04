@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.9
-milestone_name: — Backend Hygiene & Posture
-status: Awaiting next milestone
-stopped_at: Completed 11-01-PLAN.md (BASE-IMG-01)
-last_updated: "2026-06-04T11:27:20.396Z"
-last_activity: 2026-06-04 — Milestone v1.9 completed and archived
+milestone: v1.10
+milestone_name: Operational Closures
+status: planning
+last_updated: "2026-06-04T12:21:37.329Z"
+last_activity: 2026-06-04
 progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 23
-  completed_plans: 23
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # STATE — THiNX Device API
@@ -23,22 +22,22 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-06-04 after v1.9 milestone close)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** Planning next milestone (v1.10) via `/gsd:new-milestone`
+- **Current focus:** v1.10 Operational Closures — defining requirements + roadmap. Theme: ship the SEC-WS-01 + SEC-PII-02 operator runbook executions in a single focused session, alongside 3 small code helpers (WS CI smoke probe, managed_logs Slack receipt, audit-TTL eviction monitor).
 - **Latest production image:** `thinxcloud/api:latest sha256:4d3fb789` (v1.0 Phase 4 deploy 2026-05-26T22:35:54Z); v1.9 base bumped to `1.9.3054` 2026-06-02 via `304b09d1`; v1.9 backend changes deployed via operator push when ready (CI green-gate on `thinx-staging`)
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace; SEC-DEP-02 scheduled there under a new `v1.x Operational Hygiene` milestone (Phase 10 of v1.9 landed the parent-side coordination)
 
 ## Current Position
 
-Phase: (none — between milestones)
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone — run `/gsd:new-milestone`
-Last activity: 2026-06-04 — Milestone v1.9 completed and archived
+Status: Defining requirements
+Last activity: 2026-06-04 — Milestone v1.10 started
 
 ## Milestones
 
 - ✅ **v1.0 — v1 GA Backend Closures** (shipped 2026-05-27) — see `.planning/MILESTONES.md`
 - ✅ **v1.9 — Backend Hygiene & Posture** (shipped 2026-06-04) — Phases 5–11; see `.planning/MILESTONES.md` + `.planning/milestones/v1.9-ROADMAP.md`
-- 📋 **v1.10 — TBD** — to be planned via `/gsd:new-milestone`
+- 🚧 **v1.10 — Operational Closures** (planning) — Phases 12+; see `.planning/ROADMAP.md` (to be created)
 
 ## Accumulated Context
 
@@ -55,7 +54,9 @@ Last activity: 2026-06-04 — Milestone v1.9 completed and archived
 
 ### Todos
 
-- Run `/gsd:new-milestone` to start v1.10 scope/requirements/roadmap.
+- Define v1.10 REQUIREMENTS.md (5 requirements: 2 OPS-CLOSURE-*, 3 code helpers).
+- Spawn `gsd-roadmapper` to produce ROADMAP.md (phases continue from 11; v1.10 starts at Phase 12).
+- After roadmap approved: `/gsd:discuss-phase 12` for the first v1.10 phase.
 
 ### v1.10 Candidates
 
