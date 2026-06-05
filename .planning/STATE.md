@@ -3,20 +3,20 @@ gsd_state_version: 1.0
 milestone: v1.11
 milestone_name: Backlog Drawdown
 status: executing
-stopped_at: v1.11 ROADMAP creation (2026-06-05)
-last_updated: "2026-06-05T22:34:56.480Z"
+stopped_at: Phase 15 Plan 01 complete (2026-06-06)
+last_updated: "2026-06-05T22:41:51.499Z"
 last_activity: 2026-06-05
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 4
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
 # STATE — THiNX Device API
 
-**Last updated:** 2026-06-06 (Phase 15 Plan 01 complete — finder.js + FinderSpec.js; 2/4 plans in progress)
+**Last updated:** 2026-06-06 (Phase 15 Plan 02 complete — deployment.js + repository.js fs-finder sweep + specs Cases A B C C2; 2/4 plans complete)
 
 ## Project Reference
 
@@ -30,9 +30,9 @@ See: `.planning/PROJECT.md` (updated 2026-06-05 after v1.11 milestone start)
 ## Current Position
 
 Phase: 15 (fs-finder-removal) — EXECUTING
-Plan: 2 of 4
-Status: Plan 01 complete; executing Phase 15
-Last activity: 2026-06-06 -- Phase 15 Plan 01 complete (finder.js + FinderSpec.js)
+Plan: 3 of 4
+Status: Plan 02 complete; executing Phase 15
+Last activity: 2026-06-06 -- Phase 15 Plan 02 complete (deployment.js + repository.js fs-finder sweep + Cases A B C C2)
 
 ## Milestones
 
@@ -59,6 +59,7 @@ Items acknowledged and deferred at v1.10 milestone close and v1.11 scope-setting
 
 ### Decisions
 
+- 2026-06-06 — Phase 15 Plan 02 — deployment.js imports only findFilesSync (minimal import surface); repository.js imports only findDirsSync; includeDotfiles=true is mandatory 4th arg for the .git search (replicates showSystemFiles); Case C2 stubs app_config singleton via Globals reference to prove dotfile flag survives into Repository.findAllRepositories().
 - 2026-06-06 — Phase 15 Plan 01 — Manual synchronous stack-walk (no fs.readdirSync recursive:true) chosen for Node 19.x floor compatibility; only core fs/path deps; symlinks not followed per T-15-02; includeDotfiles skips entire hidden subtrees when false.
 - 2026-06-05 — v1.11 ROADMAP shape: 3 phases (15–17), granularity coarse. Phase 15 = fs-finder removal (REFACTOR-06 + REFACTOR-07 tightly coupled: sweep must precede drop). Phase 16 = Dependabot triage (SEC-DEP-03, disjoint files, parallel-safe). Phase 17 = influx prod deploy (OPS-EXEC-03, purely operational, fix already committed + CI-green). All three phases are functionally independent of each other; execution order is flexible.
 - 2026-06-05 — Phase numbering: v1.11 continues from v1.10's last phase (Phase 14). Integer phases 15–17 = v1.11 work. No `--reset-phase-numbers`; linear monorepo history preserves cross-milestone traceability.
@@ -98,9 +99,9 @@ Items acknowledged and deferred at v1.10 milestone close and v1.11 scope-setting
 
 ## Session Continuity
 
-**Stopped at:** Phase 15 Plan 01 complete (2026-06-06)
+**Stopped at:** Phase 15 Plan 02 complete (2026-06-06)
 
-**Next action:** Execute Phase 15 Plan 02 (call-site sweep — builder.js, deployment.js, platform.js, repository.js, plugins/arduino/plugin.js). Phase 17 (influx prod deploy) can be executed independently at any time the operator has a window.
+**Next action:** Execute Phase 15 Plan 03 (call-site sweep — builder.js, platform.js, plugins/arduino/plugin.js). Phase 17 (influx prod deploy) can be executed independently at any time the operator has a window.
 
 ---
 *v1.0 GA backend closures shipped and archived: 2026-05-27 (4/4 v1 requirements Verified)*
