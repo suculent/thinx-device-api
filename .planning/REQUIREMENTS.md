@@ -9,7 +9,7 @@ Requirements for the v1.11 Backlog Drawdown milestone. Each maps to exactly one 
 
 ### Dependency Hygiene
 
-- [ ] **REFACTOR-06**: All `fs-finder` call sites in `lib/` are replaced with `fs-extra` / native `fs.promises` equivalents, with behavior preserved and a behavior-locking spec per touched module. Touch surface: ~10 `finder.from()` / `finder.in()` / `finder.findFiles()` calls across `lib/thinx/builder.js`, `lib/thinx/deployment.js`, `lib/thinx/platform.js`, `lib/thinx/repository.js`, `lib/thinx/plugins/arduino/plugin.js`.
+- [x] **REFACTOR-06**: All `fs-finder` call sites in `lib/` are replaced with `fs-extra` / native `fs.promises` equivalents, with behavior preserved and a behavior-locking spec per touched module. Touch surface: ~10 `finder.from()` / `finder.in()` / `finder.findFiles()` calls across `lib/thinx/builder.js`, `lib/thinx/deployment.js`, `lib/thinx/platform.js`, `lib/thinx/repository.js`, `lib/thinx/plugins/arduino/plugin.js`.
 - [ ] **REFACTOR-07**: `fs-finder` is removed from `package.json` `dependencies` and no source reference to it remains (verified by `grep` clean + `npm ls fs-finder` resolving to nothing).
 
 ### Security / Dependencies
@@ -51,7 +51,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REFACTOR-06 | Phase 15 | Pending |
+| REFACTOR-06 | Phase 15 | Complete |
 | REFACTOR-07 | Phase 15 | Pending |
 | SEC-DEP-03 | Phase 16 | Pending |
 | OPS-EXEC-03 | Phase 17 | Pending |

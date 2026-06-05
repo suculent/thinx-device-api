@@ -2,36 +2,37 @@
 gsd_state_version: 1.0
 milestone: v1.11
 milestone_name: Backlog Drawdown
-status: planning
-last_updated: "2026-06-05T00:00:00.000Z"
+status: executing
+stopped_at: v1.11 ROADMAP creation (2026-06-05)
+last_updated: "2026-06-05T22:34:56.480Z"
 last_activity: 2026-06-05
 progress:
   total_phases: 3
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 4
+  completed_plans: 1
   percent: 0
 ---
 
 # STATE — THiNX Device API
 
-**Last updated:** 2026-06-05 (v1.11 ROADMAP created — 3 phases [15–17], 4/4 requirements mapped; phase planning pending)
+**Last updated:** 2026-06-06 (Phase 15 Plan 01 complete — finder.js + FinderSpec.js; 2/4 plans in progress)
 
 ## Project Reference
 
 See: `.planning/PROJECT.md` (updated 2026-06-05 after v1.11 milestone start)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** v1.11 Backlog Drawdown — 3 phases (15–17): fs-finder removal, Dependabot triage, influx fix prod deploy
+- **Current focus:** Phase 15 — fs-finder-removal
 - **Latest production image:** `thinxcloud/api:latest sha256:4d3fb789` (v1.0 Phase 4 deploy 2026-05-26T22:35:54Z); v1.9 base bumped to `1.9.3054` 2026-06-02; influx fix `9b6d931c` is CI-green (pipeline 5266) but **pending force-rollout to prod** (OPS-EXEC-03 / Phase 17)
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace; no coordination required for v1.11 (none of the 4 v1.11 requirements cross the parent/submodule boundary).
 
 ## Current Position
 
-Phase: Not started (roadmap created, phase planning pending)
-Plan: —
-Status: Roadmap created — run `/gsd:plan-phase 15` to begin
-Last activity: 2026-06-05 — v1.11 ROADMAP created (3 phases, 4/4 requirements mapped)
+Phase: 15 (fs-finder-removal) — EXECUTING
+Plan: 2 of 4
+Status: Plan 01 complete; executing Phase 15
+Last activity: 2026-06-06 -- Phase 15 Plan 01 complete (finder.js + FinderSpec.js)
 
 ## Milestones
 
@@ -58,6 +59,7 @@ Items acknowledged and deferred at v1.10 milestone close and v1.11 scope-setting
 
 ### Decisions
 
+- 2026-06-06 — Phase 15 Plan 01 — Manual synchronous stack-walk (no fs.readdirSync recursive:true) chosen for Node 19.x floor compatibility; only core fs/path deps; symlinks not followed per T-15-02; includeDotfiles skips entire hidden subtrees when false.
 - 2026-06-05 — v1.11 ROADMAP shape: 3 phases (15–17), granularity coarse. Phase 15 = fs-finder removal (REFACTOR-06 + REFACTOR-07 tightly coupled: sweep must precede drop). Phase 16 = Dependabot triage (SEC-DEP-03, disjoint files, parallel-safe). Phase 17 = influx prod deploy (OPS-EXEC-03, purely operational, fix already committed + CI-green). All three phases are functionally independent of each other; execution order is flexible.
 - 2026-06-05 — Phase numbering: v1.11 continues from v1.10's last phase (Phase 14). Integer phases 15–17 = v1.11 work. No `--reset-phase-numbers`; linear monorepo history preserves cross-milestone traceability.
 - 2026-06-05 — CONSOLE-LEGACY-JSON-PARSE reclassified out of parent scope (frontend double-parse in sibling submodule; documented at v1.11 start in REQUIREMENTS.md Out of Scope table + PROJECT.md).
@@ -96,9 +98,9 @@ Items acknowledged and deferred at v1.10 milestone close and v1.11 scope-setting
 
 ## Session Continuity
 
-**Stopped at:** v1.11 ROADMAP creation (2026-06-05)
+**Stopped at:** Phase 15 Plan 01 complete (2026-06-06)
 
-**Next action:** Run `/gsd:plan-phase 15` to begin Phase 15 (fs-finder Removal). Phase 17 (influx prod deploy) can be executed independently at any time the operator has a window — fix is already in git (`9b6d931c`) and CI-green.
+**Next action:** Execute Phase 15 Plan 02 (call-site sweep — builder.js, deployment.js, platform.js, repository.js, plugins/arduino/plugin.js). Phase 17 (influx prod deploy) can be executed independently at any time the operator has a window.
 
 ---
 *v1.0 GA backend closures shipped and archived: 2026-05-27 (4/4 v1 requirements Verified)*
