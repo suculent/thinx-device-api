@@ -96,4 +96,20 @@ describe("Platform", function () {
     });
   }, 15000);
 
+  it("getPlatformFromPath finds thinx.yml recursively", function () {
+    const os = require('os');
+    const fs = require('fs');
+    const pathMod = require('path');
+    const tmpRoot = fs.mkdtempSync(pathMod.join(os.tmpdir(), 'platform-finder-'));
+    try {
+      const sub = pathMod.join(tmpRoot, 'sub');
+      fs.mkdirSync(sub);
+      fs.writeFileSync(pathMod.join(sub, 'thinx.yml'), 'arduino:\n  platform: esp8266\n');
+      const result = Platform.getPlatformFromPath(tmpRoot);
+      expect(result).to.not.equal(null);
+    } finally {
+      try { fs.rmSync(tmpRoot, { recursive: true, force: true }); } catch (_e) { /* ignore */ }
+    }
+  });
+
 });
