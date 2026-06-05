@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: — Operational Closures
 status: v1.10 phases 12–14 complete + audited. ACTIVE HANDOFF → see .planning/HANDOFF.md (drive influx fix 9b6d931c to prod, then archive v1.10)
-stopped_at: "session cleared 2026-06-05 — resume via .planning/HANDOFF.md"
-last_updated: "2026-06-05T13:00:00.000Z"
+stopped_at: "2026-06-05 — influx fix (9b6d931c) now tracked under v1.10 as quick-task 260605-inf; watching CI pipeline 5265 (thinx-staging) for green before operator deploy"
+last_updated: "2026-06-05T22:00:00.000Z"
 last_activity: "2026-06-05 -- Device check-in fix DEPLOYED+verified (6b4a077c+06cd31ca; image sha256:2bf95549 live); 5 corrupted device docs cleaned. Swarm: thinx_api+thinx_mosquitto PINNED to micro (co-located w/ couchdb; MQTT healthy). Influx stats fix committed+pushed (9b6d931c) — fixes Vue dashboard check-in numbers + InfluxDB BADSTRING log spam — NOT yet deployed (operator force-rollout pending). Full resume plan in .planning/HANDOFF.md."
 progress:
   total_phases: 3
@@ -101,6 +101,7 @@ All items are non-blocking. The two quick-tasks shipped under `/gsd-quick` per u
 | 260531-n72 | Fix latent bugs in apikey.js + harden node-redis client + Slack outage notifier (incident response to 2026-05-31 14:19 UTC thinx_api OOM) | 2026-05-31 | fae0efbd | [260531-n72-fix-the-latent-bugs-in-apikey-js-and-har](./quick/260531-n72-fix-the-latent-bugs-in-apikey-js-and-har/) |
 | 260531-pdi | Refresh LE intermediate allowlist (R10..R14) in thinx-core.js cert rotation-tolerance branch — silences startup SSL verification error caused by R13-issued leaf vs R10-pinned chain | 2026-05-31 | 08e4dbd7 | [260531-pdi-fix-the-let-s-encrypt-r10-r13-cross-sign](./quick/260531-pdi-fix-the-let-s-encrypt-r10-r13-cross-sign/) |
 | 260605-lix | Device check-in did not persist top-level lastupdate (console showed stale "last connected"): `update_device_and_respond` wrote a nested `doc.changes` blob via the flat-merge `devices/modify` handler; also `runDeviceTransformers` had no else branch for transformer-less devices. Fixed both + DeviceSpec (04b) regression. Root cause proven on prod doc 04ed1650. | 2026-06-05 | 6b4a077c | [260605-lix-fix-device-check-in-lastupdate-not-persi](./quick/260605-lix-fix-device-check-in-lastupdate-not-persi/) |
+| 260605-inf | Influx stats fix (v1.10 OBS addition): dashboard check-in numbers read 0/stale + API log spammed `error parsing query: found BADSTRING`. Fixed `lib/thinx/influx.js` — tag mismatch (write `owner` vs read `owner_id`), malformed time predicates (stray `'`, Date/number → `'<ISO>'` / `now() - 7d`), `mean`→`count`, `${measurement}`→`${kpi}` loop index, removed malformed helper queries. Return shape preserved (statistics.js + Visits.vue compatible). Folded into v1.10 per session handoff. **Pending prod deploy** (operator force-rollout after CI green). | 2026-06-05 | 9b6d931c | (loose commit — folded into v1.10, no quick-task dir) |
 
 ## Cross-Project Touchpoints
 
