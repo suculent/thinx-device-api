@@ -52,7 +52,12 @@ See `.planning/milestones/v1.10-ROADMAP.md`. 5/5 v1.10 requirements.
   3. `package.json` `dependencies` no longer contains an `fs-finder` entry
   4. Each of the 5 touched modules (`builder.js`, `deployment.js`, `platform.js`, `repository.js`, `plugins/arduino/plugin.js`) has a behavior-locking spec that passes in CI
   5. The full Jasmine suite (`npm test`) is green with no regressions introduced by the replacements
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 15-01-PLAN.md — Create lib/thinx/finder.js shared helper + FinderSpec
+- [ ] 15-02-PLAN.md — Sweep deployment.js + repository.js (3 call sites)
+- [ ] 15-03-PLAN.md — Sweep builder.js + platform.js + arduino plugin (6 call sites)
+- [ ] 15-04-PLAN.md — Drop fs-finder from package.json (REFACTOR-07)
 
 ### Phase 16: Dependabot Triage
 **Goal**: All 5 outstanding default-branch Dependabot alerts are classified and any runtime-tree blockers are remediated, reducing the `npm audit --omit=dev` high count
@@ -85,9 +90,10 @@ See `.planning/milestones/v1.10-ROADMAP.md`. 5/5 v1.10 requirements.
 | 12. Code-side Closure Helpers | v1.10 | 3/3 | Complete | 2026-06-04 |
 | 13. SEC-WS-01 Edge Handshake Closure | v1.10 | 1/1 | Complete | 2026-06-05 |
 | 14. SEC-PII-02 managed_logs Sweep Closure | v1.10 | 1/1 | Complete | 2026-06-05 |
-| 15. fs-finder Removal | v1.11 | 0/? | Not started | - |
+| 15. fs-finder Removal | v1.11 | 0/4 | Not started | - |
 | 16. Dependabot Triage | v1.11 | 0/? | Not started | - |
 | 17. Influx Fix Production Deploy | v1.11 | 0/? | Not started | - |
 
 ---
 *v1.11 Backlog Drawdown ROADMAP created 2026-06-05 (4 requirements across 3 phases [15–17]; phase planning pending).*
+*Phase 15 planned 2026-06-06: 4 plans, 3 waves.*
