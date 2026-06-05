@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.10
-milestone_name: — Operational Closures
-status: v1.10 shipped + archived 2026-06-05. Awaiting next milestone (/gsd:new-milestone for v1.11). Operator action outstanding: deploy influx fix 9b6d931c (CI green, pipeline 5266).
-stopped_at: "2026-06-05 — v1.10 milestone closed and archived"
-last_updated: "2026-06-05T22:35:00.000Z"
-last_activity: 2026-06-05 — Milestone v1.10 completed and archived
+milestone: v1.11
+milestone_name: Backlog Drawdown
+status: planning
+last_updated: "2026-06-05T21:30:00.261Z"
+last_activity: 2026-06-05
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 5
-  completed_plans: 5
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # STATE — THiNX Device API
@@ -29,10 +28,10 @@ See: `.planning/PROJECT.md` (updated 2026-06-04 after v1.9 milestone close)
 
 ## Current Position
 
-Phase: Milestone v1.10 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-06-05 — Milestone v1.10 completed and archived
+Status: Defining requirements
+Last activity: 2026-06-05 — Milestone v1.11 started
 
 ## Milestones
 

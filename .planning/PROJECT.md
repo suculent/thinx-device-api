@@ -16,7 +16,7 @@ The IoT device API stays available and trustworthy across release cycles — eve
 
 Previously: v1.9 Backend Hygiene & Posture (2026-06-04) — 13/13 v1.9 requirements across 7 phases (Phases 5–11), 23 plans, 78 commits. v1.0 GA Backend Closures (2026-05-27) — 4/4 v1 requirements; default branches `master` + `main` via PR #539 + #540; production image at `sha256:4d3fb789` (Phase 4 deploy).
 
-**Next milestone:** not yet started. Run `/gsd:new-milestone` to define v1.11 (fresh REQUIREMENTS.md). Standing v1.11 candidates: fs-finder removal sweep, fresh Dependabot triage (5 alerts), and the third-deferral keep/drop call on TEST-CHAI-01 / OPS-02 / OPS-03 / CONSOLE-LEGACY-JSON-PARSE.
+**Next milestone:** v1.11 Backlog Drawdown started 2026-06-05 (defining requirements). Scope: fs-finder removal sweep, fresh Dependabot triage (5 alerts), and the pending influx stats fix prod deploy. CONSOLE-LEGACY-JSON-PARSE reclassified to sibling scope (frontend double-parse, not parent code); TEST-CHAI-01 / OPS-02 / OPS-03 kept deferred a 4th time with documented rationale.
 
 **Codebase posture after v1.9:**
 - `lib/thinx/owner.js` is fully async/await (~73 callback patterns swept; 5 behavior-locking specs added) with strict equality throughout and SEC-PII-01 + Phase 5 REFACTOR-02 invariants preserved.
@@ -27,15 +27,18 @@ Previously: v1.9 Backend Hygiene & Posture (2026-06-04) — 13/13 v1.9 requireme
 
 **Companion project:** `services/console` submodule shipped its SEC-DEP-02 phase under a new `v1.x Operational Hygiene` milestone; pointer landed in this repo via Phase 10 commit `28a4add4`.
 
-## Next Milestone
+## Current Milestone: v1.11 Backlog Drawdown
 
-**Not yet started.** Run `/gsd:new-milestone` to define v1.11 (questioning → research → requirements → roadmap; fresh REQUIREMENTS.md).
+**Goal:** Pay down the long-standing v1.x backend backlog — remove the `fs-finder` runtime dependency, triage the outstanding Dependabot alerts, and deploy the pending influx stats fix — while making deliberate disposition calls on the items that have deferred three times.
 
-**Standing candidates (deferred from v1.10):**
-- **fs-finder removal sweep** — still v1.x candidate; deferred from v1.9 Phase 5 REFACTOR-05 (5 active runtime call sites in `lib/`). Sequenced after the ops loop, which v1.10 has now closed.
-- **Fresh Dependabot triage** — 5 alerts (2H/3M) surfaced on default branch during the v1.9 push; triage deferred to v1.11 or a quick-task window.
-- **Third-deferral keep/drop call** — TEST-CHAI-01 (chai-http v5 ESM, locked per AGENTS.md), OPS-02 / OPS-03 (pure swarm-side OPS), CONSOLE-LEGACY-JSON-PARSE (sibling-project scope). All now on their third milestone of deferral — v1.11 planning should make a deliberate keep/drop call rather than auto-carrying again.
-- **Influx stats fix deploy** — `9b6d931c` (quick-task `260605-inf`) is committed + CI-green but not yet force-rolled to prod. Carry as an operator action into v1.11 if not deployed before.
+**Target features:**
+- **fs-finder removal sweep** (REFACTOR-06) — replace ~10 `finder.*` call sites across 5 `lib/` modules (`builder.js`, `deployment.js`, `platform.js`, `repository.js`, `plugins/arduino/plugin.js`) with `fs-extra`/native `fs.promises`, then drop `fs-finder` from `package.json`. Behavior-locking specs per touched module.
+- **Dependabot triage** (SEC-DEP-03) — classify the 5 default-branch alerts (2H/3M) via the established taxonomy; ship surgical `package.json` `overrides` for blockers; rescan to confirm runtime-tree reduction.
+- **Influx fix prod deploy** (OPS-EXEC-03) — force-rollout `9b6d931c` (quick-task `260605-inf`) to prod; verify dashboard check-in numbers correct + `BADSTRING` log spam silenced. CI green-gated (pipeline 5266).
+
+**Disposition decisions made at v1.11 start:**
+- **CONSOLE-LEGACY-JSON-PARSE** — reclassified to `services/console` sibling scope. Documented root cause is a frontend double-parse (`JSON.parse` on an already-parsed object at `src/login.js:173` + `password.js:87`); no parent-repo code change exists. Moved to Out of Scope; coordinate into the console submodule's GSD workspace.
+- **TEST-CHAI-01 / OPS-02 / OPS-03** — kept deferred a 4th time. Deliberate keep call (not auto-carry): chai-http v5 ESM stays locked per AGENTS.md (trigger = superagent v3 CVE); OPS-02/OPS-03 are pure swarm-side edits orthogonal to this codebase's lifecycle. Remain standing candidates for a future milestone.
 
 ## Validated Requirements (Historical)
 
@@ -101,6 +104,7 @@ Previously: v1.9 Backend Hygiene & Posture (2026-06-04) — 13/13 v1.9 requireme
 - **Multi-tenant revamp / v2 API features** — future major milestone, not v1.x
 - **Edge layer redesign** (Traefik labels, nginx rewrites beyond G8 needs) — only AUTH-API-01 may touch edge config; otherwise out
 - **Dashboard data-exposure rework** (AGENTS.md L98) — privacy concern but not a regression vs. legacy; v1.x candidate at most
+- **CONSOLE-LEGACY-JSON-PARSE** — legacy AngularJS console double-parse bug (`JSON.parse` on an already-parsed object at `services/console/src/login.js:173` + `password.js:87`); frontend fault in the sibling submodule, no parent-repo angle. Reclassified out of parent scope at v1.11 start; owned by the `services/console` GSD workspace
 
 ## Context
 
@@ -163,4 +167,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-06-05 — after v1.10 Operational Closures milestone (5/5 requirements Verified across Phases 12–14; SEC-WS-01 + SEC-PII-02 operator runbook executions closed + 3 code helpers shipped). Next milestone (v1.11) not yet started; continues phase numbering from v1.10 (next phase = 15).*
+*Last updated: 2026-06-05 — v1.11 Backlog Drawdown started (defining requirements). Scope: fs-finder removal sweep (REFACTOR-06), Dependabot triage (SEC-DEP-03), influx fix prod deploy (OPS-EXEC-03). CONSOLE-LEGACY-JSON-PARSE reclassified to sibling scope; TEST-CHAI-01/OPS-02/OPS-03 kept deferred. Continues phase numbering from v1.10 (starts at Phase 15).*
