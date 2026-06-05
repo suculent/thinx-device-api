@@ -1,0 +1,59 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-06-05T12:12:59.106Z",
+  "phase": "14",
+  "phase_name": "SEC-PII-02 managed_logs Production Sweep (OPS-EXEC-02)",
+  "phase_dir": ".planning/phases/14-sec-pii-02-managed-logs-production-sweep-ops-exec-02",
+  "plan": 1,
+  "task": 1,
+  "total_tasks": 4,
+  "status": "paused",
+  "completed_tasks": [
+    {"id": 0, "name": "Phase 12: Code-side helpers (TEST-WS-01 + OBS-01 + OBS-02)", "status": "done", "commit": "15028b5e"},
+    {"id": 0, "name": "Phase 13 Plan 13-01: SEC-WS-01 closure", "status": "done", "commit": "df94f195", "note": "Fix already live out-of-band; pivoted to snapshot-only audit-trail per built-in contingency. OPS-EXEC-01 Verified."},
+    {"id": 0, "name": "Phase 14 Plan 14-01 setup: CONTEXT.md + PLAN.md", "status": "done", "commit": "263f5092"},
+    {"id": 1, "name": "Phase 14 Task 1: CHECKPOINT — operator runs production sweep", "status": "in_progress", "progress": "SSH access granted, pre-flight 3/5 PASSED: thinx_couchdb.1 running on micro (3 days uptime, one Failed 5 days ago); /mnt/gluster/thinx/.env readable with 5 COUCHDB_* vars; THINX_PREFIX empty (DB is bare managed_logs). Remaining pre-flight: disk space ≥10 GB on /mnt/gluster; thinx_api image is v1.9+. Then: dry-run, apply with snapshot, sample-verify, compact, capture logs."}
+  ],
+  "remaining_tasks": [
+    {"id": 1, "name": "Phase 14 Task 1 (continued): Complete pre-flight + dry-run + apply + sample + compact", "status": "in_progress", "note": "Requires SSH execution via `micro` alias"},
+    {"id": 2, "name": "Phase 14 Task 2: Append Execution Annex to managed-logs-redaction.md", "status": "not_started"},
+    {"id": 3, "name": "Phase 14 Task 3: Flip OPS-EXEC-02 to Verified in REQUIREMENTS.md", "status": "not_started"},
+    {"id": 4, "name": "Phase 14 Task 4: Write 14-01-SUMMARY.md and commit", "status": "not_started"},
+    {"id": 5, "name": "v1.10 lifecycle: audit", "status": "not_started", "note": "Run /gsd:audit-milestone after Phase 14 closes"},
+    {"id": 6, "name": "v1.10 lifecycle: complete", "status": "not_started", "note": "Run /gsd:complete-milestone v1.10"},
+    {"id": 7, "name": "v1.10 lifecycle: cleanup", "status": "not_started", "note": "Run /gsd:cleanup"}
+  ],
+  "blockers": [
+    {
+      "description": "Phase 14 Task 1 requires SSH execution against production CouchDB (188.166.23.244 / 188.166.203.163). Classifier initially blocked SSH for 'Production Reads / Credential Exploration not explicitly authorized'. User granted permission via /permissions dialog; first SSH command succeeded (pre-flight checks). Remaining steps are destructive (--apply on ~658k production records).",
+      "type": "external",
+      "workaround": "SSH alias `micro` = `ssh -o IdentitiesOnly=yes root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020`. Permission grant must persist across sessions (check .claude/settings.json vs settings.local.json)."
+    }
+  ],
+  "human_actions_pending": [
+    {
+      "action": "Decide path: (a) continue autonomous sweep via micro SSH in next session, (b) operator runs sweep manually and pastes 6 log files + resume signal, (c) defer Phase 14 to v1.11 and close v1.10 with Phases 12+13 only",
+      "context": "Phase 14 stuck at CHECKPOINT; context exhausted at 76% in current session before destructive apply could safely complete. Pre-flight partial: 3/5 PASSED.",
+      "blocking": true
+    }
+  ],
+  "decisions": [
+    {"decision": "Phase 13 closed as discrepancy branch (fix already live)", "rationale": "Pre-fix probe showed 0/4 bare-nginx-404 rows — SEC-WS-01 fix had shipped out-of-band between 2026-06-02 and 2026-06-05. Honored Plan 13-01 Task 2 contingency: snapshot-only audit-trail capture, no nginx edit applied.", "phase": "13"},
+    {"decision": "Runbook premise corrected: nginx for rtm.thinx.cloud lives inside thinx_vue container, not on swarm host", "rationale": "Operator-captured nginx -T from inside container e2aaae86b53c showed the owner-shape regex (^/[0-9a-f]{64}...) already in place. Traefik routes rtm.thinx.cloud → container port 80. Documented in Phase 13 annex notes for future OPS phases.", "phase": "13"},
+    {"decision": "Phase 14 grey-area selections (D-04..D-08): full single-pass sweep, direct curl compaction, 2-retry sample-verify policy, snapshot+SHA256 in annex, 90-day shred deferred to v1.11", "rationale": "Mirrors Phase 13's all-Option-A pattern. User did not explicitly answer the inline AskUserQuestion (interrupted by Phase 13 nginx discovery) but the defaults match precedent.", "phase": "14"}
+  ],
+  "files_modified": [],
+  "blocking_constraints": [
+    {
+      "constraint": "Classifier denies SSH-to-production by default. Authorization via goal/hook is insufficient — needs explicit Bash permission rule.",
+      "severity": "advisory",
+      "evidence": "Two SSH attempts blocked early in session; succeeded only after user dismissed /permissions dialog. Permission persistence across sessions unverified."
+    },
+    {
+      "constraint": "OPS-execution phases that require operator SSH cannot complete autonomously in a single Claude session if pre-flight takes the destructive step past 75% context. The annex + REQUIREMENTS flip + SUMMARY tail consumes ~10% more.",
+      "severity": "advisory",
+      "evidence": "Phase 14 reached pre-flight at 76% — too late to safely apply + compact + capture 6 log files + write annex + close milestone."
+    }
+  ],
+  "resume_strategy": "Open fresh session. Run /gsd:autonomous --from 14 (or simply /gsd:execute-phase 14 to skip discuss/plan since both committed). Phase 14 CONTEXT.md + PLAN.md already exist. Pre-flight findings captured in this HANDOFF.json — re-run pre-flight via micro alias as smoke test, then proceed with dry-run / apply / sample / compact / log capture. After Phase 14 closes, run /gsd:audit-milestone, /gsd:complete-milestone v1.10, /gsd:cleanup."
+}
