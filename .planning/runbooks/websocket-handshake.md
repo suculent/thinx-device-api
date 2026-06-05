@@ -100,6 +100,44 @@ The fix lives on the swarm host, NOT in this repo.
 
 ---
 
+## Execution Annex — SEC-WS-01 (OPS-EXEC-01)
+
+**Executed:** 2026-06-05T10:30:20Z
+**Operator:** MS
+**Pre-fix probe:** `.planning/phases/13-sec-ws-01-edge-handshake-closure-ops-exec-01/probe-pre-fix.txt`
+**Post-fix probe:** `.planning/phases/13-sec-ws-01-edge-handshake-closure-ops-exec-01/probe-post-fix.txt`
+**Pre-fix server block:** `.planning/runbooks/swarm-configs/rtm.thinx.cloud-server.pre.nginx`
+**Post-fix server block:** `.planning/runbooks/swarm-configs/rtm.thinx.cloud-server.post.nginx`
+
+### nginx location block actually applied
+
+```nginx
+location ~* "^/[0-9a-f]{64}(/[^/]+)?$" {
+    resolver 127.0.0.11 valid=1s;
+    set $endpoint "api";
+    proxy_pass http://$endpoint:7442;
+    proxy_http_version 1.1;
+    proxy_buffering off;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Host $server_name;
+}
+```
+
+### Notes
+
+**Fix already live — discrepancy branch.** Pre-fix probe footer reported `Bare-nginx-404 rows (4-7) detected: 0/4` (vs the runbook's expected pre-fix value of `4/4`). The SEC-WS-01 edge handshake fix was already applied out-of-band sometime between Phase 6 close (2026-06-02) and Phase 13 execution (2026-06-05). The operator session was therefore **snapshot-only** — no nginx edit applied, no `nginx -t`, no `systemctl reload nginx`. `pre.nginx` and `post.nginx` are byte-identical by design.
+
+**Runbook premise correction.** The runbook assumed the nginx serving `rtm.thinx.cloud` ran on the swarm host directly. Reality discovered during operator capture: nginx runs **inside the `thinx_vue` Docker container** (image `registry.thinx.cloud:5000/thinx/console:vue`; container ID `e2aaae86b53c` on micro at capture time). Traefik routes `rtm.thinx.cloud` → container port 80; container nginx has `server_name localhost` which matches any Host header. The owner-shape location regex is `^/[0-9a-f]{64}(/[^/]+)?$` (64-hex owner pattern), not the simpler `^/[^/]+(/[0-9]+)?$` the runbook proposed — but the WS upgrade headers (`Upgrade`, `Connection "upgrade"`) and `proxy_http_version 1.1` are correctly in place, so the handshake path is functional. Capture recipe used: `docker exec -ti e2aaae86b53c nginx -T` (not `nginx -T` on the host).
+
+**Vue console smoke test — partial.** Browser DevTools Network tab on `https://console.thinx.cloud/app` showed **no WebSocket subscribe attempts at all** after login (only HTTP traffic + a vue-router redirect error from `/login` → `/app/dashboard`). The server-side handshake path is provably ready (the snapshot shows the upgrade headers), but the Vue console isn't initiating WS connections from the dashboard route. This is **out-of-scope for SEC-WS-01 / OPS-EXEC-01** (which is exclusively about the server-side edge handshake closure) — file a follow-up against the Vue console repo for client-side WS subscribe diagnosis.
+
+**Rollback procedure remains valid.** The SEC-WS-01 Rollback Procedure section (below) describes how to revert a future SEC-WS-01 swarm-host edit using `rtm.thinx.cloud-server.pre.nginx` as the restore source. In this discrepancy branch the rollback procedure has no current edit to revert — it serves as the safety net for any future re-attempt or remediation.
+
+---
+
 ## Verification
 
 Re-run the same `curl -sI` probes from the Reproduction table. The success criterion is that `/suculent` (or any owner-shaped path) is NO LONGER a bare nginx 404. Acceptable post-fix responses:
