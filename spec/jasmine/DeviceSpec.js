@@ -167,6 +167,32 @@ describe("Device", function () {
       });
   }, 5000);
 
+  it("(04b) check-in persists top-level lastupdate and creates no nested `changes`", function (done) {
+    // Regression: update_device_and_respond passed `{ changes: device }` to the
+    // devices/modify handler, which flat-merges top-level fields — so it wrote a
+    // nested `doc.changes` blob and never refreshed the real top-level lastupdate
+    // the console reads. Also: runDeviceTransformers used to skip the write
+    // entirely for a device with no `transformers` field. After the fix, a
+    // check-in must refresh top-level lastupdate and leave no `changes` field.
+    device.register(JRS, apikey, res, function (_r, success) {
+      expect(success).to.equal(true);
+      setTimeout(() => {
+        device.detail(udid, (ok, after) => {
+          expect(ok).to.equal(true);
+          expect(after).to.be.an('object');
+          expect(after).to.not.have.property('changes');
+          expect(after.lastupdate).to.not.equal(undefined);
+          const ts = new Date(after.lastupdate).getTime();
+          expect(Number.isFinite(ts)).to.equal(true);
+          // lastupdate must be recent (within the last 10 minutes), proving the
+          // check-in actually refreshed the top-level field.
+          expect(Date.now() - ts).to.be.below(10 * 60 * 1000);
+          done();
+        });
+      }, 750);
+    });
+  }, 15000);
+
   it("(05) should be able to store/fetch OTT request", function (done) {
     device.storeOTT(
       JRS,
