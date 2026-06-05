@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: — Operational Closures
-status: v1.10 phases 12–14 complete + audited. ACTIVE HANDOFF → see .planning/HANDOFF.md (drive influx fix 9b6d931c to prod, then archive v1.10)
-stopped_at: "2026-06-05 — influx fix (9b6d931c) now tracked under v1.10 as quick-task 260605-inf; watching CI pipeline 5265 (thinx-staging) for green before operator deploy"
-last_updated: "2026-06-05T22:00:00.000Z"
-last_activity: "2026-06-05 -- Device check-in fix DEPLOYED+verified (6b4a077c+06cd31ca; image sha256:2bf95549 live); 5 corrupted device docs cleaned. Swarm: thinx_api+thinx_mosquitto PINNED to micro (co-located w/ couchdb; MQTT healthy). Influx stats fix committed+pushed (9b6d931c) — fixes Vue dashboard check-in numbers + InfluxDB BADSTRING log spam — NOT yet deployed (operator force-rollout pending). Full resume plan in .planning/HANDOFF.md."
+status: v1.10 shipped + archived 2026-06-05. Awaiting next milestone (/gsd:new-milestone for v1.11). Operator action outstanding: deploy influx fix 9b6d931c (CI green, pipeline 5266).
+stopped_at: "2026-06-05 — v1.10 milestone closed and archived"
+last_updated: "2026-06-05T22:35:00.000Z"
+last_activity: 2026-06-05 — Milestone v1.10 completed and archived
 progress:
   total_phases: 3
   completed_phases: 3
@@ -29,16 +29,28 @@ See: `.planning/PROJECT.md` (updated 2026-06-04 after v1.9 milestone close)
 
 ## Current Position
 
-Phase: 14 (SEC-PII-02 managed_logs Production Sweep (OPS-EXEC-02)) — COMPLETE ✓
-Plan: 1 of 1 — 14-01 COMPLETE (discrepancy branch)
-Status: v1.10 phases 12–14 all complete; OPS-EXEC-02 Verified. Milestone ready for lifecycle.
-Last activity: 2026-06-05 -- Quick 260605-lix: fixed device check-in lastupdate persistence (modify-merge nesting + transformers else) + DeviceSpec regression; commit 6b4a077c. Phase 14 (OPS-EXEC-02) closed earlier same day. v1.10 archival (complete-milestone + cleanup) still pending.
+Phase: Milestone v1.10 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-06-05 — Milestone v1.10 completed and archived
 
 ## Milestones
 
 - ✅ **v1.0 — v1 GA Backend Closures** (shipped 2026-05-27) — see `.planning/MILESTONES.md`
 - ✅ **v1.9 — Backend Hygiene & Posture** (shipped 2026-06-04) — Phases 5–11; see `.planning/MILESTONES.md` + `.planning/milestones/v1.9-ROADMAP.md`
-- 🚧 **v1.10 — Operational Closures** (execution complete; pending lifecycle close) — Phases 12–14, 5/5 requirements Verified; see `.planning/ROADMAP.md`
+- ✅ **v1.10 — Operational Closures** (shipped + archived 2026-06-05) — Phases 12–14, 5/5 requirements Verified; see `.planning/MILESTONES.md` + `.planning/milestones/v1.10-ROADMAP.md`
+
+## Deferred Items
+
+Items acknowledged and deferred at v1.10 milestone close on 2026-06-05:
+
+| Category | Item | Status |
+|----------|------|--------|
+| quick_task | 260531-n72-fix-the-latent-bugs-in-apikey-js-and-har | scanner false-positive (work shipped via `/gsd-quick`, commit `fae0efbd`; manifest format unreadable by scanner) |
+| quick_task | 260531-pdi-fix-the-let-s-encrypt-r10-r13-cross-sign | scanner false-positive (work shipped via `/gsd-quick`, commit `08e4dbd7`; manifest format unreadable by scanner) |
+| quick_task | 260605-lix-fix-device-check-in-lastupdate-not-persi | scanner false-positive (work shipped via `/gsd-quick`, commit `6b4a077c`; manifest format unreadable by scanner) |
+
+All three are completed quick-tasks whose work is in git history; the `audit-open` scanner cannot read the manifest format their directories use. Non-blocking; no open work.
 
 ## Accumulated Context
 
@@ -130,6 +142,4 @@ If the operator chooses to abort instead, signal `## CHECKPOINT ABORTED` — pre
 
 ## Operator Next Steps
 
-- Run `/gsd:plan-phase 12` to plan Phase 12 (Code-side Closure Helpers)
-- After Phase 12 closes, run `/gsd:plan-phase 13` (OPS-EXEC-01 swarm-host nginx fix) and `/gsd:plan-phase 14` (OPS-EXEC-02 production managed_logs sweep) — either order, since 13 + 14 are independent
-- Decide on push timing for the v1.9 tag (manual `git push origin v1.9` once the tag lands locally)
+- Start the next milestone with /gsd-new-milestone

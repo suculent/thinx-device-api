@@ -1,5 +1,30 @@
 # Milestones
 
+## v1.10 — Operational Closures (Shipped: 2026-06-05)
+
+**Delivered:** Closed the two operator-runbook executions v1.9 deferred (SEC-WS-01 edge handshake + SEC-PII-02 `managed_logs` production sweep) and landed the three code-side helpers that made those closures safer and observable. Both OPS executions resolved as discrepancy branches (each fix/cleanup had already partially happened out-of-band); the redactor field-scoping bug surfaced and was fixed in-flight. 5/5 v1.10 requirements Verified; no signature break on any legacy-console-compatible route.
+
+**Stats:**
+
+- Phases: 3 (Phases 12–14) | Plans: 5 | Phase summaries: 5
+- Timeline: 2026-06-04 (roadmap) → 2026-06-05 (close) (~2 days)
+- Git range: `feat(12-03)` audit-ttl wiring (`51a50e49`) → `feat(14)` OPS-EXEC-02 close (`6db45592`), on `thinx-staging`
+- Audit status: `.planning/milestones/v1.10-MILESTONE-AUDIT.md` — ✅ passed (requirements 5/5, phases 3/3, integration 2/2, flows 2/2)
+
+**Key accomplishments:**
+
+- **TEST-WS-01** (Phase 12) — New in-process Jasmine spec `spec/jasmine/ZZ-WebSocketHandshakeRtmSpec.js` exercises the rtm-style `/<owner>(/<timestamp>)?` upgrade and asserts `101 Switching Protocols`, so any future regression of the SEC-WS-01 edge fix surfaces at CI rather than user-report.
+- **OBS-01** (Phase 12) — `scripts/redact-managed-logs.js` now posts a single Slack closure receipt (docs scanned/redacted, sample verdict, runtime, host-only env — no PII/creds) to the existing `SLACK_WEBHOOK` outage notifier on `--apply`; Slack failure never blocks script exit; `--dry-run` stays silent.
+- **OBS-02** (Phase 12) — DETECT-only audit-TTL eviction probe (`lib/thinx/audit-ttl-probe.js`) wired additively into `thinx-core.js` startup (cert-probe pattern); WARNs if CouchDB stops evicting `expire_at`-stamped `managed_logs` docs past a 7-day grace, guarding the v1.9 Phase 9 forward-TTL guarantee.
+- **OPS-EXEC-01** (Phase 13) — SEC-WS-01 edge handshake closed; `scripts/probe-rtm-handshake.sh` 7-row reproduction probe added; swarm-config snapshot trail established under `.planning/runbooks/`; runbook execution annex committed. Resolved as a discrepancy branch (fix already live out-of-band; probe 0/4 confirmed ready).
+- **OPS-EXEC-02** (Phase 14) — SEC-PII-02 `managed_logs` sweep closed against production CouchDB: 422 genuine `reset_key` leaks in the live `message` field redacted (snapshot-gated `--apply` + `--sample` exit 0 + compaction). Fixed a redactor field-scoping bug in-flight (SEC-PII-02b: the all-fields walk false-matched the legitimate 64-hex `owner` hash). The historic ~658k corpus was already deleted out-of-band (656,697 tombstones; 2,183 live docs remained).
+
+**Known deferred items at close:** 3 quick-task scanner false-positives (`260531-n72`, `260531-pdi`, `260605-lix` — all shipped via `/gsd-quick`; work in git history `fae0efbd`/`08e4dbd7`/`6b4a077c`; scanner cannot read their manifest format). See STATE.md.
+
+**Post-close addition (pending deploy):** Influx stats fix (`9b6d931c`, quick-task `260605-inf`) — corrects Vue dashboard check-in numbers + silences InfluxDB `BADSTRING` log spam. CI green (pipeline 5266); operator force-rollout to prod pending.
+
+---
+
 ## v1.9 — Backend Hygiene & Posture (Shipped: 2026-06-04)
 
 **Delivered:** Paid down the v1.x backlog the v1.0 GA explicitly deferred — structural hygiene, security posture, auth/account lifecycle, and operational guardrails — without breaking any legacy-console-compatible route the Vue console inherited. 13/13 v1.9 requirements verified.

@@ -12,9 +12,11 @@ The IoT device API stays available and trustworthy across release cycles — eve
 
 ## Current State
 
-**Shipped:** v1.9 Backend Hygiene & Posture (2026-06-04) — 13/13 v1.9 requirements verified across 7 phases (Phases 5–11), 23 plans, 78 commits on `thinx-staging`. See `.planning/MILESTONES.md` and `.planning/milestones/v1.9-ROADMAP.md`.
+**Shipped:** v1.10 Operational Closures (2026-06-05) — 5/5 v1.10 requirements Verified across 3 phases (Phases 12–14). Closed the two operator-runbook executions v1.9 deferred (SEC-WS-01 edge handshake + SEC-PII-02 `managed_logs` production sweep) plus three code-side helpers (in-process WS CI spec, Slack closure receipt, audit-TTL eviction probe). Both OPS executions resolved as discrepancy branches; a redactor field-scoping bug (SEC-PII-02b) was fixed in-flight. See `.planning/MILESTONES.md` and `.planning/milestones/v1.10-ROADMAP.md`.
 
-Previously: v1.0 GA Backend Closures (2026-05-27) — 4/4 v1 requirements; default branches `master` + `main` updated via PR #539 + #540; production image at `sha256:4d3fb789` (Phase 4 deploy).
+Previously: v1.9 Backend Hygiene & Posture (2026-06-04) — 13/13 v1.9 requirements across 7 phases (Phases 5–11), 23 plans, 78 commits. v1.0 GA Backend Closures (2026-05-27) — 4/4 v1 requirements; default branches `master` + `main` via PR #539 + #540; production image at `sha256:4d3fb789` (Phase 4 deploy).
+
+**Next milestone:** not yet started. Run `/gsd:new-milestone` to define v1.11 (fresh REQUIREMENTS.md). Standing v1.11 candidates: fs-finder removal sweep, fresh Dependabot triage (5 alerts), and the third-deferral keep/drop call on TEST-CHAI-01 / OPS-02 / OPS-03 / CONSOLE-LEGACY-JSON-PARSE.
 
 **Codebase posture after v1.9:**
 - `lib/thinx/owner.js` is fully async/await (~73 callback patterns swept; 5 behavior-locking specs added) with strict equality throughout and SEC-PII-01 + Phase 5 REFACTOR-02 invariants preserved.
@@ -25,29 +27,28 @@ Previously: v1.0 GA Backend Closures (2026-05-27) — 4/4 v1 requirements; defau
 
 **Companion project:** `services/console` submodule shipped its SEC-DEP-02 phase under a new `v1.x Operational Hygiene` milestone; pointer landed in this repo via Phase 10 commit `28a4add4`.
 
-## Current Milestone: v1.10 Operational Closures
+## Next Milestone
 
-**Goal:** Ship the two deferred operator-runbook executions from v1.9 (SEC-WS-01 edge handshake fix on `rtm.thinx.cloud` + SEC-PII-02 `managed_logs` production sweep) in a single focused session, alongside small code-side helpers that make the executions safer and the closures observable.
+**Not yet started.** Run `/gsd:new-milestone` to define v1.11 (questioning → research → requirements → roadmap; fresh REQUIREMENTS.md).
 
-**Target features:**
-
-Operator-runbook executions (the two carry-overs):
-- **SEC-WS-01 closure** — apply the swarm-host nginx `location` block per `.planning/runbooks/websocket-handshake.md`, verify `wscat` returns 101 from a fresh Vue session against rtm, persist the config change with a version-controlled trail.
-- **SEC-PII-02 closure** — execute the staged redaction sweep (snapshot → dry-run → apply → sample → compact) per `.planning/runbooks/managed-logs-redaction.md`; sample-verify ~658k docs show zero raw reset_keys.
-
-Code-side helpers for runbook closures:
-- **WS handshake CI smoke probe** — a `ZZ-*` regression spec that probes the rtm-style `/<owner>(/<timestamp>)?` path so any future regression of the SEC-WS-01 fix is caught at CI, not at user-report.
-- **`managed_logs` cleanup Slack notification** — `scripts/redact-managed-logs.js` posts a completion summary (docs scanned, redacted, sample result) to the existing Slack outage notifier so the operator gets a closure receipt.
-- **Audit-log TTL eviction monitor** — startup probe (or short scheduled job) that asserts CouchDB is actually evicting `expire_at`-stamped docs at the 90-day boundary, so the forward-TTL guarantee from v1.9 Phase 9 keeps holding.
-
-**Execution model:** OPS + opportunistic in-flight code adds — if production reveals an in-script issue (e.g., a CouchDB conflict retry pattern), the fix lands inside this milestone rather than spawning a separate cycle.
-
-**Deferred to later milestones (out of v1.10 scope):**
-- **fs-finder removal sweep** — still v1.x candidate; deferred from v1.9 Phase 5 REFACTOR-05 and sequenced after v1.10 closes the ops loop.
-- **Fresh Dependabot triage** — 5 new alerts (2H/3M) surfaced on default branch during v1.9 push; triage deferred to v1.11 or a quick-task incident response window.
-- **Carry-over from v1.0** — TEST-CHAI-01 (chai-http v5 ESM, locked per AGENTS.md), OPS-02 / OPS-03 (pure swarm-side OPS), CONSOLE-LEGACY-JSON-PARSE (sibling-project scope). Third milestone of deferral — v1.11 planning should make a deliberate keep/drop call rather than auto-carrying again.
+**Standing candidates (deferred from v1.10):**
+- **fs-finder removal sweep** — still v1.x candidate; deferred from v1.9 Phase 5 REFACTOR-05 (5 active runtime call sites in `lib/`). Sequenced after the ops loop, which v1.10 has now closed.
+- **Fresh Dependabot triage** — 5 alerts (2H/3M) surfaced on default branch during the v1.9 push; triage deferred to v1.11 or a quick-task window.
+- **Third-deferral keep/drop call** — TEST-CHAI-01 (chai-http v5 ESM, locked per AGENTS.md), OPS-02 / OPS-03 (pure swarm-side OPS), CONSOLE-LEGACY-JSON-PARSE (sibling-project scope). All now on their third milestone of deferral — v1.11 planning should make a deliberate keep/drop call rather than auto-carrying again.
+- **Influx stats fix deploy** — `9b6d931c` (quick-task `260605-inf`) is committed + CI-green but not yet force-rolled to prod. Carry as an operator action into v1.11 if not deployed before.
 
 ## Validated Requirements (Historical)
+
+<details>
+<summary>v1.10 Operational Closures (shipped 2026-06-05)</summary>
+
+- ✓ **TEST-WS-01** — v1.10 (Phase 12) — In-process Jasmine spec `spec/jasmine/ZZ-WebSocketHandshakeRtmSpec.js` exercises the rtm-style `/<owner>(/<timestamp>)?` upgrade and asserts `101 Switching Protocols`; future regression of the SEC-WS-01 edge fix now surfaces at CI.
+- ✓ **OBS-01** — v1.10 (Phase 12) — `scripts/redact-managed-logs.js` posts a single Slack closure receipt (docs scanned/redacted, sample verdict, runtime, host-only env) to `SLACK_WEBHOOK` on `--apply`; Slack failure never blocks exit; `--dry-run` stays silent.
+- ✓ **OBS-02** — v1.10 (Phase 12) — DETECT-only `lib/thinx/audit-ttl-probe.js` wired additively into `thinx-core.js` startup (cert-probe pattern); WARNs if CouchDB stops evicting `expire_at`-stamped `managed_logs` docs past a 7-day grace, guarding the v1.9 Phase 9 forward-TTL.
+- ✓ **OPS-EXEC-01** — v1.10 (Phase 13) — SEC-WS-01 edge handshake closed; `scripts/probe-rtm-handshake.sh` reproduction probe + swarm-config snapshot trail under `.planning/runbooks/` + runbook execution annex. Discrepancy branch (fix already live out-of-band).
+- ✓ **OPS-EXEC-02** — v1.10 (Phase 14) — SEC-PII-02 `managed_logs` sweep closed against production CouchDB: 422 genuine `reset_key` leaks redacted in the live `message` field (snapshot-gated `--apply` + `--sample` exit 0 + compaction); redactor field-scoping bug (SEC-PII-02b) fixed in-flight. Historic ~658k corpus already deleted out-of-band (656,697 tombstones).
+
+</details>
 
 <details>
 <summary>v1.9 Backend Hygiene & Posture (shipped 2026-06-04)</summary>
@@ -138,6 +139,10 @@ Code-side helpers for runbook closures:
 | THINX-CERT-CHECK-01 is DETECT-only (not auto-mutate) | Cert rotation lives on the swarm host (cron + ACME client) — the codebase angle is to surface drift, not to take over rotation | ✓ Good — startup WARN gives 5-min visibility on R10→R13 / R10→R14 drift before SSL incidents trigger |
 | REFACTOR-05 scope-amended mid-phase to jshint-only (fs-finder deferred to v1.10) | 5 active runtime call sites discovered during execution made `fs-finder` reclassification a breaking change disguised as a "cheap sweep" | ✓ Good — single-flag amendment surfaced in ROADMAP.md, REQUIREMENTS.md, STATE.md, and a v1.10 backlog entry; literal text gap closed by `89669fc4` |
 | v1.9 milestone closed without a separate milestone-level audit | Per-phase VERIFICATION.md ran for all 7 phases and covered 13/13 requirements; running another audit pass would mostly re-read those VERIFICATION reports | ⚠️ Revisit — if v1.10 audit tooling requires a v1.x-MILESTONE-AUDIT.md trail across all milestones, retrofit one against the 7 v1.9 VERIFICATION.md reports |
+| v1.10 Phase 12 sequenced FIRST (code helpers before the two OPS executions) | OBS-01 had to be wired into `redact-managed-logs.js` before Phase 14's sweep invoked it (auto Slack receipt); TEST-WS-01 had to exist before Phase 13's edge fix so regression coverage was there from day one | ✓ Good — both OPS phases ran with their helper dependency already in place |
+| v1.10 OPS-EXEC-01 + OPS-EXEC-02 closed as discrepancy branches | Both fixes/cleanups had already partially happened out-of-band (edge fix live; historic ~658k corpus already deleted). The phases pivoted from "apply" to "verify + persist the audit trail" rather than re-applying | ✓ Good — verification + runbook annex still produced; 5/5 Verified without redundant mutation |
+| v1.10 redactor field-scoping bug (SEC-PII-02b) fixed in-flight rather than deferred | The all-fields walk false-matched the legitimate 64-hex `owner` hash; per the milestone's "opportunistic in-flight code adds" execution model, the fix landed inside Phase 14 rather than spawning a separate cycle | ✓ Good — 422 genuine `reset_key` leaks redacted; `PII_FIELDS` allowlist [message, flags] now the documented scope |
+| v1.10 closed with influx fix (`9b6d931c`) tracked as quick-task `260605-inf` but deploy left to operator | Influx fix is a post-close addition, not one of the 5 v1.10 requirements; force-rollout is a production action on the operator's timeline. Recorded so the tracking survives the milestone boundary | — Pending — operator force-rollout after CI green (pipeline 5266 green) |
 
 ## Evolution
 
@@ -158,4 +163,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-06-04 — v1.10 Operational Closures milestone started (theme: ship SEC-WS-01 + SEC-PII-02 operator runbook executions + 3 code helpers). Continues phase numbering from v1.9 (next phase = 12).*
+*Last updated: 2026-06-05 — after v1.10 Operational Closures milestone (5/5 requirements Verified across Phases 12–14; SEC-WS-01 + SEC-PII-02 operator runbook executions closed + 3 code helpers shipped). Next milestone (v1.11) not yet started; continues phase numbering from v1.10 (next phase = 15).*
