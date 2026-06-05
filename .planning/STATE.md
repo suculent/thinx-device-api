@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: — Operational Closures
-status: v1.10 phases 12–14 complete — OPS-EXEC-02 Verified; milestone ready for lifecycle (audit → complete → cleanup)
-stopped_at: ""
+status: v1.10 phases 12–14 complete + audited. ACTIVE HANDOFF → see .planning/HANDOFF.md (drive influx fix 9b6d931c to prod, then archive v1.10)
+stopped_at: "session cleared 2026-06-05 — resume via .planning/HANDOFF.md"
 last_updated: "2026-06-05T13:00:00.000Z"
-last_activity: "2026-06-05 -- Phase 14 OPS-EXEC-02 closed (discrepancy branch). Corpus already deleted out-of-band (656,697 tombstones; 2,183 live). Redactor owner-field false-positive fixed in-flight (SEC-PII-02b; PII_FIELDS allowlist + 4 regression specs). 422 genuine message-field reset_key leaks redacted (snapshot+apply, 0 conflicts; --sample 1000 exit 0). Compaction completed. REQUIREMENTS OPS-EXEC-02 Verified; runbook execution annex committed."
+last_activity: "2026-06-05 -- Device check-in fix DEPLOYED+verified (6b4a077c+06cd31ca; image sha256:2bf95549 live); 5 corrupted device docs cleaned. Swarm: thinx_api+thinx_mosquitto PINNED to micro (co-located w/ couchdb; MQTT healthy). Influx stats fix committed+pushed (9b6d931c) — fixes Vue dashboard check-in numbers + InfluxDB BADSTRING log spam — NOT yet deployed (operator force-rollout pending). Full resume plan in .planning/HANDOFF.md."
 progress:
   total_phases: 3
   completed_phases: 3
