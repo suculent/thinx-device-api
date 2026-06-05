@@ -51,16 +51,16 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REFACTOR-06 | TBD | Pending |
-| REFACTOR-07 | TBD | Pending |
-| SEC-DEP-03 | TBD | Pending |
-| OPS-EXEC-03 | TBD | Pending |
+| REFACTOR-06 | Phase 15 | Pending |
+| REFACTOR-07 | Phase 15 | Pending |
+| SEC-DEP-03 | Phase 16 | Pending |
+| OPS-EXEC-03 | Phase 17 | Pending |
 
 **Coverage:**
 - v1.11 requirements: 4 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 4 ⚠️ (filled by roadmapper)
+- Mapped to phases: 4
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-06-05*
-*Last updated: 2026-06-05 after v1.11 Backlog Drawdown milestone start*
+*Last updated: 2026-06-05 — traceability filled after roadmap creation (Phases 15–17)*
