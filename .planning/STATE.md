@@ -32,7 +32,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-04 after v1.9 milestone close)
 Phase: 14 (SEC-PII-02 managed_logs Production Sweep (OPS-EXEC-02)) — COMPLETE ✓
 Plan: 1 of 1 — 14-01 COMPLETE (discrepancy branch)
 Status: v1.10 phases 12–14 all complete; OPS-EXEC-02 Verified. Milestone ready for lifecycle.
-Last activity: 2026-06-05 -- Phase 14 closed. Redactor owner false-positive fixed (SEC-PII-02b); 422 message-field reset_key leaks redacted; --sample 1000 exit 0; compaction complete; runbook annex + REQUIREMENTS Verified committed.
+Last activity: 2026-06-05 -- Quick 260605-lix: fixed device check-in lastupdate persistence (modify-merge nesting + transformers else) + DeviceSpec regression; commit 6b4a077c. Phase 14 (OPS-EXEC-02) closed earlier same day. v1.10 archival (complete-milestone + cleanup) still pending.
 
 ## Milestones
 
@@ -100,6 +100,7 @@ All items are non-blocking. The two quick-tasks shipped under `/gsd-quick` per u
 |---|-------------|------|--------|-----------|
 | 260531-n72 | Fix latent bugs in apikey.js + harden node-redis client + Slack outage notifier (incident response to 2026-05-31 14:19 UTC thinx_api OOM) | 2026-05-31 | fae0efbd | [260531-n72-fix-the-latent-bugs-in-apikey-js-and-har](./quick/260531-n72-fix-the-latent-bugs-in-apikey-js-and-har/) |
 | 260531-pdi | Refresh LE intermediate allowlist (R10..R14) in thinx-core.js cert rotation-tolerance branch — silences startup SSL verification error caused by R13-issued leaf vs R10-pinned chain | 2026-05-31 | 08e4dbd7 | [260531-pdi-fix-the-let-s-encrypt-r10-r13-cross-sign](./quick/260531-pdi-fix-the-let-s-encrypt-r10-r13-cross-sign/) |
+| 260605-lix | Device check-in did not persist top-level lastupdate (console showed stale "last connected"): `update_device_and_respond` wrote a nested `doc.changes` blob via the flat-merge `devices/modify` handler; also `runDeviceTransformers` had no else branch for transformer-less devices. Fixed both + DeviceSpec (04b) regression. Root cause proven on prod doc 04ed1650. | 2026-06-05 | 6b4a077c | [260605-lix-fix-device-check-in-lastupdate-not-persi](./quick/260605-lix-fix-device-check-in-lastupdate-not-persi/) |
 
 ## Cross-Project Touchpoints
 
