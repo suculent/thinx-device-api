@@ -69,4 +69,34 @@ describe("Deployer", function () {
     expect(result).to.equal(false);
   });
 
+  // Behavior-locking assertions for findFilesSync (Cases A, B)
+  it("findFilesSync non-recursive: does not descend subdirs", function () {
+    var os = require('os');
+    var fs = require('fs');
+    var path = require('path');
+    var { findFilesSync } = require('../../lib/thinx/finder');
+    var tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'dep-spec-'));
+    try {
+      // root-level file
+      fs.writeFileSync(path.join(tmpRoot, 'firmware.bin'), 'data');
+      // sub-directory file that must NOT appear in non-recursive result
+      var subDir = path.join(tmpRoot, 'sub');
+      fs.mkdirSync(subDir);
+      fs.writeFileSync(path.join(subDir, 'nested.bin'), 'nested');
+      var result = findFilesSync(tmpRoot, '*.bin', false);
+      expect(result).to.be.an('array');
+      expect(result.length).to.equal(1);
+      expect(result[0]).to.equal(path.join(tmpRoot, 'firmware.bin'));
+    } finally {
+      fs.rmSync(tmpRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("findFilesSync returns [] for nonexistent path without throwing", function () {
+    var { findFilesSync } = require('../../lib/thinx/finder');
+    var result = findFilesSync('/nonexistent-deployment-test-dir', '*.zip', false);
+    expect(result).to.be.an('array');
+    expect(result.length).to.equal(0);
+  });
+
 });
