@@ -36,7 +36,7 @@ See `.planning/milestones/v1.10-ROADMAP.md`. 5/5 v1.10 requirements.
 
 ### v1.11 — Backlog Drawdown
 
-- [ ] **Phase 15: fs-finder Removal** - Replace all `fs-finder` call sites with `fs-extra`/native equivalents and drop the dependency from `package.json`
+- [x] **Phase 15: fs-finder Removal** - Replace all `fs-finder` call sites with `fs-extra`/native equivalents and drop the dependency from `package.json` (completed 2026-06-05)
 - [ ] **Phase 16: Dependabot Triage** - Classify the 5 outstanding default-branch alerts and ship surgical `overrides` to eliminate runtime-tree highs
 - [ ] **Phase 17: Influx Fix Production Deploy** - Force-roll the committed influx stats fix to production and verify dashboard numbers + log spam silenced
 
@@ -57,7 +57,7 @@ Plans:
 - [x] 15-01-PLAN.md — Create lib/thinx/finder.js shared helper + FinderSpec
 - [x] 15-02-PLAN.md — Sweep deployment.js + repository.js (3 call sites)
 - [x] 15-03-PLAN.md — Sweep builder.js + platform.js + arduino plugin (6 call sites)
-- [ ] 15-04-PLAN.md — Drop fs-finder from package.json (REFACTOR-07)
+- [x] 15-04-PLAN.md — Drop fs-finder from package.json (REFACTOR-07)
 
 ### Phase 16: Dependabot Triage
 **Goal**: All 5 outstanding default-branch Dependabot alerts are classified and any runtime-tree blockers are remediated, reducing the `npm audit --omit=dev` high count
@@ -90,7 +90,7 @@ Plans:
 | 12. Code-side Closure Helpers | v1.10 | 3/3 | Complete | 2026-06-04 |
 | 13. SEC-WS-01 Edge Handshake Closure | v1.10 | 1/1 | Complete | 2026-06-05 |
 | 14. SEC-PII-02 managed_logs Sweep Closure | v1.10 | 1/1 | Complete | 2026-06-05 |
-| 15. fs-finder Removal | v1.11 | 3/4 | In Progress|  |
+| 15. fs-finder Removal | v1.11 | 4/4 | Complete   | 2026-06-05 |
 | 16. Dependabot Triage | v1.11 | 0/? | Not started | - |
 | 17. Influx Fix Production Deploy | v1.11 | 0/? | Not started | - |
 
