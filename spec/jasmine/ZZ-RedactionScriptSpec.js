@@ -81,6 +81,30 @@ describe("SEC-PII-02 — managed_logs redaction script", function () {
     redacted_at: "2026-06-03T00:00:00.000Z"
   };
 
+  // SEC-PII-02b regression fixtures — production `owner` is a 64-char lowercase
+  // hex hash (NOT an opaque id). Earlier fixtures used "ownerOpaqueId", which
+  // masked the field-scoping bug: the all-fields walk matched the 64-hex owner
+  // under RESET_KEY_REGEX and would overwrite it with [REDACTED-RESET_KEY].
+  const OWNER_HASH = "c".repeat(64);          // matches /[0-9a-f]{64}/g, but is NOT a leak
+
+  const docOwnerHashCleanMessage = {
+    _id: "2025-06-01T00:00:00.000Z",
+    _rev: "1-own",
+    owner: OWNER_HASH,
+    date: "2025-06-01T00:00:00.000Z",
+    message: "Checkin Existing device.",
+    flags: ["info"]
+  };
+
+  const docOwnerHashLeakMessage = {
+    _id: "2025-06-02T00:00:00.000Z",
+    _rev: "1-own2",
+    owner: OWNER_HASH,
+    date: "2025-06-02T00:00:00.000Z",
+    message: `key=${SAMPLE_RESET_KEY_2}`,
+    flags: ["info"]
+  };
+
   // --- Pure-helper specs (the 6 logic truths) -----------------------------
 
   it("containsRawPII returns true for raw 64-char hex reset_key in message", function () {
@@ -125,6 +149,35 @@ describe("SEC-PII-02 — managed_logs redaction script", function () {
     const clean = redactor.scanDoc(docClean);
     expect(clean.resetKeyHits).to.equal(0);
     expect(clean.emailHits).to.equal(0);
+  });
+
+  // --- SEC-PII-02b: owner-field scoping regression ------------------------
+
+  it("containsRawPII ignores a 64-hex owner hash when message is clean", function () {
+    // The structural `owner` field is a legitimate 64-char hex hash, not a
+    // reset_key leak. Field-scoping must keep it out of the scan.
+    expect(redactor.containsRawPII(docOwnerHashCleanMessage)).to.equal(false);
+  });
+
+  it("redactDoc does NOT touch a 64-hex owner field (no false-positive redaction)", function () {
+    const result = redactor.redactDoc(docOwnerHashCleanMessage);
+    expect(result.changed).to.equal(false);
+    expect(result.doc.owner).to.equal(OWNER_HASH);
+  });
+
+  it("redactDoc redacts a message leak while preserving the 64-hex owner hash", function () {
+    const result = redactor.redactDoc(docOwnerHashLeakMessage);
+    expect(result.changed).to.equal(true);
+    expect(result.doc.owner).to.equal(OWNER_HASH);                 // owner untouched
+    expect(result.doc.message).to.contain("[REDACTED-RESET_KEY]"); // message redacted
+    expect(result.doc.message).to.not.contain(SAMPLE_RESET_KEY_2);
+  });
+
+  it("scanDoc only counts hits in PII fields, not the owner hash", function () {
+    const scan = redactor.scanDoc(docOwnerHashCleanMessage);
+    expect(scan.resetKeyHits).to.equal(0);
+    expect(scan.emailHits).to.equal(0);
+    expect(scan.fields).to.not.contain("owner");
   });
 
   // --- CLI-gate spec (file-level — no live CouchDB) -----------------------

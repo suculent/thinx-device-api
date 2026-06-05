@@ -263,6 +263,88 @@ This irreversibility is **accepted by design** — the SEC-PII-02 invariant is t
 
 ---
 
+## Execution Annex — SEC-PII-02 (OPS-EXEC-02)
+
+**Executed:** 2026-06-05T12:35Z · **Operator:** MS (autonomous session, operator-supervised) · **Host:** `micro` (188.166.23.244) · **CouchDB:** 3.5.1 on overlay `thinx_internal`, service `thinx_couchdb.1` placed on `micro`.
+
+**Outcome:** Closed as a **discrepancy branch** — two material deviations from the runbook premise were found and handled in-session.
+
+### Pre-flight (7/7 — adapted)
+
+- ✅ CouchDB placement confirmed (`thinx_couchdb.1` Running on `micro`).
+- ✅ `/mnt/gluster/thinx/.env` readable; 5 `COUCHDB_*` vars present; `SLACK_WEBHOOK` present (OBS-01 path live).
+- ✅ `THINX_PREFIX` empty — DB is bare `managed_logs`.
+- ✅ Snapshot target `/mnt/gluster/thinx/snapshots` (`chmod 700`); `df` showed 13 GB free (> 10 GB margin).
+- ✅ `thinx_api` reachable (running on `core`); note: running image is `thinxcloud/api:latest` (forward-TTL `expire_at` writes are a Phase-9 forward concern, independent of this historic sweep).
+- ✅ Maintenance window: low-traffic; live audit-write path tolerated the small bulk update (0 conflicts).
+- ✅ Forensic-rollback artifact (snapshot) retained per § 6 (90-day window).
+
+### Discrepancy 1 — historic corpus already deleted out-of-band
+
+The runbook baseline assumed ~658k live pre-Phase-2 docs. Dry-run + `_all_docs?limit=0` + `_info` showed:
+
+| field | value |
+|-------|-------|
+| `doc_count` (live) | **2,183** |
+| `doc_del_count` | **656,697** |
+
+`2,183 + 656,697 = 658,880 ≈` the 658,808 baseline — i.e., the bulk corpus had **already been deleted** out-of-band (a compaction was already in progress on arrival, `compact_running:true`). No mass-redaction of 658k docs was required; the remaining work was the live residue + compaction.
+
+### Discrepancy 2 — redactor false-positive on the `owner` field (fixed in-flight → SEC-PII-02b)
+
+The first dry-run reported `dirty=2,176` with **all hits in `fields=[owner]`**. The `owner` field is a legitimate 64-char lowercase hex **owner hash**, which `RESET_KEY_REGEX (/[0-9a-f]{64}/g)` matches as a false positive. Running `--apply` unmodified would have overwritten `owner` on ~2,176 docs with `[REDACTED-RESET_KEY]`, destroying audit attribution.
+
+**Fix (committed this session):** `scripts/redact-managed-logs.js` now scopes the scan/redact walk to a `PII_FIELDS = ["message","flags"]` allowlist; structural fields (`owner`, `date`, `expire_at`, `_id`, `_rev`) are copied verbatim. Regression specs added to `spec/jasmine/ZZ-RedactionScriptSpec.js` (64-hex owner must NOT be redacted; message leak still redacted while owner is preserved). 11 specs pass locally (config-free; CI is the canonical green-gate).
+
+### Dry-run (post-fix)
+
+```
+[scan] scanned=2183 dirty=422 resetKeyHits=422 emailHits=0   (all hits fields=[message])
+```
+
+422 genuine `reset_key`-shape leaks in the live `message` field; zero email leaks.
+
+### Apply (DESTRUCTIVE)
+
+```
+[apply] done touched=422 conflicts=0
+```
+
+- Snapshot: `/mnt/gluster/thinx/snapshots/managed_logs.pre-redaction-20260605T123511Z.jsonl`
+- Permissions: `-rw-------` (0600) · Lines: **422** (== `touched`) · Size: 134 KB
+- SHA256: `23b76a648030d7d41426c806830c8c890700b2e9162a479b9688d931caef1d5b`
+- Runtime: ~10 s.
+
+### Sample-verify (zero-leak gate)
+
+```
+[sample] checked=2000 leaks=0
+[sample] PASS: zero raw 64-char hex reset_keys and zero raw emails across 2000 sampled docs.
+exit=0
+```
+
+### Compaction
+
+| | disk_size | data_size | compact_running |
+|---|-----------|-----------|-----------------|
+| pre  | 128,258,502 | 126,991,837 | true (out-of-band run in progress) |
+| post | 128,221,638 | 126,976,914 | false |
+| delta | **−36,864** | −14,923 | completed |
+
+Small delta by design: the out-of-band compaction already in progress reclaimed the bulk old-revs; this completion purged the 422 redaction old-revs. The 656,697 deleted-doc **tombstones remain** (CouchDB compaction does not purge tombstones without an explicit `_purge`), so `disk_size ≈ data_size`. Full irreversibility per § 5 is satisfied for the redacted docs (current rev clean; old PII revs purged by compaction).
+
+### OBS-01 Slack receipt
+
+`SLACK_WEBHOOK` present; `--apply` success path invoked `postSlackSummary("success")` (no send error logged). Expected message in `#thinx`: `✅ managed_logs redaction complete — 422 scanned / 422 redacted / sample deferred …`. (Note: the success receipt reports `sample deferred` by design — `--sample` runs after `--apply`; the sample PASS is recorded above.)
+
+### Notes
+
+- Working dir on host: `/mnt/gluster/thinx/redact-work` (fixed script + minimal `node_modules`: `nano`, `slack-notify`, `typeof`). Snapshot retained under `/mnt/gluster/thinx/snapshots` per the 90-day GDPR window.
+- Logs captured to the phase dir: `dry-run.log` (pre-fix), `scan-fixed.log` (post-fix), `apply.log`, `sample.log`.
+- **Follow-up (SEC-PII-02b):** the owner false-positive fix shipped here; if a future redaction targets additional fields, re-confirm the `PII_FIELDS` allowlist before `--apply`.
+
+---
+
 ## 6. GDPR Posture — Historic PII Redaction
 
 This section satisfies ROADMAP success criterion #4 (GDPR-posture note appended to the runbooks set).
@@ -287,8 +369,8 @@ This section satisfies ROADMAP success criterion #4 (GDPR-posture note appended 
 
 | Run Date (UTC) | Sample N (recent + old) | Result          | Operator   | Notes |
 |----------------|-------------------------|-----------------|------------|-------|
+| 2026-06-05     | 1000 + 1000             | exit 0 (clean)  | MS         | OPS-EXEC-02 close; 422 message-field leaks redacted (corpus already deleted out-of-band); owner false-positive fixed (SEC-PII-02b) |
 | YYYY-MM-DD     | 1000 + 1000             | exit 0 (clean)  | <name>     |       |
-|                |                         |                 |            |       |
 
 The `--sample 1000` exit code is the canonical green-gate (per `09-CONTEXT.md` validation criterion #1). Record EVERY apply run; the running log is the external attestation that the invariant holds over time.
 

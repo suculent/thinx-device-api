@@ -67,6 +67,23 @@ const EMAIL_REGEX = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
 const RESET_KEY_MARKER = "[REDACTED-RESET_KEY]";
 const EMAIL_MARKER = "[REDACTED-EMAIL]";
 
+// PII-bearing fields — the ONLY fields the redactor scans / overlays.
+//
+// SEC-PII-02b fix (v1.10): the original implementation walked EVERY string
+// field, which false-positive-matched the structural `owner` field — a
+// legitimate 64-char lowercase hex owner hash that is indistinguishable from
+// a raw reset_key under RESET_KEY_REGEX. Walking all fields would overwrite
+// `owner` with [REDACTED-RESET_KEY] on essentially every managed_logs doc,
+// destroying audit attribution. The audit schema (lib/thinx/audit.js
+// `_buildRecord`) puts the user-supplied, PII-bearing text in `message`
+// (string) and `flags` (string[]); `owner`/`date`/`expire_at`/`_id`/`_rev`
+// are structural and MUST NOT be redacted. Scope the walk accordingly.
+const PII_FIELDS = ["message", "flags"];
+
+function _isPiiField(key) {
+  return PII_FIELDS.indexOf(key) !== -1;
+}
+
 // CLI exit codes (documented so operators / tests can assert against them).
 const EXIT_OK = 0;
 const EXIT_USAGE = 64;
@@ -89,8 +106,8 @@ const EXIT_RUNTIME_ERROR = 70;
  */
 function containsRawPII(doc) {
   if (doc === null || typeof doc !== "object") return false;
-  for (const key of Object.keys(doc)) {
-    if (key === "_id" || key === "_rev") continue;
+  for (const key of PII_FIELDS) {
+    if (!Object.prototype.hasOwnProperty.call(doc, key)) continue;
     const val = doc[key];
     if (typeof val === "string") {
       if (_matchAny(val)) return true;
@@ -121,8 +138,8 @@ function _matchAny(s) {
 function scanDoc(doc) {
   const out = { resetKeyHits: 0, emailHits: 0, fields: [] };
   if (doc === null || typeof doc !== "object") return out;
-  for (const key of Object.keys(doc)) {
-    if (key === "_id" || key === "_rev") continue;
+  for (const key of PII_FIELDS) {
+    if (!Object.prototype.hasOwnProperty.call(doc, key)) continue;
     const val = doc[key];
     const strings = [];
     if (typeof val === "string") strings.push(val);
@@ -165,12 +182,19 @@ function redactDoc(doc) {
   const next = {};
   for (const key of Object.keys(doc)) {
     const val = doc[key];
-    if (typeof val === "string") {
-      next[key] = _redactString(val);
-    } else if (Array.isArray(val)) {
-      next[key] = val.map((item) =>
-        typeof item === "string" ? _redactString(item) : item
-      );
+    // Only PII-bearing fields are overlaid; structural fields (owner, date,
+    // expire_at, _id, _rev, …) are copied verbatim so the 64-hex owner hash
+    // is never mistaken for a reset_key. See PII_FIELDS rationale above.
+    if (_isPiiField(key)) {
+      if (typeof val === "string") {
+        next[key] = _redactString(val);
+      } else if (Array.isArray(val)) {
+        next[key] = val.map((item) =>
+          typeof item === "string" ? _redactString(item) : item
+        );
+      } else {
+        next[key] = val;
+      }
     } else {
       next[key] = val;
     }
@@ -266,6 +290,7 @@ module.exports = {
   EMAIL_REGEX,
   RESET_KEY_MARKER,
   EMAIL_MARKER,
+  PII_FIELDS,
   // Exit codes for tests:
   EXIT_OK,
   EXIT_USAGE,

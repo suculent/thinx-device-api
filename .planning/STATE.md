@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: — Operational Closures
-status: executing
-stopped_at: Phase 13 context gathered
-last_updated: "2026-06-04T20:59:30.000Z"
-last_activity: 2026-06-04 -- Phase 13 plan 13-01 — Tasks 1-3 committed; CHECKPOINT REACHED at Task 4 (DISCREPANCY: probe-pre-fix.txt = 0/4, fix already shipped out-of-band; CHECKPOINT pivots to snapshot-capture-only)
+status: v1.10 phases 12–14 complete — OPS-EXEC-02 Verified; milestone ready for lifecycle (audit → complete → cleanup)
+stopped_at: ""
+last_updated: "2026-06-05T13:00:00.000Z"
+last_activity: "2026-06-05 -- Phase 14 OPS-EXEC-02 closed (discrepancy branch). Corpus already deleted out-of-band (656,697 tombstones; 2,183 live). Redactor owner-field false-positive fixed in-flight (SEC-PII-02b; PII_FIELDS allowlist + 4 regression specs). 422 genuine message-field reset_key leaks redacted (snapshot+apply, 0 conflicts; --sample 1000 exit 0). Compaction completed. REQUIREMENTS OPS-EXEC-02 Verified; runbook execution annex committed."
 progress:
   total_phases: 3
-  completed_phases: 1
-  total_plans: 4
-  completed_plans: 3
-  percent: 33
+  completed_phases: 3
+  total_plans: 5
+  completed_plans: 5
+  percent: 100
 ---
 
 # STATE — THiNX Device API
@@ -23,22 +23,22 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-06-04 after v1.9 milestone close)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** Phase 13 — SEC-WS-01 Edge Handshake Closure (OPS-EXEC-01)
+- **Current focus:** v1.10 phases 12–14 complete — milestone lifecycle (audit → complete → cleanup)
 - **Latest production image:** `thinxcloud/api:latest sha256:4d3fb789` (v1.0 Phase 4 deploy 2026-05-26T22:35:54Z); v1.9 base bumped to `1.9.3054` 2026-06-02 via `304b09d1`; v1.9 backend changes deployed via operator push when ready (CI green-gate on `thinx-staging`)
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace; SEC-DEP-02 scheduled there under a new `v1.x Operational Hygiene` milestone (Phase 10 of v1.9 landed the parent-side coordination). No coordination required for v1.10.
 
 ## Current Position
 
-Phase: 13 (SEC-WS-01 Edge Handshake Closure (OPS-EXEC-01)) — EXECUTING (in_progress)
-Plan: 1 of 1 — 13-01 IN PROGRESS (Tasks 1-3 committed; CHECKPOINT REACHED at Task 4)
-Status: Plan 13-01 in_progress, CHECKPOINT REACHED at Task 4, awaiting operator inputs
-Last activity: 2026-06-04 -- Plan 13-01 Tasks 1-3 committed (bfb5f375 / 38ad28b9 / 080480d1); checkpoint emitted at Task 4. DISCREPANCY: probe-pre-fix.txt shows 0/4 — fix already shipped out-of-band — checkpoint pivots to snapshot-capture-only.
+Phase: 14 (SEC-PII-02 managed_logs Production Sweep (OPS-EXEC-02)) — COMPLETE ✓
+Plan: 1 of 1 — 14-01 COMPLETE (discrepancy branch)
+Status: v1.10 phases 12–14 all complete; OPS-EXEC-02 Verified. Milestone ready for lifecycle.
+Last activity: 2026-06-05 -- Phase 14 closed. Redactor owner false-positive fixed (SEC-PII-02b); 422 message-field reset_key leaks redacted; --sample 1000 exit 0; compaction complete; runbook annex + REQUIREMENTS Verified committed.
 
 ## Milestones
 
 - ✅ **v1.0 — v1 GA Backend Closures** (shipped 2026-05-27) — see `.planning/MILESTONES.md`
 - ✅ **v1.9 — Backend Hygiene & Posture** (shipped 2026-06-04) — Phases 5–11; see `.planning/MILESTONES.md` + `.planning/milestones/v1.9-ROADMAP.md`
-- 🚧 **v1.10 — Operational Closures** (planning) — Phases 12–14; see `.planning/ROADMAP.md`
+- 🚧 **v1.10 — Operational Closures** (execution complete; pending lifecycle close) — Phases 12–14, 5/5 requirements Verified; see `.planning/ROADMAP.md`
 
 ## Accumulated Context
 
@@ -88,7 +88,7 @@ All items are non-blocking. The two quick-tasks shipped under `/gsd-quick` per u
 
 ### Blockers
 
-- **Phase 13 / Plan 13-01 — CHECKPOINT REACHED at Task 4 (2026-06-04, awaiting operator inputs).** Tasks 1-3 committed (probe script + swarm-configs README + probe-pre-fix.txt baseline + SEC-WS-01 Rollback Procedure section). DISCREPANCY surfaced during Task 2: the pre-edit probe baseline captured at 2026-06-04T20:55:32Z reports `Bare-nginx-404 rows (4-7) detected: 0/4` — rows 4-7 show helmet Content-Security-Policy headers, indicating the SEC-WS-01 edge nginx fix is ALREADY LIVE on rtm.thinx.cloud (presumably shipped out-of-band between Phase 6 close 2026-06-02 and Phase 13 execution today). Per 13-01-PLAN.md line ~287 contingency: "If it shows 0/4, STOP — the fix already shipped (out-of-band); skip the SSH session and resume with `## CHECKPOINT RESOLVED — fix already in place`." The checkpoint emitted to the orchestrator pivots Operator Action from "edit + reload" to "snapshot-only" — the operator captures the LIVE (already-fixed) `rtm.thinx.cloud` server block via `nginx -T | awk` for the swarm-configs/ audit trail + re-runs the probe as `probe-post-fix.txt` (will match the pre-fix capture, both at 0/4 — confirming the live state). Sentinel inputs the resume executor will check: (1) `.planning/runbooks/swarm-configs/rtm.thinx.cloud-server.pre.nginx`, (2) `.planning/runbooks/swarm-configs/rtm.thinx.cloud-server.post.nginx` (same content as pre — no edit was applied), (3) `.planning/phases/13-.../probe-post-fix.txt` (footer = 0/4), (4) operator initials + UTC timestamp + notes.
+- None. Phase 13 (OPS-EXEC-01) and Phase 14 (OPS-EXEC-02) both closed as discrepancy branches (each fix/cleanup had already partially happened out-of-band). All 5 v1.10 requirements Verified.
 
 ### Open Questions
 
@@ -109,7 +109,7 @@ All items are non-blocking. The two quick-tasks shipped under `/gsd-quick` per u
 
 ## Session Continuity
 
-**Stopped at:** Phase 13 / Plan 13-01 — CHECKPOINT REACHED at Task 4 (Tasks 1-3 committed; awaiting operator-supplied sentinel inputs to resume Tasks 5-6)
+**Stopped at:** context exhaustion at 76% (2026-06-05)
 
 **Next action (operator-side):** Per the CHECKPOINT REACHED message returned by the executor, the operator runs the swarm-host snapshot-capture session (no edit — fix already live):
 

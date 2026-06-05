@@ -11,7 +11,7 @@ Requirements scoped to v1.10. Each maps to exactly one roadmap phase. OPS-EXEC-*
 
 - [x] **OPS-EXEC-01**: Execute SEC-WS-01 closure on the swarm host per `.planning/runbooks/websocket-handshake.md`. Apply the nginx `location ~ ^/[^/]+(/[0-9]+)?$` upgrade block to the rtm reverse-proxy config; verify `nginx -t` passes; reload nginx; persist the config change with a version-controlled trail (commit the swarm-host config snippet under `.planning/runbooks/` or wherever swarm configs live in this repo's ops trail). Validated by: (a) `wscat -c wss://rtm.thinx.cloud/<owner>/<timestamp>` from a fresh Vue session returns `101 Switching Protocols` (post-fix probe matches the runbook's 7-row reproduction table), (b) Vue console WebSocket subscribe + initial-state-fetch round-trip completes end-to-end against rtm, (c) `nginx -T | grep -A5 '^[[:space:]]*location ~ \^/'` on the swarm host shows the new block, (d) runbook updated with the execution-timestamp + post-fix probe output appended.
 
-- [ ] **OPS-EXEC-02**: Execute SEC-PII-02 closure against production CouchDB `managed_logs` per `.planning/runbooks/managed-logs-redaction.md`. Stage: snapshot to JSONL forensic dump → dry-run review → `--apply` with `--snapshot-to <path>` → `--sample 1000` verification → CouchDB compaction. The execution covers ~658k pre-Phase-2 docs. Validated by: (a) sampling N=1000 random recent + N=1000 random old `managed_logs` docs returns zero raw 64-char hex `reset_key` shapes and zero raw email shapes (the `--sample` subcommand exits 0), (b) the JSONL forensic dump exists at the documented `--snapshot-to` path and is referenced in the runbook execution annex, (c) CouchDB compaction completes and the database disk size drops by the expected delta, (d) runbook updated with the execution-timestamp + sample-result + delta figure appended.
+- [x] **OPS-EXEC-02**: Execute SEC-PII-02 closure against production CouchDB `managed_logs` per `.planning/runbooks/managed-logs-redaction.md`. Stage: snapshot to JSONL forensic dump → dry-run review → `--apply` with `--snapshot-to <path>` → `--sample 1000` verification → CouchDB compaction. The execution covers ~658k pre-Phase-2 docs. **Verified 2026-06-05 (discrepancy branch — see runbook Execution Annex):** the ~658k historic corpus was already deleted out-of-band (656,697 tombstones; 2,183 live docs remained); a redactor field-scoping bug (SEC-PII-02b — the all-fields walk false-matched the legitimate 64-hex `owner` hash) was fixed in-flight and 422 genuine `reset_key` leaks in the live `message` field were redacted (snapshot + apply + `--sample` exit 0); compaction completed. Validated by: (a) sampling N=1000 random recent + N=1000 random old `managed_logs` docs returns zero raw 64-char hex `reset_key` shapes and zero raw email shapes (the `--sample` subcommand exits 0), (b) the JSONL forensic dump exists at the documented `--snapshot-to` path and is referenced in the runbook execution annex, (c) CouchDB compaction completes and the database disk size drops by the expected delta, (d) runbook updated with the execution-timestamp + sample-result + delta figure appended.
 
 ### Observability & Test Helpers (opportunistic code adds)
 
@@ -55,7 +55,7 @@ Explicitly excluded from v1.10. Documented to prevent scope creep.
 | OBS-01 | Phase 12 | Complete |
 | OBS-02 | Phase 12 | Complete |
 | OPS-EXEC-01 | Phase 13 | Verified |
-| OPS-EXEC-02 | Phase 14 | Pending |
+| OPS-EXEC-02 | Phase 14 | Verified |
 
 **Coverage:**
 - v1.10 requirements: 5 total
