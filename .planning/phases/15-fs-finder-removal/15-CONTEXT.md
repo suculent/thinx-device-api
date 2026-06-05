@@ -7,11 +7,11 @@
 <domain>
 ## Phase Boundary
 
-Excise the internally-owned `fs-finder` fork (`github:suculent/Node-FsFinder#master`) from the runtime: replace all 12 call sites across 5 `lib/` modules with `fs-extra`/native `fs` equivalents that preserve behavior exactly, lock that behavior with a spec per touched module, then remove `fs-finder` from `package.json` `dependencies` so no source reference remains.
+Excise the internally-owned `fs-finder` fork (`github:suculent/Node-FsFinder#master`) from the runtime: replace all 9 `finder.*` call sites across 5 `lib/` modules (plus the 5 `require("fs-finder")` import lines) with `fs-extra`/native `fs` equivalents that preserve behavior exactly, lock that behavior with a spec per touched module, then remove `fs-finder` from `package.json` `dependencies` so no source reference remains.
 
 Covers requirements **REFACTOR-06** (call-site sweep + specs) and **REFACTOR-07** (dependency drop).
 
-In scope: the 12 call sites + their specs + the `package.json` removal.
+In scope: the 9 call sites + 5 require() lines + their specs + the `package.json` removal.
 Out of scope: any unrelated refactor of the surrounding methods; touching `base/node_modules` (vendored, separate).
 
 </domain>
