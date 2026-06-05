@@ -116,6 +116,47 @@
 
 ---
 
+## Milestone: v1.10 — Operational Closures
+
+**Shipped:** 2026-06-05
+**Phases:** 3 (Phases 12–14) | **Plans:** 5
+
+### What Was Built
+
+- **Phase 12 (code helpers):** in-process WS handshake CI spec (TEST-WS-01), Slack closure-receipt wiring in `redact-managed-logs.js` (OBS-01), DETECT-only audit-TTL eviction probe wired into `thinx-core.js` startup (OBS-02).
+- **Phase 13 (OPS-EXEC-01):** SEC-WS-01 edge handshake closure — `probe-rtm-handshake.sh` reproduction probe, swarm-config snapshot trail, runbook execution annex.
+- **Phase 14 (OPS-EXEC-02):** SEC-PII-02 `managed_logs` production sweep — 422 live `reset_key` leaks redacted under a snapshot-gated `--apply`, `--sample` zero-leak gate, CouchDB compaction, plus an in-flight redactor field-scoping fix (SEC-PII-02b).
+
+### What Worked
+
+- **Helper-first sequencing paid off literally:** wiring OBS-01 into the redactor before Phase 14 ran meant the production sweep's closure receipt was automatic, not an after-the-fact paste. Phase 12-before-13/14 was the right call.
+- **Discrepancy-branch handling:** both OPS executions discovered the work had already partially happened out-of-band. The phases pivoted cleanly from "apply" to "verify + persist the audit trail" without forcing a redundant mutation — the runbook-annex-as-verification-artifact model absorbed this gracefully.
+- **Opportunistic in-flight fix:** the milestone's stated execution model ("if production reveals an in-script issue, the fix lands inside this milestone") was exercised for real when the redactor's all-fields walk false-matched the 64-hex `owner` hash. Fix landed in Phase 14 rather than spawning a cycle.
+
+### What Was Inefficient
+
+- **`milestone.complete` accomplishment extraction is unreliable:** the CLI's SUMMARY one-liner scrape pulled garbage ("1. [Rule 3 - Blocking]", "One-liner:") into MILESTONES.md; the entry had to be hand-rewritten. The SUMMARY files lack a consistently-parseable one-liner field.
+- **ROADMAP/REQUIREMENTS checkbox drift:** Phases 13/14 carried unticked ROADMAP checkboxes and "Pending" traceability rows even after Verified — cosmetic, but the `roadmap.analyze` `roadmap_complete:false` flags needed manual reconciliation against `disk_status:complete`.
+- **CI flake tax:** the influx-fix verification burned a full pipeline (5265 ECONNRESET mid-`npm install`) before a clean re-run (5266) — the Docker console-build stage's network `npm install` remains the flakiest gate.
+
+### Patterns Established
+
+- **Quick-task-as-milestone-addition:** a loose incident-response commit (influx fix `9b6d931c`) was folded into the milestone as a tracked quick-task (`260605-inf`) in STATE.md rather than forced into a phase — a lightweight path for in-cycle additions that aren't requirements.
+- **Scanner-false-positive acknowledgment:** `/gsd-quick` tasks whose dirs don't carry the scanner's manifest format are recorded under STATE.md `## Deferred Items` at close with their proving commit, closing the audit loop without manufacturing artifacts.
+
+### Key Lessons
+
+- For OPS-execution milestones, **the verification artifact (runbook annex) is the deliverable** — when the fix is already live, "close" means proving + persisting the audit trail, not re-applying. The discrepancy branch is a first-class outcome, not a failure mode.
+- **Hand-verify the auto-generated MILESTONES.md entry** every close — the CLI's accomplishment extraction can't be trusted on this project's SUMMARY format.
+
+### Cost Observations
+
+- Model mix: opus-1m main loop; CircleCI MCP for CI watch/re-trigger; no execution subagents this milestone (phases were largely operator-gated)
+- Sessions: phases 12–14 across 2026-06-04 → 2026-06-05; close performed in a single resume session
+- Notable: this milestone's wall-clock was dominated by operator-side SSH windows + CI builds, not agent work — the code surface (3 small helpers + 1 redactor fix) was modest relative to the operational coordination
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -124,6 +165,7 @@
 |-----------|--------|-------|------------|
 | v1.0 | 4 | 8 | First milestone using GSD on this project; established codebase-map-before-REQUIREMENTS pattern and rung-by-rung operational-phase ladder |
 | v1.9 | 7 | 23 | Established per-phase VERIFICATION.md as the milestone gate (closes v1.0's process-debt gap); codified sequential single-branch execution for same-file sweeps; introduced operator-runbook closures + DETECT-only OPS probes; mid-phase scope amendment via single-commit document sync |
+| v1.10 | 3 | 5 | First milestone-level audit (`v1.10-MILESTONE-AUDIT.md`, ✅ passed) — closes the v1.0/v1.9 "no milestone audit" revisit flag; codified discrepancy-branch closure (verify + persist annex when fix already live); helper-first sequencing so OPS phases consume their own code deps; quick-task-as-milestone-addition for in-cycle non-requirement commits |
 
 ### Cumulative Quality
 
@@ -131,6 +173,7 @@
 |-----------|---------------------|---------------------|--------------|
 | v1.0 | 3 (`ZZ-RouterPasswordResetSpec.js`, `ZZ-OwnerLogRedactionSpec.js`, `UtilSpec.js` extensions) | 4 (`0a0e6b32`, `3a461b3d`, `81b22f1f`, `4d3fb789`) | tech_debt (no blockers; intentionally-deferred + 1 artifact gap) |
 | v1.9 | 7+ (`02-OwnerSpec.js` × 5 behavior-locking, `ZZ-RouterAdminReactivateSpec.js`, `ZZ-CookieAttributeSpec.js`, `ZZ-WebSocketLifecycleSpec.js`, `ZZ-CertProbeSpec.js`, `ZZ-AuditTTLSpec.js`, `ZZ-RouterPasswordResetSpec.js` extensions) | base image bumped to `1.9.3054`; production deploy deferred to operator push (CI green-gate on `thinx-staging`) | per-phase VERIFICATION.md PASS for all 7 phases (no separate milestone audit; carries the same revisit flag as v1.0's gap) |
+| v1.10 | 2+ (`ZZ-WebSocketHandshakeRtmSpec.js`, `ZZ-AuditTTLEvictionSpec.js`, redactor Slack-receipt unit spec) | device check-in fix + no_team Slack catch DEPLOYED & live (`sha256:2bf95549`); influx fix `9b6d931c` CI-green (pipeline 5266), operator force-rollout pending | **first milestone-level audit** — `v1.10-MILESTONE-AUDIT.md` ✅ passed (requirements 5/5, phases 3/3, integration 2/2, flows 2/2); closes the v1.0/v1.9 revisit flag |
 
 ### Recurring Backlog Themes
 
@@ -138,8 +181,10 @@
 
 - v1.0 → carried forward to v1.x: REFACTOR-01..05, SEC-COOKIE-01, SEC-WS-01, SEC-DEP-02, SEC-PII-02, OPS-02, OPS-03, AUTH-REACTIVATE-01, AUTH-RESET-LINK-CONSOLE, CONSOLE-LEGACY-JSON-PARSE, TEST-CHAI-01
 - v1.9 → carried forward to v1.10: **fs-finder removal sweep** (deferred from Phase 5 REFACTOR-05 scope amendment), **SEC-WS-01 operator-side edge fix** (runbook authored, swarm-host execution outstanding), **SEC-PII-02 production execution** (script + audit TTL shipped; ~658k-doc sweep deferred to operator window), TEST-CHAI-01 (still locked per AGENTS.md), OPS-02 / OPS-03 (pure swarm-side, still deferred), CONSOLE-LEGACY-JSON-PARSE (sibling-project scope)
-- **Survived both milestones (v1.0 → v1.9 → v1.10):** TEST-CHAI-01 (3rd milestone of deferral), OPS-02 / OPS-03 (3rd milestone of deferral), CONSOLE-LEGACY-JSON-PARSE (3rd milestone of deferral) — these have crossed the threshold from "deferred" into "structurally orthogonal to this codebase's lifecycle"; v1.10 planning should make a deliberate keep/drop call rather than auto-carrying them again
+- **Survived all three milestones (v1.0 → v1.9 → v1.10):** TEST-CHAI-01, OPS-02 / OPS-03, CONSOLE-LEGACY-JSON-PARSE — these have crossed the threshold from "deferred" into "structurally orthogonal to this codebase's lifecycle". v1.10 did NOT make the deliberate keep/drop call (the milestone was OPS-execution-scoped, not backlog-grooming); they auto-carried a 4th time. **v1.11 planning must force the keep/drop decision** — they are now overdue for it.
+- **v1.10 → carried forward to v1.11:** fs-finder removal sweep (now unblocked — the ops loop v1.10 closed was its stated gate), fresh Dependabot triage (5 alerts), the four structurally-orthogonal items above, and the influx-fix prod deploy (`9b6d931c`, CI-green, operator force-rollout pending).
 
 ---
 *Retrospective initialized: 2026-05-27 (v1.0 milestone close)*
 *v1.9 milestone section appended: 2026-06-04*
+*v1.10 milestone section appended: 2026-06-05*
