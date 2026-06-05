@@ -52,7 +52,6 @@
     "express-rate-limit": "^8.5.1",
     "express-session": "^1.19.0",
     "fs-extra": "^11.3.3",
-    "fs-finder": "github:suculent/Node-FsFinder#master",
     "helmet": "^8.1.0",
     "http-signature": "^1.3.5",
     "influx": "^5.11.0",
