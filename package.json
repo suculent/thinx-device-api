@@ -97,6 +97,7 @@
     "@commitlint/config-validator": {
       "ajv": "^8.0.0"
     },
+    "@hapi/wreck": "^18.1.1",
     "ansi-regex": "5.0.1",
     "async": "2.6.4",
     "bl": "4.0.3",
@@ -124,10 +125,12 @@
     "netmask": "2.0.2",
     "path-to-regexp": "8.4.0",
     "protobufjs": "7.1.1",
+    "serialize-javascript": "^7.0.5",
     "proxy-agent": "4.0.1",
     "string-width": "4.2.3",
     "strip-ansi": "6.0.1",
     "trim-newlines": "4.0.2",
+    "tmp": "^0.2.6",
     "tunnel-agent": "0.6.0",
     "ws": "$ws",
     "yargs-parser": "20.2.7"
