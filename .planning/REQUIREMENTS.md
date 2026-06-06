@@ -14,7 +14,7 @@ Requirements for the v1.11 Backlog Drawdown milestone. Each maps to exactly one 
 
 ### Security / Dependencies
 
-- [ ] **SEC-DEP-03**: The 5 outstanding default-branch Dependabot alerts (2 High / 3 Medium) are classified via the established closed-set taxonomy (blocker / deferred-stale / deferred-dev-only / deferred-vendored-asset), blockers remediated with surgical `package.json` `overrides`, and a post-change rescan confirms the runtime-tree (`npm audit --omit=dev`) high count is reduced.
+- [x] **SEC-DEP-03**: The 5 outstanding default-branch Dependabot alerts (2 High / 3 Medium) are classified via the established closed-set taxonomy (blocker / deferred-stale / deferred-dev-only / deferred-vendored-asset), blockers remediated with surgical `package.json` `overrides`, and a post-change rescan confirms the runtime-tree (`npm audit --omit=dev`) high count is reduced.
 
 ### Operations
 
@@ -23,6 +23,10 @@ Requirements for the v1.11 Backlog Drawdown milestone. Each maps to exactly one 
 ## Future Requirements
 
 Acknowledged and deferred — still standing candidates, not in the v1.11 roadmap. Kept deferred a 4th time at v1.11 start as a deliberate keep call (not auto-carry).
+
+### Security / Dependencies — Deferred
+
+- **uuid alert #194 (Moderate)** — transitive `uuid@8.3.2` inside `jest-junit@16` + `nyc@15` dev toolchain. Patched version is `uuid@11.1.1` (3-major jump from 8.x). Deliberately deferred: `uuid@11` risks breaking `nyc`/`jest-junit` which pin `uuid@8`; dev-only moderate does not justify toolchain regression. Disposition: **deferred-dev-only**. Revisit if `nyc`/`jest-junit` upgrade their uuid pin or if the alert escalates to runtime scope.
 
 ### Test Infrastructure
 
@@ -53,7 +57,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 |-------------|-------|--------|
 | REFACTOR-06 | Phase 15 | Complete |
 | REFACTOR-07 | Phase 15 | Complete |
-| SEC-DEP-03 | Phase 16 | Pending |
+| SEC-DEP-03 | Phase 16 | Complete |
 | OPS-EXEC-03 | Phase 17 | Pending |
 
 **Coverage:**
@@ -63,4 +67,4 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 ---
 *Requirements defined: 2026-06-05*
-*Last updated: 2026-06-05 — traceability filled after roadmap creation (Phases 15–17)*
+*Last updated: 2026-06-06 — SEC-DEP-03 marked complete (Phase 16); uuid #194 recorded as deferred-dev-only*
