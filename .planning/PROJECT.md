@@ -12,11 +12,11 @@ The IoT device API stays available and trustworthy across release cycles — eve
 
 ## Current State
 
-**Shipped:** v1.10 Operational Closures (2026-06-05) — 5/5 v1.10 requirements Verified across 3 phases (Phases 12–14). Closed the two operator-runbook executions v1.9 deferred (SEC-WS-01 edge handshake + SEC-PII-02 `managed_logs` production sweep) plus three code-side helpers (in-process WS CI spec, Slack closure receipt, audit-TTL eviction probe). Both OPS executions resolved as discrepancy branches; a redactor field-scoping bug (SEC-PII-02b) was fixed in-flight. See `.planning/MILESTONES.md` and `.planning/milestones/v1.10-ROADMAP.md`.
+**Shipped:** v1.11 Backlog Drawdown (2026-06-06) — 4/4 v1.11 requirements satisfied across 3 phases (Phases 15–17). Excised the `fs-finder` fork (9 call sites → native `lib/thinx/finder.js`; dependency dropped), triaged the 5 default-branch Dependabot alerts (3 surgical overrides; runtime tree 0 high/0 moderate; `uuid #194` deferred-dev-only), and confirmed the influx stats fix live in production (OPS-EXEC-03 resolved as a discrepancy branch — already autoredeployed). Audit `tech_debt`. **Follow-on:** Phases 15+16 are committed but unpushed/undeployed (push triggers full CI suite; deploy is separate operator work). See `.planning/MILESTONES.md` and `.planning/milestones/v1.11-ROADMAP.md`.
 
-Previously: v1.9 Backend Hygiene & Posture (2026-06-04) — 13/13 v1.9 requirements across 7 phases (Phases 5–11), 23 plans, 78 commits. v1.0 GA Backend Closures (2026-05-27) — 4/4 v1 requirements; default branches `master` + `main` via PR #539 + #540; production image at `sha256:4d3fb789` (Phase 4 deploy).
+Previously: v1.10 Operational Closures (2026-06-05) — 5/5 requirements across Phases 12–14 (SEC-WS-01 + SEC-PII-02 runbook executions + 3 code helpers). v1.9 Backend Hygiene & Posture (2026-06-04) — 13/13 across Phases 5–11. v1.0 GA Backend Closures (2026-05-27) — 4/4; production image `sha256:4d3fb789`.
 
-**Next milestone:** v1.11 Backlog Drawdown started 2026-06-05 (defining requirements). Scope: fs-finder removal sweep, fresh Dependabot triage (5 alerts), and the pending influx stats fix prod deploy. CONSOLE-LEGACY-JSON-PARSE reclassified to sibling scope (frontend double-parse, not parent code); TEST-CHAI-01 / OPS-02 / OPS-03 kept deferred a 4th time with documented rationale.
+**Next milestone:** not yet started. Run `/gsd-new-milestone` to define v1.12 (fresh REQUIREMENTS.md). Standing candidates: push/CI/deploy of v1.11 Phases 15/16 (operator follow-on), the third-deferral keep/drop call on TEST-CHAI-01 / OPS-02 / OPS-03 (now 4× deferred), and `uuid #194` (deferred-dev-only — revisit if nyc/jest-junit bump their uuid pin).
 
 **Codebase posture after v1.9:**
 - `lib/thinx/owner.js` is fully async/await (~73 callback patterns swept; 5 behavior-locking specs added) with strict equality throughout and SEC-PII-01 + Phase 5 REFACTOR-02 invariants preserved.
@@ -27,20 +27,26 @@ Previously: v1.9 Backend Hygiene & Posture (2026-06-04) — 13/13 v1.9 requireme
 
 **Companion project:** `services/console` submodule shipped its SEC-DEP-02 phase under a new `v1.x Operational Hygiene` milestone; pointer landed in this repo via Phase 10 commit `28a4add4`.
 
-## Current Milestone: v1.11 Backlog Drawdown
+## Next Milestone
 
-**Goal:** Pay down the long-standing v1.x backend backlog — remove the `fs-finder` runtime dependency, triage the outstanding Dependabot alerts, and deploy the pending influx stats fix — while making deliberate disposition calls on the items that have deferred three times.
+**Not yet started.** Run `/gsd-new-milestone` to define v1.12 (questioning → research → requirements → roadmap; fresh REQUIREMENTS.md).
 
-**Target features:**
-- **fs-finder removal sweep** (REFACTOR-06) — replace ~10 `finder.*` call sites across 5 `lib/` modules (`builder.js`, `deployment.js`, `platform.js`, `repository.js`, `plugins/arduino/plugin.js`) with `fs-extra`/native `fs.promises`, then drop `fs-finder` from `package.json`. Behavior-locking specs per touched module.
-- **Dependabot triage** (SEC-DEP-03) — classify the 5 default-branch alerts (2H/3M) via the established taxonomy; ship surgical `package.json` `overrides` for blockers; rescan to confirm runtime-tree reduction.
-- **Influx fix prod deploy** (OPS-EXEC-03) — force-rollout `9b6d931c` (quick-task `260605-inf`) to prod; verify dashboard check-in numbers correct + `BADSTRING` log spam silenced. CI green-gated (pipeline 5266).
-
-**Disposition decisions made at v1.11 start:**
-- **CONSOLE-LEGACY-JSON-PARSE** — reclassified to `services/console` sibling scope. Documented root cause is a frontend double-parse (`JSON.parse` on an already-parsed object at `src/login.js:173` + `password.js:87`); no parent-repo code change exists. Moved to Out of Scope; coordinate into the console submodule's GSD workspace.
-- **TEST-CHAI-01 / OPS-02 / OPS-03** — kept deferred a 4th time. Deliberate keep call (not auto-carry): chai-http v5 ESM stays locked per AGENTS.md (trigger = superagent v3 CVE); OPS-02/OPS-03 are pure swarm-side edits orthogonal to this codebase's lifecycle. Remain standing candidates for a future milestone.
+**Standing candidates:**
+- **v1.11 Phases 15/16 push + CI + deploy** — 33 commits unpushed on `thinx-staging` (fs-finder refactor + `@hapi/wreck` bump). Push validates them via the full CI Jasmine suite; prod deploy is a separate `docker service update --force thinx_api` (micro-pinned, co-located w/ mosquitto). Operator follow-on, not yet a milestone requirement.
+- **Third-deferral keep/drop call** — TEST-CHAI-01 (chai-http v5 ESM, locked per AGENTS.md), OPS-02 / OPS-03 (pure swarm-side OPS). Now deferred 4×; a future milestone should make a deliberate keep/drop call.
+- **uuid #194** — `deferred-dev-only` (transitive `uuid@8` in nyc/jest-junit; 8→11 bump risks the dev toolchain). Revisit if those tools bump their pin or the alert escalates to runtime scope.
 
 ## Validated Requirements (Historical)
+
+<details>
+<summary>v1.11 Backlog Drawdown (shipped 2026-06-06)</summary>
+
+- ✓ **REFACTOR-06** — v1.11 (Phase 15) — All 9 `fs-finder` call sites across 5 `lib/` modules replaced with the synchronous, version-independent native helper `lib/thinx/finder.js` (`findFilesSync`/`findDirsSync`), behavior locked by `FinderSpec` (11 cases) + per-module specs. Pre-order DFS traversal matches fs-finder's `getPathsSync` ordering exactly (caught + fixed in code review).
+- ✓ **REFACTOR-07** — v1.11 (Phase 15) — `fs-finder` (`github:suculent/Node-FsFinder#master`) removed from `package.json`; `npm ls fs-finder` empty (4 packages purged); 0 source references remain. Gated last behind a grep precondition for clean bisect.
+- ✓ **SEC-DEP-03** — v1.11 (Phase 16) — 5 default-branch Dependabot alerts triaged via taxonomy; 3 surgical overrides (`@hapi/wreck ^18.1.1` runtime, `tmp ^0.2.6`, `serialize-javascript ^7.0.5`) → runtime tree `npm audit --omit=dev` 0 high/0 moderate; mocha smoke-checked intact; `uuid #194` deferred-dev-only.
+- ✓ **OPS-EXEC-03** — v1.11 (Phase 17) — Influx stats fix (`9b6d931c`) verified live in production (discrepancy branch — already autoredeployed pipeline-5266 `:latest`). `DEVICE_CHECKIN` count=16, 0 `BADSTRING`/parse errors over 24h, `thinx_api` co-located with mosquitto on micro. Runbook annex in `swarm.md`.
+
+</details>
 
 <details>
 <summary>v1.10 Operational Closures (shipped 2026-06-05)</summary>
@@ -146,7 +152,12 @@ Previously: v1.9 Backend Hygiene & Posture (2026-06-04) — 13/13 v1.9 requireme
 | v1.10 Phase 12 sequenced FIRST (code helpers before the two OPS executions) | OBS-01 had to be wired into `redact-managed-logs.js` before Phase 14's sweep invoked it (auto Slack receipt); TEST-WS-01 had to exist before Phase 13's edge fix so regression coverage was there from day one | ✓ Good — both OPS phases ran with their helper dependency already in place |
 | v1.10 OPS-EXEC-01 + OPS-EXEC-02 closed as discrepancy branches | Both fixes/cleanups had already partially happened out-of-band (edge fix live; historic ~658k corpus already deleted). The phases pivoted from "apply" to "verify + persist the audit trail" rather than re-applying | ✓ Good — verification + runbook annex still produced; 5/5 Verified without redundant mutation |
 | v1.10 redactor field-scoping bug (SEC-PII-02b) fixed in-flight rather than deferred | The all-fields walk false-matched the legitimate 64-hex `owner` hash; per the milestone's "opportunistic in-flight code adds" execution model, the fix landed inside Phase 14 rather than spawning a separate cycle | ✓ Good — 422 genuine `reset_key` leaks redacted; `PII_FIELDS` allowlist [message, flags] now the documented scope |
-| v1.10 closed with influx fix (`9b6d931c`) tracked as quick-task `260605-inf` but deploy left to operator | Influx fix is a post-close addition, not one of the 5 v1.10 requirements; force-rollout is a production action on the operator's timeline. Recorded so the tracking survives the milestone boundary | — Pending — operator force-rollout after CI green (pipeline 5266 green) |
+| v1.10 closed with influx fix (`9b6d931c`) tracked as quick-task `260605-inf` but deploy left to operator | Influx fix is a post-close addition, not one of the 5 v1.10 requirements; force-rollout is a production action on the operator's timeline. Recorded so the tracking survives the milestone boundary | ✓ Resolved — v1.11 OPS-EXEC-03 verified it autoredeployed and is live (discrepancy branch) |
+| v1.11 fs-finder replaced with a hand-written native helper (`finder.js`), not `fs-extra` glob | `fs-extra` has no glob/recursive-find; native `fs` is the realistic tool. A manual synchronous stack/recursion walk is version-independent — avoids the Node-19 `{recursive:true}` gap that the `>=19.x` engines floor would expose | ✓ Good — plan-checker caught the Node-19 trap pre-execution; helper centralizes the contract in one spec |
+| v1.11 fs-finder replacement uses pre-order DFS in readdir order (not BFS or LIFO) | Code review found the first cut (LIFO stack) reversed sibling order vs fs-finder's `getPathsSync` pre-order DFS — would have changed `platform.js` `ymls[0]` for repos with multiple equal-depth `thinx.yml`. Matching fs-finder's exact walk preserves behavior | ✓ Good — behavior-preservation proven via direct-node tests |
+| v1.11 Dependabot triage scope = Moderate (3 overrides, defer uuid) | Runtime-tree High was already 0 (both Highs dev-only); only `@hapi/wreck` is runtime. `uuid 8→11` is a 3-major bump risking nyc/jest-junit. Remediate the safe/runtime set, defer the toolchain-risk one | ✓ Good — runtime tree 0/0; mocha intact; uuid documented deferred-dev-only |
+| v1.11 OPS-EXEC-03 closed as discrepancy branch (no force-rollout) | Operator-authorized SSH probing found the influx fix already live (autoredeployed ~17h prior). Re-rolling an identical healthy image is pure restart risk; verify + annex instead | ✓ Good — DEVICE_CHECKIN=16, 0 BADSTRING; corrected stale co-location memory (micro, not core) |
+| v1.11 closed at `tech_debt` with Phases 15/16 unpushed/undeployed | The 4 requirements (remove fs-finder, triage deps, confirm influx live) are met and code/audit-verified; pushing+deploying 15/16 is follow-on operator work outside the requirement set. Full CI suite validates on push | — Pending — operator push → CI green → optional prod deploy of 15/16 |
 
 ## Evolution
 
@@ -167,4 +178,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-06-05 — v1.11 Backlog Drawdown started (defining requirements). Scope: fs-finder removal sweep (REFACTOR-06), Dependabot triage (SEC-DEP-03), influx fix prod deploy (OPS-EXEC-03). CONSOLE-LEGACY-JSON-PARSE reclassified to sibling scope; TEST-CHAI-01/OPS-02/OPS-03 kept deferred. Continues phase numbering from v1.10 (starts at Phase 15).*
+*Last updated: 2026-06-06 — after v1.11 Backlog Drawdown milestone (4/4 requirements satisfied across Phases 15–17: fs-finder excised, Dependabot triaged, influx fix verified live). Audit tech_debt; Phases 15/16 await operator push/CI/deploy follow-on. Next milestone (v1.12) not yet started; would continue phase numbering from v1.11 (next phase = 18).*

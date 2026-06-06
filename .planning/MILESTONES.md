@@ -1,5 +1,36 @@
 # Milestones
 
+## v1.11 — Backlog Drawdown (Shipped: 2026-06-06)
+
+**Delivered:** Paid down the long-standing v1.x backend backlog — excised the `fs-finder` fork, triaged the outstanding Dependabot alerts, and confirmed the influx stats fix live in production — while making deliberate disposition calls on the items deferred three+ times. 4/4 v1.11 requirements satisfied across 3 phases; no signature break on any legacy-console-compatible route.
+
+**Stats:**
+
+- Phases: 3 (Phases 15–17) | Plans: 6 | Phase summaries: 6
+- Timeline: 2026-06-05 (milestone start) → 2026-06-06 (close) (~1.5 days)
+- Git range: `docs: start milestone v1.11` (`9c8e2292`) → milestone audit (`30ee8d17`), on `thinx-staging` (33 commits; code delta 14 files / +587 / −81)
+- Audit status: `.planning/milestones/v1.11-MILESTONE-AUDIT.md` — ⚡ `tech_debt` (requirements 4/4, phases 3/3, integration clean; deferred items below)
+
+**Key accomplishments:**
+
+- **REFACTOR-06 + REFACTOR-07** (Phase 15) — Excised the internally-owned `fs-finder` fork: replaced all 9 `finder.*` call sites across 5 `lib/` modules with a new synchronous, version-independent native helper `lib/thinx/finder.js` (`findFilesSync`/`findDirsSync`), locked by `FinderSpec` (11 cases) + per-module specs; then dropped `fs-finder` from `package.json` (purged 4 packages). Plan-checker caught a Node-19 `{recursive:true}` incompatibility (engines floor `>=19.x`) before execution → manual stack-walk; code review caught an fs-finder **ordering** divergence (LIFO vs fs-finder's pre-order DFS) that would have changed `platform.js` `ymls[0]` behavior → fixed to match exactly. Behavior preservation proven via direct-node tests (recursion, dotfiles, absolute paths, glob masks).
+- **SEC-DEP-03** (Phase 16) — Triaged the 5 live default-branch Dependabot alerts via the established taxonomy: 3 surgical `package.json` overrides (`@hapi/wreck ^18.1.1` — the only runtime alert; `tmp ^0.2.6`; `serialize-javascript ^7.0.5`, gated on a mocha smoke-check). Runtime tree (`npm audit --omit=dev`) went 1 moderate → **0 across all severities**. `uuid #194` (dev-only moderate, 3-major bump risk to nyc/jest-junit) deliberately deferred as `deferred-dev-only`.
+- **OPS-EXEC-03** (Phase 17) — Resolved as a **discrepancy branch**: operator-authorized SSH verification found the influx stats fix (`9b6d931c`, quick-task `260605-inf`) already live in prod (autoredeployed pipeline-5266 `:latest` ~17h prior). Deployed `influx.js` carries the fix; `DEVICE_CHECKIN` count = 16 (dashboard numbers correct), 0 `BADSTRING`/parse errors over 24h, `thinx_api` co-located with `thinx_mosquitto` on micro. No force-rollout applied. Corrected the stale co-location operator memory (micro, not core; api now constraint-pinned).
+
+**Known deferred items at close:** 4 (acknowledged — see STATE.md Deferred Items). 3 are v1.10-era quick-task scanner false-positives (`260531-n72`, `260531-pdi`, `260605-lix` — work in git history, scanner can't read their manifest format); 1 is Phase 15's `human_needed` verification (full Jasmine suite is Docker-gated in dev, validates on CI push — 5/5 code must-haves already verified).
+
+**Post-close follow-on (operator):** 33 commits including Phases 15+16 (fs-finder runtime refactor + `@hapi/wreck` bump) are **unpushed** on `thinx-staging`. Pushing triggers the full CI Jasmine suite (the standing gate that validates 15/16) and is required before deploying them to prod. Phases 15/16 are deliberately **not yet deployed** (only OPS-EXEC-03's influx fix needed prod, and it was already live). Deploy follow-on: push → CI green → `docker service update --force thinx_api` (the `[node.hostname==micro]` constraint keeps it co-located with mosquitto).
+
+**Disposition decisions:** CONSOLE-LEGACY-JSON-PARSE reclassified to `services/console` sibling scope at milestone start (frontend double-parse, no parent angle). TEST-CHAI-01 / OPS-02 / OPS-03 kept deferred a 4th time as a deliberate keep call.
+
+**Archives:**
+
+- Roadmap: `.planning/milestones/v1.11-ROADMAP.md`
+- Requirements: `.planning/milestones/v1.11-REQUIREMENTS.md`
+- Audit: `.planning/milestones/v1.11-MILESTONE-AUDIT.md`
+
+---
+
 ## v1.10 — Operational Closures (Shipped: 2026-06-05)
 
 **Delivered:** Closed the two operator-runbook executions v1.9 deferred (SEC-WS-01 edge handshake + SEC-PII-02 `managed_logs` production sweep) and landed the three code-side helpers that made those closures safer and observable. Both OPS executions resolved as discrepancy branches (each fix/cleanup had already partially happened out-of-band); the redactor field-scoping bug surfaced and was fixed in-flight. 5/5 v1.10 requirements Verified; no signature break on any legacy-console-compatible route.

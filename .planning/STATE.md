@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.11
 milestone_name: Backlog Drawdown
-status: verifying
-stopped_at: Phase 15 Plan 04 complete (2026-06-06)
-last_updated: "2026-06-06T07:27:14.545Z"
-last_activity: 2026-06-06
+status: Awaiting next milestone
+stopped_at: Phase 16 Plan 01 complete (2026-06-06)
+last_updated: "2026-06-06T16:39:27.739Z"
+last_activity: 2026-06-06 — Milestone v1.11 completed and archived
 progress:
   total_phases: 3
-  completed_phases: 2
-  total_plans: 5
-  completed_plans: 5
-  percent: 67
+  completed_phases: 3
+  total_plans: 6
+  completed_plans: 6
+  percent: 100
 ---
 
 # STATE — THiNX Device API
@@ -23,16 +23,16 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-06-05 after v1.11 milestone start)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** Phase 16 — dependabot-triage
+- **Current focus:** Phase 17 — influx-fix-production-deploy
 - **Latest production image:** `thinxcloud/api:latest sha256:4d3fb789` (v1.0 Phase 4 deploy 2026-05-26T22:35:54Z); v1.9 base bumped to `1.9.3054` 2026-06-02; influx fix `9b6d931c` is CI-green (pipeline 5266) but **pending force-rollout to prod** (OPS-EXEC-03 / Phase 17)
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace; no coordination required for v1.11 (none of the 4 v1.11 requirements cross the parent/submodule boundary).
 
 ## Current Position
 
-Phase: 16 (dependabot-triage) — COMPLETE
-Plan: 1 of 1 (complete)
-Status: Phase 16 complete — ready for verification (SEC-DEP-03 fulfilled)
-Last activity: 2026-06-06
+Phase: Milestone v1.11 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-06-06 — Milestone v1.11 completed and archived
 
 ## Milestones
 
@@ -43,13 +43,15 @@ Last activity: 2026-06-06
 
 ## Deferred Items
 
-Items acknowledged and deferred at v1.10 milestone close and v1.11 scope-setting on 2026-06-05:
+Items acknowledged and deferred at v1.10 milestone close, v1.11 scope-setting (2026-06-05), and v1.11 milestone close (2026-06-06):
 
 | Category | Item | Status |
 |----------|------|--------|
 | quick_task | 260531-n72-fix-the-latent-bugs-in-apikey-js-and-har | scanner false-positive (work shipped via `/gsd-quick`, commit `fae0efbd`; manifest format unreadable by scanner) |
 | quick_task | 260531-pdi-fix-the-let-s-encrypt-r10-r13-cross-sign | scanner false-positive (work shipped via `/gsd-quick`, commit `08e4dbd7`; manifest format unreadable by scanner) |
 | quick_task | 260605-lix-fix-device-check-in-lastupdate-not-persi | scanner false-positive (work shipped via `/gsd-quick`, commit `6b4a077c`; manifest format unreadable by scanner) |
+| verification_gap | Phase 15 (15-VERIFICATION.md status human_needed) | Accepted at v1.11 close. Full Jasmine suite is Docker-gated (`/mnt/data/conf/config.json` absent in dev); 5/5 code must-haves verified directly. Validates on CI push of `thinx-staging`. |
+| follow_on | Push + deploy Phases 15/16 | 33 commits unpushed on `thinx-staging`. Push → full CI suite (validates fs-finder refactor + @hapi/wreck bump) → optional prod deploy (`docker service update --force thinx_api`; micro-pinned, co-located w/ mosquitto). Not a milestone requirement; operator follow-on. |
 | future_req | TEST-CHAI-01 | Deferred 4th time (deliberate keep call). chai-http v5 ESM locked per AGENTS.md; trigger = superagent v3 CVE. Reassess at v1.12. |
 | future_req | OPS-02 | Deferred 4th time (deliberate keep call). Stale swarm memberlist entry `b356ad8e1d60` — pure swarm-side OPS orthogonal to this codebase. |
 | future_req | OPS-03 | Deferred 4th time (deliberate keep call). 4 stack services with malformed `<image>@` autoredeploy specs — pure swarm-side OPS. |
@@ -111,3 +113,7 @@ Items acknowledged and deferred at v1.10 milestone close and v1.11 scope-setting
 *v1.9 Backend Hygiene & Posture shipped and archived: 2026-06-04 (13/13 v1.9 requirements Verified across 7 phases)*
 *v1.10 Operational Closures shipped and archived: 2026-06-05 (5/5 v1.10 requirements Verified across 3 phases [12–14])*
 *v1.11 Backlog Drawdown ROADMAP created: 2026-06-05 (4/4 v1.11 requirements mapped across 3 phases [15–17])*
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone

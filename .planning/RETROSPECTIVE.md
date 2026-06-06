@@ -157,6 +157,39 @@
 
 ---
 
+## Milestone: v1.11 — Backlog Drawdown
+
+**Shipped:** 2026-06-06
+**Phases:** 3 (15–17) | **Plans:** 6 | **Commits:** 33
+
+### What Was Built
+- **Phase 15 (REFACTOR-06/07):** excised the `fs-finder` fork — 9 call sites across 5 `lib/` modules → new synchronous native helper `lib/thinx/finder.js`, dependency dropped.
+- **Phase 16 (SEC-DEP-03):** triaged 5 Dependabot alerts; 3 surgical overrides; runtime tree 0 high/0 moderate; `uuid #194` deferred.
+- **Phase 17 (OPS-EXEC-03):** verified the influx stats fix live in production (discrepancy branch — already autoredeployed).
+
+### What Worked
+- **Layered verification caught two real regressions before they shipped:** plan-checker flagged the Node-19 `{recursive:true}` incompatibility against the `>=19.x` engines floor *before* execution; code review caught the fs-finder traversal-ordering divergence (LIFO vs pre-order DFS) that would have silently changed `platform.js` platform detection. Neither would have surfaced in the (Docker-gated, un-runnable-in-dev) test suite.
+- **Reading the dependency's own source settled the "what does fs-finder actually do" question** — checking `base/node_modules/fs-finder/lib/Base.js` `getPathsSync` gave the exact ordering/recursion semantics to preserve, rather than guessing.
+- **Discrepancy-branch pattern (from v1.10) paid off again:** probing prod before deploying revealed OPS-EXEC-03 was already live, avoiding a pointless restart. Direct InfluxDB queries (`DEVICE_CHECKIN`=16, owner-tag present) gave airtight functional proof, not just "the code is deployed."
+
+### What Was Inefficient
+- The smart-discuss/plan/execute chain ran inline in the orchestrator context (not `--interactive` background agents), so the long run accumulated heavily. Phases this mechanical could have used background-agent isolation.
+- `find /` inside a container to locate `influx.js` hung — should have gone straight to the workdir (`/opt/thinx/thinx-device-api`) from `docker inspect`.
+
+### Patterns Established
+- **Verify-then-deploy for OPS phases:** inspect the deployed artifact + live telemetry before any force-rollout; close as discrepancy branch when already live.
+- **Behavior-preservation refactors get a dedicated semantics spec** (FinderSpec) that encodes the *old* dependency's contract (recursion, dotfiles, ordering, absolute paths), proven by direct-node execution when the full suite can't run locally.
+
+### Key Lessons
+- A "trivial" dependency swap had two latent correctness traps (Node-version API availability + traversal ordering). Mechanical ≠ risk-free; the review layers earned their keep.
+- Operator memory drifts: the co-location invariant was right but the *node* (core→micro) was stale and would have misdirected a deploy. Verify topology live before acting on a remembered fact.
+
+### Cost Observations
+- Model mix: orchestration + subagents on sonnet; planning/review/verify subagents per phase.
+- Notable: closed at `tech_debt` rather than `passed` — Phases 15/16 (real runtime changes) remain unpushed/undeployed pending the CI full-suite gate, an honest deferral rather than a forced "done."
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
