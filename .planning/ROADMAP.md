@@ -68,7 +68,9 @@ Plans:
   2. All alerts classified as `blocker` have a corresponding `package.json` `overrides` entry and a rationale comment
   3. `npm audit --omit=dev` high count is equal to or lower than the pre-phase count (any remaining highs are classified `deferred-*` with documented rationale)
   4. A post-change rescan result is recorded (alert count before → after)
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 16-01-PLAN.md — Add 3 surgical overrides (@hapi/wreck, tmp, serialize-javascript), smoke-check mocha, record uuid #194 as deferred-dev-only
 
 ### Phase 17: Influx Fix Production Deploy
 **Goal**: The committed influx stats fix (`9b6d931c`, quick-task `260605-inf`) is live on production and the operator has verified the dashboard and logs are clean
@@ -91,9 +93,10 @@ Plans:
 | 13. SEC-WS-01 Edge Handshake Closure | v1.10 | 1/1 | Complete | 2026-06-05 |
 | 14. SEC-PII-02 managed_logs Sweep Closure | v1.10 | 1/1 | Complete | 2026-06-05 |
 | 15. fs-finder Removal | v1.11 | 4/4 | Complete   | 2026-06-05 |
-| 16. Dependabot Triage | v1.11 | 0/? | Not started | - |
+| 16. Dependabot Triage | v1.11 | 0/1 | Not started | - |
 | 17. Influx Fix Production Deploy | v1.11 | 0/? | Not started | - |
 
 ---
 *v1.11 Backlog Drawdown ROADMAP created 2026-06-05 (4 requirements across 3 phases [15–17]; phase planning pending).*
 *Phase 15 planned 2026-06-06: 4 plans, 3 waves.*
+*Phase 16 planned 2026-06-06: 1 plan, 1 wave.*
