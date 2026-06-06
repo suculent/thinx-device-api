@@ -18,7 +18,7 @@ Requirements for the v1.11 Backlog Drawdown milestone. Each maps to exactly one 
 
 ### Operations
 
-- [ ] **OPS-EXEC-03**: The pending influx stats fix (`9b6d931c`, quick-task `260605-inf`) is force-rolled to production, and a post-deploy check confirms the Vue dashboard check-in numbers read correctly and the `error parsing query: found BADSTRING` log spam is silenced.
+- [x] **OPS-EXEC-03**: The pending influx stats fix (`9b6d931c`, quick-task `260605-inf`) is live in production and a post-deploy check confirms the Vue dashboard check-in numbers read correctly and the `error parsing query: found BADSTRING` log spam is silenced. — ✅ Verified 2026-06-06 as a **discrepancy branch** (fix already autoredeployed ~17h prior; deployed `influx.js` has the fix, 0 BADSTRING/parse errors over 24h, `DEVICE_CHECKIN` count=16 with `owner` tag present, thinx_api co-located with mosquitto on micro). No force-rollout needed. See Phase 17 SUMMARY + `swarm.md` annex.
 
 ## Future Requirements
 
@@ -58,7 +58,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | REFACTOR-06 | Phase 15 | Complete |
 | REFACTOR-07 | Phase 15 | Complete |
 | SEC-DEP-03 | Phase 16 | Complete |
-| OPS-EXEC-03 | Phase 17 | Pending |
+| OPS-EXEC-03 | Phase 17 | Complete |
 
 **Coverage:**
 - v1.11 requirements: 4 total
