@@ -4,35 +4,35 @@ milestone: v1.11
 milestone_name: Backlog Drawdown
 status: verifying
 stopped_at: Phase 15 Plan 04 complete (2026-06-06)
-last_updated: "2026-06-06T00:00:00.000Z"
+last_updated: "2026-06-06T07:27:14.545Z"
 last_activity: 2026-06-06
 progress:
   total_phases: 3
-  completed_phases: 1
-  total_plans: 4
-  completed_plans: 4
-  percent: 33
+  completed_phases: 2
+  total_plans: 5
+  completed_plans: 5
+  percent: 67
 ---
 
 # STATE — THiNX Device API
 
-**Last updated:** 2026-06-06 (Phase 15 Plan 04 complete — fs-finder removed from package.json + npm install; all 4/4 plans complete; REFACTOR-06 + REFACTOR-07 done)
+**Last updated:** 2026-06-06 (Phase 16 Plan 01 complete — SEC-DEP-03 done; 3 overrides added, runtime audit 0 moderate/high/critical; uuid #194 deferred-dev-only)
 
 ## Project Reference
 
 See: `.planning/PROJECT.md` (updated 2026-06-05 after v1.11 milestone start)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** Phase 15 — fs-finder-removal
+- **Current focus:** Phase 16 — dependabot-triage
 - **Latest production image:** `thinxcloud/api:latest sha256:4d3fb789` (v1.0 Phase 4 deploy 2026-05-26T22:35:54Z); v1.9 base bumped to `1.9.3054` 2026-06-02; influx fix `9b6d931c` is CI-green (pipeline 5266) but **pending force-rollout to prod** (OPS-EXEC-03 / Phase 17)
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace; no coordination required for v1.11 (none of the 4 v1.11 requirements cross the parent/submodule boundary).
 
 ## Current Position
 
-Phase: 15 (fs-finder-removal) — COMPLETE (all 4 plans done; awaiting verifier)
-Plan: 4 of 4
-Status: Phase 15 complete — REFACTOR-06 + REFACTOR-07 done; ready for next phase (16 or 17)
-Last activity: 2026-06-06 -- Phase 15 Plan 04 complete (fs-finder removed from package.json + npm install; 4/4 plans complete)
+Phase: 16 (dependabot-triage) — COMPLETE
+Plan: 1 of 1 (complete)
+Status: Phase 16 complete — ready for verification (SEC-DEP-03 fulfilled)
+Last activity: 2026-06-06
 
 ## Milestones
 
@@ -59,6 +59,7 @@ Items acknowledged and deferred at v1.10 milestone close and v1.11 scope-setting
 
 ### Decisions
 
+- 2026-06-06 — Phase 16 Plan 01 — SEC-DEP-03 complete: 3 overrides added (@hapi/wreck ^18.1.1, tmp ^0.2.6, serialize-javascript ^7.0.5); runtime audit 1 moderate → 0; mocha smoke-check passed (serialize-javascript 6→7 did not break runner); uuid #194 deliberately deferred-dev-only (3-major jump to uuid@11 risks nyc/jest-junit regression).
 - 2026-06-06 — Phase 15 Plan 04 — fs-finder removed from package.json; npm install removed 4 packages (fs-finder + 3 transitives); chai-http 4.4.0 lock preserved; precondition grep gate confirmed 0 call sites before removal.
 - 2026-06-06 — Phase 15 Plan 03 — builder.js:837 recursive=true for HEADER_FILE_NAME; builder.js:943/949/955 non-recursive for cleanupSecrets; platform.js:47 recursive=true for thinx.yml; arduino plugin.js:15 recursive=true for *.ino glob; require path in plugin.js is ../../finder (two levels up).
 - 2026-06-06 — Phase 15 Plan 02 — deployment.js imports only findFilesSync (minimal import surface); repository.js imports only findDirsSync; includeDotfiles=true is mandatory 4th arg for the .git search (replicates showSystemFiles); Case C2 stubs app_config singleton via Globals reference to prove dotfile flag survives into Repository.findAllRepositories().
@@ -101,9 +102,9 @@ Items acknowledged and deferred at v1.10 milestone close and v1.11 scope-setting
 
 ## Session Continuity
 
-**Stopped at:** Phase 15 Plan 04 complete (2026-06-06)
+**Stopped at:** Phase 16 Plan 01 complete (2026-06-06)
 
-**Next action:** Phase 15 complete. Run verifier for Phase 15 to confirm REFACTOR-06 + REFACTOR-07. Then proceed to Phase 16 (Dependabot Triage — SEC-DEP-03) or Phase 17 (Influx Fix Production Deploy — OPS-EXEC-03) per operator availability. Phase 17 has no code dependency and can run at any time.
+**Next action:** Phase 16 complete. Run verifier for Phase 16 to confirm SEC-DEP-03 (runtime audit clean, overrides in lock, mocha OK). Then proceed to Phase 17 (Influx Fix Production Deploy — OPS-EXEC-03). Phase 17 has no code dependency and can run at any time.
 
 ---
 *v1.0 GA backend closures shipped and archived: 2026-05-27 (4/4 v1 requirements Verified)*
