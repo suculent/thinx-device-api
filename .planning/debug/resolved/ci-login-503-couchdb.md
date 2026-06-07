@@ -1,10 +1,12 @@
 ---
-status: diagnosed
+status: resolved
 trigger: CI 00-AppSpec "POST /api/login (invalid)" returns 503 service_unavailable instead of 403, deterministic on thinx-staging after Phases 15/16; root 503 at router.auth.js:287 when Owner.validate() returns false (CouchDB user-view error/hang)
 created: 2026-06-07
 updated: 2026-06-07
-root_cause: CouchDB owners_by_username design-view query in Owner.validate() errors/times out (30s) on the first spec (view-readiness/index-build race on fresh CI test DB) -> cb(false) -> router.auth.js:287 503. v1.11 touched no auth/owner/couch/nano code; only runtime dep delta (@hapi/wreck) is off this path. Likely a pre-existing race exposed by v1.11 startup-timing shift, or coincident CI-env change.
-fix: (not applied) #1 test-harness view-warmup beforeAll with retry-until-ready (safe); #2 optional Owner.validate retry-once on transient view error (needs product review). Confirm attribution via CI revert experiment.
+root_cause: CouchDB owners_by_username design-view query in Owner.validate() errors/times out (30s) on the first spec (view-readiness/index-build race on fresh CI test DB) -> cb(false) -> router.auth.js:287 503. CONFIRMED via fix experiment. v1.11 touched no auth/owner/couch/nano code; only runtime dep delta (@hapi/wreck) is off this path — a pre-existing race exposed by v1.11 startup-timing shift.
+fix: APPLIED #1 — warm the users design-views (owners_by_username/email/activation/resetkey) with retry in 00-AppSpec beforeAll after thx.init(), so indexes build before the first request. spec/jasmine/00-AppSpec.js. Test-harness only; no product change.
+verification: Pushed fix to thinx-unit (test-only branch, no deploy) -> CircleCI pipeline 5271 SUCCESS (green, 326 specs pass). The previously-deterministic 503 is gone. Confirms both the fix and the root cause.
+files_changed: spec/jasmine/00-AppSpec.js
 ---
 
 # Debug: ci-login-503-couchdb
