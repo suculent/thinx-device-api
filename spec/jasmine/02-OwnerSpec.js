@@ -1,5 +1,6 @@
 let expect = require('chai').expect;
 let Owner = require("../../lib/thinx/owner");
+const sha256 = require("sha256");
 let envi = require("../_envi.json");
 let owner = envi.oid;
 let email = envi.email;
@@ -286,6 +287,36 @@ describe("Owner", function () {
       done();
     });
   }, 5000);
+
+  // AUTH-USERNAME-FIELD: the legacy register form posts the chosen login name in the
+  // `owner` field (input name="owner", labelled "Username (use for login!)"), NOT
+  // `username`. Owner.create must store that chosen name as doc.username so the account
+  // is findable by it at login. Before the fix body.username was undefined and username
+  // fell back to the email hash, so login worked only by owner_id.
+  it("(18) AUTH-USERNAME-FIELD: register 'owner' field becomes the stored login username", function (done) {
+    const stamp = Date.now();
+    const uniqueEmail = "username-field-" + stamp + "@example.com";
+    const chosenName = "loginname" + stamp;
+    const ownerId = sha256(Globals.prefix() + uniqueEmail.toLowerCase());
+
+    user.create(
+      { first_name: "Field", last_name: "Test", email: uniqueEmail, owner: chosenName },
+      true,
+      {},
+      (_res, success /*, response */) => {
+        expect(success).to.equal(true);
+        // Fetch the stored doc by its owner hash (no view-index lag) and assert the
+        // chosen login name landed in doc.username (was the email hash before the fix).
+        user.userlib.get(ownerId, (err, doc) => {
+          expect(err).to.equal(null);
+          expect(doc.username).to.equal(chosenName);
+          expect(doc.username).to.not.equal(ownerId);
+          done();
+        });
+      },
+      {}
+    );
+  }, 15000);
 
 
 });
