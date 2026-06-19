@@ -69,4 +69,23 @@ describe("Build log", function() {
     });
   });
 
+  // BOLA regression: list(owner) must NEVER return another owner's builds. The
+  // latest_builds view is unfiltered by owner, so a missing in-memory guard leaks
+  // every tenant's build records (a new account was showing "105 Builds").
+  it("(06) list(owner) must only return builds owned by the requester (BOLA)", function(done) {
+    const otherOwner = require("../_envi.json").dynamic2.owner;
+    blog.list(owner, function(err, body) {
+      expect(err).to.equal(false);
+      expect(body).to.be.an('object');
+      const rows = (body && body.rows) ? body.rows : [];
+      rows.forEach(function(r) {
+        if (r && r.value && typeof r.value.owner !== "undefined") {
+          expect(r.value.owner).to.equal(owner);          // never a foreign owner
+          expect(r.value.owner).to.not.equal(otherOwner); // explicit: not dynamic2's
+        }
+      });
+      done();
+    });
+  }, 15000);
+
 });
