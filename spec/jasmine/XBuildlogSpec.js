@@ -57,6 +57,12 @@ describe("Build log", function() {
           expect(bbody).to.be.an('object');
           done();
         });
+      } else {
+        // An empty list is a valid result (e.g. owner has no builds now that
+        // list() is correctly owner-scoped). Previously done() was never called
+        // here, so the test only passed by accident when the unfiltered list
+        // leaked other owners' builds.
+        done();
       }
     });
   }, 15000);
