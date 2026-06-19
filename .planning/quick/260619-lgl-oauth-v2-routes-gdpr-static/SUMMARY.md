@@ -47,6 +47,35 @@ Verify post-deploy (preserve-log login on rtm): `POST /api/login` returns
 
 Still open: Fix B (Vue origin-aware callback + JWT), `/static/gdpr.html` 404.
 
+## Fix A verified in prod (2026-06-19)
+
+User confirmed: rtm Google/GitHub login now sets `x-thx-core` and the dashboard
+stays (no bounce). Fix A done.
+
+## Fix B shipped (Vue OAuth completion) — api 22ecaac1 + console 6f26210
+
+Root cause: callback always redirected to `public_url/auth.html` (legacy rtm),
+and `performTokenLogin` issued no JWT — so Vue (JWT-based) could never complete
+OAuth. Implemented:
+- `lib/thinx/oauth_return.js`: allowlisted `?return=<origin>` (CORS_ALLOWED_ORIGINS
+  + public_url) remembered in a SameSite=Lax cookie; callback returns to
+  `<origin>/#/oauth-return?t=…` (else legacy). No open redirect.
+- `router.google.js` / `router.github.js`: wired initiator + both success redirects.
+- `router.auth.js` `performTokenLogin`: additionally mints JWTs (additive).
+- Console: `/oauth-return` page exchanges the token at `/api/v2/login` for JWTs and
+  lands on the dashboard; `Login.vue` buttons send `?return=`.
+
+**Deploy prerequisite:** `console.thinx.cloud` (the Vue origin) MUST be in the
+API's `CORS_ALLOWED_ORIGINS` env, or the callback falls back to legacy (lands on
+rtm). Verify/ set this before relying on B.
+
+**Known gap (flagged):** `/oauth-return` does not render the GDPR consent form the
+legacy `auth.html` shows for `g=false` — Vue OAuth signups skip that screen.
+Decide whether `strict_gdpr` requires gating this.
+
+Still open after B: `/static/gdpr.html` 404; issue C (legacy header "You have 105
+Builds" on a new account — suspected IDOR/BOLA on build-count).
+
 ## What changed
 
 - **`lib/router.google.js`, `lib/router.github.js`** — OAuth initiator + callback
