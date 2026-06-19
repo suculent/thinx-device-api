@@ -2,15 +2,50 @@
 quick_id: 260619-lgl
 slug: oauth-v2-routes-gdpr-static
 date: 2026-06-19
-status: complete
+status: incomplete
 commit: b92f7c76
 branch: thinx-staging
 ---
 
 # Summary
 
-Fixed the Vue console OAuth login failure and queued the `/static/gdpr.html`
-deploy-lag fix.
+Routing fix shipped (`/api/v2/oauth/*` now 302 — confirmed live). But the deploy
+exposed deeper OAuth-completion failures, and the `/static/gdpr.html` "deploy-lag"
+hypothesis was WRONG (still 404 on fresh code). See "Post-deploy reality" below.
+The task is NOT complete.
+
+## Post-deploy reality (2026-06-19, after pipeline 5282)
+
+- `GET /api/v2/oauth/google|github` → 302 ✅ (routing fix works).
+- `GET /static/gdpr.html` → still 404 ❌ (deploy-lag theory falsified; root cause
+  unproven — Traefik routes all of rtm to the API, mount is at thinx-core.js:433
+  yet not serving).
+- OAuth login does NOT complete:
+  - Vue (`console.thinx.cloud`): callback redirects to `public_url` (rtm), so the
+    user lands on rtm's legacy login page. HAR confirms the console flow's final
+    document is `rtm.thinx.cloud/`.
+  - Legacy (`rtm.thinx.cloud`): dashboard blinks then bounces to login. HAR shows
+    the `x-thx-core` session cookie IS set and Referer is `/app/`; `/app`
+    (`thinx-api.js:175`) bounces to `/` on any 401. Legacy `/app` authenticates by
+    session cookie only (no JWT). Root cause of the 401 unproven — needs a
+    preserve-log HAR of the `/login` POST + first 401 XHR, or redis/server logs.
+- These are latent bugs in the deployed code, not regressions from the 2-line
+  routing change.
+
+## Fix A shipped (legacy/rtm OAuth bounce) — commit d305a1ea
+
+Root cause proven from `~/tmp/rtm.thinx.cloud-2.har`: `POST /api/login` (token) →
+200 with **no Set-Cookie**, then every `/api/user/*` → 401 → bounce. Cause:
+`performTokenLogin` forced `cookie.secure = true` in prod, which makes
+express-session suppress Set-Cookie behind the TLS-terminating proxy
+(`req.secure===false`). Removed the per-request cookie overrides so the cookie
+inherits the global `sessionConfig` (the working password path's behavior). Added
+`OAUTH-COOKIE-01` regression test. See FIX-PLAN.md.
+
+Verify post-deploy (preserve-log login on rtm): `POST /api/login` returns
+`Set-Cookie: x-thx-core=…` and `/api/user/profile` → 200 (no bounce).
+
+Still open: Fix B (Vue origin-aware callback + JWT), `/static/gdpr.html` 404.
 
 ## What changed
 
