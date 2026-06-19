@@ -77,4 +77,48 @@ describe("ZZ-CookieAttributeSpec (SEC-COOKIE-01)", function () {
       });
   }, 30000);
 
+  /*
+   * OAUTH-COOKIE-01 regression spec
+   *
+   * The OAuth/token login path (performTokenLogin in lib/router.auth.js) MUST
+   * establish the x-thx-core session cookie just like the password path. A prior
+   * per-request `req.session.cookie.secure = true` override made express-session
+   * SUPPRESS the Set-Cookie header behind the TLS-terminating Traefik proxy
+   * (req.secure===false), so Google/GitHub logins set no session and the legacy
+   * dashboard's /api/user/* calls 401'd straight back to login. Proven via a
+   * preserve-log HAR (2026-06-19): POST /api/login (token) -> 200 with NO
+   * Set-Cookie. This baits a re-introduction of that override.
+   */
+  it("OAUTH-COOKIE-01 — token (OAuth) login also sets x-thx-core Set-Cookie", function (done) {
+    const envi = require("../_envi.json");
+    const token = "spec-oauth-cookie-01-token";
+    const wrapper = {
+      first_name: "Dynamic",
+      last_name: "User",
+      email: "dynamic@example.com",
+      username: "dynamic",
+      owner: envi.dynamic.owner
+    };
+    // Seed the redis wrapper performTokenLogin will resolve (legacy callback API).
+    thx.app.redis_client.set(token, JSON.stringify(wrapper), function () {
+      const tokenAgent = chai.request.agent(thx.app);
+      tokenAgent
+        .post('/api/login')
+        .send({ token: token })
+        .then(function (res) {
+          const setCookie = res.headers['set-cookie'];
+          expect(setCookie, 'token login must emit a Set-Cookie header').to.be.an('array');
+          const xThxCore = setCookie.find(c => /^x-thx-core=/.test(c));
+          expect(xThxCore, 'token login must establish the x-thx-core session cookie').to.be.a('string');
+          tokenAgent.close();
+          done();
+        })
+        .catch((e) => {
+          tokenAgent.close();
+          console.log("OAUTH-COOKIE-01 spec error:", e);
+          done(e);
+        });
+    });
+  }, 30000);
+
 });
