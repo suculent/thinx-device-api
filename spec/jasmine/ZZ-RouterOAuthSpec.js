@@ -55,6 +55,26 @@ describe("OAuth", function () {
             });
     }, 30000);
 
+    // The Vue console builds OAuth URLs from the /api/v2 base, so the initiator
+    // and callback must be mounted under /api/v2 as well (parity with /login).
+    it("GET /api/v2/oauth/github", function (done) {
+        chai.request(thx.app)
+            .get('/api/v2/oauth/github')
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                done();
+            });
+    }, 30000);
+
+    it("GET /api/v2/oauth/github/callback", function (done) {
+        chai.request(thx.app)
+            .get('/api/v2/oauth/github/callback')
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                done();
+            });
+    }, 30000);
+
     it("GET /api/oauth/github/callback", function (done) {
         chai.request(thx.app)
             .get('/api/oauth/github/callback')
@@ -88,6 +108,26 @@ describe("OAuth", function () {
     it("GET /api/oauth/google/callback", function (done) {
         chai.request(thx.app)
             .get('/api/oauth/google/callback')
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                done();
+            });
+    }, 30000);
+
+    // Vue console parity: the Google initiator and callback must also answer
+    // under /api/v2 (see /api/v2/oauth/github tests above).
+    it("GET /api/v2/oauth/google", function (done) {
+        chai.request(thx.app)
+            .get('/api/v2/oauth/google')
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                done();
+            });
+    }, 30000);
+
+    it("GET /api/v2/oauth/google/callback", function (done) {
+        chai.request(thx.app)
+            .get('/api/v2/oauth/google/callback')
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 done();
