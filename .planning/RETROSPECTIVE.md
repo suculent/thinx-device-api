@@ -56,6 +56,140 @@
 
 ---
 
+## Milestone: v1.9 — Backend Hygiene & Posture
+
+**Shipped:** 2026-06-04
+**Phases:** 7 (Phases 5–11) | **Plans:** 23
+
+### What Was Built
+
+- **Phase 5** (REFACTOR-01/02/05) — trust-proxy dedup with rationale comment; `!=`→`!==` in `Owner.password_reset` + coercion-case regression; `jshint` reclassified to `devDependencies` (`fs-finder` scope-amended to v1.10).
+- **Phase 6** (REFACTOR-03 / SEC-WS-01 / SEC-COOKIE-01) — raw-socket `close` handler in WS upgrade flow; `httpOnly: true` flip on the session cookie with sub-5-min documented rollback; operator runbook documenting the rtm edge-nginx routing gap (SEC-WS-01 not code-fixable from this repo).
+- **Phase 7** (REFACTOR-04) — ~73 callbacks in `lib/thinx/owner.js` converted to async/await across 6 atomic commits; 5 behavior-locking specs in `02-OwnerSpec.js`; 7 strict-equality fixes folded in; SEC-PII-01 and Phase 5 REFACTOR-02 invariants preserved verbatim.
+- **Phase 8** (AUTH-REACTIVATE-01 / AUTH-RESET-LINK-CONSOLE) — admin-only `POST /api/v2/admin/user/:id/reactivate` behind existing `requireAdmin`; one-line redirect URL change so password-reset emails land on Vue (`/password-reset?`) instead of legacy AngularJS (`/password.html?`).
+- **Phase 9** (SEC-PII-02) — `scripts/redact-managed-logs.js` (snapshot-gated `_bulk_docs` overlay + `--sample N` verification subcommand); `lib/thinx/audit.js` 90-day `expire_at` forward-TTL; operator runbook + GDPR-posture note.
+- **Phase 10** (SEC-DEP-02) — 2 console alerts classified as a new `deferred-vendored-asset` disposition (vendored `jquery-validation-1.19.5`, never invoked); SEC-DEP-02 scheduled in `services/console` GSD project; submodule pointer bumped into this repo; cross-project coordination runbook.
+- **Phase 11** (BASE-IMG-01 / THINX-CERT-CHECK-01) — `base/update.sh` rewritten (18 → 179 lines, shellcheck-clean, `set -euo pipefail`, `--tag`/`--owner`/`--dry-run`/`--help`, single atomic commit per run); DETECT-only startup `ca.pem` freshness probe (R10..R14 chain check) with `ZZ-CertProbeSpec.js` + 4 fixture PEMs.
+
+### What Worked
+
+- **Per-phase VERIFICATION.md across all 7 phases** — closed the v1.0 process-debt gap. Every v1.9 phase has a structured verification report; functional + artifact-location PASS at the milestone level even without a separate milestone-level audit.
+- **Sequential single-branch execution for the owner.js sweep (Phase 7)** — every plan touched the same file; parallel worktrees would have produced merge conflicts on every plan. 6 atomic commits gave a bisect-friendly history and each top-5 method individually revertable. No behavior regressions across 5 behavior-locking specs.
+- **Operator-runbook resolutions for code-unreachable problems** — SEC-WS-01 (edge-nginx routing gap) and SEC-PII-02 production sweep both shipped as runbooks with verbatim reproduction tables / step-by-step procedures. Tagged `deferred to edge-redesign` / `operator-window` so the boundary is explicit, not implicit.
+- **Mid-phase scope amendment via single atomic commit (Phase 5 REFACTOR-05)** — `fs-finder` reclassification turned out to be a breaking change disguised as a cheap sweep (5 active runtime call sites). Closed the gap between literal Phase 5 criterion 3 and executed jshint-only scope with one commit (`89669fc4`) that touched ROADMAP.md, REQUIREMENTS.md, STATE.md, and surfaced a v1.10 backlog entry. No re-planning required.
+- **Cross-project coordination via the submodule pointer (Phase 10)** — SEC-DEP-02 scheduled inside `services/console`'s own GSD workspace, then the pointer bump landed in this repo as a single chore commit. New `deferred-vendored-asset` disposition class adopted in `.planning/dep-triage.md` so future vendored-asset alerts get triaged consistently across projects.
+- **DETECT-only cert probe (THINX-CERT-CHECK-01)** — the cleanest way to put a codebase angle on an OPS-owned problem. The probe surfaces drift; the swarm host owns the fix. Zero risk of accidentally mutating certs at startup.
+
+### What Was Inefficient
+
+- **`gsd-sdk query milestone.complete --dry-run` silently ignored the flag and executed the real archival.** Discovered at close: the dry-run produced the actual MILESTONES.md append + STATE.md update + archive-file creation. Required a forensic manual cleanup of the noisy auto-extracted MILESTONES.md entry (raw `Date:` / `One-liner:` / `Branch:` / `Rule 1/2` placeholders had been concatenated into the accomplishments list). Future GSD work: surface the missing-flag as a hard error, or document that unknown flags are no-ops.
+- **SUMMARY one-liner extraction had low precision** — the auto-extractor pulled the first colon-suffix line per SUMMARY, which often hit raw template scaffolding (`Date:`, `One-liner:`) instead of the curated narrative. Future SUMMARY templates should put the one-liner on a standardized `one_liner:` YAML key (Phase 8 + Phase 9 SUMMARYs partially adopted this; the rest didn't).
+- **REQUIREMENTS.md traceability table drifted from ROADMAP.md status** at close (SEC-PII-02 still read "In Progress" while ROADMAP showed ✓; Verified/Pending counters at the bottom were stale). Per-phase status updates happen in ROADMAP but the requirements traceability table is a second source of truth and doesn't auto-refresh.
+- **No separate milestone-level audit** — v1.9 shipped on per-phase VERIFICATION.md alone. Carries the same risk profile as v1.0's verification-artifact gap: if v1.10 audit tooling requires a `v1.x-MILESTONE-AUDIT.md` for cross-milestone traceability, a retrofit pass will be needed.
+- **Mid-stream phase additions surfaced 2026-06-02** (BASE-IMG-01, THINX-CERT-CHECK-01) — these were operationally driven by the 2026-05-31 LE intermediate rotation incident and the `1.9.3054` manual base-image bump. They fit the milestone theme cleanly but came in after the requirements lock at 2026-06-02 19:58Z. Future milestones should keep a 24h pre-execution review window for late-surfaced requirements rather than landing them on the same day the roadmap is created.
+
+### Patterns Established
+
+- **Per-phase VERIFICATION.md as the milestone gate** — replaces v1.0's reliance on SUMMARY.md `verification:` blocks. Functional + artifact-location coverage at the phase level scales to milestone-level when all phases pass.
+- **Same-file-touching plans execute sequentially on one branch** — codified during Phase 7. Parallel worktrees are for plans with disjoint file touches; single-file sweeps go sequential to avoid synthetic merge conflicts.
+- **Operator runbooks as first-class requirement closures** — SEC-WS-01 and SEC-PII-02 production execution both ship as runbooks with documented hand-off boundaries. The codebase commitment is to surface and document; the swarm host or operator owns execution.
+- **DETECT-only probes for OPS-owned problems** — cert freshness, future SSL rotation flags, future swarm health probes. Surface drift via startup warnings; never auto-mutate state the OPS layer owns.
+- **Mid-phase scope amendment via single-commit document sync** — when execution discovers a planned criterion is breaking, amend ROADMAP/REQUIREMENTS/STATE in one atomic commit with a v1.X+1 backlog entry rather than re-planning the phase.
+- **Submodule-pointer as cross-project coordination signal** — schedule the work inside the sibling project's own GSD workspace, then land a pointer bump as a single chore commit in the parent. No cross-project commits beyond the pointer.
+- **`deferred-vendored-asset` disposition class** — new entry in `.planning/dep-triage.md` taxonomy for vendored third-party assets that aren't actually loaded by the build. Should be reused for any future "alert lives in a vendored package.json" finding.
+
+### Key Lessons
+
+1. **Per-phase VERIFICATION is sufficient for milestone close when every phase has one.** v1.0's tech-debt audit status was driven entirely by the 3 missing VERIFICATION reports. Closing that gap in v1.9 removed an entire class of close-out friction.
+2. **Same-file sweeps want sequential commits.** Parallel-worktree execution is a default that should NOT apply when every plan in a phase touches the same file. The Phase 7 sequential plan-set landed cleanly because we resisted the urge to parallelize.
+3. **A runbook is a valid requirement closure** when the actual fix lives outside the codebase. SEC-WS-01 (edge-nginx routing) and SEC-PII-02 (production execution) both closed via runbook authorship + explicit operator hand-off, not by squeezing a partial code fix.
+4. **Scope amendments should be cheap, not expensive.** REFACTOR-05's mid-phase scope reduction landed in one commit across three planning files plus a v1.10 backlog entry. No re-planning, no phase rollback, no narrative drift.
+5. **DETECT-only cert probes are the right boundary for OPS-owned problems.** THINX-CERT-CHECK-01 doesn't try to rotate certs; it surfaces the drift early enough that the swarm host's rotation cron can react. The split (codebase detects, OPS rotates) is the durable pattern.
+6. **`gsd-sdk` flags that don't exist are silently dropped.** Verified painfully: `--dry-run` on `milestone.complete` produces a wet run that's indistinguishable from a real one at the JSON-result level. Future close-out work should run with an explicit `git stash`-able working tree if exploring SDK behavior.
+7. **Submodule-pointer-as-coordination is lighter than cross-repo PRs.** Phase 10's bumps (parent chore commits + sibling-project schedule edits) closed SEC-DEP-02 cleanly without any cross-project commit other than the pointer. Pattern reusable for any future `services/*` coordination.
+
+### Cost Observations
+
+- Model mix: predominantly opus-1m for planning + verification; sonnet for execution agents; not tracked precisely
+- Sessions: ~5-7 wall-clock sessions across 2 days (phases overlapped same-day, especially Phase 5–6–9–10–11 on 2026-06-02 and 2026-06-03)
+- Notable: Phase 7 was the most commit-dense phase (6 atomic commits on a single branch in one session, ~2-3h); Phase 5 was the cheapest (3 plans on the same day as roadmap creation); Phase 6's documentation-as-code (runbook authorship) used more tokens than its code edits
+
+---
+
+## Milestone: v1.10 — Operational Closures
+
+**Shipped:** 2026-06-05
+**Phases:** 3 (Phases 12–14) | **Plans:** 5
+
+### What Was Built
+
+- **Phase 12 (code helpers):** in-process WS handshake CI spec (TEST-WS-01), Slack closure-receipt wiring in `redact-managed-logs.js` (OBS-01), DETECT-only audit-TTL eviction probe wired into `thinx-core.js` startup (OBS-02).
+- **Phase 13 (OPS-EXEC-01):** SEC-WS-01 edge handshake closure — `probe-rtm-handshake.sh` reproduction probe, swarm-config snapshot trail, runbook execution annex.
+- **Phase 14 (OPS-EXEC-02):** SEC-PII-02 `managed_logs` production sweep — 422 live `reset_key` leaks redacted under a snapshot-gated `--apply`, `--sample` zero-leak gate, CouchDB compaction, plus an in-flight redactor field-scoping fix (SEC-PII-02b).
+
+### What Worked
+
+- **Helper-first sequencing paid off literally:** wiring OBS-01 into the redactor before Phase 14 ran meant the production sweep's closure receipt was automatic, not an after-the-fact paste. Phase 12-before-13/14 was the right call.
+- **Discrepancy-branch handling:** both OPS executions discovered the work had already partially happened out-of-band. The phases pivoted cleanly from "apply" to "verify + persist the audit trail" without forcing a redundant mutation — the runbook-annex-as-verification-artifact model absorbed this gracefully.
+- **Opportunistic in-flight fix:** the milestone's stated execution model ("if production reveals an in-script issue, the fix lands inside this milestone") was exercised for real when the redactor's all-fields walk false-matched the 64-hex `owner` hash. Fix landed in Phase 14 rather than spawning a cycle.
+
+### What Was Inefficient
+
+- **`milestone.complete` accomplishment extraction is unreliable:** the CLI's SUMMARY one-liner scrape pulled garbage ("1. [Rule 3 - Blocking]", "One-liner:") into MILESTONES.md; the entry had to be hand-rewritten. The SUMMARY files lack a consistently-parseable one-liner field.
+- **ROADMAP/REQUIREMENTS checkbox drift:** Phases 13/14 carried unticked ROADMAP checkboxes and "Pending" traceability rows even after Verified — cosmetic, but the `roadmap.analyze` `roadmap_complete:false` flags needed manual reconciliation against `disk_status:complete`.
+- **CI flake tax:** the influx-fix verification burned a full pipeline (5265 ECONNRESET mid-`npm install`) before a clean re-run (5266) — the Docker console-build stage's network `npm install` remains the flakiest gate.
+
+### Patterns Established
+
+- **Quick-task-as-milestone-addition:** a loose incident-response commit (influx fix `9b6d931c`) was folded into the milestone as a tracked quick-task (`260605-inf`) in STATE.md rather than forced into a phase — a lightweight path for in-cycle additions that aren't requirements.
+- **Scanner-false-positive acknowledgment:** `/gsd-quick` tasks whose dirs don't carry the scanner's manifest format are recorded under STATE.md `## Deferred Items` at close with their proving commit, closing the audit loop without manufacturing artifacts.
+
+### Key Lessons
+
+- For OPS-execution milestones, **the verification artifact (runbook annex) is the deliverable** — when the fix is already live, "close" means proving + persisting the audit trail, not re-applying. The discrepancy branch is a first-class outcome, not a failure mode.
+- **Hand-verify the auto-generated MILESTONES.md entry** every close — the CLI's accomplishment extraction can't be trusted on this project's SUMMARY format.
+
+### Cost Observations
+
+- Model mix: opus-1m main loop; CircleCI MCP for CI watch/re-trigger; no execution subagents this milestone (phases were largely operator-gated)
+- Sessions: phases 12–14 across 2026-06-04 → 2026-06-05; close performed in a single resume session
+- Notable: this milestone's wall-clock was dominated by operator-side SSH windows + CI builds, not agent work — the code surface (3 small helpers + 1 redactor fix) was modest relative to the operational coordination
+
+---
+
+## Milestone: v1.11 — Backlog Drawdown
+
+**Shipped:** 2026-06-06
+**Phases:** 3 (15–17) | **Plans:** 6 | **Commits:** 33
+
+### What Was Built
+- **Phase 15 (REFACTOR-06/07):** excised the `fs-finder` fork — 9 call sites across 5 `lib/` modules → new synchronous native helper `lib/thinx/finder.js`, dependency dropped.
+- **Phase 16 (SEC-DEP-03):** triaged 5 Dependabot alerts; 3 surgical overrides; runtime tree 0 high/0 moderate; `uuid #194` deferred.
+- **Phase 17 (OPS-EXEC-03):** verified the influx stats fix live in production (discrepancy branch — already autoredeployed).
+
+### What Worked
+- **Layered verification caught two real regressions before they shipped:** plan-checker flagged the Node-19 `{recursive:true}` incompatibility against the `>=19.x` engines floor *before* execution; code review caught the fs-finder traversal-ordering divergence (LIFO vs pre-order DFS) that would have silently changed `platform.js` platform detection. Neither would have surfaced in the (Docker-gated, un-runnable-in-dev) test suite.
+- **Reading the dependency's own source settled the "what does fs-finder actually do" question** — checking `base/node_modules/fs-finder/lib/Base.js` `getPathsSync` gave the exact ordering/recursion semantics to preserve, rather than guessing.
+- **Discrepancy-branch pattern (from v1.10) paid off again:** probing prod before deploying revealed OPS-EXEC-03 was already live, avoiding a pointless restart. Direct InfluxDB queries (`DEVICE_CHECKIN`=16, owner-tag present) gave airtight functional proof, not just "the code is deployed."
+
+### What Was Inefficient
+- The smart-discuss/plan/execute chain ran inline in the orchestrator context (not `--interactive` background agents), so the long run accumulated heavily. Phases this mechanical could have used background-agent isolation.
+- `find /` inside a container to locate `influx.js` hung — should have gone straight to the workdir (`/opt/thinx/thinx-device-api`) from `docker inspect`.
+
+### Patterns Established
+- **Verify-then-deploy for OPS phases:** inspect the deployed artifact + live telemetry before any force-rollout; close as discrepancy branch when already live.
+- **Behavior-preservation refactors get a dedicated semantics spec** (FinderSpec) that encodes the *old* dependency's contract (recursion, dotfiles, ordering, absolute paths), proven by direct-node execution when the full suite can't run locally.
+
+### Key Lessons
+- A "trivial" dependency swap had two latent correctness traps (Node-version API availability + traversal ordering). Mechanical ≠ risk-free; the review layers earned their keep.
+- Operator memory drifts: the co-location invariant was right but the *node* (core→micro) was stale and would have misdirected a deploy. Verify topology live before acting on a remembered fact.
+
+### Cost Observations
+- Model mix: orchestration + subagents on sonnet; planning/review/verify subagents per phase.
+- Notable: closed at `tech_debt` rather than `passed` — Phases 15/16 (real runtime changes) remain unpushed/undeployed pending the CI full-suite gate, an honest deferral rather than a forced "done."
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -63,18 +197,27 @@
 | Milestone | Phases | Plans | Key Change |
 |-----------|--------|-------|------------|
 | v1.0 | 4 | 8 | First milestone using GSD on this project; established codebase-map-before-REQUIREMENTS pattern and rung-by-rung operational-phase ladder |
+| v1.9 | 7 | 23 | Established per-phase VERIFICATION.md as the milestone gate (closes v1.0's process-debt gap); codified sequential single-branch execution for same-file sweeps; introduced operator-runbook closures + DETECT-only OPS probes; mid-phase scope amendment via single-commit document sync |
+| v1.10 | 3 | 5 | First milestone-level audit (`v1.10-MILESTONE-AUDIT.md`, ✅ passed) — closes the v1.0/v1.9 "no milestone audit" revisit flag; codified discrepancy-branch closure (verify + persist annex when fix already live); helper-first sequencing so OPS phases consume their own code deps; quick-task-as-milestone-addition for in-cycle non-requirement commits |
 
 ### Cumulative Quality
 
 | Milestone | New regression specs | Production deploys | Audit status |
 |-----------|---------------------|---------------------|--------------|
 | v1.0 | 3 (`ZZ-RouterPasswordResetSpec.js`, `ZZ-OwnerLogRedactionSpec.js`, `UtilSpec.js` extensions) | 4 (`0a0e6b32`, `3a461b3d`, `81b22f1f`, `4d3fb789`) | tech_debt (no blockers; intentionally-deferred + 1 artifact gap) |
+| v1.9 | 7+ (`02-OwnerSpec.js` × 5 behavior-locking, `ZZ-RouterAdminReactivateSpec.js`, `ZZ-CookieAttributeSpec.js`, `ZZ-WebSocketLifecycleSpec.js`, `ZZ-CertProbeSpec.js`, `ZZ-AuditTTLSpec.js`, `ZZ-RouterPasswordResetSpec.js` extensions) | base image bumped to `1.9.3054`; production deploy deferred to operator push (CI green-gate on `thinx-staging`) | per-phase VERIFICATION.md PASS for all 7 phases (no separate milestone audit; carries the same revisit flag as v1.0's gap) |
+| v1.10 | 2+ (`ZZ-WebSocketHandshakeRtmSpec.js`, `ZZ-AuditTTLEvictionSpec.js`, redactor Slack-receipt unit spec) | device check-in fix + no_team Slack catch DEPLOYED & live (`sha256:2bf95549`); influx fix `9b6d931c` CI-green (pipeline 5266), operator force-rollout pending | **first milestone-level audit** — `v1.10-MILESTONE-AUDIT.md` ✅ passed (requirements 5/5, phases 3/3, integration 2/2, flows 2/2); closes the v1.0/v1.9 revisit flag |
 
 ### Recurring Backlog Themes
 
 (Track which backlog items survive multiple milestones — surfaces hidden priorities.)
 
 - v1.0 → carried forward to v1.x: REFACTOR-01..05, SEC-COOKIE-01, SEC-WS-01, SEC-DEP-02, SEC-PII-02, OPS-02, OPS-03, AUTH-REACTIVATE-01, AUTH-RESET-LINK-CONSOLE, CONSOLE-LEGACY-JSON-PARSE, TEST-CHAI-01
+- v1.9 → carried forward to v1.10: **fs-finder removal sweep** (deferred from Phase 5 REFACTOR-05 scope amendment), **SEC-WS-01 operator-side edge fix** (runbook authored, swarm-host execution outstanding), **SEC-PII-02 production execution** (script + audit TTL shipped; ~658k-doc sweep deferred to operator window), TEST-CHAI-01 (still locked per AGENTS.md), OPS-02 / OPS-03 (pure swarm-side, still deferred), CONSOLE-LEGACY-JSON-PARSE (sibling-project scope)
+- **Survived all three milestones (v1.0 → v1.9 → v1.10):** TEST-CHAI-01, OPS-02 / OPS-03, CONSOLE-LEGACY-JSON-PARSE — these have crossed the threshold from "deferred" into "structurally orthogonal to this codebase's lifecycle". v1.10 did NOT make the deliberate keep/drop call (the milestone was OPS-execution-scoped, not backlog-grooming); they auto-carried a 4th time. **v1.11 planning must force the keep/drop decision** — they are now overdue for it.
+- **v1.10 → carried forward to v1.11:** fs-finder removal sweep (now unblocked — the ops loop v1.10 closed was its stated gate), fresh Dependabot triage (5 alerts), the four structurally-orthogonal items above, and the influx-fix prod deploy (`9b6d931c`, CI-green, operator force-rollout pending).
 
 ---
 *Retrospective initialized: 2026-05-27 (v1.0 milestone close)*
+*v1.9 milestone section appended: 2026-06-04*
+*v1.10 milestone section appended: 2026-06-05*

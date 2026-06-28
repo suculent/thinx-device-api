@@ -1,0 +1,33 @@
+== deployed app version ==
+1.9.3054
+== Hub :latest digest vs running digest ==
+thinxcloud/api:latest
+== any influx query errors in last 1h (expect 0) ==
+0
+== sample of recent stats/influx activity ==
+== thinx_api task health ==
+micro Running 18 hours ago
+micro Shutdown 18 hours ago
+== influx container ==
+
+== measurements in stats db ==
+== owner tag keys present? (fix relies on owner tag) ==
+== sample count over 7d for first measurement (proves non-zero data the fixed query returns) ==
+== thinx_influxdb service placement ==
+core Running 3 days ago
+core Failed 3 days ago
+micro Failed 6 days ago
+== try influx query via api container overlay (curl influxdb http) ==
+{"results":[{"statement_id":0,"series":[{"name":"measurements","columns":["name"],"values":[["APIKEY_INVALID"],["BUILD_STARTED"],["DEVICE_CHECKIN"],["DEVICE_NEW"],["DEVICE_REVOCATION"],["LOGIN_INVALID"],["aui: n"],["cle: p"],["csx: s"],["dfw: l"],["fyi: d"],["hel: y"],["iif: n"],["nuv: v"],["pmp: x"],["sxi: m"]]}]}]}
+
+== count APUSH last 7d via overlay ==
+{"results":[{"statement_id":0}]}
+== DEVICE_CHECKIN count last 7d (the dashboard check-in number) ==
+{"results":[{"statement_id":0,"series":[{"name":"DEVICE_CHECKIN","columns":["time","count"],"values":[["2026-05-30T14:13:15.245028253Z",16]]}]}]}
+
+== tag keys on DEVICE_CHECKIN (must include owner) ==
+{"results":[{"statement_id":0,"series":[{"name":"DEVICE_CHECKIN","columns":["tagKey"],"values":[["data"],["owner"]]}]}]}
+
+== owner-filtered count (proves fixed query shape returns data) ==
+sample owner: 2e01ab0893ee63eb192e92976540e6bd05674fe42c52743533c3f1a2b6c65bdc
+{"error":"error parsing query: found \\, expected identifier, string, number, bool at line 1, char 57"}

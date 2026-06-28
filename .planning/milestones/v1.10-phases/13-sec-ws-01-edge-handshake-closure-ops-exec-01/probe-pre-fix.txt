@@ -1,0 +1,48 @@
+=== probe-rtm-handshake.sh ===
+Target host : rtm.thinx.cloud
+Timestamp UTC: 2026-06-04T20:55:32Z
+Purpose     : SEC-WS-01 / OPS-EXEC-01 edge-handshake reproduction (7-row table).
+
+--- Row 1: GET / ---
+HTTP/2 200 
+content-security-policy: default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https: wss: wss://client.relay.crisp.chat; frame-ancestors 'self'; form-action 'self' https://github.com; object-src 'none'; base-uri 'self'
+server: nginx
+
+--- Row 2: GET /api/v2/users + WS upgrade ---
+HTTP/2 404 
+access-control-allow-origin: https://rtm.thinx.cloud
+content-security-policy: default-src 'none'
+content-security-policy: default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https: wss: wss://client.relay.crisp.chat; frame-ancestors 'self'; form-action 'self' https://github.com; object-src 'none'; base-uri 'self'
+server: nginx
+
+--- Row 3: GET /api/githook ---
+HTTP/2 404 
+access-control-allow-origin: https://rtm.thinx.cloud
+content-security-policy: default-src 'none'
+content-security-policy: default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https: wss: wss://client.relay.crisp.chat; frame-ancestors 'self'; form-action 'self' https://github.com; object-src 'none'; base-uri 'self'
+server: nginx
+
+--- Row 4: GET /test ---
+HTTP/2 404 
+content-security-policy: default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https: wss: wss://client.relay.crisp.chat; frame-ancestors 'self'; form-action 'self' https://github.com; object-src 'none'; base-uri 'self'
+server: nginx
+
+--- Row 5: GET /test + WS upgrade ---
+HTTP/2 404 
+content-security-policy: default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https: wss: wss://client.relay.crisp.chat; frame-ancestors 'self'; form-action 'self' https://github.com; object-src 'none'; base-uri 'self'
+server: nginx
+
+--- Row 6: GET /test + WS upgrade + HTTP/1.1 forced ---
+HTTP/1.1 404 Not Found
+Access-Control-Allow-Origin: https://rtm.thinx.cloud
+Content-Security-Policy: default-src 'none'
+
+--- Row 7: GET /suculent + WS upgrade + HTTP/1.1 + Cookie ---
+HTTP/1.1 404 Not Found
+Access-Control-Allow-Origin: https://rtm.thinx.cloud
+Content-Security-Policy: default-src 'none'
+
+=== Summary ===
+Bare-nginx-404 rows (4-7) detected: 0/4
+  Pre-fix expected : 4/4 (edge nginx returns bare 404 — Express not reached)
+  Post-fix expected: 0/4 (Express reached — helmet CSP + CORS visible on rows 4–7)

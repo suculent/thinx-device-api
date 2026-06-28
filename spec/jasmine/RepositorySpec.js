@@ -87,4 +87,51 @@ describe("Repository", function() {
     expect(result).to.eq(false);
   });
 
+  // Behavior-locking assertions for findDirsSync (Cases C, C2)
+  it("findDirsSync finds .git directories including dotfiles", function () {
+    const os = require('os');
+    const fs = require('fs');
+    const path = require('path');
+    const { findDirsSync } = require('../../lib/thinx/finder');
+    const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'repo-spec-c-'));
+    try {
+      // Create myrepo/.git inside the temp dir
+      const gitDir = path.join(tmpRoot, 'myrepo', '.git');
+      fs.mkdirSync(gitDir, { recursive: true });
+      const result = findDirsSync(tmpRoot, '.git', true, true);
+      expect(result).to.be.an('array');
+      expect(result.length).to.be.at.least(1);
+      expect(result[0]).to.match(/\/\.git$/);
+    } finally {
+      fs.rmSync(tmpRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("Repository.findAllRepositories returns .git paths (dotfile flag survives into production)", function () {
+    const os = require('os');
+    const fs = require('fs');
+    const path = require('path');
+    const app_config = Globals.app_config();
+    const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'repo-spec-c2-'));
+    const origDataRoot = app_config.data_root;
+    const origBuildRoot = app_config.build_root;
+    try {
+      // Create myrepo/.git inside the temp dir
+      const gitDir = path.join(tmpRoot, 'myrepo', '.git');
+      fs.mkdirSync(gitDir, { recursive: true });
+      // Point repositories_path = data_root + build_root → tmpRoot
+      app_config.data_root = tmpRoot;
+      app_config.build_root = '';
+      const result = Repository.findAllRepositories();
+      expect(result).to.be.an('array');
+      expect(result.length).to.be.at.least(1);
+      const hasGitPath = result.some(p => p.endsWith('/.git'));
+      expect(hasGitPath).to.equal(true);
+    } finally {
+      app_config.data_root = origDataRoot;
+      app_config.build_root = origBuildRoot;
+      fs.rmSync(tmpRoot, { recursive: true, force: true });
+    }
+  });
+
 });

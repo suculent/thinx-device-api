@@ -5,6 +5,7 @@ const InfluxConnector = require('./lib/thinx/influx');
 const Util = require('./lib/thinx/util');
 const Owner = require('./lib/thinx/owner');
 const Device = require('./lib/thinx/device');
+const RedisHealth = require('./lib/thinx/redis-health');
 
 const { RedisStore } = require("connect-redis");
 const session = require("express-session");
@@ -66,7 +67,7 @@ module.exports = class THiNX extends EventEmitter {
     const isSupportedLetsEncryptIssuer = (attributes = []) => {
       const organization = getCertAttribute('organizationName', attributes) || getCertAttribute('O', attributes);
       const commonName = getCertAttribute('commonName', attributes) || getCertAttribute('CN', attributes);
-      return organization === "Let's Encrypt" && ['R10', 'R12'].includes(commonName);
+      return organization === "Let's Encrypt" && ['R10', 'R11', 'R12', 'R13', 'R14'].includes(commonName);
     };
 
     // set up rate limiter
@@ -100,6 +101,13 @@ module.exports = class THiNX extends EventEmitter {
     app.redis_client = app.redis_store_client.legacy();
 
     app.redis_store_client.on('error', err => console.log('Redis Client Error', err));
+
+    // Slack-debounced Redis health notifier (quick task 260531-n72).
+    // Kept ALONGSIDE the legacy console.log handler above: the console log
+    // is the noisy per-error trace operators still rely on, RedisHealth is
+    // the throttled signal that posts to Slack. Attached BEFORE .connect()
+    // so the very first connection failure is captured.
+    RedisHealth.attach(app.redis_store_client);
 
     // Section that requires initialized Redis
     console.log("ℹ️ [info] Connecting Redis client...");
@@ -200,6 +208,20 @@ module.exports = class THiNX extends EventEmitter {
                 console.log("SSL CA error", message);
               }
 
+              // THINX-CERT-CHECK-01: DETECT-only probe — emits a WARN when ca.pem does not contain the leaf's LE intermediate issuer.
+              const certProbe = require('./lib/thinx/cert-probe');
+              const probeResult = certProbe.probeCaFreshness(app_config.ssl_cert, app_config.ssl_ca);
+              if (!probeResult.ok) {
+                console.log(`⚠️ [warning] ${probeResult.message}`);
+              }
+
+              // OBS-02: DETECT-only probe — emits a WARN when the oldest live managed_logs doc is stale-expired beyond GRACE_MS (default 7 days).
+              const auditTtlProbe = require('./lib/thinx/audit-ttl-probe');
+              const _Database_obs02 = require('./lib/thinx/database');
+              const _graceDays = (app_config && typeof app_config.audit_ttl_grace_days === 'number' && app_config.audit_ttl_grace_days > 0) ? app_config.audit_ttl_grace_days : 7;
+              auditTtlProbe.probeTtlEviction({ couchdbUri: new _Database_obs02().uri(), dbName: Globals.prefix() + 'managed_logs', graceMs: _graceDays * 24 * 60 * 60 * 1000 }).then(r => { if (r.ok === false) console.log('⚠️ [warning] ' + r.message); }).catch(_e => { /* non-fatal */ });
+
+
               let caCert = read(app_config.ssl_ca, 'utf8');
               let ca = pki.certificateFromPem(caCert);
               let client = pki.certificateFromPem(read(app_config.ssl_cert, 'utf8'));
@@ -213,9 +235,16 @@ module.exports = class THiNX extends EventEmitter {
                 const caSubject = ca && ca.subject ? ca.subject.attributes : [];
                 const caIssuer = ca && ca.issuer ? ca.issuer.attributes : [];
 
-                // Let's Encrypt rotates intermediates (for example R10 -> R12).
-                // Accept the current supported LE intermediates to avoid blocking HTTPS startup
-                // when the configured CA bundle is still pinned to the previous intermediate.
+                // Let's Encrypt rotates RSA intermediates periodically (R3 -> R10 -> R11/R12 -> R13/R14, ISRG-signed).
+                // Accept any of the currently active LE RSA intermediates (R10, R11, R12, R13, R14) so HTTPS startup
+                // is not blocked when the bundled /mnt/data/ssl/chain.pem is still pinned to a previous intermediate
+                // (e.g. chain.pem pins R10 while the leaf is issued by R13 — today's production state).
+                // WORKAROUND, NOT A FIX: the correct remediation is for the operator to refresh
+                // /mnt/data/ssl/chain.pem so it matches the leaf's actual issuer chain. This allowlist exists
+                // only so a stale bundle does not silently break the boot sequence between rotations.
+                // Allowlist last refreshed: 2026-05-31 (R13 active leaf issuer in production; R11/R14 added
+                // prophylactically for the next two rotations). ECDSA intermediates (E1/E2) are intentionally
+                // omitted — THiNX certs are RSA.
                 if (isSupportedLetsEncryptIssuer(clientIssuer) && isSupportedLetsEncryptIssuer(caSubject)) {
                   const clientIssuerCn = getCertAttribute('CN', clientIssuer);
                   const caSubjectCn = getCertAttribute('CN', caSubject);
@@ -282,8 +311,6 @@ module.exports = class THiNX extends EventEmitter {
             app.builder = builder;
             app.queue = queue;
 
-            app.set("trust proxy", 1);
-
             require('path');
 
             // Bypassed LGTM, because it does not make sense on this API for all endpoints,
@@ -300,7 +327,7 @@ module.exports = class THiNX extends EventEmitter {
                 maxAge: 3600000,
                 // deepcode ignore WebCookieSecureDisabledExplicitly: not secure because HTTPS unwrapping happens outside this app
                 secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
-                httpOnly: false, // temporarily disabled due to websocket debugging
+                httpOnly: true,
                 domain: short_domain
               },
               store: sessionStore,
@@ -404,6 +431,7 @@ module.exports = class THiNX extends EventEmitter {
 
 
             app.use('/static', express.static(path.join(__dirname, 'static')));
+            // REFACTOR-01: single source of truth for trust-proxy; allowlist form chosen because Traefik fronts the app on loopback in the swarm topology.
             app.set('trust proxy', ['loopback', '127.0.0.1']);
 
             /*
@@ -469,6 +497,11 @@ module.exports = class THiNX extends EventEmitter {
                 if (typeof (socketMap.get(socketKey)) === "undefined") {
 
                   socketMap.set(socketKey, socket);
+
+                  // REFACTOR-03: raw-socket close handler — releases the socketMap entry deterministically when the upgrade aborts mid-flight (before wss-level ws.on('close') at :597 gets a chance to attach). Map.delete is idempotent so double-firing with the wss-level handler is safe.
+                  socket.on('close', () => {
+                    socketMap.delete(socketKey);
+                  });
 
                   try {
                     wss.handleUpgrade(request, socket, head, function (ws) {

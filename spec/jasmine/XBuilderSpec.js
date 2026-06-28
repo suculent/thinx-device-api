@@ -219,3 +219,61 @@ describe("Builder", function () {
   }, 10000);
 
 });
+
+// Self-contained finder behavior tests — no Redis, no network
+describe("Builder finder helpers", function () {
+
+  const os = require('os');
+  const fs = require('fs');
+  const path = require('path');
+  const { findFilesSync } = require('../../lib/thinx/finder');
+
+  let tmpDir;
+
+  beforeAll(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'xbuilder-finder-'));
+    // Top-level secret files (cleanupSecrets targets)
+    fs.writeFileSync(path.join(tmpDir, 'environment.json'), '{}');
+    fs.writeFileSync(path.join(tmpDir, 'environment.h'), '// env');
+    fs.writeFileSync(path.join(tmpDir, 'thinx.yml'), 'arduino:\n  platform: esp8266\n');
+    // Subdir with same files — non-recursive search must NOT find these
+    const subDir = path.join(tmpDir, 'sub');
+    fs.mkdirSync(subDir);
+    fs.writeFileSync(path.join(subDir, 'environment.json'), '{}');
+    fs.writeFileSync(path.join(subDir, 'environment.h'), '// env');
+    fs.writeFileSync(path.join(subDir, 'thinx.yml'), 'arduino:\n  platform: esp8266\n');
+    // Subdir with a header file for recursive search
+    const hDir = path.join(tmpDir, 'src');
+    fs.mkdirSync(hDir);
+    fs.writeFileSync(path.join(hDir, 'myheader.h'), '#pragma once');
+  });
+
+  afterAll(() => {
+    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch (_e) { /* ignore */ }
+  });
+
+  it("cleanupSecrets non-recursive: finds environment.json only at top level", function () {
+    const results = findFilesSync(tmpDir, 'environment.json', false);
+    expect(results).to.have.length(1);
+    expect(results[0]).to.equal(path.join(tmpDir, 'environment.json'));
+  });
+
+  it("cleanupSecrets non-recursive: finds environment.h only at top level", function () {
+    const results = findFilesSync(tmpDir, 'environment.h', false);
+    expect(results).to.have.length(1);
+    expect(results[0]).to.equal(path.join(tmpDir, 'environment.h'));
+  });
+
+  it("cleanupSecrets non-recursive: finds thinx.yml only at top level", function () {
+    const results = findFilesSync(tmpDir, 'thinx.yml', false);
+    expect(results).to.have.length(1);
+    expect(results[0]).to.equal(path.join(tmpDir, 'thinx.yml'));
+  });
+
+  it("HEADER_FILE_NAME recursive search finds file in subdirectory", function () {
+    const results = findFilesSync(tmpDir, 'myheader.h', true);
+    expect(results).to.have.length(1);
+    expect(results[0]).to.equal(path.join(tmpDir, 'src', 'myheader.h'));
+  });
+
+});
