@@ -72,4 +72,12 @@ describe("Plugins", function () {
         expect(result).to.be.an('array');
     });
 
+    it("arduino plugin.check finds *.ino recursively and returns platform string", async function () {
+        let manager = new Plugins(this);
+        await manager.loadFromConfig(config);
+        // spec/test_repositories/arduino has src/src.ino — tests recursive glob
+        const result = manager.plugins.arduino.check('./spec/test_repositories/arduino');
+        expect(result).to.equal('arduino');
+    });
+
 });

@@ -1,0 +1,12 @@
+== current image ==
+thinxcloud/api:latest
+== api node ==
+micro Running 17 hours ago thinxcloud/api:latest
+micro Shutdown 17 hours ago thinxcloud/api:latest
+micro Shutdown 18 hours ago thinxcloud/api:latest
+== mosquitto node ==
+micro Running 18 hours ago
+== placement constraint ==
+[node.hostname==micro]
+== BADSTRING count (expect >0) ==
+0

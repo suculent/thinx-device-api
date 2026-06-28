@@ -1,6 +1,6 @@
 {
   "name": "thinx",
-  "version": "1.9.2866",
+  "version": "1.9.3054",
   "description": "THiNX IoT Device Management API",
   "bugs": {
     "url": "https://github.com/suculent/thinx-device-api/issues"
@@ -52,11 +52,9 @@
     "express-rate-limit": "^8.5.1",
     "express-session": "^1.19.0",
     "fs-extra": "^11.3.3",
-    "fs-finder": "github:suculent/Node-FsFinder#master",
     "helmet": "^8.1.0",
     "http-signature": "^1.3.5",
     "influx": "^5.11.0",
-    "jshint": "^2.13.4",
     "jsonwebtoken": "^9.0.3",
     "mailgun.js": "^12.1.1",
     "md5": "^2.3.0",
@@ -95,9 +93,19 @@
     "yaml": "2.8.3"
   },
   "overrides": {
-    "ajv": "6.12.3",
+    "ajv": "^6.15.0",
     "@commitlint/config-validator": {
       "ajv": "^8.0.0"
+    },
+    "@babel/core": "^7.29.7",
+    "@hapi/wreck": "^18.1.1",
+    "form-data": "^4.0.6",
+    "joi": "^17.13.4",
+    "istanbul-lib-processinfo": {
+      "uuid": "^11.1.1"
+    },
+    "jest-junit": {
+      "uuid": "^11.1.1"
     },
     "ansi-regex": "5.0.1",
     "async": "2.6.4",
@@ -115,7 +123,7 @@
     "glob": "11.1.0",
     "ip": "2.0.1",
     "jose": "4.11.2",
-    "js-yaml": "4.1.1",
+    "js-yaml": "^4.3.0",
     "json-schema": "0.4.0",
     "jsprim": "1.4.2",
     "lodash": "4.18.1",
@@ -126,10 +134,12 @@
     "netmask": "2.0.2",
     "path-to-regexp": "8.4.0",
     "protobufjs": "7.1.1",
+    "serialize-javascript": "^7.0.5",
     "proxy-agent": "4.0.1",
     "string-width": "4.2.3",
     "strip-ansi": "6.0.1",
     "trim-newlines": "4.0.2",
+    "tmp": "^0.2.6",
     "tunnel-agent": "0.6.0",
     "ws": "$ws",
     "yargs-parser": "20.2.7"
@@ -146,6 +156,7 @@
     "jasmine": "^5.12.0",
     "jasmine-core": "^5.12.1",
     "jest-junit": "^16.0.0",
+    "jshint": "^2.13.4",
     "karma": "6.4.4",
     "karma-chrome-launcher": "^3.2.0",
     "karma-coverage": "^2.2.1",

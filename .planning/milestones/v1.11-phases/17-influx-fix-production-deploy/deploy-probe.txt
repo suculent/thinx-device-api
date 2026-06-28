@@ -1,0 +1,36 @@
+== container id ==
+571c88261e2c
+== running image digest ==
+sha256:97a3ea644040b490b6f1dc1f793b5fae36d63f7afec658483ee003b8f2ef0cb6
+
+== FIX SIGNATURE in deployed influx.js (owner-tag fix + count + now()-7d) ==
+== BADSTRING over last 24h (was it ever there?) ==
+0
+== influx.js path in container ==
+== deployed influx.js query lines ==
+48:            // (stray `, "owner_id"`) and pointless. Invoke the callback on success.
+61:        this.influxdb.query(`SELECT count("value") AS "count_value" FROM "stats"."autogen"."${measurement}"`).catch(e => {
+69:    queryOwner(measurement, owner_id, callback) {
+71:        console.log("queryOwner TEST with owner_id:", owner_id);
+77:        if (!/^[a-zA-Z0-9_]+$/.test(owner_id)) {
+81:        this.influxdb.query(`SELECT count("value") AS "count_value" FROM "stats"."autogen"."${measurement}" WHERE "owner"='${owner_id}'`).catch(e => {
+89:    async today(owner_id, callback) {
+95:        if (!/^[a-zA-Z0-9_]+$/.test(owner_id)) {
+103:            results[kpi] = await this.influxdb.query(`SELECT count("value") AS "count_value" FROM "stats"."autogen"."${kpi}" WHERE "owner"='${owner_id}' AND time > '${midnight.toISOString()}'`).catch(e => {
+114:    async week(owner_id, callback) {
+116:        if (!/^[a-zA-Z0-9_]+$/.test(owner_id)) {
+127:            results[kpi] = await this.influxdb.query(`SELECT count("value") AS "count_value" FROM "stats"."autogen"."${kpi}" WHERE "owner"='${owner_id}' AND time > now() - 7d`).catch((e) => {
+/opt/thinx/thinx-device-api/lib/thinx/influx.js
+== query lines in deployed influx.js ==
+48:            // (stray `, "owner_id"`) and pointless. Invoke the callback on success.
+61:        this.influxdb.query(`SELECT count("value") AS "count_value" FROM "stats"."autogen"."${measurement}"`).catch(e => {
+69:    queryOwner(measurement, owner_id, callback) {
+71:        console.log("queryOwner TEST with owner_id:", owner_id);
+77:        if (!/^[a-zA-Z0-9_]+$/.test(owner_id)) {
+81:        this.influxdb.query(`SELECT count("value") AS "count_value" FROM "stats"."autogen"."${measurement}" WHERE "owner"='${owner_id}'`).catch(e => {
+89:    async today(owner_id, callback) {
+95:        if (!/^[a-zA-Z0-9_]+$/.test(owner_id)) {
+103:            results[kpi] = await this.influxdb.query(`SELECT count("value") AS "count_value" FROM "stats"."autogen"."${kpi}" WHERE "owner"='${owner_id}' AND time > '${midnight.toISOString()}'`).catch(e => {
+114:    async week(owner_id, callback) {
+116:        if (!/^[a-zA-Z0-9_]+$/.test(owner_id)) {
+127:            results[kpi] = await this.influxdb.query(`SELECT count("value") AS "count_value" FROM "stats"."autogen"."${kpi}" WHERE "owner"='${owner_id}' AND time > now() - 7d`).catch((e) => {

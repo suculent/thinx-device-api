@@ -1,53 +1,64 @@
 # Roadmap: THiNX Device API
 
-**Last updated:** 2026-05-27 (v1.0 milestone shipped)
-
-## Project Reference
-
-- **Project context:** `.planning/PROJECT.md`
-- **Milestones index:** `.planning/MILESTONES.md`
-- **Sibling project:** `services/console/.planning/` — Vue console GSD workspace (frontend half of v1.0)
-
 ## Milestones
 
-- ✅ **v1.0 — v1 GA Backend Closures** — Phases 1-4 (shipped 2026-05-27)
+- ✅ **v1.0 — v1 GA Backend Closures** — Phases 1–4 (shipped 2026-05-27)
+- ✅ **v1.9 — Backend Hygiene & Posture** — Phases 5–11 (shipped 2026-06-04)
+- ✅ **v1.10 — Operational Closures** — Phases 12–14 (shipped 2026-06-05)
+- ✅ **v1.11 — Backlog Drawdown** — Phases 15–17 (shipped 2026-06-06)
 
 ## Phases
 
 <details>
-<summary>✅ v1.0 v1 GA Backend Closures (Phases 1-4) — SHIPPED 2026-05-27</summary>
+<summary>✅ v1.0 — v1 GA Backend Closures (Phases 1–4) — SHIPPED 2026-05-27</summary>
 
-- [x] Phase 1: AUTH API — Password Reset (2/2 plans) — Verified 2026-05-26 (AUTH-API-01)
-- [x] Phase 2: PII Logging Scrub (1/1 plan) — Verified 2026-05-26 (SEC-PII-01)
-- [x] Phase 3: Swarm Auto-Pull (1/1 plan) — Verified 2026-05-26 (OPS-01)
-- [x] Phase 4: Dependency Triage (4/4 plans) — Verified 2026-05-27 (SEC-DEP-01)
-
-Full details: `.planning/milestones/v1.0-ROADMAP.md`
-Requirements: `.planning/milestones/v1.0-REQUIREMENTS.md`
-Audit: `.planning/milestones/v1.0-MILESTONE-AUDIT.md`
-Phase artifacts: `.planning/milestones/v1.0-phases/`
+See `.planning/MILESTONES.md`. 4/4 v1 requirements (AUTH-API-01, SEC-PII-01, OPS-01, SEC-DEP-01).
 
 </details>
 
-### 📋 Next Milestone (To Be Planned)
+<details>
+<summary>✅ v1.9 — Backend Hygiene & Posture (Phases 5–11) — SHIPPED 2026-06-04</summary>
 
-Run `/gsd:new-milestone` to plan v1.x — surfaced v1.x backlog candidates already filed during v1.0 (see `.planning/milestones/v1.0-REQUIREMENTS.md` § "v2 Requirements"):
+See `.planning/milestones/v1.9-ROADMAP.md`. 13/13 v1.9 requirements across 7 phases.
 
-- `REFACTOR-01..05` — backend hygiene (trust proxy, weak equality, WebSocket close handlers, callback→async/await, jshint/fs-finder devDep misclassification)
-- `SEC-COOKIE-01`, `SEC-WS-01`, `SEC-DEP-02`, `SEC-PII-02` — security posture + console-side dep triage + historic CouchDB audit-log redaction
-- `OPS-02`, `OPS-03` — stale swarm memberlist, malformed `<image>@` autoredeploy specs
-- `AUTH-REACTIVATE-01`, `AUTH-RESET-LINK-CONSOLE` — auth/account lifecycle gaps surfaced in v1.0 UAT
-- `CONSOLE-LEGACY-JSON-PARSE` — legacy AngularJS console (deprecation candidate)
-- `TEST-CHAI-01` — chai-http v5 ESM migration (locked per AGENTS.md until forced)
+</details>
+
+<details>
+<summary>✅ v1.10 — Operational Closures (Phases 12–14) — SHIPPED 2026-06-05</summary>
+
+See `.planning/milestones/v1.10-ROADMAP.md`. 5/5 v1.10 requirements.
+
+- [x] Phase 12: Code-side Closure Helpers (3/3 plans) — TEST-WS-01 + OBS-01 + OBS-02
+- [x] Phase 13: SEC-WS-01 Edge Handshake Closure / OPS-EXEC-01 (1/1 plan)
+- [x] Phase 14: SEC-PII-02 managed_logs Production Sweep Closure / OPS-EXEC-02 (1/1 plan)
+
+</details>
+
+<details>
+<summary>✅ v1.11 — Backlog Drawdown (Phases 15–17) — SHIPPED 2026-06-06</summary>
+
+See `.planning/milestones/v1.11-ROADMAP.md`. 4/4 v1.11 requirements (REFACTOR-06, REFACTOR-07, SEC-DEP-03, OPS-EXEC-03). Audit: `tech_debt` (deferred items in `.planning/MILESTONES.md` + STATE.md).
+
+- [x] Phase 15: fs-finder Removal (4/4 plans) — REFACTOR-06 + REFACTOR-07; native `lib/thinx/finder.js` helper, `fs-finder` dropped from deps
+- [x] Phase 16: Dependabot Triage (1/1 plan) — SEC-DEP-03; 3 overrides, runtime tree 0 high/0 moderate, uuid #194 deferred
+- [x] Phase 17: Influx Fix Production Deploy (1/1 plan) — OPS-EXEC-03; discrepancy branch (fix already live, verified)
+
+**Follow-on:** Phases 15+16 are committed but unpushed/undeployed — push triggers full CI suite (validates 15/16); deploy is separate operator work. See MILESTONES.md.
+
+</details>
 
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 1. AUTH API — Password Reset | v1.0 | 2/2 | Verified | 2026-05-26 |
-| 2. PII Logging Scrub | v1.0 | 1/1 | Verified | 2026-05-26 |
-| 3. Swarm Auto-Pull | v1.0 | 1/1 | Verified | 2026-05-26 |
-| 4. Dependency Triage | v1.0 | 4/4 | Verified | 2026-05-27 |
+| 1–4. v1 GA Backend Closures | v1.0 | — | Complete | 2026-05-27 |
+| 5–11. Backend Hygiene & Posture | v1.9 | 23/23 | Complete | 2026-06-04 |
+| 12. Code-side Closure Helpers | v1.10 | 3/3 | Complete | 2026-06-04 |
+| 13. SEC-WS-01 Edge Handshake Closure | v1.10 | 1/1 | Complete | 2026-06-05 |
+| 14. SEC-PII-02 managed_logs Sweep Closure | v1.10 | 1/1 | Complete | 2026-06-05 |
+| 15. fs-finder Removal | v1.11 | 4/4 | Complete | 2026-06-05 |
+| 16. Dependabot Triage | v1.11 | 1/1 | Complete | 2026-06-06 |
+| 17. Influx Fix Production Deploy | v1.11 | 1/1 | Complete | 2026-06-06 |
 
 ---
-*v1.0 GA backend closures complete: 4/4 v1 requirements Verified (AUTH-API-01, SEC-PII-01, OPS-01, SEC-DEP-01). Companion `services/console` v1.0 frontend tracked in sibling project. Next: `/gsd:new-milestone` to define v1.x scope.*
+*v1.11 Backlog Drawdown shipped 2026-06-06 (4/4 requirements across Phases 15–17; audit tech_debt — Phases 15/16 await push/CI/deploy follow-on).*

@@ -77,6 +77,31 @@ Evidence:
 
 ---
 
+## Phase 17 / OPS-EXEC-03 — Influx fix production deploy (v1.11, 2026-06-06)
+
+**Resolution: discrepancy branch — fix already live, no rollout applied.**
+
+- **Operator:** MS (autonomous agent run, operator-authorized SSH). **UTC:** 2026-06-06.
+- **Target:** roll influx stats fix `9b6d931c` (quick-task `260605-inf`) to prod.
+- **Finding:** `thinx_api` had already autoredeployed `thinxcloud/api:latest` (pipeline 5266) ~17h prior. The deployed `lib/thinx/influx.js` already contained the full fix — `count("value")`, `WHERE "owner"=…`, `time > '<ISO>'`, `time > now() - 7d`. App version `1.9.3054`. No force-rollout was applied (re-rolling an identical healthy image is pure restart risk).
+- **Co-location note (supersedes prior assumption):** `thinx_api` is pinned to **micro** via `[node.hostname==micro]`, and `thinx_mosquitto` runs on **micro** too — co-location holds on `micro`, not `core` as previously assumed. A force-update keeps `thinx_api` on micro (constraint-pinned), so MQTT co-location is safe. `thinx_influxdb` runs on **core** and is reached by `thinx_api` over the overlay (`http://thinx_influxdb:8086`).
+
+**Verification matrix (evidence in `.planning/phases/17-influx-fix-production-deploy/deploy-{pre,post,probe}.txt`):**
+
+| Check | Result |
+|-------|--------|
+| Deployed `influx.js` has the fix | ✅ owner-tag + count() + ISO/`now()-7d` predicates present |
+| `found BADSTRING` in logs (15m / 24h) | ✅ 0 / 0 |
+| influx/query-parse errors (1h) | ✅ 0 |
+| `DEVICE_CHECKIN` count last 7d (dashboard check-in number) | ✅ 16 (non-zero) |
+| `owner` tag exists on measurements | ✅ tag keys = [data, owner] |
+| `thinx_api` co-located with `thinx_mosquitto` | ✅ both on micro (api pinned via constraint) |
+| MQTT connack-timeout spam | ✅ none |
+
+**If a future re-deploy IS needed** (e.g. after pushing Phases 15/16): `docker service update --force thinx_api` re-pulls `:latest`; the `[node.hostname==micro]` constraint keeps it co-located with mosquitto. Rollback: `docker service rollback thinx_api`.
+
+---
+
 ## Related v1.x backlog items
 
 - **OPS-02** (REQUIREMENTS.md) — Stale swarm membership entry `b356ad8e1d60` / `10.133.0.4`. Defer; cleanup is the Rung 3 procedure.
