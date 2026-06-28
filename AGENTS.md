@@ -103,6 +103,31 @@ Upgrading would require:
 
 **Trigger to reconsider:** only if Snyk/Dependabot flags a CVE in `superagent` v3 (the underlying transitive dep).
 
+### Builder base images — pin to `ubuntu:20.04`, do NOT bump
+
+The three firmware builders (`builders/nodemcu-docker-build`, `builders/mongoose-docker-build`,
+`builders/micropython-docker-build`) are pinned to `FROM ubuntu:20.04`. A bump to `ubuntu:26.04`
+was attempted and rolled back on 2026-06-28 — all three break, each for a different, non-trivial
+reason (verified by local `docker build` of each on `ubuntu:26.04`):
+
+- **micropython** — 26.04 dropped `python2` / `python2-dev` from the archive. The esp-open-sdk
+  fork (`pfalcon/esp-open-sdk`) is Python 2-only, so there is no in-place fix.
+- **mongoose** — `ppa:mongoose-os/mos` publishes no `resolute` (26.04) pocket: `apt-get update`
+  returns `404 … resolute Release` and `mos-latest` is unlocatable. Blocked upstream, not on our side.
+- **nodemcu** — esp-open-sdk's bundled crosstool-NG toolchain fails to build against the 26.04
+  host GCC/glibc: `configure: error: could not find a working compiler`.
+
+**Trigger to reconsider:** only when the upstream esp-open-sdk / mongoose-os toolchains gain a
+modern-Ubuntu-compatible release. Bumping past 20.04 requires replacing those toolchains, not just
+the `FROM` line.
+
+### Builder CI checkout — HTTPS, not SSH
+
+The builder repos' CircleCI `deploy-docker-build` job clones the (public) repo over anonymous HTTPS
+instead of the orb's default SSH `checkout`. The SSH checkout/deploy key is not provisioned on these
+repos, so the built-in `checkout` fails with `git@github.com: Permission denied (publickey)`. Keep
+the explicit `git clone https://github.com/suculent/<repo>.git .` step.
+
 ---
 
 ## Current Known Remaining Risks Before Retest
