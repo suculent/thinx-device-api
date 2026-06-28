@@ -11,6 +11,21 @@ networks:
     driver: overlay
     attachable: true
 
+# #418 (SEC-CFG-01): Docker secrets for core credentials. The operator must
+# create them before a full `docker stack deploy -c docker-swarm.yml`, e.g.:
+#   printf '%s' "$COUCHDB_USER" | docker secret create COUCHDB_USER -
+#   printf '%s' "$COUCHDB_PASS" | docker secret create COUCHDB_PASS -
+#   printf '%s' "$REDIS_PASSWORD" | docker secret create REDIS_PASSWORD -
+# Code (lib/thinx/secrets.js) prefers /run/secrets/<NAME>, falling back to the
+# existing ${...} env vars so .env-based deploys keep working unchanged.
+secrets:
+  COUCHDB_USER:
+    external: true
+  COUCHDB_PASS:
+    external: true
+  REDIS_PASSWORD:
+    external: true
+
 services:
   mosquitto:
     env_file: .env
@@ -205,6 +220,12 @@ services:
       - "GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}"
       - 'MAILGUN_API_KEY=${MAILGUN_API_KEY}'
       - 'SLACK_WEBHOOK=${SLACK_WEBHOOK}'
+    # #418 (SEC-CFG-01): mounts /run/secrets/<NAME>; lib/thinx/secrets.js prefers
+    # these over the ${...} env vars above (kept for backward compatibility).
+    secrets:
+      - COUCHDB_USER
+      - COUCHDB_PASS
+      - REDIS_PASSWORD
     ports:
       - '7442:7442'
       - '7443:7443'

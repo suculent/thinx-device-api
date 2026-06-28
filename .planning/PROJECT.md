@@ -10,6 +10,17 @@ The v1.0 GA milestone (shipped 2026-05-27) closed the 4 v1 backend gaps the Vue 
 
 The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
 
+## Current Milestone: v1.12 Inbox Drawdown
+
+**Goal:** Drain the open GitHub issue inbox by closing three long-standing backend gaps surfaced by `/gsd-inbox` triage — complete GDPR purge, per-user GitHub tokens, and Docker secrets — each landed with tests and verified in CI.
+
+**Target features:**
+- **Complete GDPR purge (#353, `priority`):** `DELETE /api/v2/gdpr` removes ALL owner-scoped data across every store (user doc, devices, builds, RSA key files, deploy_path + repo_path trees, Redis keys), via one path-guarded, idempotent orchestrator reused by the scheduled purge path — not just the user document.
+- **Per-user GITHUB_ACCESS_TOKEN backend (#392):** authenticated endpoint validates a user's GitHub token against GitHub, stores it on their user doc (never echoed back), auto-creates an RSA key if absent, and pushes the public key to GitHub. (Vue Profile UI deferred to the `services/console` submodule project.)
+- **Docker Secrets in Swarm (#418):** shared `readSecret()` helper prefers `/run/secrets/<name>` over `process.env`, adopted for core Redis/CouchDB credentials, with `docker-swarm.yml` declaring + referencing those secrets; `.env` dev boot stays working.
+
+**Already shipped this cycle:** #541 device-transfer email HTML fix (commit `6c04a601`, CI green, issue closed).
+
 ## Current State
 
 **Shipped:** v1.11 Backlog Drawdown (2026-06-06) — 4/4 v1.11 requirements satisfied across 3 phases (Phases 15–17). Excised the `fs-finder` fork (9 call sites → native `lib/thinx/finder.js`; dependency dropped), triaged the 5 default-branch Dependabot alerts (3 surgical overrides; runtime tree 0 high/0 moderate; `uuid #194` deferred-dev-only), and confirmed the influx stats fix live in production (OPS-EXEC-03 resolved as a discrepancy branch — already autoredeployed). Audit `tech_debt`. **Follow-on / known issue:** Phases 15/16 are pushed (origin at `30ee8d17`); CircleCI pipelines 5269+5270 fail **deterministically** (not flaky) on `00-AppSpec /api/login (invalid)` → 503 (CouchDB user-view `Owner.validate()` error at `router.auth.js:287`). **Not a v1.11 regression** — v1.11 touched no auth/owner/CouchDB code; it's a CI CouchDB-readiness/infra issue to investigate before deploying 15/16. See `.planning/MILESTONES.md` and `.planning/milestones/v1.11-ROADMAP.md`.

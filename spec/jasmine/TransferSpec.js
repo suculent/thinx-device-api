@@ -96,4 +96,37 @@ describe("Transfer", function () {
 
   // TODO: Fetch real device-id and do the same thing as specific transfer, then do it over v2 again with two new devices or another owner
 
+  it("(01) builds device-transfer e-mails as rendered HTML, not plaintext (#541)", function () {
+
+    const body = {
+      to: "recipient@thinx.cloud",
+      from: "sender@thinx.cloud",
+      udids: ["udid-a", "udid-b"]
+    };
+    const htmlDeviceList = "<p><ul><li>udid-a</li><li>udid-b</li></ul></p>";
+    const plural = "s";
+    const transfer_uuid = "test-uuid-1234";
+    const port = "";
+
+    const recipient = transfer.buildRecipientTransferEmail(body, htmlDeviceList, plural, transfer_uuid, port);
+    const sender = transfer.buildSenderTransferEmail(body, htmlDeviceList);
+
+    // #541: HTML belongs in the `html` field so clients render it...
+    expect(recipient.html).to.be.a('string');
+    expect(recipient.html.indexOf("<!DOCTYPE html>")).to.equal(0);
+    expect(recipient.html).to.contain(htmlDeviceList);
+    expect(recipient.html).to.contain("Accept</a>");
+    expect(recipient.html).to.contain("Decline</a>");
+    expect(recipient.html).to.contain(transfer_uuid);
+    // ...and the `text` fallback must NOT carry raw markup
+    expect(recipient.text).to.be.a('string');
+    expect(recipient.text).to.not.contain("<!DOCTYPE");
+    expect(recipient.to).to.equal(body.to);
+
+    expect(sender.html).to.be.a('string');
+    expect(sender.html.indexOf("<!DOCTYPE html>")).to.equal(0);
+    expect(sender.text).to.not.contain("<!DOCTYPE");
+    expect(sender.to).to.equal(body.from); // sender gets their own copy (#541)
+  }); // it-01
+
 }); // describe
