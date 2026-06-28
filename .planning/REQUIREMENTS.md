@@ -54,9 +54,9 @@ Explicitly excluded. Documented to prevent scope creep.
 
 Filled by the roadmap (each REQ → exactly one phase).
 
-| REQ-ID | Phase |
-|--------|-------|
-| SEC-PII-03 | — |
-| GH-01 | — |
-| GH-02 | — |
-| SEC-CFG-01 | — |
+| REQ-ID | Phase | Status |
+|--------|-------|--------|
+| SEC-PII-03 | Phase 18 | Pending |
+| GH-01 | Phase 19 | Pending |
+| GH-02 | Phase 19 | Pending |
+| SEC-CFG-01 | Phase 20 | Pending |
