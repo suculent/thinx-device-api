@@ -1,12 +1,12 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.12
-milestone_name: Inbox Drawdown
+milestone_name: Inbox Drawdown (shipped)
 status: planning
-last_updated: "2026-06-28"
+last_updated: "2026-06-28T22:58:49.552Z"
 last_activity: 2026-06-28
 progress:
-  total_phases: 3
+  total_phases: 0
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -28,10 +28,10 @@ See: `.planning/PROJECT.md`
 
 ## Current Position
 
-Phase: 18 (not started)
+Phase: Not started (defining requirements)
 Plan: —
-Status: Roadmap created — awaiting `/gsd:plan-phase 18`
-Last activity: 2026-06-28 — v1.12 roadmap created
+Status: Defining requirements
+Last activity: 2026-06-28 — Milestone v1.12 started
 
 ## Milestones
 

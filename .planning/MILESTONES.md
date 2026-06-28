@@ -1,5 +1,17 @@
 # Milestones
 
+## v1.12 — Inbox Drawdown (Shipped: 2026-06-29)
+
+**Delivered:** Drained the open GitHub issue inbox surfaced by `/gsd-inbox` triage. 4/4 requirements across Phases 18–20: complete GDPR owner-purge orchestrator (#353), per-user GitHub access token endpoint + console Profile UI (#392), Docker Secrets `readSecret()` helper for core credentials (#418). Also shipped the device-transfer e-mail HTML fix (#541). All CI-green, released as `v1.12`, merged to `master` + `main`.
+
+**Stats:**
+
+- Phases: 3 (Phases 18–20) | Requirements: SEC-PII-03, GH-01, GH-02, SEC-CFG-01
+- Issues closed: #541, #353, #392, #418
+- Release: tag `v1.12` + GitHub release; console submodule bumped to merged `thinx-staging` (GitHub-token UI + 11 nightshift/chore branches)
+- Key additions: `lib/thinx/owner_purge.js`, `lib/thinx/github_link.js`, `lib/thinx/secrets.js` + specs (`OwnerPurgeSpec`, `GitHubLinkSpec`, `SecretsSpec`)
+- Notable fix: `SecretsSpec` test-pollution (deleted real cred env vars) caught and fixed via CI
+
 ## v1.11 — Backlog Drawdown (Shipped: 2026-06-06)
 
 **Delivered:** Paid down the long-standing v1.x backend backlog — excised the `fs-finder` fork, triaged the outstanding Dependabot alerts, and confirmed the influx stats fix live in production — while making deliberate disposition calls on the items deferred three+ times. 4/4 v1.11 requirements satisfied across 3 phases; no signature break on any legacy-console-compatible route.
