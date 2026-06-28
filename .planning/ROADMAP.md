@@ -6,7 +6,7 @@
 - ✅ **v1.9 — Backend Hygiene & Posture** — Phases 5–11 (shipped 2026-06-04)
 - ✅ **v1.10 — Operational Closures** — Phases 12–14 (shipped 2026-06-05)
 - ✅ **v1.11 — Backlog Drawdown** — Phases 15–17 (shipped 2026-06-06)
-- [ ] **v1.12 — Inbox Drawdown** — Phases 18–20 (in progress 2026-06-28)
+- ✅ **v1.12 — Inbox Drawdown** — Phases 18–20 (shipped 2026-06-29)
 
 ## Phases
 

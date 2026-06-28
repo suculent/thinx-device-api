@@ -2,6 +2,13 @@
 
 ## HISTORY
 
+29/6/2026 1.12 — Inbox Drawdown
+
+» Device-transfer e-mails now render as HTML instead of raw markup (#541)
+» GDPR: complete owner purge across all stores — devices, builds, RSA key files, deploy/repo trees, and Redis keys (deleted, not expired) — via one path-guarded, idempotent orchestrator reused by the scheduled sweep (#353)
+» Per-user GitHub access token endpoint — validates with GitHub, stores on the user document (never echoed), auto-creates and pushes an RSA key; plus a masked token field in the console Profile screen (#392)
+» Docker Secrets support — readSecret() helper prefers /run/secrets over env, adopted for core Redis/CouchDB credentials; docker-swarm.yml secrets block (#418)
+
 1/11/2025 1.9.2739
 
 » updated to Node v25
