@@ -10,9 +10,11 @@ The v1.0 GA milestone (shipped 2026-05-27) closed the 4 v1 backend gaps the Vue 
 
 The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
 
-## Current Milestone: v1.12 Inbox Drawdown
+## Current Milestone: v1.12 Inbox Drawdown — ✅ SHIPPED 2026-06-29
 
-**Goal:** Drain the open GitHub issue inbox by closing three long-standing backend gaps surfaced by `/gsd-inbox` triage — complete GDPR purge, per-user GitHub tokens, and Docker secrets — each landed with tests and verified in CI.
+Released as tag `v1.12` (GitHub release) and merged to `master` + `main`. 4/4 requirements across Phases 18–20; issues #541/#353/#392/#418 closed. Archived: `.planning/milestones/v1.12-*`.
+
+**Goal (delivered):** Drain the open GitHub issue inbox by closing three long-standing backend gaps surfaced by `/gsd-inbox` triage — complete GDPR purge, per-user GitHub tokens, and Docker secrets — each landed with tests and verified in CI.
 
 **Target features:**
 - **Complete GDPR purge (#353, `priority`):** `DELETE /api/v2/gdpr` removes ALL owner-scoped data across every store (user doc, devices, builds, RSA key files, deploy_path + repo_path trees, Redis keys), via one path-guarded, idempotent orchestrator reused by the scheduled purge path — not just the user document.
