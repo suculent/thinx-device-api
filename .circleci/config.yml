@@ -37,7 +37,7 @@ jobs:
       - run:
           name: Plan a deploy
           command: |
-            circleci run release plan \
+            circleci run release plan thinx-console-vue \
               --environment-name="production" \
               --component-name="thinx-console-vue" \
               --target-version="$CIRCLE_SHA1"
@@ -80,11 +80,11 @@ jobs:
           tag: 'vue'
       - run:
           name: Mark deploy SUCCESS
-          command: circleci run release update --status=SUCCESS
+          command: circleci run release update thinx-console-vue --status=SUCCESS
           when: on_success
       - run:
           name: Mark deploy FAILED
-          command: circleci run release update --status=FAILED
+          command: circleci run release update thinx-console-vue --status=FAILED
           when: on_fail
 
   build-console-classic:
@@ -96,7 +96,7 @@ jobs:
       - run:
           name: Plan a deploy
           command: |
-            circleci run release plan \
+            circleci run release plan thinx-console-classic \
               --environment-name="production" \
               --component-name="thinx-console-classic" \
               --target-version="$CIRCLE_SHA1"
@@ -120,11 +120,11 @@ jobs:
           tag: 'swarm'
       - run:
           name: Mark deploy SUCCESS
-          command: circleci run release update --status=SUCCESS
+          command: circleci run release update thinx-console-classic --status=SUCCESS
           when: on_success
       - run:
           name: Mark deploy FAILED
-          command: circleci run release update --status=FAILED
+          command: circleci run release update thinx-console-classic --status=FAILED
           when: on_fail
 
   build-api-cloud:
@@ -137,7 +137,7 @@ jobs:
       - run:
           name: Plan a deploy
           command: |
-            circleci run release plan \
+            circleci run release plan thinx-api \
               --environment-name="production" \
               --component-name="thinx-api" \
               --target-version="$CIRCLE_SHA1"
@@ -164,11 +164,11 @@ jobs:
           event: fail
       - run:
           name: Mark deploy SUCCESS
-          command: circleci run release update --status=SUCCESS
+          command: circleci run release update thinx-api --status=SUCCESS
           when: on_success
       - run:
           name: Mark deploy FAILED
-          command: circleci run release update --status=FAILED
+          command: circleci run release update thinx-api --status=FAILED
           when: on_fail
 
   test:
