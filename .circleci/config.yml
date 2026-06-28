@@ -35,6 +35,13 @@ jobs:
           docker_layer_caching: true
       - checkout
       - run:
+          name: Plan a deploy
+          command: |
+            circleci run release plan thinx-console-vue \
+              --environment-name="production" \
+              --component-name="thinx-console-vue" \
+              --target-version="$CIRCLE_SHA1"
+      - run:
           name: "Check Required Environment Variables"
           command: |
             required_vars=(
@@ -71,6 +78,14 @@ jobs:
           image: thinx/console
           registry: registry.thinx.cloud:5000
           tag: 'vue'
+      - run:
+          name: Mark deploy SUCCESS
+          command: circleci run release update thinx-console-vue --status=SUCCESS
+          when: on_success
+      - run:
+          name: Mark deploy FAILED
+          command: circleci run release update thinx-console-vue --status=FAILED
+          when: on_fail
 
   build-console-classic:
     executor: docker/docker
@@ -78,6 +93,13 @@ jobs:
       - setup_remote_docker:
           version: 20.10.24
       - checkout
+      - run:
+          name: Plan a deploy
+          command: |
+            circleci run release plan thinx-console-classic \
+              --environment-name="production" \
+              --component-name="thinx-console-classic" \
+              --target-version="$CIRCLE_SHA1"
       - run:
           name: Fetch all dependencies (esp. console)
           command: |
@@ -96,6 +118,14 @@ jobs:
           image: thinx/console
           registry: registry.thinx.cloud:5000
           tag: 'swarm'
+      - run:
+          name: Mark deploy SUCCESS
+          command: circleci run release update thinx-console-classic --status=SUCCESS
+          when: on_success
+      - run:
+          name: Mark deploy FAILED
+          command: circleci run release update thinx-console-classic --status=FAILED
+          when: on_fail
 
   build-api-cloud:
     executor: docker/docker
@@ -104,6 +134,13 @@ jobs:
           version: previous
           docker_layer_caching: true
       - checkout
+      - run:
+          name: Plan a deploy
+          command: |
+            circleci run release plan thinx-api \
+              --environment-name="production" \
+              --component-name="thinx-api" \
+              --target-version="$CIRCLE_SHA1"
       - run:
           name: Clean package-lock
           command: |
@@ -125,7 +162,15 @@ jobs:
       - slack/notify:
           template: basic_fail_1
           event: fail
-  
+      - run:
+          name: Mark deploy SUCCESS
+          command: circleci run release update thinx-api --status=SUCCESS
+          when: on_success
+      - run:
+          name: Mark deploy FAILED
+          command: circleci run release update thinx-api --status=FAILED
+          when: on_fail
+
   test:
 
     docker:
