@@ -7,6 +7,7 @@
 - ✅ **v1.10 — Operational Closures** — Phases 12–14 (shipped 2026-06-05)
 - ✅ **v1.11 — Backlog Drawdown** — Phases 15–17 (shipped 2026-06-06)
 - ✅ **v1.12 — Inbox Drawdown** — Phases 18–20 (shipped 2026-06-29)
+- 🔄 **v1.13 — Web Hardening (Console/Edge)** — Phase 21 (in progress)
 
 ## Phases
 
@@ -44,15 +45,22 @@ See `.planning/milestones/v1.11-ROADMAP.md`. 4/4 v1.11 requirements (REFACTOR-06
 - [x] Phase 16: Dependabot Triage (1/1 plan) — SEC-DEP-03; 3 overrides, runtime tree 0 high/0 moderate, uuid #194 deferred
 - [x] Phase 17: Influx Fix Production Deploy (1/1 plan) — OPS-EXEC-03; discrepancy branch (fix already live, verified)
 
-**Follow-on:** Phases 15+16 are committed but unpushed/undeployed — push triggers full CI suite (validates 15/16); deploy is separate operator work. See MILESTONES.md.
+</details>
+
+<details>
+<summary>✅ v1.12 — Inbox Drawdown (Phases 18–20) — SHIPPED 2026-06-29</summary>
+
+See `.planning/milestones/v1.12-ROADMAP.md`. 4/4 v1.12 requirements (SEC-PII-03, GH-01, GH-02, SEC-CFG-01).
+
+- [x] Phase 18: Complete GDPR Purge — SEC-PII-03
+- [x] Phase 19: Per-user GitHub Token Backend — GH-01 + GH-02
+- [x] Phase 20: Docker Secrets Helper — SEC-CFG-01
 
 </details>
 
-### v1.12 — Inbox Drawdown (Phases 18–20)
+### v1.13 — Web Hardening (Console/Edge) (Phase 21)
 
-- [ ] **Phase 18: Complete GDPR Purge** — SEC-PII-03; single orchestrator removes all owner-scoped data across CouchDB, filesystem, RSA keys, and Redis on demand
-- [ ] **Phase 19: Per-user GitHub Token Backend** — GH-01 + GH-02; authenticated endpoint validates/stores token, auto-creates RSA key, pushes public key to GitHub
-- [ ] **Phase 20: Docker Secrets Helper** — SEC-CFG-01; `readSecret()` helper + core Redis/CouchDB credential migration + docker-swarm.yml wiring
+- [ ] **Phase 21: CSP Wildcard Removal + Anti-CSRF Token** — SEC-CSP-01 + SEC-CSRF-01; drop the `https:` scheme-wildcard from CSP `default-src`/`connect-src` across all three CSP sources (nginx edge, legacy console, Vue console), and add a synchronizer anti-CSRF token to both console login forms validated server-side by the API
 
 ## Phase Details
 
@@ -92,6 +100,20 @@ See `.planning/milestones/v1.11-ROADMAP.md`. 4/4 v1.11 requirements (REFACTOR-06
   5. A unit spec for `lib/thinx/secrets.js` covers all three code paths (file present, file absent with env var set, both absent) using a mocked fs — no filesystem writes in tests
 **Plans**: TBD
 
+### Phase 21: CSP Wildcard Removal + Anti-CSRF Token
+**Goal**: Close the two deferred HawkScan Medium findings that live in the console/edge layer — CSP scheme-wildcards and the login-form anti-CSRF token — across both the legacy AngularJS console and the Vue console plus the swarm nginx edge, kept mutually consistent
+**Depends on**: Nothing (independent security hardening; touches nginx edge config + both console images, not backend API routes except the new CSRF-validation middleware)
+**Requirements**: SEC-CSP-01, SEC-CSRF-01
+**Success Criteria** (what must be TRUE):
+  1. HawkScan rescan of `rtm.thinx.cloud` reports **0 NEW** "CSP: Wildcard Directive" (plugin 10055-4) paths — the `https:` scheme-wildcard is gone from `default-src`/`connect-src` in favor of explicit pinned hosts
+  2. HawkScan rescan reports **0 NEW** "Anti-CSRF Tokens" (plugin 20012) paths — a login POST with no/forged token is rejected (4xx) on both console login flows, while a normal login through each console still succeeds
+  3. Both the legacy AngularJS console and the Vue console load and function fully after the change — no CSP-blocked scripts/styles/websockets in the browser console, including the Crisp `wss://client.relay.crisp.chat` connection
+  4. The anti-CSRF token mechanism is identical across both consoles — one server-side validation scheme, no per-frontend fork of the check
+  5. The three CSP definitions (nginx-edge `pre`/`post` runbook snapshot, legacy console `services/console/src/default.conf`, Vue console `services/console/vue/default.conf`) are byte-for-byte equivalent modulo the host-token placeholder
+**Plans**: TBD
+
+**Granularity note (coarse):** SEC-CSP-01 and SEC-CSRF-01 are combined into a single Phase 21 rather than split across two phases. Both are console/edge-layer changes that (a) touch the exact same three deploy surfaces — nginx edge config, legacy console image, Vue console image — (b) share the identical "keep both consoles + edge mutually consistent" verification concern, and (c) ship through the same console-submodule deploy pipeline. Splitting them would duplicate the two-console-consistency check and the HawkScan-rescan verification step across two phases for no delivery-boundary benefit; `granularity: coarse` favors this single combined phase.
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -104,10 +126,13 @@ See `.planning/milestones/v1.11-ROADMAP.md`. 4/4 v1.11 requirements (REFACTOR-06
 | 15. fs-finder Removal | v1.11 | 4/4 | Complete | 2026-06-05 |
 | 16. Dependabot Triage | v1.11 | 1/1 | Complete | 2026-06-06 |
 | 17. Influx Fix Production Deploy | v1.11 | 1/1 | Complete | 2026-06-06 |
-| 18. Complete GDPR Purge | v1.12 | 0/? | Not started | - |
-| 19. Per-user GitHub Token Backend | v1.12 | 0/? | Not started | - |
-| 20. Docker Secrets Helper | v1.12 | 0/? | Not started | - |
+| 18. Complete GDPR Purge | v1.12 | 4/4 | Complete | 2026-06-29 |
+| 19. Per-user GitHub Token Backend | v1.12 | — | Complete | 2026-06-29 |
+| 20. Docker Secrets Helper | v1.12 | — | Complete | 2026-06-29 |
+| 21. CSP Wildcard Removal + Anti-CSRF Token | v1.13 | 0/? | Not started | - |
 
 ---
 *v1.11 Backlog Drawdown shipped 2026-06-06 (4/4 requirements across Phases 15–17; audit tech_debt — Phases 15/16 await push/CI/deploy follow-on).*
-*v1.12 Inbox Drawdown roadmap created 2026-06-28 (4/4 requirements across 3 phases [18–20]).*
+*v1.12 Inbox Drawdown shipped 2026-06-29 (4/4 requirements across 3 phases [18–20]).*
+*v1.13 Web Hardening (Console/Edge) roadmap created 2026-07-04 (2/2 requirements combined into 1 phase [21], granularity coarse).*
+</content>
