@@ -110,7 +110,12 @@ See `.planning/milestones/v1.12-ROADMAP.md`. 4/4 v1.12 requirements (SEC-PII-03,
   3. Both the legacy AngularJS console and the Vue console load and function fully after the change — no CSP-blocked scripts/styles/websockets in the browser console, including the Crisp `wss://client.relay.crisp.chat` connection
   4. The anti-CSRF token mechanism is identical across both consoles — one server-side validation scheme, no per-frontend fork of the check
   5. The three CSP definitions (nginx-edge `pre`/`post` runbook snapshot, legacy console `services/console/src/default.conf`, Vue console `services/console/vue/default.conf`) are byte-for-byte equivalent modulo the host-token placeholder
-**Plans**: TBD
+**Plans**: 5 plans (3 waves)
+- [ ] 21-01-PLAN.md — API CSRF double-submit middleware (fail-open/enforce flag) + route wiring
+- [ ] 21-02-PLAN.md — Console CSRF wiring (classic hidden _csrf fields + login.js header; Vue Login.vue header)
+- [ ] 21-03-PLAN.md — CSP host pinning across nginx edge runbook + both console default.conf
+- [ ] 21-04-PLAN.md — Deploy both repos fail-open + functional/CSP verify
+- [ ] 21-05-PLAN.md — Flip CSRF enforcement + HawkScan rescan + rollback runbook
 
 **Granularity note (coarse):** SEC-CSP-01 and SEC-CSRF-01 are combined into a single Phase 21 rather than split across two phases. Both are console/edge-layer changes that (a) touch the exact same three deploy surfaces — nginx edge config, legacy console image, Vue console image — (b) share the identical "keep both consoles + edge mutually consistent" verification concern, and (c) ship through the same console-submodule deploy pipeline. Splitting them would duplicate the two-console-consistency check and the HawkScan-rescan verification step across two phases for no delivery-boundary benefit; `granularity: coarse` favors this single combined phase.
 
