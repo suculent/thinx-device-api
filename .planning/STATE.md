@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.12
-milestone_name: Inbox Drawdown (shipped)
+milestone: v1.13
+milestone_name: Web Hardening (Console/Edge)
 status: planning
-last_updated: "2026-06-28T22:58:49.552Z"
-last_activity: 2026-06-28
+last_updated: "2026-07-04T14:52:39.104Z"
+last_activity: 2026-07-04
 progress:
   total_phases: 0
   completed_phases: 0
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md`
 Phase: Not started (defining requirements)
 Plan: —
 Status: Defining requirements
-Last activity: 2026-06-28 — Milestone v1.12 started
+Last activity: 2026-07-04 — Milestone v1.13 started
 
 ## Milestones
 

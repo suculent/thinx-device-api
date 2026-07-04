@@ -10,18 +10,15 @@ The v1.0 GA milestone (shipped 2026-05-27) closed the 4 v1 backend gaps the Vue 
 
 The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
 
-## Current Milestone: v1.12 Inbox Drawdown — ✅ SHIPPED 2026-06-29
+## Current Milestone: v1.13 Web Hardening (Console/Edge)
 
-Released as tag `v1.12` (GitHub release) and merged to `master` + `main`. 4/4 requirements across Phases 18–20; issues #541/#353/#392/#418 closed. Archived: `.planning/milestones/v1.12-*`.
-
-**Goal (delivered):** Drain the open GitHub issue inbox by closing three long-standing backend gaps surfaced by `/gsd-inbox` triage — complete GDPR purge, per-user GitHub tokens, and Docker secrets — each landed with tests and verified in CI.
+**Goal:** Close the two deferred HawkScan Medium findings that live in the console/edge layer — CSP scheme-wildcards and the login-form anti-CSRF token — across both the legacy AngularJS console and the Vue console plus the swarm nginx edge, kept mutually consistent.
 
 **Target features:**
-- **Complete GDPR purge (#353, `priority`):** `DELETE /api/v2/gdpr` removes ALL owner-scoped data across every store (user doc, devices, builds, RSA key files, deploy_path + repo_path trees, Redis keys), via one path-guarded, idempotent orchestrator reused by the scheduled purge path — not just the user document.
-- **Per-user GITHUB_ACCESS_TOKEN backend (#392):** authenticated endpoint validates a user's GitHub token against GitHub, stores it on their user doc (never echoed back), auto-creates an RSA key if absent, and pushes the public key to GitHub. (Vue Profile UI deferred to the `services/console` submodule project.)
-- **Docker Secrets in Swarm (#418):** shared `readSecret()` helper prefers `/run/secrets/<name>` over `process.env`, adopted for core Redis/CouchDB credentials, with `docker-swarm.yml` declaring + referencing those secrets; `.env` dev boot stays working.
+- **CSP scheme-wildcard removal (SEC-CSP-01):** drop the `https:` scheme-wildcard from `default-src`/`connect-src` and pin explicit hosts across all three CSP sources kept consistent — the nginx-edge runbook (`.planning/runbooks/swarm-configs/rtm.thinx.cloud-server.{pre,post}.nginx:28`), the legacy console image (`services/console/src/default.conf`), and the Vue console image (`services/console/vue/default.conf`) — so HawkScan "CSP: Wildcard Directive" clears on rescan. `unsafe-eval` removal is out of scope (blocked on the console leaving AngularJS).
+- **Login-form anti-CSRF token (SEC-CSRF-01):** both console login forms (legacy AND Vue) carry a synchronizer anti-CSRF token that the API validates server-side, with one token scheme compatible across both frontends, so HawkScan "Anti-CSRF Tokens" clears on rescan. Builds on `SameSite=lax` session cookies (already shipped, commit `ce7ca34c`).
 
-**Already shipped this cycle:** #541 device-transfer email HTML fix (commit `6c04a601`, CI green, issue closed).
+**Origin:** both findings surfaced by the 2026-07-04 HawkScan of `rtm.thinx.cloud` (scan `c5691244`, rescan `1f3ec1e7`); two High findings (Oracle SQLi, Shell Shock RCE) verified as false positives and triaged that session. Context in memory `csp-wildcard-hardening-deferred.md` + `thinx-console-topology`.
 
 ## Current State
 
@@ -191,4 +188,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-06-06 — after v1.11 Backlog Drawdown milestone (4/4 requirements satisfied across Phases 15–17: fs-finder excised, Dependabot triaged, influx fix verified live). Audit tech_debt; Phases 15/16 await operator push/CI/deploy follow-on. Next milestone (v1.12) not yet started; would continue phase numbering from v1.11 (next phase = 18).*
+*Last updated: 2026-07-04 — started milestone v1.13 Web Hardening (Console/Edge): 2 SEC requirements (SEC-CSP-01 CSP scheme-wildcard removal, SEC-CSRF-01 login-form anti-CSRF token) across both consoles + swarm edge, from the 2026-07-04 HawkScan of rtm.thinx.cloud. Continues phase numbering from v1.12 (next phase = 21).*
