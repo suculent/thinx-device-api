@@ -18,16 +18,6 @@ services:
       - internal
     labels:
       - traefik.backend.mosquitto.noexpose
-    # Readiness gate: the broker process is "Running" before it accepts MQTT
-    # connections, so api's plain depends_on used to start it too early. Publish
-    # with the same thinx/mosquitto test credential the app uses (ACL grants
-    # thinx readwrite /#) — succeeds only once the broker is actually listening.
-    healthcheck:
-      test: ["CMD-SHELL", "mosquitto_pub -h 127.0.0.1 -p 1883 -u thinx -P mosquitto -t healthcheck -m ok || exit 1"]
-      interval: 4s
-      timeout: 5s
-      retries: 15
-      start_period: 20s
   couchdb:
     env_file: .env
     image: 'couchdb:3.1.0'
@@ -104,13 +94,15 @@ services:
     privileged: true
     shm_size: 2048M
     restart: "no"
+    # NOTE: no `condition: service_healthy` on mosquitto — the broker's go-auth
+    # plugin only accepts the thinx credential AFTER api injects it at boot
+    # (inject_password), so any auth-based mosquitto healthcheck deadlocks
+    # (api waits for healthy ⇄ healthy needs api). Start-order + the app's own
+    # MQTT reconnect (messenger.js) + UV_THREADPOOL_SIZE below cover readiness.
     depends_on:
-      transformer:
-        condition: service_started
-      thinx-redis:
-        condition: service_started
-      mosquitto:
-        condition: service_healthy
+      - transformer
+      - thinx-redis
+      - mosquitto
     networks:
       - nat
       - internal
