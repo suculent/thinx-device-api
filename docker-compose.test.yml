@@ -18,6 +18,16 @@ services:
       - internal
     labels:
       - traefik.backend.mosquitto.noexpose
+    # Readiness gate: the broker process is "Running" before it accepts MQTT
+    # connections, so api's plain depends_on used to start it too early. Publish
+    # with the same thinx/mosquitto test credential the app uses (ACL grants
+    # thinx readwrite /#) — succeeds only once the broker is actually listening.
+    healthcheck:
+      test: ["CMD-SHELL", "mosquitto_pub -h 127.0.0.1 -p 1883 -u thinx -P mosquitto -t healthcheck -m ok || exit 1"]
+      interval: 4s
+      timeout: 5s
+      retries: 15
+      start_period: 20s
   couchdb:
     env_file: .env
     image: 'couchdb:3.1.0'
@@ -95,9 +105,12 @@ services:
     shm_size: 2048M
     restart: "no"
     depends_on:
-      - transformer
-      - thinx-redis
-      - mosquitto
+      transformer:
+        condition: service_started
+      thinx-redis:
+        condition: service_started
+      mosquitto:
+        condition: service_healthy
     networks:
       - nat
       - internal
@@ -121,6 +134,13 @@ services:
         - 'MAILGUN_API_KEY=${MAILGUN_API_KEY}'
         - 'GIT_KEY_PASSPHRASE=${GIT_KEY_PASSPHRASE:-thinx}'
     environment:
+      # Node resolves hostnames via libuv's thread pool (default 4 threads). The
+      # messenger opens a per-owner MQTT client, so a load-heavy spec run fires
+      # many concurrent getaddrinfo("mosquitto") calls that saturate the 4-thread
+      # pool and Docker's embedded DNS, surfacing as `getaddrinfo EAI_AGAIN
+      # mosquitto` and cascading MQTT-dependent spec failures. Widen the pool so
+      # concurrent lookups don't starve. Test-only; no production impact.
+      - 'UV_THREADPOOL_SIZE=64'
       - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
       - 'COUCHDB_PASS=${COUCHDB_PASS}'
       - 'COUCHDB_USER=${COUCHDB_USER}'
