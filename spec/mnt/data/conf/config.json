@@ -44,7 +44,8 @@
     "device" : false,
     "deployment": true,
     "allow_http_login": true,
-    "secrets": false
+    "secrets": false,
+    "csrf_enforce": false
   },
   "strict_gdpr": true
 }
