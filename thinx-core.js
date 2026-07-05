@@ -9,6 +9,7 @@ const RedisHealth = require('./lib/thinx/redis-health');
 
 const { RedisStore } = require("connect-redis");
 const session = require("express-session");
+const cookieParser = require("cookie-parser");
 module.exports = class THiNX extends EventEmitter {
 
   constructor() {
@@ -342,6 +343,14 @@ module.exports = class THiNX extends EventEmitter {
             const sessionParser = session(sessionConfig); /* lgtm [js/missing-token-validation] */
 
             app.use(sessionParser);
+
+            // SEC-CSRF-01: cookie-parser was already a dependency but unmounted;
+            // mounting it is additive (nothing else reads req.cookies today).
+            // csrf.ensureXsrfCookie must run before all routers so the reactive
+            // XSRF-TOKEN cookie is refreshed on every proxied round-trip.
+            app.use(cookieParser());
+            const csrf = require("./lib/middleware/csrf")(app);
+            app.use(csrf.ensureXsrfCookie);
 
             app.use(express.json({
               limit: "2mb",
