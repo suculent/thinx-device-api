@@ -113,7 +113,7 @@ See `.planning/milestones/v1.12-ROADMAP.md`. 4/4 v1.12 requirements (SEC-PII-03,
 **Plans**: 5 plans (3 waves)
 - [x] 21-01-PLAN.md — API CSRF double-submit middleware (fail-open/enforce flag) + route wiring
 - [x] 21-02-PLAN.md — Console CSRF wiring (classic hidden _csrf fields + login.js header; Vue Login.vue header)
-- [ ] 21-03-PLAN.md — CSP host pinning across nginx edge runbook + both console default.conf
+- [x] 21-03-PLAN.md — CSP host pinning across nginx edge runbook + both console default.conf
 - [ ] 21-04-PLAN.md — Deploy both repos fail-open + functional/CSP verify
 - [ ] 21-05-PLAN.md — Flip CSRF enforcement + HawkScan rescan + rollback runbook
 
@@ -134,7 +134,7 @@ See `.planning/milestones/v1.12-ROADMAP.md`. 4/4 v1.12 requirements (SEC-PII-03,
 | 18. Complete GDPR Purge | v1.12 | 4/4 | Complete | 2026-06-29 |
 | 19. Per-user GitHub Token Backend | v1.12 | — | Complete | 2026-06-29 |
 | 20. Docker Secrets Helper | v1.12 | — | Complete | 2026-06-29 |
-| 21. CSP Wildcard Removal + Anti-CSRF Token | v1.13 | 2/5 | In Progress|  |
+| 21. CSP Wildcard Removal + Anti-CSRF Token | v1.13 | 3/5 | In Progress|  |
 
 ---
 *v1.11 Backlog Drawdown shipped 2026-06-06 (4/4 requirements across Phases 15–17; audit tech_debt — Phases 15/16 await push/CI/deploy follow-on).*
