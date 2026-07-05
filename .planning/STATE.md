@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.13
 milestone_name: Web Hardening (Console/Edge)
 status: executing
-stopped_at: Completed 21-01-PLAN.md
-last_updated: "2026-07-05T18:49:42.693Z"
+stopped_at: Completed 21-02-PLAN.md
+last_updated: "2026-07-05T19:02:10.166Z"
 last_activity: 2026-07-05
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 5
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md`
 ## Current Position
 
 Phase: 21 (CSP Wildcard Removal + Anti-CSRF Token) — in progress
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-07-05
 
@@ -74,6 +74,7 @@ Items acknowledged and deferred at prior milestone closes and carried forward:
 - 2026-06-29 — v1.12 shipped 4/4 requirements across Phases 18–20 (SEC-PII-03, GH-01, GH-02, SEC-CFG-01); console submodule bumped for GitHub-token UI + 11 nightshift/chore branches.
 - [Phase 21]: issueCsrfToken never re-invokes ensureXsrfCookie/crypto.randomBytes -- it only reads the cookie the global middleware already set, so the priming GET never emits a second Set-Cookie
 - [Phase 21]: verifyCsrfToken wired onto exactly the 7 reconciled protected routes (adds the Vue v2 password reset/set routes the original D-02 list omitted); X-Access-Token/JWT routes and /api/v2/user left untouched
+- [Phase 21]: Console CSRF wiring uses two shared seams (classic $.ajaxSetup, Vue composeHeaders()) rather than per-call-site edits — Prevents future whack-a-mole regressions found across 4 plan-check passes
 
 ### Todos
 
@@ -107,7 +108,7 @@ Items acknowledged and deferred at prior milestone closes and carried forward:
 
 ## Session Continuity
 
-**Stopped at:** Completed 21-01-PLAN.md
+**Stopped at:** Completed 21-02-PLAN.md
 
 **Next action:** Run `/gsd:plan-phase 21` for Phase 21 (CSP Wildcard Removal + Anti-CSRF Token — SEC-CSP-01 + SEC-CSRF-01). This is the only v1.13 phase.
 
