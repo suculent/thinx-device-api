@@ -40,4 +40,4 @@ Filled by the roadmap (each REQ → exactly one phase).
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
 | SEC-CSP-01 | Phase 21 | Pending |
-| SEC-CSRF-01 | Phase 21 | Pending |
+| SEC-CSRF-01 | Phase 21 | In Progress (21-01 API-side done; 21-02/21-04/21-05 pending) |

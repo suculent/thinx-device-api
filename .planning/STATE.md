@@ -2,14 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.13
 milestone_name: Web Hardening (Console/Edge)
-status: planning
-last_updated: "2026-07-04T15:10:00.000Z"
-last_activity: 2026-07-04
+status: executing
+stopped_at: Completed 21-01-PLAN.md
+last_updated: "2026-07-05T18:49:42.693Z"
+last_activity: 2026-07-05
 progress:
-  total_phases: 1
+  total_phases: 4
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 5
+  completed_plans: 1
   percent: 0
 ---
 
@@ -28,10 +29,10 @@ See: `.planning/PROJECT.md`
 
 ## Current Position
 
-Phase: 21 (CSP Wildcard Removal + Anti-CSRF Token) — not started
-Plan: —
-Status: Roadmap created, planning pending
-Last activity: 2026-07-04 — v1.13 ROADMAP.md + STATE.md written; 2/2 requirements mapped to Phase 21
+Phase: 21 (CSP Wildcard Removal + Anti-CSRF Token) — in progress
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-07-05
 
 ## Milestones
 
@@ -71,6 +72,8 @@ Items acknowledged and deferred at prior milestone closes and carried forward:
 - 2026-07-04 — `unsafe-eval` removal explicitly deferred as SEC-CSP-02 (not folded into Phase 21) — AngularJS's `$parse` requires `unsafe-eval` unless run in CSP-safe mode; removing it now would break the legacy console outright. Tracked as a future requirement, blocked on the console leaving AngularJS.
 - 2026-07-04 — API-side CSRF for token-authenticated routes explicitly out of scope — those routes use `X-Access-Token`/JWT (not ambient cookies) and aren't CSRF-prone; only the cookie-session login forms need the synchronizer token.
 - 2026-06-29 — v1.12 shipped 4/4 requirements across Phases 18–20 (SEC-PII-03, GH-01, GH-02, SEC-CFG-01); console submodule bumped for GitHub-token UI + 11 nightshift/chore branches.
+- [Phase 21]: issueCsrfToken never re-invokes ensureXsrfCookie/crypto.randomBytes -- it only reads the cookie the global middleware already set, so the priming GET never emits a second Set-Cookie
+- [Phase 21]: verifyCsrfToken wired onto exactly the 7 reconciled protected routes (adds the Vue v2 password reset/set routes the original D-02 list omitted); X-Access-Token/JWT routes and /api/v2/user left untouched
 
 ### Todos
 
@@ -104,7 +107,7 @@ Items acknowledged and deferred at prior milestone closes and carried forward:
 
 ## Session Continuity
 
-**Stopped at:** v1.13 roadmap creation (2026-07-04)
+**Stopped at:** Completed 21-01-PLAN.md
 
 **Next action:** Run `/gsd:plan-phase 21` for Phase 21 (CSP Wildcard Removal + Anti-CSRF Token — SEC-CSP-01 + SEC-CSRF-01). This is the only v1.13 phase.
 
