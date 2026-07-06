@@ -16,6 +16,11 @@ This audit covers backend/API logging quality only:
 The audit intentionally does not mass-convert every remaining `console.*` call,
 and does not scan bundled console frontend vendor assets.
 
+The auditor reports missing root/service files explicitly. This keeps counts
+interpretable when optional service submodule files are not checked out in a
+local workspace. Sensitive and statistics-event checks are call-span aware, so
+multi-line `console.*`/`logger.*` calls are inspected as one log statement.
+
 ## Current Audit Counts
 
 Latest command:
@@ -27,6 +32,9 @@ npm run --silent logging-audit -- --json
 Current report summary:
 
 - Files scanned: 80
+- Missing scoped files: 0
+- Service entrypoints scanned: 4
+- Service entrypoints missing: 0
 - `console.*` calls: 897
 - `logger.*` calls: 20
 - Tracked event occurrences: 26
@@ -73,5 +81,5 @@ Focused verification commands:
 
 ```sh
 npm run --silent logging-audit -- --json
-npx jasmine spec/jasmine/LoggingQualityAuditSpec.js spec/jasmine/UtilSpec.js spec/jasmine/LoggerSpec.js spec/jasmine/MetricsCoverageSpec.js
+ENVIRONMENT=development JASMINE_CONFIG_PATH=spec/empty.json npx jasmine spec/jasmine/LoggingQualityAuditSpec.js spec/jasmine/UtilSpec.js spec/jasmine/LoggerSpec.js spec/jasmine/MetricsCoverageSpec.js
 ```
