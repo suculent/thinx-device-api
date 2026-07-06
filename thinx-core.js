@@ -498,7 +498,7 @@ module.exports = class THiNX extends EventEmitter {
                 if (Util.isDefined(cookies)) {
                   // other x-thx cookies are now deprecated and can be removed
                   if (cookies.indexOf("x-thx-core") === -1) {
-                    console.log("Should destroy socket, access unauthorized.");
+                    console.log("Should destroy socket, access unauthorized.", Util.redactCookieHeader(cookies));
                     socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
                     socket.destroy();
                     return;
@@ -652,7 +652,7 @@ module.exports = class THiNX extends EventEmitter {
 
               if (typeof (cookies) !== "undefined") {
                 if (cookies.indexOf("x-thx") === -1) {
-                  console.log(`🚫  [critical] No thx-session found in WS: ${JSON.stringify(cookies)}`);
+                  console.log(`🚫  [critical] No thx-session found in WS: ${Util.redactCookieHeader(cookies)}`);
                   return;
                 }
               } else {
