@@ -253,6 +253,51 @@ CouchDB
 docker run -p 5984:5984 -e COUCHDB_USER=rtmtest -e COUCHDB_PASSWORD=rtmtest couchdb:3.1.0
 ```
 
+## Roadmap Entropy Detector
+
+`scripts/roadmap-entropy.js` is a dependency-free static analyzer for the GSD
+planning artifacts under `.planning/` (`ROADMAP.md`, `REQUIREMENTS.md`,
+`MILESTONES.md`). It detects roadmap scope creep and drift so planning debt
+surfaces before it compounds.
+
+It flags four signal classes and rolls them into an aggregate **entropy score**
+(sum of severity weights: high=3, medium=2, low=1):
+
+* **Traceability drift** — active requirements with no mapped phase, and phases
+  citing requirement IDs that don't exist in `REQUIREMENTS.md`.
+* **Coverage drift** — `REQ → Phase` traceability entries that disagree with the
+  requirements the phase actually declares in `ROADMAP.md`.
+* **Scope creep** — requirement IDs tracked in traceability but never defined,
+  and `Out of Scope` features re-surfacing as active (unchecked) requirements.
+* **Staleness** — unchecked items under a `✅` shipped milestone, and a `🔄`
+  in-progress milestone whose phases are all already checked.
+
+Requirements for already-shipped milestones live in
+`.planning/milestones/*-REQUIREMENTS.md`, so cross-checks against the active
+`REQUIREMENTS.md` are scoped to the current (non-shipped) milestone.
+
+### Usage
+
+``` bash
+npm run roadmap-entropy               # human-readable summary
+node scripts/roadmap-entropy.js --verbose      # per-finding detail
+node scripts/roadmap-entropy.js --json         # machine-readable report
+node scripts/roadmap-entropy.js --threshold=10 # exit 1 if score > 10 (CI gate)
+node scripts/roadmap-entropy.js --strict       # exit 1 on any finding (threshold 0)
+```
+
+| Flag | Effect |
+|------|--------|
+| _(none)_ | Print a human-readable summary; always exit `0`. |
+| `--json` | Emit the full report as JSON. |
+| `--verbose` / `-v` | Show the detail line for each finding. |
+| `--threshold=N` | Exit `1` when the entropy score exceeds `N` (CI gating). |
+| `--strict` | Shorthand for `--threshold=0` — exit `1` on any finding. |
+
+Exit code is `0` unless a threshold is set and the score exceeds it, so it can
+gate CI on rising roadmap entropy without breaking the default informational
+run.
+
 # Platforms State of Union
 
 ## Overall
