@@ -2,6 +2,14 @@
 
 ## HISTORY
 
+6/7/2026 1.13 — Web Hardening
+
+» Browser session cookies now set SameSite=Lax, and double-submit CSRF protection is available behind `debug.csrf_enforce` / `CSRF_ENFORCE` using `XSRF-TOKEN` plus `X-XSRF-TOKEN`.
+» Login, password reset, user-create, and password-set POST routes now mint and validate CSRF tokens with `/api/csrf-token` and `/api/v2/csrf-token` priming endpoints; CORS allows the token header for the Vue console.
+» Classic and Vue console login, OAuth, and password flows now prime and send CSRF tokens; console CSP templates pin known THiNX, Crisp, Google, and Rollbar hosts instead of broad `https:` / `wss:` scheme wildcards.
+» Worker and Arduino builder submodules moved to security and operational fixes: worker command-injection, job-auth, and Docker-secret hardening; Arduino builder Debian 13.5 base, cflags handling, and deploy status markers.
+» MQTT-heavy CI specs are more stable via a larger API libuv DNS thread pool and MQTT reconnect timeouts, without the deadlocking mosquitto healthcheck.
+
 29/6/2026 1.12 — Inbox Drawdown
 
 » Device-transfer e-mails now render as HTML instead of raw markup (#541)
