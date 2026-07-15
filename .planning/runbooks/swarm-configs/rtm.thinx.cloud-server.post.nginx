@@ -25,7 +25,8 @@ server {
     add_header "X-Content-Type-Options" "nosniff";
     add_header "X-Download-Options" "noopen";
     add_header "X-Permitted-Cross-Domain-Policies" "all";
-    add_header "Content-Security-Policy" "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https: wss: wss://client.relay.crisp.chat; frame-ancestors 'self'; form-action 'self' https://github.com; object-src 'none'; base-uri 'self'" always;
+    # Phase 21 (SEC-CSP-01): CSP line updated in-repo to the target pinned-host policy ahead of the operator's post-deploy nginx -T recapture — the console image redeploy (services/console default.conf, Task 1) is the actual application mechanism for this line; no manual host-side nginx edit is required for CSP (unlike the SEC-WS-01 location-block gap, which was a genuine host-nginx-config mismatch).
+    add_header "Content-Security-Policy" "default-src 'self' __NGINX_HOST__ https://rtm.thinx.cloud https://console.thinx.cloud https://*.crisp.chat https://fonts.googleapis.com https://fonts.gstatic.com https://www.google-analytics.com https://api.rollbar.com data: blob: 'unsafe-inline' 'unsafe-eval'; connect-src 'self' __NGINX_HOST__ https://rtm.thinx.cloud https://console.thinx.cloud https://*.crisp.chat wss://client.relay.crisp.chat https://www.google-analytics.com https://api.rollbar.com; frame-ancestors 'self'; form-action 'self' __NGINX_HOST__ https://github.com; object-src 'none'; base-uri 'self'" always;
 
     charset utf-8;
     source_charset utf-8;

@@ -94,6 +94,11 @@ services:
     privileged: true
     shm_size: 2048M
     restart: "no"
+    # NOTE: no `condition: service_healthy` on mosquitto — the broker's go-auth
+    # plugin only accepts the thinx credential AFTER api injects it at boot
+    # (inject_password), so any auth-based mosquitto healthcheck deadlocks
+    # (api waits for healthy ⇄ healthy needs api). Start-order + the app's own
+    # MQTT reconnect (messenger.js) + UV_THREADPOOL_SIZE below cover readiness.
     depends_on:
       - transformer
       - thinx-redis
@@ -121,6 +126,13 @@ services:
         - 'MAILGUN_API_KEY=${MAILGUN_API_KEY}'
         - 'GIT_KEY_PASSPHRASE=${GIT_KEY_PASSPHRASE:-thinx}'
     environment:
+      # Node resolves hostnames via libuv's thread pool (default 4 threads). The
+      # messenger opens a per-owner MQTT client, so a load-heavy spec run fires
+      # many concurrent getaddrinfo("mosquitto") calls that saturate the 4-thread
+      # pool and Docker's embedded DNS, surfacing as `getaddrinfo EAI_AGAIN
+      # mosquitto` and cascading MQTT-dependent spec failures. Widen the pool so
+      # concurrent lookups don't starve. Test-only; no production impact.
+      - 'UV_THREADPOOL_SIZE=64'
       - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
       - 'COUCHDB_PASS=${COUCHDB_PASS}'
       - 'COUCHDB_USER=${COUCHDB_USER}'
