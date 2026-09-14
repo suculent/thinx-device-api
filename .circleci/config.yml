@@ -340,6 +340,23 @@ jobs:
           fi
 
     - run:
+        # The tests run inside the compose `api` container on the remote Docker
+        # host (setup_remote_docker), so a bind mount of ./coverage would land on
+        # that host, not in this job's workspace. `docker cp` streams the files
+        # back through the Docker API instead, which works with remote Docker.
+        name: Collect coverage from test container
+        when: always
+        command: |
+          mkdir -p ./coverage
+          CID=$(docker ps -aq --filter label=com.docker.compose.service=api | head -n 1)
+          if [ -z "$CID" ]; then
+            echo "No api container found; nothing to collect."
+            exit 0
+          fi
+          docker cp "$CID:/opt/thinx/thinx-device-api/coverage/." ./coverage/ || echo "No coverage directory in container."
+          ls -la ./coverage
+
+    - run:
         name: Check running Docker containers
         command: |
             docker ps
@@ -358,7 +375,7 @@ jobs:
     - store_artifacts:
         name: Collect coverage data
         path: ./coverage
-        destination: jest-coverage
+        destination: coverage
 
 #
 # WORKFLOWS
