@@ -104,3 +104,6 @@ influx/
 settings.json
 # Nightshift plan artifacts (keep out of version control)
 .nightshift-plan
+
+# Coveralls token must come from CI env (COVERALLS_REPO_TOKEN), never from a committed file
+.coveralls.yml

@@ -158,6 +158,16 @@ services:
       - 'MAILGUN_API_KEY=${MAILGUN_API_KEY}'
       - 'CIRCLE_NODE_INDEX=${CIRCLE_NODE_INDEX}'
       - 'CIRCLE_NODE_TOTAL=${CIRCLE_NODE_TOTAL}'
+      # Coveralls upload runs inside this container (see `npm test`). The token
+      # and CircleCI build metadata must be forwarded explicitly; nothing from
+      # the CircleCI job environment reaches the container otherwise.
+      - 'COVERALLS_REPO_TOKEN=${COVERALLS_REPO_TOKEN}'
+      - 'CIRCLECI=${CIRCLECI}'
+      - 'CIRCLE_SHA1=${CIRCLE_SHA1}'
+      - 'CIRCLE_BRANCH=${CIRCLE_BRANCH}'
+      - 'CIRCLE_BUILD_NUM=${CIRCLE_BUILD_NUM}'
+      - 'CIRCLE_WORKFLOW_ID=${CIRCLE_WORKFLOW_ID}'
+      - 'CI_PULL_REQUEST=${CI_PULL_REQUEST}'
     ports:
       - '7442:7442'
       - '7443:7443'
