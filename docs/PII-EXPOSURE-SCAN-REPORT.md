@@ -134,6 +134,13 @@ data files for PII (Personally Identifiable Information) and credential exposure
   in the `.dist` template; `git rm --cached builder.thinx.json` to stop tracking
   the non-dist copy (history-rewrite to purge is out of autonomous scope — flag
   for maintainer).
+- **status (2026-09-15):** `THINX_OWNER` / `THINX_API_KEY` removed from both
+  template files and from the `JSON2HSpec` fixture. They were pure template
+  placeholders: `Builder.generate_thinx_json()` overwrites both from the device
+  record and the owner's last API key on every build (see
+  `docs/builder-thinx-json.md`). The removed values remain in git history; the
+  owner hash matches a real production owner, so rotate the key if it is still
+  valid (liveness not verified).
 
 #### ES-4 — Reusable default secret in `.env.dist` — **LOW**
 - **file:** `.env.dist`
