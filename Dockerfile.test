@@ -85,7 +85,12 @@ RUN npm install -g npm@10.2.3 \
 
 # Install test globals before COPY . . so these layers are cached by Docker
 # Layer Caching and only rebuilt when package.json changes, not every commit
-RUN npm install -g nyc mocha jasmine mocha-lcov-reporter coveralls
+# jasmine is pinned to the same major as the devDependency in package.json.
+# NODE_ENV=production skips devDependencies, so this global install is the
+# runner that actually executes the suite; an unpinned "latest" (7.x) ignores
+# the top-level `random: false` in spec/support/jasmine.json and shuffles the
+# order-dependent specs.
+RUN npm install -g nyc mocha jasmine@5 mocha-lcov-reporter coveralls
 
 # Download test reporter before COPY . . for the same reason
 RUN curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter \

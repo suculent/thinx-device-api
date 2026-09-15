@@ -206,4 +206,34 @@ describe("Util", function () {
         let tok = "deadbeefcafebabe1234567890abcdef";
         expect(Util.redactToken(tok)).to.equal(Util.redactToken(tok));
     });
+
+    it("should redact bearer-style header values while preserving the scheme", function () {
+        expect(Util.redactHeaderValue("Bearer abcdef123456", 4)).to.equal("Bearer abcd…");
+    });
+
+    it("should handle empty/null/undefined header values defensively", function () {
+        expect(Util.redactHeaderValue("")).to.equal("<empty>");
+        expect(Util.redactHeaderValue(null)).to.equal("<null>");
+        expect(Util.redactHeaderValue(undefined)).to.equal("<undefined>");
+    });
+
+    it("should redact a single cookie header value while preserving the cookie name", function () {
+        expect(Util.redactCookieHeader("x-thx-core=s%3Asecretvalue")).to.equal("x-thx-core=<redacted>");
+    });
+
+    it("should redact multi-cookie headers without exposing raw values", function () {
+        expect(Util.redactCookieHeader("x-thx-core=s%3Asecret; XSRF-TOKEN=csrf-value; theme=dark"))
+            .to.equal("x-thx-core=<redacted>; XSRF-TOKEN=<redacted>; theme=<redacted>");
+    });
+
+    it("should handle empty/null/undefined cookie headers defensively", function () {
+        expect(Util.redactCookieHeader("")).to.equal("<empty>");
+        expect(Util.redactCookieHeader(null)).to.equal("<null>");
+        expect(Util.redactCookieHeader(undefined)).to.equal("<undefined>");
+    });
+
+    it("should mark malformed cookie header parts without throwing", function () {
+        expect(Util.redactCookieHeader("malformed-cookie")).to.equal("malformed-cookie=<malformed>");
+        expect(Util.redactCookieHeader("=missingName")).to.equal("<malformed>=<redacted>");
+    });
 });

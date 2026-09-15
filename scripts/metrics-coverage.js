@@ -34,10 +34,14 @@ const INSTRUMENTATION_PATTERNS = [
     /InfluxConnector\.statsLog\s*\(/,
     /statsLog\s*\(/,
     /influx\.statsLog\s*\(/,
+    /recordStatsEvent\s*\(/,
 ];
 
 // Patterns for metrics events to extract
-const EVENT_PATTERN = /statsLog\s*\([^,]+,\s*["']([A-Z_]+)["']/g;
+const EVENT_PATTERNS = [
+    /statsLog\s*\([^,]+,\s*["']([A-Z_]+)["']/g,
+    /recordStatsEvent\s*\([^,]+,\s*["']([A-Z_]+)["']/g,
+];
 
 /**
  * Collect all .js files recursively under a directory.
@@ -71,11 +75,13 @@ function analyzeFile(filePath) {
 
     const events = [];
     if (hasInstrumentation) {
-        let match;
-        const re = new RegExp(EVENT_PATTERN.source, 'g');
-        while ((match = re.exec(content)) !== null) {
-            if (!events.includes(match[1])) {
-                events.push(match[1]);
+        for (const pattern of EVENT_PATTERNS) {
+            let match;
+            const re = new RegExp(pattern.source, 'g');
+            while ((match = re.exec(content)) !== null) {
+                if (!events.includes(match[1])) {
+                    events.push(match[1]);
+                }
             }
         }
     }

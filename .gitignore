@@ -1,3 +1,15 @@
+# Secrets, keys & data dumps (PII/credential-leak hardening — see docs/PII-EXPOSURE-SCAN-REPORT.md)
+.env.*
+!.env.dist
+!.env.sample
+*.pem
+*.key
+credentials.*
+secrets.*
+*.sql
+*.csv
+*.xlsx
+
 # Runtime configs
 traefik/
 traefik.yml
@@ -90,3 +102,8 @@ cov-int/
 chronograf/
 influx/
 settings.json
+# Nightshift plan artifacts (keep out of version control)
+.nightshift-plan
+
+# Coveralls token must come from CI env (COVERALLS_REPO_TOKEN), never from a committed file
+.coveralls.yml
