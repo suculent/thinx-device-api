@@ -160,6 +160,22 @@ function collectFiles() {
 }
 
 function loadStatisticsEvents() {
+  // Primary source: the centralized event taxonomy (single source of truth
+  // since the owner_template literal was removed from statistics.js).
+  const taxonomyPath = path.join(ROOT, 'lib/thinx/event_taxonomy.js');
+  if (fs.existsSync(taxonomyPath)) {
+    try {
+      const taxonomy = require(taxonomyPath);
+      const names = typeof taxonomy.names === 'function' ? taxonomy.names() : Object.keys(taxonomy.NAMES || {});
+      if (Array.isArray(names) && names.length > 0) {
+        return [...new Set(names)].sort();
+      }
+    } catch (_e) {
+      // fall through to the legacy template scan
+    }
+  }
+
+  // Legacy fallback: parse the inline owner_template literal.
   const statisticsPath = path.join(ROOT, 'lib/thinx/statistics.js');
   if (!fs.existsSync(statisticsPath)) return [];
 
@@ -379,8 +395,10 @@ function detectSeverityMismatch(call) {
 }
 
 function eventFromStatsCall(call) {
-  const match = call.text.match(/\(\s*[\s\S]*?,\s*["']([A-Z_]+)["']/);
-  return match ? match[1] : null;
+  // Second argument may be a bare literal ("BUILD_FAILED") or a taxonomy
+  // constant (EventTaxonomy.NAMES.BUILD_FAILED).
+  const match = call.text.match(/\(\s*[\s\S]*?,\s*(?:["']([A-Z_]+)["']|EventTaxonomy\.NAMES\.([A-Z_]+))/);
+  return match ? (match[1] || match[2]) : null;
 }
 
 function analyzeContent(fileName, content, statisticsEvents) {

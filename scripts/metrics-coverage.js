@@ -41,6 +41,8 @@ const INSTRUMENTATION_PATTERNS = [
 const EVENT_PATTERNS = [
     /statsLog\s*\([^,]+,\s*["']([A-Z_]+)["']/g,
     /recordStatsEvent\s*\([^,]+,\s*["']([A-Z_]+)["']/g,
+    /statsLog\s*\([^,]+,\s*EventTaxonomy\.NAMES\.([A-Z_]+)/g,
+    /recordStatsEvent\s*\([^,]+,\s*EventTaxonomy\.NAMES\.([A-Z_]+)/g,
 ];
 
 /**

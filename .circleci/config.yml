@@ -171,6 +171,17 @@ jobs:
           command: circleci run release update thinx-api --status=FAILED
           when: on_fail
 
+  aikido-image-scan:
+    machine:
+      image: ubuntu-2204:current
+    steps:
+      - run:
+          name: Pull thinxcloud/api image
+          command: docker pull thinxcloud/api:latest
+      - run:
+          name: Run Aikido scan
+          command: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aikidosecurity/local-scanner image-scan thinxcloud/api:latest --apikey "$AIKIDO_TOKEN"
+
   test:
 
     docker:
@@ -445,6 +456,15 @@ workflows:
             - thinx-slack
           requires:
             - test
+          filters:
+            branches:
+              only:
+                - thinx-staging
+                - main
+
+      - aikido-image-scan:
+          requires:
+            - build-api-cloud
           filters:
             branches:
               only:
