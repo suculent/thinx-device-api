@@ -101,7 +101,7 @@
     "@babel/core": "^7.29.7",
     "@hapi/wreck": "^18.1.1",
     "form-data": "^4.0.6",
-    "joi": "^17.13.4",
+    "joi": "^17.13.7",
     "istanbul-lib-processinfo": {
       "uuid": "^11.1.1"
     },
