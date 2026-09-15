@@ -62,6 +62,7 @@
     "mime": "^4.1.0",
     "mkdirp": "^1.0.3",
     "moment-timezone": "0.6.0",
+    "mongo-sanitize": "^1.1.0",
     "morgan": "^1.10.1",
     "mqtt": "^5.14.1",
     "nano": "^10.1.4",
