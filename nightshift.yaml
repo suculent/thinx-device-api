@@ -1,0 +1,45 @@
+# Nightshift Project Configuration — thinx-device-api (backend)
+#
+# Stage: 6+ year IoT device API in MAINTENANCE. Node.js (jasmine/nyc, eslint),
+# deployed via CircleCI + Docker/docker-compose. Recently: dependency fixes.
+#
+# Focus (per owner): (1) tackle tech debt, (2) keep the stack contemporary and
+# ease deployment. Task set is deliberately tight, low/medium risk, and
+# analysis-heavy — no aggressive auto-refactors on a system with devices in the field.
+
+tasks:
+  enabled:
+    - tech-debt-classify   # Map & prioritize the debt backlog first (self-contained, low risk)
+    - dependency-risk      # Keep the recent dependency-fix momentum; flag stale/risky deps
+    - dead-code            # 6+ years of accretion — find safely removable code
+    - build-optimize       # Ease deployment: trim Docker/CircleCI build time
+    - test-flakiness       # Flaky specs gate CircleCI deploys — surface & stabilize them
+    - security-footgun     # Contemporary security hygiene for an internet-facing device API
+    - lint-fix             # Low-risk maintenance hygiene (eslint)
+    - docs-backfill        # Keep docs current as the codebase changes (low cost)
+  priorities:
+    tech-debt-classify: 1
+    dependency-risk: 2
+    dead-code: 3
+    build-optimize: 4
+    test-flakiness: 5
+    security-footgun: 6
+    lint-fix: 7
+    docs-backfill: 8
+  disabled: []
+
+integrations:
+  claude_md: true    # harmless if absent
+  agents_md: true    # AGENTS.md exists at repo root — use it for context
+  task_sources:
+    - td:
+        enabled: false      # repo does not use the `td` task manager
+        teach_agent: false
+
+# Dedicated slot so the backend actually gets runs (the daemon does ~1 project/run
+# with no rotation). Global window spans both; this project owns the first half.
+schedule:
+  window:
+    start: "17:00"
+    end: "18:00"
+    timezone: ""

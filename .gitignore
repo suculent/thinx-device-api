@@ -1,3 +1,15 @@
+# Secrets, keys & data dumps (PII/credential-leak hardening — see docs/PII-EXPOSURE-SCAN-REPORT.md)
+.env.*
+!.env.dist
+!.env.sample
+*.pem
+*.key
+credentials.*
+secrets.*
+*.sql
+*.csv
+*.xlsx
+
 # Runtime configs
 traefik/
 traefik.yml
