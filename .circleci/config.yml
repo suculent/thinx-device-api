@@ -462,11 +462,13 @@ workflows:
                 - thinx-staging
                 - main
 
-      - aikido-image-scan:
-          requires:
-            - build-api-cloud
-          filters:
-            branches:
-              only:
-                - thinx-staging
-                - main
+      # Disabled: Aikido local image scanning is not available on the free plan.
+      # Re-enable by uncommenting once the account supports it.
+      # - aikido-image-scan:
+      #     requires:
+      #       - build-api-cloud
+      #     filters:
+      #       branches:
+      #         only:
+      #           - thinx-staging
+      #           - main
