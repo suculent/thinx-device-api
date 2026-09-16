@@ -185,7 +185,7 @@ describe("Owner log redaction (SEC-PII-01)", function () {
 
         // The new redacted form references err.message (defensive).
         expect(src).to.match(/err && err\.message/);
-        expect(src).to.match(/err && err\.statusCode/);
+        expect(src).to.match(/err && err\.status\b/);
 
         // Sanity: helpers are actually used in the file.
         expect(src.indexOf("Util.redactEmail")).to.not.equal(-1);
