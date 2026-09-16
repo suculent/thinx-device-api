@@ -126,4 +126,52 @@ describe("THINX-CERT-CHECK-01 — startup ca.pem freshness probe", function () {
     expect(after.R13_CA,   'R13-ca.pem mtime must be unchanged after probe').to.equal(before.R13_CA);
   });
 
+  // ========================================================================
+  // PATH TRAVERSAL SECURITY TESTS
+  // ========================================================================
+
+  it("should reject path traversal in certPath using '..' (security)", function () {
+    const traversalPath = '../../../etc/passwd';
+    const result = certProbe.probeCaFreshness(traversalPath, R13_CA);
+    expect(result.ok).to.equal(false);
+    expect(result.leafIssuer).to.equal(null);
+    expect(result.caContains).to.deep.equal([]);
+    expect(result.message).to.equal('invalid cert path');
+  });
+
+  it("should reject path traversal in caPath using '..' (security)", function () {
+    const traversalPath = '../../sensitive/file.pem';
+    const result = certProbe.probeCaFreshness(R10_LEAF, traversalPath);
+    expect(result.ok).to.equal(false);
+    expect(result.leafIssuer).to.equal(null);
+    expect(result.caContains).to.deep.equal([]);
+    expect(result.message).to.equal('invalid ca path');
+  });
+
+  it("should reject absolute path in certPath (security)", function () {
+    const absolutePath = '/etc/shadow';
+    const result = certProbe.probeCaFreshness(absolutePath, R13_CA);
+    expect(result.ok).to.equal(false);
+    expect(result.leafIssuer).to.equal(null);
+    expect(result.caContains).to.deep.equal([]);
+    expect(result.message).to.equal('invalid cert path');
+  });
+
+  it("should reject absolute path in caPath (security)", function () {
+    const absolutePath = '/var/secrets/private.key';
+    const result = certProbe.probeCaFreshness(R10_LEAF, absolutePath);
+    expect(result.ok).to.equal(false);
+    expect(result.leafIssuer).to.equal(null);
+    expect(result.caContains).to.deep.equal([]);
+    expect(result.message).to.equal('invalid ca path');
+  });
+
+  it("should reject encoded path traversal attempts in certPath (security)", function () {
+    // Test URL-encoded '..' sequences
+    const encodedPath = '..%2F..%2Fetc%2Fpasswd';
+    const result = certProbe.probeCaFreshness(encodedPath, R13_CA);
+    expect(result.ok).to.equal(false);
+    expect(result.message).to.equal('invalid cert path');
+  });
+
 });
