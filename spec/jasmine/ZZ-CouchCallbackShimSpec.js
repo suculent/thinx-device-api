@@ -21,6 +21,9 @@ function fakeClient() {
         get(id) { return id === "missing" ? Promise.reject(Object.assign(new Error("missing"), { statusCode: 404, error: "not_found", reason: "missing" })) : Promise.resolve({ _id: id }); },
         insert(doc) { if (doc === "boom") throw new Error("sync boom"); return Promise.resolve({ ok: true, id: doc._id }); },
         atomic(design, name, id, body) { return Promise.resolve({ design, name, id, body }); },
+        // CouchDB update handlers answer without application/json -> nano 11 yields a string
+        update(id) { return Promise.resolve(JSON.stringify({ _id: id, _rev: "2-x", ok: true })); },
+        plain() { return Promise.resolve("OK"); },
         listAsStream() { return "a-stream"; },
         attachment: { get(id, name) { return Promise.resolve(id + "/" + name); } },
         multipart: { insert() { return Promise.resolve("mp"); } }
@@ -126,6 +129,29 @@ describe("couch callback shim", function () {
                 done();
             });
         });
+    });
+
+    it("JSON-parses string bodies like nano 10/axios did (callback path)", function (done) {
+        const lib = client.db.use("managed_builds");
+        lib.update("b1", (err, body) => {
+            expect(err).to.equal(null);
+            expect(body).to.be.a("object");
+            expect(body).to.deep.equal({ _id: "b1", _rev: "2-x", ok: true });
+            lib.plain((err2, body2) => {
+                expect(err2).to.equal(null);
+                expect(body2).to.equal("OK"); // non-JSON text stays a string
+                done();
+            });
+        });
+    });
+
+    it("JSON-parses string bodies on the promise path too", async function () {
+        const lib = client.db.use("managed_builds");
+        const body = await lib.update("b2");
+        expect(body).to.deep.equal({ _id: "b2", _rev: "2-x", ok: true });
+        expect(await lib.plain()).to.equal("OK");
+        expect(couch.parseBody(Buffer.from("x"))).to.be.instanceOf(Buffer);
+        expect(couch.parseBody({ a: 1 })).to.deep.equal({ a: 1 });
     });
 
     it("exposes a real nano client through the default export", function () {
