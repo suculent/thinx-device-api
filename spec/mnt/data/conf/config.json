@@ -45,7 +45,8 @@
     "deployment": true,
     "allow_http_login": true,
     "secrets": false,
-    "csrf_enforce": false
+    "csrf_enforce": false,
+    "cors_enforce": false
   },
   "strict_gdpr": true
 }
