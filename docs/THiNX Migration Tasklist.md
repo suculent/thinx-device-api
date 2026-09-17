@@ -9,7 +9,6 @@ next owner decision from older notes.
 | Container | State | Owner | Status | Next action | Acceptance criteria |
 |:----------|:------|:------|:-------|:------------|:--------------------|
 | `api` | Published | THiNX | Needs vulnerability follow-up | Review the 3 reported dependency issues and decide whether each is patched, accepted, or blocked by a base image update. | Scan result is linked, each issue has a disposition, and the API image rebuilds from the documented base image. |
-| `alpine-gulp` | Published | THiNX | Accepted | Keep current image published and include it in scheduled image scans. | Latest scan remains clean or new findings are tracked in the backlog. |
 | `base` | Published | THiNX | High-risk dependency backlog | Identify the packages behind the 165 reported issues and decide whether to rebuild the base image or replace it. | A new base image digest or accepted-risk record is documented before downstream images are rebuilt. |
 | `broker` | Published | OSS | Vendor image risk | Track vendor base image updates and confirm whether THiNX can override the base safely. | Broker deployment references a patched vendor image, a THiNX-maintained derivative, or a documented risk acceptance. |
 | `console` | Custom-built | User | Namespace and publication decision needed | Decide whether the console should remain private under `thinx/` or move to a documented THiNX image namespace. | Build source, image name, registry namespace, and deployment reference are documented and reproducible. |
