@@ -327,7 +327,7 @@ module.exports = class THiNX extends EventEmitter {
               cookie: {
                 maxAge: 3600000,
                 // deepcode ignore WebCookieSecureDisabledExplicitly: not secure because HTTPS unwrapping happens outside this app
-                secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
+                secure: true, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
                 httpOnly: true,
                 sameSite: "lax", // CSRF defense-in-depth: console.* and rtm.* share the thinx.cloud registrable domain, so Lax still sends the cookie on legitimate console→API navigation
                 domain: short_domain
@@ -458,7 +458,7 @@ module.exports = class THiNX extends EventEmitter {
               // deepcode ignore WebCookieSecureDisabledExplicitly: not secure because HTTPS unwrapping happens outside this app
               cookie: {
                 expires: hour,
-                secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
+                secure: true, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
                 httpOnly: true,
                 sameSite: "lax", // CSRF defense-in-depth; see x-thx-core note above
                 domain: short_domain
