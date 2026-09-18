@@ -46,4 +46,22 @@ describe("JSON2H API Key", function() {
        console.log(result);
   });
 
+  // Regression: the generated header must end with a newline.
+  // services/worker/builder appends `#define ENV_HASH "..."` with `>>`, so an
+  // unterminated last line produced
+  //   #define THINX_FORCED_UPDATE false#define ENV_HASH "01ba47..."
+  // which the compiler rejected with `stray '#' in program`.
+  it("should terminate the last #define with a newline", function () {
+      let result = JSON2H.process({ THINX_AUTO_UPDATE: true, THINX_FORCED_UPDATE: false }, {});
+      expect(result.endsWith("\n")).to.equal(true);
+  });
+
+  it("should keep each #define on its own line when a line is appended", function () {
+      let result = JSON2H.process({ THINX_AUTO_UPDATE: true, THINX_FORCED_UPDATE: false }, {});
+      let appended = result + '#define ENV_HASH "cafebabe"\n';
+      for (let line of appended.split("\n")) {
+          expect(line.split("#define").length).to.be.below(3);
+      }
+  });
+
 });
