@@ -321,6 +321,10 @@ jobs:
           # These lockfiles are resolved fresh here, so versions can drift from
           # what a published image actually installed. The container monitors
           # are the authoritative view of deployed dependencies.
+          #
+          # services/broker/goauth is excluded from the scan below: it is
+          # vendored upstream source (github.com/iegomez/mosquitto-go-auth) and
+          # needs a Go toolchain this executor does not carry.
           command: |
             for dir in . base services/transformer services/worker \
                        services/console/src services/console/vue; do
@@ -340,6 +344,16 @@ jobs:
                 echo "retrying $dir with --legacy-peer-deps"
                 ( cd "$dir" && npm install --package-lock-only --ignore-scripts --legacy-peer-deps )
               fi
+              # npm can report success without writing a lockfile, in which case
+              # snyk falls back to requiring node_modules and fails that project
+              # while still exiting non-zero for the whole run. Catch it here,
+              # with the directory listing, rather than in the scan output.
+              if [ ! -f "$dir/package-lock.json" ]; then
+                echo
+                echo "npm reported success but left no package-lock.json in $dir."
+                ls -la "$dir"
+                exit 1
+              fi
             done
       - install-snyk
       - run:
@@ -350,7 +364,7 @@ jobs:
             snyk monitor \
               --all-projects \
               --detection-depth=6 \
-              --exclude=spec,test_repositories \
+              --exclude=spec,test_repositories,goauth \
               --org="$SNYK_ORG_ID" \
               --remote-repo-url="$SNYK_REMOTE_REPO_URL" \
               --target-reference="$CIRCLE_BRANCH"
