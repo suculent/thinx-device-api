@@ -340,11 +340,16 @@ jobs:
                 # writing package-lock.json, so generating here succeeds while
                 # leaving nothing snyk recognises, and snyk then falls back to
                 # demanding node_modules. Both files are one format
-                # (lockfileVersion 3), so the committed shrinkwrap is copied
+                # (lockfileVersion 3), so the committed shrinkwrap is renamed
                 # into place -- it is the intended tree, and more faithful than
                 # re-resolving.
+                #
+                # Renamed, not copied: snyk refuses a directory holding both
+                # npm-shrinkwrap.json and package-lock.json and asks for an
+                # explicit --file, which --all-projects cannot express per
+                # project. This is a throwaway CI checkout, so moving is safe.
                 echo "using committed npm-shrinkwrap.json for $dir"
-                cp "$dir/npm-shrinkwrap.json" "$dir/package-lock.json"
+                mv "$dir/npm-shrinkwrap.json" "$dir/package-lock.json"
                 continue
               fi
               echo "generating lockfile for $dir"
