@@ -227,3 +227,78 @@ describe("SEC-COOKIE-04 — thinx-core.js cookie configuration parse-gate", func
         expect(source).to.not.match(/app\.set\(\s*['"]trust proxy['"]\s*,\s*true\s*\)/);
     });
 });
+
+/*
+ * SEC-COOKIE-05 — `secure: 'auto'` is resolved once, at session creation.
+ *
+ * Characterization test for express-session, not for our code: store.generate()
+ * (index.js:165) resolves 'auto' when a session is CREATED, while
+ * Store.createSession() (session/store.js:86) rehydrates a stored session's
+ * cookie verbatim. So a session established over plain HTTP keeps secure:false
+ * for its whole life, even on later requests that arrive through the proxy.
+ *
+ * Pinned here because SEC-COOKIE-03 in ZZ-CookieAttributeSpec.js depends on it:
+ * that spec must use a fresh agent, or it would load the plain-HTTP session
+ * SEC-COOKIE-01 created and see no Secure attribute. The ZZ tier cannot run
+ * locally (it needs Redis and CouchDB), so the assumption is guarded here.
+ *
+ * It also documents the graceful-rollout property relied on when this shipped:
+ * sessions minted before the change keep their persisted flag until maxAge,
+ * so nobody is logged out.
+ */
+describe("SEC-COOKIE-05 — 'auto' is evaluated at session creation only", function () {
+
+    const CookiePolicy = require("../../lib/middleware/cookie-policy");
+
+    function sharedStoreApp() {
+        const app = express();
+        app.set("trust proxy", CookiePolicy.trustedProxy({}));
+        app.use(session({
+            secret: "cookie-policy-spec-05",
+            name: "x-thx-core",
+            store: new session.MemoryStore(),
+            resave: true,
+            rolling: true,
+            saveUninitialized: false,
+            cookie: CookiePolicy.sessionCookie({ domain: ".thinx.cloud", maxAge: 3600000 })
+        }));
+        app.get("/probe", (req, res) => { req.session.uid = "spec"; res.json({ secure: req.secure }); });
+        return app;
+    }
+
+    function cookieValue(setCookieEntry) {
+        return setCookieEntry.split(";")[0];
+    }
+
+    it("keeps secure:false on a session created over plain HTTP, even once proxied", async function () {
+        const app = sharedStoreApp();
+
+        const first = await request(app);
+        const plain = cookieNamed(first.setCookie, "x-thx-core");
+        expect(plain, "plain HTTP must establish a session").to.be.a("string");
+        expect(plain).to.not.match(/;\s*Secure/i);
+
+        // Same session, now arriving through a trusted proxy reporting https.
+        const second = await request(app, {
+            "X-Forwarded-Proto": "https",
+            "Cookie": cookieValue(plain)
+        });
+        expect(second.body.secure, "the request itself is secure").to.equal(true);
+
+        const reissued = cookieNamed(second.setCookie, "x-thx-core");
+        expect(reissued, "rolling:true must re-emit the cookie").to.be.a("string");
+        // The rehydrated session keeps the flag it was born with.
+        expect(reissued).to.not.match(/;\s*Secure/i);
+    });
+
+    it("gives a brand-new proxied session the Secure attribute", async function () {
+        // Same app and store, but no inbound Cookie -> a new session is generated,
+        // so 'auto' is resolved against this request. This is why SEC-COOKIE-03
+        // needs its own agent.
+        const app = sharedStoreApp();
+        const res = await request(app, { "X-Forwarded-Proto": "https" });
+        const fresh = cookieNamed(res.setCookie, "x-thx-core");
+        expect(fresh, "proxied login must establish a session").to.be.a("string");
+        expect(fresh).to.match(/;\s*Secure/i);
+    });
+});

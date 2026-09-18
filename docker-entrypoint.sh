@@ -50,7 +50,12 @@ fi
 set -e
 
 if [[ ${ENVIRONMENT} == "test" ]]; then
-  npm run split-tests
+  # `npm run split-tests` used to run here. It shards the suite by
+  # CIRCLE_NODE_INDEX, but .circleci/config.yml sets `parallelism: 1`, so the
+  # index was always 0 — which is the branch that deletes ./spec/jasmine/ZZ*.js.
+  # Index 1 never existed, so the entire ZZ-* integration tier (SEC-COOKIE-01,
+  # OAUTH-COOKIE-01, ...) was silently skipped in every CI run. Dropped so the
+  # full suite runs on the single node.
   npm run test
 else
   echo "[thinx-entrypoint] Starting in production mode..."

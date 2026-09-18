@@ -139,7 +139,16 @@ describe("ZZ-CookieAttributeSpec (SEC-COOKIE-01)", function () {
    * stack and therefore runs locally.
    */
   it("SEC-COOKIE-03 — proxied login emits x-thx-core WITH Secure", function (done) {
-    agent
+    // MUST use its own agent, not the shared one. `secure: 'auto'` is resolved
+    // only in express-session's store.generate() (index.js:165); Store.createSession
+    // (session/store.js:86) rehydrates a stored session's cookie verbatim. The
+    // shared agent still holds the session SEC-COOKIE-01 established over plain
+    // HTTP, which persisted secure:false — reusing it would load that session and
+    // emit a cookie with no Secure attribute, failing for a reason that has
+    // nothing to do with the proxy header. A fresh agent forces a new session so
+    // 'auto' is evaluated against this request.
+    const proxiedAgent = chai.request.agent(thx.app);
+    proxiedAgent
       .post('/api/login')
       .set('X-Forwarded-Proto', 'https')
       .send({ username: 'dynamic', password: 'dynamic', remember: false })
@@ -155,9 +164,11 @@ describe("ZZ-CookieAttributeSpec (SEC-COOKIE-01)", function () {
         // Lax must survive: 'auto' sameSite would have flipped this to None.
         expect(xThxCore).to.match(/;\s*SameSite=Lax/i);
 
+        proxiedAgent.close();
         done();
       })
       .catch((e) => {
+        proxiedAgent.close();
         console.log("SEC-COOKIE-03 spec error:", e);
         done(e);
       });

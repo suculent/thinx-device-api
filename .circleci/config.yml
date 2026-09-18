@@ -344,9 +344,13 @@ jobs:
           pwd
           docker compose up --build api | tee -ia ./test.log
           echo "Docker test complete."
-          if [[ ! $(grep "specs, 0 failures" ./test.log) ]]; then 
+          # POSIX test, not bash: this step runs under `shell: /bin/sh --login`,
+          # where `[[` is not a builtin. The old `if [[ ! $(grep ...) ]]` errored
+          # with "sh: |: unknown operand" instead of evaluating, so `exit 1` was
+          # unreachable and a failing suite could still report success.
+          if ! grep -q "specs, 0 failures" ./test.log; then
             echo "» TEST failed. Should not deploy this commit."
-            grep "Failures:" ./test.log
+            grep "Failures:" ./test.log || true
             exit 1
           fi
 
