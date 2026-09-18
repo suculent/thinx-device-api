@@ -94,4 +94,24 @@ describe("Build log", function() {
     });
   }, 15000);
 
+  // Regression: createInitialLogRecord() stored `{ log: [record] }`, burying
+  // every field of the record one level down -- so the document had no
+  // top-level owner. latest_builds emits doc.owner and list() drops rows whose
+  // doc.owner !== owner, so every build was filtered out and the console showed
+  // no build logs at all. (06) above could not catch it: its owner assertions
+  // are guarded by `typeof !== "undefined"`, so they passed vacuously.
+  it("(07) stored builds must carry a top-level owner and be listable", function (done) {
+    blog.log(build_id, owner, udid, "Regression: top-level owner", "contents", () => {
+      blog.list(owner, function (err, body) {
+        expect(err).to.equal(false);
+        const rows = (body && body.rows) ? body.rows : [];
+        const mine = rows.filter((r) => r && r.value && r.value.owner === owner);
+        expect(mine.length).to.be.greaterThan(0); // unguarded: the field must exist
+        expect(mine[0].value.build_id).to.be.a('string');
+        expect(mine[0].value.log).to.be.an('array');
+        done();
+      });
+    });
+  }, 15000);
+
 });
