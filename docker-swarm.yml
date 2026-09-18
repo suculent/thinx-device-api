@@ -252,7 +252,13 @@ services:
           cpus: '1.0'
           memory: 2048M
       labels:
-        - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https" # 7444 websocket
+        # SEC-PROXY-01: the API terminates plain HTTP, so Traefik must tell it the
+        # external scheme. Express only honours this once `trust proxy` matches the
+        # traefik-public hop (see lib/middleware/cookie-policy.js); without the
+        # header, express-session refuses to mark the session cookie Secure.
+        # Named `sslheaders` to match the deployed stack — it must be REFERENCED by
+        # the https router below, a definition alone is inert.
+        - "traefik.http.middlewares.sslheaders.headers.customrequestheaders.X-Forwarded-Proto=https"
         - "traefik.http.services.thinx-api.loadbalancer.server.port=7442"
         - "traefik.enable=true"
         - "traefik.docker.network=traefik-public"
@@ -264,6 +270,7 @@ services:
 
         - "traefik.http.routers.thinx-api-https.rule=Host(`${THINX_HOSTNAME}`)"
         - "traefik.http.routers.thinx-api-https.entrypoints=https,thxps"
+        - "traefik.http.routers.thinx-api-https.middlewares=sslheaders@docker"
         - "traefik.http.routers.thinx-api-https.tls=true"
         - "traefik.http.routers.thinx-api-https.tls.certresolver=le"
 
