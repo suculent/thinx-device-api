@@ -218,6 +218,35 @@ describe("Builder", function () {
     });
   }, 10000);
 
+  // Regression: prefetchPrivate()'s success path ended with
+  //   this.sources.update(..., (xuccess) => { ... return xuccess; });
+  // The return belonged to the callback, so the method itself fell off the end
+  // and yielded undefined on every successful fetch. run_build does
+  //   if (!this.prefetchPrivate(...)) return callback(false, "git_fetch_failed");
+  // so the build aborted the moment the clone started working -- no builder
+  // container was ever started and the build log stayed empty at "created".
+  // Masked for as long as the fetch failed and took the `return false` path.
+  it("prefetchPrivate must return a boolean, never undefined", function () {
+    const fs = require('fs');
+    const os = require('os');
+    const path = require('path');
+    const fetch_dir = fs.mkdtempSync(path.join(os.tmpdir(), 'prefetch-'));
+    const br = { build_id: "spec-build", owner: owner, udid: udid, source_id: source_id };
+
+    // a public prefetch that already produced basename.json short-circuits to true
+    fs.writeFileSync(path.join(fetch_dir, "basename.json"), "{}");
+    expect(builder.prefetchPrivate(br, "true", fetch_dir)).to.equal(true);
+
+    // without it, the real git.fetch runs against a bogus command and must
+    // report failure as `false` rather than undefined
+    fs.unlinkSync(path.join(fetch_dir, "basename.json"));
+    const failed = builder.prefetchPrivate(br, "false", fetch_dir);
+    expect(failed).to.be.a('boolean');
+    expect(failed).to.equal(false);
+
+    fs.rmSync(fetch_dir, { recursive: true, force: true }); // plain fs here, not fs-extra
+  }, 15000);
+
 });
 
 // Self-contained finder behavior tests — no Redis, no network
@@ -275,5 +304,4 @@ describe("Builder finder helpers", function () {
     expect(results).to.have.length(1);
     expect(results[0]).to.equal(path.join(tmpDir, 'src', 'myheader.h'));
   });
-
 });
