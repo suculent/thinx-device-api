@@ -50,12 +50,22 @@ fi
 set -e
 
 if [[ ${ENVIRONMENT} == "test" ]]; then
-  # `npm run split-tests` used to run here. It shards the suite by
-  # CIRCLE_NODE_INDEX, but .circleci/config.yml sets `parallelism: 1`, so the
-  # index was always 0 — which is the branch that deletes ./spec/jasmine/ZZ*.js.
-  # Index 1 never existed, so the entire ZZ-* integration tier (SEC-COOKIE-01,
-  # OAUTH-COOKIE-01, ...) was silently skipped in every CI run. Dropped so the
-  # full suite runs on the single node.
+  # WARNING: this SKIPS the entire ZZ-* integration tier in CI.
+  #
+  # split-tests shards by CIRCLE_NODE_INDEX, but .circleci/config.yml sets
+  # `parallelism: 1`, so the index is always 0 — the branch that deletes
+  # ./spec/jasmine/ZZ*.js. Index 1 never runs. That has silently skipped
+  # ~393 specs (SEC-COOKIE-01, OAUTH-COOKIE-01, the router/device/transfer
+  # suites) since d7f0aaa1 reverted parallelism to 1 on 2026-03-14.
+  #
+  # Removing this line was tried on 3f9f6df3 and had to be reverted: with the
+  # tier enabled, the CI test step ran past CircleCI's 60-minute job limit and
+  # timed out (pipeline f2bccabc), blocking build-api-cloud. A local run of the
+  # same suite finishes in ~10 minutes with 186/797 failing, so the tier needs
+  # triage AND a CI hang investigated before it can be switched on.
+  #
+  # Re-enable by deleting this line — but fix the hang and the failures first.
+  npm run split-tests
   npm run test
 else
   echo "[thinx-entrypoint] Starting in production mode..."
