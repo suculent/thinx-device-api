@@ -592,7 +592,17 @@ module.exports = class THiNX extends EventEmitter {
                   var build_id = object.logtail.build_id;
                   var owner_id = object.logtail.owner_id;
                   if ((typeof (build_id) !== "undefined") && (typeof (owner_id) !== "undefined")) {
-                    blog.logtail(build_id, owner_id, app._ws[logsocket], logtail_callback);
+                    // `logsocket` is only set when the message arrives on a
+                    // dedicated log connection (/<owner>/<id>). The console
+                    // sends wsstailLog() over the OWNER connection (/<owner>),
+                    // where logsocket is null -- so app._ws[null] was undefined
+                    // and logtail() streamed the build log nowhere, leaving the
+                    // log window empty. Fall back to the connection the request
+                    // arrived on; both console log handlers render lines from
+                    // either connection.
+                    let log_ws = app._ws[logsocket];
+                    if (typeof (log_ws) === "undefined" || log_ws === null) log_ws = ws;
+                    blog.logtail(build_id, owner_id, log_ws, logtail_callback);
                   }
 
                   // Type: initial socket 
