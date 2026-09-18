@@ -665,6 +665,9 @@ workflows:
           filters:
             branches:
               only:
+                # TEMPORARY: smoke-tests the Snyk wiring without triggering any
+                # build, image push or deploy record. Remove before merging.
+                - ci/snyk-monitoring
                 - thinx-staging
                 - main
 
@@ -674,6 +677,9 @@ workflows:
           filters:
             branches:
               only:
+                # TEMPORARY: smoke-tests the Snyk wiring without triggering any
+                # build, image push or deploy record. Remove before merging.
+                - ci/snyk-monitoring
                 - thinx-staging
                 - main
 
