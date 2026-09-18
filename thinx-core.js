@@ -10,6 +10,7 @@ const RedisHealth = require('./lib/thinx/redis-health');
 const { RedisStore } = require("connect-redis");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
+const CookiePolicy = require("./lib/middleware/cookie-policy");
 module.exports = class THiNX extends EventEmitter {
 
   constructor() {
@@ -322,16 +323,18 @@ module.exports = class THiNX extends EventEmitter {
             delete full_domain_array[0];
             let short_domain = full_domain_array.join('.');
 
+            // SEC-PROXY-01: must be set before the session middleware mounts, because
+            // express-session negotiates cookie.secure from req.secure, which is only
+            // true once this allowlist matches the hop Traefik connects from.
+            app.set('trust proxy', CookiePolicy.trustedProxy(app_config));
+
             const sessionConfig = {
               secret: session_config.secret,
-              cookie: {
-                maxAge: 3600000,
-                // deepcode ignore WebCookieSecureDisabledExplicitly: not secure because HTTPS unwrapping happens outside this app
-                secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
-                httpOnly: true,
-                sameSite: "lax", // CSRF defense-in-depth: console.* and rtm.* share the thinx.cloud registrable domain, so Lax still sends the cookie on legitimate console→API navigation
-                domain: short_domain
-              },
+              // SEC-COOKIE-02: Secure is negotiated per connection, never hardcoded.
+              // sameSite stays "lax" — console.* and rtm.* share the thinx.cloud
+              // registrable domain, so Lax still sends the cookie on legitimate
+              // console→API navigation.
+              cookie: CookiePolicy.sessionCookie({ domain: short_domain, maxAge: 3600000 }),
               store: sessionStore,
               name: "x-thx-core",
               resave: true, // was true then false
@@ -339,7 +342,6 @@ module.exports = class THiNX extends EventEmitter {
               saveUninitialized: false
             };
 
-            // intentionally exposed cookie because there is no HTTPS between app and Traefik frontend
             const sessionParser = session(sessionConfig); /* lgtm [js/missing-token-validation] */
 
             app.use(sessionParser);
@@ -441,8 +443,6 @@ module.exports = class THiNX extends EventEmitter {
 
 
             app.use('/static', express.static(path.join(__dirname, 'static')));
-            // REFACTOR-01: single source of truth for trust-proxy; allowlist form chosen because Traefik fronts the app on loopback in the swarm topology.
-            app.set('trust proxy', ['loopback', '127.0.0.1']);
 
             /*
              * WebSocket Server
@@ -455,14 +455,10 @@ module.exports = class THiNX extends EventEmitter {
             wsapp.use(session({ /* lgtm [js/clear-text-cookie] */
               secret: session_config.secret,
               store: sessionStore,
-              // deepcode ignore WebCookieSecureDisabledExplicitly: not secure because HTTPS unwrapping happens outside this app
-              cookie: {
-                expires: hour,
-                secure: false, // not secure because HTTPS unwrapping /* lgtm [js/clear-text-cookie] */ /* lgtm [js/clear-text-cookie] */
-                httpOnly: true,
-                sameSite: "lax", // CSRF defense-in-depth; see x-thx-core note above
-                domain: short_domain
-              },
+              // SEC-COOKIE-02: see the x-thx-core note above. NOTE: wsapp is currently
+              // unreachable (built here but never attached to a server) — kept in sync
+              // so it is not a trap if it is ever wired up.
+              cookie: CookiePolicy.sessionCookie({ domain: short_domain, expires: hour }),
               name: "x-thx-wscore",
               resave: true,
               rolling: true,

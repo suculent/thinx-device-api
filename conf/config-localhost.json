@@ -17,6 +17,7 @@
     "server": "mqtt://localhost",
     "port": 1883
   },
+  "trusted_proxy": ["loopback"],
   "port": 7442,
   "secure_port": 7443,
   "lambda": 7474,

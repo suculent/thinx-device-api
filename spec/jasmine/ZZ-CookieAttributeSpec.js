@@ -121,4 +121,46 @@ describe("ZZ-CookieAttributeSpec (SEC-COOKIE-01)", function () {
     });
   }, 30000);
 
+  /*
+   * SEC-COOKIE-03 regression spec
+   *
+   * The behavioural other half of SEC-PROXY-01. `cookie.secure` is now 'auto', so the
+   * Secure attribute must actually APPEAR once a trusted proxy reports
+   * X-Forwarded-Proto: https — otherwise the hardening silently no-ops and we are back
+   * to shipping session cookies in clear text.
+   *
+   * This is the assertion that would have caught the old
+   * `app.set('trust proxy', ['loopback','127.0.0.1'])`: Traefik reaches the container
+   * over the traefik-public overlay (10.0.1.95 -> 10.0.1.48), so that allowlist never
+   * matched and X-Forwarded-Proto was discarded. chai-http connects over loopback,
+   * which IS in the allowlist, so the forwarded header is honoured here.
+   *
+   * Pairs with CookiePolicySpec.js, which pins the same behaviour without booting the
+   * stack and therefore runs locally.
+   */
+  it("SEC-COOKIE-03 — proxied login emits x-thx-core WITH Secure", function (done) {
+    agent
+      .post('/api/login')
+      .set('X-Forwarded-Proto', 'https')
+      .send({ username: 'dynamic', password: 'dynamic', remember: false })
+      .then(function (res) {
+        const setCookie = res.headers['set-cookie'];
+        expect(setCookie, 'proxied login must still emit Set-Cookie').to.be.an('array');
+
+        const xThxCore = setCookie.find(c => /^x-thx-core=/.test(c));
+        expect(xThxCore, 'proxied login must establish the x-thx-core session cookie').to.be.a('string');
+
+        expect(xThxCore).to.match(/;\s*Secure/i);
+        expect(xThxCore).to.include('HttpOnly');
+        // Lax must survive: 'auto' sameSite would have flipped this to None.
+        expect(xThxCore).to.match(/;\s*SameSite=Lax/i);
+
+        done();
+      })
+      .catch((e) => {
+        console.log("SEC-COOKIE-03 spec error:", e);
+        done(e);
+      });
+  }, 30000);
+
 });

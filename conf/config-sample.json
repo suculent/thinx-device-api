@@ -17,6 +17,7 @@
     "server": "mqtt://mosquitto",
     "port": 1883
   },
+  "trusted_proxy": ["loopback", "10.0.1.0/24"],
   "port": 7442,
   "secure_port": 7443,
   "lambda": 7475,
