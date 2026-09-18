@@ -322,9 +322,8 @@ jobs:
           # what a published image actually installed. The container monitors
           # are the authoritative view of deployed dependencies.
           #
-          # services/broker/goauth is excluded from the scan below: it is
-          # vendored upstream source (github.com/iegomez/mosquitto-go-auth) and
-          # needs a Go toolchain this executor does not carry.
+          # services/broker/goauth is a Go module and needs no lockfile work
+          # here; its toolchain is installed in the following step.
           command: |
             for dir in . base services/transformer services/worker \
                        services/console/src services/console/vue; do
@@ -334,6 +333,18 @@ jobs:
               fi
               if [ -f "$dir/package-lock.json" ]; then
                 echo "lockfile already present in $dir"
+                continue
+              fi
+              if [ -f "$dir/npm-shrinkwrap.json" ]; then
+                # npm updates an existing npm-shrinkwrap.json rather than
+                # writing package-lock.json, so generating here succeeds while
+                # leaving nothing snyk recognises, and snyk then falls back to
+                # demanding node_modules. Both files are one format
+                # (lockfileVersion 3), so the committed shrinkwrap is copied
+                # into place -- it is the intended tree, and more faithful than
+                # re-resolving.
+                echo "using committed npm-shrinkwrap.json for $dir"
+                cp "$dir/npm-shrinkwrap.json" "$dir/package-lock.json"
                 continue
               fi
               echo "generating lockfile for $dir"
@@ -355,6 +366,23 @@ jobs:
                 exit 1
               fi
             done
+      - run:
+          name: Install Go toolchain for services/broker/goauth
+          # services/broker/goauth is a Go module (vendored
+          # github.com/iegomez/mosquitto-go-auth) that ships in the broker
+          # image. snyk resolves Go dependencies by shelling out to `go`, which
+          # this node executor does not carry, so install it. go.mod requires
+          # go 1.26.6; this is the latest patch on that line.
+          command: |
+            GO_VERSION=1.26.8
+            GO_SHA256=d0f743b33e8d8945e6b1f432edd15785c70507121d6e2a723b21285eddf8b57b
+            cd /tmp
+            curl -sSL --retry 3 --fail -o go.tgz \
+              "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz"
+            echo "${GO_SHA256}  go.tgz" | sha256sum -c -
+            sudo tar -C /usr/local -xzf go.tgz
+            echo 'export PATH=$PATH:/usr/local/go/bin' >> "$BASH_ENV"
+            /usr/local/go/bin/go version
       - install-snyk
       - run:
           name: Snyk Open Source (SCA) into Snyk UI
@@ -364,7 +392,7 @@ jobs:
             snyk monitor \
               --all-projects \
               --detection-depth=6 \
-              --exclude=spec,test_repositories,goauth \
+              --exclude=spec,test_repositories \
               --org="$SNYK_ORG_ID" \
               --remote-repo-url="$SNYK_REMOTE_REPO_URL" \
               --target-reference="$CIRCLE_BRANCH"
