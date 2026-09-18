@@ -8,7 +8,8 @@ commands:
 
   install-snyk:
     description: >
-      Install a pinned Snyk CLI and verify its published SHA-256 before use.
+      Install a pinned Snyk CLI, verify its published SHA-256, and confirm
+      SNYK_TOKEN still authenticates against SNYK_ORG_ID before scanning.
     parameters:
       version:
         type: string
@@ -25,6 +26,51 @@ commands:
             chmod +x snyk-linux
             sudo mv snyk-linux /usr/local/bin/snyk
             snyk --version
+      - run:
+          name: Verify SNYK_TOKEN reaches the target org
+          # The scan commands report a bad credential as a bare
+          # "Authentication error (SNYK-0005) / 401", which does not say which
+          # of several causes applies. This preflight names the actual problem.
+          #
+          # Service accounts are not available on this plan, so SNYK_TOKEN is a
+          # user-owned token and rotation is a question of when, not if.
+          command: |
+            if [ -z "$SNYK_TOKEN" ]; then
+              echo "SNYK_TOKEN is empty. It is provided by the dockerhub context;"
+              echo "check that this job declares that context."
+              exit 1
+            fi
+
+            code=$(curl -s -o /dev/null -w '%{http_code}' \
+              -H "Authorization: token $SNYK_TOKEN" \
+              "https://api.snyk.io/rest/orgs/$SNYK_ORG_ID?version=2024-03-12")
+
+            case "$code" in
+              200)
+                echo "SNYK_TOKEN authenticates against org $SNYK_ORG_ID."
+                ;;
+              401)
+                echo "SNYK_TOKEN was rejected (401 Unauthorized)."
+                echo
+                echo "The token is not recognised: either it was revoked, or it is a"
+                echo "Personal Access Token that has passed its expiry date."
+                echo "Reissue at https://app.snyk.io/account, then replace SNYK_TOKEN"
+                echo "in the CircleCI 'dockerhub' context."
+                echo
+                echo "An OAuth session JWT copied from 'snyk config' will NOT work"
+                echo "here: it is scoped org.read and cannot create projects."
+                exit 1
+                ;;
+              403|404)
+                echo "SNYK_TOKEN is valid but cannot reach org $SNYK_ORG_ID (HTTP $code)."
+                echo "Confirm the token's account is a member of the thinx-cloud org."
+                exit 1
+                ;;
+              *)
+                echo "Unexpected HTTP $code from the Snyk API while checking the token."
+                exit 1
+                ;;
+            esac
 
 jobs:
 
