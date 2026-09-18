@@ -41,9 +41,15 @@ commands:
               exit 1
             fi
 
+            # Deliberately the endpoint the CLI itself calls during a scan.
+            # GET /rest/orgs/{id} is NOT usable here: a Snyk API token gets 403
+            # from it even for an org the token's own account owns, so checking
+            # against it would reject working credentials. Verified that this
+            # endpoint still returns 401 for a garbage, empty or absent token,
+            # so it rejects what it should.
             code=$(curl -s -o /dev/null -w '%{http_code}' \
               -H "Authorization: token $SNYK_TOKEN" \
-              "https://api.snyk.io/rest/orgs/$SNYK_ORG_ID?version=2024-03-12")
+              "https://api.snyk.io/v1/cli-config/feature-flags/snykCodeCli?org=$SNYK_ORG_ID")
 
             case "$code" in
               200)
@@ -62,7 +68,7 @@ commands:
                 exit 1
                 ;;
               403|404)
-                echo "SNYK_TOKEN is valid but cannot reach org $SNYK_ORG_ID (HTTP $code)."
+                echo "SNYK_TOKEN authenticates but cannot reach org $SNYK_ORG_ID (HTTP $code)."
                 echo "Confirm the token's account is a member of the thinx-cloud org."
                 exit 1
                 ;;
