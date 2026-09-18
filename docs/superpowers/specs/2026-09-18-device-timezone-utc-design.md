@@ -57,7 +57,7 @@ Both are pure — no config file, no CouchDB — so they are unit-testable in is
 
 | Field | Change |
 |---|---|
-| `timezone_utc` | **New.** IANA zone name. Source of truth. Defaults to `"UTC"`. |
+| `timezone_utc` | **New.** IANA zone name. Source of truth. Written only when a valid zone is supplied; otherwise left absent. |
 | `timezone_abbr` | Kept. Human-readable display label only; no longer used for computation. |
 | `timezone_offset` | Kept. Derived cache, recomputed on every write. |
 | `timezone` | Stop writing. Existing values left untouched. |
@@ -68,9 +68,11 @@ Both are pure — no config file, no CouchDB — so they are unit-testable in is
 
 ### Write path — registration (`lib/thinx/device.js`, ~843-862)
 
-- Take `reg.timezone_utc` when `Util.isValidTimezone` accepts it; otherwise default to `"UTC"`.
+- Take `reg.timezone_utc` when `Util.isValidTimezone` accepts it. When it is absent or invalid, **do not write the field at all** — see below.
 - Keep accepting `reg.timezone_abbr` as a display label, under the existing `typeof === "string"` guard.
-- Derive `timezone_offset` via `Util.timezoneOffsetFor(timezone_utc)`, falling back to a client-supplied `reg.timezone_offset`, then `0`.
+- Derive `timezone_offset` from the zone via `Util.timezoneOffsetFor` **only when a valid zone was supplied**. Otherwise leave the client-supplied `reg.timezone_offset` untouched (defaulting to `0` as today).
+
+The field is deliberately **not** defaulted to `"UTC"`. Defaulting would derive an offset of `0` for every device that does not send a zone, silently overwriting a client-supplied `timezone_offset` — a regression against current behaviour, and a contradiction of the sequencing guarantee below. An absent `timezone_utc` means "unknown zone", which the read path already handles by falling back to the stored offset.
 
 The `if (device_time.isDST())` conditional is **removed**. `utcOffset()` already accounts for DST, so branching on `isDST()` was never load-bearing — it only decided whether to overwrite the client-supplied value.
 
