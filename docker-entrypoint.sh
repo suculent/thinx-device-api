@@ -24,11 +24,47 @@ export SQREEN_DISABLE_STARTUP_WARNING=1
 export DOCKER_HOST="tcp://docker:2375"
 export DOCKER_HOST="unix:///var/run/docker.sock"
 
-if [ -f ~/.ssh/id_rsa ]; then
-  echo "[thinx-entrypoint] Adding host checking exception for github.com..."
-  echo "140.82.121.3 github.com" >> /etc/hosts
-  ssh -T -o "StrictHostKeyChecking=no" git@github.com || true
+# Seed known_hosts so `git clone` over SSH can verify the remote.
+#
+# This used to be guarded by `[ -f ~/.ssh/id_rsa ]`, which never held: rsakey.js
+# stores per-owner deploy keys as <owner>-<timestamp> under app_config.ssh_keys
+# (/mnt/data/ssh_keys), and nothing ever writes ~/.ssh/id_rsa. So known_hosts
+# stayed empty and every clone failed with "Host key verification failed"
+# before authentication was even attempted -- adding a deploy key could not
+# help, because SSH never got as far as offering one.
+SSH_DIR="${HOME:-/root}/.ssh"
+KNOWN_HOSTS="${SSH_DIR}/known_hosts"
+mkdir -p "${SSH_DIR}" && chmod 700 "${SSH_DIR}"
+touch "${KNOWN_HOSTS}" && chmod 600 "${KNOWN_HOSTS}"
+
+# appends stdin's known_hosts lines, skipping any already present
+add_known_hosts() {
+  while IFS= read -r line; do
+    [ -z "${line}" ] && continue
+    case "${line}" in \#*) continue ;; esac
+    grep -qxF "${line}" "${KNOWN_HOSTS}" || echo "${line}" >> "${KNOWN_HOSTS}"
+  done
+}
+
+# GitHub publishes its host keys over HTTPS, so take them from there rather
+# than trusting whatever ssh-keyscan is handed on first contact.
+GITHUB_KEYS=$(curl -fsS --max-time 10 https://api.github.com/meta 2>"$DEVNULL" | jq -r '.ssh_keys[]?' 2>"$DEVNULL")
+if [ -n "${GITHUB_KEYS}" ]; then
+  echo "[thinx-entrypoint] Seeding known_hosts for github.com from api.github.com/meta..."
+  echo "${GITHUB_KEYS}" | sed 's|^|github.com |' | add_known_hosts
+else
+  echo "[thinx-entrypoint] api.github.com unreachable, falling back to ssh-keyscan..."
+  ssh-keyscan -T 10 github.com 2>"$DEVNULL" | add_known_hosts
 fi
+
+# Sources may point at GitLab/Bitbucket/self-hosted git over SSH too.
+# GIT_KNOWN_HOSTS="gitlab.com git.example.com"
+for git_host in ${GIT_KNOWN_HOSTS}; do
+  echo "[thinx-entrypoint] Seeding known_hosts for ${git_host}..."
+  ssh-keyscan -T 10 "${git_host}" 2>"$DEVNULL" | add_known_hosts
+done
+
+echo "[thinx-entrypoint] known_hosts entries: $(wc -l < "${KNOWN_HOSTS}")"
 
 if [[ ! -z $ROLLBAR_ACCESS_TOKEN ]]; then
   if [[ -z $ROLLBAR_ENVIRONMENT ]]; then
