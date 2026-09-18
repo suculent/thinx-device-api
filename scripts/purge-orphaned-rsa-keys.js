@@ -7,10 +7,11 @@
  * Accounts deleted before revokeAllForOwner existed (GDPR #353) left their
  * private keys on disk indefinitely.
  *
- * Also reports stray askpass scripts. git.js writes `<key>.sh` next to a key
- * for the duration of one ssh-add and removes it again, so any that survive
- * are crash leftovers -- and they hold GIT_KEY_PASSPHRASE in plaintext.
- * (The legacy `askpass.sh` is one of these; nothing references it any more.)
+ * Also reports stray askpass scripts. git.js now keeps its helper in the
+ * container tmpdir and has it read GIT_KEY_PASSPHRASE from the environment,
+ * so anything matching *.sh in the key directory is a leftover from the older
+ * scheme -- and those DO carry the passphrase in cleartext (the legacy
+ * `askpass.sh` held `echo "thinx"`). Nothing references them any more.
  *
  * Modes:
  *   --scan    Dry-run (DEFAULT). Reports what would be deleted, touches nothing.
@@ -44,8 +45,8 @@ if (args.includes('--help') || args.includes('-h')) {
         '',
         '  --scan       Dry-run (default). Reports orphans, deletes nothing.',
         '  --apply      DESTRUCTIVE. Deletes orphaned key pairs.',
-        '  --askfiles   Also handle stray *.sh askpass leftovers (they contain',
-        '               GIT_KEY_PASSPHRASE in plaintext).',
+        '  --askfiles   Also remove stray *.sh askpass leftovers from the older',
+        '               scheme (they carry the passphrase in cleartext).',
         '  --json       Machine-readable output.',
         '',
         'An owner is orphaned when no document with that _id exists in',
@@ -89,6 +90,7 @@ rsakey.purgeOrphanedKeys({ dry_run: !APPLY }, (success, result) => {
         ssh_keys: rsakey.ssh_keys,
         owners_in_db: result.owners_in_db,
         owners_on_disk: result.owners_on_disk,
+        owners_retained: result.owners_retained,
         orphaned_owners: result.orphaned_owners,
         keys_affected: result.purged.reduce((sum, entry) => sum + entry.keys, 0),
         purged: result.purged,
@@ -103,15 +105,16 @@ rsakey.purgeOrphanedKeys({ dry_run: !APPLY }, (success, result) => {
 
     console.log('[purge-orphaned-rsa-keys] key dir       :', report.ssh_keys);
     console.log('[purge-orphaned-rsa-keys] owners in db  :', report.owners_in_db);
-    console.log('[purge-orphaned-rsa-keys] owners on disk:', report.owners_on_disk);
+    console.log('[purge-orphaned-rsa-keys] owners on disk:', report.owners_on_disk, '(before purge)');
     console.log('[purge-orphaned-rsa-keys] orphaned      :', report.orphaned_owners,
         '(' + report.keys_affected + ' key pairs)');
+    console.log('[purge-orphaned-rsa-keys] retained      :', report.owners_retained);
     for (const entry of report.purged) {
         console.log('  ' + (APPLY ? 'deleted' : 'would delete') + ' ' + entry.keys + ' key(s) for ' + entry.owner);
     }
     if (askfiles.length > 0) {
         console.log('[purge-orphaned-rsa-keys] stray askfiles:', askfiles.join(', '));
-        if (!ASKFILES) console.log('  (pass --askfiles to remove them; they hold the passphrase in plaintext)');
+        if (!ASKFILES) console.log('  (pass --askfiles to remove them; they carry the passphrase in cleartext)');
         if (removed_askfiles.length > 0) console.log('  removed:', removed_askfiles.join(', '));
     }
     if (!APPLY) console.log('[purge-orphaned-rsa-keys] dry run — nothing was deleted. Re-run with --apply.');
