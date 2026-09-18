@@ -281,7 +281,13 @@ jobs:
                 continue
               fi
               echo "generating lockfile for $dir"
-              ( cd "$dir" && npm install --package-lock-only --ignore-scripts )
+              # services/console/vue has an apexcharts/vue-apexcharts peer
+              # conflict and its Dockerfile installs with --legacy-peer-deps,
+              # so fall back to the same resolution the image build uses.
+              if ! ( cd "$dir" && npm install --package-lock-only --ignore-scripts ); then
+                echo "retrying $dir with --legacy-peer-deps"
+                ( cd "$dir" && npm install --package-lock-only --ignore-scripts --legacy-peer-deps )
+              fi
             done
       - install-snyk
       - run:
