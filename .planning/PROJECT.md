@@ -72,7 +72,7 @@ Previously: v1.10 Operational Closures (2026-06-05) — 5/5 requirements across 
 <details>
 <summary>v1.9 Backend Hygiene & Posture (shipped 2026-06-04)</summary>
 
-- ✓ **REFACTOR-01** — v1.9 (Phase 5) — Single canonical `app.set('trust proxy', ['loopback', '127.0.0.1'])` site in `thinx-core.js` with rationale comment; duplicate call deleted.
+- ✓ **REFACTOR-01** — v1.9 (Phase 5) — Duplicate `app.set('trust proxy', …)` call in `thinx-core.js` deleted, leaving a single canonical site. (The *value* kept at the time was later found wrong and was corrected by SEC-PROXY-01 on 2026-09-18; the trust-proxy allowlist now comes from `CookiePolicy.trustedProxy()`.)
 - ✓ **REFACTOR-02** — v1.9 (Phase 5) — `!=` → `!==` in `Owner.password_reset` (line 492) + regression test for string-vs-number coercion case.
 - ✓ **REFACTOR-05** — v1.9 (Phase 5) — `jshint` moved to `devDependencies`. (`fs-finder` scope-amended: deferred to v1.10 because of 5 active runtime call sites in `lib/`.)
 - ✓ **REFACTOR-03** — v1.9 (Phase 6) — Raw-socket `close` handler in WS upgrade flow; per-connection map entries released deterministically on mid-flight aborts.

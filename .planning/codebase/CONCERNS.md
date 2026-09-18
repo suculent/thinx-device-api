@@ -72,13 +72,6 @@
 - Effectively a noop encryption: anyone with read access to source can decrypt stored RSA keys.
 - **Fix approach:** Already specified in `IMPROVEMENTS.md` #6 — env-driven passphrase with documented migration plan for existing encrypted keys.
 
-### `httpOnly: false` + `trust proxy` collision  **[v1.x deferred]**
-
-- `thinx-core.js:285` — `app.set("trust proxy", 1)` (trust first hop)
-- `thinx-core.js:407` — `app.set('trust proxy', ['loopback', '127.0.0.1'])` (overrides L285 with a different value 122 lines later, after the server is already created at L397)
-- **Risk:** The second call wins, so the effective config is loopback-only — fine *if* the proxy IS on loopback; broken if Traefik/nginx is on a different host (e.g. in a swarm overlay network). When `trust proxy` is misconfigured, `express-rate-limit` collapses all users into the proxy's single IP bucket, and `req.ip` returns the proxy address.
-- **Fix approach:** Delete the duplicate `app.set` at L407; keep L285. Confirm with `curl -i .../api/v2/spec` whether `RateLimit-*` headers reflect per-client counts.
-
 ### Hardcoded test/dev MQTT password  **[v1.x deferred]**
 
 - `thinx-core.js:131-141` — `serviceMQPassword = "mosquitto"` in test, `"changeme!"` in development. Both are inline literals with `deepcode ignore NoHardcodedPasswords` suppressions.

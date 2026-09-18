@@ -41,6 +41,13 @@ duration: ~5min
 completed: 2026-06-02
 ---
 
+> **SUPERSEDED (2026-09-18, SEC-PROXY-01).** The trust-proxy value recorded below,
+> `['loopback', '127.0.0.1']`, was wrong: Traefik reaches the api container over the
+> traefik-public overlay (10.0.1.95 -> 10.0.1.48), so the allowlist never matched and
+> `X-Forwarded-Proto` was discarded. Now resolved via `CookiePolicy.trustedProxy()`.
+> Kept as the record of what was decided on 2026-06-02; do not treat it as current state.
+
+
 # Phase 5 Plan 1: REFACTOR-01 — Single Trust-Proxy Source Summary
 
 **Collapsed two competing `app.set('trust proxy', ...)` calls in thinx-core.js to one canonical allowlist-form site, with an explanatory comment naming the swarm topology rationale — zero observable behavior change.**

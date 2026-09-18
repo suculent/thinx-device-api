@@ -39,6 +39,13 @@ human_verification:
     why_human: "Container reaches Server-up log only when CouchDB/Redis/MQTT/`/mnt/data` mount are available on the swarm — none of which exist on the local verifier host"
 ---
 
+> **SUPERSEDED (2026-09-18, SEC-PROXY-01).** The trust-proxy value recorded below,
+> `['loopback', '127.0.0.1']`, was wrong: Traefik reaches the api container over the
+> traefik-public overlay (10.0.1.95 -> 10.0.1.48), so the allowlist never matched and
+> `X-Forwarded-Proto` was discarded. Now resolved via `CookiePolicy.trustedProxy()`.
+> Kept as the record of what was decided on 2026-06-02; do not treat it as current state.
+
+
 # Phase 5: Backend Hygiene — Cheap Sweeps Verification Report
 
 **Phase Goal:** Land low-blast-radius hygiene fixes that clean up structural debt without touching observable behavior on any public route.

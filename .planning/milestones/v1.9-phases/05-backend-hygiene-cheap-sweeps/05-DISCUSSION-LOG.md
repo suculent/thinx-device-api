@@ -1,5 +1,12 @@
 # Phase 5 Discussion Log
 
+> **SUPERSEDED (2026-09-18, SEC-PROXY-01).** The trust-proxy value recorded below,
+> `['loopback', '127.0.0.1']`, was wrong: Traefik reaches the api container over the
+> traefik-public overlay (10.0.1.95 -> 10.0.1.48), so the allowlist never matched and
+> `X-Forwarded-Proto` was discarded. Now resolved via `CookiePolicy.trustedProxy()`.
+> Kept as the record of what was decided on 2026-06-02; do not treat it as current state.
+
+
 **Date:** 2026-06-02
 **Mode:** auto (goal: "complete all phases. Discuss only when needed.")
 **Phase:** 5 — Backend Hygiene — Cheap Sweeps

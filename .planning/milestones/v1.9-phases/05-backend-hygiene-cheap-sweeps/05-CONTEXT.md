@@ -1,5 +1,12 @@
 # Phase 5 Context: Backend Hygiene — Cheap Sweeps
 
+> **SUPERSEDED (2026-09-18, SEC-PROXY-01).** The trust-proxy value recorded below,
+> `['loopback', '127.0.0.1']`, was wrong: Traefik reaches the api container over the
+> traefik-public overlay (10.0.1.95 -> 10.0.1.48), so the allowlist never matched and
+> `X-Forwarded-Proto` was discarded. Now resolved via `CookiePolicy.trustedProxy()`.
+> Kept as the record of what was decided on 2026-06-02; do not treat it as current state.
+
+
 **Created:** 2026-06-02
 **Milestone:** v1.9 — Backend Hygiene & Posture
 **Requirements:** REFACTOR-01, REFACTOR-02, REFACTOR-05
