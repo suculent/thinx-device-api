@@ -4,6 +4,28 @@ orbs:
   docker: circleci/docker@2.0.3
   slack: circleci/slack@5.0.0
 
+commands:
+
+  install-snyk:
+    description: >
+      Install a pinned Snyk CLI and verify its published SHA-256 before use.
+    parameters:
+      version:
+        type: string
+        default: v1.1305.0
+    steps:
+      - run:
+          name: Install Snyk CLI << parameters.version >>
+          command: |
+            cd /tmp
+            base="https://downloads.snyk.io/cli/<< parameters.version >>"
+            curl -sSL --retry 3 --fail -o snyk-linux        "$base/snyk-linux"
+            curl -sSL --retry 3 --fail -o snyk-linux.sha256 "$base/snyk-linux.sha256"
+            sha256sum -c snyk-linux.sha256
+            chmod +x snyk-linux
+            sudo mv snyk-linux /usr/local/bin/snyk
+            snyk --version
+
 jobs:
 
   build-base:
@@ -181,6 +203,157 @@ jobs:
       - run:
           name: Run Aikido scan
           command: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aikidosecurity/local-scanner image-scan thinxcloud/api:latest --apikey "$AIKIDO_TOKEN"
+
+  #
+  # Snyk monitoring. Code (SAST), Open Source (SCA) and Containers all report
+  # into the thinx-cloud Snyk org (43fbd00a-...), so code review, component
+  # analysis and images appear together in the Snyk UI.
+  #
+  # A workstation's default org may differ, so every command passes --org.
+  # SNYK_TOKEN must be present in the job context (already used as a build arg
+  # by build-api-cloud).
+  #
+
+  snyk-code-monitor:
+    docker:
+      - image: cimg/node:lts
+    environment:
+      SNYK_ORG_ID: 43fbd00a-d74b-4561-98a3-65e6e42bc094
+      # This repo's git remote is suculent/thinx-device-api. Pinning the target
+      # URL keeps Code and Open Source projects under one target in the UI;
+      # change this single line if the repo moves to the thinx-cloud GitHub org.
+      SNYK_REMOTE_REPO_URL: https://github.com/suculent/thinx-device-api
+    steps:
+      - checkout
+      - run:
+          name: Fetch all dependencies (esp. console)
+          command: |
+            git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
+      - install-snyk
+      - run:
+          name: Snyk Code (SAST) into Snyk UI
+          command: |
+            set +e
+            snyk code test \
+              --report \
+              --org="$SNYK_ORG_ID" \
+              --remote-repo-url="$SNYK_REMOTE_REPO_URL" \
+              --project-name=thinx-device-api \
+              --target-name=thinx-device-api \
+              --target-reference="$CIRCLE_BRANCH"
+            rc=$?
+            set -e
+            # 0 = clean, 1 = issues found (results are still uploaded),
+            # 2 = CLI/auth error, 3 = nothing scannable. Only 2 and 3 are failures.
+            if [ "$rc" -gt 1 ]; then exit "$rc"; fi
+
+  snyk-oss-monitor:
+    docker:
+      - image: cimg/node:lts
+    environment:
+      SNYK_ORG_ID: 43fbd00a-d74b-4561-98a3-65e6e42bc094
+      SNYK_REMOTE_REPO_URL: https://github.com/suculent/thinx-device-api
+    steps:
+      - checkout
+      - run:
+          name: Fetch all dependencies (esp. console)
+          command: |
+            git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
+      - run:
+          name: Generate the lockfiles snyk monitor needs
+          # Only the root package-lock.json is committed; the rest are caught by
+          # a global gitignore rule. Without a lockfile (or a populated
+          # node_modules) --all-projects silently SKIPS a project, which would
+          # otherwise leave 5 of the 6 apps unscanned.
+          #
+          # These lockfiles are resolved fresh here, so versions can drift from
+          # what a published image actually installed. The container monitors
+          # are the authoritative view of deployed dependencies.
+          command: |
+            for dir in . base services/transformer services/worker \
+                       services/console/src services/console/vue; do
+              if [ ! -f "$dir/package.json" ]; then
+                echo "no package.json in $dir, skipping"
+                continue
+              fi
+              if [ -f "$dir/package-lock.json" ]; then
+                echo "lockfile already present in $dir"
+                continue
+              fi
+              echo "generating lockfile for $dir"
+              ( cd "$dir" && npm install --package-lock-only --ignore-scripts )
+            done
+      - install-snyk
+      - run:
+          name: Snyk Open Source (SCA) into Snyk UI
+          # `monitor` records the dependency graph and exits 0 even when
+          # vulnerabilities are found, so no exit-code handling is needed here.
+          command: |
+            snyk monitor \
+              --all-projects \
+              --detection-depth=6 \
+              --exclude=spec,test_repositories \
+              --org="$SNYK_ORG_ID" \
+              --remote-repo-url="$SNYK_REMOTE_REPO_URL" \
+              --target-reference="$CIRCLE_BRANCH"
+
+  snyk-container-monitor:
+    parameters:
+      image:
+        type: string
+      tag:
+        type: string
+        default: latest
+      registry:
+        type: string
+        default: docker.io
+      dockerfile:
+        description: Dockerfile to associate, enabling base-image upgrade advice.
+        type: string
+        default: ''
+      submodules:
+        description: Set when the Dockerfile lives inside a submodule.
+        type: boolean
+        default: false
+    machine:
+      image: ubuntu-2204:current
+    environment:
+      SNYK_ORG_ID: 43fbd00a-d74b-4561-98a3-65e6e42bc094
+    steps:
+      - checkout
+      - when:
+          condition: << parameters.submodules >>
+          steps:
+            - run:
+                name: Fetch all dependencies (esp. console)
+                command: |
+                  git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
+      - docker/check:
+          registry: << parameters.registry >>
+      - install-snyk
+      - run:
+          name: Monitor << parameters.image >>:<< parameters.tag >>
+          # `container monitor` has no --remote-repo-url, so container projects
+          # group by image rather than under the git target. They still land in
+          # the same thinx-cloud org as Code and Open Source.
+          command: |
+            PROJECT="<< parameters.image >>:<< parameters.tag >>"
+            IMAGE="$PROJECT"
+            if [ "<< parameters.registry >>" != "docker.io" ]; then
+              IMAGE="<< parameters.registry >>/$PROJECT"
+            fi
+
+            FILE_ARG=""
+            if [ -n "<< parameters.dockerfile >>" ]; then
+              FILE_ARG="--file=<< parameters.dockerfile >>"
+            fi
+
+            docker pull "$IMAGE"
+            snyk container monitor "$IMAGE" \
+              --org="$SNYK_ORG_ID" \
+              --project-name="$PROJECT" \
+              --target-reference="$CIRCLE_BRANCH" \
+              $FILE_ARG
 
   test:
 
@@ -476,3 +649,97 @@ workflows:
       #         only:
       #           - thinx-staging
       #           - main
+
+      #
+      # Snyk: code review (SAST), component analysis (SCA) and container images,
+      # all reported into the thinx-cloud Snyk org.
+      #
+      # Each container monitor mirrors the filters of the job that builds its
+      # image. A single job requiring all four builds would never run, because
+      # build-base is `base`-only while the others are staging/main.
+      #
+
+      - snyk-code-monitor:
+          context:
+            - dockerhub
+          filters:
+            branches:
+              only:
+                - thinx-staging
+                - main
+
+      - snyk-oss-monitor:
+          context:
+            - dockerhub
+          filters:
+            branches:
+              only:
+                - thinx-staging
+                - main
+
+      - snyk-container-monitor:
+          name: snyk-monitor-api
+          image: thinxcloud/api
+          tag: latest
+          dockerfile: ./Dockerfile
+          context:
+            - dockerhub
+          requires:
+            - build-api-cloud
+          filters:
+            branches:
+              only:
+                - thinx-staging
+                - main
+
+      - snyk-container-monitor:
+          name: snyk-monitor-base
+          image: thinxcloud/base
+          tag: latest
+          dockerfile: ./base/Dockerfile
+          context:
+            - dockerhub
+          requires:
+            - build-base
+          filters:
+            branches:
+              only:
+                - base
+
+      - snyk-container-monitor:
+          name: snyk-monitor-console-classic
+          image: thinx/console
+          tag: swarm
+          registry: registry.thinx.cloud:5000
+          dockerfile: services/console/src/Dockerfile
+          submodules: true
+          context:
+            - thinx-docker-repo
+            - console
+          requires:
+            - build-console-classic
+          filters:
+            branches:
+              only:
+                - thinx-staging
+                - main
+
+      - snyk-container-monitor:
+          name: snyk-monitor-console-vue
+          image: thinx/console
+          tag: vue
+          registry: registry.thinx.cloud:5000
+          dockerfile: services/console/vue/Dockerfile
+          submodules: true
+          context:
+            - dockerhub
+            - thinx-docker-repo
+            - console
+          requires:
+            - build-vue-console
+          filters:
+            branches:
+              only:
+                - thinx-console
+                - thinx-staging
+                - main
