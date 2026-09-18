@@ -24,7 +24,7 @@
  *   --batch-size <N>        Docs per _bulk_docs request (default 500).
  *   --max-docs <N>          Cap docs touched/scanned per invocation
  *                           (default unbounded).
- *   --db-name <name>        Override DB name (default `${THINX_PREFIX}devices`).
+ *   --db-name <name>        Override DB name (default `${THINX_PREFIX}managed_devices`).
  *   --help, -h              Print usage and exit 0.
  *
  * Credential resolution (env-only, ZERO repo-hardcoded creds):
@@ -139,7 +139,7 @@ function usage() {
     "                               Required with --apply. Parent dir must exist.",
     "  --batch-size <N>             Docs per _bulk_docs (default: 500).",
     "  --max-docs <N>               Cap docs scanned/touched (default: unbounded).",
-    "  --db-name <name>             Override DB (default: ${THINX_PREFIX}devices).",
+    "  --db-name <name>             Override DB (default: ${THINX_PREFIX}managed_devices).",
     "  --help, -h                   Print this help and exit 0.",
     "",
     "Environment:",
@@ -211,7 +211,7 @@ function resolveCouchUrl() {
 function resolveDbName(argDbName) {
   if (argDbName) return argDbName;
   const prefix = process.env.THINX_PREFIX || "";
-  return `${prefix}devices`;
+  return `${prefix}managed_devices`;
 }
 
 function summarise(mode, counts, reports) {
