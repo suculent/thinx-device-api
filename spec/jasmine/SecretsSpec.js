@@ -65,4 +65,56 @@ describe("secrets.readSecret", function () {
     expect(b).to.equal("first"); // cached, not re-read
   });
 
+  // SEC-CFG-01: Path traversal vulnerability mitigation tests
+  describe("path traversal protection", function () {
+
+    it("rejects relative path traversal with ../", function () {
+      fs.existsSync = () => true;
+      fs.readFileSync = () => "leaked_secret";
+      process.env["../etc/passwd"] = "fallback";
+      
+      const result = readSecret("../etc/passwd", "default");
+      // Should fall back to env or default, not read the traversed path
+      expect(result).to.equal("fallback");
+    });
+
+    it("rejects multiple levels of path traversal", function () {
+      fs.existsSync = () => true;
+      fs.readFileSync = () => "leaked_secret";
+      process.env["../../etc/shadow"] = "fallback";
+      
+      const result = readSecret("../../etc/shadow", "default");
+      expect(result).to.equal("fallback");
+    });
+
+    it("rejects absolute paths", function () {
+      fs.existsSync = () => true;
+      fs.readFileSync = () => "leaked_secret";
+      process.env["/etc/passwd"] = "fallback";
+      
+      const result = readSecret("/etc/passwd", "default");
+      expect(result).to.equal("fallback");
+    });
+
+    it("rejects path traversal with encoded characters", function () {
+      fs.existsSync = () => true;
+      fs.readFileSync = () => "leaked_secret";
+      const traversalName = "..%2F..%2Fetc%2Fpasswd";
+      process.env[traversalName] = "fallback";
+      
+      const result = readSecret(traversalName, "default");
+      expect(result).to.equal("fallback");
+    });
+
+    it("allows valid secret names without path components", function () {
+      const validName = "VALID_SECRET_NAME";
+      fs.existsSync = (p) => p === "/run/secrets/" + validName;
+      fs.readFileSync = () => "  valid_secret_value\n";
+      
+      const result = readSecret(validName);
+      expect(result).to.equal("valid_secret_value");
+    });
+
+  });
+
 });
