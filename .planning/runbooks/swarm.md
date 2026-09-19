@@ -1,8 +1,11 @@
 # Swarm Operations Runbook
 
-Operator-facing recovery procedures for the THiNX production swarm host `188.166.23.244`.
+Operator-facing recovery procedures for the THiNX production swarm host `micro`.
 
-**SSH connection:** `ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244`
+**SSH connection:** `ssh micro`
+
+> `micro` and `core` are the SSH aliases in the operator's `~/.aliases`; host, port, user and
+> key live there rather than in this public repository.
 **Deploy script (manual escape hatch):** `/mnt/gluster/deployment/swarm/restart.sh`
 **Stack file location:** `/mnt/gluster/deployment/swarm/` (`docker-swarm.yml`, `thinx.yml`, etc.)
 
@@ -19,18 +22,18 @@ Operator-facing recovery procedures for the THiNX production swarm host `188.166
 ### Rung 1 — Force-restart swarmpit_app (default first move)
 
 ```bash
-ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "docker service update --force swarmpit_app"
+ssh micro "docker service update --force swarmpit_app"
 ```
 
 Wait ~90s for the new task to boot (Swarmpit 1.9 JVM + CouchDB + InfluxDB warm-up).
 
 **Verify recovery:**
 ```bash
-ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 \
+ssh micro \
   "curl -s -o /dev/null -w '%{http_code}\n' https://swarmpit.thinx.cloud"
 # expect: 200
 
-ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 \
+ssh micro \
   "docker service logs swarmpit_app --since 2m --tail 50"
 # expect: startup banner + "Swarmpit running on port 8080" + "Docker SOCK: /var/run/docker.sock"
 ```
@@ -43,7 +46,7 @@ git push origin thinx-staging
 
 # 2. Wait for CircleCI to push a new thinxcloud/api:latest digest to Docker Hub (typically 3-5 min)
 # 3. Confirm the swarm autoredeploys thinx_api to the new digest within 5 min:
-ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 \
+ssh micro \
   "docker service ps thinx_api --no-trunc --format '{{.ID}} {{.CurrentState}} {{.Image}}' | head -3"
 # expect: new task ID, Running, new digest matching Hub's :latest
 ```
@@ -52,7 +55,7 @@ Phase 3 observed SLA: **delta = 63 seconds** (Hub digest change → new task Run
 
 **Rollback** (if Rung 1 makes things worse):
 ```bash
-ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "docker service rollback swarmpit_app"
+ssh micro "docker service rollback swarmpit_app"
 ```
 
 ### Rungs 2-4 — Escalation ladder (operator-gated)

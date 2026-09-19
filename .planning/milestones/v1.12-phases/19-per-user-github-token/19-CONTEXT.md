@@ -2,7 +2,7 @@
 
 **Gathered:** 2026-06-29
 **Status:** Ready for planning
-**Mode:** Authored from `.planning/inbox-tasks/392-per-user-github-token.md` (verified file:line refs).
+**Mode:** Authored from `.planning/archive/inbox-tasks/392-per-user-github-token.md` (verified file:line refs).
 
 <domain>
 ## Phase Boundary

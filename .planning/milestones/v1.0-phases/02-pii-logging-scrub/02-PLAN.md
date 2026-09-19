@@ -182,8 +182,8 @@ The `callback(true, user.reset_key)` here returns the RAW reset_key VALUE to the
   </files>
   <behavior>
     `Util.redactEmail(email)`:
-    - `redactEmail("matej.sychra@tmcoy.cz")` returns `"m***@tmcoy.cz"` (first-char of local-part + `***` + `@` + domain unchanged)
-    - `redactEmail("a@b.cz")` returns `"a***@b.cz"` (single-char local-part — still emits first char + ***)
+    - `redactEmail("user@example.com")` returns `"u***@example.com"` (first-char of local-part + `***` + `@` + domain unchanged)
+    - `redactEmail("a@example.com")` returns `"a***@example.com"` (single-char local-part — still emits first char + ***)
     - `redactEmail("")` returns `"<empty>"` (defensive sentinel; do NOT throw)
     - `redactEmail(null)` returns `"<null>"`
     - `redactEmail(undefined)` returns `"<undefined>"`
@@ -201,8 +201,8 @@ The `callback(true, user.reset_key)` here returns the RAW reset_key VALUE to the
     - Deterministic: same input → same output every call (prefix is raw `substring(0, prefix)`, not a hash — preserves correlation per T-02-08)
 
     Spec block to add to UtilSpec.js (extend the existing `describe("Util", ...)` block, do NOT create a new spec file — UtilSpec.js already covers Util's other statics):
-    - `it("should redact a typical email", ...)` asserting `m***@tmcoy.cz`
-    - `it("should redact a single-char-local email", ...)` asserting `a***@b.cz`
+    - `it("should redact a typical email", ...)` asserting `u***@example.com`
+    - `it("should redact a single-char-local email", ...)` asserting `a***@example.com`
     - `it("should handle empty/null/undefined email defensively", ...)`
     - `it("should redact a malformed email (no @)", ...)`
     - `it("should redact a 64-char hex token with 6-char prefix + Unicode ellipsis", ...)`
@@ -227,7 +227,7 @@ The `callback(true, user.reset_key)` here returns the RAW reset_key VALUE to the
     1. `grep -n "static redactEmail" lib/thinx/util.js` → exactly 1 hit
     2. `grep -n "static redactToken" lib/thinx/util.js` → exactly 1 hit
     3. `grep -c "redactEmail\|redactToken" spec/jasmine/UtilSpec.js` → at least 8 (one per behavior `it`)
-    4. `node -e "const U=require('./lib/thinx/util.js'); console.log(U.redactEmail('matej.sychra@tmcoy.cz'), '|', U.redactToken('a1b2c3d4e5f6g7h8'))"` → `m***@tmcoy.cz | a1b2c3…`
+    4. `node -e "const U=require('./lib/thinx/util.js'); console.log(U.redactEmail('user@example.com'), '|', U.redactToken('a1b2c3d4e5f6g7h8'))"` → `u***@example.com | a1b2c3…`
   </verify>
   <done>
     `Util.redactEmail` and `Util.redactToken` are defined in `lib/thinx/util.js`, both defensive against null/undefined/empty inputs, both deterministic. UtilSpec.js carries at least 8 new `it()` blocks asserting the behaviors listed. `npx jasmine --filter=Util` passes 0 failures. Atomic commit landed with `--no-gpg-sign`.
@@ -393,11 +393,11 @@ The `callback(true, user.reset_key)` here returns the RAW reset_key VALUE to the
        - `feat(util): SEC-PII-01 — add redactEmail/redactToken helpers with unit tests`
        - (Phase 1 close-out commits below these)
     3. Push: `git push origin thinx-staging`. Watch for CI green or red.
-    4. SSH to swarm and trigger deploy. PATH NOTE (per memory `swarm-deploy-script-name`): the actual deploy script on the swarm host is `./restart.sh` at the user's home, NOT `./scripts/stack-deploy` (the latter exists locally but is for ad-hoc local stack-deploy, not production swarm). Connection: `ssh -p2020 root@188.166.23.244` per AGENTS.md L17-19.
-       - `ssh -p2020 root@188.166.23.244 './restart.sh'` — execute restart script on the swarm host.
+    4. SSH to swarm and trigger deploy. PATH NOTE (per memory `swarm-deploy-script-name`): the actual deploy script on the swarm host is `./restart.sh` at the user's home, NOT `./scripts/stack-deploy` (the latter exists locally but is for ad-hoc local stack-deploy, not production swarm). Connection: `ssh micro` per AGENTS.md L17-19.
+       - `ssh micro './restart.sh'` — execute restart script on the swarm host.
        - ESCALATION RULE per Phase 1 lesson: if ssh fails (connection refused, auth error, host key changed) OR restart.sh exits non-zero, STOP IMMEDIATELY. Do NOT proceed to Task 5 log verification (the new image isn't running yet, so any verification would test the OLD code). Surface the exact failure mode to the orchestrator: `ssh exit code: <N>, output: <stderr>`.
-    5. After deploy completes, verify the new image is rolling: `ssh -p2020 root@188.166.23.244 'docker service ps thinx_api --no-trunc | head -5'`. The top row should show a "Preparing" / "Starting" / "Running" task with a new image SHA (different from the prior `0a0e6b32` that Phase 1 deployed). Wait up to 90 seconds for "Running" state; if it stays in "Pending" / "Rejected" for more than 2 minutes, ESCALATE.
-    6. Capture the deployed image SHA: `ssh -p2020 root@188.166.23.244 'docker service inspect thinx_api --format "{{.Spec.TaskTemplate.ContainerSpec.Image}}"'`. Record this SHA for the SUMMARY.
+    5. After deploy completes, verify the new image is rolling: `ssh micro 'docker service ps thinx_api --no-trunc | head -5'`. The top row should show a "Preparing" / "Starting" / "Running" task with a new image SHA (different from the prior `0a0e6b32` that Phase 1 deployed). Wait up to 90 seconds for "Running" state; if it stays in "Pending" / "Rejected" for more than 2 minutes, ESCALATE.
+    6. Capture the deployed image SHA: `ssh micro 'docker service inspect thinx_api --format "{{.Spec.TaskTemplate.ContainerSpec.Image}}"'`. Record this SHA for the SUMMARY.
   </action>
   <verify>
     <automated>cd /Users/igraczech/Repositories/thinx-device-api && bash -c '
@@ -410,7 +410,7 @@ The `callback(true, user.reset_key)` here returns the RAW reset_key VALUE to the
       echo "PRE-PUSH CHECKS PASS"
     '</automated>
     Post-push: CI status check (poll for ~2 min): `gh run list --branch thinx-staging --limit 1 --json status,conclusion`. ESCALATE if conclusion=failure.
-    Post-deploy: `ssh -p2020 root@188.166.23.244 'docker service ps thinx_api --no-trunc | head -3'` — top task is "Running" with a NEW image SHA. ESCALATE if "Rejected" or "Failed".
+    Post-deploy: `ssh micro 'docker service ps thinx_api --no-trunc | head -3'` — top task is "Running" with a NEW image SHA. ESCALATE if "Rejected" or "Failed".
   </verify>
   <done>
     Three commits pushed to `thinx-staging`. CI passed (or, if CI failed for an unrelated reason like a flake, the executor must surface BOTH the spec failure category AND a recommended retry/escalate decision — do not silently retry). Swarm restart triggered via `./restart.sh`. New image rolled in (SHA captured). No silent failures — every step's exit code was inspected.
@@ -435,7 +435,7 @@ The `callback(true, user.reset_key)` here returns the RAW reset_key VALUE to the
       --data '{"email":"never-registered-redaction-probe-2026@thinx.cloud"}'
     ```
     Expected HTTP: 200 (Phase 1 no-enum normalization stays in effect).
-    Tail the swarm logs in another terminal BEFORE running the curl: `ssh -p2020 root@188.166.23.244 'docker service logs thinx_api --tail 50 --follow' | grep -E "(password_reset_init|@)"`.
+    Tail the swarm logs in another terminal BEFORE running the curl: `ssh micro 'docker service logs thinx_api --tail 50 --follow' | grep -E "(password_reset_init|@)"`.
     PASS criteria: log lines contain `n***@thinx.cloud` (or similar redacted form — first char of `never-registered-...` is `n`); NO log line contains the literal local-part `never-registered-redaction-probe-2026`; NO log line contains the full `{body}` CouchDB envelope dump (should be `{rows: 0}` or equivalent count).
     FAIL criteria: any log line contains the raw email local-part OR the full `{body}` envelope.
 
@@ -455,7 +455,7 @@ The `callback(true, user.reset_key)` here returns the RAW reset_key VALUE to the
     **Probe C — Audit-log persisted form in CouchDB (managed_logs):**
     Query the audit log directly to confirm the persisted-to-database string is also redacted (this is the higher-priority leak per CONTEXT D-03):
     ```
-    ssh -p2020 root@188.166.23.244 'docker exec $(docker ps -qf name=couchdb) curl -s -u admin:$COUCH_ADMIN_PASS http://localhost:5984/managed_logs/_all_docs?include_docs=true\&limit=10\&descending=true' | grep -E "(Attempt to reset|Attempt to set)" | head -5
+    ssh micro 'docker exec $(docker ps -qf name=couchdb) curl -s -u admin:$COUCH_ADMIN_PASS http://localhost:5984/managed_logs/_all_docs?include_docs=true\&limit=10\&descending=true' | grep -E "(Attempt to reset|Attempt to set)" | head -5
     ```
     PASS criteria: the recent audit doc message field reads `"Attempt to reset password with: <6hex>…"`; NO 64-char hex token.
     FAIL criteria: any recent audit doc contains a full 64-char hex token in the message field.

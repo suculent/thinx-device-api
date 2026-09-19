@@ -61,7 +61,7 @@ There are also two supporting findings worth knowing during planning: (a) the re
 - **No new npm dependencies.** Build a fix from what's already in `package.json`.
 - **Push to current branch (`thinx-staging`) to trigger CircleCI** — do not wait for the user to do it manually (`AGENTS.md:11`).
 - **Deployment flow:** Push parent → CircleCI builds `thinxcloud/api:latest` and `registry.thinx.cloud:5000/thinx/console:vue` → Swarmpit rolls out service tasks. The parent submodule bump triggers BOTH builds (`AGENTS.md:13-15`).
-- **Swarm host access:** `ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020`, swarm path `/mnt/gluster/deployment/swarm`. Use only if root-cause demands edge config inspection.
+- **Swarm host access:** `ssh micro path `/mnt/gluster/deployment/swarm`. Use only if root-cause demands edge config inspection.
 - **`OPS-swarmpull` is broken** (`MEMORY.md` 2026-05-25 14:44 CET incident): Swarmpit no longer auto-redeploys after a registry push. Manual `./scripts/stack-deploy` works. This affects how you VERIFY the fix landed on rtm — do not assume a parent submodule bump alone deploys.
 
 ## Architectural Responsibility Map
@@ -345,8 +345,7 @@ done
 ### Step 5 — Edge-layer probe (only if Steps 1-4 don't reproduce)
 SSH to the swarm host and curl the Node API directly from inside the overlay network:
 ```bash
-ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020
-docker exec -it $(docker ps -qf 'name=thinx_api') sh
+ssh micro exec -it $(docker ps -qf 'name=thinx_api') sh
 # inside the container
 curl -sS -i -X POST http://localhost:7442/api/v2/password/reset \
      -H 'Content-Type: application/json' \
@@ -379,7 +378,7 @@ Comment out middleware one at a time in `thinx-core.js:316-359`, restart, retry 
 | # | Candidate | Confidence | Evidence | Reproducibility cost |
 |---|-----------|-----------|----------|----------------------|
 | 1 | **Backend JWT branch fires on `Authorization: Bearer null` from the Vue client** | **HIGH** | `lib/router.js:103` matches header presence not validity; Vue `core/api.js:53-57` unconditionally sets `Authorization: Bearer ' + this.refreshToken` (null when logged out); existing test at `ZZ-AppSessionUserV2DeleteSpec.js:85` passes only because it sends *no* `Authorization`. | Free (curl in §Diagnostic Step 2 confirms in < 30 s without any code change). |
-| 2 | Traefik label drift on `rtm.thinx.cloud` adding a header that triggers a different branch | LOW-MEDIUM | No evidence in `docker-swarm.yml` of an Auth-related label change; AGENTS.md changelog doesn't mention one. Plausible only if Step 5 disagrees with Step 3. | Medium — requires ssh to 188.166.23.244 + `docker service inspect`. |
+| 2 | Traefik label drift on `rtm.thinx.cloud` adding a header that triggers a different branch | LOW-MEDIUM | No evidence in `docker-swarm.yml` of an Auth-related label change; AGENTS.md changelog doesn't mention one. Plausible only if Step 5 disagrees with Step 3. | Medium — requires ssh to micro + `docker service inspect`. |
 | 3 | Console-container nginx (`services/console/vue/default.conf`) injecting/stripping headers | LOW | The current `default.conf` is a pass-through (`proxy_set_header Host $host; proxy_set_header X-Forwarded-*`). No body manipulation. No auth-header rewriting. | Low — `cat services/console/vue/default.conf` from this researcher's read. |
 | 4 | `enforceACLHeaders` returning 403 (the seed's CONCERNS #1 suspect) | LOW (debunked) | Re-read of `lib/router.js:32-56`: this function only *sets headers* and never stamps a status. The `'*'` fallback at L52 is just a CORS header, not a 403. Cannot be the source. | Done in this research. |
 | 5 | Helmet adding a request-time guard | LOW (debunked) | `thinx-core.js:52-55` mounts `helmet.frameguard()` and default `helmet()`. Helmet only sets response headers; it never rejects requests with 403. | Done in this research. |
@@ -700,7 +699,7 @@ The seed asked: which pattern is this codebase using for "this route bypasses au
 | CouchDB (in `docker-compose.test.yml`) | DB-backed specs | Available via compose | 3.2.0 (per INTEGRATIONS.md) | — |
 | Redis (in `docker-compose.test.yml`) | Session + JWT secret + queue | Available via compose | 5.x | — |
 | Mosquitto, Influx, transformer, worker | Specs that boot full app | Available via compose | per INTEGRATIONS.md | — |
-| ssh to `188.166.23.244` | Edge-layer diagnostic step (only if needed) | User-provided per AGENTS.md L17-19 | — | Skip §Diagnostic Step 5; use local docker exec as substitute |
+| ssh to `micro` | Edge-layer diagnostic step (only if needed) | User-provided per AGENTS.md L17-19 | — | Skip §Diagnostic Step 5; use local docker exec as substitute |
 | Mailgun API access from rtm | Production email send during UAT | Out of scope to verify | — | Document in `SUMMARY.md` that email delivery is an ops verification, not a phase exit gate |
 | CircleCI | CI runs on push | Yes (per AGENTS.md) | — | — |
 

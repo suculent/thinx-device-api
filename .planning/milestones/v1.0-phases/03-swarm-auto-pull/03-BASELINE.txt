@@ -2,7 +2,7 @@ DRIFT: none — all 8 probe outputs match 03-CONTEXT.md <live_findings> snapshot
 
 # Phase 3 Baseline — Pre-Rung-1 State Snapshot
 # Captured: 2026-05-26 ~16:19 UTC (Task 1)
-# Probe host: ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244
+# Probe host: ssh micro
 
 ## Probe 1 — Wall-clock anchor (`date -u`)
 Tue May 26 16:19:48 UTC 2026
@@ -75,7 +75,7 @@ Old shutdown/failed tasks for context:
 
 ### Step 2 — Trigger restart (`docker service update --force swarmpit_app`)
 Time: 2026-05-26 16:20:50 UTC
-Command: ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "docker service update --force swarmpit_app"
+Command: ssh micro "docker service update --force swarmpit_app"
 Result: "verify: Service swarmpit_app converged" — Docker's built-in 4s × 5-cycle stability check passed.
 
 ### Step 3 — Wait for new task Running (poll every 10s, ≤90s budget)

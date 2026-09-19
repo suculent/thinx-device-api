@@ -29,5 +29,5 @@ micro Failed 6 days ago
 {"results":[{"statement_id":0,"series":[{"name":"DEVICE_CHECKIN","columns":["tagKey"],"values":[["data"],["owner"]]}]}]}
 
 == owner-filtered count (proves fixed query shape returns data) ==
-sample owner: 2e01ab0893ee63eb192e92976540e6bd05674fe42c52743533c3f1a2b6c65bdc
+sample owner: <owner_id redacted — real production owner>
 {"error":"error parsing query: found \\, expected identifier, string, number, bool at line 1, char 57"}

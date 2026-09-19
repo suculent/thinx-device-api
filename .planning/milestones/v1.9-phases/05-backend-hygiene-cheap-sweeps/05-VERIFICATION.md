@@ -180,10 +180,10 @@ The local verifier host has no CouchDB, Redis, MQTT, or `/mnt/data` mount, so th
 2. **Swarmpit autoredeploy ≤5min SLA**
    - Test: After CircleCI green, observe Swarmpit autoredeploy of `thinx_api` service.
    - Expected: Service rolls to new image within 5 minutes.
-   - Why human: Swarm orchestration is on the production host (188.166.23.244).
+   - Why human: Swarm orchestration is on the production host (micro).
 
 3. **Production container reaches `Server up at`**
-   - Test: `ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'docker service logs thinx_api --since 5m | grep "Server up at"'`
+   - Test: `ssh micro 'docker service logs thinx_api --since 5m | grep "Server up at"'`
    - Expected: Returns a match within ~30s of the rollover.
    - Why human: Container reaches `Server up at` only with CouchDB/Redis/MQTT/`/mnt/data` available — none of which exist on the local verifier.
 

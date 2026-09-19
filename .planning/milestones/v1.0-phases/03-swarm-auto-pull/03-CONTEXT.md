@@ -2,12 +2,12 @@
 
 **Gathered:** 2026-05-26
 **Status:** Ready for planning
-**Source:** Live SSH pre-investigation against `188.166.23.244` 2026-05-26 (this is the G8-INVESTIGATION.md analog for Phase 3 — data-driven seed rather than speculative suspect list)
+**Source:** Live SSH pre-investigation against `micro` 2026-05-26 (this is the G8-INVESTIGATION.md analog for Phase 3 — data-driven seed rather than speculative suspect list)
 
 <domain>
 ## Phase Boundary
 
-**In scope:** Diagnose why swarm-side auto-redeploy on `188.166.23.244` stopped working at/around 2026-05-25 14:44 CEST (12:44 UTC) and restore it so a CircleCI registry push of `thinxcloud/api:latest` results in a rolling task update within ~5 minutes, without needing the manual `./restart.sh` workaround.
+**In scope:** Diagnose why swarm-side auto-redeploy on `micro` stopped working at/around 2026-05-25 14:44 CEST (12:44 UTC) and restore it so a CircleCI registry push of `thinxcloud/api:latest` results in a rolling task update within ~5 minutes, without needing the manual `./restart.sh` workaround.
 
 **Out of scope for this phase:**
 - Replacing Swarmpit with a different autoredeploy tool (e.g., Watchtower, Diun, Keel) — that's a v2 migration, not a v1 GA fix
@@ -82,7 +82,7 @@ The phase SUMMARY MUST document, for whichever rung's fix landed:
 - `.planning/codebase/CONCERNS.md` ("Operations Concerns" section) — original generic suspect list (now narrowed)
 
 ### Phase 1 + 2 lessons (apply here)
-- `.planning/phases/01-auth-api-password-reset/01-SUMMARY.md` — Escalate-not-chain rule on operational failure; explicit `-i ~/.ssh/DOKey2` key flag for ssh; verify image SHA rolled BEFORE declaring deploy success
+- `.planning/phases/01-auth-api-password-reset/01-SUMMARY.md` — Escalate-not-chain rule on operational failure; explicit `` key flag for ssh; verify image SHA rolled BEFORE declaring deploy success
 - `.planning/phases/02-pii-logging-scrub/02-SUMMARY.md` — Probe BOTH success and error paths after a fix; opportunistic fixes only count if they share the same atomic commit; document new findings as separate backlog items rather than scope creep
 
 ### Operations references

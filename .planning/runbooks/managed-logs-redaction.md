@@ -2,7 +2,7 @@
 
 Operator-facing procedure for redacting historic PII (raw 64-char hex `reset_key` substrings + raw email patterns) from the `managed_logs` CouchDB database on the THiNX production swarm, AND for operating the forward-going 90-day TTL cron that prevents the leak shape from re-accumulating.
 
-**Swarm SSH:** `ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244` (`micro`); `ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.203.163` (`core`, swarm leader).
+**Swarm SSH:** `ssh micro` (`micro`); `ssh core` (`core`, swarm leader).
 **Stack repo on swarm host:** `/mnt/gluster/deployment/swarm/` (use the `thx` alias on either node).
 **CouchDB credentials:** `/mnt/gluster/thinx/.env` — `COUCHDB_USER`, `COUCHDB_PASSWORD`.
 **CouchDB reachability:** overlay network `thinx_internal` (attachable, spans both nodes); service name `thinx_couchdb` resolves on the overlay; placement drifts (verify with `docker service ps thinx_couchdb`).
@@ -38,7 +38,7 @@ The procedure is: SNAPSHOT-DRY-RUN → REVIEW → APPLY (with mandatory snapshot
 ### Step 1 — Sync repo to the swarm host
 
 ```bash
-ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244
+ssh micro
 cd /mnt/gluster/deployment/swarm/   # or wherever the operator keeps the working checkout
 git fetch origin
 git checkout thinx-staging
@@ -265,7 +265,7 @@ This irreversibility is **accepted by design** — the SEC-PII-02 invariant is t
 
 ## Execution Annex — SEC-PII-02 (OPS-EXEC-02)
 
-**Executed:** 2026-06-05T12:35Z · **Operator:** MS (autonomous session, operator-supervised) · **Host:** `micro` (188.166.23.244) · **CouchDB:** 3.5.1 on overlay `thinx_internal`, service `thinx_couchdb.1` placed on `micro`.
+**Executed:** 2026-06-05T12:35Z · **Operator:** MS (autonomous session, operator-supervised) · **Host:** `micro` · **CouchDB:** 3.5.1 on overlay `thinx_internal`, service `thinx_couchdb.1` placed on `micro`.
 
 **Outcome:** Closed as a **discrepancy branch** — two material deviations from the runbook premise were found and handled in-session.
 

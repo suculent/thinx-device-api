@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.13
 milestone_name: Web Hardening (Console/Edge)
 status: executing
-stopped_at: Completed 21-03-PLAN.md
-last_updated: "2026-07-05T19:08:08.030Z"
-last_activity: 2026-07-05
+stopped_at: Completed 21-03-PLAN.md; SEC-CSP-01 carried further by out-of-plan sessions through 2026-09-19
+last_updated: "2026-09-19T21:40:00.000Z"
+last_activity: 2026-09-19
 progress:
   total_phases: 4
   completed_phases: 0
@@ -16,7 +16,7 @@ progress:
 
 # STATE — THiNX Device API
 
-**Last updated:** 2026-07-04 (v1.13 roadmap created — 2/2 requirements combined into Phase 21)
+**Last updated:** 2026-09-19 (reconciled with ~123 commits that landed outside the plan flow since 2026-07-05)
 
 ## Project Reference
 
@@ -24,15 +24,19 @@ See: `.planning/PROJECT.md`
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
 - **Current focus:** v1.13 Web Hardening (Console/Edge) — Phase 21 (CSP Wildcard Removal + Anti-CSRF Token) is the only phase; it must touch the swarm nginx edge and both console images (legacy AngularJS `services/console/src/default.conf` + Vue `services/console/vue/default.conf`) consistently, plus add server-side CSRF validation to the API's login route.
-- **Latest production image:** `thinxcloud/api:latest sha256:4d3fb789` (v1.0 Phase 4 deploy 2026-05-26T22:35:54Z); influx fix `9b6d931c` live in prod (autoredeployed pipeline-5266); v1.12 Phases 18–20 shipped 2026-06-29 (console submodule bumped for GitHub-token UI + nightshift branches).
+- **Production today (2026-09-19):** api + transformer run on `micro`, not `core`. Classic console image `registry.thinx.cloud:5000/thinx/console:swarm@sha256:27b1ca72` on node `core`, serving the CSP build with no inline scripts; rollback digest `sha256:1906bd5f`. `thinx-staging` publishes to the private registry, `main` to Docker Hub — one registry per branch since `3cfd0666`.
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace. Phase 21 touches BOTH console images (legacy + Vue) directly since the CSP and CSRF findings are console-frontend concerns, not backend-only; coordinate submodule pointer bump as part of Phase 21 deploy.
 
 ## Current Position
 
 Phase: 21 (CSP Wildcard Removal + Anti-CSRF Token) — in progress
-Plan: 4 of 5
-Status: Ready to execute
-Last activity: 2026-07-05
+Plan: 4 of 5 in the GSD flow; SEC-CSP-01 has since been carried past its plan by out-of-plan work
+Status: 21-01..21-03 complete. Production now enforces `script-src` **without** `'unsafe-inline'`
+        (plus `script-src-attr 'none'`) after the classic console's inline scripts were migrated to
+        external assets — further than 21-03 scoped. 21-04 (verification) and 21-05 (runbook) are
+        still unwritten; the evidence they would collect is in the console repo's
+        `docs/superpowers/plans/2026-09-19-csp-inline.md` deploy record.
+Last activity: 2026-09-19
 
 ## Milestones
 
@@ -42,6 +46,67 @@ Last activity: 2026-07-05
 - ✅ **v1.11 — Backlog Drawdown** (shipped 2026-06-06) — Phases 15–17, 4/4 requirements Verified; audit `tech_debt`; see `.planning/MILESTONES.md` + `.planning/milestones/v1.11-ROADMAP.md`
 - ✅ **v1.12 — Inbox Drawdown** (shipped 2026-06-29) — Phases 18–20, 4/4 requirements Verified; see `.planning/MILESTONES.md`
 - 🔄 **v1.13 — Web Hardening (Console/Edge)** (roadmap created 2026-07-04) — Phase 21, 2/2 requirements mapped; phase planning pending
+
+## Since the last state update (2026-07-06 → 2026-09-19)
+
+~123 commits landed on `thinx-staging`/`main` outside the GSD plan flow. Grouped by theme, with
+entry-point commits — none of this is reflected in a phase SUMMARY, so this list is the record:
+
+- **Observability and privacy tooling (Jul 6–15).** Logging quality audit, made call-span aware
+  (`00291f10`, `2a32b4d0`); event taxonomy centralized as one source of truth (`06fbf580`); PII
+  exposure scan report plus `.gitignore` hardening (`48643a53`); privacy-policy consistency checker
+  with a CI spec (`c722c9a6`); bounded severity + secret redaction in the auth modules (`1c7b8616`);
+  roadmap entropy detector (`6ef99e50`).
+- **Dependency and injection sweep (Sep 14–16).** socket.io family to 4.8.3, `ws` pinned 8.21.3,
+  axios 1.20.0, joi/moment bumps (`d9c62c11`, `4d68d9ff`, `33e8e463`); CouchDB callback semantics
+  restored on nano 11 through the new `lib/thinx/couch.js` shim (`0788a7f1`, `77b0760c`); optional
+  CORS enforcement with a warning-only rollout mode (`6ac1f0da`); NoSQL injection sanitizer
+  (`c0980f90`); crypto-js replaced by `node:crypto` for transmit-key decryption (`dcd8234e`);
+  committed Coveralls token removed and coverage collected as CI artifacts (`aefcf8bb`, `54db7afb`);
+  jasmine pinned to 5.x so the order-dependent specs stop shuffling (`b57aa986`).
+- **Image and platform hardening (Sep 17–18).** Docker Hardened Images for base, worker, couchdb and
+  the platformio builder (`8b6683fb`, `09fac716`, `64d32de1`, `f910b8df`); device `timezone_utc`
+  feature from design spec through registration, edit, read and a backfill migration (`6c9bef79`,
+  `e843b871`, `fdaa4eb7`, `f61e3341`, `de1ca0f9`, `a2d6b874`); sslheaders attached to the https
+  router with a corrected trust-proxy allowlist and negotiated cookie `Secure` flag (`3574b983`,
+  `2a54b977`); `docker-swarm.yml` reconciled with the deployed stack (`3cfdc034`); Snyk code, OSS and
+  container monitoring wired into CI including the vendored goauth module (`0935e747` … `e8c3f21f`);
+  test gate repaired so the ZZ-* tier stops being skipped (`3f9f6df3`).
+- **Secrets and pipeline hygiene (Sep 19).** Every secret ENV removed from the api image and
+  publishes pinned to `main` (`7a4a6fcd`) — 13 from the api image including SLACK_WEBHOOK, plus
+  ROLLBAR_ACCESS_TOKEN and REDIS_PASSWORD elsewhere; AQUA_SEC_TOKEN and SNYK_TOKEN had leaked in a
+  published image and were rotated. redis and transformer publish `:latest` again rather than only a
+  SHA tag (`f5af5aec`), which immediately surfaced a latent crash — both redis scripts carried a
+  bash shebang on an Alpine image with no bash, fixed to POSIX `sh`. One registry per branch ends the
+  tag race (`3cfd0666`); all six submodules publish `main` only; console images reach Docker Hub
+  through a second credential pair (`41da13d7`). OAuth authorize host allowlisted with an exact match
+  (`974d389e`). Transformer sandbox: device status moved from interpolated script source to isolate
+  globals, 1000 ms timeout, context release (`7e407973`), and the `POST /do` handler that never bound
+  `this` (`f806d382`). npm dropped from the production image, ~204 MB (`caef2027`). Bootstrap
+  3.3.7 → 3.4.1 in the legacy console (`a40a6f1a`). `master` retired in favour of `main`
+  (`a2337b3b`), PR #554 merged.
+- **This session (Sep 19, late).** Classic-console inline scripts migrated to external assets and
+  deployed; production `script-src` now has no `'unsafe-inline'` and gains `script-src-attr 'none'`
+  (`529be527`, console `33d20bca`). Three unused dependencies dropped and the dead `overrides.ip`
+  entry with them (`3bce59cf`). CodeQL workflow pinned to least privilege (`79736b49`). CODEOWNERS
+  added (`071893e9`). AngularJS digest guard so handlers stop aborting mid-digest — the missing
+  header avatar (`87be96d1`, console `b0d514d`). codebeat removed, the service is gone (`ad103672`).
+  PR #555 (`thinx-staging` → `main`) is open and ready; merging is what publishes to Docker Hub.
+
+## Open Operational Items
+
+Carried from the 2026-09-19 sessions, none of them blocking:
+
+| Item | State |
+|------|-------|
+| PR #555 | Open, ready for review, `MERGEABLE`. Merge publishes `thinxcloud/console:latest`, `:vue` and the api image to Docker Hub. |
+| Aikido | Auth fixed by the operator, never exercised against a real scan. |
+| Aikido branch-protection finding | Recommendation stands: accept-risk the *review* requirement (solo maintainer — GitHub forbids self-approval, so requiring approvals hard-blocks every merge) and enforce status checks, signed commits (already 100% `G`) and no force-push/deletion instead. Same reason CODEOWNERS must not be paired with "Require review from Code Owners" yet. |
+| Private registry flakiness | `docker login registry.thinx.cloud:5000` timed out in two consecutive pipelines on 2026-09-19, both times while another job was pushing an image to it. Both passed on rerun. Worth a retry wrapper on the login step or more I/O headroom on `micro`. |
+| CodeQL workflow staleness | Still triggers on the deleted `master` branch, so only the weekly schedule fires; `github/codeql-action/*@v1` was retired in Jan 2023 and `actions/checkout@v2` is two majors behind. |
+| `couchdb` / `console-build-env` images | Not refreshed — nothing has been pushed to them. |
+| `Dockerfile.test` secrets as ENV | Deliberate. That image is never published. |
+| Snyk `snyk-monitor-console-classic` | Green as of 2026-09-19 (the missing `dockerhub` context was the original cause; the later failure was the registry timeout above). |
 
 ## Deferred Items
 
@@ -79,7 +144,8 @@ Items acknowledged and deferred at prior milestone closes and carried forward:
 
 ### Todos
 
-- Run `/gsd:plan-phase 21` for Phase 21 (CSP Wildcard Removal + Anti-CSRF Token — SEC-CSP-01 + SEC-CSRF-01). This is the only v1.13 phase; plan should decompose into: (a) nginx-edge CSP config change (runbook snapshot), (b) legacy console `default.conf` CSP change, (c) Vue console `default.conf` CSP change, (d) server-side CSRF token generation + validation middleware on the login route, (e) legacy console login-form token wiring, (f) Vue console login-form token wiring, (g) HawkScan rescan verification for both plugins (10055-4, 20012).
+- Reconcile Phase 21 with reality before closing it: 21-01..21-03 shipped, and the inline-script removal deployed on 2026-09-19 took SEC-CSP-01 past what 21-03 scoped. 21-04 (verification) and 21-05 (runbook) should be written against the deployed state, reusing the deploy record in the console repo (`docs/superpowers/plans/2026-09-19-csp-inline.md`) rather than re-deriving it.
+- Authenticated in-browser verification of the CSP build has never run against the deployed instance — the pre-deploy Playwright suites (`src/test/csp/browser.cjs`, `app-browser.cjs`) cover it with fixtures only. That is the one real gap in 21-04.
 - Before closing Phase 21: confirm the Crisp widget (`wss://client.relay.crisp.chat`) and any other explicit-host dependents are enumerated and pinned in the new CSP — a missed host will silently break a console feature post-deploy.
 - Coordinate `services/console` submodule pointer bump as part of Phase 21's deploy (both console images change).
 
@@ -95,11 +161,11 @@ Items acknowledged and deferred at prior milestone closes and carried forward:
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
-| 260531-n72 | Fix latent bugs in apikey.js + harden node-redis client + Slack outage notifier (incident response to 2026-05-31 14:19 UTC thinx_api OOM) | 2026-05-31 | fae0efbd | [260531-n72-fix-the-latent-bugs-in-apikey-js-and-har](./quick/260531-n72-fix-the-latent-bugs-in-apikey-js-and-har/) |
-| 260531-pdi | Refresh LE intermediate allowlist (R10..R14) in thinx-core.js cert rotation-tolerance branch — silences startup SSL verification error caused by R13-issued leaf vs R10-pinned chain | 2026-05-31 | 08e4dbd7 | [260531-pdi-fix-the-let-s-encrypt-r10-r13-cross-sign](./quick/260531-pdi-fix-the-let-s-encrypt-r10-r13-cross-sign/) |
-| 260605-lix | Device check-in did not persist top-level lastupdate (console showed stale "last connected"): `update_device_and_respond` wrote a nested `doc.changes` blob via the flat-merge `devices/modify` handler; also `runDeviceTransformers` had no else branch for transformer-less devices. Fixed both + DeviceSpec (04b) regression. Root cause proven on prod doc 04ed1650. | 2026-06-05 | 6b4a077c | [260605-lix-fix-device-check-in-lastupdate-not-persi](./quick/260605-lix-fix-device-check-in-lastupdate-not-persi/) |
+| 260531-n72 | Fix latent bugs in apikey.js + harden node-redis client + Slack outage notifier (incident response to 2026-05-31 14:19 UTC thinx_api OOM) | 2026-05-31 | fae0efbd | [260531-n72-fix-the-latent-bugs-in-apikey-js-and-har](./archive/quick/260531-n72-fix-the-latent-bugs-in-apikey-js-and-har/) |
+| 260531-pdi | Refresh LE intermediate allowlist (R10..R14) in thinx-core.js cert rotation-tolerance branch — silences startup SSL verification error caused by R13-issued leaf vs R10-pinned chain | 2026-05-31 | 08e4dbd7 | [260531-pdi-fix-the-let-s-encrypt-r10-r13-cross-sign](./archive/quick/260531-pdi-fix-the-let-s-encrypt-r10-r13-cross-sign/) |
+| 260605-lix | Device check-in did not persist top-level lastupdate (console showed stale "last connected"): `update_device_and_respond` wrote a nested `doc.changes` blob via the flat-merge `devices/modify` handler; also `runDeviceTransformers` had no else branch for transformer-less devices. Fixed both + DeviceSpec (04b) regression. Root cause proven on prod doc 04ed1650. | 2026-06-05 | 6b4a077c | [260605-lix-fix-device-check-in-lastupdate-not-persi](./archive/quick/260605-lix-fix-device-check-in-lastupdate-not-persi/) |
 | 260605-inf | Influx stats fix (v1.10 OBS addition): dashboard check-in numbers read 0/stale + API log spammed `error parsing query: found BADSTRING`. Fixed `lib/thinx/influx.js` — tag mismatch (write `owner` vs read `owner_id`), malformed time predicates (stray `'`, Date/number → `'<ISO>'` / `now() - 7d`), `mean`→`count`, `${measurement}`→`${kpi}` loop index, removed malformed helper queries. Return shape preserved (statistics.js + Visits.vue compatible). CI green (pipeline 5266). Live in prod (autoredeployed). | 2026-06-05 | 9b6d931c | (loose commit — folded into v1.10, no quick-task dir) |
-| 260619-lgl | OAuth login failed from the Vue console: Google/GitHub buttons hit `/api/v2/oauth/{google,github}` (Vue API base is `/api/v2`) but the backend only mounted `/api/oauth/*` → `404 Cannot GET`. Dual-mounted the OAuth initiator+callback routes under `/api` and `/api/v2` (parity with `/login`+`/logout`); `redirect_uri` unchanged. Issue #2 (`/static/gdpr.html` 404) is deploy-lag — API code already serves it (`thinx-core.js:433`), ships on deploy. Console pin left at `1191184b`. Deployed via `thinx-staging`. | 2026-06-19 | b92f7c76 | [260619-lgl-oauth-v2-routes-gdpr-static](./quick/260619-lgl-oauth-v2-routes-gdpr-static/) |
+| 260619-lgl | OAuth login failed from the Vue console: Google/GitHub buttons hit `/api/v2/oauth/{google,github}` (Vue API base is `/api/v2`) but the backend only mounted `/api/oauth/*` → `404 Cannot GET`. Dual-mounted the OAuth initiator+callback routes under `/api` and `/api/v2` (parity with `/login`+`/logout`); `redirect_uri` unchanged. Issue #2 (`/static/gdpr.html` 404) is deploy-lag — API code already serves it (`thinx-core.js:433`), ships on deploy. Console pin left at `1191184b`. Deployed via `thinx-staging`. | 2026-06-19 | b92f7c76 | [260619-lgl-oauth-v2-routes-gdpr-static](./archive/quick/260619-lgl-oauth-v2-routes-gdpr-static/) |
 
 ## Cross-Project Touchpoints
 
@@ -109,9 +175,9 @@ Items acknowledged and deferred at prior milestone closes and carried forward:
 
 ## Session Continuity
 
-**Stopped at:** Completed 21-03-PLAN.md
+**Stopped at:** Completed 21-03-PLAN.md in the plan flow; SEC-CSP-01 carried further by direct work through 2026-09-19.
 
-**Next action:** Run `/gsd:plan-phase 21` for Phase 21 (CSP Wildcard Removal + Anti-CSRF Token — SEC-CSP-01 + SEC-CSRF-01). This is the only v1.13 phase.
+**Next action:** Merge PR #555, then write 21-04/21-05 against the deployed state.
 
 ---
 *v1.0 GA backend closures shipped and archived: 2026-05-27 (4/4 v1 requirements Verified)*

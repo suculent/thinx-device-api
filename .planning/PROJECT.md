@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A long-lived Node/Express IoT device API monorepo (`thinx-device-api`) — bootstrap at `thinx-core.js`, 17 API v2 routers under `lib/router.*.js`, MQTT messaging + WebSocket runtime, Redis-backed session + build queue, CouchDB persistence, Docker-based firmware builder. Sibling to the `services/console` submodule (Vue console + legacy AngularJS console under deprecation). Deployed to swarm on `188.166.23.244` via CircleCI image publish + Swarmpit autoredeploy.
+A long-lived Node/Express IoT device API monorepo (`thinx-device-api`) — bootstrap at `thinx-core.js`, 17 API v2 routers under `lib/router.*.js`, MQTT messaging + WebSocket runtime, Redis-backed session + build queue, CouchDB persistence, Docker-based firmware builder. Sibling to the `services/console` submodule (Vue console + legacy AngularJS console under deprecation). Deployed to swarm on `micro` via CircleCI image publish + Swarmpit autoredeploy.
 
 The v1.0 GA milestone (shipped 2026-05-27) closed the 4 v1 backend gaps the Vue console depends on. Going forward, the project scope is the broader backend lifecycle: hygiene refactors, v1.x backlog, the inevitable v2 multi-tenant revamp.
 
@@ -93,7 +93,7 @@ Previously: v1.10 Operational Closures (2026-06-05) — 5/5 requirements across 
 
 - ✓ **AUTH-API-01** — v1.0 (Phase 1) — Unauthenticated `POST /api/v2/password/reset` returns 200 with no-enumeration body; Vue console `Authorization: Bearer null` pattern handled. Class-fix in `lib/router.js` (Bearer-null guard) + body normalization in `lib/router.user.js`. Regression spec `ZZ-RouterPasswordResetSpec.js`.
 - ✓ **SEC-PII-01** — v1.0 (Phase 2) — PII/credentials redacted at 12+1 sites in `lib/thinx/owner.js` via `Util.redactEmail` + `Util.redactToken`. Audit-log writes redacted before CouchDB persistence. Regression spec `ZZ-OwnerLogRedactionSpec.js`.
-- ✓ **OPS-01** — v1.0 (Phase 3) — Swarm autoredeploy restored on `188.166.23.244` via Rung 1 force-restart of `swarmpit_app`. Push-observe SLA 63s vs ≤300s target. Runbook at `.planning/runbooks/swarm.md`.
+- ✓ **OPS-01** — v1.0 (Phase 3) — Swarm autoredeploy restored on `micro` via Rung 1 force-restart of `swarmpit_app`. Push-observe SLA 63s vs ≤300s target. Runbook at `.planning/runbooks/swarm.md`.
 - ✓ **SEC-DEP-01** — v1.0 (Phase 4) — 29 Dependabot alerts classified; 4 `package.json` `overrides` edits shipped via `d8e3176c`; runtime-tree `npm audit --omit=dev` high 9→0; merged to master (#539) + main (#540).
 
 </details>
@@ -125,11 +125,12 @@ Previously: v1.10 Operational Closures (2026-06-05) — 5/5 requirements across 
 ## Context
 
 - **Tech stack:** Node/Express monolith, CommonJS (no ESM migration), chai-http v4 pinned per `AGENTS.md:82-92`
-- **Production deploy:** parent `thinx-staging` push → CircleCI build → image publish → Swarmpit autoredeploy on `188.166.23.244` (SLA ~50-65s observed in v1.0). Manual `./restart.sh` is the fallback (Phase 3 fix made it unnecessary).
+- **Production deploy:** parent `thinx-staging` push → CircleCI build → image publish → Swarmpit autoredeploy on `micro` (SLA ~50-65s observed in v1.0). Manual `./restart.sh` is the fallback (Phase 3 fix made it unnecessary).
+- **Branch model (since 2026-09-19):** `master` is deleted and `main` is the default branch. `main` is protected — direct pushes are rejected (`GH006`), so changes reach it through a PR. `thinx-staging` accepts direct pushes. Since `3cfd0666` the two branches publish to different registries: `thinx-staging` → `registry.thinx.cloud:5000`, `main` → Docker Hub, which ended the race where both wrote the same tags. All six submodules publish from `main` only.
 - **Signing:** GPG-sign commits is the project default; the 2026-05-26 single-session authorization for unsigned commits is recorded in memory `unsigned-commits-260526` and does not carry forward.
 - **AGENTS.md** at parent root is the existing onboarding doc (Codex-runtime convention) — kept as the ops/deploy + dependency-lock rationale reference alongside `.planning/`.
 - **Sibling project:** `services/console/.planning/` has 10 phases shipped (v1.0 frontend) + Phase 11 in flight. Parent v1.0 GA and console v1.0 GA land together; v1.x coordination is per-project but cross-references the shared backlog (SEC-DEP-02 etc.).
-- **Production image at milestone close:** `thinxcloud/api:latest sha256:4d3fb789` (Phase 4 deploy 2026-05-26T22:35:54Z).
+- **Production image at v1.0 milestone close:** `thinxcloud/api:latest sha256:4d3fb789` (Phase 4 deploy 2026-05-26T22:35:54Z). Current production state lives in `STATE.md`, which is where this line stops being maintained.
 
 ## Constraints
 

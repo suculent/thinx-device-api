@@ -63,7 +63,7 @@ completed: 2026-06-02
 
 - Closed SEC-WS-01 in this repo via option (b) of the requirement (REQUIREMENTS.md:27) — documented + tagged deferred. No code change; the reproduction proves the request never reaches Express, so a code-side change would have masked the actual gap.
 - Captured the 7-row reproduction table verbatim from CONTEXT.md (curl-probes against `/`, `/api/v2/users`, `/api/githook`, `/test` × 3 protocol/upgrade variants, `/suculent` real-owner shape — all captured 2026-06-02T21:10-21:11Z). The helmet/CSP/CORS-header presence/absence distinguishes Express-reached (rows 2-3) vs nginx-only (rows 4-7) responses.
-- Documented the concrete operator action: SSH `root@188.166.23.244 -p2020`, `nginx -T` inspection, add a `location ~ ^/[^/]+(/.*)?$` block ordered after `/api/` and `/static/` but before the catch-all `/`, with the WebSocket-required `proxy_http_version 1.1`, `proxy_set_header Upgrade $http_upgrade`, and `proxy_set_header Connection "Upgrade"` directives. `nginx -t` && `systemctl reload nginx` as the apply gate.
+- Documented the concrete operator action: SSH `micro -p2020`, `nginx -T` inspection, add a `location ~ ^/[^/]+(/.*)?$` block ordered after `/api/` and `/static/` but before the catch-all `/`, with the WebSocket-required `proxy_http_version 1.1`, `proxy_set_header Upgrade $http_upgrade`, and `proxy_set_header Connection "Upgrade"` directives. `nginx -t` && `systemctl reload nginx` as the apply gate.
 - Documented the post-fix verification: re-run the same `curl -sI` probes against `/suculent`; success criterion is anything BUT a bare nginx 404 — either 401 (Express reached, app rejected unauthenticated upgrade) or 101 Switching Protocols (Express reached, upgrade succeeded).
 - Pre-created the shared runbook file in Wave 1 so Plan 06-02 (SEC-COOKIE-01, Wave 2) can APPEND its rollback section rather than fall through its defensive-stub fallback path (06-02 Task 3 branch (a)).
 
@@ -91,7 +91,7 @@ All Task 1 + Task 2 acceptance criteria pass:
 | `test -f .planning/runbooks/websocket-handshake.md` | exists | exists |
 | `grep -c "SEC-WS-01"` | ≥ 2 | 5 |
 | `grep -c "deferred to edge-redesign"` | ≥ 1 | 2 |
-| `grep -c "188.166.23.244"` | ≥ 1 | 1 |
+| `grep -c "micro"` | ≥ 1 | 1 |
 | `grep -c "nginx -T"` | ≥ 1 | 3 |
 | `grep -c "proxy_set_header Upgrade"` | ≥ 1 | 1 |
 | `grep -c "rtm.thinx.cloud/suculent"` | ≥ 1 | 2 |
@@ -140,7 +140,7 @@ The 06-01-SUMMARY.md file is untracked in the working tree — that file is orch
 
 None — this plan is documentation-only.
 
-The runbook itself drives a future operator action on the swarm host (`root@188.166.23.244 -p2020` → `nginx -T` → add `location` block → `nginx -t` && `systemctl reload nginx`), but that action is the runbook's contract with the operator, not setup required to use this plan's deliverable.
+The runbook itself drives a future operator action on the swarm host (`micro -p2020` → `nginx -T` → add `location` block → `nginx -t` && `systemctl reload nginx`), but that action is the runbook's contract with the operator, not setup required to use this plan's deliverable.
 
 ## Next Phase Readiness
 

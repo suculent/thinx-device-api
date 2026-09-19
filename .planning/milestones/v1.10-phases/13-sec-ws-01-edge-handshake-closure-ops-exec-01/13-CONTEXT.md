@@ -6,7 +6,7 @@
 <domain>
 ## Phase Boundary
 
-Operator-executed SSH session that adds an nginx `location` block to the `rtm.thinx.cloud` server config on the swarm host (`188.166.23.244`), closing the SEC-WS-01 edge-routing gap that has caused all WebSocket upgrade requests to return 404 instead of 101. The actual `nginx -t` + `systemctl reload nginx` happens off-repo; what lands in this codebase is the prep artifacts, the captured pre-fix probe baseline, the persisted before+after nginx server-block snapshots, the runbook execution annex, a reusable probe script for future regressions, and an explicit rollback section in the runbook.
+Operator-executed SSH session that adds an nginx `location` block to the `rtm.thinx.cloud` server config on the swarm host (`micro`), closing the SEC-WS-01 edge-routing gap that has caused all WebSocket upgrade requests to return 404 instead of 101. The actual `nginx -t` + `systemctl reload nginx` happens off-repo; what lands in this codebase is the prep artifacts, the captured pre-fix probe baseline, the persisted before+after nginx server-block snapshots, the runbook execution annex, a reusable probe script for future regressions, and an explicit rollback section in the runbook.
 
 **In scope:**
 - Single plan (13-01-PLAN.md) with the GSD CHECKPOINT mechanism — executor produces all prep artifacts then returns `## CHECKPOINT REACHED` requesting the operator run the SSH session, then resumes to write the post-fix annex.
@@ -107,7 +107,7 @@ Operator-executed SSH session that adds an nginx `location` block to the `rtm.th
   4. Runbook updated with execution annex (timestamp + initials + pre/post probe output + applied nginx block + operator notes)
   5. Swarm-host nginx config snippet (the FULL server block) persisted under `.planning/runbooks/swarm-configs/` — NOT just an annex note (D-05/D-07 makes this concrete)
 - **D-24:** Test-env ACCEPT pattern (carries forward from Phase 12 D-41): CI canonical green-gate is Jasmine in the Docker test image. Phase 13 adds NO new specs (the spec layer is Phase 12 TEST-WS-01's job). Local gates per plan are static (`shellcheck scripts/probe-rtm-handshake.sh` exit 0; runbook + snapshot file existence checks).
-- **D-25:** Plan checkpoint message MUST give the operator a complete actionable instruction set: (a) SSH command from AGENTS.md:18 (`ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020`), (b) pre-fix snapshot extraction command, (c) edit instructions referencing the runbook procedure, (d) post-fix snapshot extraction command, (e) post-fix probe instruction. No ambiguity; no required interpretation; reproducible by any operator with SSH access.
+- **D-25:** Plan checkpoint message MUST give the operator a complete actionable instruction set: (a) SSH command from AGENTS.md:18 (`ssh micro pre-fix snapshot extraction command, (c) edit instructions referencing the runbook procedure, (d) post-fix snapshot extraction command, (e) post-fix probe instruction. No ambiguity; no required interpretation; reproducible by any operator with SSH access.
 
 ### Claude's Discretion
 
@@ -149,8 +149,7 @@ Operator-executed SSH session that adds an nginx `location` block to the `rtm.th
 - `.planning/runbooks/managed-logs-redaction.md` (Phase 9) — sibling OPS runbook that Phase 14 will execute against
 
 ### Operator credentials + access
-- `AGENTS.md:18` — SSH command verbatim (`ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020`)
-- `AGENTS.md` § "Websocket Findings" (lines 44-55) — original SEC-WS-01 surfacing; console-side fix landed but server-side gap remained
+- `AGENTS.md:18` — SSH command verbatim (`ssh micro `AGENTS.md` § "Websocket Findings" (lines 44-55) — original SEC-WS-01 surfacing; console-side fix landed but server-side gap remained
 - `~/.claude/projects/-Users-igraczech-Repositories-thinx-device-api/memory/thinx-ssl-cert-renewal-gap.md` — adjacent operator-memory pattern (other OPS gaps where operator action lives off-repo)
 
 ### v1.10 Phase 14 sibling
@@ -188,7 +187,7 @@ Operator-executed SSH session that adds an nginx `location` block to the `rtm.th
 - **Phase 13 ↔ `.planning/runbooks/swarm-configs/` (new)** — NEW DIRECTORY. Phase 13 creates it + populates with `rtm.thinx.cloud-server.{pre,post}.nginx` + a README.
 - **Phase 13 ↔ `scripts/probe-rtm-handshake.sh` (new)** — NEW FILE. No coupling to existing scripts.
 - **Phase 13 ↔ `.planning/REQUIREMENTS.md`** — Phase 13 marks OPS-EXEC-01 as Verified in the traceability table at plan close.
-- **Phase 13 ↔ swarm host (`188.166.23.244`)** — operator-executed SSH session; off-repo. Phase 13 does NOT automate this; the CHECKPOINT mechanism bridges the gap.
+- **Phase 13 ↔ swarm host (`micro`)** — operator-executed SSH session; off-repo. Phase 13 does NOT automate this; the CHECKPOINT mechanism bridges the gap.
 
 </code_context>
 

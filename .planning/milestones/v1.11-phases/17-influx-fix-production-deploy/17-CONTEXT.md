@@ -23,7 +23,7 @@ Out of scope: any code change (the fix is already shipped); deploying Phases 15/
 - Pushing + deploying Phases 15/16 is separate milestone-completion work that happens AFTER Phase 17, with its own CI-green gate (the full Jasmine suite runs on that push).
 
 ### Deploy mechanism (from `.planning/runbooks/swarm.md`)
-- SSH: `ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244`
+- SSH: `ssh micro`
 - Stack/deploy dir: `/mnt/gluster/deployment/swarm/` (`restart.sh` is the manual escape hatch).
 - Force the swarm to re-pull `:latest` and restart the API service:
   `docker service update --force thinx_api` (re-pulls the pinned image and reschedules the task).

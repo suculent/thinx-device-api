@@ -2,7 +2,7 @@
 
 **Gathered:** 2026-06-29
 **Status:** Ready for planning
-**Mode:** Authored from `.planning/inbox-tasks/418-docker-secrets-swarm.md`.
+**Mode:** Authored from `.planning/archive/inbox-tasks/418-docker-secrets-swarm.md`.
 
 <domain>
 ## Phase Boundary

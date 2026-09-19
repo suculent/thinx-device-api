@@ -71,7 +71,7 @@
 - `lib/thinx/owner.js` — `password_reset_init` (L486) and `password_reset` (L444) implementations. Logs PII (separate concern: SEC-PII-01 / Phase 2).
 
 ### Operations
-- `AGENTS.md:8-19` — Deployment flow + ssh details for the swarm host `188.166.23.244` (used for edge config inspection if needed).
+- `AGENTS.md:8-19` — Deployment flow + ssh details for the swarm host `micro` (used for edge config inspection if needed).
 - `AGENTS.md:26-27` — "CSP websocket blocking was fixed by allowing connect-src websocket origins in nginx config" / "Backend CORS bug was fixed in lib/router.js by reflecting request origins instead of returning `*` with credentials". Recent edge + backend changes worth bisecting against.
 
 ### Requirement

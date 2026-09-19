@@ -13,7 +13,7 @@ files_modified:
   - .planning/REQUIREMENTS.md
   - AGENTS.md
   # NOTE: This phase's primary "change" is OPERATIONAL (live swarm state on
-  # 188.166.23.244). Code-side commits in this monorepo may be zero (rung 1
+  # micro). Code-side commits in this monorepo may be zero (rung 1
   # outcome) or limited to an AGENTS.md runbook line + STATE/ROADMAP/REQ
   # bookkeeping. The artifacts above are the in-repo paper trail; the actual
   # repair lives outside the source tree.
@@ -25,7 +25,7 @@ user_setup:
     why: "Operational diagnosis + restoration of swarmpit_app on the production swarm host"
     env_vars: []
     dashboard_config:
-      - task: "SSH access to root@188.166.23.244:2020 with key ~/.ssh/DOKey2"
+      - task: "SSH access to micro:2020 with key the operator SSH key"
         location: "Local machine — key already present per Phase 1 + 2 deploys"
       - task: "Read access to /mnt/gluster/deployment/swarm on the swarm host"
         location: "Used by ./restart.sh — must remain functional after any swarmpit edits"
@@ -65,7 +65,7 @@ must_haves:
 ---
 
 <objective>
-Diagnose and restore swarm-side auto-redeploy on `188.166.23.244` so that a CircleCI push of `thinxcloud/api:latest` results in a rolling `thinx_api` task within 5 minutes, without requiring the manual `./restart.sh` workaround. This closes OPS-01 — the last operational v1 GA blocker before Phase 4 (Dependency Triage).
+Diagnose and restore swarm-side auto-redeploy on `micro` so that a CircleCI push of `thinxcloud/api:latest` results in a rolling `thinx_api` task within 5 minutes, without requiring the manual `./restart.sh` workaround. This closes OPS-01 — the last operational v1 GA blocker before Phase 4 (Dependency Triage).
 
 Purpose: Phase 3 is **operational**, not source-code. The pre-investigation in `03-CONTEXT.md` already narrowed the root cause to a degraded `swarmpit_app` (Bad Gateway via Traefik + 2+ hours of zero application logs + 30 hours of zero autoredeploy log lines). This plan executes a locked 4-rung investigation ladder (restart → DB rebuild → stale-node cleanup → Swarmpit upgrade), escalates on failure instead of chaining, and produces a documented root cause + reversion plan + runbook line as the close-out deliverable.
 
@@ -97,7 +97,7 @@ Output:
 - All commits MUST be `--no-gpg-sign` (memory `unsigned-commits-260526`).
 - Commit subject prefix MUST be one of `chore:` / `fix:` / `docs:` (parent commitlint). NEVER `plan:`, `ops:`, `phase:`.
 - Deploy script: `/mnt/gluster/deployment/swarm/restart.sh` per memory `swarm-deploy-script-name` and AGENTS.md L19.
-- Every ssh invocation MUST include `-i ~/.ssh/DOKey2 -p 2020` (Phase 1 plan-check W-04 lesson).
+- Every ssh invocation MUST include ` -p 2020` (Phase 1 plan-check W-04 lesson).
 - Today's date: 2026-05-26.
 </environment_notes>
 
@@ -106,7 +106,7 @@ Output:
 
 SSH connection string (use this EXACT form):
 ```
-ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "<command>"
+ssh micro "<command>"
 ```
 
 Key diagnostic commands (run via ssh):
@@ -156,7 +156,7 @@ Push-and-observe SLA target: NEW thinx_api task transitioning Running with NEW i
   <action>
 SSH to the swarm host and capture the current state of swarmpit_app, thinx_api, and the Docker Hub `thinxcloud/api:latest` digest. The 03-CONTEXT.md `<live_findings>` snapshot was taken ~2026-05-26 17:00 UTC; verify nothing material has drifted before applying Rung 1's fix.
 
-Commands to run (all via `ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "<cmd>"`), capturing stdout+stderr to `03-BASELINE.txt`:
+Commands to run (all via `ssh micro "<cmd>"`), capturing stdout+stderr to `03-BASELINE.txt`:
 
 1. `date -u` — wall-clock anchor
 2. `docker service ls --filter "name=swarmpit"` — confirm all swarmpit_* services running
@@ -233,7 +233,7 @@ Sequence:
 2. **Wait for CircleCI to build + push image to Docker Hub:**
    - Poll Docker Hub every 30 seconds via the swarm host:
      ```
-     ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 \
+     ssh micro \
        "docker pull -q thinxcloud/api:latest 2>&1 | tail -1"
      ```
    - Record the digest from Task 1's baseline as `digest_pre` (e.g., `sha256:950043b4...`).
@@ -287,9 +287,9 @@ What the executor will do once approved:
 
 1. Backup current swarmpit_db data (best-effort):
    ```
-   ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "docker ps --filter 'label=com.docker.swarm.service.name=swarmpit_db' --format '{{.ID}}' | head -1"
+   ssh micro "docker ps --filter 'label=com.docker.swarm.service.name=swarmpit_db' --format '{{.ID}}' | head -1"
    # → use the container ID to dump _all_docs
-   ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "docker exec <db-container-id> curl -s http://localhost:5984/_all_dbs > /tmp/swarmpit_db_backup_$(date +%Y%m%d_%H%M).json"
+   ssh micro "docker exec <db-container-id> curl -s http://localhost:5984/_all_dbs > /tmp/swarmpit_db_backup_$(date +%Y%m%d_%H%M).json"
    ```
    If the backup command fails (CouchDB internal port not exposed, container architecture differs), capture the failure but proceed — backup is best-effort, not gating.
 
@@ -328,13 +328,13 @@ What the executor will do once approved:
 
 1. Confirm the stale node ID `b356ad8e1d60` / IP `10.133.0.4` per 03-CONTEXT.md `<live_findings>` is STILL present in `docker info` output but NOT in `docker node ls`:
    ```
-   ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "docker info 2>&1 | grep -A 5 'Nodes:'"
-   ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "docker node ls"
+   ssh micro "docker info 2>&1 | grep -A 5 'Nodes:'"
+   ssh micro "docker node ls"
    ```
 2. If confirmed stale: force-remove via `docker node rm b356ad8e1d60` (note: this command requires the node to first be down per Docker docs; if it's already absent from `docker node ls`, this may be a no-op or may require `docker swarm leave --force` on a manager).
 3. Verify memberlist gossip timeouts cease (check 5-minute window post-cleanup):
    ```
-   ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "journalctl -u docker --since '5 minutes ago' | grep -c 'memberlist.*timeout'"
+   ssh micro "journalctl -u docker --since '5 minutes ago' | grep -c 'memberlist.*timeout'"
    ```
    Expect 0 (or substantially reduced from pre-cleanup baseline).
 4. Restart swarmpit_app once more (`docker service update --force swarmpit_app`) to give the watcher a fresh fabric view.
@@ -420,7 +420,7 @@ This task ALWAYS runs at the end of the phase. The exact form of the close-out d
    ```
    ## Swarm Auto-Pull Recovery
    - Symptom: swarmpit.thinx.cloud returns Bad Gateway AND `docker service logs swarmpit_app --since 30m` is empty.
-   - Recovery (rung 1 — restart swarmpit watcher): `ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "docker service update --force swarmpit_app"`. Wait for new task Running (`docker service ps swarmpit_app`); verify `curl https://swarmpit.thinx.cloud` returns 200.
+   - Recovery (rung 1 — restart swarmpit watcher): `ssh micro "docker service update --force swarmpit_app"`. Wait for new task Running (`docker service ps swarmpit_app`); verify `curl https://swarmpit.thinx.cloud` returns 200.
    - Verification: push a no-op commit; observe `docker service ps thinx_api` for a new task with the new image SHA within 5 minutes.
    - Reference: `.planning/phases/03-swarm-auto-pull/03-SUMMARY.md` (root cause + reversion plan).
    ```
@@ -476,7 +476,7 @@ This task ALWAYS runs at the end of the phase. The exact form of the close-out d
 
 **Validation gates (apply to either case):**
 - `grep "OPS-01" .planning/REQUIREMENTS.md` shows either `Verified` (Case A) OR a clearly-marked deferral (Case B). Never silently broken.
-- `./restart.sh` path on the swarm host is unchanged (verify with `ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "ls -la /mnt/gluster/deployment/swarm/restart.sh"`).
+- `./restart.sh` path on the swarm host is unchanged (verify with `ssh micro "ls -la /mnt/gluster/deployment/swarm/restart.sh"`).
 - The thinx_api service on the swarm is still healthy (`curl -s -o /dev/null -w "%{http_code}\n" https://rtm.thinx.cloud/api/v2/spec` returns 200).
   </action>
   <verify>
@@ -544,13 +544,13 @@ Phase 3 is COMPLETE when ALL of the following are true:
 
 | Source | Item | Covered by |
 |--------|------|------------|
-| GOAL (ROADMAP §3) | "Restore swarm-side auto-redeploy on 188.166.23.244 so that a parent-monorepo push triggering a registry image build results in a rolling task update without operator intervention" | Tasks 2 + 3 (Rung 1 fix + SLA test) |
+| GOAL (ROADMAP §3) | "Restore swarm-side auto-redeploy on micro so that a parent-monorepo push triggering a registry image build results in a rolling task update without operator intervention" | Tasks 2 + 3 (Rung 1 fix + SLA test) |
 | GOAL (ROADMAP §3) | "Target SLA: rolling task within 5 minutes of push completion" | Task 3 (push-observe with 5-min PASS gate) |
 | GOAL (ROADMAP §3 criterion 1) | "Root cause is documented... in `.planning/phase-3/`" | Task 7 (03-SUMMARY.md `## Root cause` section) |
 | GOAL (ROADMAP §3 criterion 2) | "Controlled push-and-observe verification on rtm" | Task 3 |
 | GOAL (ROADMAP §3 criterion 3) | "A reversion plan is documented in the phase close-out" | Task 7 (03-SUMMARY.md `## Reversion plan`); rung-specific reversions in Tasks 2, 4, 5, 6 |
 | GOAL (ROADMAP §3 criterion 4) | "The manual `./scripts/stack-deploy` workaround remains functional as a fallback" | Tasks 1 + 7 (file-existence check before AND after); all rung tasks have "do not break ./restart.sh" guardrail |
-| REQ (REQUIREMENTS.md OPS-01) | "Swarm-side auto-pull on 188.166.23.244 resumes working" | Tasks 2 + 3 |
+| REQ (REQUIREMENTS.md OPS-01) | "Swarm-side auto-pull on micro resumes working" | Tasks 2 + 3 |
 | REQ (OPS-01 validation a) | "root-cause documented" | Task 7 |
 | REQ (OPS-01 validation b) | "controlled push-and-observe verification on rtm" | Task 3 |
 | REQ (OPS-01 validation c) | "reversion plan documented if fix introduces regression" | Task 7 + per-rung reversions in Tasks 2-6 |

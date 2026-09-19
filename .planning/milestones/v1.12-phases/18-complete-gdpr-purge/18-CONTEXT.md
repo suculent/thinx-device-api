@@ -2,7 +2,7 @@
 
 **Gathered:** 2026-06-28
 **Status:** Ready for planning
-**Mode:** Authored from `/gsd-inbox` triage task note (`.planning/inbox-tasks/353-gdpr-complete-purge.md`) — spec is concrete with verified file:line references, so interactive discuss was skipped.
+**Mode:** Authored from `/gsd-inbox` triage task note (`.planning/archive/inbox-tasks/353-gdpr-complete-purge.md`) — spec is concrete with verified file:line references, so interactive discuss was skipped.
 
 <domain>
 ## Phase Boundary

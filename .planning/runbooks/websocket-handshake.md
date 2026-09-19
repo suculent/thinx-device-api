@@ -1,5 +1,8 @@
 # WebSocket Handshake Runbook
 
+> `micro` and `core` are the SSH aliases in the operator's `~/.aliases`; host, port, user and
+> key live there rather than in this public repository.
+
 Operational runbook for WebSocket-related issues on `rtm.thinx.cloud`. Currently documents SEC-WS-01 (rtm handshake 404 — edge nginx routing gap). Plan 06-02 (SEC-COOKIE-01) appends a rollback section to this file.
 
 ---
@@ -47,8 +50,7 @@ The fix lives on the swarm host, NOT in this repo.
 1. **SSH to the swarm host** (per `AGENTS.md:18`):
 
    ```bash
-   ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020
-   ```
+   ssh micro
 
 2. **Inspect the current nginx config** (the `rtm.thinx.cloud` server block):
 
@@ -223,7 +225,7 @@ curl -sI -c /tmp/thx-cookies.txt -X POST https://rtm.thinx.cloud/api/login \
 
    Commit body MUST name (a) the observed regression symptom (e.g., "Vue console login succeeds but WS subscribe fails immediately with cookie-undefined console error"), and (b) link to the SEC-COOKIE-01 SUMMARY at `.planning/phases/06-websocket-surface-hardening/06-02-SUMMARY.md` for context.
 
-4. **Push to `thinx-staging`.** CircleCI builds and pushes `thinxcloud/api:latest`; Swarmpit autoredeploy rolls the new image to the swarm host `188.166.23.244` within ~5 minutes (per the canonical autoredeploy SLA in `.planning/runbooks/swarm.md`).
+4. **Push to `thinx-staging`.** CircleCI builds and pushes `thinxcloud/api:latest`; Swarmpit autoredeploy rolls the new image to the swarm host `micro` within ~5 minutes (per the canonical autoredeploy SLA in `.planning/runbooks/swarm.md`).
 
 5. **Verify the regression is resolved** by reloading the Vue console at `https://rtm.thinx.cloud/app` in a fresh browser session, logging in, and confirming the WS subscribe round-trip completes (DevTools Network tab, filter on WS, status `101 Switching Protocols`).
 
@@ -278,8 +280,7 @@ This diagnosis check distinguishes "SEC-WS-01 caused this" from an unrelated reg
 1. **SSH to the swarm host** (verbatim per `AGENTS.md:18`):
 
    ```bash
-   ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020
-   ```
+   ssh micro
 
 2. **Restore the pre-fix nginx server block from the persisted snapshot.** Locate the `rtm.thinx.cloud` server block in `/etc/nginx/sites-enabled/` (or wherever this swarm host's nginx layout places it — confirm via `nginx -T 2>&1 | grep -B2 'server_name rtm.thinx.cloud'`). Replace the current server block with the contents of `.planning/runbooks/swarm-configs/rtm.thinx.cloud-server.pre.nginx` (transferred to the swarm host via `scp` from a developer workstation or `git pull` of the `thinx-device-api` repo's `thinx-staging` branch).
 

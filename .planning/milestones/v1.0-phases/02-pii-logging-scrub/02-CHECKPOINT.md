@@ -30,7 +30,7 @@ both emit only the redacted forms. That requires a side-by-side `docker logs
 In **terminal 1** (start tail FIRST, then run curl in terminal 2):
 
 ```bash
-ssh -p 2020 -i ~/.ssh/DOKey2 root@188.166.23.244 \
+ssh micro \
   'docker service logs thinx_api --tail 5 --follow' \
   | grep -E '\''(password_reset_init|@|cloud)'\''
 ```
@@ -76,7 +76,7 @@ test-stack and is sufficient evidence for the success path.
 In **terminal 1** (continue tailing or restart):
 
 ```bash
-ssh -p 2020 -i ~/.ssh/DOKey2 root@188.166.23.244 \
+ssh micro \
   'docker service logs thinx_api --tail 5 --follow' \
   | grep -E '\''(reset_key|password|alog|Attempt)'\''
 ```
@@ -113,7 +113,7 @@ This is the **highest-priority** check — the audit log persists indefinitely
 in CouchDB and is queryable, unlike the rotating stdout.
 
 ```bash
-ssh -p 2020 -i ~/.ssh/DOKey2 root@188.166.23.244 \
+ssh micro \
   'CID=$(docker ps -qf name=thinx_couchdb); \
    docker exec "$CID" curl -s -u admin:$COUCH_ADMIN_PASS \
      "http://localhost:5984/managed_logs/_all_docs?include_docs=true&limit=20&descending=true"' \

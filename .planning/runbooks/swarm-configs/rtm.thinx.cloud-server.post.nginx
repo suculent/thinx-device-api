@@ -1,6 +1,6 @@
 # Captured: 2026-06-05T10:30Z
 # Source: docker exec -ti e2aaae86b53c nginx -T (inside thinx_vue.1.hqwfyi29x6xmbai3k2fjp9row container)
-# Host: micro (root@188.166.23.244)
+# Host: micro
 # Service: thinx_vue (registry.thinx.cloud:5000/thinx/console:vue)
 # Routing: Traefik routes rtm.thinx.cloud -> this container's port 80; container nginx has server_name localhost which matches any host header
 # Captured by: MS (operator initials)

@@ -127,7 +127,7 @@ None — no new security-relevant surface introduced. The runbook is documentati
 1. **Snapshot retention policy** — recommended 90 days mirroring the forward-TTL window, then `shred -u`. Operator decision; runbook documents the recommendation but does not enforce it programmatically.
 2. **Cron design-doc shape OUT OF SCOPE** — per `09-CONTEXT.md`, the design doc lives on the swarm-host side; the runbook ships the cron recipe as a starting template the operator adapts. This keeps Phase 9 closed without requiring the design doc to be merged in this repo.
 3. **Runbook format follows `swarm.md` verbatim** — operator-facing tone, SSH access blurb, `# expect:` verification comments, horizontal-rule section dividers. The `websocket-handshake.md` precedent informed the more discursive prose sections (Pre-flight, GDPR Posture).
-4. **No credentials, no real PII, no real doc IDs** — all examples use `${COUCHDB_USER}` / `${COUCHDB_PASSWORD}` env-var refs and `<doc _id>` placeholders. The IP `188.166.23.244` is already published in `AGENTS.md` and `swarm.md` (repo-public-OK posture) — no new sensitive data introduced.
+4. **No credentials, no real PII, no real doc IDs** — all examples use `${COUCHDB_USER}` / `${COUCHDB_PASSWORD}` env-var refs and `<doc _id>` placeholders. The IP `micro` is already published in `AGENTS.md` and `swarm.md` (repo-public-OK posture) — no new sensitive data introduced.
 
 ## References
 
