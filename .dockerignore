@@ -4,3 +4,6 @@ package-lock.json
 tools/
 conf/
 clair*
+# Go build outputs (mosquitto auth plugin) belong in the broker image only;
+# stale local copies otherwise ship in the API image and get scanned as stdlib.
+**/*.so
