@@ -103,23 +103,55 @@ Upgrading would require:
 
 **Trigger to reconsider:** only if Snyk/Dependabot flags a CVE in `superagent` v3 (the underlying transitive dep).
 
-### Builder base images — pin to `ubuntu:20.04`, do NOT bump
+### Builder base images — 22.04 is the ceiling, do NOT bump past it
 
-The three firmware builders (`builders/nodemcu-docker-build`, `builders/mongoose-docker-build`,
-`builders/micropython-docker-build`) are pinned to `FROM ubuntu:20.04`. A bump to `ubuntu:26.04`
-was attempted and rolled back on 2026-06-28 — all three break, each for a different, non-trivial
-reason (verified by local `docker build` of each on `ubuntu:26.04`):
+Current state (check the `FROM` line before trusting this list):
+
+| builder | base image |
+|---|---|
+| `builders/nodemcu-docker-build` | `ubuntu:22.04` — verified building 2026-09-20 |
+| `builders/micropython-docker-build` | `ubuntu:22.04` |
+| `builders/mongoose-docker-build` | `ubuntu:20.04` — still on the old pin |
+
+A bump to `ubuntu:26.04` was attempted and rolled back on 2026-06-28 — all three break, each for a
+different, non-trivial reason (verified by local `docker build` of each on `ubuntu:26.04`):
 
 - **micropython** — 26.04 dropped `python2` / `python2-dev` from the archive. The esp-open-sdk
-  fork (`pfalcon/esp-open-sdk`) is Python 2-only, so there is no in-place fix.
+  fork (`pfalcon/esp-open-sdk`) is Python 2-only, so there is no in-place fix. 22.04 still ships
+  `python2` in universe, which is why 22.04 is fine.
 - **mongoose** — `ppa:mongoose-os/mos` publishes no `resolute` (26.04) pocket: `apt-get update`
-  returns `404 … resolute Release` and `mos-latest` is unlocatable. Blocked upstream, not on our side.
+  returns `404 … resolute Release` and `mos-latest` is unlocatable. Blocked upstream, not on our
+  side. Whether the PPA has a `jammy` (22.04) pocket has not been tested — leave it on 20.04 until
+  someone does.
 - **nodemcu** — esp-open-sdk's bundled crosstool-NG toolchain fails to build against the 26.04
-  host GCC/glibc: `configure: error: could not find a working compiler`.
+  host GCC/glibc: `configure: error: could not find a working compiler`. It builds clean on 22.04.
 
 **Trigger to reconsider:** only when the upstream esp-open-sdk / mongoose-os toolchains gain a
-modern-Ubuntu-compatible release. Bumping past 20.04 requires replacing those toolchains, not just
+modern-Ubuntu-compatible release. Bumping past 22.04 requires replacing those toolchains, not just
 the `FROM` line.
+
+### nodemcu builder — newlib tarball pre-seeded on purpose
+
+`builders/nodemcu-docker-build/Dockerfile` downloads `newlib-2.0.0.tar.gz` into
+`/home/nodemcu/tarballs` and appends `CT_LOCAL_TARBALLS_DIR` + `CT_CONNECT_TIMEOUT=60` to
+esp-open-sdk's `crosstool-config-overrides` before running `make`. Do not "simplify" this away.
+
+crosstool-NG 1.22 lists three newlib mirrors in `scripts/build/libc/newlib.sh`, but two are dead on
+arrival: the `{a,b}` mirror list lives in a shell variable, and bash does brace expansion *before*
+parameter expansion, so those two expand to the literal words `{http://mirrors.kernel.org/…,` and
+`ftp://sourceware.org/pub/newlib}`. Only `http://mirrors.kernel.org/sources.redhat.com/newlib`
+survives — a single mirror, fetched for a 15 MB file under a 10s timeout.
+
+**Symptom when it flakes:** the Docker build dies in `RUN cd /home/nodemcu/esp-open-sdk/ && make`
+with `Build failed in step 'Retrieving needed toolchain components' tarballs'` /
+`do_libc_get[scripts/build/libc/newlib.sh@26]`. This looks like a base-image/compiler problem and
+is not one — everything before it (autoconf, `./configure`, kconfig, `ct-ng xtensa-lx106-elf`) has
+already succeeded. Seen on CircleCI 2026-09-17 (run `aa3f2ead`) while the identical image built
+clean locally minutes earlier.
+
+The pinned version tracks `CT_LIBC_NEWLIB_V_2_0_0` in the upstream sample config
+`crosstool-NG/samples/xtensa-lx106-elf/crosstool.config` — bump the URL, the sha256 and that
+setting together.
 
 ### Builder CI checkout — HTTPS, not SSH
 
