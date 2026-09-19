@@ -21,6 +21,84 @@ describe("Sanitka", function () {
     expect(s).to.equal(null);
   });
 
+  // Both values end up inside a shell command string built in sources.js /
+  // devices.js / builder.js and executed by git.js (exec.execSync). The
+  // sanitizers are allowlists; a backtick, $(...), ;, |, newline or a space
+  // must never pass. See also scripts/test-shell-safety.js, which additionally
+  // executes the built commands.
+  const SHELL_PAYLOADS = {
+    "backtick": "`touch /tmp/pwned`",
+    "command substitution": "$(touch /tmp/pwned)",
+    "semicolon": "; touch /tmp/pwned",
+    "pipe": "| touch /tmp/pwned",
+    "newline": "\ntouch /tmp/pwned",
+    "space": " touch /tmp/pwned",
+    "ampersand": "&& touch /tmp/pwned",
+    "single quote": "'; touch /tmp/pwned; '",
+    "double quote": "\"; touch /tmp/pwned; \""
+  };
+
+  Object.keys(SHELL_PAYLOADS).forEach(function (label) {
+    let payload = SHELL_PAYLOADS[label];
+
+    it("should reject branch containing " + label, function () {
+      expect(sanitka.branch("main" + payload)).to.equal(null);
+      expect(sanitka.branch(payload)).to.equal(null);
+    });
+
+    it("should reject URL containing " + label, function () {
+      expect(sanitka.url("https://github.com/suculent/thinx-device-api.git" + payload)).to.equal(null);
+      expect(sanitka.url("git@github.com:suculent/thinx-device-api.git" + payload)).to.equal(null);
+    });
+  });
+
+  it("should reject branch starting with a dash (git argument injection)", function () {
+    expect(sanitka.branch("--upload-pack=touch /tmp/pwned")).to.equal(null);
+  });
+
+  it("should reject branch with path traversal, trailing slash, .lock or @{", function () {
+    expect(sanitka.branch("feature/../../etc")).to.equal(null);
+    expect(sanitka.branch("main/")).to.equal(null);
+    expect(sanitka.branch("main.lock")).to.equal(null);
+    expect(sanitka.branch("main@{1}")).to.equal(null);
+  });
+
+  it("should default to main for undefined and null branch", function () {
+    expect(sanitka.branch(undefined)).to.equal("main");
+    expect(sanitka.branch(null)).to.equal("main");
+  });
+
+  it("should strip a leading origin/ from a valid branch", function () {
+    expect(sanitka.branch("origin/master")).to.equal("master");
+    expect(sanitka.branch("origin/main")).to.equal("main");
+  });
+
+  it("should accept valid branch names unchanged", function () {
+    expect(sanitka.branch("main")).to.equal("main");
+    expect(sanitka.branch("feature/THX-123_new-thing")).to.equal("feature/THX-123_new-thing");
+    expect(sanitka.branch("v1.0.0")).to.equal("v1.0.0");
+  });
+
+  it("should accept valid git URLs and return them unchanged", function () {
+    let urls = [
+      "https://github.com/suculent/thinx-device-api.git",
+      "http://example.com/repo.git",
+      "https://user:token@github.com/suculent/private.git",
+      "ssh://git@github.com:22/suculent/thinx-device-api.git",
+      "git://example.com/repo.git",
+      "git@github.com:suculent/thinx-device-api.git"
+    ];
+    urls.forEach(function (url) {
+      expect(sanitka.url(url)).to.equal(url);
+    });
+  });
+
+  it("should reject URLs without an accepted scheme", function () {
+    expect(sanitka.url("file:///etc/passwd")).to.equal(null);
+    expect(sanitka.url("ext::sh -c touch% /tmp/pwned")).to.equal(null);
+    expect(sanitka.url("github.com/suculent/thinx-device-api.git")).to.equal(null);
+  });
+
   it("should de-escape (delete) dangerous shell characters \", \', ;", function () {
     var s = sanitka.deescape("\"\';;;\"");
     expect(s).to.equal(null);
