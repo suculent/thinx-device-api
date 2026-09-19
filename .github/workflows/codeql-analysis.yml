@@ -9,10 +9,21 @@ on:
   schedule:
     - cron: '0 18 * * 5'
 
+# Least privilege: every job starts read-only, and the one job that needs to
+# write gets exactly that scope below. Without this block GITHUB_TOKEN inherits
+# the repository default, which can include write access to contents/packages.
+permissions:
+  contents: read
+
 jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read          # actions/checkout
+      security-events: write  # upload the SARIF results to code scanning
+      actions: read           # read workflow run metadata (needed on private repos)
 
     strategy:
       fail-fast: false

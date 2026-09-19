@@ -1,0 +1,37 @@
+# Code owners for suculent/thinx-device-api.
+#
+# There is one maintainer today, so the global rule would be enough on its own.
+# The path rules below exist to keep the sensitive surfaces explicitly owned as
+# collaborators are added, and to make review of those paths a deliberate act
+# rather than an accident of who happened to open the PR.
+#
+# This file assigns reviewers; by itself it blocks nothing. It only gates merges
+# once branch protection on main turns on "Require review from Code Owners" —
+# which, with a single owner, would block every merge, because GitHub does not
+# let you approve your own pull request. Enable that rule only after a second
+# reviewer with write access exists.
+
+*                           @suculent
+
+# CI/CD: anything that can publish an image, deploy, or mint a token
+/.circleci/                 @suculent
+/.github/                   @suculent
+/.githooks/                 @suculent
+/Dockerfile                 @suculent
+/Dockerfile.test            @suculent
+
+# Dependency surface
+/package.json               @suculent
+/package-lock.json          @suculent
+/.snyk                      @suculent
+
+# Authentication, session handling and request middleware
+/lib/middleware/            @suculent
+/lib/router.*.js            @suculent
+/lib/thinx/oauth-github.js  @suculent
+/lib/thinx/oauth_return.js  @suculent
+/lib/thinx/origins.js       @suculent
+
+# Runtime configuration and deployment topology
+/conf/                      @suculent
+/services/                  @suculent
