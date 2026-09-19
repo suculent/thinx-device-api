@@ -134,7 +134,6 @@ services:
       context: .
       dockerfile: ./Dockerfile
       args:
-        - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
         - 'ENVIRONMENT=${ENVIRONMENT}'
         - 'REVISION=${REVISION}'
         - 'ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}'
@@ -143,7 +142,6 @@ services:
         - 'THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}'
         - 'WORKER_SECRET=${WORKER_SECRET}'
     environment:
-      - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
       - 'COUCHDB_PASS=${COUCHDB_PASS}'
       - 'COUCHDB_USER=${COUCHDB_USER}'
       - 'ENVIRONMENT=${ENVIRONMENT}'

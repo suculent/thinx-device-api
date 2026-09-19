@@ -152,6 +152,15 @@ jobs:
           image: thinx/console
           registry: registry.thinx.cloud:5000
           tag: 'vue'
+      # Mirror the same image to Docker Hub as thinxcloud/console:vue.
+      # Re-tagging the image we just built keeps Hub and the private registry
+      # bit-identical; a second docker/build would rebuild and diverge.
+      - docker/check
+      - run:
+          name: Mirror to Docker Hub (thinxcloud/console:vue)
+          command: |
+            docker tag registry.thinx.cloud:5000/thinx/console:vue thinxcloud/console:vue
+            docker push thinxcloud/console:vue
       - run:
           name: Mark deploy SUCCESS
           command: circleci run release update thinx-console-vue --status=SUCCESS
@@ -192,6 +201,15 @@ jobs:
           image: thinx/console
           registry: registry.thinx.cloud:5000
           tag: 'swarm'
+      # Mirror the same image to Docker Hub as thinxcloud/console:latest.
+      # The internal tag stays 'swarm' (that is what the stack pulls); 'latest'
+      # is the public-facing name that already exists on Hub.
+      - docker/check
+      - run:
+          name: Mirror to Docker Hub (thinxcloud/console:latest)
+          command: |
+            docker tag registry.thinx.cloud:5000/thinx/console:swarm thinxcloud/console:latest
+            docker push thinxcloud/console:latest
       - run:
           name: Mark deploy SUCCESS
           command: circleci run release update thinx-console-classic --status=SUCCESS
@@ -223,7 +241,10 @@ jobs:
       - docker/build:
           image: thinxcloud/api
           dockerfile: ./Dockerfile
-          extra_build_args: --build-arg AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN} --build-arg SNYK_TOKEN=${SNYK_TOKEN} --build-arg ENVIRONMENT=${ENVIRONMENT} --build-arg REVISION=$(git describe --abbrev=0) --build-arg COMMIT_SHA=$CIRCLE_SHA1 --build-arg ENTERPRISE=${ENTERPRISE}
+          # AQUA_SEC_TOKEN / SNYK_TOKEN are deliberately not passed: the scanners
+          # run as their own CircleCI jobs, and passing them here baked the live
+          # values into the public thinxcloud/api image.
+          extra_build_args: --build-arg ENVIRONMENT=${ENVIRONMENT} --build-arg REVISION=$(git describe --abbrev=0) --build-arg COMMIT_SHA=$CIRCLE_SHA1 --build-arg ENTERPRISE=${ENTERPRISE}
           tag: 'latest'
       - docker/push:
           digest-path: /tmp/digest.txt
@@ -703,6 +724,8 @@ workflows:
       
       - build-console-classic:
           context:
+            # dockerhub is required for the thinxcloud/console:latest mirror
+            - dockerhub
             - thinx-docker-repo
             - console
           filters:

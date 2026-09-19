@@ -111,7 +111,6 @@ services:
       context: .
       dockerfile: ./Dockerfile
       args:
-        - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
         - 'COUCHDB_PASS=${COUCHDB_PASS}'
         - 'COUCHDB_USER=${COUCHDB_USER}'
         - 'ENVIRONMENT=${ENVIRONMENT}'
@@ -133,7 +132,6 @@ services:
       # mosquitto` and cascading MQTT-dependent spec failures. Widen the pool so
       # concurrent lookups don't starve. Test-only; no production impact.
       - 'UV_THREADPOOL_SIZE=64'
-      - 'AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}'
       - 'COUCHDB_PASS=${COUCHDB_PASS}'
       - 'COUCHDB_USER=${COUCHDB_USER}'
       - 'ENVIRONMENT=${ENVIRONMENT}'
