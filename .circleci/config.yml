@@ -859,6 +859,14 @@ workflows:
           dockerfile: services/console/src/Dockerfile
           submodules: true
           context:
+            # dockerhub carries SNYK_TOKEN. Without it this job installed the
+            # Snyk CLI and then failed its own preflight with "SNYK_TOKEN is
+            # empty", so the console-classic image was never monitored.
+            # Order matters: dockerhub first, then thinx-docker-repo, so the
+            # private-registry DOCKER_LOGIN/DOCKER_PASSWORD win the name
+            # collision and the registry.thinx.cloud:5000 pull still works.
+            # This mirrors snyk-monitor-console-vue, which already passes.
+            - dockerhub
             - thinx-docker-repo
             - console
           requires:
