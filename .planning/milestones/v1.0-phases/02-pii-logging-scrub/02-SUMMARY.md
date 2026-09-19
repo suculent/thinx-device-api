@@ -16,7 +16,7 @@ plans:
 ## What shipped
 
 - **`lib/thinx/util.js`** — Two new static helpers added (commit `0de30806`):
-  - `Util.redactEmail(email)` — first-char + `***` + `@` + domain (e.g., `m***@tmcoy.cz` from `matej.sychra@tmcoy.cz`)
+  - `Util.redactEmail(email)` — first-char + `***` + `@` + domain (e.g., `u***@example.com` from `user@example.com`)
   - `Util.redactToken(token, prefix=6)` — first-6-chars + `…` (Unicode U+2026 ellipsis)
   - Both defensive on `null`/`undefined`/empty; deterministic (preserves log correlation across emissions)
   - 8 new `it()` blocks in `spec/jasmine/UtilSpec.js` covering the spec contract
@@ -42,7 +42,7 @@ All three commits live on `thinx-staging` and deployed as image `thinxcloud/api:
 
 `lib/thinx/owner.js` had 12+ `console.log` and `alog.log` emissions that interpolated raw PII or credential material into the log line:
 
-- **Emails:** `password_reset_init` not-found error log at the legacy L499 dumped the raw `email` parameter (e.g., `[password_reset_init] email matej.sychra@tmcoy.cz not found in ...`)
+- **Emails:** `password_reset_init` not-found error log at the legacy L499 dumped the raw `email` parameter (e.g., `[password_reset_init] email user@example.com not found in ...`)
 - **Reset keys:** seven sites across `password_reset`, `set_password_reset`, `resetUserWithKey`, `sendResetEmail` dumped the 64-character `reset_key` token in plaintext to either stdout or the CouchDB `managed_logs` audit table
 - **Activation tokens:** `sendActivationEmail` prod log line, `activate` debug log, `set_password_activation` debug log all dumped the activation token in plaintext
 - **Mailgun access token:** `sendMail` error callback dumped the entire `err` object via template-string interpolation — per the inline comment "receives instance of accesstoken(!?)", the `err` carries the Mailgun API key when the call fails
@@ -89,8 +89,8 @@ The plan's `<interfaces>` table flagged a `body` envelope dump in the `password_
 The Phase 2 fix only addresses NEW emissions. The existing CouchDB `managed_logs` database contains **658,808 docs** as of 2026-05-26, and a random sample shows many historic entries with the OLD raw-reset_key format:
 
 ```
-Attempt to set password with: 53d97b305c88081c744e764ddc7c52dc7b98b74cd503c0f96ae799624014b644
-Attempt to reset password with: 72a1510d090868d056ceea048653ac6fefc6d55ebd3f12932ac65dbb1eba6a65
+Attempt to set password with: <reset_key redacted — 64-hex, sample taken from production logs>
+Attempt to reset password with: <reset_key redacted — 64-hex, sample taken from production logs>
 ```
 
 This is a separate GDPR-adjacent retention concern. Phase 2's fix prevents the leak from continuing; cleanup of historic data is filed as `SEC-PII-02` in v1.x/v2 deferred (see REQUIREMENTS.md update). Likely remediation paths: (a) one-time scrub via a CouchDB `_bulk_docs` UPDATE with redacted message strings, (b) bulk delete of all audit entries older than the relevant retention window, (c) introduce an `audit_log` TTL.
@@ -115,7 +115,7 @@ Cross-referenced with memory `swarm-deploy-script-name` and AGENTS.md L19: the c
 
 ## Next phase
 
-**Phase 3 — Swarm Auto-Pull** (OPS-01). Diagnose and restore swarm-side auto-redeploy on `188.166.23.244`. Less mechanical than Phase 2 — needs investigation of the Swarmpit watcher / registry webhook / manifest mismatch.
+**Phase 3 — Swarm Auto-Pull** (OPS-01). Diagnose and restore swarm-side auto-redeploy on `micro`. Less mechanical than Phase 2 — needs investigation of the Swarmpit watcher / registry webhook / manifest mismatch.
 
 Run `/gsd-plan-phase 3` when ready.
 

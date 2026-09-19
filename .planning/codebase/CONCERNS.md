@@ -245,7 +245,7 @@
 - Symptom: after CircleCI pushes `registry.thinx.cloud:5000/thinx/console:vue`, Swarmpit no longer auto-redeploys the service task. Manual `./scripts/stack-deploy` (at `/Users/igraczech/Repositories/thinx-device-api/scripts/stack-deploy`) works.
 - `docker-swarm.yml` carries `swarmpit.service.deployment.autoredeploy=true` labels on all relevant services (L49, L99, L130, L155, L185, L249, L297) — config is in place; the failure is downstream (Swarmpit watcher or registry-notification path).
 - **Recon to do:**
-  1. SSH to `root@188.166.23.244 -p2020` (per AGENTS.md L17-19).
+  1. SSH to `micro -p2020` (per AGENTS.md L17-19).
   2. Check Swarmpit container logs: `docker service logs swarmpit_app --since 2h`.
   3. Verify the registry → Swarmpit webhook (if any) is still configured.
   4. Confirm the swarm node can pull from `registry.thinx.cloud:5000` without manual `--with-registry-auth`.

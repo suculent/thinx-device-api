@@ -52,8 +52,7 @@ Suggested order — cheap → expensive:
 
 3. **Check edge config on rtm:**
    ```bash
-   ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020
-   # Look at swarm:
+   ssh micro Look at swarm:
    cd /mnt/gluster/deployment/swarm
    # Inspect Traefik labels and nginx config for /api/v2/password/* paths
    ```

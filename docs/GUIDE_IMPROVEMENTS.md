@@ -35,7 +35,7 @@ intentionally small so this PR stays easy to review.
 
 - **Endpoints section points to a missing script.** Line ~234 reads
   _"See 03-test.sh."_ but no `03-test.sh` exists anywhere in the repo (the only
-  shell scripts in root are `codeclimate.sh`, `copy-envs.sh`,
+  shell scripts in root are `copy-envs.sh`,
   `docker-entrypoint.sh`). Meanwhile `docs/APIs.md` now catalogs the API
   endpoints. **Suggestion:** replace the reference with a link to
   `docs/APIs.md`, and drop the "no point of maintaining documentation … user

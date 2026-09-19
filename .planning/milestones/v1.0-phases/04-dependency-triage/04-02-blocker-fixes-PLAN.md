@@ -118,7 +118,7 @@ Swarmpit autoredeploy (Phase 3's load-bearing fix):
   Watcher polls docker hub for digest change
   On new digest: emits `INFO: Service ... ( thinx_api ) autoredeploy fired! DIGEST: [ old ] -> [ new ]`
   Expected SLA: ≤120s from new digest to new thinx_api task Running
-  Fallback if stalled: `ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "docker service update --force swarmpit_app"` (Rung 1 recovery procedure per AGENTS.md / .planning/runbooks/swarm.md)
+  Fallback if stalled: `ssh micro "docker service update --force swarmpit_app"` (Rung 1 recovery procedure per AGENTS.md / .planning/runbooks/swarm.md)
 
 Per-package transitive paths (post-fix verification, via `npm ls`):
   follow-redirects:
@@ -348,10 +348,10 @@ GHSA IDs closed by this commit (7 total — for commit body "Alerts closed" refe
     3. Watch CircleCI: `gh run list --branch thinx-staging --limit 3 --workflow build-api-cloud` (or the exact workflow ID for thinx-device-api). Poll every ~60s until a run for the new commit SHA appears and reaches conclusion. Budget: 15 minutes from t0 to CI green. If CI red: STOP. Read the failing step's log via `gh run view <run-id> --log-failed`; diagnose; revert the override commit on thinx-staging if necessary (`git revert HEAD && git push`); halt this slice and consult with operator.
     4. On CI green at time t1: capture the new image digest. Either via `gh run view <run-id> --log` and grep for the published sha256, or via `curl -s https://hub.docker.com/v2/repositories/thinxcloud/api/tags/latest/ | jq -r '.digest'`.
     5. Watch Swarmpit autoredeploy. Expected SLA: ≤120s from t1 to new thinx_api task Running. Methods (any one suffices):
-       - `ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "docker service ps thinx_api --no-trunc --format '{{.Name}} {{.Image}} {{.CurrentState}}' | head -3"` — look for a new task with the new digest in Running state, recent timestamp.
+       - `ssh micro "docker service ps thinx_api --no-trunc --format '{{.Name}} {{.Image}} {{.CurrentState}}' | head -3"` — look for a new task with the new digest in Running state, recent timestamp.
        - `curl -i https://rtm.thinx.cloud/api/v2/spec` — response header should advertise the new image SHA.
     6. On autoredeploy stall (>5 min after CI green with no new task): trigger Rung 1 recovery per `.planning/runbooks/swarm.md`:
-       - `ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "docker service update --force swarmpit_app"`
+       - `ssh micro "docker service update --force swarmpit_app"`
        - Wait 60-120s, re-check service ps. Phase 3 documented this as the load-bearing recovery procedure.
     7. On autoredeploy success at t2: verify the contract smoke tests:
        a. Phase 1 contract: `curl -X POST https://rtm.thinx.cloud/api/v2/password/reset -H 'Authorization: Bearer null' -H 'Content-Type: application/json' -d '{"email":"x@y"}'` — MUST return HTTP 200 with the standard success body shape.

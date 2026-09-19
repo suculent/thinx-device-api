@@ -190,8 +190,7 @@ Workflows / jobs:
 5. Production console URL: `https://rtm.thinx.cloud/`
 
 **Swarm host access (from AGENTS.md):**
-- `ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020`
-- Swarm path: `/mnt/gluster/deployment/swarm`
+- `ssh micro Swarm path: `/mnt/gluster/deployment/swarm`
 
 ## Edge / Reverse Proxy
 

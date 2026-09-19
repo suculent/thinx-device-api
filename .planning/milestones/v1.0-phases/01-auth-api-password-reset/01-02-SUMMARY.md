@@ -29,7 +29,7 @@ The existing `ZZ-AppSessionUserV2DeleteSpec.js:85-97` unauth-POST test would not
 
 ### Task 2 — Push, CI, deploy
 
-Pushed `thinx-staging` (`e3c9a112` then `c67d9afd`). CircleCI built the new image; restart.sh invoked twice on the swarm host `188.166.23.244` via SSH (per AGENTS.md L17-19 ssh details; note that the actual script is `./restart.sh`, not `./scripts/stack-deploy` as docs say — see [[swarm-deploy-script-name]]).
+Pushed `thinx-staging` (`e3c9a112` then `c67d9afd`). CircleCI built the new image; restart.sh invoked twice on the swarm host `micro` via SSH (per AGENTS.md L17-19 ssh details; note that the actual script is `./restart.sh`, not `./scripts/stack-deploy` as docs say — see [[swarm-deploy-script-name]]).
 
 Two deploys this wave:
 

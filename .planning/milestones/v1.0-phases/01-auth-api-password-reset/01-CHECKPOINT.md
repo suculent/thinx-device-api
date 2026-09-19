@@ -31,7 +31,7 @@ CircleCI `main` workflow on commit `3413166c`: **completed=success** at ~04:30 f
 
 ### Deploy status
 
-- Swarm host: `188.166.23.244` (alias `micro`), swarm path `/mnt/gluster/deployment/swarm`.
+- Swarm host: `micro` (alias `micro`), swarm path `/mnt/gluster/deployment/swarm`.
 - Deploy script: `./restart.sh` (rolling `docker stack deploy --with-registry-auth -c ./thinx.yml thinx`). **NOTE:** the plan referenced `./scripts/stack-deploy` based on console-Phase-11 / AGENTS.md convention, but this repo's swarm stack uses `./restart.sh` — applied Rule 3 (auto-fix blocking issue, unambiguous correct path).
 - Pre-deploy image: `thinxcloud/api:latest@sha256:6d82429b...3faa26`.
 - Post-deploy image: `thinxcloud/api:latest@sha256:6a57af1b...c567d`.
@@ -59,7 +59,7 @@ Probe 1 also carries `access-control-allow-origin: https://rtm.thinx.cloud` in t
 
 ### Pre-conditions
 
-- Working test mailbox you control (your `corpus.cz` mailbox or a sandbox address you can read).
+- Working test mailbox you control (any sandbox mailbox you can read).
 - A registered THiNX account whose email matches that mailbox. If you don't already have one on rtm, use your existing account or create one via `Sign up` on the console.
 - A modern browser (Chrome / Firefox / Safari). Use **incognito/private** to ensure no stale `x-thx-core` session cookie.
 
@@ -96,7 +96,7 @@ Probe 1 also carries `access-control-allow-origin: https://rtm.thinx.cloud` in t
 
 ### What to look for if something goes wrong
 
-- **"Forgot password?" returns 403:** deploy didn't actually roll. Re-check via `ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'docker service ps thinx_api --no-trunc | head -3'`. Image digest should be `sha256:6a57af1b...c567d` (post-deploy) — if you see `6d82429b...` (pre-deploy) the rollover regressed.
+- **"Forgot password?" returns 403:** deploy didn't actually roll. Re-check via `ssh micro 'docker service ps thinx_api --no-trunc | head -3'`. Image digest should be `sha256:6a57af1b...c567d` (post-deploy) — if you see `6d82429b...` (pre-deploy) the rollover regressed.
 - **"Forgot password?" returns 200 but no email arrives:** Mailgun config issue on rtm. NOT a Phase 1 regression. Document and surface; `approved-with-mailgun-note` resume signal is fine.
 - **Reset link from email opens but GET round-trip returns 401:** `getPasswordReset` handler at `lib/router.user.js:26-37` regressed — NOT touched by this plan; surface as an ops problem.
 - **Login after reset fails:** `postPasswordSet` regressed — NOT touched by this plan; surface as an ops problem.

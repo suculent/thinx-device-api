@@ -6,6 +6,45 @@ orbs:
 
 commands:
 
+  registry-login:
+    description: >
+      docker login, retried. Replaces the orb's docker/check, which logs in once
+      and fails the whole job on a single timeout. The private registry runs on
+      the same host that serves image pulls, and it stops answering /v2/ while it
+      absorbs a concurrent push: four jobs died that way on 2026-09-19
+      ("context deadline exceeded"), every one of them green on a plain rerun.
+      The env-var preflight the orb did is kept, since a missing context should
+      still fail immediately rather than burn the retries.
+    parameters:
+      registry:
+        type: string
+        default: docker.io
+    steps:
+      - run:
+          name: Docker login (<< parameters.registry >>)
+          command: |
+            if [ -z "$DOCKER_LOGIN" ] || [ -z "$DOCKER_PASSWORD" ]; then
+              echo "DOCKER_LOGIN/DOCKER_PASSWORD are not set; check this job's contexts." >&2
+              exit 1
+            fi
+
+            for attempt in 1 2 3 4 5; do
+              if echo "$DOCKER_PASSWORD" \
+                | docker login -u "$DOCKER_LOGIN" \
+                    --password-stdin << parameters.registry >>; then
+                exit 0
+              fi
+
+              if [ "$attempt" -lt 5 ]; then
+                delay=$(( attempt * 10 ))
+                echo "login attempt $attempt failed, retrying in ${delay}s" >&2
+                sleep "$delay"
+              fi
+            done
+
+            echo "docker login to << parameters.registry >> failed 5 times" >&2
+            exit 1
+
   install-snyk:
     description: >
       Install a pinned Snyk CLI, verify its published SHA-256, and confirm
@@ -86,7 +125,7 @@ jobs:
       - setup_remote_docker:
           version: previous
       - checkout
-      - docker/check
+      - registry-login
       - run:
           name: Clean up artifacts
           command: |
@@ -163,7 +202,7 @@ jobs:
           condition:
             equal: ["registry", << parameters.publish >>]
           steps:
-            - docker/check:
+            - registry-login:
                 registry: registry.thinx.cloud:5000
             - docker/push:
                 digest-path: /tmp/digest.txt
@@ -244,7 +283,7 @@ jobs:
           condition:
             equal: ["registry", << parameters.publish >>]
           steps:
-            - docker/check:
+            - registry-login:
                 registry: registry.thinx.cloud:5000
             - docker/push:
                 digest-path: /tmp/digest.txt
@@ -321,7 +360,7 @@ jobs:
           condition:
             equal: ["hub", << parameters.publish >>]
           steps:
-            - docker/check
+            - registry-login
             - docker/push:
                 digest-path: /tmp/digest.txt
                 image: thinxcloud/api
@@ -335,7 +374,7 @@ jobs:
           condition:
             equal: ["registry", << parameters.publish >>]
           steps:
-            - docker/check:
+            - registry-login:
                 registry: registry.thinx.cloud:5000
             - run:
                 name: Push to private registry (thinx/api:swarm)
@@ -546,7 +585,7 @@ jobs:
                 name: Fetch all dependencies (esp. console)
                 command: |
                   git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
-      - docker/check:
+      - registry-login:
           registry: << parameters.registry >>
       - install-snyk
       - run:

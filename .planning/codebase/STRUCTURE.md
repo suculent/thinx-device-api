@@ -23,7 +23,6 @@ thinx-device-api/
 ├── cypress.json              # Cypress config (used by console submodule)
 ├── karma.conf.js             # Karma config (legacy)
 ├── commitlint.config.js      # Conventional commits gate
-├── codeclimate.json
 ├── sonar-project.properties
 ├── shiftleft.yml
 ├── stackhawk.yml

@@ -13,7 +13,7 @@ requires:
 provides:
   - "Main session cookie x-thx-core ships with httpOnly: true (thinx-core.js:316). The stale 'temporarily disabled due to websocket debugging' debugging-era comment is removed."
   - "Regression spec at spec/jasmine/ZZ-CookieAttributeSpec.js asserts that the Set-Cookie: x-thx-core= response header on a session-establishing endpoint INCLUDES the HttpOnly RFC 6265 attribute. Also regression-baits against stringly-typed mis-encodings (HttpOnly=true / HttpOnly=false)."
-  - "Runbook section ## SEC-COOKIE-01 Rollback Procedure appended to .planning/runbooks/websocket-handshake.md documenting the < 5min operator-side revert path (edit line 316 → commit on thinx-staging with subject `revert(SEC-COOKIE-01): restore httpOnly: false pending WS investigation` → push → Swarmpit autoredeploy to 188.166.23.244)."
+  - "Runbook section ## SEC-COOKIE-01 Rollback Procedure appended to .planning/runbooks/websocket-handshake.md documenting the < 5min operator-side revert path (edit line 316 → commit on thinx-staging with subject `revert(SEC-COOKIE-01): restore httpOnly: false pending WS investigation` → push → Swarmpit autoredeploy to micro)."
   - "Closes SEC-COOKIE-01 milestone-v1.9 debt requirement. Narrows XSS-stealable-cookie surface for x-thx-core; idempotent re-assertion at lib/router.auth.js:106 (OAuth post-login override) survives unchanged."
 
 affects:
@@ -112,7 +112,7 @@ Documented in `.planning/runbooks/websocket-handshake.md` under `## SEC-COOKIE-0
 Steps (operator-side):
 1. Edit `thinx-core.js:~316`: change `httpOnly: true,` back to `httpOnly: false,`. Do NOT re-add the stale comment.
 2. Commit on `thinx-staging` with subject `revert(SEC-COOKIE-01): restore httpOnly: false pending WS investigation`.
-3. Push. CircleCI builds + pushes `thinxcloud/api:latest`; Swarmpit autoredeploys to `188.166.23.244` within ~5 min.
+3. Push. CircleCI builds + pushes `thinxcloud/api:latest`; Swarmpit autoredeploys to `micro` within ~5 min.
 4. Verify by reloading the Vue console at `https://rtm.thinx.cloud/app` — WS subscribe round-trip should resume.
 
 The runbook also names the post-rollback follow-up: file a quick-task identifying the JS-side `document.cookie` reader, patch the reader to use server-supplied session data, then re-attempt SEC-COOKIE-01. The regression spec is expected to FAIL during the rollback window — that failure is the canonical signal that SEC-COOKIE-01 needs a re-attempt.
@@ -140,7 +140,7 @@ Per Phase 5 ACCEPT pattern, `npm test` aborts locally on missing `/mnt/data/conf
 | 13 | `grep -c "httpOnly: false" .planning/runbooks/websocket-handshake.md` | ≥ 1 | 2 ✓ |
 | 14 | `grep -c "revert(SEC-COOKIE-01)" .planning/runbooks/websocket-handshake.md` | ≥ 1 | 1 ✓ |
 | 15 | `grep -c "thinx-staging" .planning/runbooks/websocket-handshake.md` | ≥ 1 | 3 ✓ |
-| 16 | `grep -c "188.166.23.244" .planning/runbooks/websocket-handshake.md` | ≥ 1 | 2 ✓ |
+| 16 | `grep -c "micro" .planning/runbooks/websocket-handshake.md` | ≥ 1 | 2 ✓ |
 | 17 | `grep -c "SEC-WS-01" .planning/runbooks/websocket-handshake.md` | ≥ 1 (06-03 content survives) | 6 ✓ |
 | 18 | `git log -1 --pretty=format:'%s'` | exact subject | matches ✓ |
 | 19 | `git log -1 --stat` | 3 files changed | 3 files ✓ |

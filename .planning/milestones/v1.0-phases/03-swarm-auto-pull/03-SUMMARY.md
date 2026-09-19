@@ -47,12 +47,12 @@ metrics:
 
 # Phase 3 SUMMARY — Swarm Auto-Pull (OPS-01) — VERIFIED
 
-Closes the third v1 GA backend blocker. Swarm-side auto-redeploy on `188.166.23.244` is restored: a CircleCI push of `thinxcloud/api:latest` now results in a rolling `thinx_api` task within 5 minutes (observed delta: **63 seconds**), without operator invocation of `./restart.sh`. Root cause was a silent-watcher degradation of Swarmpit 1.9; a clean force-restart of the swarmpit_app service was the smallest possible fix and succeeded on the first attempt.
+Closes the third v1 GA backend blocker. Swarm-side auto-redeploy on `micro` is restored: a CircleCI push of `thinxcloud/api:latest` now results in a rolling `thinx_api` task within 5 minutes (observed delta: **63 seconds**), without operator invocation of `./restart.sh`. Root cause was a silent-watcher degradation of Swarmpit 1.9; a clean force-restart of the swarmpit_app service was the smallest possible fix and succeeded on the first attempt.
 
 ## What changed
 
 **Operational action (no source-code commits in this monorepo for the fix itself):**
-- `ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "docker service update --force swarmpit_app"` executed 2026-05-26 16:20:50 UTC.
+- `ssh micro "docker service update --force swarmpit_app"` executed 2026-05-26 16:20:50 UTC.
 - This rolled the swarmpit_app service task without changing image or config — equivalent to a graceful process restart from within the swarm fabric.
 
 **In-repo paper trail (this phase's documentation/bookkeeping commits):**
@@ -90,7 +90,7 @@ This is a **state issue, not a config issue** — Swarmpit's labels and DOCKER_A
 Specific to the Rung 1 fix (force-restart of swarmpit_app). If post-fix behavior degrades — though it has not as of 2026-05-26 16:31 UTC — execute the rollback:
 
 ```bash
-ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "docker service rollback swarmpit_app"
+ssh micro "docker service rollback swarmpit_app"
 ```
 
 **Expected side effects:**
@@ -111,7 +111,7 @@ Content (excerpt — full version with commands, verification, and rollback in `
 
 > **Symptom:** `swarmpit.thinx.cloud` returns Bad Gateway AND `docker service logs swarmpit_app --since 30m` is empty.
 >
-> **Recovery (rung 1):** `ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "docker service update --force swarmpit_app"`. Wait ~90s for the new task to boot; verify `curl https://swarmpit.thinx.cloud` returns 200 and `docker service logs swarmpit_app --since 2m` is non-empty.
+> **Recovery (rung 1):** `ssh micro "docker service update --force swarmpit_app"`. Wait ~90s for the new task to boot; verify `curl https://swarmpit.thinx.cloud` returns 200 and `docker service logs swarmpit_app --since 2m` is non-empty.
 >
 > **Verification:** push a no-op commit; observe `docker service ps thinx_api` for a new task with the new image SHA within 5 minutes.
 >
@@ -193,7 +193,7 @@ These are pre-existing config issues in `/mnt/gluster/deployment/swarm/*.yml` fi
 
 *Phase: 03-swarm-auto-pull*
 *Verified: 2026-05-26 (Rung 1 PASS; SLA delta 63s; 237s under target)*
-*Author: Claude (executor) + matej.sychra@corpus.cz (operator)*
+*Author: Claude (executor) + @suculent (operator)*
 
 ## Self-Check: PASSED
 

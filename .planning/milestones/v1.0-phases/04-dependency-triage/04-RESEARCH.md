@@ -6,7 +6,7 @@
 
 ## Project context
 
-`thinx-device-api` is a Node 22 / Express 5 IoT device API deployed as a Docker Swarm service on `188.166.23.244`. Phase 4 closes the final v1 GA backend requirement (SEC-DEP-01): classify every open GitHub Dependabot finding as v1-blocker or v1.x-deferred, ship blocker fixes via `package.json` direct bumps / `overrides` block edits / code mitigations, and document the post-fix `npm audit` baseline at `.planning/dep-triage.md`. The codebase carries a hard `chai-http` v4 lock (16 ZZ-* spec files with 216 `chai.request(thx.app)` call sites — verified by grep) that prevents bumping `chai-http` regardless of CVE pressure. The fix vector of record is the existing `overrides` block at `package.json` L97-L136 (38 pins, already used to suppress transitive CVEs).
+`thinx-device-api` is a Node 22 / Express 5 IoT device API deployed as a Docker Swarm service on `micro`. Phase 4 closes the final v1 GA backend requirement (SEC-DEP-01): classify every open GitHub Dependabot finding as v1-blocker or v1.x-deferred, ship blocker fixes via `package.json` direct bumps / `overrides` block edits / code mitigations, and document the post-fix `npm audit` baseline at `.planning/dep-triage.md`. The codebase carries a hard `chai-http` v4 lock (16 ZZ-* spec files with 216 `chai.request(thx.app)` call sites — verified by grep) that prevents bumping `chai-http` regardless of CVE pressure. The fix vector of record is the existing `overrides` block at `package.json` L97-L136 (38 pins, already used to suppress transitive CVEs).
 
 ## Source reconciliation — Dependabot vs Snyk vs npm audit
 

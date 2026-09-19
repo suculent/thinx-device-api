@@ -17,7 +17,7 @@ Future OPS phases targeting additional hosts (e.g., `swarmpit.thinx.cloud`, mosq
 
 ## Snapshot capture recipe
 
-Run on the swarm host as root (after `ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020`), once before the edit and once after:
+Run on the swarm host as root (after `ssh micro before the edit and once after:
 
 ```bash
 nginx -T 2>&1 | awk '/server_name rtm.thinx.cloud/,/^}/' > rtm.thinx.cloud-server.pre.nginx

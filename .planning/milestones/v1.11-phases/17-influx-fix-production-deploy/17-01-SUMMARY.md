@@ -6,7 +6,7 @@
 
 ## What happened
 
-Phase 17 set out to force-rollout the influx stats fix (`9b6d931c`, quick-task `260605-inf`) to production. Operator-authorized SSH probing of the production swarm host (`188.166.23.244`) revealed the fix was **already live** — the swarm had autoredeployed `thinxcloud/api:latest` (CircleCI pipeline 5266) ~17 hours earlier, and that image contains the fix.
+Phase 17 set out to force-rollout the influx stats fix (`9b6d931c`, quick-task `260605-inf`) to production. Operator-authorized SSH probing of the production swarm host (`micro`) revealed the fix was **already live** — the swarm had autoredeployed `thinxcloud/api:latest` (CircleCI pipeline 5266) ~17 hours earlier, and that image contains the fix.
 
 Rather than re-roll an identical, healthy image (pure restart risk, ~1–2 min downtime, zero benefit), the phase resolved as a **discrepancy branch** — verify the fix is live and operating, persist the evidence + runbook annex, and close. This mirrors v1.10's OPS-EXEC-01/02 resolutions.
 

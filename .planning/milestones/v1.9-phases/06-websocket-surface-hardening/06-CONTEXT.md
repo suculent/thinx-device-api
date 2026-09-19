@@ -81,7 +81,7 @@ This is reachable evidence: the absence of helmet/CSP/CORS headers in the `/test
 - **Why NOT a code-side fix:** The reproduction proves the request never reaches Express. There is nothing to fix in this repo's code for SEC-WS-01 (REFACTOR-03 is a separate, real code gap that needs fixing on its own merits, but that's not the rtm 404 root cause). A code-side change would mask the actual issue and could create false hope.
 - **Action items in the runbook:**
   1. **Root cause statement** — edge nginx route gap (with the 7-row reproduction table).
-  2. **Operator action** — `nginx -T` on swarm host (`root@188.166.23.244 -p2020`) to confirm current rtm.thinx.cloud config. Add the missing `location ~ ^/[^/]+(/.*)?$` block (or however the route is best expressed without conflicting with `/api/*` / `/static/*`).
+  2. **Operator action** — `nginx -T` on swarm host (`micro -p2020`) to confirm current rtm.thinx.cloud config. Add the missing `location ~ ^/[^/]+(/.*)?$` block (or however the route is best expressed without conflicting with `/api/*` / `/static/*`).
   3. **Tag:** "deferred to edge-redesign" per the requirement's option (b) — fix lives on the swarm host, not in this repo.
   4. **Post-fix verification:** re-run the same `curl -sI` probe and confirm `/suculent` now returns either 401 (Express rejection, no auth) or 101 (successful upgrade) — anything but a bare nginx 404.
 

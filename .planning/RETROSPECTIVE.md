@@ -11,7 +11,7 @@
 
 - **AUTH-API-01** — Class-fix Bearer-null guard in `lib/router.js` + no-enumeration body normalization in `lib/router.user.js`; new `ZZ-RouterPasswordResetSpec.js` regression spec; Vue console `Authorization: Bearer null` pattern (frontend half) now harmless
 - **SEC-PII-01** — `Util.redactEmail` + `Util.redactToken` helpers, sweep across 12+1 PII-leak sites in `lib/thinx/owner.js` (audit-log writes redacted before CouchDB persistence); `ZZ-OwnerLogRedactionSpec.js` regression coverage
-- **OPS-01** — Restored swarm-side autoredeploy on `188.166.23.244` via Rung 1 force-restart of `swarmpit_app`; push-observe SLA 63s vs ≤300s target; canonical runbook at `.planning/runbooks/swarm.md`
+- **OPS-01** — Restored swarm-side autoredeploy on `micro` via Rung 1 force-restart of `swarmpit_app`; push-observe SLA 63s vs ≤300s target; canonical runbook at `.planning/runbooks/swarm.md`
 - **SEC-DEP-01** — Triaged 29 Dependabot alerts (7 blocker / 19 deferred-stale / 3 deferred-dev-only) via `.planning/dep-triage.md`; 4 surgical `package.json` `overrides` edits in atomic commit `d8e3176c`; runtime-tree `npm audit --omit=dev` high 9→0; merged to master+main (PRs #539, #540)
 
 ### What Worked

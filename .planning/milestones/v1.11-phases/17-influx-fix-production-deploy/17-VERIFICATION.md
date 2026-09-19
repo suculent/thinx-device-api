@@ -18,7 +18,7 @@ resolution: discrepancy-branch
 |-----|--------|----------|
 | OPS-EXEC-03 | **satisfied** | Influx fix `9b6d931c` confirmed live in prod via operator-authorized SSH |
 
-## Evidence (production swarm 188.166.23.244, 2026-06-06)
+## Evidence (production swarm micro, 2026-06-06)
 
 | Check | Result |
 |-------|--------|
