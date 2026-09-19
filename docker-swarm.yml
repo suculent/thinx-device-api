@@ -138,7 +138,7 @@ services:
         - "traefik.http.routers.thinx-db-https.tls.certresolver=le"
         - "traefik.http.routers.thinx-db-https.middlewares=couch-auth,error-pages-middleware"
 
-        - traefik.http.middlewares.couch-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
+        - traefik.http.middlewares.couch-auth.basicauth.users=${COUCH_USERNAME?Variable not set}:${COUCH_HASHED_PASSWORD?Variable not set}
 
   thinx-redis:
     networks:
@@ -480,7 +480,7 @@ services:
 
         - swarmpit.service.deployment.autoredeploy=true
 
-        - traefik.http.middlewares.influx-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
+        - traefik.http.middlewares.influx-auth.basicauth.users=${INFLUX_USERNAME?Variable not set}:${INFLUX_HASHED_PASSWORD?Variable not set}
         - traefik.http.routers.thinx-influx-https.middlewares=influx-auth,error-pages-middleware
         - traefik.http.routers.thinx-influx-http.middlewares=influx-auth,error-pages-middleware
 
@@ -524,5 +524,5 @@ services:
 
         - swarmpit.service.deployment.autoredeploy=true
 
-        - traefik.http.middlewares.chrono-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
+        - traefik.http.middlewares.chrono-auth.basicauth.users=${CHRONO_USERNAME?Variable not set}:${CHRONO_HASHED_PASSWORD?Variable not set}
         - traefik.http.routers.thinx-chronograf-https.middlewares=chrono-auth,error-pages-middleware
