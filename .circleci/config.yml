@@ -152,6 +152,28 @@ jobs:
           image: thinx/console
           registry: registry.thinx.cloud:5000
           tag: 'vue'
+      # Mirror the image just built to Docker Hub as thinxcloud/console:vue.
+      #
+      # This cannot use the orb's docker/check: that reads the fixed names
+      # DOCKER_LOGIN/DOCKER_PASSWORD, which in this job already hold the
+      # registry.thinx.cloud:5000 credentials. A job holds one value per name,
+      # so Hub needs its own pair (DOCKERHUB_LOGIN/DOCKERHUB_PASSWORD, supplied
+      # by the console context). Logging in explicitly keeps both registries
+      # authenticated at once.
+      #
+      # Re-tagging the built image rather than rebuilding keeps Hub and the
+      # private registry bit-identical.
+      - run:
+          name: Mirror to Docker Hub (thinxcloud/console:vue)
+          command: |
+            if [ -z "$DOCKERHUB_LOGIN" ] || [ -z "$DOCKERHUB_PASSWORD" ]; then
+              echo "DOCKERHUB_LOGIN/DOCKERHUB_PASSWORD are not set."
+              echo "They come from the 'console' context; check this job declares it."
+              exit 1
+            fi
+            echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_LOGIN" --password-stdin docker.io
+            docker tag registry.thinx.cloud:5000/thinx/console:vue thinxcloud/console:vue
+            docker push thinxcloud/console:vue
       - run:
           name: Mark deploy SUCCESS
           command: circleci run release update thinx-console-vue --status=SUCCESS
@@ -192,6 +214,21 @@ jobs:
           image: thinx/console
           registry: registry.thinx.cloud:5000
           tag: 'swarm'
+      # Mirror the image just built to Docker Hub as thinxcloud/console:latest.
+      # See the note in build-vue-console for why this cannot use docker/check.
+      # The internal tag stays 'swarm' — that is what the swarm stack pulls;
+      # 'latest' is the public-facing name on Docker Hub.
+      - run:
+          name: Mirror to Docker Hub (thinxcloud/console:latest)
+          command: |
+            if [ -z "$DOCKERHUB_LOGIN" ] || [ -z "$DOCKERHUB_PASSWORD" ]; then
+              echo "DOCKERHUB_LOGIN/DOCKERHUB_PASSWORD are not set."
+              echo "They come from the 'console' context; check this job declares it."
+              exit 1
+            fi
+            echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_LOGIN" --password-stdin docker.io
+            docker tag registry.thinx.cloud:5000/thinx/console:swarm thinxcloud/console:latest
+            docker push thinxcloud/console:latest
       - run:
           name: Mark deploy SUCCESS
           command: circleci run release update thinx-console-classic --status=SUCCESS
