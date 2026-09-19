@@ -1,4 +1,4 @@
-FROM thinxcloud/base:alpine
+FROM thinxcloud/base:latest
 
 LABEL maintainer="Matej Sychra <suculent@me.com>"
 LABEL name="THiNX API" version="1.9.2866"
@@ -24,10 +24,9 @@ ARG ROLLBAR_ACCESS_TOKEN
 ENV ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
 ARG ROLLBAR_ENVIRONMENT
 ARG ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
-ARG AQUA_SEC_TOKEN
-ENV AQUA_SEC_TOKEN=${AQUA_SEC_TOKEN}
-ARG SNYK_TOKEN
-ENV SNYK_TOKEN=${SNYK_TOKEN}
+
+# AQUA_SEC_TOKEN / SNYK_TOKEN intentionally absent: the scanners run as
+# CircleCI jobs, never inside this image.
 
 ARG ENVIRONMENT
 ENV ENVIRONMENT=${ENVIRONMENT}
