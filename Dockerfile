@@ -64,8 +64,25 @@ WORKDIR /opt/thinx/thinx-device-api
 # Install app dependencies
 COPY package.json ./
 
+# npm is a build-time tool only and is removed in the same layer it was used
+# in — a later `rm` would leave it in the earlier layer and save nothing.
+#
+# Safe because the production start path never calls it: docker-entrypoint.sh
+# runs `node --trace-warnings thinx.js` for ENVIRONMENT=production (verified on
+# the running swarm task), and nothing under lib/ shells out to npm — the only
+# commands spawned there are `git rev-parse HEAD` and `hostname`. The
+# entrypoint's `npm run test` branch is reached only when ENVIRONMENT=test, and
+# that path builds from Dockerfile.test, which keeps npm.
+#
+# Both copies go: /usr/local (installed by the line above) and /usr/lib (from
+# the base image). The ~/.npm cache is the bigger win at ~187 MB versus npm's
+# own ~17 MB.
 RUN npm install -g npm@10.2.3 \
- && npm install --omit=dev .
+ && npm install --omit=dev . \
+ && npm cache clean --force \
+ && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx \
+           /usr/lib/node_modules/npm /usr/bin/npm /usr/bin/npx \
+           /root/.npm
 
 # THiNX Web & Device API (HTTP)
 EXPOSE 7442
