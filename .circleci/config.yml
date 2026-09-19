@@ -104,6 +104,15 @@ jobs:
 
   build-vue-console:
     executor: docker/docker
+    parameters:
+      # Which registry this instance publishes to. thinx-staging publishes to
+      # the private registry (what docker-swarm.yml actually pulls); main
+      # publishes the public Docker Hub mirror. Before this split both branches
+      # ran the same job and raced to write the same tags seconds apart.
+      publish:
+        type: enum
+        enum: ["registry", "hub"]
+        default: "registry"
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
@@ -138,8 +147,8 @@ jobs:
           name: Fetch all dependencies (esp. console)
           command: |
             git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
-      - docker/check:
-          registry: registry.thinx.cloud:5000
+      # The build only tags locally, so it needs no registry credentials and is
+      # shared by both publish targets.
       - docker/build:
           registry: registry.thinx.cloud:5000
           docker-context: services/console/vue
@@ -147,33 +156,46 @@ jobs:
           dockerfile: services/console/vue/Dockerfile
           extra_build_args: --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} --build-arg LANDING_HOSTNAME=${LANDING_HOSTNAME} --build-arg API_HOSTNAME=${API_HOSTNAME} --build-arg API_BASEURL=${API_BASEURL} --build-arg WEB_HOSTNAME=${WEB_HOSTNAME} --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} --build-arg ENTERPRISE=${ENTERPRISE} --build-arg ENVIRONMENT=${ENVIRONMENT} --build-arg COMMIT_ID=$CIRCLE_SHA1 --build-arg VERSION_CODE=$(echo $CIRCLE_SHA1 | cut -c -7) --build-arg VUE_APP_CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} --build-arg VUE_APP_API_HOSTNAME=${VUE_APP_API_HOSTNAME} --build-arg VUE_APP_ROLLBAR_ACCESS_TOKEN=${VUE_APP_ROLLBAR_ACCESS_TOKEN} --build-arg VUE_APP_LANDING_HOSTNAME=${VUE_APP_LANDING_HOSTNAME} --build-arg VUE_APP_GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} --build-arg VUE_APP_GOOGLE_MAPS_APIKEY=${GOOGLE_MAPS_APIKEY} --build-arg VUE_APP_CONSOLE_HOSTNAME=${WEB_HOSTNAME} --build-arg VUE_APP_BUILD_HASH=$(echo $CIRCLE_SHA1 | cut -c -7)
           tag: 'vue'
-      - docker/push:
-          digest-path: /tmp/digest.txt
-          image: thinx/console
-          registry: registry.thinx.cloud:5000
-          tag: 'vue'
-      # Mirror the image just built to Docker Hub as thinxcloud/console:vue.
+
+      # thinx-staging -> private registry only. This is the copy the swarm
+      # pulls (docker-swarm.yml: ${REGISTRY}/thinx/console:vue).
+      - when:
+          condition:
+            equal: ["registry", << parameters.publish >>]
+          steps:
+            - docker/check:
+                registry: registry.thinx.cloud:5000
+            - docker/push:
+                digest-path: /tmp/digest.txt
+                image: thinx/console
+                registry: registry.thinx.cloud:5000
+                tag: 'vue'
+
+      # main -> public Docker Hub mirror only.
       #
       # This cannot use the orb's docker/check: that reads the fixed names
-      # DOCKER_LOGIN/DOCKER_PASSWORD, which in this job already hold the
+      # DOCKER_LOGIN/DOCKER_PASSWORD, which elsewhere in this job hold the
       # registry.thinx.cloud:5000 credentials. A job holds one value per name,
       # so Hub needs its own pair (DOCKERHUB_LOGIN/DOCKERHUB_PASSWORD, supplied
-      # by the console context). Logging in explicitly keeps both registries
-      # authenticated at once.
+      # by the console context).
       #
       # Re-tagging the built image rather than rebuilding keeps Hub and the
       # private registry bit-identical.
-      - run:
-          name: Mirror to Docker Hub (thinxcloud/console:vue)
-          command: |
-            if [ -z "$DOCKERHUB_LOGIN" ] || [ -z "$DOCKERHUB_PASSWORD" ]; then
-              echo "DOCKERHUB_LOGIN/DOCKERHUB_PASSWORD are not set."
-              echo "They come from the 'console' context; check this job declares it."
-              exit 1
-            fi
-            echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_LOGIN" --password-stdin docker.io
-            docker tag registry.thinx.cloud:5000/thinx/console:vue thinxcloud/console:vue
-            docker push thinxcloud/console:vue
+      - when:
+          condition:
+            equal: ["hub", << parameters.publish >>]
+          steps:
+            - run:
+                name: Mirror to Docker Hub (thinxcloud/console:vue)
+                command: |
+                  if [ -z "$DOCKERHUB_LOGIN" ] || [ -z "$DOCKERHUB_PASSWORD" ]; then
+                    echo "DOCKERHUB_LOGIN/DOCKERHUB_PASSWORD are not set."
+                    echo "They come from the 'console' context; check this job declares it."
+                    exit 1
+                  fi
+                  echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_LOGIN" --password-stdin docker.io
+                  docker tag registry.thinx.cloud:5000/thinx/console:vue thinxcloud/console:vue
+                  docker push thinxcloud/console:vue
       - run:
           name: Mark deploy SUCCESS
           command: circleci run release update thinx-console-vue --status=SUCCESS
@@ -185,6 +207,13 @@ jobs:
 
   build-console-classic:
     executor: docker/docker
+    parameters:
+      # See build-vue-console — thinx-staging publishes to the private
+      # registry, main publishes the public Docker Hub mirror.
+      publish:
+        type: enum
+        enum: ["registry", "hub"]
+        default: "registry"
     steps:
       - setup_remote_docker:
           version: 20.10.24
@@ -200,8 +229,7 @@ jobs:
           name: Fetch all dependencies (esp. console)
           command: |
             git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
-      - docker/check:
-          registry: registry.thinx.cloud:5000
+      # Build only tags locally; no credentials needed, shared by both targets.
       - docker/build:
           registry: registry.thinx.cloud:5000
           docker-context: services/console/src
@@ -209,26 +237,39 @@ jobs:
           dockerfile: services/console/src/Dockerfile
           extra_build_args: --build-arg ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN} --build-arg LANDING_HOSTNAME=${LANDING_HOSTNAME} --build-arg API_HOSTNAME=${API_HOSTNAME} --build-arg API_BASEURL=${API_BASEURL} --build-arg WEB_HOSTNAME=${WEB_HOSTNAME} --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} --build-arg CRISP_WEBSITE_ID=${CRISP_WEBSITE_ID} --build-arg ENTERPRISE=${ENTERPRISE} --build-arg ENVIRONMENT=${ENVIRONMENT} --build-arg COMMIT_ID=$CIRCLE_SHA1 --build-arg VERSION_CODE=$(echo $CIRCLE_SHA1 | cut -c -7)
           tag: 'swarm'
-      - docker/push:
-          digest-path: /tmp/digest.txt
-          image: thinx/console
-          registry: registry.thinx.cloud:5000
-          tag: 'swarm'
-      # Mirror the image just built to Docker Hub as thinxcloud/console:latest.
-      # See the note in build-vue-console for why this cannot use docker/check.
-      # The internal tag stays 'swarm' — that is what the swarm stack pulls;
-      # 'latest' is the public-facing name on Docker Hub.
-      - run:
-          name: Mirror to Docker Hub (thinxcloud/console:latest)
-          command: |
-            if [ -z "$DOCKERHUB_LOGIN" ] || [ -z "$DOCKERHUB_PASSWORD" ]; then
-              echo "DOCKERHUB_LOGIN/DOCKERHUB_PASSWORD are not set."
-              echo "They come from the 'console' context; check this job declares it."
-              exit 1
-            fi
-            echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_LOGIN" --password-stdin docker.io
-            docker tag registry.thinx.cloud:5000/thinx/console:swarm thinxcloud/console:latest
-            docker push thinxcloud/console:latest
+
+      # thinx-staging -> private registry only. This is the copy the swarm
+      # pulls (docker-swarm.yml: ${REGISTRY}/thinx/console:swarm).
+      - when:
+          condition:
+            equal: ["registry", << parameters.publish >>]
+          steps:
+            - docker/check:
+                registry: registry.thinx.cloud:5000
+            - docker/push:
+                digest-path: /tmp/digest.txt
+                image: thinx/console
+                registry: registry.thinx.cloud:5000
+                tag: 'swarm'
+
+      # main -> public Docker Hub mirror only. The internal tag stays 'swarm'
+      # (that is what the swarm stack pulls); 'latest' is the public-facing
+      # name on Docker Hub. See build-vue-console for the credential note.
+      - when:
+          condition:
+            equal: ["hub", << parameters.publish >>]
+          steps:
+            - run:
+                name: Mirror to Docker Hub (thinxcloud/console:latest)
+                command: |
+                  if [ -z "$DOCKERHUB_LOGIN" ] || [ -z "$DOCKERHUB_PASSWORD" ]; then
+                    echo "DOCKERHUB_LOGIN/DOCKERHUB_PASSWORD are not set."
+                    echo "They come from the 'console' context; check this job declares it."
+                    exit 1
+                  fi
+                  echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_LOGIN" --password-stdin docker.io
+                  docker tag registry.thinx.cloud:5000/thinx/console:swarm thinxcloud/console:latest
+                  docker push thinxcloud/console:latest
       - run:
           name: Mark deploy SUCCESS
           command: circleci run release update thinx-console-classic --status=SUCCESS
@@ -240,6 +281,14 @@ jobs:
 
   build-api-cloud:
     executor: docker/docker
+    parameters:
+      # thinx-staging publishes to the private registry, main publishes to
+      # Docker Hub. docker-swarm.yml currently pulls thinxcloud/api:latest from
+      # Hub, so the private copy is a staging artifact until that is flipped.
+      publish:
+        type: enum
+        enum: ["registry", "hub"]
+        default: "hub"
     steps:
       - setup_remote_docker:
           version: previous
@@ -256,7 +305,7 @@ jobs:
           name: Clean package-lock
           command: |
             rm -rf ./package-lock.json
-      - docker/check
+      # Build only tags locally; no credentials needed, shared by both targets.
       - docker/build:
           image: thinxcloud/api
           dockerfile: ./Dockerfile
@@ -265,10 +314,34 @@ jobs:
           # values into the public thinxcloud/api image.
           extra_build_args: --build-arg ENVIRONMENT=${ENVIRONMENT} --build-arg REVISION=$(git describe --abbrev=0) --build-arg COMMIT_SHA=$CIRCLE_SHA1 --build-arg ENTERPRISE=${ENTERPRISE}
           tag: 'latest'
-      - docker/push:
-          digest-path: /tmp/digest.txt
-          image: thinxcloud/api
-          tag: 'latest'
+
+      # main -> Docker Hub only. This is what docker-swarm.yml pulls today
+      # (thinxcloud/api:latest).
+      - when:
+          condition:
+            equal: ["hub", << parameters.publish >>]
+          steps:
+            - docker/check
+            - docker/push:
+                digest-path: /tmp/digest.txt
+                image: thinxcloud/api
+                tag: 'latest'
+
+      # thinx-staging -> private registry only, mirroring the console's
+      # two-registry pattern. Nothing consumes thinx/api:swarm yet; flip
+      # docker-swarm.yml's api image to ${REGISTRY}/thinx/api:swarm to deploy
+      # the staging build instead of the Hub one.
+      - when:
+          condition:
+            equal: ["registry", << parameters.publish >>]
+          steps:
+            - docker/check:
+                registry: registry.thinx.cloud:5000
+            - run:
+                name: Push to private registry (thinx/api:swarm)
+                command: |
+                  docker tag thinxcloud/api:latest registry.thinx.cloud:5000/thinx/api:swarm
+                  docker push registry.thinx.cloud:5000/thinx/api:swarm
       # Pass-notification removed (was misleading — fires before the swarm
       # actually pulls the new image). App-start Slack notification is now
       # sent from inside the API at init time via Notifier.notifyAppStart()
@@ -741,7 +814,16 @@ workflows:
                 - thinx-staging
                 - main
       
+      # One registry per branch. Previously each of these ran on both
+      # thinx-staging and main, so two pipelines started seconds apart and
+      # raced to write the same tags in the same registries.
+      #
+      #   thinx-staging -> registry.thinx.cloud:5000 (what the swarm pulls)
+      #   main          -> Docker Hub (the public mirror)
+
       - build-console-classic:
+          name: console-classic-registry
+          publish: registry
           context:
             - thinx-docker-repo
             - console
@@ -749,9 +831,21 @@ workflows:
             branches:
               only:
                 - thinx-staging
+
+      - build-console-classic:
+          name: console-classic-hub
+          publish: hub
+          context:
+            - thinx-docker-repo
+            - console
+          filters:
+            branches:
+              only:
                 - main
 
       - build-vue-console:
+          name: vue-console-registry
+          publish: registry
           context:
             - dockerhub
             - thinx-docker-repo
@@ -761,6 +855,17 @@ workflows:
               only:
                 - thinx-console
                 - thinx-staging
+
+      - build-vue-console:
+          name: vue-console-hub
+          publish: hub
+          context:
+            - dockerhub
+            - thinx-docker-repo
+            - console
+          filters:
+            branches:
+              only:
                 - main
 
       - build-base:
@@ -772,6 +877,23 @@ workflows:
                 - base
 
       - build-api-cloud:
+          name: api-registry
+          publish: registry
+          context:
+            - dockerhub
+            - thinx-docker-repo
+            - SonarCloud
+            - thinx-slack
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - thinx-staging
+
+      - build-api-cloud:
+          name: api-hub
+          publish: hub
           context:
             - dockerhub
             - SonarCloud
@@ -781,7 +903,6 @@ workflows:
           filters:
             branches:
               only:
-                - thinx-staging
                 - main
 
       # Disabled: Aikido local image scanning is not available on the free plan.
@@ -829,12 +950,12 @@ workflows:
           dockerfile: ./Dockerfile
           context:
             - dockerhub
+          # Scans the Hub copy, which only main publishes now.
           requires:
-            - build-api-cloud
+            - api-hub
           filters:
             branches:
               only:
-                - thinx-staging
                 - main
 
       - snyk-container-monitor:
@@ -869,13 +990,13 @@ workflows:
             - dockerhub
             - thinx-docker-repo
             - console
+          # Scans the private-registry copy, which only thinx-staging publishes.
           requires:
-            - build-console-classic
+            - console-classic-registry
           filters:
             branches:
               only:
                 - thinx-staging
-                - main
 
       - snyk-container-monitor:
           name: snyk-monitor-console-vue
@@ -888,11 +1009,12 @@ workflows:
             - dockerhub
             - thinx-docker-repo
             - console
+          # Scans the private-registry copy, which thinx-staging (and the
+          # thinx-console dev branch) publishes.
           requires:
-            - build-vue-console
+            - vue-console-registry
           filters:
             branches:
               only:
                 - thinx-console
                 - thinx-staging
-                - main
