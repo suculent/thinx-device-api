@@ -152,15 +152,6 @@ jobs:
           image: thinx/console
           registry: registry.thinx.cloud:5000
           tag: 'vue'
-      # Mirror the same image to Docker Hub as thinxcloud/console:vue.
-      # Re-tagging the image we just built keeps Hub and the private registry
-      # bit-identical; a second docker/build would rebuild and diverge.
-      - docker/check
-      - run:
-          name: Mirror to Docker Hub (thinxcloud/console:vue)
-          command: |
-            docker tag registry.thinx.cloud:5000/thinx/console:vue thinxcloud/console:vue
-            docker push thinxcloud/console:vue
       - run:
           name: Mark deploy SUCCESS
           command: circleci run release update thinx-console-vue --status=SUCCESS
@@ -201,15 +192,6 @@ jobs:
           image: thinx/console
           registry: registry.thinx.cloud:5000
           tag: 'swarm'
-      # Mirror the same image to Docker Hub as thinxcloud/console:latest.
-      # The internal tag stays 'swarm' (that is what the stack pulls); 'latest'
-      # is the public-facing name that already exists on Hub.
-      - docker/check
-      - run:
-          name: Mirror to Docker Hub (thinxcloud/console:latest)
-          command: |
-            docker tag registry.thinx.cloud:5000/thinx/console:swarm thinxcloud/console:latest
-            docker push thinxcloud/console:latest
       - run:
           name: Mark deploy SUCCESS
           command: circleci run release update thinx-console-classic --status=SUCCESS
@@ -724,8 +706,6 @@ workflows:
       
       - build-console-classic:
           context:
-            # dockerhub is required for the thinxcloud/console:latest mirror
-            - dockerhub
             - thinx-docker-repo
             - console
           filters:
