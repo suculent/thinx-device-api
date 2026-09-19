@@ -17,7 +17,6 @@ IoT Device Management Server running on node.js.
 
 
 [![CodeFactor](https://www.codefactor.io/repository/github/suculent/thinx-device-api/badge)](https://www.codefactor.io/repository/github/suculent/thinx-device-api)
-[![codebeat badge](https://codebeat.co/badges/a3b416b1-b53b-4bc5-ae6e-8a2b9ca31880)](https://codebeat.co/projects/github-com-suculent-thinx-device-api-master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/9a7d084ad97e430ba12333f384b44255)](https://www.codacy.com/app/suculent/thinx-device-api?utm_source=github.com&utm_medium=referral&utm_content=suculent/thinx-device-api&utm_campaign=badger)
 <a href="https://scan.coverity.com/projects/suculent-thinx-device-api">
   <img alt="Coverity Scan Build Status"
