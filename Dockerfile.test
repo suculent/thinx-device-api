@@ -108,6 +108,9 @@ EXPOSE 9002
 # Copy app source code
 COPY . .
 
+# API-served HTML must not depend on inline scripts. No test packages required.
+RUN node --test spec/node/StaticCsp.test.js
+
 RUN mkdir -p ./.nyc_output
 
 # only for test mocking (may not work, will need structure with mock data in repo)

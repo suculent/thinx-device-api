@@ -96,6 +96,9 @@ EXPOSE 9002
 # Copy app source code
 COPY . .
 
+# API-served HTML must not depend on inline scripts. No test packages required.
+RUN node --test spec/node/StaticCsp.test.js
+
 # TODO: Implement Snyk Container Scanning here in addition to DockerHub manual scans...
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh

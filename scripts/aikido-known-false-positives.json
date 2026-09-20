@@ -1,0 +1,33 @@
+{
+  "//": "Findings from `aikido_scan_paths` that have been read and judged noise. Aikido's Code Quality product is not in the free plan, so there is no issue record to mark on their side and every scan re-reports these. scripts/aikido-filter.js drops them so a routine scan only shows what is new.",
+  "//match": "rule + file + snippet (whitespace-normalised). Deliberately NOT line numbers: those drift on every edit. Matching the snippet means a NEW occurrence of the same rule in the same file still surfaces.",
+  "//upkeep": "The filter reports entries that matched nothing, so a fix or a refactor makes its entry visibly stale instead of silently hiding a later finding. Delete stale entries; never add one without reading the flow first.",
+  "entries": [
+    { "rule": "express_open_redirect", "file": "lib/router.google.js", "snippet": "ores.redirect(ourl);",
+      "reason": "Target comes from oauthReturn.returnURLFor(takeReturnOrigin(...)): origin is read from an httpOnly cookie and must be an exact member of the allowlist in lib/thinx/origins.js, else it falls back to app_config.public_url.", "verified": "2026-09-20" },
+    { "rule": "express_open_redirect", "file": "lib/router.google.js", "snippet": "res.redirect(authorizeTarget.href);",
+      "reason": "Authorize host is pinned to exactly accounts.google.com (not a suffix match) before redirecting - commit 974d389e.", "verified": "2026-09-20" },
+    { "rule": "express_open_redirect", "file": "lib/router.google.js", "snippet": "res.redirect(ourl);",
+      "reason": "Same allowlisted return origin as the other Google redirect.", "verified": "2026-09-20" },
+    { "rule": "express_open_redirect", "file": "lib/router.google.js", "snippet": "res.redirect(app_config.public_url + '/error.html?success=failed&title=OAuth-Error&reason=' + err.message);",
+      "reason": "Host is app_config.public_url; only err.message is interpolated, into the query string.", "verified": "2026-09-20" },
+    { "rule": "express_open_redirect", "file": "lib/router.github.js", "snippet": "response.redirect(courl);",
+      "reason": "courl is built from res.thx_return_origin, set at router.github.js:255 from oauthReturn.takeReturnOrigin - same allowlist as the Google flow.", "verified": "2026-09-20" },
+    { "rule": "express_open_redirect", "file": "lib/router.github.js", "snippet": "response.redirect(ourl);",
+      "reason": "Same allowlisted origin via res.thx_return_origin.", "verified": "2026-09-20" },
+    { "rule": "AIK_js_ssrf", "file": "lib/router.github.js", "snippet": "https.get(requestOptions, (res) => {",
+      "reason": "requestOptions.host is the literal 'api.github.com'; the only tainted value is the token, sent in the Authorization header, not the URL.", "verified": "2026-09-20" },
+    { "rule": "AIK_node_sqli_injection", "file": "lib/thinx/influx.js", "snippet": "this.influxdb.query(`SELECT count(\"value\") AS \"count_value\" FROM \"stats\".\"autogen\".\"${measurement}\"`)",
+      "reason": "Guarded by /^[a-zA-Z0-9_]+$/ on measurement, which throws on mismatch before the query is built.", "verified": "2026-09-20" },
+    { "rule": "AIK_node_sqli_injection", "file": "lib/thinx/influx.js", "snippet": "WHERE \"owner\"='${owner_id}'`)",
+      "reason": "queryOwner guards both measurement and owner_id with /^[a-zA-Z0-9_]+$/ and throws on mismatch.", "verified": "2026-09-20" },
+    { "rule": "AIK_node_sqli_injection", "file": "lib/thinx/influx.js", "snippet": "AND time > '${midnight.toISOString()}'`)",
+      "reason": "today() guards owner_id with /^[a-zA-Z0-9_]+$/; kpi comes from the fixed event taxonomy, and the timestamp is generated locally.", "verified": "2026-09-20" },
+    { "rule": "AIK_node_sqli_injection", "file": "lib/thinx/influx.js", "snippet": "AND time > now() - 7d`)",
+      "reason": "week() guards owner_id with /^[a-zA-Z0-9_]+$/; kpi comes from the fixed event taxonomy.", "verified": "2026-09-20" },
+    { "rule": "AIK_js_shell_injection_child_process", "file": "lib/thinx/builder.js", "snippet": "let shell = exec.spawn(command, args, { cwd: ROOT, shell: false });",
+      "reason": "argv form with shell:false - there is no shell to inject into. The rule flags the API, not the usage.", "verified": "2026-09-20" },
+    { "rule": "AIK_ts_generic_path_traversal", "file": "lib/thinx/secrets.js", "snippet": "const secret_path = path.resolve(base, name);",
+      "reason": "The next three lines assert containment with path.relative (added by aikido-autofix in #556); names are code constants, not request input.", "verified": "2026-09-20" }
+  ]
+}
