@@ -1,17 +1,20 @@
 ---
-gsd_state_version: 1.0
+gsd_state_version: "1.0"
 milestone: v1.13
-milestone_name: Web Hardening (Console/Edge)
+milestone_name: Web Hardening (Console/Edge) (Phase 21)
+current_phase: 21
+current_phase_name: CSP Wildcard Removal + Anti-CSRF Token
 status: executing
-stopped_at: Completed 21-03-PLAN.md; SEC-CSP-01 carried further by out-of-plan sessions through 2026-09-19
-last_updated: "2026-09-19T21:40:00.000Z"
-last_activity: 2026-09-19
+stopped_at: "Phase 21 reconciled 2026-09-21; blocked on 21-04 Task 2 operator checkpoint"
+last_updated: "2026-09-21T14:25:00.000Z"
+last_activity: 2026-09-21
+state_head: 9909d0e4fca7482c084a695f8a1941997ec31bb7
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 11
   total_plans: 5
   completed_plans: 3
-  percent: 0
+  percent: 60
 ---
 
 # STATE — THiNX Device API
@@ -33,9 +36,11 @@ Phase: 21 (CSP Wildcard Removal + Anti-CSRF Token) — in progress
 Plan: 4 of 5 in the GSD flow; SEC-CSP-01 has since been carried past its plan by out-of-plan work
 Status: 21-01..21-03 complete. Production now enforces `script-src` **without** `'unsafe-inline'`
         (plus `script-src-attr 'none'`) after the classic console's inline scripts were migrated to
-        external assets — further than 21-03 scoped. 21-04 (verification) and 21-05 (runbook) are
-        still unwritten; the evidence they would collect is in the console repo's
-        `docs/superpowers/plans/2026-09-19-csp-inline.md` deploy record.
+        external assets — further than 21-03 scoped. 21-04 and 21-05 ARE written (corrected
+        2026-09-21 — the earlier "still unwritten" note was wrong); what they lack is execution.
+        Reconciled against live state 2026-09-21: 21-04 Task 1 (push both repos, bump submodule,
+        CI green) is already satisfied and must not be re-run; 21-04 Task 2 (authenticated
+        in-browser verification) is the only real gap; CSRF enforcement is confirmed still OFF.
 Last activity: 2026-09-19
 
 ## Milestones
@@ -99,7 +104,7 @@ Carried from the 2026-09-19 sessions, none of them blocking:
 
 | Item | State |
 |------|-------|
-| PR #555 | Open, ready for review, `MERGEABLE`. Merge publishes `thinxcloud/console:latest`, `:vue` and the api image to Docker Hub. |
+| PR #555 | ✅ MERGED 2026-09-19T21:34:24Z (`thinx-staging` -> `main`). Docker Hub publish triggered. |
 | Aikido | Auth fixed by the operator, never exercised against a real scan. |
 | Aikido branch-protection finding | Recommendation stands: accept-risk the *review* requirement (solo maintainer — GitHub forbids self-approval, so requiring approvals hard-blocks every merge) and enforce status checks, signed commits (already 100% `G`) and no force-push/deletion instead. Same reason CODEOWNERS must not be paired with "Require review from Code Owners" yet. |
 | Private registry flakiness | `docker login registry.thinx.cloud:5000` timed out in two consecutive pipelines on 2026-09-19, both times while another job was pushing an image to it. Both passed on rerun. Worth a retry wrapper on the login step or more I/O headroom on `micro`. |
@@ -147,7 +152,10 @@ Items acknowledged and deferred at prior milestone closes and carried forward:
 
 ### Todos
 
-- Reconcile Phase 21 with reality before closing it: 21-01..21-03 shipped, and the inline-script removal deployed on 2026-09-19 took SEC-CSP-01 past what 21-03 scoped. 21-04 (verification) and 21-05 (runbook) should be written against the deployed state, reusing the deploy record in the console repo (`docs/superpowers/plans/2026-09-19-csp-inline.md`) rather than re-deriving it.
+- ~~Reconcile Phase 21 with reality before closing it~~ **DONE 2026-09-21.** Findings recorded in a `## RECONCILIATION WITH DEPLOYED REALITY` block at the top of both `21-04-PLAN.md` and `21-05-PLAN.md`. Summary: 21-04 Task 1 already satisfied (csrf.js on `origin/thinx-staging` + `origin/main`, HEAD==origin 0/0, submodule `acb62d82` 0/0, PR #555 merged 2026-09-19T21:34:24Z, and `app.thinx.cloud` live-mints `XSRF-TOKEN; Domain=.thinx.cloud; Secure; SameSite=Lax`). Enforcement confirmed still fail-open (`POST /api/login` sans token -> `invalid_credentials`, not `csrf_token_invalid`). Both plans' dead `$HOME/.claude/get-shit-done/...` execution-context paths repointed to `~/.claude/gsd-core/...`.
+- **NEW (2026-09-21) — Vue console CSP does not match its own image config.** `console.thinx.cloud` serves a CSP byte-identical (modulo order) to the CLASSIC `services/console/src/default.conf`, not to `services/console/vue/default.conf`; both console hosts return one identical CSP header. So 21-03's edit to `vue/default.conf` has no observable production effect. Determine what actually emits that header (edge nginx vs image) in 21-04 Task 2 step 0.
+- **NEW (2026-09-21) — latent cold-session lockout.** `services/console/vue/default.conf` `connect-src` omits `https://app.thinx.cloud` and `wss://app.thinx.cloud`. If that file ever takes effect, the Vue console's cross-origin `GET /api/v2/csrf-token` prime is CSP-blocked — the exact lockout 21-05's must_haves forbid. Masked today only because the live classic CSP lists both hosts. Fix before flipping enforcement if `vue/default.conf` is (or becomes) authoritative.
+- **NEW (2026-09-21) — runbook snapshots stale.** `.planning/runbooks/swarm-configs/rtm.thinx.cloud-server.{pre,post}.nginx:29` still record 21-03's CSP (`'unsafe-inline'` in `default-src`, no `app.thinx.cloud`, no split `script-src`/`style-src`, no `script-src-attr`). Refresh against the live header during 21-05.
 - Authenticated in-browser verification of the CSP build has never run against the deployed instance — the pre-deploy Playwright suites (`src/test/csp/browser.cjs`, `app-browser.cjs`) cover it with fixtures only. That is the one real gap in 21-04.
 - Before closing Phase 21: confirm the Crisp widget (`wss://client.relay.crisp.chat`) and any other explicit-host dependents are enumerated and pinned in the new CSP — a missed host will silently break a console feature post-deploy.
 - Coordinate `services/console` submodule pointer bump as part of Phase 21's deploy (both console images change).
@@ -178,9 +186,15 @@ Items acknowledged and deferred at prior milestone closes and carried forward:
 
 ## Session Continuity
 
-**Stopped at:** Completed 21-03-PLAN.md in the plan flow; SEC-CSP-01 carried further by direct work through 2026-09-19.
+**Last session:** 2026-09-21T14:07:57.908Z
 
-**Next action:** Merge PR #555, then write 21-04/21-05 against the deployed state.
+**Stopped at:** Phase 21 reconciled against deployed reality (2026-09-21); execution blocked on an
+operator-only checkpoint.
+
+**Next action:** Execute 21-04 Task 2 — the authenticated in-browser verification of both consoles
+(blocking `checkpoint:human-verify`, needs a real staging login + DevTools + a swarm `docker service ps`).
+Task 1 of 21-04 is already satisfied; do not re-run it. Only after that checkpoint passes may 21-05
+flip `debug.csrf_enforce` / `CSRF_ENFORCE` on the `thinx_api` service.
 
 ---
 *v1.0 GA backend closures shipped and archived: 2026-05-27 (4/4 v1 requirements Verified)*
