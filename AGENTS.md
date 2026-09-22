@@ -57,7 +57,7 @@ different, non-trivial reason (verified by local `docker build` of each on `ubun
   `python2` in universe, which is why 22.04 is fine.
 - **mongoose** — no longer applies: the image left the Ubuntu line entirely on 2026-09-22. The
   `ppa:mongoose-os/mos` dependency (which publishes focal only, hence the 26.04 `404 … resolute
-  Release`) is gone — `mos` is now compiled from source in a `golang:1.25.13` stage and dropped
+  Release`) is gone — `mos` is now compiled from source in a `golang:1.27.1` stage and dropped
   into a Debian 13 DHI base. See *mongoose builder — mos is built from source* below.
 - **nodemcu** — esp-open-sdk's bundled crosstool-NG toolchain fails to build against the 26.04
   host GCC/glibc: `configure: error: could not find a working compiler`. It builds clean on 22.04.
@@ -70,14 +70,18 @@ both on Debian 13 DHI.)
 ### mongoose builder — `mos` is built from source, not installed from the PPA
 
 `builders/mongoose-docker-build` compiles `github.com/mongoose-os/mos` at pinned commit
-`b44964e` (master, 2023-03-13) in a `golang:1.25.13` stage and copies the binary into a
+`b44964e` (master, 2023-03-13) in a `golang:1.27.1` stage and copies the binary into a
 `dhi.io/debian-base:trixie-dev` runtime. Do not "simplify" this back to `apt-get install mos-latest`.
 
 The PPA `.deb` is a **go1.13.8** binary frozen since 2023-03-14. Grype reports **287 Go stdlib CVEs
 against it, 18 of them critical**, and none of them are fixable by apt: the stdlib is linked into
 that binary, not provided by the distro. Upstream has published nothing since, so re-linking the
-same tree is the only lever. After the rebuild, the only stdlib hit left is CVE-2026-46600, which
-OSV records as `introduced: 1.26.0` — a false positive against a 1.25.13 build.
+same tree is the only lever. After the rebuild, grype reports **zero** stdlib hits.
+
+**Pin the Go stage to a supported line.** It was `golang:1.25.13` for a day; Go backports security
+fixes to the two most recent majors only, so with 1.27 released the 1.25 line is already done
+receiving them. Both builders track `golang:1.27.1`. Bump it when Go 1.29 ships, not before —
+and rerun the build-chain tests, since the toolchain is what links these binaries.
 
 Build-stage requirements: `python3` (the Makefile generates `version/version.go` via
 `tools/fw_meta.py`), plus `pkg-config libusb-1.0-0-dev libftdi1-dev libudev-dev` — `mos` links
@@ -103,7 +107,7 @@ so `THiNX BUILD FAILED` can never print.
 
 The Arduino 1.8.19 tarball ships two prebuilt runtimes that scanners flag and that no base bump can
 reach: `arduino-builder` linked against **go1.14.4**, and an **Oracle JRE 1.8.0_191**
-(`BUILD_TYPE="commercial"`). All three Dockerfiles now rebuild the first with Go 1.25.13 and replace
+(`BUILD_TYPE="commercial"`). All three Dockerfiles now rebuild the first with Go 1.27.1 and replace
 the second with **Temurin 8u462** — Oracle's own 8u461 is licence-gated, Temurin 8u462 is the
 redistributable build at the same CPU level, and Debian 13 ships no openjdk-8 at all (21 and 25
 only). The IDE is still Java (`cmd.sh` runs `arduino --verify` and `--install-library`), so the JRE
