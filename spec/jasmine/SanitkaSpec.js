@@ -115,6 +115,32 @@ describe("Sanitka", function () {
     expect(result).to.equal(null);
   });
 
+  // statistics.js parse_oid() calls Sanitka.owner() on the class, not on an
+  // instance. Every other method of this class has a static twin; owner() and
+  // source() did not, so that call threw "Sanitka.owner is not a function".
+  it("should expose owner statically", function () {
+    let input = "31b1f6bf498d7cec463ff2588aca59a52df6f880e60e8d4d6bcda0d8e6e87823";
+    expect(Sanitka.owner(input)).to.equal(input);
+    expect(Sanitka.owner("invalid-owner")).to.equal(null);
+    expect(Sanitka.owner(undefined)).to.equal(null);
+  });
+
+  it("should expose source statically", function () {
+    let input = "31b1f6bf498d7cec463ff2588aca59a52df6f880e60e8d4d6bcda0d8e6e87823";
+    expect(Sanitka.source(input)).to.equal(input);
+    expect(Sanitka.source("invalid-source")).to.equal(null);
+    expect(Sanitka.source(undefined)).to.equal(null);
+  });
+
+  // Guards the whole class against the same mistake returning elsewhere.
+  it("should expose every instance method statically", function () {
+    const skipped = ["constructor"];
+    const instanceMethods = Object.getOwnPropertyNames(Sanitka.prototype)
+      .filter((name) => !skipped.includes(name));
+    const missing = instanceMethods.filter((name) => typeof Sanitka[name] !== "function");
+    expect(missing).to.deep.equal([]);
+  });
+
   it("should reject invalid udid character", function () {
     var result = sanitka.udid("d6ff2bb0-df34-11e7-b351-eb37822aa17z");
     expect(result).to.equal(null);
