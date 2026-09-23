@@ -20,7 +20,7 @@ services:
       - traefik.backend.mosquitto.noexpose
   couchdb:
     env_file: .env
-    image: 'couchdb:3.1.0'
+    image: 'dhi.io/couchdb:3' # needs `docker login dhi.io` (see .circleci test job)
     restart: unless-stopped
     environment:
       - 'NODENAME=${NODENAME}'

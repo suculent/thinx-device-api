@@ -60,9 +60,9 @@ Integrations consumed by the main backend API (`thinx-device-api`). The `service
 
 ## Data Storage
 
-**Primary database — CouchDB 3.2.0**
+**Primary database — CouchDB 3.5 (Docker Hardened Image)**
 
-- Image: `couchdb:3.2.0` (`docker-compose.yml` L27)
+- Image: `dhi.io/couchdb:3` (`docker-compose.yml`, `docker-compose.test.yml`, `docker-swarm.yml`); runs as uid/gid 65532
 - Network alias: `couchdb`, port `5984` (internal docker network only — no TLS)
 - Client library: `nano` ^10.1.4
 - Connection: built in `lib/thinx/database.js` L17-18 as `http://${COUCHDB_USER}:${COUCHDB_PASS}@couchdb:5984` (basic auth, internal docker network)
