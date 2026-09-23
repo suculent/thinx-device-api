@@ -239,7 +239,7 @@ services:
 
   # currently for development only(!) mind the volume path
   influxdb:
-    image: influxdb:1.8
+    image: dhi.io/influxdb:2
     ports:
       - '8086:8086'
     networks:
@@ -253,7 +253,7 @@ services:
       - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_PASSWORD}
 
   chronograf:
-    image: chronograf:1.9
+    image: chronograf:alpine
     ports:
       - '8888:8888'
     networks:
