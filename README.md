@@ -249,7 +249,8 @@ docker run -ti -p 6379:6379 -e REDIS_PASSWORD=changeme! thinxcloud/redis:latest
 CouchDB
 
 ``` bash
-docker run -p 5984:5984 -e COUCHDB_USER=rtmtest -e COUCHDB_PASSWORD=rtmtest couchdb:3.1.0
+docker login dhi.io   # Docker Hardened Images require a Docker Hub login
+docker run -p 5984:5984 -e COUCHDB_USER=rtmtest -e COUCHDB_PASSWORD=rtmtest dhi.io/couchdb:3
 ```
 
 ## Roadmap Entropy Detector
