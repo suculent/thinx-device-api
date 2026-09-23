@@ -69,14 +69,28 @@ both on Debian 13 DHI.)
 
 ### mongoose builder — `mos` is built from source, not installed from the PPA
 
-`builders/mongoose-docker-build` compiles `github.com/mongoose-os/mos` at pinned commit
-`b44964e` (master, 2023-03-13) in a `golang:1.27.1` stage and copies the binary into a
-`dhi.io/debian-base:trixie-dev` runtime. Do not "simplify" this back to `apt-get install mos-latest`.
+`builders/mongoose-docker-build` compiles **`github.com/suculent/mos`** — our fork — at pinned
+commit `f612a4c` (branch `thinx/deps-2026-09`) in a `golang:1.27.1` stage and copies the binary
+into a `dhi.io/debian-base:trixie-dev` runtime. Do not "simplify" this back to
+`apt-get install mos-latest`, and do not point it at upstream `mongoose-os/mos`.
+
+The fork exists because upstream's tree still carries its 2021 dependency set (x/crypto, go-git
+v5.4.2, grpc v1.40, x/net), which grype scores at **77 findings, 11 critical**, and upstream has
+shipped nothing since 2023-03-13. The fork branch bumps nine modules to current, raises the `go`
+directive to 1.24+ (required by modern x/crypto), fixes three latent non-constant-format-string
+bugs that vet then exposes, and adds `common/ourgit`'s first test — go-git's only first-party
+consumer — which passes identically on v5.4.2 and v5.19.2. Image findings after the bump: **2**,
+both non-applicable (a gRPC xDS *server* DoS fixed only in an unreleased `1.85.0-dev`, and the
+standing "x/crypto/openpgp is unmaintained" advisory reached via go-git).
+
+**Always repin `MOS_REF` by SHA after a fork change — never track the branch name**, or the image
+stops being reproducible. Rebasing the fork on upstream is a no-op while upstream stays dormant.
 
 The PPA `.deb` is a **go1.13.8** binary frozen since 2023-03-14. Grype reports **287 Go stdlib CVEs
 against it, 18 of them critical**, and none of them are fixable by apt: the stdlib is linked into
 that binary, not provided by the distro. Upstream has published nothing since, so re-linking the
-same tree is the only lever. After the rebuild, grype reports **zero** stdlib hits.
+same tree is the only lever. After the rebuild, grype reports **zero** stdlib hits. The image's remaining ~960 Debian findings
+are **all** `not-fixed` or `wont-fix` upstream — zero are actionable, so do not spend time on them.
 
 **Pin the Go stage to a supported line.** It was `golang:1.25.13` for a day; Go backports security
 fixes to the two most recent majors only, so with 1.27 released the 1.25 line is already done
