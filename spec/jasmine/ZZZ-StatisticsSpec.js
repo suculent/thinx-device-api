@@ -68,4 +68,38 @@ describe("Statistics", function () {
     });
   }, 10000);
 
+  // parse_oid() used to re-seed the owner template on every matching line, so
+  // parse_line()'s increments were discarded and each owner ended the run with
+  // only the last matching line counted.
+  it("(09) should accumulate event counters across lines", function () {
+    const EventTaxonomy = require('../../lib/thinx/event_taxonomy');
+    const fresh = new Statistics();
+    fresh.owners = {}; fresh.owners[owner] = EventTaxonomy.templateModel();
+
+    const lines = [
+      "[OID:" + owner + "] DEVICE_CHECKIN",
+      "[OID:" + owner + "] DEVICE_CHECKIN",
+      "[OID:" + owner + "] DEVICE_CHECKIN",
+      "[OID:" + owner + "] BUILD_SUCCESS"
+    ];
+    lines.forEach((line) => fresh.parse_oid(line));
+
+    expect(fresh.owners[owner].DEVICE_CHECKIN[0]).to.equal(3);
+    expect(fresh.owners[owner].BUILD_SUCCESS[0]).to.equal(1);
+  });
+
+  // OIDs that are not in the user database must be ignored, not created.
+  it("(10) should ignore lines for unknown owners", function () {
+    const EventTaxonomy = require('../../lib/thinx/event_taxonomy');
+    const unknown = "a".repeat(64);
+    const fresh = new Statistics();
+    fresh.owners = {}; fresh.owners[owner] = EventTaxonomy.templateModel();
+
+    fresh.parse_oid("[OID:" + unknown + "] DEVICE_CHECKIN");
+    fresh.parse_oid("[OID:not-an-oid] DEVICE_CHECKIN");
+
+    expect(fresh.owners[unknown]).to.equal(undefined);
+    expect(fresh.owners[owner].DEVICE_CHECKIN[0]).to.equal(0);
+  });
+
 });

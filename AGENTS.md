@@ -1,10 +1,5 @@
 # THiNX Device API Session Notes
 
-## Repositories
-- Parent repo: `/Users/igraczech/Repositories/thinx-device-api`
-- Console frontend: `/Users/igraczech/Repositories/thinx-device-api/services/console`
-- Console source root: `/Users/igraczech/Repositories/thinx-device-api/services/console/src`
-
 ## Deployment
 - Production console URL: `https://rtm.thinx.cloud/`
 - Swarmpit URL used for task monitoring: `https://swarmpit.thinx.cloud/#/tasks`
@@ -18,53 +13,6 @@
   - `ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020`
   - Swarm path: `/mnt/gluster/deployment/swarm`
 
-## Swarm Auto-Pull Recovery
-
-- **Symptom:** `https://swarmpit.thinx.cloud` returns Bad Gateway (502) AND `docker service logs swarmpit_app --since 30m` is empty. CircleCI builds and pushes `thinxcloud/api:latest` successfully, but the swarm does not pick up the new image (Swarmpit watcher silently degraded — container Running, app deadlocked).
-- **Recovery (rung 1 — restart swarmpit watcher):**
-  ```
-  ssh -i ~/.ssh/DOKey2 -p 2020 root@188.166.23.244 "docker service update --force swarmpit_app"
-  ```
-  Wait ~90s for the new task to boot; verify `curl -s -o /dev/null -w '%{http_code}\n' https://swarmpit.thinx.cloud` returns 200 and `docker service logs swarmpit_app --since 2m` is non-empty (expect startup banner + `Swarmpit running on port 8080`).
-- **Verification:** push a no-op commit to `thinx-staging`; observe `docker service ps thinx_api` for a new task with the new image SHA within 5 minutes (typical observed delta: 60-120s post-digest-change).
-- **If recovery doesn't restore autoredeploy:** see `.planning/phases/03-swarm-auto-pull/03-PLAN.md` Rungs 2-4 (swarmpit_db rebuild → stale-node membership cleanup → Swarmpit 1.9→latest upgrade). Each requires operator approval.
-- **Reference:** `.planning/phases/03-swarm-auto-pull/03-SUMMARY.md` (root cause + reversion plan + verification matrix). Phase 3 closed 2026-05-26 via Rung 1.
-
-## Confirmed Fixes
-- Login regression was caused by bad validator asset paths in the public pages. Fixed in:
-  - `services/console/src/index.html`
-  - `services/console/src/auth.html`
-  - `services/console/src/password.html`
-- CSP websocket blocking was fixed by allowing `connect-src` websocket origins in nginx config.
-- Backend CORS bug was fixed in `lib/router.js` by reflecting request origins instead of returning `*` with credentials.
-- Committed conflict markers were resolved in:
-  - `services/console/src/default.conf`
-  - `services/console/vue/default.conf`
-
-## Websocket Findings
-- Original live issue:
-  - frontend used `wss://app.thinx.cloud/<owner>` and got `404`
-- Root cause:
-  - console build derived websocket URL from stale host configuration
-- Console-side websocket fix:
-  - `services/console/src/gulpfile.js` now derives websocket origin from `API_BASEURL`/API origin
-- Local rebuilt output now uses:
-  - `wss://rtm.thinx.cloud/<owner>`
-  - `wss://rtm.thinx.cloud/<owner>/<timestamp>`
-- Important:
-  - if live still returns `404` after serving the corrected bundle, the remaining bug is server-side websocket routing or upgrade handling on `rtm.thinx.cloud`, not CSP and not the console host selection
-
-## Frontend Issues Fixed In Source
-- Sensitive browser logging removed from:
-  - `services/console/src/app/js/main.js`
-  - `services/console/src/app/js/controllers/LogviewController.js`
-- `propsFilter` hardened in:
-  - `services/console/src/app/js/main.js`
-  - now skips undefined/null fields instead of calling `.toString()` on them
-- Devices page Angular parse/runtime issue fixed in:
-  - `services/console/src/app/views/devices.html`
-  - removed `ng-dblclick="return false"` from build links and replaced with `preventDefault()` in the click handler
-
 ## Local Verification
 - Build command:
   - `npm run build:test`
@@ -77,18 +25,6 @@
   - `services/console/src/html/app/js/controllers/LogviewController.js`
   - `services/console/src/html/app/js/main.js`
   - `services/console/src/html/app/views/devices.html`
-
-## Live Retest Checklist
-- Hard reload the authenticated app in Chrome DevTools
-- Check `/app/js/controllers/LogviewController.js` served by `rtm.thinx.cloud`
-- Verify websocket target is `wss://rtm.thinx.cloud/...`
-- Verify whether websocket handshake still returns `404`
-- Check console for:
-  - cookie logging
-  - owner/profile/debug logging
-  - old websocket debug logs
-- Visit Devices page and confirm no Angular parse error
-- Reassess findings list to include remaining issues only
 
 ## Dependency Version Locks
 
@@ -111,7 +47,7 @@ Current state (check the `FROM` line before trusting this list):
 |---|---|
 | `builders/nodemcu-docker-build` | `ubuntu:22.04` — verified building 2026-09-20 |
 | `builders/micropython-docker-build` | `ubuntu:22.04` |
-| `builders/mongoose-docker-build` | `ubuntu:20.04` — still on the old pin |
+| `builders/mongoose-docker-build` | `dhi.io/debian-base:trixie-dev` (Debian 13.7) — moved off Ubuntu 2026-09-22 |
 
 A bump to `ubuntu:26.04` was attempted and rolled back on 2026-06-28 — all three break, each for a
 different, non-trivial reason (verified by local `docker build` of each on `ubuntu:26.04`):
@@ -119,16 +55,83 @@ different, non-trivial reason (verified by local `docker build` of each on `ubun
 - **micropython** — 26.04 dropped `python2` / `python2-dev` from the archive. The esp-open-sdk
   fork (`pfalcon/esp-open-sdk`) is Python 2-only, so there is no in-place fix. 22.04 still ships
   `python2` in universe, which is why 22.04 is fine.
-- **mongoose** — `ppa:mongoose-os/mos` publishes no `resolute` (26.04) pocket: `apt-get update`
-  returns `404 … resolute Release` and `mos-latest` is unlocatable. Blocked upstream, not on our
-  side. Whether the PPA has a `jammy` (22.04) pocket has not been tested — leave it on 20.04 until
-  someone does.
+- **mongoose** — no longer applies: the image left the Ubuntu line entirely on 2026-09-22. The
+  `ppa:mongoose-os/mos` dependency (which publishes focal only, hence the 26.04 `404 … resolute
+  Release`) is gone — `mos` is now compiled from source in a `golang:1.27.1` stage and dropped
+  into a Debian 13 DHI base. See *mongoose builder — mos is built from source* below.
 - **nodemcu** — esp-open-sdk's bundled crosstool-NG toolchain fails to build against the 26.04
   host GCC/glibc: `configure: error: could not find a working compiler`. It builds clean on 22.04.
 
-**Trigger to reconsider:** only when the upstream esp-open-sdk / mongoose-os toolchains gain a
+**Trigger to reconsider:** only when the upstream esp-open-sdk toolchain gains a
 modern-Ubuntu-compatible release. Bumping past 22.04 requires replacing those toolchains, not just
-the `FROM` line.
+the `FROM` line. (This ceiling is about the two esp-open-sdk builders; arduino and mongoose are
+both on Debian 13 DHI.)
+
+### mongoose builder — `mos` is built from source, not installed from the PPA
+
+`builders/mongoose-docker-build` compiles **`github.com/suculent/mos`** — our fork — at pinned
+commit `f612a4c` (branch `thinx/deps-2026-09`) in a `golang:1.27.1` stage and copies the binary
+into a `dhi.io/debian-base:trixie-dev` runtime. Do not "simplify" this back to
+`apt-get install mos-latest`, and do not point it at upstream `mongoose-os/mos`.
+
+The fork exists because upstream's tree still carries its 2021 dependency set (x/crypto, go-git
+v5.4.2, grpc v1.40, x/net), which grype scores at **77 findings, 11 critical**, and upstream has
+shipped nothing since 2023-03-13. The fork branch bumps nine modules to current, raises the `go`
+directive to 1.24+ (required by modern x/crypto), fixes three latent non-constant-format-string
+bugs that vet then exposes, and adds `common/ourgit`'s first test — go-git's only first-party
+consumer — which passes identically on v5.4.2 and v5.19.2. Image findings after the bump: **2**,
+both non-applicable (a gRPC xDS *server* DoS fixed only in an unreleased `1.85.0-dev`, and the
+standing "x/crypto/openpgp is unmaintained" advisory reached via go-git).
+
+**Always repin `MOS_REF` by SHA after a fork change — never track the branch name**, or the image
+stops being reproducible. Rebasing the fork on upstream is a no-op while upstream stays dormant.
+
+The PPA `.deb` is a **go1.13.8** binary frozen since 2023-03-14. Grype reports **287 Go stdlib CVEs
+against it, 18 of them critical**, and none of them are fixable by apt: the stdlib is linked into
+that binary, not provided by the distro. Upstream has published nothing since, so re-linking the
+same tree is the only lever. After the rebuild, grype reports **zero** stdlib hits. The image's remaining ~960 Debian findings
+are **all** `not-fixed` or `wont-fix` upstream — zero are actionable, so do not spend time on them.
+
+**Pin the Go stage to a supported line.** It was `golang:1.25.13` for a day; Go backports security
+fixes to the two most recent majors only, so with 1.27 released the 1.25 line is already done
+receiving them. Both builders track `golang:1.27.1`. Bump it when Go 1.29 ships, not before —
+and rerun the build-chain tests, since the toolchain is what links these binaries.
+
+Build-stage requirements: `python3` (the Makefile generates `version/version.go` via
+`tools/fw_meta.py`), plus `pkg-config libusb-1.0-0-dev libftdi1-dev libudev-dev` — `mos` links
+libusb/libftdi through cgo (`gousb`, `cesanta/hid`, `cesanta/go-serial`). The runtime image
+therefore needs `libusb-1.0-0` and `libftdi1-2`, which the PPA package used to pull in as `Depends`.
+
+Verified 2026-09-22: the image builds and `mos build --arch=esp8266` produces `fw.zip` through
+`build.mongoose-os.com`.
+
+**Fixed alongside the base move (2026-09-22):** `cmd.sh` used to call `/root/.mos/bin/mos update`
+under `set -e`, and `/root/.mos` has never existed in the published image — the entrypoint died
+there before it built anything. `mos update` is dead upstream too (`404` on
+`mongoose-os.com/downloads/mos-latest/version.json`; the PPA build shelled out to `sudo apt-get`,
+which is not installed). It now calls `mos` from `PATH` with no update step; running the entrypoint
+against `mongoose-os-apps/demo-js` reports `THiNX BUILD SUCCESSFUL.` and writes `build/fw.zip`.
+
+Two further pre-existing bugs in that script, **not** fixed: the arch probe is inverted
+(`if [[ -z $(cat ./mos.yml | grep "esp32") ]]; then ARCH='esp32'` — a project that *mentions* esp32
+builds as esp8266, and vice versa), and `RESULT=$?` after the build is unreachable under `set -e`,
+so `THiNX BUILD FAILED` can never print.
+
+### arduino builder — the JRE and `arduino-builder` are re-linked in builder stages
+
+The Arduino 1.8.19 tarball ships two prebuilt runtimes that scanners flag and that no base bump can
+reach: `arduino-builder` linked against **go1.14.4**, and an **Oracle JRE 1.8.0_191**
+(`BUILD_TYPE="commercial"`). All three Dockerfiles now rebuild the first with Go 1.27.1 and replace
+the second with **Temurin 8u462** — Oracle's own 8u461 is licence-gated, Temurin 8u462 is the
+redistributable build at the same CPU level, and Debian 13 ships no openjdk-8 at all (21 and 25
+only). The IDE is still Java (`cmd.sh` runs `arduino --verify` and `--install-library`), so the JRE
+cannot be dropped; `arduino-cli` would remove both findings at once but is a rewrite of `cmd.sh`.
+
+Two traps, both recorded in `arduino-docker-build/CHANGELOG.md` 0.8.217: `arduino-builder` must be
+built from commit `99ac98e`, not `master` (master pulls a 2022 `arduino-cli` that rejects
+`/opt/workspace/<name>.ino` with `main file missing from sketch`), and `go.zipexe` must be replaced
+with v1.0.2 (v1.0.0 nil-derefs in `debug/elf` on a modern-linker binary, so `go.rice` panics in
+`init()`).
 
 ### nodemcu builder — newlib tarball pre-seeded on purpose
 
@@ -161,7 +164,3 @@ repos, so the built-in `checkout` fails with `git@github.com: Permission denied 
 the explicit `git clone https://github.com/suculent/<repo>.git .` step.
 
 ---
-
-## Current Known Remaining Risks Before Retest
-- Websocket handshake may still return `404` even with corrected frontend bundle
-- Authenticated dashboard still fetches broad operational/account data immediately on load

@@ -1,17 +1,20 @@
 ---
-gsd_state_version: 1.0
+gsd_state_version: "1.0"
 milestone: v1.13
-milestone_name: Web Hardening (Console/Edge)
+milestone_name: Web Hardening (Console/Edge) (Phase 21)
+current_phase: 21
+current_phase_name: CSP Wildcard Removal + Anti-CSRF Token
 status: executing
-stopped_at: Completed 21-03-PLAN.md; SEC-CSP-01 carried further by out-of-plan sessions through 2026-09-19
-last_updated: "2026-09-19T21:40:00.000Z"
-last_activity: 2026-09-19
+stopped_at: "Phase 21 reconciled 2026-09-21; blocked on 21-04 Task 2 operator checkpoint"
+last_updated: "2026-09-21T14:25:00.000Z"
+last_activity: 2026-09-21
+state_head: 9909d0e4fca7482c084a695f8a1941997ec31bb7
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 11
   total_plans: 5
   completed_plans: 3
-  percent: 0
+  percent: 60
 ---
 
 # STATE — THiNX Device API
@@ -24,7 +27,7 @@ See: `.planning/PROJECT.md`
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
 - **Current focus:** v1.13 Web Hardening (Console/Edge) — Phase 21 (CSP Wildcard Removal + Anti-CSRF Token) is the only phase; it must touch the swarm nginx edge and both console images (legacy AngularJS `services/console/src/default.conf` + Vue `services/console/vue/default.conf`) consistently, plus add server-side CSRF validation to the API's login route.
-- **Production today (2026-09-19):** api + transformer run on `micro`, not `core`. Classic console image `registry.thinx.cloud:5000/thinx/console:swarm@sha256:27b1ca72` on node `core`, serving the CSP build with no inline scripts; rollback digest `sha256:1906bd5f`. `thinx-staging` publishes to the private registry, `main` to Docker Hub — one registry per branch since `3cfd0666`.
+- **Production today (CORRECTED 2026-09-21 by direct swarm inspection):** `thinx_api` runs on **core**, `thinx_console` on **micro**, `thinx_vue` on **core** — api and classic console are the reverse of what was recorded on 2026-09-19. Original (now stale) note follows: api + transformer run on `micro`, not `core`. Classic console image `registry.thinx.cloud:5000/thinx/console:swarm@sha256:27b1ca72` on node `core`, serving the CSP build with no inline scripts; rollback digest `sha256:1906bd5f`. `thinx-staging` publishes to the private registry, `main` to Docker Hub — one registry per branch since `3cfd0666`.
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace. Phase 21 touches BOTH console images (legacy + Vue) directly since the CSP and CSRF findings are console-frontend concerns, not backend-only; coordinate submodule pointer bump as part of Phase 21 deploy.
 
 ## Current Position
@@ -33,9 +36,11 @@ Phase: 21 (CSP Wildcard Removal + Anti-CSRF Token) — in progress
 Plan: 4 of 5 in the GSD flow; SEC-CSP-01 has since been carried past its plan by out-of-plan work
 Status: 21-01..21-03 complete. Production now enforces `script-src` **without** `'unsafe-inline'`
         (plus `script-src-attr 'none'`) after the classic console's inline scripts were migrated to
-        external assets — further than 21-03 scoped. 21-04 (verification) and 21-05 (runbook) are
-        still unwritten; the evidence they would collect is in the console repo's
-        `docs/superpowers/plans/2026-09-19-csp-inline.md` deploy record.
+        external assets — further than 21-03 scoped. 21-04 and 21-05 ARE written (corrected
+        2026-09-21 — the earlier "still unwritten" note was wrong); what they lack is execution.
+        Reconciled against live state 2026-09-21: 21-04 Task 1 (push both repos, bump submodule,
+        CI green) is already satisfied and must not be re-run; 21-04 Task 2 (authenticated
+        in-browser verification) is the only real gap; CSRF enforcement is confirmed still OFF.
 Last activity: 2026-09-19
 
 ## Milestones
@@ -99,7 +104,7 @@ Carried from the 2026-09-19 sessions, none of them blocking:
 
 | Item | State |
 |------|-------|
-| PR #555 | Open, ready for review, `MERGEABLE`. Merge publishes `thinxcloud/console:latest`, `:vue` and the api image to Docker Hub. |
+| PR #555 | ✅ MERGED 2026-09-19T21:34:24Z (`thinx-staging` -> `main`). Docker Hub publish triggered. |
 | Aikido | Auth fixed by the operator, never exercised against a real scan. |
 | Aikido branch-protection finding | Recommendation stands: accept-risk the *review* requirement (solo maintainer — GitHub forbids self-approval, so requiring approvals hard-blocks every merge) and enforce status checks, signed commits (already 100% `G`) and no force-push/deletion instead. Same reason CODEOWNERS must not be paired with "Require review from Code Owners" yet. |
 | Private registry flakiness | `docker login registry.thinx.cloud:5000` timed out in two consecutive pipelines on 2026-09-19, both times while another job was pushing an image to it. Both passed on rerun. Worth a retry wrapper on the login step or more I/O headroom on `micro`. |
@@ -147,7 +152,18 @@ Items acknowledged and deferred at prior milestone closes and carried forward:
 
 ### Todos
 
-- Reconcile Phase 21 with reality before closing it: 21-01..21-03 shipped, and the inline-script removal deployed on 2026-09-19 took SEC-CSP-01 past what 21-03 scoped. 21-04 (verification) and 21-05 (runbook) should be written against the deployed state, reusing the deploy record in the console repo (`docs/superpowers/plans/2026-09-19-csp-inline.md`) rather than re-deriving it.
+- ~~Reconcile Phase 21 with reality before closing it~~ **DONE 2026-09-21.** Findings recorded in a `## RECONCILIATION WITH DEPLOYED REALITY` block at the top of both `21-04-PLAN.md` and `21-05-PLAN.md`. Summary: 21-04 Task 1 already satisfied (csrf.js on `origin/thinx-staging` + `origin/main`, HEAD==origin 0/0, submodule `acb62d82` 0/0, PR #555 merged 2026-09-19T21:34:24Z, and `app.thinx.cloud` live-mints `XSRF-TOKEN; Domain=.thinx.cloud; Secure; SameSite=Lax`). Enforcement confirmed still fail-open (`POST /api/login` sans token -> `invalid_credentials`, not `csrf_token_invalid`). Both plans' dead `$HOME/.claude/get-shit-done/...` execution-context paths repointed to `~/.claude/gsd-core/...`.
+- **NEW (2026-09-21) — Vue console CSP does not match its own image config.** `console.thinx.cloud` serves a CSP byte-identical (modulo order) to the CLASSIC `services/console/src/default.conf`, not to `services/console/vue/default.conf`; both console hosts return one identical CSP header. So 21-03's edit to `vue/default.conf` has no observable production effect. Determine what actually emits that header (edge nginx vs image) in 21-04 Task 2 step 0.
+- **NEW (2026-09-21) — latent cold-session lockout.** `services/console/vue/default.conf` `connect-src` omits `https://app.thinx.cloud` and `wss://app.thinx.cloud`. If that file ever takes effect, the Vue console's cross-origin `GET /api/v2/csrf-token` prime is CSP-blocked — the exact lockout 21-05's must_haves forbid. Masked today only because the live classic CSP lists both hosts. Fix before flipping enforcement if `vue/default.conf` is (or becomes) authoritative.
+- **NEW (2026-09-21, swarm-verified) — TOPOLOGY HAS DRIFTED; 21-04 Task 2 step 0 is a live BLOCKER.** Actual placement now: `thinx_api` on **core**, `thinx_console` on **micro**, `thinx_vue` on **core**. Both the plans and this file's "Production today" line assert the opposite for api/console (api on micro, classic console on core). Per 21-04 Task 2 step 0's own instruction ("If the live mapping has drifted from this, STOP and treat it as a blocker — do not guess"), verification cannot be signed off until this is reconciled. All three services were observed mid-reschedule (`Preparing`) at 14:3x and settled to `Running`; all three hostnames return HTTP 200 and `app.thinx.cloud` still mints `XSRF-TOKEN`. `docker service ls` on the leader returns an *unstable subset* across consecutive polls — query services by name, not by listing.
+- **RESOLVED (2026-09-21) — the console CSP override is a swarm BIND MOUNT, not a build bug.** (This supersedes an earlier, incorrect note in this file claiming the `:vue` image did not contain `vue/default.conf`. It does.) Both `thinx_vue` and `thinx_console` mount the SAME host file over the image's config, read-only:
+  `/mnt/gluster/deployment/swarm/console/default.conf` -> `/etc/nginx/conf.d/default.conf`.
+  Proof: a throwaway container from the deployed `:vue` image has `default.conf` = 95 lines, `Permissions-Policy`=1, `Strict-Transport`=0, `cloudfront`=0 — an exact fingerprint match for HEAD's `services/console/vue/default.conf`. The RUNNING container has 103 lines, `Permissions-Policy`=0, `Strict-Transport`=1, `cloudfront`=1 — an exact match for the gluster file (4634 bytes, mtime **Sep 19 20:16**, i.e. the 2026-09-19 inline-script session). CI, `vue/Dockerfile:94` and the build context are all correct and were never at fault.
+  **Consequence for Phase 21: 21-03's edits to BOTH `src/default.conf` and `vue/default.conf` are INERT in production.** SEC-CSP-01's live effect was achieved by hand-editing the gluster file on 2026-09-19, not by the image changes. The production CSP source of truth is that gluster file, which lives in its own git repo on the swarm (`/mnt/glusterfs/deployment/swarm`) — NOT in this repo and NOT in the console submodule.
+  Because one file serves both consoles, the two console hosts necessarily return an identical CSP; there is no per-console policy today.
+- **Downgraded (2026-09-21) — the Vue `connect-src` gap is latent, not active.** `vue/default.conf` omitting `https://app.thinx.cloud`/`wss://app.thinx.cloud` cannot bite while the bind mount is in place (the gluster file lists both). It becomes a live cold-session lockout only if the mount is removed so the image config takes effect. Still worth fixing, but it is not a 21-05 blocker.
+- **NEW (2026-09-21) — `WEB_HOSTNAME` is wrong for the `:vue` build.** The deployed image carries `ARG WEB_HOSTNAME=rtm.thinx.cloud` / `ENV NGINX_HOST=rtm.thinx.cloud`. Both CI jobs pass `--build-arg VUE_APP_CONSOLE_HOSTNAME=${WEB_HOSTNAME}`, and `WEB_HOSTNAME` is a single project-level var shared with the CLASSIC build, where `rtm.thinx.cloud` is correct. Two distinct effects: (a) `__NGINX_HOST__` substitution — inert, overridden by the mount; (b) `VUE_APP_CONSOLE_HOSTNAME`, which IS baked into the Vue bundle and read by `vue/src/mixins/hostnames.js:4`. Impact of (b) is limited to the three "THiNX Console" footer links (`Layout.vue:12`, `Login.vue:91`, `PasswordReset.vue:96`) pointing at the classic console instead of itself — cosmetic, no auth/security effect. Fix needs a SEPARATE var (e.g. `VUE_WEB_HOSTNAME`) or a per-job override; changing the shared `WEB_HOSTNAME` would break the classic image.
+- **NEW (2026-09-21) — runbook snapshots stale.** `.planning/runbooks/swarm-configs/rtm.thinx.cloud-server.{pre,post}.nginx:29` still record 21-03's CSP (`'unsafe-inline'` in `default-src`, no `app.thinx.cloud`, no split `script-src`/`style-src`, no `script-src-attr`). Refresh against the live header during 21-05.
 - Authenticated in-browser verification of the CSP build has never run against the deployed instance — the pre-deploy Playwright suites (`src/test/csp/browser.cjs`, `app-browser.cjs`) cover it with fixtures only. That is the one real gap in 21-04.
 - Before closing Phase 21: confirm the Crisp widget (`wss://client.relay.crisp.chat`) and any other explicit-host dependents are enumerated and pinned in the new CSP — a missed host will silently break a console feature post-deploy.
 - Coordinate `services/console` submodule pointer bump as part of Phase 21's deploy (both console images change).
@@ -178,9 +194,15 @@ Items acknowledged and deferred at prior milestone closes and carried forward:
 
 ## Session Continuity
 
-**Stopped at:** Completed 21-03-PLAN.md in the plan flow; SEC-CSP-01 carried further by direct work through 2026-09-19.
+**Last session:** 2026-09-21T14:07:57.908Z
 
-**Next action:** Merge PR #555, then write 21-04/21-05 against the deployed state.
+**Stopped at:** Phase 21 reconciled against deployed reality (2026-09-21); execution blocked on an
+operator-only checkpoint.
+
+**Next action:** Execute 21-04 Task 2 — the authenticated in-browser verification of both consoles
+(blocking `checkpoint:human-verify`, needs a real staging login + DevTools + a swarm `docker service ps`).
+Task 1 of 21-04 is already satisfied; do not re-run it. Only after that checkpoint passes may 21-05
+flip `debug.csrf_enforce` / `CSRF_ENFORCE` on the `thinx_api` service.
 
 ---
 *v1.0 GA backend closures shipped and archived: 2026-05-27 (4/4 v1 requirements Verified)*
