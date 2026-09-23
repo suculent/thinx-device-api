@@ -48,7 +48,7 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.5.1",
     "express-session": "^1.19.0",
-    "fs-extra": "^11.3.3",
+    "fs-extra": "^11.3.6",
     "helmet": "^8.1.0",
     "influx": "^5.11.0",
     "jsonwebtoken": "^9.0.3",
@@ -57,7 +57,7 @@
     "mkdirp": "^1.0.3",
     "moment-timezone": "0.6.0",
     "mongo-sanitize": "^1.1.0",
-    "mqtt": "^5.14.1",
+    "mqtt": "^5.16.0",
     "nano": "^11.0.7",
     "node-forge": "^1.4.0",
     "node-schedule": "^2.1.1",
@@ -80,6 +80,7 @@
     "yaml": "2.8.3"
   },
   "overrides": {
+    "fs-extra@<11.3.6": "11.3.6",
     "axios": "1.20.0",
     "ajv": "^6.15.0",
     "@commitlint/config-validator": {
