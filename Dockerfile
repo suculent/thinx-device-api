@@ -1,7 +1,40 @@
+# Rebuild the Docker CLI with pinned x/net and grpc instead of relying on the
+# copy inherited from thinxcloud/base:latest, so this image carries the fixed
+# dependencies even when the base tag has not been republished yet.
+# Keep in sync with base/Dockerfile and services/worker/Dockerfile.
+FROM golang:1.26.8-alpine3.24 AS docker-cli
+
+RUN apk add --no-cache ca-certificates curl git
+WORKDIR /src/docker-cli
+
+# Docker CLI v29.8.1, pinned by source commit and archive checksum.
+RUN curl -fSL https://codeload.github.com/docker/cli/tar.gz/477f1252f2391a2b34fdce2e7bd03a0eee660005 -o /tmp/cli.tar.gz \
+    && echo "4609135885a5afea23961dc07bb070febe3a9976165ff104b3138d46757006f8  /tmp/cli.tar.gz" | sha256sum -c - \
+    && tar -xzf /tmp/cli.tar.gz --strip-components=1 \
+    && rm /tmp/cli.tar.gz
+
+# Upstream uses vendor.mod instead of go.mod. Build in module mode so the
+# requested versions replace the vendored dependencies and remain auditable.
+RUN cp vendor.mod go.mod && cp vendor.sum go.sum \
+    && go get golang.org/x/net@v0.59.0 google.golang.org/grpc@v1.85.0-dev.0.20260825072537-93e31b48545e \
+    && CGO_ENABLED=0 go build -mod=mod -trimpath -tags grpcnotrace \
+       -ldflags "-s -w -X github.com/docker/cli/cli/version.Version=29.8.1 -X github.com/docker/cli/cli/version.GitCommit=477f125-deps" \
+       -o /out/docker ./cmd/docker \
+    && go version -m /out/docker | awk '\
+       $1 == "dep" && $2 == "golang.org/x/net" { net = ($3 == "v0.59.0") } \
+       $1 == "dep" && $2 == "google.golang.org/grpc" { grpc = ($3 == "v1.85.0-dev.0.20260825072537-93e31b48545e") } \
+       END { exit !(net && grpc) }' \
+    && /out/docker --version \
+    && /out/docker run --help >/dev/null \
+    && /out/docker service create --help >/dev/null
+
 FROM thinxcloud/base:latest
 
 LABEL maintainer="Matej Sychra <suculent@me.com>"
 LABEL name="THiNX API" version="1.9.2866"
+
+# Replaces the CLI inherited from thinxcloud/base (see the docker-cli stage above).
+COPY --from=docker-cli /out/docker /usr/bin/docker
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -19,7 +52,7 @@ ARG ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
 
 # No secret is declared as ENV in this image.
 #
-# ENV persists into the published layers and this build is single-stage, so
+# ENV persists into the published layers of the final stage, so
 # anything declared here is readable by anyone who pulls thinxcloud/api, which
 # is public. Secrets reach the container at runtime instead, through
 # docker-compose `environment:` and `env_file: .env`:
