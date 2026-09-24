@@ -529,7 +529,7 @@ jobs:
           # github.com/iegomez/mosquitto-go-auth) that ships in the broker
           # image. snyk resolves Go dependencies by shelling out to `go`, which
           # this node executor does not carry, so install it. go.mod requires
-          # go 1.26.6; this is the latest patch on that line.
+          # go 1.26.8; this is the latest patch on that line.
           command: |
             GO_VERSION=1.26.8
             GO_SHA256=d0f743b33e8d8945e6b1f432edd15785c70507121d6e2a723b21285eddf8b57b
