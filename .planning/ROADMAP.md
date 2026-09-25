@@ -98,7 +98,7 @@ See `.planning/milestones/v1.13-ROADMAP.md`. 2/2 v1.13 requirements (SEC-CSP-01,
   3. In the live Vue bundle, the "THiNX Console" links (layout, login, password reset) point at the Vue console host. `VUE_WEB_HOSTNAME` is traced from the CircleCI project variable through the build arg into the served bundle.
   4. `docker-swarm.yml` no longer sets the dead runtime `VUE_APP_CONSOLE_HOSTNAME` environment variable.
 
-**Plans**: 3/3 plans executed
+**Plans**: 3/4 plans executed
 
 Plans:
 **Wave 1**
@@ -112,6 +112,10 @@ Plans:
 **Wave 3** *(blocked on Wave 2 completion)*
 
 - [x] 22-03-PLAN.md — PR thinx-staging → main opened (gated), PR CodeQL run and non-required status proven, evidence recorded (no merge)
+
+**Wave 4** *(gap closure, blocked on Wave 3 completion)*
+
+- [ ] 22-04-PLAN.md — Layout footer gets the hostnames mixin (the one broken CI-03 link) with a plain-node footer test, shipped submodule → parent pointer → thinx-staging, proven in the served bundle and a logged-in check; CI-03 marked complete only after approval
 
 **Notes**: Verify-first. CI-02 (`be376db9`) and CI-03 (`3f2f6da4`) are probably discrepancy branches, so the phase opens by checking current state before writing code. The research-era option to switch CI compose to `influxdb:1.8` is dropped: CI stays on `dhi.io/influxdb:2`, which matches the Phase 27 target.
 
