@@ -1,43 +1,118 @@
-# Requirements: THiNX Device API — v1.13 Web Hardening (Console/Edge)
+# Requirements: THiNX Device API — v1.14 Backlog & Hardening Sweep
 
-**Defined:** 2026-07-04
-**Core Value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
+**Defined:** 2026-09-25
+**Core Value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on keeps working with no signature breaks; push → CI → Swarmpit autoredeploy stays under a 5-minute SLA.
 
-## v1.13 Requirements
+**Research:** `.planning/research/SUMMARY.md` (+ STACK / FEATURES / ARCHITECTURE / PITFALLS)
 
-Requirements for the v1.13 Web Hardening milestone. Each maps to exactly one roadmap phase. Sourced from the 2026-07-04 HawkScan DAST of `rtm.thinx.cloud` (scan `c5691244`, rescan `1f3ec1e7`) — the two Medium findings that were deliberately deferred at scan time because they live in the console/edge layer, not the API core. Context: memory `csp-wildcard-hardening-deferred.md` + `thinx-console-topology`. The live swarm runs **two** console services (legacy `thinx_console` AngularJS + `thinx_vue`), so both frontends plus the swarm nginx edge are in scope and must stay consistent.
+## v1.14 Requirements
 
-### Web Hardening
+### CI & SAST
 
-- [x] **SEC-CSP-01**: The `Content-Security-Policy` header no longer uses the `https:` scheme-wildcard in `default-src`/`connect-src`; explicit hosts are pinned instead. The change is applied consistently across all three CSP sources — the swarm nginx edge (`.planning/runbooks/swarm-configs/rtm.thinx.cloud-server.pre.nginx:28` + `.post.nginx:28`), the legacy console image (`services/console/src/default.conf`), and the Vue console image (`services/console/vue/default.conf`) — so the effective policy is identical whichever image serves a request. `unsafe-eval` is intentionally retained (removal is blocked on the console leaving AngularJS — see Future). — Acceptance: HawkScan rescan of `rtm.thinx.cloud` reports **0 NEW** "CSP: Wildcard Directive" (plugin 10055-4) paths; the legacy console and Vue console both load and function (no CSP-blocked scripts/styles/websockets in the browser console, including the Crisp `wss://client.relay.crisp.chat` connection); the three CSP definitions are byte-for-byte equivalent modulo the host-token placeholder.
+- [ ] **CI-01**: CodeQL analysis runs on push to `main` and `thinx-staging` and on PRs to `main`, using `github/codeql-action@v4` + `actions/checkout@v7` (`javascript-typescript`, `build-mode: none`); the check is non-required and GitHub default setup stays off
+- [ ] **CI-02**: Every CircleCI login to `registry.thinx.cloud:5000` goes through the retrying `registry-login` command (including the test job at `.circleci/config.yml:~767`); no login passes the password on the command line
+- [ ] **CI-03**: The Vue console footer links point at the Vue console host in the live bundle (`VUE_WEB_HOSTNAME` verified end to end); the dead runtime `VUE_APP_CONSOLE_HOSTNAME` env is removed from `docker-swarm.yml`
 
-- [ ] **SEC-CSRF-01**: Both console login forms — the legacy AngularJS console AND the Vue console — carry a synchronizer anti-CSRF token that the API validates server-side on the login POST, using a single token scheme compatible with both frontends. Requests with a missing/invalid token are rejected; valid logins are unaffected. Builds on the `SameSite=lax` session cookies already shipped (commit `ce7ca34c`). — Acceptance: HawkScan rescan reports **0 NEW** "Anti-CSRF Tokens" (plugin 20012) paths; a login POST with no/forged token is rejected (4xx) while a normal login through each console still succeeds; the token mechanism is identical across both consoles (no per-frontend fork of the server-side check).
+### Build Pipeline Sinks
+
+- [ ] **SEC-EXEC-01**: `lib/thinx/git.js` runs git via argv (`execFileSync("git", …)`), with no shell string and no `ssh-agent sh -c` wrapper; SSH auth uses a constant `GIT_SSH_COMMAND` + askpass with `GIT_KEY_PASSPHRASE` passed explicitly; stderr is captured so success detection is unchanged; a private-repo build succeeds in production
+- [ ] **SEC-EXEC-02**: The remote-builder command (`builder.js:~944`) runs via argv, and the `shell-escape` dependency is removed
+- [ ] **SEC-PATH-01**: Every builder read/write of a repo-controlled file (incl. `thinx.yml` write-back) is contained by `realpath` + `path.relative` and refuses symlinks; `device.owner` / `device.udid` are sanitized before building `BUILD_PATH`
+- [ ] **SEC-PATH-02**: Firmware repositories are cloned with `core.symlinks=false`
+
+### Secrets
+
+- [ ] **SEC-CFG-02**: The 9 credentials read in `lib/` load through `readSecret()` with env fallback kept and null-safe guards (`readSecret` returns `null`); each is provisioned as a swarm secret one service at a time (not via `restart.sh`), plus a new `CSRF_SECRET`; `docker-swarm.yml` mirrors the stack (incl. its stale api image reference)
+
+### CSRF
+
+- [ ] **SEC-CSRF-02** (WR-06): The CSRF token is HMAC-signed and bound to the session id; the priming GET creates a short-TTL pre-session; a stale/invalid token is re-minted rather than echoed; the key comes from `CSRF_SECRET` (HKDF-from-session-secret fallback, fail closed, never random); a `CSRF_MODE` (legacy|signed) switch allows rollback independently of `CSRF_ENFORCE`; the wire contract (`XSRF-TOKEN` / `X-XSRF-TOKEN` / `…/csrf-token` / `csrf_token_invalid`) is unchanged
+- [ ] **SEC-CSRF-03**: The session id is regenerated at every interactive login (password, token login, Google, GitHub) but not on the per-request Bearer bridge; the login response sets the new `XSRF-TOKEN`; logout clears it
+- [ ] **SEC-CSRF-04** (WR-04): `POST /api/v2/user` requires a valid CSRF token (no machine-client exemption); the priming contract is documented in OpenAPI
+- [ ] **SEC-CSRF-05**: Cookie-authenticated mutation routes (`DELETE /api/v2/user`, `POST /api/user/delete`, `/api/gdpr/revoke`, `/api/v2/profile`) require the CSRF token; Bearer / API-key requests stay exempt
+- [ ] **SEC-CSRF-06**: Under enforcement, cold login on both consoles, Google and GitHub OAuth, a forced `thinx_api` redeploy mid-session, and the classic register / forgot-password / reset-confirm flows all work
+
+### Console Edge
+
+- [ ] **SEC-CSP-03**: The gluster `/mnt/gluster/deployment/swarm/console/default.conf` is the canonical console header config, hardened with `Referrer-Policy`, `Permissions-Policy` and `X-Permitted-Cross-Domain-Policies: none`; each console host emits exactly one CSP header
+- [ ] **SEC-CSP-04**: Both image `default.conf` files (classic + Vue) and the `.planning/runbooks/swarm-configs/` snapshots mirror the gluster headers; a normalising parity script confirms it
+
+### Log Paging
+
+- [ ] **LOG-01**: CouchDB design docs are upserted idempotently (rev-aware) at boot, so view changes reach production; new views live in a new design doc (`_design/logs` untouched)
+- [ ] **LOG-02**: The legacy no-param audit-log call keeps its response shape and 200-item cap but returns the caller's own newest 200 entries with their real `flags` (owner-keyed view)
+- [ ] **LOG-03**: A Vue Console user can page through the audit log beyond 200 entries (opt-in `limit` / `cursor`; response keeps `response` as an array and adds `paging: {limit, has_more, next_cursor}`; cursor never carries the owner)
+- [ ] **LOG-04**: A Vue Console user can page through the build list; the paged path has no prune side effect; the console submodule pointer is bumped and deployed
+
+### Ops — InfluxDB
+
+- [ ] **OPS-INFLUX-01**: `thinx_influxdb` runs InfluxDB 2 in production, upgraded from a verified backup, with existing `stats` data migrated
+- [ ] **OPS-INFLUX-02**: `lib/thinx/influx.js` reads and writes against InfluxDB 2 and the dashboard / Visits statistics still render; CI runs the influx specs against InfluxDB 2
+- [ ] **OPS-INFLUX-03**: `stats` data has a finite 90-day retention (bucket retention)
+
+### Ops — Swarmpit
+
+- [ ] **OPS-SWARM-01**: Swarmpit runs 1.10 in production and registry-triggered autoredeploy still completes within the 5-minute SLA
+- [ ] **OPS-SWARM-02**: Swarmpit stats are disabled and `swarmpit_influxdb` is removed (the `swarmpit/influxdb.conf` file `thinx_influxdb` mounts is preserved or re-homed); autoredeploy verified by a test push
+- [ ] **OPS-SWARM-03**: `swarmpit_agent` is removed; autoredeploy verified by a test push; `swarmpit_db` untouched
 
 ## Future Requirements
 
-Acknowledged and deferred — candidates not in the v1.13 roadmap.
-
-### Web Hardening — Deferred
-
-- **SEC-CSP-02 (`unsafe-eval` removal)**: Drop `'unsafe-eval'` (and tighten `'unsafe-inline'`) from the CSP once the console is fully off AngularJS. AngularJS's `$parse` requires `unsafe-eval` unless run in CSP mode; removing it now would break the legacy console. Blocked on the AngularJS→Vue console migration completing.
+- **SEC-CFG-03**: Remove env-var fallbacks for swept secrets (`WORKER_SECRET` waits on the worker repo)
+- **SEC-CFG-04**: Move `config.json`-held secrets (session secret, JWT material) and host scripts to swarm secrets
+- **SEC-CSP-02**: `unsafe-eval` removal — blocked on AngularJS console retirement
+- **SEC-CSP-05**: Retire the gluster bind mount so images own the console headers
+- **SEC-CSRF-07**: `__Host-` cookie prefix / cookie rename
+- TEST-CHAI-01, OPS-02, OPS-03, `uuid #194` — carried deferrals
 
 ## Out of Scope
 
-Explicitly excluded. Documented to prevent scope creep.
-
 | Feature | Reason |
 |---------|--------|
-| Removing `'unsafe-eval'` / `'unsafe-inline'` from CSP | Blocked on AngularJS retirement; tracked as deferred SEC-CSP-02. |
-| The two High HawkScan findings (Oracle SQLi, Shell Shock RCE) | Verified as false positives against the code (no SQL datastore; `mac` never shelled) and triaged FALSE_POSITIVE on the platform at scan time. Not real vulnerabilities. |
-| Information Leak – Email (`/public/privacy.html`) | Intentional privacy-policy contact address; triaged FALSE_POSITIVE at scan time. |
-| API-side CSRF for token-authenticated routes | API routes use `X-Access-Token`/JWT (not ambient cookies) and are not CSRF-prone; only the cookie-session login forms need the token. |
-| Multi-tenant revamp / v2 API features | Future major milestone, not v1.x. |
+| CSRF exemption for machine clients | Decided 2026-09-25: registrants must prime the token |
+| `saveUninitialized: true` | Creates a Redis session per anonymous hit; the pre-session is created only by the priming GET |
+| Editing `_design/logs` in place | Forces a full re-index of the view the retention cron relies on |
+| `skip` paging / `total_rows` | Slow on large views; `has_more` suffices |
+| Replacing Swarmpit (shepherd / webhook) | v1.14 trims and upgrades it; replacement is a later decision |
+| Upgrading `swarmpit_influxdb` to v2 | It is being removed (OPS-SWARM-02) |
+| `csrf-csrf` / `csurf` libraries | ~30 lines of `node:crypto` suffice; csurf is deprecated |
 
 ## Traceability
 
-Filled by the roadmap (each REQ → exactly one phase).
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| CI-01 | Phase 22 | Gaps Found |
+| CI-02 | Phase 22 | Gaps Found |
+| CI-03 | Phase 22 | Gaps Found |
+| SEC-EXEC-01 | Phase 23 | Pending |
+| SEC-EXEC-02 | Phase 23 | Pending |
+| SEC-PATH-01 | Phase 23 | Pending |
+| SEC-PATH-02 | Phase 23 | Pending |
+| SEC-CFG-02 | Phase 24 | Pending |
+| SEC-CSRF-02 | Phase 25 | Pending |
+| SEC-CSRF-03 | Phase 25 | Pending |
+| SEC-CSRF-04 | Phase 25 | Pending |
+| SEC-CSRF-05 | Phase 25 | Pending |
+| SEC-CSRF-06 | Phase 25 | Pending |
+| SEC-CSP-03 | Phase 25 | Pending |
+| SEC-CSP-04 | Phase 25 | Pending |
+| LOG-01 | Phase 26 | Pending |
+| LOG-02 | Phase 26 | Pending |
+| LOG-03 | Phase 26 | Pending |
+| LOG-04 | Phase 26 | Pending |
+| OPS-INFLUX-01 | Phase 27 | Pending |
+| OPS-INFLUX-02 | Phase 27 | Pending |
+| OPS-INFLUX-03 | Phase 27 | Pending |
+| OPS-SWARM-01 | Phase 28 | Pending |
+| OPS-SWARM-02 | Phase 28 | Pending |
+| OPS-SWARM-03 | Phase 28 | Pending |
 
-| REQ-ID | Phase | Status |
-|--------|-------|--------|
-| SEC-CSP-01 | Phase 21 | Complete |
-| SEC-CSRF-01 | Phase 21 | In Progress (21-01 API-side + 21-02 console-side done; 21-04/21-05 pending) |
+**Coverage:**
+
+- v1.14 requirements: 25 total
+- Mapped to phases: 25 (Phases 22–28)
+- Unmapped: 0 ✓
+
+---
+*Requirements defined: 2026-09-25*
+*Last updated: 2026-09-25 after roadmap creation (traceability mapped to Phases 22–28)*

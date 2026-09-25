@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A long-lived Node/Express IoT device API monorepo (`thinx-device-api`) — bootstrap at `thinx-core.js`, 17 API v2 routers under `lib/router.*.js`, MQTT messaging + WebSocket runtime, Redis-backed session + build queue, CouchDB persistence, Docker-based firmware builder. Sibling to the `services/console` submodule (Vue console + legacy AngularJS console under deprecation). Deployed to swarm on `micro` via CircleCI image publish + Swarmpit autoredeploy.
+A long-lived Node/Express IoT device API monorepo (`thinx-device-api`) — bootstrap at `thinx-core.js`, 17 API v2 routers under `lib/router.*.js`, MQTT messaging + WebSocket runtime, Redis-backed session + build queue, CouchDB persistence, Docker-based firmware builder. Sibling to the `services/console` submodule (Vue console + legacy AngularJS console under deprecation). Deployed to a Docker swarm (nodes `micro` and `core`; service placement floats) via CircleCI image publish to the private registry + Swarmpit autoredeploy.
 
 The v1.0 GA milestone (shipped 2026-05-27) closed the 4 v1 backend gaps the Vue console depends on. Going forward, the project scope is the broader backend lifecycle: hygiene refactors, v1.x backlog, the inevitable v2 multi-tenant revamp.
 
@@ -10,25 +10,17 @@ The v1.0 GA milestone (shipped 2026-05-27) closed the 4 v1 backend gaps the Vue 
 
 The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
 
-## Current Milestone: v1.13 Web Hardening (Console/Edge)
-
-**Goal:** Close the two deferred HawkScan Medium findings that live in the console/edge layer — CSP scheme-wildcards and the login-form anti-CSRF token — across both the legacy AngularJS console and the Vue console plus the swarm nginx edge, kept mutually consistent.
-
-**Target features:**
-- **CSP scheme-wildcard removal (SEC-CSP-01):** drop the `https:` scheme-wildcard from `default-src`/`connect-src` and pin explicit hosts across all three CSP sources kept consistent — the nginx-edge runbook (`.planning/runbooks/swarm-configs/rtm.thinx.cloud-server.{pre,post}.nginx:28`), the legacy console image (`services/console/src/default.conf`), and the Vue console image (`services/console/vue/default.conf`) — so HawkScan "CSP: Wildcard Directive" clears on rescan. `unsafe-eval` removal is out of scope (blocked on the console leaving AngularJS).
-- **Login-form anti-CSRF token (SEC-CSRF-01):** both console login forms (legacy AND Vue) carry a synchronizer anti-CSRF token that the API validates server-side, with one token scheme compatible across both frontends, so HawkScan "Anti-CSRF Tokens" clears on rescan. Builds on `SameSite=lax` session cookies (already shipped, commit `ce7ca34c`).
-
-**Origin:** both findings surfaced by the 2026-07-04 HawkScan of `rtm.thinx.cloud` (scan `c5691244`, rescan `1f3ec1e7`); two High findings (Oracle SQLi, Shell Shock RCE) verified as false positives and triaged that session. Context in memory `csp-wildcard-hardening-deferred.md` + `thinx-console-topology`.
-
 ## Current State
 
-**Shipped:** v1.11 Backlog Drawdown (2026-06-06) — 4/4 v1.11 requirements satisfied across 3 phases (Phases 15–17). Excised the `fs-finder` fork (9 call sites → native `lib/thinx/finder.js`; dependency dropped), triaged the 5 default-branch Dependabot alerts (3 surgical overrides; runtime tree 0 high/0 moderate; `uuid #194` deferred-dev-only), and confirmed the influx stats fix live in production (OPS-EXEC-03 resolved as a discrepancy branch — already autoredeployed). Audit `tech_debt`. **Follow-on / known issue:** Phases 15/16 are pushed (origin at `30ee8d17`); CircleCI pipelines 5269+5270 fail **deterministically** (not flaky) on `00-AppSpec /api/login (invalid)` → 503 (CouchDB user-view `Owner.validate()` error at `router.auth.js:287`). **Not a v1.11 regression** — v1.11 touched no auth/owner/CouchDB code; it's a CI CouchDB-readiness/infra issue to investigate before deploying 15/16. See `.planning/MILESTONES.md` and `.planning/milestones/v1.11-ROADMAP.md`.
+**Shipped:** v1.13 Web Hardening (Console/Edge) (2026-09-25) — 2/2 requirements in Phase 21. The `https:`/`wss:` scheme wildcard is gone from every CSP source; the live policy pins 7 explicit hosts (plus `app.thinx.cloud`). Double-submit CSRF (`XSRF-TOKEN` cookie + `X-XSRF-TOKEN` header, `lib/middleware/csrf.js`) guards the 7 cookie-session login/account POSTs and has been **enforced in production since 2026-09-25 09:02Z**. Both consoles log in cleanly under enforcement. Verification `passed` with 3 operator overrides: HawkScan (the original acceptance scanner) was removed in `bb0ce4a7`, and the production console CSP turned out to come from a gluster bind mount (`/mnt/gluster/deployment/swarm/console/default.conf`) rather than the image configs.
 
-Previously: v1.10 Operational Closures (2026-06-05) — 5/5 requirements across Phases 12–14 (SEC-WS-01 + SEC-PII-02 runbook executions + 3 code helpers). v1.9 Backend Hygiene & Posture (2026-06-04) — 13/13 across Phases 5–11. v1.0 GA Backend Closures (2026-05-27) — 4/4; production image `sha256:4d3fb789`.
+Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user GitHub token backend, Docker Secrets `readSecret()` helper. v1.11 Backlog Drawdown (2026-06-06) — fs-finder excised, Dependabot triage, influx fix confirmed live. v1.10 Operational Closures (2026-06-05). v1.9 Backend Hygiene & Posture (2026-06-04). v1.0 GA Backend Closures (2026-05-27).
 
-**Next milestone:** not yet started. Run `/gsd-new-milestone` to define v1.12 (fresh REQUIREMENTS.md). Standing candidates: push/CI/deploy of v1.11 Phases 15/16 (operator follow-on), the third-deferral keep/drop call on TEST-CHAI-01 / OPS-02 / OPS-03 (now 4× deferred), and `uuid #194` (deferred-dev-only — revisit if nyc/jest-junit bump their uuid pin).
+**Production topology (2026-09-21, swarm-verified; placement floats — always query it):** `thinx_api` on core, `thinx_console` on micro, `thinx_vue` on core. Both console services bind-mount the same gluster `default.conf`, so both hosts serve one identical CSP.
 
-**Codebase posture after v1.9:**
+**Codebase posture (as of v1.13):**
+- Web edge: pinned-host CSP (no scheme wildcards; `unsafe-eval` still present for AngularJS); double-submit CSRF enforced on cookie-session login/account POSTs; rollback via `CSRF_ENFORCE` flag per `.planning/runbooks/csp-csrf-hardening.md`.
+- Core credentials (Redis, CouchDB) load through `readSecret()` from Docker secrets; GDPR purge is a single orchestrator (`owner_purge.js`) reused by scheduled purges.
 - `lib/thinx/owner.js` is fully async/await (~73 callback patterns swept; 5 behavior-locking specs added) with strict equality throughout and SEC-PII-01 + Phase 5 REFACTOR-02 invariants preserved.
 - WebSocket lifecycle is deterministic (raw-socket `close` handler), session cookie is `httpOnly: true` with documented sub-5-min rollback, edge-handshake gap captured in an operator runbook.
 - Account lifecycle: admin `POST /api/v2/admin/user/:id/reactivate` exists for soft-deleted users; password-reset emails land on the Vue console (`/password-reset?`).
@@ -37,16 +29,37 @@ Previously: v1.10 Operational Closures (2026-06-05) — 5/5 requirements across 
 
 **Companion project:** `services/console` submodule shipped its SEC-DEP-02 phase under a new `v1.x Operational Hygiene` milestone; pointer landed in this repo via Phase 10 commit `28a4add4`.
 
-## Next Milestone
+## Current Milestone: v1.14 Backlog & Hardening Sweep
 
-**Not yet started.** Run `/gsd-new-milestone` to define v1.12 (questioning → research → requirements → roadmap; fresh REQUIREMENTS.md).
+**Goal:** Close the v1.13 security follow-ups and the open ops/code findings, and ship three long-standing backlog features (log paging, InfluxDB retention, Swarmpit trim). Phases start at 22.
 
-**Standing candidates:**
-- **CI red on `thinx-staging` — CouchDB user-view 503 (BLOCKS deploy of 15/16)** — pipelines 5269+5270 fail deterministically on `00-AppSpec /api/login (invalid)` → `Owner.validate()` returns false (CouchDB user-directory error/hang) → 503 at `router.auth.js:287`. Not v1.11 code (it touched no auth/owner/couch path). Investigate CouchDB startup/readiness in CI (or `/gsd-debug` the auth 503). Once green, optional prod deploy of 15/16 (`docker service update --force thinx_api`; micro-pinned). This is the top follow-on.
-- **Third-deferral keep/drop call** — TEST-CHAI-01 (chai-http v5 ESM, locked per AGENTS.md), OPS-02 / OPS-03 (pure swarm-side OPS). Now deferred 4×; a future milestone should make a deliberate keep/drop call.
-- **uuid #194** — `deferred-dev-only` (transitive `uuid@8` in nyc/jest-junit; 8→11 bump risks the dev toolchain). Revisit if those tools bump their pin or the alert escalates to runtime scope.
+**Target features:**
+- **WR-06** — session-bound CSRF token (HMAC(secret, random‖session_id)), rotated on login
+- **WR-04** — `POST /api/v2/user` requires the CSRF token, no machine-client exemption (decision 2026-09-25: non-browser clients must prime the token)
+- **Console CSP source of truth** — the gluster bind-mounted `default.conf` is canonical (decision 2026-09-25); image `default.conf` files and the runbook snapshots mirror it, including the Vue `connect-src` `app.thinx.cloud` fix; spot-check classic register / forgot / reset-confirm under enforcement
+- **SEC-CFG-02** — `readSecret()` sweep over the ~20 remaining sensitive env vars
+- **builder.js path traversal** — fix Aikido-flagged `readFileSync`/`lstatSync` sinks in `lib/thinx/builder.js`
+- **git.js argv** — `lib/thinx/git.js` `execSync` sink takes argv, not a shell string
+- **CodeQL workflow** — trigger on `main`, current action majors
+- **Registry login retry** — retry wrapper on the CI `docker login registry.thinx.cloud:5000` step
+- **Vue hostname var** — separate Vue console hostname build var so footer links point at itself
+- **Log paging** — optional bookmark paging for audit + build logs, used by the Vue Console only; Legacy console keeps the 200-item behavior unchanged
+- **InfluxDB 2** — upgrade `thinx_influxdb` 1.8 → 2 in production (added 2026-09-25), with `influx.js` moved to v2 and a 90-day retention on `stats` (default `autogen` is infinite today)
+- **Swarmpit 1.10 + trim** — upgrade Swarmpit to 1.10 (added 2026-09-25), then disable stats and drop `swarmpit_influxdb` and `swarmpit_agent`; registry-triggered autoredeploy must keep working; `swarmpit_db` stays couchdb 2.3.0
+
+**Still deferred:** SEC-CSP-02 (`unsafe-eval`, blocked on AngularJS retirement); TEST-CHAI-01, OPS-02, OPS-03, `uuid #194`.
+
+**Scope note:** log paging and the Vue hostname var touch `services/console` (Vue). As in v1.13, this milestone coordinates the console submodule pointer bump rather than treating that work as fully external.
 
 ## Validated Requirements (Historical)
+
+<details>
+<summary>v1.13 Web Hardening (Console/Edge) (shipped 2026-09-25)</summary>
+
+- ✓ **SEC-CSP-01** — v1.13 (Phase 21) — `https:`/`wss:` scheme wildcard removed from `default-src`/`connect-src` in favour of pinned hosts, across both console `default.conf` files, the edge runbook snapshots and the live gluster-mounted CSP. HawkScan rescan waived (scanner removed); verified by repo-wide CSP parse and live header.
+- ✓ **SEC-CSRF-01** — v1.13 (Phase 21) — Double-submit CSRF token (adjusted from "synchronizer" at CONTEXT time) validated by one server-side middleware for both consoles; missing/forged token → 403 `csrf_token_invalid`; enforced in production since 2026-09-25 09:02Z; cold logins on both consoles verified by the operator.
+
+</details>
 
 <details>
 <summary>v1.11 Backlog Drawdown (shipped 2026-06-06)</summary>
@@ -118,7 +131,7 @@ Previously: v1.10 Operational Closures (2026-06-05) — 5/5 requirements across 
 - **G10** (`thinx_worker` silent-loop on `docker pull`) — lives in the worker repo, different codebase
 - **chai-http v5 ESM migration** — dependency lock per `AGENTS.md:82-92`; trigger to reconsider is a Snyk/Dependabot CVE in superagent v3 (tracked as TEST-CHAI-01)
 - **Multi-tenant revamp / v2 API features** — future major milestone, not v1.x
-- **Edge layer redesign** (Traefik labels, nginx rewrites beyond G8 needs) — only AUTH-API-01 may touch edge config; otherwise out
+- **Edge layer redesign** (Traefik labels, nginx rewrites beyond G8 needs) — out of scope except for targeted header hardening (AUTH-API-01 in v1.0, CSP pinning in v1.13)
 - **Dashboard data-exposure rework** (AGENTS.md L98) — privacy concern but not a regression vs. legacy; v1.x candidate at most
 - **CONSOLE-LEGACY-JSON-PARSE** — legacy AngularJS console double-parse bug (`JSON.parse` on an already-parsed object at `services/console/src/login.js:173` + `password.js:87`); frontend fault in the sibling submodule, no parent-repo angle. Reclassified out of parent scope at v1.11 start; owned by the `services/console` GSD workspace
 
@@ -170,6 +183,13 @@ Previously: v1.10 Operational Closures (2026-06-05) — 5/5 requirements across 
 | v1.11 OPS-EXEC-03 closed as discrepancy branch (no force-rollout) | Operator-authorized SSH probing found the influx fix already live (autoredeployed ~17h prior). Re-rolling an identical healthy image is pure restart risk; verify + annex instead | ✓ Good — DEVICE_CHECKIN=16, 0 BADSTRING; corrected stale co-location memory (micro, not core) |
 | v1.11 closed at `tech_debt` with Phases 15/16 unpushed/undeployed | The 4 requirements (remove fs-finder, triage deps, confirm influx live) are met and code/audit-verified; pushing+deploying 15/16 is follow-on operator work outside the requirement set. Full CI suite validates on push | — Pending — operator push → CI green → optional prod deploy of 15/16 |
 
+| v1.13 SEC-CSP-01 + SEC-CSRF-01 combined into one phase | Same three deploy surfaces and the same two-console consistency check; `granularity: coarse` | ✓ Good — one deploy pipeline, one verification pass |
+| CSRF via double-submit cookie, not a server-side synchronizer token | Stateless; works identically for the classic and Vue consoles across `app.`/`console.`/`rtm.` subdomains; no session-store coupling | ⚠️ Revisit — review WR-06: the cookie is scoped to `.thinx.cloud`, so a sibling subdomain can plant it; a session-bound HMAC token is the stronger design |
+| CSRF rolled out fail-open (21-04), enforcement flipped separately (21-05) | Lets both consoles be verified live before a bad token can lock anyone out; enforcement is a single env flag with a documented rollback | ✓ Good — two browser-found defects fixed before the flip; no lockout |
+| Console CSRF wired through two shared seams, not per call site | Four plan-check passes kept finding missed call sites | ✓ Good — no call-site regressions after the flip |
+| HawkScan acceptance criteria closed by operator override | StackHawk was removed (`bb0ce4a7`); substitute evidence = CSP parse, CSRF specs, live probes, operator cold-browser approval | — Pending — a substitute DAST run (e.g. Burp) would turn the override into evidence |
+| Production CSP source of truth = gluster bind mount, documented rather than removed | Discovered mid-phase; removing the mount while the Vue image config lacks `app.thinx.cloud` would lock out cold Vue sessions | ⚠️ Revisit — finish the retirement path in `console-csp-source-of-truth.md` |
+
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
@@ -189,4 +209,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-07-04 — started milestone v1.13 Web Hardening (Console/Edge): 2 SEC requirements (SEC-CSP-01 CSP scheme-wildcard removal, SEC-CSRF-01 login-form anti-CSRF token) across both consoles + swarm edge, from the 2026-07-04 HawkScan of rtm.thinx.cloud. Continues phase numbering from v1.12 (next phase = 21).*
+*Last updated: 2026-09-25 at v1.14 milestone start (Backlog & Hardening Sweep; first phase = 22)*

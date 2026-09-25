@@ -67,11 +67,13 @@ with no `'unsafe-inline'` (it retains `'unsafe-eval'` — SEC-CSP-02, deferred).
 
 ## Latent risk if the mount is ever removed
 
-`services/console/vue/default.conf`'s `connect-src` omits `https://app.thinx.cloud` and
-`wss://app.thinx.cloud`. The Vue console calls the API cross-origin at `app.thinx.cloud`, so if that
-config ever takes effect, the priming `GET /api/v2/csrf-token` is CSP-blocked and a cold Vue session
-cannot log in once CSRF enforcement is on. (`app.thinx.cloud` *was* present in that `connect-src` at
-`cd2731f`/`b793bb8` and was dropped later — a regression, not an original oversight.)
+*Update 2026-09-25:* the `connect-src` gap this section used to describe is closed. Console `60e1ef0`
+(2026-09-21) restored `https://app.thinx.cloud` and `wss://app.thinx.cloud` to `vue/default.conf`, so a cold
+Vue session can still prime `GET /api/v2/csrf-token` under enforcement if that file ever takes effect.
+
+The image configs still differ from production in other ways. Neither lists `https://cdn.rollbar.com`, which
+production has had in `script-src` since 2026-09-24, so Rollbar would be CSP-blocked. `src/default.conf`
+also lacks the production-only CloudFront and cdnjs hosts.
 
 **Do not remove the bind mount before reconciling the image configs.**
 

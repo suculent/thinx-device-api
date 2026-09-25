@@ -1,0 +1,1 @@
+{"content":"Docker single-file bind mounts pin the inode at container start; editors/sed -i that write-and-rename create a new inode so the container keeps serving the old file until restarted. Mount the directory or edit in place (truncate+write).","source":"web","provider":"websearch","confidence":"HIGH","fetched_at":"2026-09-25T10:41:59.782Z","ttl":86400000,"kind":"web"}

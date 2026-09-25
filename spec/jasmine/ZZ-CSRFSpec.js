@@ -12,7 +12,13 @@
  * (4) forged header, enforce -> 403; (5) ensureXsrfCookie mints a fresh
  * cookie only when none present; (6) issueCsrfToken echoes the
  * already-minted token WITHOUT a second Set-Cookie / second randomBytes
- * call (no-double-generation).
+ * call (no-double-generation); (7) fail-open log carries a reason code and
+ * duplicate-cookie count, never token values; (8) enforce mode logs one
+ * reason-coded line per rejection; (9) cookie Domain derivation never
+ * throws and keeps ".thinx.cloud" for the production api_url; (10) the minted
+ * cookie carries that domain and path "/"; (11) no token is minted for
+ * preflights, device, firmware and webhook traffic, while console routes
+ * still get one.
  */
 
 // Force the lightweight bundled config path (spec/mnt/data/conf/config.json)
@@ -23,6 +29,8 @@ if (typeof (process.env.ENVIRONMENT) === "undefined") {
 
 var expect = require('chai').expect;
 
+const cookie = require("cookie");
+const CookiePolicy = require("../../lib/middleware/cookie-policy");
 const csrfFactory = require("../../lib/middleware/csrf");
 const csrf = csrfFactory({}); // no app.* members are used by this middleware
 
@@ -167,6 +175,155 @@ describe("ZZ-CSRFSpec (SEC-CSRF-01)", function () {
             expect(body.csrf_token).to.equal(mintedToken);
             done();
         });
+    });
+
+    // Runs verifyCsrfToken and returns every console.log line it emitted.
+    function captureLogs(req, res) {
+        const originalLog = console.log;
+        const lines = [];
+        let nextCalled = false;
+        console.log = function (msg) {
+            lines.push(String(msg));
+        };
+        try {
+            csrf.verifyCsrfToken(req, res, function next() { nextCalled = true; });
+        } finally {
+            console.log = originalLog;
+        }
+        return { lines: lines, nextCalled: nextCalled };
+    }
+
+    it("7. fail-open log carries a reason code and the duplicate-cookie count, never the token values (WR-01)", function () {
+        const cases = [
+            { cookies: {}, headers: { 'x-xsrf-token': 'hdrtoken123' }, reason: 'no_cookie' },
+            { cookies: { 'XSRF-TOKEN': 'cookietoken1' }, headers: {}, reason: 'no_header' },
+            { cookies: { 'XSRF-TOKEN': 'cookietoken1' }, headers: { 'x-xsrf-token': 'short' }, reason: 'length_mismatch' },
+            { cookies: { 'XSRF-TOKEN': 'cookietoken1' }, headers: { 'x-xsrf-token': 'cookietoken2' }, reason: 'value_mismatch' }
+        ];
+        cases.forEach(function (c) {
+            const req = { cookies: c.cookies, headers: c.headers, method: 'POST', originalUrl: '/api/login?x=secret' };
+            const out = captureLogs(req, mockRes());
+            expect(out.nextCalled).to.equal(true);
+            expect(out.lines.length).to.equal(1);
+            expect(out.lines[0]).to.contain("CSRF token missing/mismatched");
+            expect(out.lines[0]).to.contain("reason=" + c.reason);
+            expect(out.lines[0]).to.contain("POST /api/login");
+            expect(out.lines[0]).to.not.contain("secret");
+            expect(out.lines[0]).to.not.match(/cookietoken|hdrtoken|short/);
+        });
+
+        const dupReq = {
+            cookies: { 'XSRF-TOKEN': 'cookietoken1' },
+            headers: { 'x-xsrf-token': 'cookietoken2', cookie: 'XSRF-TOKEN=cookietoken1; x-thx-core=s; XSRF-TOKEN=cookietoken2' },
+            method: 'POST',
+            originalUrl: '/api/v2/session/token'
+        };
+        const dup = captureLogs(dupReq, mockRes());
+        expect(dup.lines[0]).to.contain("xsrf_cookies=2");
+        expect(dup.lines[0]).to.contain("duplicate_cookie=true");
+        expect(dup.lines[0]).to.not.contain("cookietoken");
+    });
+
+    it("8. enforce mode logs exactly one reason-coded line per rejection (WR-01)", function () {
+        process.env.CSRF_ENFORCE = 'true';
+        const req = {
+            cookies: { 'XSRF-TOKEN': 'cookietoken1' },
+            headers: { 'x-xsrf-token': 'cookietoken2', cookie: 'XSRF-TOKEN=cookietoken1' },
+            method: 'POST',
+            originalUrl: '/api/v2/session/token'
+        };
+        const res = mockRes();
+        const out = captureLogs(req, res);
+        expect(out.nextCalled).to.equal(false);
+        expect(res._status).to.equal(403);
+        expect(out.lines.length).to.equal(1);
+        expect(out.lines[0]).to.contain("CSRF token rejected");
+        expect(out.lines[0]).to.contain("reason=value_mismatch");
+        expect(out.lines[0]).to.contain("xsrf_cookies=1");
+        expect(out.lines[0]).to.not.contain("duplicate_cookie");
+        expect(out.lines[0]).to.contain("POST /api/v2/session/token");
+        expect(out.lines[0]).to.not.contain("cookietoken");
+    });
+
+    it("9. cookieDomain() parses the api_url hostname and never throws (WR-02)", function () {
+        const cases = [
+            ["https://rtm.thinx.cloud", ".thinx.cloud"],   // production
+            ["https://app.thinx.cloud", ".thinx.cloud"],   // spec config
+            ["https://app.thinx.cloud/", ".thinx.cloud"],  // trailing slash used to yield ".thinx.cloud/"
+            ["https://app.thinx.cloud:7443", ".thinx.cloud"], // port used to yield ".thinx.cloud:7443"
+            ["https://app.thinx.cloud/api/v2", ".thinx.cloud"],
+            ["app.thinx.cloud", ".thinx.cloud"],
+            ["https://api.eu.thinx.cloud", ".eu.thinx.cloud"],
+            ["https://thinx.cloud", undefined],            // two labels used to yield ".cloud"
+            ["http://localhost:7443", undefined],
+            ["http://127.0.0.1:7443", undefined],
+            ["http://[::1]:7443", undefined],
+            ["<enter-your-api-fqdn>", undefined],
+            ["", undefined],
+            [undefined, undefined],
+            [null, undefined]
+        ];
+        cases.forEach(function (c) {
+            const domain = CookiePolicy.cookieDomain(c[0]);
+            expect(domain, String(c[0])).to.equal(c[1]);
+            // whatever comes out must be accepted by the cookie serializer Express uses
+            expect(function () { cookie.serialize("XSRF-TOKEN", "v", { domain: domain, path: "/" }); }, String(c[0])).to.not.throw();
+        });
+    });
+
+    it("10. ensureXsrfCookie sets domain .thinx.cloud and path / for the bundled api_url (WR-02)", function (done) {
+        const req = { cookies: {} };
+        const res = mockRes();
+        csrf.ensureXsrfCookie(req, res, function next() {
+            expect(res._cookieCalls.length).to.equal(1);
+            expect(res._cookieCalls[0].options.domain).to.equal(".thinx.cloud");
+            expect(res._cookieCalls[0].options.path).to.equal("/");
+            expect(res._cookieCalls[0].options.secure).to.equal(false);
+            done();
+        });
+    });
+
+    it("10b. ensureXsrfCookie still calls next() when res.cookie throws (WR-02)", function (done) {
+        const req = { cookies: {} };
+        const res = mockRes();
+        res.cookie = function () { throw new TypeError("option domain is invalid"); };
+        const originalLog = console.log;
+        console.log = function () { };
+        try {
+            csrf.ensureXsrfCookie(req, res, function next() {
+                console.log = originalLog;
+                expect(res.locals.xsrfToken).to.equal(undefined);
+                done();
+            });
+        } finally {
+            console.log = originalLog;
+        }
+    });
+
+    it("11. ensureXsrfCookie skips preflight, device, firmware and webhook traffic only (WR-03)", function () {
+        function mints(req) {
+            const res = mockRes();
+            let nextCalled = false;
+            csrf.ensureXsrfCookie(Object.assign({ cookies: {}, headers: {} }, req), res, function next() { nextCalled = true; });
+            expect(nextCalled).to.equal(true);
+            return res._cookieCalls.length === 1;
+        }
+        // not minted
+        expect(mints({ method: "OPTIONS", path: "/api/v2/login" })).to.equal(false);
+        expect(mints({ method: "POST", path: "/device/register", headers: { origin: "device" } })).to.equal(false);
+        expect(mints({ method: "POST", path: "/api/v2/device", headers: { origin: "device" } })).to.equal(false);
+        expect(mints({ method: "POST", path: "/device/register" })).to.equal(false);
+        expect(mints({ method: "GET", path: "/device/firmware" })).to.equal(false);
+        expect(mints({ method: "POST", path: "/Device/Firmware" })).to.equal(false);
+        expect(mints({ method: "POST", path: "/githook" })).to.equal(false);
+        expect(mints({ method: "POST", path: "/api/githook/" })).to.equal(false);
+        // still minted: priming endpoints and console routes
+        expect(mints({ method: "GET", path: "/api/csrf-token" })).to.equal(true);
+        expect(mints({ method: "GET", path: "/api/v2/csrf-token", headers: { origin: "https://console.thinx.cloud" } })).to.equal(true);
+        expect(mints({ method: "POST", path: "/api/v2/login" })).to.equal(true);
+        expect(mints({ method: "POST", path: "/api/device/edit" })).to.equal(true);
+        expect(mints({ method: "GET", path: "/api/v2/device" })).to.equal(true);
+        expect(mints({ method: "GET", path: "/api/githooks" })).to.equal(true);
     });
 
 });

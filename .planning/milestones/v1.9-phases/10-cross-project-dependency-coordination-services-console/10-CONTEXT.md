@@ -1,3 +1,10 @@
+---
+audit_acknowledged:
+  milestone: v1.13
+  at: 2026-09-25
+  questions_digest: da2bb89d125971d3fc25a7069499a3ef88b40b780bd4cbcfd861feb88e654bc9
+---
+
 # Phase 10 Context: Cross-Project Dependency Coordination (services/console)
 
 **Created:** 2026-06-03
@@ -9,11 +16,13 @@
 Coordinate the parallel SEC-DEP-02 dependency-triage work in the `services/console` submodule (sibling GSD project, different repo: `git@github.com:thinx-cloud/console.git`). Classify the 2 high-severity Dependabot alerts on `thinx-cloud/console`; record the verdict roll-up in `.planning/dep-triage.md`; schedule (but do not execute) the parallel SEC-DEP-02 phase in `services/console/.planning/ROADMAP.md`; defer the submodule pointer bump until the console-side phase completes and merges.
 
 In scope:
+
 1. **Annex `.planning/dep-triage.md`** with a "Phase 10 / SEC-DEP-02 (services/console)" section containing the 2 high-severity alert classifications (data already fetched via `gh api repos/thinx-cloud/console/dependabot/alerts`).
 2. **Schedule SEC-DEP-02 phase** in `services/console/.planning/ROADMAP.md` (touches the submodule). The actual phase plan/execution lives in that GSD workspace and is run by the operator in a separate session.
 3. **Coordination runbook** documenting the cross-project workflow + how the submodule pointer bump lands after the console-side work merges.
 
 Out of scope (deferred):
+
 - Executing the dep-fix in `services/console` itself (lives in its own GSD workspace; operator opens that to plan + execute).
 - Actually bumping the submodule pointer in this repo (depends on console-side work completing).
 - CircleCI green-gate verification of the submodule bump (post-bump operator-side).
@@ -31,6 +40,7 @@ Out of scope (deferred):
 ## Code Context — The 2 high-severity console alerts (fetched 2026-06-03 via `gh api repos/thinx-cloud/console/dependabot/alerts?state=open&severity=high`)
 
 ### Alert 54 — `grunt < 1.5.3` (CVE-2022-1537, GHSA-rm36-94g8-835r)
+
 - **Package:** `grunt`
 - **Severity:** high (CVSS 7.0)
 - **Vulnerability:** TOCTOU race condition in `file.copy` → arbitrary file write → local priv-esc IF a lower-privileged user has write access to both source and destination directories.
@@ -44,6 +54,7 @@ Out of scope (deferred):
   - **Effective exposure: ZERO.**
 
 ### Alert 52 — `grunt < 1.3.0` (CVE-2020-7729, GHSA-m5pj-vjjf-4m3h)
+
 - **Package:** `grunt`
 - **Severity:** high (CVSS 7.1)
 - **Vulnerability:** Arbitrary code execution via default `load()` instead of `safeLoad()` in `grunt.file.readYAML`.
@@ -57,12 +68,14 @@ Out of scope (deferred):
 **Verdict:** `deferred-vendored-asset` (NEW disposition introduced by Phase 10; mirrors `deferred-dev-only` + `deferred-stale` from Phase 4 SEC-DEP-01).
 
 **Rationale:**
+
 - Both alerts live in `src/assets/global/plugins/jquery-validation-1.19.5/package.json` — a vendored static-asset bundle. The plugin's source is shipped as pre-compiled JS+CSS; grunt is referenced only because it was the build tool used to author the plugin's original source.
 - services/console does NOT invoke grunt against this vendored package.json during its own build. The vulnerable grunt versions exist in the dependency graph only as transitive metadata.
 - No code path in the production runtime or in the services/console build pipeline reaches the vulnerable `grunt.file.copy` or `grunt.file.readYAML` functions.
 - **Future trigger** for re-classification: if a future services/console build step starts invoking grunt against the vendored plugin's package.json, OR if the vendored plugin is replaced with a different bundle that runs grunt in-build.
 
 **Recommended remediation (for the services/console SEC-DEP-02 phase to land):**
+
 - **Preferred:** delete the vendored plugin's `package.json` (it's metadata only — the compiled JS/CSS in the same directory is what actually loads). Removes the alerts entirely.
 - **Acceptable:** dismiss both alerts in Dependabot UI with rationale "vendored asset; grunt not in build path". The vulnerability still appears in lockfile but is marked dismissed.
 
@@ -77,6 +90,7 @@ Out of scope (deferred):
 - Defer the submodule pointer bump until the operator completes the console-side phase.
 
 **Why not execute the remediation in Phase 10 itself:**
+
 - The actual edit (deleting `src/assets/global/plugins/jquery-validation-1.19.5/package.json` OR dismissing Dependabot alerts) belongs in `services/console` — a separate Git repo with its own GSD workspace.
 - Cross-repo execution in one session is brittle (submodule pointer + double-commit dance, two CI pipelines to verify).
 - The classification work IS the substantive deliverable from this repo — without `dep-triage.md` annex, the verdict isn't recorded anywhere durable.
@@ -84,6 +98,7 @@ Out of scope (deferred):
 ### Submodule pointer bump
 
 **Decision:** DEFERRED to a follow-up operator action (NOT part of Phase 10 verification).
+
 - Current submodule pointer: `27758ebda8a179a440aff1cd443f9ffe1fe84a6d` (services/console at `v1.999-3-g27758eb`).
 - After the operator plans + executes the console-side SEC-DEP-02 phase, the pointer bumps to whatever the post-fix commit is. That bump is its own commit in this repo (`chore: bump services/console submodule to <sha>`) — out of Phase 10 scope.
 - This matches Phase 10's ROADMAP success criterion #3 wording: "AFTER the console-side triage merges, the services/console submodule pointer in thinx-device-api is updated cleanly on thinx-staging". The submodule bump is conditional on the console-side merge.
@@ -91,6 +106,7 @@ Out of scope (deferred):
 ### services/console-side phase scheduling
 
 **Decision:** Add a new SEC-DEP-02 phase entry to `services/console/.planning/ROADMAP.md`.
+
 - services/console is currently between milestones (v1.999 shipped 2026-05-27; v1.x backlog awaits `/gsd-new-milestone`). The cleanest landing is to add SEC-DEP-02 as the first phase of a new "v1.x Operational Hygiene" milestone OR as a standalone "post-v1.999 backport" entry. Either is acceptable; the planner can choose.
 - The new phase entry includes: goal, dependencies (none), requirements (SEC-DEP-02), success criteria (4 items mirroring the parent project's structure), and a "Plans: TBD" placeholder.
 

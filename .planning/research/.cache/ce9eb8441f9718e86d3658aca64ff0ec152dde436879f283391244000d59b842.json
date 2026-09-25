@@ -1,0 +1,1 @@
+{"content":"Swarmpit: SWARMPIT_INFLUXDB unset disables statistics (docs). SWARMPIT_AGENT_URL nil = dynamic. Docs do not describe autoredeploy dependency on agent; autoredeploy is an app-side feature using registry credentials stored in swarmpit_db.","source":"web","provider":"websearch","confidence":"MEDIUM","fetched_at":"2026-09-25T10:41:59.335Z","ttl":86400000,"kind":"web"}

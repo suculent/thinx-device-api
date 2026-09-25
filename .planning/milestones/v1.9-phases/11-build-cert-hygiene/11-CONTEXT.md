@@ -1,3 +1,10 @@
+---
+audit_acknowledged:
+  milestone: v1.13
+  at: 2026-09-25
+  questions_digest: 7769bac10ffadd3c49c0b14453c19c868eeced8bf43fcd582823a8525d69371a
+---
+
 # Phase 11 Context: Build & Cert Hygiene (FINAL v1.9 phase)
 
 **Created:** 2026-06-03
@@ -9,10 +16,12 @@
 Final v1.9 phase. Harden the base-image rebuild script so it stops needing out-of-band manual `git commit` steps (BASE-IMG-01), and add a code-side startup probe that flags `ca.pem` freshness drift before it turns into a 2026-05-31-style SSL incident (THINX-CERT-CHECK-01). Both are bounded in-repo changes.
 
 In scope:
+
 1. **BASE-IMG-01:** Rewrite `base/update.sh` (currently 18 lines, no error handling) to include `set -euo pipefail`, optional `--tag <tag>` argument, automatic patch-level version bump, and pre/post image digest logging. The script ends with exactly one `chore: base version bump` commit on success (or surfaces a documented failure).
 2. **THINX-CERT-CHECK-01:** Add a startup probe (new file `lib/thinx/cert-probe.js` or equivalent) that reads `ca.pem`, compares its chain to the leaf certificate's issuer (already-imported `isSupportedLetsEncryptIssuer` logic at `thinx-core.js:67-71` covers R10-R14), and emits a clear startup WARN when `ca.pem` is older than the leaf or doesn't contain the matching intermediate. Unit test covers the matcher logic against fixture PEM bundles.
 
 Out of scope (deferred):
+
 - ACME / Let's Encrypt cert-rotation automation (lives on swarm host, not this repo per REQUIREMENTS.md SEC-PII-01 area + "Out of Scope" in REQUIREMENTS.md).
 - Auto-rotating `ca.pem` from inside the app (THINX-CERT-CHECK-01 is DETECT-only — does NOT mutate certs).
 - Replacing `base/update.sh` with a CI-driven pipeline (out of v1.9 scope).
@@ -38,7 +47,9 @@ Out of scope (deferred):
 
 ```bash
 #!/bin/bash
+
 # expected usage: ./update.sh --owner suculent
+
 export TAG="alpine"
 export OWNER="thinxcloud"
 echo "Will update image with tag ${TAG}"
@@ -50,6 +61,7 @@ docker push $OWNER/base:alpine
 ```
 
 Gaps (per BASE-IMG-01):
+
 - No `set -euo pipefail` — `&&`-chained `npm install . --omit=dev && npm audit fix` is the only error-stopper
 - No `--tag <tag>` argument — `TAG="alpine"` is hardcoded
 - No auto-version bump — operator must `git commit` the version change separately (this is why `304b09d1` exists as a standalone commit)
@@ -60,6 +72,7 @@ Gaps (per BASE-IMG-01):
 ### Existing SSL context (THINX-CERT-CHECK-01 anchor)
 
 `thinx-core.js:67-71`:
+
 ```js
 const isSupportedLetsEncryptIssuer = (attributes = []) => {
   const organization = getCertAttribute('organizationName', attributes) || getCertAttribute('O', attributes);
@@ -69,6 +82,7 @@ const isSupportedLetsEncryptIssuer = (attributes = []) => {
 ```
 
 `thinx-core.js:198-215` (SSL load path — where probe hooks):
+
 ```js
 var ssl_options = null;
 if ((fs.existsSync(app_config.ssl_key)) && (fs.existsSync(app_config.ssl_cert))) {
@@ -107,6 +121,7 @@ The probe reads `app_config.ssl_ca` + `app_config.ssl_cert`, extracts the leaf c
 8. **`shellcheck` clean.** `shellcheck base/update.sh` exits 0.
 
 **Validation:**
+
 - `shellcheck base/update.sh` exits 0.
 - Running `bash base/update.sh --tag alpine --dry-run` (dry-run mode optional but recommended) doesn't mutate anything.
 - Full run on clean clone: produces image, single `chore: base version bump` commit, no other side effects.
@@ -124,6 +139,7 @@ The probe reads `app_config.ssl_ca` + `app_config.ssl_cert`, extracts the leaf c
 5. The probe is CALLED from `thinx-core.js` near line 211 (after `read(app_config.ssl_ca, 'utf8')` already loads ca.pem). If the return is `ok: false`, `console.log` the message with the `⚠️` prefix matching project style. **Probe does NOT mutate certs.**
 
 **Unit test:** `spec/jasmine/ZZ-CertProbeSpec.js` covers:
+
 - R10 leaf + R10 ca → `ok: true`
 - R13 leaf + R13 ca → `ok: true`
 - R13 leaf + R10 ca → `ok: false`, message mentions R13 + R10
@@ -132,6 +148,7 @@ The probe reads `app_config.ssl_ca` + `app_config.ssl_cert`, extracts the leaf c
 **Fixture PEM bundles:** New `spec/fixtures/cert-probe/` directory with 4 fixture PEM files (R10-leaf, R10-ca, R13-leaf, R13-ca). Use `openssl req -x509 -newkey rsa:2048 -nodes -days 365 -subj "/O=Let's Encrypt/CN=R10"` etc. to generate at plan-execute time (committed to repo).
 
 **Validation:**
+
 - Unit test passes locally and in CI.
 - Startup with R13 leaf + R10-era ca.pem emits the WARN line (verifiable by spec mocking `app_config.ssl_*` paths + grepping captured stdout).
 - Startup with matching intermediate emits NO warning.

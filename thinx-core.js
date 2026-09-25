@@ -318,10 +318,8 @@ module.exports = class THiNX extends EventEmitter {
             // Bypassed LGTM, because it does not make sense on this API for all endpoints,
             // what is possible is covered by helmet and no-cache.
 
-            let full_domain = app_config.api_url;
-            let full_domain_array = full_domain.split(".");
-            delete full_domain_array[0];
-            let short_domain = full_domain_array.join('.');
+            // Same parent-domain derivation as the XSRF-TOKEN cookie (csrf.js); never throws.
+            let short_domain = CookiePolicy.cookieDomain(app_config.api_url);
 
             // SEC-PROXY-01: must be set before the session middleware mounts, because
             // express-session negotiates cookie.secure from req.secure, which is only

@@ -517,14 +517,101 @@ components:
             type: string
           description: Multiple environment variable names to delete
 
+    CsrfTokenResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        csrf_token:
+          type: string
+          description: The anti-CSRF token (48 hex characters). Same value as the `XSRF-TOKEN` cookie.
+          example: "3f9a0c2b7d1e4a5f8b6c0d2e9f1a3b5c7d9e0f2a4b6c8d0e"
+
+  # SEC-CSRF-01 double-submit check (enforced in production since 2026-09-25).
+  # Applies only to the routes that reference these components; every other
+  # route, and every Bearer / API-key authenticated call, is unaffected.
+  parameters:
+    XsrfTokenHeader:
+      name: X-XSRF-TOKEN
+      in: header
+      required: true
+      description: |
+        Anti-CSRF double-submit token. Must equal the `XSRF-TOKEN` cookie sent with the same
+        request (compared in constant time). Obtain both by calling `GET /csrf-token` first
+        and keeping its cookie. Browser consoles do this automatically; machine clients that
+        do not keep cookies should use Bearer (JWT) or API-key authentication instead of
+        these cookie-session routes.
+      schema:
+        type: string
+    XsrfTokenCookie:
+      name: XSRF-TOKEN
+      in: cookie
+      required: true
+      description: |
+        Anti-CSRF cookie set by the API (`SameSite=Lax`, not httpOnly, `Path=/`) on the first
+        request that arrives without it, including `GET /csrf-token`. Its value must be echoed
+        in the `X-XSRF-TOKEN` header.
+      schema:
+        type: string
+
+  responses:
+    CsrfTokenInvalid:
+      description: |
+        Anti-CSRF check failed: the `X-XSRF-TOKEN` header is missing, or does not match the
+        `XSRF-TOKEN` cookie. Rejected before the route handler runs, so nothing was changed.
+        Re-fetch `GET /csrf-token` and retry once.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              response:
+                type: string
+                example: csrf_token_invalid
+
 paths:
+  /csrf-token:
+    get:
+      summary: Anti-CSRF token
+      description: |
+        Returns the anti-CSRF token for the double-submit check and sets the `XSRF-TOKEN`
+        cookie when the request did not already carry one (an existing cookie is echoed, never
+        rotated). Call it before the cookie-session routes that require `X-XSRF-TOKEN`:
+        `POST /login`, `POST /session/token` (v2), `POST /password/reset`, `POST /password/set`,
+        and the v1 `POST /user/create`, `POST /user/password/reset` and `POST /user/password/set`.
+      tags:
+        - Authentication
+      responses:
+        '200':
+          description: Token issued or echoed
+          headers:
+            Set-Cookie:
+              description: '`XSRF-TOKEN=<token>; Domain=<parent domain>; Path=/; SameSite=Lax`, only when the request had no `XSRF-TOKEN` cookie'
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsrfTokenResponse'
+
   # Authentication endpoints
   /login:
     post:
       summary: User login
-      description: Authenticate a user with username and password or OAuth token
+      description: |
+        Authenticate a user with username and password or OAuth token.
+        Requires the anti-CSRF double-submit pair (`XSRF-TOKEN` cookie + matching
+        `X-XSRF-TOKEN` header, see `GET /csrf-token`); without it the call returns
+        403 `csrf_token_invalid`.
       tags:
         - Authentication
+      parameters:
+        - $ref: '#/components/parameters/XsrfTokenHeader'
+        - $ref: '#/components/parameters/XsrfTokenCookie'
       requestBody:
         content:
           application/json:
@@ -540,7 +627,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/LoginResponse'
         '403':
-          description: Authentication failed
+          description: |
+            Authentication failed, or the anti-CSRF check failed. A CSRF failure has the body
+            `{"success":false,"response":"csrf_token_invalid"}` (see
+            `#/components/responses/CsrfTokenInvalid`); re-fetch `GET /csrf-token` and retry once.
           content:
             application/json:
               schema:
@@ -1358,9 +1448,12 @@ paths:
   /password/reset:
     post:
       summary: Initiate password reset
-      description: Send a password reset email to the user
+      description: Send a password reset email to the user. Requires the anti-CSRF double-submit pair (see `GET /csrf-token`).
       tags:
         - Users
+      parameters:
+        - $ref: '#/components/parameters/XsrfTokenHeader'
+        - $ref: '#/components/parameters/XsrfTokenCookie'
       requestBody:
         content:
           application/json:
@@ -1385,6 +1478,8 @@ paths:
                     example: true
         '400':
           description: Bad request
+        '403':
+          $ref: '#/components/responses/CsrfTokenInvalid'
 
     get:
       summary: Process password reset
@@ -1411,9 +1506,12 @@ paths:
   /password/set:
     post:
       summary: Set new password
-      description: Set a new password using a reset key
+      description: Set a new password using a reset key. Requires the anti-CSRF double-submit pair (see `GET /csrf-token`).
       tags:
         - Users
+      parameters:
+        - $ref: '#/components/parameters/XsrfTokenHeader'
+        - $ref: '#/components/parameters/XsrfTokenCookie'
       requestBody:
         content:
           application/json:
@@ -1444,6 +1542,8 @@ paths:
                     example: true
         '400':
           description: Bad request or invalid token
+        '403':
+          $ref: '#/components/responses/CsrfTokenInvalid'
 
   /stats:
     get:
