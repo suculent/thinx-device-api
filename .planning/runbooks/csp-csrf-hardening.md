@@ -245,6 +245,11 @@ need a count, enable access logging at the edge first.
 
 ## HawkScan rescan procedure
 
+> **Retired 2026-09-25.** The StackHawk service is deprecated and `stackhawk.yml` was deleted from
+> the repo, so the procedure below can no longer be run. The 21-05 rescan was skipped by operator
+> decision, and SEC-CSP-01 / SEC-CSRF-01 closure rests on the post-flip checks above. The section is
+> kept as a historical record only.
+
 Run from the workstation, in the repo root. `stackhawk.yml` targets `host: https://rtm.thinx.cloud`,
 app `729977da-df6c-4e46-bb7e-849f7b71ae8a`, env `Production`. Previous pair: scan `c5691244`,
 rescan `1f3ec1e7` (2026-07-04). This scans production, so do it only after the flip has passed its
@@ -375,8 +380,8 @@ check that a cold console login tolerates that 404 (Vue `OAuthReturn.vue` awaits
 | `thinx.yml` persisted? (A only) | Yes. Swarm repo commit `bc6d04a`, one line only. The file had other uncommitted edits, which were left in place; the pre-edit copy is `/root/thinx.yml.bak-20260925`. |
 | Post-flip curl: header-less → | `csrf_token_invalid`, HTTP 403 |
 | Post-flip curl: primed → | `invalid_credentials`; primed `session/token` via the console proxy → `no_session`, HTTP 401 |
-| Browser checks (cold login ×2, Vue reset, Vue OAuth, classic OAuth, Vue reload) | Vue reload of a warm session: `session/token` → 200, and the other 16 API calls returned no 403s. **Still to do:** cold login ×2, Vue password reset, Vue OAuth, classic OAuth. |
-| HawkScan scan ID / 10055-4 NEW / 20012 NEW | Not run yet (21-05 Task 2) |
+| Browser checks (cold login ×2, Vue reset, Vue OAuth, classic OAuth, Vue reload) | Vue reload of a warm session: `session/token` → 200, and the other 16 API calls returned no 403s. Operator on 2026-09-25: cold login on both consoles OK; Vue password reset OK; classic GitHub OAuth on rtm OK. The first attempt got 502/504 on static assets while a redeploy was restarting `thinx_console`; after a reload it landed on the dashboard. |
+| HawkScan scan ID / 10055-4 NEW / 20012 NEW | Skipped. StackHawk is deprecated and its integration was removed on 2026-09-25. |
 | Rolled back? (when, why) | No |
 
 ---
