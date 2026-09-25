@@ -4,18 +4,18 @@ milestone: v1.14
 milestone_name: Backlog & Hardening Sweep
 current_phase: 22
 current_phase_name: ci-sast-baseline
-status: executing
-stopped_at: Completed 22-02-PLAN.md (Task 3 D-13 server-side applied on re-dispatch)
-last_updated: "2026-09-25T12:59:07.294Z"
+status: verifying
+stopped_at: Completed 22-03-PLAN.md
+last_updated: "2026-09-25T13:19:12.547Z"
 last_activity: 2026-09-25
 last_activity_desc: Phase 22 execution started
-state_head: 9ccf9f18b346c5306fba29c9d445c5afb5b833ca
+state_head: 1cc407a81f3df0c532a20d85f7e0557bc7ef15ed
 progress:
   total_phases: 7
   completed_phases: 6
   total_plans: 3
-  completed_plans: 2
-  percent: 67
+  completed_plans: 3
+  percent: 86
 ---
 
 # STATE — THiNX Device API
@@ -35,10 +35,10 @@ See: `.planning/PROJECT.md` (updated 2026-09-25 at v1.14 start)
 
 Phase: 22 (ci-sast-baseline) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-25 — Phase 22 execution started
 
-Progress: [███████░░░] 67% (0/7 phases)
+Progress: [█████████░] 86% (0/7 phases)
 
 ## Milestones
 
@@ -171,6 +171,7 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 22]: [Phase 22]: CI-02 took the delete path — D-01 pre-check found no private-registry pull on the CircleCI test path
 - [Phase 22]: [Phase 22]: CodeQL security-extended does not flag git.js execSync or builder readFileSync/lstatSync sinks; Phase 23 sink before/after must come from Aikido (baseline 147 open alerts at 89c5cf93)
 - [Phase 22]: 22-02: D-13 gluster+live removal of VUE_APP_CONSOLE_HOSTNAME approved (proceed); first attempt denied by the auto-mode permission classifier, applied on re-dispatch 2026-09-25 13:08Z (gluster line 290 removed with backup, one --env-rm on thinx_console, image unchanged)
+- [Phase 22]: 22-03: Release PR #569 thinx-staging -> main opened after user 'open-pr' gate; left OPEN, CodeQL PR analysis 1839520597 green and non-required; main-push run pending user merge
 
 ### Todos
 
@@ -223,9 +224,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-09-25T12:59:07.260Z
+**Last session:** 2026-09-25T13:19:12.516Z
 
-**Stopped at:** Completed 22-02-PLAN.md (Task 3 D-13 server-side applied on re-dispatch)
+**Stopped at:** Completed 22-03-PLAN.md
 
 **Next action:** `/gsd:discuss-phase 22` (then `/gsd:plan-phase 22`)
 
@@ -248,3 +249,4 @@ Decided at plan time, not blocking the roadmap:
 |------|----------|-------|-------|
 | Phase 22 P01 | 10 min | 3 tasks | 4 files |
 | Phase 22 P02 | 13 min | 3 tasks | 1 files |
+| Phase 22 P03 | 4min | 2 tasks | 1 files |
