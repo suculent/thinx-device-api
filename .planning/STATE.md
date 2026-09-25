@@ -2,20 +2,20 @@
 gsd_state_version: "1.0"
 milestone: v1.14
 milestone_name: Backlog & Hardening Sweep
-current_phase: 22
-current_phase_name: CI & SAST Baseline
-status: executing
-stopped_at: Completed 22-04-PLAN.md
-last_updated: "2026-09-25T14:32:45.757Z"
+current_phase: 23
+current_phase_name: Build-Pipeline Sink Hardening
+status: planning
+stopped_at: Phase 22 complete, ready to plan Phase 23
+last_updated: "2026-09-25T15:02:31.963Z"
 last_activity: 2026-09-25
-last_activity_desc: Completed 22-04-PLAN.md (CI-03 gap closure)
-state_head: "0bd2633ab97b8e24495313f054991574df06263f"
+last_activity_desc: Phase 22 complete, transitioned to Phase 23
+state_head: 92312b67ec70f988054f08f5466ea833b09e5ae3
 progress:
   total_phases: 7
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 4
   completed_plans: 4
-  percent: 86
+  percent: 54
 ---
 
 # STATE — THiNX Device API
@@ -24,21 +24,21 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-09-25 at v1.14 start)
+See: `.planning/PROJECT.md` (updated 2026-09-25 after Phase 22)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** v1.14 Backlog & Hardening Sweep — Phase 22 CI & SAST Baseline (ready to plan; verify-first).
+- **Current focus:** v1.14 Backlog & Hardening Sweep — Phase 23 Build-Pipeline Sink Hardening (ready to plan).
 - **Production today (CORRECTED 2026-09-21 by direct swarm inspection):** `thinx_api` runs on **core**, `thinx_console` on **micro**, `thinx_vue` on **core** — api and classic console are the reverse of what was recorded on 2026-09-19. Original (now stale) note follows: api + transformer run on `micro`, not `core`. Classic console image `registry.thinx.cloud:5000/thinx/console:swarm@sha256:27b1ca72` on node `core`, serving the CSP build with no inline scripts; rollback digest `sha256:1906bd5f`. `thinx-staging` publishes to the private registry, `main` to Docker Hub — one registry per branch since `3cfd0666`.
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace. In v1.14, Phase 22 (Vue hostname var), Phase 25 (image `default.conf` header mirror) and Phase 26 (Vue log paging UI) touch the console submodule; coordinate each pointer bump with the phase deploy.
 
 ## Current Position
 
-Phase: 22 (CI & SAST Baseline) — EXECUTING
-Plan: 4 of 4 (22-04 complete)
-Status: All 4 plans complete — awaiting phase 22 re-verification
-Last activity: 2026-09-25 — Completed 22-04 (CI-03 gap closed, logged-in check approved)
+Phase: 23 — Build-Pipeline Sink Hardening
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-25 — Phase 22 complete, transitioned to Phase 23
 
-Progress: [█████████░] 86% (0/7 phases)
+Progress: [█░░░░░░░░░] 14% (1/7 v1.14 phases; Phase 22 4/4 plans)
 
 ## Milestones
 
@@ -198,6 +198,12 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 
 - None.
 
+### Concerns carried from Phase 22
+
+- ⚠️ [Phase 22] Console `test:unit` (footer hostnames guard) runs in no CI job or image build (review WR-03); its sweep/render also has blind spots (WR-04, WR-05).
+- ⚠️ [Phase 22] Submodule `Test Vue console` CircleCI job has failed on every thinx-staging run since job 836 (2026-09-23) in `Install dependencies and build`; not the deploy path.
+- ⚠️ [Phase 22] Review WR-01 (test job still receives the private-registry credential via context) and WR-02 (AGENTS.md publishes the ssh endpoint) remain open.
+
 ### Open Questions
 
 Decided at plan time, not blocking the roadmap:
@@ -229,9 +235,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Last session:** 2026-09-25T14:32:45.715Z
 
-**Stopped at:** Completed 22-04-PLAN.md
+**Stopped at:** Phase 22 complete, ready to plan Phase 23
 
-**Next action:** `/gsd:discuss-phase 22` (then `/gsd:plan-phase 22`)
+**Next action:** `/gsd:discuss-phase 23` (then `/gsd:plan-phase 23`)
 
 ---
 *v1.0 GA backend closures shipped and archived: 2026-05-27 (4/4 v1 requirements Verified)*
@@ -244,7 +250,10 @@ Decided at plan time, not blocking the roadmap:
 
 ## Operator Next Steps
 
-- Review `.planning/ROADMAP.md` (v1.14 section), then start Phase 22 with `/gsd:discuss-phase 22`
+- Start Phase 23 with `/gsd:discuss-phase 23`
+- Push the pending `.planning` docs commits on `thinx-staging` when convenient (triggers CircleCI + PR CodeQL)
+- Merge PR #569 when ready, then record the CodeQL main-push row (CI-01 follow-up)
+- Decide whether to sync `thinx-cloud/console` `main` to its `thinx-staging` (trails by the 22-04 fix commit `a5b0246`)
 
 ## Performance Metrics
 

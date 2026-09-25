@@ -1,9 +1,10 @@
 ---
 phase: 22-ci-sast-baseline
 verified: 2026-09-25T14:46:02Z
-status: human_needed
+status: passed
 score: 42/42 must-haves verified (roadmap SC 4/4, plan truths 38/38)
 covered_files:
+
   - .circleci/config.yml
   - .github/workflows/codeql-analysis.yml
   - .planning/REQUIREMENTS.md
@@ -21,6 +22,7 @@ covered_files:
   - services/console/vue/package.json
   - services/console/vue/src/components/Layout/Layout.vue
   - services/console/vue/tests/unit/footer-hostnames.cjs
+
 covered_digest: "v1:sha256:a21d3e3fea36099b254cbcf311cf08697c41134b0dce99d0d31a13e70827c9d4"
 behavior_unverified: 0
 overrides_applied: 0
@@ -32,10 +34,12 @@ re_verification:
   gaps_remaining: []
   regressions: []
 coincidental_reliance_items:
+
   - truth: "22-04 truth 4: npm run test:unit exits 0 and renders the real footers of Layout, Login and PasswordReset to the console and landing hosts"
     reason: fixture-only
     harden: "The test builds each VM from the component's mixins only (plus data), not from the full component options. It skips the component's own created/computed, the global layoutMixin and the store, so a Layout created() that resets $hostnames would still pass (REVIEW WR-05). Build the VM from the full options with only the render swapped in. This verifier's scratch harness does that and it passes on the fix and fails on a0e86707. Also run test:unit in the image build or the submodule CI job (WR-03)."
 human_verification:
+
   - test: "Logged-in retest of the classic console at https://rtm.thinx.cloud (console-retest skill), carried from the prior report and from the 22-02 deferred human-check"
     expected: "Dashboard loads, websocket connects to wss://rtm.thinx.cloud/..., Devices page renders with no Angular parse error, and the browser console shows no cookie/owner/profile debug logging"
     why_human: "Needs login credentials. The unauthenticated subset passes again (root=200, LogviewController.js=200). A new classic image was autoredeployed on 9bf5cf97 at 14:20:16Z, so a logged-in look after that rollout is worth doing"
@@ -239,6 +243,7 @@ None.
 ### Gaps Summary
 
 The single prior gap is closed. `Layout.vue` now declares the hostnames mixin (2 added lines, template untouched, main.js untouched). The fix is on thinx-staging in both repos, and console.thinx.cloud serves it as buildHash 9bf5cf9, built by the green vue-console-registry job 15424. The Layout footer href was shown correct four ways:
+
 - in the compiled bundle, whose Layout module imports and declares the mixin
 - by a full-options render of the real component, which fails on the pre-fix code
 - by the shipped unit test

@@ -40,9 +40,9 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 - **SEC-CFG-02** — `readSecret()` sweep over the ~20 remaining sensitive env vars
 - **builder.js path traversal** — fix Aikido-flagged `readFileSync`/`lstatSync` sinks in `lib/thinx/builder.js`
 - **git.js argv** — `lib/thinx/git.js` `execSync` sink takes argv, not a shell string
-- **CodeQL workflow** — trigger on `main`, current action majors
-- **Registry login retry** — retry wrapper on the CI `docker login registry.thinx.cloud:5000` step
-- **Vue hostname var** — separate Vue console hostname build var so footer links point at itself
+- ✓ **CodeQL workflow** — trigger on `main`, current action majors *(shipped Phase 22, CI-01)*
+- ✓ **Registry login retry** — retry wrapper on the CI `docker login registry.thinx.cloud:5000` step *(shipped Phase 22, CI-02)*
+- ✓ **Vue hostname var** — separate Vue console hostname build var so footer links point at itself *(shipped Phase 22, CI-03)*
 - **Log paging** — optional bookmark paging for audit + build logs, used by the Vue Console only; Legacy console keeps the 200-item behavior unchanged
 - **InfluxDB 2** — upgrade `thinx_influxdb` 1.8 → 2 in production (added 2026-09-25), with `influx.js` moved to v2 and a 90-day retention on `stats` (default `autogen` is infinite today)
 - **Swarmpit 1.10 + trim** — upgrade Swarmpit to 1.10 (added 2026-09-25), then disable stats and drop `swarmpit_influxdb` and `swarmpit_agent`; registry-triggered autoredeploy must keep working; `swarmpit_db` stays couchdb 2.3.0
@@ -52,6 +52,15 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 **Scope note:** log paging and the Vue hostname var touch `services/console` (Vue). As in v1.13, this milestone coordinates the console submodule pointer bump rather than treating that work as fully external.
 
 ## Validated Requirements (Historical)
+
+<details open>
+<summary>v1.14 Backlog & Hardening Sweep (in progress)</summary>
+
+- ✓ **CI-01** — v1.14 (Phase 22) — CodeQL `javascript-typescript` (`codeql-action@v4`, `checkout@v7`, `build-mode: none`) runs on pushes to `thinx-staging`/`main` and PRs to `main`; non-required; default setup off. security-extended baseline recorded (147 alerts). Main-push row pending the merge of PR #569.
+- ✓ **CI-02** — v1.14 (Phase 22) — Every private-registry login in `.circleci/config.yml` goes through the retrying stdin `registry-login` command; the raw argv-password login in the test job is gone.
+- ✓ **CI-03** — v1.14 (Phase 22) — Vue console "THiNX Console" links (layout, login, password reset) point at the Vue console host via `VUE_WEB_HOSTNAME` → `VUE_APP_CONSOLE_HOSTNAME` build arg; dead runtime env removed from `docker-swarm.yml`, gluster and the live service. The authenticated Layout footer needed a gap-closure fix (22-04: missing hostnames mixin), guarded by a plain-node footer test.
+
+</details>
 
 <details>
 <summary>v1.13 Web Hardening (Console/Edge) (shipped 2026-09-25)</summary>
@@ -189,6 +198,9 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 | Console CSRF wired through two shared seams, not per call site | Four plan-check passes kept finding missed call sites | ✓ Good — no call-site regressions after the flip |
 | HawkScan acceptance criteria closed by operator override | StackHawk was removed (`bb0ce4a7`); substitute evidence = CSP parse, CSRF specs, live probes, operator cold-browser approval | — Pending — a substitute DAST run (e.g. Burp) would turn the override into evidence |
 | Production CSP source of truth = gluster bind mount, documented rather than removed | Discovered mid-phase; removing the mount while the Vue image config lacks `app.thinx.cloud` would lock out cold Vue sessions | ⚠️ Revisit — finish the retirement path in `console-csp-source-of-truth.md` |
+| Phase 22 re-opened CI-03 after verification instead of accepting the public-page evidence | 22-02 marked CI-03 complete without the logged-in Layout check; the verifier found the Layout footer links had no href (missing hostnames mixin, pre-existing) | ✓ Good — 22-04 fixed it with the per-component mixin pattern and marked CI-03 complete only after a logged-in approval |
+| Layout gets the hostnames mixin per component, not a global `Vue.mixin` or a populated prototype | A global mixin would run the hostnames `data()`/`created()` on every component instance, library components included; four pages already use the per-component pattern | ✓ Good — 2-line fix, template byte-identical |
+| Console `test:unit` stays a local pre-deploy guard for now | It runs in no CI job or image build (review WR-03); adding it to the Vue Dockerfile is the known fix | ⚠️ Revisit — wire `yarn test:unit` into the Vue image build |
 
 ## Evolution
 
@@ -209,4 +221,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-09-25 at v1.14 milestone start (Backlog & Hardening Sweep; first phase = 22)*
+*Last updated: 2026-09-25 after Phase 22 (CI & SAST Baseline)*
