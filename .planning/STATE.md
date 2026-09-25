@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 22
 current_phase_name: ci-sast-baseline
 status: executing
-stopped_at: Phase 22 context gathered
-last_updated: "2026-09-25T12:28:59.407Z"
+stopped_at: Completed 22-01-PLAN.md
+last_updated: "2026-09-25T12:42:42.439Z"
 last_activity: 2026-09-25
-last_activity_desc: v1.14 roadmap created (7 phases, 25/25 requirements mapped)
-state_head: 2b15303452c502ff869769414336a1a50b95a645
+last_activity_desc: Phase 22 execution started
+state_head: 41d2658fffbe0e22f8c235083adfcc160542f63a
 progress:
   total_phases: 7
   completed_phases: 6
   total_plans: 3
-  completed_plans: 0
-  percent: 0
+  completed_plans: 1
+  percent: 33
 ---
 
 # STATE — THiNX Device API
@@ -33,12 +33,12 @@ See: `.planning/PROJECT.md` (updated 2026-09-25 at v1.14 start)
 
 ## Current Position
 
-Phase: 22 (ci-sast-baseline) — READY TO EXECUTE
-Plan: — (not yet planned)
+Phase: 22 (ci-sast-baseline) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-09-25 — v1.14 roadmap created (7 phases, 25/25 requirements mapped)
+Last activity: 2026-09-25 — Phase 22 execution started
 
-Progress: [░░░░░░░░░░] 0% (0/7 phases)
+Progress: [███░░░░░░░] 33% (0/7 phases)
 
 ## Milestones
 
@@ -168,6 +168,8 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 21]: verifyCsrfToken wired onto exactly the 7 reconciled protected routes (adds the Vue v2 password reset/set routes the original D-02 list omitted); X-Access-Token/JWT routes and /api/v2/user left untouched
 - [Phase 21]: Console CSRF wiring uses two shared seams (classic $.ajaxSetup, Vue composeHeaders()) rather than per-call-site edits — Prevents future whack-a-mole regressions found across 4 plan-check passes
 - [Phase 21]: SEC-CSP-01: pinned CSP host allowlist across console images + runbook snapshots, replacing the https:/wss: scheme wildcard — unsafe-inline/unsafe-eval left unchanged per source; SEC-CSP-02 deferred
+- [Phase 22]: [Phase 22]: CI-02 took the delete path — D-01 pre-check found no private-registry pull on the CircleCI test path
+- [Phase 22]: [Phase 22]: CodeQL security-extended does not flag git.js execSync or builder readFileSync/lstatSync sinks; Phase 23 sink before/after must come from Aikido (baseline 147 open alerts at 89c5cf93)
 
 ### Todos
 
@@ -218,11 +220,11 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Resume file:** .planning/phases/22-ci-sast-baseline/22-CONTEXT.md
+**Resume file:** None
 
-**Last session:** 2026-09-25T11:43:09.951Z
+**Last session:** 2026-09-25T12:42:42.397Z
 
-**Stopped at:** Phase 22 context gathered
+**Stopped at:** Completed 22-01-PLAN.md
 
 **Next action:** `/gsd:discuss-phase 22` (then `/gsd:plan-phase 22`)
 
@@ -238,3 +240,9 @@ Decided at plan time, not blocking the roadmap:
 ## Operator Next Steps
 
 - Review `.planning/ROADMAP.md` (v1.14 section), then start Phase 22 with `/gsd:discuss-phase 22`
+
+## Performance Metrics
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 22 P01 | 10 min | 3 tasks | 4 files |

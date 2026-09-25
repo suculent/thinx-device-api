@@ -98,12 +98,12 @@ See `.planning/milestones/v1.13-ROADMAP.md`. 2/2 v1.13 requirements (SEC-CSP-01,
   3. In the live Vue bundle, the "THiNX Console" links (layout, login, password reset) point at the Vue console host. `VUE_WEB_HOSTNAME` is traced from the CircleCI project variable through the build arg into the served bundle.
   4. `docker-swarm.yml` no longer sets the dead runtime `VUE_APP_CONSOLE_HOSTNAME` environment variable.
 
-**Plans**: 3 plans
+**Plans**: 1/3 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 22-01-PLAN.md — CodeQL workflow rewrite proven on a thinx-staging push (tracer), raw test-job registry login removed (CI-02), CodeQL security-extended baseline recorded (D-07)
+- [x] 22-01-PLAN.md — CodeQL workflow rewrite proven on a thinx-staging push (tracer), raw test-job registry login removed (CI-02), CodeQL security-extended baseline recorded (D-07)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -224,7 +224,7 @@ Plans:
 | 15–17. Backlog Drawdown | v1.11 | 6/6 | Complete | 2026-06-06 |
 | 18–20. Inbox Drawdown | v1.12 | — | Complete | 2026-06-29 |
 | 21. CSP Wildcard Removal + Anti-CSRF Token | v1.13 | 5/5 | Complete | 2026-09-25 |
-| 22. CI & SAST Baseline | v1.14 | 0/TBD | Not started | - |
+| 22. CI & SAST Baseline | v1.14 | 1/3 | In Progress|  |
 | 23. Build-Pipeline Sink Hardening | v1.14 | 0/TBD | Not started | - |
 | 24. Secrets Sweep | v1.14 | 0/TBD | Not started | - |
 | 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 0/TBD | Not started | - |
