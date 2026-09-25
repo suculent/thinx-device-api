@@ -1,10 +1,13 @@
-# Captured: 2026-06-05T10:30Z
-# Source: docker exec -ti e2aaae86b53c nginx -T (inside thinx_vue.1.hqwfyi29x6xmbai3k2fjp9row container)
-# Host: micro
-# Service: thinx_vue (registry.thinx.cloud:5000/thinx/console:vue)
-# Routing: Traefik routes rtm.thinx.cloud -> this container's port 80; container nginx has server_name localhost which matches any host header
-# Captured by: MS (operator initials)
-# Note: pre and post are byte-identical in this discrepancy branch — SEC-WS-01 fix was already live at capture time (probe-pre-fix.txt footer: Bare-nginx-404 rows (4-7) detected: 0/4)
+# Captured: 2026-09-25T08:42Z (Phase 21 / Plan 21-05 runbook work; read-only)
+# Source: docker exec 230ffceddb73 nginx -T (inside thinx_vue.1.4r6rx1vh0lhl7clxija3b1ro0, node micro) -- conf.d/default.conf section only
+# Live file: /etc/nginx/conf.d/default.conf in BOTH thinx_vue and thinx_console is a read-only bind mount of
+#   /mnt/gluster/deployment/swarm/console/default.conf (md5 f4e9fde797f43effa7a8104c387cf5b7, 4682 bytes, mtime 2026-09-24T15:07:50Z)
+#   == .planning/runbooks/swarm-configs/console-default.conf.prod. See .planning/runbooks/console-csp-source-of-truth.md.
+# Routing: rtm.thinx.cloud -> thinx_console (:swarm, node core); console.thinx.cloud -> thinx_vue (:vue, node micro).
+#   One mounted file serves both; the live Content-Security-Policy header on both hosts matched this file at capture time.
+# Captured by: Claude (GSD 21-05 executor)
+# Note: pre and post are byte-identical by design -- the 21-05 CSRF enforce flip is API-side (thinx_api) and does not touch nginx.
+#   Replaces the 2026-06-05 (Phase 13) capture, which predated SEC-CSP-01 (2026-09-19) and the cdn.rollbar.com edit (2026-09-24).
 
 # configuration file /etc/nginx/conf.d/default.conf:
 server {
@@ -23,11 +26,11 @@ server {
     add_header "X-Frame-Options" "DENY";
     add_header "X-XSS-Protection" "1; mode=block";
     add_header "X-Content-Type-Options" "nosniff";
+    add_header "Strict-Transport-Security" "max-age=31536000; includeSubDomains; preload" always;
     add_header "X-Download-Options" "noopen";
     add_header "X-Permitted-Cross-Domain-Policies" "all";
-    # Phase 21 (SEC-CSP-01): CSP line updated in-repo to the target pinned-host policy ahead of the operator's post-deploy nginx -T recapture — the console image redeploy (services/console default.conf, Task 1) is the actual application mechanism for this line; no manual host-side nginx edit is required for CSP (unlike the SEC-WS-01 location-block gap, which was a genuine host-nginx-config mismatch).
-    add_header "Content-Security-Policy" "default-src 'self' __NGINX_HOST__ https://rtm.thinx.cloud https://console.thinx.cloud https://*.crisp.chat https://fonts.googleapis.com https://fonts.gstatic.com https://www.google-analytics.com https://api.rollbar.com data: blob: 'unsafe-inline' 'unsafe-eval'; connect-src 'self' __NGINX_HOST__ https://rtm.thinx.cloud https://console.thinx.cloud https://*.crisp.chat wss://client.relay.crisp.chat https://www.google-analytics.com https://api.rollbar.com; frame-ancestors 'self'; form-action 'self' __NGINX_HOST__ https://github.com; object-src 'none'; base-uri 'self'" always;
-
+    add_header "Content-Security-Policy" "default-src 'self' https://app.thinx.cloud https://rtm.thinx.cloud https://console.thinx.cloud https://*.crisp.chat https://fonts.googleapis.com https://fonts.gstatic.com https://www.google-analytics.com https://api.rollbar.com https://cdn.rollbar.com https://d37gvrvc0wt4s1.cloudfront.net https://cdnjs.cloudflare.com https://*.gravatar.com https://gravatar.com https://avatars.githubusercontent.com data: blob:; connect-src 'self' https://app.thinx.cloud https://rtm.thinx.cloud https://console.thinx.cloud wss://app.thinx.cloud wss://rtm.thinx.cloud wss://console.thinx.cloud https://*.crisp.chat wss://client.relay.crisp.chat https://www.google-analytics.com https://api.rollbar.com; frame-ancestors 'self'; form-action 'self' https://github.com; object-src 'none'; base-uri 'self'; script-src 'self' https://app.thinx.cloud https://rtm.thinx.cloud https://console.thinx.cloud https://*.crisp.chat https://www.google-analytics.com https://api.rollbar.com https://cdn.rollbar.com https://d37gvrvc0wt4s1.cloudfront.net https://cdnjs.cloudflare.com 'unsafe-eval'; script-src-attr 'none'; style-src 'self' https://app.thinx.cloud https://rtm.thinx.cloud https://console.thinx.cloud https://*.crisp.chat https://fonts.googleapis.com https://fonts.gstatic.com https://www.google-analytics.com https://api.rollbar.com https://d37gvrvc0wt4s1.cloudfront.net https://cdnjs.cloudflare.com https://*.gravatar.com https://gravatar.com https://avatars.githubusercontent.com data: blob: 'unsafe-inline'" always;
+    
     charset utf-8;
     source_charset utf-8;
 
