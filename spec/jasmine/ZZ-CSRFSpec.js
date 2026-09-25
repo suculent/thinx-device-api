@@ -16,7 +16,9 @@
  * duplicate-cookie count, never token values; (8) enforce mode logs one
  * reason-coded line per rejection; (9) cookie Domain derivation never
  * throws and keeps ".thinx.cloud" for the production api_url; (10) the minted
- * cookie carries that domain and path "/".
+ * cookie carries that domain and path "/"; (11) no token is minted for
+ * preflights, device, firmware and webhook traffic, while console routes
+ * still get one.
  */
 
 // Force the lightweight bundled config path (spec/mnt/data/conf/config.json)
@@ -296,6 +298,32 @@ describe("ZZ-CSRFSpec (SEC-CSRF-01)", function () {
         } finally {
             console.log = originalLog;
         }
+    });
+
+    it("11. ensureXsrfCookie skips preflight, device, firmware and webhook traffic only (WR-03)", function () {
+        function mints(req) {
+            const res = mockRes();
+            let nextCalled = false;
+            csrf.ensureXsrfCookie(Object.assign({ cookies: {}, headers: {} }, req), res, function next() { nextCalled = true; });
+            expect(nextCalled).to.equal(true);
+            return res._cookieCalls.length === 1;
+        }
+        // not minted
+        expect(mints({ method: "OPTIONS", path: "/api/v2/login" })).to.equal(false);
+        expect(mints({ method: "POST", path: "/device/register", headers: { origin: "device" } })).to.equal(false);
+        expect(mints({ method: "POST", path: "/api/v2/device", headers: { origin: "device" } })).to.equal(false);
+        expect(mints({ method: "POST", path: "/device/register" })).to.equal(false);
+        expect(mints({ method: "GET", path: "/device/firmware" })).to.equal(false);
+        expect(mints({ method: "POST", path: "/Device/Firmware" })).to.equal(false);
+        expect(mints({ method: "POST", path: "/githook" })).to.equal(false);
+        expect(mints({ method: "POST", path: "/api/githook/" })).to.equal(false);
+        // still minted: priming endpoints and console routes
+        expect(mints({ method: "GET", path: "/api/csrf-token" })).to.equal(true);
+        expect(mints({ method: "GET", path: "/api/v2/csrf-token", headers: { origin: "https://console.thinx.cloud" } })).to.equal(true);
+        expect(mints({ method: "POST", path: "/api/v2/login" })).to.equal(true);
+        expect(mints({ method: "POST", path: "/api/device/edit" })).to.equal(true);
+        expect(mints({ method: "GET", path: "/api/v2/device" })).to.equal(true);
+        expect(mints({ method: "GET", path: "/api/githooks" })).to.equal(true);
     });
 
 });
