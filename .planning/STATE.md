@@ -5,16 +5,16 @@ milestone_name: Web Hardening (Console/Edge) (Phase 21)
 current_phase: 21
 current_phase_name: CSP Wildcard Removal + Anti-CSRF Token
 status: executing
-stopped_at: Completed 21-04-PLAN.md
-last_updated: "2026-09-25T08:39:45.316Z"
+stopped_at: Completed 21-05-PLAN.md
+last_updated: "2026-09-25T09:12:20.298Z"
 last_activity: 2026-09-25
-state_head: 3e5670273ea037493518deab08f0a44fff525981
+state_head: bb0ce4a70646f798c4d14b5c5ab383b442f9c782
 progress:
   total_phases: 4
   completed_phases: 11
   total_plans: 5
-  completed_plans: 4
-  percent: 80
+  completed_plans: 5
+  percent: 100
 ---
 
 # STATE — THiNX Device API
@@ -170,9 +170,7 @@ Items acknowledged and deferred at prior milestone closes and carried forward:
 
 ### Blockers
 
--
-
-- 21-05 pre-flip gate: an unexplained CSRF mismatch on POST /api/v2/session/token (2026-09-25T08:35:09Z; 9 more on a replaced thinx_api task). Before enforcing, run a cold incognito login on both consoles and watch thinx_api for ~1 day for new session/token warnings. See 21-04-SUMMARY.md.
+None
 
 ### Open Questions
 
@@ -198,9 +196,9 @@ Items acknowledged and deferred at prior milestone closes and carried forward:
 
 **Resume file:** None
 
-**Last session:** 2026-09-25T08:39:38.470Z
+**Last session:** 2026-09-25T09:12:20.264Z
 
-**Stopped at:** Completed 21-04-PLAN.md
+**Stopped at:** Completed 21-05-PLAN.md
 operator-only checkpoint.
 
 **Next action:** Execute 21-04 Task 2 — the authenticated in-browser verification of both consoles

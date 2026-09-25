@@ -122,13 +122,13 @@ See `.planning/milestones/v1.12-ROADMAP.md`. 4/4 v1.12 requirements (SEC-PII-03,
   4. The anti-CSRF token mechanism is identical across both consoles — one server-side validation scheme, no per-frontend fork of the check
   5. The three CSP definitions (nginx-edge `pre`/`post` runbook snapshot, legacy console `services/console/src/default.conf`, Vue console `services/console/vue/default.conf`) are byte-for-byte equivalent modulo the host-token placeholder
 
-**Plans**: 4/5 plans executed (3 waves)
+**Plans**: 5/5 plans executed (3 waves)
 
 - [x] 21-01-PLAN.md — API CSRF double-submit middleware (fail-open/enforce flag) + route wiring
 - [x] 21-02-PLAN.md — Console CSRF wiring (classic hidden _csrf fields + login.js header; Vue Login.vue header)
 - [x] 21-03-PLAN.md — CSP host pinning across nginx edge runbook + both console default.conf
 - [x] 21-04-PLAN.md — Deploy both repos fail-open + functional/CSP verify
-- [ ] 21-05-PLAN.md — Flip CSRF enforcement + HawkScan rescan + rollback runbook
+- [x] 21-05-PLAN.md — Flip CSRF enforcement + HawkScan rescan + rollback runbook
 
 **Granularity note (coarse):** SEC-CSP-01 and SEC-CSRF-01 are combined into a single Phase 21 rather than split across two phases. Both are console/edge-layer changes that (a) touch the exact same three deploy surfaces — nginx edge config, legacy console image, Vue console image — (b) share the identical "keep both consoles + edge mutually consistent" verification concern, and (c) ship through the same console-submodule deploy pipeline. Splitting them would duplicate the two-console-consistency check and the HawkScan-rescan verification step across two phases for no delivery-boundary benefit; `granularity: coarse` favors this single combined phase.
 
@@ -147,7 +147,7 @@ See `.planning/milestones/v1.12-ROADMAP.md`. 4/4 v1.12 requirements (SEC-PII-03,
 | 18. Complete GDPR Purge | v1.12 | 4/4 | Complete | 2026-06-29 |
 | 19. Per-user GitHub Token Backend | v1.12 | — | Complete | 2026-06-29 |
 | 20. Docker Secrets Helper | v1.12 | — | Complete | 2026-06-29 |
-| 21. CSP Wildcard Removal + Anti-CSRF Token | v1.13 | 4/5 | In Progress|  |
+| 21. CSP Wildcard Removal + Anti-CSRF Token | v1.13 | 5/5 | In Progress|  |
 
 ---
 *v1.11 Backlog Drawdown shipped 2026-06-06 (4/4 requirements across Phases 15–17; audit tech_debt — Phases 15/16 await push/CI/deploy follow-on).*
