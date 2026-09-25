@@ -44,8 +44,8 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 - **Registry login retry** — retry wrapper on the CI `docker login registry.thinx.cloud:5000` step
 - **Vue hostname var** — separate Vue console hostname build var so footer links point at itself
 - **Log paging** — optional bookmark paging for audit + build logs, used by the Vue Console only; Legacy console keeps the 200-item behavior unchanged
-- **InfluxDB retention** — finite retention on the `stats` DB (default `autogen` is infinite)
-- **Swarmpit trim** — disable stats, drop `swarmpit_influxdb` / `swarmpit_agent` where possible; registry-triggered autoredeploy must keep working; `swarmpit_db` stays couchdb 2.3.0
+- **InfluxDB 2** — upgrade `thinx_influxdb` 1.8 → 2 in production (added 2026-09-25), with `influx.js` moved to v2 and a 90-day retention on `stats` (default `autogen` is infinite today)
+- **Swarmpit 1.10 + trim** — upgrade Swarmpit to 1.10 (added 2026-09-25), then disable stats and drop `swarmpit_influxdb` and `swarmpit_agent`; registry-triggered autoredeploy must keep working; `swarmpit_db` stays couchdb 2.3.0
 
 **Still deferred:** SEC-CSP-02 (`unsafe-eval`, blocked on AngularJS retirement); TEST-CHAI-01, OPS-02, OPS-03, `uuid #194`.
 
