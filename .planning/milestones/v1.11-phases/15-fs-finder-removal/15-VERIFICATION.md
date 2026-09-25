@@ -5,9 +5,14 @@ status: human_needed
 score: 5/5 must-haves verified
 overrides_applied: 0
 human_verification:
+
   - test: "Run the full Jasmine suite (npm test) on a Docker-provisioned environment with config.json (Redis + CouchDB)"
     expected: "All specs green — no regressions introduced by the fs-finder replacements; FinderSpec 11/11, DeploymentSpec A+B, RepositorySpec C+C2, XBuilderSpec A1–A3+B, PlatformSpec C, PluginSpec D all pass"
     why_human: "The full suite requires a Docker-provisioned config.json (Redis + CouchDB connections). This is a long-standing project constraint confirmed across all 4 plan SUMMARYs. CI gates on push to thinx-staging. Not runnable in the dev environment — cannot substitute for the real CI green signal."
+audit_acknowledged:
+  milestone: v1.13
+  at: 2026-09-25
+  status: human_needed
 ---
 
 # Phase 15: fs-finder Removal — Verification Report

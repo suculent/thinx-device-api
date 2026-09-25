@@ -1,3 +1,10 @@
+---
+audit_acknowledged:
+  milestone: v1.13
+  at: 2026-09-25
+  questions_digest: 259b4f9bf03585efc57b9afccda0d02af173fa4333d9b5f0f01ee9baf80abdb1
+---
+
 # Phase 7 Context: owner.js Async/Await Sweep
 
 **Created:** 2026-06-02
@@ -31,6 +38,7 @@ Downstream agents (researcher, planner, executor) MUST consult these:
 ## Code Context
 
 ### File shape
+
 - `lib/thinx/owner.js`: 1161 lines, single `Owner` class export.
 - 74 occurrences of `callback(...)` invocations.
 - ZERO existing `async` / `await` — file is uniformly callback-style.
@@ -64,11 +72,13 @@ Downstream agents (researcher, planner, executor) MUST consult these:
 **Top-5 highest-fanout (per ROADMAP.md success criterion 3):** `create`, `delete`, `update`, `password_reset`, `password_set` (named `set_password` in code — likely the same; researcher must confirm).
 
 ### nano promise API (already available)
+
 `package.json` pins `"nano": "^10.1.4"`. Nano 10.x supports native promises — all `this.userlib.<method>(...)` calls work without a callback and return a Promise. No `util.promisify` needed.
 
 Example mechanical transform (the canonical pattern):
 
 **Before:**
+
 ```js
 this.userlib.view("users", "owners_by_resetkey", { key: reset_key, include_docs: true }, (err, body) => {
   if (err) { return callback(false, err); }
@@ -78,6 +88,7 @@ this.userlib.view("users", "owners_by_resetkey", { key: reset_key, include_docs:
 ```
 
 **After:**
+
 ```js
 try {
   const body = await this.userlib.view("users", "owners_by_resetkey", { key: reset_key, include_docs: true });
@@ -89,6 +100,7 @@ try {
 ```
 
 Notes:
+
 - The outer method's signature stays `methodName(args, callback)` (NOT `async methodName(args)`) — public callers don't change. The method becomes `async methodName(args, callback) { try { await ... callback(true, x); } catch (err) { callback(false, err); } }`.
 - Nested callbacks inside the same method become sequential `await` calls, often eliminating Christmas-tree indentation.
 - Existing redaction/audit-log calls (`alog.log(...)`, `Util.redactToken(...)`, `Util.redactEmail(...)` — landed in Phase 1 SEC-PII-01) MUST stay intact in their original positions in the converted code.
@@ -96,6 +108,7 @@ Notes:
 ### Strict-equality cleanup targets (folded in from Phase 5 deferred)
 
 Three remaining non-strict comparisons in owner.js after Phase 5's REFACTOR-02:
+
 - Line `:277` — inside `mqtt_key`: `if (api_keys.length == 0)` → `=== 0`
 - Line `:515` — inside `password_reset_init`: `if (body.rows.length != 1)` → `!== 1`
 - Line `:572` — inside `atomic`: `if ((action_name == "password_reset") && (process.env.ENVIRONMENT == "test"))` → `===` on both
@@ -109,6 +122,7 @@ All three are inside non-top-5 methods that Plan 07-1 will already be touching f
 ### Granularity: Two-phase approach (internals first, then top-5 methods individually)
 
 **Plan 07-1 — Internals conversion (one atomic commit):**
+
 - Convert all NON-TOP-5 methods in `lib/thinx/owner.js` from callback-style internals to async/await using nano 10's native promise API.
 - Methods touched: `mqtt_key`, `profile`, `process_update`, `apply_update`, `validate`, `password_reset_init`, `activate`, `atomic`, `set_password_reset`, `set_password_activation`, `create_default_acl`, `create_mqtt_access`, `create_default_mqtt_apikey`, `createMesh`, `deleteMeshes`, `updateLastSeen` (plus any others discovered by researcher).
 - Public signatures preserved (each method remains `methodName(args, callback)`; only internals become `async`).
@@ -116,6 +130,7 @@ All three are inside non-top-5 methods that Plan 07-1 will already be touching f
 - Commit: `refactor(REFACTOR-04): convert owner.js non-top-5 methods to async/await + strict-equality sweep`
 
 **Plans 07-2 through 07-6 — Top-5 methods individually (5 atomic commits):**
+
 - One commit per top-5 method: `create`, `delete`, `update`, `password_reset`, `set_password`.
 - Each commit converts that method's internals to async/await + adds a call-graph spot-check comment in the method body documenting which routers/internals call it (per ROADMAP.md success criterion 3).
 - If the method had a stale `!=`/`==` that falls in its body, fold the strict-equality fix into the same commit.
@@ -128,6 +143,7 @@ All three are inside non-top-5 methods that Plan 07-1 will already be touching f
   - 07-6: `refactor(REFACTOR-04): convert Owner.set_password to async/await internals`
 
 **Why this granularity:**
+
 - Top-5 methods carry the highest behavioral risk (4+ callers each for `profile` / `create`; reset/auth-critical flows for `password_reset` / `set_password`; account lifecycle for `delete` / `update`). Isolating them per-commit gives CI a bisect-friendly history if anything regresses.
 - Plan 07-1 bundles ~15 lower-fanout methods in one commit because the conversion is uniform and mechanical; lower bisect granularity is acceptable for these methods.
 - Plan 07-1 is ALSO where the strict-equality fold lands (lines 277, 515, 572) because all three are in non-top-5 methods.

@@ -2,46 +2,40 @@
 gsd_state_version: "1.0"
 milestone: v1.13
 milestone_name: Web Hardening (Console/Edge) (Phase 21)
-current_phase: 21
-status: completed
+status: Awaiting next milestone
 stopped_at: Phase 21 complete — all phases complete
-last_updated: "2026-09-25T10:25:35.043Z"
+last_updated: "2026-09-25T10:28:20.585Z"
 last_activity: 2026-09-25
-last_activity_desc: Phase 21 complete
-state_head: 47284faf3f41ac84bc5c29cd6457c9e2a5fa9353
+last_activity_desc: Milestone v1.13 completed and archived
+state_head: 7e36d71a235ea325c5d2d5fa21e3758523d544ba
 progress:
   total_phases: 4
   completed_phases: 12
   total_plans: 5
   completed_plans: 5
   percent: 100
+current_phase: 21
 ---
 
 # STATE — THiNX Device API
 
-**Last updated:** 2026-09-19 (reconciled with ~123 commits that landed outside the plan flow since 2026-07-05)
+**Last updated:** 2026-09-25 (v1.13 milestone closed and archived)
 
 ## Project Reference
 
 See: `.planning/PROJECT.md`
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** v1.13 Web Hardening (Console/Edge) — Phase 21 (CSP Wildcard Removal + Anti-CSRF Token) is the only phase; it must touch the swarm nginx edge and both console images (legacy AngularJS `services/console/src/default.conf` + Vue `services/console/vue/default.conf`) consistently, plus add server-side CSRF validation to the API's login route.
+- **Current focus:** Between milestones — v1.13 Web Hardening (Console/Edge) shipped 2026-09-25. Next: `/gsd-new-milestone` (v1.14, next phase = 22).
 - **Production today (CORRECTED 2026-09-21 by direct swarm inspection):** `thinx_api` runs on **core**, `thinx_console` on **micro**, `thinx_vue` on **core** — api and classic console are the reverse of what was recorded on 2026-09-19. Original (now stale) note follows: api + transformer run on `micro`, not `core`. Classic console image `registry.thinx.cloud:5000/thinx/console:swarm@sha256:27b1ca72` on node `core`, serving the CSP build with no inline scripts; rollback digest `sha256:1906bd5f`. `thinx-staging` publishes to the private registry, `main` to Docker Hub — one registry per branch since `3cfd0666`.
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace. Phase 21 touches BOTH console images (legacy + Vue) directly since the CSP and CSRF findings are console-frontend concerns, not backend-only; coordinate submodule pointer bump as part of Phase 21 deploy.
 
 ## Current Position
 
-Phase: 21
-Plan: Not started
-Status: All phases complete
-        (plus `script-src-attr 'none'`) after the classic console's inline scripts were migrated to
-        external assets — further than 21-03 scoped. 21-04 and 21-05 ARE written (corrected
-        2026-09-21 — the earlier "still unwritten" note was wrong); what they lack is execution.
-        Reconciled against live state 2026-09-21: 21-04 Task 1 (push both repos, bump submodule,
-        CI green) is already satisfied and must not be re-run; 21-04 Task 2 (authenticated
-        in-browser verification) is the only real gap; CSRF enforcement is confirmed still OFF.
-Last activity: 2026-09-25 — Phase 21 complete
+Phase: Milestone v1.13 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-09-25 — Milestone v1.13 completed and archived
 
 ## Milestones
 
@@ -50,7 +44,7 @@ Last activity: 2026-09-25 — Phase 21 complete
 - ✅ **v1.10 — Operational Closures** (shipped + archived 2026-06-05) — Phases 12–14, 5/5 requirements Verified; see `.planning/MILESTONES.md` + `.planning/milestones/v1.10-ROADMAP.md`
 - ✅ **v1.11 — Backlog Drawdown** (shipped 2026-06-06) — Phases 15–17, 4/4 requirements Verified; audit `tech_debt`; see `.planning/MILESTONES.md` + `.planning/milestones/v1.11-ROADMAP.md`
 - ✅ **v1.12 — Inbox Drawdown** (shipped 2026-06-29) — Phases 18–20, 4/4 requirements Verified; see `.planning/MILESTONES.md`
-- 🔄 **v1.13 — Web Hardening (Console/Edge)** (roadmap created 2026-07-04) — Phase 21, 2/2 requirements mapped; phase planning pending
+- ✅ **v1.13 — Web Hardening (Console/Edge)** (shipped + archived 2026-09-25) — Phase 21, 2/2 requirements Verified (3 operator overrides); see `.planning/MILESTONES.md` + `.planning/milestones/v1.13-ROADMAP.md`
 
 ## Since the last state update (2026-07-06 → 2026-09-19)
 
@@ -135,6 +129,12 @@ Items acknowledged and deferred at prior milestone closes and carried forward:
 | out_of_scope (v1.12) | GH-03 (console UI for GitHub token) | Vue Profile screen to enter/replace/clear GitHub token — owned by `services/console/.planning/`. Out of scope for Phase 19. |
 | out_of_scope (v1.12) | SEC-CFG-02 (full readSecret sweep) | ~20 remaining sensitive env vars beyond core Redis/CouchDB. Phase 20 proved the pattern with core creds first; full sweep deferred. |
 | deferred_v1.13 | SEC-CSP-02 (`unsafe-eval` removal) | Blocked on AngularJS console retirement — `$parse` requires `unsafe-eval` unless CSP mode. Revisit once console fully migrated to Vue. |
+| verification_gap (ack v1.13) | 15/15-VERIFICATION.md (archived v1.11) | human_needed — formally acknowledged via `audit-open acknowledge` at v1.13 close (2026-09-25); already accepted at v1.11 close |
+| context_questions (ack v1.13) | 05, 06, 07, 08, 09, 10, 11 / *-CONTEXT.md (archived v1.9) | 2–3 planner questions each, all answered by the phase plans; acknowledged at v1.13 close (2026-09-25) |
+| deferred_v1.13 | WR-06 CSRF token not session-bound | Double-submit cookie on `.thinx.cloud` gives no same-site protection; session-mutation routes unguarded. Architectural follow-up (HMAC(secret, random‖session_id), rotate on login). See `21-REVIEW-FIX.md`. |
+| deferred_v1.13 | WR-04 `POST /api/v2/user` without CSRF | Documented public registration endpoint for non-browser clients; decide whether it must stay open. |
+| deferred_v1.13 | Console CSP source-of-truth retirement | Image `default.conf` files diverge from the gluster bind-mounted production file; Vue `connect-src` lacks `app.thinx.cloud` (latent cold-session lockout if the mount is dropped). Edge runbook CSP snapshots stale. |
+| deferred_v1.13 | Classic register / forgot / reset-confirm under enforcement | Verifier's one behaviour-unverified item — spot-check in a browser. |
 
 ## Accumulated Context
 
@@ -198,13 +198,9 @@ None
 
 **Last session:** 2026-09-25T09:12:20.264Z
 
-**Stopped at:** Phase 21 complete — all phases complete
-operator-only checkpoint.
+**Stopped at:** Milestone v1.13 completed and archived (2026-09-25)
 
-**Next action:** Execute 21-04 Task 2 — the authenticated in-browser verification of both consoles
-(blocking `checkpoint:human-verify`, needs a real staging login + DevTools + a swarm `docker service ps`).
-Task 1 of 21-04 is already satisfied; do not re-run it. Only after that checkpoint passes may 21-05
-flip `debug.csrf_enforce` / `CSRF_ENFORCE` on the `thinx_api` service.
+**Next action:** `/gsd-new-milestone` to define v1.14. Candidate scope is listed under "Next Milestone" in `.planning/PROJECT.md`.
 
 ---
 *v1.0 GA backend closures shipped and archived: 2026-05-27 (4/4 v1 requirements Verified)*
@@ -212,5 +208,8 @@ flip `debug.csrf_enforce` / `CSRF_ENFORCE` on the `thinx_api` service.
 *v1.10 Operational Closures shipped and archived: 2026-06-05 (5/5 v1.10 requirements Verified across 3 phases [12–14])*
 *v1.11 Backlog Drawdown shipped and archived: 2026-06-06 (4/4 v1.11 requirements Verified across 3 phases [15–17])*
 *v1.12 Inbox Drawdown shipped 2026-06-29 (4/4 v1.12 requirements Verified across 3 phases [18–20])*
-*v1.13 Web Hardening (Console/Edge) roadmap created: 2026-07-04 (2/2 v1.13 requirements mapped into 1 phase [21], granularity coarse)*
-</content>
+*v1.13 Web Hardening (Console/Edge) shipped and archived: 2026-09-25 (2/2 v1.13 requirements Verified in 1 phase [21]; 3 operator overrides)*
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone

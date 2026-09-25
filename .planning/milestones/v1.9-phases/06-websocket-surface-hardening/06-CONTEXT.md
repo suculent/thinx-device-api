@@ -1,3 +1,10 @@
+---
+audit_acknowledged:
+  milestone: v1.13
+  at: 2026-09-25
+  questions_digest: fb45e3e4190f200c7a96855de32f3b6efe07564b69950438fa8b2cd084506fb3
+---
+
 # Phase 6 Context: WebSocket Surface Hardening
 
 **Created:** 2026-06-02
@@ -32,6 +39,7 @@ Downstream agents (researcher, planner, executor) MUST read these before touchin
 ## Code Context
 
 ### REFACTOR-03 — WebSocket close handler gap
+
 - **Existing wss-level cleanup (line 597–599):**
   ```js
   ws.on('close', () => {
@@ -42,6 +50,7 @@ Downstream agents (researcher, planner, executor) MUST read these before touchin
 - **Symptoms:** Stale `socketMap` entries for failed upgrades — same-`socketKey` duplicate-upgrade detection at line 463 stays "armed" even though there's no live connection. Memory leak grows monotonically.
 
 ### SEC-WS-01 — rtm.thinx.cloud handshake 404 (REPRODUCED in this session)
+
 Root cause confirmed. Reproduction evidence captured 2026-06-02T21:10–21:11Z:
 
 | Request | Response | Headers | Diagnosis |
@@ -59,6 +68,7 @@ Root cause confirmed. Reproduction evidence captured 2026-06-02T21:10–21:11Z:
 This is reachable evidence: the absence of helmet/CSP/CORS headers in the `/test` and `/suculent` responses (versus their presence in `/api/v2/users`) proves Express was not reached. AGENTS.md guessed "Traefik" — the actual edge appears to be nginx-fronted (the `server: nginx` header is the giveaway). Either nginx is the only edge, or nginx fronts Traefik. Either way, the routing gap is at the edge.
 
 ### SEC-COOKIE-01 — httpOnly stale debugging note
+
 - **Main session cookie (`thinx-core.js:310–323`):** `name: 'x-thx-core'`, `httpOnly: false` with comment "temporarily disabled due to websocket debugging" (line 316). Suspect — likely a leftover from older debugging.
 - **Separate WS session cookie (`thinx-core.js:428–445`):** `name: 'x-thx-wscore'`, `httpOnly: true` (line 438). Proves the WS flow does NOT need `x-thx-core` to be readable from JS.
 - **Post-OAuth-login override (`lib/router.auth.js:106`):** `req.session.cookie.httpOnly = true` — the OAuth login flow already upgrades the cookie to httpOnly:true post-hoc. So the initial `false` is contradicted by post-login behavior.
@@ -68,6 +78,7 @@ This is reachable evidence: the absence of helmet/CSP/CORS headers in the `/test
 ## Decisions
 
 ### REFACTOR-03 — Add raw-socket close handler in the upgrade flow
+
 - **Decision:** Add `socket.on('close', () => { socketMap.delete(socketKey); })` in the upgrade handler at `thinx-core.js:459–501`, immediately after `socketMap.set(socketKey, socket)` at line 485. This guarantees raw-socket map cleanup even when `wss.handleUpgrade()` fails or the client disconnects mid-upgrade.
 - **Note:** The existing wss-level `ws.on('close')` at line 597 stays — it handles the post-upgrade lifecycle. Both handlers together cover the full lifecycle (raw socket → upgraded WS → close).
 - **Validation:**
@@ -77,6 +88,7 @@ This is reachable evidence: the absence of helmet/CSP/CORS headers in the `/test
   - Production smoke (post-merge): Vue console WS subscribe still round-trips on rtm AFTER the edge nginx fix lands.
 
 ### SEC-WS-01 — Document the edge-nginx routing gap with reproduction evidence
+
 - **Decision:** Write a runbook at `.planning/runbooks/websocket-handshake.md` documenting the root cause (edge nginx does not route `/<owner>` paths to the Express upstream), the reproduction evidence captured in this session (the 7-row request/response table above), and the operator-side action (add an nginx `location` block matching `/<owner>(/<timestamp>)?` that proxies to the Express WebSocket upstream with `proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection "Upgrade"`).
 - **Why NOT a code-side fix:** The reproduction proves the request never reaches Express. There is nothing to fix in this repo's code for SEC-WS-01 (REFACTOR-03 is a separate, real code gap that needs fixing on its own merits, but that's not the rtm 404 root cause). A code-side change would mask the actual issue and could create false hope.
 - **Action items in the runbook:**
@@ -88,6 +100,7 @@ This is reachable evidence: the absence of helmet/CSP/CORS headers in the `/test
 - **Validation:** A regression spec/runbook entry documents the reproduction recipe. The Vue console handshake post-edge-fix returns `101 Switching Protocols` (per the requirement's success criterion).
 
 ### SEC-COOKIE-01 — Flip `httpOnly: true` with documented fallback path
+
 - **Decision:** Change `thinx-core.js:316` to `httpOnly: true` (remove the stale "temporarily disabled due to websocket debugging" comment). Add a regression spec that asserts the `Set-Cookie: x-thx-core=...` response header DOES include `HttpOnly`.
 - **Fallback path (if the Vue console WS subscribe regresses on rtm after deploy):** Revert the line back to `httpOnly: false` AND update the runbook to document the operational reason. The plan should include a clear rollback procedure in the SUMMARY.md so the operator can roll back in <5 min if needed.
 - **Note:** A pre-deploy smoke from `wscat` + a real Vue session cookie won't help because the edge-nginx gap (SEC-WS-01) blocks all WS traffic to rtm regardless of cookie shape. The cookie change can only be smoke-tested AFTER SEC-WS-01's edge fix lands. So the SEC-COOKIE-01 deploy needs to land in either of two patterns: (a) sequence after the operator's nginx edge fix, OR (b) ship with the fallback-rollback documented in the runbook and accept a brief regression-watch window.
@@ -99,6 +112,7 @@ This is reachable evidence: the absence of helmet/CSP/CORS headers in the `/test
 ## Coordination
 
 Phase 6 sequences AFTER Phase 5 per ROADMAP.md line 49 — Phase 5's REFACTOR-01 trust-proxy dedup is adjacent to the same `thinx-core.js` block. Phase 5 just landed on `thinx-staging` (8 commits ending `b0aef15b`); Phase 6 work happens on top of that. Phase 6 plans should:
+
 - Read `thinx-core.js` AFTER Phase 5's edits (the line numbers above reflect the post-Phase-5 state).
 - Be aware that line numbers shift again after Phase 6 edits (the SEC-COOKIE-01 edit is a one-character flip, but the REFACTOR-03 addition is ~3 lines).
 

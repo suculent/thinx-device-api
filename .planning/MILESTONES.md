@@ -1,5 +1,39 @@
 # Milestones
 
+## v1.13 — Web Hardening (Console/Edge) (Shipped: 2026-09-25)
+
+**Delivered:** Closed the two HawkScan Medium findings in the console/edge layer. The CSP `https:`/`wss:` scheme wildcard is gone in favour of pinned hosts, and a double-submit anti-CSRF token guards every cookie-session login/account POST on both consoles, enforced in production since 2026-09-25 09:02Z. 2/2 requirements (SEC-CSP-01, SEC-CSRF-01) in Phase 21.
+
+**Stats:**
+
+- Phases: 1 (Phase 21) | Plans: 5 | Tasks: 12
+- Timeline: 2026-07-04 (milestone start, `3780097d`) → 2026-09-25 (close) (~12 weeks elapsed; most of it was out-of-plan work between the 21-03 CSP edit on 2026-07-05 and the 21-04/21-05 deploy and flip in September)
+- Git range: `3780097d` → `7e36d71a` on `thinx-staging` (262 commits; 226 files, +15,242 / −2,924, of which `lib/`+`spec/`+`conf/` are 70 files, +4,132 / −328). The range includes ~123 commits outside the plan flow (see STATE.md).
+- Verification: `21-VERIFICATION.md` `passed`, 19/19 must-haves (3 operator overrides)
+- Code review: `21-REVIEW.md` → 7 warnings fixed, WR-04 skipped on purpose, WR-06 deferred (architectural)
+
+**Key accomplishments:**
+
+- **CSRF middleware** (21-01): `lib/middleware/csrf.js` implements a double-submit `XSRF-TOKEN` cookie + `X-XSRF-TOKEN` header check on the 7 cookie-session login/account POST routes. It ships fail-open behind `debug.csrf_enforce` / `CSRF_ENFORCE`.
+- **Console wiring** (21-02): hidden `_csrf` form fields plus two shared seams (classic jQuery `$.ajaxSetup`, Vue `core/api.js` `composeHeaders()`) cover every classic and Vue call site. The two auto-login-on-load paths await cookie priming.
+- **CSP host pinning** (21-03): a pinned host allowlist replaces the scheme wildcard in both console configs and the edge runbook snapshots. The live gluster-mounted CSP carries no wildcard either.
+- **Fail-open deploy + verify** (21-04): both consoles were verified in-browser against the live middleware. Two defects were found, fixed and deployed before sign-off. The work also showed that the production console CSP comes from a gluster bind mount, not the images (`console-csp-source-of-truth.md`).
+- **Enforcement flip** (21-05): a missing or mismatched token now returns 403 `csrf_token_invalid`. Cold login on both consoles, Vue password reset, classic GitHub OAuth return and warm Vue reload all still work. Rollback runbook: `csp-csrf-hardening.md`.
+
+**Known verification overrides:** 8 newly acknowledged, 0 carried forward from a prior close (see STATE.md Deferred Items). All 8 are artifacts from archived milestones: the Phase 15 `human_needed` verification (v1.11) and leftover CONTEXT planner questions in Phases 05–11 (v1.9). None is from v1.13. Phase 21 itself carries 3 operator-accepted must-have overrides: HawkScan SC1/SC2 waived because StackHawk was removed in `bb0ce4a7`, and SC5 "byte-for-byte CSP" superseded by the gluster bind-mount finding.
+
+**Closeout type:** `override_closeout`. No milestone-level audit was run; the single phase's VERIFICATION.md was the gate.
+
+**Deferred:** SEC-CSP-02 (`unsafe-eval`), WR-06 (session-bound CSRF token), WR-04 (`POST /api/v2/user`), console CSP source-of-truth retirement, and a browser spot-check of the classic register/reset flows under enforcement.
+
+**Archives:**
+
+- Roadmap: `.planning/milestones/v1.13-ROADMAP.md`
+- Requirements: `.planning/milestones/v1.13-REQUIREMENTS.md`
+- Phases: `.planning/milestones/v1.13-phases/`
+
+---
+
 ## v1.12 — Inbox Drawdown (Shipped: 2026-06-29)
 
 **Delivered:** Drained the open GitHub issue inbox surfaced by `/gsd-inbox` triage. 4/4 requirements across Phases 18–20: complete GDPR owner-purge orchestrator (#353), per-user GitHub access token endpoint + console Profile UI (#392), Docker Secrets `readSecret()` helper for core credentials (#418). Also shipped the device-transfer e-mail HTML fix (#541). All CI-green, released as `v1.12`, merged to `master` + `main`.

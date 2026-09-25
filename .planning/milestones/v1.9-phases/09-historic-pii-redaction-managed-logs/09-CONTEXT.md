@@ -1,3 +1,10 @@
+---
+audit_acknowledged:
+  milestone: v1.13
+  at: 2026-09-25
+  questions_digest: 5d04aab749de492a4c3e2b8d682b30158dbbbd3e9f83d21bb388a27ad75b520b
+---
+
 # Phase 9 Context: Historic PII Redaction (managed_logs)
 
 **Created:** 2026-06-03
@@ -9,6 +16,7 @@
 Remediate the ~658k pre-v1.0 CouchDB `managed_logs` documents that still carry raw `reset_keys` (and any other PII), AND introduce a forward-going TTL on new audit entries.
 
 The phase delivers FOUR artifacts:
+
 1. A reversible-with-snapshot redaction script (`scripts/redact-managed-logs.js`) that streams `_all_docs?include_docs=true` in batches, detects raw 64-char hex `reset_key` substrings + raw email patterns, overlays `[REDACTED]` via `_bulk_docs`.
 2. A sampling verification subcommand (N=1000 random recent + N=1000 random old) returning zero raw reset_keys post-remediation.
 3. A forward-going TTL modification to `lib/thinx/audit.js` that adds an `expire_at` field (e.g., now + 90 days) to every new log write, plus a CouchDB `_design/cleanup` view that surfaces expired docs for a nightly cron.
@@ -35,7 +43,9 @@ Out of scope (deferred): the operator's actual production run (which lives in th
 ## Code Context
 
 ### Audit log write path
+
 `lib/thinx/audit.js` `Audit.log(owner, message, flag, callback)`:
+
 ```js
 let record = {
   "message": message,
@@ -45,15 +55,18 @@ let record = {
 };
 loglib.insert(record, mtime, (err) => { ... });
 ```
+
 Records keyed by `mtime` (Date object stringified). No expiry field today.
 
 ### PII leak shape (per SEC-PII-01 Phase 2)
+
 - Raw 64-char hex `reset_key` substrings (`/[0-9a-f]{64}/`) — primarily inside `message` field of old audit entries (pre-Phase-2 owner.js wrote raw keys to alog.log)
 - Raw email addresses in `message` and possibly elsewhere
 - Mailgun tokens (sometimes)
 - Activation tokens
 
 ### CouchDB managed_logs access (per `couchdb-access` memory)
+
 - Overlay network reachable via `docker run --rm --network thinx_internal curlimages/curl:latest` from either swarm node
 - Credentials in `/mnt/gluster/thinx/.env` as `COUCHDB_USER` / `COUCHDB_PASSWORD`
 - Service placement drifts; `docker service ps thinx_couchdb` to find which node hosts it
@@ -63,6 +76,7 @@ Records keyed by `mtime` (Date object stringified). No expiry field today.
 ### SEC-PII-02 Strategy: Hybrid — overlay-redact + forward TTL
 
 **Per-doc redaction (historic):**
+
 - Script streams `managed_logs/_all_docs?include_docs=true&limit=1000&startkey=...` in pages of 1000.
 - For each doc, scan `message` field (and any other string fields) for raw 64-char hex reset_key + email substrings.
 - If found, overlay redacted version: `message` becomes the string with PII replaced by `[REDACTED-RESET_KEY]` / `[REDACTED-EMAIL]` (mirroring `Util.redactToken` / `Util.redactEmail` output format).
@@ -71,17 +85,20 @@ Records keyed by `mtime` (Date object stringified). No expiry field today.
 - **Reversibility:** the script's first action is to dump a `managed_logs.pre-redaction.json` snapshot for forensic rollback. The redaction itself is destructive of audit-log content (the original PII text is overwritten in CouchDB; only the snapshot retains it).
 
 **Forward-going TTL (audit.js change):**
+
 - Modify `Audit.log` to add `expire_at: new Date(Date.now() + 90 * 24 * 3600 * 1000)` to every record (90-day retention).
 - Add a CouchDB `_design/cleanup` view emitting `[expire_at, _id]` for expired docs.
 - A nightly cron (lives on the swarm host; runbook documents the cron entry) hits `_all_docs?endkey=<expired_threshold>` and DELETEs.
 - The 90-day retention window is GDPR-friendly (purpose-limitation + storage-limitation) but preserves enough for security-incident forensics.
 
 **Why this combination:**
+
 - Overlay-redact closes the historic data lake (`658k existing docs`).
 - TTL prevents the leak shape from re-accumulating even if a future regression bypasses SEC-PII-01.
 - Audit chronology preserved (overlay doesn't delete docs; metadata + redacted message stay queryable).
 
 ### Script invariants (must hold)
+
 - **Dry-run mode is the DEFAULT** — script REQUIRES explicit `--apply` flag to actually mutate CouchDB. Without `--apply`, prints would-be edits + counts to stdout.
 - **Snapshot first** — script refuses to apply unless `--snapshot-to <path>` has been written and the path is non-empty. Snapshot is a JSONL stream of all original docs.
 - **Sampling verification** — `--sample N` subcommand picks N random old + N random recent docs after redaction and asserts zero raw-key/email patterns in `message`. Exits non-zero if any leak.
@@ -89,6 +106,7 @@ Records keyed by `mtime` (Date object stringified). No expiry field today.
 - **Bounded** — script accepts `--max-docs N` for staged rollouts; default unbounded.
 
 ### Validation criteria (per ROADMAP success criterion)
+
 1. **Sampling N=1000 random recent + N=1000 random old `managed_logs` docs returns zero raw 64-char hex reset_keys post-remediation.** Script's `--sample` subcommand checks this; exit 0 = pass.
 2. **TTL/retention behavior captured in a runbook** under `.planning/runbooks/managed-logs-redaction.md`.
 3. **GDPR-posture note** appended to the runbook documenting scope, method, sampling evidence, residual risk.

@@ -1,3 +1,10 @@
+---
+audit_acknowledged:
+  milestone: v1.13
+  at: 2026-09-25
+  questions_digest: 5dd346216487734949cc353209dbf9333713f90a5e04fc6e95fc9c6dd072ebf3
+---
+
 # Phase 8 Context: Auth & Account Lifecycle Closures
 
 **Created:** 2026-06-03
@@ -7,6 +14,7 @@
 ## Domain
 
 Close two account-lifecycle gaps from the v1.0 UAT:
+
 1. Soft-deleted users (`user.deleted = true`) can be reactivated through an admin endpoint.
 2. Password-reset emails link to the Vue console (NOT the legacy AngularJS `/password.html` path).
 
